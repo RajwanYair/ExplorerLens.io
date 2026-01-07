@@ -282,9 +282,9 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>
-        ..\external\compression\zlib-1.3.1\x64\Release;..\external\compression\zstd-1.5.7\build\x64\Release;..\external\compression\lz4-1.10.0\build\VS2022\liblz4\bin\x64_Release;..\external\compression\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0\build-vs</AdditionalLibraryDirectories>
+        ..\external\compression\zlib-1.3.1\x64\Release;..\external\compression\lz4-1.10.0\build-vs\Release;..\external\compression\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0\build-vs\Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>
-        zlibstatic.lib;zstd_static.lib;liblz4_static.lib;unrar.lib;libwebp.lib;libsharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+        zlibstatic.lib;liblz4_static.lib;webp.lib;sharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
     </Link>
     <Bscmake>
@@ -318,16 +318,17 @@
     <!-- External Library Wrappers (v5.2+) -->
     <!-- <ClCompile Include="libarchive_wrapper.cpp" /> --> <!-- Disabled until libarchive is built -->
     <!-- UnRAR sources removed - using DLL -->
-    <!-- Legacy ZIP support using built-in unzip.cpp (missing file - using minizip-ng instead) -->
-    <!-- <ClCompile Include="unzip.cpp" /> -->
+    <!-- Legacy ZIP support using built-in unzip.cpp (stub implementation until minizip-ng is ready) -->
+    <ClCompile Include="unzip.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <!-- Modern ZIP using minizip-ng - enabled -->
-    <ClCompile Include="unzip_new.cpp" />
+    <!-- Modern ZIP using minizip-ng - temporarily disabled due to CRT linkage issues -->
+    <!-- TODO: Fix minizip-ng CRT linkage or use dynamic DLL instead of static lib -->
+    <!-- <ClCompile Include="unzip_new.cpp" /> -->
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbxArchive.h" />

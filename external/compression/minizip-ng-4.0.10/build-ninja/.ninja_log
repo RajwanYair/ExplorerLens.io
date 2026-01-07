@@ -1,0 +1,19 @@
+# ninja log v7
+9	478	7894705487523128	CMakeFiles/minizip.dir/mz_crypt.c.obj	44aafa02decb76
+29	523	7894705487723145	CMakeFiles/minizip.dir/mz_os.c.obj	dc8478a4a8969093
+47	551	7894705487903143	CMakeFiles/minizip.dir/mz_strm.c.obj	7c5d9ffdc6ea1f03
+68	576	7894705488133150	CMakeFiles/minizip.dir/mz_strm_buf.c.obj	2af46262449e63dc
+114	607	7894705488566782	CMakeFiles/minizip.dir/mz_strm_split.c.obj	9987945b35b3b06a
+93	632	7894705488356675	CMakeFiles/minizip.dir/mz_strm_mem.c.obj	9b63128a829b49f9
+136	1260	7894705488816755	CMakeFiles/minizip.dir/mz_zip.c.obj	f6d55b0bec6814fb
+551	1311	7894705492937945	CMakeFiles/minizip.dir/mz_strm_pkcrypt.c.obj	3dcf75b814e63303
+171	1321	7894705489186786	CMakeFiles/minizip.dir/mz_zip_rw.c.obj	805aef919cf49f05
+581	1327	7894705493243117	CMakeFiles/minizip.dir/mz_strm_wzaes.c.obj	cf61c013e47ca620
+228	1386	7894705489716769	CMakeFiles/minizip.dir/mz_strm_os_win32.c.obj	3886c25d50184b2a
+499	1390	7894705492417973	CMakeFiles/minizip.dir/mz_crypt_winvista.c.obj	ba7247f1e8ecb446
+527	1454	7894705492697979	CMakeFiles/minizip.dir/mz_crypt_winxp.c.obj	4c717aad2a5b0241
+608	1458	7894705493513129	CMakeFiles/minizip.dir/compat/ioapi.c.obj	b0c2128835150440
+637	1527	7894705493803228	CMakeFiles/minizip.dir/compat/unzip.c.obj	4d874e78a55f6c44
+207	1565	7894705489496781	CMakeFiles/minizip.dir/mz_os_win32.c.obj	87d34e822a5c412b
+1283	1630	7894705500298409	CMakeFiles/minizip.dir/compat/zip.c.obj	2c10957b8c2c0764
+1630	1817	7894705503736381	minizip.lib	2cbd4f8644ac2e9d
