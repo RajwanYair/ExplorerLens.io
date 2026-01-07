@@ -37,6 +37,9 @@ bld/
 build/
 build-logs/
 
+# Build output logs directory
+BuildLogs/
+
 # Release packages (archives only, not active releases)
 release-packages/
 
