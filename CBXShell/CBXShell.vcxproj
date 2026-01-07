@@ -282,9 +282,9 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>
-        ..\external\compression\zlib-1.3.1\x64\Release;..\external\compression\lz4-1.10.0\build-vs\Release;..\external\compression\zstd-1.5.7\build-manual;..\external\compression\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0\build-vs\Release</AdditionalLibraryDirectories>
+        ..\external\compression\zlib-1.3.1\x64\Release;..\external\compression\lz4-1.10.0\build-vs\Release;..\external\compression\zstd-1.5.7\build-manual;..\external\compression\minizip-ng-4.0.10\build-manual;..\external\compression\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0\build-vs\Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>
-        zlibstatic.lib;liblz4_static.lib;zstd_static.lib;webp.lib;sharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+        zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
     </Link>
     <Bscmake>
