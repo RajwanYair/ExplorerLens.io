@@ -318,16 +318,16 @@
     <!-- External Library Wrappers (v5.2+) -->
     <!-- <ClCompile Include="libarchive_wrapper.cpp" /> --> <!-- Disabled until libarchive is built -->
     <!-- UnRAR sources removed - using DLL -->
-    <!-- Legacy ZIP support using built-in unzip.cpp (to be replaced with minizip-ng) -->
-    <ClCompile Include="unzip.cpp" />
+    <!-- Legacy ZIP support using built-in unzip.cpp (missing file - using minizip-ng instead) -->
+    <!-- <ClCompile Include="unzip.cpp" /> -->
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <!-- Modern ZIP using minizip-ng - disabled until minizip-ng library is built -->
-    <!-- <ClCompile Include="unzip_new.cpp" /> -->
+    <!-- Modern ZIP using minizip-ng - enabled -->
+    <ClCompile Include="unzip_new.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbxArchive.h" />

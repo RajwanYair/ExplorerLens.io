@@ -2,8 +2,8 @@
 // DarkThumbs v5.2.0 - Implementation
 // Copyright (c) 2025 DarkThumbs Project
 
-#include "gpu_accelerator.h"
 #include "StdAfx.h"
+#include "gpu_accelerator.h"
 #include <algorithm>
 #include <chrono>
 #include <sstream>

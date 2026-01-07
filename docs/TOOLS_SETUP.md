@@ -1,35 +1,96 @@
 # Build Tools Setup for DarkThumbs
 
-This document lists all required tools and utilities for building DarkThumbs on Windows.
+This document lists all required tools and utilities for building DarkThumbs on Windows (x64 only).
+
+## Tool Discovery and Detection
+
+### Automated Tool Detection Script
+
+Run this script to find all installed build tools on your system:
+
+```powershell
+# Run from project root
+.\build-scripts\Find-All-Tools.ps1
+```
+
+This will display paths for:
+
+- Visual Studio installations
+- MSVC compiler versions
+- Windows SDK versions
+- CMake installations
+- Git location
+- PowerShell version
+
+### Manual Tool Discovery
+
+**Find Visual Studio:**
+
+```powershell
+# Using vswhere (installed with VS)
+$vsPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" `
+    -latest -property installationPath
+Write-Host "Visual Studio Path: $vsPath"
+```
+
+**Find MSVC Compiler:**
+
+```powershell
+# Find latest MSVC toolset
+$msvcPath = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC"
+if (Test-Path $msvcPath) {
+    $latestMSVC = Get-ChildItem $msvcPath | Sort-Object Name -Descending | Select-Object -First 1
+    Write-Host "Latest MSVC: $($latestMSVC.Name)"
+    Write-Host "Compiler: $($latestMSVC.FullName)\bin\Hostx64\x64\cl.exe"
+}
+```
+
+**Find Windows SDK:**
+
+```powershell
+# List installed SDKs
+$sdkPath = "C:\Program Files (x86)\Windows Kits\10\Include"
+if (Test-Path $sdkPath) {
+    Get-ChildItem $sdkPath | Where-Object { $_.Name -match '^\d' } | 
+        Sort-Object Name -Descending | 
+        Select-Object Name, FullName
+}
+```
 
 ## Core Build Tools
 
 ### Visual Studio Build Tools
 
-**Required Version:** Visual Studio 2022/2026 Build Tools with MSVC v19.50+
+**Required Version:** Visual Studio 2022/2026 Build Tools with MSVC v19.50+  
+**Platform:** x64 only (32-bit/x86 support removed)
 
 **Installation:**
 
 ```powershell
 # Download from Microsoft
 # https://visualstudio.microsoft.com/downloads/
-# Select "Build Tools for Visual Studio"
+# Select "Build Tools for Visual Studio 2022"
 
 # Required components:
-# - MSVC v143 - VS 2022 C++ x64/x86 build tools (Latest)
+# - MSVC v143 - VS 2022 C++ x64 build tools (Latest)
 # - Windows 11 SDK (10.0.26100.0 or later)
 # - C++ CMake tools for Windows
-# - C++ ATL for latest build tools (x86 & x64)
+# - C++ ATL for latest x64 build tools
 ```
 
 **Verification:**
 
 ```powershell
 # Find Visual Studio installation
-& "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+& "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" `
+    -latest -property installationPath
+
+# Initialize x64 build environment
+& "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 
 # Check MSVC version
-cl.exe # After running vcvars64.bat
+cl.exe
+# Should show: Microsoft (R) C/C++ Optimizing Compiler Version 19.50 or higher for x64
 ```
 
 ### CMake
@@ -53,7 +114,34 @@ choco install cmake
 
 ```powershell
 cmake --version
-# Should show: cmake version 3.20 or higher
+# Should show: cmake version 3.28 or higher
+
+# Find CMake installation
+where.exe cmake
+# or
+Get-Command cmake | Select-Object -ExpandProperty Source
+```
+
+### Ninja Build System
+
+**Required for faster builds:** Ninja 1.11 or higher
+
+**Installation:**
+
+```powershell
+# Using winget
+winget install Ninja-build.Ninja
+
+# Manual download
+# https://github.com/ninja-build/ninja/releases
+# Extract ninja.exe to a directory in PATH (e.g., tools/)
+```
+
+**Verification:**
+
+```powershell
+ninja --version
+where.exe ninja
 ```
 
 ### PowerShell 7
@@ -98,6 +186,43 @@ choco install git
 
 ```powershell
 git --version
+where.exe git
+```
+
+### NMake
+
+**Included with:** Visual Studio Build Tools
+
+**Verification:**
+
+```powershell
+# After running vcvars64.bat
+nmake /?
+where.exe nmake
+# Typical path: C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\<version>\bin\Hostx64\x64\nmake.exe
+```
+
+---
+
+## Environment Setup
+
+### Initialize Build Environment
+
+Before building, always initialize the MSVC x64 environment:
+
+```powershell
+# Option 1: Using vcvars64.bat directly
+& "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+
+# Option 2: Using project setup script
+.\build-scripts\setup-msvc-env.ps1
+
+# Verify environment is set
+$env:Platform
+# Should show: x64
+
+$env:VCINSTALLDIR
+# Should show Visual Studio VC installation path
 ```
 
 ---

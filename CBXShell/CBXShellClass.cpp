@@ -1,8 +1,8 @@
 // CBXShellClass.cpp : Implementation of CCBXshellApp and DLL registration.
 
+#include "StdAfx.h"
 #include "CBXShellClass.h"
 #include "CBXShell.h"
-#include "StdAfx.h"
 #include <string>
 
 HRESULT CCBXShell::FinalConstruct(void) {

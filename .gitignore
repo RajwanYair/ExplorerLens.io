@@ -44,6 +44,18 @@ release-packages/
 documentation/
 docs/archive/
 
+# x86/32-bit build directories (project is 64-bit only)
+DarkThumbsSetup_x86/
+
+# Downloaded library archives (except in downloads/)
+*.tar.gz
+*.zip
+*.nupkg
+!downloads/*.tar.gz
+!downloads/*.zip
+!downloads/*.nupkg
+!tests/**/*.zip
+
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
@@ -361,3 +373,6 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Build logs
+build-log.txt

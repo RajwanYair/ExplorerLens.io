@@ -4,8 +4,8 @@
  * Optimized for Windows 11 with delay-load support
  ******************************************************************************/
 
-#include "webp_decoder.h"
 #include "StdAfx.h"
+#include "webp_decoder.h"
 
 // Link with libwebp static library
 // Note: For dynamic DLL, use #pragma comment(linker, "/DELAYLOAD:webp.dll")
