@@ -6,12 +6,14 @@
 ## ✅ Completed Tasks
 
 ### 1. Source Code Management
+
 - [x] All source code and documents checked into git
 - [x] Build artifacts excluded from repository (.gitignore updated)
 - [x] Downloaded archives consolidated to `downloads/` directory
 - [x] Archive files properly excluded from git (except `downloads/` and `tests/`)
 
 ### 2. Build System Configuration
+
 - [x] Project verified as **64-bit only** (x64 configurations)
 - [x] Removed 32-bit installer (`DarkThumbsSetup_x86/` deleted)
 - [x] NuGet packages restored (WTL 10.0.10320)
@@ -20,6 +22,7 @@
 - [x] Replaced missing `unzip.cpp` with `unzip_new.cpp` (minizip-ng)
 
 ### 3. Documentation
+
 - [x] Updated `TOOLS_SETUP.md` with comprehensive tool discovery commands
 - [x] Added automated script reference (`Find-All-Tools.ps1`)
 - [x] Added manual PowerShell commands for tool detection
@@ -28,6 +31,7 @@
 ## ⚠️ Current Status: Compilation Successful, Linking Blocked
 
 ### Build Results
+
 ```
 ✅ CBXManager.exe - Built successfully
 ✅ CBXShell source files - Compiled successfully
@@ -35,6 +39,7 @@
 ```
 
 ### Linker Error
+
 ```
 LINK : fatal error LNK1181: cannot open input file 'zstd_static.lib'
 ```
@@ -44,17 +49,21 @@ LINK : fatal error LNK1181: cannot open input file 'zstd_static.lib'
 The following compression and image libraries must be built before CBXShell.dll can link:
 
 ### Compression Libraries
+
 1. **zlib** → `zlibstatic.lib`
 2. **zstd** → `zstd_static.lib`
 3. **lz4** → `liblz4_static.lib`
 
 ### Image Libraries
+
 4. **libwebp** → `libwebp.lib`, `libsharpyuv.lib`
 
 ### Archive Libraries
+
 5. **unrar** → `unrar.lib`
 
 ### Build Scripts Available
+
 - `build-scripts/Build-Zlib.ps1`
 - `build-scripts/Build-Zstd.ps1`
 - `build-scripts/Build-LZ4.ps1`
@@ -65,6 +74,7 @@ The following compression and image libraries must be built before CBXShell.dll 
 ## 🚀 Next Steps
 
 ### Option 1: Build Individual Libraries (Recommended for Testing)
+
 ```powershell
 # Build zlib first (many libraries depend on it)
 .\build-scripts\Build-Zlib.ps1
@@ -78,18 +88,21 @@ The following compression and image libraries must be built before CBXShell.dll 
 ```
 
 ### Option 2: Build All Libraries (Comprehensive)
+
 ```powershell
 # Run the complete build process (may take 30-60 minutes on slow machines)
 .\Build-Production-SlowMachine.ps1 -Clean
 ```
 
 ### Option 3: Use Existing Task
+
 ```powershell
 # Use VS Code task for monitored build
 # Press Ctrl+Shift+P → "Tasks: Run Task" → "Build All Libraries (Slow Machine)"
 ```
 
 ### After External Libraries Are Built
+
 ```powershell
 # Rebuild the solution
 $msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"
@@ -99,6 +112,7 @@ $msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\MSBuild
 ## 📦 Library Paths
 
 External libraries should be built to:
+
 ```
 external/
   ├── zlib-1.3.1/
@@ -114,6 +128,7 @@ external/
 ```
 
 The project's `.vcxproj` file already includes search paths:
+
 ```xml
 <AdditionalLibraryDirectories>
   $(ProjectDir)\..\external\zlib-1.3.1\x64\Release;
@@ -127,12 +142,14 @@ The project's `.vcxproj` file already includes search paths:
 ## 🔍 Verification
 
 To verify build artifacts are excluded from git:
+
 ```powershell
 # Should show NO build artifacts
 git status --ignored
 ```
 
 Expected ignored:
+
 - `packages/` (NuGet)
 - `x64/` (build outputs)
 - `build/` (CMake)
@@ -142,6 +159,7 @@ Expected ignored:
 ## 📊 Archive Files Status
 
 All archive files are in correct locations:
+
 ```
 ✅ downloads/zlib131.zip
 ✅ downloads/wtl.10.0.10320.zip
@@ -153,6 +171,7 @@ All archive files are in correct locations:
 ## 🛠️ Tool Discovery
 
 Tools can be discovered using:
+
 ```powershell
 # Automated detection
 .\build-scripts\Find-All-Tools.ps1
@@ -166,6 +185,7 @@ vswhere -latest -property installationPath
 **The project is ready for external library builds.**
 
 All source code compilation issues have been resolved:
+
 - ✅ MIDL command fixed
 - ✅ Precompiled headers corrected
 - ✅ Missing unzip.cpp replaced with unzip_new.cpp
