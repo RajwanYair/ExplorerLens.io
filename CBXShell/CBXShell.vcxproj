@@ -416,6 +416,7 @@
       Text="$([System.String]::Format('$(ErrorText)', '..\packages\wtl.10.0.10320\build\native\wtl.targets'))" />
   </Target>
   <ItemGroup>
+    <!-- WARNING: DO NOT FORMAT! MIDL command MUST remain on single line or it will fail with MIDL1011/MIDL1000 errors -->
     <CustomBuild Include="CBXShell.idl">
       <Command>midl.exe /nologo /char signed /env x64 /Oicf /h "CBXShell.h" /iid "CBXShell_i.c" /tlb ".\CBXShell.tlb" /target "NT60" "%(FullPath)"</Command>
       <Outputs>CBXShell.h;CBXShell_i.c;.\CBXShell.tlb</Outputs>
