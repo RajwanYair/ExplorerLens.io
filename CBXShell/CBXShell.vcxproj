@@ -179,6 +179,11 @@
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>
+        ..\external\compression\zlib-1.3.1\x64\Release;..\external\compression\lz4-1.10.0\build-vs\Release;..\external\compression\zstd-1.5.7\build-manual;..\external\compression\minizip-ng-4.0.10\build-manual;..\external\compression\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0\build-vs\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>
+        zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>MSVCRT;LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -248,7 +253,7 @@
       <PreprocessorDefinitions>
         WIN32;NDEBUG;_WINDOWS;_USRDLL;ENABLE_HEIF_SUPPORT;ENABLE_AVIF_SUPPORT;ENABLE_PDF_SUPPORT;ENABLE_VIDEO_SUPPORT;ENABLE_AUDIO_SUPPORT;ENABLE_DOCUMENT_SUPPORT;ENABLE_FONT_SUPPORT;ENABLE_SVG_SUPPORT;ENABLE_RAW_SUPPORT;UNRAR;SILENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -289,7 +294,7 @@
         ..\external\compression\zlib-1.3.1\x64\Release;..\external\compression\lz4-1.10.0\build-vs\Release;..\external\compression\zstd-1.5.7\build-manual;..\external\compression\minizip-ng-4.0.10\build-manual;..\external\compression\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0\build-vs\Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>
         zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
