@@ -1,0 +1,129 @@
+site_name: DarkThumbs Documentation
+site_description: Advanced Windows Shell Extension for Thumbnail Generation
+site_author: DarkThumbs Project
+site_url: https://darkthumbs.github.io
+
+repo_name: darkthumbs/darkthumbs
+repo_url: https://github.com/darkthumbs/darkthumbs
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quick-start.md
+      - Configuration: getting-started/configuration.md
+      - Troubleshooting: getting-started/troubleshooting.md
+
+  - User Guide:
+      - Supported Formats: user-guide/formats.md
+      - Performance Settings: user-guide/performance.md
+      - Cache Management: user-guide/cache.md
+      - GPU Acceleration: user-guide/gpu-acceleration.md
+      - Advanced Features: user-guide/advanced-features.md
+
+  - SDK Documentation:
+      - Overview: sdk/overview.md
+      - Getting Started: sdk/getting-started.md
+      - API Reference: sdk/api-reference.md
+      - Plugin Development: sdk/plugin-development.md
+      - Examples: sdk/examples.md
+      - Best Practices: sdk/best-practices.md
+
+  - Architecture:
+      - System Design: architecture/system-design.md
+      - Engine Contracts: architecture/engine-contracts.md
+      - Plugin System: architecture/plugin-system.md
+      - Caching Strategy: architecture/caching.md
+      - GPU Pipeline: architecture/gpu-pipeline.md
+      - Security Model: architecture/security.md
+
+  - Enterprise:
+      - Deployment Guide: enterprise/deployment.md
+      - Policy Management: enterprise/policy-management.md
+      - Group Policy (ADMX): enterprise/group-policy.md
+      - Fleet Management: enterprise/fleet-management.md
+      - Compliance: enterprise/compliance.md
+      - Support: enterprise/support.md
+
+  - Developer Guide:
+      - Build from Source: developer/building.md
+      - Development Environment: developer/environment.md
+      - Contributing: developer/contributing.md
+      - Testing: developer/testing.md
+      - Release Process: developer/release-process.md
+      - Code Signing: CODE_SIGNING.md
+
+  - Reference:
+      - CLI Reference: reference/cli.md
+      - PowerShell Module: reference/powershell.md
+      - Configuration File: reference/configuration.md
+      - Error Codes: reference/error-codes.md
+      - Performance Metrics: reference/performance-metrics.md
+
+  - Roadmap:
+      - Master Plan: MAKE_IT_GREAT_AGAIN_2026.md
+      - Release Notes: CHANGELOG.md
+      - Format Strategy: FORMAT_STRATEGY.md
+      - Compatibility Kit: COMPATIBILITY_KIT_SPEC.md
+
+plugins:
+  - search
+  - tags
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/darkthumbs/darkthumbs
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/darkthumbs
+
+copyright: Copyright &copy; 2024-2026 DarkThumbs Project

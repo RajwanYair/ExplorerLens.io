@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A7C89F55-5F9C-4B8D-8D9E-3F4E5A6B7C8D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libarchive</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)x64\Release\</OutDir>
+    <IntDir>$(ProjectDir)x64\Release\obj\</IntDir>
+    <TargetName>archive</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;LIBARCHIVE_STATIC;_CRT_SECURE_NO_WARNINGS;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)libarchive;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="libarchive\archive_acl.c" />
+    <ClCompile Include="libarchive\archive_check_magic.c" />
+    <ClCompile Include="libarchive\archive_cmdline.c" />
+    <ClCompile Include="libarchive\archive_cryptor.c" />
+    <ClCompile Include="libarchive\archive_digest.c" />
+    <ClCompile Include="libarchive\archive_entry.c" />
+    <ClCompile Include="libarchive\archive_entry_copy_stat.c" />
+    <ClCompile Include="libarchive\archive_entry_link_resolver.c" />
+    <ClCompile Include="libarchive\archive_entry_sparse.c" />
+    <ClCompile Include="libarchive\archive_entry_stat.c" />
+    <ClCompile Include="libarchive\archive_entry_strmode.c" />
+    <ClCompile Include="libarchive\archive_entry_xattr.c" />
+    <ClCompile Include="libarchive\archive_getdate.c" />
+    <ClCompile Include="libarchive\archive_hmac.c" />
+    <ClCompile Include="libarchive\archive_match.c" />
+    <ClCompile Include="libarchive\archive_options.c" />
+    <ClCompile Include="libarchive\archive_pack_dev.c" />
+    <ClCompile Include="libarchive\archive_pathmatch.c" />
+    <ClCompile Include="libarchive\archive_ppmd7.c" />
+    <ClCompile Include="libarchive\archive_ppmd8.c" />
+    <ClCompile Include="libarchive\archive_random.c" />
+    <ClCompile Include="libarchive\archive_rb.c" />
+    <ClCompile Include="libarchive\archive_read.c" />
+    <ClCompile Include="libarchive\archive_read_add_passphrase.c" />
+    <ClCompile Include="libarchive\archive_read_append_filter.c" />
+    <ClCompile Include="libarchive\archive_read_data_into_fd.c" />
+    <ClCompile Include="libarchive\archive_read_disk_entry_from_file.c" />
+    <ClCompile Include="libarchive\archive_read_disk_posix.c" />
+    <ClCompile Include="libarchive\archive_read_disk_set_standard_lookup.c" />
+    <ClCompile Include="libarchive\archive_read_disk_windows.c" />
+    <ClCompile Include="libarchive\archive_read_extract.c" />
+    <ClCompile Include="libarchive\archive_read_extract2.c" />
+    <ClCompile Include="libarchive\archive_read_open_fd.c" />
+    <ClCompile Include="libarchive\archive_read_open_file.c" />
+    <ClCompile Include="libarchive\archive_read_open_filename.c" />
+    <ClCompile Include="libarchive\archive_read_open_memory.c" />
+    <ClCompile Include="libarchive\archive_read_set_format.c" />
+    <ClCompile Include="libarchive\archive_read_set_options.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_all.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_by_code.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_bzip2.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_compress.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_grzip.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_gzip.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_lrzip.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_lz4.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_lzop.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_none.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_program.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_rpm.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_uu.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_xz.c" />
+    <ClCompile Include="libarchive\archive_read_support_filter_zstd.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_7zip.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_all.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_ar.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_by_code.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_cab.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_cpio.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_empty.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_iso9660.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_lha.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_mtree.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_rar.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_rar5.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_raw.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_tar.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_warc.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_xar.c" />
+    <ClCompile Include="libarchive\archive_read_support_format_zip.c" />
+    <ClCompile Include="libarchive\archive_string.c" />
+    <ClCompile Include="libarchive\archive_string_sprintf.c" />
+    <ClCompile Include="libarchive\archive_util.c" />
+    <ClCompile Include="libarchive\archive_version_details.c" />
+    <ClCompile Include="libarchive\archive_virtual.c" />
+    <ClCompile Include="libarchive\archive_windows.c" />
+    <ClCompile Include="libarchive\archive_write.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_b64encode.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_by_name.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_bzip2.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_compress.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_grzip.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_gzip.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_lrzip.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_lz4.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_lzop.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_none.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_program.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_uuencode.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_xz.c" />
+    <ClCompile Include="libarchive\archive_write_add_filter_zstd.c" />
+    <ClCompile Include="libarchive\archive_write_disk_posix.c" />
+    <ClCompile Include="libarchive\archive_write_disk_set_standard_lookup.c" />
+    <ClCompile Include="libarchive\archive_write_disk_windows.c" />
+    <ClCompile Include="libarchive\archive_write_open_fd.c" />
+    <ClCompile Include="libarchive\archive_write_open_file.c" />
+    <ClCompile Include="libarchive\archive_write_open_filename.c" />
+    <ClCompile Include="libarchive\archive_write_open_memory.c" />
+    <ClCompile Include="libarchive\archive_write_set_format.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_7zip.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_ar.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_by_name.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_cpio.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_cpio_binary.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_cpio_newc.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_cpio_odc.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_filter_by_ext.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_gnutar.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_iso9660.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_mtree.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_pax.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_raw.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_shar.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_ustar.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_v7tar.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_warc.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_xar.c" />
+    <ClCompile Include="libarchive\archive_write_set_format_zip.c" />
+    <ClCompile Include="libarchive\archive_write_set_options.c" />
+    <ClCompile Include="libarchive\archive_write_set_passphrase.c" />
+    <ClCompile Include="libarchive\filter_fork_posix.c" />
+    <ClCompile Include="libarchive\filter_fork_windows.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

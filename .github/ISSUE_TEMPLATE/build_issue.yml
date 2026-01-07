@@ -1,0 +1,68 @@
+name: Build Issue
+description: Report problems with building the project
+title: "[Build]: "
+labels: ["build", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a build issue! Please provide details to help us resolve it.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Build Component
+      description: Which component is failing to build?
+      options:
+        - External Libraries (zlib, lzma, zstd, etc.)
+        - CBXShell.dll
+        - CBXManager
+        - Installer
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: Windows version (e.g., Windows 11 23H2)
+      placeholder: Windows 11 23H2
+    validations:
+      required: true
+
+  - type: input
+    id: vs-version
+    attributes:
+      label: Visual Studio Version
+      description: Which Visual Studio or BuildTools version?
+      placeholder: VS 2022 17.8.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Build Steps
+      description: What steps did you follow to build?
+      placeholder: |
+        1. Opened x64 Native Tools Command Prompt
+        2. Ran build-scripts\Build-Production.ps1
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error Message
+      description: Complete error message or log output
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information

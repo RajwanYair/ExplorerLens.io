@@ -1,0 +1,186 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build All Libraries (Slow Machine)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-File",
+        "${workspaceFolder}\\Build-Production-SlowMachine.ps1",
+        "-Clean"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Build with VS Code Monitoring",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-File",
+        "${workspaceFolder}\\Build-Production-SlowMachine.ps1",
+        "-Clean",
+        "-MonitorInVSCode"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Monitor Build Logs",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-File",
+        "${workspaceFolder}\\build-scripts\\Monitor-Build-Logs.ps1"
+      ],
+      "problemMatcher": [],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Check Build Status",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-File",
+        "${workspaceFolder}\\build-scripts\\Check-Build-Status.ps1"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      }
+    },
+    {
+      "label": "Build LZMA (with monitoring)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-File",
+        "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
+        "-ScriptPath",
+        "${workspaceFolder}\\build-scripts\\build-lzma-simple.ps1",
+        "-Watch"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Build LibWebP (with monitoring)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-File",
+        "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
+        "-ScriptPath",
+        "${workspaceFolder}\\build-scripts\\Build-LibWebP-NMake.ps1",
+        "-Watch"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Build Minizip-NG (with monitoring)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-File",
+        "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
+        "-ScriptPath",
+        "${workspaceFolder}\\build-scripts\\Build-MinizipNG.ps1",
+        "-Watch"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Clean Build Artifacts",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-Command",
+        "Remove-Item -Path build,x64,packages,CBXShell\\x64,CBXManager\\x64 -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Clean complete' -ForegroundColor Green"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Open Latest Build Log",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-NoLogo",
+        "-Command",
+        "$log = Get-ChildItem build-logs\\*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if($log){code $log.FullName}else{Write-Host 'No logs found' -ForegroundColor Yellow}"
+      ],
+      "problemMatcher": [],
+      "group": "none",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    }
+  ]
+}

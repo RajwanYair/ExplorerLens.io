@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>wtl</id>
+    <version>10.0.10320</version>
+    <title>Windows Template Library</title>
+    <authors>WTL Team</authors>
+    <owners>Microsoft,WTL Team</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="file">license\license.txt</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <projectUrl>https://sourceforge.net/projects/wtl/</projectUrl>
+    <description>Windows Template Library (WTL) is a C++ library for developing Windows applications and UI components. It extends ATL (Active Template Library) and provides a set of classes for controls, dialogs, frame windows, GDI objects, and more.</description>
+    <summary>This package contains the header files for Windows Template Library.</summary>
+    <releaseNotes>This release is based on WTL 10.0.10320 (Sourceforge). See https://sourceforge.net/projects/wtl/files/WTL%2010/WTL%2010.0.10320%20Release/ for a list of changes.</releaseNotes>
+    <copyright>Copyright ® 2018 Microsoft Corporation, WTL Team. All rights reserved.</copyright>
+    <language>en-US</language>
+    <tags>C++ Native Win32 GUI Window Microsoft</tags>
+  </metadata>
+</package>

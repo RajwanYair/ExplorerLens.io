@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/external/compression/xz-5.6.3/src/common/common_w32res.rc
+winresrc.h
+-
+config.h
+C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/external/compression/xz-5.6.3/src/common/config.h
+lzma/version.h
+C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/external/compression/xz-5.6.3/src/common/lzma/version.h
+
+C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/external/compression/xz-5.6.3/src/liblzma/api/lzma/version.h
+
+C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/external/compression/xz-5.6.3/src/xzdec/lzmadec_w32res.rc
+common_w32res.rc
+C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/external/compression/xz-5.6.3/src/xzdec/common_w32res.rc
+

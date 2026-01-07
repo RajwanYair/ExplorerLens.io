@@ -1,0 +1,72 @@
+{
+  "$schema": "https://darkthumbs.dev/schemas/plugin-manifest-v1.json",
+  "manifestVersion": 1,
+  "plugin": {
+    "id": "darkthumbs.plugin.sample",
+    "name": "Sample XYZ Format Decoder",
+    "version": "1.0.0",
+    "vendor": "DarkThumbs Project",
+    "description": "Reference plugin demonstrating SDK usage for custom XYZ format",
+    "homepage": "https://github.com/darkthumbs/plugin-samples",
+    "icon": "assets/icons/icon-256.png"
+  },
+  "abiVersion": 1,
+  "engineVersion": {
+    "min": "5.4.0",
+    "max": "6.9.99"
+  },
+  "capabilities": [
+    "read_file",
+    "decode"
+  ],
+  "formats": [
+    {
+      "extension": ".xyz",
+      "mimeType": "image/x-xyz",
+      "description": "XYZ Sample Format",
+      "priority": 50,
+      "magicBytes": "58595A31"
+    }
+  ],
+  "binaries": {
+    "x64": {
+      "path": "plugin.dll",
+      "sha256": "REPLACE_WITH_ACTUAL_SHA256_HASH",
+      "size": 0
+    }
+  },
+  "dependencies": {
+    "runtime": [
+      "vcredist.x64.14.0"
+    ],
+    "plugins": []
+  },
+  "configuration": {
+    "schemaUri": "https://darkthumbs.dev/schemas/plugin-config/sample-v1.json",
+    "defaults": {
+      "maxImageSize": 10000,
+      "quality": "high"
+    }
+  },
+  "security": {
+    "signatureType": "none",
+    "permissions": {
+      "allowNetworkAccess": false,
+      "allowFileSystemWrite": false,
+      "allowRegistryAccess": false
+    }
+  },
+  "metadata": {
+    "author": "DarkThumbs Team <team@darkthumbs.dev>",
+    "license": "MIT",
+    "tags": ["sample", "example", "reference", "xyz"],
+    "category": "Image Decoders",
+    "releaseDate": "2026-01-06",
+    "changelog": "docs/CHANGELOG.md"
+  },
+  "testing": {
+    "compatibilityTestPassed": false,
+    "testKitVersion": "1.0.0",
+    "testResults": null
+  }
+}

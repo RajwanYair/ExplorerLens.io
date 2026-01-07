@@ -1,0 +1,79 @@
+{
+    "cmake.sourceDirectory": "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/CBXManager",
+    "files.associations": {
+        "xstring": "cpp",
+        "algorithm": "cpp"
+    },
+    "chat.agent.maxRequests": 125,
+    // Performance optimizations for slow machines
+    "terminal.integrated.persistentSessionReviveProcess": "never",
+    "terminal.integrated.enablePersistentSessions": false,
+    "terminal.integrated.scrollback": 50000,
+    "terminal.integrated.fastScrollSensitivity": 5,
+    // File watchers - keep build-logs monitored
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/build/**": true,
+        "**/x64/**": true,
+        "**/external/**/build*": true,
+        "**/packages/**": true,
+        "**/build-logs": false
+    },
+    // Search configuration - allow searching build-logs
+    "search.exclude": {
+        "**/build": true,
+        "**/x64": true,
+        "**/external/**/build*": true,
+        "**/packages": true,
+        "**/.vs": true,
+        "**/build-logs": false
+    },
+    "files.exclude": {
+        "**/.vs": true,
+        "**/x64/Debug": true,
+        "**/ipch": true
+    },
+    // Auto-save for monitoring log changes
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    // Build and task timeouts (extended for slow machines)
+    "task.slowProviderWarning": false,
+    "task.autoDetect": "off",
+    "terminal.integrated.commandsToSkipShell": [],
+    // Disable shell integration that can slow down terminals
+    "terminal.integrated.shellIntegration.enabled": false,
+    // C++ IntelliSense optimizations
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "C_Cpp.autocomplete": "disabled",
+    "C_Cpp.errorSquiggles": "disabled",
+    // Git optimizations
+    "git.autorefresh": false,
+    "git.autofetch": false,
+    // Editor performance
+    "editor.quickSuggestions": {
+        "other": false,
+        "comments": false,
+        "strings": false
+    },
+    "editor.suggestOnTriggerCharacters": false,
+    "editor.acceptSuggestionOnEnter": "off",
+    "editor.parameterHints.enabled": false,
+    // PowerShell integration
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-NoProfile",
+                "-NoLogo"
+            ]
+        },
+        "PowerShell (Profile)": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        }
+    }
+}

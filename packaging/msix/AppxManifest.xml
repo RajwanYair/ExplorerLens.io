@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+         xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap uap3 desktop rescap">
+
+  <Identity Name="DarkThumbs"
+            Publisher="CN=DarkThumbs Project"
+            Version="6.0.0.0" />
+
+  <Properties>
+    <DisplayName>DarkThumbs</DisplayName>
+    <PublisherDisplayName>DarkThumbs Project</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Advanced Windows Shell Extension for thumbnail generation supporting 50+ formats with GPU acceleration</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.22621.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="DarkThumbsManager" Executable="CBXManager.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="DarkThumbs Manager"
+                          Description="DarkThumbs Configuration Manager"
+                          BackgroundColor="transparent"
+                          Square150x150Logo="Assets\Square150x150Logo.png"
+                          Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+      </uap:VisualElements>
+
+      <Extensions>
+        <!-- Shell Extension Registration -->
+        <desktop:Extension Category="windows.comServer">
+          <desktop:ComServer>
+            <desktop:ExeServer Executable="CBXManager.exe" DisplayName="DarkThumbs Shell Extension">
+              <desktop:Class Id="YOUR-CLSID-HERE" DisplayName="DarkThumbs Thumbnail Provider" />
+            </desktop:ExeServer>
+          </desktop:ComServer>
+        </desktop:Extension>
+
+        <!-- File Type Associations -->
+        <uap3:Extension Category="windows.fileTypeAssociation">
+          <uap3:FileTypeAssociation Name="darkthumbs">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.cbz</uap:FileType>
+              <uap:FileType>.cbr</uap:FileType>
+              <uap:FileType>.cb7</uap:FileType>
+              <uap:FileType>.cbt</uap:FileType>
+              <uap:FileType>.epub</uap:FileType>
+              <uap:FileType>.mobi</uap:FileType>
+              <uap:FileType>.webp</uap:FileType>
+              <uap:FileType>.avif</uap:FileType>
+              <uap:FileType>.jxl</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap3:FileTypeAssociation>
+        </uap3:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
+  </Capabilities>
+</Package>

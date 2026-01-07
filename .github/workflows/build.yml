@@ -1,0 +1,332 @@
+name: Build DarkThumbs
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  SOLUTION_FILE: CBXShell.sln
+
+jobs:
+  build:
+    name: Build x64 Release
+    runs-on: windows-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Setup Build Environment
+        shell: pwsh
+        run: |
+          Write-Host "Setting up Visual Studio BuildTools 2026 environment..." -ForegroundColor Cyan
+
+          # Check for VS BuildTools 2026 first, fallback to 2022/2019
+          # Use environment variables for cross-system compatibility
+          $vsPaths = @(
+            "$env:ProgramFiles(x86)\Microsoft Visual Studio\18\BuildTools",
+            "$env:ProgramFiles\Microsoft Visual Studio\2026\BuildTools",
+            "$env:ProgramFiles(x86)\Microsoft Visual Studio\2022\BuildTools",
+            "$env:ProgramFiles\Microsoft Visual Studio\2022\Enterprise",
+            "$env:ProgramFiles\Microsoft Visual Studio\2022\Community"
+          )
+
+          $vsPath = $null
+          foreach ($path in $vsPaths) {
+            if (Test-Path $path) {
+              $vsPath = $path
+              Write-Host "✅ Found Visual Studio at: $vsPath" -ForegroundColor Green
+              break
+            }
+          }
+
+          if (-not $vsPath) {
+            Write-Error "❌ Visual Studio not found in any expected location"
+            exit 1
+          }
+
+          # Set MSBuild path
+          $msbuildPath = Join-Path $vsPath "MSBuild\Current\Bin\MSBuild.exe"
+          if (-not (Test-Path $msbuildPath)) {
+            $msbuildPath = Join-Path $vsPath "MSBuild\Current\Bin\amd64\MSBuild.exe"
+          }
+
+          if (Test-Path $msbuildPath) {
+            Write-Host "✅ MSBuild: $msbuildPath" -ForegroundColor Green
+            Add-Content $env:GITHUB_ENV "MSBUILD_PATH=$msbuildPath"
+            Add-Content $env:GITHUB_PATH (Split-Path $msbuildPath)
+          } else {
+            Write-Error "❌ MSBuild not found"
+            exit 1
+          }
+
+          # Initialize MSVC environment
+          $vcvarsPath = Join-Path $vsPath "VC\Auxiliary\Build\vcvarsall.bat"
+          if (Test-Path $vcvarsPath) {
+            Write-Host "✅ Initializing MSVC environment..." -ForegroundColor Yellow
+            cmd /c "`"$vcvarsPath`" x64 && set" | ForEach-Object {
+              if ($_ -match "^([^=]+)=(.*)$") {
+                $varName = $matches[1]
+                $varValue = $matches[2]
+                Set-Item -Path "env:$varName" -Value $varValue
+                if ($varName -in @('PATH', 'INCLUDE', 'LIB', 'LIBPATH')) {
+                  Add-Content $env:GITHUB_ENV "$varName=$varValue"
+                }
+              }
+            }
+            Write-Host "✅ MSVC environment initialized" -ForegroundColor Green
+          } else {
+            Write-Warning "⚠️  vcvarsall.bat not found, using default environment"
+          }
+
+      - name: Verify Build Tools
+        shell: pwsh
+        run: |
+          Write-Host "" 
+          Write-Host "╔════════════════════════════════════════╗" -ForegroundColor Cyan
+          Write-Host "║     Verifying Build Tools              ║" -ForegroundColor Cyan
+          Write-Host "╚════════════════════════════════════════╝" -ForegroundColor Cyan
+          Write-Host ""
+
+          $tools = @{
+            "cl.exe" = @{ Name = "MSVC Compiler"; Required = $true }
+            "msbuild" = @{ Name = "MSBuild"; Required = $true }
+            "link" = @{ Name = "MSVC Linker"; Required = $true }
+            "lib" = @{ Name = "MSVC Librarian"; Required = $true }
+            "nmake" = @{ Name = "NMake"; Required = $false }
+          }
+
+          $allGood = $true
+          foreach ($tool in $tools.Keys) {
+            $cmd = Get-Command $tool -ErrorAction SilentlyContinue
+            if ($cmd) {
+              if ($tool -eq "cl.exe") {
+                $version = (& $tool 2>&1 | Select-Object -First 1)
+                Write-Host "  ✅ $($tools[$tool].Name): $version" -ForegroundColor Green
+              } elseif ($tool -eq "msbuild") {
+                $version = (& $tool /version 2>&1 | Select-Object -Last 1)
+                Write-Host "  ✅ $($tools[$tool].Name): $version" -ForegroundColor Green
+              } else {
+                Write-Host "  ✅ $($tools[$tool].Name): $($cmd.Source)" -ForegroundColor Green
+              }
+            } else {
+              if ($tools[$tool].Required) {
+                Write-Host "  ❌ $($tools[$tool].Name): NOT FOUND" -ForegroundColor Red
+                $allGood = $false
+              } else {
+                Write-Host "  ⚠️  $($tools[$tool].Name): NOT FOUND (optional)" -ForegroundColor Yellow
+              }
+            }
+          }
+
+          if (-not $allGood) {
+            Write-Error "Required build tools are missing"
+            exit 1
+          }
+
+          Write-Host ""
+          Write-Host "✅ All required build tools verified" -ForegroundColor Green
+
+      - name: Restore NuGet Packages
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          Write-Host "" 
+          Write-Host "╔════════════════════════════════════════╗" -ForegroundColor Cyan
+          Write-Host "║     Restoring NuGet Packages           ║" -ForegroundColor Cyan
+          Write-Host "╚════════════════════════════════════════╝" -ForegroundColor Cyan
+          Write-Host ""
+
+          $msbuild = if ($env:MSBUILD_PATH) { $env:MSBUILD_PATH } else { "msbuild" }
+          & $msbuild "${{ env.SOLUTION_FILE }}" /t:Restore /p:Configuration=${{ env.BUILD_TYPE }} /p:Platform=x64 /v:minimal /nologo
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "NuGet restore failed with exit code: $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+
+          Write-Host "✅ NuGet packages restored" -ForegroundColor Green
+
+      - name: Build Solution
+        shell: pwsh
+        timeout-minutes: 60
+        run: |
+          Write-Host "" 
+          Write-Host "╔════════════════════════════════════════╗" -ForegroundColor Cyan
+          Write-Host "║     Building Solution                  ║" -ForegroundColor Cyan
+          Write-Host "╚════════════════════════════════════════╝" -ForegroundColor Cyan
+          Write-Host ""
+          Write-Host "Configuration: ${{ env.BUILD_TYPE }}" -ForegroundColor White
+          Write-Host "Platform: x64" -ForegroundColor White
+          Write-Host "Solution: ${{ env.SOLUTION_FILE }}" -ForegroundColor White
+          Write-Host ""
+
+          # Create build-logs directory
+          New-Item -ItemType Directory -Force -Path "build-logs" | Out-Null
+          $buildLog = "build-logs/github-build-$(Get-Date -Format 'yyyy-MM-dd_HHmmss').log"
+
+          $msbuild = if ($env:MSBUILD_PATH) { $env:MSBUILD_PATH } else { "msbuild" }
+          $stopwatch = [Diagnostics.Stopwatch]::StartNew()
+
+          Write-Host "Starting build with file-based logging..." -ForegroundColor Cyan
+          Write-Host "Log file: $buildLog" -ForegroundColor Gray
+
+          # Run build with output redirected to file
+          $buildProcess = Start-Process -FilePath $msbuild -ArgumentList @(
+            "${{ env.SOLUTION_FILE }}",
+            "/t:Rebuild",
+            "/p:Configuration=${{ env.BUILD_TYPE }}",
+            "/p:Platform=x64",
+            "/m",
+            "/v:normal",
+            "/nologo"
+          ) -NoNewWindow -PassThru -RedirectStandardOutput "$buildLog.stdout" -RedirectStandardError "$buildLog.stderr"
+
+          # Monitor build progress by checking log file
+          $lastSize = 0
+          $noChangeCount = 0
+          while (!$buildProcess.HasExited) {
+            Start-Sleep -Seconds 15
+            if (Test-Path "$buildLog.stdout") {
+              $currentSize = (Get-Item "$buildLog.stdout").Length
+              $elapsed = $stopwatch.Elapsed.TotalSeconds
+              Write-Host "Build in progress... ($([Math]::Round($elapsed, 0))s elapsed, $([Math]::Round($currentSize/1KB, 1))KB logged)" -ForegroundColor Yellow
+              
+              # Check if build is stuck
+              if ($currentSize -eq $lastSize) {
+                $noChangeCount++
+                if ($noChangeCount -gt 20) {
+                  Write-Warning "Build appears stuck - no log growth for 5 minutes"
+                }
+              } else {
+                $noChangeCount = 0
+                $lastSize = $currentSize
+              }
+            }
+          }
+
+          $buildProcess.WaitForExit()
+          $buildResult = $buildProcess.ExitCode
+
+          # Combine logs
+          if (Test-Path "$buildLog.stdout") { Get-Content "$buildLog.stdout" | Out-File $buildLog -Encoding UTF8 }
+          if (Test-Path "$buildLog.stderr") { Get-Content "$buildLog.stderr" | Add-Content $buildLog -Encoding UTF8 }
+
+          $stopwatch.Stop()
+
+          Write-Host ""
+          Write-Host "Build completed in $($stopwatch.Elapsed.TotalSeconds.ToString('F1')) seconds" -ForegroundColor Cyan
+          Write-Host "Full log saved to: $buildLog" -ForegroundColor Gray
+
+          if ($buildResult -ne 0) {
+            Write-Host ""
+            Write-Host "=== Last 50 lines of build output ===" -ForegroundColor Red
+            if (Test-Path $buildLog) { Get-Content $buildLog -Tail 50 }
+            Write-Error "Build failed with exit code: $buildResult"
+            exit $buildResult
+          }
+
+          Write-Host "✅ Build successful" -ForegroundColor Green
+
+      - name: Verify Build Outputs
+        shell: pwsh
+        run: |
+          Write-Host "" 
+          Write-Host "╔════════════════════════════════════════╗" -ForegroundColor Cyan
+          Write-Host "║     Verifying Build Outputs            ║" -ForegroundColor Cyan
+          Write-Host "╚════════════════════════════════════════╝" -ForegroundColor Cyan
+          Write-Host ""
+
+          $outputs = @(
+            @{ Path = "x64\Release\CBXShell.dll"; Description = "Main shell extension DLL" },
+            @{ Path = "x64\Release\CBXManager.exe"; Description = "Configuration utility" }
+          )
+
+          $missing = @()
+          $totalSize = 0
+
+          foreach ($output in $outputs) {
+            if (Test-Path $output.Path) {
+              $item = Get-Item $output.Path
+              $sizeKB = $item.Length / 1KB
+              $totalSize += $item.Length
+              Write-Host "  ✅ $($output.Path)" -ForegroundColor Green
+              Write-Host "     Size: $([math]::Round($sizeKB, 2)) KB - $($output.Description)" -ForegroundColor Gray
+            } else {
+              Write-Host "  ❌ $($output.Path) - MISSING" -ForegroundColor Red
+              $missing += $output.Path
+            }
+          }
+
+          Write-Host ""
+
+          if ($missing.Count -gt 0) {
+            Write-Error "Build verification failed: $($missing.Count) file(s) missing"
+            exit 1
+          }
+
+          $totalSizeMB = $totalSize / 1MB
+          Write-Host "✅ All build outputs verified!" -ForegroundColor Green
+          Write-Host "Total output size: $([math]::Round($totalSizeMB, 2)) MB" -ForegroundColor Cyan
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DarkThumbs-x64-Release
+          path: |
+            x64/Release/CBXShell.dll
+            x64/Release/CBXManager.exe
+            x64/Release/*.pdb
+          retention-days: 30
+
+      - name: Create Build Summary
+        shell: pwsh
+        if: always()
+        run: |
+          Write-Host "# 🎉 Build Summary" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "## Build Configuration" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Platform**: x64" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Configuration**: ${{ env.BUILD_TYPE }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Solution**: ${{ env.SOLUTION_FILE }}" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "- **Runner**: ${{ runner.os }} (${{ runner.arch }})" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+
+          if (Test-Path "x64\Release") {
+            Write-Host "## ✅ Build Outputs" >> $env:GITHUB_STEP_SUMMARY
+            Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+            
+            $files = Get-ChildItem "x64\Release\*.dll", "x64\Release\*.exe" -ErrorAction SilentlyContinue
+            if ($files) {
+              $totalSize = ($files | Measure-Object -Property Length -Sum).Sum
+              Write-Host "| File | Size | Type |" >> $env:GITHUB_STEP_SUMMARY
+              Write-Host "|------|------|------|" >> $env:GITHUB_STEP_SUMMARY
+              
+              foreach ($file in $files) {
+                $sizeKB = [math]::Round($file.Length / 1KB, 2)
+                $type = if ($file.Extension -eq ".dll") { "Library" } else { "Executable" }
+                Write-Host "| **$($file.Name)** | $sizeKB KB | $type |" >> $env:GITHUB_STEP_SUMMARY
+              }
+              
+              Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+              Write-Host "**Total Size**: $([math]::Round($totalSize / 1MB, 2)) MB" >> $env:GITHUB_STEP_SUMMARY
+            } else {
+              Write-Host "⚠️ No build outputs found" >> $env:GITHUB_STEP_SUMMARY
+            }
+          } else {
+            Write-Host "## ❌ Build Failed" >> $env:GITHUB_STEP_SUMMARY
+            Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+            Write-Host "Build output directory not found." >> $env:GITHUB_STEP_SUMMARY
+          }
+
+          Write-Host "" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "---" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "*Built with DarkThumbs CI/CD Pipeline*" >> $env:GITHUB_STEP_SUMMARY

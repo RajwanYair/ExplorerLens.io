@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Build Environment
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Build Release
+        shell: pwsh
+        run: |
+          Write-Host "Building release packages..." -ForegroundColor Cyan
+
+          # Build external libraries
+          & ".\build-scripts\Build-External-Libraries-Final.ps1"
+
+          # Build main project
+          msbuild CBXShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
+
+          # Create installer packages
+          # Add installer build commands here
+
+      - name: Create Release Archive
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF -replace 'refs/tags/v', ''
+          $archiveName = "DarkThumbs-$version-x64.zip"
+
+          # Package files
+          Compress-Archive -Path @(
+            'x64\Release\CBXShell.dll',
+            'README.md',
+            'LICENSE',
+            'ROADMAP.md'
+          ) -DestinationPath $archiveName
+
+          Write-Host "Created $archiveName" -ForegroundColor Green
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            DarkThumbs-*.zip
+          draft: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

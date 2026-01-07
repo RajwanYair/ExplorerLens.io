@@ -1,0 +1,53 @@
+name: Plugin Request
+description: Request support for a new file format or plugin
+title: "[Plugin]: "
+labels: ["plugin", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Request support for a new file format through the plugin system.
+
+  - type: input
+    id: format
+    attributes:
+      label: File Format
+      description: What file format should be supported?
+      placeholder: .jxl (JPEG XL)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Format Description
+      description: Describe the file format and its use cases
+      placeholder: |
+        JPEG XL is a next-generation image format with better compression than JPEG...
+    validations:
+      required: true
+
+  - type: input
+    id: library
+    attributes:
+      label: Decoder Library
+      description: Is there an open-source library that can decode this format?
+      placeholder: libjxl
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this format to you?
+      options:
+        - Nice to have
+        - Important
+        - Critical
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
