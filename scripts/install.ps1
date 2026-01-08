@@ -90,7 +90,7 @@ if ($Unregister) {
                 Write-Status "Warning: regsvr32 returned exit code $($proc.ExitCode)" "ERROR"
             }
         } catch {
-            Write-Status "Error unregistering DLL: $_" "ERROR"
+            Write-Status "Error unregistering DLL: $($_.Exception.Message)" "ERROR"
         }
     }
     
@@ -101,7 +101,7 @@ if ($Unregister) {
             Remove-Item -Recurse -Force -Path $InstallDir
             Write-Status "Installation directory removed" "SUCCESS"
         } catch {
-            Write-Status "Error removing directory: $_" "ERROR"
+            Write-Status "Error removing directory: $($_.Exception.Message)" "ERROR"
             Write-Status "You may need to restart Explorer and try again" "INFO"
             exit 1
         }
@@ -171,7 +171,7 @@ try {
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
     Write-Status "Directory created" "SUCCESS"
 } catch {
-    Write-Status "Error creating directory: $_" "ERROR"
+    Write-Status "Error creating directory: $($_.Exception.Message)" "ERROR"
     exit 1
 }
 
@@ -185,7 +185,7 @@ foreach ($file in $filesToCopy) {
         Copy-Item -Path $sourcePath -Destination $destPath -Force
         Write-Status "  Copied $file" "SUCCESS"
     } catch {
-        Write-Status "  Error copying $file: $_" "ERROR"
+        Write-Status "  Error copying $file: $($_.Exception.Message)" "ERROR"
         exit 1
     }
 }
@@ -205,7 +205,7 @@ try {
         Write-Status "The DLL may already be registered or registration failed" "INFO"
     }
 } catch {
-    Write-Status "Error registering DLL: $_" "ERROR"
+    Write-Status "Error registering DLL: $($_.Exception.Message)" "ERROR"
     Write-Status "Installation may be incomplete" "ERROR"
     exit 1
 }
