@@ -1,0 +1,155 @@
+# DarkThumbs Build Method - Standard Operating Procedure
+
+**Last Updated:** January 8, 2026  
+**Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring
+
+---
+
+## Build Architecture
+
+### Supported Configurations
+- **Platform**: x64 ONLY (32-bit builds are not supported)
+- **Configurations**: Debug, Release
+- **Toolchain**: Visual Studio 2022 Build Tools (v143), MSVC 19.3+
+- **Build Systems**: 
+  - MSBuild for shell extension (CBXShell.sln)
+  - CMake + Ninja for Engine library
+
+### Compiler Flags
+**Release configuration:**
+- `/W4` - Warning level 4
+- `/WX` - Treat warnings as errors (enforced)
+- `/O2` - Optimize for speed
+- `/GL` - Whole program optimization
+- `/arch:AVX2` - AVX2 instruction set
+- `/std:c++20` - C++20 standard
+- `/MT` - Static runtime (or `/MD` for DLL runtime)
+
+**Debug configuration:**
+- `/W4` - Warning level 4
+- `/Od` - No optimization
+- `/Zi` - Full debug info
+- `/MTd` or `/MDd` - Debug runtime
+
+---
+
+## Build Process
+
+### Clean Build (Recommended)
+```powershell
+# Clean all build artifacts
+Remove-Item -Recurse -Force build, x64, CBXShell\x64, CBXManager\x64, Engine\Release -ErrorAction SilentlyContinue
+
+# Build Engine library first
+cd Engine
+cmake -S . -B Release -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+cmake --build Release --config Release
+
+# Build shell extension
+cd ..
+msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+```
+
+### Incremental Build
+```powershell
+msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+```
+
+### With Logging (REQUIRED for slow machines)
+```powershell
+$LogDir = "build-logs"
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+$LogFile = "$LogDir\build_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+
+msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal 2>&1 | Tee-Object -FilePath $LogFile
+```
+
+---
+
+## Monitoring (CRITICAL)
+
+### ✅ DO: Monitor via VS Code
+- All build scripts pipe output to `/build-logs/*.log`
+- Open logs in VS Code explorer to monitor progress
+- Use VS Code tasks for automated builds
+- Tail log files with VS Code extensions
+
+### ❌ DON'T: Monitor in shell
+- Never `Ctrl-C` a running build to check status
+- Never use `Start-Sleep` followed by re-run
+- Don't watch shell output directly (unreliable on slow machines)
+
+### Log File Location
+```
+/build-logs/
+  build_20260108_134500.log
+  build_20260108_140230.log
+  ...
+```
+*Note: `/build-logs` is gitignored*
+
+---
+
+## Timeout Policy
+
+### Local Builds
+- Default timeout: **120 minutes** (slow machine)
+- Use PowerShell `-TimeoutSeconds` or `Start-Process -Wait`
+- Never terminate builds manually
+
+### CI/CD (GitHub Actions)
+```yaml
+jobs:
+  build:
+    timeout-minutes: 120
+```
+
+---
+
+## Verification Checklist
+
+After each build:
+- [ ] 0 errors in output
+- [ ] 0 warnings in Release (enforced by `/WX`)
+- [ ] Output files exist:
+  - `x64\Release\CBXShell.dll` (~1.3 MB)
+  - `x64\Release\CBXManager.exe` (~300 KB)
+  - `Engine\Release\DarkThumbsEngine.lib` (~1.9 MB)
+- [ ] Log file saved to `/build-logs`
+- [ ] No build artifacts committed to Git
+
+---
+
+## Troubleshooting
+
+### Build fails with LNK2001/LNK2019 (unresolved externals)
+- Verify Engine library built first: `Engine\Release\DarkThumbsEngine.lib`
+- Check AdditionalLibraryDirectories in CBXShell.vcxproj
+- Ensure all external libs are x64: zlib, webp, avif, etc.
+
+### Warning-as-error failures
+- Fix the warning; do not suppress with pragmas
+- Common: unused variables, narrowing conversions, missing override
+- If external library warning: isolate with `/external:W0`
+
+### Slow build times
+- Enable `/MP` (multi-processor compilation) - already set
+- Use Ninja instead of MSBuild for Engine: `cmake -G Ninja`
+- Check disk I/O (SSD recommended)
+
+---
+
+## External Libraries
+
+See [THIRD_PARTY.md](../docs/THIRD_PARTY.md) for dependency build instructions.
+
+**Required x64 libraries:**
+- zlib 1.3.1
+- lz4 1.10.0
+- zstd 1.5.7
+- libwebp 1.5.0
+- libavif 1.3.0
+- libjxl 0.11.1
+- minizip-ng 4.0.10
+
+All libraries must be built with `/MT` (static runtime) to match shell extension.

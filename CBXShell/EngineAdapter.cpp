@@ -8,8 +8,9 @@
 #include "../Engine/Decoders/WebPDecoder.h"
 #include "../Engine/Decoders/AVIFDecoder.h"
 #include "../Engine/Decoders/ArchiveDecoder.h"
-#include "../Engine/Decoders/JXLDecoder.h"
-#include "../Engine/Decoders/HEIFDecoder.h"
+// TODO: Complete JXL and HEIF decoder integration with Engine library
+// #include "../Engine/Decoders/JXLDecoder.h"
+// #include "../Engine/Decoders/HEIFDecoder.h"
 #include "error_logger.h"
 
 namespace DarkThumbs {
@@ -99,19 +100,15 @@ void EngineAdapter::RegisterDecoders() {
     registry.RegisterDecoder(new Engine::ArchiveDecoder());
     DT_LOG_DEBUG(LogCategory::ENGINE, "Registered ArchiveDecoder");
 
-    // Register JXL decoder (JPEG XL - modern high-efficiency format)
-    registry.RegisterDecoder(new Engine::JXLDecoder());
-    DT_LOG_DEBUG(LogCategory::ENGINE, "Registered JXLDecoder");
-
-    // Register HEIF decoder (HEIC - Apple iPhone photos)
-    registry.RegisterDecoder(new Engine::HEIFDecoder());
-    DT_LOG_DEBUG(LogCategory::ENGINE, "Registered HEIFDecoder");
+    // TODO: Complete JXL and HEIF decoder integration
+    // These decoders exist but need to be built into the Engine library first
+    // registry.RegisterDecoder(new Engine::JXLDecoder());
+    // DT_LOG_DEBUG(LogCategory::ENGINE, "Registered JXLDecoder");
+    // registry.RegisterDecoder(new Engine::HEIFDecoder());
+    // DT_LOG_DEBUG(LogCategory::ENGINE, "Registered HEIFDecoder");
 
     // Log decoder statistics
     size_t decoderCount = registry.GetDecoderCount();
-    DT_LOG_INFO(LogCategory::ENGINE, 
-        std::string("Registered ") + std::to_string(decoderCount) + " decoders");
-}
     DT_LOG_INFO(LogCategory::ENGINE, 
         std::string("Registered ") + std::to_string(decoderCount) + " decoders");
 }

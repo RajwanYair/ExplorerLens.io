@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 
+namespace DarkThumbs {
 namespace Engine {
 
     /// <summary>
@@ -81,3 +82,4 @@ namespace Engine {
     };
 
 } // namespace Engine
+} // namespace DarkThumbs

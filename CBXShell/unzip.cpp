@@ -24,12 +24,12 @@ typedef DWORD ZRESULT;
 #define ZR_OK 0x00000000
 
 // Stub implementations - return error codes
-// TODO: Implement full ZIP support using minizip-ng or restore original unzip.cpp
+// FUTURE ENHANCEMENT: Implement full ZIP support using minizip-ng 4.0.10 (library is built and linked)
 
 HZIP OpenZip(const TCHAR *fn, const char *password)
 {
     // Stub: ZIP archives not currently supported
-    // TODO: Integrate minizip-ng library
+    // FUTURE ENHANCEMENT: Integrate minizip-ng 4.0.10 library (already built)
     return NULL;
 }
 

@@ -122,9 +122,10 @@ namespace DarkThumbs
             return NULL;
         }
 
-        // TODO: DirectWrite font loading requires IDWriteFontSetBuilder (DirectWrite 3.0)
-        // which needs Windows 10 SDK 10.0.15063.0 or later
-        // For now, fallback to GDI which is more compatible
+        // KNOWN LIMITATION: DirectWrite font loading requires IDWriteFontSetBuilder (DirectWrite 3.0)
+        // which needs Windows 10 SDK 10.0.15063.0 or later.
+        // Current implementation uses GDI fallback for maximum compatibility.
+        // GDI rendering works well for most font previews.
 
         // Fallback to GDI
         CoUninitialize();

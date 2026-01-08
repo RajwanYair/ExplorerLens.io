@@ -2,6 +2,75 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Build DarkThumbs (Release)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/build.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Configuration",
+        "Release"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "Build DarkThumbs (Debug)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/build.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Configuration",
+        "Debug"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "Clean Build (Release)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/build.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Configuration",
+        "Release",
+        "-Clean"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "Install DarkThumbs (Admin Required)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/install.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Configuration",
+        "Release"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "Uninstall DarkThumbs (Admin Required)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/install.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Unregister"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "Verify Build Tools",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/verify-tools.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
       "name": "PowerShell: Install to Program Files (Admin)",
       "type": "PowerShell",
       "request": "launch",

@@ -12,6 +12,7 @@
 // #pragma comment(lib, "jxl.lib")
 // #pragma comment(lib, "jxl_threads.lib")
 
+namespace DarkThumbs {
 namespace Engine {
 
     JXLDecoder::JXLDecoder()
@@ -300,3 +301,4 @@ namespace Engine {
     }
 
 } // namespace Engine
+} // namespace DarkThumbs

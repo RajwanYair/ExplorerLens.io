@@ -125,8 +125,8 @@ namespace DarkThumbs
 
     HBITMAP AudioThumbnail::ExtractAlbumArtMP3(const std::wstring &audioPath)
     {
-        // TODO: Implement ID3v2 tag parsing
-        // For now, rely on Property System
+        // FUTURE ENHANCEMENT: Implement ID3v2 tag parsing
+        // For now, rely on Property System (works for most MP3 files)
         // Full implementation would parse:
         // - ID3v2.3/2.4 APIC frame (Attached Picture)
         // - Extract JPEG/PNG image data
@@ -136,21 +136,21 @@ namespace DarkThumbs
 
     HBITMAP AudioThumbnail::ExtractAlbumArtFLAC(const std::wstring &audioPath)
     {
-        // TODO: Implement FLAC metadata block parsing
+        // FUTURE ENHANCEMENT: Implement FLAC metadata block parsing
         // Parse METADATA_BLOCK_PICTURE
         return NULL;
     }
 
     HBITMAP AudioThumbnail::ExtractAlbumArtM4A(const std::wstring &audioPath)
     {
-        // TODO: Implement MP4 atom parsing
+        // FUTURE ENHANCEMENT: Implement MP4 atom parsing
         // Look for 'covr' atom in metadata
         return NULL;
     }
 
     HBITMAP AudioThumbnail::ExtractAlbumArtOgg(const std::wstring &audioPath)
     {
-        // TODO: Implement Ogg Vorbis comment parsing
+        // FUTURE ENHANCEMENT: Implement Ogg Vorbis comment parsing
         // Extract METADATA_BLOCK_PICTURE from comments
         return NULL;
     }
@@ -187,7 +187,7 @@ namespace DarkThumbs
 
     HBITMAP AudioThumbnail::GenerateWaveformWMF(const std::wstring &audioPath, int width, int height)
     {
-        // TODO: Implement Windows Media Foundation audio decoding
+        // FUTURE ENHANCEMENT: Implement Windows Media Foundation audio decoding
         // For now, create a simple placeholder waveform
         std::vector<float> samples(width, 0.0f);
         return DrawWaveform(samples, width, height, RGB(100, 100, 100));

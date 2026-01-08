@@ -10,6 +10,7 @@
 // #include <libheif/heif.h>
 // #pragma comment(lib, "heif.lib")
 
+namespace DarkThumbs {
 namespace Engine {
 
     HEIFDecoder::HEIFDecoder()
@@ -456,3 +457,4 @@ namespace Engine {
     }
 
 } // namespace Engine
+} // namespace DarkThumbs

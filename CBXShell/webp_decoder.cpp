@@ -1,17 +1,16 @@
 /******************************************************************************
  * webp_decoder.cpp
  * WebP Image Decoder Implementation for DarkThumbs
- * Optimized for Windows 11 with delay-load support
+ * Optimized for Windows 11 with static library linkage
  ******************************************************************************/
 
 #include "StdAfx.h"
 #include "webp_decoder.h"
 
-// Link with libwebp static library
+// Link with libwebp static library (libwebp 1.5.0)
 // Note: For dynamic DLL, use #pragma comment(linker, "/DELAYLOAD:webp.dll")
-// Temporarily disabled - WebP library not built yet
-// #pragma comment(lib, "webp.lib")
-// #pragma comment(lib, "sharpyuv.lib")
+#pragma comment(lib, "webp.lib")
+#pragma comment(lib, "sharpyuv.lib")
 
 #include <webp/decode.h>
 

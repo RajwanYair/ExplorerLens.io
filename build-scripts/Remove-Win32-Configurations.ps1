@@ -27,7 +27,7 @@ foreach ($projFile in $projectFiles) {
     
     # Load XML
     [xml]$xml = Get-Content $fullPath
-    $ns = @{msb = "http://schemas.microsoft.com/developer/msbuild/2003"}
+    $ns = @{msb = "http://schemas.microsoft.com/developer/msbuild/2003" }
     
     # Track changes
     $changesMade = 0

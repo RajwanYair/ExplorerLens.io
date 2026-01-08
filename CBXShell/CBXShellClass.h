@@ -6,7 +6,7 @@
 #include "resource.h" // main symbols
 
 #include "cbxArchive.h"
-// #include "EngineAdapter.h" // TEMPORARILY DISABLED until Engine is complete
+#include "EngineAdapter.h"
 #include <thumbcache.h> // IThumbnailProvider
 
 /////////////////////////////////////////////////////////////////////////////
@@ -85,8 +85,8 @@ private:
   __cbx::CCBXArchive m_cbx;
   CComPtr<IStream> m_spStream; // For IInitializeWithStream
   
-  // Engine integration (v5.3.0) - TEMPORARILY DISABLED until Engine is complete
-  // std::unique_ptr<DarkThumbs::EngineAdapter> m_engineAdapter;
+  // Engine integration (v5.3.0)
+  std::unique_ptr<DarkThumbs::EngineAdapter> m_engineAdapter;
   bool m_useEngine; // Toggle between Engine and legacy implementation
 };
 

@@ -99,10 +99,11 @@ namespace DarkThumbs
         // Office Open XML files are ZIP archives
         // Thumbnail is typically at: docProps/thumbnail.jpeg or thumbnail.png
 
-        // TODO: Implement ZIP extraction using minizip-ng
+        // FUTURE ENHANCEMENT: Implement ZIP extraction using minizip-ng 4.0.10
+        // Library is built and linked, extraction logic needs implementation.
         // Path in archive: "docProps/thumbnail.jpeg"
         //
-        // For now, return NULL and rely on other strategies
+        // For now, return NULL and rely on other strategies (Property System works for most files)
 
         return NULL;
     }
