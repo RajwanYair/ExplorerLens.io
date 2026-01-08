@@ -17,10 +17,10 @@ Write-Host ""
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent $ScriptDir
 $ExternalDir = Join-Path $RootDir "external"
-$LibavifDir = Join-Path $ExternalDir "libavif-1.3.0"
-$Dav1dDir = Join-Path $ExternalDir "image-libs\dav1d"
+$LibavifDir = Join-Path $ExternalDir "image-libs\libavif-1.3.0"
+$Dav1dDir = Join-Path $ExternalDir "image-libs\dav1d-1.5.1\install"
 $BuildDir = Join-Path $LibavifDir "build-msvc"
-$InstallDir = Join-Path $ExternalDir "image-libs\libavif"
+$InstallDir = Join-Path $LibavifDir "install"
 
 # Verify source exists
 if (-not (Test-Path $LibavifDir)) {
@@ -40,8 +40,7 @@ $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 if (Test-Path $VsWhere) {
     $VsPath = & $VsWhere -latest -property installationPath
     Write-Host "[OK] Found Visual Studio at: $VsPath" -ForegroundColor Green
-}
-else {
+} else {
     Write-Host "[ERROR] Visual Studio not found" -ForegroundColor Red
     exit 1
 }
@@ -96,13 +95,11 @@ try {
     }
     
     Write-Host "[OK] Build complete" -ForegroundColor Green
-}
-catch {
+} catch {
     Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red
     Pop-Location
     exit 1
-}
-finally {
+} finally {
     Pop-Location
 }
 
@@ -119,8 +116,7 @@ if (Test-Path $LibPath) {
     Write-Host "  - Gain Map API (HDR)" -ForegroundColor White
     Write-Host "  - Sample Transform" -ForegroundColor White
     exit 0
-}
-else {
+} else {
     Write-Host ""
     Write-Host "[ERROR] Build failed - library not found" -ForegroundColor Red
     exit 1

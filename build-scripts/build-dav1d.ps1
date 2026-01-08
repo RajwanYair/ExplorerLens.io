@@ -17,9 +17,9 @@ Write-Host ""
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent $ScriptDir
 $ExternalDir = Join-Path $RootDir "external"
-$Dav1dDir = Join-Path $ExternalDir "dav1d-1.5.1"
+$Dav1dDir = Join-Path $ExternalDir "image-libs\dav1d-1.5.1"
 $BuildDir = Join-Path $Dav1dDir "build-msvc"
-$InstallDir = Join-Path $ExternalDir "image-libs\dav1d"
+$InstallDir = Join-Path $Dav1dDir "install"
 
 # Verify source exists
 if (-not (Test-Path $Dav1dDir)) {
@@ -48,8 +48,7 @@ $VsDevCmd = Join-Path $VsPath "Common7\Tools\VsDevCmd.bat"
 
 if (Test-Path $VsDevCmd) {
     Write-Host "[OK] Found Visual Studio BuildTools at: $VsPath" -ForegroundColor Green
-}
-else {
+} else {
     # Try vswhere as fallback
     $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
     if (Test-Path $VsWhere) {
@@ -106,8 +105,7 @@ if (Test-Path $LibPath) {
     Write-Host "Library: $LibPath" -ForegroundColor Green
     Write-Host "Headers: $(Join-Path $InstallDir 'include')" -ForegroundColor Green
     exit 0
-}
-else {
+} else {
     Write-Host ""
     Write-Host "[ERROR] Build failed - library not found" -ForegroundColor Red
     exit 1
