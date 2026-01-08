@@ -17,15 +17,16 @@ DarkThumbs generates thumbnails for comic books, archives, modern images, RAW ph
 **Getting Started:**
 
 - [Build Guide](docs/BUILD_GUIDE.md) - Complete build instructions
-- [Installation Guide](docs/INSTALLATION_GUIDE.md) - Setup and configuration
+- [Installation Testing Guide](docs/INSTALLATION_TESTING_GUIDE.md) - Installation and testing procedures
 - [Quick Setup](docs/QUICK_SETUP.md) - Fast start guide
+- **[Current Status](READY_FOR_TESTING.md)** - ✅ Ready for installation testing
 
 **Development:**
 
 - [ROADMAP](ROADMAP.md) - Development roadmap and milestones
-- [Project Status](docs/PROJECT_STATUS.md) - Current priorities
 - [Contributing](.github/CONTRIBUTING.md) - How to contribute
 - [Project Structure](docs/PROJECT_STRUCTURE.md) - Architecture overview
+- [Build Scripts Reference](docs/BUILD_SCRIPTS_REFERENCE.md) - Build automation reference
 
 ---
 
