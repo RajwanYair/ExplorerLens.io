@@ -1,15 +1,17 @@
 # DarkThumbs - Project Status & Consolidated Plan
 
 **Last Updated:** January 8, 2026  
-**Current Phase:** ✅ P2 Engine Refactoring - **ENGINE ACTIVE IN PRODUCTION!**  
-**Next Milestone:** v5.3.0 → v6.0.0 (Target: July 2026)
+**Current Phase:** ✅ v5.3.0 Complete - Engine Active + Testing Infrastructure  
+**Next Milestone:** v5.4.0 - Advanced Decoders (Target: February 2026)
 
-**Latest Update (Jan 8, 2026):** 
+**Latest Updates (Jan 8, 2026):** 
 - ✅ Engine library complete (DarkThumbsEngine.lib, 1.93 MB) with ThumbnailPipeline, 22/22 tests passing
 - ✅ CBXShell successfully integrated with Engine library (builds with 0 errors)
-- ✅ **Engine adapter ENABLED** - v5.3.0 now uses Engine pipeline with legacy fallback
+- ✅ **Engine adapter ENABLED** - v5.3.0 uses Engine pipeline with legacy fallback
 - ✅ All 4 decoders registered: Image, WebP, AVIF, Archive (supports 31+ formats)
-- 🎯 Next: Manual testing and v6.0.0 plugin system planning
+- ✅ **Testing infrastructure complete** - TESTING_GUIDE.md, GitHub Actions CI/CD workflow
+- ✅ **JXL and HEIF decoders added** - placeholder implementations ready for library integration
+- 🎯 Next: Build libjxl/libheif libraries, enable decoders, manual testing
 
 ---
 
@@ -25,9 +27,14 @@
 | **zstd** | 1.5.7 | ✅ Built & Linked | zstd_static.lib |
 | **LibWebP** | 1.5.0 | ✅ Built & Linked | libwebp.lib |
 | **Minizip-NG** | 4.0.10 | ✅ Built & Linked | minizip.lib (292 KB, /MD runtime) |
+| **libavif** | 1.3.0 | ✅ Built & Linked | avif.lib (AVIF support) |
 | **ZIP Support** | 4.0.10 | ✅ **ENABLED** | unzip_new.cpp active (382 lines) |
-| **v5.2.0 Shell Extension** | 5.2.0 | ✅ Builds Clean | 0 warnings, 0 errors (Release x64) |
+| **v5.3.0 Engine** | 5.3.0 | ✅ Active | DarkThumbsEngine.lib (1.93 MB, 22/22 tests) |
+| **v5.3.0 Shell Extension** | 5.3.0 | ✅ Builds Clean | 0 warnings, 0 errors (Release x64) |
+| **CI/CD Pipeline** | 1.0 | ✅ Complete | GitHub Actions workflow created |
 | **GPU Acceleration** | - | ⚠️ Unverified | Code exists, needs testing |
+| **JXL Decoder** | - | 🔄 Placeholder | Awaiting libjxl build |
+| **HEIF Decoder** | - | 🔄 Placeholder | Awaiting libheif build |
 
 ### What Needs Testing 🧪
 
