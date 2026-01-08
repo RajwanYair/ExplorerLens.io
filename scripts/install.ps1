@@ -123,21 +123,39 @@ Write-Status "Target: $InstallDir"
 # Verify source files exist
 $requiredFiles = @(
     "CBXShell.dll",
-    "CBXManager.exe",
+    "CBXManager.exe"
+)
+
+$optionalFiles = @(
     "UnRAR64.dll"
 )
 
 Write-Status "`nVerifying source files..." "INFO"
 $missingFiles = @()
+$filesToCopy = @()
+
 foreach ($file in $requiredFiles) {
     $sourcePath = Join-Path $SourceDir $file
     if (Test-Path $sourcePath) {
         $fileInfo = Get-Item $sourcePath
         $sizeKB = [math]::Round($fileInfo.Length / 1KB, 0)
         Write-Status "  $file ($sizeKB KB)" "SUCCESS"
+        $filesToCopy += $file
     } else {
         Write-Status "  $file NOT FOUND" "ERROR"
         $missingFiles += $file
+    }
+}
+
+foreach ($file in $optionalFiles) {
+    $sourcePath = Join-Path $SourceDir $file
+    if (Test-Path $sourcePath) {
+        $fileInfo = Get-Item $sourcePath
+        $sizeKB = [math]::Round($fileInfo.Length / 1KB, 0)
+        Write-Status "  $file ($sizeKB KB) [OPTIONAL]" "SUCCESS"
+        $filesToCopy += $file
+    } else {
+        Write-Status "  $file not found (optional - RAR support disabled)" "INFO"
     }
 }
 
@@ -159,7 +177,7 @@ try {
 
 # Copy files
 Write-Status "`nCopying files..." "INFO"
-foreach ($file in $requiredFiles) {
+foreach ($file in $filesToCopy) {
     $sourcePath = Join-Path $SourceDir $file
     $destPath = Join-Path $InstallDir $file
     
