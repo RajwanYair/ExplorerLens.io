@@ -53,6 +53,8 @@ set(ENGINE_HEADERS
     Decoders/WebPDecoder.h
     Decoders/AVIFDecoder.h
     Decoders/ArchiveDecoder.h
+    Decoders/JXLDecoder.h
+    Decoders/HEIFDecoder.h
     
     # GPU
     GPU/D3D11Renderer.h
@@ -72,6 +74,8 @@ set(ENGINE_SOURCES
     Decoders/WebPDecoder.cpp
     Decoders/AVIFDecoder.cpp
     Decoders/ArchiveDecoder.cpp
+    Decoders/JXLDecoder.cpp
+    Decoders/HEIFDecoder.cpp
     
     # GPU
     GPU/D3D11Renderer.cpp
