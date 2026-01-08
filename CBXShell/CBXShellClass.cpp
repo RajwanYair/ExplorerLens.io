@@ -3,6 +3,7 @@
 #include "StdAfx.h"
 #include "CBXShellClass.h"
 #include "CBXShell.h"
+#include "metrics_collector.h"
 #include <string>
 
 HRESULT CCBXShell::FinalConstruct(void) {
@@ -47,6 +48,22 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
                                      WTS_ALPHATYPE *pdwAlpha) {
   PROFILE_FUNCTION();
 
+  // Get file extension for metrics
+  std::string fileExt;
+  const WCHAR* filePath = m_cbx.GetFilePath();
+  if (filePath) {
+    std::wstring wpath(filePath);
+    size_t dotPos = wpath.find_last_of(L'.');
+    if (dotPos != std::wstring::npos) {
+      std::wstring wext = wpath.substr(dotPos + 1);
+      fileExt = std::string(wext.begin(), wext.end());
+      std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), ::tolower);
+    }
+  }
+  
+  // Track thumbnail generation metrics
+  DarkThumbs::ThumbnailMetricsScope metricsScope(fileExt);
+
   if (!phBmpThumbnail || !pdwAlpha) {
     DT_LOG_ERROR(DarkThumbs::LogCategory::COM,
                  "GetThumbnail: Invalid parameters");
@@ -86,6 +103,9 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
     DT_LOG_HRESULT(DarkThumbs::LogLevel::LVL_ERROR,
                    DarkThumbs::LogCategory::DECODER, "Thumbnail extraction",
                    hr);
+    metricsScope.SetSuccess(false);
+  } else {
+    metricsScope.SetSuccess(true);
   }
 
   return hr;
