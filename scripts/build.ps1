@@ -87,7 +87,7 @@ Write-Log "Verifying build tools..."
 
 $requiredTools = @{
     "msbuild" = "MSBuild (Visual Studio Build Tools)"
-    "cmake" = "CMake"
+    "cmake"   = "CMake"
 }
 
 if ($BuildEngine) {
@@ -148,9 +148,9 @@ if ($BuildEngine) {
         
         # Detect available VS generator
         $vsGenerators = @(
-            @{Name = "Visual Studio 18 2026"; Year = "2026"; Version = "18"},
-            @{Name = "Visual Studio 17 2022"; Year = "2022"; Version = "17"},
-            @{Name = "Visual Studio 16 2019"; Year = "2019"; Version = "16"}
+            @{Name = "Visual Studio 18 2026"; Year = "2026"; Version = "18" },
+            @{Name = "Visual Studio 17 2022"; Year = "2022"; Version = "17" },
+            @{Name = "Visual Studio 16 2019"; Year = "2019"; Version = "16" }
         )
         
         $generator = $null
