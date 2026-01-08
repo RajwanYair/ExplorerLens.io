@@ -43,9 +43,10 @@ BuildLogs/
 # Release packages (archives only, not active releases)
 release-packages/
 
-# Duplicate documentation directories
+# Duplicate documentation directories (old unorganized archives)
 documentation/
-docs/archive/
+# Allow organized archive directories (for consolidation project)
+# docs/archive/ is now tracked for historical reference
 
 # x86/32-bit build directories (project is 64-bit only)
 DarkThumbsSetup_x86/
