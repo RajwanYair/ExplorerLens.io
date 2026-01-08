@@ -1,5 +1,4 @@
 #Requires -Version 7.0
-#Requires -RunAsAdministrator
 
 <#
 .SYNOPSIS
@@ -37,7 +36,10 @@ param(
     [string]$Configuration = "Release",
 
     [Parameter()]
-    [switch]$Unregister
+    [switch]$Unregister,
+
+    [Parameter()]
+    [switch]$DryRun
 )
 
 Set-StrictMode -Version Latest
@@ -54,22 +56,27 @@ function Write-Status {
     param([string]$Message, [string]$Type = "INFO")
     switch ($Type) {
         "SUCCESS" { Write-Host "✓ $Message" -ForegroundColor Green }
-        "ERROR"   { Write-Host "✗ $Message" -ForegroundColor Red }
-        "INFO"    { Write-Host "• $Message" -ForegroundColor Cyan }
-        default   { Write-Host $Message }
+        "ERROR" { Write-Host "✗ $Message" -ForegroundColor Red }
+        "INFO" { Write-Host "• $Message" -ForegroundColor Cyan }
+        default { Write-Host $Message }
     }
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "DarkThumbs Installation Script" -ForegroundColor Cyan
+if ($DryRun) {
+    Write-Host "[DRY RUN MODE - No changes will be made]" -ForegroundColor Yellow
+}
 Write-Host "========================================`n" -ForegroundColor Cyan
 
-# Check admin rights
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
-    Write-Status "ERROR: This script must run as Administrator" "ERROR"
-    Write-Status "Right-click PowerShell and select 'Run as Administrator'" "INFO"
-    exit 1
+# Check admin rights (skip for dry-run)
+if (-not $DryRun) {
+    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    if (-not $isAdmin) {
+        Write-Status "ERROR: This script must run as Administrator" "ERROR"
+        Write-Status "Right-click PowerShell and select 'Run as Administrator'" "INFO"
+        exit 1
+    }
 }
 
 # Uninstall mode
@@ -167,12 +174,16 @@ if ($missingFiles.Count -gt 0) {
 
 # Create installation directory
 Write-Status "`nCreating installation directory..." "INFO"
-try {
-    New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-    Write-Status "Directory created" "SUCCESS"
-} catch {
-    Write-Status "Error creating directory: $($_.Exception.Message)" "ERROR"
-    exit 1
+if ($DryRun) {
+    Write-Status "[DRY RUN] Would create: $InstallDir" "INFO"
+} else {
+    try {
+        New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+        Write-Status "Directory created" "SUCCESS"
+    } catch {
+        Write-Status "Error creating directory: $($_.Exception.Message)" "ERROR"
+        exit 1
+    }
 }
 
 # Copy files
@@ -181,12 +192,16 @@ foreach ($file in $filesToCopy) {
     $sourcePath = Join-Path $SourceDir $file
     $destPath = Join-Path $InstallDir $file
     
-    try {
-        Copy-Item -Path $sourcePath -Destination $destPath -Force
-        Write-Status "  Copied $file" "SUCCESS"
-    } catch {
-        Write-Status "  Error copying ${file}: $($_.Exception.Message)" "ERROR"
-        exit 1
+    if ($DryRun) {
+        Write-Status "  [DRY RUN] Would copy: $file" "INFO"
+    } else {
+        try {
+            Copy-Item -Path $sourcePath -Destination $destPath -Force
+            Write-Status "  Copied $file" "SUCCESS"
+        } catch {
+            Write-Status "  Error copying ${file}: $($_.Exception.Message)" "ERROR"
+            exit 1
+        }
     }
 }
 
@@ -194,20 +209,45 @@ foreach ($file in $filesToCopy) {
 Write-Status "`nRegistering COM DLL..." "INFO"
 $dllPath = Join-Path $InstallDir "CBXShell.dll"
 
-try {
-    $regsvr32 = Join-Path $env:SystemRoot "System32\regsvr32.exe"
-    $proc = Start-Process -FilePath $regsvr32 -ArgumentList "/s", "`"$dllPath`"" -Wait -PassThru -NoNewWindow
-    
-    if ($proc.ExitCode -eq 0) {
-        Write-Status "COM DLL registered successfully" "SUCCESS"
-    } else {
-        Write-Status "Warning: regsvr32 returned exit code $($proc.ExitCode)" "ERROR"
-        Write-Status "The DLL may already be registered or registration failed" "INFO"
+if ($DryRun) {
+    Write-Status "[DRY RUN] Would register: $dllPath" "INFO"
+    Write-Status "[DRY RUN] Command: regsvr32.exe /s `"$dllPath`"" "INFO"
+} else {
+    try {
+        $regsvr32 = Join-Path $env:SystemRoot "System32\regsvr32.exe"
+        Write-Status "Running: $regsvr32 /s `"$dllPath`"" "INFO"
+        Write-Status "(This may take 10-30 seconds...)" "INFO"
+        
+        # Start process with timeout
+        $proc = Start-Process -FilePath $regsvr32 -ArgumentList "/s", "`"$dllPath`"" -PassThru -NoNewWindow
+        
+        # Wait with timeout (30 seconds)
+        $timeout = 30
+        $waitResult = $proc.WaitForExit($timeout * 1000)
+        
+        if (-not $waitResult) {
+            Write-Status "Registration timed out after $timeout seconds" "ERROR"
+            Write-Status "Attempting to kill hung process..." "INFO"
+            $proc.Kill()
+            Write-Status "Try manual registration: regsvr32.exe `"$dllPath`"" "INFO"
+            exit 1
+        }
+        
+        if ($proc.ExitCode -eq 0) {
+            Write-Status "COM DLL registered successfully" "SUCCESS"
+        } else {
+            Write-Status "Warning: regsvr32 returned exit code $($proc.ExitCode)" "ERROR"
+            Write-Status "The DLL may already be registered or registration failed" "INFO"
+            
+            # Try verbose registration to see error
+            Write-Status "Attempting verbose registration for diagnostic..." "INFO"
+            $verboseProc = Start-Process -FilePath $regsvr32 -ArgumentList "`"$dllPath`"" -Wait -PassThru
+        }
+    } catch {
+        Write-Status "Error registering DLL: $($_.Exception.Message)" "ERROR"
+        Write-Status "Installation may be incomplete" "ERROR"
+        exit 1
     }
-} catch {
-    Write-Status "Error registering DLL: $($_.Exception.Message)" "ERROR"
-    Write-Status "Installation may be incomplete" "ERROR"
-    exit 1
 }
 
 # Installation summary
