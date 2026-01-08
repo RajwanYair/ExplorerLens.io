@@ -1,7 +1,21 @@
 # DarkThumbs Build Guide
 
-**Complete Build Instructions - Consolidated Guide**  
-**Last Updated:** January 7, 2026
+**Complete Build Instructions - x64 Only**  
+**Last Updated:** January 8, 2026
+
+---
+
+## Important Notes
+
+### Platform Support
+
+**This project supports x64 (64-bit) builds ONLY.**
+
+- ✅ **Supported:** x64 (64-bit Windows)
+- ❌ **Not Supported:** Win32/x86 (32-bit) - removed as of January 2026
+- **Reason:** Modern Windows shell extensions should target 64-bit architecture
+
+All project files have been configured to build for x64 platform exclusively. Win32 configurations have been removed to simplify the build process and prevent accidental 32-bit builds.
 
 ---
 
@@ -43,34 +57,91 @@
 
 ### Required Tools
 
-1. **Visual Studio 2026 BuildTools**
+#### 1. Visual Studio 2026 Build Tools
 
-   ```powershell
-   # Verify installation
-   &"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
-   cl /? # Should show MSVC 19.50+
-   ```
+**How to Find:**
 
-2. **CMake** (3.20+)
+```powershell
+# Check if VS Build Tools are installed
+$vsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+if (Test-Path $vsWhere) {
+    $vsPath = & $vsWhere -latest -property installationPath
+    Write-Host "Visual Studio found at: $vsPath"
+} else {
+    Write-Host "Visual Studio not found - download from https://visualstudio.microsoft.com/downloads/"
+}
+```
 
-   ```powershell
-   cmake --version  # Should be 3.20 or higher
-   ```
+**Manual Check:**
+- **Location:** `C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools`
+- **Version Required:** MSVC v19.50+ (Visual Studio 2026)
+- **Download:** https://visualstudio.microsoft.com/downloads/ → Build Tools for Visual Studio
 
-3. **Git**
+**Verify Installation:**
 
-   ```powershell
-   git --version
-   ```
+```powershell
+# Set up x64 build environment
+&"${env:ProgramFiles(x86)}\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+cl /?  # Should display MSVC 19.50+
+```
 
-### Opening Native Command Prompt (CRITICAL)
+#### 2. CMake (3.20+)
 
-**Why Native?** PowerShell wrappers cause CMake environment issues.
+**How to Find:**
 
-1. Press `Win + X`
-2. Select "Terminal" or "Command Prompt"
-3. Run: `"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"`
-4. Verify: `where nmake` should show VS BuildTools path
+```powershell
+# Check if CMake is in PATH
+$cmake = Get-Command cmake -ErrorAction SilentlyContinue
+if ($cmake) {
+    cmake --version
+} else {
+    Write-Host "CMake not found - download from https://cmake.org/download/"
+}
+```
+
+**Download:** https://cmake.org/download/  
+**Install Location:** Typically `C:\Program Files\CMake\bin\cmake.exe`
+
+#### 3. Git
+
+**How to Find:**
+
+```powershell
+# Check if Git is installed
+$git = Get-Command git -ErrorAction SilentlyContinue
+if ($git) {
+    git --version
+} else {
+    Write-Host "Git not found - download from https://git-scm.com/downloads"
+}
+```
+
+**Download:** https://git-scm.com/downloads  
+**Install Location:** Typically `C:\Program Files\Git\bin\git.exe`
+
+### Opening Native Command Prompt for Build Tools
+
+**Why Native?** PowerShell wrappers may cause CMake environment issues.
+
+**Option 1: Developer Command Prompt**
+1. Start Menu → Search "Developer Command Prompt for VS 2026"
+2. This automatically sets up the build environment
+
+**Option 2: Manual Setup**
+1. Press `Win + X` → Select "Terminal" or "Command Prompt"
+2. Run: `"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"`
+3. Verify: `where nmake` should show VS BuildTools path
+
+**Option 3: PowerShell with vcvars64 (Recommended)**
+
+```powershell
+# Import VS environment variables (use in PowerShell scripts)
+cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat" && set' | ForEach-Object {
+    if ($_ -match "^(.*?)=(.*)$") {
+        Set-Item -Force -Path "ENV:\$($matches[1])" -Value $matches[2]
+    }
+}
+```
 
 ---
 

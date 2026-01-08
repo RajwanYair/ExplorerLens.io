@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="18.0"
-  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -18,20 +17,6 @@
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v145</PlatformToolset>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>Unicode</CharacterSet>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v145</PlatformToolset>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
@@ -49,52 +34,20 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
-      Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
-      Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>15.0.26419.1</_ProjectFileVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <LinkIncremental>true</LinkIncremental>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules />
-    <CodeAnalysisRuleAssemblies />
-    <BuildLogFile>$(SolutionDir)BuildLogs\$(ProjectName)_$(Platform)_$(Configuration).log</BuildLogFile>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules />
-    <CodeAnalysisRuleAssemblies />
-    <BuildLogFile>$(SolutionDir)BuildLogs\$(ProjectName)_$(Platform)_$(Configuration).log</BuildLogFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
@@ -109,45 +62,6 @@
     <CodeAnalysisRuleAssemblies />
     <BuildLogFile>$(SolutionDir)BuildLogs\$(ProjectName)_$(Platform)_$(Configuration).log</BuildLogFile>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Midl>
-      <HeaderFileName />
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>
-        packages\wtl.10.0.10320\lib\native\include;..\external\compression\zlib-1.3.1;..\external\compression\zstd-1.5.7\lib;..\external\compression\lz4-1.10.0\lib;..\external\compression\bzip2-1.0.8;..\external\compression\lzma-24.08\C;..\external\compression\minizip-ng-4.0.10;..\external\compression\unrar-7.2.2;..\external\compression\libarchive-3.7.6\libarchive;..\external\image-libs\libwebp-1.5.0\src;..\external\image-libs\libjxl-0.11.1\lib\include;..\external\image-libs\libavif-1.3.0\include;..\external\image-libs\dav1d-1.5.1\include</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <ControlFlowGuard>Guard</ControlFlowGuard>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x041a</Culture>
-    </ResourceCompile>
-    <Link>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\CBXShell.def</ModuleDefinitionFile>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
-      <RandomizedBaseAddress>true</RandomizedBaseAddress>
-      <DataExecutionPrevention>true</DataExecutionPrevention>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Link>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug/CBXShell.bsc</OutputFile>
-    </Bscmake>
-    <PostBuildEvent>
-      <Command></Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
       <TargetEnvironment>X64</TargetEnvironment>
@@ -155,7 +69,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN64;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -190,59 +104,11 @@
       <OutputFile>.\Debug/CBXShell.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command></Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Midl>
-      <HeaderFileName />
-    </Midl>
-    <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;UNRAR;SILENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <BufferSecurityCheck>true</BufferSecurityCheck>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalIncludeDirectories>
-        packages\wtl.10.0.10320\lib\native\include;..\external\compression\zlib-1.3.1;..\external\compression\zstd-1.5.7\lib;..\external\compression\lz4-1.10.0\lib;..\external\compression\bzip2-1.0.8;..\external\compression\lzma-24.08\C;..\external\compression\minizip-ng-4.0.10;..\external\compression\unrar-7.2.2;..\external\compression\libarchive-3.7.6\libarchive;..\external\image-libs\libwebp-1.5.0\src;..\external\image-libs\libjxl-0.11.1\lib\include;..\external\image-libs\libavif-1.3.0\include;..\external\image-libs\dav1d-1.5.1\include</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <ControlFlowGuard>Guard</ControlFlowGuard>
-      <SDLCheck>true</SDLCheck>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x041a</Culture>
-    </ResourceCompile>
-    <Link>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\CBXShell.def</ModuleDefinitionFile>
-      <SubSystem>Windows</SubSystem>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>true</RandomizedBaseAddress>
-      <DataExecutionPrevention>true</DataExecutionPrevention>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Link>
-    <Bscmake>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Release/CBXShell.bsc</OutputFile>
-    </Bscmake>
-    <PostBuildEvent>
-      <Command></Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -251,7 +117,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <PreprocessorDefinitions>
-        WIN32;NDEBUG;_WINDOWS;_USRDLL;ENABLE_HEIF_SUPPORT;ENABLE_AVIF_SUPPORT;ENABLE_PDF_SUPPORT;ENABLE_VIDEO_SUPPORT;ENABLE_AUDIO_SUPPORT;ENABLE_DOCUMENT_SUPPORT;ENABLE_FONT_SUPPORT;ENABLE_SVG_SUPPORT;ENABLE_RAW_SUPPORT;UNRAR;SILENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        _WIN64;NDEBUG;_WINDOWS;_USRDLL;ENABLE_HEIF_SUPPORT;ENABLE_AVIF_SUPPORT;ENABLE_PDF_SUPPORT;ENABLE_VIDEO_SUPPORT;ENABLE_AUDIO_SUPPORT;ENABLE_DOCUMENT_SUPPORT;ENABLE_FONT_SUPPORT;ENABLE_SVG_SUPPORT;ENABLE_RAW_SUPPORT;UNRAR;SILENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -311,7 +177,8 @@
     <ClCompile Include="webp_decoder.cpp" />
     <ClCompile Include="heif_decoder_native.cpp" />
     <ClCompile Include="avif_decoder.cpp" />
-    <!-- <ClCompile Include="jxl_decoder.cpp" /> --> <!-- Disabled until libjxl is built -->
+    <!-- <ClCompile Include="jxl_decoder.cpp" /> -->
+    <!-- Disabled until libjxl is built -->
     <!-- Performance enhancements (Sprint C1-C4, v5.1.0) -->
     <ClCompile Include="thumbnail_cache.cpp" />
     <ClCompile Include="thumbnail_collage.cpp" />
@@ -327,15 +194,16 @@
     <!-- Engine Integration (Sprint 11 - v5.3.0) -->
     <ClCompile Include="EngineAdapter.cpp" />
     <!-- External Library Wrappers (v5.2+) -->
-    <!-- <ClCompile Include="libarchive_wrapper.cpp" /> --> <!-- Disabled until libarchive is built -->
+    <!-- <ClCompile Include="libarchive_wrapper.cpp" /> -->
+    <!-- Disabled until libarchive is built -->
     <!-- UnRAR sources removed - using DLL -->
     <!-- Modern ZIP support using minizip-ng 4.0.10 - CRT linkage fixed with /MD runtime (Jan 2026) -->
     <!-- Legacy stub unzip.cpp disabled - minizip-ng provides full ZIP support below -->
     <!-- <ClCompile Include="unzip.cpp" /> -->
     <ClCompile Include="StdAfx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <!-- Modern ZIP using minizip-ng 4.0.10 - Enabled Jan 2026 after CRT linkage resolved with /MD runtime -->
@@ -378,14 +246,13 @@
     <ClInclude Include="unrar.h" />
     <ClInclude Include="unzip.h" />
   </ItemGroup>
-
   <ItemGroup>
     <ResourceCompile Include="CBXShell.rc">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      <AdditionalIncludeDirectories>
         $(OUTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
         $(OUTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      <AdditionalIncludeDirectories>
         $(OUTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
         $(OUTDIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -398,7 +265,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\zip.ico">
@@ -406,18 +272,15 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="packages\wtl.10.0.10320\build\native\wtl.targets"
-      Condition="Exists('packages\wtl.10.0.10320\build\native\wtl.targets')" />
-    <Import Project="..\packages\wtl.10.0.10320\build\native\wtl.targets"
-      Condition="Exists('..\packages\wtl.10.0.10320\build\native\wtl.targets')" />
+    <Import Project="packages\wtl.10.0.10320\build\native\wtl.targets" Condition="Exists('packages\wtl.10.0.10320\build\native\wtl.targets')" />
+    <Import Project="..\packages\wtl.10.0.10320\build\native\wtl.targets" Condition="Exists('..\packages\wtl.10.0.10320\build\native\wtl.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>??????????????????????? NuGet ???????????????????????????????????[NuGet ????????]
         ???????????????http://go.microsoft.com/fwlink/?LinkID=322105 ????????????????????? {0} ???</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\wtl.10.0.10320\build\native\wtl.targets')"
-      Text="$([System.String]::Format('$(ErrorText)', '..\packages\wtl.10.0.10320\build\native\wtl.targets'))" />
+    <Error Condition="!Exists('..\packages\wtl.10.0.10320\build\native\wtl.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\wtl.10.0.10320\build\native\wtl.targets'))" />
   </Target>
   <ItemGroup>
     <!-- WARNING: DO NOT FORMAT! MIDL command MUST remain on single line or it will fail with MIDL1011/MIDL1000 errors -->
