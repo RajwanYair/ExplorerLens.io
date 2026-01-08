@@ -1,0 +1,10 @@
+^C:\USERS\RYAIR\ONEDRIVE - INTEL CORPORATION\DOCUMENTS\MYSCRIPTS\DARKTHUMBS\ENGINE\BUILD\CMAKEFILES\E8985FE37570943A8A19D791A28B1A86\GENERATE.STAMP.RULE
+setlocal
+C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/build" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/build/DarkThumbsEngine.slnx"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

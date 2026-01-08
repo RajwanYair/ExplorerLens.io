@@ -1,0 +1,92 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║                  BUILD PROCESS QUICK REFERENCE                    ║
+║                     DarkThumbs Project                            ║
+║                    For Slow Machines                              ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+🚨 CRITICAL RULES
+═══════════════════════════════════════════════════════════════════
+
+❌ NEVER interrupt builds with Ctrl-C
+❌ NEVER run monitoring in same shell as build
+❌ NEVER assume build is done when prompt returns
+✅ ALWAYS wait 60+ seconds before checking results
+✅ ALWAYS use file system tools for monitoring
+✅ ALWAYS use /fl /flp:LogFile=... for logging
+
+═══════════════════════════════════════════════════════════════════
+📋 STANDARD BUILD WORKFLOW
+═══════════════════════════════════════════════════════════════════
+
+1. START BUILD (with logging)
+   msbuild Project.vcxproj /p:Configuration=Release /fl /flp:LogFile=build.log
+
+2. WAIT (do nothing)
+   - Engine: 60 seconds minimum
+   - CBXShell: 90 seconds minimum
+   - Full solution: 180 seconds (3 minutes) minimum
+
+3. CHECK RESULTS (file system only)
+   .\build-scripts\Verify-Build-Output.ps1
+
+4. REVIEW LOG (if needed)
+   Get-Content build.log -Tail 50
+
+═══════════════════════════════════════════════════════════════════
+🛠️ MONITORING TOOLS
+═══════════════════════════════════════════════════════════════════
+
+Verify outputs:
+  .\build-scripts\Verify-Build-Output.ps1
+
+Monitor log (separate terminal):
+  .\build-scripts\Monitor-Build-Safe.ps1 -LogFile build.log
+
+Check specific file:
+  Get-Item CBXShell\x64\Release\CBXShell.dll | Format-List
+
+═══════════════════════════════════════════════════════════════════
+⏱️ EXPECTED BUILD TIMES (Slow Machine)
+═══════════════════════════════════════════════════════════════════
+
+Project                  Minimum    Safe Wait
+────────────────────────────────────────────
+DarkThumbsEngine.lib     30 sec     60 sec
+CBXShell.dll             45 sec     90 sec
+CBXManager.exe           15 sec     30 sec
+Full Solution           180 sec    300 sec (5 min)
+
+═══════════════════════════════════════════════════════════════════
+✅ CORRECT EXAMPLE
+═══════════════════════════════════════════════════════════════════
+
+# Start build
+msbuild CBXShell.vcxproj /p:Configuration=Release /fl /flp:LogFile=cbx.log
+
+# Wait (do nothing for 90 seconds)
+
+# Check with file system tools
+.\build-scripts\Verify-Build-Output.ps1
+
+═══════════════════════════════════════════════════════════════════
+❌ INCORRECT EXAMPLE (DO NOT DO THIS!)
+═══════════════════════════════════════════════════════════════════
+
+msbuild CBXShell.vcxproj    # Start build
+^C                           # ❌ KILLS BUILD
+Start-Sleep -Seconds 10      # ❌ BUILD IS DEAD
+Get-Item output.dll          # ❌ FILE DOESN'T EXIST
+
+═══════════════════════════════════════════════════════════════════
+📚 DOCUMENTATION
+═══════════════════════════════════════════════════════════════════
+
+Full instructions:   .github/AI_BUILD_INSTRUCTIONS.md
+Guidelines:          .github/BUILD_MONITORING_GUIDELINES.md
+Improvements:        docs/BUILD_PROCESS_IMPROVEMENTS.md
+
+═══════════════════════════════════════════════════════════════════
+
+Remember: Slow machines need patience. Let builds finish!
+
+Last updated: January 8, 2026

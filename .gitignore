@@ -379,3 +379,35 @@ MigrationBackup/
 
 # Build logs
 build-log.txt
+build-output.log
+*.Build.CppClean.log
+
+# CMake build directories and files
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/CTestTestfile.cmake
+**/Makefile
+**/*.dir/
+**/*.vcxproj.user
+
+# Engine build outputs (CMake generated)
+Engine/ALL_BUILD.vcxproj
+Engine/ALL_BUILD.vcxproj.filters
+Engine/ZERO_CHECK.vcxproj
+Engine/ZERO_CHECK.vcxproj.filters
+Engine/INSTALL.vcxproj
+Engine/INSTALL.vcxproj.filters
+Engine/RUN_TESTS.vcxproj
+Engine/RUN_TESTS.vcxproj.filters
+Engine/DarkThumbsEngine.slnx
+Engine/test-output.txt
+Engine/Release/
+Engine/Debug/
+Engine/x64/
+Engine/build/
+
+# Test output files
+test-output.txt
+test-results*.txt
+TEST_RESULTS*.md

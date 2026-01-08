@@ -1,5 +1,5 @@
 # DarkThumbs GPU Acceleration Performance Report
-**Generated:** 2025-11-26 14:03:39
+**Generated:** 2026-01-07 10:29:48
 
 ## System Information
 
@@ -26,32 +26,80 @@
 
 | Image Size | Thumbnail Size | Avg Time (ms) | Min Time (ms) | Max Time (ms) | Median (ms) |
 |------------|----------------|---------------|---------------|---------------|-------------|
-| 1920x1080 | 256px | 48.67 | 13.55 | 99.45 | 44.44 |
-| 1920x1080 | 512px | 32.97 | 14.08 | 64.24 | 32.54 |
-| 1920x1080 | 1024px | 40.23 | 15.22 | 61.77 | 43.97 |
+| 1024x768 | 256px | 24.84 | 14.74 | 46.09 | 26.08 |
+| 1024x768 | 512px | 31.28 | 14.64 | 47.29 | 30.93 |
+| 1024x768 | 1024px | 24.58 | 13.24 | 47.17 | 17.98 |
+| 1920x1080 | 256px | 30.01 | 14.36 | 48.46 | 31.69 |
+| 1920x1080 | 512px | 30.03 | 15.31 | 56.84 | 30.71 |
+| 1920x1080 | 1024px | 39.28 | 15.34 | 61.28 | 42.43 |
+| 3840x2160 | 256px | 29.66 | 14.65 | 61.26 | 30.03 |
+| 3840x2160 | 512px | 33.09 | 14.62 | 46.65 | 43.94 |
+| 3840x2160 | 1024px | 36.65 | 13.82 | 60.75 | 31.59 |
 
 ### Detailed Results
 
+#### 1024x768 → 256px
+- **Average:** 24.84 ms
+- **Minimum:** 14.74 ms
+- **Maximum:** 46.09 ms
+- **Median:** 26.08 ms
+- **Throughput:** 40.3 thumbnails/sec
+
+#### 1024x768 → 512px
+- **Average:** 31.28 ms
+- **Minimum:** 14.64 ms
+- **Maximum:** 47.29 ms
+- **Median:** 30.93 ms
+- **Throughput:** 32 thumbnails/sec
+
+#### 1024x768 → 1024px
+- **Average:** 24.58 ms
+- **Minimum:** 13.24 ms
+- **Maximum:** 47.17 ms
+- **Median:** 17.98 ms
+- **Throughput:** 40.7 thumbnails/sec
+
 #### 1920x1080 → 256px
-- **Average:** 48.67 ms
-- **Minimum:** 13.55 ms
-- **Maximum:** 99.45 ms
-- **Median:** 44.44 ms
-- **Throughput:** 20.5 thumbnails/sec
+- **Average:** 30.01 ms
+- **Minimum:** 14.36 ms
+- **Maximum:** 48.46 ms
+- **Median:** 31.69 ms
+- **Throughput:** 33.3 thumbnails/sec
 
 #### 1920x1080 → 512px
-- **Average:** 32.97 ms
-- **Minimum:** 14.08 ms
-- **Maximum:** 64.24 ms
-- **Median:** 32.54 ms
-- **Throughput:** 30.3 thumbnails/sec
+- **Average:** 30.03 ms
+- **Minimum:** 15.31 ms
+- **Maximum:** 56.84 ms
+- **Median:** 30.71 ms
+- **Throughput:** 33.3 thumbnails/sec
 
 #### 1920x1080 → 1024px
-- **Average:** 40.23 ms
-- **Minimum:** 15.22 ms
-- **Maximum:** 61.77 ms
-- **Median:** 43.97 ms
-- **Throughput:** 24.9 thumbnails/sec
+- **Average:** 39.28 ms
+- **Minimum:** 15.34 ms
+- **Maximum:** 61.28 ms
+- **Median:** 42.43 ms
+- **Throughput:** 25.5 thumbnails/sec
+
+#### 3840x2160 → 256px
+- **Average:** 29.66 ms
+- **Minimum:** 14.65 ms
+- **Maximum:** 61.26 ms
+- **Median:** 30.03 ms
+- **Throughput:** 33.7 thumbnails/sec
+
+#### 3840x2160 → 512px
+- **Average:** 33.09 ms
+- **Minimum:** 14.62 ms
+- **Maximum:** 46.65 ms
+- **Median:** 43.94 ms
+- **Throughput:** 30.2 thumbnails/sec
+
+#### 3840x2160 → 1024px
+- **Average:** 36.65 ms
+- **Minimum:** 13.82 ms
+- **Maximum:** 60.75 ms
+- **Median:** 31.59 ms
+- **Throughput:** 27.3 thumbnails/sec
 
 ## GPU Acceleration Analysis
 

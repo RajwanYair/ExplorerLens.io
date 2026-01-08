@@ -1,0 +1,104 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PowerShell: Install to Program Files (Admin)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}\\scripts\\install\\Install-DarkThumbs.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": false,
+      "args": []
+    },
+    {
+      "name": "PowerShell: Uninstall from Program Files (Admin)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}\\scripts\\install\\uninstall-x64.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": false,
+      "args": []
+    },
+    {
+      "name": "PowerShell: Build All Libraries",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}\\Build-Production-SlowMachine.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": false,
+      "args": [
+        "-Clean"
+      ]
+    },
+    {
+      "name": "PowerShell: Test Format Support",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}\\tests\\Test-FormatSupport.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": false,
+      "args": []
+    },
+    {
+      "name": "PowerShell: Test GPU Acceleration",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}\\tests\\Test-GPUAcceleration.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": false,
+      "args": []
+    },
+    {
+      "name": "PowerShell: Check Build Status",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}\\build-scripts\\Check-Build-Status.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": false,
+      "args": []
+    },
+    {
+      "name": "PowerShell: Build LZMA (with monitoring)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
+      "cwd": "${workspaceFolder}",
+      "createTemporaryIntegratedConsole": false,
+      "args": [
+        "-ScriptPath",
+        "${workspaceFolder}\\build-scripts\\build-lzma-simple.ps1",
+        "-Watch"
+      ]
+    },
+    {
+      "name": "PowerShell: Current Script",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${file}",
+      "cwd": "${fileDirname}",
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "C++: Launch CBXManager",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\x64\\Release\\CBXManager.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "C++: Debug CBXManager",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}\\x64\\Debug\\CBXManager.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "console": "integratedTerminal"
+    }
+  ]
+}
