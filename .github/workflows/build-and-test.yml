@@ -1,0 +1,283 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  PLATFORM: x64
+
+jobs:
+  build-engine:
+    name: Build Engine Library
+    runs-on: windows-2022
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+    
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v2
+    
+    - name: Restore NuGet packages
+      run: nuget restore Engine/DarkThumbsEngine.slnx
+    
+    - name: Build External Dependencies
+      run: |
+        Write-Host "Building external libraries..." -ForegroundColor Cyan
+        # These should already be built, but verify
+        if (-not (Test-Path "external/lib/zlib.lib")) {
+          Write-Host "Warning: External libraries not found" -ForegroundColor Yellow
+        }
+      shell: pwsh
+    
+    - name: Build Engine Library
+      run: |
+        msbuild Engine/DarkThumbsEngine.vcxproj `
+          /p:Configuration=${{ env.BUILD_TYPE }} `
+          /p:Platform=${{ env.PLATFORM }} `
+          /m `
+          /v:minimal
+      shell: pwsh
+    
+    - name: Verify Engine Output
+      run: |
+        $engineLib = "Engine/${{ env.BUILD_TYPE }}/DarkThumbsEngine.lib"
+        if (Test-Path $engineLib) {
+          $size = (Get-Item $engineLib).Length / 1MB
+          Write-Host "✓ Engine library built: $([math]::Round($size, 2)) MB" -ForegroundColor Green
+        } else {
+          Write-Host "✗ Engine library not found!" -ForegroundColor Red
+          exit 1
+        }
+      shell: pwsh
+    
+    - name: Upload Engine Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: engine-lib
+        path: |
+          Engine/${{ env.BUILD_TYPE }}/DarkThumbsEngine.lib
+          Engine/${{ env.BUILD_TYPE }}/DarkThumbsEngine.pdb
+        retention-days: 7
+
+  test-engine:
+    name: Test Engine Library
+    needs: build-engine
+    runs-on: windows-2022
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+    
+    - name: Download Engine Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: engine-lib
+        path: Engine/${{ env.BUILD_TYPE }}
+    
+    - name: Build Engine Tests
+      run: |
+        msbuild Engine/Tests/EngineTests.vcxproj `
+          /p:Configuration=${{ env.BUILD_TYPE }} `
+          /p:Platform=${{ env.PLATFORM }} `
+          /m `
+          /v:minimal
+      shell: pwsh
+    
+    - name: Prepare Test Data
+      run: |
+        # Ensure test files exist
+        if (-not (Test-Path "tests/test-images")) {
+          New-Item -ItemType Directory -Path "tests/test-images" -Force
+          Write-Host "Created test-images directory" -ForegroundColor Yellow
+        }
+        if (-not (Test-Path "test-archives")) {
+          Write-Host "Warning: test-archives directory not found" -ForegroundColor Yellow
+        }
+      shell: pwsh
+    
+    - name: Run Engine Tests
+      run: |
+        cd Engine/Tests/${{ env.BUILD_TYPE }}
+        .\EngineTests.exe
+      shell: pwsh
+      continue-on-error: true
+      id: run-tests
+    
+    - name: Check Test Results
+      run: |
+        if ($env:TEST_EXIT_CODE -eq 0) {
+          Write-Host "✓ All Engine tests passed!" -ForegroundColor Green
+        } else {
+          Write-Host "✗ Engine tests failed with exit code: $env:TEST_EXIT_CODE" -ForegroundColor Red
+          exit 1
+        }
+      env:
+        TEST_EXIT_CODE: ${{ steps.run-tests.outcome == 'success' && 0 || 1 }}
+      shell: pwsh
+
+  build-cbxshell:
+    name: Build CBXShell Extension
+    needs: build-engine
+    runs-on: windows-2022
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+    
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v2
+    
+    - name: Restore NuGet packages
+      run: nuget restore CBXShell.sln
+    
+    - name: Download Engine Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: engine-lib
+        path: Engine/${{ env.BUILD_TYPE }}
+    
+    - name: Build CBXShell Solution
+      run: |
+        msbuild CBXShell.sln `
+          /p:Configuration=${{ env.BUILD_TYPE }} `
+          /p:Platform=${{ env.PLATFORM }} `
+          /m `
+          /v:minimal `
+          /p:TreatWarningsAsErrors=true
+      shell: pwsh
+    
+    - name: Verify Build Outputs
+      run: |
+        $outputs = @(
+          @{Name="CBXShell.dll"; Path="x64/${{ env.BUILD_TYPE }}/CBXShell.dll"},
+          @{Name="CBXManager.exe"; Path="x64/${{ env.BUILD_TYPE }}/CBXManager.exe"}
+        )
+        
+        $allFound = $true
+        foreach ($output in $outputs) {
+          if (Test-Path $output.Path) {
+            $size = (Get-Item $output.Path).Length / 1MB
+            Write-Host "✓ $($output.Name): $([math]::Round($size, 2)) MB" -ForegroundColor Green
+          } else {
+            Write-Host "✗ $($output.Name) not found!" -ForegroundColor Red
+            $allFound = $false
+          }
+        }
+        
+        if (-not $allFound) { exit 1 }
+      shell: pwsh
+    
+    - name: Upload CBXShell Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cbxshell-binaries
+        path: |
+          x64/${{ env.BUILD_TYPE }}/CBXShell.dll
+          x64/${{ env.BUILD_TYPE }}/CBXShell.pdb
+          x64/${{ env.BUILD_TYPE }}/CBXManager.exe
+          x64/${{ env.BUILD_TYPE }}/CBXManager.pdb
+        retention-days: 30
+
+  code-analysis:
+    name: Static Code Analysis
+    runs-on: windows-2022
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Run clang-format check
+      run: |
+        Write-Host "Code formatting check placeholder" -ForegroundColor Cyan
+        # TODO: Add clang-format validation
+      shell: pwsh
+      continue-on-error: true
+    
+    - name: Check for common issues
+      run: |
+        Write-Host "Running basic code checks..." -ForegroundColor Cyan
+        
+        # Check for debug output in release code
+        $debugPrints = Select-String -Path "CBXShell/*.cpp","Engine/**/*.cpp" -Pattern "OutputDebugString|printf|cout" -Exclude "*test*"
+        if ($debugPrints) {
+          Write-Host "Warning: Found debug output statements" -ForegroundColor Yellow
+        }
+        
+        # Check for hardcoded paths
+        $hardcodedPaths = Select-String -Path "CBXShell/*.cpp","Engine/**/*.cpp" -Pattern 'C:\\|D:\\' -Exclude "*test*","*path*"
+        if ($hardcodedPaths) {
+          Write-Host "Warning: Found hardcoded paths" -ForegroundColor Yellow
+        }
+        
+        Write-Host "✓ Code analysis complete" -ForegroundColor Green
+      shell: pwsh
+
+  build-summary:
+    name: Build Summary
+    needs: [build-engine, test-engine, build-cbxshell, code-analysis]
+    runs-on: windows-2022
+    if: always()
+    
+    steps:
+    - name: Generate Summary
+      run: |
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host "    DarkThumbs Build Summary" -ForegroundColor Cyan
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host ""
+        
+        $status = @{
+          "Engine Build" = "${{ needs.build-engine.result }}"
+          "Engine Tests" = "${{ needs.test-engine.result }}"
+          "CBXShell Build" = "${{ needs.build-cbxshell.result }}"
+          "Code Analysis" = "${{ needs.code-analysis.result }}"
+        }
+        
+        foreach ($job in $status.GetEnumerator()) {
+          $color = switch ($job.Value) {
+            "success" { "Green" }
+            "failure" { "Red" }
+            "skipped" { "Yellow" }
+            default { "Gray" }
+          }
+          $icon = if ($job.Value -eq "success") { "✓" } else { "✗" }
+          Write-Host "$icon $($job.Key): $($job.Value)" -ForegroundColor $color
+        }
+        
+        Write-Host ""
+        Write-Host "========================================" -ForegroundColor Cyan
+      shell: pwsh
+    
+    - name: Check Overall Status
+      run: |
+        $allSuccess = @(
+          "${{ needs.build-engine.result }}",
+          "${{ needs.test-engine.result }}",
+          "${{ needs.build-cbxshell.result }}"
+        ) -notcontains "failure"
+        
+        if (-not $allSuccess) {
+          Write-Host "Build pipeline failed!" -ForegroundColor Red
+          exit 1
+        }
+        Write-Host "Build pipeline succeeded!" -ForegroundColor Green
+      shell: pwsh
