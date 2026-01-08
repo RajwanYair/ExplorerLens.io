@@ -191,8 +191,8 @@
     <!-- Document & Font Support (Sprint 9 Phase 1) -->
     <ClCompile Include="document_thumbnail.cpp" />
     <ClCompile Include="font_preview.cpp" />
-    <!-- Engine Integration (Sprint 11 - v5.3.0) -->
-    <ClCompile Include="EngineAdapter.cpp" />
+    <!-- Engine Integration (Sprint 11 - v5.3.0) - DISABLED until Engine is complete -->
+    <!-- <ClCompile Include="EngineAdapter.cpp" /> -->
     <!-- External Library Wrappers (v5.2+) -->
     <!-- <ClCompile Include="libarchive_wrapper.cpp" /> -->
     <!-- Disabled until libarchive is built -->
@@ -229,8 +229,8 @@
     <!-- Document & Font Support (Sprint 9 Phase 1) -->
     <ClInclude Include="document_thumbnail.h" />
     <ClInclude Include="font_preview.h" />
-    <!-- Engine Integration (Sprint 11 - v5.3.0) -->
-    <ClInclude Include="EngineAdapter.h" />
+    <!-- Engine Integration (Sprint 11 - v5.3.0) - DISABLED until Engine is complete -->
+    <!-- <ClInclude Include="EngineAdapter.h" /> -->
     <!-- External Library Wrappers (v5.2+) -->
     <ClInclude Include="libarchive_wrapper.h" />
     <!-- Phase 10 Infrastructure (Code Quality & Performance) -->

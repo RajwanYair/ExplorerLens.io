@@ -11,8 +11,9 @@ HRESULT CCBXShell::FinalConstruct(void) {
 
   m_cbx.LoadRegistrySettings();
 
-  // Initialize Engine adapter (v5.3.0 - ACTIVE)
+  // Initialize Engine adapter (v5.3.0 - TEMPORARILY DISABLED until Engine is complete)
   m_useEngine = false; // Default to legacy fallback
+  /*
   try {
     m_engineAdapter = std::make_unique<DarkThumbs::EngineAdapter>();
     if (m_engineAdapter->Initialize()) {
@@ -26,6 +27,7 @@ HRESULT CCBXShell::FinalConstruct(void) {
       std::string("Engine adapter exception: ") + ex.what());
     m_useEngine = false; // Fallback to legacy on exception
   }
+  */
 
   return S_OK;
 }
@@ -34,10 +36,12 @@ void CCBXShell::FinalRelease(void) {
   ATLTRACE("CCBXShell::FinalRelease\n");
   
   // Shutdown Engine adapter
+  /*
   if (m_engineAdapter) {
     m_engineAdapter->Shutdown();
     m_engineAdapter.reset();
   }
+  */
   
   DT_LOG_INFO(DarkThumbs::LogCategory::COM, "CCBXShell COM object released");
 }
@@ -56,7 +60,8 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
   *phBmpThumbnail = nullptr;
   *pdwAlpha = WTSAT_ARGB; // Use alpha channel for modern Windows
 
-  // Try Engine path first (v5.3.0)
+  // Try Engine path first (v5.3.0 - TEMPORARILY DISABLED)
+  /*
   if (m_useEngine && m_engineAdapter && m_engineAdapter->IsInitialized()) {
     // Use new Engine architecture
     HRESULT hr = m_engineAdapter->GenerateThumbnail(
@@ -69,11 +74,9 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
     if (SUCCEEDED(hr)) {
       return hr;
     }
-    
-    // Fallback to legacy if Engine fails
-    DT_LOG_WARNING(DarkThumbs::LogCategory::ENGINE, 
-      "Engine thumbnail failed, falling back to legacy");
+    // Fall through to legacy on Engine failure
   }
+  */
 
   // Legacy path (existing implementation)
   SIZE size = {static_cast<LONG>(cx), static_cast<LONG>(cx)};
