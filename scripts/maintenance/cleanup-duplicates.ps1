@@ -33,25 +33,25 @@ Write-Host "========================================`n" -ForegroundColor Cyan
 # Define duplicates to remove/archive
 $duplicatesToArchive = @(
     @{
-        Path = "scripts/install/Install-DarkThumbs.ps1"
-        Reason = "Superseded by scripts/install.ps1"
+        Path        = "scripts/install/Install-DarkThumbs.ps1"
+        Reason      = "Superseded by scripts/install.ps1"
         ArchivePath = "scripts/install/_archive/Install-DarkThumbs.ps1.old"
     },
     @{
-        Path = "scripts/install/install-x64.ps1"
-        Reason = "Superseded by scripts/install.ps1"
+        Path        = "scripts/install/install-x64.ps1"
+        Reason      = "Superseded by scripts/install.ps1"
         ArchivePath = "scripts/install/_archive/install-x64.ps1.old"
     },
     @{
-        Path = "scripts/install/uninstall-x64.ps1"
-        Reason = "Use scripts/install.ps1 -Unregister instead"
+        Path        = "scripts/install/uninstall-x64.ps1"
+        Reason      = "Use scripts/install.ps1 -Unregister instead"
         ArchivePath = "scripts/install/_archive/uninstall-x64.ps1.old"
     }
 )
 
 $documentationToConsolidate = @(
     @{
-        Path = "docs/QUICK_SETUP.md"
+        Path   = "docs/QUICK_SETUP.md"
         Reason = "Content merged into INSTALLATION_READY.md"
         Action = "Review and delete if no unique content"
     }
