@@ -38,8 +38,7 @@ if (-not (Test-Path "x64\Release\UnRAR64.dll")) {
     if (Test-Path "CBXShell\UnRAR64.dll") {
         Copy-Item "CBXShell\UnRAR64.dll" "x64\Release\" -Force
         Write-Host "  UnRAR64.dll copied to Release directory" -ForegroundColor Green
-    }
-    else {
+    } else {
         Write-Host "  [WARNING] UnRAR64.dll not found" -ForegroundColor Yellow
         Write-Host "  RAR archive support may not work" -ForegroundColor Yellow
     }
@@ -57,8 +56,7 @@ Start-Process -FilePath "regsvr32" -ArgumentList "/s", "/u", "`"$InstallDir\CBXS
 Start-Process -FilePath "regsvr32" -ArgumentList "/s", "/u", "x64\Release\CBXShell.dll" -Wait -NoNewWindow -ErrorAction SilentlyContinue
 if (Test-Path "$InstallDir\CBXShell.dll") {
     Write-Host "  Previous version unregistered" -ForegroundColor White
-}
-else {
+} else {
     Write-Host "  No previous version found" -ForegroundColor White
 }
 
@@ -67,8 +65,7 @@ Write-Host "[3/8] Creating installation directory..." -ForegroundColor Green
 if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
     Write-Host "  Created: $InstallDir" -ForegroundColor White
-}
-else {
+} else {
     Write-Host "  Directory exists: $InstallDir" -ForegroundColor White
 }
 
@@ -79,8 +76,7 @@ Write-Host "[4/8] Copying files to installation directory..." -ForegroundColor G
 Copy-Item "x64\Release\CBXShell.dll" "$InstallDir\" -Force
 if ($?) {
     Write-Host "  CBXShell.dll installed" -ForegroundColor White
-}
-else {
+} else {
     Write-Host "  [ERROR] Failed to copy CBXShell.dll" -ForegroundColor Red
     Start-Process explorer.exe
     Read-Host "Press Enter to exit"
@@ -104,39 +100,40 @@ if (Test-Path "x64\Release\CBXManager.exe") {
 }
 
 Write-Host ""
-Write-Host "[5/8] Registering CBXShell.dll (64-bit COM Server)..." -ForegroundColor Green
-Push-Location $InstallDir
+Write-Host "[5/8] Registering CBXShell.dll (64-bit COM Server) from Program Files..." -ForegroundColor Green
 
-# Verify dependencies
-if (-not (Test-Path "CBXShell.dll")) {
+# Verify DLL exists in Program Files
+$DllPath = Join-Path $InstallDir "CBXShell.dll"
+if (-not (Test-Path $DllPath)) {
     Write-Host "  [ERROR] CBXShell.dll not found in install directory!" -ForegroundColor Red
-    Pop-Location
+    Write-Host "  Expected: $DllPath" -ForegroundColor Yellow
     Start-Process explorer.exe
     Read-Host "Press Enter to exit"
     exit 1
 }
 
-if (-not (Test-Path "UnRAR64.dll")) {
+# Verify UnRAR dependency
+$UnRarPath = Join-Path $InstallDir "UnRAR64.dll"
+if (-not (Test-Path $UnRarPath)) {
     Write-Host "  [WARNING] UnRAR64.dll not found - RAR support will not work" -ForegroundColor Yellow
 }
 
-# Register the DLL
-$RegProcess = Start-Process -FilePath "regsvr32" -ArgumentList "/s", "CBXShell.dll" -Wait -PassThru -NoNewWindow
+Write-Host "  DLL Location: $DllPath" -ForegroundColor Gray
+
+# Register the DLL using full path from Program Files
+$RegProcess = Start-Process -FilePath "regsvr32" -ArgumentList "/s", "`"$DllPath`"" -Wait -PassThru -NoNewWindow
 if ($RegProcess.ExitCode -eq 0) {
-    Write-Host "  CBXShell.dll registered successfully" -ForegroundColor White
-}
-else {
-    Write-Host "  [ERROR] DLL registration failed!" -ForegroundColor Red
+    Write-Host "  CBXShell.dll registered successfully from Program Files" -ForegroundColor White
+} else {
+    Write-Host "  [ERROR] DLL registration failed (Exit code: $($RegProcess.ExitCode))" -ForegroundColor Red
     Write-Host ""
-    Write-Host "  Trying with full path..." -ForegroundColor Yellow
-    Start-Process -FilePath "regsvr32" -ArgumentList "`"$InstallDir\CBXShell.dll`"" -Wait -NoNewWindow
+    Write-Host "  Trying interactive registration..." -ForegroundColor Yellow
+    Start-Process -FilePath "regsvr32" -ArgumentList "`"$DllPath`"" -Wait -NoNewWindow
     Write-Host ""
-    Pop-Location
     Start-Process explorer.exe
     Read-Host "Press Enter to exit"
     exit 1
 }
-Pop-Location
 
 Write-Host ""
 Write-Host "[6/8] Clearing thumbnail cache..." -ForegroundColor Green

@@ -2488,6 +2488,12 @@ namespace __cbx
 			}
 		}
 
+		// Get current file path (for Engine integration v5.3.0)
+		const wchar_t* GetFilePath() const
+		{
+			return m_cbxFile;
+		}
+
 #ifdef _DEBUG
 	public:
 		void debug_SetSort(BOOL bS = TRUE) { m_bSort = bS; }

@@ -5,9 +5,11 @@
 
 #Requires -RunAsAdministrator
 
+param(
+    [string]$InstallDir = "$env:ProgramFiles\DarkThumbs"
+)
+
 $ErrorActionPreference = "Stop"
-$rootDir = $PSScriptRoot
-$dllPath = Join-Path $rootDir "CBXShell\x64\Release\CBXShell.dll"
 
 Write-Host "`n+====================================================+" -ForegroundColor Cyan
 Write-Host "|    DarkThumbs v5.0 Uninstallation Script         |" -ForegroundColor Cyan
@@ -22,30 +24,41 @@ if (-not $isAdmin) {
     exit 1
 }
 
+# Check if installed in Program Files
+$DllPath = Join-Path $InstallDir "CBXShell.dll"
+$isInstalled = Test-Path $DllPath
+
 # Check if registered
 $regPath = "HKLM:\SOFTWARE\Classes\CLSID\{7D8A33DE-5C89-4508-A228-C05F4DCE0C99}"
 $isRegistered = Test-Path $regPath
 
-if (-not $isRegistered) {
-    Write-Host "DarkThumbs is not currently registered." -ForegroundColor Yellow
+if (-not $isRegistered -and -not $isInstalled) {
+    Write-Host "DarkThumbs is not currently registered or installed." -ForegroundColor Yellow
     Write-Host "Nothing to uninstall.`n" -ForegroundColor Green
     exit 0
 }
 
-Write-Host "Found registered DarkThumbs installation" -ForegroundColor Yellow
-Write-Host "Unregistering CBXShell.dll from Windows..." -ForegroundColor Yellow
+if ($isInstalled) {
+    Write-Host "Found DarkThumbs installation at: $InstallDir" -ForegroundColor Yellow
+}
+
+if ($isRegistered) {
+    Write-Host "Found registered DarkThumbs COM server" -ForegroundColor Yellow
+}
+
+Write-Host "`nUnregistering CBXShell.dll from Windows..." -ForegroundColor Yellow
 
 try {
     # Use regsvr32 to unregister the DLL
     $regsvr32 = Join-Path $env:SystemRoot "System32\regsvr32.exe"
     
-    # Try with the DLL file if it exists
-    if (Test-Path $dllPath) {
-        $arguments = @("/u", "/s", "`"$dllPath`"")
+    # Try with the DLL file from Program Files if it exists
+    if (Test-Path $DllPath) {
+        $arguments = @("/u", "/s", "`"$DllPath`"")
         $process = Start-Process -FilePath $regsvr32 -ArgumentList $arguments -Wait -PassThru -NoNewWindow
         
         if ($process.ExitCode -eq 0) {
-            Write-Host "  [OK] DLL unregistered successfully" -ForegroundColor Green
+            Write-Host "  [OK] DLL unregistered successfully from Program Files" -ForegroundColor Green
         } else {
             Write-Host "  [WARNING] regsvr32 returned exit code $($process.ExitCode)" -ForegroundColor Yellow
         }
@@ -64,6 +77,18 @@ try {
     Remove-Item $thumbcache -Force -ErrorAction SilentlyContinue
     Write-Host "  [OK] Thumbnail cache cleared" -ForegroundColor Green
     
+    # Remove installation directory
+    if (Test-Path $InstallDir) {
+        Write-Host "`nRemoving installation directory..." -ForegroundColor Yellow
+        try {
+            Remove-Item -Path $InstallDir -Recurse -Force -ErrorAction Stop
+            Write-Host "  [OK] Installation directory removed: $InstallDir" -ForegroundColor Green
+        } catch {
+            Write-Host "  [WARNING] Could not remove installation directory: $_" -ForegroundColor Yellow
+            Write-Host "  You may need to manually delete: $InstallDir" -ForegroundColor Yellow
+        }
+    }
+    
     # Restart Windows Explorer
     Write-Host "`nRestarting Windows Explorer..." -ForegroundColor Yellow
     
@@ -77,11 +102,11 @@ try {
     Write-Host "|      Uninstallation Successful!                   |" -ForegroundColor Green
     Write-Host "+====================================================+" -ForegroundColor Green
     
-    Write-Host "`nDarkThumbs has been completely removed from Windows.`n" -ForegroundColor Cyan
+    Write-Host "`nDarkThumbs has been completely removed from Windows." -ForegroundColor Cyan
+    Write-Host "Installation directory: $InstallDir`n" -ForegroundColor Gray
     
     exit 0
-}
-catch {
+} catch {
     Write-Host "`n+====================================================+" -ForegroundColor Red
     Write-Host "|      Uninstallation Failed!                       |" -ForegroundColor Red
     Write-Host "+====================================================+" -ForegroundColor Red

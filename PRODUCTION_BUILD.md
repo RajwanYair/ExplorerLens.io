@@ -7,12 +7,14 @@ Last verified: January 7, 2026
 ## Production/Release Requirements
 
 **Release builds must be absolutely clean:**
+
 - ✅ 0 Warnings
 - ✅ 0 Errors
 - ✅ No workarounds or ignored warnings
 - ✅ Proper runtime library linkage
 
 **Debug builds acceptance criteria:**
+
 - Warnings are acceptable for Debug configuration
 - Focus is on functionality, not production quality
 - Runtime conflicts with external libraries are expected (using Release libs in Debug)
@@ -36,6 +38,7 @@ msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m
 ```
 
 **Expected output:**
+
 ```
 Build succeeded.
     0 Warning(s)
@@ -46,6 +49,7 @@ Time Elapsed 00:00:XX.XX
 ## Build Configuration
 
 ### Release Configuration (Production)
+
 - **Runtime Library**: `/MD` (Multi-threaded DLL)
 - **Optimization**: Full (`/O2`, `/Ot`, `/Oy`, `/GL`, `/LTCG`)
 - **CPU Extensions**: AVX2, Spectre mitigation
@@ -54,6 +58,7 @@ Time Elapsed 00:00:XX.XX
 - **Output**: `x64\Release\CBXShell.dll` (~828 KB)
 
 ### External Library Requirements
+
 - **zlib 1.3.1**: Built with `/MT` → Ignored via `/NODEFAULTLIB:LIBCMT`
 - **lz4 1.10.0**: Built with `/MT` → Ignored via `/NODEFAULTLIB:LIBCMT`
 - **zstd 1.5.7**: Built with `/MD` ✅ (matches CBXShell)
@@ -72,6 +77,7 @@ cd ..\..\..
 ```
 
 **Or use the automated script:**
+
 ```powershell
 .\Build-Production-SlowMachine.ps1
 ```
@@ -86,6 +92,7 @@ msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /t:Rebuild /m
 ### Step 3: Verify Zero Warnings
 
 Check the build output - it **MUST** show:
+
 ```
 Build succeeded.
     0 Warning(s)
@@ -97,12 +104,15 @@ If you see **ANY warnings**, investigate and fix them. Do not use `/NODEFAULTLIB
 ## VS Code Integration
 
 ### Build Tasks
+
 - **Build Release (Production - Zero Warnings)**: Incremental build with VS Code problem matcher
 - **Rebuild Release (Clean Build)**: Full clean rebuild
 - **Build with VS Code Monitoring**: For long-running external library builds
 
 ### Problem Matchers
+
 All production build tasks use `$msCompile` problem matcher:
+
 - Errors appear in VS Code Problems panel
 - Click to jump to source location
 - No need for PowerShell-level monitoring
@@ -129,6 +139,7 @@ This tells the linker to ignore the static runtime library when linking against 
 ### Debug Configuration
 
 Debug uses `/MTd` (static debug runtime) which conflicts with Release-built external libraries. This is **acceptable** because:
+
 - Debug is not for production deployment
 - Warnings are allowed in Debug
 - Rebuilding all external libraries with `/MTd` is unnecessary overhead
@@ -140,6 +151,7 @@ Debug uses `/MTd` (static debug runtime) which conflicts with Release-built exte
 **Solution**: Already handled via `<IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>`
 
 If this warning appears, verify:
+
 1. Release configuration uses `/MD` runtime
 2. `IgnoreSpecificDefaultLibraries` includes `LIBCMT`
 
@@ -148,6 +160,7 @@ If this warning appears, verify:
 **Cause**: Code formatter breaks MIDL command across lines
 
 **Solution**: Keep MIDL command on single line in `CBXShell.vcxproj`:
+
 ```xml
 <Command>midl.exe /nologo /char signed /env x64 /Oicf /h "CBXShell.h" /iid "CBXShell_i.c" /tlb ".\CBXShell.tlb" /target "NT60" "%(FullPath)"</Command>
 ```
@@ -157,6 +170,7 @@ If this warning appears, verify:
 **Cause**: Build directory cleaned or library not built
 
 **Solution**:
+
 ```powershell
 cd external\compression\minizip-ng-4.0.10
 .\build-minizip-manual.ps1

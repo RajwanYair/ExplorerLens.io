@@ -36,18 +36,18 @@ function Build-MinizipWithMT {
     
     $flags = if ($Config -eq "Release") {
         @{
-            Runtime = "/MT"
-            Opt = "/O2"
-            Defines = "NDEBUG"
-            Output = "minizip.lib"
+            Runtime  = "/MT"
+            Opt      = "/O2"
+            Defines  = "NDEBUG"
+            Output   = "minizip.lib"
             BuildDir = "build-manual"
         }
     } else {
         @{
-            Runtime = "/MTd"
-            Opt = "/Od /Zi"
-            Defines = "_DEBUG"
-            Output = "minizipd.lib"
+            Runtime  = "/MTd"
+            Opt      = "/Od /Zi"
+            Defines  = "_DEBUG"
+            Output   = "minizipd.lib"
             BuildDir = "build-manual-debug"
         }
     }
@@ -109,7 +109,7 @@ function Build-MinizipWithMT {
         lib.exe /nologo /OUT:$($flags.Output) $objFiles
         
         if (Test-Path $flags.Output) {
-            $size = [math]::Round((Get-Item $flags.Output).Length/1KB, 2)
+            $size = [math]::Round((Get-Item $flags.Output).Length / 1KB, 2)
             Write-Host "  ✓ minizip-ng $Config built: $($flags.Output) ($size KB) with $($flags.Runtime)" -ForegroundColor Green
             
             # Verify runtime
@@ -133,8 +133,7 @@ function Build-MinizipWithMT {
         
         Write-Warning "minizip-ng $Config build failed"
         return $false
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 }
@@ -144,18 +143,18 @@ function Build-ZstdWithMT {
     
     $flags = if ($Config -eq "Release") {
         @{
-            Runtime = "/MT"
-            Opt = "/O2"
-            Defines = "NDEBUG"
-            Output = "zstd_static.lib"
+            Runtime  = "/MT"
+            Opt      = "/O2"
+            Defines  = "NDEBUG"
+            Output   = "zstd_static.lib"
             BuildDir = "build-manual"
         }
     } else {
         @{
-            Runtime = "/MTd"
-            Opt = "/Od /Zi"
-            Defines = "_DEBUG"
-            Output = "zstd_staticd.lib"
+            Runtime  = "/MTd"
+            Opt      = "/Od /Zi"
+            Defines  = "_DEBUG"
+            Output   = "zstd_staticd.lib"
             BuildDir = "build-manual-debug"
         }
     }
@@ -209,14 +208,13 @@ function Build-ZstdWithMT {
         lib.exe /nologo /OUT:$($flags.Output) $objFiles
         
         if (Test-Path $flags.Output) {
-            $size = [math]::Round((Get-Item $flags.Output).Length/1KB, 2)
+            $size = [math]::Round((Get-Item $flags.Output).Length / 1KB, 2)
             Write-Host "  ✓ zstd $Config built: $($flags.Output) ($size KB) with $($flags.Runtime)" -ForegroundColor Green
             return $true
         }
         
         return $false
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 }

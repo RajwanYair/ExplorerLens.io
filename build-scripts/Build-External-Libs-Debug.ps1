@@ -56,8 +56,7 @@ function Build-ZlibDebug {
         
         Write-Warning "zlib Debug build failed"
         return $false
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 }
@@ -92,8 +91,7 @@ function Build-Lz4Debug {
         
         Write-Warning "lz4 Debug build failed"
         return $false
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 }
@@ -152,8 +150,7 @@ function Build-ZstdDebug {
         
         Write-Warning "zstd Debug build failed"
         return $false
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 }
@@ -214,8 +211,7 @@ function Build-MinizipDebug {
         
         Write-Warning "minizip-ng Debug build failed"
         return $false
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 }
@@ -251,27 +247,26 @@ function Build-LibWebPDebug {
         cmake --build . --config Debug --parallel
         
         if ((Test-Path "Debug\webp.lib") -and (Test-Path "Debug\sharpyuv.lib")) {
-            $webpSize = Get-Item 'Debug\webp.lib' | ForEach-Object { [math]::Round($_.Length/1KB, 2) }
-            $sharpyuvSize = Get-Item 'Debug\sharpyuv.lib' | ForEach-Object { [math]::Round($_.Length/1KB, 2) }
+            $webpSize = Get-Item 'Debug\webp.lib' | ForEach-Object { [math]::Round($_.Length / 1KB, 2) }
+            $sharpyuvSize = Get-Item 'Debug\sharpyuv.lib' | ForEach-Object { [math]::Round($_.Length / 1KB, 2) }
             Write-Host "  ✓ libwebp Debug built: webp.lib ($webpSize KB), sharpyuv.lib ($sharpyuvSize KB)" -ForegroundColor Green
             return $true
         }
         
         Write-Warning "libwebp Debug build failed"
         return $false
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 }
 
 # Build all libraries
 $results = @{
-    "zlib" = Build-ZlibDebug
-    "lz4" = Build-Lz4Debug
-    "zstd" = Build-ZstdDebug
+    "zlib"       = Build-ZlibDebug
+    "lz4"        = Build-Lz4Debug
+    "zstd"       = Build-ZstdDebug
     "minizip-ng" = Build-MinizipDebug
-    "libwebp" = Build-LibWebPDebug
+    "libwebp"    = Build-LibWebPDebug
 }
 
 # Summary

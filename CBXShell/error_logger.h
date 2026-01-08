@@ -29,7 +29,7 @@ enum class LogLevel {
   LVL_CRITICAL = 4
 };
 
-enum class LogCategory { GENERAL, GPU, CACHE, DECODER, COM, PERFORMANCE };
+enum class LogCategory { GENERAL, GPU, CACHE, DECODER, COM, PERFORMANCE, ENGINE };
 
 class Logger {
 private:
