@@ -185,7 +185,7 @@ foreach ($file in $filesToCopy) {
         Copy-Item -Path $sourcePath -Destination $destPath -Force
         Write-Status "  Copied $file" "SUCCESS"
     } catch {
-        Write-Status "  Error copying $file: $($_.Exception.Message)" "ERROR"
+        Write-Status "  Error copying ${file}: $($_.Exception.Message)" "ERROR"
         exit 1
     }
 }
