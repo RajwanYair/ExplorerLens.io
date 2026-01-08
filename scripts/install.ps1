@@ -62,6 +62,19 @@ function Write-Status {
     }
 }
 
+# Helper function to safely restart Explorer
+function Restart-Explorer {
+    param([bool]$Wait = $true)
+    Write-Status "Stopping Windows Explorer..." "INFO"
+    Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+    if ($Wait) {
+        Start-Sleep -Seconds 2
+        Write-Status "Starting Windows Explorer..." "INFO"
+        Start-Process explorer.exe
+        Start-Sleep -Seconds 1
+    }
+}
+
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "DarkThumbs Installation Script" -ForegroundColor Cyan
 if ($DryRun) {
@@ -126,6 +139,28 @@ if ($Unregister) {
 Write-Status "Installing $ProductName $Configuration build..." "INFO"
 Write-Status "Source: $SourceDir"
 Write-Status "Target: $InstallDir"
+
+# Unregister existing DLL to release file lock
+if (-not $DryRun) {
+    $existingDll = Join-Path $InstallDir "CBXShell.dll"
+    if (Test-Path $existingDll) {
+        Write-Status "`nUnregistering existing COM DLL..." "INFO"
+        try {
+            $regsvr32 = Join-Path $env:SystemRoot "System32\regsvr32.exe"
+            $proc = Start-Process -FilePath $regsvr32 -ArgumentList "/u", "/s", "`"$existingDll`"" -Wait -PassThru -NoNewWindow -ErrorAction SilentlyContinue
+            if ($proc.ExitCode -eq 0) {
+                Write-Status "Existing DLL unregistered" "SUCCESS"
+            }
+        } catch {
+            Write-Status "Note: Could not unregister existing DLL (may not be registered)" "INFO"
+        }
+        
+        # Stop Explorer to release file lock
+        Write-Status "Stopping Explorer to release file locks..." "INFO"
+        Restart-Explorer -Wait $false
+        Start-Sleep -Seconds 2
+    }
+}
 
 # Verify source files exist
 $requiredFiles = @(
@@ -254,6 +289,15 @@ if ($DryRun) {
 Write-Host "`n========================================" -ForegroundColor Green
 Write-Host "INSTALLATION COMPLETE" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
+
+# Restart Explorer
+if (-not $DryRun) {
+    Write-Status "Restarting Windows Explorer..." "INFO"
+    Start-Process explorer.exe
+    Start-Sleep -Seconds 1
+    Write-Status "Explorer restarted" "SUCCESS"
+}
+
 Write-Host "Installation directory:" -ForegroundColor Cyan
 Write-Host "  $InstallDir`n" -ForegroundColor White
 
@@ -264,10 +308,8 @@ Get-ChildItem $InstallDir | ForEach-Object {
 }
 
 Write-Host "`nNext steps:" -ForegroundColor Yellow
-Write-Host "  1. Restart Windows Explorer for shell extension to activate" -ForegroundColor White
-Write-Host "     Run: taskkill /f /im explorer.exe && start explorer.exe" -ForegroundColor Gray
-Write-Host "  2. Test thumbnail generation on .cbz/.cbr files" -ForegroundColor White
-Write-Host "  3. Run CBXManager.exe to configure settings" -ForegroundColor White
+Write-Host "  1. Test thumbnail generation on .cbz/.cbr files" -ForegroundColor White
+Write-Host "  2. Run CBXManager.exe to configure settings" -ForegroundColor White
 
 Write-Host "`nTo uninstall:" -ForegroundColor Yellow
 Write-Host "  .\scripts\install.ps1 -Unregister" -ForegroundColor Gray

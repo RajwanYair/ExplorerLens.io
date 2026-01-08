@@ -66,6 +66,84 @@ regsvr32 /u /s x64\Release\CBXShell.dll
 - Ensure build succeeds
 - Update documentation if needed
 
+## Project Organization
+
+### Avoiding Duplicate Files
+
+**Before creating new files**, search for existing ones:
+```powershell
+# Search for similar scripts
+Get-ChildItem -Recurse -Filter "*install*.ps1"
+
+# Search for similar docs
+Get-ChildItem docs -Recurse -Filter "*.md" | Select-String "Installation"
+```
+
+### Canonical File Locations
+
+| Purpose | Canonical Path | Notes |
+|---------|---------------|-------|
+| **Main build** | `scripts/build.ps1` | Use this, not build-scripts/build.ps1 |
+| **Installation** | `scripts/install.ps1` | Consolidates all install logic |
+| **Verification** | `scripts/verify-tools.ps1` | Tool detection |
+| **Library builds** | `build-scripts/*.ps1` | Library-specific builds OK |
+| **Updates** | `build-scripts/update-all-libraries.ps1` | Version updates |
+
+### Naming Conventions
+
+**Scripts:**
+- Use lowercase-with-hyphens: `build-library.ps1`, `verify-tools.ps1`
+- Prefix by purpose: `build-*`, `install-*`, `verify-*`, `update-*`
+
+**Documentation:**
+- Major docs: UPPERCASE_WITH_UNDERSCORES: `BUILD_GUIDE.md`
+- Subdirectory docs: lowercase-with-hyphens: `getting-started/installation.md`
+- Session notes: `SESSION_SUMMARY_2026-01-08.md`
+- Sprint notes: `SPRINT12_COMPLETION_REPORT.md`
+
+### Documentation Standards
+
+**Avoid duplicate installation guides**:
+- ✅ `INSTALLATION_READY.md` (root, user-facing)
+- ✅ `docs/getting-started/installation.md` (detailed with troubleshooting)
+- ❌ Don't create `QUICK_SETUP.md`, `INSTALL.md`, etc.
+
+**Link to canonical docs**:
+```markdown
+For detailed troubleshooting, see [Installation Guide](docs/getting-started/installation.md)
+```
+
+### Commit Message Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+```
+
+**Types**: `feat`, `fix`, `refactor`, `docs`, `build`, `chore`
+
+**Examples**:
+```bash
+feat: add dry-run mode to installation script
+fix: resolve COM registration timeout
+refactor(scripts): consolidate duplicate installation scripts
+docs: update build guide with VS 2026 support
+```
+
+### Directory Structure
+
+**Keep:**
+- `scripts/` - Canonical scripts at root
+- `build-scripts/` - Library-specific builds
+- `docs/` - All documentation
+- `docs/archive/` - Historical summaries
+- `docs/development/` - Sprint notes, changelogs
+
+**Avoid:**
+- Duplicate scripts in `scripts/install/*.ps1` (use `scripts/install.ps1`)
+- Multiple guides for same topic (consolidate into one)
+
 ## Bug Reports
 
 Use GitHub Issues with:
