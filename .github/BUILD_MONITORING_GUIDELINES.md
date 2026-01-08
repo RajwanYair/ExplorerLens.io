@@ -1,17 +1,33 @@
 # Build Monitoring Guidelines for Slow Machines
 
-## Problem Statement
+**Last Updated:** January 8, 2026  
+**Status:** 🔴 **MANDATORY** - Required for all AI assistants and developers  
+**Purpose:** Prevent build interruptions on slow machines
 
-On slow machines, AI assistants may interrupt build processes by using the same shell for both execution and monitoring. This leads to:
+---
 
-- Build processes being killed with Ctrl-C
-- `Start-Sleep` commands interrupting compilation
-- Incomplete builds that appear to succeed
-- Wasted time re-running builds
+## ⚠️ Critical Problem
 
-## Best Practices
+On slow machines, builds take longer than expected. The following anti-pattern causes failures:
 
-### ✅ DO: Separate Execution from Monitoring
+```powershell
+# ❌ WRONG - This is what was happening:
+msbuild project.vcxproj        # Start build
+# ... AI waits 3 seconds ...
+^C                              # Interrupt build (Ctrl-C)
+Start-Sleep -Seconds 5          # Try to wait
+Get-Item output.dll             # Check for file that was never built
+```
+
+**Why this fails:**
+1. Build is interrupted mid-compilation
+2. Output files are never created
+3. Monitoring commands run on incomplete build
+4. Time is wasted, must restart entire process
+
+---
+
+## ✅ Correct Approach: Separate Execution from Monitoring
 
 **Execute builds in background:**
 
