@@ -54,10 +54,17 @@ DarkThumbsSetup_x86/
 *.tar.gz
 *.zip
 *.nupkg
-!downloads/*.tar.gz
-!downloads/*.zip
-!downloads/*.nupkg
+!downloads/**/*.tar.gz
+!downloads/**/*.zip
+!downloads/**/*.nupkg
 !tests/**/*.zip
+
+# External library dependencies (downloaded submodules)
+external/**/third_party/
+external/**/build*/
+external/**/install/
+external/**/.git/
+external/**/.github/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

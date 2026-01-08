@@ -33,8 +33,7 @@ $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 if (Test-Path $VsWhere) {
     $VsPath = & $VsWhere -latest -property installationPath
     Write-Host "[OK] Found Visual Studio at: $VsPath" -ForegroundColor Green
-}
-else {
+} else {
     Write-Host "[ERROR] Visual Studio not found" -ForegroundColor Red
     exit 1
 }
@@ -59,16 +58,13 @@ Push-Location $LibjxlDir
 try {
     if (Test-Path ".git") {
         & git submodule update --init --recursive
-    }
-    else {
+    } else {
         Write-Host "[WARNING] Not a git repository, submodules may be missing" -ForegroundColor Yellow
         Write-Host "Continuing anyway - bundled dependencies will be used" -ForegroundColor Yellow
     }
-}
-catch {
+} catch {
     Write-Host "[WARNING] Git submodule init failed: $($_.Exception.Message)" -ForegroundColor Yellow
-}
-finally {
+} finally {
     Pop-Location
 }
 
@@ -76,9 +72,12 @@ finally {
 Write-Host "Configuring libjxl with CMake..." -ForegroundColor Yellow
 Push-Location $BuildDir
 
+# Setup install directory
+$InstallDir = Join-Path $LibjxlDir "install"
+
 try {
     & cmake .. `
-        -G "Visual Studio 17 2022" `
+        -G "Visual Studio 18 2026" `
         -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
         -DCMAKE_INSTALL_PREFIX="$InstallDir" `
@@ -111,13 +110,11 @@ try {
     }
     
     Write-Host "[OK] Build complete" -ForegroundColor Green
-}
-catch {
+} catch {
     Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red
     Pop-Location
     exit 1
-}
-finally {
+} finally {
     Pop-Location
 }
 
@@ -141,8 +138,7 @@ if ((Test-Path $LibPath) -or (Test-Path $LibDecodePath)) {
     Write-Host "  - SKCMS color management" -ForegroundColor White
     Write-Host "  - Bundled Brotli and Highway" -ForegroundColor White
     exit 0
-}
-else {
+} else {
     Write-Host ""
     Write-Host "[ERROR] Build failed - library not found" -ForegroundColor Red
     exit 1
