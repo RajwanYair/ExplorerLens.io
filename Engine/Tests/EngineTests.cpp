@@ -9,6 +9,8 @@
 #include "../Decoders/WebPDecoder.h"
 #include "../Decoders/AVIFDecoder.h"
 #include "../Decoders/ArchiveDecoder.h"
+#include "../Decoders/JXLDecoder.h"
+#include "../Decoders/HEIFDecoder.h"
 #include <iostream>
 #include <cassert>
 
@@ -599,6 +601,59 @@ TEST(TestArchiveDecoder_RegisterWithRegistry) {
 }
 
 //==============================================================================
+// JXL Decoder Tests
+//==============================================================================
+
+TEST(TestJXLDecoder_Create)
+{
+    JXLDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"JXLDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestJXLDecoder_CanDecode)
+{
+    JXLDecoder decoder;
+    
+    ASSERT(decoder.CanDecode(L"image.jxl"));
+    ASSERT(decoder.CanDecode(L"photo.JXL")); // Case insensitive
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(L"archive.zip"));
+    ASSERT(!decoder.CanDecode(nullptr));
+    ASSERT(!decoder.CanDecode(L"noextension"));
+}
+
+//==============================================================================
+// HEIF Decoder Tests
+//==============================================================================
+
+TEST(TestHEIFDecoder_Create)
+{
+    HEIFDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"HEIFDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestHEIFDecoder_CanDecode)
+{
+    HEIFDecoder decoder;
+    
+    ASSERT(decoder.CanDecode(L"image.heif"));
+    ASSERT(decoder.CanDecode(L"photo.heic")); // Apple format
+    ASSERT(decoder.CanDecode(L"iphone.HEIC")); // Case insensitive
+    ASSERT(decoder.CanDecode(L"file.hif"));
+    ASSERT(decoder.CanDecode(L"image.heifs"));
+    ASSERT(decoder.CanDecode(L"photo.heics"));
+    ASSERT(decoder.CanDecode(L"movie.avci"));
+    ASSERT(decoder.CanDecode(L"video.avcs"));
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(L"archive.zip"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+//==============================================================================
 // Main Test Runner
 //==============================================================================
 
@@ -673,6 +728,20 @@ int main()
     RUN_TEST(TestArchiveDecoder_IsArchiveFormat);
     RUN_TEST(TestArchiveDecoder_GetInfo);
     RUN_TEST(TestArchiveDecoder_RegisterWithRegistry);
+    
+    std::wcout << std::endl;
+    
+    // JXL Decoder Tests
+    std::wcout << L"JXL Decoder Tests:" << std::endl;
+    RUN_TEST(TestJXLDecoder_Create);
+    RUN_TEST(TestJXLDecoder_CanDecode);
+    
+    std::wcout << std::endl;
+    
+    // HEIF Decoder Tests
+    std::wcout << L"HEIF Decoder Tests:" << std::endl;
+    RUN_TEST(TestHEIFDecoder_Create);
+    RUN_TEST(TestHEIFDecoder_CanDecode);
     
     // GPU Renderer Tests
     RunGPUTests();
