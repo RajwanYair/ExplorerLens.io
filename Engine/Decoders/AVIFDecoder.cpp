@@ -3,6 +3,7 @@
 // Copyright (c) 2025 DarkThumbs Project
 
 #include "AVIFDecoder.h"
+#include "../Utils/PerformanceProfiler.h"
 #include <shlwapi.h>
 #include <fstream>
 #include <vector>
@@ -87,6 +88,8 @@ bool AVIFDecoder::CanDecode(const wchar_t* filePath) {
 }
 
 HRESULT AVIFDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
+    PROFILE_SCOPE(ProfileComponent::DECODE_AVIF);
+    
     if (!CanDecode(request.filePath)) {
         return E_INVALIDARG;
     }

@@ -3,6 +3,7 @@
 // Copyright (c) 2025 DarkThumbs Project
 
 #include "ImageDecoder.h"
+#include "../Utils/PerformanceProfiler.h"
 #include <shlwapi.h>
 
 #pragma comment(lib, "windowscodecs.lib")
@@ -91,6 +92,8 @@ bool ImageDecoder::CanDecode(const wchar_t* filePath) {
 }
 
 HRESULT ImageDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
+    PROFILE_SCOPE(ProfileComponent::DECODE_IMAGE);
+    
     if (!CanDecode(request.filePath)) {
         return E_INVALIDARG;
     }

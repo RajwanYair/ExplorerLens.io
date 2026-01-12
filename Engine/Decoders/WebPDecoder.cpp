@@ -3,6 +3,7 @@
 // Copyright (c) 2025 DarkThumbs Project
 
 #include "WebPDecoder.h"
+#include "../Utils/PerformanceProfiler.h"
 #include <shlwapi.h>
 #include <fstream>
 #include <vector>
@@ -51,6 +52,8 @@ bool WebPDecoder::CanDecode(const wchar_t* filePath) {
 }
 
 HRESULT WebPDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
+    PROFILE_SCOPE(ProfileComponent::DECODE_WEBP);
+    
     if (!CanDecode(request.filePath)) {
         return E_INVALIDARG;
     }

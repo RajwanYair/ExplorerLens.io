@@ -2,6 +2,7 @@
 // Archive (ZIP/CBZ) thumbnail decoder implementation
 
 #include "ArchiveDecoder.h"
+#include "../Utils/PerformanceProfiler.h"
 #include <algorithm>
 #include <shlwapi.h>
 #include <wincodec.h>
@@ -121,6 +122,8 @@ bool ArchiveDecoder::CanDecode(const wchar_t* filePath) {
 }
 
 HRESULT ArchiveDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
+    PROFILE_SCOPE(ProfileComponent::DECODE_ARCHIVE);
+    
     // Extract first image from archive
     std::vector<unsigned char> imageData;
     std::wstring imageName;
