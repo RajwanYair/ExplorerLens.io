@@ -15,6 +15,21 @@ add_executable(EngineTests
     test_gpu.cpp
 )
 
+# Benchmark executable
+add_executable(EngineBenchmark
+    EngineBenchmark.cpp
+)
+
+target_link_libraries(EngineBenchmark
+    PRIVATE
+        DarkThumbsEngine
+)
+
+target_include_directories(EngineBenchmark
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
+
 target_link_libraries(EngineTests
     PRIVATE
         DarkThumbsEngine

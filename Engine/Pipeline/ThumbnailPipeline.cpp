@@ -3,6 +3,7 @@
 #include "../GPU/D3D11Renderer.h"
 #include "../GPU/GDIRenderer.h"
 #include "../Cache/ThumbnailCache.h"
+#include "../Utils/PerformanceProfiler.h"
 #include <chrono>
 #include <algorithm>
 
@@ -96,6 +97,8 @@ public:
     }
 
     ThumbnailResult GenerateThumbnail(const ThumbnailRequest& request) {
+        PROFILE_SCOPE(ProfileComponent::PIPELINE_TOTAL);
+        
         auto startTime = std::chrono::high_resolution_clock::now();
         
         ThumbnailResult result;

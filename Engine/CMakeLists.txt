@@ -62,6 +62,9 @@ set(ENGINE_HEADERS
     
     # Cache
     Cache/ThumbnailCache.h
+    
+    # Utils
+    Utils/PerformanceProfiler.h
 )
 
 set(ENGINE_SOURCES
@@ -84,6 +87,9 @@ set(ENGINE_SOURCES
     
     # Cache
     Cache/ThumbnailCache.cpp
+    
+    # Utils
+    Utils/PerformanceProfiler.cpp
 )
 
 #==============================================================================
