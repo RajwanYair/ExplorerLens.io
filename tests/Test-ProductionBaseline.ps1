@@ -119,11 +119,11 @@ function Add-TestResult {
     )
     
     $script:TestSuites += [PSCustomObject]@{
-        Suite = $Suite
-        Passed = $Passed
-        Failed = $Failed
+        Suite   = $Suite
+        Passed  = $Passed
+        Failed  = $Failed
         Skipped = $Skipped
-        Notes = $Notes
+        Notes   = $Notes
     }
     
     $script:TotalTests += ($Passed + $Failed + $Skipped)
@@ -160,13 +160,11 @@ function Test-BuildVerification {
                 $failed++
                 Write-Failure "Build verification failed (missing components)"
             }
-        }
-        catch {
+        } catch {
             $failed++
             Write-Failure "Build verification script error: $($_.Exception.Message)"
         }
-    }
-    else {
+    } else {
         $failed++
         Write-Failure "Build verification script not found: $buildScript"
     }
@@ -184,8 +182,7 @@ function Test-BuildVerification {
             $file = Get-Item $output
             $sizeKB = [math]::Round($file.Length / 1KB, 0)
             Write-Success "$output present ($sizeKB KB)"
-        }
-        else {
+        } else {
             $failed++
             Write-Failure "$output missing"
         }
@@ -211,8 +208,7 @@ function Test-COMRegistration {
     if (Test-Path $dllPath) {
         $passed++
         Write-Success "CBXShell.dll found"
-    }
-    else {
+    } else {
         $failed++
         Write-Failure "CBXShell.dll not found"
         Add-TestResult -Suite "COM Registration" -Passed $passed -Failed $failed
@@ -225,13 +221,11 @@ function Test-COMRegistration {
         if ($LASTEXITCODE -eq 0) {
             $passed++
             Write-Success "CBXShell.dll registration successful"
-        }
-        else {
+        } else {
             $failed++
             Write-Failure "CBXShell.dll registration failed (exit code: $LASTEXITCODE)"
         }
-    }
-    catch {
+    } catch {
         $failed++
         Write-Failure "Registration error: $($_.Exception.Message)"
     }
@@ -253,12 +247,10 @@ function Test-COMRegistration {
     if ($extensionsPassed -eq $extensions.Count) {
         $passed++
         Write-Success "All $($extensions.Count) shell extension handlers registered"
-    }
-    elseif ($extensionsPassed -gt 0) {
+    } elseif ($extensionsPassed -gt 0) {
         $passed++
         Write-Warning "$extensionsPassed/$($extensions.Count) shell extension handlers registered"
-    }
-    else {
+    } else {
         $failed++
         Write-Failure "No shell extension handlers found"
     }
@@ -270,8 +262,7 @@ function Test-COMRegistration {
         if ($approved.$clsid) {
             $passed++
             Write-Success "Shell extension approved: $($approved.$clsid)"
-        }
-        else {
+        } else {
             $failed++
             Write-Failure "Shell extension not in approved list"
         }
@@ -299,18 +290,15 @@ function Test-FormatSupport {
             if ($exitCode -eq 0) {
                 Add-TestResult -Suite "Format Support" -Passed 31 -Failed 0 -Notes "All formats tested successfully"
                 Write-Success "Format support validation passed"
-            }
-            else {
+            } else {
                 Add-TestResult -Suite "Format Support" -Passed 0 -Failed 1 -Notes "Format tests failed"
                 Write-Failure "Format support validation failed"
             }
-        }
-        catch {
+        } catch {
             Add-TestResult -Suite "Format Support" -Passed 0 -Failed 1 -Notes "Test script error"
             Write-Failure "Format test error: $($_.Exception.Message)"
         }
-    }
-    else {
+    } else {
         Write-Warning "Format support test script not found, skipping detailed tests"
         
         # Basic format support check
@@ -322,8 +310,7 @@ function Test-FormatSupport {
         if ($testFiles) {
             $passed++
             Write-Success "Test archive directory contains $($testFiles.Count) test files"
-        }
-        else {
+        } else {
             $failed++
             Write-Failure "No test files found in test-archives directory"
         }
@@ -350,18 +337,15 @@ function Test-GPUAcceleration {
             if ($exitCode -eq 0) {
                 Add-TestResult -Suite "GPU Acceleration" -Passed 1 -Failed 0 -Notes "DirectX 11 validated"
                 Write-Success "GPU acceleration verified"
-            }
-            else {
+            } else {
                 Add-TestResult -Suite "GPU Acceleration" -Passed 0 -Failed 1 -Notes "GPU tests failed"
                 Write-Failure "GPU acceleration validation failed"
             }
-        }
-        catch {
+        } catch {
             Add-TestResult -Suite "GPU Acceleration" -Passed 0 -Failed 1 -Notes "Test error"
             Write-Failure "GPU test error: $($_.Exception.Message)"
         }
-    }
-    else {
+    } else {
         Write-Warning "GPU acceleration test script not found"
         Add-TestResult -Suite "GPU Acceleration" -Passed 0 -Failed 0 -Skipped 1 -Notes "Test script missing"
     }
@@ -392,13 +376,11 @@ function Test-PerformanceBaseline {
             if ($loadTimeMs -lt 1000) {
                 $passed++
                 Write-Success "DLL load time: $([math]::Round($loadTimeMs, 2)) ms (acceptable)"
-            }
-            else {
+            } else {
                 $failed++
                 Write-Warning "DLL load time: $([math]::Round($loadTimeMs, 2)) ms (slow)"
             }
-        }
-        catch {
+        } catch {
             # Expected for native DLL
             $passed++
             Write-Info "Native DLL (COM), load time validation skipped"
@@ -410,8 +392,7 @@ function Test-PerformanceBaseline {
     if ($dllSize -lt 5) {
         $passed++
         Write-Success "DLL size: $([math]::Round($dllSize, 2)) MB (optimal)"
-    }
-    else {
+    } else {
         $failed++
         Write-Warning "DLL size: $([math]::Round($dllSize, 2)) MB (large)"
     }
@@ -437,40 +418,35 @@ Write-Host "  Phase: Priority 1 - Production Baseline Verification"
 # Execute test suites
 if (-not $SkipBuildCheck) {
     Test-BuildVerification
-}
-else {
+} else {
     Write-Warning "Build verification skipped"
     Add-TestResult -Suite "Build Verification" -Passed 0 -Failed 0 -Skipped 3
 }
 
 if (-not $SkipInstallTest) {
     Test-COMRegistration
-}
-else {
+} else {
     Write-Warning "COM registration tests skipped"
     Add-TestResult -Suite "COM Registration" -Passed 0 -Failed 0 -Skipped 4
 }
 
 if (-not $SkipFormatTest -and -not $QuickTest) {
     Test-FormatSupport
-}
-else {
+} else {
     Write-Warning "Format support tests skipped"
     Add-TestResult -Suite "Format Support" -Passed 0 -Failed 0 -Skipped 31
 }
 
 if (-not $QuickTest) {
     Test-GPUAcceleration
-}
-else {
+} else {
     Write-Warning "GPU acceleration tests skipped (quick mode)"
     Add-TestResult -Suite "GPU Acceleration" -Passed 0 -Failed 0 -Skipped 1
 }
 
 if (-not $SkipPerformanceTest -and -not $QuickTest) {
     Test-PerformanceBaseline
-}
-else {
+} else {
     Write-Warning "Performance baseline tests skipped"
     Add-TestResult -Suite "Performance Baseline" -Passed 0 -Failed 0 -Skipped 2
 }
@@ -490,8 +466,8 @@ foreach ($suite in $script:TestSuites) {
     $passRate = if ($total -gt 0) { [math]::Round(($suite.Passed / $total) * 100, 1) } else { 0 }
     
     $statusIcon = if ($suite.Failed -eq 0 -and $suite.Passed -gt 0) { "$script:Green✓$script:Reset" } 
-                  elseif ($suite.Failed -gt 0) { "$script:Red✗$script:Reset" }
-                  else { "$script:Yellow⊘$script:Reset" }
+    elseif ($suite.Failed -gt 0) { "$script:Red✗$script:Reset" }
+    else { "$script:Yellow⊘$script:Reset" }
     
     Write-Host "  $statusIcon $($suite.Suite)"
     Write-Host "      Passed: $script:Green$($suite.Passed)$script:Reset | Failed: $script:Red$($suite.Failed)$script:Reset | Skipped: $script:Yellow$($suite.Skipped)$script:Reset ($passRate% pass rate)"
@@ -522,15 +498,13 @@ if ($script:FailedTests -eq 0 -and $script:PassedTests -gt 0) {
     Write-Host "$script:Green╚══════════════════════════════════════════════════════════════╝$script:Reset"
     Write-Host "`n$script:Green✓ All critical tests passed. v5.3.0 is ready for production.$script:Reset"
     exit 0
-}
-elseif ($script:FailedTests -eq 0 -and $script:SkippedTests -gt 0) {
+} elseif ($script:FailedTests -eq 0 -and $script:SkippedTests -gt 0) {
     Write-Host "$script:Yellow╔══════════════════════════════════════════════════════════════╗$script:Reset"
     Write-Host "$script:Yellow║  ⚠ PARTIAL VERIFICATION (tests skipped)                     ║$script:Reset"
     Write-Host "$script:Yellow╚══════════════════════════════════════════════════════════════╝$script:Reset"
     Write-Host "`n$script:Yellow⚠ Run full test suite for complete verification.$script:Reset"
     exit 0
-}
-else {
+} else {
     Write-Host "$script:Red╔══════════════════════════════════════════════════════════════╗$script:Reset"
     Write-Host "$script:Red║  ✗ PRODUCTION BASELINE VERIFICATION FAILED                  ║$script:Reset"
     Write-Host "$script:Red╚══════════════════════════════════════════════════════════════╝$script:Reset"

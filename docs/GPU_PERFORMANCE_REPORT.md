@@ -1,5 +1,5 @@
 # DarkThumbs GPU Acceleration Performance Report
-**Generated:** 2026-01-07 10:29:48
+**Generated:** 2026-01-12 11:36:44
 
 ## System Information
 
@@ -26,80 +26,80 @@
 
 | Image Size | Thumbnail Size | Avg Time (ms) | Min Time (ms) | Max Time (ms) | Median (ms) |
 |------------|----------------|---------------|---------------|---------------|-------------|
-| 1024x768 | 256px | 24.84 | 14.74 | 46.09 | 26.08 |
-| 1024x768 | 512px | 31.28 | 14.64 | 47.29 | 30.93 |
-| 1024x768 | 1024px | 24.58 | 13.24 | 47.17 | 17.98 |
-| 1920x1080 | 256px | 30.01 | 14.36 | 48.46 | 31.69 |
-| 1920x1080 | 512px | 30.03 | 15.31 | 56.84 | 30.71 |
-| 1920x1080 | 1024px | 39.28 | 15.34 | 61.28 | 42.43 |
-| 3840x2160 | 256px | 29.66 | 14.65 | 61.26 | 30.03 |
-| 3840x2160 | 512px | 33.09 | 14.62 | 46.65 | 43.94 |
-| 3840x2160 | 1024px | 36.65 | 13.82 | 60.75 | 31.59 |
+| 1024x768 | 256px | 38.49 | 23.19 | 55.51 | 39.77 |
+| 1024x768 | 512px | 40.81 | 15.39 | 66.37 | 41.5 |
+| 1024x768 | 1024px | 30.76 | 14.89 | 50.02 | 31.55 |
+| 1920x1080 | 256px | 37.04 | 14.55 | 50.98 | 46.88 |
+| 1920x1080 | 512px | 29.59 | 15.24 | 49.46 | 32.19 |
+| 1920x1080 | 1024px | 38.01 | 14.68 | 64.86 | 48.49 |
+| 3840x2160 | 256px | 28.98 | 11.53 | 51.13 | 33.44 |
+| 3840x2160 | 512px | 39.74 | 14.81 | 52.99 | 47.42 |
+| 3840x2160 | 1024px | 35.79 | 21.33 | 64.77 | 33.66 |
 
 ### Detailed Results
 
 #### 1024x768 → 256px
-- **Average:** 24.84 ms
-- **Minimum:** 14.74 ms
-- **Maximum:** 46.09 ms
-- **Median:** 26.08 ms
-- **Throughput:** 40.3 thumbnails/sec
+- **Average:** 38.49 ms
+- **Minimum:** 23.19 ms
+- **Maximum:** 55.51 ms
+- **Median:** 39.77 ms
+- **Throughput:** 26 thumbnails/sec
 
 #### 1024x768 → 512px
-- **Average:** 31.28 ms
-- **Minimum:** 14.64 ms
-- **Maximum:** 47.29 ms
-- **Median:** 30.93 ms
-- **Throughput:** 32 thumbnails/sec
+- **Average:** 40.81 ms
+- **Minimum:** 15.39 ms
+- **Maximum:** 66.37 ms
+- **Median:** 41.5 ms
+- **Throughput:** 24.5 thumbnails/sec
 
 #### 1024x768 → 1024px
-- **Average:** 24.58 ms
-- **Minimum:** 13.24 ms
-- **Maximum:** 47.17 ms
-- **Median:** 17.98 ms
-- **Throughput:** 40.7 thumbnails/sec
+- **Average:** 30.76 ms
+- **Minimum:** 14.89 ms
+- **Maximum:** 50.02 ms
+- **Median:** 31.55 ms
+- **Throughput:** 32.5 thumbnails/sec
 
 #### 1920x1080 → 256px
-- **Average:** 30.01 ms
-- **Minimum:** 14.36 ms
-- **Maximum:** 48.46 ms
-- **Median:** 31.69 ms
-- **Throughput:** 33.3 thumbnails/sec
+- **Average:** 37.04 ms
+- **Minimum:** 14.55 ms
+- **Maximum:** 50.98 ms
+- **Median:** 46.88 ms
+- **Throughput:** 27 thumbnails/sec
 
 #### 1920x1080 → 512px
-- **Average:** 30.03 ms
-- **Minimum:** 15.31 ms
-- **Maximum:** 56.84 ms
-- **Median:** 30.71 ms
-- **Throughput:** 33.3 thumbnails/sec
+- **Average:** 29.59 ms
+- **Minimum:** 15.24 ms
+- **Maximum:** 49.46 ms
+- **Median:** 32.19 ms
+- **Throughput:** 33.8 thumbnails/sec
 
 #### 1920x1080 → 1024px
-- **Average:** 39.28 ms
-- **Minimum:** 15.34 ms
-- **Maximum:** 61.28 ms
-- **Median:** 42.43 ms
-- **Throughput:** 25.5 thumbnails/sec
+- **Average:** 38.01 ms
+- **Minimum:** 14.68 ms
+- **Maximum:** 64.86 ms
+- **Median:** 48.49 ms
+- **Throughput:** 26.3 thumbnails/sec
 
 #### 3840x2160 → 256px
-- **Average:** 29.66 ms
-- **Minimum:** 14.65 ms
-- **Maximum:** 61.26 ms
-- **Median:** 30.03 ms
-- **Throughput:** 33.7 thumbnails/sec
+- **Average:** 28.98 ms
+- **Minimum:** 11.53 ms
+- **Maximum:** 51.13 ms
+- **Median:** 33.44 ms
+- **Throughput:** 34.5 thumbnails/sec
 
 #### 3840x2160 → 512px
-- **Average:** 33.09 ms
-- **Minimum:** 14.62 ms
-- **Maximum:** 46.65 ms
-- **Median:** 43.94 ms
-- **Throughput:** 30.2 thumbnails/sec
+- **Average:** 39.74 ms
+- **Minimum:** 14.81 ms
+- **Maximum:** 52.99 ms
+- **Median:** 47.42 ms
+- **Throughput:** 25.2 thumbnails/sec
 
 #### 3840x2160 → 1024px
-- **Average:** 36.65 ms
-- **Minimum:** 13.82 ms
-- **Maximum:** 60.75 ms
-- **Median:** 31.59 ms
-- **Throughput:** 27.3 thumbnails/sec
+- **Average:** 35.79 ms
+- **Minimum:** 21.33 ms
+- **Maximum:** 64.77 ms
+- **Median:** 33.66 ms
+- **Throughput:** 27.9 thumbnails/sec
 
 ## GPU Acceleration Analysis
 
