@@ -113,7 +113,22 @@ public:
     }
     
     void Reset() {
-        m_metrics = ThumbnailMetrics();
+        // Reset all atomic counters individually since ThumbnailMetrics cannot be copy-assigned
+        m_metrics.totalAttempts.store(0);
+        m_metrics.successCount.store(0);
+        m_metrics.failureCount.store(0);
+        m_metrics.cacheHits.store(0);
+        m_metrics.cacheMisses.store(0);
+        m_metrics.zipCount.store(0);
+        m_metrics.rarCount.store(0);
+        m_metrics.cbzCount.store(0);
+        m_metrics.cbrCount.store(0);
+        m_metrics.sevenzCount.store(0);
+        m_metrics.webpCount.store(0);
+        m_metrics.avifCount.store(0);
+        m_metrics.jxlCount.store(0);
+        m_metrics.peakMemoryBytes.store(0);
+        m_metrics.totalMemoryAllocated.store(0);
         m_startTime = std::chrono::system_clock::now();
     }
     

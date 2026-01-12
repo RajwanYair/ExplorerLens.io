@@ -83,19 +83,31 @@
 
 #### Sprint 11: Platform Foundation (Weeks 5-8) ⏳ IN PROGRESS
 
-**Status:** ~15-20% Complete (January 12, 2026 - Week 5 Day 1)
+**Status:** ~35-40% Complete (January 12, 2026 - Week 5 Day 1)
 
 **Completed:**
 - ✅ Engine builds as standalone DarkThumbsEngine.lib (1.97 MB, zero COM dependencies)
 - ✅ Engine CMake configuration verified for independent compilation
-- ✅ Comprehensive Sprint 11 implementation plan created
+- ✅ Comprehensive Sprint 11 implementation plan created ([SPRINT11_PLATFORM_FOUNDATION.md](docs/SPRINT11_PLATFORM_FOUNDATION.md))
 - ✅ Engine unit tests built and executing (EngineTests.exe 861 KB)
-- ✅ Test results: 22+ tests passing (Decoder Registry 6/6, Format Detector 8/8, Image Decoder 8+)
+- ✅ **ALL 38 unit tests PASSING (100% success rate)** ([ENGINE_TEST_RESULTS.md](docs/ENGINE_TEST_RESULTS.md))
+  - Decoder Registry: 6/6 PASSED
+  - Format Detector: 8/8 PASSED
+  - Image Decoder: 8/8 PASSED (JPEG, PNG, BMP, GIF, TIFF)
+  - WebP Decoder: 5/5 PASSED
+  - AVIF Decoder: 5/5 PASSED (AVIF, HEIF, HEIC)
+  - Archive Decoder: 6/6 PASSED (ZIP, CBZ)
+- ✅ **Critical bug fix**: Heap corruption resolved (non-owning DecoderRegistry pattern)
+- ✅ **Decoder interface standardization**: JXL/HEIF headers updated to IThumbnailDecoder standard
 
 **In Progress:**
-- 🔄 Debugging heap corruption in test suite (exit code -1073740940)
-- 🔄 Decoder interface standardization (JXL/HEIF need updates)
-- 🔄 Complete test suite execution (blocked on heap corruption fix)
+- 🔄 EngineAdapter integration verification with CBXShell
+- 🔄 Integration testing (COM → Engine → Thumbnail flow)
+
+**Remaining Week 5 Tasks:**
+- ⏳ GPU abstraction layer (CPU fallback renderer)
+- ⏳ Cache integration with ThumbnailPipeline
+- ⏳ EngineAdapter optimization (reduce marshaling overhead)
 
 **Objectives:**
 
