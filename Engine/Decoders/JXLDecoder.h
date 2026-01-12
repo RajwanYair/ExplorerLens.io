@@ -28,10 +28,14 @@ namespace Engine {
         virtual ~JXLDecoder();
 
         // IThumbnailDecoder implementation
-        bool CanDecode(const std::wstring& filePath) override;
-        ThumbnailResult Decode(const ThumbnailRequest& request) override;
-        std::wstring GetDecoderName() const override { return L"JXLDecoder"; }
-        int GetDecoderPriority() const override { return 90; } // High priority for modern format
+        bool CanDecode(const wchar_t* filePath) override;
+        HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
+        DecoderInfo GetInfo() const override;
+        const wchar_t* GetName() const override { return L"JXLDecoder"; }
+        const wchar_t** GetSupportedExtensions() const override;
+        uint32_t GetExtensionCount() const override { return 1; }
+        bool SupportsGPU() const override { return false; }
+        bool IsArchiveDecoder() const override { return false; }
 
     private:
         /// <summary>
@@ -79,6 +83,9 @@ namespace Engine {
         // Configuration
         bool m_useMultithreading;  // Enable parallel decoding
         uint32_t m_maxThreads;     // Maximum decode threads
+        
+        // Supported extensions
+        static constexpr const wchar_t* s_extensions[2] = { L".jxl", nullptr };
     };
 
 } // namespace Engine

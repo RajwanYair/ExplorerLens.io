@@ -27,10 +27,14 @@ namespace Engine {
         virtual ~HEIFDecoder();
 
         // IThumbnailDecoder implementation
-        bool CanDecode(const std::wstring& filePath) override;
-        ThumbnailResult Decode(const ThumbnailRequest& request) override;
-        std::wstring GetDecoderName() const override { return L"HEIFDecoder"; }
-        int GetDecoderPriority() const override { return 85; } // High priority for Apple photos
+        bool CanDecode(const wchar_t* filePath) override;
+        HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
+        DecoderInfo GetInfo() const override;
+        const wchar_t* GetName() const override { return L"HEIFDecoder"; }
+        const wchar_t** GetSupportedExtensions() const override;
+        uint32_t GetExtensionCount() const override;
+        bool SupportsGPU() const override { return false; }
+        bool IsArchiveDecoder() const override { return false; }
 
     private:
         /// <summary>
@@ -90,6 +94,12 @@ namespace Engine {
         // Configuration
         bool m_preferEmbeddedThumbnail;  // Use embedded thumbnail if available
         bool m_supportHDR;               // Enable HDR decoding (tone mapping required)
+        
+        // Supported extensions (HEIF, HEIC, Apple variants)
+        static constexpr const wchar_t* s_extensions[11] = {
+            L".heif", L".heic", L".hif", L".heifs", L".heics",
+            L".avci", L".avcs", L".avif", L".heif-sequence", L".heic-sequence", nullptr
+        };
     };
 
 } // namespace Engine

@@ -9,9 +9,11 @@
 #include "../Decoders/WebPDecoder.h"
 #include "../Decoders/AVIFDecoder.h"
 #include "../Decoders/ArchiveDecoder.h"
-// NOTE: JXL and HEIF decoders temporarily disabled due to interface mismatch
-//#include "../Decoders/JXLDecoder.h"
-//#include "../Decoders/HEIFDecoder.h"
+// NOTE: JXL and HEIF decoders have interface declarations fixed but
+// implementation is stub (awaiting libjxl/libheif integration)
+// Tests re-enabled to verify interface compliance
+#include "../Decoders/JXLDecoder.h"
+#include "../Decoders/HEIFDecoder.h"
 #include <iostream>
 #include <cassert>
 

@@ -15,6 +15,9 @@
 namespace DarkThumbs {
 namespace Engine {
 
+    // Define static extension array
+    constexpr const wchar_t* JXLDecoder::s_extensions[];
+
     JXLDecoder::JXLDecoder()
         : m_useMultithreading(true)
         , m_maxThreads(4)
@@ -23,21 +26,32 @@ namespace Engine {
 
     JXLDecoder::~JXLDecoder() = default;
 
-    bool JXLDecoder::CanDecode(const std::wstring& filePath) {
+    bool JXLDecoder::CanDecode(const wchar_t* filePath) {
+        if (!filePath) return false;
+        
         // Check file extension
-        size_t dotPos = filePath.find_last_of(L'.');
-        if (dotPos == std::wstring::npos) {
-            return false;
-        }
-
-        std::wstring ext = filePath.substr(dotPos);
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::towlower);
-
-        return (ext == L".jxl");
+        const wchar_t* ext = wcsrchr(filePath, L'.');
+        if (!ext) return false;
+        
+        return (_wcsicmp(ext, L".jxl") == 0);
+    }
+    
+    const wchar_t** JXLDecoder::GetSupportedExtensions() const {
+        return s_extensions;
+    }
+    
+    DecoderInfo JXLDecoder::GetInfo() const {
+        DecoderInfo info;
+        info.name = L"JXLDecoder";
+        info.version = L"1.0.0";
+        info.supportedExtensions = s_extensions;
+        info.extensionCount = 1;
+        info.supportsGPU = false;
+        info.isArchiveDecoder = false;
+        return info;
     }
 
-    ThumbnailResult JXLDecoder::Decode(const ThumbnailRequest& request) {
-        ThumbnailResult result;
+    HRESULT JXLDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
         result.Success = false;
 
         // Verify file exists
