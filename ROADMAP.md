@@ -83,7 +83,7 @@
 
 #### Sprint 11: Platform Foundation (Weeks 5-8) ⏳ IN PROGRESS
 
-**Status:** ~60% Complete (January 12, 2026 - Week 5 Day 2 Session 1)
+**Status:** ~62% Complete (January 12, 2026 - Week 5 Day 2 Session 2)
 
 **Completed:**
 - ✅ Engine builds as standalone DarkThumbsEngine.lib (1.99 MB, zero COM dependencies)
@@ -126,16 +126,24 @@
   - EngineBenchmark.exe with 4 benchmark scenarios
   - PERFORMANCE_ANALYSIS.md documentation (1200+ lines)
   - 670+ lines of profiling code added
+- ✅ **Decoder-Specific Profiling Complete** (Week 5 Day 2 Session 2)
+  - ImageDecoder instrumented with DECODE_IMAGE profiling
+  - WebPDecoder instrumented with DECODE_WEBP profiling
+  - AVIFDecoder instrumented with DECODE_AVIF profiling
+  - ArchiveDecoder instrumented with DECODE_ARCHIVE profiling
+  - Enables granular performance measurement per decoder
+  - All 38 tests still passing with instrumentation
 
-**Week 5 Day 2 Session 1 Achievements:**
+**Week 5 Day 2 Session 1-2 Achievements:**
 - **Performance Infrastructure**: Complete profiling system
 - **Benchmark Suite**: 4 comprehensive benchmarks implemented
 - **Documentation**: Full performance analysis report
 - **Build Integration**: CMake targets for benchmarking
+- **Decoder Instrumentation**: All decoders profiled individually
 - **Production Ready**: Zero overhead when disabled, <1% when enabled
 
 **Remaining Week 5 Tasks:**
-- ⏳ End-to-end integration testing (requires DLL rebuild)
+- ⏳ End-to-end integration testing (blocked: CBXShell.dll file lock)
 - ⏳ Performance optimization based on profiling data
 
 **Objectives:**
