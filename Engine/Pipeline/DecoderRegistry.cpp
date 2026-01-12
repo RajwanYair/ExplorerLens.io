@@ -51,7 +51,8 @@ bool DecoderRegistry::UnregisterDecoder(IThumbnailDecoder* decoder)
     
     auto it = std::find(m_decoders.begin(), m_decoders.end(), decoder);
     if (it != m_decoders.end()) {
-        delete *it;
+        // NOTE: DecoderRegistry is non-owning - it does NOT delete decoder pointers
+        // The caller is responsible for decoder lifetime management
         m_decoders.erase(it);
         return true;
     }
@@ -114,11 +115,9 @@ const std::vector<IThumbnailDecoder*>& DecoderRegistry::GetAllDecoders() const
 
 void DecoderRegistry::Clear()
 {
-    // Delete all decoder instances
-    for (IThumbnailDecoder* decoder : m_decoders) {
-        delete decoder;
-    }
-    
+    // NOTE: DecoderRegistry is non-owning - it does NOT delete decoder pointers
+    // The caller is responsible for decoder lifetime management
+    // Simply clear the vector of pointers
     m_decoders.clear();
 }
 
