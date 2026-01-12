@@ -64,7 +64,10 @@ public:
 
         // Create cache if enabled
         if (config.enableCache && !cacheProvider) {
-            cacheProvider = std::make_unique<ThumbnailCache>();
+            auto cache = std::make_unique<ThumbnailCache>();
+            if (SUCCEEDED(cache->Initialize())) {
+                cacheProvider = std::move(cache);
+            }
         }
 
         initialized = true;
@@ -81,7 +84,11 @@ public:
         }
 
         if (cacheProvider) {
-            cacheProvider->Clear();
+            // Properly shutdown cache (ThumbnailCache has Shutdown method)
+            auto* cache = dynamic_cast<ThumbnailCache*>(cacheProvider.get());
+            if (cache) {
+                cache->Shutdown();
+            }
         }
 
         decoderRegistry.Clear();
@@ -100,11 +107,30 @@ public:
 
         totalRequests++;
 
-        // TODO: Check cache implementation here when ready
-        // if (config.enableCache && cacheProvider) {
-        //     ... cache lookup ...
-        //     cacheHits++;
-        // }
+        // Step 1: Check cache for existing thumbnail
+        if (config.enableCache && cacheProvider) {
+            HBITMAP cachedBitmap = nullptr;
+            if (SUCCEEDED(cacheProvider->Get(request.filePath, 
+                                              request.width, 
+                                              request.height, 
+                                              &cachedBitmap))) {
+                // Cache hit!
+                result.hBitmap = cachedBitmap;
+                result.width = request.width;
+                result.height = request.height;
+                result.fromCache = true;
+                result.status = S_OK;
+                
+                cacheHits++;
+                
+                auto endTime = std::chrono::high_resolution_clock::now();
+                result.generationTimeMs = static_cast<uint32_t>(
+                    std::chrono::duration_cast<std::chrono::milliseconds>(
+                        endTime - startTime).count());
+                
+                return result;
+            }
+        }
         cacheMisses++;
 
         // Step 2: Find appropriate decoder
@@ -123,10 +149,14 @@ public:
         // Step 3: Generate thumbnail
         result.status = decoder->Decode(request, result);
 
-        // Step 4: TODO - Cache the result if successful
-        // if (SUCCEEDED(result.status) && config.enableCache && cacheProvider) {
-        //     ... cache storage ...
-        // }
+        // Step 4: Cache the result if successful
+        if (SUCCEEDED(result.status) && config.enableCache && cacheProvider && result.hBitmap) {
+            // Store in cache (fire and forget - don't fail thumbnail on cache error)
+            cacheProvider->Put(request.filePath, 
+                              result.width, 
+                              result.height, 
+                              result.hBitmap);
+        }
 
         // Update timing
         auto endTime = std::chrono::high_resolution_clock::now();
