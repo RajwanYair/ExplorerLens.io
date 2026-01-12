@@ -58,6 +58,7 @@ set(ENGINE_HEADERS
     
     # GPU
     GPU/D3D11Renderer.h
+    GPU/GDIRenderer.h
     
     # Cache
     Cache/ThumbnailCache.h
@@ -79,7 +80,7 @@ set(ENGINE_SOURCES
     
     # GPU
     GPU/D3D11Renderer.cpp
-    # GPU/CPURenderer.cpp  # Future: software fallback
+    GPU/GDIRenderer.cpp
     
     # Cache
     Cache/ThumbnailCache.cpp

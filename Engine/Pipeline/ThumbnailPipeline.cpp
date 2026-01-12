@@ -1,6 +1,7 @@
 #include "ThumbnailPipeline.h"
 #include "FormatDetector.h"
 #include "../GPU/D3D11Renderer.h"
+#include "../GPU/GDIRenderer.h"
 #include "../Cache/ThumbnailCache.h"
 #include <chrono>
 #include <algorithm>
@@ -48,9 +49,16 @@ public:
 
         // Create GPU renderer if enabled
         if (config.enableGPU && !gpuRenderer) {
+            // Try hardware GPU first (D3D11)
             auto d3dRenderer = std::make_unique<D3D11Renderer>();
-            if (d3dRenderer->Initialize() == S_OK) {
+            if (SUCCEEDED(d3dRenderer->Initialize())) {
                 gpuRenderer = std::move(d3dRenderer);
+            } else {
+                // Fall back to CPU renderer (GDI+)
+                auto cpuRenderer = std::make_unique<GDIRenderer>();
+                if (SUCCEEDED(cpuRenderer->Initialize())) {
+                    gpuRenderer = std::move(cpuRenderer);
+                }
             }
         }
 
