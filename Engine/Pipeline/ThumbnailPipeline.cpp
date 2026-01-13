@@ -135,10 +135,17 @@ public:
         result.status = E_FAIL;
 
         if (!initialized) {
+            OutputDebugStringW(L"[Pipeline] ERROR: Pipeline not initialized\n");
             return result;
         }
 
         totalRequests++;
+        
+        // Log request
+        wchar_t logBuf[512];
+        swprintf_s(logBuf, L"[Pipeline] Request #%llu: %s (%ux%u)\n", 
+                   totalRequests, request.filePath, request.width, request.height);
+        OutputDebugStringW(logBuf);
 
         // Step 1: Check cache for existing thumbnail
         if (config.enableCache && cacheProvider) {
@@ -169,6 +176,7 @@ public:
         // Step 2: Find appropriate decoder
         IThumbnailDecoder* decoder = decoderRegistry.FindDecoder(request.filePath);
         if (!decoder) {
+            OutputDebugStringW(L"[Pipeline] ERROR: No decoder found for file\n");
             result.status = E_NOINTERFACE;  // No decoder found
 
             auto endTime = std::chrono::high_resolution_clock::now();
@@ -178,9 +186,20 @@ public:
 
             return result;
         }
+        
+        // Log decoder found
+        wchar_t decoderLog[256];
+        swprintf_s(decoderLog, L"[Pipeline] Using decoder: %s\n", decoder->GetName());
+        OutputDebugStringW(decoderLog);
 
         // Step 3: Generate thumbnail
         result.status = decoder->Decode(request, result);
+        
+        // Log decode result
+        wchar_t resultLog[256];
+        swprintf_s(resultLog, L"[Pipeline] Decode result: HRESULT=0x%08X, HBITMAP=%p\n", 
+                   result.status, result.hBitmap);
+        OutputDebugStringW(resultLog);
 
         // Step 4: Cache the result if successful
         if (SUCCEEDED(result.status) && config.enableCache && cacheProvider && result.hBitmap) {

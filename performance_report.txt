@@ -1,24 +1,24 @@
 === Detailed Performance Analysis ===
 
-Total Operations: 62
-Total Time: 32.02 ms
-Average per Operation: 0.52 ms
+Total Operations: 35
+Total Time: 407.28 ms
+Average per Operation: 11.64 ms
 
 Component Breakdown:
 -----------------------------------------------------------------------------------
 Decode Image:
-  Calls: 31
-  Total Time: 1.60 ms (5.0%)
-  Average: 0.05 ms
-  Min: 0.01 ms
-  Max: 0.78 ms
-  Range: 0.77 ms
+  Calls: 4
+  Total Time: 136.93 ms (33.6%)
+  Average: 34.23 ms
+  Min: 27.66 ms
+  Max: 43.54 ms
+  Range: 15.88 ms
 
 Pipeline Total:
   Calls: 31
-  Total Time: 30.43 ms (95.0%)
-  Average: 0.98 ms
-  Min: 0.44 ms
-  Max: 8.59 ms
-  Range: 8.15 ms
+  Total Time: 270.35 ms (66.4%)
+  Average: 8.72 ms
+  Min: 2.21 ms
+  Max: 66.22 ms
+  Range: 64.01 ms
 

@@ -53,6 +53,13 @@ std::vector<std::wstring> FindTestImages() {
 }
 
 int main() {
+    // Initialize COM for WIC
+    HRESULT hrCOM = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (FAILED(hrCOM)) {
+        std::wcerr << L"ERROR: Failed to initialize COM (HRESULT=0x" << std::hex << hrCOM << L")\n";
+        return 1;
+    }
+    
     std::wcout << L"DarkThumbs Engine Performance Benchmark\n";
     std::wcout << L"Version: 5.3.0\n";
     std::wcout << L"========================================\n\n";
@@ -228,5 +235,9 @@ int main() {
     pipeline.Shutdown();
     
     std::wcout << L"\nBenchmark completed successfully!\n";
+    
+    // Uninitialize COM
+    CoUninitialize();
+    
     return 0;
 }

@@ -94,7 +94,10 @@ bool ImageDecoder::CanDecode(const wchar_t* filePath) {
 HRESULT ImageDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
     PROFILE_SCOPE(ProfileComponent::DECODE_IMAGE);
     
+    OutputDebugStringW(L"[ImageDecoder] Decode() called\n");
+    
     if (!CanDecode(request.filePath)) {
+        OutputDebugStringW(L"[ImageDecoder] ERROR: CanDecode() returned false\n");
         return E_INVALIDARG;
     }
 
@@ -104,9 +107,14 @@ HRESULT ImageDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& r
                                  request.height, &hBitmap);
 
     if (FAILED(hr)) {
+        wchar_t errLog[256];
+        swprintf_s(errLog, L"[ImageDecoder] DecodeFromFile failed: HRESULT=0x%08X\n", hr);
+        OutputDebugStringW(errLog);
         result.status = hr;
         return hr;
     }
+
+    OutputDebugStringW(L"[ImageDecoder] DecodeFromFile succeeded, HBITMAP created\n");
 
     // Success
     result.hBitmap = hBitmap;
@@ -135,6 +143,7 @@ DecoderInfo ImageDecoder::GetInfo() const {
 HRESULT ImageDecoder::DecodeFromFile(const wchar_t* path, UINT targetWidth,
                                      UINT targetHeight, HBITMAP* phBitmap) {
     if (!path || !*path || !phBitmap) {
+        OutputDebugStringW(L"[ImageDecoder] DecodeFromFile: Invalid arguments\n");
         return E_INVALIDARG;
     }
 
@@ -142,8 +151,11 @@ HRESULT ImageDecoder::DecodeFromFile(const wchar_t* path, UINT targetWidth,
 
     ComPtr<IWICImagingFactory> factory = GetWICFactory();
     if (!factory) {
+        OutputDebugStringW(L"[ImageDecoder] ERROR: WIC Factory creation failed\n");
         return E_FAIL;
     }
+    
+    OutputDebugStringW(L"[ImageDecoder] WIC Factory obtained\n");
 
     // Create decoder from file
     ComPtr<IWICBitmapDecoder> decoder;
@@ -156,8 +168,13 @@ HRESULT ImageDecoder::DecodeFromFile(const wchar_t* path, UINT targetWidth,
     );
 
     if (FAILED(hr)) {
+        wchar_t errLog[256];
+        swprintf_s(errLog, L"[ImageDecoder] CreateDecoderFromFilename failed: HRESULT=0x%08X\n", hr);
+        OutputDebugStringW(errLog);
         return hr;
     }
+    
+    OutputDebugStringW(L"[ImageDecoder] WIC decoder created from file\n");
 
     // Get first frame
     ComPtr<IWICBitmapFrameDecode> frame;
