@@ -1,0 +1,16 @@
+=== Detailed Performance Analysis ===
+
+Total Operations: 31
+Total Time: 16.16 ms
+Average per Operation: 0.52 ms
+
+Component Breakdown:
+-----------------------------------------------------------------------------------
+Pipeline Total:
+  Calls: 31
+  Total Time: 16.16 ms (100.0%)
+  Average: 0.52 ms
+  Min: 0.23 ms
+  Max: 5.29 ms
+  Range: 5.06 ms
+

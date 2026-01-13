@@ -174,6 +174,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
+    <ProjectReference Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\EngineBenchmark.vcxproj">
+      <Project>{9D28301E-27C5-3589-99B1-E3707F2E3D80}</Project>
+      <Name>EngineBenchmark</Name>
+    </ProjectReference>
     <ProjectReference Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\EngineTests.vcxproj">
       <Project>{286A497E-6AB8-309F-8E2A-75B20365467D}</Project>
       <Name>EngineTests</Name>

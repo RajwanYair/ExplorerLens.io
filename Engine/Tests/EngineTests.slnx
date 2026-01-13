@@ -8,10 +8,15 @@
 		<Platform Name="x64"/>
 	</Configurations>
 	<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="f4893484-1b08-31d6-bbef-8b159c2a1838" DefaultStartup="true">
+		<BuildDependency Project="EngineBenchmark.vcxproj"/>
 		<BuildDependency Project="EngineTests.vcxproj"/>
 		<BuildDependency Project="../ZERO_CHECK.vcxproj"/>
 	</Project>
 	<Project Path="../DarkThumbsEngine.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="f4a5aa68-cfa7-3484-b4db-a5952a26f0bd">
+		<BuildDependency Project="../ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Project Path="EngineBenchmark.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="9d28301e-27c5-3589-99b1-e3707f2e3d80">
+		<BuildDependency Project="../DarkThumbsEngine.vcxproj"/>
 		<BuildDependency Project="../ZERO_CHECK.vcxproj"/>
 	</Project>
 	<Project Path="EngineTests.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="286a497e-6ab8-309f-8e2a-75b20365467d">
