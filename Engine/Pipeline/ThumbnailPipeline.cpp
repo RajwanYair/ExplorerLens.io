@@ -4,6 +4,10 @@
 #include "../GPU/GDIRenderer.h"
 #include "../Cache/ThumbnailCache.h"
 #include "../Utils/PerformanceProfiler.h"
+#include "../Decoders/ImageDecoder.h"
+#include "../Decoders/WebPDecoder.h"
+#include "../Decoders/AVIFDecoder.h"
+#include "../Decoders/ArchiveDecoder.h"
 #include <chrono>
 #include <algorithm>
 
@@ -21,6 +25,9 @@ public:
     std::unique_ptr<IFormatDetector> formatDetector;
     std::unique_ptr<IGPURenderer> gpuRenderer;
     std::unique_ptr<ICacheProvider> cacheProvider;
+
+    // Decoder storage (we own these)
+    std::vector<std::unique_ptr<IThumbnailDecoder>> decoders;
 
     // Statistics
     uint64_t totalRequests = 0;
@@ -47,6 +54,29 @@ public:
         if (!formatDetector) {
             formatDetector = std::make_unique<FormatDetector>();
         }
+
+        // Register all available decoders (order matters - more specific first)
+        // 1. Archive formats (ZIP, RAR, 7Z, etc.)
+        auto archiveDecoder = std::make_unique<ArchiveDecoder>();
+        decoderRegistry.RegisterDecoder(archiveDecoder.get());
+        decoders.push_back(std::move(archiveDecoder));
+        
+        // 2. Modern image formats with specific decoders
+        auto webpDecoder = std::make_unique<WebPDecoder>();
+        decoderRegistry.RegisterDecoder(webpDecoder.get());
+        decoders.push_back(std::move(webpDecoder));
+        
+        auto avifDecoder = std::make_unique<AVIFDecoder>();
+        decoderRegistry.RegisterDecoder(avifDecoder.get());
+        decoders.push_back(std::move(avifDecoder));
+        
+        // 3. Standard image formats via WIC (JPEG, PNG, BMP, GIF, TIFF)
+        auto imageDecoder = std::make_unique<ImageDecoder>();
+        decoderRegistry.RegisterDecoder(imageDecoder.get());
+        decoders.push_back(std::move(imageDecoder));
+        
+        // Note: JXLDecoder and HEIFDecoder are currently disabled
+        // They can be added here when their interface is updated
 
         // Create GPU renderer if enabled
         if (config.enableGPU && !gpuRenderer) {
