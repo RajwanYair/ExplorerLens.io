@@ -68,7 +68,7 @@ namespace Engine {
         /// <summary>
         /// Read entire file into memory
         /// </summary>
-        std::unique_ptr<uint8_t[]> ReadFileData(const std::wstring& filePath, size_t& outSize);
+        std::unique_ptr<uint8_t[]> ReadFileData(const wchar_t* filePath, size_t& outSize);
 
         /// <summary>
         /// Create HBITMAP from RGBA pixel data

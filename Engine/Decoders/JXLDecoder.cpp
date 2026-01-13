@@ -44,35 +44,45 @@ namespace Engine {
         DecoderInfo info;
         info.name = L"JXLDecoder";
         info.version = L"1.0.0";
-        info.supportedExtensions = s_extensions;
-        info.extensionCount = 1;
+        info.description = L"JPEG XL decoder (libjxl integration pending)";
         info.supportsGPU = false;
         info.isArchiveDecoder = false;
         return info;
     }
 
     HRESULT JXLDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
-        result.Success = false;
+        // Initialize result structure
+        result.hBitmap = nullptr;
+        result.width = 0;
+        result.height = 0;
+        result.status = E_FAIL;
+        result.usedGPU = false;
+        
+        // Validate input
+        if (!request.filePath) {
+            result.status = E_INVALIDARG;
+            return E_INVALIDARG;
+        }
 
         // Verify file exists
-        DWORD attrs = GetFileAttributesW(request.FilePath.c_str());
+        DWORD attrs = GetFileAttributesW(request.filePath);
         if (attrs == INVALID_FILE_ATTRIBUTES) {
-            result.ErrorMessage = L"File not found";
-            return result;
+            result.status = HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+            return result.status;
         }
 
         // Read file data
         size_t fileSize = 0;
-        auto fileData = ReadFileData(request.FilePath, fileSize);
+        auto fileData = ReadFileData(request.filePath, fileSize);
         if (!fileData || fileSize == 0) {
-            result.ErrorMessage = L"Failed to read file";
-            return result;
+            result.status = HRESULT_FROM_WIN32(ERROR_READ_FAULT);
+            return result.status;
         }
 
         // Verify JXL signature
         if (!VerifyJXLSignature(fileData.get(), fileSize)) {
-            result.ErrorMessage = L"Invalid JXL signature";
-            return result;
+            result.status = E_FAIL; // Invalid format
+            return result.status;
         }
 
 // TODO: Implement actual JXL decoding when libjxl is built
@@ -85,36 +95,37 @@ namespace Engine {
         uint8_t* pixels = DecodeJXLImage(
             fileData.get(),
             fileSize,
-            request.Width,
-            request.Height,
+            request.width,
+            request.height,
             decodedWidth,
             decodedHeight,
             channels
         );
 
         if (!pixels) {
-            result.ErrorMessage = L"JXL decoding failed";
-            return result;
+            result.status = E_FAIL;
+            return result.status;
         }
 
         // Create HBITMAP from decoded pixels
-        result.Bitmap = CreateHBITMAPFromRGBA(pixels, decodedWidth, decodedHeight, channels);
+        result.hBitmap = CreateHBITMAPFromRGBA(pixels, decodedWidth, decodedHeight, channels);
         delete[] pixels;
 
-        if (result.Bitmap) {
-            result.Success = true;
-            result.Width = decodedWidth;
-            result.Height = decodedHeight;
+        if (result.hBitmap) {
+            result.status = S_OK;
+            result.width = decodedWidth;
+            result.height = decodedHeight;
+            return S_OK;
         } else {
-            result.ErrorMessage = L"Failed to create HBITMAP";
+            result.status = E_OUTOFMEMORY;
+            return result.status;
         }
 #else
         // Placeholder until libjxl is integrated
-        result.ErrorMessage = L"JXL decoder not yet implemented (libjxl library required)";
-        result.Success = false;
+        // Return E_NOTIMPL to indicate decoder not yet implemented
+        result.status = E_NOTIMPL;
+        return E_NOTIMPL;
 #endif
-
-        return result;
     }
 
     bool JXLDecoder::VerifyJXLSignature(const uint8_t* data, size_t size) const {
@@ -244,7 +255,7 @@ namespace Engine {
 #endif
     }
 
-    std::unique_ptr<uint8_t[]> JXLDecoder::ReadFileData(const std::wstring& filePath, size_t& outSize) {
+    std::unique_ptr<uint8_t[]> JXLDecoder::ReadFileData(const wchar_t* filePath, size_t& outSize) {
         std::ifstream file(filePath, std::ios::binary | std::ios::ate);
         if (!file.is_open()) {
             outSize = 0;
