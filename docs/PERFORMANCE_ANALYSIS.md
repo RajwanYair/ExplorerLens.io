@@ -1,13 +1,16 @@
 # Performance Analysis Report
 **DarkThumbs Engine v5.3.0**  
-**Sprint 11 - Week 5 Day 2**  
-**Date:** January 12, 2026
+**Sprint 11 - Week 5 Day 2-3**  
+**Date:** January 12-13, 2026
+**Update:** Decoder registration completed, benchmark diagnostics in progress
 
 ---
 
 ## Executive Summary
 
 Performance profiling infrastructure has been successfully implemented and integrated into the DarkThumbs Engine. The profiling framework provides high-resolution timing measurements, statistical analysis, and comprehensive reporting capabilities for identifying performance bottlenecks and optimization opportunities.
+
+**Recent Update (Jan 13):** Decoder registration has been implemented in ThumbnailPipeline. Initial benchmarks show decoders are being called but thumbnail generation is failing (0% success rate). Diagnostic investigation is needed to identify the root cause before performance optimization can proceed.
 
 ### Key Achievements
 - ✅ PerformanceProfiler class with microsecond-precision timing
@@ -16,6 +19,40 @@ Performance profiling infrastructure has been successfully implemented and integ
 - ✅ EngineBenchmark.exe for systematic performance testing
 - ✅ Statistical analysis (min/max/avg/total times, call counts)
 - ✅ Report generation and file export capabilities
+- ✅ Decoder registration in pipeline (Archive, WebP, AVIF, Image/WIC)
+- ⚠️ Benchmark reveals thumbnail generation failures (requires investigation)
+
+---
+
+## Recent Benchmark Results (January 13, 2026)
+
+### Test Configuration
+- **Test Image:** C:\Windows\Web\Wallpaper\Windows\img0.jpg (JPEG)
+- **Total Requests:** 31  
+- **Success Rate:** 0% (0/31) ⚠️
+- **Average Pipeline Time:** 0.98 ms
+- **Average Decode Time:** 0.05 ms
+- **Cache Hit Rate:** 0% (no successful generations to cache)
+
+### Performance Profile
+```
+Component                     Calls   Total(ms)     Avg(ms)     Min(ms)     Max(ms)
+-----------------------------------------------------------------------------------
+Pipeline Total                   31       30.43        0.98        0.44        8.59
+Decode Image                     31        1.60        0.05        0.01        0.78
+```
+
+### Key Observations
+1. **Decoders are registered and called:** Profile shows 31 "Decode Image" calls  
+2. **Fast failure:** 0.05ms avg decode time suggests immediate failure, not timeout
+3. **No cache utilization:** 0% hit rate (expected since generation fails)
+4. **FindDecoder() succeeds:** Pipeline finds appropriate decoder for JPEG files
+
+### Next Steps for Investigation
+1. Add diagnostic logging to capture HRESULT values from Decode() calls
+2. Verify WIC initialization in ImageDecoder::Initialize()
+3. Test decoders directly outside pipeline context
+4. Confirm COM initialization before pipeline usage
 
 ---
 

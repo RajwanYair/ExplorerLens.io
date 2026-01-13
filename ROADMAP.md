@@ -83,7 +83,7 @@
 
 #### Sprint 11: Platform Foundation (Weeks 5-8) ⏳ IN PROGRESS
 
-**Status:** ~65% Complete (January 12, 2026 - Week 5 Day 2 Session 3)
+**Status:** ~70% Complete (January 13, 2026 - Week 5 Day 3 Session 1)
 
 **Completed:**
 - ✅ Engine builds as standalone DarkThumbsEngine.lib (1.99 MB, zero COM dependencies)
@@ -118,6 +118,11 @@
 - ✅ **Cache Integration Complete**
   - Automatic cache lookup before decoding (1-5ms cache hits)
   - Transparent cache storage after successful decode
+- ✅ **Decoder Registration Implemented** (January 13)
+  - ThumbnailPipeline now registers 4 active decoders on initialization
+  - Proper lifetime management with unique_ptr storage
+  - Registration order: Archive → WebP → AVIF → WIC/Image
+  - Decoders confirmed being called (profiling shows activity)
   - MD5-based cache keys with file metadata
   - Persistent storage in %LOCALAPPDATA%
   - 64% average performance improvement with cache
