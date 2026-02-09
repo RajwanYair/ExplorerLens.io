@@ -2,12 +2,71 @@
 
 **For:** GitHub Copilot, AI coding assistants  
 **Project:** DarkThumbs  
-**Machine Type:** Slow compilation machine  
-**Last Updated:** January 8, 2026
+**Environment:** Persistent dev tools (no searching!)  
+**Last Updated:** February 9, 2026
 
 ---
 
-## 🚨 CRITICAL RULES - READ FIRST
+## 🎯 NEW: Zero-Configuration Environment (Feb 2026)
+
+**All build tools are now available immediately in every PowerShell session!**
+
+No more searching for MSBuild, CMake, or MSVC. Everything is pre-configured.
+
+### How It Works
+
+1. **Setup script auto-loads** in PowerShell profile
+2. **MSVC environment loaded** on demand (CL, NMake, Link, RC)
+3. **All tools verified** before first use
+4. **Convenient aliases** ready to use (dtbuild, dttest, dtclean)
+
+### Quick Verification
+
+```powershell
+# Check environment is loaded:
+Show-DarkThumbsInfo
+
+# Test all tools:
+Test-BuildTools
+```
+
+**Expected Output:**
+```
+✅ MSBuild (18.3.0)
+✅ CMake (4.2.1)
+✅ Git (2.x.x)
+✅ MSVC (CL) (19.44.x)
+✅ NMake
+✅ Link
+✅ RC
+✅ Ninja (1.x.x)
+```
+
+---
+
+## � Recommended Build Approach (2026)
+
+### Use Convenient Aliases
+
+```powershell
+# Build full solution (Release)
+dtbuild Release
+
+# Build Engine only
+dtbuild Engine
+
+# Clean artifacts
+dtbuild Clean
+
+# Run tests
+dttest
+```
+
+These commands handle all complexity internally. No monitoring needed!
+
+---
+
+## 🚨 CRITICAL RULES - READ FIRST (Legacy/Manual Builds)
 
 ### Rule #1: NEVER Interrupt Running Builds
 
