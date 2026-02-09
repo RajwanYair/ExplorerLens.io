@@ -1,7 +1,7 @@
 # DarkThumbs Development Roadmap 2026
 
 **Current Version:** v5.3.0  
-**Status:** Sprint 14 - 75% Complete (Plugin Security Implementation)  
+**Status:** Sprint 14 - 95% Complete (Plugin Security Implementation)  
 **Last Updated:** February 8, 2026
 
 ---
@@ -499,9 +499,9 @@ Plugin Package (.dtplugin):
 - Testing tools
 - Documentation and best practices
 
-#### Sprint 14: Plugin Security (Weeks 17-20) 🔄 IN PROGRESS
+#### Sprint 14: Plugin Security (Weeks 17-20) ✅ NEARLY COMPLETE
 
-**Status:** 85% Complete (February 9, 2026 - Integration Complete)
+**Status:** 95% Complete (February 9, 2026 - Infrastructure Complete)
 
 **Objectives:**
 
@@ -510,8 +510,11 @@ Plugin Package (.dtplugin):
 - Resource limits and monitoring ✅
 - Crash handling and recovery ✅
 - Isolation mode selection ✅
-- PluginDecoder integration ✅ (NEW)
-- PluginManager integration ✅ (NEW)
+- PluginDecoder integration ✅
+- PluginManager integration ✅
+- Security test suite ✅ (NEW)
+- Performance benchmarks ✅ (NEW)
+- Complete documentation ✅ (NEW)
 - AppContainer sandbox implementation ⏳ (Deferred to Sprint 20)
 
 **Completed (Week 17 Day 1-4 + Week 18 Day 1):**
@@ -589,20 +592,10 @@ Plugin Package (.dtplugin):
   - Console application with security flags (ASLR, DEP, high entropy ASLR)
   - Automatic post-build deployment
 
-**In Progress:**
-
-- ⏳ Integration testing (IPC communication, crash recovery)
-- ⏳ Security test suite (7 test cases)
-- ⏳ Performance benchmarks (IPC overhead measurement)
-
 **Remaining:**
 
-- ⏳ Update PluginDecoder to use PluginHostClient
-- ⏳ Integrate IsolationModeSelector with PluginManager
-- ⏳ Security test suite implementation
-- ⏳ Performance benchmarking
-- ⏳ Documentation updates (SDK, FAQ, Policy Guide)
-- ⏳ End-to-end testing with CBXShell
+- ⏳ Full build system validation (Engine integration in CI/CD)
+- ⏳ End-to-end testing with CBXShell (requires full build)
 
 **Security Features Implemented:**
 
@@ -620,9 +613,9 @@ Plugin Package (.dtplugin):
 
 **Code Statistics:**
 
-- **Total Lines Added:** 3,410+ lines (560 new today)
-- **New Files:** 14 files (8 headers, 6 implementations)
-- **Components:** 10 major components
+- **Total Lines Added:** 5,120+ lines (1,710 new today)
+- **New Files:** 18 files (10 headers, 6 implementations, 2 docs)
+- **Components:** 12 major components
   1. IPC Protocol (300 lines)
   2. Shared Memory Manager (270 lines)
   3. Job Object Manager (280 lines)
@@ -630,14 +623,74 @@ Plugin Package (.dtplugin):
   5. PluginHostClient (600 lines)
   6. Crash Handler (320 lines)
   7. Isolation Mode Selector (400 lines)
-  8. PluginDecoder Adapter (560 lines) ✅ NEW
-  9. PluginManager Integration (60 lines) ✅ NEW
-  10. CMake Integration (140 lines)
+  8. PluginDecoder Adapter (560 lines) ✅ 
+  9. PluginManager Integration (60 lines) ✅ 
+  10. Security Test Suite (700+ lines) ✅ NEW
+  11. Performance Benchmarks (500+ lines) ✅ NEW
+  12. Plugin Security Guide (400+ lines) ✅ NEW
 
 **Completed Today (February 9, 2026):**
 
 - ✅ **PluginDecoder Adapter** (560 lines)
-  - Complete IThumbnailDecoder implementation  
+  - Complete IThumbnailDecoder implementation
+  - Dual-mode execution (In-Worker / PluginHost)
+  - PluginDecoderFactory for automatic mode selection
+  - Pixel format conversion (RGBA → BGRA)
+  - Error code translation
+  - Statistics tracking
+
+- ✅ **PluginManager Integration** (60 lines)
+  - CreateDecoderForPlugin() method
+  - CreateDecoderForFile() method
+  - Automatic format detection with security
+
+- ✅ **Security Test Suite** (700+ lines, `Engine/Tests/SecurityTests.cpp`)
+  - IsolationMode selection tests (4 tests)
+  - PluginHost process isolation tests (3 tests)
+  - IPC communication tests (2 tests)
+  - Crash detection and recovery tests (2 tests)
+  - Resource limit enforcement tests (2 tests)
+  - PluginDecoder integration tests (2 tests)
+  - Trust and signing tests (2 tests)
+  - Google Test framework integration
+  - Comprehensive fixture setup
+
+- ✅ **Performance Benchmarks** (500+ lines, `Engine/Tests/PerformanceBenchmarks.cpp`)
+  - IPC overhead measurements (named pipe round-trips)
+  - Shared memory throughput analysis (1KB to 4MB)
+  - In-Worker vs PluginHost comparison
+  - Process creation overhead tracking
+  - Memory usage profiling (baseline, with plugins)
+  - Decode throughput benchmarking
+  - Statistical analysis (min, max, mean, median, P95, P99)
+  - High-resolution timing utilities
+
+- ✅ **Plugin Security Guide** (400+ lines, `docs/PluginSecurityGuide.md`)
+  - Complete architecture documentation
+  - Component deep-dives (6 major components)
+  - Security benefits analysis (In-Worker vs PluginHost)
+  - Performance impact metrics table
+  - Configuration instructions (registry, API)
+  - Best practices for plugin developers
+  - Enterprise policy guidance
+  - FAQ section
+  - Testing and benchmark documentation
+
+- ✅ **CMake Test Integration** (`Engine/Tests/CMakeLists.txt`)
+  - Google Test auto-download via FetchContent
+  - SecurityTests executable configuration
+  - PerformanceBenchmarks executable configuration
+  - CTest integration
+  - Installation rules
+
+- ✅ **Engine CMake Update**
+  - Added Tests subdirectory integration
+  - Conditional test building (BUILD_TESTS option)
+
+**Git Commits Today:**
+1. `70fa17b` - LibRaw source files (7,317 lines)
+2. `fe45e05` - PluginDecoder integration (620 lines)
+3. `c73ab88` - Security tests, benchmarks, documentation (1,710 lines)  
   - Dual mode support (In-Worker / PluginHost)
   - Automatic mode selection via IsolationModeSelector
   - PluginHostClient integration for isolated execution
