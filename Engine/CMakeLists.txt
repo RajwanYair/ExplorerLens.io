@@ -16,20 +16,29 @@ project(DarkThumbsEngine
 # Project Options
 #==============================================================================
 
-option(BUILD_TESTS "Build unit tests" OFF)  # Disabled during infrastructure testing
+option(BUILD_TESTS "Build unit tests" ON)  # Enabled for CI/CD
+option(BUILD_BENCHMARKS "Build performance benchmarks" ON)
 option(BUILD_SHARED_LIBS "Build as shared library" OFF)
 option(ENABLE_GPU "Enable GPU acceleration" ON)
+option(ENABLE_CACHE "Enable thumbnail caching" ON)
 
 #==============================================================================
 # Compiler Settings
 #==============================================================================
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)  # C++20 for latest features
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Use /MD runtime (Multi-threaded DLL)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
+# Windows 11 optimizations
+add_compile_definitions(
+    WINVER=0x0A00
+    _WIN32_WINNT=0x0A00
+    NTDDI_VERSION=0x0A000000
+)
 
 #==============================================================================
 # Source Files
@@ -53,8 +62,8 @@ set(ENGINE_HEADERS
     Decoders/WebPDecoder.h
     Decoders/AVIFDecoder.h
     Decoders/ArchiveDecoder.h
-    # Decoders/JXLDecoder.h         # TODO: Fix interface mismatch
-    # Decoders/HEIFDecoder.h        # TODO: Fix interface mismatch
+    Decoders/JXLDecoder.h         # JPEG XL decoder
+    Decoders/HEIFDecoder.h        # HEIF/HEIC decoder
     
     # GPU
     GPU/D3D11Renderer.h
@@ -63,8 +72,19 @@ set(ENGINE_HEADERS
     # Cache
     Cache/ThumbnailCache.h
     
+    # Plugin System
+    Plugin/PluginManager.h
+    Plugin/PluginDecoder.h         # Plugin wrapper for IThumbnailDecoder
+    Plugin/PluginHostClient.h
+    Plugin/CrashHandler.h
+    Plugin/IsolationModeSelector.h
+    Plugin/IPC/PluginIPCProtocol.h
+    Plugin/IPC/SharedMemoryManager.h
+    Plugin/Security/JobObjectManager.h
+    
     # Utils
     Utils/PerformanceProfiler.h
+    Utils/SIMDScaler.h
 )
 
 set(ENGINE_SOURCES
@@ -78,8 +98,8 @@ set(ENGINE_SOURCES
     Decoders/WebPDecoder.cpp
     Decoders/AVIFDecoder.cpp
     Decoders/ArchiveDecoder.cpp
-    # Decoders/JXLDecoder.cpp       # TODO: Fix interface mismatch
-    # Decoders/HEIFDecoder.cpp      # TODO: Fix interface mismatch
+    Decoders/JXLDecoder.cpp       # JPEG XL decoder
+    Decoders/HEIFDecoder.cpp      # HEIF/HEIC decoder
     
     # GPU
     GPU/D3D11Renderer.cpp
@@ -88,8 +108,18 @@ set(ENGINE_SOURCES
     # Cache
     Cache/ThumbnailCache.cpp
     
+    # Plugin System
+    Plugin/PluginManager.cpp
+    Plugin/PluginDecoder.cpp       # Plugin wrapper for IThumbnailDecoder
+    Plugin/PluginHostClient.cpp
+    Plugin/CrashHandler.cpp
+    Plugin/IsolationModeSelector.cpp
+    Plugin/IPC/SharedMemoryManager.cpp
+    Plugin/Security/JobObjectManager.cpp
+    
     # Utils
     Utils/PerformanceProfiler.cpp
+    Utils/SIMDScaler.cpp
 )
 
 #==============================================================================
@@ -111,6 +141,11 @@ if(ENGINE_SOURCES)
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libwebp-1.5.0/src
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression/minizip-ng-4.0.10
+            # HEIF/JXL includes
+            ${CMAKE_CURRENT_SOURCE_DIR}/../external/libheif-install/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/../external/libjxl-install/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/../external/brotli-install/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/../external/highway-install/include
     )
     
     # Windows-specific settings
@@ -129,7 +164,8 @@ if(ENGINE_SOURCES)
                 windowscodecs
                 shlwapi
                 bcrypt          # For minizip-ng crypto
-                crypt32         # For minizip-ng crypto
+                crypt32         # For minizip-ng crypto and signatures
+                wintrust        # For Authenticode signature verification
         )
         
         # Link libwebp
@@ -139,6 +175,11 @@ if(ENGINE_SOURCES)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression/minizip-ng-4.0.10/build-manual
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression/zlib-1.3.1/x64/Release
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression/zstd-1.5.7/build-manual
+                # HEIF/JXL libraries
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/libheif-install/lib
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/libjxl-install/lib
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/brotli-install/lib
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/highway-install/lib
         )
         
         target_link_libraries(DarkThumbsEngine
@@ -148,6 +189,13 @@ if(ENGINE_SOURCES)
                 minizip
                 zlibstatic
                 zstd_static
+                # HEIF/JXL libraries
+                heif
+                jxl
+                jxl_threads
+                brotlicommon
+                brotlidec
+                hwy
         )
     endif()
     
@@ -176,6 +224,12 @@ if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(Tests)
 endif()
+
+#==============================================================================
+# PluginHost Executable
+#==============================================================================
+
+add_subdirectory(PluginHost)
 
 #==============================================================================
 # Installation
