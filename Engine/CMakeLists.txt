@@ -91,6 +91,7 @@ set(ENGINE_HEADERS
     Decoders/PDFDecoder.h         # PDF document thumbnail
     Decoders/DocumentDecoder.h    # Document format thumbnails
     Decoders/FontDecoder.h        # Font preview renderer
+    Decoders/ModelDecoder.h       # 3D model decoder (Sprint 12)
     
     # GPU
     GPU/D3D11Renderer.h
@@ -150,6 +151,7 @@ set(ENGINE_SOURCES
     Decoders/PDFDecoder.cpp       # PDF document thumbnail
     Decoders/DocumentDecoder.cpp  # Document format thumbnails
     Decoders/FontDecoder.cpp      # Font preview renderer
+    Decoders/ModelDecoder.cpp     # 3D model decoder (Sprint 12)
     
     # GPU
     GPU/D3D11Renderer.cpp

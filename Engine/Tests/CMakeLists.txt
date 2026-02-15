@@ -25,6 +25,11 @@ add_executable(EngineBenchmark
     EngineBenchmark.cpp
 )
 
+# Sprint 16: Integration Tests
+add_executable(IntegrationTests
+    IntegrationTests.cpp
+)
+
 # Link JXL libraries if enabled
 if(HAS_LIBJXL)
     target_compile_definitions(EngineBenchmark PRIVATE JXL_STATIC_DEFINE)
@@ -44,6 +49,12 @@ target_link_libraries(EngineBenchmark
         DarkThumbsEngine
 )
 
+# Link IntegrationTests
+target_link_libraries(IntegrationTests
+    PRIVATE
+        DarkThumbsEngine
+)
+
 # Link JXL libraries if enabled
 if(HAS_LIBJXL)
     target_link_libraries(EngineBenchmark
@@ -57,6 +68,11 @@ if(HAS_LIBJXL)
 endif()
 
 target_include_directories(EngineBenchmark
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
+
+target_include_directories(IntegrationTests
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
