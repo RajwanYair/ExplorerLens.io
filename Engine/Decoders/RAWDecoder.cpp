@@ -49,7 +49,17 @@ const wchar_t* RAWDecoder::m_extensions[] = {
     // Phase One
     L".iiq",
     // Sigma
-    L".x3f"
+    L".x3f",
+    // Kodak
+    L".dcr", L".kdc",
+    // Minolta
+    L".mrw",
+    // Epson
+    L".erf",
+    // Mamiya
+    L".mef",
+    // Red Digital Cinema
+    L".r3d"
 };
 
 const uint32_t RAWDecoder::m_extensionCount = 
@@ -459,6 +469,87 @@ HBITMAP RAWDecoder::DecodeJPEGToHBITMAP(const BYTE* jpegData, size_t dataSize) {
     return hBitmap;
 }
 
+// ============================================================================
+// RAW Metadata Extraction
+// ============================================================================
+
+bool RAWDecoder::GetRAWMetadata(const wchar_t* filePath, RAWMetadata& metadata) {
+    if (!filePath) return false;
+    
+    try {
+        LibRaw rawProcessor;
+        
+        // Convert wchar_t path to char
+        char pathMB[MAX_PATH];
+        WideCharToMultiByte(CP_UTF8, 0, filePath, -1, pathMB, MAX_PATH, NULL, NULL);
+        
+        // Open file
+        int ret = rawProcessor.open_file(pathMB);
+        if (ret != LIBRAW_SUCCESS) {
+            return false;
+        }
+        
+        // Extract metadata from RAW file
+        libraw_imgother_t& other = rawProcessor.imgdata.other;
+        libraw_iparams_t& idata = rawProcessor.imgdata.idata;
+        libraw_image_sizes_t& sizes = rawProcessor.imgdata.sizes;
+        
+        // Camera info
+        if (idata.make[0] != '\0') {
+            char makeMB[128];
+            strncpy_s(makeMB, idata.make, sizeof(makeMB) - 1);
+            int wideSize = MultiByteToWideChar(CP_UTF8, 0, makeMB, -1, nullptr, 0);
+            if (wideSize > 0) {
+                std::vector<wchar_t> wideStr(wideSize);
+                MultiByteToWideChar(CP_UTF8, 0, makeMB, -1, wideStr.data(), wideSize);
+                metadata.cameraMake = wideStr.data();
+            }
+        }
+        
+        if (idata.model[0] != '\0') {
+            char modelMB[128];
+            strncpy_s(modelMB, idata.model, sizeof(modelMB) - 1);
+            int wideSize = MultiByteToWideChar(CP_UTF8, 0, modelMB, -1, nullptr, 0);
+            if (wideSize > 0) {
+                std::vector<wchar_t> wideStr(wideSize);
+                MultiByteToWideChar(CP_UTF8, 0, modelMB, -1, wideStr.data(), wideSize);
+                metadata.cameraModel = wideStr.data();
+            }
+        }
+        
+        // Exposure settings
+        metadata.isoSpeed = static_cast<uint32_t>(other.iso_speed);
+        metadata.shutterSpeed = other.shutter;
+        metadata.aperture = other.aperture;
+        metadata.focalLength = other.focal_len;
+        
+        // Image dimensions
+        metadata.imageWidth = sizes.width;
+        metadata.imageHeight = sizes.height;
+        
+        // Check for embedded thumbnail
+        ret = rawProcessor.unpack_thumb();
+        metadata.hasEmbeddedThumbnail = (ret == LIBRAW_SUCCESS && rawProcessor.imgdata.thumbnail.thumb != nullptr);
+        
+        // Timestamp
+        if (other.timestamp > 0) {
+            time_t timestamp = other.timestamp;
+            struct tm timeinfo;
+            if (localtime_s(&timeinfo, &timestamp) == 0) {
+                wchar_t timeStr[64];
+                wcsftime(timeStr, sizeof(timeStr) / sizeof(wchar_t), L"%Y-%m-%d %H:%M:%S", &timeinfo);
+                metadata.timestamp = timeStr;
+            }
+        }
+        
+        return true;
+        
+    } catch (const std::exception& e) {
+        LOG_ERROR(L"RAWDecoder: Exception in GetRAWMetadata: %S", e.what());
+        return false;
+    }
+}
+
 } // namespace Engine
 } // namespace DarkThumbs
 
@@ -481,6 +572,7 @@ RAWDecoder::RAWDecoder() {}
 RAWDecoder::~RAWDecoder() {}
 bool RAWDecoder::CanDecode(const wchar_t*) { return false; }
 HRESULT RAWDecoder::Decode(const ThumbnailRequest&, ThumbnailResult&) { return E_NOTIMPL; }
+bool RAWDecoder::GetRAWMetadata(const wchar_t*, RAWMetadata&) { return false; }
 DecoderInfo RAWDecoder::GetInfo() const {
     DecoderInfo info{};
     info.version = 0;

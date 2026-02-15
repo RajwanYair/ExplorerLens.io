@@ -2,14 +2,15 @@
 // DarkThumbs Engine v1.0.0
 // Copyright (c) 2026 DarkThumbs Project
 //
-// Supports: Canon CR2/CR3, Nikon NEF, Sony ARW, Adobe DNG, and 15+ camera RAW formats
+// Supports: Canon CR2/CR3, Nikon NEF, Sony ARW, Adobe DNG, and 20+ camera RAW formats
 // Features:
 // - Embedded thumbnail extraction (fast path < 10ms)
 // - Full RAW decode with demosaicing (quality path < 200ms)
 // - EXIF orientation handling
 // - White balance and exposure adjustment
 // - Wide color gamut support (converts to sRGB)
-// - Supports 500+ camera models
+// - Supports 700+ camera models
+// - RAW metadata extraction (camera model, ISO, exposure, aperture)
 
 #pragma once
 
@@ -17,9 +18,24 @@
 #include "../Utils/EXIFOrientation.h"
 #include <memory>
 #include <mutex>
+#include <string>
 
 namespace DarkThumbs {
 namespace Engine {
+
+// RAW image metadata structure
+struct RAWMetadata {
+    std::wstring cameraModel;
+    std::wstring cameraMake;
+    uint32_t isoSpeed = 0;
+    float shutterSpeed = 0.0f; // in seconds
+    float aperture = 0.0f;     // f-stop value
+    float focalLength = 0.0f;  // in mm
+    uint32_t imageWidth = 0;
+    uint32_t imageHeight = 0;
+    std::wstring timestamp;
+    bool hasEmbeddedThumbnail = false;
+};
 
 class RAWDecoder : public IThumbnailDecoder {
 public:
@@ -35,6 +51,9 @@ public:
     uint32_t GetExtensionCount() const override { return m_extensionCount; }
     bool SupportsGPU() const override { return false; } // CPU-based LibRaw
     bool IsArchiveDecoder() const override { return false; }
+
+    // RAW metadata extraction
+    bool GetRAWMetadata(const wchar_t* filePath, RAWMetadata& metadata);
 
 private:
     // Implementation details hidden in pImpl
@@ -79,6 +98,9 @@ private:
     // Hasselblad: 3fr
     // Phase One: iiq
     // Sigma: x3f
+    // Kodak: dcr, kdc
+    // Minolta: mrw
+    // Epson: erf
     static const wchar_t* m_extensions[];
     static const uint32_t m_extensionCount;
 };
