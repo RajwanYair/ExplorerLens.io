@@ -54,6 +54,7 @@ set(ENGINE_HEADERS
     Engine.h
     Core/Types.h
     Core/Config.h
+    Core/EngineAPI.h
     Core/BuildConfig.h
     Core/DecoderHealthMonitor.h
     Core/ErrorContext.h
@@ -111,6 +112,7 @@ set(ENGINE_HEADERS
     # Utils
     Utils/PerformanceProfiler.h
     Utils/SIMDScaler.h
+    Utils/HardwareCapabilities.h
     Utils/EXIFOrientation.h
     Utils/MemoryMappedFile.h
     Utils/SmallObjectPool.h
@@ -119,6 +121,7 @@ set(ENGINE_HEADERS
 set(ENGINE_SOURCES
     # Core implementations
     Core/Config.cpp
+    Core/EngineAPI.cpp
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -167,6 +170,7 @@ set(ENGINE_SOURCES
     # Utils
     Utils/PerformanceProfiler.cpp
     Utils/SIMDScaler.cpp
+    Utils/HardwareCapabilities.cpp
     Utils/EXIFOrientation.cpp
 )
 
@@ -177,9 +181,10 @@ set(ENGINE_SOURCES
 if(ENGINE_SOURCES)
     if(BUILD_SHARED_LIBS)
         add_library(DarkThumbsEngine SHARED ${ENGINE_SOURCES} ${ENGINE_HEADERS})
-        target_compile_definitions(DarkThumbsEngine PRIVATE DARKTHUMBS_ENGINE_EXPORTS)
+        target_compile_definitions(DarkThumbsEngine PRIVATE ENGINE_EXPORTS)
     else()
         add_library(DarkThumbsEngine STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS})
+        target_compile_definitions(DarkThumbsEngine PRIVATE ENGINE_EXPORTS)
     endif()
     
     target_include_directories(DarkThumbsEngine
@@ -283,9 +288,19 @@ if(ENGINE_SOURCES)
             /permissive-  # Standards conformance
         )
         
-        # Fix LIBCMT conflict - ignore static CRT if library was built with /MT
+        # CRT Runtime Linking Fix
+        # NOTE: This is a temporary workaround. The proper fix is to rebuild
+        # all external libraries with /MD (dynamic CRT) instead of /MT (static CRT).
+        # Affected libraries: libwebp, zlib, zstd, minizip-ng, brotli, highway
+        # 
+        # Proper solution:
+        #   1. Rerun CMake for each external library with: -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
+        #   2. Or add set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL") to their CMakeLists.txt
+        #   3. Rebuild all Release libraries
+        # 
+        # Until fixed, we must ignore LIBCMT to avoid LNK4098 warnings/errors
         target_link_options(DarkThumbsEngine PRIVATE
-            /NODEFAULTLIB:LIBCMT    # Ignore static CRT, use dynamic /MD
+            /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts
             /IGNORE:4099            # Ignore missing PDB warnings for external libs
         )
     endif()

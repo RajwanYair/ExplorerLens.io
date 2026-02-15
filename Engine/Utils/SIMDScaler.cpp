@@ -4,45 +4,16 @@
 //==============================================================================
 
 #include "SIMDScaler.h"
+#include "HardwareCapabilities.h"
 #include <algorithm>
 #include <cstring>
 #include <cmath>
 #include <intrin.h>
 
+using namespace DarkThumbs::Engine;
+
 namespace DarkThumbs {
 namespace SIMD {
-
-//==============================================================================
-// CPU Feature Detection
-//==============================================================================
-
-CPUFeatures::CPUFeatures() {
-    int cpuInfo[4];
-    
-    // Check for extended features
-    __cpuidex(cpuInfo, 7, 0);
-    m_hasAVX2 = (cpuInfo[1] & (1 << 5)) != 0;
-    m_hasFMA = (cpuInfo[1] & (1 << 12)) != 0;
-    
-    // Check for AVX-512 Foundation (basic AVX-512 support)
-    // AVX-512F is bit 16 of EBX in CPUID.(EAX=07H, ECX=0)
-    m_hasAVX512 = (cpuInfo[1] & (1 << 16)) != 0;
-    
-    // Check for SSE4.1 support
-    __cpuid(cpuInfo, 1);
-    m_hasSSE41 = (cpuInfo[2] & (1 << 19)) != 0;
-    
-    // Verify OS supports AVX-512 (XSAVE enabled for ZMM registers)
-    if (m_hasAVX512) {
-        __cpuidex(cpuInfo, 0xD, 1);
-        // Check XCR0 for ZMM state support
-        unsigned long long xcr0 = _xgetbv(0);
-        bool osSupportsAVX512 = (xcr0 & 0xE6) == 0xE6;  // Check bits 5, 6, 7 (ZMM, opmask, Hi16_ZMM)
-        if (!osSupportsAVX512) {
-            m_hasAVX512 = false;  // CPU has AVX-512 but OS doesn't support it
-        }
-    }
-}
 
 //==============================================================================
 // Main Scaling Function
@@ -68,7 +39,8 @@ bool SIMDScaler::ScaleBGRA(
     }
 
     // Select implementation based on quality and CPU features
-    const auto& cpuFeatures = CPUFeatures::Get();
+    const auto& hwCaps = HardwareCapabilities::Get();
+    const auto& cpu = hwCaps.GetCPU();
     
     switch (quality) {
         case ScalingQuality::NearestNeighbor:
@@ -80,7 +52,7 @@ bool SIMDScaler::ScaleBGRA(
             
         case ScalingQuality::Bicubic:
             // Bicubic scaling (higher quality, sharp edges)
-            if (cpuFeatures.HasAVX2()) {
+            if (cpu.hasAVX2) {
                 return ScaleBGRA_Bicubic_AVX2(
                     srcData, srcWidth, srcHeight, srcStride,
                     dstData, dstWidth, dstHeight, dstStride
@@ -102,12 +74,12 @@ bool SIMDScaler::ScaleBGRA(
         case ScalingQuality::Bilinear:
         default:
             // Bilinear scaling (fast, good quality, balanced)
-            if (cpuFeatures.HasAVX2()) {
+            if (cpu.hasAVX2) {
                 return ScaleBGRA_Bilinear_AVX2(
                     srcData, srcWidth, srcHeight, srcStride,
                     dstData, dstWidth, dstHeight, dstStride
                 );
-            } else if (cpuFeatures.HasSSE41()) {
+            } else if (cpu.hasSSE41) {
                 return ScaleBGRA_Bilinear_SSE41(
                     srcData, srcWidth, srcHeight, srcStride,
                     dstData, dstWidth, dstHeight, dstStride

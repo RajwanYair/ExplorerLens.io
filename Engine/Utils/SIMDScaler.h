@@ -4,49 +4,18 @@
 // SIMDScaler.h - SIMD-accelerated image scaling
 // Copyright (c) 2026 - DarkThumbs Project
 // 
-// High-performance image scaling using AVX2 intrinsics
+// High-performance image scaling using AVX2/AVX-512 intrinsics
 // Provides 3-4x speedup over naive implementations
+// Uses HardwareCapabilities for CPU feature detection
 //==============================================================================
 
 #include <cstdint>
 #include <memory>
-#include <immintrin.h>  // AVX2 intrinsics
+#include <immintrin.h>  // SIMD intrinsics
+#include "HardwareCapabilities.h"
 
 namespace DarkThumbs {
 namespace SIMD {
-
-//==============================================================================
-// CPU Feature Detection
-//==============================================================================
-
-class CPUFeatures {
-public:
-    static CPUFeatures& Get() {
-        static CPUFeatures instance;
-        return instance;
-    }
-
-    bool HasAVX512() const { return m_hasAVX512; }
-    bool HasAVX2() const { return m_hasAVX2; }
-    bool HasSSE41() const { return m_hasSSE41; }
-    bool HasFMA() const { return m_hasFMA; }
-    
-    // Return best available SIMD instruction set
-    const char* GetBestSIMD() const {
-        if (m_hasAVX512) return "AVX-512";
-        if (m_hasAVX2) return "AVX2";
-        if (m_hasSSE41) return "SSE4.1";
-        return "Scalar";
-    }
-
-private:
-    CPUFeatures();
-    
-    bool m_hasAVX512 = false;
-    bool m_hasAVX2 = false;
-    bool m_hasSSE41 = false;
-    bool m_hasFMA = false;
-};
 
 //==============================================================================
 // SIMD Image Scaler

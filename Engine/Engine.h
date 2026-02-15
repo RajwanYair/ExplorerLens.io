@@ -42,15 +42,8 @@ namespace Engine {
      DARKTHUMBS_ENGINE_VERSION_PATCH)
 #endif
 
-/// Get engine version as string
-inline const wchar_t* GetEngineVersion() {
-    return L"6.0.0";
-}
-
-/// Get engine build date
-inline const wchar_t* GetEngineBuildDate() {
-    return L"" __DATE__ " " __TIME__;
-}
+// Function declarations (implemented in EngineAPI.cpp)
+#include "Core/EngineAPI.h"
 
 //==============================================================================
 /// Engine Information
