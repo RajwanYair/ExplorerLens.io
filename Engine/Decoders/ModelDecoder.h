@@ -31,6 +31,10 @@ namespace Engine {
         HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
         const wchar_t** GetSupportedExtensions() const override;
         DecoderInfo GetInfo() const override;
+        const wchar_t* GetName() const override;
+        uint32_t GetExtensionCount() const override;
+        bool SupportsGPU() const override;
+        bool IsArchiveDecoder() const override;
 
     private:
         // Mesh data structures

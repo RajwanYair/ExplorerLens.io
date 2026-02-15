@@ -59,7 +59,7 @@ int g_integrationTestsFailed = 0;
 INTEGRATION_TEST(TestPipeline_FullInitialization)
 {
     // Test complete pipeline initialization with all decoders
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     ASSERT_INTEGRATION(registry != nullptr);
 
     // Register all decoders
@@ -73,9 +73,10 @@ INTEGRATION_TEST(TestPipeline_FullInitialization)
     registry->RegisterDecoder(new FontDecoder());
     registry->RegisterDecoder(new ModelDecoder());
 
-    auto stats = registry->GetStats();
-    ASSERT_INTEGRATION(stats.totalDecoders >= 9);
-    ASSERT_INTEGRATION(stats.supportedExtensionsCount > 50);
+    size_t totalDecoders = 0, imageDecoders = 0, archiveDecoders = 0, totalExtensions = 0;
+    registry->GetStats(&totalDecoders, &imageDecoders, &archiveDecoders, &totalExtensions);
+    ASSERT_INTEGRATION(totalDecoders >= 9);
+    ASSERT_INTEGRATION(totalExtensions > 50);
 
     delete registry;
 }
@@ -83,7 +84,7 @@ INTEGRATION_TEST(TestPipeline_FullInitialization)
 INTEGRATION_TEST(TestPipeline_ImageFormatsEndToEnd)
 {
     // Test image format decoding pipeline
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ImageDecoder());
     registry->RegisterDecoder(new WebPDecoder());
 
@@ -100,7 +101,7 @@ INTEGRATION_TEST(TestPipeline_ImageFormatsEndToEnd)
 INTEGRATION_TEST(TestPipeline_VideoFormatPriority)
 {
     // Video files should route to VideoDecoder, not ImageDecoder
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ImageDecoder());
     registry->RegisterDecoder(new VideoDecoder());
 
@@ -108,7 +109,7 @@ INTEGRATION_TEST(TestPipeline_VideoFormatPriority)
     ASSERT_INTEGRATION(decoder != nullptr);
 
     auto info = decoder->GetInfo();
-    std::wstring decoderName(info.decoderName);
+    std::wstring decoderName(info.name);
     ASSERT_INTEGRATION(decoderName.find(L"Video") != std::wstring::npos);
 
     delete registry;
@@ -117,7 +118,7 @@ INTEGRATION_TEST(TestPipeline_VideoFormatPriority)
 INTEGRATION_TEST(TestPipeline_ArchiveFormatRecognition)
 {
     // Archives should be handled by ArchiveDecoder
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ArchiveDecoder());
 
     auto* decoder = registry->FindDecoder(L".cbz");
@@ -135,7 +136,7 @@ INTEGRATION_TEST(TestPipeline_ArchiveFormatRecognition)
 INTEGRATION_TEST(TestPipeline_MultiDecoderCoexistence)
 {
     // Multiple decoders should coexist without conflicts
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     
     registry->RegisterDecoder(new ImageDecoder());
     registry->RegisterDecoder(new WebPDecoder());
@@ -159,7 +160,7 @@ INTEGRATION_TEST(TestPipeline_MultiDecoderCoexistence)
         ASSERT_INTEGRATION(decoder != nullptr);
         
         auto info = decoder->GetInfo();
-        std::wstring name(info.decoderName);
+        std::wstring name(info.name);
         ASSERT_INTEGRATION(name.find(testCase.second) != std::wstring::npos);
     }
 
@@ -169,7 +170,7 @@ INTEGRATION_TEST(TestPipeline_MultiDecoderCoexistence)
 INTEGRATION_TEST(TestPipeline_DocumentFormats)
 {
     // Document thumbnails (EPUB, MOBI) should work
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new DocumentDecoder());
 
     auto* decoder = registry->FindDecoder(L".epub");
@@ -184,7 +185,7 @@ INTEGRATION_TEST(TestPipeline_DocumentFormats)
 INTEGRATION_TEST(TestPipeline_FontFormats)
 {
     // Font preview rendering
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new FontDecoder());
 
     auto* decoder = registry->FindDecoder(L".ttf");
@@ -202,7 +203,7 @@ INTEGRATION_TEST(TestPipeline_FontFormats)
 INTEGRATION_TEST(TestPipeline_3DModelFormats)
 {
     // 3D model thumbnails (Sprint 12)
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ModelDecoder());
 
     auto* decoder = registry->FindDecoder(L".obj");
@@ -220,7 +221,7 @@ INTEGRATION_TEST(TestPipeline_3DModelFormats)
 INTEGRATION_TEST(TestPipeline_InvalidFormatHandling)
 {
     // Invalid/unsupported formats should return nullptr
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ImageDecoder());
 
     auto* decoder = registry->FindDecoder(L".xyz");
@@ -235,7 +236,7 @@ INTEGRATION_TEST(TestPipeline_InvalidFormatHandling)
 INTEGRATION_TEST(TestPipeline_NullInputHandling)
 {
     // Pipeline should handle null inputs gracefully
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ImageDecoder());
 
     auto* decoder = registry->FindDecoder(nullptr);
@@ -250,7 +251,7 @@ INTEGRATION_TEST(TestPipeline_NullInputHandling)
 INTEGRATION_TEST(TestPipeline_CaseInsensitiveExtensions)
 {
     // Extensions should be case-insensitive
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ImageDecoder());
 
     auto* decoder1 = registry->FindDecoder(L".JPG");
@@ -269,21 +270,24 @@ INTEGRATION_TEST(TestPipeline_CaseInsensitiveExtensions)
 INTEGRATION_TEST(TestPipeline_DecoderStatistics)
 {
     // Statistics should accurately reflect registered decoders
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     
-    auto stats1 = registry->GetStats();
-    ASSERT_INTEGRATION(stats1.totalDecoders == 0);
-    ASSERT_INTEGRATION(stats1.supportedExtensionsCount == 0);
+    size_t totalDecoders1 = 0, imageDecoders1 = 0, archiveDecoders1 = 0, totalExtensions1 = 0;
+    registry->GetStats(&totalDecoders1, &imageDecoders1, &archiveDecoders1, &totalExtensions1);
+    ASSERT_INTEGRATION(totalDecoders1 == 0);
+    ASSERT_INTEGRATION(totalExtensions1 == 0);
 
     registry->RegisterDecoder(new ImageDecoder());
-    auto stats2 = registry->GetStats();
-    ASSERT_INTEGRATION(stats2.totalDecoders == 1);
-    ASSERT_INTEGRATION(stats2.supportedExtensionsCount > 0);
+    size_t totalDecoders2 = 0, imageDecoders2 = 0, archiveDecoders2 = 0, totalExtensions2 = 0;
+    registry->GetStats(&totalDecoders2, &imageDecoders2, &archiveDecoders2, &totalExtensions2);
+    ASSERT_INTEGRATION(totalDecoders2 == 1);
+    ASSERT_INTEGRATION(totalExtensions2 > 0);
 
     registry->RegisterDecoder(new WebPDecoder());
-    auto stats3 = registry->GetStats();
-    ASSERT_INTEGRATION(stats3.totalDecoders == 2);
-    ASSERT_INTEGRATION(stats3.supportedExtensionsCount > stats2.supportedExtensionsCount);
+    size_t totalDecoders3 = 0, imageDecoders3 = 0, archiveDecoders3 = 0, totalExtensions3 = 0;
+    registry->GetStats(&totalDecoders3, &imageDecoders3, &archiveDecoders3, &totalExtensions3);
+    ASSERT_INTEGRATION(totalDecoders3 == 2);
+    ASSERT_INTEGRATION(totalExtensions3 > totalExtensions2);
 
     delete registry;
 }
@@ -292,7 +296,7 @@ INTEGRATION_TEST(TestPipeline_MemoryManagement)
 {
     // Test proper cleanup - no memory leaks
     for (int i = 0; i < 100; ++i) {
-        auto registry = DecoderRegistry::Create();
+        auto* registry = new DecoderRegistry();
         registry->RegisterDecoder(new ImageDecoder());
         registry->RegisterDecoder(new WebPDecoder());
         registry->RegisterDecoder(new AVIFDecoder());
@@ -308,7 +312,7 @@ INTEGRATION_TEST(TestPipeline_MemoryManagement)
 INTEGRATION_TEST(TestPipeline_ThreadSafety)
 {
     // Basic thread safety test (registry should handle concurrent lookups)
-    auto registry = DecoderRegistry::Create();
+    auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ImageDecoder());
     registry->RegisterDecoder(new WebPDecoder());
 

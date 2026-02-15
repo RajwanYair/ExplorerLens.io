@@ -283,7 +283,7 @@ int main() {
     
     // Check CPU features using HardwareCapabilities
     auto& hwCaps = HardwareCapabilities::Get();
-    const auto& cpu = hwCaps.GetCPUCapabilities();
+    const auto& cpu = hwCaps.GetCPU();
     std::wcout << L"CPU Features:\n";
     std::wcout << L"  AVX2:  " << (cpu.hasAVX2 ? L"Yes" : L"No") << L"\n";
     std::wcout << L"  SSE4.1: " << (cpu.hasSSE41 ? L"Yes" : L"No") << L"\n";

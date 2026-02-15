@@ -47,6 +47,8 @@ target_link_directories(EngineBenchmark
 target_link_libraries(EngineBenchmark
     PRIVATE
         DarkThumbsEngine
+        d3d12.lib
+        dxgi.lib
 )
 
 # Link IntegrationTests

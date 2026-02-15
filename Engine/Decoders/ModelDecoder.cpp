@@ -56,12 +56,31 @@ namespace Engine {
         DecoderInfo info;
         info.name = L"ModelDecoder";
         info.version = L"1.0.0";
-        info.description = L"3D Model Thumbnail Provider (OBJ, STL, GLTF)";
         info.supportedExtensions = const_cast<const wchar_t**>(s_extensions);
         info.extensionCount = 4;
         info.supportsGPU = true;
         info.isArchiveDecoder = false;
         return info;
+    }
+
+    const wchar_t* ModelDecoder::GetName() const
+    {
+        return L"ModelDecoder";
+    }
+
+    uint32_t ModelDecoder::GetExtensionCount() const
+    {
+        return 4;
+    }
+
+    bool ModelDecoder::SupportsGPU() const
+    {
+        return true;
+    }
+
+    bool ModelDecoder::IsArchiveDecoder() const
+    {
+        return false;
     }
 
     HRESULT ModelDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result)
@@ -301,6 +320,8 @@ namespace Engine {
     {
         // GLTF/GLB loading requires a full parser (use tinygltf or cgltf in production)
         // For now, return placeholder indicating format is recognized but not implemented
+        (void)filePath; // Suppress unused parameter warning
+        (void)mesh;     // Suppress unused parameter warning
         return false;
     }
 
@@ -327,7 +348,7 @@ namespace Engine {
         // Calculate projection (very basic orthographic)
         float scaleX = width / (mesh.boundsMax.x - mesh.boundsMin.x);
         float scaleY = height / (mesh.boundsMax.y - mesh.boundsMin.y);
-        float scale = min(scaleX, scaleY) * 0.8f; // 80% of available space
+        float scale = (scaleX < scaleY ? scaleX : scaleY) * 0.8f; // 80% of available space
 
         float centerX = (mesh.boundsMin.x + mesh.boundsMax.x) / 2.0f;
         float centerY = (mesh.boundsMin.y + mesh.boundsMax.y) / 2.0f;
@@ -366,13 +387,13 @@ namespace Engine {
         mesh.boundsMax = mesh.vertices[0].position;
 
         for (const auto& v : mesh.vertices) {
-            mesh.boundsMin.x = min(mesh.boundsMin.x, v.position.x);
-            mesh.boundsMin.y = min(mesh.boundsMin.y, v.position.y);
-            mesh.boundsMin.z = min(mesh.boundsMin.z, v.position.z);
+            mesh.boundsMin.x = (mesh.boundsMin.x < v.position.x) ? mesh.boundsMin.x : v.position.x;
+            mesh.boundsMin.y = (mesh.boundsMin.y < v.position.y) ? mesh.boundsMin.y : v.position.y;
+            mesh.boundsMin.z = (mesh.boundsMin.z < v.position.z) ? mesh.boundsMin.z : v.position.z;
 
-            mesh.boundsMax.x = max(mesh.boundsMax.x, v.position.x);
-            mesh.boundsMax.y = max(mesh.boundsMax.y, v.position.y);
-            mesh.boundsMax.z = max(mesh.boundsMax.z, v.position.z);
+            mesh.boundsMax.x = (mesh.boundsMax.x > v.position.x) ? mesh.boundsMax.x : v.position.x;
+            mesh.boundsMax.y = (mesh.boundsMax.y > v.position.y) ? mesh.boundsMax.y : v.position.y;
+            mesh.boundsMax.z = (mesh.boundsMax.z > v.position.z) ? mesh.boundsMax.z : v.position.z;
         }
     }
 

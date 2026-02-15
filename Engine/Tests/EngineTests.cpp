@@ -1042,7 +1042,7 @@ TEST(TestFontDecoder_GetInfo)
 {
     FontDecoder decoder;
     auto info = decoder.GetInfo();
-    ASSERT_NOT_NULL(info.decoderName);
+    ASSERT_NOT_NULL(info.name);
 }
 
 //==============================================================================
@@ -1065,7 +1065,7 @@ TEST(TestVideoDecoder_TimestampValidation)
     // Verify negative timestamps are rejected
     // Actual implementation tested in VideoDecoder::SeekToKeyframe
     auto info = decoder.GetInfo();
-    ASSERT_NOT_NULL(info.decoderName);
+    ASSERT_NOT_NULL(info.name);
 }
 
 TEST(TestVideoDecoder_CorruptFileHandling)
@@ -1103,7 +1103,7 @@ TEST(TestAudioDecoder_NoAlbumArtGracefulFallback)
     AudioDecoder decoder;
     // Should handle files without album art gracefully
     auto info = decoder.GetInfo();
-    ASSERT_NOT_NULL(info.decoderName);
+    ASSERT_NOT_NULL(info.name);
 }
 
 //==============================================================================
@@ -1134,7 +1134,7 @@ TEST(TestDocumentDecoder_MissingCoverHandling)
     DocumentDecoder decoder;
     // Should handle EPUB without cover.jpg/png gracefully
     auto info = decoder.GetInfo();
-    ASSERT_NOT_NULL(info.decoderName);
+    ASSERT_NOT_NULL(info.name);
 }
 
 //==============================================================================
@@ -1154,7 +1154,7 @@ TEST(TestFontDecoder_MetadataExtraction)
     FontDecoder decoder;
     // Test font metadata extraction (family, weight, style)
     auto info = decoder.GetInfo();
-    ASSERT_NOT_NULL(info.decoderName);
+    ASSERT_NOT_NULL(info.name);
 }
 
 TEST(TestFontDecoder_TrueTypeCollectionHandling)
@@ -1191,7 +1191,7 @@ TEST(TestArchiveDecoder_PasswordProtectedHandling)
     ArchiveDecoder decoder;
     // Should detect password-protected archives gracefully
     auto info = decoder.GetInfo();
-    ASSERT_NOT_NULL(info.decoderName);
+    ASSERT_NOT_NULL(info.name);
 }
 
 //==============================================================================
@@ -1244,7 +1244,7 @@ TEST(TestModelDecoder_Create)
 {
     ModelDecoder decoder;
     auto info = decoder.GetInfo();
-    ASSERT_NOT_NULL(info.decoderName);
+    ASSERT_NOT_NULL(info.name);
 }
 
 TEST(TestModelDecoder_OBJSupport)
@@ -1282,7 +1282,7 @@ TEST(TestModelDecoder_GetInfo)
 {
     ModelDecoder decoder;
     auto info = decoder.GetInfo();
-    ASSERT_NOT_NULL(info.decoderName);
+    ASSERT_NOT_NULL(info.name);
     ASSERT(info.supportsGPU); // Model decoder uses D3D11
 }
 
