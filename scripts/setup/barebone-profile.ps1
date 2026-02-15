@@ -18,7 +18,7 @@ function prompt {
 }
 
 # Essential DarkThumbs variables
-$global:DarkThumbsPath = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
+$global:DarkThumbsPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 # Quick navigation aliases
 function dt { Set-Location $global:DarkThumbsPath }

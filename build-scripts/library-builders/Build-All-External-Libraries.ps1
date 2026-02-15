@@ -252,11 +252,11 @@ $libraries = @(
     
     # 5. LZMA
     @{
-        Name         = "LZMA 24.08"
+        Name         = "LZMA 26.00"
         Type         = "CMake"
-        SourceDir    = "external\compression\lzma-24.08"
-        BuildDir     = "external\compression\lzma-24.08\build-vs"
-        OutputLib    = "external\compression\lzma-24.08\build-vs\Release\lzma.lib"
+        SourceDir    = "external\compression-libs\lzma-26.00"
+        BuildDir     = "external\compression-libs\lzma-26.00\build-vs"
+        OutputLib    = "external\compression-libs\lzma-26.00\build-vs\Release\lzma.lib"
         CMakeOptions = @{}
     },
     
@@ -276,7 +276,7 @@ $libraries = @(
             "ZLIB_ROOT"    = (Resolve-Path "external\compression\zlib-1.3.1").Path
             "BZIP2_ROOT"   = (Resolve-Path "external\compression\bzip2-1.0.8").Path
             "ZSTD_ROOT"    = (Resolve-Path "external\compression\zstd-1.5.7").Path
-            "LIBLZMA_ROOT" = (Resolve-Path "external\compression\lzma-24.08").Path
+            "LIBLZMA_ROOT" = (Resolve-Path "external\compression-libs\lzma-26.00").Path
         }
     },
     

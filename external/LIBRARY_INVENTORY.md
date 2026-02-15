@@ -14,7 +14,7 @@
 | lz4 | 1.10.0 | 1.10.0 | ✅ Up-to-date | CMake |
 | minizip-ng | 4.0.10 | 4.0.10 | ✅ Up-to-date | CMake |
 | bzip2 | 1.0.8 | 1.0.8 | ✅ Up-to-date | CMake |
-| lzma | 25.00 | 25.00 | ✅ Up-to-date | Custom build |
+| lzma | 26.00 | 26.00 | ✅ Up-to-date | Custom build |
 | xz | 5.6.3 | 5.6.3 | ✅ Up-to-date | CMake |
 | unrar | 7.2.2 | 7.2.2 | ✅ Up-to-date | Custom build |
 | libarchive | 3.7.6 | 3.7.6 | ✅ Up-to-date | CMake |

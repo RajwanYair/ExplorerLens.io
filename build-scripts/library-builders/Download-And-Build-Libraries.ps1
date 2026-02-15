@@ -54,7 +54,7 @@ if ($vcpkg) {
             "lz4.lib"         = "external\compression\lz4-1.10.0\build-vs\Release\liblz4_static.lib"
             "zstd_static.lib" = "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib"
             "bz2.lib"         = "external\compression\bzip2-1.0.8\x64\Release\bzip2.lib"
-            "lzma.lib"        = "external\compression\lzma-24.08\build-vs\Release\lzma.lib"
+            "lzma.lib"        = "external\compression-libs\lzma-26.00\build-vs\Release\lzma.lib"
             "minizip.lib"     = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib"
             "webp.lib"        = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"
             "sharpyuv.lib"    = "external\image-libs\libwebp-1.5.0\build-vs\Release\sharpyuv.lib"
@@ -132,7 +132,7 @@ $allLibs = @(
     @{Name = "LZ4"; Path = "external\compression\lz4-1.10.0\build\VS2022\liblz4\bin\x64_Release\liblz4_static.lib"; Required = $true },
     @{Name = "Zstd"; Path = "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib"; Required = $false },
     @{Name = "Bzip2"; Path = "external\compression\bzip2-1.0.8\x64\Release\bzip2.lib"; Required = $false },
-    @{Name = "LZMA"; Path = "external\compression\lzma-24.08\build-vs\Release\lzma.lib"; Required = $false },
+    @{Name = "LZMA"; Path = "external\compression-libs\lzma-26.00\build-vs\Release\lzma.lib"; Required = $false },
     @{Name = "MinizipNG"; Path = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib"; Required = $true },
     @{Name = "WebP"; Path = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"; Required = $true },
     @{Name = "SharpYUV"; Path = "external\image-libs\libwebp-1.5.0\build-vs\Release\sharpyuv.lib"; Required = $true }

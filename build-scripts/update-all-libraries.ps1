@@ -112,7 +112,7 @@ $libraries = @{
     }
     "lzma"       = @{
         "Current"  = "24.08"
-        "Latest"   = if ($latestLZMA) { $latestLZMA } else { "24.08" }
+        "Latest"   = if ($latestLZMA) { $latestLZMA } else { "26.00" }
         "Url"      = if ($latestLZMA) { "https://www.7-zip.org/a/lzma$($latestLZMA.Replace('.', '')).7z" } else { "https://www.7-zip.org/a/lzma2408.7z" }
         "Category" = "Compression"
     }

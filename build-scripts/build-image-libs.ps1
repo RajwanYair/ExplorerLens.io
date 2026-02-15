@@ -14,7 +14,7 @@ Write-Host "=== DarkThumbs Image Libraries Build Script ===" -ForegroundColor Cy
 Write-Host "Building: dav1d 1.5.1, libavif 1.3.0, libjxl 0.11.1" -ForegroundColor Yellow
 Write-Host ""
 
-$RootDir = "c:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
+$RootDir = Split-Path -Parent $PSScriptRoot
 $ExternalDir = Join-Path $RootDir "external"
 $ImageLibsDir = Join-Path $ExternalDir "image-libs"
 
@@ -92,13 +92,11 @@ if (-not $SkipDav1d) {
         meson install -C $Dav1dBuild 2>&1 | Out-Null
         
         Write-Host "  [OK] dav1d build complete" -ForegroundColor Green
-    }
-    catch {
+    } catch {
         Write-Host "  [ERROR] dav1d build failed: $($_.Exception.Message)" -ForegroundColor Red
         Pop-Location
         exit 1
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 } else {
@@ -154,13 +152,11 @@ if (-not $SkipLibavif) {
         cmake --install . --config Release | Out-Null
         
         Write-Host "  [OK] libavif build complete" -ForegroundColor Green
-    }
-    catch {
+    } catch {
         Write-Host "  [ERROR] libavif build failed: $($_.Exception.Message)" -ForegroundColor Red
         Pop-Location
         exit 1
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 } else {
@@ -211,13 +207,11 @@ if (-not $SkipLibjxl) {
         cmake --install . --config Release | Out-Null
         
         Write-Host "  [OK] libjxl build complete" -ForegroundColor Green
-    }
-    catch {
+    } catch {
         Write-Host "  [ERROR] libjxl build failed: $($_.Exception.Message)" -ForegroundColor Red
         Pop-Location
         exit 1
-    }
-    finally {
+    } finally {
         Pop-Location
     }
 } else {

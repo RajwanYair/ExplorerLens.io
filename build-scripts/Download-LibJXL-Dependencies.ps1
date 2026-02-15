@@ -2,7 +2,7 @@
 # Required: Highway, Brotli, and skcms
 
 param(
-    [string]$LibjxlDir = "c:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\external\image-libs\libjxl-0.11.1"
+    [string]$LibjxlDir = (Join-Path (Split-Path -Parent $PSScriptRoot) "external\image-libs\libjxl-0.11.1")
 )
 
 $ErrorActionPreference = "Stop"

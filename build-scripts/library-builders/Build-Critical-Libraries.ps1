@@ -200,7 +200,7 @@ if (-not (Test-Path $minizipOutput)) {
     $zlibRoot = (Resolve-Path "external\compression\zlib-1.3.1").Path
     $bzip2Root = (Resolve-Path "external\compression\bzip2-1.0.8").Path
     $zstdRoot = (Resolve-Path "external\compression\zstd-1.5.7").Path
-    $lzmaRoot = (Resolve-Path "external\compression\lzma-24.08").Path
+    $lzmaRoot = (Resolve-Path "external\compression-libs\lzma-26.00").Path
     
     $cmd = @"
 call "$vcvarsall" x64 && cd /d "$PWD\$minizipBuild" && cmake "$PWD\$minizipSrc" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=ON -DMZ_LZMA=ON -DMZ_ZSTD=ON -DZLIB_ROOT="$zlibRoot" -DBZIP2_ROOT="$bzip2Root" -DZSTD_ROOT="$zstdRoot" -DLIBLZMA_ROOT="$lzmaRoot" && nmake

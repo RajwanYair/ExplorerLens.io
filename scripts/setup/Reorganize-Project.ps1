@@ -2,7 +2,7 @@
 # Systematically reorganize DarkThumbs project directory structure
 
 $ErrorActionPreference = 'Stop'
-$rootDir = "c:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $rootDir
 
 Write-Host "=== DarkThumbs Project Reorganization ===" -ForegroundColor Cyan

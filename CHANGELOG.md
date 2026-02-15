@@ -5,6 +5,79 @@ All notable changes to DarkThumbs will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.2.0] - 2026-02-15
+
+### Added
+
+- **USER_GUIDE.md**: Comprehensive end-user documentation covering installation, configuration, troubleshooting, and FAQ (370+ lines)
+- **DEVELOPER_GUIDE.md**: Complete developer documentation with architecture overview, build instructions, contribution guidelines, testing, and debugging (440+ lines)
+- **KNOWN_ISSUES.md**: Detailed known issues list with workarounds, performance expectations, compatibility matrix (310+ lines)
+- **SEH Exception Handling**: Shell extension now wraps `GetThumbnail()` with `__try/__except` to prevent Explorer crashes from access violations, stack overflow, and divide-by-zero errors
+- **Circuit Breaker Pattern**: Decoder failure isolation system prevents infinite retry loops. Failing decoders auto-disable after 5 failures with 5-minute recovery timeout
+- **AVX2 Compiler Flags**: Added `-mavx2` and `-mfma` for Clang, `/arch:AVX2` for MSVC in Engine CMakeLists.txt for SIMD optimization
+- **SPRINT_PLAN_25.md**: Comprehensive 25-sprint development plan (540 lines) with 40-50 day timeline and P0-P3 priorities
+- **SPRINT_PROGRESS.md**: Real-time sprint tracking document (268 lines) with completion percentages and blocker analysis
+
+### Fixed
+
+- **LZMA SDK Updated**: Upgraded from 24.08/25.00 to **26.00** (latest stable release)
+  - Created `build-lzma-sdk-26.00.ps1` with proper `/MD` (MultiThreadedDLL) CRT linkage
+  - Updated all project references (CBXShell.vcxproj, LIBRARY_INVENTORY.md)
+  - Removed obsolete versions (LZMA 25.00 directory, build-sdk-24.08.ps1 script)
+
+- **Path Standardization**: Converted 7+ scripts from hardcoded absolute paths to relative paths using `$PSScriptRoot`:
+  - `scripts/Setup-DevEnvironment.ps1`
+  - `build-scripts/build-image-libs.ps1`
+  - `scripts/setup/Reorganize-Project.ps1`
+  - `scripts/setup/fix-profile.ps1`
+  - `scripts/setup/barebone-profile.ps1`
+  - `build-scripts/Download-LibJXL-Dependencies.ps1`
+  - `build-scripts/Remove-Win32-Configurations.ps1`
+
+- **Cross-Compiler Build Support**: Fixed Clang/MSVC compiler flag conflicts in Engine/CMakeLists.txt
+  - Conditional compilation: Clang gets `-Wall -Wextra -mavx2`, MSVC gets `/W4 /WX /arch:AVX2`
+  - Resolved "unknown warning option '-W4'" error with Clang
+  
+- **Library Path Resolution**: Fixed MSBuild linker error "cannot open input file 'DarkThumbsEngine.lib'"
+  - Copied library to `build/lib/Release/` for MSBuild compatibility
+  - CBXShell.dll now builds successfully (3.18 MB)
+
+- **README Accuracy**: Updated format count from 130+ to **155+**, version from 6.0.0 to **6.2.0**, LZMA version from 24.08 to **26.00**
+
+### Changed
+
+- **Build System Enhancements**:
+  - DarkThumbsEngine.lib: 3.66 MB (AVX2-optimized)
+  - CBXShell.dll: 3.18 MB (3261 KB)
+  - CBXManager.exe: 400.5 KB
+  - All builds use `/MD` runtime for consistency
+
+- **Documentation Structure**: Established comprehensive documentation framework:
+  - User-facing: USER_GUIDE.md, KNOWN_ISSUES.md
+  - Developer-facing: DEVELOPER_GUIDE.md, BUILD_METHOD.md
+  - Planning: SPRINT_PLAN_25.md, SPRINT_PROGRESS.md
+
+### Technical Debt Resolved
+
+- **Sprint 1 (80% → 100%)**: External Libraries - LZMA 26.00 with /MD flags verified
+- **Sprint 14 (95% → 100%)**: Memory Leak Detection - RAII wrappers (`ScopedHandle`, `ScopedCOMPtr`) operational
+- **Sprint 22 (90% → 100%)**: Error Handling - SEH exception handling + circuit breaker pattern implemented
+- **Sprint 25 (30% → 95%)**: Documentation - USER_GUIDE, DEVELOPER_GUIDE, KNOWN_ISSUES created; CHANGELOG updated
+
+### Performance
+
+- **SIMD Optimization**: AVX2 instructions enabled for image scaling operations
+- **Compiler Optimization**: Both Clang and MSVC builds use aggressive optimization (`-O3` / `/O2`)
+- **Circuit Breaker**: Prevents wasted CPU cycles retrying known-bad decoders
+
+### Security
+
+- **Exception Safety**: SEH wrapper prevents malicious or corrupted files from crashing Explorer
+- **Failure Isolation**: Circuit breaker limits damage from buggy decoders
+- **Static Linking**: All compression/image libraries statically linked with `/MD` runtime
+
+---
+
 ## [6.0.0] - 2026-02-12
 
 ### Added

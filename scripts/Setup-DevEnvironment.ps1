@@ -46,7 +46,7 @@ $Global:DarkThumbsConfig = @{
     VCVars64    = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
     
     # Project Paths
-    ProjectRoot = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
+    ProjectRoot = Split-Path -Parent $PSScriptRoot
 }
 
 # ============================================================================

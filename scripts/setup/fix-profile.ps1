@@ -31,7 +31,7 @@ if (Test-Path $VSPath) {
 }
 
 # Project navigation
-$global:DarkThumbsPath = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
+$global:DarkThumbsPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 function dt {
     Set-Location $global:DarkThumbsPath

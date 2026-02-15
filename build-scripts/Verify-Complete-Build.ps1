@@ -132,8 +132,8 @@ Test-Library "zstd 1.5.7" `
     "$projectRoot\external\compression\zstd-1.5.7\build-manual\zstd_static.lib" `
     1000
 
-Test-Library "LZMA SDK 24.08" `
-    "$projectRoot\external\compression\lzma-24.08\C\build-vs\lib\lzma.lib" `
+Test-Library "LZMA SDK 26.00" `
+    "$projectRoot\external\compression-libs\lzma-26.00\C\build-vs\lib\lzma.lib" `
     1800
 
 Test-Library "liblzma (xz-5.6.3)" `
@@ -221,7 +221,7 @@ Write-Header "Build Scripts"
 $buildScripts = @(
     "build.ps1",
     "Build-Production-SlowMachine.ps1",
-    "build-lzma-sdk-24.08.ps1",
+    "build-lzma-sdk-26.00.ps1",
     "build-unrar.ps1",
     "Build-LibWebP-NMake.ps1",
     "Build-MinizipNG.ps1",

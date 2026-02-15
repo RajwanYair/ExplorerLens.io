@@ -2,7 +2,7 @@
 # This script ensures the project only builds for x64 platform
 
 param(
-    [string]$ProjectPath = "c:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
+    [string]$ProjectPath = Split-Path -Parent $PSScriptRoot
 )
 
 $ErrorActionPreference = "Stop"

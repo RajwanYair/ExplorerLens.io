@@ -284,12 +284,22 @@ if(ENGINE_SOURCES)
     endif()
     
     # Compiler warnings
-    if(MSVC)
-        target_compile_options(DarkThumbsEngine PRIVATE
-            /W4           # Warning level 4
-            /WX           # Warnings as errors - TEMPORARILY ENABLED TO FIND ALL WARNINGS
-            /permissive-  # Standards conformance
-        )
+    if(MSVC OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            target_compile_options(DarkThumbsEngine PRIVATE
+                -Wall         # Enable all warnings
+                -Wextra       # Extra warnings
+                -mavx2        # Enable AVX2 instructions for SIMD operations
+                -mfma         # Enable FMA instructions
+            )
+        else()
+            target_compile_options(DarkThumbsEngine PRIVATE
+                /W4           # Warning level 4
+                /WX           # Warnings as errors - TEMPORARILY ENABLED TO FIND ALL WARNINGS
+                /permissive-  # Standards conformance
+                /arch:AVX2    # Enable AVX2 instructions for SIMD operations
+            )
+        endif()
         
         # CRT Runtime Linking Fix
         # NOTE: This is a temporary workaround. The proper fix is to rebuild

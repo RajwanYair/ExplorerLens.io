@@ -1,13 +1,13 @@
 # DarkThumbs - GPU-Accelerated Thumbnail Generator
 
-**High-Performance Windows Shell Extension for 130+ File Formats**
+**High-Performance Windows Shell Extension for 155+ File Formats**
 
-DarkThumbs generates thumbnails for comic books, archives, modern images, RAW photos, and videos using **DirectX 11 GPU acceleration** and **SIMD-optimized processing**.
+DarkThumbs generates thumbnails for comic books, archives, modern images, RAW photos, and videos using **DirectX 11 GPU acceleration** and **AVX2 SIMD-optimized processing**.
 
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
 ![Platform](https://img.shields.io/badge/Platform-x64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-6.0.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-6.2.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
@@ -37,7 +37,7 @@ DarkThumbs generates thumbnails for comic books, archives, modern images, RAW ph
 
 ## ✨ Features
 
-### Supported Formats (130+ formats)
+### Supported Formats (155+ formats)
 
 #### Core Image Formats (✅ Fully Supported)
 - **Standard:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tiff`, `.tif`
@@ -175,7 +175,7 @@ See [Build Guide](docs/build/BUILD_GUIDE.md) for more troubleshooting.
 
 ## 📦 External Libraries
 
-**Compression:** zlib 1.3.1, LZ4 1.10.0, zstd 1.5.7, LZMA 24.08, minizip-ng 4.0.10  
+**Compression:** zlib 1.3.1, LZ4 1.10.0, zstd 1.5.7, LZMA 26.00, minizip-ng 4.0.10  
 **Images:** libwebp 1.5.0, Windows WIC (HEIF/AVIF/RAW)  
 **Archives:** UnRAR 7.2.1  
 **Rendering:** DirectX 11
