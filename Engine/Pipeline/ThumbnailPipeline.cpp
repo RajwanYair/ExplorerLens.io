@@ -26,6 +26,7 @@
 #include "../Decoders/PDFDecoder.h"
 #include "../Decoders/DocumentDecoder.h"
 #include "../Decoders/FontDecoder.h"
+#include "../Decoders/ModelDecoder.h"
 #include "../Plugin/PluginDecoder.h"
 #include "../Plugin/PluginManager.h"
 #include <chrono>
@@ -219,6 +220,11 @@ public:
         auto fontDecoder = std::make_unique<FontDecoder>();
         decoderRegistry.RegisterDecoder(fontDecoder.get());
         decoders.push_back(std::move(fontDecoder));
+        
+        // 3D models (.obj, .stl, .gltf, .glb)
+        auto modelDecoder = std::make_unique<ModelDecoder>();
+        decoderRegistry.RegisterDecoder(modelDecoder.get());
+        decoders.push_back(std::move(modelDecoder));
         
         // 3. Standard image formats via WIC (JPEG, PNG, BMP, GIF, TIFF)
         auto imageDecoder = std::make_unique<ImageDecoder>();
