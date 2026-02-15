@@ -25,10 +25,25 @@ namespace Engine {
 
 // Static data
 const unsigned char ArchiveDecoder::ZIP_SIGNATURE[4] = { 0x50, 0x4B, 0x03, 0x04 }; // "PK\x03\x04"
+const unsigned char ArchiveDecoder::RAR_SIGNATURE[4] = { 0x52, 0x61, 0x72, 0x21 }; // "Rar!"
+const unsigned char ArchiveDecoder::SEVENZ_SIGNATURE[6] = { 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C }; // "7z\xBC\xAF\x27\x1C"
+const unsigned char ArchiveDecoder::TAR_SIGNATURE[5] = { 0x75, 0x73, 0x74, 0x61, 0x72 }; // "ustar" at offset 257
 
 const wchar_t* ArchiveDecoder::m_extensions[] = {
     L".zip",
-    L".cbz"  // Comic book archive (ZIP-based)
+    L".cbz",   // Comic book archive (ZIP)
+    L".cb7",   // Comic book archive (7z)
+    L".cbr",   // Comic book archive (RAR)
+    L".cbt",   // Comic book archive (TAR)
+    L".7z",    // 7-Zip archive
+    L".rar",   // RAR archive
+    L".tar",   // TAR archive
+    L".tar.gz", // Compressed TAR
+    L".tgz",   // Compressed TAR (short)
+    L".tar.bz2", // Bzip2 compressed TAR
+    L".tbz",   // Bzip2 compressed TAR (short)
+    L".tar.xz", // XZ compressed TAR
+    L".txz"    // XZ compressed TAR (short)
 };
 
 const uint32_t ArchiveDecoder::m_extensionCount = sizeof(m_extensions) / sizeof(m_extensions[0]);
@@ -124,11 +139,16 @@ bool ArchiveDecoder::CanDecode(const wchar_t* filePath) {
 HRESULT ArchiveDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
     PROFILE_SCOPE(ProfileComponent::DECODE_ARCHIVE);
     
-    // Extract first image from archive
+    // Extract best cover image from archive (prefers cover.*, folder.*, 001.*)
     std::vector<unsigned char> imageData;
     std::wstring imageName;
     
-    HRESULT hr = ExtractFirstImage(request.filePath, imageData, imageName);
+    HRESULT hr = ExtractBestCoverImage(request.filePath, imageData, imageName);
+    if (FAILED(hr)) {
+        // Fallback to first image if no cover found
+        hr = ExtractFirstImage(request.filePath, imageData, imageName);
+    }
+    
     if (FAILED(hr)) {
         return hr;
     }
@@ -147,6 +167,215 @@ HRESULT ArchiveDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult&
     
     return hr;
 }
+
+// ============================================================================
+// Cover Image Detection
+// ============================================================================
+
+bool ArchiveDecoder::IsCoverImage(const std::wstring& filename) {
+    std::wstring lower = filename;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::towlower);
+    
+    // Check for common cover image names
+    return (lower.find(L"cover") != std::wstring::npos ||
+            lower.find(L"folder") != std::wstring::npos ||
+            lower.find(L"front") != std::wstring::npos ||
+            lower.find(L"thumb") != std::wstring::npos ||
+            lower.find(L"poster") != std::wstring::npos ||
+            lower.find(L"001") != std::wstring::npos ||
+            lower.find(L"00") != std::wstring::npos);
+}
+
+int ArchiveDecoder::GetImagePriority(const std::wstring& filename) {
+    std::wstring lower = filename;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::towlower);
+    
+    // Higher priority = better cover image candidate
+    if (lower.find(L"cover") != std::wstring::npos) return 100;
+    if (lower.find(L"folder") != std::wstring::npos) return 90;
+    if (lower.find(L"front") != std::wstring::npos) return 80;
+    if (lower.find(L"poster") != std::wstring::npos) return 70;
+    if (lower.find(L"thumb") != std::wstring::npos) return 60;
+    if (lower.find(L"001.") != std::wstring::npos) return 50;
+    if (lower.find(L"01.") != std::wstring::npos) return 40;
+    if (lower.find(L"00.") != std::wstring::npos) return 45;
+    
+    // Prefer files in root directory (fewer path separators)
+    int slashCount = 0;
+    for (wchar_t c : filename) {
+        if (c == L'/' || c == L'\\') slashCount++;
+    }
+    return 30 - slashCount; // Penalize deep nesting
+}
+
+// ============================================================================
+// Format Detection
+// ============================================================================
+
+bool ArchiveDecoder::IsZipFormat(const wchar_t* filePath) {
+    const wchar_t* ext = PathFindExtensionW(filePath);
+    return ext && (_wcsicmp(ext, L".zip") == 0 || _wcsicmp(ext, L".cbz") == 0);
+}
+
+bool ArchiveDecoder::IsRarFormat(const wchar_t* filePath) {
+    const wchar_t* ext = PathFindExtensionW(filePath);
+    return ext && (_wcsicmp(ext, L".rar") == 0 || _wcsicmp(ext, L".cbr") == 0);
+}
+
+bool ArchiveDecoder::Is7zFormat(const wchar_t* filePath) {
+    const wchar_t* ext = PathFindExtensionW(filePath);
+    return ext && (_wcsicmp(ext, L".7z") == 0 || _wcsicmp(ext, L".cb7") == 0);
+}
+
+bool ArchiveDecoder::IsTarFormat(const wchar_t* filePath) {
+    const wchar_t* ext = PathFindExtensionW(filePath);
+    if (!ext) return false;
+    std::wstring extStr(ext);
+    return (extStr.find(L".tar") != std::wstring::npos || _wcsicmp(ext, L".cbt") == 0);
+}
+
+// ============================================================================
+// Best Cover Image Extraction
+// ============================================================================
+
+HRESULT ArchiveDecoder::ExtractBestCoverImage(const wchar_t* archivePath,
+                                               std::vector<unsigned char>& imageData,
+                                               std::wstring& imageName) {
+    // Only implemented for ZIP format currently
+    if (!IsZipFormat(archivePath)) {
+        return E_NOTIMPL;
+    }
+    
+    // Convert wstring to UTF-8
+    int utf8Size = WideCharToMultiByte(CP_UTF8, 0, archivePath, -1, nullptr, 0, nullptr, nullptr);
+    if (utf8Size <= 0) {
+        return E_INVALIDARG;
+    }
+
+    std::unique_ptr<char[]> utf8Path(new char[utf8Size]);
+    WideCharToMultiByte(CP_UTF8, 0, archivePath, -1, utf8Path.get(), utf8Size, nullptr, nullptr);
+
+    // Create ZIP reader
+    void* reader = mz_zip_reader_create();
+    if (!reader) {
+        return E_OUTOFMEMORY;
+    }
+
+    // Open ZIP file
+    int32_t err = mz_zip_reader_open_file(reader, utf8Path.get());
+    if (err != MZ_OK) {
+        mz_zip_reader_delete(&reader);
+        return E_FAIL;
+    }
+
+    // Find best cover image
+    err = mz_zip_reader_goto_first_entry(reader);
+    std::wstring bestImageName;
+    int bestPriority = -1;
+    int64_t bestImageSize = 0;
+    
+    while (err == MZ_OK) {
+        mz_zip_file* file_info = nullptr;
+        if (mz_zip_reader_entry_get_info(reader, &file_info) == MZ_OK && file_info) {
+            // Skip directories
+            if (!mz_zip_reader_entry_is_dir(reader)) {
+                // Convert filename to wstring
+                int wideSize = MultiByteToWideChar(CP_UTF8, 0, file_info->filename, -1, nullptr, 0);
+                if (wideSize > 0) {
+                    std::unique_ptr<wchar_t[]> wideName(new wchar_t[wideSize]);
+                    MultiByteToWideChar(CP_UTF8, 0, file_info->filename, -1, wideName.get(), wideSize);
+                    std::wstring filename(wideName.get());
+
+                    // Check if it's an image
+                    if (IsImageFile(filename)) {
+                        int priority = GetImagePriority(filename);
+                        if (priority > bestPriority) {
+                            bestPriority = priority;
+                            bestImageName = filename;
+                            bestImageSize = file_info->uncompressed_size;
+                        }
+                    }
+                }
+            }
+        }
+
+        err = mz_zip_reader_goto_next_entry(reader);
+    }
+
+    if (bestImageName.empty()) {
+        mz_zip_reader_close(reader);
+        mz_zip_reader_delete(&reader);
+        return E_FAIL;
+    }
+
+    imageName = bestImageName;
+
+    // Limit to 32MB
+    const int64_t MAX_IMAGE_SIZE = 32 * 1024 * 1024;
+    if (bestImageSize > MAX_IMAGE_SIZE) {
+        mz_zip_reader_close(reader);
+        mz_zip_reader_delete(&reader);
+        return E_OUTOFMEMORY;
+    }
+
+    // Convert image name to UTF-8
+    utf8Size = WideCharToMultiByte(CP_UTF8, 0, imageName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (utf8Size <= 0) {
+        mz_zip_reader_close(reader);
+        mz_zip_reader_delete(&reader);
+        return E_INVALIDARG;
+    }
+
+    std::unique_ptr<char[]> utf8Name(new char[utf8Size]);
+    WideCharToMultiByte(CP_UTF8, 0, imageName.c_str(), -1, utf8Name.get(), utf8Size, nullptr, nullptr);
+
+    // Locate the entry
+    err = mz_zip_reader_locate_entry(reader, utf8Name.get(), 0);
+    if (err != MZ_OK) {
+        mz_zip_reader_close(reader);
+        mz_zip_reader_delete(&reader);
+        return E_FAIL;
+    }
+
+    // Open entry for reading
+    err = mz_zip_reader_entry_open(reader);
+    if (err != MZ_OK) {
+        mz_zip_reader_close(reader);
+        mz_zip_reader_delete(&reader);
+        return E_FAIL;
+    }
+
+    // Get entry info
+    mz_zip_file* file_info = nullptr;
+    err = mz_zip_reader_entry_get_info(reader, &file_info);
+    if (err != MZ_OK || !file_info) {
+        mz_zip_reader_entry_close(reader);
+        mz_zip_reader_close(reader);
+        mz_zip_reader_delete(&reader);
+        return E_FAIL;
+    }
+
+    // Allocate buffer
+    size_t fileSize = static_cast<size_t>(file_info->uncompressed_size);
+    imageData.resize(fileSize);
+
+    // Read entry data
+    int32_t bytesRead = mz_zip_reader_entry_read(reader, imageData.data(), static_cast<int32_t>(fileSize));
+    
+    mz_zip_reader_entry_close(reader);
+    mz_zip_reader_close(reader);
+    mz_zip_reader_delete(&reader);
+
+    if (bytesRead != static_cast<int32_t>(fileSize)) {
+        return E_FAIL;
+    }
+
+    return S_OK;
+}
+
+// ============================================================================
+// First Image Extraction (Fallback)
+// ============================================================================
 
 HRESULT ArchiveDecoder::ExtractFirstImage(const wchar_t* archivePath,
                                           std::vector<unsigned char>& imageData,
@@ -410,6 +639,78 @@ HRESULT ArchiveDecoder::DecodeImageData(const std::vector<unsigned char>& imageD
 
     *phBitmap = hBitmap;
     return S_OK;
+}
+
+// ============================================================================
+// Archive Metadata Extraction
+// ============================================================================
+
+bool ArchiveDecoder::GetArchiveMetadata(const wchar_t* filePath, ArchiveMetadata& metadata) {
+    if (!filePath) return false;
+    
+    // Only implemented for ZIP format currently
+    if (!IsZipFormat(filePath)) {
+        return false;
+    }
+    
+    metadata.format = L"ZIP";
+    
+    // Convert wstring to UTF-8
+    int utf8Size = WideCharToMultiByte(CP_UTF8, 0, filePath, -1, nullptr, 0, nullptr, nullptr);
+    if (utf8Size <= 0) {
+        return false;
+    }
+
+    std::unique_ptr<char[]> utf8Path(new char[utf8Size]);
+    WideCharToMultiByte(CP_UTF8, 0, filePath, -1, utf8Path.get(), utf8Size, nullptr, nullptr);
+
+    // Create ZIP reader
+    void* reader = mz_zip_reader_create();
+    if (!reader) {
+        return false;
+    }
+
+    // Open ZIP file
+    int32_t err = mz_zip_reader_open_file(reader, utf8Path.get());
+    if (err != MZ_OK) {
+        mz_zip_reader_delete(&reader);
+        return false;
+    }
+
+    // Iterate through entries
+    err = mz_zip_reader_goto_first_entry(reader);
+    while (err == MZ_OK) {
+        mz_zip_file* file_info = nullptr;
+        if (mz_zip_reader_entry_get_info(reader, &file_info) == MZ_OK && file_info) {
+            if (!mz_zip_reader_entry_is_dir(reader)) {
+                metadata.totalFiles++;
+                metadata.uncompressedSize += file_info->uncompressed_size;
+                
+                // Check if encrypted
+                if ((file_info->flag & MZ_ZIP_FLAG_ENCRYPTED) != 0) {
+                    metadata.isEncrypted = true;
+                }
+                
+                // Count image files
+                int wideSize = MultiByteToWideChar(CP_UTF8, 0, file_info->filename, -1, nullptr, 0);
+                if (wideSize > 0) {
+                    std::unique_ptr<wchar_t[]> wideName(new wchar_t[wideSize]);
+                    MultiByteToWideChar(CP_UTF8, 0, file_info->filename, -1, wideName.get(), wideSize);
+                    std::wstring filename(wideName.get());
+                    
+                    if (IsImageFile(filename)) {
+                        metadata.totalImages++;
+                    }
+                }
+            }
+        }
+        err = mz_zip_reader_goto_next_entry(reader);
+    }
+
+    mz_zip_reader_close(reader);
+    mz_zip_reader_delete(&reader);
+    
+    return true;
 }
 
 } // namespace Engine

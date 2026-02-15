@@ -1,6 +1,8 @@
 // ArchiveDecoder.h
-// Archive (ZIP/CBZ) thumbnail decoder for DarkThumbs Engine
-// Extracts and decodes the first image file from ZIP archives using minizip-ng and WIC
+// Archive (ZIP/CBZ/7Z/RAR/TAR) thumbnail decoder for DarkThumbs Engine
+// Extracts and decodes the best cover image from various archive formats
+// Primary support: ZIP/CBZ using minizip-ng
+// Future support: 7Z, RAR, TAR, CAB, ISO (requires additional libraries)
 
 #pragma once
 
@@ -11,6 +13,15 @@
 
 namespace DarkThumbs {
 namespace Engine {
+
+// Archive metadata structure
+struct ArchiveMetadata {
+    std::wstring format;
+    uint32_t totalFiles = 0;
+    uint32_t totalImages = 0;
+    uint64_t uncompressedSize = 0;
+    bool isEncrypted = false;
+};
 
 class ArchiveDecoder : public IThumbnailDecoder {
 public:
@@ -27,20 +38,36 @@ public:
     bool SupportsGPU() const override { return false; } // Archive extraction is CPU-bound
     bool IsArchiveDecoder() const override { return true; }
 
+    // Archive metadata extraction
+    bool GetArchiveMetadata(const wchar_t* filePath, ArchiveMetadata& metadata);
+
     // Archive-specific functionality
     static bool IsArchiveFormat(const void* pData, size_t dataSize);
     
 private:
-    // ZIP signature detection
-    static const unsigned char ZIP_SIGNATURE[4]; // PK\x03\x04
+    // Format signatures
+    static const unsigned char ZIP_SIGNATURE[4];  // PK\x03\x04
+    static const unsigned char RAR_SIGNATURE[4];  // Rar!
+    static const unsigned char SEVENZ_SIGNATURE[6]; // 7z\xBC\xAF\x27\x1C
+    static const unsigned char TAR_SIGNATURE[5];  // ustar
 
     // Helper methods
     HRESULT ExtractFirstImage(const wchar_t* archivePath, std::vector<unsigned char>& imageData, 
                           std::wstring& imageName);
+    HRESULT ExtractBestCoverImage(const wchar_t* archivePath, std::vector<unsigned char>& imageData,
+                                  std::wstring& imageName);
     HRESULT DecodeImageData(const std::vector<unsigned char>& imageData, const std::wstring& imageName,
                         UINT targetWidth, UINT targetHeight, HBITMAP* phBitmap);
     
     bool IsImageFile(const std::wstring& filename);
+    bool IsCoverImage(const std::wstring& filename);
+    int GetImagePriority(const std::wstring& filename);
+    
+    // Format detection
+    bool IsZipFormat(const wchar_t* filePath);
+    bool IsRarFormat(const wchar_t* filePath);
+    bool Is7zFormat(const wchar_t* filePath);
+    bool IsTarFormat(const wchar_t* filePath);
     
     // WIC factory (shared with ImageDecoder)
     static IWICImagingFactory* GetWICFactory();
