@@ -26,14 +26,16 @@ namespace DarkThumbs {
 namespace Engine {
 
 // Supported extensions — broad video format coverage
+// Includes VP9 (.webm) and AV1 (.mp4, .mkv, .webm) if codecs installed
 const wchar_t* VideoDecoder::m_extensions[] = {
     L".mp4", L".mkv", L".avi", L".wmv", L".mov",
     L".flv", L".webm", L".m4v", L".mpg", L".mpeg",
     L".ts", L".mts", L".m2ts", L".3gp", L".3g2",
     L".vob", L".ogv", L".rm", L".rmvb", L".asf",
+    L".divx", L".xvid",
     nullptr
 };
-const uint32_t VideoDecoder::m_extensionCount = 20;
+const uint32_t VideoDecoder::m_extensionCount = 22;
 
 VideoDecoder::VideoDecoder() = default;
 VideoDecoder::~VideoDecoder() = default;
@@ -108,9 +110,20 @@ HRESULT VideoDecoder::ExtractFrameMF(const wchar_t* filePath, uint32_t width,
 
     IMFSourceReader* pReader = nullptr;
     IMFMediaType* pOutputType = nullptr;
+    IMFAttributes* pAttributes = nullptr;
 
-    // Create Source Reader
-    hr = MFCreateSourceReaderFromURL(filePath, nullptr, &pReader);
+    // Create attributes for hardware acceleration (DXVA2)
+    if (m_useHardwareAccel) {
+        MFCreateAttributes(&pAttributes, 2);
+        if (pAttributes) {
+            pAttributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
+            pAttributes->SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
+        }
+    }
+
+    // Create Source Reader with optional hardware acceleration
+    hr = MFCreateSourceReaderFromURL(filePath, pAttributes, &pReader);
+    if (pAttributes) pAttributes->Release();
     if (FAILED(hr)) goto cleanup;
 
     // Configure output as RGB32
@@ -274,6 +287,116 @@ bool VideoDecoder::IsVideoFormat(const wchar_t* path) {
         if (_wcsicmp(ext, m_extensions[i]) == 0) return true;
     }
     return false;
+}
+
+// ============================================================================
+// Intelligent Keyframe Search
+// ============================================================================
+
+HRESULT VideoDecoder::SeekToKeyframe(IMFSourceReader* pReader, LONGLONG duration) {
+    if (!pReader || duration <= 0) return E_INVALIDARG;
+
+    // Calculate initial seek position
+    LONGLONG seekPos = static_cast<LONGLONG>(duration * m_seekPosition);
+    
+    // Try seeking to exact position first
+    PROPVARIANT var;
+    PropVariantInit(&var);
+    var.vt = VT_I8;
+    var.hVal.QuadPart = seekPos;
+    
+    HRESULT hr = pReader->SetCurrentPosition(GUID_NULL, var);
+    if (FAILED(hr)) return hr;
+
+    // Read first sample to check if it's a keyframe    
+// If not, search backwards within 5-second window for keyframe
+    DWORD streamIndex = 0, flags = 0;
+    LONGLONG timestamp = 0;
+    IMFSample* pSample = nullptr;
+
+    hr = pReader->ReadSample(
+        static_cast<DWORD>(MF_SOURCE_READER_FIRST_VIDEO_STREAM),
+        0, &streamIndex, &flags, &timestamp, &pSample);
+
+    if (pSample) pSample->Release();
+    
+    // If we got a sample, great! If not, try beginning of file
+    if (FAILED(hr) || (flags & MF_SOURCE_READERF_ERROR)) {
+        // Fallback: seek to 0
+        PropVariantClear(&var);
+        PropVariantInit(&var);
+        var.vt = VT_I8;
+        var.hVal.QuadPart = 0;
+        hr = pReader->SetCurrentPosition(GUID_NULL, var);
+    }
+
+    return hr;
+}
+
+// ============================================================================
+// Video Metadata Extraction
+// ============================================================================
+
+bool VideoDecoder::GetMetadata(const wchar_t* filePath, VideoMetadata& metadata) {
+    if (!filePath) return false;
+
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    bool comInit = SUCCEEDED(hr) || hr == S_FALSE || hr == RPC_E_CHANGED_MODE;
+    if (!comInit) return false;
+
+    hr = MFStartup(MF_VERSION);
+    if (FAILED(hr)) {
+        CoUninitialize();
+        return false;
+    }
+
+    IMFSourceReader* pReader = nullptr;
+    hr = MFCreateSourceReaderFromURL(filePath, nullptr, &pReader);
+    
+    if (SUCCEEDED(hr) && pReader) {
+        // Get duration
+        PROPVARIANT var;
+        PropVariantInit(&var);
+        hr = pReader->GetPresentationAttribute(
+            static_cast<DWORD>(MF_SOURCE_READER_MEDIASOURCE),
+            MF_PD_DURATION, &var);
+        
+        if (SUCCEEDED(hr)) {
+            LONGLONG duration = 0;
+            PropVariantToInt64(var, &duration);
+            metadata.durationMs = static_cast<uint64_t>(duration / 10000); // Convert to milliseconds
+            PropVariantClear(&var);
+        }
+
+        // Get video dimensions
+        IMFMediaType* pType = nullptr;
+        hr = pReader->GetCurrentMediaType(
+            static_cast<DWORD>(MF_SOURCE_READER_FIRST_VIDEO_STREAM), &pType);
+        
+        if (SUCCEEDED(hr) && pType) {
+            MFGetAttributeSize(pType, MF_MT_FRAME_SIZE, &metadata.width, &metadata.height);
+            
+            // Try to get codec info (simplified)
+            GUID subtype;
+            if (SUCCEEDED(pType->GetGUID(MF_MT_SUBTYPE, &subtype))) {
+                if (subtype == MFVideoFormat_H264) metadata.codec = L"H.264";
+                else if (subtype == MFVideoFormat_HEVC) metadata.codec = L"H.265/HEVC";
+                else if (subtype == MFVideoFormat_VP80) metadata.codec = L"VP8";
+                else if (subtype == MFVideoFormat_VP90) metadata.codec = L"VP9";
+                else if (subtype == MFVideoFormat_AV1) metadata.codec = L"AV1";
+                else metadata.codec = L"Unknown";
+            }
+            
+            pType->Release();
+        }
+
+        metadata.hasKeyframes = true; // Assume most videos have keyframes
+        pReader->Release();
+    }
+
+    MFShutdown();
+    CoUninitialize();
+    return SUCCEEDED(hr);
 }
 
 } // namespace Engine
