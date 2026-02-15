@@ -765,7 +765,7 @@ bool SIMDScaler::ScaleBGRA_BoxFilter(
     uint32_t dstHeight,
     uint32_t dstStride
 ) {
-    if (CPUFeatures::Get().HasSSE41()) {
+    if (HardwareCapabilities::Get().GetCPU().hasSSE41) {
         return ScaleBGRA_BoxFilter_SSE41(srcData, srcWidth, srcHeight, srcStride,
                                           dstData, dstWidth, dstHeight, dstStride);
     }

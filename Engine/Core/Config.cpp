@@ -185,7 +185,7 @@ bool EngineConfig::SaveToRegistry(HKEY rootKey, const wchar_t* subKey) const {
 // Global Instance
 //==============================================================================
 
-EngineConfig& GetEngineConfig() {
+ENGINE_API EngineConfig& GetEngineConfig() {
     static EngineConfig instance;
     static std::once_flag initFlag;
     

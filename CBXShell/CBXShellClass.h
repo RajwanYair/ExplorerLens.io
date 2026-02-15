@@ -82,6 +82,9 @@ public:
   STDMETHOD(Initialize)(IStream *pstream, DWORD grfMode);
 
 private:
+  // Internal thumbnail generation (Sprint 22: SEH-safe implementation)
+  HRESULT GetThumbnail_Internal(UINT cx, HBITMAP *phBmpThumbnail, WTS_ALPHATYPE *pdwAlpha);
+  
   __cbx::CCBXArchive m_cbx;
   CComPtr<IStream> m_spStream; // For IInitializeWithStream
   

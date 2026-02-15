@@ -7,9 +7,14 @@
 
 // DLL export/import macros for Windows
 #ifdef _WIN32
-    #ifdef ENGINE_EXPORTS
+    #ifdef ENGINE_STATIC
+        // Static library: no dllexport/dllimport
+        #define ENGINE_API
+    #elif defined(ENGINE_EXPORTS)
+        // Building DLL: export symbols
         #define ENGINE_API __declspec(dllexport)
     #else
+        // Using DLL: import symbols
         #define ENGINE_API __declspec(dllimport)
     #endif
 #else

@@ -69,7 +69,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WIN64;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN64;_DEBUG;_WINDOWS;_USRDLL;ENGINE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -117,7 +117,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <PreprocessorDefinitions>
-        _WIN64;NDEBUG;_WINDOWS;_USRDLL;ENABLE_WEBP_SUPPORT;ENABLE_HEIF_SUPPORT;ENABLE_AVIF_SUPPORT;ENABLE_JXL_SUPPORT;ENABLE_PDF_SUPPORT;ENABLE_VIDEO_SUPPORT;ENABLE_AUDIO_SUPPORT;ENABLE_DOCUMENT_SUPPORT;ENABLE_FONT_SUPPORT;ENABLE_SVG_SUPPORT;ENABLE_RAW_SUPPORT;ENABLE_PSD_SUPPORT;ENABLE_DDS_SUPPORT;ENABLE_HDR_SUPPORT;ENABLE_PPM_SUPPORT;ENABLE_EXR_SUPPORT;UNRAR;SILENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        _WIN64;NDEBUG;_WINDOWS;_USRDLL;ENGINE_STATIC;ENABLE_WEBP_SUPPORT;ENABLE_HEIF_SUPPORT;ENABLE_AVIF_SUPPORT;ENABLE_JXL_SUPPORT;ENABLE_PDF_SUPPORT;ENABLE_VIDEO_SUPPORT;ENABLE_AUDIO_SUPPORT;ENABLE_DOCUMENT_SUPPORT;ENABLE_FONT_SUPPORT;ENABLE_SVG_SUPPORT;ENABLE_RAW_SUPPORT;ENABLE_PSD_SUPPORT;ENABLE_DDS_SUPPORT;ENABLE_HDR_SUPPORT;ENABLE_PPM_SUPPORT;ENABLE_EXR_SUPPORT;UNRAR;SILENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>

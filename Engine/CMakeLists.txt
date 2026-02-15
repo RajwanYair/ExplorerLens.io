@@ -184,7 +184,8 @@ if(ENGINE_SOURCES)
         target_compile_definitions(DarkThumbsEngine PRIVATE ENGINE_EXPORTS)
     else()
         add_library(DarkThumbsEngine STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS})
-        target_compile_definitions(DarkThumbsEngine PRIVATE ENGINE_EXPORTS)
+        # STATIC library: do NOT define ENGINE_EXPORTS, so ENGINE_API is empty
+        target_compile_definitions(DarkThumbsEngine PUBLIC ENGINE_STATIC)
     endif()
     
     target_include_directories(DarkThumbsEngine

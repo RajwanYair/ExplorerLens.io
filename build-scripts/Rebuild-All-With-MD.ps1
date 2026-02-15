@@ -6,13 +6,13 @@
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [switch]$DryRun,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [switch]$SkipBuild,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string[]]$OnlyLibraries
 )
 
@@ -36,23 +36,23 @@ New-Item -ItemType Directory -Path $BuildLogDir -Force | Out-Null
 
 $Libraries = @(
     @{
-        Name = "zlib"
-        Version = "1.3.1"
-        SourceDir = "compression-libs\zlib-1.3.1"
-        BuildSystem = "CMake"
+        Name         = "zlib"
+        Version      = "1.3.1"
+        SourceDir    = "compression-libs\zlib-1.3.1"
+        BuildSystem  = "CMake"
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
             "-DBUILD_SHARED_LIBS=OFF"
         )
-        BuildDir = "build-md"
-        Outputs = @("zlib.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("zlib.lib")
     },
     @{
-        Name = "zstd"
-        Version = "1.5.7"
-        SourceDir = "compression-libs\zstd-1.5.7\build\cmake"
-        BuildSystem = "CMake"
+        Name         = "zstd"
+        Version      = "1.5.7"
+        SourceDir    = "compression-libs\zstd-1.5.7\build\cmake"
+        BuildSystem  = "CMake"
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
@@ -60,14 +60,14 @@ $Libraries = @(
             "-DZSTD_BUILD_PROGRAMS=OFF"
             "-DZSTD_BUILD_TESTS=OFF"
         )
-        BuildDir = "build-md"
-        Outputs = @("zstd.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("zstd.lib")
     },
     @{
-        Name = "lz4"
-        Version = "1.10.0"
-        SourceDir = "compression-libs\lz4-1.10.0\build\cmake"
-        BuildSystem = "CMake"
+        Name         = "lz4"
+        Version      = "1.10.0"
+        SourceDir    = "compression-libs\lz4-1.10.0\build\cmake"
+        BuildSystem  = "CMake"
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
@@ -75,14 +75,14 @@ $Libraries = @(
             "-DLZ4_BUILD_CLI=OFF"
             "-DLZ4_BUILD_LEGACY_LZ4C=OFF"
         )
-        BuildDir = "build-md"
-        Outputs = @("lz4.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("lz4.lib")
     },
     @{
-        Name = "minizip-ng"
-        Version = "4.0.10"
-        SourceDir = "compression-libs\minizip-ng-4.0.10"
-        BuildSystem = "CMake"
+        Name         = "minizip-ng"
+        Version      = "4.0.10"
+        SourceDir    = "compression-libs\minizip-ng-4.0.10"
+        BuildSystem  = "CMake"
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
@@ -93,40 +93,40 @@ $Libraries = @(
             "-DMZ_LZMA=ON"
             "-DMZ_ZSTD=ON"
         )
-        BuildDir = "build-md"
-        Outputs = @("minizip4.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("minizip4.lib")
     },
     @{
-        Name = "bzip2"
-        Version = "1.0.8"
-        SourceDir = "compression-libs\bzip2-1.0.8"
-        BuildSystem = "CMake"
+        Name         = "bzip2"
+        Version      = "1.0.8"
+        SourceDir    = "compression-libs\bzip2-1.0.8"
+        BuildSystem  = "CMake"
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
             "-DBUILD_SHARED_LIBS=OFF"
         )
-        BuildDir = "build-md"
-        Outputs = @("bzip2.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("bzip2.lib")
     },
     @{
-        Name = "xz"
-        Version = "5.6.3"
-        SourceDir = "compression-libs\xz-5.6.3"
-        BuildSystem = "CMake"
+        Name         = "xz"
+        Version      = "5.6.3"
+        SourceDir    = "compression-libs\xz-5.6.3"
+        BuildSystem  = "CMake"
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
             "-DBUILD_SHARED_LIBS=OFF"
         )
-        BuildDir = "build-md"
-        Outputs = @("liblzma.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("liblzma.lib")
     },
     @{
-        Name = "libwebp"
-        Version = "1.5.0"
-        SourceDir = "image-libs\libwebp-1.5.0-original"
-        BuildSystem = "CMake"
+        Name         = "libwebp"
+        Version      = "1.5.0"
+        SourceDir    = "image-libs\libwebp-1.5.0-original"
+        BuildSystem  = "CMake"
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
@@ -139,27 +139,27 @@ $Libraries = @(
             "-DWEBP_BUILD_WEBPMUX=OFF"
             "-DWEBP_BUILD_EXTRAS=OFF"
         )
-        BuildDir = "build-md"
-        Outputs = @("webp.lib", "webpdecoder.lib", "webpdemux.lib", "sharpyuv.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("webp.lib", "webpdecoder.lib", "webpdemux.lib", "sharpyuv.lib")
     },
     @{
-        Name = "dav1d"
-        Version = "1.5.1"
-        SourceDir = "image-libs\dav1d-1.5.1"
-        BuildSystem = "Meson"
+        Name         = "dav1d"
+        Version      = "1.5.1"
+        SourceDir    = "image-libs\dav1d-1.5.1"
+        BuildSystem  = "Meson"
         MesonOptions = @(
             "--buildtype=release"
             "-Ddefault_library=static"
             "-Db_vscrt=md"
         )
-        BuildDir = "build-md"
-        Outputs = @("dav1d.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("dav1d.lib")
     },
     @{
-        Name = "libavif"
-        Version = "1.3.0"
-        SourceDir = "image-libs\libavif-1.3.0"
-        BuildSystem = "CMake"
+        Name         = "libavif"
+        Version      = "1.3.0"
+        SourceDir    = "image-libs\libavif-1.3.0"
+        BuildSystem  = "CMake"
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
@@ -168,8 +168,8 @@ $Libraries = @(
             "-DAVIF_BUILD_APPS=OFF"
             "-DAVIF_BUILD_TESTS=OFF"
         )
-        BuildDir = "build-md"
-        Outputs = @("avif.lib")
+        BuildDir     = "build-md"
+        Outputs      = @("avif.lib")
     }
 )
 

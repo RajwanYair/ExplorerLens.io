@@ -8,16 +8,16 @@
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [switch]$Uninstall,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [switch]$Upgrade,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$InstallPath = "$env:ProgramFiles\DarkThumbs",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [switch]$SkipBackup
 )
 
@@ -33,8 +33,8 @@ $BuildConfig = "Release"
 $Platform = "x64"
 
 $SourceFiles = @{
-    "CBXShell.dll" = "x64\$BuildConfig\CBXShell.dll"
-    "CBXManager.exe" = "x64\$BuildConfig\CBXManager.exe"
+    "CBXShell.dll"         = "x64\$BuildConfig\CBXShell.dll"
+    "CBXManager.exe"       = "x64\$BuildConfig\CBXManager.exe"
     "DarkThumbsEngine.dll" = "build\bin\$BuildConfig\DarkThumbsEngine.dll"
 }
 
@@ -231,7 +231,7 @@ function Clear-ThumbnailCache {
         
         foreach ($pattern in $cachePaths) {
             Get-ChildItem -Path (Split-Path $pattern) -Filter (Split-Path $pattern -Leaf) -ErrorAction SilentlyContinue | 
-                Remove-Item -Force -ErrorAction SilentlyContinue
+            Remove-Item -Force -ErrorAction SilentlyContinue
         }
         
         Write-Success "Thumbnail cache cleared"
