@@ -63,34 +63,40 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
                                      WTS_ALPHATYPE *pdwAlpha) {
   PROFILE_FUNCTION();
 
-  // Get file extension for metrics
-  std::string fileExt;
-  const WCHAR* filePath = m_cbx.GetFilePath();
-  if (filePath) {
-    std::wstring wpath(filePath);
-    size_t dotPos = wpath.find_last_of(L'.');
-    if (dotPos != std::wstring::npos) {
-      std::wstring wext = wpath.substr(dotPos + 1);
-      // Proper wide-to-narrow conversion for file extensions (ASCII only)
-      fileExt.reserve(wext.length());
-      for (wchar_t wc : wext) {
-        fileExt.push_back(static_cast<char>(wc & 0xFF));
+  // ========================================================================
+  // CRITICAL: Wrap entire function in SEH to prevent Explorer crashes
+  // Sprint 22, Task 22.1: Comprehensive structured exception handling
+  // ========================================================================
+  __try {
+
+    // Get file extension for metrics
+    std::string fileExt;
+    const WCHAR* filePath = m_cbx.GetFilePath();
+    if (filePath) {
+      std::wstring wpath(filePath);
+      size_t dotPos = wpath.find_last_of(L'.');
+      if (dotPos != std::wstring::npos) {
+        std::wstring wext = wpath.substr(dotPos + 1);
+        // Proper wide-to-narrow conversion for file extensions (ASCII only)
+        fileExt.reserve(wext.length());
+        for (wchar_t wc : wext) {
+          fileExt.push_back(static_cast<char>(wc & 0xFF));
+        }
+        std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), ::tolower);
       }
-      std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), ::tolower);
     }
-  }
-  
-  // Track thumbnail generation metrics
-  DarkThumbs::ThumbnailMetricsScope metricsScope(fileExt);
+    
+    // Track thumbnail generation metrics
+    DarkThumbs::ThumbnailMetricsScope metricsScope(fileExt);
 
-  if (!phBmpThumbnail || !pdwAlpha) {
-    DT_LOG_ERROR(DarkThumbs::LogCategory::COM,
-                 "GetThumbnail: Invalid parameters");
-    return E_POINTER;
-  }
+    if (!phBmpThumbnail || !pdwAlpha) {
+      DT_LOG_ERROR(DarkThumbs::LogCategory::COM,
+                  "GetThumbnail: Invalid parameters");
+      return E_POINTER;
+    }
 
-  *phBmpThumbnail = nullptr;
-  *pdwAlpha = WTSAT_ARGB; // Use alpha channel for modern Windows
+    *phBmpThumbnail = nullptr;
+    *pdwAlpha = WTSAT_ARGB; // Use alpha channel for modern Windows
 
   // Try Engine path first (v6.2.0 - PRIMARY PATH)
   if (m_useEngine && m_engineAdapter && m_engineAdapter->IsInitialized()) {
@@ -155,6 +161,28 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
   }
 
   return hr;
+
+  } __except(EXCEPTION_EXECUTE_HANDLER) {
+    // ========================================================================
+    // SEH Exception Handler - Sprint 22, Task 22.1
+    // Prevent Explorer crash by catching all exceptions
+    // ========================================================================
+    DWORD exceptionCode = GetExceptionCode();
+    
+    DT_LOG_ERROR(DarkThumbs::LogCategory::COM,
+                 std::string("CRITICAL: SEH exception in GetThumbnail - Code: 0x") +
+                 std::to_string(exceptionCode) + 
+                 std::string(" (Access Violation/Stack Corruption/etc.)"));
+    
+    // Clean up any partial resources
+    if (phBmpThumbnail && *phBmpThumbnail) {
+      DeleteObject(*phBmpThumbnail);
+      *phBmpThumbnail = nullptr;
+    }
+    
+    // Return graceful failure - Explorer continues running
+    return E_FAIL;
+  }
 }
 
 // IInitializeWithStream::Initialize - Stream-based loading for better
