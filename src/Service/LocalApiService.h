@@ -4,6 +4,9 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <map>
+#include <mutex>
+#include <thread>
 #include "../Engine/contracts/thumbnail_contracts.h"
 
 namespace DarkThumbs::Service {
@@ -47,6 +50,9 @@ namespace DarkThumbs::Service {
         ServiceConfig m_config;
         bool m_isRunning;
         std::unique_ptr<IRequestHandler> m_handler;
+        std::map<std::string, std::function<std::string()>> m_routes;
+        std::unique_ptr<std::thread> m_listenerThread;
+        std::mutex m_routeMutex;
         
         void ListenHttp();
         void ListenPipe();

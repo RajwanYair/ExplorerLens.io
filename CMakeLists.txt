@@ -20,6 +20,7 @@ project(DarkThumbs
 option(BUILD_TESTS "Build unit tests" ON)
 option(BUILD_BENCHMARKS "Build performance benchmarks" ON)
 option(BUILD_ENGINE_ONLY "Build only the engine library" OFF)
+option(BUILD_MODERN_RUNTIME "Build worker/shellhost/local-api runtime components" OFF)
 option(ENABLE_GPU "Enable GPU acceleration (DirectX 11)" ON)
 option(ENABLE_CACHE "Enable thumbnail caching" ON)
 
@@ -129,6 +130,10 @@ find_package(WindowsSDK QUIET)
 # Always build the Engine
 add_subdirectory(Engine)
 
+if(BUILD_MODERN_RUNTIME)
+    add_subdirectory(src)
+endif()
+
 if(NOT BUILD_ENGINE_ONLY)
     # Build the shell extension and manager
     # Note: These require additional COM setup and are primarily built via MSBuild
@@ -233,6 +238,7 @@ message(STATUS "Options:")
 message(STATUS "  BUILD_TESTS:        ${BUILD_TESTS}")
 message(STATUS "  BUILD_BENCHMARKS:   ${BUILD_BENCHMARKS}")
 message(STATUS "  BUILD_ENGINE_ONLY:  ${BUILD_ENGINE_ONLY}")
+message(STATUS "  BUILD_MODERN_RUNTIME: ${BUILD_MODERN_RUNTIME}")
 message(STATUS "  ENABLE_GPU:         ${ENABLE_GPU}")
 message(STATUS "  ENABLE_CACHE:       ${ENABLE_CACHE}")
 message(STATUS "")

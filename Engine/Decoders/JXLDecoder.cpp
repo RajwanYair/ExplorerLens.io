@@ -181,7 +181,6 @@ namespace Engine {
 
         // Process decoder events
         JxlBasicInfo info;
-        bool gotInfo = false;
         uint8_t* pixels = nullptr;
 
         while (true) {
@@ -191,7 +190,6 @@ namespace Engine {
                 if (JxlDecoderGetBasicInfo(decoder.get(), &info) != JXL_DEC_SUCCESS) {
                     return nullptr;
                 }
-                gotInfo = true;
 
                 // Calculate thumbnail dimensions
                 outWidth = info.xsize;

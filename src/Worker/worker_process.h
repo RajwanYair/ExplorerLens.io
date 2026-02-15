@@ -14,6 +14,9 @@
 #include <queue>
 #include <atomic>
 #include <chrono>
+#include <vector>
+#include <mutex>
+
 
 namespace DarkThumbs {
 namespace Worker {
@@ -189,7 +192,6 @@ public:
     
 private:
     WorkerConfig m_config;
-    uint32_t m_poolSize;
     std::vector<std::unique_ptr<WorkerProcess>> m_workers;
     std::atomic<uint32_t> m_nextWorkerIndex{0};
     mutable std::mutex m_mutex;

@@ -92,7 +92,7 @@ namespace Engine {
         );
 
         // Configuration
-        bool m_preferEmbeddedThumbnail;  // Use embedded thumbnail if available
+    [[maybe_unused]] bool m_preferEmbeddedThumbnail;  // Use embedded thumbnail if available
         
         // Supported extensions (HEIF, HEIC, Apple variants)
         static constexpr const wchar_t* s_extensions[11] = {

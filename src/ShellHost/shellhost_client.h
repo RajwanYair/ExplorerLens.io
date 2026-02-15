@@ -14,6 +14,10 @@
 #include <atomic>
 #include <chrono>
 #include <mutex>
+#include <vector>
+#include <queue>
+#include <condition_variable>
+#include <string>
 
 namespace DarkThumbs {
 namespace ShellHost {

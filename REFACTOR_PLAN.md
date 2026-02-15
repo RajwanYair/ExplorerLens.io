@@ -20,6 +20,90 @@ This plan refactors DarkThumbs from a legacy ATL/WTL shell extension into a mode
 
 ---
 
+## 1.1 Reality Audit (February 15, 2026) — Corrected Status
+
+This audit supersedes stale status flags in this file where they conflict with implementation evidence in the current codebase.
+
+### Implemented and Shipping (Verified)
+
+| Area | Current Reality |
+|---|---|
+| Core decoders | 21 decoders are compiled and registered in `Engine/Pipeline/ThumbnailPipeline.cpp` |
+| JXL | Implemented and linked when `HAS_LIBJXL=ON` in `Engine/CMakeLists.txt` |
+| HEIF | Decoder exists; optional library path remains config-dependent (`HAS_LIBHEIF`) |
+| Shell extension | `CBXShell.dll` is real and integrated with Engine path plus legacy fallback in `CBXShell/CBXShellClass.cpp` |
+| GPU acceleration | D3D11 batch path exists (`RenderThumbnailBatch`) but not D3D12 compute yet |
+| Cache optimization | Compression level + optimize/defragment methods exist in `Engine/Cache/ThumbnailCache.*` |
+| Plugin validation | Plugin-system validation tests exist in `tests/PluginSystemTests.cpp` |
+| Signing automation | Enhanced signing workflow exists in `build-scripts/Sign-Binaries.ps1` |
+
+### Planned but Not Applied (True Gaps)
+
+| Gap | Evidence |
+|---|---|
+| Out-of-process worker runtime | `src/Worker/worker_process.h` exists, but no `src/**/*.cpp` implementation files |
+| ShellHost IPC client runtime | `src/ShellHost/shellhost_client.h` header exists, no compiled runtime integration |
+| Local API service runtime | `src/Service/LocalApiService.h` header exists, no implementation or build target |
+| WinUI Manager integration | `src/Manager.WinUI` has C#/XAML code, but not included in `CBXShell.sln` or CMake build graph |
+| WinUI ↔ Engine bridge | No C++/WinRT or P/Invoke production bridge to Engine APIs |
+| Web dashboard | No frontend project or static web bundle wired to localhost API |
+| Full engine-only shell path | Legacy fallback still active in `CBXShell/CBXShellClass.cpp` |
+| Advanced QA matrix | No full per-extension fixture matrix enforcing p95 latency and reliability gates |
+
+### Windows 11 GUI Direction (Native + Web)
+
+**Native executable (primary):**
+- WinUI 3 desktop app (Windows App SDK), x64 + ARM64
+- WebView2 host for embedded dashboard pages
+- Use AppNotificationManager, Mica backdrop, high-DPI fluent controls
+
+**Web interface (secondary + remote admin local only):**
+- Localhost-only API service (`127.0.0.1`, token protected)
+- SPA dashboard (React or similar) loaded in WebView2 and optionally external browser
+- WebSocket telemetry stream for live decode/cache/worker health
+
+---
+
+## 1.2 Refactor Program (Windows 11 First, Performance First)
+
+### Phase R1 — Stabilize Runtime Boundaries (1-2 weeks)
+1. Implement Worker runtime from existing contracts (`src/Worker/*.h`) with job object limits and watchdog.
+2. Implement ShellHost IPC client and route shell requests through worker first.
+3. Keep controlled legacy fallback behind feature flag for rollback only.
+4. Add ETW provider and correlation IDs across shell → worker → decoder.
+
+### Phase R2 — Native GUI Modernization (1-2 weeks)
+1. Promote `src/Manager.WinUI` into official build/release pipeline.
+2. Introduce Engine bridge layer (C API + P/Invoke or C++/WinRT projection).
+3. Migrate WTL feature parity: format toggles, cache control, diagnostics, plugin status, GPU settings.
+4. Add MSIX packaging and update strategy for Manager app.
+
+### Phase R3 — Web Interface Delivery (1 week)
+1. Implement LocalApiService runtime with versioned routes (`/api/v1/...`).
+2. Add auth token + localhost binding + request size/rate limits.
+3. Build Web dashboard with pages: status, formats, cache, diagnostics, plugins.
+4. Embed in WinUI via WebView2 and support optional external browser access.
+
+### Phase R4 — File Type Coverage Expansion (2+ weeks)
+1. Finish quality upgrades for placeholder/fallback decoders (PDF, Document, Font).
+2. Add Tier-1 missing formats by usage impact (JP2/J2K, richer office extraction, text/code previews).
+3. Add plugin-delivered long-tail formats (DICOM, CAD, niche archives) instead of monolith growth.
+4. Maintain a single source-of-truth extension matrix generated from decoder registry + tests.
+
+### Phase R5 — Performance and Reliability Gates (continuous)
+1. Enforce p95 thumbnail latency budgets by format class.
+2. Add corpus-driven tests for all registered extensions and corrupted-input fuzz cases.
+3. Add memory caps and cancellation paths for large/hostile files.
+4. Require release gates: zero build errors, zero warnings, no explorer crash repros in stress tests.
+
+### Definition of Done for v7.x
+- Worker path is default for Explorer requests and survives decoder crashes.
+- WinUI Manager and web dashboard are both functional and backed by the same API.
+- All registered extensions either produce a real thumbnail or a deterministic typed placeholder with diagnostics.
+- Performance SLOs and stability gates are automated in CI.
+
+---
+
 ## 2. Gap Analysis — What ROADMAP Tasks Were NOT Applied
 
 ### 2.1 Unapplied ROADMAP Sprints

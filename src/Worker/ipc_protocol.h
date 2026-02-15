@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <atomic>
 
 namespace DarkThumbs {
 namespace IPC {
@@ -120,7 +121,7 @@ struct MessageHeader {
     uint64_t timestamp;        // Microseconds since epoch
 };
 
-static_assert(sizeof(MessageHeader) == 48, "MessageHeader must be 48 bytes");
+static_assert(sizeof(MessageHeader) == 40, "MessageHeader must be 40 bytes");
 
 #pragma pack(pop)
 
