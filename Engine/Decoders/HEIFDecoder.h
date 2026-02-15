@@ -93,7 +93,6 @@ namespace Engine {
 
         // Configuration
         bool m_preferEmbeddedThumbnail;  // Use embedded thumbnail if available
-        bool m_supportHDR;               // Enable HDR decoding (tone mapping required)
         
         // Supported extensions (HEIF, HEIC, Apple variants)
         static constexpr const wchar_t* s_extensions[11] = {

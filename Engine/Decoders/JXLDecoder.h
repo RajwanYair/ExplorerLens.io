@@ -79,10 +79,6 @@ namespace Engine {
             uint32_t height,
             uint32_t channels
         );
-
-        // Configuration
-        bool m_useMultithreading;  // Enable parallel decoding
-        uint32_t m_maxThreads;     // Maximum decode threads
         
         // Supported extensions
         static constexpr const wchar_t* s_extensions[2] = { L".jxl", nullptr };

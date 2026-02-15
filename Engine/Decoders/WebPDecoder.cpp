@@ -293,9 +293,6 @@ void WebPDecoder::AddAnimationBadge(HBITMAP hBitmap, int width, int height) {
     HPEN hPen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
     HBRUSH hOldBrush = (HBRUSH)SelectObject(hdcMem, hBrush);
     HPEN hOldPen = (HPEN)SelectObject(hdcMem, hPen);
-
-    // Set transparency (blend mode)
-    BLENDFUNCTION blend = { AC_SRC_OVER, 0, 180, 0 }; // 70% opaque
     
     // Draw background circle
     Ellipse(hdcMem, x, y, x + badgeSize2, y + badgeSize2);

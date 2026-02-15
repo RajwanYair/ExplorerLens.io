@@ -20,8 +20,6 @@ namespace Engine {
     // Static extension array defined in header
 
     JXLDecoder::JXLDecoder()
-        : m_useMultithreading(true)
-        , m_maxThreads(4)
     {
     }
 

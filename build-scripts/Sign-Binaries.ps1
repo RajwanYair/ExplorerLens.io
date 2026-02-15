@@ -331,8 +331,7 @@ if ($GenerateChecksums) {
                 
                 Write-Host "  $($file.Name): " -NoNewline
                 Write-Host $hash -ForegroundColor Gray
-            }
-            catch {
+            } catch {
                 Write-Host "  FAILED: $($file.Name)" -ForegroundColor Red
             }
         }
@@ -354,8 +353,7 @@ if ($TagRelease -and $ReleaseVersion) {
         $gitVersion = (git --version 2>&1)
         if ($LASTEXITCODE -ne 0) {
             Write-Host "WARNING: Git not found, skipping release tagging" -ForegroundColor Yellow
-        }
-        else {
+        } else {
             # Create annotated tag
             $tagName = "v$ReleaseVersion"
             $tagMessage = "Release $ReleaseVersion - Signed binaries"
@@ -367,13 +365,11 @@ if ($TagRelease -and $ReleaseVersion) {
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "✓ Tag created: $tagName" -ForegroundColor Green
                 Write-Host "  Push with: git push origin $tagName" -ForegroundColor Gray
-            }
-            else {
+            } else {
                 Write-Host "WARNING: Tag creation failed (may already exist)" -ForegroundColor Yellow
             }
         }
-    }
-    catch {
+    } catch {
         Write-Host "WARNING: Release tagging failed: $_" -ForegroundColor Yellow
     }
 }

@@ -31,19 +31,6 @@ inline bool StrEqualI(const wchar_t* a, const wchar_t* b)
     return _wcsicmp(a, b) == 0;
 }
 
-// Check if string ends with suffix (case-insensitive)
-bool EndsWith(const wchar_t* str, const wchar_t* suffix)
-{
-    if (!str || !suffix) return false;
-    
-    size_t strLen = wcslen(str);
-    size_t suffixLen = wcslen(suffix);
-    
-    if (suffixLen > strLen) return false;
-    
-    return StrEqualI(str + strLen - suffixLen, suffix);
-}
-
 } // anonymous namespace
 
 //==============================================================================

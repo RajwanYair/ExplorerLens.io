@@ -17,7 +17,6 @@ namespace Engine {
 
     HEIFDecoder::HEIFDecoder()
         : m_preferEmbeddedThumbnail(true)
-        , m_supportHDR(false) // Disable HDR by default (requires tone mapping)
     {
     }
 
