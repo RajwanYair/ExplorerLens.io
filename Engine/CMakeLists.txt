@@ -276,7 +276,7 @@ if(ENGINE_SOURCES)
         
         # Conditionally link optional decoder libraries
         if(HAS_LIBJXL)
-            target_link_libraries(DarkThumbsEngine PUBLIC jxl jxl_threads brotlicommon brotlidec hwy)
+            target_link_libraries(DarkThumbsEngine PUBLIC jxl jxl_cms jxl_threads brotlicommon brotlidec hwy)
         endif()
         if(HAS_LIBRAW)
             target_link_libraries(DarkThumbsEngine PUBLIC libraw_static)

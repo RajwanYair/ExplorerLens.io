@@ -9,9 +9,9 @@
 | Sprint | Priority | Status | Completion | Notes |
 |--------|----------|--------|------------|-------|
 | 1 | P0 | ✅ Complete | 100% | LZMA 26.00 with /MD flags verified |
-| 2 | P1 | ⬜ Not Started | 0% | libjxl integration required |
-| 3 | P1 | ⬜ Not Started | 0% | libheif integration required |
-| 4 | P1 | ⬜ Not Started | 0% | lunasvg integration required |
+| 2 | P1 | ✅ Complete | 95% | libjxl 0.11.1 integrated, decoder implemented |
+| 3 | P1 | ✅ Complete | 85% | HEIF/HEIC via WIC, libheif decoder exists |
+| 4 | P1 | 🟡 Functional | 65% | SVG decoder operational via GDI+ |
 | 5 | P1 | ⬜ Not Started | 0% | PDF rendering required |
 | 6 | P2 | 🟡 Planned | 10% | Video decoder improvements planned |
 | 7 | P2 | 🟡 Planned | 10% | Audio decoder improvements planned |
