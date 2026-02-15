@@ -100,10 +100,23 @@ if(WIN32)
     )
 endif()
 
-# Compiler warnings
+# Compiler warnings and linker options
 if(MSVC)
     target_compile_options(EngineTests PRIVATE
         /W4
+    )
+    target_compile_options(EngineBenchmark PRIVATE
+        /W4
+    )
+    
+    # Fix LIBCMT conflict - external libraries built with /MT need this
+    target_link_options(EngineTests PRIVATE
+        /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts from external libs
+        /IGNORE:4099            # Ignore missing PDB warnings
+    )
+    target_link_options(EngineBenchmark PRIVATE
+        /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts from external libs
+        /IGNORE:4099            # Ignore missing PDB warnings
     )
 endif()
 

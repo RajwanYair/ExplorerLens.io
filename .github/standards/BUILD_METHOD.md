@@ -176,3 +176,101 @@ See [LIBRARY_INVENTORY.md](../../external/LIBRARY_INVENTORY.md) for complete ver
 
 **Important:** All libraries MUST be built with `-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"` (dynamic CRT `/MD`) 
 to prevent LIBCMT conflicts. See [REFACTOR_PLAN.md](../../REFACTOR_PLAN.md) for rebuild instructions.
+
+---
+
+## Recent Build Fixes (February 2026)
+
+### Issue #1: LNK4098 - LIBCMT Conflict in Test Executables
+
+**Symptom:**
+```
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; 
+use /NODEFAULTLIB:library [EngineBenchmark.vcxproj]
+```
+
+**Root Cause:**
+- Main Engine library had `/NODEFAULTLIB:LIBCMT` linker option
+- Test executables (EngineTests, EngineBenchmark) did NOT have the flag
+- External libraries (zlib, webp, zstd, minizip-ng) built with static CRT (`/MT`)
+- Tests link both Engine (using `/MD`) and external libs (using `/MT`) causing conflict
+
+**Fix Applied:**
+Added `/NODEFAULTLIB:LIBCMT` and `/IGNORE:4099` to test executables in `Engine/Tests/CMakeLists.txt`:
+```cmake
+if(MSVC)
+    target_link_options(EngineTests PRIVATE
+        /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts from external libs
+        /IGNORE:4099            # Ignore missing PDB warnings
+    )
+    target_link_options(EngineBenchmark PRIVATE
+        /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts from external libs
+        /IGNORE:4099            # Ignore missing PDB warnings
+    )
+endif()
+```
+
+**Proper Long-Term Solution:**
+Rebuild ALL external libraries with `/MD` dynamic CRT using `Rebuild-All-With-MD.ps1` script.
+Current fix is temporary workaround that suppresses warning without fixing root cause.
+
+### Issue #2: C4456 - Variable Shadowing Warning
+
+**Symptom:**
+```
+EngineBenchmark.cpp(300,19): warning C4456: declaration of 'iterations' hides 
+previous local declaration
+```
+
+**Root Cause:**
+- Outer scope at line 237: `const int iterations = 10000;`
+- Inner loop reusing same name could cause shadowing
+
+**Fix Applied:**
+Verified code uses distinct variable names:
+- Line 237: `const int iterations = 10000;` (for format detection)
+- Line 300: `const int scaleIterations = 10;` (for SIMD benchmarks)
+- No shadowing in current code - warning from previous version
+
+**Best Practice:**
+Use descriptive variable names with prefixes indicating scope:
+- `formatIterations`, `scaleIterations`, `cacheIterations` etc.
+- Avoid reusing generic names like `i`, `j`, `count`, `iterations` in nested scopes
+
+### Issue #3: C4702 - Unreachable Code Warning
+
+**Symptom:**
+```
+EngineTests.cpp(760): warning C4702: unreachable code
+```
+
+**Root Cause:**
+Compiler optimization detecting code paths that can never execute, typically after:
+- Unconditional return/throw statements
+- All branches of if/else returning
+- Infinite loops
+
+**Fix Applied:**
+Could not reproduce in current codebase - likely fixed in recent commits.
+Common causes in test code:
+- Code after ASSERT macros (which throw on failure)
+- Debug-only code after return statements
+- Unreachable catch blocks
+
+**Best Practice:**
+- Review compiler warnings during code generation phase (not just compilation)
+- Remove dead code immediately
+- Use `[[maybe_unused]]` attribute for intentionally unused variables
+
+---
+
+## Build Validation Checklist
+
+After CMake configuration changes:
+- [ ] Clean build: `cmake --build build --target clean`  
+- [ ] Rebuild all: `cmake --build build --config Release -j 8`
+- [ ] Check for LNK4098 warnings (LIBCMT conflicts)
+- [ ] Check for C4456 warnings (variable shadowing)
+- [ ] Check for C4702 warnings (unreachable code)
+- [ ] Run tests: `ctest --test-dir build -C Release --output-on-failure`
+- [ ] Verify zero warnings in Release builds

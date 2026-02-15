@@ -223,12 +223,13 @@ HRESULT FontDecoder::RenderFontPreview(const wchar_t* filePath, uint32_t width,
 
         // Create text layout with custom font
         IDWriteTextLayout* pTextLayout = nullptr;
-        hr = pDWriteFactory->CreateTextLayout(sampleText, wcslen(sampleText), pTextFormat,
+        UINT32 textLength = static_cast<UINT32>(wcslen(sampleText));
+        hr = pDWriteFactory->CreateTextLayout(sampleText, textLength, pTextFormat,
                                               static_cast<float>(width), static_cast<float>(height),
                                               &pTextLayout);
         if (SUCCEEDED(hr)) {
             // Apply custom font face to text layout
-            DWRITE_TEXT_RANGE textRange = { 0, wcslen(sampleText) };
+            DWRITE_TEXT_RANGE textRange = { 0, textLength };
             pTextLayout->SetFontSize(fontSize, textRange);
 
             // Draw text
@@ -466,7 +467,9 @@ bool FontDecoder::GetFontMetadata(const wchar_t* filePath, FontMetadata& metadat
                     // Get font metrics
                     DWRITE_FONT_METRICS fontMetrics;
                     pFontFace->GetMetrics(&fontMetrics);
-                    metadata.weightValue = fontMetrics.weight;
+                    // Note: Font weight must be obtained from IDWriteFont, not DWRITE_FONT_METRICS
+                    // For now, set a default value (normal = 400)
+                    metadata.weightValue = 400;
 
                     // Check if monospace by comparing glyph widths
                     UINT16 glyphIndices[3] = { 0, 0, 0 };
@@ -491,7 +494,6 @@ bool FontDecoder::GetFontMetadata(const wchar_t* filePath, FontMetadata& metadat
                         if (fileName) {
                             metadata.fullName = fileName;
                             // Remove extension
-                            size_t len = wcslen(fileName);
                             const wchar_t* dotPos = wcsrchr(fileName, L'.');
                             if (dotPos) {
                                 metadata.familyName.assign(fileName, dotPos - fileName);

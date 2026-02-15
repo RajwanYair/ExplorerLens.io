@@ -14,6 +14,9 @@
 #include "../Core/IThumbnailDecoder.h"
 #include <cstdint>
 
+// Forward declarations for Media Foundation types
+struct IMFSourceReader;
+
 namespace DarkThumbs {
 namespace Engine {
 

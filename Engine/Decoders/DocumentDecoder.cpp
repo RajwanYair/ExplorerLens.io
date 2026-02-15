@@ -181,7 +181,7 @@ HRESULT DocumentDecoder::ExtractEPUBCover(const wchar_t* filePath, uint32_t widt
                 mz_zip_reader_entry_get_info(zip_reader, &file_info);
                 if (file_info && file_info->uncompressed_size > 0 && file_info->uncompressed_size < 50 * 1024 * 1024) {
                     imageData.resize(file_info->uncompressed_size);
-                    int32_t bytesRead = mz_zip_reader_entry_read(zip_reader, imageData.data(), imageData.size());
+                    int32_t bytesRead = mz_zip_reader_entry_read(zip_reader, imageData.data(), static_cast<int32_t>(imageData.size()));
                     if (bytesRead == static_cast<int32_t>(imageData.size())) {
                         mz_zip_reader_entry_close(zip_reader);
                         // Successfully read cover image
@@ -202,7 +202,7 @@ HRESULT DocumentDecoder::ExtractEPUBCover(const wchar_t* filePath, uint32_t widt
         Gdiplus::GdiplusStartupInput gdipInput;
         ULONG_PTR gdipToken = 0;
         if (Gdiplus::GdiplusStartup(&gdipToken, &gdipInput, nullptr) == Gdiplus::Ok) {
-            IStream* stream = SHCreateMemStream(imageData.data(), imageData.size());
+            IStream* stream = SHCreateMemStream(imageData.data(), static_cast<UINT>(imageData.size()));
             if (stream) {
                 Gdiplus::Bitmap* bmp = Gdiplus::Bitmap::FromStream(stream);
                 if (bmp && bmp->GetLastStatus() == Gdiplus::Ok) {
@@ -276,8 +276,8 @@ HRESULT DocumentDecoder::ExtractMOBICover(const wchar_t* filePath, uint32_t widt
     // Decode JPEG to HBITMAP using GDI+
     Gdiplus::GdiplusStartupInput gdipInput;
     ULONG_PTR gdipToken = 0;
-    if (Gdiplus::GdiplusStartup(&gdipToken, &gdipInput, nullptr) == Gdiplus::Ok) {
-        IStream* stream = SHCreateMemStream(jpegData.data(), jpegData.size());
+    if (Gdiplus::GdiplusStartup(&gdipToken, & gdipInput, nullptr) == Gdiplus::Ok) {
+        IStream* stream = SHCreateMemStream(jpegData.data(), static_cast<UINT>(jpegData.size()));
         if (stream) {
             Gdiplus::Bitmap* bmp = Gdiplus::Bitmap::FromStream(stream);
             if (bmp && bmp->GetLastStatus() == Gdiplus::Ok) {

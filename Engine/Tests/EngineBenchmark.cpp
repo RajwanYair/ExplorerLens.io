@@ -3,6 +3,7 @@
 #include "../Pipeline/FormatDetector.h"
 #include "../Utils/PerformanceProfiler.h"
 #include "../Utils/SIMDScaler.h"
+#include "../Utils/HardwareCapabilities.h"
 #include <windows.h>
 #include <iostream>
 #include <iomanip>
@@ -280,12 +281,13 @@ int main() {
     const uint32_t thumbWidth = 256;
     const uint32_t thumbHeight = 256;
     
-    // Check CPU features
-    auto& cpuFeatures = DarkThumbs::SIMD::CPUFeatures::Get();
+    // Check CPU features using HardwareCapabilities
+    auto& hwCaps = HardwareCapabilities::Get();
+    const auto& cpu = hwCaps.GetCPUCapabilities();
     std::wcout << L"CPU Features:\n";
-    std::wcout << L"  AVX2:  " << (cpuFeatures.HasAVX2() ? L"Yes" : L"No") << L"\n";
-    std::wcout << L"  SSE4.1: " << (cpuFeatures.HasSSE41() ? L"Yes" : L"No") << L"\n";
-    std::wcout << L"  FMA:   " << (cpuFeatures.HasFMA() ? L"Yes" : L"No") << L"\n\n";
+    std::wcout << L"  AVX2:  " << (cpu.hasAVX2 ? L"Yes" : L"No") << L"\n";
+    std::wcout << L"  SSE4.1: " << (cpu.hasSSE41 ? L"Yes" : L"No") << L"\n";
+    std::wcout << L"  FMA:   " << (cpu.hasFMA ? L"Yes" : L"No") << L"\n\n";
     
     for (const auto& test : sizes) {
         // Create source buffer (simulated BGRA image)
@@ -302,10 +304,10 @@ int main() {
         double mpixPerSec = 0.0;
         
         // Test AVX2 if available
-        if (cpuFeatures.HasAVX2()) {
+        if (cpu.hasAVX2) {
             QueryPerformanceCounter(&start);
             for (int i = 0; i < scaleIterations; i++) {
-                DarkThumbs::SIMD::SIMDScaler::ScaleBGRA_Bilinear_AVX2(
+                SIMD::SIMDScaler::ScaleBGRA_Bilinear_AVX2(
                     srcData.data(), test.width, test.height, srcStride,
                     dstData.data(), thumbWidth, thumbHeight, dstStride
                 );
@@ -322,7 +324,7 @@ int main() {
         // Test scalar fallback
         QueryPerformanceCounter(&start);
         for (int i = 0; i < scaleIterations; i++) {
-            DarkThumbs::SIMD::SIMDScaler::ScaleBGRA_Bilinear_Scalar(
+            SIMD::SIMDScaler::ScaleBGRA_Bilinear_Scalar(
                 srcData.data(), test.width, test.height, srcStride,
                 dstData.data(), thumbWidth, thumbHeight, dstStride
             );
