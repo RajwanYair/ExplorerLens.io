@@ -4,6 +4,7 @@
 #include "CBXShellClass.h"
 #include "CBXShell.h"
 #include "metrics_collector.h"
+#include "../Engine/Core/Config.h"
 #include <string>
 
 HRESULT CCBXShell::FinalConstruct(void) {
@@ -12,20 +13,34 @@ HRESULT CCBXShell::FinalConstruct(void) {
 
   m_cbx.LoadRegistrySettings();
 
-  // Initialize Engine adapter (v5.3.0 - ACTIVE)
-  m_useEngine = false; // Default to legacy fallback
+  // Initialize Engine adapter (v6.2.0 - PRIMARY PATH)
+  m_useEngine = false; // Will be set to true if Engine initializes successfully
   try {
     m_engineAdapter = std::make_unique<DarkThumbs::EngineAdapter>();
     if (m_engineAdapter->Initialize()) {
-      m_useEngine = true; // ✅ Engine pipeline now active!
-      DT_LOG_INFO(DarkThumbs::LogCategory::ENGINE, "✓ Engine adapter initialized - v5.3.0 active");
+      m_useEngine = true; 
+      DT_LOG_INFO(DarkThumbs::LogCategory::ENGINE, 
+        "✓ Engine pipeline ACTIVE (v6.2.0) - Legacy fallback controlled by registry");
     } else {
-      DT_LOG_WARNING(DarkThumbs::LogCategory::ENGINE, "Engine adapter init failed, using legacy code");
+      DT_LOG_WARNING(DarkThumbs::LogCategory::ENGINE, 
+        "Engine adapter initialization failed - check Engine build and dependencies");
+      m_useEngine = false; // Engine unavailable
     }
   } catch (const std::exception& ex) {
     DT_LOG_ERROR(DarkThumbs::LogCategory::ENGINE, 
-      std::string("Engine adapter exception: ") + ex.what());
-    m_useEngine = false; // Fallback to legacy on exception
+      std::string("Engine adapter exception during init: ") + ex.what());
+    m_useEngine = false; 
+  }
+
+  // Log configuration status
+  auto& config = DarkThumbs::Engine::GetEngineConfig();
+  if (m_useEngine) {
+    DT_LOG_INFO(DarkThumbs::LogCategory::ENGINE, 
+      std::string("Engine enabled. Legacy fallback: ") + 
+      (config.allowLegacyFallback ? "ENABLED" : "DISABLED (Engine-only)"));
+  } else {
+    DT_LOG_WARNING(DarkThumbs::LogCategory::ENGINE,
+      "Engine unavailable - using legacy implementation only");
   }
 
   return S_OK;
@@ -56,7 +71,11 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
     size_t dotPos = wpath.find_last_of(L'.');
     if (dotPos != std::wstring::npos) {
       std::wstring wext = wpath.substr(dotPos + 1);
-      fileExt = std::string(wext.begin(), wext.end());
+      // Proper wide-to-narrow conversion for file extensions (ASCII only)
+      fileExt.reserve(wext.length());
+      for (wchar_t wc : wext) {
+        fileExt.push_back(static_cast<char>(wc & 0xFF));
+      }
       std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), ::tolower);
     }
   }
@@ -73,9 +92,12 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
   *phBmpThumbnail = nullptr;
   *pdwAlpha = WTSAT_ARGB; // Use alpha channel for modern Windows
 
-  // Try Engine path first (v5.3.0)
+  // Try Engine path first (v6.2.0 - PRIMARY PATH)
   if (m_useEngine && m_engineAdapter && m_engineAdapter->IsInitialized()) {
-    // Use new Engine architecture
+    DT_LOG_DEBUG(DarkThumbs::LogCategory::ENGINE, 
+      std::string("Using Engine pipeline for: ") + fileExt);
+    
+    // Use Engine architecture
     HRESULT hr = m_engineAdapter->GenerateThumbnail(
       m_cbx.GetFilePath(), 
       cx, 
@@ -84,27 +106,51 @@ STDMETHODIMP CCBXShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
       phBmpThumbnail);
     
     if (SUCCEEDED(hr)) {
+      DT_LOG_DEBUG(DarkThumbs::LogCategory::ENGINE, 
+        "Engine thumbnail generation successful");
+      metricsScope.SetSuccess(true);
       return hr;
     }
-    // Fall through to legacy on Engine failure
+    
+    // Engine failed - check if legacy fallback is allowed
+    auto& config = DarkThumbs::Engine::GetEngineConfig();
+    if (!config.allowLegacyFallback) {
+      // No fallback - Engine is the only path
+      DT_LOG_ERROR(DarkThumbs::LogCategory::ENGINE, 
+        std::string("Engine thumbnail failed for: ") + fileExt + 
+        " - Legacy fallback disabled (Engine-only mode)");
+      metricsScope.SetSuccess(false);
+      return hr; // Return Engine error
+    }
+    
     DT_LOG_WARNING(DarkThumbs::LogCategory::ENGINE, 
-      "Engine thumbnail failed, falling back to legacy");
+      std::string("Engine thumbnail failed for: ") + fileExt + 
+      " - Attempting legacy fallback");
+  } else {
+    DT_LOG_WARNING(DarkThumbs::LogCategory::ENGINE,
+      "Engine not initialized - using legacy implementation");
   }
 
-  // Legacy path (existing implementation)
+  // Legacy path (DEPRECATED - only used if Engine unavailable or explicit fallback enabled)
+  DT_LOG_DEBUG(DarkThumbs::LogCategory::DECODER, 
+    std::string("Using legacy decoder for: ") + fileExt);
+  
   SIZE size = {static_cast<LONG>(cx), static_cast<LONG>(cx)};
   DWORD dwFlags = 0;
   m_cbx.OnGetLocation(&size, &dwFlags);
 
-  // Extract thumbnail using existing logic
+  // Extract thumbnail using legacy logic
   HRESULT hr = m_cbx.OnExtract(phBmpThumbnail);
 
   if (FAILED(hr)) {
     DT_LOG_HRESULT(DarkThumbs::LogLevel::LVL_ERROR,
-                   DarkThumbs::LogCategory::DECODER, "Thumbnail extraction",
+                   DarkThumbs::LogCategory::DECODER, 
+                   std::string("Legacy thumbnail extraction failed for: ") + fileExt,
                    hr);
     metricsScope.SetSuccess(false);
   } else {
+    DT_LOG_DEBUG(DarkThumbs::LogCategory::DECODER,
+      std::string("Legacy thumbnail successful for: ") + fileExt);
     metricsScope.SetSuccess(true);
   }
 

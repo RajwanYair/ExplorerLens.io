@@ -201,6 +201,90 @@ namespace DarkMode
 
 		return isDarkMode ? hBrushDark : hBrushLight;
 	}
+
+	// Set dark mode scrollbar theme for a window (Windows 10 1903+)
+	inline void SetDarkScrollbar(HWND hWnd, bool darkMode)
+	{
+		// Explorer theme enables dark scrollbars on Windows 10 1903+
+		if (darkMode)
+		{
+			SetWindowTheme(hWnd, L"DarkMode_Explorer", nullptr);
+		}
+		else
+		{
+			SetWindowTheme(hWnd, L"Explorer", nullptr);
+		}
+	}
+
+	// Apply dark scrollbars to all child scrollable controls
+	inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode)
+	{
+		EnumChildWindows(hDlg, [](HWND hChild, LPARAM lParam) -> BOOL
+		{
+			bool dark = (lParam != 0);
+			TCHAR className[64];
+			GetClassName(hChild, className, 64);
+
+			// Apply dark scrollbars to listboxes, treeviews, listviews, edit controls
+			if (_tcsicmp(className, _T("ListBox")) == 0 ||
+				_tcsicmp(className, _T("SysListView32")) == 0 ||
+				_tcsicmp(className, _T("SysTreeView32")) == 0 ||
+				_tcsicmp(className, _T("Edit")) == 0)
+			{
+				SetDarkScrollbar(hChild, dark);
+			}
+			
+			return TRUE;
+		}, (LPARAM)(darkMode ? 1 : 0));
+	}
+
+	// Get Windows accent color from system settings
+	inline COLORREF GetSystemAccentColor()
+	{
+		DWORD color = 0;
+		BOOL opaque = FALSE;
+
+		// DwmGetColorizationColor returns the window colorization color
+		HRESULT hr = DwmGetColorizationColor(&color, &opaque);
+		if (SUCCEEDED(hr))
+		{
+			// ARGB to RGB (discard alpha)
+			return RGB((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+		}
+		
+		// Fallback: read from registry
+		DWORD accentColor = 0;
+		DWORD size = sizeof(DWORD);
+		HKEY key;
+		if (RegOpenKeyExW(HKEY_CURRENT_USER,
+			L"Software\\Microsoft\\Windows\\DWM",
+			0, KEY_READ, &key) == ERROR_SUCCESS)
+		{
+			RegQueryValueExW(key, L"AccentColor", nullptr, nullptr,
+				reinterpret_cast<BYTE*>(&accentColor), &size);
+			RegCloseKey(key);
+			// Registry stores as AABBGGRR
+			return RGB(accentColor & 0xFF,
+				(accentColor >> 8) & 0xFF,
+				(accentColor >> 16) & 0xFF);
+		}
+
+		// Default accent blue
+		return RGB(0, 120, 215);
+	}
+
+	// Create a themed tooltip control with dark mode support
+	inline void SetDarkTooltip(HWND hTooltip, bool darkMode)
+	{
+		if (darkMode)
+		{
+			SetWindowTheme(hTooltip, L"DarkMode_Explorer", nullptr);
+		}
+		else
+		{
+			SetWindowTheme(hTooltip, nullptr, nullptr);
+		}
+	}
 }
 
 #endif // _DARKMODEHELPER_H_

@@ -6,9 +6,11 @@
 #include <vector>
 #include <algorithm>
 
-// TODO: Uncomment when libheif is built
-// #include <libheif/heif.h>
-// #pragma comment(lib, "heif.lib")
+// libheif integration - conditionally included when HAS_LIBHEIF is defined
+#ifdef HAS_LIBHEIF
+#include <libheif/heif.h>
+#pragma comment(lib, "heif.lib")
+#endif
 
 namespace DarkThumbs {
 namespace Engine {
@@ -21,49 +23,81 @@ namespace Engine {
 
     HEIFDecoder::~HEIFDecoder() = default;
 
-    bool HEIFDecoder::CanDecode(const std::wstring& filePath) {
-        // Check file extension
-        size_t dotPos = filePath.find_last_of(L'.');
-        if (dotPos == std::wstring::npos) {
-            return false;
+    bool HEIFDecoder::CanDecode(const wchar_t* filePath) {
+        if (!filePath) return false;
+        
+        const wchar_t* ext = wcsrchr(filePath, L'.');
+        if (!ext) return false;
+
+        return (_wcsicmp(ext, L".heif") == 0 ||
+                _wcsicmp(ext, L".heic") == 0 ||
+                _wcsicmp(ext, L".hif") == 0 ||
+                _wcsicmp(ext, L".heifs") == 0 ||
+                _wcsicmp(ext, L".heics") == 0 ||
+                _wcsicmp(ext, L".avci") == 0 ||
+                _wcsicmp(ext, L".avcs") == 0);
+    }
+    
+    const wchar_t** HEIFDecoder::GetSupportedExtensions() const {
+        return const_cast<const wchar_t**>(s_extensions);
+    }
+    
+    uint32_t HEIFDecoder::GetExtensionCount() const {
+        // Count non-null extensions
+        uint32_t count = 0;
+        while (s_extensions[count] != nullptr) {
+            count++;
         }
-
-        std::wstring ext = filePath.substr(dotPos);
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::towlower);
-
-        // HEIF extensions: .heif, .heic (Apple), .hif, .heifs, .heics, .avci, .avcs
-        return (ext == L".heif" || ext == L".heic" || ext == L".hif" ||
-                ext == L".heifs" || ext == L".heics" || 
-                ext == L".avci" || ext == L".avcs");
+        return count;
+    }
+    
+    DecoderInfo HEIFDecoder::GetInfo() const {
+        DecoderInfo info;
+        info.name = L"HEIFDecoder";
+        info.version = L"1.0.0";
+        info.supportedExtensions = const_cast<const wchar_t**>(s_extensions);
+        info.extensionCount = GetExtensionCount();
+        info.supportsGPU = false;
+        info.isArchiveDecoder = false;
+        return info;
     }
 
-    ThumbnailResult HEIFDecoder::Decode(const ThumbnailRequest& request) {
-        ThumbnailResult result;
-        result.Success = false;
+    HRESULT HEIFDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& result) {
+        result.hBitmap = nullptr;
+        result.width = 0;
+        result.height = 0;
+        result.status = E_FAIL;
+        result.usedGPU = false;
+
+        // Validate input
+        if (!request.filePath) {
+            result.status = E_INVALIDARG;
+            return E_INVALIDARG;
+        }
 
         // Verify file exists
-        DWORD attrs = GetFileAttributesW(request.FilePath.c_str());
+        DWORD attrs = GetFileAttributesW(request.filePath);
         if (attrs == INVALID_FILE_ATTRIBUTES) {
-            result.ErrorMessage = L"File not found";
-            return result;
+            result.status = HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+            return result.status;
         }
 
         // Read file data
         size_t fileSize = 0;
-        auto fileData = ReadFileData(request.FilePath, fileSize);
+        auto fileData = ReadFileData(request.filePath, fileSize);
         if (!fileData || fileSize == 0) {
-            result.ErrorMessage = L"Failed to read file";
-            return result;
+            result.status = HRESULT_FROM_WIN32(ERROR_READ_FAULT);
+            return result.status;
         }
 
         // Verify HEIF signature
         if (!VerifyHEIFSignature(fileData.get(), fileSize)) {
-            result.ErrorMessage = L"Invalid HEIF signature";
-            return result;
+            result.status = E_FAIL;
+            return result.status;
         }
 
-// TODO: Implement actual HEIF decoding when libheif is built
-#if 0
+#ifdef HAS_LIBHEIF
+        // Decode HEIF image
         uint32_t decodedWidth = 0;
         uint32_t decodedHeight = 0;
         uint32_t channels = 0;
@@ -85,8 +119,8 @@ namespace Engine {
             pixels = DecodeHEIFImage(
                 fileData.get(),
                 fileSize,
-                request.Width,
-                request.Height,
+                request.width,
+                request.height,
                 decodedWidth,
                 decodedHeight,
                 channels
@@ -94,28 +128,29 @@ namespace Engine {
         }
 
         if (!pixels) {
-            result.ErrorMessage = L"HEIF decoding failed";
-            return result;
+            result.status = E_FAIL;
+            return result.status;
         }
 
         // Create HBITMAP from decoded pixels
-        result.Bitmap = CreateHBITMAPFromRGBA(pixels, decodedWidth, decodedHeight, channels);
+        result.hBitmap = CreateHBITMAPFromRGBA(pixels, decodedWidth, decodedHeight, channels);
         delete[] pixels;
 
-        if (result.Bitmap) {
-            result.Success = true;
-            result.Width = decodedWidth;
-            result.Height = decodedHeight;
+        if (result.hBitmap) {
+            result.status = S_OK;
+            result.width = decodedWidth;
+            result.height = decodedHeight;
+            return S_OK;
         } else {
-            result.ErrorMessage = L"Failed to create HBITMAP";
+            result.status = E_OUTOFMEMORY;
+            return result.status;
         }
 #else
         // Placeholder until libheif is integrated
-        result.ErrorMessage = L"HEIF decoder not yet implemented (libheif library required)";
-        result.Success = false;
+        // Return E_NOTIMPL to indicate decoder not yet implemented
+        result.status = E_NOTIMPL;
+        return E_NOTIMPL;
 #endif
-
-        return result;
     }
 
     bool HEIFDecoder::VerifyHEIFSignature(const uint8_t* data, size_t size) const {
@@ -172,8 +207,7 @@ namespace Engine {
         uint32_t& outHeight,
         uint32_t& outChannels)
     {
-// TODO: Implement when libheif is available
-#if 0
+#ifdef HAS_LIBHEIF
         // Initialize HEIF context
         struct heif_context* ctx = heif_context_alloc();
         if (!ctx) {
@@ -201,21 +235,19 @@ namespace Engine {
         int imageHeight = heif_image_handle_get_height(handle);
         bool hasAlpha = heif_image_handle_has_alpha_channel(handle);
 
-        // Calculate thumbnail dimensions
-        outWidth = imageWidth;
-        outHeight = imageHeight;
-        outChannels = hasAlpha ? 4 : 3;
-
-        // Scale to target size while maintaining aspect ratio
-        if (outWidth > targetWidth || outHeight > targetHeight) {
-            float scaleW = static_cast<float>(targetWidth) / outWidth;
-            float scaleH = static_cast<float>(targetHeight) / outHeight;
-            float scale = min(scaleW, scaleH);
-            outWidth = static_cast<uint32_t>(outWidth * scale);
-            outHeight = static_cast<uint32_t>(outHeight * scale);
+        // Calculate thumbnail dimensions (maintain aspect ratio)
+        float aspectRatio = static_cast<float>(imageWidth) / imageHeight;
+        outWidth = targetWidth;
+        outHeight = static_cast<uint32_t>(targetWidth / aspectRatio);
+        
+        if (outHeight > targetHeight) {
+            outHeight = targetHeight;
+            outWidth = static_cast<uint32_t>(targetHeight * aspectRatio);
         }
 
-        // Decode image
+        outChannels = hasAlpha ? 4 : 3;
+
+        // Decode image to RGBA/RGB
         struct heif_image* image = nullptr;
         err = heif_decode_image(handle, &image,
             heif_colorspace_RGB,
@@ -241,7 +273,7 @@ namespace Engine {
         }
 
         // Allocate output buffer
-        size_t pixelSize = outWidth * outHeight * outChannels;
+        size_t pixelSize = static_cast<size_t>(imageWidth) * imageHeight * outChannels;
         uint8_t* pixels = new (std::nothrow) uint8_t[pixelSize];
         if (!pixels) {
             heif_image_release(image);
@@ -250,13 +282,16 @@ namespace Engine {
             return nullptr;
         }
 
-        // Copy/scale pixel data
-        // TODO: Implement proper scaling if outWidth/outHeight differ from imageWidth/imageHeight
-        for (uint32_t y = 0; y < outHeight; ++y) {
-            memcpy(pixels + y * outWidth * outChannels,
+        // Copy pixel data
+        for (int y = 0; y < imageHeight; ++y) {
+            memcpy(pixels + y * imageWidth * outChannels,
                    srcData + y * stride,
-                   outWidth * outChannels);
+                   imageWidth * outChannels);
         }
+
+        // Update output dimensions to actual decoded size
+        outWidth = imageWidth;
+        outHeight = imageHeight;
 
         // Cleanup
         heif_image_release(image);
@@ -265,10 +300,10 @@ namespace Engine {
 
         return pixels;
 #else
-        // Placeholder
-        outWidth = 256;
-        outHeight = 256;
-        outChannels = 4;
+        // libheif not available
+        (void)fileData; (void)dataSize;
+        (void)targetWidth; (void)targetHeight;
+        outWidth = 0; outHeight = 0; outChannels = 0;
         return nullptr;
 #endif
     }
@@ -280,8 +315,7 @@ namespace Engine {
         uint32_t& outHeight,
         uint32_t& outChannels)
     {
-// TODO: Implement when libheif is available
-#if 0
+#ifdef HAS_LIBHEIF
         // Initialize HEIF context
         struct heif_context* ctx = heif_context_alloc();
         if (!ctx) {
@@ -304,18 +338,19 @@ namespace Engine {
             return nullptr;
         }
 
-        // Check for thumbnails
+        // Check if thumbnail exists
         int numThumbnails = heif_image_handle_get_number_of_thumbnails(handle);
         if (numThumbnails == 0) {
+            // No embedded thumbnail
             heif_image_handle_release(handle);
             heif_context_free(ctx);
-            return nullptr; // No embedded thumbnail
+            return nullptr;
         }
 
-        // Get first thumbnail
+        // Get first thumbnail handle
         heif_item_id thumbnailId;
         heif_image_handle_get_list_of_thumbnail_IDs(handle, &thumbnailId, 1);
-
+        
         struct heif_image_handle* thumbHandle = nullptr;
         err = heif_image_handle_get_thumbnail(handle, thumbnailId, &thumbHandle);
         if (err.code != heif_error_Ok) {
@@ -324,17 +359,15 @@ namespace Engine {
             return nullptr;
         }
 
-        // Decode thumbnail (same as main image decode)
-        int thumbWidth = heif_image_handle_get_width(thumbHandle);
-        int thumbHeight = heif_image_handle_get_height(thumbHandle);
+        // Get thumbnail dimensions
+        outWidth = heif_image_handle_get_width(thumbHandle);
+        outHeight = heif_image_handle_get_height(thumbHandle);
         bool hasAlpha = heif_image_handle_has_alpha_channel(thumbHandle);
-
-        outWidth = thumbWidth;
-        outHeight = thumbHeight;
         outChannels = hasAlpha ? 4 : 3;
 
-        struct heif_image* image = nullptr;
-        err = heif_decode_image(thumbHandle, &image,
+        // Decode thumbnail
+        struct heif_image* thumbImage = nullptr;
+        err = heif_decode_image(thumbHandle, &thumbImage,
             heif_colorspace_RGB,
             hasAlpha ? heif_chroma_interleaved_RGBA : heif_chroma_interleaved_RGB,
             nullptr);
@@ -349,10 +382,21 @@ namespace Engine {
         // Get pixel data
         int stride = 0;
         const uint8_t* srcData = heif_image_get_plane_readonly(
-            image, heif_channel_interleaved, &stride);
+            thumbImage, heif_channel_interleaved, &stride);
 
         if (!srcData) {
-            heif_image_release(image);
+            heif_image_release(thumbImage);
+            heif_image_handle_release(thumbHandle);
+            heif_image_handle_release(handle);
+            heif_context_free(ctx);
+            return nullptr;
+        }
+
+        // Allocate output buffer
+        size_t pixelSize = static_cast<size_t>(outWidth) * outHeight * outChannels;
+        uint8_t* pixels = new (std::nothrow) uint8_t[pixelSize];
+        if (!pixels) {
+            heif_image_release(thumbImage);
             heif_image_handle_release(thumbHandle);
             heif_image_handle_release(handle);
             heif_context_free(ctx);
@@ -360,28 +404,23 @@ namespace Engine {
         }
 
         // Copy pixel data
-        size_t pixelSize = outWidth * outHeight * outChannels;
-        uint8_t* pixels = new (std::nothrow) uint8_t[pixelSize];
-        if (pixels) {
-            for (uint32_t y = 0; y < outHeight; ++y) {
-                memcpy(pixels + y * outWidth * outChannels,
-                       srcData + y * stride,
-                       outWidth * outChannels);
-            }
+        for (uint32_t y = 0; y < outHeight; ++y) {
+            memcpy(pixels + y * outWidth * outChannels,
+                   srcData + y * stride,
+                   outWidth * outChannels);
         }
 
         // Cleanup
-        heif_image_release(image);
+        heif_image_release(thumbImage);
         heif_image_handle_release(thumbHandle);
         heif_image_handle_release(handle);
         heif_context_free(ctx);
 
         return pixels;
 #else
-        // Placeholder
-        outWidth = 256;
-        outHeight = 256;
-        outChannels = 4;
+        // libheif not available
+        (void)fileData; (void)dataSize;
+        outWidth = 0; outHeight = 0; outChannels = 0;
         return nullptr;
 #endif
     }

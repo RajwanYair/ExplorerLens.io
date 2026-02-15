@@ -304,6 +304,197 @@ public:
 	}
 
 	/////////////////////////
+	// Sprint 18A: Registry Backup System
+	// Backup existing handler GUID before installation
+	BOOL BackupHandler(int cbxType, LPCTSTR keyPath, LPCTSTR backupName)
+	{
+		TCHAR existingGuid[256] = {0};
+		ULONG len = 256;
+		CRegKey rk;
+
+		// Read existing handler GUID
+		if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, keyPath, KEY_READ))
+		{
+			if (ERROR_SUCCESS == rk.QueryStringValue(NULL, existingGuid, &len))
+			{
+				// Don't backup if it's already our GUID
+				if (StrCmpI(existingGuid, CBX_GUID_KEY) == 0)
+				{
+					rk.Close();
+					return FALSE; // No backup needed
+				}
+
+				// Store backup
+				CString backupKey;
+				backupKey.Format(_T("%s\\Backups\\%s"), CBX_APP_KEY, backupName);
+				
+				CRegKey rkBackup;
+				if (ERROR_SUCCESS == rkBackup.Create(HKEY_CURRENT_USER, backupKey, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+				{
+					rkBackup.SetStringValue(NULL, existingGuid);
+					rkBackup.Close();
+					rk.Close();
+					return TRUE; // Backup successful
+				}
+			}
+			rk.Close();
+		}
+		return FALSE; // Nothing to backup
+	}
+
+	/////////////////////////
+	// Sprint 18A: Restore backed-up handler
+	BOOL RestoreHandler(LPCTSTR keyPath, LPCTSTR backupName)
+	{
+		CString backupKey;
+		backupKey.Format(_T("%s\\Backups\\%s"), CBX_APP_KEY, backupName);
+		
+		TCHAR backedUpGuid[256] = {0};
+		ULONG len = 256;
+		CRegKey rkBackup;
+
+		// Read backup
+		if (ERROR_SUCCESS == rkBackup.Open(HKEY_CURRENT_USER, backupKey, KEY_READ))
+		{
+			if (ERROR_SUCCESS == rkBackup.QueryStringValue(NULL, backedUpGuid, &len))
+			{
+				// Restore the backed-up handler
+				CRegKey rk;
+				if (ERROR_SUCCESS == rk.Create(HKEY_CURRENT_USER, keyPath, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+				{
+					rk.SetStringValue(NULL, backedUpGuid);
+					rk.Close();
+				}
+
+				// Delete backup entry
+				rkBackup.Close();
+				RegDeleteKey(HKEY_CURRENT_USER, backupKey);
+				return TRUE;
+			}
+			rkBackup.Close();
+		}
+		return FALSE; // No backup to restore
+	}
+
+	/////////////////////////
+	// Sprint 18A: Get program name from handler GUID
+	CString GetHandlerProgramName(LPCTSTR guid)
+	{
+		if (!guid || guid[0] == 0)
+			return _T("None");
+
+		// Check for known handler GUIDs first
+		if (StrCmpI(guid, CBX_GUID_KEY) == 0)
+			return _T("DarkThumbs");
+		if (StrStrI(guid, _T("c5aec3ec-e812-4677-a9a7-4fee1f9aa000")) != NULL)
+			return _T("Windows Media Foundation");
+		if (StrStrI(guid, _T("DC6EFB56-9CFA-464D-8880-44885D7DC193")) != NULL)
+			return _T("Windows PDF Handler");
+		if (StrStrI(guid, _T("C7657C4A-9F70-11D0-A999-00C04FD655E1")) != NULL)
+			return _T("Windows Photo Viewer");
+		if (StrStrI(guid, _T("7D2B9654-0AE1-4BBD-BD42-7A0C3A23E787")) != NULL)
+			return _T("Windows Imaging Component");
+
+		// Try to resolve CLSID to program name
+		CString clsidKey;
+		clsidKey.Format(_T("CLSID\\%s\\InprocServer32"), guid);
+		
+		TCHAR dllPath[MAX_PATH] = {0};
+		ULONG len = MAX_PATH;
+		CRegKey rk;
+
+		if (ERROR_SUCCESS == rk.Open(HKEY_CLASSES_ROOT, clsidKey, KEY_READ))
+		{
+			if (ERROR_SUCCESS == rk.QueryStringValue(NULL, dllPath, &len))
+			{
+				// Extract filename from path
+				LPCTSTR filename = PathFindFileName(dllPath);
+				if (filename && filename[0])
+				{
+					// Remove .dll extension
+					CString name(filename);
+					int dotPos = name.ReverseFind('.');
+					if (dotPos > 0)
+						name = name.Left(dotPos);
+					
+					rk.Close();
+					return name;
+				}
+			}
+			rk.Close();
+		}
+
+		// Return short GUID if we can't resolve
+		CString shortGuid(guid);
+		if (shortGuid.GetLength() > 12)
+			shortGuid = shortGuid.Left(12) + _T("...");
+		return shortGuid;
+	}
+
+	/////////////////////////
+	// Sprint 18A: Enhanced handler status with program info
+	// Returns status and fills programName with handler application name
+	HandlerStatus GetHandlerStatusEx(int cbxType, LPCTSTR extension, CString& programName)
+	{
+		ATLASSERT(cbxType > CBX_NONE);
+		
+		TCHAR guid[256] = {0};
+		ULONG len = 256;
+		CRegKey rk;
+
+		programName = _T("None");
+
+		// First check HKCU (user-specific - where DarkThumbs registers)
+		if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, GetTHKeyName(cbxType), KEY_READ))
+		{
+			if (ERROR_SUCCESS == rk.QueryStringValue(NULL, guid, &len))
+			{
+				programName = GetHandlerProgramName(guid);
+				rk.Close();
+				
+				if (StrCmpI(guid, CBX_GUID_KEY) == 0)
+					return HANDLER_DARKTHUMBS;
+				else
+					return HANDLER_THIRD_PARTY;
+			}
+			rk.Close();
+		}
+
+		// Check HKCR (system-wide handlers)
+		CString regPath;
+		regPath.Format(_T("%s\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"), extension);
+		
+		len = 256;
+		ZeroMemory(guid, sizeof(guid));
+		
+		if (ERROR_SUCCESS == rk.Open(HKEY_CLASSES_ROOT, regPath, KEY_READ))
+		{
+			if (ERROR_SUCCESS == rk.QueryStringValue(NULL, guid, &len))
+			{
+				programName = GetHandlerProgramName(guid);
+				rk.Close();
+
+				// Check for known Windows native handler GUIDs
+				if (StrStrI(guid, _T("c5aec3ec-e812-4677-a9a7-4fee1f9aa000")) != NULL ||
+				    StrStrI(guid, _T("DC6EFB56-9CFA-464D-8880-44885D7DC193")) != NULL ||
+				    StrStrI(guid, _T("C7657C4A-9F70-11D0-A999-00C04FD655E1")) != NULL ||
+				    StrStrI(guid, _T("7D2B9654-0AE1-4BBD-BD42-7A0C3A23E787")) != NULL)
+				{
+					return HANDLER_NATIVE;
+				}
+				
+				// Not our GUID and not a known Windows handler
+				if (StrCmpI(guid, CBX_GUID_KEY) != 0)
+					return HANDLER_THIRD_PARTY;
+			}
+			rk.Close();
+		}
+
+		programName = _T("None");
+		return HANDLER_NONE;
+	}
+
+	/////////////////////////
 	// Get extension for a CBX type (for status detection)
 	LPCTSTR GetExtension(int cbxType)
 	{
@@ -338,7 +529,7 @@ public:
 	}
 
 	/////////////////////////
-	// set thumbnail / infotip handlers
+	// set thumbnail / infotip handlers (Sprint 18A: Enhanced with backup/restore)
 	void SetHandlers(int cbxType, BOOL bSet)
 	{
 		ATLASSERT(cbxType>CBX_NONE);
@@ -363,11 +554,23 @@ public:
 				_T("SOFTWARE\\Classes\\.MPG\\shellex\\{00021500-0000-0000-C000-000000000046}"),
 				_T("SOFTWARE\\Classes\\.MPEG\\shellex\\{00021500-0000-0000-C000-000000000046}")
 			};
+			const LPCTSTR backupNames[] = {
+				_T("mp4_th"), _T("avi_th"), _T("mkv_th"), _T("mov_th"), _T("wmv_th"), 
+				_T("flv_th"), _T("webm_th"), _T("m4v_th"), _T("mpg_th"), _T("mpeg_th")
+			};
+			const LPCTSTR backupNamesInfo[] = {
+				_T("mp4_ih"), _T("avi_ih"), _T("mkv_ih"), _T("mov_ih"), _T("wmv_ih"),
+				_T("flv_ih"), _T("webm_ih"), _T("m4v_ih"), _T("mpg_ih"), _T("mpeg_ih")
+			};
 			
 			for (int i = 0; i < _countof(videoExts); i++)
 			{
 				if (bSet)
 				{
+					// Sprint 18A: Backup existing handlers before overwriting
+					BackupHandler(cbxType, videoExts[i], backupNames[i]);
+					BackupHandler(cbxType, videoInfoTips[i], backupNamesInfo[i]);
+
 					CRegKey rkt, rki;
 					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, videoExts[i], NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
 						rkt.SetStringValue(NULL, CBX_GUID_KEY);
@@ -376,8 +579,53 @@ public:
 				}
 				else
 				{
-					RegDeleteKey(HKEY_CURRENT_USER, videoExts[i]);
-					RegDeleteKey(HKEY_CURRENT_USER, videoInfoTips[i]);
+					// Sprint 18A: Smart uninstall - only remove if it's our handler
+					TCHAR currentGuid[256] = {0};
+					ULONG len = 256;
+					CRegKey rk;
+
+					// Check thumbnail handler
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, videoExts[i], KEY_READ))
+					{
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+						{
+							if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+							{
+								rk.Close();
+								// It's our handler - remove or restore backup
+								if (!RestoreHandler(videoExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, videoExts[i]);
+							}
+							else
+							{
+								rk.Close(); // Not our handler, don't touch it
+							}
+						}
+						else
+							rk.Close();
+					}
+
+					// Check infotip handler
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, videoInfoTips[i], KEY_READ))
+					{
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+						{
+							if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+							{
+								rk.Close();
+								if (!RestoreHandler(videoInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, videoInfoTips[i]);
+							}
+							else
+							{
+								rk.Close();
+							}
+						}
+						else
+							rk.Close();
+					}
 				}
 			}
 			return;
@@ -387,11 +635,16 @@ public:
 			// HEIF formats: .heif, .heic
 			const LPCTSTR heifExts[] = { CBX_HEIFTH_KEY, CBX_HEICTH_KEY };
 			const LPCTSTR heifInfoTips[] = { CBX_HEIFIH_KEY, CBX_HEICIH_KEY };
+			const LPCTSTR backupNames[] = { _T("heif_th"), _T("heic_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("heif_ih"), _T("heic_ih") };
 			
 			for (int i = 0; i < _countof(heifExts); i++)
 			{
 				if (bSet)
 				{
+					BackupHandler(cbxType, heifExts[i], backupNames[i]);
+					BackupHandler(cbxType, heifInfoTips[i], backupNamesInfo[i]);
+
 					CRegKey rkt, rki;
 					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, heifExts[i], NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
 						rkt.SetStringValue(NULL, CBX_GUID_KEY);
@@ -400,8 +653,46 @@ public:
 				}
 				else
 				{
-					RegDeleteKey(HKEY_CURRENT_USER, heifExts[i]);
-					RegDeleteKey(HKEY_CURRENT_USER, heifInfoTips[i]);
+					// Smart uninstall
+					TCHAR currentGuid[256] = {0};
+					ULONG len = 256;
+					CRegKey rk;
+
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, heifExts[i], KEY_READ))
+					{
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+						{
+							if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+							{
+								rk.Close();
+								if (!RestoreHandler(heifExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, heifExts[i]);
+							}
+							else
+								rk.Close();
+						}
+						else
+							rk.Close();
+					}
+
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, heifInfoTips[i], KEY_READ))
+					{
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+						{
+							if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+							{
+								rk.Close();
+								if (!RestoreHandler(heifInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, heifInfoTips[i]);
+							}
+							else
+								rk.Close();
+						}
+						else
+							rk.Close();
+					}
 				}
 			}
 			return;
@@ -411,11 +702,16 @@ public:
 			// TIFF formats: .tif, .tiff
 			const LPCTSTR tiffExts[] = { CBX_TIFFTH_KEY, _T("SOFTWARE\\Classes\\.TIFF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
 			const LPCTSTR tiffInfoTips[] = { CBX_TIFFIH_KEY, _T("SOFTWARE\\Classes\\.TIFF\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("tif_th"), _T("tiff_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("tif_ih"), _T("tiff_ih") };
 			
 			for (int i = 0; i < _countof(tiffExts); i++)
 			{
 				if (bSet)
 				{
+					BackupHandler(cbxType, tiffExts[i], backupNames[i]);
+					BackupHandler(cbxType, tiffInfoTips[i], backupNamesInfo[i]);
+
 					CRegKey rkt, rki;
 					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, tiffExts[i], NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
 						rkt.SetStringValue(NULL, CBX_GUID_KEY);
@@ -424,8 +720,46 @@ public:
 				}
 				else
 				{
-					RegDeleteKey(HKEY_CURRENT_USER, tiffExts[i]);
-					RegDeleteKey(HKEY_CURRENT_USER, tiffInfoTips[i]);
+					// Smart uninstall
+					TCHAR currentGuid[256] = {0};
+					ULONG len = 256;
+					CRegKey rk;
+
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, tiffExts[i], KEY_READ))
+					{
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+						{
+							if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+							{
+								rk.Close();
+								if (!RestoreHandler(tiffExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, tiffExts[i]);
+							}
+							else
+								rk.Close();
+						}
+						else
+							rk.Close();
+					}
+
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, tiffInfoTips[i], KEY_READ))
+					{
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+						{
+							if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+							{
+								rk.Close();
+								if (!RestoreHandler(tiffInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, tiffInfoTips[i]);
+							}
+							else
+								rk.Close();
+						}
+						else
+							rk.Close();
+					}
 				}
 			}
 			return;
@@ -449,11 +783,16 @@ public:
 				_T("SOFTWARE\\Classes\\.ARW\\shellex\\{00021500-0000-0000-C000-000000000046}"),
 				_T("SOFTWARE\\Classes\\.ORF\\shellex\\{00021500-0000-0000-C000-000000000046}")
 			};
+			const LPCTSTR backupNames[] = { _T("dng_th"), _T("cr2_th"), _T("cr3_th"), _T("nef_th"), _T("arw_th"), _T("orf_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("dng_ih"), _T("cr2_ih"), _T("cr3_ih"), _T("nef_ih"), _T("arw_ih"), _T("orf_ih") };
 			
 			for (int i = 0; i < _countof(rawExts); i++)
 			{
 				if (bSet)
 				{
+					BackupHandler(cbxType, rawExts[i], backupNames[i]);
+					BackupHandler(cbxType, rawInfoTips[i], backupNamesInfo[i]);
+
 					CRegKey rkt, rki;
 					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, rawExts[i], NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
 						rkt.SetStringValue(NULL, CBX_GUID_KEY);
@@ -462,16 +801,62 @@ public:
 				}
 				else
 				{
-					RegDeleteKey(HKEY_CURRENT_USER, rawExts[i]);
-					RegDeleteKey(HKEY_CURRENT_USER, rawInfoTips[i]);
+					// Smart uninstall
+					TCHAR currentGuid[256] = {0};
+					ULONG len = 256;
+					CRegKey rk;
+
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, rawExts[i], KEY_READ))
+					{
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+						{
+							if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+							{
+								rk.Close();
+								if (!RestoreHandler(rawExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, rawExts[i]);
+							}
+							else
+								rk.Close();
+						}
+						else
+							rk.Close();
+					}
+
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, rawInfoTips[i], KEY_READ))
+					{
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+						{
+							if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+							{
+								rk.Close();
+								if (!RestoreHandler(rawInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, rawInfoTips[i]);
+							}
+							else
+								rk.Close();
+						}
+						else
+							rk.Close();
+					}
 				}
 			}
 			return;
 		}
 
 		// Standard single-extension formats
+		CString backupTH, backupIH;
+		backupTH.Format(_T("%s_th"), GetExtension(cbxType));
+		backupIH.Format(_T("%s_ih"), GetExtension(cbxType));
+
 		if (bSet)
 		{
+			// Sprint 18A: Backup before overwriting
+			BackupHandler(cbxType, GetTHKeyName(cbxType), backupTH);
+			BackupHandler(cbxType, GetIHKeyName(cbxType), backupIH);
+
 			//thumbnail
 			CRegKey rkt, rki;
 			if (ERROR_SUCCESS==rkt.Create(HKEY_CURRENT_USER, GetTHKeyName(cbxType), NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
@@ -482,10 +867,54 @@ public:
 		}
 		else
 		{
+			// Sprint 18A: Smart uninstall - only remove if it's our handler
+			TCHAR currentGuid[256] = {0};
+			ULONG len = 256;
+			CRegKey rk;
+
 			//thumbnail
-			if (HasTH(cbxType)) RegDeleteKey(HKEY_CURRENT_USER, GetTHKeyName(cbxType));
+			if (HasTH(cbxType))
+			{
+				if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, GetTHKeyName(cbxType), KEY_READ))
+				{
+					if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+					{
+						if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+						{
+							rk.Close();
+							if (!RestoreHandler(GetTHKeyName(cbxType), backupTH))
+								RegDeleteKey(HKEY_CURRENT_USER, GetTHKeyName(cbxType));
+						}
+						else
+							rk.Close();
+					}
+					else
+						rk.Close();
+				}
+			}
+
 			//infotip
-			if (HasIH(cbxType)) RegDeleteKey(HKEY_CURRENT_USER, GetIHKeyName(cbxType));
+			if (HasIH(cbxType))
+			{
+				len = 256;
+				ZeroMemory(currentGuid, sizeof(currentGuid));
+				if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, GetIHKeyName(cbxType), KEY_READ))
+				{
+					if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len))
+					{
+						if (StrCmpI(currentGuid, CBX_GUID_KEY) == 0)
+						{
+							rk.Close();
+							if (!RestoreHandler(GetIHKeyName(cbxType), backupIH))
+								RegDeleteKey(HKEY_CURRENT_USER, GetIHKeyName(cbxType));
+						}
+						else
+							rk.Close();
+					}
+					else
+						rk.Close();
+				}
+			}
 		}
 	}
 

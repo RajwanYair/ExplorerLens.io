@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.20)
+
 # CBXShell - Shell Extension DLL
 project(CBXShell)
 
@@ -6,7 +8,7 @@ set(SOURCES
     CBXShell.cpp
     CBXShellClass.cpp
     StdAfx.cpp
-    unzip.cpp
+    unzip_new.cpp
 )
 
 set(HEADERS

@@ -7,10 +7,52 @@
 #include <shlwapi.h>
 #include <atlbase.h>
 #include <atlstr.h>
+#include <string>
+#include <vector>
 
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "shlwapi.lib")
 
+namespace DarkThumbs {
+
+// RAW Decoder using LibRaw for professional camera RAW formats
+class RAWDecoder
+{
+public:
+	// Get dimensions from RAW file (fast, metadata only)
+	static bool GetDimensions(const BYTE* data, size_t size, int* width, int* height);
+
+	// Decode RAW to HBITMAP for thumbnail display
+	static HRESULT DecodeToHBITMAP(
+		const BYTE* data,
+		size_t size,
+		HBITMAP* phBitmap,
+		int maxWidth = 256,
+		int maxHeight = 256);
+
+	// Get camera metadata (make, model)
+	static bool GetCameraInfo(
+		const BYTE* data,
+		size_t size,
+		std::wstring& cameraMake,
+		std::wstring& cameraModel);
+
+private:
+	// Helper: Decode embedded JPEG thumbnail
+	static HBITMAP DecodeJPEGThumbnail(const BYTE* jpegData, size_t jpegSize);
+
+	// Helper: Convert LibRaw bitmap to HBITMAP
+	static HBITMAP ConvertBitmapToHBITMAP(
+		const BYTE* pixels,
+		int width,
+		int height,
+		int colors,
+		int bits);
+};
+
+} // namespace DarkThumbs
+
+// Legacy namespace for compatibility
 namespace RawDecoder
 {
 	// RAW format detection by extension and magic bytes

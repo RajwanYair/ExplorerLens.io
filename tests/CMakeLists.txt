@@ -12,7 +12,7 @@ enable_testing()
 # Include directories
 include_directories(
     ${CMAKE_SOURCE_DIR}/../CBXShell
-    ${CMAKE_SOURCE_DIR}/../external/wtl/Include
+    ${CMAKE_SOURCE_DIR}/../packages/wtl.10.0.10320/lib/native/include
 )
 
 # Find required libraries

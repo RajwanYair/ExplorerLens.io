@@ -77,7 +77,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>
-        packages\wtl.10.0.10320\lib\native\include;..\external\compression\zlib-1.3.1;..\external\compression\zstd-1.5.7\lib;..\external\compression\lz4-1.10.0\lib;..\external\compression\bzip2-1.0.8;..\external\compression\lzma-24.08\C;..\external\compression\minizip-ng-4.0.10;..\external\compression\unrar-7.2.2;..\external\compression\libarchive-3.7.6\libarchive;..\external\image-libs\libwebp-1.5.0\src;..\external\image-libs\libjxl-0.11.1\lib\include;..\external\image-libs\libavif-1.3.0\include;..\external\image-libs\dav1d-1.5.1\include</AdditionalIncludeDirectories>
+        packages\wtl.10.0.10320\lib\native\include;..\external\compression-libs\zlib-1.3.1;..\external\compression-libs\zstd-1.5.7\lib;..\external\compression-libs\lz4-1.10.0\lib;..\external\compression-libs\bzip2-1.0.8;..\external\compression-libs\lzma-24.08\C;..\external\compression-libs\minizip-ng-4.0.10;..\external\archive-libs\unrar-7.2.2;..\external\compression-libs\libarchive-3.7.6\libarchive;..\external\image-libs\libwebp-1.5.0-original\src;..\external\image-libs\libjxl-0.11.1\lib\include;..\external\image-libs\libavif-1.3.0\include;..\external\image-libs\dav1d-1.5.1\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ControlFlowGuard>Guard</ControlFlowGuard>
     </ClCompile>
@@ -94,9 +94,9 @@
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>
-        ..\external\compression\zlib-1.3.1\x64\Release;..\external\compression\lz4-1.10.0\build-vs\Release;..\external\compression\zstd-1.5.7\build-manual;..\external\compression\minizip-ng-4.0.10\build-manual;..\external\compression\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0\build-vs\Release</AdditionalLibraryDirectories>
+        ..\build\lib\Debug;..\external\compression-libs\zlib-1.3.1\x64\Release;..\external\compression-libs\lz4-1.10.0\build-vs\Release;..\external\compression-libs\zstd-1.5.7\build-manual;..\external\compression-libs\minizip-ng-4.0.10\build-manual;..\external\archive-libs\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0-original\build-vs\Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>
-        zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+        DarkThumbsEngine.lib;zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT;LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <Bscmake>
@@ -117,7 +117,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <PreprocessorDefinitions>
-        _WIN64;NDEBUG;_WINDOWS;_USRDLL;ENABLE_HEIF_SUPPORT;ENABLE_AVIF_SUPPORT;ENABLE_PDF_SUPPORT;ENABLE_VIDEO_SUPPORT;ENABLE_AUDIO_SUPPORT;ENABLE_DOCUMENT_SUPPORT;ENABLE_FONT_SUPPORT;ENABLE_SVG_SUPPORT;ENABLE_RAW_SUPPORT;UNRAR;SILENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        _WIN64;NDEBUG;_WINDOWS;_USRDLL;ENABLE_WEBP_SUPPORT;ENABLE_HEIF_SUPPORT;ENABLE_AVIF_SUPPORT;ENABLE_JXL_SUPPORT;ENABLE_PDF_SUPPORT;ENABLE_VIDEO_SUPPORT;ENABLE_AUDIO_SUPPORT;ENABLE_DOCUMENT_SUPPORT;ENABLE_FONT_SUPPORT;ENABLE_SVG_SUPPORT;ENABLE_RAW_SUPPORT;ENABLE_PSD_SUPPORT;ENABLE_DDS_SUPPORT;ENABLE_HDR_SUPPORT;ENABLE_PPM_SUPPORT;ENABLE_EXR_SUPPORT;UNRAR;SILENT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -127,7 +127,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalIncludeDirectories>
-        packages\wtl.10.0.10320\lib\native\include;..\Engine;..\external\compression\zlib-1.3.1;..\external\compression\zstd-1.5.7\lib;..\external\compression\lz4-1.10.0\lib;..\external\compression\bzip2-1.0.8;..\external\compression\lzma-24.08\C;..\external\compression\minizip-ng-4.0.10;..\external\compression\unrar-7.2.2;..\external\compression\libarchive-3.7.6\libarchive;..\external\image-libs\libwebp-1.5.0\src;..\external\image-libs\libjxl-0.11.1\lib\include;..\external\image-libs\libjxl-0.11.1\build-msvc\lib\include\jxl;..\external\image-libs\libavif-1.3.0\include;..\external\image-libs\dav1d-1.5.1\include</AdditionalIncludeDirectories>
+        packages\wtl.10.0.10320\lib\native\include;..\Engine;..\external\compression-libs\zlib-1.3.1;..\external\compression-libs\zstd-1.5.7\lib;..\external\compression-libs\lz4-1.10.0\lib;..\external\compression-libs\bzip2-1.0.8;..\external\compression-libs\lzma-24.08\C;..\external\compression-libs\minizip-ng-4.0.10;..\external\archive-libs\unrar-7.2.2;..\external\compression-libs\libarchive-3.7.6\libarchive;..\external\image-libs\libwebp-1.5.0-original\src;..\external\image-libs\libjxl-0.11.1\build-msvc\lib\include;..\external\image-libs\libavif-1.3.0\include;..\external\image-libs\dav1d-1.5.1\include;..\external\camera-libs\libraw-install\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ControlFlowGuard>Guard</ControlFlowGuard>
@@ -157,9 +157,9 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>
-        ..\Engine\Release\Release;..\external\compression\zlib-1.3.1\x64\Release;..\external\compression\lz4-1.10.0\build-vs\Release;..\external\compression\zstd-1.5.7\build-manual;..\external\compression\minizip-ng-4.0.10\build-manual;..\external\compression\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0\build-vs\Release</AdditionalLibraryDirectories>
+        ..\build\lib\Release;..\external\compression-libs\zlib-1.3.1\x64\Release;..\external\compression-libs\lz4-1.10.0\build-vs\Release;..\external\compression-libs\zstd-1.5.7\build-manual;..\external\compression-libs\minizip-ng-4.0.10\build-manual;..\external\archive-libs\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0-original\build-vs\Release;..\external\image-libs\libjxl-0.11.1\install\lib;..\external\brotli-install\lib;..\external\highway-install\lib;..\external\libheif-install\lib;..\external\camera-libs\libraw-install\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>
-        DarkThumbsEngine.lib;zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+        DarkThumbsEngine.lib;zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;libraw_static.lib;jxl.lib;jxl_cms.lib;jxl_threads.lib;brotlidec.lib;brotlicommon.lib;hwy.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <Bscmake>
@@ -173,25 +173,26 @@
   <ItemGroup>
     <ClCompile Include="CBXShell.cpp" />
     <ClCompile Include="CBXShellClass.cpp" />
-    <!-- Modern image decoders (Sprint 1-4) -->
-    <ClCompile Include="webp_decoder.cpp" />
-    <ClCompile Include="heif_decoder_native.cpp" />
-    <ClCompile Include="avif_decoder.cpp" />
-    <!-- JPEG XL (libjxl 0.11.1) - Modern high-efficiency format -->
-    <!-- <ClCompile Include="jxl_decoder.cpp" /> --> <!-- TODO: Build libjxl libraries first -->
-    <!-- Performance enhancements (Sprint C1-C4, v5.1.0) -->
+    <!-- Modern Image Format Decoders (v5.0+) -->
+    <ClCompile Include="webp_decoder.cpp" /> <!-- WebP support via libwebp 1.5.0 -->
+    <ClCompile Include="heif_decoder_native.cpp" /> <!-- HEIF/HEIC via Windows WIC -->
+    <ClCompile Include="avif_decoder.cpp" /> <!-- AVIF via Windows WIC -->
+    <ClCompile Include="jxl_decoder.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- JPEG XL via libjxl 0.11.1 - DEFERRED (Sprint 16.2) -->
+    </ClCompile>
+    <ClCompile Include="raw_decoder.cpp" /> <!-- Camera RAW via Windows WIC -->
+    <!-- Performance & Caching (v5.1.0) -->
     <ClCompile Include="thumbnail_cache.cpp" />
     <ClCompile Include="thumbnail_collage.cpp" />
     <ClCompile Include="video_thumbnail.cpp" />
     <ClCompile Include="pdf_decoder.cpp" />
     <!-- GPU Acceleration (v5.2.0) -->
     <ClCompile Include="gpu_accelerator.cpp" />
-    <!-- Audio Support (Sprint 8) -->
+    <!-- Media & Document Support (v5.0+) -->
     <ClCompile Include="audio_thumbnail.cpp" />
-    <!-- Document & Font Support (Sprint 9 Phase 1) -->
     <ClCompile Include="document_thumbnail.cpp" />
     <ClCompile Include="font_preview.cpp" />
-    <!-- Engine Integration (Sprint 11 - v5.3.0) -->
+    <!-- Engine Integration (v5.3.0) -->
     <ClCompile Include="EngineAdapter.cpp" />
     <!-- External Library Wrappers (v5.2+) -->
     <!-- libarchive_wrapper.cpp - Planned for future when libarchive is built -->
@@ -212,24 +213,25 @@
   <ItemGroup>
     <ClInclude Include="cbxArchive.h" />
     <ClInclude Include="CBXShellClass.h" />
-    <!-- Modern image decoders (Sprint 1-4) -->
+    <!-- Modern Image Format Decoders (v5.0+) -->
     <ClInclude Include="webp_decoder.h" />
     <ClInclude Include="heif_decoder_native.h" />
     <ClInclude Include="avif_decoder.h" />
     <ClInclude Include="jxl_decoder.h" />
-    <!-- Performance enhancements (Sprint C1-C4, v5.1.0) -->
+    <ClInclude Include="raw_decoder.h" />
+    <ClInclude Include="svg_decoder.h" />
+    <!-- Performance & Caching (v5.1.0) -->
     <ClInclude Include="thumbnail_cache.h" />
     <ClInclude Include="thumbnail_collage.h" />
     <ClInclude Include="video_thumbnail.h" />
     <ClInclude Include="pdf_decoder.h" />
     <!-- GPU Acceleration (v5.2.0) -->
     <ClInclude Include="gpu_accelerator.h" />
-    <!-- Audio Support (Sprint 8) -->
+    <!-- Media & Document Support (v5.0+) -->
     <ClInclude Include="audio_thumbnail.h" />
-    <!-- Document & Font Support (Sprint 9 Phase 1) -->
     <ClInclude Include="document_thumbnail.h" />
     <ClInclude Include="font_preview.h" />
-    <!-- Engine Integration (Sprint 11 - v5.3.0) -->
+    <!-- Engine Integration (v5.3.0) -->
     <ClInclude Include="EngineAdapter.h" />
     <!-- External Library Wrappers (v5.2+) -->
     <ClInclude Include="libarchive_wrapper.h" />

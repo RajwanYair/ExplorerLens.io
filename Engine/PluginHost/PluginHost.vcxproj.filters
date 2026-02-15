@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\PluginHost\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\PluginHost\PluginHostServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\PluginHost\PluginHostServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\PluginHost\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{2B402B24-2176-3956-BD85-6B7CE6A9BABB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{0DC4B97B-F9D4-34AD-99AF-B6CD3FD51F5E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

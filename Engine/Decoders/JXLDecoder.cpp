@@ -6,17 +6,18 @@
 #include <vector>
 #include <algorithm>
 
-// TODO: Uncomment when libjxl is built
-// #include <jxl/decode.h>
-// #include <jxl/decode_cxx.h>
-// #pragma comment(lib, "jxl.lib")
-// #pragma comment(lib, "jxl_threads.lib")
+// libjxl integration - conditionally included when HAS_LIBJXL is defined
+#ifdef HAS_LIBJXL
+#include <jxl/decode.h>
+#include <jxl/decode_cxx.h>
+#pragma comment(lib, "jxl.lib")
+#pragma comment(lib, "jxl_threads.lib")
+#endif
 
 namespace DarkThumbs {
 namespace Engine {
 
-    // Define static extension array
-    constexpr const wchar_t* JXLDecoder::s_extensions[];
+    // Static extension array defined in header
 
     JXLDecoder::JXLDecoder()
         : m_useMultithreading(true)
@@ -37,14 +38,15 @@ namespace Engine {
     }
     
     const wchar_t** JXLDecoder::GetSupportedExtensions() const {
-        return s_extensions;
+        return const_cast<const wchar_t**>(s_extensions);
     }
     
     DecoderInfo JXLDecoder::GetInfo() const {
         DecoderInfo info;
         info.name = L"JXLDecoder";
         info.version = L"1.0.0";
-        info.description = L"JPEG XL decoder (libjxl integration pending)";
+        info.supportedExtensions = const_cast<const wchar_t**>(s_extensions);
+        info.extensionCount = 1;
         info.supportsGPU = false;
         info.isArchiveDecoder = false;
         return info;
@@ -85,9 +87,8 @@ namespace Engine {
             return result.status;
         }
 
-// TODO: Implement actual JXL decoding when libjxl is built
-#if 0
-        // Decode JXL image
+#ifdef HAS_LIBJXL
+        // Decode JXL image using libjxl
         uint32_t decodedWidth = 0;
         uint32_t decodedHeight = 0;
         uint32_t channels = 0;
@@ -162,9 +163,8 @@ namespace Engine {
         uint32_t& outHeight,
         uint32_t& outChannels)
     {
-// TODO: Implement when libjxl is available
-#if 0
-        // Create JXL decoder
+#ifdef HAS_LIBJXL
+        // Create JXL decoder using C++ API
         auto decoder = JxlDecoderMake(nullptr);
         if (!decoder) {
             return nullptr;
@@ -204,21 +204,22 @@ namespace Engine {
                 if (outWidth > targetWidth || outHeight > targetHeight) {
                     float scaleW = static_cast<float>(targetWidth) / outWidth;
                     float scaleH = static_cast<float>(targetHeight) / outHeight;
-                    float scale = min(scaleW, scaleH);
+                    float scale = (scaleW < scaleH) ? scaleW : scaleH;  // Use ternary instead of std::min
                     outWidth = static_cast<uint32_t>(outWidth * scale);
                     outHeight = static_cast<uint32_t>(outHeight * scale);
                 }
 
-                // Allocate pixel buffer
-                size_t pixelSize = outWidth * outHeight * outChannels;
+                // Allocate pixel buffer (always RGBA for consistency)
+                outChannels = 4; // Force RGBA
+                size_t pixelSize = static_cast<size_t>(outWidth) * outHeight * outChannels;
                 pixels = new (std::nothrow) uint8_t[pixelSize];
                 if (!pixels) {
                     return nullptr;
                 }
 
-                // Set output buffer
+                // Set output buffer with RGBA format
                 JxlPixelFormat format = {
-                    outChannels,
+                    4, // RGBA
                     JXL_TYPE_UINT8,
                     JXL_NATIVE_ENDIAN,
                     0
@@ -235,22 +236,35 @@ namespace Engine {
                 return pixels;
             }
             else if (status == JXL_DEC_SUCCESS) {
-                // Decoding finished
+                // Decoding finished successfully
                 return pixels;
             }
+            else if (status == JXL_DEC_NEED_MORE_INPUT) {
+                // Should not happen with complete input
+                if (pixels) {
+                    delete[] pixels;
+                }
+                return nullptr;
+            }
             else {
-                // Error occurred
+                // Error occurred during decoding
                 if (pixels) {
                     delete[] pixels;
                 }
                 return nullptr;
             }
         }
+
+        // Should not reach here
+        if (pixels) {
+            delete[] pixels;
+        }
+        return nullptr;
 #else
-        // Placeholder
-        outWidth = 256;
-        outHeight = 256;
-        outChannels = 4;
+        // libjxl not available - return nullptr
+        (void)fileData; (void)dataSize;
+        (void)targetWidth; (void)targetHeight;
+        outWidth = 0; outHeight = 0; outChannels = 0;
         return nullptr;
 #endif
     }

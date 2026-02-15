@@ -57,4 +57,12 @@
 #define IDC_BTN_SAVE_CONFIG                     1053
 #define IDC_BTN_RESTORE                         1054
 #define IDC_BTN_LOAD_CONFIG                     1055
+#define IDC_CB_PSD                              1056
+#define IDC_CB_DDS                              1057
+#define IDC_CB_HDR                              1058
+#define IDC_CB_AUDIO                            1059
+#define IDC_CB_DOCUMENT                         1060
+#define IDC_CB_FONT                             1061
+#define IDC_CB_EXR                              1062
+#define IDC_PRO_IMAGE_GROUP                     1063
 

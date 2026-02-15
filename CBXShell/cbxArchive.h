@@ -10,22 +10,23 @@
 #define STRICT
 #endif
 
+#include <algorithm>  // For std::min, std::max
 #include <shlObj.h>
 #include <shlwapi.h>
 #pragma comment(lib, "shlwapi.lib")
 
 #include "DarkModeHelper.h"
 #include "ModernCppHelper.h"
-#include "thumbnail_cache.h"   // Performance caching (Sprint C1)
-#include "thumbnail_collage.h" // Multi-page collage (Sprint C2)
-// Modern image format support
-#include "webp_decoder.h" // WebP support (Sprint 1)
-// ENABLE_HEIF_SUPPORT - Native Windows HEIF/HEIC via WIC (Sprint 2) - defined in vcxproj
-// ENABLE_AVIF_SUPPORT - Native Windows AVIF via WIC (Sprint 3) - defined in vcxproj
-// ENABLE_PDF_SUPPORT - PDF thumbnail support (Sprint C4) - defined in vcxproj
-// ENABLE_VIDEO_SUPPORT - Video thumbnail support (Sprint C3) - defined in vcxproj
+#include "thumbnail_cache.h"   // Performance caching (v5.1.0)
+#include "thumbnail_collage.h" // Multi-page collage (v5.1.0)
+// Modern image format support (v5.0+)
+#include "webp_decoder.h" // WebP support via libwebp
+// ENABLE_HEIF_SUPPORT - Native Windows HEIF/HEIC via WIC - defined in vcxproj
+// ENABLE_AVIF_SUPPORT - Native Windows AVIF via WIC - defined in vcxproj
+// ENABLE_PDF_SUPPORT - PDF thumbnail support - defined in vcxproj
+// ENABLE_VIDEO_SUPPORT - Video thumbnail support - defined in vcxproj
 // DISABLE_RAR_SUPPORT - RAR support disabled for 100% static linking - defined in vcxproj
-// ENABLE_JXL_SUPPORT - JPEG XL support (Sprint 4) - defined in vcxproj
+// ENABLE_JXL_SUPPORT - JPEG XL support - defined in vcxproj
 // ENABLE_LIBARCHIVE_SUPPORT - Advanced archive formats (TAR, ISO, CPIO) - defined in vcxproj
 // ENABLE_SVG_SUPPORT - SVG vector graphics - defined in vcxproj
 // ENABLE_RAW_SUPPORT - RAW photo formats (DNG, CR2, NEF, ARW) - defined in vcxproj
@@ -36,7 +37,10 @@
 #include "avif_decoder.h" // AVIF support using Windows Imaging Component
 #endif
 #ifdef ENABLE_JXL_SUPPORT
-#include "jxl_decoder.h" // JPEG XL support (Sprint 4) - libjxl
+#include "jxl_decoder.h" // JPEG XL support via libjxl 0.11.1
+#endif
+#ifdef ENABLE_RAW_SUPPORT
+#include "raw_decoder.h" // RAW camera support via Windows WIC
 #endif
 #ifdef ENABLE_PDF_SUPPORT
 #include "pdf_decoder.h" // PDF thumbnail extraction
@@ -63,11 +67,7 @@
 #include "libarchive_wrapper.h" // Advanced archive support (TAR, ISO, CPIO, XAR, AR)
 #endif
 
-// #include "gdiplus.h" // uncomment if needed
-// #pragma comment(lib,"gdiplus.lib")
-
 // ATL headers
-// #include <atlstr.h> // uncomment if needed
 #include <atlimage.h>
 #include <atlfile.h>
 
@@ -111,10 +111,10 @@
 #define CBXTYPE_ZSTD 16	 // .zst Zstandard compressed archives
 #define CBXTYPE_LZMA 17	 // .xz/.lzma LZMA compressed archives
 
-// Media and document formats (Sprint C3-C4, Sprint 8)
+// Media and document formats (v5.0+)
 #define CBXTYPE_VIDEO 18 // Video files (.mp4, .avi, .mkv, etc.)
 #define CBXTYPE_PDF 19	 // PDF documents
-#define CBXTYPE_AUDIO 20 // Audio files (.mp3, .flac, .wav, etc.) - Sprint 8
+#define CBXTYPE_AUDIO 20 // Audio files (.mp3, .flac, .wav, etc.)
 
 // Future format support (not yet implemented)
 #define CBXTYPE_LZ4 21	// .lz4 LZ4 compressed archives (future)
@@ -123,7 +123,7 @@
 #define CBXTYPE_ODT 24	// .odt OpenDocument Text
 #define CBXTYPE_ODP 25	// .odp OpenDocument Presentation
 
-// Sprint 9 Phase 1: Document formats
+// Document formats (v5.0+)
 #define CBXTYPE_DOCX 60 // .docx Microsoft Word
 #define CBXTYPE_PPTX 61 // .pptx Microsoft PowerPoint
 #define CBXTYPE_XLSX 62 // .xlsx Microsoft Excel
@@ -131,7 +131,7 @@
 #define CBXTYPE_PPT 64	// .ppt Legacy Microsoft PowerPoint
 #define CBXTYPE_XLS 65	// .xls Legacy Microsoft Excel
 
-// Sprint 9 Phase 1: Font formats
+// Font formats (v5.0+)
 #define CBXTYPE_FONT 70 // .ttf/.otf/.woff/.woff2 Font files
 
 // LibArchive formats (v5.2+)
@@ -159,9 +159,16 @@
 #define CBXTYPE_HEIC 42 // .heic High Efficiency Image Format
 #define CBXTYPE_HEIF 43 // .heif HEIF container
 #define CBXTYPE_JXL 44	// .jxl JPEG XL
-#define CBXTYPE_TIFF 45 // .tif/.tiff Tagged Image File Format (Sprint D2)
-#define CBXTYPE_SVG 46	// .svg Scalable Vector Graphics (Sprint D2)
-#define CBXTYPE_RAW 47	// .dng/.cr2/.cr3/.nef/.arw Camera RAW formats (Sprint D4)
+#define CBXTYPE_TIFF 45 // .tif/.tiff Tagged Image File Format
+#define CBXTYPE_SVG 46	// .svg Scalable Vector Graphics
+#define CBXTYPE_RAW 47	// .dng/.cr2/.cr3/.nef/.arw Camera RAW formats
+
+// Professional/specialty image formats (v6.1+)
+#define CBXTYPE_PSD 48	// .psd/.psb Adobe Photoshop
+#define CBXTYPE_DDS 49	// .dds DirectDraw Surface (game textures)
+#define CBXTYPE_HDR 55	// .hdr Radiance RGBE HDR
+#define CBXTYPE_EXR 56	// .exr OpenEXR HDR image
+#define CBXTYPE_PPM 57	// .ppm/.pgm/.pbm/.pnm Netpbm portable formats
 
 // Image format identifiers (for detection within archives)
 #define IMGTYPE_UNKNOWN 0
@@ -681,7 +688,7 @@ namespace __cbx
 			*phBmpThumbnail = NULL;
 			// ATLTRACE("IExtractImage::Extract\n");
 
-			// Sprint C1: Thumbnail caching for 10-100x performance boost
+			// Thumbnail caching for 10-100x performance boost (v5.1.0)
 			static bool cacheInitialized = false;
 			if (!cacheInitialized)
 			{
@@ -1660,7 +1667,7 @@ namespace __cbx
 			// Vector formats
 			if (StrEqual(_e, _T(".svg")))
 				return TRUE;
-			// RAW photo formats (Sprint D4)
+			// RAW photo formats (v5.3+)
 			if (StrEqual(_e, _T(".dng")))
 				return TRUE;
 			if (StrEqual(_e, _T(".cr2")))
@@ -1685,7 +1692,7 @@ namespace __cbx
 		BOOL IsVideo(LPCTSTR szFile)
 		{
 			LPWSTR _e = PathFindExtension(szFile);
-			// Common video formats (Sprint 8: 35+ formats)
+			// Common video formats (v5.0+: 35+ formats)
 			if (StrEqual(_e, _T(".mp4")))
 				return TRUE;
 			if (StrEqual(_e, _T(".avi")))
@@ -1761,7 +1768,7 @@ namespace __cbx
 		BOOL IsAudio(LPCTSTR szFile)
 		{
 			LPWSTR _e = PathFindExtension(szFile);
-			// Sprint 8: Audio format support (11 formats)
+			// Audio format support (v5.0+: 11 formats)
 			if (StrEqual(_e, _T(".mp3")))
 				return TRUE;
 			if (StrEqual(_e, _T(".wav")))
@@ -1790,7 +1797,7 @@ namespace __cbx
 		BOOL IsDocument(LPCTSTR szFile)
 		{
 			LPWSTR _e = PathFindExtension(szFile);
-			// Sprint 9 Phase 1: Office document formats (6 formats)
+			// Office document formats (v5.0+: 6 formats)
 			if (StrEqual(_e, _T(".docx")))
 				return TRUE;
 			if (StrEqual(_e, _T(".pptx")))
@@ -1998,7 +2005,7 @@ namespace __cbx
 			if (StrEqual(szExt, _T(".xls")))
 				return CBXTYPE_XLS;
 
-			// Font formats (Sprint 9 Phase 1: 4 formats)
+			// Font formats (v5.0+: 4 formats)
 			if (StrEqual(szExt, _T(".ttf")))
 				return CBXTYPE_FONT;
 			if (StrEqual(szExt, _T(".otf")))
@@ -2008,7 +2015,7 @@ namespace __cbx
 			if (StrEqual(szExt, _T(".woff2")))
 				return CBXTYPE_FONT;
 
-			// PDF format (Sprint C4)
+			// PDF format (v5.0+)
 			if (StrEqual(szExt, _T(".pdf")))
 				return CBXTYPE_PDF;
 
@@ -2047,36 +2054,176 @@ namespace __cbx
 			if (StrEqual(szExt, _T(".svgz")))
 				return CBXTYPE_SVG;
 #endif
-
-			// RAW photo formats (v5.2+)
 #ifdef ENABLE_RAW_SUPPORT
-			if (StrEqual(szExt, _T(".dng")))
-				return CBXTYPE_RAW;
+			// Canon RAW formats
 			if (StrEqual(szExt, _T(".cr2")))
 				return CBXTYPE_RAW;
 			if (StrEqual(szExt, _T(".cr3")))
 				return CBXTYPE_RAW;
+			if (StrEqual(szExt, _T(".crw")))
+				return CBXTYPE_RAW;
+			// Nikon RAW
 			if (StrEqual(szExt, _T(".nef")))
 				return CBXTYPE_RAW;
 			if (StrEqual(szExt, _T(".nrw")))
 				return CBXTYPE_RAW;
+			// Sony RAW
 			if (StrEqual(szExt, _T(".arw")))
 				return CBXTYPE_RAW;
+			if (StrEqual(szExt, _T(".srf")))
+				return CBXTYPE_RAW;
+			if (StrEqual(szExt, _T(".sr2")))
+				return CBXTYPE_RAW;
+			// Other common RAW formats
+			if (StrEqual(szExt, _T(".dng")))
+				return CBXTYPE_RAW; // Adobe Digital Negative
 			if (StrEqual(szExt, _T(".orf")))
-				return CBXTYPE_RAW;
+				return CBXTYPE_RAW; // Olympus
 			if (StrEqual(szExt, _T(".rw2")))
-				return CBXTYPE_RAW;
+				return CBXTYPE_RAW; // Panasonic
 			if (StrEqual(szExt, _T(".pef")))
-				return CBXTYPE_RAW;
+				return CBXTYPE_RAW; // Pentax
 			if (StrEqual(szExt, _T(".raf")))
-				return CBXTYPE_RAW;
+				return CBXTYPE_RAW; // Fujifilm
+			if (StrEqual(szExt, _T(".dcr")))
+				return CBXTYPE_RAW; // Kodak
+			if (StrEqual(szExt, _T(".mrw")))
+				return CBXTYPE_RAW; // Minolta
+			if (StrEqual(szExt, _T(".x3f")))
+				return CBXTYPE_RAW; // Sigma
+			// Samsung
 			if (StrEqual(szExt, _T(".srw")))
 				return CBXTYPE_RAW;
-			if (StrEqual(szExt, _T(".x3f")))
-				return CBXTYPE_RAW;
+			// Leica
 			if (StrEqual(szExt, _T(".rwl")))
 				return CBXTYPE_RAW;
+			// Hasselblad
+			if (StrEqual(szExt, _T(".3fr")))
+				return CBXTYPE_RAW;
+			// Phase One
+			if (StrEqual(szExt, _T(".iiq")))
+				return CBXTYPE_RAW;
+			if (StrEqual(szExt, _T(".cap")))
+				return CBXTYPE_RAW;
+			// Leaf
+			if (StrEqual(szExt, _T(".mos")))
+				return CBXTYPE_RAW;
+			// Epson
+			if (StrEqual(szExt, _T(".erf")))
+				return CBXTYPE_RAW;
+			// Kodak
+			if (StrEqual(szExt, _T(".kdc")))
+				return CBXTYPE_RAW;
+			if (StrEqual(szExt, _T(".dcr")))
+				return CBXTYPE_RAW;
+			// Mamiya
+			if (StrEqual(szExt, _T(".mef")))
+				return CBXTYPE_RAW;
+			// Casio
+			if (StrEqual(szExt, _T(".bay")))
+				return CBXTYPE_RAW;
+			// GoPro
+			if (StrEqual(szExt, _T(".gpr")))
+				return CBXTYPE_RAW;
 #endif
+
+			// Photoshop/Design formats (v6.1+)
+#ifdef ENABLE_PSD_SUPPORT
+			if (StrEqual(szExt, _T(".psd")))
+				return CBXTYPE_PSD;
+			if (StrEqual(szExt, _T(".psb")))
+				return CBXTYPE_PSD;
+#endif
+
+			// DirectX/Game textures (v6.1+)
+#ifdef ENABLE_DDS_SUPPORT
+			if (StrEqual(szExt, _T(".dds")))
+				return CBXTYPE_DDS;
+#endif
+
+			// HDR image formats (v6.1+)
+#ifdef ENABLE_HDR_SUPPORT
+			if (StrEqual(szExt, _T(".hdr")))
+				return CBXTYPE_HDR;
+#endif
+#ifdef ENABLE_EXR_SUPPORT
+			if (StrEqual(szExt, _T(".exr")))
+				return CBXTYPE_EXR;
+#endif
+
+			// Netpbm portable image formats (v6.1+)
+#ifdef ENABLE_PPM_SUPPORT
+			if (StrEqual(szExt, _T(".ppm")))
+				return CBXTYPE_PPM;
+			if (StrEqual(szExt, _T(".pgm")))
+				return CBXTYPE_PPM;
+			if (StrEqual(szExt, _T(".pbm")))
+				return CBXTYPE_PPM;
+			if (StrEqual(szExt, _T(".pnm")))
+				return CBXTYPE_PPM;
+			if (StrEqual(szExt, _T(".pam")))
+				return CBXTYPE_PPM;
+			if (StrEqual(szExt, _T(".pfm")))
+				return CBXTYPE_PPM;
+#endif
+
+			// Additional video formats (v6.1+)
+#ifdef ENABLE_VIDEO_SUPPORT
+			if (StrEqual(szExt, _T(".vob")))
+				return CBXTYPE_VIDEO;
+			if (StrEqual(szExt, _T(".divx")))
+				return CBXTYPE_VIDEO;
+			if (StrEqual(szExt, _T(".h264")))
+				return CBXTYPE_VIDEO;
+			if (StrEqual(szExt, _T(".h265")))
+				return CBXTYPE_VIDEO;
+			if (StrEqual(szExt, _T(".hevc")))
+				return CBXTYPE_VIDEO;
+			if (StrEqual(szExt, _T(".av1")))
+				return CBXTYPE_VIDEO;
+			if (StrEqual(szExt, _T(".vp9")))
+				return CBXTYPE_VIDEO;
+			if (StrEqual(szExt, _T(".y4m")))
+				return CBXTYPE_VIDEO;
+#endif
+
+			// Additional audio formats (v6.1+)
+#ifdef ENABLE_AUDIO_SUPPORT
+			if (StrEqual(szExt, _T(".aac")))
+				return CBXTYPE_AUDIO;
+			if (StrEqual(szExt, _T(".wma")))
+				return CBXTYPE_AUDIO;
+			if (StrEqual(szExt, _T(".aiff")))
+				return CBXTYPE_AUDIO;
+			if (StrEqual(szExt, _T(".aif")))
+				return CBXTYPE_AUDIO;
+			if (StrEqual(szExt, _T(".dsf")))
+				return CBXTYPE_AUDIO;
+			if (StrEqual(szExt, _T(".dff")))
+				return CBXTYPE_AUDIO;
+			if (StrEqual(szExt, _T(".alac")))
+				return CBXTYPE_AUDIO;
+#endif
+
+			// Additional document formats (v6.1+)
+#ifdef ENABLE_DOCUMENT_SUPPORT
+			if (StrEqual(szExt, _T(".rtf")))
+				return CBXTYPE_DOC;
+			if (StrEqual(szExt, _T(".odt")))
+				return CBXTYPE_DOCX;
+			if (StrEqual(szExt, _T(".odp")))
+				return CBXTYPE_PPTX;
+			if (StrEqual(szExt, _T(".ods")))
+				return CBXTYPE_XLSX;
+			if (StrEqual(szExt, _T(".xps")))
+				return CBXTYPE_DOC;
+#endif
+
+			// eBook additional formats (v6.1+)
+			if (StrEqual(szExt, _T(".djvu")))
+				return CBXTYPE_EPUB;
+			if (StrEqual(szExt, _T(".djv")))
+				return CBXTYPE_EPUB;
 
 			return CBXTYPE_NONE;
 		}
@@ -2265,6 +2412,20 @@ namespace __cbx
 #endif
 
 #ifdef ENABLE_RAW_SUPPORT
+							// Try RAW camera decoder (LibRaw-based, Sprint 13)
+							{
+								// RAW formats: Canon (CR2, CR3, CRW), Nikon (NEF, NRW), Sony (ARW, SRF, SR2),
+								// Olympus (ORF), Panasonic (RW2), Pentax (PEF), Fujifilm (RAF), DNG, etc.
+								HRESULT hrRaw = DarkThumbs::RAWDecoder::DecodeToHBITMAP(buffer.data(), streamSize, &hModernBitmap,
+																						pThumbSize ? pThumbSize->cx : 512, pThumbSize ? pThumbSize->cy : 512);
+								if (SUCCEEDED(hrRaw))
+								{
+									return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
+								}
+							}
+#endif
+
+#ifdef ENABLE_RAW_SUPPORT
 							// Try RAW decoder (WIC with Camera Codec Pack, Sprint D4)
 							// Note: Requires Windows Camera Codec Pack or manufacturer codecs
 							if (RawDecoder::IsRAWFormat(nullptr, buffer.data(), streamSize))
@@ -2375,9 +2536,9 @@ namespace __cbx
 
 				hdcNew.SetStretchBltMode(HALFTONE);
 				hdcNew.SetBrushOrg(0, 0, NULL);
-				// variables retain values until assignment
-				tw = (int)(min(rx, ry) * tw); // C424 warning workaround
-				th = (int)(min(rx, ry) * th);
+				// Use std::min to avoid macro conflicts
+				tw = (int)((std::min)(rx, ry) * tw);
+				th = (int)((std::min)(rx, ry) * th);
 
 				CBitmap hbmpNew;
 				hbmpNew.CreateCompatibleBitmap(ci.GetDC(), tw, th);

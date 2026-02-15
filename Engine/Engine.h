@@ -1,7 +1,7 @@
 //==============================================================================
 // DarkThumbs Engine - Public API
 // Copyright (c) 2026 - DarkThumbs Project
-// Version: 5.3.0
+// Version: 6.0.0
 //==============================================================================
 
 #pragma once
@@ -22,18 +22,29 @@ namespace Engine {
 /// DarkThumbs Engine Version Information
 //==============================================================================
 
-#define DARKTHUMBS_ENGINE_VERSION_MAJOR 5
-#define DARKTHUMBS_ENGINE_VERSION_MINOR 3
-#define DARKTHUMBS_ENGINE_VERSION_PATCH 0
+// Define version macros if not already defined by CMake
+#ifndef DARKTHUMBS_ENGINE_VERSION_MAJOR
+#define DARKTHUMBS_ENGINE_VERSION_MAJOR 6
+#endif
 
+#ifndef DARKTHUMBS_ENGINE_VERSION_MINOR
+#define DARKTHUMBS_ENGINE_VERSION_MINOR 0
+#endif
+
+#ifndef DARKTHUMBS_ENGINE_VERSION_PATCH
+#define DARKTHUMBS_ENGINE_VERSION_PATCH 0
+#endif
+
+#ifndef DARKTHUMBS_ENGINE_VERSION
 #define DARKTHUMBS_ENGINE_VERSION \
     ((DARKTHUMBS_ENGINE_VERSION_MAJOR << 16) | \
      (DARKTHUMBS_ENGINE_VERSION_MINOR << 8) | \
      DARKTHUMBS_ENGINE_VERSION_PATCH)
+#endif
 
 /// Get engine version as string
 inline const wchar_t* GetEngineVersion() {
-    return L"5.3.0";
+    return L"6.0.0";
 }
 
 /// Get engine build date

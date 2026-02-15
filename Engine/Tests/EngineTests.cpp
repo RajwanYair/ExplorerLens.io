@@ -14,8 +14,21 @@
 // Tests re-enabled to verify interface compliance
 #include "../Decoders/JXLDecoder.h"
 #include "../Decoders/HEIFDecoder.h"
+#include "../Decoders/PSDDecoder.h"
+#include "../Decoders/DDSDecoder.h"
+#include "../Decoders/HDRDecoder.h"
+#include "../Decoders/PPMDecoder.h"
+#include "../Decoders/EXRDecoder.h"
+#include "../Decoders/SVGDecoder.h"
+#include "../Decoders/VideoDecoder.h"
+#include "../Decoders/AudioDecoder.h"
+#include "../Decoders/PDFDecoder.h"
+#include "../Decoders/DocumentDecoder.h"
+#include "../Decoders/FontDecoder.h"
 #include <iostream>
 #include <cassert>
+#include <vector>
+#include <string>
 
 // GPU tests
 extern void RunGPUTests();
@@ -33,7 +46,7 @@ int g_testsFailed = 0;
 #define TEST(name) \
     void name(); \
     void name##_Runner() { \
-        std::wcout << L"Running: " << L#name << L"..." << std::endl; \
+        std::wcout << L"Running: " << L"" #name << L"..." << std::endl; \
         g_testsRun++; \
         try { \
             name(); \
@@ -41,7 +54,7 @@ int g_testsFailed = 0;
             std::wcout << L"  [PASS]" << std::endl; \
         } catch (const char* msg) { \
             g_testsFailed++; \
-            std::wcout << L"  [FAIL] " << msg << std::endl; \
+            std::cout << "  [FAIL] " << msg << std::endl; \
         } \
     } \
     void name()
@@ -103,6 +116,7 @@ public:
     }
     
     HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override {
+        (void)request; // Suppress unused parameter warning
         result.status = S_OK;
         return S_OK;
     }
@@ -214,6 +228,60 @@ TEST(TestDecoderRegistry_GetStats)
     
     ASSERT_EQ(totalDecoders, 2);
     ASSERT_EQ(totalExtensions, 3);
+}
+
+TEST(TestDecoderRegistry_ComprehensiveIntegration)
+{
+    DecoderRegistry registry;
+    
+    // Register all real decoders
+    registry.RegisterDecoder(new ImageDecoder());
+    registry.RegisterDecoder(new WebPDecoder());
+    registry.RegisterDecoder(new AVIFDecoder());
+    registry.RegisterDecoder(new ArchiveDecoder());
+    registry.RegisterDecoder(new JXLDecoder());
+    registry.RegisterDecoder(new HEIFDecoder());
+    
+    // Test that all expected formats can be decoded
+    struct FormatTest {
+        const wchar_t* extension;
+        const wchar_t* expectedDecoder;
+    };
+    
+    std::vector<FormatTest> tests = {
+        { L".jpg", L"ImageDecoder" },
+        { L".jpeg", L"ImageDecoder" },
+        { L".png", L"ImageDecoder" },
+        { L".bmp", L"ImageDecoder" },
+        { L".webp", L"WebPDecoder" },
+        { L".avif", L"AVIFDecoder" },
+        { L".jxl", L"JXLDecoder" },
+        { L".heif", L"HEIFDecoder" },
+        { L".heic", L"HEIFDecoder" },
+        { L".zip", L"ArchiveDecoder" },
+        { L".cbz", L"ArchiveDecoder" }
+        // Note: .rar not supported yet - requires UnRAR library
+    };
+    
+    for (const auto& test : tests) {
+        std::wstring testFile = std::wstring(L"test") + test.extension;
+        IThumbnailDecoder* decoder = registry.FindDecoder(testFile.c_str());
+        
+        // Verify decoder was found
+        ASSERT(decoder != nullptr);
+        
+        // Verify it's the right decoder (basic check via CanDecode)
+        ASSERT(decoder->CanDecode(testFile.c_str()));
+    }
+    
+    // Test stats are correct
+    size_t totalDecoders, imageDecoders, archiveDecoders, totalExtensions;
+    registry.GetStats(&totalDecoders, &imageDecoders, &archiveDecoders, &totalExtensions);
+    
+    ASSERT(totalDecoders >= 6);  // At least the 6 we registered
+    ASSERT(imageDecoders >= 5);  // Image, WebP, AVIF, JXL, HEIF
+    ASSERT(archiveDecoders >= 1); // Archive decoder
+    ASSERT(totalExtensions >= 20); // Many extensions across all decoders
 }
 
 //==============================================================================
@@ -604,10 +672,9 @@ TEST(TestArchiveDecoder_RegisterWithRegistry) {
 }
 
 //==============================================================================
-// JXL Decoder Tests (Disabled - interface mismatch)
+// JXL Decoder Tests (Re-enabled - basic interface tests)
 //==============================================================================
 
-/*
 TEST(TestJXLDecoder_Create)
 {
     JXLDecoder decoder;
@@ -627,13 +694,66 @@ TEST(TestJXLDecoder_CanDecode)
     ASSERT(!decoder.CanDecode(nullptr));
     ASSERT(!decoder.CanDecode(L"noextension"));
 }
-*/
+
+TEST(TestJXLDecoder_GetInfo)
+{
+    JXLDecoder decoder;
+    DecoderInfo info = decoder.GetInfo();
+    
+    ASSERT_NOT_NULL(info.name);
+    ASSERT_EQ(wcscmp(info.name, L"JXLDecoder"), 0);
+    ASSERT_NOT_NULL(info.version);
+    ASSERT(info.extensionCount >= 1);
+    ASSERT_NOT_NULL(info.supportedExtensions);
+    ASSERT(!info.supportsGPU);
+    ASSERT(!info.isArchiveDecoder);
+}
+
+TEST(TestJXLDecoder_Extensions)
+{
+    JXLDecoder decoder;
+    const wchar_t** extensions = decoder.GetSupportedExtensions();
+    uint32_t count = decoder.GetExtensionCount();
+    
+    ASSERT_NOT_NULL(extensions);
+    ASSERT(count >= 1);
+    
+    // Verify .jxl is in the list
+    bool foundJXL = false;
+    for (uint32_t i = 0; i < count; i++) {
+        if (_wcsicmp(extensions[i], L".jxl") == 0) {
+            foundJXL = true;
+            break;
+        }
+    }
+    ASSERT(foundJXL);
+}
+
+#ifdef HAS_LIBJXL
+// Only run actual decode tests if JXL library is linked
+TEST(TestJXLDecoder_DecodeReturnsResult)
+{
+    JXLDecoder decoder;
+    
+    // Test with non-existent file - should return error
+    ThumbnailRequest request;
+    request.sourcePath = L"nonexistent.jxl";
+    request.targetWidth = 256;
+    request.targetHeight = 256;
+    
+    ThumbnailResult result;
+    HRESULT hr = decoder.Decode(request, result);
+    
+    // Should fail gracefully (file doesn't exist)
+    // Either returns error or empty bitmap - both are acceptable
+    ASSERT(FAILED(hr) || result.bitmap == nullptr);
+}
+#endif
 
 //==============================================================================
-// HEIF Decoder Tests (Disabled - interface mismatch)
+// HEIF Decoder Tests (Re-enabled - basic interface tests)
 //==============================================================================
 
-/*
 TEST(TestHEIFDecoder_Create)
 {
     HEIFDecoder decoder;
@@ -658,7 +778,254 @@ TEST(TestHEIFDecoder_CanDecode)
     ASSERT(!decoder.CanDecode(L"archive.zip"));
     ASSERT(!decoder.CanDecode(nullptr));
 }
-*/
+
+//==============================================================================
+// PSD Decoder Tests
+//==============================================================================
+
+TEST(TestPSDDecoder_Create)
+{
+    PSDDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"PSDDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestPSDDecoder_CanDecode)
+{
+    PSDDecoder decoder;
+    // PSD requires signature check, so without a real file, CanDecode returns false
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+    ASSERT(!decoder.CanDecode(L""));
+}
+
+TEST(TestPSDDecoder_GetInfo)
+{
+    PSDDecoder decoder;
+    auto info = decoder.GetInfo();
+    ASSERT_EQ(wcscmp(info.name, L"PSDDecoder"), 0);
+    ASSERT(info.extensionCount == 2); // .psd, .psb
+}
+
+//==============================================================================
+// DDS Decoder Tests
+//==============================================================================
+
+TEST(TestDDSDecoder_Create)
+{
+    DDSDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"DDSDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestDDSDecoder_CanDecode)
+{
+    DDSDecoder decoder;
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+//==============================================================================
+// HDR Decoder Tests
+//==============================================================================
+
+TEST(TestHDRDecoder_Create)
+{
+    HDRDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"HDRDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestHDRDecoder_CanDecode)
+{
+    HDRDecoder decoder;
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+//==============================================================================
+// PPM Decoder Tests
+//==============================================================================
+
+TEST(TestPPMDecoder_Create)
+{
+    PPMDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"PPMDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestPPMDecoder_Extensions)
+{
+    PPMDecoder decoder;
+    ASSERT(decoder.GetExtensionCount() >= 6); // ppm, pgm, pbm, pnm, pam, pfm
+}
+
+//==============================================================================
+// EXR Decoder Tests
+//==============================================================================
+
+TEST(TestEXRDecoder_Create)
+{
+    EXRDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"EXRDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestEXRDecoder_CanDecode)
+{
+    EXRDecoder decoder;
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+//==============================================================================
+// SVG Decoder Tests
+//==============================================================================
+
+TEST(TestSVGDecoder_Create)
+{
+    SVGDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"SVGDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestSVGDecoder_CanDecode)
+{
+    SVGDecoder decoder;
+    ASSERT(decoder.CanDecode(L"image.svg"));
+    ASSERT(decoder.CanDecode(L"file.SVG"));
+    ASSERT(decoder.CanDecode(L"file.svgz"));
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+//==============================================================================
+// Video Decoder Tests
+//==============================================================================
+
+TEST(TestVideoDecoder_Create)
+{
+    VideoDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"VideoDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestVideoDecoder_CanDecode)
+{
+    VideoDecoder decoder;
+    ASSERT(decoder.CanDecode(L"movie.mp4"));
+    ASSERT(decoder.CanDecode(L"movie.MKV"));
+    ASSERT(decoder.CanDecode(L"clip.avi"));
+    ASSERT(decoder.CanDecode(L"video.webm"));
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+TEST(TestVideoDecoder_Extensions)
+{
+    VideoDecoder decoder;
+    ASSERT(decoder.GetExtensionCount() >= 15); // Many video formats
+}
+
+//==============================================================================
+// Audio Decoder Tests
+//==============================================================================
+
+TEST(TestAudioDecoder_Create)
+{
+    AudioDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"AudioDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestAudioDecoder_CanDecode)
+{
+    AudioDecoder decoder;
+    ASSERT(decoder.CanDecode(L"song.mp3"));
+    ASSERT(decoder.CanDecode(L"track.FLAC"));
+    ASSERT(decoder.CanDecode(L"audio.wav"));
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+//==============================================================================
+// PDF Decoder Tests
+//==============================================================================
+
+TEST(TestPDFDecoder_Create)
+{
+    PDFDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"PDFDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestPDFDecoder_CanDecode)
+{
+    PDFDecoder decoder;
+    ASSERT(decoder.CanDecode(L"document.pdf"));
+    ASSERT(decoder.CanDecode(L"file.PDF"));
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+//==============================================================================
+// Document Decoder Tests
+//==============================================================================
+
+TEST(TestDocumentDecoder_Create)
+{
+    DocumentDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"DocumentDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestDocumentDecoder_CanDecode)
+{
+    DocumentDecoder decoder;
+    ASSERT(decoder.CanDecode(L"book.epub"));
+    ASSERT(decoder.CanDecode(L"doc.docx"));
+    ASSERT(decoder.CanDecode(L"kindle.mobi"));
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
+
+TEST(TestDocumentDecoder_Extensions)
+{
+    DocumentDecoder decoder;
+    ASSERT(decoder.GetExtensionCount() >= 15); // Many document formats
+}
+
+//==============================================================================
+// Font Decoder Tests
+//==============================================================================
+
+TEST(TestFontDecoder_Create)
+{
+    FontDecoder decoder;
+    ASSERT_EQ(wcscmp(decoder.GetName(), L"FontDecoder"), 0);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(TestFontDecoder_CanDecode)
+{
+    FontDecoder decoder;
+    ASSERT(decoder.CanDecode(L"font.ttf"));
+    ASSERT(decoder.CanDecode(L"font.OTF"));
+    ASSERT(decoder.CanDecode(L"font.woff"));
+    ASSERT(!decoder.CanDecode(L"image.jpg"));
+    ASSERT(!decoder.CanDecode(nullptr));
+}
 
 //==============================================================================
 // Main Test Runner
@@ -678,6 +1045,7 @@ int main()
     RUN_TEST(TestDecoderRegistry_FindDecoder);
     RUN_TEST(TestDecoderRegistry_FindDecoderByName);
     RUN_TEST(TestDecoderRegistry_GetStats);
+    RUN_TEST(TestDecoderRegistry_ComprehensiveIntegration);
     
     std::wcout << std::endl;
     
@@ -738,17 +1106,102 @@ int main()
     
     std::wcout << std::endl;
     
-    // JXL Decoder Tests (Disabled - interface mismatch)
-    // std::wcout << L"JXL Decoder Tests:" << std::endl;
-    // RUN_TEST(TestJXLDecoder_Create);
-    // RUN_TEST(TestJXLDecoder_CanDecode);
+    // JXL Decoder Tests
+    std::wcout << L"JXL Decoder Tests:" << std::endl;
+    RUN_TEST(TestJXLDecoder_Create);
+    RUN_TEST(TestJXLDecoder_CanDecode);
+    RUN_TEST(TestJXLDecoder_GetInfo);
+    RUN_TEST(TestJXLDecoder_Extensions);
+#ifdef HAS_LIBJXL
+    RUN_TEST(TestJXLDecoder_DecodeReturnsResult);
+#endif
     
-    // std::wcout << std::endl;
+    std::wcout << std::endl;
     
-    // HEIF Decoder Tests (Disabled - interface mismatch)
-    // std::wcout << L"HEIF Decoder Tests:" << std::endl;
-    // RUN_TEST(TestHEIFDecoder_Create);
-    // RUN_TEST(TestHEIFDecoder_CanDecode);
+    // HEIF Decoder Tests
+    std::wcout << L"HEIF Decoder Tests:" << std::endl;
+    RUN_TEST(TestHEIFDecoder_Create);
+    RUN_TEST(TestHEIFDecoder_CanDecode);
+    
+    std::wcout << std::endl;
+    
+    // PSD Decoder Tests
+    std::wcout << L"PSD Decoder Tests:" << std::endl;
+    RUN_TEST(TestPSDDecoder_Create);
+    RUN_TEST(TestPSDDecoder_CanDecode);
+    RUN_TEST(TestPSDDecoder_GetInfo);
+    
+    std::wcout << std::endl;
+    
+    // DDS Decoder Tests
+    std::wcout << L"DDS Decoder Tests:" << std::endl;
+    RUN_TEST(TestDDSDecoder_Create);
+    RUN_TEST(TestDDSDecoder_CanDecode);
+    
+    std::wcout << std::endl;
+    
+    // HDR Decoder Tests
+    std::wcout << L"HDR Decoder Tests:" << std::endl;
+    RUN_TEST(TestHDRDecoder_Create);
+    RUN_TEST(TestHDRDecoder_CanDecode);
+    
+    std::wcout << std::endl;
+    
+    // PPM Decoder Tests
+    std::wcout << L"PPM Decoder Tests:" << std::endl;
+    RUN_TEST(TestPPMDecoder_Create);
+    RUN_TEST(TestPPMDecoder_Extensions);
+    
+    std::wcout << std::endl;
+    
+    // EXR Decoder Tests
+    std::wcout << L"EXR Decoder Tests:" << std::endl;
+    RUN_TEST(TestEXRDecoder_Create);
+    RUN_TEST(TestEXRDecoder_CanDecode);
+    
+    std::wcout << std::endl;
+    
+    // SVG Decoder Tests
+    std::wcout << L"SVG Decoder Tests:" << std::endl;
+    RUN_TEST(TestSVGDecoder_Create);
+    RUN_TEST(TestSVGDecoder_CanDecode);
+    
+    std::wcout << std::endl;
+    
+    // Video Decoder Tests
+    std::wcout << L"Video Decoder Tests:" << std::endl;
+    RUN_TEST(TestVideoDecoder_Create);
+    RUN_TEST(TestVideoDecoder_CanDecode);
+    RUN_TEST(TestVideoDecoder_Extensions);
+    
+    std::wcout << std::endl;
+    
+    // Audio Decoder Tests
+    std::wcout << L"Audio Decoder Tests:" << std::endl;
+    RUN_TEST(TestAudioDecoder_Create);
+    RUN_TEST(TestAudioDecoder_CanDecode);
+    
+    std::wcout << std::endl;
+    
+    // PDF Decoder Tests
+    std::wcout << L"PDF Decoder Tests:" << std::endl;
+    RUN_TEST(TestPDFDecoder_Create);
+    RUN_TEST(TestPDFDecoder_CanDecode);
+    
+    std::wcout << std::endl;
+    
+    // Document Decoder Tests
+    std::wcout << L"Document Decoder Tests:" << std::endl;
+    RUN_TEST(TestDocumentDecoder_Create);
+    RUN_TEST(TestDocumentDecoder_CanDecode);
+    RUN_TEST(TestDocumentDecoder_Extensions);
+    
+    std::wcout << std::endl;
+    
+    // Font Decoder Tests
+    std::wcout << L"Font Decoder Tests:" << std::endl;
+    RUN_TEST(TestFontDecoder_Create);
+    RUN_TEST(TestFontDecoder_CanDecode);
     
     // GPU Renderer Tests
     RunGPUTests();

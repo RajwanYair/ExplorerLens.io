@@ -46,8 +46,26 @@ namespace DarkThumbs {
         m_stats[ProfileComponent::DECODE_ARCHIVE].name = L"Decode Archive";
         m_stats[ProfileComponent::DECODE_JXL].name = L"Decode JXL";
         m_stats[ProfileComponent::DECODE_HEIF].name = L"Decode HEIF";
+        m_stats[ProfileComponent::DECODE_RAW].name = L"Decode RAW";
+        m_stats[ProfileComponent::DECODE_ICO].name = L"Decode ICO";
+        m_stats[ProfileComponent::DECODE_TGA].name = L"Decode TGA";
+        m_stats[ProfileComponent::DECODE_QOI].name = L"Decode QOI";
+        m_stats[ProfileComponent::DECODE_PSD].name = L"Decode PSD";
+        m_stats[ProfileComponent::DECODE_DDS].name = L"Decode DDS";
+        m_stats[ProfileComponent::DECODE_HDR].name = L"Decode HDR";
+        m_stats[ProfileComponent::DECODE_PPM].name = L"Decode PPM";
+        m_stats[ProfileComponent::DECODE_EXR].name = L"Decode EXR";
+        m_stats[ProfileComponent::DECODE_SVG].name = L"Decode SVG";
+        m_stats[ProfileComponent::DECODE_VIDEO].name = L"Decode Video";
+        m_stats[ProfileComponent::DECODE_AUDIO].name = L"Decode Audio";
+        m_stats[ProfileComponent::DECODE_PDF].name = L"Decode PDF";
+        m_stats[ProfileComponent::DECODE_DOCUMENT].name = L"Decode Document";
+        m_stats[ProfileComponent::DECODE_FONT].name = L"Decode Font";
         m_stats[ProfileComponent::GPU_RENDER_D3D11].name = L"GPU Render (D3D11)";
         m_stats[ProfileComponent::GPU_RENDER_GDI].name = L"GPU Render (GDI+)";
+        m_stats[ProfileComponent::SIMD_SCALE_BILINEAR].name = L"SIMD Scale Bilinear";
+        m_stats[ProfileComponent::SIMD_SCALE_BICUBIC].name = L"SIMD Scale Bicubic";
+        m_stats[ProfileComponent::SIMD_COLOR_CONVERT].name = L"SIMD Color Convert";
         m_stats[ProfileComponent::PIPELINE_TOTAL].name = L"Pipeline Total";
     }
 

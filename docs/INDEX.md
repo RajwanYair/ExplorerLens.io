@@ -1,92 +1,106 @@
 # DarkThumbs Documentation Index
 
-**Project:** DarkThumbs - Advanced Thumbnail Provider for Windows  
-**Current Version:** v5.2.0 (Production)  
+**Project:** DarkThumbs - GPU-Accelerated Thumbnail Provider for Windows  
+**Current Version:** v6.0.0  
 **Status:** Active Development  
-**Last Updated:** January 6, 2026
+**Last Updated:** February 2026
 
 ---
 
-## 🎯 Quick Links
+## Quick Links
 
-### Essential Documents
-- **[ROADMAP.md](../ROADMAP.md)** - Current development priorities and timeline
-- **[README.md](README.md)** - Project overview and features
-- **[BUILD_GUIDE.md](BUILD_GUIDE.md)** - How to build the project
-- **[QUICK_START.md](QUICK_START.md)** - Get started quickly
-
-### For Developers
-- **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Code organization
-- **[BUILD_REQUIREMENTS.md](BUILD_REQUIREMENTS.md)** - Dependencies and tools
-- **[TEST_STRATEGY_V1.md](TEST_STRATEGY_V1.md)** - Testing approach
-
-### For Plugin Developers
-- **[SDK_GUIDE.md](SDK_GUIDE.md)** - Plugin development guide
-- **[PLUGIN_PACKAGE_FORMAT_V1.md](PLUGIN_PACKAGE_FORMAT_V1.md)** - Package specification
-- **[PLUGIN_SANDBOX_MODEL_V1.md](PLUGIN_SANDBOX_MODEL_V1.md)** - Security model
-- **[PLUGIN_MARKETPLACE_PROTOCOL_V1.md](PLUGIN_MARKETPLACE_PROTOCOL_V1.md)** - Marketplace API
+| Document | Description |
+|----------|-------------|
+| [ROADMAP.md](../ROADMAP.md) | Development roadmap v3.0 |
+| [README.md](../README.md) | Project overview and features |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [SBOM.json](SBOM.json) | Software Bill of Materials |
 
 ---
 
-## 📋 Current Status
+## Build & Installation
 
-### What Works (v5.2.0)
-- ✅ Shell extension thumbnail provider for 31+ formats
-- ✅ GPU acceleration (6.5x speedup)
-- ✅ Advanced caching system
-- ✅ Comprehensive logging and profiling
+| Document | Description |
+|----------|-------------|
+| [BUILD_GUIDE.md](build/BUILD_GUIDE.md) | Complete build instructions |
+| [BUILD_REQUIREMENTS.md](build/BUILD_REQUIREMENTS.md) | Prerequisites and dependencies |
+| [BUILD_SCRIPTS_REFERENCE.md](build/BUILD_SCRIPTS_REFERENCE.md) | Build script documentation |
+| [BUILD_MONITORING.md](build/BUILD_MONITORING.md) | Slow-machine build monitoring |
+| [INSTALLATION_GUIDE.md](build/INSTALLATION_GUIDE.md) | Installation instructions |
+| [INSTALLER_OPTIONS.md](build/INSTALLER_OPTIONS.md) | Installer technology analysis |
+| [CODE_SIGNING.md](build/CODE_SIGNING.md) | Code signing infrastructure |
+| [COM_REGISTRATION_DIAGNOSTICS.md](build/COM_REGISTRATION_DIAGNOSTICS.md) | COM troubleshooting |
 
-### What''s Being Built
-- 🔧 **Priority 1:** Fix production build issues
-- 🔧 **Priority 2:** Engine refactoring (separation from shell host)
-- 📋 **Priority 3:** Plugin system implementation
-- 📋 **Priority 4:** Manager app integration
+## Architecture
 
-### Documentation Cleanup (January 2026)
-- ✅ **52 files archived** (old plans, outdated reports)
-- ✅ **38 active files** (current, relevant documentation)
-- ✅ **Consolidated roadmap** with realistic priorities
-- ✅ **Single source of truth**: ROADMAP.md
+| Document | Description |
+|----------|-------------|
+| [INTEGRATION_ARCHITECTURE.md](architecture/INTEGRATION_ARCHITECTURE.md) | System architecture |
+| [PROJECT_STRUCTURE.md](architecture/PROJECT_STRUCTURE.md) | Code organization |
+| [PROJECT_OVERVIEW.md](architecture/PROJECT_OVERVIEW.md) | Project overview |
+| [P2_ENGINE_REFACTORING_PLAN.md](architecture/P2_ENGINE_REFACTORING_PLAN.md) | Engine refactoring |
+| [COMPATIBILITY_KIT_SPEC.md](architecture/COMPATIBILITY_KIT_SPEC.md) | Compatibility kit spec |
+| [OBSERVABILITY_SPEC_V1.md](architecture/OBSERVABILITY_SPEC_V1.md) | Observability spec |
+
+## Plugin System
+
+| Document | Description |
+|----------|-------------|
+| [PLUGIN_API.md](plugins/PLUGIN_API.md) | Plugin API reference |
+| [PLUGIN_PACKAGE_FORMAT_V1.md](plugins/PLUGIN_PACKAGE_FORMAT_V1.md) | Package format spec |
+| [PLUGIN_SANDBOX_MODEL_V1.md](plugins/PLUGIN_SANDBOX_MODEL_V1.md) | Sandbox security model |
+| [PLUGIN_MARKETPLACE_PROTOCOL_V1.md](plugins/PLUGIN_MARKETPLACE_PROTOCOL_V1.md) | Marketplace protocol |
+| [PluginSecurityGuide.md](plugins/PluginSecurityGuide.md) | Plugin security guide |
+
+## GPU & Performance
+
+| Document | Description |
+|----------|-------------|
+| [GPU_ABSTRACTION_LAYER.md](gpu/GPU_ABSTRACTION_LAYER.md) | GPU abstraction layer |
+| [GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing guide |
+| [INTEL_GPU_GUIDE.md](gpu/INTEL_GPU_GUIDE.md) | Intel GPU specifics |
+| [MULTI_GPU_TESTING_GUIDE.md](gpu/MULTI_GPU_TESTING_GUIDE.md) | Multi-GPU testing |
+| [TEXTURE_POOLING.md](gpu/TEXTURE_POOLING.md) | Texture pooling optimization |
+| [PERFORMANCE_METRICS.md](gpu/PERFORMANCE_METRICS.md) | Performance metrics system |
+| [PERF_REGRESSION_GATES.md](gpu/PERF_REGRESSION_GATES.md) | Regression gates policy |
+
+## Format Support
+
+| Document | Description |
+|----------|-------------|
+| [FORMAT_SUPPORT_ANALYSIS.md](formats/FORMAT_SUPPORT_ANALYSIS.md) | Format implementation plan |
+| [CAPABILITY_AUDIT.md](formats/CAPABILITY_AUDIT.md) | Format capability audit |
+| [DECODER_AUDIT_REPORT.md](formats/DECODER_AUDIT_REPORT.md) | Decoder audit report |
+| [RAW_DECODER_IMPLEMENTATION.md](formats/RAW_DECODER_IMPLEMENTATION.md) | RAW decoder docs |
+| [HEIF_VALIDATION_STATUS.md](formats/HEIF_VALIDATION_STATUS.md) | HEIF validation status |
+
+## Testing
+
+| Document | Description |
+|----------|-------------|
+| [TESTING_GUIDE.md](testing/TESTING_GUIDE.md) | Test suite guide |
+| [TEST_VALIDATION_CHECKLIST.md](testing/TEST_VALIDATION_CHECKLIST.md) | Pre-deployment checklist |
+| [PRIORITY1_BASELINE_VERIFICATION.md](testing/PRIORITY1_BASELINE_VERIFICATION.md) | Baseline verification |
+
+## Planning
+
+| Document | Description |
+|----------|-------------|
+| [ENHANCEMENT_PLAN_SUMMARY.md](planning/ENHANCEMENT_PLAN_SUMMARY.md) | Enhancement plan summary |
+| [OPENSOURCE_ENHANCEMENT_PLAN.md](planning/OPENSOURCE_ENHANCEMENT_PLAN.md) | Open-source enhancements |
+| [LIBRARY_UPDATE_PLAN.md](planning/LIBRARY_UPDATE_PLAN.md) | Library update plan |
+| [UNDEVELOPED_FEATURES.md](planning/UNDEVELOPED_FEATURES.md) | Feature backlog analysis |
+| [PROJECT_STATUS.md](planning/PROJECT_STATUS.md) | Current project status |
+| [SPRINT15_FORMAT_EXPANSION.md](planning/SPRINT15_FORMAT_EXPANSION.md) | Sprint 15 plan |
+
+## Other
+
+| Path | Description |
+|------|-------------|
+| [getting-started/](getting-started/) | Getting started guide |
+| [release-notes/](release-notes/) | Version release notes |
+| [archive/](archive/) | Historical session summaries and old docs |
 
 ---
 
-## 📚 Active Documentation (38 files)
-
-See sections below for categorized listing.
-
----
-
-## 🗂️ Archived Documentation (52 files)
-
-| Archive Category | Count | Purpose |
-|------------------|-------|---------|
-| Planning (2024) | 7 | Ambitious multi-year plans (deferred) |
-| Sprint Reports | 18 | Historical sprint completions |
-| Build History | 14 | Old build status reports |
-| Analysis | 8 | Project analysis and migration plans |
-| GPU History | 5 | GPU testing sprint reports |
-
-**Location:** `docs/archive/{category}/`
-
-These files remain available for reference but are no longer actively maintained.
-
----
-
-## 🎯 Roadmap Summary
-
-See **[ROADMAP.md](../ROADMAP.md)** for full details.
-
-**Target:** v6.0.0 in 5-6 months (Q2-Q3 2026)
-
-1. **P1: Fix Production** (1-2 weeks) → v5.2.1
-2. **P2: Engine Refactor** (2-3 weeks) → v5.3.0
-3. **P3: Plugin System** (3-4 weeks) → v5.4.0
-4. **P4: Manager Integration** (2-3 weeks) → v5.5.0
-5. **P5: Performance** (2-3 weeks) → v5.6.0
-6. **P6: Format Expansion** (2-3 weeks) → v5.7.0
-7. **P7: Ecosystem Tools** (2-3 weeks) → v5.8.0
-8. **P8: Release Polish** (2-3 weeks) → v6.0.0
-
----
-
-**For detailed documentation, see [ROADMAP.md](../ROADMAP.md)**
+*For the full development roadmap, see [ROADMAP.md](../ROADMAP.md)*

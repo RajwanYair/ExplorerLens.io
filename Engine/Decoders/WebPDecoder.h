@@ -43,6 +43,12 @@ private:
     // Check if data is WebP format (RIFF...WEBP signature)
     bool IsWebPFormat(const BYTE* data, size_t size);
     
+    // Check if WebP is animated (has ANIM chunk or VP8X animation flag)
+    bool IsAnimatedWebP(const BYTE* data, size_t size);
+    
+    // Add animation badge overlay to bitmap
+    void AddAnimationBadge(HBITMAP hBitmap, int width, int height);
+    
     // Convert RGBA to Windows BGRA DIB section
     HBITMAP CreateBitmapFromRGBA(const BYTE* rgba, int width, int height);
     

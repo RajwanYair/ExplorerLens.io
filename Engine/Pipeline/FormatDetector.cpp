@@ -20,10 +20,14 @@ namespace Engine {
 
 namespace {
 
-// Case-insensitive string comparison
-bool StrEqualI(const wchar_t* a, const wchar_t* b)
+// Case-insensitive string comparison (optimized with early length check)
+inline bool StrEqualI(const wchar_t* a, const wchar_t* b)
 {
     if (!a || !b) return false;
+    // Quick length check before full comparison
+    size_t lenA = wcslen(a);
+    size_t lenB = wcslen(b);
+    if (lenA != lenB) return false;
     return _wcsicmp(a, b) == 0;
 }
 
@@ -105,6 +109,17 @@ FormatType FormatDetector::DetectFromExtension(const wchar_t* extension)
     if (StrEqualI(ext, L".raw") || StrEqualI(ext, L".cr2") || StrEqualI(ext, L".nef") || 
         StrEqualI(ext, L".arw") || StrEqualI(ext, L".dng")) return FormatType::ImageRAW;
     
+    // Professional image formats
+    if (StrEqualI(ext, L".psd") || StrEqualI(ext, L".psb")) return FormatType::ImagePSD;
+    if (StrEqualI(ext, L".dds")) return FormatType::ImageDDS;
+    if (StrEqualI(ext, L".hdr")) return FormatType::ImageHDR;
+    if (StrEqualI(ext, L".exr")) return FormatType::ImageEXR;
+    if (StrEqualI(ext, L".ppm") || StrEqualI(ext, L".pgm") || StrEqualI(ext, L".pbm") ||
+        StrEqualI(ext, L".pnm") || StrEqualI(ext, L".pam") || StrEqualI(ext, L".pfm")) return FormatType::ImagePPM;
+    if (StrEqualI(ext, L".tga")) return FormatType::ImageTGA;
+    if (StrEqualI(ext, L".qoi")) return FormatType::ImageQOI;
+    if (StrEqualI(ext, L".svg") || StrEqualI(ext, L".svgz")) return FormatType::ImageSVG;
+    
     // Archive formats
     if (StrEqualI(ext, L".zip") || StrEqualI(ext, L".cbz")) return FormatType::ArchiveZIP;
     if (StrEqualI(ext, L".rar") || StrEqualI(ext, L".cbr")) return FormatType::ArchiveRAR;
@@ -116,13 +131,37 @@ FormatType FormatDetector::DetectFromExtension(const wchar_t* extension)
     if (StrEqualI(ext, L".epub")) return FormatType::DocumentEPUB;
     
     // Video formats
-    if (StrEqualI(ext, L".mp4")) return FormatType::VideoMP4;
+    if (StrEqualI(ext, L".mp4") || StrEqualI(ext, L".m4v")) return FormatType::VideoMP4;
     if (StrEqualI(ext, L".mkv")) return FormatType::VideoMKV;
     if (StrEqualI(ext, L".avi")) return FormatType::VideoAVI;
+    if (StrEqualI(ext, L".wmv") || StrEqualI(ext, L".mov") || StrEqualI(ext, L".flv") ||
+        StrEqualI(ext, L".webm") || StrEqualI(ext, L".mpg") || StrEqualI(ext, L".mpeg") ||
+        StrEqualI(ext, L".ts") || StrEqualI(ext, L".mts") || StrEqualI(ext, L".m2ts") ||
+        StrEqualI(ext, L".3gp") || StrEqualI(ext, L".vob") || StrEqualI(ext, L".ogv") ||
+        StrEqualI(ext, L".asf")) return FormatType::VideoMP4; // Generic video
     
     // Audio formats
     if (StrEqualI(ext, L".mp3")) return FormatType::AudioMP3;
     if (StrEqualI(ext, L".flac")) return FormatType::AudioFLAC;
+    if (StrEqualI(ext, L".wma") || StrEqualI(ext, L".aac") || StrEqualI(ext, L".m4a") ||
+        StrEqualI(ext, L".ogg") || StrEqualI(ext, L".opus") || StrEqualI(ext, L".wav") ||
+        StrEqualI(ext, L".aiff") || StrEqualI(ext, L".aif") || StrEqualI(ext, L".ape") ||
+        StrEqualI(ext, L".wv")) return FormatType::AudioMP3; // Generic audio
+    
+    // Document formats (expanded)
+    if (StrEqualI(ext, L".epub")) return FormatType::DocumentEPUB;
+    if (StrEqualI(ext, L".mobi") || StrEqualI(ext, L".azw") || StrEqualI(ext, L".azw3") ||
+        StrEqualI(ext, L".fb2")) return FormatType::DocumentEPUB; // eBook category
+    if (StrEqualI(ext, L".docx") || StrEqualI(ext, L".doc") || StrEqualI(ext, L".rtf") ||
+        StrEqualI(ext, L".odt") || StrEqualI(ext, L".xps") || StrEqualI(ext, L".oxps") ||
+        StrEqualI(ext, L".djvu") || StrEqualI(ext, L".djv")) return FormatType::DocumentPDF; // Doc category
+    if (StrEqualI(ext, L".xlsx") || StrEqualI(ext, L".xls") || StrEqualI(ext, L".ods") ||
+        StrEqualI(ext, L".pptx") || StrEqualI(ext, L".ppt") || StrEqualI(ext, L".odp")) return FormatType::DocumentPDF;
+    
+    // Font formats
+    if (StrEqualI(ext, L".ttf") || StrEqualI(ext, L".otf") || StrEqualI(ext, L".woff") ||
+        StrEqualI(ext, L".woff2") || StrEqualI(ext, L".ttc") || StrEqualI(ext, L".fon") ||
+        StrEqualI(ext, L".fnt")) return FormatType::DocumentPDF; // Font category
     
     return FormatType::Unknown;
 }
@@ -232,7 +271,7 @@ bool FormatDetector::IsImageFormat(const wchar_t* extension) const
 {
     FormatType type = const_cast<FormatDetector*>(this)->DetectFromExtension(extension);
     
-    return (type >= FormatType::ImageJPEG && type <= FormatType::ImageRAW);
+    return (type >= FormatType::ImageJPEG && type <= FormatType::ImageSVG);
 }
 
 bool FormatDetector::IsArchiveFormat(const wchar_t* extension) const

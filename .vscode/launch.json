@@ -71,28 +71,10 @@
       "createTemporaryIntegratedConsole": false
     },
     {
-      "name": "PowerShell: Install to Program Files (Admin)",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}\\scripts\\install\\Install-DarkThumbs.ps1",
-      "cwd": "${workspaceFolder}",
-      "createTemporaryIntegratedConsole": false,
-      "args": []
-    },
-    {
-      "name": "PowerShell: Uninstall from Program Files (Admin)",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}\\scripts\\install\\uninstall-x64.ps1",
-      "cwd": "${workspaceFolder}",
-      "createTemporaryIntegratedConsole": false,
-      "args": []
-    },
-    {
       "name": "PowerShell: Build All Libraries",
       "type": "PowerShell",
       "request": "launch",
-      "script": "${workspaceFolder}\\Build-Production-SlowMachine.ps1",
+      "script": "${workspaceFolder}\\build-scripts\\production\\Build-Production-SlowMachine.ps1",
       "cwd": "${workspaceFolder}",
       "createTemporaryIntegratedConsole": false,
       "args": [
@@ -135,7 +117,7 @@
       "createTemporaryIntegratedConsole": false,
       "args": [
         "-ScriptPath",
-        "${workspaceFolder}\\build-scripts\\build-lzma-simple.ps1",
+        "${workspaceFolder}\\build-scripts\\external-libs\\build-lzma-sdk-24.08.ps1",
         "-Watch"
       ]
     },

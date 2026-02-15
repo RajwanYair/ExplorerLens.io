@@ -4,6 +4,7 @@
  *****************************************************************************/
 
 #include "PluginDecoder.h"
+#include "../Core/PluginTypes.h"
 #include "IsolationModeSelector.h"
 #include "PluginHostClient.h"
 #include <chrono>
@@ -29,7 +30,7 @@ static std::string WideToUTF8(const std::wstring& wstr) {
     return result;
 }
 
-static std::wstring UTF8ToWide(const std::string& str) {
+[[maybe_unused]] static std::wstring UTF8ToWide(const std::string& str) {
     if (str.empty()) return {};
     
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(),
@@ -50,27 +51,61 @@ PluginDecoder::PluginDecoder(PluginHandle* plugin_handle,
     , plugin_id_(plugin_id)
     , isolation_mode_(IsolationMode::InWorker)
 {
+    // Initialize DecoderInfo with defaults
+    info_.name = nullptr;
+    info_.version = nullptr;
+    info_.supportedExtensions = nullptr;
+    info_.extensionCount = 0;
+    info_.supportsGPU = false;
+    info_.isArchiveDecoder = false;
+    
     // Get plugin info for decoder metadata
     if (plugin_handle_ && plugin_handle_->IsLoaded()) {
         const PluginInfo* pinfo = plugin_handle_->GetInfo();
         if (pinfo) {
-            // Convert plugin info to DecoderInfo
-            wcsncpy_s(info_.name, pinfo->name, _TRUNCATE);
-            wcsncpy_s(info_.version, pinfo->version, _TRUNCATE);
-            info_.supportedExtensions.clear();
-            
-            // Parse extensions
-            const wchar_t* ext_start = pinfo->supported_extensions;
-            while (*ext_start) {
-                std::wstring ext;
-                while (*ext_start && *ext_start != L';') {
-                    ext += *ext_start++;
+            // Convert UTF-8 plugin info to wide strings
+            if (pinfo->plugin_name) {
+                int len = MultiByteToWideChar(CP_UTF8, 0, pinfo->plugin_name, -1, nullptr, 0);
+                if (len > 0) {
+                    plugin_name_.resize(len - 1);
+                    MultiByteToWideChar(CP_UTF8, 0, pinfo->plugin_name, -1, &plugin_name_[0], len);
                 }
-                if (!ext.empty()) {
-                    info_.supportedExtensions.push_back(ext);
-                }
-                if (*ext_start == L';') ext_start++;
             }
+            
+            if (pinfo->plugin_version) {
+                int len = MultiByteToWideChar(CP_UTF8, 0, pinfo->plugin_version, -1, nullptr, 0);
+                if (len > 0) {
+                    plugin_version_.resize(len - 1);
+                    MultiByteToWideChar(CP_UTF8, 0, pinfo->plugin_version, -1, &plugin_version_[0], len);
+                }
+            }
+            
+            // Parse extensions from UTF-8
+            if (pinfo->supported_extensions) {
+                for (size_t i = 0; pinfo->supported_extensions[i] != nullptr; ++i) {
+                    int len = MultiByteToWideChar(CP_UTF8, 0, pinfo->supported_extensions[i], -1, nullptr, 0);
+                    if (len > 0) {
+                        std::wstring ext;
+                        ext.resize(len - 1);
+                        MultiByteToWideChar(CP_UTF8, 0, pinfo->supported_extensions[i], -1, &ext[0], len);
+                        extension_strings_.push_back(ext);
+                    }
+                }
+                
+                // Build pointer array for DecoderInfo
+                for (auto& ext : extension_strings_) {
+                    extension_ptrs_.push_back(ext.c_str());
+                }
+                extension_ptrs_.push_back(nullptr);  // Null terminator
+            }
+            
+            // Set DecoderInfo pointers
+            info_.name = plugin_name_.empty() ? L"Unknown Plugin" : plugin_name_.c_str();
+            info_.version = plugin_version_.empty() ? L"1.0.0" : plugin_version_.c_str();
+            info_.supportedExtensions = extension_ptrs_.empty() ? nullptr : extension_ptrs_.data();
+            info_.extensionCount = static_cast<uint32_t>(extension_strings_.size());
+            info_.supportsGPU = (pinfo->capabilities & PLUGIN_CAP_GPU_DECODE) != 0;
+            info_.isArchiveDecoder = false;
         }
     }
 }
@@ -82,11 +117,13 @@ PluginDecoder::PluginDecoder(const std::filesystem::path& plugin_path,
     , isolation_mode_(IsolationMode::PluginHost)
 {
     // Create PluginHostClient for isolated execution
-    host_client_ = std::make_unique<PluginHostClient>(plugin_path);
+    host_client_ = std::make_unique<PluginHostClient>();
     
     // Initialize decoder info (will be populated from PluginHost)
-    wcscpy_s(info_.name, L"Plugin (Isolated)");
-    wcscpy_s(info_.version, L"1.0");
+    plugin_name_ = L"Plugin (Isolated)";
+    plugin_version_ = L"1.0";
+    info_.name = plugin_name_.c_str();
+    info_.version = plugin_version_.c_str();
 }
 
 PluginDecoder::~PluginDecoder() {
@@ -109,8 +146,8 @@ bool PluginDecoder::CanDecode(const wchar_t* filePath) {
         std::filesystem::path path(filePath);
         std::wstring ext = path.extension().wstring();
         
-        for (const auto& supported : info_.supportedExtensions) {
-            if (_wcsicmp(ext.c_str(), supported.c_str()) == 0) {
+        for (size_t i = 0; i < info_.extensionCount && info_.supportedExtensions[i]; ++i) {
+            if (_wcsicmp(ext.c_str(), info_.supportedExtensions[i]) == 0) {
                 return true;
             }
         }
@@ -157,95 +194,21 @@ HRESULT PluginDecoder::DecodeInWorker(const ThumbnailRequest& request,
     
     // Convert ThumbnailRequest to plugin DecodeRequest
     DecodeRequest plugin_req = {};
-    ConvertToPluginRequest(request, plugin_req);
+    PluginTypeConvert::ToPluginRequest(request, plugin_req);
     
     // Decode via plugin
     DecodeResult plugin_result = {};
     PluginErrorCode error = plugin_handle_->Decode(&plugin_req, &plugin_result);
     
     if (error != PLUGIN_SUCCESS) {
-        return TranslatePluginError(error);
+        return PluginTypeConvert::TranslateErrorCode(error);
     }
     
-    // Convert result to ThumbnailResult
-    HRESULT hr = ConvertPluginResult(plugin_result, result);
-    
-    // Free plugin result
-    plugin_handle_->FreeResult(&plugin_result);
-    
-    return hr;
-}
-
-HRESULT PluginDecoder::DecodeInPluginHost(const ThumbnailRequest& request, 
-                                         ThumbnailResult& result) {
-    if (!host_client_) {
-        return E_POINTER;
-    }
-    
-    // Start PluginHost if not already running
-    if (!host_client_->IsRunning()) {
-        HRESULT hr = host_client_->Start();
-        if (FAILED(hr)) {
-            return hr;
-        }
-    }
-    
-    // Convert path to UTF-8
-    std::string file_path_utf8 = WideToUTF8(request.filePath);
-    
-    // Send decode request via IPC
-    DecodeResult plugin_result = {};
-    HRESULT hr = host_client_->DecodeImage(
-        file_path_utf8.c_str(),
-        request.targetWidth,
-        request.targetHeight,
-        &plugin_result);
-    
+    // Convert result to ThumbnailResult (creates HBITMAP)
+    HRESULT hr = PluginTypeConvert::ToEngineResult(plugin_result, result);
     if (FAILED(hr)) {
-        if (hr == HRESULT_FROM_WIN32(ERROR_TIMEOUT)) {
-            stats_.timeouts++;
-        }
+        plugin_handle_->FreeResult(&plugin_result);
         return hr;
-    }
-    
-    // Convert result to ThumbnailResult
-    hr = ConvertPluginResult(plugin_result, result);
-    
-    // Free plugin result memory
-    if (plugin_result.pixels) {
-        free(const_cast<uint8_t*>(plugin_result.pixels));
-    }
-    
-    return hr;
-}
-
-void PluginDecoder::ConvertToPluginRequest(const ThumbnailRequest& request,
-                                          DecodeRequest& plugin_request) {
-    // Convert file path to UTF-8
-    std::string file_path_utf8 = WideToUTF8(request.filePath);
-    strncpy_s(plugin_request.file_path, file_path_utf8.c_str(), _TRUNCATE);
-    
-    plugin_request.target_width = request.targetWidth;
-    plugin_request.target_height = request.targetHeight;
-    plugin_request.flags = 0;
-    
-    // Set flags based on request
-    if (request.flags & ThumbnailFlags::PreserveAspectRatio) {
-        plugin_request.flags |= DECODE_FLAG_PRESERVE_ASPECT;
-    }
-    if (request.flags & ThumbnailFlags::HighQuality) {
-        plugin_request.flags |= DECODE_FLAG_HIGH_QUALITY;
-    }
-    
-    plugin_request.progress_callback = nullptr;
-    plugin_request.user_data = nullptr;
-}
-
-HRESULT PluginDecoder::ConvertPluginResult(const DecodeResult& plugin_result,
-                                          ThumbnailResult& result) {
-    if (!plugin_result.pixels || plugin_result.width == 0 || 
-        plugin_result.height == 0) {
-        return E_FAIL;
     }
     
     // Create HBITMAP from pixel data
@@ -255,15 +218,75 @@ HRESULT PluginDecoder::ConvertPluginResult(const DecodeResult& plugin_result,
         plugin_result.height,
         plugin_result.pixel_format);
     
+    // Free plugin result
+    plugin_handle_->FreeResult(&plugin_result);
+    
     if (!result.hBitmap) {
         return E_OUTOFMEMORY;
     }
     
-    result.width = plugin_result.width;
-    result.height = plugin_result.height;
     result.status = S_OK;
-    
     return S_OK;
+}
+
+HRESULT PluginDecoder::DecodeInPluginHost(const ThumbnailRequest& request, 
+                                         ThumbnailResult& result) {
+    if (!host_client_) {
+        return E_POINTER;
+    }
+    
+    // Start PluginHost if not already running
+    if (!host_client_->IsAlive()) {
+        bool started = host_client_->StartPluginHost(plugin_path_.wstring());
+        if (!started) {
+            return E_FAIL;
+        }
+    }
+    
+    // Convert path to UTF-8
+    std::string file_path_utf8 = WideToUTF8(request.filePath);
+    
+    // Prepare DecodeRequest
+    DecodeRequest plugin_request = {};
+    PluginTypeConvert::ToPluginRequest(request, plugin_request);
+    
+    // Send decode request via IPC  
+    DecodeResult plugin_result = {};
+    IPC::IPCErrorCode ipc_error = host_client_->RequestThumbnail(
+        plugin_request,
+        plugin_result);
+    
+    if (ipc_error != IPC::IPCErrorCode::SUCCESS) {
+        return PluginTypeConvert::TranslateErrorCode(plugin_result.error_code);
+    }
+    
+    // Convert result to ThumbnailResult (creates HBITMAP)
+    HRESULT hr = PluginTypeConvert::ToEngineResult(plugin_result, result);
+    if (FAILED(hr)) {
+        if (plugin_result.pixels) {
+            free(const_cast<uint8_t*>(plugin_result.pixels));
+        }
+        return hr;
+    }
+    
+    // Create HBITMAP from pixel data
+    result.hBitmap = CreateHBITMAPFromPixels(
+        plugin_result.pixels,
+        plugin_result.width,
+        plugin_result.height,
+        plugin_result.pixel_format);
+    
+    // Free plugin result memory
+    if (plugin_result.pixels) {
+        free(const_cast<uint8_t*>(plugin_result.pixels));
+    }
+    
+    if (!result.hBitmap) {
+        return E_OUTOFMEMORY;
+    }
+    
+    result.status = S_OK;
+    return hr;
 }
 
 HBITMAP PluginDecoder::CreateHBITMAPFromPixels(const uint8_t* pixels,
@@ -314,6 +337,45 @@ HBITMAP PluginDecoder::CreateHBITMAPFromPixels(const uint8_t* pixels,
                        width * 4);
             }
         }
+        else if (format == PIXEL_FORMAT_RGB24) {
+            // Convert RGB24 to BGRA32 (swap R/B, add alpha=255)
+            for (uint32_t y = 0; y < height; y++) {
+                for (uint32_t x = 0; x < width; x++) {
+                    size_t src_idx  = y * width * 3 + x * 3;
+                    size_t dest_idx = y * dest_stride + x * 4;
+                    dest[dest_idx + 0] = pixels[src_idx + 2]; // B
+                    dest[dest_idx + 1] = pixels[src_idx + 1]; // G
+                    dest[dest_idx + 2] = pixels[src_idx + 0]; // R
+                    dest[dest_idx + 3] = 255;                  // A
+                }
+            }
+        }
+        else if (format == PIXEL_FORMAT_BGR24) {
+            // Convert BGR24 to BGRA32 (add alpha=255)
+            for (uint32_t y = 0; y < height; y++) {
+                for (uint32_t x = 0; x < width; x++) {
+                    size_t src_idx  = y * width * 3 + x * 3;
+                    size_t dest_idx = y * dest_stride + x * 4;
+                    dest[dest_idx + 0] = pixels[src_idx + 0]; // B
+                    dest[dest_idx + 1] = pixels[src_idx + 1]; // G
+                    dest[dest_idx + 2] = pixels[src_idx + 2]; // R
+                    dest[dest_idx + 3] = 255;                  // A
+                }
+            }
+        }
+        else if (format == PIXEL_FORMAT_GRAY8) {
+            // Convert Grayscale 8-bit to BGRA32
+            for (uint32_t y = 0; y < height; y++) {
+                for (uint32_t x = 0; x < width; x++) {
+                    uint8_t gray = pixels[y * width + x];
+                    size_t dest_idx = y * dest_stride + x * 4;
+                    dest[dest_idx + 0] = gray; // B
+                    dest[dest_idx + 1] = gray; // G
+                    dest[dest_idx + 2] = gray; // R
+                    dest[dest_idx + 3] = 255;  // A
+                }
+            }
+        }
         else {
             // Unsupported format
             DeleteObject(hBitmap);
@@ -327,26 +389,7 @@ HBITMAP PluginDecoder::CreateHBITMAPFromPixels(const uint8_t* pixels,
     return hBitmap;
 }
 
-HRESULT PluginDecoder::TranslatePluginError(PluginErrorCode error) {
-    switch (error) {
-        case PLUGIN_SUCCESS:
-            return S_OK;
-        case PLUGIN_ERROR_NOT_SUPPORTED:
-            return E_NOTIMPL;
-        case PLUGIN_ERROR_INVALID_INPUT:
-            return E_INVALIDARG;
-        case PLUGIN_ERROR_OUT_OF_MEMORY:
-            return E_OUTOFMEMORY;
-        case PLUGIN_ERROR_FILE_NOT_FOUND:
-            return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
-        case PLUGIN_ERROR_DECODE_FAILED:
-            return E_FAIL;
-        case PLUGIN_ERROR_TIMEOUT:
-            return HRESULT_FROM_WIN32(ERROR_TIMEOUT);
-        default:
-            return E_FAIL;
-    }
-}
+
 
 DecoderInfo PluginDecoder::GetInfo() const {
     std::lock_guard<std::mutex> lock(mutex_);

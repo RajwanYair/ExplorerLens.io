@@ -1,9 +1,11 @@
 #include "StdAfx.h"
 #include "thumbnail_cache.h"
+#include "GdiplusRAII.h"
 #include <wincrypt.h>
 #include <sstream>
 #include <iomanip>
 #include <filesystem>
+#include <memory>
 #include <gdiplus.h>
 
 #pragma comment(lib, "advapi32.lib")
@@ -108,13 +110,10 @@ std::wstring ThumbnailCache::GetCachePath(const std::wstring& cacheKey) {
 bool ThumbnailCache::SaveBitmapToFile(HBITMAP hBitmap, const std::wstring& filePath) {
     if (!hBitmap) return false;
     
-    // Initialize GDI+
-    static bool gdiplusInitialized = false;
-    static ULONG_PTR gdiplusToken = 0;
-    if (!gdiplusInitialized) {
-        Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-        Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
-        gdiplusInitialized = true;
+    // Ensure GDI+ is initialized
+    GdiplusRAII& gdiplus = GdiplusRAII::GetInstance();
+    if (!gdiplus.IsInitialized()) {
+        return false;
     }
     
     // Create GDI+ bitmap from HBITMAP
@@ -156,26 +155,21 @@ bool ThumbnailCache::SaveBitmapToFile(HBITMAP hBitmap, const std::wstring& fileP
 }
 
 HBITMAP ThumbnailCache::LoadBitmapFromFile(const std::wstring& filePath) {
-    // Initialize GDI+
-    static bool gdiplusInitialized = false;
-    static ULONG_PTR gdiplusToken = 0;
-    if (!gdiplusInitialized) {
-        Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-        Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
-        gdiplusInitialized = true;
+    // Ensure GDI+ is initialized
+    GdiplusRAII& gdiplus = GdiplusRAII::GetInstance();
+    if (!gdiplus.IsInitialized()) {
+        return nullptr;
     }
     
     // Load PNG from file
-    Gdiplus::Bitmap* bitmap = new Gdiplus::Bitmap(filePath.c_str());
+    std::unique_ptr<Gdiplus::Bitmap> bitmap(new Gdiplus::Bitmap(filePath.c_str()));
     if (!bitmap || bitmap->GetLastStatus() != Gdiplus::Ok) {
-        if (bitmap) delete bitmap;
         return nullptr;
     }
     
     // Convert to HBITMAP
     HBITMAP hBitmap = nullptr;
     bitmap->GetHBITMAP(Gdiplus::Color(0, 0, 0), &hBitmap);
-    delete bitmap;
     
     return hBitmap;
 }

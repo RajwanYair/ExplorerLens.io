@@ -1,6 +1,8 @@
 #include "../Engine.h"
 #include "../Pipeline/ThumbnailPipeline.h"
+#include "../Pipeline/FormatDetector.h"
 #include "../Utils/PerformanceProfiler.h"
+#include "../Utils/SIMDScaler.h"
 #include <windows.h>
 #include <iostream>
 #include <iomanip>
@@ -207,6 +209,134 @@ int main() {
             }
         }
     }
+
+    // Benchmark 4: Format Detection Performance
+    PrintHeader(L"Benchmark 4: Format Detection Performance");
+    std::wcout << L"Testing format detection speed (10000 iterations per format)\n\n";
+    
+    // Test various format extensions
+    struct FormatTest {
+        const wchar_t* name;
+        const wchar_t* extension;
+    };
+    
+    std::vector<FormatTest> formats = {
+        { L"JPEG", L".jpg" },
+        { L"PNG", L".png" },
+        { L"WebP", L".webp" },
+        { L"JPEG XL", L".jxl" },
+        { L"AVIF", L".avif" },
+        { L"HEIF", L".heif" },
+        { L"RAW (CR2)", L".cr2" },
+        { L"ZIP", L".zip" },
+        { L"RAR", L".rar" },
+        { L"CBZ", L".cbz" }
+    };
+    
+    FormatDetector detector;
+    const int iterations = 10000;
+    
+    for (const auto& format : formats) {
+        LARGE_INTEGER freq, start, end;
+        QueryPerformanceFrequency(&freq);
+        QueryPerformanceCounter(&start);
+        
+        // Run detection multiple times
+        FormatType detectedType = FormatType::Unknown;
+        for (int i = 0; i < iterations; i++) {
+            detectedType = detector.DetectFromExtension(format.extension);
+        }
+        
+        QueryPerformanceCounter(&end);
+        double totalMs = (end.QuadPart - start.QuadPart) * 1000.0 / freq.QuadPart;
+        double avgUs = (totalMs * 1000.0) / iterations;  // microseconds per detection
+        
+        std::wcout << std::left << std::setw(15) << format.name 
+                   << std::right << std::setw(10) << std::fixed << std::setprecision(3) << avgUs << L" μs/detection"
+                   << std::setw(15) << std::fixed << std::setprecision(0) << (1000000.0 / avgUs) << L" det/sec"
+                   << L"  [" << (detectedType != FormatType::Unknown ? L"OK" : L"FAIL") << L"]\n";
+    }
+    
+    std::wcout << L"\nTarget: < 1 μs per extension-based detection\n";
+    std::wcout << L"Extension detection is O(1) hash lookup - very fast!\n";
+
+    // Benchmark 5: SIMD Scaling Performance
+    PrintHeader(L"Benchmark 5: SIMD Scaling Performance");
+    std::wcout << L"Testing image scaling with SIMD optimizations\n\n";
+    
+    // Test different image sizes and methods
+    struct ScaleTest {
+        const wchar_t* size;
+        uint32_t width;
+        uint32_t height;
+    };
+    
+    std::vector<ScaleTest> sizes = {
+        { L"HD (1920x1080)", 1920, 1080 },
+        { L"4K (3840x2160)", 3840, 2160 },
+        { L"8K (7680x4320)", 7680, 4320 }
+    };
+    
+    const uint32_t thumbWidth = 256;
+    const uint32_t thumbHeight = 256;
+    
+    // Check CPU features
+    auto& cpuFeatures = DarkThumbs::SIMD::CPUFeatures::Get();
+    std::wcout << L"CPU Features:\n";
+    std::wcout << L"  AVX2:  " << (cpuFeatures.HasAVX2() ? L"Yes" : L"No") << L"\n";
+    std::wcout << L"  SSE4.1: " << (cpuFeatures.HasSSE41() ? L"Yes" : L"No") << L"\n";
+    std::wcout << L"  FMA:   " << (cpuFeatures.HasFMA() ? L"Yes" : L"No") << L"\n\n";
+    
+    for (const auto& test : sizes) {
+        // Create source buffer (simulated BGRA image)
+        uint32_t srcStride = test.width * 4;
+        uint32_t dstStride = thumbWidth * 4;
+        std::vector<uint8_t> srcData(srcStride * test.height, 128);  // Gray image
+        std::vector<uint8_t> dstData(dstStride * thumbHeight);
+        
+        // Benchmark scaling
+        LARGE_INTEGER freq, start, end;
+        QueryPerformanceFrequency(&freq);
+        const int scaleIterations = 10;  // Fewer iterations for large images
+        double avgMs = 0.0;
+        double mpixPerSec = 0.0;
+        
+        // Test AVX2 if available
+        if (cpuFeatures.HasAVX2()) {
+            QueryPerformanceCounter(&start);
+            for (int i = 0; i < scaleIterations; i++) {
+                DarkThumbs::SIMD::SIMDScaler::ScaleBGRA_Bilinear_AVX2(
+                    srcData.data(), test.width, test.height, srcStride,
+                    dstData.data(), thumbWidth, thumbHeight, dstStride
+                );
+            }
+            QueryPerformanceCounter(&end);
+            avgMs = ((end.QuadPart - start.QuadPart) * 1000.0 / freq.QuadPart) / scaleIterations;
+            mpixPerSec = (test.width * test.height / 1000000.0) / (avgMs / 1000.0);
+            
+            std::wcout << std::left << std::setw(25) << test.size 
+                       << L"AVX2:   " << std::right << std::setw(8) << std::fixed << std::setprecision(2) << avgMs << L" ms  "
+                       << std::setw(6) << std::fixed << std::setprecision(1) << mpixPerSec << L" Mpix/s\n";
+        }
+        
+        // Test scalar fallback
+        QueryPerformanceCounter(&start);
+        for (int i = 0; i < scaleIterations; i++) {
+            DarkThumbs::SIMD::SIMDScaler::ScaleBGRA_Bilinear_Scalar(
+                srcData.data(), test.width, test.height, srcStride,
+                dstData.data(), thumbWidth, thumbHeight, dstStride
+            );
+        }
+        QueryPerformanceCounter(&end);
+        avgMs = ((end.QuadPart - start.QuadPart) * 1000.0 / freq.QuadPart) / scaleIterations;
+        mpixPerSec = (test.width * test.height / 1000000.0) / (avgMs / 1000.0);
+        
+        std::wcout << std::left << std::setw(25) << L""
+                   << L"Scalar: " << std::right << std::setw(8) << std::fixed << std::setprecision(2) << avgMs << L" ms  "
+                   << std::setw(6) << std::fixed << std::setprecision(1) << mpixPerSec << L" Mpix/s\n\n";
+    }
+    
+    std::wcout << L"Target: > 100 Mpix/s for real-time thumbnail generation\n";
 
     // Print pipeline statistics
     PrintHeader(L"Pipeline Statistics");

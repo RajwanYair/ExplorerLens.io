@@ -8,8 +8,8 @@
 #include "video_thumbnail.h"
 #include <dshow.h>
 #include <atlbase.h>
-// qedit.h not available in modern SDKs - define ISampleGrabber interfaces inline
-// #include <qedit.h>  // For ISampleGrabber
+// qedit.h was removed from Windows SDK 7.0+. The ISampleGrabber interfaces
+// are defined inline below as a replacement. Do not attempt to re-add qedit.h.
 
 // ISampleGrabber interface (from qedit.h)
 interface ISampleGrabberCB : public IUnknown {

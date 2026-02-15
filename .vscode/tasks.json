@@ -83,7 +83,7 @@
         "-NoProfile",
         "-NoLogo",
         "-File",
-        "${workspaceFolder}\\Build-Production-SlowMachine.ps1",
+        "${workspaceFolder}\\build-scripts\\production\\Build-Production-SlowMachine.ps1",
         "-Clean"
       ],
       "problemMatcher": [],
@@ -106,7 +106,7 @@
         "-NoProfile",
         "-NoLogo",
         "-File",
-        "${workspaceFolder}\\Build-Production-SlowMachine.ps1",
+        "${workspaceFolder}\\build-scripts\\production\\Build-Production-SlowMachine.ps1",
         "-Clean",
         "-MonitorInVSCode"
       ],
@@ -166,7 +166,7 @@
         "-File",
         "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
         "-ScriptPath",
-        "${workspaceFolder}\\build-scripts\\build-lzma-simple.ps1",
+        "${workspaceFolder}\\build-scripts\\external-libs\\build-lzma-sdk-24.08.ps1",
         "-Watch"
       ],
       "problemMatcher": [],
@@ -187,7 +187,7 @@
         "-File",
         "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
         "-ScriptPath",
-        "${workspaceFolder}\\build-scripts\\Build-LibWebP-NMake.ps1",
+        "${workspaceFolder}\\build-scripts\\external-libs\\Build-LibWebP-NMake.ps1",
         "-Watch"
       ],
       "problemMatcher": [],
@@ -208,7 +208,7 @@
         "-File",
         "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
         "-ScriptPath",
-        "${workspaceFolder}\\build-scripts\\Build-MinizipNG.ps1",
+        "${workspaceFolder}\\build-scripts\\external-libs\\Build-MinizipNG.ps1",
         "-Watch"
       ],
       "problemMatcher": [],
@@ -234,23 +234,6 @@
       "presentation": {
         "reveal": "always",
         "panel": "new"
-      }
-    },
-    {
-      "label": "Open Latest Build Log",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-Command",
-        "$log = Get-ChildItem build-logs\\*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if($log){code $log.FullName}else{Write-Host 'No logs found' -ForegroundColor Yellow}"
-      ],
-      "problemMatcher": [],
-      "group": "none",
-      "presentation": {
-        "reveal": "silent",
-        "panel": "shared"
       }
     },
     {
@@ -303,6 +286,23 @@
       "options": {
         "cwd": "${workspaceFolder}"
       }
+    },
+    {
+      "label": "Build Engine (CMake Release)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build",
+        "--config",
+        "Release",
+        "--target",
+        "DarkThumbsEngine",
+        "-j",
+        "8"
+      ],
+      "isBackground": false,
+      "group": "build"
     }
   ]
 }

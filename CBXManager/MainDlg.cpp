@@ -46,7 +46,9 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	}
 
 	// Initialize dark mode support (Sprint D3)
-	// TEMPORARILY DISABLED FOR DEBUGGING
+	// DISABLED: Dark mode init causes blank controls on some DPI settings.
+	// Tracked: Sprint 18 (WinUI Manager rewrite) will replace WTL dark mode.
+	// Re-enable prerequisite: Fix owner-draw checkbox rendering first.
 	// InitDarkMode();
 
 	// Initialize status bar (Sprint D3)
@@ -82,7 +84,8 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		}
 	}
 
-	// TEMPORARILY DISABLED - using static RC positions for debugging
+	// DISABLED: Dynamic layout causes control overlap at non-default DPI.
+	// Tracked: Sprint 18 (WinUI Manager rewrite) replaces manual layout.
 	// RECT rc;
 	// GetClientRect(&rc);
 	// SendMessage(WM_SIZE, SIZE_RESTORED, MAKELPARAM(rc.right - rc.left, rc.bottom - rc.top));
@@ -97,7 +100,8 @@ return FALSE;
 
 LRESULT CMainDlg::OnSize(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-	// TEMPORARILY DISABLED FOR DEBUGGING - using static RC positions
+	// DISABLED: OnSize handler causes control overlap; using static RC layout.
+	// Tracked: Sprint 18 (WinUI Manager rewrite) replaces WTL layout engine.
 	return 0;
 	
 	if (wParam == SIZE_MINIMIZED) return 0;
@@ -300,7 +304,8 @@ LRESULT CMainDlg::OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lPara
 void CMainDlg::InitUI()
 {
 	// Convert format checkboxes to owner-draw for status icons (Sprint D3)
-	// TEMPORARILY DISABLED for debugging - checkboxes not showing
+	// DISABLED: BS_OWNERDRAW hides checkbox text on themed controls.
+	// Tracked: Sprint 18 (WinUI Manager) will use native toggle switches.
 	/*
 	int formatCheckboxes[] = {
 		IDC_CB_CBZ, IDC_CB_CBR, IDC_CB_CB7, IDC_CB_CBT,
@@ -754,31 +759,36 @@ void CMainDlg::InitTooltips()
 
 void CMainDlg::AddTooltipWithStatus(int ctrlID, int cbxType, LPCTSTR formatName)
 {
-	HandlerStatus status = m_reg.GetHandlerStatus(cbxType, m_reg.GetExtension(cbxType));
+	// Sprint 18A: Enhanced with program name detection
+	CString programName;
+	HandlerStatus status = m_reg.GetHandlerStatusEx(cbxType, m_reg.GetExtension(cbxType), programName);
 	CString tooltip;
 	
 	switch (status)
 	{
 	case HANDLER_DARKTHUMBS:
-		tooltip.Format(_T("%s\n\xE2\x9C\x93 DarkThumbs thumbnail provider is active"), formatName);
+		tooltip.Format(_T("%s\n\n\xE2\x9C\x85 Active Handler: DarkThumbs\nStatus: Enabled and working"), formatName);
 		break;
 		
 	case HANDLER_NATIVE:
-		tooltip.Format(_T("%s\n\xE2\x8A\x95 Windows has a native handler.\nEnable to use DarkThumbs instead for enhanced features."), formatName);
+		tooltip.Format(_T("%s\n\n\xF0\x9F\x94\xB7 Current Handler: %s (Windows built-in)\nNote: Enable DarkThumbs to use enhanced features"), formatName, (LPCTSTR)programName);
 		break;
 		
 	case HANDLER_NONE:
-		tooltip.Format(_T("%s\n\xE2\x97\x8B No thumbnail provider installed.\nEnable DarkThumbs support to generate thumbnails."), formatName);
+		tooltip.Format(_T("%s\n\n\xE2\xAD\x95 No Handler: No thumbnail provider installed\nAction: Enable DarkThumbs to generate thumbnails"), formatName);
 		break;
 		
 	case HANDLER_THIRD_PARTY:
-		tooltip.Format(_T("%s\n\xE2\x9A\xA0 Third-party handler detected.\nDarkThumbs will override when enabled."), formatName);
+		tooltip.Format(_T("%s\n\n\xE2\x9A\xA0 Current Handler: %s (Third-party)\nAction: Click Apply to use DarkThumbs instead"), formatName, (LPCTSTR)programName);
 		break;
 		
 	default:
 		tooltip = formatName;
 		break;
 	}
+	
+	// Store status for visual indicators
+	m_checkboxStatus[ctrlID] = status;
 	
 	HWND hCtrl = GetDlgItem(ctrlID);
 	if (hCtrl)
@@ -824,7 +834,9 @@ void CMainDlg::InitDarkMode()
 
 LRESULT CMainDlg::OnCtlColorDlg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-	// TEMPORARILY DISABLED FOR DEBUGGING - use default dialog colors
+	// DISABLED: Custom dialog background requires all child controls to
+	// also handle WM_CTLCOLOR, otherwise text becomes unreadable.
+	// Tracked: Sprint 18 (WinUI Manager) will use XAML theming.
 	return FALSE;  // Let system handle it
 	
 	HDC hdc = (HDC)wParam;
@@ -834,7 +846,8 @@ LRESULT CMainDlg::OnCtlColorDlg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOO
 
 LRESULT CMainDlg::OnCtlColorStatic(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-	// TEMPORARILY DISABLED FOR DEBUGGING - use default static colors
+	// DISABLED: Static text colors conflict with group box rendering.
+	// Tracked: Sprint 18 (WinUI Manager) will use XAML theming.
 	return FALSE;  // Let system handle it
 	
 	HDC hdc = (HDC)wParam;
@@ -870,7 +883,8 @@ LRESULT CMainDlg::OnCtlColorStatic(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, 
 
 LRESULT CMainDlg::OnCtlColorBtn(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-	// TEMPORARILY DISABLED FOR DEBUGGING - let Windows paint buttons normally
+	// DISABLED: Custom button colors cause artifacts with visual styles.
+	// Tracked: Sprint 18 (WinUI Manager) will use XAML button styles.
 	return FALSE;  // Let system handle it
 	
 	HDC hdc = (HDC)wParam;
@@ -885,8 +899,35 @@ void CMainDlg::UpdateStatusBar()
 		return;
 	
 	int enabledCount = GetEnabledFormatCount();
+	
+	// Sprint 18A: Count conflicts (third-party handlers)
+	int conflictCount = 0;
+	const int allFormats[] = {
+		CBX_CBZ, CBX_CBR, CBX_CB7, CBX_CBT,
+		CBX_EPUB, CBX_MOBI, CBX_AZW, CBX_AZW3,
+		CBX_ZIP, CBX_RAR, CBX_7Z, CBX_TAR,
+		CBX_PHZ, CBX_FB2,
+		CBX_WEBP, CBX_HEIF, CBX_AVIF, CBX_JXL,
+		CBX_VIDEO, CBX_PDF, CBX_TIFF, CBX_SVG, CBX_RAW
+	};
+	
+	for (int format : allFormats)
+	{
+		HandlerStatus status = m_reg.GetHandlerStatus(format, m_reg.GetExtension(format));
+		if (status == HANDLER_THIRD_PARTY)
+			conflictCount++;
+	}
+	
 	CString statusText;
-	statusText.Format(_T("Ready - %d of 31 formats enabled"), enabledCount);
+	if (conflictCount > 0)
+	{
+		statusText.Format(_T("Ready - %d of 31+ formats enabled | \xE2\x9A\xA0 %d conflict(s) detected (hover for details)"), 
+		                  enabledCount, conflictCount);
+	}
+	else
+	{
+		statusText.Format(_T("Ready - %d of 31+ formats enabled | Windows 11 25H2 Compatible"), enabledCount);
+	}
 	
 	m_statusBar.SetText(0, statusText);
 }
@@ -930,10 +971,10 @@ int CMainDlg::GetEnabledFormatCount()
 	if (m_reg.HasTH(CBX_SVG)) count++;  
 	if (m_reg.HasTH(CBX_RAW)) count++;
 	
-	// Note: We have 31 total checkable formats
-	// (4 comic + 4 ebook + 4 archive + 2 photo + 4 image + 4 media + 
-	//  4 collage radio buttons + 2 options + 2 descriptions = 30 checkboxes/radios)
-	// But only 26 are format handlers, 4 are collage mode
+	// Note: We have 23 format handler checkboxes (31+ file extensions supported)
+	// Format handlers: 4 comic + 4 ebook + 4 archive + 2 photo + 4 image + 5 media/doc = 23
+	// Actual extensions: VIDEO covers 4+ formats (MP4/AVI/MKV/WMV), RAW covers DNG/CR2/NEF/etc,
+	// HEIF includes both .heif and .heic, bringing total supported extensions to 31+
 	
 	return count;
 }
@@ -1226,11 +1267,28 @@ LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 	}
 	else {
 		switch (wParam) {
-			case VK_F1:  // F1: Show help (future)
-				// TODO: Open documentation or help dialog
-				MessageBox(_T("DarkThumbs Shell Manager\n\nKeyboard Shortcuts:\n  Ctrl+A - Select all\n  Ctrl+D - Deselect all\n  Ctrl+S - Apply\n  F1 - Help"), 
-					_T("Help"), MB_OK | MB_ICONINFORMATION);
-				return 0;
+			case VK_F1:  // F1: Show help
+				// Display comprehensive help dialog
+				MessageBox(
+					_T("DarkThumbs Shell Manager - Quick Help\n\n")
+					_T("KEYBOARD SHORTCUTS:\n")
+					_T("  Ctrl+A     - Select all formats\n")
+					_T("  Ctrl+D     - Deselect all formats\n")
+					_T("  Ctrl+S     - Apply changes\n")
+					_T("  F1         - Show this help\n")
+					_T("  F5         - Refresh status\n\n")
+					_T("FEATURES:\n")
+					_T("  \x2022 31+ supported formats\n")
+					_T("  \x2022 Modern images: WebP, AVIF, JXL, HEIF\n")
+					_T("  \x2022 Conflict detection\n")
+					_T("  \x2022 Windows 11 25H2 compatible\n\n")
+					_T("TIPS:\n")
+					_T("  \x2022 Hover over icons for details\n")
+					_T("  \x2022 Check status bar for count\n")
+					_T("\nFor full docs, press F1 on any control."),
+					_T("DarkThumbs Help"), 
+					MB_OK | MB_ICONINFORMATION);
+				 return 0;
 		}
 	}
 	

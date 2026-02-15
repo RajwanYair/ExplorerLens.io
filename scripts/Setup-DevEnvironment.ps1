@@ -31,19 +31,19 @@
 
 $Global:DarkThumbsConfig = @{
     # Visual Studio 2026 Build Tools
-    VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
+    VSPath      = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
     MSVCVersion = "14.44.35207"
-    WindowsSDK = "10.0.26100.0"
+    WindowsSDK  = "10.0.26100.0"
     
-    # Build Tools
-    MSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"
-    CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
-    Git = "C:\Users\ryair\scoop\shims\git.exe"
-    Ninja = "C:\Users\ryair\scoop\shims\ninja.exe"
+    # Build Tools (Updated Feb 9, 2026)
+    MSBuild     = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"
+    CMake       = "C:\Users\ryair\scoop\shims\cmake.exe"  # v4.2.3
+    Git         = "C:\Users\ryair\scoop\shims\git.exe"      # v2.53.0
+    Ninja       = "C:\Users\ryair\scoop\shims\ninja.exe"  # v1.13.2
     
     # VC Tools
-    VCVarsAll = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
-    VCVars64 = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+    VCVarsAll   = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
+    VCVars64    = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
     
     # Project Paths
     ProjectRoot = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
@@ -143,11 +143,9 @@ function Load-MSVCEnvironment {
             Write-Host "  - Windows SDK: $($Global:DarkThumbsConfig.WindowsSDK)" -ForegroundColor Gray
             Write-Host "  - Tools: CL, Link, NMake, RC" -ForegroundColor Gray
         }
-    }
-    catch {
+    } catch {
         Write-Error "Failed to load MSVC environment: $_"
-    }
-    finally {
+    } finally {
         Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
     }
 }
@@ -189,11 +187,9 @@ function Test-BuildTools {
                 try {
                     if ($tool.Command -eq "msbuild") {
                         $version = (& $tool.Command -version 2>&1 | Select-String -Pattern "\d+\.\d+\.\d+" | Select-Object -First 1).Matches.Value
-                    }
-                    elseif ($tool.Command -eq "cmake") {
+                    } elseif ($tool.Command -eq "cmake") {
                         $version = (& $tool.Command --version 2>&1 | Select-String -Pattern "\d+\.\d+\.\d+" | Select-Object -First 1).Matches.Value
-                    }
-                    elseif ($tool.Command -eq "git") {
+                    } elseif ($tool.Command -eq "git") {
                         $version = (& $tool.Command --version 2>&1 | Select-String -Pattern "\d+\.\d+\.\d+" | Select-Object -First 1).Matches.Value
                     }
                     
@@ -202,13 +198,11 @@ function Test-BuildTools {
                     } else {
                         Write-Host ""
                     }
-                }
-                catch {
+                } catch {
                     Write-Host ""
                 }
             }
-        }
-        else {
+        } else {
             $allGood = $false
             if (-not $Quiet) {
                 Write-Host "  ❌ $($tool.Name) - NOT FOUND" -ForegroundColor Red
@@ -236,7 +230,7 @@ function Invoke-DarkThumbsBuild {
         Quick build commands for DarkThumbs
     #>
     param(
-        [Parameter(Position=0)]
+        [Parameter(Position = 0)]
         [ValidateSet("Release", "Debug", "Engine", "Shell", "Clean", "Rebuild", "Help")]
         [string]$Target = "Help"
     )
@@ -260,7 +254,7 @@ function Invoke-DarkThumbsBuild {
             Write-Host "Building Engine..." -ForegroundColor Cyan
             Push-Location "$projectRoot\Engine"
             if (-not (Test-Path "build")) { mkdir build }
-            cd build
+            Set-Location build
             cmake .. -G "Visual Studio 18 2026" -A x64
             cmake --build . --config Release -j 8
             Pop-Location
@@ -274,7 +268,7 @@ function Invoke-DarkThumbsBuild {
         "Clean" {
             Write-Host "Cleaning build artifacts..." -ForegroundColor Yellow
             Push-Location $projectRoot
-            Remove-Item -Path build,x64,packages,CBXShell\x64,CBXManager\x64 -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path build, x64, packages, CBXShell\x64, CBXManager\x64 -Recurse -Force -ErrorAction SilentlyContinue
             Write-Host "✓ Clean complete" -ForegroundColor Green
             Pop-Location
         }
@@ -323,9 +317,9 @@ function Show-DarkThumbsInfo {
     Write-Host "  SDK:     $($Global:DarkThumbsConfig.WindowsSDK)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Build Tools:" -ForegroundColor Yellow
-    Write-Host "  MSBuild: $(if (Get-Command msbuild -EA SilentlyContinue) { (msbuild -version | Select-String '\d+\.\d+' | Select -First 1).Matches.Value } else { 'Not found' })" -ForegroundColor Gray
-    Write-Host "  CMake:   $(if (Get-Command cmake -EA SilentlyContinue) { (cmake --version | Select-String '\d+\.\d+\.\d+' | Select -First 1).Matches.Value } else { 'Not found' })" -ForegroundColor Gray
-    Write-Host "  Git:     $(if (Get-Command git -EA SilentlyContinue) { (git --version | Select-String '\d+\.\d+\.\d+' | Select -First 1).Matches.Value } else { 'Not found' })" -ForegroundColor Gray
+    Write-Host "  MSBuild: $(if (Get-Command msbuild -EA SilentlyContinue) { (msbuild -version | Select-String '\d+\.\d+' | Select-Object -First 1).Matches.Value } else { 'Not found' })" -ForegroundColor Gray
+    Write-Host "  CMake:   $(if (Get-Command cmake -EA SilentlyContinue) { (cmake --version | Select-String '\d+\.\d+\.\d+' | Select-Object -First 1).Matches.Value } else { 'Not found' })" -ForegroundColor Gray
+    Write-Host "  Git:     $(if (Get-Command git -EA SilentlyContinue) { (git --version | Select-String '\d+\.\d+\.\d+' | Select-Object -First 1).Matches.Value } else { 'Not found' })" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Project:" -ForegroundColor Yellow
     Write-Host "  Root:    $($Global:DarkThumbsConfig.ProjectRoot)" -ForegroundColor Gray

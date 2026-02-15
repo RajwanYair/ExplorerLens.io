@@ -15,9 +15,28 @@ add_executable(EngineTests
     test_gpu.cpp
 )
 
+# Link JXL libraries if enabled
+if(HAS_LIBJXL)
+    target_compile_definitions(EngineTests PRIVATE JXL_STATIC_DEFINE)
+endif()
+
 # Benchmark executable
 add_executable(EngineBenchmark
     EngineBenchmark.cpp
+)
+
+# Link JXL libraries if enabled
+if(HAS_LIBJXL)
+    target_compile_definitions(EngineBenchmark PRIVATE JXL_STATIC_DEFINE)
+endif()
+
+# Add library search paths
+target_link_directories(EngineBenchmark
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../SDK/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../external/libjxl-install/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../external/brotli-install/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../external/highway-install/lib
 )
 
 target_link_libraries(EngineBenchmark
@@ -25,15 +44,48 @@ target_link_libraries(EngineBenchmark
         DarkThumbsEngine
 )
 
+# Link JXL libraries if enabled
+if(HAS_LIBJXL)
+    target_link_libraries(EngineBenchmark
+        PRIVATE
+            jxl
+            jxl_threads
+            hwy
+            brotlicommon
+            brotlidec
+    )
+endif()
+
 target_include_directories(EngineBenchmark
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
+
+# Add library search paths
+target_link_directories(EngineTests
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../SDK/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../external/libjxl-install/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../external/brotli-install/lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../external/highway-install/lib
 )
 
 target_link_libraries(EngineTests
     PRIVATE
         DarkThumbsEngine
 )
+
+# Link JXL libraries if enabled
+if(HAS_LIBJXL)
+    target_link_libraries(EngineTests
+        PRIVATE
+            jxl
+            jxl_threads
+            hwy
+            brotlicommon
+            brotlidec
+    )
+endif()
 
 target_include_directories(EngineTests
     PRIVATE

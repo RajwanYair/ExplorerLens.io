@@ -6,6 +6,7 @@
 
 #include "StdAfx.h"
 #include "audio_thumbnail.h"
+#include "GdiplusRAII.h"
 #include <atlbase.h>
 #include <propsys.h>
 #include <propkey.h>
@@ -71,10 +72,12 @@ namespace DarkThumbs
         hr = propStore->GetValue(PKEY_ThumbnailStream, &propVar);
         if (SUCCEEDED(hr) && propVar.vt == VT_STREAM && propVar.pStream)
         {
-            // Load image from stream using GDI+
-            Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-            ULONG_PTR gdiplusToken;
-            Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+            // Ensure GDI+ is initialized
+            GdiplusRAII& gdiplus = GdiplusRAII::GetInstance();
+            if (!gdiplus.IsInitialized()) {
+                PropVariantClear(&propVar);
+                return NULL;
+            }
 
             Gdiplus::Bitmap *bitmap = Gdiplus::Bitmap::FromStream(propVar.pStream);
             if (bitmap && bitmap->GetLastStatus() == Gdiplus::Ok)
@@ -84,13 +87,11 @@ namespace DarkThumbs
                 delete bitmap;
 
                 PropVariantClear(&propVar);
-                Gdiplus::GdiplusShutdown(gdiplusToken);
                 return hBitmap;
             }
 
             if (bitmap)
                 delete bitmap;
-            Gdiplus::GdiplusShutdown(gdiplusToken);
         }
 
         PropVariantClear(&propVar);

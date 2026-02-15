@@ -140,24 +140,39 @@ HRESULT WebPDecoder::DecodeFromMemory(const BYTE* data, size_t size, UINT target
         return E_FAIL;
     }
 
-    // Decode to RGBA (libwebp allocates the buffer)
-    int decodedWidth = 0, decodedHeight = 0;
-    BYTE* rgba = WebPDecodeRGBA(data, size, &decodedWidth, &decodedHeight);
-
-    if (!rgba) {
+    //Use WebPDecoderConfig for native scaling support (performance optimization)
+    WebPDecoderConfig config;
+    if (!WebPInitDecoderConfig(&config)) {
         return E_FAIL;
     }
 
-    // For now, use the full decoded image
-    // TODO: Add scaling support using WebPDecodeRGBA with config for target size
-    // targetWidth and targetHeight will be used in future scaling implementation
-    (void)targetWidth;
-    (void)targetHeight;
+    // Enable native scaling to target size
+    config.options.use_scaling = 1;
+    config.options.scaled_width = targetWidth;
+    config.options.scaled_height = targetHeight;
     
-    HBITMAP hBitmap = CreateBitmapFromRGBA(rgba, decodedWidth, decodedHeight);
+    // Enable multi-threaded decoding for better performance
+    config.options.use_threads = 1;
+    
+    // Output format: RGBA for easier GDI+ integration
+    config.output.colorspace = MODE_RGBA;
 
-    // Free libwebp buffer
-    WebPFree(rgba);
+    // Decode with native scaling
+    VP8StatusCode status = WebPDecode(data, size, &config);
+    if (status != VP8_STATUS_OK) {
+        WebPFreeDecBuffer(&config.output);
+        return E_FAIL;
+    }
+
+    // Create bitmap from scaled output
+    HBITMAP hBitmap = CreateBitmapFromRGBA(
+        config.output.u.RGBA.rgba,
+        config.output.width,
+        config.output.height
+    );
+
+    // Free WebP decoder buffer
+    WebPFreeDecBuffer(&config.output);
 
     if (!hBitmap) {
         return E_FAIL;
@@ -187,6 +202,32 @@ bool WebPDecoder::IsWebPFormat(const BYTE* data, size_t size) {
     }
 
     return true;
+}
+
+bool WebPDecoder::IsAnimatedWebP(const BYTE* data, size_t size) {
+    if (!IsWebPFormat(data, size) || size < 20) {
+        return false;
+    }
+
+    // Check for ANIM chunk (animated WebP)
+    // Search for "ANIM" chunk in the file
+    for (size_t i = 12; i < size - 4; i++) {
+        if (memcmp(data + i, "ANIM", 4) == 0) {
+            return true;
+        }
+        // Also check for VP8X with animation flag
+        if (i < size - 10 && memcmp(data + i, "VP8X", 4) == 0) {
+            // VP8X flags are at offset i+8, bit 1 indicates animation
+            if (i + 9 < size) {
+                uint8_t flags = data[i + 8];
+                if (flags & 0x02) {  // Animation flag
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 HBITMAP WebPDecoder::CreateBitmapFromRGBA(const BYTE* rgba, int width, int height) {
@@ -227,6 +268,56 @@ HBITMAP WebPDecoder::CreateBitmapFromRGBA(const BYTE* rgba, int width, int heigh
     }
 
     return hBitmap;
+}
+
+void WebPDecoder::AddAnimationBadge(HBITMAP hBitmap, int width, int height) {
+    if (!hBitmap || width <= 0 || height <= 0) {
+        return;
+    }
+
+    // Create DC for drawing
+    HDC hdcScreen = GetDC(nullptr);
+    HDC hdcMem = CreateCompatibleDC(hdcScreen);
+    HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
+
+    // Draw animation indicator in bottom-right corner
+    // Use a small semi-transparent badge with "GIF-style" icon
+    const int badgeSize = std::min(width / 6, height / 6);
+    const int badgeSize2 = std::max(20, badgeSize); // Minimum 20 pixels
+    const int margin = 4;
+    const int x = width - badgeSize2 - margin;
+    const int y = height - badgeSize2 - margin;
+
+    // Draw semi-transparent rounded rectangle
+    HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
+    HPEN hPen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
+    HBRUSH hOldBrush = (HBRUSH)SelectObject(hdcMem, hBrush);
+    HPEN hOldPen = (HPEN)SelectObject(hdcMem, hPen);
+
+    // Set transparency (blend mode)
+    BLENDFUNCTION blend = { AC_SRC_OVER, 0, 180, 0 }; // 70% opaque
+    
+    // Draw background circle
+    Ellipse(hdcMem, x, y, x + badgeSize2, y + badgeSize2);
+
+    // Draw play symbol (triangle) for animation
+    POINT pts[3] = {
+        { x + badgeSize2 / 3, y + badgeSize2 / 4 },
+        { x + badgeSize2 / 3, y + 3 * badgeSize2 / 4 },
+        { x + 2 * badgeSize2 / 3, y + badgeSize2 / 2 }
+    };
+    
+    SelectObject(hdcMem, GetStockObject(WHITE_BRUSH));
+    Polygon(hdcMem, pts, 3);
+
+    // Cleanup
+    SelectObject(hdcMem, hOldBrush);
+    SelectObject(hdcMem, hOldPen);
+    SelectObject(hdcMem, hOldBitmap);
+    DeleteObject(hBrush);
+    DeleteObject(hPen);
+    DeleteDC(hdcMem);
+    ReleaseDC(nullptr, hdcScreen);
 }
 
 } // namespace Engine

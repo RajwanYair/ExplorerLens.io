@@ -385,9 +385,13 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
-# Build logs
+# Build logs (root level)
 build-log.txt
 build-output.log
+build-output-clean.log
+build-final.log
+build-full-*.log
+performance_report.txt
 *.Build.CppClean.log
 
 # CMake build directories and files

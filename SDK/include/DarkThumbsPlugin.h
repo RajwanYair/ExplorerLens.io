@@ -291,7 +291,7 @@ DT_PLUGIN_API DT_Status DT_SetConfig(const wchar_t* configJson);
 /*
  * VERSION HISTORY
  * 
- * ABI Version 1 (v5.4.0) - Initial release
+ * ABI Version 1 (v6.0.0) - Initial release
  *   - Core plugin interface
  *   - Capability system
  *   - Format registration

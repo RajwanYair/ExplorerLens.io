@@ -1,5 +1,6 @@
 #include "ThumbnailPipeline.h"
 #include "FormatDetector.h"
+#include "../Core/Config.h"
 #include "../GPU/D3D11Renderer.h"
 #include "../GPU/GDIRenderer.h"
 #include "../Cache/ThumbnailCache.h"
@@ -8,8 +9,30 @@
 #include "../Decoders/WebPDecoder.h"
 #include "../Decoders/AVIFDecoder.h"
 #include "../Decoders/ArchiveDecoder.h"
+#include "../Decoders/RAWDecoder.h"
+#include "../Decoders/JXLDecoder.h"
+#include "../Decoders/HEIFDecoder.h"
+#include "../Decoders/ICODecoder.h"
+#include "../Decoders/TGADecoder.h"
+#include "../Decoders/QOIDecoder.h"
+#include "../Decoders/PSDDecoder.h"
+#include "../Decoders/DDSDecoder.h"
+#include "../Decoders/HDRDecoder.h"
+#include "../Decoders/PPMDecoder.h"
+#include "../Decoders/EXRDecoder.h"
+#include "../Decoders/SVGDecoder.h"
+#include "../Decoders/VideoDecoder.h"
+#include "../Decoders/AudioDecoder.h"
+#include "../Decoders/PDFDecoder.h"
+#include "../Decoders/DocumentDecoder.h"
+#include "../Decoders/FontDecoder.h"
+#include "../Plugin/PluginDecoder.h"
+#include "../Plugin/PluginManager.h"
 #include <chrono>
 #include <algorithm>
+#include <thread>
+#include <future>
+#include <mutex>
 
 namespace DarkThumbs {
 namespace Engine {
@@ -26,8 +49,10 @@ public:
     std::unique_ptr<IGPURenderer> gpuRenderer;
     std::unique_ptr<ICacheProvider> cacheProvider;
 
-    // Decoder storage (we own these)
+    // Decoder storage (we own these) - lazy initialization
     std::vector<std::unique_ptr<IThumbnailDecoder>> decoders;
+    bool decodersInitialized = false;  // NEW: Lazy init flag
+    std::mutex decoderInitMutex;  // NEW: Thread-safe lazy init
 
     // Statistics
     uint64_t totalRequests = 0;
@@ -55,29 +80,9 @@ public:
             formatDetector = std::make_unique<FormatDetector>();
         }
 
-        // Register all available decoders (order matters - more specific first)
-        // 1. Archive formats (ZIP, RAR, 7Z, etc.)
-        auto archiveDecoder = std::make_unique<ArchiveDecoder>();
-        decoderRegistry.RegisterDecoder(archiveDecoder.get());
-        decoders.push_back(std::move(archiveDecoder));
+        // NEW: Decoders are NOT created here anymore - lazy init on first use
+        // This saves ~50-100ms startup time per COM object creation
         
-        // 2. Modern image formats with specific decoders
-        auto webpDecoder = std::make_unique<WebPDecoder>();
-        decoderRegistry.RegisterDecoder(webpDecoder.get());
-        decoders.push_back(std::move(webpDecoder));
-        
-        auto avifDecoder = std::make_unique<AVIFDecoder>();
-        decoderRegistry.RegisterDecoder(avifDecoder.get());
-        decoders.push_back(std::move(avifDecoder));
-        
-        // 3. Standard image formats via WIC (JPEG, PNG, BMP, GIF, TIFF)
-        auto imageDecoder = std::make_unique<ImageDecoder>();
-        decoderRegistry.RegisterDecoder(imageDecoder.get());
-        decoders.push_back(std::move(imageDecoder));
-        
-        // Note: JXLDecoder and HEIFDecoder are currently disabled
-        // They can be added here when their interface is updated
-
         // Create GPU renderer if enabled
         if (config.enableGPU && !gpuRenderer) {
             // Try hardware GPU first (D3D11)
@@ -103,6 +108,128 @@ public:
 
         initialized = true;
         return true;
+    }
+
+    void EnsureDecodersInitialized() {
+        if (decodersInitialized) {
+            return;
+        }
+        
+        std::lock_guard<std::mutex> lock(decoderInitMutex);
+        if (decodersInitialized) {  // Double-check after lock
+            return;
+        }
+        
+        OutputDebugStringW(L"[Pipeline] Lazy initializing decoders...\n");
+        
+        // Register all available decoders (order matters - more specific first)
+        // 1. Archive formats (ZIP, RAR, 7Z, etc.)
+        auto archiveDecoder = std::make_unique<ArchiveDecoder>();
+        decoderRegistry.RegisterDecoder(archiveDecoder.get());
+        decoders.push_back(std::move(archiveDecoder));
+        
+        // 2. Modern image formats with specific decoders
+        auto webpDecoder = std::make_unique<WebPDecoder>();
+        decoderRegistry.RegisterDecoder(webpDecoder.get());
+        decoders.push_back(std::move(webpDecoder));
+        
+        auto avifDecoder = std::make_unique<AVIFDecoder>();
+        decoderRegistry.RegisterDecoder(avifDecoder.get());
+        decoders.push_back(std::move(avifDecoder));
+        
+        // Camera RAW formats (Canon, Nikon, Sony, DNG, etc.)
+        auto rawDecoder = std::make_unique<RAWDecoder>();
+        decoderRegistry.RegisterDecoder(rawDecoder.get());
+        decoders.push_back(std::move(rawDecoder));
+        
+        // HEIF/HEIC formats (iPhone photos, AVIF variants)
+        auto heifDecoder = std::make_unique<HEIFDecoder>();
+        decoderRegistry.RegisterDecoder(heifDecoder.get());
+        decoders.push_back(std::move(heifDecoder));
+        
+        // JPEG XL (modern high-efficiency format)
+        auto jxlDecoder = std::make_unique<JXLDecoder>();
+        decoderRegistry.RegisterDecoder(jxlDecoder.get());
+        decoders.push_back(std::move(jxlDecoder));
+        
+        // Professional/specialty formats
+        auto icoDecoder = std::make_unique<ICODecoder>();
+        decoderRegistry.RegisterDecoder(icoDecoder.get());
+        decoders.push_back(std::move(icoDecoder));
+        
+        auto tgaDecoder = std::make_unique<TGADecoder>();
+        decoderRegistry.RegisterDecoder(tgaDecoder.get());
+        decoders.push_back(std::move(tgaDecoder));
+        
+        auto qoiDecoder = std::make_unique<QOIDecoder>();
+        decoderRegistry.RegisterDecoder(qoiDecoder.get());
+        decoders.push_back(std::move(qoiDecoder));
+        
+        // Adobe Photoshop PSD/PSB
+        auto psdDecoder = std::make_unique<PSDDecoder>();
+        decoderRegistry.RegisterDecoder(psdDecoder.get());
+        decoders.push_back(std::move(psdDecoder));
+        
+        // DirectDraw Surface (game textures)
+        auto ddsDecoder = std::make_unique<DDSDecoder>();
+        decoderRegistry.RegisterDecoder(ddsDecoder.get());
+        decoders.push_back(std::move(ddsDecoder));
+        
+        // Radiance HDR (RGBE)
+        auto hdrDecoder = std::make_unique<HDRDecoder>();
+        decoderRegistry.RegisterDecoder(hdrDecoder.get());
+        decoders.push_back(std::move(hdrDecoder));
+        
+        // Netpbm formats (PPM/PGM/PBM/PNM/PAM/PFM)
+        auto ppmDecoder = std::make_unique<PPMDecoder>();
+        decoderRegistry.RegisterDecoder(ppmDecoder.get());
+        decoders.push_back(std::move(ppmDecoder));
+        
+        // OpenEXR (via WIC codec)
+        auto exrDecoder = std::make_unique<EXRDecoder>();
+        decoderRegistry.RegisterDecoder(exrDecoder.get());
+        decoders.push_back(std::move(exrDecoder));
+        
+        // SVG/SVGZ vector images
+        auto svgDecoder = std::make_unique<SVGDecoder>();
+        decoderRegistry.RegisterDecoder(svgDecoder.get());
+        decoders.push_back(std::move(svgDecoder));
+        
+        // Video formats (Media Foundation)
+        auto videoDecoder = std::make_unique<VideoDecoder>();
+        decoderRegistry.RegisterDecoder(videoDecoder.get());
+        decoders.push_back(std::move(videoDecoder));
+        
+        // Audio formats (album art / waveform)
+        auto audioDecoder = std::make_unique<AudioDecoder>();
+        decoderRegistry.RegisterDecoder(audioDecoder.get());
+        decoders.push_back(std::move(audioDecoder));
+        
+        // PDF documents
+        auto pdfDecoder = std::make_unique<PDFDecoder>();
+        decoderRegistry.RegisterDecoder(pdfDecoder.get());
+        decoders.push_back(std::move(pdfDecoder));
+        
+        // Office/eBook/document formats
+        auto documentDecoder = std::make_unique<DocumentDecoder>();
+        decoderRegistry.RegisterDecoder(documentDecoder.get());
+        decoders.push_back(std::move(documentDecoder));
+        
+        // Font preview (TTF, OTF, etc.)
+        auto fontDecoder = std::make_unique<FontDecoder>();
+        decoderRegistry.RegisterDecoder(fontDecoder.get());
+        decoders.push_back(std::move(fontDecoder));
+        
+        // 3. Standard image formats via WIC (JPEG, PNG, BMP, GIF, TIFF)
+        auto imageDecoder = std::make_unique<ImageDecoder>();
+        decoderRegistry.RegisterDecoder(imageDecoder.get());
+        decoders.push_back(std::move(imageDecoder));
+        
+        // 4. Scan for and load third-party plugins
+        LoadPlugins();
+        
+        decodersInitialized = true;
+        OutputDebugStringW(L"[Pipeline] Lazy decoder init complete\n");
     }
 
     void Shutdown() {
@@ -133,6 +260,26 @@ public:
         
         ThumbnailResult result;
         result.status = E_FAIL;
+
+        // Input validation (Task A21: Add comprehensive bounds checking)
+        if (!request.filePath || request.filePath[0] == L'\0') {
+            OutputDebugStringW(L"[Pipeline] ERROR: Invalid file path\n");
+            result.status = E_INVALIDARG;
+            return result;
+        }
+        
+        if (request.width == 0 || request.height == 0) {
+            OutputDebugStringW(L"[Pipeline] ERROR: Invalid dimensions (0x0)\n");
+            result.status = E_INVALIDARG;
+            return result;
+        }
+        
+        // Reasonable max resolution check (8K = 7680x4320)
+        if (request.width > 8192 || request.height > 8192) {
+            OutputDebugStringW(L"[Pipeline] ERROR: Dimensions exceed maximum (8192x8192)\n");
+            result.status = E_INVALIDARG;
+            return result;
+        }
 
         if (!initialized) {
             OutputDebugStringW(L"[Pipeline] ERROR: Pipeline not initialized\n");
@@ -173,7 +320,10 @@ public:
         }
         cacheMisses++;
 
-        // Step 2: Find appropriate decoder
+        // Step 2: Ensure decoders are initialized (lazy init)
+        EnsureDecodersInitialized();
+
+        // Step 3: Find appropriate decoder
         IThumbnailDecoder* decoder = decoderRegistry.FindDecoder(request.filePath);
         if (!decoder) {
             OutputDebugStringW(L"[Pipeline] ERROR: No decoder found for file\n");
@@ -192,7 +342,7 @@ public:
         swprintf_s(decoderLog, L"[Pipeline] Using decoder: %s\n", decoder->GetName());
         OutputDebugStringW(decoderLog);
 
-        // Step 3: Generate thumbnail
+        // Step 4: Generate thumbnail
         result.status = decoder->Decode(request, result);
         
         // Log decode result
@@ -201,7 +351,7 @@ public:
                    result.status, result.hBitmap);
         OutputDebugStringW(resultLog);
 
-        // Step 4: Cache the result if successful
+        // Step 5: Cache the result if successful
         if (SUCCEEDED(result.status) && config.enableCache && cacheProvider && result.hBitmap) {
             // Store in cache (fire and forget - don't fail thumbnail on cache error)
             cacheProvider->Put(request.filePath, 
@@ -225,6 +375,9 @@ public:
         if (!initialized) {
             return false;
         }
+
+        // Lazy init decoders if needed
+        const_cast<Impl*>(this)->EnsureDecodersInitialized();
 
         // Check if we have a decoder for this file
         return decoderRegistry.FindDecoder(filePath.c_str()) != nullptr;
@@ -253,6 +406,85 @@ public:
         cacheMisses = 0;
         totalProcessingTimeMs = 0;
     }
+
+private:
+    /// Load and register third-party plugins
+    void LoadPlugins() {
+        OutputDebugStringW(L"[Pipeline] Scanning for plugins...\n");
+        
+        // Get plugin manager singleton
+        auto& pluginManager = PluginManager::Instance();
+        
+        // Get plugin search paths
+        auto searchPaths = PluginDiscovery::GetPluginSearchPaths();
+        
+        size_t totalLoaded = 0;
+        
+        // Scan each search path
+        for (const auto& path : searchPaths) {
+            if (!std::filesystem::exists(path)) {
+                continue;
+            }
+            
+            wchar_t logBuf[512];
+            swprintf_s(logBuf, L"[Pipeline] Scanning plugin directory: %s\n", path.c_str());
+            OutputDebugStringW(logBuf);
+            
+            size_t loaded = pluginManager.ScanPluginDirectory(path);
+            totalLoaded += loaded;
+            
+            if (loaded > 0) {
+                swprintf_s(logBuf, L"[Pipeline] Loaded %zu plugin(s) from %s\n", 
+                          loaded, path.c_str());
+                OutputDebugStringW(logBuf);
+            }
+        }
+        
+        // Create decoder wrappers for all loaded plugins
+        auto pluginNames = pluginManager.GetPluginNames();
+        for (const auto& name : pluginNames) {
+            // Get plugin handle
+            PluginHandle* pluginHandle = pluginManager.GetPluginHandle(name);
+            if (!pluginHandle || !pluginHandle->IsLoaded()) {
+                continue;
+            }
+            
+            // Get plugin info
+            const PluginInfo* info = pluginHandle->GetInfo();
+            if (!info) {
+                continue;
+            }
+            
+            // Log plugin discovery
+            wchar_t logBuf[512];
+            if (info->plugin_name) {
+                swprintf_s(logBuf, L"[Pipeline] Registering plugin decoder: %S (v%S)\n", 
+                          info->plugin_name, 
+                          info->plugin_version ? info->plugin_version : "1.0");
+                OutputDebugStringW(logBuf);
+                
+                // List supported extensions
+                if (info->supported_extensions) {
+                    for (size_t i = 0; info->supported_extensions[i] != nullptr; ++i) {
+                        swprintf_s(logBuf, L"[Pipeline]   - Format: %S\n", 
+                                  info->supported_extensions[i]);
+                        OutputDebugStringW(logBuf);
+                    }
+                }
+            }
+            
+            // Create PluginDecoder wrapper
+            std::wstring name_wide(name.begin(), name.end());
+            auto pluginDecoder = std::make_unique<PluginDecoder>(pluginHandle, name_wide);
+            IThumbnailDecoder* decoderPtr = pluginDecoder.get();
+            decoderRegistry.RegisterDecoder(decoderPtr);
+            decoders.push_back(std::move(pluginDecoder));
+        }
+        
+        wchar_t summary[256];
+        swprintf_s(summary, L"[Pipeline] Plugin scan complete. Total plugins: %zu\n", totalLoaded);
+        OutputDebugStringW(summary);
+    }
 };
 
 //==============================================================================
@@ -276,6 +508,51 @@ void ThumbnailPipeline::Shutdown() {
 
 ThumbnailResult ThumbnailPipeline::GenerateThumbnail(const ThumbnailRequest& request) {
     return m_impl->GenerateThumbnail(request);
+}
+
+std::vector<ThumbnailResult> ThumbnailPipeline::GenerateThumbnailsBatch(
+    const std::vector<ThumbnailRequest>& requests) {
+    std::vector<ThumbnailResult> results(requests.size());
+    
+    if (!m_impl->initialized || requests.empty()) return results;
+    
+    if (!m_impl->config.enableParallelDecode || requests.size() <= 1) {
+        // Sequential fallback
+        for (size_t i = 0; i < requests.size(); ++i) {
+            results[i] = m_impl->GenerateThumbnail(requests[i]);
+        }
+        return results;
+    }
+    
+    // Parallel execution with bounded concurrency
+    uint32_t maxConcurrent = m_impl->config.maxConcurrentDecodes;
+    if (maxConcurrent == 0) maxConcurrent = 4;
+    
+    size_t remaining = requests.size();
+    size_t offset = 0;
+    
+    while (remaining > 0) {
+        size_t batchSize = (std::min)(static_cast<size_t>(maxConcurrent), remaining);
+        std::vector<std::future<ThumbnailResult>> futures;
+        futures.reserve(batchSize);
+        
+        for (size_t i = 0; i < batchSize; ++i) {
+            size_t idx = offset + i;
+            futures.push_back(std::async(std::launch::async,
+                [this, &requests, idx]() {
+                    return m_impl->GenerateThumbnail(requests[idx]);
+                }));
+        }
+        
+        for (size_t i = 0; i < batchSize; ++i) {
+            results[offset + i] = futures[i].get();
+        }
+        
+        offset += batchSize;
+        remaining -= batchSize;
+    }
+    
+    return results;
 }
 
 bool ThumbnailPipeline::IsFormatSupported(const std::wstring& filePath) const {
@@ -309,6 +586,51 @@ void ThumbnailPipeline::GetStatistics(
 
 void ThumbnailPipeline::ResetStatistics() {
     m_impl->ResetStatistics();
+}
+
+//==============================================================================
+// Decoder Status Reporting
+//==============================================================================
+
+std::vector<ThumbnailPipeline::DecoderStatus> ThumbnailPipeline::GetDecoderStatus() const {
+    std::vector<DecoderStatus> status;
+
+    if (!m_impl || !m_impl->initialized)
+        return status;
+
+    for (const auto& decoder : m_impl->decoders) {
+        if (!decoder) continue;
+
+        DecoderInfo info = decoder->GetInfo();
+        DecoderStatus entry;
+        entry.name = info.name;
+        entry.version = info.version;
+        entry.extensionCount = info.extensionCount;
+        entry.supportsGPU = info.supportsGPU;
+        entry.isArchiveDecoder = info.isArchiveDecoder;
+        status.push_back(entry);
+    }
+
+    return status;
+}
+
+size_t ThumbnailPipeline::GetDecoderCount() const {
+    if (!m_impl || !m_impl->initialized)
+        return 0;
+    return m_impl->decoders.size();
+}
+
+size_t ThumbnailPipeline::GetTotalExtensionCount() const {
+    if (!m_impl || !m_impl->initialized)
+        return 0;
+
+    size_t total = 0;
+    for (const auto& decoder : m_impl->decoders) {
+        if (!decoder) continue;
+        DecoderInfo info = decoder->GetInfo();
+        total += info.extensionCount;
+    }
+    return total;
 }
 
 } // namespace Engine

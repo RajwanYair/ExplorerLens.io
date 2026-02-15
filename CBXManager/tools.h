@@ -231,11 +231,9 @@ private:
 };
 //************************************************************************
 
-//#ifdef USES_HTMLHELP
-// handles F1 or dialog context help
-//#include "resource.h"
-//#include "Htmlhelp.h"
-//#pragma comment(lib,"Htmlhelp.lib")
+// HTML Help support removed - no longer used.
+// If re-enabling, add: #include "resource.h", #include "Htmlhelp.h",
+// #pragma comment(lib,"Htmlhelp.lib") and #define USES_HTMLHELP
 template <class T> class CDialogHelp
 {
 public:

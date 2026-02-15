@@ -145,8 +145,7 @@ try {
     if ($Global:DarkThumbsEnvLoaded) {
         Write-Host "✓ Environment initialized" -ForegroundColor Green
     }
-}
-catch {
+} catch {
     Write-Warning "Failed to load setup script: $_"
     Write-Host "`nThe installation completed, but there may be an issue with the script." -ForegroundColor Yellow
     Write-Host "Check the setup script for errors: $setupScript`n" -ForegroundColor Yellow

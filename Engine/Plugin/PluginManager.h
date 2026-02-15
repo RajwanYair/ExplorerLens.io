@@ -16,6 +16,9 @@
 #include <functional>
 
 namespace DarkThumbs {
+namespace Engine {
+    class PluginDecoder;  // Forward declaration
+}
 
 //============================================================================
 // Plugin Handle (loaded plugin instance)
@@ -28,8 +31,9 @@ public:
     
     // Non-copyable
     PluginHandle(const PluginHandle&) = delete;
-    PluginHandle& operator=(const PluginHandle&) = delete;
-    
+    PluginHandle& operator=(const PluginHandle&) = delete;    
+    // Make PluginManager a friend so it can access init_ and initialized_
+    friend class PluginManager;    
     // Movable
     PluginHandle(PluginHandle&&) noexcept;
     PluginHandle& operator=(PluginHandle&&) noexcept;
@@ -121,11 +125,11 @@ public:
                               PluginProgressCallback progress = nullptr);
     
     // Create IThumbnailDecoder wrapper for a plugin with automatic mode selection
-    std::unique_ptr<class PluginDecoder> CreateDecoderForPlugin(
+    std::unique_ptr<Engine::PluginDecoder> CreateDecoderForPlugin(
         const std::string& plugin_name);
     
     // Create IThumbnailDecoder wrapper for best plugin for file
-    std::unique_ptr<class PluginDecoder> CreateDecoderForFile(
+    std::unique_ptr<Engine::PluginDecoder> CreateDecoderForFile(
         const std::filesystem::path& file_path);
     
     // Plugin events (optional callbacks)

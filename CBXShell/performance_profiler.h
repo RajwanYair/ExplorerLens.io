@@ -106,14 +106,14 @@ public:
 };
 
 // RAII timer for automatic profiling
-class ScopedTimer {
+class CBXScopedTimer {
 private:
     std::string m_metricName;
     std::chrono::high_resolution_clock::time_point m_start;
     bool m_enabled;
 
 public:
-    explicit ScopedTimer(const std::string& metricName)
+    explicit CBXScopedTimer(const std::string& metricName)
         : m_metricName(metricName)
         , m_enabled(PerformanceProfiler::Instance().IsEnabled())
     {
@@ -122,7 +122,7 @@ public:
         }
     }
 
-    ~ScopedTimer() {
+    ~CBXScopedTimer() {
         if (m_enabled) {
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - m_start);
@@ -132,12 +132,12 @@ public:
     }
 
     // Non-copyable
-    ScopedTimer(const ScopedTimer&) = delete;
-    ScopedTimer& operator=(const ScopedTimer&) = delete;
+    CBXScopedTimer(const CBXScopedTimer&) = delete;
+    CBXScopedTimer& operator=(const CBXScopedTimer&) = delete;
 };
 
 // Convenience macro
-#define PROFILE_SCOPE(name) DarkThumbs::ScopedTimer __profiler_timer__(name)
+#define PROFILE_SCOPE(name) DarkThumbs::CBXScopedTimer __profiler_timer__(name)
 #define PROFILE_FUNCTION() PROFILE_SCOPE(__FUNCTION__)
 
 } // namespace DarkThumbs

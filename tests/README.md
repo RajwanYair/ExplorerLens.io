@@ -174,7 +174,7 @@ tests\build\
 ```
 =========================================
 DarkThumbs Unit Test Suite
-Version: 4.6 (Windows 11 Modernized)
+Version: 6.0.0 (GPU-Accelerated)
 =========================================
 
 [Suite 1/8] Format Detection Tests
@@ -447,4 +447,4 @@ Same as DarkThumbs project. Tests are MIT-compatible and freely redistributable.
 
 **Last Updated:** November 18, 2024  
 **Test Suite Version:** 1.0  
-**DarkThumbs Version:** 4.6 (Windows 11 Modernized)
+**DarkThumbs Version:** 6.0.0 (GPU-Accelerated)

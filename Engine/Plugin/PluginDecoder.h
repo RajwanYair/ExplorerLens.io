@@ -50,7 +50,13 @@ public:
     HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
     DecoderInfo GetInfo() const override;
     const wchar_t* GetName() const override { return info_.name; }
-    const wchar_t* GetVersion() const override { return info_.version; }
+    const wchar_t** GetSupportedExtensions() const override { return info_.supportedExtensions; }
+    uint32_t GetExtensionCount() const override { return info_.extensionCount; }
+    bool SupportsGPU() const override { return info_.supportsGPU; }
+    bool IsArchiveDecoder() const override { return info_.isArchiveDecoder; }
+    
+    /// Get plugin version (convenience method, also available via GetInfo().version)
+    const wchar_t* GetVersion() const { return info_.version; }
     
     /// Get the isolation mode being used
     IsolationMode GetIsolationMode() const { return isolation_mode_; }
@@ -81,26 +87,19 @@ private:
     // PluginHost mode decoding
     HRESULT DecodeInPluginHost(const ThumbnailRequest& request, ThumbnailResult& result);
     
-    // Helper: Convert plugin DecodeResult to ThumbnailResult
-    HRESULT ConvertPluginResult(const DecodeResult& plugin_result, 
-                               ThumbnailResult& result);
-    
-    // Helper: Convert ThumbnailRequest to plugin DecodeRequest
-    void ConvertToPluginRequest(const ThumbnailRequest& request,
-                               DecodeRequest& plugin_request);
-    
     // Helper: Convert pixel data to HBITMAP
     HBITMAP CreateHBITMAPFromPixels(const uint8_t* pixels,
                                    uint32_t width, uint32_t height,
                                    PixelFormat format);
     
-    // Helper: Translate plugin error to HRESULT
-    HRESULT TranslatePluginError(PluginErrorCode error);
-    
     // Plugin information
     std::wstring plugin_id_;
     std::filesystem::path plugin_path_;
     DecoderInfo info_;
+    std::wstring plugin_name_;     // Storage for info_.name
+    std::wstring plugin_version_;  // Storage for info_.version
+    std::vector<const wchar_t*> extension_ptrs_;  // Storage for info_.supportedExtensions array
+    std::vector<std::wstring> extension_strings_;  // Actual extension string storage
     
     // Execution mode
     IsolationMode isolation_mode_;

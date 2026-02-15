@@ -8,9 +8,8 @@
 #include "../Engine/Decoders/WebPDecoder.h"
 #include "../Engine/Decoders/AVIFDecoder.h"
 #include "../Engine/Decoders/ArchiveDecoder.h"
-// TODO: Complete JXL and HEIF decoder integration with Engine library
-// #include "../Engine/Decoders/JXLDecoder.h"
-// #include "../Engine/Decoders/HEIFDecoder.h"
+// Note: JXL/HEIF decoders are registered by ThumbnailPipeline automatically.
+// No direct includes needed here - the pipeline handles all decoder registration.
 #include "error_logger.h"
 
 namespace DarkThumbs {
@@ -48,8 +47,8 @@ bool EngineAdapter::Initialize() {
             return false;
         }
 
-        // Register all decoders
-        RegisterDecoders();
+        // Note: ThumbnailPipeline automatically registers all built-in decoders
+        // No need to manually register decoders here
 
         m_initialized = true;
 
@@ -75,42 +74,6 @@ void EngineAdapter::Shutdown() {
 
     m_initialized = false;
     DT_LOG_INFO(LogCategory::ENGINE, "Engine adapter shutdown complete");
-}
-
-void EngineAdapter::RegisterDecoders() {
-    if (!m_pipeline) {
-        return;
-    }
-
-    auto& registry = m_pipeline->GetDecoderRegistry();
-
-    // Register image decoder (JPEG, PNG, BMP, GIF, TIFF, etc.)
-    registry.RegisterDecoder(new Engine::ImageDecoder());
-    DT_LOG_DEBUG(LogCategory::ENGINE, "Registered ImageDecoder");
-
-    // Register WebP decoder
-    registry.RegisterDecoder(new Engine::WebPDecoder());
-    DT_LOG_DEBUG(LogCategory::ENGINE, "Registered WebPDecoder");
-
-    // Register AVIF decoder
-    registry.RegisterDecoder(new Engine::AVIFDecoder());
-    DT_LOG_DEBUG(LogCategory::ENGINE, "Registered AVIFDecoder");
-
-    // Register archive decoder (ZIP, RAR, 7z, CBZ, CBR, etc.)
-    registry.RegisterDecoder(new Engine::ArchiveDecoder());
-    DT_LOG_DEBUG(LogCategory::ENGINE, "Registered ArchiveDecoder");
-
-    // TODO: Complete JXL and HEIF decoder integration
-    // These decoders exist but need to be built into the Engine library first
-    // registry.RegisterDecoder(new Engine::JXLDecoder());
-    // DT_LOG_DEBUG(LogCategory::ENGINE, "Registered JXLDecoder");
-    // registry.RegisterDecoder(new Engine::HEIFDecoder());
-    // DT_LOG_DEBUG(LogCategory::ENGINE, "Registered HEIFDecoder");
-
-    // Log decoder statistics
-    size_t decoderCount = registry.GetDecoderCount();
-    DT_LOG_INFO(LogCategory::ENGINE, 
-        std::string("Registered ") + std::to_string(decoderCount) + " decoders");
 }
 
 HRESULT EngineAdapter::GenerateThumbnail(

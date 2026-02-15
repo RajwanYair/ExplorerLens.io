@@ -21,27 +21,44 @@ namespace DarkThumbs {
 namespace Engine {
 
 namespace {
-    // GDI+ initialization helper
+    // GDI+ initialization helper - thread-safe lazy singleton
+    // NOTE: Uses lazy initialization to avoid DLL loading order issues
+    // and static initialization order fiasco. GDI+ is initialized on first
+    // use rather than at DLL load time, ensuring dependencies are ready.
     class GdiplusInit {
     public:
+        static GdiplusInit& Get() {
+            static GdiplusInit instance;  // Thread-safe since C++11
+            return instance;
+        }
+        
+        bool IsInitialized() const { return m_initialized; }
+        
+        // Delete copy/move constructors (singleton pattern)
+        GdiplusInit(const GdiplusInit&) = delete;
+        GdiplusInit& operator=(const GdiplusInit&) = delete;
+        GdiplusInit(GdiplusInit&&) = delete;
+        GdiplusInit& operator=(GdiplusInit&&) = delete;
+        
+    private:
         GdiplusInit() : m_initialized(false), m_token(0) {
             Gdiplus::GdiplusStartupInput input;
-            if (Gdiplus::GdiplusStartup(&m_token, &input, nullptr) == Gdiplus::Ok) {
+            Gdiplus::Status status = Gdiplus::GdiplusStartup(&m_token, &input, nullptr);
+            if (status == Gdiplus::Ok) {
                 m_initialized = true;
             }
+            // Initialization failure handled by IsInitialized() checks
         }
+        
         ~GdiplusInit() {
             if (m_initialized && m_token) {
                 Gdiplus::GdiplusShutdown(m_token);
             }
         }
-        bool IsInitialized() const { return m_initialized; }
-    private:
+        
         bool m_initialized;
         ULONG_PTR m_token;
     };
-    
-    GdiplusInit g_gdiplusInit;
     
     // Get current time in seconds since epoch
     uint64_t GetCurrentTime() {
@@ -244,7 +261,7 @@ bool ThumbnailCache::GetFileMetadata(const wchar_t* filePath, FileMetadata& meta
 }
 
 bool ThumbnailCache::SaveBitmapToFile(HBITMAP hBitmap, const std::wstring& filePath) {
-    if (!hBitmap || !g_gdiplusInit.IsInitialized()) {
+    if (!hBitmap || !GdiplusInit::Get().IsInitialized()) {
         return false;
     }
     
@@ -287,7 +304,7 @@ bool ThumbnailCache::SaveBitmapToFile(HBITMAP hBitmap, const std::wstring& fileP
 }
 
 HBITMAP ThumbnailCache::LoadBitmapFromFile(const std::wstring& filePath) {
-    if (!g_gdiplusInit.IsInitialized()) {
+    if (!GdiplusInit::Get().IsInitialized()) {
         return nullptr;
     }
     
@@ -552,6 +569,40 @@ HRESULT ThumbnailCache::GetStats(uint32_t* outEntryCount, uint32_t* outTotalSize
     }
     
     return S_OK;
+}
+
+//==============================================================================
+// Extended Statistics
+//==============================================================================
+
+void ThumbnailCache::GetDetailedStats(CacheStatistics* outStats) const {
+    if (!outStats) {
+        return;
+    }
+    
+    std::lock_guard<std::mutex> lock(m_mutex);
+    
+    outStats->hitCount = m_hitCount;
+    outStats->missCount = m_missCount;
+    outStats->evictionCount = m_evictionCount;
+    outStats->entryCount = static_cast<uint32_t>(m_entries.size());
+    outStats->totalSizeMB = static_cast<uint32_t>(m_currentSizeBytes / (1024 * 1024));
+    
+    // Calculate hit rate
+    uint64_t totalAccesses = m_hitCount + m_missCount;
+    if (totalAccesses > 0) {
+        outStats->hitRate = static_cast<double>(m_hitCount) / static_cast<double>(totalAccesses);
+    } else {
+        outStats->hitRate = 0.0;
+    }
+}
+
+void ThumbnailCache::ResetStatistics() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    
+    m_hitCount = 0;
+    m_missCount = 0;
+    m_evictionCount = 0;
 }
 
 //==============================================================================

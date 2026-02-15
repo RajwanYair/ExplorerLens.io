@@ -157,7 +157,8 @@ bool PluginHandle::CanDecode(const std::filesystem::path& file_path) const {
         return false;
     }
     
-    std::string path_utf8 = file_path.u8string();
+    auto u8path = file_path.u8string();
+    std::string path_utf8(u8path.begin(), u8path.end());
     return can_decode_(path_utf8.c_str(), nullptr, 0);
 }
 
@@ -195,7 +196,8 @@ PluginErrorCode PluginHandle::GetMetadata(const std::filesystem::path& file_path
         return PLUGIN_ERROR_UNSUPPORTED_FORMAT;
     }
     
-    std::string path_utf8 = file_path.u8string();
+    auto u8path = file_path.u8string();
+    std::string path_utf8(u8path.begin(), u8path.end());
     return get_metadata_(path_utf8.c_str(), nullptr, 0, metadata);
 }
 
@@ -205,7 +207,8 @@ PluginErrorCode PluginHandle::GetThumbnail(const std::filesystem::path& file_pat
         return PLUGIN_ERROR_UNSUPPORTED_FORMAT;
     }
     
-    std::string path_utf8 = file_path.u8string();
+    auto u8path = file_path.u8string();
+    std::string path_utf8(u8path.begin(), u8path.end());
     return get_thumbnail_(path_utf8.c_str(), nullptr, 0, result);
 }
 
@@ -351,7 +354,8 @@ PluginHandle* PluginManager::GetPluginHandle(const std::string& plugin_name) {
 PluginHandle* PluginManager::FindPluginForFile(const std::filesystem::path& file_path) {
     // First try extension lookup (fast path)
     auto ext = file_path.extension().string();
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    std::transform(ext.begin(), ext.end(), ext.begin(), 
+                   [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
     
     auto it = extension_map_.find(ext);
     if (it != extension_map_.end()) {
@@ -372,7 +376,8 @@ PluginHandle* PluginManager::FindPluginForFile(const std::filesystem::path& file
 
 PluginHandle* PluginManager::FindPluginForExtension(const std::string& extension) {
     std::string ext = extension;
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    std::transform(ext.begin(), ext.end(), ext.begin(), 
+                   [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
     
     if (ext.empty() || ext[0] != '.') {
         ext = "." + ext;
@@ -405,7 +410,8 @@ PluginErrorCode PluginManager::DecodeFile(const std::filesystem::path& file_path
     
     // Prepare decode request
     DecodeRequest request = {};
-    std::string path_utf8 = file_path.u8string();
+    auto u8path = file_path.u8string();
+    std::string path_utf8(u8path.begin(), u8path.end());
     request.file_path = path_utf8.c_str();
     request.data = nullptr;
     request.data_size = 0;
@@ -469,10 +475,12 @@ std::unique_ptr<Engine::PluginDecoder> PluginManager::CreateDecoderForFile(
 }
 
 void* PluginManager::PluginAlloc(size_t size, void* user_data) {
+    (void)user_data; // Unused parameter
     return malloc(size);
 }
 
 void PluginManager::PluginFree(void* ptr, void* user_data) {
+    (void)user_data; // Unused parameter
     free(ptr);
 }
 
@@ -496,7 +504,8 @@ void PluginManager::UpdateExtensionMap(PluginHandle* plugin) {
     if (info->supported_extensions) {
         for (size_t i = 0; info->supported_extensions[i] != nullptr; ++i) {
             std::string ext = info->supported_extensions[i];
-            std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+            std::transform(ext.begin(), ext.end(), ext.begin(), 
+                           [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
             extension_map_[ext] = plugin;
         }
     }
@@ -526,7 +535,8 @@ void PluginManager::RemoveFromExtensionMap(const std::string& plugin_name) {
     if (info->supported_extensions) {
         for (size_t i = 0; info->supported_extensions[i] != nullptr; ++i) {
             std::string ext = info->supported_extensions[i];
-            std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+            std::transform(ext.begin(), ext.end(), ext.begin(), 
+                           [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
             extension_map_.erase(ext);
         }
     }

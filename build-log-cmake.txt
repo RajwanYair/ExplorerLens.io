@@ -1,0 +1,65 @@
+MSBuild version 18.3.0-preview-25570-20+708535641 for .NET Framework
+
+MSBuild version 18.3.0-preview-25570-20+708535641 for .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/CMakeLists.txt
+  ThumbnailPipeline.cpp
+  DecoderRegistry.cpp
+  FormatDetector.cpp
+  ImageDecoder.cpp
+  WebPDecoder.cpp
+  AVIFDecoder.cpp
+  ArchiveDecoder.cpp
+  RAWDecoder.cpp
+  JXLDecoder.cpp
+  HEIFDecoder.cpp
+  ICODecoder.cpp
+  TGADecoder.cpp
+  QOIDecoder.cpp
+  PSDDecoder.cpp
+  DDSDecoder.cpp
+  HDRDecoder.cpp
+  PPMDecoder.cpp
+  EXRDecoder.cpp
+  SVGDecoder.cpp
+  VideoDecoder.cpp
+  AudioDecoder.cpp
+  PDFDecoder.cpp
+  DocumentDecoder.cpp
+  FontDecoder.cpp
+  D3D11Renderer.cpp
+  GDIRenderer.cpp
+  ThumbnailCache.cpp
+  PluginManager.cpp
+  PluginDecoder.cpp
+  PluginHostClient.cpp
+  CrashHandler.cpp
+  IsolationModeSelector.cpp
+  SharedMemoryManager.cpp
+  JobObjectManager.cpp
+  PerformanceProfiler.cpp
+  SIMDScaler.cpp
+  EXIFOrientation.cpp
+  DarkThumbsEngine.vcxproj -> C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\build\lib\Release\DarkThumbsEngine.lib
+  Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeLists.txt
+  EngineBenchmark.cpp
+C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\EngineBenchmark.cpp(300,19): warning C4456: declaration of 'iterations' hides previous local declaration [C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\build\Engine\Tests\EngineBenchmark.vcxproj]
+      C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\EngineBenchmark.cpp(237,15):
+      see declaration of 'iterations'
+  
+     Creating library C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/build/lib/Release/EngineBenchmark.lib and object C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/build/lib/Release/EngineBenchmark.exp
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library [C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\build\Engine\Tests\EngineBenchmark.vcxproj]
+  Generating code
+  Finished generating code
+  EngineBenchmark.vcxproj -> C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\build\bin\Release\EngineBenchmark.exe
+  Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeLists.txt
+  EngineTests.cpp
+  test_gpu.cpp
+     Creating library C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/build/lib/Release/EngineTests.lib and object C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/build/lib/Release/EngineTests.exp
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library [C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\build\Engine\Tests\EngineTests.vcxproj]
+  Generating code
+C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\EngineTests.cpp(760): warning C4702: unreachable code [C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\build\Engine\Tests\EngineTests.vcxproj]
+  Finished generating code
+  EngineTests.vcxproj -> C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\build\bin\Release\EngineTests.exe
+  Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/CMakeLists.txt

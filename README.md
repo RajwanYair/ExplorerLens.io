@@ -1,13 +1,13 @@
 # DarkThumbs - GPU-Accelerated Thumbnail Generator
 
-**High-Performance Windows Shell Extension for 31+ File Formats**
+**High-Performance Windows Shell Extension for 130+ File Formats**
 
-DarkThumbs generates thumbnails for comic books, archives, modern images, RAW photos, and videos using **DirectX 11 GPU acceleration**.
+DarkThumbs generates thumbnails for comic books, archives, modern images, RAW photos, and videos using **DirectX 11 GPU acceleration** and **SIMD-optimized processing**.
 
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
 ![Platform](https://img.shields.io/badge/Platform-x64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-5.2.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-6.0.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
@@ -16,30 +16,57 @@ DarkThumbs generates thumbnails for comic books, archives, modern images, RAW ph
 
 **Getting Started:**
 
-- [Build Guide](docs/BUILD_GUIDE.md) - Complete build instructions
-- [Installation Testing Guide](docs/INSTALLATION_TESTING_GUIDE.md) - Installation and testing procedures
-- [Quick Setup](docs/QUICK_SETUP.md) - Fast start guide
-- **[Current Status](READY_FOR_TESTING.md)** - ✅ Ready for installation testing
+- [Build Guide](docs/build/BUILD_GUIDE.md) - Complete build instructions
+- [Quick Setup](docs/getting-started/QUICK_SETUP.md) - Fast start guide
+- [Installation Testing Guide](docs/getting-started/INSTALLATION_TESTING_GUIDE.md) - Installation and testing procedures
+
+**Project Organization:**
+
+- [Project Structure](PROJECT_STRUCTURE.md) - Complete directory organization
+- [ROADMAP](ROADMAP.md) - Development roadmap and milestones
+- [Documentation Index](docs/INDEX.md) - Complete documentation index
 
 **Development:**
 
-- [ROADMAP](ROADMAP.md) - Development roadmap and milestones
+- [Development Guide](docs/development/README.md) - Developer documentation
 - [Contributing](.github/CONTRIBUTING.md) - How to contribute
-- [Project Structure](docs/PROJECT_STRUCTURE.md) - Architecture overview
-- [Build Scripts Reference](docs/BUILD_SCRIPTS_REFERENCE.md) - Build automation reference
+- [Coding Standards](.github/standards/CODING_STANDARDS.md) - Code style and conventions
+- [Build Scripts](build-scripts/README.md) - Build automation reference
 
 ---
 
 ## ✨ Features
 
-### Supported Formats (31+)
+### Supported Formats (130+ formats)
 
+#### Core Image Formats (✅ Fully Supported)
+- **Standard:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tiff`, `.tif`
+- **Modern:** `.webp` (WebP), `.avif` (AV1 Image), `.jxl` (JPEG XL) ✅
+- **Mobile:** `.heif`, `.heic`, `.hif`, `.avci`, `.avcs` (Apple HEIC/HEIF) ✅
+- **Implementation:** JXL via libjxl 0.11.1 | HEIF via Windows WIC (hardware-accelerated)
+
+#### Archives & Comic Books (✅ Fully Supported)
 - **Comic Books:** `.cbz`, `.cbr`, `.cb7`, `.cbt`
 - **E-Books:** `.epub`, `.mobi`, `.azw`, `.azw3`, `.fb2`
-- **Archives:** `.zip`, `.rar`, `.7z`, `.tar`
-- **Modern Images:** `.webp`, `.heif`, `.heic`, `.avif`, `.tif`, `.svg`, `.dng`
-- **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`
-- **Videos:** `.mp4`, `.avi`, `.mkv`, `.mov`, `.wmv`, `.flv`, `.webm`
+- **Archives:** `.zip`, `.rar`, `.7z`, `.tar`, `.gz`, `.bz2`, `.xz`
+
+#### Professional Formats (✅ RAW Photos & Modern Formats)
+- **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.dng`, `.rw2`, `.raf`, `.pef`, `.dcr`, `.mrw`, `.x3f` and 100+ more camera formats (✅ LibRaw 0.21.2)
+  - **Features:** Embedded JPEG thumbnail extraction (< 10ms), full RAW decode with demosaicing, EXIF orientation support, auto white balance
+  - **Cameras:** Canon, Nikon, Sony, Olympus, Panasonic, Fujifilm, Pentax, Adobe DNG, Leica, Samsung, Hasselblad, Phase One, Sigma
+- **Modern Images:** `.jxl` (JPEG XL) via libjxl 0.11.1, `.heif`/`.heic` (HEIF/HEIC) via WIC with hardware acceleration
+  - **JXL Features:** Next-gen format support, better compression than WebP, wide color gamut
+  - **HEIF Features:** Apple iPhone photos (iOS 11+), HDR support, 16-bit depth, wide color
+- **Design:** `.psd`, `.psb` (Photoshop) ⏳, `.svg` (vector graphics) ⏳
+- **HDR:** `.exr` (OpenEXR), `.hdr` (Radiance RGBE)
+- **Texture:** `.dds` (DirectX textures)
+- **Legacy:** `.tga` (Targa), `.ico` (icons), `.jp2` (JPEG2000)
+
+#### Video Formats (✅ Via DirectShow)
+- **Common:** `.mp4`, `.avi`, `.mkv`, `.mov`, `.wmv`, `.flv`, `.webm`
+
+**Legend:**  
+✅ = Fully implemented | 🔄 = In progress | 📋 = Planned
 
 ### Performance
 
@@ -66,7 +93,7 @@ cd DarkThumbs
 RUN-BUILD.bat
 ```
 
-See [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md) for detailed instructions.
+See [Build Guide](docs/build/BUILD_GUIDE.md) for detailed instructions.
 
 ### Install
 
@@ -142,7 +169,7 @@ del /f /s /q "%LocalAppData%\Microsoft\Windows\Explorer\thumbcache_*.db"
 reg query "HKCR\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}\InprocServer32"
 ```
 
-See [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md) for more troubleshooting.
+See [Build Guide](docs/build/BUILD_GUIDE.md) for more troubleshooting.
 
 ---
 

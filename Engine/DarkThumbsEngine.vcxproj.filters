@@ -22,6 +22,15 @@
     <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Decoders\ArchiveDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Decoders\ICODecoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Decoders\TGADecoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Decoders\QOIDecoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\GPU\D3D11Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -32,6 +41,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Utils\PerformanceProfiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Utils\SIMDScaler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -52,6 +64,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Core\ICacheProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Core\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Pipeline\ThumbnailPipeline.h">
@@ -75,6 +90,15 @@
     <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Decoders\ArchiveDecoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Decoders\ICODecoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Decoders\TGADecoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Decoders\QOIDecoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\GPU\D3D11Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -85,6 +109,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Utils\PerformanceProfiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Utils\SIMDScaler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,14 @@
 //==============================================================================
 // DarkThumbs Engine - Common Types & Structures
+// Version: 1.0.0
 // Copyright (c) 2026 - DarkThumbs Project
+//
+// This file defines core types, enumerations, and structures used throughout
+// the DarkThumbs thumbnail generation engine. All decoder implementations
+// and pipeline components depend on these foundational types.
+//
+// Thread Safety: All types defined here are thread-safe for read operations.
+// Structures with mutable fields must be synchronized externally.
 //==============================================================================
 
 #pragma once
@@ -10,6 +18,15 @@
 
 namespace DarkThumbs {
 namespace Engine {
+
+//==============================================================================
+// Version Information
+//==============================================================================
+
+#define DARKTHUMBS_ENGINE_VERSION_MAJOR 1
+#define DARKTHUMBS_ENGINE_VERSION_MINOR 0
+#define DARKTHUMBS_ENGINE_VERSION_PATCH 0
+#define DARKTHUMBS_ENGINE_VERSION "1.0.0"
 
 //==============================================================================
 // Forward Declarations
@@ -24,29 +41,40 @@ class IGPURenderer;
 // Enumerations
 //==============================================================================
 
-/// Supported format types
+/// Supported format types for thumbnail generation
+/// 
+/// Each format type corresponds to one or more file extensions.
+/// Decoders register themselves to handle specific format types.
 enum class FormatType : uint32_t
 {
-    Unknown = 0,
+    Unknown = 0,          ///< Unknown or unsupported format
     
     // Image Formats
-    ImageJPEG,
-    ImagePNG,
-    ImageBMP,
-    ImageGIF,
-    ImageTIFF,
-    ImageWEBP,
-    ImageAVIF,
-    ImageHEIF,
-    ImageJXL,
-    ImageICO,
-    ImageRAW,
+    ImageJPEG,            ///< JPEG (.jpg, .jpeg)
+    ImagePNG,             ///< PNG (.png) with alpha support
+    ImageBMP,             ///< Windows Bitmap (.bmp)
+    ImageGIF,             ///< GIF (.gif) - first frame only
+    ImageTIFF,            ///< TIFF (.tif, .tiff) multi-page support
+    ImageWEBP,            ///< WebP (.webp) modern image format
+    ImageAVIF,            ///< AVIF (.avif) AV1-based format
+    ImageHEIF,            ///< HEIF/HEIC (.heif, .heic) iPhone photos
+    ImageJXL,             ///< JPEG XL (.jxl) next-gen compression
+    ImageICO,             ///< Icon (.ico)
+    ImageRAW,             ///< Camera RAW (.cr2, .nef, .arw, .dng, etc.)
+    ImagePSD,             ///< Adobe Photoshop (.psd, .psb)
+    ImageDDS,             ///< DirectDraw Surface (.dds) game textures
+    ImageHDR,             ///< Radiance RGBE (.hdr) HDR images
+    ImageEXR,             ///< OpenEXR (.exr) HDR/VFX images
+    ImagePPM,             ///< Netpbm (.ppm, .pgm, .pbm, .pnm, .pfm)
+    ImageTGA,             ///< Targa (.tga) already decoded by TGADecoder
+    ImageQOI,             ///< Quite OK Image (.qoi) already decoded
+    ImageSVG,             ///< SVG vector (.svg, .svgz)
     
-    // Archive Formats (with images inside)
-    ArchiveZIP,        // .zip, .cbz
-    ArchiveRAR,        // .rar, .cbr
-    Archive7Z,         // .7z, .cb7
-    ArchiveTAR,        // .tar, .cbt
+    // Archive Formats (containing images)
+    ArchiveZIP,           ///< ZIP archives (.zip, .cbz)
+    ArchiveRAR,           ///< RAR archives (.rar, .cbr)
+    Archive7Z,            ///< 7-Zip archives (.7z, .cb7)
+    ArchiveTAR,           ///< TAR archives (.tar, .cbt)
     
     // Document Formats
     DocumentPDF,
@@ -60,6 +88,9 @@ enum class FormatType : uint32_t
     // Audio Formats (with album art)
     AudioMP3,
     AudioFLAC,
+    
+    // Font Formats
+    FontTTF,              ///< TrueType/OpenType fonts (.ttf, .otf, .woff, .ttc)
 };
 
 /// Thumbnail generation flags

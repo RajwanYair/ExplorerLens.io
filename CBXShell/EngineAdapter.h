@@ -61,9 +61,6 @@ public:
 private:
     std::unique_ptr<Engine::ThumbnailPipeline> m_pipeline;
     bool m_initialized;
-
-    /// Register all built-in decoders with the pipeline
-    void RegisterDecoders();
 };
 
 } // namespace DarkThumbs
