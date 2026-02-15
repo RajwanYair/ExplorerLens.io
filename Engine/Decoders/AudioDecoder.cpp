@@ -108,6 +108,25 @@ HRESULT AudioDecoder::ExtractAlbumArt(const wchar_t* filePath, HBITMAP* phBitmap
         if (SUCCEEDED(hr) && *phBitmap) return S_OK;
     }
 
+    // Try OGG Vorbis/Opus
+    if (fileSize >= 4 && data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S') {
+        HRESULT hr = ExtractAlbumArtOGG(data.get(), fileSize, phBitmap);
+        if (SUCCEEDED(hr) && *phBitmap) return S_OK;
+    }
+
+    // Try M4A/AAC (ftyp signature)
+    if (fileSize >= 12 && data[4] == 'f' && data[5] == 't' && data[6] == 'y' && data[7] == 'p') {
+        HRESULT hr = ExtractAlbumArtM4A(data.get(), fileSize, phBitmap);
+        if (SUCCEEDED(hr) && *phBitmap) return S_OK;
+    }
+
+    // Try WMA using Property System
+    const wchar_t* ext = PathFindExtensionW(filePath);
+    if (ext && _wcsicmp(ext, L".wma") == 0) {
+        HRESULT hr = ExtractAlbumArtWMA(filePath, phBitmap);
+        if (SUCCEEDED(hr) && *phBitmap) return S_OK;
+    }
+
     // Fallback to Windows Property System (handles WMA, M4A, etc.)
     return ExtractAlbumArtPropertySystem(filePath, phBitmap);
 }
@@ -239,6 +258,66 @@ HRESULT AudioDecoder::ExtractAlbumArtFLAC(const uint8_t* data, size_t size, HBIT
 
     return E_FAIL;
 }
+
+// ============================================================================
+// OGG Album Art Extraction (Sprint 7)
+// ============================================================================
+
+HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size, HBITMAP* phBitmap) {
+    // OGG uses Vorbis Comments with METADATA_BLOCK_PICTURE
+    // For simplicity, this is a stub - full implementation would parse Vorbis comment headers
+    // and extract base64-encoded FLAC picture block
+    (void)data; (void)size; (void)phBitmap;
+    return E_NOTIMPL; // Fallback to Property System
+}
+
+// ============================================================================
+// M4A/AAC Album Art Extraction (Sprint 7)
+// ============================================================================
+
+HRESULT AudioDecoder::ExtractAlbumArtM4A(const uint8_t* data, size_t size, HBITMAP* phBitmap) {
+    // M4A uses MP4 container with 'covr' atom in 'meta' > 'ilst'
+    // Parse atom hierarchy to find cover art
+    size_t offset = 0;
+    
+    while (offset + 8 < size) {
+        uint32_t atomSize = (data[offset] << 24) | (data[offset + 1] << 16) |
+                           (data[offset + 2] << 8) | data[offset + 3];
+        
+        if (atomSize < 8 || offset + atomSize > size) break;
+        
+        // Check for 'covr' atom
+        if (offset + 8 <= size && 
+            data[offset + 4] == 'c' && data[offset + 5] == 'o' &&
+            data[offset + 6] == 'v' && data[offset + 7] == 'r') {
+            
+            // Skip atom header and data header (typically 16 bytes)
+            size_t imgOffset = offset + 16;
+            if (imgOffset < offset + atomSize) {
+                size_t imgSize = atomSize - 16;
+                *phBitmap = CreateBitmapFromImageData(data + imgOffset, imgSize);
+                if (*phBitmap) return S_OK;
+            }
+        }
+        
+        offset += atomSize;
+    }
+    
+    return E_FAIL;
+}
+
+// ============================================================================
+// WMA Album Art Extraction (Sprint 7)
+// ============================================================================
+
+HRESULT AudioDecoder::ExtractAlbumArtWMA(const wchar_t* filePath, HBITMAP* phBitmap) {
+    // WMA uses Property System - delegate to PropertySystem method
+    return ExtractAlbumArtPropertySystem(filePath, phBitmap);
+}
+
+// ============================================================================
+// Property System Album Art Extraction
+// ============================================================================
 
 HRESULT AudioDecoder::ExtractAlbumArtPropertySystem(const wchar_t* filePath, HBITMAP* phBitmap) {
     // Use Windows Property System to get thumbnail
@@ -456,6 +535,65 @@ bool AudioDecoder::IsAudioFormat(const wchar_t* path) {
         if (_wcsicmp(ext, m_extensions[i]) == 0) return true;
     }
     return false;
+}
+
+// ============================================================================
+// Audio Metadata Extraction (Sprint 7)
+// ============================================================================
+
+bool AudioDecoder::GetAudioMetadata(const wchar_t* filePath, AudioMetadata& metadata) {
+    if (!filePath) return false;
+
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    bool comInit = SUCCEEDED(hr) || hr == S_FALSE || hr == RPC_E_CHANGED_MODE;
+    if (!comInit) return false;
+
+    IPropertyStore* pStore = nullptr;
+    hr = SHGetPropertyStoreFromParsingName(filePath, nullptr, GPS_DEFAULT, IID_PPV_ARGS(&pStore));
+    
+    if (SUCCEEDED(hr) && pStore) {
+        PROPVARIANT pv;
+        
+        // Artist
+        PropVariantInit(&pv);
+        if (SUCCEEDED(pStore->GetValue(PKEY_Music_Artist, &pv)) && pv.vt == VT_LPWSTR) {
+            metadata.artist = pv.pwszVal;
+        }
+        PropVariantClear(&pv);
+        
+        // Album
+        PropVariantInit(&pv);
+        if (SUCCEEDED(pStore->GetValue(PKEY_Music_AlbumTitle, &pv)) && pv.vt == VT_LPWSTR) {
+            metadata.album = pv.pwszVal;
+        }
+        PropVariantClear(&pv);
+        
+        // Title
+        PropVariantInit(&pv);
+        if (SUCCEEDED(pStore->GetValue(PKEY_Title, &pv)) && pv.vt == VT_LPWSTR) {
+            metadata.title = pv.pwszVal;
+        }
+        PropVariantClear(&pv);
+        
+        // Duration (in 100-nanosecond units)
+        PropVariantInit(&pv);
+        if (SUCCEEDED(pStore->GetValue(PKEY_Media_Duration, &pv)) && pv.vt == VT_UI8) {
+            metadata.durationSec = static_cast<uint32_t>(pv.uhVal.QuadPart / 10000000);
+        }
+        PropVariantClear(&pv);
+        
+        // Bitrate (in bits per second)
+        PropVariantInit(&pv);
+        if (SUCCEEDED(pStore->GetValue(PKEY_Audio_EncodingBitrate, &pv)) && pv.vt == VT_UI4) {
+            metadata.bitrate = pv.ulVal;
+        }
+        PropVariantClear(&pv);
+        
+        pStore->Release();
+    }
+
+    CoUninitialize();
+    return !metadata.artist.empty() || !metadata.album.empty() || !metadata.title.empty();
 }
 
 } // namespace Engine

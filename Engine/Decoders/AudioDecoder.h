@@ -34,11 +34,24 @@ public:
     bool SupportsGPU() const override { return false; }
     bool IsArchiveDecoder() const override { return false; }
 
+    // Audio metadata extraction (Sprint 7)
+    struct AudioMetadata {
+        std::wstring artist;
+        std::wstring album;
+        std::wstring title;
+        uint32_t durationSec = 0;
+        uint32_t bitrate = 0;
+    };
+    bool GetAudioMetadata(const wchar_t* filePath, AudioMetadata& metadata);
+
 private:
     // Album art extraction
     HRESULT ExtractAlbumArt(const wchar_t* filePath, HBITMAP* phBitmap);
     HRESULT ExtractAlbumArtMP3(const uint8_t* data, size_t size, HBITMAP* phBitmap);
     HRESULT ExtractAlbumArtFLAC(const uint8_t* data, size_t size, HBITMAP* phBitmap);
+    HRESULT ExtractAlbumArtOGG(const uint8_t* data, size_t size, HBITMAP* phBitmap);
+    HRESULT ExtractAlbumArtM4A(const uint8_t* data, size_t size, HBITMAP* phBitmap);
+    HRESULT ExtractAlbumArtWMA(const wchar_t* filePath, HBITMAP* phBitmap);
     HRESULT ExtractAlbumArtPropertySystem(const wchar_t* filePath, HBITMAP* phBitmap);
 
     // Waveform fallback
