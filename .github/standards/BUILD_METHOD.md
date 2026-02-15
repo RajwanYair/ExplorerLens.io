@@ -10,10 +10,26 @@
 ### Supported Configurations
 - **Platform**: x64 ONLY (32-bit builds are not supported)
 - **Configurations**: Debug, Release
-- **Toolchain**: Visual Studio 2022 Build Tools (v143), MSVC 19.3+
+- **Toolchain**: Visual Studio 2026 Build Tools (v145), MSVC 19.3+
 - **Build Systems**: 
   - MSBuild for shell extension (CBXShell.sln)
   - CMake + Ninja for Engine library
+
+### Tool Paths (Auto-detected on this machine)
+```powershell
+# Visual Studio Build Tools 18.3.0 (2026)
+$VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
+$MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
+$vcvarsall = "$VSPath\VC\Auxiliary\Build\vcvarsall.bat"
+
+# CMake 4.2.3 (via Scoop)
+$CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
+
+# Ninja 1.13.2 (via Scoop)
+$Ninja = "C:\Users\ryair\scoop\shims\ninja.exe"
+```
+
+**Note:** Tools are auto-detected by `build-scripts\Find-All-Tools.ps1`. If not in PATH, the script searches standard installation locations.
 
 ### Compiler Flags
 **Release configuration:**
@@ -141,7 +157,7 @@ After each build:
 
 ## External Libraries
 
-See [THIRD_PARTY.md](../docs/THIRD_PARTY.md) for dependency build instructions.
+See [LIBRARY_INVENTORY.md](../../external/LIBRARY_INVENTORY.md) for complete version listing.
 
 **Required x64 libraries:**
 - zlib 1.3.1
@@ -149,7 +165,14 @@ See [THIRD_PARTY.md](../docs/THIRD_PARTY.md) for dependency build instructions.
 - zstd 1.5.7
 - libwebp 1.5.0
 - libavif 1.3.0
+- dav1d 1.5.1
 - libjxl 0.11.1
 - minizip-ng 4.0.10
+- lzma 25.00 (LZMA SDK)
+- xz 5.6.3
+- bzip2 1.0.8
+- unrar 7.2.2
+- libarchive 3.7.6
 
-All libraries must be built with `/MT` (static runtime) to match shell extension.
+**Important:** All libraries MUST be built with `-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"` (dynamic CRT `/MD`) 
+to prevent LIBCMT conflicts. See [REFACTOR_PLAN.md](../../REFACTOR_PLAN.md) for rebuild instructions.
