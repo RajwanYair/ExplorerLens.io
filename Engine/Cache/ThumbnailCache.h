@@ -75,6 +75,21 @@ public:
     HRESULT Initialize(uint32_t maxSizeMB = 500);
     void Shutdown();
 
+    // Sprint 21: Enhanced cache configuration
+    enum class CompressionLevel {
+        None = 0,         // No compression (fastest, largest size)
+        Fast = 3,         // Fast compression (good for testing)
+        Balanced = 6,     // Default PNG compression
+        Maximum = 9       // Maximum compression (slowest, smallest size)
+    };
+    
+    void SetCompressionLevel(CompressionLevel level);
+    CompressionLevel GetCompressionLevel() const { return m_compressionLevel; }
+    
+    // Cache optimization
+    HRESULT OptimizeCache();  // Recompress existing entries with current settings
+    HRESULT DefragmentCache(); // Remove gaps, reorganize entries
+    
     // Extended statistics (beyond ICacheProvider interface)
     struct CacheStatistics {
         uint64_t hitCount;
@@ -124,6 +139,7 @@ private:
     uint32_t m_maxSizeMB;
     uint64_t m_currentSizeBytes;
     std::wstring m_cacheDirectory;
+    CompressionLevel m_compressionLevel;
     
     // Cache metadata (in-memory tracking)
     mutable std::mutex m_mutex;

@@ -673,6 +673,54 @@ HRESULT D3D11Renderer::RecoverDevice() {
     return hr;
 }
 
+//==============================================================================
+// Batch Processing (Sprint 20)
+//==============================================================================
+
+HRESULT D3D11Renderer::RenderThumbnailBatch(BatchRenderRequest* requests, uint32_t requestCount) {
+    if (!requests || requestCount == 0) {
+        return E_INVALIDARG;
+    }
+    
+    if (!m_initialized || !m_gpuAvailable) {
+        // Fallback: process sequentially without GPU
+        for (uint32_t i = 0; i < requestCount; ++i) {
+            requests[i].result = E_FAIL; // Would call CPU fallback in real implementation
+        }
+        return S_FALSE;
+    }
+    
+    HRESULT overallResult = S_OK;
+    uint32_t successCount = 0;
+    
+    // Process batch with GPU (can be parallelized further with command lists)
+    for (uint32_t i = 0; i < requestCount; ++i) {
+        auto& req = requests[i];
+        
+        HRESULT hr = RenderThumbnail(
+            req.imageData, req.imageWidth, req.imageHeight,
+            req.thumbWidth, req.thumbHeight, req.outBitmap
+        );
+        
+        req.result = hr;
+        
+        if (SUCCEEDED(hr)) {
+            successCount++;
+        } else {
+            overallResult = S_FALSE; // Partial success
+        }
+    }
+    
+    // Update statistics
+    {
+        std::lock_guard<std::mutex> lock(m_statsMutex);
+        m_totalOperations += requestCount;
+        m_gpuOperations += successCount;
+    }
+    
+    return (successCount == requestCount) ? S_OK : overallResult;
+}
+
 } // namespace Engine
 } // namespace DarkThumbs
 

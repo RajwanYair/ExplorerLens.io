@@ -41,6 +41,19 @@ public:
     HRESULT ScaleBitmap(HBITMAP hSource, uint32_t targetWidth, uint32_t targetHeight,
                        HBITMAP* phResult);
     
+    // Sprint 20: Batch processing support
+    struct BatchRenderRequest {
+        const uint8_t* imageData;
+        uint32_t imageWidth;
+        uint32_t imageHeight;
+        uint32_t thumbWidth;
+        uint32_t thumbHeight;
+        HBITMAP* outBitmap;
+        HRESULT result;
+    };
+    
+    HRESULT RenderThumbnailBatch(BatchRenderRequest* requests, uint32_t requestCount);
+    
     // Device status
     bool CheckDeviceStatus();
     HRESULT RecoverDevice();

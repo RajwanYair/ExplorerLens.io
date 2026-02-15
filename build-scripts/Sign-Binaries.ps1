@@ -14,6 +14,12 @@ param(
     [string]$TimestampServer = "http://timestamp.digicert.com",
     [string]$Configuration = "Release",
     [switch]$VerifyOnly,
+    [switch]$UseAzureCodeSigning,
+    [string]$AzureKeyVaultUrl = "",
+    [string]$AzureCertificateName = "",
+    [switch]$GenerateChecksums,
+    [switch]$TagRelease,
+    [string]$ReleaseVersion = "",
     [switch]$Help
 )
 
@@ -302,6 +308,96 @@ foreach ($binary in $BinariesToSign) {
     }
 
     Write-Host ""
+}
+
+#==============================================================================
+# Sprint 24: Enhanced Signing Features
+#==============================================================================
+
+# Generate SHA-256 checksums for all signed binaries
+if ($GenerateChecksums) {
+    Write-Host ""
+    Write-Host "=== Generating SHA-256 Checksums ===" -ForegroundColor Cyan
+    
+    $checksumFile = Join-Path $PSScriptRoot "..\SHA256SUMS.txt"
+    $checksums = @()
+    
+    foreach ($file in $filesToSign) {
+        if (Test-Path $file.Path) {
+            try {
+                $hash = (Get-FileHash -Path $file.Path -Algorithm SHA256).Hash
+                $relativePath = (Resolve-Path -Path $file.Path -Relative).TrimStart(".\")
+                $checksums += "$hash  $relativePath"
+                
+                Write-Host "  $($file.Name): " -NoNewline
+                Write-Host $hash -ForegroundColor Gray
+            }
+            catch {
+                Write-Host "  FAILED: $($file.Name)" -ForegroundColor Red
+            }
+        }
+    }
+    
+    # Write checksums file
+    $checksums | Out-File -FilePath $checksumFile -Encoding UTF8
+    Write-Host ""
+    Write-Host "✓ Checksums written to: $checksumFile" -ForegroundColor Green
+}
+
+# Create Git release tag
+if ($TagRelease -and $ReleaseVersion) {
+    Write-Host ""
+    Write-Host "=== Creating Release Tag ===" -ForegroundColor Cyan
+    
+    try {
+        # Check if git is available
+        $gitVersion = (git --version 2>&1)
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "WARNING: Git not found, skipping release tagging" -ForegroundColor Yellow
+        }
+        else {
+            # Create annotated tag
+            $tagName = "v$ReleaseVersion"
+            $tagMessage = "Release $ReleaseVersion - Signed binaries"
+            
+            Write-Host "  Creating tag: $tagName" -ForegroundColor White
+            
+            git tag -a $tagName -m $tagMessage 2>&1 | Out-Null
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✓ Tag created: $tagName" -ForegroundColor Green
+                Write-Host "  Push with: git push origin $tagName" -ForegroundColor Gray
+            }
+            else {
+                Write-Host "WARNING: Tag creation failed (may already exist)" -ForegroundColor Yellow
+            }
+        }
+    }
+    catch {
+        Write-Host "WARNING: Release tagging failed: $_" -ForegroundColor Yellow
+    }
+}
+
+# Azure Code Signing support (future enhancement)
+if ($UseAzureCodeSigning) {
+    Write-Host ""
+    Write-Host "=== Azure Code Signing ===" -ForegroundColor Cyan
+    
+    if (-not $AzureKeyVaultUrl -or -not $AzureCertificateName) {
+        Write-Host "ERROR: Azure Code Signing requires -AzureKeyVaultUrl and -AzureCertificateName" -ForegroundColor Red
+        exit 1
+    }
+    
+    Write-Host "Azure Key Vault: $AzureKeyVaultUrl" -ForegroundColor White
+    Write-Host "Certificate: $AzureCertificateName" -ForegroundColor White
+    Write-Host ""
+    Write-Host "NOTE: Azure Code Signing requires:" -ForegroundColor Yellow
+    Write-Host "  1. Azure CLI installed (az login)" -ForegroundColor Yellow
+    Write-Host "  2. Azure SignTool extension" -ForegroundColor Yellow
+    Write-Host "  3. Key Vault access permissions" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "SKIPPED: Azure Code Signing not yet implemented" -ForegroundColor Yellow
+    Write-Host "         Use standard code signing for now" -ForegroundColor Yellow
 }
 
 #==============================================================================
