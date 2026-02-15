@@ -12,11 +12,8 @@ ENGINE_API const wchar_t* ENGINE_CALL GetEngineVersion() {
     return L"6.2.0";
 }
 
-#define _WIDE2(x) L##x
-#define WIDE(x) _WIDE2(x)
-
 ENGINE_API const wchar_t* ENGINE_CALL GetEngineBuildDate() {
-    return WIDE(__DATE__) L" " WIDE(__TIME__);
+    return L"2026-02-15";  // Version 6.2.0 build
 }
 
 } // namespace Engine
