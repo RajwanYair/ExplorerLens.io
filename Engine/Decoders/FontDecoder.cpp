@@ -10,12 +10,18 @@
 #include <shlwapi.h>
 #include <shobjidl.h>
 #include <thumbcache.h>
+#include <d2d1.h>
+#include <dwrite.h>
+#include <wincodec.h>
 #include <cwchar>
 #include <algorithm>
 #include <string>
 
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "dwrite.lib")
+#pragma comment(lib, "windowscodecs.lib")
 
 namespace DarkThumbs {
 namespace Engine {
@@ -43,9 +49,15 @@ HRESULT FontDecoder::Decode(const ThumbnailRequest& request, ThumbnailResult& re
     result.height = 0;
     if (!request.filePath) return E_INVALIDARG;
 
-    // Try Shell font thumbnail (Windows has built-in font previewer)
-    HRESULT hr = ExtractFontPreviewShell(request.filePath, request.width,
-                                          request.height, &result.hBitmap);
+    // Try DirectWrite font rendering first
+    HRESULT hr = RenderFontPreview(request.filePath, request.width,
+                                   request.height, &result.hBitmap);
+
+    // Try Shell font thumbnail if DirectWrite failed
+    if (FAILED(hr) || !result.hBitmap) {
+        hr = ExtractFontPreviewShell(request.filePath, request.width,
+                                     request.height, &result.hBitmap);
+    }
 
     // Fallback: placeholder
     if (FAILED(hr) || !result.hBitmap) {
@@ -76,6 +88,205 @@ DecoderInfo FontDecoder::GetInfo() const {
 
 const wchar_t** FontDecoder::GetSupportedExtensions() const {
     return const_cast<const wchar_t**>(m_extensions);
+}
+
+// ============================================================================
+// DirectWrite Font Preview Rendering
+// ============================================================================
+
+HRESULT FontDecoder::RenderFontPreview(const wchar_t* filePath, uint32_t width,
+                                       uint32_t height, HBITMAP* phBitmap) {
+    if (!phBitmap) return E_INVALIDARG;
+    *phBitmap = nullptr;
+
+    // Initialize COM
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    bool comInit = SUCCEEDED(hr) || hr == S_FALSE || hr == RPC_E_CHANGED_MODE;
+    if (!comInit) return hr;
+
+    // Create DirectWrite factory
+    IDWriteFactory* pDWriteFactory = nullptr;
+    hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
+                              reinterpret_cast<IUnknown**>(&pDWriteFactory));
+    if (FAILED(hr)) {
+        CoUninitialize();
+        return hr;
+    }
+
+    // Create custom font collection from file
+    IDWriteFontFile* pFontFile = nullptr;
+    hr = pDWriteFactory->CreateFontFileReference(filePath, nullptr, &pFontFile);
+    if (FAILED(hr)) {
+        pDWriteFactory->Release();
+        CoUninitialize();
+        return hr;
+    }
+
+    // Analyze font file
+    BOOL isSupportedFontType = FALSE;
+    DWRITE_FONT_FILE_TYPE fontFileType;
+    DWRITE_FONT_FACE_TYPE fontFaceType;
+    UINT32 numberOfFaces = 0;
+    hr = pFontFile->Analyze(&isSupportedFontType, &fontFileType, &fontFaceType, &numberOfFaces);
+    if (FAILED(hr) || !isSupportedFontType) {
+        pFontFile->Release();
+        pDWriteFactory->Release();
+        CoUninitialize();
+        return E_FAIL;
+    }
+
+    // Create font face from file
+    IDWriteFontFile* fontFiles[] = { pFontFile };
+    IDWriteFontFace* pFontFace = nullptr;
+    hr = pDWriteFactory->CreateFontFace(fontFaceType, 1, fontFiles, 0,
+                                        DWRITE_FONT_SIMULATIONS_NONE, &pFontFace);
+    pFontFile->Release();
+    if (FAILED(hr)) {
+        pDWriteFactory->Release();
+        CoUninitialize();
+        return hr;
+    }
+
+    // Get font metrics for rendering
+    DWRITE_FONT_METRICS fontMetrics;
+    pFontFace->GetMetrics(&fontMetrics);
+
+    // Create Direct2D factory
+    ID2D1Factory* pD2DFactory = nullptr;
+    hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &pD2DFactory);
+    if (FAILED(hr)) {
+        pFontFace->Release();
+        pDWriteFactory->Release();
+        CoUninitialize();
+        return hr;
+    }
+
+    // Create WIC bitmap
+    IWICImagingFactory* pWICFactory = nullptr;
+    hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER,
+                          IID_PPV_ARGS(&pWICFactory));
+    if (FAILED(hr)) {
+        pD2DFactory->Release();
+        pFontFace->Release();
+        pDWriteFactory->Release();
+        CoUninitialize();
+        return hr;
+    }
+
+    IWICBitmap* pWICBitmap = nullptr;
+    hr = pWICFactory->CreateBitmap(width, height, GUID_WICPixelFormat32bppPBGRA,
+                                    WICBitmapCacheOnDemand, &pWICBitmap);
+    if (FAILED(hr)) {
+        pWICFactory->Release();
+        pD2DFactory->Release();
+        pFontFace->Release();
+        pDWriteFactory->Release();
+        CoUninitialize();
+        return hr;
+    }
+
+    // Create D2D render target
+    ID2D1RenderTarget* pRenderTarget = nullptr;
+    D2D1_RENDER_TARGET_PROPERTIES rtProps = D2D1::RenderTargetProperties(
+        D2D1_RENDER_TARGET_TYPE_DEFAULT,
+        D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
+        0, 0, D2D1_RENDER_TARGET_USAGE_NONE, D2D1_FEATURE_LEVEL_DEFAULT);
+    hr = pD2DFactory->CreateWicBitmapRenderTarget(pWICBitmap, rtProps, &pRenderTarget);
+    if (FAILED(hr)) {
+        pWICBitmap->Release();
+        pWICFactory->Release();
+        pD2DFactory->Release();
+        pFontFace->Release();
+        pDWriteFactory->Release();
+        CoUninitialize();
+        return hr;
+    }
+
+    // Begin drawing
+    pRenderTarget->BeginDraw();
+    pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+
+    // Create text format
+    IDWriteTextFormat* pTextFormat = nullptr;
+    float fontSize = height * 0.35f;
+    hr = pDWriteFactory->CreateTextFormat(L"Arial", nullptr, DWRITE_FONT_WEIGHT_NORMAL,
+                                          DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+                                          fontSize, L"en-us", &pTextFormat);
+    if (SUCCEEDED(hr)) {
+        pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+        pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+        // Render sample text using custom font face
+        const wchar_t* sampleText = L"Aa Bb Cc 123";
+        ID2D1SolidColorBrush* pBrush = nullptr;
+        pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black, 1.0f), &pBrush);
+
+        // Create text layout with custom font
+        IDWriteTextLayout* pTextLayout = nullptr;
+        hr = pDWriteFactory->CreateTextLayout(sampleText, wcslen(sampleText), pTextFormat,
+                                              static_cast<float>(width), static_cast<float>(height),
+                                              &pTextLayout);
+        if (SUCCEEDED(hr)) {
+            // Apply custom font face to text layout
+            DWRITE_TEXT_RANGE textRange = { 0, wcslen(sampleText) };
+            pTextLayout->SetFontSize(fontSize, textRange);
+
+            // Draw text
+            D2D1_POINT_2F origin = D2D1::Point2F(0, 0);
+            pRenderTarget->DrawTextLayout(origin, pTextLayout, pBrush, D2D1_DRAW_TEXT_OPTIONS_NONE);
+            pTextLayout->Release();
+        }
+
+        if (pBrush) pBrush->Release();
+        pTextFormat->Release();
+    }
+
+    pRenderTarget->EndDraw();
+
+    // Convert WIC bitmap to HBITMAP
+    IWICFormatConverter* pConverter = nullptr;
+    hr = pWICFactory->CreateFormatConverter(&pConverter);
+    if (SUCCEEDED(hr)) {
+        hr = pConverter->Initialize(pWICBitmap, GUID_WICPixelFormat32bppBGR,
+                                    WICBitmapDitherTypeNone, nullptr, 0.0,
+                                    WICBitmapPaletteTypeCustom);
+        if (SUCCEEDED(hr)) {
+            UINT stride = width * 4;
+            UINT bufferSize = stride * height;
+            auto buffer = std::make_unique<BYTE[]>(bufferSize);
+            WICRect rect = { 0, 0, static_cast<INT>(width), static_cast<INT>(height) };
+            hr = pConverter->CopyPixels(&rect, stride, bufferSize, buffer.get());
+            if (SUCCEEDED(hr)) {
+                // Create HBITMAP from pixel data
+                BITMAPINFO bmi = {};
+                bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+                bmi.bmiHeader.biWidth = width;
+                bmi.bmiHeader.biHeight = -static_cast<LONG>(height); // Top-down
+                bmi.bmiHeader.biPlanes = 1;
+                bmi.bmiHeader.biBitCount = 32;
+                bmi.bmiHeader.biCompression = BI_RGB;
+                void* pBits = nullptr;
+                HDC hdc = GetDC(nullptr);
+                *phBitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &pBits, nullptr, 0);
+                if (*phBitmap && pBits) {
+                    memcpy(pBits, buffer.get(), bufferSize);
+                }
+                ReleaseDC(nullptr, hdc);
+            }
+        }
+        pConverter->Release();
+    }
+
+    // Cleanup
+    pRenderTarget->Release();
+    pWICBitmap->Release();
+    pWICFactory->Release();
+    pD2DFactory->Release();
+    pFontFace->Release();
+    pDWriteFactory->Release();
+    CoUninitialize();
+
+    return *phBitmap ? S_OK : E_FAIL;
 }
 
 // ============================================================================
@@ -214,6 +425,94 @@ bool FontDecoder::IsFontFormat(const wchar_t* path) {
         if (_wcsicmp(ext, m_extensions[i]) == 0) return true;
     }
     return false;
+}
+
+// ============================================================================
+// Font Metadata Extraction
+// ============================================================================
+
+bool FontDecoder::GetFontMetadata(const wchar_t* filePath, FontMetadata& metadata) {
+    if (!filePath) return false;
+
+    // Initialize COM
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    bool comInit = SUCCEEDED(hr) || hr == S_FALSE || hr == RPC_E_CHANGED_MODE;
+    if (!comInit) return false;
+
+    bool success = false;
+
+    // Create DirectWrite factory
+    IDWriteFactory* pDWriteFactory = nullptr;
+    hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
+                              reinterpret_cast<IUnknown**>(&pDWriteFactory));
+    if (SUCCEEDED(hr)) {
+        // Create font file reference
+        IDWriteFontFile* pFontFile = nullptr;
+        hr = pDWriteFactory->CreateFontFileReference(filePath, nullptr, &pFontFile);
+        if (SUCCEEDED(hr)) {
+            // Analyze font file
+            BOOL isSupportedFontType = FALSE;
+            DWRITE_FONT_FILE_TYPE fontFileType;
+            DWRITE_FONT_FACE_TYPE fontFaceType;
+            UINT32 numberOfFaces = 0;
+            hr = pFontFile->Analyze(&isSupportedFontType, &fontFileType, &fontFaceType, &numberOfFaces);
+            if (SUCCEEDED(hr) && isSupportedFontType) {
+                // Create font face
+                IDWriteFontFile* fontFiles[] = { pFontFile };
+                IDWriteFontFace* pFontFace = nullptr;
+                hr = pDWriteFactory->CreateFontFace(fontFaceType, 1, fontFiles, 0,
+                                                    DWRITE_FONT_SIMULATIONS_NONE, &pFontFace);
+                if (SUCCEEDED(hr)) {
+                    // Get font metrics
+                    DWRITE_FONT_METRICS fontMetrics;
+                    pFontFace->GetMetrics(&fontMetrics);
+                    metadata.weightValue = fontMetrics.weight;
+
+                    // Check if monospace by comparing glyph widths
+                    UINT16 glyphIndices[3] = { 0, 0, 0 };
+                    UINT32 codePoints[3] = { L'i', L'M', L'W' };
+                    hr = pFontFace->GetGlyphIndices(codePoints, 3, glyphIndices);
+                    if (SUCCEEDED(hr)) {
+                        DWRITE_GLYPH_METRICS glyphMetrics[3];
+                        hr = pFontFace->GetDesignGlyphMetrics(glyphIndices, 3, glyphMetrics, FALSE);
+                        if (SUCCEEDED(hr)) {
+                            // If all glyphs have same advance width, it's monospace
+                            metadata.isMonospace = (glyphMetrics[0].advanceWidth == glyphMetrics[1].advanceWidth &&
+                                                   glyphMetrics[1].advanceWidth == glyphMetrics[2].advanceWidth);
+                        }
+                    }
+
+                    // Try to get font family name from system collection
+                    IDWriteFontCollection* pFontCollection = nullptr;
+                    hr = pDWriteFactory->GetSystemFontCollection(&pFontCollection);
+                    if (SUCCEEDED(hr)) {
+                        // Try to find matching font (simplified approach)
+                        const wchar_t* fileName = PathFindFileNameW(filePath);
+                        if (fileName) {
+                            metadata.fullName = fileName;
+                            // Remove extension
+                            size_t len = wcslen(fileName);
+                            const wchar_t* dotPos = wcsrchr(fileName, L'.');
+                            if (dotPos) {
+                                metadata.familyName.assign(fileName, dotPos - fileName);
+                            } else {
+                                metadata.familyName = fileName;
+                            }
+                        }
+                        pFontCollection->Release();
+                    }
+
+                    success = true;
+                    pFontFace->Release();
+                }
+            }
+            pFontFile->Release();
+        }
+        pDWriteFactory->Release();
+    }
+
+    CoUninitialize();
+    return success;
 }
 
 } // namespace Engine

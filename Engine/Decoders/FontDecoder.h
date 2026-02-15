@@ -4,7 +4,7 @@
 //
 // Supports: TTF, OTF, WOFF, WOFF2, TTC, FON
 // Features:
-// - Renders sample text using DirectWrite
+// - Renders sample text using DirectWrite with actual font
 // - Shows font name and style in preview
 // - Falls back to Shell thumbnail provider
 
@@ -12,9 +12,19 @@
 
 #include "../Core/IThumbnailDecoder.h"
 #include <cstdint>
+#include <string>
 
 namespace DarkThumbs {
 namespace Engine {
+
+// Font metadata structure
+struct FontMetadata {
+    std::wstring familyName;
+    std::wstring styleName;
+    std::wstring fullName;
+    bool isMonospace = false;
+    uint32_t weightValue = 400; // 400 = Regular, 700 = Bold
+};
 
 class FontDecoder : public IThumbnailDecoder {
 public:
@@ -31,7 +41,14 @@ public:
     bool SupportsGPU() const override { return false; }
     bool IsArchiveDecoder() const override { return false; }
 
+    // Font metadata extraction
+    bool GetFontMetadata(const wchar_t* filePath, FontMetadata& metadata);
+
 private:
+    // DirectWrite font rendering
+    HRESULT RenderFontPreview(const wchar_t* filePath, uint32_t width,
+                              uint32_t height, HBITMAP* phBitmap);
+
     // Shell-based font thumbnail
     HRESULT ExtractFontPreviewShell(const wchar_t* filePath, uint32_t width,
                                      uint32_t height, HBITMAP* phBitmap);
