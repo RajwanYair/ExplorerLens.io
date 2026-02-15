@@ -214,4 +214,282 @@ namespace DarkThumbs {
         }
     }
 
+    // ============================================================================
+    // Memory Tracking
+    // ============================================================================
+
+    void PerformanceProfiler::RecordMemoryUsage(ProfileComponent component, size_t bytes)
+    {
+        if (!m_enabled) return;
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_memoryUsage[component] += bytes;
+    }
+
+    size_t PerformanceProfiler::GetTotalMemoryUsage() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        size_t total = 0;
+        for (const auto& [component, bytes] : m_memoryUsage) {
+            total += bytes;
+        }
+        return total;
+    }
+
+    size_t PerformanceProfiler::GetMemoryUsage(ProfileComponent component) const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        auto it = m_memoryUsage.find(component);
+        return (it != m_memoryUsage.end()) ? it->second : 0;
+    }
+
+    // ============================================================================
+    // Performance Analysis
+    // ============================================================================
+
+    std::vector<ProfileComponent> PerformanceProfiler::GetSlowestComponents(size_t count) const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        
+        // Collect all components with data
+        std::vector<std::pair<ProfileComponent, double>> components;
+        for (const auto& [component, stats] : m_stats) {
+            if (stats.callCount > 0) {
+                components.push_back({ component, stats.avgTimeMs });
+            }
+        }
+
+        // Sort by average time (descending)
+        std::sort(components.begin(), components.end(),
+            [](const auto& a, const auto& b) {
+                return a.second > b.second;
+            });
+
+        // Extract top N components
+        std::vector<ProfileComponent> result;
+        for (size_t i = 0; i < (std::min)(count, components.size()); i++) {
+            result.push_back(components[i].first);
+        }
+        return result;
+    }
+
+    std::vector<ProfileComponent> PerformanceProfiler::GetMostCalledComponents(size_t count) const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        
+        // Collect all components with data
+        std::vector<std::pair<ProfileComponent, size_t>> components;
+        for (const auto& [component, stats] : m_stats) {
+            if (stats.callCount > 0) {
+                components.push_back({ component, stats.callCount });
+            }
+        }
+
+        // Sort by call count (descending)
+        std::sort(components.begin(), components.end(),
+            [](const auto& a, const auto& b) {
+                return a.second > b.second;
+            });
+
+        // Extract top N components
+        std::vector<ProfileComponent> result;
+        for (size_t i = 0; i < (std::min)(count, components.size()); i++) {
+            result.push_back(components[i].first);
+        }
+        return result;
+    }
+
+    double PerformanceProfiler::GetTotalTimeMs() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        double total = 0.0;
+        for (const auto& [component, stats] : m_stats) {
+            if (stats.callCount > 0) {
+                total += stats.totalTimeMs;
+            }
+        }
+        return total;
+    }
+
+    // ============================================================================
+    // HTML Report Generation
+    // ============================================================================
+
+    std::wstring PerformanceProfiler::GenerateHTMLReport() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        std::wostringstream html;
+
+        html << L"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>DarkThumbs Performance Report</title>" << std::endl;
+        html << L"<style>body{font-family:Arial,sans-serif;margin:20px;background:#f5f5f5;}" << std::endl;
+        html << L"h1{color:#2c3e50;}table{border-collapse:collapse;width:100%;background:white;box-shadow:0 2px 4px rgba(0,0,0,0.1);}" << std::endl;
+        html << L"th{background:#3498db;color:white;padding:12px;text-align:left;}td{padding:10px;border-bottom:1px solid #ddd;}" << std::endl;
+        html << L"tr:hover{background:#f8f9fa;}.metric{font-weight:bold;color:#27ae60;}" << std::endl;
+        html << L"</style></head><body>" << std::endl;
+
+        html << L"<h1>DarkThumbs Performance Report</h1>" << std::endl;
+
+        // Summary metrics
+        double totalTime = GetTotalTimeMs();
+        size_t totalMem = GetTotalMemoryUsage();
+        
+        html << L"<div style=\"background:white;padding:20px;margin-bottom:20px;border-radius:8px;\">" << std::endl;
+        html << L"<h2>Summary</h2>" << std::endl;
+        html << L"<p><span class=\"metric\">Total Time:</span> " << std::fixed << std::setprecision(2) << totalTime << L" ms</p>" << std::endl;
+        html << L"<p><span class=\"metric\">Total Memory:</span> " << (totalMem / 1024.0 / 1024.0) << L" MB</p>" << std::endl;
+        html << L"</div>" << std::endl;
+
+        // Performance table
+        html << L"<table>" << std::endl;
+        html << L"<tr><th>Component</th><th>Calls</th><th>Total (ms)</th><th>Avg (ms)</th><th>Min (ms)</th><th>Max (ms)</th><th>Memory (KB)</th></tr>" << std::endl;
+
+        // Sort by total time
+        std::vector<std::pair<ProfileComponent, ComponentStats>> sortedStats;
+        for (const auto& [component, stats] : m_stats) {
+            if (stats.callCount > 0) {
+                sortedStats.push_back({ component, stats });
+            }
+        }
+        std::sort(sortedStats.begin(), sortedStats.end(),
+            [](const auto& a, const auto& b) {
+                return a.second.totalTimeMs > b.second.totalTimeMs;
+            });
+
+        for (const auto& [component, stats] : sortedStats) {
+            size_t mem = GetMemoryUsage(component);
+            html << L"<tr><td>" << stats.name << L"</td>";
+            html << L"<td>" << stats.callCount << L"</td>";
+            html << L"<td>" << std::fixed << std::setprecision(2) << stats.totalTimeMs << L"</td>";
+            html << L"<td>" << std::fixed << std::setprecision(2) << stats.avgTimeMs << L"</td>";
+            html << L"<td>" << std::fixed << std::setprecision(2) << stats.minTimeMs << L"</td>";
+            html << L"<td>" << std::fixed << std::setprecision(2) << stats.maxTimeMs << L"</td>";
+            html << L"<td>" << (mem / 1024.0) << L"</td></tr>" << std::endl;
+        }
+
+        html << L"</table></body></html>" << std::endl;
+        return html.str();
+    }
+
+    bool PerformanceProfiler::ExportHTMLReport(const std::wstring& filePath) const
+    {
+        try {
+            std::wofstream file(filePath);
+            if (!file.is_open()) {
+                return false;
+            }
+            file << GenerateHTMLReport();
+            file.close();
+            return true;
+        }
+        catch (...) {
+            return false;
+        }
+    }
+
+    // ============================================================================
+    // CSV Report Generation
+    // ============================================================================
+
+    std::wstring PerformanceProfiler::GenerateCSVReport() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        std::wostringstream csv;
+
+        // Header
+        csv << L"Component,Calls,Total(ms),Avg(ms),Min(ms),Max(ms),Memory(KB)" << std::endl;
+
+        // Data rows
+        for (const auto& [component, stats] : m_stats) {
+            if (stats.callCount > 0) {
+                size_t mem = GetMemoryUsage(component);
+                csv << stats.name << L",";
+                csv << stats.callCount << L",";
+                csv << std::fixed << std::setprecision(2) << stats.totalTimeMs << L",";
+                csv << std::fixed << std::setprecision(2) << stats.avgTimeMs << L",";
+                csv << std::fixed << std::setprecision(2) << stats.minTimeMs << L",";
+                csv << std::fixed << std::setprecision(2) << stats.maxTimeMs << L",";
+                csv << (mem / 1024.0) << std::endl;
+            }
+        }
+
+        return csv.str();
+    }
+
+    bool PerformanceProfiler::ExportCSVReport(const std::wstring& filePath) const
+    {
+        try {
+            std::wofstream file(filePath);
+            if (!file.is_open()) {
+                return false;
+            }
+            file << GenerateCSVReport();
+            file.close();
+            return true;
+        }
+        catch (...) {
+            return false;
+        }
+    }
+
+    // ============================================================================
+    // Performance Hints
+    // ============================================================================
+
+    std::vector<std::wstring> PerformanceProfiler::GetPerformanceHints() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        std::vector<std::wstring> hints;
+
+        // Analyze slow decoders
+        auto slowest = GetSlowestComponents(3);
+        for (auto component : slowest) {
+            const auto& stats = m_stats.at(component);
+            if (stats.avgTimeMs > 100.0) {
+                hints.push_back(L"Slow decoder detected: " + stats.name + L" (avg " +
+                               std::to_wstring(static_cast<int>(stats.avgTimeMs)) + L"ms). Consider enabling thumbnail extraction or GPU acceleration.");
+            }
+        }
+
+        // Check cache effectiveness
+        auto cacheStats = m_stats.find(ProfileComponent::CACHE_LOOKUP);
+        if (cacheStats != m_stats.end() && cacheStats->second.callCount > 100) {
+            double cacheTime = cacheStats->second.avgTimeMs;
+            if (cacheTime > 5.0) {
+                hints.push_back(L"Cache lookup is slow (" + std::to_wstring(static_cast<int>(cacheTime)) +
+                               L"ms). Consider optimizing cache storage or indexing.");
+            }
+        }
+
+        // Check memory usage
+        size_t totalMem = GetTotalMemoryUsage();
+        if (totalMem > 512 * 1024 * 1024) { // > 512 MB
+            hints.push_back(L"High memory usage detected (" + std::to_wstring(totalMem / 1024 / 1024) +
+                           L" MB). Consider implementing memory pooling or reducing cache size.");
+        }
+
+        // Check GPU usage
+        auto gpuStats = m_stats.find(ProfileComponent::GPU_RENDER_D3D11);
+        auto gdiStats = m_stats.find(ProfileComponent::GPU_RENDER_GDI);
+        if (gpuStats != m_stats.end() && gdiStats != m_stats.end()) {
+            if (gpuStats->second.callCount < gdiStats->second.callCount / 10) {
+                hints.push_back(L"GPU acceleration is underutilized. Most rendering uses GDI+. Enable D3D11 for better performance.");
+            }
+        }
+
+        // Check for performance outliers (high max vs avg)
+        for (const auto& [component, stats] : m_stats) {
+            if (stats.callCount > 10 && stats.maxTimeMs > stats.avgTimeMs * 5.0) {
+                hints.push_back(L"Performance outlier detected in " + stats.name + L". Max time (" +
+                               std::to_wstring(static_cast<int>(stats.maxTimeMs)) + L"ms) much higher than average (" +
+                               std::to_wstring(static_cast<int>(stats.avgTimeMs)) + L"ms). Investigate edge cases.");
+            }
+        }
+
+        if (hints.empty()) {
+            hints.push_back(L"Performance looks good! No optimization suggestions at this time.");
+        }
+
+        return hints;
+    }
+
 } // namespace DarkThumbs

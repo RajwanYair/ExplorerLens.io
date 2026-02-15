@@ -97,19 +97,38 @@ namespace DarkThumbs {
         // Record timing sample
         void RecordSample(ProfileComponent component, double timeMs);
 
+        // Record memory usage
+        void RecordMemoryUsage(ProfileComponent component, size_t bytes);
+
         // Get statistics
         const ComponentStats& GetStats(ProfileComponent component) const;
         std::map<ProfileComponent, ComponentStats> GetAllStats() const;
 
+        // Get total memory usage
+        size_t GetTotalMemoryUsage() const;
+        size_t GetMemoryUsage(ProfileComponent component) const;
+
+        // Performance analysis
+        std::vector<ProfileComponent> GetSlowestComponents(size_t count = 5) const;
+        std::vector<ProfileComponent> GetMostCalledComponents(size_t count = 5) const;
+        double GetTotalTimeMs() const;
+
         // Reset all statistics
         void Reset();
 
-        // Generate report
+        // Generate reports
         std::wstring GenerateReport() const;
         std::wstring GenerateDetailedReport() const;
+        std::wstring GenerateHTMLReport() const;
+        std::wstring GenerateCSVReport() const;
 
         // Export to file
         bool ExportToFile(const std::wstring& filePath) const;
+        bool ExportHTMLReport(const std::wstring& filePath) const;
+        bool ExportCSVReport(const std::wstring& filePath) const;
+
+        // Performance hints
+        std::vector<std::wstring> GetPerformanceHints() const;
 
     private:
         PerformanceProfiler();
@@ -122,6 +141,7 @@ namespace DarkThumbs {
         bool m_enabled = false;
         mutable std::mutex m_mutex;
         std::map<ProfileComponent, ComponentStats> m_stats;
+        std::map<ProfileComponent, size_t> m_memoryUsage;
 
         void InitializeStats();
         std::wstring ComponentToString(ProfileComponent component) const;
