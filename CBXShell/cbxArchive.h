@@ -19,17 +19,16 @@
 #include "ModernCppHelper.h"
 #include "thumbnail_cache.h"   // Performance caching (v5.1.0)
 #include "thumbnail_collage.h" // Multi-page collage (v5.1.0)
+
+// ============================================================================
+// LEGACY DECODERS (v5.0 era) — DEPRECATED as of v6.2.0
+// All formats are now handled by Engine pipeline (ThumbnailPipeline → DecoderRegistry).
+// Legacy decoders are gated behind CBXSHELL_LEGACY_DECODERS and excluded from build by default.
+// To re-enable for debugging: add CBXSHELL_LEGACY_DECODERS to Preprocessor Definitions.
+// ============================================================================
+#ifdef CBXSHELL_LEGACY_DECODERS
 // Modern image format support (v5.0+)
 #include "webp_decoder.h" // WebP support via libwebp
-// ENABLE_HEIF_SUPPORT - Native Windows HEIF/HEIC via WIC - defined in vcxproj
-// ENABLE_AVIF_SUPPORT - Native Windows AVIF via WIC - defined in vcxproj
-// ENABLE_PDF_SUPPORT - PDF thumbnail support - defined in vcxproj
-// ENABLE_VIDEO_SUPPORT - Video thumbnail support - defined in vcxproj
-// DISABLE_RAR_SUPPORT - RAR support disabled for 100% static linking - defined in vcxproj
-// ENABLE_JXL_SUPPORT - JPEG XL support - defined in vcxproj
-// ENABLE_LIBARCHIVE_SUPPORT - Advanced archive formats (TAR, ISO, CPIO) - defined in vcxproj
-// ENABLE_SVG_SUPPORT - SVG vector graphics - defined in vcxproj
-// ENABLE_RAW_SUPPORT - RAW photo formats (DNG, CR2, NEF, ARW) - defined in vcxproj
 #ifdef ENABLE_HEIF_SUPPORT
 #include "heif_decoder_native.h" // HEIF/HEIC support using Windows Imaging Component
 #endif
@@ -48,9 +47,6 @@
 #ifdef ENABLE_SVG_SUPPORT
 #include "svg_decoder.h" // SVG rendering via WIC
 #endif
-#ifdef ENABLE_RAW_SUPPORT
-#include "raw_decoder.h" // RAW photo support via WIC (DNG, CR2, NEF, ARW)
-#endif
 #ifdef ENABLE_VIDEO_SUPPORT
 #include "video_thumbnail.h" // Video frame extraction using DirectShow
 #endif
@@ -63,6 +59,8 @@
 #ifdef ENABLE_FONT_SUPPORT
 #include "font_preview.h" // Font file previews (Sprint 9 Phase 1)
 #endif
+#endif // CBXSHELL_LEGACY_DECODERS
+
 #ifdef ENABLE_LIBARCHIVE_SUPPORT
 #include "libarchive_wrapper.h" // Advanced archive support (TAR, ISO, CPIO, XAR, AR)
 #endif
@@ -1208,7 +1206,7 @@ namespace __cbx
 
 				case CBXTYPE_VIDEO:
 				{
-#ifdef ENABLE_VIDEO_SUPPORT
+#if defined(CBXSHELL_LEGACY_DECODERS) && defined(ENABLE_VIDEO_SUPPORT)
 					// Extract video thumbnail using DirectShow (Sprint C3)
 					std::wstring videoPath(m_cbxFile.operator LPCTSTR());
 
@@ -1241,7 +1239,7 @@ namespace __cbx
 
 				case CBXTYPE_AUDIO:
 				{
-#ifdef ENABLE_AUDIO_SUPPORT
+#if defined(CBXSHELL_LEGACY_DECODERS) && defined(ENABLE_AUDIO_SUPPORT)
 					// Extract audio thumbnail (Sprint 8)
 					std::wstring audioPath(m_cbxFile.operator LPCTSTR());
 
@@ -1292,7 +1290,7 @@ namespace __cbx
 				case CBXTYPE_PPT:
 				case CBXTYPE_XLS:
 				{
-#ifdef ENABLE_DOCUMENT_SUPPORT
+#if defined(CBXSHELL_LEGACY_DECODERS) && defined(ENABLE_DOCUMENT_SUPPORT)
 					// Extract document thumbnail (Sprint 9 Phase 1)
 					std::wstring docPath(m_cbxFile.operator LPCTSTR());
 
@@ -1316,7 +1314,7 @@ namespace __cbx
 
 				case CBXTYPE_FONT:
 				{
-#ifdef ENABLE_FONT_SUPPORT
+#if defined(CBXSHELL_LEGACY_DECODERS) && defined(ENABLE_FONT_SUPPORT)
 					// Generate font preview (Sprint 9 Phase 1)
 					std::wstring fontPath(m_cbxFile.operator LPCTSTR());
 
@@ -2322,8 +2320,9 @@ namespace __cbx
 			// This provides better performance and smaller memory footprint
 			HBITMAP hModernBitmap = NULL;
 
-// Try modern image formats (enabled, delay-loaded DLLs for optimal performance)
-#ifdef ENABLE_WEBP_SUPPORT
+// LEGACY: Modern formats tried inline (v5.0 era). Now handled by Engine pipeline.
+// Only compiled when CBXSHELL_LEGACY_DECODERS is defined.
+#if defined(CBXSHELL_LEGACY_DECODERS) && defined(ENABLE_WEBP_SUPPORT)
 			{
 				// Read stream data for format detection
 				STATSTG stat = {};

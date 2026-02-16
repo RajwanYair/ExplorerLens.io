@@ -387,12 +387,22 @@ MigrationBackup/
 
 # Build logs (root level)
 build-log.txt
+build-log-cmake.txt
 build-output.log
 build-output-clean.log
 build-final.log
+build-clean.log
+build-final-summary.log
+build-test-final.log
+build-test-verification.log
+build-verification.log
 build-full-*.log
 performance_report.txt
 *.Build.CppClean.log
+
+# Temporary build directories
+build-clean/
+build-final/
 
 # CMake build directories and files
 **/CMakeFiles/

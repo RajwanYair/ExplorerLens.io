@@ -173,25 +173,47 @@
   <ItemGroup>
     <ClCompile Include="CBXShell.cpp" />
     <ClCompile Include="CBXShellClass.cpp" />
-    <!-- Modern Image Format Decoders (v5.0+) -->
-    <ClCompile Include="webp_decoder.cpp" /> <!-- WebP support via libwebp 1.5.0 -->
-    <ClCompile Include="heif_decoder_native.cpp" /> <!-- HEIF/HEIC via Windows WIC -->
-    <ClCompile Include="avif_decoder.cpp" /> <!-- AVIF via Windows WIC -->
-    <ClCompile Include="jxl_decoder.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- JPEG XL via libjxl 0.11.1 - DEFERRED (Sprint 16.2) -->
+    <!-- ================================================================== -->
+    <!-- LEGACY Decoders (v5.0 era) - EXCLUDED from build as of v6.2.0      -->
+    <!-- All formats now handled by Engine pipeline (ThumbnailPipeline).     -->
+    <!-- Files kept for reference. Re-enable by adding CBXSHELL_LEGACY_DECODERS -->
+    <!-- to Preprocessor Definitions and setting ExcludedFromBuild to false. -->
+    <!-- ================================================================== -->
+    <ClCompile Include="webp_decoder.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/WebPDecoder.cpp -->
     </ClCompile>
-    <ClCompile Include="raw_decoder.cpp" /> <!-- Camera RAW via Windows WIC -->
-    <!-- Performance & Caching (v5.1.0) -->
+    <ClCompile Include="heif_decoder_native.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/HEIFDecoder.cpp -->
+    </ClCompile>
+    <ClCompile Include="avif_decoder.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/AVIFDecoder.cpp -->
+    </ClCompile>
+    <ClCompile Include="jxl_decoder.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/JXLDecoder.cpp -->
+    </ClCompile>
+    <ClCompile Include="raw_decoder.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/RAWDecoder.cpp -->
+    </ClCompile>
+    <ClCompile Include="video_thumbnail.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/VideoDecoder.cpp -->
+    </ClCompile>
+    <ClCompile Include="pdf_decoder.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/PDFDecoder.cpp -->
+    </ClCompile>
+    <ClCompile Include="audio_thumbnail.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/AudioDecoder.cpp -->
+    </ClCompile>
+    <ClCompile Include="document_thumbnail.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/DocumentDecoder.cpp -->
+    </ClCompile>
+    <ClCompile Include="font_preview.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/FontDecoder.cpp -->
+    </ClCompile>
+    <!-- Performance & Caching (v5.1.0) — still used by legacy fallback path -->
     <ClCompile Include="thumbnail_cache.cpp" />
     <ClCompile Include="thumbnail_collage.cpp" />
-    <ClCompile Include="video_thumbnail.cpp" />
-    <ClCompile Include="pdf_decoder.cpp" />
     <!-- GPU Acceleration (v5.2.0) -->
     <ClCompile Include="gpu_accelerator.cpp" />
-    <!-- Media & Document Support (v5.0+) -->
-    <ClCompile Include="audio_thumbnail.cpp" />
-    <ClCompile Include="document_thumbnail.cpp" />
-    <ClCompile Include="font_preview.cpp" />
     <!-- Engine Integration (v5.3.0) -->
     <ClCompile Include="EngineAdapter.cpp" />
     <!-- External Library Wrappers (v5.2+) -->
@@ -213,24 +235,23 @@
   <ItemGroup>
     <ClInclude Include="cbxArchive.h" />
     <ClInclude Include="CBXShellClass.h" />
-    <!-- Modern Image Format Decoders (v5.0+) -->
+    <!-- LEGACY decoder headers (kept for reference, gated by CBXSHELL_LEGACY_DECODERS) -->
     <ClInclude Include="webp_decoder.h" />
     <ClInclude Include="heif_decoder_native.h" />
     <ClInclude Include="avif_decoder.h" />
     <ClInclude Include="jxl_decoder.h" />
     <ClInclude Include="raw_decoder.h" />
     <ClInclude Include="svg_decoder.h" />
-    <!-- Performance & Caching (v5.1.0) -->
-    <ClInclude Include="thumbnail_cache.h" />
-    <ClInclude Include="thumbnail_collage.h" />
     <ClInclude Include="video_thumbnail.h" />
     <ClInclude Include="pdf_decoder.h" />
-    <!-- GPU Acceleration (v5.2.0) -->
-    <ClInclude Include="gpu_accelerator.h" />
-    <!-- Media & Document Support (v5.0+) -->
     <ClInclude Include="audio_thumbnail.h" />
     <ClInclude Include="document_thumbnail.h" />
     <ClInclude Include="font_preview.h" />
+    <!-- Performance & Caching (v5.1.0) -->
+    <ClInclude Include="thumbnail_cache.h" />
+    <ClInclude Include="thumbnail_collage.h" />
+    <!-- GPU Acceleration (v5.2.0) -->
+    <ClInclude Include="gpu_accelerator.h" />
     <!-- Engine Integration (v5.3.0) -->
     <ClInclude Include="EngineAdapter.h" />
     <!-- External Library Wrappers (v5.2+) -->

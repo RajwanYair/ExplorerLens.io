@@ -133,7 +133,9 @@ HRESULT CCBXShell::GetThumbnail_Internal(UINT cx, HBITMAP *phBmpThumbnail,
       "Engine not initialized - using legacy implementation");
   }
 
-  // Legacy path (DEPRECATED - only used if Engine unavailable or explicit fallback enabled)
+  // Legacy path (DEPRECATED v6.2.0 - Legacy decoders excluded from build)
+  // Only reachable if: Engine unavailable AND CBXSHELL_LEGACY_DECODERS compiled in
+  // In normal builds, only archive/cache helpers remain from legacy code.
   DT_LOG_DEBUG(DarkThumbs::LogCategory::DECODER, 
     std::string("Using legacy decoder for: ") + fileExt);
   
