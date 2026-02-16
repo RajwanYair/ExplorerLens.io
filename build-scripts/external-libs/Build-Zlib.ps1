@@ -17,7 +17,7 @@ Write-Host "====================================================================
 Write-Host ""
 
 # Get project root
-$ProjectRoot = Split-Path -Parent $PSScriptRoot
+$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $ProjectRoot
 
 # Check if already built

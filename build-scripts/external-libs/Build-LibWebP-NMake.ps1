@@ -13,7 +13,7 @@ Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "Building libwebp 1.5.0 (nmake method)" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
-$rootDir = Split-Path -Parent $PSScriptRoot
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $webpDir = Join-Path $rootDir "external\image-libs\libwebp-1.5.0"
 
 if (-not (Test-Path $webpDir)) {

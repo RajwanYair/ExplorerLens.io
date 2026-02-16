@@ -17,7 +17,7 @@ Write-Host "====================================================================
 Write-Host ""
 
 # Get project root
-$ProjectRoot = Split-Path -Parent $PSScriptRoot
+$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $ProjectRoot
 
 # Find MSBuild
@@ -68,8 +68,7 @@ if (Test-Path $OutputLib) {
     Write-Host "1. Copy liblz4_static.lib to external\compression\lz4\x64\Release\lz4.lib" -ForegroundColor Gray
     Write-Host "2. Update CBXShell.vcxproj AdditionalLibraryDirectories if needed" -ForegroundColor Gray
     exit 0
-}
-else {
+} else {
     Write-Host ""
     Write-Host "[ERROR] Output file not found: $OutputLib" -ForegroundColor Red
     Write-Host "Searching for .lib files:" -ForegroundColor Yellow

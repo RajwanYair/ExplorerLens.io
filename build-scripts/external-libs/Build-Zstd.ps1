@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "`n=== Building zstd 1.5.7 ===" -ForegroundColor Green
 
-$rootDir = Split-Path -Parent $PSScriptRoot
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $zstdDir = Join-Path $rootDir "external\compression\zstd-1.5.7"
 
 if (-not (Test-Path $zstdDir)) {

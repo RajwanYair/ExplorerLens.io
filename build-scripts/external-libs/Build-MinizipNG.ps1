@@ -17,7 +17,7 @@ Write-Host "====================================================================
 Write-Host ""
 
 # Get project root
-$ProjectRoot = Split-Path -Parent $PSScriptRoot
+$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $ProjectRoot
 
 # Find CMake
@@ -94,8 +94,7 @@ if (Test-Path $OutputLib) {
     Write-Host "1. Copy minizip.lib to external\compression\minizip-ng\x64\Release\minizip-ng.lib" -ForegroundColor Gray
     Write-Host "2. Update CBXShell.vcxproj AdditionalLibraryDirectories if needed" -ForegroundColor Gray
     exit 0
-}
-else {
+} else {
     Write-Host ""
     Write-Host "[ERROR] Output file not found: $OutputLib" -ForegroundColor Red
     Write-Host "Build directory contents:" -ForegroundColor Yellow

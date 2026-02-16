@@ -95,7 +95,7 @@ if ($Clean) {
     Write-Log "Cleaning build artifacts..." "Yellow"
     Write-Progress-File -Status "Cleaning" -Current "Removing build directories" -Step 1 -Total 10
     
-    $cleanDirs = @("build", "x64", "packages", "CBXShell\x64", "CBXManager\x64")
+    $cleanDirs = @("build", "x64", "CBXShell\x64", "CBXManager\x64")
     foreach ($dir in $cleanDirs) {
         if (Test-Path $dir) {
             Write-Log "  Removing: $dir" "Gray"
@@ -114,12 +114,12 @@ if (-not $SkipLibraries) {
     Write-Log "Using file-based monitoring (logs in build-logs/)" "Gray"
     
     $libraries = @(
-        @{ Script = "Build-Zlib.ps1"; Name = "zlib"; Timeout = 300 },
-        @{ Script = "Build-LZ4.ps1"; Name = "LZ4"; Timeout = 600 },
-        @{ Script = "Build-Zstd.ps1"; Name = "Zstandard"; Timeout = 900 },
-        @{ Script = "build-lzma-simple.ps1"; Name = "liblzma"; Timeout = 1200 },
-        @{ Script = "Build-LibWebP-NMake.ps1"; Name = "LibWebP"; Timeout = 1200 },
-        @{ Script = "Build-MinizipNG.ps1"; Name = "Minizip-NG"; Timeout = 900 }
+        @{ Script = "external-libs/Build-Zlib.ps1"; Name = "zlib"; Timeout = 300 },
+        @{ Script = "external-libs/Build-LZ4.ps1"; Name = "LZ4"; Timeout = 600 },
+        @{ Script = "external-libs/Build-Zstd.ps1"; Name = "Zstandard"; Timeout = 900 },
+        @{ Script = "external-libs/build-lzma-sdk-26.00.ps1"; Name = "liblzma"; Timeout = 1200 },
+        @{ Script = "external-libs/Build-LibWebP-NMake.ps1"; Name = "LibWebP"; Timeout = 1200 },
+        @{ Script = "external-libs/Build-MinizipNG.ps1"; Name = "Minizip-NG"; Timeout = 900 }
     )
     
     $step = 2
@@ -131,7 +131,8 @@ if (-not $SkipLibraries) {
         Write-Log "  Timeout: $($lib.Timeout) seconds ($([math]::Round($lib.Timeout/60, 1)) minutes)" "Gray"
         Write-Progress-File -Status "Building" -Current $lib.Name -Step $step -Total $totalSteps
         
-        $libLogFile = "build-logs\$($lib.Script.Replace('.ps1', ''))-$timestamp.log"
+        $safeScriptName = $lib.Script.Replace('.ps1', '').Replace('/', '-').Replace('\\', '-')
+        $libLogFile = "build-logs\$safeScriptName-$timestamp.log"
         $scriptPath = Join-Path "build-scripts" $lib.Script
         
         if (-not (Test-Path $scriptPath)) {
