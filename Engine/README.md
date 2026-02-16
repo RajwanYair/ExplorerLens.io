@@ -205,9 +205,9 @@ The Engine includes comprehensive unit tests:
 
 ## References
 
-- [PROJECT_STATUS.md](../PROJECT_STATUS.md) - Overall project status
-- [P2_ENGINE_REFACTORING_PLAN.md](../docs/P2_ENGINE_REFACTORING_PLAN.md) - Detailed implementation plan
-- [ROADMAP.md](../ROADMAP.md) - Long-term roadmap
+- [MASTER_PLAN.md](../MASTER_PLAN.md) - Overall project status and roadmap
+- [docs/formats/DECODER_AUDIT_REPORT.md](../docs/formats/DECODER_AUDIT_REPORT.md) - Decoder implementation audit
+- [docs/architecture/INTEGRATION_ARCHITECTURE.md](../docs/architecture/INTEGRATION_ARCHITECTURE.md) - Integration architecture
 
 ---
 

@@ -259,7 +259,7 @@ Use `/m` flag for parallel builds to maximize CPU usage.
 - **Detailed Tool Docs:** `.github/TOOL_VERSIONS.md`
 - **Environment Script:** `scripts/Setup-DevEnvironment.ps1`
 - **Build Scripts:** `build-scripts/`
-- **Project Roadmap:** `ROADMAP.md`
+- **Project Roadmap:** `MASTER_PLAN.md`
 - **Sprint 14 Docs:** `docs/PluginSecurityGuide.md`
 
 ---

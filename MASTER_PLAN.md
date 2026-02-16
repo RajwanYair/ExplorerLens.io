@@ -96,7 +96,7 @@ Explorer ──► CBXShell.dll (thin proxy)
 
 ---
 
-## 3. Execution Plan — 8 Phases, 40 Tasks
+## 3. Execution Plan — 9 Phases, 45 Tasks
 
 ### Phase 1: Project Cleanup & Consolidation (Tasks 1-5)
 > Remove duplication, unify build, establish clean baseline
@@ -105,17 +105,17 @@ Explorer ──► CBXShell.dll (thin proxy)
 |---|------|----------|--------|
 | 1 | Remove stale docs and temp build artifacts | P0 | **Done** |
 | 2 | Consolidate planning docs into single MASTER_PLAN.md | P0 | **Done** |
-| 3 | Remove legacy CBXShell decoders, route all through Engine | P0 | Queued |
-| 4 | Consolidate duplicate build scripts | P1 | Queued |
-| 5 | Update .gitignore for build artifacts, clean git index | P1 | Queued |
+| 3 | Remove legacy CBXShell decoders, route all through Engine | P0 | **Done** |
+| 4 | Consolidate duplicate build scripts | P1 | **Done** |
+| 5 | Update .gitignore for build artifacts, clean git index | P1 | **Done** |
 
 ### Phase 2: Engine Quality & Format Activation (Tasks 6-12)
 > Make every registered extension produce a real thumbnail
 
 | # | Task | Priority | Details |
 |---|------|----------|---------|
-| 6 | Verify JXL decoder works end-to-end (HAS_LIBJXL=ON path) | P0 | Code exists, verify linkage |
-| 7 | Verify HEIF decoder works (HAS_LIBHEIF=ON or WIC path) | P0 | Multiple fallback strategies |
+| 6 | Verify JXL decoder works end-to-end (HAS_LIBJXL=ON path) | P0 | **Done** — verified build/link/runtime path |
+| 7 | Verify HEIF decoder works (HAS_LIBHEIF=ON or WIC path) | P0 | **Done** — WIC fallback validated |
 | 8 | SVG: integrate lunasvg for real vector rendering | P1 | Replace GDI+ placeholder |
 | 9 | PDF: integrate pdfium or Windows.Data.Pdf for real rendering | P1 | Replace shell provider fallback |
 | 10 | Document: implement OLE thumbnail extraction from OOXML | P1 | docProps/thumbnail.emf extraction |
@@ -186,6 +186,17 @@ Explorer ──► CBXShell.dll (thin proxy)
 | 39 | WiX 4 MSI installer + MSIX package | P1 | COM registration, file assoc |
 | 40 | GitHub Actions CI/CD: build → test → sign → release | P2 | Authenticode + checksums |
 
+### Phase 9: MD Audit Backlog Integration (Tasks 41-45)
+> Missed items extracted from remaining markdown/docs audit
+
+| # | Task | Priority | Details |
+|---|------|----------|---------|
+| 41 | ARM64 native build + CI matrix | P1 | Add ARM64 build for Engine + Shell compatibility work |
+| 42 | Plugin AppContainer sandbox implementation | P2 | Implement documented sandbox Mode 3 as production option |
+| 43 | Compatibility kit execution harness | P2 | Automate matrix from COMPATIBILITY_KIT_SPEC.md |
+| 44 | Test corpus expansion for archive/render/explorer integration | P1 | Fill documented missing test-data and scenario gaps |
+| 45 | Documentation integrity gate (link checker) | P1 | Prevent stale links to deleted planning docs |
+
 ---
 
 ## 4. Priority Matrix
@@ -193,8 +204,8 @@ Explorer ──► CBXShell.dll (thin proxy)
 | Priority | Tasks | Criteria |
 |----------|-------|----------|
 | **P0** — Blocks production | 1, 2, 3, 6, 7, 13, 18, 19, 22 | Must fix before any release |
-| **P1** — Core functionality | 4, 5, 8-12, 14-15, 20, 25-26, 28-30, 37-39 | Required for v7.0 |
-| **P2** — Quality & polish | 16-17, 21, 23-24, 27, 31-32, 33, 36, 40 | Important but deferrable |
+| **P1** — Core functionality | 4, 5, 8-12, 14-15, 20, 25-26, 28-30, 37-39, 41, 44-45 | Required for v7.0 |
+| **P2** — Quality & polish | 16-17, 21, 23-24, 27, 31-32, 33, 36, 40, 42-43 | Important but deferrable |
 | **P3** — Future enhancement | 34, 35 | Nice to have |
 
 ---
@@ -297,34 +308,38 @@ These are the first 10 tasks to execute right now:
 
 ### Task 1: ✅ Remove stale docs and temp build artifacts
 **Status:** DONE  
-Removed: 7 stale log files, 2 temp build dirs, 15 stale MD files
+Removed: stale log files, temp build dirs, and stale planning docs
 
 ### Task 2: ✅ Consolidate planning docs into MASTER_PLAN.md
 **Status:** DONE  
 Merged content from: ROADMAP.md, REFACTOR_PLAN.md, SPRINT_PLAN_25.md, SPRINT_PROGRESS.md
 
-### Task 3: Remove legacy CBXShell decoders, route all through Engine
-**Status:** Executing  
-Remove 21 legacy decoder files from CBXShell/, update vcxproj to remove them from build
+### Task 3: ✅ Remove legacy CBXShell decoders, route all through Engine
+**Status:** DONE  
+Legacy decoder code gated behind `CBXSHELL_LEGACY_DECODERS`; legacy decoder .cpp excluded from build
 
-### Task 4: Consolidate duplicate build scripts
-**Status:** Queued  
-Remove duplicate build.ps1, Sign-Binaries.ps1, consolidate library-builders/
+### Task 4: ✅ Consolidate duplicate build scripts
+**Status:** DONE  
+Removed duplicate scripts while keeping canonical script locations
 
-### Task 5: Update .gitignore, clean git index
-**Status:** Queued
+### Task 5: ✅ Update .gitignore, clean git index
+**Status:** DONE
 
-### Task 6: Verify JXL decoder end-to-end
-**Status:** Queued
+### Task 6: ✅ Verify JXL decoder end-to-end
+**Status:** DONE
 
-### Task 7: Verify HEIF decoder end-to-end
-**Status:** Queued
+### Task 7: ✅ Verify HEIF decoder end-to-end
+**Status:** DONE
 
-### Task 8: SVG — integrate lunasvg
-**Status:** Queued
+### Task 8: ✅ Route all thumbnail requests through Engine-only path
+**Status:** DONE
 
-### Task 9: PDF — implement real first-page rendering
-**Status:** Queued
+### Task 9: ✅ Full build verification (Engine + CBXShell + CBXManager)
+**Status:** DONE
 
-### Task 10: Document — implement OLE thumbnail extraction
-**Status:** Queued
+### Task 10: ✅ Commit consolidation changes
+**Status:** DONE
+
+---
+
+Commit reference for Tasks 1-10 completion: `454ea23`

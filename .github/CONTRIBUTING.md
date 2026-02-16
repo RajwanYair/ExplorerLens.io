@@ -6,13 +6,13 @@ Thank you for your interest in contributing to DarkThumbs!
 
 1. **Review the documentation:**
    - [README.md](../README.md) - Project overview
-   - [ROADMAP.md](../ROADMAP.md) - Development roadmap
-   - [docs/BUILD_GUIDE.md](../docs/BUILD_GUIDE.md) - Build instructions
+   - [MASTER_PLAN.md](../MASTER_PLAN.md) - Development roadmap
+   - [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) - Build instructions
 
 2. **Set up your development environment:**
    - Visual Studio 2026 BuildTools with MSVC v19.50+
    - CMake 3.20+
-   - See [WINDOWS_BUILD_TOOLS.md](WINDOWS_BUILD_TOOLS.md) for detailed setup
+   - See [WINDOWS_BUILD_TOOLS.md](../docs/development/WINDOWS_BUILD_TOOLS.md) for detailed setup
 
 ## Development Workflow
 
@@ -163,7 +163,8 @@ Open an issue with:
 ## Questions?
 
 - Check [docs/BUILD_GUIDE.md](../docs/BUILD_GUIDE.md) for build issues
-- Review [ROADMAP.md](../ROADMAP.md) for project direction
+- Check [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) for build issues
+- Review [MASTER_PLAN.md](../MASTER_PLAN.md) for project direction
 - Open a GitHub Discussion for general questions
 
 Thank you for contributing!

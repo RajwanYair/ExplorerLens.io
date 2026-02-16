@@ -448,7 +448,7 @@ View logs with **DebugView** (Sysinternals):
 ## Additional Resources
 
 - **Build Instructions:** [BUILD_METHOD.md](.github/standards/BUILD_METHOD.md)
-- **Sprint Plan:** [SPRINT_PLAN_25.md](SPRINT_PLAN_25.md)
+- **Sprint Plan:** [MASTER_PLAN.md](MASTER_PLAN.md)
 - **Library Inventory:** [external/LIBRARY_INVENTORY.md](external/LIBRARY_INVENTORY.md)
 - **User Guide:** [USER_GUIDE.md](USER_GUIDE.md)
 - **Plugin SDK:** [SDK/docs/PLUGIN_SDK.md](SDK/docs/PLUGIN_SDK.md)

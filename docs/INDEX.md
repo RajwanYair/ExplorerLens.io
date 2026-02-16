@@ -11,9 +11,9 @@
 
 | Document | Description |
 |----------|-------------|
-| [ROADMAP.md](../ROADMAP.md) | Development roadmap v3.0 |
+| [MASTER_PLAN.md](../MASTER_PLAN.md) | Unified roadmap and execution plan |
 | [README.md](../README.md) | Project overview and features |
-| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [CHANGELOG.md](../CHANGELOG.md) | Version history |
 | [SBOM.json](SBOM.json) | Software Bill of Materials |
 
 ---
@@ -37,8 +37,7 @@
 |----------|-------------|
 | [INTEGRATION_ARCHITECTURE.md](architecture/INTEGRATION_ARCHITECTURE.md) | System architecture |
 | [PROJECT_STRUCTURE.md](architecture/PROJECT_STRUCTURE.md) | Code organization |
-| [PROJECT_OVERVIEW.md](architecture/PROJECT_OVERVIEW.md) | Project overview |
-| [P2_ENGINE_REFACTORING_PLAN.md](architecture/P2_ENGINE_REFACTORING_PLAN.md) | Engine refactoring |
+| [MASTER_PLAN.md](../MASTER_PLAN.md) | Refactoring phases and priorities |
 | [COMPATIBILITY_KIT_SPEC.md](architecture/COMPATIBILITY_KIT_SPEC.md) | Compatibility kit spec |
 | [OBSERVABILITY_SPEC_V1.md](architecture/OBSERVABILITY_SPEC_V1.md) | Observability spec |
 
@@ -86,12 +85,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [ENHANCEMENT_PLAN_SUMMARY.md](planning/ENHANCEMENT_PLAN_SUMMARY.md) | Enhancement plan summary |
-| [OPENSOURCE_ENHANCEMENT_PLAN.md](planning/OPENSOURCE_ENHANCEMENT_PLAN.md) | Open-source enhancements |
-| [LIBRARY_UPDATE_PLAN.md](planning/LIBRARY_UPDATE_PLAN.md) | Library update plan |
-| [UNDEVELOPED_FEATURES.md](planning/UNDEVELOPED_FEATURES.md) | Feature backlog analysis |
-| [PROJECT_STATUS.md](planning/PROJECT_STATUS.md) | Current project status |
-| [SPRINT15_FORMAT_EXPANSION.md](planning/SPRINT15_FORMAT_EXPANSION.md) | Sprint 15 plan |
+| [MASTER_PLAN.md](../MASTER_PLAN.md) | Single source of truth for roadmap, sprints, and refactoring tasks |
 
 ## Other
 
@@ -103,4 +97,4 @@
 
 ---
 
-*For the full development roadmap, see [ROADMAP.md](../ROADMAP.md)*
+*For the full development roadmap, see [MASTER_PLAN.md](../MASTER_PLAN.md)*

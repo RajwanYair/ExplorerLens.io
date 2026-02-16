@@ -188,7 +188,7 @@ Setup-DarkThumbsEnv -Force
 - **Tool Versions:** `.github/TOOL_VERSIONS.md`
 - **Quick Reference:** `.github/BUILD_QUICK_REFERENCE.md`
 - **AI Instructions:** `.github/AI_BUILD_INSTRUCTIONS.md`
-- **Project Roadmap:** `../ROADMAP.md`
+- **Project Roadmap:** `../MASTER_PLAN.md`
 
 ---
 

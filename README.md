@@ -17,13 +17,13 @@ DarkThumbs generates thumbnails for comic books, archives, modern images, RAW ph
 **Getting Started:**
 
 - [Build Guide](docs/build/BUILD_GUIDE.md) - Complete build instructions
-- [Quick Setup](docs/getting-started/QUICK_SETUP.md) - Fast start guide
-- [Installation Testing Guide](docs/getting-started/INSTALLATION_TESTING_GUIDE.md) - Installation and testing procedures
+- [Installation Guide](docs/getting-started/installation.md) - Installation and setup
+- [Testing Guide](docs/testing/TESTING_GUIDE.md) - Validation and test procedures
 
 **Project Organization:**
 
-- [Project Structure](PROJECT_STRUCTURE.md) - Complete directory organization
-- [ROADMAP](ROADMAP.md) - Development roadmap and milestones
+- [Project Structure](docs/architecture/PROJECT_STRUCTURE.md) - Complete directory organization
+- [Master Plan](MASTER_PLAN.md) - Unified roadmap and execution plan
 - [Documentation Index](docs/INDEX.md) - Complete documentation index
 
 **Development:**
@@ -121,7 +121,7 @@ DarkThumbs/
 ├── .github/               # GitHub workflows and templates
 ├── CBXShell.sln          # Visual Studio solution
 ├── LICENSE               # MIT License
-├── ROADMAP.md            # Development roadmap
+├── MASTER_PLAN.md        # Unified roadmap and execution plan
 └── RUN-BUILD.bat         # Quick build script
 ```
 
@@ -147,7 +147,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 **Build System:** Active Recovery  
 **Next Milestone:** v6.0.0 (July 2026)
 
-See [ROADMAP.md](ROADMAP.md) for the complete development plan.
+See [MASTER_PLAN.md](MASTER_PLAN.md) for the complete development plan.
 
 ---
 

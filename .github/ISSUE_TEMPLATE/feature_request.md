@@ -29,7 +29,7 @@ How important is this feature to you?
 - [ ] Low - minor improvement
 
 ## Roadmap Alignment
-Have you checked if this aligns with the [ROADMAP.md](../../ROADMAP.md)?
+Have you checked if this aligns with the [MASTER_PLAN.md](../../MASTER_PLAN.md)?
 - [ ] Yes, aligns with existing plans
 - [ ] No, this is a new direction
 - [ ] Not sure
