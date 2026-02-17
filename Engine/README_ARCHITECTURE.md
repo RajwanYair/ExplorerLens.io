@@ -283,7 +283,7 @@ auto quality = ScalingQuality::Bicubic;  // vs. Bilinear (default)
 **Project:** DarkThumbs  
 **License:** MIT  
 **Repository:** (Internal)  
-**Issues:** See ROADMAP.md for known issues and sprint planning
+**Issues:** See MASTER_PLAN.md for known issues and sprint planning
 
 ---
 

@@ -1,32 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  DarkThumbs Windows Installer (WiX Toolset 4.x/5.x)
+  DarkThumbs Windows Installer (WiX Toolset v6.x)
   Sprint 23: Packaging & Deployment
   
   Build Instructions:
-    wix build DarkThumbs.wxs -out DarkThumbs-Setup-6.2.0.msi
+    wix build DarkThumbs.wxs -out DarkThumbs-Setup-7.0.0.msi
   
   Prerequisites:
-    - WiX Toolset v4.0.5+ or v5.0+
+    - WiX Toolset v6.0+
     - .NET SDK 8.0+
     - All binaries built in Release configuration
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   
-  <!-- Product Information -->
-  <Product Id="*"
-           Name="DarkThumbs"
+  <!-- Package Information (WiX v6 syntax) -->
+  <Package Name="DarkThumbs"
            Language="1033"
-           Version="6.2.0.0"
+           Version="7.0.0.0"
            Manufacturer="DarkThumbs Project"
-           UpgradeCode="A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
-    
-    <Package InstallerVersion="500"
-             Compressed="yes"
-             InstallScope="perMachine"
-             Description="DarkThumbs - GPU-Accelerated Windows Thumbnail Provider"
-             Comments="150+ file format thumbnail generation for Windows Explorer"
-             Manufacturer="DarkThumbs Project" />
+           UpgradeCode="A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078"
+           InstallerVersion="500"
+           Compressed="yes"
+           Scope="perMachine"
+           ProductCode="*">
     
     <!-- Upgrade Logic -->
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed."
@@ -45,7 +41,8 @@
       
       <!-- Core Components -->
       <ComponentGroupRef Id="CoreComponents" />
-      <ComponentGroupRef Id="ExternalLibraries" />
+      <!-- External libraries moved to vcpkg integration -->
+      <!-- <ComponentGroupRef Id="ExternalLibraries" /> -->
       <ComponentGroupRef Id="RegistryEntries" />
       <ComponentGroupRef Id="StartMenuShortcuts" />
     </Feature>
@@ -65,7 +62,7 @@
              AllowAdvertise="no">
       <ComponentGroupRef Id="DebugComponents" />
     </Feature>
-  </Product>
+  </Package>
   
   <!-- Directory Structure -->
   <Fragment>
@@ -88,19 +85,18 @@
       <!-- Shell Extension COM DLL -->
       <Component Id="CBXShellDLL" Guid="B8394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <File Id="CBXShellDLL" 
-              Source="$(var.BuildDir)\CBXShell\x64\Release\CBXShell.dll"
+              Source="$(var.BuildDir)\x64\Release\CBXShell.dll"
               KeyPath="yes"
-              Checksum="yes">
-          <!-- COM Registration -->
-          <RegistryValue Root="HKCR" 
-                         Key="CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" 
-                         Value="DarkThumbs Thumbnail Provider"
-                         Type="string" />
-        </File>
+              Checksum="yes" />
+        
+        <!-- COM Registration -->
+        <RegistryValue Root="HKCR" 
+                       Key="CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" 
+                       Value="DarkThumbs Thumbnail Provider"
+                       Type="string" />
       </Component>
       
-      <!-- Engine Library --
->
+      <!-- Engine Library -->
       <Component Id="EngineLibrary" Guid="C8394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <File Id="DarkThumbsEngine"
               Source="$(var.BuildDir)\build\lib\Release\DarkThumbsEngine.lib"
@@ -108,7 +104,8 @@
       </Component>
     </ComponentGroup>
     
-    <!-- External Dependencies -->
+    <!-- External Dependencies - TODO: Add after vcpkg build -->
+    <!--
     <ComponentGroup Id="ExternalLibraries" Directory="BinFolder">
       <Component Id="LibWebP" Guid="D8394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <File Source="$(var.BuildDir)\external\image-libs\libwebp-1.5.0-build\libwebp.dll" />
@@ -118,16 +115,17 @@
         <File Source="$(var.BuildDir)\external\image-libs\libavif-1.3.0\build\Release\avif.dll" />
       </Component>
       
-      <Component Id="LibJXL" Guid="F8394D0D-EE2B-4A00-9FAC-AB8D3B03F078" Condition="HAS_LIBJXL">
+      <Component Id="LibJXL" Guid="F8394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <File Source="$(var.BuildDir)\external\image-libs\libjxl-0.11.1\install\bin\jxl.dll" />
       </Component>
     </ComponentGroup>
+    -->
     
     <!-- Manager Application -->
     <ComponentGroup Id="ManagerComponents" Directory="BinFolder">
       <Component Id="CBXManagerEXE" Guid="18394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <File Id="CBXManagerEXE"
-              Source="$(var.BuildDir)\CBXManager\x64\Release\CBXManager.exe"
+              Source="$(var.BuildDir)\x64\Release\CBXManager.exe"
               KeyPath="yes" />
       </Component>
     </ComponentGroup>
@@ -135,11 +133,11 @@
     <!-- Debug Symbols -->
     <ComponentGroup Id="DebugComponents" Directory="BinFolder">
       <Component Id="CBXShellPDB" Guid="28394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
-        <File Source="$(var.BuildDir)\CBXShell\x64\Release\CBXShell.pdb" />
+        <File Source="$(var.BuildDir)\x64\Release\CBXShell.pdb" />
       </Component>
       
       <Component Id="CBXManagerPDB" Guid="38394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
-        <File Source="$(var.BuildDir)\CBXManager\x64\Release\CBXManager.pdb" />
+        <File Source="$(var.BuildDir)\x64\Release\CBXManager.pdb" />
       </Component>
     </ComponentGroup>
     
@@ -170,7 +168,7 @@
         </RegistryKey>
         
         <!-- JPEG XL -->
-        <RegistryKey Root="HKCR" Key=".jxl\shellex\{e357fccd-a995-4576-b01f-234630154e96}" Condition="HAS_LIBJXL">
+        <RegistryKey Root="HKCR" Key=".jxl\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
           <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
         </RegistryKey>
         
@@ -188,7 +186,7 @@
       <Component Id="ConfigurationRegistry" Guid="58394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <RegistryKey Root="HKLM" Key="SOFTWARE\DarkThumbs">
           <RegistryValue Name="InstallPath" Value="[INSTALLFOLDER]" Type="string" />
-          <RegistryValue Name="Version" Value="6.2.0" Type="string" />
+          <RegistryValue Name="Version" Value="7.0.0" Type="string" />
           <RegistryValue Name="CacheMaxSizeMB" Value="500" Type="integer" />
           <RegistryValue Name="GPUEnabled" Value="1" Type="integer" />
         </RegistryKey>
@@ -219,16 +217,18 @@
   
   <!-- Icons -->
   <Fragment>
-    <Icon Id="AppIcon.exe" SourceFile="$(var.BuildDir)\CBXManager\CBXManager.exe" />
+    <Icon Id="AppIcon.exe" SourceFile="$(var.BuildDir)\x64\Release\CBXManager.exe" />
   </Fragment>
   
   <!-- UI Configuration -->
+  <!-- Commented out for WiX v6 compatibility - use basic MSI UI -->
+  <!--
   <Fragment>
     <UI Id="WixUI_FeatureTree">
       <UIRef Id="WixUI_FeatureTree" />
       <UIRef Id="WixUI_ErrorProgressText" />
       
-      <!-- License Agreement -->
+      
       <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
       <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
     </UI>
@@ -238,19 +238,14 @@
     <WixVariable Id="WixUIBannerBmp" Value="$(var.BuildDir)\packaging\banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="$(var.BuildDir)\packaging\dialog.bmp" />
   </Fragment>
+  -->
   
   <!-- Custom Actions -->
   <Fragment>
-    <!-- Refresh Windows Explorer after installation -->
-    <CustomAction Id="RefreshExplorer"
-                  BinaryKey="WixCA"
-                  DllEntry="WixShellExec"
-                  Execute="deferred"
-                  Impersonate="no"
-                  Return="ignore" />
-    
+    <!-- Note: Explorer refresh removed for WiX v6 compatibility -->
+    <!-- Users can restart Explorer manually or reboot to apply changes -->
     <InstallExecuteSequence>
-      <Custom Action="RefreshExplorer" Before="InstallFinalize">NOT REMOVE</Custom>
+      <!-- Reserved for future custom actions -->
     </InstallExecuteSequence>
   </Fragment>
   

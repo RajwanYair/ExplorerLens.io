@@ -1,0 +1,170 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "vcpkg-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      }
+    },
+    {
+      "name": "msvc-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": "Windows",
+          "intelliSenseMode": "windows-msvc-x64"
+        }
+      }
+    },
+    {
+      "name": "vcpkg-release",
+      "displayName": "Release (vcpkg + Ninja)",
+      "description": "Fast Release build using vcpkg dependencies and Ninja generator",
+      "inherits": [
+        "vcpkg-base",
+        "msvc-base"
+      ],
+      "binaryDir": "${sourceDir}/build-vcpkg",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      }
+    },
+    {
+      "name": "vcpkg-debug",
+      "displayName": "Debug (vcpkg + Ninja)",
+      "description": "Debug build with vcpkg dependencies for development",
+      "inherits": [
+        "vcpkg-base",
+        "msvc-base"
+      ],
+      "binaryDir": "${sourceDir}/build-vcpkg-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+      }
+    },
+    {
+      "name": "default-release",
+      "displayName": "Release (Default - Ninja)",
+      "description": "Standard Release build with Ninja (no vcpkg)",
+      "inherits": "msvc-base",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "default-debug",
+      "displayName": "Debug (Default - Ninja)",
+      "description": "Standard Debug build with Ninja (no vcpkg)",
+      "inherits": "msvc-base",
+      "binaryDir": "${sourceDir}/build-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "vs2022",
+      "displayName": "Visual Studio 2022 (MSBuild)",
+      "description": "Traditional Visual Studio build using MSBuild",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build-vs",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "vcpkg-release",
+      "displayName": "Build Release (vcpkg)",
+      "configurePreset": "vcpkg-release",
+      "configuration": "Release",
+      "jobs": 8,
+      "verbose": false
+    },
+    {
+      "name": "vcpkg-debug",
+      "displayName": "Build Debug (vcpkg)",
+      "configurePreset": "vcpkg-debug",
+      "configuration": "Debug",
+      "jobs": 8,
+      "verbose": false
+    },
+    {
+      "name": "default-release",
+      "displayName": "Build Release (Default)",
+      "configurePreset": "default-release",
+      "configuration": "Release",
+      "jobs": 8,
+      "verbose": false
+    },
+    {
+      "name": "default-debug",
+      "displayName": "Build Debug (Default)",
+      "configurePreset": "default-debug",
+      "configuration": "Debug",
+      "jobs": 8,
+      "verbose": false
+    },
+    {
+      "name": "vs2022-release",
+      "displayName": "Build Release (VS2022)",
+      "configurePreset": "vs2022",
+      "configuration": "Release"
+    },
+    {
+      "name": "vs2022-debug",
+      "displayName": "Build Debug (VS2022)",
+      "configurePreset": "vs2022",
+      "configuration": "Debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "vcpkg-release-test",
+      "displayName": "Test Release (vcpkg)",
+      "configurePreset": "vcpkg-release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "vcpkg-debug-test",
+      "displayName": "Test Debug (vcpkg)",
+      "configurePreset": "vcpkg-debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "ignore",
+        "stopOnFailure": false
+      }
+    }
+  ],
+  "vendor": {
+    "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+      "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
+    }
+  }
+}

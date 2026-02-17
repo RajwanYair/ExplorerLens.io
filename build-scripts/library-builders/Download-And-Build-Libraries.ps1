@@ -2,6 +2,11 @@
 # Download-And-Build-Libraries.ps1
 # Download prebuilt libraries or build from source for DarkThumbs
 # ===========================================================================
+# 
+# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# This script is kept for reference only.
+# See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
+# 
 
 $ErrorActionPreference = "Continue"
 $ProgressPreference = "SilentlyContinue"
@@ -56,8 +61,8 @@ if ($vcpkg) {
             "bz2.lib"         = "external\compression\bzip2-1.0.8\x64\Release\bzip2.lib"
             "lzma.lib"        = "external\compression-libs\lzma-26.00\build-vs\Release\lzma.lib"
             "minizip.lib"     = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib"
-            "webp.lib"        = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"
-            "sharpyuv.lib"    = "external\image-libs\libwebp-1.5.0\build-vs\Release\sharpyuv.lib"
+            "webp.lib"        = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib"
+            "sharpyuv.lib"    = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\sharpyuv.lib"
         }
         
         $vcpkgLibDir = Join-Path $vcpkgRoot "installed\x64-windows-static\lib"
@@ -134,8 +139,8 @@ $allLibs = @(
     @{Name = "Bzip2"; Path = "external\compression\bzip2-1.0.8\x64\Release\bzip2.lib"; Required = $false },
     @{Name = "LZMA"; Path = "external\compression-libs\lzma-26.00\build-vs\Release\lzma.lib"; Required = $false },
     @{Name = "MinizipNG"; Path = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib"; Required = $true },
-    @{Name = "WebP"; Path = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"; Required = $true },
-    @{Name = "SharpYUV"; Path = "external\image-libs\libwebp-1.5.0\build-vs\Release\sharpyuv.lib"; Required = $true }
+    @{Name = "WebP"; Path = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib"; Required = $true },
+    @{Name = "SharpYUV"; Path = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\sharpyuv.lib"; Required = $true }
 )
 
 $ready = 0

@@ -85,8 +85,8 @@ function Build-MinizipWithMT {
             "mz_strm_pkcrypt.c", "mz_strm_wzaes.c"
         )
         
-        $zlibDir = Join-Path $WorkspaceRoot "external\compression\zlib-1.3.1"
-        $zstdDir = Join-Path $WorkspaceRoot "external\compression\zstd-1.5.7"
+        $zlibDir = Join-Path $WorkspaceRoot "external\compression-libs\zlib-1.3.1"
+        $zstdDir = Join-Path $WorkspaceRoot "external\compression-libs\zstd-1.5.7"
         
         $objFiles = @()
         foreach ($src in $sources) {

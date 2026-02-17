@@ -508,7 +508,7 @@ cd external
 git clone https://github.com/strukturag/libheif.git
 cd libheif
 mkdir build && cd build
-cmake -G "Visual Studio 17 2022" -A x64 ..
+cmake -G "Visual Studio 18 2026" -A x64 ..
 cmake --build . --config Release
 ```
 
@@ -517,13 +517,13 @@ cmake --build . --config Release
 cd external
 git clone https://github.com/google/brotli.git
 cd brotli && mkdir build && cd build
-cmake -G "Visual Studio 17 2022" -A x64 ..
+cmake -G "Visual Studio 18 2026" -A x64 ..
 cmake --build . --config Release
 
 cd ../../
 git clone https://github.com/google/highway.git
 cd highway && mkdir build && cd build
-cmake -G "Visual Studio 17 2022" -A x64 ..
+cmake -G "Visual Studio 18 2026" -A x64 ..
 cmake --build . --config Release
 ```
 

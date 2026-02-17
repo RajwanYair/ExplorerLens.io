@@ -36,7 +36,7 @@ DarkThumbs/
 ├── packaging/                 # Package configuration (MSIX, MSI)
 ├── README.md                  # Project overview and quick start
 ├── release-scripts/           # Release automation
-├── ROADMAP.md                 # Development roadmap
+├── MASTER_PLAN.md             # Development roadmap (unified)
 ├── scripts/                   # Utility scripts
 ├── SDK/                       # Plugin SDK
 ├── src/                       # Future modular C++ projects
@@ -80,10 +80,10 @@ DarkThumbs/
 ```
 build-scripts/
 ├── external-libs/             # Individual library builders
-│   ├── build-dav1d.ps1
-│   ├── build-libavif.ps1
+│   ├── Build-Dav1d.ps1
+│   ├── Build-LibAVIF.ps1
 │   ├── Build-LibHEIF.ps1
-│   ├── build-libjxl.ps1
+│   ├── Build-LibJXL.ps1
 │   ├── Build-LibRaw.ps1
 │   ├── Build-LibWebP-NMake.ps1
 │   ├── Build-LZ4.ps1
@@ -102,7 +102,7 @@ build-scripts/
 │   ├── Enable-DarkThumbsDiagnostics.ps1
 │   └── Monitor-Build.ps1
 ├── validation/                # Build validation
-│   ├── check-tools.ps1
+│   ├── Check-Tools.ps1
 │   ├── Simple-Validate.ps1
 │   └── Validate-Build.ps1
 ├── archive/                   # Archived/deprecated scripts
@@ -421,7 +421,7 @@ See [.gitignore](.gitignore) for complete exclusion list.
 ### Documentation
 
 - **README.md** - Project overview, features, quick start
-- **ROADMAP.md** - Development roadmap and milestones
+- **MASTER_PLAN.md** - Development roadmap and milestones (unified source of truth)
 - **LICENSE** - MIT License
 - **PROJECT_STRUCTURE.md** - This file
 
@@ -488,7 +488,7 @@ cd DarkThumbs
 ### 2. Build External Libraries
 
 ```powershell
-.\build-scripts\library-builders\Build-All-External-Libraries.ps1
+.\/build-scripts\/Build-All-DarkThumbs-V7.ps1 -Clean
 ```
 
 ### 3. Build DarkThumbs

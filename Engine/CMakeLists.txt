@@ -1,13 +1,13 @@
 #==============================================================================
 # DarkThumbs Engine - CMake Build Configuration
 # Copyright (c) 2026 - DarkThumbs Project
-# Version: 6.0.0
+# Version: 7.0.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(DarkThumbsEngine
-    VERSION 6.0.0
+    VERSION 7.0.0
     DESCRIPTION "DarkThumbs Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -27,6 +27,27 @@ option(ENABLE_CACHE "Enable thumbnail caching" ON)
 option(HAS_LIBJXL "Enable JPEG XL support (requires libjxl)" ON)
 option(HAS_LIBHEIF "Enable HEIF/HEIC support (requires libheif)" OFF)
 option(HAS_LIBRAW "Enable Camera RAW support (requires LibRaw)" ON)
+
+# libheif/libde265 path resolution (install-first, build fallback)
+set(LIBHEIF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/install/include")
+if(NOT EXISTS "${LIBHEIF_INCLUDE_DIR}/libheif/heif.h")
+    set(LIBHEIF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/libheif/api")
+endif()
+
+set(LIBHEIF_GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/build-vs")
+
+set(LIBHEIF_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/install/lib/heif.lib")
+if(NOT EXISTS "${LIBHEIF_LIBRARY_PATH}")
+    set(LIBHEIF_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/build-vs/libheif/Release/heif.lib")
+endif()
+
+set(LIBDE265_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libde265-1.0.15/build-vs/libde265/Release/de265.lib")
+if(NOT EXISTS "${LIBDE265_LIBRARY_PATH}")
+    set(LIBDE265_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libde265-1.0.15/install/lib/de265.lib")
+endif()
+if(NOT EXISTS "${LIBDE265_LIBRARY_PATH}")
+    set(LIBDE265_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libde265-1.0.15/install/lib/libde265.lib")
+endif()
 
 #==============================================================================
 # Compiler Settings
@@ -200,6 +221,9 @@ if(ENGINE_SOURCES)
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/minizip-ng-4.0.10
             # JXL includes (actual install location)
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libjxl-0.11.1/install/include
+            # libheif includes (HEIF/HEIC support)
+            ${LIBHEIF_INCLUDE_DIR}
+            ${LIBHEIF_GENERATED_INCLUDE_DIR}
             # LibRaw includes
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/camera-libs/libraw-install/include
     )
@@ -221,7 +245,7 @@ if(ENGINE_SOURCES)
         endif()
         
         if(HAS_LIBHEIF)
-            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_LIBHEIF)
+            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_LIBHEIF LIBHEIF_STATIC_BUILD)
             message(STATUS "HEIF/HEIC support: ENABLED")
         else()
             message(STATUS "HEIF/HEIC support: DISABLED (set -DHAS_LIBHEIF=ON when libheif is available)")
@@ -280,6 +304,15 @@ if(ENGINE_SOURCES)
         endif()
         if(HAS_LIBRAW)
             target_link_libraries(DarkThumbsEngine PUBLIC libraw_static)
+        endif()
+        if(HAS_LIBHEIF)
+            if(NOT EXISTS "${LIBHEIF_LIBRARY_PATH}")
+                message(FATAL_ERROR "HAS_LIBHEIF=ON but heif.lib was not found. Expected at ${LIBHEIF_LIBRARY_PATH}")
+            endif()
+            if(NOT EXISTS "${LIBDE265_LIBRARY_PATH}")
+                message(FATAL_ERROR "HAS_LIBHEIF=ON but libde265 library was not found. Expected at ${LIBDE265_LIBRARY_PATH}")
+            endif()
+            target_link_libraries(DarkThumbsEngine PUBLIC "${LIBHEIF_LIBRARY_PATH}" "${LIBDE265_LIBRARY_PATH}")
         endif()
     endif()
     

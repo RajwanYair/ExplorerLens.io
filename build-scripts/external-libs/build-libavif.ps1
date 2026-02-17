@@ -1,123 +1,77 @@
-# Build libavif 1.3.0 for DarkThumbs
-# PowerShell build script with CMake and MSVC
+#Requires -Version 7.0
+# DarkThumbs v7.0 - Build libavif 1.3.0 (AV1 Image Format)
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 16, 2026
 
 param(
     [string]$Configuration = "Release",
-    [string]$Platform = "x64"
+    [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-Write-Host "Building libavif 1.3.0 for DarkThumbs" -ForegroundColor Cyan
-Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
-Write-Host "Platform: $Platform" -ForegroundColor Yellow
-Write-Host ""
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$sourceDir = Join-Path $rootDir "external\image-libs\libavif-1.3.0"
+$dav1dDir = Join-Path $rootDir "external\image-libs\dav1d-1.5.1\install"
+$buildDir = Join-Path $sourceDir "build-msvc"
+$installDir = Join-Path $sourceDir "install"
 
-# Setup paths
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
-$ExternalDir = Join-Path $RootDir "external"
-$LibavifDir = Join-Path $ExternalDir "image-libs\libavif-1.3.0"
-$Dav1dDir = Join-Path $ExternalDir "image-libs\dav1d-1.5.1\install"
-$BuildDir = Join-Path $LibavifDir "build-msvc"
-$InstallDir = Join-Path $LibavifDir "install"
+Write-BuildHeader "Building libavif 1.3.0 (AV1 Image Format)"
 
-# Verify source exists
-if (-not (Test-Path $LibavifDir)) {
-    Write-Host "[ERROR] libavif source not found at: $LibavifDir" -ForegroundColor Red
-    Write-Host "Please run download-all-libs.ps1 first." -ForegroundColor Yellow
+# Verify source directory
+if (-not (Test-Path $sourceDir)) {
+    Write-BuildLog "libavif-1.3.0 not found at $sourceDir" -Level Error
+    Write-BuildLog "Please run download-all-libs.ps1 first" -Level Warning
     exit 1
 }
 
-# Verify dav1d is built
-if (-not (Test-Path (Join-Path $Dav1dDir "lib\dav1d.lib"))) {
-    Write-Host "[ERROR] dav1d not built. Please run build-dav1d.ps1 first." -ForegroundColor Red
+# Verify dav1d dependency
+if (-not (Test-Path (Join-Path $dav1dDir "lib\dav1d.lib"))) {
+    Write-BuildLog "dav1d not built. Please run Build-Dav1d.ps1 first" -Level Error
     exit 1
 }
 
-# Find Visual Studio and CMake
-$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-if (Test-Path $VsWhere) {
-    $VsPath = & $VsWhere -latest -property installationPath
-    Write-Host "[OK] Found Visual Studio at: $VsPath" -ForegroundColor Green
-} else {
-    Write-Host "[ERROR] Visual Studio not found" -ForegroundColor Red
-    exit 1
-}
-
-# Check for CMake
-$CMake = Get-Command cmake -ErrorAction SilentlyContinue
-if (-not $CMake) {
-    Write-Host "[ERROR] CMake not found in PATH" -ForegroundColor Red
-    exit 1
-}
-
-# Create build directory
-if (Test-Path $BuildDir) {
-    Write-Host "Cleaning existing build directory..." -ForegroundColor Yellow
-    Remove-Item -Recurse -Force $BuildDir
-}
-New-Item -ItemType Directory -Path $BuildDir | Out-Null
-
-# Configure with CMake
-Write-Host "Configuring libavif with CMake..." -ForegroundColor Yellow
-Push-Location $BuildDir
+Write-BuildLog "Source: $sourceDir" -Level Info
+Write-BuildLog "Build: $buildDir" -Level Info
+Write-BuildLog "Install: $installDir" -Level Info
+Write-BuildLog "DAV1D: $dav1dDir" -Level Info
 
 try {
-    & cmake .. `
-        -G "Visual Studio 17 2022" `
-        -A x64 `
-        -DCMAKE_BUILD_TYPE=Release `
-        -DCMAKE_INSTALL_PREFIX="$InstallDir" `
-        -DBUILD_SHARED_LIBS=OFF `
-        -DAVIF_CODEC_DAV1D=ON `
-        -DAVIF_LOCAL_DAV1D=OFF `
-        -Ddav1d_DIR="$Dav1dDir" `
-        -DAVIF_CODEC_AOM=OFF `
-        -DAVIF_BUILD_APPS=OFF `
-        -DAVIF_BUILD_TESTS=OFF `
-        -DAVIF_BUILD_EXAMPLES=OFF `
-        -DAVIF_ENABLE_EXPERIMENTAL_GAIN_MAP=ON `
-        -DAVIF_ENABLE_EXPERIMENTAL_SAMPLE_TRANSFORM=ON
-    
-    if ($LASTEXITCODE -ne 0) {
-        throw "CMake configuration failed"
+    # CMake options for libavif
+    $cmakeOptions = @{
+        'CMAKE_BUILD_TYPE'                          = 'Release'
+        'BUILD_SHARED_LIBS'                         = 'OFF'
+        'AVIF_CODEC_DAV1D'                          = 'ON'
+        'AVIF_LOCAL_DAV1D'                          = 'OFF'
+        'dav1d_DIR'                                 = $dav1dDir
+        'AVIF_CODEC_AOM'                            = 'OFF'
+        'AVIF_BUILD_APPS'                           = 'OFF'
+        'AVIF_BUILD_TESTS'                          = 'OFF'
+        'AVIF_BUILD_EXAMPLES'                       = 'OFF'
+        'AVIF_ENABLE_EXPERIMENTAL_GAIN_MAP'         = 'ON'
+        'AVIF_ENABLE_EXPERIMENTAL_SAMPLE_TRANSFORM' = 'ON'
     }
     
-    Write-Host "[OK] CMake configuration complete" -ForegroundColor Green
+    # Build with CMake
+    Invoke-CMakeBuild `
+        -LibraryName "libavif" `
+        -SourceDir $sourceDir `
+        -BuildDir $buildDir `
+        -InstallDir $installDir `
+        -Configuration $Configuration `
+        -CMakeOptions $cmakeOptions `
+        -Clean:$Clean
     
-    # Build
-    Write-Host "Building libavif..." -ForegroundColor Yellow
-    & cmake --build . --config Release --target install
+    # Verify outputs
+    $expectedLib = Join-Path $installDir "lib\avif.lib"
+    Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
     
-    if ($LASTEXITCODE -ne 0) {
-        throw "Build failed"
-    }
+    Write-BuildLog "libavif 1.3.0 build completed successfully" -Level Success
+    Write-BuildLog "Features: DAV1D decoder (AV1), Gain Map API (HDR), Sample Transform" -Level Info
     
-    Write-Host "[OK] Build complete" -ForegroundColor Green
 } catch {
-    Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red
-    Pop-Location
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
-} finally {
-    Pop-Location
 }
 
-# Verify build
-$LibPath = Join-Path $InstallDir "lib\avif.lib"
-if (Test-Path $LibPath) {
-    Write-Host ""
-    Write-Host "[SUCCESS] libavif built successfully!" -ForegroundColor Green
-    Write-Host "Library: $LibPath" -ForegroundColor Green
-    Write-Host "Headers: $(Join-Path $InstallDir 'include')" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Features enabled:" -ForegroundColor Cyan
-    Write-Host "  - DAV1D decoder (AV1)" -ForegroundColor White
-    Write-Host "  - Gain Map API (HDR)" -ForegroundColor White
-    Write-Host "  - Sample Transform" -ForegroundColor White
-    exit 0
-} else {
-    Write-Host ""
-    Write-Host "[ERROR] Build failed - library not found" -ForegroundColor Red
-    exit 1
-}

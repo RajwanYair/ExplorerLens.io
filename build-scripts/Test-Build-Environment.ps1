@@ -45,12 +45,12 @@ if ($cmake) {
 Write-Host "`n[3] External Libraries" -ForegroundColor Yellow
 
 $libraries = @{
-    "zlib-1.3.1"         = "external\compression\zlib-1.3.1"
-    "lz4-1.10.0"         = "external\compression\lz4-1.10.0"
-    "zstd-1.5.7"         = "external\compression\zstd-1.5.7"
-    "xz-5.6.3 (liblzma)" = "external\compression\xz-5.6.3"
-    "minizip-ng-4.0.10"  = "external\compression\minizip-ng-4.0.10"
-    "libwebp-1.5.0"      = "external\image-libs\libwebp-1.5.0"
+    "zlib-1.3.1"         = "external\compression-libs\zlib-1.3.1"
+    "lz4-1.10.0"         = "external\compression-libs\lz4-1.10.0"
+    "zstd-1.5.7"         = "external\compression-libs\zstd-1.5.7"
+    "xz-5.6.3 (liblzma)" = "external\compression-libs\xz-5.6.3"
+    "minizip-ng-4.0.10"  = "external\compression-libs\minizip-ng-4.0.10"
+    "libwebp-1.5.0"      = "external\image-libs\libwebp-1.5.0-build"
     "dav1d-1.5.1"        = "external\image-libs\dav1d-1.5.1"
     "libavif-1.3.0"      = "external\image-libs\libavif-1.3.0"
     "libjxl-0.11.1"      = "external\image-libs\libjxl-0.11.1"
@@ -71,9 +71,8 @@ foreach ($lib in $libraries.GetEnumerator()) {
 Write-Host "`n[4] Critical Build Files" -ForegroundColor Yellow
 
 $criticalFiles = @{
-    "libwebp Makefile.vc"       = "external\image-libs\libwebp-1.5.0\Makefile.vc"
-    "xz CMakeLists.txt"         = "external\compression\xz-5.6.3\CMakeLists.txt"
-    "minizip-ng CMakeLists.txt" = "external\compression\minizip-ng-4.0.10\CMakeLists.txt"
+    "libwebp Makefile.vc"       = "external\image-libs\libwebp-1.5.0-build\Makefile.vc"
+    "minizip-ng CMakeLists.txt" = "external\compression-libs\minizip-ng-4.0.10\CMakeLists.txt"
 }
 
 foreach ($file in $criticalFiles.GetEnumerator()) {

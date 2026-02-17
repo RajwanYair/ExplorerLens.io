@@ -86,15 +86,15 @@ Write-Host "`n[1/7] Verifying Root Directory Structure..." -ForegroundColor Cyan
 Write-Host "────────────────────────────────────────────" -ForegroundColor DarkGray
 
 Test-FileExists "README.md" "Root README.md exists"
-Test-FileExists "ROADMAP.md" "ROADMAP.md exists"
+Test-FileExists "MASTER_PLAN.md" "MASTER_PLAN.md exists"
 Test-FileExists "LICENSE" "LICENSE file exists"
-Test-FileExists "PROJECT_STRUCTURE.md" "PROJECT_STRUCTURE.md exists"
+Test-FileExists "docs\architecture\PROJECT_STRUCTURE.md" "PROJECT_STRUCTURE.md exists"
 Test-FileExists "CMakeLists.txt" "Root CMakeLists.txt exists"
 Test-FileExists "CBXShell.sln" "Visual Studio solution exists"
 Test-FileExists ".gitignore" ".gitignore exists"
 Test-FileExists ".gitattributes" ".gitattributes exists"
 
-Test-FileNotExists "SPRINT_SUMMARY.md" "SPRINT_SUMMARY.md moved from root"
+Test-FileNotExists "SPRINT_SUMMARY.md" "Legacy sprint summary removed from root"
 
 # ============================================================================
 # 2. .github Directory Structure
@@ -126,19 +126,18 @@ Write-Host "──────────────────────�
 
 Test-DirectoryExists "docs" "docs directory exists"
 Test-DirectoryExists "docs\development" "docs\development exists"
-Test-DirectoryExists "docs\sprints" "docs\sprints exists"
 Test-DirectoryExists "docs\architecture" "docs\architecture exists"
 Test-DirectoryExists "docs\build" "docs\build exists"
 Test-DirectoryExists "docs\getting-started" "docs\getting-started exists"
 Test-DirectoryExists "docs\testing" "docs\testing exists"
-Test-DirectoryExists "docs\planning" "docs\planning exists"
 Test-DirectoryExists "docs\plugins" "docs\plugins exists"
+Test-DirectoryExists "docs\audits" "docs\audits exists"
 
 Test-FileExists "docs\development\README.md" "Development README exists"
 Test-FileExists "docs\development\AI_BUILD_INSTRUCTIONS.md" "AI build instructions moved"
 Test-FileExists "docs\development\BUILD_QUICK_REFERENCE.md" "Build quick ref moved"
 Test-FileExists "docs\development\THIRD_PARTY.md" "Third-party docs moved"
-Test-FileExists "docs\ORGANIZATION_REPORT.md" "Organization report exists"
+Test-FileExists "docs\INDEX.md" "Documentation index exists"
 
 # ============================================================================
 # 4. Build Scripts Structure
@@ -153,13 +152,12 @@ Test-DirectoryExists "build-scripts\production" "production subdirectory exists"
 Test-DirectoryExists "build-scripts\library-builders" "library-builders exists"
 Test-DirectoryExists "build-scripts\utilities" "utilities subdirectory exists"
 Test-DirectoryExists "build-scripts\validation" "validation subdirectory exists"
-Test-DirectoryExists "build-scripts\archive" "archive subdirectory exists"
 
 Test-FileExists "build-scripts\README.md" "Build scripts README exists"
-Test-FileExists "build-scripts\build.ps1" "Main build script exists"
+Test-FileExists "scripts\build.ps1" "Main build script exists"
 
 Test-FileExists "build-scripts\external-libs\Build-LibWebP-NMake.ps1" "LibWebP script moved"
-Test-FileExists "build-scripts\external-libs\build-libjxl.ps1" "LibJXL script moved"
+Test-FileExists "build-scripts\external-libs\Build-LibJXL.ps1" "LibJXL script moved"
 Test-FileExists "build-scripts\production\Build-Production-SlowMachine.ps1" "Production script moved"
 
 Test-FileNotExists "build-scripts\build-liblzma.bat" "Obsolete .bat script removed"
@@ -175,13 +173,11 @@ Write-Host "──────────────────────�
 Test-DirectoryExists "external" "external directory exists"
 Test-DirectoryExists "external\compression" "compression libs directory exists"
 Test-DirectoryExists "external\image-libs" "image-libs directory exists"
-Test-DirectoryExists "external\archives" "archives directory exists"
+Test-DirectoryExists "external\archive-libs" "archive libs directory exists"
 
 Test-FileExists "external\README.md" "External README exists"
 Test-FileExists "external\LIBRARY_INVENTORY.md" "Library inventory exists"
 
-Test-DirectoryExists "downloads" "downloads directory exists"
-Test-FileExists "downloads\README.md" "Downloads README exists"
 
 # ============================================================================
 # 6. Core Components
@@ -208,9 +204,9 @@ Write-Host "`n[7/7] Verifying Scripts and Tools..." -ForegroundColor Cyan
 Write-Host "────────────────────────────────────────────" -ForegroundColor DarkGray
 
 Test-DirectoryExists "scripts" "scripts directory exists"
-Test-FileExists "scripts\reorganize-project.ps1" "Reorganization script exists"
+Test-FileExists "scripts\setup\Reorganize-Project.ps1" "Reorganization script exists"
 
-Test-DirectoryExists "release-scripts" "release-scripts exists"
+Test-DirectoryExists "scripts\release" "scripts\release exists"
 Test-DirectoryExists "tools" "tools directory exists"
 
 # ============================================================================

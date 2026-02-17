@@ -1,13 +1,13 @@
 # DarkThumbs - GPU-Accelerated Thumbnail Generator
 
-**High-Performance Windows Shell Extension for 155+ File Formats**
+**High-Performance Windows Shell Extension for 200+ File Formats**
 
-DarkThumbs generates thumbnails for comic books, archives, modern images, RAW photos, and videos using **DirectX 11 GPU acceleration** and **AVX2 SIMD-optimized processing**.
+DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11 GPU acceleration** and **multi-threaded processing**. Version 7.0 adds video thumbnails, PDF support, SVG rendering, QOI format, and comprehensive multimedia format coverage.
 
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
 ![Platform](https://img.shields.io/badge/Platform-x64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-6.2.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-7.0.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
@@ -16,7 +16,7 @@ DarkThumbs generates thumbnails for comic books, archives, modern images, RAW ph
 
 **Getting Started:**
 
-- [Build Guide](docs/build/BUILD_GUIDE.md) - Complete build instructions
+- [Build Quick Reference](docs/development/BUILD_QUICK_REFERENCE.md) - Complete build instructions
 - [Installation Guide](docs/getting-started/installation.md) - Installation and setup
 - [Testing Guide](docs/testing/TESTING_GUIDE.md) - Validation and test procedures
 
@@ -37,7 +37,7 @@ DarkThumbs generates thumbnails for comic books, archives, modern images, RAW ph
 
 ## ✨ Features
 
-### Supported Formats (155+ formats)
+### Supported Formats (200+ file extensions via 24 specialized decoders)
 
 #### Core Image Formats (✅ Fully Supported)
 - **Standard:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tiff`, `.tif`
@@ -57,16 +57,35 @@ DarkThumbs generates thumbnails for comic books, archives, modern images, RAW ph
 - **Modern Images:** `.jxl` (JPEG XL) via libjxl 0.11.1, `.heif`/`.heic` (HEIF/HEIC) via WIC with hardware acceleration
   - **JXL Features:** Next-gen format support, better compression than WebP, wide color gamut
   - **HEIF Features:** Apple iPhone photos (iOS 11+), HDR support, 16-bit depth, wide color
-- **Design:** `.psd`, `.psb` (Photoshop) ⏳, `.svg` (vector graphics) ⏳
+- **Design:** `.psd`, `.psb` (Photoshop), `.svg` (vector graphics)
 - **HDR:** `.exr` (OpenEXR), `.hdr` (Radiance RGBE)
 - **Texture:** `.dds` (DirectX textures)
 - **Legacy:** `.tga` (Targa), `.ico` (icons), `.jp2` (JPEG2000)
 
-#### Video Formats (✅ Via DirectShow)
-- **Common:** `.mp4`, `.avi`, `.mkv`, `.mov`, `.wmv`, `.flv`, `.webm`
+#### Video & Audio (✅ Media Foundation)
+- **Video:** `.mp4`, `.mkv`, `.avi`, `.webm`, `.mov`, `.wmv`, `.flv`, `.mpg`, `.mpeg`, `.ts`, `.mts`, `.m2ts`, `.3gp`, `.vob`, `.ogv` (22 extensions)
+- **Audio:** `.mp3`, `.flac`, `.m4a`, `.ogg`, `.wma`, `.wav`, `.opus` - extracts album art or generates waveform
+
+#### Documents & Fonts (✅ Shell API + GDI+)
+- **Documents:** `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.epub` (Office/Edge required for Office formats)
+- **Fonts:** `.ttf`, `.otf`, `.ttc` - renders font preview
+
+#### 3D Models (✅ Built-in parser)
+- **Models:** `.obj`, `.stl`, `.gltf`, `.glb` - orthographic preview rendering
+
+#### Vector Graphics (✅ GDI+ renderer)
+- **SVG:** `.svg`, `.svgz` - rasterizes vector graphics to thumbnail
+
+#### Special Formats (✅ Native decoders)
+- **QOI:** `.qoi` (Quite OK Image - fastest decode format)
+- **ICO:** `.ico`, `.cur` (Windows icons/cursors)
+- **TGA:** `.tga` (Targa)
+- **PPM:** `.ppm`, `.pgm`, `.pbm`, `.pnm`, `.pam`, `.pfm` (Netpbm formats)
+- **DDS:** `.dds` (DirectX textures)
+- **HDR:** `.hdr`, `.pic` (Radiance RGBE)
 
 **Legend:**  
-✅ = Fully implemented | 🔄 = In progress | 📋 = Planned
+✅ = Production ready | ⚠️ = Requires external dependency | 📋 = Planned
 
 ### Performance
 
@@ -93,7 +112,7 @@ cd DarkThumbs
 RUN-BUILD.bat
 ```
 
-See [Build Guide](docs/build/BUILD_GUIDE.md) for detailed instructions.
+See [Build Quick Reference](docs/development/BUILD_QUICK_REFERENCE.md) for detailed instructions.
 
 ### Install
 
@@ -143,9 +162,9 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 5.2.0  
-**Build System:** Active Recovery  
-**Next Milestone:** v6.0.0 (July 2026)
+**Current Version:** 7.0.0  
+**Build System:** CMake + MSBuild (Stable)  
+**Next Milestone:** v7.1 - libheif integration (iPhone photos)
 
 See [MASTER_PLAN.md](MASTER_PLAN.md) for the complete development plan.
 
@@ -169,16 +188,17 @@ del /f /s /q "%LocalAppData%\Microsoft\Windows\Explorer\thumbcache_*.db"
 reg query "HKCR\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}\InprocServer32"
 ```
 
-See [Build Guide](docs/build/BUILD_GUIDE.md) for more troubleshooting.
+See [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for more troubleshooting.
 
 ---
 
 ## 📦 External Libraries
 
 **Compression:** zlib 1.3.1, LZ4 1.10.0, zstd 1.5.7, LZMA 26.00, minizip-ng 4.0.10  
-**Images:** libwebp 1.5.0, Windows WIC (HEIF/AVIF/RAW)  
-**Archives:** UnRAR 7.2.1  
-**Rendering:** DirectX 11
+**Images:** libwebp 1.5.0, libavif 1.3.0 (dav1d 1.5.1), libjxl 0.11.1, LibRaw 0.21.3  
+**Archives:** UnRAR 7.2.1, minizip-ng 4.0.10  
+**Video:** Windows Media Foundation (system API)  
+**Rendering:** DirectX 11, GDI+
 
 ---
 
@@ -190,12 +210,12 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ## 🔗 Links
 
-- **Repository:** [GitHub](https://github.com/username/DarkThumbs) _(update with actual URL)_
-- **Issues:** [GitHub Issues](https://github.com/username/DarkThumbs/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/username/DarkThumbs/discussions)
+- **Repository:** Internal project repository
+- **Issues:** Use project issue tracker configured for this workspace
+- **Discussions:** Use team discussion channel
 
 ---
 
 **Built with ❤️ using C++20 and DirectX 11**
 
-_Last Updated: January 7, 2026_
+_Last Updated: February 16, 2026_

@@ -1,54 +1,164 @@
-# Build Scripts Directory
+# Build Scripts - DarkThumbs v7.0
 
-This directory contains all build automation scripts for the DarkThumbs project.
+**Unified Build System for Windows 11**  
+Comprehensive build infrastructure for external dependencies, engine, and installer packaging.
 
-## Directory Structure
+> **⚡ NEW in v7.0:** Unified build modules, 50% code reduction, vcpkg integration
+
+---
+
+## 📁 Directory Structure
 
 ```
 build-scripts/
-├── external-libs/       # External library build scripts (libwebp, libjxl, libraw, etc.)
-├── library-builders/    # Consolidated library builders
-├── production/          # Production build orchestrators
-├── utilities/           # Build utilities and helpers
-├── validation/          # Build validation and verification scripts
-├── archive/             # Archived/deprecated build scripts
-├── build.ps1            # Main build script (Standard builds)
-├── Find-MSBuild.ps1     # MSBuild detection utility
-├── Test-Build-Environment.ps1  # Environment verification
-└── README.md            # This file
+├── core/                           # 🆕 Core build modules
+│   ├── Build-Library-Core.ps1      #     Unified build functions (CMake, MSBuild, NMake)
+│   └── Build-Helpers.ps1           #     vcpkg integration, Git helpers, environment
+│
+├── external-libs/                  # External library build scripts
+│   ├── Build-LibWebP-NMake.ps1     #     ✅ Refactored (175 → 102 lines)
+│   ├── Build-MinizipNG.ps1         #     ✅ Refactored (104 → 60 lines)
+│   ├── build-libjxl.ps1            #     ✅ Refactored (150 → 90 lines)
+│   ├── build-libavif.ps1           #     ✅ Refactored (150 → 80 lines)
+│   └── [other libraries...]        #     🔄 Migration in progress
+│
+├── library-builders/               # Library orchestration scripts
+├── production/                     # Production build orchestrators
+├── utilities/                      # Build utilities and helpers
+├── validation/                     # Build validation scripts
+│   └── check-tools.ps1             #     Verify build environment
+│
+├── Build-All-And-Package.ps1       # 🆕 Complete build orchestrator (recommended)
+├── Setup-Vcpkg.ps1                 # 🆕 vcpkg package manager setup
+├── DEPRECATED.md                   # 🆕 List of deprecated scripts
+├── Find-MSBuild.ps1                # ⚠️  Deprecated - use Build-Library-Core
+├── Test-Build-Environment.ps1      #     Environment verification
+└── README.md                       #     This file
 ```
 
-## Quick Start
+---
 
-### Standard Build
+## 🚀 Quick Start
+
+### ⭐ Recommended: Complete Build
 ```powershell
-.\build.ps1 -Configuration Release
+# Build everything: dependencies, engine, solution, and MSI installer
+.\build-scripts\Build-All-And-Package.ps1
+
+# With options
+.\build-scripts\Build-All-And-Package.ps1 -Configuration Release -Version 7.0.0 -Clean
+
+# Skip dependencies (if already built)
+.\build-scripts\Build-All-And-Package.ps1 -SkipDependencies
+
+# Skip MSI packaging
+.\build-scripts\Build-All-And-Package.ps1 -SkipPackaging
 ```
 
-### Production Build (All Libraries)
+### Legacy: Individual Components
 ```powershell
-.\production\Build-Production-SlowMachine.ps1 -Clean
-```
+# Build external dependencies (refactored)
+.\build-scripts\external-libs\Build-LibWebP-NMake.ps1
+.\build-scripts\external-libs\Build-MinizipNG.ps1
+.\build-scripts\external-libs\build-libjxl.ps1
+.\build-scripts\external-libs\build-libavif.ps1
 
-### Build Individual External Library
-```powershell
-.\external-libs\Build-LibWebP-NMake.ps1
-.\external-libs\build-libjxl.ps1
+# Build DarkThumbs Engine (CMake)
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+
+# Build CBXShell solution (MSBuild)
+msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m
+
+# Create MSI installer
+.\packaging\Build-Installer.ps1 -Version 7.0.0
 ```
 
 ### Verify Build Environment
 ```powershell
-.\Test-Build-Environment.ps1
+.\build-scripts\validation\check-tools.ps1
 ```
 
-## Build Scripts Organization
+---
+
+## 📚 Core Module Reference (NEW in v7.0)
+
+### Build-Library-Core.ps1
+
+The unified build module provides consistent functions for all build systems.
+
+#### Key Functions
+
+##### `Invoke-CMakeBuild`
+Build CMake-based libraries with automatic configuration and verification.
+
+```powershell
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
+
+$cmakeOptions = @{
+    'CMAKE_BUILD_TYPE'  = 'Release'
+    'BUILD_SHARED_LIBS' = 'OFF'
+}
+
+Invoke-CMakeBuild `
+    -LibraryName "MyLibrary" `
+    -SourceDir $sourceDir `
+    -BuildDir $buildDir `
+    -InstallDir $installDir `
+    -Configuration $Configuration `
+    -CMakeOptions $cmakeOptions `
+    -Clean:$Clean
+```
+
+##### `Invoke-MSBuildLibrary` | `Invoke-NMakeBuild`
+Build MSBuild projects or NMake projects with automatic tool discovery.
+
+##### `Find-MSBuildPath`, `Find-CMakePath`, `Test-VisualStudioTools`
+Automatically locate and verify build tools.
+
+##### `Write-BuildLog`
+Unified colored logging across all scripts.
+
+```powershell
+Write-BuildLog "Starting build..." -Level Info      # Blue
+Write-BuildLog "Build successful!" -Level Success   # Green
+Write-BuildLog "Warning!" -Level Warning             # Yellow
+Write-BuildLog "Build failed!" -Level Error          # Red
+```
+
+### Build-Helpers.ps1
+
+Additional helper functions for vcpkg, Git, and environment management.
+
+```powershell
+. "$PSScriptRoot\..\core\Build-Helpers.ps1"
+
+# vcpkg integration
+if (-not (Test-VcpkgInstalled)) {
+    Install-VcpkgIfNeeded
+}
+Install-VcpkgPackage -PackageName "zlib:x64-windows-static"
+
+# Git helpers
+Initialize-GitSubmodules -Path $sourceDir
+
+# Environment setup
+Set-VisualStudioEnvironment -VSVersion "2022"
+```
+
+See [build-scripts/core/](./core/) for full documentation.
+
+---
+
+## 📖 Build Scripts Organization
 
 ### Core Build Scripts
 
-- **build.ps1** - Main build orchestrator for DarkThumbs solution
+- 🆕 **Build-All-And-Package.ps1** - Complete build orchestrator (recommended)
+- 🆕 **Setup-Vcpkg.ps1** - Automated vcpkg setup and package installation
+- **scripts/build.ps1** - Main build orchestrator for DarkThumbs solution
 - **build-cbxshell-quick.ps1** - Quick incremental build
-- **Find-MSBuild.ps1** - Locate MSBuild.exe and Visual Studio
-- **Find-All-Tools.ps1** - Discover all required build tools
+- ⚠️  **Find-MSBuild.ps1** - DEPRECATED - Use `Find-MSBuildPath` from Build-Library-Core
 - **Test-Build-Environment.ps1** - Verify build prerequisites
 
 ### External Library Builders (`external-libs/`)
@@ -129,7 +239,7 @@ The build system respects these environment variables:
 - `DARKTHUMBS_ROOT` - Project root directory (auto-detected)
 - `DARKTHUMBS_BUILD_TYPE` - Override configuration (Debug/Release)
 - `DARKTHUMBS_EXTERNAL_LIBS` - External libraries directory
-- `CMAKE_GENERATOR` - CMake generator (default: Visual Studio 17 2022)
+- `CMAKE_GENERATOR` - CMake generator (default: Visual Studio 18 2026)
 
 ## Build Output
 
@@ -205,5 +315,5 @@ For build issues:
 
 ---
 
-**Last Updated:** February 11, 2026  
+**Last Updated:** February 16, 2026  
 **Maintainer:** DarkThumbs Development Team

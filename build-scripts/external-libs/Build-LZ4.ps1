@@ -1,79 +1,80 @@
-# ===========================================================================
-# Build-LZ4.ps1
-# Build LZ4 1.10.0 - Fast Compression Library
-# ===========================================================================
+#Requires -Version 7.0
+# DarkThumbs v7.0 - Build LZ4 1.10.0 (Fast Compression)
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 16, 2026
 
 param(
     [string]$Configuration = "Release",
-    [string]$Platform = "x64"
+    [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-Write-Host ""
-Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host "Building LZ4 1.10.0 (Fast Compression Library)" -ForegroundColor Cyan
-Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host ""
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$lz4Dir = Join-Path $rootDir "external\compression-libs\lz4-1.10.0"
+$buildDir = Join-Path $lz4Dir "build\VS2022"
 
-# Get project root
-$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-Set-Location $ProjectRoot
+Write-BuildHeader "Building LZ4 1.10.0 (Fast Compression)"
 
-# Find MSBuild
-$MSBuild = & "$PSScriptRoot\Find-MSBuild.ps1"
-if (-not $MSBuild) {
-    Write-Host "ERROR: MSBuild not found" -ForegroundColor Red
+# Verify source directory
+if (-not (Test-Path $lz4Dir)) {
+    Write-BuildLog "lz4-1.10.0 not found at $lz4Dir" -Level Error
+    Write-BuildLog "Please download and extract LZ4 source" -Level Warning
     exit 1
 }
 
-$Solution = Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build\VS2022\lz4.sln"
+Write-BuildLog "Source: $lz4Dir" -Level Info
+Write-BuildLog "Build: $buildDir" -Level Info
 
-if (-not (Test-Path $Solution)) {
-    Write-Host "ERROR: Solution file not found!" -ForegroundColor Red
-    Write-Host "Expected: $Solution" -ForegroundColor Yellow
-    exit 1
-}
-
-Write-Host "Solution: $Solution" -ForegroundColor White
-Write-Host ""
-
-# Build liblz4 project (static library)
-$Project = Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build\VS2022\liblz4\liblz4.vcxproj"
-
-if (Test-Path $Project) {
-    Write-Host "Building liblz4 static library..." -ForegroundColor White
-    & $MSBuild $Project /t:Clean /p:Configuration=$Configuration /p:Platform=$Platform /v:minimal /nologo
-    & $MSBuild $Project /t:Build /p:Configuration=$Configuration /p:Platform=$Platform /v:minimal /nologo
+try {
+    # LZ4 has Visual Studio project files
+    $vcxproj = Join-Path $buildDir "liblz4\liblz4.vcxproj"
     
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host ""
-        Write-Host "[FAILED] LZ4 build failed!" -ForegroundColor Red
-        exit 1
+    if (-not (Test-Path $vcxproj)) {
+        # Try CMake fallback
+        $cmakeLists = Join-Path $lz4Dir "build\cmake\CMakeLists.txt"
+        
+        if (Test-Path $cmakeLists) {
+            Write-BuildLog "Using CMake build" -Level Info
+            
+            $cmakeBuildDir = Join-Path $lz4Dir "build-vs"
+            $cmakeOptions = @{
+                'CMAKE_BUILD_TYPE'      = 'Release'
+                'BUILD_SHARED_LIBS'     = 'OFF'
+                'LZ4_BUILD_CLI'         = 'OFF'
+                'LZ4_BUILD_LEGACY_LZ4C' = 'OFF'
+            }
+            
+            Invoke-CMakeBuild `
+                -LibraryName "lz4" `
+                -SourceDir (Join-Path $lz4Dir "build\cmake") `
+                -BuildDir $cmakeBuildDir `
+                -Configuration $Configuration `
+                -CMakeOptions $cmakeOptions `
+                -Clean:$Clean
+        } else {
+            throw "No build system found (liblz4.vcxproj or CMakeLists.txt missing)"
+        }
+    } else {
+        Write-BuildLog "Using MSBuild" -Level Info
+        
+        Invoke-MSBuildLibrary `
+            -LibraryName "liblz4" `
+            -ProjectFile $vcxproj `
+            -Configuration $Configuration `
+            -Platform "x64" `
+            -Clean:$Clean
+        
+        # Verify output (LZ4 outputs to non-standard location)
+        $expectedLib = Join-Path $buildDir "liblz4\bin\x64_$Configuration\liblz4_static.lib"
+        Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
     }
-}
-
-# Check for output (lib is built to liblz4\bin\ directory)
-$OutputLib = Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build\VS2022\liblz4\bin\$Platform`_$Configuration\liblz4_static.lib"
-
-if (Test-Path $OutputLib) {
-    $Size = (Get-Item $OutputLib).Length
-    $SizeKB = [math]::Round($Size / 1KB, 1)
-    Write-Host ""
-    Write-Host "[SUCCESS] liblz4_static.lib built: $SizeKB KB ($Size bytes)" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Output: $OutputLib" -ForegroundColor White
-    Write-Host ""
-    Write-Host "Next Steps:" -ForegroundColor Yellow
-    Write-Host "1. Copy liblz4_static.lib to external\compression\lz4\x64\Release\lz4.lib" -ForegroundColor Gray
-    Write-Host "2. Update CBXShell.vcxproj AdditionalLibraryDirectories if needed" -ForegroundColor Gray
-    exit 0
-} else {
-    Write-Host ""
-    Write-Host "[ERROR] Output file not found: $OutputLib" -ForegroundColor Red
-    Write-Host "Searching for .lib files:" -ForegroundColor Yellow
-    Get-ChildItem (Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build\VS2022") -Recurse -Filter "*.lib" -ErrorAction SilentlyContinue | 
-    Select-Object FullName, @{Name = 'Size(KB)'; Expression = { [math]::Round($_.Length / 1KB, 1) } } | 
-    Format-Table -AutoSize
+    
+    Write-BuildLog "LZ4 1.10.0 build completed successfully" -Level Success
+    Write-BuildLog "Features: Fast compression, streaming API" -Level Info
+    
+} catch {
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }

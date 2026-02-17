@@ -2,6 +2,11 @@
 # Build-Critical-Libraries.ps1
 # Build critical missing libraries for DarkThumbs using NMake
 # ===========================================================================
+# 
+# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# This script is kept for reference only.
+# See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
+# 
 
 $ErrorActionPreference = "Continue"
 
@@ -26,7 +31,7 @@ if (-not (Test-Path $vcvarsall)) {
 # =============================================================================
 Write-Host "[1/4] Building Zstd 1.5.7..." -ForegroundColor Yellow
 
-$zstdOutput = "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib"
+$zstdOutput = "external\compression-libs\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib"
 if (Test-Path $zstdOutput) {
     $size = (Get-Item $zstdOutput).Length
     if ($size -gt 1KB) {
@@ -37,8 +42,8 @@ if (Test-Path $zstdOutput) {
 }
 
 if (-not (Test-Path $zstdOutput)) {
-    $zstdSrc = "external\compression\zstd-1.5.7\build\cmake"
-    $zstdBuild = "external\compression\zstd-1.5.7\build-vs"
+    $zstdSrc = "external\compression-libs\zstd-1.5.7\build\cmake"
+    $zstdBuild = "external\compression-libs\zstd-1.5.7\build-vs"
     
     if (Test-Path $zstdBuild) {
         Remove-Item $zstdBuild -Recurse -Force -ErrorAction SilentlyContinue
@@ -66,7 +71,7 @@ Write-Host ""
 # =============================================================================
 Write-Host "[2/4] Building Bzip2 1.0.8..." -ForegroundColor Yellow
 
-$bzip2Output = "external\compression\bzip2-1.0.8\x64\Release\bzip2.lib"
+$bzip2Output = "external\compression-libs\bzip2-1.0.8\x64\Release\bzip2.lib"
 if (Test-Path $bzip2Output) {
     $size = (Get-Item $bzip2Output).Length
     if ($size -gt 1KB) {
@@ -114,8 +119,8 @@ Write-Host ""
 # =============================================================================
 Write-Host "[3/4] Building LibWebP 1.5.0..." -ForegroundColor Yellow
 
-$webpOutput = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"
-$sharpyuvOutput = "external\image-libs\libwebp-1.5.0\build-vs\Release\sharpyuv.lib"
+$webpOutput = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib"
+$sharpyuvOutput = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\sharpyuv.lib"
 
 if ((Test-Path $webpOutput) -and (Test-Path $sharpyuvOutput)) {
     $size1 = (Get-Item $webpOutput).Length
@@ -128,8 +133,8 @@ if ((Test-Path $webpOutput) -and (Test-Path $sharpyuvOutput)) {
 }
 
 if (-not ((Test-Path $webpOutput) -and (Test-Path $sharpyuvOutput))) {
-    $webpSrc = "external\image-libs\libwebp-1.5.0"
-    $webpBuild = "external\image-libs\libwebp-1.5.0\build-vs"
+    $webpSrc = "external\image-libs\libwebp-1.5.0-build"
+    $webpBuild = "external\image-libs\libwebp-1.5.0-build\build-vs"
     
     if (Test-Path $webpBuild) {
         Remove-Item $webpBuild -Recurse -Force -ErrorAction SilentlyContinue
@@ -239,8 +244,8 @@ $allLibs = @(
     @{Name = "Zstd"; Path = "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib" },
     @{Name = "Bzip2"; Path = "external\compression\bzip2-1.0.8\x64\Release\bzip2.lib" },
     @{Name = "MinizipNG"; Path = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib" },
-    @{Name = "WebP"; Path = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib" },
-    @{Name = "SharpYUV"; Path = "external\image-libs\libwebp-1.5.0\build-vs\Release\sharpyuv.lib" }
+    @{Name = "WebP"; Path = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib" },
+    @{Name = "SharpYUV"; Path = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\sharpyuv.lib" }
 )
 
 $ready = 0

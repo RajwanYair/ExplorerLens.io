@@ -60,7 +60,7 @@ function Build-Library {
     Push-Location $buildDir
     
     $cmakeArgs = @(
-        "-G", "Visual Studio 17 2022",
+        "-G", "Visual Studio 18 2026",
         "-A", "x64",
         "-DCMAKE_INSTALL_PREFIX=$installDir",
         "-DCMAKE_BUILD_TYPE=$Configuration",

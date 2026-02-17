@@ -29,7 +29,7 @@ $vsPaths = @(
     "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools",
     "C:\Program Files (x86)\Microsoft Visual Studio\2022\Community",
     "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools",
-    "C:\Program Files (x86)\Microsoft Visual Studio\17\BuildTools",
+    "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools",
     "C:\Program Files\Microsoft Visual Studio\2026\BuildTools",
     "C:\Program Files\Microsoft Visual Studio\2025\BuildTools",
     "C:\Program Files\Microsoft Visual Studio\2022\BuildTools"
@@ -120,23 +120,33 @@ if ($ninja) {
 }
 
 # Find vcpkg
-$vcpkg = Get-Command vcpkg -ErrorAction SilentlyContinue
-if ($vcpkg) {
-    $tools["vcpkg"] = $vcpkg.Source
-} else {
-    # Check common paths
-    $vcpkgPaths = @(
-        "$env:USERPROFILE\scoop\apps\vcpkg\current\vcpkg.exe",
-        "$env:USERPROFILE\vcpkg\vcpkg.exe",
-        "C:\vcpkg\vcpkg.exe",
-        "C:\Tools\vcpkg\vcpkg.exe",
-        "$env:VCPKG_ROOT\vcpkg.exe"
-    )
+$vcpkg = $null
+# Check Visual Studio installation first (highest priority)
+$vsVcpkgPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\vcpkg\vcpkg.exe"
+if (Test-Path $vsVcpkgPath) {
+    $tools["vcpkg"] = $vsVcpkgPath
+    $vcpkg = $vsVcpkgPath
+}
+
+if (-not $vcpkg) {
+    $vcpkg = Get-Command vcpkg -ErrorAction SilentlyContinue
+    if ($vcpkg) {
+        $tools["vcpkg"] = $vcpkg.Source
+    } else {
+        # Check common paths
+        $vcpkgPaths = @(
+            "$env:VCPKG_ROOT\vcpkg.exe",
+            "$env:USERPROFILE\scoop\apps\vcpkg\current\vcpkg.exe",
+            "$env:USERPROFILE\vcpkg\vcpkg.exe",
+            "C:\vcpkg\vcpkg.exe",
+            "C:\Tools\vcpkg\vcpkg.exe"
+        )
     
-    foreach ($path in $vcpkgPaths) {
-        if (Test-Path $path) {
-            $tools["vcpkg"] = $path
-            break
+        foreach ($path in $vcpkgPaths) {
+            if (Test-Path $path) {
+                $tools["vcpkg"] = $path
+                break
+            }
         }
     }
 }

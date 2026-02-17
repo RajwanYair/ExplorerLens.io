@@ -364,7 +364,7 @@ Upon completing Priority 1:
 1. **Document Results**
    - Update `TEST_RESULTS_LATEST.md`
    - Create Priority 1 completion milestone doc
-   - Update ROADMAP.md status
+   - Update MASTER_PLAN.md status
 
 2. **Proceed to Phase 2**
    - Architecture Modernization
@@ -380,7 +380,7 @@ Upon completing Priority 1:
 
 ## Related Documentation
 
-- [ROADMAP.md](../ROADMAP.md) - Development phases and priorities
+- [MASTER_PLAN.md](../../MASTER_PLAN.md) - Development phases and priorities
 - [PRODUCTION_BUILD.md](../PRODUCTION_BUILD.md) - Build procedures
 - [BUILD_MILESTONE_PHASE1_PRIORITY0.md](BUILD_MILESTONE_PHASE1_PRIORITY0.md) - Previous milestone
 - [tests/README.md](../tests/README.md) - Test suite documentation

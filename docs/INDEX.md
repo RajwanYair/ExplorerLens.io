@@ -1,9 +1,9 @@
 # DarkThumbs Documentation Index
 
-**Project:** DarkThumbs - GPU-Accelerated Thumbnail Provider for Windows  
-**Current Version:** v6.0.0  
-**Status:** Active Development  
-**Last Updated:** February 2026
+**Project:** DarkThumbs  
+**Current Version:** v6.2.x  
+**Planning Authority:** [MASTER_PLAN.md](../MASTER_PLAN.md)  
+**Last Updated:** February 16, 2026
 
 ---
 
@@ -12,89 +12,91 @@
 | Document | Description |
 |----------|-------------|
 | [MASTER_PLAN.md](../MASTER_PLAN.md) | Unified roadmap and execution plan |
-| [README.md](../README.md) | Project overview and features |
-| [CHANGELOG.md](../CHANGELOG.md) | Version history |
-| [SBOM.json](SBOM.json) | Software Bill of Materials |
+| [README.md](../README.md) | Project overview and feature summary |
+| [CHANGELOG.md](../CHANGELOG.md) | Release history and change log |
+| [KNOWN_ISSUES.md](../KNOWN_ISSUES.md) | Current known issues and mitigations |
+| [USER_GUIDE.md](../USER_GUIDE.md) | End-user installation and usage guide |
+| [DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md) | Developer setup and architecture guide |
 
----
-
-## Build & Installation
+## Development
 
 | Document | Description |
 |----------|-------------|
-| [BUILD_GUIDE.md](build/BUILD_GUIDE.md) | Complete build instructions |
-| [BUILD_REQUIREMENTS.md](build/BUILD_REQUIREMENTS.md) | Prerequisites and dependencies |
-| [BUILD_SCRIPTS_REFERENCE.md](build/BUILD_SCRIPTS_REFERENCE.md) | Build script documentation |
-| [BUILD_MONITORING.md](build/BUILD_MONITORING.md) | Slow-machine build monitoring |
-| [INSTALLATION_GUIDE.md](build/INSTALLATION_GUIDE.md) | Installation instructions |
-| [INSTALLER_OPTIONS.md](build/INSTALLER_OPTIONS.md) | Installer technology analysis |
-| [CODE_SIGNING.md](build/CODE_SIGNING.md) | Code signing infrastructure |
-| [COM_REGISTRATION_DIAGNOSTICS.md](build/COM_REGISTRATION_DIAGNOSTICS.md) | COM troubleshooting |
+| [development/README.md](development/README.md) | Development docs entry point |
+| [development/BUILD_QUICK_REFERENCE.md](development/BUILD_QUICK_REFERENCE.md) | Build quick reference |
+| [development/WINDOWS_BUILD_TOOLS.md](development/WINDOWS_BUILD_TOOLS.md) | Windows toolchain notes |
+| [development/THIRD_PARTY.md](development/THIRD_PARTY.md) | Third-party dependency inventory |
+| [development/TOOL_DISCOVERY.md](development/TOOL_DISCOVERY.md) | Tool discovery and probing |
+| [development/TOOL_VERSIONS.md](development/TOOL_VERSIONS.md) | Known tool versions |
 
 ## Architecture
 
 | Document | Description |
 |----------|-------------|
-| [INTEGRATION_ARCHITECTURE.md](architecture/INTEGRATION_ARCHITECTURE.md) | System architecture |
-| [PROJECT_STRUCTURE.md](architecture/PROJECT_STRUCTURE.md) | Code organization |
-| [MASTER_PLAN.md](../MASTER_PLAN.md) | Refactoring phases and priorities |
-| [COMPATIBILITY_KIT_SPEC.md](architecture/COMPATIBILITY_KIT_SPEC.md) | Compatibility kit spec |
-| [OBSERVABILITY_SPEC_V1.md](architecture/OBSERVABILITY_SPEC_V1.md) | Observability spec |
+| [architecture/PROJECT_STRUCTURE.md](architecture/PROJECT_STRUCTURE.md) | Repository and component structure |
+| [architecture/INTEGRATION_ARCHITECTURE.md](architecture/INTEGRATION_ARCHITECTURE.md) | Integration architecture details |
+| [architecture/OBSERVABILITY_SPEC_V1.md](architecture/OBSERVABILITY_SPEC_V1.md) | Observability plan/spec |
+| [architecture/COMPATIBILITY_KIT_SPEC.md](architecture/COMPATIBILITY_KIT_SPEC.md) | Compatibility matrix specification |
 
-## Plugin System
-
-| Document | Description |
-|----------|-------------|
-| [PLUGIN_API.md](plugins/PLUGIN_API.md) | Plugin API reference |
-| [PLUGIN_PACKAGE_FORMAT_V1.md](plugins/PLUGIN_PACKAGE_FORMAT_V1.md) | Package format spec |
-| [PLUGIN_SANDBOX_MODEL_V1.md](plugins/PLUGIN_SANDBOX_MODEL_V1.md) | Sandbox security model |
-| [PLUGIN_MARKETPLACE_PROTOCOL_V1.md](plugins/PLUGIN_MARKETPLACE_PROTOCOL_V1.md) | Marketplace protocol |
-| [PluginSecurityGuide.md](plugins/PluginSecurityGuide.md) | Plugin security guide |
-
-## GPU & Performance
+## Formats
 
 | Document | Description |
 |----------|-------------|
-| [GPU_ABSTRACTION_LAYER.md](gpu/GPU_ABSTRACTION_LAYER.md) | GPU abstraction layer |
-| [GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing guide |
-| [INTEL_GPU_GUIDE.md](gpu/INTEL_GPU_GUIDE.md) | Intel GPU specifics |
-| [MULTI_GPU_TESTING_GUIDE.md](gpu/MULTI_GPU_TESTING_GUIDE.md) | Multi-GPU testing |
-| [TEXTURE_POOLING.md](gpu/TEXTURE_POOLING.md) | Texture pooling optimization |
-| [PERFORMANCE_METRICS.md](gpu/PERFORMANCE_METRICS.md) | Performance metrics system |
-| [PERF_REGRESSION_GATES.md](gpu/PERF_REGRESSION_GATES.md) | Regression gates policy |
+| [formats/FORMAT_SUPPORT_ANALYSIS.md](formats/FORMAT_SUPPORT_ANALYSIS.md) | Format support analysis |
+| [formats/CAPABILITY_AUDIT.md](formats/CAPABILITY_AUDIT.md) | Capability audit |
+| [formats/DECODER_STATUS.md](formats/DECODER_STATUS.md) | Decoder status matrix |
+| [formats/DECODER_AUDIT_REPORT.md](formats/DECODER_AUDIT_REPORT.md) | Decoder audit report |
+| [formats/RAW_DECODER_IMPLEMENTATION.md](formats/RAW_DECODER_IMPLEMENTATION.md) | RAW decoder implementation notes |
+| [formats/HEIF_VALIDATION_STATUS.md](formats/HEIF_VALIDATION_STATUS.md) | HEIF validation status |
 
-## Format Support
+## GPU and Performance
 
 | Document | Description |
 |----------|-------------|
-| [FORMAT_SUPPORT_ANALYSIS.md](formats/FORMAT_SUPPORT_ANALYSIS.md) | Format implementation plan |
-| [CAPABILITY_AUDIT.md](formats/CAPABILITY_AUDIT.md) | Format capability audit |
-| [DECODER_AUDIT_REPORT.md](formats/DECODER_AUDIT_REPORT.md) | Decoder audit report |
-| [RAW_DECODER_IMPLEMENTATION.md](formats/RAW_DECODER_IMPLEMENTATION.md) | RAW decoder docs |
-| [HEIF_VALIDATION_STATUS.md](formats/HEIF_VALIDATION_STATUS.md) | HEIF validation status |
+| [PERFORMANCE.md](PERFORMANCE.md) | Top-level performance guidance |
+| [gpu/PERFORMANCE_METRICS.md](gpu/PERFORMANCE_METRICS.md) | Metrics definitions |
+| [gpu/PERF_REGRESSION_GATES.md](gpu/PERF_REGRESSION_GATES.md) | Performance regression policy |
+| [gpu/GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing guide |
+| [gpu/INTEL_GPU_GUIDE.md](gpu/INTEL_GPU_GUIDE.md) | Intel GPU-specific guidance |
+| [gpu/MULTI_GPU_TESTING_GUIDE.md](gpu/MULTI_GPU_TESTING_GUIDE.md) | Multi-GPU testing strategy |
+| [gpu/GPU_ABSTRACTION_LAYER.md](gpu/GPU_ABSTRACTION_LAYER.md) | GPU abstraction architecture |
+| [gpu/TEXTURE_POOLING.md](gpu/TEXTURE_POOLING.md) | Texture pooling details |
+
+## Plugins
+
+| Document | Description |
+|----------|-------------|
+| [plugins/PLUGIN_API.md](plugins/PLUGIN_API.md) | Plugin API reference |
+| [plugins/PLUGIN_PACKAGE_FORMAT_V1.md](plugins/PLUGIN_PACKAGE_FORMAT_V1.md) | Package format spec |
+| [plugins/PLUGIN_SANDBOX_MODEL_V1.md](plugins/PLUGIN_SANDBOX_MODEL_V1.md) | Sandbox model |
+| [plugins/PLUGIN_MARKETPLACE_PROTOCOL_V1.md](plugins/PLUGIN_MARKETPLACE_PROTOCOL_V1.md) | Marketplace protocol |
+| [plugins/PluginSecurityGuide.md](plugins/PluginSecurityGuide.md) | Plugin security guidance |
 
 ## Testing
 
 | Document | Description |
 |----------|-------------|
-| [TESTING_GUIDE.md](testing/TESTING_GUIDE.md) | Test suite guide |
-| [TEST_VALIDATION_CHECKLIST.md](testing/TEST_VALIDATION_CHECKLIST.md) | Pre-deployment checklist |
-| [PRIORITY1_BASELINE_VERIFICATION.md](testing/PRIORITY1_BASELINE_VERIFICATION.md) | Baseline verification |
+| [testing/TESTING_GUIDE.md](testing/TESTING_GUIDE.md) | Testing framework guide |
+| [testing/TEST_VALIDATION_CHECKLIST.md](testing/TEST_VALIDATION_CHECKLIST.md) | Validation checklist |
+| [testing/PRIORITY1_BASELINE_VERIFICATION.md](testing/PRIORITY1_BASELINE_VERIFICATION.md) | Baseline verification notes |
 
-## Planning
+## User and Operations
 
 | Document | Description |
 |----------|-------------|
-| [MASTER_PLAN.md](../MASTER_PLAN.md) | Single source of truth for roadmap, sprints, and refactoring tasks |
+| [USER_MANUAL.md](USER_MANUAL.md) | End-user manual |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting scenarios |
+| [CODE_SIGNING.md](CODE_SIGNING.md) | Code-signing policy and workflow |
+| [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md) | Plugin development guide |
 
-## Other
+## Releases and Audit
 
-| Path | Description |
-|------|-------------|
-| [getting-started/](getting-started/) | Getting started guide |
-| [release-notes/](release-notes/) | Version release notes |
-| [archive/](archive/) | Historical session summaries and old docs |
+| Document | Description |
+|----------|-------------|
+| [release-notes/RELEASE_NOTES_v6.0.0.md](release-notes/RELEASE_NOTES_v6.0.0.md) | v6.0.0 release notes |
+| [release-notes/v5.3.0-RELEASE-NOTES.md](release-notes/v5.3.0-RELEASE-NOTES.md) | v5.3.0 release notes |
+| [audits/MD_AUDIT_2026-02-16.md](audits/MD_AUDIT_2026-02-16.md) | Markdown drift and duplication audit |
 
 ---
 
-*For the full development roadmap, see [MASTER_PLAN.md](../MASTER_PLAN.md)*
+For roadmap, sprint status, and backlog priorities, use [MASTER_PLAN.md](../MASTER_PLAN.md).

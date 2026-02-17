@@ -1,308 +1,449 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Build Release (Standard)",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-File",
-        "${workspaceFolder}/scripts/build.ps1",
-        "-Configuration",
-        "Release"
-      ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": "$msCompile",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      }
-    },
-    {
-      "label": "Clean Build (Standard)",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-File",
-        "${workspaceFolder}/scripts/build.ps1",
-        "-Configuration",
-        "Release",
-        "-Clean"
-      ],
-      "group": "build",
-      "problemMatcher": "$msCompile",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      }
-    },
-    {
-      "label": "Open Latest Build Log",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-Command",
-        "$log = Get-ChildItem build-logs/*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if($log){code $log.FullName}else{Write-Host 'No logs found' -ForegroundColor Yellow}"
-      ],
-      "group": "none",
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "never",
-        "panel": "shared"
-      }
-    },
-    {
-      "label": "Verify Tools",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-File",
-        "${workspaceFolder}/scripts/verify-tools.ps1"
-      ],
-      "group": "test",
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      }
-    },
-    {
-      "label": "Build All Libraries (Slow Machine)",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-File",
-        "${workspaceFolder}\\build-scripts\\production\\Build-Production-SlowMachine.ps1",
-        "-Clean"
-      ],
-      "problemMatcher": [],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "clear": true
-      },
-      "isBackground": true,
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
-    },
-    {
-      "label": "Build with VS Code Monitoring",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-File",
-        "${workspaceFolder}\\build-scripts\\production\\Build-Production-SlowMachine.ps1",
-        "-Clean",
-        "-MonitorInVSCode"
-      ],
-      "problemMatcher": [],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "clear": true
-      },
-      "isBackground": true
-    },
-    {
-      "label": "Monitor Build Logs",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-File",
-        "${workspaceFolder}\\build-scripts\\Monitor-Build-Logs.ps1"
-      ],
-      "problemMatcher": [],
-      "group": "none",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": false
-      },
-      "isBackground": true
-    },
-    {
-      "label": "Check Build Status",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-File",
-        "${workspaceFolder}\\build-scripts\\Check-Build-Status.ps1"
-      ],
-      "problemMatcher": [],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "clear": true
-      }
-    },
-    {
-      "label": "Build LZMA (with monitoring)",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-File",
-        "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
-        "-ScriptPath",
-        "${workspaceFolder}\\build-scripts\\external-libs\\build-lzma-sdk-24.08.ps1",
-        "-Watch"
-      ],
-      "problemMatcher": [],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      },
-      "isBackground": true
-    },
-    {
-      "label": "Build LibWebP (with monitoring)",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-File",
-        "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
-        "-ScriptPath",
-        "${workspaceFolder}\\build-scripts\\external-libs\\Build-LibWebP-NMake.ps1",
-        "-Watch"
-      ],
-      "problemMatcher": [],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      },
-      "isBackground": true
-    },
-    {
-      "label": "Build Minizip-NG (with monitoring)",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-File",
-        "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
-        "-ScriptPath",
-        "${workspaceFolder}\\build-scripts\\external-libs\\Build-MinizipNG.ps1",
-        "-Watch"
-      ],
-      "problemMatcher": [],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      },
-      "isBackground": true
-    },
-    {
-      "label": "Clean Build Artifacts",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-NoLogo",
-        "-Command",
-        "Remove-Item -Path build,x64,packages,CBXShell\\x64,CBXManager\\x64 -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Clean complete' -ForegroundColor Green"
-      ],
-      "problemMatcher": [],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      }
-    },
-    {
-      "label": "Build Release (Production - Zero Warnings)",
-      "type": "shell",
-      "command": "msbuild",
-      "args": [
-        "CBXShell.sln",
-        "/p:Configuration=Release",
-        "/p:Platform=x64",
-        "/m",
-        "/v:minimal"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": false
-      },
-      "problemMatcher": "$msCompile",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
-    },
-    {
-      "label": "Rebuild Release (Clean Build)",
-      "type": "shell",
-      "command": "msbuild",
-      "args": [
-        "CBXShell.sln",
-        "/p:Configuration=Release",
-        "/p:Platform=x64",
-        "/t:Rebuild",
-        "/m",
-        "/v:minimal"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": false
-      },
-      "problemMatcher": "$msCompile",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
-    },
-    {
-      "label": "Build Engine (CMake Release)",
-      "type": "shell",
-      "command": "cmake",
-      "args": [
-        "--build",
-        "build",
-        "--config",
-        "Release",
-        "--target",
-        "DarkThumbsEngine",
-        "-j",
-        "8"
-      ],
-      "isBackground": false,
-      "group": "build"
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build All & Create MSI Package",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}/build-scripts/production/Build-All-And-Package.ps1",
+				"-SkipTests"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": "$msCompile",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": true
+			}
+		},
+		{
+			"label": "Build Release (Standard)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-File",
+				"${workspaceFolder}/scripts/build.ps1",
+				"-Configuration",
+				"Release"
+			],
+			"group": "build",
+			"problemMatcher": "$msCompile",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": true
+			}
+		},
+		{
+			"label": "Clean Build (Standard)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-File",
+				"${workspaceFolder}/scripts/build.ps1",
+				"-Configuration",
+				"Release",
+				"-Clean"
+			],
+			"group": "build",
+			"problemMatcher": "$msCompile",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": true
+			}
+		},
+		{
+			"label": "Setup vcpkg",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}/build-scripts/core/Setup-Vcpkg.ps1"
+			],
+			"group": "none",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "Open Latest Build Log",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$log = Get-ChildItem build-logs/*.log | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if($log){code $log.FullName}else{Write-Host 'No logs found' -ForegroundColor Yellow}"
+			],
+			"group": "none",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "never",
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Verify Tools",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-File",
+				"${workspaceFolder}/scripts/verify-tools.ps1"
+			],
+			"group": "test",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			}
+		},
+		{
+			"label": "Build All Libraries (Slow Machine)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\production\\Build-Production-SlowMachine.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new",
+				"clear": true
+			},
+			"isBackground": true,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "Build with VS Code Monitoring",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\production\\Build-Production-SlowMachine.ps1",
+				"-Clean",
+				"-MonitorInVSCode"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new",
+				"clear": true
+			},
+			"isBackground": true
+		},
+		{
+			"label": "Monitor Build Logs",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\Monitor-Build-Logs.ps1"
+			],
+			"problemMatcher": [],
+			"group": "none",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": false
+			},
+			"isBackground": true
+		},
+		{
+			"label": "Check Build Status",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\Check-Build-Status.ps1"
+			],
+			"problemMatcher": [],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new",
+				"clear": true
+			}
+		},
+		{
+			"label": "Build LZMA (with monitoring)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\external-libs\\Build-LZMA-SDK-26.00.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build LibWebP (with monitoring)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\external-libs\\Build-LibWebP-NMake.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build Minizip-NG (with monitoring)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\external-libs\\Build-MinizipNG.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build Zlib",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\external-libs\\Build-Zlib.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build Zstd",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\external-libs\\Build-Zstd.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build LZ4",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\external-libs\\Build-LZ4.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build LibRaw",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\external-libs\\Build-LibRaw.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build dav1d (AV1 Decoder)",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-File",
+				"${workspaceFolder}\\build-scripts\\external-libs\\Build-Dav1d.ps1",
+				"-Clean"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Clean Build Artifacts",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-NoLogo",
+				"-Command",
+				"Remove-Item -Path build,x64,packages,CBXShell\\x64,CBXManager\\x64 -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Clean complete' -ForegroundColor Green"
+			],
+			"problemMatcher": [],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"label": "Build Release (Production - Zero Warnings)",
+			"type": "shell",
+			"command": "msbuild",
+			"args": [
+				"CBXShell.sln",
+				"/p:Configuration=Release",
+				"/p:Platform=x64",
+				"/m",
+				"/v:minimal"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "Rebuild Release (Clean Build)",
+			"type": "shell",
+			"command": "msbuild",
+			"args": [
+				"CBXShell.sln",
+				"/p:Configuration=Release",
+				"/p:Platform=x64",
+				"/t:Rebuild",
+				"/m",
+				"/v:minimal"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": "$msCompile",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "Build Engine (CMake Release)",
+			"type": "shell",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"build",
+				"--config",
+				"Release",
+				"--target",
+				"DarkThumbsEngine",
+				"-j",
+				"8"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Build HEIF via Proxy",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-File",
+				"${workspaceFolder}/build-scripts/external-libs/Build-LibHEIF.ps1",
+				"-Configuration",
+				"Release",
+				"-Clean",
+				"-Libde265ZipPath",
+				"",
+				"-LibheifZipPath",
+				"",
+				"-GitProxyUrl",
+				"http://proxy-chain.intel.com:928",
+				"-DisableGitSslVerifyForProxy",
+				"1"
+			],
+			"isBackground": false,
+			"group": "build"
+		}
+	]
 }

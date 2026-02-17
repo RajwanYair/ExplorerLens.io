@@ -13,14 +13,14 @@ HRESULT CCBXShell::FinalConstruct(void) {
 
   m_cbx.LoadRegistrySettings();
 
-  // Initialize Engine adapter (v6.2.0 - PRIMARY PATH)
+  // Initialize Engine adapter (v7.0.0 - PRIMARY PATH)
   m_useEngine = false; // Will be set to true if Engine initializes successfully
   try {
     m_engineAdapter = std::make_unique<DarkThumbs::EngineAdapter>();
     if (m_engineAdapter->Initialize()) {
       m_useEngine = true; 
       DT_LOG_INFO(DarkThumbs::LogCategory::ENGINE, 
-        "✓ Engine pipeline ACTIVE (v6.2.0) - Legacy fallback controlled by registry");
+        "✓ Engine pipeline ACTIVE (v7.0.0) - Legacy fallback controlled by registry");
     } else {
       DT_LOG_WARNING(DarkThumbs::LogCategory::ENGINE, 
         "Engine adapter initialization failed - check Engine build and dependencies");
@@ -94,7 +94,7 @@ HRESULT CCBXShell::GetThumbnail_Internal(UINT cx, HBITMAP *phBmpThumbnail,
   *phBmpThumbnail = nullptr;
   *pdwAlpha = WTSAT_ARGB; // Use alpha channel for modern Windows
 
-  // Try Engine path first (v6.2.0 - PRIMARY PATH)
+  // Try Engine path first (v7.0.0 - PRIMARY PATH)
   if (m_useEngine && m_engineAdapter && m_engineAdapter->IsInitialized()) {
     DT_LOG_DEBUG(DarkThumbs::LogCategory::ENGINE, 
       std::string("Using Engine pipeline for: ") + fileExt);
@@ -133,7 +133,7 @@ HRESULT CCBXShell::GetThumbnail_Internal(UINT cx, HBITMAP *phBmpThumbnail,
       "Engine not initialized - using legacy implementation");
   }
 
-  // Legacy path (DEPRECATED v6.2.0 - Legacy decoders excluded from build)
+  // Legacy path (DEPRECATED v7.0.0 - Legacy decoders excluded from build)
   // Only reachable if: Engine unavailable AND CBXSHELL_LEGACY_DECODERS compiled in
   // In normal builds, only archive/cache helpers remain from legacy code.
   DT_LOG_DEBUG(DarkThumbs::LogCategory::DECODER, 

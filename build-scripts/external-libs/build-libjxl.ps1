@@ -1,145 +1,89 @@
-# Build libjxl 0.11.1 (JPEG XL) for DarkThumbs
-# PowerShell build script with CMake and MSVC
+#Requires -Version 7.0
+# DarkThumbs v7.0 - Build libjxl 0.11.1 (JPEG XL)
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 16, 2026
 
 param(
     [string]$Configuration = "Release",
-    [string]$Platform = "x64"
+    [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-Write-Host "Building libjxl 0.11.1 for DarkThumbs" -ForegroundColor Cyan
-Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
-Write-Host "Platform: $Platform" -ForegroundColor Yellow
-Write-Host ""
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$sourceDir = Join-Path $rootDir "external\image-libs\libjxl-0.11.1"
+$buildDir = Join-Path $sourceDir "build-msvc"
+$installDir = Join-Path $sourceDir "install"
 
-# Setup paths
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
-$ExternalDir = Join-Path $RootDir "external"
-$LibjxlDir = Join-Path $ExternalDir "image-libs\libjxl-0.11.1"
-$BuildDir = Join-Path $LibjxlDir "build-msvc"
-$OutputDir = Join-Path $LibjxlDir "x64\Release"
+Write-BuildHeader "Building libjxl 0.11.1 (JPEG XL)"
 
-# Verify source exists
-if (-not (Test-Path $LibjxlDir)) {
-    Write-Host "[ERROR] libjxl source not found at: $LibjxlDir" -ForegroundColor Red
-    Write-Host "Please run download-all-libs.ps1 first." -ForegroundColor Yellow
+# Verify source directory
+if (-not (Test-Path $sourceDir)) {
+    Write-BuildLog "libjxl-0.11.1 not found at $sourceDir" -Level Error
+    Write-BuildLog "Please run download-all-libs.ps1 first" -Level Warning
     exit 1
 }
 
-# Find Visual Studio and CMake
-$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-if (Test-Path $VsWhere) {
-    $VsPath = & $VsWhere -latest -property installationPath
-    Write-Host "[OK] Found Visual Studio at: $VsPath" -ForegroundColor Green
-} else {
-    Write-Host "[ERROR] Visual Studio not found" -ForegroundColor Red
-    exit 1
-}
+Write-BuildLog "Source: $sourceDir" -Level Info
+Write-BuildLog "Build: $buildDir" -Level Info
+Write-BuildLog "Install: $installDir" -Level Info
 
-# Check for CMake
-$CMake = Get-Command cmake -ErrorAction SilentlyContinue
-if (-not $CMake) {
-    Write-Host "[ERROR] CMake not found in PATH" -ForegroundColor Red
-    exit 1
-}
-
-# Create build directory
-if (Test-Path $BuildDir) {
-    Write-Host "Cleaning existing build directory..." -ForegroundColor Yellow
-    Remove-Item -Recurse -Force $BuildDir
-}
-New-Item -ItemType Directory -Path $BuildDir | Out-Null
-
-# libjxl requires submodules - initialize them
-Write-Host "Initializing git submodules..." -ForegroundColor Yellow
-Push-Location $LibjxlDir
-try {
-    if (Test-Path ".git") {
-        & git submodule update --init --recursive
-    } else {
-        Write-Host "[WARNING] Not a git repository, submodules may be missing" -ForegroundColor Yellow
-        Write-Host "Continuing anyway - bundled dependencies will be used" -ForegroundColor Yellow
+# Initialize git submodules if this is a git repo
+if (Test-Path (Join-Path $sourceDir ".git")) {
+    Write-BuildLog "Initializing git submodules..." -Level Info
+    Push-Location $sourceDir
+    try {
+        git submodule update --init --recursive 2>&1 | Out-Null
+    } catch {
+        Write-BuildLog "Git submodule init failed, continuing with bundled dependencies" -Level Warning
+    } finally {
+        Pop-Location
     }
-} catch {
-    Write-Host "[WARNING] Git submodule init failed: $($_.Exception.Message)" -ForegroundColor Yellow
-} finally {
-    Pop-Location
 }
-
-# Configure with CMake
-Write-Host "Configuring libjxl with CMake..." -ForegroundColor Yellow
-Push-Location $BuildDir
-
-# Setup install directory
-$InstallDir = Join-Path $LibjxlDir "install"
 
 try {
-    & cmake .. `
-        -G "Visual Studio 18 2026" `
-        -A x64 `
-        -DCMAKE_BUILD_TYPE=Release `
-        -DCMAKE_INSTALL_PREFIX="$InstallDir" `
-        -DBUILD_SHARED_LIBS=OFF `
-        -DBUILD_TESTING=OFF `
-        -DJPEGXL_ENABLE_TOOLS=OFF `
-        -DJPEGXL_ENABLE_DOXYGEN=OFF `
-        -DJPEGXL_ENABLE_MANPAGES=OFF `
-        -DJPEGXL_ENABLE_BENCHMARK=OFF `
-        -DJPEGXL_ENABLE_EXAMPLES=OFF `
-        -DJPEGXL_ENABLE_JNI=OFF `
-        -DJPEGXL_ENABLE_SJPEG=OFF `
-        -DJPEGXL_ENABLE_OPENEXR=OFF `
-        -DJPEGXL_ENABLE_SKCMS=ON `
-        -DJPEGXL_FORCE_SYSTEM_BROTLI=OFF `
-        -DJPEGXL_FORCE_SYSTEM_HWY=OFF
-    
-    if ($LASTEXITCODE -ne 0) {
-        throw "CMake configuration failed"
+    # CMake options for libjxl
+    $cmakeOptions = @{
+        'CMAKE_BUILD_TYPE'           = 'Release'
+        'BUILD_SHARED_LIBS'          = 'OFF'
+        'BUILD_TESTING'              = 'OFF'
+        'JPEGXL_ENABLE_TOOLS'        = 'OFF'
+        'JPEGXL_ENABLE_DOXYGEN'      = 'OFF'
+        'JPEGXL_ENABLE_MANPAGES'     = 'OFF'
+        'JPEGXL_ENABLE_BENCHMARK'    = 'OFF'
+        'JPEGXL_ENABLE_EXAMPLES'     = 'OFF'
+        'JPEGXL_ENABLE_JNI'          = 'OFF'
+        'JPEGXL_ENABLE_SJPEG'        = 'OFF'
+        'JPEGXL_ENABLE_OPENEXR'      = 'OFF'
+        'JPEGXL_ENABLE_SKCMS'        = 'ON'
+        'JPEGXL_FORCE_SYSTEM_BROTLI' = 'OFF'
+        'JPEGXL_FORCE_SYSTEM_HWY'    = 'OFF'
     }
     
-    Write-Host "[OK] CMake configuration complete" -ForegroundColor Green
+    # Build with CMake
+    Invoke-CMakeBuild `
+        -LibraryName "libjxl" `
+        -SourceDir $sourceDir `
+        -BuildDir $buildDir `
+        -InstallDir $installDir `
+        -Configuration $Configuration `
+        -CMakeOptions $cmakeOptions `
+        -Clean:$Clean
     
-    # Build
-    Write-Host "Building libjxl (this may take several minutes)..." -ForegroundColor Yellow
-    & cmake --build . --config Release --target install --parallel
+    # Verify outputs
+    $expectedLibs = @(
+        (Join-Path $installDir "lib\jxl.lib"),
+        (Join-Path $installDir "lib\jxl_dec.lib")
+    )
     
-    if ($LASTEXITCODE -ne 0) {
-        throw "Build failed"
-    }
+    Test-BuildOutput -Files $expectedLibs -ThrowOnMissing:$false
     
-    Write-Host "[OK] Build complete" -ForegroundColor Green
+    Write-BuildLog "libjxl 0.11.1 build completed successfully" -Level Success
+    Write-BuildLog "Features: JPEG XL decoding, SKCMS color management, bundled Brotli/Highway" -Level Info
+    
 } catch {
-    Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red
-    Pop-Location
-    exit 1
-} finally {
-    Pop-Location
-}
-
-# Verify build
-$LibPath = Join-Path $InstallDir "lib\jxl.lib"
-$LibDecodePath = Join-Path $InstallDir "lib\jxl_dec.lib"
-
-if ((Test-Path $LibPath) -or (Test-Path $LibDecodePath)) {
-    Write-Host ""
-    Write-Host "[SUCCESS] libjxl built successfully!" -ForegroundColor Green
-    if (Test-Path $LibPath) {
-        Write-Host "Library: $LibPath" -ForegroundColor Green
-    }
-    if (Test-Path $LibDecodePath) {
-        Write-Host "Decoder: $LibDecodePath" -ForegroundColor Green
-    }
-    Write-Host "Headers: $(Join-Path $InstallDir 'include')" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Features enabled:" -ForegroundColor Cyan
-    Write-Host "  - JPEG XL decoding" -ForegroundColor White
-    Write-Host "  - SKCMS color management" -ForegroundColor White
-    Write-Host "  - Bundled Brotli and Highway" -ForegroundColor White
-    exit 0
-} else {
-    Write-Host ""
-    Write-Host "[ERROR] Build failed - library not found" -ForegroundColor Red
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+

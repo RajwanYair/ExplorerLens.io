@@ -1,174 +1,102 @@
 #Requires -Version 7.0
-# DarkThumbs - Build libwebp 1.5.0 using native Makefile.vc (BEST METHOD)
-# Uses the official Windows nmake build system
-# Date: January 6, 2026
+# DarkThumbs v7.0 - Build libwebp 1.5.0 using native Makefile.vc
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 16, 2026
 
 param(
     [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
-
-Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "Building libwebp 1.5.0 (nmake method)" -ForegroundColor Cyan
-Write-Host "========================================`n" -ForegroundColor Cyan
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
 $rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$webpDir = Join-Path $rootDir "external\image-libs\libwebp-1.5.0"
+$webpDir = Join-Path $rootDir "external\image-libs\libwebp-1.5.0-build"
+$outputDir = Join-Path $webpDir "build-vs\Release"
 
+Write-BuildHeader "Building libwebp 1.5.0 (NMake)"
+
+# Verify source directory
 if (-not (Test-Path $webpDir)) {
-    Write-Host "❌ ERROR: libwebp-1.5.0 not found at $webpDir" -ForegroundColor Red
+    Write-BuildLog "libwebp-1.5.0-build not found at $webpDir" -Level Error
+    Write-BuildLog "Note: Path was corrected from libwebp-1.5.0 to libwebp-1.5.0-build" -Level Info
     exit 1
 }
 
-Write-Host "Source directory: $webpDir" -ForegroundColor Gray
-Write-Host ""
+Write-BuildLog "Source: $webpDir" -Level Info
 
-Push-Location $webpDir
+# Clean if requested
+if ($Clean) {
+    $outputPath = Join-Path $webpDir "output"
+    if (Test-Path $outputPath) {
+        Write-BuildLog "Cleaning previous build..." -Level Info
+        Remove-Item $outputPath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
 
 try {
-    # Clean if requested
-    if ($Clean -and (Test-Path "output")) {
-        Write-Host "Cleaning previous build..." -ForegroundColor Yellow
-        Remove-Item "output" -Recurse -Force -ErrorAction SilentlyContinue
+    # Build with NMake
+    Invoke-NMakeBuild -LibraryName "libwebp" -SourceDir $webpDir -Target "CFG=release-static RTLIBCFG=static OBJDIR=output\x64\Release" -MakefileVars @{
+        'File' = 'Makefile.vc'
     }
     
-    # Setup MSVC environment
-    Write-Host "[1/3] Setting up Visual Studio environment..." -ForegroundColor Cyan
+    # Find and verify outputs
+    Write-BuildLog "Verifying build outputs..." -Level Info
     
-    $vcvarsPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
-    if (-not (Test-Path $vcvarsPath)) {
-        throw "vcvars64.bat not found at: $vcvarsPath"
-    }
-    
-    # Create a temporary batch file to run the build
-    $buildScript = @"
-@echo off
-call "$vcvarsPath" x64
-cd /d "$webpDir"
-nmake /f Makefile.vc CFG=release-static RTLIBCFG=static OBJDIR=output\x64\Release
-"@
-    
-    $tempBat = [System.IO.Path]::GetTempFileName() + ".bat"
-    $buildScript | Out-File -FilePath $tempBat -Encoding ASCII
-    
-    Write-Host "[2/3] Building with nmake..." -ForegroundColor Cyan
-    Write-Host "      This may take a few minutes..." -ForegroundColor Gray
-    Write-Host ""
-    
-    # Run the build
-    $process = Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$tempBat`"" -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$env:TEMP\webp-build-stdout.log" -RedirectStandardError "$env:TEMP\webp-build-stderr.log"
-    
-    Remove-Item $tempBat -Force -ErrorAction SilentlyContinue
-    
-    if ($process.ExitCode -ne 0) {
-        Write-Host "`n❌ Build failed with exit code: $($process.ExitCode)" -ForegroundColor Red
-        Write-Host "`nBuild output:" -ForegroundColor Yellow
-        if (Test-Path "$env:TEMP\webp-build-stdout.log") {
-            Get-Content "$env:TEMP\webp-build-stdout.log" | Select-Object -Last 30
-        }
-        if (Test-Path "$env:TEMP\webp-build-stderr.log") {
-            Get-Content "$env:TEMP\webp-build-stderr.log"
-        }
-        throw "nmake failed"
-    }
-    
-    Write-Host "[3/3] Verifying build outputs..." -ForegroundColor Cyan
-    Write-Host ""
-    
-    # Check for built libraries in multiple possible locations
     $possibleOutputDirs = @(
         "output\release-static\x64\lib",
         "output\x64\Release\release-static\x64\lib",
         "output\x64\Release"
     )
     
-    $outputDir = $null
+    $outputLibDir = $null
     foreach ($dir in $possibleOutputDirs) {
-        if (Test-Path $dir) {
-            $outputDir = $dir
-            Write-Host "  Found output directory: $outputDir" -ForegroundColor Gray
+        $fullPath = Join-Path $webpDir $dir
+        if (Test-Path $fullPath) {
+            $outputLibDir = $fullPath
             break
         }
     }
     
-    if (-not $outputDir) {
-        Write-Host "  ⚠️  Standard output directories not found. Searching..." -ForegroundColor Yellow
-        $foundLibs = Get-ChildItem "output" -Recurse -Filter "libwebp.lib" -ErrorAction SilentlyContinue
-        if ($foundLibs) {
-            $outputDir = Split-Path $foundLibs[0].FullName -Parent
-            Write-Host "  Found libraries in: $outputDir" -ForegroundColor Gray
+    if (-not $outputLibDir) {
+        # Fallback: search for libwebp.lib
+        $foundLib = Get-ChildItem (Join-Path $webpDir "output") -Recurse -Filter "libwebp.lib" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($foundLib) {
+            $outputLibDir = $foundLib.DirectoryName
+        } else {
+            throw "Build outputs not found"
         }
     }
     
-    $builtLibs = @()
-    $libFiles = @(
-        "$outputDir\libwebp.lib",
-        "$outputDir\libwebpdecoder.lib", 
-        "$outputDir\libwebpdemux.lib",
-        "$outputDir\libwebpmux.lib",
-        "$outputDir\libsharpyuv.lib"
+    # Verify expected libraries
+    $expectedLibs = @(
+        (Join-Path $outputLibDir "libwebp.lib"),
+        (Join-Path $outputLibDir "libsharpyuv.lib")
     )
     
-    foreach ($libFile in $libFiles) {
-        if (Test-Path $libFile) {
-            $size = (Get-Item $libFile).Length
-            $name = Split-Path $libFile -Leaf
-            Write-Host "  ✅ $name - $([Math]::Round($size/1KB, 1)) KB" -ForegroundColor Green
-            $builtLibs += $libFile
-        }
+    Test-BuildOutput -Files $expectedLibs -ThrowOnMissing:$false
+    
+    # Copy to standard location
+    New-CleanDirectory -Path $outputDir
+    
+    # Copy main libraries with rename
+    $mainLib = Join-Path $outputLibDir "libwebp.lib"
+    if (Test-Path $mainLib) {
+        Copy-Item $mainLib (Join-Path $outputDir "webp.lib") -Force
+        Write-BuildLog "Copied webp.lib" -Level Success
     }
     
-    if ($builtLibs.Count -eq 0) {
-        Write-Host "`n⚠️  No libraries found in $outputDir" -ForegroundColor Yellow
-        Write-Host "Searching for libraries..." -ForegroundColor Gray
-        Get-ChildItem "output" -Recurse -Filter "*.lib" -ErrorAction SilentlyContinue | ForEach-Object {
-            Write-Host "  Found: $($_.FullName)" -ForegroundColor Gray
-        }
-        throw "No libraries were built!"
+    $sharpyuvLib = Join-Path $outputLibDir "libsharpyuv.lib"
+    if (Test-Path $sharpyuvLib) {
+        Copy-Item $sharpyuvLib (Join-Path $outputDir "sharpyuv.lib") -Force
+        Write-BuildLog "Copied sharpyuv.lib" -Level Success
     }
     
-    # Copy to expected location for Build-Production.ps1
-    $targetDir = "build-vs\Release"
-    if (-not (Test-Path $targetDir)) {
-        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-    }
-    
-    Write-Host ""
-    Write-Host "Copying libraries to build-vs\Release..." -ForegroundColor Cyan
-    
-    # Copy main webp library
-    $mainLib = Get-ChildItem "output" -Recurse -Filter "libwebp.lib" -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($mainLib) {
-        Copy-Item $mainLib.FullName "$targetDir\webp.lib" -Force
-        Write-Host "  ✅ Copied webp.lib" -ForegroundColor Green
-    }
-    
-    # Copy sharpyuv if available
-    $sharpyuvLib = Get-ChildItem "output" -Recurse -Filter "libsharpyuv.lib" -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($sharpyuvLib) {
-        Copy-Item $sharpyuvLib.FullName "$targetDir\sharpyuv.lib" -Force
-        Write-Host "  ✅ Copied sharpyuv.lib" -ForegroundColor Green
-    }
-    
-    Write-Host ""
-    Write-Host "========================================" -ForegroundColor Green
-    Write-Host "✅ libwebp 1.5.0 Build Complete!" -ForegroundColor Green
-    Write-Host "========================================" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Libraries ready in: $targetDir" -ForegroundColor Cyan
+    Write-BuildLog "libwebp 1.5.0 build completed successfully" -Level Success
+    Write-BuildLog "Output: $outputDir" -Level Info
     
 } catch {
-    Write-Host "`n❌ Build Failed: $($_.Exception.Message)" -ForegroundColor Red
-    Pop-Location
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
-} finally {
-    # Cleanup temp files
-    Remove-Item "$env:TEMP\webp-build-stdout.log" -Force -ErrorAction SilentlyContinue
-    Remove-Item "$env:TEMP\webp-build-stderr.log" -Force -ErrorAction SilentlyContinue
 }
 
-Pop-Location
-
-Write-Host "Ready to rebuild DarkThumbs with updated libwebp!" -ForegroundColor Cyan
-Write-Host ""

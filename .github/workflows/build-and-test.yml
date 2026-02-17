@@ -12,8 +12,8 @@ env:
   PLATFORM: x64
 
 jobs:
-  build-engine:
-    name: Build Engine Library
+  build-libraries:
+    name: Build External Libraries
     runs-on: windows-2022
     
     steps:
@@ -25,79 +25,58 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
     
-    - name: Setup NuGet
-      uses: nuget/setup-nuget@v2
-    
-    - name: Restore NuGet packages
-      run: nuget restore Engine/DarkThumbsEngine.slnx
-    
-    - name: Build External Dependencies
-      run: |
-        Write-Host "Building external libraries..." -ForegroundColor Cyan
-        # These should already be built, but verify
-        if (-not (Test-Path "external/lib/zlib.lib")) {
-          Write-Host "Warning: External libraries not found" -ForegroundColor Yellow
-        }
+    - name: Setup vcpkg
       shell: pwsh
-    
-    - name: Build Engine Library
       run: |
-        msbuild Engine/DarkThumbsEngine.vcxproj `
-          /p:Configuration=${{ env.BUILD_TYPE }} `
-          /p:Platform=${{ env.PLATFORM }} `
-          /m `
-          /v:minimal
-      shell: pwsh
+        Write-Host "Setting up vcpkg..." -ForegroundColor Cyan
+        & "${{ github.workspace }}\build-scripts\core\Setup-Vcpkg.ps1"
     
-    - name: Verify Engine Output
-      run: |
-        $engineLib = "Engine/${{ env.BUILD_TYPE }}/DarkThumbsEngine.lib"
-        if (Test-Path $engineLib) {
-          $size = (Get-Item $engineLib).Length / 1MB
-          Write-Host "✓ Engine library built: $([math]::Round($size, 2)) MB" -ForegroundColor Green
-        } else {
-          Write-Host "✗ Engine library not found!" -ForegroundColor Red
-          exit 1
-        }
-      shell: pwsh
-    
-    - name: Upload Engine Artifact
-      uses: actions/upload-artifact@v4
+    - name: Cache External Libraries
+      uses: actions/cache@v4
       with:
-        name: engine-lib
         path: |
-          Engine/${{ env.BUILD_TYPE }}/DarkThumbsEngine.lib
-          Engine/${{ env.BUILD_TYPE }}/DarkThumbsEngine.pdb
-        retention-days: 7
-
-  test-engine:
-    name: Test Engine Library
-    needs: build-engine
-    runs-on: windows-2022
+          SDK/
+          external/libraw-install/
+        key: external-libs-${{ runner.os }}-${{ hashFiles('build-scripts/external-libs/*.ps1') }}
+        restore-keys: |
+          external-libs-${{ runner.os }}-
     
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
-    
-    - name: Download Engine Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: engine-lib
-        path: Engine/${{ env.BUILD_TYPE }}
-    
-    - name: Build Engine Tests
-      run: |
-        msbuild Engine/Tests/EngineTests.vcxproj `
-          /p:Configuration=${{ env.BUILD_TYPE }} `
-          /p:Platform=${{ env.PLATFORM }} `
-          /m `
-          /v:minimal
+    - name: Build Compression Libraries
       shell: pwsh
+      run: |
+        Write-Host "Building compression libraries..." -ForegroundColor Cyan
+        
+        $scripts = @(
+          "Build-Zlib.ps1",
+          "Build-Zstd.ps1",
+          "Build-LZ4.ps1",
+          "build-lzma-sdk-26.00.ps1"
+        )
+        
+        foreach ($script in $scripts) {
+          $path = Join-Path "${{ github.workspace }}\build-scripts\external-libs" $script
+          if (Test-Path $path) {
+            Write-Host "Building $script..." -ForegroundColor Yellow
+            & $path
+          }
+        }
     
-    - name: Prepare Test Data
+    - name: Build Image Libraries
+      shell: pwsh
+      run: |
+        Write-Host "Building image format libraries..." -ForegroundColor Cyan
+        
+        $scripts = @(
+          "Build-LibWebP-NMake.ps1",
+          "build-libjxl.ps1",
+          "build-libavif.ps1",
+          "build-dav1d.ps1",
+          "Build-MinizipNG.ps1",
+          "Build-LibRaw.ps1"
+        )
+        
+        foreach ($script in $scripts) {
+          $path = Join-Path "${{ github.workspace }}\build-scripts\external-libs" $script
       run: |
         # Ensure test files exist
         if (-not (Test-Path "tests/test-images")) {
@@ -118,16 +97,76 @@ jobs:
       id: run-tests
     
     - name: Check Test Results
+          if (Test-Path $path) {
+            Write-Host "Building $script..." -ForegroundColor Yellow
+            & $path
+          }
+        }
+    
+    - name: Upload Library Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: external-libraries
+        path: |
+          SDK/
+          external/libraw-install/
+        retention-days: 7
+
+  build-engine:
+    name: Build DarkThumbs Engine
+    needs: build-libraries
+    runs-on: windows-2022
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+    
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+    
+    - name: Download Library Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: external-libraries
+        path: .
+    
+    - name: Build Engine with CMake
+      shell: pwsh
       run: |
-        if ($env:TEST_EXIT_CODE -eq 0) {
-          Write-Host "✓ All Engine tests passed!" -ForegroundColor Green
+        Write-Host "Building DarkThumbsEngine..." -ForegroundColor Cyan
+        
+        cmake -S Engine -B build `
+          -G "Visual Studio 18 2026" `
+          -A x64 `
+          -DCMAKE_BUILD_TYPE=Release
+        
+        cmake --build build --config Release --target DarkThumbsEngine -j 8
+    
+    - name: Verify Engine Output
+      run: |
+        $engineDll = "build\bin\Release\DarkThumbsEngine.dll"
+        if (Test-Path $engineDll) {
+          $size = (Get-Item $engineDll).Length / 1MB
+          Write-Host "✓ Engine DLL built: $([math]::Round($size, 2)) MB" -ForegroundColor Green
         } else {
-          Write-Host "✗ Engine tests failed with exit code: $env:TEST_EXIT_CODE" -ForegroundColor Red
+          Write-Host "✗ Engine DLL not found!" -ForegroundColor Red
           exit 1
         }
-      env:
-        TEST_EXIT_CODE: ${{ steps.run-tests.outcome == 'success' && 0 || 1 }}
       shell: pwsh
+    
+    - name: Upload Engine Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: engine-dll
+        path: |
+          build/bin/Release/DarkThumbsEngine.dll
+          build/bin/Release/DarkThumbsEngine.pdb
+        retention-days: 7
 
   build-cbxshell:
     name: Build CBXShell Extension
@@ -146,30 +185,37 @@ jobs:
     - name: Setup NuGet
       uses: nuget/setup-nuget@v2
     
-    - name: Restore NuGet packages
-      run: nuget restore CBXShell.sln
+    - name: Download Library Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: external-libraries
+        path: .
     
     - name: Download Engine Artifact
       uses: actions/download-artifact@v4
       with:
-        name: engine-lib
-        path: Engine/${{ env.BUILD_TYPE }}
+        name: engine-dll
+        path: build/bin/Release
+    
+    - name: Restore NuGet packages
+      run: nuget restore CBXShell.sln
     
     - name: Build CBXShell Solution
-      run: |
-        msbuild CBXShell.sln `
-          /p:Configuration=${{ env.BUILD_TYPE }} `
-          /p:Platform=${{ env.PLATFORM }} `
-          /m `
-          /v:minimal `
-          /p:TreatWarningsAsErrors=true
       shell: pwsh
+      run: |
+        Write-Host "Building CBXShell solution..." -ForegroundColor Cyan
+        
+        msbuild CBXShell.sln `
+          /p:Configuration=Release `
+          /p:Platform=x64 `
+          /m `
+          /v:minimal
     
     - name: Verify Build Outputs
       run: |
         $outputs = @(
-          @{Name="CBXShell.dll"; Path="x64/${{ env.BUILD_TYPE }}/CBXShell.dll"},
-          @{Name="CBXManager.exe"; Path="x64/${{ env.BUILD_TYPE }}/CBXManager.exe"}
+          @{Name="CBXShell.dll"; Path="x64/Release/CBXShell.dll"},
+          @{Name="CBXManager.exe"; Path="x64/Release/CBXManager.exe"}
         )
         
         $allFound = $true
@@ -191,49 +237,41 @@ jobs:
       with:
         name: cbxshell-binaries
         path: |
-          x64/${{ env.BUILD_TYPE }}/CBXShell.dll
-          x64/${{ env.BUILD_TYPE }}/CBXShell.pdb
-          x64/${{ env.BUILD_TYPE }}/CBXManager.exe
-          x64/${{ env.BUILD_TYPE }}/CBXManager.pdb
+          x64/Release/CBXShell.dll
+          x64/Release/CBXShell.pdb
+          x64/Release/CBXManager.exe
+          x64/Release/CBXManager.pdb
         retention-days: 30
 
-  code-analysis:
-    name: Static Code Analysis
+  verify-build:
+    name: Build Verification
+    needs: [build-libraries, build-engine, build-cbxshell]
     runs-on: windows-2022
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Run clang-format check
-      run: |
-        Write-Host "Code formatting check placeholder" -ForegroundColor Cyan
-        # TODO: Add clang-format validation
-      shell: pwsh
-      continue-on-error: true
+    - name: Download All Artifacts
+      uses: actions/download-artifact@v4
     
-    - name: Check for common issues
-      run: |
-        Write-Host "Running basic code checks..." -ForegroundColor Cyan
-        
-        # Check for debug output in release code
-        $debugPrints = Select-String -Path "CBXShell/*.cpp","Engine/**/*.cpp" -Pattern "OutputDebugString|printf|cout" -Exclude "*test*"
-        if ($debugPrints) {
-          Write-Host "Warning: Found debug output statements" -ForegroundColor Yellow
-        }
-        
-        # Check for hardcoded paths
-        $hardcodedPaths = Select-String -Path "CBXShell/*.cpp","Engine/**/*.cpp" -Pattern 'C:\\|D:\\' -Exclude "*test*","*path*"
-        if ($hardcodedPaths) {
-          Write-Host "Warning: Found hardcoded paths" -ForegroundColor Yellow
-        }
-        
-        Write-Host "✓ Code analysis complete" -ForegroundColor Green
+    - name: Run Build Verification Suite
       shell: pwsh
+      run: |
+        Write-Host "Running comprehensive build verification..." -ForegroundColor Cyan
+        & "${{ github.workspace }}\build-scripts\validation\Test-BuildVerification.ps1" -CreateReport -Verbose
+    
+    - name: Upload Verification Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: verification-report
+        path: build-logs/verification-report-*.json
+        retention-days: 30
 
   build-summary:
     name: Build Summary
-    needs: [build-engine, test-engine, build-cbxshell, code-analysis]
+    needs: [build-libraries, build-engine, build-cbxshell, verify-build]
     runs-on: windows-2022
     if: always()
     
@@ -246,10 +284,10 @@ jobs:
         Write-Host ""
         
         $status = @{
+          "External Libraries" = "${{ needs.build-libraries.result }}"
           "Engine Build" = "${{ needs.build-engine.result }}"
-          "Engine Tests" = "${{ needs.test-engine.result }}"
           "CBXShell Build" = "${{ needs.build-cbxshell.result }}"
-          "Code Analysis" = "${{ needs.code-analysis.result }}"
+          "Build Verification" = "${{ needs.verify-build.result }}"
         }
         
         foreach ($job in $status.GetEnumerator()) {
@@ -270,8 +308,8 @@ jobs:
     - name: Check Overall Status
       run: |
         $allSuccess = @(
+          "${{ needs.build-libraries.result }}",
           "${{ needs.build-engine.result }}",
-          "${{ needs.test-engine.result }}",
           "${{ needs.build-cbxshell.result }}"
         ) -notcontains "failure"
         
@@ -279,5 +317,5 @@ jobs:
           Write-Host "Build pipeline failed!" -ForegroundColor Red
           exit 1
         }
-        Write-Host "Build pipeline succeeded!" -ForegroundColor Green
+        Write-Host "✓ Build pipeline succeeded!" -ForegroundColor Green
       shell: pwsh

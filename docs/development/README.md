@@ -54,8 +54,8 @@ This directory contains comprehensive documentation for developers working on Da
 # Full clean build
 .\build-scripts\build.ps1 -Configuration Release -Clean
 
-# Build external libraries
-.\build-scripts\library-builders\Build-All-External-Libraries.ps1
+# Build external libraries (V7 unified script)
+.\build-scripts\Build-All-DarkThumbs-V7.ps1 -Clean
 ```
 
 ### 3. Testing

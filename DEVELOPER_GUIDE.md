@@ -166,29 +166,76 @@ DarkThumbs/
 
 ## Building from Source
 
-### Quick Build (Standard)
+### ⭐ Recommended: Complete Build (NEW in v7.0)
 
 ```powershell
-# Full build with dependencies
+# Complete build: dependencies, engine, solution, and MSI installer
+.\build-scripts\Build-All-And-Package.ps1 -Configuration Release -Version 7.0.0
+
+# Skip dependencies if already built (faster)
+.\build-scripts\Build-All-And-Package.ps1 -SkipDependencies
+
+# Clean build (rebuild from scratch)
+.\build-scripts\Build-All-And-Package.ps1 -Clean
+
+# Or use Visual Studio task
+# Ctrl+Shift+B → "Build Release (Standard)"
+```
+
+### Quick Build (Standard - Legacy)
+
+```powershell
+# Full build with dependencies (uses old build system)
 .\scripts\build.ps1 -Configuration Release
 
 # Or use Visual Studio task
 # Ctrl+Shift+B → "Build Release (Standard)"
 ```
 
-### Step-by-Step Build
+### Step-by-Step Build (Manual Control)
+
+#### 0. Setup vcpkg (Optional - NEW in v7.0)
+
+```powershell
+# vcpkg can be used for future dependency management
+.\build-scripts\Setup-Vcpkg.ps1
+
+# With package installation
+.\build-scripts\Setup-Vcpkg.ps1 -InstallPackages
+
+# Note: DarkThumbs currently builds most libraries from source
+```
 
 #### 1. Build External Libraries
+
+**NEW v7.0 Refactored Scripts (Recommended):**
+
+```powershell
+# Using new unified build modules (50% less code)
+.\build-scripts\external-libs\Build-LibWebP-NMake.ps1  -Configuration Release -Clean
+.\build-scripts\external-libs\Build-MinizipNG.ps1      -Configuration Release -Clean
+.\build-scripts\external-libs\build-libjxl.ps1         -Configuration Release -Clean
+.\build-scripts\external-libs\build-libavif.ps1        -Configuration Release -Clean
+
+# Remaining libraries (legacy scripts - being refactored)
+.\build-scripts\external-libs\build-lzma-sdk-26.00.ps1
+.\build-scripts\external-libs\Build-Zlib.ps1
+.\build-scripts\external-libs\Build-Zstd.ps1
+```
+
+**Legacy Method:**
 
 ```powershell
 # Build all external libraries with /MD runtime (4-6 hours)
 .\build-scripts\Rebuild-All-With-MD.ps1 -Clean
 
-# Or build individually:
+# Or build individually (old scripts)
 .\build-scripts\external-libs\build-lzma-sdk-26.00.ps1
 .\build-scripts\external-libs\Build-LibWebP-NMake.ps1
 .\build-scripts\external-libs\Build-MinizipNG.ps1
 ```
+
+> **💡 TIP:** Use the new `Build-All-And-Package.ps1` script to build everything automatically.
 
 #### 2. Build Engine (CMake + Ninja)
 

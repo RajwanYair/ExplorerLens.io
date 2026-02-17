@@ -58,6 +58,8 @@ const wchar_t* RAWDecoder::m_extensions[] = {
     L".erf",
     // Mamiya
     L".mef",
+    // GoPro
+    L".gpr",
     // Red Digital Cinema
     L".r3d"
 };

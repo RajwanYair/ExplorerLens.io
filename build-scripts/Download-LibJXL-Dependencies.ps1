@@ -134,7 +134,7 @@ foreach ($dep in $Dependencies) {
 Write-Host ""
 if ($AllOk) {
     Write-Host "[SUCCESS] All dependencies installed!" -ForegroundColor Green
-    Write-Host "You can now build libjxl with: .\build-scripts\build-libjxl.ps1" -ForegroundColor Cyan
+    Write-Host "You can now build libjxl with: .\build-scripts\Build-LibJXL.ps1" -ForegroundColor Cyan
 } else {
     Write-Host "[WARNING] Some dependencies are missing" -ForegroundColor Yellow
     exit 1

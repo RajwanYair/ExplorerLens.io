@@ -66,6 +66,8 @@ namespace DarkThumbs {
         m_stats[ProfileComponent::SIMD_SCALE_BILINEAR].name = L"SIMD Scale Bilinear";
         m_stats[ProfileComponent::SIMD_SCALE_BICUBIC].name = L"SIMD Scale Bicubic";
         m_stats[ProfileComponent::SIMD_COLOR_CONVERT].name = L"SIMD Color Convert";
+        m_stats[ProfileComponent::PIPELINE_DECODER_INIT].name = L"Pipeline Decoder Init";
+        m_stats[ProfileComponent::PIPELINE_DECODER_LOOKUP].name = L"Pipeline Decoder Lookup";
         m_stats[ProfileComponent::PIPELINE_TOTAL].name = L"Pipeline Total";
     }
 

@@ -1,6 +1,6 @@
 # DarkThumbs Known Issues & Troubleshooting
-**Version:** 6.2.0  
-**Last Updated:** February 15, 2026
+**Version:** 7.0.0  
+**Last Updated:** February 16, 2026
 
 ## Current Known Issues
 
@@ -12,26 +12,26 @@
 
 ### High Priority (P1)
 
-#### 1. JPEG XL (.jxl) Support Not Yet Implemented
-**Status:** Planned for Sprint 2  
-**Impact:** `.jxl` files show generic icon instead of thumbnail  
-**Workaround:** None. Feature in development.  
-**ETA:** v6.3.0
+#### 1. JPEG XL (.jxl) Build Configuration
+**Status:** ✅ **Working** (libjxl 0.11.1 linked in current build)  
+**Impact:** `.jxl` support active when built with `-DHAS_LIBJXL=ON` (default ON)  
 
 **Details:**
-- libjxl 0.11.1 is integrated but decoder not yet connected
-- Build scripts ready at `build-scripts/external-libs/build-libjxl.ps1`
-- Requires linking against jxl.lib, jxl_cms.lib, jxl_threads.lib
+- JXL decoder fully operational in current Engine build
+- libjxl 0.11.1 + brotli + highway libraries linked
+- Build-LibJXL.ps1 available for rebuilding from source
+- Latest build: 0 errors, 0 warnings with JXL support enabled
 
-#### 2. HEIF/HEIC Hardware Acceleration Limitations
-**Status:** Windows WIC dependency  
-**Impact:** HEIF thumbnails slow on systems without hardware HEVC decoder  
-**Workaround:** Install "HEVC Video Extensions" from Microsoft Store (free or $0.99)
+#### 2. HEIF/HEIC Support
+**Status:** 🔄 **In Progress** (libheif build script ready, building libde265 + libheif)  
+**Impact:** HEIF thumbnails currently use Windows WIC fallback (requires HEVC codec)  
+**Resolution:** Building native libheif 1.19.5 + libde265 1.0.15 decoder - no codec dependency needed
 
 **Details:**
-- DarkThumbs uses Windows Imaging Component (WIC) for HEIF/HEIC
-- WIC requires hardware HEVC support or codec pack
-- Software fallback is very slow (5-10 seconds per thumbnail)
+- Native HEIFDecoder.cpp already implemented in Engine (gated with `HAS_LIBHEIF`)
+- Build-LibHEIF.ps1 configured to auto-download and build libde265 + libheif
+- Once built, set `-DHAS_LIBHEIF=ON` in CMake to enable native HEIF decoding
+- K-Lite Codec Pack (installed) also provides HEVC decoder as interim fallback
 
 ---
 
@@ -60,14 +60,27 @@
 - Affects certain Canon CR3, Nikon NEF, Sony ARW files
 
 #### 5. Video Thumbnails Missing for Some Codecs
-**Status:** DirectShow filter dependency  
-**Impact:** Thumbnails missing for: AV1, VP9, HEVC (in MKV), ProRes  
-**Workaround:** Install codec pack (K-Lite Codec Pack recommended)
+**Status:** ✅ **RESOLVED** (K-Lite Codec Pack 19.4.5 installed)  
+**Impact:** Previously: thumbnails missing for AV1, VP9, HEVC (in MKV), ProRes  
+**Resolution:** K-Lite Codec Pack provides DirectShow and Media Foundation filters for all major video codecs.
 
 **Details:**
-DarkThumbs uses DirectShow for video decoding. Missing DirectShow filters = no thumbnail.
+DarkThumbs uses Media Foundation (primary) and Shell IThumbnailProvider (fallback) for video thumbnails. K-Lite Codec Pack 19.4.5 Basic installs LAV Filters which provide:
+- ✅ H.264/H.265/HEVC - All containers (MP4, MKV, MOV)
+- ✅ AV1 - WebM and MP4 containers
+- ✅ VP8/VP9 - WebM containers
+- ✅ ProRes - MOV containers
+- ✅ MPEG-2, MPEG-4, DivX, Xvid - Legacy formats
+- ✅ WMV, FLV, RMVB - Streaming media formats
 
-**Install codecs:**
+**K-Lite Integration Notes:**
+- K-Lite registers system-wide Media Foundation transforms (MFTs) and DirectShow filters
+- DarkThumbs automatically picks up these codecs via `MFCreateSourceReaderFromURL()`
+- The Shell fallback path (`ExtractFrameShell()`) also benefits from K-Lite's IThumbnailProvider
+- No code changes needed - K-Lite codec detection is automatic
+- DXVA2 hardware acceleration works with K-Lite for H.264/H.265/AV1
+
+If K-Lite is not installed on user machines:
 ```powershell
 # Option 1: K-Lite Codec Pack (recommended)
 # Download from https://codecguide.com/download_kl.htm

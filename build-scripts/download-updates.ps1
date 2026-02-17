@@ -16,7 +16,7 @@ $env:HTTPS_PROXY = $ProxyUrl
 [System.Net.WebRequest]::DefaultWebProxy = New-Object System.Net.WebProxy($ProxyUrl)
 
 $rootDir = Split-Path -Parent $PSScriptRoot
-$compressionDir = Join-Path $rootDir "external\compression"
+$compressionDir = Join-Path $rootDir "external\compression-libs"
 
 # Download zstd 1.5.7
 Write-Host "`nDownloading zstd 1.5.7..." -ForegroundColor Cyan

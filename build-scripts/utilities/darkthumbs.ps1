@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ProjectRoot = $PSScriptRoot
+$ProjectRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 
 Write-Host "+=================================================================+" -ForegroundColor Cyan
 Write-Host "|               DarkThumbs Build & Management                   |" -ForegroundColor Cyan
@@ -80,21 +80,21 @@ function Show-Help {
     Write-Host "Show this help message"
     Write-Host ""
     Write-Host "Examples:" -ForegroundColor Yellow
-    Write-Host "  .\darkthumbs.ps1 build" -ForegroundColor Gray
-    Write-Host "  .\darkthumbs.ps1 clean" -ForegroundColor Gray
-    Write-Host "  .\darkthumbs.ps1 test" -ForegroundColor Gray
-    Write-Host "  .\darkthumbs.ps1 install" -ForegroundColor Gray
+    Write-Host "  .\\DarkThumbs.ps1 build" -ForegroundColor Gray
+    Write-Host "  .\\DarkThumbs.ps1 clean" -ForegroundColor Gray
+    Write-Host "  .\\DarkThumbs.ps1 test" -ForegroundColor Gray
+    Write-Host "  .\\DarkThumbs.ps1 install" -ForegroundColor Gray
     Write-Host ""
 }
 
 function Invoke-Build {
     Write-Host "Building DarkThumbs ($Configuration|$Platform)..." -ForegroundColor Yellow
-    & "$ProjectRoot\scripts\build\Quick-Build.ps1" -Configuration $Configuration -Platform $Platform
+    & "$ProjectRoot\scripts\build.ps1" -Configuration $Configuration
 }
 
 function Invoke-CleanBuild {
     Write-Host "Clean building DarkThumbs ($Configuration|$Platform)..." -ForegroundColor Yellow
-    & "$ProjectRoot\scripts\build\Build-Production.ps1"
+    & "$ProjectRoot\scripts\build.ps1" -Configuration $Configuration -Clean
 }
 
 function Invoke-Test {
@@ -106,14 +106,12 @@ function Invoke-Install {
     Write-Host "Installing DarkThumbs..." -ForegroundColor Yellow
     if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         Write-Warning "Installation requires Administrator privileges. Restarting as Administrator..."
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$ProjectRoot\scripts\install\install-x64.ps1" -Verb RunAs -WorkingDirectory "$ProjectRoot"
-    }
-    else {
+        Start-Process -FilePath "pwsh.exe" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$ProjectRoot\scripts\install.ps1", "-Configuration", $Configuration -Verb RunAs -WorkingDirectory "$ProjectRoot"
+    } else {
         Push-Location "$ProjectRoot"
         try {
-            & "$ProjectRoot\scripts\install\install-x64.ps1"
-        }
-        finally {
+            & "$ProjectRoot\scripts\install.ps1" -Configuration $Configuration
+        } finally {
             Pop-Location
         }
     }
@@ -123,14 +121,12 @@ function Invoke-Uninstall {
     Write-Host "Uninstalling DarkThumbs..." -ForegroundColor Yellow
     if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
         Write-Warning "Uninstallation requires Administrator privileges. Restarting as Administrator..."
-        Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$ProjectRoot\scripts\install\uninstall-x64.ps1" -Verb RunAs -WorkingDirectory "$ProjectRoot"
-    }
-    else {
+        Start-Process -FilePath "pwsh.exe" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$ProjectRoot\scripts\install.ps1", "-Unregister" -Verb RunAs -WorkingDirectory "$ProjectRoot"
+    } else {
         Push-Location "$ProjectRoot"
         try {
-            & "$ProjectRoot\scripts\install\uninstall-x64.ps1"
-        }
-        finally {
+            & "$ProjectRoot\scripts\install.ps1" -Unregister
+        } finally {
             Pop-Location
         }
     }
@@ -138,12 +134,12 @@ function Invoke-Uninstall {
 
 function Invoke-Verify {
     Write-Host "Verifying development tools..." -ForegroundColor Yellow
-    & "$ProjectRoot\scripts\setup\verify-tools.ps1"
+    & "$ProjectRoot\scripts\verify-tools.ps1"
 }
 
 function Invoke-Setup {
     Write-Host "Setting up development environment..." -ForegroundColor Yellow
-    & "$ProjectRoot\scripts\setup\Update-DevTools.ps1" -InstallMissing
+    & "$ProjectRoot\scripts\Setup-DevEnvironment.ps1"
 }
 
 # Execute action

@@ -6,56 +6,140 @@ on:
       - "v*.*.*"
   workflow_dispatch:
 
+env:
+  BUILD_TYPE: Release
+  PLATFORM: x64
+
 jobs:
   create-release:
-    name: Create Release
-    runs-on: windows-latest
+    name: Create Release & MSI Package
+    runs-on: windows-2022
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
-      - name: Setup Build Environment
-        uses: microsoft/setup-msbuild@v1.1
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-      - name: Build Release
+      - name: Setup .NET SDK (for WiX)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Install WiX Toolset
         shell: pwsh
         run: |
-          Write-Host "Building release packages..." -ForegroundColor Cyan
+          Write-Host "Installing WiX Toolset..." -ForegroundColor Cyan
+          dotnet tool install --global wix --version 5.0.0
+          wix --version
 
-          # Build external libraries
-          & ".\build-scripts\Build-External-Libraries-Final.ps1"
+      - name: Setup vcpkg (if needed)
+        shell: pwsh
+        run: |
+          Write-Host "Setting up vcpkg..." -ForegroundColor Cyan
+          & "${{ github.workspace }}\build-scripts\core\Setup-Vcpkg.ps1"
 
-          # Build main project
-          msbuild CBXShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
+      - name: Build All Libraries & Create MSI
+        shell: pwsh
+        run: |
+          Write-Host "Building complete DarkThumbs release package..." -ForegroundColor Cyan
 
-          # Create installer packages
-          # Add installer build commands here
+          # Use unified build script
+          $buildScript = "${{ github.workspace }}\build-scripts\production\Build-All-And-Package.ps1"
+
+          if (Test-Path $buildScript) {
+            & $buildScript -Clean -SkipTests
+          } else {
+            Write-Host "Warning: Build-All-And-Package.ps1 not found, using legacy build" -ForegroundColor Yellow
+            
+            # Fallback to manual build steps
+            msbuild CBXShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+          }
+
+      - name: Run Build Verification
+        shell: pwsh
+        run: |
+          Write-Host "Verifying build outputs..." -ForegroundColor Cyan
+          & "${{ github.workspace }}\build-scripts\validation\Test-BuildVerification.ps1" -CreateReport
 
       - name: Create Release Archive
         shell: pwsh
         run: |
-          $version = $env:GITHUB_REF -replace 'refs/tags/v', ''
+          $version = if ($env:GITHUB_REF -match 'refs/tags/v(.+)') { $matches[1] } else { "dev" }
           $archiveName = "DarkThumbs-$version-x64.zip"
 
-          # Package files
-          Compress-Archive -Path @(
+          Write-Host "Creating release archive: $archiveName" -ForegroundColor Cyan
+
+          # Package binaries
+          $files = @(
             'x64\Release\CBXShell.dll',
+            'x64\Release\CBXManager.exe',
+            'build\bin\Release\DarkThumbsEngine.dll',
             'README.md',
             'LICENSE',
-            'ROADMAP.md'
-          ) -DestinationPath $archiveName
+            'USER_GUIDE.md',
+            'Install-DarkThumbs.ps1'
+          )
 
-          Write-Host "Created $archiveName" -ForegroundColor Green
+          $validFiles = $files | Where-Object { Test-Path $_ }
+
+          if ($validFiles.Count -gt 0) {
+            Compress-Archive -Path $validFiles -DestinationPath $archiveName -Force
+            Write-Host "✓ Created $archiveName" -ForegroundColor Green
+          } else {
+            Write-Host "✗ No files found to archive!" -ForegroundColor Red
+            exit 1
+          }
+
+      - name: Find MSI Package
+        id: find-msi
+        shell: pwsh
+        run: |
+          $msiPath = Get-ChildItem -Path "packaging\output" -Filter "*.msi" -Recurse | Select-Object -First 1
+          if ($msiPath) {
+            Write-Host "Found MSI: $($msiPath.FullName)" -ForegroundColor Green
+            echo "msi-path=$($msiPath.FullName)" >> $env:GITHUB_OUTPUT
+            echo "msi-name=$($msiPath.Name)" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "Warning: No MSI package found" -ForegroundColor Yellow
+            echo "msi-path=" >> $env:GITHUB_OUTPUT
+          }
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             DarkThumbs-*.zip
+            ${{ steps.find-msi.outputs.msi-path }}
           draft: true
           generate_release_notes: true
+          body: |
+            # DarkThumbs Release ${{ github.ref_name }}
+
+            ## Installation
+            - **MSI Installer (Recommended)**: Run `${{ steps.find-msi.outputs.msi-name }}` for automated installation
+            - **Manual Installation**: Extract ZIP and run `Install-DarkThumbs.ps1` as Administrator
+
+            ## What's New
+            See the full [CHANGELOG](CHANGELOG.md) for details.
+
+            ## System Requirements
+            - Windows 11 x64 (22H2 or later recommended)
+            - Visual C++ Redistributable 2022
+            - .NET Framework 4.8 or later
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-package
+          path: |
+            DarkThumbs-*.zip
+            packaging/output/*.msi
+            build-logs/verification-report-*.json
+          retention-days: 30

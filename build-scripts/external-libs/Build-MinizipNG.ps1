@@ -1,103 +1,68 @@
-# ===========================================================================
-# Build-MinizipNG.ps1
-# Build minizip-ng 4.0.10 - Modern ZIP Archive Library
-# ===========================================================================
+#Requires -Version 7.0
+# DarkThumbs v7.0 - Build minizip-ng 4.0.10 (Modern ZIP Library)
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 16, 2026
 
 param(
     [string]$Configuration = "Release",
-    [string]$Platform = "x64"
+    [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-Write-Host ""
-Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host "Building minizip-ng 4.0.10 (Modern ZIP Library)" -ForegroundColor Cyan
-Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host ""
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$sourceDir = Join-Path $rootDir "external\compression-libs\minizip-ng-4.0.10"
+$buildDir = Join-Path $sourceDir "build-vs"
+$outputDir = Join-Path $buildDir $Configuration
 
-# Get project root
-$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-Set-Location $ProjectRoot
+Write-BuildHeader "Building minizip-ng 4.0.10"
 
-# Find CMake
-$CMake = Get-Command cmake -ErrorAction SilentlyContinue
-if (-not $CMake) {
-    Write-Host "ERROR: CMake not found. Please install CMake." -ForegroundColor Red
+# Verify source directory
+if (-not (Test-Path $sourceDir)) {
+    Write-BuildLog "minizip-ng-4.0.10 not found at $sourceDir" -Level Error
     exit 1
 }
 
-$SourceDir = Join-Path $ProjectRoot "external\compression\minizip-ng-4.0.10"
-$BuildDir = Join-Path $SourceDir "build-vs"
+Write-BuildLog "Source: $sourceDir" -Level Info
+Write-BuildLog "Build: $buildDir" -Level Info
 
-if (-not (Test-Path $SourceDir)) {
-    Write-Host "ERROR: Source directory not found!" -ForegroundColor Red
-    Write-Host "Expected: $SourceDir" -ForegroundColor Yellow
+try {
+    # CMake options for minizip-ng
+    $cmakeOptions = @{
+        'BUILD_SHARED_LIBS' = 'OFF'
+        'MZ_COMPAT'         = 'OFF'
+        'MZ_ZLIB'           = 'ON'
+        'MZ_BZIP2'          = 'ON'
+        'MZ_LZMA'           = 'ON'
+        'MZ_ZSTD'           = 'ON'
+        'MZ_OPENSSL'        = 'OFF'
+        'MZ_LIBCOMP'        = 'OFF'
+        'MZ_FETCH_LIBS'     = 'OFF'
+    }
+    
+    # Build with CMake
+    Invoke-CMakeBuild `
+        -LibraryName "minizip-ng" `
+        -SourceDir $sourceDir `
+        -BuildDir $buildDir `
+        -Configuration $Configuration `
+        -CMakeOptions $cmakeOptions `
+        -Clean:$Clean
+    
+    # Verify output
+    $expectedLib = Join-Path $outputDir "minizip.lib"
+    Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
+    
+    Write-BuildLog "minizip-ng 4.0.10 build completed successfully" -Level Success
+    Write-BuildLog "Output: $expectedLib" -Level Info
+    Write-BuildLog "Next step: Copy to external\compression-libs\minizip-ng-4.0.10\build-manual\$Configuration\" -Level Info
+    
+} catch {
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
 
-# Create build directory
-if (-not (Test-Path $BuildDir)) {
-    Write-Host "Creating build directory..." -ForegroundColor White
-    New-Item -ItemType Directory -Path $BuildDir -Force | Out-Null
-}
-
-Set-Location $BuildDir
-
-Write-Host "Source: $SourceDir" -ForegroundColor White
-Write-Host "Build:  $BuildDir" -ForegroundColor White
-Write-Host ""
-
-# Configure with CMake
-Write-Host "Configuring with CMake..." -ForegroundColor White
-& cmake $SourceDir `
-    -G "Visual Studio 17 2022" `
-    -A x64 `
-    -DBUILD_SHARED_LIBS=OFF `
-    -DMZ_COMPAT=OFF `
-    -DMZ_ZLIB=ON `
-    -DMZ_BZIP2=ON `
-    -DMZ_LZMA=ON `
-    -DMZ_ZSTD=ON `
-    -DMZ_OPENSSL=OFF `
-    -DMZ_LIBCOMP=OFF `
-    -DMZ_FETCH_LIBS=OFF
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "[FAILED] CMake configuration failed!" -ForegroundColor Red
-    exit 1
-}
-
-# Build
-Write-Host ""
-Write-Host "Building $Configuration configuration..." -ForegroundColor White
-& cmake --build . --config $Configuration --target minizip
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "[FAILED] Build failed!" -ForegroundColor Red
-    exit 1
-}
-
-# Check for output
-$OutputLib = Join-Path $BuildDir "$Configuration\minizip.lib"
-
-if (Test-Path $OutputLib) {
-    $Size = (Get-Item $OutputLib).Length
-    Write-Host ""
-    Write-Host "[SUCCESS] minizip.lib built: $Size bytes" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Output: $OutputLib" -ForegroundColor White
-    Write-Host ""
-    Write-Host "Next Steps:" -ForegroundColor Yellow
-    Write-Host "1. Copy minizip.lib to external\compression\minizip-ng\x64\Release\minizip-ng.lib" -ForegroundColor Gray
-    Write-Host "2. Update CBXShell.vcxproj AdditionalLibraryDirectories if needed" -ForegroundColor Gray
-    exit 0
-} else {
-    Write-Host ""
-    Write-Host "[ERROR] Output file not found: $OutputLib" -ForegroundColor Red
-    Write-Host "Build directory contents:" -ForegroundColor Yellow
-    Get-ChildItem $BuildDir -Recurse -Filter "*.lib" | Format-Table FullName, Length
-    exit 1
+Get-ChildItem $BuildDir -Recurse -Filter "*.lib" | Format-Table FullName, Length
+exit 1
 }

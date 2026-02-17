@@ -1,11 +1,11 @@
 ; ============================================================
-; DarkThumbs v5.2.0 - NSIS Installer Script
+; DarkThumbs v7.0.0 - NSIS Installer Script
 ; Nullsoft Scriptable Install System
 ; Download NSIS from: https://nsis.sourceforge.io/
 ; ============================================================
 
 !define PRODUCT_NAME "DarkThumbs"
-!define PRODUCT_VERSION "5.2.0"
+!define PRODUCT_VERSION "7.0.0"
 !define PRODUCT_PUBLISHER "DarkThumbs Project"
 !define PRODUCT_WEB_SITE "https://github.com/yourusername/darkthumbs"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"

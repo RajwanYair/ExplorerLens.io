@@ -4,7 +4,7 @@
 
 param(
     [string]$Configuration = "Release",
-    [string]$Version = "6.2.0"
+    [string]$Version = "7.0.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -37,9 +37,8 @@ Write-Host ""
 Write-Host "[2/5] Verifying build artifacts..." -ForegroundColor Yellow
 
 $BinariesToCheck = @(
-    "CBXShell\x64\$Configuration\CBXShell.dll",
-    "CBXManager\x64\$Configuration\CBXManager.exe",
-    "build\lib\$Configuration\DarkThumbsEngine.lib"
+    "x64\$Configuration\CBXShell.dll",
+    "x64\$Configuration\CBXManager.exe"
 )
 
 $AllExist = $true
@@ -85,9 +84,7 @@ try {
         -out "$MsiFile" `
         -define "BuildDir=$RootDir" `
         -define "Version=$Version" `
-        -arch x64 `
-        -ext WixToolset.UI.wixext `
-        -ext WixToolset.Util.wixext
+        -arch x64
     
     if ($LASTEXITCODE -ne 0) {
         throw "WiX build failed with exit code $LASTEXITCODE"

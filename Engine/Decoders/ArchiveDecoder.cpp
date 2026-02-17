@@ -120,16 +120,36 @@ bool ArchiveDecoder::IsImageFile(const std::wstring& filename) {
 }
 
 bool ArchiveDecoder::CanDecode(const wchar_t* filePath) {
-    // Check extension
+    if (!filePath || !*filePath) {
+        return false;
+    }
+
+    // Get simple extension first
     const wchar_t* ext = PathFindExtensionW(filePath);
     if (!ext || *ext == L'\0') {
         return false;
     }
 
-    // Check against supported extensions
+    // Check simple extension match
     for (uint32_t i = 0; i < m_extensionCount; i++) {
         if (_wcsicmp(ext, m_extensions[i]) == 0) {
             return true;
+        }
+    }
+
+    // Check compound extensions (.tar.gz, .tar.bz2, .tar.xz)
+    // Find the second-to-last dot for compound extension matching
+    std::wstring path(filePath);
+    size_t lastDot = path.rfind(L'.');
+    if (lastDot != std::wstring::npos && lastDot > 0) {
+        size_t prevDot = path.rfind(L'.', lastDot - 1);
+        if (prevDot != std::wstring::npos) {
+            std::wstring compoundExt = path.substr(prevDot);
+            for (uint32_t i = 0; i < m_extensionCount; i++) {
+                if (_wcsicmp(compoundExt.c_str(), m_extensions[i]) == 0) {
+                    return true;
+                }
+            }
         }
     }
 

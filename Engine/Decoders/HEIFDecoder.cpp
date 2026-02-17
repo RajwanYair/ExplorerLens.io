@@ -5,6 +5,139 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <mutex>
+#include <wincodec.h>
+#include <wrl/client.h>
+
+namespace {
+
+HRESULT DecodeHEIFWithWIC(
+    const wchar_t* filePath,
+    uint32_t targetWidth,
+    uint32_t targetHeight,
+    DarkThumbs::Engine::ThumbnailResult& result)
+{
+    static std::mutex wicFactoryMutex;
+    static Microsoft::WRL::ComPtr<IWICImagingFactory> wicFactory;
+
+    {
+        std::lock_guard<std::mutex> lock(wicFactoryMutex);
+        if (!wicFactory) {
+            HRESULT hrFactory = CoCreateInstance(
+                CLSID_WICImagingFactory,
+                nullptr,
+                CLSCTX_INPROC_SERVER,
+                IID_PPV_ARGS(&wicFactory));
+            if (FAILED(hrFactory)) {
+                return hrFactory;
+            }
+        }
+    }
+
+    Microsoft::WRL::ComPtr<IWICBitmapDecoder> decoder;
+    HRESULT hr = wicFactory->CreateDecoderFromFilename(
+        filePath,
+        nullptr,
+        GENERIC_READ,
+        WICDecodeMetadataCacheOnDemand,
+        &decoder);
+    if (FAILED(hr)) {
+        return hr;
+    }
+
+    Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> frame;
+    hr = decoder->GetFrame(0, &frame);
+    if (FAILED(hr)) {
+        return hr;
+    }
+
+    UINT width = 0;
+    UINT height = 0;
+    hr = frame->GetSize(&width, &height);
+    if (FAILED(hr) || width == 0 || height == 0) {
+        return FAILED(hr) ? hr : E_FAIL;
+    }
+
+    Microsoft::WRL::ComPtr<IWICFormatConverter> converter;
+    hr = wicFactory->CreateFormatConverter(&converter);
+    if (FAILED(hr)) {
+        return hr;
+    }
+
+    hr = converter->Initialize(
+        frame.Get(),
+        GUID_WICPixelFormat32bppBGRA,
+        WICBitmapDitherTypeNone,
+        nullptr,
+        0.0f,
+        WICBitmapPaletteTypeCustom);
+    if (FAILED(hr)) {
+        return hr;
+    }
+
+    IWICBitmapSource* source = converter.Get();
+    Microsoft::WRL::ComPtr<IWICBitmapScaler> scaler;
+
+    if ((targetWidth > 0 && width > targetWidth) || (targetHeight > 0 && height > targetHeight)) {
+        float maxW = (targetWidth > 0) ? static_cast<float>(targetWidth) : static_cast<float>(width);
+        float maxH = (targetHeight > 0) ? static_cast<float>(targetHeight) : static_cast<float>(height);
+        float scale = (std::min)(maxW / static_cast<float>(width), maxH / static_cast<float>(height));
+        if (scale > 0.0f && scale < 1.0f) {
+            UINT scaledW = (std::max)(1u, static_cast<UINT>(width * scale));
+            UINT scaledH = (std::max)(1u, static_cast<UINT>(height * scale));
+
+            hr = wicFactory->CreateBitmapScaler(&scaler);
+            if (FAILED(hr)) {
+                return hr;
+            }
+
+            hr = scaler->Initialize(converter.Get(), scaledW, scaledH, WICBitmapInterpolationModeHighQualityCubic);
+            if (FAILED(hr)) {
+                return hr;
+            }
+
+            source = scaler.Get();
+            width = scaledW;
+            height = scaledH;
+        }
+    }
+
+    BITMAPINFO bmi = {};
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = static_cast<LONG>(width);
+    bmi.bmiHeader.biHeight = -static_cast<LONG>(height);
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    void* bits = nullptr;
+    HDC hdc = GetDC(nullptr);
+    HBITMAP hBitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
+    ReleaseDC(nullptr, hdc);
+
+    if (!hBitmap || !bits) {
+        if (hBitmap) {
+            DeleteObject(hBitmap);
+        }
+        return E_OUTOFMEMORY;
+    }
+
+    const UINT stride = width * 4;
+    const UINT bufferSize = stride * height;
+    hr = source->CopyPixels(nullptr, stride, bufferSize, static_cast<BYTE*>(bits));
+    if (FAILED(hr)) {
+        DeleteObject(hBitmap);
+        return hr;
+    }
+
+    result.hBitmap = hBitmap;
+    result.width = width;
+    result.height = height;
+    result.status = S_OK;
+    return S_OK;
+}
+
+}
 
 // libheif integration - conditionally included when HAS_LIBHEIF is defined
 #ifdef HAS_LIBHEIF
@@ -145,10 +278,13 @@ namespace Engine {
             return result.status;
         }
 #else
-        // Placeholder until libheif is integrated
-        // Return E_NOTIMPL to indicate decoder not yet implemented
-        result.status = E_NOTIMPL;
-        return E_NOTIMPL;
+    HRESULT wicHr = DecodeHEIFWithWIC(request.filePath, request.width, request.height, result);
+    if (SUCCEEDED(wicHr)) {
+        return S_OK;
+    }
+
+    result.status = E_NOTIMPL;
+    return E_NOTIMPL;
 #endif
     }
 

@@ -2,6 +2,11 @@
 # Build-All-External-Libraries.ps1
 # Build all external libraries required for DarkThumbs
 # ===========================================================================
+# 
+# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# This script is kept for reference only.
+# See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
+# 
 
 param(
     [switch]$Force
@@ -284,9 +289,9 @@ $libraries = @(
     @{
         Name         = "LibWebP 1.5.0"
         Type         = "CMake"
-        SourceDir    = "external\image-libs\libwebp-1.5.0"
-        BuildDir     = "external\image-libs\libwebp-1.5.0\build-vs"
-        OutputLib    = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"
+        SourceDir    = "external\image-libs\libwebp-1.5.0-build"
+        BuildDir     = "external\image-libs\libwebp-1.5.0-build\build-vs"
+        OutputLib    = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib"
         CMakeOptions = @{
             "WEBP_BUILD_ANIM_UTILS" = "OFF"
             "WEBP_BUILD_CWEBP"      = "OFF"
@@ -356,7 +361,7 @@ if (Test-Path $bzip2Source) {
 }
 
 # Copy WebP sharpyuv library
-$sharpyuvSource = "external\image-libs\libwebp-1.5.0\build-vs\Release\sharpyuv.lib"
+$sharpyuvSource = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\sharpyuv.lib"
 if (Test-Path $sharpyuvSource) {
     Write-Host "  ✓ SharpYUV library found" -ForegroundColor Green
 }

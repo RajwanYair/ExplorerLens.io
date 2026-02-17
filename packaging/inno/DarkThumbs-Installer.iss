@@ -1,11 +1,11 @@
 ; ============================================================
-; DarkThumbs v5.2.0 - Inno Setup Installer Script
+; DarkThumbs v7.0.0 - Inno Setup Installer Script
 ; Download Inno Setup from: https://jrsoftware.org/isinfo.php
 ; Build command: iscc DarkThumbs-Installer.iss
 ; ============================================================
 
 #define MyAppName "DarkThumbs"
-#define MyAppVersion "5.2.0"
+#define MyAppVersion "7.0.0"
 #define MyAppPublisher "DarkThumbs Project"
 #define MyAppURL "https://github.com/yourusername/darkthumbs"
 #define MyAppExeName "CBXManager.exe"
@@ -63,7 +63,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 ; Main application files (to Program Files)
 Source: "..\x64\Release\CBXManager.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\external\compression\unrar\x64\Release\UnRAR64.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\external\compression-libs\unrar\x64\Release\UnRAR64.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\tests\tests\GPUValidator.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion isreadme

@@ -2,6 +2,11 @@
 # Build-Libraries-Simple.ps1
 # Build required external libraries using existing build systems
 # ===========================================================================
+# 
+# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# This script is kept for reference only.
+# See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
+# 
 
 $ErrorActionPreference = "Stop"
 
@@ -11,11 +16,11 @@ Write-Host "Building External Libraries - Simple Approach" -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
 Write-Host ""
 
-$ProjectRoot = $PSScriptRoot
+$ProjectRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Set-Location $ProjectRoot
 
 # Find MSBuild
-$msbuild = & "$PSScriptRoot\build-scripts\Find-MSBuild.ps1"
+$msbuild = & "$ProjectRoot\build-scripts\Find-MSBuild.ps1"
 if (-not $msbuild) {
     Write-Host "ERROR: MSBuild not found!" -ForegroundColor Red
     exit 1
@@ -34,7 +39,7 @@ if (Test-Path $zlibLib) {
     Write-Host "  ✓ Already built ($([Math]::Round($size/1KB, 1)) KB)" -ForegroundColor Green
 } else {
     Write-Host "  Building..." -ForegroundColor White
-    & "$PSScriptRoot\build-scripts\Build-Zlib.ps1"
+    & "$ProjectRoot\build-scripts\external-libs\Build-Zlib.ps1"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "  ✗ Build failed!" -ForegroundColor Red
     }
@@ -127,7 +132,7 @@ if (Test-Path "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.
     } else {
         Write-Host "  ✗ Solution file not found!" -ForegroundColor Red
         Write-Host "  Trying build script..." -ForegroundColor Yellow
-        & "$PSScriptRoot\build-scripts\build-zstd-1.5.7.ps1"
+        & "$ProjectRoot\build-scripts\external-libs\Build-Zstd.ps1"
     }
 }
 Write-Host ""
@@ -136,15 +141,15 @@ Write-Host ""
 # 4. LibWebP (use build script)
 # ============================================================================
 Write-Host "[4/5] LibWebP 1.5.0" -ForegroundColor Yellow
-$webpLib = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"
+$webpLib = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib"
 if (Test-Path $webpLib) {
     $size = (Get-Item $webpLib).Length
     Write-Host "  ✓ Already built ($([Math]::Round($size/1KB, 1)) KB)" -ForegroundColor Green
 } else {
     Write-Host "  Building..." -ForegroundColor White
-    $buildScript = "build-scripts\build-libwebp-1.5.ps1"
+    $buildScript = "build-scripts\external-libs\Build-LibWebP-NMake.ps1"
     if (Test-Path $buildScript) {
-        & "$PSScriptRoot\$buildScript"
+        & "$ProjectRoot\$buildScript"
     } else {
         Write-Host "  ✗ Build script not found!" -ForegroundColor Red
     }
@@ -185,12 +190,12 @@ Write-Host "Library Build Summary" -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
 
 $requiredLibs = @(
-    @{Name="Zlib"; Path="external\compression\zlib-1.3.1\build-vs\Release\zlibstatic.lib"},
-    @{Name="LZ4"; Path="external\compression\lz4-1.10.0\build-vs\Release\liblz4_static.lib"},
-    @{Name="Zstd"; Path="external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib"},
-    @{Name="WebP"; Path="external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"},
-    @{Name="SharpYUV"; Path="external\image-libs\libwebp-1.5.0\build-vs\Release\sharpyuv.lib"},
-    @{Name="MinizipNG"; Path="external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib"}
+    @{Name = "Zlib"; Path = "external\compression\zlib-1.3.1\build-vs\Release\zlibstatic.lib" },
+    @{Name = "LZ4"; Path = "external\compression\lz4-1.10.0\build-vs\Release\liblz4_static.lib" },
+    @{Name = "Zstd"; Path = "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib" },
+    @{Name = "WebP"; Path = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib" },
+    @{Name = "SharpYUV"; Path = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\sharpyuv.lib" },
+    @{Name = "MinizipNG"; Path = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib" }
 )
 
 $builtCount = 0

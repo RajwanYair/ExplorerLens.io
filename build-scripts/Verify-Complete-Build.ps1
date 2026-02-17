@@ -121,38 +121,34 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 Write-Header "Compression Libraries"
 
 Test-Library "zlib 1.3.1" `
-    "$projectRoot\external\compression\zlib-1.3.1\x64\Release\zlibstatic.lib" `
+    "$projectRoot\external\compression-libs\zlib-1.3.1\x64\Release\zlibstatic.lib" `
     100
 
 Test-Library "LZ4 1.10.0" `
-    "$projectRoot\external\compression\lz4-1.10.0\build-vs\Release\liblz4_static.lib" `
+    "$projectRoot\external\compression-libs\lz4-1.10.0\build-vs\Release\liblz4_static.lib" `
     500
 
 Test-Library "zstd 1.5.7" `
-    "$projectRoot\external\compression\zstd-1.5.7\build-manual\zstd_static.lib" `
+    "$projectRoot\external\compression-libs\zstd-1.5.7\build-manual\zstd_static.lib" `
     1000
 
 Test-Library "LZMA SDK 26.00" `
     "$projectRoot\external\compression-libs\lzma-26.00\C\build-vs\lib\lzma.lib" `
     1800
 
-Test-Library "liblzma (xz-5.6.3)" `
-    "$projectRoot\external\compression\xz-5.6.3\build-vs\lzma.lib" `
-    400
-
 Test-Library "Minizip-NG 4.0.10" `
-    "$projectRoot\external\compression\minizip-ng-4.0.10\build-manual\minizip.lib" `
+    "$projectRoot\external\compression-libs\minizip-ng-4.0.10\build-manual\minizip.lib" `
     250
 
 # === Image Libraries ===
 Write-Header "Image Processing Libraries"
 
 Test-Library "LibWebP 1.5.0 (full)" `
-    "$projectRoot\external\image-libs\libwebp-1.5.0\output\x64\Release\release-static\x64\lib\libwebp.lib" `
+    "$projectRoot\external\image-libs\libwebp-1.5.0-build\output\x64\Release\release-static\x64\lib\libwebp.lib" `
     1500
 
 Test-Library "LibWebP 1.5.0 (decoder)" `
-    "$projectRoot\external\image-libs\libwebp-1.5.0\output\x64\Release\release-static\x64\lib\libwebpdecoder.lib" `
+    "$projectRoot\external\image-libs\libwebp-1.5.0-build\output\x64\Release\release-static\x64\lib\libwebpdecoder.lib" `
     700
 
 # Check for optional image libraries
@@ -221,8 +217,8 @@ Write-Header "Build Scripts"
 $buildScripts = @(
     "build.ps1",
     "Build-Production-SlowMachine.ps1",
-    "build-lzma-sdk-26.00.ps1",
-    "build-unrar.ps1",
+    "Build-LZMA-SDK-26.00.ps1",
+    "Build-UnRAR.ps1",
     "Build-LibWebP-NMake.ps1",
     "Build-MinizipNG.ps1",
     "Build-Zstd.ps1",

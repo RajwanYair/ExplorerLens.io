@@ -16,7 +16,7 @@ public partial class MainViewModel : ObservableObject
     private string _engineStatus = "DarkThumbs Engine: Active";
 
     [ObservableProperty]
-    private string _version = "v5.5.0";
+    private string _version = "v7.0.0";
 
     public MainViewModel()
     {

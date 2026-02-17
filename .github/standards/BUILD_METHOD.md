@@ -58,7 +58,7 @@ Remove-Item -Recurse -Force build, x64, CBXShell\x64, CBXManager\x64, Engine\Rel
 
 # Build Engine library first
 cd Engine
-cmake -S . -B Release -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B Release -G "Visual Studio 18 2026" -A x64 -DCMAKE_BUILD_TYPE=Release
 cmake --build Release --config Release
 
 # Build shell extension

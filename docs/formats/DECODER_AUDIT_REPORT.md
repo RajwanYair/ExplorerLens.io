@@ -325,4 +325,4 @@ All decoders are thread-safe:
 - [IThumbnailDecoder.h](../Engine/Core/IThumbnailDecoder.h) - Interface specification
 - [SPRINT11_PLATFORM_FOUNDATION.md](SPRINT11_PLATFORM_FOUNDATION.md) - Implementation plan
 - [ENGINE_TEST_RESULTS.md](ENGINE_TEST_RESULTS.md) - Test results
-- [ROADMAP.md](../ROADMAP.md) - Project roadmap
+- [MASTER_PLAN.md](../../MASTER_PLAN.md) - Project roadmap

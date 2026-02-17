@@ -1,13 +1,17 @@
 #==============================================================================
 # DarkThumbs - Root CMake Configuration
 # Copyright (c) 2026 - DarkThumbs Project
-# Version: 6.0.0
+# Version: 7.0.0
+#
+# vcpkg Integration (Optional):
+#   cmake -B build -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+#   cmake --build build --config Release
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(DarkThumbs
-    VERSION 6.0.0
+    VERSION 7.0.0
     DESCRIPTION "DarkThumbs - Advanced Thumbnail Generator for Windows"
     LANGUAGES CXX
     HOMEPAGE_URL "https://github.com/yourusername/DarkThumbs"
@@ -117,7 +121,7 @@ set(ZLIB_DIR ${COMPRESSION_DIR}/zlib-1.3.1)
 set(LZ4_DIR ${COMPRESSION_DIR}/lz4-1.10.0)
 set(ZSTD_DIR ${COMPRESSION_DIR}/zstd-1.5.7)
 set(LZMA_DIR ${COMPRESSION_DIR}/xz-5.6.3)
-set(WEBP_DIR ${IMAGE_LIBS_DIR}/libwebp-1.5.0)
+set(WEBP_DIR ${IMAGE_LIBS_DIR}/libwebp-1.5.0-build)
 set(MINIZIP_DIR ${COMPRESSION_DIR}/minizip-ng-4.0.10)
 
 # Windows SDK and DirectX
@@ -172,28 +176,6 @@ endif()
 
 if(BUILD_TESTS)
     enable_testing()
-    
-    # Engine tests are built in the Engine subdirectory
-    add_test(NAME EngineUnitTests
-        COMMAND $<TARGET_FILE:EngineTests>
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-    
-    if(BUILD_BENCHMARKS)
-        add_test(NAME EngineBenchmarks
-            COMMAND $<TARGET_FILE:EngineBenchmark>
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        )
-        set_tests_properties(EngineBenchmarks PROPERTIES
-            LABELS "benchmark"
-            TIMEOUT 60
-        )
-    endif()
-    
-    set_tests_properties(EngineUnitTests PROPERTIES
-        LABELS "unit"
-        TIMEOUT 30
-    )
 endif()
 
 #==============================================================================

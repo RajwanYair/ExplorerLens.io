@@ -117,7 +117,7 @@ if (-not $SkipLibraries) {
         @{ Script = "external-libs/Build-Zlib.ps1"; Name = "zlib"; Timeout = 300 },
         @{ Script = "external-libs/Build-LZ4.ps1"; Name = "LZ4"; Timeout = 600 },
         @{ Script = "external-libs/Build-Zstd.ps1"; Name = "Zstandard"; Timeout = 900 },
-        @{ Script = "external-libs/build-lzma-sdk-26.00.ps1"; Name = "liblzma"; Timeout = 1200 },
+        @{ Script = "external-libs/Build-LZMA-SDK-26.00.ps1"; Name = "liblzma"; Timeout = 1200 },
         @{ Script = "external-libs/Build-LibWebP-NMake.ps1"; Name = "LibWebP"; Timeout = 1200 },
         @{ Script = "external-libs/Build-MinizipNG.ps1"; Name = "Minizip-NG"; Timeout = 900 }
     )

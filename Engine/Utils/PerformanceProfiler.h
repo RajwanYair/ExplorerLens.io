@@ -40,6 +40,8 @@ namespace DarkThumbs {
         SIMD_SCALE_BILINEAR,
         SIMD_SCALE_BICUBIC,
         SIMD_COLOR_CONVERT,
+        PIPELINE_DECODER_INIT,
+        PIPELINE_DECODER_LOOKUP,
         PIPELINE_TOTAL,
         COMPONENT_COUNT
     };

@@ -41,7 +41,7 @@ DarkThumbs/
 ├── CBXShell.sln        # Visual Studio solution
 ├── LICENSE             # License file
 ├── README.md           # Project overview
-├── ROADMAP.md          # Development roadmap
+├── MASTER_PLAN.md      # Development roadmap (unified)
 └── RUN-BUILD.bat       # Quick build script
 ```
 

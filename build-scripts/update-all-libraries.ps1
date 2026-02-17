@@ -5,7 +5,7 @@
 
 param(
     [switch]$UseProxy,
-    [string]$ProxyUrl = "http://proxy-chain.intel.com:911"
+    [string]$ProxyUrl = "http://proxy-chain.intel.com:928"
 )
 
 $ErrorActionPreference = "Stop"

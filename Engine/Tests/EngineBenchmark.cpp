@@ -64,7 +64,7 @@ int main() {
     }
     
     std::wcout << L"DarkThumbs Engine Performance Benchmark\n";
-    std::wcout << L"Version: 5.3.0\n";
+    std::wcout << L"Version: 7.0.0\n";
     std::wcout << L"========================================\n\n";
 
     // Find test images

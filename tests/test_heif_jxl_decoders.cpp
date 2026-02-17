@@ -133,7 +133,7 @@ void TestFormatRegistration() {
 int wmain(int argc, wchar_t* argv[]) {
     std::wcout << L"╔══════════════════════════════════════════════════════╗\n";
     std::wcout << L"║  DarkThumbs HEIF/JXL Decoder Test Suite            ║\n";
-    std::wcout << L"║  Version 5.3.0+ - Format Support Verification      ║\n";
+    std::wcout << L"║  Version 7.0.0 - Format Support Verification      ║\n";
     std::wcout << L"╚══════════════════════════════════════════════════════╝\n";
     
     CoInitialize(nullptr);

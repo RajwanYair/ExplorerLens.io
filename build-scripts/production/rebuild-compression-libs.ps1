@@ -40,12 +40,12 @@ Write-Host "Using MSBuild: $msbuild`n" -ForegroundColor Cyan
 
 # Configure build flags (NO /GL to avoid LTCG issues)
 $buildConfig = @{
-    "Configuration" = "Release"
-    "Platform" = "x64"
-    "CharacterSet" = "Unicode"
-    "RuntimeLibrary" = "MultiThreaded"  # Static runtime /MT
+    "Configuration"            = "Release"
+    "Platform"                 = "x64"
+    "CharacterSet"             = "Unicode"
+    "RuntimeLibrary"           = "MultiThreaded"  # Static runtime /MT
     "WholeProgramOptimization" = "false"  # Disable /GL
-    "Optimization" = "MaxSpeed"  # /O2
+    "Optimization"             = "MaxSpeed"  # /O2
 }
 
 Write-Host "=== DarkThumbs Compression Libraries Rebuild ===" -ForegroundColor Green
@@ -157,7 +157,7 @@ if ($zstdDir) {
     Push-Location $buildDir
     
     # Configure with CMake
-    cmake ..\build\cmake -G "Visual Studio 17 2022" -A x64 `
+    cmake ..\build\cmake -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
         -DZSTD_BUILD_SHARED=OFF `
         -DZSTD_BUILD_STATIC=ON `
@@ -194,7 +194,7 @@ if (Test-Path $lz4Dir) {
     Push-Location $buildDir
     
     # Configure with CMake
-    cmake ..\build\cmake -G "Visual Studio 17 2022" -A x64 `
+    cmake ..\build\cmake -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
         -DBUILD_SHARED_LIBS=OFF `
         -DCMAKE_C_FLAGS_RELEASE="/MT /O2" `
@@ -217,7 +217,7 @@ if (Test-Path $lz4Dir) {
 
 # Build minizip-ng (WITHOUT /GL to fix LTCG issue!)
 Write-Host "Building minizip-ng (no LTCG)..." -ForegroundColor Yellow
-$minizipDir = Join-Path $compressionDir "minizip-ng-4.0.7"
+$minizipDir = Join-Path $compressionDir "minizip-ng-4.0.10"
 if (Test-Path $minizipDir) {
     Push-Location $minizipDir
     
@@ -230,7 +230,7 @@ if (Test-Path $minizipDir) {
     Push-Location $buildDir
     
     # Configure with CMake - EXPLICITLY disable /GL
-    cmake .. -G "Visual Studio 17 2022" -A x64 `
+    cmake .. -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
         -DMZ_BUILD_TESTS=OFF `
         -DMZ_BUILD_UNIT_TESTS=OFF `

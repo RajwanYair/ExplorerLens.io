@@ -161,10 +161,10 @@ cmake --build build-msvc --config Release
 ```xml
 <AdditionalIncludeDirectories>
   ..\Engine;
-  ..\external\compression\zlib-1.3.1;
-  ..\external\compression\zstd-1.5.7\lib;
-  ..\external\compression\lz4-1.10.0\lib;
-  ..\external\compression\minizip-ng-4.0.10;
+  ..\external\compression-libs\zlib-1.3.1;
+  ..\external\compression-libs\zstd-1.5.7\lib;
+  ..\external\compression-libs\lz4-1.10.0\lib;
+  ..\external\compression-libs\minizip-ng-4.0.10;
   ..\external\image-libs\libwebp-1.5.0\src;
   ..\external\image-libs\libjxl-0.11.1\lib\include;
   ..\external\image-libs\libjxl-0.11.1\build-msvc\lib\include\jxl;
@@ -177,10 +177,10 @@ cmake --build build-msvc --config Release
 ```xml
 <AdditionalLibraryDirectories>
   ..\Engine\Release\Release;
-  ..\external\compression\zlib-1.3.1\x64\Release;
-  ..\external\compression\lz4-1.10.0\build-msvc\x64\Release;
-  ..\external\compression\zstd-1.5.7\lib\x64\Release;
-  ..\external\compression\minizip-ng-4.0.10\build-msvc\Release;
+  ..\external\compression-libs\zlib-1.3.1\x64\Release;
+  ..\external\compression-libs\lz4-1.10.0\build-msvc\x64\Release;
+  ..\external\compression-libs\zstd-1.5.7\lib\x64\Release;
+  ..\external\compression-libs\minizip-ng-4.0.10\build-msvc\Release;
   ..\external\image-libs\libwebp-1.5.0\output\Release-static\x64\lib;
   ..\external\image-libs\libjxl-0.11.1\build-msvc\lib\Release;
   ..\external\image-libs\libavif-1.3.0\build\Release;
@@ -214,10 +214,10 @@ After building all libraries:
 ```powershell
 # Check all libraries exist
 $libs = @(
-    "external\compression\zlib-1.3.1\x64\Release\zlibstatic.lib",
-    "external\compression\lz4-1.10.0\build-msvc\x64\Release\liblz4_static.lib",
-    "external\compression\zstd-1.5.7\lib\x64\Release\zstd_static.lib",
-    "external\compression\minizip-ng-4.0.10\build-msvc\Release\minizip.lib",
+    "external\compression-libs\zlib-1.3.1\x64\Release\zlibstatic.lib",
+    "external\compression-libs\lz4-1.10.0\build-msvc\x64\Release\liblz4_static.lib",
+    "external\compression-libs\zstd-1.5.7\lib\x64\Release\zstd_static.lib",
+    "external\compression-libs\minizip-ng-4.0.10\build-msvc\Release\minizip.lib",
     "external\image-libs\libwebp-1.5.0\output\Release-static\x64\lib\webp.lib",
     "external\image-libs\libavif-1.3.0\build\Release\avif.lib",
     "external\image-libs\libjxl-0.11.1\build-msvc\lib\Release\jxl.lib"

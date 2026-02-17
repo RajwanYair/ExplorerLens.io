@@ -1,8 +1,8 @@
-# cDarkThumbs Engine
+# DarkThumbs Engine
 
-**Version:** 5.3.0
+**Version:** 7.0.0
 **Created:** January 7, 2026
-**Status:** Under Development (Sprint 11 - Platform Foundation)
+**Status:** Active Development (v7.0 Refactoring Complete)
 
 ---
 

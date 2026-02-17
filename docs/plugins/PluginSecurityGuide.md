@@ -428,7 +428,7 @@ cd Engine/Tests
 
 ## Additional Resources
 
-- **ROADMAP.md**: Overall project roadmap and sprint planning
+- **MASTER_PLAN.md**: Overall project roadmap and sprint planning
 - **SDK Documentation**: Plugin development SDK (coming in Sprint 15)
 - **API Reference**: Engine API documentation (auto-generated from code)
 

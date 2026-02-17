@@ -1,6 +1,7 @@
 //==============================================================================
 // DarkThumbs Engine - Integration Tests
-// Sprint 16: End-to-end pipeline testing with real files
+// Sprint 16+: End-to-end pipeline testing with real files
+// Updated v7.0.0 - All 24 decoders
 // Copyright (c) 2026 - DarkThumbs Project
 //==============================================================================
 
@@ -10,8 +11,21 @@
 #include "../Decoders/WebPDecoder.h"
 #include "../Decoders/AVIFDecoder.h"
 #include "../Decoders/ArchiveDecoder.h"
+#include "../Decoders/RAWDecoder.h"
+#include "../Decoders/HEIFDecoder.h"
+#include "../Decoders/JXLDecoder.h"
+#include "../Decoders/ICODecoder.h"
+#include "../Decoders/TGADecoder.h"
+#include "../Decoders/QOIDecoder.h"
+#include "../Decoders/PSDDecoder.h"
+#include "../Decoders/DDSDecoder.h"
+#include "../Decoders/HDRDecoder.h"
+#include "../Decoders/PPMDecoder.h"
+#include "../Decoders/EXRDecoder.h"
+#include "../Decoders/SVGDecoder.h"
 #include "../Decoders/VideoDecoder.h"
 #include "../Decoders/AudioDecoder.h"
+#include "../Decoders/PDFDecoder.h"
 #include "../Decoders/DocumentDecoder.h"
 #include "../Decoders/FontDecoder.h"
 #include "../Decoders/ModelDecoder.h"
@@ -58,25 +72,38 @@ int g_integrationTestsFailed = 0;
 
 INTEGRATION_TEST(TestPipeline_FullInitialization)
 {
-    // Test complete pipeline initialization with all decoders
+    // Test complete pipeline initialization with all 24 decoders
     auto* registry = new DecoderRegistry();
     ASSERT_INTEGRATION(registry != nullptr);
 
-    // Register all decoders
-    registry->RegisterDecoder(new ImageDecoder());
+    // Register all decoders (same order as ThumbnailPipeline)
+    registry->RegisterDecoder(new ArchiveDecoder());
     registry->RegisterDecoder(new WebPDecoder());
     registry->RegisterDecoder(new AVIFDecoder());
-    registry->RegisterDecoder(new ArchiveDecoder());
+    registry->RegisterDecoder(new RAWDecoder());
+    registry->RegisterDecoder(new HEIFDecoder());
+    registry->RegisterDecoder(new JXLDecoder());
+    registry->RegisterDecoder(new ICODecoder());
+    registry->RegisterDecoder(new TGADecoder());
+    registry->RegisterDecoder(new QOIDecoder());
+    registry->RegisterDecoder(new PSDDecoder());
+    registry->RegisterDecoder(new DDSDecoder());
+    registry->RegisterDecoder(new HDRDecoder());
+    registry->RegisterDecoder(new PPMDecoder());
+    registry->RegisterDecoder(new EXRDecoder());
+    registry->RegisterDecoder(new SVGDecoder());
     registry->RegisterDecoder(new VideoDecoder());
     registry->RegisterDecoder(new AudioDecoder());
+    registry->RegisterDecoder(new PDFDecoder());
     registry->RegisterDecoder(new DocumentDecoder());
     registry->RegisterDecoder(new FontDecoder());
     registry->RegisterDecoder(new ModelDecoder());
+    registry->RegisterDecoder(new ImageDecoder());
 
     size_t totalDecoders = 0, imageDecoders = 0, archiveDecoders = 0, totalExtensions = 0;
     registry->GetStats(&totalDecoders, &imageDecoders, &archiveDecoders, &totalExtensions);
-    ASSERT_INTEGRATION(totalDecoders >= 9);
-    ASSERT_INTEGRATION(totalExtensions > 50);
+    ASSERT_INTEGRATION(totalDecoders == 22); // 22 unique decoder instances
+    ASSERT_INTEGRATION(totalExtensions > 80); // 80+ file extensions supported
 
     delete registry;
 }
@@ -135,24 +162,65 @@ INTEGRATION_TEST(TestPipeline_ArchiveFormatRecognition)
 
 INTEGRATION_TEST(TestPipeline_MultiDecoderCoexistence)
 {
-    // Multiple decoders should coexist without conflicts
+    // All decoders should coexist and route correctly
     auto* registry = new DecoderRegistry();
     
-    registry->RegisterDecoder(new ImageDecoder());
+    registry->RegisterDecoder(new ArchiveDecoder());
     registry->RegisterDecoder(new WebPDecoder());
     registry->RegisterDecoder(new AVIFDecoder());
-    registry->RegisterDecoder(new ArchiveDecoder());
+    registry->RegisterDecoder(new RAWDecoder());
+    registry->RegisterDecoder(new HEIFDecoder());
+    registry->RegisterDecoder(new JXLDecoder());
+    registry->RegisterDecoder(new ICODecoder());
+    registry->RegisterDecoder(new TGADecoder());
+    registry->RegisterDecoder(new QOIDecoder());
+    registry->RegisterDecoder(new PSDDecoder());
+    registry->RegisterDecoder(new DDSDecoder());
+    registry->RegisterDecoder(new HDRDecoder());
+    registry->RegisterDecoder(new PPMDecoder());
+    registry->RegisterDecoder(new EXRDecoder());
+    registry->RegisterDecoder(new SVGDecoder());
     registry->RegisterDecoder(new VideoDecoder());
     registry->RegisterDecoder(new AudioDecoder());
+    registry->RegisterDecoder(new PDFDecoder());
+    registry->RegisterDecoder(new DocumentDecoder());
+    registry->RegisterDecoder(new FontDecoder());
+    registry->RegisterDecoder(new ModelDecoder());
+    registry->RegisterDecoder(new ImageDecoder());
 
     // Each format should route to correct decoder
     std::vector<std::pair<std::wstring, std::wstring>> testCases = {
-        { L".jpg", L"Image" },
+        // Image formats
+        { L".jpg",  L"Image" },
+        { L".png",  L"Image" },
+        { L".bmp",  L"Image" },
+        { L".gif",  L"Image" },
+        { L".tiff", L"Image" },
         { L".webp", L"WebP" },
         { L".avif", L"AVIF" },
-        { L".zip", L"Archive" },
-        { L".mp4", L"Video" },
-        { L".mp3", L"Audio" }
+        { L".jxl",  L"JXL" },
+        { L".heic", L"HEIF" },
+        { L".ico",  L"ICO" },
+        { L".tga",  L"TGA" },
+        { L".qoi",  L"QOI" },
+        { L".psd",  L"PSD" },
+        { L".dds",  L"DDS" },
+        { L".hdr",  L"HDR" },
+        { L".ppm",  L"PPM" },
+        { L".svg",  L"SVG" },
+        // Archive formats
+        { L".zip",  L"Archive" },
+        { L".cbz",  L"Archive" },
+        { L".rar",  L"Archive" },
+        // Media formats
+        { L".mp4",  L"Video" },
+        { L".mp3",  L"Audio" },
+        // Document formats
+        { L".epub", L"Document" },
+        // Font formats
+        { L".ttf",  L"Font" },
+        // 3D model formats
+        { L".obj",  L"Model" },
     };
 
     for (const auto& testCase : testCases) {
@@ -213,6 +281,116 @@ INTEGRATION_TEST(TestPipeline_3DModelFormats)
     ASSERT_INTEGRATION(decoder != nullptr);
 
     decoder = registry->FindDecoder(L".gltf");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    delete registry;
+}
+
+INTEGRATION_TEST(TestPipeline_SpecialtyImageFormats)
+{
+    // Test all specialty image decoders added in v5.3-v7.0
+    auto* registry = new DecoderRegistry();
+    registry->RegisterDecoder(new QOIDecoder());
+    registry->RegisterDecoder(new PSDDecoder());
+    registry->RegisterDecoder(new DDSDecoder());
+    registry->RegisterDecoder(new HDRDecoder());
+    registry->RegisterDecoder(new PPMDecoder());
+    registry->RegisterDecoder(new TGADecoder());
+    registry->RegisterDecoder(new ICODecoder());
+    registry->RegisterDecoder(new EXRDecoder());
+    registry->RegisterDecoder(new SVGDecoder());
+
+    // QOI
+    auto* decoder = registry->FindDecoder(L".qoi");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // PSD/PSB
+    decoder = registry->FindDecoder(L".psd");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // DDS
+    decoder = registry->FindDecoder(L".dds");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // HDR (Radiance)
+    decoder = registry->FindDecoder(L".hdr");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // PPM/PGM/PBM
+    decoder = registry->FindDecoder(L".ppm");
+    ASSERT_INTEGRATION(decoder != nullptr);
+    decoder = registry->FindDecoder(L".pgm");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // TGA
+    decoder = registry->FindDecoder(L".tga");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // ICO/CUR
+    decoder = registry->FindDecoder(L".ico");
+    ASSERT_INTEGRATION(decoder != nullptr);
+    decoder = registry->FindDecoder(L".cur");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // SVG/SVGZ
+    decoder = registry->FindDecoder(L".svg");
+    ASSERT_INTEGRATION(decoder != nullptr);
+    decoder = registry->FindDecoder(L".svgz");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    delete registry;
+}
+
+INTEGRATION_TEST(TestPipeline_CameraRAWFormats)
+{
+    // Camera RAW formats via LibRaw
+    auto* registry = new DecoderRegistry();
+    registry->RegisterDecoder(new RAWDecoder());
+
+    std::vector<std::wstring> rawExts = {
+        L".cr2", L".cr3", L".nef", L".arw", L".dng", L".raf", L".rw2", L".orf"
+    };
+
+    for (const auto& ext : rawExts) {
+        auto* decoder = registry->FindDecoder(ext.c_str());
+        ASSERT_INTEGRATION(decoder != nullptr);
+    }
+
+    delete registry;
+}
+
+INTEGRATION_TEST(TestPipeline_ModernImageFormats)
+{
+    // Modern next-gen image formats (JXL, HEIF, AVIF)
+    auto* registry = new DecoderRegistry();
+    registry->RegisterDecoder(new JXLDecoder());
+    registry->RegisterDecoder(new HEIFDecoder());
+    registry->RegisterDecoder(new AVIFDecoder());
+
+    // JPEG XL
+    auto* decoder = registry->FindDecoder(L".jxl");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // HEIF/HEIC (iPhone photos)
+    decoder = registry->FindDecoder(L".heic");
+    ASSERT_INTEGRATION(decoder != nullptr);
+    decoder = registry->FindDecoder(L".heif");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    // AVIF
+    decoder = registry->FindDecoder(L".avif");
+    ASSERT_INTEGRATION(decoder != nullptr);
+
+    delete registry;
+}
+
+INTEGRATION_TEST(TestPipeline_PDFDocumentFormat)
+{
+    // PDF thumbnails via PDFDecoder
+    auto* registry = new DecoderRegistry();
+    registry->RegisterDecoder(new PDFDecoder());
+
+    auto* decoder = registry->FindDecoder(L".pdf");
     ASSERT_INTEGRATION(decoder != nullptr);
 
     delete registry;
@@ -333,7 +511,7 @@ int main()
 {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"DarkThumbs Engine - Integration Tests" << std::endl;
-    std::wcout << L"Sprint 16: End-to-End Pipeline Testing" << std::endl;
+    std::wcout << L"v7.0.0: All 24 Decoders Pipeline Tests" << std::endl;
     std::wcout << L"========================================" << std::endl << std::endl;
 
     // Pipeline Integration Tests
@@ -343,6 +521,10 @@ int main()
     RUN_INTEGRATION_TEST(TestPipeline_VideoFormatPriority);
     RUN_INTEGRATION_TEST(TestPipeline_ArchiveFormatRecognition);
     RUN_INTEGRATION_TEST(TestPipeline_MultiDecoderCoexistence);
+    RUN_INTEGRATION_TEST(TestPipeline_SpecialtyImageFormats);
+    RUN_INTEGRATION_TEST(TestPipeline_CameraRAWFormats);
+    RUN_INTEGRATION_TEST(TestPipeline_ModernImageFormats);
+    RUN_INTEGRATION_TEST(TestPipeline_PDFDocumentFormat);
     RUN_INTEGRATION_TEST(TestPipeline_DocumentFormats);
     RUN_INTEGRATION_TEST(TestPipeline_FontFormats);
     RUN_INTEGRATION_TEST(TestPipeline_3DModelFormats);

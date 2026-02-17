@@ -146,3 +146,39 @@ add_test(
     NAME EngineUnitTests
     COMMAND EngineTests
 )
+
+if(BUILD_BENCHMARKS)
+    add_test(
+        NAME EngineBenchmarks
+        COMMAND EngineBenchmark
+    )
+endif()
+
+if(WIN32)
+    # Build a proper Windows PATH string (semicolon-delimited, no CMake list artifacts)
+    set(DARKTHUMBS_TEST_RUNTIME_DIRS
+        "${CMAKE_SOURCE_DIR}/external/image-libs/libde265-1.0.15/build-vs/libde265/Release"
+        "${CMAKE_SOURCE_DIR}/external/image-libs/libheif-1.19.5/build-vs/libheif/Release"
+        "${CMAKE_SOURCE_DIR}/external/image-libs/libheif-1.19.5/install/bin"
+        "${CMAKE_SOURCE_DIR}/external/compression-libs/unrar/build/unrardll64/Release"
+        "${CMAKE_SOURCE_DIR}/external/camera-libs/libraw/buildfiles/release-x86_64"
+        "${CMAKE_SOURCE_DIR}/external/compression-libs/zlib-1.3.1/build-md"
+        "${CMAKE_SOURCE_DIR}/external/compression-libs/zstd-1.5.7/build/cmake/build-md/lib"
+    )
+    # Join list elements with ";" as Windows PATH separator
+    string(JOIN "\\;" DARKTHUMBS_TEST_RUNTIME_PATH ${DARKTHUMBS_TEST_RUNTIME_DIRS})
+
+    set_tests_properties(EngineUnitTests PROPERTIES
+        ENVIRONMENT "PATH=${DARKTHUMBS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit"
+        TIMEOUT 30
+    )
+
+    if(BUILD_BENCHMARKS)
+        set_tests_properties(EngineBenchmarks PROPERTIES
+            ENVIRONMENT "PATH=${DARKTHUMBS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+            LABELS "benchmark"
+            TIMEOUT 120
+        )
+    endif()
+endif()

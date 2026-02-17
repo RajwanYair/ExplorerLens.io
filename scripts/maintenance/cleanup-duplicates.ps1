@@ -52,7 +52,7 @@ $duplicatesToArchive = @(
 $documentationToConsolidate = @(
     @{
         Path   = "docs/QUICK_SETUP.md"
-        Reason = "Content merged into INSTALLATION_READY.md"
+        Reason = "Content should be merged into docs/getting-started/installation.md"
         Action = "Review and delete if no unique content"
     }
 )
@@ -115,15 +115,15 @@ Write-Host "  Build:        scripts/build.ps1" -ForegroundColor White
 Write-Host "  Install:      scripts/install.ps1" -ForegroundColor White
 Write-Host "  Verify:       scripts/verify-tools.ps1" -ForegroundColor White
 Write-Host "  Library Build: build-scripts/*.ps1" -ForegroundColor White
-Write-Host "  Updates:      build-scripts/update-all-libraries.ps1" -ForegroundColor White
+Write-Host "  Updates:      build-scripts/Update-All-Libraries.ps1" -ForegroundColor White
 
 Write-Host "`nCanonical Documentation:" -ForegroundColor Green
 Write-Host "========================`n" -ForegroundColor Green
-Write-Host "  Installation (user):    INSTALLATION_READY.md" -ForegroundColor White
 Write-Host "  Installation (detail):  docs/getting-started/installation.md" -ForegroundColor White
-Write-Host "  Build guide:            docs/BUILD_GUIDE.md" -ForegroundColor White
-Write-Host "  Tool setup:             docs/TOOLS_SETUP.md" -ForegroundColor White
-Write-Host "  COM diagnostics:        docs/COM_REGISTRATION_DIAGNOSTICS.md" -ForegroundColor White
+Write-Host "  Build guide:            docs/build/BUILD_GUIDE.md" -ForegroundColor White
+Write-Host "  Build scripts:          build-scripts/README.md" -ForegroundColor White
+Write-Host "  Dev tools:              docs/development/WINDOWS_BUILD_TOOLS.md" -ForegroundColor White
+Write-Host "  COM diagnostics:        docs/build/COM_REGISTRATION_DIAGNOSTICS.md" -ForegroundColor White
 
 # Summary
 Write-Host "`n========================================" -ForegroundColor Cyan

@@ -44,7 +44,7 @@ Write-Host "Setting up MSVC environment..." -ForegroundColor Cyan
 $vcvarsPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 
 if (!(Test-Path $vcvarsPath)) {
-    $vcvarsPath = "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+    $vcvarsPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 }
 
 if (!(Test-Path $vcvarsPath)) {

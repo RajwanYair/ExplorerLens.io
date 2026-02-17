@@ -9,11 +9,12 @@
 #include "../Decoders/WebPDecoder.h"
 #include "../Decoders/AVIFDecoder.h"
 #include "../Decoders/ArchiveDecoder.h"
-// NOTE: JXL and HEIF decoders have interface declarations fixed but
-// implementation is stub (awaiting libjxl/libheif integration)
-// Tests re-enabled to verify interface compliance
+#include "../Decoders/RAWDecoder.h"
 #include "../Decoders/JXLDecoder.h"
 #include "../Decoders/HEIFDecoder.h"
+#include "../Decoders/ICODecoder.h"
+#include "../Decoders/TGADecoder.h"
+#include "../Decoders/QOIDecoder.h"
 #include "../Decoders/PSDDecoder.h"
 #include "../Decoders/DDSDecoder.h"
 #include "../Decoders/HDRDecoder.h"
@@ -602,19 +603,28 @@ TEST(TestArchiveDecoder_Extensions) {
     uint32_t count = decoder.GetExtensionCount();
     
     ASSERT_NOT_NULL(extensions);
-    ASSERT_EQ(count, 2); // .zip, .cbz
+    ASSERT_EQ(count, 14); // Full archive format set
     
-    // Check specific extensions
+    // Check core extensions
     bool hasZip = false;
     bool hasCbz = false;
+    bool has7z = false;
+    bool hasRar = false;
+    bool hasTarGz = false;
     
     for (uint32_t i = 0; i < count; i++) {
         if (wcscmp(extensions[i], L".zip") == 0) hasZip = true;
         if (wcscmp(extensions[i], L".cbz") == 0) hasCbz = true;
+        if (wcscmp(extensions[i], L".7z") == 0) has7z = true;
+        if (wcscmp(extensions[i], L".rar") == 0) hasRar = true;
+        if (wcscmp(extensions[i], L".tar.gz") == 0) hasTarGz = true;
     }
     
     ASSERT(hasZip);
     ASSERT(hasCbz);
+    ASSERT(has7z);
+    ASSERT(hasRar);
+    ASSERT(hasTarGz);
 }
 
 TEST(TestArchiveDecoder_CanDecode) {
@@ -623,11 +633,12 @@ TEST(TestArchiveDecoder_CanDecode) {
     ASSERT(decoder.CanDecode(L"archive.zip"));
     ASSERT(decoder.CanDecode(L"comic.cbz"));
     ASSERT(decoder.CanDecode(L"path/to/file.ZIP")); // Case insensitive
+    ASSERT(decoder.CanDecode(L"archive.rar"));
+    ASSERT(decoder.CanDecode(L"archive.7z"));
     
     // Should not decode non-archive formats
     ASSERT(!decoder.CanDecode(L"image.jpg"));
     ASSERT(!decoder.CanDecode(L"photo.png"));
-    ASSERT(!decoder.CanDecode(L"archive.rar")); // Not supported yet
 }
 
 TEST(TestArchiveDecoder_IsArchiveFormat) {
@@ -817,7 +828,8 @@ TEST(TestDDSDecoder_Create)
 {
     DDSDecoder decoder;
     ASSERT_EQ(wcscmp(decoder.GetName(), L"DDSDecoder"), 0);
-    ASSERT(!decoder.SupportsGPU());
+    // DDS decoder uses WIC + D3D11, SupportsGPU() returns true
+    ASSERT(decoder.SupportsGPU());
     ASSERT(!decoder.IsArchiveDecoder());
 }
 
@@ -1198,34 +1210,34 @@ TEST(TestArchiveDecoder_PasswordProtectedHandling)
 // Sprint 11: RAW Format Expansion Tests
 //==============================================================================
 
-TEST(TestImageDecoder_CR3Support)
+TEST(TestRAWDecoder_CR3Support)
 {
-    ImageDecoder decoder;
+    RAWDecoder decoder;
     ASSERT(decoder.CanDecode(L"photo.cr3"));
 }
 
-TEST(TestImageDecoder_ARWSupport)
+TEST(TestRAWDecoder_ARWSupport)
 {
-    ImageDecoder decoder;
+    RAWDecoder decoder;
     ASSERT(decoder.CanDecode(L"photo.arw"));
 }
 
-TEST(TestImageDecoder_ORFSupport)
+TEST(TestRAWDecoder_ORFSupport)
 {
-    ImageDecoder decoder;
+    RAWDecoder decoder;
     ASSERT(decoder.CanDecode(L"photo.orf"));
 }
 
-TEST(TestImageDecoder_GPRSupport)
+TEST(TestRAWDecoder_GPRSupport)
 {
-    ImageDecoder decoder;
+    RAWDecoder decoder;
     ASSERT(decoder.CanDecode(L"photo.gpr"));
 }
 
-TEST(TestImageDecoder_MultipleRAWFormats)
+TEST(TestRAWDecoder_MultipleRAWFormats)
 {
-    ImageDecoder decoder;
-    // Test various RAW formats
+    RAWDecoder decoder;
+    // Test all major camera RAW formats via RAWDecoder (LibRaw)
     ASSERT(decoder.CanDecode(L"image.cr2"));
     ASSERT(decoder.CanDecode(L"image.cr3"));
     ASSERT(decoder.CanDecode(L"image.nef"));
@@ -1510,11 +1522,11 @@ int main()
     
     // Sprint 11: RAW Format Expansion Tests
     std::wcout << L"Sprint 11 - RAW Format Expansion:" << std::endl;
-    RUN_TEST(TestImageDecoder_CR3Support);
-    RUN_TEST(TestImageDecoder_ARWSupport);
-    RUN_TEST(TestImageDecoder_ORFSupport);
-    RUN_TEST(TestImageDecoder_GPRSupport);
-    RUN_TEST(TestImageDecoder_MultipleRAWFormats);
+    RUN_TEST(TestRAWDecoder_CR3Support);
+    RUN_TEST(TestRAWDecoder_ARWSupport);
+    RUN_TEST(TestRAWDecoder_ORFSupport);
+    RUN_TEST(TestRAWDecoder_GPRSupport);
+    RUN_TEST(TestRAWDecoder_MultipleRAWFormats);
     
     std::wcout << std::endl;
     

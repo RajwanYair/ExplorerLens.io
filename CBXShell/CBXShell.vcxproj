@@ -150,16 +150,16 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkIncremental>false</LinkIncremental>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <SetChecksum>true</SetChecksum>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>
-        ..\build\lib\Release;..\external\compression-libs\zlib-1.3.1\x64\Release;..\external\compression-libs\lz4-1.10.0\build-vs\Release;..\external\compression-libs\zstd-1.5.7\build-manual;..\external\compression-libs\minizip-ng-4.0.10\build-manual;..\external\archive-libs\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0-original\build-vs\Release;..\external\image-libs\libjxl-0.11.1\install\lib;..\external\brotli-install\lib;..\external\highway-install\lib;..\external\libheif-install\lib;..\external\camera-libs\libraw-install\lib</AdditionalLibraryDirectories>
+        ..\build\lib\Release;..\external\compression-libs\zlib-1.3.1\x64\Release;..\external\compression-libs\lz4-1.10.0\build-vs\Release;..\external\compression-libs\zstd-1.5.7\build-manual;..\external\compression-libs\minizip-ng-4.0.10\build-manual;..\external\archive-libs\unrar-7.2.2\x64\Release;..\external\image-libs\libwebp-1.5.0-original\build-vs\Release;..\external\image-libs\libjxl-0.11.1\install\lib;..\external\brotli-install\lib;..\external\highway-install\lib;..\external\image-libs\libheif-1.19.5\install\lib;..\external\image-libs\libheif-1.19.5\build-vs\libheif\Release;..\external\image-libs\libde265-1.0.15\build-vs\libde265\Release;..\external\image-libs\libde265-1.0.15\install\lib;..\external\camera-libs\libraw-install\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>
-        DarkThumbsEngine.lib;zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;libraw_static.lib;jxl.lib;jxl_cms.lib;jxl_threads.lib;brotlidec.lib;brotlicommon.lib;hwy.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+        DarkThumbsEngine.lib;zlibstatic.lib;liblz4_static.lib;zstd_static.lib;minizip.lib;webp.lib;sharpyuv.lib;libraw_static.lib;jxl.lib;jxl_cms.lib;jxl_threads.lib;brotlidec.lib;brotlicommon.lib;hwy.lib;heif.lib;de265.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;bcrypt.lib;delayimp.lib;windowscodecs.lib;d2d1.lib;propsys.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
     <Bscmake>
@@ -167,7 +167,8 @@
       <OutputFile>.\Release/CBXShell.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>echo Modern compression libraries statically linked</Command>
+      <Command>echo Modern compression libraries statically linked
+if exist "..\external\image-libs\libde265-1.0.15\build-vs\libde265\Release\libde265.dll" copy /Y "..\external\image-libs\libde265-1.0.15\build-vs\libde265\Release\libde265.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -179,21 +180,7 @@
     <!-- Files kept for reference. Re-enable by adding CBXSHELL_LEGACY_DECODERS -->
     <!-- to Preprocessor Definitions and setting ExcludedFromBuild to false. -->
     <!-- ================================================================== -->
-    <ClCompile Include="webp_decoder.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/WebPDecoder.cpp -->
-    </ClCompile>
-    <ClCompile Include="heif_decoder_native.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/HEIFDecoder.cpp -->
-    </ClCompile>
-    <ClCompile Include="avif_decoder.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/AVIFDecoder.cpp -->
-    </ClCompile>
-    <ClCompile Include="jxl_decoder.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/JXLDecoder.cpp -->
-    </ClCompile>
-    <ClCompile Include="raw_decoder.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/RAWDecoder.cpp -->
-    </ClCompile>
+    <!-- v7.0 CLEANUP: Duplicate decoder files removed. All decoding now via Engine/Decoders/ exclusively. -->
     <ClCompile Include="video_thumbnail.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild> <!-- LEGACY: Engine/Decoders/VideoDecoder.cpp -->
     </ClCompile>
@@ -235,12 +222,7 @@
   <ItemGroup>
     <ClInclude Include="cbxArchive.h" />
     <ClInclude Include="CBXShellClass.h" />
-    <!-- LEGACY decoder headers (kept for reference, gated by CBXSHELL_LEGACY_DECODERS) -->
-    <ClInclude Include="webp_decoder.h" />
-    <ClInclude Include="heif_decoder_native.h" />
-    <ClInclude Include="avif_decoder.h" />
-    <ClInclude Include="jxl_decoder.h" />
-    <ClInclude Include="raw_decoder.h" />
+    <!-- v7.0 CLEANUP: Duplicate decoder headers removed. All decoding now via Engine/Decoders/ exclusively. -->
     <ClInclude Include="svg_decoder.h" />
     <ClInclude Include="video_thumbnail.h" />
     <ClInclude Include="pdf_decoder.h" />

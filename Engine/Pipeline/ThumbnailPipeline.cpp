@@ -34,9 +34,60 @@
 #include <thread>
 #include <future>
 #include <mutex>
+#include <unordered_map>
 
 namespace DarkThumbs {
 namespace Engine {
+
+namespace {
+
+std::wstring GetLowercaseExtension(const wchar_t* filePath) {
+    if (!filePath) {
+        return std::wstring();
+    }
+
+    const wchar_t* dot = wcsrchr(filePath, L'.');
+    if (!dot || *(dot + 1) == L'\0') {
+        return std::wstring();
+    }
+
+    std::wstring extension(dot);
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+        [](wchar_t ch) { return static_cast<wchar_t>(towlower(ch)); });
+    return extension;
+}
+
+ProfileComponent GetDecoderProfileComponent(const IThumbnailDecoder* decoder) {
+    if (!decoder || !decoder->GetName()) {
+        return ProfileComponent::DECODE_IMAGE;
+    }
+
+    const wchar_t* name = decoder->GetName();
+    if (_wcsicmp(name, L"WebPDecoder") == 0) return ProfileComponent::DECODE_WEBP;
+    if (_wcsicmp(name, L"AVIFDecoder") == 0) return ProfileComponent::DECODE_AVIF;
+    if (_wcsicmp(name, L"ArchiveDecoder") == 0) return ProfileComponent::DECODE_ARCHIVE;
+    if (_wcsicmp(name, L"JXLDecoder") == 0) return ProfileComponent::DECODE_JXL;
+    if (_wcsicmp(name, L"HEIFDecoder") == 0) return ProfileComponent::DECODE_HEIF;
+    if (_wcsicmp(name, L"RAWDecoder") == 0) return ProfileComponent::DECODE_RAW;
+    if (_wcsicmp(name, L"ICODecoder") == 0) return ProfileComponent::DECODE_ICO;
+    if (_wcsicmp(name, L"TGADecoder") == 0) return ProfileComponent::DECODE_TGA;
+    if (_wcsicmp(name, L"QOIDecoder") == 0) return ProfileComponent::DECODE_QOI;
+    if (_wcsicmp(name, L"PSDDecoder") == 0) return ProfileComponent::DECODE_PSD;
+    if (_wcsicmp(name, L"DDSDecoder") == 0) return ProfileComponent::DECODE_DDS;
+    if (_wcsicmp(name, L"HDRDecoder") == 0) return ProfileComponent::DECODE_HDR;
+    if (_wcsicmp(name, L"PPMDecoder") == 0) return ProfileComponent::DECODE_PPM;
+    if (_wcsicmp(name, L"EXRDecoder") == 0) return ProfileComponent::DECODE_EXR;
+    if (_wcsicmp(name, L"SVGDecoder") == 0) return ProfileComponent::DECODE_SVG;
+    if (_wcsicmp(name, L"VideoDecoder") == 0) return ProfileComponent::DECODE_VIDEO;
+    if (_wcsicmp(name, L"AudioDecoder") == 0) return ProfileComponent::DECODE_AUDIO;
+    if (_wcsicmp(name, L"PDFDecoder") == 0) return ProfileComponent::DECODE_PDF;
+    if (_wcsicmp(name, L"DocumentDecoder") == 0) return ProfileComponent::DECODE_DOCUMENT;
+    if (_wcsicmp(name, L"FontDecoder") == 0) return ProfileComponent::DECODE_FONT;
+
+    return ProfileComponent::DECODE_IMAGE;
+}
+
+}
 
 //==============================================================================
 // Pipeline Implementation (PIMPL Pattern)
@@ -54,6 +105,8 @@ public:
     std::vector<std::unique_ptr<IThumbnailDecoder>> decoders;
     bool decodersInitialized = false;  // NEW: Lazy init flag
     std::mutex decoderInitMutex;  // NEW: Thread-safe lazy init
+    std::unordered_map<std::wstring, IThumbnailDecoder*> decoderLookupCache;
+    std::mutex decoderLookupCacheMutex;
 
     // Statistics
     uint64_t totalRequests = 0;
@@ -256,11 +309,17 @@ public:
         }
 
         decoderRegistry.Clear();
+        {
+            std::lock_guard<std::mutex> lock(decoderLookupCacheMutex);
+            decoderLookupCache.clear();
+        }
+        decoders.clear();
+        decodersInitialized = false;
         initialized = false;
     }
 
     ThumbnailResult GenerateThumbnail(const ThumbnailRequest& request) {
-        PROFILE_SCOPE(ProfileComponent::PIPELINE_TOTAL);
+        ScopedTimer pipelineTotalTimer(ProfileComponent::PIPELINE_TOTAL);
         
         auto startTime = std::chrono::high_resolution_clock::now();
         
@@ -302,6 +361,7 @@ public:
 
         // Step 1: Check cache for existing thumbnail
         if (config.enableCache && cacheProvider) {
+            ScopedTimer cacheLookupTimer(ProfileComponent::CACHE_LOOKUP);
             HBITMAP cachedBitmap = nullptr;
             if (SUCCEEDED(cacheProvider->Get(request.filePath, 
                                               request.width, 
@@ -327,10 +387,33 @@ public:
         cacheMisses++;
 
         // Step 2: Ensure decoders are initialized (lazy init)
-        EnsureDecodersInitialized();
+        {
+            ScopedTimer decoderInitTimer(ProfileComponent::PIPELINE_DECODER_INIT);
+            EnsureDecodersInitialized();
+        }
 
         // Step 3: Find appropriate decoder
-        IThumbnailDecoder* decoder = decoderRegistry.FindDecoder(request.filePath);
+        IThumbnailDecoder* decoder = nullptr;
+        {
+            ScopedTimer decoderLookupTimer(ProfileComponent::PIPELINE_DECODER_LOOKUP);
+            const std::wstring extensionKey = GetLowercaseExtension(request.filePath);
+
+            if (!extensionKey.empty()) {
+                std::lock_guard<std::mutex> lock(decoderLookupCacheMutex);
+                auto cached = decoderLookupCache.find(extensionKey);
+                if (cached != decoderLookupCache.end()) {
+                    decoder = cached->second;
+                }
+            }
+
+            if (!decoder) {
+                decoder = decoderRegistry.FindDecoder(request.filePath);
+                if (decoder && !extensionKey.empty()) {
+                    std::lock_guard<std::mutex> lock(decoderLookupCacheMutex);
+                    decoderLookupCache[extensionKey] = decoder;
+                }
+            }
+        }
         if (!decoder) {
             OutputDebugStringW(L"[Pipeline] ERROR: No decoder found for file\n");
             result.status = E_NOINTERFACE;  // No decoder found
@@ -349,7 +432,10 @@ public:
         OutputDebugStringW(decoderLog);
 
         // Step 4: Generate thumbnail
-        result.status = decoder->Decode(request, result);
+        {
+            ScopedTimer decoderTimer(GetDecoderProfileComponent(decoder));
+            result.status = decoder->Decode(request, result);
+        }
         
         // Log decode result
         wchar_t resultLog[256];
@@ -359,6 +445,7 @@ public:
 
         // Step 5: Cache the result if successful
         if (SUCCEEDED(result.status) && config.enableCache && cacheProvider && result.hBitmap) {
+            ScopedTimer cacheStoreTimer(ProfileComponent::CACHE_STORE);
             // Store in cache (fire and forget - don't fail thumbnail on cache error)
             cacheProvider->Put(request.filePath, 
                               result.width, 

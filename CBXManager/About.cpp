@@ -21,7 +21,7 @@ void CAboutDlg::PopulateAboutInfo() {
 	std::wostringstream oss;
 	
 	// Application version
-	oss << L"DarkThumbs v6.2.0\r\n";
+	oss << L"DarkThumbs v7.0.0\r\n";
 	oss << L"Build: " << __DATE__ << L" " << __TIME__ << L"\r\n";
 	oss << L"\r\n";
 	

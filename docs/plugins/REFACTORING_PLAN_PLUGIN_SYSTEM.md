@@ -426,7 +426,7 @@ Keep `PluginTypes.h` changes, re-comment CMakeLists.txt plugin sources:
 
 ## Related Documents
 
-- [ROADMAP.md](../ROADMAP.md) - Sprint 17: Plugin System Repair
+- [MASTER_PLAN.md](../../MASTER_PLAN.md) - Sprint 17: Plugin System Repair
 - [ARCHITECTURE.md](../docs/ARCHITECTURE.md) - Plugin architecture overview
 - [Engine/Core/PluginTypes.h](../Engine/Core/PluginTypes.h) - Type conversion utilities
 - [SDK/plugin_api.h](../SDK/plugin_api.h) - Plugin ABI definition

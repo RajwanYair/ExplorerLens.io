@@ -8,7 +8,7 @@ Write-Host "Building UnRAR DLL" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 $rootDir = Split-Path -Parent $PSScriptRoot
-$unrarDir = Join-Path $rootDir "external\compression\unrar"
+$unrarDir = Join-Path $rootDir "external\compression-libs\unrar"
 $projectFile = Join-Path $unrarDir "UnRARDll.vcxproj"
 $outputDir = Join-Path $rootDir "x64\Release"
 

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "darkthumbs",
+  "version": "7.0.0",
+  "description": "DarkThumbs - Advanced Thumbnail Handler for Windows 11",
+  "homepage": "https://github.com/yourusername/DarkThumbs",
+  "license": "MIT",
+  "supports": "windows & x64",
+  "dependencies": [
+    {
+      "name": "zlib",
+      "platform": "windows",
+      "features": [
+        "static"
+      ]
+    },
+    {
+      "name": "zstd",
+      "platform": "windows"
+    },
+    {
+      "name": "lz4",
+      "platform": "windows"
+    },
+    {
+      "name": "bzip2",
+      "platform": "windows"
+    },
+    {
+      "name": "libwebp",
+      "platform": "windows",
+      "features": [
+        "all"
+      ]
+    },
+    {
+      "name": "libavif",
+      "platform": "windows",
+      "features": [
+        "aom"
+      ]
+    },
+    {
+      "name": "libjpeg-turbo",
+      "platform": "windows"
+    },
+    {
+      "name": "libpng",
+      "platform": "windows"
+    },
+    {
+      "name": "giflib",
+      "platform": "windows"
+    },
+    {
+      "name": "tiff",
+      "platform": "windows"
+    },
+    {
+      "name": "libheif",
+      "platform": "windows"
+    },
+    {
+      "name": "libraw",
+      "platform": "windows"
+    }
+  ],
+  "builtin-baseline": "3af1d1e60af2b2abf55760538cd607829029b07a",
+  "overrides": [
+    {
+      "name": "zlib",
+      "version": "1.3.1"
+    }
+  ],
+  "features": {
+    "all": {
+      "description": "Build all image format decoders",
+      "dependencies": [
+        "libwebp",
+        "libavif",
+        "libjpeg-turbo",
+        "libpng",
+        "giflib",
+        "tiff",
+        "libheif",
+        "libraw"
+      ]
+    },
+    "minimal": {
+      "description": "Build only essential decoders",
+      "dependencies": [
+        "zlib",
+        "libwebp",
+        "libjpeg-turbo",
+        "libpng"
+      ]
+    }
+  }
+}

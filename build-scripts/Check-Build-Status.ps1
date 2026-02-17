@@ -23,42 +23,42 @@ Write-Host ""
 $libraries = @(
     @{
         Name         = "zlib 1.3.1"
-        Path         = "external\compression\zlib-1.3.1\x64\Release\zlibstatic.lib"
+        Path         = "external\compression-libs\zlib-1.3.1\x64\Release\zlibstatic.lib"
         ExpectedSize = 195
     },
     @{
         Name         = "LZ4 1.10.0"
-        Path         = "external\compression\lz4-1.10.0\build\VS2022\bin\x64_Release\liblz4_static.lib"
+        Path         = "external\compression-libs\lz4-1.10.0\build\VS2022\bin\x64_Release\liblz4_static.lib"
         ExpectedSize = 150
     },
     @{
         Name         = "Zstandard 1.5.7"
-        Path         = "external\compression\zstd-1.5.7\build\VS2022\bin\x64\Release\zstd_static.lib"
+        Path         = "external\compression-libs\zstd-1.5.7\build\VS2022\bin\x64\Release\zstd_static.lib"
         ExpectedSize = 800
     },
     @{
         Name         = "liblzma (xz-5.6.3)"
-        Path         = "external\compression\xz-5.6.3\build-vs\Release\liblzma.lib"
+        Path         = "external\compression-libs\xz-5.6.3\build-vs\Release\liblzma.lib"
         ExpectedSize = 200
     },
     @{
         Name         = "LibWebP 1.5.0"
-        Path         = "external\image-libs\libwebp-1.5.0\build-vs\output\x64\Release\release-static\x64\lib\webp.lib"
+        Path         = "external\image-libs\libwebp-1.5.0-build\build-vs\output\x64\Release\release-static\x64\lib\webp.lib"
         ExpectedSize = 1700
     },
     @{
         Name         = "LibWebP demux"
-        Path         = "external\image-libs\libwebp-1.5.0\build-vs\output\x64\Release\release-static\x64\lib\libwebpdemux.lib"
+        Path         = "external\image-libs\libwebp-1.5.0-build\build-vs\output\x64\Release\release-static\x64\lib\libwebpdemux.lib"
         ExpectedSize = 41
     },
     @{
         Name         = "LibWebP sharpyuv"
-        Path         = "external\image-libs\libwebp-1.5.0\build-vs\output\x64\Release\release-static\x64\lib\libsharpyuv.lib"
+        Path         = "external\image-libs\libwebp-1.5.0-build\build-vs\output\x64\Release\release-static\x64\lib\libsharpyuv.lib"
         ExpectedSize = 79
     },
     @{
         Name         = "Minizip-NG 4.0.10"
-        Path         = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib"
+        Path         = "external\compression-libs\minizip-ng-4.0.10\build-vs\Release\minizip.lib"
         ExpectedSize = 200
     }
 )

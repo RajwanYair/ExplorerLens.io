@@ -2,6 +2,11 @@
 # Build-All-Libraries.ps1
 # Build all external libraries for DarkThumbs
 # ===========================================================================
+# 
+# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# This script is kept for reference only.
+# See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
+# 
 
 $ErrorActionPreference = "Stop"
 
@@ -97,62 +102,62 @@ function Build-Library {
 # Library Definitions
 $libraries = @(
     @{
-        Name = "Zlib 1.3.1"
+        Name      = "Zlib 1.3.1"
         SourceDir = Join-Path $ProjectRoot "external\compression\zlib-1.3.1"
-        BuildDir = Join-Path $ProjectRoot "external\compression\zlib-1.3.1\build-vs"
-        Options = @{}
+        BuildDir  = Join-Path $ProjectRoot "external\compression\zlib-1.3.1\build-vs"
+        Options   = @{}
         OutputLib = "external\compression\zlib-1.3.1\build-vs\Release\zlibstatic.lib"
     },
     @{
-        Name = "LZ4 1.10.0"
+        Name      = "LZ4 1.10.0"
         SourceDir = Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build\cmake"
-        BuildDir = Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build-vs"
-        Options = @{
-            "LZ4_BUILD_CLI" = "OFF"
+        BuildDir  = Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build-vs"
+        Options   = @{
+            "LZ4_BUILD_CLI"         = "OFF"
             "LZ4_BUILD_LEGACY_LZ4C" = "OFF"
         }
         OutputLib = "external\compression\lz4-1.10.0\build-vs\Release\liblz4_static.lib"
     },
     @{
-        Name = "Zstd 1.5.7"
+        Name      = "Zstd 1.5.7"
         SourceDir = Join-Path $ProjectRoot "external\compression\zstd-1.5.7\build\cmake"
-        BuildDir = Join-Path $ProjectRoot "external\compression\zstd-1.5.7\build-vs"
-        Options = @{
+        BuildDir  = Join-Path $ProjectRoot "external\compression\zstd-1.5.7\build-vs"
+        Options   = @{
             "ZSTD_BUILD_PROGRAMS" = "OFF"
-            "ZSTD_BUILD_CONTRIB" = "OFF"
-            "ZSTD_BUILD_TESTS" = "OFF"
+            "ZSTD_BUILD_CONTRIB"  = "OFF"
+            "ZSTD_BUILD_TESTS"    = "OFF"
         }
         OutputLib = "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib"
     },
     @{
-        Name = "MinizipNG 4.0.10"
+        Name      = "MinizipNG 4.0.10"
         SourceDir = Join-Path $ProjectRoot "external\compression\minizip-ng-4.0.10"
-        BuildDir = Join-Path $ProjectRoot "external\compression\minizip-ng-4.0.10\build-vs"
-        Options = @{
+        BuildDir  = Join-Path $ProjectRoot "external\compression\minizip-ng-4.0.10\build-vs"
+        Options   = @{
             "MZ_COMPAT" = "OFF"
-            "MZ_ZLIB" = "ON"
-            "MZ_BZIP2" = "ON"
-            "MZ_LZMA" = "ON"
-            "MZ_ZSTD" = "ON"
+            "MZ_ZLIB"   = "ON"
+            "MZ_BZIP2"  = "ON"
+            "MZ_LZMA"   = "ON"
+            "MZ_ZSTD"   = "ON"
         }
         OutputLib = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib"
     },
     @{
-        Name = "LibWebP 1.5.0"
-        SourceDir = Join-Path $ProjectRoot "external\image-libs\libwebp-1.5.0"
-        BuildDir = Join-Path $ProjectRoot "external\image-libs\libwebp-1.5.0\build-vs"
-        Options = @{
+        Name      = "LibWebP 1.5.0"
+        SourceDir = Join-Path $ProjectRoot "external\image-libs\libwebp-1.5.0-build"
+        BuildDir  = Join-Path $ProjectRoot "external\image-libs\libwebp-1.5.0-build\build-vs"
+        Options   = @{
             "WEBP_BUILD_ANIM_UTILS" = "OFF"
-            "WEBP_BUILD_CWEBP" = "OFF"
-            "WEBP_BUILD_DWEBP" = "OFF"
-            "WEBP_BUILD_GIF2WEBP" = "OFF"
-            "WEBP_BUILD_IMG2WEBP" = "OFF"
-            "WEBP_BUILD_VWEBP" = "OFF"
-            "WEBP_BUILD_WEBPINFO" = "OFF"
-            "WEBP_BUILD_WEBPMUX" = "OFF"
-            "WEBP_BUILD_EXTRAS" = "OFF"
+            "WEBP_BUILD_CWEBP"      = "OFF"
+            "WEBP_BUILD_DWEBP"      = "OFF"
+            "WEBP_BUILD_GIF2WEBP"   = "OFF"
+            "WEBP_BUILD_IMG2WEBP"   = "OFF"
+            "WEBP_BUILD_VWEBP"      = "OFF"
+            "WEBP_BUILD_WEBPINFO"   = "OFF"
+            "WEBP_BUILD_WEBPMUX"    = "OFF"
+            "WEBP_BUILD_EXTRAS"     = "OFF"
         }
-        OutputLib = "external\image-libs\libwebp-1.5.0\build-vs\Release\webp.lib"
+        OutputLib = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib"
     }
 )
 
@@ -163,9 +168,9 @@ $builtLibs = @()
 
 foreach ($lib in $libraries) {
     $result = Build-Library -Name $lib.Name `
-                           -SourceDir $lib.SourceDir `
-                           -BuildDir $lib.BuildDir `
-                           -CMakeOptions $lib.Options
+        -SourceDir $lib.SourceDir `
+        -BuildDir $lib.BuildDir `
+        -CMakeOptions $lib.Options
     
     if ($result) {
         $successCount++

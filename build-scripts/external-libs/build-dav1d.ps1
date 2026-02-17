@@ -1,112 +1,107 @@
-# Build dav1d 1.5.1 AV1 decoder library for DarkThumbs
-# PowerShell build script with MSVC toolchain
+#Requires -Version 7.0
+# DarkThumbs v7.0 - Build dav1d 1.5.1 (AV1 Video Decoder)
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 16, 2026
 
 param(
     [string]$Configuration = "Release",
-    [string]$Platform = "x64"
+    [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
+# Import helper module for Meson environment setup
+. "$PSScriptRoot\..\core\Build-Helpers.ps1"
 
-Write-Host "Building dav1d 1.5.1 for DarkThumbs" -ForegroundColor Cyan
-Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
-Write-Host "Platform: $Platform" -ForegroundColor Yellow
-Write-Host ""
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$dav1dDir = Join-Path $rootDir "external\image-libs\dav1d-1.5.1"
+$buildDir = Join-Path $dav1dDir "build-msvc"
+$installDir = Join-Path $dav1dDir "install"
 
-# Setup paths
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RootDir = Split-Path -Parent (Split-Path -Parent $ScriptDir)
-$ExternalDir = Join-Path $RootDir "external"
-$Dav1dDir = Join-Path $ExternalDir "image-libs\dav1d-1.5.1"
-$BuildDir = Join-Path $Dav1dDir "build-msvc"
-$InstallDir = Join-Path $Dav1dDir "install"
+Write-BuildHeader "Building dav1d 1.5.1 (AV1 Video Decoder)"
 
-# Verify source exists
-if (-not (Test-Path $Dav1dDir)) {
-    Write-Host "[ERROR] dav1d source not found at: $Dav1dDir" -ForegroundColor Red
-    Write-Host "Please run download-all-libs.ps1 first." -ForegroundColor Yellow
+# Verify source directory
+if (-not (Test-Path $dav1dDir)) {
+    Write-BuildLog "dav1d-1.5.1 not found at $dav1dDir" -Level Error
+    Write-BuildLog "Please run download-all-libs.ps1 first" -Level Warning
     exit 1
 }
 
-# Check for meson and ninja
-$HasMeson = Get-Command meson -ErrorAction SilentlyContinue
-$HasNinja = Get-Command ninja -ErrorAction SilentlyContinue
+Write-BuildLog "Source: $dav1dDir" -Level Info
+Write-BuildLog "Build: $buildDir" -Level Info
+Write-BuildLog "Install: $installDir" -Level Info
 
-if (-not $HasMeson) {
-    Write-Host "[INFO] Meson not found. Installing via pip..." -ForegroundColor Yellow
-    python -m pip install meson --proxy http://proxy-dmz.intel.com:912
-}
-
-if (-not $HasNinja) {
-    Write-Host "[INFO] Ninja not found. Installing via pip..." -ForegroundColor Yellow
-    python -m pip install ninja --proxy http://proxy-dmz.intel.com:912
-}
-
-# Find Visual Studio
-$VsPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
-$VsDevCmd = Join-Path $VsPath "Common7\Tools\VsDevCmd.bat"
-
-if (Test-Path $VsDevCmd) {
-    Write-Host "[OK] Found Visual Studio BuildTools at: $VsPath" -ForegroundColor Green
-} else {
-    # Try vswhere as fallback
-    $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-    if (Test-Path $VsWhere) {
-        $VsPath = & $VsWhere -latest -property installationPath
-        if ($VsPath) {
-            $VsDevCmd = Join-Path $VsPath "Common7\Tools\VsDevCmd.bat"
+try {
+    # Check for Meson and Ninja
+    if (-not (Test-CommandExists "meson")) {
+        Write-BuildLog "Meson not found, installing via pip..." -Level Warning
+        python -m pip install meson --quiet
+    }
+    
+    if (-not (Test-CommandExists "ninja")) {
+        Write-BuildLog "Ninja not found, installing via pip..." -Level Warning
+        python -m pip install ninja --quiet
+    }
+    
+    # Clean build directory if requested
+    if ($Clean -and (Test-Path $buildDir)) {
+        Write-BuildLog "Cleaning previous build" -Level Info
+        Remove-Item $buildDir -Recurse -Force
+    }
+    
+    # Configure with Meson
+    if (-not (Test-Path $buildDir)) {
+        Write-BuildLog "Configuring dav1d with Meson..." -Level Info
+        
+        Push-Location $dav1dDir
+        try {
+            & meson setup $buildDir `
+                --buildtype=release `
+                --default-library=static `
+                --vsenv `
+                --prefix=$installDir `
+                -Denable_asm=true `
+                -Denable_tools=false `
+                -Denable_examples=false `
+                -Denable_tests=false
+            
+            if ($LASTEXITCODE -ne 0) {
+                throw "Meson configuration failed"
+            }
+        }
+        finally {
+            Pop-Location
         }
     }
     
-    if (-not (Test-Path $VsDevCmd)) {
-        Write-Host "[ERROR] Visual Studio not found" -ForegroundColor Red
-        exit 1
+    # Build with Ninja
+    Write-BuildLog "Building dav1d..." -Level Info
+    Push-Location $buildDir
+    try {
+        & ninja
+        if ($LASTEXITCODE -ne 0) {
+            throw "Ninja build failed"
+        }
+        
+        # Install
+        & ninja install
+        if ($LASTEXITCODE -ne 0) {
+            throw "Installation failed"
+        }
     }
+    finally {
+        Pop-Location
+    }
+    
+    # Verify output
+    $expectedLib = Join-Path $installDir "lib\dav1d.lib"
+    Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
+    
+    Write-BuildLog "dav1d 1.5.1 build completed successfully" -Level Success
+    Write-BuildLog "Features: AV1 video decoder, optimized assembly" -Level Info
+    
 }
-
-# Create build directory
-if (Test-Path $BuildDir) {
-    Write-Host "Cleaning existing build directory..." -ForegroundColor Yellow
-    Remove-Item -Recurse -Force $BuildDir
-}
-New-Item -ItemType Directory -Path $BuildDir | Out-Null
-
-# Create build script that runs in VS environment
-$MesonExe = "C:\Users\ryair\AppData\Local\Python\pythoncore-3.14-64\Scripts\meson.exe"
-$NinjaExe = "C:\Users\ryair\AppData\Local\Python\pythoncore-3.14-64\Scripts\ninja.exe"
-
-$BuildScriptContent = @"
-@echo off
-call "$VsDevCmd" -arch=amd64 -host_arch=amd64
-
-cd /d "$Dav1dDir"
-
-"$MesonExe" setup build-msvc --buildtype=release --default-library=static --prefix="$InstallDir" -Denable_asm=true -Denable_tools=false -Denable_examples=false -Denable_tests=false
-
-cd build-msvc
-"$NinjaExe"
-"$NinjaExe" install
-
-echo [OK] dav1d build complete
-"@
-
-$TempBuildScript = Join-Path $env:TEMP "build-dav1d-temp.cmd"
-$BuildScriptContent | Out-File -FilePath $TempBuildScript -Encoding ASCII
-
-# Execute build
-Write-Host "Configuring and building dav1d..." -ForegroundColor Yellow
-& cmd /c $TempBuildScript
-
-# Verify build
-$LibPath = Join-Path $InstallDir "lib\dav1d.lib"
-if (Test-Path $LibPath) {
-    Write-Host ""
-    Write-Host "[SUCCESS] dav1d built successfully!" -ForegroundColor Green
-    Write-Host "Library: $LibPath" -ForegroundColor Green
-    Write-Host "Headers: $(Join-Path $InstallDir 'include')" -ForegroundColor Green
-    exit 0
-} else {
-    Write-Host ""
-    Write-Host "[ERROR] Build failed - library not found" -ForegroundColor Red
+catch {
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }

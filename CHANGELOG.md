@@ -5,6 +5,65 @@ All notable changes to DarkThumbs will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.0] - 2026-02-16
+
+### Added
+
+- **K-Lite Codec Pack Integration**: Detected and documented K-Lite 19.4.5 Basic installation providing LAV Filters for extended video codec support (ProRes, FFV1, VP9 in MKV, etc.)
+- **Build-LibHEIF.ps1**: Complete build script for libheif 1.19.5 + libde265 1.0.15 using Build-Library-Core.ps1 module
+- **Engine CMakeLists.txt**: Added libheif/libde265 include/library paths and conditional link targets
+- **Tasks 21-30**: Full execution block documented in MASTER_PLAN.md
+- **Integration Tests**: Added 4 new tests (SpecialtyImageFormats, CameraRAWFormats, ModernImageFormats, PDFDocumentFormat) covering all 24 decoders
+- **Multi-Decoder Coexistence Test**: Expanded from 6 to 27 format routing assertions
+- **Offline HEIF Integration Path**: Added validated local-ZIP build workflow for `libde265` + `libheif` (no internet required)
+- **Proxy-Native GitHub Source Update Path**: Validated `libde265` + `libheif` source refresh via Intel proxy (`http://proxy-chain.intel.com:928`) and made it default in HEIF update flow
+
+### Fixed
+
+- **Visual Studio 18 Migration**: Updated 16+ locations from VS 17 2022 to VS 18 2026:
+  - Build-Library-Core.ps1 defaults (CMakeGenerator, CMakeToolset v145, MSBuildToolsVersion 18.0)
+  - Build-ImageLibs.ps1, Build-JXL-Dependencies.ps1, Find-All-Tools.ps1
+  - Rebuild-Compression-Libs.ps1 (3 hardcoded locations)
+  - Build-LibRaw-NMake.ps1 (stale VS 2022 fallback path)
+  - build-scripts/README.md, SDK/examples/minimal-plugin/README.md
+  - FORMAT_SUPPORT_ANALYSIS.md (3 cmake examples)
+  - WINDOWS_BUILD_TOOLS.md, BUILD_METHOD.md
+  - .github/workflows/build-and-test.yml (CI/CD pipeline)
+  - EXECUTION_SUMMARY_TASKS_21-30.md
+- **Library Path Corrections**: Fixed stale `external\compression\` references to `external\compression-libs\` in:
+  - Test-Build-Environment.ps1, Test-Builds.ps1, Verify-Complete-Build.ps1, validate-release.ps1
+- **Version References**: minizip-ng 4.0.7→4.0.10, unrar 7.2.1→7.2.2, lzma 24.08→26.00, libheif 1.18.2→1.19.5
+- **verify-project-structure.ps1**: Removed checks for deleted dirs (docs/sprints, docs/planning)
+- **KNOWN_ISSUES.md**: Updated to v7.0.0:
+  - Issue #1 (JXL) → ✅ Working (libjxl linked in current build)
+  - Issue #2 (HEIF) → 🔄 In Progress (build scripts ready)
+  - Issue #5 (Video Codecs) → ✅ Resolved (K-Lite installed)
+- **Build-All-And-Package.ps1**: Expanded from 4 to 12 library build scripts
+- **CBXShellClass.cpp**: Updated version references from v6.2.0 to v7.0.0
+- **LIBRARY_RESEARCH_2026.md**: Major status update - corrected 10+ entries reflecting actual implementation (QOI, SVG, EXR, Video, Audio, PDF, etc. all already implemented)
+- **Integration Tests**: Updated includes from 9 to 22 decoder headers, FullInitialization test now registers all 22 decoder instances
+- **Build-LibHEIF.ps1**: Corrected `libde265` library naming (`libde265.lib`), fixed CMake argument quoting for paths with spaces, explicit `LIBDE265_*` wiring, and resilient artifact verification
+- **Engine/CMakeLists.txt**: Added libheif install/build fallback include+library path resolution, corrected `libde265` linkage handling, and enforced artifact checks when `HAS_LIBHEIF=ON`
+- **CBXShell.vcxproj**: Corrected HEIF/de265 linker dependencies to use `de265.lib` import library path and added Release runtime deployment for `libde265.dll`
+- **build-scripts/Update-All-Libraries.ps1**: Updated default proxy URL to `http://proxy-chain.intel.com:928`
+
+### Changed
+
+- **Build Results**: Full clean build — 0 errors, 0 warnings:
+  - CBXShell.dll: 2940 KB (x64\Release\)
+  - CBXManager.exe: 400 KB (x64\Release\)
+  - DarkThumbsEngine.lib: 130 MB (build\lib\Release\)
+- **Architecture Audit (Sprint 3)**: Verified single Engine adapter path, legacy decoders gated behind CBXSHELL_LEGACY_DECODERS, all 24 decoders registered in ThumbnailPipeline
+- **Project Cleanup**: Removed 3 empty directories, moved 6 legacy docs to docs/development/, removed leftover xz tarball
+- **HEIF Build Status**: `HAS_LIBHEIF=ON` now validated in project configuration, with `heif.lib` produced from local source at `external/image-libs/libheif-1.19.5/build-vs/libheif/Release/heif.lib`
+- **HEIF Link Status**: Production Release link now resolves `heif.lib` + `de265.lib` successfully (`CBXShell.dll` built in `x64/Release`)
+
+### Removed
+
+- **Empty directories**: external/archive-libs/, docs/planning/, docs/sprints/
+- **Stale archive**: external/compression-libs/xz-5.6.3.tar.gz
+- **xz-5.6.3 build validation**: Removed from Test-Build-Environment.ps1 and Verify-Complete-Build.ps1
+
 ## [6.2.0] - 2026-02-15
 
 ### Added

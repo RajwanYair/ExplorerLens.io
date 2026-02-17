@@ -1,161 +1,108 @@
-# Build LibRaw for Camera RAW Support
-# DarkThumbs External Library Build Script
+#Requires -Version 7.0
+# DarkThumbs v7.0 - Build LibRaw 0.21.2 (RAW Camera Image Decoder)
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 16, 2026
 
 param(
-    [switch]$Clean,
     [string]$Configuration = "Release",
-    [string]$Platform = "x64"
+    [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-# Paths
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$externalDir = Join-Path $repoRoot "external"
-$librawDir = Join-Path $externalDir "libraw"
-$solutionFile = Join-Path $librawDir "LibRaw.sln"
-$installDir = Join-Path $externalDir "libraw-install"
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$librawDir = Join-Path $rootDir "external\camera-libs\libraw"
+$installDir = Join-Path $rootDir "external\camera-libs\libraw-install"
 
-Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  Building LibRaw for Camera RAW Support" -ForegroundColor Cyan
-Write-Host "================================================" -ForegroundColor Cyan
-Write-Host ""
+Write-BuildHeader "Building LibRaw 0.21.2 (Camera RAW Decoder)"
 
-# Verify LibRaw source exists
+# Verify source directory
 if (-not (Test-Path $librawDir)) {
-    Write-Host "ERROR: LibRaw source not found at: $librawDir" -ForegroundColor Red
-    Write-Host "Please download LibRaw 0.21.2 and extract to external/camera-libs/libraw/" -ForegroundColor Yellow
+    Write-BuildLog "LibRaw source not found at $librawDir" -Level Error
+    Write-BuildLog "Please download LibRaw 0.21.2 from libraw.org" -Level Warning
     exit 1
 }
 
-if (-not (Test-Path $solutionFile)) {
-    Write-Host "ERROR: LibRaw.sln not found at: $solutionFile" -ForegroundColor Red
-    exit 1
-}
-
-# Clean if requested
-if ($Clean) {
-    Write-Host "Cleaning LibRaw build outputs..." -ForegroundColor Yellow
-    $patterns = @("buildfiles\$Platform\$Configuration", "bin", "lib", "obj")
-    foreach ($pattern in $patterns) {
-        $path = Join-Path $librawDir $pattern
-        if (Test-Path $path) {
-            Remove-Item -Recurse -Force $path -ErrorAction SilentlyContinue
-        }
-    }
-    if (Test-Path $installDir) {
-        Remove-Item -Recurse -Force $installDir
-    }
-}
-
-# Build LibRaw with MSBuild
-Write-Host "Building LibRaw with MSBuild ($Configuration|$Platform)..." -ForegroundColor Green
-Write-Host "Solution: $solutionFile" -ForegroundColor Gray
-Write-Host ""
-
-Push-Location $librawDir
+Write-BuildLog "Source: $librawDir" -Level Info
+Write-BuildLog "Install: $installDir" -Level Info
 
 try {
-    # Build just the libraw project (not samples)
-    # Note: Retargeting to current VS toolset and Windows SDK
-    msbuild $solutionFile `
-        /t:libraw `
-        /p:Configuration=$Configuration `
-        /p:Platform=$Platform `
-        /p:WindowsTargetPlatformVersion=10.0.26100.0 `
-        /p:PlatformToolset=v143 `
-        /m `
-        /v:minimal
-
-    if ($LASTEXITCODE -ne 0) {
-        throw "MSBuild failed with exit code $LASTEXITCODE"
+    # LibRaw typically has Visual Studio solution
+    $solutionFile = Join-Path $librawDir "LibRaw.sln"
+    $vcxproj = Join-Path $librawDir "LibRaw.vcxproj"
+    
+    if (Test-Path $solutionFile) {
+        Write-BuildLog "Using MSBuild with solution file" -Level Info
+        
+        # Build using MSBuild (LibRaw has VS solution)
+        $msbuildPath = Find-MSBuildPath
+        if (-not $msbuildPath) {
+            throw "MSBuild not found"
+        }
+        
+        & $msbuildPath `
+            $solutionFile `
+            /t:libraw `
+            /p:Configuration=$Configuration `
+            /p:Platform=x64 `
+            /p:WindowsTargetPlatformVersion=10.0.26100.0 `
+            /p:PlatformToolset=v145 `
+            /m `
+            /v:minimal `
+            /nologo
+        
+        if ($LASTEXITCODE -ne 0) {
+            throw "MSBuild failed with exit code $LASTEXITCODE"
+        }
+    } elseif (Test-Path $vcxproj) {
+        Write-BuildLog "Using MSBuild with project file" -Level Info
+        
+        Invoke-MSBuildLibrary `
+            -LibraryName "LibRaw" `
+            -ProjectFile $vcxproj `
+            -Configuration $Configuration `
+            -Platform "x64" `
+            -Clean:$Clean
+    } else {
+        throw "No Visual Studio solution or project file found"
     }
-
-    # Find the output library (LibRaw uses release-x86_64 directory naming)
+    
+    # Find output (LibRaw uses non-standard naming)
     $searchPatterns = @(
-        "buildfiles\release-x86_64\libraw.lib",
-        "buildfiles\$Platform\$Configuration\libraw.lib",
-        "lib\libraw.lib",
-        "*\libraw.lib"
+        (Join-Path $librawDir "buildfiles\release-x86_64\libraw.lib"),
+        (Join-Path $librawDir "buildfiles\x64\$Configuration\libraw.lib"),
+        (Join-Path $librawDir "lib\libraw.lib")
     )
     
     $outputLib = $null
     foreach ($pattern in $searchPatterns) {
-        $fullPattern = Join-Path $librawDir $pattern
-        Write-Host "Searching: $fullPattern" -ForegroundColor Gray
-        $found = Get-Item $fullPattern -ErrorAction SilentlyContinue
-        if ($found) {
-            $outputLib = $found
+        if (Test-Path $pattern) {
+            $outputLib = $pattern
             break
         }
     }
-
+    
     if (-not $outputLib) {
-        throw "Could not find libraw.lib in build output"
+        throw "libraw.lib not found in expected locations"
     }
-
-    Write-Host ""
-    Write-Host "Found library: $($outputLib.FullName)" -ForegroundColor Green
-
-    # Create install directory structure
+    
+    Write-BuildLog "Found: $outputLib" -Level Success
+    
+    # Install headers and library
     $installInclude = Join-Path $installDir "include"
     $installLib = Join-Path $installDir "lib"
     
     New-Item -ItemType Directory -Path $installInclude -Force | Out-Null
     New-Item -ItemType Directory -Path $installLib -Force | Out-Null
-
-    # Copy library
-    Write-Host "Installing to: $installDir" -ForegroundColor Green
-    Copy-Item $outputLib.FullName -Destination (Join-Path $installLib "libraw_static.lib") -Force
-
-    # Copy headers
-    $librawHeaders = Join-Path $librawDir "libraw"
-    Copy-Item $librawHeaders -Destination (Join-Path $installInclude "libraw") -Recurse -Force
-
-    Write-Host ""
-    Write-Host "================================================" -ForegroundColor Green
-    Write-Host "  LibRaw Build Complete!" -ForegroundColor Green
-    Write-Host "================================================" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "================================================" -ForegroundColor Green
-    Write-Host "  LibRaw Build Complete!" -ForegroundColor Green
-    Write-Host "================================================" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Installation Location:" -ForegroundColor Cyan
-    Write-Host "  $installDir" -ForegroundColor White
-    Write-Host ""
-    Write-Host "Include Directory:" -ForegroundColor Cyan
-    Write-Host "  $installInclude\libraw" -ForegroundColor White
-    Write-Host ""
-    Write-Host "Library File:" -ForegroundColor Cyan
-    Write-Host "  $installLib\libraw_static.lib" -ForegroundColor White
     
-    # Show library size
-    $libSize = (Get-Item (Join-Path $installLib "libraw_static.lib")).Length / 1MB
-    Write-Host "  Size: $([math]::Round($libSize, 2)) MB" -ForegroundColor White
-    Write-Host ""
-    Write-Host "Supported RAW Formats:" -ForegroundColor Cyan
-    Write-Host "  Canon: .cr2, .cr3, .crw" -ForegroundColor White
-    Write-Host "  Nikon: .nef, .nrw" -ForegroundColor White
-    Write-Host "  Sony: .arw, .srf, .sr2" -ForegroundColor White
-    Write-Host "  Olympus: .orf" -ForegroundColor White
-    Write-Host "  Panasonic: .rw2" -ForegroundColor White
-    Write-Host "  Pentax: .pef" -ForegroundColor White
-    Write-Host "  Fujifilm: .raf" -ForegroundColor White
-    Write-Host "  Adobe: .dng" -ForegroundColor White
-    Write-Host "  And 100+ more RAW formats..." -ForegroundColor White
-    Write-Host ""
-
+    Copy-Item $outputLib -Destination (Join-Path $installLib "libraw_static.lib") -Force
+    Copy-Item (Join-Path $librawDir "libraw") -Destination (Join-Path $installInclude "libraw") -Recurse -Force
+    
+    Write-BuildLog "LibRaw 0.21.2 build completed successfully" -Level Success
+    Write-BuildLog "Supports 100+ RAW formats: Canon CR2/CR3, Nikon NEF, Sony ARW, etc." -Level Info
+    
 } catch {
-    Write-Host ""
-    Write-Host "================================================" -ForegroundColor Red
-    Write-Host "  Build Failed!" -ForegroundColor Red
-    Write-Host "================================================" -ForegroundColor Red
-    Write-Host $_.Exception.Message -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Stack Trace:" -ForegroundColor Yellow
-    Write-Host $_.ScriptStackTrace -ForegroundColor Gray
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
-} finally {
-    Pop-Location
 }

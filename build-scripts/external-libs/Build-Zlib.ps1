@@ -1,89 +1,85 @@
-# ===========================================================================
-# Build-Zlib.ps1
-# Build zlib 1.3.1 - DEFLATE Compression Library
-# ===========================================================================
+#Requires -Version 7.0
+# DarkThumbs v7.0 - Build zlib 1.3.1 (DEFLATE Compression)
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 16, 2026
 
 param(
     [string]$Configuration = "Release",
-    [string]$Platform = "x64"
+    [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-Write-Host ""
-Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host "Building zlib 1.3.1 (DEFLATE Compression)" -ForegroundColor Cyan
-Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host ""
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$zlibDir = Join-Path $rootDir "external\compression-libs\zlib-1.3.1"
+$buildDir = Join-Path $zlibDir "build-vs"
+$installDir = Join-Path $zlibDir "install"
 
-# Get project root
-$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-Set-Location $ProjectRoot
+Write-BuildHeader "Building zlib 1.3.1 (DEFLATE Compression)"
 
-# Check if already built
-$ExistingLib = Join-Path $ProjectRoot "external\compression\zlib-1.3.1\x64\Release\zlibstatic.lib"
-if (Test-Path $ExistingLib) {
-    $Size = (Get-Item $ExistingLib).Length
-    Write-Host "zlib already built: $ExistingLib ($Size bytes)" -ForegroundColor Green
-    exit 0
-}
-
-# Find MSBuild
-$MSBuild = & "$PSScriptRoot\Find-MSBuild.ps1"
-if (-not $MSBuild) {
-    Write-Host "ERROR: MSBuild not found" -ForegroundColor Red
+# Verify source directory
+if (-not (Test-Path $zlibDir)) {
+    Write-BuildLog "zlib-1.3.1 not found at $zlibDir" -Level Error
+    Write-BuildLog "Please download and extract zlib source" -Level Warning
     exit 1
 }
 
-# Try to find existing vcxproj, or use CMake/Ninja
-$Project = Join-Path $ProjectRoot "external\compression\zlib-1.3.1\build-vs\zlib.vcxproj"
-$ZlibDir = Join-Path $ProjectRoot "external\compression\zlib-1.3.1"
+Write-BuildLog "Source: $zlibDir" -Level Info
+Write-BuildLog "Build: $buildDir" -Level Info
+Write-BuildLog "Install: $installDir" -Level Info
 
-if (-not (Test-Path $Project)) {
-    # Use CMake/Ninja build
-    Write-Host "Using CMake/Ninja build..." -ForegroundColor Yellow
-    $buildDir = Join-Path $ZlibDir "x64\Release"
+try {
+    # Try CMake build first (preferred method)
+    $cmakeLists = Join-Path $zlibDir "CMakeLists.txt"
     
-    if (-not (Test-Path $buildDir)) {
-        New-Item -Path $buildDir -ItemType Directory -Force | Out-Null
-    }
-    
-    Push-Location $buildDir
-    try {
-        cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CONFIGURATION_TYPES=Release -DBUILD_SHARED_LIBS=OFF "../.."
-        ninja zlibstatic
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR: ninja build failed" -ForegroundColor Red
-            exit 1
+    if (Test-Path $cmakeLists) {
+        Write-BuildLog "Using CMake build" -Level Info
+        
+        $cmakeOptions = @{
+            'CMAKE_BUILD_TYPE'  = 'Release'
+            'BUILD_SHARED_LIBS' = 'OFF'
         }
-    } finally {
-        Pop-Location
+        
+        Invoke-CMakeBuild `
+            -LibraryName "zlib" `
+            -SourceDir $zlibDir `
+            -BuildDir $buildDir `
+            -InstallDir $installDir `
+            -Configuration $Configuration `
+            -CMakeOptions $cmakeOptions `
+            -Clean:$Clean
+        
+        # Verify output
+        $expectedLib = Join-Path $installDir "lib\zlibstatic.lib"
+        if (-not (Test-Path $expectedLib)) {
+            # Try alternate location
+            $expectedLib = Join-Path $buildDir "$Configuration\zlibstatic.lib"
+        }
+        
+        Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
+    } else {
+        # Fallback to MSBuild if vcxproj exists
+        $vcxproj = Join-Path $zlibDir "build-vs\zlib.vcxproj"
+        
+        if (Test-Path $vcxproj) {
+            Write-BuildLog "Using MSBuild" -Level Info
+            
+            Invoke-MSBuildLibrary `
+                -LibraryName "zlib" `
+                -ProjectFile $vcxproj `
+                -Configuration $Configuration `
+                -Platform "x64" `
+                -Clean:$Clean
+        } else {
+            throw "No build system found (CMakeLists.txt or zlib.vcxproj missing)"
+        }
     }
     
-    exit 0
-}
-
-Write-Host "Project: $Project" -ForegroundColor White
-Write-Host ""
-
-# Clean and build
-& $MSBuild $Project /t:Clean /p:Configuration=$Configuration /p:Platform=$Platform /v:minimal /nologo
-& $MSBuild $Project /t:Build /p:Configuration=$Configuration /p:Platform=$Platform /v:minimal /nologo
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "[FAILED] zlib build failed!" -ForegroundColor Red
-    exit 1
-}
-
-$Output = Join-Path $ProjectRoot "external\compression\zlib-1.3.1\build-vs\$Configuration\zlibstatic.lib"
-if (Test-Path $Output) {
-    $Size = (Get-Item $Output).Length
-    Write-Host ""
-    Write-Host "[SUCCESS] zlibstatic.lib built: $Size bytes" -ForegroundColor Green
-    exit 0
-} else {
-    Write-Host ""
-    Write-Host "[ERROR] Output file not found: $Output" -ForegroundColor Red
+    Write-BuildLog "zlib 1.3.1 build completed successfully" -Level Success
+    Write-BuildLog "Features: DEFLATE compression, standard library" -Level Info
+    
+} catch {
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
