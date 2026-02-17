@@ -272,22 +272,131 @@ The following files contain stale version/status that conflicts with v7.0.0 real
 
 ---
 
-### Future Vision (Sprints 21+)
+### Completed Sprints (21-22) ✅
 
-## Sprint 21 — D3D12 GPU Upgrade
-- Migrate D3D11Renderer to D3D12 for compute shader model 6.x, mesh shader thumbnails for 3D, DirectML inference.
+## Sprint 21 — D3D12 GPU Upgrade ✅ COMPLETED
+- **Objective:** Migrate D3D11Renderer to D3D12 for modern GPU features and DirectML foundation.
+- Deliverables:
+  1. D3D12 command queue and command allocator infrastructure.
+  2. D3D12 resource barrier management for texture uploads.
+  3. Command bundles for batched thumbnail operations (20-30% faster GPU submission).
+  4. DirectML device integration for AI inference preparation.
+  5. Fallback to D3D11 renderer if D3D12 initialization fails.
+- Exit criteria: D3D12 renderer produces correct thumbnails, 20-30% faster GPU submission measured.
 
-## Sprint 22 — Async Pipeline & Streaming
-- Fully async decoder pipeline with `std::coroutine` (C++20), streaming decode for progressive JPEG/JXL, prefetch engine.
+## Sprint 22 — Async Pipeline & Streaming ✅ COMPLETED
+- **Objective:** Implement fully async decoder pipeline with C++20 coroutines for reduced latency.
+- Deliverables:
+  1. `ThumbnailPipeline::DecodeAsync()` with C++20 coroutine support.
+  2. Streaming decode for progressive JPEG/JXL with partial rendering.
+  3. Prefetch engine with sequential browsing prediction (40% perceived latency reduction).
+  4. Thread pool integration for parallel decode operations.
+  5. Async cache lookup with non-blocking database queries.
+- Exit criteria: Sequential thumbnails render 40% faster with prefetch, coroutines reduce blocking.
+
+---
+
+### Active Sprints (23-32) — Advanced Features & Production Hardening
 
 ## Sprint 23 — AI-Assisted Thumbnails
-- DirectML/ONNX integration for super-resolution upscaling, content-aware cropping, NSFW detection/blurring.
+- **Objective:** Integrate DirectML/ONNX for AI-enhanced thumbnail generation.
+- Deliverables:
+  1. DirectML super-resolution upscaling for low-quality images (2x/4x ESRGAN model).
+  2. Content-aware smart cropping using saliency detection (identify subjects in photos).
+  3. NSFW content detection model (ONNX) with automatic blurring/warning overlay.
+  4. Face detection and centering for portrait photos.
+  5. AI model cache and lazy loading (models only loaded when needed).
+- Exit criteria: Super-resolution produces visibly sharper 256px thumbnails from <128px sources, NSFW detection achieves >95% accuracy.
 
 ## Sprint 24 — Microsoft Store Submission
-- MSIX packaging, Store certification, Windows App SDK integration, auto-update via Store.
+- **Objective:** Package and submit DarkThumbs to Microsoft Store for broader distribution.
+- Deliverables:
+  1. MSIX packaging with Windows App SDK 1.6+ integration.
+  2. Manifest file with proper capabilities and declarations.
+  3. Microsoft Store Partner Center account setup and app submission.
+  4. Store certification compliance (privacy policy, screenshots, descriptions).
+  5. Auto-update via Store delivery pipeline.
+- Exit criteria: DarkThumbs passes Store certification, users can install/update via Microsoft Store.
 
 ## Sprint 25 — OpenImageIO Integration
-- Unified multi-format library for exotic formats (Cineon, DPX, Pixar .tex, deep EXR), reducing per-format decoder maintenance.
+- **Objective:** Integrate OpenImageIO for unified exotic format support.
+- Deliverables:
+  1. OpenImageIO 2.5+ library integration with CMake/vcpkg.
+  2. OIIO-backed decoder for Cineon (.cin), DPX (.dpx), Pixar .tex formats.
+  3. Deep EXR support with multi-layer thumbnail selection (show composite/beauty layer).
+  4. OIIO texture cache integration for large image streaming.
+  5. Benchmark comparison: OIIO vs existing decoders for overlapping formats (EXR, TIFF).
+- Exit criteria: Cineon/DPX thumbnails render correctly, deep EXR shows correct layer.
+
+## Sprint 26 — Cloud Integration & Sync
+- **Objective:** Enable cloud storage integration for OneDrive, Google Drive, Dropbox thumbnails.
+- Deliverables:
+  1. Cloud provider SDK integration (Microsoft Graph API, Google Drive API, Dropbox API).
+  2. OAuth 2.0 authentication flow for user account linking.
+  3. Cloud file thumbnail cache with remote URL → local cache mapping.
+  4. Optimistic thumbnail generation from cloud-provided previews when available.
+  5. Automatic cache invalidation on cloud file modification.
+- Exit criteria: Thumbnails for OneDrive files render in Explorer without full download.
+
+## Sprint 27 — Advanced Caching & Database Optimization
+- **Objective:** Optimize SQLite cache with advanced indexing and cleanup strategies.
+- Deliverables:
+  1. Multi-tier cache hierarchy: memory cache (LRU) → SQLite → disk fallback.
+  2. Bloom filter for negative cache lookups (avoid DB query for non-existent entries).
+  3. Background cache maintenance: automatic cleanup of stale entries >30 days old.
+  4. WAL (Write-Ahead Logging) mode for SQLite with improved concurrent read performance.
+  5. Cache statistics dashboard: hit rate, size, entry count, eviction rate.
+- Exit criteria: Cache hit rate >90% for repeated access, SQLite queries <1ms p95.
+
+## Sprint 28 — Multi-Format Video Thumbnail Enhancement
+- **Objective:** Improve video thumbnail quality and format support.
+- Deliverables:
+  1. Scene detection: select most representative frame (avoid black frames, transitions).
+  2. Animated thumbnail generation: GIF/WebP animation from video clips (<5 seconds).
+  3. Codec support expansion: AV1 (via dav1d), VP9, HEVC 10-bit.
+  4. Video metadata overlay: duration, resolution, codec on thumbnail.
+  5. HDR video tone mapping for SDR thumbnail display.
+- Exit criteria: Video thumbnails show best scene frame, animated thumbnails work for MP4/MKV.
+
+## Sprint 29 — Advanced Plugin Marketplace
+- **Objective:** Build public plugin marketplace infrastructure with security scanning.
+- Deliverables:
+  1. Plugin marketplace web service (REST API) for discovery and download.
+  2. Plugin signing and verification: digital signatures required for all plugins.
+  3. Automated security scanning: malware detection, capability analysis.
+  4. User ratings and reviews system for quality feedback.
+  5. In-app plugin browser with one-click install from marketplace.
+- Exit criteria: Users can browse/install community plugins from marketplace, all plugins signed.
+
+## Sprint 30 — Accessibility & Internationalization
+- **Objective:** Make DarkThumbs accessible and support multiple languages.
+- Deliverables:
+  1. Screen reader support: ARIA labels, keyboard navigation in CBXManager.
+  2. High-contrast mode support: respect Windows contrast themes.
+  3. Localization framework: extract all UI strings to resource files (.resx).
+  4. Translation support for 5 languages: English, Spanish, German, French, Japanese.
+  5. RTL (Right-to-Left) layout support for Arabic/Hebrew.
+- Exit criteria: CBXManager fully navigable via keyboard/screen reader, UI displays in all 5 languages.
+
+## Sprint 31 — Enterprise Deployment Features
+- **Objective:** Add enterprise IT management capabilities.
+- Deliverables:
+  1. Group Policy (GPO) support: centralized configuration via Windows Registry policies.
+  2. Silent install mode: MSI with `/quiet` parameter for automated deployment.
+  3. Configuration file support: JSON config file for bulk settings deployment.
+  4. Telemetry disable switch: enterprise privacy compliance mode.
+  5. Network cache: shared thumbnail cache on network drive for VDI environments.
+- Exit criteria: IT administrators can deploy DarkThumbs across organization with GPO, telemetry disabled.
+
+## Sprint 32 — Final Performance & Quality Polish
+- **Objective:** Final optimization pass and production readiness validation.
+- Deliverables:
+  1. Comprehensive profiling campaign: identify and fix all >10ms bottlenecks.
+  2. Memory optimization: reduce baseline heap usage by 20%, eliminate all memory leaks.
+  3. Startup time optimization: cold start <500ms, warm start <100ms.
+  4. Full regression test suite: 500+ test cases covering all decoders and edge cases.
+  5. Load testing: 100,000 thumbnail requests without crash/leak in 24-hour soak test.
+- Exit criteria: p95 latency <100ms, 0 memory leaks, 0 crashes in 100k requests, startup <500ms cold.
 
 ---
 
