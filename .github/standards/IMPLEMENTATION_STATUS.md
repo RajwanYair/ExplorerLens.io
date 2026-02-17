@@ -2,7 +2,7 @@
 
 **Last Updated:** February 18, 2026  
 **Version:** v7.0.0  
-**Status:** 🔄 Active Development — Sprints 1-39 Complete; Sprints 40-42 Next
+**Status:** ✅ All 49 Sprints Complete
 
 ---
 
@@ -31,7 +31,7 @@
 
 ## Sprint Completion Status
 
-### ✅ Completed (35 of 42 sprints)
+### ✅ Completed (49 of 49 sprints)
 
 | Sprint | Name | Phase | Status |
 |--------|------|-------|--------|
@@ -97,10 +97,20 @@
 | 38 | Animated Thumbnails | Engine/Decoders/AnimatedThumbnailDecoder.h | `b2244a5` |
 | 39 | Archive Grid Preview | Engine/Decoders/ArchiveGridPreview.h | `9490f1d` |
 
-### 📅 Future (Sprints 40-42)
-| 40 | Color Space Awareness & HDR Tone Mapping | ICC profile extraction, gamut mapping, HDR→SDR |
-| 41 | Duplicate Detection & Perceptual Hashing | pHash/dHash, similarity matching, Find Duplicates UI |
-| 42 | Portable Mode & Thumbnail Overlay Badges | portable.ini, file-based config, format/size badges |
+### 📅 Sprints 40-49 (Complete — UX + Platform Maturity)
+
+| Sprint | Name | Key Files | Commit |
+|--------|------|-----------|--------|
+| 40 | Color Space & HDR | Engine/Core/ColorSpaceHDR.h | `d8ca9fe` |
+| 41 | Duplicate Detection | Engine/Core/DuplicateDetection.h | `954458f` |
+| 42 | Portable Mode & Badges | Engine/Utils/PortableMode.h | `07d3c71` |
+| 43 | Batch Processing | Engine/Pipeline/BatchProcessor.h | `b6906b9` |
+| 44 | Network Thumbnails | Engine/Cloud/NetworkThumbnailProvider.h | `4e8695d` |
+| 45 | Preview Pane & Tooltips | Engine/Shell/PreviewPaneHandler.h | `b9104ca` |
+| 46 | Format Conversion | Engine/Codec/FormatConverter.h | `26e3ec8` |
+| 47 | Accessibility & i18n | Engine/Utils/AccessibilityI18n.h | `d12694a` |
+| 48 | Telemetry Dashboard | Engine/Core/TelemetryDashboard.h | `3ac4a25` |
+| 49 | Release Packaging | Engine/Release/ReleasePackaging.h | `61c590f` |
 
 ---
 
