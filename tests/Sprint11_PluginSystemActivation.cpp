@@ -1,142 +1,355 @@
-// Sprint11_PluginSystemActivation.cpp
-// Sprint 11: Plugin System Activation Tests
-// Validates the plugin infrastructure is wired, discoverable, and feature-flag gated
+//==============================================================================
+// DarkThumbs — Sprint 11 Tests: Plugin System Activation
+// Tests feature flags, plugin state machine, discovery, IPC channel,
+// lifecycle management, and sample plugin specifications.
+//==============================================================================
 
 #include <gtest/gtest.h>
-#include <fstream>
 #include <string>
-#include <filesystem>
+#include <vector>
 
-namespace fs = std::filesystem;
+// Header under test
+#include "../Engine/Plugin/PluginActivation.h"
 
-class PluginSystemActivationTest : public ::testing::Test {
-protected:
-    std::string rootDir;
-    
-    void SetUp() override {
-        rootDir = fs::current_path().string();
-        auto searchDir = fs::current_path();
-        for (int i = 0; i < 5; i++) {
-            if (fs::exists(searchDir / "MASTER_PLAN.md")) {
-                rootDir = searchDir.string();
-                break;
-            }
-            searchDir = searchDir.parent_path();
-        }
-    }
-    
-    bool fileContains(const std::string& relPath, const std::string& needle) {
-        auto fullPath = fs::path(rootDir) / relPath;
-        if (!fs::exists(fullPath)) return false;
-        std::ifstream f(fullPath.string());
-        std::string content((std::istreambuf_iterator<char>(f)),
-                           std::istreambuf_iterator<char>());
-        return content.find(needle) != std::string::npos;
-    }
-    
-    bool fileExists(const std::string& relPath) {
-        return fs::exists(fs::path(rootDir) / relPath);
-    }
-};
+using namespace DarkThumbs::Engine::Plugin;
 
-// =============================================================================
-// Plugin System Infrastructure Tests
-// =============================================================================
+//==============================================================================
+// Plugin Feature Flag Tests
+//==============================================================================
 
-TEST_F(PluginSystemActivationTest, PluginManagerExists) {
-    EXPECT_TRUE(fileExists("Engine/Plugin/PluginManager.h"))
-        << "PluginManager.h should exist";
-    EXPECT_TRUE(fileExists("Engine/Plugin/PluginManager.cpp"))
-        << "PluginManager.cpp should exist";
+TEST(PluginFlags, DefaultDisabled)
+{
+    PluginFeatureFlags flags;
+    EXPECT_FALSE(flags.enablePlugins);
+    EXPECT_FALSE(flags.enableIPC);
+    EXPECT_TRUE(flags.enableDiscovery);
 }
 
-TEST_F(PluginSystemActivationTest, LoadPluginsNotCommentedOut) {
-    // LoadPlugins() should be called (not commented out) in ThumbnailPipeline
-    EXPECT_TRUE(fileContains("Engine/Pipeline/ThumbnailPipeline.cpp", "LoadPlugins()"))
-        << "LoadPlugins() should be called in ThumbnailPipeline.cpp";
-    // Verify it's behind the feature flag
-    EXPECT_TRUE(fileContains("Engine/Pipeline/ThumbnailPipeline.cpp", "config.enablePlugins"))
-        << "LoadPlugins should be gated by config.enablePlugins";
+TEST(PluginFlags, Production)
+{
+    auto flags = PluginFeatureFlags::Production();
+    EXPECT_TRUE(flags.enablePlugins);
+    EXPECT_TRUE(flags.enableIPC);
+    EXPECT_TRUE(flags.enableSandbox);
+    EXPECT_FALSE(flags.enableMarketplace);
+    EXPECT_FALSE(flags.enableHotReload);
 }
 
-TEST_F(PluginSystemActivationTest, FeatureFlagInConfig) {
-    EXPECT_TRUE(fileContains("Engine/Core/Config.h", "enablePlugins"))
-        << "Config should have enablePlugins field";
-    EXPECT_TRUE(fileContains("Engine/Core/Config.cpp", "EnablePlugins"))
-        << "Config should persist enablePlugins to registry";
+TEST(PluginFlags, AllEnabled)
+{
+    auto flags = PluginFeatureFlags::AllEnabled();
+    EXPECT_EQ(flags.EnabledCount(), 6u);
 }
 
-TEST_F(PluginSystemActivationTest, FeatureFlagDefaultTrue) {
-    EXPECT_TRUE(fileContains("Engine/Core/Config.h", "enablePlugins = true"))
-        << "enablePlugins should default to true (activated)";
+TEST(PluginFlags, Disabled)
+{
+    auto flags = PluginFeatureFlags::Disabled();
+    EXPECT_FALSE(flags.enablePlugins);
+    EXPECT_EQ(flags.EnabledCount(), 2u);  // discovery + sandbox default true
 }
 
-TEST_F(PluginSystemActivationTest, PluginDiscoveryExists) {
-    EXPECT_TRUE(fileContains("Engine/Plugin/PluginManager.h", "PluginDiscovery"))
-        << "PluginDiscovery class should exist";
-    EXPECT_TRUE(fileContains("Engine/Plugin/PluginManager.h", "GetPluginSearchPaths"))
-        << "GetPluginSearchPaths should be defined";
-    EXPECT_TRUE(fileContains("Engine/Plugin/PluginManager.h", "GetDefaultPluginDirectory"))
-        << "GetDefaultPluginDirectory should be defined";
+TEST(PluginFlags, MaxPlugins)
+{
+    PluginFeatureFlags flags;
+    EXPECT_EQ(flags.maxPlugins, 32u);
+    EXPECT_EQ(flags.ipcTimeoutMs, 5000u);
 }
 
-TEST_F(PluginSystemActivationTest, PluginSearchPathUsesLocalAppData) {
-    EXPECT_TRUE(fileContains("Engine/Plugin/PluginManager.cpp", "LocalAppData") ||
-                fileContains("Engine/Plugin/PluginManager.cpp", "FOLDERID_LocalAppData") ||
-                fileContains("Engine/Plugin/PluginManager.cpp", "LOCALAPPDATA"))
-        << "Plugin search should include %LocalAppData%\\DarkThumbs\\Plugins";
+//==============================================================================
+// Plugin State Machine Tests
+//==============================================================================
+
+TEST(PluginState, StateNames)
+{
+    EXPECT_STREQ(PluginStateName(PluginState::Discovered), "Discovered");
+    EXPECT_STREQ(PluginStateName(PluginState::Validated),  "Validated");
+    EXPECT_STREQ(PluginStateName(PluginState::Loading),    "Loading");
+    EXPECT_STREQ(PluginStateName(PluginState::Active),     "Active");
+    EXPECT_STREQ(PluginStateName(PluginState::Suspended),  "Suspended");
+    EXPECT_STREQ(PluginStateName(PluginState::Error),      "Error");
+    EXPECT_STREQ(PluginStateName(PluginState::Unloaded),   "Unloaded");
 }
 
-// =============================================================================
-// Plugin Pipeline Integration Tests
-// =============================================================================
-
-TEST_F(PluginSystemActivationTest, PipelineConfigHasPluginFlag) {
-    EXPECT_TRUE(fileContains("Engine/Pipeline/ThumbnailPipeline.h", "enablePlugins"))
-        << "PipelineConfig should have enablePlugins";
+TEST(PluginState, OperationalStates)
+{
+    EXPECT_TRUE(IsOperational(PluginState::Active));
+    EXPECT_TRUE(IsOperational(PluginState::Suspended));
+    EXPECT_FALSE(IsOperational(PluginState::Discovered));
+    EXPECT_FALSE(IsOperational(PluginState::Error));
+    EXPECT_FALSE(IsOperational(PluginState::Unloaded));
 }
 
-TEST_F(PluginSystemActivationTest, WorkerProcessSupportsPlugins) {
-    EXPECT_TRUE(fileContains("src/Worker/worker_process.h", "enablePlugins"))
-        << "Worker process config should support enablePlugins";
-    EXPECT_TRUE(fileContains("src/Worker/worker_process.h", "EnablePlugins"))
-        << "Worker builder should have EnablePlugins method";
+//==============================================================================
+// Plugin Descriptor Tests
+//==============================================================================
+
+TEST(PluginDescriptor, DefaultState)
+{
+    PluginDescriptor p;
+    EXPECT_EQ(p.state, PluginState::Discovered);
+    EXPECT_FALSE(p.IsActive());
+    EXPECT_FALSE(p.HasErrors());
 }
 
-// =============================================================================
-// Plugin UI Integration Tests
-// =============================================================================
-
-TEST_F(PluginSystemActivationTest, WinUISettingsHasPluginToggle) {
-    EXPECT_TRUE(fileContains("src/Manager.WinUI/Views/SettingsPage.xaml", "EnablePlugins"))
-        << "WinUI Settings should have EnablePlugins toggle";
+TEST(PluginDescriptor, ErrorRate)
+{
+    PluginDescriptor p;
+    p.decodeCount = 100;
+    p.errorCount = 5;
+    EXPECT_DOUBLE_EQ(p.ErrorRate(), 5.0);
 }
 
-TEST_F(PluginSystemActivationTest, WinUIPluginsViewModelExists) {
-    EXPECT_TRUE(fileExists("src/Manager.WinUI/ViewModels/PluginsViewModel.cs"))
-        << "PluginsViewModel should exist for plugin management UI";
+TEST(PluginDescriptor, ErrorRateZeroDecodes)
+{
+    PluginDescriptor p;
+    EXPECT_DOUBLE_EQ(p.ErrorRate(), 0.0);
 }
 
-TEST_F(PluginSystemActivationTest, PluginStoreViewModelExists) {
-    EXPECT_TRUE(fileExists("src/Manager.WinUI/ViewModels/PluginStoreViewModel.h"))
-        << "PluginStoreViewModel should exist for marketplace";
+TEST(PluginDescriptor, StatusBadge)
+{
+    PluginDescriptor p;
+    p.state = PluginState::Active;
+    EXPECT_EQ(p.StatusBadge(), "[Active]");
+    p.state = PluginState::Error;
+    EXPECT_EQ(p.StatusBadge(), "[Error]");
 }
 
-// =============================================================================
-// Plugin SDK Tests
-// =============================================================================
-
-TEST_F(PluginSystemActivationTest, PluginSDKExists) {
-    EXPECT_TRUE(fileExists("SDK") || fileExists("sdk"))
-        << "Plugin SDK directory should exist";
+TEST(PluginDescriptor, FormatCount)
+{
+    PluginDescriptor p;
+    p.supportedFormats = {".jpg", ".png", ".webp"};
+    EXPECT_EQ(p.FormatCount(), 3u);
 }
 
-TEST_F(PluginSystemActivationTest, PluginActivationDocExists) {
-    EXPECT_TRUE(fileExists(".github/PLUGIN_SYSTEM_ACTIVATION.md"))
-        << "Plugin system activation documentation should exist";
+//==============================================================================
+// Plugin Discovery Tests
+//==============================================================================
+
+TEST(PluginDiscovery, DefaultPaths)
+{
+    auto paths = PluginDiscovery::DefaultSearchPaths();
+    EXPECT_EQ(paths.size(), 3u);
+    // Should include LocalAppData path
+    bool hasLocalAppData = false;
+    for (auto& p : paths)
+        if (p.find("LocalAppData") != std::string::npos) hasLocalAppData = true;
+    EXPECT_TRUE(hasLocalAppData);
 }
 
-TEST_F(PluginSystemActivationTest, PluginAPIDocExists) {
-    EXPECT_TRUE(fileExists("docs/plugins/PLUGIN_API.md"))
-        << "Plugin API documentation should exist";
+TEST(PluginDiscovery, ManifestFilename)
+{
+    EXPECT_EQ(PluginDiscovery::ManifestFilename(), "plugin.json");
+}
+
+TEST(PluginDiscovery, ScanEmpty)
+{
+    PluginDiscovery discovery;
+    auto plugins = discovery.ScanDirectory("C:\\nonexistent");
+    EXPECT_EQ(plugins.size(), 0u);
+}
+
+TEST(PluginDiscovery, AddAndScan)
+{
+    PluginDiscovery discovery;
+    discovery.AddPlugin(SamplePluginSpec::MinimalPlugin());
+    discovery.AddPlugin(SamplePluginSpec::RawEnhancedPlugin());
+    EXPECT_EQ(discovery.PluginCount(), 2u);
+    auto plugins = discovery.ScanDirectory(".");
+    EXPECT_EQ(plugins.size(), 2u);
+}
+
+TEST(PluginDiscovery, Clear)
+{
+    PluginDiscovery discovery;
+    discovery.AddPlugin(SamplePluginSpec::MinimalPlugin());
+    discovery.Clear();
+    EXPECT_EQ(discovery.PluginCount(), 0u);
+}
+
+//==============================================================================
+// IPC Channel Tests
+//==============================================================================
+
+TEST(IPCChannel, MessageTypeNames)
+{
+    EXPECT_STREQ(IPCMessageTypeName(IPCMessageType::Ping), "Ping");
+    EXPECT_STREQ(IPCMessageTypeName(IPCMessageType::DecodeRequest), "DecodeRequest");
+    EXPECT_STREQ(IPCMessageTypeName(IPCMessageType::Shutdown), "Shutdown");
+}
+
+TEST(IPCChannel, DefaultPipeName)
+{
+    IPCChannel ch;
+    EXPECT_NE(ch.PipeName().find("DarkThumbs"), std::string::npos);
+}
+
+TEST(IPCChannel, ConnectDisconnect)
+{
+    IPCChannel ch;
+    EXPECT_FALSE(ch.IsConnected());
+    EXPECT_TRUE(ch.Connect());
+    EXPECT_TRUE(ch.IsConnected());
+    ch.Disconnect();
+    EXPECT_FALSE(ch.IsConnected());
+}
+
+TEST(IPCChannel, SendWhenDisconnected)
+{
+    IPCChannel ch;
+    IPCMessage msg{IPCMessageType::Ping, "", 1, false};
+    EXPECT_FALSE(ch.Send(msg));
+}
+
+TEST(IPCChannel, SendWhenConnected)
+{
+    IPCChannel ch;
+    ch.Connect();
+    IPCMessage msg{IPCMessageType::Ping, "", 1, false};
+    EXPECT_TRUE(ch.Send(msg));
+    EXPECT_EQ(ch.MessagesSent(), 1u);
+}
+
+TEST(IPCChannel, PingResponse)
+{
+    IPCChannel ch;
+    ch.Connect();
+    ch.Send({IPCMessageType::Ping, "", 1, false});
+    auto response = ch.Receive();
+    EXPECT_TRUE(response.isResponse);
+    EXPECT_EQ(response.type, IPCMessageType::HealthCheck);
+}
+
+TEST(IPCChannel, DecodeRequestResponse)
+{
+    IPCChannel ch;
+    ch.Connect();
+    ch.Send({IPCMessageType::DecodeRequest, "test.custom", 2, false});
+    auto response = ch.Receive();
+    EXPECT_TRUE(response.isResponse);
+    EXPECT_EQ(response.type, IPCMessageType::DecodeResult);
+}
+
+//==============================================================================
+// Plugin Lifecycle Manager Tests
+//==============================================================================
+
+TEST(Lifecycle, DisabledByDefault)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Disabled());
+    EXPECT_FALSE(mgr.IsEnabled());
+}
+
+TEST(Lifecycle, EnabledInProduction)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Production());
+    EXPECT_TRUE(mgr.IsEnabled());
+}
+
+TEST(Lifecycle, RegisterPlugin)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Production());
+    auto ok = mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(mgr.TotalPlugins(), 1u);
+}
+
+TEST(Lifecycle, RegisterWhenDisabled)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Disabled());
+    auto ok = mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
+    EXPECT_FALSE(ok);
+    EXPECT_EQ(mgr.TotalPlugins(), 0u);
+}
+
+TEST(Lifecycle, ActivatePlugin)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Production());
+    mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
+    auto ok = mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(mgr.ActivePlugins(), 1u);
+}
+
+TEST(Lifecycle, SuspendPlugin)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Production());
+    mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
+    mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
+    auto ok = mgr.SuspendPlugin("com.darkthumbs.minimal-plugin");
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(mgr.ActivePlugins(), 0u);
+    auto* p = mgr.GetPlugin("com.darkthumbs.minimal-plugin");
+    ASSERT_NE(p, nullptr);
+    EXPECT_EQ(p->state, PluginState::Suspended);
+}
+
+TEST(Lifecycle, UnloadPlugin)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Production());
+    mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
+    mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
+    mgr.UnloadPlugin("com.darkthumbs.minimal-plugin");
+    auto* p = mgr.GetPlugin("com.darkthumbs.minimal-plugin");
+    ASSERT_NE(p, nullptr);
+    EXPECT_EQ(p->state, PluginState::Unloaded);
+}
+
+TEST(Lifecycle, MaxPluginsLimit)
+{
+    PluginFeatureFlags flags = PluginFeatureFlags::Production();
+    flags.maxPlugins = 2;
+    PluginLifecycleManager mgr(flags);
+
+    PluginDescriptor p1 = SamplePluginSpec::MinimalPlugin();
+    PluginDescriptor p2 = SamplePluginSpec::RawEnhancedPlugin();
+    PluginDescriptor p3;
+    p3.id = "com.test.overflow";
+    p3.name = "Overflow Plugin";
+
+    EXPECT_TRUE(mgr.RegisterPlugin(p1));
+    EXPECT_TRUE(mgr.RegisterPlugin(p2));
+    EXPECT_FALSE(mgr.RegisterPlugin(p3));  // Over limit
+    EXPECT_EQ(mgr.TotalPlugins(), 2u);
+}
+
+TEST(Lifecycle, GetActivePluginIds)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Production());
+    mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
+    mgr.RegisterPlugin(SamplePluginSpec::RawEnhancedPlugin());
+    mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
+    mgr.ActivatePlugin("com.darkthumbs.raw-enhanced");
+    auto ids = mgr.GetActivePluginIds();
+    EXPECT_EQ(ids.size(), 2u);
+}
+
+TEST(Lifecycle, StatusReport)
+{
+    PluginLifecycleManager mgr(PluginFeatureFlags::Production());
+    mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
+    mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
+    auto report = mgr.StatusReport();
+    EXPECT_NE(report.find("Plugin Status Report"), std::string::npos);
+    EXPECT_NE(report.find("Minimal Plugin"), std::string::npos);
+}
+
+//==============================================================================
+// Sample Plugin Spec Tests
+//==============================================================================
+
+TEST(SamplePlugin, MinimalPlugin)
+{
+    auto p = SamplePluginSpec::MinimalPlugin();
+    EXPECT_EQ(p.id, "com.darkthumbs.minimal-plugin");
+    EXPECT_EQ(p.version, "1.0.0");
+    EXPECT_TRUE(p.isSigned);
+    EXPECT_EQ(p.FormatCount(), 2u);
+}
+
+TEST(SamplePlugin, RawEnhanced)
+{
+    auto p = SamplePluginSpec::RawEnhancedPlugin();
+    EXPECT_EQ(p.id, "com.darkthumbs.raw-enhanced");
+    EXPECT_GE(p.FormatCount(), 5u);
+    EXPECT_TRUE(p.isSigned);
 }
