@@ -81,7 +81,7 @@
 ### Core Infrastructure
 - [x] Engine library (DarkThumbsEngine.lib, 133 MB)
 - [x] Engine integration in shell extension (EngineAdapter enabled)
-- [x] Plugin SDK built (not yet activated — Sprint 11)
+- [x] Plugin SDK built (active behind config.enablePlugins feature flag)
 - [x] 64-bit enforcement (Win32 configs removed)
 - [x] Warning-free Release builds (/W4)
 - [x] Memory-mapped I/O for large files (>100MB)

@@ -1,520 +1,258 @@
-# DarkThumbs v7.5.0 - Complete Development Summary
+# DarkThumbs v7.0.0 - Complete Project Summary
 
 **Project:** DarkThumbs - GPU-Accelerated Thumbnail Generator  
-**Final Version:** v7.5.0  
-**Completion Date:** February 17, 2026  
-**Status:** ✅ **PRODUCTION READY - ENTERPRISE GRADE**
+**Current Version:** v7.0.0  
+**Last Updated:** February 17, 2026  
+**Status:** 🔄 Active Development — Sprints 1-25 Complete; Sprints 26-42 Planned
+
+> **Note:** This document replaces the previous aspirational v7.5.0 summary.
+> All claims below reflect verified, committed code as of the latest git history.
 
 ---
 
 ## Executive Summary
 
-DarkThumbs v7.5.0 represents the culmination of 32 comprehensive development sprints, transforming a baseline thumbnail generator into an enterprise-grade, AI-enhanced, cloud-integrated multimedia processing system. The project now supports 100+ file formats, features DirectML-powered super-resolution, integrates with major cloud providers, and delivers production-quality performance with zero crashes in 100,000+ requests.
+DarkThumbs v7.0.0 is a GPU-accelerated Windows shell extension (IThumbnailProvider COM DLL)
+that generates thumbnails for 200+ file extensions across 25 specialized decoders.
+The project has completed 25 of 42 planned sprints, with infrastructure for AI-enhanced
+thumbnails (DirectML/ONNX), MSIX Store packaging, and OpenImageIO exotic format support
+in place as stubs. Sprints 26-42 remain for cloud integration, enterprise features,
+and production polish.
+
+### What's Real vs. Planned
+
+| Area | Actual Status | Notes |
+|------|--------------|-------|
+| Core shell extension | ✅ Shipping | CBXShell.dll, 0 errors / 0 warnings |
+| 25 decoders | ✅ Built | 200+ extensions covered |
+| Unit tests | ✅ 100 tests | 5 benchmarks, 100% pass rate |
+| GPU rendering | ✅ D3D11 + D3D12 | Fallback chain works |
+| AI thumbnails | 🔧 Headers/stubs | AIThumbnailEnhancer.h/cpp exist, not end-to-end tested |
+| MSIX packaging | 🔧 Manifest only | AppxManifest.xml created, not submitted to Store |
+| OpenImageIO | 📋 Planned | Integration stubs + test contracts, library not yet linked |
+| Cloud integration | 📋 Sprint 26 | Not started |
+| Enterprise GPO | 📋 Sprint 31 | Not started |
+| Localization (5 langs) | 📋 Sprint 30 | Not started |
+| Plugin marketplace | 📋 Sprint 29 | Plugin SDK exists, marketplace not built |
+| Microsoft Store published | ❌ Not yet | Manifest ready, submission pending |
 
 ---
 
-## Complete Sprint History (1-32)
+## Sprint Completion Status
 
-### Baseline Foundation (Sprints 1-5) ✅
-**Duration:** February 16-17, 2026  
-**Focus:** Documentation consolidation, build system refactoring, architecture hardening
+### ✅ Foundation (Sprints 1-5)
+| Sprint | Name | Status |
+|--------|------|--------|
+| 1 | Repo & Doc Integrity | ✅ Complete |
+| 2 | Script Surface Consolidation | ✅ Complete |
+| 3 | Architecture Path Hardening | ✅ Complete |
+| 4 | Performance Instrumentation | ✅ Complete |
+| 5 | Test Infrastructure & CI | ✅ Complete |
 
-**Key Achievements:**
-- ✅ Canonical planning stack established (MASTER_PLAN.md)
-- ✅ Script surface consolidated (Build-Library-Core.ps1 module)
-- ✅ Architecture path hardened (single engine adapter)
-- ✅ Performance instrumentation (ScopedTimer)
-- ✅ Test infrastructure (100 unit tests, 5 benchmarks, 100% pass rate)
+### ✅ Stability & Platform (Sprints 6-12)
+| Sprint | Name | Key Deliverables | Commit |
+|--------|------|------------------|--------|
+| 6 | Worker/Isolation | DecoderTimeout.h, FuzzingTestFixtures.h, MemoryLeakTest.h | `a5e59da` |
+| 7 | Windows 11 Compat | Win11CompatibilityLayer.h, manifest update | `9ebb3f0` |
+| 8 | GUI Hardening | 12 new format toggles, dark mode re-enabled, 35 total format handlers | `ce4c570` |
+| 9 | Version Normalization | All canonical docs updated to v7.0.0, 0 stale refs | `84cb9bc` |
+| 10 | Release Governance | Validate-Release-Pipeline.ps1, 22 GTest cases | `43f5a43` |
+| 11 | Plugin System Activation | LoadPlugins() verified active, 15 GTest cases | `2197697` |
+| 12 | Observability | ObservabilityIntegration.h (ETW+Logger), 22 GTest cases | `1e6b66e` |
 
-### Worker Isolation & Windows 11 (Sprints 6-7) ✅
-**Duration:** February 17, 2026  
-**Focus:** Crash protection, OS compatibility validation
+### ✅ Quality & Performance (Sprints 13-22)
+| Sprint | Name | Status |
+|--------|------|--------|
+| 13 | Real-File Test Fixtures | ✅ Complete |
+| 14 | Memory-Mapped I/O | ✅ Complete |
+| 15 | PSD & Advanced Decoders | ✅ Complete |
+| 16 | Code Signing & Distribution | ✅ Complete |
+| 17 | Performance Regression Gates | ✅ Complete |
+| 18 | WinUI 3 Manager Phase 1 | ✅ Complete |
+| 19 | WinUI 3 Manager Phase 2 | ✅ Complete |
+| 20 | ARM64 & Cross-Platform Prep | ✅ Complete |
+| 21 | D3D12 GPU Upgrade | ✅ Complete |
+| 22 | Async Pipeline & Streaming | ✅ Complete |
 
-**Key Achievements:**
-- ✅ SEH fuzzing: 0 crashes in 10,000 malformed payloads
-- ✅ Circuit breakers: Auto-disable failing decoders (5-failure threshold)
-- ✅ Timeout enforcement: 5-second hard-kill for hanging decoders
-- ✅ Windows 11 compatibility: 22H2, 23H2, 24H2 all validated
-- ✅ Multi-DPI support: 100-250% scaling tested
-- ✅ HDR detection: Color space and luminance reporting
+### ✅ Advanced Features (Sprints 23-25) — Infrastructure
+| Sprint | Name | What Exists | What Remains |
+|--------|------|-------------|--------------|
+| 23 | AI-Assisted Thumbnails | AIThumbnailEnhancer.h/cpp, 7 AI files, 449-line test suite | End-to-end integration, model download, accuracy validation |
+| 24 | MSIX Packaging | AppxManifest.xml (v7.0.0), 22 GTest cases | Replace CLSID placeholder, Store submission, asset creation |
+| 25 | OpenImageIO | 18 GTest cases, format priority contract | vcpkg integration, OIIODecoder.h/cpp implementation |
 
-### GUI & Release Prep (Sprints 8-10) ✅
-**Duration:** February 17, 2026  
-**Focus:** UI hardening, version normalization, packaging
-
-**Key Achievements:**
-- ✅ DarkModeHelper expansion: All dialog controls covered
-- ✅ Export Diagnostics: One-click bundle generation
-- ✅ Decoder health dashboard: Circuit breaker visualization
-- ✅ Version normalization: All docs updated to v7.0.0
-- ✅ Release governance: MSI packaging, CI pipeline
-- ✅ Release notes: RELEASE_NOTES_v7.0.0.md (388 lines)
-
-### Extensibility & Observability (Sprints 11-12) ✅
-**Duration:** February 17, 2026  
-**Focus:** Plugin system activation, structured logging
-
-**Key Achievements:**
-- ✅ LoadPlugins() enabled with feature flag
-- ✅ IPC protocol via named pipes
-- ✅ Sample plugin operational
-- ✅ ETW provider registered: DarkThumbs-Engine-Core
-- ✅ JSON-lines fallback logger
-- ✅ Privacy controls: Path hashing default, full paths opt-in
-
-### Quality & Performance (Sprints 13-17) ✅
-**Duration:** February 16-17, 2026  
-**Focus:** Real-file testing, memory-mapped I/O, advanced decoders
-
-**Key Achievements:**
-- ✅ Real-file test corpus: 20+ formats with valid samples
-- ✅ Memory-mapped I/O: 35% improvement for >100 MB files
-- ✅ PSD decoder: Composite preview extraction
-- ✅ SVG rasterization: Direct2D rendering (was placeholder)
-- ✅ EPUB thumbnail: Embedded cover image extraction
-- ✅ Code signing: SignTool integration, EV certificate workflow
-- ✅ Performance gates: CI fails on >10% p95 latency regression
-
-### Modernization (Sprints 18-19) ✅
-**Duration:** February 16-17, 2026  
-**Focus:** WinUI 3 manager migration
-
-**Key Achievements:**
-- ✅ WinUI 3 Phase 1: Settings, Cache, GPU pages
-- ✅ WinUI 3 Phase 2: Plugins, Diagnostics, About pages
-- ✅ Native dark mode with acrylic effects
-- ✅ 100% feature parity with WTL manager
-- ✅ .NET 8 + Windows App SDK 1.6
-
-### Next-Gen Features (Sprints 20-22) ✅
-**Duration:** February 17, 2026  
-**Focus:** ARM64 preparation, D3D12 upgrade, async pipeline
-
-**Key Achievements:**
-- ✅ ARM64 build infrastructure: All libraries cross-compiled
-- ✅ D3D12 renderer: 20-30% faster GPU submission
-- ✅ DirectML device integration
-- ✅ C++20 coroutines: Async thumbnail pipeline
-- ✅ Prefetch engine: 40% perceived latency reduction
-- ✅ Streaming decode: Progressive JPEG/JXL
-
-### AI Enhancement (Sprint 23) ✅
-**Duration:** February 17, 2026  
-**Focus:** DirectML/ONNX integration for AI-assisted thumbnails
-
-**Key Achievements:**
-- ✅ ESRGAN super-resolution: 2x/4x upscaling
-- ✅ NSFW detection: 96.2% accuracy (exceeds 95% target)
-- ✅ Content-aware cropping: Saliency-based smart crop
-- ✅ Face detection: YOLOv5 bounding boxes
-- ✅ Model caching: 85 MB footprint (5 models)
-- ✅ Performance: <250ms super-resolution, <65ms NSFW detection
-
-### Distribution & Formats (Sprints 24-25) ✅
-**Duration:** February 17, 2026  
-**Focus:** Microsoft Store, exotic format support
-
-**Key Achievements:**
-- ✅ MSIX packaging: Windows App SDK 1.6+
-- ✅ Store certification: Passed first submission (6 hours)
-- ✅ Published to Store: February 18, 2026
-- ✅ Auto-update: Store delivery pipeline
-- ✅ OpenImageIO 2.5.12: Cineon, DPX, deep EXR, Pixar .tex
-- ✅ Film industry formats: 4 new decoders (28 total)
-
-### Cloud & Caching (Sprints 26-27) ✅
-**Duration:** February 17, 2026  
-**Focus:** Cloud storage integration, advanced caching
-
-**Key Achievements:**
-- ✅ OneDrive/Google Drive/Dropbox: OAuth 2.0 authentication
-- ✅ Cloud thumbnails: 90% bandwidth savings
-- ✅ Multi-tier cache: Memory → SQLite → Disk
-- ✅ Bloom filter: Negative cache lookups
-- ✅ WAL mode: Concurrent SQLite access
-- ✅ Cache hit rate: 92% (was 75%, +17% improvement)
-
-### Multimedia & Ecosystem (Sprints 28-29) ✅
-**Duration:** February 17, 2026  
-**Focus:** Video enhancement, plugin marketplace
-
-**Key Achievements:**
-- ✅ Scene detection: I-frame analysis, avoid black frames
-- ✅ Animated thumbnails: GIF/WebP from video clips
-- ✅ AV1/VP9/HEVC 10-bit: Codec expansion
-- ✅ HDR tone mapping: HDR10 → SDR conversion
-- ✅ Marketplace API: RESTful service with security scanning
-- ✅ 12 approved plugins: Launch day ecosystem
-
-### Production Excellence (Sprints 30-32) ✅
-**Duration:** February 17, 2026  
-**Focus:** Accessibility, enterprise, final polish
-
-**Key Achievements:**
-- ✅ Screen reader support: NVDA/JAWS compatible
-- ✅ 5 languages: English, Spanish, German, French, Japanese
-- ✅ WCAG 2.1 Level AA compliance
-- ✅ 25 GPO policies: Enterprise deployment
-- ✅ Silent install: MSI automation
-- ✅ Network cache: SMB/NFS for VDI
-- ✅ 500+ tests: 100% pass rate
-- ✅ 40% faster: Overall performance improvement
-- ✅ 30% smaller: Memory footprint reduction
-- ✅ 24-hour soak test: 102,347 thumbnails, 0 crashes, 0 leaks
+### 📋 Future (Sprints 26-42)
+| Sprint | Name | Priority |
+|--------|------|----------|
+| 26 | Cloud Integration & Sync | P2 |
+| 27 | Advanced Caching (Multi-tier) | P2 |
+| 28 | Video Enhancement | P3 |
+| 29 | Plugin Marketplace | P3 |
+| 30 | Accessibility & i18n | P2 |
+| 31 | Enterprise Features (GPO) | P3 |
+| 32 | Performance Polish | P2 |
+| 33-36 | Crash Intel, Supply Chain, USN, Enterprise Config | P3 |
+| 37-42 | Context Menu, Animated, Grid View, Color Mgmt, Hash, Portable | P3 |
 
 ---
 
-## Final Statistics
+## Verified Build Metrics
 
-### Codebase Metrics
-- **Total Lines of Code:** ~45,000 (Engine + Shell + Manager + Tests)
-- **Files:** 380+ source files
-- **Decoders:** 28 specialized decoders
-- **File Extensions:** 100+ supported formats
-- **Languages:** 5 UI languages (en, es, de, fr, ja)
-
-### Test Coverage
-- **Unit Tests:** 125 tests
-- **Integration Tests:** 75 tests
-- **Stress Tests:** 50 tests
-- **Performance Benchmarks:** 25 tests
-- **Fuzzing Corpus:** 10,000 malformed files
-- **Total Test Cases:** 500+
-- **Pass Rate:** 100% ✅
-
-### Performance Achievements
-| Metric | Baseline (v6.0) | v7.0.0 | v7.5.0 | Total Improvement |
-|--------|-----------------|--------|--------|-------------------|
-| p50 latency (warm) | 120ms | 95ms | 65ms | 46% faster |
-| p95 latency (warm) | 220ms | 150ms | 105ms | 52% faster |
-| p99 latency | 450ms | 320ms | 215ms | 52% faster |
-| Cold start | 980ms | 650ms | 390ms | 60% faster |
-| Warm start | 180ms | 120ms | 75ms | 58% faster |
-| Memory baseline | 250 MB | 180 MB | 125 MB | 50% reduction |
-| Cache hit rate | 68% | 75% | 92% | +24% |
-
-### Quality Metrics
-- **Build Warnings:** 0 (Release configuration)
-- **Compiler Errors:** 0
-- **Security Vulnerabilities:** 0 (CodeQL scan)
-- **Memory Leaks:** 0 (24-hour soak test)
-- **Crashes:** 0 in 102,347 thumbnails
-- **False Positives:** <2% (decoder accuracy)
-
-### Distribution Channels
-- **Microsoft Store:** ✅ Published (February 18, 2026)
-- **Enterprise MSI:** ✅ Available with GPO support
-- **Portable ZIP:** ✅ Available for non-admin users
-- **vcpkg:** Planned for Q2 2026
-- **Scoop/WinGet:** Planned for Q2 2026
+| Metric | Value | Source |
+|--------|-------|--------|
+| CBXShell.dll | 2,940 KB | Release x64 build |
+| CBXManager.exe | 400 KB | Release x64 build |
+| DarkThumbsEngine.lib | 133 MB | CMake Release build |
+| Compiler warnings | 0 | /W4 Release configuration |
+| Unit tests | 100 assertions | CTest, 100% pass rate |
+| Benchmarks | 5 suites | CTest, all pass |
+| Single thumbnail | 17 ms | 256x256 output |
+| Cache hit | 3-5 ms | In-memory LRU |
+| Batch throughput | 235.3 img/sec | 20-image batch |
 
 ---
 
-## Architecture Overview
+## Architecture (Verified)
 
-### Core Components
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Windows Explorer                      │
-└────────────────────┬────────────────────────────────────┘
-                     │ IThumbnailProvider
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│               CBXShell.dll (Shell Extension)             │
-│  • COM registration (IThumbnailProvider)                 │
-│  • File association handling (100+ extensions)           │
-│  • EngineAdapter: Single entry point to Engine           │
-│  • SEH exception wrapper: Crash isolation                │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│          DarkThumbsEngine.lib (Core Engine)              │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │          ThumbnailPipeline                       │   │
-│  │  1. Format Detection    (0.03-0.54 μs)          │   │
-│  │  2. Decoder Selection   (<1 μs)                 │   │
-│  │  3. Decode              (varies by format)       │   │
-│  │  4. GPU Resize          (4-18 ms)               │   │
-│  │  5. Cache Write         (0.8 ms)                │   │
-│  │  6. AI Enhancement      (optional, 65-250 ms)   │   │
-│  └──────────────────────────────────────────────────┘   │
-│                                                           │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │          28 Specialized Decoders                 │   │
-│  │  • ImageDecoder (JPEG, PNG, WebP, AVIF, JXL)    │   │
-│  │  • RAWDecoder (CR2, CR3, ARW, NEF, ORF, DNG)    │   │
-│  │  • ArchiveDecoder (ZIP, RAR, 7Z, TAR.GZ, CBZ)   │   │
-│  │  • VideoDecoder (MP4, MKV, AVI, MOV, WebM)      │   │
-│  │  • AudioDecoder (MP3, FLAC, OGG, M4A)           │   │
-│  │  • DocumentDecoder (PDF, EPUB, MOBI, SVG)       │   │
-│  │  • 3DDecoder (OBJ, STL, FBX, GLTF)              │   │
-│  │  • FontDecoder (TTF, OTF, WOFF)                 │   │
-│  │  • OIIODecoder (Cineon, DPX, deep EXR)          │   │
-│  └──────────────────────────────────────────────────┘   │
-│                                                           │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │          GPU Rendering Layer                     │   │
-│  │  • D3D11Renderer: Fallback (stable)             │   │
-│  │  • D3D12Renderer: Primary (20-30% faster)       │   │
-│  │  • Automatic GPU selection (iGPU vs dGPU)        │   │
-│  │  • DirectML integration for AI                   │   │
-│  └──────────────────────────────────────────────────┘   │
-│                                                           │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │          AI Enhancement (Optional)               │   │
-│  │  • ESRGAN super-resolution (2x/4x)              │   │
-│  │  • NSFW detection (96.2% accuracy)              │   │
-│  │  • Content-aware cropping (saliency)            │   │
-│  │  • Face detection (YOLOv5)                      │   │
-│  │  • Model lazy loading (85 MB total)             │   │
-│  └──────────────────────────────────────────────────┘   │
-│                                                           │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │          Multi-Tier Cache                        │   │
-│  │  1. Memory LRU cache (fastest, ~3 ms)           │   │
-│  │  2. SQLite database (fast, ~0.8 ms)             │   │
-│  │  3. Disk fallback (slow, ~15 ms)                │   │
-│  │  4. Network cache (VDI, ~8-25 ms)               │   │
-│  │  5. Cloud cache (OneDrive/GDrive, ~200 ms)      │   │
-│  └──────────────────────────────────────────────────┘   │
-│                                                           │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │          Plugin System (Sandboxed)               │   │
-│  │  • PluginManager: Discovery and lifecycle        │   │
-│  │  • PluginHost.exe: Isolated process              │   │
-│  │  • Named pipe IPC: Communication                 │   │
-│  │  • 12 marketplace plugins available              │   │
-│  └──────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│          CBXManager.exe (Configuration UI)               │
-│  • WinUI 3 (modern UI, .NET 8)                          │
-│  • Settings: Handler registration, GPU, cache            │
-│  • Diagnostics: Export bundle, decoder health            │
-│  • Plugins: Marketplace browser, install, ratings        │
-│  • Accessibility: Screen reader, keyboard nav            │
-│  • Localization: 5 languages (en/es/de/fr/ja)           │
-└─────────────────────────────────────────────────────────┘
++----------------------------------------------+
+|            Windows Explorer                   |
+|         IThumbnailProvider COM                |
++------------------+---------------------------+
+                   |
+                   v
++----------------------------------------------+
+|         CBXShell.dll (Shell Extension)        |
+|  - COM registration for 200+ extensions      |
+|  - EngineAdapter -> DarkThumbsEngine.lib     |
+|  - SEH crash isolation wrapper               |
++------------------+---------------------------+
+                   |
+                   v
++----------------------------------------------+
+|       DarkThumbsEngine.lib (Core Engine)     |
+|                                              |
+|  25 Decoders:                                |
+|  +- Archives: ZIP, RAR, 7Z, TAR, CBZ/CBR    |
+|  +- E-Books: EPUB, MOBI, AZW, FB2, PHZ      |
+|  +- Modern Images: WebP, AVIF, HEIF, JXL    |
+|  +- Professional: PSD, DDS, HDR, EXR        |
+|  +- Classic: TIFF, SVG, ICO, BMP, GIF, PNG  |
+|  +- Specialty: QOI, PPM, TGA                |
+|  +- Camera RAW: DNG, CR2, CR3, NEF, ARW     |
+|  +- Video: MP4, AVI, MKV, MOV, WebM         |
+|  +- Audio: MP3, FLAC, WAV, OGG              |
+|  +- Documents: PDF, DOCX, XLSX              |
+|  +- Fonts: TTF, OTF, WOFF                   |
+|  +- 3D Models: OBJ, STL, FBX, GLTF         |
+|                                              |
+|  GPU: D3D11 (fallback) + D3D12 (primary)    |
+|  AI:  AIThumbnailEnhancer (DirectML/ONNX)   |
+|  Cache: In-memory LRU + SQLite              |
+|  Plugins: PluginManager + PluginHost IPC    |
++----------------------------------------------+
+                   |
+                   v
++----------------------------------------------+
+|       CBXManager.exe (Configuration UI)      |
+|  - WTL dialog (primary, production)          |
+|  - WinUI 3 pages (in progress)               |
+|  - 35 format toggle checkboxes               |
+|  - Dark mode support                         |
+|  - Config snapshots + change summary         |
+|  - Plugin management UI                      |
++----------------------------------------------+
 ```
 
 ---
 
-## Git Commit History (Sprints 23-32)
+## External Libraries (x64 Release, Verified)
 
-```
-5146b81 (HEAD -> main) Sprints 24-32: Advanced Features & Production Excellence - Complete
-6d6c2be Sprint 23: AI-Assisted Thumbnails - Complete
-037f0b7 Sprints 6-22: Comprehensive Implementation Summary
-f9e27c3 Sprints 10-12, 20-22: Infrastructure & Advanced Features - Complete
-78e6598 Sprint 9: Version Normalization & v7.0 Release Notes - Complete
-d8aa45d Sprint 8: GUI Hardening (Current Manager) - Complete
-e87a952 Sprint 7: Windows 11 Compatibility Matrix - Complete
-9d10542 Sprint 6: Worker/Isolation Stabilization - Complete
-```
-
-**Total Commits:** 8 major sprint commits  
-**Documentation:** 13 sprint completion files (.github/SPRINT_*.md)  
-**Lines Changed:** ~20,000 lines added across all sprints
-
----
-
-## Documentation Generated
-
-### Sprint Documentation
-1. `.github/SPRINT_6_COMPLETE.md` - Worker/Isolation
-2. `.github/SPRINT_7_COMPLETE.md` - Windows 11 Compatibility
-3. `.github/SPRINT_8_COMPLETE.md` - GUI Hardening
-4. `.github/SPRINT_9_COMPLETE.md` - Version Normalization
-5. `.github/SPRINT_10_COMPLETE.md` - Release Governance
-6. `.github/SPRINT_11_COMPLETE.md` - Plugin System
-7. `.github/SPRINT_12_COMPLETE.md` - Observability
-8. `.github/SPRINT_20_COMPLETE.md` - ARM64 Preparation
-9. `.github/SPRINT_21_COMPLETE.md` - D3D12 Upgrade
-10. `.github/SPRINT_22_COMPLETE.md` - Async Pipeline
-11. `.github/SPRINT_23_COMPLETE.md` - AI Enhancement
-12. `.github/SPRINTS_6-22_SUMMARY.md` - Mid-project summary
-13. `.github/SPRINTS_24-32_SUMMARY.md` - Final summary
-14. `.github/IMPLEMENTATION_STATUS.md` - Updated to v7.5.0
-
-### Technical Documentation
-- `MASTER_PLAN.md` - Unified roadmap (684 lines, all 32 sprints)
-- `DEVELOPER_GUIDE.md` - Developer onboarding
-- `USER_GUIDE.md` - End-user documentation
-- `QUICK_BUILD_REFERENCE.md` - Fast build guide
-- `docs/INDEX.md` - Complete documentation catalog
+| Library | Version | Purpose |
+|---------|---------|---------|
+| zlib | 1.3.1 | Compression |
+| LZ4 | 1.10.0 | Fast compression |
+| zstd | 1.5.7 | Modern compression |
+| LZMA SDK | 26.00 | 7-Zip compression |
+| minizip-ng | 4.0.10 | Archive extraction |
+| UnRAR | 7.2.2 | RAR extraction |
+| libwebp | 1.5.0 | WebP decode |
+| libavif | 1.3.0 | AVIF decode (dav1d 1.5.1) |
+| libjxl | 0.11.1 | JPEG XL decode |
+| libheif | 1.19.5 | HEIF/HEIC (libde265) |
+| LibRaw | 0.21.3 | Camera RAW |
 
 ---
 
-## Release Readiness Certification
+## Git Commit History (This Session)
 
-### ✅ Functional Completeness
-- [x] All 32 sprints delivered with full documentation
-- [x] 500+ test cases passing (100% pass rate)
-- [x] 28 decoders operational (100+ file extensions)
-- [x] AI enhancement functional (4 models loaded)
-- [x] Cloud integration working (3 providers)
-- [x] Plugin marketplace active (12 plugins approved)
-- [x] 5 languages supported (100% strings translated)
-- [x] Enterprise features complete (25 GPO policies)
-
-### ✅ Performance Validation
-- [x] p95 latency: 105ms (target: <110ms) ✅
-- [x] Cold start: 390ms (target: <500ms) ✅
-- [x] Memory: 125 MB baseline (30% reduction) ✅
-- [x] Cache hit rate: 92% (target: >90%) ✅
-- [x] 24-hour soak test: 0 crashes in 102,347 requests ✅
-
-### ✅ Distribution Channels
-- [x] Microsoft Store: Published (Feb 18, 2026)
-- [x] Enterprise MSI: Available with GPO templates
-- [x] Portable ZIP: Available for non-admin users
-- [x] Auto-update: Functional via Store delivery
-- [x] Code signing: All binaries signed with EV certificate
-
-### ✅ Quality Assurance
-- [x] Build warnings: 0 (Release configuration)
-- [x] Security vulnerabilities: 0 (CodeQL scan)
-- [x] Memory leaks: 0 (soak test validated)
-- [x] Crash rate: 0/102,347 requests
-- [x] Test coverage: 500+ comprehensive tests
-
-### ✅ Compliance & Accessibility
-- [x] WCAG 2.1 Level AA compliance
-- [x] Screen reader support (NVDA/JAWS)
-- [x] Keyboard navigation (100% accessible)
-- [x] GDPR compliance (telemetry opt-out)
-- [x] Privacy policy published
-
----
-
-## Known Limitations
-
-### Minor Issues (Non-Blocking)
-1. **AI Models:** Require manual download (85 MB, auto-download in future)
-2. **Animated Thumbnails:** Limited to 5-second clips (performance constraint)
-3. **Deep EXR Layers:** Shows composite only (layer selection UI pending)
-4. **Cloud Sync Latency:** OneDrive refresh takes 30-60 seconds
-5. **ARM64 Hardware:** Cross-compiled but not device-tested (requires ARM64 PC)
-
-### Future Enhancements (Post-v7.5)
-- Sprint 33: HDR thumbnail preview in CBXManager
-- Sprint 34: Mobile companion app (iOS/Android remote configuration)
-- Sprint 35: Real-time collaboration (shared thumbnail annotations)
-- Sprint 36: Custom AI model marketplace (user-trained models)
-
----
-
-## Deployment Instructions
-
-### Microsoft Store Installation (Recommended)
-```powershell
-# Open Microsoft Store app
-Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4XXXXX"
-
-# Or via command line
-winget install DarkThumbs.DarkThumbs
 ```
-
-### Enterprise MSI Installation
-```powershell
-# Silent install with custom settings
-msiexec /i DarkThumbs-7.5.0-Enterprise-x64.msi /quiet /norestart `
-  ALLUSERS=1 CACHESIZE=10240 GPUACCEL=1 TELEMETRY=0 `
-  INSTALLDIR="C:\Program Files\DarkThumbs"
-
-# With Group Policy deployment
-# Copy DarkThumbs.admx to C:\Windows\PolicyDefinitions\
-# Copy DarkThumbs.adml to C:\Windows\PolicyDefinitions\en-US\
-# Configure via gpedit.msc under Computer Configuration > Administrative Templates > DarkThumbs
-```
-
-### Developer Build from Source
-```powershell
-# Clone repository
-git clone https://github.com/yourusername/DarkThumbs.git
-cd DarkThumbs
-
-# Bootstrap dependencies
-.\vcpkg\bootstrap-vcpkg.bat
-.\build-scripts\Setup-Vcpkg.ps1
-
-# Build all components
-.\build-scripts\Build-All-DarkThumbs-V7.ps1
-
-# Run tests
-ctest --test-dir build --config Release --verbose
-
-# Install
-.\Install-DarkThumbs.ps1
+c959f3e Sprints 23-25: AI thumbnails verified, MSIX v7.0.0 fix, OpenImageIO tests
+1e6b66e Sprint 12: Observability - ObservabilityIntegration.h + 22 GTest cases
+2197697 Sprint 11: Plugin system verified active, 15 GTest cases
+43f5a43 Sprint 10: Release governance - Validate-Release-Pipeline.ps1 + 22 GTests
+84cb9bc Sprint 9: Version normalization - 0 stale references remaining
+ce4c570 Sprint 8: GUI hardening - 12 new format toggles, dark mode, 35 handlers
+9ebb3f0 Sprint 7: Win11 Compat - Win11CompatibilityLayer.h + manifest
+a5e59da Sprint 6: Worker/Isolation - DecoderTimeout, Fuzzing, MemoryLeak
 ```
 
 ---
 
-## Support & Community
+## Known Gaps & Technical Debt
 
-### Official Resources
-- **Documentation:** [docs/INDEX.md](docs/INDEX.md)
-- **GitHub Repository:** https://github.com/yourusername/DarkThumbs
-- **Microsoft Store:** ms-windows-store://pdp/?productid=9NBLGGH4XXXXX
-- **Issue Tracker:** https://github.com/yourusername/DarkThumbs/issues
+### Must-Fix Before Release
+1. **MSIX CLSID placeholder:** `YOUR-CLSID-HERE` in AppxManifest.xml needs actual CLSID
+2. **RC dialog resource:** Sprint 8 added 12 new IDC_ defines but .rc file needs Visual Studio Resource Editor to add physical checkbox controls
+3. **cbxArchive.h CBXTYPE gaps:** ICO, QOI, TGA, MODEL, DOCUMENT types not yet defined in archive type enum
 
-### Community
-- **Discussions:** https://github.com/yourusername/DarkThumbs/discussions
-- **Plugin Marketplace:** https://marketplace.darkthumbs.example.com
-- **Support Email:** support@darkthumbs.example.com
+### Observability (Partially Wired)
+- ETWTracing.h and StructuredLogger.h exist; ObservabilityIntegration.h unifies them
+- Pipeline telemetry integration pending (connect ScopedTrace to decode pipeline)
 
----
+### GUI
+- Dynamic layout (OnSize) exits immediately — cosmetic issue for fixed-size dialog
+- WinUI 3 manager pages created but not yet at feature parity with WTL
 
-## Acknowledgments
-
-### Technologies Used
-- **Windows SDK:** 10.0.26100 (Windows 11 compatibility)
-- **Visual Studio:** 2026 (v145 toolset)
-- **C++ Standard:** C++20 (coroutines, concepts, ranges)
-- **DirectX:** D3D11/D3D12 for GPU acceleration
-- **DirectML:** 1.13.1 for AI inference
-- **ONNX Runtime:** 1.17.1 for neural network support
-- **OpenImageIO:** 2.5.12 for exotic formats
-- **Windows App SDK:** 1.6 for WinUI 3
-
-### External Libraries
-- libjxl 0.11.1, libheif 1.18.2, libwebp 1.4.0, LibRaw 0.21.3
-- dav1d 1.5.0, zlib 1.3.1, zstd 1.5.6, lz4 1.10.0
-- minizip-ng 4.0.10, lzma-sdk 26.00
-- SQLite 3.45, rapidjson 1.1.0
+### Documentation
+- `.github/SPRINTS_24-32_SUMMARY.md` — Contains aspirational claims about Sprints 26-32 being complete (they are NOT started)
+- `.github/SPRINTS_6-22_SUMMARY.md` — Some inflated descriptions (test counts, feature claims)
 
 ---
 
-## Final Recommendations
+## Learnings & Best Practices
 
-### For End Users
-1. **Install via Microsoft Store** for automatic updates and seamless experience
-2. **Enable AI enhancement** if you have a DirectX 12 compatible GPU
-3. **Connect cloud storage** for faster OneDrive/Google Drive thumbnails
-4. **Explore plugin marketplace** for additional format support
+### Build System
+- **VS version detection:** Always use `vswhere.exe` — never hardcode VS paths
+- **Static vs dynamic CRT:** External libs use /MD, Engine uses /MT — keep compatible
+- **Proxy builds:** Corporate proxy needs `http.proxy` + SSL revoke disable for GitHub clones
+- **CMake generators:** Use `Visual Studio 18 2026` with `v145` toolset, or Ninja for speed
 
-### For IT Administrators
-1. **Deploy via GPO** with silent MSI installer for enterprise rollout
-2. **Configure network cache** on SMB share for VDI environments
-3. **Disable telemetry** if required by compliance policies
-4. **Use Group Policy** to enforce consistent settings across organization
+### GUI
+- **Dark mode on WTL:** WM_CTLCOLOR* alone is insufficient — all child controls need matching
+- **Owner-draw checkboxes:** BS_OWNERDRAW hides text on themed Windows — avoid in WTL
+- **Dynamic layout:** WTL CDialogImpl has no anchor-based layout; manual OnSize risks overlap
 
-### For Developers
-1. **Use build scripts** for consistent dependency management
-2. **Run full test suite** before submitting changes (500+ tests)
-3. **Follow coding standards** in `.github/standards/CODING_STANDARDS.md`
-4. **Profile performance** with built-in profiler before optimization
+### Decoders
+- **Compound extensions:** `.tar.gz` needs two-dot matching in CanDecode()
+- **RAW decoder:** LibRaw handles CR3/ARW/ORF/GPR — don't route through WIC
+- **HEIF linkage:** Use `de265.lib` import library, copy `libde265.dll` to output at runtime
+
+### Testing
+- **CTest PATH:** Windows needs semicolon-joined PATH via `string(JOIN)` for DLL dirs
+- **GPU in CI:** All GPU tests must soft-pass with `[SKIP]` when D3D11 init fails (headless)
+- **Plugin system myth:** LoadPlugins() was never commented out — already gated behind `config.enablePlugins` (default: true)
+
+### Documentation
+- **Aspirational docs are dangerous:** Previous .github docs claimed features that didn't exist (v7.5.0, Store published, 500+ tests). Always verify against actual code.
+- **Single source of truth:** MASTER_PLAN.md (root) is the canonical roadmap
 
 ---
 
-**Project Status:** ✅ **PRODUCTION READY - ENTERPRISE GRADE**  
-**Version:** v7.5.0  
-**Release Date:** February 17, 2026  
-**Next Milestone:** HDR Preview UI (Sprint 33) - Q2 2026
+## Reference
 
----
-
-*DarkThumbs - Transforming thumbnail generation with AI, cloud, and enterprise capabilities.*
+- **Roadmap:** [MASTER_PLAN.md](../MASTER_PLAN.md) (root)
+- **Build Status:** [IMPLEMENTATION_STATUS.md](standards/IMPLEMENTATION_STATUS.md)
+- **Build Guide:** [QUICK_BUILD_REFERENCE.md](../QUICK_BUILD_REFERENCE.md)
+- **Developer Guide:** [DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md)
+- **Changelog:** [CHANGELOG.md](../CHANGELOG.md)
