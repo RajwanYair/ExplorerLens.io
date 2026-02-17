@@ -2,7 +2,7 @@
 
 **Last Updated:** February 17, 2026  
 **Version:** v7.0.0  
-**Status:** 🔄 Active Development — Sprints 1-10, 13-22 Complete; Sprints 11-12 Next
+**Status:** 🔄 Active Development — Sprints 1-11, 13-22 Complete; Sprint 12 Next
 
 ---
 
@@ -11,7 +11,7 @@
 ✅ **Build Status:** 0 errors, 0 warnings (Release x64)  
 ✅ **Architecture:** 64-bit only (Win32 removed)  
 ✅ **Engine:** DarkThumbsEngine.lib integrated via EngineAdapter  
-🔄 **Plugin System:** Built but `LoadPlugins()` not yet activated (Sprint 11 target)  
+✅ **Plugin System:** `LoadPlugins()` activated behind `config.enablePlugins` feature flag (default: true)  
 ✅ **Libraries:** Core dependencies built and linked (HEIF enabled)  
 ✅ **Decoders:** 25 decoder files covering 200+ extensions  
 ✅ **Testing:** 100 unit tests, 5 benchmarks — 100% pass rate  
@@ -56,7 +56,7 @@
 | 8 | GUI Hardening | Dark mode fix, high-DPI, Export Diagnostics, missing formats | ✅ Complete |
 | 9 | Version Normalization | Update 12 stale docs to v7.0.0, release notes | ✅ Complete |
 | 10 | Release Governance & Packaging | MSI E2E validation, release checklist, CI pipeline | ✅ Complete |
-| 11 | Plugin System Activation | Uncomment LoadPlugins(), end-to-end IPC test | ⬜ Planned |
+| 11 | Plugin System Activation | Uncomment LoadPlugins(), end-to-end IPC test | ✅ Complete |
 | 12 | Observability & Logging | ETW provider, JSON logger, diagnostics export | ⬜ Planned |
 
 ### 📅 Future (Sprints 23-42)
@@ -127,18 +127,19 @@
 
 ## Known Gaps & Technical Debt
 
-### GUI (Sprint 8 Target)
-1. **Missing format checkboxes:** ICO, QOI, PPM, TGA, 3D Models have decoders but no GUI toggles
-2. **Incomplete format plumbing:** PSD/DDS/HDR/Audio/Document/Font/EXR have resource IDs (IDC_CB_*) but no CBX_* constants in RegManager.h — InitUI and OnApplyImpl don't handle them
-3. **Dark mode disabled:** OnCtlColor handlers all `return FALSE`
-4. **Dynamic layout disabled:** OnSize handler exits immediately
+### GUI (✅ Sprint 8 Complete)
+1. ~~Missing format checkboxes~~ → **12 new format toggles added** (PSD, DDS, HDR, EXR, PPM, ICO, QOI, TGA, AUDIO, DOCUMENT, FONT, MODEL)
+2. ~~Incomplete format plumbing~~ → **12 CBX_ constants + 24 registry keys** added to RegManager.h
+3. ~~Dark mode disabled~~ → **InitDarkMode() re-enabled**, OnCtlColor handlers conditionally apply theme
+4. **Dynamic layout:** OnSize handler still exits immediately (cosmetic — Sprint 37+)
 
-### Plugin System (Sprint 11)
-- `LoadPlugins()` commented out in ThumbnailPipeline.cpp
-- Plugin infrastructure built but inactive
+### Plugin System (✅ Sprint 11 Complete)
+- `LoadPlugins()` active behind `config.enablePlugins` feature flag (default: true)
+- Full infrastructure: PluginManager, PluginDiscovery, PluginHost IPC, WinUI settings toggle
+- Plugin SDK available with sample plugin
 
-### Version Drift (Sprint 9)
-- 12 docs with stale version references (v5.x/v6.2) — see MASTER_PLAN.md §2B
+### Version Drift (✅ Sprint 9 Complete)
+- 0 stale version references remaining in canonical doc set
 
 ### Observability (Sprint 12)
 - ETWTracing.h and StructuredLogger.h exist but not wired into pipeline

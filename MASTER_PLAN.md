@@ -54,7 +54,7 @@ The following files contain stale version/status that conflicts with v7.0.0 real
 
 ### D. Plugin system gap
 - Plugin SDK, sandbox model, marketplace protocol, IPC, and PluginHost code are **fully built**.
-- Activation blocked: `LoadPlugins()` call in ThumbnailPipeline.cpp is commented out (Sprint 17 target).
+- Activation status: `LoadPlugins()` call in ThumbnailPipeline.cpp is **active** behind `config.enablePlugins` feature flag (default: true).
 - No real third-party plugins exist yet; sample plugin in SDK/examples/ is the only one.
 
 ### E. Windows 11/GUI gaps
