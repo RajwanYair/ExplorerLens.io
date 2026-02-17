@@ -1,188 +1,416 @@
-// Sprint12_Observability.cpp
-// Sprint 12: Observability & Structured Logging Tests
-// Validates ETW, JSON logger, diagnostics export, and pipeline telemetry
+//==============================================================================
+// DarkThumbs — Sprint 12 Tests: Observability & Structured Logging
+// Tests ETW events, JSON-lines logger, privacy filters, request tracing,
+// diagnostics bundle building, and log level filtering.
+//==============================================================================
 
 #include <gtest/gtest.h>
-#include <fstream>
 #include <string>
-#include <filesystem>
+#include <vector>
 
-namespace fs = std::filesystem;
+// Header under test
+#include "../Engine/Utils/ObservabilityPipeline.h"
 
-class ObservabilityTest : public ::testing::Test {
-protected:
-    std::string rootDir;
-    
-    void SetUp() override {
-        rootDir = fs::current_path().string();
-        auto searchDir = fs::current_path();
-        for (int i = 0; i < 5; i++) {
-            if (fs::exists(searchDir / "MASTER_PLAN.md")) {
-                rootDir = searchDir.string();
-                break;
-            }
-            searchDir = searchDir.parent_path();
-        }
+using namespace DarkThumbs::Engine::Observability;
+
+//==============================================================================
+// ETW Event Tests
+//==============================================================================
+
+TEST(ETWEvents, EventNames)
+{
+    EXPECT_STREQ(ETWEventName(ETWEventId::RequestStart), "RequestStart");
+    EXPECT_STREQ(ETWEventName(ETWEventId::RequestStop), "RequestStop");
+    EXPECT_STREQ(ETWEventName(ETWEventId::CacheHit), "CacheHit");
+    EXPECT_STREQ(ETWEventName(ETWEventId::CacheMiss), "CacheMiss");
+    EXPECT_STREQ(ETWEventName(ETWEventId::DecodeStart), "DecodeStart");
+    EXPECT_STREQ(ETWEventName(ETWEventId::DecodeFail), "DecodeFail");
+    EXPECT_STREQ(ETWEventName(ETWEventId::CrashCaught), "CrashCaught");
+    EXPECT_STREQ(ETWEventName(ETWEventId::GPUFallback), "GPUFallback");
+}
+
+TEST(ETWEvents, ProviderConfig)
+{
+    ETWProviderConfig config;
+    EXPECT_STREQ(config.ProviderName, "DarkThumbs-Engine-Core");
+    EXPECT_TRUE(config.enabled);
+    EXPECT_EQ(ETWProviderConfig::TotalEventTypes, 15u);
+}
+
+TEST(ETWEvents, ProviderGUID)
+{
+    std::string guid = ETWProviderConfig::ProviderGUID;
+    EXPECT_NE(guid.find("{"), std::string::npos);
+    EXPECT_NE(guid.find("}"), std::string::npos);
+    EXPECT_GT(guid.size(), 30u);
+}
+
+TEST(ETWEvents, EventIdValues)
+{
+    // Verify event ID ranges per OBSERVABILITY_SPEC_V1.md
+    EXPECT_GE(static_cast<uint16_t>(ETWEventId::RequestStart), 100u);
+    EXPECT_GE(static_cast<uint16_t>(ETWEventId::CacheHit), 200u);
+    EXPECT_GE(static_cast<uint16_t>(ETWEventId::DecodeStart), 300u);
+    EXPECT_GE(static_cast<uint16_t>(ETWEventId::CrashCaught), 400u);
+    EXPECT_GE(static_cast<uint16_t>(ETWEventId::PluginLoad), 500u);
+    EXPECT_GE(static_cast<uint16_t>(ETWEventId::MemoryPressure), 600u);
+}
+
+//==============================================================================
+// Log Level Tests
+//==============================================================================
+
+TEST(LogLevel, LevelNames)
+{
+    EXPECT_STREQ(LogLevelName(LogLevel::Trace), "TRACE");
+    EXPECT_STREQ(LogLevelName(LogLevel::Debug), "DEBUG");
+    EXPECT_STREQ(LogLevelName(LogLevel::Info), "INFO");
+    EXPECT_STREQ(LogLevelName(LogLevel::Warning), "WARN");
+    EXPECT_STREQ(LogLevelName(LogLevel::Error), "ERROR");
+    EXPECT_STREQ(LogLevelName(LogLevel::Critical), "CRITICAL");
+}
+
+//==============================================================================
+// Log Entry Tests
+//==============================================================================
+
+TEST(LogEntry, JSONFormat)
+{
+    LogEntry entry;
+    entry.timestamp = "2025-07-11T12:00:00Z";
+    entry.level = LogLevel::Info;
+    entry.component = "Decoder";
+    entry.message = "JPEG decode complete";
+    entry.requestId = 42;
+
+    auto json = entry.ToJSON();
+    EXPECT_NE(json.find("\"ts\":\"2025-07-11"), std::string::npos);
+    EXPECT_NE(json.find("\"level\":\"INFO\""), std::string::npos);
+    EXPECT_NE(json.find("\"component\":\"Decoder\""), std::string::npos);
+    EXPECT_NE(json.find("\"requestId\":42"), std::string::npos);
+}
+
+TEST(LogEntry, TextFormat)
+{
+    LogEntry entry;
+    entry.timestamp = "2025-07-11";
+    entry.level = LogLevel::Error;
+    entry.component = "Cache";
+    entry.message = "Cache miss for file";
+
+    auto text = entry.ToText();
+    EXPECT_NE(text.find("ERROR"), std::string::npos);
+    EXPECT_NE(text.find("[Cache]"), std::string::npos);
+    EXPECT_NE(text.find("Cache miss"), std::string::npos);
+}
+
+TEST(LogEntry, CustomFields)
+{
+    LogEntry entry;
+    entry.timestamp = "now";
+    entry.component = "GPU";
+    entry.message = "fallback";
+    entry.fields["gpu"] = "Intel UHD";
+    entry.fields["reason"] = "timeout";
+
+    auto json = entry.ToJSON();
+    EXPECT_NE(json.find("\"gpu\":\"Intel UHD\""), std::string::npos);
+    EXPECT_NE(json.find("\"reason\":\"timeout\""), std::string::npos);
+}
+
+//==============================================================================
+// JSON-Lines Logger Tests
+//==============================================================================
+
+TEST(JSONLogger, EmptyByDefault)
+{
+    JSONLinesLogger logger;
+    EXPECT_EQ(logger.EntryCount(), 0u);
+    EXPECT_EQ(logger.ErrorCount(), 0u);
+}
+
+TEST(JSONLogger, LogEntry)
+{
+    JSONLinesLogger logger;
+    LogEntry e;
+    e.timestamp = "now"; e.level = LogLevel::Info;
+    e.component = "Test"; e.message = "Hello";
+    logger.Log(e);
+    EXPECT_EQ(logger.EntryCount(), 1u);
+}
+
+TEST(JSONLogger, MinLevelFilter)
+{
+    JSONLinesLogger logger;
+    logger.SetMinLevel(LogLevel::Warning);
+
+    LogEntry info{};
+    info.level = LogLevel::Info;
+    info.timestamp = "now"; info.component = "T"; info.message = "filtered";
+    logger.Log(info);
+
+    LogEntry warn{};
+    warn.level = LogLevel::Warning;
+    warn.timestamp = "now"; warn.component = "T"; warn.message = "kept";
+    logger.Log(warn);
+
+    EXPECT_EQ(logger.EntryCount(), 1u);  // Only warning kept
+}
+
+TEST(JSONLogger, FlushJSON)
+{
+    JSONLinesLogger logger;
+    LogEntry e;
+    e.timestamp = "t1"; e.level = LogLevel::Info;
+    e.component = "A"; e.message = "msg1";
+    logger.Log(e);
+    e.timestamp = "t2"; e.message = "msg2";
+    logger.Log(e);
+
+    auto output = logger.Flush();
+    // Should have 2 JSON lines
+    size_t newlines = std::count(output.begin(), output.end(), '\n');
+    EXPECT_EQ(newlines, 2u);
+}
+
+TEST(JSONLogger, FilterByLevel)
+{
+    JSONLinesLogger logger;
+    LogEntry e;
+    e.timestamp = "now"; e.component = "T";
+
+    e.level = LogLevel::Info; e.message = "info"; logger.Log(e);
+    e.level = LogLevel::Error; e.message = "err"; logger.Log(e);
+    e.level = LogLevel::Info; e.message = "info2"; logger.Log(e);
+
+    auto errors = logger.GetByLevel(LogLevel::Error);
+    EXPECT_EQ(errors.size(), 1u);
+}
+
+TEST(JSONLogger, FilterByComponent)
+{
+    JSONLinesLogger logger;
+    LogEntry e;
+    e.timestamp = "now"; e.level = LogLevel::Info;
+
+    e.component = "Decoder"; e.message = "d1"; logger.Log(e);
+    e.component = "Cache"; e.message = "c1"; logger.Log(e);
+    e.component = "Decoder"; e.message = "d2"; logger.Log(e);
+
+    auto decoder = logger.GetByComponent("Decoder");
+    EXPECT_EQ(decoder.size(), 2u);
+}
+
+TEST(JSONLogger, ErrorAndWarningCount)
+{
+    JSONLinesLogger logger;
+    LogEntry e;
+    e.timestamp = "now"; e.component = "T";
+
+    e.level = LogLevel::Error; e.message = "e1"; logger.Log(e);
+    e.level = LogLevel::Critical; e.message = "c1"; logger.Log(e);
+    e.level = LogLevel::Warning; e.message = "w1"; logger.Log(e);
+    e.level = LogLevel::Info; e.message = "i1"; logger.Log(e);
+
+    EXPECT_EQ(logger.ErrorCount(), 2u);    // Error + Critical
+    EXPECT_EQ(logger.WarningCount(), 1u);
+}
+
+TEST(JSONLogger, Clear)
+{
+    JSONLinesLogger logger;
+    LogEntry e; e.timestamp = "now"; e.level = LogLevel::Info;
+    e.component = "T"; e.message = "test";
+    logger.Log(e);
+    logger.Clear();
+    EXPECT_EQ(logger.EntryCount(), 0u);
+}
+
+//==============================================================================
+// Privacy Filter Tests
+//==============================================================================
+
+TEST(Privacy, HashMode)
+{
+    PrivacyFilter filter(PrivacyFilter::Mode::Hash);
+    auto hashed = filter.FilterPath("C:\\Users\\ryair\\Documents\\photo.jpg");
+    EXPECT_NE(hashed.find("path:"), std::string::npos);
+    EXPECT_EQ(hashed.find("ryair"), std::string::npos);  // No username
+}
+
+TEST(Privacy, VerboseMode)
+{
+    PrivacyFilter filter(PrivacyFilter::Mode::Verbose);
+    std::string path = "C:\\Users\\test\\photo.jpg";
+    EXPECT_EQ(filter.FilterPath(path), path);  // Full path preserved
+}
+
+TEST(Privacy, DeterministicHash)
+{
+    PrivacyFilter filter;
+    auto h1 = filter.FilterPath("C:\\test\\file.jpg");
+    auto h2 = filter.FilterPath("C:\\test\\file.jpg");
+    EXPECT_EQ(h1, h2);  // Same input → same hash
+}
+
+TEST(Privacy, DifferentHashForDifferentPaths)
+{
+    PrivacyFilter filter;
+    auto h1 = filter.FilterPath("C:\\a\\file.jpg");
+    auto h2 = filter.FilterPath("C:\\b\\file.jpg");
+    EXPECT_NE(h1, h2);
+}
+
+TEST(Privacy, FilenamExtraction)
+{
+    PrivacyFilter filter;
+    EXPECT_EQ(filter.FilterToFilename("C:\\Users\\test\\photo.jpg"), "photo.jpg");
+    EXPECT_EQ(filter.FilterToFilename("photo.jpg"), "photo.jpg");
+}
+
+TEST(Privacy, ModeSwitch)
+{
+    PrivacyFilter filter;
+    EXPECT_FALSE(filter.IsVerbose());
+    filter.SetMode(PrivacyFilter::Mode::Verbose);
+    EXPECT_TRUE(filter.IsVerbose());
+}
+
+//==============================================================================
+// Request Trace Tests
+//==============================================================================
+
+TEST(RequestTrace, PipelineMs)
+{
+    RequestTrace t;
+    t.detectMs = 1.0;
+    t.decodeMs = 10.0;
+    t.resizeMs = 2.0;
+    t.cacheMs = 0.5;
+    t.marshalMs = 0.5;
+    EXPECT_DOUBLE_EQ(t.PipelineMs(), 14.0);
+}
+
+TEST(RequestTrace, JSONOutput)
+{
+    RequestTrace t;
+    t.requestId = 99;
+    t.format = "JPEG";
+    t.decoder = "WIC";
+    t.totalMs = 15.5;
+    t.cacheHit = true;
+    auto json = t.ToJSON();
+    EXPECT_NE(json.find("\"requestId\":99"), std::string::npos);
+    EXPECT_NE(json.find("\"format\":\"JPEG\""), std::string::npos);
+    EXPECT_NE(json.find("\"cacheHit\":true"), std::string::npos);
+}
+
+//==============================================================================
+// Request Tracer Tests
+//==============================================================================
+
+TEST(RequestTracer, EmptyStats)
+{
+    RequestTracer tracer;
+    EXPECT_DOUBLE_EQ(tracer.AverageLatencyMs(), 0.0);
+    EXPECT_DOUBLE_EQ(tracer.CacheHitRate(), 0.0);
+    EXPECT_DOUBLE_EQ(tracer.SuccessRate(), 100.0);
+}
+
+TEST(RequestTracer, RecordAndStats)
+{
+    RequestTracer tracer;
+    RequestTrace t;
+    t.totalMs = 10.0; t.succeeded = true; t.cacheHit = false;
+    tracer.RecordTrace(t);
+    t.totalMs = 20.0; t.cacheHit = true;
+    tracer.RecordTrace(t);
+
+    EXPECT_EQ(tracer.TraceCount(), 2u);
+    EXPECT_DOUBLE_EQ(tracer.AverageLatencyMs(), 15.0);
+    EXPECT_DOUBLE_EQ(tracer.CacheHitRate(), 50.0);
+    EXPECT_DOUBLE_EQ(tracer.SuccessRate(), 100.0);
+}
+
+TEST(RequestTracer, ErrorTracking)
+{
+    RequestTracer tracer;
+    RequestTrace ok; ok.totalMs = 5.0; ok.succeeded = true;
+    RequestTrace fail; fail.totalMs = 100.0; fail.succeeded = false;
+    tracer.RecordTrace(ok);
+    tracer.RecordTrace(ok);
+    tracer.RecordTrace(fail);
+    EXPECT_EQ(tracer.ErrorCount(), 1u);
+    EXPECT_GT(tracer.SuccessRate(), 66.0);
+    EXPECT_LT(tracer.SuccessRate(), 67.0);
+}
+
+TEST(RequestTracer, P95Latency)
+{
+    RequestTracer tracer;
+    for (int i = 0; i < 100; ++i) {
+        RequestTrace t;
+        t.totalMs = static_cast<double>(i + 1);
+        t.succeeded = true;
+        tracer.RecordTrace(t);
     }
-    
-    bool fileContains(const std::string& relPath, const std::string& needle) {
-        auto fullPath = fs::path(rootDir) / relPath;
-        if (!fs::exists(fullPath)) return false;
-        std::ifstream f(fullPath.string());
-        std::string content((std::istreambuf_iterator<char>(f)),
-                           std::istreambuf_iterator<char>());
-        return content.find(needle) != std::string::npos;
-    }
-    
-    bool fileExists(const std::string& relPath) {
-        return fs::exists(fs::path(rootDir) / relPath);
-    }
-};
-
-// =============================================================================
-// ETW Provider Tests
-// =============================================================================
-
-TEST_F(ObservabilityTest, ETWTracingHeaderExists) {
-    EXPECT_TRUE(fileExists("Engine/Utils/ETWTracing.h"))
-        << "ETW tracing header should exist";
+    EXPECT_GE(tracer.P95LatencyMs(), 95.0);
+    EXPECT_LE(tracer.P95LatencyMs(), 96.0);
 }
 
-TEST_F(ObservabilityTest, ETWProviderGUIDDefined) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ETWTracing.h", "DARKTHUMBS_PROVIDER_GUID"))
-        << "ETW provider GUID should be defined";
+//==============================================================================
+// Diagnostic Bundle Tests
+//==============================================================================
+
+TEST(DiagBundle, SystemInfo)
+{
+    SystemInfo info;
+    EXPECT_EQ(info.darkThumbsVersion, "7.0.0");
+    auto json = info.ToJSON();
+    EXPECT_NE(json.find("\"version\":\"7.0.0\""), std::string::npos);
 }
 
-TEST_F(ObservabilityTest, ETWEventIDsDefined) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ETWTracing.h", "ThumbnailGeneration_Start"))
-        << "ThumbnailGeneration_Start event should be defined";
-    EXPECT_TRUE(fileContains("Engine/Utils/ETWTracing.h", "Decode_Start"))
-        << "Decode_Start event should be defined";
-    EXPECT_TRUE(fileContains("Engine/Utils/ETWTracing.h", "Cache_Hit"))
-        << "Cache_Hit event should be defined";
+TEST(DiagBundle, SectionCount)
+{
+    DiagnosticBundle bundle;
+    EXPECT_EQ(bundle.SectionCount(), 1u);  // system info only
+    bundle.decoderStatus = "All stable";
+    EXPECT_EQ(bundle.SectionCount(), 2u);
+    bundle.pluginStatus = "None loaded";
+    EXPECT_EQ(bundle.SectionCount(), 3u);
 }
 
-// =============================================================================
-// Structured Logger Tests
-// =============================================================================
+TEST(DiagBundle, Builder)
+{
+    DiagnosticBundleBuilder builder;
+    SystemInfo info;
+    info.cpuModel = "i9-14900K";
+    info.gpuModel = "RTX 4090";
+    info.ramMB = 65536;
+    builder.SetSystemInfo(info);
 
-TEST_F(ObservabilityTest, StructuredLoggerHeaderExists) {
-    EXPECT_TRUE(fileExists("Engine/Utils/StructuredLogger.h"))
-        << "Structured logger header should exist";
+    LogEntry log;
+    log.timestamp = "now"; log.level = LogLevel::Info;
+    log.component = "Test"; log.message = "Ready";
+    builder.AddLog(log);
+
+    RequestTrace trace;
+    trace.requestId = 1; trace.totalMs = 10.0;
+    builder.AddTrace(trace);
+
+    builder.SetDecoderStatus("24 decoders active");
+
+    EXPECT_EQ(builder.LogCount(), 1u);
+    EXPECT_EQ(builder.TraceCount(), 1u);
+    EXPECT_GE(builder.SectionCount(), 3u);
 }
 
-TEST_F(ObservabilityTest, StructuredLoggerIsJsonLines) {
-    EXPECT_TRUE(fileContains("Engine/Utils/StructuredLogger.h", "JSON"))
-        << "Logger should produce JSON-lines output";
-}
-
-TEST_F(ObservabilityTest, StructuredLoggerHasLogLevels) {
-    EXPECT_TRUE(fileContains("Engine/Utils/StructuredLogger.h", "LogLevel"))
-        << "Logger should support log levels";
-    EXPECT_TRUE(fileContains("Engine/Utils/StructuredLogger.h", "LogInfo"))
-        << "Logger should have LogInfo method";
-    EXPECT_TRUE(fileContains("Engine/Utils/StructuredLogger.h", "LogWarning"))
-        << "Logger should have LogWarning method";
-    EXPECT_TRUE(fileContains("Engine/Utils/StructuredLogger.h", "LogError"))
-        << "Logger should have LogError method";
-}
-
-TEST_F(ObservabilityTest, StructuredLoggerSupportsPrivacy) {
-    EXPECT_TRUE(fileContains("Engine/Utils/StructuredLogger.h", "Privacy") ||
-                fileContains("Engine/Utils/StructuredLogger.h", "privacy") ||
-                fileContains("Engine/Utils/StructuredLogger.h", "m_enablePrivacy"))
-        << "Logger should support privacy mode for path hashing";
-}
-
-TEST_F(ObservabilityTest, StructuredLoggerIsThreadSafe) {
-    EXPECT_TRUE(fileContains("Engine/Utils/StructuredLogger.h", "mutex"))
-        << "Logger should use mutex for thread safety";
-}
-
-// =============================================================================
-// Observability Integration Tests
-// =============================================================================
-
-TEST_F(ObservabilityTest, ObservabilityIntegrationExists) {
-    EXPECT_TRUE(fileExists("Engine/Utils/ObservabilityIntegration.h"))
-        << "Observability integration header should exist";
-}
-
-TEST_F(ObservabilityTest, PipelineTelemetryClass) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "PipelineTelemetry"))
-        << "PipelineTelemetry class should exist";
-}
-
-TEST_F(ObservabilityTest, TelemetryTracesThumbnailLifecycle) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "TraceThumbnailStart"))
-        << "Should trace thumbnail request start";
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "TraceThumbnailComplete"))
-        << "Should trace thumbnail request completion";
-}
-
-TEST_F(ObservabilityTest, TelemetryTracesDecoding) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "TraceDecodeStart"))
-        << "Should trace decode start";
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "TraceDecodeComplete"))
-        << "Should trace decode completion";
-}
-
-TEST_F(ObservabilityTest, ScopedTraceExists) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "ScopedTrace"))
-        << "ScopedTrace RAII class should exist";
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "TRACE_SCOPE"))
-        << "TRACE_SCOPE macro should exist";
-}
-
-// =============================================================================
-// Diagnostics Export Tests
-// =============================================================================
-
-TEST_F(ObservabilityTest, DiagnosticsExporterExists) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "DiagnosticsExporter"))
-        << "DiagnosticsExporter class should exist";
-}
-
-TEST_F(ObservabilityTest, DiagnosticsBundleCollectsSystemInfo) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "CollectSystemInfo"))
-        << "Should collect system info";
-}
-
-TEST_F(ObservabilityTest, DiagnosticsBundleCollectsConfig) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "CollectConfig"))
-        << "Should collect configuration";
-}
-
-TEST_F(ObservabilityTest, DiagnosticsBundleCollectsLogs) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "CollectRecentLogs"))
-        << "Should collect recent logs";
-}
-
-TEST_F(ObservabilityTest, DiagnosticsBundleCollectsRegistry) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "CollectRegistryInfo"))
-        << "Should collect registry info";
-}
-
-TEST_F(ObservabilityTest, DiagnosticsCanExportToFile) {
-    EXPECT_TRUE(fileContains("Engine/Utils/ObservabilityIntegration.h", "ExportToFile"))
-        << "Should be able to export diagnostics to file";
-}
-
-// =============================================================================
-// WinUI Diagnostics Integration Tests
-// =============================================================================
-
-TEST_F(ObservabilityTest, WinUIDiagnosticsPageExists) {
-    EXPECT_TRUE(fileExists("src/Manager.WinUI/Views/DiagnosticsPage.xaml"))
-        << "WinUI DiagnosticsPage should exist";
-}
-
-TEST_F(ObservabilityTest, WinUIDiagnosticsViewModelExists) {
-    EXPECT_TRUE(fileExists("src/Manager.WinUI/ViewModels/DiagnosticsViewModel.cs"))
-        << "WinUI DiagnosticsViewModel should exist";
-}
-
-TEST_F(ObservabilityTest, WinUIHasExportDiagnosticsButton) {
-    EXPECT_TRUE(fileContains("src/Manager.WinUI/Views/DiagnosticsPage.xaml", "ExportDiagnostics"))
-        << "DiagnosticsPage should have Export Diagnostics button";
+TEST(DiagBundle, Report)
+{
+    DiagnosticBundleBuilder builder;
+    builder.SetDecoderStatus("JPEG: Stable");
+    auto& bundle = builder.Build();
+    auto report = bundle.GenerateReport();
+    EXPECT_NE(report.find("Diagnostic Report"), std::string::npos);
+    EXPECT_NE(report.find("JPEG: Stable"), std::string::npos);
 }
