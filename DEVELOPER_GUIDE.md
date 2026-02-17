@@ -1,5 +1,5 @@
 # DarkThumbs Developer Guide
-**Version:** 6.2.0  
+**Version:** 7.0.0  
 **Target Audience:** Contributors, Plugin Developers, Maintainers
 
 ## Table of Contents

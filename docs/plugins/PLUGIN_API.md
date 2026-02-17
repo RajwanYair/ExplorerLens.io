@@ -1,7 +1,7 @@
 # DarkThumbs Plugin API Documentation
 
-**Version:** 5.3.0 (Engine v1.0.0)  
-**Last Updated:** January 13, 2026  
+**Version:** 7.0.0 (Engine v7.0.0)  
+**Last Updated:** February 17, 2026  
 **Target Audience:** Plugin developers creating custom thumbnail decoders
 
 ## Table of Contents

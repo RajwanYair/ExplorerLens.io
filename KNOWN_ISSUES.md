@@ -23,15 +23,14 @@
 - Latest build: 0 errors, 0 warnings with JXL support enabled
 
 #### 2. HEIF/HEIC Support
-**Status:** 🔄 **In Progress** (libheif build script ready, building libde265 + libheif)  
-**Impact:** HEIF thumbnails currently use Windows WIC fallback (requires HEVC codec)  
-**Resolution:** Building native libheif 1.19.5 + libde265 1.0.15 decoder - no codec dependency needed
+**Status:** ✅ **Integrated** (libheif 1.19.5 + libde265 1.0.15 built and linked)  
+**Impact:** Native HEIF thumbnails work without WIC dependency  
 
 **Details:**
-- Native HEIFDecoder.cpp already implemented in Engine (gated with `HAS_LIBHEIF`)
-- Build-LibHEIF.ps1 configured to auto-download and build libde265 + libheif
-- Once built, set `-DHAS_LIBHEIF=ON` in CMake to enable native HEIF decoding
-- K-Lite Codec Pack (installed) also provides HEVC decoder as interim fallback
+- Native HEIFDecoder.cpp fully operational in Engine with `HAS_LIBHEIF=ON`
+- libheif 1.19.5 + libde265 1.0.15 built and linked in Release configuration
+- No HEVC codec dependency required for basic HEIF decode
+- Build scripts (Build-LibHEIF.ps1) validated with local and proxy-based source refresh
 
 ---
 

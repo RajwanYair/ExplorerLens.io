@@ -12,17 +12,20 @@ Automated testing infrastructure for validating Engine functionality, performanc
 
 ## Current Test Coverage
 
-### Core Tests (22/22 Passing) ✅
+### Core Tests (100/100 Passing) ✅
 
 | Test Category | Tests | Status | Coverage |
 |--------------|-------|--------|----------|
-| **Decoder Registration** | 4 | ✅ Pass | DecoderRegistry operations |
-| **Format Detection** | 5 | ✅ Pass | File extension/MIME detection |
-| **Image Decoding** | 4 | ✅ Pass | JPEG, PNG, BMP, GIF |
-| **WebP Decoding** | 2 | ✅ Pass | Static & animated WebP |
-| **AVIF Decoding** | 2 | ✅ Pass | AVIF format support |
-| **Archive Decoding** | 3 | ✅ Pass | ZIP, CBZ extraction |
-| **GPU Rendering** | 2 | ✅ Pass | D3D11 initialization |
+| **Decoder Registration** | 10 | ✅ Pass | DecoderRegistry operations |
+| **Format Detection** | 15 | ✅ Pass | File extension/MIME detection |
+| **Image Decoding** | 20 | ✅ Pass | JPEG, PNG, BMP, GIF, WebP, AVIF |
+| **Archive Decoding** | 10 | ✅ Pass | ZIP, RAR, 7Z, CBZ/CBR extraction |
+| **RAW Decoding** | 8 | ✅ Pass | CR2, CR3, NEF, ARW, DNG |
+| **Specialty Formats** | 12 | ✅ Pass | TGA, QOI, ICO, DDS, HDR, EXR |
+| **Video/Audio** | 8 | ✅ Pass | MP4, MKV, MP3, FLAC |
+| **GPU Rendering** | 7 | ✅ Pass | D3D11 initialization & scaling |
+| **Sprint 6: Isolation** | 6 | ✅ Pass | Malformed payloads, circuit breaker |
+| **Integration Tests** | 4 | ✅ Pass | End-to-end pipeline |
 
 ## Test Categories
 

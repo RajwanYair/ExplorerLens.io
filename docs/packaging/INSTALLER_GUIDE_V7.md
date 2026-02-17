@@ -30,7 +30,7 @@ DarkThumbs v7.0.0 provides multiple installer formats to support different deplo
 
 | Tool | Version | Purpose | Download |
 |------|---------|---------|----------|
-| **Visual Studio Build Tools** | 2022 (v143) | MSVC compiler | [Download](https://visualstudio.microsoft.com/downloads/) |
+| **Visual Studio Build Tools** | 18 2026 (v145) | MSVC compiler | [Download](https://visualstudio.microsoft.com/downloads/) |
 | **CMake** | 3.20+ | Build configuration | [Download](https://cmake.org/download/) |
 | **WiX Toolset** | 4.0.5+ or 5.0+ | MSI installer creation | [Download](https://wixtoolset.org/releases/) |
 | **Inno Setup** | 6.3+ | Setup wizard creation | [Download](https://jrsoftware.org/isinfo.php) |

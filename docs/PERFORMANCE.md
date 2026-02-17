@@ -1,7 +1,7 @@
 # DarkThumbs Performance Tuning Guide
 **Sprint 25: Documentation Completion**  
-**Version:** 6.2.0  
-**Last Updated:** February 15, 2026
+**Version:** 7.0.0  
+**Last Updated:** February 17, 2026
 
 ---
 

@@ -1,9 +1,9 @@
 # DarkThumbs Documentation Index
 
 **Project:** DarkThumbs  
-**Current Version:** v6.2.x  
+**Current Version:** v7.0.0  
 **Planning Authority:** [MASTER_PLAN.md](../MASTER_PLAN.md)  
-**Last Updated:** February 16, 2026
+**Last Updated:** February 17, 2026
 
 ---
 

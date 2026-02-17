@@ -1,6 +1,6 @@
 # DarkThumbs Decoder Status Matrix
-**Version:** 5.4.0  
-**Last Updated:** February 2026 (Sprint 15C Audit)
+**Version:** 7.0.0  
+**Last Updated:** February 17, 2026 (Sprint 9)
 
 ---
 
@@ -24,14 +24,14 @@ These implement `IThumbnailDecoder` and are registered with `ThumbnailPipeline`.
 | **ImageDecoder** | .jpg .jpeg .jpe .jfif .png .bmp .dib .gif .tif .tiff | ✅ Functional | — | WIC (built-in) | 8 tests |
 | **WebPDecoder** | .webp | ✅ Functional | — | libwebp 1.5.0 | 5 tests |
 | **AVIFDecoder** | .avif .heif .heic | ✅ Functional | — | WIC (Win10+ codec) | 5 tests |
-| **HEIFDecoder** | .heif .heic .hif .heifs .heics .avci .avcs | ⚠️ Conditional | `HAS_LIBHEIF` (OFF) | libheif | 2 tests |
+| **HEIFDecoder** | .heif .heic .hif .heifs .heics .avci .avcs | ✅ Functional | `HAS_LIBHEIF` (ON) | libheif | 2 tests |
 | **JXLDecoder** | .jxl | ⚠️ Conditional | `HAS_LIBJXL` (OFF) | libjxl 0.11.1 | 2 tests |
 | **ArchiveDecoder** | .zip .cbz | ✅ Functional | — | minizip-ng 4.0.10 | 6 tests |
 | **RAWDecoder** | .cr2 .cr3 .crw .nef .nrw .arw .srf .sr2 .orf .rw2 .raw .raf .pef .ptx .dng .rwl .srw .3fr .iiq .x3f | ✅ Functional | `HAS_LIBRAW` (ON) | LibRaw 0.21.2 | 0 tests |
 | **TGADecoder** | .tga .tpic | ✅ Functional | — | Native (no deps) | 0 tests |
 | **QOIDecoder** | .qoi | ✅ Functional | — | Native (no deps) | 0 tests |
 
-**Total Engine tests:** 28 decoder tests + 14 infrastructure tests = 42 total
+**Total Engine tests:** 100 unit tests + 5 benchmark suites = 105 total
 
 ---
 

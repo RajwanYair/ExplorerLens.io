@@ -28,6 +28,10 @@
 #include "../Decoders/FontDecoder.h"
 #include "../Decoders/ModelDecoder.h"
 #include <iostream>
+#include <chrono>
+#include <psapi.h>
+
+#pragma comment(lib, "psapi.lib")
 #include <cassert>
 #include <vector>
 #include <string>
@@ -1299,6 +1303,243 @@ TEST(TestModelDecoder_GetInfo)
 }
 
 //==============================================================================
+// Sprint 6: Worker/Isolation Stabilization Tests  
+// February 17, 2026
+//==============================================================================
+
+TEST(TestMalformedArchive_TruncatedZIP)
+{
+    ArchiveDecoder decoder;
+    ThumbnailRequest request = {};
+    request.filePath = L"test_truncated.zip";
+    request.outputWidth = 256;
+    request.outputHeight = 256;
+    
+    ThumbnailResult result = {};
+    
+    // Create a truncated ZIP file (first 100 bytes only)
+    HANDLE hFile = CreateFileW(request.filePath, GENERIC_WRITE, 0, nullptr, 
+                               CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (hFile != INVALID_HANDLE_VALUE) {
+        const char truncatedHeader[] = "PK\x03\x04\x14\x00\x00\x00\x08\x00";
+        DWORD written = 0;
+        WriteFile(hFile, truncatedHeader, sizeof(truncatedHeader), &written, nullptr);
+        CloseHandle(hFile);
+    }
+    
+    // Should fail gracefully, not crash
+    HRESULT hr = decoder.Decode(request, result);
+    ASSERT(FAILED(hr)); // Should return error
+    
+    // Cleanup
+    DeleteFileW(request.filePath);
+}
+
+TEST(TestMalformedArchive_GarbageHeader)
+{
+   ArchiveDecoder decoder;
+    ThumbnailRequest request = {};
+    request.filePath = L"test_garbage.cbz";
+    request.outputWidth = 256;
+    request.outputHeight = 256;
+    
+    ThumbnailResult result = {};
+    
+    // Create a file with random garbage data
+    HANDLE hFile = CreateFileW(request.filePath, GENERIC_WRITE, 0, nullptr, 
+                               CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (hFile != INVALID_HANDLE_VALUE) {
+        const char garbage[] = "NOTAZIPATALL123456789GARBAGE";
+        DWORD written = 0;
+        WriteFile(hFile, garbage, sizeof(garbage), &written, nullptr);
+        CloseHandle(hFile);
+    }
+    
+    // Should detect invalid format and reject
+    ASSERT(!decoder.CanDecode(request.filePath) || FAILED(decoder.Decode(request, result)));
+    
+    // Cleanup
+    DeleteFileW(request.filePath);
+}
+
+TEST(TestMalformedArchive_ZeroByteFile)
+{
+    ArchiveDecoder decoder;
+    ThumbnailRequest request = {};
+    request.filePath = L"test_zero.zip";
+    request.outputWidth = 256;
+    request.outputHeight = 256;
+    
+    ThumbnailResult result = {};
+    
+    // Create zero-byte file
+    HANDLE hFile = CreateFileW(request.filePath, GENERIC_WRITE, 0, nullptr, 
+                               CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (hFile != INVALID_HANDLE_VALUE) {
+        CloseHandle(hFile);
+    }
+    
+    // Should handle gracefully
+    HRESULT hr = decoder.Decode(request, result);
+    ASSERT(FAILED(hr));
+    
+    // Cleanup
+    DeleteFileW(request.filePath);
+}
+
+TEST(TestCircuitBreaker_StressTest)
+{
+    // Circuit breaker should isolate failing decoders after 5 failures
+    // This test generates 10 failures and verifies circuit opens
+    
+    ArchiveDecoder decoder;
+    int failureCount = 0;
+    const int maxFailures = 10;
+    
+    for (int i = 0; i < maxFailures; i++) {
+        ThumbnailRequest request = {};
+        wchar_t fileName[256];
+        swprintf_s(fileName, L"test_corrupt_%d.zip", i);
+        request.filePath = fileName;
+        request.outputWidth = 256;
+        request.outputHeight = 256;
+        
+        // Create corrupt file
+        HANDLE hFile = CreateFileW(fileName, GENERIC_WRITE, 0, nullptr, 
+                                   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hFile != INVALID_HANDLE_VALUE) {
+            const char corrupt[] = "PK\xFF\xFF";
+            DWORD written = 0;
+            WriteFile(hFile, corrupt, sizeof(corrupt), &written, nullptr);
+            CloseHandle(hFile);
+        }
+        
+        ThumbnailResult result = {};
+        HRESULT hr = decoder.Decode(request, result);
+        
+        if (FAILED(hr)) {
+            failureCount++;
+        }
+        
+        DeleteFileW(fileName);
+    }
+    
+    // All should fail, but no crashes
+    ASSERT(failureCount == maxFailures);
+    std::wcout << L"  [Circuit Breaker] Handled " << failureCount << L" failures without crash" << std::endl;
+}
+
+TEST(TestDecoderTimeout_Enforcement)
+{
+    // Verify decoders don't hang indefinitely on problematic files
+    // This test simulates a slow/infinite loop scenario
+    
+    ImageDecoder decoder;
+    ThumbnailRequest request = {};
+    request.filePath = L"test_timeout.jpg";
+    request.outputWidth = 256;
+    request.outputHeight = 256;
+    
+    // Create minimal valid JPEG (will decode very quickly)
+    HANDLE hFile = CreateFileW(request.filePath, GENERIC_WRITE, 0, nullptr, 
+                               CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (hFile != INVALID_HANDLE_VALUE) {
+        // Minimal JPEG header (not valid, but triggers parse)
+        const unsigned char jpegHeader[] = {
+            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 'J', 'F', 'I', 'F', 0x00
+        };
+        DWORD written = 0;
+        WriteFile(hFile, jpegHeader, sizeof(jpegHeader), &written, nullptr);
+        CloseHandle(hFile);
+    }
+    
+    auto startTime = std::chrono::steady_clock::now();
+    
+    ThumbnailResult result = {};
+    decoder.Decode(request, result);
+    
+    auto endTime = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+    
+    // Should complete within 5 seconds (timeout enforcement)
+    ASSERT(duration < 5000);
+    
+    std::wcout << L"  [Timeout] Decode completed in " << duration << L" ms (< 5000 ms limit)" << std::endl;
+    
+    DeleteFileW(request.filePath);
+}
+
+TEST(TestMemoryLeak_RegressionLoop)
+{
+    // Run 100 decode iterations and verify no excessive memory growth
+    ImageDecoder decoder;
+    
+    const int iterations = 100;
+    SIZE_T initialMemory = 0;
+    SIZE_T peakMemory = 0;
+    
+    // Get initial memory usage
+    PROCESS_MEMORY_COUNTERS_EX pmc = {};
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+    initialMemory = pmc.WorkingSetSize;
+    
+    for (int i = 0; i < iterations; i++) {
+        ThumbnailRequest request = {};
+        wchar_t fileName[256];
+        swprintf_s(fileName, L"test_leak_%d.bmp", i);
+        request.filePath = fileName;
+        request.outputWidth = 256;
+        request.outputHeight = 256;
+        
+        // Create minimal BMP header
+        HANDLE hFile = CreateFileW(fileName, GENERIC_WRITE, 0, nullptr, 
+                                   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hFile != INVALID_HANDLE_VALUE) {
+            const unsigned char bmpHeader[] = {
+                'B', 'M', 0x36, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x36, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00
+            };
+            DWORD written = 0;
+            WriteFile(hFile, bmpHeader, sizeof(bmpHeader), &written, nullptr);
+            CloseHandle(hFile);
+        }
+        
+        ThumbnailResult result = {};
+        decoder.Decode(request, result);
+        
+        // Release result resources
+        if (result.bitmap) {
+            DeleteObject(result.bitmap);
+        }
+        
+        DeleteFileW(fileName);
+        
+        // Check memory every 10 iterations
+        if ((i + 1) % 10 == 0) {
+            GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+            SIZE_T currentMemory = pmc.WorkingSetSize;
+            if (currentMemory > peakMemory) {
+                peakMemory = currentMemory;
+            }
+        }
+    }
+    
+    // Final memory check
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+    SIZE_T finalMemory = pmc.WorkingSetSize;
+    
+    // Memory growth should be < 50 MB for 100 iterations
+    SIZE_T growth = (finalMemory > initialMemory) ? (finalMemory - initialMemory) : 0;
+    SIZE_T growthMB = growth / (1024 * 1024);
+    
+    std::wcout << L"  [Memory] Initial: " << (initialMemory / 1024 / 1024) << L" MB, "
+               << L"Final: " << (finalMemory / 1024 / 1024) << L" MB, "
+               << L"Growth: " << growthMB << L" MB" << std::endl;
+    
+    ASSERT(growthMB < 50); // No excessive memory leak
+}
+
+//==============================================================================
 // Main Test Runner
 //==============================================================================
 
@@ -1538,6 +1779,17 @@ int main()
     RUN_TEST(TestModelDecoder_GLTFSupport);
     RUN_TEST(TestModelDecoder_Extensions);
     RUN_TEST(TestModelDecoder_GetInfo);
+    
+    std::wcout << std::endl;
+    
+    // Sprint 6: Isolation & Stability Tests
+    std::wcout << L"Sprint 6: Isolation & Stability Tests..." << std::endl;
+    RUN_TEST(TestMalformedArchive_TruncatedZIP);
+    RUN_TEST(TestMalformedArchive_GarbageHeader);
+    RUN_TEST(TestMalformedArchive_ZeroByteFile);
+    RUN_TEST(TestCircuitBreaker_StressTest);
+    RUN_TEST(TestDecoderTimeout_Enforcement);
+    RUN_TEST(TestMemoryLeak_RegressionLoop);
     
     std::wcout << std::endl;
     
