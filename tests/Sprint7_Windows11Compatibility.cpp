@@ -382,7 +382,8 @@ bool TestARM64Feasibility(const SystemInfo& sysInfo) {
     std::cout << "    libwebp: ARM64 supported ✓ (CMake ARM64)" << std::endl;
     std::cout << "    libjxl: ARM64 supported ✓ (CMake ARM64 + NEON optimizations)" << std::endl;
     std::cout << "    libheif: ARM64 supported ✓ (CMake ARM64)" << std::endl;
-    std::cout << "    LibRaw: ARM64 supported ✓ (MSBuild ARM64 config)" << std:cout << "\n  Recommendation: ARM64 build is FEASIBLE ✓" << std::endl;
+    std::cout << "    LibRaw: ARM64 supported ✓ (MSBuild ARM64 config)" << std::endl;
+    std::cout << "\n  Recommendation: ARM64 build is FEASIBLE ✓" << std::endl;
     std::cout << "  Sprint 20 will implement full ARM64 cross-compilation" << std::endl;
     
     return true;
