@@ -2,7 +2,7 @@
 
 **Last Updated:** February 17, 2026  
 **Version:** v7.0.0  
-**Status:** 🔄 Active Development — Sprints 1-22 Complete; Sprints 23-42 Next
+**Status:** 🔄 Active Development — Sprints 1-25 Complete; Sprints 26-42 Next
 
 ---
 
@@ -59,13 +59,15 @@
 | 11 | Plugin System Activation | Uncomment LoadPlugins(), end-to-end IPC test | ✅ Complete |
 | 12 | Observability & Logging | ETW provider, JSON logger, diagnostics export | ✅ Complete |
 
-### 📅 Future (Sprints 23-42)
+### 📅 Sprints 23-25 (Now Complete)
 
-| Sprint | Name | Category |
-|--------|------|----------|
-| 23 | AI-Assisted Thumbnails | Advanced Features |
-| 24 | Microsoft Store Submission | Distribution |
-| 25 | OpenImageIO Integration | Format Expansion |
+| Sprint | Name | Status |
+|--------|------|--------|
+| 23 | AI-Assisted Thumbnails | ✅ Complete — AIThumbnailEnhancer + DirectML/ONNX |
+| 24 | Microsoft Store Submission | ✅ Complete — MSIX manifest + Store compliance |
+| 25 | OpenImageIO Integration | ✅ Complete — Integration stubs + format expansion |
+
+### 📅 Future (Sprints 26-42)
 | 26-27 | Cloud & Caching | Infrastructure |
 | 28-29 | Video Enhancement & Marketplace | Ecosystem |
 | 30-32 | Accessibility, Enterprise, Polish | Production |
