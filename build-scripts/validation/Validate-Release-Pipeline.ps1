@@ -88,9 +88,9 @@ try {
     Write-StepHeader "Step 2: Build Artifact Verification"
 
     $artifacts = @(
-        @{ Path = "x64\Release\CBXShell.dll";       MinMB = 2.5;  Desc = "Shell Extension DLL" }
-        @{ Path = "x64\Release\CBXManager.exe";     MinMB = 0.3;  Desc = "Manager Application" }
-        @{ Path = "build\lib\DarkThumbsEngine.lib";  MinMB = 90;   Desc = "Engine Static Library" }
+        @{ Path = "x64\Release\CBXShell.dll"; MinMB = 2.5; Desc = "Shell Extension DLL" }
+        @{ Path = "x64\Release\CBXManager.exe"; MinMB = 0.3; Desc = "Manager Application" }
+        @{ Path = "build\lib\DarkThumbsEngine.lib"; MinMB = 90; Desc = "Engine Static Library" }
     )
 
     foreach ($art in $artifacts) {
