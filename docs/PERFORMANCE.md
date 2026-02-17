@@ -592,7 +592,7 @@ cd "C:\Program Files\DarkThumbs"
 
 # Output:
 # ==================================================
-# DarkThumbs Benchmark Suite - Version 6.2.0
+# DarkThumbs Benchmark Suite - Version 7.0.0
 # ==================================================
 # System: Intel Core i7-10700K, 16 GB RAM
 # GPU: NVIDIA RTX 3060 (12 GB VRAM)
