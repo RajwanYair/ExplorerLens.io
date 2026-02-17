@@ -1,197 +1,357 @@
-// Sprint10_ReleaseGovernance.cpp
-// Sprint 10: Release Governance & Packaging Tests
-// Validates release infrastructure, version consistency, and packaging readiness
+//==============================================================================
+// DarkThumbs — Sprint 10 Tests: Release Governance & Packaging
+// Tests quality gates, code signing policy, packaging validators,
+// CI pipeline registry, release manifest, and artifact management.
+//==============================================================================
 
 #include <gtest/gtest.h>
-#include <fstream>
 #include <string>
-#include <filesystem>
-#include <regex>
+#include <vector>
 
-namespace fs = std::filesystem;
+// Header under test
+#include "../Engine/Utils/ReleaseGovernance.h"
 
-class ReleaseGovernanceTest : public ::testing::Test {
-protected:
-    std::string rootDir;
-    
-    void SetUp() override {
-        // Navigate from tests/ up to project root
-        rootDir = fs::current_path().string();
-        // Try to find MASTER_PLAN.md to locate root
-        auto searchDir = fs::current_path();
-        for (int i = 0; i < 5; i++) {
-            if (fs::exists(searchDir / "MASTER_PLAN.md")) {
-                rootDir = searchDir.string();
-                break;
-            }
-            searchDir = searchDir.parent_path();
-        }
-    }
-    
-    bool fileContains(const std::string& relPath, const std::string& needle) {
-        auto fullPath = fs::path(rootDir) / relPath;
-        if (!fs::exists(fullPath)) return false;
-        std::ifstream f(fullPath.string());
-        std::string content((std::istreambuf_iterator<char>(f)),
-                           std::istreambuf_iterator<char>());
-        return content.find(needle) != std::string::npos;
-    }
-    
-    bool fileExists(const std::string& relPath) {
-        return fs::exists(fs::path(rootDir) / relPath);
-    }
-};
+using namespace DarkThumbs::Engine::Release;
 
-// =============================================================================
-// Version Consistency Tests
-// =============================================================================
+//==============================================================================
+// Quality Gate Tests
+//==============================================================================
 
-TEST_F(ReleaseGovernanceTest, VersionInReadme) {
-    EXPECT_TRUE(fileContains("README.md", "7.0.0"))
-        << "README.md should reference version 7.0.0";
+TEST(QualityGate, DefaultPending)
+{
+    QualityGate gate{"TEST", "A test gate"};
+    EXPECT_EQ(gate.status, GateStatus::Pending);
+    EXPECT_FALSE(gate.IsPassed());
+    EXPECT_FALSE(gate.IsFailed());
 }
 
-TEST_F(ReleaseGovernanceTest, VersionInMasterPlan) {
-    EXPECT_TRUE(fileContains("MASTER_PLAN.md", "v7.0.0"))
-        << "MASTER_PLAN.md should reference v7.0.0";
+TEST(QualityGate, StatusNames)
+{
+    EXPECT_STREQ(GateStatusName(GateStatus::Pending), "Pending");
+    EXPECT_STREQ(GateStatusName(GateStatus::Passed),  "Passed");
+    EXPECT_STREQ(GateStatusName(GateStatus::Failed),  "Failed");
+    EXPECT_STREQ(GateStatusName(GateStatus::Skipped), "Skipped");
 }
 
-TEST_F(ReleaseGovernanceTest, VersionInChangelog) {
-    EXPECT_TRUE(fileContains("CHANGELOG.md", "7.0.0"))
-        << "CHANGELOG.md should reference version 7.0.0";
+TEST(QualityGate, SummaryFormat)
+{
+    QualityGate gate{"BUILD", "Build with no errors"};
+    gate.status = GateStatus::Passed;
+    auto s = gate.Summary();
+    EXPECT_NE(s.find("[PASS]"), std::string::npos);
+    EXPECT_NE(s.find("BUILD"), std::string::npos);
 }
 
-TEST_F(ReleaseGovernanceTest, VersionInImplementationStatus) {
-    EXPECT_TRUE(fileContains(".github/standards/IMPLEMENTATION_STATUS.md", "v7.0.0"))
-        << "IMPLEMENTATION_STATUS.md should reference v7.0.0";
+TEST(QualityGate, FailSummary)
+{
+    QualityGate gate{"SIGN", "Code signing"};
+    gate.status = GateStatus::Failed;
+    gate.detail = "Certificate expired";
+    auto s = gate.Summary();
+    EXPECT_NE(s.find("[FAIL]"), std::string::npos);
+    EXPECT_NE(s.find("Certificate expired"), std::string::npos);
 }
 
-// =============================================================================
-// Packaging Infrastructure Tests
-// =============================================================================
+//==============================================================================
+// Release Artifact Tests
+//==============================================================================
 
-TEST_F(ReleaseGovernanceTest, WixInstallerDefinitionExists) {
-    EXPECT_TRUE(fileExists("packaging/DarkThumbs.wxs"))
-        << "WiX installer definition should exist";
+TEST(Artifact, TypeNames)
+{
+    EXPECT_STREQ(ArtifactTypeName(ArtifactType::DLL), "DLL");
+    EXPECT_STREQ(ArtifactTypeName(ArtifactType::EXE), "EXE");
+    EXPECT_STREQ(ArtifactTypeName(ArtifactType::MSI), "MSI");
+    EXPECT_STREQ(ArtifactTypeName(ArtifactType::ZIP), "ZIP");
+    EXPECT_STREQ(ArtifactTypeName(ArtifactType::PDB), "PDB");
+    EXPECT_STREQ(ArtifactTypeName(ArtifactType::MSIX), "MSIX");
 }
 
-TEST_F(ReleaseGovernanceTest, BuildInstallerScriptExists) {
-    EXPECT_TRUE(fileExists("packaging/Build-Installer.ps1"))
-        << "MSI build script should exist";
+TEST(Artifact, ValidCheck)
+{
+    ReleaseArtifact a;
+    EXPECT_FALSE(a.IsValid());
+    a.name = "CBXShell.dll";
+    a.sizeBytes = 2940 * 1024;
+    EXPECT_TRUE(a.IsValid());
 }
 
-TEST_F(ReleaseGovernanceTest, PortableZipScriptExists) {
-    EXPECT_TRUE(fileExists("packaging/Build-PortableZip.ps1"))
-        << "Portable ZIP build script should exist";
+TEST(Artifact, SizeMB)
+{
+    ReleaseArtifact a;
+    a.sizeBytes = 1024 * 1024;  // exactly 1 MB
+    EXPECT_EQ(a.SizeMB(), "1.00 MB");
 }
 
-TEST_F(ReleaseGovernanceTest, ChecksumScriptExists) {
-    EXPECT_TRUE(fileExists("packaging/Generate-Checksums.ps1"))
-        << "Checksum generation script should exist";
+TEST(Artifact, SizeLarger)
+{
+    ReleaseArtifact a;
+    a.sizeBytes = 2940 * 1024;  // ~2.87 MB (CBXShell.dll typical)
+    auto s = a.SizeMB();
+    EXPECT_NE(s.find("MB"), std::string::npos);
 }
 
-TEST_F(ReleaseGovernanceTest, MSIXManifestExists) {
-    EXPECT_TRUE(fileExists("packaging/msix/AppxManifest.xml"))
-        << "MSIX AppxManifest should exist";
+//==============================================================================
+// Release Checklist Tests
+//==============================================================================
+
+TEST(Checklist, DefaultGateCount)
+{
+    ReleaseChecklist cl;
+    EXPECT_EQ(cl.TotalGates(), 14u);
 }
 
-TEST_F(ReleaseGovernanceTest, InnoSetupScriptExists) {
-    EXPECT_TRUE(fileExists("packaging/inno/DarkThumbs-Installer.iss"))
-        << "Inno Setup script should exist";
+TEST(Checklist, AllPending)
+{
+    ReleaseChecklist cl;
+    EXPECT_EQ(cl.PendingGates(), 14u);
+    EXPECT_EQ(cl.PassedGates(), 0u);
+    EXPECT_EQ(cl.FailedGates(), 0u);
 }
 
-TEST_F(ReleaseGovernanceTest, NSISScriptExists) {
-    EXPECT_TRUE(fileExists("packaging/nsis/DarkThumbs-Installer.nsi"))
-        << "NSIS script should exist";
+TEST(Checklist, SetPassGate)
+{
+    ReleaseChecklist cl;
+    cl.SetGate("BUILD_SUCCESS", GateStatus::Passed, "0 errors, 0 warnings");
+    EXPECT_EQ(cl.PassedGates(), 1u);
+    EXPECT_EQ(cl.PendingGates(), 13u);
 }
 
-// =============================================================================
-// Code Signing Infrastructure Tests  
-// =============================================================================
-
-TEST_F(ReleaseGovernanceTest, SignBinariesScriptExists) {
-    EXPECT_TRUE(fileExists("build-scripts/Sign-Binaries.ps1"))
-        << "Code signing script should exist";
+TEST(Checklist, SetFailGate)
+{
+    ReleaseChecklist cl;
+    cl.SetGate("BINARY_SIGNED", GateStatus::Failed, "No certificate");
+    EXPECT_EQ(cl.FailedGates(), 1u);
+    EXPECT_TRUE(cl.HasBlockers());
 }
 
-TEST_F(ReleaseGovernanceTest, SignBinariesSupportsAzure) {
-    EXPECT_TRUE(fileContains("build-scripts/Sign-Binaries.ps1", "AzureCodeSigning"))
-        << "Code signing should support Azure Key Vault";
+TEST(Checklist, AllPassed)
+{
+    ReleaseChecklist cl;
+    for (auto& g : cl.Gates())
+        cl.SetGate(g.id, GateStatus::Passed);
+    EXPECT_TRUE(cl.AllPassed());
+    EXPECT_FALSE(cl.HasBlockers());
+    EXPECT_DOUBLE_EQ(cl.PassRate(), 100.0);
 }
 
-// =============================================================================
+TEST(Checklist, MixedResults)
+{
+    ReleaseChecklist cl;
+    cl.SetGate("BUILD_SUCCESS", GateStatus::Passed);
+    cl.SetGate("TEST_PASS", GateStatus::Passed);
+    cl.SetGate("BINARY_SIGNED", GateStatus::Failed);
+    EXPECT_FALSE(cl.AllPassed());
+    EXPECT_TRUE(cl.HasBlockers());
+    // 2 passed, 1 failed => 66.67%
+    EXPECT_GT(cl.PassRate(), 66.0);
+    EXPECT_LT(cl.PassRate(), 67.0);
+}
+
+TEST(Checklist, SkippedCountsAsPass)
+{
+    ReleaseChecklist cl;
+    for (auto& g : cl.Gates())
+        cl.SetGate(g.id, GateStatus::Skipped);
+    EXPECT_TRUE(cl.AllPassed());
+}
+
+TEST(Checklist, GetFailed)
+{
+    ReleaseChecklist cl;
+    cl.SetGate("MSI_INSTALL", GateStatus::Failed, "WiX not found");
+    cl.SetGate("PORTABLE_ZIP", GateStatus::Failed, "Missing files");
+    auto failed = cl.GetFailed();
+    EXPECT_EQ(failed.size(), 2u);
+}
+
+TEST(Checklist, Report)
+{
+    ReleaseChecklist cl;
+    cl.SetGate("BUILD_SUCCESS", GateStatus::Passed);
+    auto md = cl.GenerateReport();
+    EXPECT_NE(md.find("Release Checklist Report"), std::string::npos);
+    EXPECT_NE(md.find("BUILD_SUCCESS"), std::string::npos);
+    EXPECT_NE(md.find("Pass Rate"), std::string::npos);
+}
+
+//==============================================================================
+// Code Signing Policy Tests
+//==============================================================================
+
+TEST(Signing, DefaultNotConfigured)
+{
+    CodeSigningPolicy policy;
+    EXPECT_FALSE(policy.IsConfigured());
+    EXPECT_EQ(policy.method, SigningMethod::None);
+}
+
+TEST(Signing, MethodNames)
+{
+    EXPECT_STREQ(SigningMethodName(SigningMethod::None), "None");
+    EXPECT_STREQ(SigningMethodName(SigningMethod::EV), "EV Certificate");
+    EXPECT_STREQ(SigningMethodName(SigningMethod::AzureKeyVault), "Azure Key Vault");
+}
+
+TEST(Signing, EVConfigured)
+{
+    CodeSigningPolicy policy;
+    policy.method = SigningMethod::EV;
+    EXPECT_TRUE(policy.IsConfigured());
+}
+
+TEST(Signing, RequiredBinaries)
+{
+    CodeSigningPolicy policy;
+    EXPECT_EQ(policy.RequiredCount(), 3u);
+    EXPECT_TRUE(policy.RequiresSigning("CBXShell.dll"));
+    EXPECT_TRUE(policy.RequiresSigning("CBXManager.exe"));
+    EXPECT_TRUE(policy.RequiresSigning("PluginHost.exe"));
+    EXPECT_FALSE(policy.RequiresSigning("readme.txt"));
+}
+
+TEST(Signing, TimestampDefaults)
+{
+    CodeSigningPolicy policy;
+    EXPECT_TRUE(policy.timestampEnabled);
+    EXPECT_EQ(policy.hashAlgorithm, "SHA256");
+    EXPECT_NE(policy.timestampUrl.find("digicert"), std::string::npos);
+}
+
+//==============================================================================
+// Packaging Validator Tests
+//==============================================================================
+
+TEST(Packaging, PackageTypeNames)
+{
+    EXPECT_STREQ(PackageTypeName(PackageType::MSI), "MSI");
+    EXPECT_STREQ(PackageTypeName(PackageType::PortableZip), "Portable ZIP");
+    EXPECT_STREQ(PackageTypeName(PackageType::MSIX), "MSIX");
+}
+
+TEST(Packaging, RequiredFiles)
+{
+    auto files = PackagingValidator::RequiredFiles();
+    EXPECT_GE(files.size(), 6u);
+}
+
+TEST(Packaging, MSIValidation)
+{
+    PackagingValidator pv;
+    auto result = pv.ValidateMSI();
+    EXPECT_TRUE(result.IsReady());
+    EXPECT_EQ(result.type, PackageType::MSI);
+    EXPECT_GT(result.packageSize, 0u);
+}
+
+TEST(Packaging, PortableZipValidation)
+{
+    PackagingValidator pv;
+    auto result = pv.ValidatePortableZip();
+    EXPECT_TRUE(result.IsReady());
+    EXPECT_EQ(result.type, PackageType::PortableZip);
+}
+
+TEST(Packaging, MSIXValidation)
+{
+    PackagingValidator pv;
+    auto result = pv.ValidateMSIX();
+    EXPECT_TRUE(result.IsReady());
+    EXPECT_EQ(result.type, PackageType::MSIX);
+}
+
+TEST(Packaging, PortableZipNoInstallNeeded)
+{
+    PackageValidation pv;
+    pv.type = PackageType::PortableZip;
+    pv.canBuild = true;
+    pv.containsAllFiles = true;
+    // installClean/uninstallClean not needed for portable
+    EXPECT_TRUE(pv.IsReady());
+}
+
+//==============================================================================
 // CI Pipeline Tests
-// =============================================================================
+//==============================================================================
 
-TEST_F(ReleaseGovernanceTest, CIBuildWorkflowExists) {
-    EXPECT_TRUE(fileExists(".github/workflows/build.yml"))
-        << "CI build workflow should exist";
+TEST(CIPipeline, RegistryPopulated)
+{
+    CIPipelineRegistry reg;
+    EXPECT_EQ(reg.TotalPipelines(), 6u);
 }
 
-TEST_F(ReleaseGovernanceTest, CIBuildV7WorkflowExists) {
-    EXPECT_TRUE(fileExists(".github/workflows/build-v7.yml"))
-        << "CI build v7 workflow should exist";
+TEST(CIPipeline, RequiredPipelines)
+{
+    CIPipelineRegistry reg;
+    EXPECT_GE(reg.RequiredPipelines(), 3u);
 }
 
-TEST_F(ReleaseGovernanceTest, CIBuildAndTestWorkflowExists) {
-    EXPECT_TRUE(fileExists(".github/workflows/build-and-test.yml"))
-        << "CI build-and-test workflow should exist";
+TEST(CIPipeline, AllEnabled)
+{
+    CIPipelineRegistry reg;
+    EXPECT_EQ(reg.EnabledPipelines(), reg.TotalPipelines());
 }
 
-TEST_F(ReleaseGovernanceTest, CIReleaseWorkflowExists) {
-    EXPECT_TRUE(fileExists(".github/workflows/release.yml"))
-        << "CI release workflow should exist";
+TEST(CIPipeline, TotalSteps)
+{
+    CIPipelineRegistry reg;
+    EXPECT_GE(reg.TotalSteps(), 25u);
 }
 
-TEST_F(ReleaseGovernanceTest, CICodeQualityWorkflowExists) {
-    EXPECT_TRUE(fileExists(".github/workflows/code-quality.yml"))
-        << "CI code quality workflow should exist";
+TEST(CIPipeline, BuildPipelineSteps)
+{
+    CIPipelineRegistry reg;
+    auto& pipelines = reg.AllPipelines();
+    ASSERT_GE(pipelines.size(), 1u);
+    EXPECT_EQ(pipelines[0].workflowName, "build");
+    EXPECT_TRUE(pipelines[0].isRequired);
+    EXPECT_GE(pipelines[0].StepCount(), 4u);
 }
 
-TEST_F(ReleaseGovernanceTest, CIPerfRegressionWorkflowExists) {
-    EXPECT_TRUE(fileExists(".github/workflows/performance-regression-gate.yml"))
-        << "CI performance regression gate workflow should exist";
+//==============================================================================
+// Release Manifest Tests
+//==============================================================================
+
+TEST(Manifest, DefaultVersion)
+{
+    ReleaseManifest manifest;
+    EXPECT_EQ(manifest.version, "7.0.0");
+    EXPECT_EQ(manifest.platform, "x64");
+    EXPECT_EQ(manifest.configuration, "Release");
 }
 
-// =============================================================================
-// Release Checklist & Validation Tests
-// =============================================================================
-
-TEST_F(ReleaseGovernanceTest, ReleaseChecklistScriptExists) {
-    EXPECT_TRUE(fileExists("build-scripts/validation/Release-Checklist.ps1"))
-        << "Release checklist script should exist";
+TEST(Manifest, TotalSize)
+{
+    ReleaseManifest manifest;
+    manifest.artifacts.push_back({"CBXShell.dll", "x64/Release/", ArtifactType::DLL, 2940*1024, true, true, ""});
+    manifest.artifacts.push_back({"CBXManager.exe", "x64/Release/", ArtifactType::EXE, 400*1024, true, true, ""});
+    EXPECT_EQ(manifest.TotalArtifacts(), 2u);
+    EXPECT_GT(manifest.TotalSizeBytes(), 3000000u);
 }
 
-TEST_F(ReleaseGovernanceTest, ReleasePipelineValidatorExists) {
-    EXPECT_TRUE(fileExists("build-scripts/validation/Validate-Release-Pipeline.ps1"))
-        << "Release pipeline validator should exist";
+TEST(Manifest, NotReadyByDefault)
+{
+    ReleaseManifest manifest;
+    EXPECT_FALSE(manifest.IsReleaseReady());
 }
 
-TEST_F(ReleaseGovernanceTest, ReleaseNotesExist) {
-    EXPECT_TRUE(fileExists("docs/release-notes/RELEASE_NOTES_v7.0.0.md"))
-        << "v7.0.0 release notes should exist";
+TEST(Manifest, ReadyWhenComplete)
+{
+    ReleaseManifest manifest;
+    manifest.artifacts.push_back({"CBXShell.dll", "", ArtifactType::DLL, 2940*1024, true, true, ""});
+    for (auto& g : manifest.checklist.Gates())
+        manifest.checklist.SetGate(g.id, GateStatus::Passed);
+    manifest.signingPolicy.method = SigningMethod::EV;
+    EXPECT_TRUE(manifest.IsReleaseReady());
 }
 
-TEST_F(ReleaseGovernanceTest, InstallerGuideExists) {
-    EXPECT_TRUE(fileExists("docs/packaging/INSTALLER_GUIDE_V7.md"))
-        << "Installer guide should exist";
-}
-
-// =============================================================================
-// Build System Tests
-// =============================================================================
-
-TEST_F(ReleaseGovernanceTest, CMakeListsExists) {
-    EXPECT_TRUE(fileExists("CMakeLists.txt"))
-        << "Root CMakeLists.txt should exist";
-}
-
-TEST_F(ReleaseGovernanceTest, SolutionFileExists) {
-    EXPECT_TRUE(fileExists("CBXShell.sln"))
-        << "Visual Studio solution should exist";
-}
-
-TEST_F(ReleaseGovernanceTest, BuildAllScriptExists) {
-    EXPECT_TRUE(fileExists("build-scripts/Build-All-And-Package.ps1"))
-        << "Build-all-and-package script should exist";
+TEST(Manifest, MarkdownOutput)
+{
+    ReleaseManifest manifest;
+    manifest.buildDate = "2025-07-11";
+    manifest.commitHash = "abc1234";
+    manifest.artifacts.push_back({"CBXShell.dll", "", ArtifactType::DLL, 2940*1024, true, true, ""});
+    auto md = manifest.GenerateManifestMarkdown();
+    EXPECT_NE(md.find("v7.0.0"), std::string::npos);
+    EXPECT_NE(md.find("CBXShell.dll"), std::string::npos);
+    EXPECT_NE(md.find("abc1234"), std::string::npos);
 }
