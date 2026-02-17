@@ -284,8 +284,12 @@ public:
         decoderRegistry.RegisterDecoder(imageDecoder.get());
         decoders.push_back(std::move(imageDecoder));
         
-        // 4. Scan for and load third-party plugins
-        LoadPlugins();
+        // 4. Scan for and load third-party plugins (Sprint 11 - feature flag controlled)
+        if (config.enablePlugins) {
+            LoadPlugins();
+        } else {
+            OutputDebugStringW(L"[Pipeline] Plugin loading disabled by configuration\n");
+        }
         
         decodersInitialized = true;
         OutputDebugStringW(L"[Pipeline] Lazy decoder init complete\n");
