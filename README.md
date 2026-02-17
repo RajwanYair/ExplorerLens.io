@@ -43,7 +43,7 @@ DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts,
 - **Standard:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tiff`, `.tif`
 - **Modern:** `.webp` (WebP), `.avif` (AV1 Image), `.jxl` (JPEG XL) ✅
 - **Mobile:** `.heif`, `.heic`, `.hif`, `.avci`, `.avcs` (Apple HEIC/HEIF) ✅
-- **Implementation:** JXL via libjxl 0.11.1 | HEIF via Windows WIC (hardware-accelerated)
+- **Implementation:** JXL via libjxl 0.11.1 | HEIF via libheif 1.19.5 (with WIC fallback on Windows 11)
 
 #### Archives & Comic Books (✅ Fully Supported)
 - **Comic Books:** `.cbz`, `.cbr`, `.cb7`, `.cbt`
@@ -54,7 +54,7 @@ DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts,
 - **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.dng`, `.rw2`, `.raf`, `.pef`, `.dcr`, `.mrw`, `.x3f` and 100+ more camera formats (✅ LibRaw 0.21.3)
   - **Features:** Embedded JPEG thumbnail extraction (< 10ms), full RAW decode with demosaicing, EXIF orientation support, auto white balance
   - **Cameras:** Canon, Nikon, Sony, Olympus, Panasonic, Fujifilm, Pentax, Adobe DNG, Leica, Samsung, Hasselblad, Phase One, Sigma
-- **Modern Images:** `.jxl` (JPEG XL) via libjxl 0.11.1, `.heif`/`.heic` (HEIF/HEIC) via WIC with hardware acceleration
+- **Modern Images:** `.jxl` (JPEG XL) via libjxl 0.11.1, `.heif`/`.heic` (HEIF/HEIC) via libheif 1.19.5 + WIC fallback
   - **JXL Features:** Next-gen format support, better compression than WebP, wide color gamut
   - **HEIF Features:** Apple iPhone photos (iOS 11+), HDR support, 16-bit depth, wide color
 - **Design:** `.psd`, `.psb` (Photoshop), `.svg` (vector graphics)

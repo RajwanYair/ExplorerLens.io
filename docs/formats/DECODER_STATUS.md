@@ -81,18 +81,12 @@ These are static-method classes used by the COM shell extension directly. They d
 - **Documents:** DOCX, DOC, XLSX, XLS, PPTX, PPT, TXT, RTF, XPS, OXPS
 - **Fonts:** TTF, OTF, WOFF, WOFF2
 
-### Conditional (requires library build)
-- **HEIF/HEIC:** Engine decoder needs `HAS_LIBHEIF=ON` + libheif built
-- **JPEG XL:** Engine decoder needs `HAS_LIBJXL=ON` + libjxl built
-
-### Stubs (awaiting implementation)
-- **PDF:** Shell extension returns E_NOTIMPL
-- **SVG:** Shell extension shows placeholder gradient
-
 ### Total Format Count
-- **Working:** ~100+ file extensions across all decoders
-- **Conditional:** 8 extensions (HEIF family + JXL)
-- **Stub:** 2 extensions (PDF, SVG)
+- **Working:** 200+ file extensions across 25 decoders
+- **HEIF/HEIC:** ✅ Integrated — `HAS_LIBHEIF=ON` (default) via libheif 1.19.5
+- **JPEG XL:** ✅ Integrated — `HAS_LIBJXL=ON` (default) via libjxl 0.11.1
+- **PDF:** Shell extension returns E_NOTIMPL (future Sprint)
+- **SVG:** Shell extension shows placeholder gradient (future Sprint)
 
 ---
 
@@ -101,8 +95,8 @@ These are static-method classes used by the COM shell extension directly. They d
 Set in `Engine/CMakeLists.txt`:
 
 ```cmake
-option(HAS_LIBJXL  "Enable JPEG XL support via libjxl"  OFF)
-option(HAS_LIBHEIF "Enable HEIF/HEIC support via libheif" OFF)
+option(HAS_LIBJXL  "Enable JPEG XL support via libjxl"  ON)  # Default ON since v7.0.0
+option(HAS_LIBHEIF "Enable HEIF/HEIC support via libheif" ON)  # Default ON since v7.0.0
 option(HAS_LIBRAW  "Enable Camera RAW support via LibRaw" ON)
 ```
 

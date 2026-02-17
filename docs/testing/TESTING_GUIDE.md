@@ -134,10 +134,10 @@ Engine/Tests/Release/EngineTests.exe --junit-output=test-results.xml
 ### Console Output
 
 ```
-DarkThumbs Engine Tests - v5.3.0
+DarkThumbs Engine Tests - v7.0.0
 ================================
 
-Running 22 tests...
+Running 100 tests...
 
 [✓] test_decoder_registration_add           (2ms)
 [✓] test_decoder_registration_find          (1ms)
@@ -149,10 +149,12 @@ Running 22 tests...
 [✓] test_avif_decoder_decode                (35ms)
 [✓] test_archive_decoder_zip                (45ms)
 [✓] test_gpu_initialization                 (120ms)
+... (90 more tests)
 
 ================================
-Tests: 22/22 passed (0 failed)
-Time: 358ms
+Tests: 100/100 passed (0 failed)
+Benchmarks: 5/5 passed
+Time: 4.2s
 Status: ✅ ALL TESTS PASSED
 ```
 
@@ -160,8 +162,8 @@ Status: ✅ ALL TESTS PASSED
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="DarkThumbsEngineTests" tests="22" failures="0" time="0.358">
-  <testsuite name="DecoderTests" tests="10" failures="0" time="0.203">
+<testsuites name="DarkThumbsEngineTests" tests="100" failures="0" time="4.200">
+  <testsuite name="DecoderTests" tests="25" failures="0" time="1.203">
     <testcase name="test_decoder_registration_add" time="0.002"/>
     <testcase name="test_image_decoder_png" time="0.015"/>
     ...

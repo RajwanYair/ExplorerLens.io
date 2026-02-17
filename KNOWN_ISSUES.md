@@ -6,7 +6,7 @@
 
 ### Critical (P0)
 
-**None currently.** All P0 issues have been resolved in v6.2.0.
+**None currently.** All P0 issues have been resolved as of v7.0.0.
 
 ---
 
@@ -113,7 +113,7 @@ Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\*.db" -Force
 **Impact:** CBXManager UI doesn't fully respect Windows dark mode  
 **Workaround:** None. Cosmetic issue only.
 
-**Note:** DarkModeHelper.h implements dark mode for dialogs, but Win32 controls have limited dark mode support. Planned migration to WinUI 3 in Sprint 18 will resolve this.
+**Note:** DarkModeHelper.h implements dark mode for dialogs. Dark mode was re-enabled in Sprint 8 with conditional OnCtlColor handlers. WinUI 3 manager (Sprint 18-19) provides a fully modern alternative.
 
 #### 8. Network Drive Performance
 **Status:** By design  
