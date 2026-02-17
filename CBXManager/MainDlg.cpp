@@ -45,11 +45,10 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		pSysMenu.AppendMenu(MF_STRING, IDC_APPABOUT, _T("About"));
 	}
 
-	// Initialize dark mode support (Sprint D3)
-	// DISABLED: Dark mode init causes blank controls on some DPI settings.
-	// Tracked: Sprint 18 (WinUI Manager rewrite) will replace WTL dark mode.
-	// Re-enable prerequisite: Fix owner-draw checkbox rendering first.
-	// InitDarkMode();
+	// Initialize dark mode support (Sprint D3, re-enabled Sprint 8)
+	// Detects system dark mode, sets title bar and app mode.
+	// Note: OnCtlColor handlers now conditionally apply dark theme.
+	InitDarkMode();
 
 	// Initialize status bar (Sprint D3)
 	HWND hStatusBar = GetDlgItem(IDC_STATUSBAR);
@@ -368,6 +367,20 @@ void CMainDlg::InitUI()
 	Button_SetCheck(GetDlgItem(IDC_CB_SVG),   m_reg.HasTH(CBX_SVG));
 	Button_SetCheck(GetDlgItem(IDC_CB_RAW),   m_reg.HasTH(CBX_RAW));
 	
+	// Sprint 8: Professional & Specialized Formats
+	Button_SetCheck(GetDlgItem(IDC_CB_PSD),   m_reg.HasTH(CBX_PSD));
+	Button_SetCheck(GetDlgItem(IDC_CB_DDS),   m_reg.HasTH(CBX_DDS));
+	Button_SetCheck(GetDlgItem(IDC_CB_HDR),   m_reg.HasTH(CBX_HDR));
+	Button_SetCheck(GetDlgItem(IDC_CB_EXR),   m_reg.HasTH(CBX_EXR));
+	Button_SetCheck(GetDlgItem(IDC_CB_PPM),   m_reg.HasTH(CBX_PPM));
+	Button_SetCheck(GetDlgItem(IDC_CB_ICO),   m_reg.HasTH(CBX_ICO));
+	Button_SetCheck(GetDlgItem(IDC_CB_QOI),   m_reg.HasTH(CBX_QOI));
+	Button_SetCheck(GetDlgItem(IDC_CB_TGA),   m_reg.HasTH(CBX_TGA));
+	Button_SetCheck(GetDlgItem(IDC_CB_AUDIO), m_reg.HasTH(CBX_AUDIO));
+	Button_SetCheck(GetDlgItem(IDC_CB_DOCUMENT), m_reg.HasTH(CBX_DOCUMENT));
+	Button_SetCheck(GetDlgItem(IDC_CB_FONT),  m_reg.HasTH(CBX_FONT));
+	Button_SetCheck(GetDlgItem(IDC_CB_MODEL), m_reg.HasTH(CBX_MODEL));
+	
 	// Collage Mode (Sprint C2)
 	DWORD collageMode = m_reg.GetCollageMode();
 	Button_SetCheck(GetDlgItem(IDC_RADIO_1X1), (collageMode == 1));
@@ -548,6 +561,80 @@ void CMainDlg::OnApplyImpl()
 	{
 		bRefresh=TRUE;
 		m_reg.SetHandlers(CBX_RAW, bRet);
+	}
+	
+	// Sprint 8: Professional & Specialized Formats
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_PSD)));
+	if (bRet!=m_reg.HasTH(CBX_PSD))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_PSD, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_DDS)));
+	if (bRet!=m_reg.HasTH(CBX_DDS))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_DDS, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_HDR)));
+	if (bRet!=m_reg.HasTH(CBX_HDR))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_HDR, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_EXR)));
+	if (bRet!=m_reg.HasTH(CBX_EXR))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_EXR, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_PPM)));
+	if (bRet!=m_reg.HasTH(CBX_PPM))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_PPM, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_ICO)));
+	if (bRet!=m_reg.HasTH(CBX_ICO))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_ICO, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_QOI)));
+	if (bRet!=m_reg.HasTH(CBX_QOI))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_QOI, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_TGA)));
+	if (bRet!=m_reg.HasTH(CBX_TGA))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_TGA, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_AUDIO)));
+	if (bRet!=m_reg.HasTH(CBX_AUDIO))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_AUDIO, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_DOCUMENT)));
+	if (bRet!=m_reg.HasTH(CBX_DOCUMENT))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_DOCUMENT, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_FONT)));
+	if (bRet!=m_reg.HasTH(CBX_FONT))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_FONT, bRet);
+	}
+	bRet=(BST_CHECKED==Button_GetCheck(GetDlgItem(IDC_CB_MODEL)));
+	if (bRet!=m_reg.HasTH(CBX_MODEL))
+	{
+		bRefresh=TRUE;
+		m_reg.SetHandlers(CBX_MODEL, bRet);
 	}
 	
 	// Collage Mode (Sprint C2)
@@ -740,6 +827,20 @@ void CMainDlg::InitTooltips()
 	AddTooltipWithStatus(IDC_CB_SVG, CBX_SVG, _T("SVG Vector Graphics\nExtensions: .svg, .svgz\nScalable vector format"));
 	AddTooltipWithStatus(IDC_CB_RAW, CBX_RAW, _T("RAW Camera Photos\nExtensions: .dng, .cr2, .cr3, .nef, .arw, .orf\nRequires: Microsoft Camera Codec Pack (free)\nPerformance: Fast (uses embedded preview)"));
 	
+	// Sprint 8: Professional & Specialized Formats
+	AddTooltipWithStatus(IDC_CB_PSD, CBX_PSD, _T("PSD - Adobe Photoshop Document\nExtensions: .psd, .psb\nShows: Composite preview layer"));
+	AddTooltipWithStatus(IDC_CB_DDS, CBX_DDS, _T("DDS - DirectDraw Surface\nExtensions: .dds\nUsed by: Games, 3D applications"));
+	AddTooltipWithStatus(IDC_CB_HDR, CBX_HDR, _T("HDR - Radiance High Dynamic Range\nExtensions: .hdr\nUsed by: Professional photography, 3D rendering"));
+	AddTooltipWithStatus(IDC_CB_EXR, CBX_EXR, _T("EXR - OpenEXR High Dynamic Range\nExtensions: .exr\nUsed by: VFX, film production"));
+	AddTooltipWithStatus(IDC_CB_PPM, CBX_PPM, _T("PPM - Portable Pixmap\nExtensions: .ppm, .pgm, .pbm\nUsed by: Scientific imaging, CLI tools"));
+	AddTooltipWithStatus(IDC_CB_ICO, CBX_ICO, _T("ICO - Windows Icon\nExtensions: .ico, .cur\nShows: Largest available icon size"));
+	AddTooltipWithStatus(IDC_CB_QOI, CBX_QOI, _T("QOI - Quite OK Image Format\nExtensions: .qoi\nFast lossless compression"));
+	AddTooltipWithStatus(IDC_CB_TGA, CBX_TGA, _T("TGA - Targa Image\nExtensions: .tga\nUsed by: Games, 3D applications"));
+	AddTooltipWithStatus(IDC_CB_AUDIO, CBX_AUDIO, _T("Audio Cover Art\nExtensions: .mp3, .flac, .ogg, .wma, .aac\nShows: Embedded album art thumbnail"));
+	AddTooltipWithStatus(IDC_CB_DOCUMENT, CBX_DOCUMENT, _T("Document Thumbnails\nExtensions: .docx, .xlsx, .pptx\nShows: First page preview via OLE/COM"));
+	AddTooltipWithStatus(IDC_CB_FONT, CBX_FONT, _T("Font Preview Thumbnails\nExtensions: .ttf, .otf, .woff\nShows: Sample text rendering"));
+	AddTooltipWithStatus(IDC_CB_MODEL, CBX_MODEL, _T("3D Model Thumbnails\nExtensions: .stl, .obj, .ply\nShows: Wireframe/solid preview"));
+	
 	// Options tooltips (no status needed)
 	m_tooltip.AddTool(GetDlgItem(IDC_CB_SORT), _T("Sort images alphabetically by filename\nUncheck to use archive order (creation/modification time)"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CB_SHOWICON), _T("Show archive type icon overlay on thumbnails\nHelps identify CBZ vs CBR vs ZIP, etc."));
@@ -834,10 +935,9 @@ void CMainDlg::InitDarkMode()
 
 LRESULT CMainDlg::OnCtlColorDlg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-	// DISABLED: Custom dialog background requires all child controls to
-	// also handle WM_CTLCOLOR, otherwise text becomes unreadable.
-	// Tracked: Sprint 18 (WinUI Manager) will use XAML theming.
-	return FALSE;  // Let system handle it
+	// Sprint 8: Re-enabled dark mode dialog background
+	if (!m_isDarkMode)
+		return FALSE;  // Let system handle light theme
 	
 	HDC hdc = (HDC)wParam;
 	SetBkColor(hdc, m_theme.background);
@@ -846,9 +946,9 @@ LRESULT CMainDlg::OnCtlColorDlg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOO
 
 LRESULT CMainDlg::OnCtlColorStatic(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-	// DISABLED: Static text colors conflict with group box rendering.
-	// Tracked: Sprint 18 (WinUI Manager) will use XAML theming.
-	return FALSE;  // Let system handle it
+	// Sprint 8: Re-enabled dark mode static/group box colors
+	if (!m_isDarkMode)
+		return FALSE;  // Let system handle light theme
 	
 	HDC hdc = (HDC)wParam;
 	HWND hCtrl = (HWND)lParam;
@@ -883,9 +983,9 @@ LRESULT CMainDlg::OnCtlColorStatic(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, 
 
 LRESULT CMainDlg::OnCtlColorBtn(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-	// DISABLED: Custom button colors cause artifacts with visual styles.
-	// Tracked: Sprint 18 (WinUI Manager) will use XAML button styles.
-	return FALSE;  // Let system handle it
+	// Sprint 8: Re-enabled dark mode button colors
+	if (!m_isDarkMode)
+		return FALSE;  // Let system handle light theme
 	
 	HDC hdc = (HDC)wParam;
 	SetTextColor(hdc, m_theme.text);
@@ -971,10 +1071,25 @@ int CMainDlg::GetEnabledFormatCount()
 	if (m_reg.HasTH(CBX_SVG)) count++;  
 	if (m_reg.HasTH(CBX_RAW)) count++;
 	
-	// Note: We have 23 format handler checkboxes (31+ file extensions supported)
-	// Format handlers: 4 comic + 4 ebook + 4 archive + 2 photo + 4 image + 5 media/doc = 23
-	// Actual extensions: VIDEO covers 4+ formats (MP4/AVI/MKV/WMV), RAW covers DNG/CR2/NEF/etc,
-	// HEIF includes both .heif and .heic, bringing total supported extensions to 31+
+	// Sprint 8: Professional & Specialized Formats (12)
+	if (m_reg.HasTH(CBX_PSD)) count++;
+	if (m_reg.HasTH(CBX_DDS)) count++;
+	if (m_reg.HasTH(CBX_HDR)) count++;
+	if (m_reg.HasTH(CBX_EXR)) count++;
+	if (m_reg.HasTH(CBX_PPM)) count++;
+	if (m_reg.HasTH(CBX_ICO)) count++;
+	if (m_reg.HasTH(CBX_QOI)) count++;
+	if (m_reg.HasTH(CBX_TGA)) count++;
+	if (m_reg.HasTH(CBX_AUDIO)) count++;
+	if (m_reg.HasTH(CBX_DOCUMENT)) count++;
+	if (m_reg.HasTH(CBX_FONT)) count++;
+	if (m_reg.HasTH(CBX_MODEL)) count++;
+	
+	// Note: We have 35 format handler checkboxes (50+ file extensions supported)
+	// Format handlers: 4 comic + 4 ebook + 4 archive + 2 photo + 4 image + 5 media/doc + 12 specialized = 35
+	// Actual extensions: VIDEO covers 4+ formats, RAW covers DNG/CR2/NEF/etc,
+	// HEIF covers .heif/.heic, AUDIO covers MP3/FLAC/etc, DOCUMENT covers DOCX/XLSX/PPTX/etc,
+	// FONT covers TTF/OTF, MODEL covers STL/OBJ/PLY, bringing total to 50+
 	
 	return count;
 }
@@ -1018,6 +1133,20 @@ void CMainDlg::InitStatusIcons()
 	m_checkboxStatus[IDC_CB_TIFF] = m_reg.GetHandlerStatus(CBX_TIFF, m_reg.GetExtension(CBX_TIFF));
 	m_checkboxStatus[IDC_CB_SVG] = m_reg.GetHandlerStatus(CBX_SVG, m_reg.GetExtension(CBX_SVG));
 	m_checkboxStatus[IDC_CB_RAW] = m_reg.GetHandlerStatus(CBX_RAW, m_reg.GetExtension(CBX_RAW));
+	
+	// Sprint 8: Professional & Specialized Formats
+	m_checkboxStatus[IDC_CB_PSD] = m_reg.GetHandlerStatus(CBX_PSD, m_reg.GetExtension(CBX_PSD));
+	m_checkboxStatus[IDC_CB_DDS] = m_reg.GetHandlerStatus(CBX_DDS, m_reg.GetExtension(CBX_DDS));
+	m_checkboxStatus[IDC_CB_HDR] = m_reg.GetHandlerStatus(CBX_HDR, m_reg.GetExtension(CBX_HDR));
+	m_checkboxStatus[IDC_CB_EXR] = m_reg.GetHandlerStatus(CBX_EXR, m_reg.GetExtension(CBX_EXR));
+	m_checkboxStatus[IDC_CB_PPM] = m_reg.GetHandlerStatus(CBX_PPM, m_reg.GetExtension(CBX_PPM));
+	m_checkboxStatus[IDC_CB_ICO] = m_reg.GetHandlerStatus(CBX_ICO, m_reg.GetExtension(CBX_ICO));
+	m_checkboxStatus[IDC_CB_QOI] = m_reg.GetHandlerStatus(CBX_QOI, m_reg.GetExtension(CBX_QOI));
+	m_checkboxStatus[IDC_CB_TGA] = m_reg.GetHandlerStatus(CBX_TGA, m_reg.GetExtension(CBX_TGA));
+	m_checkboxStatus[IDC_CB_AUDIO] = m_reg.GetHandlerStatus(CBX_AUDIO, m_reg.GetExtension(CBX_AUDIO));
+	m_checkboxStatus[IDC_CB_DOCUMENT] = m_reg.GetHandlerStatus(CBX_DOCUMENT, m_reg.GetExtension(CBX_DOCUMENT));
+	m_checkboxStatus[IDC_CB_FONT] = m_reg.GetHandlerStatus(CBX_FONT, m_reg.GetExtension(CBX_FONT));
+	m_checkboxStatus[IDC_CB_MODEL] = m_reg.GetHandlerStatus(CBX_MODEL, m_reg.GetExtension(CBX_MODEL));
 }
 
 LRESULT CMainDlg::OnDrawItem(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
@@ -1278,7 +1407,7 @@ LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 					_T("  F1         - Show this help\n")
 					_T("  F5         - Refresh status\n\n")
 					_T("FEATURES:\n")
-					_T("  \x2022 31+ supported formats\n")
+					_T("  \x2022 50+ supported formats\n")
 					_T("  \x2022 Modern images: WebP, AVIF, JXL, HEIF\n")
 					_T("  \x2022 Conflict detection\n")
 					_T("  \x2022 Windows 11 25H2 compatible\n\n")
@@ -1297,14 +1426,17 @@ LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 
 void CMainDlg::OnSelectAll()
 {
-	// Select all 23 format checkboxes
+	// Select all 35 format checkboxes (Sprint 8: added 12 specialized formats)
 	int formatCheckboxes[] = {
 		IDC_CB_CBZ, IDC_CB_CBR, IDC_CB_CB7, IDC_CB_CBT,
 		IDC_CB_EPUB, IDC_CB_MOBI, IDC_CB_AZW, IDC_CB_AZW3,
 		IDC_CB_ZIP, IDC_CB_RAR, IDC_CB_7Z, IDC_CB_TAR,
 		IDC_CB_PHZ, IDC_CB_FB2,
 		IDC_CB_WEBP, IDC_CB_HEIF, IDC_CB_AVIF, IDC_CB_JXL,
-		IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW
+		IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW,
+		IDC_CB_PSD, IDC_CB_DDS, IDC_CB_HDR, IDC_CB_EXR,
+		IDC_CB_PPM, IDC_CB_ICO, IDC_CB_QOI, IDC_CB_TGA,
+		IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT, IDC_CB_MODEL
 	};
 	
 	for (int id : formatCheckboxes) {
@@ -1314,14 +1446,17 @@ void CMainDlg::OnSelectAll()
 
 void CMainDlg::OnDeselectAll()
 {
-	// Deselect all 23 format checkboxes
+	// Deselect all 35 format checkboxes (Sprint 8: added 12 specialized formats)
 	int formatCheckboxes[] = {
 		IDC_CB_CBZ, IDC_CB_CBR, IDC_CB_CB7, IDC_CB_CBT,
 		IDC_CB_EPUB, IDC_CB_MOBI, IDC_CB_AZW, IDC_CB_AZW3,
 		IDC_CB_ZIP, IDC_CB_RAR, IDC_CB_7Z, IDC_CB_TAR,
 		IDC_CB_PHZ, IDC_CB_FB2,
 		IDC_CB_WEBP, IDC_CB_HEIF, IDC_CB_AVIF, IDC_CB_JXL,
-		IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW
+		IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW,
+		IDC_CB_PSD, IDC_CB_DDS, IDC_CB_HDR, IDC_CB_EXR,
+		IDC_CB_PPM, IDC_CB_ICO, IDC_CB_QOI, IDC_CB_TGA,
+		IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT, IDC_CB_MODEL
 	};
 	
 	for (int id : formatCheckboxes) {
@@ -1359,6 +1494,19 @@ ConfigSnapshot CMainDlg::CaptureCurrentConfig()
 	config.tiff = (m_reg.HasTH(CBX_TIFF) != FALSE);
 	config.svg = (m_reg.HasTH(CBX_SVG) != FALSE);
 	config.raw = (m_reg.HasTH(CBX_RAW) != FALSE);
+	// Sprint 8: Professional & Specialized Formats
+	config.psd = (m_reg.HasTH(CBX_PSD) != FALSE);
+	config.dds = (m_reg.HasTH(CBX_DDS) != FALSE);
+	config.hdr = (m_reg.HasTH(CBX_HDR) != FALSE);
+	config.exr = (m_reg.HasTH(CBX_EXR) != FALSE);
+	config.ppm = (m_reg.HasTH(CBX_PPM) != FALSE);
+	config.ico = (m_reg.HasTH(CBX_ICO) != FALSE);
+	config.qoi = (m_reg.HasTH(CBX_QOI) != FALSE);
+	config.tga = (m_reg.HasTH(CBX_TGA) != FALSE);
+	config.audio = (m_reg.HasTH(CBX_AUDIO) != FALSE);
+	config.document = (m_reg.HasTH(CBX_DOCUMENT) != FALSE);
+	config.font = (m_reg.HasTH(CBX_FONT) != FALSE);
+	config.model = (m_reg.HasTH(CBX_MODEL) != FALSE);
 	
 	// Capture options
 	config.sortOpt = (m_reg.IsSortOpt() != FALSE);
@@ -1394,6 +1542,19 @@ void CMainDlg::ApplyConfigSnapshot(const ConfigSnapshot& config)
 	m_reg.SetHandlers(CBX_TIFF, config.tiff);
 	m_reg.SetHandlers(CBX_SVG, config.svg);
 	m_reg.SetHandlers(CBX_RAW, config.raw);
+	// Sprint 8: Professional & Specialized Formats
+	m_reg.SetHandlers(CBX_PSD, config.psd);
+	m_reg.SetHandlers(CBX_DDS, config.dds);
+	m_reg.SetHandlers(CBX_HDR, config.hdr);
+	m_reg.SetHandlers(CBX_EXR, config.exr);
+	m_reg.SetHandlers(CBX_PPM, config.ppm);
+	m_reg.SetHandlers(CBX_ICO, config.ico);
+	m_reg.SetHandlers(CBX_QOI, config.qoi);
+	m_reg.SetHandlers(CBX_TGA, config.tga);
+	m_reg.SetHandlers(CBX_AUDIO, config.audio);
+	m_reg.SetHandlers(CBX_DOCUMENT, config.document);
+	m_reg.SetHandlers(CBX_FONT, config.font);
+	m_reg.SetHandlers(CBX_MODEL, config.model);
 	
 	// Apply options
 	m_reg.SetSortOpt(config.sortOpt);
@@ -1495,6 +1656,20 @@ bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot& outConfig)
 	outConfig.svg = getBool("svg");
 	outConfig.raw = getBool("raw");
 	
+	// Sprint 8: Professional & Specialized Formats
+	outConfig.psd = getBool("psd");
+	outConfig.dds = getBool("dds");
+	outConfig.hdr = getBool("hdr");
+	outConfig.exr = getBool("exr");
+	outConfig.ppm = getBool("ppm");
+	outConfig.ico = getBool("ico");
+	outConfig.qoi = getBool("qoi");
+	outConfig.tga = getBool("tga");
+	outConfig.audio = getBool("audio");
+	outConfig.document = getBool("document");
+	outConfig.font = getBool("font");
+	outConfig.model = getBool("model");
+	
 	// Parse options
 	outConfig.sortOpt = getBool("sortPages");
 	outConfig.showIconOpt = getBool("showIconOverlay");
@@ -1588,6 +1763,20 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename, ConfigSnapshot& outConfig
 	outConfig.tiff = isFormatEnabled("tif") || isFormatEnabled("tiff");
 	outConfig.svg = isFormatEnabled("svg");
 	outConfig.raw = isFormatEnabled("dng"); // Use dng as proxy for all RAW
+	
+	// Sprint 8: Professional & Specialized Formats
+	outConfig.psd = isFormatEnabled("psd");
+	outConfig.dds = isFormatEnabled("dds");
+	outConfig.hdr = isFormatEnabled("hdr");
+	outConfig.exr = isFormatEnabled("exr");
+	outConfig.ppm = isFormatEnabled("ppm");
+	outConfig.ico = isFormatEnabled("ico");
+	outConfig.qoi = isFormatEnabled("qoi");
+	outConfig.tga = isFormatEnabled("tga");
+	outConfig.audio = isFormatEnabled("mp3"); // Use mp3 as proxy for all audio
+	outConfig.document = isFormatEnabled("docx"); // Use docx as proxy for all documents
+	outConfig.font = isFormatEnabled("ttf"); // Use ttf as proxy for all fonts
+	outConfig.model = isFormatEnabled("stl"); // Use stl as proxy for all 3D models
 	
 	// Parse options
 	outConfig.sortOpt = (getDwordValue("SortOpt") != 0);

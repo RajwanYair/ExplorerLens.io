@@ -35,13 +35,17 @@ struct ConfigChange
 // Structure to hold complete configuration snapshot
 struct ConfigSnapshot
 {
-	// Format handlers (23 formats)
+	// Format handlers (23 core + 12 specialized = 35 formats)
 	bool cbz, cbr, cb7, cbt;
 	bool epub, mobi, azw, azw3;
 	bool zip, rar, z7, tar;
 	bool phz, fb2;
 	bool webp, heif, avif, jxl;
 	bool video, pdf, tiff, svg, raw;
+	// Sprint 8: Professional & Specialized Formats
+	bool psd, dds, hdr, exr;
+	bool ppm, ico, qoi, tga;
+	bool audio, document, font, model;
 	
 	// Options
 	bool sortOpt;

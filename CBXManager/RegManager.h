@@ -46,6 +46,19 @@
 #define CBX_TIFFTH_KEY _T("SOFTWARE\\Classes\\.TIF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
 #define CBX_SVGTH_KEY _T("SOFTWARE\\Classes\\.SVG\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
 #define CBX_DNGTH_KEY _T("SOFTWARE\\Classes\\.DNG\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+// Sprint 8: New format thumbnail handler keys
+#define CBX_PSDTH_KEY _T("SOFTWARE\\Classes\\.PSD\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_DDSTH_KEY _T("SOFTWARE\\Classes\\.DDS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_HDRTH_KEY _T("SOFTWARE\\Classes\\.HDR\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_EXRTH_KEY _T("SOFTWARE\\Classes\\.EXR\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_PPMTH_KEY _T("SOFTWARE\\Classes\\.PPM\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_ICOTH_KEY _T("SOFTWARE\\Classes\\.ICO\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_QOITH_KEY _T("SOFTWARE\\Classes\\.QOI\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_TGATH_KEY _T("SOFTWARE\\Classes\\.TGA\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_MP3TH_KEY _T("SOFTWARE\\Classes\\.MP3\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_TTFTH_KEY _T("SOFTWARE\\Classes\\.TTF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_DOCXTH_KEY _T("SOFTWARE\\Classes\\.DOCX\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define CBX_STLTH_KEY _T("SOFTWARE\\Classes\\.STL\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
 // infotip handler keys
 #define CBX_ZIPIH_KEY _T("SOFTWARE\\Classes\\.ZIP\\shellex\\{00021500-0000-0000-C000-000000000046}")
 #define CBX_CBZIH_KEY _T("SOFTWARE\\Classes\\.CBZ\\shellex\\{00021500-0000-0000-C000-000000000046}")
@@ -74,6 +87,19 @@
 #define CBX_TIFFIH_KEY _T("SOFTWARE\\Classes\\.TIF\\shellex\\{00021500-0000-0000-C000-000000000046}")
 #define CBX_SVGIH_KEY _T("SOFTWARE\\Classes\\.SVG\\shellex\\{00021500-0000-0000-C000-000000000046}")
 #define CBX_DNGIH_KEY _T("SOFTWARE\\Classes\\.DNG\\shellex\\{00021500-0000-0000-C000-000000000046}")
+// Sprint 8: New format infotip handler keys
+#define CBX_PSDIH_KEY _T("SOFTWARE\\Classes\\.PSD\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_DDSIH_KEY _T("SOFTWARE\\Classes\\.DDS\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_HDRIH_KEY _T("SOFTWARE\\Classes\\.HDR\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_EXRIH_KEY _T("SOFTWARE\\Classes\\.EXR\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_PPMIH_KEY _T("SOFTWARE\\Classes\\.PPM\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_ICOIH_KEY _T("SOFTWARE\\Classes\\.ICO\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_QOIIH_KEY _T("SOFTWARE\\Classes\\.QOI\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_TGAIH_KEY _T("SOFTWARE\\Classes\\.TGA\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_MP3IH_KEY _T("SOFTWARE\\Classes\\.MP3\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_TTFIH_KEY _T("SOFTWARE\\Classes\\.TTF\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_DOCXIH_KEY _T("SOFTWARE\\Classes\\.DOCX\\shellex\\{00021500-0000-0000-C000-000000000046}")
+#define CBX_STLIH_KEY _T("SOFTWARE\\Classes\\.STL\\shellex\\{00021500-0000-0000-C000-000000000046}")
 
 // cbx types (must match CBXTYPE in cbxArchive.h)
 #define CBX_NONE 0
@@ -100,6 +126,20 @@
 #define CBX_TIFF 45  // Must match CBXTYPE_TIFF in cbxArchive.h
 #define CBX_SVG 46   // Must match CBXTYPE_SVG in cbxArchive.h
 #define CBX_RAW 47   // Must match CBXTYPE_RAW in cbxArchive.h (DNG, CR2, NEF, ARW, etc.)
+
+// Sprint 8: New format types for professional/specialized formats
+#define CBX_PSD  48   // Matches CBXTYPE_PSD — Photoshop
+#define CBX_DDS  49   // Matches CBXTYPE_DDS — DirectDraw Surface
+#define CBX_HDR  55   // Matches CBXTYPE_HDR — Radiance HDR
+#define CBX_EXR  56   // Matches CBXTYPE_EXR — OpenEXR
+#define CBX_PPM  57   // Matches CBXTYPE_PPM — Portable Pixmap
+#define CBX_FONT 70   // Matches CBXTYPE_FONT — Font thumbnails (TTF, OTF)
+#define CBX_ICO  71   // Windows Icon
+#define CBX_QOI  72   // Quite OK Image Format
+#define CBX_TGA  73   // Targa Image
+#define CBX_AUDIO 74  // Audio cover art (MP3, FLAC, etc.) — Note: differs from CBXTYPE_AUDIO=20 (CBX_PDF=20 conflict)
+#define CBX_DOCUMENT 75 // Document thumbnails (DOCX, XLSX, PPTX)
+#define CBX_MODEL 76  // 3D Model thumbnails (STL, OBJ, PLY)
 
 // Handler status enumeration
 enum HandlerStatus
@@ -947,6 +987,19 @@ public:
 		case CBX_TIFF: return CBX_TIFFTH_KEY;
 		case CBX_SVG: return CBX_SVGTH_KEY;
 		case CBX_RAW: return CBX_DNGTH_KEY;
+		// Sprint 8: New format types
+		case CBX_PSD: return CBX_PSDTH_KEY;
+		case CBX_DDS: return CBX_DDSTH_KEY;
+		case CBX_HDR: return CBX_HDRTH_KEY;
+		case CBX_EXR: return CBX_EXRTH_KEY;
+		case CBX_PPM: return CBX_PPMTH_KEY;
+		case CBX_ICO: return CBX_ICOTH_KEY;
+		case CBX_QOI: return CBX_QOITH_KEY;
+		case CBX_TGA: return CBX_TGATH_KEY;
+		case CBX_AUDIO: return CBX_MP3TH_KEY;     // Primary audio format
+		case CBX_FONT: return CBX_TTFTH_KEY;       // Primary font format
+		case CBX_DOCUMENT: return CBX_DOCXTH_KEY;  // Primary document format
+		case CBX_MODEL: return CBX_STLTH_KEY;      // Primary 3D model format
 		default:break;
 		}
 	return NULL;
@@ -979,6 +1032,19 @@ public:
 		case CBX_TIFF: return CBX_TIFFIH_KEY;
 		case CBX_SVG: return CBX_SVGIH_KEY;
 		case CBX_RAW: return CBX_DNGIH_KEY;
+		// Sprint 8: New format types
+		case CBX_PSD: return CBX_PSDIH_KEY;
+		case CBX_DDS: return CBX_DDSIH_KEY;
+		case CBX_HDR: return CBX_HDRIH_KEY;
+		case CBX_EXR: return CBX_EXRIH_KEY;
+		case CBX_PPM: return CBX_PPMIH_KEY;
+		case CBX_ICO: return CBX_ICOIH_KEY;
+		case CBX_QOI: return CBX_QOIIH_KEY;
+		case CBX_TGA: return CBX_TGAIH_KEY;
+		case CBX_AUDIO: return CBX_MP3IH_KEY;
+		case CBX_FONT: return CBX_TTFIH_KEY;
+		case CBX_DOCUMENT: return CBX_DOCXIH_KEY;
+		case CBX_MODEL: return CBX_STLIH_KEY;
 		default:break;
 		}
 	return NULL;
