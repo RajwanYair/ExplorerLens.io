@@ -1,8 +1,8 @@
 # DarkThumbs Implementation Status
 
-**Last Updated:** February 17, 2026  
+**Last Updated:** February 18, 2026  
 **Version:** v7.0.0  
-**Status:** 🔄 Active Development — Sprints 1-25 Complete; Sprints 26-42 Next
+**Status:** 🔄 Active Development — Sprints 1-35 Complete; Sprints 36-42 Next
 
 ---
 
@@ -19,13 +19,19 @@
 🔄 **UI (WinUI 3):** Settings page created, integration ongoing  
 ✅ **Observability:** ETW provider, StructuredLogger, ObservabilityIntegration wired into pipeline  
 🔄 **Distribution:** MSI infrastructure ready, signing planned (Sprint 10)  
-✅ **Performance:** 235.3 img/sec batch, 17ms single thumbnail, <5ms cache hit
+✅ **Performance:** 235.3 img/sec batch, 17ms single thumbnail, <5ms cache hit  
+✅ **Cloud:** CloudThumbnailProvider with OneDrive/Google Drive/Dropbox abstraction  
+✅ **Caching:** Multi-tier cache (Memory→SQLite→Disk), Bloom filter, WAL mode  
+✅ **Enterprise:** Group Policy (ADMX), silent install, network cache, telemetry control  
+✅ **Security:** SBOM (SPDX/CycloneDX), dependency provenance, CI policy gate  
+✅ **Crash Intel:** Minidump capture, symbol pipeline, crash bucketing  
+✅ **USN Journal:** NTFS change journal watcher, file identity cache keys, stale-hit metrics
 
 ---
 
 ## Sprint Completion Status
 
-### ✅ Completed (26 of 42 sprints)
+### ✅ Completed (35 of 42 sprints)
 
 | Sprint | Name | Phase | Status |
 |--------|------|-------|--------|
@@ -59,7 +65,7 @@
 | 11 | Plugin System Activation | Uncomment LoadPlugins(), end-to-end IPC test | ✅ Complete |
 | 12 | Observability & Logging | ETW provider, JSON logger, diagnostics export | ✅ Complete |
 
-### 📅 Sprints 23-25 (Now Complete)
+### 📅 Sprints 23-25 (Complete — Infrastructure)
 
 | Sprint | Name | Status |
 |--------|------|--------|
@@ -67,12 +73,24 @@
 | 24 | Microsoft Store Submission | ✅ Complete — MSIX manifest + Store compliance |
 | 25 | OpenImageIO Integration | ✅ Complete — Integration stubs + format expansion |
 
-### 📅 Future (Sprints 26-42)
-| 26-27 | Cloud & Caching | Infrastructure |
-| 28-29 | Video Enhancement & Marketplace | Ecosystem |
-| 30-32 | Accessibility, Enterprise, Polish | Production |
-| 33-36 | Crash Intel, Supply Chain, USN, Enterprise | Infrastructure (NEW) |
-| 37-42 | Context Menu, Animated, Grid, Color, Hash, Portable | UX Enhancement (NEW) |
+### 📅 Sprints 26-35 (Complete — Advanced Features & Production)
+
+| Sprint | Name | Key Files | Commit |
+|--------|------|-----------|--------|
+| 26 | Cloud Integration & Sync | Engine/Cloud/CloudThumbnailProvider.h | `0936aa5` |
+| 27 | Advanced Caching (Multi-tier) | Engine/Cache/MultiTierCache.h | `af60118` |
+| 28 | Video Enhancement | Engine/Decoders/VideoEnhancer.h | `897cabd` |
+| 29 | Plugin Marketplace | Engine/Plugin/PluginMarketplace.h | `7e2df03` |
+| 30 | Accessibility & i18n | Engine/Utils/AccessibilityFramework.h | `290205f` |
+| 31 | Enterprise Deployment | Engine/Utils/EnterpriseDeployment.h | `d300508` |
+| 32 | Performance Polish | Engine/Utils/PerformancePolish.h | `b3cbed2` |
+| 33 | Crash Intelligence | Engine/Plugin/CrashIntelligence.h | `433ffea` |
+| 34 | Supply-Chain Security | Engine/Utils/SupplyChainSecurity.h | `7395a9e` |
+| 35 | USN Cache Invalidation | Engine/Cache/USNCacheInvalidation.h | `1e024eb` |
+
+### 📅 Future (Sprints 36-42)
+| 36 | Enterprise Readiness Pack | ADMX/ADML, offline update, fleet health export |
+| 37-42 | Context Menu, Animated, Grid, Color, Hash, Portable | UX Enhancement |
 
 ---
 

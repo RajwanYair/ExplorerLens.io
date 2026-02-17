@@ -2,8 +2,8 @@
 
 **Project:** DarkThumbs - GPU-Accelerated Thumbnail Generator  
 **Current Version:** v7.0.0  
-**Last Updated:** February 17, 2026  
-**Status:** 🔄 Active Development — Sprints 1-25 Complete; Sprints 26-42 Planned
+**Last Updated:** February 18, 2026  
+**Status:** 🔄 Active Development — Sprints 1-35 Complete; Sprints 36-42 Planned
 
 > **Note:** This document replaces the previous aspirational v7.5.0 summary.
 > All claims below reflect verified, committed code as of the latest git history.
@@ -14,10 +14,11 @@
 
 DarkThumbs v7.0.0 is a GPU-accelerated Windows shell extension (IThumbnailProvider COM DLL)
 that generates thumbnails for 200+ file extensions across 25 specialized decoders.
-The project has completed 25 of 42 planned sprints, with infrastructure for AI-enhanced
-thumbnails (DirectML/ONNX), MSIX Store packaging, and OpenImageIO exotic format support
-in place as stubs. Sprints 26-42 remain for cloud integration, enterprise features,
-and production polish.
+The project has completed 35 of 42 planned sprints, with advanced infrastructure for
+cloud integration, multi-tier caching, enterprise deployment (GPO), crash intelligence,
+supply-chain security (SBOM), USN journal cache invalidation, plugin marketplace,
+accessibility/i18n, and video enhancement. Sprints 36-42 remain for enterprise readiness
+pack, context menus, animated thumbnails, and color management.
 
 ### What's Real vs. Planned
 
@@ -30,10 +31,16 @@ and production polish.
 | AI thumbnails | 🔧 Headers/stubs | AIThumbnailEnhancer.h/cpp exist, not end-to-end tested |
 | MSIX packaging | 🔧 Manifest only | AppxManifest.xml created, not submitted to Store |
 | OpenImageIO | 📋 Planned | Integration stubs + test contracts, library not yet linked |
-| Cloud integration | 📋 Sprint 26 | Not started |
-| Enterprise GPO | 📋 Sprint 31 | Not started |
-| Localization (5 langs) | 📋 Sprint 30 | Not started |
-| Plugin marketplace | 📋 Sprint 29 | Plugin SDK exists, marketplace not built |
+| Cloud integration | ✅ Sprint 26 | CloudThumbnailProvider.h — OneDrive/Google Drive/Dropbox abstraction |
+| Multi-tier caching | ✅ Sprint 27 | MultiTierCache.h — Bloom filter, WAL SQLite, 3-tier hierarchy |
+| Video enhancement | ✅ Sprint 28 | VideoEnhancer.h — scene detection, HDR tone mapping |
+| Plugin marketplace | ✅ Sprint 29 | PluginMarketplace.h — signing, security scanning, REST API |
+| Accessibility & i18n | ✅ Sprint 30 | AccessibilityFramework.h — 5 languages, UIA, WCAG contrast |
+| Enterprise GPO | ✅ Sprint 31 | EnterpriseDeployment.h — ADMX, silent install, network cache |
+| Performance profiling | ✅ Sprint 32 | PerformancePolish.h — micro-profiler, memory pool, soak test |
+| Crash intelligence | ✅ Sprint 33 | CrashIntelligence.h — minidump, symbol pipeline, bucketing |
+| Supply-chain security | ✅ Sprint 34 | SupplyChainSecurity.h — SBOM SPDX/CycloneDX, CI policy gate |
+| USN cache invalidation | ✅ Sprint 35 | USNCacheInvalidation.h — NTFS journal, file identity keys |
 | Microsoft Store published | ❌ Not yet | Manifest ready, submission pending |
 
 ---
@@ -81,18 +88,30 @@ and production polish.
 | 24 | MSIX Packaging | AppxManifest.xml (v7.0.0), 22 GTest cases | Replace CLSID placeholder, Store submission, asset creation |
 | 25 | OpenImageIO | 18 GTest cases, format priority contract | vcpkg integration, OIIODecoder.h/cpp implementation |
 
-### 📋 Future (Sprints 26-42)
+### ✅ Advanced Features & Production (Sprints 26-35)
+| Sprint | Name | Key File | Commit |
+|--------|------|----------|--------|
+| 26 | Cloud Integration & Sync | Engine/Cloud/CloudThumbnailProvider.h | `0936aa5` |
+| 27 | Advanced Caching (Multi-tier) | Engine/Cache/MultiTierCache.h | `af60118` |
+| 28 | Video Enhancement | Engine/Decoders/VideoEnhancer.h | `897cabd` |
+| 29 | Plugin Marketplace | Engine/Plugin/PluginMarketplace.h | `7e2df03` |
+| 30 | Accessibility & i18n | Engine/Utils/AccessibilityFramework.h | `290205f` |
+| 31 | Enterprise Deployment | Engine/Utils/EnterpriseDeployment.h | `d300508` |
+| 32 | Performance Polish | Engine/Utils/PerformancePolish.h | `b3cbed2` |
+| 33 | Crash Intelligence | Engine/Plugin/CrashIntelligence.h | `433ffea` |
+| 34 | Supply-Chain Security | Engine/Utils/SupplyChainSecurity.h | `7395a9e` |
+| 35 | USN Cache Invalidation | Engine/Cache/USNCacheInvalidation.h | `1e024eb` |
+
+### 📋 Future (Sprints 36-42)
 | Sprint | Name | Priority |
 |--------|------|----------|
-| 26 | Cloud Integration & Sync | P2 |
-| 27 | Advanced Caching (Multi-tier) | P2 |
-| 28 | Video Enhancement | P3 |
-| 29 | Plugin Marketplace | P3 |
-| 30 | Accessibility & i18n | P2 |
-| 31 | Enterprise Features (GPO) | P3 |
-| 32 | Performance Polish | P2 |
-| 33-36 | Crash Intel, Supply Chain, USN, Enterprise Config | P3 |
-| 37-42 | Context Menu, Animated, Grid View, Color Mgmt, Hash, Portable | P3 |
+| 36 | Enterprise Readiness Pack | P2 |
+| 37 | Context Menu Extensions | P3 |
+| 38 | Animated Format Support | P3 |
+| 39 | Grid View & Batch Ops | P3 |
+| 40 | Color Management | P3 |
+| 41 | Hash & Dedup | P3 |
+| 42 | Portable Edition | P3 |
 
 ---
 
@@ -215,7 +234,7 @@ a5e59da Sprint 6: Worker/Isolation - DecoderTimeout, Fuzzing, MemoryLeak
 - WinUI 3 manager pages created but not yet at feature parity with WTL
 
 ### Documentation
-- `.github/SPRINTS_24-32_SUMMARY.md` — Contains aspirational claims about Sprints 26-32 being complete (they are NOT started)
+- `.github/SPRINTS_24-32_SUMMARY.md` — Updated to reflect actual Sprint 26-35 completion status with accurate file/commit references
 - `.github/SPRINTS_6-22_SUMMARY.md` — Some inflated descriptions (test counts, feature claims)
 
 ---
