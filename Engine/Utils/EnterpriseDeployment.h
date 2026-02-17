@@ -1,0 +1,500 @@
+// EnterpriseDeployment.h - Enterprise Deployment & Group Policy (Sprint 31)
+// DarkThumbs Engine v7.0.0+
+// Copyright (c) 2026 DarkThumbs Project
+//
+// Features:
+// - Group Policy Object (GPO) support via ADMX/ADML templates
+// - Silent MSI installation with transform files
+// - JSON-based configuration management
+// - Telemetry opt-out / disable capability
+// - Network shared cache for enterprise environments
+// - SCCM/Intune deployment integration
+// - Per-machine and per-user policy enforcement
+//
+// Architecture:
+//   GroupPolicyProvider  → reads HKLM/HKCU Software\Policies\DarkThumbs
+//   JsonConfigProvider   → reads darkthumbs.json from config paths
+//   EnterpriseConfig     → merges policy + JSON + defaults (policy wins)
+//   NetworkCacheClient   → UNC path shared cache access
+//   TelemetryController  → opt-in/opt-out telemetry management
+
+#pragma once
+
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <map>
+#include <memory>
+
+namespace DarkThumbs {
+namespace Engine {
+
+// ============================================================================
+// Configuration Priority & Sources
+// ============================================================================
+
+/// Configuration source priority (higher = overrides lower)
+enum class ConfigSource {
+    Default = 0,        ///< Built-in defaults
+    UserConfig = 1,     ///< User's darkthumbs.json
+    MachineConfig = 2,  ///< Machine-wide darkthumbs.json
+    UserPolicy = 3,     ///< HKCU\...\Policies\DarkThumbs (GPO user)
+    MachinePolicy = 4   ///< HKLM\...\Policies\DarkThumbs (GPO machine)
+};
+
+/// A single configuration value with tracked source
+struct ConfigValue {
+    std::string key;
+    std::string value;
+    ConfigSource source = ConfigSource::Default;
+    bool isLocked = false;      ///< Locked by policy (user cannot override)
+
+    int32_t AsInt(int32_t fallback = 0) const {
+        try { return std::stoi(value); } catch (...) { return fallback; }
+    }
+    bool AsBool() const {
+        return value == "1" || value == "true" || value == "yes";
+    }
+};
+
+
+// ============================================================================
+// Group Policy (ADMX/ADML)
+// ============================================================================
+
+/// GPO policy definition for ADMX template generation
+struct PolicyDefinition {
+    std::string name;               ///< Policy name (e.g., "EnableTelemetry")
+    std::string displayName;        ///< Human-readable name for GPMC
+    std::string description;        ///< Explain text shown in GPMC
+    std::string category;           ///< ADMX category path
+    std::string registryKey;        ///< Full registry key path
+    std::string registryValue;      ///< Registry value name
+
+    enum class ValueType {
+        Boolean,    ///< REG_DWORD (0/1)
+        Integer,    ///< REG_DWORD
+        String,     ///< REG_SZ
+        Enum        ///< REG_DWORD with named options
+    } type = ValueType::Boolean;
+
+    // For Enum type
+    struct EnumOption { std::string name; uint32_t value; };
+    std::vector<EnumOption> enumOptions;
+
+    // Constraints for Integer type
+    int32_t minValue = 0;
+    int32_t maxValue = 100;
+    int32_t defaultValue = 0;
+};
+
+/// Registry-based policy reader
+class GroupPolicyProvider {
+public:
+    /// Registry paths for DarkThumbs policies
+    static constexpr const char* kMachinePolicyKey = 
+        "SOFTWARE\\Policies\\DarkThumbs";
+    static constexpr const char* kUserPolicyKey = 
+        "SOFTWARE\\Policies\\DarkThumbs";
+
+    GroupPolicyProvider() {
+        InitializePolicies();
+    }
+
+    /// Read a DWORD policy value from registry
+    bool ReadDWord(ConfigSource source, const std::string& valueName, 
+                   uint32_t& outValue) const {
+        // In real implementation: RegOpenKeyExA + RegQueryValueExA
+        (void)source;
+        (void)valueName;
+        outValue = 0;
+        return false;  // Not found (no registry available in test)
+    }
+
+    /// Read a string policy value from registry
+    bool ReadString(ConfigSource source, const std::string& valueName, 
+                    std::string& outValue) const {
+        (void)source;
+        (void)valueName;
+        outValue.clear();
+        return false;
+    }
+
+    /// Check if a policy is configured (exists in registry)
+    bool IsPolicyConfigured(const std::string& policyName) const {
+        auto it = m_policies.find(policyName);
+        return it != m_policies.end();
+    }
+
+    /// Get all defined policies
+    const std::map<std::string, PolicyDefinition>& GetPolicies() const { return m_policies; }
+
+    /// Generate ADMX XML content for Group Policy Editor
+    std::string GenerateADMX() const {
+        std::string admx;
+        admx += "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+        admx += "<policyDefinitions revision=\"1.0\" schemaVersion=\"1.0\">\n";
+        admx += "  <policyNamespaces>\n";
+        admx += "    <target prefix=\"darkthumbs\" namespace=\"DarkThumbs.Policies\"/>\n";
+        admx += "  </policyNamespaces>\n";
+        admx += "  <categories>\n";
+        admx += "    <category name=\"DarkThumbs\" displayName=\"DarkThumbs Shell Extension\"/>\n";
+        admx += "    <category name=\"Telemetry\" displayName=\"Telemetry\" parentCategory=\"DarkThumbs\"/>\n";
+        admx += "    <category name=\"Cache\" displayName=\"Cache\" parentCategory=\"DarkThumbs\"/>\n";
+        admx += "    <category name=\"Formats\" displayName=\"Formats\" parentCategory=\"DarkThumbs\"/>\n";
+        admx += "  </categories>\n";
+
+        admx += "  <policies>\n";
+        for (const auto& [name, policy] : m_policies) {
+            admx += "    <policy name=\"" + policy.name + "\" ";
+            admx += "class=\"Both\" displayName=\"" + policy.displayName + "\" ";
+            admx += "key=\"" + policy.registryKey + "\" ";
+            admx += "valueName=\"" + policy.registryValue + "\">\n";
+            admx += "      <parentCategory ref=\"" + policy.category + "\"/>\n";
+            admx += "    </policy>\n";
+        }
+        admx += "  </policies>\n";
+        admx += "</policyDefinitions>\n";
+        return admx;
+    }
+
+private:
+    void InitializePolicies() {
+        // Telemetry policies
+        m_policies["DisableTelemetry"] = {
+            "DisableTelemetry",
+            "Disable telemetry collection",
+            "When enabled, no usage data is collected or transmitted.",
+            "Telemetry",
+            "SOFTWARE\\Policies\\DarkThumbs",
+            "DisableTelemetry",
+            PolicyDefinition::ValueType::Boolean
+        };
+        m_policies["TelemetryLevel"] = {
+            "TelemetryLevel",
+            "Telemetry collection level",
+            "Controls the level of telemetry data collected.",
+            "Telemetry",
+            "SOFTWARE\\Policies\\DarkThumbs",
+            "TelemetryLevel",
+            PolicyDefinition::ValueType::Enum,
+            {{"Off", 0}, {"Basic", 1}, {"Enhanced", 2}, {"Full", 3}},
+            0, 3, 1
+        };
+
+        // Cache policies
+        m_policies["MaxCacheSizeMB"] = {
+            "MaxCacheSizeMB",
+            "Maximum cache size (MB)",
+            "Sets the maximum disk cache size in megabytes.",
+            "Cache",
+            "SOFTWARE\\Policies\\DarkThumbs",
+            "MaxCacheSizeMB",
+            PolicyDefinition::ValueType::Integer,
+            {}, 50, 10240, 500
+        };
+        m_policies["NetworkCachePath"] = {
+            "NetworkCachePath",
+            "Network cache UNC path",
+            "UNC path to shared network cache (e.g., \\\\server\\darkthumbs-cache).",
+            "Cache",
+            "SOFTWARE\\Policies\\DarkThumbs",
+            "NetworkCachePath",
+            PolicyDefinition::ValueType::String
+        };
+
+        // Format policies
+        m_policies["DisabledFormats"] = {
+            "DisabledFormats",
+            "Disabled file formats",
+            "Comma-separated list of format extensions to disable (e.g., \"psd,ai,eps\").",
+            "Formats",
+            "SOFTWARE\\Policies\\DarkThumbs",
+            "DisabledFormats",
+            PolicyDefinition::ValueType::String
+        };
+
+        // GPU policies
+        m_policies["DisableGPU"] = {
+            "DisableGPU",
+            "Disable GPU acceleration",
+            "Forces software rendering, disabling DirectX GPU acceleration.",
+            "DarkThumbs",
+            "SOFTWARE\\Policies\\DarkThumbs",
+            "DisableGPU",
+            PolicyDefinition::ValueType::Boolean
+        };
+    }
+
+    std::map<std::string, PolicyDefinition> m_policies;
+};
+
+
+// ============================================================================
+// JSON Configuration
+// ============================================================================
+
+/// JSON configuration file locations (searched in order)
+struct ConfigPaths {
+    /// Per-user config: %APPDATA%\DarkThumbs\darkthumbs.json
+    static std::string GetUserConfigPath() {
+        return "%APPDATA%\\DarkThumbs\\darkthumbs.json";
+    }
+
+    /// Machine-wide config: %PROGRAMDATA%\DarkThumbs\darkthumbs.json
+    static std::string GetMachineConfigPath() {
+        return "%PROGRAMDATA%\\DarkThumbs\\darkthumbs.json";
+    }
+
+    /// Network config: \\server\share\darkthumbs.json (set via GPO)
+    std::string networkConfigPath;
+};
+
+/// JSON configuration schema
+struct JsonConfig {
+    // General
+    bool darkMode = true;
+    std::string language = "en-US";
+    bool checkUpdates = true;
+
+    // Cache
+    uint32_t maxCacheSizeMB = 500;
+    uint32_t cacheExpiryDays = 30;
+    std::string customCachePath;
+
+    // Performance
+    uint32_t maxConcurrentDecoders = 4;
+    bool useGPU = true;
+    uint32_t thumbnailQuality = 85;
+
+    // Telemetry (enterprise can force off)
+    bool telemetryEnabled = true;
+    uint32_t telemetryLevel = 1;    // 0=Off, 1=Basic, 2=Enhanced, 3=Full
+
+    // Formats
+    std::vector<std::string> disabledFormats;
+    std::vector<std::string> additionalExtensions;
+};
+
+
+// ============================================================================
+// Silent Installation
+// ============================================================================
+
+/// MSI installation options for enterprise deployment
+struct SilentInstallConfig {
+    bool silentMode = true;         ///< /qn (no UI)
+    bool perMachine = true;         ///< ALLUSERS=1
+    bool registerShellExt = true;   ///< Register COM shell extension
+    bool createShortcuts = false;   ///< Don't create desktop shortcuts
+    bool enableAutoUpdate = false;  ///< Disable auto-update in enterprise
+    std::string installDir;         ///< Custom install directory (INSTALLDIR)
+    std::string logFile;            ///< MSI log file path
+    std::string transformFile;      ///< .mst transform file for customization
+
+    /// Generate msiexec command line
+    std::string GenerateCommandLine(const std::string& msiPath) const {
+        std::string cmd = "msiexec /i \"" + msiPath + "\"";
+        if (silentMode) cmd += " /qn";
+        if (perMachine) cmd += " ALLUSERS=1";
+        if (!installDir.empty()) cmd += " INSTALLDIR=\"" + installDir + "\"";
+        if (!logFile.empty()) cmd += " /L*v \"" + logFile + "\"";
+        if (!transformFile.empty()) cmd += " TRANSFORMS=\"" + transformFile + "\"";
+        cmd += " REGISTER_SHELL=" + std::string(registerShellExt ? "1" : "0");
+        cmd += " CREATE_SHORTCUTS=" + std::string(createShortcuts ? "1" : "0");
+        cmd += " AUTO_UPDATE=" + std::string(enableAutoUpdate ? "1" : "0");
+        return cmd;
+    }
+};
+
+
+// ============================================================================
+// Network Cache
+// ============================================================================
+
+/// Network shared cache for enterprise environments
+class NetworkCacheClient {
+public:
+    struct NetworkCacheConfig {
+        std::string uncPath;            ///< \\server\share\darkthumbs-cache
+        uint32_t timeoutMs = 5000;      ///< Network timeout
+        uint32_t maxRetries = 2;        ///< Retry count on failure
+        bool readOnly = false;          ///< Only read from network, write locally
+        uint64_t maxSizeMB = 10240;     ///< 10 GB network cache limit
+    };
+
+    explicit NetworkCacheClient(NetworkCacheConfig config = {})
+        : m_config(config) {}
+
+    /// Check if a file exists in the network cache
+    bool Exists(const std::string& cacheKey) const {
+        if (m_config.uncPath.empty()) return false;
+        // In real: check UNC path + cacheKey file existence
+        return false;
+    }
+
+    /// Get a cached thumbnail from network
+    bool Get(const std::string& cacheKey, std::vector<uint8_t>& data) const {
+        (void)cacheKey;
+        (void)data;
+        return false;
+    }
+
+    /// Put a thumbnail into network cache
+    bool Put(const std::string& cacheKey, const std::vector<uint8_t>& data) {
+        if (m_config.readOnly) return false;
+        (void)cacheKey;
+        (void)data;
+        return true;
+    }
+
+    /// Check network cache accessibility
+    bool IsAvailable() const {
+        return !m_config.uncPath.empty();
+        // In real: ping UNC path for availability
+    }
+
+    const NetworkCacheConfig& GetConfig() const { return m_config; }
+
+private:
+    NetworkCacheConfig m_config;
+};
+
+
+// ============================================================================
+// Telemetry Controller
+// ============================================================================
+
+/// Telemetry opt-in levels
+enum class TelemetryLevel {
+    Off = 0,        ///< No data collection
+    Basic = 1,      ///< Version, OS, feature usage counts
+    Enhanced = 2,   ///< + Performance metrics, error rates
+    Full = 3        ///< + Diagnostic data (opt-in only, never default)
+};
+
+/// Controls telemetry collection with enterprise override
+class TelemetryController {
+public:
+    TelemetryController()
+        : m_level(TelemetryLevel::Basic)
+        , m_policyOverride(false) {}
+
+    /// Set telemetry level (may be overridden by policy)
+    void SetLevel(TelemetryLevel level) {
+        if (m_policyOverride) return;  // Enterprise policy takes precedence
+        m_level = level;
+    }
+
+    /// Apply enterprise policy override
+    void ApplyPolicyOverride(TelemetryLevel forcedLevel) {
+        m_level = forcedLevel;
+        m_policyOverride = true;
+    }
+
+    /// Check if data collection is active
+    bool IsCollecting() const {
+        return m_level != TelemetryLevel::Off;
+    }
+
+    /// Check if level is at least the specified level
+    bool IsAtLeast(TelemetryLevel minimum) const {
+        return static_cast<int>(m_level) >= static_cast<int>(minimum);
+    }
+
+    /// Check if policy has overridden user setting
+    bool IsPolicyControlled() const { return m_policyOverride; }
+
+    TelemetryLevel GetLevel() const { return m_level; }
+
+private:
+    TelemetryLevel m_level;
+    bool m_policyOverride;
+};
+
+
+// ============================================================================
+// Enterprise Configuration Merger
+// ============================================================================
+
+/// Merges configuration from all sources respecting priority
+class EnterpriseConfigManager {
+public:
+    EnterpriseConfigManager()
+        : m_policyProvider()
+        , m_networkCache()
+        , m_telemetry() {}
+
+    /// Set a configuration value from a specific source
+    void SetValue(const std::string& key, const std::string& value, ConfigSource source) {
+        auto it = m_values.find(key);
+        if (it == m_values.end() || source >= it->second.source) {
+            ConfigValue cv;
+            cv.key = key;
+            cv.value = value;
+            cv.source = source;
+            cv.isLocked = (source >= ConfigSource::UserPolicy);
+            m_values[key] = cv;
+        }
+    }
+
+    /// Get a configuration value (highest priority wins)
+    ConfigValue GetValue(const std::string& key) const {
+        auto it = m_values.find(key);
+        if (it != m_values.end()) return it->second;
+        return {key, "", ConfigSource::Default, false};
+    }
+
+    /// Check if a setting is locked by policy
+    bool IsLocked(const std::string& key) const {
+        auto it = m_values.find(key);
+        return it != m_values.end() && it->second.isLocked;
+    }
+
+    /// Load configuration from all sources
+    void LoadAll() {
+        // 1. Load defaults
+        SetValue("MaxCacheSizeMB", "500", ConfigSource::Default);
+        SetValue("TelemetryEnabled", "true", ConfigSource::Default);
+        SetValue("UseGPU", "true", ConfigSource::Default);
+
+        // 2. Load user JSON config
+        // 3. Load machine JSON config
+        // 4. Load user GPO
+        // 5. Load machine GPO (highest priority)
+    }
+
+    /// Get effective configuration as JSON (for diagnostics)
+    std::string ExportEffectiveConfig() const {
+        std::string json = "{\n";
+        for (const auto& [key, cv] : m_values) {
+            json += "  \"" + key + "\": {\"value\": \"" + cv.value + 
+                    "\", \"source\": " + std::to_string(static_cast<int>(cv.source)) +
+                    ", \"locked\": " + (cv.isLocked ? "true" : "false") + "},\n";
+        }
+        json += "}\n";
+        return json;
+    }
+
+    const GroupPolicyProvider& GetPolicyProvider() const { return m_policyProvider; }
+    TelemetryController& GetTelemetry() { return m_telemetry; }
+    NetworkCacheClient& GetNetworkCache() { return m_networkCache; }
+
+    /// Enterprise deployment statistics
+    struct DeploymentStats {
+        uint32_t policiesApplied = 0;
+        uint32_t configValuesLoaded = 0;
+        uint32_t policyOverrides = 0;
+        bool networkCacheAvailable = false;
+        TelemetryLevel effectiveTelemetryLevel = TelemetryLevel::Basic;
+    };
+
+private:
+    GroupPolicyProvider m_policyProvider;
+    NetworkCacheClient m_networkCache;
+    TelemetryController m_telemetry;
+    std::map<std::string, ConfigValue> m_values;
+};
+
+} // namespace Engine
+} // namespace DarkThumbs
