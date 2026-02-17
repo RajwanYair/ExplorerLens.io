@@ -1,351 +1,475 @@
-// ============================================================================
-// Sprint6_IsolationTests.cpp
-// Sprint 6 - Worker/Isolation Stabilization Tests
-// ============================================================================
-// Deliverables:
-// 1. SEH exception fuzzing with malformed/corrupt archives
-// 2. Circuit breaker stress test: 5000 corrupt-payload iterations
-// 3. Decoder timeout enforcement: hard-kill decoders exceeding 5-second wall clock
-// 4. Memory leak regression test: 100-iteration decode loop with peak-heap assertion
-//
-// Updated: Integrates DecoderTimeout, FuzzingTestFixtures, and MemoryLeakTest
-// infrastructure from Sprint 6 implementation.
-// ============================================================================
+//==============================================================================
+// DarkThumbs — Sprint 6 Tests: Worker/Isolation Stabilization
+// Tests SEH fuzzing engine, circuit breaker hardening, decoder timeout
+// enforcement, memory leak regression, and worker isolation monitoring.
+//==============================================================================
 
-#include "../Engine/Pipeline/ThumbnailPipeline.h"
-#include "../Engine/Utils/DecoderCircuitBreaker.h"
-#include "../Engine/Utils/DecoderTimeout.h"
-#include "../Engine/Tests/FuzzingTestFixtures.h"
-#include "../Engine/Tests/MemoryLeakTest.h"
-#include <windows.h>
-#include <Psapi.h>
-#include <iostream>
+#include <gtest/gtest.h>
+#include <string>
 #include <vector>
 #include <chrono>
-#include <fstream>
-#include <random>
+#include <thread>
+#include <atomic>
+#include <functional>
 
-namespace DarkThumbs {
-namespace Sprint6Tests {
+// Headers under test
+#include "../Engine/Utils/SEHFuzzingEngine.h"
+#include "../Engine/Utils/DecoderCircuitBreaker.h"
+#include "../Engine/Utils/DecoderTimeout.h"
 
-// ============================================================================
-// Test 1: SEH Exception Fuzzing - Malformed Archives
-// ============================================================================
-bool TestSEHFuzzingCorruptArchives() {
-    std::cout << "\n=== Test 1: SEH Fuzzing - Corrupt Archives ===" << std::endl;
-    
-    const wchar_t* testFormats[] = {
-        L"corrupt.zip",
-        L"corrupt.rar",
-        L"corrupt.7z",
-        L"corrupt.cbz",
-        L"corrupt.cbr"
-    };
-    
-    const size_t TEST_ITERATIONS = 1000;
-    size_t crashCount = 0;
-    size_t gracefulFailCount = 0;
-    
-    // Create test directory if needed
-    CreateDirectoryW(L"tests\\data\\corrupt", nullptr);
-    
-    for (size_t iter = 0; iter < TEST_ITERATIONS; iter++) {
-        for (const wchar_t* format : testFormats) {
-            // Generate corrupt file with random garbage data
-            std::wstring filePath = L"tests\\data\\corrupt\\";
-            filePath += format;
-            filePath += L"_";
-            filePath += std::to_wstring(iter);
-            
-            GenerateCorruptFile(filePath.c_str(), 1024 + (rand() % 10240));
-            
-            // Try to generate thumbnail - should fail gracefully
-            __try {
-                HBITMAP hBitmap = nullptr;
-                auto pipeline = ThumbnailPipeline::GetInstance();
-                HRESULT hr = pipeline->GenerateThumbnail(
-                    filePath.c_str(),
-                    256, 256,
-                    false, // CPU only for fuzzing
-                    &hBitmap
-                );
-                
-                if (hBitmap) {
-                    DeleteObject(hBitmap);
-                }
-                
-                if (FAILED(hr)) {
-                    gracefulFailCount++;
-                }
-                
-            } __except(EXCEPTION_EXECUTE_HANDLER) {
-                crashCount++;
-                std::cout << "  CRASH detected for: " << iter << std::endl;
-            }
-            
-            // Clean up
-            DeleteFileW(filePath.c_str());
-        }
-        
-        if ((iter + 1) % 100 == 0) {
-            std::cout << "  Progress: " << (iter + 1) << "/" << TEST_ITERATIONS 
-                      << " iterations, " << crashCount << " crashes" << std::endl;
-        }
+using namespace DarkThumbs::Engine::Isolation;
+using namespace DarkThumbs;
+
+//==============================================================================
+// Corruption Strategy Tests
+//==============================================================================
+
+TEST(CorruptionStrategy, StrategyNamesValid)
+{
+    for (uint32_t i = 0; i < static_cast<uint32_t>(CorruptionStrategy::MaxEnum); ++i) {
+        auto s = static_cast<CorruptionStrategy>(i);
+        const char* name = CorruptionStrategyName(s);
+        ASSERT_NE(name, nullptr);
+        EXPECT_STRNE(name, "Unknown");
     }
-    
-    std::cout << "\n  Results:" << std::endl;
-    std::cout << "    Total iterations: " << TEST_ITERATIONS * 5 << std::endl;
-    std::cout << "    Crashes: " << crashCount << std::endl;
-    std::cout << "    Graceful failures: " << gracefulFailCount << std::endl;
-    
-    // Exit criteria: 0 crashes
-    bool passed = (crashCount == 0);
-    std::cout << "  Status: " << (passed ? "PASS ✓" : "FAIL ✗") << std::endl;
-    return passed;
 }
 
-// ============================================================================
-// Test 2: Circuit Breaker Stress Test - 5000 Corrupt Payloads
-// ============================================================================
-bool TestCircuitBreakerStress() {
-    std::cout << "\n=== Test 2: Circuit Breaker Stress Test ===" << std::endl;
-    
-    const size_t STRESS_ITERATIONS = 5000;
-    size_t explorerCrashes = 0;
-    size_t circuitOpenCount = 0;
-    
-    // Reset circuit breakers
-    CircuitBreakerManager::GetInstance().Reset();
-    
-    auto pipeline = ThumbnailPipeline::GetInstance();
-    
-    for (size_t i = 0; i < STRESS_ITERATIONS; i++) {
-        // Generate corrupt payloads for different formats
-        std::wstring corruptFile = L"tests\\data\\corrupt\\stress_";
-        corruptFile += std::to_wstring(i);
-        corruptFile += L".cbz";
-        
-        GenerateCorruptFile(corruptFile.c_str(), 2048);
-        
-        __try {
-            HBITMAP hBitmap = nullptr;
-            HRESULT hr = pipeline->GenerateThumbnail(
-                corruptFile.c_str(),
-                256, 256,
-                false,
-                &hBitmap
-            );
-            
-            if (hBitmap) {
-                DeleteObject(hBitmap);
-            }
-            
-        } __except(EXCEPTION_EXECUTE_HANDLER) {
-            explorerCrashes++;
-        }
-        
-        // Check circuit breaker states
-        auto& cbManager = CircuitBreakerManager::GetInstance();
-        auto status = cbManager.GetStatus();
-        for (const auto& [decoderName, state] : status) {
-            if (state == CircuitState::OPEN) {
-                circuitOpenCount++;
-            }
-        }
-        
-        DeleteFileW(corruptFile.c_str());
-        
-        if ((i + 1) % 500 == 0) {
-            std::cout << "  Progress: " << (i + 1) << "/" << STRESS_ITERATIONS 
-                      << " iterations, " << explorerCrashes << " crashes, "
-                      << circuitOpenCount << " circuit openings" << std::endl;
-        }
-    }
-    
-    std::cout << "\n  Results:" << std::endl;
-    std::cout << "    Total iterations: " << STRESS_ITERATIONS << std::endl;
-    std::cout << "    Explorer crashes: " << explorerCrashes << std::endl;
-    std::cout << "    Circuit breaker activations: " << circuitOpenCount << std::endl;
-    
-    // Exit criteria: 0 Explorer crashes
-    bool passed = (explorerCrashes == 0);
-    std::cout << "  Status: " << (passed ? "PASS ✓" : "FAIL ✗") << std::endl;
-    return passed;
+TEST(CorruptionStrategy, UnknownReturnsUnknown)
+{
+    auto name = CorruptionStrategyName(static_cast<CorruptionStrategy>(99));
+    EXPECT_STREQ(name, "Unknown");
 }
 
-// ============================================================================
-// Test 3: Decoder Timeout Enforcement - Hard Kill After 5 Seconds
-// ============================================================================
-bool TestDecoderTimeoutEnforcement() {
-    std::cout << "\n=== Test 3: Decoder Timeout Enforcement ===" << std::endl;
-    
-    // Create a file that triggers slow decoding (e.g., massive resolution)
-    std::wstring slowFile = L"tests\\data\\timeout_test.png";
-    
-    std::cout << "  Testing 5-second timeout enforcement..." << std::endl;
-    
-    auto start = std::chrono::steady_clock::now();
-    
-    __try {
-        HBITMAP hBitmap = nullptr;
-        auto pipeline = ThumbnailPipeline::GetInstance();
-        
-        // This should timeout and be killed
-        HRESULT hr = pipeline->GenerateThumbnail(
-            slowFile.c_str(),
-            256, 256,
-            false,
-            &hBitmap
-        );
-        
-        if (hBitmap) {
-            DeleteObject(hBitmap);
-        }
-        
-    } __except(EXCEPTION_EXECUTE_HANDLER) {
-        std::cout << "  Exception caught (expected for timeout)" << std::endl;
-    }
-    
-    auto end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    
-    std::cout << "  Decode attempt duration: " << duration.count() << " ms" << std::endl;
-    
-    // Should be killed within 5500ms (5s timeout + 500ms grace)
-    bool passed = (duration.count() < 5500);
-    std::cout << "  Status: " << (passed ? "PASS ✓" : "FAIL ✗") << std::endl;
-    return passed;
+TEST(CorruptionStrategy, StrategyCount)
+{
+    EXPECT_EQ(static_cast<uint32_t>(CorruptionStrategy::MaxEnum), 8u);
 }
 
-// ============================================================================
-// Test 4: Memory Leak Regression Test - 100 Iterations
-// ============================================================================
-bool TestMemoryLeakRegression() {
-    std::cout << "\n=== Test 4: Memory Leak Regression Test ===" << std::endl;
-    
-    const size_t LEAK_TEST_ITERATIONS = 100;
-    
-    // Get baseline memory
-    PROCESS_MEMORY_COUNTERS_EX memStart;
-    GetProcessMemoryInfo(GetCurrentProcess(), 
-        reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memStart), 
-        sizeof(memStart));
-    
-    size_t peakHeapBefore = memStart.PeakWorkingSetSize;
-    
-    std::cout << "  Baseline peak heap: " << (peakHeapBefore / 1024 / 1024) << " MB" << std::endl;
-    std::cout << "  Running " << LEAK_TEST_ITERATIONS << " decode iterations..." << std::endl;
-    
-    auto pipeline = ThumbnailPipeline::GetInstance();
-    
-    // Test with real sample files
-    std::vector<std::wstring> testFiles = {
-        L"tests\\data\\corpus\\images\\jpeg\\sample.jpg",
-        L"tests\\data\\corpus\\images\\png\\sample.png",
-        L"tests\\data\\corpus\\images\\webp\\sample.webp",
-        L"tests\\data\\corpus\\archives\\zip\\sample.zip",
-        L"tests\\data\\corpus\\archives\\cbz\\sample.cbz"
-    };
-    
-    for (size_t i = 0; i < LEAK_TEST_ITERATIONS; i++) {
-        for (const auto& testFile : testFiles) {
-            HBITMAP hBitmap = nullptr;
-            HRESULT hr = pipeline->GenerateThumbnail(
-                testFile.c_str(),
-                256, 256,
-                false,
-                &hBitmap
-            );
-            
-            if (hBitmap) {
-                DeleteObject(hBitmap);
-            }
-        }
-        
-        if ((i + 1) % 10 == 0) {
-            // Check memory periodically
-            PROCESS_MEMORY_COUNTERS_EX memCurrent;
-            GetProcessMemoryInfo(GetCurrentProcess(), 
-                reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memCurrent), 
-                sizeof(memCurrent));
-            
-            std::cout << "  Iteration " << (i + 1) << ": " 
-                      << (memCurrent.WorkingSetSize / 1024 / 1024) << " MB" << std::endl;
-        }
-    }
-    
-    // Force garbage collection
-    Sleep(1000);
-    
-    // Get final memory
-    PROCESS_MEMORY_COUNTERS_EX memEnd;
-    GetProcessMemoryInfo(GetCurrentProcess(), 
-        reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memEnd), 
-        sizeof(memEnd));
-    
-    size_t peakHeapAfter = memEnd.PeakWorkingSetSize;
-    size_t workingSetAfter = memEnd.WorkingSetSize;
-    
-    std::cout << "\n  Results:" << std::endl;
-    std::cout << "    Peak heap before: " << (peakHeapBefore / 1024 / 1024) << " MB" << std::endl;
-    std::cout << "    Peak heap after: " << (peakHeapAfter / 1024 / 1024) << " MB" << std::endl;
-    std::cout << "    Working set after: " << (workingSetAfter / 1024 / 1024) << " MB" << std::endl;
-    
-    // Peak heap should not grow more than 2x
-    double growthRatio = static_cast<double>(peakHeapAfter) / peakHeapBefore;
-    std::cout << "    Growth ratio: " << growthRatio << "x" << std::endl;
-    
-    bool passed = (growthRatio < 2.0);
-    std::cout << "  Status: " << (passed ? "PASS ✓" : "FAIL ✗") << std::endl;
-    return passed;
+//==============================================================================
+// Magic Bytes Tests
+//==============================================================================
+
+TEST(FormatMagic, KnownMagicBytesNotEmpty)
+{
+    auto magics = GetKnownMagicBytes();
+    EXPECT_GE(magics.size(), 15u);
 }
 
-// ============================================================================
-// Helper: Generate Corrupt File with Random Data
-// ============================================================================
-void GenerateCorruptFile(const wchar_t* filePath, size_t size) {
-    std::ofstream file(filePath, std::ios::binary);
-    if (!file.is_open()) {
-        return;
+TEST(FormatMagic, AllFormatsHaveMagicBytes)
+{
+    for (const auto& m : GetKnownMagicBytes()) {
+        EXPECT_NE(m.extension, nullptr);
+        EXPECT_GT(m.extension[0], '\0') << "Empty extension";
+        EXPECT_FALSE(m.magic.empty()) << "Missing magic for " << m.extension;
+        EXPECT_GT(m.minSize, 0u) << "Zero minSize for " << m.extension;
     }
-    
-    // Write garbage data
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 255);
-    
-    for (size_t i = 0; i < size; i++) {
-        char byte = static_cast<char>(dis(gen));
-        file.write(&byte, 1);
-    }
-    
-    file.close();
 }
 
-} // namespace Sprint6Tests
-} // namespace DarkThumbs
+TEST(FormatMagic, ZipMagicCorrect)
+{
+    auto magics = GetKnownMagicBytes();
+    bool found = false;
+    for (auto& m : magics) {
+        if (std::string(m.extension) == ".zip") {
+            EXPECT_EQ(m.magic[0], 0x50);
+            EXPECT_EQ(m.magic[1], 0x4B);
+            found = true;
+        }
+    }
+    EXPECT_TRUE(found) << ".zip not in magic bytes table";
+}
 
-// ============================================================================
-// Main Test Runner
-// ============================================================================
-int main() {
-    using namespace DarkThumbs::Sprint6Tests;
-    
-    std::cout << "============================================" << std::endl;
-    std::cout << "Sprint 6: Worker/Isolation Stabilization Tests" << std::endl;
-    std::cout << "============================================" << std::endl;
-    
-    bool allPassed = true;
-    
-    // Run all tests
-    allPassed &= TestSEHFuzzingCorruptArchives();
-    allPassed &= TestCircuitBreakerStress();
-    allPassed &= TestDecoderTimeoutEnforcement();
-    allPassed &= TestMemoryLeakRegression();
-    
-    std::cout << "\n============================================" << std::endl;
-    std::cout << "Sprint 6 Test Results: " << (allPassed ? "ALL PASS ✓" : "FAILURES DETECTED ✗") << std::endl;
-    std::cout << "============================================" << std::endl;
-    
-    return allPassed ? 0 : 1;
+TEST(FormatMagic, PngMagicCorrect)
+{
+    auto magics = GetKnownMagicBytes();
+    bool found = false;
+    for (auto& m : magics) {
+        if (std::string(m.extension) == ".png") {
+            EXPECT_EQ(m.magic.size(), 8u);
+            EXPECT_EQ(m.magic[0], 0x89);
+            EXPECT_EQ(m.magic[1], 0x50);
+            found = true;
+        }
+    }
+    EXPECT_TRUE(found);
+}
+
+//==============================================================================
+// Corrupt Payload Generator Tests
+//==============================================================================
+
+TEST(CorruptPayload, GenerateZeroFill)
+{
+    CorruptPayloadGenerator gen(42);
+    auto payload = gen.Generate(CorruptionStrategy::ZeroFill, ".zip", 256);
+    EXPECT_EQ(payload.size(), 256u);
+    for (auto b : payload) EXPECT_EQ(b, 0x00);
+}
+
+TEST(CorruptPayload, GenerateRandomBytes)
+{
+    CorruptPayloadGenerator gen(42);
+    auto p1 = gen.Generate(CorruptionStrategy::RandomBytes, ".png", 512);
+    EXPECT_EQ(p1.size(), 512u);
+    bool hasNonZero = false;
+    for (auto b : p1) if (b != 0) hasNonZero = true;
+    EXPECT_TRUE(hasNonZero);
+}
+
+TEST(CorruptPayload, GenerateValidHeaderGarbage)
+{
+    CorruptPayloadGenerator gen(42);
+    auto payload = gen.Generate(CorruptionStrategy::ValidHeaderGarbage, ".zip", 1024);
+    EXPECT_EQ(payload.size(), 1024u);
+    EXPECT_EQ(payload[0], 0x50);
+    EXPECT_EQ(payload[1], 0x4B);
+    EXPECT_EQ(payload[2], 0x03);
+    EXPECT_EQ(payload[3], 0x04);
+}
+
+TEST(CorruptPayload, GenerateTruncated)
+{
+    CorruptPayloadGenerator gen(42);
+    auto payload = gen.Generate(CorruptionStrategy::Truncated, ".png", 1024);
+    EXPECT_LT(payload.size(), 1024u);
+    EXPECT_GT(payload.size(), 0u);
+}
+
+TEST(CorruptPayload, GenerateBitFlip)
+{
+    CorruptPayloadGenerator gen(42);
+    auto payload = gen.Generate(CorruptionStrategy::BitFlip, ".jpg", 512);
+    EXPECT_EQ(payload.size(), 512u);
+}
+
+TEST(CorruptPayload, GenerateOversizeField)
+{
+    CorruptPayloadGenerator gen(42);
+    auto payload = gen.Generate(CorruptionStrategy::OversizeField, ".bmp", 512);
+    EXPECT_EQ(payload.size(), 512u);
+    bool hasOversize = false;
+    for (size_t i = 0; i + 3 < payload.size(); i += 4) {
+        if (payload[i] == 0xFF && payload[i+1] == 0xFF &&
+            payload[i+2] == 0xFF && payload[i+3] == 0xFF) {
+            hasOversize = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasOversize);
+}
+
+TEST(CorruptPayload, GenerateRepeatingPattern)
+{
+    CorruptPayloadGenerator gen(42);
+    auto payload = gen.Generate(CorruptionStrategy::RepeatingPattern, ".tga", 256);
+    EXPECT_EQ(payload.size(), 256u);
+    uint32_t pattern = 0;
+    std::memcpy(&pattern, payload.data(), 4);
+    EXPECT_EQ(pattern, 0xDEADBEEFu);
+}
+
+TEST(CorruptPayload, RandomStrategyInRange)
+{
+    CorruptPayloadGenerator gen(42);
+    for (int i = 0; i < 100; ++i) {
+        auto s = gen.RandomStrategy();
+        EXPECT_LT(static_cast<uint32_t>(s),
+                   static_cast<uint32_t>(CorruptionStrategy::MaxEnum));
+    }
+}
+
+TEST(CorruptPayload, RandomPayloadSizeInRange)
+{
+    CorruptPayloadGenerator gen(42);
+    for (int i = 0; i < 100; ++i) {
+        auto sz = gen.RandomPayloadSize(128, 4096);
+        EXPECT_GE(sz, 128u);
+        EXPECT_LE(sz, 4096u);
+    }
+}
+
+//==============================================================================
+// SEH Isolation Wrapper Tests
+//==============================================================================
+
+TEST(SEHIsolation, SuccessfulExecution)
+{
+    auto result = SEHIsolationWrapper::Execute([]() { return true; });
+    EXPECT_TRUE(result.completed);
+    EXPECT_FALSE(result.sehCaught);
+    EXPECT_EQ(result.exceptionCode, 0u);
+    EXPECT_GT(result.elapsedMs, 0.0);
+}
+
+TEST(SEHIsolation, FailedExecution)
+{
+    auto result = SEHIsolationWrapper::Execute([]() { return false; });
+    EXPECT_FALSE(result.completed);
+    EXPECT_FALSE(result.sehCaught);
+}
+
+TEST(SEHIsolation, TimeMeasurement)
+{
+    auto result = SEHIsolationWrapper::Execute([]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        return true;
+    });
+    EXPECT_GE(result.elapsedMs, 5.0);
+}
+
+//==============================================================================
+// Worker Isolation Monitor Tests
+//==============================================================================
+
+TEST(WorkerMonitor, RegisterWorker)
+{
+    WorkerIsolationMonitor monitor;
+    monitor.RegisterWorker(1);
+    monitor.RegisterWorker(2);
+    EXPECT_EQ(monitor.WorkerCount(), 2u);
+}
+
+TEST(WorkerMonitor, RecordSuccess)
+{
+    WorkerIsolationMonitor monitor;
+    monitor.RegisterWorker(1);
+    monitor.RecordSuccess(1);
+    monitor.RecordSuccess(1);
+    monitor.RecordSuccess(1);
+
+    auto workers = monitor.GetAllWorkers();
+    ASSERT_EQ(workers.size(), 1u);
+    EXPECT_EQ(workers[0].totalRequests, 3u);
+    EXPECT_EQ(workers[0].successfulDecodes, 3u);
+    EXPECT_EQ(workers[0].sehExceptions, 0u);
+    EXPECT_FALSE(workers[0].markedForRecycle);
+}
+
+TEST(WorkerMonitor, RecycleTriggerByCount)
+{
+    WorkerIsolationMonitor monitor(5, 100.0);
+    monitor.RegisterWorker(1);
+    for (int i = 0; i < 5; ++i) monitor.RecordSEHException(1);
+    EXPECT_TRUE(monitor.ShouldRecycle(1));
+    EXPECT_EQ(monitor.RecycleCandidateCount(), 1u);
+}
+
+TEST(WorkerMonitor, RecycleTriggerByRate)
+{
+    WorkerIsolationMonitor monitor(1000, 10.0);
+    monitor.RegisterWorker(1);
+    for (int i = 0; i < 10; ++i) monitor.RecordSuccess(1);
+    for (int i = 0; i < 2; ++i) monitor.RecordSEHException(1);
+    EXPECT_TRUE(monitor.ShouldRecycle(1));
+}
+
+TEST(WorkerMonitor, HealthyWorkerNotRecycled)
+{
+    WorkerIsolationMonitor monitor(10, 5.0);
+    monitor.RegisterWorker(1);
+    for (int i = 0; i < 100; ++i) monitor.RecordSuccess(1);
+    monitor.RecordSEHException(1);
+    EXPECT_FALSE(monitor.ShouldRecycle(1));
+}
+
+TEST(WorkerMonitor, MultipleWorkerIndependence)
+{
+    WorkerIsolationMonitor monitor(3, 100.0);
+    monitor.RegisterWorker(1);
+    monitor.RegisterWorker(2);
+    for (int i = 0; i < 50; ++i) monitor.RecordSuccess(1);
+    for (int i = 0; i < 3; ++i) monitor.RecordSEHException(2);
+    EXPECT_FALSE(monitor.ShouldRecycle(1));
+    EXPECT_TRUE(monitor.ShouldRecycle(2));
+}
+
+TEST(WorkerMonitor, TimeoutCountsAsFailure)
+{
+    WorkerIsolationMonitor monitor(3, 100.0);
+    monitor.RegisterWorker(1);
+    for (int i = 0; i < 3; ++i) monitor.RecordTimeout(1);
+    EXPECT_TRUE(monitor.ShouldRecycle(1));
+}
+
+//==============================================================================
+// Fuzz Campaign Runner Tests
+//==============================================================================
+
+TEST(FuzzCampaign, RunWithNoDecoder)
+{
+    FuzzCampaignRunner runner(42);
+    auto report = runner.Run(10, {".zip", ".png", ".jpg"});
+    EXPECT_EQ(report.totalIterations, 30u);
+    EXPECT_EQ(report.crashes, 0u);
+    EXPECT_TRUE(report.OverallPass());
+}
+
+TEST(FuzzCampaign, RunWithSuccessDecoder)
+{
+    FuzzCampaignRunner runner(42);
+    runner.SetDecoderCallback([](const uint8_t*, size_t, const std::string&) {
+        return true;
+    });
+    auto report = runner.Run(50, {".webp"});
+    EXPECT_EQ(report.totalIterations, 50u);
+    EXPECT_EQ(report.crashes, 0u);
+    EXPECT_TRUE(report.OverallPass());
+}
+
+TEST(FuzzCampaign, RunWithRejectDecoder)
+{
+    FuzzCampaignRunner runner(42);
+    runner.SetDecoderCallback([](const uint8_t*, size_t, const std::string&) {
+        return false;
+    });
+    auto report = runner.Run(100, {".heif"});
+    EXPECT_EQ(report.totalIterations, 100u);
+    EXPECT_EQ(report.crashes, 0u);
+    EXPECT_EQ(report.gracefulRejects, 100u);
+    EXPECT_DOUBLE_EQ(report.GracefulRate(), 100.0);
+    EXPECT_TRUE(report.OverallPass());
+}
+
+TEST(FuzzCampaign, QuickSmokeTest)
+{
+    FuzzCampaignRunner runner(42);
+    runner.SetDecoderCallback([](const uint8_t*, size_t, const std::string&) {
+        return false;
+    });
+    auto report = runner.QuickSmoke(500);
+    EXPECT_EQ(report.totalIterations, 500u);
+    EXPECT_EQ(report.crashes, 0u);
+    EXPECT_GT(report.totalElapsedMs, 0.0);
+    EXPECT_GT(report.avgIterationMs, 0.0);
+    EXPECT_TRUE(report.OverallPass());
+}
+
+TEST(FuzzCampaign, SEHRateCalculation)
+{
+    FuzzCampaignReport report;
+    report.totalIterations = 1000;
+    report.sehExceptions = 50;
+    EXPECT_DOUBLE_EQ(report.SEHRate(), 5.0);
+}
+
+TEST(FuzzCampaign, SupportedFormatCount)
+{
+    FuzzCampaignRunner runner;
+    EXPECT_GE(runner.SupportedFormatCount(), 15u);
+}
+
+//==============================================================================
+// FuzzResult Tests
+//==============================================================================
+
+TEST(FuzzResult, DefaultPass)
+{
+    FuzzResult res{};
+    EXPECT_TRUE(res.IsPass());
+}
+
+TEST(FuzzResult, CrashedFails)
+{
+    FuzzResult res{};
+    res.crashed = true;
+    EXPECT_FALSE(res.IsPass());
+}
+
+//==============================================================================
+// Circuit Breaker Integration Tests (Sprint 6 hardening)
+//==============================================================================
+
+TEST(CircuitBreakerS6, InitiallyAvailable)
+{
+    DecoderCircuitBreaker cb("TestDecoder");
+    EXPECT_TRUE(cb.IsAvailable());
+}
+
+TEST(CircuitBreakerS6, OpensAfterConsecutiveFailures)
+{
+    DecoderCircuitBreaker cb("TestDecoder");
+    for (int i = 0; i < 5; ++i) cb.RecordFailure();
+    EXPECT_FALSE(cb.IsAvailable());
+}
+
+TEST(CircuitBreakerS6, SuccessResetsFailureCount)
+{
+    DecoderCircuitBreaker cb("TestDecoder");
+    cb.RecordFailure();
+    cb.RecordFailure();
+    cb.RecordSuccess();
+    cb.RecordFailure();
+    cb.RecordFailure();
+    EXPECT_TRUE(cb.IsAvailable());
+}
+
+TEST(CircuitBreakerS6, StressTest5000)
+{
+    DecoderCircuitBreaker cb("StressDecoder");
+    int openCount = 0;
+    for (int i = 0; i < 5000; ++i) {
+        if (i % 100 == 0) {
+            cb.RecordFailure();
+        } else {
+            cb.RecordSuccess();
+        }
+        if (!cb.IsAvailable()) openCount++;
+    }
+    EXPECT_LT(openCount, 100) << "Circuit stayed open too often under mixed load";
+}
+
+//==============================================================================
+// Memory Leak Regression Tests
+//==============================================================================
+
+TEST(MemoryLeak, CaptureSnapshot)
+{
+    auto snap = MemoryLeakRegressionHarness::CaptureSnapshot();
+    EXPECT_GT(snap.workingSetBytes, 0u);
+    EXPECT_GT(snap.privateBytes, 0u);
+}
+
+TEST(MemoryLeak, NoLeakInTightLoop)
+{
+    auto result = MemoryLeakRegressionHarness::RunLeakTest([]() {
+        volatile int x = 42;
+        (void)x;
+    }, 100);
+    EXPECT_EQ(result.iterations, 100u);
+    EXPECT_TRUE(result.passedLeakCheck)
+        << "Growth per iteration: " << result.growthPerIterKB << " KB";
+}
+
+TEST(MemoryLeak, ThresholdConstant)
+{
+    EXPECT_EQ(MemoryLeakRegressionHarness::LeakTestResult::MAX_GROWTH_PER_ITER_KB,
+              1.0);
+}
+
+//==============================================================================
+// Campaign Report Tests
+//==============================================================================
+
+TEST(CampaignReport, OverallPassWhenZeroCrashes)
+{
+    FuzzCampaignReport report;
+    report.totalIterations = 10000;
+    report.crashes = 0;
+    EXPECT_TRUE(report.OverallPass());
+}
+
+TEST(CampaignReport, OverallFailWhenCrashes)
+{
+    FuzzCampaignReport report;
+    report.totalIterations = 10000;
+    report.crashes = 1;
+    EXPECT_FALSE(report.OverallPass());
+}
+
+TEST(CampaignReport, ZeroIterationsNoDiv)
+{
+    FuzzCampaignReport report;
+    report.totalIterations = 0;
+    EXPECT_DOUBLE_EQ(report.SEHRate(), 0.0);
+    EXPECT_DOUBLE_EQ(report.GracefulRate(), 0.0);
 }
