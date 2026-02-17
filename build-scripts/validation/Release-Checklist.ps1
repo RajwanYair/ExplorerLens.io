@@ -38,10 +38,10 @@ try {
     Write-CheckHeader "1. Version Consistency"
     
     $VersionFiles = @{
-        "MASTER_PLAN.md" = $Version
-        "README.md" = $Version
-        "CHANGELOG.md" = $Version
-        "packaging/DarkThumbs.wxs" = $Version
+        "MASTER_PLAN.md"             = $Version
+        "README.md"                  = $Version
+        "CHANGELOG.md"               = $Version
+        "packaging/DarkThumbs.wxs"   = $Version
         "CBXShell/CBXShellClass.cpp" = $Version
     }
     
@@ -70,8 +70,8 @@ try {
         Write-CheckHeader "2. Build Artifacts"
         
         $BuildArtifacts = @{
-            "x64/Release/CBXShell.dll" = 2800000  # ~2.8 MB minimum
-            "x64/Release/CBXManager.exe" = 350000  # ~350 KB minimum
+            "x64/Release/CBXShell.dll"       = 2800000  # ~2.8 MB minimum
+            "x64/Release/CBXManager.exe"     = 350000  # ~350 KB minimum
             "build/lib/DarkThumbsEngine.lib" = 100000000  # ~100 MB minimum
         }
         
@@ -327,7 +327,7 @@ try {
     )
     
     $securityIssues = @()
-    Get-ChildItem -Path $RootDir -Recurse -Include *.cpp,*.h,*.ps1,*.json -ErrorAction SilentlyContinue | ForEach-Object {
+    Get-ChildItem -Path $RootDir -Recurse -Include *.cpp, *.h, *.ps1, *.json -ErrorAction SilentlyContinue | ForEach-Object {
         $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
         foreach ($pattern in $securityPatterns) {
             if ($content -match $pattern) {

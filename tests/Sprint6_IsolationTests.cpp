@@ -7,13 +7,18 @@
 // 2. Circuit breaker stress test: 5000 corrupt-payload iterations
 // 3. Decoder timeout enforcement: hard-kill decoders exceeding 5-second wall clock
 // 4. Memory leak regression test: 100-iteration decode loop with peak-heap assertion
+//
+// Updated: Integrates DecoderTimeout, FuzzingTestFixtures, and MemoryLeakTest
+// infrastructure from Sprint 6 implementation.
 // ============================================================================
 
-#include "../Engine/Core/ThumbnailPipeline.h"
-#include "../Engine/Core/DecoderCircuitBreaker.h"
-#include "../Engine/Core/DecoderHealthMonitor.h"
-#include "../Engine/Utils/MemoryTracker.h"
+#include "../Engine/Pipeline/ThumbnailPipeline.h"
+#include "../Engine/Utils/DecoderCircuitBreaker.h"
+#include "../Engine/Utils/DecoderTimeout.h"
+#include "../Engine/Tests/FuzzingTestFixtures.h"
+#include "../Engine/Tests/MemoryLeakTest.h"
 #include <windows.h>
+#include <Psapi.h>
 #include <iostream>
 #include <vector>
 #include <chrono>

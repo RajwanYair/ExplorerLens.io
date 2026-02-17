@@ -51,7 +51,7 @@ DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts,
 - **Archives:** `.zip`, `.rar`, `.7z`, `.tar`, `.gz`, `.bz2`, `.xz`
 
 #### Professional Formats (✅ RAW Photos & Modern Formats)
-- **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.dng`, `.rw2`, `.raf`, `.pef`, `.dcr`, `.mrw`, `.x3f` and 100+ more camera formats (✅ LibRaw 0.21.2)
+- **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.dng`, `.rw2`, `.raf`, `.pef`, `.dcr`, `.mrw`, `.x3f` and 100+ more camera formats (✅ LibRaw 0.21.3)
   - **Features:** Embedded JPEG thumbnail extraction (< 10ms), full RAW decode with demosaicing, EXIF orientation support, auto white balance
   - **Cameras:** Canon, Nikon, Sony, Olympus, Panasonic, Fujifilm, Pentax, Adobe DNG, Leica, Samsung, Hasselblad, Phase One, Sigma
 - **Modern Images:** `.jxl` (JPEG XL) via libjxl 0.11.1, `.heif`/`.heic` (HEIF/HEIC) via WIC with hardware acceleration
@@ -165,7 +165,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 **Current Version:** 7.0.0  
 **Build Status:** 0 errors / 0 warnings  
 **Test Status:** 100/100 unit tests, 5/5 benchmarks (100% pass rate)  
-**Next Milestone:** v7.1 - Plugin system activation, ETW logging, code signing
+**Next Milestone:** v7.1 — Plugin system activation, ETW structured logging, context menu integration, animated format support
 
 See [MASTER_PLAN.md](MASTER_PLAN.md) for the complete development plan.
 

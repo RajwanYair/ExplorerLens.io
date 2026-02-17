@@ -1,6 +1,6 @@
 # DarkThumbs Known Issues & Troubleshooting
 **Version:** 7.0.0  
-**Last Updated:** February 16, 2026
+**Last Updated:** February 17, 2026
 
 ## Current Known Issues
 
@@ -338,5 +338,5 @@ High memory usage is temporary and released after thumbnail generation completes
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** February 15, 2026
+**Document Version:** 1.1  
+**Last Updated:** February 17, 2026

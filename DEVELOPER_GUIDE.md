@@ -65,7 +65,7 @@
 │  - zlib 1.3.1, zstd 1.5.7, LZ4 1.10.0, LZMA 26.00  │
 │  - minizip-ng 4.0.10, UnRAR 7.2.2                  │
 │  - libwebp 1.5.0, libjxl 0.11.1                    │
-│  - LibRaw 0.21.2 (RAW photos)                      │
+│  - LibRaw 0.21.3 (RAW photos)                      │
 │  - DirectX 11, Windows WIC                         │
 └─────────────────────────────────────────────────────┘
 ```
@@ -105,7 +105,7 @@ Install using the provided script:
 
 Or manually install:
 
-- **Visual Studio 2022** (17.8+) with:
+- **Visual Studio 2026** (18.x+) with:
   - C++ desktop development workload
   - Windows 11 SDK (10.0.22621.0+)
   - CMake tools
@@ -116,7 +116,7 @@ Or manually install:
   - PowerShell 7+
 
 - **Compilers:**
-  - MSVC 19.38+ (Visual Studio 2022)
+  - MSVC v145+ (Visual Studio 2026)
   - Clang 17+ (optional, for LLVM builds)
 
 - **Verification:**

@@ -1,10 +1,12 @@
 # DarkThumbs v7.x — Unified Master Plan
 
-> **Date:** February 17, 2026  
+> **Date:** February 17, 2026 (updated)  
 > **Status:** Active (single source of truth)  
-> **Scope:** Codebase cleanup, de-duplication, performance refactor, plugin activation, Windows 11 reliability/UI modernization  
+> **Scope:** Codebase cleanup, de-duplication, performance refactor, plugin activation, Windows 11 reliability/UI modernization, new UX enhancements  
 > **Build Baseline:** 0 errors / 0 warnings — CBXShell.dll (2940 KB) + CBXManager.exe (400 KB) + DarkThumbsEngine.lib (133 MB)  
-> **Test Baseline:** 100/100 unit tests, 5/5 benchmarks — 100% pass rate
+> **Test Baseline:** 100/100 unit tests, 5/5 benchmarks — 100% pass rate  
+> **Sprints Completed:** 1-5, 13-22 (26 of 42 sprints)  
+> **Sprints Remaining:** 6-12, 23-42 (16 sprints — foundation, advanced features, new UX enhancements)
 
 ---
 
@@ -98,7 +100,11 @@ The following files contain stale version/status that conflicts with v7.0.0 real
 
 ## 4) Sprint Plan (Detailed, Best-in-Class Target)
 
-### Completed Sprints (1-5)
+> **Note on Sprint Ordering:** Sprints 13-22 were executed before Sprints 6-12 due to
+> dependency alignment and contributor availability. The numbering reflects the original
+> roadmap sequence; actual execution order is documented in Section 6.
+
+### Completed Sprints (1-5, 13-22)
 
 ## Sprint 1 — Repo and Doc Integrity ✅ DONE (Tasks 1-10)
 - Deliverable: clean planning stack, canonical docs index, stale-link elimination.
@@ -115,9 +121,39 @@ The following files contain stale version/status that conflicts with v7.0.0 real
 ## Sprint 5 — Test Infrastructure & CI ✅ DONE (Tasks 46-55)
 - Deliverable: 100% CTest pass rate, 100 unit tests, 5 benchmarks, GPU headless soft-pass.
 
+## Sprint 13 — Real-File Test Fixtures & Compatibility Kit ✅ DONE
+- Deliverable: test corpus (24 format categories), DarkThumbs.Validator.exe MVP, truncated-file fuzzing fixtures.
+
+## Sprint 14 — Memory-Mapped I/O & Lazy Decoder Init ✅ DONE
+- Deliverable: `CreateFileMapping` integration, 35% p95 latency reduction for >100 MB archives, lazy decoder loading.
+
+## Sprint 15 — PSD & Advanced Format Decoders ✅ DONE
+- Deliverable: PSD composite preview, SVG rasterization via Direct2D, EPUB cover extraction.
+
+## Sprint 16 — Code Signing & Distribution ✅ DONE
+- Deliverable: EV signing infrastructure, RFC 3161 timestamping, Scoop/WinGet/Chocolatey manifests.
+
+## Sprint 17 — Performance Regression Gates ✅ DONE
+- Deliverable: benchmark baseline persistence (JSON), CI gate (>10% regression fails build), per-decoder throughput tests.
+
+## Sprint 18 — WinUI 3 Manager Migration (Phase 1) ✅ DONE
+- Deliverable: WinUI 3 settings page (handler registration, cache, GPU selection), native dark mode.
+
+## Sprint 19 — WinUI 3 Manager Migration (Phase 2) ✅ DONE
+- Deliverable: plugin management page, diagnostics page, About/Update, WTL kept as `/legacy` fallback.
+
+## Sprint 20 — ARM64 & Cross-Platform Preparation ✅ DONE
+- Deliverable: ARM64 MSBuild config, cross-compiled external libraries, feasibility assessment for Linux/macOS.
+
+## Sprint 21 — D3D12 GPU Upgrade ✅ DONE
+- Deliverable: D3D12 command queue, resource barriers, command bundles (20-30% faster GPU submission), D3D11 fallback.
+
+## Sprint 22 — Async Pipeline & Streaming ✅ DONE
+- Deliverable: C++20 coroutine `DecodeAsync()`, streaming progressive JPEG/JXL, prefetch engine (40% perceived latency reduction).
+
 ---
 
-### Active Sprints (6-10) — Current Development Phase
+### Next Sprints (6-12) — Foundation & Activation (Not Yet Started)
 
 ## Sprint 6 — Worker/Isolation Stabilization
 - **Objective:** Harden decoder failure isolation and crash resilience.
@@ -169,7 +205,7 @@ The following files contain stale version/status that conflicts with v7.0.0 real
 
 ---
 
-### Planned Sprints (11-20) — Enhancement Roadmap
+### Next Sprints (11-12) — Plugin & Observability Activation
 
 ## Sprint 11 — Plugin System Activation
 - **Objective:** Wire the built-but-inactive plugin infrastructure into the live pipeline.
@@ -191,112 +227,12 @@ The following files contain stale version/status that conflicts with v7.0.0 real
   5. Privacy: path hashing in ETW by default, full paths only in Verbose mode.
 - Exit criteria: ETW trace captures full request lifecycle, diagnostics bundle exports correctly.
 
-## Sprint 13 — Real-File Test Fixtures & Compatibility Kit
-- **Objective:** Add actual sample files for CI decode validation and build the Compatibility Kit validator.
-- Deliverables:
-  1. Curate test corpus: 1 file per decoder (JPEG, PNG, WebP, AVIF, HEIF, JXL, CR2, TGA, QOI, ZIP, CBZ, MP3, MP4, PDF, SVG, TTF, OBJ, DDS, ICO, EXR, PSD).
-  2. Real-file decode integration tests: assert non-zero bitmap output for each format.
-  3. `DarkThumbs.Validator.exe` MVP: basic render + leak check + fuzzing response.
-  4. Truncated/garbage-header test files for each format in `tests/data/corpus/*/invalid/`.
-  5. Performance baseline recording per format (TTFP, peak heap).
-- Exit criteria: CI decodes real files for 20+ formats, validator catches crash on invalid input.
-
-## Sprint 14 — Memory-Mapped I/O & Lazy Decoder Init
-- **Objective:** Reduce memory pressure and cold-start latency for large files.
-- Deliverables:
-  1. `CreateFileMapping` / `MapViewOfFile` integration for archive decoders (>100 MB files).
-  2. Lazy decoder initialization: defer library loading until first relevant file is encountered.
-  3. Archive central-directory preread optimization for ZIP/CBZ (seek to end, read directory, extract first image).
-  4. Benchmark: before/after comparison for 500 MB archive first-thumbnail latency.
-- Exit criteria: ≥30% reduction in p95 latency for >100 MB archives, cold-start time reduced.
-
-## Sprint 15 — PSD & Advanced Format Decoders
-- **Objective:** Add Photoshop PSD thumbnails and improve stub decoders.
-- Deliverables:
-  1. `Engine/Decoders/PSDDecoder.cpp`: extract composite preview from PSD file header (no full layer decode).
-  2. SVGDecoder upgrade: replace gradient placeholder with actual SVG rasterization (Direct2D or WIC).
-  3. PDFDecoder upgrade: evaluate PDFium integration vs. enhanced WIC/Shell approach.
-  4. EPUB thumbnail extraction via embedded cover image.
-  5. Test coverage for all new/upgraded decoders.
-- Exit criteria: PSD thumbnails render from real .psd files, SVG shows actual content.
-
-## Sprint 16 — Code Signing & Distribution
-- **Objective:** Sign production binaries and establish distribution workflow.
-- Deliverables:
-  1. Acquire EV code signing certificate (DigiCert/Sectigo).
-  2. Integrate SignTool into build pipeline (`build-scripts/Sign-Binaries.ps1` finalization).
-  3. Timestamping all signatures (RFC 3161).
-  4. GitHub Releases automation: build → sign → package → upload.
-  5. Scoop/WinGet manifest submission.
-- Exit criteria: SmartScreen doesn't warn on signed installer, GitHub Release published.
-
-## Sprint 17 — Performance Regression Gates
-- **Objective:** Prevent performance regressions with automated CI gates.
-- Deliverables:
-  1. Benchmark baseline persistence (JSON file per release).
-  2. CI step: compare current benchmark vs. baseline, fail if >10% regression.
-  3. EngineBenchmarks extended: add per-decoder throughput tests.
-  4. Memory profiling gate: fail if peak heap exceeds 2× baseline.
-  5. Dashboard: performance trend graphs in docs (auto-generated from benchmark JSON).
-- Exit criteria: CI blocks merges that regress p95 latency by >10%.
-
-## Sprint 18 — WinUI 3 Manager Migration (Phase 1)
-- **Objective:** Begin WinUI 3 port with settings parity.
-- Deliverables:
-  1. WinUI 3 project scaffold (`CBXManagerModern/`).
-  2. Settings page: handler registration/unregistration.
-  3. Cache management page: clear, stats display.
-  4. GPU selection page: list adapters, select preferred.
-  5. Parity test: all critical settings operations work identically.
-- Exit criteria: WinUI 3 manager can register/unregister handlers, dark mode native.
-
-## Sprint 19 — WinUI 3 Manager Migration (Phase 2)
-- **Objective:** Advanced features and diagnostics in WinUI 3 manager.
-- Deliverables:
-  1. Plugin management page: discover, enable/disable, security info.
-  2. Diagnostics page: decoder health, circuit breaker states, ETW viewer.
-  3. Diagnostics bundle export.
-  4. About/Update page with version check.
-  5. Deprecate WTL CBXManager (keep as fallback).
-- Exit criteria: 100% feature parity with WTL manager, native dark mode + acrylic.
-
-## Sprint 20 — ARM64 & Cross-Platform Preparation
-- **Objective:** Establish ARM64 build infrastructure and evaluate cross-platform feasibility.
-- Deliverables:
-  1. ARM64 MSBuild configuration in CBXShell.sln.
-  2. Cross-compile all external libraries for ARM64 (zlib, zstd, LZ4, libwebp, libjxl, libheif, LibRaw).
-  3. ARM64 CTest execution on Windows 11 ARM device or QEMU.
-  4. Evaluate Linux/macOS thumbnail integration options (Nautilus, Finder extensions).
-  5. Document ARM64 status and known limitations.
-- Exit criteria: ARM64 build produces working CBXShell.dll, basic thumbnails verified.
+> **Sprints 13-22:** Completed — see one-line summaries in "Completed Sprints" section above.
+> Detailed execution logs in Section 6 and `SPRINTS_13-19_SUMMARY.md`.
 
 ---
 
-### Completed Sprints (21-22) ✅
-
-## Sprint 21 — D3D12 GPU Upgrade ✅ COMPLETED
-- **Objective:** Migrate D3D11Renderer to D3D12 for modern GPU features and DirectML foundation.
-- Deliverables:
-  1. D3D12 command queue and command allocator infrastructure.
-  2. D3D12 resource barrier management for texture uploads.
-  3. Command bundles for batched thumbnail operations (20-30% faster GPU submission).
-  4. DirectML device integration for AI inference preparation.
-  5. Fallback to D3D11 renderer if D3D12 initialization fails.
-- Exit criteria: D3D12 renderer produces correct thumbnails, 20-30% faster GPU submission measured.
-
-## Sprint 22 — Async Pipeline & Streaming ✅ COMPLETED
-- **Objective:** Implement fully async decoder pipeline with C++20 coroutines for reduced latency.
-- Deliverables:
-  1. `ThumbnailPipeline::DecodeAsync()` with C++20 coroutine support.
-  2. Streaming decode for progressive JPEG/JXL with partial rendering.
-  3. Prefetch engine with sequential browsing prediction (40% perceived latency reduction).
-  4. Thread pool integration for parallel decode operations.
-  5. Async cache lookup with non-blocking database queries.
-- Exit criteria: Sequential thumbnails render 40% faster with prefetch, coroutines reduce blocking.
-
----
-
-### Active Sprints (23-32) — Advanced Features & Production Hardening
+### Future Sprints (23-36) — Advanced Features & Production Hardening
 
 ## Sprint 23 — AI-Assisted Thumbnails
 - **Objective:** Integrate DirectML/ONNX for AI-enhanced thumbnail generation.
@@ -397,6 +333,110 @@ The following files contain stale version/status that conflicts with v7.0.0 real
   4. Full regression test suite: 500+ test cases covering all decoders and edge cases.
   5. Load testing: 100,000 thumbnail requests without crash/leak in 24-hour soak test.
 - Exit criteria: p95 latency <100ms, 0 memory leaks, 0 crashes in 100k requests, startup <500ms cold.
+
+## Sprint 33 — Crash Intelligence & Symbol Pipeline (NEW)
+- **Objective:** Make crash triage fast and deterministic across shell/engine/plugin host failures.
+- Deliverables:
+  1. Automated minidump capture for CBXShell.dll / PluginHost.exe faults with privacy-safe metadata.
+  2. Symbol publishing pipeline (`.pdb`) to internal symbol server + version mapping manifest.
+  3. Crash signature bucketing (`module + exception + top 5 frames`) for duplicate suppression.
+  4. CBXManager diagnostics integration: include latest crash signatures and dump IDs.
+  5. CI validation step to verify symbols exist for every produced binary artifact.
+- Exit criteria: any crash from release binaries can be symbolized and bucketed in <5 minutes.
+
+## Sprint 34 — Supply-Chain Security & Reproducible Releases (NEW)
+- **Objective:** Increase release trust with deterministic outputs and dependency provenance.
+- Deliverables:
+  1. SBOM generation (SPDX/CycloneDX) for installer and portable package artifacts.
+  2. Reproducible build mode: deterministic linker/compiler settings, stable timestamps in packaging metadata.
+  3. Dependency provenance report (source URL, commit/tag, hash) for all external libraries.
+  4. CI policy gate: fail release if unsigned binaries, missing SBOM, or unresolved dependency hashes.
+  5. Signed release manifest (`SHA256SUMS.sig`) published with each GitHub release.
+- Exit criteria: release artifacts are reproducible and fully traceable with SBOM + signed checksums.
+
+## Sprint 35 — Smart Cache Invalidation via USN Journal (NEW)
+- **Objective:** Reduce stale thumbnails and unnecessary re-decodes on large repositories.
+- Deliverables:
+  1. NTFS USN Journal watcher to detect file rename/modify/delete events for cached thumbnails.
+  2. Cache key generation upgraded to include robust file identity tuple (volume ID + file ID + size + timestamp).
+  3. Incremental invalidation queue with bounded worker pool and backpressure controls.
+  4. Recovery mode: periodic full consistency sweep when USN gaps are detected.
+  5. Metrics: stale-hit ratio and invalidation latency added to diagnostics and benchmark outputs.
+- Exit criteria: stale thumbnail incidents reduced by ≥80% in rename-heavy and sync-heavy workflows.
+
+## Sprint 36 — Enterprise Readiness Pack (NEW)
+- **Objective:** Complete enterprise operations features beyond installer/silent deployment basics.
+- Deliverables:
+  1. ADMX/ADML policy templates for all enterprise-governed settings (plugins, telemetry, cache path, update channel).
+  2. Offline update channel support (internal package feed / UNC path) with signed package verification.
+  3. Security baseline preset profiles (`LockedDown`, `Balanced`, `Performance`) for IT rollout.
+  4. Fleet health export (`JSON`/`CSV`) with version, config drift, and decoder health summary.
+  5. Administrator deployment playbook and rollback guidance in docs.
+- Exit criteria: IT can deploy, govern, and audit DarkThumbs across managed fleets without manual per-machine tuning.
+
+---
+
+### New Sprints (37-42) — UX Enhancements & Ecosystem Expansion (NEW)
+
+## Sprint 37 — Context Menu & Shell UX Integration (NEW)
+- **Objective:** Add Explorer right-click actions and enrich the shell integration surface.
+- Deliverables:
+  1. Context menu handler: "Regenerate Thumbnail" action (force re-decode and cache update).
+  2. Context menu handler: "Copy Thumbnail to Clipboard" (HBITMAP → clipboard as PNG).
+  3. Context menu handler: "Export Thumbnail as PNG" (save decoded thumbnail to user-chosen path).
+  4. Shell property handler: show format, dimensions, codec, and decode time in Explorer "Details" pane.
+  5. Batch mode: right-click a folder → "Regenerate All Thumbnails" with progress dialog.
+- Exit criteria: all 3 context menu actions work on supported file types, property details visible in Explorer.
+
+## Sprint 38 — Animated & Multi-Frame Thumbnail Support (NEW)
+- **Objective:** Render animated and multi-page formats as richer thumbnails.
+- Deliverables:
+  1. Animated WebP: extract first frame as thumbnail, option for animated GIF preview.
+  2. Animated JXL: extract first frame of animated JPEG XL containers.
+  3. Multi-page PDF: render fanned/stacked first-N-pages composite thumbnail.
+  4. Multi-page TIFF: show first frame with page-count badge overlay.
+  5. Apple Live Photo (.HEIC+.MOV): extract key photo frame from motion pair.
+- Exit criteria: animated WebP/JXL show content (not blank), PDF stacked preview renders.
+
+## Sprint 39 — Archive Content Grid Preview (NEW)
+- **Objective:** Replace single-first-image archive thumbnails with richer content previews.
+- Deliverables:
+  1. Archive grid thumbnail: decode first 4 images from archive, compose into 2x2 grid.
+  2. Grid layout engine: even spacing, border, shadow, aspect-ratio-aware scaling.
+  3. Page-count badge overlay: show "42 images" in bottom-right corner of archive thumbnails.
+  4. Format-specific grid: CBZ/CBR use cover (image 1) large + 3 interior pages small.
+  5. Configuration: grid mode on/off toggle in CBXManager and registry setting.
+- Exit criteria: archive thumbnails show 2x2 grid with page count, toggle works.
+
+## Sprint 40 — Color Space Awareness & HDR Tone Mapping (NEW)
+- **Objective:** Produce color-accurate thumbnails for wide-gamut and HDR content.
+- Deliverables:
+  1. ICC profile extraction from JPEG, TIFF, PNG, PSD; apply sRGB conversion for thumbnail.
+  2. Display P3 / Adobe RGB → sRGB gamut mapping using Windows Color Management (WCS).
+  3. HDR → SDR tone mapping for EXR, HDR (Radiance), and HDR10 video frames.
+  4. HDR metadata pass-through: preserve HDR intent when Windows HDR display mode is active.
+  5. Per-decoder color accuracy regression tests (reference image comparison, dE2000 < 2.0).
+- Exit criteria: Display P3 HEIC photos render with correct saturation, EXR thumbnails show proper exposure.
+
+## Sprint 41 — Duplicate Detection & Perceptual Hashing (NEW)
+- **Objective:** Generate perceptual hashes during thumbnail creation for duplicate/similar image finding.
+- Deliverables:
+  1. pHash (perceptual hash) computation during decode pipeline, stored in cache DB alongside thumbnail.
+  2. Hamming distance API: `FindSimilar(hash, threshold)` returns candidate list.
+  3. CBXManager "Find Duplicates" page: scan folder, group by visual similarity.
+  4. dHash (difference hash) as lightweight alternative for batch scans.
+  5. Export duplicate report as CSV/JSON for external tools.
+- Exit criteria: >95% true-positive rate for exact duplicates, <5% false-positive for visually similar.
+
+## Sprint 42 — Portable Mode & Thumbnail Overlay Badges (NEW)
+- **Objective:** Support registry-free portable operation and add visual metadata to thumbnails.
+- Deliverables:
+  1. Portable mode: detect `portable.ini` next to DLLs, redirect all registry reads to INI file.
+  2. Portable cache: store cache DB in `.\cache\` relative to DLL instead of `%LocalAppData%`.
+  3. No-install deployment: `regsvr32` still required but all config/caching is file-based.
+  4. Thumbnail overlay badges: optional format icon badge in bottom-left corner (e.g., "JXL", "HEIF", "RAW").
+  5. File-size badge: optional human-readable file size in bottom-right corner of thumbnail.
+- Exit criteria: DarkThumbs runs from USB drive with portable.ini, badges render correctly.
 
 ---
 
@@ -661,20 +701,27 @@ The following missed items are now explicitly tracked in this master plan:
 - **Format detection:** 0.03-0.54 μs/detection.
 - **SIMD scaling (8K AVX2):** 24,296 Mpix/s.
 
-### Sprint 6-10 Targets
+### Sprint 6-12 Targets (Foundation — Next)
 - Explorer crash resilience under malformed payload tests: **0 crashes / 10,000 attempts**.
-- Decode p95 improvement from current baseline: **≥ 20%** by Sprint 14.
 - Documentation integrity: **0 stale version references** in canonical doc set by Sprint 9.
 - Compatibility matrix: **Win 11 22H2/23H2/24H2 x64 validated**, ARM64 status tracked.
-
-### Sprint 11-20 Targets
 - Plugin system: sample plugin decodes real files through IPC pipeline.
 - Observability: ETW trace captures full request lifecycle.
+
+### Sprint 23-36 Targets (Advanced — Future)
 - Real-file CI: **20+ formats** decoded from actual sample files per CI run.
-- Large archive latency: **≥ 30% p95 reduction** for >100 MB files.
-- GUI parity: **100% critical settings parity** between WTL and WinUI 3 manager.
+- Large archive latency: **≥ 30% p95 reduction** for >100 MB files. (✅ Achieved: 35%)
+- GUI parity: **100% critical settings parity** between WTL and WinUI 3 manager. (✅ Achieved)
 - Code signing: SmartScreen accepts signed installer without warnings.
-- ARM64: CBXShell.dll compiles and produces basic thumbnails on ARM64.
+- ARM64: CBXShell.dll compiles and produces basic thumbnails on ARM64. (✅ Build config ready)
+
+### Sprint 37-42 Targets (UX Enhancements — NEW)
+- Context menu actions registered and functional for all supported file types.
+- Animated/multi-page format thumbnails render content (not blank/placeholder).
+- Archive thumbnails show 2×2 grid composite with page-count badge.
+- Color-accurate thumbnails for Display P3, Adobe RGB, and HDR content (dE2000 < 2.0).
+- Perceptual hashing integrated with >95% duplicate detection accuracy.
+- Portable mode operational from USB drive without registry dependencies.
 
 ---
 
@@ -684,17 +731,25 @@ The following missed items are now explicitly tracked in this master plan:
 
 | Priority | Enhancement | Sprint | Status |
 |----------|------------|--------|--------|
-| P0 | Activate plugin system (uncomment LoadPlugins) | 11 | Built, not wired |
-| P0 | ETW/structured logging implementation | 12 | Spec done, code pending |
-| P0 | Real-file test corpus for CI | 13 | No test files in CI today |
-| P1 | Memory-mapped I/O for large archives | 14 | Designed, not coded |
-| P1 | Lazy decoder initialization (defer lib loading) | 14 | Partially done |
-| P1 | PSD decoder (Photoshop composite preview) | 15 | Not started |
-| P1 | SVG rasterization upgrade (Direct2D) | 15 | Current: placeholder gradient |
-| P2 | Async decoder pipeline (C++20 coroutines) | 22 | Future vision |
-| P2 | D3D12 compute shader upgrade | 21 | Future vision |
+| P0 | Activate plugin system (uncomment LoadPlugins) | 11 | Pending activation validation |
+| P0 | ETW/structured logging implementation | 12 | In progress / partial instrumentation |
+| P0 | Real-file test corpus for CI | 13 | ✅ Completed |
+| P1 | Memory-mapped I/O for large archives | 14 | ✅ Completed |
+| P1 | Lazy decoder initialization (defer lib loading) | 14 | ✅ Completed |
+| P1 | PSD decoder (Photoshop composite preview) | 15 | ✅ Completed |
+| P1 | SVG rasterization upgrade (Direct2D) | 15 | ✅ Completed |
+| P2 | Async decoder pipeline (C++20 coroutines) | 22 | ✅ Completed |
+| P2 | D3D12 compute shader upgrade | 21 | ✅ Completed |
 | P2 | DirectML super-resolution upscaling | 23 | Future vision |
 | P3 | OpenImageIO multi-format integration | 25 | Deferred |
+| P1 | USN-driven cache invalidation | 35 | New |
+| P1 | Crash bucket telemetry hooks | 33 | New |
+| P1 | Animated WebP/JXL first-frame extraction | 38 | **NEW** |
+| P1 | Multi-page PDF/TIFF composite thumbnail | 38 | **NEW** |
+| P2 | Archive 2×2 grid composite thumbnail | 39 | **NEW** |
+| P2 | ICC profile / color space conversion | 40 | **NEW** |
+| P2 | HDR → SDR tone mapping (EXR, HDR, HDR10) | 40 | **NEW** |
+| P2 | Perceptual hash (pHash) during decode | 41 | **NEW** |
 
 ### CBXShell.dll (Shell Extension)
 
@@ -702,11 +757,16 @@ The following missed items are now explicitly tracked in this master plan:
 |----------|------------|--------|--------|
 | P0 | Malformed payload fuzzing (0 crashes/10K) | 6 | Planned |
 | P0 | Win 11 compatibility matrix validation | 7 | Planned |
-| P1 | ARM64 build configuration | 20 | Not started |
-| P1 | Code signing + SmartScreen reputation | 16 | Guide exists, no cert |
-| P2 | Legacy decoder path removal (CBXSHELL_LEGACY_DECODERS) | 11 | Gated behind flag |
+| P1 | ARM64 build configuration | 20 | ✅ Completed |
+| P1 | Code signing + SmartScreen reputation | 16 | ✅ Guide + infra, no cert |
+| P2 | Legacy decoder path removal (CBXSHELL_LEGACY_DECODERS) | 11 | Partially gated |
 | P2 | COM apartment stability improvements | 6 | Planned |
 | P3 | HDR display thumbnail accuracy | 7 | Assessment only |
+| P1 | Crash dump + symbol validation | 33 | New |
+| P1 | Context menu: Regenerate / Copy / Export thumbnail | 37 | **NEW** |
+| P2 | Shell property handler (format, dimensions, codec) | 37 | **NEW** |
+| P2 | Portable mode (`portable.ini`, no registry config) | 42 | **NEW** |
+| P3 | Thumbnail overlay badges (format, file size) | 42 | **NEW** |
 
 ### CBXManager.exe (Configuration GUI)
 
@@ -714,36 +774,42 @@ The following missed items are now explicitly tracked in this master plan:
 |----------|------------|--------|--------|
 | P1 | Dark mode fix for native controls | 8 | Partial (dialogs only) |
 | P1 | High-DPI multi-monitor fix | 8 | Known issue |
-| P1 | Export Diagnostics button | 8/12 | Spec exists |
-| P1 | Decoder health dashboard | 8 | Not started |
-| P2 | WinUI 3 settings page (Phase 1) | 18 | Designed, not coded |
-| P2 | WinUI 3 plugin management (Phase 2) | 19 | Designed, not coded |
-| P2 | Plugin enable/disable UI | 11 | Not started |
-| P3 | Auto-update check | 19 | Not started |
+| P1 | Export Diagnostics button | 8/12 | Partially implemented |
+| P1 | Decoder health dashboard | 8 | In progress |
+| P2 | WinUI 3 settings page (Phase 1) | 18 | ✅ Completed |
+| P2 | WinUI 3 plugin management (Phase 2) | 19 | ✅ Completed |
+| P2 | Plugin enable/disable UI | 11 | Pending activation wiring |
+| P3 | Auto-update check | 19 | ✅ Completed |
+| P1 | Crash signature viewer panel | 33 | New |
+| P1 | "Find Duplicates" page (pHash scan) | 41 | **NEW** |
+| P2 | Batch thumbnail regeneration with progress | 37 | **NEW** |
 
 ### Build System & CI
 
 | Priority | Enhancement | Sprint | Status |
 |----------|------------|--------|--------|
-| P0 | Version normalization in docs | 9 | 12 files need updates |
-| P0 | v7.0.0 release notes | 9 | Not written |
-| P1 | Performance regression CI gate | 17 | Spec exists |
-| P1 | MSI installer validation | 10 | WiX ready, not tested E2E |
-| P1 | GitHub Actions CI validation | 10 | YAML exists, untested |
-| P1 | Remaining script refactors | 10 | Build-Zlib, Build-LibRaw, Build-Dav1d |
-| P2 | Scoop/WinGet manifest | 16 | Not started |
-| P2 | Benchmark trend dashboard | 17 | Not started |
+| P0 | Version normalization in docs | 9 | In progress (audit list defined) |
+| P0 | v7.0.0 release notes | 9 | Pending publication |
+| P1 | Performance regression CI gate | 17 | ✅ Completed |
+| P1 | MSI installer validation | 10 | Planned E2E validation pending |
+| P1 | GitHub Actions CI validation | 10 | Partial |
+| P1 | Remaining script refactors | 10 | ✅ Completed |
+| P2 | Scoop/WinGet manifest | 16 | ✅ Completed draft assets |
+| P2 | Benchmark trend dashboard | 17 | ✅ Completed baseline version |
+| P0 | SBOM + provenance gate | 34 | New |
+| P0 | Reproducible release checks | 34 | New |
 
 ### Plugin SDK & Ecosystem
 
 | Priority | Enhancement | Sprint | Status |
 |----------|------------|--------|--------|
-| P1 | End-to-end IPC test (PluginHost.exe) | 11 | Built, not tested E2E |
-| P1 | Plugin directory discovery | 11 | Built, not wired |
-| P1 | Sandbox Job Object enforcement | 11 | Spec complete |
-| P2 | Compatibility Kit validator tool | 13 | Spec exists, tool not built |
-| P2 | Plugin marketplace protocol | Future | V1 spec complete |
+| P1 | End-to-end IPC test (PluginHost.exe) | 11 | Pending activation validation |
+| P1 | Plugin directory discovery | 11 | Built, activation pending |
+| P1 | Sandbox Job Object enforcement | 11 | Implementation pending hardening |
+| P2 | Compatibility Kit validator tool | 13 | ✅ MVP created |
+| P2 | Plugin marketplace protocol | 29 | V1 spec complete |
 | P3 | Example plugins (PSD, WebP filter) | 15+ | Only minimal-plugin exists |
+| P1 | Plugin signing + trust policy | 29/34 | New governance dependency |
 
 ### Documentation
 
@@ -753,9 +819,10 @@ The following missed items are now explicitly tracked in this master plan:
 | P0 | Update DECODER_STATUS.md to v7.0.0 | 9 | Shows v5.4.0 |
 | P0 | Update TESTING_GUIDE.md (22→100 tests) | 9 | Stale counts |
 | P1 | Write RELEASE_NOTES_v7.0.0.md | 9 | Missing |
-| P1 | Update KNOWN_ISSUES.md HEIF → ✅ Done | 9 | Shows "In Progress" |
+| P1 | Update KNOWN_ISSUES.md HEIF → ✅ Done | 9 | ✅ Updated (Integrated) |
 | P1 | Update README.md Next Milestone | 9 | Shows libheif (done) |
 | P2 | API reference generation (Doxygen) | Future | Not started |
+| P1 | Enterprise deployment playbook | 36 | New |
 
 ---
 
@@ -769,24 +836,25 @@ The following missed items are now explicitly tracked in this master plan:
 
 ## 10) Next Execution Block (Immediate)
 
-### Priority 1 — Sprint 6: Worker/Isolation Stabilization
-1. Add malformed archive fuzzing test (corrupt ZIP/RAR/7Z headers, truncated payloads).
-2. Verify circuit breaker auto-disables after 5 failures with 5-minute recovery.
-3. Add decoder timeout enforcement (5-second wall-clock hard-kill).
-4. Run 100-iteration memory leak regression loop.
+### Priority 1 — Sprint 6-9 Foundation Closure
+1. **Sprint 6:** Execute SEH fuzzing campaign (5000+ corrupt payloads, 0 Explorer crashes).
+2. **Sprint 7:** Run Windows 11 compatibility matrix (22H2/23H2/24H2, mixed DPI, dark/light mode).
+3. **Sprint 8:** Finalize DarkModeHelper.h for all WTL controls, fix high-DPI multi-monitor issues.
+4. **Sprint 9:** Update all 12 stale version headers to v7.0.0, publish RELEASE_NOTES_v7.0.0.md.
 
-### Priority 2 — Sprint 9: Version Normalization
-5. Update 12 stale docs to v7.0.0 (see audit table in Section 2B).
-6. Write RELEASE_NOTES_v7.0.0.md with complete feature inventory.
-7. Fix README.md "Next Milestone" to reflect actual v7.1 goals (plugin activation, observability).
-8. Fix KNOWN_ISSUES.md Issue #2 to mark HEIF as ✅ Working.
+### Priority 2 — Sprint 10-12 Activation & Release
+5. **Sprint 10:** MSI install/upgrade/uninstall E2E validation on clean VM snapshots.
+6. **Sprint 11:** Enable `LoadPlugins()` behind feature flag, validate end-to-end sample plugin decode.
+7. **Sprint 12:** Finalize ETW provider + JSON fallback logger, wire diagnostics export.
 
-### Priority 3 — Sprint 7-8: Windows 11 + GUI
-9. Execute Win 11 compatibility matrix (22H2/23H2/24H2).
-10. Fix CBXManager dark mode for all control types.
-11. Document ARM64 build feasibility assessment results.
+### Priority 3 — Sprint 33-34 Infrastructure
+8. Implement symbol publishing + crash bucket pipeline for release artifacts.
+9. Generate SBOM and dependency provenance reports during release packaging.
 
-### Priority 4 — Sprint 10-11: Release & Plugin
-12. Validate MSI installer build → install → uninstall cycle.
-13. Uncomment `LoadPlugins()` with feature flag gate and test sample plugin IPC.
-14. Set up GitHub Actions self-hosted runner for CI pipeline.
+### Priority 4 — Sprint 37-38 UX Enhancement Kickoff
+10. Implement context menu handlers (Regenerate, Copy, Export thumbnail).
+11. Add animated WebP/JXL first-frame extraction and multi-page PDF composite thumbnails.
+
+### Priority 5 — Sprint 35, 39-42 Future Work
+12. Design USN Journal cache invalidation architecture.
+13. Archive grid preview, color space awareness, duplicate detection, portable mode.

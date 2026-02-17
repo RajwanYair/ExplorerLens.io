@@ -33,34 +33,34 @@ try {
     
     $systemInfo = @{
         timestamp = (Get-Date -Format "o")
-        os = @{
-            caption = (Get-CimInstance Win32_OperatingSystem).Caption
-            version = (Get-CimInstance Win32_OperatingSystem).Version
-            build = (Get-CimInstance Win32_OperatingSystem).BuildNumber
+        os        = @{
+            caption      = (Get-CimInstance Win32_OperatingSystem).Caption
+            version      = (Get-CimInstance Win32_OperatingSystem).Version
+            build        = (Get-CimInstance Win32_OperatingSystem).BuildNumber
             architecture = (Get-CimInstance Win32_OperatingSystem).OSArchitecture
-            installDate = (Get-CimInstance Win32_OperatingSystem).InstallDate
+            installDate  = (Get-CimInstance Win32_OperatingSystem).InstallDate
         }
-        hardware = @{
+        hardware  = @{
             processor = (Get-CimInstance Win32_Processor).Name
-            cores = (Get-CimInstance Win32_Processor).NumberOfCores
-            threads = (Get-CimInstance Win32_Processor).NumberOfLogicalProcessors
-            ramGB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)
+            cores     = (Get-CimInstance Win32_Processor).NumberOfCores
+            threads   = (Get-CimInstance Win32_Processor).NumberOfLogicalProcessors
+            ramGB     = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)
         }
-        graphics = @(
+        graphics  = @(
             Get-CimInstance Win32_VideoController | ForEach-Object {
                 @{
-                    name = $_.Name
+                    name          = $_.Name
                     driverVersion = $_.DriverVersion
-                    driverDate = $_.DriverDate
-                    vramMB = [math]::Round($_.AdapterRAM / 1MB, 0)
+                    driverDate    = $_.DriverDate
+                    vramMB        = [math]::Round($_.AdapterRAM / 1MB, 0)
                 }
             }
         )
-        monitors = @(
+        monitors  = @(
             Get-CimInstance WmiMonitorID -Namespace root\wmi -ErrorAction SilentlyContinue | ForEach-Object {
                 @{
                     manufacturer = [System.Text.Encoding]::ASCII.GetString($_.ManufacturerName -ne 0)
-                    productCode = [System.Text.Encoding]::ASCII.GetString($_.ProductCodeID -ne 0)
+                    productCode  = [System.Text.Encoding]::ASCII.GetString($_.ProductCodeID -ne 0)
                     serialNumber = [System.Text.Encoding]::ASCII.GetString($_.SerialNumberID -ne 0)
                 }
             }
@@ -78,7 +78,7 @@ try {
     
     $config = @{
         registry = @{}
-        files = @{}
+        files    = @{}
     }
     
     # Registry settings
@@ -118,7 +118,7 @@ try {
     # =========================================================================
     Write-Host "`n[3/8] Collecting logs..." -ForegroundColor Yellow
     
-$logPaths = @(
+    $logPaths = @(
         "$env:LOCALAPPDATA\DarkThumbs\Logs\darkthumbs.log",
         "$env:TEMP\DarkThumbs\darkthumbs.log",
         "$env:APPDATA\DarkThumbs\Logs\darkthumbs.log"
@@ -228,13 +228,13 @@ Windows Registry Editor Version 5.00
     Write-Host "`n[6/8] Collecting performance metrics..." -ForegroundColor Yellow
     
     $perfMetrics = @{
-        collected_at = (Get-Date -Format "o")
-        cache_stats = @{}
+        collected_at  = (Get-Date -Format "o")
+        cache_stats   = @{}
         decoder_stats = @{}
-        memory_usage = @{
-            workingSetMB = 0
+        memory_usage  = @{
+            workingSetMB   = 0
             privateBytesMB = 0
-            virtualSizeMB = 0
+            virtualSizeMB  = 0
         }
     }
     

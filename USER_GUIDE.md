@@ -1,6 +1,6 @@
 # DarkThumbs User Guide
-**Version:** 6.2.0  
-**Last Updated:** February 15, 2026
+**Version:** 7.0.0  
+**Last Updated:** February 17, 2026
 
 ## Table of Contents
 - [Installation](#installation)
@@ -27,7 +27,7 @@
 2. **Run the installer** as Administrator:
    ```powershell
    # Right-click installer → "Run as Administrator"
-   .\DarkThumbs-Setup-6.2.0.msi
+   .\DarkThumbs-Setup-7.0.0.msi
    ```
 
 3. **Follow the wizard**:
@@ -100,7 +100,7 @@ Stop-Process -Name explorer -Force
 
 ## Supported Formats
 
-DarkThumbs supports **155+ file formats** across multiple categories:
+DarkThumbs supports **200+ file formats** across multiple categories:
 
 ### Archives & Comic Books
 - **Comic Books:** `.cbz`, `.cbr`, `.cb7`, `.cbt`
@@ -108,8 +108,10 @@ DarkThumbs supports **155+ file formats** across multiple categories:
 
 ### Images
 - **Standard:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tiff`, `.tif`
-- **Modern:** `.webp`, `.jxl` (JPEG XL), `.avif`, `.heic`, `.heif`
-- **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.dng`, `.rw2`, `.raf`, `.pef`, `.dcr`, `.mrw`, `.x3f` + 100 more camera formats
+- **Modern:** `.webp`, `.jxl` (JPEG XL), `.avif`, `.heic`, `.heif` ✅
+- **Professional:** `.psd`, `.psb` (Photoshop), `.svg` (vector), `.exr` (OpenEXR), `.hdr` (Radiance)
+- **Texture/Legacy:** `.dds`, `.tga`, `.ico`, `.qoi`, `.ppm`/`.pgm`/`.pbm`
+- **RAW Photos:** `.cr2`, `.cr3`, `.nef`, `.arw`, `.orf`, `.dng`, `.rw2`, `.raf`, `.pef`, `.dcr`, `.mrw`, `.x3f`, `.gpr` + 100 more camera formats
 
 ### Videos
 - **Common:** `.mp4`, `.avi`, `.mkv`, `.mov`, `.wmv`, `.flv`, `.webm`
@@ -119,9 +121,13 @@ DarkThumbs supports **155+ file formats** across multiple categories:
 - **Lossless:** `.flac`, `.ape`, `.wav`, `.wv`, `.tta`
 - **Compressed:** `.mp3`, `.m4a`, `.aac`, `.ogg`, `.opus`
 
-### Documents (Planned)
+### Documents (✅ Supported)
 - **PDF:** `.pdf` (first page thumbnail)
 - **Office:** `.docx`, `.xlsx`, `.pptx` (via Windows thumbnail provider)
+
+### Fonts & 3D Models (✅ Supported)
+- **Fonts:** `.ttf`, `.otf`, `.ttc` (font preview rendering)
+- **3D Models:** `.obj`, `.stl`, `.gltf`, `.glb` (orthographic preview)
 
 ---
 
