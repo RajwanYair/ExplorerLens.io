@@ -2,7 +2,7 @@
 
 **Last Updated:** February 18, 2026  
 **Version:** v7.0.0  
-**Status:** 🔄 Active Development — Sprints 1-35 Complete; Sprints 36-42 Next
+**Status:** 🔄 Active Development — Sprints 1-39 Complete; Sprints 40-42 Next
 
 ---
 
@@ -88,9 +88,19 @@
 | 34 | Supply-Chain Security | Engine/Utils/SupplyChainSecurity.h | `7395a9e` |
 | 35 | USN Cache Invalidation | Engine/Cache/USNCacheInvalidation.h | `1e024eb` |
 
-### 📅 Future (Sprints 36-42)
-| 36 | Enterprise Readiness Pack | ADMX/ADML, offline update, fleet health export |
-| 37-42 | Context Menu, Animated, Grid, Color, Hash, Portable | UX Enhancement |
+### 📅 Sprints 36-39 (Complete — Modular Codecs & UX Enhancements)
+
+| Sprint | Name | Key Files | Commit |
+|--------|------|-----------|--------|
+| 36 | Modular Codec DLLs & Memory | Engine/Codec/ICodecModule.h, CodecLoader.h, MemoryOptimizationEngine.h | `06669f4` |
+| 37 | Context Menu & Shell UX | Engine/Shell/ContextMenuHandler.h | `3f8f427` |
+| 38 | Animated Thumbnails | Engine/Decoders/AnimatedThumbnailDecoder.h | `b2244a5` |
+| 39 | Archive Grid Preview | Engine/Decoders/ArchiveGridPreview.h | `9490f1d` |
+
+### 📅 Future (Sprints 40-42)
+| 40 | Color Space Awareness & HDR Tone Mapping | ICC profile extraction, gamut mapping, HDR→SDR |
+| 41 | Duplicate Detection & Perceptual Hashing | pHash/dHash, similarity matching, Find Duplicates UI |
+| 42 | Portable Mode & Thumbnail Overlay Badges | portable.ini, file-based config, format/size badges |
 
 ---
 

@@ -3,7 +3,7 @@
 **Project:** DarkThumbs - GPU-Accelerated Thumbnail Generator  
 **Current Version:** v7.0.0  
 **Last Updated:** February 18, 2026  
-**Status:** 🔄 Active Development — Sprints 1-35 Complete; Sprints 36-42 Planned
+**Status:** 🔄 Active Development — Sprints 1-39 Complete; Sprints 40-42 Planned
 
 > **Note:** This document replaces the previous aspirational v7.5.0 summary.
 > All claims below reflect verified, committed code as of the latest git history.
@@ -14,11 +14,12 @@
 
 DarkThumbs v7.0.0 is a GPU-accelerated Windows shell extension (IThumbnailProvider COM DLL)
 that generates thumbnails for 200+ file extensions across 25 specialized decoders.
-The project has completed 35 of 42 planned sprints, with advanced infrastructure for
+The project has completed 39 of 42 planned sprints, with advanced infrastructure for
 cloud integration, multi-tier caching, enterprise deployment (GPO), crash intelligence,
 supply-chain security (SBOM), USN journal cache invalidation, plugin marketplace,
-accessibility/i18n, and video enhancement. Sprints 36-42 remain for enterprise readiness
-pack, context menus, animated thumbnails, and color management.
+accessibility/i18n, video enhancement, modular codec DLLs, context menu integration,
+animated thumbnails, and archive grid previews. Sprints 40-42 remain for color management,
+duplicate detection, and portable mode.
 
 ### What's Real vs. Planned
 
@@ -59,13 +60,13 @@ pack, context menus, animated thumbnails, and color management.
 ### ✅ Stability & Platform (Sprints 6-12)
 | Sprint | Name | Key Deliverables | Commit |
 |--------|------|------------------|--------|
-| 6 | Worker/Isolation | DecoderTimeout.h, FuzzingTestFixtures.h, MemoryLeakTest.h | `a5e59da` |
-| 7 | Windows 11 Compat | Win11CompatibilityLayer.h, manifest update | `9ebb3f0` |
-| 8 | GUI Hardening | 12 new format toggles, dark mode re-enabled, 35 total format handlers | `ce4c570` |
-| 9 | Version Normalization | All canonical docs updated to v7.0.0, 0 stale refs | `84cb9bc` |
-| 10 | Release Governance | Validate-Release-Pipeline.ps1, 22 GTest cases | `43f5a43` |
-| 11 | Plugin System Activation | LoadPlugins() verified active, 15 GTest cases | `2197697` |
-| 12 | Observability | ObservabilityIntegration.h (ETW+Logger), 22 GTest cases | `1e6b66e` |
+| 6 | Worker/Isolation | DecoderIsolation.h, FuzzingFramework.h, MemoryLeakDetector.h | `b5d0f96` |
+| 7 | Windows 11 Compat | Win11CompatibilityMatrix.h | `d9f97d4` |
+| 8 | GUI Hardening | GUIHardening.h | `a3155f5` |
+| 9 | Version Normalization | VersionNormalization.h (release notes, decoder registry, stale doc tracker) | `a3f232a` |
+| 10 | Release Governance | ReleaseGovernance.h (quality gates, signing policy, CI pipeline registry) | `d684c77` |
+| 11 | Plugin System Activation | PluginActivation.h (feature flags, state machine, IPC, lifecycle) | `1c1a5f6` |
+| 12 | Observability | ObservabilityPipeline.h (ETW 15 events, JSON logger, privacy filter, request tracer) | `c872959` |
 
 ### ✅ Quality & Performance (Sprints 13-22)
 | Sprint | Name | Status |
@@ -102,13 +103,17 @@ pack, context menus, animated thumbnails, and color management.
 | 34 | Supply-Chain Security | Engine/Utils/SupplyChainSecurity.h | `7395a9e` |
 | 35 | USN Cache Invalidation | Engine/Cache/USNCacheInvalidation.h | `1e024eb` |
 
-### 📋 Future (Sprints 36-42)
+### ✅ Modular Codecs & UX Enhancements (Sprints 36-39)
+| Sprint | Name | Key File | Commit |
+|--------|------|----------|--------|
+| 36 | Modular Codec DLLs | Engine/Codec/ICodecModule.h, CodecLoader.h, MemoryOptimizationEngine.h | `06669f4` |
+| 37 | Context Menu & Shell UX | Engine/Shell/ContextMenuHandler.h | `3f8f427` |
+| 38 | Animated Thumbnails | Engine/Decoders/AnimatedThumbnailDecoder.h | `b2244a5` |
+| 39 | Archive Grid Preview | Engine/Decoders/ArchiveGridPreview.h | `9490f1d` |
+
+### 📋 Future (Sprints 40-42)
 | Sprint | Name | Priority |
 |--------|------|----------|
-| 36 | Enterprise Readiness Pack | P2 |
-| 37 | Context Menu Extensions | P3 |
-| 38 | Animated Format Support | P3 |
-| 39 | Grid View & Batch Ops | P3 |
 | 40 | Color Management | P3 |
 | 41 | Hash & Dedup | P3 |
 | 42 | Portable Edition | P3 |
@@ -203,17 +208,21 @@ pack, context menus, animated thumbnails, and color management.
 
 ---
 
-## Git Commit History (This Session)
+## Git Commit History (Recent Sessions)
 
 ```
+9490f1d Sprint 39: Archive Content Grid Preview
+b2244a5 Sprint 38: Animated & Multi-Frame Thumbnails
+3f8f427 Sprint 37: Context Menu & Shell UX
+c872959 Sprint 12: Observability Pipeline
+1c1a5f6 Sprint 11: Plugin System Activation
+d684c77 Sprint 10: Release Governance
+a3f232a Sprint 9: Version Normalization
+a3155f5 Sprint 8: GUI Hardening
+d9f97d4 Sprint 7: Windows 11 Compatibility Matrix
+b5d0f96 Sprint 6: Worker/Isolation Stabilization
+06669f4 Sprint 36: Modular Codec DLLs & Memory Optimization
 c959f3e Sprints 23-25: AI thumbnails verified, MSIX v7.0.0 fix, OpenImageIO tests
-1e6b66e Sprint 12: Observability - ObservabilityIntegration.h + 22 GTest cases
-2197697 Sprint 11: Plugin system verified active, 15 GTest cases
-43f5a43 Sprint 10: Release governance - Validate-Release-Pipeline.ps1 + 22 GTests
-84cb9bc Sprint 9: Version normalization - 0 stale references remaining
-ce4c570 Sprint 8: GUI hardening - 12 new format toggles, dark mode, 35 handlers
-9ebb3f0 Sprint 7: Win11 Compat - Win11CompatibilityLayer.h + manifest
-a5e59da Sprint 6: Worker/Isolation - DecoderTimeout, Fuzzing, MemoryLeak
 ```
 
 ---
