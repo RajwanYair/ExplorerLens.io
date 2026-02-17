@@ -2,7 +2,7 @@
 
 **Last Updated:** February 17, 2026  
 **Version:** v7.0.0  
-**Status:** 🔄 Active Development — Sprints 1-11, 13-22 Complete; Sprint 12 Next
+**Status:** 🔄 Active Development — Sprints 1-22 Complete; Sprints 23-42 Next
 
 ---
 
@@ -17,7 +17,7 @@
 ✅ **Testing:** 100 unit tests, 5 benchmarks — 100% pass rate  
 ✅ **UI (WTL):** CBXManager with format toggles, tooltips, config snapshots  
 🔄 **UI (WinUI 3):** Settings page created, integration ongoing  
-🔄 **Observability:** ScopedTimer profiling live, ETW planned (Sprint 12)  
+✅ **Observability:** ETW provider, StructuredLogger, ObservabilityIntegration wired into pipeline  
 🔄 **Distribution:** MSI infrastructure ready, signing planned (Sprint 10)  
 ✅ **Performance:** 235.3 img/sec batch, 17ms single thumbnail, <5ms cache hit
 
@@ -57,7 +57,7 @@
 | 9 | Version Normalization | Update 12 stale docs to v7.0.0, release notes | ✅ Complete |
 | 10 | Release Governance & Packaging | MSI E2E validation, release checklist, CI pipeline | ✅ Complete |
 | 11 | Plugin System Activation | Uncomment LoadPlugins(), end-to-end IPC test | ✅ Complete |
-| 12 | Observability & Logging | ETW provider, JSON logger, diagnostics export | ⬜ Planned |
+| 12 | Observability & Logging | ETW provider, JSON logger, diagnostics export | ✅ Complete |
 
 ### 📅 Future (Sprints 23-42)
 
