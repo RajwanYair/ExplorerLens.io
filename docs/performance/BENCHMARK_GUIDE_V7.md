@@ -1,8 +1,10 @@
-# Performance Benchmarking Guide - DarkThumbs v7.0.0
+# Performance Benchmarking Guide - DarkThumbs v7.1.0
 
 **Benchmark Suite:** Engine/Tests/EngineBenchmark.cpp  
-**Platform:** Windows 11 24H2, DirectX 11  
-**Test Hardware:** AMD Ryzen 7 5800X, NVIDIA RTX 3070, 32GB RAM
+**Platform:** Windows 11 24H2, DirectX 11 + DirectX 12  
+**Test Hardware:** AMD Ryzen 7 5800X, NVIDIA RTX 3070, 32GB RAM  
+**Build:** v7.1.0, 25 decoders, 0 errors / 0 warnings  
+**Sprint:** 74 sprints completed
 
 ---
 
@@ -38,7 +40,7 @@ Benchmark_Decode("sample.jpg", 1000 iterations):
   - Warm decode (cached):   Avg 2ms,  Min 1ms, Max 5ms
 ```
 
-#### Baseline Results (v7.0.0)
+#### Baseline Results (v7.1.0)
 
 | Decoder | Format | Size | Cold | Warm | Rating |
 |---------|--------|------|------|------|--------|
