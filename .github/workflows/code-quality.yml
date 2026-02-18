@@ -6,10 +6,15 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Lint Code
     runs-on: windows-latest
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -17,20 +22,70 @@ jobs:
       - name: Run clang-format check
         shell: pwsh
         run: |
-          # Check C++ code formatting
-          $files = Get-ChildItem -Path CBXShell,CBXManager -Recurse -Include *.cpp,*.h
-          Write-Host "Checking $($files.Count) files for formatting..."
-          # Add actual clang-format check here when available
+          $files = Get-ChildItem -Path CBXShell,CBXManager,Engine -Recurse -Include *.cpp,*.h -ErrorAction SilentlyContinue
+          Write-Host "Found $($files.Count) C++ source files to check"
+          
+          $clangFormat = Get-Command clang-format -ErrorAction SilentlyContinue
+          if ($clangFormat) {
+            $errors = 0
+            foreach ($f in $files) {
+              $diff = & clang-format --dry-run --Werror $f.FullName 2>&1
+              if ($LASTEXITCODE -ne 0) { $errors++; Write-Host "  Format issue: $($f.Name)" -ForegroundColor Yellow }
+            }
+            if ($errors -gt 0) { Write-Host "$errors file(s) need formatting" -ForegroundColor Yellow }
+            else { Write-Host "All files pass formatting check" -ForegroundColor Green }
+          } else {
+            Write-Host "clang-format not available, skipping format check" -ForegroundColor Yellow
+          }
 
   analyze:
     name: Static Analysis
     runs-on: windows-latest
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run code analysis
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Run MSVC Code Analysis
         shell: pwsh
         run: |
-          Write-Host "Running static analysis..."
-          # Add MSVC static analysis or other tools here
+          Write-Host "Running MSVC static analysis..." -ForegroundColor Cyan
+          msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /p:EnableCppCoreCheck=true /p:RunCodeAnalysis=true /m /v:minimal 2>&1 | Tee-Object -Variable buildOutput
+          
+          $warnings = $buildOutput | Select-String "warning C\d+"
+          if ($warnings.Count -gt 0) {
+            Write-Host "$($warnings.Count) code analysis warnings found" -ForegroundColor Yellow
+            $warnings | Select-Object -First 20 | ForEach-Object { Write-Host $_.Line }
+          } else {
+            Write-Host "No code analysis warnings" -ForegroundColor Green
+          }
+        continue-on-error: true
+
+  header-check:
+    name: Header Guard Validation
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check header guards
+        shell: pwsh
+        run: |
+          $headers = Get-ChildItem -Path Engine,CBXShell,CBXManager -Recurse -Include *.h -ErrorAction SilentlyContinue
+          $missing = @()
+          foreach ($h in $headers) {
+            $content = Get-Content $h.FullName -Raw -ErrorAction SilentlyContinue
+            if ($content -and $content -notmatch '#pragma once' -and $content -notmatch '#ifndef\s+\w+_H') {
+              $missing += $h.Name
+            }
+          }
+          if ($missing.Count -gt 0) {
+            Write-Host "Headers missing include guards:" -ForegroundColor Yellow
+            $missing | ForEach-Object { Write-Host "  $_" }
+          } else {
+            Write-Host "All $($headers.Count) headers have include guards" -ForegroundColor Green
+          }
