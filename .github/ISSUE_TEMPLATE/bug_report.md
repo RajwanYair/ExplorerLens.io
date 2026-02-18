@@ -24,8 +24,14 @@ What actually happened instead.
 ## System Information
 - **OS:** Windows 11 [Version]
 - **GPU:** [e.g., Intel Arc A770, NVIDIA RTX 4090]
-- **DarkThumbs Version:** [e.g., v5.2.0]
-- **Build:** [x64/x86]
+- **DarkThumbs Version:** [e.g., v7.1.0]
+- **Build:** x64 Release
+- **GPU Acceleration:** [D3D11 / D3D12 / CPU fallback]
+
+## File Information
+- **File format:** [e.g., CBZ, WebP, HEIC, RAR]
+- **File size:** [approximate]
+- **File count (if archive):** [number of files]
 
 ## Screenshots
 If applicable, add screenshots to help explain your problem.
