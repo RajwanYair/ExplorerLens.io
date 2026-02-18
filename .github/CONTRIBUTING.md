@@ -45,18 +45,22 @@ regsvr32 /u /s x64\Release\CBXShell.dll
 - **C++20** standard
 - **RAII** for resource management
 - **COM** for Windows integration
-- **DirectX 11** for GPU acceleration
-- Follow existing code style and conventions
+- **DirectX 11 + DirectX 12** for GPU acceleration
+- **Zero warnings** policy — build must produce 0 warnings
+- Follow `.clang-tidy` rules (see project root)
+- See `docs/development/CODE_QUALITY_STANDARDS.md` for naming conventions
+- All headers must use `#pragma once`
 
 ## Submitting Changes
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/your-feature`)
 3. Make your changes
-4. Test thoroughly
-5. Commit with descriptive messages
-6. Push to your fork
-7. Open a Pull Request
+4. Run `cmake --build build --config Release -j 8` — must produce **0 errors, 0 warnings**
+5. Run `ctest --test-dir build -C Release --output-on-failure` — all tests must pass
+6. Commit with descriptive messages (see format below)
+7. Push to your fork
+8. Open a Pull Request
 
 ## Pull Request Guidelines
 
