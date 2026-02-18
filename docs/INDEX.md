@@ -1,9 +1,10 @@
 # DarkThumbs Documentation Index
 
 **Project:** DarkThumbs  
-**Current Version:** v7.0.0  
+**Current Version:** v7.1.0  
 **Planning Authority:** [MASTER_PLAN.md](../MASTER_PLAN.md)  
-**Last Updated:** February 17, 2026
+**Sprints Completed:** 74  
+**Last Updated:** February 18, 2026
 
 ---
 
@@ -17,6 +18,7 @@
 | [KNOWN_ISSUES.md](../KNOWN_ISSUES.md) | Current known issues and mitigations |
 | [USER_GUIDE.md](../USER_GUIDE.md) | End-user installation and usage guide |
 | [DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md) | Developer setup and architecture guide |
+| [QUICK_BUILD_REFERENCE.md](../QUICK_BUILD_REFERENCE.md) | Quick build reference card |
 
 ## Development
 
@@ -24,6 +26,7 @@
 |----------|-------------|
 | [development/README.md](development/README.md) | Development docs entry point |
 | [development/BUILD_QUICK_REFERENCE.md](development/BUILD_QUICK_REFERENCE.md) | Build quick reference |
+| [development/CODE_QUALITY_STANDARDS.md](development/CODE_QUALITY_STANDARDS.md) | Code quality and static analysis standards |
 | [development/WINDOWS_BUILD_TOOLS.md](development/WINDOWS_BUILD_TOOLS.md) | Windows toolchain notes |
 | [development/THIRD_PARTY.md](development/THIRD_PARTY.md) | Third-party dependency inventory |
 | [development/TOOL_DISCOVERY.md](development/TOOL_DISCOVERY.md) | Tool discovery and probing |
@@ -79,6 +82,7 @@
 | [testing/TESTING_GUIDE.md](testing/TESTING_GUIDE.md) | Testing framework guide |
 | [testing/TEST_VALIDATION_CHECKLIST.md](testing/TEST_VALIDATION_CHECKLIST.md) | Validation checklist |
 | [testing/PRIORITY1_BASELINE_VERIFICATION.md](testing/PRIORITY1_BASELINE_VERIFICATION.md) | Baseline verification notes |
+| [testing/INTEGRATION_TEST_MATRIX.md](testing/INTEGRATION_TEST_MATRIX.md) | Integration test coverage matrix |
 
 ## User and Operations
 
@@ -93,9 +97,27 @@
 
 | Document | Description |
 |----------|-------------|
+| [release-notes/RELEASE_NOTES_v7.1.0.md](release-notes/RELEASE_NOTES_v7.1.0.md) | v7.1.0 release notes |
 | [release-notes/RELEASE_NOTES_v6.0.0.md](release-notes/RELEASE_NOTES_v6.0.0.md) | v6.0.0 release notes |
 | [release-notes/v5.3.0-RELEASE-NOTES.md](release-notes/v5.3.0-RELEASE-NOTES.md) | v5.3.0 release notes |
 | [audits/MD_AUDIT_2026-02-16.md](audits/MD_AUDIT_2026-02-16.md) | Markdown drift and duplication audit |
+
+## GitHub Configuration
+
+| Document | Description |
+|----------|-------------|
+| [../.github/copilot-instructions.md](../.github/copilot-instructions.md) | AI assistant project context |
+| [../.github/CONTRIBUTING.md](../.github/CONTRIBUTING.md) | Contribution guidelines |
+| [../.github/SECURITY.md](../.github/SECURITY.md) | Security policy and vulnerability reporting |
+| [../.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | PR template with checklists |
+| [../.github/COMPLETE_PROJECT_SUMMARY.md](../.github/COMPLETE_PROJECT_SUMMARY.md) | Full project summary |
+
+## Performance
+
+| Document | Description |
+|----------|-------------|
+| [performance/BENCHMARK_GUIDE_V7.md](performance/BENCHMARK_GUIDE_V7.md) | Benchmarking guide with baseline results |
+| [PERFORMANCE.md](PERFORMANCE.md) | Top-level performance guidance |
 
 ---
 
