@@ -201,6 +201,7 @@ set(ENGINE_HEADERS
     Decoders/JPEG2000Decoder.h        # Sprint 133 — JPEG 2000 decoder
     Decoders/KTXTextureDecoder.h      # Sprint 134 — KTX/KTX2 texture decoder
     Decoders/JXRWICDecoder.h          # Sprint 135 — JPEG XR WIC decoder
+    Decoders/EBookCoverExtractor.h    # Sprint 136 — Extended eBook support
 )
 
 set(ENGINE_SOURCES
