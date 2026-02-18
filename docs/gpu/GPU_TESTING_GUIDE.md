@@ -1,8 +1,8 @@
 # DarkThumbs GPU Testing Guide
 
-**Version:** 5.2.0 Phase 2  
-**Date:** November 24, 2025  
-**Status:** Testing Tools Ready
+**Version:** 7.1.0  
+**Date:** February 18, 2026  
+**Status:** ✅ GPU Testing Operational (D3D11 + D3D12)
 
 ---
 
