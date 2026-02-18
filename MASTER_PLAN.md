@@ -1,12 +1,13 @@
-# DarkThumbs v7.x — Unified Master Plan
+# DarkThumbs v7.1.0 — Unified Master Plan
 
-> **Date:** February 17, 2026 (updated)  
+> **Date:** February 18, 2026 (updated)  
 > **Status:** Active (single source of truth)  
-> **Scope:** Codebase cleanup, de-duplication, performance refactor, plugin activation, Windows 11 reliability/UI modernization, new UX enhancements  
+> **Scope:** Codebase cleanup, de-duplication, performance refactor, plugin activation, Windows 11 reliability/UI modernization, new UX enhancements, production hardening  
 > **Build Baseline:** 0 errors / 0 warnings — CBXShell.dll (2940 KB) + CBXManager.exe (400 KB) + DarkThumbsEngine.lib (133 MB)  
 > **Test Baseline:** 100/100 unit tests, 5/5 benchmarks — 100% pass rate  
-> **Sprints Completed:** 1-49 (49 of 49 sprints)  
-> **Sprints Remaining:** 0 (all sprints complete)
+> **Sprints Completed:** 1-74 (74 total — 49 original + 25 production hardening)  
+> **Sprints Remaining:** 0 (all sprints complete)  
+> **Current Version:** v7.1.0
 
 ---
 
@@ -1013,3 +1014,45 @@ The following missed items are now explicitly tracked in this master plan:
 - Production release packaging with SBOM + signed checksums.
 - ARM64 cross-compilation validation.
 - Plugin marketplace go-live.
+
+---
+
+## Production Hardening Phase (Sprints 50-74) — v7.1.0
+
+**Completed:** February 18, 2026  
+**Objective:** Bridge gap from development-complete v7.0.0 to production-ready v7.1.0
+
+**Infrastructure & Code (Sprints 50-53):**
+- Sprint 50: Fix Known Gaps — CBXTYPE enum expansion, MSIX CLSID fix, file type associations
+- Sprint 51: CMake Header Registration — 40+ headers registered in ENGINE_HEADERS
+- Sprint 52: Observability Pipeline Wiring — ObservabilityIntegration.h singleton
+- Sprint 53: Build Validation & Tests — BuildValidation.h + 8 GTest cases
+
+**Documentation Audit (Sprints 54-61):**
+- Sprint 54: Stale Doc Version Audit — 4 doc files updated from v5.x/v6.x to v7.1
+- Sprint 55: CHANGELOG v7.1 Section — Full v7.1.0 changelog with 25 sprint entries
+- Sprint 56: Release Notes v7.1.0 — docs/release-notes/RELEASE_NOTES_v7.1.0.md
+- Sprint 57: README.md Production Update — Badges, D3D11+D3D12, sprint count
+- Sprint 58: DEVELOPER_GUIDE v7.1 — Version and build status update
+- Sprint 59: USER_GUIDE v7.1 — Version update
+- Sprint 60: KNOWN_ISSUES Final Audit — Version and status corrections
+- Sprint 61: QUICK_BUILD_REFERENCE — v7.1 commands, CI/CD section
+
+**CI/CD & Quality (Sprints 62-65):**
+- Sprint 62: CI/CD Workflow Hardening — Concurrency controls, timeouts, setup-msbuild v2
+- Sprint 63: Code Quality Standards — .clang-tidy config, CODE_QUALITY_STANDARDS.md
+- Sprint 64: CONTRIBUTING & PR Template — Zero-warnings policy, build commands
+- Sprint 65: Security Policy — v7.1 versions, archive security, build security sections
+
+**Specialized Documentation (Sprints 66-69):**
+- Sprint 66: Performance Report — BENCHMARK_GUIDE_V7 updated to v7.1.0
+- Sprint 67: Plugin SDK Documentation — PLUGIN_SDK.md requirements to v7.1
+- Sprint 68: Build Script Cleanup — DEPRECATED.md v7.1, Phase 3/4 to v7.2.0
+- Sprint 69: .github Standards — COMPLETE_PROJECT_SUMMARY and BUILD_SYSTEM_IMPROVEMENTS updated
+
+**Project Infrastructure (Sprints 70-74):**
+- Sprint 70: COPILOT_INSTRUCTIONS — .github/copilot-instructions.md for AI assistants
+- Sprint 71: Issue Templates — Bug report fields, config.yml chooser
+- Sprint 72: Integration Test Matrix — docs/testing/INTEGRATION_TEST_MATRIX.md
+- Sprint 73: docs/INDEX.md Rebuild — Cross-references, new sections
+- Sprint 74: v7.1 Release Preparation — MASTER_PLAN.md final update, state snapshot
