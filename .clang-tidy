@@ -1,0 +1,62 @@
+---
+# DarkThumbs v7.1.0 - Clang-Tidy Configuration
+# Sprint 63: Code Quality Static Analysis
+
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  cert-*,
+  -cert-err58-cpp,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-no-malloc,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  -modernize-avoid-c-arrays,
+  -modernize-concat-nested-namespaces,
+  performance-*,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-identifier-length,
+  -readability-function-cognitive-complexity,
+  -readability-uppercase-literal-suffix,
+  misc-*,
+  -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: '(Engine|CBXShell|CBXManager)/.*\.h$'
+
+CheckOptions:
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: m_
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: modernize-use-nullptr.NullMacros
+    value: 'NULL'
+  - key: performance-unnecessary-value-param.AllowedTypes
+    value: 'ComPtr;CComPtr;wil::com_ptr'
+  - key: bugprone-argument-comment.StrictMode
+    value: false
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: true
+  - key: misc-include-cleaner.IgnoreHeaders
+    value: 'windows.h;shlobj.h;thumbcache.h'
