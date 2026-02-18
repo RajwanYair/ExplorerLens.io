@@ -194,6 +194,7 @@ set(ENGINE_HEADERS
     Core/ETWSinkComplete.h            # Sprint 126 — ETW sink completion
     Shell/COMApartmentAudit.h         # Sprint 127 — COM apartment audit
     Plugin/PluginRuntimeValidation.h  # Sprint 128 — Plugin E2E validation
+    Memory/DirectoryFormatProfiler.h  # Sprint 129 — Directory format profiler
 )
 
 set(ENGINE_SOURCES
