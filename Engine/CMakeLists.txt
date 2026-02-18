@@ -207,6 +207,7 @@ set(ENGINE_HEADERS
     Release/MSILifecycleRunner.h      # Sprint 139 — MSI lifecycle E2E automation
     Memory/MemorySoakValidator.h      # Sprint 140 — Memory soak validation
     Utils/DarkModeManagerV2.h         # Sprint 141 — DarkMode V2 complete
+    Utils/PerMonitorDPIManager.h      # Sprint 142 — Per-monitor DPI V2
 )
 
 set(ENGINE_SOURCES
