@@ -1,6 +1,6 @@
 # DarkThumbs User Guide
-**Version:** 7.0.0  
-**Last Updated:** February 17, 2026
+**Version:** 7.1.0  
+**Last Updated:** February 18, 2026
 
 ## Table of Contents
 - [Installation](#installation)
