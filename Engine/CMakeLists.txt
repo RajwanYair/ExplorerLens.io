@@ -192,6 +192,7 @@ set(ENGINE_HEADERS
     # Sprint 125-149: v8.2 Program
     Core/VersionDriftGate.h           # Sprint 125 — Version drift CI gate
     Core/ETWSinkComplete.h            # Sprint 126 — ETW sink completion
+    Shell/COMApartmentAudit.h         # Sprint 127 — COM apartment audit
 )
 
 set(ENGINE_SOURCES
