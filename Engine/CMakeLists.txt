@@ -209,6 +209,7 @@ set(ENGINE_HEADERS
     Utils/DarkModeManagerV2.h         # Sprint 141 — DarkMode V2 complete
     Utils/PerMonitorDPIManager.h      # Sprint 142 — Per-monitor DPI V2
     Core/DecoderHealthDashboard.h     # Sprint 143 — Decoder health dashboard
+    Core/DiagnosticsExporter.h        # Sprint 144 — Diagnostics export finalization
 )
 
 set(ENGINE_SOURCES
