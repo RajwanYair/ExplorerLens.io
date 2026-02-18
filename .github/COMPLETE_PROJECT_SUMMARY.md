@@ -1,9 +1,9 @@
-# DarkThumbs v7.0.0 - Complete Project Summary
+# DarkThumbs v7.1.0 - Complete Project Summary
 
 **Project:** DarkThumbs - GPU-Accelerated Thumbnail Generator  
-**Current Version:** v7.0.0  
+**Current Version:** v7.1.0  
 **Last Updated:** February 18, 2026  
-**Status:** ✅ All 49 Sprints Complete
+**Status:** ✅ All 74 Sprints Complete (49 original + 25 production hardening)
 
 > **Note:** This document replaces the previous aspirational v7.5.0 summary.
 > All claims below reflect verified, committed code as of the latest git history.
@@ -12,9 +12,10 @@
 
 ## Executive Summary
 
-DarkThumbs v7.0.0 is a GPU-accelerated Windows shell extension (IThumbnailProvider COM DLL)
+DarkThumbs v7.1.0 is a GPU-accelerated Windows shell extension (IThumbnailProvider COM DLL)
 that generates thumbnails for 200+ file extensions across 25 specialized decoders.
-The project has completed all 49 planned sprints, with advanced infrastructure for
+The project has completed all 74 planned sprints (49 original + 25 production hardening),
+with advanced infrastructure for
 cloud integration, multi-tier caching, enterprise deployment (GPO), crash intelligence,
 supply-chain security (SBOM), USN journal cache invalidation, plugin marketplace,
 accessibility/i18n, video enhancement, modular codec DLLs, context menu integration,
