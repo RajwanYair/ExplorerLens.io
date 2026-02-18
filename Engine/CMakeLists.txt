@@ -199,6 +199,7 @@ set(ENGINE_HEADERS
     Memory/BufferPoolAllocator.h      # Sprint 131 — Buffer pool & slab allocator
     Pipeline/ExplorerWorkScheduler.h  # Sprint 132 — Explorer work scheduler
     Decoders/JPEG2000Decoder.h        # Sprint 133 — JPEG 2000 decoder
+    Decoders/KTXTextureDecoder.h      # Sprint 134 — KTX/KTX2 texture decoder
 )
 
 set(ENGINE_SOURCES
