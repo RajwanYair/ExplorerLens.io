@@ -202,6 +202,7 @@ set(ENGINE_HEADERS
     Decoders/KTXTextureDecoder.h      # Sprint 134 — KTX/KTX2 texture decoder
     Decoders/JXRWICDecoder.h          # Sprint 135 — JPEG XR WIC decoder
     Decoders/EBookCoverExtractor.h    # Sprint 136 — Extended eBook support
+    Utils/ContinuousFuzzEngine.h      # Sprint 137 — Continuous fuzzing engine
 )
 
 set(ENGINE_SOURCES
