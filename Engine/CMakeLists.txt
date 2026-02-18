@@ -200,6 +200,7 @@ set(ENGINE_HEADERS
     Pipeline/ExplorerWorkScheduler.h  # Sprint 132 — Explorer work scheduler
     Decoders/JPEG2000Decoder.h        # Sprint 133 — JPEG 2000 decoder
     Decoders/KTXTextureDecoder.h      # Sprint 134 — KTX/KTX2 texture decoder
+    Decoders/JXRWICDecoder.h          # Sprint 135 — JPEG XR WIC decoder
 )
 
 set(ENGINE_SOURCES
