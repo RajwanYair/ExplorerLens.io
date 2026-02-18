@@ -168,6 +168,19 @@
 #define CBXTYPE_EXR 56	// .exr OpenEXR HDR image
 #define CBXTYPE_PPM 57	// .ppm/.pgm/.pbm/.pnm Netpbm portable formats
 
+// Standalone image formats (v7.0+)
+#define CBXTYPE_ICO 58	// .ico/.cur Windows icon/cursor
+#define CBXTYPE_QOI 59	// .qoi Quite OK Image format
+#define CBXTYPE_TGA 75	// .tga Targa image format
+#define CBXTYPE_BMP 76	// .bmp/.dib Windows bitmap
+#define CBXTYPE_GIF 77	// .gif Graphics Interchange Format
+
+// 3D model formats (v7.0+)
+#define CBXTYPE_MODEL 80	// .obj/.stl/.fbx/.gltf/.glb 3D model files
+
+// Document formats (v7.0+) — generic category
+#define CBXTYPE_DOCUMENT 81	// Generic document type (DOCX/PPTX/etc. fall here if not specific)
+
 // Image format identifiers (for detection within archives)
 #define IMGTYPE_UNKNOWN 0
 #define IMGTYPE_BMP 1

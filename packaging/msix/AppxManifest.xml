@@ -40,7 +40,7 @@
         <desktop:Extension Category="windows.comServer">
           <desktop:ComServer>
             <desktop:ExeServer Executable="CBXManager.exe" DisplayName="DarkThumbs Shell Extension">
-              <desktop:Class Id="YOUR-CLSID-HERE" DisplayName="DarkThumbs Thumbnail Provider" />
+              <desktop:Class Id="9E6ECB90-5A61-42BD-B851-D3297D9C7F39" DisplayName="DarkThumbs Thumbnail Provider" />
             </desktop:ExeServer>
           </desktop:ComServer>
         </desktop:Extension>
@@ -58,6 +58,21 @@
               <uap:FileType>.webp</uap:FileType>
               <uap:FileType>.avif</uap:FileType>
               <uap:FileType>.jxl</uap:FileType>
+              <uap:FileType>.heic</uap:FileType>
+              <uap:FileType>.heif</uap:FileType>
+              <uap:FileType>.psd</uap:FileType>
+              <uap:FileType>.dds</uap:FileType>
+              <uap:FileType>.hdr</uap:FileType>
+              <uap:FileType>.exr</uap:FileType>
+              <uap:FileType>.tga</uap:FileType>
+              <uap:FileType>.ico</uap:FileType>
+              <uap:FileType>.qoi</uap:FileType>
+              <uap:FileType>.svg</uap:FileType>
+              <uap:FileType>.tiff</uap:FileType>
+              <uap:FileType>.dng</uap:FileType>
+              <uap:FileType>.cr2</uap:FileType>
+              <uap:FileType>.nef</uap:FileType>
+              <uap:FileType>.arw</uap:FileType>
             </uap:SupportedFileTypes>
           </uap3:FileTypeAssociation>
         </uap3:Extension>
