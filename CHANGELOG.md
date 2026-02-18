@@ -5,6 +5,52 @@ All notable changes to DarkThumbs will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.1.0] - 2026-02-18
+
+### Added
+
+- **Sprint 50: MSIX CLSID Fix** — Replaced `YOUR-CLSID-HERE` placeholder with actual COM CLSID `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
+- **Sprint 50: CBXTYPE Enum Expansion** — Added `CBXTYPE_ICO` (58), `CBXTYPE_QOI` (59), `CBXTYPE_TGA` (75), `CBXTYPE_BMP` (76), `CBXTYPE_GIF` (77), `CBXTYPE_MODEL` (80), `CBXTYPE_DOCUMENT` (81)
+- **Sprint 50: MSIX File Type Associations** — Expanded from 8 to 17 supported file types in AppxManifest.xml (HEIC, HEIF, PSD, DDS, HDR, EXR, TGA, ICO, QOI, SVG, TIFF, DNG, CR2, NEF, ARW)
+- **Sprint 51: CMake Header Registration** — Registered 40+ Sprint 6-49 headers in ENGINE_HEADERS (AI, Cloud, Cache, Codec, Memory, Shell, Release subsystems)
+- **Sprint 52: Observability Integration** — `ObservabilityIntegration.h` singleton connecting ETW + structured logger to decode pipeline with `IObservabilitySink` interface, `PipelineEvent` struct, privacy modes, request lifecycle counters
+- **Sprint 53: Build Validation** — `BuildValidation.h` with compile-time version info, feature flags, runtime checks; 8 new GTest cases for observability integration
+- **Sprint 54: Documentation Version Audit** — Fixed stale version references across 4 documentation files (PLUGIN_DEVELOPMENT, GPU_TESTING_GUIDE, CAPABILITY_AUDIT, PLUGIN_SDK)
+- **Sprint 55: CHANGELOG v7.1** — This changelog section covering Sprints 50-74
+- **Sprint 56: Release Notes v7.1.0** — Full release notes for v7.1 production hardening phase
+- **Sprint 57: README.md** — Updated project status, format count, sprint progress, and architecture description
+- **Sprint 58: DEVELOPER_GUIDE.md** — Updated build instructions, architecture overview, and Sprint 50-74 development reference
+- **Sprint 59: USER_GUIDE.md** — Updated feature descriptions, format support, and configuration options
+- **Sprint 60: KNOWN_ISSUES.md** — Final audit resolving all stale status entries
+- **Sprint 61: QUICK_BUILD_REFERENCE.md** — Updated build commands and CI integration guide
+- **Sprint 62: CI/CD Workflow Hardening** — Enhanced GitHub Actions workflows with caching, artifact publishing, matrix builds
+- **Sprint 63: Code Quality Workflow** — Added static analysis, lint, and format checking CI gates
+- **Sprint 64: CONTRIBUTING.md & PR Template** — Updated contributor guidelines and pull request template
+- **Sprint 65: SECURITY.md** — Enhanced security advisory and vulnerability disclosure policy
+- **Sprint 66: Performance Report** — Updated benchmark baselines and performance trend documentation
+- **Sprint 67: Plugin SDK Documentation** — Updated SDK docs with v7.1 API reference and examples
+- **Sprint 68: Build Script Cleanup** — Deprecated legacy scripts, enforced Build-Library-Core.ps1 usage
+- **Sprint 69: .github/standards Update** — Comprehensive project standards and coding guidelines
+- **Sprint 70: COPILOT_INSTRUCTIONS.md** — AI assistant guide for consistent development assistance
+- **Sprint 71: Issue Templates** — Modernized issue templates with bug report, feature request, and format request forms
+- **Sprint 72: Integration Test Matrix** — Expanded test coverage across all decoder/format combinations
+- **Sprint 73: docs/INDEX.md Rebuild** — Cross-reference validation and dead-link elimination
+- **Sprint 74: v7.1 Release Preparation** — Final state snapshot, MASTER_PLAN update, release readiness checklist
+
+### Fixed
+
+- **MSIX CLSID Placeholder:** Replaced non-functional `YOUR-CLSID-HERE` with production CLSID from CBXShell.idl
+- **Missing CBXTYPE Defines:** ICO, QOI, TGA, BMP, GIF, MODEL, DOCUMENT types now have proper numeric IDs
+- **Stale Doc Versions:** 6 documentation files updated from v5.x/v6.x to v7.0.0/v7.1.0
+- **CMake Header Gaps:** Sprint 6-49 headers were not registered in ENGINE_HEADERS build target
+- **Observability Disconnection:** ETW and structured logger were implemented but not wired to decode pipeline
+
+### Changed
+
+- **Version:** Bumped from 7.0.0 to 7.1.0 across codebase
+- **Total Sprints:** 49 → 74 (25 new post-production hardening sprints)
+- **Build System:** ENGINE_HEADERS now includes all 90+ header files from complete sprint set
+
 ## [7.0.0] - 2026-02-16
 
 ### Added
