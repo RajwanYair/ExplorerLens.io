@@ -6,9 +6,10 @@ We provide security updates for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 6.x.x   | :white_check_mark: |
-| 5.2.x   | :white_check_mark: |
-| < 5.2   | :x:                |
+| 7.1.x   | :white_check_mark: Current |
+| 7.0.x   | :white_check_mark: |
+| 6.x.x   | :white_check_mark: Security fixes only |
+| < 6.0   | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -54,6 +55,24 @@ We provide security updates for the following versions:
 - **Exception Handling:** Comprehensive error handling prevents crashes
 - **Input Validation:** All file paths and data validated
 - **Resource Limits:** CPU and memory quotas enforced
+- **Buffer Overflow Protection:** Stack canaries and ASLR enabled via `/GS /DYNAMICBASE`
+- **DEP/NX:** Data Execution Prevention enabled via `/NXCOMPAT`
+- **Control Flow Guard:** `/guard:cf` enabled in Release builds
+
+### Archive Handling Security (v7.0+)
+
+- **Zip Bomb Detection:** Compression ratio limits prevent decompression bombs
+- **Path Traversal Prevention:** Archive entry paths sanitized (no `../` escape)
+- **Size Limits:** Maximum extracted size enforced per archive
+- **Format Validation:** Magic bytes verified before decoding
+- **Timeout Guards:** Per-file decode timeout prevents CPU exhaustion
+
+### Build Security
+
+- **CodeQL Analysis:** Automated on every push to `main` via GitHub Actions
+- **Zero Warnings Policy:** All warnings treated as potential issues
+- **Static Analysis:** MSVC CppCoreCheck enabled in CI
+- **Dependency Scanning:** vcpkg dependencies pinned to specific versions
 
 ## Best Practices for Users
 
