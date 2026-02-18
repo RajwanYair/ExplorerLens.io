@@ -204,6 +204,7 @@ set(ENGINE_HEADERS
     Decoders/EBookCoverExtractor.h    # Sprint 136 — Extended eBook support
     Utils/ContinuousFuzzEngine.h      # Sprint 137 — Continuous fuzzing engine
     Utils/CompatibilityMatrix.h       # Sprint 138 — Win11 compatibility matrix
+    Release/MSILifecycleRunner.h      # Sprint 139 — MSI lifecycle E2E automation
 )
 
 set(ENGINE_SOURCES
