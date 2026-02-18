@@ -10,7 +10,7 @@ GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 - **Build System:** CMake 3.20+ (Engine) + MSBuild (Shell/Manager)
 - **GPU:** DirectX 11 + DirectX 12 with CPU fallback
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-- **Sprint Count:** 99 completed
+- **Sprint Count:** 124 completed
 - **Build Status:** 0 errors, 0 warnings
 
 ## Architecture
@@ -114,7 +114,7 @@ ctest --test-dir build -C Release --output-on-failure
 
 ## Sprint Execution Guidance (v7.2+)
 
-- **Next roadmap block:** Sprints 100-124 (v8.0.0 -> v8.1.0 execution block)
+- **Next roadmap block:** Sprints 125+ (define next block in `MASTER_PLAN.md` before execution)
 - **Execution package docs:** `docs/development/sprints-v8/SPRINT_XX.md`
 - **Source of truth:** `MASTER_PLAN.md` must be updated before creating new sprint work
 - **Carry-over closure:** legacy "planned/partial" items from older sections must be explicitly mapped to new sprint tasks
