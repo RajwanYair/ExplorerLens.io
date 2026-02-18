@@ -5,10 +5,10 @@
 > **Scope:** Codebase cleanup, de-duplication, performance refactor, plugin activation, Windows 11 reliability/UI modernization, new UX enhancements, production hardening  
 > **Build Baseline:** 0 errors / 0 warnings — CBXShell.dll (2940 KB) + CBXManager.exe (400 KB) + DarkThumbsEngine.lib (133 MB)  
 > **Test Baseline:** 100/100 unit tests, 5/5 benchmarks — 100% pass rate  
-> **Sprints Completed:** 1-124 (124 total — 49 original + 75 execution/refactor sprints)  
+> **Sprints Completed:** 1-149 (149 total — 49 original + 75 execution/refactor + 25 CI/release hardening)  
 > **Sprints Remaining:** 0 (current roadmap block complete)  
 > **Current Version:** v7.1.0  
-> **Next Planned Block:** Sprints 75-124 (v7.2.0 → v8.1.0 refactor program)
+> **Next Planned Block:** Sprints 150+ (define in MASTER_PLAN.md before execution)
 
 ---
 

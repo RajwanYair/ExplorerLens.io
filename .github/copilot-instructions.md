@@ -10,7 +10,7 @@ GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 - **Build System:** CMake 3.20+ (Engine) + MSBuild (Shell/Manager)
 - **GPU:** DirectX 11 + DirectX 12 with CPU fallback
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-- **Sprint Count:** 124 completed
+- **Sprint Count:** 149 completed
 - **Build Status:** 0 errors, 0 warnings
 
 ## Architecture
@@ -112,10 +112,29 @@ ctest --test-dir build -C Release --output-on-failure
 9. **Test changes with:** `cmake --build build --config Release -j 8`
 10. **Validate with:** `ctest --test-dir build -C Release --output-on-failure`
 
-## Sprint Execution Guidance (v7.2+)
+## External Libraries Directory Structure (Post-Cleanup)
 
-- **Next roadmap block:** Sprints 125+ (define next block in `MASTER_PLAN.md` before execution)
+```
+external/
+  compression-libs/   — zlib, lz4, zstd, minizip-ng, lzma, unrar, bzip2, libarchive, xz
+  image-libs/          — libwebp, libjxl, libavif, libheif, libde265, dav1d
+  camera-libs/         — libraw, libraw-install
+  pdf-libs/            — mupdf
+  ui-libs/             — wtl
+```
+
+> **Note:** Build scripts use `$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)` to resolve the project root. All scripts import `Build-Library-Core.ps1` from `build-scripts/core/`.
+
+## .gitignore Considerations
+
+- The `Release/` pattern in `.gitignore` blocks `Engine/Release/` — use `git add -f` for files there
+- Stale `CMakeCache.txt` files from directory renames are auto-detected by `Build-Library-Core.ps1`
+
+## Sprint Execution Guidance (v8.2+)
+
+- **Next roadmap block:** Sprints 150+ (define next block in `MASTER_PLAN.md` before execution)
 - **Execution package docs:** `docs/development/sprints-v8/SPRINT_XX.md`
 - **Source of truth:** `MASTER_PLAN.md` must be updated before creating new sprint work
 - **Carry-over closure:** legacy "planned/partial" items from older sections must be explicitly mapped to new sprint tasks
 - **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
+- **Sprint deliverables pattern:** header in `Engine/`, GTest in `tests/`, doc in `docs/development/sprints-v8/`, CMakeLists.txt registration, git commit
