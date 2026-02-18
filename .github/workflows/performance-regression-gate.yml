@@ -3,9 +3,9 @@ name: Performance Regression Gate
 # Trigger on PRs and main branch pushes
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -16,39 +16,39 @@ jobs:
   performance-regression-check:
     name: Check Performance Regressions
     runs-on: windows-latest
-    
+
     strategy:
       matrix:
         configuration: [Release]
         platform: [x64]
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for baseline lookup
-      
+          fetch-depth: 0 # Full history for baseline lookup
+
       - name: Setup MSVC
         uses: microsoft/setup-msbuild@v2
         with:
-          vs-version: 'latest'
-      
+          vs-version: "latest"
+
       - name: Setup vcpkg
         run: |
           git clone https://github.com/Microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
           .\vcpkg\vcpkg integrate install
-      
+
       - name: Install Google Benchmark
         run: |
           .\vcpkg\vcpkg install benchmark:x64-windows
-      
+
       - name: Configure CMake
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake"
-      
+
       - name: Build DarkThumbs
         run: |
           cmake --build build --config Release --target DarkThumbsEngine -j 8
-      
+
       - name: Build Benchmark Executable

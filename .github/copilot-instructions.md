@@ -23,21 +23,21 @@ DarkThumbsEngine.lib       — Core decode + render pipeline
 
 ### Key Directories
 
-| Directory | Purpose |
-|-----------|---------|
-| `CBXShell/` | Shell extension DLL (COM registration, thumbnail provider) |
-| `CBXManager/` | WTL-based admin GUI for registration/settings |
-| `Engine/` | Core library — decoders, GPU pipeline, caching, observability |
-| `Engine/Core/` | Decode pipeline, GPU renderer, resource management |
-| `Engine/Decoders/` | Format-specific decoders (25 total) |
-| `Engine/Tests/` | GTest unit tests + Google Benchmark |
-| `build-scripts/` | PowerShell build automation |
-| `build-scripts/core/` | Build-Library-Core.ps1 — unified build module |
-| `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.) |
-| `packaging/` | MSI (WiX), Inno Setup, MSIX manifests |
-| `SDK/` | Plugin SDK (C ABI, plugin_api.h) |
-| `docs/` | All documentation |
-| `.github/workflows/` | CI/CD pipelines |
+| Directory                      | Purpose                                                       |
+| ------------------------------ | ------------------------------------------------------------- |
+| `CBXShell/`                    | Shell extension DLL (COM registration, thumbnail provider)    |
+| `CBXManager/`                  | WTL-based admin GUI for registration/settings                 |
+| `Engine/`                      | Core library — decoders, GPU pipeline, caching, observability |
+| `Engine/Core/`                 | Decode pipeline, GPU renderer, resource management            |
+| `Engine/Decoders/`             | Format-specific decoders (25 total)                           |
+| `Engine/Tests/`                | GTest unit tests + Google Benchmark                           |
+| `build-scripts/`               | PowerShell build automation                                   |
+| `build-scripts/core/`          | Build-Library-Core.ps1 — unified build module                 |
+| `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.)             |
+| `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                         |
+| `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                              |
+| `docs/`                        | All documentation                                             |
+| `.github/workflows/`           | CI/CD pipelines                                               |
 
 ## Build Commands
 
@@ -58,20 +58,20 @@ ctest --test-dir build -C Release --output-on-failure
 
 ## External Libraries (Statically Linked)
 
-| Library | Version | Purpose |
-|---------|---------|---------|
-| zlib | 1.3.1 | ZIP/deflate compression |
-| LZ4 | 1.10.0 | Fast compression |
-| zstd | 1.5.7 | Zstandard compression |
-| LZMA SDK | 26.00 | 7z archives |
-| minizip-ng | 4.0.10 | ZIP archive handling |
-| UnRAR | 7.2.2 | RAR archive extraction |
-| libwebp | 1.5.0 | WebP images |
-| libavif | 1.3.0 | AVIF images |
-| libjxl | 0.11.1 | JPEG XL images |
-| libheif | 1.19.5 | HEIF/HEIC images |
-| libde265 | 1.0.15 | HEVC decoding for libheif |
-| LibRaw | 0.21.3 | RAW camera formats |
+| Library    | Version | Purpose                   |
+| ---------- | ------- | ------------------------- |
+| zlib       | 1.3.1   | ZIP/deflate compression   |
+| LZ4        | 1.10.0  | Fast compression          |
+| zstd       | 1.5.7   | Zstandard compression     |
+| LZMA SDK   | 26.00   | 7z archives               |
+| minizip-ng | 4.0.10  | ZIP archive handling      |
+| UnRAR      | 7.2.2   | RAR archive extraction    |
+| libwebp    | 1.5.0   | WebP images               |
+| libavif    | 1.3.0   | AVIF images               |
+| libjxl     | 0.11.1  | JPEG XL images            |
+| libheif    | 1.19.5  | HEIF/HEIC images          |
+| libde265   | 1.0.15  | HEVC decoding for libheif |
+| LibRaw     | 0.21.3  | RAW camera formats        |
 
 ## Code Conventions
 

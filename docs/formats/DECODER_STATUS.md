@@ -1,6 +1,6 @@
 # DarkThumbs Decoder Status Matrix
-**Version:** 7.0.0  
-**Last Updated:** February 17, 2026 (Sprint 9)
+**Version:** 7.1.0  
+**Last Updated:** February 18, 2026 (Sprint 75)
 
 ---
 
@@ -27,7 +27,7 @@ These implement `IThumbnailDecoder` and are registered with `ThumbnailPipeline`.
 | **HEIFDecoder** | .heif .heic .hif .heifs .heics .avci .avcs | ✅ Functional | `HAS_LIBHEIF` (ON) | libheif | 2 tests |
 | **JXLDecoder** | .jxl | ⚠️ Conditional | `HAS_LIBJXL` (OFF) | libjxl 0.11.1 | 2 tests |
 | **ArchiveDecoder** | .zip .cbz | ✅ Functional | — | minizip-ng 4.0.10 | 6 tests |
-| **RAWDecoder** | .cr2 .cr3 .crw .nef .nrw .arw .srf .sr2 .orf .rw2 .raw .raf .pef .ptx .dng .rwl .srw .3fr .iiq .x3f | ✅ Functional | `HAS_LIBRAW` (ON) | LibRaw 0.21.2 | 0 tests |
+| **RAWDecoder** | .cr2 .cr3 .crw .nef .nrw .arw .srf .sr2 .orf .rw2 .raw .raf .pef .ptx .dng .rwl .srw .3fr .iiq .x3f | ✅ Functional | `HAS_LIBRAW` (ON) | LibRaw 0.21.3 | 0 tests |
 | **TGADecoder** | .tga .tpic | ✅ Functional | — | Native (no deps) | 0 tests |
 | **QOIDecoder** | .qoi | ✅ Functional | — | Native (no deps) | 0 tests |
 
@@ -59,14 +59,14 @@ These are static-method classes used by the COM shell extension directly. They d
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| **PluginDecoder** | ⚠️ Built, not wired | Adapter wrapping plugin DLL as IThumbnailDecoder |
-| **PluginManager** | ⚠️ Built, not wired | Discovery, loading, lifecycle management |
-| **PluginHostClient** | ⚠️ Built, not wired | IPC to isolated PluginHost.exe |
-| **IPC Protocol** | ⚠️ Built, not wired | Named pipe + shared memory |
+| **PluginDecoder** | ✅ Built and wired (feature-flag controlled) | Adapter wrapping plugin DLL as IThumbnailDecoder |
+| **PluginManager** | ✅ Built and wired (feature-flag controlled) | Discovery, loading, lifecycle management |
+| **PluginHostClient** | ✅ Built and wired (feature-flag controlled) | IPC to isolated PluginHost.exe |
+| **IPC Protocol** | ✅ Built and wired (feature-flag controlled) | Named pipe + shared memory |
 | **Plugin SDK** | ✅ Complete | C ABI, stable API v1.0 |
 | **Sample Plugin** | ✅ Example | SDK/examples/minimal-plugin/ |
 
-**Plugin system activation:** Sprint 17 — uncomment `LoadPlugins()` in ThumbnailPipeline.cpp
+**Plugin system activation:** Active via `LoadPlugins()` in ThumbnailPipeline with `config.enablePlugins` gate (default: enabled).
 
 ---
 

@@ -7,7 +7,8 @@
 > **Test Baseline:** 100/100 unit tests, 5/5 benchmarks — 100% pass rate  
 > **Sprints Completed:** 1-74 (74 total — 49 original + 25 production hardening)  
 > **Sprints Remaining:** 0 (all sprints complete)  
-> **Current Version:** v7.1.0
+> **Current Version:** v7.1.0  
+> **Next Planned Block:** Sprints 75-110 (v7.2.0 → v8.0.0 refactor program)
 
 ---
 
@@ -1056,3 +1057,263 @@ The following missed items are now explicitly tracked in this master plan:
 - Sprint 72: Integration Test Matrix — docs/testing/INTEGRATION_TEST_MATRIX.md
 - Sprint 73: docs/INDEX.md Rebuild — Cross-references, new sections
 - Sprint 74: v7.1 Release Preparation — MASTER_PLAN.md final update, state snapshot
+
+---
+
+## 11) Current Status Review (Verified — February 18, 2026)
+
+### A. Baseline state
+- ✅ Working tree clean, branch `main`, latest commit `957931e` (Sprint 74)
+- ✅ Sprints 1-74 completed and committed
+- ✅ Build baseline remains 0 errors / 0 warnings
+- ✅ Documentation, CI/CD, and governance files updated for v7.1.0
+
+### B. Carry-over items from older plan sections to absorb in next block
+
+The table below captures legacy entries that were marked planned/partial in historical sections and must be explicitly closed in the next roadmap.
+
+| Area | Legacy Status Text | Action in new program |
+|------|--------------------|------------------------|
+| Plugin activation validation | Pending activation validation | Add end-to-end plugin runtime test matrix + crash isolation soak |
+| ETW/structured logging | In progress / partial instrumentation | Complete sink wiring, schema, and retention policy |
+| Fuzzing & malformed payload hardening | Planned | Add continuous fuzzing job with crash budget gate |
+| Win11 compatibility matrix validation | Planned | Build full OS/GPU/DPI matrix with pass criteria |
+| COM apartment stability improvements | Planned | Add apartment model audits + STA/MTA regression tests |
+| CBXManager dark mode/DPI | Partial / known issue | Finish control-level dark mode + per-monitor DPI V2 behavior |
+| Decoder health dashboard | In progress | Ship data model + UI parity acceptance tests |
+| Version normalization in docs | In progress | Finish stale docs sweep and add automated version drift gate |
+| MSI installer E2E validation | Planned pending | Add full install/upgrade/uninstall/repair CI scenario |
+
+### C. Status corrections needed in docs (high priority)
+- `docs/formats/DECODER_STATUS.md` still reports v7.0.0 and stale per-decoder flags/counts.
+- Historical sections in this file include outdated “planned/partial” labels that must be superseded by execution results.
+- A formal status-normalization sprint is required to align all docs with committed code reality.
+
+---
+
+## 12) Additional Format Support Strategy (v7.2+)
+
+### Priority format candidates
+
+| Priority | Format Group | Extensions | Why it matters | Likely implementation path |
+|----------|--------------|------------|----------------|----------------------------|
+| P0 | JPEG 2000 | `.jp2`, `.j2k`, `.jpf`, `.jpx` | Enterprise/scanner, medical, archival workflows | OpenJPEG (or WIC codec when available) |
+| P0 | CAD 2D | `.dwg`, `.dxf` | Engineering-heavy Windows Explorer workflows | ODA/LibreDWG adapter plugin path |
+| P1 | Modern texture containers | `.ktx`, `.ktx2`, `.basis` | Game-dev assets, GPU-native textures | KTX-Software + Basis Universal |
+| P1 | 3D scene exchange | `.gltf`, `.glb` | Common interchange for DCC/game pipelines | tinygltf + Draco optional |
+| P1 | High-efficiency still image | `.jxr`, `.wdp`, `.hdp` | Windows ecosystem compatibility | WIC-backed decoder path |
+| P2 | eBook expanded support | `.epub`, `.mobi`, `.azw3` | User library workflows | EPUB native + plugin bridge for Kindle formats |
+| P2 | Scientific imaging | `.fits`, `.nii` | Research/medical preview requirements | Plugin-first optional module |
+
+### Format acceptance gate
+1. Real sample corpus (minimum 50 files per new format family)
+2. Decode correctness checks (golden image hash or perceptual diff)
+3. Memory ceiling under stress (no sustained growth after 10K previews)
+4. Explorer stability gate (no crash/hang in 60-minute browse soak)
+5. Documentation + registration + UI enablement completed in same sprint
+
+---
+
+## 13) Memory-First Explorer Strategy (Single-Format Directory Optimization)
+
+### Objective
+When user browses a folder dominated by one file type, memory should converge to a format-specific low steady-state profile with minimal decoder/lib footprint.
+
+### Core design
+
+1. **Directory Format Profiling (DFP)**
+  - Build lightweight extension histogram per folder (first N entries + incremental updates).
+  - Detect dominant format family (`dominant_ratio >= 0.8`) and activate “single-format hot mode”.
+
+2. **Decoder Hotset Activation**
+  - Load only required decoder(s) + minimal transitive libs for dominant family.
+  - Defer all other decoders to cold state.
+  - Add inactivity-based unload (e.g., 30-60s) for heavyweight decoder stacks.
+
+3. **Per-Family Memory Budgets**
+  - Define dynamic memory budgets by format group:
+    - Lightweight images (JPEG/PNG/WebP): low budget
+    - RAW/HDR/video/model: medium/high budget with strict cap
+  - Enforce budget with LRU + pressure-triggered eviction.
+
+4. **Allocator and Buffer Reuse**
+  - Reuse decode buffers and GPU staging textures by size class.
+  - Introduce slab pools for common thumbnail dimensions.
+  - Avoid duplicate copies between decode → resize → marshaling paths.
+
+5. **Explorer-Aware Work Scheduling**
+  - Prioritize visible viewport files first.
+  - Cancel in-flight decodes for scrolled-out items.
+  - Reduce worker fan-out in single-format mode to avoid memory spikes.
+
+6. **Observability + Guardrails**
+  - Add per-request memory telemetry (peak working set delta, allocation classes).
+  - Add regression gate: single-format browse in large folder must not exceed defined peak memory envelope.
+
+### Target KPIs for memory-focused browsing
+- Peak private bytes during 5,000-file single-format browse: **-35%** vs v7.1 baseline
+- Sustained working set after idle settle: **-40%** vs baseline
+- Cache hit latency unchanged or improved (<5 ms target maintained)
+
+---
+
+## 14) Full Refactor Program (Sprints 75-110)
+
+> Program scope: Engine, Shell, Manager GUI, build scripts, packaging, SDK/plugins, docs, CI/CD.
+
+### Phase R1 — Truth Alignment & Safety Net (Sprints 75-78)
+
+**Sprint 75: Status normalization sweep**
+- Update stale status/version docs (starting with `docs/formats/DECODER_STATUS.md`)
+- Add “status source-of-truth” references across docs
+- Deliverable: zero contradictory status statements
+
+**Sprint 76: Contract inventory and ABI map**
+- Enumerate public/implicit contracts across `CBXShell`, `Engine`, `SDK`
+- Lock ABI-sensitive interfaces and add compatibility tests
+
+**Sprint 77: Explorer stability baseline suite**
+- Add deterministic Explorer browse scenarios (single-format, mixed-format, deep tree)
+- Capture baseline memory/latency/crash metrics
+
+**Sprint 78: Regression safety harness**
+- CI gates for warning budget, memory envelope, browse soak, plugin crash isolation
+
+### Phase R2 — Decoder Architecture Refactor (Sprints 79-82)
+
+**Sprint 79: Decoder registration unification**
+- Replace split registration logic with canonical registry + capability descriptors
+
+**Sprint 80: Single-format hot mode runtime**
+- Implement directory format profiling + dominant-family optimization path
+
+**Sprint 81: Lazy unload + dependency refcounting**
+- Add timed unload for inactive decoder families and dependent libs
+
+**Sprint 82: Zero-copy thumbnail pipeline**
+- Remove redundant memory copies across decode/resize/marshal stages
+
+### Phase R3 — Memory & Cache Deep Optimization (Sprints 83-86)
+
+**Sprint 83: Adaptive cache budgets**
+- Per-format cache partitioning and dynamic shrink on memory pressure
+
+**Sprint 84: Buffer pool and slab allocator integration**
+- Reuse decode buffers by dimension/format class
+
+**Sprint 85: Archive path memory compaction**
+- Streamed extraction + bounded temporary buffers for large archives
+
+**Sprint 86: Soak validation and leak closure**
+- 10K preview soak, leak diffing, working-set stabilization gate
+
+### Phase R4 — Format Expansion Wave 1 (Sprints 87-90)
+
+**Sprint 87: JPEG 2000 family support**
+- Add JP2/J2K decoder path + registration + tests + docs
+
+**Sprint 88: KTX/KTX2 texture support**
+- Add GPU-friendly texture decoder path for KTX containers
+
+**Sprint 89: glTF/GLB model thumbnails**
+- Add lightweight scene preview pipeline and fallback raster mode
+
+**Sprint 90: WIC-enhanced legacy modern formats**
+- Add JXR/WDP/HDP support via WIC where available
+
+### Phase R5 — Format Expansion Wave 2 (Sprints 91-94)
+
+**Sprint 91: CAD format pathway (plugin-first)**
+- Introduce DWG/DXF support through isolated plugin adapter
+
+**Sprint 92: eBook enhancement pass**
+- Harden EPUB and extend optional MOBI/AZW3 via plugin layer
+
+**Sprint 93: Scientific format plugin scaffold**
+- FITS/NIfTI plugin contracts + sample implementations
+
+**Sprint 94: Format fallback intelligence**
+- Smart fallback ranking based on codec/library availability and quality
+
+### Phase R6 — GUI Modernization (Sprints 95-98)
+
+**Sprint 95: WTL stabilization final pass**
+- Complete dark mode and per-monitor DPI V2 behavior
+
+**Sprint 96: WinUI 3 shell settings host**
+- Establish WinUI 3 host shell for settings with parity bridge
+
+**Sprint 97: Diagnostics/health experience**
+- Ship decoder health dashboard + memory telemetry panels
+
+**Sprint 98: Accessibility & Fluent 2 polish**
+- Keyboard navigation, narrator quality, contrast, RTL verification
+
+### Phase R7 — Library & Toolchain Modernization (Sprints 99-102)
+
+**Sprint 99: Dependency refresh framework**
+- Define update cadence, ABI-risk rubric, and security review checklist
+
+**Sprint 100: Compression/image stack updates**
+- Upgrade zlib/zstd/lz4/libwebp/libavif/libjxl/libheif where safe
+
+**Sprint 101: Build reproducibility hardening**
+- Deterministic build flags, reproducible package metadata, SBOM verification
+
+**Sprint 102: Toolchain uplift**
+- Validate latest VS 18 updates, SDK revisions, and sanitizer compatibility
+
+### Phase R8 — Plugin Ecosystem Productionization (Sprints 103-106)
+
+**Sprint 103: Plugin runtime hardening**
+- Finalize sandbox policies, timeouts, and resource quotas
+
+**Sprint 104: Plugin compatibility kit 2.0**
+- Strengthen validator with perf/memory/crash policy checks
+
+**Sprint 105: Marketplace trust workflow**
+- Signing, provenance, revocation, and publisher policy enforcement
+
+**Sprint 106: Reference plugin pack**
+- Deliver production-grade example plugins for at least 3 format families
+
+### Phase R9 — Release, Validation, and Rollout (Sprints 107-110)
+
+**Sprint 107: Full matrix validation**
+- OS/GPU/DPI/locale/plugin matrix run with pass/fail dashboard
+
+**Sprint 108: Installer lifecycle E2E**
+- Install/upgrade/repair/uninstall automation with rollback checks
+
+**Sprint 109: Performance + memory release gate**
+- Must meet browse memory envelope and latency KPIs before release candidate
+
+**Sprint 110: v8.0.0 release readiness**
+- Final docs sync, release notes, signed artifacts, go/no-go checklist
+
+---
+
+## 15) Coverage Matrix — Project Sections, Levels, and File Surfaces
+
+| Project Surface | Primary Paths | Planned Coverage in Sprints 75-110 |
+|----------------|---------------|-------------------------------------|
+| Shell COM layer | `CBXShell/`, `src/shell/` | Stability, apartment model, registration, format routing |
+| Manager GUI | `CBXManager/` | WTL hardening, WinUI 3 modernization, diagnostics UX |
+| Core engine | `Engine/Core/`, `Engine/Decoders/`, `src/Engine/` | Hot-mode memory optimization, decoder unification, cache strategy |
+| Plugin runtime | `Engine/Plugin/`, `Engine/PluginHost/`, `SDK/` | Sandbox hardening, compatibility kit, plugin deployment |
+| Build scripts | `build-scripts/`, `build-scripts/core/`, `build-scripts/external-libs/` | Deterministic builds, deprecation cleanup, update framework |
+| Packaging | `packaging/` | MSI/MSIX lifecycle validation, signed release governance |
+| CI/CD | `.github/workflows/`, `.github/` | Memory/perf gates, fuzzing, matrix validation, policy enforcement |
+| Documentation | `docs/`, root `*.md`, `.github/*.md` | Version normalization, drift prevention, release traceability |
+| Tests/benchmarks | `tests/`, `Engine/Tests/` | Soak, fuzz, matrix, and regression gate expansion |
+
+---
+
+## 16) Definition of Done for the New Program
+
+1. No historical “planned/in-progress” item remains unowned or untracked.
+2. Single-format directory browsing memory KPIs are met and continuously enforced in CI.
+3. New format additions ship with tests, docs, registration updates, and fallback behavior.
+4. GUI modernization reaches parity + improved accessibility without regressions.
+5. All release artifacts are reproducible, signed, and validated through full lifecycle tests.
+6. `MASTER_PLAN.md` remains the sole schedule/status truth source.

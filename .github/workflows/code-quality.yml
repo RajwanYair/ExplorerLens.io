@@ -24,7 +24,7 @@ jobs:
         run: |
           $files = Get-ChildItem -Path CBXShell,CBXManager,Engine -Recurse -Include *.cpp,*.h -ErrorAction SilentlyContinue
           Write-Host "Found $($files.Count) C++ source files to check"
-          
+
           $clangFormat = Get-Command clang-format -ErrorAction SilentlyContinue
           if ($clangFormat) {
             $errors = 0
@@ -54,7 +54,7 @@ jobs:
         run: |
           Write-Host "Running MSVC static analysis..." -ForegroundColor Cyan
           msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /p:EnableCppCoreCheck=true /p:RunCodeAnalysis=true /m /v:minimal 2>&1 | Tee-Object -Variable buildOutput
-          
+
           $warnings = $buildOutput | Select-String "warning C\d+"
           if ($warnings.Count -gt 0) {
             Write-Host "$($warnings.Count) code analysis warnings found" -ForegroundColor Yellow
