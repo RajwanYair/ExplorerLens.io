@@ -196,6 +196,7 @@ set(ENGINE_HEADERS
     Plugin/PluginRuntimeValidation.h  # Sprint 128 — Plugin E2E validation
     Memory/DirectoryFormatProfiler.h  # Sprint 129 — Directory format profiler
     Memory/DecoderHotsetManager.h     # Sprint 130 — Decoder hotset manager
+    Memory/BufferPoolAllocator.h      # Sprint 131 — Buffer pool & slab allocator
 )
 
 set(ENGINE_SOURCES
