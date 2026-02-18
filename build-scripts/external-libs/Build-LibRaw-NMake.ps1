@@ -1,27 +1,39 @@
+#Requires -Version 7.0
 #================================================================
 # Build-LibRaw-NMake.ps1
-# Build LibRaw 0.21.2 using MSVC nmake
+# DarkThumbs v7.0 - Build LibRaw 0.21.2 using MSVC nmake
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-LibRaw-NMake.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   LibRaw source:      <repo>\external\camera-libs\libraw\
+#   Install dir:        <repo>\external\camera-libs\libraw-install\
 #================================================================
 
 param(
     [switch]$Clean
 )
 
-$ErrorActionPreference = "Stop"
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  Building LibRaw with MSVC nmake" -ForegroundColor Cyan
-Write-Host "================================================" -ForegroundColor Cyan
-Write-Host ""
+# Paths — use double Split-Path to get project root from external-libs/
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$LibRawSource = Join-Path $rootDir "external\camera-libs\libraw"
+$OutputDir = Join-Path $rootDir "external\camera-libs\libraw-install"
 
-# Paths
-$LibRawSource = "$PSScriptRoot\..\external\libraw"
-$OutputDir = "$PSScriptRoot\..\external\libraw-install"
+Write-BuildHeader "Building LibRaw with MSVC nmake"
 
 if (!(Test-Path $LibRawSource)) {
-    Write-Host "ERROR: LibRaw source not found at: $LibRawSource" -ForegroundColor Red
+    Write-BuildLog "LibRaw source not found at: $LibRawSource" -Level Error
     exit 1
 }
+
+Write-BuildLog "Source:  $LibRawSource" -Level Info
+Write-BuildLog "Install: $OutputDir" -Level Info
 
 # Clean if requested
 if ($Clean) {

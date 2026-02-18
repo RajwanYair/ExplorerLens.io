@@ -1,7 +1,16 @@
 #Requires -Version 7.0
 # DarkThumbs v7.0 - Build libheif 1.19.5 (HEIF/HEIC Support)
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 16, 2026
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-LibHEIF.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   libheif source:     <repo>\external\image-libs\libheif-1.19.5\
+#   libde265 source:    <repo>\external\image-libs\libde265-1.0.15\
+#   Build dir:          <repo>\external\image-libs\libheif-1.19.5\build-vs\
+#   Install dir:        <repo>\external\image-libs\libheif-1.19.5\install\
 
 param(
     [string]$Configuration = "Release",

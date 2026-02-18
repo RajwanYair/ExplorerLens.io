@@ -1,7 +1,15 @@
 #Requires -Version 7.0
 # DarkThumbs v7.0 - Build LZMA SDK 26.00 (7-Zip compression)
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 16, 2026
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-LZMA-SDK-26.00.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   LZMA source:        <repo>\external\compression-libs\lzma-26.00\C\
+#   Build dir:          <repo>\external\compression-libs\lzma-26.00\C\build-vs\
+#   Install dir:        <repo>\SDK\lzma\
 
 param(
     [string]$Configuration = "Release",

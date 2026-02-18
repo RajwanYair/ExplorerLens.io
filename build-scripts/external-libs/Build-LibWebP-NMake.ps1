@@ -1,7 +1,14 @@
 #Requires -Version 7.0
 # DarkThumbs v7.0 - Build libwebp 1.5.0 using native Makefile.vc
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 16, 2026
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-LibWebP-NMake.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   libwebp source:     <repo>\external\image-libs\libwebp-1.5.0-build\
+#   Build dir:          <repo>\external\image-libs\libwebp-1.5.0-build\build-cmake\
 
 param(
     [switch]$Clean

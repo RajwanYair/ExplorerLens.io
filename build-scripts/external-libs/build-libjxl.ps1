@@ -1,7 +1,15 @@
 #Requires -Version 7.0
 # DarkThumbs v7.0 - Build libjxl 0.11.1 (JPEG XL)
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 16, 2026
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-LibJXL.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   libjxl source:      <repo>\external\image-libs\libjxl-0.11.1\
+#   Build dir:          <repo>\external\image-libs\libjxl-0.11.1\build-msvc\
+#   Install dir:        <repo>\external\image-libs\libjxl-0.11.1\install\
 
 param(
     [string]$Configuration = "Release",

@@ -1,7 +1,15 @@
 #Requires -Version 7.0
 # DarkThumbs v7.0 - Build zlib 1.3.1 (DEFLATE Compression)
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 16, 2026
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-Zlib.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   zlib source:        <repo>\external\compression-libs\zlib-1.3.1\
+#   Build dir:          <repo>\external\compression-libs\zlib-1.3.1\build-vs\
+#   Install dir:        <repo>\external\compression-libs\zlib-1.3.1\install\
 
 param(
     [string]$Configuration = "Release",

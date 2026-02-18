@@ -1,7 +1,14 @@
 #Requires -Version 7.0
 # DarkThumbs v7.0 - Build minizip-ng 4.0.10 (Modern ZIP Library)
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 16, 2026
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-MinizipNG.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   minizip-ng source:  <repo>\external\compression-libs\minizip-ng-4.0.10\
+#   Build dir:          <repo>\external\compression-libs\minizip-ng-4.0.10\build-vs\
 
 param(
     [string]$Configuration = "Release",

@@ -1,7 +1,15 @@
 #Requires -Version 7.0
 # DarkThumbs v7.0 - Build zstd 1.5.7 (Zstandard Compression)
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 16, 2026
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-Zstd.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   zstd source:        <repo>\external\compression-libs\zstd-1.5.7\
+#   Build dir:          <repo>\external\compression-libs\zstd-1.5.7\build-vs\
+#   Install dir:        <repo>\external\compression-libs\zstd-1.5.7\install\
 
 param(
     [string]$Configuration = "Release",

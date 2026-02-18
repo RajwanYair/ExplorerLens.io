@@ -1,7 +1,15 @@
 #Requires -Version 7.0
 # DarkThumbs v7.0 - Build dav1d 1.5.1 (AV1 Video Decoder)
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 16, 2026
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-Dav1d.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   dav1d source:       <repo>\external\image-libs\dav1d-1.5.1\
+#   Build dir:          <repo>\external\image-libs\dav1d-1.5.1\build-msvc\
+#   Install dir:        <repo>\external\image-libs\dav1d-1.5.1\install\
 
 param(
     [string]$Configuration = "Release",

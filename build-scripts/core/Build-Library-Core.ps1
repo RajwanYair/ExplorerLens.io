@@ -304,6 +304,18 @@ function Invoke-CMakeBuild {
     # Create/clean build directory
     New-CleanDirectory -Path $BuildDir -Clean:$Clean
     
+    # Detect stale CMakeCache.txt (path mismatch from directory renames)
+    $existingCache = Join-Path $BuildDir 'CMakeCache.txt'
+    if (Test-Path $existingCache) {
+        $cacheContent = Get-Content $existingCache -First 5 | Out-String
+        $normalizedSource = $SourceDir.Replace('\', '/').TrimEnd('/')
+        if ($cacheContent -notmatch [regex]::Escape($normalizedSource)) {
+            Write-BuildLog "Stale CMakeCache.txt detected (directory was renamed). Cleaning build dir..." -Level Warning
+            Remove-Item -Path $BuildDir -Recurse -Force -ErrorAction SilentlyContinue
+            New-CleanDirectory -Path $BuildDir
+        }
+    }
+    
     # Build CMake arguments
     $cmakeArgs = @(
         "-S", "`"$SourceDir`"",

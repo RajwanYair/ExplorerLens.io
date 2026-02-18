@@ -1,98 +1,125 @@
 #Requires -Version 7.0
-# Build UnRAR DLL for Windows x64
+# DarkThumbs v7.0 - Build UnRAR DLL (RAR Archive Extraction)
+# Refactored to use Build-Library-Core.ps1 module
+# Date: February 18, 2026
+#
+# Directory structure (post-cleanup):
+#   Project root:       <repo>\
+#   This script:        <repo>\build-scripts\external-libs\Build-UnRAR.ps1
+#   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
+#   UnRAR source:       <repo>\external\compression-libs\unrar\
+#   Build output:       <repo>\x64\Release\UnRAR64.dll
 
-$ErrorActionPreference = "Stop"
+param(
+    [string]$Configuration = "Release",
+    [switch]$Clean
+)
 
-Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "Building UnRAR DLL" -ForegroundColor Cyan
-Write-Host "========================================`n" -ForegroundColor Cyan
+# Import core build module
+. "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-$rootDir = Split-Path -Parent $PSScriptRoot
+$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $unrarDir = Join-Path $rootDir "external\compression-libs\unrar"
 $projectFile = Join-Path $unrarDir "UnRARDll.vcxproj"
 $outputDir = Join-Path $rootDir "x64\Release"
 
+Write-BuildHeader "Building UnRAR DLL (RAR Archive Extraction)"
+
+# Verify source directory
+if (-not (Test-Path $unrarDir)) {
+    Write-BuildLog "UnRAR source not found at $unrarDir" -Level Error
+    Write-BuildLog "Please download and extract UnRAR source" -Level Warning
+    exit 1
+}
+
 if (-not (Test-Path $projectFile)) {
-    Write-Host "❌ ERROR: UnRAR project not found: $projectFile" -ForegroundColor Red
+    Write-BuildLog "UnRARDll.vcxproj not found at $projectFile" -Level Error
     exit 1
 }
 
-Write-Host "Source:  $unrarDir" -ForegroundColor Gray
-Write-Host "Project: UnRARDll.vcxproj" -ForegroundColor Gray
-Write-Host "Output:  $outputDir`n" -ForegroundColor Gray
+Write-BuildLog "Source:  $unrarDir" -Level Info
+Write-BuildLog "Project: UnRARDll.vcxproj" -Level Info
+Write-BuildLog "Output:  $outputDir" -Level Info
 
-# Find MSBuild
-$msbuildPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe"
-if (-not (Test-Path $msbuildPath)) {
-    Write-Host "❌ ERROR: MSBuild not found at: $msbuildPath" -ForegroundColor Red
-    exit 1
-}
-
-# Build UnRAR DLL
-Write-Host "[1/2] Building UnRAR64.dll..." -ForegroundColor Yellow
 try {
+    # Find MSBuild using Build-Library-Core.ps1 helper
+    $msbuildPath = Find-MSBuildPath
+    if (-not $msbuildPath) {
+        throw "MSBuild not found"
+    }
+    Write-BuildLog "MSBuild: $msbuildPath" -Level Info
+
+    # Clean if requested
+    if ($Clean) {
+        $cleanDirs = @(
+            (Join-Path $unrarDir "x64"),
+            (Join-Path $unrarDir "Release")
+        )
+        foreach ($d in $cleanDirs) {
+            if (Test-Path $d) {
+                Remove-Item $d -Recurse -Force -ErrorAction SilentlyContinue
+                Write-BuildLog "Cleaned: $d" -Level Info
+            }
+        }
+    }
+
+    # Build UnRAR DLL
+    Write-BuildLog "Building UnRAR64.dll..." -Level Info
     $buildArgs = @(
         $projectFile
-        "/p:Configuration=Release"
+        "/p:Configuration=$Configuration"
         "/p:Platform=x64"
         "/p:PlatformToolset=v145"
         "/v:minimal"
         "/m"
     )
-    
+
     & $msbuildPath $buildArgs
-    
+
     if ($LASTEXITCODE -ne 0) {
-        throw "Build failed with exit code $LASTEXITCODE"
+        throw "MSBuild failed with exit code $LASTEXITCODE"
     }
-    Write-Host "  ✓ Build complete" -ForegroundColor Green
+
+    # Find the output DLL
+    Write-BuildLog "Locating output DLL..." -Level Info
+    $possibleLocations = @(
+        (Join-Path $unrarDir "x64\Release\UnRAR64.dll"),
+        (Join-Path $unrarDir "x64\Release\UnRAR.dll"),
+        (Join-Path $unrarDir "Release\UnRAR64.dll")
+    )
+
+    $dllPath = $null
+    foreach ($location in $possibleLocations) {
+        if (Test-Path $location) {
+            $dllPath = $location
+            break
+        }
+    }
+
+    if (-not $dllPath) {
+        Write-BuildLog "UnRAR64.dll not found in expected locations:" -Level Error
+        foreach ($loc in $possibleLocations) {
+            Write-BuildLog "  $loc" -Level Warning
+        }
+        throw "UnRAR64.dll not found"
+    }
+
+    # Copy to project output directory
+    $size = (Get-Item $dllPath).Length / 1KB
+    Write-BuildLog "Found: $dllPath ($([math]::Round($size, 0)) KB)" -Level Success
+
+    if (-not (Test-Path $outputDir)) {
+        New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+    }
+
+    $targetPath = Join-Path $outputDir "UnRAR64.dll"
+    Copy-Item $dllPath $targetPath -Force
+    Write-BuildLog "Copied to: $targetPath" -Level Success
+
+    Write-BuildLog "UnRAR build completed successfully" -Level Success
+    Write-BuildLog "Provides RAR archive decompression support" -Level Info
+
 } catch {
-    Write-Host "  ❌ Build error: $_" -ForegroundColor Red
+    Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
-
-# Find the output DLL
-Write-Host "`n[2/2] Locating output..." -ForegroundColor Yellow
-$possibleLocations = @(
-    (Join-Path $unrarDir "x64\Release\UnRAR64.dll"),
-    (Join-Path $unrarDir "x64\Release\UnRAR.dll"),
-    (Join-Path $unrarDir "Release\UnRAR64.dll")
-)
-
-$dllPath = $null
-foreach ($location in $possibleLocations) {
-    if (Test-Path $location) {
-        $dllPath = $location
-        break
-    }
-}
-
-if (-not $dllPath) {
-    Write-Host "  ❌ UnRAR64.dll not found in expected locations" -ForegroundColor Red
-    Write-Host "  Searched:" -ForegroundColor Yellow
-    foreach ($loc in $possibleLocations) {
-        Write-Host "    $loc" -ForegroundColor Gray
-    }
-    exit 1
-}
-
-# Copy to project output directory
-$size = (Get-Item $dllPath).Length / 1KB
-Write-Host "  ✓ Found: $dllPath ($([math]::Round($size, 0)) KB)" -ForegroundColor Green
-
-if (-not (Test-Path $outputDir)) {
-    New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
-}
-
-$targetPath = Join-Path $outputDir "UnRAR64.dll"
-Copy-Item $dllPath $targetPath -Force
-Write-Host "  ✓ Copied to: $targetPath" -ForegroundColor Green
-
-Write-Host "`n========================================" -ForegroundColor Green
-Write-Host "✓ UnRAR Build Complete" -ForegroundColor Green
-Write-Host "========================================`n" -ForegroundColor Green
-
-Write-Host "DLL: $targetPath ($([math]::Round($size, 0)) KB)" -ForegroundColor Cyan
-Write-Host "`nUnRAR64.dll provides RAR archive decompression support`n" -ForegroundColor Gray
-
-exit 0
