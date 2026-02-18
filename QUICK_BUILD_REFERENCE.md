@@ -1,4 +1,4 @@
-# DarkThumbs v7.0.0 - Quick Build Reference Card
+# DarkThumbs v7.1.0 - Quick Build Reference Card
 ## Fast Reference for Daily Development
 
 ---
@@ -173,11 +173,11 @@ $Timestamp = "http://timestamp.digicert.com"
 |-----------|------|-------|
 | **vcpkg Setup** | 0 sec | Pre-installed with VS |
 | **CMake Configure** | 5-10 sec | First run |
-| **Full Build (Ninja)** | 55 sec | All 24 decoders |
+| **Full Build (Ninja)** | 55 sec | All 25 decoders |
 | **Full Build (MSBuild)** | 75 sec | Traditional method |
 | **Incremental Build** | 3-15 sec | After file changes |
 | **MSI Creation** | 30-60 sec | With all components |
-| **Run Tests** | 10-20 sec | 152 test cases |
+| **Run Tests** | 10-20 sec | 100+ unit tests, 5 benchmarks |
 
 ---
 
@@ -243,19 +243,45 @@ Get-FileHash packaging\output\*.msi,packaging\release-packages\*.exe -Algorithm 
 
 ---
 
-## 🎉 New in v7.0.0
+## 🎉 New in v7.1.0
 
-- ✅ **200+ file formats** (was 155+)
-- ✅ **MSI installer** ready for enterprise
+- ✅ **200+ file formats** with 25 decoders
+- ✅ **D3D11 + D3D12** GPU acceleration pipeline
+- ✅ **MSI installer** ready for enterprise deployment
 - ✅ **Inno Setup installer** for end users
-- ✅ **vcpkg integration** for dependencies
-- ✅ **9.3x faster builds** with Ninja
-- ✅ **2,000+ lines** of new documentation
+- ✅ **vcpkg integration** for dependency management
+- ✅ **9.3x faster builds** with Ninja generator
+- ✅ **Observability integration** (ETW + structured logging)
+- ✅ **Build validation** with compile-time feature flags
+- ✅ **0 errors, 0 warnings** production build
+- ✅ **74 sprints** of continuous development
 - ✅ **VCPKG_ROOT** auto-configured
 - ✅ **PowerShell profile** for productivity
 
 ---
 
-**DarkThumbs v7.0.0 - Quick Build Reference**  
+## 🔄 CI/CD Quick Commands
+
+### GitHub Actions (Local Validation)
+```powershell
+# Simulate CI build locally
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release -j 8
+ctest --test-dir build -C Release --output-on-failure
+```
+
+### Production Build Script
+```powershell
+.\build-scripts\production\Build-Production-SlowMachine.ps1 -Clean
+```
+
+### Build All Libraries + Package
+```powershell
+.\build-scripts\Build-All-And-Package.ps1
+```
+
+---
+
+**DarkThumbs v7.1.0 - Quick Build Reference**  
 *Print this card for easy reference!*  
-*Last Updated: February 16, 2026*
+*Last Updated: February 18, 2026*
