@@ -188,6 +188,9 @@ set(ENGINE_HEADERS
     Utils/AccessibilityI18n.h         # Sprint 47 — WCAG, RTL, keyboard nav
     Core/TelemetryDashboard.h         # Sprint 48 — Health scoring, diagnostics
     Release/ReleasePackaging.h        # Sprint 49 — SBOM, MSI, auto-update
+
+    # Sprint 125-149: v8.2 Program
+    Core/VersionDriftGate.h           # Sprint 125 — Version drift CI gate
 )
 
 set(ENGINE_SOURCES

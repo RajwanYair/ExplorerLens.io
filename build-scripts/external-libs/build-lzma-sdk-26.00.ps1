@@ -30,45 +30,60 @@ Write-BuildLog "Build: $buildDir" -Level Info
 Write-BuildLog "Install: $installDir" -Level Info
 
 try {
-    # LZMA SDK uses CMake with NMake
+    # LZMA SDK build path
     $cmakeLists = Join-Path $lzmaDir "CMakeLists.txt"
     
     if (-not (Test-Path $cmakeLists)) {
         Write-BuildLog "Creating basic CMakeLists.txt for LZMA SDK" -Level Warning
-        # LZMA SDK may not have CMakeLists.txt, we may need to use NMake directly
-        # For now, try NMake build pattern
-        
-        $makefileDir = $lzmaDir
-        $environment = @{
-            'CFLAGS' = '/MD /O2 /DNDEBUG'
-        }
-        
-        Invoke-NMakeBuild `
-            -LibraryName "lzma" `
-            -SourceDir $lzmaDir `
-            -MakefileDir $makefileDir `
-            -Target "all" `
-            -Environment $environment
+        $cmakeContent = @"
+cmake_minimum_required(VERSION 3.20)
+project(lzma LANGUAGES C)
+
+add_library(lzma STATIC
+    Alloc.c
+    CpuArch.c
+    LzFind.c
+    LzFindMt.c
+    LzmaDec.c
+    LzmaEnc.c
+    LzmaLib.c
+    Threads.c
+)
+
+target_include_directories(lzma PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+
+set_target_properties(lzma PROPERTIES OUTPUT_NAME "lzma")
+
+install(TARGETS lzma
+    ARCHIVE DESTINATION lib
+)
+
+install(FILES
+    LzmaLib.h
+    LzmaDec.h
+    LzmaEnc.h
+    DESTINATION include
+)
+"@
+        Set-Content -Path $cmakeLists -Value $cmakeContent -Encoding UTF8
     }
-    else {
-        # Use CMake if available
-        $cmakeOptions = @{
-            'CMAKE_BUILD_TYPE'           = 'Release'
-            'CMAKE_C_FLAGS_RELEASE'      = '/MD /O2 /DNDEBUG'
-            'CMAKE_MSVC_RUNTIME_LIBRARY' = 'MultiThreadedDLL'
-            'CMAKE_INSTALL_PREFIX'       = $installDir
-        }
-        
-        Invoke-CMakeBuild `
-            -LibraryName "lzma" `
-            -SourceDir $lzmaDir `
-            -BuildDir $buildDir `
-            -InstallDir $installDir `
-            -Configuration $Configuration `
-            -CMakeOptions $cmakeOptions `
-            -Generator "NMake Makefiles" `
-            -Clean:$Clean
+
+    $cmakeOptions = @{
+        'CMAKE_BUILD_TYPE'           = 'Release'
+        'CMAKE_MSVC_RUNTIME_LIBRARY' = 'MultiThreadedDLL'
     }
+    
+    Invoke-CMakeBuild `
+        -LibraryName "lzma" `
+        -SourceDir $lzmaDir `
+        -BuildDir $buildDir `
+        -InstallDir $installDir `
+        -Configuration $Configuration `
+        -CMakeOptions $cmakeOptions `
+        -Clean:$Clean
     
     # Verify output
     $expectedLib = Join-Path $installDir "lib\lzma.lib"

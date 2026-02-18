@@ -33,7 +33,7 @@ try {
         'BUILD_SHARED_LIBS' = 'OFF'
         'MZ_COMPAT'         = 'OFF'
         'MZ_ZLIB'           = 'ON'
-        'MZ_BZIP2'          = 'ON'
+        'MZ_BZIP2'          = 'OFF'
         'MZ_LZMA'           = 'ON'
         'MZ_ZSTD'           = 'ON'
         'MZ_OPENSSL'        = 'OFF'
@@ -63,6 +63,4 @@ try {
     exit 1
 }
 
-Get-ChildItem $BuildDir -Recurse -Filter "*.lib" | Format-Table FullName, Length
-exit 1
-}
+Get-ChildItem $buildDir -Recurse -Filter "*.lib" | Format-Table FullName, Length

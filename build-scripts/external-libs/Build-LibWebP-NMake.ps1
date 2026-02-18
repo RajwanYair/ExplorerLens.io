@@ -35,9 +35,36 @@ if ($Clean) {
 }
 
 try {
-    # Build with NMake
-    Invoke-NMakeBuild -LibraryName "libwebp" -SourceDir $webpDir -Target "CFG=release-static RTLIBCFG=static OBJDIR=output\x64\Release" -MakefileVars @{
-        'File' = 'Makefile.vc'
+    # Build with NMake if available, otherwise fallback to CMake
+    $nmake = Get-Command nmake.exe -ErrorAction SilentlyContinue
+    if ($nmake) {
+        Invoke-NMakeBuild -LibraryName "libwebp" -SourceDir $webpDir -Target "CFG=release-static RTLIBCFG=static OBJDIR=output\x64\Release" -MakefileVars @{
+            'File' = 'Makefile.vc'
+        }
+    }
+    else {
+        Write-BuildLog "nmake not found in environment; falling back to CMake build" -Level Warning
+        $cmakeBuildDir = Join-Path $webpDir "build-cmake"
+        $cmakeOptions = @{
+            'BUILD_SHARED_LIBS'      = 'OFF'
+            'WEBP_BUILD_CWEBP'       = 'OFF'
+            'WEBP_BUILD_DWEBP'       = 'OFF'
+            'WEBP_BUILD_GIF2WEBP'    = 'OFF'
+            'WEBP_BUILD_IMG2WEBP'    = 'OFF'
+            'WEBP_BUILD_VWEBP'       = 'OFF'
+            'WEBP_BUILD_WEBPINFO'    = 'OFF'
+            'WEBP_BUILD_WEBPMUX'     = 'OFF'
+            'WEBP_BUILD_EXTRAS'      = 'OFF'
+            'WEBP_BUILD_ANIM_UTILS'  = 'OFF'
+        }
+
+        Invoke-CMakeBuild `
+            -LibraryName "libwebp" `
+            -SourceDir $webpDir `
+            -BuildDir $cmakeBuildDir `
+            -Configuration "Release" `
+            -CMakeOptions $cmakeOptions `
+            -Clean:$Clean
     }
     
     # Find and verify outputs
@@ -46,7 +73,9 @@ try {
     $possibleOutputDirs = @(
         "output\release-static\x64\lib",
         "output\x64\Release\release-static\x64\lib",
-        "output\x64\Release"
+        "output\x64\Release",
+        "build-cmake\Release",
+        "build-cmake\lib\Release"
     )
     
     $outputLibDir = $null
