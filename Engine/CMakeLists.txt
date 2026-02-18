@@ -206,6 +206,7 @@ set(ENGINE_HEADERS
     Utils/CompatibilityMatrix.h       # Sprint 138 — Win11 compatibility matrix
     Release/MSILifecycleRunner.h      # Sprint 139 — MSI lifecycle E2E automation
     Memory/MemorySoakValidator.h      # Sprint 140 — Memory soak validation
+    Utils/DarkModeManagerV2.h         # Sprint 141 — DarkMode V2 complete
 )
 
 set(ENGINE_SOURCES
