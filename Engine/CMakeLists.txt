@@ -195,6 +195,7 @@ set(ENGINE_HEADERS
     Shell/COMApartmentAudit.h         # Sprint 127 — COM apartment audit
     Plugin/PluginRuntimeValidation.h  # Sprint 128 — Plugin E2E validation
     Memory/DirectoryFormatProfiler.h  # Sprint 129 — Directory format profiler
+    Memory/DecoderHotsetManager.h     # Sprint 130 — Decoder hotset manager
 )
 
 set(ENGINE_SOURCES
