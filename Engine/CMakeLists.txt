@@ -205,6 +205,7 @@ set(ENGINE_HEADERS
     Utils/ContinuousFuzzEngine.h      # Sprint 137 — Continuous fuzzing engine
     Utils/CompatibilityMatrix.h       # Sprint 138 — Win11 compatibility matrix
     Release/MSILifecycleRunner.h      # Sprint 139 — MSI lifecycle E2E automation
+    Memory/MemorySoakValidator.h      # Sprint 140 — Memory soak validation
 )
 
 set(ENGINE_SOURCES
