@@ -111,3 +111,11 @@ ctest --test-dir build -C Release --output-on-failure
 8. **Git commits must have descriptive messages** — include sprint number if applicable
 9. **Test changes with:** `cmake --build build --config Release -j 8`
 10. **Validate with:** `ctest --test-dir build -C Release --output-on-failure`
+
+## Sprint Execution Guidance (v7.2+)
+
+- **Next roadmap block:** Sprints 75-110 (v7.2.0 -> v8.0.0 refactor program)
+- **Execution package docs:** `docs/development/sprints-v8/SPRINT_XX.md`
+- **Source of truth:** `MASTER_PLAN.md` must be updated before creating new sprint work
+- **Carry-over closure:** legacy "planned/partial" items from older sections must be explicitly mapped to new sprint tasks
+- **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
