@@ -197,6 +197,7 @@ set(ENGINE_HEADERS
     Memory/DirectoryFormatProfiler.h  # Sprint 129 — Directory format profiler
     Memory/DecoderHotsetManager.h     # Sprint 130 — Decoder hotset manager
     Memory/BufferPoolAllocator.h      # Sprint 131 — Buffer pool & slab allocator
+    Pipeline/ExplorerWorkScheduler.h  # Sprint 132 — Explorer work scheduler
 )
 
 set(ENGINE_SOURCES
