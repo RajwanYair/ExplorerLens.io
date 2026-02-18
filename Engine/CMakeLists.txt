@@ -193,6 +193,7 @@ set(ENGINE_HEADERS
     Core/VersionDriftGate.h           # Sprint 125 — Version drift CI gate
     Core/ETWSinkComplete.h            # Sprint 126 — ETW sink completion
     Shell/COMApartmentAudit.h         # Sprint 127 — COM apartment audit
+    Plugin/PluginRuntimeValidation.h  # Sprint 128 — Plugin E2E validation
 )
 
 set(ENGINE_SOURCES
