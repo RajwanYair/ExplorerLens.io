@@ -1,8 +1,9 @@
 # Deprecated Build Scripts
 
-**Date:** February 16, 2026  
-**Version:** DarkThumbs v7.0  
-**Reason:** Consolidated into Build-Library-Core.ps1 module
+**Date:** February 18, 2026  
+**Version:** DarkThumbs v7.1.0  
+**Reason:** Consolidated into Build-Library-Core.ps1 module  
+**Sprints:** 74 sprints completed
 
 ## Deprecated Scripts
 
@@ -103,15 +104,17 @@ All external library scripts now use Build-Library-Core.ps1:
 - ✅ Build-Dav1d.ps1
 - ✅ Build-LibHEIF.ps1 (NEW - includes libde265 dependency)
 
-### Phase 3: Remove Deprecated Files (⏳ Scheduled Q2 2026)
+### Phase 3: Remove Deprecated Files (⏳ Scheduled v7.2.0)
 - Archive old Find-MSBuild.ps1 scripts
 - Update all references in documentation
 - Add warning messages to deprecated scripts
+- **Note:** Deprecated scripts should emit `Write-Warning` on invocation
 
-### Phase 4: Consolidate Orchestrator Scripts (⏳ Scheduled Q2 2026)
+### Phase 4: Consolidate Orchestrator Scripts (⏳ Scheduled v7.2.0)
 - Evaluate test-builds.ps1 vs Build-All-And-Package.ps1
 - Consolidate quick-build scripts
 - Update VS Code tasks to use new scripts
+- Retire Build-All-DarkThumbs-V7.ps1 in favor of Build-All-And-Package.ps1
 
 ## Questions or Issues?
 
