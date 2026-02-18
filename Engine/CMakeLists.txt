@@ -198,6 +198,7 @@ set(ENGINE_HEADERS
     Memory/DecoderHotsetManager.h     # Sprint 130 — Decoder hotset manager
     Memory/BufferPoolAllocator.h      # Sprint 131 — Buffer pool & slab allocator
     Pipeline/ExplorerWorkScheduler.h  # Sprint 132 — Explorer work scheduler
+    Decoders/JPEG2000Decoder.h        # Sprint 133 — JPEG 2000 decoder
 )
 
 set(ENGINE_SOURCES
