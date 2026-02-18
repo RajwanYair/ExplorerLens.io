@@ -213,6 +213,7 @@ set(ENGINE_HEADERS
     Core/VersionDriftDetector.h       # Sprint 145 — Version drift CI integration
     Core/PerfRegressionGate.h         # Sprint 146 — Performance regression CI gate V2
     Core/ReproducibleBuildVerifier.h   # Sprint 147 — Reproducible build verification
+    Core/ReleaseReadinessDashboard.h   # Sprint 148 — Release readiness dashboard
 )
 
 set(ENGINE_SOURCES
