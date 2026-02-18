@@ -138,6 +138,56 @@ set(ENGINE_HEADERS
     Utils/EXIFOrientation.h
     Utils/MemoryMappedFile.h
     Utils/SmallObjectPool.h
+
+    # Sprint 6-12: Foundation & Activation
+    Core/DecoderIsolation.h           # Sprint 6  — SEH fuzzing, circuit breaker
+    Core/FuzzingFramework.h           # Sprint 6  — Malformed payload fuzzing
+    Core/MemoryLeakDetector.h         # Sprint 6  — Leak regression tests
+    Core/Win11CompatibilityMatrix.h   # Sprint 7  — OS/DPI/HDR/GPU compat
+    Core/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
+    Core/VersionNormalization.h      # Sprint 9  — Version audit, release notes
+    Core/ReleaseGovernance.h         # Sprint 10 — Quality gates, CI pipeline
+    Core/PluginActivation.h          # Sprint 11 — Feature flags, IPC, lifecycle
+    Core/ObservabilityPipeline.h     # Sprint 12 — ETW, JSON logger, privacy
+
+    # Sprint 23-25: AI & Store & OIIO
+    AI/AIThumbnailEnhancer.h          # Sprint 23 — DirectML/ONNX super-resolution
+
+    # Sprint 26-35: Advanced Features
+    Cloud/CloudThumbnailProvider.h    # Sprint 26 — OneDrive/GDrive/Dropbox
+    Cache/MultiTierCache.h            # Sprint 27 — Bloom filter, WAL SQLite
+    Decoders/VideoEnhancer.h          # Sprint 28 — Scene detection, HDR tone map
+    Plugin/PluginMarketplace.h        # Sprint 29 — Signing, security scan, REST
+    Utils/AccessibilityFramework.h    # Sprint 30 — UIA, WCAG, 5 languages
+    Utils/EnterpriseDeployment.h      # Sprint 31 — ADMX, GPO, network cache
+    Utils/PerformancePolish.h         # Sprint 32 — Micro-profiler, memory pool
+    Plugin/CrashIntelligence.h        # Sprint 33 — Minidump, symbols, bucketing
+    Utils/SupplyChainSecurity.h       # Sprint 34 — SBOM SPDX/CycloneDX
+    Cache/USNCacheInvalidation.h      # Sprint 35 — NTFS journal, file identity
+
+    # Sprint 36: Modular Codecs & Memory
+    Codec/ICodecModule.h              # Sprint 36 — C ABI codec interface
+    Codec/CodecLoader.h               # Sprint 36 — Demand-loading registry
+    Codec/CodecModuleSpecs.h          # Sprint 36 — 17 codec DLL specs
+    Codec/LazyCodecManager.h          # Sprint 36 — Directory-aware preloading
+    Memory/MemoryOptimizationEngine.h # Sprint 36 — Per-subsystem accounting
+
+    # Sprint 37-39: UX Enhancements
+    Shell/ContextMenuHandler.h        # Sprint 37 — Explorer right-click actions
+    Decoders/AnimatedThumbnailDecoder.h # Sprint 38 — Animated WebP/JXL/GIF
+    Decoders/ArchiveGridPreview.h     # Sprint 39 — 2x2 grid composite
+
+    # Sprint 40-49: Platform Maturity
+    Core/ColorSpaceHDR.h              # Sprint 40 — ICC, gamut, HDR tone map
+    Core/DuplicateDetection.h         # Sprint 41 — pHash/dHash/aHash
+    Utils/PortableMode.h              # Sprint 42 — INI config, badges
+    Pipeline/BatchProcessor.h         # Sprint 43 — Priority queue, rate limit
+    Cloud/NetworkThumbnailProvider.h   # Sprint 44 — URL/proxy/retry/throttle
+    Shell/PreviewPaneHandler.h        # Sprint 45 — EXIF, tooltips, columns
+    Codec/FormatConverter.h           # Sprint 46 — 9 output formats, profiles
+    Utils/AccessibilityI18n.h         # Sprint 47 — WCAG, RTL, keyboard nav
+    Core/TelemetryDashboard.h         # Sprint 48 — Health scoring, diagnostics
+    Release/ReleasePackaging.h        # Sprint 49 — SBOM, MSI, auto-update
 )
 
 set(ENGINE_SOURCES
