@@ -8,7 +8,7 @@
 > **Sprints Completed:** 1-74 (74 total — 49 original + 25 production hardening)  
 > **Sprints Remaining:** 0 (all sprints complete)  
 > **Current Version:** v7.1.0  
-> **Next Planned Block:** Sprints 75-110 (v7.2.0 → v8.0.0 refactor program)
+> **Next Planned Block:** Sprints 75-124 (v7.2.0 → v8.1.0 refactor program)
 
 ---
 
@@ -1157,7 +1157,7 @@ When user browses a folder dominated by one file type, memory should converge to
 
 ---
 
-## 14) Full Refactor Program (Sprints 75-110)
+## 14) Full Refactor Program (Sprints 75-124)
 
 > Program scope: Engine, Shell, Manager GUI, build scripts, packaging, SDK/plugins, docs, CI/CD.
 
@@ -1291,11 +1291,59 @@ When user browses a folder dominated by one file type, memory should converge to
 **Sprint 110: v8.0.0 release readiness**
 - Final docs sync, release notes, signed artifacts, go/no-go checklist
 
+### Phase R10 — Post-v8.0 Hardening (Sprints 111-114)
+
+**Sprint 111: Explorer memory pressure controller**
+- Implement pressure-aware cache trims and decoder throttling under memory stress
+
+**Sprint 112: Single-format directory accelerator rollout**
+- Ship dominant-format hot path tuning with telemetry-backed guardrails
+
+**Sprint 113: Plugin sandbox policy tightening**
+- Enforce stricter job object quotas, timeout ceilings, and policy-driven kill switches
+
+**Sprint 114: ARM64 validation pass**
+- Validate ARM64 build/runtime matrix and close architecture-specific regressions
+
+### Phase R11 — Ecosystem and Quality Expansion (Sprints 115-119)
+
+**Sprint 115: Extended format corpus CI**
+- Add expanded real-world corpus CI jobs for new format families
+
+**Sprint 116: Decoder reliability scoring v2**
+- Introduce reliability scorecards with failure taxonomy and trend tracking
+
+**Sprint 117: Manager UX telemetry and diagnostics parity**
+- Align GUI diagnostics with engine telemetry events and export workflows
+
+**Sprint 118: Build graph optimization**
+- Reduce full-build latency and improve incremental dependency graph behavior
+
+**Sprint 119: Security posture refresh**
+- Update dependency CVE audit process and security response runbooks
+
+### Phase R12 — v8.1 Release Program (Sprints 120-124)
+
+**Sprint 120: Release candidate stabilization**
+- Freeze risky changes and run full regression and compatibility passes
+
+**Sprint 121: Packaging and updater validation**
+- Validate MSI/MSIX/portable/updater flows with upgrade/rollback scenarios
+
+**Sprint 122: Documentation and SDK sync**
+- Ensure docs and SDK guides fully match shipped runtime behavior
+
+**Sprint 123: Final performance and memory gate**
+- Enforce v8.1 go/no-go thresholds for latency, memory, and stability
+
+**Sprint 124: v8.1.0 release readiness**
+- Final release notes, signing, artifact verification, and launch checklist
+
 ---
 
 ## 15) Coverage Matrix — Project Sections, Levels, and File Surfaces
 
-| Project Surface | Primary Paths | Planned Coverage in Sprints 75-110 |
+| Project Surface | Primary Paths | Planned Coverage in Sprints 75-124 |
 |----------------|---------------|-------------------------------------|
 | Shell COM layer | `CBXShell/`, `src/shell/` | Stability, apartment model, registration, format routing |
 | Manager GUI | `CBXManager/` | WTL hardening, WinUI 3 modernization, diagnostics UX |
