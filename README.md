@@ -2,13 +2,16 @@
 
 **High-Performance Windows Shell Extension for 200+ File Formats**
 
-DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11 GPU acceleration** and **multi-threaded processing**. Version 7.0 adds video thumbnails, PDF support, SVG rendering, QOI format, and comprehensive multimedia format coverage.
+DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11/12 GPU acceleration** and **multi-threaded processing**. Version 7.1 completes 74 development sprints with production hardening, comprehensive CI/CD, observability integration, and full documentation audit.
 
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
 ![Platform](https://img.shields.io/badge/Platform-x64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-7.0.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-7.1.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+![Sprints](https://img.shields.io/badge/Sprints-74%2F74-success)
+![Tests](https://img.shields.io/badge/Tests-100%25%20pass-success)
+![Warnings](https://img.shields.io/badge/Warnings-0-green)
 
 ---
 
