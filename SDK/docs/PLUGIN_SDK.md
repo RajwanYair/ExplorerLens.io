@@ -28,10 +28,11 @@ The DarkThumbs Plugin SDK enables developers to extend DarkThumbs with custom th
 
 ### System Requirements
 
-- **DarkThumbs**: Version 7.0.0 or later
-- **Compiler**: MSVC 2022+ (Windows), GCC 11+ (Linux), Clang 14+ (macOS)
+- **DarkThumbs**: Version 7.1.0 or later
+- **Compiler**: MSVC 2026+ v145 toolset (Windows), GCC 11+ (Linux), Clang 14+ (macOS)
 - **C++ Standard**: C++20 or C11
 - **Windows SDK**: 10.0.26100.0 or later
+- **GPU**: DirectX 11 or DirectX 12 capable GPU (for GPU-accelerated plugins)
 
 ---
 
