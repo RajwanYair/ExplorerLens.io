@@ -136,6 +136,7 @@ set(ENGINE_HEADERS
     
     # Cache
     Cache/ThumbnailCache.h
+    Cache/PersistentDiskCache.h   # Sprint 192 — persistent disk cache with eviction
     
     # Plugin System
     Plugin/PluginManager.h
@@ -306,6 +307,7 @@ set(ENGINE_SOURCES
     
     # Cache
     Cache/ThumbnailCache.cpp
+    Cache/PersistentDiskCache.cpp   # Sprint 192 — persistent disk cache with eviction
     
     # Plugin System
     Plugin/PluginManager.cpp

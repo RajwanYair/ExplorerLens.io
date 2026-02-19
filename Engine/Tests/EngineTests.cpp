@@ -39,6 +39,7 @@
 #include "../Pipeline/ParallelBatchDecoder.h"
 #include "../Utils/CodeCoverageIntegration.h"
 #include "../Utils/MemorySafetyIntegration.h"
+#include "../Cache/PersistentDiskCache.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2154,6 +2155,136 @@ TEST(TestMemSafety_MaxMappableSize)
 }
 
 //==============================================================================
+// Sprint 192: Cache System V2 — Persistent Disk Cache Tests
+//==============================================================================
+
+TEST(TestDiskCache_OpenClose)
+{
+    using namespace DarkThumbs::Engine;
+    DiskCacheConfig config;
+    config.cacheDirPath = L"C:\\DarkThumbsTestCache";
+    config.maxDiskSizeMB = 64;
+    PersistentDiskCache cache(config);
+    ASSERT(cache.Open());
+    ASSERT(cache.IsOpen());
+    cache.Close();
+    ASSERT(!cache.IsOpen());
+}
+
+TEST(TestDiskCache_PutAndContains)
+{
+    using namespace DarkThumbs::Engine;
+    DiskCacheConfig config;
+    config.maxDiskSizeMB = 64;
+    PersistentDiskCache cache(config);
+    cache.Open();
+    uint8_t data[] = {0xFF, 0x00, 0xAA, 0x55};
+    ASSERT(cache.Put(L"C:\\test\\image.png", 256, 256, data, 4, 15.0, L"PNG"));
+    ASSERT(cache.Contains(L"C:\\test\\image.png"));
+    ASSERT(!cache.Contains(L"C:\\test\\nonexistent.png"));
+}
+
+TEST(TestDiskCache_GetRetrieval)
+{
+    using namespace DarkThumbs::Engine;
+    PersistentDiskCache cache;
+    cache.Open();
+    uint8_t data[] = {0x01, 0x02, 0x03, 0x04, 0x05};
+    cache.Put(L"C:\\test\\photo.jpg", 512, 512, data, 5, 25.0, L"JPEG");
+    uint32_t w = 0, h = 0;
+    std::vector<uint8_t> out;
+    ASSERT(cache.Get(L"C:\\test\\photo.jpg", w, h, out));
+    ASSERT(w == 512 && h == 512);
+    ASSERT(out.size() == 5);
+}
+
+TEST(TestDiskCache_Remove)
+{
+    using namespace DarkThumbs::Engine;
+    PersistentDiskCache cache;
+    cache.Open();
+    uint8_t data[] = {0xAA};
+    cache.Put(L"C:\\test\\remove.tga", 128, 128, data, 1, 5.0, L"TGA");
+    ASSERT(cache.Contains(L"C:\\test\\remove.tga"));
+    ASSERT(cache.Remove(L"C:\\test\\remove.tga"));
+    ASSERT(!cache.Contains(L"C:\\test\\remove.tga"));
+}
+
+TEST(TestDiskCache_EvictionStrategies)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(PersistentDiskCache::GetEvictionName(EvictionStrategy::LRU)) == L"LRU");
+    ASSERT(std::wstring(PersistentDiskCache::GetEvictionName(EvictionStrategy::LFU)) == L"LFU");
+    ASSERT(std::wstring(PersistentDiskCache::GetEvictionName(EvictionStrategy::CostAware)) == L"CostAware");
+    ASSERT(std::wstring(PersistentDiskCache::GetEvictionName(EvictionStrategy::SizeAware)) == L"SizeAware");
+    ASSERT(std::wstring(PersistentDiskCache::GetEvictionName(EvictionStrategy::Hybrid)) == L"Hybrid");
+}
+
+TEST(TestDiskCache_EntryStates)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(PersistentDiskCache::GetEntryStateName(CacheEntryState::Valid)) == L"Valid");
+    ASSERT(std::wstring(PersistentDiskCache::GetEntryStateName(CacheEntryState::Stale)) == L"Stale");
+    ASSERT(std::wstring(PersistentDiskCache::GetEntryStateName(CacheEntryState::Corrupted)) == L"Corrupted");
+    ASSERT(std::wstring(PersistentDiskCache::GetEntryStateName(CacheEntryState::Expired)) == L"Expired");
+    ASSERT(std::wstring(PersistentDiskCache::GetEntryStateName(CacheEntryState::Warming)) == L"Warming");
+}
+
+TEST(TestDiskCache_CRC32)
+{
+    using namespace DarkThumbs::Engine;
+    uint8_t data1[] = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello"
+    uint32_t crc1 = PersistentDiskCache::ComputeCRC32(data1, 5);
+    ASSERT(crc1 != 0);
+    // Same data should produce same CRC
+    uint32_t crc2 = PersistentDiskCache::ComputeCRC32(data1, 5);
+    ASSERT(crc1 == crc2);
+    // Different data should produce different CRC
+    uint8_t data3[] = {0x57, 0x6F, 0x72, 0x6C, 0x64}; // "World"
+    uint32_t crc3 = PersistentDiskCache::ComputeCRC32(data3, 5);
+    ASSERT(crc1 != crc3);
+    // Empty should return 0
+    ASSERT(PersistentDiskCache::ComputeCRC32(nullptr, 0) == 0);
+}
+
+TEST(TestDiskCache_CacheKey)
+{
+    using namespace DarkThumbs::Engine;
+    auto key1 = PersistentDiskCache::GenerateCacheKey(L"C:\\dir\\file.png", 256);
+    auto key2 = PersistentDiskCache::GenerateCacheKey(L"C:\\dir\\file.png", 256);
+    ASSERT(key1 == key2); // Deterministic
+    auto key3 = PersistentDiskCache::GenerateCacheKey(L"C:\\dir\\file.png", 512);
+    ASSERT(key1 != key3); // Different size = different key
+    auto key4 = PersistentDiskCache::GenerateCacheKey(L"C:\\dir\\other.png", 256);
+    ASSERT(key1 != key4); // Different path = different key
+}
+
+TEST(TestDiskCache_Stats)
+{
+    using namespace DarkThumbs::Engine;
+    DiskCacheConfig config;
+    config.maxDiskSizeMB = 128;
+    PersistentDiskCache cache(config);
+    cache.Open();
+    uint8_t data[] = {0xBB, 0xCC};
+    cache.Put(L"C:\\test\\s1.bmp", 64, 64, data, 2, 3.0, L"BMP");
+    cache.Put(L"C:\\test\\s2.bmp", 64, 64, data, 2, 4.0, L"BMP");
+    auto stats = cache.GetStats();
+    ASSERT(stats.totalEntries == 2);
+    ASSERT(stats.maxDiskBytes == 128ULL * 1024 * 1024);
+}
+
+TEST(TestDiskCache_Compact)
+{
+    using namespace DarkThumbs::Engine;
+    PersistentDiskCache cache;
+    cache.Open();
+    ASSERT(cache.Compact());
+    cache.Close();
+    ASSERT(!cache.Compact()); // Should fail when closed
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2738,6 +2869,19 @@ int main()
     RUN_TEST(TestMemSafety_SanitizerNames);
     RUN_TEST(TestMemSafety_AccessPatterns);
     RUN_TEST(TestMemSafety_MaxMappableSize);
+    
+    // Sprint 192: Cache System V2
+    std::wcout << L"Sprint 192: Cache System V2..." << std::endl;
+    RUN_TEST(TestDiskCache_OpenClose);
+    RUN_TEST(TestDiskCache_PutAndContains);
+    RUN_TEST(TestDiskCache_GetRetrieval);
+    RUN_TEST(TestDiskCache_Remove);
+    RUN_TEST(TestDiskCache_EvictionStrategies);
+    RUN_TEST(TestDiskCache_EntryStates);
+    RUN_TEST(TestDiskCache_CRC32);
+    RUN_TEST(TestDiskCache_CacheKey);
+    RUN_TEST(TestDiskCache_Stats);
+    RUN_TEST(TestDiskCache_Compact);
     
     std::wcout << std::endl;
     
