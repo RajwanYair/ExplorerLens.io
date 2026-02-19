@@ -83,6 +83,8 @@ try {
     # Find the output DLL
     Write-BuildLog "Locating output DLL..." -Level Info
     $possibleLocations = @(
+        (Join-Path $unrarDir "build\unrardll64\$Configuration\UnRAR64.dll"),
+        (Join-Path $unrarDir "build\unrardll64\$Configuration\UnRAR.dll"),
         (Join-Path $unrarDir "x64\Release\UnRAR64.dll"),
         (Join-Path $unrarDir "x64\Release\UnRAR.dll"),
         (Join-Path $unrarDir "Release\UnRAR64.dll")

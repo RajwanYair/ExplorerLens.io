@@ -58,7 +58,12 @@ try {
     }
     
     # Configure with Meson
-    if (-not (Test-Path $buildDir)) {
+    $buildNinja = Join-Path $buildDir "build.ninja"
+    if ((-not (Test-Path $buildDir)) -or (-not (Test-Path $buildNinja))) {
+        if ((Test-Path $buildDir) -and (-not (Test-Path $buildNinja))) {
+            Write-BuildLog "Stale/incomplete dav1d build directory detected (build.ninja missing). Reconfiguring..." -Level Warning
+            Remove-Item $buildDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
         Write-BuildLog "Configuring dav1d with Meson..." -Level Info
         
         Push-Location $dav1dDir
@@ -76,40 +81,40 @@ try {
             if ($LASTEXITCODE -ne 0) {
                 throw "Meson configuration failed"
             }
-        }
-        finally {
+        } finally {
             Pop-Location
         }
     }
     
-    # Build with Ninja
+    # Build with Meson wrapper (ensures proper VS environment for ninja)
     Write-BuildLog "Building dav1d..." -Level Info
-    Push-Location $buildDir
-    try {
-        & ninja
-        if ($LASTEXITCODE -ne 0) {
-            throw "Ninja build failed"
-        }
-        
-        # Install
-        & ninja install
-        if ($LASTEXITCODE -ne 0) {
-            throw "Installation failed"
-        }
+    & meson compile -C $buildDir
+    if ($LASTEXITCODE -ne 0) {
+        throw "Ninja build failed"
     }
-    finally {
-        Pop-Location
+
+    # Install
+    & meson install -C $buildDir
+    if ($LASTEXITCODE -ne 0) {
+        throw "Installation failed"
     }
     
-    # Verify output
-    $expectedLib = Join-Path $installDir "lib\dav1d.lib"
+    # Verify output (Meson may emit libdav1d.a on Windows; normalize to dav1d.lib)
+    $installLibDir = Join-Path $installDir "lib"
+    $expectedLib = Join-Path $installLibDir "dav1d.lib"
+    $altLib = Join-Path $installLibDir "libdav1d.a"
+
+    if ((-not (Test-Path $expectedLib)) -and (Test-Path $altLib)) {
+        Write-BuildLog "Found libdav1d.a; creating dav1d.lib compatibility copy" -Level Warning
+        Copy-Item $altLib $expectedLib -Force
+    }
+
     Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
     
     Write-BuildLog "dav1d 1.5.1 build completed successfully" -Level Success
     Write-BuildLog "Features: AV1 video decoder, optimized assembly" -Level Info
     
-}
-catch {
+} catch {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }

@@ -5,9 +5,11 @@
 - **Status:** Implemented
 
 ## Objective
+
 Complete ETW provider sink wiring with schema versioning, retention policies, auto-rotation, structured event emission, and JSON-lines file logger.
 
 ## Deliverables
+
 1. Schema v2.0 with forward-compatible event structure.
 2. RetentionPolicy (Development/Production/Enterprise) with size/time/hybrid rotation.
 3. 18 well-known EventIds covering pipeline, cache, decoder, GPU, plugin, memory, config, health.
@@ -17,5 +19,6 @@ Complete ETW provider sink wiring with schema versioning, retention policies, au
 7. 20 GTest cases.
 
 ## Files
+
 - `Engine/Core/ETWSinkComplete.h` (NEW)
 - `tests/Sprint126_ETWSinkComplete.cpp` (NEW)

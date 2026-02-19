@@ -12,7 +12,13 @@
 #include <map>
 
 
-BOOL CMainDlg::PreTranslateMessage(MSG* pMsg) { return CWindow::IsDialogMessage(pMsg); }
+BOOL CMainDlg::PreTranslateMessage(MSG* pMsg) {
+	// Forward mouse messages to tooltip control
+	if (m_tooltip.m_hWnd) {
+		m_tooltip.RelayEvent(pMsg);
+	}
+	return CWindow::IsDialogMessage(pMsg);
+}
 BOOL CMainDlg::OnIdle() { return FALSE;}
 
 LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -45,12 +51,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		pSysMenu.AppendMenu(MF_STRING, IDC_APPABOUT, _T("About"));
 	}
 
-	// Initialize dark mode support (Sprint D3, re-enabled Sprint 8)
-	// Detects system dark mode, sets title bar and app mode.
-	// Note: OnCtlColor handlers now conditionally apply dark theme.
-	InitDarkMode();
-
-	// Initialize status bar (Sprint D3)
+	// Initialize status bar
 	HWND hStatusBar = GetDlgItem(IDC_STATUSBAR);
 	if (hStatusBar)
 	{
@@ -58,22 +59,46 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		UpdateStatusBar();
 	}
 
-	// Initialize status icons for checkboxes (Sprint D3)
+	// Initialize status icons for checkboxes (handler status tracking)
 	InitStatusIcons();
 
 	InitUI();
 
-	// Initialize tooltips with handler status (Sprint D1)
+	// Initialize tooltips with handler status
 	InitTooltips();
 
-	// Force all checkboxes to be visible before layout
+	// Capture initial dialog client size for proportional resize
+	RECT rc;
+	GetClientRect(&rc);
+	m_initialSize.cx = rc.right;
+	m_initialSize.cy = rc.bottom;
+
+	// Capture initial positions of all child controls
+	m_anchors.clear();
+	HWND hChild = ::GetWindow(m_hWnd, GW_CHILD);
+	while (hChild) {
+		int id = ::GetDlgCtrlID(hChild);
+		RECT childRect;
+		::GetWindowRect(hChild, &childRect);
+		::MapWindowPoints(HWND_DESKTOP, m_hWnd, (LPPOINT)&childRect, 2);
+		m_anchors.push_back({id, childRect});
+		hChild = ::GetWindow(hChild, GW_HWNDNEXT);
+	}
+
+	// Create initial font
+	RecreateFont(m_fontSize);
+
+	// Force all 35 format checkboxes to be visible
 	int allCheckboxes[] = {
 		IDC_CB_CBZ, IDC_CB_CBR, IDC_CB_CB7, IDC_CB_CBT,
 		IDC_CB_EPUB, IDC_CB_MOBI, IDC_CB_AZW, IDC_CB_AZW3,
 		IDC_CB_ZIP, IDC_CB_RAR, IDC_CB_7Z, IDC_CB_TAR,
 		IDC_CB_PHZ, IDC_CB_FB2,
 		IDC_CB_WEBP, IDC_CB_HEIF, IDC_CB_AVIF, IDC_CB_JXL,
-		IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW
+		IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW,
+		IDC_CB_PSD, IDC_CB_DDS, IDC_CB_HDR, IDC_CB_EXR,
+		IDC_CB_PPM, IDC_CB_ICO, IDC_CB_QOI, IDC_CB_TGA,
+		IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT, IDC_CB_MODEL
 	};
 	for (int id : allCheckboxes) {
 		HWND hCheck = GetDlgItem(id);
@@ -83,15 +108,6 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 		}
 	}
 
-	// DISABLED: Dynamic layout causes control overlap at non-default DPI.
-	// Tracked: Sprint 18 (WinUI Manager rewrite) replaces manual layout.
-	// RECT rc;
-	// GetClientRect(&rc);
-	// SendMessage(WM_SIZE, SIZE_RESTORED, MAKELPARAM(rc.right - rc.left, rc.bottom - rc.top));
-	
-	// Set initial theme button text
-	UpdateThemeButton();
-
 	//set focus to Cancel btn
 	GotoDlgCtrl(GetDlgItem(IDCANCEL));
 return FALSE;
@@ -99,238 +115,68 @@ return FALSE;
 
 LRESULT CMainDlg::OnSize(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
 {
-	// DISABLED: OnSize handler causes control overlap; using static RC layout.
-	// Tracked: Sprint 18 (WinUI Manager rewrite) replaces WTL layout engine.
-	return 0;
-	
 	if (wParam == SIZE_MINIMIZED) return 0;
+	if (m_initialSize.cx == 0 || m_anchors.empty()) return 0;
 	
 	int clientWidth = LOWORD(lParam);
 	int clientHeight = HIWORD(lParam);
 	
-	// Minimum layout checks
-	if (clientWidth < 360 || clientHeight < 325) return 0;
-	
-	const int MARGIN = 10;
-	const int GROUP_SPACING = 8;        // Space between group boxes (increased)
-	const int GROUPBOX_HEIGHT = 62;
-	const int CHECKBOX_HEIGHT = 12;     // Increased for better readability
-	const int CHECKBOX_SPACING = 16;    // Increased gap between checkboxes
-	const int BUTTON_HEIGHT = 14;
-	const int BUTTON_WIDTH = 60;
-	const int THEME_BUTTON_WIDTH = 50;
-	
-	// Determine layout: portrait (vertical) vs landscape (horizontal)
-	bool isPortrait = (clientHeight > clientWidth);
-	
-	int colWidth, col1X, col2X, numCols;
-	
-	if (isPortrait) {
-		// Portrait: Single column layout (full width)
-		numCols = 1;
-		colWidth = clientWidth - (2 * MARGIN);
-		col1X = MARGIN;
-		col2X = MARGIN;
-	} else {
-		// Landscape: Two column layout
-		numCols = 2;
-		colWidth = (clientWidth - (3 * MARGIN)) / 2;
-		col1X = MARGIN;
-		col2X = col1X + colWidth + MARGIN;
-	}
-	
-	int currentY = 5;
-	
-	// Helper function to move groupbox and its checkboxes
-	auto MoveGroupWithChecks = [&](int groupID, int x, int y, const int* checkIDs, int numChecks) {
-		HWND hGroup = GetDlgItem(groupID);
-		if (hGroup) {
-			::SetWindowPos(hGroup, NULL, x, y, colWidth, GROUPBOX_HEIGHT, SWP_NOZORDER | SWP_SHOWWINDOW);
-			// Force group box to redraw to show text
-			::InvalidateRect(hGroup, NULL, TRUE);
-		}
-		
-		int checkY = y + 16;  // Start lower inside groupbox for better spacing
-		for (int i = 0; i < numChecks; i++) {
-			HWND hCheck = GetDlgItem(checkIDs[i]);
-			if (hCheck) {
-				::SetWindowPos(hCheck, NULL, x + 10, checkY, colWidth - 20, CHECKBOX_HEIGHT, SWP_NOZORDER | SWP_SHOWWINDOW);
-				::ShowWindow(hCheck, SW_SHOW);  // Ensure visible
-			}
-			checkY += CHECKBOX_SPACING;
-		}
-	};
-	
-	// Layout groupboxes based on orientation
-	if (numCols == 1) {
-		// Portrait: Stack all groups vertically
-		const int comicIDs[] = {IDC_CB_CBZ, IDC_CB_CBR, IDC_CB_CB7, IDC_CB_CBT};
-		MoveGroupWithChecks(IDC_COMIC_GROUP, col1X, currentY, comicIDs, 4);
-		currentY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int ebookIDs[] = {IDC_CB_EPUB, IDC_CB_MOBI, IDC_CB_AZW, IDC_CB_AZW3};
-		MoveGroupWithChecks(IDC_EBOOK_GROUP, col1X, currentY, ebookIDs, 4);
-		currentY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int archiveIDs[] = {IDC_CB_ZIP, IDC_CB_RAR, IDC_CB_7Z, IDC_CB_TAR};
-		MoveGroupWithChecks(IDC_ARCHIVE_GROUP, col1X, currentY, archiveIDs, 4);
-		currentY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int photoIDs[] = {IDC_CB_PHZ, IDC_CB_FB2};
-		MoveGroupWithChecks(IDC_PHOTO_GROUP, col1X, currentY, photoIDs, 2);
-		currentY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int imageIDs[] = {IDC_CB_WEBP, IDC_CB_HEIF, IDC_CB_AVIF, IDC_CB_JXL};
-		MoveGroupWithChecks(IDC_IMAGE_GROUP, col1X, currentY, imageIDs, 4);
-		currentY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int mediaIDs[] = {IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW};
-		int mediaHeight = 16 + (5 * CHECKBOX_SPACING);  // Better spacing
-		HWND hMediaGroup = GetDlgItem(IDC_MEDIA_GROUP);
-		if (hMediaGroup) {
-			::SetWindowPos(hMediaGroup, NULL, col1X, currentY, colWidth, mediaHeight, SWP_NOZORDER | SWP_SHOWWINDOW);
-			::InvalidateRect(hMediaGroup, NULL, TRUE);
-		}
-		int checkY = currentY + 16;
-		for (int i = 0; i < 5; i++) {
-			HWND hCheck = GetDlgItem(mediaIDs[i]);
-			if (hCheck) {
-				::SetWindowPos(hCheck, NULL, col1X + 10, checkY, colWidth - 20, CHECKBOX_HEIGHT, SWP_NOZORDER | SWP_SHOWWINDOW);
-				::ShowWindow(hCheck, SW_SHOW);  // Ensure visible
-			}
-			checkY += CHECKBOX_SPACING;
-		}
-		currentY += mediaHeight + GROUP_SPACING;
-		
-		const int collageIDs[] = {IDC_RADIO_1X1, IDC_RADIO_2X2, IDC_RADIO_3X3, IDC_RADIO_4X4};
-		MoveGroupWithChecks(IDC_COLLAGE_GROUP, col1X, currentY, collageIDs, 4);
-		currentY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int advOptIDs[] = {IDC_CB_SORT, IDC_SORT_DESC, IDC_CB_SHOWICON, IDC_CB_SHOWICON_DESC};
-		MoveGroupWithChecks(IDC_SORT_ADVOPTGROUP, col1X, currentY, advOptIDs, 4);
-		currentY += GROUPBOX_HEIGHT + 10;
-		
-	} else {
-		// Landscape: Two-column layout
-		int leftY = 5, rightY = 5;
-		
-		const int comicIDs[] = {IDC_CB_CBZ, IDC_CB_CBR, IDC_CB_CB7, IDC_CB_CBT};
-		MoveGroupWithChecks(IDC_COMIC_GROUP, col1X, leftY, comicIDs, 4);
-		leftY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int ebookIDs[] = {IDC_CB_EPUB, IDC_CB_MOBI, IDC_CB_AZW, IDC_CB_AZW3};
-		MoveGroupWithChecks(IDC_EBOOK_GROUP, col2X, rightY, ebookIDs, 4);
-		rightY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int archiveIDs[] = {IDC_CB_ZIP, IDC_CB_RAR, IDC_CB_7Z, IDC_CB_TAR};
-		MoveGroupWithChecks(IDC_ARCHIVE_GROUP, col1X, leftY, archiveIDs, 4);
-		leftY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int photoIDs[] = {IDC_CB_PHZ, IDC_CB_FB2};
-		MoveGroupWithChecks(IDC_PHOTO_GROUP, col2X, rightY, photoIDs, 2);
-		rightY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int imageIDs[] = {IDC_CB_WEBP, IDC_CB_HEIF, IDC_CB_AVIF, IDC_CB_JXL};
-		MoveGroupWithChecks(IDC_IMAGE_GROUP, col1X, leftY, imageIDs, 4);
-		leftY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int mediaIDs[] = {IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW};
-		int mediaHeight = 16 + (5 * CHECKBOX_SPACING);
-		HWND hMediaGroup = GetDlgItem(IDC_MEDIA_GROUP);
-		if (hMediaGroup) {
-			::SetWindowPos(hMediaGroup, NULL, col2X, rightY, colWidth, mediaHeight, SWP_NOZORDER | SWP_SHOWWINDOW);
-			::InvalidateRect(hMediaGroup, NULL, TRUE);
-		}
-		int checkY = rightY + 16;
-		for (int i = 0; i < 5; i++) {
-			HWND hCheck = GetDlgItem(mediaIDs[i]);
-			if (hCheck) {
-				::SetWindowPos(hCheck, NULL, col2X + 10, checkY, colWidth - 20, CHECKBOX_HEIGHT, SWP_NOZORDER | SWP_SHOWWINDOW);
-				::ShowWindow(hCheck, SW_SHOW);  // Ensure visible
-			}
-			checkY += CHECKBOX_SPACING;
-		}
-		rightY += mediaHeight + GROUP_SPACING;
-		
-		const int collageIDs[] = {IDC_RADIO_1X1, IDC_RADIO_2X2, IDC_RADIO_3X3, IDC_RADIO_4X4};
-		MoveGroupWithChecks(IDC_COLLAGE_GROUP, col1X, leftY, collageIDs, 4);
-		leftY += GROUPBOX_HEIGHT + GROUP_SPACING;
-		
-		const int advOptIDs[] = {IDC_CB_SORT, IDC_SORT_DESC, IDC_CB_SHOWICON, IDC_CB_SHOWICON_DESC};
-		MoveGroupWithChecks(IDC_SORT_ADVOPTGROUP, col2X, rightY, advOptIDs, 4);
-		rightY += GROUPBOX_HEIGHT + 10;
-		
-		currentY = max(leftY, rightY);
-	}
-	
-	// Position buttons at bottom (leave room for status bar)
-	const int STATUSBAR_HEIGHT = 20;
-	int buttonY = clientHeight - STATUSBAR_HEIGHT - BUTTON_HEIGHT - 10;
-	int cancelX = clientWidth - MARGIN - BUTTON_WIDTH;
-	int okX = cancelX - BUTTON_WIDTH - 10;
-	int applyX = okX - BUTTON_WIDTH - 10;
-	int themeX = MARGIN;
-	
-	HWND hTheme = GetDlgItem(IDC_BTN_THEME);
-	HWND hApply = GetDlgItem(IDC_APPLY);
-	HWND hOK = GetDlgItem(IDOK);
-	HWND hCancel = GetDlgItem(IDCANCEL);
-	
-	if (hTheme) ::SetWindowPos(hTheme, NULL, themeX, buttonY, THEME_BUTTON_WIDTH, BUTTON_HEIGHT, SWP_NOZORDER | SWP_SHOWWINDOW);
-	if (hApply) ::SetWindowPos(hApply, NULL, applyX, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT, SWP_NOZORDER | SWP_SHOWWINDOW);
-	if (hOK) ::SetWindowPos(hOK, NULL, okX, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT, SWP_NOZORDER | SWP_SHOWWINDOW);
-	if (hCancel) ::SetWindowPos(hCancel, NULL, cancelX, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT, SWP_NOZORDER | SWP_SHOWWINDOW);
-	
-	// Position status bar at bottom
-	if (m_statusBar.m_hWnd) {
-		m_statusBar.SetWindowPos(NULL, 0, clientHeight - STATUSBAR_HEIGHT, clientWidth, STATUSBAR_HEIGHT, SWP_NOZORDER);
-	}
-	
-	// Invalidate to force redraw
-	Invalidate();
+	RelayoutControls(clientWidth, clientHeight);
 	
 	return 0;
+}
+
+void CMainDlg::RelayoutControls(int clientWidth, int clientHeight)
+{
+	if (m_initialSize.cx == 0 || m_anchors.empty()) return;
+	
+	double scaleX = (double)clientWidth / m_initialSize.cx;
+	double scaleY = (double)clientHeight / m_initialSize.cy;
+	
+	HDWP hDwp = ::BeginDeferWindowPos((int)m_anchors.size());
+	if (!hDwp) return;
+	
+	for (const auto& anchor : m_anchors) {
+		HWND hCtrl = GetDlgItem(anchor.id);
+		if (!hCtrl) continue;
+		
+		// Status bar always goes to the bottom full width
+		if (anchor.id == IDC_STATUSBAR) {
+			int sbHeight = anchor.initialRect.bottom - anchor.initialRect.top;
+			hDwp = ::DeferWindowPos(hDwp, hCtrl, NULL, 
+				0, clientHeight - sbHeight, clientWidth, sbHeight,
+				SWP_NOZORDER | SWP_SHOWWINDOW);
+			continue;
+		}
+		
+		// Scale positions and sizes proportionally
+		int newX = (int)(anchor.initialRect.left * scaleX);
+		int newY = (int)(anchor.initialRect.top * scaleY);
+		int newW = (int)((anchor.initialRect.right - anchor.initialRect.left) * scaleX);
+		int newH = (int)((anchor.initialRect.bottom - anchor.initialRect.top) * scaleY);
+		
+		// Clamp minimum sizes
+		if (newW < 20) newW = 20;
+		if (newH < 8) newH = 8;
+		
+		hDwp = ::DeferWindowPos(hDwp, hCtrl, NULL, newX, newY, newW, newH,
+			SWP_NOZORDER | SWP_SHOWWINDOW);
+	}
+	
+	::EndDeferWindowPos(hDwp);
+	Invalidate();
 }
 
 LRESULT CMainDlg::OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& /*bHandled*/)
 {
 	LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
 	lpMMI->ptMinTrackSize.x = 360;  // Minimum width
-	lpMMI->ptMinTrackSize.y = 325;  // Minimum height
+	lpMMI->ptMinTrackSize.y = 460;  // Minimum height
 	return 0;
 }
 
 void CMainDlg::InitUI()
 {
-	// Convert format checkboxes to owner-draw for status icons (Sprint D3)
-	// DISABLED: BS_OWNERDRAW hides checkbox text on themed controls.
-	// Tracked: Sprint 18 (WinUI Manager) will use native toggle switches.
-	/*
-	int formatCheckboxes[] = {
-		IDC_CB_CBZ, IDC_CB_CBR, IDC_CB_CB7, IDC_CB_CBT,
-		IDC_CB_EPUB, IDC_CB_MOBI, IDC_CB_AZW, IDC_CB_AZW3,
-		IDC_CB_ZIP, IDC_CB_RAR, IDC_CB_7Z, IDC_CB_TAR,
-		IDC_CB_PHZ, IDC_CB_FB2,
-		IDC_CB_WEBP, IDC_CB_HEIF, IDC_CB_AVIF, IDC_CB_JXL,
-		IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW
-	};
-	
-	for (int id : formatCheckboxes)
-	{
-		HWND hCheckbox = GetDlgItem(id);
-		if (hCheckbox)
-		{
-			// Add BS_OWNERDRAW style
-			LONG style = ::GetWindowLong(hCheckbox, GWL_STYLE);
-			::SetWindowLong(hCheckbox, GWL_STYLE, style | BS_OWNERDRAW);
-			
-			// Ensure checkbox is visible after style change
-			::ShowWindow(hCheckbox, SW_SHOW);
-			::InvalidateRect(hCheckbox, NULL, TRUE);
-		}
-	}
-	*/
-
 	//Button_GetCheck   BST_CHECKED : BST_UNCHECKED equals TRUE: FALSE
 	// Comic Book Formats
 	Button_SetCheck(GetDlgItem(IDC_CB_CBZ),  m_reg.HasTH(CBX_CBZ));
@@ -723,11 +569,12 @@ return 0;
 
 LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-	// Clean up dark mode brushes and fonts (Sprint D3, E1.2)
-	if (m_hBrushBackground) DeleteObject(m_hBrushBackground);
-	if (m_hBrushGroupBox) DeleteObject(m_hBrushGroupBox);
-	if (m_hGroupBoxFont) DeleteObject(m_hGroupBoxFont);
-
+	// Clean up font
+	if (m_hFont) {
+		::DeleteObject(m_hFont);
+		m_hFont = NULL;
+	}
+	
 	// unregister message filtering and idle updates
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
 	ATLASSERT(pLoop != NULL);
@@ -900,98 +747,10 @@ void CMainDlg::AddTooltipWithStatus(int ctrlID, int cbxType, LPCTSTR formatName)
 
 //////////////////////////////////////////////////////////////////////////
 // Sprint D3: Dark mode and modern UI support
+// NOTE: Dark mode has been removed for plain system-themed GUI.
+// The dark mode infrastructure (DarkModeHelper.h) is retained
+// but not used. The dialog uses standard Windows system colors.
 //////////////////////////////////////////////////////////////////////////
-
-void CMainDlg::InitDarkMode()
-{
-	// Detect system dark mode preference
-	m_isDarkMode = DarkMode::IsSystemDarkMode();
-	m_theme = m_isDarkMode ? DarkMode::GetDarkTheme() : DarkMode::GetLightTheme();
-	
-	// Initialize brushes
-	m_hBrushBackground = CreateSolidBrush(m_theme.background);
-	m_hBrushGroupBox = CreateSolidBrush(m_theme.groupBox);
-	
-	// Create bold font for group box headers (Sprint E)
-	m_hGroupBoxFont = CreateFont(
-		0, 0, 0, 0, FW_SEMIBOLD,  // Semi-bold weight for better readability
-		FALSE, FALSE, FALSE,
-		DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-		DEFAULT_PITCH | FF_DONTCARE,
-		_T("Segoe UI")
-	);
-	
-	// Enable dark mode for the window and title bar (Windows 10 1809+)
-	if (m_isDarkMode)
-	{
-		DarkMode::SetAppDarkMode(true);
-		DarkMode::EnableDarkModeForWindow(m_hWnd, true);
-		DarkMode::SetDarkModeForTitleBar(m_hWnd, true);
-	}
-	
-	ATLTRACE("Dark mode: %s\n", m_isDarkMode ? "enabled" : "disabled");
-}
-
-LRESULT CMainDlg::OnCtlColorDlg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
-{
-	// Sprint 8: Re-enabled dark mode dialog background
-	if (!m_isDarkMode)
-		return FALSE;  // Let system handle light theme
-	
-	HDC hdc = (HDC)wParam;
-	SetBkColor(hdc, m_theme.background);
-	return (LRESULT)m_hBrushBackground;
-}
-
-LRESULT CMainDlg::OnCtlColorStatic(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
-{
-	// Sprint 8: Re-enabled dark mode static/group box colors
-	if (!m_isDarkMode)
-		return FALSE;  // Let system handle light theme
-	
-	HDC hdc = (HDC)wParam;
-	HWND hCtrl = (HWND)lParam;
-	
-	// Get control class name to differentiate group boxes from static text
-	TCHAR className[256];
-	GetClassName(hCtrl, className, 256);
-	
-	if (_tcscmp(className, _T("Button")) == 0)
-	{
-		// This is a group box (group boxes are Button class with BS_GROUPBOX style)
-		LONG style = ::GetWindowLong(hCtrl, GWL_STYLE);
-		if (style & BS_GROUPBOX)
-		{
-			SetTextColor(hdc, m_theme.text);
-			SetBkMode(hdc, TRANSPARENT);
-			
-			// Apply bold font to group box header (Sprint E)
-			if (m_hGroupBoxFont) {
-				::SendMessage(hCtrl, WM_SETFONT, (WPARAM)m_hGroupBoxFont, TRUE);
-			}
-			
-			return (LRESULT)m_hBrushBackground; // Use dialog background for group boxes
-		}
-	}
-	
-	// Regular static text
-	SetTextColor(hdc, m_theme.text);
-	SetBkMode(hdc, TRANSPARENT);
-	return (LRESULT)m_hBrushBackground;
-}
-
-LRESULT CMainDlg::OnCtlColorBtn(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
-{
-	// Sprint 8: Re-enabled dark mode button colors
-	if (!m_isDarkMode)
-		return FALSE;  // Let system handle light theme
-	
-	HDC hdc = (HDC)wParam;
-	SetTextColor(hdc, m_theme.text);
-	SetBkMode(hdc, TRANSPARENT);
-	return (LRESULT)m_hBrushBackground;
-}
 
 void CMainDlg::UpdateStatusBar()
 {
@@ -1149,224 +908,9 @@ void CMainDlg::InitStatusIcons()
 	m_checkboxStatus[IDC_CB_MODEL] = m_reg.GetHandlerStatus(CBX_MODEL, m_reg.GetExtension(CBX_MODEL));
 }
 
-LRESULT CMainDlg::OnDrawItem(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
-{
-	LPDRAWITEMSTRUCT lpDIS = (LPDRAWITEMSTRUCT)lParam;
-	
-	// Only handle checkbox owner-draw
-	if (lpDIS->CtlType != ODT_BUTTON)
-		return FALSE;
-	
-	// Check if this is a format checkbox with status
-	auto it = m_checkboxStatus.find(lpDIS->CtlID);
-	if (it == m_checkboxStatus.end())
-		return FALSE; // Not a format checkbox, use default drawing
-	
-	HandlerStatus status = it->second;
-	HDC hdc = lpDIS->hDC;
-	RECT rcItem = lpDIS->rcItem;
-	
-	// Get checkbox state
-	BOOL isChecked = (Button_GetCheck(lpDIS->hwndItem) == BST_CHECKED);
-	BOOL isDisabled = ((lpDIS->itemState & ODS_DISABLED) != 0);
-	BOOL isFocused = ((lpDIS->itemState & ODS_FOCUS) != 0);
-	
-	// Fill background
-	HBRUSH hBrush = CreateSolidBrush(m_theme.background);
-	FillRect(hdc, &rcItem, hBrush);
-	DeleteObject(hBrush);
-	
-	// Draw checkbox box
-	int checkBoxSize = 13;
-	int checkBoxY = rcItem.top + (rcItem.bottom - rcItem.top - checkBoxSize) / 2;
-	RECT rcCheckBox = { rcItem.left + 2, checkBoxY, rcItem.left + 2 + checkBoxSize, checkBoxY + checkBoxSize };
-	
-	// Draw checkbox border and background
-	HBRUSH hCheckBrush = CreateSolidBrush(m_isDarkMode ? RGB(55, 55, 55) : RGB(255, 255, 255));
-	HPEN hCheckPen = CreatePen(PS_SOLID, 1, m_theme.border);
-	HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hCheckBrush);
-	HPEN hOldPen = (HPEN)SelectObject(hdc, hCheckPen);
-	
-	Rectangle(hdc, rcCheckBox.left, rcCheckBox.top, rcCheckBox.right, rcCheckBox.bottom);
-	
-	SelectObject(hdc, hOldPen);
-	SelectObject(hdc, hOldBrush);
-	DeleteObject(hCheckPen);
-	DeleteObject(hCheckBrush);
-	
-	// Draw checkmark if checked
-	if (isChecked)
-	{
-		HPEN hCheckmarkPen = CreatePen(PS_SOLID, 2, m_isDarkMode ? RGB(100, 180, 255) : RGB(0, 120, 215));
-		SelectObject(hdc, hCheckmarkPen);
-		
-		// Draw checkmark
-		int cx = rcCheckBox.left + 3;
-		int cy = rcCheckBox.top + 6;
-		MoveToEx(hdc, cx, cy, NULL);
-		LineTo(hdc, cx + 3, cy + 3);
-		LineTo(hdc, cx + 8, cy - 2);
-		
-		DeleteObject(hCheckmarkPen);
-	}
-	
-	// Draw status icon (small circle with color)
-	int iconX = rcCheckBox.right + 6;
-	int iconY = checkBoxY + checkBoxSize / 2;
-	DrawStatusIcon(hdc, iconX, iconY, status);
-	
-	// Draw text
-	TCHAR text[256];
-	::GetWindowText(lpDIS->hwndItem, text, 256);
-	
-	RECT rcText = rcItem;
-	rcText.left = iconX + 12; // After status icon
-	
-	SetBkMode(hdc, TRANSPARENT);
-	SetTextColor(hdc, isDisabled ? m_theme.disabledText : m_theme.text);
-	
-	HFONT hFont = (HFONT)SendMessage(lpDIS->hwndItem, WM_GETFONT, 0, 0);
-	HFONT hOldFont = (HFONT)SelectObject(hdc, hFont);
-	
-	DrawText(hdc, text, -1, &rcText, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
-	
-	SelectObject(hdc, hOldFont);
-	
-	// Draw focus rectangle
-	if (isFocused)
-	{
-		RECT rcFocus = rcItem;
-		rcFocus.left += 1;
-		rcFocus.right -= 1;
-		rcFocus.top += 1;
-		rcFocus.bottom -= 1;
-		DrawFocusRect(hdc, &rcFocus);
-	}
-	
-	return TRUE;
-}
-
-void CMainDlg::DrawStatusIcon(HDC hdc, int x, int y, HandlerStatus status)
-{
-	COLORREF color = GetStatusColor(status);
-	int radius = 3;
-	
-	// Draw filled circle
-	HBRUSH hBrush = CreateSolidBrush(color);
-	HPEN hPen = CreatePen(PS_SOLID, 1, color);
-	HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-	HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
-	
-	Ellipse(hdc, x - radius, y - radius, x + radius, y + radius);
-	
-	SelectObject(hdc, hOldPen);
-	SelectObject(hdc, hOldBrush);
-	DeleteObject(hPen);
-	DeleteObject(hBrush);
-	
-	// Note: Status icon symbols not rendered to avoid font compatibility issues
-	// The colored dot itself is sufficient for visual indication
-	// Full status details are available in tooltips
-}
-
-COLORREF CMainDlg::GetStatusColor(HandlerStatus status)
-{
-	switch (status)
-	{
-	case HANDLER_DARKTHUMBS:
-		return RGB(76, 175, 80);  // Material Green (DarkThumbs active)
-		
-	case HANDLER_NATIVE:
-		return RGB(33, 150, 243);  // Material Blue (Windows native handler)
-		
-	case HANDLER_NONE:
-		return RGB(158, 158, 158); // Gray (No handler)
-		
-	case HANDLER_THIRD_PARTY:
-		return RGB(255, 152, 0);   // Material Orange (Third-party handler)
-		
-	default:
-		return RGB(128, 128, 128); // Default gray
-	}
-}
-
-// Theme toggle handler
-LRESULT CMainDlg::OnThemeToggle(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	// Toggle dark mode state
-	m_isDarkMode = !m_isDarkMode;
-	
-	// Update theme colors
-	m_theme = m_isDarkMode ? DarkMode::GetDarkTheme() : DarkMode::GetLightTheme();
-	
-	// Recreate brushes and fonts
-	if (m_hBrushBackground) DeleteObject(m_hBrushBackground);
-	if (m_hBrushGroupBox) DeleteObject(m_hBrushGroupBox);
-	if (m_hGroupBoxFont) DeleteObject(m_hGroupBoxFont);
-	
-	m_hBrushBackground = CreateSolidBrush(m_theme.background);
-	m_hBrushGroupBox = CreateSolidBrush(m_theme.groupBox);
-	m_hGroupBoxFont = CreateFont(
-		0, 0, 0, 0, FW_SEMIBOLD,
-		FALSE, FALSE, FALSE,
-		DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-		CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-		DEFAULT_PITCH | FF_DONTCARE,
-		_T("Segoe UI")
-	);
-	
-	// Apply theme to window
-	ApplyTheme();
-	
-	// Update button text
-	UpdateThemeButton();
-	
-	// Force full repaint
-	Invalidate(TRUE);
-	UpdateWindow();
-	
-	// Repaint all child windows
-	EnumChildWindows(m_hWnd, [](HWND hwnd, LPARAM) -> BOOL {
-		::InvalidateRect(hwnd, NULL, TRUE);
-		return TRUE;
-	}, 0);
-	
-	return 0;
-}
-
-// Apply theme to dialog and controls
-void CMainDlg::ApplyTheme()
-{
-	// Set title bar dark mode
-	DarkMode::SetDarkModeForTitleBar(m_hWnd, m_isDarkMode);
-	DarkMode::EnableDarkModeForWindow(m_hWnd, m_isDarkMode);
-	
-	// Update status bar
-	if (m_statusBar.m_hWnd)
-	{
-		m_statusBar.SetBkColor(m_theme.background);
-		m_statusBar.Invalidate();
-	}
-}
-
-// Update theme button text
-void CMainDlg::UpdateThemeButton()
-{
-	HWND hThemeBtn = GetDlgItem(IDC_BTN_THEME);
-	if (hThemeBtn)
-	{
-		if (m_isDarkMode)
-			::SetWindowText(hThemeBtn, _T("Light Light"));
-		else
-			::SetWindowText(hThemeBtn, _T("🌙 Dark"));
-	}
-}
-
-// Handle checkbox clicks for owner-draw checkboxes
+// Handle checkbox clicks - BS_AUTO3STATE handles toggling automatically
 LRESULT CMainDlg::OnCheckboxClicked(WORD /*wNotifyCode*/, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
 {
-	// BS_AUTO3STATE handles toggling automatically, no manual intervention needed
-	// Just let Windows handle the state changes
 	return 0;
 }
 
@@ -1392,6 +936,21 @@ LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 				OnApply(0, IDC_APPLY, NULL, bHandled);
 				return 0;
 			}
+			case VK_OEM_PLUS:   // Ctrl+= (Ctrl+=): Increase font size
+			case VK_ADD:        // Ctrl+NumPad+
+				if (m_fontSize < FONT_SIZE_MAX) {
+					RecreateFont(m_fontSize + 1);
+				}
+				return 0;
+			case VK_OEM_MINUS:  // Ctrl+-: Decrease font size
+			case VK_SUBTRACT:   // Ctrl+NumPad-
+				if (m_fontSize > FONT_SIZE_MIN) {
+					RecreateFont(m_fontSize - 1);
+				}
+				return 0;
+			case '0':           // Ctrl+0: Reset font to default
+				RecreateFont(8);
+				return 0;
 		}
 	}
 	else {
@@ -1404,12 +963,17 @@ LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 					_T("  Ctrl+A     - Select all formats\n")
 					_T("  Ctrl+D     - Deselect all formats\n")
 					_T("  Ctrl+S     - Apply changes\n")
+					_T("  Ctrl+=     - Increase font size\n")
+					_T("  Ctrl+-     - Decrease font size\n")
+					_T("  Ctrl+0     - Reset font size\n")
+					_T("  Ctrl+Wheel - Zoom font in/out\n")
 					_T("  F1         - Show this help\n")
 					_T("  F5         - Refresh status\n\n")
 					_T("FEATURES:\n")
 					_T("  \x2022 50+ supported formats\n")
 					_T("  \x2022 Modern images: WebP, AVIF, JXL, HEIF\n")
 					_T("  \x2022 Conflict detection\n")
+					_T("  \x2022 Resizable window with font scaling\n")
 					_T("  \x2022 Windows 11 25H2 compatible\n\n")
 					_T("TIPS:\n")
 					_T("  \x2022 Hover over icons for details\n")
@@ -1422,6 +986,70 @@ LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOO
 	}
 	
 	return 0;
+}
+
+LRESULT CMainDlg::OnMouseWheel(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+{
+	bool ctrlPressed = (LOWORD(wParam) & MK_CONTROL) != 0;
+	if (!ctrlPressed) {
+		bHandled = FALSE;
+		return 0;
+	}
+	
+	short zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+	if (zDelta > 0 && m_fontSize < FONT_SIZE_MAX) {
+		RecreateFont(m_fontSize + 1);
+	} else if (zDelta < 0 && m_fontSize > FONT_SIZE_MIN) {
+		RecreateFont(m_fontSize - 1);
+	}
+	
+	return 0;
+}
+
+void CMainDlg::RecreateFont(int pointSize)
+{
+	m_fontSize = pointSize;
+	
+	// Delete old font if it exists
+	if (m_hFont) {
+		::DeleteObject(m_hFont);
+		m_hFont = NULL;
+	}
+	
+	// Create new font at the requested point size
+	HDC hDC = ::GetDC(m_hWnd);
+	int logPixelsY = ::GetDeviceCaps(hDC, LOGPIXELSY);
+	::ReleaseDC(m_hWnd, hDC);
+	
+	int lfHeight = -MulDiv(pointSize, logPixelsY, 72);
+	
+	m_hFont = ::CreateFont(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+		DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+		CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, _T("Segoe UI"));
+	
+	if (!m_hFont) {
+		// Fallback to MS Shell Dlg
+		m_hFont = ::CreateFont(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+			CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
+	}
+	
+	if (m_hFont) {
+		// Apply font to all child controls
+		HWND hChild = ::GetWindow(m_hWnd, GW_CHILD);
+		while (hChild) {
+			::SendMessage(hChild, WM_SETFONT, (WPARAM)m_hFont, TRUE);
+			hChild = ::GetWindow(hChild, GW_HWNDNEXT);
+		}
+		
+		// Update status bar with font info
+		CString statusText;
+		statusText.Format(_T("Font: %dpt | Ctrl+=/- to resize"), m_fontSize);
+		if (m_statusBar.m_hWnd)
+			m_statusBar.SetText(0, statusText);
+		
+		Invalidate();
+	}
 }
 
 void CMainDlg::OnSelectAll()

@@ -79,10 +79,11 @@ try {
         -CMakeOptions $cmakeOptions `
         -Clean:$Clean
     
-    # Verify outputs
+    # Verify outputs (jxl_dec.lib was merged into jxl.lib in 0.11.x)
     $expectedLibs = @(
         (Join-Path $installDir "lib\jxl.lib"),
-        (Join-Path $installDir "lib\jxl_dec.lib")
+        (Join-Path $installDir "lib\jxl_cms.lib"),
+        (Join-Path $installDir "lib\jxl_threads.lib")
     )
     
     Test-BuildOutput -Files $expectedLibs -ThrowOnMissing:$false

@@ -8,7 +8,7 @@
 #   This script:        <repo>\build-scripts\external-libs\Build-LZ4.ps1
 #   Core module:        <repo>\build-scripts\core\Build-Library-Core.ps1
 #   LZ4 source:         <repo>\external\compression-libs\lz4-1.10.0\
-#   Build dir:          <repo>\external\compression-libs\lz4-1.10.0\build\VS2022\
+#   Build dir:          <repo>\external\compression-libs\lz4-1.10.0\build-vs\
 
 param(
     [string]$Configuration = "Release",
@@ -21,6 +21,8 @@ param(
 $rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $lz4Dir = Join-Path $rootDir "external\compression-libs\lz4-1.10.0"
 $buildDir = Join-Path $lz4Dir "build\VS2022"
+$fallbackBuildDir = Join-Path $lz4Dir "build-vs"
+$prebuiltLib = Join-Path $fallbackBuildDir "$Configuration\liblz4_static.lib"
 
 Write-BuildHeader "Building LZ4 1.10.0 (Fast Compression)"
 
@@ -60,8 +62,17 @@ try {
                 -Configuration $Configuration `
                 -CMakeOptions $cmakeOptions `
                 -Clean:$Clean
+
+            # Verify output from CMake path
+            $cmakeExpected = Join-Path $cmakeBuildDir "$Configuration\liblz4_static.lib"
+            Test-BuildOutput -Files @($cmakeExpected) -ThrowOnMissing
         } else {
-            throw "No build system found (liblz4.vcxproj or CMakeLists.txt missing)"
+            if (-not $Clean -and (Test-Path $prebuiltLib)) {
+                Write-BuildLog "No build project files found; using prebuilt artifact: $prebuiltLib" -Level Warning
+                Test-BuildOutput -Files @($prebuiltLib) -ThrowOnMissing
+            } else {
+                throw "No build system found (liblz4.vcxproj or CMakeLists.txt missing)"
+            }
         }
     } else {
         Write-BuildLog "Using MSBuild" -Level Info

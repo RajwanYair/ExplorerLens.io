@@ -1,7 +1,7 @@
 # DarkThumbs Library Update Script
 # Updates all external open-source libraries to latest stable versions
 # Dynamically fetches latest versions from GitHub and other sources
-# Date: January 8, 2026
+# Date: February 18, 2026
 
 param(
     [switch]$UseProxy,
@@ -62,7 +62,7 @@ function Get-LatestLZMAVersion {
 # Base directory
 $rootDir = Split-Path -Parent $PSScriptRoot
 $externalDir = Join-Path $rootDir "external"
-$compressionDir = Join-Path $externalDir "compression"
+$compressionDir = Join-Path $externalDir "compression-libs"
 $imageLibsDir = Join-Path $externalDir "image-libs"
 
 # Create directories if they don't exist

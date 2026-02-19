@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////
-// v4.6
+// v8.4.0 (Sprint 175+)
 //////////////////////////////////////////////
 // CCBXShell functionality implementation
 
@@ -114,9 +114,9 @@
 #define CBXTYPE_PDF 19	 // PDF documents
 #define CBXTYPE_AUDIO 20 // Audio files (.mp3, .flac, .wav, etc.)
 
-// Future format support (not yet implemented)
-#define CBXTYPE_LZ4 21	// .lz4 LZ4 compressed archives (future)
-#define CBXTYPE_DJVU 22 // .djvu DjVu scanned documents
+// Extended format support (v8.4+)
+#define CBXTYPE_LZ4 21	// .lz4 LZ4 compressed archives
+#define CBXTYPE_DJVU 22 // .djvu/.djv DjVu scanned documents
 #define CBXTYPE_CHM 23	// .chm Compiled HTML Help
 #define CBXTYPE_ODT 24	// .odt OpenDocument Text
 #define CBXTYPE_ODP 25	// .odp OpenDocument Presentation
@@ -2050,6 +2050,13 @@ namespace __cbx
 				return CBXTYPE_HEIC;
 			if (StrEqual(szExt, _T(".heifs")))
 				return CBXTYPE_HEIF;
+			// Sprint 175: Add missing HEIF extensions
+			if (StrEqual(szExt, _T(".hif")))
+				return CBXTYPE_HEIC;
+			if (StrEqual(szExt, _T(".avci")))
+				return CBXTYPE_HEIC;
+			if (StrEqual(szExt, _T(".avcs")))
+				return CBXTYPE_HEIF;
 #endif
 #ifdef ENABLE_JXL_SUPPORT
 			if (StrEqual(szExt, _T(".jxl")))
@@ -2231,10 +2238,29 @@ namespace __cbx
 #endif
 
 			// eBook additional formats (v6.1+)
+			// Fixed in Sprint 175: djvu/djv now correctly route to CBXTYPE_DJVU
 			if (StrEqual(szExt, _T(".djvu")))
-				return CBXTYPE_EPUB;
+				return CBXTYPE_DJVU;
 			if (StrEqual(szExt, _T(".djv")))
-				return CBXTYPE_EPUB;
+				return CBXTYPE_DJVU;
+
+			// 3D Model formats (Sprint 175)
+			if (StrEqual(szExt, _T(".obj")))
+				return CBXTYPE_MODEL;
+			if (StrEqual(szExt, _T(".stl")))
+				return CBXTYPE_MODEL;
+			if (StrEqual(szExt, _T(".gltf")))
+				return CBXTYPE_MODEL;
+			if (StrEqual(szExt, _T(".glb")))
+				return CBXTYPE_MODEL;
+			if (StrEqual(szExt, _T(".fbx")))
+				return CBXTYPE_MODEL;
+			if (StrEqual(szExt, _T(".3ds")))
+				return CBXTYPE_MODEL;
+			if (StrEqual(szExt, _T(".dae")))
+				return CBXTYPE_MODEL;
+			if (StrEqual(szExt, _T(".ply")))
+				return CBXTYPE_MODEL;
 
 			return CBXTYPE_NONE;
 		}

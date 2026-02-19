@@ -57,9 +57,18 @@ try {
         -CMakeOptions $cmakeOptions `
         -Clean:$Clean
     
-    # Verify output
-    $expectedLib = Join-Path $outputDir "minizip.lib"
-    Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
+    # Verify output (actual output name is minizip-ng.lib; keep minizip.lib as legacy fallback)
+    $expectedLibPrimary = Join-Path $outputDir "minizip-ng.lib"
+    $expectedLibLegacy = Join-Path $outputDir "minizip.lib"
+    if (Test-Path $expectedLibPrimary) {
+        Test-BuildOutput -Files @($expectedLibPrimary) -ThrowOnMissing
+        $expectedLib = $expectedLibPrimary
+    } elseif (Test-Path $expectedLibLegacy) {
+        Test-BuildOutput -Files @($expectedLibLegacy) -ThrowOnMissing
+        $expectedLib = $expectedLibLegacy
+    } else {
+        Test-BuildOutput -Files @($expectedLibPrimary) -ThrowOnMissing
+    }
     
     Write-BuildLog "minizip-ng 4.0.10 build completed successfully" -Level Success
     Write-BuildLog "Output: $expectedLib" -Level Info

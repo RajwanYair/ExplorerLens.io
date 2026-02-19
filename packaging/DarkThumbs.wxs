@@ -41,8 +41,6 @@
       
       <!-- Core Components -->
       <ComponentGroupRef Id="CoreComponents" />
-      <!-- External libraries moved to vcpkg integration -->
-      <!-- <ComponentGroupRef Id="ExternalLibraries" /> -->
       <ComponentGroupRef Id="RegistryEntries" />
       <ComponentGroupRef Id="StartMenuShortcuts" />
     </Feature>
@@ -94,13 +92,6 @@
                        Key="CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" 
                        Value="DarkThumbs Thumbnail Provider"
                        Type="string" />
-      </Component>
-      
-      <!-- Engine Library -->
-      <Component Id="EngineLibrary" Guid="C8394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
-        <File Id="DarkThumbsEngine"
-              Source="$(var.BuildDir)\build\lib\Release\DarkThumbsEngine.lib"
-              KeyPath="yes" />
       </Component>
     </ComponentGroup>
     

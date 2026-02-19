@@ -176,13 +176,22 @@ public:
         
         OutputDebugStringW(L"[Pipeline] Lazy initializing decoders...\n");
         
-        // Register all available decoders (order matters - more specific first)
-        // 1. Archive formats (ZIP, RAR, 7Z, etc.)
+        // Register all available decoders
+        // Priority: Archives first, then WIC (Windows native), then specialized decoders
+        
+        // 1. Archive formats (ZIP, RAR, 7Z, etc.) — must be first
         auto archiveDecoder = std::make_unique<ArchiveDecoder>();
         decoderRegistry.RegisterDecoder(archiveDecoder.get());
         decoders.push_back(std::move(archiveDecoder));
         
-        // 2. Modern image formats with specific decoders
+        // 2. WIC (Windows Imaging Component) — preferred for standard formats
+        // Handles JPEG, PNG, BMP, GIF, TIFF natively via Windows codecs
+        // WIC-first ensures best performance and compatibility for common formats
+        auto imageDecoder = std::make_unique<ImageDecoder>();
+        decoderRegistry.RegisterDecoder(imageDecoder.get());
+        decoders.push_back(std::move(imageDecoder));
+        
+        // 3. Modern image formats with specific decoders
         auto webpDecoder = std::make_unique<WebPDecoder>();
         decoderRegistry.RegisterDecoder(webpDecoder.get());
         decoders.push_back(std::move(webpDecoder));
@@ -278,11 +287,6 @@ public:
         auto modelDecoder = std::make_unique<ModelDecoder>();
         decoderRegistry.RegisterDecoder(modelDecoder.get());
         decoders.push_back(std::move(modelDecoder));
-        
-        // 3. Standard image formats via WIC (JPEG, PNG, BMP, GIF, TIFF)
-        auto imageDecoder = std::make_unique<ImageDecoder>();
-        decoderRegistry.RegisterDecoder(imageDecoder.get());
-        decoders.push_back(std::move(imageDecoder));
         
         // 4. Scan for and load third-party plugins (Sprint 11 - feature flag controlled)
         if (config.enablePlugins) {

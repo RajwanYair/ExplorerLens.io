@@ -3,11 +3,11 @@
 
 #include "tools.h"
 #include "regmanager.h"
-#include "DarkModeHelper.h"
 #include "ChangeSummaryDlg.h"
 
 #include <Htmlhelp.h>
 #include <map>
+#include <vector>
 #pragma comment(lib,"Htmlhelp.lib")
 
 class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>, public CDialogDrag<CMainDlg>,
@@ -29,14 +29,10 @@ public:
 		MESSAGE_HANDLER(WM_SIZE, OnSize)
 		MESSAGE_HANDLER(WM_GETMINMAXINFO, OnGetMinMaxInfo)
 		MESSAGE_HANDLER(WM_KEYDOWN, OnKeyDown)
-		MESSAGE_HANDLER(WM_CTLCOLORDLG, OnCtlColorDlg)
-		MESSAGE_HANDLER(WM_CTLCOLORSTATIC, OnCtlColorStatic)
-		MESSAGE_HANDLER(WM_CTLCOLORBTN, OnCtlColorBtn)
-		MESSAGE_HANDLER(WM_DRAWITEM, OnDrawItem)
+		MESSAGE_HANDLER(WM_MOUSEWHEEL, OnMouseWheel)
 		COMMAND_ID_HANDLER(IDOK, OnOK)
 		COMMAND_ID_HANDLER(IDC_APPLY, OnApply)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
-		COMMAND_ID_HANDLER(IDC_BTN_THEME, OnThemeToggle)
 		COMMAND_ID_HANDLER(IDC_BTN_LOAD_CONFIG, OnLoadConfig)
 		COMMAND_HANDLER(IDC_CB_CBZ, BN_CLICKED, OnCheckboxClicked)
 		COMMAND_HANDLER(IDC_CB_CBR, BN_CLICKED, OnCheckboxClicked)
@@ -83,16 +79,12 @@ public:
 	LRESULT OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& /*bHandled*/);
 	LRESULT OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& /*bHandled*/);
 	LRESULT OnKeyDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-	LRESULT OnCtlColorDlg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
-	LRESULT OnCtlColorStatic(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
-	LRESULT OnCtlColorBtn(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
-	LRESULT OnDrawItem(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
+	LRESULT OnMouseWheel(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 
 	LRESULT OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	LRESULT OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnApply(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-	LRESULT OnThemeToggle(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnCheckboxClicked(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnLoadConfig(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	void OnSelectAll();
@@ -110,27 +102,31 @@ private:
 	CToolTipCtrl m_tooltip;
 	CStatusBarCtrl m_statusBar;
 	
-	bool m_isDarkMode;
-	DarkMode::ThemeColors m_theme;
-	HBRUSH m_hBrushBackground;
-	HBRUSH m_hBrushGroupBox;
-	HFONT m_hGroupBoxFont;  // Bold font for group box headers
-	
-	// Status icon mapping for owner-draw checkboxes (Sprint D3)
+	// Handler status mapping for tooltips
 	std::map<int, HandlerStatus> m_checkboxStatus;
 	
-	// Helper methods
-	void ApplyTheme();
-	void UpdateThemeButton();
+	// Font resize support
+	HFONT m_hFont = NULL;
+	int m_fontSize = 8;       // Current font size in points (default: 8)
+	static const int FONT_SIZE_MIN = 7;
+	static const int FONT_SIZE_MAX = 16;
 	
+	// Layout anchoring for resize
+	struct ControlAnchor {
+		int id;
+		RECT initialRect;   // Position in initial dialog DU (stored as pixels at init)
+	};
+	std::vector<ControlAnchor> m_anchors;
+	SIZE m_initialSize = {0, 0};  // Initial dialog client size
+	
+	// Helper methods
 	void InitTooltips();
 	void AddTooltipWithStatus(int ctrlID, int cbxType, LPCTSTR formatName);
-	void InitDarkMode();
 	void InitStatusIcons();
 	void UpdateStatusBar();
 	int GetEnabledFormatCount();
-	void DrawStatusIcon(HDC hdc, int x, int y, HandlerStatus status);
-	COLORREF GetStatusColor(HandlerStatus status);
+	void RecreateFont(int pointSize);
+	void RelayoutControls(int clientWidth, int clientHeight);
 	
 	// Configuration management
 	ConfigSnapshot CaptureCurrentConfig();

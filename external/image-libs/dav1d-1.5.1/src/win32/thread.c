@@ -1,5 +1,6 @@
 /*
- * Copyright © 2018, VideoLAN and dav1d authors
+ * Copyright © 2018-2021, VideoLAN and dav1d authors
+ * Copyright © 2018, Two Orioles, LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,78 +25,75 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * Windows pthread compatibility layer
- * Minimal implementation for dav1d decoder threading support
- */
-
 #include "config.h"
 
-#include <windows.h>
+#if defined(_WIN32)
+
 #include <process.h>
-#include <errno.h>
+#include <stdlib.h>
+#include <windows.h>
 
 #include "common/attributes.h"
 
-typedef struct {
-    void *(*func)(void *);
-    void *arg;
-} dav1d_thread_wrapper_arg;
+#include "src/thread.h"
 
-static unsigned __stdcall dav1d_thread_wrapper(void *arg) {
-    dav1d_thread_wrapper_arg *t = arg;
-    void *(*func)(void *) = t->func;
-    void *func_arg = t->arg;
+static HRESULT (WINAPI *set_thread_description)(HANDLE, PCWSTR);
 
-    free(t);
-    func(func_arg);
+COLD void dav1d_init_thread(void) {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+    HANDLE kernel32 = GetModuleHandleW(L"kernel32.dll");
+    if (kernel32)
+        set_thread_description =
+            (void*)GetProcAddress(kernel32, "SetThreadDescription");
+#endif
+}
+
+#undef dav1d_set_thread_name
+COLD void dav1d_set_thread_name(const wchar_t *const name) {
+    if (set_thread_description) /* Only available since Windows 10 1607 */
+        set_thread_description(GetCurrentThread(), name);
+}
+
+static COLD unsigned __stdcall thread_entrypoint(void *const data) {
+    pthread_t *const t = data;
+    t->arg = t->func(t->arg);
     return 0;
 }
 
-int dav1d_pthread_create(pthread_t *thread, const pthread_attr_t *attr,
-                        void *(*func)(void *), void *arg)
+COLD int dav1d_pthread_create(pthread_t *const thread,
+                              const pthread_attr_t *const attr,
+                              void *(*const func)(void*), void *const arg)
 {
-    dav1d_thread_wrapper_arg *wrapper_arg = malloc(sizeof(dav1d_thread_wrapper_arg));
-    if (!wrapper_arg)
-        return ENOMEM;
-
-    wrapper_arg->func = func;
-    wrapper_arg->arg = arg;
-
-    *thread = (pthread_t) _beginthreadex(NULL, 0, dav1d_thread_wrapper,
-                                         wrapper_arg, 0, NULL);
-    if (!*thread) {
-        free(wrapper_arg);
-        return errno;
-    }
-
-    return 0;
+    const unsigned stack_size = attr ? attr->stack_size : 0;
+    thread->func = func;
+    thread->arg = arg;
+    thread->h = (HANDLE)_beginthreadex(NULL, stack_size, thread_entrypoint, thread,
+                                       STACK_SIZE_PARAM_IS_A_RESERVATION, NULL);
+    return !thread->h;
 }
 
-int dav1d_pthread_join(pthread_t thread, void **res) {
-    DWORD ret = WaitForSingleObject((HANDLE) thread, INFINITE);
-    if (ret != WAIT_OBJECT_0) {
-        if (ret == WAIT_FAILED)
-            return EINVAL;
-        else
-            return EDEADLK;
-    }
-    CloseHandle((HANDLE) thread);
+COLD int dav1d_pthread_join(pthread_t *const thread, void **const res) {
+    if (WaitForSingleObject(thread->h, INFINITE))
+        return 1;
+
     if (res)
-        *res = NULL;
-    return 0;
+        *res = thread->arg;
+
+    return !CloseHandle(thread->h);
 }
 
-int dav1d_pthread_once(pthread_once_t *once_control,
-                      void (*init_routine)(void))
+COLD int dav1d_pthread_once(pthread_once_t *const once_control,
+                            void (*const init_routine)(void))
 {
     BOOL pending = FALSE;
-    if (!InitOnceBeginInitialize(once_control, 0, &pending, NULL))
-        return EINVAL;
 
-    if (pending)
+    if (InitOnceBeginInitialize(once_control, 0, &pending, NULL) != TRUE)
+        return 1;
+
+    if (pending == TRUE)
         init_routine();
 
-    InitOnceComplete(once_control, 0, NULL);
-    return 0;
+    return !InitOnceComplete(once_control, 0, NULL);
 }
+
+#endif

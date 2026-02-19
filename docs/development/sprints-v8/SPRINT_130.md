@@ -4,6 +4,7 @@
 Implement a decoder hotset manager that loads/unloads decoders on demand based on directory format profiling, idle eviction timers, and memory budgets.
 
 ## Scope
+
 - **File**: `Engine/Memory/DecoderHotsetManager.h`
 - **Tests**: `tests/Sprint130_DecoderHotsetManager.cpp` (12 tests)
 

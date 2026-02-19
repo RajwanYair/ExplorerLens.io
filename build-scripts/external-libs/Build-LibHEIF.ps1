@@ -229,7 +229,7 @@ $cmakeOptions = @{
     'CMAKE_BUILD_TYPE'      = 'Release'
     'BUILD_SHARED_LIBS'     = 'OFF'
     'CMAKE_C_FLAGS'         = '/DLIBDE265_STATIC_BUILD'
-    'CMAKE_CXX_FLAGS'       = '/DLIBDE265_STATIC_BUILD'
+    'CMAKE_CXX_FLAGS'       = '/DLIBDE265_STATIC_BUILD /EHsc'
     'BUILD_TESTING'         = 'OFF'
     'WITH_EXAMPLES'         = 'OFF'
     'WITH_GDK_PIXBUF'       = 'OFF'
@@ -239,8 +239,8 @@ $cmakeOptions = @{
     'WITH_AOM_DECODER'      = 'OFF'
     'WITH_AOM_ENCODER'      = 'OFF'
     'LIBDE265_STATIC_BUILD' = '1'
-    'LIBDE265_INCLUDE_DIR'  = "`"$libde265IncludeDir`""
-    'LIBDE265_LIBRARY'      = "`"$libde265LibraryPath`""
+    'LIBDE265_INCLUDE_DIR'  = $libde265IncludeDir
+    'LIBDE265_LIBRARY'      = $libde265LibraryPath
 }
 
 try {

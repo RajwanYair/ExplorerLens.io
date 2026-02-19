@@ -1,6 +1,7 @@
 #pragma once
-// Sprint 133 — JPEG 2000 Decoder Interface
+// Sprint 133 — JPEG 2000 Decoder Interface (enhanced Sprint 160)
 // JP2/J2K/JPF/JPX format support via OpenJPEG-compatible interface.
+// Sprint 160: tile streaming, colour-space conversion, 256 MB memory ceiling.
 // Provides thumbnail extraction from JPEG 2000 wavelet-compressed images.
 
 #include <cstdint>

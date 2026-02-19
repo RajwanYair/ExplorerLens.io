@@ -9,7 +9,7 @@
 				"-NoProfile",
 				"-NoLogo",
 				"-File",
-				"${workspaceFolder}/build-scripts/production/Build-All-And-Package.ps1",
+				"${workspaceFolder}/build-scripts/Build-All-And-Package.ps1",
 				"-SkipTests"
 			],
 			"group": {
@@ -70,7 +70,7 @@
 				"-NoProfile",
 				"-NoLogo",
 				"-File",
-				"${workspaceFolder}/build-scripts/core/Setup-Vcpkg.ps1"
+				"${workspaceFolder}/build-scripts/Setup-Vcpkg.ps1"
 			],
 			"group": "none",
 			"problemMatcher": [],

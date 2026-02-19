@@ -5,13 +5,16 @@
 - **Status:** Implemented
 
 ## Objective
+
 Create automated version drift detection and enforcement infrastructure to eliminate stale version references in docs/code and provide CI-enforceable gate policies.
 
 ## Scope Areas
+
 - `Engine/Core/VersionDriftGate.h` — Semantic version parsing, drift classification, gate policies
 - `tests/Sprint125_VersionDriftGate.cpp` — 25 GTest cases
 
 ## Deliverables
+
 1. `SemanticVersion` struct with parse, compare, format, pre-release/build-meta support.
 2. `DriftSeverity` classification: None/Minor/Moderate/Major/Critical.
 3. `VersionDriftGate` engine: source registration, reference tracking, drift validation.
@@ -20,6 +23,7 @@ Create automated version drift detection and enforcement infrastructure to elimi
 6. `DriftReport` output: compliance %, severity text, violation list, timestamp.
 
 ## Acceptance Criteria
+
 - Semantic version parsing handles major.minor.patch, pre-release, and build metadata.
 - Drift classification correctly identifies None/Minor/Moderate/Major/Critical severity.
 - Gate check passes when all sources match canonical version.
@@ -28,11 +32,13 @@ Create automated version drift detection and enforcement infrastructure to elimi
 - 25 test cases passing.
 
 ## Key Design Decisions
+
 - Version comparison treats pre-release as less than release (semver spec).
 - Stale patterns auto-initialized for v5.x (critical), v6.x (major), v7.0.x (moderate).
 - Gate policies are composable — exempt files allow version-archaeology files to pass.
 
 ## Files Created/Modified
+
 - `Engine/Core/VersionDriftGate.h` (NEW)
 - `tests/Sprint125_VersionDriftGate.cpp` (NEW)
 - `Engine/CMakeLists.txt` (MODIFIED — header registration)

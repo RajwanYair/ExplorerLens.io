@@ -125,10 +125,16 @@ struct ThumbnailRequest
     const wchar_t* filePath;
     
     /// Desired thumbnail width (pixels)
-    uint32_t width;
+    union {
+        uint32_t width;
+        uint32_t outputWidth;   // Backward compatibility alias
+    };
     
     /// Desired thumbnail height (pixels)
-    uint32_t height;
+    union {
+        uint32_t height;
+        uint32_t outputHeight;  // Backward compatibility alias
+    };
     
     /// Generation flags (combination of ThumbnailFlags)
     ThumbnailFlags flags;
@@ -150,7 +156,10 @@ struct ThumbnailRequest
 struct ThumbnailResult
 {
     /// Generated thumbnail bitmap (caller must delete with DeleteObject)
-    HBITMAP hBitmap;
+    union {
+        HBITMAP hBitmap;
+        HBITMAP bitmap;         // Backward compatibility alias
+    };
     
     /// Actual thumbnail width (may differ from request if aspect ratio preserved)
     uint32_t width;

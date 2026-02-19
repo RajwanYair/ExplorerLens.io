@@ -60,20 +60,24 @@
     "editor.suggestOnTriggerCharacters": false,
     "editor.acceptSuggestionOnEnter": "off",
     "editor.parameterHints.enabled": false,
-    // PowerShell integration
-    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    // PowerShell integration - use latest PowerShell 7 (pwsh)
+    "terminal.integrated.defaultProfile.windows": "PowerShell 7 (Admin)",
     "terminal.integrated.profiles.windows": {
-        "PowerShell": {
-            "source": "PowerShell",
+        "PowerShell 7 (Admin)": {
+            "path": "pwsh.exe",
             "icon": "terminal-powershell",
             "args": [
                 "-NoProfile",
                 "-NoLogo"
             ]
         },
-        "PowerShell (Profile)": {
+        "PowerShell (Legacy)": {
             "source": "PowerShell",
-            "icon": "terminal-powershell"
+            "icon": "terminal-powershell",
+            "args": [
+                "-NoProfile",
+                "-NoLogo"
+            ]
         }
     }
 }

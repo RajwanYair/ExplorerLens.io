@@ -105,7 +105,7 @@ function Write-BuildHeader {
 function Find-MSBuildPath {
     <#
     .SYNOPSIS
-        Finds MSBuild.exe path (VS 2022 or VS 2019)
+        Finds MSBuild.exe path (VS 2022/2026)
     .OUTPUTS
         String path to MSBuild.exe or $null if not found
     #>
@@ -116,19 +116,29 @@ function Find-MSBuildPath {
     $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
     if (Test-Path $vswhere) {
         $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild `
-            -property installationPath -version '[17.0,18.0)'
+            -property installationPath -version '[17.0,19.0)'
         
         if ($vsPath) {
-            $msbuild = Join-Path $vsPath 'MSBuild\Current\Bin\MSBuild.exe'
-            if (Test-Path $msbuild) {
-                Write-BuildLog "Found MSBuild: $msbuild" -Level Success
-                return $msbuild
+            $vsCandidates = @(
+                (Join-Path $vsPath 'MSBuild\Current\Bin\amd64\MSBuild.exe'),
+                (Join-Path $vsPath 'MSBuild\Current\Bin\MSBuild.exe')
+            )
+            foreach ($msbuild in $vsCandidates) {
+                if (Test-Path $msbuild) {
+                    Write-BuildLog "Found MSBuild: $msbuild" -Level Success
+                    return $msbuild
+                }
             }
         }
     }
     
     # Fallback: Check common paths
     $commonPaths = @(
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles(x86)}\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2026\Enterprise\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2026\Professional\MSBuild\Current\Bin\amd64\MSBuild.exe",
+        "${env:ProgramFiles}\Microsoft Visual Studio\2026\Community\MSBuild\Current\Bin\amd64\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe",
@@ -335,8 +345,13 @@ function Invoke-CMakeBuild {
     
     # Add custom options
     foreach ($key in $CMakeOptions.Keys) {
-        $value = $CMakeOptions[$key]
-        $cmakeArgs += "-D${key}=$value"
+        $value = [string]$CMakeOptions[$key]
+        if ($value -match '[\s"]') {
+            $escapedValue = $value.Replace('"', '`"')
+            $cmakeArgs += "-D${key}=`"$escapedValue`""
+        } else {
+            $cmakeArgs += "-D${key}=$value"
+        }
     }
     
     # Configure
@@ -345,10 +360,20 @@ function Invoke-CMakeBuild {
     
     $configureCmd = "& `"$cmake`" $($cmakeArgs -join ' ')"
     $configureResult = Invoke-Expression $configureCmd
-    
+
     if ($LASTEXITCODE -ne 0) {
-        Write-BuildLog "CMake configuration failed" -Level Error
-        throw "CMake configuration failed with exit code $LASTEXITCODE"
+        $cachePath = Join-Path $BuildDir "CMakeCache.txt"
+        if (Test-Path $cachePath) {
+            Write-BuildLog "CMake configuration failed; stale cache/toolset mismatch suspected. Cleaning build dir and retrying once..." -Level Warning
+            Remove-Item -Path $BuildDir -Recurse -Force -ErrorAction SilentlyContinue
+            New-CleanDirectory -Path $BuildDir
+            $configureResult = Invoke-Expression $configureCmd
+        }
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-BuildLog "CMake configuration failed" -Level Error
+            throw "CMake configuration failed with exit code $LASTEXITCODE"
+        }
     }
     
     # Build

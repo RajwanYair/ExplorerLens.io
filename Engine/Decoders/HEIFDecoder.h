@@ -95,9 +95,11 @@ namespace Engine {
     [[maybe_unused]] bool m_preferEmbeddedThumbnail;  // Use embedded thumbnail if available
         
         // Supported extensions (HEIF, HEIC, Apple variants)
-        static constexpr const wchar_t* s_extensions[11] = {
+        // Sprint 175: Fixed overlap — HEIFDecoder handles HEIF container formats (HEVC codec)
+        // AVIF (.avif/.avifs) is handled by AVIFDecoder (AV1 codec)
+        static constexpr const wchar_t* s_extensions[10] = {
             L".heif", L".heic", L".hif", L".heifs", L".heics",
-            L".avci", L".avcs", L".avif", L".heif-sequence", L".heic-sequence", nullptr
+            L".avci", L".avcs", L".heif-sequence", L".heic-sequence", nullptr
         };
     };
 
