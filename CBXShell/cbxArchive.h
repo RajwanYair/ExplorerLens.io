@@ -181,6 +181,12 @@
 // Document formats (v7.0+) — generic category
 #define CBXTYPE_DOCUMENT 81	// Generic document type (DOCX/PPTX/etc. fall here if not specific)
 
+// Additional image formats (v8.4+, Sprint 180)
+#define CBXTYPE_WMF 82	// .wmf Windows Metafile
+#define CBXTYPE_EMF 83	// .emf Enhanced Metafile
+#define CBXTYPE_PCX 84	// .pcx ZSoft PCX image
+#define CBXTYPE_FARBFELD 85	// .ff Farbfeld image
+
 // Image format identifiers (for detection within archives)
 #define IMGTYPE_UNKNOWN 0
 #define IMGTYPE_BMP 1
@@ -2261,6 +2267,16 @@ namespace __cbx
 				return CBXTYPE_MODEL;
 			if (StrEqual(szExt, _T(".ply")))
 				return CBXTYPE_MODEL;
+
+			// Additional image formats (Sprint 180)
+			if (StrEqual(szExt, _T(".wmf")))
+				return CBXTYPE_WMF;
+			if (StrEqual(szExt, _T(".emf")))
+				return CBXTYPE_EMF;
+			if (StrEqual(szExt, _T(".pcx")))
+				return CBXTYPE_PCX;
+			if (StrEqual(szExt, _T(".ff")))
+				return CBXTYPE_FARBFELD;
 
 			return CBXTYPE_NONE;
 		}

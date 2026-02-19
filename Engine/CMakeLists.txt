@@ -117,6 +117,9 @@ set(ENGINE_HEADERS
     Decoders/EPUBDecoder.h        # Sprint 15 — EPUB cover extractor
     Decoders/OptimizedArchiveReader.h # Sprint 14 — Memory-mapped archive reader
     # Decoders/ExampleDecoder.h   # Reference template (not compiled into engine)
+    Decoders/WMFDecoder.h         # Sprint 180 — Windows Metafile (WMF/EMF)
+    Decoders/PCXDecoder.h         # Sprint 180 — ZSoft PCX image
+    Decoders/FarbfeldDecoder.h    # Sprint 180 — Farbfeld (.ff) image
     
     # GPU
     GPU/D3D11Renderer.h
@@ -271,6 +274,9 @@ set(ENGINE_SOURCES
     Decoders/DocumentDecoder.cpp  # Document format thumbnails
     Decoders/FontDecoder.cpp      # Font preview renderer
     Decoders/ModelDecoder.cpp     # 3D model decoder (Sprint 12)
+    Decoders/WMFDecoder.cpp       # Sprint 180 — Windows Metafile (WMF/EMF)
+    Decoders/PCXDecoder.cpp       # Sprint 180 — ZSoft PCX image
+    Decoders/FarbfeldDecoder.cpp  # Sprint 180 — Farbfeld (.ff) image
     
     # GPU
     GPU/D3D11Renderer.cpp
