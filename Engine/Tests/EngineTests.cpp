@@ -36,6 +36,7 @@
 #include "../Decoders/XPMDecoder.h"
 #include "../Pipeline/AsyncThumbnailProvider.h"
 #include "../GPU/D3D12ComputePipeline.h"
+#include "../Pipeline/ParallelBatchDecoder.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -1878,6 +1879,104 @@ TEST(TestD3D12Compute_Stats)
 }
 
 //==============================================================================
+// Sprint 189: Parallel Batch Decoder Tests
+//==============================================================================
+
+TEST(TestBatchDecoder_Create)
+{
+    ParallelBatchDecoder decoder;
+    ASSERT(!decoder.IsRunning());
+}
+
+TEST(TestBatchDecoder_Initialize)
+{
+    ParallelBatchDecoder decoder;
+    bool ok = decoder.Initialize();
+    ASSERT(ok);
+    ASSERT(decoder.IsRunning());
+    decoder.Shutdown();
+    ASSERT(!decoder.IsRunning());
+}
+
+TEST(TestBatchDecoder_Config)
+{
+    BatchDecoderConfig config;
+    config.workerThreads = 8;
+    config.maxBatchSize = 500;
+    ParallelBatchDecoder decoder(config);
+    ASSERT(decoder.GetConfig().workerThreads == 8);
+    ASSERT(decoder.GetConfig().maxBatchSize == 500);
+}
+
+TEST(TestBatchDecoder_ClassifyFormats)
+{
+    // Archives are serial
+    ASSERT(ParallelBatchDecoder::ClassifyFormat(L".zip") == ParallelismLevel::SerialOnly);
+    ASSERT(ParallelBatchDecoder::ClassifyFormat(L".rar") == ParallelismLevel::SerialOnly);
+    ASSERT(ParallelBatchDecoder::ClassifyFormat(L".7z") == ParallelismLevel::SerialOnly);
+    // GPU formats are limited
+    ASSERT(ParallelBatchDecoder::ClassifyFormat(L".dds") == ParallelismLevel::LimitedParallel);
+    ASSERT(ParallelBatchDecoder::ClassifyFormat(L".ktx") == ParallelismLevel::LimitedParallel);
+    // Standard images are full parallel
+    ASSERT(ParallelBatchDecoder::ClassifyFormat(L".jpg") == ParallelismLevel::FullParallel);
+    ASSERT(ParallelBatchDecoder::ClassifyFormat(L".png") == ParallelismLevel::FullParallel);
+}
+
+TEST(TestBatchDecoder_ParallelismNames)
+{
+    ASSERT(std::wstring(ParallelBatchDecoder::GetParallelismName(ParallelismLevel::FullParallel)) == L"FullParallel");
+    ASSERT(std::wstring(ParallelBatchDecoder::GetParallelismName(ParallelismLevel::SerialOnly)) == L"SerialOnly");
+    ASSERT(std::wstring(ParallelBatchDecoder::GetParallelismName(ParallelismLevel::LimitedParallel)) == L"LimitedParallel");
+}
+
+TEST(TestBatchDecoder_StatusNames)
+{
+    ASSERT(std::wstring(ParallelBatchDecoder::GetBatchStatusName(BatchItemStatus::Pending)) == L"Pending");
+    ASSERT(std::wstring(ParallelBatchDecoder::GetBatchStatusName(BatchItemStatus::Completed)) == L"Completed");
+    ASSERT(std::wstring(ParallelBatchDecoder::GetBatchStatusName(BatchItemStatus::Cancelled)) == L"Cancelled");
+}
+
+TEST(TestBatchDecoder_PriorityNames)
+{
+    ASSERT(std::wstring(ParallelBatchDecoder::GetBatchPriorityName(BatchPriority::Immediate)) == L"Immediate");
+    ASSERT(std::wstring(ParallelBatchDecoder::GetBatchPriorityName(BatchPriority::Background)) == L"Background");
+    ASSERT(std::wstring(ParallelBatchDecoder::GetBatchPriorityName(BatchPriority::CacheWarm)) == L"CacheWarm");
+}
+
+TEST(TestBatchDecoder_SubmitEmpty)
+{
+    ParallelBatchDecoder decoder;
+    decoder.Initialize();
+    std::vector<std::wstring> empty;
+    uint64_t id = decoder.SubmitBatch(empty);
+    ASSERT(id == 0); // Empty batch rejected
+    decoder.Shutdown();
+}
+
+TEST(TestBatchDecoder_SubmitBatch)
+{
+    ParallelBatchDecoder decoder;
+    decoder.Initialize();
+    std::vector<std::wstring> files = {L"test1.jpg", L"test2.png", L"test3.bmp"};
+    uint64_t id = decoder.SubmitBatch(files);
+    ASSERT(id > 0);
+    auto results = decoder.GetBatchResults(id);
+    ASSERT(results.size() == 3);
+    decoder.Shutdown();
+}
+
+TEST(TestBatchDecoder_CancelBatch)
+{
+    ParallelBatchDecoder decoder;
+    decoder.Initialize();
+    std::vector<std::wstring> files = {L"a.jpg", L"b.png"};
+    uint64_t id = decoder.SubmitBatch(files);
+    bool cancelled = decoder.CancelBatch(id);
+    ASSERT(cancelled);
+    decoder.Shutdown();
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2427,6 +2526,18 @@ int main()
     RUN_TEST(TestD3D12Compute_ResizeNotInit);
     RUN_TEST(TestD3D12Compute_ResizeCPU);
     RUN_TEST(TestD3D12Compute_Stats);
+    
+    std::wcout << L"Sprint 189 - Parallel Batch Decoder:" << std::endl;
+    RUN_TEST(TestBatchDecoder_Create);
+    RUN_TEST(TestBatchDecoder_Initialize);
+    RUN_TEST(TestBatchDecoder_Config);
+    RUN_TEST(TestBatchDecoder_ClassifyFormats);
+    RUN_TEST(TestBatchDecoder_ParallelismNames);
+    RUN_TEST(TestBatchDecoder_StatusNames);
+    RUN_TEST(TestBatchDecoder_PriorityNames);
+    RUN_TEST(TestBatchDecoder_SubmitEmpty);
+    RUN_TEST(TestBatchDecoder_SubmitBatch);
+    RUN_TEST(TestBatchDecoder_CancelBatch);
     
     std::wcout << std::endl;
     

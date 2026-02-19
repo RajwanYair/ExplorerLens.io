@@ -90,6 +90,7 @@ set(ENGINE_HEADERS
     Pipeline/DecoderRegistry.h
     Pipeline/FormatDetector.h
     Pipeline/AsyncThumbnailProvider.h  # Sprint 187 — Async shell extension
+    Pipeline/ParallelBatchDecoder.h    # Sprint 189 — Parallel batch decode
     
     # Decoders
     Decoders/ImageDecoder.h
@@ -259,6 +260,7 @@ set(ENGINE_SOURCES
     Pipeline/DecoderRegistry.cpp
     Pipeline/FormatDetector.cpp
     Pipeline/AsyncThumbnailProvider.cpp  # Sprint 187 — Async shell extension
+    Pipeline/ParallelBatchDecoder.cpp    # Sprint 189 — Parallel batch decode
     
     # Decoders
     Decoders/ImageDecoder.cpp
