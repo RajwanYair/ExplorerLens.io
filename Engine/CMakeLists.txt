@@ -162,6 +162,7 @@ set(ENGINE_HEADERS
     Utils/MSIXPackageManager.h        # Sprint 195 — MSIX packaging & auto-update
     Utils/TestSuiteExpansion.h         # Sprint 196 — Test framework expansion
     Utils/MalformedInputHandler.h      # Sprint 197 — Malformed input hardening
+    Utils/ReleaseGateV3.h              # Sprint 198 — v9.2 release gate
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -335,6 +336,7 @@ set(ENGINE_SOURCES
     Utils/MSIXPackageManager.cpp        # Sprint 195 — MSIX packaging & auto-update
     Utils/TestSuiteExpansion.cpp         # Sprint 196 — Test framework expansion
     Utils/MalformedInputHandler.cpp      # Sprint 197 — Malformed input hardening
+    Utils/ReleaseGateV3.cpp              # Sprint 198 — v9.2 release gate
 )
 
 #==============================================================================

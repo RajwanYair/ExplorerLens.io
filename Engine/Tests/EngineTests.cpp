@@ -45,6 +45,7 @@
 #include "../Utils/MSIXPackageManager.h"
 #include "../Utils/TestSuiteExpansion.h"
 #include "../Utils/MalformedInputHandler.h"
+#include "../Utils/ReleaseGateV3.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2819,6 +2820,151 @@ TEST(TestMalformed_CorruptionNames)
 }
 
 //==============================================================================
+// Sprint 198: v9.2 Release Gate Tests
+//==============================================================================
+
+TEST(TestReleaseV3_DefaultThresholds)
+{
+    using namespace DarkThumbs::Engine;
+    auto t = ReleaseGateV3::ForV92();
+    ASSERT(t.minTestCount == 500);
+    ASSERT(t.minTestPassRate == 99.5);
+    ASSERT(t.maxSingleDecodeMs == 20.0);
+    ASSERT(t.minBatchThroughput == 200.0);
+    ASSERT(t.maxBuildWarnings == 0);
+    ASSERT(t.maxBuildErrors == 0);
+    ASSERT(t.requireARM64CI == true);
+    ASSERT(t.requireMSIXPackage == true);
+}
+
+TEST(TestReleaseV3_EvaluateEmpty)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV3 gate;
+    auto result = gate.Evaluate();
+    ASSERT(result.version == L"v9.2.0");
+    ASSERT(result.totalKPIs == 0);
+    ASSERT(result.verdict == GateVerdict::Pass); // No KPIs = no failures
+}
+
+TEST(TestReleaseV3_AllPass)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV3 gate;
+    KPIMeasurement m1;
+    m1.dimension = ReleaseKPIDimension::BuildQuality;
+    m1.name = L"Warnings";
+    m1.passed = true;
+    gate.AddMeasurement(m1);
+    KPIMeasurement m2;
+    m2.dimension = ReleaseKPIDimension::TestCoverage;
+    m2.name = L"PassRate";
+    m2.passed = true;
+    gate.AddMeasurement(m2);
+    auto result = gate.Evaluate();
+    ASSERT(result.verdict == GateVerdict::Pass);
+    ASSERT(result.passedKPIs == 2);
+    ASSERT(result.failedKPIs == 0);
+    ASSERT(result.overallScore == 100.0);
+}
+
+TEST(TestReleaseV3_BlockerFails)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV3 gate;
+    KPIMeasurement m;
+    m.dimension = ReleaseKPIDimension::BuildQuality;
+    m.name = L"BuildErrors";
+    m.passed = false;
+    m.notes = L"3 errors remain";
+    gate.AddMeasurement(m);
+    auto result = gate.Evaluate();
+    ASSERT(result.verdict == GateVerdict::Blocked);
+    ASSERT(result.blockers.size() == 1);
+}
+
+TEST(TestReleaseV3_ConditionalPass)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV3 gate;
+    // 9 pass, 1 non-blocker fail = ConditionalPass
+    for (int i = 0; i < 9; i++) {
+        KPIMeasurement m;
+        m.dimension = ReleaseKPIDimension::Performance;
+        m.name = L"KPI" + std::to_wstring(i);
+        m.passed = true;
+        gate.AddMeasurement(m);
+    }
+    KPIMeasurement fail;
+    fail.dimension = ReleaseKPIDimension::Documentation;
+    fail.name = L"DocSync";
+    fail.passed = false;
+    fail.notes = L"2 docs outdated";
+    gate.AddMeasurement(fail);
+    auto result = gate.Evaluate();
+    ASSERT(result.verdict == GateVerdict::ConditionalPass);
+    ASSERT(result.overallScore == 90.0);
+}
+
+TEST(TestReleaseV3_PlatformValidation)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV3 gate;
+    PlatformValidation x64;
+    x64.platform = L"x64";
+    x64.buildSucceeded = true;
+    x64.testsRan = true;
+    x64.testsPassed = 500;
+    x64.testsFailed = 0;
+    gate.AddPlatform(x64);
+    auto result = gate.Evaluate();
+    ASSERT(result.platforms.size() == 1);
+    ASSERT(result.platforms[0].buildSucceeded == true);
+}
+
+TEST(TestReleaseV3_ReleaseNotes)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV3 gate;
+    ReleaseGateResult result;
+    result.version = L"v9.2.0";
+    result.verdict = GateVerdict::Pass;
+    result.overallScore = 100.0;
+    result.passedKPIs = 9;
+    result.totalKPIs = 9;
+    auto notes = gate.GenerateReleaseNotes(result);
+    ASSERT(notes.find(L"v9.2.0") != std::wstring::npos);
+    ASSERT(notes.find(L"Pass") != std::wstring::npos);
+}
+
+TEST(TestReleaseV3_Checklist)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV3 gate;
+    auto checklist = gate.GenerateChecklist();
+    ASSERT(checklist.find(L"Zero warnings") != std::wstring::npos);
+    ASSERT(checklist.find(L"MSIX") != std::wstring::npos);
+    ASSERT(checklist.find(L"High-DPI") != std::wstring::npos);
+}
+
+TEST(TestReleaseV3_DimensionNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ReleaseGateV3::GetDimensionName(ReleaseKPIDimension::BuildQuality)) == L"BuildQuality");
+    ASSERT(std::wstring(ReleaseGateV3::GetDimensionName(ReleaseKPIDimension::Security)) == L"Security");
+    ASSERT(std::wstring(ReleaseGateV3::GetDimensionName(ReleaseKPIDimension::Packaging)) == L"Packaging");
+}
+
+TEST(TestReleaseV3_VerdictNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(GateVerdict::Pass)) == L"Pass");
+    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(GateVerdict::Fail)) == L"Fail");
+    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(GateVerdict::ConditionalPass)) == L"ConditionalPass");
+    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(GateVerdict::Blocked)) == L"Blocked");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -3481,6 +3627,19 @@ int main()
     RUN_TEST(TestMalformed_MagicBytesMultiple);
     RUN_TEST(TestMalformed_ClampDimensions);
     RUN_TEST(TestMalformed_CorruptionNames);
+    
+    // Sprint 198: v9.2 Release Gate Tests
+    std::wcout << L"Sprint 198: v9.2 Release Gate Tests..." << std::endl;
+    RUN_TEST(TestReleaseV3_DefaultThresholds);
+    RUN_TEST(TestReleaseV3_EvaluateEmpty);
+    RUN_TEST(TestReleaseV3_AllPass);
+    RUN_TEST(TestReleaseV3_BlockerFails);
+    RUN_TEST(TestReleaseV3_ConditionalPass);
+    RUN_TEST(TestReleaseV3_PlatformValidation);
+    RUN_TEST(TestReleaseV3_ReleaseNotes);
+    RUN_TEST(TestReleaseV3_Checklist);
+    RUN_TEST(TestReleaseV3_DimensionNames);
+    RUN_TEST(TestReleaseV3_VerdictNames);
     
     std::wcout << std::endl;
     
