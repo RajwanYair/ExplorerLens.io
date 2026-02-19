@@ -277,6 +277,7 @@ set(ENGINE_SOURCES
     Decoders/WMFDecoder.cpp       # Sprint 180 — Windows Metafile (WMF/EMF)
     Decoders/PCXDecoder.cpp       # Sprint 180 — ZSoft PCX image
     Decoders/FarbfeldDecoder.cpp  # Sprint 180 — Farbfeld (.ff) image
+    Decoders/JPEG2000Decoder.cpp  # Sprint 181 — JPEG 2000 (JP2/J2K/JPX)
     
     # GPU
     GPU/D3D11Renderer.cpp

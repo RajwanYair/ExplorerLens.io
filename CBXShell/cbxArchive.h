@@ -186,6 +186,7 @@
 #define CBXTYPE_EMF 83	// .emf Enhanced Metafile
 #define CBXTYPE_PCX 84	// .pcx ZSoft PCX image
 #define CBXTYPE_FARBFELD 85	// .ff Farbfeld image
+#define CBXTYPE_JP2 86	// .jp2/.j2k/.j2c/.jpx JPEG 2000 (Sprint 181)
 
 // Image format identifiers (for detection within archives)
 #define IMGTYPE_UNKNOWN 0
@@ -2277,6 +2278,20 @@ namespace __cbx
 				return CBXTYPE_PCX;
 			if (StrEqual(szExt, _T(".ff")))
 				return CBXTYPE_FARBFELD;
+
+			// JPEG 2000 formats (Sprint 181)
+			if (StrEqual(szExt, _T(".jp2")))
+				return CBXTYPE_JP2;
+			if (StrEqual(szExt, _T(".j2k")))
+				return CBXTYPE_JP2;
+			if (StrEqual(szExt, _T(".j2c")))
+				return CBXTYPE_JP2;
+			if (StrEqual(szExt, _T(".jpx")))
+				return CBXTYPE_JP2;
+			if (StrEqual(szExt, _T(".jpf")))
+				return CBXTYPE_JP2;
+			if (StrEqual(szExt, _T(".jph")))
+				return CBXTYPE_JP2;
 
 			return CBXTYPE_NONE;
 		}
