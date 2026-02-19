@@ -25,7 +25,7 @@ option(ENABLE_CACHE "Enable thumbnail caching" ON)
 # Optional decoder library flags
 # Set these to ON when the corresponding libraries are built and available
 option(HAS_LIBJXL "Enable JPEG XL support (requires libjxl)" ON)
-option(HAS_LIBHEIF "Enable HEIF/HEIC support (requires libheif)" OFF)
+option(HAS_LIBHEIF "Enable HEIF/HEIC support (requires libheif)" ON)
 option(HAS_LIBRAW "Enable Camera RAW support (requires LibRaw)" ON)
 
 # libheif/libde265 path resolution (install-first, build fallback)
@@ -94,7 +94,7 @@ set(ENGINE_HEADERS
     Decoders/ImageDecoder.h
     Decoders/WebPDecoder.h
     Decoders/AVIFDecoder.h
-     Decoders/ArchiveDecoder.h
+    Decoders/ArchiveDecoder.h
     Decoders/RAWDecoder.h         # Camera RAW decoder (LibRaw)
     Decoders/JXLDecoder.h         # JPEG XL decoder
     Decoders/HEIFDecoder.h        # HEIF/HEIC decoder
@@ -139,16 +139,12 @@ set(ENGINE_HEADERS
     Utils/MemoryMappedFile.h
     Utils/SmallObjectPool.h
 
-    # Sprint 6-12: Foundation & Activation
-    Core/DecoderIsolation.h           # Sprint 6  — SEH fuzzing, circuit breaker
-    Core/FuzzingFramework.h           # Sprint 6  — Malformed payload fuzzing
-    Core/MemoryLeakDetector.h         # Sprint 6  — Leak regression tests
-    Core/Win11CompatibilityMatrix.h   # Sprint 7  — OS/DPI/HDR/GPU compat
-    Core/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
-    Core/VersionNormalization.h      # Sprint 9  — Version audit, release notes
-    Core/ReleaseGovernance.h         # Sprint 10 — Quality gates, CI pipeline
-    Core/PluginActivation.h          # Sprint 11 — Feature flags, IPC, lifecycle
-    Core/ObservabilityPipeline.h     # Sprint 12 — ETW, JSON logger, privacy
+    # Sprint 8-12: Foundation & Activation
+    Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
+    Utils/VersionNormalization.h      # Sprint 9  — Version audit, release notes
+    Utils/ReleaseGovernance.h         # Sprint 10 — Quality gates, CI pipeline
+    Plugin/PluginActivation.h         # Sprint 11 — Feature flags, IPC, lifecycle
+    Utils/ObservabilityPipeline.h     # Sprint 12 — ETW, JSON logger, privacy
 
     # Sprint 23-25: AI & Store & OIIO
     AI/AIThumbnailEnhancer.h          # Sprint 23 — DirectML/ONNX super-resolution
@@ -178,8 +174,6 @@ set(ENGINE_HEADERS
     Decoders/ArchiveGridPreview.h     # Sprint 39 — 2x2 grid composite
 
     # Sprint 40-49: Platform Maturity
-    Core/ColorSpaceHDR.h              # Sprint 40 — ICC, gamut, HDR tone map
-    Core/DuplicateDetection.h         # Sprint 41 — pHash/dHash/aHash
     Utils/PortableMode.h              # Sprint 42 — INI config, badges
     Pipeline/BatchProcessor.h         # Sprint 43 — Priority queue, rate limit
     Cloud/NetworkThumbnailProvider.h   # Sprint 44 — URL/proxy/retry/throttle
@@ -187,7 +181,6 @@ set(ENGINE_HEADERS
     Codec/FormatConverter.h           # Sprint 46 — 9 output formats, profiles
     Utils/AccessibilityI18n.h         # Sprint 47 — WCAG, RTL, keyboard nav
     Core/TelemetryDashboard.h         # Sprint 48 — Health scoring, diagnostics
-    Release/ReleasePackaging.h        # Sprint 49 — SBOM, MSI, auto-update
 
     # Sprint 125-149: v8.2 Program
     Core/VersionDriftGate.h           # Sprint 125 — Version drift CI gate
@@ -204,7 +197,6 @@ set(ENGINE_HEADERS
     Decoders/EBookCoverExtractor.h    # Sprint 136 — Extended eBook support
     Utils/ContinuousFuzzEngine.h      # Sprint 137 — Continuous fuzzing engine
     Utils/CompatibilityMatrix.h       # Sprint 138 — Win11 compatibility matrix
-    Release/MSILifecycleRunner.h      # Sprint 139 — MSI lifecycle E2E automation
     Memory/MemorySoakValidator.h      # Sprint 140 — Memory soak validation
     Utils/DarkModeManagerV2.h         # Sprint 141 — DarkMode V2 complete
     Utils/PerMonitorDPIManager.h      # Sprint 142 — Per-monitor DPI V2
@@ -214,6 +206,32 @@ set(ENGINE_HEADERS
     Core/PerfRegressionGate.h         # Sprint 146 — Performance regression CI gate V2
     Core/ReproducibleBuildVerifier.h   # Sprint 147 — Reproducible build verification
     Core/ReleaseReadinessDashboard.h   # Sprint 148 — Release readiness dashboard
+
+    # Sprint 150-174: v8.3.0 Block — Plugin Ecosystem, ARM64, Format Expansion, Memory Excellence, Release
+    Plugin/PluginRuntimeTestMatrix.h       # Sprint 150 — Plugin runtime test matrix
+    Plugin/PluginSandboxPolicy.h           # Sprint 151 — Plugin sandbox policy framework
+    Plugin/PluginCompatibilityKitV2.h      # Sprint 152 — Plugin compatibility kit V2
+    Plugin/PluginReferencePack.h           # Sprint 153 — Plugin reference implementation pack
+    Plugin/PluginTrustChain.h              # Sprint 154 — Plugin trust chain validation
+    Utils/ARM64BuildConfig.h              # Sprint 155 — ARM64 build configuration
+    Utils/ARM64LibraryMatrix.h            # Sprint 156 — ARM64 library compatibility matrix
+    Utils/ARM64RuntimeValidator.h         # Sprint 157 — ARM64 runtime validator
+    Utils/ARM64PerformanceBaseline.h      # Sprint 158 — ARM64 performance baseline
+    Utils/ARM64CIIntegration.h            # Sprint 159 — ARM64 CI integration
+    Decoders/CADFormatPlugin.h            # Sprint 161 — CAD format plugin (DWG/DXF/STEP/IGES)
+    Decoders/GLTFModelDecoder.h           # Sprint 162 — glTF/GLB 3D model decoder
+    Decoders/ScientificFormatPlugin.h     # Sprint 163 — Scientific format plugin (FITS/NIfTI)
+    Pipeline/FormatFallbackEngine.h       # Sprint 164 — Format fallback intelligence engine
+    Memory/ArchiveMemoryCompactor.h       # Sprint 165 — Archive memory compactor
+    Pipeline/ZeroCopyPipeline.h           # Sprint 166 — Zero-copy GPU upload pipeline
+    Cache/AdaptiveCacheBudgetManager.h    # Sprint 167 — Adaptive cache budget manager
+    Memory/HotModeDirectoryEngine.h       # Sprint 168 — Hot-mode directory pre-warm engine
+    Memory/MemoryPressureControllerV2.h   # Sprint 169 — Memory pressure controller V2
+    Utils/MatrixValidationFramework.h     # Sprint 170 — Matrix validation framework
+    Utils/InstallerLifecycleAutomation.h  # Sprint 171 — Installer lifecycle automation
+    Core/ReleaseGateV2.h                  # Sprint 172 — Release gate V2 (v8.3.0 KPIs)
+    Core/DocumentationSyncAudit.h         # Sprint 173 — Documentation sync audit
+    Core/ProgramClosureV83.h              # Sprint 174 — v8.3.0 program closure
 )
 
 set(ENGINE_SOURCES
@@ -357,7 +375,7 @@ if(ENGINE_SOURCES)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../SDK/lib
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/minizip-ng-4.0.10/build-manual
-                ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/zlib-1.3.1/x64/Release
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/zlib-1.3.1/install/lib
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/zstd-1.5.7/build-manual
                 # JXL libraries (actual install location)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libjxl-0.11.1/install/lib

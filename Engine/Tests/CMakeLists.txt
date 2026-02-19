@@ -13,6 +13,32 @@ project(EngineTests LANGUAGES CXX)
 add_executable(EngineTests
     EngineTests.cpp
     test_gpu.cpp
+    # Sprint 150-174: v8.3.0 Block test suites
+    Sprint150_PluginTestMatrix.cpp
+    Sprint151_PluginSandboxPolicy.cpp
+    Sprint152_PluginCompatKitV2.cpp
+    Sprint153_PluginReferencePack.cpp
+    Sprint154_PluginTrustChain.cpp
+    Sprint155_ARM64BuildConfig.cpp
+    Sprint156_ARM64LibraryMatrix.cpp
+    Sprint157_ARM64RuntimeValidator.cpp
+    Sprint158_ARM64PerfBaseline.cpp
+    Sprint159_ARM64CIIntegration.cpp
+    Sprint160_JPEG2000Decoder.cpp
+    Sprint161_CADFormat.cpp
+    Sprint162_GLTFModel.cpp
+    Sprint163_Scientific.cpp
+    Sprint164_FallbackEngine.cpp
+    Sprint165_ArchiveMemory.cpp
+    Sprint166_ZeroCopy.cpp
+    Sprint167_AdaptiveCache.cpp
+    Sprint168_HotMode.cpp
+    Sprint169_MemPressure.cpp
+    Sprint170_MatrixValidation.cpp
+    Sprint171_InstallerLifecycle.cpp
+    Sprint172_ReleaseGate.cpp
+    Sprint173_DocSync.cpp
+    Sprint174_ProgramClosure.cpp
 )
 
 # Link JXL libraries if enabled
