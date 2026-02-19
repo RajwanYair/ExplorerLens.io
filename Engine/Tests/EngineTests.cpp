@@ -34,6 +34,7 @@
 #include "../Decoders/XCFDecoder.h"
 #include "../Decoders/SGIDecoder.h"
 #include "../Decoders/XPMDecoder.h"
+#include "../Pipeline/AsyncThumbnailProvider.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -1695,6 +1696,99 @@ TEST(TestXPMDecoder_ReadInfoInvalid)
 }
 
 //==============================================================================
+// Sprint 187: Async Shell Extension Tests
+//==============================================================================
+
+TEST(TestAsyncProvider_Create)
+{
+    AsyncThumbnailProvider provider;
+    ASSERT(!provider.IsRunning());
+    ASSERT(provider.GetQueueDepth() == 0);
+}
+
+TEST(TestAsyncProvider_Initialize)
+{
+    AsyncThumbnailProvider provider;
+    bool ok = provider.Initialize();
+    ASSERT(ok);
+    ASSERT(provider.IsRunning());
+    provider.Shutdown();
+    ASSERT(!provider.IsRunning());
+}
+
+TEST(TestAsyncProvider_Config)
+{
+    AsyncProviderConfig config;
+    config.minThreads = 4;
+    config.maxThreads = 16;
+    config.maxQueueDepth = 512;
+    config.timeoutMs = 10000;
+    AsyncThumbnailProvider provider(config);
+    ASSERT(provider.GetConfig().minThreads == 4);
+    ASSERT(provider.GetConfig().maxThreads == 16);
+    ASSERT(provider.GetConfig().maxQueueDepth == 512);
+    ASSERT(provider.GetConfig().timeoutMs == 10000);
+}
+
+TEST(TestAsyncProvider_PriorityNames)
+{
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetPriorityName(DecodePriority::Critical)) == L"Critical");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetPriorityName(DecodePriority::High)) == L"High");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetPriorityName(DecodePriority::Normal)) == L"Normal");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetPriorityName(DecodePriority::Low)) == L"Low");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetPriorityName(DecodePriority::Idle)) == L"Idle");
+}
+
+TEST(TestAsyncProvider_StateNames)
+{
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetStateName(RequestState::Queued)) == L"Queued");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetStateName(RequestState::InProgress)) == L"InProgress");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetStateName(RequestState::Completed)) == L"Completed");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetStateName(RequestState::Failed)) == L"Failed");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetStateName(RequestState::Cancelled)) == L"Cancelled");
+    ASSERT(std::wstring(AsyncThumbnailProvider::GetStateName(RequestState::TimedOut)) == L"TimedOut");
+}
+
+TEST(TestAsyncProvider_SyncFallback)
+{
+    AsyncThumbnailProvider provider;
+    provider.Initialize();
+    auto result = provider.DecodeSynchronous(L"test.png", 256);
+    ASSERT(result.state == RequestState::Completed);
+    ASSERT(result.width == 256);
+    ASSERT(result.height == 256);
+    provider.Shutdown();
+}
+
+TEST(TestAsyncProvider_SyncFallbackEmpty)
+{
+    AsyncThumbnailProvider provider;
+    provider.Initialize();
+    auto result = provider.DecodeSynchronous(L"", 256);
+    ASSERT(result.state == RequestState::Failed);
+    provider.Shutdown();
+}
+
+TEST(TestAsyncProvider_Stats)
+{
+    AsyncThumbnailProvider provider;
+    provider.Initialize();
+    auto stats = provider.GetStats();
+    ASSERT(stats.totalRequests == 0);
+    ASSERT(stats.completedRequests == 0);
+    ASSERT(stats.queueDepth == 0);
+    provider.Shutdown();
+}
+
+TEST(TestAsyncProvider_SubmitNotRunning)
+{
+    AsyncThumbnailProvider provider;
+    // Not initialized — should return 0
+    uint64_t id = provider.SubmitRequest(L"test.png", 256, DecodePriority::Normal, nullptr);
+    ASSERT(id == 0);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2221,6 +2315,17 @@ int main()
     RUN_TEST(TestXPMDecoder_Create);
     RUN_TEST(TestXPMDecoder_InvalidFile);
     RUN_TEST(TestXPMDecoder_ReadInfoInvalid);
+    
+    std::wcout << L"Sprint 187 - Async Shell Extension:" << std::endl;
+    RUN_TEST(TestAsyncProvider_Create);
+    RUN_TEST(TestAsyncProvider_Initialize);
+    RUN_TEST(TestAsyncProvider_Config);
+    RUN_TEST(TestAsyncProvider_PriorityNames);
+    RUN_TEST(TestAsyncProvider_StateNames);
+    RUN_TEST(TestAsyncProvider_SyncFallback);
+    RUN_TEST(TestAsyncProvider_SyncFallbackEmpty);
+    RUN_TEST(TestAsyncProvider_Stats);
+    RUN_TEST(TestAsyncProvider_SubmitNotRunning);
     
     std::wcout << std::endl;
     

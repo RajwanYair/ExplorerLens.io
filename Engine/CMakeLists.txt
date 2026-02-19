@@ -89,6 +89,7 @@ set(ENGINE_HEADERS
     Pipeline/ThumbnailPipeline.h
     Pipeline/DecoderRegistry.h
     Pipeline/FormatDetector.h
+    Pipeline/AsyncThumbnailProvider.h  # Sprint 187 — Async shell extension
     
     # Decoders
     Decoders/ImageDecoder.h
@@ -256,6 +257,7 @@ set(ENGINE_SOURCES
     Pipeline/ThumbnailPipeline.cpp
     Pipeline/DecoderRegistry.cpp
     Pipeline/FormatDetector.cpp
+    Pipeline/AsyncThumbnailProvider.cpp  # Sprint 187 — Async shell extension
     
     # Decoders
     Decoders/ImageDecoder.cpp
