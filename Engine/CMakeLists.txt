@@ -113,6 +113,10 @@ set(ENGINE_HEADERS
     Decoders/DocumentDecoder.h    # Document format thumbnails
     Decoders/FontDecoder.h        # Font preview renderer
     Decoders/ModelDecoder.h       # 3D model decoder (Sprint 12)
+    Decoders/ColorSpaceManager.h  # Sprint 40 — Color space awareness & HDR tone mapping
+    Decoders/EPUBDecoder.h        # Sprint 15 — EPUB cover extractor
+    Decoders/OptimizedArchiveReader.h # Sprint 14 — Memory-mapped archive reader
+    # Decoders/ExampleDecoder.h   # Reference template (not compiled into engine)
     
     # GPU
     GPU/D3D11Renderer.h
@@ -351,6 +355,34 @@ if(ENGINE_SOURCES)
         else()
             message(STATUS "Camera RAW support: DISABLED (set -DHAS_LIBRAW=ON when LibRaw is available)")
         endif()
+
+        if(HAS_LIBAVIF)
+            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_LIBAVIF)
+            message(STATUS "AVIF support: ENABLED")
+        else()
+            message(STATUS "AVIF support: DISABLED (set -DHAS_LIBAVIF=ON when libavif is available)")
+        endif()
+
+        if(HAS_MUPDF)
+            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_MUPDF)
+            message(STATUS "PDF support (MuPDF): ENABLED")
+        else()
+            message(STATUS "PDF support (MuPDF): DISABLED (set -DHAS_MUPDF=ON when MuPDF is available)")
+        endif()
+
+        if(ENABLE_VIDEO_DECODER)
+            target_compile_definitions(DarkThumbsEngine PRIVATE ENABLE_VIDEO_DECODER)
+            message(STATUS "Video decoder: ENABLED")
+        else()
+            message(STATUS "Video decoder: DISABLED (set -DENABLE_VIDEO_DECODER=ON)")
+        endif()
+
+        if(ENABLE_AUDIO_DECODER)
+            target_compile_definitions(DarkThumbsEngine PRIVATE ENABLE_AUDIO_DECODER)
+            message(STATUS "Audio decoder: ENABLED")
+        else()
+            message(STATUS "Audio decoder: DISABLED (set -DENABLE_AUDIO_DECODER=ON)")
+        endif()
         
         target_link_libraries(DarkThumbsEngine
             PRIVATE
@@ -521,4 +553,12 @@ message(STATUS "  Shared Library:    ${BUILD_SHARED_LIBS}")
 message(STATUS "  Build Tests:       ${BUILD_TESTS}")
 message(STATUS "  GPU Acceleration:  ${ENABLE_GPU}")
 message(STATUS "  C++ Standard:      ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Feature Flags:")
+message(STATUS "    HAS_LIBJXL:            ${HAS_LIBJXL}")
+message(STATUS "    HAS_LIBHEIF:           ${HAS_LIBHEIF}")
+message(STATUS "    HAS_LIBRAW:            ${HAS_LIBRAW}")
+message(STATUS "    HAS_LIBAVIF:           ${HAS_LIBAVIF}")
+message(STATUS "    HAS_MUPDF:             ${HAS_MUPDF}")
+message(STATUS "    ENABLE_VIDEO_DECODER:  ${ENABLE_VIDEO_DECODER}")
+message(STATUS "    ENABLE_AUDIO_DECODER:  ${ENABLE_AUDIO_DECODER}")
 message(STATUS "")
