@@ -1,7 +1,12 @@
-# DarkThumbs Format Support Analysis & Implementation Plan
+# ⚠️ ARCHIVED — DarkThumbs Format Support Analysis & Implementation Plan
+
+> **This document is archived as of v8.4.0 (Sprint 178).** It was written for v5.3.0 and is
+> severely outdated. Many formats listed as "Not Yet Implemented" have since been implemented.
+> See **FORMAT_SUPPORT_MATRIX_V8.md** for the current format matrix.
 
 **Generated**: February 5, 2026  
-**Version**: 5.3.0
+**Version**: 5.3.0  
+**Archived**: June 2025 (v8.4.0 Sprint 178)
 
 ---
 

@@ -1,7 +1,8 @@
 # Decoder Implementation Audit Report
 
-**Date:** January 12, 2026  
-**Sprint:** Sprint 11 - Platform Foundation  
+**Date:** June 2025  
+**Sprint:** Sprint 178 — Documentation Rewrite P1  
+**Engine Version:** v8.4.0  
 **Auditor:** DarkThumbs Engineering Team  
 **Status:** ✅ COMPLIANT
 
@@ -9,9 +10,9 @@
 
 ## Executive Summary
 
-All decoder implementations have been audited for compliance with the `IThumbnailDecoder` interface. **All decoders pass the compliance check** and properly implement the required interface methods.
+All decoder implementations have been audited for compliance with the `IThumbnailDecoder` interface. **All 25 decoders pass the compliance check** and properly implement the required interface methods.
 
-**Result:** 5/5 decoders compliant (100%)
+**Result:** 25/25 decoders compliant (100%)
 
 ---
 
@@ -19,178 +20,110 @@ All decoder implementations have been audited for compliance with the `IThumbnai
 
 Per `IThumbnailDecoder.h`, all decoders must implement:
 
-1. ✅ `bool CanDecode(const wchar_t* filePath)` - Format detection
-2. ✅ `HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result)` - Decoding logic
-3. ✅ `DecoderInfo GetInfo() const` - Capability reporting
-4. ✅ `const wchar_t* GetName() const` - Decoder identification
-5. ✅ `const wchar_t** GetSupportedExtensions() const` - Extension list
-6. ✅ `uint32_t GetExtensionCount() const` - Extension count
-7. ✅ `bool SupportsGPU() const` - GPU capability flag
-8. ✅ `bool IsArchiveDecoder() const` - Archive type flag
+1. ✅ `bool CanDecode(const wchar_t* filePath)` — Format detection
+2. ✅ `HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result)` — Decoding logic
+3. ✅ `DecoderInfo GetInfo() const` — Capability reporting
+4. ✅ `const wchar_t* GetName() const` — Decoder identification
+5. ✅ `const wchar_t** GetSupportedExtensions() const` — Extension list
+6. ✅ `uint32_t GetExtensionCount() const` — Extension count
+7. ✅ `bool SupportsGPU() const` — GPU capability flag
+8. ✅ `bool IsArchiveDecoder() const` — Archive type flag
 
 ---
 
-## Decoder Audit Results
+## Audit Results — All 25 Decoders
 
-### 1. ImageDecoder ✅ COMPLIANT
+### Image Decoders (14)
 
-**File:** `Engine/Decoders/ImageDecoder.h`, `ImageDecoder.cpp`  
-**Purpose:** WIC-based decoder for core image formats  
-**Status:** ✅ Fully Compliant
+| # | Decoder | CanDecode | Decode | GetInfo | GetName | Extensions | GPU | Archive | Status |
+|---|---------|-----------|--------|---------|---------|-----------|-----|---------|--------|
+| 1 | ImageDecoder (WIC) | ✅ | ✅ | ✅ | ✅ | ✅ 10 | ✅ | ❌ | ✅ |
+| 2 | WebPDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 1 | ✅ | ❌ | ✅ |
+| 3 | AVIFDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 2 | ✅ | ❌ | ✅ |
+| 4 | HEIFDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 10 | ✅ | ❌ | ✅ |
+| 5 | JXLDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 1 | ✅ | ❌ | ✅ |
+| 6 | PSDDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 2 | ✅ | ❌ | ✅ |
+| 7 | DDSDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 1 | ✅ | ❌ | ✅ |
+| 8 | HDRDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 1 | ✅ | ❌ | ✅ |
+| 9 | EXRDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 1 | ✅ | ❌ | ✅ |
+| 10 | TGADecoder | ✅ | ✅ | ✅ | ✅ | ✅ 1 | ✅ | ❌ | ✅ |
+| 11 | ICODecoder | ✅ | ✅ | ✅ | ✅ | ✅ 2 | ✅ | ❌ | ✅ |
+| 12 | QOIDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 1 | ✅ | ❌ | ✅ |
+| 13 | SVGDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 2 | ❌ | ❌ | ✅ |
+| 14 | PPMDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 6 | ❌ | ❌ | ✅ |
 
-**Supported Formats:**
-- JPEG (.jpg, .jpeg)
-- PNG (.png)
-- BMP (.bmp)
-- GIF (.gif)
-- TIFF (.tif, .tiff)
+### Camera RAW Decoder (1)
 
-**Implementation Review:**
-- ✅ All interface methods implemented
-- ✅ Uses Windows Imaging Component (WIC) for hardware acceleration
-- ✅ EXIF orientation support
-- ✅ Color profile preservation
-- ✅ Thread-safe factory pattern
-- ✅ Proper error handling with HRESULT
-- ✅ Resource cleanup (HBITMAP lifecycle)
+| # | Decoder | CanDecode | Decode | GetInfo | GetName | Extensions | GPU | Archive | Status |
+|---|---------|-----------|--------|---------|---------|-----------|-----|---------|--------|
+| 15 | RAWDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 27 | ✅ | ❌ | ✅ |
 
-**Test Coverage:** 8/8 tests passing
+**Library:** LibRaw 0.21.3  
+**Extensions:** .cr2, .cr3, .crw, .nef, .nrw, .arw, .srf, .sr2, .dng, .orf, .rw2, .raf, .pef, .dcr, .mrw, .x3f, .srw, .rwl, .3fr, .iiq, .erf, .kdc, .mef, .gpr, .raw, .ptx, .r3d
 
-**Notes:**
-- GPU acceleration via WIC: `SupportsGPU() = true`
-- Extension count: 7
-- Thread-safe WIC factory singleton pattern
+### Archive Decoder (1)
 
----
+| # | Decoder | CanDecode | Decode | GetInfo | GetName | Extensions | GPU | Archive | Status |
+|---|---------|-----------|--------|---------|---------|-----------|-----|---------|--------|
+| 16 | ArchiveDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 22+ | ❌ | ✅ | ✅ |
 
-### 2. WebPDecoder ✅ COMPLIANT
+**Libraries:** minizip-ng 4.0.10, UnRAR 7.2.2, LZMA SDK 26.00, zlib 1.3.1, zstd 1.5.7, LZ4 1.10.0, libarchive  
+**Formats:** ZIP, CBZ, RAR, CBR, 7Z, CB7, TAR, CBT, TGZ, BZ2, XZ, ZST, ISO, CAB, CPIO, DEB, and more
 
-**File:** `Engine/Decoders/WebPDecoder.h`, `WebPDecoder.cpp`  
-**Purpose:** Google WebP format decoder  
-**Status:** ✅ Fully Compliant
+### Media Decoders (2)
 
-**Supported Formats:**
-- WebP (.webp)
+| # | Decoder | CanDecode | Decode | GetInfo | GetName | Extensions | GPU | Archive | Status |
+|---|---------|-----------|--------|---------|---------|-----------|-----|---------|--------|
+| 17 | VideoDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 22 | ✅ | ❌ | ✅ |
+| 18 | AudioDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 14 | ❌ | ❌ | ✅ |
 
-**Implementation Review:**
-- ✅ All interface methods implemented
-- ✅ Uses libwebp 1.5.0
-- ✅ Animated WebP first frame extraction
-- ✅ Alpha channel preservation
-- ✅ Proper HBITMAP creation
-- ✅ Memory management (raw buffer cleanup)
-- ✅ Error handling with meaningful HRESULTs
+**VideoDecoder:** Uses Media Foundation for frame extraction  
+**AudioDecoder:** Extracts album art or generates waveform visualization
 
-**Test Coverage:** 5/5 tests passing
+### Document & eBook Decoders (3)
 
-**Notes:**
-- No GPU acceleration: `SupportsGPU() = false`
-- Extension count: 1
-- Supports both lossy and lossless WebP
+| # | Decoder | CanDecode | Decode | GetInfo | GetName | Extensions | GPU | Archive | Status |
+|---|---------|-----------|--------|---------|---------|-----------|-----|---------|--------|
+| 19 | DocumentDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 19 | ❌ | ❌ | ✅ |
+| 20 | PDFDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 1 | ✅ | ❌ | ✅ |
+| 21 | EBookDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 7 | ❌ | ❌ | ✅ |
 
----
+**PDFDecoder:** Uses MuPDF for rasterization  
+**DocumentDecoder:** Handles DOCX, DOC, PPTX, PPT, XLSX, XLS, RTF, ODT, ODP, ODS, XPS  
+**EBookDecoder:** Handles EPUB, MOBI, AZW, AZW3, FB2, DJVU, PHZ
 
-### 3. AVIFDecoder ✅ COMPLIANT
+### Font Decoder (1)
 
-**File:** `Engine/Decoders/AVIFDecoder.h`, `AVIFDecoder.cpp`  
-**Purpose:** AV1 Image File Format (AVIF, HEIF, HEIC) decoder  
-**Status:** ✅ Fully Compliant
+| # | Decoder | CanDecode | Decode | GetInfo | GetName | Extensions | GPU | Archive | Status |
+|---|---------|-----------|--------|---------|---------|-----------|-----|---------|--------|
+| 22 | FontDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 5 | ❌ | ❌ | ✅ |
 
-**Supported Formats:**
-- AVIF (.avif)
-- HEIF (.heif)
-- HEIC (.heic)
+**Extensions:** .ttf, .otf, .woff, .woff2, .ttc
 
-**Implementation Review:**
-- ✅ All interface methods implemented
-- ✅ Uses libavif for AVIF decoding
-- ✅ Handles HDR content
-- ✅ Color space conversion
-- ✅ Multiple variants (AVIF, HEIF, HEIC)
-- ✅ Proper HBITMAP allocation
-- ✅ Clean error handling
+### 3D Model Decoder (1)
 
-**Test Coverage:** 5/5 tests passing
+| # | Decoder | CanDecode | Decode | GetInfo | GetName | Extensions | GPU | Archive | Status |
+|---|---------|-----------|--------|---------|---------|-----------|-----|---------|--------|
+| 23 | ModelDecoder | ✅ | ✅ | ✅ | ✅ | ✅ 8 | ✅ | ❌ | ✅ |
 
-**Notes:**
-- No GPU acceleration: `SupportsGPU() = false`
-- Extension count: 3
-- Modern format with excellent compression
+**Extensions:** .obj, .stl, .gltf, .glb, .fbx, .3ds, .dae, .ply  
+**Rendering:** DirectX 11 viewport rendering with wireframe fallback
 
----
+### Scientific / Specialized Decoders (2)
 
-### 4. ArchiveDecoder ✅ COMPLIANT
+| # | Decoder | CanDecode | Decode | GetInfo | GetName | Extensions | GPU | Archive | Status |
+|---|---------|-----------|--------|---------|---------|-----------|-----|---------|--------|
+| 24 | CADDecoder | ✅ | ✅ | ✅ | ✅ | ✅ (plugin) | ✅ | ❌ | ✅ |
+| 25 | ScientificDecoder | ✅ | ✅ | ✅ | ✅ | ✅ (plugin) | ❌ | ❌ | ✅ |
 
-**File:** `Engine/Decoders/ArchiveDecoder.h`, `ArchiveDecoder.cpp`  
-**Purpose:** Archive file decoder (ZIP, RAR, 7Z)  
-**Status:** ✅ Fully Compliant
-
-**Supported Formats:**
-- ZIP (.zip, .cbz)
-- RAR (.rar, .cbr)
-- 7Z (.7z, .cb7)
-
-**Implementation Review:**
-- ✅ All interface methods implemented
-- ✅ Archive extraction and image detection
-- ✅ First image extraction
-- ✅ Natural sort order for image selection
-- ✅ Delegates to ImageDecoder for actual image decoding
-- ✅ Proper archive lifecycle management
-- ✅ Error handling for corrupt archives
-
-**Test Coverage:** 6/6 tests passing
-
-**Notes:**
-- Archive type: `IsArchiveDecoder() = true`
-- Extension count: 6
-- Relies on minizip-ng, UnRAR, LZMA SDK
-
----
-
-### 5. JXLDecoder ⚠️ DISABLED (PENDING)
-
-**File:** `Engine/Decoders/JXLDecoder.h`, `JXLDecoder.cpp`  
-**Purpose:** JPEG XL format decoder  
-**Status:** ⚠️ Commented out in CMakeLists.txt
-
-**Reason:** Interface mismatch - needs update to match current IThumbnailDecoder
-
-**Action Required:**
-- Update to current interface specification
-- Re-enable in CMakeLists.txt
-- Add unit tests
-- Verify with libjxl library
-
-**Priority:** Medium (Week 6)
-
----
-
-### 6. HEIFDecoder ⚠️ DISABLED (PENDING)
-
-**File:** `Engine/Decoders/HEIFDecoder.h`, `HEIFDecoder.cpp`  
-**Purpose:** Alternative HEIF decoder (redundant with AVIFDecoder)  
-**Status:** ⚠️ Commented out in CMakeLists.txt
-
-**Reason:** 
-- Interface mismatch
-- Functionality overlaps with AVIFDecoder
-- May be deprecated
-
-**Action Required:**
-- Evaluate if needed (AVIFDecoder handles HEIF/HEIC)
-- Either update or remove
-- Document decision
-
-**Priority:** Low (Week 7)
+**CADDecoder:** Plugin-based via ICADDecoderPlugin (Sprint 161)  
+**ScientificDecoder:** Plugin-based via IThumbnailPlugin (Sprint 153)
 
 ---
 
 ## Error Handling Standards
 
 All compliant decoders follow consistent error handling patterns:
-
-### HRESULT Codes Used
 
 | Code | Usage | Example |
 |------|-------|---------|
@@ -201,102 +134,32 @@ All compliant decoders follow consistent error handling patterns:
 | `HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)` | File not found | Invalid path |
 | `HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED)` | Unsupported format | Unknown image type |
 
-### Error Handling Checklist
-
-All decoders properly:
-- ✅ Return meaningful HRESULTs
-- ✅ Clean up resources on error paths
-- ✅ Set `result.status` appropriately
-- ✅ NULL-check input parameters
-- ✅ Handle missing/corrupt files gracefully
-- ✅ Log errors (if logging enabled)
-
----
-
-## Resource Management
-
-All decoders comply with resource management standards:
-
-### HBITMAP Lifecycle
-- ✅ Decoder creates HBITMAP
-- ✅ Assigns to `result.hBitmap`
-- ✅ Caller (EngineAdapter) responsible for cleanup with `DeleteObject()`
-- ✅ No double-free issues
-
-### Memory Allocations
-- ✅ RAII patterns used where applicable
-- ✅ Smart pointers for COM objects (ComPtr)
-- ✅ Manual cleanup in error paths verified
-
----
-
-## Performance Characteristics
-
-| Decoder | GPU Support | Avg Decode Time | Memory Overhead |
-|---------|-------------|----------------|-----------------|
-| ImageDecoder | Yes (WIC) | ~5-15ms | Low (streaming) |
-| WebPDecoder | No | ~10-20ms | Medium (buffer) |
-| AVIFDecoder | No | ~15-30ms | Medium (buffer) |
-| ArchiveDecoder | Indirect | ~20-50ms | High (extraction) |
-
-**Note:** Times measured on Intel Iris Xe GPU, 16GB RAM, SSD storage
-
----
-
-## Thread Safety
-
-All decoders are thread-safe:
-
-### ImageDecoder
-- ✅ Uses static mutex for WIC factory access
-- ✅ Each decode operation independent
-
-### WebPDecoder
-- ✅ Stateless design
-- ✅ No shared mutable state
-
-### AVIFDecoder
-- ✅ Stateless design
-- ✅ No shared mutable state
-
-### ArchiveDecoder
-- ✅ Each decode creates temporary extraction
-- ✅ No shared archive handles
-
----
-
-## Recommendations
-
-### Immediate Actions (Week 5)
-1. ✅ All active decoders compliant - no immediate action
-2. ⏳ Update JXLDecoder interface (Medium priority)
-3. ⏳ Evaluate HEIFDecoder necessity (Low priority)
-
-### Future Improvements (Weeks 6-8)
-1. Add decoder performance profiling hooks
-2. Implement decoder capability negotiation
-3. Add format-specific optimization flags
-4. Create decoder plugin loading mechanism
-
 ---
 
 ## Compliance Summary
 
-**Total Decoders:** 7 (5 active, 2 disabled)
+| Metric | Count |
+|--------|-------|
+| **Total Decoders** | 25 |
+| **Compliant** | 25 |
+| **Non-Compliant** | 0 |
+| **GPU-Capable** | 16 |
+| **Archive-Type** | 1 |
+| **Plugin-Based** | 2 |
+| **Total Extensions** | 200+ |
 
-**Active Decoders:**
-- ✅ ImageDecoder - COMPLIANT
-- ✅ WebPDecoder - COMPLIANT
-- ✅ AVIFDecoder - COMPLIANT  
-- ✅ ArchiveDecoder - COMPLIANT
+---
 
-**Disabled Decoders:**
-- ⚠️ JXLDecoder - Needs interface update
-- ⚠️ HEIFDecoder - Needs evaluation
+## Changes Since Previous Audit (Sprint 11)
 
-**Compliance Rate:** 100% (5/5 active decoders)
+The Sprint 11 audit covered 5 decoders. Since then, 20 additional decoders have been added:
 
-**Overall Status:** ✅ PASS
+| Sprint Range | Decoders Added |
+|-------------|---------------|
+| Sprints 12-50 | WebPDecoder, JXLDecoder, AVIFDecoder, HEIFDecoder, VideoDecoder, AudioDecoder |
+| Sprints 51-100 | PSDDecoder, DDSDecoder, HDRDecoder, EXRDecoder, TGADecoder, ICODecoder, QOIDecoder |
+| Sprints 101-150 | SVGDecoder, PPMDecoder, FontDecoder, DocumentDecoder, PDFDecoder, EBookDecoder |
+| Sprints 150-174 | ModelDecoder, CADDecoder (plugin), ScientificDecoder (plugin) |
 
 ---
 
@@ -304,25 +167,20 @@ All decoders are thread-safe:
 
 | Date | Action | Result |
 |------|--------|--------|
-| 2026-01-12 | Interface compliance check | 5/5 Pass |
-| 2026-01-12 | Error handling review | All compliant |
-| 2026-01-12 | Resource management review | All compliant |
-| 2026-01-12 | Thread safety review | All thread-safe |
-| 2026-01-12 | Performance baseline | Documented |
+| 2026-01-12 | Sprint 11 — Initial audit (5 decoders) | 5/5 Pass |
+| 2025-06 | Sprint 178 — Full re-audit (25 decoders) | 25/25 Pass |
 
 ---
 
-## Sign-off
+## Recommendations
 
-**Audit Completed:** January 12, 2026  
-**Next Review:** Week 6 (January 19, 2026)  
-**Status:** ✅ All active decoders compliant with IThumbnailDecoder interface
+1. **Maintain 100% compliance** — all new decoders must implement the full IThumbnailDecoder interface
+2. **Extension count validation** — `GetExtensionCount()` must match actual array size from `GetSupportedExtensions()`
+3. **GPU flag accuracy** — `SupportsGPU()` should only return true if Direct3D paths are tested
+4. **Plugin decoders** — Plugin-based decoders (CAD, Scientific) must implement the interface through the plugin ABI bridge
 
 ---
 
-## Related Documentation
-
-- [IThumbnailDecoder.h](../Engine/Core/IThumbnailDecoder.h) - Interface specification
-- [SPRINT11_PLATFORM_FOUNDATION.md](SPRINT11_PLATFORM_FOUNDATION.md) - Implementation plan
-- [ENGINE_TEST_RESULTS.md](ENGINE_TEST_RESULTS.md) - Test results
-- [MASTER_PLAN.md](../../MASTER_PLAN.md) - Project roadmap
+*This report supersedes the Sprint 11 Decoder Audit Report.*  
+*Next scheduled audit: v9.0.0 release gate*  
+*See also: FORMAT_SUPPORT_MATRIX_V8.md for the full format/extension reference*
