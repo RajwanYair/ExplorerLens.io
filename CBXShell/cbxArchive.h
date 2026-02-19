@@ -192,6 +192,8 @@
 #define CBXTYPE_VTF 89	// .vtf Valve Texture Format (Sprint 184)
 #define CBXTYPE_ORA 90	// .ora OpenRaster image (Sprint 185)
 #define CBXTYPE_XCF 91	// .xcf GIMP native image (Sprint 185)
+#define CBXTYPE_SGI 92	// .sgi/.rgb/.rgba/.bw SGI image (Sprint 186)
+#define CBXTYPE_XPM 93	// .xpm X PixMap image (Sprint 186)
 
 // Image format identifiers (for detection within archives)
 #define IMGTYPE_UNKNOWN 0
@@ -2323,6 +2325,18 @@ namespace __cbx
 				return CBXTYPE_ORA;
 			if (StrEqual(szExt, _T(".xcf")))
 				return CBXTYPE_XCF;
+
+			// Legacy image formats (Sprint 186)
+			if (StrEqual(szExt, _T(".sgi")))
+				return CBXTYPE_SGI;
+			if (StrEqual(szExt, _T(".rgb")))
+				return CBXTYPE_SGI;
+			if (StrEqual(szExt, _T(".rgba")))
+				return CBXTYPE_SGI;
+			if (StrEqual(szExt, _T(".bw")))
+				return CBXTYPE_SGI;
+			if (StrEqual(szExt, _T(".xpm")))
+				return CBXTYPE_XPM;
 
 			return CBXTYPE_NONE;
 		}

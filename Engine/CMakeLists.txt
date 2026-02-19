@@ -124,6 +124,8 @@ set(ENGINE_HEADERS
     Decoders/VTFDecoder.h          # Sprint 184 — Valve Texture Format
     Decoders/OpenRasterDecoder.h   # Sprint 185 — OpenRaster (.ora)
     Decoders/XCFDecoder.h          # Sprint 185 — GIMP XCF native
+    Decoders/SGIDecoder.h          # Sprint 186 — SGI/RGB image
+    Decoders/XPMDecoder.h          # Sprint 186 — X PixMap
     
     # GPU
     GPU/D3D11Renderer.h
@@ -287,6 +289,8 @@ set(ENGINE_SOURCES
     Decoders/VTFDecoder.cpp        # Sprint 184 — Valve Texture Format
     Decoders/OpenRasterDecoder.cpp # Sprint 185 — OpenRaster (.ora)
     Decoders/XCFDecoder.cpp        # Sprint 185 — GIMP XCF native
+    Decoders/SGIDecoder.cpp        # Sprint 186 — SGI/RGB image
+    Decoders/XPMDecoder.cpp        # Sprint 186 — X PixMap
     
     # GPU
     GPU/D3D11Renderer.cpp

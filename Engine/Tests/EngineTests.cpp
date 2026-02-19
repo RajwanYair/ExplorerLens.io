@@ -32,6 +32,8 @@
 #include "../Decoders/VTFDecoder.h"
 #include "../Decoders/OpenRasterDecoder.h"
 #include "../Decoders/XCFDecoder.h"
+#include "../Decoders/SGIDecoder.h"
+#include "../Decoders/XPMDecoder.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -1610,6 +1612,89 @@ TEST(TestXCFDecoder_ColorModes)
 }
 
 //==============================================================================
+// Sprint 186: SGI/RGB & XPM — Legacy Image Formats
+//==============================================================================
+
+TEST(TestSGIDecoder_ExtensionCheck)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(SGIDecoder::IsSGIExtension(".sgi"));
+    ASSERT(SGIDecoder::IsSGIExtension(".rgb"));
+    ASSERT(SGIDecoder::IsSGIExtension(".rgba"));
+    ASSERT(SGIDecoder::IsSGIExtension(".bw"));
+    ASSERT(SGIDecoder::IsSGIExtension(".SGI"));
+    ASSERT(!SGIDecoder::IsSGIExtension(".png"));
+}
+
+TEST(TestSGIDecoder_Create)
+{
+    using namespace DarkThumbs::Decoders;
+    SGIDecoder decoder;
+    ASSERT(SGIDecoder::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(SGIDecoder::EXTENSIONS[0]) == ".sgi");
+    // Count extensions
+    int count = 0;
+    while (SGIDecoder::EXTENSIONS[count] != nullptr) count++;
+    ASSERT(count == 6); // .sgi .rgb .rgba .bw .int .inta
+}
+
+TEST(TestSGIDecoder_InvalidFile)
+{
+    using namespace DarkThumbs::Decoders;
+    SGIDecoder decoder;
+    auto result = decoder.Decode("nonexistent.sgi");
+    ASSERT(!result.success);
+}
+
+TEST(TestSGIDecoder_ReadInfoInvalid)
+{
+    using namespace DarkThumbs::Decoders;
+    SGIDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.sgi");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestSGIDecoder_StorageTypes)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(static_cast<uint8_t>(SGIStorageType::Verbatim) == 0);
+    ASSERT(static_cast<uint8_t>(SGIStorageType::RLE) == 1);
+}
+
+TEST(TestXPMDecoder_ExtensionCheck)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(XPMDecoder::IsXPMExtension(".xpm"));
+    ASSERT(XPMDecoder::IsXPMExtension(".XPM"));
+    ASSERT(!XPMDecoder::IsXPMExtension(".png"));
+}
+
+TEST(TestXPMDecoder_Create)
+{
+    using namespace DarkThumbs::Decoders;
+    XPMDecoder decoder;
+    ASSERT(XPMDecoder::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(XPMDecoder::EXTENSIONS[0]) == ".xpm");
+    ASSERT(XPMDecoder::EXTENSIONS[1] == nullptr);
+}
+
+TEST(TestXPMDecoder_InvalidFile)
+{
+    using namespace DarkThumbs::Decoders;
+    XPMDecoder decoder;
+    auto result = decoder.Decode("nonexistent.xpm");
+    ASSERT(!result.success);
+}
+
+TEST(TestXPMDecoder_ReadInfoInvalid)
+{
+    using namespace DarkThumbs::Decoders;
+    XPMDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.xpm");
+    ASSERT(!info.IsValid());
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2125,6 +2210,17 @@ int main()
     RUN_TEST(TestXCFDecoder_InvalidFile);
     RUN_TEST(TestXCFDecoder_ReadInfoInvalid);
     RUN_TEST(TestXCFDecoder_ColorModes);
+    
+    std::wcout << L"Sprint 186 - SGI/RGB & XPM:" << std::endl;
+    RUN_TEST(TestSGIDecoder_ExtensionCheck);
+    RUN_TEST(TestSGIDecoder_Create);
+    RUN_TEST(TestSGIDecoder_InvalidFile);
+    RUN_TEST(TestSGIDecoder_ReadInfoInvalid);
+    RUN_TEST(TestSGIDecoder_StorageTypes);
+    RUN_TEST(TestXPMDecoder_ExtensionCheck);
+    RUN_TEST(TestXPMDecoder_Create);
+    RUN_TEST(TestXPMDecoder_InvalidFile);
+    RUN_TEST(TestXPMDecoder_ReadInfoInvalid);
     
     std::wcout << std::endl;
     
