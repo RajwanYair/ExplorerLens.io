@@ -154,6 +154,7 @@ set(ENGINE_HEADERS
     Utils/EXIFOrientation.h
     Utils/MemoryMappedFile.h
     Utils/SmallObjectPool.h
+    Utils/CodeCoverageIntegration.h  # Sprint 190 — Code coverage & fuzzing
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -319,6 +320,7 @@ set(ENGINE_SOURCES
     Utils/SIMDScaler.cpp
     Utils/HardwareCapabilities.cpp
     Utils/EXIFOrientation.cpp
+    Utils/CodeCoverageIntegration.cpp  # Sprint 190 — Code coverage & fuzzing
 )
 
 #==============================================================================

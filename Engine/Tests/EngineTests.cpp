@@ -37,6 +37,7 @@
 #include "../Pipeline/AsyncThumbnailProvider.h"
 #include "../GPU/D3D12ComputePipeline.h"
 #include "../Pipeline/ParallelBatchDecoder.h"
+#include "../Utils/CodeCoverageIntegration.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -1977,6 +1978,85 @@ TEST(TestBatchDecoder_CancelBatch)
 }
 
 //==============================================================================
+// Sprint 190: Code Coverage & Fuzzing Tests
+//==============================================================================
+
+TEST(TestCoverage_Create)
+{
+    CodeCoverageIntegration cov;
+    auto thresholds = cov.GetThresholds();
+    ASSERT(thresholds.minLineCoverage == 60.0);
+}
+
+TEST(TestCoverage_CIThresholds)
+{
+    auto t = CoverageThresholds::ForCI();
+    ASSERT(t.minLineCoverage == 60.0);
+    ASSERT(t.minBranchCoverage == 40.0);
+    ASSERT(t.minFunctionCoverage == 70.0);
+}
+
+TEST(TestCoverage_ReleaseThresholds)
+{
+    auto t = CoverageThresholds::ForRelease();
+    ASSERT(t.minLineCoverage == 75.0);
+    ASSERT(t.minBranchCoverage == 55.0);
+    ASSERT(t.minFunctionCoverage == 85.0);
+}
+
+TEST(TestCoverage_GenerateCommand)
+{
+    CodeCoverageIntegration cov;
+    auto cmd = cov.GenerateCoverageCommand(L"EngineTests.exe", L"coverage-output");
+    ASSERT(!cmd.empty());
+    ASSERT(cmd.find(L"OpenCppCoverage") != std::wstring::npos);
+    ASSERT(cmd.find(L"EngineTests.exe") != std::wstring::npos);
+}
+
+TEST(TestCoverage_MetricNames)
+{
+    ASSERT(std::wstring(CodeCoverageIntegration::GetMetricName(CoverageMetric::LineCoverage)) == L"LineCoverage");
+    ASSERT(std::wstring(CodeCoverageIntegration::GetMetricName(CoverageMetric::BranchCoverage)) == L"BranchCoverage");
+}
+
+TEST(TestCoverage_FuzzTargetNames)
+{
+    ASSERT(std::wstring(CodeCoverageIntegration::GetFuzzTargetName(FuzzTargetType::HeaderParsing)) == L"HeaderParsing");
+    ASSERT(std::wstring(CodeCoverageIntegration::GetFuzzTargetName(FuzzTargetType::MalformedInput)) == L"MalformedInput");
+}
+
+TEST(TestCoverage_FuzzableDecoders)
+{
+    auto decoders = CodeCoverageIntegration::GetFuzzableDecoders();
+    ASSERT(decoders.size() >= 25);
+    // Check known decoders present
+    bool hasWebP = false, hasSGI = false;
+    for (const auto& d : decoders) {
+        if (d == L"WebPDecoder") hasWebP = true;
+        if (d == L"SGIDecoder") hasSGI = true;
+    }
+    ASSERT(hasWebP);
+    ASSERT(hasSGI);
+}
+
+TEST(TestCoverage_GenerateFuzzTargets)
+{
+    CodeCoverageIntegration cov;
+    auto targets = cov.GenerateFuzzTargets();
+    ASSERT(targets.size() >= 25);
+    ASSERT(!targets[0].decoderName.empty());
+    ASSERT(targets[0].targetTypes.size() == 3);
+}
+
+TEST(TestCoverage_ValidateEmpty)
+{
+    CodeCoverageIntegration cov;
+    CoverageReport report;
+    // Empty report should not meet thresholds
+    ASSERT(!cov.ValidateCoverage(report));
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2538,6 +2618,17 @@ int main()
     RUN_TEST(TestBatchDecoder_SubmitEmpty);
     RUN_TEST(TestBatchDecoder_SubmitBatch);
     RUN_TEST(TestBatchDecoder_CancelBatch);
+    
+    std::wcout << L"Sprint 190 - Code Coverage & Fuzzing:" << std::endl;
+    RUN_TEST(TestCoverage_Create);
+    RUN_TEST(TestCoverage_CIThresholds);
+    RUN_TEST(TestCoverage_ReleaseThresholds);
+    RUN_TEST(TestCoverage_GenerateCommand);
+    RUN_TEST(TestCoverage_MetricNames);
+    RUN_TEST(TestCoverage_FuzzTargetNames);
+    RUN_TEST(TestCoverage_FuzzableDecoders);
+    RUN_TEST(TestCoverage_GenerateFuzzTargets);
+    RUN_TEST(TestCoverage_ValidateEmpty);
     
     std::wcout << std::endl;
     
