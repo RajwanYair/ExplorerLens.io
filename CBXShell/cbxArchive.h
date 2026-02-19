@@ -187,6 +187,7 @@
 #define CBXTYPE_PCX 84	// .pcx ZSoft PCX image
 #define CBXTYPE_FARBFELD 85	// .ff Farbfeld image
 #define CBXTYPE_JP2 86	// .jp2/.j2k/.j2c/.jpx JPEG 2000 (Sprint 181)
+#define CBXTYPE_EPS 87	// .eps/.epsf/.ps Encapsulated PostScript (Sprint 183)
 
 // Image format identifiers (for detection within archives)
 #define IMGTYPE_UNKNOWN 0
@@ -2292,6 +2293,18 @@ namespace __cbx
 				return CBXTYPE_JP2;
 			if (StrEqual(szExt, _T(".jph")))
 				return CBXTYPE_JP2;
+
+			// Vector/PostScript formats (Sprint 183)
+			if (StrEqual(szExt, _T(".eps")))
+				return CBXTYPE_EPS;
+			if (StrEqual(szExt, _T(".epsf")))
+				return CBXTYPE_EPS;
+			if (StrEqual(szExt, _T(".ps")))
+				return CBXTYPE_EPS;
+
+			// Adobe Illustrator files — most are PDF-based (Sprint 183)
+			if (StrEqual(szExt, _T(".ai")))
+				return CBXTYPE_PDF;
 
 			return CBXTYPE_NONE;
 		}

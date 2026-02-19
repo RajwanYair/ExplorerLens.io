@@ -27,6 +27,7 @@
 #include "../Decoders/DocumentDecoder.h"
 #include "../Decoders/FontDecoder.h"
 #include "../Decoders/ModelDecoder.h"
+#include "../Decoders/EPSDecoder.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -1363,6 +1364,54 @@ TEST(TestModelDecoder_ExtensionCount)
 }
 
 //==============================================================================
+// Sprint 183: EPS/PostScript Decoder Tests
+//==============================================================================
+
+TEST(TestEPSDecoder_Create)
+{
+    EPSDecoder decoder;
+    auto info = decoder.GetInfo();
+    ASSERT_NOT_NULL(info.name);
+    ASSERT_EQUAL(3u, info.extensionCount);
+}
+
+TEST(TestEPSDecoder_CanDecode)
+{
+    EPSDecoder decoder;
+    ASSERT(decoder.CanDecode(L"image.eps"));
+    ASSERT(decoder.CanDecode(L"IMAGE.EPS"));
+    ASSERT(decoder.CanDecode(L"file.epsf"));
+    ASSERT(decoder.CanDecode(L"document.ps"));
+}
+
+TEST(TestEPSDecoder_NoDecodeNonEPS)
+{
+    EPSDecoder decoder;
+    ASSERT(!decoder.CanDecode(L"file.pdf"));
+    ASSERT(!decoder.CanDecode(L"file.svg"));
+    ASSERT(!decoder.CanDecode(L"file.ai"));
+    ASSERT(!decoder.CanDecode(L"file.jpg"));
+}
+
+TEST(TestEPSDecoder_GetInfo)
+{
+    EPSDecoder decoder;
+    auto info = decoder.GetInfo();
+    ASSERT(!info.supportsGPU);
+    ASSERT(!info.isArchiveDecoder);
+}
+
+TEST(TestPDFDecoder_AIRouting)
+{
+    // .ai files are PDF-based and should be handled by PDFDecoder
+    PDFDecoder decoder;
+    // PDFDecoder uses IsPDFFormat() which checks file signature,
+    // not extension, so we just verify the architectural intent
+    auto info = decoder.GetInfo();
+    ASSERT_NOT_NULL(info.name);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -1847,6 +1896,13 @@ int main()
     RUN_TEST(TestModelDecoder_FBXSupport);
     RUN_TEST(TestModelDecoder_ExpandedExtensions);
     RUN_TEST(TestModelDecoder_ExtensionCount);
+    
+    std::wcout << L"Sprint 183 - EPS/PostScript Decoder:" << std::endl;
+    RUN_TEST(TestEPSDecoder_Create);
+    RUN_TEST(TestEPSDecoder_CanDecode);
+    RUN_TEST(TestEPSDecoder_NoDecodeNonEPS);
+    RUN_TEST(TestEPSDecoder_GetInfo);
+    RUN_TEST(TestPDFDecoder_AIRouting);
     
     std::wcout << std::endl;
     

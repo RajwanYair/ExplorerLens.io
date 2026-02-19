@@ -120,6 +120,7 @@ set(ENGINE_HEADERS
     Decoders/WMFDecoder.h         # Sprint 180 — Windows Metafile (WMF/EMF)
     Decoders/PCXDecoder.h         # Sprint 180 — ZSoft PCX image
     Decoders/FarbfeldDecoder.h    # Sprint 180 — Farbfeld (.ff) image
+    Decoders/EPSDecoder.h         # Sprint 183 — EPS/PostScript vector
     
     # GPU
     GPU/D3D11Renderer.h
@@ -278,6 +279,7 @@ set(ENGINE_SOURCES
     Decoders/PCXDecoder.cpp       # Sprint 180 — ZSoft PCX image
     Decoders/FarbfeldDecoder.cpp  # Sprint 180 — Farbfeld (.ff) image
     Decoders/JPEG2000Decoder.cpp  # Sprint 181 — JPEG 2000 (JP2/J2K/JPX)
+    Decoders/EPSDecoder.cpp       # Sprint 183 — EPS/PostScript vector
     
     # GPU
     GPU/D3D11Renderer.cpp
