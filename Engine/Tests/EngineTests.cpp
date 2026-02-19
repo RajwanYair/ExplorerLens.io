@@ -44,6 +44,7 @@
 #include "../Core/HighDPIScaling.h"
 #include "../Utils/MSIXPackageManager.h"
 #include "../Utils/TestSuiteExpansion.h"
+#include "../Utils/MalformedInputHandler.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2710,6 +2711,114 @@ TEST(TestSuite_Config)
 }
 
 //==============================================================================
+// Sprint 197: Malformed Input Hardening Tests
+//==============================================================================
+
+TEST(TestMalformed_DefaultConfig)
+{
+    using namespace DarkThumbs::Engine;
+    MalformedInputHandler handler;
+    const auto& cfg = handler.GetConfig();
+    ASSERT(cfg.enableHeaderValidation == true);
+    ASSERT(cfg.enableSizeChecks == true);
+    ASSERT(cfg.decodeTimeoutMs == 30000);
+    ASSERT(cfg.bombLimits.maxImageWidth == 65536);
+    ASSERT(cfg.bombLimits.maxImageHeight == 65536);
+    ASSERT(cfg.bombLimits.maxCompressionRatio == 100.0);
+    ASSERT(cfg.returnPlaceholderOnError == true);
+}
+
+TEST(TestMalformed_DimensionsSafe)
+{
+    using namespace DarkThumbs::Engine;
+    MalformedInputHandler handler;
+    ASSERT(handler.AreDimensionsSafe(1920, 1080) == true);
+    ASSERT(handler.AreDimensionsSafe(65536, 65536) == true);
+    ASSERT(handler.AreDimensionsSafe(65537, 100) == false);
+    ASSERT(handler.AreDimensionsSafe(100, 65537) == false);
+    ASSERT(handler.AreDimensionsSafe(0, 100) == false);
+    ASSERT(handler.AreDimensionsSafe(100, 0) == false);
+}
+
+TEST(TestMalformed_DimensionsBomb)
+{
+    using namespace DarkThumbs::Engine;
+    MalformedInputHandler handler;
+    // 256M+1 pixels should fail
+    ASSERT(handler.AreDimensionsSafe(65536, 4097) == false);
+    // 256M exactly should pass
+    ASSERT(handler.AreDimensionsSafe(16384, 16384) == true);
+}
+
+TEST(TestMalformed_CompressionRatio)
+{
+    using namespace DarkThumbs::Engine;
+    MalformedInputHandler handler;
+    ASSERT(handler.IsCompressionRatioSafe(1000, 50000) == true); // 50:1
+    ASSERT(handler.IsCompressionRatioSafe(1000, 100000) == true); // 100:1
+    ASSERT(handler.IsCompressionRatioSafe(1000, 100001) == false); // >100:1
+    ASSERT(handler.IsCompressionRatioSafe(0, 1000) == false); // div by zero
+}
+
+TEST(TestMalformed_NestingDepth)
+{
+    using namespace DarkThumbs::Engine;
+    MalformedInputHandler handler;
+    ASSERT(handler.IsNestingDepthSafe(0) == true);
+    ASSERT(handler.IsNestingDepthSafe(3) == true);
+    ASSERT(handler.IsNestingDepthSafe(4) == false);
+}
+
+TEST(TestMalformed_MagicBytesPNG)
+{
+    using namespace DarkThumbs::Engine;
+    uint8_t png[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00 };
+    ASSERT(MalformedInputHandler::IsPNG(png, 8) == true);
+    ASSERT(MalformedInputHandler::CheckMagicBytes(png, 8, L"PNG") == true);
+    ASSERT(MalformedInputHandler::CheckMagicBytes(png, 8, L"JPEG") == false);
+}
+
+TEST(TestMalformed_MagicBytesJPEG)
+{
+    using namespace DarkThumbs::Engine;
+    uint8_t jpeg[] = { 0xFF, 0xD8, 0xFF, 0xE0, 0x00 };
+    ASSERT(MalformedInputHandler::IsJPEG(jpeg, 4) == true);
+    uint8_t notJpeg[] = { 0xFF, 0xD9, 0xFF };
+    ASSERT(MalformedInputHandler::IsJPEG(notJpeg, 3) == false);
+}
+
+TEST(TestMalformed_MagicBytesMultiple)
+{
+    using namespace DarkThumbs::Engine;
+    uint8_t zip[] = { 0x50, 0x4B, 0x03, 0x04 };
+    ASSERT(MalformedInputHandler::IsZIP(zip, 4) == true);
+    uint8_t bmp[] = { 0x42, 0x4D, 0x00, 0x00 };
+    ASSERT(MalformedInputHandler::IsBMP(bmp, 4) == true);
+    uint8_t pdf[] = { 0x25, 0x50, 0x44, 0x46 };
+    ASSERT(MalformedInputHandler::IsPDF(pdf, 4) == true);
+}
+
+TEST(TestMalformed_ClampDimensions)
+{
+    using namespace DarkThumbs::Engine;
+    uint32_t w = 8000, h = 6000;
+    MalformedInputHandler::ClampDimensions(w, h, 4096, 4096);
+    ASSERT(w <= 4096);
+    ASSERT(h <= 4096);
+    ASSERT(w > 0 && h > 0);
+}
+
+TEST(TestMalformed_CorruptionNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(MalformedInputHandler::GetCorruptionName(CorruptionType::None)) == L"None");
+    ASSERT(std::wstring(MalformedInputHandler::GetCorruptionName(CorruptionType::TruncatedFile)) == L"TruncatedFile");
+    ASSERT(std::wstring(MalformedInputHandler::GetCorruptionName(CorruptionType::DecompressionBomb)) == L"DecompressionBomb");
+    ASSERT(std::wstring(MalformedInputHandler::GetSeverityName(ValidationSeverity::Critical)) == L"Critical");
+    ASSERT(std::wstring(MalformedInputHandler::GetSeverityName(ValidationSeverity::Warning)) == L"Warning");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -3359,6 +3468,19 @@ int main()
     RUN_TEST(TestSuite_MeetsTargets);
     RUN_TEST(TestSuite_PassRate);
     RUN_TEST(TestSuite_Config);
+    
+    // Sprint 197: Malformed Input Hardening Tests
+    std::wcout << L"Sprint 197: Malformed Input Hardening Tests..." << std::endl;
+    RUN_TEST(TestMalformed_DefaultConfig);
+    RUN_TEST(TestMalformed_DimensionsSafe);
+    RUN_TEST(TestMalformed_DimensionsBomb);
+    RUN_TEST(TestMalformed_CompressionRatio);
+    RUN_TEST(TestMalformed_NestingDepth);
+    RUN_TEST(TestMalformed_MagicBytesPNG);
+    RUN_TEST(TestMalformed_MagicBytesJPEG);
+    RUN_TEST(TestMalformed_MagicBytesMultiple);
+    RUN_TEST(TestMalformed_ClampDimensions);
+    RUN_TEST(TestMalformed_CorruptionNames);
     
     std::wcout << std::endl;
     
