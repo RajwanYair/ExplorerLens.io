@@ -159,6 +159,7 @@ set(ENGINE_HEADERS
     Utils/CodeCoverageIntegration.h  # Sprint 190 — Code coverage & fuzzing
     Utils/MemorySafetyIntegration.h  # Sprint 191 — ASAN + memory-mapped I/O
     Utils/ARM64HardwareValidator.h    # Sprint 193 — ARM64 hardware CI validation
+    Utils/MSIXPackageManager.h        # Sprint 195 — MSIX packaging & auto-update
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -329,6 +330,7 @@ set(ENGINE_SOURCES
     Utils/CodeCoverageIntegration.cpp  # Sprint 190 — Code coverage & fuzzing
     Utils/MemorySafetyIntegration.cpp  # Sprint 191 — ASAN + memory-mapped I/O
     Utils/ARM64HardwareValidator.cpp    # Sprint 193 — ARM64 hardware CI validation
+    Utils/MSIXPackageManager.cpp        # Sprint 195 — MSIX packaging & auto-update
 )
 
 #==============================================================================

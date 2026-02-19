@@ -42,6 +42,7 @@
 #include "../Cache/PersistentDiskCache.h"
 #include "../Utils/ARM64HardwareValidator.h"
 #include "../Core/HighDPIScaling.h"
+#include "../Utils/MSIXPackageManager.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2492,6 +2493,109 @@ TEST(TestDPI_AwarenessNames)
 }
 
 //==============================================================================
+// Sprint 195: MSIX Packaging Tests
+//==============================================================================
+
+TEST(TestMSIX_GenerateManifest)
+{
+    using namespace DarkThumbs::Engine;
+    MSIXPackageManager mgr;
+    auto xml = mgr.GenerateManifest();
+    ASSERT(!xml.empty());
+    ASSERT(xml.find(L"<Package") != std::wstring::npos);
+    ASSERT(xml.find(L"<Identity") != std::wstring::npos);
+    ASSERT(xml.find(L"9E6ECB90-5A61-42BD-B851-D3297D9C7F39") != std::wstring::npos);
+}
+
+TEST(TestMSIX_ValidateManifest)
+{
+    using namespace DarkThumbs::Engine;
+    MSIXPackageManager mgr;
+    auto xml = mgr.GenerateManifest();
+    ASSERT(mgr.ValidateManifest(xml));
+    ASSERT(!mgr.ValidateManifest(L"")); // Empty fails
+    ASSERT(!mgr.ValidateManifest(L"<html></html>")); // Wrong structure
+}
+
+TEST(TestMSIX_GenerateAppInstaller)
+{
+    using namespace DarkThumbs::Engine;
+    MSIXConfig config;
+    config.autoUpdate.updateUri = L"https://example.com/DarkThumbs.appinstaller";
+    MSIXPackageManager mgr(config);
+    auto xml = mgr.GenerateAppInstaller();
+    ASSERT(!xml.empty());
+    ASSERT(xml.find(L"AppInstaller") != std::wstring::npos);
+    ASSERT(xml.find(L"UpdateSettings") != std::wstring::npos);
+}
+
+TEST(TestMSIX_ChannelNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(MSIXPackageManager::GetChannelName(PackageChannel::Stable)) == L"Stable");
+    ASSERT(std::wstring(MSIXPackageManager::GetChannelName(PackageChannel::Beta)) == L"Beta");
+    ASSERT(std::wstring(MSIXPackageManager::GetChannelName(PackageChannel::Dev)) == L"Dev");
+    ASSERT(std::wstring(MSIXPackageManager::GetChannelName(PackageChannel::Canary)) == L"Canary");
+    ASSERT(std::wstring(MSIXPackageManager::GetChannelName(PackageChannel::Internal)) == L"Internal");
+}
+
+TEST(TestMSIX_SigningNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(MSIXPackageManager::GetSigningName(SigningMode::None)) == L"None");
+    ASSERT(std::wstring(MSIXPackageManager::GetSigningName(SigningMode::SelfSigned)) == L"SelfSigned");
+    ASSERT(std::wstring(MSIXPackageManager::GetSigningName(SigningMode::Authenticode)) == L"Authenticode");
+    ASSERT(std::wstring(MSIXPackageManager::GetSigningName(SigningMode::AzureTrusted)) == L"AzureTrusted");
+}
+
+TEST(TestMSIX_PackageTypeNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(MSIXPackageManager::GetPackageTypeName(PackageType::MSIX)) == L"MSIX");
+    ASSERT(std::wstring(MSIXPackageManager::GetPackageTypeName(PackageType::MSIXBundle)) == L"MSIXBundle");
+    ASSERT(std::wstring(MSIXPackageManager::GetPackageTypeName(PackageType::SparsePackage)) == L"SparsePackage");
+}
+
+TEST(TestMSIX_Capabilities)
+{
+    using namespace DarkThumbs::Engine;
+    auto caps = PackageCapability::RunFullTrust | PackageCapability::ShellExtension | PackageCapability::COMServer;
+    ASSERT(HasCapability(caps, PackageCapability::RunFullTrust));
+    ASSERT(HasCapability(caps, PackageCapability::ShellExtension));
+    ASSERT(HasCapability(caps, PackageCapability::COMServer));
+    ASSERT(!HasCapability(caps, PackageCapability::Notifications));
+}
+
+TEST(TestMSIX_BuildPackage)
+{
+    using namespace DarkThumbs::Engine;
+    MSIXPackageManager mgr;
+    auto result = mgr.BuildPackage(L"C:\\temp\\output");
+    ASSERT(result.success);
+    ASSERT(!result.outputPath.empty());
+    ASSERT(result.fileSizeBytes > 0);
+}
+
+TEST(TestMSIX_IsMSIXSupported)
+{
+    using namespace DarkThumbs::Engine;
+    bool supported = MSIXPackageManager::IsMSIXSupported();
+    // On Windows 10+, should be true
+    ASSERT(supported);
+}
+
+TEST(TestMSIX_Config)
+{
+    using namespace DarkThumbs::Engine;
+    MSIXConfig config;
+    config.version = L"9.2.0.0";
+    config.packageName = L"DarkThumbs";
+    MSIXPackageManager mgr(config);
+    ASSERT(mgr.GetConfig().version == L"9.2.0.0");
+    ASSERT(mgr.GetConfig().packageName == L"DarkThumbs");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -3115,6 +3219,19 @@ int main()
     RUN_TEST(TestDPI_ScaleFactors);
     RUN_TEST(TestDPI_ScaleNames);
     RUN_TEST(TestDPI_AwarenessNames);
+    
+    // Sprint 195: MSIX Packaging
+    std::wcout << L"Sprint 195: MSIX Packaging..." << std::endl;
+    RUN_TEST(TestMSIX_GenerateManifest);
+    RUN_TEST(TestMSIX_ValidateManifest);
+    RUN_TEST(TestMSIX_GenerateAppInstaller);
+    RUN_TEST(TestMSIX_ChannelNames);
+    RUN_TEST(TestMSIX_SigningNames);
+    RUN_TEST(TestMSIX_PackageTypeNames);
+    RUN_TEST(TestMSIX_Capabilities);
+    RUN_TEST(TestMSIX_BuildPackage);
+    RUN_TEST(TestMSIX_IsMSIXSupported);
+    RUN_TEST(TestMSIX_Config);
     
     std::wcout << std::endl;
     
