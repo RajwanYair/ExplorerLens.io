@@ -155,6 +155,7 @@ set(ENGINE_HEADERS
     Utils/MemoryMappedFile.h
     Utils/SmallObjectPool.h
     Utils/CodeCoverageIntegration.h  # Sprint 190 — Code coverage & fuzzing
+    Utils/MemorySafetyIntegration.h  # Sprint 191 — ASAN + memory-mapped I/O
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -321,6 +322,7 @@ set(ENGINE_SOURCES
     Utils/HardwareCapabilities.cpp
     Utils/EXIFOrientation.cpp
     Utils/CodeCoverageIntegration.cpp  # Sprint 190 — Code coverage & fuzzing
+    Utils/MemorySafetyIntegration.cpp  # Sprint 191 — ASAN + memory-mapped I/O
 )
 
 #==============================================================================

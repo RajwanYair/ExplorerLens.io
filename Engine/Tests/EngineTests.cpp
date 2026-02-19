@@ -38,6 +38,7 @@
 #include "../GPU/D3D12ComputePipeline.h"
 #include "../Pipeline/ParallelBatchDecoder.h"
 #include "../Utils/CodeCoverageIntegration.h"
+#include "../Utils/MemorySafetyIntegration.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2057,6 +2058,102 @@ TEST(TestCoverage_ValidateEmpty)
 }
 
 //==============================================================================
+// Sprint 191: Memory Safety Tests
+//==============================================================================
+
+TEST(TestMemSafety_ASANDetection)
+{
+    // ASAN is typically not enabled in normal builds
+    bool asanEnabled = MemorySafetyIntegration::IsASANEnabled();
+    // Just verify it doesn't crash — actual value depends on build config
+    (void)asanEnabled;
+    ASSERT(true);
+}
+
+TEST(TestMemSafety_RecommendedConfig)
+{
+    auto config = MemorySafetyIntegration::GetRecommendedConfig();
+    ASSERT(config.enableASAN);
+    ASSERT(config.enableStackProtection);
+    ASSERT(config.enableHeapProtection);
+    ASSERT(config.enableLeakDetection);
+}
+
+TEST(TestMemSafety_CompilerFlags)
+{
+    auto config = MemorySafetyIntegration::GetRecommendedConfig();
+    auto flags = config.GetCompilerFlags();
+    ASSERT(flags.find(L"/fsanitize=address") != std::wstring::npos);
+}
+
+TEST(TestMemSafety_CMakeOptions)
+{
+    auto config = MemorySafetyIntegration::GetRecommendedConfig();
+    auto opts = config.GetCMakeOptions();
+    ASSERT(!opts.empty());
+    ASSERT(opts.find(L"fsanitize") != std::wstring::npos);
+}
+
+TEST(TestMemSafety_SafeBuffer)
+{
+    uint8_t data[] = {0x01, 0x02, 0x03, 0x04, 0x05};
+    auto buffer = MemorySafetyIntegration::CreateSafeBuffer(data, 5);
+    ASSERT(buffer.IsValid());
+    ASSERT(buffer.Size() == 5);
+    ASSERT(buffer.Available() == 5);
+    
+    uint8_t val = 0;
+    ASSERT(buffer.ReadValue(val));
+    ASSERT(val == 0x01);
+    ASSERT(buffer.Available() == 4);
+}
+
+TEST(TestMemSafety_SafeBufferBounds)
+{
+    uint8_t data[] = {0xAA, 0xBB};
+    auto buffer = MemorySafetyIntegration::CreateSafeBuffer(data, 2);
+    
+    // Reading 3 bytes from 2-byte buffer should fail
+    uint8_t dst[3];
+    ASSERT(!buffer.Read(dst, 3));
+    
+    // But reading 2 should succeed
+    buffer.Seek(0);
+    ASSERT(buffer.Read(dst, 2));
+}
+
+TEST(TestMemSafety_ValidateAccess)
+{
+    SafeBuffer buffer(10);
+    ASSERT(MemorySafetyIntegration::ValidateAccess(buffer, 0, 10));
+    ASSERT(MemorySafetyIntegration::ValidateAccess(buffer, 5, 5));
+    ASSERT(!MemorySafetyIntegration::ValidateAccess(buffer, 5, 6)); // exceeds
+    ASSERT(!MemorySafetyIntegration::ValidateAccess(buffer, 11, 1)); // out of range
+}
+
+TEST(TestMemSafety_SanitizerNames)
+{
+    ASSERT(std::wstring(MemorySafetyIntegration::GetSanitizerName(SanitizerMode::None)) == L"None");
+    ASSERT(std::wstring(MemorySafetyIntegration::GetSanitizerName(SanitizerMode::AddressSanitizer)) == L"AddressSanitizer");
+    ASSERT(std::wstring(MemorySafetyIntegration::GetSanitizerName(SanitizerMode::ThreadSanitizer)) == L"ThreadSanitizer");
+}
+
+TEST(TestMemSafety_AccessPatterns)
+{
+    ASSERT(std::wstring(MemorySafetyIntegration::GetAccessPatternName(AccessPattern::Sequential)) == L"Sequential");
+    ASSERT(std::wstring(MemorySafetyIntegration::GetAccessPatternName(AccessPattern::Random)) == L"Random");
+    ASSERT(std::wstring(MemorySafetyIntegration::GetAccessPatternName(AccessPattern::HeaderOnly)) == L"HeaderOnly");
+}
+
+TEST(TestMemSafety_MaxMappableSize)
+{
+    uint64_t maxSize = MemorySafetyIntegration::GetMaxMappableSize();
+    ASSERT(maxSize > 0);
+    // On x64, should be at least 256MB
+    ASSERT(maxSize >= 256ULL * 1024 * 1024);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2629,6 +2726,18 @@ int main()
     RUN_TEST(TestCoverage_FuzzableDecoders);
     RUN_TEST(TestCoverage_GenerateFuzzTargets);
     RUN_TEST(TestCoverage_ValidateEmpty);
+    
+    std::wcout << L"Sprint 191 - Memory Safety:" << std::endl;
+    RUN_TEST(TestMemSafety_ASANDetection);
+    RUN_TEST(TestMemSafety_RecommendedConfig);
+    RUN_TEST(TestMemSafety_CompilerFlags);
+    RUN_TEST(TestMemSafety_CMakeOptions);
+    RUN_TEST(TestMemSafety_SafeBuffer);
+    RUN_TEST(TestMemSafety_SafeBufferBounds);
+    RUN_TEST(TestMemSafety_ValidateAccess);
+    RUN_TEST(TestMemSafety_SanitizerNames);
+    RUN_TEST(TestMemSafety_AccessPatterns);
+    RUN_TEST(TestMemSafety_MaxMappableSize);
     
     std::wcout << std::endl;
     
