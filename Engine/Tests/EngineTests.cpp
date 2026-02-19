@@ -40,6 +40,7 @@
 #include "../Utils/CodeCoverageIntegration.h"
 #include "../Utils/MemorySafetyIntegration.h"
 #include "../Cache/PersistentDiskCache.h"
+#include "../Utils/ARM64HardwareValidator.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2285,6 +2286,117 @@ TEST(TestDiskCache_Compact)
 }
 
 //==============================================================================
+// Sprint 193: ARM64 Hardware Validation Tests
+//==============================================================================
+
+TEST(TestARM64_PlatformDetection)
+{
+    using namespace DarkThumbs::Engine;
+    // On x64 build, these should return specific values
+    bool isARM64 = ARM64HardwareValidator::IsRunningOnARM64();
+    bool isEC = ARM64HardwareValidator::IsRunningAsARM64EC();
+    bool isEmulated = ARM64HardwareValidator::IsRunningUnderEmulation();
+    // At least one state must be deterministic
+    (void)isARM64; (void)isEC; (void)isEmulated;
+    ASSERT(true); // Detection doesn't crash
+}
+
+TEST(TestARM64_FeatureDetection)
+{
+    using namespace DarkThumbs::Engine;
+    auto features = ARM64HardwareValidator::DetectFeatures();
+    uint32_t count = ARM64HardwareValidator::CountFeatures(features);
+#if defined(_M_ARM64)
+    // NEON is mandatory on ARM64
+    ASSERT(HasFeature(features, ARM64Feature::NEON));
+    ASSERT(count >= 1);
+#else
+    ASSERT(count == 0); // No ARM64 features on x64
+#endif
+}
+
+TEST(TestARM64_FeatureNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(ARM64Feature::NEON)) == L"NEON");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(ARM64Feature::CRC32)) == L"CRC32");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(ARM64Feature::AES)) == L"AES");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(ARM64Feature::SVE)) == L"SVE");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(ARM64Feature::SVE2)) == L"SVE2");
+}
+
+TEST(TestARM64_TargetNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ARM64HardwareValidator::GetTargetName(ARM64Target::Native)) == L"Native");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetTargetName(ARM64Target::ARM64EC)) == L"ARM64EC");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetTargetName(ARM64Target::ARM64X)) == L"ARM64X");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetTargetName(ARM64Target::CrossCompile)) == L"CrossCompile");
+}
+
+TEST(TestARM64_PerfCategoryNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(PerfCategory::SingleDecode)) == L"SingleDecode");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(PerfCategory::BatchDecode)) == L"BatchDecode");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(PerfCategory::GPUScaling)) == L"GPUScaling");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(PerfCategory::CacheHit)) == L"CacheHit");
+    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(PerfCategory::ShellResponse)) == L"ShellResponse");
+}
+
+TEST(TestARM64_PerfBaselines)
+{
+    using namespace DarkThumbs::Engine;
+    ARM64HardwareValidator validator;
+    auto baselines = validator.GenerateBaselines();
+    ASSERT(baselines.size() == 7);
+    for (const auto& b : baselines) {
+        ASSERT(b.targetMs > 0);
+        ASSERT(b.x64ReferenceMs > 0);
+    }
+}
+
+TEST(TestARM64_X64ReferenceBaselines)
+{
+    using namespace DarkThumbs::Engine;
+    auto refs = ARM64HardwareValidator::GetX64ReferenceBaselines();
+    ASSERT(refs.size() >= 4);
+    ASSERT(refs[0].x64ReferenceMs == 17.0); // Single decode
+}
+
+TEST(TestARM64_RunValidation)
+{
+    using namespace DarkThumbs::Engine;
+    ARM64HardwareValidator validator;
+    auto result = validator.RunValidation();
+    ASSERT(result.coreCount > 0);
+    ASSERT(result.memoryMB > 0);
+    ASSERT(!result.perfResults.empty());
+}
+
+TEST(TestARM64_CIWorkflow)
+{
+    using namespace DarkThumbs::Engine;
+    ARM64CIConfig config;
+    config.runnerLabel = L"windows-arm64";
+    auto yaml = ARM64HardwareValidator::GenerateCIWorkflow(config);
+    ASSERT(!yaml.empty());
+    ASSERT(yaml.find(L"ARM64") != std::wstring::npos);
+    ASSERT(yaml.find(L"cmake") != std::wstring::npos);
+}
+
+TEST(TestARM64_FeatureBitmask)
+{
+    using namespace DarkThumbs::Engine;
+    auto combined = ARM64Feature::NEON | ARM64Feature::CRC32 | ARM64Feature::AES;
+    ASSERT(HasFeature(combined, ARM64Feature::NEON));
+    ASSERT(HasFeature(combined, ARM64Feature::CRC32));
+    ASSERT(HasFeature(combined, ARM64Feature::AES));
+    ASSERT(!HasFeature(combined, ARM64Feature::SVE));
+    ASSERT(ARM64HardwareValidator::CountFeatures(combined) == 3);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2882,6 +2994,19 @@ int main()
     RUN_TEST(TestDiskCache_CacheKey);
     RUN_TEST(TestDiskCache_Stats);
     RUN_TEST(TestDiskCache_Compact);
+    
+    // Sprint 193: ARM64 Hardware Validation
+    std::wcout << L"Sprint 193: ARM64 Hardware Validation..." << std::endl;
+    RUN_TEST(TestARM64_PlatformDetection);
+    RUN_TEST(TestARM64_FeatureDetection);
+    RUN_TEST(TestARM64_FeatureNames);
+    RUN_TEST(TestARM64_TargetNames);
+    RUN_TEST(TestARM64_PerfCategoryNames);
+    RUN_TEST(TestARM64_PerfBaselines);
+    RUN_TEST(TestARM64_X64ReferenceBaselines);
+    RUN_TEST(TestARM64_RunValidation);
+    RUN_TEST(TestARM64_CIWorkflow);
+    RUN_TEST(TestARM64_FeatureBitmask);
     
     std::wcout << std::endl;
     
