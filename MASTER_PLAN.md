@@ -1,14 +1,14 @@
 # DarkThumbs v7.1.0 — Unified Master Plan
 
-> **Date:** February 18, 2026 (updated)  
+> **Date:** February 19, 2026 (updated)  
 > **Status:** Active (single source of truth)  
-> **Scope:** Codebase cleanup, de-duplication, performance refactor, plugin activation, Windows 11 reliability/UI modernization, new UX enhancements, production hardening  
+> **Scope:** Codebase cleanup, de-duplication, performance refactor, plugin activation, Windows 11 reliability/UI modernization, new UX enhancements, production hardening, v8.3.0 plugin/ARM64/format/memory excellence  
 > **Build Baseline:** 0 errors / 0 warnings — CBXShell.dll (2940 KB) + CBXManager.exe (400 KB) + DarkThumbsEngine.lib (133 MB)  
 > **Test Baseline:** 100/100 unit tests, 5/5 benchmarks — 100% pass rate  
 > **Sprints Completed:** 1-149 (149 total — 49 original + 75 execution/refactor + 25 CI/release hardening)  
-> **Sprints Remaining:** 0 (current roadmap block complete)  
-> **Current Version:** v7.1.0  
-> **Next Planned Block:** Sprints 150+ (define in MASTER_PLAN.md before execution)
+> **Sprints Remaining:** 25 (Sprints 150-174 — v8.3.0 block in progress)  
+> **Current Version:** v7.1.0 → v8.3.0 (in progress)  
+> **Active Block:** Sprints 150-174 defined February 19, 2026
 
 ---
 
@@ -1365,3 +1365,88 @@ When user browses a folder dominated by one file type, memory should converge to
 4. GUI modernization reaches parity + improved accessibility without regressions.
 5. All release artifacts are reproducible, signed, and validated through full lifecycle tests.
 6. `MASTER_PLAN.md` remains the sole schedule/status truth source.
+
+---
+
+## 17) Sprint Block 150-174 — v8.3.0 Plugin Production, ARM64, Format Expansion & Memory Excellence
+
+> **Date Defined:** February 19, 2026
+> **Objective:** Productionize the plugin ecosystem, validate ARM64 target, expand format support with 6 new decoder families, and reach memory excellence KPIs for single-format directory browsing.
+> **Version Target:** v8.3.0
+> **Sprint Count:** 25 (Sprints 150-174)
+
+### Phase P1 — Plugin Ecosystem Production (Sprints 150-154)
+
+**Sprint 150: Plugin Runtime E2E Test Matrix** — `Plugin/PluginRuntimeTestMatrix.h`, 15+ tests
+**Sprint 151: Plugin Sandbox Policy Hardening** — `Plugin/PluginSandboxPolicy.h`, 14+ tests
+**Sprint 152: Plugin Compatibility Kit v2.0** — `Plugin/PluginCompatibilityKitV2.h`, 16+ tests
+**Sprint 153: Plugin Reference Pack** — `Plugin/PluginReferencePack.h`, 18+ tests
+**Sprint 154: Plugin Marketplace Trust Workflow** — `Plugin/PluginTrustChain.h`, 14+ tests
+
+### Phase P2 — ARM64 Validation (Sprints 155-159)
+
+**Sprint 155: ARM64 Build Configuration** — `Utils/ARM64BuildConfig.h`, 12+ tests
+**Sprint 156: ARM64 Library Cross-Compilation** — `Utils/ARM64LibraryMatrix.h`, 13+ tests
+**Sprint 157: ARM64 Runtime Validation** — `Utils/ARM64RuntimeValidator.h`, 14+ tests
+**Sprint 158: ARM64 Performance Baseline** — `Utils/ARM64PerformanceBaseline.h`, 13+ tests
+**Sprint 159: ARM64 CI Integration** — `Utils/ARM64CIIntegration.h`, 12+ tests
+
+### Phase P3 — Format Expansion (Sprints 160-164)
+
+**Sprint 160: JPEG 2000 Full Decoder** — `Decoders/JPEG2000Decoder.h` (enhanced), 18+ tests
+**Sprint 161: CAD Format Plugin Scaffold** — `Decoders/CADFormatPlugin.h`, 16+ tests
+**Sprint 162: glTF/GLB 3D Model Thumbnails** — `Decoders/GLTFModelDecoder.h`, 17+ tests
+**Sprint 163: Scientific Format Plugin** — `Decoders/ScientificFormatPlugin.h`, 15+ tests
+**Sprint 164: Format Fallback Intelligence** — `Pipeline/FormatFallbackEngine.h`, 16+ tests
+
+### Phase P4 — Memory Excellence (Sprints 165-169)
+
+**Sprint 165: Archive Path Memory Compaction** — `Memory/ArchiveMemoryCompactor.h`, 15+ tests
+**Sprint 166: Zero-Copy Thumbnail Pipeline** — `Pipeline/ZeroCopyPipeline.h`, 15+ tests
+**Sprint 167: Adaptive Cache Budget Manager** — `Cache/AdaptiveCacheBudgetManager.h`, 17+ tests
+**Sprint 168: Hot-Mode Directory Rollout** — `Memory/HotModeDirectoryEngine.h`, 16+ tests
+**Sprint 169: Memory Pressure Controller V2** — `Memory/MemoryPressureControllerV2.h`, 17+ tests
+
+### Phase P5 — v8.3.0 Release (Sprints 170-174)
+
+**Sprint 170: Full Matrix Validation V2** — `Utils/MatrixValidationFramework.h`, 18+ tests
+**Sprint 171: Installer Lifecycle E2E** — `Utils/InstallerLifecycleAutomation.h`, 16+ tests
+**Sprint 172: Perf & Memory Release Gate V2** — `Core/ReleaseGateV2.h`, 16+ tests
+**Sprint 173: v8.3.0 Documentation Sync** — `Core/DocumentationSyncAudit.h`, 13+ tests
+**Sprint 174: v8.3.0 Program Closure** — `Core/ProgramClosureV83.h`, 12+ tests
+
+---
+
+## 18) Sprint Block 150-174 Execution Log
+
+> Updated per commit as each sprint completes.
+
+| Sprint | Title | Status | Commit |
+|--------|-------|--------|--------|
+| 150 | Plugin Runtime Test Matrix | ✅ Done | ec37640 |
+| 151 | Plugin Sandbox Policy | ✅ Done | de857ea |
+| 152 | Plugin Compatibility Kit V2 | ✅ Done | 9fbac47 |
+| 153 | Plugin Reference Pack | ✅ Done | d49f83f |
+| 154 | Plugin Trust Chain | ✅ Done | 4ddf79d |
+| 155 | ARM64 Build Configuration | ✅ Done | 1491b7d |
+| 156 | ARM64 Library Compatibility Matrix | ✅ Done | 822ad6f |
+| 157 | ARM64 Runtime Validator | ✅ Done | 9370862 |
+| 158 | ARM64 Performance Baseline | ✅ Done | bb228e9 |
+| 159 | ARM64 CI Integration | ✅ Done | 0476bf2 |
+| 160 | JPEG 2000 Decoder Enhancement | ✅ Done | 7a7847e |
+| 161 | CAD Format Plugin | ✅ Done | a512050 |
+| 162 | glTF/GLB 3D Model Decoder | ✅ Done | becf38b |
+| 163 | Scientific Format Plugin | ✅ Done | 801cce1 |
+| 164 | Format Fallback Engine | ✅ Done | b5962e0 |
+| 165 | Archive Memory Compactor | ✅ Done | b99d78c |
+| 166 | Zero-Copy GPU Upload Pipeline | ✅ Done | 7fca4d0 |
+| 167 | Adaptive Cache Budget Manager | ✅ Done | 943b3d3 |
+| 168 | Hot-Mode Directory Engine | ✅ Done | b40f914 |
+| 169 | Memory Pressure Controller V2 | ✅ Done | 680f1ff |
+| 170 | Matrix Validation Framework | ✅ Done | 030309a |
+| 171 | Installer Lifecycle Automation | ✅ Done | 31814c2 |
+| 172 | Release Gate V2 | ✅ Done | 8eae84d |
+| 173 | Documentation Sync Audit | ✅ Done | fdb25a6 |
+| 174 | v8.3.0 Program Closure | ✅ Done | d9d65cf |
+
+**Block Status: COMPLETE ✅ — All 25 sprints delivered. v8.3.0 declared.**
