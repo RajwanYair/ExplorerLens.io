@@ -1303,6 +1303,66 @@ TEST(TestModelDecoder_GetInfo)
 }
 
 //==============================================================================
+// Sprint 182: Enhanced Model Decoder Tests — PLY, DAE, expanded extensions
+//==============================================================================
+
+TEST(TestModelDecoder_PLYSupport)
+{
+    ModelDecoder decoder;
+    ASSERT(decoder.CanDecode(L"mesh.ply"));
+    ASSERT(decoder.CanDecode(L"MESH.PLY"));
+    ASSERT(decoder.CanDecode(L"C:\\models\\scan.ply"));
+}
+
+TEST(TestModelDecoder_DAESupport)
+{
+    ModelDecoder decoder;
+    ASSERT(decoder.CanDecode(L"model.dae"));
+    ASSERT(decoder.CanDecode(L"MODEL.DAE"));
+    ASSERT(decoder.CanDecode(L"scene.dae"));
+}
+
+TEST(TestModelDecoder_3DSSupport)
+{
+    ModelDecoder decoder;
+    ASSERT(decoder.CanDecode(L"model.3ds"));
+    ASSERT(decoder.CanDecode(L"old_model.3ds"));
+}
+
+TEST(TestModelDecoder_FBXSupport)
+{
+    ModelDecoder decoder;
+    ASSERT(decoder.CanDecode(L"model.fbx"));
+    ASSERT(decoder.CanDecode(L"character.fbx"));
+}
+
+TEST(TestModelDecoder_ExpandedExtensions)
+{
+    ModelDecoder decoder;
+    // Original 4
+    ASSERT(decoder.CanDecode(L"test.obj"));
+    ASSERT(decoder.CanDecode(L"test.stl"));
+    ASSERT(decoder.CanDecode(L"test.gltf"));
+    ASSERT(decoder.CanDecode(L"test.glb"));
+    // New 4
+    ASSERT(decoder.CanDecode(L"test.ply"));
+    ASSERT(decoder.CanDecode(L"test.dae"));
+    ASSERT(decoder.CanDecode(L"test.3ds"));
+    ASSERT(decoder.CanDecode(L"test.fbx"));
+    // Negative
+    ASSERT(!decoder.CanDecode(L"test.jpg"));
+    ASSERT(!decoder.CanDecode(L"test.png"));
+}
+
+TEST(TestModelDecoder_ExtensionCount)
+{
+    ModelDecoder decoder;
+    ASSERT_EQUAL(8u, decoder.GetExtensionCount());
+    auto info = decoder.GetInfo();
+    ASSERT_EQUAL(8u, info.extensionCount);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -1779,6 +1839,14 @@ int main()
     RUN_TEST(TestModelDecoder_GLTFSupport);
     RUN_TEST(TestModelDecoder_Extensions);
     RUN_TEST(TestModelDecoder_GetInfo);
+    
+    std::wcout << L"Sprint 182 - Enhanced Model Decoder:" << std::endl;
+    RUN_TEST(TestModelDecoder_PLYSupport);
+    RUN_TEST(TestModelDecoder_DAESupport);
+    RUN_TEST(TestModelDecoder_3DSSupport);
+    RUN_TEST(TestModelDecoder_FBXSupport);
+    RUN_TEST(TestModelDecoder_ExpandedExtensions);
+    RUN_TEST(TestModelDecoder_ExtensionCount);
     
     std::wcout << std::endl;
     
