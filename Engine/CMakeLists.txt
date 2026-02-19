@@ -84,6 +84,7 @@ set(ENGINE_HEADERS
     Core/IGPURenderer.h
     Core/ICacheProvider.h
     Core/Logger.h
+    Core/HighDPIScaling.h              # Sprint 194 — Per-monitor DPI scaling
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -258,6 +259,7 @@ set(ENGINE_SOURCES
     # Core implementations
     Core/Config.cpp
     Core/EngineAPI.cpp
+    Core/HighDPIScaling.cpp              # Sprint 194 — Per-monitor DPI scaling
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp

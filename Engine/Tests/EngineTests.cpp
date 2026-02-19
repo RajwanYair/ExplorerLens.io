@@ -41,6 +41,7 @@
 #include "../Utils/MemorySafetyIntegration.h"
 #include "../Cache/PersistentDiskCache.h"
 #include "../Utils/ARM64HardwareValidator.h"
+#include "../Core/HighDPIScaling.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2397,6 +2398,100 @@ TEST(TestARM64_FeatureBitmask)
 }
 
 //==============================================================================
+// Sprint 194: High-DPI Support Tests
+//==============================================================================
+
+TEST(TestDPI_SystemDPI)
+{
+    using namespace DarkThumbs::Engine;
+    uint32_t dpi = HighDPIScaling::GetSystemDPI();
+    ASSERT(dpi >= 72 && dpi <= 600); // Sane range
+}
+
+TEST(TestDPI_GetMonitorDPI)
+{
+    using namespace DarkThumbs::Engine;
+    auto info = HighDPIScaling::GetMonitorDPI(0);
+    ASSERT(info.monitorIndex == 0);
+    ASSERT(info.dpiX >= 72);
+    ASSERT(info.width > 0 && info.height > 0);
+}
+
+TEST(TestDPI_EnumerateMonitors)
+{
+    using namespace DarkThumbs::Engine;
+    auto monitors = HighDPIScaling::EnumerateMonitors();
+    ASSERT(!monitors.empty());
+    ASSERT(monitors[0].isPrimary || monitors.size() == 1);
+}
+
+TEST(TestDPI_LogicalPhysicalConversion)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(HighDPIScaling::LogicalToPhysical(256, 96) == 256);
+    ASSERT(HighDPIScaling::LogicalToPhysical(256, 192) == 512);
+    ASSERT(HighDPIScaling::LogicalToPhysical(256, 144) == 384);
+    ASSERT(HighDPIScaling::PhysicalToLogical(512, 192) == 256);
+    ASSERT(HighDPIScaling::PhysicalToLogical(256, 96) == 256);
+}
+
+TEST(TestDPI_ScaleRequest)
+{
+    using namespace DarkThumbs::Engine;
+    HighDPIScaling scaling;
+    auto req = scaling.ScaleRequest(256, 256, 192);
+    ASSERT(req.logicalWidth == 256);
+    ASSERT(req.physicalWidth == 512);
+    ASSERT(req.dpi == 192);
+    ASSERT(req.scaleFactor == 2.0);
+}
+
+TEST(TestDPI_NearestScale)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(HighDPIScaling::GetNearestScale(96) == DPIScale::Scale100);
+    ASSERT(HighDPIScaling::GetNearestScale(120) == DPIScale::Scale125);
+    ASSERT(HighDPIScaling::GetNearestScale(144) == DPIScale::Scale150);
+    ASSERT(HighDPIScaling::GetNearestScale(192) == DPIScale::Scale200);
+    ASSERT(HighDPIScaling::GetNearestScale(288) == DPIScale::Scale300);
+}
+
+TEST(TestDPI_DPIForScale)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale100) == 96);
+    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale125) == 120);
+    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale150) == 144);
+    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale200) == 192);
+    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale400) == 384);
+}
+
+TEST(TestDPI_ScaleFactors)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(HighDPIScaling::GetScaleFactor(DPIScale::Scale100) == 1.0);
+    ASSERT(HighDPIScaling::GetScaleFactor(DPIScale::Scale200) == 2.0);
+    ASSERT(HighDPIScaling::GetScaleFactorForDPI(96) == 1.0);
+    ASSERT(HighDPIScaling::GetScaleFactorForDPI(192) == 2.0);
+}
+
+TEST(TestDPI_ScaleNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(HighDPIScaling::GetScaleName(DPIScale::Scale100)) == L"100%");
+    ASSERT(std::wstring(HighDPIScaling::GetScaleName(DPIScale::Scale150)) == L"150%");
+    ASSERT(std::wstring(HighDPIScaling::GetScaleName(DPIScale::Scale200)) == L"200%");
+    ASSERT(std::wstring(HighDPIScaling::GetScaleName(DPIScale::Custom)) == L"Custom");
+}
+
+TEST(TestDPI_AwarenessNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(HighDPIScaling::GetAwarenessName(DPIAwareness::Unaware)) == L"Unaware");
+    ASSERT(std::wstring(HighDPIScaling::GetAwarenessName(DPIAwareness::PerMonitorV2)) == L"PerMonitorV2");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -3007,6 +3102,19 @@ int main()
     RUN_TEST(TestARM64_RunValidation);
     RUN_TEST(TestARM64_CIWorkflow);
     RUN_TEST(TestARM64_FeatureBitmask);
+    
+    // Sprint 194: High-DPI Support
+    std::wcout << L"Sprint 194: High-DPI Support..." << std::endl;
+    RUN_TEST(TestDPI_SystemDPI);
+    RUN_TEST(TestDPI_GetMonitorDPI);
+    RUN_TEST(TestDPI_EnumerateMonitors);
+    RUN_TEST(TestDPI_LogicalPhysicalConversion);
+    RUN_TEST(TestDPI_ScaleRequest);
+    RUN_TEST(TestDPI_NearestScale);
+    RUN_TEST(TestDPI_DPIForScale);
+    RUN_TEST(TestDPI_ScaleFactors);
+    RUN_TEST(TestDPI_ScaleNames);
+    RUN_TEST(TestDPI_AwarenessNames);
     
     std::wcout << std::endl;
     
