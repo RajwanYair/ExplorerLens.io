@@ -131,6 +131,7 @@ set(ENGINE_HEADERS
     # GPU
     GPU/D3D11Renderer.h
     GPU/GDIRenderer.h
+    GPU/D3D12ComputePipeline.h   # Sprint 188 — D3D12 compute pipeline
     
     # Cache
     Cache/ThumbnailCache.h
@@ -297,6 +298,7 @@ set(ENGINE_SOURCES
     # GPU
     GPU/D3D11Renderer.cpp
     GPU/GDIRenderer.cpp
+    GPU/D3D12ComputePipeline.cpp   # Sprint 188 — D3D12 compute pipeline
     
     # Cache
     Cache/ThumbnailCache.cpp

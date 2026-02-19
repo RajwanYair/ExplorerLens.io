@@ -35,6 +35,7 @@
 #include "../Decoders/SGIDecoder.h"
 #include "../Decoders/XPMDecoder.h"
 #include "../Pipeline/AsyncThumbnailProvider.h"
+#include "../GPU/D3D12ComputePipeline.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -1789,6 +1790,94 @@ TEST(TestAsyncProvider_SubmitNotRunning)
 }
 
 //==============================================================================
+// Sprint 188: D3D12 Compute Pipeline Tests
+//==============================================================================
+
+TEST(TestD3D12Compute_Create)
+{
+    D3D12ComputePipeline pipeline;
+    ASSERT(!pipeline.IsInitialized());
+    ASSERT(pipeline.GetActiveBackend() == GPUBackend::CPU);
+}
+
+TEST(TestD3D12Compute_Initialize)
+{
+    D3D12ComputePipeline pipeline;
+    bool ok = pipeline.Initialize();
+    ASSERT(ok);
+    ASSERT(pipeline.IsInitialized());
+    pipeline.Shutdown();
+    ASSERT(!pipeline.IsInitialized());
+}
+
+TEST(TestD3D12Compute_BackendNames)
+{
+    ASSERT(std::wstring(D3D12ComputePipeline::GetBackendName(GPUBackend::Auto)) == L"Auto");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetBackendName(GPUBackend::D3D12)) == L"D3D12");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetBackendName(GPUBackend::D3D11)) == L"D3D11");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetBackendName(GPUBackend::CPU)) == L"CPU");
+}
+
+TEST(TestD3D12Compute_AlgorithmNames)
+{
+    ASSERT(std::wstring(D3D12ComputePipeline::GetAlgorithmName(ScalingAlgorithm::Bilinear)) == L"Bilinear");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetAlgorithmName(ScalingAlgorithm::Lanczos3)) == L"Lanczos3");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetAlgorithmName(ScalingAlgorithm::Adaptive)) == L"Adaptive");
+}
+
+TEST(TestD3D12Compute_ColorSpaceNames)
+{
+    ASSERT(std::wstring(D3D12ComputePipeline::GetColorSpaceName(GPUColorSpace::SRGB)) == L"sRGB");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetColorSpaceName(GPUColorSpace::LinearRGB)) == L"LinearRGB");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetColorSpaceName(GPUColorSpace::HDR10)) == L"HDR10");
+}
+
+TEST(TestD3D12Compute_ToneMapNames)
+{
+    ASSERT(std::wstring(D3D12ComputePipeline::GetToneMapName(ToneMapOperator::None)) == L"None");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetToneMapName(ToneMapOperator::Reinhard)) == L"Reinhard");
+    ASSERT(std::wstring(D3D12ComputePipeline::GetToneMapName(ToneMapOperator::ACES)) == L"ACES");
+}
+
+TEST(TestD3D12Compute_ProbeHardware)
+{
+    D3D12ComputePipeline pipeline;
+    auto reqs = pipeline.ProbeHardware();
+    // CPU fallback mode — no GPU compute
+    ASSERT(!reqs.adapterDescription.empty());
+}
+
+TEST(TestD3D12Compute_ResizeNotInit)
+{
+    D3D12ComputePipeline pipeline;
+    auto result = pipeline.Resize(nullptr, 0, 0, 0, 0);
+    ASSERT(!result.success);
+}
+
+TEST(TestD3D12Compute_ResizeCPU)
+{
+    D3D12ComputePipeline pipeline;
+    pipeline.Initialize();
+    // Create a 4x4 BGRA test image (64 bytes)
+    std::vector<uint8_t> input(4 * 4 * 4, 128);
+    auto result = pipeline.Resize(input.data(), 4, 4, 2, 2);
+    ASSERT(result.success);
+    ASSERT(result.outputWidth == 2);
+    ASSERT(result.outputHeight == 2);
+    ASSERT(result.outputData.size() == 2 * 2 * 4);
+    pipeline.Shutdown();
+}
+
+TEST(TestD3D12Compute_Stats)
+{
+    D3D12ComputePipeline pipeline;
+    pipeline.Initialize();
+    auto stats = pipeline.GetStats();
+    ASSERT(stats.totalDispatches == 0);
+    pipeline.Shutdown();
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2326,6 +2415,18 @@ int main()
     RUN_TEST(TestAsyncProvider_SyncFallbackEmpty);
     RUN_TEST(TestAsyncProvider_Stats);
     RUN_TEST(TestAsyncProvider_SubmitNotRunning);
+    
+    std::wcout << L"Sprint 188 - D3D12 Compute Pipeline:" << std::endl;
+    RUN_TEST(TestD3D12Compute_Create);
+    RUN_TEST(TestD3D12Compute_Initialize);
+    RUN_TEST(TestD3D12Compute_BackendNames);
+    RUN_TEST(TestD3D12Compute_AlgorithmNames);
+    RUN_TEST(TestD3D12Compute_ColorSpaceNames);
+    RUN_TEST(TestD3D12Compute_ToneMapNames);
+    RUN_TEST(TestD3D12Compute_ProbeHardware);
+    RUN_TEST(TestD3D12Compute_ResizeNotInit);
+    RUN_TEST(TestD3D12Compute_ResizeCPU);
+    RUN_TEST(TestD3D12Compute_Stats);
     
     std::wcout << std::endl;
     
