@@ -43,6 +43,7 @@
 #include "../Utils/ARM64HardwareValidator.h"
 #include "../Core/HighDPIScaling.h"
 #include "../Utils/MSIXPackageManager.h"
+#include "../Utils/TestSuiteExpansion.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2596,6 +2597,119 @@ TEST(TestMSIX_Config)
 }
 
 //==============================================================================
+// Sprint 196: Test Suite Expansion Tests
+//==============================================================================
+
+TEST(TestSuite_DecoderSpecs)
+{
+    using namespace DarkThumbs::Engine;
+    TestSuiteExpansion suite;
+    auto specs = suite.GetDecoderTestSpecs();
+    ASSERT(specs.size() >= 25); // At least 25 decoders
+    ASSERT(specs[0].formatName == L"PNG");
+    ASSERT(specs[0].hasValidFile);
+}
+
+TEST(TestSuite_CoverageGaps)
+{
+    using namespace DarkThumbs::Engine;
+    TestSuiteExpansion suite;
+    auto gaps = suite.CalculateCoverageGaps();
+    ASSERT(!gaps.empty());
+    // Core decoders should be the largest gap
+    ASSERT(gaps[0].component == L"Core Decoders");
+    ASSERT(gaps[0].gap > 0);
+}
+
+TEST(TestSuite_TotalCount)
+{
+    using namespace DarkThumbs::Engine;
+    TestSuiteExpansion suite;
+    uint32_t total = suite.GetTotalTestCount();
+    ASSERT(total > 200); // Should have substantial test count
+}
+
+TEST(TestSuite_ComputeSummary)
+{
+    using namespace DarkThumbs::Engine;
+    TestSuiteExpansion suite;
+    std::vector<TestResult> results;
+    TestResult r1; r1.testName = L"Test1"; r1.verdict = TestVerdict::Pass; r1.durationMs = 1.0;
+    TestResult r2; r2.testName = L"Test2"; r2.verdict = TestVerdict::Pass; r2.durationMs = 2.0;
+    TestResult r3; r3.testName = L"Test3"; r3.verdict = TestVerdict::Fail; r3.durationMs = 0.5;
+    results.push_back(r1); results.push_back(r2); results.push_back(r3);
+    auto summary = suite.ComputeSummary(results);
+    ASSERT(summary.totalTests == 3);
+    ASSERT(summary.passed == 2);
+    ASSERT(summary.failed == 1);
+    ASSERT(summary.failures.size() == 1);
+}
+
+TEST(TestSuite_CategoryNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(TestSuiteExpansion::GetCategoryName(TestCategory::UnitTest)) == L"UnitTest");
+    ASSERT(std::wstring(TestSuiteExpansion::GetCategoryName(TestCategory::DecoderTest)) == L"DecoderTest");
+    ASSERT(std::wstring(TestSuiteExpansion::GetCategoryName(TestCategory::FuzzTest)) == L"FuzzTest");
+    ASSERT(std::wstring(TestSuiteExpansion::GetCategoryName(TestCategory::COMTest)) == L"COMTest");
+}
+
+TEST(TestSuite_VerdictNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(TestSuiteExpansion::GetVerdictName(TestVerdict::Pass)) == L"Pass");
+    ASSERT(std::wstring(TestSuiteExpansion::GetVerdictName(TestVerdict::Fail)) == L"Fail");
+    ASSERT(std::wstring(TestSuiteExpansion::GetVerdictName(TestVerdict::Skip)) == L"Skip");
+    ASSERT(std::wstring(TestSuiteExpansion::GetVerdictName(TestVerdict::Timeout)) == L"Timeout");
+    ASSERT(std::wstring(TestSuiteExpansion::GetVerdictName(TestVerdict::Flaky)) == L"Flaky");
+}
+
+TEST(TestSuite_TestFiles)
+{
+    using namespace DarkThumbs::Engine;
+    TestSuiteExpansion suite;
+    auto files = suite.GetTestFilesForDecoder(L"PNG");
+    ASSERT(files.size() == 5);
+    ASSERT(files[0].find(L"PNG") != std::wstring::npos);
+}
+
+TEST(TestSuite_MeetsTargets)
+{
+    using namespace DarkThumbs::Engine;
+    TestExpansionConfig config;
+    config.targetTotalTests = 100; // Low target for test
+    TestSuiteExpansion suite(config);
+    ASSERT(suite.MeetsTargets()); // Current should exceed 100
+}
+
+TEST(TestSuite_PassRate)
+{
+    using namespace DarkThumbs::Engine;
+    TestSuiteExpansion suite;
+    std::vector<TestResult> results;
+    for (int i = 0; i < 100; i++) {
+        TestResult r;
+        r.testName = L"Test" + std::to_wstring(i);
+        r.verdict = TestVerdict::Pass;
+        r.durationMs = 0.1;
+        results.push_back(r);
+    }
+    auto summary = suite.ComputeSummary(results);
+    ASSERT(summary.passRate == 100.0);
+}
+
+TEST(TestSuite_Config)
+{
+    using namespace DarkThumbs::Engine;
+    TestExpansionConfig config;
+    config.targetTestsPerDecoder = 15;
+    config.targetTotalTests = 800;
+    TestSuiteExpansion suite(config);
+    ASSERT(suite.GetConfig().targetTestsPerDecoder == 15);
+    ASSERT(suite.GetConfig().targetTotalTests == 800);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -3232,6 +3346,19 @@ int main()
     RUN_TEST(TestMSIX_BuildPackage);
     RUN_TEST(TestMSIX_IsMSIXSupported);
     RUN_TEST(TestMSIX_Config);
+    
+    // Sprint 196: Test Suite Expansion
+    std::wcout << L"Sprint 196: Test Suite Expansion..." << std::endl;
+    RUN_TEST(TestSuite_DecoderSpecs);
+    RUN_TEST(TestSuite_CoverageGaps);
+    RUN_TEST(TestSuite_TotalCount);
+    RUN_TEST(TestSuite_ComputeSummary);
+    RUN_TEST(TestSuite_CategoryNames);
+    RUN_TEST(TestSuite_VerdictNames);
+    RUN_TEST(TestSuite_TestFiles);
+    RUN_TEST(TestSuite_MeetsTargets);
+    RUN_TEST(TestSuite_PassRate);
+    RUN_TEST(TestSuite_Config);
     
     std::wcout << std::endl;
     
