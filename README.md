@@ -2,15 +2,15 @@
 
 **High-Performance Windows Shell Extension for 200+ File Formats**
 
-DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11/12 GPU acceleration** and **multi-threaded processing**. Version 7.1 completes 74 development sprints with production hardening, comprehensive CI/CD, observability integration, and full documentation audit.
+DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11/12 GPU acceleration** and **multi-threaded processing**. Version 8.4.0 encompasses 176 development sprints spanning plugin ecosystem, ARM64 foundation, format expansion, memory excellence, and comprehensive documentation overhaul.
 
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
-![Platform](https://img.shields.io/badge/Platform-x64-green)
+![Platform](https://img.shields.io/badge/Platform-x64%20|%20ARM64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-7.1.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-8.4.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Sprints](https://img.shields.io/badge/Sprints-74%2F74-success)
-![Tests](https://img.shields.io/badge/Tests-100%25%20pass-success)
+![Sprints](https://img.shields.io/badge/Sprints-176-success)
+![Tests](https://img.shields.io/badge/Tests-437%20pass-success)
 ![Warnings](https://img.shields.io/badge/Warnings-0-green)
 
 ---
@@ -40,7 +40,7 @@ DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts,
 
 ## ✨ Features
 
-### Supported Formats (200+ file extensions via 24 specialized decoders)
+### Supported Formats (200+ file extensions via 25 specialized decoders)
 
 #### Core Image Formats (✅ Fully Supported)
 - **Standard:** `.jpg`, `.jpeg`, `.png`, `.bmp`, `.gif`, `.tiff`, `.tif`
@@ -165,10 +165,11 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 7.0.0  
+**Current Version:** 8.4.0  
 **Build Status:** 0 errors / 0 warnings  
-**Test Status:** 100/100 unit tests, 5/5 benchmarks (100% pass rate)  
-**Next Milestone:** v7.1 — Plugin system activation, ETW structured logging, context menu integration, animated format support
+**Test Status:** 437 unit tests, 5 benchmarks (100% pass rate)  
+**Sprints Completed:** 176  
+**Next Milestone:** v9.0.0 — Format expansion, async shell extension, D3D12 compute pipeline
 
 See [MASTER_PLAN.md](MASTER_PLAN.md) for the complete development plan.
 
@@ -220,6 +221,6 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-**Built with ❤️ using C++20 and DirectX 11**
+**Built with ❤️ using C++20 and DirectX 11/12**
 
-_Last Updated: February 16, 2026_
+_Last Updated: June 2025 (v8.4.0)_

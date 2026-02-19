@@ -5,12 +5,12 @@
 DarkThumbs is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 8.3.0
+- **Version:** 8.4.0
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.20+ (Engine) + MSBuild (Shell/Manager)
 - **GPU:** DirectX 11 + DirectX 12 with CPU fallback
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-- **Sprint Count:** 174 completed (v8.3.0 block: Sprints 150–174 ✅)
+- **Sprint Count:** 177 completed (v8.4.0 block: Sprints 175–177 ✅)
 - **Build Status:** 0 errors, 0 warnings
 
 ## Architecture
@@ -43,7 +43,7 @@ DarkThumbsEngine.lib       — Core decode + render pipeline
 | `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                         |
 | `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                              |
 | `docs/`                        | All documentation                                             |
-| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_174.md)        |
+| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_177.md)        |
 | `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                             |
 
 ## Build Commands
@@ -138,15 +138,24 @@ external/
 - The `Release/` pattern in `.gitignore` blocks `Engine/Release/` — use `git add -f` for files there
 - Stale `CMakeCache.txt` files from directory renames are auto-detected by `Build-Library-Core.ps1`
 
-## Sprint Execution Guidance (v8.3+)
+## Sprint Execution Guidance (v8.4+)
 
-- **Next roadmap block:** Sprints 175+ (define next block in `MASTER_PLAN.md` before execution)
-- **Next block theme (v9.0.0):** Vulkan/D3D12 compute, ARM64 hardware CI, Python SDK, async shell extension
+- **Current version:** v8.4.0 (Sprints 175-177 complete)
+- **Next roadmap block:** Sprints 178+ per `docs/IMPROVEMENT_PLAN_V9.md`
+- **Next block theme (v9.0.0):** Format expansion, async shell extension, D3D12 compute pipeline
 - **Execution package docs:** `docs/development/sprints-v8/SPRINT_XX.md`
-- **Source of truth:** `MASTER_PLAN.md` must be updated before creating new sprint work
+- **Source of truth:** `MASTER_PLAN.md` + `docs/IMPROVEMENT_PLAN_V9.md`
 - **Carry-over closure:** legacy "planned/partial" items from older sections must be explicitly mapped to new sprint tasks
 - **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
 - **Sprint deliverables pattern:** header in `Engine/`, GTest in `Engine/Tests/`, doc in `docs/development/sprints-v8/`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS AND `Engine/Tests/CMakeLists.txt` EngineTests sources), git commit
+
+## v8.4.0 Block Summary (Sprints 175–177 ✅)
+
+| Sprint | Title | Key Changes |
+|---|---|---|
+| 175 | Critical Bug Fixes | Fixed djvu→CBXTYPE_DJVU, added model routing, AVIF/HEIF separation, HEIF extensions |
+| 176 | Shell Registration Expansion | CBXShell.rgs 47→93 extensions (archives, RAW, docs, models, fonts) |
+| 177 | Version Normalization | All docs updated to v8.4.0, CHANGELOG v8.0-8.4 entries added |
 
 ## v8.3.0 Block Summary (Sprints 150–174 ✅)
 

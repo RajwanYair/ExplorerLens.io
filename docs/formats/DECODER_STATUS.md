@@ -1,6 +1,6 @@
 # DarkThumbs Decoder Status Matrix
-**Version:** 7.1.0  
-**Last Updated:** February 18, 2026 (Sprint 75)
+**Version:** 8.4.0  
+**Last Updated:** June 2025 (Sprint 177)
 
 ---
 

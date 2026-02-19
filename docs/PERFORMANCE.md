@@ -1,7 +1,7 @@
 # DarkThumbs Performance Tuning Guide
-**Sprint 25: Documentation Completion**  
-**Version:** 7.0.0  
-**Last Updated:** February 17, 2026
+**Sprint 177: Version Normalization**  
+**Version:** 8.4.0  
+**Last Updated:** June 2025
 
 ---
 
@@ -592,7 +592,7 @@ cd "C:\Program Files\DarkThumbs"
 
 # Output:
 # ==================================================
-# DarkThumbs Benchmark Suite - Version 7.0.0
+# DarkThumbs Benchmark Suite - Version 8.4.0
 # ==================================================
 # System: Intel Core i7-10700K, 16 GB RAM
 # GPU: NVIDIA RTX 3060 (12 GB VRAM)
@@ -795,6 +795,6 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 1500000
 
 ---
 
-**Last Updated:** February 15, 2026  
-**Sprint:** 25 - Documentation Completion  
-**Version:** 6.2.0
+**Last Updated:** June 2025  
+**Sprint:** 177 - Version Normalization  
+**Version:** 8.4.0

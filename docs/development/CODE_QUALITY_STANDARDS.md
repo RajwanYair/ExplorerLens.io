@@ -1,6 +1,6 @@
 # DarkThumbs Code Quality Standards
-# Sprint 63: Static Analysis Configuration
-# Version: 7.1.0
+# Sprint 177: Version Normalization
+# Version: 8.4.0
 
 ## Overview
 

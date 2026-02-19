@@ -174,7 +174,7 @@ tests\build\
 ```
 =========================================
 DarkThumbs Unit Test Suite
-Version: 6.0.0 (GPU-Accelerated)
+Version: 8.4.0 (GPU-Accelerated)
 =========================================
 
 [Suite 1/8] Format Detection Tests
@@ -446,5 +446,5 @@ Same as DarkThumbs project. Tests are MIT-compatible and freely redistributable.
 ---
 
 **Last Updated:** November 18, 2024  
-**Test Suite Version:** 1.0  
-**DarkThumbs Version:** 6.0.0 (GPU-Accelerated)
+**Test Suite Version:** 2.0  
+**DarkThumbs Version:** 8.4.0 (GPU-Accelerated)

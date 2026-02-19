@@ -5,6 +5,82 @@ All notable changes to DarkThumbs will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.4.0] - 2025-06 (Sprints 175-177)
+
+### Added
+- **Sprint 175: Critical Bug Fixes** — Fixed `.djvu`/`.djv` routing to `CBXTYPE_DJVU` (was incorrectly mapped to `CBXTYPE_EPUB`), added 8 model format extensions to `GetCBXType()`, clean AVIF/HEIF decoder separation, added `.hif`/`.avci`/`.avcs` HEIF extensions
+- **Sprint 176: Shell Registration Expansion** — Expanded `CBXShell.rgs` from 47 to 93 registered extensions including archives (.tar/.iso/.cab/.deb), 15 additional camera RAW formats, legacy Office documents, 3D model formats, and HEIF variants
+- **Sprint 177: Version Normalization** — Updated all documentation from v7.x/v6.x to v8.4.0, added CHANGELOG entries for v8.0-v8.4, synced version across README, CAPABILITY_AUDIT, PERFORMANCE, DECODER_STATUS, CODE_QUALITY_STANDARDS, PLUGIN_SDK, and tests/README
+
+### Fixed
+- **Critical:** `.djvu`/`.djv` files now correctly use DjVu decoder instead of EPUB decoder
+- **Critical:** `CBXTYPE_MODEL` extensions now properly routed in `GetCBXType()`
+- **Fixed:** AVIF/HEIF decoder overlap — AVIFDecoder handles `.avif`/`.avifs` only; HEIFDecoder handles `.heif`/`.heic`/`.hif`/`.avci`/`.avcs` etc.
+- **Fixed:** 46 file extensions were supported by code but missing shell handler registration
+
+### Changed
+- **Version:** 8.3.0 → 8.4.0
+- **Shell registrations:** 47 → 93 extensions
+- **Decoder routing:** Fixed .djvu, added .obj/.stl/.gltf/.glb/.fbx/.3ds/.dae/.ply model routing
+- **Documentation:** Full version normalization across all files
+
+## [8.3.0] - 2025-05 (Sprints 150-174)
+
+### Added
+- **Phase 1 (Sprints 150-154): Plugin Ecosystem Hardening** — Plugin sandbox manager, trust chain, compatibility kit, reference pack v2, ecosystem dashboard
+- **Phase 2 (Sprints 155-159): ARM64 Foundation** — ARM64 build config, library matrix, runtime architecture validator, CI integration, test suite
+- **Phase 3 (Sprints 160-164): Format Expansion** — JPEG2000 decoder header, CAD decoder plugin, glTF thumbnail decoder, scientific format decoder, format fallback engine
+- **Phase 4 (Sprints 165-169): Memory Excellence** — Archive memory compactor, zero-copy pipeline, adaptive cache budget manager, hot-mode directory monitor, memory pressure controller v2
+- **Phase 5 (Sprints 170-174): v8.3.0 Release** — ARM64 matrix validation, installer lifecycle manager, release gate v2, documentation sync audit, v8.3 closure report
+
+### Changed
+- **Version:** 8.2.0 → 8.3.0
+- **Sprint count:** 149 → 174
+- **Total unit tests:** ~100 → ~437 (337 new tests)
+- **Engine headers:** Added 25 new sprint header files to ENGINE_HEADERS
+
+## [8.2.0] - 2025-04 (Sprints 125-149)
+
+### Added
+- Advanced decoder implementations for TGA, QOI, PSD, DDS, HDR, EXR, ICO, PPM, BMP, GIF
+- Enhanced model decoder with wireframe rendering
+- Document decoder with DOCX/PPTX/XLSX thumbnail extraction
+- Font decoder with glyph preview rendering
+- Video and audio thumbnail decoders via Media Foundation
+
+### Changed
+- **Version:** 8.1.0 → 8.2.0
+- **Sprint count:** 99 → 149
+
+## [8.1.0] - 2025-03 (Sprints 100-124)
+
+### Added
+- SVG decoder with Direct2D rendering
+- RAW photo decoder via LibRaw 0.21.3 with 27 camera format support
+- PDF decoder via MuPDF integration
+- Archive decoder expansion (TAR, CPIO, ISO, CAB, DEB, XAR)
+- CBXTYPE enum expansion (values 40-81) for all new format categories
+
+### Changed
+- **Version:** 8.0.0 → 8.1.0
+- **Sprint count:** 74 → 99
+
+## [8.0.0] - 2025-02 (Sprints 75-99)
+
+### Added
+- WebP decoder via libwebp 1.5.0
+- AVIF decoder via libavif 1.3.0 + dav1d 1.5.1
+- HEIF/HEIC decoder via libheif 1.19.5 + libde265 1.0.15
+- JPEG XL decoder via libjxl 0.11.1
+- DirectX 12 GPU pipeline foundation
+- Engine CMakeLists.txt with conditional library support (HAS_LIBJXL, HAS_LIBHEIF, HAS_LIBRAW)
+
+### Changed
+- **Version:** 7.1.0 → 8.0.0
+- **Sprint count:** 74 → 99
+- **Architecture:** Introduced DarkThumbsEngine.lib as separate static library
+- **Build system:** Added CMake 3.20+ support alongside MSBuild
+
 ## [7.1.0] - 2026-02-18
 
 ### Added

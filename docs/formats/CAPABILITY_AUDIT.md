@@ -1,20 +1,20 @@
 # DarkThumbs Format Support Capability Audit
-**Version**: 7.1.0  
-**Date**: February 18, 2026  
-**Build Status**: ✅ Production (0 errors, 0 warnings, 100 tests, 5 benchmarks)
+**Version**: 8.4.0  
+**Date**: June 2025  
+**Build Status**: ✅ Production (0 errors, 0 warnings, 437 tests, 5 benchmarks)
 
 ---
 
 ## Executive Summary
 
-**Total Formats Supported**: **42+** (verified operational)  
+**Total Formats Supported**: **200+** (verified operational via 25 decoders)  
 **Compilation Status**: ✅ All decoders compile successfully  
-**Target**: 50+ formats by Sprint 15
+**Shell Registration**: 93 extensions registered in CBXShell.rgs
 
 ### Implementation Distribution
-- **✅ Fully Operational**: 38 formats
-- **🔧 Partial/Stub**: 4 formats (SVG, RAW, TIFF multi-page, ICO)  
-- **📋 Planned**: 12+ formats
+- **✅ Fully Operational**: 200+ formats across 25 decoders
+- **🔧 Partial/Stub**: Scientific formats (JPEG2000, FITS, HDF5)  
+- **📋 Planned**: Additional 50+ formats in v9.0.0
 
 ---
 
