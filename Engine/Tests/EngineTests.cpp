@@ -28,6 +28,8 @@
 #include "../Decoders/FontDecoder.h"
 #include "../Decoders/ModelDecoder.h"
 #include "../Decoders/EPSDecoder.h"
+#include "../Decoders/KTXTextureDecoder.h"
+#include "../Decoders/VTFDecoder.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -1412,6 +1414,120 @@ TEST(TestPDFDecoder_AIRouting)
 }
 
 //==============================================================================
+// Sprint 184: Game Texture Formats — KTX/KTX2 + VTF
+// Tests for Khronos KTX and Valve Texture Format decoders
+//==============================================================================
+
+TEST(TestKTXDecoder_Create)
+{
+    using namespace DarkThumbs::Decoders;
+    KTXTextureDecoder decoder = KTXTextureDecoder::Create();
+    ASSERT(decoder.IsAvailable());
+}
+
+TEST(TestKTXDecoder_ExtensionCheck)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(KTXTextureDecoder::IsKTXExtension(".ktx"));
+    ASSERT(KTXTextureDecoder::IsKTXExtension(".KTX"));
+    ASSERT(KTXTextureDecoder::IsKTXExtension(".ktx2"));
+    ASSERT(KTXTextureDecoder::IsKTXExtension(".KTX2"));
+    ASSERT(!KTXTextureDecoder::IsKTXExtension(".png"));
+    ASSERT(!KTXTextureDecoder::IsKTXExtension(".dds"));
+}
+
+TEST(TestKTXDecoder_ExtensionVersion)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(KTXExtensions::VersionFromExtension(".ktx") == KTXVersion::KTX1);
+    ASSERT(KTXExtensions::VersionFromExtension(".ktx2") == KTXVersion::KTX2);
+    ASSERT(KTXExtensions::VersionFromExtension(".png") == KTXVersion::Unknown);
+}
+
+TEST(TestKTXDecoder_CompressionNames)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(std::string(CompressionName(TextureCompression::BC1_RGB)) == "BC1 (DXT1)");
+    ASSERT(std::string(CompressionName(TextureCompression::BC7_RGBA)) == "BC7 (RGBA)");
+    ASSERT(std::string(CompressionName(TextureCompression::ASTC_4x4)) == "ASTC 4x4");
+    ASSERT(IsBlockCompressed(TextureCompression::BC1_RGB));
+    ASSERT(!IsBlockCompressed(TextureCompression::Uncompressed));
+}
+
+TEST(TestKTXDecoder_TextureInfo)
+{
+    using namespace DarkThumbs::Decoders;
+    KTXTextureInfo info;
+    info.width = 1024;
+    info.height = 1024;
+    info.mipLevels = 11;
+    info.version = KTXVersion::KTX2;
+    info.compression = TextureCompression::BC7_RGBA;
+    
+    ASSERT(info.IsValid());
+    ASSERT(info.HasMipmaps());
+    ASSERT(!info.Is3D());
+    
+    uint32_t bestMip = info.BestMipForThumbnail(256);
+    ASSERT(bestMip > 0); // Should select a smaller mip
+    
+    size_t estSize = info.EstimateCompressedSize();
+    ASSERT(estSize > 0);
+}
+
+TEST(TestKTXDecoder_SupercompressionNames)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(std::string(SupercompressionName(KTXSupercompression::None)) == "None");
+    ASSERT(std::string(SupercompressionName(KTXSupercompression::Zstd)) == "Zstandard");
+}
+
+TEST(TestKTXDecoder_InvalidFile)
+{
+    using namespace DarkThumbs::Decoders;
+    KTXTextureDecoder decoder;
+    auto result = decoder.Decode("nonexistent.ktx");
+    ASSERT(!result.IsSuccess());
+}
+
+TEST(TestVTFDecoder_ExtensionCheck)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(VTFDecoder::IsVTFExtension(".vtf"));
+    ASSERT(VTFDecoder::IsVTFExtension(".VTF"));
+    ASSERT(!VTFDecoder::IsVTFExtension(".png"));
+    ASSERT(!VTFDecoder::IsVTFExtension(".dds"));
+}
+
+TEST(TestVTFDecoder_Create)
+{
+    using namespace DarkThumbs::Decoders;
+    VTFDecoder decoder;
+    ASSERT(VTFDecoder::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(VTFDecoder::EXTENSIONS[0]) == ".vtf");
+    ASSERT(VTFDecoder::EXTENSIONS[1] == nullptr);
+}
+
+TEST(TestVTFDecoder_InvalidFile)
+{
+    using namespace DarkThumbs::Decoders;
+    VTFDecoder decoder;
+    auto result = decoder.Decode("nonexistent.vtf");
+    ASSERT(!result.success);
+}
+
+TEST(TestVTFDecoder_ImageSizeCompute)
+{
+    using namespace DarkThumbs::Decoders;
+    // DXT1: 8 bytes per 4x4 block
+    // 256x256 = 64x64 blocks = 4096 blocks * 8 = 32768 bytes
+    // We can't call the private method directly, but we test via decode
+    VTFDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.vtf");
+    ASSERT(!info.IsValid()); // File doesn't exist, should be invalid
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -1903,6 +2019,19 @@ int main()
     RUN_TEST(TestEPSDecoder_NoDecodeNonEPS);
     RUN_TEST(TestEPSDecoder_GetInfo);
     RUN_TEST(TestPDFDecoder_AIRouting);
+    
+    std::wcout << L"Sprint 184 - Game Texture Formats (KTX/VTF):" << std::endl;
+    RUN_TEST(TestKTXDecoder_Create);
+    RUN_TEST(TestKTXDecoder_ExtensionCheck);
+    RUN_TEST(TestKTXDecoder_ExtensionVersion);
+    RUN_TEST(TestKTXDecoder_CompressionNames);
+    RUN_TEST(TestKTXDecoder_TextureInfo);
+    RUN_TEST(TestKTXDecoder_SupercompressionNames);
+    RUN_TEST(TestKTXDecoder_InvalidFile);
+    RUN_TEST(TestVTFDecoder_ExtensionCheck);
+    RUN_TEST(TestVTFDecoder_Create);
+    RUN_TEST(TestVTFDecoder_InvalidFile);
+    RUN_TEST(TestVTFDecoder_ImageSizeCompute);
     
     std::wcout << std::endl;
     

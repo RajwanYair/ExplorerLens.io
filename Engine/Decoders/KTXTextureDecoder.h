@@ -1,7 +1,8 @@
 #pragma once
-// Sprint 134 — KTX/KTX2 Texture Decoder
+// Sprint 134+184 — KTX/KTX2 Texture Decoder
 // GPU-native texture container support for Khronos KTX and KTX2 formats.
 // Extracts thumbnails from compressed GPU textures (BC1-BC7, ASTC, ETC2).
+// Sprint 184: Full implementation with KTX1/KTX2 header parsing, BC1 decompression.
 
 #include <cstdint>
 #include <cstddef>
@@ -190,48 +191,16 @@ public:
 
     bool IsAvailable() const { return m_available; }
 
-    KTXTextureInfo ReadInfo(const std::string& filePath) const {
-        KTXTextureInfo info;
-        size_t dot = filePath.rfind('.');
-        if (dot != std::string::npos) {
-            info.version = KTXExtensions::VersionFromExtension(filePath.substr(dot));
-        }
+    /// Read texture metadata from a KTX/KTX2 file without decoding pixel data.
+    KTXTextureInfo ReadInfo(const std::string& filePath) const;
 
-        // Stub values for testing
-        info.width = 2048;
-        info.height = 2048;
-        info.mipLevels = 11;
-        info.compression = TextureCompression::BC7_RGBA;
-        info.isSRGB = true;
+    /// Fully decode a KTX/KTX2 file to RGBA pixels, selecting the best mip level.
+    KTXDecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const;
 
-        return info;
-    }
-
+    /// Convenience wrapper around Decode().
     KTXDecodeResult DecodeThumbnail(const std::string& filePath,
                                      uint32_t maxSize = 256) const {
-        KTXDecodeResult result;
-        if (!IsAvailable()) {
-            result.status = KTXDecodeStatus::UnsupportedFormat;
-            return result;
-        }
-
-        auto info = ReadInfo(filePath);
-        if (!info.IsValid()) {
-            result.status = KTXDecodeStatus::InvalidHeader;
-            return result;
-        }
-
-        uint32_t mip = info.BestMipForThumbnail(maxSize);
-        result.info = info;
-        result.usedMipLevel = mip;
-        result.decodedWidth = info.width >> mip;
-        result.decodedHeight = info.height >> mip;
-        if (result.decodedWidth == 0) result.decodedWidth = 1;
-        if (result.decodedHeight == 0) result.decodedHeight = 1;
-        result.status = KTXDecodeStatus::Success;
-        result.decodeTimeMs = 8.0;
-
-        return result;
+        return Decode(filePath, maxSize);
     }
 
     static bool IsKTXExtension(const std::string& ext) {
@@ -242,6 +211,22 @@ public:
 
 private:
     bool m_available = true;
+
+    // Format mapping helpers
+    TextureCompression MapGLFormat(uint32_t glFormat) const;
+    TextureCompression MapVkFormat(uint32_t vkFormat) const;
+
+    // Decode paths
+    KTXDecodeResult DecodeUncompressed(const std::vector<uint8_t>& data,
+                                        const KTXTextureInfo& info,
+                                        uint32_t mipLevel) const;
+    KTXDecodeResult DecodeBlockCompressed(const std::vector<uint8_t>& data,
+                                           const KTXTextureInfo& info,
+                                           uint32_t mipLevel) const;
+
+    // BC1 (DXT1) block decompression
+    void DecompressBC1Block(const uint8_t* block, uint8_t* output,
+                            uint32_t outputStride) const;
 };
 
 } // namespace DarkThumbs::Decoders

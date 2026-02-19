@@ -188,6 +188,8 @@
 #define CBXTYPE_FARBFELD 85	// .ff Farbfeld image
 #define CBXTYPE_JP2 86	// .jp2/.j2k/.j2c/.jpx JPEG 2000 (Sprint 181)
 #define CBXTYPE_EPS 87	// .eps/.epsf/.ps Encapsulated PostScript (Sprint 183)
+#define CBXTYPE_KTX 88	// .ktx/.ktx2 Khronos KTX texture (Sprint 184)
+#define CBXTYPE_VTF 89	// .vtf Valve Texture Format (Sprint 184)
 
 // Image format identifiers (for detection within archives)
 #define IMGTYPE_UNKNOWN 0
@@ -2305,6 +2307,14 @@ namespace __cbx
 			// Adobe Illustrator files — most are PDF-based (Sprint 183)
 			if (StrEqual(szExt, _T(".ai")))
 				return CBXTYPE_PDF;
+
+			// Game texture formats (Sprint 184)
+			if (StrEqual(szExt, _T(".ktx")))
+				return CBXTYPE_KTX;
+			if (StrEqual(szExt, _T(".ktx2")))
+				return CBXTYPE_KTX;
+			if (StrEqual(szExt, _T(".vtf")))
+				return CBXTYPE_VTF;
 
 			return CBXTYPE_NONE;
 		}

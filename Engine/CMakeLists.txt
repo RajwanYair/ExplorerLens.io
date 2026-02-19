@@ -121,6 +121,7 @@ set(ENGINE_HEADERS
     Decoders/PCXDecoder.h         # Sprint 180 — ZSoft PCX image
     Decoders/FarbfeldDecoder.h    # Sprint 180 — Farbfeld (.ff) image
     Decoders/EPSDecoder.h         # Sprint 183 — EPS/PostScript vector
+    Decoders/VTFDecoder.h          # Sprint 184 — Valve Texture Format
     
     # GPU
     GPU/D3D11Renderer.h
@@ -280,6 +281,8 @@ set(ENGINE_SOURCES
     Decoders/FarbfeldDecoder.cpp  # Sprint 180 — Farbfeld (.ff) image
     Decoders/JPEG2000Decoder.cpp  # Sprint 181 — JPEG 2000 (JP2/J2K/JPX)
     Decoders/EPSDecoder.cpp       # Sprint 183 — EPS/PostScript vector
+    Decoders/KTXTextureDecoder.cpp # Sprint 184 — KTX/KTX2 texture decoder
+    Decoders/VTFDecoder.cpp        # Sprint 184 — Valve Texture Format
     
     # GPU
     GPU/D3D11Renderer.cpp
