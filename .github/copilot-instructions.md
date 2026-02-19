@@ -23,28 +23,28 @@ DarkThumbsEngine.lib       — Core decode + render pipeline
 
 ### Key Directories
 
-| Directory                      | Purpose                                                       |
-| ------------------------------ | ------------------------------------------------------------- |
-| `CBXShell/`                    | Shell extension DLL (COM registration, thumbnail provider)    |
-| `CBXManager/`                  | WTL-based admin GUI for registration/settings                 |
-| `Engine/`                      | Core library — decoders, GPU pipeline, caching, observability |
-| `Engine/Core/`                 | Decode pipeline, GPU renderer, resource management            |
-| `Engine/Decoders/`             | Format-specific decoders (25+ total, incl. CAD/glTF/Scientific) |
-| `Engine/Plugin/`               | Plugin ecosystem (trust chain, sandbox, compat kit, ref pack) |
-| `Engine/Memory/`               | Memory management (compactor, hot-mode, pressure controller)  |
-| `Engine/Pipeline/`             | Pipeline stages (fallback engine, zero-copy upload)           |
-| `Engine/Cache/`                | Cache management (adaptive budget manager)                    |
+| Directory                      | Purpose                                                           |
+| ------------------------------ | ----------------------------------------------------------------- |
+| `CBXShell/`                    | Shell extension DLL (COM registration, thumbnail provider)        |
+| `CBXManager/`                  | WTL-based admin GUI for registration/settings                     |
+| `Engine/`                      | Core library — decoders, GPU pipeline, caching, observability     |
+| `Engine/Core/`                 | Decode pipeline, GPU renderer, resource management                |
+| `Engine/Decoders/`             | Format-specific decoders (25+ total, incl. CAD/glTF/Scientific)   |
+| `Engine/Plugin/`               | Plugin ecosystem (trust chain, sandbox, compat kit, ref pack)     |
+| `Engine/Memory/`               | Memory management (compactor, hot-mode, pressure controller)      |
+| `Engine/Pipeline/`             | Pipeline stages (fallback engine, zero-copy upload)               |
+| `Engine/Cache/`                | Cache management (adaptive budget manager)                        |
 | `Engine/Utils/`                | Utilities (ARM64 support, matrix validation, installer lifecycle) |
-| `Engine/Tests/`                | GTest unit tests + Google Benchmark                           |
-| `build-scripts/`               | PowerShell build automation                                   |
-| `build-scripts/core/`          | Build-Library-Core.ps1 — unified build module                 |
-| `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.)             |
-| `cmake/`                       | CMake toolchain files (incl. toolchain-windows-arm64.cmake)   |
-| `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                         |
-| `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                              |
-| `docs/`                        | All documentation                                             |
-| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_177.md)        |
-| `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                             |
+| `Engine/Tests/`                | GTest unit tests + Google Benchmark                               |
+| `build-scripts/`               | PowerShell build automation                                       |
+| `build-scripts/core/`          | Build-Library-Core.ps1 — unified build module                     |
+| `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.)                 |
+| `cmake/`                       | CMake toolchain files (incl. toolchain-windows-arm64.cmake)       |
+| `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                             |
+| `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                                  |
+| `docs/`                        | All documentation                                                 |
+| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_177.md)            |
+| `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                                 |
 
 ## Build Commands
 
@@ -151,21 +151,21 @@ external/
 
 ## v8.4.0 Block Summary (Sprints 175–177 ✅)
 
-| Sprint | Title | Key Changes |
-|---|---|---|
-| 175 | Critical Bug Fixes | Fixed djvu→CBXTYPE_DJVU, added model routing, AVIF/HEIF separation, HEIF extensions |
-| 176 | Shell Registration Expansion | CBXShell.rgs 47→93 extensions (archives, RAW, docs, models, fonts) |
-| 177 | Version Normalization | All docs updated to v8.4.0, CHANGELOG v8.0-8.4 entries added |
+| Sprint | Title                        | Key Changes                                                                         |
+| ------ | ---------------------------- | ----------------------------------------------------------------------------------- |
+| 175    | Critical Bug Fixes           | Fixed djvu→CBXTYPE_DJVU, added model routing, AVIF/HEIF separation, HEIF extensions |
+| 176    | Shell Registration Expansion | CBXShell.rgs 47→93 extensions (archives, RAW, docs, models, fonts)                  |
+| 177    | Version Normalization        | All docs updated to v8.4.0, CHANGELOG v8.0-8.4 entries added                        |
 
 ## v8.3.0 Block Summary (Sprints 150–174 ✅)
 
-| Phase | Sprints | Title |
-|---|---|---|
-| P1 | 150–154 | Plugin Ecosystem Hardening (sandbox, trust chain, compat kit, ref pack) |
-| P2 | 155–159 | ARM64 Foundation (build config, lib matrix, runtime validator, CI) |
-| P3 | 160–164 | Format Expansion (JPEG2000, CAD/glTF/Scientific, fallback engine) |
-| P4 | 165–169 | Memory Excellence (compactor, zero-copy, adaptive cache, hot-mode, pressure V2) |
-| P5 | 170–174 | v8.3.0 Release (matrix validation, installer lifecycle, release gate V2, doc sync, closure) |
+| Phase | Sprints | Title                                                                                       |
+| ----- | ------- | ------------------------------------------------------------------------------------------- |
+| P1    | 150–154 | Plugin Ecosystem Hardening (sandbox, trust chain, compat kit, ref pack)                     |
+| P2    | 155–159 | ARM64 Foundation (build config, lib matrix, runtime validator, CI)                          |
+| P3    | 160–164 | Format Expansion (JPEG2000, CAD/glTF/Scientific, fallback engine)                           |
+| P4    | 165–169 | Memory Excellence (compactor, zero-copy, adaptive cache, hot-mode, pressure V2)             |
+| P5    | 170–174 | v8.3.0 Release (matrix validation, installer lifecycle, release gate V2, doc sync, closure) |
 
 ## New Patterns Discovered in v8.3.0 Sprints
 

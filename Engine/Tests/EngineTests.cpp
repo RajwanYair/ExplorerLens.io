@@ -30,6 +30,8 @@
 #include "../Decoders/EPSDecoder.h"
 #include "../Decoders/KTXTextureDecoder.h"
 #include "../Decoders/VTFDecoder.h"
+#include "../Decoders/OpenRasterDecoder.h"
+#include "../Decoders/XCFDecoder.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -1528,6 +1530,86 @@ TEST(TestVTFDecoder_ImageSizeCompute)
 }
 
 //==============================================================================
+// Sprint 185: OpenRaster & XCF — Open Image Editor Formats
+//==============================================================================
+
+TEST(TestORADecoder_ExtensionCheck)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(OpenRasterDecoder::IsORAExtension(".ora"));
+    ASSERT(OpenRasterDecoder::IsORAExtension(".ORA"));
+    ASSERT(!OpenRasterDecoder::IsORAExtension(".png"));
+    ASSERT(!OpenRasterDecoder::IsORAExtension(".xcf"));
+}
+
+TEST(TestORADecoder_Create)
+{
+    using namespace DarkThumbs::Decoders;
+    OpenRasterDecoder decoder;
+    ASSERT(OpenRasterDecoder::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(OpenRasterDecoder::EXTENSIONS[0]) == ".ora");
+    ASSERT(OpenRasterDecoder::EXTENSIONS[1] == nullptr);
+}
+
+TEST(TestORADecoder_InvalidFile)
+{
+    using namespace DarkThumbs::Decoders;
+    OpenRasterDecoder decoder;
+    auto result = decoder.Decode("nonexistent.ora");
+    ASSERT(!result.success);
+}
+
+TEST(TestORADecoder_ReadInfoInvalid)
+{
+    using namespace DarkThumbs::Decoders;
+    OpenRasterDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.ora");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestXCFDecoder_ExtensionCheck)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(XCFDecoder::IsXCFExtension(".xcf"));
+    ASSERT(XCFDecoder::IsXCFExtension(".XCF"));
+    ASSERT(!XCFDecoder::IsXCFExtension(".psd"));
+    ASSERT(!XCFDecoder::IsXCFExtension(".ora"));
+}
+
+TEST(TestXCFDecoder_Create)
+{
+    using namespace DarkThumbs::Decoders;
+    XCFDecoder decoder;
+    ASSERT(XCFDecoder::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(XCFDecoder::EXTENSIONS[0]) == ".xcf");
+    ASSERT(XCFDecoder::EXTENSIONS[1] == nullptr);
+}
+
+TEST(TestXCFDecoder_InvalidFile)
+{
+    using namespace DarkThumbs::Decoders;
+    XCFDecoder decoder;
+    auto result = decoder.Decode("nonexistent.xcf");
+    ASSERT(!result.success);
+}
+
+TEST(TestXCFDecoder_ReadInfoInvalid)
+{
+    using namespace DarkThumbs::Decoders;
+    XCFDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.xcf");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestXCFDecoder_ColorModes)
+{
+    using namespace DarkThumbs::Decoders;
+    ASSERT(static_cast<uint32_t>(XCFColorMode::RGB) == 0);
+    ASSERT(static_cast<uint32_t>(XCFColorMode::Grayscale) == 1);
+    ASSERT(static_cast<uint32_t>(XCFColorMode::Indexed) == 2);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -2032,6 +2114,17 @@ int main()
     RUN_TEST(TestVTFDecoder_Create);
     RUN_TEST(TestVTFDecoder_InvalidFile);
     RUN_TEST(TestVTFDecoder_ImageSizeCompute);
+    
+    std::wcout << L"Sprint 185 - OpenRaster & XCF:" << std::endl;
+    RUN_TEST(TestORADecoder_ExtensionCheck);
+    RUN_TEST(TestORADecoder_Create);
+    RUN_TEST(TestORADecoder_InvalidFile);
+    RUN_TEST(TestORADecoder_ReadInfoInvalid);
+    RUN_TEST(TestXCFDecoder_ExtensionCheck);
+    RUN_TEST(TestXCFDecoder_Create);
+    RUN_TEST(TestXCFDecoder_InvalidFile);
+    RUN_TEST(TestXCFDecoder_ReadInfoInvalid);
+    RUN_TEST(TestXCFDecoder_ColorModes);
     
     std::wcout << std::endl;
     

@@ -122,6 +122,8 @@ set(ENGINE_HEADERS
     Decoders/FarbfeldDecoder.h    # Sprint 180 — Farbfeld (.ff) image
     Decoders/EPSDecoder.h         # Sprint 183 — EPS/PostScript vector
     Decoders/VTFDecoder.h          # Sprint 184 — Valve Texture Format
+    Decoders/OpenRasterDecoder.h   # Sprint 185 — OpenRaster (.ora)
+    Decoders/XCFDecoder.h          # Sprint 185 — GIMP XCF native
     
     # GPU
     GPU/D3D11Renderer.h
@@ -283,6 +285,8 @@ set(ENGINE_SOURCES
     Decoders/EPSDecoder.cpp       # Sprint 183 — EPS/PostScript vector
     Decoders/KTXTextureDecoder.cpp # Sprint 184 — KTX/KTX2 texture decoder
     Decoders/VTFDecoder.cpp        # Sprint 184 — Valve Texture Format
+    Decoders/OpenRasterDecoder.cpp # Sprint 185 — OpenRaster (.ora)
+    Decoders/XCFDecoder.cpp        # Sprint 185 — GIMP XCF native
     
     # GPU
     GPU/D3D11Renderer.cpp

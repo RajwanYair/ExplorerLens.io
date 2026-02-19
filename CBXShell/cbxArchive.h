@@ -190,6 +190,8 @@
 #define CBXTYPE_EPS 87	// .eps/.epsf/.ps Encapsulated PostScript (Sprint 183)
 #define CBXTYPE_KTX 88	// .ktx/.ktx2 Khronos KTX texture (Sprint 184)
 #define CBXTYPE_VTF 89	// .vtf Valve Texture Format (Sprint 184)
+#define CBXTYPE_ORA 90	// .ora OpenRaster image (Sprint 185)
+#define CBXTYPE_XCF 91	// .xcf GIMP native image (Sprint 185)
 
 // Image format identifiers (for detection within archives)
 #define IMGTYPE_UNKNOWN 0
@@ -2315,6 +2317,12 @@ namespace __cbx
 				return CBXTYPE_KTX;
 			if (StrEqual(szExt, _T(".vtf")))
 				return CBXTYPE_VTF;
+
+			// Open image editor formats (Sprint 185)
+			if (StrEqual(szExt, _T(".ora")))
+				return CBXTYPE_ORA;
+			if (StrEqual(szExt, _T(".xcf")))
+				return CBXTYPE_XCF;
 
 			return CBXTYPE_NONE;
 		}
