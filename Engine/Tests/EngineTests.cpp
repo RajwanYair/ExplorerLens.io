@@ -122,6 +122,11 @@
 #include "../Utils/FuzzTestingManager.h"
 #include "../Utils/ReleaseGateV19.h"
 #include "../Core/VulkanComputeActivation.h"
+#include "../Plugin/PluginMarketplaceV3.h"
+#include "../Core/AIThumbnailEnhancer.h"
+#include "../Decoders/SpreadsheetPreviewDecoder.h"
+#include "../Decoders/USDDecoder.h"
+#include "../Utils/AutoUpdateEngine.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -6631,6 +6636,179 @@ TEST(TestVulkan_ValidateConfig) {
     ASSERT(!VulkanComputeActivation::ValidateConfig(cfg));
 }
 
+//== Sprint 275: Plugin Marketplace V3 Tests
+
+TEST(TestMarketV3_CategoryNames) {
+    for (size_t i = 0; i < PluginMarketplaceV3::CategoryCount(); ++i) {
+        auto name = PluginMarketplaceV3::CategoryName(static_cast<PluginCategoryV3>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestMarketV3_TrustNames) {
+    for (size_t i = 0; i < PluginMarketplaceV3::TrustLevelCount(); ++i) {
+        auto name = PluginMarketplaceV3::TrustName(static_cast<PluginTrustLevelV3>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestMarketV3_SandboxNames) {
+    for (size_t i = 0; i < PluginMarketplaceV3::SandboxPolicyCount(); ++i) {
+        auto name = PluginMarketplaceV3::SandboxName(static_cast<SandboxPolicy>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestMarketV3_Counts) {
+    ASSERT(PluginMarketplaceV3::CategoryCount() == 8);
+    ASSERT(PluginMarketplaceV3::TrustLevelCount() == 4);
+    ASSERT(PluginMarketplaceV3::SandboxPolicyCount() == 4);
+}
+
+TEST(TestMarketV3_EntryDefaults) {
+    MarketplaceEntryV3 entry;
+    ASSERT(entry.category == PluginCategoryV3::Utility);
+    ASSERT(entry.sandbox == SandboxPolicy::Full);
+    ASSERT(entry.autoUpdate);
+}
+
+//== Sprint 276: AI-Enhanced Thumbnails Tests
+
+TEST(TestAI_EnhancementNames) {
+    for (size_t i = 0; i < AIThumbnailEnhancer::EnhancementCount(); ++i) {
+        auto name = AIThumbnailEnhancer::EnhancementName(static_cast<AIEnhancement>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestAI_BackendNames) {
+    for (size_t i = 0; i < AIThumbnailEnhancer::BackendCount(); ++i) {
+        auto name = AIThumbnailEnhancer::BackendName(static_cast<AIModelBackend>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestAI_Counts) {
+    ASSERT(AIThumbnailEnhancer::EnhancementCount() == 7);
+    ASSERT(AIThumbnailEnhancer::BackendCount() == 4);
+}
+
+TEST(TestAI_QualityValid) {
+    ASSERT(AIThumbnailEnhancer::IsQualityValid(0.85f));
+    ASSERT(!AIThumbnailEnhancer::IsQualityValid(-0.1f));
+    ASSERT(!AIThumbnailEnhancer::IsQualityValid(1.5f));
+}
+
+TEST(TestAI_ConfigDefaults) {
+    AIEnhancementConfig cfg;
+    ASSERT(cfg.backend == AIModelBackend::CPUFallback);
+    ASSERT(cfg.maxProcessMs == 100);
+    ASSERT(cfg.gpuAccelerate);
+}
+
+//== Sprint 277: Spreadsheet Preview Tests
+
+TEST(TestSpreadsheet_FormatNames) {
+    for (size_t i = 0; i < SpreadsheetPreviewDecoder::FormatCount(); ++i) {
+        auto name = SpreadsheetPreviewDecoder::FormatName(static_cast<SpreadsheetFormat>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestSpreadsheet_CellTypeNames) {
+    for (size_t i = 0; i < SpreadsheetPreviewDecoder::CellTypeCount(); ++i) {
+        auto name = SpreadsheetPreviewDecoder::CellTypeName(static_cast<CellDataType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestSpreadsheet_DetectFormat) {
+    ASSERT(SpreadsheetPreviewDecoder::DetectFormat(L".csv") == SpreadsheetFormat::CSV);
+    ASSERT(SpreadsheetPreviewDecoder::DetectFormat(L".xlsx") == SpreadsheetFormat::XLSX);
+    ASSERT(SpreadsheetPreviewDecoder::DetectFormat(L".ods") == SpreadsheetFormat::ODS);
+}
+
+TEST(TestSpreadsheet_Counts) {
+    ASSERT(SpreadsheetPreviewDecoder::FormatCount() == 6);
+    ASSERT(SpreadsheetPreviewDecoder::CellTypeCount() == 7);
+}
+
+TEST(TestSpreadsheet_ConfigDefaults) {
+    SpreadsheetPreviewConfig cfg;
+    ASSERT(cfg.maxRows == 20);
+    ASSERT(cfg.showGridLines);
+    ASSERT(cfg.alternateRows);
+}
+
+//== Sprint 278: USD/USDZ Decoder Tests
+
+TEST(TestUSD_ElementNames) {
+    for (size_t i = 0; i < USDDecoder::ElementCount(); ++i) {
+        auto name = USDDecoder::ElementName(static_cast<USDElementType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestUSD_VariantNames) {
+    for (size_t i = 0; i < USDDecoder::VariantCount(); ++i) {
+        auto name = USDDecoder::VariantName(static_cast<USDVariant>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestUSD_DetectVariant) {
+    ASSERT(USDDecoder::DetectVariant(L".usda") == USDVariant::USDA);
+    ASSERT(USDDecoder::DetectVariant(L".usdc") == USDVariant::USDC);
+    ASSERT(USDDecoder::DetectVariant(L".usdz") == USDVariant::USDZ);
+}
+
+TEST(TestUSD_USDZMagic) {
+    uint8_t pk[] = { 0x50, 0x4B, 0x03, 0x04, 0x00 };
+    ASSERT(USDDecoder::CheckUSDZMagic(pk, 5));
+    uint8_t bad[] = { 0x00, 0x00 };
+    ASSERT(!USDDecoder::CheckUSDZMagic(bad, 2));
+}
+
+TEST(TestUSD_Counts) {
+    ASSERT(USDDecoder::ElementCount() == 7);
+    ASSERT(USDDecoder::VariantCount() == 3);
+}
+
+//== Sprint 279: Auto-Update Engine Tests
+
+TEST(TestAutoUpdate_ChannelNames) {
+    for (size_t i = 0; i < AutoUpdateEngine::ChannelCount(); ++i) {
+        auto name = AutoUpdateEngine::ChannelName(static_cast<UpdateChannel>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestAutoUpdate_CheckResultNames) {
+    for (size_t i = 0; i < AutoUpdateEngine::CheckResultCount(); ++i) {
+        auto name = AutoUpdateEngine::CheckResultName(static_cast<UpdateCheckResult>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestAutoUpdate_DownloadStateNames) {
+    for (size_t i = 0; i < AutoUpdateEngine::DownloadStateCount(); ++i) {
+        auto name = AutoUpdateEngine::DownloadStateName(static_cast<DownloadState>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestAutoUpdate_ParseVersion) {
+    uint32_t maj, min, pat;
+    ASSERT(AutoUpdateEngine::ParseVersion(L"11.2.0", maj, min, pat));
+    ASSERT(maj == 11 && min == 2 && pat == 0);
+}
+
+TEST(TestAutoUpdate_Counts) {
+    ASSERT(AutoUpdateEngine::ChannelCount() == 4);
+    ASSERT(AutoUpdateEngine::CheckResultCount() == 6);
+    ASSERT(AutoUpdateEngine::DownloadStateCount() == 7);
+}
+
 //==============================================================================
 // Main Test Runner
 //==============================================================================
@@ -7721,6 +7899,46 @@ int main()
     RUN_TEST(TestVulkan_Counts);
     RUN_TEST(TestVulkan_MinRequirements);
     RUN_TEST(TestVulkan_ValidateConfig);
+
+    // Sprint 275: Plugin Marketplace V3 Tests
+    std::wcout << L"Sprint 275: Plugin Marketplace V3..." << std::endl;
+    RUN_TEST(TestMarketV3_CategoryNames);
+    RUN_TEST(TestMarketV3_TrustNames);
+    RUN_TEST(TestMarketV3_SandboxNames);
+    RUN_TEST(TestMarketV3_Counts);
+    RUN_TEST(TestMarketV3_EntryDefaults);
+
+    // Sprint 276: AI-Enhanced Thumbnails Tests
+    std::wcout << L"Sprint 276: AI-Enhanced Thumbnails..." << std::endl;
+    RUN_TEST(TestAI_EnhancementNames);
+    RUN_TEST(TestAI_BackendNames);
+    RUN_TEST(TestAI_Counts);
+    RUN_TEST(TestAI_QualityValid);
+    RUN_TEST(TestAI_ConfigDefaults);
+
+    // Sprint 277: Spreadsheet Preview Tests
+    std::wcout << L"Sprint 277: Spreadsheet Preview..." << std::endl;
+    RUN_TEST(TestSpreadsheet_FormatNames);
+    RUN_TEST(TestSpreadsheet_CellTypeNames);
+    RUN_TEST(TestSpreadsheet_DetectFormat);
+    RUN_TEST(TestSpreadsheet_Counts);
+    RUN_TEST(TestSpreadsheet_ConfigDefaults);
+
+    // Sprint 278: USD/USDZ Decoder Tests
+    std::wcout << L"Sprint 278: USD/USDZ..." << std::endl;
+    RUN_TEST(TestUSD_ElementNames);
+    RUN_TEST(TestUSD_VariantNames);
+    RUN_TEST(TestUSD_DetectVariant);
+    RUN_TEST(TestUSD_USDZMagic);
+    RUN_TEST(TestUSD_Counts);
+
+    // Sprint 279: Auto-Update Engine Tests
+    std::wcout << L"Sprint 279: Auto-Update Engine..." << std::endl;
+    RUN_TEST(TestAutoUpdate_ChannelNames);
+    RUN_TEST(TestAutoUpdate_CheckResultNames);
+    RUN_TEST(TestAutoUpdate_DownloadStateNames);
+    RUN_TEST(TestAutoUpdate_ParseVersion);
+    RUN_TEST(TestAutoUpdate_Counts);
 
     std::wcout << std::endl;
 

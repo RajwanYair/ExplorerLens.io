@@ -239,6 +239,11 @@ set(ENGINE_HEADERS
     Utils/FuzzTestingManager.h            # Sprint 272 — Fuzz testing activation
     Utils/ReleaseGateV19.h               # Sprint 273 — v11.2 release gate
     Core/VulkanComputeActivation.h       # Sprint 274 — Vulkan compute backend
+    Plugin/PluginMarketplaceV3.h          # Sprint 275 — Plugin marketplace V3
+    Core/AIThumbnailEnhancer.h            # Sprint 276 — AI-enhanced thumbnails
+    Decoders/SpreadsheetPreviewDecoder.h  # Sprint 277 — Spreadsheet/data preview
+    Decoders/USDDecoder.h                 # Sprint 278 — USD/USDZ support
+    Utils/AutoUpdateEngine.h              # Sprint 279 — Auto-update engine
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
