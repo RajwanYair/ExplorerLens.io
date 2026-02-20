@@ -259,6 +259,10 @@ set(ENGINE_HEADERS
     Cache/CacheWarmingService.h           # Sprint 292 — Cache warming service
     Core/MultiGPULoadBalancer.h           # Sprint 293 — Multi-GPU load balancer
     Utils/ReleaseGateV21.h                # Sprint 294 — Release gate V21 (v12.5)
+    Core/AccessibilityPipeline.h          # Sprint 295 — Accessibility pipeline
+    Utils/TelemetryAnalyticsEngine.h      # Sprint 296 — Telemetry & analytics
+    Core/CloudStorageIntegration.h        # Sprint 297 — Cloud storage integration
+    Utils/ReleaseGateV22.h                # Sprint 298 — Release gate V22 (v13.0)
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI

@@ -142,6 +142,10 @@
 #include "../Cache/CacheWarmingService.h"
 #include "../Core/MultiGPULoadBalancer.h"
 #include "../Utils/ReleaseGateV21.h"
+#include "../Core/AccessibilityPipeline.h"
+#include "../Utils/TelemetryAnalyticsEngine.h"
+#include "../Core/CloudStorageIntegration.h"
+#include "../Utils/ReleaseGateV22.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -7340,6 +7344,152 @@ TEST(TestGateV21_AllKPIsPresent) {
     for (auto& r : results) ASSERT(r.passed);
 }
 
+//== Sprint 295: Accessibility Pipeline Tests ==
+TEST(TestAccessibility_FeatureNames) {
+    for (size_t i = 0; i < AccessibilityPipeline::FeatureCount(); ++i) {
+        auto name = AccessibilityPipeline::FeatureName(static_cast<AccessibilityFeature>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestAccessibility_ColorBlindModes) {
+    for (size_t i = 0; i < AccessibilityPipeline::ColorBlindModeCount(); ++i) {
+        auto name = AccessibilityPipeline::ColorBlindModeName(static_cast<ColorBlindMode>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestAccessibility_HCThemes) {
+    for (size_t i = 0; i < AccessibilityPipeline::HCThemeCount(); ++i) {
+        auto name = AccessibilityPipeline::HCThemeName(static_cast<HighContrastTheme>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestAccessibility_DefaultConfig) {
+    AccessibilityConfig cfg;
+    ASSERT(cfg.screenReader == true);
+    ASSERT(cfg.highContrast == false);
+    ASSERT(cfg.keyboardNav == true);
+    ASSERT(cfg.cbMode == ColorBlindMode::None);
+}
+
+TEST(TestAccessibility_Counts) {
+    ASSERT(AccessibilityPipeline::FeatureCount() == 6);
+    ASSERT(AccessibilityPipeline::ColorBlindModeCount() == 5);
+    ASSERT(AccessibilityPipeline::HCThemeCount() == 5);
+}
+
+//== Sprint 296: Telemetry & Analytics Tests ==
+TEST(TestTelemetry_EventNames) {
+    for (size_t i = 0; i < TelemetryAnalyticsEngine::EventCount(); ++i) {
+        auto name = TelemetryAnalyticsEngine::EventName(static_cast<TelemetryEvent>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestTelemetry_ConsentNames) {
+    for (size_t i = 0; i < TelemetryAnalyticsEngine::ConsentCount(); ++i) {
+        auto name = TelemetryAnalyticsEngine::ConsentName(static_cast<TelemetryConsent>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestTelemetry_PeriodNames) {
+    for (size_t i = 0; i < TelemetryAnalyticsEngine::PeriodCount(); ++i) {
+        auto name = TelemetryAnalyticsEngine::PeriodName(static_cast<AggregationPeriod>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestTelemetry_CacheHitRate) {
+    ASSERT(TelemetryAnalyticsEngine::CacheHitRate(80, 20) > 0.79);
+    ASSERT(TelemetryAnalyticsEngine::CacheHitRate(80, 20) < 0.81);
+    ASSERT(TelemetryAnalyticsEngine::CacheHitRate(0, 0) == 0.0);
+}
+
+TEST(TestTelemetry_DefaultConfig) {
+    TelemetryConfig cfg;
+    ASSERT(cfg.consent == TelemetryConsent::Disabled);
+    ASSERT(cfg.localOnly == true);
+    ASSERT(cfg.anonymize == true);
+}
+
+//== Sprint 297: Cloud Storage Integration Tests ==
+TEST(TestCloud_ProviderNames) {
+    for (size_t i = 0; i < CloudStorageIntegration::ProviderCount(); ++i) {
+        auto name = CloudStorageIntegration::ProviderName(static_cast<CloudProvider>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCloud_FileStateNames) {
+    for (size_t i = 0; i < CloudStorageIntegration::FileStateCount(); ++i) {
+        auto name = CloudStorageIntegration::FileStateName(static_cast<CloudFileState>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCloud_HydrationNames) {
+    for (size_t i = 0; i < CloudStorageIntegration::HydrationCount(); ++i) {
+        auto name = CloudStorageIntegration::HydrationName(static_cast<HydrationStrategy>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCloud_ShouldHydrate) {
+    CloudIntegrationConfig cfg;
+    cfg.strategy = HydrationStrategy::HydrateIfSmall;
+    CloudFileInfo small;
+    small.state = CloudFileState::OnlineOnly;
+    small.fileSize = 1024;
+    ASSERT(CloudStorageIntegration::ShouldHydrate(small, cfg));
+    CloudFileInfo local;
+    local.state = CloudFileState::Available;
+    ASSERT(!CloudStorageIntegration::ShouldHydrate(local, cfg));
+}
+
+TEST(TestCloud_Counts) {
+    ASSERT(CloudStorageIntegration::ProviderCount() == 6);
+    ASSERT(CloudStorageIntegration::FileStateCount() == 5);
+    ASSERT(CloudStorageIntegration::HydrationCount() == 4);
+}
+
+//== Sprint 298: Release Gate V22 (v13.0) Tests ==
+TEST(TestGateV22_KPINames) {
+    for (uint32_t i = 0; i < ReleaseGateV22::KPICount(); ++i) {
+        auto name = ReleaseGateV22::KPIName(static_cast<GateV22KPI>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestGateV22_Evaluate) {
+    ReleaseGateV22 gate;
+    std::vector<GateV22Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.approved == true);
+    ASSERT(verdict.passed == ReleaseGateV22::KPICount());
+    ASSERT(verdict.failed == 0);
+}
+
+TEST(TestGateV22_KPICount) {
+    ASSERT(ReleaseGateV22::KPICount() == 23);
+}
+
+TEST(TestGateV22_Version) {
+    GateV22Verdict v;
+    ASSERT(v.version == L"13.0.0");
+    ASSERT(v.milestone == L"v13.0 Final Release");
+}
+
+TEST(TestGateV22_AllKPIsPresent) {
+    ReleaseGateV22 gate;
+    std::vector<GateV22Result> results;
+    gate.Evaluate(results);
+    ASSERT(results.size() == ReleaseGateV22::KPICount());
+    for (auto& r : results) ASSERT(r.passed);
+}
+
 //==============================================================================
 // Main Test Runner
 //==============================================================================
@@ -8585,6 +8735,34 @@ int main()
     RUN_TEST(TestGateV21_KPICount);
     RUN_TEST(TestGateV21_Version);
     RUN_TEST(TestGateV21_AllKPIsPresent);
+
+    // Sprint 295: Accessibility Pipeline
+    RUN_TEST(TestAccessibility_FeatureNames);
+    RUN_TEST(TestAccessibility_ColorBlindModes);
+    RUN_TEST(TestAccessibility_HCThemes);
+    RUN_TEST(TestAccessibility_DefaultConfig);
+    RUN_TEST(TestAccessibility_Counts);
+
+    // Sprint 296: Telemetry & Analytics
+    RUN_TEST(TestTelemetry_EventNames);
+    RUN_TEST(TestTelemetry_ConsentNames);
+    RUN_TEST(TestTelemetry_PeriodNames);
+    RUN_TEST(TestTelemetry_CacheHitRate);
+    RUN_TEST(TestTelemetry_DefaultConfig);
+
+    // Sprint 297: Cloud Storage Integration
+    RUN_TEST(TestCloud_ProviderNames);
+    RUN_TEST(TestCloud_FileStateNames);
+    RUN_TEST(TestCloud_HydrationNames);
+    RUN_TEST(TestCloud_ShouldHydrate);
+    RUN_TEST(TestCloud_Counts);
+
+    // Sprint 298: Release Gate V22 (v13.0)
+    RUN_TEST(TestGateV22_KPINames);
+    RUN_TEST(TestGateV22_Evaluate);
+    RUN_TEST(TestGateV22_KPICount);
+    RUN_TEST(TestGateV22_Version);
+    RUN_TEST(TestGateV22_AllKPIsPresent);
 
     std::wcout << std::endl;
 
