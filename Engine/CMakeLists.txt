@@ -254,6 +254,11 @@ set(ENGINE_HEADERS
     Decoders/NIfTIDecoder.h               # Sprint 287 — NIfTI neuroimaging
     Decoders/CADFormatDecoder.h           # Sprint 288 — STEP/IGES CAD decoder
     Core/HDRDisplayPipeline.h             # Sprint 289 — HDR display pipeline
+    Core/PerMonitorDPIV3.h                # Sprint 290 — Per-monitor DPI V3
+    Core/ShellOverlayHandler.h            # Sprint 291 — Shell overlay icons
+    Cache/CacheWarmingService.h           # Sprint 292 — Cache warming service
+    Core/MultiGPULoadBalancer.h           # Sprint 293 — Multi-GPU load balancer
+    Utils/ReleaseGateV21.h                # Sprint 294 — Release gate V21 (v12.5)
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI

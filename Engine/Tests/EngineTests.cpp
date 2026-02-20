@@ -137,6 +137,11 @@
 #include "../Decoders/NIfTIDecoder.h"
 #include "../Decoders/CADFormatDecoder.h"
 #include "../Core/HDRDisplayPipeline.h"
+#include "../Core/PerMonitorDPIV3.h"
+#include "../Core/ShellOverlayHandler.h"
+#include "../Cache/CacheWarmingService.h"
+#include "../Core/MultiGPULoadBalancer.h"
+#include "../Utils/ReleaseGateV21.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -7160,6 +7165,181 @@ TEST(TestHDR_Counts) {
     ASSERT(HDRDisplayPipeline::HDRFormatCount() == 5);
 }
 
+//== Sprint 290: Per-Monitor DPI V3 Tests ==
+TEST(TestDPI_AwarenessNames) {
+    for (size_t i = 0; i < PerMonitorDPIV3::AwarenessCount(); ++i) {
+        auto name = PerMonitorDPIV3::AwarenessName(static_cast<DPIAwareness>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestDPI_ScaleNames) {
+    for (size_t i = 0; i < PerMonitorDPIV3::ScaleCount(); ++i) {
+        auto name = PerMonitorDPIV3::ScaleName(static_cast<DPIScale>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestDPI_ScaledSize) {
+    ASSERT(PerMonitorDPIV3::ScaledSize(256, 96) == 256);
+    ASSERT(PerMonitorDPIV3::ScaledSize(256, 192) == 512);
+    ASSERT(PerMonitorDPIV3::ScaledSize(256, 144) == 384);
+}
+
+TEST(TestDPI_DefaultConfig) {
+    DPIScalingConfig cfg;
+    ASSERT(cfg.awareness == DPIAwareness::PerMonitorV3);
+    ASSERT(cfg.baseThumbnailSize == 256);
+    ASSERT(cfg.autoScale == true);
+}
+
+TEST(TestDPI_Counts) {
+    ASSERT(PerMonitorDPIV3::AwarenessCount() == 5);
+    ASSERT(PerMonitorDPIV3::ScaleCount() == 8);
+}
+
+//== Sprint 291: Shell Overlay Icon Handler Tests ==
+TEST(TestOverlay_IconNames) {
+    for (size_t i = 0; i < ShellOverlayHandler::OverlayCount(); ++i) {
+        auto name = ShellOverlayHandler::OverlayName(static_cast<OverlayIconType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestOverlay_PositionNames) {
+    for (size_t i = 0; i < ShellOverlayHandler::PositionCount(); ++i) {
+        auto name = ShellOverlayHandler::PositionName(static_cast<OverlayPosition>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestOverlay_ValidateOpacity) {
+    ASSERT(ShellOverlayHandler::ValidateOpacity(0.5f));
+    ASSERT(ShellOverlayHandler::ValidateOpacity(0.0f));
+    ASSERT(ShellOverlayHandler::ValidateOpacity(1.0f));
+    ASSERT(!ShellOverlayHandler::ValidateOpacity(-0.1f));
+    ASSERT(!ShellOverlayHandler::ValidateOpacity(1.1f));
+}
+
+TEST(TestOverlay_DefaultConfig) {
+    OverlayIconConfig cfg;
+    ASSERT(cfg.position == OverlayPosition::BottomRight);
+    ASSERT(cfg.iconSize == 16);
+    ASSERT(cfg.enabled == true);
+}
+
+TEST(TestOverlay_Counts) {
+    ASSERT(ShellOverlayHandler::OverlayCount() == 7);
+    ASSERT(ShellOverlayHandler::PositionCount() == 4);
+}
+
+//== Sprint 292: Cache Warming Service Tests ==
+TEST(TestCacheWarm_StrategyNames) {
+    for (size_t i = 0; i < CacheWarmingService::StrategyCount(); ++i) {
+        auto name = CacheWarmingService::StrategyName(static_cast<WarmingStrategy>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCacheWarm_PriorityNames) {
+    for (size_t i = 0; i < CacheWarmingService::PriorityCount(); ++i) {
+        auto name = CacheWarmingService::PriorityName(static_cast<WarmingPriority>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCacheWarm_JobStatusNames) {
+    for (size_t i = 0; i < CacheWarmingService::JobStatusCount(); ++i) {
+        auto name = CacheWarmingService::JobStatusName(static_cast<WarmingJobStatus>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCacheWarm_DefaultConfig) {
+    CacheWarmingConfig cfg;
+    ASSERT(cfg.strategy == WarmingStrategy::MostRecent);
+    ASSERT(cfg.priority == WarmingPriority::Idle);
+    ASSERT(cfg.maxConcurrent == 2);
+    ASSERT(cfg.respectPowerMode == true);
+}
+
+TEST(TestCacheWarm_Counts) {
+    ASSERT(CacheWarmingService::StrategyCount() == 5);
+    ASSERT(CacheWarmingService::PriorityCount() == 4);
+    ASSERT(CacheWarmingService::JobStatusCount() == 6);
+}
+
+//== Sprint 293: Multi-GPU Load Balancer Tests ==
+TEST(TestMultiGPU_StrategyNames) {
+    for (size_t i = 0; i < MultiGPULoadBalancer::StrategyCount(); ++i) {
+        auto name = MultiGPULoadBalancer::StrategyName(static_cast<GPUBalanceStrategy>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestMultiGPU_DeviceTypeNames) {
+    for (size_t i = 0; i < MultiGPULoadBalancer::DeviceTypeCount(); ++i) {
+        auto name = MultiGPULoadBalancer::DeviceTypeName(static_cast<GPUDeviceType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestMultiGPU_ValidateConfig) {
+    MultiGPUConfig cfg;
+    ASSERT(MultiGPULoadBalancer::ValidateConfig(cfg));
+    MultiGPUConfig bad;
+    bad.maxGPUs = 0;
+    ASSERT(!MultiGPULoadBalancer::ValidateConfig(bad));
+}
+
+TEST(TestMultiGPU_DefaultConfig) {
+    MultiGPUConfig cfg;
+    ASSERT(cfg.strategy == GPUBalanceStrategy::LeastLoaded);
+    ASSERT(cfg.maxGPUs == 4);
+    ASSERT(cfg.enableFallback == true);
+    ASSERT(cfg.preferDiscrete == true);
+}
+
+TEST(TestMultiGPU_Counts) {
+    ASSERT(MultiGPULoadBalancer::StrategyCount() == 5);
+    ASSERT(MultiGPULoadBalancer::DeviceTypeCount() == 4);
+}
+
+//== Sprint 294: Release Gate V21 Tests ==
+TEST(TestGateV21_KPINames) {
+    for (uint32_t i = 0; i < ReleaseGateV21::KPICount(); ++i) {
+        auto name = ReleaseGateV21::KPIName(static_cast<GateV21KPI>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestGateV21_Evaluate) {
+    ReleaseGateV21 gate;
+    std::vector<GateV21Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.approved == true);
+    ASSERT(verdict.passed == ReleaseGateV21::KPICount());
+    ASSERT(verdict.failed == 0);
+}
+
+TEST(TestGateV21_KPICount) {
+    ASSERT(ReleaseGateV21::KPICount() == 22);
+}
+
+TEST(TestGateV21_Version) {
+    GateV21Verdict v;
+    ASSERT(v.version == L"12.5.0");
+    ASSERT(v.approved == false);
+}
+
+TEST(TestGateV21_AllKPIsPresent) {
+    ReleaseGateV21 gate;
+    std::vector<GateV21Result> results;
+    gate.Evaluate(results);
+    ASSERT(results.size() == ReleaseGateV21::KPICount());
+    for (auto& r : results) ASSERT(r.passed);
+}
+
 //==============================================================================
 // Main Test Runner
 //==============================================================================
@@ -8370,6 +8550,41 @@ int main()
     RUN_TEST(TestHDR_FormatNames);
     RUN_TEST(TestHDR_ValidateExposure);
     RUN_TEST(TestHDR_Counts);
+
+    // Sprint 290: Per-Monitor DPI V3
+    RUN_TEST(TestDPI_AwarenessNames);
+    RUN_TEST(TestDPI_ScaleNames);
+    RUN_TEST(TestDPI_ScaledSize);
+    RUN_TEST(TestDPI_DefaultConfig);
+    RUN_TEST(TestDPI_Counts);
+
+    // Sprint 291: Shell Overlay Icon Handler
+    RUN_TEST(TestOverlay_IconNames);
+    RUN_TEST(TestOverlay_PositionNames);
+    RUN_TEST(TestOverlay_ValidateOpacity);
+    RUN_TEST(TestOverlay_DefaultConfig);
+    RUN_TEST(TestOverlay_Counts);
+
+    // Sprint 292: Cache Warming Service
+    RUN_TEST(TestCacheWarm_StrategyNames);
+    RUN_TEST(TestCacheWarm_PriorityNames);
+    RUN_TEST(TestCacheWarm_JobStatusNames);
+    RUN_TEST(TestCacheWarm_DefaultConfig);
+    RUN_TEST(TestCacheWarm_Counts);
+
+    // Sprint 293: Multi-GPU Load Balancer
+    RUN_TEST(TestMultiGPU_StrategyNames);
+    RUN_TEST(TestMultiGPU_DeviceTypeNames);
+    RUN_TEST(TestMultiGPU_ValidateConfig);
+    RUN_TEST(TestMultiGPU_DefaultConfig);
+    RUN_TEST(TestMultiGPU_Counts);
+
+    // Sprint 294: Release Gate V21
+    RUN_TEST(TestGateV21_KPINames);
+    RUN_TEST(TestGateV21_Evaluate);
+    RUN_TEST(TestGateV21_KPICount);
+    RUN_TEST(TestGateV21_Version);
+    RUN_TEST(TestGateV21_AllKPIsPresent);
 
     std::wcout << std::endl;
 
