@@ -229,6 +229,11 @@ set(ENGINE_HEADERS
     Core/D3D12PipelineActivation.h        # Sprint 262 — D3D12 pipeline activation
     Core/AsyncShellActivation.h           # Sprint 263 — Async shell extension
     Core/SIMDAccelerationManager.h        # Sprint 264 — SIMD acceleration
+    Core/ParallelBatchProcessor.h         # Sprint 265 — Parallel batch decode
+    Cache/PersistentCacheManager.h        # Sprint 266 — Persistent cache & USN
+    Utils/ReleaseGateV18.h                # Sprint 267 — v11.1 performance release gate
+    Utils/ARM64PlatformValidator.h        # Sprint 268 — ARM64 validation
+    Utils/MSIXPackagingManager.h          # Sprint 269 — MSIX packaging
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI

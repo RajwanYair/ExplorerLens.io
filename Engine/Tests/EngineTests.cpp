@@ -112,6 +112,11 @@
 #include "../Core/D3D12PipelineActivation.h"
 #include "../Core/AsyncShellActivation.h"
 #include "../Core/SIMDAccelerationManager.h"
+#include "../Core/ParallelBatchProcessor.h"
+#include "../Cache/PersistentCacheManager.h"
+#include "../Utils/ReleaseGateV18.h"
+#include "../Utils/ARM64PlatformValidator.h"
+#include "../Utils/MSIXPackagingManager.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -6299,6 +6304,162 @@ TEST(TestSIMD_Counts) {
 }
 
 //==============================================================================
+//== Sprint 265: Parallel Batch Decode Tests
+//==============================================================================
+
+TEST(TestBatch_PolicyNames) {
+    ASSERT(std::wstring(ParallelBatchProcessor::PolicyName(BatchPolicy::Adaptive)) == L"Adaptive");
+    ASSERT(std::wstring(ParallelBatchProcessor::PolicyName(BatchPolicy::SizeOrdered)) == L"Size Ordered");
+}
+
+TEST(TestBatch_OptimalThreads) {
+    ASSERT(ParallelBatchProcessor::OptimalThreadCount(4) == 3);
+    ASSERT(ParallelBatchProcessor::OptimalThreadCount(8) == 6);
+    ASSERT(ParallelBatchProcessor::OptimalThreadCount(16) == 14);
+}
+
+TEST(TestBatch_ValidateConfig) {
+    BatchDecodeConfig cfg;
+    ASSERT(ParallelBatchProcessor::ValidateConfig(cfg));
+    cfg.maxThreads = 0;
+    ASSERT(!ParallelBatchProcessor::ValidateConfig(cfg));
+}
+
+TEST(TestBatch_Throughput) {
+    ASSERT(ParallelBatchProcessor::CalculateThroughput(400, 1000.0) == 400.0);
+    ASSERT(ParallelBatchProcessor::CalculateThroughput(0, 0) == 0);
+}
+
+TEST(TestBatch_PolicyCount) {
+    ASSERT(ParallelBatchProcessor::PolicyCount() == 5);
+}
+
+//==============================================================================
+//== Sprint 266: Persistent Cache & USN Tests
+//==============================================================================
+
+TEST(TestPCache_BackendNames) {
+    ASSERT(std::wstring(PersistentCacheManager::BackendName(CacheBackend::Hybrid)) == L"Hybrid");
+    ASSERT(std::wstring(PersistentCacheManager::BackendName(CacheBackend::SQLite)) == L"SQLite");
+}
+
+TEST(TestPCache_PolicyNames) {
+    ASSERT(std::wstring(PersistentCacheManager::PolicyName(InvalidationPolicy::USNJournal)) == L"USN Journal");
+}
+
+TEST(TestPCache_ValidateConfig) {
+    PersistentCacheConfig cfg;
+    ASSERT(PersistentCacheManager::ValidateConfig(cfg));
+    cfg.maxMemoryMB = 0;
+    ASSERT(!PersistentCacheManager::ValidateConfig(cfg));
+}
+
+TEST(TestPCache_HitRate) {
+    ASSERT(PersistentCacheManager::CalculateHitRate(80, 20) == 0.8);
+    ASSERT(PersistentCacheManager::CalculateHitRate(0, 0) == 0.0);
+}
+
+TEST(TestPCache_Counts) {
+    ASSERT(PersistentCacheManager::BackendCount() == 4);
+    ASSERT(PersistentCacheManager::PolicyCount() == 5);
+}
+
+//==============================================================================
+//== Sprint 267: Release Gate V18 Tests
+//==============================================================================
+
+TEST(TestGateV18_KPINames) {
+    ASSERT(std::wstring(ReleaseGateV18::KPIName(GateV18KPI::SingleThumbnailLatency)) == L"SingleThumbnailLatency");
+    ASSERT(std::wstring(ReleaseGateV18::KPIName(GateV18KPI::BatchThroughput)) == L"BatchThroughput");
+}
+
+TEST(TestGateV18_KPICount) {
+    ASSERT(ReleaseGateV18::KPICount() == 20);
+}
+
+TEST(TestGateV18_Thresholds) {
+    auto t = ReleaseGateV18::DefaultThresholds();
+    ASSERT(t.maxSingleMs == 12.0);
+    ASSERT(t.minBatchPerSec == 400.0);
+}
+
+TEST(TestGateV18_Evaluate) {
+    ReleaseGateV18 gate;
+    std::vector<GateV18Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.approved);
+    ASSERT(verdict.passed == 20);
+}
+
+TEST(TestGateV18_Version) {
+    ReleaseGateV18 gate;
+    std::vector<GateV18Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.version == L"11.1.0");
+}
+
+//==============================================================================
+//== Sprint 268: ARM64 Validation Tests
+//==============================================================================
+
+TEST(TestARM64_FeatureNames) {
+    ASSERT(std::wstring(ARM64PlatformValidator::FeatureName(ARM64Feature::NEON)) == L"NEON");
+    ASSERT(std::wstring(ARM64PlatformValidator::FeatureName(ARM64Feature::SVE)) == L"SVE");
+}
+
+TEST(TestARM64_CategoryNames) {
+    ASSERT(std::wstring(ARM64PlatformValidator::CategoryName(ARM64TestCategory::BasicBoot)) == L"Basic Boot");
+    ASSERT(std::wstring(ARM64PlatformValidator::CategoryName(ARM64TestCategory::SIMDPaths)) == L"SIMD Paths");
+}
+
+TEST(TestARM64_Counts) {
+    ASSERT(ARM64PlatformValidator::FeatureCount() == 9);
+    ASSERT(ARM64PlatformValidator::CategoryCount() == 8);
+}
+
+TEST(TestARM64_IsARM64) {
+    // On x64, this should be false
+    #if defined(_M_X64) || defined(__x86_64__)
+    ASSERT(!ARM64PlatformValidator::IsARM64());
+    #endif
+}
+
+TEST(TestARM64_Config) {
+    ARM64ValidationConfig cfg;
+    ASSERT(!cfg.isEmulated);
+    ASSERT(!cfg.isNativeARM64);
+}
+
+//==============================================================================
+//== Sprint 269: MSIX Packaging Tests
+//==============================================================================
+
+TEST(TestMSIX_TargetNames) {
+    ASSERT(std::wstring(MSIXPackagingManager::TargetName(MSIXTarget::Store)) == L"Microsoft Store");
+    ASSERT(std::wstring(MSIXPackagingManager::TargetName(MSIXTarget::Desktop)) == L"Desktop Bridge");
+}
+
+TEST(TestMSIX_CapabilityNames) {
+    ASSERT(std::wstring(MSIXPackagingManager::CapabilityName(MSIXCapability::ShellExtension)) == L"Shell Extension");
+}
+
+TEST(TestMSIX_Counts) {
+    ASSERT(MSIXPackagingManager::TargetCount() == 4);
+    ASSERT(MSIXPackagingManager::CapabilityCount() == 6);
+}
+
+TEST(TestMSIX_Identity) {
+    auto id = MSIXPackagingManager::GenerateIdentity(L"DarkThumbs", L"11.0.0.0");
+    ASSERT(id == L"DarkThumbs_11.0.0.0");
+}
+
+TEST(TestMSIX_ValidateVersion) {
+    ASSERT(MSIXPackagingManager::ValidateVersion(L"11.0.0.0"));
+    ASSERT(!MSIXPackagingManager::ValidateVersion(L"11.0.0"));
+    ASSERT(!MSIXPackagingManager::ValidateVersion(L"abc"));
+}
+
+//==============================================================================
 // Main Test Runner
 //==============================================================================
 
@@ -7308,6 +7469,46 @@ int main()
     RUN_TEST(TestSIMD_SelectLevel);
     RUN_TEST(TestSIMD_Speedup);
     RUN_TEST(TestSIMD_Counts);
+
+    // Sprint 265: Parallel Batch Decode Tests
+    std::wcout << L"Sprint 265: Parallel Batch..." << std::endl;
+    RUN_TEST(TestBatch_PolicyNames);
+    RUN_TEST(TestBatch_OptimalThreads);
+    RUN_TEST(TestBatch_ValidateConfig);
+    RUN_TEST(TestBatch_Throughput);
+    RUN_TEST(TestBatch_PolicyCount);
+
+    // Sprint 266: Persistent Cache & USN Tests
+    std::wcout << L"Sprint 266: Persistent Cache..." << std::endl;
+    RUN_TEST(TestPCache_BackendNames);
+    RUN_TEST(TestPCache_PolicyNames);
+    RUN_TEST(TestPCache_ValidateConfig);
+    RUN_TEST(TestPCache_HitRate);
+    RUN_TEST(TestPCache_Counts);
+
+    // Sprint 267: Release Gate V18 Tests
+    std::wcout << L"Sprint 267: Release Gate V18..." << std::endl;
+    RUN_TEST(TestGateV18_KPINames);
+    RUN_TEST(TestGateV18_KPICount);
+    RUN_TEST(TestGateV18_Thresholds);
+    RUN_TEST(TestGateV18_Evaluate);
+    RUN_TEST(TestGateV18_Version);
+
+    // Sprint 268: ARM64 Validation Tests
+    std::wcout << L"Sprint 268: ARM64 Validation..." << std::endl;
+    RUN_TEST(TestARM64_FeatureNames);
+    RUN_TEST(TestARM64_CategoryNames);
+    RUN_TEST(TestARM64_Counts);
+    RUN_TEST(TestARM64_IsARM64);
+    RUN_TEST(TestARM64_Config);
+
+    // Sprint 269: MSIX Packaging Tests
+    std::wcout << L"Sprint 269: MSIX Packaging..." << std::endl;
+    RUN_TEST(TestMSIX_TargetNames);
+    RUN_TEST(TestMSIX_CapabilityNames);
+    RUN_TEST(TestMSIX_Counts);
+    RUN_TEST(TestMSIX_Identity);
+    RUN_TEST(TestMSIX_ValidateVersion);
 
     std::wcout << std::endl;
 
