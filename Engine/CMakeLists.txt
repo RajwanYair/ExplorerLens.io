@@ -103,6 +103,8 @@ set(ENGINE_HEADERS
     Core/BatchProcessingEngine.h       # Sprint 233 — Multi-file batch ops
     Core/RegistryManager.h             # Sprint 236 — Registry read/write
     Core/ErrorRecoveryEngine.h         # Sprint 237 — Crash recovery & checkpoints
+    Core/ResourcePoolEngine.h          # Sprint 240 — Object pool for resource reuse
+    Core/MetadataExtractor.h           # Sprint 242 — EXIF/IPTC/XMP extraction
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -205,6 +207,9 @@ set(ENGINE_HEADERS
     Utils/FileHashEngine.h                # Sprint 235 — SHA256/MD5/CRC32 hashing
     Utils/LogRotationEngine.h             # Sprint 238 — Log rotation & cleanup
     Utils/ReleaseGateV13.h                # Sprint 239 — v10.3 release gate
+    Utils/CommandLineInterface.h          # Sprint 241 — CLI argument parser
+    Utils/NotificationEngine.h            # Sprint 243 — Toast notifications
+    Utils/ReleaseGateV14.h                # Sprint 244 — v10.4 release gate
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -324,6 +329,8 @@ set(ENGINE_SOURCES
     Core/BatchProcessingEngine.cpp       # Sprint 233 — Multi-file batch ops
     Core/RegistryManager.cpp             # Sprint 236 — Registry read/write
     Core/ErrorRecoveryEngine.cpp         # Sprint 237 — Crash recovery & checkpoints
+    Core/ResourcePoolEngine.cpp          # Sprint 240 — Object pool for resource reuse
+    Core/MetadataExtractor.cpp           # Sprint 242 — EXIF/IPTC/XMP extraction
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -421,6 +428,9 @@ set(ENGINE_SOURCES
     Utils/FileHashEngine.cpp                # Sprint 235 — SHA256/MD5/CRC32 hashing
     Utils/LogRotationEngine.cpp             # Sprint 238 — Log rotation & cleanup
     Utils/ReleaseGateV13.cpp                # Sprint 239 — v10.3 release gate
+    Utils/CommandLineInterface.cpp          # Sprint 241 — CLI argument parser
+    Utils/NotificationEngine.cpp            # Sprint 243 — Toast notifications
+    Utils/ReleaseGateV14.cpp                # Sprint 244 — v10.4 release gate
 )
 
 #==============================================================================

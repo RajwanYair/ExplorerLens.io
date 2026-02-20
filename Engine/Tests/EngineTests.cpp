@@ -88,6 +88,11 @@
 #include "../Core/ErrorRecoveryEngine.h"
 #include "../Utils/LogRotationEngine.h"
 #include "../Utils/ReleaseGateV13.h"
+#include "../Core/ResourcePoolEngine.h"
+#include "../Utils/CommandLineInterface.h"
+#include "../Core/MetadataExtractor.h"
+#include "../Utils/NotificationEngine.h"
+#include "../Utils/ReleaseGateV14.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -5071,6 +5076,255 @@ TEST(TestGateV13_Version)
 }
 
 //==============================================================================
+// Sprint 240: ResourcePoolEngine Tests
+//==============================================================================
+
+TEST(TestResourcePool_Checkout)
+{
+    using namespace DarkThumbs;
+    ResourcePoolEngine pool;
+    pool.Initialize();
+    auto r = pool.Checkout(ResourceType::DecoderContext);
+    ASSERT(r.id > 0);
+    ASSERT(r.state == ResourceState::InUse);
+}
+
+TEST(TestResourcePool_Return)
+{
+    using namespace DarkThumbs;
+    ResourcePoolEngine pool;
+    pool.Initialize();
+    auto r = pool.Checkout(ResourceType::GPUTexture);
+    ASSERT(pool.Return(r.id));
+    ASSERT(pool.GetAvailableCount(ResourceType::GPUTexture) >= 1);
+}
+
+TEST(TestResourcePool_Stats)
+{
+    using namespace DarkThumbs;
+    ResourcePoolEngine pool;
+    pool.Initialize();
+    pool.Checkout(ResourceType::DecoderContext);
+    auto stats = pool.GetStats();
+    ASSERT(stats.totalCheckouts >= 1);
+}
+
+TEST(TestResourcePool_TypeNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(ResourcePoolEngine::GetResourceTypeName(ResourceType::GPUTexture)) == L"GPU Texture");
+    ASSERT(ResourcePoolEngine::GetResourceTypeCount() == 6);
+}
+
+TEST(TestResourcePool_Prewarm)
+{
+    using namespace DarkThumbs;
+    PoolConfig cfg;
+    cfg.enablePrewarming = false;
+    ResourcePoolEngine pool(cfg);
+    pool.Initialize();
+    uint32_t created = pool.Prewarm(ResourceType::ComputeBuffer, 5);
+    ASSERT(created == 5);
+    ASSERT(pool.GetAvailableCount(ResourceType::ComputeBuffer) == 5);
+}
+
+//==============================================================================
+// Sprint 241: CommandLineInterface Tests
+//==============================================================================
+
+TEST(TestCLI_ParseFlags)
+{
+    using namespace DarkThumbs;
+    CommandLineInterface cli(L"TestApp");
+    ArgDefinition def;
+    def.longName = L"--verbose";
+    def.shortName = L"-v";
+    def.type = ArgType::Flag;
+    cli.AddArgument(def);
+    auto status = cli.Parse({L"--verbose"});
+    ASSERT(status == ParseStatus::Success);
+    ASSERT(cli.GetFlag(L"--verbose"));
+}
+
+TEST(TestCLI_ParseString)
+{
+    using namespace DarkThumbs;
+    CommandLineInterface cli(L"TestApp");
+    ArgDefinition def;
+    def.longName = L"--output";
+    def.shortName = L"-o";
+    def.type = ArgType::String;
+    cli.AddArgument(def);
+    auto status = cli.Parse({L"--output", L"file.txt"});
+    ASSERT(status == ParseStatus::Success);
+    ASSERT(cli.GetString(L"--output") == L"file.txt");
+}
+
+TEST(TestCLI_MissingRequired)
+{
+    using namespace DarkThumbs;
+    CommandLineInterface cli;
+    ArgDefinition def;
+    def.longName = L"--input";
+    def.shortName = L"-i";
+    def.type = ArgType::FilePath;
+    def.required = true;
+    cli.AddArgument(def);
+    auto status = cli.Parse({});
+    ASSERT(status == ParseStatus::MissingRequired);
+}
+
+TEST(TestCLI_HelpRequested)
+{
+    using namespace DarkThumbs;
+    CommandLineInterface cli;
+    auto status = cli.Parse({L"--help"});
+    ASSERT(status == ParseStatus::HelpRequested);
+}
+
+TEST(TestCLI_ArgTypeNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(CommandLineInterface::GetArgTypeName(ArgType::String)) == L"String");
+    ASSERT(std::wstring(CommandLineInterface::GetParseStatusName(ParseStatus::Success)) == L"Success");
+}
+
+//==============================================================================
+// Sprint 242: MetadataExtractor Tests
+//==============================================================================
+
+TEST(TestMetadata_Extract)
+{
+    using namespace DarkThumbs;
+    MetadataExtractor extractor;
+    auto result = extractor.Extract(L"test_image.jpg");
+    ASSERT(result.success);
+    ASSERT(result.tagCount > 0);
+}
+
+TEST(TestMetadata_FieldLookup)
+{
+    using namespace DarkThumbs;
+    MetadataExtractor extractor;
+    auto result = extractor.Extract(L"test_image.jpg");
+    ASSERT(extractor.HasField(result, MetadataField::Width));
+    ASSERT(extractor.GetFieldValue(result, MetadataField::Width) == L"1920");
+}
+
+TEST(TestMetadata_Standards)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(MetadataExtractor::GetStandardName(MetadataStandard::EXIF)) == L"EXIF");
+    ASSERT(MetadataExtractor::GetStandardCount() == 5);
+}
+
+TEST(TestMetadata_FieldNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(MetadataExtractor::GetFieldName(MetadataField::CameraMake)) == L"Camera Make");
+    ASSERT(MetadataExtractor::GetFieldCount() == 16);
+}
+
+TEST(TestMetadata_FormatExposure)
+{
+    using namespace DarkThumbs;
+    auto formatted = MetadataExtractor::FormatExposureTime(0.004);
+    ASSERT(formatted == L"1/250s");
+}
+
+//==============================================================================
+// Sprint 243: NotificationEngine Tests
+//==============================================================================
+
+TEST(TestNotify_Send)
+{
+    using namespace DarkThumbs;
+    NotificationEngine engine;
+    uint64_t id = engine.Send(NotifyType::BatchComplete, L"Done", L"Batch finished");
+    ASSERT(id > 0);
+    ASSERT(engine.GetTotalCount() == 1);
+}
+
+TEST(TestNotify_Dismiss)
+{
+    using namespace DarkThumbs;
+    NotificationEngine engine;
+    uint64_t id = engine.Send(NotifyType::UpdateAvailable, L"Update", L"v2.0");
+    ASSERT(engine.Dismiss(id));
+    auto n = engine.GetNotification(id);
+    ASSERT(n != nullptr);
+    ASSERT(n->state == NotifyState::Dismissed);
+}
+
+TEST(TestNotify_ByType)
+{
+    using namespace DarkThumbs;
+    NotificationEngine engine;
+    engine.Send(NotifyType::DecoderError, L"Err1", L"msg1");
+    engine.Send(NotifyType::DecoderError, L"Err2", L"msg2");
+    engine.Send(NotifyType::CacheCleared, L"Cache", L"cleared");
+    auto errors = engine.GetByType(NotifyType::DecoderError);
+    ASSERT(errors.size() == 2);
+}
+
+TEST(TestNotify_TypeNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(NotificationEngine::GetTypeName(NotifyType::PluginLoaded)) == L"Plugin Loaded");
+    ASSERT(NotificationEngine::GetTypeCount() == 7);
+}
+
+TEST(TestNotify_PriorityNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(NotificationEngine::GetPriorityName(NotifyPriority::Critical)) == L"Critical");
+    ASSERT(std::wstring(NotificationEngine::GetStateName(NotifyState::Expired)) == L"Expired");
+}
+
+//==============================================================================
+// Sprint 244: ReleaseGateV14 Tests
+//==============================================================================
+
+TEST(TestGateV14_KPINames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(ReleaseGateV14::GetKPIName(GateKPIV14::BuildClean)) == L"Build Clean");
+    ASSERT(std::wstring(ReleaseGateV14::GetKPIName(GateKPIV14::MetadataAccuracy)) == L"Metadata Accuracy");
+}
+
+TEST(TestGateV14_KPICount)
+{
+    using namespace DarkThumbs;
+    ASSERT(ReleaseGateV14::GetKPICount() == 18);
+}
+
+TEST(TestGateV14_Evaluate)
+{
+    using namespace DarkThumbs;
+    ReleaseGateV14 gate;
+    ASSERT(!gate.Evaluate());
+    for (uint32_t i = 0; i < ReleaseGateV14::GetKPICount(); ++i) {
+        gate.SetKPIResult(static_cast<GateKPIV14>(i), true, 100.0);
+    }
+    ASSERT(gate.Evaluate());
+}
+
+TEST(TestGateV14_Approved)
+{
+    using namespace DarkThumbs;
+    ReleaseGateV14 gate;
+    ASSERT(!gate.IsApproved());
+    ASSERT(gate.GetFailedCount() == 18);
+}
+
+TEST(TestGateV14_Version)
+{
+    using namespace DarkThumbs;
+    ReleaseGateV14 gate;
+    ASSERT(gate.GetVersion() == L"10.4.0");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -6119,6 +6373,48 @@ int main()
     RUN_TEST(TestGateV13_Evaluate);
     RUN_TEST(TestGateV13_Approved);
     RUN_TEST(TestGateV13_Version);
+
+    std::wcout << std::endl;
+
+    // Sprint 240: Resource Pool Tests
+    std::wcout << L"Sprint 240: Resource Pool Engine..." << std::endl;
+    RUN_TEST(TestResourcePool_Checkout);
+    RUN_TEST(TestResourcePool_Return);
+    RUN_TEST(TestResourcePool_Stats);
+    RUN_TEST(TestResourcePool_TypeNames);
+    RUN_TEST(TestResourcePool_Prewarm);
+
+    // Sprint 241: CLI Tests
+    std::wcout << L"Sprint 241: Command Line Interface..." << std::endl;
+    RUN_TEST(TestCLI_ParseFlags);
+    RUN_TEST(TestCLI_ParseString);
+    RUN_TEST(TestCLI_MissingRequired);
+    RUN_TEST(TestCLI_HelpRequested);
+    RUN_TEST(TestCLI_ArgTypeNames);
+
+    // Sprint 242: Metadata Extractor Tests
+    std::wcout << L"Sprint 242: Metadata Extractor..." << std::endl;
+    RUN_TEST(TestMetadata_Extract);
+    RUN_TEST(TestMetadata_FieldLookup);
+    RUN_TEST(TestMetadata_Standards);
+    RUN_TEST(TestMetadata_FieldNames);
+    RUN_TEST(TestMetadata_FormatExposure);
+
+    // Sprint 243: Notification Engine Tests
+    std::wcout << L"Sprint 243: Notification Engine..." << std::endl;
+    RUN_TEST(TestNotify_Send);
+    RUN_TEST(TestNotify_Dismiss);
+    RUN_TEST(TestNotify_ByType);
+    RUN_TEST(TestNotify_TypeNames);
+    RUN_TEST(TestNotify_PriorityNames);
+
+    // Sprint 244: Release Gate V14 Tests
+    std::wcout << L"Sprint 244: Release Gate V14..." << std::endl;
+    RUN_TEST(TestGateV14_KPINames);
+    RUN_TEST(TestGateV14_KPICount);
+    RUN_TEST(TestGateV14_Evaluate);
+    RUN_TEST(TestGateV14_Approved);
+    RUN_TEST(TestGateV14_Version);
 
     std::wcout << std::endl;
 
