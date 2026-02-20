@@ -164,6 +164,7 @@ set(ENGINE_HEADERS
     Decoders/TextPreviewDecoder.h        # Sprint 257 — Markdown/code preview
     Decoders/DICOMDecoderV2.h            # Sprint 258 — DICOM decoder completion
     Decoders/FITSDecoderV2.h             # Sprint 259 — FITS decoder completion
+    Decoders/ModelFormatHandler.h        # Sprint 260 — 3MF/USD format support
     
     # GPU
     GPU/D3D11Renderer.h
@@ -224,6 +225,10 @@ set(ENGINE_HEADERS
     Utils/ReleaseGateV15.h                # Sprint 248 — v10.5 release gate
     Utils/TestInfrastructureV2.h           # Sprint 253 — Test infrastructure upgrade
     Utils/ReleaseGateV16.h                # Sprint 254 — v10.6 release gate
+    Utils/ReleaseGateV17.h                # Sprint 261 — v11.0 release gate
+    Core/D3D12PipelineActivation.h        # Sprint 262 — D3D12 pipeline activation
+    Core/AsyncShellActivation.h           # Sprint 263 — Async shell extension
+    Core/SIMDAccelerationManager.h        # Sprint 264 — SIMD acceleration
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI

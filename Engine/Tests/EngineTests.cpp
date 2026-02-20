@@ -107,6 +107,11 @@
 #include "../Decoders/TextPreviewDecoder.h"
 #include "../Decoders/DICOMDecoderV2.h"
 #include "../Decoders/FITSDecoderV2.h"
+#include "../Decoders/ModelFormatHandler.h"
+#include "../Utils/ReleaseGateV17.h"
+#include "../Core/D3D12PipelineActivation.h"
+#include "../Core/AsyncShellActivation.h"
+#include "../Core/SIMDAccelerationManager.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -6123,6 +6128,177 @@ TEST(TestFITSv2_Normalize) {
 }
 
 //==============================================================================
+//== Sprint 260: 3MF/USD Format Tests
+//==============================================================================
+
+TEST(TestModelFmt_Detect3MF) {
+    ASSERT(ModelFormatHandler::DetectFormat(L".3mf") == Model3DFormat::ThreeMF);
+    ASSERT(ModelFormatHandler::DetectFormat(L".usdz") == Model3DFormat::USDZ);
+    ASSERT(ModelFormatHandler::DetectFormat(L".step") == Model3DFormat::STEP);
+}
+
+TEST(TestModelFmt_FormatNames) {
+    ASSERT(std::wstring(ModelFormatHandler::FormatName(Model3DFormat::ThreeMF)) == L"3D Manufacturing Format");
+    ASSERT(std::wstring(ModelFormatHandler::FormatName(Model3DFormat::USDZ)) == L"USD ZIP Package");
+}
+
+TEST(TestModelFmt_Is3MF) {
+    uint8_t pk[] = { 'P', 'K', 0x03, 0x04 };
+    ASSERT(ModelFormatHandler::Is3MFFile(pk, 4));
+    uint8_t bad[] = { 0, 0, 0, 0 };
+    ASSERT(!ModelFormatHandler::Is3MFFile(bad, 4));
+}
+
+TEST(TestModelFmt_Thumbnail) {
+    ASSERT(ModelFormatHandler::CanExtractThumbnail(Model3DFormat::ThreeMF));
+    ASSERT(ModelFormatHandler::CanExtractThumbnail(Model3DFormat::USDZ));
+    ASSERT(!ModelFormatHandler::CanExtractThumbnail(Model3DFormat::STEP));
+}
+
+TEST(TestModelFmt_Counts) {
+    ASSERT(ModelFormatHandler::FormatCount() == 7);
+    ASSERT(ModelFormatHandler::ExtensionCount() == 9);
+}
+
+//==============================================================================
+//== Sprint 261: Release Gate V17 Tests
+//==============================================================================
+
+TEST(TestGateV17_KPINames) {
+    ASSERT(std::wstring(ReleaseGateV17::KPIName(GateV17KPI::BuildClean)) == L"BuildClean");
+    ASSERT(std::wstring(ReleaseGateV17::KPIName(GateV17KPI::DPXDecoderValid)) == L"DPXDecoderValid");
+}
+
+TEST(TestGateV17_KPICount) {
+    ASSERT(ReleaseGateV17::KPICount() == 21);
+}
+
+TEST(TestGateV17_Evaluate) {
+    ReleaseGateV17 gate;
+    std::vector<GateV17Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(results.size() == 21);
+}
+
+TEST(TestGateV17_Approved) {
+    ReleaseGateV17 gate;
+    std::vector<GateV17Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.approved);
+    ASSERT(verdict.passed == 21);
+}
+
+TEST(TestGateV17_Version) {
+    ReleaseGateV17 gate;
+    std::vector<GateV17Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.version == L"11.0.0");
+}
+
+//==============================================================================
+//== Sprint 262: D3D12 Pipeline Activation Tests
+//==============================================================================
+
+TEST(TestD3D12Act_BackendNames) {
+    ASSERT(std::wstring(D3D12PipelineActivation::BackendName(GPUBackend::D3D12)) == L"Direct3D 12");
+    ASSERT(std::wstring(D3D12PipelineActivation::BackendName(GPUBackend::GDI)) == L"GDI+ (CPU)");
+}
+
+TEST(TestD3D12Act_FeatureLevels) {
+    ASSERT(std::wstring(D3D12PipelineActivation::FeatureLevelName(D3DFeatureLevel::Level_12_0)) == L"12.0");
+}
+
+TEST(TestD3D12Act_SelectBackend) {
+    GPUAdapterInfo adapter;
+    adapter.supportsD3D12 = true;
+    adapter.dedicatedVideoMemory = 1024ULL * 1024 * 1024; // 1 GB
+    adapter.featureLevel = D3DFeatureLevel::Level_12_0;
+    D3D12ActivationConfig cfg;
+    ASSERT(D3D12PipelineActivation::SelectBackend(adapter, cfg) == GPUBackend::D3D12);
+}
+
+TEST(TestD3D12Act_Fallback) {
+    GPUAdapterInfo adapter;
+    adapter.supportsD3D12 = false;
+    adapter.featureLevel = D3DFeatureLevel::Level_11_0;
+    D3D12ActivationConfig cfg;
+    ASSERT(D3D12PipelineActivation::SelectBackend(adapter, cfg) == GPUBackend::D3D11);
+}
+
+TEST(TestD3D12Act_ValidateConfig) {
+    D3D12ActivationConfig cfg;
+    ASSERT(D3D12PipelineActivation::ValidateConfig(cfg));
+    cfg.maxConcurrentDispatches = 0;
+    ASSERT(!D3D12PipelineActivation::ValidateConfig(cfg));
+}
+
+//==============================================================================
+//== Sprint 263: Async Shell Extension Tests
+//==============================================================================
+
+TEST(TestAsync_StateNames) {
+    ASSERT(std::wstring(AsyncShellActivation::StateName(AsyncDecodeState::Queued)) == L"Queued");
+    ASSERT(std::wstring(AsyncShellActivation::StateName(AsyncDecodeState::Completed)) == L"Completed");
+    ASSERT(std::wstring(AsyncShellActivation::StateName(AsyncDecodeState::TimedOut)) == L"Timed Out");
+}
+
+TEST(TestAsync_PriorityNames) {
+    ASSERT(std::wstring(AsyncShellActivation::PriorityName(DecodePriority::Critical)) == L"Critical");
+    ASSERT(std::wstring(AsyncShellActivation::PriorityName(DecodePriority::Idle)) == L"Idle");
+}
+
+TEST(TestAsync_Counts) {
+    ASSERT(AsyncShellActivation::StateCount() == 8);
+    ASSERT(AsyncShellActivation::PriorityCount() == 5);
+}
+
+TEST(TestAsync_ValidateConfig) {
+    AsyncProviderConfig cfg;
+    ASSERT(AsyncShellActivation::ValidateConfig(cfg));
+    cfg.maxConcurrent = 0;
+    ASSERT(!AsyncShellActivation::ValidateConfig(cfg));
+}
+
+TEST(TestAsync_Timeout) {
+    AsyncProviderConfig cfg;
+    cfg.defaultTimeoutMs = 5000;
+    cfg.criticalTimeoutMs = 10000;
+    ASSERT(AsyncShellActivation::EffectiveTimeout(cfg, DecodePriority::Critical) == 10000);
+    ASSERT(AsyncShellActivation::EffectiveTimeout(cfg, DecodePriority::Low) == 2500);
+}
+
+//==============================================================================
+//== Sprint 264: SIMD Acceleration Tests
+//==============================================================================
+
+TEST(TestSIMD_LevelNames) {
+    ASSERT(std::wstring(SIMDAccelerationManager::LevelName(SIMDLevel::AVX2)) == L"AVX2");
+    ASSERT(std::wstring(SIMDAccelerationManager::LevelName(SIMDLevel::NEON)) == L"NEON");
+}
+
+TEST(TestSIMD_OperationNames) {
+    ASSERT(std::wstring(SIMDAccelerationManager::OperationName(SIMDOperation::BilinearResize)) == L"Bilinear Resize");
+    ASSERT(std::wstring(SIMDAccelerationManager::OperationName(SIMDOperation::AlphaBlend)) == L"Alpha Blend");
+}
+
+TEST(TestSIMD_SelectLevel) {
+    SIMDCapabilities caps;
+    caps.hasSSE2 = true; caps.hasSSE41 = true; caps.hasAVX = true; caps.hasAVX2 = true;
+    SIMDConfig cfg;
+    ASSERT(SIMDAccelerationManager::SelectLevel(caps, cfg) == SIMDLevel::AVX2);
+}
+
+TEST(TestSIMD_Speedup) {
+    ASSERT(SIMDAccelerationManager::SpeedupEstimate(SIMDLevel::AVX2) == 4.0f);
+    ASSERT(SIMDAccelerationManager::SpeedupEstimate(SIMDLevel::None) == 1.0f);
+}
+
+TEST(TestSIMD_Counts) {
+    ASSERT(SIMDAccelerationManager::LevelCount() == 7);
+    ASSERT(SIMDAccelerationManager::OperationCount() == 8);
+}
+
+//==============================================================================
 // Main Test Runner
 //==============================================================================
 
@@ -7092,6 +7268,46 @@ int main()
     RUN_TEST(TestFITSv2_Validate);
     RUN_TEST(TestFITSv2_DataSize);
     RUN_TEST(TestFITSv2_Normalize);
+
+    // Sprint 260: 3MF/USD Format Tests
+    std::wcout << L"Sprint 260: 3MF/USD Formats..." << std::endl;
+    RUN_TEST(TestModelFmt_Detect3MF);
+    RUN_TEST(TestModelFmt_FormatNames);
+    RUN_TEST(TestModelFmt_Is3MF);
+    RUN_TEST(TestModelFmt_Thumbnail);
+    RUN_TEST(TestModelFmt_Counts);
+
+    // Sprint 261: Release Gate V17 Tests
+    std::wcout << L"Sprint 261: Release Gate V17..." << std::endl;
+    RUN_TEST(TestGateV17_KPINames);
+    RUN_TEST(TestGateV17_KPICount);
+    RUN_TEST(TestGateV17_Evaluate);
+    RUN_TEST(TestGateV17_Approved);
+    RUN_TEST(TestGateV17_Version);
+
+    // Sprint 262: D3D12 Pipeline Activation Tests
+    std::wcout << L"Sprint 262: D3D12 Pipeline..." << std::endl;
+    RUN_TEST(TestD3D12Act_BackendNames);
+    RUN_TEST(TestD3D12Act_FeatureLevels);
+    RUN_TEST(TestD3D12Act_SelectBackend);
+    RUN_TEST(TestD3D12Act_Fallback);
+    RUN_TEST(TestD3D12Act_ValidateConfig);
+
+    // Sprint 263: Async Shell Extension Tests
+    std::wcout << L"Sprint 263: Async Shell..." << std::endl;
+    RUN_TEST(TestAsync_StateNames);
+    RUN_TEST(TestAsync_PriorityNames);
+    RUN_TEST(TestAsync_Counts);
+    RUN_TEST(TestAsync_ValidateConfig);
+    RUN_TEST(TestAsync_Timeout);
+
+    // Sprint 264: SIMD Acceleration Tests
+    std::wcout << L"Sprint 264: SIMD Acceleration..." << std::endl;
+    RUN_TEST(TestSIMD_LevelNames);
+    RUN_TEST(TestSIMD_OperationNames);
+    RUN_TEST(TestSIMD_SelectLevel);
+    RUN_TEST(TestSIMD_Speedup);
+    RUN_TEST(TestSIMD_Counts);
 
     std::wcout << std::endl;
 
