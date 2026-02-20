@@ -73,6 +73,11 @@
 #include "../Core/FormatConverterEngine.h"
 #include "../Utils/EnterpriseDeploymentManager.h"
 #include "../Utils/ReleaseGateV11.h"
+#include "../Core/WatchFolderEngine.h"
+#include "../Utils/DiagnosticDashboard.h"
+#include "../Core/PerformanceBenchmarkV2.h"
+#include "../Utils/LocalizationEngine.h"
+#include "../Core/ThemeEngine.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -4401,6 +4406,235 @@ TEST(TestGateV11_SingleKPI)
 }
 
 //==============================================================================
+// Sprint 225: Watch Folder Engine Tests
+//==============================================================================
+
+TEST(TestWatch_ChangeTypeNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(WatchFolderEngine::GetChangeTypeName(FileChangeType::Created)) == L"Created");
+    ASSERT(std::wstring(WatchFolderEngine::GetChangeTypeName(FileChangeType::Renamed)) == L"Renamed");
+}
+
+TEST(TestWatch_WatchModes)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(WatchFolderEngine::GetWatchModeName(WatchMode::Native)) == L"Native");
+    ASSERT(std::wstring(WatchFolderEngine::GetWatchModeName(WatchMode::Hybrid)) == L"Hybrid");
+}
+
+TEST(TestWatch_AddFolder)
+{
+    using namespace DarkThumbs::Engine;
+    WatchFolderEngine engine;
+    ASSERT(engine.AddFolder(L"C:\\Test") == true);
+    ASSERT(engine.GetWatchCount() == 1);
+    ASSERT(engine.AddFolder(L"C:\\Test") == false);  // duplicate
+}
+
+TEST(TestWatch_RemoveFolder)
+{
+    using namespace DarkThumbs::Engine;
+    WatchFolderEngine engine;
+    engine.AddFolder(L"C:\\Test");
+    ASSERT(engine.RemoveFolder(L"C:\\Test") == true);
+    ASSERT(engine.GetWatchCount() == 0);
+}
+
+TEST(TestWatch_SimulateChange)
+{
+    using namespace DarkThumbs::Engine;
+    WatchFolderEngine engine;
+    engine.AddFolder(L"C:\\Watch");
+    bool callbackFired = false;
+    engine.SetChangeCallback([&](const FileChangeEvent& evt) {
+        callbackFired = true;
+        ASSERT(evt.changeType == FileChangeType::Modified);
+    });
+    engine.SimulateChange(L"C:\\Watch\\file.jpg", FileChangeType::Modified);
+    ASSERT(callbackFired == true);
+}
+
+//==============================================================================
+// Sprint 226: Diagnostic Dashboard Tests
+//==============================================================================
+
+TEST(TestDiag_CategoryNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(DiagnosticDashboard::GetCategoryName(MetricCategory::CPU)) == L"CPU");
+    ASSERT(std::wstring(DiagnosticDashboard::GetCategoryName(MetricCategory::GPU)) == L"GPU");
+}
+
+TEST(TestDiag_HealthNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(DiagnosticDashboard::GetHealthName(HealthLevel::Healthy)) == L"Healthy");
+    ASSERT(std::wstring(DiagnosticDashboard::GetHealthName(HealthLevel::Critical)) == L"Critical");
+}
+
+TEST(TestDiag_RecordMetric)
+{
+    using namespace DarkThumbs::Engine;
+    DiagnosticDashboard dash;
+    dash.RecordMetric(L"CPU Usage", MetricCategory::CPU, 45.0, 100.0);
+    ASSERT(dash.GetMetrics().size() == 1);
+}
+
+TEST(TestDiag_Snapshot)
+{
+    using namespace DarkThumbs::Engine;
+    DiagnosticDashboard dash;
+    dash.RecordMetric(L"M1", MetricCategory::CPU, 30.0, 100.0);
+    auto snap = dash.GetSnapshot();
+    ASSERT(snap.metricCount == 1);
+    ASSERT(snap.overall == HealthLevel::Healthy);
+}
+
+TEST(TestDiag_CategoryCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(DiagnosticDashboard::GetCategoryCount() == 7);
+}
+
+//==============================================================================
+// Sprint 227: Performance Benchmark V2 Tests
+//==============================================================================
+
+TEST(TestBenchV2_TypeNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(PerformanceBenchmarkV2::GetBenchmarkTypeName(BenchmarkType::SingleDecode)) == L"Single Decode");
+    ASSERT(std::wstring(PerformanceBenchmarkV2::GetBenchmarkTypeName(BenchmarkType::CacheHit)) == L"Cache Hit");
+}
+
+TEST(TestBenchV2_ComputeStats)
+{
+    using namespace DarkThumbs::Engine;
+    PerformanceBenchmarkV2 bench;
+    std::vector<double> samples = {10.0, 12.0, 11.0, 15.0, 9.0};
+    auto result = bench.ComputeStats(L"Test", BenchmarkType::SingleDecode, samples);
+    ASSERT(result.iterations == 5);
+    ASSERT(result.minMs == 9.0);
+    ASSERT(result.maxMs == 15.0);
+}
+
+TEST(TestBenchV2_MeetsTarget)
+{
+    using namespace DarkThumbs::Engine;
+    BenchmarkResult r;
+    r.p95Ms = 15.0;
+    ASSERT(PerformanceBenchmarkV2::MeetsTarget(r, 20.0) == true);
+    ASSERT(PerformanceBenchmarkV2::MeetsTarget(r, 10.0) == false);
+}
+
+TEST(TestBenchV2_AddResult)
+{
+    using namespace DarkThumbs::Engine;
+    PerformanceBenchmarkV2 bench;
+    BenchmarkResult r;
+    r.label = L"Test";
+    bench.AddResult(r);
+    ASSERT(bench.GetResults().size() == 1);
+}
+
+TEST(TestBenchV2_TypeCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(PerformanceBenchmarkV2::GetBenchmarkTypeCount() == 6);
+}
+
+//==============================================================================
+// Sprint 228: Localization Engine Tests
+//==============================================================================
+
+TEST(TestL10n_LocaleNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(LocalizationEngine::GetLocaleName(Locale::EN_US)) == L"English (US)");
+    ASSERT(std::wstring(LocalizationEngine::GetLocaleName(Locale::DE_DE)) == L"German");
+}
+
+TEST(TestL10n_TextDirection)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(LocalizationEngine::GetTextDirection(Locale::EN_US) == TextDirection::LTR);
+    ASSERT(LocalizationEngine::GetTextDirection(Locale::AR_SA) == TextDirection::RTL);
+    ASSERT(LocalizationEngine::GetTextDirection(Locale::HE_IL) == TextDirection::RTL);
+}
+
+TEST(TestL10n_SetLocale)
+{
+    using namespace DarkThumbs::Engine;
+    LocalizationEngine eng;
+    eng.SetLocale(Locale::FR_FR);
+    ASSERT(eng.GetLocale() == Locale::FR_FR);
+    ASSERT(eng.IsRTL() == false);
+}
+
+TEST(TestL10n_StringLookup)
+{
+    using namespace DarkThumbs::Engine;
+    LocalizationEngine eng;
+    eng.AddString(L"app.title", Locale::EN_US, L"DarkThumbs");
+    eng.AddString(L"app.title", Locale::DE_DE, L"DunkleDaumen");
+    eng.SetLocale(Locale::DE_DE);
+    ASSERT(eng.GetString(L"app.title") == L"DunkleDaumen");
+}
+
+TEST(TestL10n_LocaleCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(LocalizationEngine::GetLocaleCount() == 10);
+}
+
+//==============================================================================
+// Sprint 229: Theme Engine Tests
+//==============================================================================
+
+TEST(TestTheme_TypeNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ThemeEngine::GetThemeTypeName(ThemeType::Dark)) == L"Dark");
+    ASSERT(std::wstring(ThemeEngine::GetThemeTypeName(ThemeType::Light)) == L"Light");
+}
+
+TEST(TestTheme_DefaultDark)
+{
+    using namespace DarkThumbs::Engine;
+    ThemeEngine engine;
+    auto theme = engine.GetActiveTheme();
+    ASSERT(theme.type == ThemeType::Dark);
+    ASSERT(theme.background.r == 30);
+}
+
+TEST(TestTheme_SetLight)
+{
+    using namespace DarkThumbs::Engine;
+    ThemeEngine engine;
+    engine.SetThemeType(ThemeType::Light);
+    ASSERT(engine.GetActiveTheme().type == ThemeType::Light);
+    ASSERT(engine.GetActiveTheme().background.r == 255);
+}
+
+TEST(TestTheme_RegisterCustom)
+{
+    using namespace DarkThumbs::Engine;
+    ThemeEngine engine;
+    ThemeDefinition custom;
+    custom.name = L"Midnight";
+    custom.type = ThemeType::Custom;
+    engine.RegisterCustomTheme(custom);
+    ASSERT(engine.GetRegisteredThemes().size() == 4);  // 3 defaults + 1 custom
+}
+
+TEST(TestTheme_TypeCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(ThemeEngine::GetThemeTypeCount() == 5);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -5314,6 +5548,51 @@ int main()
     RUN_TEST(TestGateV11_Evaluate);
     RUN_TEST(TestGateV11_Thresholds);
     RUN_TEST(TestGateV11_SingleKPI);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 225: Watch Folder Engine..." << std::endl;
+    RUN_TEST(TestWatch_ChangeTypeNames);
+    RUN_TEST(TestWatch_WatchModes);
+    RUN_TEST(TestWatch_AddFolder);
+    RUN_TEST(TestWatch_RemoveFolder);
+    RUN_TEST(TestWatch_SimulateChange);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 226: Diagnostic Dashboard..." << std::endl;
+    RUN_TEST(TestDiag_CategoryNames);
+    RUN_TEST(TestDiag_HealthNames);
+    RUN_TEST(TestDiag_RecordMetric);
+    RUN_TEST(TestDiag_Snapshot);
+    RUN_TEST(TestDiag_CategoryCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 227: Performance Benchmark V2..." << std::endl;
+    RUN_TEST(TestBenchV2_TypeNames);
+    RUN_TEST(TestBenchV2_ComputeStats);
+    RUN_TEST(TestBenchV2_MeetsTarget);
+    RUN_TEST(TestBenchV2_AddResult);
+    RUN_TEST(TestBenchV2_TypeCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 228: Localization Engine..." << std::endl;
+    RUN_TEST(TestL10n_LocaleNames);
+    RUN_TEST(TestL10n_TextDirection);
+    RUN_TEST(TestL10n_SetLocale);
+    RUN_TEST(TestL10n_StringLookup);
+    RUN_TEST(TestL10n_LocaleCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 229: Theme Engine..." << std::endl;
+    RUN_TEST(TestTheme_TypeNames);
+    RUN_TEST(TestTheme_DefaultDark);
+    RUN_TEST(TestTheme_SetLight);
+    RUN_TEST(TestTheme_RegisterCustom);
+    RUN_TEST(TestTheme_TypeCount);
 
     std::wcout << std::endl;
 

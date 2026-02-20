@@ -95,6 +95,9 @@ set(ENGINE_HEADERS
     Core/SecurityHardeningV2.h         # Sprint 219 — Security hardening & integrity
     Core/CloudSyncProvider.h           # Sprint 221 — Cloud storage thumbnail sync
     Core/FormatConverterEngine.h       # Sprint 222 — Batch format conversion
+    Core/WatchFolderEngine.h           # Sprint 225 — Filesystem watch auto-regen
+    Core/PerformanceBenchmarkV2.h      # Sprint 227 — Benchmark harness w/ percentiles
+    Core/ThemeEngine.h                 # Sprint 229 — Dark/light/custom themes
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -190,6 +193,8 @@ set(ENGINE_HEADERS
     Utils/AccessibilityEngine.h           # Sprint 220 — Accessibility support
     Utils/EnterpriseDeploymentManager.h   # Sprint 223 — Enterprise deployment
     Utils/ReleaseGateV11.h                # Sprint 224 — v10.1 release gate
+    Utils/DiagnosticDashboard.h           # Sprint 226 — Runtime health metrics
+    Utils/LocalizationEngine.h            # Sprint 228 — i18n/l10n string tables
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -301,6 +306,9 @@ set(ENGINE_SOURCES
     Core/SecurityHardeningV2.cpp         # Sprint 219 — Security hardening & integrity
     Core/CloudSyncProvider.cpp           # Sprint 221 — Cloud storage thumbnail sync
     Core/FormatConverterEngine.cpp       # Sprint 222 — Batch format conversion
+    Core/WatchFolderEngine.cpp           # Sprint 225 — Filesystem watch auto-regen
+    Core/PerformanceBenchmarkV2.cpp      # Sprint 227 — Benchmark harness w/ percentiles
+    Core/ThemeEngine.cpp                 # Sprint 229 — Dark/light/custom themes
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -391,6 +399,8 @@ set(ENGINE_SOURCES
     Utils/AccessibilityEngine.cpp           # Sprint 220 — Accessibility support
     Utils/EnterpriseDeploymentManager.cpp   # Sprint 223 — Enterprise deployment
     Utils/ReleaseGateV11.cpp                # Sprint 224 — v10.1 release gate
+    Utils/DiagnosticDashboard.cpp           # Sprint 226 — Runtime health metrics
+    Utils/LocalizationEngine.cpp            # Sprint 228 — i18n/l10n string tables
 )
 
 #==============================================================================
