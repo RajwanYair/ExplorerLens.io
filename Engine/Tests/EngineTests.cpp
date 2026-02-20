@@ -93,6 +93,10 @@
 #include "../Core/MetadataExtractor.h"
 #include "../Utils/NotificationEngine.h"
 #include "../Utils/ReleaseGateV14.h"
+#include "../Core/ContentIndexer.h"
+#include "../Utils/NetworkDiagnostics.h"
+#include "../Core/ConfigMigrationEngine.h"
+#include "../Utils/ReleaseGateV15.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -5325,6 +5329,210 @@ TEST(TestGateV14_Version)
 }
 
 //==============================================================================
+// Sprint 245: ContentIndexer Tests
+//==============================================================================
+
+TEST(TestIndexer_AddFile)
+{
+    using namespace DarkThumbs;
+    ContentIndexer indexer;
+    uint64_t id = indexer.AddFile(L"C:\\photos\\test.jpg");
+    ASSERT(id > 0);
+    ASSERT(indexer.GetTotalCount() == 1);
+}
+
+TEST(TestIndexer_ClassifyExtension)
+{
+    using namespace DarkThumbs;
+    ASSERT(ContentIndexer::ClassifyExtension(L".jpg") == ContentType::Image);
+    ASSERT(ContentIndexer::ClassifyExtension(L".zip") == ContentType::Archive);
+    ASSERT(ContentIndexer::ClassifyExtension(L".pdf") == ContentType::Document);
+    ASSERT(ContentIndexer::ClassifyExtension(L".mp4") == ContentType::Video);
+}
+
+TEST(TestIndexer_IndexAll)
+{
+    using namespace DarkThumbs;
+    ContentIndexer indexer;
+    indexer.AddFile(L"test1.png");
+    indexer.AddFile(L"test2.cbz");
+    uint32_t indexed = indexer.IndexAll();
+    ASSERT(indexed == 2);
+}
+
+TEST(TestIndexer_ContentTypeNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(ContentIndexer::GetContentTypeName(ContentType::Image)) == L"Image");
+    ASSERT(ContentIndexer::GetContentTypeCount() == 8);
+}
+
+TEST(TestIndexer_SearchByType)
+{
+    using namespace DarkThumbs;
+    ContentIndexer indexer;
+    indexer.AddFile(L"photo.jpg");
+    indexer.AddFile(L"archive.zip");
+    indexer.IndexAll();
+    auto images = indexer.SearchByType(ContentType::Image);
+    ASSERT(images.size() == 1);
+}
+
+//==============================================================================
+// Sprint 246: NetworkDiagnostics Tests
+//==============================================================================
+
+TEST(TestNetDiag_RunTest)
+{
+    using namespace DarkThumbs;
+    NetworkDiagnostics diag;
+    auto result = diag.RunTest(NetTestType::Ping, L"https://example.com");
+    ASSERT(result.status == NetTestStatus::Passed);
+    ASSERT(result.latencyMs > 0.0);
+}
+
+TEST(TestNetDiag_RunAllTests)
+{
+    using namespace DarkThumbs;
+    NetworkDiagnostics diag;
+    auto report = diag.RunAllTests();
+    ASSERT(report.results.size() > 0);
+}
+
+TEST(TestNetDiag_TypeNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(NetworkDiagnostics::GetTestTypeName(NetTestType::DNSResolve)) == L"DNS Resolve");
+    ASSERT(NetworkDiagnostics::GetTestTypeCount() == 5);
+}
+
+TEST(TestNetDiag_StatusNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(NetworkDiagnostics::GetTestStatusName(NetTestStatus::Passed)) == L"Passed");
+    ASSERT(std::wstring(NetworkDiagnostics::GetTestStatusName(NetTestStatus::Timeout)) == L"Timeout");
+}
+
+TEST(TestNetDiag_Proxy)
+{
+    using namespace DarkThumbs;
+    NetworkDiagnostics diag;
+    ProxyConfig proxy;
+    proxy.host = L"proxy.example.com";
+    proxy.port = 8080;
+    proxy.enabled = true;
+    diag.SetProxy(proxy);
+    auto result = diag.RunTest(NetTestType::ProxyCheck, L"https://example.com");
+    ASSERT(result.status == NetTestStatus::Passed);
+}
+
+//==============================================================================
+// Sprint 247: ConfigMigrationEngine Tests
+//==============================================================================
+
+TEST(TestConfigMig_Migrate)
+{
+    using namespace DarkThumbs;
+    ConfigMigrationEngine engine;
+    engine.SetSourceVersion(L"10.4.0");
+    engine.SetTargetVersion(L"10.5.0");
+    engine.AddSetting(L"theme", L"dark");
+    MigrationRule rule;
+    rule.sourceKey = L"theme";
+    rule.targetKey = L"ui.theme";
+    rule.action = MigrationAction::Rename;
+    engine.AddRule(rule);
+    auto report = engine.Migrate();
+    ASSERT(report.status == MigrationStatus::Completed);
+    ASSERT(engine.HasSetting(L"ui.theme"));
+}
+
+TEST(TestConfigMig_Rollback)
+{
+    using namespace DarkThumbs;
+    ConfigMigrationEngine engine;
+    engine.AddSetting(L"key1", L"val1");
+    MigrationRule rule;
+    rule.sourceKey = L"key1";
+    rule.action = MigrationAction::Delete;
+    engine.AddRule(rule);
+    engine.Migrate();
+    ASSERT(!engine.HasSetting(L"key1"));
+    ASSERT(engine.Rollback());
+    ASSERT(engine.HasSetting(L"key1"));
+}
+
+TEST(TestConfigMig_SetDefault)
+{
+    using namespace DarkThumbs;
+    ConfigMigrationEngine engine;
+    MigrationRule rule;
+    rule.targetKey = L"newSetting";
+    rule.defaultValue = L"defaultVal";
+    rule.action = MigrationAction::SetDefault;
+    engine.AddRule(rule);
+    engine.Migrate();
+    ASSERT(engine.GetSetting(L"newSetting") == L"defaultVal");
+}
+
+TEST(TestConfigMig_ActionNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(ConfigMigrationEngine::GetActionName(MigrationAction::Rename)) == L"Rename");
+    ASSERT(ConfigMigrationEngine::GetActionCount() == 5);
+}
+
+TEST(TestConfigMig_StatusNames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(ConfigMigrationEngine::GetStatusName(MigrationStatus::Completed)) == L"Completed");
+    ASSERT(std::wstring(ConfigMigrationEngine::GetStatusName(MigrationStatus::RolledBack)) == L"Rolled Back");
+}
+
+//==============================================================================
+// Sprint 248: ReleaseGateV15 Tests
+//==============================================================================
+
+TEST(TestGateV15_KPINames)
+{
+    using namespace DarkThumbs;
+    ASSERT(std::wstring(ReleaseGateV15::GetKPIName(GateKPIV15::BuildClean)) == L"Build Clean");
+    ASSERT(std::wstring(ReleaseGateV15::GetKPIName(GateKPIV15::ConfigMigration)) == L"Config Migration");
+}
+
+TEST(TestGateV15_KPICount)
+{
+    using namespace DarkThumbs;
+    ASSERT(ReleaseGateV15::GetKPICount() == 20);
+}
+
+TEST(TestGateV15_Evaluate)
+{
+    using namespace DarkThumbs;
+    ReleaseGateV15 gate;
+    ASSERT(!gate.Evaluate());
+    for (uint32_t i = 0; i < ReleaseGateV15::GetKPICount(); ++i) {
+        gate.SetKPIResult(static_cast<GateKPIV15>(i), true, 100.0);
+    }
+    ASSERT(gate.Evaluate());
+}
+
+TEST(TestGateV15_Approved)
+{
+    using namespace DarkThumbs;
+    ReleaseGateV15 gate;
+    ASSERT(!gate.IsApproved());
+    ASSERT(gate.GetFailedCount() == 20);
+}
+
+TEST(TestGateV15_Version)
+{
+    using namespace DarkThumbs;
+    ReleaseGateV15 gate;
+    ASSERT(gate.GetVersion() == L"10.5.0");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -6415,6 +6623,40 @@ int main()
     RUN_TEST(TestGateV14_Evaluate);
     RUN_TEST(TestGateV14_Approved);
     RUN_TEST(TestGateV14_Version);
+
+    std::wcout << std::endl;
+
+    // Sprint 245: Content Indexer Tests
+    std::wcout << L"Sprint 245: Content Indexer..." << std::endl;
+    RUN_TEST(TestIndexer_AddFile);
+    RUN_TEST(TestIndexer_ClassifyExtension);
+    RUN_TEST(TestIndexer_IndexAll);
+    RUN_TEST(TestIndexer_ContentTypeNames);
+    RUN_TEST(TestIndexer_SearchByType);
+
+    // Sprint 246: Network Diagnostics Tests
+    std::wcout << L"Sprint 246: Network Diagnostics..." << std::endl;
+    RUN_TEST(TestNetDiag_RunTest);
+    RUN_TEST(TestNetDiag_RunAllTests);
+    RUN_TEST(TestNetDiag_TypeNames);
+    RUN_TEST(TestNetDiag_StatusNames);
+    RUN_TEST(TestNetDiag_Proxy);
+
+    // Sprint 247: Config Migration Tests
+    std::wcout << L"Sprint 247: Config Migration Engine..." << std::endl;
+    RUN_TEST(TestConfigMig_Migrate);
+    RUN_TEST(TestConfigMig_Rollback);
+    RUN_TEST(TestConfigMig_SetDefault);
+    RUN_TEST(TestConfigMig_ActionNames);
+    RUN_TEST(TestConfigMig_StatusNames);
+
+    // Sprint 248: Release Gate V15 Tests
+    std::wcout << L"Sprint 248: Release Gate V15..." << std::endl;
+    RUN_TEST(TestGateV15_KPINames);
+    RUN_TEST(TestGateV15_KPICount);
+    RUN_TEST(TestGateV15_Evaluate);
+    RUN_TEST(TestGateV15_Approved);
+    RUN_TEST(TestGateV15_Version);
 
     std::wcout << std::endl;
 

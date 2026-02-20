@@ -105,6 +105,8 @@ set(ENGINE_HEADERS
     Core/ErrorRecoveryEngine.h         # Sprint 237 — Crash recovery & checkpoints
     Core/ResourcePoolEngine.h          # Sprint 240 — Object pool for resource reuse
     Core/MetadataExtractor.h           # Sprint 242 — EXIF/IPTC/XMP extraction
+    Core/ContentIndexer.h              # Sprint 245 — File content indexing
+    Core/ConfigMigrationEngine.h       # Sprint 247 — Settings migration
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -210,6 +212,8 @@ set(ENGINE_HEADERS
     Utils/CommandLineInterface.h          # Sprint 241 — CLI argument parser
     Utils/NotificationEngine.h            # Sprint 243 — Toast notifications
     Utils/ReleaseGateV14.h                # Sprint 244 — v10.4 release gate
+    Utils/NetworkDiagnostics.h            # Sprint 246 — Network connectivity testing
+    Utils/ReleaseGateV15.h                # Sprint 248 — v10.5 release gate
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -331,6 +335,8 @@ set(ENGINE_SOURCES
     Core/ErrorRecoveryEngine.cpp         # Sprint 237 — Crash recovery & checkpoints
     Core/ResourcePoolEngine.cpp          # Sprint 240 — Object pool for resource reuse
     Core/MetadataExtractor.cpp           # Sprint 242 — EXIF/IPTC/XMP extraction
+    Core/ContentIndexer.cpp              # Sprint 245 — File content indexing
+    Core/ConfigMigrationEngine.cpp       # Sprint 247 — Settings migration
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -431,6 +437,8 @@ set(ENGINE_SOURCES
     Utils/CommandLineInterface.cpp          # Sprint 241 — CLI argument parser
     Utils/NotificationEngine.cpp            # Sprint 243 — Toast notifications
     Utils/ReleaseGateV14.cpp                # Sprint 244 — v10.4 release gate
+    Utils/NetworkDiagnostics.cpp            # Sprint 246 — Network connectivity testing
+    Utils/ReleaseGateV15.cpp                # Sprint 248 — v10.5 release gate
 )
 
 #==============================================================================
