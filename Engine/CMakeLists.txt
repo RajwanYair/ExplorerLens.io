@@ -131,11 +131,13 @@ set(ENGINE_HEADERS
     Decoders/XPMDecoder.h          # Sprint 186 — X PixMap
     Decoders/DICOMDecoder.h         # Sprint 199 — Medical DICOM imaging
     Decoders/FITSDecoder.h          # Sprint 199 — Astronomy FITS imaging
+    Decoders/Advanced3DFormatDecoder.h # Sprint 200 — FBX/USD/3MF/STEP/IGES
     
     # GPU
     GPU/D3D11Renderer.h
     GPU/GDIRenderer.h
     GPU/D3D12ComputePipeline.h   # Sprint 188 — D3D12 compute pipeline
+    GPU/VulkanComputePipeline.h  # Sprint 202 — Vulkan compute pipeline
     
     # Cache
     Cache/ThumbnailCache.h
@@ -150,6 +152,7 @@ set(ENGINE_HEADERS
     Plugin/IPC/PluginIPCProtocol.h
     Plugin/IPC/SharedMemoryManager.h
     Plugin/Security/JobObjectManager.h
+    Plugin/PluginMarketplaceV2.h     # Sprint 201 — Plugin marketplace V2
     
     # Utils
     Utils/PerformanceProfiler.h
@@ -165,6 +168,8 @@ set(ENGINE_HEADERS
     Utils/TestSuiteExpansion.h         # Sprint 196 — Test framework expansion
     Utils/MalformedInputHandler.h      # Sprint 197 — Malformed input hardening
     Utils/ReleaseGateV3.h              # Sprint 198 — v9.2 release gate
+    Utils/PythonSDK.h                  # Sprint 203 — Python SDK bindings
+    Utils/ReleaseGateV10.h             # Sprint 204 — v10.0 release gate
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -310,11 +315,13 @@ set(ENGINE_SOURCES
     Decoders/XPMDecoder.cpp        # Sprint 186 — X PixMap
     Decoders/DICOMDecoder.cpp       # Sprint 199 — Medical DICOM imaging
     Decoders/FITSDecoder.cpp        # Sprint 199 — Astronomy FITS imaging
+    Decoders/Advanced3DFormatDecoder.cpp # Sprint 200 — FBX/USD/3MF/STEP/IGES
     
     # GPU
     GPU/D3D11Renderer.cpp
     GPU/GDIRenderer.cpp
     GPU/D3D12ComputePipeline.cpp   # Sprint 188 — D3D12 compute pipeline
+    GPU/VulkanComputePipeline.cpp  # Sprint 202 — Vulkan compute pipeline
     
     # Cache
     Cache/ThumbnailCache.cpp
@@ -328,6 +335,7 @@ set(ENGINE_SOURCES
     Plugin/IsolationModeSelector.cpp
     Plugin/IPC/SharedMemoryManager.cpp
     Plugin/Security/JobObjectManager.cpp
+    Plugin/PluginMarketplaceV2.cpp     # Sprint 201 — Plugin marketplace V2
     
     # Utils
     Utils/PerformanceProfiler.cpp
@@ -341,6 +349,8 @@ set(ENGINE_SOURCES
     Utils/TestSuiteExpansion.cpp         # Sprint 196 — Test framework expansion
     Utils/MalformedInputHandler.cpp      # Sprint 197 — Malformed input hardening
     Utils/ReleaseGateV3.cpp              # Sprint 198 — v9.2 release gate
+    Utils/PythonSDK.cpp                  # Sprint 203 — Python SDK bindings
+    Utils/ReleaseGateV10.cpp             # Sprint 204 — v10.0 release gate
 )
 
 #==============================================================================

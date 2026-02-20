@@ -48,6 +48,11 @@
 #include "../Utils/ReleaseGateV3.h"
 #include "../Decoders/DICOMDecoder.h"
 #include "../Decoders/FITSDecoder.h"
+#include "../Decoders/Advanced3DFormatDecoder.h"
+#include "../Plugin/PluginMarketplaceV2.h"
+#include "../GPU/VulkanComputePipeline.h"
+#include "../Utils/PythonSDK.h"
+#include "../Utils/ReleaseGateV10.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -3075,6 +3080,339 @@ TEST(TestFITS_StretchAlgorithm)
 }
 
 //==============================================================================
+// Sprint 200: Advanced 3D Format Decoder Tests
+//==============================================================================
+
+TEST(TestAdvanced3D_FBXDetection)
+{
+    using namespace DarkThumbs::Engine;
+    // FBX binary magic: "Kaydara FBX Binary  \0"
+    std::vector<uint8_t> data(64, 0);
+    const char* magic = "Kaydara FBX Binary  ";
+    memcpy(data.data(), magic, strlen(magic));
+    ASSERT(Advanced3DFormatDecoder::IsFBXFile(data.data(), data.size()) == true);
+    std::vector<uint8_t> bad = { 0, 1, 2, 3, 4, 5, 6, 7 };
+    ASSERT(Advanced3DFormatDecoder::IsFBXFile(bad.data(), bad.size()) == false);
+}
+
+TEST(TestAdvanced3D_Extensions)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(Advanced3DFormatDecoder::GetExtensionCount() >= 8);
+    auto exts = Advanced3DFormatDecoder::GetExtensions();
+    ASSERT(exts.size() >= 8);
+    bool hasFBX = false, hasUSD = false, has3MF = false;
+    for (const auto& e : exts) {
+        if (e == L".fbx") hasFBX = true;
+        if (e == L".usd") hasUSD = true;
+        if (e == L".3mf") has3MF = true;
+    }
+    ASSERT(hasFBX && hasUSD && has3MF);
+}
+
+TEST(TestAdvanced3D_FormatNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(Advanced3DFormatDecoder::GetFormatName(Format3D::FBX)) == L"FBX");
+    ASSERT(std::wstring(Advanced3DFormatDecoder::GetFormatName(Format3D::USDA)) == L"USDA");
+    ASSERT(std::wstring(Advanced3DFormatDecoder::GetFormatName(Format3D::_3MF)) == L"3MF");
+    ASSERT(std::wstring(Advanced3DFormatDecoder::GetFormatName(Format3D::STEP)) == L"STEP");
+    ASSERT(std::wstring(Advanced3DFormatDecoder::GetFormatName(Format3D::IGES)) == L"IGES");
+}
+
+TEST(TestAdvanced3D_BoundingBox)
+{
+    using namespace DarkThumbs::Engine;
+    Advanced3DFormatDecoder decoder;
+    BoundingBox3D box;
+    box.minX = -1.0f; box.minY = -2.0f; box.minZ = -3.0f;
+    box.maxX = 1.0f;  box.maxY = 2.0f;  box.maxZ = 3.0f;
+    auto cam = decoder.ComputeAutoCamera(box);
+    ASSERT(cam.distance > 0.0f);
+    ASSERT(cam.fov > 0.0f && cam.fov < 180.0f);
+}
+
+TEST(TestAdvanced3D_WireframeRender)
+{
+    using namespace DarkThumbs::Engine;
+    Advanced3DFormatDecoder decoder;
+    MeshInfo3D mesh;
+    mesh.vertexCount = 3;
+    mesh.triangleCount = 1;
+    mesh.hasNormals = false;
+    mesh.hasUVs = false;
+    mesh.materialCount = 1;
+    ASSERT(decoder.EstimateWireframeComplexity(mesh) > 0);
+}
+
+//==============================================================================
+// Sprint 201: Plugin Marketplace V2 Tests
+//==============================================================================
+
+TEST(TestMarketplaceV2_CatalogInit)
+{
+    using namespace DarkThumbs::Engine;
+    PluginMarketplaceV2 marketplace;
+    ASSERT(marketplace.GetCatalogSize() == 0);
+    ASSERT(marketplace.GetCatalogUrl().find(L"darkthumbs.dev") != std::wstring::npos);
+}
+
+TEST(TestMarketplaceV2_Search)
+{
+    using namespace DarkThumbs::Engine;
+    PluginMarketplaceV2 marketplace;
+    // Add a test plugin to catalog
+    PluginListing listing;
+    listing.id = L"test-plugin-001";
+    listing.name = L"Test Image Decoder";
+    listing.description = L"A test decoder plugin";
+    listing.category = PluginCategory::ImageDecoder;
+    listing.version = {1, 0, 0};
+    listing.minEngineVersion = {9, 0, 0};
+    listing.verified = true;
+    listing.downloadCount = 100;
+    marketplace.AddListing(listing);
+    ASSERT(marketplace.GetCatalogSize() == 1);
+    // Search
+    MarketplaceFilter filter;
+    filter.category = PluginCategory::ImageDecoder;
+    auto results = marketplace.Search(filter);
+    ASSERT(results.size() == 1);
+    ASSERT(results[0].id == L"test-plugin-001");
+}
+
+TEST(TestMarketplaceV2_SemVer)
+{
+    using namespace DarkThumbs::Engine;
+    PluginVersion v1 = {1, 0, 0};
+    PluginVersion v2 = {1, 1, 0};
+    PluginVersion v3 = {2, 0, 0};
+    ASSERT(PluginMarketplaceV2::IsVersionCompatible(v1, v2) == true);
+    ASSERT(PluginMarketplaceV2::IsVersionCompatible(v1, v3) == false);
+}
+
+TEST(TestMarketplaceV2_CategoryNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(PluginMarketplaceV2::GetCategoryName(PluginCategory::ImageDecoder)) == L"Image Decoder");
+    ASSERT(std::wstring(PluginMarketplaceV2::GetCategoryName(PluginCategory::ArchiveHandler)) == L"Archive Handler");
+    ASSERT(std::wstring(PluginMarketplaceV2::GetCategoryName(PluginCategory::GPUFilter)) == L"GPU Filter");
+}
+
+TEST(TestMarketplaceV2_InstallUninstall)
+{
+    using namespace DarkThumbs::Engine;
+    PluginMarketplaceV2 marketplace;
+    PluginListing listing;
+    listing.id = L"install-test-001";
+    listing.name = L"Install Test Plugin";
+    listing.category = PluginCategory::DocumentDecoder;
+    listing.version = {1, 0, 0};
+    listing.minEngineVersion = {9, 0, 0};
+    listing.verified = true;
+    marketplace.AddListing(listing);
+    // Simulate install
+    bool installed = marketplace.InstallPlugin(L"install-test-001");
+    ASSERT(installed == true);
+    ASSERT(marketplace.IsInstalled(L"install-test-001") == true);
+    // Uninstall
+    bool removed = marketplace.UninstallPlugin(L"install-test-001");
+    ASSERT(removed == true);
+    ASSERT(marketplace.IsInstalled(L"install-test-001") == false);
+}
+
+//==============================================================================
+// Sprint 202: Vulkan Compute Pipeline Tests
+//==============================================================================
+
+TEST(TestVulkan_BackendNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(VulkanComputePipeline::GetBackendName(GPUBackend::None)) == L"None");
+    ASSERT(std::wstring(VulkanComputePipeline::GetBackendName(GPUBackend::Vulkan)) == L"Vulkan");
+    ASSERT(std::wstring(VulkanComputePipeline::GetBackendName(GPUBackend::D3D12)) == L"D3D12");
+    ASSERT(std::wstring(VulkanComputePipeline::GetBackendName(GPUBackend::D3D11)) == L"D3D11");
+    ASSERT(std::wstring(VulkanComputePipeline::GetBackendName(GPUBackend::CPU)) == L"CPU");
+}
+
+TEST(TestVulkan_ShaderTypeNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(VulkanComputePipeline::GetShaderTypeName(ComputeShaderType::Resize)) == L"Resize");
+    ASSERT(std::wstring(VulkanComputePipeline::GetShaderTypeName(ComputeShaderType::ToneMap)) == L"ToneMap");
+    ASSERT(std::wstring(VulkanComputePipeline::GetShaderTypeName(ComputeShaderType::Sharpen)) == L"Sharpen");
+}
+
+TEST(TestVulkan_CPUFallbackResize)
+{
+    using namespace DarkThumbs::Engine;
+    VulkanComputePipeline pipeline;
+    // Create a 4x4 RGBA test image
+    std::vector<uint8_t> src(4 * 4 * 4, 128);
+    std::vector<uint8_t> dst(2 * 2 * 4, 0);
+    bool ok = pipeline.CPUFallbackResize(src.data(), 4, 4, dst.data(), 2, 2, 4);
+    ASSERT(ok == true);
+    // Check output is not all zeros
+    bool hasData = false;
+    for (auto b : dst) { if (b > 0) { hasData = true; break; } }
+    ASSERT(hasData);
+}
+
+TEST(TestVulkan_PipelineCacheStats)
+{
+    using namespace DarkThumbs::Engine;
+    VulkanComputePipeline pipeline;
+    auto stats = pipeline.GetCacheStats();
+    ASSERT(stats.entries == 0);
+    ASSERT(stats.hits == 0);
+    ASSERT(stats.misses == 0);
+}
+
+TEST(TestVulkan_ActiveBackend)
+{
+    using namespace DarkThumbs::Engine;
+    VulkanComputePipeline pipeline;
+    // Default should be CPU or None (without Vulkan runtime)
+    auto backend = pipeline.GetActiveBackend();
+    ASSERT(backend == GPUBackend::CPU || backend == GPUBackend::None);
+}
+
+//==============================================================================
+// Sprint 203: Python SDK Tests
+//==============================================================================
+
+TEST(TestPythonSDK_DefaultConfig)
+{
+    using namespace DarkThumbs::Engine;
+    PythonSDK sdk;
+    auto config = sdk.GetConfig();
+    ASSERT(config.maxConcurrent > 0);
+    ASSERT(config.defaultWidth == 256);
+    ASSERT(config.defaultHeight == 256);
+}
+
+TEST(TestPythonSDK_DecoderInfo)
+{
+    using namespace DarkThumbs::Engine;
+    PythonSDK sdk;
+    auto decoders = sdk.GetDecoderList();
+    ASSERT(decoders.size() > 0);
+    bool hasArchive = false;
+    for (const auto& d : decoders) {
+        if (d.name == L"ArchiveDecoder") hasArchive = true;
+    }
+    ASSERT(hasArchive);
+}
+
+TEST(TestPythonSDK_CtypesStub)
+{
+    using namespace DarkThumbs::Engine;
+    PythonSDK sdk;
+    auto stub = sdk.GenerateCtypesStub();
+    ASSERT(stub.find(L"DarkThumbs_Init") != std::wstring::npos);
+    ASSERT(stub.find(L"DarkThumbs_GenerateThumbnail") != std::wstring::npos);
+    ASSERT(stub.find(L"ctypes") != std::wstring::npos);
+}
+
+TEST(TestPythonSDK_Pybind11Wrapper)
+{
+    using namespace DarkThumbs::Engine;
+    PythonSDK sdk;
+    auto wrapper = sdk.GeneratePybind11Wrapper();
+    ASSERT(wrapper.find(L"pybind11") != std::wstring::npos);
+    ASSERT(wrapper.find(L"PYBIND11_MODULE") != std::wstring::npos);
+}
+
+TEST(TestPythonSDK_BatchConfig)
+{
+    using namespace DarkThumbs::Engine;
+    PythonSDK sdk;
+    PythonSDKConfig config;
+    config.maxConcurrent = 4;
+    config.defaultWidth = 512;
+    config.defaultHeight = 512;
+    config.enableBatchMode = true;
+    sdk.SetConfig(config);
+    auto result = sdk.GetConfig();
+    ASSERT(result.maxConcurrent == 4);
+    ASSERT(result.defaultWidth == 512);
+    ASSERT(result.enableBatchMode == true);
+}
+
+//==============================================================================
+// Sprint 204: Release Gate V10 Tests
+//==============================================================================
+
+TEST(TestReleaseGateV10_DefaultThresholds)
+{
+    using namespace DarkThumbs::Engine;
+    auto t = ReleaseGateV10::ForV10();
+    ASSERT(t.minDecoderCount == 30);
+    ASSERT(t.minTestCount == 600);
+    ASSERT(t.minTestPassRate >= 99.0);
+    ASSERT(t.minShellRegistrations == 110);
+    ASSERT(t.maxBuildWarnings == 0);
+}
+
+TEST(TestReleaseGateV10_PassingGate)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV10 gate;
+    gate.SetDecoderCount(32);
+    gate.SetTestMetrics(650, 650, 100.0);
+    gate.SetShellRegistrations(115);
+    // Add GPU backends
+    GPUBackendResult d3d11 = {GPUBackend::D3D11, true, true, L"OK"};
+    GPUBackendResult d3d12 = {GPUBackend::D3D12, true, true, L"OK"};
+    gate.AddGPUBackend(d3d11);
+    gate.AddGPUBackend(d3d12);
+    // Format categories
+    for (uint32_t i = 0; i < 16; i++) {
+        FormatCoverageEntry entry;
+        entry.category = L"Category" + std::to_wstring(i);
+        entry.formatsSupported = 10;
+        entry.formatsTotal = 10;
+        gate.AddFormatCoverage(entry);
+    }
+    auto result = gate.Evaluate();
+    ASSERT(result.passed == true);
+    ASSERT(result.overallScore >= 80.0);
+}
+
+TEST(TestReleaseGateV10_FailingGate)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV10 gate;
+    gate.SetDecoderCount(5);      // too low
+    gate.SetTestMetrics(50, 48, 96.0);  // too low
+    gate.SetShellRegistrations(20);
+    auto result = gate.Evaluate();
+    ASSERT(result.passed == false);
+    ASSERT(result.blockers.size() > 0);
+}
+
+TEST(TestReleaseGateV10_Changelog)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV10 gate;
+    gate.SetDecoderCount(30);
+    gate.SetShellRegistrations(110);
+    gate.SetTestMetrics(600, 600, 100.0);
+    auto result = gate.Evaluate();
+    ASSERT(result.changelog.find(L"v10.0.0") != std::wstring::npos);
+    ASSERT(result.changelog.find(L"DICOM") != std::wstring::npos);
+}
+
+TEST(TestReleaseGateV10_CategoryNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ReleaseGateV10::GetCategoryName(V10KPICategory::BuildSystem)) == L"Build System");
+    ASSERT(std::wstring(ReleaseGateV10::GetCategoryName(V10KPICategory::TestCoverage)) == L"Test Coverage");
+    ASSERT(std::wstring(ReleaseGateV10::GetCategoryName(V10KPICategory::PluginEcosystem)) == L"Plugin Ecosystem");
+    ASSERT(std::wstring(ReleaseGateV10::GetCategoryName(V10KPICategory::Scientific)) == L"Scientific");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -3764,6 +4102,51 @@ int main()
     RUN_TEST(TestFITS_BytesPerPixel);
     RUN_TEST(TestFITS_StretchAlgorithm);
     
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 200: Advanced 3D Format Decoder..." << std::endl;
+    RUN_TEST(TestAdvanced3D_FBXDetection);
+    RUN_TEST(TestAdvanced3D_Extensions);
+    RUN_TEST(TestAdvanced3D_FormatNames);
+    RUN_TEST(TestAdvanced3D_BoundingBox);
+    RUN_TEST(TestAdvanced3D_WireframeRender);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 201: Plugin Marketplace V2..." << std::endl;
+    RUN_TEST(TestMarketplaceV2_CatalogInit);
+    RUN_TEST(TestMarketplaceV2_Search);
+    RUN_TEST(TestMarketplaceV2_SemVer);
+    RUN_TEST(TestMarketplaceV2_CategoryNames);
+    RUN_TEST(TestMarketplaceV2_InstallUninstall);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 202: Vulkan Compute Pipeline..." << std::endl;
+    RUN_TEST(TestVulkan_BackendNames);
+    RUN_TEST(TestVulkan_ShaderTypeNames);
+    RUN_TEST(TestVulkan_CPUFallbackResize);
+    RUN_TEST(TestVulkan_PipelineCacheStats);
+    RUN_TEST(TestVulkan_ActiveBackend);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 203: Python SDK..." << std::endl;
+    RUN_TEST(TestPythonSDK_DefaultConfig);
+    RUN_TEST(TestPythonSDK_DecoderInfo);
+    RUN_TEST(TestPythonSDK_CtypesStub);
+    RUN_TEST(TestPythonSDK_Pybind11Wrapper);
+    RUN_TEST(TestPythonSDK_BatchConfig);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 204: Release Gate V10..." << std::endl;
+    RUN_TEST(TestReleaseGateV10_DefaultThresholds);
+    RUN_TEST(TestReleaseGateV10_PassingGate);
+    RUN_TEST(TestReleaseGateV10_FailingGate);
+    RUN_TEST(TestReleaseGateV10_Changelog);
+    RUN_TEST(TestReleaseGateV10_CategoryNames);
+
     std::wcout << std::endl;
 
     // Sprint 6: Isolation & Stability Tests
