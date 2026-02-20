@@ -83,6 +83,11 @@
 #include "../Core/ShellPreviewHandler.h"
 #include "../Core/BatchProcessingEngine.h"
 #include "../Utils/ReleaseGateV12.h"
+#include "../Utils/FileHashEngine.h"
+#include "../Core/RegistryManager.h"
+#include "../Core/ErrorRecoveryEngine.h"
+#include "../Utils/LogRotationEngine.h"
+#include "../Utils/ReleaseGateV13.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -4852,6 +4857,220 @@ TEST(TestGateV12_Version)
 }
 
 //==============================================================================
+// Sprint 235: File Hash Engine Tests
+//==============================================================================
+
+TEST(TestHash_AlgorithmNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(FileHashEngine::GetAlgorithmName(HashAlgorithm::SHA256)) == L"SHA-256");
+    ASSERT(std::wstring(FileHashEngine::GetAlgorithmName(HashAlgorithm::CRC32)) == L"CRC32");
+}
+
+TEST(TestHash_CRC32)
+{
+    using namespace DarkThumbs::Engine;
+    const uint8_t data[] = {'H', 'e', 'l', 'l', 'o'};
+    uint32_t crc = FileHashEngine::ComputeCRC32(data, 5);
+    ASSERT(crc != 0);  // Non-trivial hash
+}
+
+TEST(TestHash_ComputeHash)
+{
+    using namespace DarkThumbs::Engine;
+    const uint8_t data[] = {1, 2, 3};
+    auto hash = FileHashEngine::ComputeHash(data, 3, HashAlgorithm::CRC32);
+    ASSERT(hash.length() == 8);
+}
+
+TEST(TestHash_VerifyHash)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(FileHashEngine::VerifyHash(L"abc", L"abc") == true);
+    ASSERT(FileHashEngine::VerifyHash(L"abc", L"def") == false);
+}
+
+TEST(TestHash_AlgorithmCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(FileHashEngine::GetAlgorithmCount() == 5);
+}
+
+//==============================================================================
+// Sprint 236: Registry Manager Tests
+//==============================================================================
+
+TEST(TestReg_HiveNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(RegistryManager::GetHiveName(RegHive::HKCU)) == L"HKCU");
+    ASSERT(std::wstring(RegistryManager::GetHiveName(RegHive::HKLM)) == L"HKLM");
+}
+
+TEST(TestReg_WriteRead)
+{
+    using namespace DarkThumbs::Engine;
+    RegistryManager mgr;
+    mgr.WriteString(RegHive::HKCU, L"SOFTWARE\\DarkThumbs", L"Version", L"10.3.0");
+    auto val = mgr.ReadString(RegHive::HKCU, L"SOFTWARE\\DarkThumbs", L"Version");
+    ASSERT(val == L"10.3.0");
+}
+
+TEST(TestReg_DefaultValue)
+{
+    using namespace DarkThumbs::Engine;
+    RegistryManager mgr;
+    auto val = mgr.ReadString(RegHive::HKCU, L"MISSING", L"Key", L"default");
+    ASSERT(val == L"default");
+}
+
+TEST(TestReg_Delete)
+{
+    using namespace DarkThumbs::Engine;
+    RegistryManager mgr;
+    mgr.WriteString(RegHive::HKCU, L"Test", L"Name", L"Value");
+    ASSERT(mgr.DeleteValue(RegHive::HKCU, L"Test", L"Name") == true);
+    ASSERT(mgr.GetEntries().size() == 0);
+}
+
+TEST(TestReg_BasePath)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(RegistryManager::GetBasePath() == L"SOFTWARE\\DarkThumbs");
+}
+
+//==============================================================================
+// Sprint 237: Error Recovery Engine Tests
+//==============================================================================
+
+TEST(TestRecovery_StrategyNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ErrorRecoveryEngine::GetStrategyName(RecoveryStrategy::Retry)) == L"Retry");
+    ASSERT(std::wstring(ErrorRecoveryEngine::GetStrategyName(RecoveryStrategy::SafeMode)) == L"Safe Mode");
+}
+
+TEST(TestRecovery_CreateCheckpoint)
+{
+    using namespace DarkThumbs::Engine;
+    ErrorRecoveryEngine eng;
+    auto id = eng.CreateCheckpoint(L"Before decode", L"state1");
+    ASSERT(id == 1);
+    ASSERT(eng.GetCheckpointCount() == 1);
+}
+
+TEST(TestRecovery_RestoreCheckpoint)
+{
+    using namespace DarkThumbs::Engine;
+    ErrorRecoveryEngine eng;
+    auto id = eng.CreateCheckpoint(L"CP1", L"state1");
+    ASSERT(eng.RestoreCheckpoint(id) == true);
+    ASSERT(eng.GetState() == RecoveryState::Recovered);
+}
+
+TEST(TestRecovery_CrashRecovery)
+{
+    using namespace DarkThumbs::Engine;
+    ErrorRecoveryEngine eng;
+    ASSERT(eng.RecoverFromCrash(RecoveryStrategy::Retry) == true);
+    ASSERT(eng.GetState() == RecoveryState::Recovered);
+}
+
+TEST(TestRecovery_StrategyCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(ErrorRecoveryEngine::GetStrategyCount() == 5);
+}
+
+//==============================================================================
+// Sprint 238: Log Rotation Engine Tests
+//==============================================================================
+
+TEST(TestLogRot_PolicyNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(LogRotationEngine::GetPolicyName(RotationPolicy::SizeBased)) == L"Size Based");
+    ASSERT(std::wstring(LogRotationEngine::GetPolicyName(RotationPolicy::Hybrid)) == L"Hybrid");
+}
+
+TEST(TestLogRot_CompressionNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(LogRotationEngine::GetCompressionName(LogCompression::GZip)) == L"GZip");
+    ASSERT(std::wstring(LogRotationEngine::GetCompressionName(LogCompression::Zstd)) == L"Zstd");
+}
+
+TEST(TestLogRot_NeedsRotation)
+{
+    using namespace DarkThumbs::Engine;
+    LogRotationEngine eng;
+    RotationConfig cfg;
+    cfg.maxSizeBytes = 1024;
+    eng.SetConfig(cfg);
+    ASSERT(eng.NeedsRotation(2048) == true);
+    ASSERT(eng.NeedsRotation(512) == false);
+}
+
+TEST(TestLogRot_Cleanup)
+{
+    using namespace DarkThumbs::Engine;
+    LogRotationEngine eng;
+    RotationConfig cfg;
+    cfg.maxFiles = 2;
+    eng.SetConfig(cfg);
+    eng.AddRotatedFile(L"log1.log", 100);
+    eng.AddRotatedFile(L"log2.log", 100);
+    eng.AddRotatedFile(L"log3.log", 100);
+    auto cleanup = eng.GetFilesToCleanup();
+    ASSERT(cleanup.size() == 1);
+}
+
+TEST(TestLogRot_PolicyCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(LogRotationEngine::GetPolicyCount() == 4);
+}
+
+//==============================================================================
+// Sprint 239: Release Gate V13 Tests
+//==============================================================================
+
+TEST(TestGateV13_KPINames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ReleaseGateV13::GetKPIName(GateKPIV13::BuildClean)) == L"Build Clean");
+    ASSERT(std::wstring(ReleaseGateV13::GetKPIName(GateKPIV13::RecoverySuccess)) == L"Recovery Success");
+}
+
+TEST(TestGateV13_KPICount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(ReleaseGateV13::GetKPICount() == 17);
+}
+
+TEST(TestGateV13_Evaluate)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV13 gate;
+    auto r = gate.EvaluateKPI(GateKPIV13::HashVerification);
+    ASSERT(r.passed == true);
+}
+
+TEST(TestGateV13_Approved)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV13 gate;
+    ASSERT(gate.IsApproved() == true);
+}
+
+TEST(TestGateV13_Version)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV13 gate;
+    ASSERT(gate.GetVersion() == L"10.3.0");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -5855,6 +6074,51 @@ int main()
     RUN_TEST(TestGateV12_Evaluate);
     RUN_TEST(TestGateV12_Approved);
     RUN_TEST(TestGateV12_Version);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 235: File Hash Engine..." << std::endl;
+    RUN_TEST(TestHash_AlgorithmNames);
+    RUN_TEST(TestHash_CRC32);
+    RUN_TEST(TestHash_ComputeHash);
+    RUN_TEST(TestHash_VerifyHash);
+    RUN_TEST(TestHash_AlgorithmCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 236: Registry Manager..." << std::endl;
+    RUN_TEST(TestReg_HiveNames);
+    RUN_TEST(TestReg_WriteRead);
+    RUN_TEST(TestReg_DefaultValue);
+    RUN_TEST(TestReg_Delete);
+    RUN_TEST(TestReg_BasePath);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 237: Error Recovery Engine..." << std::endl;
+    RUN_TEST(TestRecovery_StrategyNames);
+    RUN_TEST(TestRecovery_CreateCheckpoint);
+    RUN_TEST(TestRecovery_RestoreCheckpoint);
+    RUN_TEST(TestRecovery_CrashRecovery);
+    RUN_TEST(TestRecovery_StrategyCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 238: Log Rotation Engine..." << std::endl;
+    RUN_TEST(TestLogRot_PolicyNames);
+    RUN_TEST(TestLogRot_CompressionNames);
+    RUN_TEST(TestLogRot_NeedsRotation);
+    RUN_TEST(TestLogRot_Cleanup);
+    RUN_TEST(TestLogRot_PolicyCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 239: Release Gate V13..." << std::endl;
+    RUN_TEST(TestGateV13_KPINames);
+    RUN_TEST(TestGateV13_KPICount);
+    RUN_TEST(TestGateV13_Evaluate);
+    RUN_TEST(TestGateV13_Approved);
+    RUN_TEST(TestGateV13_Version);
 
     std::wcout << std::endl;
 

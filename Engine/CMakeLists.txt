@@ -101,6 +101,8 @@ set(ENGINE_HEADERS
     Core/UpdateEngine.h                # Sprint 231 — Auto-update lifecycle
     Core/ShellPreviewHandler.h         # Sprint 232 — IPreviewHandler COM
     Core/BatchProcessingEngine.h       # Sprint 233 — Multi-file batch ops
+    Core/RegistryManager.h             # Sprint 236 — Registry read/write
+    Core/ErrorRecoveryEngine.h         # Sprint 237 — Crash recovery & checkpoints
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -200,6 +202,9 @@ set(ENGINE_HEADERS
     Utils/LocalizationEngine.h            # Sprint 228 — i18n/l10n string tables
     Utils/TelemetryEngine.h               # Sprint 230 — Anonymous usage telemetry
     Utils/ReleaseGateV12.h                # Sprint 234 — v10.2 release gate
+    Utils/FileHashEngine.h                # Sprint 235 — SHA256/MD5/CRC32 hashing
+    Utils/LogRotationEngine.h             # Sprint 238 — Log rotation & cleanup
+    Utils/ReleaseGateV13.h                # Sprint 239 — v10.3 release gate
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -317,6 +322,8 @@ set(ENGINE_SOURCES
     Core/UpdateEngine.cpp                # Sprint 231 — Auto-update lifecycle
     Core/ShellPreviewHandler.cpp         # Sprint 232 — IPreviewHandler COM
     Core/BatchProcessingEngine.cpp       # Sprint 233 — Multi-file batch ops
+    Core/RegistryManager.cpp             # Sprint 236 — Registry read/write
+    Core/ErrorRecoveryEngine.cpp         # Sprint 237 — Crash recovery & checkpoints
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -411,6 +418,9 @@ set(ENGINE_SOURCES
     Utils/LocalizationEngine.cpp            # Sprint 228 — i18n/l10n string tables
     Utils/TelemetryEngine.cpp               # Sprint 230 — Anonymous usage telemetry
     Utils/ReleaseGateV12.cpp                # Sprint 234 — v10.2 release gate
+    Utils/FileHashEngine.cpp                # Sprint 235 — SHA256/MD5/CRC32 hashing
+    Utils/LogRotationEngine.cpp             # Sprint 238 — Log rotation & cleanup
+    Utils/ReleaseGateV13.cpp                # Sprint 239 — v10.3 release gate
 )
 
 #==============================================================================
