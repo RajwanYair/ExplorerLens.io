@@ -5,12 +5,12 @@
 DarkThumbs is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 8.4.0
+- **Version:** 10.5.0
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.20+ (Engine) + MSBuild (Shell/Manager)
 - **GPU:** DirectX 11 + DirectX 12 with CPU fallback
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-- **Sprint Count:** 177 completed (v8.4.0 block: Sprints 175–177 ✅)
+- **Sprint Count:** 248 completed (v10.5.0 block: Sprints 199–248 ✅)
 - **Build Status:** 0 errors, 0 warnings
 
 ## Architecture
@@ -43,7 +43,7 @@ DarkThumbsEngine.lib       — Core decode + render pipeline
 | `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                             |
 | `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                                  |
 | `docs/`                        | All documentation                                                 |
-| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_177.md)            |
+| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_248.md)            |
 | `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                                 |
 
 ## Build Commands
@@ -102,7 +102,7 @@ ctest --test-dir build -C Release --output-on-failure
 ## Testing
 
 - **Framework:** Google Test + Google Benchmark
-- **Test count:** ~437 unit tests (100 original + 337 new Sprints 150–174), 5 benchmarks
+- **Test count:** ~687 unit tests (100 original + 337 Sprints 150–174 + 250 Sprints 199–248), 5 benchmarks
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -138,16 +138,32 @@ external/
 - The `Release/` pattern in `.gitignore` blocks `Engine/Release/` — use `git add -f` for files there
 - Stale `CMakeCache.txt` files from directory renames are auto-detected by `Build-Library-Core.ps1`
 
-## Sprint Execution Guidance (v8.4+)
+## Sprint Execution Guidance (v10.5+)
 
-- **Current version:** v8.4.0 (Sprints 175-177 complete)
-- **Next roadmap block:** Sprints 178+ per `docs/IMPROVEMENT_PLAN_V9.md`
-- **Next block theme (v9.0.0):** Format expansion, async shell extension, D3D12 compute pipeline
+- **Current version:** v10.5.0 (Sprints 199-248 complete)
+- **Next roadmap block:** Sprints 249+ per `docs/IMPROVEMENT_PLAN_V11.md`
 - **Execution package docs:** `docs/development/sprints-v8/SPRINT_XX.md`
-- **Source of truth:** `MASTER_PLAN.md` + `docs/IMPROVEMENT_PLAN_V9.md`
-- **Carry-over closure:** legacy "planned/partial" items from older sections must be explicitly mapped to new sprint tasks
+- **Source of truth:** `MASTER_PLAN.md`
 - **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
-- **Sprint deliverables pattern:** header in `Engine/`, GTest in `Engine/Tests/`, doc in `docs/development/sprints-v8/`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS AND `Engine/Tests/CMakeLists.txt` EngineTests sources), git commit
+- **Sprint deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, doc in `docs/development/sprints-v8/`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
+- **Batch pattern:** Create 5 sprints' source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → create sprint docs → git commit each individually
+- **CMakeLists.txt insertion points:** Core headers before `# Pipeline`, Core sources before `# Pipeline implementations`, Utils headers before `# Sprint 8-12:`, Utils sources before closing `)`
+- **EngineTests.cpp insertion points:** New includes after last sprint include, TEST() functions before `//== Sprint 6:` section, RUN_TEST() calls before `// Sprint 6: Isolation & Stability Tests`
+
+## v10.5.0 Block Summary (Sprints 199–248 ✅)
+
+| Phase | Sprints | Title                                                                                                |
+| ----- | ------- | ---------------------------------------------------------------------------------------------------- |
+| P1    | 199–204 | GPU Pipeline V2, D3D12 Compute, Shader Compiler, Pipeline Cache, GPU Memory Pool, Release Gate V5     |
+| P2    | 205–209 | Async Decode, Thread Pool V2, Priority Queue, Decode Cache V2, Release Gate V6                        |
+| P3    | 210–214 | Format Detection V2, MIME Resolver, Codec Registry, Stream Analyzer, Release Gate V7                  |
+| P4    | 215–219 | ETW Provider V2, Perf Counters, Diagnostic Logger, Health Monitor, Release Gate V8                    |
+| P5    | 220–224 | Accessibility, Cloud Sync, Format Converter, Enterprise Deploy, Release Gate V11                      |
+| P6    | 225–229 | Watch Folder, Diagnostics Dashboard, Benchmark V2, Localization, Theme Engine                         |
+| P7    | 230–234 | Telemetry, Update Engine, Shell Preview, Batch Processing, Release Gate V12                            |
+| P8    | 235–239 | File Hash, Registry Manager, Error Recovery, Log Rotation, Release Gate V13                            |
+| P9    | 240–244 | Resource Pool, CLI Parser, Metadata Extractor, Notifications, Release Gate V14                         |
+| P10   | 245–248 | Content Indexer, Network Diagnostics, Config Migration, Release Gate V15 (milestone)                   |
 
 ## v8.4.0 Block Summary (Sprints 175–177 ✅)
 
@@ -177,3 +193,17 @@ external/
 - **Cache budget:** `AdaptiveCacheBudgetManager` maintains hot/warm/cold tier budget sum invariant (total = 512MB default)
 - **Release gate:** `ReleaseGateV2` requires ALL 9 KPI dimensions to pass; `ReleaseKPIThresholds::ForV83()` has exact thresholds
 - **Doc sync audit:** Sprint 173 `DocumentationSyncAudit` checks 7 artifacts — run before declaring any release done
+
+## New Patterns Discovered in v10.5.0 Sprints
+
+- **Resource pooling:** `ResourcePoolEngine` manages checkout/return lifecycle with TTL eviction and prewarming (Sprint 240)
+- **CLI parsing:** `CommandLineInterface` supports Flag/String/Int/FilePath/Enum arg types with validation and help generation (Sprint 241)
+- **Metadata extraction:** `MetadataExtractor` handles 5 standards (EXIF/IPTC/XMP/ICC/GPS) with 16 fields and formatting utilities (Sprint 242)
+- **Notification system:** `NotificationEngine` manages 7 event types with priority-scaled duration (Critical=3x, High=2x) and max-cap overflow (Sprint 243)
+- **Content indexing:** `ContentIndexer` classifies 40+ extensions into 8 content types with batch indexing and multi-axis search (Sprint 245)
+- **Network diagnostics:** `NetworkDiagnostics` tests 5 connectivity types (Ping/DNS/HTTP/Proxy/TLS) with proxy config support (Sprint 246)
+- **Config migration:** `ConfigMigrationEngine` supports 5 migration actions (Copy/Rename/Transform/Delete/SetDefault) with backup-based rollback (Sprint 247)
+- **Release gates:** Gates evolve from V5 (12 KPIs) through V15 (20 KPIs) — each adds KPIs validating new sprint deliverables
+- **Test framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with `g_testsRun/g_testsPassed/g_testsFailed` counters — NOT GTest
+- **Batch sprint execution:** 5 sprints per batch — create source files → register CMakeLists.txt → add tests → create sprint docs → git commit each individually
+- **Namespace:** All engine classes use `namespace DarkThumbs { }` — use `using namespace DarkThumbs;` in tests
