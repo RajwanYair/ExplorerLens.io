@@ -117,6 +117,11 @@
 #include "../Utils/ReleaseGateV18.h"
 #include "../Utils/ARM64PlatformValidator.h"
 #include "../Utils/MSIXPackagingManager.h"
+#include "../Utils/Win11IntegrationManager.h"
+#include "../Utils/TestSuiteExpansionV2.h"
+#include "../Utils/FuzzTestingManager.h"
+#include "../Utils/ReleaseGateV19.h"
+#include "../Core/VulkanComputeActivation.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -6459,6 +6464,173 @@ TEST(TestMSIX_ValidateVersion) {
     ASSERT(!MSIXPackagingManager::ValidateVersion(L"abc"));
 }
 
+//== Sprint 270: Windows 11 24H2 Integration Tests
+
+TEST(TestWin11_FeatureNames) {
+    for (size_t i = 0; i < Win11IntegrationManager::FeatureCount(); ++i) {
+        auto name = Win11IntegrationManager::FeatureName(static_cast<Win11Feature>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestWin11_VersionNames) {
+    for (size_t i = 0; i < Win11IntegrationManager::VersionCount(); ++i) {
+        auto name = Win11IntegrationManager::VersionName(static_cast<WindowsVersion>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestWin11_FeatureAvailability) {
+    ASSERT(!Win11IntegrationManager::IsFeatureAvailable(Win11Feature::ModernContextMenu, WindowsVersion::Windows10_21H2));
+    ASSERT(Win11IntegrationManager::IsFeatureAvailable(Win11Feature::ModernContextMenu, WindowsVersion::Windows11_21H2));
+}
+
+TEST(TestWin11_TabbedExplorer) {
+    ASSERT(!Win11IntegrationManager::IsFeatureAvailable(Win11Feature::TabbedExplorer, WindowsVersion::Windows11_21H2));
+    ASSERT(Win11IntegrationManager::IsFeatureAvailable(Win11Feature::TabbedExplorer, WindowsVersion::Windows11_22H2));
+}
+
+TEST(TestWin11_Config) {
+    Win11IntegrationConfig cfg;
+    ASSERT(cfg.enableModernMenu);
+    ASSERT(cfg.cornerRadius == 8);
+    ASSERT(cfg.detectedVersion == WindowsVersion::Unknown);
+}
+
+//== Sprint 271: Test Suite Expansion V2 Tests
+
+TEST(TestTestSuiteV2_CategoryNames) {
+    for (size_t i = 0; i < TestSuiteExpansionV2::CategoryCount(); ++i) {
+        auto name = TestSuiteExpansionV2::CategoryName(static_cast<TestFileCategoryV2>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestTestSuiteV2_COMTestNames) {
+    for (size_t i = 0; i < TestSuiteExpansionV2::COMTestCount(); ++i) {
+        auto name = TestSuiteExpansionV2::COMTestName(static_cast<COMTestType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestTestSuiteV2_Counts) {
+    ASSERT(TestSuiteExpansionV2::CategoryCount() == 14);
+    ASSERT(TestSuiteExpansionV2::COMTestCount() == 5);
+}
+
+TEST(TestTestSuiteV2_TotalTarget) {
+    RealFileTestConfig cfg;
+    ASSERT(TestSuiteExpansionV2::TotalTarget(cfg) == 480);
+}
+
+TEST(TestTestSuiteV2_CorpusDefaults) {
+    TestCorpusStatsV2 stats;
+    ASSERT(stats.totalFiles == 0);
+    ASSERT(stats.formatsRepresented == 0);
+}
+
+//== Sprint 272: Fuzz Testing Tests
+
+TEST(TestFuzz_BackendNames) {
+    for (size_t i = 0; i < FuzzTestingManager::BackendCount(); ++i) {
+        auto name = FuzzTestingManager::BackendName(static_cast<FuzzerBackend>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestFuzz_MutationNames) {
+    for (size_t i = 0; i < FuzzTestingManager::StrategyCount(); ++i) {
+        auto name = FuzzTestingManager::MutationName(static_cast<MutationStrategy>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestFuzz_Counts) {
+    ASSERT(FuzzTestingManager::BackendCount() == 4);
+    ASSERT(FuzzTestingManager::StrategyCount() == 8);
+}
+
+TEST(TestFuzz_ValidateConfig) {
+    FuzzTargetConfig cfg;
+    cfg.decoderName = L"webp";
+    ASSERT(FuzzTestingManager::ValidateConfig(cfg));
+}
+
+TEST(TestFuzz_InvalidConfig) {
+    FuzzTargetConfig cfg;
+    ASSERT(!FuzzTestingManager::ValidateConfig(cfg));
+    cfg.decoderName = L"test";
+    cfg.maxInputSize = 0;
+    ASSERT(!FuzzTestingManager::ValidateConfig(cfg));
+}
+
+//== Sprint 273: Release Gate V19 Tests
+
+TEST(TestGateV19_KPINames) {
+    for (uint32_t i = 0; i < ReleaseGateV19::KPICount(); ++i) {
+        auto name = ReleaseGateV19::KPIName(static_cast<GateV19KPI>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestGateV19_KPICount) {
+    ASSERT(ReleaseGateV19::KPICount() == 20);
+}
+
+TEST(TestGateV19_Evaluate) {
+    ReleaseGateV19 gate;
+    std::vector<GateV19Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.approved);
+    ASSERT(verdict.passed == 20);
+}
+
+TEST(TestGateV19_Version) {
+    GateV19Verdict v;
+    ASSERT(v.version == L"11.2.0");
+}
+
+TEST(TestGateV19_ResultDefault) {
+    GateV19Result r;
+    ASSERT(!r.passed);
+    ASSERT(r.detail.empty());
+}
+
+//== Sprint 274: Vulkan Compute Backend Tests
+
+TEST(TestVulkan_FeatureNames) {
+    for (size_t i = 0; i < VulkanComputeActivation::FeatureCount(); ++i) {
+        auto name = VulkanComputeActivation::FeatureName(static_cast<VulkanFeature>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestVulkan_QueueNames) {
+    for (size_t i = 0; i < VulkanComputeActivation::QueueTypeCount(); ++i) {
+        auto name = VulkanComputeActivation::QueueName(static_cast<VulkanQueueType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestVulkan_Counts) {
+    ASSERT(VulkanComputeActivation::FeatureCount() == 7);
+    ASSERT(VulkanComputeActivation::QueueTypeCount() == 5);
+}
+
+TEST(TestVulkan_MinRequirements) {
+    VulkanAdapterInfo info;
+    info.computeSupport = true;
+    info.deviceMemory = 512 * 1024 * 1024ULL;
+    ASSERT(VulkanComputeActivation::MeetsMinimumRequirements(info));
+}
+
+TEST(TestVulkan_ValidateConfig) {
+    VulkanPipelineConfig cfg;
+    ASSERT(VulkanComputeActivation::ValidateConfig(cfg));
+    cfg.workGroupSizeX = 0;
+    ASSERT(!VulkanComputeActivation::ValidateConfig(cfg));
+}
+
 //==============================================================================
 // Main Test Runner
 //==============================================================================
@@ -7509,6 +7681,46 @@ int main()
     RUN_TEST(TestMSIX_Counts);
     RUN_TEST(TestMSIX_Identity);
     RUN_TEST(TestMSIX_ValidateVersion);
+
+    // Sprint 270: Windows 11 24H2 Integration Tests
+    std::wcout << L"Sprint 270: Windows 11 24H2 Integration..." << std::endl;
+    RUN_TEST(TestWin11_FeatureNames);
+    RUN_TEST(TestWin11_VersionNames);
+    RUN_TEST(TestWin11_FeatureAvailability);
+    RUN_TEST(TestWin11_TabbedExplorer);
+    RUN_TEST(TestWin11_Config);
+
+    // Sprint 271: Test Suite Expansion V2 Tests
+    std::wcout << L"Sprint 271: Test Suite Expansion V2..." << std::endl;
+    RUN_TEST(TestTestSuiteV2_CategoryNames);
+    RUN_TEST(TestTestSuiteV2_COMTestNames);
+    RUN_TEST(TestTestSuiteV2_Counts);
+    RUN_TEST(TestTestSuiteV2_TotalTarget);
+    RUN_TEST(TestTestSuiteV2_CorpusDefaults);
+
+    // Sprint 272: Fuzz Testing Tests
+    std::wcout << L"Sprint 272: Fuzz Testing..." << std::endl;
+    RUN_TEST(TestFuzz_BackendNames);
+    RUN_TEST(TestFuzz_MutationNames);
+    RUN_TEST(TestFuzz_Counts);
+    RUN_TEST(TestFuzz_ValidateConfig);
+    RUN_TEST(TestFuzz_InvalidConfig);
+
+    // Sprint 273: Release Gate V19 Tests
+    std::wcout << L"Sprint 273: Release Gate V19..." << std::endl;
+    RUN_TEST(TestGateV19_KPINames);
+    RUN_TEST(TestGateV19_KPICount);
+    RUN_TEST(TestGateV19_Evaluate);
+    RUN_TEST(TestGateV19_Version);
+    RUN_TEST(TestGateV19_ResultDefault);
+
+    // Sprint 274: Vulkan Compute Backend Tests
+    std::wcout << L"Sprint 274: Vulkan Compute..." << std::endl;
+    RUN_TEST(TestVulkan_FeatureNames);
+    RUN_TEST(TestVulkan_QueueNames);
+    RUN_TEST(TestVulkan_Counts);
+    RUN_TEST(TestVulkan_MinRequirements);
+    RUN_TEST(TestVulkan_ValidateConfig);
 
     std::wcout << std::endl;
 

@@ -234,6 +234,11 @@ set(ENGINE_HEADERS
     Utils/ReleaseGateV18.h                # Sprint 267 — v11.1 performance release gate
     Utils/ARM64PlatformValidator.h        # Sprint 268 — ARM64 validation
     Utils/MSIXPackagingManager.h          # Sprint 269 — MSIX packaging
+    Utils/Win11IntegrationManager.h       # Sprint 270 — Windows 11 24H2 integration
+    Utils/TestSuiteExpansionV2.h          # Sprint 271 — Test suite expansion V2
+    Utils/FuzzTestingManager.h            # Sprint 272 — Fuzz testing activation
+    Utils/ReleaseGateV19.h               # Sprint 273 — v11.2 release gate
+    Core/VulkanComputeActivation.h       # Sprint 274 — Vulkan compute backend
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
