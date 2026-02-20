@@ -152,18 +152,18 @@ external/
 
 ## v10.5.0 Block Summary (Sprints 199–248 ✅)
 
-| Phase | Sprints | Title                                                                                                |
-| ----- | ------- | ---------------------------------------------------------------------------------------------------- |
-| P1    | 199–204 | GPU Pipeline V2, D3D12 Compute, Shader Compiler, Pipeline Cache, GPU Memory Pool, Release Gate V5     |
-| P2    | 205–209 | Async Decode, Thread Pool V2, Priority Queue, Decode Cache V2, Release Gate V6                        |
-| P3    | 210–214 | Format Detection V2, MIME Resolver, Codec Registry, Stream Analyzer, Release Gate V7                  |
-| P4    | 215–219 | ETW Provider V2, Perf Counters, Diagnostic Logger, Health Monitor, Release Gate V8                    |
-| P5    | 220–224 | Accessibility, Cloud Sync, Format Converter, Enterprise Deploy, Release Gate V11                      |
-| P6    | 225–229 | Watch Folder, Diagnostics Dashboard, Benchmark V2, Localization, Theme Engine                         |
-| P7    | 230–234 | Telemetry, Update Engine, Shell Preview, Batch Processing, Release Gate V12                            |
-| P8    | 235–239 | File Hash, Registry Manager, Error Recovery, Log Rotation, Release Gate V13                            |
-| P9    | 240–244 | Resource Pool, CLI Parser, Metadata Extractor, Notifications, Release Gate V14                         |
-| P10   | 245–248 | Content Indexer, Network Diagnostics, Config Migration, Release Gate V15 (milestone)                   |
+| Phase | Sprints | Title                                                                                             |
+| ----- | ------- | ------------------------------------------------------------------------------------------------- |
+| P1    | 199–204 | GPU Pipeline V2, D3D12 Compute, Shader Compiler, Pipeline Cache, GPU Memory Pool, Release Gate V5 |
+| P2    | 205–209 | Async Decode, Thread Pool V2, Priority Queue, Decode Cache V2, Release Gate V6                    |
+| P3    | 210–214 | Format Detection V2, MIME Resolver, Codec Registry, Stream Analyzer, Release Gate V7              |
+| P4    | 215–219 | ETW Provider V2, Perf Counters, Diagnostic Logger, Health Monitor, Release Gate V8                |
+| P5    | 220–224 | Accessibility, Cloud Sync, Format Converter, Enterprise Deploy, Release Gate V11                  |
+| P6    | 225–229 | Watch Folder, Diagnostics Dashboard, Benchmark V2, Localization, Theme Engine                     |
+| P7    | 230–234 | Telemetry, Update Engine, Shell Preview, Batch Processing, Release Gate V12                       |
+| P8    | 235–239 | File Hash, Registry Manager, Error Recovery, Log Rotation, Release Gate V13                       |
+| P9    | 240–244 | Resource Pool, CLI Parser, Metadata Extractor, Notifications, Release Gate V14                    |
+| P10   | 245–248 | Content Indexer, Network Diagnostics, Config Migration, Release Gate V15 (milestone)              |
 
 ## v8.4.0 Block Summary (Sprints 175–177 ✅)
 

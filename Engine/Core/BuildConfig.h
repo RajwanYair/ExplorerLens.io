@@ -88,10 +88,12 @@ namespace Engine {
         constexpr bool EnableAsserts = DT_ENABLE_ASSERTS;
         
         // Version info
-        constexpr int VersionMajor = 6;
-        constexpr int VersionMinor = 2;
+        constexpr int VersionMajor = 10;
+        constexpr int VersionMinor = 5;
         constexpr int VersionPatch = 0;
-        constexpr const wchar_t* VersionString = L"6.2.0";
+        constexpr const wchar_t* VersionString = L"10.5.0";
+        constexpr int SprintCount = 248;
+        constexpr int TestCount = 687;
         constexpr const wchar_t* BuildDate = __TIMESTAMP__;
     }
 

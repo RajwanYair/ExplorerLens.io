@@ -5,6 +5,142 @@ All notable changes to DarkThumbs will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [10.5.0] - 2026-02 (Sprints 235-248)
+
+### Added
+- **Sprint 235: File Hash Engine** — SHA256/MD5/CRC32 file hashing for cache keys and integrity
+- **Sprint 236: Registry Manager** — Windows registry read/write abstraction for settings
+- **Sprint 237: Error Recovery Engine** — Crash checkpoint/restore and graceful recovery
+- **Sprint 238: Log Rotation Engine** — Automatic log rotation with size/age policies
+- **Sprint 239: Release Gate V13** — v10.3 milestone validation (16 KPIs)
+- **Sprint 240: Resource Pool Engine** — Object pooling with TTL eviction and prewarming
+- **Sprint 241: CLI Parser** — Command-line argument parser with Flag/String/Int/FilePath/Enum types
+- **Sprint 242: Metadata Extractor** — EXIF/IPTC/XMP/ICC/GPS metadata extraction (16 fields)
+- **Sprint 243: Notification Engine** — Toast notifications with priority-scaled duration
+- **Sprint 244: Release Gate V14** — v10.4 milestone validation (18 KPIs)
+- **Sprint 245: Content Indexer** — File classification (40+ extensions, 8 content types)
+- **Sprint 246: Network Diagnostics** — Ping/DNS/HTTP/Proxy/TLS connectivity testing
+- **Sprint 247: Config Migration Engine** — Settings migration with backup-based rollback
+- **Sprint 248: Release Gate V15** — v10.5 milestone validation (20 KPIs)
+
+### Changed
+- **Version:** 10.4.0 → 10.5.0
+- **Sprint count:** 234 → 248
+- **Total KPIs tracked:** 20 across 5 release gates (V11-V15)
+
+## [10.4.0] - 2026-01 (Sprints 220-234)
+
+### Added
+- **Sprint 220: Accessibility Engine** — WCAG compliance, high-contrast, screen reader support
+- **Sprint 221: Cloud Sync Provider** — OneDrive/GDrive/Dropbox path detection and sync
+- **Sprint 222: Format Converter Engine** — Batch format conversion between 10+ formats
+- **Sprint 223: Enterprise Deployment** — ADMX/GPO policies, MSI properties, network deploy
+- **Sprint 224: Release Gate V11** — v10.1 milestone validation
+- **Sprint 225: Watch Folder Engine** — Filesystem monitoring with auto-regeneration
+- **Sprint 226: Diagnostic Dashboard** — Runtime health metrics and categorized telemetry
+- **Sprint 227: Performance Benchmark V2** — Benchmark harness with percentile statistics
+- **Sprint 228: Localization Engine** — i18n/l10n with string tables for 5+ locales
+- **Sprint 229: Theme Engine** — Dark/light/custom theme support
+- **Sprint 230: Telemetry Engine** — Anonymous usage telemetry with consent levels
+- **Sprint 231: Update Engine** — Auto-update lifecycle with channel management
+- **Sprint 232: Shell Preview Handler** — IPreviewHandler COM integration
+- **Sprint 233: Batch Processing Engine** — Multi-file batch operations with progress tracking
+- **Sprint 234: Release Gate V12** — v10.2 milestone validation
+
+### Changed
+- **Version:** 10.3.0 → 10.4.0
+- **Sprint count:** 219 → 234
+
+## [10.3.0] - 2025-12 (Sprints 215-219)
+
+### Added
+- **Sprint 215: Animated Thumbnail Engine** — Animated WebP/JXL/GIF frame extraction
+- **Sprint 216: Shell Context Menu V2** — Extended right-click actions
+- **Sprint 217: Portable Mode Manager** — USB/removable drive portable config
+- **Sprint 218: Network Provider Engine** — UNC path and network share thumbnail support
+- **Sprint 219: Security Hardening V2** — DEP/ASLR validation, integrity checks
+
+### Changed
+- **Version:** 10.2.0 → 10.3.0
+- **Sprint count:** 214 → 219
+
+## [10.2.0] - 2025-11 (Sprints 210-214)
+
+### Added
+- **Sprint 210: CI/CD Pipeline Validation** — Multi-platform build validation
+- **Sprint 211: eBook Decoder** — Enhanced eBook cover extraction (EPUB/MOBI/AZW/FB2)
+- **Sprint 212: Geospatial Decoder** — Geospatial format rendering (Mercator projection)
+- **Sprint 213: Auto Documentation Generator** — Format matrix auto-generation from code
+- **Sprint 214: Config Migration Engine** — Settings version migration framework
+
+### Changed
+- **Version:** 10.1.0 → 10.2.0
+- **Sprint count:** 209 → 214
+
+## [10.1.0] - 2025-10 (Sprints 205-209)
+
+### Added
+- **Sprint 205: Async Shell Extension** — Non-blocking IThumbnailProvider with thread pool
+- **Sprint 206: Encoder Export Engine** — Export thumbnails in 10+ output formats
+- **Sprint 207: Telemetry Engine** — Health scoring and event recording
+- **Sprint 208: SIMD Accelerator** — AVX2/SSE4.1 accelerated image processing
+- **Sprint 209: Windows 11 Integration** — Dark mode detection, Mica effects, modern APIs
+
+### Changed
+- **Version:** 10.0.0 → 10.1.0
+- **Sprint count:** 204 → 209
+
+## [10.0.0] - 2025-09 (Sprints 199-204)
+
+### Added
+- **Sprint 199: Scientific Format Suite** — DICOM and FITS decoder stubs with data structures
+- **Sprint 200: Advanced 3D Format Decoder** — FBX/USD/3MF/STEP/IGES support framework
+- **Sprint 201: Plugin Marketplace V2** — Searchable catalog with SemVer management
+- **Sprint 202: Vulkan Compute Pipeline** — Vulkan GPU backend with SPIR-V shaders
+- **Sprint 203: Python SDK** — ctypes/pybind11 bindings for thumbnail generation
+- **Sprint 204: Release Gate V10** — v10.0 milestone validation with 12 KPIs
+
+### Changed
+- **Version:** 9.2.0 → 10.0.0
+- **Sprint count:** 198 → 204
+
+## [9.2.0] - 2025-08 (Sprints 187-198)
+
+### Added
+- **Sprint 187: Async Shell Extension** — First async implementation
+- **Sprint 188: D3D12 Compute Pipeline** — DirectX 12 GPU compute backend
+- **Sprint 189: Parallel Batch Decoder** — Multi-threaded batch decode with priority queue
+- **Sprint 190: Code Coverage Integration** — OpenCppCoverage + fuzzing targets
+- **Sprint 191: Memory Safety** — ASAN integration, safe buffer patterns
+- **Sprint 192: Persistent Disk Cache** — SQLite-backed persistent thumbnail cache
+- **Sprint 193: ARM64 Hardware Validator** — ARM64 feature detection and CI workflow
+- **Sprint 194: High-DPI Scaling** — Per-monitor DPI awareness and scaling
+- **Sprint 195: MSIX Packaging** — Modern Windows app packaging
+- **Sprint 196: Test Suite Expansion** — Test framework with decoder coverage specs
+- **Sprint 197: Malformed Input Hardening** — Image bomb detection, magic byte validation
+- **Sprint 198: Release Gate V3** — v9.2 release gate with 9 dimensions
+
+### Changed
+- **Version:** 9.0.0 → 9.2.0
+- **Sprint count:** 186 → 198
+- **Total unit tests:** 437 → ~587
+
+## [9.0.0] - 2025-07 (Sprints 178-186)
+
+### Added
+- **Sprint 178-180: Format Expansion** — WMF/EMF, PCX, Farbfeld decoders
+- **Sprint 181: JPEG 2000 Decoder** — JP2/J2K/JPX/JPH support with OpenJPEG
+- **Sprint 182: Enhanced Model Decoder** — PLY/DAE/3DS/FBX wireframe rendering
+- **Sprint 183: EPS/PostScript Decoder** — EPS/PS/AI vector format support
+- **Sprint 184: Game Texture Formats** — KTX/KTX2 and VTF (Valve) texture decoders
+- **Sprint 185: Creative Suite** — OpenRaster (.ora) and GIMP XCF decoders
+- **Sprint 186: Retro Formats** — SGI/RGB and XPM image decoders
+
+### Changed
+- **Version:** 8.4.0 → 9.0.0
+- **Sprint count:** 177 → 186
+- **Shell registrations:** 93 maintained, new format types integrated into decode pipeline
+
 ## [8.4.0] - 2025-06 (Sprints 175-177)
 
 ### Added

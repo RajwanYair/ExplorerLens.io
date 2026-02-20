@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(DarkThumbsEngine
-    VERSION 7.0.0
+    VERSION 10.5.0
     DESCRIPTION "DarkThumbs Thumbnail Generation Engine"
     LANGUAGES CXX
 )
