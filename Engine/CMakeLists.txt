@@ -159,6 +159,11 @@ set(ENGINE_HEADERS
     Decoders/Advanced3DFormatDecoder.h # Sprint 200 — FBX/USD/3MF/STEP/IGES
     Decoders/EBookDecoder.h              # Sprint 211 — eBook cover extraction
     Decoders/GeospatialDecoder.h         # Sprint 212 — Geospatial format decoder
+    Decoders/DPXDecoder.h                # Sprint 255 — DPX/Cineon film format
+    Decoders/AnimatedFormatHandler.h     # Sprint 256 — APNG & animated formats
+    Decoders/TextPreviewDecoder.h        # Sprint 257 — Markdown/code preview
+    Decoders/DICOMDecoderV2.h            # Sprint 258 — DICOM decoder completion
+    Decoders/FITSDecoderV2.h             # Sprint 259 — FITS decoder completion
     
     # GPU
     GPU/D3D11Renderer.h

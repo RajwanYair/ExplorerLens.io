@@ -102,6 +102,11 @@
 #include "../Core/ShellRegistrationManager.h"
 #include "../Utils/TestInfrastructureV2.h"
 #include "../Utils/ReleaseGateV16.h"
+#include "../Decoders/DPXDecoder.h"
+#include "../Decoders/AnimatedFormatHandler.h"
+#include "../Decoders/TextPreviewDecoder.h"
+#include "../Decoders/DICOMDecoderV2.h"
+#include "../Decoders/FITSDecoderV2.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -5944,6 +5949,180 @@ TEST(TestGateV16_Version) {
 }
 
 //==============================================================================
+//== Sprint 255: DPX/Cineon Decoder Tests
+//==============================================================================
+
+TEST(TestDPX_MagicBytes) {
+    uint8_t dpxBE[] = { 0x53, 0x44, 0x50, 0x58 }; // SDPX
+    ASSERT(DPXCineonDecoder::IsDPXFile(dpxBE, 4));
+    uint8_t bad[] = { 0x00, 0x00, 0x00, 0x00 };
+    ASSERT(!DPXCineonDecoder::IsDPXFile(bad, 4));
+}
+
+TEST(TestDPX_CineonMagic) {
+    uint8_t cin[] = { 0x80, 0x2A, 0x5F, 0xD7 };
+    ASSERT(DPXCineonDecoder::IsCineonFile(cin, 4));
+}
+
+TEST(TestDPX_TransferNames) {
+    ASSERT(std::wstring(DPXCineonDecoder::TransferName(DPXTransfer::LogFilm)) == L"Log Film");
+    ASSERT(std::wstring(DPXCineonDecoder::TransferName(DPXTransfer::Linear)) == L"Linear");
+}
+
+TEST(TestDPX_LogToLinear) {
+    uint8_t out = DPXCineonDecoder::LogToLinear(0);
+    ASSERT(out == 0);
+    uint8_t out2 = DPXCineonDecoder::LogToLinear(1023);
+    ASSERT(out2 == 255);
+}
+
+TEST(TestDPX_TransferCount) {
+    ASSERT(DPXCineonDecoder::TransferTypeCount() == 6);
+}
+
+//==============================================================================
+//== Sprint 256: APNG & Animated Format Tests
+//==============================================================================
+
+TEST(TestAnim_DetectAPNG) {
+    ASSERT(AnimatedFormatHandler::DetectFormat(L".apng") == AnimatedFormat::APNG);
+    ASSERT(AnimatedFormatHandler::DetectFormat(L".gif") == AnimatedFormat::AnimatedGIF);
+}
+
+TEST(TestAnim_FormatNames) {
+    ASSERT(std::wstring(AnimatedFormatHandler::FormatName(AnimatedFormat::APNG)) == L"Animated PNG");
+    ASSERT(std::wstring(AnimatedFormatHandler::FormatName(AnimatedFormat::AnimatedWebP)) == L"Animated WebP");
+}
+
+TEST(TestAnim_StrategyNames) {
+    ASSERT(std::wstring(AnimatedFormatHandler::StrategyName(FrameStrategy::FirstFrame)) == L"FirstFrame");
+    ASSERT(std::wstring(AnimatedFormatHandler::StrategyName(FrameStrategy::MiddleFrame)) == L"MiddleFrame");
+}
+
+TEST(TestAnim_SelectFrame) {
+    AnimationInfo info;
+    info.frameCount = 100;
+    ASSERT(AnimatedFormatHandler::SelectFrame(info, FrameStrategy::FirstFrame) == 0);
+    ASSERT(AnimatedFormatHandler::SelectFrame(info, FrameStrategy::MiddleFrame) == 50);
+}
+
+TEST(TestAnim_FormatCount) {
+    ASSERT(AnimatedFormatHandler::FormatCount() == 5);
+}
+
+//==============================================================================
+//== Sprint 257: Text Preview Decoder Tests
+//==============================================================================
+
+TEST(TestTextPreview_DetectLang) {
+    ASSERT(TextPreviewDecoder::DetectLanguage(L".py") == TextLanguage::Python);
+    ASSERT(TextPreviewDecoder::DetectLanguage(L".cpp") == TextLanguage::CPP);
+    ASSERT(TextPreviewDecoder::DetectLanguage(L".md") == TextLanguage::Markdown);
+}
+
+TEST(TestTextPreview_LanguageNames) {
+    ASSERT(std::wstring(TextPreviewDecoder::LanguageName(TextLanguage::Python)) == L"Python");
+    ASSERT(std::wstring(TextPreviewDecoder::LanguageName(TextLanguage::CSharp)) == L"C#");
+}
+
+TEST(TestTextPreview_IsTextFile) {
+    ASSERT(TextPreviewDecoder::IsTextFile(L".json"));
+    ASSERT(TextPreviewDecoder::IsTextFile(L".ts"));
+    ASSERT(!TextPreviewDecoder::IsTextFile(L".exe"));
+}
+
+TEST(TestTextPreview_ValidateConfig) {
+    TextPreviewConfig cfg;
+    ASSERT(TextPreviewDecoder::ValidateConfig(cfg));
+    cfg.maxLines = 0;
+    ASSERT(!TextPreviewDecoder::ValidateConfig(cfg));
+}
+
+TEST(TestTextPreview_ExtCount) {
+    ASSERT(TextPreviewDecoder::ExtensionCount() == 31);
+    ASSERT(TextPreviewDecoder::LanguageCount() == 20);
+}
+
+//==============================================================================
+//== Sprint 258: DICOM Decoder V2 Tests
+//==============================================================================
+
+TEST(TestDICOMv2_Magic) {
+    std::vector<uint8_t> data(136, 0);
+    data[128] = 'D'; data[129] = 'I'; data[130] = 'C'; data[131] = 'M';
+    ASSERT(DICOMDecoderV2::IsDICOMFile(data.data(), data.size()));
+    data[128] = 0;
+    ASSERT(!DICOMDecoderV2::IsDICOMFile(data.data(), data.size()));
+}
+
+TEST(TestDICOMv2_TransferSyntax) {
+    ASSERT(std::wstring(DICOMDecoderV2::TransferSyntaxName(DICOMTransferSyntax::ExplicitVRLittleEndian)) == L"Explicit VR Little Endian");
+    ASSERT(DICOMDecoderV2::TransferSyntaxCount() == 8);
+}
+
+TEST(TestDICOMv2_CanDecode) {
+    ASSERT(DICOMDecoderV2::CanDecodeNatively(DICOMTransferSyntax::ImplicitVRLittleEndian));
+    ASSERT(DICOMDecoderV2::CanDecodeNatively(DICOMTransferSyntax::ExplicitVRLittleEndian));
+    ASSERT(!DICOMDecoderV2::CanDecodeNatively(DICOMTransferSyntax::JPEGBaseline));
+}
+
+TEST(TestDICOMv2_Validate) {
+    DICOMImageInfo info;
+    info.rows = 512; info.columns = 512;
+    info.bitsAllocated = 16; info.bitsStored = 12;
+    ASSERT(DICOMDecoderV2::ValidateInfo(info));
+    info.rows = 0;
+    ASSERT(!DICOMDecoderV2::ValidateInfo(info));
+}
+
+TEST(TestDICOMv2_PixelSize) {
+    DICOMImageInfo info;
+    info.rows = 256; info.columns = 256;
+    info.bitsAllocated = 16; info.samplesPerPixel = 1; info.numberOfFrames = 1;
+    ASSERT(DICOMDecoderV2::CalculatePixelSize(info) == 256 * 256 * 2);
+}
+
+//==============================================================================
+//== Sprint 259: FITS Decoder V2 Tests
+//==============================================================================
+
+TEST(TestFITSv2_Magic) {
+    const char* hdr = "SIMPLE  = ";
+    ASSERT(FITSDecoderV2::IsFITSFile(reinterpret_cast<const uint8_t*>(hdr), 80));
+    const char* bad = "NOTFITS = ";
+    ASSERT(!FITSDecoderV2::IsFITSFile(reinterpret_cast<const uint8_t*>(bad), 80));
+}
+
+TEST(TestFITSv2_BytesPerPixel) {
+    ASSERT(FITSDecoderV2::BytesPerPixel(FITSBitpix::UInt8) == 1);
+    ASSERT(FITSDecoderV2::BytesPerPixel(FITSBitpix::Int16) == 2);
+    ASSERT(FITSDecoderV2::BytesPerPixel(FITSBitpix::Float32) == 4);
+    ASSERT(FITSDecoderV2::BytesPerPixel(FITSBitpix::Float64) == 8);
+}
+
+TEST(TestFITSv2_Validate) {
+    FITSImageInfo info;
+    info.naxis = 2; info.width = 1024; info.height = 1024;
+    info.bitpix = FITSBitpix::Float32;
+    ASSERT(FITSDecoderV2::ValidateInfo(info));
+    info.naxis = 1;
+    ASSERT(!FITSDecoderV2::ValidateInfo(info));
+}
+
+TEST(TestFITSv2_DataSize) {
+    FITSImageInfo info;
+    info.width = 100; info.height = 100; info.depth = 1;
+    info.bitpix = FITSBitpix::Float32;
+    ASSERT(FITSDecoderV2::CalculateDataSize(info) == 100 * 100 * 4);
+}
+
+TEST(TestFITSv2_Normalize) {
+    ASSERT(FITSDecoderV2::NormalizeTo8Bit(0.0, 0.0, 1.0) == 0);
+    ASSERT(FITSDecoderV2::NormalizeTo8Bit(1.0, 0.0, 1.0) == 255);
+    ASSERT(FITSDecoderV2::NormalizeTo8Bit(0.5, 0.0, 1.0) == 127);
+}
+
+//==============================================================================
 // Main Test Runner
 //==============================================================================
 
@@ -6873,6 +7052,46 @@ int main()
     RUN_TEST(TestGateV16_Evaluate);
     RUN_TEST(TestGateV16_Approved);
     RUN_TEST(TestGateV16_Version);
+
+    // Sprint 255: DPX/Cineon Decoder Tests
+    std::wcout << L"Sprint 255: DPX/Cineon Decoder..." << std::endl;
+    RUN_TEST(TestDPX_MagicBytes);
+    RUN_TEST(TestDPX_CineonMagic);
+    RUN_TEST(TestDPX_TransferNames);
+    RUN_TEST(TestDPX_LogToLinear);
+    RUN_TEST(TestDPX_TransferCount);
+
+    // Sprint 256: APNG & Animated Format Tests
+    std::wcout << L"Sprint 256: Animated Formats..." << std::endl;
+    RUN_TEST(TestAnim_DetectAPNG);
+    RUN_TEST(TestAnim_FormatNames);
+    RUN_TEST(TestAnim_StrategyNames);
+    RUN_TEST(TestAnim_SelectFrame);
+    RUN_TEST(TestAnim_FormatCount);
+
+    // Sprint 257: Text Preview Decoder Tests
+    std::wcout << L"Sprint 257: Text Preview..." << std::endl;
+    RUN_TEST(TestTextPreview_DetectLang);
+    RUN_TEST(TestTextPreview_LanguageNames);
+    RUN_TEST(TestTextPreview_IsTextFile);
+    RUN_TEST(TestTextPreview_ValidateConfig);
+    RUN_TEST(TestTextPreview_ExtCount);
+
+    // Sprint 258: DICOM Decoder V2 Tests
+    std::wcout << L"Sprint 258: DICOM V2..." << std::endl;
+    RUN_TEST(TestDICOMv2_Magic);
+    RUN_TEST(TestDICOMv2_TransferSyntax);
+    RUN_TEST(TestDICOMv2_CanDecode);
+    RUN_TEST(TestDICOMv2_Validate);
+    RUN_TEST(TestDICOMv2_PixelSize);
+
+    // Sprint 259: FITS Decoder V2 Tests
+    std::wcout << L"Sprint 259: FITS V2..." << std::endl;
+    RUN_TEST(TestFITSv2_Magic);
+    RUN_TEST(TestFITSv2_BytesPerPixel);
+    RUN_TEST(TestFITSv2_Validate);
+    RUN_TEST(TestFITSv2_DataSize);
+    RUN_TEST(TestFITSv2_Normalize);
 
     std::wcout << std::endl;
 
