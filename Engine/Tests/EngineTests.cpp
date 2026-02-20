@@ -63,6 +63,11 @@
 #include "../Decoders/GeospatialDecoder.h"
 #include "../Utils/AutoDocGenerator.h"
 #include "../Utils/ConfigMigrationEngine.h"
+#include "../Core/AnimatedThumbnailEngine.h"
+#include "../Core/ShellContextMenuV2.h"
+#include "../Utils/PortableModeManager.h"
+#include "../Core/NetworkProviderEngine.h"
+#include "../Core/SecurityHardeningV2.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -3948,6 +3953,228 @@ TEST(TestConfigMigration_Validation)
 }
 
 //==============================================================================
+// Sprint 215: Animated Thumbnail Engine Tests
+//==============================================================================
+
+TEST(TestAnim_FormatNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(AnimatedThumbnailEngine::GetFormatName(AnimatedFormat::GIF)) == L"GIF");
+    ASSERT(std::wstring(AnimatedThumbnailEngine::GetFormatName(AnimatedFormat::APNG)) == L"APNG");
+    ASSERT(std::wstring(AnimatedThumbnailEngine::GetFormatName(AnimatedFormat::WebPAnim)) == L"WebP Animation");
+}
+
+TEST(TestAnim_StrategyNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(AnimatedThumbnailEngine::GetStrategyName(FrameStrategy::First)) == L"First Frame");
+    ASSERT(std::wstring(AnimatedThumbnailEngine::GetStrategyName(FrameStrategy::Middle)) == L"Middle Frame");
+    ASSERT(std::wstring(AnimatedThumbnailEngine::GetStrategyName(FrameStrategy::MostDetail)) == L"Most Detail");
+}
+
+TEST(TestAnim_FrameSelection)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(AnimatedThumbnailEngine::SelectBestFrame(100, FrameStrategy::First) == 0);
+    ASSERT(AnimatedThumbnailEngine::SelectBestFrame(100, FrameStrategy::Middle) == 50);
+    ASSERT(AnimatedThumbnailEngine::SelectBestFrame(30, FrameStrategy::MostDetail) == 10);
+}
+
+TEST(TestAnim_FormatDetection)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(AnimatedThumbnailEngine::DetectFormat(L"test.gif") == AnimatedFormat::GIF);
+    ASSERT(AnimatedThumbnailEngine::DetectFormat(L"test.apng") == AnimatedFormat::APNG);
+    ASSERT(AnimatedThumbnailEngine::DetectFormat(L"test.webp") == AnimatedFormat::WebPAnim);
+}
+
+TEST(TestAnim_FormatCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(AnimatedThumbnailEngine::GetFormatCount() == 6);
+    AnimatedThumbnailEngine engine;
+    ASSERT(engine.GetMaxFrameScan() == 100);
+}
+
+//==============================================================================
+// Sprint 216: Shell Context Menu V2 Tests
+//==============================================================================
+
+TEST(TestContextMenu_ActionNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ShellContextMenuV2::GetActionName(ContextAction::Regenerate)) == L"Regenerate");
+    ASSERT(std::wstring(ShellContextMenuV2::GetActionName(ContextAction::ClearCache)) == L"Clear Cache");
+    ASSERT(std::wstring(ShellContextMenuV2::GetActionName(ContextAction::Settings)) == L"Settings");
+}
+
+TEST(TestContextMenu_DefaultMenu)
+{
+    using namespace DarkThumbs::Engine;
+    auto items = ShellContextMenuV2::GetDefaultMenu();
+    ASSERT(items.size() >= 5);
+    ASSERT(items[0].action == ContextAction::Regenerate);
+}
+
+TEST(TestContextMenu_ExecuteAction)
+{
+    using namespace DarkThumbs::Engine;
+    ShellContextMenuV2 menu;
+    auto result = menu.ExecuteAction(ContextAction::Regenerate, L"test.cbz");
+    ASSERT(result.success == true);
+    ASSERT(result.executedAction == ContextAction::Regenerate);
+}
+
+TEST(TestContextMenu_PositionNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ShellContextMenuV2::GetPositionName(MenuPosition::TopLevel)) == L"Top Level");
+    ASSERT(std::wstring(ShellContextMenuV2::GetPositionName(MenuPosition::SubMenu)) == L"Sub Menu");
+}
+
+TEST(TestContextMenu_ActionCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(ShellContextMenuV2::GetActionCount() == 7);
+}
+
+//==============================================================================
+// Sprint 217: Portable Mode Manager Tests
+//==============================================================================
+
+TEST(TestPortable_StatusNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(PortableModeManager::GetStatusName(PortableStatus::Installed)) == L"Installed");
+    ASSERT(std::wstring(PortableModeManager::GetStatusName(PortableStatus::Portable)) == L"Portable");
+    ASSERT(std::wstring(PortableModeManager::GetStatusName(PortableStatus::Hybrid)) == L"Hybrid");
+}
+
+TEST(TestPortable_LocationNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(PortableModeManager::GetLocationName(StorageLocation::Registry)) == L"Registry");
+    ASSERT(std::wstring(PortableModeManager::GetLocationName(StorageLocation::IniFile)) == L"INI File");
+    ASSERT(std::wstring(PortableModeManager::GetLocationName(StorageLocation::ExeDirectory)) == L"Exe Directory");
+}
+
+TEST(TestPortable_LocationCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(PortableModeManager::GetLocationCount() == 5);
+}
+
+TEST(TestPortable_Detection)
+{
+    using namespace DarkThumbs::Engine;
+    PortableModeManager mgr;
+    auto result = mgr.Detect();
+    ASSERT(!result.exePath.empty());
+    ASSERT(result.status == PortableStatus::Installed || result.status == PortableStatus::Portable);
+}
+
+TEST(TestPortable_CacheSize)
+{
+    using namespace DarkThumbs::Engine;
+    PortableModeManager mgr;
+    ASSERT(mgr.GetCacheSize() == 256 * 1024 * 1024);
+    mgr.SetCacheSize(128 * 1024 * 1024);
+    ASSERT(mgr.GetCacheSize() == 128 * 1024 * 1024);
+}
+
+//==============================================================================
+// Sprint 218: Network Provider Engine Tests
+//==============================================================================
+
+TEST(TestNetwork_ProtocolNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(NetworkProviderEngine::GetProtocolName(NetworkProtocol::UNC)) == L"UNC");
+    ASSERT(std::wstring(NetworkProviderEngine::GetProtocolName(NetworkProtocol::SMB)) == L"SMB");
+    ASSERT(std::wstring(NetworkProviderEngine::GetProtocolName(NetworkProtocol::WebDAV)) == L"WebDAV");
+}
+
+TEST(TestNetwork_PathDetection)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(NetworkProviderEngine::IsNetworkPath(L"\\\\server\\share") == true);
+    ASSERT(NetworkProviderEngine::IsNetworkPath(L"C:\\local\\path") == false);
+    ASSERT(NetworkProviderEngine::IsNetworkPath(L"ftp://server/file") == true);
+}
+
+TEST(TestNetwork_ProtocolDetection)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(NetworkProviderEngine::DetectProtocol(L"\\\\server\\share") == NetworkProtocol::UNC);
+    ASSERT(NetworkProviderEngine::DetectProtocol(L"ftp://server/file") == NetworkProtocol::FTP);
+    ASSERT(NetworkProviderEngine::DetectProtocol(L"http://example.com/file") == NetworkProtocol::HTTP);
+}
+
+TEST(TestNetwork_ParsePath)
+{
+    using namespace DarkThumbs::Engine;
+    NetworkProviderEngine engine;
+    auto path = engine.ParsePath(L"\\\\myserver\\myshare\\folder\\file.cbz");
+    ASSERT(path.server == L"myserver");
+    ASSERT(path.share == L"myshare");
+    ASSERT(path.protocol == NetworkProtocol::UNC);
+}
+
+TEST(TestNetwork_ProtocolCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(NetworkProviderEngine::GetProtocolCount() == 6);
+    NetworkProviderEngine engine;
+    ASSERT(engine.GetTimeout() == 5000);
+    ASSERT(engine.GetMaxRetries() == 3);
+}
+
+//==============================================================================
+// Sprint 219: Security Hardening V2 Tests
+//==============================================================================
+
+TEST(TestSecurity_LevelNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(SecurityHardeningV2::GetLevelName(SecurityLevel::None)) == L"None");
+    ASSERT(std::wstring(SecurityHardeningV2::GetLevelName(SecurityLevel::Standard)) == L"Standard");
+    ASSERT(std::wstring(SecurityHardeningV2::GetLevelName(SecurityLevel::Maximum)) == L"Maximum");
+}
+
+TEST(TestSecurity_CheckNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(SecurityHardeningV2::GetCheckName(IntegrityCheck::FileHash)) == L"File Hash");
+    ASSERT(std::wstring(SecurityHardeningV2::GetCheckName(IntegrityCheck::CodeSign)) == L"Code Signing");
+    ASSERT(std::wstring(SecurityHardeningV2::GetCheckName(IntegrityCheck::MemoryGuard)) == L"Memory Guard");
+}
+
+TEST(TestSecurity_BasicAudit)
+{
+    using namespace DarkThumbs::Engine;
+    SecurityHardeningV2 sec;
+    auto result = sec.RunAudit(SecurityLevel::Basic);
+    ASSERT(result.checksRun >= 2);
+    ASSERT(result.auditTimeMs >= 0.0);
+}
+
+TEST(TestSecurity_CheckCounts)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(SecurityHardeningV2::GetCheckCount() == 5);
+    ASSERT(SecurityHardeningV2::GetLevelCount() == 5);
+}
+
+TEST(TestSecurity_DEPCheck)
+{
+    using namespace DarkThumbs::Engine;
+    SecurityHardeningV2 sec;
+    // On modern Windows, DEP should be enabled
+    ASSERT(sec.IsDEPEnabled() == true);
+    ASSERT(sec.IsASLREnabled() == true);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -4771,6 +4998,51 @@ int main()
     RUN_TEST(TestConfigMigration_BasicMigration);
     RUN_TEST(TestConfigMigration_RenameRule);
     RUN_TEST(TestConfigMigration_Validation);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 215: Animated Thumbnail Engine..." << std::endl;
+    RUN_TEST(TestAnim_FormatNames);
+    RUN_TEST(TestAnim_StrategyNames);
+    RUN_TEST(TestAnim_FrameSelection);
+    RUN_TEST(TestAnim_FormatDetection);
+    RUN_TEST(TestAnim_FormatCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 216: Shell Context Menu V2..." << std::endl;
+    RUN_TEST(TestContextMenu_ActionNames);
+    RUN_TEST(TestContextMenu_DefaultMenu);
+    RUN_TEST(TestContextMenu_ExecuteAction);
+    RUN_TEST(TestContextMenu_PositionNames);
+    RUN_TEST(TestContextMenu_ActionCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 217: Portable Mode Manager..." << std::endl;
+    RUN_TEST(TestPortable_StatusNames);
+    RUN_TEST(TestPortable_LocationNames);
+    RUN_TEST(TestPortable_LocationCount);
+    RUN_TEST(TestPortable_Detection);
+    RUN_TEST(TestPortable_CacheSize);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 218: Network Provider Engine..." << std::endl;
+    RUN_TEST(TestNetwork_ProtocolNames);
+    RUN_TEST(TestNetwork_PathDetection);
+    RUN_TEST(TestNetwork_ProtocolDetection);
+    RUN_TEST(TestNetwork_ParsePath);
+    RUN_TEST(TestNetwork_ProtocolCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 219: Security Hardening V2..." << std::endl;
+    RUN_TEST(TestSecurity_LevelNames);
+    RUN_TEST(TestSecurity_CheckNames);
+    RUN_TEST(TestSecurity_BasicAudit);
+    RUN_TEST(TestSecurity_CheckCounts);
+    RUN_TEST(TestSecurity_DEPCheck);
 
     std::wcout << std::endl;
 

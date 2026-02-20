@@ -89,6 +89,10 @@ set(ENGINE_HEADERS
     Core/EncoderExportEngine.h         # Sprint 206 — Export encoder engine
     Core/TelemetryEngine.h             # Sprint 207 — Telemetry & health scoring
     Core/SIMDAccelerator.h             # Sprint 208 — SIMD-accelerated processing
+    Core/AnimatedThumbnailEngine.h     # Sprint 215 — Animated image frame extraction
+    Core/ShellContextMenuV2.h          # Sprint 216 — Shell context menu integration
+    Core/NetworkProviderEngine.h       # Sprint 218 — Network path thumbnail support
+    Core/SecurityHardeningV2.h         # Sprint 219 — Security hardening & integrity
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -180,6 +184,7 @@ set(ENGINE_HEADERS
     Utils/CIValidator.h                  # Sprint 210 — CI/CD pipeline validation
     Utils/AutoDocGenerator.h             # Sprint 213 — Auto documentation generator
     Utils/ConfigMigrationEngine.h        # Sprint 214 — Config migration engine
+    Utils/PortableModeManager.h           # Sprint 217 — Portable mode (USB/removable)
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -285,6 +290,10 @@ set(ENGINE_SOURCES
     Core/EncoderExportEngine.cpp         # Sprint 206 — Export encoder engine
     Core/TelemetryEngine.cpp             # Sprint 207 — Telemetry & health scoring
     Core/SIMDAccelerator.cpp             # Sprint 208 — SIMD-accelerated processing
+    Core/AnimatedThumbnailEngine.cpp     # Sprint 215 — Animated image frame extraction
+    Core/ShellContextMenuV2.cpp          # Sprint 216 — Shell context menu integration
+    Core/NetworkProviderEngine.cpp       # Sprint 218 — Network path thumbnail support
+    Core/SecurityHardeningV2.cpp         # Sprint 219 — Security hardening & integrity
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -371,6 +380,7 @@ set(ENGINE_SOURCES
     Utils/CIValidator.cpp                  # Sprint 210 — CI/CD pipeline validation
     Utils/AutoDocGenerator.cpp             # Sprint 213 — Auto documentation generator
     Utils/ConfigMigrationEngine.cpp        # Sprint 214 — Config migration engine
+    Utils/PortableModeManager.cpp           # Sprint 217 — Portable mode (USB/removable)
 )
 
 #==============================================================================
