@@ -97,6 +97,11 @@
 #include "../Utils/NetworkDiagnostics.h"
 #include "../Core/ConfigMigrationEngine.h"
 #include "../Utils/ReleaseGateV15.h"
+#include "../Core/FormatRegistry.h"
+#include "../Core/FormatTypes.h"
+#include "../Core/ShellRegistrationManager.h"
+#include "../Utils/TestInfrastructureV2.h"
+#include "../Utils/ReleaseGateV16.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -5769,6 +5774,175 @@ TEST(TestMemoryLeak_RegressionLoop)
     ASSERT(growthMB < 50); // No excessive memory leak
 }
 
+//== Sprint 250: Format Registry Tests
+TEST(TestFormatReg_Register) {
+    FormatRegistry& reg = FormatRegistry::Instance();
+    FormatEntry entry;
+    entry.type = FormatType::DPX;
+    entry.category = FormatCategory::ProfessionalImage;
+    entry.primaryExt = L".dpx";
+    entry.description = L"DPX Film Frame";
+    entry.decoderName = L"DPXDecoder";
+    entry.hasDecoder = true;
+    reg.Register(entry);
+    ASSERT(reg.GetEntry(FormatType::DPX) != nullptr);
+}
+
+TEST(TestFormatReg_LookupByExt) {
+    FormatRegistry& reg = FormatRegistry::Instance();
+    reg.RegisterAlias(L".dpx", FormatType::DPX);
+    auto type = reg.LookupByExtension(L".dpx");
+    ASSERT(type == FormatType::DPX);
+}
+
+TEST(TestFormatReg_CategoryNames) {
+    ASSERT(std::wstring(FormatRegistry::CategoryName(FormatCategory::Archive)) == L"Archive");
+    ASSERT(std::wstring(FormatRegistry::CategoryName(FormatCategory::ModernImage)) == L"ModernImage");
+    ASSERT(std::wstring(FormatRegistry::CategoryName(FormatCategory::Scientific)) == L"Scientific");
+}
+
+TEST(TestFormatReg_TypeNames) {
+    ASSERT(std::wstring(FormatRegistry::TypeName(FormatType::WebP)) == L"WebP");
+    ASSERT(std::wstring(FormatRegistry::TypeName(FormatType::DPX)) == L"DPX");
+    ASSERT(std::wstring(FormatRegistry::TypeName(FormatType::DICOM)) == L"DICOM");
+}
+
+TEST(TestFormatReg_Validate) {
+    FormatRegistry& reg = FormatRegistry::Instance();
+    auto result = reg.Validate();
+    ASSERT(result.orphanedExtensions == 0);
+}
+
+//== Sprint 251: Format Type Lookup Tests
+TEST(TestFormatLookup_WebP) {
+    auto& lookup = FormatTypeLookup::Instance();
+    ASSERT(lookup.Lookup(L".webp") == FormatType::WebP);
+}
+
+TEST(TestFormatLookup_Archives) {
+    auto& lookup = FormatTypeLookup::Instance();
+    ASSERT(lookup.Lookup(L".zip") == FormatType::ZIP);
+    ASSERT(lookup.Lookup(L".7z") == FormatType::SevenZip);
+    ASSERT(lookup.Lookup(L".rar") == FormatType::RAR);
+}
+
+TEST(TestFormatLookup_Scientific) {
+    auto& lookup = FormatTypeLookup::Instance();
+    ASSERT(lookup.Lookup(L".dcm") == FormatType::DICOM);
+    ASSERT(lookup.Lookup(L".fits") == FormatType::FITS);
+}
+
+TEST(TestFormatLookup_Film) {
+    auto& lookup = FormatTypeLookup::Instance();
+    ASSERT(lookup.Lookup(L".dpx") == FormatType::DPX);
+    ASSERT(lookup.Lookup(L".cin") == FormatType::Cineon);
+}
+
+TEST(TestFormatLookup_Stats) {
+    auto& lookup = FormatTypeLookup::Instance();
+    auto stats = lookup.GetStats();
+    ASSERT(stats.totalMappings >= 80);
+    ASSERT(stats.archiveTypes >= 10);
+}
+
+//== Sprint 252: Shell Registration Manager Tests
+TEST(TestShellReg_AddRegistered) {
+    ShellRegistrationManager mgr;
+    mgr.AddRegistered(L".webp", L"WebP Image");
+    ASSERT(mgr.IsRegistered(L".webp"));
+    ASSERT(mgr.RegisteredCount() == 1);
+}
+
+TEST(TestShellReg_MissingRegs) {
+    ShellRegistrationManager mgr;
+    mgr.AddRegistered(L".webp");
+    mgr.AddSupported(L".dpx");
+    auto missing = mgr.GetMissingRegistrations();
+    ASSERT(missing.size() == 1);
+    ASSERT(missing[0] == L".dpx");
+}
+
+TEST(TestShellReg_V106NewExts) {
+    auto exts = ShellRegistrationManager::GetV106NewExtensions();
+    ASSERT(exts.size() >= 10);
+}
+
+TEST(TestShellReg_CategoryNames) {
+    ASSERT(std::wstring(ShellRegistrationManager::CategoryName(0)) == L"Archives");
+    ASSERT(std::wstring(ShellRegistrationManager::CategoryName(8)) == L"Scientific");
+}
+
+TEST(TestShellReg_Audit) {
+    ShellRegistrationManager mgr;
+    mgr.AddRegistered(L".webp");
+    mgr.AddRegistered(L".avif");
+    auto audit = mgr.RunAudit();
+    ASSERT(audit.registered == 2);
+    ASSERT(audit.synced);
+}
+
+//== Sprint 253: Test Infrastructure V2 Tests
+TEST(TestInfra_CoverageCommand) {
+    auto cmd = TestInfrastructure::GetCoverageCommand(CoverageTool::OpenCppCoverage);
+    ASSERT(cmd.find(L"OpenCppCoverage") != std::wstring::npos);
+}
+
+TEST(TestInfra_SanitizerNames) {
+    ASSERT(std::wstring(TestInfrastructure::SanitizerModeName(SanitizerMode::AddressSanitizer)) == L"ASAN");
+    ASSERT(std::wstring(TestInfrastructure::SanitizerModeName(SanitizerMode::Full)) == L"Full");
+}
+
+TEST(TestInfra_CoverageToolNames) {
+    ASSERT(std::wstring(TestInfrastructure::CoverageToolName(CoverageTool::OpenCppCoverage)) == L"OpenCppCoverage");
+}
+
+TEST(TestInfra_SanitizerFlags) {
+    auto flags = TestInfrastructure::GetSanitizerFlags(SanitizerMode::AddressSanitizer);
+    ASSERT(flags.find(L"fsanitize") != std::wstring::npos);
+}
+
+TEST(TestInfra_CoverageThresholds) {
+    TestInfrastructure infra;
+    auto ci = infra.GetCIThresholds();
+    ASSERT(ci.lineCoverage >= 70.0f);
+    auto rel = infra.GetReleaseThresholds();
+    ASSERT(rel.lineCoverage >= 85.0f);
+}
+
+//== Sprint 254: Release Gate V16 Tests
+TEST(TestGateV16_KPINames) {
+    ASSERT(std::wstring(ReleaseGateV16::KPIName(GateV16KPI::VersionSync)) == L"VersionSync");
+    ASSERT(std::wstring(ReleaseGateV16::KPIName(GateV16KPI::FormatRegistryValid)) == L"FormatRegistryValid");
+}
+
+TEST(TestGateV16_KPICount) {
+    ASSERT(ReleaseGateV16::KPICount() == 20);
+}
+
+TEST(TestGateV16_Evaluate) {
+    ReleaseGateV16 gate;
+    auto r = gate.EvaluateKPI(GateV16KPI::TestPassRate, 100.0f);
+    ASSERT(r.passed);
+}
+
+TEST(TestGateV16_Approved) {
+    ReleaseGateV16 gate;
+    std::vector<GateV16Result> results;
+    GateV16Result r1; r1.passed = true;
+    GateV16Result r2; r2.passed = true;
+    results.push_back(r1);
+    results.push_back(r2);
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.approved);
+}
+
+TEST(TestGateV16_Version) {
+    ReleaseGateV16 gate;
+    std::vector<GateV16Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.version == L"10.6.0");
+}
+
 //==============================================================================
 // Main Test Runner
 //==============================================================================
@@ -6657,6 +6831,48 @@ int main()
     RUN_TEST(TestGateV15_Evaluate);
     RUN_TEST(TestGateV15_Approved);
     RUN_TEST(TestGateV15_Version);
+
+    std::wcout << std::endl;
+
+    // Sprint 250: Format Registry Tests
+    std::wcout << L"Sprint 250: Format Registry..." << std::endl;
+    RUN_TEST(TestFormatReg_Register);
+    RUN_TEST(TestFormatReg_LookupByExt);
+    RUN_TEST(TestFormatReg_CategoryNames);
+    RUN_TEST(TestFormatReg_TypeNames);
+    RUN_TEST(TestFormatReg_Validate);
+
+    // Sprint 251: Format Type Lookup Tests
+    std::wcout << L"Sprint 251: Format Type Lookup..." << std::endl;
+    RUN_TEST(TestFormatLookup_WebP);
+    RUN_TEST(TestFormatLookup_Archives);
+    RUN_TEST(TestFormatLookup_Scientific);
+    RUN_TEST(TestFormatLookup_Film);
+    RUN_TEST(TestFormatLookup_Stats);
+
+    // Sprint 252: Shell Registration Manager Tests
+    std::wcout << L"Sprint 252: Shell Registration Manager..." << std::endl;
+    RUN_TEST(TestShellReg_AddRegistered);
+    RUN_TEST(TestShellReg_MissingRegs);
+    RUN_TEST(TestShellReg_V106NewExts);
+    RUN_TEST(TestShellReg_CategoryNames);
+    RUN_TEST(TestShellReg_Audit);
+
+    // Sprint 253: Test Infrastructure V2 Tests
+    std::wcout << L"Sprint 253: Test Infrastructure V2..." << std::endl;
+    RUN_TEST(TestInfra_CoverageCommand);
+    RUN_TEST(TestInfra_SanitizerNames);
+    RUN_TEST(TestInfra_CoverageToolNames);
+    RUN_TEST(TestInfra_SanitizerFlags);
+    RUN_TEST(TestInfra_CoverageThresholds);
+
+    // Sprint 254: Release Gate V16 Tests
+    std::wcout << L"Sprint 254: Release Gate V16..." << std::endl;
+    RUN_TEST(TestGateV16_KPINames);
+    RUN_TEST(TestGateV16_KPICount);
+    RUN_TEST(TestGateV16_Evaluate);
+    RUN_TEST(TestGateV16_Approved);
+    RUN_TEST(TestGateV16_Version);
 
     std::wcout << std::endl;
 

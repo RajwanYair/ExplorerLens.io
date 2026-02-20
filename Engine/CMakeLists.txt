@@ -107,6 +107,9 @@ set(ENGINE_HEADERS
     Core/MetadataExtractor.h           # Sprint 242 — EXIF/IPTC/XMP extraction
     Core/ContentIndexer.h              # Sprint 245 — File content indexing
     Core/ConfigMigrationEngine.h       # Sprint 247 — Settings migration
+    Core/FormatRegistry.h                # Sprint 250 — Format registry singleton
+    Core/FormatTypes.h                   # Sprint 251 — Format type lookup table
+    Core/ShellRegistrationManager.h      # Sprint 252 — Shell registration manager
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -214,6 +217,8 @@ set(ENGINE_HEADERS
     Utils/ReleaseGateV14.h                # Sprint 244 — v10.4 release gate
     Utils/NetworkDiagnostics.h            # Sprint 246 — Network connectivity testing
     Utils/ReleaseGateV15.h                # Sprint 248 — v10.5 release gate
+    Utils/TestInfrastructureV2.h           # Sprint 253 — Test infrastructure upgrade
+    Utils/ReleaseGateV16.h                # Sprint 254 — v10.6 release gate
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
