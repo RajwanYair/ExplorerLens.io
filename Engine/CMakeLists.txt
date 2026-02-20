@@ -93,6 +93,8 @@ set(ENGINE_HEADERS
     Core/ShellContextMenuV2.h          # Sprint 216 — Shell context menu integration
     Core/NetworkProviderEngine.h       # Sprint 218 — Network path thumbnail support
     Core/SecurityHardeningV2.h         # Sprint 219 — Security hardening & integrity
+    Core/CloudSyncProvider.h           # Sprint 221 — Cloud storage thumbnail sync
+    Core/FormatConverterEngine.h       # Sprint 222 — Batch format conversion
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -185,6 +187,9 @@ set(ENGINE_HEADERS
     Utils/AutoDocGenerator.h             # Sprint 213 — Auto documentation generator
     Utils/ConfigMigrationEngine.h        # Sprint 214 — Config migration engine
     Utils/PortableModeManager.h           # Sprint 217 — Portable mode (USB/removable)
+    Utils/AccessibilityEngine.h           # Sprint 220 — Accessibility support
+    Utils/EnterpriseDeploymentManager.h   # Sprint 223 — Enterprise deployment
+    Utils/ReleaseGateV11.h                # Sprint 224 — v10.1 release gate
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -294,6 +299,8 @@ set(ENGINE_SOURCES
     Core/ShellContextMenuV2.cpp          # Sprint 216 — Shell context menu integration
     Core/NetworkProviderEngine.cpp       # Sprint 218 — Network path thumbnail support
     Core/SecurityHardeningV2.cpp         # Sprint 219 — Security hardening & integrity
+    Core/CloudSyncProvider.cpp           # Sprint 221 — Cloud storage thumbnail sync
+    Core/FormatConverterEngine.cpp       # Sprint 222 — Batch format conversion
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -381,6 +388,9 @@ set(ENGINE_SOURCES
     Utils/AutoDocGenerator.cpp             # Sprint 213 — Auto documentation generator
     Utils/ConfigMigrationEngine.cpp        # Sprint 214 — Config migration engine
     Utils/PortableModeManager.cpp           # Sprint 217 — Portable mode (USB/removable)
+    Utils/AccessibilityEngine.cpp           # Sprint 220 — Accessibility support
+    Utils/EnterpriseDeploymentManager.cpp   # Sprint 223 — Enterprise deployment
+    Utils/ReleaseGateV11.cpp                # Sprint 224 — v10.1 release gate
 )
 
 #==============================================================================

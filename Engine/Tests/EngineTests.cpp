@@ -68,6 +68,11 @@
 #include "../Utils/PortableModeManager.h"
 #include "../Core/NetworkProviderEngine.h"
 #include "../Core/SecurityHardeningV2.h"
+#include "../Utils/AccessibilityEngine.h"
+#include "../Core/CloudSyncProvider.h"
+#include "../Core/FormatConverterEngine.h"
+#include "../Utils/EnterpriseDeploymentManager.h"
+#include "../Utils/ReleaseGateV11.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -4175,6 +4180,227 @@ TEST(TestSecurity_DEPCheck)
 }
 
 //==============================================================================
+// Sprint 220: Accessibility Engine Tests
+//==============================================================================
+
+TEST(TestA11y_FeatureNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(AccessibilityEngine::GetFeatureName(A11yFeature::ScreenReader)) == L"Screen Reader");
+    ASSERT(std::wstring(AccessibilityEngine::GetFeatureName(A11yFeature::HighContrast)) == L"High Contrast");
+    ASSERT(std::wstring(AccessibilityEngine::GetFeatureName(A11yFeature::KeyboardNav)) == L"Keyboard Navigation");
+}
+
+TEST(TestA11y_ContrastModes)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(AccessibilityEngine::GetContrastModeName(ContrastMode::Normal)) == L"Normal");
+    ASSERT(std::wstring(AccessibilityEngine::GetContrastModeName(ContrastMode::HighWhite)) == L"High Contrast White");
+    ASSERT(std::wstring(AccessibilityEngine::GetContrastModeName(ContrastMode::HighBlack)) == L"High Contrast Black");
+}
+
+TEST(TestA11y_FeatureToggle)
+{
+    using namespace DarkThumbs::Engine;
+    AccessibilityEngine engine;
+    engine.EnableFeature(A11yFeature::LargeText);
+    ASSERT(engine.IsFeatureEnabled(A11yFeature::LargeText) == true);
+    engine.DisableFeature(A11yFeature::LargeText);
+    ASSERT(engine.IsFeatureEnabled(A11yFeature::LargeText) == false);
+}
+
+TEST(TestA11y_FeatureCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(AccessibilityEngine::GetFeatureCount() == 7);
+}
+
+TEST(TestA11y_ComplianceAudit)
+{
+    using namespace DarkThumbs::Engine;
+    AccessibilityEngine engine;
+    auto result = engine.RunComplianceAudit();
+    ASSERT(result.checksRun >= 5);
+    ASSERT(result.auditTimeMs >= 0.0);
+}
+
+//==============================================================================
+// Sprint 221: Cloud Sync Provider Tests
+//==============================================================================
+
+TEST(TestCloud_ProviderNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(CloudSyncProvider::GetProviderName(CloudProvider::OneDrive)) == L"OneDrive");
+    ASSERT(std::wstring(CloudSyncProvider::GetProviderName(CloudProvider::SharePoint)) == L"SharePoint");
+    ASSERT(std::wstring(CloudSyncProvider::GetProviderName(CloudProvider::AmazonS3)) == L"Amazon S3");
+}
+
+TEST(TestCloud_StatusNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(CloudSyncProvider::GetStatusName(SyncStatus::Idle)) == L"Idle");
+    ASSERT(std::wstring(CloudSyncProvider::GetStatusName(SyncStatus::Syncing)) == L"Syncing");
+    ASSERT(std::wstring(CloudSyncProvider::GetStatusName(SyncStatus::Completed)) == L"Completed");
+}
+
+TEST(TestCloud_ProviderDetection)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(CloudSyncProvider::DetectProvider(L"C:\\Users\\test\\OneDrive\\file.cbz") == CloudProvider::OneDrive);
+    ASSERT(CloudSyncProvider::DetectProvider(L"C:\\Users\\test\\Dropbox\\file.cbz") == CloudProvider::Dropbox);
+}
+
+TEST(TestCloud_IsCloudPath)
+{
+    using namespace DarkThumbs::Engine;
+    CloudSyncProvider provider;
+    ASSERT(provider.IsCloudPath(L"C:\\Users\\test\\OneDrive\\folder") == true);
+    ASSERT(provider.IsCloudPath(L"C:\\Users\\test\\Documents\\local") == false);
+}
+
+TEST(TestCloud_ProviderCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(CloudSyncProvider::GetProviderCount() == 6);
+}
+
+//==============================================================================
+// Sprint 222: Format Converter Engine Tests
+//==============================================================================
+
+TEST(TestConverter_FormatNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(FormatConverterEngine::GetFormatName(ConvertFormat::PNG)) == L"PNG");
+    ASSERT(std::wstring(FormatConverterEngine::GetFormatName(ConvertFormat::JPEG)) == L"JPEG");
+    ASSERT(std::wstring(FormatConverterEngine::GetFormatName(ConvertFormat::WebP)) == L"WebP");
+    ASSERT(std::wstring(FormatConverterEngine::GetFormatName(ConvertFormat::JXL)) == L"JPEG XL");
+}
+
+TEST(TestConverter_FormatDetection)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(FormatConverterEngine::DetectFormat(L"test.png") == ConvertFormat::PNG);
+    ASSERT(FormatConverterEngine::DetectFormat(L"test.jpg") == ConvertFormat::JPEG);
+    ASSERT(FormatConverterEngine::DetectFormat(L"test.webp") == ConvertFormat::WebP);
+    ASSERT(FormatConverterEngine::DetectFormat(L"test.avif") == ConvertFormat::AVIF);
+}
+
+TEST(TestConverter_QualityPresets)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(FormatConverterEngine::GetQualityValue(QualityPreset::Lossless) == 100);
+    ASSERT(FormatConverterEngine::GetQualityValue(QualityPreset::High) == 90);
+    ASSERT(FormatConverterEngine::GetQualityValue(QualityPreset::Medium) == 75);
+}
+
+TEST(TestConverter_FormatExtensions)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(FormatConverterEngine::GetFormatExtension(ConvertFormat::PNG)) == L".png");
+    ASSERT(std::wstring(FormatConverterEngine::GetFormatExtension(ConvertFormat::JXL)) == L".jxl");
+}
+
+TEST(TestConverter_FormatCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(FormatConverterEngine::GetFormatCount() == 7);
+}
+
+//==============================================================================
+// Sprint 223: Enterprise Deployment Manager Tests
+//==============================================================================
+
+TEST(TestEnterprise_MethodNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(EnterpriseDeploymentManager::GetMethodName(DeploymentMethod::GPO)) == L"Group Policy");
+    ASSERT(std::wstring(EnterpriseDeploymentManager::GetMethodName(DeploymentMethod::SCCM)) == L"SCCM");
+    ASSERT(std::wstring(EnterpriseDeploymentManager::GetMethodName(DeploymentMethod::Intune)) == L"Intune");
+}
+
+TEST(TestEnterprise_PolicyTypes)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(EnterpriseDeploymentManager::GetPolicyTypeName(PolicyType::MachinePol)) == L"Machine Policy");
+    ASSERT(std::wstring(EnterpriseDeploymentManager::GetPolicyTypeName(PolicyType::UserPol)) == L"User Policy");
+}
+
+TEST(TestEnterprise_AddPolicy)
+{
+    using namespace DarkThumbs::Engine;
+    EnterpriseDeploymentManager mgr;
+    DeploymentPolicy pol;
+    pol.name = L"Enable GPU";
+    pol.key = L"GPUEnabled";
+    pol.value = L"1";
+    mgr.AddPolicy(pol);
+    ASSERT(mgr.GetPolicies().size() == 1);
+    ASSERT(mgr.ValidatePolicies() == true);
+}
+
+TEST(TestEnterprise_MSIProperties)
+{
+    using namespace DarkThumbs::Engine;
+    EnterpriseDeploymentManager mgr;
+    auto props = mgr.GenerateMSIProperties();
+    ASSERT(props.count(L"ALLUSERS") == 1);
+    ASSERT(props[L"ALLUSERS"] == L"1");
+}
+
+TEST(TestEnterprise_MethodCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(EnterpriseDeploymentManager::GetMethodCount() == 6);
+}
+
+//==============================================================================
+// Sprint 224: Release Gate V11 Tests
+//==============================================================================
+
+TEST(TestGateV11_KPINames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ReleaseGateV11::GetKPIName(GateKPIV11::BuildClean)) == L"Build Clean");
+    ASSERT(std::wstring(ReleaseGateV11::GetKPIName(GateKPIV11::TestPassRate)) == L"Test Pass Rate");
+    ASSERT(std::wstring(ReleaseGateV11::GetKPIName(GateKPIV11::SecurityAudit)) == L"Security Audit");
+}
+
+TEST(TestGateV11_KPICount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(ReleaseGateV11::GetKPICount() == 15);
+}
+
+TEST(TestGateV11_Evaluate)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV11 gate;
+    auto result = gate.Evaluate(L"v10.1.0");
+    ASSERT(result.kpisEvaluated == 15);
+    ASSERT(result.releaseVersion == L"v10.1.0");
+}
+
+TEST(TestGateV11_Thresholds)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV11 gate;
+    ASSERT(gate.GetThreshold(GateKPIV11::TestPassRate) == 100.0);
+    gate.SetThreshold(GateKPIV11::TestCoverage, 90.0);
+    ASSERT(gate.GetThreshold(GateKPIV11::TestCoverage) == 90.0);
+}
+
+TEST(TestGateV11_SingleKPI)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV11 gate;
+    auto result = gate.EvaluateKPI(GateKPIV11::BuildClean);
+    ASSERT(result.passed == true);
+    ASSERT(result.kpi == GateKPIV11::BuildClean);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -5043,6 +5269,51 @@ int main()
     RUN_TEST(TestSecurity_BasicAudit);
     RUN_TEST(TestSecurity_CheckCounts);
     RUN_TEST(TestSecurity_DEPCheck);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 220: Accessibility Engine..." << std::endl;
+    RUN_TEST(TestA11y_FeatureNames);
+    RUN_TEST(TestA11y_ContrastModes);
+    RUN_TEST(TestA11y_FeatureToggle);
+    RUN_TEST(TestA11y_FeatureCount);
+    RUN_TEST(TestA11y_ComplianceAudit);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 221: Cloud Sync Provider..." << std::endl;
+    RUN_TEST(TestCloud_ProviderNames);
+    RUN_TEST(TestCloud_StatusNames);
+    RUN_TEST(TestCloud_ProviderDetection);
+    RUN_TEST(TestCloud_IsCloudPath);
+    RUN_TEST(TestCloud_ProviderCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 222: Format Converter Engine..." << std::endl;
+    RUN_TEST(TestConverter_FormatNames);
+    RUN_TEST(TestConverter_FormatDetection);
+    RUN_TEST(TestConverter_QualityPresets);
+    RUN_TEST(TestConverter_FormatExtensions);
+    RUN_TEST(TestConverter_FormatCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 223: Enterprise Deployment Manager..." << std::endl;
+    RUN_TEST(TestEnterprise_MethodNames);
+    RUN_TEST(TestEnterprise_PolicyTypes);
+    RUN_TEST(TestEnterprise_AddPolicy);
+    RUN_TEST(TestEnterprise_MSIProperties);
+    RUN_TEST(TestEnterprise_MethodCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 224: Release Gate V11..." << std::endl;
+    RUN_TEST(TestGateV11_KPINames);
+    RUN_TEST(TestGateV11_KPICount);
+    RUN_TEST(TestGateV11_Evaluate);
+    RUN_TEST(TestGateV11_Thresholds);
+    RUN_TEST(TestGateV11_SingleKPI);
 
     std::wcout << std::endl;
 
