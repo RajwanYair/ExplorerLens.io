@@ -53,6 +53,11 @@
 #include "../GPU/VulkanComputePipeline.h"
 #include "../Utils/PythonSDK.h"
 #include "../Utils/ReleaseGateV10.h"
+#include "../Core/AsyncShellExtension.h"
+#include "../Core/EncoderExportEngine.h"
+#include "../Core/TelemetryEngine.h"
+#include "../Core/SIMDAccelerator.h"
+#include "../Utils/Win11Integration.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -3413,6 +3418,290 @@ TEST(TestReleaseGateV10_CategoryNames)
 }
 
 //==============================================================================
+// Sprint 205: Async Shell Extension Tests
+//==============================================================================
+
+TEST(TestAsync_SubmitRequest)
+{
+    using namespace DarkThumbs::Engine;
+    AsyncShellExtension ext;
+    AsyncThumbnailRequest req;
+    req.filePath = L"test.zip";
+    req.width = 256;
+    req.height = 256;
+    req.priority = ThumbnailPriority::Normal;
+    uint64_t id = ext.SubmitRequest(req);
+    ASSERT(id > 0);
+    ASSERT(ext.GetRequestState(id) == RequestState::Queued);
+}
+
+TEST(TestAsync_CancelRequest)
+{
+    using namespace DarkThumbs::Engine;
+    AsyncShellExtension ext;
+    AsyncThumbnailRequest req;
+    req.filePath = L"test.cbz";
+    uint64_t id = ext.SubmitRequest(req);
+    bool cancelled = ext.CancelRequest(id);
+    ASSERT(cancelled == true);
+    ASSERT(ext.GetRequestState(id) == RequestState::Cancelled);
+}
+
+TEST(TestAsync_PriorityNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(AsyncShellExtension::GetPriorityName(ThumbnailPriority::Critical)) == L"Critical");
+    ASSERT(std::wstring(AsyncShellExtension::GetPriorityName(ThumbnailPriority::Normal)) == L"Normal");
+    ASSERT(std::wstring(AsyncShellExtension::GetPriorityName(ThumbnailPriority::Idle)) == L"Idle");
+}
+
+TEST(TestAsync_ThreadPool)
+{
+    using namespace DarkThumbs::Engine;
+    AsyncShellExtension ext(8);
+    ASSERT(ext.GetThreadCount() == 8);
+    ext.Start();
+    ASSERT(ext.IsRunning() == true);
+    ext.Stop();
+    ASSERT(ext.IsRunning() == false);
+}
+
+TEST(TestAsync_DrainQueue)
+{
+    using namespace DarkThumbs::Engine;
+    AsyncShellExtension ext;
+    for (int i = 0; i < 5; i++) {
+        AsyncThumbnailRequest req;
+        req.filePath = L"file" + std::to_wstring(i) + L".zip";
+        ext.SubmitRequest(req);
+    }
+    ASSERT(ext.GetQueueDepth() == 5);
+    ext.DrainQueue();
+    ASSERT(ext.GetQueueDepth() == 0);
+}
+
+//==============================================================================
+// Sprint 206: Encoder Export Engine Tests
+//==============================================================================
+
+TEST(TestExport_FormatNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(EncoderExportEngine::GetFormatName(ExportFormat::PNG)) == L"PNG");
+    ASSERT(std::wstring(EncoderExportEngine::GetFormatName(ExportFormat::JPEG)) == L"JPEG");
+    ASSERT(std::wstring(EncoderExportEngine::GetFormatName(ExportFormat::WebP)) == L"WebP");
+    ASSERT(std::wstring(EncoderExportEngine::GetFormatName(ExportFormat::BMP)) == L"BMP");
+}
+
+TEST(TestExport_FormatExtensions)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(EncoderExportEngine::GetFormatExtension(ExportFormat::PNG)) == L".png");
+    ASSERT(std::wstring(EncoderExportEngine::GetFormatExtension(ExportFormat::JPEG)) == L".jpg");
+    ASSERT(std::wstring(EncoderExportEngine::GetFormatExtension(ExportFormat::JXL)) == L".jxl");
+}
+
+TEST(TestExport_AlphaSupport)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(EncoderExportEngine::SupportsAlpha(ExportFormat::PNG) == true);
+    ASSERT(EncoderExportEngine::SupportsAlpha(ExportFormat::JPEG) == false);
+    ASSERT(EncoderExportEngine::SupportsAlpha(ExportFormat::WebP) == true);
+    ASSERT(EncoderExportEngine::SupportsAlpha(ExportFormat::BMP) == false);
+}
+
+TEST(TestExport_BMPEncode)
+{
+    using namespace DarkThumbs::Engine;
+    EncoderExportEngine engine;
+    // 2x2 RGBA image
+    uint8_t data[] = {
+        255,0,0,255,  0,255,0,255,
+        0,0,255,255,  255,255,0,255
+    };
+    std::vector<uint8_t> output;
+    ExportConfig config;
+    config.format = ExportFormat::BMP;
+    auto result = engine.ExportToMemory(data, 2, 2, config, output);
+    ASSERT(result.success == true);
+    ASSERT(output.size() > 54);  // BMP header is 54 bytes
+    ASSERT(output[0] == 'B' && output[1] == 'M');
+}
+
+TEST(TestExport_QualityPresets)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(EncoderExportEngine::GetDefaultQuality(ExportFormat::JPEG, QualityPreset::Draft) == 50);
+    ASSERT(EncoderExportEngine::GetDefaultQuality(ExportFormat::JPEG, QualityPreset::High) == 95);
+    ASSERT(EncoderExportEngine::GetDefaultQuality(ExportFormat::JPEG, QualityPreset::Lossless) == 100);
+}
+
+//==============================================================================
+// Sprint 207: Telemetry Engine Tests
+//==============================================================================
+
+TEST(TestTelemetry_RecordEvent)
+{
+    using namespace DarkThumbs::Engine;
+    TelemetryEngine telemetry;
+    TelemetryEvent evt;
+    evt.severity = TelemetrySeverity::Info;
+    evt.category = TelemetryCategory::Decode;
+    evt.eventName = L"TestDecode";
+    evt.value = 15.3;
+    telemetry.RecordEvent(evt);
+    ASSERT(telemetry.GetEventCount() == 1);
+}
+
+TEST(TestTelemetry_Metrics)
+{
+    using namespace DarkThumbs::Engine;
+    TelemetryEngine telemetry;
+    telemetry.RecordMetric(TelemetryCategory::Decode, L"DecodeTime", 12.5, L"ms");
+    telemetry.RecordMetric(TelemetryCategory::Cache, L"CacheHitRate", 95.0, L"%");
+    ASSERT(telemetry.GetEventCount() == 2);
+    ASSERT(telemetry.GetEventCount(TelemetryCategory::Decode) == 1);
+}
+
+TEST(TestTelemetry_HealthScore)
+{
+    using namespace DarkThumbs::Engine;
+    TelemetryEngine telemetry;
+    for (int i = 0; i < 100; i++) {
+        telemetry.RecordMetric(TelemetryCategory::Decode, L"Decode", 10.0);
+    }
+    auto health = telemetry.ComputeHealthScore();
+    ASSERT(health.overallScore > 0.0);
+    ASSERT(health.grade.size() > 0);
+}
+
+TEST(TestTelemetry_Privacy)
+{
+    using namespace DarkThumbs::Engine;
+    TelemetryEngine telemetry;
+    telemetry.EnablePrivacyMode(true);
+    ASSERT(telemetry.IsPrivacyMode() == true);
+    TelemetryEvent pii;
+    pii.piiSafe = false;
+    pii.eventName = L"PII Event";
+    telemetry.RecordEvent(pii);
+    ASSERT(telemetry.GetEventCount() == 0);  // PII should be filtered
+}
+
+TEST(TestTelemetry_SeverityNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(TelemetryEngine::GetSeverityName(TelemetrySeverity::Debug)) == L"Debug");
+    ASSERT(std::wstring(TelemetryEngine::GetSeverityName(TelemetrySeverity::Error)) == L"Error");
+    ASSERT(std::wstring(TelemetryEngine::GetSeverityName(TelemetrySeverity::Critical)) == L"Critical");
+}
+
+//==============================================================================
+// Sprint 208: SIMD Accelerator Tests
+//==============================================================================
+
+TEST(TestSIMD_DetectCapabilities)
+{
+    using namespace DarkThumbs::Engine;
+    SIMDAccelerator simd;
+    auto caps = simd.DetectCapabilities();
+    // x86_64 should at least have SSE2
+    ASSERT(caps.hasSSE2 == true);
+    ASSERT(caps.cacheLineSize == 64);
+}
+
+TEST(TestSIMD_ResizeBilinear)
+{
+    using namespace DarkThumbs::Engine;
+    SIMDAccelerator simd;
+    std::vector<uint8_t> src(8 * 8 * 4, 200);
+    std::vector<uint8_t> dst(4 * 4 * 4, 0);
+    bool ok = simd.ResizeBilinear(src.data(), 8, 8, dst.data(), 4, 4, 4);
+    ASSERT(ok == true);
+    bool hasData = false;
+    for (auto b : dst) { if (b > 0) { hasData = true; break; } }
+    ASSERT(hasData);
+}
+
+TEST(TestSIMD_ColorConvert)
+{
+    using namespace DarkThumbs::Engine;
+    SIMDAccelerator simd;
+    uint8_t src[] = {255, 0, 0, 255};  // RGBA red
+    uint8_t dst[4] = {};
+    bool ok = simd.ColorConvertRGBAToBGRA(src, dst, 1);
+    ASSERT(ok == true);
+    ASSERT(dst[0] == 0);    // B
+    ASSERT(dst[2] == 255);  // R swapped
+}
+
+TEST(TestSIMD_LevelNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(SIMDAccelerator::GetLevelName(SIMDLevel::SSE2)) == L"SSE2");
+    ASSERT(std::wstring(SIMDAccelerator::GetLevelName(SIMDLevel::AVX2)) == L"AVX2");
+    ASSERT(std::wstring(SIMDAccelerator::GetLevelName(SIMDLevel::NEON)) == L"NEON");
+}
+
+TEST(TestSIMD_Alignment)
+{
+    using namespace DarkThumbs::Engine;
+    alignas(32) uint8_t aligned[64] = {};
+    ASSERT(SIMDAccelerator::IsAligned(aligned, 16) == true);
+    ASSERT(SIMDAccelerator::GetOptimalAlignment(SIMDLevel::AVX2) == 32);
+    ASSERT(SIMDAccelerator::GetOptimalAlignment(SIMDLevel::AVX512) == 64);
+}
+
+//==============================================================================
+// Sprint 209: Windows 11 Integration Tests
+//==============================================================================
+
+TEST(TestWin11_VersionDetection)
+{
+    using namespace DarkThumbs::Engine;
+    Win11Integration win11;
+    auto ver = win11.DetectVersion();
+    ASSERT(ver.major >= 10);  // Should be Win10+
+    ASSERT(ver.build > 0);
+    ASSERT(ver.displayName.size() > 0);
+}
+
+TEST(TestWin11_FeatureNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(Win11Integration::GetFeatureName(Win11Feature::RoundedCorners)) == L"Rounded Corners");
+    ASSERT(std::wstring(Win11Integration::GetFeatureName(Win11Feature::MicaMaterial)) == L"Mica Material");
+    ASSERT(std::wstring(Win11Integration::GetFeatureName(Win11Feature::DarkMode)) == L"Dark Mode");
+}
+
+TEST(TestWin11_DarkModeDetection)
+{
+    using namespace DarkThumbs::Engine;
+    Win11Integration win11;
+    // Just verify it doesn't crash — result depends on user setting
+    bool darkMode = win11.IsDarkModeEnabled();
+    (void)darkMode;
+    ASSERT(true);
+}
+
+TEST(TestWin11_MicaModes)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(Win11Integration::GetMicaModeName(MicaMode::None)) == L"None");
+    ASSERT(std::wstring(Win11Integration::GetMicaModeName(MicaMode::Mica)) == L"Mica");
+    ASSERT(std::wstring(Win11Integration::GetMicaModeName(MicaMode::Acrylic)) == L"Acrylic");
+}
+
+TEST(TestWin11_FeatureCount)
+{
+    using namespace DarkThumbs::Engine;
+    Win11Integration win11;
+    ASSERT(Win11Integration::GetFeatureCount() == 8);
+    auto features = win11.GetAvailableFeatures();
+    ASSERT(features.size() >= 1);  // At least DarkMode should be available
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -4146,6 +4435,51 @@ int main()
     RUN_TEST(TestReleaseGateV10_FailingGate);
     RUN_TEST(TestReleaseGateV10_Changelog);
     RUN_TEST(TestReleaseGateV10_CategoryNames);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 205: Async Shell Extension..." << std::endl;
+    RUN_TEST(TestAsync_SubmitRequest);
+    RUN_TEST(TestAsync_CancelRequest);
+    RUN_TEST(TestAsync_PriorityNames);
+    RUN_TEST(TestAsync_ThreadPool);
+    RUN_TEST(TestAsync_DrainQueue);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 206: Encoder Export Engine..." << std::endl;
+    RUN_TEST(TestExport_FormatNames);
+    RUN_TEST(TestExport_FormatExtensions);
+    RUN_TEST(TestExport_AlphaSupport);
+    RUN_TEST(TestExport_BMPEncode);
+    RUN_TEST(TestExport_QualityPresets);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 207: Telemetry Engine..." << std::endl;
+    RUN_TEST(TestTelemetry_RecordEvent);
+    RUN_TEST(TestTelemetry_Metrics);
+    RUN_TEST(TestTelemetry_HealthScore);
+    RUN_TEST(TestTelemetry_Privacy);
+    RUN_TEST(TestTelemetry_SeverityNames);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 208: SIMD Accelerator..." << std::endl;
+    RUN_TEST(TestSIMD_DetectCapabilities);
+    RUN_TEST(TestSIMD_ResizeBilinear);
+    RUN_TEST(TestSIMD_ColorConvert);
+    RUN_TEST(TestSIMD_LevelNames);
+    RUN_TEST(TestSIMD_Alignment);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 209: Windows 11 Integration..." << std::endl;
+    RUN_TEST(TestWin11_VersionDetection);
+    RUN_TEST(TestWin11_FeatureNames);
+    RUN_TEST(TestWin11_DarkModeDetection);
+    RUN_TEST(TestWin11_MicaModes);
+    RUN_TEST(TestWin11_FeatureCount);
 
     std::wcout << std::endl;
 

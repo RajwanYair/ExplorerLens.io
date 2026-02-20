@@ -85,6 +85,10 @@ set(ENGINE_HEADERS
     Core/ICacheProvider.h
     Core/Logger.h
     Core/HighDPIScaling.h              # Sprint 194 — Per-monitor DPI scaling
+    Core/AsyncShellExtension.h         # Sprint 205 — Async shell extension V2
+    Core/EncoderExportEngine.h         # Sprint 206 — Export encoder engine
+    Core/TelemetryEngine.h             # Sprint 207 — Telemetry & health scoring
+    Core/SIMDAccelerator.h             # Sprint 208 — SIMD-accelerated processing
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -170,6 +174,7 @@ set(ENGINE_HEADERS
     Utils/ReleaseGateV3.h              # Sprint 198 — v9.2 release gate
     Utils/PythonSDK.h                  # Sprint 203 — Python SDK bindings
     Utils/ReleaseGateV10.h             # Sprint 204 — v10.0 release gate
+    Utils/Win11Integration.h           # Sprint 209 — Windows 11 native features
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -271,6 +276,10 @@ set(ENGINE_SOURCES
     Core/Config.cpp
     Core/EngineAPI.cpp
     Core/HighDPIScaling.cpp              # Sprint 194 — Per-monitor DPI scaling
+    Core/AsyncShellExtension.cpp         # Sprint 205 — Async shell extension V2
+    Core/EncoderExportEngine.cpp         # Sprint 206 — Export encoder engine
+    Core/TelemetryEngine.cpp             # Sprint 207 — Telemetry & health scoring
+    Core/SIMDAccelerator.cpp             # Sprint 208 — SIMD-accelerated processing
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -351,6 +360,7 @@ set(ENGINE_SOURCES
     Utils/ReleaseGateV3.cpp              # Sprint 198 — v9.2 release gate
     Utils/PythonSDK.cpp                  # Sprint 203 — Python SDK bindings
     Utils/ReleaseGateV10.cpp             # Sprint 204 — v10.0 release gate
+    Utils/Win11Integration.cpp           # Sprint 209 — Windows 11 native features
 )
 
 #==============================================================================
