@@ -46,6 +46,8 @@
 #include "../Utils/TestSuiteExpansion.h"
 #include "../Utils/MalformedInputHandler.h"
 #include "../Utils/ReleaseGateV3.h"
+#include "../Decoders/DICOMDecoder.h"
+#include "../Decoders/FITSDecoder.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -2965,6 +2967,114 @@ TEST(TestReleaseV3_VerdictNames)
 }
 
 //==============================================================================
+// Sprint 199: Scientific Format Suite Tests (DICOM + FITS)
+//==============================================================================
+
+TEST(TestDICOM_IsDICOMFile)
+{
+    // Valid DICOM: 128-byte preamble + "DICM"
+    std::vector<uint8_t> data(256, 0);
+    data[128] = 'D'; data[129] = 'I'; data[130] = 'C'; data[131] = 'M';
+    ASSERT(DarkThumbs::Engine::DICOMDecoder::IsDICOMFile(data.data(), data.size()) == true);
+    // Invalid
+    std::vector<uint8_t> bad(256, 0);
+    ASSERT(DarkThumbs::Engine::DICOMDecoder::IsDICOMFile(bad.data(), bad.size()) == false);
+    // Too small
+    ASSERT(DarkThumbs::Engine::DICOMDecoder::IsDICOMFile(nullptr, 0) == false);
+}
+
+TEST(TestDICOM_Extensions)
+{
+    ASSERT(DarkThumbs::Engine::DICOMDecoder::GetExtensionCount() == 2);
+    auto exts = DarkThumbs::Engine::DICOMDecoder::GetExtensions();
+    ASSERT(std::wstring(exts[0]) == L".dcm");
+    ASSERT(std::wstring(exts[1]) == L".dicom");
+}
+
+TEST(TestDICOM_PhotometricNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(DICOMDecoder::GetPhotometricName(DICOMPhotometric::Monochrome2)) == L"MONOCHROME2");
+    ASSERT(std::wstring(DICOMDecoder::GetPhotometricName(DICOMPhotometric::RGB)) == L"RGB");
+    ASSERT(std::wstring(DICOMDecoder::GetPhotometricName(DICOMPhotometric::Unknown)) == L"UNKNOWN");
+}
+
+TEST(TestDICOM_TransferSyntaxNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(DICOMDecoder::GetTransferSyntaxName(DICOMTransferSyntax::ExplicitVRLittleEndian)).find(L"Explicit") != std::wstring::npos);
+    ASSERT(std::wstring(DICOMDecoder::GetTransferSyntaxName(DICOMTransferSyntax::Unsupported)) == L"Unsupported");
+}
+
+TEST(TestDICOM_WindowLevel)
+{
+    using namespace DarkThumbs::Engine;
+    DICOMDecoder decoder;
+    // Default window: center=40, width=400 -> range [-160, 240]
+    // Value at center should map to ~128
+    uint8_t val = decoder.ApplyWindowLevel(40);
+    ASSERT(val >= 126 && val <= 130);  // Allow rounding
+    // Value at lower bound -> 0
+    uint8_t low = decoder.ApplyWindowLevel(-200);
+    ASSERT(low == 0);
+    // Value above upper bound -> 255
+    uint8_t high = decoder.ApplyWindowLevel(300);
+    ASSERT(high == 255);
+}
+
+TEST(TestFITS_IsFITSFile)
+{
+    // Valid FITS header
+    std::string header = "SIMPLE  =                    T / file does conform to FITS standard";
+    header.resize(80, ' ');
+    std::vector<uint8_t> data(header.begin(), header.end());
+    ASSERT(DarkThumbs::Engine::FITSDecoder::IsFITSFile(data.data(), data.size()) == true);
+    // Invalid
+    std::vector<uint8_t> bad(80, 'X');
+    ASSERT(DarkThumbs::Engine::FITSDecoder::IsFITSFile(bad.data(), bad.size()) == false);
+}
+
+TEST(TestFITS_Extensions)
+{
+    ASSERT(DarkThumbs::Engine::FITSDecoder::GetExtensionCount() == 3);
+    auto exts = DarkThumbs::Engine::FITSDecoder::GetExtensions();
+    ASSERT(std::wstring(exts[0]) == L".fits");
+    ASSERT(std::wstring(exts[1]) == L".fit");
+    ASSERT(std::wstring(exts[2]) == L".fts");
+}
+
+TEST(TestFITS_BitpixNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(FITSDecoder::GetBitpixName(FITSBitpix::UInt8)) == L"8-bit unsigned");
+    ASSERT(std::wstring(FITSDecoder::GetBitpixName(FITSBitpix::Float32)) == L"32-bit float");
+}
+
+TEST(TestFITS_BytesPerPixel)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(FITSDecoder::GetBytesPerPixel(FITSBitpix::UInt8) == 1);
+    ASSERT(FITSDecoder::GetBytesPerPixel(FITSBitpix::Int16) == 2);
+    ASSERT(FITSDecoder::GetBytesPerPixel(FITSBitpix::Float32) == 4);
+    ASSERT(FITSDecoder::GetBytesPerPixel(FITSBitpix::Float64) == 8);
+}
+
+TEST(TestFITS_StretchAlgorithm)
+{
+    using namespace DarkThumbs::Engine;
+    FITSDecoder decoder;
+    // Linear stretch: midpoint
+    uint8_t mid = decoder.ApplyStretch(50.0, 0.0, 100.0, FITSStretch::Linear);
+    ASSERT(mid >= 126 && mid <= 130);
+    // Linear stretch: minimum
+    uint8_t low = decoder.ApplyStretch(0.0, 0.0, 100.0, FITSStretch::Linear);
+    ASSERT(low == 0);
+    // Linear stretch: maximum
+    uint8_t high = decoder.ApplyStretch(100.0, 0.0, 100.0, FITSStretch::Linear);
+    ASSERT(high == 255);
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -3641,8 +3751,21 @@ int main()
     RUN_TEST(TestReleaseV3_DimensionNames);
     RUN_TEST(TestReleaseV3_VerdictNames);
     
-    std::wcout << std::endl;
+    // Sprint 199: Scientific Format Suite Tests
+    std::wcout << L"Sprint 199: Scientific Format Suite..." << std::endl;
+    RUN_TEST(TestDICOM_IsDICOMFile);
+    RUN_TEST(TestDICOM_Extensions);
+    RUN_TEST(TestDICOM_PhotometricNames);
+    RUN_TEST(TestDICOM_TransferSyntaxNames);
+    RUN_TEST(TestDICOM_WindowLevel);
+    RUN_TEST(TestFITS_IsFITSFile);
+    RUN_TEST(TestFITS_Extensions);
+    RUN_TEST(TestFITS_BitpixNames);
+    RUN_TEST(TestFITS_BytesPerPixel);
+    RUN_TEST(TestFITS_StretchAlgorithm);
     
+    std::wcout << std::endl;
+
     // Sprint 6: Isolation & Stability Tests
     std::wcout << L"Sprint 6: Isolation & Stability Tests..." << std::endl;
     RUN_TEST(TestMalformedArchive_TruncatedZIP);
