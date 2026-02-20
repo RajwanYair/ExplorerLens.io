@@ -244,6 +244,11 @@ set(ENGINE_HEADERS
     Decoders/SpreadsheetPreviewDecoder.h  # Sprint 277 — Spreadsheet/data preview
     Decoders/USDDecoder.h                 # Sprint 278 — USD/USDZ support
     Utils/AutoUpdateEngine.h              # Sprint 279 — Auto-update engine
+    Utils/ReleaseGateV20.h               # Sprint 280 — v12.0 release gate
+    Decoders/StructuredDataDecoder.h      # Sprint 281 — CSV/JSON preview
+    Decoders/NotebookPreviewDecoder.h     # Sprint 282 — Jupyter notebook preview
+    Decoders/DatabasePreviewDecoder.h     # Sprint 283 — Database preview
+    Decoders/LegacyImageDecoder.h         # Sprint 284 — FLIF/BPG legacy images
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI

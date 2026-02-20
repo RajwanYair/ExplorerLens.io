@@ -127,6 +127,11 @@
 #include "../Decoders/SpreadsheetPreviewDecoder.h"
 #include "../Decoders/USDDecoder.h"
 #include "../Utils/AutoUpdateEngine.h"
+#include "../Utils/ReleaseGateV20.h"
+#include "../Decoders/StructuredDataDecoder.h"
+#include "../Decoders/NotebookPreviewDecoder.h"
+#include "../Decoders/DatabasePreviewDecoder.h"
+#include "../Decoders/LegacyImageDecoder.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -6809,6 +6814,175 @@ TEST(TestAutoUpdate_Counts) {
     ASSERT(AutoUpdateEngine::DownloadStateCount() == 7);
 }
 
+//== Sprint 280: Release Gate V20 Tests
+
+TEST(TestGateV20_KPINames) {
+    for (uint32_t i = 0; i < ReleaseGateV20::KPICount(); ++i) {
+        auto name = ReleaseGateV20::KPIName(static_cast<GateV20KPI>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestGateV20_KPICount) {
+    ASSERT(ReleaseGateV20::KPICount() == 21);
+}
+
+TEST(TestGateV20_Evaluate) {
+    ReleaseGateV20 gate;
+    std::vector<GateV20Result> results;
+    auto verdict = gate.Evaluate(results);
+    ASSERT(verdict.approved);
+    ASSERT(verdict.passed == 21);
+}
+
+TEST(TestGateV20_Version) {
+    GateV20Verdict v;
+    ASSERT(v.version == L"12.0.0");
+}
+
+TEST(TestGateV20_ResultDefault) {
+    GateV20Result r;
+    ASSERT(!r.passed);
+}
+
+//== Sprint 281: CSV/JSON Preview Tests
+
+TEST(TestStructData_FormatNames) {
+    for (size_t i = 0; i < StructuredDataDecoder::FormatCount(); ++i) {
+        auto name = StructuredDataDecoder::FormatName(static_cast<StructuredDataFormat>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestStructData_ValueTypeNames) {
+    for (size_t i = 0; i < StructuredDataDecoder::ValueTypeCount(); ++i) {
+        auto name = StructuredDataDecoder::ValueTypeName(static_cast<JSONValueType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestStructData_StyleNames) {
+    for (size_t i = 0; i < StructuredDataDecoder::StyleCount(); ++i) {
+        auto name = StructuredDataDecoder::StyleName(static_cast<DataPreviewStyle>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestStructData_DetectFormat) {
+    ASSERT(StructuredDataDecoder::DetectFormat(L".json") == StructuredDataFormat::JSON);
+    ASSERT(StructuredDataDecoder::DetectFormat(L".yaml") == StructuredDataFormat::YAML);
+    ASSERT(StructuredDataDecoder::DetectFormat(L".xml") == StructuredDataFormat::XML);
+}
+
+TEST(TestStructData_Counts) {
+    ASSERT(StructuredDataDecoder::FormatCount() == 6);
+    ASSERT(StructuredDataDecoder::ValueTypeCount() == 6);
+    ASSERT(StructuredDataDecoder::StyleCount() == 4);
+}
+
+//== Sprint 282: Notebook Preview Tests
+
+TEST(TestNotebook_CellTypeNames) {
+    for (size_t i = 0; i < NotebookPreviewDecoder::CellTypeCount(); ++i) {
+        auto name = NotebookPreviewDecoder::CellTypeName(static_cast<NotebookCellType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestNotebook_OutputTypeNames) {
+    for (size_t i = 0; i < NotebookPreviewDecoder::OutputTypeCount(); ++i) {
+        auto name = NotebookPreviewDecoder::OutputTypeName(static_cast<NotebookOutputType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestNotebook_KernelNames) {
+    for (size_t i = 0; i < NotebookPreviewDecoder::KernelCount(); ++i) {
+        auto name = NotebookPreviewDecoder::KernelName(static_cast<NotebookKernel>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestNotebook_Counts) {
+    ASSERT(NotebookPreviewDecoder::CellTypeCount() == 3);
+    ASSERT(NotebookPreviewDecoder::OutputTypeCount() == 6);
+    ASSERT(NotebookPreviewDecoder::KernelCount() == 6);
+}
+
+TEST(TestNotebook_MetadataDefaults) {
+    NotebookMetadata meta;
+    ASSERT(meta.kernel == NotebookKernel::Python);
+    ASSERT(meta.formatVersion == 4);
+}
+
+//== Sprint 283: Database Preview Tests
+
+TEST(TestDatabase_EngineNames) {
+    for (size_t i = 0; i < DatabasePreviewDecoder::EngineCount(); ++i) {
+        auto name = DatabasePreviewDecoder::EngineName(static_cast<DatabaseEngine>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestDatabase_ColumnTypeNames) {
+    for (size_t i = 0; i < DatabasePreviewDecoder::ColumnTypeCount(); ++i) {
+        auto name = DatabasePreviewDecoder::ColumnTypeName(static_cast<SQLColumnType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestDatabase_PreviewStyleNames) {
+    for (size_t i = 0; i < DatabasePreviewDecoder::PreviewStyleCount(); ++i) {
+        auto name = DatabasePreviewDecoder::PreviewStyleName(static_cast<DatabasePreviewStyle>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestDatabase_SQLiteMagic) {
+    const char magic[] = "SQLite format 3";
+    uint8_t buf[16];
+    memcpy(buf, magic, 15);
+    buf[15] = 0;
+    ASSERT(DatabasePreviewDecoder::CheckSQLiteMagic(buf, 16));
+}
+
+TEST(TestDatabase_Counts) {
+    ASSERT(DatabasePreviewDecoder::EngineCount() == 4);
+    ASSERT(DatabasePreviewDecoder::ColumnTypeCount() == 7);
+    ASSERT(DatabasePreviewDecoder::PreviewStyleCount() == 4);
+}
+
+//== Sprint 284: Legacy Image Decoder Tests
+
+TEST(TestLegacyImg_FormatNames) {
+    for (size_t i = 0; i < LegacyImageDecoder::FormatCount(); ++i) {
+        auto name = LegacyImageDecoder::FormatName(static_cast<LegacyImageFormat>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestLegacyImg_ColorSpaceNames) {
+    for (size_t i = 0; i < LegacyImageDecoder::ColorSpaceCount(); ++i) {
+        auto name = LegacyImageDecoder::ColorSpaceName(static_cast<LegacyColorSpace>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestLegacyImg_FLIFMagic) {
+    uint8_t flif[] = { 'F', 'L', 'I', 'F' };
+    ASSERT(LegacyImageDecoder::CheckFLIFMagic(flif, 4));
+}
+
+TEST(TestLegacyImg_BPGMagic) {
+    uint8_t bpg[] = { 0x42, 0x50, 0x47, 0xFB };
+    ASSERT(LegacyImageDecoder::CheckBPGMagic(bpg, 4));
+}
+
+TEST(TestLegacyImg_Counts) {
+    ASSERT(LegacyImageDecoder::FormatCount() == 6);
+    ASSERT(LegacyImageDecoder::ColorSpaceCount() == 6);
+}
+
 //==============================================================================
 // Main Test Runner
 //==============================================================================
@@ -7939,6 +8113,46 @@ int main()
     RUN_TEST(TestAutoUpdate_DownloadStateNames);
     RUN_TEST(TestAutoUpdate_ParseVersion);
     RUN_TEST(TestAutoUpdate_Counts);
+
+    // Sprint 280: Release Gate V20 Tests
+    std::wcout << L"Sprint 280: Release Gate V20..." << std::endl;
+    RUN_TEST(TestGateV20_KPINames);
+    RUN_TEST(TestGateV20_KPICount);
+    RUN_TEST(TestGateV20_Evaluate);
+    RUN_TEST(TestGateV20_Version);
+    RUN_TEST(TestGateV20_ResultDefault);
+
+    // Sprint 281: CSV/JSON Preview Tests
+    std::wcout << L"Sprint 281: CSV/JSON Preview..." << std::endl;
+    RUN_TEST(TestStructData_FormatNames);
+    RUN_TEST(TestStructData_ValueTypeNames);
+    RUN_TEST(TestStructData_StyleNames);
+    RUN_TEST(TestStructData_DetectFormat);
+    RUN_TEST(TestStructData_Counts);
+
+    // Sprint 282: Notebook Preview Tests
+    std::wcout << L"Sprint 282: Notebook Preview..." << std::endl;
+    RUN_TEST(TestNotebook_CellTypeNames);
+    RUN_TEST(TestNotebook_OutputTypeNames);
+    RUN_TEST(TestNotebook_KernelNames);
+    RUN_TEST(TestNotebook_Counts);
+    RUN_TEST(TestNotebook_MetadataDefaults);
+
+    // Sprint 283: Database Preview Tests
+    std::wcout << L"Sprint 283: Database Preview..." << std::endl;
+    RUN_TEST(TestDatabase_EngineNames);
+    RUN_TEST(TestDatabase_ColumnTypeNames);
+    RUN_TEST(TestDatabase_PreviewStyleNames);
+    RUN_TEST(TestDatabase_SQLiteMagic);
+    RUN_TEST(TestDatabase_Counts);
+
+    // Sprint 284: Legacy Image Decoder Tests
+    std::wcout << L"Sprint 284: Legacy Image..." << std::endl;
+    RUN_TEST(TestLegacyImg_FormatNames);
+    RUN_TEST(TestLegacyImg_ColorSpaceNames);
+    RUN_TEST(TestLegacyImg_FLIFMagic);
+    RUN_TEST(TestLegacyImg_BPGMagic);
+    RUN_TEST(TestLegacyImg_Counts);
 
     std::wcout << std::endl;
 
