@@ -5,12 +5,12 @@
 DarkThumbs is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 10.5.0
+- **Version:** 13.0.0
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.20+ (Engine) + MSBuild (Shell/Manager)
-- **GPU:** DirectX 11 + DirectX 12 with CPU fallback
+- **GPU:** DirectX 11 + DirectX 12 + Vulkan Compute with CPU fallback
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-- **Sprint Count:** 248 completed (v10.5.0 block: Sprints 199–248 ✅)
+- **Sprint Count:** 298 completed (v13.0.0 block: Sprints 249–298 ✅)
 - **Build Status:** 0 errors, 0 warnings
 
 ## Architecture
@@ -43,7 +43,7 @@ DarkThumbsEngine.lib       — Core decode + render pipeline
 | `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                             |
 | `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                                  |
 | `docs/`                        | All documentation                                                 |
-| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_248.md)            |
+| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_298.md)            |
 | `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                                 |
 
 ## Build Commands
@@ -101,8 +101,8 @@ ctest --test-dir build -C Release --output-on-failure
 
 ## Testing
 
-- **Framework:** Google Test + Google Benchmark
-- **Test count:** ~687 unit tests (100 original + 337 Sprints 150–174 + 250 Sprints 199–248), 5 benchmarks
+- **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
+- **Test count:** ~937 unit tests (100 original + 337 Sprints 150–174 + 250 Sprints 199–248 + 250 Sprints 249–298), 5 benchmarks
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -138,10 +138,10 @@ external/
 - The `Release/` pattern in `.gitignore` blocks `Engine/Release/` — use `git add -f` for files there
 - Stale `CMakeCache.txt` files from directory renames are auto-detected by `Build-Library-Core.ps1`
 
-## Sprint Execution Guidance (v10.5+)
+## Sprint Execution Guidance (v13.0+)
 
-- **Current version:** v10.5.0 (Sprints 199-248 complete)
-- **Next roadmap block:** Sprints 249+ per `docs/IMPROVEMENT_PLAN_V11.md`
+- **Current version:** v13.0.0 (Sprints 249-298 complete)
+- **Next roadmap block:** Sprints 299+ (next improvement plan TBD)
 - **Execution package docs:** `docs/development/sprints-v8/SPRINT_XX.md`
 - **Source of truth:** `MASTER_PLAN.md`
 - **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
@@ -206,4 +206,33 @@ external/
 - **Release gates:** Gates evolve from V5 (12 KPIs) through V15 (20 KPIs) — each adds KPIs validating new sprint deliverables
 - **Test framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with `g_testsRun/g_testsPassed/g_testsFailed` counters — NOT GTest
 - **Batch sprint execution:** 5 sprints per batch — create source files → register CMakeLists.txt → add tests → create sprint docs → git commit each individually
-- **Namespace:** All engine classes use `namespace DarkThumbs { }` — use `using namespace DarkThumbs;` in tests
+- **Namespace:** All engine classes use `namespace DarkThumbs { namespace Engine { } }` — use `using namespace DarkThumbs::Engine;` in tests
+- **File collision handling:** If a header name exists from a prior sprint, create a V2/V3 variant (e.g., TestSuiteExpansionV2.h, PluginMarketplaceV3.h)
+- **CMakeLists.txt insertion:** After last registered sprint header, before `# Sprint 8-12:` comment
+- **EngineTests.cpp insertion:** Includes before `#include <iostream>`, TEST() before `// Main Test Runner`, RUN_TEST() before `// Sprint 6: Isolation`
+
+## v13.0.0 Block Summary (Sprints 249–298 ✅)
+
+| Phase | Sprints | Title                                                                                             |
+| ----- | ------- | ------------------------------------------------------------------------------------------------- |
+| P1    | 249–254 | Version Sync, Architecture Docs, Quality Foundation, CI Hardening, Perf Baseline, Release Gate V16 |
+| P2    | 255–259 | DPX/Cineon, APNG, Text Preview, DICOM V2, FITS V2 (format expansion)                              |
+| P3    | 260–264 | 3MF/USD Decoders, Release Gate V17, D3D12 Async Compute, Async Shell Registration, SIMD Pipeline  |
+| P4    | 265–269 | Parallel Batch, Persistent Cache, Release Gate V18, ARM64 Detection V2, MSIX Packaging            |
+| P5    | 270–274 | Win11 24H2, Test Suite V2, Fuzz Testing, Release Gate V19, Vulkan Compute Activation              |
+| P6    | 275–279 | Plugin Marketplace V3, AI Thumbnails, Spreadsheet Preview, USD/USDZ, Auto-Update Engine           |
+| P7    | 280–284 | Release Gate V20 (v12.0), Structured Data, Notebook Preview, Database Preview, Legacy Images      |
+| P8    | 285–289 | Vector Formats (CDR/Visio), Scientific Data (HDF5/NetCDF), NIfTI, CAD (STEP/IGES), HDR Display    |
+| P9    | 290–294 | Per-Monitor DPI V3, Shell Overlay, Cache Warming, Multi-GPU Load Balancer, Release Gate V21       |
+| P10   | 295–298 | Accessibility Pipeline, Telemetry Analytics, Cloud Storage, Release Gate V22 (v13.0 Final)        |
+
+## New Patterns Discovered in v13.0.0 Sprints
+
+- **Decoder expansion:** New decoders in `Engine/Decoders/` for spreadsheets (SpreadsheetPreviewDecoder), notebooks (NotebookPreviewDecoder), databases (DatabasePreviewDecoder), legacy images (LegacyImageDecoder), vector formats (VectorFormatDecoder), scientific data (ScientificDataDecoder), NIfTI (NIfTIDecoder), CAD (CADFormatDecoder), structured data (StructuredDataDecoder), USD (USDDecoder)
+- **GPU pipeline:** HDRDisplayPipeline (6 tone map operators), MultiGPULoadBalancer (5 strategies), VulkanComputeActivation (7 features), PerMonitorDPIV3 (8 DPI scales)
+- **Cache system:** CacheWarmingService (5 warming strategies, battery-aware), AdaptiveCacheBudgetManager updates
+- **Shell integration:** ShellOverlayHandler (7 overlay icon types), CloudStorageIntegration (6 providers, hydration strategies)
+- **Quality infrastructure:** FuzzTestingManager (4 backends), AccessibilityPipeline (6 features, 5 color blind modes), TelemetryAnalyticsEngine (privacy-first, opt-in)
+- **Release gates:** Gates V16–V22, culminating in V22 (23 KPIs) for v13.0 final release
+- **Auto-update:** AutoUpdateEngine (4 channels: Stable/Beta/Dev/Canary, semantic versioning)
+- **AI integration:** AIThumbnailEnhancer (7 enhancements, 4 backends: DirectML/ONNX/OpenVINO/CPU)
