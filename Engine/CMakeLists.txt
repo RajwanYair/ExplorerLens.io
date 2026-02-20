@@ -98,6 +98,9 @@ set(ENGINE_HEADERS
     Core/WatchFolderEngine.h           # Sprint 225 — Filesystem watch auto-regen
     Core/PerformanceBenchmarkV2.h      # Sprint 227 — Benchmark harness w/ percentiles
     Core/ThemeEngine.h                 # Sprint 229 — Dark/light/custom themes
+    Core/UpdateEngine.h                # Sprint 231 — Auto-update lifecycle
+    Core/ShellPreviewHandler.h         # Sprint 232 — IPreviewHandler COM
+    Core/BatchProcessingEngine.h       # Sprint 233 — Multi-file batch ops
     
     # Pipeline
     Pipeline/ThumbnailPipeline.h
@@ -195,6 +198,8 @@ set(ENGINE_HEADERS
     Utils/ReleaseGateV11.h                # Sprint 224 — v10.1 release gate
     Utils/DiagnosticDashboard.h           # Sprint 226 — Runtime health metrics
     Utils/LocalizationEngine.h            # Sprint 228 — i18n/l10n string tables
+    Utils/TelemetryEngine.h               # Sprint 230 — Anonymous usage telemetry
+    Utils/ReleaseGateV12.h                # Sprint 234 — v10.2 release gate
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -309,6 +314,9 @@ set(ENGINE_SOURCES
     Core/WatchFolderEngine.cpp           # Sprint 225 — Filesystem watch auto-regen
     Core/PerformanceBenchmarkV2.cpp      # Sprint 227 — Benchmark harness w/ percentiles
     Core/ThemeEngine.cpp                 # Sprint 229 — Dark/light/custom themes
+    Core/UpdateEngine.cpp                # Sprint 231 — Auto-update lifecycle
+    Core/ShellPreviewHandler.cpp         # Sprint 232 — IPreviewHandler COM
+    Core/BatchProcessingEngine.cpp       # Sprint 233 — Multi-file batch ops
     
     # Pipeline implementations
     Pipeline/ThumbnailPipeline.cpp
@@ -401,6 +409,8 @@ set(ENGINE_SOURCES
     Utils/ReleaseGateV11.cpp                # Sprint 224 — v10.1 release gate
     Utils/DiagnosticDashboard.cpp           # Sprint 226 — Runtime health metrics
     Utils/LocalizationEngine.cpp            # Sprint 228 — i18n/l10n string tables
+    Utils/TelemetryEngine.cpp               # Sprint 230 — Anonymous usage telemetry
+    Utils/ReleaseGateV12.cpp                # Sprint 234 — v10.2 release gate
 )
 
 #==============================================================================

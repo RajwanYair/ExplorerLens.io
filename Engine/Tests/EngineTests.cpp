@@ -78,6 +78,11 @@
 #include "../Core/PerformanceBenchmarkV2.h"
 #include "../Utils/LocalizationEngine.h"
 #include "../Core/ThemeEngine.h"
+#include "../Utils/TelemetryEngine.h"
+#include "../Core/UpdateEngine.h"
+#include "../Core/ShellPreviewHandler.h"
+#include "../Core/BatchProcessingEngine.h"
+#include "../Utils/ReleaseGateV12.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -4635,6 +4640,218 @@ TEST(TestTheme_TypeCount)
 }
 
 //==============================================================================
+// Sprint 230: Telemetry Engine Tests
+//==============================================================================
+
+TEST(TestTelemetry_CategoryNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(TelemetryEngine::GetCategoryName(TelemetryCategory::Decode)) == L"Decode");
+    ASSERT(std::wstring(TelemetryEngine::GetCategoryName(TelemetryCategory::GPU)) == L"GPU");
+}
+
+TEST(TestTelemetry_ConsentNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(TelemetryEngine::GetConsentName(ConsentLevel::None)) == L"None");
+    ASSERT(std::wstring(TelemetryEngine::GetConsentName(ConsentLevel::Full)) == L"Full");
+}
+
+TEST(TestTelemetry_ConsentNone)
+{
+    using namespace DarkThumbs::Engine;
+    TelemetryEngine eng;
+    ASSERT(eng.RecordEvent(L"TestEvt", TelemetryCategory::Decode) == false);
+    ASSERT(eng.GetEventCount() == 0);
+}
+
+TEST(TestTelemetry_ConsentBasic)
+{
+    using namespace DarkThumbs::Engine;
+    TelemetryEngine eng;
+    eng.SetConsent(ConsentLevel::Basic);
+    ASSERT(eng.RecordEvent(L"Error", TelemetryCategory::Error) == true);
+    ASSERT(eng.RecordEvent(L"Decode", TelemetryCategory::Decode) == false);
+}
+
+TEST(TestTelemetry_CategoryCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(TelemetryEngine::GetCategoryCount() == 7);
+}
+
+//==============================================================================
+// Sprint 231: Update Engine Tests
+//==============================================================================
+
+TEST(TestUpdate_ChannelNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(UpdateEngine::GetChannelName(UpdateChannel::Stable)) == L"Stable");
+    ASSERT(std::wstring(UpdateEngine::GetChannelName(UpdateChannel::Beta)) == L"Beta");
+}
+
+TEST(TestUpdate_StatusNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(UpdateEngine::GetStatusName(UpdateStatus::Available)) == L"Available");
+    ASSERT(std::wstring(UpdateEngine::GetStatusName(UpdateStatus::Ready)) == L"Ready");
+}
+
+TEST(TestUpdate_CompareVersions)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(UpdateEngine::CompareVersions(L"2.0.0", L"1.0.0") > 0);
+    ASSERT(UpdateEngine::CompareVersions(L"1.0.0", L"1.0.0") == 0);
+    ASSERT(UpdateEngine::CompareVersions(L"1.0.0", L"2.0.0") < 0);
+}
+
+TEST(TestUpdate_CheckForUpdate)
+{
+    using namespace DarkThumbs::Engine;
+    UpdateEngine eng;
+    eng.SetCurrentVersion(L"1.0.0");
+    auto info = eng.CheckForUpdate(L"2.0.0");
+    ASSERT(info.status == UpdateStatus::Available);
+}
+
+TEST(TestUpdate_ChannelCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(UpdateEngine::GetChannelCount() == 4);
+}
+
+//==============================================================================
+// Sprint 232: Shell Preview Handler Tests
+//==============================================================================
+
+TEST(TestPreview_ModeNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ShellPreviewHandler::GetModeName(PreviewMode::FullImage)) == L"Full Image");
+    ASSERT(std::wstring(ShellPreviewHandler::GetModeName(PreviewMode::HexDump)) == L"Hex Dump");
+}
+
+TEST(TestPreview_DetectMode)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(ShellPreviewHandler::DetectMode(L".jpg") == PreviewMode::FullImage);
+    ASSERT(ShellPreviewHandler::DetectMode(L".pdf") == PreviewMode::Document);
+    ASSERT(ShellPreviewHandler::DetectMode(L".gif") == PreviewMode::Filmstrip);
+}
+
+TEST(TestPreview_LoadFile)
+{
+    using namespace DarkThumbs::Engine;
+    ShellPreviewHandler handler;
+    PreviewParams params;
+    params.filePath = L"C:\\test.jpg";
+    ASSERT(handler.LoadFile(params) == true);
+    ASSERT(handler.GetState() == PreviewState::Ready);
+}
+
+TEST(TestPreview_Unload)
+{
+    using namespace DarkThumbs::Engine;
+    ShellPreviewHandler handler;
+    PreviewParams params;
+    params.filePath = L"C:\\test.jpg";
+    handler.LoadFile(params);
+    handler.Unload();
+    ASSERT(handler.GetState() == PreviewState::Unloaded);
+}
+
+TEST(TestPreview_ModeCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(ShellPreviewHandler::GetModeCount() == 5);
+}
+
+//==============================================================================
+// Sprint 233: Batch Processing Engine Tests
+//==============================================================================
+
+TEST(TestBatch_OperationNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(BatchProcessingEngine::GetOperationName(BatchOperation::GenerateThumbnails)) == L"Generate Thumbnails");
+    ASSERT(std::wstring(BatchProcessingEngine::GetOperationName(BatchOperation::ExportMetadata)) == L"Export Metadata");
+}
+
+TEST(TestBatch_CreateJob)
+{
+    using namespace DarkThumbs::Engine;
+    BatchProcessingEngine eng;
+    auto idx = eng.CreateJob(L"Test", BatchOperation::ValidateFiles, {L"a.jpg", L"b.png"});
+    ASSERT(idx == 0);
+    ASSERT(eng.GetJobCount() == 1);
+    ASSERT(eng.GetJob(0).progress.totalFiles == 2);
+}
+
+TEST(TestBatch_RunJob)
+{
+    using namespace DarkThumbs::Engine;
+    BatchProcessingEngine eng;
+    eng.CreateJob(L"Test", BatchOperation::GenerateThumbnails, {L"a.jpg"});
+    ASSERT(eng.RunJob(0) == true);
+    ASSERT(eng.GetJob(0).status == BatchStatus::Completed);
+}
+
+TEST(TestBatch_CancelJob)
+{
+    using namespace DarkThumbs::Engine;
+    BatchProcessingEngine eng;
+    eng.CreateJob(L"Test", BatchOperation::CleanCache, {L"a.jpg"});
+    ASSERT(eng.CancelJob(0) == true);
+    ASSERT(eng.GetJob(0).status == BatchStatus::Cancelled);
+}
+
+TEST(TestBatch_OperationCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(BatchProcessingEngine::GetOperationCount() == 5);
+}
+
+//==============================================================================
+// Sprint 234: Release Gate V12 Tests
+//==============================================================================
+
+TEST(TestGateV12_KPINames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ReleaseGateV12::GetKPIName(GateKPIV12::BuildClean)) == L"Build Clean");
+    ASSERT(std::wstring(ReleaseGateV12::GetKPIName(GateKPIV12::L10nCoverage)) == L"L10n Coverage");
+}
+
+TEST(TestGateV12_KPICount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(ReleaseGateV12::GetKPICount() == 16);
+}
+
+TEST(TestGateV12_Evaluate)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV12 gate;
+    auto result = gate.EvaluateKPI(GateKPIV12::BuildClean);
+    ASSERT(result.passed == true);
+}
+
+TEST(TestGateV12_Approved)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV12 gate;
+    ASSERT(gate.IsApproved() == true);
+}
+
+TEST(TestGateV12_Version)
+{
+    using namespace DarkThumbs::Engine;
+    ReleaseGateV12 gate;
+    ASSERT(gate.GetVersion() == L"10.2.0");
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -5593,6 +5810,51 @@ int main()
     RUN_TEST(TestTheme_SetLight);
     RUN_TEST(TestTheme_RegisterCustom);
     RUN_TEST(TestTheme_TypeCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 230: Telemetry Engine..." << std::endl;
+    RUN_TEST(TestTelemetry_CategoryNames);
+    RUN_TEST(TestTelemetry_ConsentNames);
+    RUN_TEST(TestTelemetry_ConsentNone);
+    RUN_TEST(TestTelemetry_ConsentBasic);
+    RUN_TEST(TestTelemetry_CategoryCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 231: Update Engine..." << std::endl;
+    RUN_TEST(TestUpdate_ChannelNames);
+    RUN_TEST(TestUpdate_StatusNames);
+    RUN_TEST(TestUpdate_CompareVersions);
+    RUN_TEST(TestUpdate_CheckForUpdate);
+    RUN_TEST(TestUpdate_ChannelCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 232: Shell Preview Handler..." << std::endl;
+    RUN_TEST(TestPreview_ModeNames);
+    RUN_TEST(TestPreview_DetectMode);
+    RUN_TEST(TestPreview_LoadFile);
+    RUN_TEST(TestPreview_Unload);
+    RUN_TEST(TestPreview_ModeCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 233: Batch Processing Engine..." << std::endl;
+    RUN_TEST(TestBatch_OperationNames);
+    RUN_TEST(TestBatch_CreateJob);
+    RUN_TEST(TestBatch_RunJob);
+    RUN_TEST(TestBatch_CancelJob);
+    RUN_TEST(TestBatch_OperationCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 234: Release Gate V12..." << std::endl;
+    RUN_TEST(TestGateV12_KPINames);
+    RUN_TEST(TestGateV12_KPICount);
+    RUN_TEST(TestGateV12_Evaluate);
+    RUN_TEST(TestGateV12_Approved);
+    RUN_TEST(TestGateV12_Version);
 
     std::wcout << std::endl;
 
