@@ -136,6 +136,8 @@ set(ENGINE_HEADERS
     Decoders/DICOMDecoder.h         # Sprint 199 — Medical DICOM imaging
     Decoders/FITSDecoder.h          # Sprint 199 — Astronomy FITS imaging
     Decoders/Advanced3DFormatDecoder.h # Sprint 200 — FBX/USD/3MF/STEP/IGES
+    Decoders/EBookDecoder.h              # Sprint 211 — eBook cover extraction
+    Decoders/GeospatialDecoder.h         # Sprint 212 — Geospatial format decoder
     
     # GPU
     GPU/D3D11Renderer.h
@@ -175,6 +177,9 @@ set(ENGINE_HEADERS
     Utils/PythonSDK.h                  # Sprint 203 — Python SDK bindings
     Utils/ReleaseGateV10.h             # Sprint 204 — v10.0 release gate
     Utils/Win11Integration.h           # Sprint 209 — Windows 11 native features
+    Utils/CIValidator.h                  # Sprint 210 — CI/CD pipeline validation
+    Utils/AutoDocGenerator.h             # Sprint 213 — Auto documentation generator
+    Utils/ConfigMigrationEngine.h        # Sprint 214 — Config migration engine
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
@@ -325,6 +330,8 @@ set(ENGINE_SOURCES
     Decoders/DICOMDecoder.cpp       # Sprint 199 — Medical DICOM imaging
     Decoders/FITSDecoder.cpp        # Sprint 199 — Astronomy FITS imaging
     Decoders/Advanced3DFormatDecoder.cpp # Sprint 200 — FBX/USD/3MF/STEP/IGES
+    Decoders/EBookDecoder.cpp              # Sprint 211 — eBook cover extraction
+    Decoders/GeospatialDecoder.cpp         # Sprint 212 — Geospatial format decoder
     
     # GPU
     GPU/D3D11Renderer.cpp
@@ -361,6 +368,9 @@ set(ENGINE_SOURCES
     Utils/PythonSDK.cpp                  # Sprint 203 — Python SDK bindings
     Utils/ReleaseGateV10.cpp             # Sprint 204 — v10.0 release gate
     Utils/Win11Integration.cpp           # Sprint 209 — Windows 11 native features
+    Utils/CIValidator.cpp                  # Sprint 210 — CI/CD pipeline validation
+    Utils/AutoDocGenerator.cpp             # Sprint 213 — Auto documentation generator
+    Utils/ConfigMigrationEngine.cpp        # Sprint 214 — Config migration engine
 )
 
 #==============================================================================

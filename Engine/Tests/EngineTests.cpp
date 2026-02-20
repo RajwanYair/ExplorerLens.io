@@ -58,6 +58,11 @@
 #include "../Core/TelemetryEngine.h"
 #include "../Core/SIMDAccelerator.h"
 #include "../Utils/Win11Integration.h"
+#include "../Utils/CIValidator.h"
+#include "../Decoders/EBookDecoder.h"
+#include "../Decoders/GeospatialDecoder.h"
+#include "../Utils/AutoDocGenerator.h"
+#include "../Utils/ConfigMigrationEngine.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -3702,6 +3707,247 @@ TEST(TestWin11_FeatureCount)
 }
 
 //==============================================================================
+// Sprint 210: CI/CD Pipeline Validation Tests
+//==============================================================================
+
+TEST(TestCI_PlatformNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(CIValidator::GetPlatformName(CIPlatform::GitHubActions)) == L"GitHub Actions");
+    ASSERT(std::wstring(CIValidator::GetPlatformName(CIPlatform::AzureDevOps)) == L"Azure DevOps");
+    ASSERT(std::wstring(CIValidator::GetPlatformName(CIPlatform::Jenkins)) == L"Jenkins");
+}
+
+TEST(TestCI_StageNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(CIValidator::GetStageName(CIStage::Build)) == L"Build");
+    ASSERT(std::wstring(CIValidator::GetStageName(CIStage::Test)) == L"Test");
+    ASSERT(std::wstring(CIValidator::GetStageName(CIStage::Package)) == L"Package");
+}
+
+TEST(TestCI_ValidatorCreation)
+{
+    using namespace DarkThumbs::Engine;
+    CIValidator validator;
+    auto result = validator.ValidatePipeline(CIPlatform::GitHubActions);
+    ASSERT(result.platform == CIPlatform::GitHubActions);
+}
+
+TEST(TestCI_ArtifactTypeNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ArtifactType::DLL)) == L"DLL");
+    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ArtifactType::MSI)) == L"MSI");
+    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ArtifactType::MSIX)) == L"MSIX");
+}
+
+TEST(TestCI_StageCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(CIValidator::GetStageCount() == 7);
+}
+
+//==============================================================================
+// Sprint 211: eBook Decoder Tests
+//==============================================================================
+
+TEST(TestEBook_FormatNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(EBookDecoder::GetFormatName(EBookFormat::EPUB)) == L"EPUB");
+    ASSERT(std::wstring(EBookDecoder::GetFormatName(EBookFormat::MOBI)) == L"MOBI");
+    ASSERT(std::wstring(EBookDecoder::GetFormatName(EBookFormat::FB2)) == L"FB2");
+}
+
+TEST(TestEBook_DecoderCreation)
+{
+    using namespace DarkThumbs::Engine;
+    EBookDecoder decoder;
+    ASSERT(decoder.GetSupportedFormats().size() >= 4);
+}
+
+TEST(TestEBook_FormatDetection)
+{
+    using namespace DarkThumbs::Engine;
+    EBookDecoder decoder;
+    ASSERT(decoder.DetectFormat(L"test.epub") == EBookFormat::EPUB);
+    ASSERT(decoder.DetectFormat(L"test.mobi") == EBookFormat::MOBI);
+    ASSERT(decoder.DetectFormat(L"test.fb2") == EBookFormat::FB2);
+}
+
+TEST(TestEBook_CoverExtraction)
+{
+    using namespace DarkThumbs::Engine;
+    EBookDecoder decoder;
+    auto result = decoder.ExtractCover(L"nonexistent.epub");
+    ASSERT(result.success == false);
+}
+
+TEST(TestEBook_FormatCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(EBookDecoder::GetFormatCount() >= 4);
+}
+
+//==============================================================================
+// Sprint 212: Geospatial Decoder Tests
+//==============================================================================
+
+TEST(TestGeo_FormatNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(GeospatialDecoder::GetFormatName(GeoFormat::GeoTIFF)) == L"GeoTIFF");
+    ASSERT(std::wstring(GeospatialDecoder::GetFormatName(GeoFormat::Shapefile)) == L"Shapefile");
+    ASSERT(std::wstring(GeospatialDecoder::GetFormatName(GeoFormat::KML)) == L"KML");
+}
+
+TEST(TestGeo_DecoderCreation)
+{
+    using namespace DarkThumbs::Engine;
+    GeospatialDecoder decoder;
+    ASSERT(decoder.GetSupportedFormats().size() >= 4);
+}
+
+TEST(TestGeo_HaversineDistance)
+{
+    using namespace DarkThumbs::Engine;
+    // New York to London approx 5570 km
+    double dist = GeospatialDecoder::HaversineDistance(40.7128, -74.0060, 51.5074, -0.1278);
+    ASSERT(dist > 5500.0 && dist < 5700.0);
+}
+
+TEST(TestGeo_MercatorProjection)
+{
+    using namespace DarkThumbs::Engine;
+    auto [x, y] = GeospatialDecoder::MercatorProjection(0.0, 0.0);
+    ASSERT(x >= -0.001 && x <= 0.001);
+    ASSERT(y >= -0.001 && y <= 0.001);
+}
+
+TEST(TestGeo_FormatCount)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(GeospatialDecoder::GetFormatCount() >= 4);
+}
+
+//==============================================================================
+// Sprint 213: Auto Documentation Generator Tests
+//==============================================================================
+
+TEST(TestAutoDoc_SectionNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(AutoDocGenerator::GetSectionName(DocSection::Overview)) == L"Overview");
+    ASSERT(std::wstring(AutoDocGenerator::GetSectionName(DocSection::Decoders)) == L"Decoders");
+    ASSERT(std::wstring(AutoDocGenerator::GetSectionName(DocSection::Testing)) == L"Testing");
+}
+
+TEST(TestAutoDoc_FormatNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(AutoDocGenerator::GetFormatName(DocFormat::Markdown)) == L"Markdown");
+    ASSERT(std::wstring(AutoDocGenerator::GetFormatName(DocFormat::HTML)) == L"HTML");
+}
+
+TEST(TestAutoDoc_FormatExtensions)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(AutoDocGenerator::GetFormatExtension(DocFormat::Markdown)) == L".md");
+    ASSERT(std::wstring(AutoDocGenerator::GetFormatExtension(DocFormat::HTML)) == L".html");
+    ASSERT(std::wstring(AutoDocGenerator::GetFormatExtension(DocFormat::AsciiDoc)) == L".adoc");
+}
+
+TEST(TestAutoDoc_DecoderRegistration)
+{
+    using namespace DarkThumbs::Engine;
+    AutoDocGenerator gen;
+    DecoderDocEntry entry;
+    entry.name = L"TestDecoder";
+    entry.extensions = {L".test", L".tst"};
+    entry.testCount = 5;
+    entry.gpuAccelerated = true;
+    gen.RegisterDecoder(entry);
+    ASSERT(gen.GetTotalExtensions() == 2);
+    ASSERT(gen.GetTotalTests() == 5);
+}
+
+TEST(TestAutoDoc_SectionGeneration)
+{
+    using namespace DarkThumbs::Engine;
+    AutoDocGenerator gen;
+    auto content = gen.GenerateSection(DocSection::Overview, DocFormat::Markdown);
+    ASSERT(!content.empty());
+    ASSERT(content.find(L"Overview") != std::wstring::npos);
+}
+
+//==============================================================================
+// Sprint 214: Config Migration Engine Tests
+//==============================================================================
+
+TEST(TestConfigMigration_VersionNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ConfigMigrationEngine::GetVersionName(ConfigVersion::V7_0)) == L"v7.0");
+    ASSERT(std::wstring(ConfigMigrationEngine::GetVersionName(ConfigVersion::V10_0)) == L"v10.0");
+}
+
+TEST(TestConfigMigration_ActionNames)
+{
+    using namespace DarkThumbs::Engine;
+    ASSERT(std::wstring(ConfigMigrationEngine::GetActionName(MigrationAction::Keep)) == L"Keep");
+    ASSERT(std::wstring(ConfigMigrationEngine::GetActionName(MigrationAction::Rename)) == L"Rename");
+    ASSERT(std::wstring(ConfigMigrationEngine::GetActionName(MigrationAction::Remove)) == L"Remove");
+}
+
+TEST(TestConfigMigration_BasicMigration)
+{
+    using namespace DarkThumbs::Engine;
+    ConfigMigrationEngine engine;
+    std::map<std::wstring, std::wstring> config;
+    config[L"ThumbnailSize"] = L"256";
+    config[L"GPUEnabled"] = L"1";
+    engine.SetSourceConfig(config);
+    auto result = engine.Migrate(ConfigVersion::V7_0, ConfigVersion::V10_0);
+    ASSERT(result.success == true);
+    ASSERT(result.keysAdded > 0);  // New keys added for V10
+}
+
+TEST(TestConfigMigration_RenameRule)
+{
+    using namespace DarkThumbs::Engine;
+    ConfigMigrationEngine engine;
+    MigrationRule rule;
+    rule.sourceKey = L"OldKey";
+    rule.targetKey = L"NewKey";
+    rule.action = MigrationAction::Rename;
+    engine.AddRule(rule);
+    std::map<std::wstring, std::wstring> config;
+    config[L"OldKey"] = L"value123";
+    engine.SetSourceConfig(config);
+    auto result = engine.Migrate(ConfigVersion::V8_0, ConfigVersion::V10_0);
+    ASSERT(result.keysRenamed == 1);
+    auto migrated = engine.GetMigratedConfig();
+    ASSERT(migrated.count(L"NewKey") == 1);
+    ASSERT(migrated[L"NewKey"] == L"value123");
+}
+
+TEST(TestConfigMigration_Validation)
+{
+    using namespace DarkThumbs::Engine;
+    ConfigMigrationEngine engine;
+    std::map<std::wstring, std::wstring> good;
+    good[L"ThumbnailSize"] = L"256";
+    good[L"GPUEnabled"] = L"1";
+    good[L"CacheEnabled"] = L"1";
+    ASSERT(engine.ValidateConfig(good) == true);
+
+    std::map<std::wstring, std::wstring> bad;
+    bad[L"SomeRandomKey"] = L"value";
+    ASSERT(engine.ValidateConfig(bad) == false);  // Missing required keys
+}
+
+//==============================================================================
 // Sprint 6: Worker/Isolation Stabilization Tests  
 // February 17, 2026
 //==============================================================================
@@ -4480,6 +4726,51 @@ int main()
     RUN_TEST(TestWin11_DarkModeDetection);
     RUN_TEST(TestWin11_MicaModes);
     RUN_TEST(TestWin11_FeatureCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 210: CI/CD Pipeline Validation..." << std::endl;
+    RUN_TEST(TestCI_PlatformNames);
+    RUN_TEST(TestCI_StageNames);
+    RUN_TEST(TestCI_ValidatorCreation);
+    RUN_TEST(TestCI_ArtifactTypeNames);
+    RUN_TEST(TestCI_StageCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 211: eBook Decoder..." << std::endl;
+    RUN_TEST(TestEBook_FormatNames);
+    RUN_TEST(TestEBook_DecoderCreation);
+    RUN_TEST(TestEBook_FormatDetection);
+    RUN_TEST(TestEBook_CoverExtraction);
+    RUN_TEST(TestEBook_FormatCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 212: Geospatial Decoder..." << std::endl;
+    RUN_TEST(TestGeo_FormatNames);
+    RUN_TEST(TestGeo_DecoderCreation);
+    RUN_TEST(TestGeo_HaversineDistance);
+    RUN_TEST(TestGeo_MercatorProjection);
+    RUN_TEST(TestGeo_FormatCount);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 213: Auto Documentation Generator..." << std::endl;
+    RUN_TEST(TestAutoDoc_SectionNames);
+    RUN_TEST(TestAutoDoc_FormatNames);
+    RUN_TEST(TestAutoDoc_FormatExtensions);
+    RUN_TEST(TestAutoDoc_DecoderRegistration);
+    RUN_TEST(TestAutoDoc_SectionGeneration);
+
+    std::wcout << std::endl;
+
+    std::wcout << L"Sprint 214: Config Migration Engine..." << std::endl;
+    RUN_TEST(TestConfigMigration_VersionNames);
+    RUN_TEST(TestConfigMigration_ActionNames);
+    RUN_TEST(TestConfigMigration_BasicMigration);
+    RUN_TEST(TestConfigMigration_RenameRule);
+    RUN_TEST(TestConfigMigration_Validation);
 
     std::wcout << std::endl;
 
