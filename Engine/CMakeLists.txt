@@ -249,6 +249,11 @@ set(ENGINE_HEADERS
     Decoders/NotebookPreviewDecoder.h     # Sprint 282 — Jupyter notebook preview
     Decoders/DatabasePreviewDecoder.h     # Sprint 283 — Database preview
     Decoders/LegacyImageDecoder.h         # Sprint 284 — FLIF/BPG legacy images
+    Decoders/VectorFormatDecoder.h        # Sprint 285 — CDR/Visio vector decoder
+    Decoders/ScientificDataDecoder.h      # Sprint 286 — HDF5/NetCDF scientific
+    Decoders/NIfTIDecoder.h               # Sprint 287 — NIfTI neuroimaging
+    Decoders/CADFormatDecoder.h           # Sprint 288 — STEP/IGES CAD decoder
+    Core/HDRDisplayPipeline.h             # Sprint 289 — HDR display pipeline
 
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI

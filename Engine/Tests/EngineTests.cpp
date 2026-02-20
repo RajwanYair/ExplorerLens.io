@@ -132,6 +132,11 @@
 #include "../Decoders/NotebookPreviewDecoder.h"
 #include "../Decoders/DatabasePreviewDecoder.h"
 #include "../Decoders/LegacyImageDecoder.h"
+#include "../Decoders/VectorFormatDecoder.h"
+#include "../Decoders/ScientificDataDecoder.h"
+#include "../Decoders/NIfTIDecoder.h"
+#include "../Decoders/CADFormatDecoder.h"
+#include "../Core/HDRDisplayPipeline.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -6983,6 +6988,178 @@ TEST(TestLegacyImg_Counts) {
     ASSERT(LegacyImageDecoder::ColorSpaceCount() == 6);
 }
 
+//== Sprint 285: CDR/Visio Vector Decoder Tests
+
+TEST(TestVector_FormatNames) {
+    for (size_t i = 0; i < VectorFormatDecoder::FormatCount(); ++i) {
+        auto name = VectorFormatDecoder::FormatName(static_cast<VectorFormat>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestVector_ElementNames) {
+    for (size_t i = 0; i < VectorFormatDecoder::ElementCount(); ++i) {
+        auto name = VectorFormatDecoder::ElementName(static_cast<VectorElement>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestVector_DetectFormat) {
+    ASSERT(VectorFormatDecoder::DetectFormat(L".cdr") == VectorFormat::CDR);
+    ASSERT(VectorFormatDecoder::DetectFormat(L".vsdx") == VectorFormat::VSDX);
+    ASSERT(VectorFormatDecoder::DetectFormat(L".emf") == VectorFormat::EMF);
+}
+
+TEST(TestVector_Counts) {
+    ASSERT(VectorFormatDecoder::FormatCount() == 7);
+    ASSERT(VectorFormatDecoder::ElementCount() == 7);
+}
+
+TEST(TestVector_ConfigDefaults) {
+    VectorDecoderConfig cfg;
+    ASSERT(cfg.renderWidth == 256);
+    ASSERT(cfg.antiAlias);
+}
+
+//== Sprint 286: HDF5/NetCDF Scientific Decoder Tests
+
+TEST(TestSciData_FormatNames) {
+    for (size_t i = 0; i < ScientificDataDecoder::FormatCount(); ++i) {
+        auto name = ScientificDataDecoder::FormatName(static_cast<ScientificDataFormat>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestSciData_DataTypeNames) {
+    for (size_t i = 0; i < ScientificDataDecoder::DataTypeCount(); ++i) {
+        auto name = ScientificDataDecoder::DataTypeName(static_cast<HDF5DataType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestSciData_VisModeNames) {
+    for (size_t i = 0; i < ScientificDataDecoder::VisModeCount(); ++i) {
+        auto name = ScientificDataDecoder::VisModeName(static_cast<SciVisMode>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestSciData_HDF5Magic) {
+    uint8_t magic[] = { 0x89, 0x48, 0x44, 0x46, 0x0D, 0x0A, 0x1A, 0x0A };
+    ASSERT(ScientificDataDecoder::CheckHDF5Magic(magic, 8));
+}
+
+TEST(TestSciData_Counts) {
+    ASSERT(ScientificDataDecoder::FormatCount() == 4);
+    ASSERT(ScientificDataDecoder::DataTypeCount() == 8);
+    ASSERT(ScientificDataDecoder::VisModeCount() == 5);
+}
+
+//== Sprint 287: NIfTI Neuroimaging Tests
+
+TEST(TestNIfTI_DataTypeNames) {
+    for (size_t i = 0; i < NIfTIDecoder::DataTypeCount(); ++i) {
+        auto name = NIfTIDecoder::DataTypeName(static_cast<NIfTIDataType>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestNIfTI_SliceNames) {
+    for (size_t i = 0; i < NIfTIDecoder::SliceCount(); ++i) {
+        auto name = NIfTIDecoder::SliceName(static_cast<NIfTISlice>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestNIfTI_VariantNames) {
+    for (size_t i = 0; i < NIfTIDecoder::VariantCount(); ++i) {
+        auto name = NIfTIDecoder::VariantName(static_cast<NIfTIVariant>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestNIfTI_Counts) {
+    ASSERT(NIfTIDecoder::DataTypeCount() == 7);
+    ASSERT(NIfTIDecoder::SliceCount() == 3);
+    ASSERT(NIfTIDecoder::VariantCount() == 4);
+}
+
+TEST(TestNIfTI_HeaderDefaults) {
+    NIfTIHeaderInfo hdr;
+    ASSERT(hdr.variant == NIfTIVariant::NIfTI1);
+    ASSERT(hdr.voxOffset == 352);
+    ASSERT(hdr.sclSlope == 1.0f);
+}
+
+//== Sprint 288: STEP/IGES CAD Decoder Tests
+
+TEST(TestCAD_FormatNames) {
+    for (size_t i = 0; i < CADFormatDecoder::FormatCount(); ++i) {
+        auto name = CADFormatDecoder::FormatName(static_cast<CADFormat>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCAD_EntityNames) {
+    for (size_t i = 0; i < CADFormatDecoder::EntityCount(); ++i) {
+        auto name = CADFormatDecoder::EntityName(static_cast<CADEntity>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCAD_RenderModeNames) {
+    for (size_t i = 0; i < CADFormatDecoder::RenderModeCount(); ++i) {
+        auto name = CADFormatDecoder::RenderModeName(static_cast<CADRenderMode>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestCAD_STEPMagic) {
+    const char step[] = "ISO-10303-21;";
+    ASSERT(CADFormatDecoder::CheckSTEPMagic(reinterpret_cast<const uint8_t*>(step), 13));
+}
+
+TEST(TestCAD_Counts) {
+    ASSERT(CADFormatDecoder::FormatCount() == 4);
+    ASSERT(CADFormatDecoder::EntityCount() == 7);
+    ASSERT(CADFormatDecoder::RenderModeCount() == 5);
+}
+
+//== Sprint 289: HDR Display Pipeline Tests
+
+TEST(TestHDR_ToneMapNames) {
+    for (size_t i = 0; i < HDRDisplayPipeline::ToneMapCount(); ++i) {
+        auto name = HDRDisplayPipeline::ToneMapName(static_cast<ToneMappingOp>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestHDR_GamutNames) {
+    for (size_t i = 0; i < HDRDisplayPipeline::GamutCount(); ++i) {
+        auto name = HDRDisplayPipeline::GamutName(static_cast<ColorGamut>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestHDR_FormatNames) {
+    for (size_t i = 0; i < HDRDisplayPipeline::HDRFormatCount(); ++i) {
+        auto name = HDRDisplayPipeline::HDRFormatName(static_cast<HDRFormat>(i));
+        ASSERT(name != nullptr && wcslen(name) > 0);
+    }
+}
+
+TEST(TestHDR_ValidateExposure) {
+    ASSERT(HDRDisplayPipeline::ValidateExposure(1.0f));
+    ASSERT(!HDRDisplayPipeline::ValidateExposure(0.0f));
+    ASSERT(!HDRDisplayPipeline::ValidateExposure(25.0f));
+}
+
+TEST(TestHDR_Counts) {
+    ASSERT(HDRDisplayPipeline::ToneMapCount() == 6);
+    ASSERT(HDRDisplayPipeline::GamutCount() == 5);
+    ASSERT(HDRDisplayPipeline::HDRFormatCount() == 5);
+}
+
 //==============================================================================
 // Main Test Runner
 //==============================================================================
@@ -8153,6 +8330,46 @@ int main()
     RUN_TEST(TestLegacyImg_FLIFMagic);
     RUN_TEST(TestLegacyImg_BPGMagic);
     RUN_TEST(TestLegacyImg_Counts);
+
+    // Sprint 285: CDR/Visio Vector Decoder Tests
+    std::wcout << L"Sprint 285: CDR/Visio Vector..." << std::endl;
+    RUN_TEST(TestVector_FormatNames);
+    RUN_TEST(TestVector_ElementNames);
+    RUN_TEST(TestVector_DetectFormat);
+    RUN_TEST(TestVector_Counts);
+    RUN_TEST(TestVector_ConfigDefaults);
+
+    // Sprint 286: HDF5/NetCDF Scientific Decoder Tests
+    std::wcout << L"Sprint 286: HDF5/NetCDF Scientific..." << std::endl;
+    RUN_TEST(TestSciData_FormatNames);
+    RUN_TEST(TestSciData_DataTypeNames);
+    RUN_TEST(TestSciData_VisModeNames);
+    RUN_TEST(TestSciData_HDF5Magic);
+    RUN_TEST(TestSciData_Counts);
+
+    // Sprint 287: NIfTI Neuroimaging Tests
+    std::wcout << L"Sprint 287: NIfTI Neuroimaging..." << std::endl;
+    RUN_TEST(TestNIfTI_DataTypeNames);
+    RUN_TEST(TestNIfTI_SliceNames);
+    RUN_TEST(TestNIfTI_VariantNames);
+    RUN_TEST(TestNIfTI_Counts);
+    RUN_TEST(TestNIfTI_HeaderDefaults);
+
+    // Sprint 288: STEP/IGES CAD Decoder Tests
+    std::wcout << L"Sprint 288: STEP/IGES CAD..." << std::endl;
+    RUN_TEST(TestCAD_FormatNames);
+    RUN_TEST(TestCAD_EntityNames);
+    RUN_TEST(TestCAD_RenderModeNames);
+    RUN_TEST(TestCAD_STEPMagic);
+    RUN_TEST(TestCAD_Counts);
+
+    // Sprint 289: HDR Display Pipeline Tests
+    std::wcout << L"Sprint 289: HDR Display Pipeline..." << std::endl;
+    RUN_TEST(TestHDR_ToneMapNames);
+    RUN_TEST(TestHDR_GamutNames);
+    RUN_TEST(TestHDR_FormatNames);
+    RUN_TEST(TestHDR_ValidateExposure);
+    RUN_TEST(TestHDR_Counts);
 
     std::wcout << std::endl;
 
