@@ -264,6 +264,58 @@ set(ENGINE_HEADERS
     Core/CloudStorageIntegration.h        # Sprint 297 — Cloud storage integration
     Utils/ReleaseGateV22.h                # Sprint 298 — Release gate V22 (v13.0)
 
+    # Sprint 299-348: v14.0 "Apex" Block
+    Core/VersionSyncV14.h                 # Sprint 299 — v14.0 version sync & architecture
+    Core/GPUPipelineV3.h                  # Sprint 300 — GPU Pipeline V3 enhanced DX12
+    Core/ShaderCompilerV2.h               # Sprint 301 — Shader compiler V2 with PSO cache
+    Cache/PipelineStateCacheV2.h          # Sprint 302 — Pipeline state cache V2
+    Core/GPUMemoryPoolV2.h                # Sprint 303 — GPU memory pool V2 with defrag
+    Utils/ReleaseGateV23.h                # Sprint 304 — Release gate V23 (GPU V3 phase)
+    Pipeline/SmartFormatDetectorV2.h      # Sprint 305 — Smart format detector V2
+    Decoders/ExtendedVideoDecoder.h       # Sprint 306 — Extended video codec support
+    Decoders/AudioVisualizationV2.h       # Sprint 307 — Audio visualization V2
+    Decoders/Model3DRendererV2.h          # Sprint 308 — 3D model renderer V2
+    Utils/ReleaseGateV24.h                # Sprint 309 — Release gate V24 (format intel)
+    Plugin/PluginSDKV2.h                  # Sprint 310 — Plugin SDK V2.0
+    Plugin/PluginDebuggerIntegration.h    # Sprint 311 — Plugin debugger integration
+    Plugin/PluginHotReload.h              # Sprint 312 — Plugin hot-reload system
+    Plugin/PluginPerformanceProfiler.h    # Sprint 313 — Plugin performance profiler
+    Utils/ReleaseGateV25.h                # Sprint 314 — Release gate V25 (dev experience)
+    Utils/ThreatModelV2.h                 # Sprint 315 — Threat model V2 (STRIDE)
+    Utils/MemorySafetyAuditV2.h           # Sprint 316 — Memory safety audit V2
+    Utils/SupplyChainIntegrityV2.h        # Sprint 317 — Supply chain integrity V2
+    Core/RuntimeIntegrityVerifier.h       # Sprint 318 — Runtime integrity verifier
+    Utils/ReleaseGateV26.h                # Sprint 319 — Release gate V26 (security)
+    Core/ProgressiveThumbnailLoader.h     # Sprint 320 — Progressive thumbnail loader
+    Core/ThumbnailAnimationEngineV2.h     # Sprint 321 — Thumbnail animation engine V2
+    Core/PreviewPanelV2.h                 # Sprint 322 — Preview panel V2
+    Core/QuickLookIntegration.h           # Sprint 323 — Quick look integration
+    Utils/ReleaseGateV27.h                # Sprint 324 — Release gate V27 (UX excellence)
+    AI/SceneUnderstandingEngine.h         # Sprint 325 — AI scene understanding engine
+    AI/SmartCropV2.h                      # Sprint 326 — Smart crop V2 saliency-driven
+    AI/ImageQualityAssessor.h             # Sprint 327 — AI image quality assessor
+    AI/AISearchIntegration.h              # Sprint 328 — AI-powered search integration
+    Utils/ReleaseGateV28.h                # Sprint 329 — Release gate V28 (AI/ML)
+    Utils/EnterprisePolicyEngineV2.h      # Sprint 330 — Enterprise policy engine V2
+    Core/SharePointTeamsIntegration.h     # Sprint 331 — SharePoint/Teams integration
+    Cache/MultiTenantCacheManager.h       # Sprint 332 — Multi-tenant cache manager
+    Utils/ComplianceAuditLogger.h         # Sprint 333 — Compliance & audit logging
+    Utils/ReleaseGateV29.h                # Sprint 334 — Release gate V29 (enterprise)
+    Utils/Windows12Compatibility.h        # Sprint 335 — Windows 12 compatibility
+    Utils/ARM64PerformanceOptimizer.h     # Sprint 336 — ARM64 performance optimizer
+    Core/WinRTAppSDKIntegrationV2.h       # Sprint 337 — WinRT/AppSDK integration V2
+    Utils/InstallerV2Manager.h            # Sprint 338 — Installer V2 modern packaging
+    Utils/ReleaseGateV30.h                # Sprint 339 — Release gate V30 (platform)
+    Cache/SubMillisecondCacheEngine.h     # Sprint 340 — Sub-millisecond cache engine
+    GPU/GPUDecodeAccelerationV2.h         # Sprint 341 — GPU decode acceleration V2
+    Pipeline/ParallelIOPipeline.h         # Sprint 342 — Parallel I/O pipeline
+    Memory/MemoryFootprintOptimizerV2.h   # Sprint 343 — Memory footprint optimizer V2
+    Utils/ReleaseGateV31.h                # Sprint 344 — Release gate V31 (perf summit)
+    Core/AccessibilitySuiteV2.h           # Sprint 345 — Accessibility suite V2
+    Utils/DocumentationExcellenceV2.h     # Sprint 346 — Documentation excellence V2
+    Utils/QualityAssuranceV2.h            # Sprint 347 — Quality assurance V2
+    Utils/ReleaseGateV32.h                # Sprint 348 — Release gate V32 (v14.0 Final)
+
     # Sprint 8-12: Foundation & Activation
     Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
     Utils/VersionNormalization.h      # Sprint 9  — Version audit, release notes

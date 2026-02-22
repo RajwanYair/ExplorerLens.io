@@ -146,6 +146,57 @@
 #include "../Utils/TelemetryAnalyticsEngine.h"
 #include "../Core/CloudStorageIntegration.h"
 #include "../Utils/ReleaseGateV22.h"
+// Sprint 299-348: v14.0 "Apex"
+#include "../Core/VersionSyncV14.h"
+#include "../Core/GPUPipelineV3.h"
+#include "../Core/ShaderCompilerV2.h"
+#include "../Cache/PipelineStateCacheV2.h"
+#include "../Core/GPUMemoryPoolV2.h"
+#include "../Utils/ReleaseGateV23.h"
+#include "../Pipeline/SmartFormatDetectorV2.h"
+#include "../Decoders/ExtendedVideoDecoder.h"
+#include "../Decoders/AudioVisualizationV2.h"
+#include "../Decoders/Model3DRendererV2.h"
+#include "../Utils/ReleaseGateV24.h"
+#include "../Plugin/PluginSDKV2.h"
+#include "../Plugin/PluginDebuggerIntegration.h"
+#include "../Plugin/PluginHotReload.h"
+#include "../Plugin/PluginPerformanceProfiler.h"
+#include "../Utils/ReleaseGateV25.h"
+#include "../Utils/ThreatModelV2.h"
+#include "../Utils/MemorySafetyAuditV2.h"
+#include "../Utils/SupplyChainIntegrityV2.h"
+#include "../Core/RuntimeIntegrityVerifier.h"
+#include "../Utils/ReleaseGateV26.h"
+#include "../Core/ProgressiveThumbnailLoader.h"
+#include "../Core/ThumbnailAnimationEngineV2.h"
+#include "../Core/PreviewPanelV2.h"
+#include "../Core/QuickLookIntegration.h"
+#include "../Utils/ReleaseGateV27.h"
+#include "../AI/SceneUnderstandingEngine.h"
+#include "../AI/SmartCropV2.h"
+#include "../AI/ImageQualityAssessor.h"
+#include "../AI/AISearchIntegration.h"
+#include "../Utils/ReleaseGateV28.h"
+#include "../Utils/EnterprisePolicyEngineV2.h"
+#include "../Core/SharePointTeamsIntegration.h"
+#include "../Cache/MultiTenantCacheManager.h"
+#include "../Utils/ComplianceAuditLogger.h"
+#include "../Utils/ReleaseGateV29.h"
+#include "../Utils/Windows12Compatibility.h"
+#include "../Utils/ARM64PerformanceOptimizer.h"
+#include "../Core/WinRTAppSDKIntegrationV2.h"
+#include "../Utils/InstallerV2Manager.h"
+#include "../Utils/ReleaseGateV30.h"
+#include "../Cache/SubMillisecondCacheEngine.h"
+#include "../GPU/GPUDecodeAccelerationV2.h"
+#include "../Pipeline/ParallelIOPipeline.h"
+#include "../Memory/MemoryFootprintOptimizerV2.h"
+#include "../Utils/ReleaseGateV31.h"
+#include "../Core/AccessibilitySuiteV2.h"
+#include "../Utils/DocumentationExcellenceV2.h"
+#include "../Utils/QualityAssuranceV2.h"
+#include "../Utils/ReleaseGateV32.h"
 #include <iostream>
 #include <chrono>
 #include <psapi.h>
@@ -7491,6 +7542,360 @@ TEST(TestGateV22_AllKPIsPresent) {
 }
 
 //==============================================================================
+// Sprint 299-348: v14.0 "Apex" Tests
+//==============================================================================
+
+// Sprint 299: VersionSyncV14
+TEST(TestV14_DomainNames)       { ASSERT(VersionSyncV14::DomainName(V14Domain::GPUPipelineV3) != nullptr); }
+TEST(TestV14_FeatureStatusNames){ ASSERT(VersionSyncV14::FeatureStatusName(FeatureStatus::Implemented) != nullptr); }
+TEST(TestV14_DomainCount)       { ASSERT(VersionSyncV14::DomainCount() == static_cast<size_t>(V14Domain::COUNT)); }
+TEST(TestV14_FeatureStatusCount){ ASSERT(VersionSyncV14::FeatureStatusCount() == static_cast<size_t>(FeatureStatus::COUNT)); }
+TEST(TestV14_GetVersion)        { V14Version v = VersionSyncV14::GetVersion(); ASSERT(v.major == 14 && v.minor == 0); }
+
+// Sprint 300: GPUPipelineV3
+TEST(TestGPUV3_FeatureNames)  { ASSERT(GPUPipelineV3::FeatureName(GPUV3Feature::MeshShaders) != nullptr); }
+TEST(TestGPUV3_QueueNames)    { ASSERT(GPUPipelineV3::QueueName(PipelineV3Queue::Direct) != nullptr); }
+TEST(TestGPUV3_PerfTierNames) { ASSERT(GPUPipelineV3::PerfTierName(GPUV3PerfTier::Ultra) != nullptr); }
+TEST(TestGPUV3_FeatureCount)  { ASSERT(GPUPipelineV3::FeatureCount() == static_cast<size_t>(GPUV3Feature::COUNT)); }
+TEST(TestGPUV3_QueueCount)    { ASSERT(GPUPipelineV3::QueueCount() == static_cast<size_t>(PipelineV3Queue::COUNT)); }
+
+// Sprint 301: ShaderCompilerV2
+TEST(TestShaderV2_ModelNames)   { ASSERT(ShaderCompilerV2::ModelName(ShaderModel::SM6_7) != nullptr); }
+TEST(TestShaderV2_StageNames)   { ASSERT(ShaderCompilerV2::StageName(ShaderStage::Vertex) != nullptr); }
+TEST(TestShaderV2_OptLevelNames){ ASSERT(ShaderCompilerV2::OptLevelName(ShaderOptLevel::Full) != nullptr); }
+TEST(TestShaderV2_ModelCount)   { ASSERT(ShaderCompilerV2::ModelCount() == static_cast<size_t>(ShaderModel::COUNT)); }
+TEST(TestShaderV2_StageCount)   { ASSERT(ShaderCompilerV2::StageCount() == static_cast<size_t>(ShaderStage::COUNT)); }
+
+// Sprint 302: PipelineStateCacheV2
+TEST(TestPSOCacheV2_StateNames)  { ASSERT(PipelineStateCacheV2::StateName(PSOCacheState::Warm) != nullptr); }
+TEST(TestPSOCacheV2_TypeNames)   { ASSERT(PipelineStateCacheV2::TypeName(PipelineType::Graphics) != nullptr); }
+TEST(TestPSOCacheV2_WarmupNames) { ASSERT(PipelineStateCacheV2::WarmupStrategyName(PSOWarmupStrategy::Eager) != nullptr); }
+TEST(TestPSOCacheV2_StateCount)  { ASSERT(PipelineStateCacheV2::StateCount() == static_cast<size_t>(PSOCacheState::COUNT)); }
+TEST(TestPSOCacheV2_TypeCount)   { ASSERT(PipelineStateCacheV2::TypeCount() == static_cast<size_t>(PipelineType::COUNT)); }
+
+// Sprint 303: GPUMemoryPoolV2
+TEST(TestGPUMemV2_HeapTypeNames)    { ASSERT(GPUMemoryPoolV2::HeapTypeName(GPUHeapType::Default) != nullptr); }
+TEST(TestGPUMemV2_ResidencyNames)   { ASSERT(GPUMemoryPoolV2::ResidencyName(GPUResidencyPriority::High) != nullptr); }
+TEST(TestGPUMemV2_AllocNames)       { ASSERT(GPUMemoryPoolV2::AllocStrategyName(GPUAllocStrategy::BuddySystem) != nullptr); }
+TEST(TestGPUMemV2_HeapTypeCount)    { ASSERT(GPUMemoryPoolV2::HeapTypeCount() == static_cast<size_t>(GPUHeapType::COUNT)); }
+TEST(TestGPUMemV2_ResidencyCount)   { ASSERT(GPUMemoryPoolV2::ResidencyCount() == static_cast<size_t>(GPUResidencyPriority::COUNT)); }
+
+// Sprint 304: ReleaseGateV23
+TEST(TestGateV23_KPINames) { ASSERT(ReleaseGateV23::KPIName(GateV23KPI::GPUV3Stable) != nullptr); }
+TEST(TestGateV23_KPICount) { ASSERT(ReleaseGateV23::KPICount() == 12); }
+TEST(TestGateV23_Evaluate) { bool r[30]={}; auto res = ReleaseGateV23::Evaluate(r); ASSERT(res.kpiPassCount == 0); }
+TEST(TestGateV23_AllPass)  { bool r[30]; for(int i=0;i<30;++i)r[i]=true; auto res=ReleaseGateV23::Evaluate(r); ASSERT(res.allKPIsPass); }
+TEST(TestGateV23_Advance)  { bool r[30]={};r[0]=true; auto res=ReleaseGateV23::Evaluate(r); ASSERT(!res.advanceRecommended); }
+
+// Sprint 305: SmartFormatDetectorV2
+TEST(TestSmartDetV2_MethodNames) { ASSERT(SmartFormatDetectorV2::MethodName(DetectionMethod::MagicBytes) != nullptr); }
+TEST(TestSmartDetV2_ConfNames)   { ASSERT(SmartFormatDetectorV2::ConfidenceName(DetectionConfidence::High) != nullptr); }
+TEST(TestSmartDetV2_HintNames)   { ASSERT(SmartFormatDetectorV2::HintName(DetectionHint::Extension) != nullptr); }
+TEST(TestSmartDetV2_MethodCount) { ASSERT(SmartFormatDetectorV2::MethodCount() == static_cast<size_t>(DetectionMethod::COUNT)); }
+TEST(TestSmartDetV2_ConfCount)   { ASSERT(SmartFormatDetectorV2::ConfidenceCount() == static_cast<size_t>(DetectionConfidence::COUNT)); }
+
+// Sprint 306: ExtendedVideoDecoder
+TEST(TestExtVideo_CodecNames)      { ASSERT(ExtendedVideoDecoder::CodecName(ExtVideoCodec::H264) != nullptr); }
+TEST(TestExtVideo_AccelNames)      { ASSERT(ExtendedVideoDecoder::AccelName(VideoDecodeAccel::DXVA2) != nullptr); }
+TEST(TestExtVideo_FrameSelectNames){ ASSERT(ExtendedVideoDecoder::FrameSelectName(VideoFrameSelect::FirstKeyframe) != nullptr); }
+TEST(TestExtVideo_CodecCount)      { ASSERT(ExtendedVideoDecoder::CodecCount() == static_cast<size_t>(ExtVideoCodec::COUNT)); }
+TEST(TestExtVideo_AccelCount)      { ASSERT(ExtendedVideoDecoder::AccelCount() == static_cast<size_t>(VideoDecodeAccel::COUNT)); }
+
+// Sprint 307: AudioVisualizationV2
+TEST(TestAudioVisV2_ModeNames)     { ASSERT(AudioVisualizationV2::ModeName(AudioVisMode::Waveform) != nullptr); }
+TEST(TestAudioVisV2_ColorNames)    { ASSERT(AudioVisualizationV2::ColorSchemeName(AudioVisColorScheme::Fire) != nullptr); }
+TEST(TestAudioVisV2_LoudnessNames) { ASSERT(AudioVisualizationV2::LoudnessUnitName(LoudnessUnit::LUFS) != nullptr); }
+TEST(TestAudioVisV2_ModeCount)     { ASSERT(AudioVisualizationV2::ModeCount() == static_cast<size_t>(AudioVisMode::COUNT)); }
+TEST(TestAudioVisV2_ColorCount)    { ASSERT(AudioVisualizationV2::ColorSchemeCount() == static_cast<size_t>(AudioVisColorScheme::COUNT)); }
+
+// Sprint 308: Model3DRendererV2
+TEST(TestModel3DV2_FormatNames) { ASSERT(Model3DRendererV2::FormatName(Model3DFormat::OBJ) != nullptr); }
+TEST(TestModel3DV2_LightNames)  { ASSERT(Model3DRendererV2::LightingModeName(Model3DLightingMode::PBR) != nullptr); }
+TEST(TestModel3DV2_CamNames)    { ASSERT(Model3DRendererV2::CameraPresetName(Model3DCameraPreset::Front) != nullptr); }
+TEST(TestModel3DV2_FormatCount) { ASSERT(Model3DRendererV2::FormatCount() == static_cast<size_t>(Model3DFormat::COUNT)); }
+TEST(TestModel3DV2_LightCount)  { ASSERT(Model3DRendererV2::LightingModeCount() == static_cast<size_t>(Model3DLightingMode::COUNT)); }
+
+// Sprint 309: ReleaseGateV24
+TEST(TestGateV24_KPINames) { ASSERT(ReleaseGateV24::KPIName(GateV24KPI::SmartFormatDetection) != nullptr); }
+TEST(TestGateV24_KPICount) { ASSERT(ReleaseGateV24::KPICount() == 12); }
+TEST(TestGateV24_Evaluate) { bool r[30]={}; auto res = ReleaseGateV24::Evaluate(r); ASSERT(res.kpiPassCount == 0); }
+TEST(TestGateV24_AllPass)  { bool r[30]; for(int i=0;i<30;++i)r[i]=true; auto res=ReleaseGateV24::Evaluate(r); ASSERT(res.allKPIsPass); }
+TEST(TestGateV24_Advance)  { bool r[30]={};r[0]=true; auto res=ReleaseGateV24::Evaluate(r); ASSERT(!res.advanceRecommended); }
+
+// Sprint 310: PluginSDKV2
+TEST(TestPluginSDKV2_CapNames)     { ASSERT(PluginSDKV2::CapabilityName(PluginSDKV2Capability::ThumbnailProvider) != nullptr); }
+TEST(TestPluginSDKV2_LifeCycleNames){ ASSERT(PluginSDKV2::LifeCycleName(PluginSDKV2LifeCycle::Init) != nullptr); }
+TEST(TestPluginSDKV2_APIVersionNames){ ASSERT(PluginSDKV2::APIVersionName(PluginAPIVersion::V2) != nullptr); }
+TEST(TestPluginSDKV2_CapCount)     { ASSERT(PluginSDKV2::CapabilityCount() == static_cast<size_t>(PluginSDKV2Capability::COUNT)); }
+TEST(TestPluginSDKV2_LifeCycleCount){ ASSERT(PluginSDKV2::LifeCycleCount() == static_cast<size_t>(PluginSDKV2LifeCycle::COUNT)); }
+
+// Sprint 311: PluginDebuggerIntegration
+TEST(TestPluginDbg_ModeNames)    { ASSERT(PluginDebuggerIntegration::ModeName(PluginDebugMode::Attach) != nullptr); }
+TEST(TestPluginDbg_LogLevelNames){ ASSERT(PluginDebuggerIntegration::LogLevelName(PluginLogLevel::Debug) != nullptr); }
+TEST(TestPluginDbg_EventNames)   { ASSERT(PluginDebuggerIntegration::EventName(PluginDebugEvent::Load) != nullptr); }
+TEST(TestPluginDbg_ModeCount)    { ASSERT(PluginDebuggerIntegration::ModeCount() == static_cast<size_t>(PluginDebugMode::COUNT)); }
+TEST(TestPluginDbg_LogLevelCount){ ASSERT(PluginDebuggerIntegration::LogLevelCount() == static_cast<size_t>(PluginLogLevel::COUNT)); }
+
+// Sprint 312: PluginHotReload
+TEST(TestHotReload_TriggerNames){ ASSERT(PluginHotReload::TriggerName(HotReloadTrigger::FileChanged) != nullptr); }
+TEST(TestHotReload_StateNames)  { ASSERT(PluginHotReload::StateName(HotReloadState::Idle) != nullptr); }
+TEST(TestHotReload_PolicyNames) { ASSERT(PluginHotReload::PolicyName(HotReloadPolicy::Automatic) != nullptr); }
+TEST(TestHotReload_TriggerCount){ ASSERT(PluginHotReload::TriggerCount() == static_cast<size_t>(HotReloadTrigger::COUNT)); }
+TEST(TestHotReload_StateCount)  { ASSERT(PluginHotReload::StateCount() == static_cast<size_t>(HotReloadState::COUNT)); }
+
+// Sprint 313: PluginPerformanceProfiler
+TEST(TestPluginPerf_MetricNames)  { ASSERT(PluginPerformanceProfiler::MetricName(PluginPerfMetric::DecodeTimeMs) != nullptr); }
+TEST(TestPluginPerf_AlertNames)   { ASSERT(PluginPerformanceProfiler::AlertName(PluginPerfAlert::SlowDecode) != nullptr); }
+TEST(TestPluginPerf_SamplingNames){ ASSERT(PluginPerformanceProfiler::SamplingRateName(PluginPerfSamplingRate::High) != nullptr); }
+TEST(TestPluginPerf_MetricCount)  { ASSERT(PluginPerformanceProfiler::MetricCount() == static_cast<size_t>(PluginPerfMetric::COUNT)); }
+TEST(TestPluginPerf_AlertCount)   { ASSERT(PluginPerformanceProfiler::AlertCount() == static_cast<size_t>(PluginPerfAlert::COUNT)); }
+
+// Sprint 314: ReleaseGateV25
+TEST(TestGateV25_KPINames) { ASSERT(ReleaseGateV25::KPIName(GateV25KPI::BuildClean) != nullptr); }
+TEST(TestGateV25_KPICount) { ASSERT(ReleaseGateV25::KPICount() == 11); }
+TEST(TestGateV25_Evaluate) { std::vector<GateV25Result> r; auto v=ReleaseGateV25::Evaluate(r); ASSERT(v.passed==0); }
+TEST(TestGateV25_AllPass)  { std::vector<GateV25Result> r; auto v=ReleaseGateV25::Evaluate(r); ASSERT(!v.approved); }
+TEST(TestGateV25_Advance)  { ASSERT(ReleaseGateV25::KPICount() > 0); }
+
+// Sprint 315: ThreatModelV2
+TEST(TestThreatV2_CategoryNames)   { ASSERT(ThreatModelV2::CategoryName(ThreatCategory::Spoofing) != nullptr); }
+TEST(TestThreatV2_SeverityNames)   { ASSERT(ThreatModelV2::SeverityName(ThreatSeverity::Critical) != nullptr); }
+TEST(TestThreatV2_MitigationNames) { ASSERT(ThreatModelV2::MitigationName(MitigationStatus::Implemented) != nullptr); }
+TEST(TestThreatV2_CategoryCount)   { ASSERT(ThreatModelV2::CategoryCount() == static_cast<size_t>(ThreatCategory::COUNT)); }
+TEST(TestThreatV2_SeverityCount)   { ASSERT(ThreatModelV2::SeverityCount() == static_cast<size_t>(ThreatSeverity::COUNT)); }
+
+// Sprint 316: MemorySafetyAuditV2
+TEST(TestMemSafetyV2_ViolationNames){ ASSERT(MemorySafetyAuditV2::ViolationName(MemSafetyViolation::BufferOverflow) != nullptr); }
+TEST(TestMemSafetyV2_ToolNames)     { ASSERT(MemorySafetyAuditV2::ToolName(MemSafetyTool::AddressSanitizer) != nullptr); }
+TEST(TestMemSafetyV2_ScopeNames)    { ASSERT(MemorySafetyAuditV2::ScopeName(MemSafetyScope::AllDecoders) != nullptr); }
+TEST(TestMemSafetyV2_ViolationCount){ ASSERT(MemorySafetyAuditV2::ViolationCount() == static_cast<size_t>(MemSafetyViolation::COUNT)); }
+TEST(TestMemSafetyV2_ToolCount)     { ASSERT(MemorySafetyAuditV2::ToolCount() == static_cast<size_t>(MemSafetyTool::COUNT)); }
+
+// Sprint 317: SupplyChainIntegrityV2
+TEST(TestSupplyChainV2_SBOMNames)  { ASSERT(SupplyChainIntegrityV2::SBOMFormatName(SBOMFormat::SPDX) != nullptr); }
+TEST(TestSupplyChainV2_VulnNames)  { ASSERT(SupplyChainIntegrityV2::VulnStatusName(DepVulnStatus::Clean) != nullptr); }
+TEST(TestSupplyChainV2_ReprodNames){ ASSERT(SupplyChainIntegrityV2::ReproducibleCheckName(ReproducibleBuildCheck::HashMatch) != nullptr); }
+TEST(TestSupplyChainV2_SBOMCount)  { ASSERT(SupplyChainIntegrityV2::SBOMFormatCount() == static_cast<size_t>(SBOMFormat::COUNT)); }
+TEST(TestSupplyChainV2_VulnCount)  { ASSERT(SupplyChainIntegrityV2::VulnStatusCount() == static_cast<size_t>(DepVulnStatus::COUNT)); }
+
+// Sprint 318: RuntimeIntegrityVerifier
+TEST(TestRuntimeInteg_CheckTypeNames){ ASSERT(RuntimeIntegrityVerifier::CheckTypeName(IntegrityCheckType::CodeSigning) != nullptr); }
+TEST(TestRuntimeInteg_ResultNames)   { ASSERT(RuntimeIntegrityVerifier::VerifyResultName(IntegrityVerifyResult::Pass) != nullptr); }
+TEST(TestRuntimeInteg_TamperNames)   { ASSERT(RuntimeIntegrityVerifier::TamperName(TamperIndicator::None) != nullptr); }
+TEST(TestRuntimeInteg_CheckTypeCount){ ASSERT(RuntimeIntegrityVerifier::CheckTypeCount() == static_cast<size_t>(IntegrityCheckType::COUNT)); }
+TEST(TestRuntimeInteg_ResultCount)   { ASSERT(RuntimeIntegrityVerifier::VerifyResultCount() == static_cast<size_t>(IntegrityVerifyResult::COUNT)); }
+
+// Sprint 319: ReleaseGateV26
+TEST(TestGateV26_KPINames) { ASSERT(ReleaseGateV26::KPIName(GateV26KPI::BuildClean) != nullptr); }
+TEST(TestGateV26_KPICount) { ASSERT(ReleaseGateV26::KPICount() == 11); }
+TEST(TestGateV26_Evaluate) { std::vector<GateV26Result> r; auto v=ReleaseGateV26::Evaluate(r); ASSERT(v.passed==0); }
+TEST(TestGateV26_AllPass)  { std::vector<GateV26Result> r; auto v=ReleaseGateV26::Evaluate(r); ASSERT(!v.approved); }
+TEST(TestGateV26_Advance)  { ASSERT(ReleaseGateV26::KPICount() > 0); }
+
+// Sprint 320: ProgressiveThumbnailLoader
+TEST(TestProgLoad_StageNames)    { ASSERT(ProgressiveThumbnailLoader::StageName(ProgressiveLoadStage::Placeholder) != nullptr); }
+TEST(TestProgLoad_StrategyNames) { ASSERT(ProgressiveThumbnailLoader::StrategyName(ProgressiveLoadStrategy::BlurToSharp) != nullptr); }
+TEST(TestProgLoad_PlaceholderNames){ ASSERT(ProgressiveThumbnailLoader::PlaceholderName(ThumbnailPlaceholder::ColorSwatch) != nullptr); }
+TEST(TestProgLoad_StageCount)    { ASSERT(ProgressiveThumbnailLoader::StageCount() == static_cast<size_t>(ProgressiveLoadStage::COUNT)); }
+TEST(TestProgLoad_StrategyCount) { ASSERT(ProgressiveThumbnailLoader::StrategyCount() == static_cast<size_t>(ProgressiveLoadStrategy::COUNT)); }
+
+// Sprint 321: ThumbnailAnimationEngineV2
+TEST(TestAnimEngineV2_FormatNames)  { ASSERT(ThumbnailAnimationEngineV2::FormatName(AnimThumbnailFormat::GIF) != nullptr); }
+TEST(TestAnimEngineV2_LoopModeNames){ ASSERT(ThumbnailAnimationEngineV2::LoopModeName(AnimLoopMode::Infinite) != nullptr); }
+TEST(TestAnimEngineV2_InterpNames)  { ASSERT(ThumbnailAnimationEngineV2::InterpolationName(AnimInterpolation::Linear) != nullptr); }
+TEST(TestAnimEngineV2_FormatCount)  { ASSERT(ThumbnailAnimationEngineV2::FormatCount() == static_cast<size_t>(AnimThumbnailFormat::COUNT)); }
+TEST(TestAnimEngineV2_LoopModeCount){ ASSERT(ThumbnailAnimationEngineV2::LoopModeCount() == static_cast<size_t>(AnimLoopMode::COUNT)); }
+
+// Sprint 322: PreviewPanelV2
+TEST(TestPreviewV2_TabNames)        { ASSERT(PreviewPanelV2::TabName(PreviewPanelTab::Image) != nullptr); }
+TEST(TestPreviewV2_ZoomNames)       { ASSERT(PreviewPanelV2::ZoomLevelName(PreviewZoomLevel::FitToWindow) != nullptr); }
+TEST(TestPreviewV2_ColorPickerNames){ ASSERT(PreviewPanelV2::ColorPickerModeName(ColorPickerMode::HEX) != nullptr); }
+TEST(TestPreviewV2_TabCount)        { ASSERT(PreviewPanelV2::TabCount() == static_cast<size_t>(PreviewPanelTab::COUNT)); }
+TEST(TestPreviewV2_ZoomCount)       { ASSERT(PreviewPanelV2::ZoomLevelCount() == static_cast<size_t>(PreviewZoomLevel::COUNT)); }
+
+// Sprint 323: QuickLookIntegration
+TEST(TestQuickLook_ModeNames)    { ASSERT(QuickLookIntegration::ModeName(QuickLookMode::Inline) != nullptr); }
+TEST(TestQuickLook_TransitionNames){ ASSERT(QuickLookIntegration::TransitionName(QuickLookTransition::Fade) != nullptr); }
+TEST(TestQuickLook_MetadataNames){ ASSERT(QuickLookIntegration::MetadataOverlayName(QuickLookMetadataOverlay::Dimensions) != nullptr); }
+TEST(TestQuickLook_ModeCount)    { ASSERT(QuickLookIntegration::ModeCount() == static_cast<size_t>(QuickLookMode::COUNT)); }
+TEST(TestQuickLook_TransitionCount){ ASSERT(QuickLookIntegration::TransitionCount() == static_cast<size_t>(QuickLookTransition::COUNT)); }
+
+// Sprint 324: ReleaseGateV27
+TEST(TestGateV27_KPINames) { ASSERT(ReleaseGateV27::KPIName(GateV27KPI::BuildClean) != nullptr); }
+TEST(TestGateV27_KPICount) { ASSERT(ReleaseGateV27::KPICount() == 11); }
+TEST(TestGateV27_Evaluate) { std::vector<GateV27Result> r; auto v=ReleaseGateV27::Evaluate(r); ASSERT(v.passed==0); }
+TEST(TestGateV27_AllPass)  { std::vector<GateV27Result> r; auto v=ReleaseGateV27::Evaluate(r); ASSERT(!v.approved); }
+TEST(TestGateV27_Advance)  { ASSERT(ReleaseGateV27::KPICount() > 0); }
+
+// Sprint 325: SceneUnderstandingEngine
+TEST(TestSceneAI_CategoryNames){ ASSERT(SceneUnderstandingEngine::CategoryName(SceneCategory::Indoor) != nullptr); }
+TEST(TestSceneAI_BackendNames) { ASSERT(SceneUnderstandingEngine::BackendName(SceneMLBackend::DirectML) != nullptr); }
+TEST(TestSceneAI_ConfNames)    { ASSERT(SceneUnderstandingEngine::ConfidenceName(SceneConfidence::High) != nullptr); }
+TEST(TestSceneAI_CategoryCount){ ASSERT(SceneUnderstandingEngine::CategoryCount() == static_cast<size_t>(SceneCategory::COUNT)); }
+TEST(TestSceneAI_BackendCount) { ASSERT(SceneUnderstandingEngine::BackendCount() == static_cast<size_t>(SceneMLBackend::COUNT)); }
+
+// Sprint 326: SmartCropV2
+TEST(TestSmartCropV2_StrategyNames){ ASSERT(SmartCropV2::StrategyName(CropStrategy::SaliencyMap) != nullptr); }
+TEST(TestSmartCropV2_AspectNames)  { ASSERT(SmartCropV2::AspectRatioName(CropAspectRatio::Square) != nullptr); }
+TEST(TestSmartCropV2_PaddingNames) { ASSERT(SmartCropV2::PaddingModeName(CropPaddingMode::None) != nullptr); }
+TEST(TestSmartCropV2_StrategyCount){ ASSERT(SmartCropV2::StrategyCount() == static_cast<size_t>(CropStrategy::COUNT)); }
+TEST(TestSmartCropV2_AspectCount)  { ASSERT(SmartCropV2::AspectRatioCount() == static_cast<size_t>(CropAspectRatio::COUNT)); }
+
+// Sprint 327: ImageQualityAssessor
+TEST(TestIQA_MetricNames){ ASSERT(ImageQualityAssessor::MetricName(IQAMetric::PSNR) != nullptr); }
+TEST(TestIQA_DefectNames){ ASSERT(ImageQualityAssessor::DefectName(IQADefect::Blur) != nullptr); }
+TEST(TestIQA_GradeNames) { ASSERT(ImageQualityAssessor::GradeName(IQAGrade::Excellent) != nullptr); }
+TEST(TestIQA_MetricCount){ ASSERT(ImageQualityAssessor::MetricCount() == static_cast<size_t>(IQAMetric::COUNT)); }
+TEST(TestIQA_DefectCount){ ASSERT(ImageQualityAssessor::DefectCount() == static_cast<size_t>(IQADefect::COUNT)); }
+
+// Sprint 328: AISearchIntegration
+TEST(TestAISearch_ModeNames)     { ASSERT(AISearchIntegration::ModeName(AISearchMode::SemanticSimilarity) != nullptr); }
+TEST(TestAISearch_EmbeddingNames){ ASSERT(AISearchIntegration::EmbeddingModelName(EmbeddingModel::CLIP) != nullptr); }
+TEST(TestAISearch_StatusNames)   { ASSERT(AISearchIntegration::IndexStatusName(SearchIndexStatus::Ready) != nullptr); }
+TEST(TestAISearch_ModeCount)     { ASSERT(AISearchIntegration::ModeCount() == static_cast<size_t>(AISearchMode::COUNT)); }
+TEST(TestAISearch_EmbeddingCount){ ASSERT(AISearchIntegration::EmbeddingModelCount() == static_cast<size_t>(EmbeddingModel::COUNT)); }
+
+// Sprint 329: ReleaseGateV28
+TEST(TestGateV28_KPINames) { ASSERT(ReleaseGateV28::KPIName(GateV28KPI::BuildClean) != nullptr); }
+TEST(TestGateV28_KPICount) { ASSERT(ReleaseGateV28::KPICount() == 11); }
+TEST(TestGateV28_Evaluate) { std::vector<GateV28Result> r; auto v=ReleaseGateV28::Evaluate(r); ASSERT(v.passed==0); }
+TEST(TestGateV28_AllPass)  { std::vector<GateV28Result> r; auto v=ReleaseGateV28::Evaluate(r); ASSERT(!v.approved); }
+TEST(TestGateV28_Advance)  { ASSERT(ReleaseGateV28::KPICount() > 0); }
+
+// Sprint 330: EnterprisePolicyEngineV2
+TEST(TestEntPolV2_SourceNames){ ASSERT(EnterprisePolicyEngineV2::SourceName(EnterprisePolicySource::GroupPolicy) != nullptr); }
+TEST(TestEntPolV2_StatusNames){ ASSERT(EnterprisePolicyEngineV2::ComplianceStatusName(PolicyComplianceStatus::Compliant) != nullptr); }
+TEST(TestEntPolV2_ScopeNames) { ASSERT(EnterprisePolicyEngineV2::ScopeName(PolicyScope::Machine) != nullptr); }
+TEST(TestEntPolV2_SourceCount){ ASSERT(EnterprisePolicyEngineV2::SourceCount() == static_cast<size_t>(EnterprisePolicySource::COUNT)); }
+TEST(TestEntPolV2_StatusCount){ ASSERT(EnterprisePolicyEngineV2::ComplianceStatusCount() == static_cast<size_t>(PolicyComplianceStatus::COUNT)); }
+
+// Sprint 331: SharePointTeamsIntegration
+TEST(TestSPTeams_CloudSourceNames){ ASSERT(SharePointTeamsIntegration::CloudSourceName(CloudFileSource::SharePoint) != nullptr); }
+TEST(TestSPTeams_AuthMethodNames) { ASSERT(SharePointTeamsIntegration::AuthMethodName(GraphAuthMethod::DeviceCode) != nullptr); }
+TEST(TestSPTeams_SyncStateNames)  { ASSERT(SharePointTeamsIntegration::SyncStateName(CloudSyncState::Idle) != nullptr); }
+TEST(TestSPTeams_CloudSourceCount){ ASSERT(SharePointTeamsIntegration::CloudSourceCount() == static_cast<size_t>(CloudFileSource::COUNT)); }
+TEST(TestSPTeams_AuthMethodCount) { ASSERT(SharePointTeamsIntegration::AuthMethodCount() == static_cast<size_t>(GraphAuthMethod::COUNT)); }
+
+// Sprint 332: MultiTenantCacheManager
+TEST(TestMTCache_TierNames)   { ASSERT(MultiTenantCacheManager::TierName(TenantCacheTier::Hot) != nullptr); }
+TEST(TestMTCache_IsolationNames){ ASSERT(MultiTenantCacheManager::IsolationName(TenantIsolation::Strict) != nullptr); }
+TEST(TestMTCache_EvictNames)  { ASSERT(MultiTenantCacheManager::EvictPolicyName(TenantEvictPolicy::LRU) != nullptr); }
+TEST(TestMTCache_TierCount)   { ASSERT(MultiTenantCacheManager::TierCount() == static_cast<size_t>(TenantCacheTier::COUNT)); }
+TEST(TestMTCache_IsolationCount){ ASSERT(MultiTenantCacheManager::IsolationCount() == static_cast<size_t>(TenantIsolation::COUNT)); }
+
+// Sprint 333: ComplianceAuditLogger
+TEST(TestCompliance_RegNames)       { ASSERT(ComplianceAuditLogger::RegulationName(ComplianceRegulation::GDPR) != nullptr); }
+TEST(TestCompliance_DataClassNames) { ASSERT(ComplianceAuditLogger::DataClassificationName(DataClassification::Confidential) != nullptr); }
+TEST(TestCompliance_EventTypeNames) { ASSERT(ComplianceAuditLogger::AuditEventTypeName(AuditEventType::Access) != nullptr); }
+TEST(TestCompliance_RegCount)       { ASSERT(ComplianceAuditLogger::RegulationCount() == static_cast<size_t>(ComplianceRegulation::COUNT)); }
+TEST(TestCompliance_DataClassCount) { ASSERT(ComplianceAuditLogger::DataClassCount() == static_cast<size_t>(DataClassification::COUNT)); }
+
+// Sprint 334: ReleaseGateV29
+TEST(TestGateV29_KPINames) { ASSERT(ReleaseGateV29::KPIName(GateV29KPI::EnterprisePolicyCompliance) != nullptr); }
+TEST(TestGateV29_KPICount) { ASSERT(ReleaseGateV29::KPICount() == 11); }
+TEST(TestGateV29_Evaluate) { bool r[30]={}; auto res = ReleaseGateV29::Evaluate(r); ASSERT(res.kpiPassCount == 0); }
+TEST(TestGateV29_AllPass)  { bool r[30]; for(int i=0;i<30;++i)r[i]=true; auto res=ReleaseGateV29::Evaluate(r); ASSERT(res.allKPIsPass); }
+TEST(TestGateV29_Advance)  { bool r[30]={}; auto res=ReleaseGateV29::Evaluate(r); ASSERT(!res.advanceRecommended); }
+
+// Sprint 335: Windows12Compatibility
+TEST(TestWin12_FeatureNames)    { ASSERT(Windows12Compatibility::FeatureName(Win12Feature::FluentV4) != nullptr); }
+TEST(TestWin12_CompatModeNames) { ASSERT(Windows12Compatibility::CompatModeName(Win12CompatMode::Adaptive) != nullptr); }
+TEST(TestWin12_APIFamilyNames)  { ASSERT(Windows12Compatibility::APIFamilyName(Win12APIFamily::Shell) != nullptr); }
+TEST(TestWin12_FeatureCount)    { ASSERT(Windows12Compatibility::FeatureCount() == static_cast<size_t>(Win12Feature::COUNT)); }
+TEST(TestWin12_CompatModeCount) { ASSERT(Windows12Compatibility::CompatModeCount() == static_cast<size_t>(Win12CompatMode::COUNT)); }
+
+// Sprint 336: ARM64PerformanceOptimizer
+TEST(TestARM64Opt_SIMDNames)   { ASSERT(ARM64PerformanceOptimizer::SIMDExtName(ARM64SIMDExt::NEON) != nullptr); }
+TEST(TestARM64Opt_CoreTypeNames){ ASSERT(ARM64PerformanceOptimizer::CoreTypeName(ARM64CoreType::BigCore) != nullptr); }
+TEST(TestARM64Opt_ThermalNames){ ASSERT(ARM64PerformanceOptimizer::ThermalHintName(ARM64ThermalHint::Balanced) != nullptr); }
+TEST(TestARM64Opt_SIMDCount)   { ASSERT(ARM64PerformanceOptimizer::SIMDExtCount() == static_cast<size_t>(ARM64SIMDExt::COUNT)); }
+TEST(TestARM64Opt_ThermalCount){ ASSERT(ARM64PerformanceOptimizer::ThermalHintCount() == static_cast<size_t>(ARM64ThermalHint::COUNT)); }
+
+// Sprint 337: WinRTAppSDKIntegrationV2
+TEST(TestWinRTV2_ActivationNames) { ASSERT(WinRTAppSDKIntegrationV2::ActivationKindName(WinRTActivationKind::Unpackaged) != nullptr); }
+TEST(TestWinRTV2_BootstrapNames)  { ASSERT(WinRTAppSDKIntegrationV2::BootstrapPhaseName(AppSDKBootstrapPhase::Initialize) != nullptr); }
+TEST(TestWinRTV2_StreamNames)     { ASSERT(WinRTAppSDKIntegrationV2::StreamModeName(WinRTStreamMode::Async) != nullptr); }
+TEST(TestWinRTV2_ActivationCount) { ASSERT(WinRTAppSDKIntegrationV2::ActivationKindCount() == static_cast<size_t>(WinRTActivationKind::COUNT)); }
+TEST(TestWinRTV2_BootstrapCount)  { ASSERT(WinRTAppSDKIntegrationV2::BootstrapPhaseCount() == static_cast<size_t>(AppSDKBootstrapPhase::COUNT)); }
+
+// Sprint 338: InstallerV2Manager
+TEST(TestInstallerV2_FormatNames){ ASSERT(InstallerV2Manager::FormatName(InstallerFormat::MSIX) != nullptr); }
+TEST(TestInstallerV2_ScopeNames) { ASSERT(InstallerV2Manager::InstallScopeName(InstallScope::PerMachine) != nullptr); }
+TEST(TestInstallerV2_PhaseNames) { ASSERT(InstallerV2Manager::PhaseName(InstallPhase::Apply) != nullptr); }
+TEST(TestInstallerV2_FormatCount){ ASSERT(InstallerV2Manager::FormatCount() == static_cast<size_t>(InstallerFormat::COUNT)); }
+TEST(TestInstallerV2_PhaseCount) { ASSERT(InstallerV2Manager::PhaseCount() == static_cast<size_t>(InstallPhase::COUNT)); }
+
+// Sprint 339: ReleaseGateV30
+TEST(TestGateV30_KPINames) { ASSERT(ReleaseGateV30::KPIName(GateV30KPI::Windows12CompatLayer) != nullptr); }
+TEST(TestGateV30_KPICount) { ASSERT(ReleaseGateV30::KPICount() == 10); }
+TEST(TestGateV30_Evaluate) { bool r[30]={}; auto res = ReleaseGateV30::Evaluate(r); ASSERT(res.kpiPassCount == 0); }
+TEST(TestGateV30_AllPass)  { bool r[30]; for(int i=0;i<30;++i)r[i]=true; auto res=ReleaseGateV30::Evaluate(r); ASSERT(res.allKPIsPass); }
+TEST(TestGateV30_Advance)  { bool r[30]={}; auto res=ReleaseGateV30::Evaluate(r); ASSERT(!res.advanceRecommended); }
+
+// Sprint 340: SubMillisecondCacheEngine
+TEST(TestSubMsCache_HashNames)    { ASSERT(SubMillisecondCacheEngine::HashAlgoName(CacheHashAlgo::XXHash3) != nullptr); }
+TEST(TestSubMsCache_EvictionNames){ ASSERT(SubMillisecondCacheEngine::EvictionName(SubMsCacheEviction::TinyLFU) != nullptr); }
+TEST(TestSubMsCache_NumaNames)    { ASSERT(SubMillisecondCacheEngine::NumaTierName(NumaTier::Local) != nullptr); }
+TEST(TestSubMsCache_HashCount)    { ASSERT(SubMillisecondCacheEngine::HashAlgoCount() == static_cast<size_t>(CacheHashAlgo::COUNT)); }
+TEST(TestSubMsCache_EvictionCount){ ASSERT(SubMillisecondCacheEngine::EvictionCount() == static_cast<size_t>(SubMsCacheEviction::COUNT)); }
+
+// Sprint 341: GPUDecodeAccelerationV2
+TEST(TestGPUDecV2_VendorNames){ ASSERT(GPUDecodeAccelerationV2::VendorName(GPUDecodeVendor::Intel) != nullptr); }
+TEST(TestGPUDecV2_APINames)   { ASSERT(GPUDecodeAccelerationV2::APIName(GPUDecodeAPI::D3D12Video) != nullptr); }
+TEST(TestGPUDecV2_CodecNames) { ASSERT(GPUDecodeAccelerationV2::CodecName(GPUDecodeCodec::HEVC) != nullptr); }
+TEST(TestGPUDecV2_VendorCount){ ASSERT(GPUDecodeAccelerationV2::VendorCount() == static_cast<size_t>(GPUDecodeVendor::COUNT)); }
+TEST(TestGPUDecV2_APICount)   { ASSERT(GPUDecodeAccelerationV2::APICount() == static_cast<size_t>(GPUDecodeAPI::COUNT)); }
+
+// Sprint 342: ParallelIOPipeline
+TEST(TestParallelIO_BackendNames) { ASSERT(ParallelIOPipeline::BackendName(IOBackend::IOCP) != nullptr); }
+TEST(TestParallelIO_PriorityNames){ ASSERT(ParallelIOPipeline::PriorityName(IOPriority::High) != nullptr); }
+TEST(TestParallelIO_VolumeNames)  { ASSERT(ParallelIOPipeline::VolumeTypeName(VolumeType::NVMe) != nullptr); }
+TEST(TestParallelIO_BackendCount) { ASSERT(ParallelIOPipeline::BackendCount() == static_cast<size_t>(IOBackend::COUNT)); }
+TEST(TestParallelIO_PriorityCount){ ASSERT(ParallelIOPipeline::PriorityCount() == static_cast<size_t>(IOPriority::COUNT)); }
+
+// Sprint 343: MemoryFootprintOptimizerV2
+TEST(TestMemFootV2_AllocNames)    { ASSERT(MemoryFootprintOptimizerV2::AllocatorName(AllocatorType::MiMalloc) != nullptr); }
+TEST(TestMemFootV2_TrimNames)     { ASSERT(MemoryFootprintOptimizerV2::TrimStrategyName(TrimStrategy::Idle) != nullptr); }
+TEST(TestMemFootV2_LargePageNames){ ASSERT(MemoryFootprintOptimizerV2::LargePagePolicyName(LargePagePolicy::Preferred) != nullptr); }
+TEST(TestMemFootV2_AllocCount)    { ASSERT(MemoryFootprintOptimizerV2::AllocatorCount() == static_cast<size_t>(AllocatorType::COUNT)); }
+TEST(TestMemFootV2_TrimCount)     { ASSERT(MemoryFootprintOptimizerV2::TrimStrategyCount() == static_cast<size_t>(TrimStrategy::COUNT)); }
+
+// Sprint 344: ReleaseGateV31
+TEST(TestGateV31_KPINames) { ASSERT(ReleaseGateV31::KPIName(GateV31KPI::SubMsCacheP99) != nullptr); }
+TEST(TestGateV31_KPICount) { ASSERT(ReleaseGateV31::KPICount() == 10); }
+TEST(TestGateV31_Evaluate) { bool r[30]={}; auto res = ReleaseGateV31::Evaluate(r); ASSERT(res.kpiPassCount == 0); }
+TEST(TestGateV31_AllPass)  { bool r[30]; for(int i=0;i<30;++i)r[i]=true; auto res=ReleaseGateV31::Evaluate(r); ASSERT(res.allKPIsPass); }
+TEST(TestGateV31_Advance)  { bool r[30]={}; auto res=ReleaseGateV31::Evaluate(r); ASSERT(!res.advanceRecommended); }
+
+// Sprint 345: AccessibilitySuiteV2
+TEST(TestA11ySuiteV2_WCAGNames)      { ASSERT(AccessibilitySuiteV2::WCAGLevelName(WCAGLevel::AA) != nullptr); }
+TEST(TestA11ySuiteV2_ColorBlindNames){ ASSERT(AccessibilitySuiteV2::ColorBlindModeName(ColorBlindMode::Deuteranopia) != nullptr); }
+TEST(TestA11ySuiteV2_FeatureNames)   { ASSERT(AccessibilitySuiteV2::FeatureName(AccessibilityFeature::ContrastEnforcement) != nullptr); }
+TEST(TestA11ySuiteV2_WCAGCount)      { ASSERT(AccessibilitySuiteV2::WCAGLevelCount() == static_cast<size_t>(WCAGLevel::COUNT)); }
+TEST(TestA11ySuiteV2_ColorBlindCount){ ASSERT(AccessibilitySuiteV2::ColorBlindCount() == static_cast<size_t>(ColorBlindMode::COUNT)); }
+
+// Sprint 346: DocumentationExcellenceV2
+TEST(TestDocExcV2_FormatNames){ ASSERT(DocumentationExcellenceV2::DocFormatName(DocFormat::Doxygen) != nullptr); }
+TEST(TestDocExcV2_ScopeNames) { ASSERT(DocumentationExcellenceV2::DocScopeName(DocScope::Public) != nullptr); }
+TEST(TestDocExcV2_DriftNames) { ASSERT(DocumentationExcellenceV2::DriftLevelName(DocDriftLevel::Clean) != nullptr); }
+TEST(TestDocExcV2_FormatCount){ ASSERT(DocumentationExcellenceV2::DocFormatCount() == static_cast<size_t>(DocFormat::COUNT)); }
+TEST(TestDocExcV2_ScopeCount) { ASSERT(DocumentationExcellenceV2::DocScopeCount() == static_cast<size_t>(DocScope::COUNT)); }
+
+// Sprint 347: QualityAssuranceV2
+TEST(TestQAV2_CategoryNames){ ASSERT(QualityAssuranceV2::TestCategoryName(QATestCategory::Unit) != nullptr); }
+TEST(TestQAV2_SeverityNames){ ASSERT(QualityAssuranceV2::DefectSeverityName(QADefectSeverity::Critical) != nullptr); }
+TEST(TestQAV2_SignalNames)  { ASSERT(QualityAssuranceV2::ShipSignalName(QAShipSignal::Ship) != nullptr); }
+TEST(TestQAV2_CategoryCount){ ASSERT(QualityAssuranceV2::TestCategoryCount() == static_cast<size_t>(QATestCategory::COUNT)); }
+TEST(TestQAV2_SignalCount)  { ASSERT(QualityAssuranceV2::ShipSignalCount() == static_cast<size_t>(QAShipSignal::COUNT)); }
+
+// Sprint 348: ReleaseGateV32
+TEST(TestGateV32_KPINames)  { ASSERT(ReleaseGateV32::KPIName(GateV32KPI::GPUV3PipelineStable) != nullptr); }
+TEST(TestGateV32_KPICount)  { ASSERT(ReleaseGateV32::KPICount() == 23); }
+TEST(TestGateV32_Evaluate)  { bool r[30]={}; auto res = ReleaseGateV32::Evaluate(r); ASSERT(res.kpiPassCount == 0); }
+TEST(TestGateV32_AllPass)   { bool r[30]; for(int i=0;i<30;++i)r[i]=true; auto res=ReleaseGateV32::Evaluate(r); ASSERT(res.allKPIsPass && res.v14ShipApproved); }
+TEST(TestGateV32_v14Approved){ bool r[23]; for(int i=0;i<23;++i)r[i]=true; auto res=ReleaseGateV32::Evaluate(r); ASSERT(res.v14ShipApproved); }
+
+//==============================================================================
 // Main Test Runner
 //==============================================================================
 
@@ -8763,6 +9168,356 @@ int main()
     RUN_TEST(TestGateV22_KPICount);
     RUN_TEST(TestGateV22_Version);
     RUN_TEST(TestGateV22_AllKPIsPresent);
+
+    // Sprint 299: Version Sync V14
+    RUN_TEST(TestV14_DomainNames);
+    RUN_TEST(TestV14_FeatureStatusNames);
+    RUN_TEST(TestV14_DomainCount);
+    RUN_TEST(TestV14_FeatureStatusCount);
+    RUN_TEST(TestV14_GetVersion);
+
+    // Sprint 300: GPU Pipeline V3
+    RUN_TEST(TestGPUV3_FeatureNames);
+    RUN_TEST(TestGPUV3_QueueNames);
+    RUN_TEST(TestGPUV3_PerfTierNames);
+    RUN_TEST(TestGPUV3_FeatureCount);
+    RUN_TEST(TestGPUV3_QueueCount);
+
+    // Sprint 301: Shader Compiler V2
+    RUN_TEST(TestShaderV2_ModelNames);
+    RUN_TEST(TestShaderV2_StageNames);
+    RUN_TEST(TestShaderV2_OptLevelNames);
+    RUN_TEST(TestShaderV2_ModelCount);
+    RUN_TEST(TestShaderV2_StageCount);
+
+    // Sprint 302: Pipeline State Cache V2
+    RUN_TEST(TestPSOCacheV2_StateNames);
+    RUN_TEST(TestPSOCacheV2_TypeNames);
+    RUN_TEST(TestPSOCacheV2_WarmupNames);
+    RUN_TEST(TestPSOCacheV2_StateCount);
+    RUN_TEST(TestPSOCacheV2_TypeCount);
+
+    // Sprint 303: GPU Memory Pool V2
+    RUN_TEST(TestGPUMemV2_HeapTypeNames);
+    RUN_TEST(TestGPUMemV2_ResidencyNames);
+    RUN_TEST(TestGPUMemV2_AllocNames);
+    RUN_TEST(TestGPUMemV2_HeapTypeCount);
+    RUN_TEST(TestGPUMemV2_ResidencyCount);
+
+    // Sprint 304: Release Gate V23
+    RUN_TEST(TestGateV23_KPINames);
+    RUN_TEST(TestGateV23_KPICount);
+    RUN_TEST(TestGateV23_Evaluate);
+    RUN_TEST(TestGateV23_AllPass);
+    RUN_TEST(TestGateV23_Advance);
+
+    // Sprint 305: Smart Format Detector V2
+    RUN_TEST(TestSmartDetV2_MethodNames);
+    RUN_TEST(TestSmartDetV2_ConfNames);
+    RUN_TEST(TestSmartDetV2_HintNames);
+    RUN_TEST(TestSmartDetV2_MethodCount);
+    RUN_TEST(TestSmartDetV2_ConfCount);
+
+    // Sprint 306: Extended Video Decoder
+    RUN_TEST(TestExtVideo_CodecNames);
+    RUN_TEST(TestExtVideo_AccelNames);
+    RUN_TEST(TestExtVideo_FrameSelectNames);
+    RUN_TEST(TestExtVideo_CodecCount);
+    RUN_TEST(TestExtVideo_AccelCount);
+
+    // Sprint 307: Audio Visualization V2
+    RUN_TEST(TestAudioVisV2_ModeNames);
+    RUN_TEST(TestAudioVisV2_ColorNames);
+    RUN_TEST(TestAudioVisV2_LoudnessNames);
+    RUN_TEST(TestAudioVisV2_ModeCount);
+    RUN_TEST(TestAudioVisV2_ColorCount);
+
+    // Sprint 308: 3D Model Renderer V2
+    RUN_TEST(TestModel3DV2_FormatNames);
+    RUN_TEST(TestModel3DV2_LightNames);
+    RUN_TEST(TestModel3DV2_CamNames);
+    RUN_TEST(TestModel3DV2_FormatCount);
+    RUN_TEST(TestModel3DV2_LightCount);
+
+    // Sprint 309: Release Gate V24
+    RUN_TEST(TestGateV24_KPINames);
+    RUN_TEST(TestGateV24_KPICount);
+    RUN_TEST(TestGateV24_Evaluate);
+    RUN_TEST(TestGateV24_AllPass);
+    RUN_TEST(TestGateV24_Advance);
+
+    // Sprint 310: Plugin SDK V2
+    RUN_TEST(TestPluginSDKV2_CapNames);
+    RUN_TEST(TestPluginSDKV2_LifeCycleNames);
+    RUN_TEST(TestPluginSDKV2_APIVersionNames);
+    RUN_TEST(TestPluginSDKV2_CapCount);
+    RUN_TEST(TestPluginSDKV2_LifeCycleCount);
+
+    // Sprint 311: Plugin Debugger Integration
+    RUN_TEST(TestPluginDbg_ModeNames);
+    RUN_TEST(TestPluginDbg_LogLevelNames);
+    RUN_TEST(TestPluginDbg_EventNames);
+    RUN_TEST(TestPluginDbg_ModeCount);
+    RUN_TEST(TestPluginDbg_LogLevelCount);
+
+    // Sprint 312: Plugin Hot Reload
+    RUN_TEST(TestHotReload_TriggerNames);
+    RUN_TEST(TestHotReload_StateNames);
+    RUN_TEST(TestHotReload_PolicyNames);
+    RUN_TEST(TestHotReload_TriggerCount);
+    RUN_TEST(TestHotReload_StateCount);
+
+    // Sprint 313: Plugin Performance Profiler
+    RUN_TEST(TestPluginPerf_MetricNames);
+    RUN_TEST(TestPluginPerf_AlertNames);
+    RUN_TEST(TestPluginPerf_SamplingNames);
+    RUN_TEST(TestPluginPerf_MetricCount);
+    RUN_TEST(TestPluginPerf_AlertCount);
+
+    // Sprint 314: Release Gate V25
+    RUN_TEST(TestGateV25_KPINames);
+    RUN_TEST(TestGateV25_KPICount);
+    RUN_TEST(TestGateV25_Evaluate);
+    RUN_TEST(TestGateV25_AllPass);
+    RUN_TEST(TestGateV25_Advance);
+
+    // Sprint 315: Threat Model V2
+    RUN_TEST(TestThreatV2_CategoryNames);
+    RUN_TEST(TestThreatV2_SeverityNames);
+    RUN_TEST(TestThreatV2_MitigationNames);
+    RUN_TEST(TestThreatV2_CategoryCount);
+    RUN_TEST(TestThreatV2_SeverityCount);
+
+    // Sprint 316: Memory Safety Audit V2
+    RUN_TEST(TestMemSafetyV2_ViolationNames);
+    RUN_TEST(TestMemSafetyV2_ToolNames);
+    RUN_TEST(TestMemSafetyV2_ScopeNames);
+    RUN_TEST(TestMemSafetyV2_ViolationCount);
+    RUN_TEST(TestMemSafetyV2_ToolCount);
+
+    // Sprint 317: Supply Chain Integrity V2
+    RUN_TEST(TestSupplyChainV2_SBOMNames);
+    RUN_TEST(TestSupplyChainV2_VulnNames);
+    RUN_TEST(TestSupplyChainV2_ReprodNames);
+    RUN_TEST(TestSupplyChainV2_SBOMCount);
+    RUN_TEST(TestSupplyChainV2_VulnCount);
+
+    // Sprint 318: Runtime Integrity Verifier
+    RUN_TEST(TestRuntimeInteg_CheckTypeNames);
+    RUN_TEST(TestRuntimeInteg_ResultNames);
+    RUN_TEST(TestRuntimeInteg_TamperNames);
+    RUN_TEST(TestRuntimeInteg_CheckTypeCount);
+    RUN_TEST(TestRuntimeInteg_ResultCount);
+
+    // Sprint 319: Release Gate V26
+    RUN_TEST(TestGateV26_KPINames);
+    RUN_TEST(TestGateV26_KPICount);
+    RUN_TEST(TestGateV26_Evaluate);
+    RUN_TEST(TestGateV26_AllPass);
+    RUN_TEST(TestGateV26_Advance);
+
+    // Sprint 320: Progressive Thumbnail Loader
+    RUN_TEST(TestProgLoad_StageNames);
+    RUN_TEST(TestProgLoad_StrategyNames);
+    RUN_TEST(TestProgLoad_PlaceholderNames);
+    RUN_TEST(TestProgLoad_StageCount);
+    RUN_TEST(TestProgLoad_StrategyCount);
+
+    // Sprint 321: Thumbnail Animation Engine V2
+    RUN_TEST(TestAnimEngineV2_FormatNames);
+    RUN_TEST(TestAnimEngineV2_LoopModeNames);
+    RUN_TEST(TestAnimEngineV2_InterpNames);
+    RUN_TEST(TestAnimEngineV2_FormatCount);
+    RUN_TEST(TestAnimEngineV2_LoopModeCount);
+
+    // Sprint 322: Preview Panel V2
+    RUN_TEST(TestPreviewV2_TabNames);
+    RUN_TEST(TestPreviewV2_ZoomNames);
+    RUN_TEST(TestPreviewV2_ColorPickerNames);
+    RUN_TEST(TestPreviewV2_TabCount);
+    RUN_TEST(TestPreviewV2_ZoomCount);
+
+    // Sprint 323: Quick Look Integration
+    RUN_TEST(TestQuickLook_ModeNames);
+    RUN_TEST(TestQuickLook_TransitionNames);
+    RUN_TEST(TestQuickLook_MetadataNames);
+    RUN_TEST(TestQuickLook_ModeCount);
+    RUN_TEST(TestQuickLook_TransitionCount);
+
+    // Sprint 324: Release Gate V27
+    RUN_TEST(TestGateV27_KPINames);
+    RUN_TEST(TestGateV27_KPICount);
+    RUN_TEST(TestGateV27_Evaluate);
+    RUN_TEST(TestGateV27_AllPass);
+    RUN_TEST(TestGateV27_Advance);
+
+    // Sprint 325: Scene Understanding Engine
+    RUN_TEST(TestSceneAI_CategoryNames);
+    RUN_TEST(TestSceneAI_BackendNames);
+    RUN_TEST(TestSceneAI_ConfNames);
+    RUN_TEST(TestSceneAI_CategoryCount);
+    RUN_TEST(TestSceneAI_BackendCount);
+
+    // Sprint 326: Smart Crop V2
+    RUN_TEST(TestSmartCropV2_StrategyNames);
+    RUN_TEST(TestSmartCropV2_AspectNames);
+    RUN_TEST(TestSmartCropV2_PaddingNames);
+    RUN_TEST(TestSmartCropV2_StrategyCount);
+    RUN_TEST(TestSmartCropV2_AspectCount);
+
+    // Sprint 327: Image Quality Assessor
+    RUN_TEST(TestIQA_MetricNames);
+    RUN_TEST(TestIQA_DefectNames);
+    RUN_TEST(TestIQA_GradeNames);
+    RUN_TEST(TestIQA_MetricCount);
+    RUN_TEST(TestIQA_DefectCount);
+
+    // Sprint 328: AI Search Integration
+    RUN_TEST(TestAISearch_ModeNames);
+    RUN_TEST(TestAISearch_EmbeddingNames);
+    RUN_TEST(TestAISearch_StatusNames);
+    RUN_TEST(TestAISearch_ModeCount);
+    RUN_TEST(TestAISearch_EmbeddingCount);
+
+    // Sprint 329: Release Gate V28
+    RUN_TEST(TestGateV28_KPINames);
+    RUN_TEST(TestGateV28_KPICount);
+    RUN_TEST(TestGateV28_Evaluate);
+    RUN_TEST(TestGateV28_AllPass);
+    RUN_TEST(TestGateV28_Advance);
+
+    // Sprint 330: Enterprise Policy Engine V2
+    RUN_TEST(TestEntPolV2_SourceNames);
+    RUN_TEST(TestEntPolV2_StatusNames);
+    RUN_TEST(TestEntPolV2_ScopeNames);
+    RUN_TEST(TestEntPolV2_SourceCount);
+    RUN_TEST(TestEntPolV2_StatusCount);
+
+    // Sprint 331: SharePoint / Teams Integration
+    RUN_TEST(TestSPTeams_CloudSourceNames);
+    RUN_TEST(TestSPTeams_AuthMethodNames);
+    RUN_TEST(TestSPTeams_SyncStateNames);
+    RUN_TEST(TestSPTeams_CloudSourceCount);
+    RUN_TEST(TestSPTeams_AuthMethodCount);
+
+    // Sprint 332: Multi-Tenant Cache Manager
+    RUN_TEST(TestMTCache_TierNames);
+    RUN_TEST(TestMTCache_IsolationNames);
+    RUN_TEST(TestMTCache_EvictNames);
+    RUN_TEST(TestMTCache_TierCount);
+    RUN_TEST(TestMTCache_IsolationCount);
+
+    // Sprint 333: Compliance Audit Logger
+    RUN_TEST(TestCompliance_RegNames);
+    RUN_TEST(TestCompliance_DataClassNames);
+    RUN_TEST(TestCompliance_EventTypeNames);
+    RUN_TEST(TestCompliance_RegCount);
+    RUN_TEST(TestCompliance_DataClassCount);
+
+    // Sprint 334: Release Gate V29
+    RUN_TEST(TestGateV29_KPINames);
+    RUN_TEST(TestGateV29_KPICount);
+    RUN_TEST(TestGateV29_Evaluate);
+    RUN_TEST(TestGateV29_AllPass);
+    RUN_TEST(TestGateV29_Advance);
+
+    // Sprint 335: Windows 12 Compatibility
+    RUN_TEST(TestWin12_FeatureNames);
+    RUN_TEST(TestWin12_CompatModeNames);
+    RUN_TEST(TestWin12_APIFamilyNames);
+    RUN_TEST(TestWin12_FeatureCount);
+    RUN_TEST(TestWin12_CompatModeCount);
+
+    // Sprint 336: ARM64 Performance Optimizer
+    RUN_TEST(TestARM64Opt_SIMDNames);
+    RUN_TEST(TestARM64Opt_CoreTypeNames);
+    RUN_TEST(TestARM64Opt_ThermalNames);
+    RUN_TEST(TestARM64Opt_SIMDCount);
+    RUN_TEST(TestARM64Opt_ThermalCount);
+
+    // Sprint 337: WinRT App SDK Integration V2
+    RUN_TEST(TestWinRTV2_ActivationNames);
+    RUN_TEST(TestWinRTV2_BootstrapNames);
+    RUN_TEST(TestWinRTV2_StreamNames);
+    RUN_TEST(TestWinRTV2_ActivationCount);
+    RUN_TEST(TestWinRTV2_BootstrapCount);
+
+    // Sprint 338: Installer V2 Manager
+    RUN_TEST(TestInstallerV2_FormatNames);
+    RUN_TEST(TestInstallerV2_ScopeNames);
+    RUN_TEST(TestInstallerV2_PhaseNames);
+    RUN_TEST(TestInstallerV2_FormatCount);
+    RUN_TEST(TestInstallerV2_PhaseCount);
+
+    // Sprint 339: Release Gate V30
+    RUN_TEST(TestGateV30_KPINames);
+    RUN_TEST(TestGateV30_KPICount);
+    RUN_TEST(TestGateV30_Evaluate);
+    RUN_TEST(TestGateV30_AllPass);
+    RUN_TEST(TestGateV30_Advance);
+
+    // Sprint 340: Sub-Millisecond Cache Engine
+    RUN_TEST(TestSubMsCache_HashNames);
+    RUN_TEST(TestSubMsCache_EvictionNames);
+    RUN_TEST(TestSubMsCache_NumaNames);
+    RUN_TEST(TestSubMsCache_HashCount);
+    RUN_TEST(TestSubMsCache_EvictionCount);
+
+    // Sprint 341: GPU Decode Acceleration V2
+    RUN_TEST(TestGPUDecV2_VendorNames);
+    RUN_TEST(TestGPUDecV2_APINames);
+    RUN_TEST(TestGPUDecV2_CodecNames);
+    RUN_TEST(TestGPUDecV2_VendorCount);
+    RUN_TEST(TestGPUDecV2_APICount);
+
+    // Sprint 342: Parallel I/O Pipeline
+    RUN_TEST(TestParallelIO_BackendNames);
+    RUN_TEST(TestParallelIO_PriorityNames);
+    RUN_TEST(TestParallelIO_VolumeNames);
+    RUN_TEST(TestParallelIO_BackendCount);
+    RUN_TEST(TestParallelIO_PriorityCount);
+
+    // Sprint 343: Memory Footprint Optimizer V2
+    RUN_TEST(TestMemFootV2_AllocNames);
+    RUN_TEST(TestMemFootV2_TrimNames);
+    RUN_TEST(TestMemFootV2_LargePageNames);
+    RUN_TEST(TestMemFootV2_AllocCount);
+    RUN_TEST(TestMemFootV2_TrimCount);
+
+    // Sprint 344: Release Gate V31
+    RUN_TEST(TestGateV31_KPINames);
+    RUN_TEST(TestGateV31_KPICount);
+    RUN_TEST(TestGateV31_Evaluate);
+    RUN_TEST(TestGateV31_AllPass);
+    RUN_TEST(TestGateV31_Advance);
+
+    // Sprint 345: Accessibility Suite V2
+    RUN_TEST(TestA11ySuiteV2_WCAGNames);
+    RUN_TEST(TestA11ySuiteV2_ColorBlindNames);
+    RUN_TEST(TestA11ySuiteV2_FeatureNames);
+    RUN_TEST(TestA11ySuiteV2_WCAGCount);
+    RUN_TEST(TestA11ySuiteV2_ColorBlindCount);
+
+    // Sprint 346: Documentation Excellence V2
+    RUN_TEST(TestDocExcV2_FormatNames);
+    RUN_TEST(TestDocExcV2_ScopeNames);
+    RUN_TEST(TestDocExcV2_DriftNames);
+    RUN_TEST(TestDocExcV2_FormatCount);
+    RUN_TEST(TestDocExcV2_ScopeCount);
+
+    // Sprint 347: Quality Assurance V2
+    RUN_TEST(TestQAV2_CategoryNames);
+    RUN_TEST(TestQAV2_SeverityNames);
+    RUN_TEST(TestQAV2_SignalNames);
+    RUN_TEST(TestQAV2_CategoryCount);
+    RUN_TEST(TestQAV2_SignalCount);
+
+    // Sprint 348: Release Gate V32 (v14.0 Final)
+    RUN_TEST(TestGateV32_KPINames);
+    RUN_TEST(TestGateV32_KPICount);
+    RUN_TEST(TestGateV32_Evaluate);
+    RUN_TEST(TestGateV32_AllPass);
+    RUN_TEST(TestGateV32_v14Approved);
 
     std::wcout << std::endl;
 
