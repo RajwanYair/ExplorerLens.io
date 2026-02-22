@@ -1450,3 +1450,120 @@ When user browses a folder dominated by one file type, memory should converge to
 | 174 | v8.3.0 Program Closure | ✅ Done | d9d65cf |
 
 **Block Status: COMPLETE ✅ — All 25 sprints delivered. v8.3.0 declared.**
+
+---
+
+## 19) Sprint Block 299-348 — v14.0 "Apex"
+
+> **Version:** 14.0.0 (Codename: Apex)
+> **Sprint Count:** 50 sprints (299-348)
+> **Test Count:** +250 tests (350 total in EngineTests.cpp)
+> **New Subdirectories:** `Engine/AI/`, `Engine/GPU/`, `Engine/Memory/`
+> **Status:** ✅ COMPLETE
+
+### Phase 1: GPU Pipeline V3 (Sprints 299-304)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P1 | GPU Pipeline V3 | DirectX 12 Ultimate mesh shaders, DXR, VRS — 6 sprints |
+
+### Phase 2: Format Intelligence (Sprints 305-309)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P2 | Format Intelligence | Smart detection, extended video/audio/3D decode — 5 sprints |
+
+### Phase 3: Plugin Ecosystem V2 (Sprints 310-314)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P3 | Plugin Ecosystem V2 | SDK V2, debugger integration, hot reload, perf profiler — 5 sprints |
+
+### Phase 4: Security Hardening V2 (Sprints 315-319)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P4 | Security Hardening V2 | STRIDE threat model, memory safety, SBOM, runtime integrity — 5 sprints |
+
+### Phase 5: UX Polish V2 (Sprints 320-324)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P5 | UX Polish V2 | Progressive loader, animation engine, preview panel, Quick Look — 5 sprints |
+
+### Phase 6: AI Intelligence V2 (Sprints 325-329)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P6 | AI Intelligence V2 | Scene understanding, smart crop, IQA, semantic search — 5 sprints |
+
+### Phase 7: Enterprise & Cloud V2 (Sprints 330-334)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P7 | Enterprise & Cloud V2 | GPO/MDM policy, M365 cloud, multi-tenant cache, compliance audit — 5 sprints |
+
+### Phase 8: Platform Modernization (Sprints 335-339)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P8 | Platform Modernization | Win12 compat, ARM64 SIMD, WinRT App SDK V2, Installer V2 — 5 sprints |
+
+### Phase 9: Performance Excellence (Sprints 340-344)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P9 | Performance Excellence | Sub-ms cache, GPU decode V2, parallel I/O, memory footprint — 5 sprints |
+
+### Phase 10: v14.0 Release (Sprints 345-348)
+| Phase | Title | Key Deliverable |
+|-------|-------|-----------------|
+| P10 | v14.0 Release | Accessibility V2, doc excellence, QA V2, Release Gate V32 — 4 sprints |
+
+### Execution Log
+
+| Sprint | Title | Status | Commit |
+|--------|-------|--------|--------|
+| 299 | Version Sync V14 | ✅ Done | 3cc124c |
+| 300 | GPU Pipeline V3 | ✅ Done | c5055cc |
+| 301 | Shader Compiler V2 | ✅ Done | 56bbd37 |
+| 302 | Pipeline State Cache V2 | ✅ Done | fa5c72a |
+| 303 | GPU Memory Pool V2 | ✅ Done | a324eb4 |
+| 304 | Release Gate V23 | ✅ Done | a11b4a3 |
+| 305 | Smart Format Detector V2 | ✅ Done | d9951e7 |
+| 306 | Extended Video Decoder | ✅ Done | 42f85bb |
+| 307 | Audio Visualization V2 | ✅ Done | ae70cb1 |
+| 308 | 3D Model Renderer V2 | ✅ Done | 2570c1b |
+| 309 | Release Gate V24 | ✅ Done | 2b1974c |
+| 310 | Plugin SDK V2 | ✅ Done | 0bbf80f |
+| 311 | Plugin Debugger Integration | ✅ Done | 2f92ffe |
+| 312 | Plugin Hot Reload | ✅ Done | 3e5c7ba |
+| 313 | Plugin Performance Profiler | ✅ Done | e906e71 |
+| 314 | Release Gate V25 | ✅ Done | 6801afa |
+| 315 | Threat Model V2 | ✅ Done | e6d53ea |
+| 316 | Memory Safety Audit V2 | ✅ Done | 8630da3 |
+| 317 | Supply Chain Integrity V2 | ✅ Done | 96f7bd7 |
+| 318 | Runtime Integrity Verifier | ✅ Done | 59836d2 |
+| 319 | Release Gate V26 | ✅ Done | 3090cd6 |
+| 320 | Progressive Thumbnail Loader | ✅ Done | 59f54aa |
+| 321 | Thumbnail Animation Engine V2 | ✅ Done | 12e2bd8 |
+| 322 | Preview Panel V2 | ✅ Done | c7a0887 |
+| 323 | Quick Look Integration | ✅ Done | 04bc929 |
+| 324 | Release Gate V27 | ✅ Done | acda567 |
+| 325 | Scene Understanding Engine | ✅ Done | 6698188 |
+| 326 | Smart Crop V2 | ✅ Done | e3c0c7b |
+| 327 | Image Quality Assessor | ✅ Done | b2d3026 |
+| 328 | AI Search Integration | ✅ Done | 4ec7415 |
+| 329 | Release Gate V28 | ✅ Done | b267949 |
+| 330 | Enterprise Policy Engine V2 | ✅ Done | 75a5d98 |
+| 331 | SharePoint & Teams Integration | ✅ Done | c4df197 |
+| 332 | Multi-Tenant Cache Manager | ✅ Done | 49cc5a3 |
+| 333 | Compliance Audit Logger | ✅ Done | a9a8e16 |
+| 334 | Release Gate V29 | ✅ Done | 3b5c853 |
+| 335 | Windows 12 Compatibility | ✅ Done | d9db95b |
+| 336 | ARM64 Performance Optimizer | ✅ Done | 3c1f012 |
+| 337 | WinRT App SDK Integration V2 | ✅ Done | 54637ef |
+| 338 | Installer V2 Manager | ✅ Done | 70aaf49 |
+| 339 | Release Gate V30 | ✅ Done | 5eb5873 |
+| 340 | Sub-Millisecond Cache Engine | ✅ Done | f0a159c |
+| 341 | GPU Decode Acceleration V2 | ✅ Done | 1b04da1 |
+| 342 | Parallel I/O Pipeline | ✅ Done | dfd5601 |
+| 343 | Memory Footprint Optimizer V2 | ✅ Done | 312df4f |
+| 344 | Release Gate V31 | ✅ Done | 8cc9ebe |
+| 345 | Accessibility Suite V2 | ✅ Done | 4efd1c2 |
+| 346 | Documentation Excellence V2 | ✅ Done | d47c50d |
+| 347 | Quality Assurance V2 | ✅ Done | 3b41e69 |
+| 348 | Release Gate V32 (v14.0 Final) | ✅ Done | 3e13dd9 |
+
+**Block Status: COMPLETE ✅ — All 50 sprints delivered. v14.0 "Apex" declared. 350 total engine tests. v14ShipApproved.**
