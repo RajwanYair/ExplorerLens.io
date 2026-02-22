@@ -5,12 +5,12 @@
 DarkThumbs is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 13.0.0
+- **Version:** 14.0.0 (Codename: Apex)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.20+ (Engine) + MSBuild (Shell/Manager)
 - **GPU:** DirectX 11 + DirectX 12 + Vulkan Compute with CPU fallback
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-- **Sprint Count:** 298 completed (v13.0.0 block: Sprints 249–298 ✅)
+- **Sprint Count:** 348 completed (v14.0.0 block: Sprints 299–348 ✅)
 - **Build Status:** 0 errors, 0 warnings
 
 ## Architecture
@@ -31,11 +31,13 @@ DarkThumbsEngine.lib       — Core decode + render pipeline
 | `Engine/Core/`                 | Decode pipeline, GPU renderer, resource management                |
 | `Engine/Decoders/`             | Format-specific decoders (25+ total, incl. CAD/glTF/Scientific)   |
 | `Engine/Plugin/`               | Plugin ecosystem (trust chain, sandbox, compat kit, ref pack)     |
-| `Engine/Memory/`               | Memory management (compactor, hot-mode, pressure controller)      |
-| `Engine/Pipeline/`             | Pipeline stages (fallback engine, zero-copy upload)               |
-| `Engine/Cache/`                | Cache management (adaptive budget manager)                        |
+| `Engine/Memory/`               | Memory management (compactor, hot-mode, pressure controller, footprint optimizer) |
+| `Engine/Pipeline/`             | Pipeline stages (fallback engine, zero-copy upload, parallel I/O) |
+| `Engine/Cache/`                | Cache management (adaptive budget, PSO cache, sub-ms cache, multi-tenant) |
 | `Engine/Utils/`                | Utilities (ARM64 support, matrix validation, installer lifecycle) |
 | `Engine/Tests/`                | GTest unit tests + Google Benchmark                               |
+| `Engine/AI/`                   | AI/ML modules (scene understanding, smart crop, IQA, search)      |
+| `Engine/GPU/`                  | GPU decode acceleration (NVDEC/QuickSync/AMF vendor routing)      |
 | `build-scripts/`               | PowerShell build automation                                       |
 | `build-scripts/core/`          | Build-Library-Core.ps1 — unified build module                     |
 | `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.)                 |
@@ -43,7 +45,7 @@ DarkThumbsEngine.lib       — Core decode + render pipeline
 | `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                             |
 | `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                                  |
 | `docs/`                        | All documentation                                                 |
-| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_298.md)            |
+| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_348.md)            |
 | `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                                 |
 
 ## Build Commands
@@ -102,7 +104,7 @@ ctest --test-dir build -C Release --output-on-failure
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~937 unit tests (100 original + 337 Sprints 150–174 + 250 Sprints 199–248 + 250 Sprints 249–298), 5 benchmarks
+- **Test count:** ~1187 unit tests (100 original + 337 Sprints 150–174 + 250 Sprints 199–248 + 250 Sprints 249–298 + 250 Sprints 299–348), 5 benchmarks
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -138,10 +140,10 @@ external/
 - The `Release/` pattern in `.gitignore` blocks `Engine/Release/` — use `git add -f` for files there
 - Stale `CMakeCache.txt` files from directory renames are auto-detected by `Build-Library-Core.ps1`
 
-## Sprint Execution Guidance (v13.0+)
+## Sprint Execution Guidance (v14.0+)
 
-- **Current version:** v13.0.0 (Sprints 249-298 complete)
-- **Next roadmap block:** Sprints 299+ (next improvement plan TBD)
+- **Current version:** v14.0.0 "Apex" (Sprints 299-348 complete)
+- **Next roadmap block:** Sprints 349+ (next improvement plan TBD)
 - **Execution package docs:** `docs/development/sprints-v8/SPRINT_XX.md`
 - **Source of truth:** `MASTER_PLAN.md`
 - **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
@@ -213,18 +215,18 @@ external/
 
 ## v13.0.0 Block Summary (Sprints 249–298 ✅)
 
-| Phase | Sprints | Title                                                                                             |
-| ----- | ------- | ------------------------------------------------------------------------------------------------- |
+| Phase | Sprints | Title                                                                                              |
+| ----- | ------- | -------------------------------------------------------------------------------------------------- |
 | P1    | 249–254 | Version Sync, Architecture Docs, Quality Foundation, CI Hardening, Perf Baseline, Release Gate V16 |
-| P2    | 255–259 | DPX/Cineon, APNG, Text Preview, DICOM V2, FITS V2 (format expansion)                              |
-| P3    | 260–264 | 3MF/USD Decoders, Release Gate V17, D3D12 Async Compute, Async Shell Registration, SIMD Pipeline  |
-| P4    | 265–269 | Parallel Batch, Persistent Cache, Release Gate V18, ARM64 Detection V2, MSIX Packaging            |
-| P5    | 270–274 | Win11 24H2, Test Suite V2, Fuzz Testing, Release Gate V19, Vulkan Compute Activation              |
-| P6    | 275–279 | Plugin Marketplace V3, AI Thumbnails, Spreadsheet Preview, USD/USDZ, Auto-Update Engine           |
-| P7    | 280–284 | Release Gate V20 (v12.0), Structured Data, Notebook Preview, Database Preview, Legacy Images      |
-| P8    | 285–289 | Vector Formats (CDR/Visio), Scientific Data (HDF5/NetCDF), NIfTI, CAD (STEP/IGES), HDR Display    |
-| P9    | 290–294 | Per-Monitor DPI V3, Shell Overlay, Cache Warming, Multi-GPU Load Balancer, Release Gate V21       |
-| P10   | 295–298 | Accessibility Pipeline, Telemetry Analytics, Cloud Storage, Release Gate V22 (v13.0 Final)        |
+| P2    | 255–259 | DPX/Cineon, APNG, Text Preview, DICOM V2, FITS V2 (format expansion)                               |
+| P3    | 260–264 | 3MF/USD Decoders, Release Gate V17, D3D12 Async Compute, Async Shell Registration, SIMD Pipeline   |
+| P4    | 265–269 | Parallel Batch, Persistent Cache, Release Gate V18, ARM64 Detection V2, MSIX Packaging             |
+| P5    | 270–274 | Win11 24H2, Test Suite V2, Fuzz Testing, Release Gate V19, Vulkan Compute Activation               |
+| P6    | 275–279 | Plugin Marketplace V3, AI Thumbnails, Spreadsheet Preview, USD/USDZ, Auto-Update Engine            |
+| P7    | 280–284 | Release Gate V20 (v12.0), Structured Data, Notebook Preview, Database Preview, Legacy Images       |
+| P8    | 285–289 | Vector Formats (CDR/Visio), Scientific Data (HDF5/NetCDF), NIfTI, CAD (STEP/IGES), HDR Display     |
+| P9    | 290–294 | Per-Monitor DPI V3, Shell Overlay, Cache Warming, Multi-GPU Load Balancer, Release Gate V21        |
+| P10   | 295–298 | Accessibility Pipeline, Telemetry Analytics, Cloud Storage, Release Gate V22 (v13.0 Final)         |
 
 ## New Patterns Discovered in v13.0.0 Sprints
 
@@ -236,3 +238,34 @@ external/
 - **Release gates:** Gates V16–V22, culminating in V22 (23 KPIs) for v13.0 final release
 - **Auto-update:** AutoUpdateEngine (4 channels: Stable/Beta/Dev/Canary, semantic versioning)
 - **AI integration:** AIThumbnailEnhancer (7 enhancements, 4 backends: DirectML/ONNX/OpenVINO/CPU)
+
+## v14.0.0 Block Summary (Sprints 299–348 ✅)
+
+| Phase | Sprints | Title                                                                                                    |
+| ----- | ------- | -------------------------------------------------------------------------------------------------------- |
+| P1    | 299–304 | Version Sync V14, GPU Pipeline V3, Shader Compiler V2, PSO Cache V2, GPU Memory Pool V2, Gate V23        |
+| P2    | 305–309 | Smart Format Detector V2, Extended Video, Audio Vis V2, 3D Renderer V2, Release Gate V24                 |
+| P3    | 310–314 | Plugin SDK V2, Plugin Debugger, Plugin Hot Reload, Plugin Perf Profiler, Release Gate V25                |
+| P4    | 315–319 | Threat Model V2, Memory Safety Audit V2, Supply Chain V2, Runtime Integrity, Release Gate V26            |
+| P5    | 320–324 | Progressive Thumbnail Loader, Animation Engine V2, Preview Panel V2, Quick Look, Release Gate V27        |
+| P6    | 325–329 | Scene Understanding, Smart Crop V2, Image Quality Assessor, AI Search, Release Gate V28                  |
+| P7    | 330–334 | Enterprise Policy V2, SharePoint/Teams, Multi-Tenant Cache, Compliance Audit, Release Gate V29           |
+| P8    | 335–339 | Windows 12 Compat, ARM64 Perf Optimizer, WinRT App SDK V2, Installer V2, Release Gate V30               |
+| P9    | 340–344 | Sub-Ms Cache Engine, GPU Decode V2, Parallel I/O, Memory Footprint V2, Release Gate V31                  |
+| P10   | 345–348 | Accessibility Suite V2, Doc Excellence V2, Quality Assurance V2, Release Gate V32 (v14.0 Final)          |
+
+## New Patterns Discovered in v14.0.0 Sprints
+
+- **New Engine subdirectories:** `Engine/AI/` (scene understanding, smart crop, IQA, semantic search), `Engine/GPU/` (GPU decode vendor routing), `Engine/Memory/` (footprint optimizer V2)
+- **Two release gate API patterns:**
+  - Gates V23–V28: `Evaluate(const std::vector<GateVxxResult>&)` → `GateVxxVerdict { bool approved; uint32_t passed; uint32_t failed; }`
+  - Gates V29–V32: `Evaluate(bool kpiResults[])` → `ReleaseGateVxxResult { bool allKPIsPass; uint8_t kpiPassCount; float gateScore; bool advanceRecommended/v14ShipApproved; }`
+- **Final gate KPI count:** ReleaseGateV32 has 23 KPIs; first value is `GPUV3PipelineStable` (index 0)
+- **AI/ML module pattern:** Classes in `Engine/AI/` use `SceneMLBackend` / `EmbeddingModel` enum for backend selection (DirectML/ONNX/OpenVINO/CPU)
+- **GPU decode routing:** `GPUDecodeAccelerationV2` in `Engine/GPU/` routes by `GPUDecodeVendor` at runtime; capability probe at startup
+- **Plugin V2 pattern:** `PluginSDKV2Capability` bitmask (9 flags), lifecycle via `PluginSDKV2LifeCycle`, hot-reload via shadow DLL copy
+- **Security pattern:** Supply chain via `SupplyChainIntegrityV2` (SPDX/CycloneDX SBOM + OSV.dev CVE feed); runtime PE hash in `RuntimeIntegrityVerifier`
+- **Enterprise pattern:** Policy source hierarchy: `EnterprisePolicyEngineV2` (GPO → Intune → ConfigMgr → Manual)
+- **Sub-ms cache:** `SubMillisecondCacheEngine` uses robin-hood open-addressing with `CacheHashAlgo::XXH3` default and NUMA-local allocation
+- **CMakeLists.txt insertion:** New headers go after last Sprint 298 entry, grouped under `# Sprint 299-348: v14.0 "Apex" Block` comment
+- **EngineTests.cpp insertion:** Includes before `#include <iostream>`, TEST() before `// Main Test Runner`, RUN_TEST() before `// Sprint 6: Isolation`
