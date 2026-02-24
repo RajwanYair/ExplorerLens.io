@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build minizip-ng 4.0.10 (Modern ZIP Library)
+# ExplorerLens v7.0 - Build minizip-ng 4.0.10 (Modern ZIP Library)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -38,11 +38,11 @@ try {
     # CMake options for minizip-ng
     $cmakeOptions = @{
         'BUILD_SHARED_LIBS' = 'OFF'
-        'MZ_COMPAT'         = 'OFF'
+        'MZ_COMPAT'         = 'ON'
         'MZ_ZLIB'           = 'ON'
         'MZ_BZIP2'          = 'OFF'
-        'MZ_LZMA'           = 'ON'
-        'MZ_ZSTD'           = 'ON'
+        'MZ_LZMA'           = 'OFF'
+        'MZ_ZSTD'           = 'OFF'
         'MZ_OPENSSL'        = 'OFF'
         'MZ_LIBCOMP'        = 'OFF'
         'MZ_FETCH_LIBS'     = 'OFF'
@@ -80,3 +80,4 @@ try {
 }
 
 Get-ChildItem $buildDir -Recurse -Filter "*.lib" | Format-Table FullName, Length
+

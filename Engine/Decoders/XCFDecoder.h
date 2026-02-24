@@ -1,17 +1,17 @@
 #pragma once
 //==============================================================================
 // XCF (GIMP Native) Decoder
-// Sprint 185: Open image editor format support
+// Open image editor format support
 // Parses GIMP XCF file headers to extract canvas info.
 // Renders flattened composites from the first visible layer.
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include <cstdint>
 #include <string>
 #include <vector>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // XCF color modes
@@ -76,4 +76,5 @@ namespace DarkThumbs::Decoders {
         static uint32_t ReadBE32(const uint8_t* data);
     };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

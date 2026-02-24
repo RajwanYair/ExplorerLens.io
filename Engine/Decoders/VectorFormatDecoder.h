@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 285: CDR/Visio Vector Decoder
+// ExplorerLens Engine — CDR/Visio Vector Decoder
 // CorelDRAW (.cdr) and Visio (.vsd/.vsdx) vector format thumbnail generation.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Vector format type
 enum class VectorFormat : uint8_t {
@@ -99,4 +99,5 @@ public:
     static constexpr size_t ElementCount() { return static_cast<size_t>(VectorElement::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

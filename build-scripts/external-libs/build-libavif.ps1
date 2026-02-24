@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build libavif 1.3.0 (AV1 Image Format)
+# ExplorerLens v7.0 - Build libavif 1.3.0 (AV1 Image Format)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -67,14 +67,14 @@ set(dav1d_FOUND TRUE)
     # CMake options for libavif
     $cmakeOptions = @{
         'CMAKE_BUILD_TYPE'                          = 'Release'
-        'BUILD_SHARED_LIBS'                         = 'OFF'
+        'BUILD_SHARED_LIBS'                         = 'ON'
         'AVIF_CODEC_DAV1D'                          = 'SYSTEM'
-        'AVIF_LIBYUV'                               = 'OFF'
+        'AVIF_LIBYUV'                               = 'ON'
         'CMAKE_PREFIX_PATH'                         = $dav1dDir
-        'AVIF_CODEC_AOM'                            = 'OFF'
-        'AVIF_BUILD_APPS'                           = 'OFF'
-        'AVIF_BUILD_TESTS'                          = 'OFF'
-        'AVIF_BUILD_EXAMPLES'                       = 'OFF'
+        'AVIF_CODEC_AOM'                            = 'ON'
+        'AVIF_BUILD_APPS'                           = 'ON'
+        'AVIF_BUILD_TESTS'                          = 'ON'
+        'AVIF_BUILD_EXAMPLES'                       = 'ON'
         'AVIF_ENABLE_EXPERIMENTAL_GAIN_MAP'         = 'ON'
         'AVIF_ENABLE_EXPERIMENTAL_SAMPLE_TRANSFORM' = 'ON'
     }
@@ -100,4 +100,5 @@ set(dav1d_FOUND TRUE)
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+
 

@@ -1,16 +1,17 @@
 //==============================================================================
 // SGI Image Decoder — Implementation
-// Sprint 186: SGI/RGB & Legacy Format Support
+// SGI/RGB & Legacy Format Support
 // Handles SGI image format (IRIS RGB) with RLE and verbatim encoding.
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "SGIDecoder.h"
 #include <fstream>
 #include <cstring>
 #include <algorithm>
+#include <cctype>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // SGI file header (big-endian, 512 bytes)
@@ -50,7 +51,8 @@ namespace DarkThumbs::Decoders {
     bool SGIDecoder::IsSGIExtension(const std::string& ext)
     {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         return lower == ".sgi" || lower == ".rgb" || lower == ".rgba" ||
                lower == ".bw"  || lower == ".int" || lower == ".inta";
     }
@@ -131,6 +133,7 @@ namespace DarkThumbs::Decoders {
     SGIDecoder::DecodeResult SGIDecoder::Decode(const std::string& filePath,
                                                  uint32_t targetWidth) const
     {
+        (void)targetWidth;
         DecodeResult result;
         ImageInfo info = ReadInfo(filePath);
         if (!info.IsValid()) {
@@ -250,4 +253,5 @@ namespace DarkThumbs::Decoders {
         return result;
     }
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

@@ -10,7 +10,7 @@
 
 ## Overview
 
-Production Baseline Verification establishes confidence that DarkThumbs v5.3.0 is stable, performant, and ready for end-user deployment. This phase validates all critical functionality after completing the Build System Recovery (Priority 0).
+Production Baseline Verification establishes confidence that ExplorerLens v5.3.0 is stable, performant, and ready for end-user deployment. This phase validates all critical functionality after completing the Build System Recovery (Priority 0).
 
 ## Testing Framework
 
@@ -38,14 +38,14 @@ Production Baseline Verification establishes confidence that DarkThumbs v5.3.0 i
 - **Tests:**
   - All 8 compression libraries present
   - All 2 image libraries built
-  - CBXShell.dll exists (1,354 KB)
-  - CBXManager.exe exists (293 KB)
+  - LENSShell.dll exists (1,354 KB)
+  - LENSManager.exe exists (293 KB)
 - **Pass Criteria:** All libraries found with correct sizes
 
 #### 2. COM Registration & Installation ✅
 - **Purpose:** Validate shell extension registration
 - **Tests:**
-  - CBXShell.dll registration via regsvr32
+  - LENSShell.dll registration via regsvr32
   - Shell extension handlers for .cbz, .cbr, .cb7, .cbt, .epub
   - Approved shell extensions registry entry
 - **Pass Criteria:** All registry entries present and correct
@@ -136,7 +136,7 @@ Production Baseline Verification establishes confidence that DarkThumbs v5.3.0 i
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║     DarkThumbs v5.3.0 Production Baseline Verification      ║
+║     ExplorerLens v5.3.0 Production Baseline Verification      ║
 ║              Priority 1 Testing Suite v1.0.0                ║
 ╚══════════════════════════════════════════════════════════════╝
 
@@ -146,12 +146,12 @@ Production Baseline Verification establishes confidence that DarkThumbs v5.3.0 i
 
 === Test Suite 1: Build Verification ===
   ✓ Build verification passed (all libraries present)
-  ✓ CBXShell.dll present (1354 KB)
-  ✓ CBXManager.exe present (293 KB)
+  ✓ LENSShell.dll present (1354 KB)
+  ✓ LENSManager.exe present (293 KB)
 
 === Test Suite 2: COM Registration & Installation ===
-  ✓ CBXShell.dll found
-  ✓ CBXShell.dll registration successful
+  ✓ LENSShell.dll found
+  ✓ LENSShell.dll registration successful
   ✓ All 5 shell extension handlers registered
 
 📊 Test Suite Results:
@@ -220,7 +220,7 @@ Same as above, plus:
 
 #### COM Registration Fails
 
-**Symptom:** "CBXShell.dll registration failed"
+**Symptom:** "LENSShell.dll registration failed"
 
 **Causes:**
 - Not running as Administrator
@@ -231,13 +231,13 @@ Same as above, plus:
 ```powershell
 # Run PowerShell as Administrator
 # Unregister first
-regsvr32 /u x64\Release\CBXShell.dll
+regsvr32 /u x64\Release\LENSShell.dll
 
 # Kill Explorer (releases locks)
 Stop-Process -Name explorer -Force
 
 # Re-register
-regsvr32 x64\Release\CBXShell.dll
+regsvr32 x64\Release\LENSShell.dll
 
 # Restart Explorer
 Start-Process explorer
@@ -248,7 +248,7 @@ Start-Process explorer
 **Symptom:** "No shell extension handlers found"
 
 **Causes:**
-- CBXShell.dll not registered
+- LENSShell.dll not registered
 - Registry permissions
 - User vs. Machine registration
 
@@ -301,7 +301,7 @@ Get-ChildItem test-archives\
 ### 2. Context Menu Test
 
 1. Right-click on `test-comic.cbz`
-2. Check for "CBXShell" or thumbnail-related context menu items
+2. Check for "LENSShell" or thumbnail-related context menu items
 3. Verify no duplicate or conflicting entries
 
 **Expected:** Clean context menu integration
@@ -391,3 +391,4 @@ Upon completing Priority 1:
 **Document Version:** 1.0.0  
 **Last Updated:** January 12, 2026  
 **Next Review:** Upon Priority 1 completion
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// CodeCoverageIntegration — Sprint 190 Implementation
+// CodeCoverageIntegration
 // OpenCppCoverage + LibFuzzer infrastructure
 //==============================================================================
 
@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <sstream>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 CodeCoverageIntegration::CodeCoverageIntegration()
     : m_thresholds(CoverageThresholds::ForCI())
@@ -26,7 +26,7 @@ std::wstring CodeCoverageIntegration::GenerateCoverageCommand(
     // Generate OpenCppCoverage command line
     std::wstring cmd = L"OpenCppCoverage.exe";
     cmd += L" --sources Engine\\";
-    cmd += L" --sources CBXShell\\";
+    cmd += L" --sources LENSShell\\";
     cmd += L" --excluded_sources Engine\\Tests\\";
     cmd += L" --excluded_sources external\\";
     cmd += L" --export_type cobertura:" + outputDir + L"\\coverage.xml";
@@ -163,4 +163,5 @@ std::vector<std::wstring> CodeCoverageIntegration::GetFuzzableDecoders()
     };
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

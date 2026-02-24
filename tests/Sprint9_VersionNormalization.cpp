@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 9 Tests: Version Normalization & v7.0 Release Notes
+// ExplorerLens — Sprint 9 Tests: Version Normalization & v7.0 Release Notes
 // Tests version scanning, stale reference detection, decoder status registry,
 // release notes generation, and documentation integrity reporting.
 //==============================================================================
@@ -11,7 +11,7 @@
 // Header under test
 #include "../Engine/Utils/VersionNormalization.h"
 
-using namespace DarkThumbs::Engine::Docs;
+using namespace ExplorerLens::Engine::Docs;
 
 //==============================================================================
 // VersionInfo Tests
@@ -71,7 +71,7 @@ TEST(VersionInfo, Inequality)
 TEST(VersionScanner, DetectStaleVersion)
 {
     VersionScanner scanner;
-    std::string content = "DarkThumbs v5.4.0 - Released 2024\n"
+    std::string content = "ExplorerLens v5.4.0 - Released 2024\n"
                           "Current version: v7.0.0\n"
                           "Previously v6.2 was the last release.\n";
     auto refs = scanner.ScanContent("test.md", content);
@@ -85,7 +85,7 @@ TEST(VersionScanner, DetectStaleVersion)
 TEST(VersionScanner, NoStaleInCleanContent)
 {
     VersionScanner scanner;
-    std::string content = "DarkThumbs v7.0.0\n"
+    std::string content = "ExplorerLens v7.0.0\n"
                           "All decoders updated to latest.\n";
     auto refs = scanner.ScanContent("clean.md", content);
     EXPECT_EQ(refs.size(), 0u);
@@ -349,3 +349,4 @@ TEST(StaleTracker, ProgressPercent)
     // 3/12 = 25%
     EXPECT_DOUBLE_EQ(tracker.ProgressPercent(), 25.0);
 }
+

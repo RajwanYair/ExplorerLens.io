@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 168 — Hot-Mode Directory Engine
+// Hot-Mode Directory Engine
 // Background index, change notification watcher, pre-warm thumbnail generation
 // for directories with > 50 images (Explorer hot paths).
 
@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace DarkThumbs::Memory {
+namespace ExplorerLens::Memory {
 
 // ─── Hot-mode thresholds ─────────────────────────────────────────────────────
 
@@ -119,7 +119,7 @@ public:
 
         for (uint32_t i = startIndex; i < end; ++i) {
             ++result.filesAttempted;
-            // stub: real impl calls DarkThumbsEngine::DecodeThumbnail
+            // stub: real impl calls ExplorerLensEngine::DecodeThumbnail
             snap.entries[i].thumbnailCached = true;
             snap.entries[i].prewarmPending  = false;
             result.bytesUsed += 4 * 256 * 256;  // 256 KB per thumbnail BGRA estimate
@@ -140,4 +140,5 @@ private:
     ChangeCallback      m_changeCallback;
 };
 
-} // namespace DarkThumbs::Memory
+} // namespace ExplorerLens::Memory
+

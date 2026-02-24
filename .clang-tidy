@@ -1,6 +1,5 @@
 ---
-# DarkThumbs v7.1.0 - Clang-Tidy Configuration
-# Sprint 63: Code Quality Static Analysis
+# ExplorerLens.io v14.0.0 - Clang-Tidy Configuration
 
 Checks: >
   -*,
@@ -35,7 +34,7 @@ Checks: >
 
 WarningsAsErrors: ""
 
-HeaderFilterRegex: '(Engine|CBXShell|CBXManager)/.*\.h$'
+HeaderFilterRegex: '(Engine|LENSShell|LENSManager)/.*\.h$'
 
 CheckOptions:
   - key: readability-identifier-naming.ClassCase

@@ -1,7 +1,7 @@
 # AI Assistant Build Instructions
 
 **For:** GitHub Copilot, AI coding assistants  
-**Project:** DarkThumbs  
+**Project:** ExplorerLens  
 **Environment:** Persistent dev tools (no searching!)  
 **Last Updated:** February 9, 2026
 
@@ -24,7 +24,7 @@ No more searching for MSBuild, CMake, or MSVC. Everything is pre-configured.
 
 ```powershell
 # Check environment is loaded:
-Show-DarkThumbsInfo
+Show-ExplorerLensInfo
 
 # Test all tools:
 Test-BuildTools
@@ -111,7 +111,7 @@ msbuild Project.vcxproj /fl /flp:LogFile=build.log
 
 ```powershell
 # Use run_in_terminal with isBackground=true or wait 60+ seconds
-msbuild CBXShell.vcxproj /p:Configuration=Release /p:Platform=x64 /fl /flp:LogFile=cbxshell-build.log
+msbuild LENSShell.vcxproj /p:Configuration=Release /p:Platform=x64 /fl /flp:LogFile=LENSShell-build.log
 ```
 
 ### Step 2: Wait (Do Nothing)
@@ -119,7 +119,7 @@ msbuild CBXShell.vcxproj /p:Configuration=Release /p:Platform=x64 /fl /flp:LogFi
 ```powershell
 # Wait adequate time based on project:
 # - Engine library: 45 seconds minimum
-# - CBXShell DLL: 60 seconds minimum  
+# - LENSShell DLL: 60 seconds minimum  
 # - Full solution: 180 seconds (3 minutes) minimum
 
 # DO NOT run any commands during this time
@@ -129,21 +129,21 @@ msbuild CBXShell.vcxproj /p:Configuration=Release /p:Platform=x64 /fl /flp:LogFi
 
 ```powershell
 # Use list_dir tool
-list_dir("c:\\Users\\ryair\\...\\CBXShell\\x64\\Release")
+list_dir("c:\\Users\\ryair\\...\\LENSShell\\x64\\Release")
 
 # Use file_search tool
-file_search("CBXShell/x64/Release/*.dll")
+file_search("LENSShell/x64/Release/*.dll")
 
 # Check log file with read_file tool
-read_file("cbxshell-build.log", startLine=1, endLine=50)
+read_file("LENSShell-build.log", startLine=1, endLine=50)
 ```
 
 ### Step 4: Verify Success
 
 ```powershell
 # Check if DLL exists and is recent (< 5 minutes old)
-if (Test-Path 'CBXShell\x64\Release\CBXShell.dll') {
-    $dll = Get-Item 'CBXShell\x64\Release\CBXShell.dll'
+if (Test-Path 'LENSShell\x64\Release\LENSShell.dll') {
+    $dll = Get-Item 'LENSShell\x64\Release\LENSShell.dll'
     $age = (Get-Date) - $dll.LastWriteTime
     if ($age.TotalMinutes -lt 5) {
         Write-Host "✓ Build successful"
@@ -180,9 +180,9 @@ Checks all expected output files exist and are recent.
 
 | Project | Configuration | Minimum Wait | Safe Wait |
 |---------|--------------|--------------|-----------|
-| DarkThumbsEngine.lib | Release x64 | 30 sec | 60 sec |
-| CBXShell.dll | Release x64 | 45 sec | 90 sec |
-| CBXManager.exe | Release x64 | 15 sec | 30 sec |
+| ExplorerLensEngine.lib | Release x64 | 30 sec | 60 sec |
+| LENSShell.dll | Release x64 | 45 sec | 90 sec |
+| LENSManager.exe | Release x64 | 15 sec | 30 sec |
 | Full Solution | Release x64 | 180 sec (3 min) | 300 sec (5 min) |
 
 **Always use "Safe Wait" time to be certain build completes.**
@@ -194,7 +194,7 @@ Checks all expected output files exist and are recent.
 ```powershell
 # AI Assistant Action 1: Start build
 # Tool: run_in_terminal
-# Command: msbuild Engine/DarkThumbsEngine.vcxproj /p:Configuration=Release /p:Platform=x64 /fl /flp:LogFile=engine-build.log
+# Command: msbuild Engine/ExplorerLensEngine.vcxproj /p:Configuration=Release /p:Platform=x64 /fl /flp:LogFile=engine-build.log
 # isBackground: true (or wait without interruption)
 
 # AI Assistant Action 2: Wait (do nothing for 60 seconds)
@@ -202,11 +202,11 @@ Checks all expected output files exist and are recent.
 
 # AI Assistant Action 3: Check build output via file system
 # Tool: list_dir
-# Path: c:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Release
+# Path: c:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Release
 
 # AI Assistant Action 4: Verify file exists
 # Tool: file_search
-# Query: Engine/Release/DarkThumbsEngine.lib
+# Query: Engine/Release/ExplorerLensEngine.lib
 
 # AI Assistant Action 5: Read log for status
 # Tool: read_file
@@ -225,7 +225,7 @@ Checks all expected output files exist and are recent.
 # ❌ WRONG - This is what causes failures:
 
 # Action 1: Start build
-msbuild Engine/DarkThumbsEngine.vcxproj
+msbuild Engine/ExplorerLensEngine.vcxproj
 
 # Action 2: Interrupt after 5 seconds
 ^C  # <-- THIS KILLS THE BUILD
@@ -234,7 +234,7 @@ msbuild Engine/DarkThumbsEngine.vcxproj
 Start-Sleep -Seconds 10  # <-- BUILD IS ALREADY DEAD
 
 # Action 4: Check for output that was never created
-Get-Item Engine\Release\DarkThumbsEngine.lib  # <-- FILE DOESN'T EXIST
+Get-Item Engine\Release\ExplorerLensEngine.lib  # <-- FILE DOESN'T EXIST
 
 # Result: Build failed, time wasted
 ```
@@ -254,7 +254,7 @@ User asks to build project
 │  ├─ Yes → Use 60+ second wait time
 │  └─ No → Continue
 │
-├─ Is this CBXShell DLL?
+├─ Is this LENSShell DLL?
 │  ├─ Yes → Use 90+ second wait time
 │  └─ No → Use 30+ second wait time
 │
@@ -354,3 +354,4 @@ Do NOT:
 
 **Last updated:** January 8, 2026  
 **Review:** Required before any build operation
+

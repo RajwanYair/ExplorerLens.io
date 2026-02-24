@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(PluginTester
     VERSION 1.0.0
-    DESCRIPTION "DarkThumbs Plugin Testing Tool"
+    DESCRIPTION "ExplorerLens Plugin Testing Tool"
     LANGUAGES CXX
 )
 
@@ -55,3 +55,4 @@ install(TARGETS plugin-tester
 )
 
 message(STATUS "Plugin Tester configured")
+

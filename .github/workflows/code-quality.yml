@@ -22,7 +22,7 @@ jobs:
       - name: Run clang-format check
         shell: pwsh
         run: |
-          $files = Get-ChildItem -Path CBXShell,CBXManager,Engine -Recurse -Include *.cpp,*.h -ErrorAction SilentlyContinue
+          $files = Get-ChildItem -Path LENSShell,LENSManager,Engine -Recurse -Include *.cpp,*.h -ErrorAction SilentlyContinue
           Write-Host "Found $($files.Count) C++ source files to check"
 
           $clangFormat = Get-Command clang-format -ErrorAction SilentlyContinue
@@ -53,7 +53,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Host "Running MSVC static analysis..." -ForegroundColor Cyan
-          msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /p:EnableCppCoreCheck=true /p:RunCodeAnalysis=true /m /v:minimal 2>&1 | Tee-Object -Variable buildOutput
+          msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /p:EnableCppCoreCheck=true /p:RunCodeAnalysis=true /m /v:minimal 2>&1 | Tee-Object -Variable buildOutput
 
           $warnings = $buildOutput | Select-String "warning C\d+"
           if ($warnings.Count -gt 0) {
@@ -75,7 +75,7 @@ jobs:
       - name: Check header guards
         shell: pwsh
         run: |
-          $headers = Get-ChildItem -Path Engine,CBXShell,CBXManager -Recurse -Include *.h -ErrorAction SilentlyContinue
+          $headers = Get-ChildItem -Path Engine,LENSShell,LENSManager -Recurse -Include *.h -ErrorAction SilentlyContinue
           $missing = @()
           foreach ($h in $headers) {
             $content = Get-Content $h.FullName -Raw -ErrorAction SilentlyContinue
@@ -89,3 +89,4 @@ jobs:
           } else {
             Write-Host "All $($headers.Count) headers have include guards" -ForegroundColor Green
           }
+

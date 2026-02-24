@@ -1,4 +1,4 @@
-// plugin_trust.h - DarkThumbs Plugin Trust and Signature Verification v1.0
+// plugin_trust.h - ExplorerLens Plugin Trust and Signature Verification v1.0
 // Part of Sprint 20: Plugin Sandbox v2 + Trust/Signing (v6.2)
 //
 // PURPOSE:
@@ -10,8 +10,8 @@
 //   - Level 0: Unsigned (blocked by default in enterprise)
 //   - Level 1: Self-signed (user must explicitly trust)
 //   - Level 2: Code-signed by known CA (standard trust)
-//   - Level 3: Signed by DarkThumbs-verified publisher (full trust)
-//   - Level 4: Signed by DarkThumbs team (system trust)
+//   - Level 3: Signed by ExplorerLens-verified publisher (full trust)
+//   - Level 4: Signed by ExplorerLens team (system trust)
 //
 // VERIFICATION LAYERS:
 //   1. Authenticode signature validation (Windows crypto APIs)
@@ -39,7 +39,7 @@
 #pragma comment(lib, "wintrust.lib")
 #pragma comment(lib, "crypt32.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace PluginTrust {
 
 // Version
@@ -54,8 +54,8 @@ enum class TrustLevel : uint32_t {
     UNTRUSTED = 1,          // Not signed or invalid signature
     SELF_SIGNED = 2,        // Self-signed certificate
     CODE_SIGNED = 3,        // Signed by recognized CA
-    VERIFIED_PUBLISHER = 4, // Signed by DarkThumbs-verified publisher
-    SYSTEM_TRUST = 5        // Signed by DarkThumbs team
+    VERIFIED_PUBLISHER = 4, // Signed by ExplorerLens-verified publisher
+    SYSTEM_TRUST = 5        // Signed by ExplorerLens team
 };
 
 inline const wchar_t* ToString(TrustLevel level) {
@@ -432,4 +432,5 @@ void GetCertificateValidity(
 bool VerifyFileIntegrity(const std::wstring& filePath, const FileHash& expectedHash);
 
 } // namespace PluginTrust
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

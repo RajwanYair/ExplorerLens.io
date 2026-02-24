@@ -1,7 +1,7 @@
 {
   "name": "Minimal Plugin Example",
   "version": "1.0.0",
-  "author": "DarkThumbs Team",
+  "author": "ExplorerLens Team",
   "description": "Simple ASCII art image format decoder - demonstrates minimal plugin structure",
   "license": "MIT",
   "api_version": "1.0",

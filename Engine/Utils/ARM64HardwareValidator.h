@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// ARM64HardwareValidator — Sprint 193
+// ARM64HardwareValidator
 // ARM64 hardware CI validation, feature detection, and performance baseline
 //
 // Architecture:
@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// ARM64 CPU feature flags (bitmask)
 enum class ARM64Feature : uint32_t {
@@ -151,4 +151,5 @@ private:
     ARM64CIConfig m_config;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

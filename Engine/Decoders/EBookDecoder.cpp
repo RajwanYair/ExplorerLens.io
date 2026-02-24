@@ -1,12 +1,12 @@
 //==============================================================================
-// EBookDecoder — Sprint 211
+// EBookDecoder
 //==============================================================================
 
 #include "EBookDecoder.h"
 #include <algorithm>
 #include <cstring>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 EBookDecoder::EBookDecoder() {}
 
@@ -130,4 +130,5 @@ const wchar_t* EBookDecoder::GetFormatMimeType(EBookFormat format) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

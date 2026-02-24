@@ -1,8 +1,8 @@
-# ARM64 Support — DarkThumbs v8.3.0
+# ARM64 Support — ExplorerLens v8.3.0
 
 ## Overview
 
-DarkThumbs v8.3.0 introduces foundational ARM64 support as part of the Sprints 155–159 block.
+ExplorerLens v8.3.0 introduces foundational ARM64 support as part of the Sprints 155–159 block.
 This document describes the build configuration, library compatibility matrix, runtime validation
 approach, performance baseline targets, and CI integration strategy for Windows ARM64.
 
@@ -16,8 +16,8 @@ ARM64 binaries are produced via cross-compilation.
 
 ```
 Host (x64)  ──cross-compile──▶  Target (ARM64 / Windows on ARM)
-   MSVC v145                       DarkThumbsEngine.lib (ARM64)
-   cl.exe (amd64_arm64)            CBXShell.dll (ARM64) [future]
+   MSVC v145                       ExplorerLensEngine.lib (ARM64)
+   cl.exe (amd64_arm64)            LENSShell.dll (ARM64) [future]
 ```
 
 ---
@@ -128,9 +128,9 @@ Triggers: push to `main`/`develop`/`release/*`, PRs to `main`/`develop`, manual 
 
 ## Known Limitations (v8.3.0)
 
-- `CBXShell.dll` (COM shell extension) is **not yet packaged as ARM64** — the native shell
+- `LENSShell.dll` (COM shell extension) is **not yet packaged as ARM64** — the native shell
   extension requires ARM64EC or native ARM64 COM registration; planned for v9.0.0.
-- `CBXManager.exe` (WTL GUI) has not been validated on ARM64 Windows; WTL 10 supports ARM64
+- `LENSManager.exe` (WTL GUI) has not been validated on ARM64 Windows; WTL 10 supports ARM64
   but build scripts need updating.
 - UnRAR ARM64 build requires a CMake-based approach (the NMake build system used for x64
   does not support ARM64 targets).
@@ -151,3 +151,4 @@ Triggers: push to `main`/`develop`/`release/*`, PRs to `main`/`develop`, manual 
 ---
 
 *Document created: Sprint 159 | Version: v8.3.0 | Last updated: Sprint 159*
+

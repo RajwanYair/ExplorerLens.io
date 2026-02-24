@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 251: cbxArchive.h Split — FormatTypes.h
-// Centralized format type constants. Bridges legacy #define CBXTYPE and
+// ExplorerLens Engine — lensArchive.h Split — FormatTypes.h
+// Centralized format type constants. Bridges legacy #define LENSTYPE and
 // new enum class FormatType.
 //==============================================================================
 #pragma once
@@ -8,9 +8,9 @@
 #include <string>
 #include <unordered_map>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
-/// Lookup table replacing the monolithic GetCBXType() if-else chain.
+/// Lookup table replacing the monolithic GetLENSType() if-else chain.
 /// Maps lowercase extension (with dot) → FormatType.
 class FormatTypeLookup {
 public:
@@ -84,7 +84,7 @@ public:
         Add(L".csv", FormatType::CSV);    Add(L".tsv", FormatType::CSV);
         Add(L".json", FormatType::JSON);  Add(L".yaml", FormatType::JSON);
         Add(L".yml", FormatType::JSON);
-        // Documents, RAW, etc. remain in legacy GetCBXType() for backward compat
+        // Documents, RAW, etc. remain in legacy GetLENSType() for backward compat
         m_initialized = true;
     }
 
@@ -113,4 +113,5 @@ private:
     bool m_initialized = false;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

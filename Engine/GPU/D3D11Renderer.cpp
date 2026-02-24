@@ -12,7 +12,7 @@
 
 using Microsoft::WRL::ComPtr;
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 D3D11Renderer::D3D11Renderer()
@@ -674,7 +674,7 @@ HRESULT D3D11Renderer::RecoverDevice() {
 }
 
 //==============================================================================
-// Batch Processing (Sprint 20)
+// Batch Processing
 //==============================================================================
 
 HRESULT D3D11Renderer::RenderThumbnailBatch(BatchRenderRequest* requests, uint32_t requestCount) {
@@ -722,12 +722,13 @@ HRESULT D3D11Renderer::RenderThumbnailBatch(BatchRenderRequest* requests, uint32
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 
 //==============================================================================
 // Factory Function
 //==============================================================================
 
-DarkThumbs::Engine::IGPURenderer* CreateD3D11Renderer() {
-    return new DarkThumbs::Engine::D3D11Renderer();
+ExplorerLens::Engine::IGPURenderer* CreateD3D11Renderer() {
+    return new ExplorerLens::Engine::D3D11Renderer();
 }
+

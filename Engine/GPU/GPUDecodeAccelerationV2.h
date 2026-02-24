@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 341: GPU Decode Acceleration V2
+// ExplorerLens Engine — GPU Decode Acceleration V2
 // Vendor-agnostic hardware decode routing for JPEG/HEVC/AV1/JPEG XL via
 // D3D12 video decode, Intel Quick Sync V3, AMD VCE/VCN, and NVIDIA NVDEC
 // with graceful CPU fallback and decode pipeline telemetry.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class GPUDecodeVendor  : uint8_t { Intel=0, AMD, NVIDIA, ARM, CPU, COUNT };
 enum class GPUDecodeAPI     : uint8_t { D3D12Video=0, QuickSyncV3, VCNVCE, NVDEC, MediaFoundation, COUNT };
@@ -67,4 +67,5 @@ public:
     static constexpr size_t CodecCount()  { return static_cast<size_t>(GPUDecodeCodec::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

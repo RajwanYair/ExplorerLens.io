@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 291: Shell Overlay Icon Handler
+// ExplorerLens Engine — Shell Overlay Icon Handler
 // IShellIconOverlayIdentifier for status overlay icons on thumbnails.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Overlay icon type
 enum class OverlayIconType : uint8_t {
@@ -71,4 +71,5 @@ public:
     static bool ValidateOpacity(float o) { return o >= 0.0f && o <= 1.0f; }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 295: Accessibility Pipeline
+// ExplorerLens Engine — Accessibility Pipeline
 // Screen reader, high contrast, and keyboard navigation for thumbnails.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Accessibility feature
 enum class AccessibilityFeature : uint8_t {
@@ -94,4 +94,5 @@ public:
     static constexpr size_t HCThemeCount() { return static_cast<size_t>(HighContrastTheme::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

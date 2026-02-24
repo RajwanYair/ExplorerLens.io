@@ -5,7 +5,7 @@
     Build image libraries (libavif, libjxl) using CMake
     
 .DESCRIPTION
-    Builds modern image format libraries with proper MSVC flags for DarkThumbs
+    Builds modern image format libraries with proper MSVC flags for ExplorerLens
     - libavif 1.3.0 (AVIF/AV1 images)
     - libjxl 0.11.1 (JPEG XL)
     
@@ -30,7 +30,7 @@ $RootDir = Split-Path -Parent $PSScriptRoot
 $ExternalDir = Join-Path $RootDir "external\image-libs"
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Image Library Builder" -ForegroundColor Cyan
+Write-Host "ExplorerLens Image Library Builder" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
 Write-Host "Libraries: $Library`n" -ForegroundColor Yellow
@@ -89,12 +89,12 @@ function Build-LibAVIF {
         -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" `
         -DAVIF_CODEC_AOM=ON `
         -DAVIF_LOCAL_AOM=ON `
-        -DAVIF_CODEC_DAV1D=OFF `
+        -DAVIF_CODEC_DAV1D=ON `
         -DAVIF_LIBYUV=LOCAL `
-        -DBUILD_SHARED_LIBS=OFF `
-        -DAVIF_BUILD_APPS=OFF `
-        -DAVIF_BUILD_TESTS=OFF `
-        -DAVIF_BUILD_EXAMPLES=OFF `
+        -DBUILD_SHARED_LIBS=ON `
+        -DAVIF_BUILD_APPS=ON `
+        -DAVIF_BUILD_TESTS=ON `
+        -DAVIF_BUILD_EXAMPLES=ON `
         -DCMAKE_INSTALL_PREFIX=$installDir
     
     if ($LASTEXITCODE -ne 0) {
@@ -154,17 +154,17 @@ function Build-LibJXL {
         -A x64 `
         -DCMAKE_BUILD_TYPE=$Configuration `
         -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" `
-        -DBUILD_SHARED_LIBS=OFF `
-        -DJPEGXL_ENABLE_BENCHMARK=OFF `
-        -DJPEGXL_ENABLE_EXAMPLES=OFF `
-        -DJPEGXL_ENABLE_MANPAGES=OFF `
-        -DJPEGXL_ENABLE_TOOLS=OFF `
-        -DJPEGXL_ENABLE_VIEWERS=OFF `
-        -DJPEGXL_ENABLE_PLUGINS=OFF `
-        -DJPEGXL_ENABLE_DEVTOOLS=OFF `
-        -DJPEGXL_ENABLE_SJPEG=OFF `
-        -DJPEGXL_ENABLE_OPENEXR=OFF `
-        -DJPEGXL_FORCE_SYSTEM_BROTLI=OFF `
+        -DBUILD_SHARED_LIBS=ON `
+        -DJPEGXL_ENABLE_BENCHMARK=ON `
+        -DJPEGXL_ENABLE_EXAMPLES=ON `
+        -DJPEGXL_ENABLE_MANPAGES=ON `
+        -DJPEGXL_ENABLE_TOOLS=ON `
+        -DJPEGXL_ENABLE_VIEWERS=ON `
+        -DJPEGXL_ENABLE_PLUGINS=ON `
+        -DJPEGXL_ENABLE_DEVTOOLS=ON `
+        -DJPEGXL_ENABLE_SJPEG=ON `
+        -DJPEGXL_ENABLE_OPENEXR=ON `
+        -DJPEGXL_FORCE_SYSTEM_BROTLI=ON `
         -DCMAKE_INSTALL_PREFIX=$installDir
     
     if ($LASTEXITCODE -ne 0) {
@@ -224,3 +224,4 @@ if ($success) {
     Write-Host "========================================`n" -ForegroundColor Cyan
     exit 1
 }
+

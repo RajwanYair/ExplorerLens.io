@@ -1,4 +1,4 @@
-// plugin_verification.h - DarkThumbs Verified Plugin Compatibility Test Kit v1.0
+// plugin_verification.h - ExplorerLens Verified Plugin Compatibility Test Kit v1.0
 // Part of Sprint 20: Plugin Sandbox v2 + Trust/Signing (v6.2)
 //
 // PURPOSE:
@@ -33,7 +33,7 @@
 #include <map>
 #include <optional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace PluginVerification {
 
 // Version
@@ -512,4 +512,5 @@ std::vector<std::wstring> LoadTestFiles(const std::wstring& testDataPath, const 
 bool ValidateTestData(const std::wstring& testDataPath);
 
 } // namespace PluginVerification
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,6 +1,6 @@
 // FontDecoder.cpp - Font Preview Thumbnail Decoder Implementation
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 
 #include "FontDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
@@ -23,7 +23,7 @@
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "windowscodecs.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* FontDecoder::m_extensions[] = {
@@ -518,4 +518,5 @@ bool FontDecoder::GetFontMetadata(const wchar_t* filePath, FontMetadata& metadat
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 159 — ARM64 CI Integration
+// ARM64 CI Integration
 // CI matrix entry descriptor, workflow metadata, and documentation completeness
 // checks for ARM64 build/test/deploy stages.
 
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Platform {
+namespace ExplorerLens::Platform {
 
 // ─── CI stage types ───────────────────────────────────────────────────────────
 
@@ -143,4 +143,5 @@ struct ARM64CIIntegration {
     }
 };
 
-} // namespace DarkThumbs::Platform
+} // namespace ExplorerLens::Platform
+

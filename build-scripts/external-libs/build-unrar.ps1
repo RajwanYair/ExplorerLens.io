@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build UnRAR DLL (RAR Archive Extraction)
+# ExplorerLens v7.0 - Build UnRAR DLL (RAR Archive Extraction)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -125,3 +125,4 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+

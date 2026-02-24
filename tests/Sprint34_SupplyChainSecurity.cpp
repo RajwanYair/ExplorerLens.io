@@ -1,5 +1,5 @@
 /******************************************************************************
- * DarkThumbs — Sprint 34: Supply-Chain Security Tests
+ * ExplorerLens — Sprint 34: Supply-Chain Security Tests
  * 22 GTest cases covering SBOM generation, dependency provenance,
  * reproducible build flags, CI policy gates, and release manifests.
  *****************************************************************************/
@@ -118,7 +118,7 @@ TEST(SupplyChainSecurity, ProvenancePurlExplicit) {
 //============================================================================
 
 TEST(SupplyChainSecurity, RegistryAllKnownDeps) {
-    // DarkThumbs has 11 known dependencies
+    // ExplorerLens has 11 known dependencies
     std::vector<std::wstring> expected = {
         L"libjxl", L"libheif", L"libwebp", L"LibRaw", L"libavif",
         L"zlib", L"zstd", L"lz4", L"lzma", L"minizip-ng", L"unrar"
@@ -153,10 +153,10 @@ TEST(SupplyChainSecurity, RegistryValidationDetectsIncomplete) {
 
 TEST(SupplyChainSecurity, SBOMSPDXContainsVersion) {
     // Verify SPDX output includes product name and version
-    std::wstring product = L"DarkThumbs";
+    std::wstring product = L"ExplorerLens";
     std::wstring version = L"7.0.0";
     std::wstring spdx_name = product + L"-" + version;
-    EXPECT_EQ(spdx_name, L"DarkThumbs-7.0.0");
+    EXPECT_EQ(spdx_name, L"ExplorerLens-7.0.0");
 }
 
 TEST(SupplyChainSecurity, SBOMComponentCount) {
@@ -239,10 +239,10 @@ TEST(SupplyChainSecurity, PolicyChecklistScoring) {
 
 TEST(SupplyChainSecurity, ManifestChecksumFormat) {
     SCTest::ReleaseArtifact art;
-    art.filename = L"CBXShell.dll";
+    art.filename = L"LENSShell.dll";
     art.sha256 = L"abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
     std::wstring line = art.sha256 + L"  " + art.filename + L"\n";
-    EXPECT_TRUE(line.find(L"  CBXShell.dll") != std::wstring::npos);
+    EXPECT_TRUE(line.find(L"  LENSShell.dll") != std::wstring::npos);
 }
 
 TEST(SupplyChainSecurity, ManifestVerifyMatch) {
@@ -262,8 +262,9 @@ TEST(SupplyChainSecurity, ManifestVerifyMismatch) {
 
 TEST(SupplyChainSecurity, ManifestArtifactCount) {
     std::vector<SCTest::ReleaseArtifact> artifacts;
-    artifacts.push_back({L"CBXShell.dll", L"hash1", 2940 * 1024});
-    artifacts.push_back({L"CBXManager.exe", L"hash2", 400 * 1024});
-    artifacts.push_back({L"DarkThumbs-7.0.0-x64.msi", L"hash3", 15 * 1024 * 1024});
+    artifacts.push_back({L"LENSShell.dll", L"hash1", 2940 * 1024});
+    artifacts.push_back({L"LENSManager.exe", L"hash2", 400 * 1024});
+    artifacts.push_back({L"ExplorerLens-7.0.0-x64.msi", L"hash3", 15 * 1024 * 1024});
     EXPECT_EQ(artifacts.size(), 3u);
 }
+

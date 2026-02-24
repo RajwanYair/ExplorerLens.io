@@ -1,10 +1,10 @@
 #pragma once
-// Sprint 237: Error Recovery Engine — crash recovery, checkpoint save/restore
+// Error Recovery Engine — crash recovery, checkpoint save/restore
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Recovery strategy
 enum class RecoveryStrategy : uint32_t {
@@ -63,4 +63,5 @@ private:
     static Checkpoint s_emptyCheckpoint;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

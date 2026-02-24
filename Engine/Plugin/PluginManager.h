@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Manager
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Manager
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Manages plugin discovery, loading, and lifecycle.
  *****************************************************************************/
@@ -15,7 +15,7 @@
 #include <filesystem>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
     class PluginDecoder;  // Forward declaration
 }
@@ -244,4 +244,5 @@ private:
     size_t count_ = 0;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

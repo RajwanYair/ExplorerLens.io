@@ -1,12 +1,12 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 38: Animated & Multi-Frame Thumbnail Support
+// ExplorerLens — Animated & Multi-Frame Thumbnail Support
 // First-frame extraction for animated WebP/JXL, multi-page PDF composite,
 // multi-page TIFF, Apple Live Photo key frame, frame count badges.
 //==============================================================================
 
-#ifndef DARKTHUMBS_ANIMATED_THUMBNAIL_DECODER_H
-#define DARKTHUMBS_ANIMATED_THUMBNAIL_DECODER_H
+#ifndef EXPLORERLENS_ANIMATED_THUMBNAIL_DECODER_H
+#define EXPLORERLENS_ANIMATED_THUMBNAIL_DECODER_H
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@
 #include <cmath>
 #include <array>
 
-namespace DarkThumbs { namespace Engine { namespace Decoders {
+namespace ExplorerLens { namespace Engine { namespace Decoders {
 
 //==============================================================================
 // Animated Format Detection
@@ -360,6 +360,8 @@ public:
     }
 };
 
-}}} // namespace DarkThumbs::Engine::Decoders
+}}} // namespace ExplorerLens::Engine::Decoders
 
-#endif // DARKTHUMBS_ANIMATED_THUMBNAIL_DECODER_H
+#endif // EXPLORERLENS_ANIMATED_THUMBNAIL_DECODER_H
+
+

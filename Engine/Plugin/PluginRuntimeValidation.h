@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// PluginRuntimeValidation.h — Sprint 128
+// PluginRuntimeValidation.h
 // End-to-end plugin runtime test matrix, crash isolation soak, IPC validation,
 // and plugin lifecycle management verification.
 //==============================================================================
@@ -13,7 +13,7 @@
 #include <atomic>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Plugin {
+namespace ExplorerLens { namespace Plugin {
 
 /// Plugin lifecycle states
 enum class PluginState : uint8_t {
@@ -242,4 +242,5 @@ private:
     }
 };
 
-}} // namespace DarkThumbs::Plugin
+}} // namespace ExplorerLens::Plugin
+

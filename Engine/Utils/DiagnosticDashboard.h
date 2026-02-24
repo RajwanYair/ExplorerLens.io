@@ -1,10 +1,10 @@
 #pragma once
-// Sprint 226: Diagnostic Dashboard — runtime health metrics and ETW counter aggregation
+// Diagnostic Dashboard — runtime health metrics and ETW counter aggregation
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Category of health metric
 enum class MetricCategory : uint32_t {
@@ -70,4 +70,5 @@ private:
     HealthLevel EvaluateHealth(double value, double threshold) const;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,7 +1,7 @@
 #include "ErrorRecoveryEngine.h"
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 Checkpoint ErrorRecoveryEngine::s_emptyCheckpoint = {};
 
@@ -85,4 +85,5 @@ bool ErrorRecoveryEngine::RecoverFromCrash(RecoveryStrategy strategy) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

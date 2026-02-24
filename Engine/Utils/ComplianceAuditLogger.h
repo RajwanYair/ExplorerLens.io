@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 333: Compliance & Audit Logger
+// ExplorerLens Engine — Compliance & Audit Logger
 // GDPR/CCPA/HIPAA-aware event logging with data classification labels,
 // retention policies, immutable audit trails, and DSR (data subject request)
 // redaction capabilities.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class ComplianceRegulation : uint8_t { GDPR=0,CCPA,HIPAA,SOX,ISO27001,COUNT };
 enum class DataClassification    : uint8_t { Public=0,Internal,Confidential,Restricted,COUNT };
@@ -68,4 +68,5 @@ public:
     static constexpr size_t AuditEventCount()   { return static_cast<size_t>(AuditEventType::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

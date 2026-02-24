@@ -1,14 +1,14 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Comprehensive build verification for DarkThumbs project.
+    Comprehensive build verification for ExplorerLens project.
 
 .DESCRIPTION
     Verifies that all external libraries and main project outputs are built correctly.
     Checks file existence, sizes, and provides a complete build status report.
 
 .NOTES
-    Author: DarkThumbs Build System
+    Author: ExplorerLens Build System
     Created: January 12, 2026
     Version: 1.0.0
 #>
@@ -111,7 +111,7 @@ function Test-OutputFile {
 
 # Main verification
 Write-Host "`n$script:Blue╔═══════════════════════════════════════════════════════╗$script:Reset"
-Write-Host "$script:Blue║   DarkThumbs Complete Build Verification v1.0.0     ║$script:Reset"
+Write-Host "$script:Blue║   ExplorerLens Complete Build Verification v1.0.0     ║$script:Reset"
 Write-Host "$script:Blue╚═══════════════════════════════════════════════════════╝$script:Reset"
 
 # Get project root
@@ -182,33 +182,33 @@ if (Test-Path $unrarPath) {
 # === Main Project Outputs ===
 Write-Header "Main Project Outputs"
 
-Test-OutputFile "CBXShell.dll" `
-    "$projectRoot\x64\Release\CBXShell.dll" `
+Test-OutputFile "LENSShell.dll" `
+    "$projectRoot\x64\Release\LENSShell.dll" `
     1000 1500
 
-Test-OutputFile "CBXManager.exe" `
-    "$projectRoot\x64\Release\CBXManager.exe" `
+Test-OutputFile "LENSManager.exe" `
+    "$projectRoot\x64\Release\LENSManager.exe" `
     250 350
 
 # === Visual Studio Solution Files ===
 Write-Header "Project Configuration"
 
 $script:TotalChecks++
-if (Test-Path "$projectRoot\CBXShell.sln") {
+if (Test-Path "$projectRoot\LENSShell.sln") {
     $script:PassedChecks++
-    Write-Success "Solution file: CBXShell.sln"
+    Write-Success "Solution file: LENSShell.sln"
 } else {
     $script:FailedChecks++
-    Write-Failure "Solution file: CBXShell.sln NOT FOUND"
+    Write-Failure "Solution file: LENSShell.sln NOT FOUND"
 }
 
 $script:TotalChecks++
-if (Test-Path "$projectRoot\CBXShell\CBXShell.vcxproj") {
+if (Test-Path "$projectRoot\LENSShell\LENSShell.vcxproj") {
     $script:PassedChecks++
-    Write-Success "Project file: CBXShell.vcxproj"
+    Write-Success "Project file: LENSShell.vcxproj"
 } else {
     $script:FailedChecks++
-    Write-Failure "Project file: CBXShell.vcxproj NOT FOUND"
+    Write-Failure "Project file: LENSShell.vcxproj NOT FOUND"
 }
 
 # === Build Scripts ===
@@ -267,3 +267,4 @@ if ($script:FailedChecks -eq 0) {
     Write-Host "  Run the appropriate build scripts to fix the issues."
     exit 1
 }
+

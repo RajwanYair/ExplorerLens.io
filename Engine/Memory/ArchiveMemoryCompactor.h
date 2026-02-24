@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 165 — Archive Memory Compactor
+// Archive Memory Compactor
 // Post-decode buffer compaction, slab recycling, large-archive eviction policy.
 // Works together with the existing cache layer to reduce working-set on low-RAM machines.
 
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Memory {
+namespace ExplorerLens::Memory {
 
 // ─── Slab descriptor ─────────────────────────────────────────────────────────
 
@@ -134,4 +134,5 @@ private:
     uint64_t                m_currentTick;
 };
 
-} // namespace DarkThumbs::Memory
+} // namespace ExplorerLens::Memory
+

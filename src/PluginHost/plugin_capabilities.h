@@ -1,4 +1,4 @@
-// plugin_capabilities.h - DarkThumbs Plugin Capability Gate System v1.0
+// plugin_capabilities.h - ExplorerLens Plugin Capability Gate System v1.0
 // Part of Sprint 20: Plugin Sandbox v2 + Trust/Signing (v6.2)
 //
 // PURPOSE:
@@ -36,7 +36,7 @@
 #include <map>
 #include <set>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace PluginCapabilities {
 
 // Version
@@ -478,4 +478,5 @@ bool ValidateManifest(const CapabilityManifest& manifest, std::vector<std::wstri
 CapabilitySet GetRecommendedCapabilities(const std::wstring& formatType);
 
 } // namespace PluginCapabilities
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Performance Hints
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Performance Hints
+// Copyright (c) 2026 - ExplorerLens Project
 // Task B9: Performance optimization hints and prefetching
 //==============================================================================
 
@@ -10,7 +10,7 @@
 #include <string>
 #include <atomic>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Performance {
 
@@ -164,4 +164,5 @@ namespace Performance {
 
 } // namespace Performance
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,12 +1,12 @@
 //==============================================================================
-// DarkThumbs Engine - EXIF Orientation Utilities
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - EXIF Orientation Utilities
+// Copyright (c) 2026 - ExplorerLens Project
 // Version: 6.0.0
 //==============================================================================
 
 #include "EXIFOrientation.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Utils {
 
@@ -133,4 +133,5 @@ HBITMAP ApplyEXIFOrientation(HBITMAP hBitmap, int orientation) {
 
 } // namespace Utils
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

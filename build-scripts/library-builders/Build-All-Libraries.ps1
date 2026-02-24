@@ -1,9 +1,9 @@
 # ===========================================================================
 # Build-All-Libraries.ps1
-# Build all external libraries for DarkThumbs
+# Build all external libraries for ExplorerLens
 # ===========================================================================
 # 
-# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# ⚠️  DEPRECATED: Use Build-All-ExplorerLens-V7.ps1 instead
 # This script is kept for reference only.
 # See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
 # 
@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host "Building All External Libraries for DarkThumbs" -ForegroundColor Cyan
+Write-Host "Building All External Libraries for ExplorerLens" -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -66,7 +66,7 @@ function Build-Library {
         "-B", $BuildDir,
         "-G", "Ninja",
         "-DCMAKE_BUILD_TYPE=Release",
-        "-DBUILD_SHARED_LIBS=OFF"
+        "-DBUILD_SHARED_LIBS=ON"
     )
     
     foreach ($key in $CMakeOptions.Keys) {
@@ -113,8 +113,8 @@ $libraries = @(
         SourceDir = Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build\cmake"
         BuildDir  = Join-Path $ProjectRoot "external\compression\lz4-1.10.0\build-vs"
         Options   = @{
-            "LZ4_BUILD_CLI"         = "OFF"
-            "LZ4_BUILD_LEGACY_LZ4C" = "OFF"
+            "LZ4_BUILD_CLI"         = "ON"
+            "LZ4_BUILD_LEGACY_LZ4C" = "ON"
         }
         OutputLib = "external\compression\lz4-1.10.0\build-vs\Release\liblz4_static.lib"
     },
@@ -123,9 +123,9 @@ $libraries = @(
         SourceDir = Join-Path $ProjectRoot "external\compression\zstd-1.5.7\build\cmake"
         BuildDir  = Join-Path $ProjectRoot "external\compression\zstd-1.5.7\build-vs"
         Options   = @{
-            "ZSTD_BUILD_PROGRAMS" = "OFF"
-            "ZSTD_BUILD_CONTRIB"  = "OFF"
-            "ZSTD_BUILD_TESTS"    = "OFF"
+            "ZSTD_BUILD_PROGRAMS" = "ON"
+            "ZSTD_BUILD_CONTRIB"  = "ON"
+            "ZSTD_BUILD_TESTS"    = "ON"
         }
         OutputLib = "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib"
     },
@@ -134,7 +134,7 @@ $libraries = @(
         SourceDir = Join-Path $ProjectRoot "external\compression\minizip-ng-4.0.10"
         BuildDir  = Join-Path $ProjectRoot "external\compression\minizip-ng-4.0.10\build-vs"
         Options   = @{
-            "MZ_COMPAT" = "OFF"
+            "MZ_COMPAT" = "ON"
             "MZ_ZLIB"   = "ON"
             "MZ_BZIP2"  = "ON"
             "MZ_LZMA"   = "ON"
@@ -147,15 +147,15 @@ $libraries = @(
         SourceDir = Join-Path $ProjectRoot "external\image-libs\libwebp-1.5.0-build"
         BuildDir  = Join-Path $ProjectRoot "external\image-libs\libwebp-1.5.0-build\build-vs"
         Options   = @{
-            "WEBP_BUILD_ANIM_UTILS" = "OFF"
-            "WEBP_BUILD_CWEBP"      = "OFF"
-            "WEBP_BUILD_DWEBP"      = "OFF"
-            "WEBP_BUILD_GIF2WEBP"   = "OFF"
-            "WEBP_BUILD_IMG2WEBP"   = "OFF"
-            "WEBP_BUILD_VWEBP"      = "OFF"
-            "WEBP_BUILD_WEBPINFO"   = "OFF"
-            "WEBP_BUILD_WEBPMUX"    = "OFF"
-            "WEBP_BUILD_EXTRAS"     = "OFF"
+            "WEBP_BUILD_ANIM_UTILS" = "ON"
+            "WEBP_BUILD_CWEBP"      = "ON"
+            "WEBP_BUILD_DWEBP"      = "ON"
+            "WEBP_BUILD_GIF2WEBP"   = "ON"
+            "WEBP_BUILD_IMG2WEBP"   = "ON"
+            "WEBP_BUILD_VWEBP"      = "ON"
+            "WEBP_BUILD_WEBPINFO"   = "ON"
+            "WEBP_BUILD_WEBPMUX"    = "ON"
+            "WEBP_BUILD_EXTRAS"     = "ON"
         }
         OutputLib = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib"
     }
@@ -210,3 +210,4 @@ if ($failCount -eq 0) {
     Write-Host "Some libraries failed to build. Check errors above." -ForegroundColor Red
     exit 1
 }
+

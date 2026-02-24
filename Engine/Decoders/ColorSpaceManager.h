@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 40: Color Space Awareness & HDR Tone Mapping
+// ExplorerLens — Color Space Awareness & HDR Tone Mapping
 // ICC profile extraction, gamut mapping, HDR→SDR conversion, color accuracy.
 //==============================================================================
 
@@ -12,7 +12,7 @@
 #include <array>
 #include <functional>
 
-namespace DarkThumbs::Engine::Decoders {
+namespace ExplorerLens::Engine::Decoders {
 
 //------------------------------------------------------------------------------
 // Color Space Identifiers
@@ -492,4 +492,5 @@ inline ColorSpace DefaultColorSpaceForFormat(const std::string& format) {
     return ColorSpace::sRGB;
 }
 
-} // namespace DarkThumbs::Engine::Decoders
+} // namespace ExplorerLens::Engine::Decoders
+

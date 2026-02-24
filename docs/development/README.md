@@ -1,6 +1,6 @@
 # Development Documentation
 
-This directory contains comprehensive documentation for developers working on DarkThumbs.
+This directory contains comprehensive documentation for developers working on ExplorerLens.
 
 ## Contents
 
@@ -49,13 +49,13 @@ This directory contains comprehensive documentation for developers working on Da
 
 ```powershell
 # Quick incremental build
-.\build-scripts\build-cbxshell-quick.ps1
+.\build-scripts\build-LENSShell-quick.ps1
 
 # Full clean build
 .\build-scripts\build.ps1 -Configuration Release -Clean
 
 # Build external libraries (V7 unified script)
-.\build-scripts\Build-All-DarkThumbs-V7.ps1 -Clean
+.\build-scripts\Build-All-ExplorerLens-V7.ps1 -Clean
 ```
 
 ### 3. Testing
@@ -68,7 +68,7 @@ This directory contains comprehensive documentation for developers working on Da
 .\tests\run-integration-tests.ps1
 
 # Manual testing
-.\build-scripts\utilities\Enable-DarkThumbsDiagnostics.ps1
+.\build-scripts\utilities\Enable-ExplorerLensDiagnostics.ps1
 ```
 
 ### 4. Debugging
@@ -77,10 +77,10 @@ Enable verbose logging and diagnostics:
 
 ```powershell
 # Enable diagnostic logging
-.\build-scripts\utilities\Enable-DarkThumbsDiagnostics.ps1
+.\build-scripts\utilities\Enable-ExplorerLensDiagnostics.ps1
 
 # View logs
-.\build-scripts\utilities\View-DarkThumbsDiagnostics.ps1
+.\build-scripts\utilities\View-ExplorerLensDiagnostics.ps1
 
 # Monitor build process
 .\build-scripts\utilities\Monitor-Build.ps1
@@ -90,7 +90,7 @@ Enable verbose logging and diagnostics:
 
 ### Adding a New Image Format
 
-1. Add decoder to `CBXShell/decoders/`
+1. Add decoder to `LENSShell/decoders/`
 2. Implement `IFormatDecoder` interface
 3. Register in `DecoderRegistry`
 4. Add tests to `tests/`
@@ -243,7 +243,7 @@ Use Visual Studio Profiler or ETW:
 Shell extensions run in `explorer.exe`:
 
 1. **Attach debugger** to explorer.exe
-2. **Set breakpoints** in DarkThumbs code
+2. **Set breakpoints** in ExplorerLens code
 3. **Trigger** thumbnail request (navigate to folder with supported files)
 4. **Debugger breaks** at your breakpoint
 
@@ -251,9 +251,9 @@ Shell extensions run in `explorer.exe`:
 
 ```powershell
 # Enable full crash dumps
-.\build-scripts\utilities\Enable-DarkThumbsDiagnostics.ps1
+.\build-scripts\utilities\Enable-ExplorerLensDiagnostics.ps1
 
-# Crashes saved to: %LocalAppData%\DarkThumbs\CrashDumps\
+# Crashes saved to: %LocalAppData%\ExplorerLens\CrashDumps\
 # Open with WinDbg Preview
 ```
 
@@ -261,10 +261,10 @@ Shell extensions run in `explorer.exe`:
 
 ```powershell
 # View logs
-Get-Content "$env:LOCALAPPDATA\DarkThumbs\Logs\*.log" -Tail 50
+Get-Content "$env:LOCALAPPDATA\ExplorerLens\Logs\*.log" -Tail 50
 
 # Follow logs in real-time
-Get-Content "$env:LOCALAPPDATA\DarkThumbs\Logs\latest.log" -Wait
+Get-Content "$env:LOCALAPPDATA\ExplorerLens\Logs\latest.log" -Wait
 ```
 
 ## CI/CD
@@ -299,8 +299,8 @@ See [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) for:
 - [LibRaw](https://www.libraw.org/)
 
 ### Community
-- [GitHub Issues](https://github.com/yourusername/DarkThumbs/issues)
-- [Discussions](https://github.com/yourusername/DarkThumbs/discussions)
+- [GitHub Issues](https://github.com/yourusername/ExplorerLens/issues)
+- [Discussions](https://github.com/yourusername/ExplorerLens/discussions)
 
 ## Support
 
@@ -313,4 +313,5 @@ For development questions:
 ---
 
 **Last Updated:** February 11, 2026  
-**Maintained by:** DarkThumbs Development Team
+**Maintained by:** ExplorerLens Development Team
+

@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    Test and validate build environment for DarkThumbs
+    Test and validate build environment for ExplorerLens
 .DESCRIPTION
     Checks all prerequisites and external library directories
 #>
@@ -10,7 +10,7 @@
 $ErrorActionPreference = "Continue"
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "  DarkThumbs Build Environment Test" -ForegroundColor Cyan
+Write-Host "  ExplorerLens Build Environment Test" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 $rootDir = Split-Path -Parent $PSScriptRoot
@@ -102,3 +102,4 @@ if ($failed -eq 0) {
     Write-Host "`n❌ Build environment has missing components!" -ForegroundColor Red
     exit 1
 }
+

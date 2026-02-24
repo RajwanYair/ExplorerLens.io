@@ -1,4 +1,4 @@
-# DarkThumbs PluginHost Executable
+# ExplorerLens PluginHost Executable
 # Separate process for secure plugin execution
 
 cmake_minimum_required(VERSION 3.20)
@@ -18,7 +18,7 @@ target_include_directories(PluginHost PRIVATE
 
 # Link libraries
 target_link_libraries(PluginHost PRIVATE
-    DarkThumbsEngine
+    ExplorerLensEngine
 )
 
 # Compiler settings
@@ -53,3 +53,4 @@ add_custom_command(TARGET PluginHost POST_BUILD
         ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/PluginHost.exe
     COMMENT "Copying PluginHost.exe to output directory"
 )
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 276: AI-Enhanced Thumbnails
+// ExplorerLens Engine — AI-Enhanced Thumbnails
 // ML-based thumbnail quality enhancement: super-resolution, auto-crop, saliency.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// AI enhancement type
 enum class AIEnhancement : uint8_t {
@@ -80,4 +80,5 @@ public:
     static bool IsQualityValid(float q) { return q >= 0.0f && q <= 1.0f; }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

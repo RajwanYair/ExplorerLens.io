@@ -1,7 +1,7 @@
 //==============================================================================
-// DarkThumbs Engine — Lazy Loading Codec Manager
-// Sprint 36+: Execution Optimization — Per-Format DLL Architecture
-// Copyright (c) 2026 — DarkThumbs Project
+// ExplorerLens Engine — Lazy Loading Codec Manager
+// Execution Optimization — Per-Format DLL Architecture
+// Copyright (c) 2026 — ExplorerLens Project
 //
 // PURPOSE:
 //   High-level manager that bridges the existing ThumbnailPipeline with the
@@ -30,7 +30,7 @@
 //   2. Memory pressure callbacks — hooks into system memory notifications
 //      to proactively unload idle codecs before OOM.
 //   3. Decode routing — transparently routes to the right codec DLL.
-//   4. Statistics & diagnostics for CBXManager health display.
+//   4. Statistics & diagnostics for LENSManager health display.
 //==============================================================================
 
 #pragma once
@@ -49,7 +49,7 @@
 #include <thread>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Codec {
 
@@ -378,7 +378,7 @@ public:
 
     std::vector<std::string> GetLoadedCodecs() const { return m_loader.GetLoadedCodecs(); }
 
-    /// Get a compact diagnostic string for CBXManager health display
+    /// Get a compact diagnostic string for LENSManager health display
     std::string GetDiagnosticsSummary() const
     {
         auto stats = m_loader.GetStats();
@@ -598,4 +598,5 @@ private:
 
 } // namespace Codec
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

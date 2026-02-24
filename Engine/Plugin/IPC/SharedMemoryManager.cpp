@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Shared Memory Manager Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Shared Memory Manager Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  *****************************************************************************/
 
 #include "SharedMemoryManager.h"
@@ -9,7 +9,7 @@
 #include <aclapi.h>
 #include <sddl.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace IPC {
 
 //============================================================================
@@ -178,7 +178,7 @@ bool SharedMemorySection::Read(void* data, uint64_t offset, uint64_t read_size) 
 
 std::string SharedMemoryManager::GenerateName(uint64_t correlation_id) {
     std::ostringstream oss;
-    oss << "Local\\DarkThumbs-Shared-"
+    oss << "Local\\ExplorerLens-Shared-"
         << std::hex << std::setw(16) << std::setfill('0')
         << correlation_id;
     return oss.str();
@@ -265,4 +265,5 @@ std::unique_ptr<SharedMemorySection> SharedMemoryManager::OpenForBitmap(
 }
 
 } // namespace IPC
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

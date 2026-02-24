@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 7 Tests: Windows 11 Compatibility Matrix
+// ExplorerLens — Sprint 7 Tests: Windows 11 Compatibility Matrix
 // Tests OS version detection, dark mode, HDR, multi-GPU enumeration,
 // ARM64 features, DPI scaling, and full compatibility matrix building.
 //==============================================================================
@@ -11,7 +11,7 @@
 // Header under test
 #include "../Engine/Utils/Windows11CompatMatrix.h"
 
-using namespace DarkThumbs::Engine::Compat;
+using namespace ExplorerLens::Engine::Compat;
 
 //==============================================================================
 // Win11 Build Constants
@@ -306,3 +306,4 @@ TEST(LiveDetection, FullCompatibilityMatrix)
     // At minimum: OS version, dark mode, GPU, D3D11, DPI, HDR, ARM64
     EXPECT_GE(matrix.testResults.size(), 7u);
 }
+

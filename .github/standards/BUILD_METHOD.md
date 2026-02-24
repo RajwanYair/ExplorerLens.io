@@ -1,4 +1,4 @@
-# DarkThumbs Build Method - Standard Operating Procedure
+# ExplorerLens Build Method - Standard Operating Procedure
 
 **Last Updated:** January 8, 2026  
 **Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring
@@ -12,7 +12,7 @@
 - **Configurations**: Debug, Release
 - **Toolchain**: Visual Studio 2026 Build Tools (v145), MSVC 19.3+
 - **Build Systems**: 
-  - MSBuild for shell extension (CBXShell.sln)
+  - MSBuild for shell extension (LENSShell.sln)
   - CMake + Ninja for Engine library
 
 ### Tool Paths (Auto-detected on this machine)
@@ -54,7 +54,7 @@ $Ninja = "C:\Users\ryair\scoop\shims\ninja.exe"
 ### Clean Build (Recommended)
 ```powershell
 # Clean all build artifacts
-Remove-Item -Recurse -Force build, x64, CBXShell\x64, CBXManager\x64, Engine\Release -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force build, x64, LENSShell\x64, LENSManager\x64, Engine\Release -ErrorAction SilentlyContinue
 
 # Build Engine library first
 cd Engine
@@ -63,12 +63,12 @@ cmake --build Release --config Release
 
 # Build shell extension
 cd ..
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
 ```
 
 ### Incremental Build
 ```powershell
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
 ```
 
 ### With Logging (REQUIRED for slow machines)
@@ -77,7 +77,7 @@ $LogDir = "build-logs"
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $LogFile = "$LogDir\build_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal 2>&1 | Tee-Object -FilePath $LogFile
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal 2>&1 | Tee-Object -FilePath $LogFile
 ```
 
 ---
@@ -128,9 +128,9 @@ After each build:
 - [ ] 0 errors in output
 - [ ] 0 warnings in Release (enforced by `/WX`)
 - [ ] Output files exist:
-  - `x64\Release\CBXShell.dll` (~1.3 MB)
-  - `x64\Release\CBXManager.exe` (~300 KB)
-  - `Engine\Release\DarkThumbsEngine.lib` (~1.9 MB)
+  - `x64\Release\LENSShell.dll` (~1.3 MB)
+  - `x64\Release\LENSManager.exe` (~300 KB)
+  - `Engine\Release\ExplorerLensEngine.lib` (~1.9 MB)
 - [ ] Log file saved to `/build-logs`
 - [ ] No build artifacts committed to Git
 
@@ -139,8 +139,8 @@ After each build:
 ## Troubleshooting
 
 ### Build fails with LNK2001/LNK2019 (unresolved externals)
-- Verify Engine library built first: `Engine\Release\DarkThumbsEngine.lib`
-- Check AdditionalLibraryDirectories in CBXShell.vcxproj
+- Verify Engine library built first: `Engine\Release\ExplorerLensEngine.lib`
+- Check AdditionalLibraryDirectories in LENSShell.vcxproj
 - Ensure all external libs are x64: zlib, webp, avif, etc.
 
 ### Warning-as-error failures
@@ -274,3 +274,4 @@ After CMake configuration changes:
 - [ ] Check for C4702 warnings (unreachable code)
 - [ ] Run tests: `ctest --test-dir build -C Release --output-on-failure`
 - [ ] Verify zero warnings in Release builds
+

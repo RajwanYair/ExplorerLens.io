@@ -8,7 +8,7 @@
 
 ## Overview
 
-The DarkThumbs Plugin Marketplace provides a centralized, trusted repository for discovering, installing, and updating plugins. This document defines:
+The ExplorerLens Plugin Marketplace provides a centralized, trusted repository for discovering, installing, and updating plugins. This document defines:
 
 - Registry API schema
 - Update channels
@@ -20,7 +20,7 @@ The DarkThumbs Plugin Marketplace provides a centralized, trusted repository for
 
 ## Registry API Endpoints
 
-Base URL: `https://api.marketplace.darkthumbs.dev/v1`
+Base URL: `https://api.marketplace.explorerlens.dev/v1`
 
 ### 1. List Plugins
 
@@ -45,7 +45,7 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
   "limit": 20,
   "plugins": [
     {
-      "id": "darkthumbs.plugin.psd",
+      "id": "explorerlens.plugin.psd",
       "name": "Photoshop Document Decoder",
       "vendor": "Adobe Systems Inc.",
       "description": "Native PSD thumbnail decoder with layer support",
@@ -55,7 +55,7 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
       "rating": 4.8,
       "downloads": 125000,
       "lastUpdated": "2026-01-05T10:00:00Z",
-      "icon": "https://cdn.marketplace.darkthumbs.dev/plugins/psd/icon-256.png",
+      "icon": "https://cdn.marketplace.explorerlens.dev/plugins/psd/icon-256.png",
       "formats": [".psd", ".psb"],
       "abiVersion": 1,
       "minEngineVersion": "6.0.0",
@@ -75,7 +75,7 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
 
 ```json
 {
-  "id": "darkthumbs.plugin.psd",
+  "id": "explorerlens.plugin.psd",
   "name": "Photoshop Document Decoder",
   "vendor": "Adobe Systems Inc.",
   "description": "Native PSD thumbnail decoder with layer support",
@@ -88,18 +88,18 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
   "downloads": 125000,
   "lastUpdated": "2026-01-05T10:00:00Z",
   "created": "2025-03-15T08:00:00Z",
-  "homepage": "https://github.com/adobe/darkthumbs-psd",
-  "repository": "https://github.com/adobe/darkthumbs-psd",
+  "homepage": "https://github.com/adobe/explorerlens-psd",
+  "repository": "https://github.com/adobe/explorerlens-psd",
   "license": "MIT",
   "author": {
     "name": "John Doe",
     "email": "john@adobe.com",
     "url": "https://adobe.com"
   },
-  "icon": "https://cdn.marketplace.darkthumbs.dev/plugins/psd/icon-256.png",
+  "icon": "https://cdn.marketplace.explorerlens.dev/plugins/psd/icon-256.png",
   "screenshots": [
-    "https://cdn.marketplace.darkthumbs.dev/plugins/psd/screenshot-1.png",
-    "https://cdn.marketplace.darkthumbs.dev/plugins/psd/screenshot-2.png"
+    "https://cdn.marketplace.explorerlens.dev/plugins/psd/screenshot-1.png",
+    "https://cdn.marketplace.explorerlens.dev/plugins/psd/screenshot-2.png"
   ],
   "formats": [
     {
@@ -125,7 +125,7 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
     "stable": {
       "version": "1.2.3",
       "releaseDate": "2026-01-05",
-      "downloadUrl": "https://cdn.marketplace.darkthumbs.dev/plugins/psd/psd-1.2.3.dtplugin",
+      "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.2.3.dtplugin",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "size": 2458624,
       "changelog": "Fixed layer rendering bug, improved performance"
@@ -133,7 +133,7 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
     "beta": {
       "version": "1.3.0-beta.1",
       "releaseDate": "2026-01-01",
-      "downloadUrl": "https://cdn.marketplace.darkthumbs.dev/plugins/psd/psd-1.3.0-beta.1.dtplugin",
+      "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.3.0-beta.1.dtplugin",
       "sha256": "...",
       "size": 2459136,
       "changelog": "Added Smart Object support"
@@ -206,12 +206,12 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
 {
   "plugins": [
     {
-      "id": "darkthumbs.plugin.psd",
+      "id": "explorerlens.plugin.psd",
       "version": "1.2.0",
       "channel": "stable"
     },
     {
-      "id": "darkthumbs.plugin.webp",
+      "id": "explorerlens.plugin.webp",
       "version": "2.1.5",
       "channel": "stable"
     }
@@ -225,18 +225,18 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
 {
   "updates": [
     {
-      "id": "darkthumbs.plugin.psd",
+      "id": "explorerlens.plugin.psd",
       "currentVersion": "1.2.0",
       "availableVersion": "1.2.3",
       "updateAvailable": true,
       "breaking": false,
-      "downloadUrl": "https://cdn.marketplace.darkthumbs.dev/plugins/psd/psd-1.2.3.dtplugin",
+      "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.2.3.dtplugin",
       "sha256": "...",
       "size": 2458624,
       "changelog": "Fixed layer rendering bug, improved performance"
     },
     {
-      "id": "darkthumbs.plugin.webp",
+      "id": "explorerlens.plugin.webp",
       "currentVersion": "2.1.5",
       "availableVersion": "2.1.5",
       "updateAvailable": false
@@ -259,13 +259,13 @@ Base URL: `https://api.marketplace.darkthumbs.dev/v1`
   "timestamp": "2026-01-06T14:30:00Z",
   "revocations": [
     {
-      "pluginId": "darkthumbs.plugin.malicious",
+      "pluginId": "explorerlens.plugin.malicious",
       "version": "1.0.5",
       "reason": "Critical security vulnerability (CVE-2026-1234)",
       "date": "2026-01-06",
       "severity": "critical",
       "action": "block",
-      "details": "https://security.darkthumbs.dev/CVE-2026-1234"
+      "details": "https://security.explorerlens.dev/CVE-2026-1234"
     }
   ]
 }
@@ -319,7 +319,7 @@ Run automated test suite covering:
 - Memory usage (< 100MB per request)
 - Error handling (corrupt/truncated files)
 
-**Test Kit:** <https://github.com/darkthumbs/plugin-test-kit>
+**Test Kit:** <https://github.com/explorerlens/plugin-test-kit>
 
 **Submission:**
 
@@ -328,9 +328,9 @@ Run automated test suite covering:
 .\PluginTestKit.exe --plugin MyPlugin.dtplugin --output results.json
 
 # Submit results
-curl -X POST https://api.marketplace.darkthumbs.dev/v1/verification/submit \
+curl -X POST https://api.marketplace.explorerlens.dev/v1/verification/submit \
   -H "Authorization: Bearer {api-key}" \
-  -F "pluginId=darkthumbs.plugin.myplugin" \
+  -F "pluginId=explorerlens.plugin.myplugin" \
   -F "results=@results.json"
 ```
 
@@ -430,7 +430,7 @@ bool VerifyPluginIntegrity(LoadedPlugin* plugin) {
 
 ### Step 1: Create Account
 
-1. Visit <https://marketplace.darkthumbs.dev>
+1. Visit <https://marketplace.explorerlens.dev>
 2. Sign in with GitHub, Microsoft, or email
 3. Create vendor profile
 4. Verify email and identity
@@ -475,26 +475,26 @@ Hosted at plugin repository root:
 ```json
 {
   "plugin": {
-    "id": "darkthumbs.plugin.psd",
+    "id": "explorerlens.plugin.psd",
     "name": "Photoshop Document Decoder",
     "vendor": "Adobe Systems Inc."
   },
   "marketplace": {
     "category": "Image Decoders",
     "tags": ["photoshop", "psd", "layers", "adobe"],
-    "icon": "https://raw.githubusercontent.com/adobe/darkthumbs-psd/main/assets/icon-256.png",
+    "icon": "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/assets/icon-256.png",
     "screenshots": [
-      "https://raw.githubusercontent.com/adobe/darkthumbs-psd/main/assets/screenshot-1.png"
+      "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/assets/screenshot-1.png"
     ]
   },
   "support": {
-    "homepage": "https://github.com/adobe/darkthumbs-psd",
-    "issues": "https://github.com/adobe/darkthumbs-psd/issues",
+    "homepage": "https://github.com/adobe/explorerlens-psd",
+    "issues": "https://github.com/adobe/explorerlens-psd/issues",
     "email": "support@adobe.com",
-    "documentation": "https://github.com/adobe/darkthumbs-psd/wiki"
+    "documentation": "https://github.com/adobe/explorerlens-psd/wiki"
   },
   "updates": {
-    "updateUrl": "https://raw.githubusercontent.com/adobe/darkthumbs-psd/main/update.json"
+    "updateUrl": "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/update.json"
   }
 }
 ```
@@ -507,7 +507,7 @@ Hosted at plugin repository root:
 
 ```json
 {
-  "pluginId": "darkthumbs.plugin.psd",
+  "pluginId": "explorerlens.plugin.psd",
   "version": "1.2.3",
   "metrics": {
     "totalRequests": 1523,
@@ -532,7 +532,7 @@ Hosted at plugin repository root:
 
 ### Submitted To
 
-`POST https://api.marketplace.darkthumbs.dev/v1/telemetry`
+`POST https://api.marketplace.explorerlens.dev/v1/telemetry`
 
 ### Dashboard
 
@@ -626,3 +626,4 @@ The Plugin Marketplace provides:
 ✅ Developer analytics
 
 **Status:** Specification complete, ready for implementation in Sprint 12.
+

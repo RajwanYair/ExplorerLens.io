@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 300: GPU Pipeline V3
+// ExplorerLens Engine — GPU Pipeline V3
 // Enhanced DirectX 12 pipeline with mesh shaders, enhanced barriers, and
 // GPU-driven dispatch for high-throughput thumbnail rendering.
 //==============================================================================
@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// GPU Pipeline V3 features
 enum class GPUV3Feature : uint8_t {
@@ -99,4 +99,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

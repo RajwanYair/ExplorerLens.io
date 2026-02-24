@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 330: Enterprise Policy Engine V2
+// ExplorerLens Engine — Enterprise Policy Engine V2
 // ADMX/GPO V2 with per-policy compliance scoring, policy drift detection,
 // Intune MDM integration, and centralized policy distribution endpoint.
 //==============================================================================
@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class EnterprisePolicySource : uint8_t { GroupPolicy=0,Intune,Workspace1,ManualJSON,COUNT };
 enum class PolicyComplianceStatus : uint8_t { Compliant=0,NonCompliant,NotApplicable,Unknown,COUNT };
@@ -66,4 +66,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

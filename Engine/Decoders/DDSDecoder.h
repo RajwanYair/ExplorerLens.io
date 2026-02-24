@@ -1,6 +1,6 @@
 // DDSDecoder.h - DirectDraw Surface Texture Decoder
-// DarkThumbs Engine v6.1.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.1.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: DirectDraw Surface (.dds) - game/3D textures
 // Features:
@@ -18,7 +18,7 @@
 #include <wrl/client.h>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class DDSDecoder : public IThumbnailDecoder {
@@ -48,4 +48,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

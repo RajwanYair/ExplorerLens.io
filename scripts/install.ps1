@@ -2,11 +2,11 @@
 
 <#
 .SYNOPSIS
-    Install DarkThumbs shell extension to Program Files
+    Install ExplorerLens shell extension to Program Files
 
 .DESCRIPTION
-    Installs DarkThumbs to %ProgramFiles%\DarkThumbs\
-    Registers COM DLL (CBXShell.dll) for Windows Explorer integration
+    Installs ExplorerLens to %ProgramFiles%\ExplorerLens\
+    Registers COM DLL (LENSShell.dll) for Windows Explorer integration
     
     IMPORTANT: Must run as Administrator
 
@@ -47,7 +47,7 @@ $ErrorActionPreference = "Stop"
 
 # Constants
 $WorkspaceRoot = $PSScriptRoot | Split-Path -Parent
-$ProductName = "DarkThumbs"
+$ProductName = "ExplorerLens"
 $InstallDir = Join-Path $env:ProgramFiles $ProductName
 $SourceDir = Join-Path $WorkspaceRoot "x64\$Configuration"
 
@@ -76,7 +76,7 @@ function Restart-Explorer {
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Installation Script" -ForegroundColor Cyan
+Write-Host "ExplorerLens Installation Script" -ForegroundColor Cyan
 if ($DryRun) {
     Write-Host "[DRY RUN MODE - No changes will be made]" -ForegroundColor Yellow
 }
@@ -97,7 +97,7 @@ if ($Unregister) {
     Write-Status "Uninstalling $ProductName..." "INFO"
     
     # Unregister DLL
-    $dllPath = Join-Path $InstallDir "CBXShell.dll"
+    $dllPath = Join-Path $InstallDir "LENSShell.dll"
     if (Test-Path $dllPath) {
         Write-Status "Unregistering COM DLL..."
         try {
@@ -142,7 +142,7 @@ Write-Status "Target: $InstallDir"
 
 # Unregister existing DLL to release file lock
 if (-not $DryRun) {
-    $existingDll = Join-Path $InstallDir "CBXShell.dll"
+    $existingDll = Join-Path $InstallDir "LENSShell.dll"
     if (Test-Path $existingDll) {
         Write-Status "`nUnregistering existing COM DLL..." "INFO"
         try {
@@ -164,8 +164,8 @@ if (-not $DryRun) {
 
 # Verify source files exist
 $requiredFiles = @(
-    "CBXShell.dll",
-    "CBXManager.exe"
+    "LENSShell.dll",
+    "LENSManager.exe"
 )
 
 $optionalFiles = @(
@@ -242,7 +242,7 @@ foreach ($file in $filesToCopy) {
 
 # Register COM DLL
 Write-Status "`nRegistering COM DLL..." "INFO"
-$dllPath = Join-Path $InstallDir "CBXShell.dll"
+$dllPath = Join-Path $InstallDir "LENSShell.dll"
 
 if ($DryRun) {
     Write-Status "[DRY RUN] Would register: $dllPath" "INFO"
@@ -309,10 +309,11 @@ Get-ChildItem $InstallDir | ForEach-Object {
 
 Write-Host "`nNext steps:" -ForegroundColor Yellow
 Write-Host "  1. Test thumbnail generation on .cbz/.cbr files" -ForegroundColor White
-Write-Host "  2. Run CBXManager.exe to configure settings" -ForegroundColor White
+Write-Host "  2. Run LENSManager.exe to configure settings" -ForegroundColor White
 
 Write-Host "`nTo uninstall:" -ForegroundColor Yellow
 Write-Host "  .\scripts\install.ps1 -Unregister" -ForegroundColor Gray
 Write-Host ""
 
 exit 0
+

@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// ReproducibleBuildVerifier.h — Sprint 147
+// ReproducibleBuildVerifier.h
 // Deterministic build verification: hash comparison, timestamp stripping,
 // artifact fingerprinting for reproducible builds
 // ============================================================================
@@ -15,7 +15,7 @@
 #include <numeric>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 // ── Hash representation ────────────────────────────────────────────────────
 
@@ -328,4 +328,5 @@ private:
     ReproducibilityPolicy m_policy;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

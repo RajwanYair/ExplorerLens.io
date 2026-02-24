@@ -1,0 +1,5 @@
+build/**
+build-logs/**
+external/**
+packages/**
+x64/**

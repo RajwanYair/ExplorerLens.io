@@ -1,8 +1,8 @@
 //==============================================================================
-// DarkThumbs — Sprint 6: SEH Fuzzing Engine & Worker Isolation
+// ExplorerLens — SEH Fuzzing Engine & Worker Isolation
 //
 // Structured Exception Handling (SEH) fuzzing infrastructure to validate
-// that CBXShell survives malformed / corrupt payloads without crashing
+// that LENSShell survives malformed / corrupt payloads without crashing
 // Explorer. Wraps every decoder call in __try/__except, generates diverse
 // corrupt test payloads, and records results per-iteration.
 //==============================================================================
@@ -21,7 +21,7 @@
 #include <mutex>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Isolation {
 
@@ -603,4 +603,5 @@ public:
 
 } // namespace Isolation
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

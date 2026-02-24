@@ -7,8 +7,8 @@
 #include <chrono>
 #include <cstring>
 
-using namespace DarkThumbs;
-using namespace DarkThumbs::Engine;
+using namespace ExplorerLens;
+using namespace ExplorerLens::Engine;
 
 // Test helpers
 void PrintTestHeader(const char* testName) {
@@ -394,3 +394,4 @@ void RunCacheTests() {
     
     std::wcout << L"  Cache Tests: " << passed << L"/" << total << L" passed" << std::endl;
 }
+

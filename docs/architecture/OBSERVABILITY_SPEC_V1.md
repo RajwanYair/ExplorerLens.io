@@ -11,9 +11,9 @@ We are moving away from ad-hoc `ODS` (OutputDebugString) logging to strictly str
 
 ## 2. ETW Provider
 
-- **Provider Name:** `DarkThumbs-Engine-Core`
+- **Provider Name:** `ExplorerLens-Engine-Core`
 - **GUID:** `{D4257123-ABCD-4321-8765-000000000001}` (To be generated)
-- **Symbol:** `DarkThumbs_Provider`
+- **Symbol:** `ExplorerLens_Provider`
 
 ### 2.1 Key Events
 
@@ -61,3 +61,4 @@ The Manager App will have a "Export Diagnostics" button. It produces a ZIP conta
 
 - **PII Stripping:** File paths should be hashed in ETW by default. Full paths only in Verbose/Diagnostic mode.
 - **Data Scrubbing:** No image content is ever logged.
+

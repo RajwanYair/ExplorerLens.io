@@ -1,17 +1,17 @@
-# DarkThumbs Project Structure
+# ExplorerLens Project Structure
 
 **Last Updated:** February 11, 2026  
 **Version:** 6.0.0  
 **Organization Standard:** Industrial Open Source
 
-This document describes the complete directory structure and organization of the DarkThumbs project.
+This document describes the complete directory structure and organization of the ExplorerLens project.
 
 ---
 
 ## 📁 Root Directory Structure
 
 ```
-DarkThumbs/
+ExplorerLens/
 ├── .git/                      # Git repository data
 ├── .github/                   # GitHub configuration and workflows
 ├── .gitignore                 # Git exclusions
@@ -20,11 +20,11 @@ DarkThumbs/
 ├── build/                     # CMake build outputs (not tracked)
 ├── build-logs/                # Build logs with timestamps (not tracked)
 ├── build-scripts/             # Build automation scripts
-├── CBXManager/                # GUI management application
-├── CBXShell/                  # Shell extension core (COM DLL)
-├── CBXShell.sln               # Visual Studio solution
+├── LENSManager/                # GUI management application
+├── LENSShell/                  # Shell extension core (COM DLL)
+├── LENSShell.sln               # Visual Studio solution
 ├── CMakeLists.txt             # Root CMake configuration
-├── DarkThumbsSetup_x64/       # Installer project (WiX)  
+├── ExplorerLensSetup_x64/       # Installer project (WiX)  
 ├── docs/                      # Documentation
 ├── downloads/                 # Downloaded library archives (tracked)
 ├── Engine/                    # Thumbnail engine (C++20, unit-tested)
@@ -75,7 +75,7 @@ DarkThumbs/
 
 ### `build-scripts/` - Build Automation
 
-**Purpose:** PowerShell scripts for building DarkThumbs and external dependencies.
+**Purpose:** PowerShell scripts for building ExplorerLens and external dependencies.
 
 ```
 build-scripts/
@@ -98,8 +98,8 @@ build-scripts/
 │   ├── Build-Production-SlowMachine.ps1
 │   └── Rebuild-External-Libs-Correct-Runtime.ps1
 ├── utilities/                 # Build utilities
-│   ├── darkthumbs.ps1
-│   ├── Enable-DarkThumbsDiagnostics.ps1
+│   ├── ExplorerLens.ps1
+│   ├── Enable-ExplorerLensDiagnostics.ps1
 │   └── Monitor-Build.ps1
 ├── validation/                # Build validation
 │   ├── Check-Tools.ps1
@@ -115,16 +115,16 @@ build-scripts/
 
 ---
 
-### `CBXManager/` - Management GUI Application
+### `LENSManager/` - Management GUI Application
 
-**Purpose:** GUI application for configuring DarkThumbs settings and file associations.
+**Purpose:** GUI application for configuring ExplorerLens settings and file associations.
 
 ```
-CBXManager/
+LENSManager/
 ├── MainDlg.cpp                # Main dialog implementation
 ├── MainDlg.h                  # Main dialog header
-├── CBXManager.cpp             # Application entry point
-├── CBXManager.vcxproj         # Visual Studio project
+├── LENSManager.cpp             # Application entry point
+├── LENSManager.vcxproj         # Visual Studio project
 ├── DarkModeHelper.h           # Dark mode support
 ├── RegManager.h               # Registry management
 ├── About.h                    # About dialog
@@ -136,22 +136,22 @@ CBXManager/
 
 ---
 
-### `CBXShell/` - Shell Extension (Core)
+### `LENSShell/` - Shell Extension (Core)
 
 **Purpose:** COM DLL shell extension that provides thumbnail generation for Windows Explorer.
 
 ```
-CBXShell/
+LENSShell/
 ├── decoders/                  # Format-specific decoders
 │   ├── archive_decoder.cpp
 │   ├── avif_decoder.cpp
 │   ├── jxl_decoder.cpp
 │   ├── raw_decoder.cpp
 │   └── webp_decoder.cpp
-├── CBXShell.cpp               # DLL entry point
-├── CBXShell.idl               # COM interface definitions
-├── CBXShellClass.cpp          # Main COM class
-├── CBXShell.vcxproj           # Visual Studio project
+├── LENSShell.cpp               # DLL entry point
+├── LENSShell.idl               # COM interface definitions
+├── LENSShellClass.cpp          # Main COM class
+├── LENSShell.vcxproj           # Visual Studio project
 ├── EngineAdapter.h            # Engine integration
 └── x64/                       # Build outputs (not tracked)
 ```
@@ -321,7 +321,7 @@ packaging/
 └── ...
 ```
 
-**Related:** `DarkThumbsSetup_x64/` (WiX installer project)
+**Related:** `ExplorerLensSetup_x64/` (WiX installer project)
 
 ---
 
@@ -353,7 +353,7 @@ scripts/
 
 ### `SDK/` - Plugin SDK
 
-**Purpose:** Plugin development kit for extending DarkThumbs.
+**Purpose:** Plugin development kit for extending ExplorerLens.
 
 ```
 SDK/
@@ -404,8 +404,8 @@ These directories are generated during builds and **not tracked** in git:
 - `build/` - CMake build outputs
 - `build-logs/` - Build log files
 - `x64/` - Visual Studio x64 outputs
-- `CBXManager/x64/` - CBXManager builds
-- `CBXShell/x64/` - CBXShell builds
+- `LENSManager/x64/` - LENSManager builds
+- `LENSShell/x64/` - LENSShell builds
 - `Engine/build/` - Engine CMake builds
 - `Engine/x64/` - Engine builds
 - `install/` - CMake install output
@@ -427,7 +427,7 @@ See [.gitignore](.gitignore) for complete exclusion list.
 
 ### Build Configuration
 
-- **CBXShell.sln** - Visual Studio solution (main)
+- **LENSShell.sln** - Visual Studio solution (main)
 - **CMakeLists.txt** - Root CMake configuration
 - **.gitignore** - Git file exclusions
 - **.gitattributes** - Git line endings and attributes
@@ -444,9 +444,9 @@ See [.gitignore](.gitignore) for complete exclusion list.
 
 ```
 x64/Release/
-├── CBXShell.dll               # Shell extension DLL
-├── CBXManager.exe             # Management GUI
-├── DarkThumbsEngine.lib       # Engine static library
+├── LENSShell.dll               # Shell extension DLL
+├── LENSManager.exe             # Management GUI
+├── ExplorerLensEngine.lib       # Engine static library
 └── ...
 ```
 
@@ -481,17 +481,17 @@ Managed by NuGet Package Manager.
 ### 1. Clone Repository
 
 ```powershell
-git clone https://github.com/yourusername/DarkThumbs.git
-cd DarkThumbs
+git clone https://github.com/yourusername/ExplorerLens.git
+cd ExplorerLens
 ```
 
 ### 2. Build External Libraries
 
 ```powershell
-.\/build-scripts\/Build-All-DarkThumbs-V7.ps1 -Clean
+.\/build-scripts\/Build-All-ExplorerLens-V7.ps1 -Clean
 ```
 
-### 3. Build DarkThumbs
+### 3. Build ExplorerLens
 
 ```powershell
 .\build-scripts\build.ps1 -Configuration Release
@@ -564,8 +564,8 @@ Every major directory should have a `README.md` explaining:
 | `build/` | CMake build outputs | ❌ No |
 | `build-logs/` | Build logs | ❌ No |
 | `build-scripts/` | Build automation | ✅ Yes |
-| `CBXManager/` | GUI application source | ✅ Yes |
-| `CBXShell/` | Shell extension source | ✅ Yes |
+| `LENSManager/` | GUI application source | ✅ Yes |
+| `LENSShell/` | Shell extension source | ✅ Yes |
 | `docs/` | Documentation | ✅ Yes |
 | `downloads/` | Library archives (cache) | ✅ Yes (exception) |
 | `Engine/` | Engine source & tests | ✅ Yes |
@@ -615,11 +615,12 @@ Every major directory should have a `README.md` explaining:
 
 For questions about project structure:
 - **Read:** This document
-- **Search:** [GitHub Issues](https://github.com/yourusername/DarkThumbs/issues)
-- **Ask:** [GitHub Discussions](https://github.com/yourusername/DarkThumbs/discussions)
+- **Search:** [GitHub Issues](https://github.com/yourusername/ExplorerLens/issues)
+- **Ask:** [GitHub Discussions](https://github.com/yourusername/ExplorerLens/discussions)
 
 ---
 
-**Maintained by:** DarkThumbs Development Team  
+**Maintained by:** ExplorerLens Development Team  
 **Standard:** Industrial Open Source Project Organization  
 **Compliance:** GitHub best practices, Microsoft OSS guidelines
+

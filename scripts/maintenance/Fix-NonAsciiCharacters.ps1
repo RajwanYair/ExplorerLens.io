@@ -11,7 +11,7 @@ $ErrorActionPreference = "Continue"
 $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 Write-Host "=========================================================================="  -ForegroundColor Cyan
-Write-Host "Fixing Non-ASCII Characters in DarkThumbs Project" -ForegroundColor Cyan
+Write-Host "Fixing Non-ASCII Characters in ExplorerLens Project" -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -167,3 +167,4 @@ if ($WhatIf) {
     Write-Host "  Mode: DRY RUN (no files modified)" -ForegroundColor Yellow
 }
 Write-Host "==========================================================================" -ForegroundColor Green
+

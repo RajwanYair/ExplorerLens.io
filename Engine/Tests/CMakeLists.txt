@@ -1,5 +1,5 @@
 #==============================================================================
-# DarkThumbs Engine Tests - CMake Configuration
+# ExplorerLens Engine Tests - CMake Configuration
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
@@ -72,7 +72,7 @@ target_link_directories(EngineBenchmark
 
 target_link_libraries(EngineBenchmark
     PRIVATE
-        DarkThumbsEngine
+        ExplorerLensEngine
         d3d12.lib
         dxgi.lib
 )
@@ -80,7 +80,7 @@ target_link_libraries(EngineBenchmark
 # Link IntegrationTests
 target_link_libraries(IntegrationTests
     PRIVATE
-        DarkThumbsEngine
+        ExplorerLensEngine
 )
 
 # Link JXL libraries if enabled
@@ -116,7 +116,7 @@ target_link_directories(EngineTests
 
 target_link_libraries(EngineTests
     PRIVATE
-        DarkThumbsEngine
+        ExplorerLensEngine
 )
 
 # Link JXL libraries if enabled
@@ -133,6 +133,7 @@ endif()
 
 target_include_directories(EngineTests
     PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
@@ -182,7 +183,7 @@ endif()
 
 if(WIN32)
     # Build a proper Windows PATH string (semicolon-delimited, no CMake list artifacts)
-    set(DARKTHUMBS_TEST_RUNTIME_DIRS
+    set(EXPLORERLENS_TEST_RUNTIME_DIRS
         "${CMAKE_SOURCE_DIR}/external/image-libs/libde265-1.0.15/build-vs/libde265/Release"
         "${CMAKE_SOURCE_DIR}/external/image-libs/libheif-1.19.5/build-vs/libheif/Release"
         "${CMAKE_SOURCE_DIR}/external/image-libs/libheif-1.19.5/install/bin"
@@ -192,19 +193,21 @@ if(WIN32)
         "${CMAKE_SOURCE_DIR}/external/compression-libs/zstd-1.5.7/build/cmake/build-md/lib"
     )
     # Join list elements with ";" as Windows PATH separator
-    string(JOIN "\\;" DARKTHUMBS_TEST_RUNTIME_PATH ${DARKTHUMBS_TEST_RUNTIME_DIRS})
+    string(JOIN "\\;" EXPLORERLENS_TEST_RUNTIME_PATH ${EXPLORERLENS_TEST_RUNTIME_DIRS})
 
     set_tests_properties(EngineUnitTests PROPERTIES
-        ENVIRONMENT "PATH=${DARKTHUMBS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
         LABELS "unit"
         TIMEOUT 30
     )
 
     if(BUILD_BENCHMARKS)
         set_tests_properties(EngineBenchmarks PROPERTIES
-            ENVIRONMENT "PATH=${DARKTHUMBS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+            ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
             LABELS "benchmark"
             TIMEOUT 120
         )
     endif()
 endif()
+
+

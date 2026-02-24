@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 #================================================================
 # Build-LibRaw-NMake.ps1
-# DarkThumbs v7.0 - Build LibRaw 0.21.2 using MSVC nmake
+# ExplorerLens v7.0 - Build LibRaw 0.21.2 using MSVC nmake
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -121,3 +121,4 @@ Write-Host "================================================" -ForegroundColor G
 Write-Host "Library: $OutputDir\lib\libraw_static.lib" -ForegroundColor Green
 Write-Host "Headers: $OutputDir\include\libraw\" -ForegroundColor Green
 Write-Host ""
+

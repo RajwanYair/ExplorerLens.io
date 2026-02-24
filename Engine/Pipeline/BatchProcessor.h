@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 43: Batch Processing & Queue Management
+// ExplorerLens Engine — Batch Processing & Queue Management
 //
 // Provides priority-based job scheduling, parallel decode queue management,
 // progress tracking with callbacks, cancellation/pause/resume, rate limiting,
@@ -20,7 +20,7 @@
 #include <iomanip>
 #include <unordered_map>
 
-namespace DarkThumbs::Engine::Pipeline {
+namespace ExplorerLens::Engine::Pipeline {
 
 //==============================================================================
 // Job Priority
@@ -468,4 +468,5 @@ struct BatchProcessingConfig {
     }
 };
 
-} // namespace DarkThumbs::Engine::Pipeline
+} // namespace ExplorerLens::Engine::Pipeline
+

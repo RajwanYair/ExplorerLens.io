@@ -1,4 +1,4 @@
-# DarkThumbs Build System - Tool Versions & Paths
+# ExplorerLens Build System - Tool Versions & Paths
 **Last Updated:** February 9, 2026 (Updated: Tools refreshed)  
 **Machine:** Intel Development Workstation  
 **Environment:** Windows 11 + VS 2026 Build Tools
@@ -59,10 +59,10 @@ SDK_VERSION = "10.0.26100.0"
 Add to your PowerShell profile (`$PROFILE`):
 
 ```powershell
-# DarkThumbs Development Environment - Auto-load
-$darkThumbsEnv = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\scripts\Setup-DevEnvironment.ps1"
-if (Test-Path $darkThumbsEnv) {
-    . $darkThumbsEnv
+# ExplorerLens Development Environment - Auto-load
+$ExplorerLensEnv = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\scripts\Setup-DevEnvironment.ps1"
+if (Test-Path $ExplorerLensEnv) {
+    . $ExplorerLensEnv
 }
 ```
 
@@ -76,7 +76,7 @@ if (Test-Path $darkThumbsEnv) {
 ### Manual Load (if not in profile)
 
 ```powershell
-cd "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
+cd "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens"
 .\scripts\Setup-DevEnvironment.ps1
 ```
 
@@ -84,7 +84,7 @@ cd "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
 
 ```powershell
 # Check what's loaded
-Show-DarkThumbsInfo
+Show-ExplorerLensInfo
 
 # Test tools
 Test-BuildTools
@@ -126,16 +126,16 @@ If you need to run tools directly without shortcuts:
 
 ```powershell
 # Build full solution
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
 
 # Build specific project
-msbuild CBXShell\CBXShell.vcxproj /p:Configuration=Release /p:Platform=x64 /m
+msbuild LENSShell\LENSShell.vcxproj /p:Configuration=Release /p:Platform=x64 /m
 
 # Rebuild (clean build)
-msbuild CBXShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /m
+msbuild LENSShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /m
 
 # With logging
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /fl /flp:LogFile=build.log /v:minimal
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /fl /flp:LogFile=build.log /v:minimal
 ```
 
 ### CMake (Engine)
@@ -180,7 +180,7 @@ Available generators:
   Unix Makefiles               - Make (WSL/MSYS2)
 ```
 
-**Recommended for DarkThumbs:**
+**Recommended for ExplorerLens:**
 - **Local Development:** `Visual Studio 18 2026` (best IDE integration)
 - **CI/CD:** `Ninja` (fastest compile times)
 - **Command Line:** `NMake Makefiles` (simple, no IDE needed)
@@ -250,7 +250,7 @@ cmake -B build -S . -G "Visual Studio 18 2026" -A x64
 Load-MSVCEnvironment
 
 # Or reload full environment
-Setup-DarkThumbsEnv -Force
+Setup-ExplorerLensEnv -Force
 ```
 
 ### Problem: "Generator 'Visual Studio 18 2026' not found"
@@ -271,7 +271,7 @@ Add environment setup to PowerShell profile:
 notepad $PROFILE
 
 # Add this line:
-. "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\scripts\Setup-DevEnvironment.ps1"
+. "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\scripts\Setup-DevEnvironment.ps1"
 
 # Save and restart PowerShell
 ```
@@ -369,3 +369,4 @@ vs_installer.exe modify --installPath "C:\Program Files (x86)\Microsoft Visual S
 ---
 
 *This document is auto-generated from tool discovery. Last verified: February 9, 2026.*
+

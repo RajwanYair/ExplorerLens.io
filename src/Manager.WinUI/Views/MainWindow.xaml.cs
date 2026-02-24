@@ -1,12 +1,12 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using DarkThumbs.Manager.ViewModels;
-using DarkThumbs.Manager.Views.Pages;
+using ExplorerLens.Manager.ViewModels;
+using ExplorerLens.Manager.Views.Pages;
 using System;
 using System.Collections.Generic;
 
-namespace DarkThumbs.Manager.Views;
+namespace ExplorerLens.Manager.Views;
 
 public sealed partial class MainWindow : Window
 {
@@ -31,7 +31,7 @@ public sealed partial class MainWindow : Window
         ViewModel = App.Services.GetService(typeof(MainViewModel)) as MainViewModel
             ?? throw new InvalidOperationException("MainViewModel not registered");
 
-        Title = "DarkThumbs Manager v5.5.0";
+        Title = "ExplorerLens.io Manager v14.0.0";
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(NavView);
 

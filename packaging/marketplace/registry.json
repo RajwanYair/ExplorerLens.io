@@ -1,9 +1,9 @@
 {
   "version": "1.0.0",
   "registry": {
-    "name": "DarkThumbs Plugin Marketplace Beta",
-    "description": "Official plugin registry for DarkThumbs v6.0.0+",
-    "baseUrl": "https://marketplace.darkthumbs.org/api/v1",
+    "name": "ExplorerLens Plugin Marketplace Beta",
+    "description": "Official plugin registry for ExplorerLens v6.0.0+",
+    "baseUrl": "https://marketplace.explorerlens.org/api/v1",
     "updateIntervalHours": 24
   },
   "channels": {
@@ -43,11 +43,11 @@
   ],
   "plugins": [
     {
-      "id": "darkthumbs.plugin.psd",
+      "id": "explorerlens.plugin.psd",
       "name": "Adobe Photoshop (PSD) Support",
       "version": "1.0.0",
       "description": "Thumbnail generation for Adobe Photoshop PSD files with layer preview support",
-      "author": "DarkThumbs Project",
+      "author": "ExplorerLens Project",
       "category": "Creative Formats",
       "channel": "stable",
       "verified": true,
@@ -55,9 +55,9 @@
         "dll": "sha256:abcdef1234567890...",
         "manifest": "sha256:fedcba0987654321..."
       },
-      "downloadUrl": "https://marketplace.darkthumbs.org/plugins/darkthumbs.plugin.psd-1.0.0.dtplugin",
-      "homepage": "https://docs.darkthumbs.org/plugins/psd",
-      "repository": "https://github.com/darkthumbs/plugin-psd",
+      "downloadUrl": "https://marketplace.explorerlens.org/plugins/explorerlens.plugin.psd-1.0.0.dtplugin",
+      "homepage": "https://docs.explorerlens.org/plugins/psd",
+      "repository": "https://github.com/explorerlens/plugin-psd",
       "license": "MIT",
       "minEngineVersion": "6.0.0",
       "maxEngineVersion": "6.999.999",
@@ -77,11 +77,11 @@
       "reviews": 42
     },
     {
-      "id": "darkthumbs.plugin.obj",
+      "id": "explorerlens.plugin.obj",
       "name": "3D Model Support (OBJ/GLTF)",
       "version": "1.0.0",
       "description": "Thumbnail generation for 3D model files (OBJ, GLTF, GLB) with customizable camera angles",
-      "author": "DarkThumbs Project",
+      "author": "ExplorerLens Project",
       "category": "3D Models",
       "channel": "stable",
       "verified": true,
@@ -89,9 +89,9 @@
         "dll": "sha256:1234567890abcdef...",
         "manifest": "sha256:0987654321fedcba..."
       },
-      "downloadUrl": "https://marketplace.darkthumbs.org/plugins/darkthumbs.plugin.obj-1.0.0.dtplugin",
-      "homepage": "https://docs.darkthumbs.org/plugins/3dmodel",
-      "repository": "https://github.com/darkthumbs/plugin-3dmodel",
+      "downloadUrl": "https://marketplace.explorerlens.org/plugins/explorerlens.plugin.obj-1.0.0.dtplugin",
+      "homepage": "https://docs.explorerlens.org/plugins/3dmodel",
+      "repository": "https://github.com/explorerlens/plugin-3dmodel",
       "license": "MIT",
       "minEngineVersion": "6.0.0",
       "maxEngineVersion": "6.999.999",
@@ -113,7 +113,7 @@
       "reviews": 28
     },
     {
-      "id": "darkthumbs.plugin.xcf",
+      "id": "explorerlens.plugin.xcf",
       "name": "GIMP XCF Support",
       "version": "1.0.0",
       "description": "Thumbnail generation for GIMP XCF files with layer merging",
@@ -125,9 +125,9 @@
         "dll": "sha256:9876543210fedcba...",
         "manifest": "sha256:123456789abcdef0..."
       },
-      "downloadUrl": "https://marketplace.darkthumbs.org/plugins/darkthumbs.plugin.xcf-1.0.0.dtplugin",
-      "homepage": "https://github.com/contributor/darkthumbs-xcf",
-      "repository": "https://github.com/contributor/darkthumbs-xcf",
+      "downloadUrl": "https://marketplace.explorerlens.org/plugins/explorerlens.plugin.xcf-1.0.0.dtplugin",
+      "homepage": "https://github.com/contributor/explorerlens-xcf",
+      "repository": "https://github.com/contributor/explorerlens-xcf",
       "license": "MIT",
       "minEngineVersion": "6.0.0",
       "maxEngineVersion": "6.999.999",
@@ -148,7 +148,7 @@
   ],
   "revocations": [
     {
-      "pluginId": "darkthumbs.plugin.malicious",
+      "pluginId": "explorerlens.plugin.malicious",
       "reason": "Security vulnerability CVE-2026-XXXXX",
       "revokedAt": "2026-01-01T00:00:00Z",
       "severity": "critical",
@@ -162,3 +162,4 @@
     "verifiedPlugins": 2
   }
 }
+

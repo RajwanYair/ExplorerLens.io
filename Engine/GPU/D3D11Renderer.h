@@ -1,6 +1,6 @@
-// D3D11Renderer.h - DirectX 11 GPU Renderer for DarkThumbs Engine
+// D3D11Renderer.h - DirectX 11 GPU Renderer for ExplorerLens Engine
 // Engine v1.0.0 - GPU-Accelerated Thumbnail Scaling
-// Copyright (c) 2026 DarkThumbs Project
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Features:
 // - Hardware-accelerated thumbnail scaling with Lanczos3 compute shader
@@ -18,7 +18,7 @@
 #include <mutex>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class D3D11Renderer : public IGPURenderer {
@@ -41,7 +41,7 @@ public:
     HRESULT ScaleBitmap(HBITMAP hSource, uint32_t targetWidth, uint32_t targetHeight,
                        HBITMAP* phResult);
     
-    // Sprint 20: Batch processing support
+    // Batch processing support
     struct BatchRenderRequest {
         const uint8_t* imageData;
         uint32_t imageWidth;
@@ -121,9 +121,10 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 
 // Factory function
 extern "C" {
-    __declspec(dllexport) DarkThumbs::Engine::IGPURenderer* CreateD3D11Renderer();
+    __declspec(dllexport) ExplorerLens::Engine::IGPURenderer* CreateD3D11Renderer();
 }
+

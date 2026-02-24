@@ -1,7 +1,7 @@
 // Sprint 144 — Diagnostics Export Finalization Tests
 #include <gtest/gtest.h>
 #include "Core/DiagnosticsExporter.h"
-using namespace DarkThumbs::Core;
+using namespace ExplorerLens::Core;
 
 TEST(Sprint144_Diag, CategoryName_Coverage) {
     EXPECT_STREQ(DiagCategoryName(DiagCategory::SystemInfo), "SystemInfo");
@@ -92,3 +92,4 @@ TEST(Sprint144_Diag, Exporter_SizeLimit) {
     auto filtered = exp.FilteredEntries();
     EXPECT_EQ(filtered.size(), 1u); // big file excluded
 }
+

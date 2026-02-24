@@ -1,6 +1,6 @@
 # Coding Standards
 
-This document defines the coding standards and conventions for the DarkThumbs project.
+This document defines the coding standards and conventions for the ExplorerLens project.
 
 ## Table of Contents
 
@@ -47,8 +47,8 @@ const int MAX_THUMBNAIL_SIZE = 1024;
 constexpr int kDefaultSize = 256;
 
 // Namespaces: lowercase
-namespace darkthumbs { }
-namespace darkthumbs::decoders { }
+namespace ExplorerLens { }
+namespace ExplorerLens::decoders { }
 
 // Enums: PascalCase for type, UPPER_CASE for values
 enum class ImageFormat {
@@ -98,13 +98,13 @@ void Function() {
 }
 
 // Namespaces: no indentation inside
-namespace darkthumbs {
+namespace ExplorerLens {
 
 class MyClass {
     // ...
 };
 
-}  // namespace darkthumbs
+}  // namespace ExplorerLens
 ```
 
 ### Header Files
@@ -279,7 +279,7 @@ std::atomic<bool> m_running{false};
     
 .NOTES
     Version: 1.0.0
-    Author: DarkThumbs Team
+    Author: ExplorerLens Team
     Last Updated: 2026-02-11
 #>
 
@@ -551,7 +551,7 @@ See [PROJECT_STRUCTURE.md](../../PROJECT_STRUCTURE.md) for complete structure.
 
 ### Directory Naming
 
-- **Source code:** `PascalCase/` (e.g., `CBXShell/`, `Engine/`)
+- **Source code:** `PascalCase/` (e.g., `LENSShell/`, `Engine/`)
 - **Documentation:** `lowercase/` (e.g., `docs/`, `tests/`)
 - **Build scripts:** `lowercase-with-dash/` (e.g., `build-scripts/`)
 
@@ -641,4 +641,5 @@ For questions about coding standards:
 
 **Last Updated:** February 11, 2026  
 **Version:** 1.0  
-**Maintained by:** DarkThumbs Development Team
+**Maintained by:** ExplorerLens Development Team
+

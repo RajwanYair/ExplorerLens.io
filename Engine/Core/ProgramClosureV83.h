@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 174 — Program Closure v8.3.0
+// Program Closure v8.3.0
 // Final retrospective, deliverable inventory, carry-forward list,
 // next-block seed (Sprints 175+).
 
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Core {
+namespace ExplorerLens::Core {
 
 // ─── Deliverable state ───────────────────────────────────────────────────────
 
@@ -132,4 +132,5 @@ public:
     }
 };
 
-} // namespace DarkThumbs::Core
+} // namespace ExplorerLens::Core
+

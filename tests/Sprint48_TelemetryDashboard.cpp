@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include "../Engine/Core/TelemetryDashboard.h"
 
-using namespace DarkThumbs::Engine::Core;
+using namespace ExplorerLens::Engine::Core;
 
 // =============================================================================
 // HealthLevel Tests
@@ -392,7 +392,7 @@ TEST(DiagnosticExportTest, ToTextBasic) {
     d.totalThumbnailsGenerated = 500;
     d.totalErrors = 3;
     auto text = DiagnosticExport::ToText(d);
-    EXPECT_NE(text.find("DarkThumbs Diagnostics"), std::string::npos);
+    EXPECT_NE(text.find("ExplorerLens Diagnostics"), std::string::npos);
     EXPECT_NE(text.find("7.0.0"), std::string::npos);
     EXPECT_NE(text.find("500"), std::string::npos);
 }
@@ -467,3 +467,4 @@ TEST(DiagnosticsConfigTest, Disabled) {
     auto cfg = DiagnosticsConfig::Disabled();
     EXPECT_FALSE(cfg.enabled);
 }
+

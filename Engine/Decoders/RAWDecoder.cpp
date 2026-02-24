@@ -1,5 +1,5 @@
 // RAWDecoder.cpp - LibRaw Implementation
-// DarkThumbs Engine v1.0.0
+// ExplorerLens Engine v1.0.0
 
 #include "RAWDecoder.h"
 #include "../Core/Logger.h"
@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Extension list covering major camera manufacturers
@@ -553,13 +553,13 @@ bool RAWDecoder::GetRAWMetadata(const wchar_t* filePath, RAWMetadata& metadata) 
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 
 #else // !HAS_LIBRAW — Stub implementation when LibRaw is unavailable
 
 #include <windows.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Provide complete type for pImpl so unique_ptr destructor works
@@ -582,6 +582,6 @@ DecoderInfo RAWDecoder::GetInfo() const {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 
 #endif // HAS_LIBRAW

@@ -1,5 +1,5 @@
 // GPUThumbnailTest.cpp - GPU Thumbnail Generation Test Tool
-// Tests CBXShell GPU acceleration with real images
+// Tests LENSShell GPU acceleration with real images
 // Validates compute shader execution, quality, and correctness
 
 #include <windows.h>
@@ -356,3 +356,4 @@ int wmain(int argc, wchar_t* argv[]) {
     
     return 0;
 }
+

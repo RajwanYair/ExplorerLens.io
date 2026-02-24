@@ -1,6 +1,6 @@
 // AVIFDecoder.h - WIC-based AVIF/HEIF Decoder
-// DarkThumbs Engine v1.0.0
-// Copyright (c) 2025 DarkThumbs Project
+// ExplorerLens Engine v1.0.0
+// Copyright (c) 2025 ExplorerLens Project
 //
 // Supports: AVIF, HEIF using Windows Imaging Component
 // Features:
@@ -18,7 +18,7 @@
 #include <wrl/client.h>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class AVIFDecoder : public IThumbnailDecoder {
@@ -58,4 +58,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

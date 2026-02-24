@@ -24,7 +24,7 @@ function Write-Action {
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs - Duplicate File Cleanup" -ForegroundColor Cyan
+Write-Host "ExplorerLens - Duplicate File Cleanup" -ForegroundColor Cyan
 if ($DryRun) {
     Write-Host "[DRY RUN MODE - No changes will be made]" -ForegroundColor Yellow
 }
@@ -33,9 +33,9 @@ Write-Host "========================================`n" -ForegroundColor Cyan
 # Define duplicates to remove/archive
 $duplicatesToArchive = @(
     @{
-        Path        = "scripts/install/Install-DarkThumbs.ps1"
+        Path        = "scripts/install/Install-ExplorerLens.ps1"
         Reason      = "Superseded by scripts/install.ps1"
-        ArchivePath = "scripts/install/_archive/Install-DarkThumbs.ps1.old"
+        ArchivePath = "scripts/install/_archive/Install-ExplorerLens.ps1.old"
     },
     @{
         Path        = "scripts/install/install-x64.ps1"
@@ -140,3 +140,4 @@ if ($DryRun) {
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 exit 0
+

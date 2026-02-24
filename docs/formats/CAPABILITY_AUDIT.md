@@ -1,4 +1,4 @@
-# DarkThumbs Format Support Capability Audit
+# ExplorerLens Format Support Capability Audit
 **Version**: 8.4.0  
 **Date**: June 2025  
 **Build Status**: ✅ Production (0 errors, 0 warnings, 437 tests, 5 benchmarks)
@@ -9,7 +9,7 @@
 
 **Total Formats Supported**: **200+** (verified operational via 25 decoders)  
 **Compilation Status**: ✅ All decoders compile successfully  
-**Shell Registration**: 93 extensions registered in CBXShell.rgs
+**Shell Registration**: 93 extensions registered in LENSShell.rgs
 
 ### Implementation Distribution
 - **✅ Fully Operational**: 200+ formats across 25 decoders
@@ -62,7 +62,7 @@
 
 ### 6. WebP (.webp)
 - **Implementation**: libwebp 1.5.0 (static library)
-- **File**: `CBXShell/webp_decoder.cpp`
+- **File**: `LENSShell/webp_decoder.cpp`
 - **Size**: ~250 lines (estimated)
 - **Library**: `libwebp.lib`, `libsharpyuv.lib`
 - **Performance**: <20ms (lossy), <30ms (lossless)
@@ -71,7 +71,7 @@
 
 ### 7. AVIF (.avif)
 - **Implementation**: Windows Imaging Component (WIC)
-- **File**: `CBXShell/avif_decoder.cpp`, `avif_decoder.h`
+- **File**: `LENSShell/avif_decoder.cpp`, `avif_decoder.h`
 - **Library**: Windows WIC + AV1 Video Extension
 - **Performance**: <25ms (hardware), <80ms (software)
 - **Test Status**: ✅ Verified in production
@@ -80,7 +80,7 @@
 
 ### 8-12. HEIF/HEIC (.heic, .heif, .hif, .avci, .avcs) ✅ **NEWLY VERIFIED**
 - **Implementation**: Windows Imaging Component (WIC)
-- **File**: `CBXShell/heif_decoder_native.cpp` (194 lines), `heif_decoder_native.h`
+- **File**: `LENSShell/heif_decoder_native.cpp` (194 lines), `heif_decoder_native.h`
 - **Library**: Windows WIC + HEIF Image Extensions
 - **Performance**: <10ms (embedded thumbnail), <50ms (full decode)
 - **Test Status**: ✅ Compiled, ⏳ Runtime testing pending
@@ -95,7 +95,7 @@
 
 ### 13. JPEG XL (.jxl) ✅ **NEWLY VERIFIED**
 - **Implementation**: libjxl 0.11.1 with parallel runner
-- **File**: `CBXShell/jxl_decoder.cpp` (292 lines), `jxl_decoder.h`
+- **File**: `LENSShell/jxl_decoder.cpp` (292 lines), `jxl_decoder.h`
 - **Libraries**: `jxl.lib`, `jxl_threads.lib`, `brotlicommon.lib`, `brotlidec.lib`, `hwy.lib`
 - **Performance**: <100ms (progressive), <50ms (simple)
 - **Test Status**: ✅ Compiled, ⏳ Runtime testing pending
@@ -114,7 +114,7 @@
 
 ### 14. ZIP Archives (.zip)
 - **Implementation**: minizip-ng 4.0.10
-- **File**: `CBXShell/unzip_new.cpp`
+- **File**: `LENSShell/unzip_new.cpp`
 - **Library**: `minizip.lib`, `zlibstatic.lib`
 - **Performance**: <50ms (thumbnail extraction)
 - **Test Status**: ✅ Verified in production
@@ -122,7 +122,7 @@
 
 ### 15. RAR Archives (.rar)
 - **Implementation**: UNRAR library
-- **File**: Archive handling in `CBXShell/`
+- **File**: Archive handling in `LENSShell/`
 - **Library**: UnRAR SDK
 - **Performance**: <60ms
 - **Test Status**: ✅ Verified in production
@@ -130,7 +130,7 @@
 
 ### 16. 7-Zip Archives (.7z)
 - **Implementation**: LZMA SDK 24.08
-- **File**: Archive handling in `CBXShell/`
+- **File**: Archive handling in `LENSShell/`
 - **Library**: `lzma.lib`
 - **Performance**: <70ms (LZMA2 decompression)
 - **Test Status**: ✅ Verified in production
@@ -156,7 +156,7 @@
 
 ### 27-34. Video Files (.mp4, .avi, .mkv, .mov, .wmv, .flv, .webm, .m4v)
 - **Implementation**: DirectShow + Video Thumbnail Provider
-- **File**: `CBXShell/video_thumbnail.cpp`, `video_thumbnail.h`
+- **File**: `LENSShell/video_thumbnail.cpp`, `video_thumbnail.h`
 - **Library**: Windows DirectShow API
 - **Performance**: 50-200ms (seeks to interesting frame)
 - **Test Status**: ✅ Verified in production
@@ -172,14 +172,14 @@
 
 ### 35. PDF (.pdf)
 - **Implementation**: Custom PDF renderer
-- **File**: `CBXShell/pdf_decoder.cpp`, `pdf_decoder.h`
+- **File**: `LENSShell/pdf_decoder.cpp`, `pdf_decoder.h`
 - **Performance**: <100ms (first page)
 - **Test Status**: ✅ Verified in production
 - **Features**: First page rendering, multi-page documents
 
 ### 36-37. Text Files (.txt, .log, .md, etc.)
 - **Implementation**: Text file preview generator
-- **File**: `CBXShell/document_thumbnail.cpp`
+- **File**: `LENSShell/document_thumbnail.cpp`
 - **Performance**: <20ms
 - **Test Status**: ✅ Verified in production
 - **Features**: Syntax highlighting, first N lines
@@ -190,7 +190,7 @@
 
 ### 38-39. TrueType/OpenType Fonts (.ttf, .otf)
 - **Implementation**: DirectWrite font rendering
-- **File**: `CBXShell/font_preview.cpp`, `font_preview.h`
+- **File**: `LENSShell/font_preview.cpp`, `font_preview.h`
 - **Library**: Windows DirectWrite API
 - **Performance**: <30ms
 - **Test Status**: ✅ Verified in production
@@ -202,7 +202,7 @@
 
 ### 40-41. Audio Files (.mp3, .flac, .wav, .ogg, etc.)
 - **Implementation**: Waveform visualization
-- **File**: `CBXShell/audio_thumbnail.cpp`, `audio_thumbnail.h`
+- **File**: `LENSShell/audio_thumbnail.cpp`, `audio_thumbnail.h`
 - **Performance**: <80ms (waveform generation)
 - **Test Status**: ✅ Verified in production
 - **Features**: Audio waveform as thumbnail, metadata display
@@ -213,7 +213,7 @@
 
 ### 42. SVG (.svg) - PLACEHOLDER
 - **Implementation**: Stub with placeholder rendering
-- **File**: `CBXShell/svg_decoder.h` (228 lines, header-only)
+- **File**: `LENSShell/svg_decoder.h` (228 lines, header-only)
 - **Current**: Generates gradient placeholder with "SVG" text
 - **Status**: 🔧 Needs full implementation
 - **Planned**: NanoSVG or resvg integration (Sprint 14 Phase 2)
@@ -222,7 +222,7 @@
 
 ### 43-48. RAW Camera Formats (.cr2, .cr3, .nef, .arw, .orf, .dng, .rw2, .raf, .pef, .dcr) - DETECTION ONLY
 - **Implementation**: Format detection only
-- **File**: `CBXShell/raw_decoder.h` (329 lines, header-only)
+- **File**: `LENSShell/raw_decoder.h` (329 lines, header-only)
 - **Current**: Signature detection for all major RAW formats
 - **Status**: 🔧 Needs decoding implementation
 - **Planned**: libraw integration (Sprint 13 Phase 1 - HIGH PRIORITY)
@@ -418,7 +418,7 @@ High (16MB+):     PDF, Archives (large), Audio waveforms
 ### Registry Key Template
 ```
 HKEY_CLASSES_ROOT\.{extension}\shellex\{e357fccd-a995-4576-b01f-234630154e96}
-  (Default) = {CBXShell CLSID}
+  (Default) = {LENSShell CLSID}
 ```
 
 ---
@@ -438,8 +438,8 @@ Link-Time Optimization: /LTCG
 
 ### Build Output
 ```
-✅ CBXShell.dll      - Shell Extension (x64\Release\)
-✅ CBXManager.exe    - Configuration Manager
+✅ LENSShell.dll      - Shell Extension (x64\Release\)
+✅ LENSManager.exe    - Configuration Manager
 ✅ Exit Code: 0      - Success
 ✅ Warnings: 0       - Zero-warning build
 ```
@@ -480,7 +480,7 @@ Link-Time Optimization: /LTCG
 
 ## Conclusion
 
-DarkThumbs has **42+ fully operational formats** with excellent modern format coverage (WebP, AVIF, HEIF, JXL). The HEIF and JXL implementations are production-ready and compiled successfully. With RAW and SVG implementations, the project will reach **50+ formats** well ahead of schedule.
+ExplorerLens has **42+ fully operational formats** with excellent modern format coverage (WebP, AVIF, HEIF, JXL). The HEIF and JXL implementations are production-ready and compiled successfully. With RAW and SVG implementations, the project will reach **50+ formats** well ahead of schedule.
 
 **Key Strengths**:
 - Zero-warning compilation
@@ -498,4 +498,5 @@ DarkThumbs has **42+ fully operational formats** with excellent modern format co
 
 *Document Generated: February 6, 2026*  
 *Audit Tool: GitHub Copilot (Claude Sonnet 4.5)*  
-*Build Version: DarkThumbs 7.1.0*
+*Build Version: ExplorerLens 7.1.0*
+

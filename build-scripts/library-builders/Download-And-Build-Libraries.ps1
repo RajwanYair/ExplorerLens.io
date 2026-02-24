@@ -1,9 +1,9 @@
 # ===========================================================================
 # Download-And-Build-Libraries.ps1
-# Download prebuilt libraries or build from source for DarkThumbs
+# Download prebuilt libraries or build from source for ExplorerLens
 # ===========================================================================
 # 
-# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# ⚠️  DEPRECATED: Use Build-All-ExplorerLens-V7.ps1 instead
 # This script is kept for reference only.
 # See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
 # 
@@ -177,8 +177,9 @@ if ($missingRequired -gt 0) {
     Write-Host "Build will likely fail." -ForegroundColor Yellow
 } elseif ($missing -eq 0) {
     Write-Host ""
-    Write-Host "All libraries ready! You can now build CBXShell." -ForegroundColor Green
+    Write-Host "All libraries ready! You can now build LENSShell." -ForegroundColor Green
 } else {
     Write-Host ""
     Write-Host "Optional libraries missing. Build may succeed with reduced functionality." -ForegroundColor Yellow
 }
+

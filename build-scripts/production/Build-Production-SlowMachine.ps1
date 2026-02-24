@@ -4,7 +4,7 @@
     Production build with file-based monitoring for slow machines
 
 .DESCRIPTION
-    Complete production build of DarkThumbs with all libraries.
+    Complete production build of ExplorerLens with all libraries.
     Optimized for slow machines with extended timeouts and file-based
     output monitoring instead of real-time terminal output.
 
@@ -73,7 +73,7 @@ function Write-Progress-File {
 
 Write-Log ""
 Write-Log "========================================" "Cyan"
-Write-Log "  DarkThumbs Production Build" "Cyan"
+Write-Log "  ExplorerLens Production Build" "Cyan"
 Write-Log "  Slow Machine Optimized" "Cyan"
 Write-Log "========================================" "Cyan"
 Write-Log "Started: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" "Gray"
@@ -95,7 +95,7 @@ if ($Clean) {
     Write-Log "Cleaning build artifacts..." "Yellow"
     Write-Progress-File -Status "Cleaning" -Current "Removing build directories" -Step 1 -Total 10
     
-    $cleanDirs = @("build", "x64", "CBXShell\x64", "CBXManager\x64")
+    $cleanDirs = @("build", "x64", "LENSShell\x64", "LENSManager\x64")
     foreach ($dir in $cleanDirs) {
         if (Test-Path $dir) {
             Write-Log "  Removing: $dir" "Gray"
@@ -224,10 +224,10 @@ if (-not $SkipLibraries) {
     }
 }
 
-# Build CBXShell solution
+# Build LENSShell solution
 Write-Log ""
-Write-Log "Building CBXShell solution..." "Cyan"
-Write-Progress-File -Status "Building" -Current "CBXShell" -Step ($totalSteps - 1) -Total $totalSteps
+Write-Log "Building LENSShell solution..." "Cyan"
+Write-Progress-File -Status "Building" -Current "LENSShell" -Step ($totalSteps - 1) -Total $totalSteps
 
 $msbuildScript = ".\build-scripts\Find-MSBuild.ps1"
 if (Test-Path $msbuildScript) {
@@ -235,17 +235,17 @@ if (Test-Path $msbuildScript) {
     if ($msbuild -and (Test-Path $msbuild)) {
         Write-Log "MSBuild: $msbuild" "Gray"
         
-        $msbuildLog = "build-logs\msbuild-cbxshell-$timestamp.log"
+        $msbuildLog = "build-logs\msbuild-LENSShell-$timestamp.log"
         
         Write-Log "Building (output to $msbuildLog)..." "Gray"
         
-        & $msbuild "CBXShell.sln" /p:Configuration=Release /p:Platform=x64 /m /v:minimal *>&1 | 
+        & $msbuild "LENSShell.sln" /p:Configuration=Release /p:Platform=x64 /m /v:minimal *>&1 | 
         Tee-Object -FilePath $msbuildLog
         
         if ($LASTEXITCODE -eq 0) {
-            Write-Log "✅ CBXShell build succeeded" "Green"
+            Write-Log "✅ LENSShell build succeeded" "Green"
         } else {
-            Write-Log "❌ CBXShell build failed (exit code: $LASTEXITCODE)" "Red"
+            Write-Log "❌ LENSShell build failed (exit code: $LASTEXITCODE)" "Red"
             Write-Log "Check log: $msbuildLog" "Yellow"
         }
     } else {
@@ -285,3 +285,4 @@ Write-Progress-File -Status "Complete" -Current "Build finished" -Step $totalSte
 # Return exit code based on results
 $failures = ($libraryResults.Values | Where-Object { $_ -eq "Failed" }).Count
 exit $failures
+

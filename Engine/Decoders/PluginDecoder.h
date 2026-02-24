@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Engine - Plugin Decoder Wrapper
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Engine - Plugin Decoder Wrapper
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Wraps a PluginHandle to implement the IThumbnailDecoder interface,
  * allowing plugins to participate in the thumbnail generation pipeline.
@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //============================================================================
@@ -21,7 +21,7 @@ namespace Engine {
 /// 
 /// This class wraps a PluginHandle and adapts it to the IThumbnailDecoder
 /// interface, allowing third-party plugins to seamlessly integrate with
-/// the DarkThumbs thumbnail pipeline.
+/// the ExplorerLens thumbnail pipeline.
 /// 
 /// The wrapper handles:
 /// - Conversion between wchar_t paths and UTF-8 for plugin API
@@ -76,4 +76,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

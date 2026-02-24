@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include "../Engine/Release/ReleasePackaging.h"
 
-using namespace DarkThumbs::Engine::Release;
+using namespace ExplorerLens::Engine::Release;
 
 // =============================================================================
 // PackageType Tests
@@ -124,7 +124,7 @@ TEST(ArtifactTest, HasChecksum) {
 TEST(ArtifactTest, IsValid) {
     Artifact a;
     EXPECT_FALSE(a.IsValid());
-    a.filename = "DarkThumbs-7.0.0-x64.msi";
+    a.filename = "ExplorerLens-7.0.0-x64.msi";
     a.sizeBytes = 5000000;
     EXPECT_TRUE(a.IsValid());
 }
@@ -200,30 +200,30 @@ TEST(SBOMEntryTest, HasLicenseAndURL) {
     EXPECT_TRUE(e.HasURL());
 }
 
-TEST(SBOMTest, DarkThumbsSBOM) {
-    auto sbom = SBOM::DarkThumbsSBOM();
-    EXPECT_EQ(sbom.product, "DarkThumbs");
+TEST(SBOMTest, ExplorerLensSBOM) {
+    auto sbom = SBOM::ExplorerLensSBOM();
+    EXPECT_EQ(sbom.product, "ExplorerLens");
     EXPECT_GT(sbom.entries.size(), 10u);
     EXPECT_GT(sbom.DirectDependencyCount(), 0u);
 }
 
 TEST(SBOMTest, TransitiveDependencies) {
-    auto sbom = SBOM::DarkThumbsSBOM();
+    auto sbom = SBOM::ExplorerLensSBOM();
     EXPECT_GT(sbom.TransitiveDependencyCount(), 0u);
     EXPECT_EQ(sbom.DirectDependencyCount() + sbom.TransitiveDependencyCount(),
               sbom.entries.size());
 }
 
 TEST(SBOMTest, AllHaveLicenses) {
-    auto sbom = SBOM::DarkThumbsSBOM();
+    auto sbom = SBOM::ExplorerLensSBOM();
     EXPECT_TRUE(sbom.AllHaveLicenses());
 }
 
 TEST(SBOMTest, ToText) {
-    auto sbom = SBOM::DarkThumbsSBOM();
+    auto sbom = SBOM::ExplorerLensSBOM();
     auto text = sbom.ToText();
     EXPECT_NE(text.find("Software Bill of Materials"), std::string::npos);
-    EXPECT_NE(text.find("DarkThumbs"), std::string::npos);
+    EXPECT_NE(text.find("ExplorerLens"), std::string::npos);
     EXPECT_NE(text.find("libjxl"), std::string::npos);
     EXPECT_NE(text.find("transitive"), std::string::npos);
 }
@@ -246,7 +246,7 @@ TEST(UpdateChannelTest, Names) {
 TEST(UpdateManifestTest, HasDownloadInfo) {
     UpdateManifest m;
     EXPECT_FALSE(m.HasDownloadInfo());
-    m.downloadUrl = "https://example.com/DarkThumbs.msi";
+    m.downloadUrl = "https://example.com/ExplorerLens.msi";
     m.sizeBytes = 5000000;
     EXPECT_TRUE(m.HasDownloadInfo());
 }
@@ -262,7 +262,7 @@ TEST(UpdateManifestTest, ToJSON) {
     UpdateManifest m;
     m.version = {7, 1, 0, 0, ""};
     m.channel = UpdateChannel::Stable;
-    m.downloadUrl = "https://example.com/DarkThumbs.msi";
+    m.downloadUrl = "https://example.com/ExplorerLens.msi";
     m.sizeBytes = 5000000;
     m.isRequired = false;
     auto json = m.ToJSON();
@@ -346,3 +346,4 @@ TEST(ReleaseConfigTest, PackagesToBuildFull) {
     // MSI + ZIP + MSIX + Symbols = 4
     EXPECT_EQ(pkgs.size(), 4u);
 }
+

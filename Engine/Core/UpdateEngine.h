@@ -1,10 +1,10 @@
 #pragma once
-// Sprint 231: Update Engine — auto-update check, download, verify, and install
+// Update Engine — auto-update check, download, verify, and install
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Update channel
 enum class UpdateChannel : uint32_t {
@@ -67,4 +67,5 @@ private:
     UpdateChannel m_channel = UpdateChannel::Stable;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

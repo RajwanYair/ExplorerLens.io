@@ -1,5 +1,5 @@
 // JXLDecoder.cpp - JPEG XL (JXL) format decoder implementation
-// Part of DarkThumbs Engine v5.3.0+
+// Part of ExplorerLens Engine v5.3.0+
 
 #include "JXLDecoder.h"
 #include <fstream>
@@ -14,7 +14,7 @@
 #pragma comment(lib, "jxl_threads.lib")
 #endif
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     // Static extension array defined in header
@@ -336,4 +336,5 @@ namespace Engine {
     }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

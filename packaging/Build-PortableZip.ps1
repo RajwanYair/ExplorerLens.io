@@ -1,6 +1,6 @@
 # Build-PortableZip.ps1
 # Sprint 10: Release Governance & Packaging
-# Creates portable ZIP distribution of DarkThumbs
+# Creates portable ZIP distribution of ExplorerLens
 
 param(
     [string]$Configuration = "Release",
@@ -13,7 +13,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Portable ZIP Builder" -ForegroundColor Cyan
+Write-Host "ExplorerLens Portable ZIP Builder" -ForegroundColor Cyan
 Write-Host "Version: $Version" -ForegroundColor Cyan
 Write-Host "============================================`n" -ForegroundColor Cyan
 
@@ -31,7 +31,7 @@ if (-not (Test-Path $OutputDir)) {
 }
 
 # Create temporary staging directory
-$StagingDir = Join-Path $env:TEMP "DarkThumbs-Staging-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+$StagingDir = Join-Path $env:TEMP "ExplorerLens-Staging-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 New-Item -ItemType Directory -Path $StagingDir -Force | Out-Null
 Write-Host "[Created] Staging directory: $StagingDir" -ForegroundColor Green
 
@@ -45,8 +45,8 @@ try {
     New-Item -ItemType Directory -Path $BinariesDir -Force | Out-Null
     
     $MainBinaries = @(
-        "x64\$Configuration\CBXShell.dll",
-        "x64\$Configuration\CBXManager.exe"
+        "x64\$Configuration\LENSShell.dll",
+        "x64\$Configuration\LENSManager.exe"
     )
     
     foreach ($binary in $MainBinaries) {
@@ -137,8 +137,8 @@ try {
     Write-Host "`n[4/6] Creating installation scripts..." -ForegroundColor Yellow
     
     $InstallScript = @'
-# Install-DarkThumbs-Portable.ps1
-# Portable installation script for DarkThumbs
+# Install-ExplorerLens-Portable.ps1
+# Portable installation script for ExplorerLens
 
 param(
     [switch]$Uninstall = $false
@@ -150,58 +150,58 @@ $ScriptDir = Split-Path -Parent $PSCommandPath
 $BinDir = Join-Path $ScriptDir "bin"
 
 if ($Uninstall) {
-    Write-Host "Unregistering DarkThumbs shell extension..." -ForegroundColor Yellow
+    Write-Host "Unregistering ExplorerLens shell extension..." -ForegroundColor Yellow
     
     # Unregister COM server
     $regsvr32 = Join-Path $env:SystemRoot "System32\regsvr32.exe"
-    $cbxShellPath = Join-Path $BinDir "CBXShell.dll"
+    $lensShellPath = Join-Path $BinDir "LENSShell.dll"
     
-    if (Test-Path $cbxShellPath) {
-        & $regsvr32 /u /s $cbxShellPath
+    if (Test-Path $lensShellPath) {
+        & $regsvr32 /u /s $lensShellPath
         Write-Host "✓ Unregistered successfully" -ForegroundColor Green
     } else {
-        Write-Host "✗ CBXShell.dll not found" -ForegroundColor Red
+        Write-Host "✗ LENSShell.dll not found" -ForegroundColor Red
     }
 } else {
-    Write-Host "Installing DarkThumbs shell extension..." -ForegroundColor Yellow
+    Write-Host "Installing ExplorerLens shell extension..." -ForegroundColor Yellow
     
     # Register COM server
     $regsvr32 = Join-Path $env:SystemRoot "System32\regsvr32.exe"
-    $cbxShellPath = Join-Path $BinDir "CBXShell.dll"
+    $lensShellPath = Join-Path $BinDir "LENSShell.dll"
     
-    if (Test-Path $cbxShellPath) {
-        & $regsvr32 /s $cbxShellPath
+    if (Test-Path $lensShellPath) {
+        & $regsvr32 /s $lensShellPath
         
         if ($LASTEXITCODE -eq 0) {
             Write-Host "✓ Registered successfully" -ForegroundColor Green
-            Write-Host "`nDarkThumbs is now installed!" -ForegroundColor Green
-            Write-Host "Run CBXManager.exe to configure settings." -ForegroundColor Cyan
+            Write-Host "`nExplorerLens is now installed!" -ForegroundColor Green
+            Write-Host "Run LENSManager.exe to configure settings." -ForegroundColor Cyan
         } else {
             Write-Host "✗ Registration failed (exit code: $LASTEXITCODE)" -ForegroundColor Red
             Write-Host "Try running as Administrator" -ForegroundColor Yellow
         }
     } else {
-        Write-Host "✗ CBXShell.dll not found at: $cbxShellPath" -ForegroundColor Red
+        Write-Host "✗ LENSShell.dll not found at: $lensShellPath" -ForegroundColor Red
     }
 }
 '@
     
-    $installScriptPath = Join-Path $StagingDir "Install-DarkThumbs-Portable.ps1"
+    $installScriptPath = Join-Path $StagingDir "Install-ExplorerLens-Portable.ps1"
     Set-Content -Path $installScriptPath -Value $InstallScript -Force
-    Write-Host "  ✓ Created Install-DarkThumbs-Portable.ps1" -ForegroundColor Green
+    Write-Host "  ✓ Created Install-ExplorerLens-Portable.ps1" -ForegroundColor Green
     
     # Create README for portable version
     $PortableReadme = @"
-DarkThumbs v$Version - Portable Edition
+ExplorerLens v$Version - Portable Edition
 ========================================
 
 Quick Start:
-1. Run 'Install-DarkThumbs-Portable.ps1' as Administrator to register the shell extension
-2. Run 'bin\CBXManager.exe' to configure settings
+1. Run 'Install-ExplorerLens-Portable.ps1' as Administrator to register the shell extension
+2. Run 'bin\LENSManager.exe' to configure settings
 3. Thumbnails will appear automatically in Windows Explorer
 
 Uninstallation:
-1. Run 'Install-DarkThumbs-Portable.ps1 -Uninstall' as Administrator
+1. Run 'Install-ExplorerLens-Portable.ps1 -Uninstall' as Administrator
 2. Delete this folder
 
 Supported Formats:
@@ -216,7 +216,7 @@ Supported Formats:
 
 For more information, see docs/README.md and docs/USER_GUIDE.md
 
-Configuration Manager: bin\CBXManager.exe
+Configuration Manager: bin\LENSManager.exe
 Build Date: $(Get-Date -Format 'yyyy-MM-dd')
 Version: $Version
 "@
@@ -235,7 +235,7 @@ Version: $Version
         New-Item -ItemType Directory -Path $SourceDir -Force | Out-Null
         
         # Copy essential source directories (exclude build artifacts)
-        $SourceDirs = @("CBXShell", "CBXManager", "Engine", "SDK", "tests")
+        $SourceDirs = @("LENSShell", "LENSManager", "Engine", "SDK", "tests")
         foreach ($dir in $SourceDirs) {
             $srcPath = Join-Path $RootDir $dir
             if (Test-Path $srcPath) {
@@ -246,8 +246,8 @@ Version: $Version
         }
         
         # Copy solution file
-        Copy-Item (Join-Path $RootDir "CBXShell.sln") (Join-Path $SourceDir "CBXShell.sln") -Force
-        Write-Host "  ✓ Copied CBXShell.sln" -ForegroundColor Green
+        Copy-Item (Join-Path $RootDir "LENSShell.sln") (Join-Path $SourceDir "LENSShell.sln") -Force
+        Write-Host "  ✓ Copied LENSShell.sln" -ForegroundColor Green
     }
     
     # =============================================================================
@@ -255,7 +255,7 @@ Version: $Version
     # =============================================================================
     Write-Host "`n[6/6] Creating ZIP archive..." -ForegroundColor Yellow
     
-    $ZipFileName = "DarkThumbs-$Version-Portable.zip"
+    $ZipFileName = "ExplorerLens-$Version-Portable.zip"
     $ZipPath = Join-Path $OutputDir $ZipFileName
     
     # Remove old ZIP if exists
@@ -277,7 +277,7 @@ Version: $Version
     Write-Host "`n[7/6] Generating checksums..." -ForegroundColor Yellow
     
     $sha256 = (Get-FileHash -Path $ZipPath -Algorithm SHA256).Hash
-    $checksumFile = Join-Path $OutputDir "DarkThumbs-$Version-Portable.sha256"
+    $checksumFile = Join-Path $OutputDir "ExplorerLens-$Version-Portable.sha256"
     
     $checksumContent = @"
 $sha256  $ZipFileName
@@ -309,3 +309,4 @@ $sha256  $ZipFileName
         Write-Host "[Cleaned] Temporary staging directory" -ForegroundColor Gray
     }
 }
+

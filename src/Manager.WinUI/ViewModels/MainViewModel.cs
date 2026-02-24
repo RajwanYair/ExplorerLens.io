@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 
-namespace DarkThumbs.Manager.ViewModels;
+namespace ExplorerLens.Manager.ViewModels;
 
 /// <summary>
 /// Main ViewModel for the application window
@@ -13,7 +13,7 @@ public partial class MainViewModel : ObservableObject
     private string _currentPageTitle = "Dashboard";
 
     [ObservableProperty]
-    private string _engineStatus = "DarkThumbs Engine: Active";
+    private string _engineStatus = "ExplorerLens Engine: Active";
 
     [ObservableProperty]
     private string _version = "v7.0.0";
@@ -27,6 +27,6 @@ public partial class MainViewModel : ObservableObject
     {
         // Check engine status
         await Task.Delay(100); // Simulate async init
-        EngineStatus = "DarkThumbs Engine: Active • 0 active requests";
+        EngineStatus = "ExplorerLens Engine: Active • 0 active requests";
     }
 }

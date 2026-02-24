@@ -1,6 +1,6 @@
 // SVGDecoder.cpp - SVG/SVGZ Vector Image Decoder Implementation
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 
 #include "SVGDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
@@ -17,7 +17,7 @@
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Supported extensions
@@ -402,4 +402,5 @@ std::unique_ptr<uint8_t[]> SVGDecoder::ReadFileData(const wchar_t* path, size_t&
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,4 +1,4 @@
-# Additional Library Research for DarkThumbs v7.0
+# Additional Library Research for ExplorerLens v7.0
 **Date:** February 16, 2026  
 **Purpose:** Identify additional open-source libraries to enhance format support
 
@@ -241,7 +241,7 @@ ag/libde265
 
 ## 📊 Format Coverage Analysis
 
-### **Current DarkThumbs v7.0 Support (Updated Feb 2026)**
+### **Current ExplorerLens v7.0 Support (Updated Feb 2026)**
 
 | Category | Current Formats | Status |
 |----------|----------------|--------|
@@ -383,3 +383,4 @@ All 24 decoders follow this pattern (all steps completed for existing decoders):
 
 **Last Updated:** February 16, 2026  
 **Next Review:** March 1, 2026
+

@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Tester
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Tester
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Command-line tool for testing and validating plugins.
  *****************************************************************************/
@@ -75,8 +75,8 @@ public:
         // Check API version
         uint32_t plugin_major = (info_->api_version >> 16) & 0xFFFF;
         uint32_t plugin_minor = info_->api_version & 0xFFFF;
-        uint32_t host_major = (DARKTHUMBS_PLUGIN_API_VERSION >> 16) & 0xFFFF;
-        uint32_t host_minor = DARKTHUMBS_PLUGIN_API_VERSION & 0xFFFF;
+        uint32_t host_major = (EXPLORERLENS_PLUGIN_API_VERSION >> 16) & 0xFFFF;
+        uint32_t host_minor = EXPLORERLENS_PLUGIN_API_VERSION & 0xFFFF;
         
         std::cout << "Plugin API version: " << plugin_major << "." << plugin_minor << "\n";
         std::cout << "Host API version:   " << host_major << "." << host_minor << "\n";
@@ -275,7 +275,7 @@ private:
 //============================================================================
 
 void PrintUsage(const char* program) {
-    std::cout << "\nDarkThumbs Plugin Tester v1.0\n";
+    std::cout << "\nExplorerLens Plugin Tester v1.0\n";
     std::cout << "==============================\n\n";
     std::cout << "Usage:\n";
     std::cout << "  " << program << " <plugin.dll> [options]\n\n";
@@ -357,3 +357,5 @@ int wmain(int argc, wchar_t* argv[]) {
     std::cout << "\n=== All Tests Passed ===\n";
     return 0;
 }
+
+

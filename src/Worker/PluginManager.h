@@ -4,9 +4,9 @@
 #include <string>
 #include <memory>
 #include <windows.h>
-#include "../SDK/include/DarkThumbsPlugin.h"
+#include "../SDK/include/ExplorerLensPlugin.h"
 
-namespace DarkThumbs::Worker {
+namespace ExplorerLens::Worker {
 
     enum class PluginStatus {
         Unloaded,
@@ -62,3 +62,4 @@ namespace DarkThumbs::Worker {
     std::shared_ptr<IPluginManager> CreatePluginManager();
 
 }
+

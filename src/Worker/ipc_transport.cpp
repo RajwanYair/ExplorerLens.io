@@ -6,7 +6,7 @@
 #include <sstream>
 #include <thread>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace IPC {
 
 namespace {
@@ -461,4 +461,5 @@ uint32_t ConnectionPool::GetActiveCount() const {
 }
 
 } // namespace IPC
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

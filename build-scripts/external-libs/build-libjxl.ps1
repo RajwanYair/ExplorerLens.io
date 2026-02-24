@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build libjxl 0.11.1 (JPEG XL)
+# ExplorerLens v7.0 - Build libjxl 0.11.1 (JPEG XL)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -54,19 +54,19 @@ try {
     # CMake options for libjxl
     $cmakeOptions = @{
         'CMAKE_BUILD_TYPE'           = 'Release'
-        'BUILD_SHARED_LIBS'          = 'OFF'
-        'BUILD_TESTING'              = 'OFF'
-        'JPEGXL_ENABLE_TOOLS'        = 'OFF'
-        'JPEGXL_ENABLE_DOXYGEN'      = 'OFF'
-        'JPEGXL_ENABLE_MANPAGES'     = 'OFF'
-        'JPEGXL_ENABLE_BENCHMARK'    = 'OFF'
-        'JPEGXL_ENABLE_EXAMPLES'     = 'OFF'
-        'JPEGXL_ENABLE_JNI'          = 'OFF'
-        'JPEGXL_ENABLE_SJPEG'        = 'OFF'
-        'JPEGXL_ENABLE_OPENEXR'      = 'OFF'
+        'BUILD_SHARED_LIBS'          = 'ON'
+        'BUILD_TESTING'              = 'ON'
+        'JPEGXL_ENABLE_TOOLS'        = 'ON'
+        'JPEGXL_ENABLE_DOXYGEN'      = 'ON'
+        'JPEGXL_ENABLE_MANPAGES'     = 'ON'
+        'JPEGXL_ENABLE_BENCHMARK'    = 'ON'
+        'JPEGXL_ENABLE_EXAMPLES'     = 'ON'
+        'JPEGXL_ENABLE_JNI'          = 'ON'
+        'JPEGXL_ENABLE_SJPEG'        = 'ON'
+        'JPEGXL_ENABLE_OPENEXR'      = 'ON'
         'JPEGXL_ENABLE_SKCMS'        = 'ON'
-        'JPEGXL_FORCE_SYSTEM_BROTLI' = 'OFF'
-        'JPEGXL_FORCE_SYSTEM_HWY'    = 'OFF'
+        'JPEGXL_FORCE_SYSTEM_BROTLI' = 'ON'
+        'JPEGXL_FORCE_SYSTEM_HWY'    = 'ON'
     }
     
     # Build with CMake
@@ -95,4 +95,5 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+
 

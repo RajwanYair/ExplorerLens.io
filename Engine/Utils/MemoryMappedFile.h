@@ -1,6 +1,6 @@
 //==============================================================================
 // MemoryMappedFile.h - Memory-Mapped File I/O for Efficient Image Loading  
-// Part of DarkThumbs Engine Utils
+// Part of ExplorerLens Engine Utils
 //==============================================================================
 
 #pragma once
@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -216,4 +216,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 331: SharePoint & Teams Integration
+// ExplorerLens Engine — SharePoint & Teams Integration
 // Thumbnail generation for SharePoint document libraries and Teams file cards
 // with Graph API auth, delta sync, and adaptive thumbnail sizes.
 //==============================================================================
@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class CloudFileSource : uint8_t { SharePoint=0,OneDrive,Teams,Yammer,COUNT };
 enum class GraphAuthMethod : uint8_t { DeviceCode=0,ClientCredential,ManagedIdentity,InteractiveMSAL,COUNT };
@@ -63,4 +63,5 @@ public:
     static constexpr size_t SyncStateCount()   { return static_cast<size_t>(CloudSyncState::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

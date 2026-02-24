@@ -1,10 +1,10 @@
 /******************************************************************************
- * DarkThumbs Plugin API v1.0
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin API v1.0
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
- * This is the stable C ABI for DarkThumbs thumbnail decoder plugins.
+ * This is the stable C ABI for ExplorerLens thumbnail decoder plugins.
  * Plugins written against this API will remain binary-compatible across
- * DarkThumbs minor versions.
+ * ExplorerLens minor versions.
  * 
  * License: MIT
  *****************************************************************************/
@@ -22,20 +22,20 @@ extern "C" {
 // API Version and Compatibility
 //============================================================================
 
-#define DARKTHUMBS_PLUGIN_API_VERSION_MAJOR 1
-#define DARKTHUMBS_PLUGIN_API_VERSION_MINOR 0
-#define DARKTHUMBS_PLUGIN_API_VERSION_PATCH 0
+#define EXPLORERLENS_PLUGIN_API_VERSION_MAJOR 1
+#define EXPLORERLENS_PLUGIN_API_VERSION_MINOR 0
+#define EXPLORERLENS_PLUGIN_API_VERSION_PATCH 0
 
 // Plugin API version (major.minor format for ABI compatibility checks)
-#define DARKTHUMBS_PLUGIN_API_VERSION \
-    ((DARKTHUMBS_PLUGIN_API_VERSION_MAJOR << 16) | DARKTHUMBS_PLUGIN_API_VERSION_MINOR)
+#define EXPLORERLENS_PLUGIN_API_VERSION \
+    ((EXPLORERLENS_PLUGIN_API_VERSION_MAJOR << 16) | EXPLORERLENS_PLUGIN_API_VERSION_MINOR)
 
 //============================================================================
 // Platform Export Macros
 //============================================================================
 
 #ifdef _WIN32
-    #ifdef DARKTHUMBS_PLUGIN_EXPORTS
+    #ifdef EXPLORERLENS_PLUGIN_EXPORTS
         #define PLUGIN_API __declspec(dllexport)
     #else
         #define PLUGIN_API __declspec(dllimport)
@@ -115,7 +115,7 @@ typedef struct {
     const char* plugin_license;         // License type (e.g., "MIT", "GPL")
     
     // API compatibility
-    uint32_t api_version;               // DARKTHUMBS_PLUGIN_API_VERSION
+    uint32_t api_version;               // EXPLORERLENS_PLUGIN_API_VERSION
     
     // Supported formats (null-terminated array)
     const char** supported_extensions;  // e.g., {".webp", ".webm", NULL}
@@ -297,7 +297,7 @@ PLUGIN_API const char* PLUGIN_CALL plugin_error_to_string(PluginErrorCode error)
 #include <string>
 #include <vector>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 class IPluginDecoder {
 public:
@@ -329,6 +329,8 @@ public:
     }
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 
 #endif // __cplusplus
+
+

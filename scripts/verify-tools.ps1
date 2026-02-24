@@ -17,7 +17,7 @@
 Set-StrictMode -Version Latest
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Build Tools Verification" -ForegroundColor Cyan
+Write-Host "ExplorerLens Build Tools Verification" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 $allToolsFound = $true
@@ -200,3 +200,4 @@ if ($allToolsFound) {
     Write-Host "  Or run: winget install <TOOL_NAME>`n" -ForegroundColor Gray
     exit 1
 }
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 338: Installer V2 Manager
+// ExplorerLens Engine — Installer V2 Manager
 // Modern MSIX + MSI V2 packaging pipeline with silent-install support,
 // staged rollout manifests, delta-package diff, rollback snapshots, and
 // enterprise pre-staging via Download-And-Stage workflow.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class InstallerFormat     : uint8_t { MSI=0, MSIX, MSIXBUNDLE, AppInstaller, WinGetManifest, COUNT };
 enum class InstallScope        : uint8_t { PerMachine=0, PerUser, AdminRequired, COUNT };
@@ -80,4 +80,5 @@ public:
     static constexpr size_t RollbackStrategyCount() { return static_cast<size_t>(RollbackStrategy::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

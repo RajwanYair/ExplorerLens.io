@@ -1,4 +1,4 @@
-# DarkThumbs Plugin Development Guide
+# ExplorerLens Plugin Development Guide
 **Sprint 25: Documentation Completion (updated Sprint 54)**  
 **Version:** 7.1.0  
 **Last Updated:** February 18, 2026
@@ -22,7 +22,7 @@
 
 ### What Are Plugins?
 
-**DarkThumbs plugins** are custom thumbnail decoders that extend format support beyond the built-in codecs.
+**ExplorerLens plugins** are custom thumbnail decoders that extend format support beyond the built-in codecs.
 
 **Use cases:**
 - Proprietary image formats (medical imaging, scientific data)
@@ -44,10 +44,10 @@
 
 ## Architecture Overview
 
-### DarkThumbs Engine Structure
+### ExplorerLens Engine Structure
 
 ```
-DarkThumbsEngine.lib
+ExplorerLensEngine.lib
 ├── DecoderRegistry (singleton)
 │   ├── RegisterDecoder(extension, factory)
 │   ├── GetDecoderForExtension(extension) → IThumbnailDecoder*
@@ -74,7 +74,7 @@ DarkThumbsEngine.lib
    ↓
 2. Explorer requests thumbnail via IThumbnailProvider::GetThumbnail()
    ↓
-3. DarkThumbs checks cache: CacheManager::Get(filePath)
+3. ExplorerLens checks cache: CacheManager::Get(filePath)
    ↓ (cache miss)
 4. DecoderRegistry::GetDecoderForExtension(".xyz")
    ↓
@@ -104,7 +104,7 @@ DarkThumbsEngine.lib
 #include <string>
 #include <vector>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 class MyCustomDecoder : public IThumbnailDecoder {
 public:
@@ -134,7 +134,7 @@ private:
     std::vector<uint8_t> DecompressData(const uint8_t* compressed, size_t size) const;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 ```
 
 ---
@@ -147,7 +147,7 @@ private:
 #include <fstream>
 #include <stdexcept>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 bool MyCustomDecoder::CanDecode(const std::wstring& filePath) const {
     // Quick validation: Check file extension
@@ -267,7 +267,7 @@ std::vector<uint8_t> MyCustomDecoder::DecompressData(
     return decompressed;
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 ```
 
 ---
@@ -281,7 +281,7 @@ std::vector<uint8_t> MyCustomDecoder::DecompressData(
 #include "MyCustomDecoder.h"
 #include "DecoderRegistry.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 // Factory function
 static IThumbnailDecoder* CreateMyCustomDecoder() {
@@ -301,7 +301,7 @@ static bool s_registered = []() {
     return true;
 }();
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 ```
 
 ---
@@ -402,14 +402,14 @@ public:
 
 ```cmake
 # Add custom decoder to Engine library
-target_sources(DarkThumbsEngine PRIVATE
+target_sources(ExplorerLensEngine PRIVATE
     Engine/decoders/MyCustomDecoder.cpp
     Engine/decoders/MyCustomDecoder.h
     Engine/decoders/MyCustomDecoderRegistration.cpp
 )
 
 # Link external library (if needed)
-target_link_libraries(DarkThumbsEngine PRIVATE
+target_link_libraries(ExplorerLensEngine PRIVATE
     mycustomlib  # Example: libxyz.lib
 )
 ```
@@ -427,7 +427,7 @@ add_library(MyCustomDecoderPlugin SHARED
 )
 
 target_link_libraries(MyCustomDecoderPlugin PRIVATE
-    DarkThumbsEngine  # Link against Engine for interfaces
+    ExplorerLensEngine  # Link against Engine for interfaces
     mycustomlib
 )
 
@@ -475,7 +475,7 @@ PLUGIN_EXPORT void DestroyPlugin(IDecoderPlugin* plugin) {
 #include <fstream>
 
 TEST(MyCustomDecoderTest, CanDecodeValidFile) {
-    DarkThumbs::MyCustomDecoder decoder;
+    ExplorerLens::MyCustomDecoder decoder;
     
     // Create test file
     std::ofstream file("test.xyz", std::ios::binary);
@@ -491,7 +491,7 @@ TEST(MyCustomDecoderTest, CanDecodeValidFile) {
 }
 
 TEST(MyCustomDecoderTest, DecodeProducesValidBitmap) {
-    DarkThumbs::MyCustomDecoder decoder;
+    ExplorerLens::MyCustomDecoder decoder;
     
     auto bitmap = decoder.Decode(L"test.xyz", 256, 256);
     
@@ -504,13 +504,13 @@ TEST(MyCustomDecoderTest, DecodeProducesValidBitmap) {
 }
 
 TEST(MyCustomDecoderTest, RejectInvalidFile) {
-    DarkThumbs::MyCustomDecoder decoder;
+    ExplorerLens::MyCustomDecoder decoder;
     
     EXPECT_FALSE(decoder.CanDecode(L"notafile.txt"));
 }
 
 TEST(MyCustomDecoderTest, ThrowOnCorruptedFile) {
-    DarkThumbs::MyCustomDecoder decoder;
+    ExplorerLens::MyCustomDecoder decoder;
     
     // Create corrupted file (truncated header)
     std::ofstream file("corrupt.xyz", std::ios::binary);
@@ -531,7 +531,7 @@ TEST(MyCustomDecoderTest, ThrowOnCorruptedFile) {
 ```cpp
 // test/IntegrationTests.cpp
 TEST(IntegrationTest, DecoderRegistered) {
-    auto& registry = DarkThumbs::DecoderRegistry::GetInstance();
+    auto& registry = ExplorerLens::DecoderRegistry::GetInstance();
     
     EXPECT_TRUE(registry.IsExtensionSupported(".xyz"));
     
@@ -543,7 +543,7 @@ TEST(IntegrationTest, DecoderRegistered) {
 }
 
 TEST(IntegrationTest, EndToEndDecode) {
-    auto& registry = DarkThumbs::DecoderRegistry::GetInstance();
+    auto& registry = ExplorerLens::DecoderRegistry::GetInstance();
     
     // Get decoder
     auto* decoder = registry.GetDecoderForExtension(".xyz");
@@ -570,12 +570,12 @@ TEST(IntegrationTest, EndToEndDecode) {
 1. **Build and install:**
    ```powershell
    cmake --build build --config Release
-   copy build\bin\Release\CBXShell.dll "C:\Program Files\DarkThumbs\"
-   regsvr32 "C:\Program Files\DarkThumbs\CBXShell.dll"
+   copy build\bin\Release\LENSShell.dll "C:\Program Files\ExplorerLens\"
+   regsvr32 "C:\Program Files\ExplorerLens\LENSShell.dll"
    ```
 
-2. **Enable format in CBXManager:**
-   - Launch CBXManager.exe
+2. **Enable format in LENSManager:**
+   - Launch LENSManager.exe
    - Select "MyCustomFormat (.xyz)"
    - Click "Install"
 
@@ -587,7 +587,7 @@ TEST(IntegrationTest, EndToEndDecode) {
 
 4. **Check logs:**
    ```powershell
-   Get-Content "C:\ProgramData\DarkThumbs\Logs\Engine.log" -Tail 50
+   Get-Content "C:\ProgramData\ExplorerLens\Logs\Engine.log" -Tail 50
    ```
 
 ---
@@ -622,9 +622,9 @@ TEST(IntegrationTest, EndToEndDecode) {
 
 **Directory structure:**
 ```
-C:\Program Files\DarkThumbs\
-├── CBXShell.dll
-├── DarkThumbsEngine.lib
+C:\Program Files\ExplorerLens\
+├── LENSShell.dll
+├── ExplorerLensEngine.lib
 └── Extensions\
     ├── MyCustomDecoderPlugin.dll
     └── mycustomlib.dll (dependency)
@@ -793,7 +793,7 @@ ThumbnailBitmap MyDecoder::Decode(...) {
 #pragma once
 #include "IThumbnailDecoder.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 class MinimalDecoder : public IThumbnailDecoder {
 public:
@@ -843,7 +843,7 @@ static bool s_minimalRegistered = []() {
     return true;
 }();
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 ```
 
 ---
@@ -858,3 +858,4 @@ static bool s_minimalRegistered = []() {
 **Last Updated:** February 18, 2026  
 **Sprint:** 54 - Documentation Version Audit  
 **Version:** 7.1.0
+

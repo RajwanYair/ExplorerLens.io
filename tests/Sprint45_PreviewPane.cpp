@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 45 Tests: Preview Pane & Rich Tooltip Integration
+// ExplorerLens — Sprint 45 Tests: Preview Pane & Rich Tooltip Integration
 // Tests preview mode, EXIF fields, image dimensions, camera info,
 // GPS info, file metadata, tooltip content, property columns, config.
 //==============================================================================
@@ -10,7 +10,7 @@
 
 #include "../Engine/Shell/PreviewPaneHandler.h"
 
-using namespace DarkThumbs::Engine::Shell;
+using namespace ExplorerLens::Engine::Shell;
 
 //==============================================================================
 // Preview Mode Tests
@@ -335,7 +335,7 @@ TEST(PropertyColumn, DefaultColumns)
 {
     auto cols = PropertyColumn::DefaultColumns();
     EXPECT_GE(cols.size(), 5u);
-    EXPECT_EQ(cols[0].id, "DarkThumbs.Format");
+    EXPECT_EQ(cols[0].id, "ExplorerLens.Format");
     EXPECT_EQ(cols[0].label, "Image Format");
     EXPECT_TRUE(cols[0].visible);
 }
@@ -377,3 +377,4 @@ TEST(PreviewPaneConfig, Photographer)
     EXPECT_TRUE(c.showColorProfile);
     EXPECT_DOUBLE_EQ(c.maxZoomFactor, 16.0);
 }
+

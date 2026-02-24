@@ -1,7 +1,7 @@
 // Sprint 133 — JPEG 2000 Decoder Tests
 #include <gtest/gtest.h>
 #include "Decoders/JPEG2000Decoder.h"
-using namespace DarkThumbs::Decoders;
+using namespace ExplorerLens::Decoders;
 
 TEST(Sprint133_JP2, Extensions_Supported) {
     EXPECT_TRUE(JP2Extensions::IsSupported(".jp2"));
@@ -77,3 +77,4 @@ TEST(Sprint133_JP2, StaticExtCheck) {
     EXPECT_TRUE(JPEG2000Decoder::IsJP2Extension(".jp2"));
     EXPECT_FALSE(JPEG2000Decoder::IsJP2Extension(".png"));
 }
+

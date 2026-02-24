@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// AnimatedThumbnailEngine — Sprint 215
+// AnimatedThumbnailEngine
 // Extracts and renders representative frames from animated image formats
 // (GIF, APNG, WebP animation, AVIF sequences).
 //==============================================================================
@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class AnimatedFormat : uint8_t {
     GIF     = 0,
@@ -71,4 +71,5 @@ private:
     uint32_t m_maxFrameScan = 100;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,12 +1,12 @@
 # Intel GPU Optimization Guide
 
-**DarkThumbs v5.2.0 - Intel Graphics Support**
+**ExplorerLens v5.2.0 - Intel Graphics Support**
 
 ---
 
 ## Overview
 
-DarkThumbs v5.2.0 includes extensive support and optimizations for Intel GPUs, from older HD Graphics to the latest Iris Xe and Arc discrete graphics cards.
+ExplorerLens v5.2.0 includes extensive support and optimizations for Intel GPUs, from older HD Graphics to the latest Iris Xe and Arc discrete graphics cards.
 
 ## Supported Intel GPUs
 
@@ -66,7 +66,7 @@ DarkThumbs v5.2.0 includes extensive support and optimizations for Intel GPUs, f
 
 ## Intel GPU Detection
 
-DarkThumbs automatically detects Intel GPUs and applies optimizations:
+ExplorerLens automatically detects Intel GPUs and applies optimizations:
 
 ### Detection Output (DebugView)
 
@@ -121,7 +121,7 @@ DarkThumbs automatically detects Intel GPUs and applies optimizations:
 
 ### 1. Shared Memory Optimization
 
-Intel integrated GPUs use system RAM as shared graphics memory. DarkThumbs optimizes for this:
+Intel integrated GPUs use system RAM as shared graphics memory. ExplorerLens optimizes for this:
 
 - **Zero-copy texture uploads** when possible
 - **Efficient shared memory allocation** for texture buffers
@@ -275,8 +275,8 @@ Intel GPUs from HD Graphics 4000+ support DirectX 11.1 fast semantics:
    - Verify correct resolution
    - Refresh rate: Highest available
 
-4. **3D Preferences** (for CBXShell.dll)
-   - Add CBXShell.dll to application list (optional)
+4. **3D Preferences** (for LENSShell.dll)
+   - Add LENSShell.dll to application list (optional)
    - Set to "Maximum Performance" profile
 
 ---
@@ -319,7 +319,7 @@ Use these tools to verify GPU acceleration:
 
 - **Task Manager** → Performance → GPU
 - **Intel Graphics Command Center** → System → Performance
-- **DebugView** (Sysinternals) for DarkThumbs logs
+- **DebugView** (Sysinternals) for ExplorerLens logs
 
 ### 3. Optimize System Configuration
 
@@ -336,15 +336,15 @@ Use these tools to verify GPU acceleration:
 A: Yes! Intel HD Graphics 3000 (2nd gen) supports DirectX 11.0 and will benefit from GPU acceleration (3-4x speedup).
 
 **Q: I have both Intel integrated and NVIDIA discrete. Which is used?**  
-A: Windows automatically selects the discrete GPU (NVIDIA/AMD) for 3D applications. DarkThumbs will use whichever GPU DirectX 11 provides.
+A: Windows automatically selects the discrete GPU (NVIDIA/AMD) for 3D applications. ExplorerLens will use whichever GPU DirectX 11 provides.
 
 **Q: Can I force Intel integrated GPU usage?**  
-A: Yes, via Intel Graphics Settings → 3D → Add CBXShell.dll → Select "Integrated Graphics"
+A: Yes, via Intel Graphics Settings → 3D → Add LENSShell.dll → Select "Integrated Graphics"
 
-**Q: Does DarkThumbs support Intel Xe-HPG (Data Center)?**  
+**Q: Does ExplorerLens support Intel Xe-HPG (Data Center)?**  
 A: Not tested, but should work if DirectX 11.0+ is supported.
 
-**Q: My Intel Arc GPU shows low FPS in games but DarkThumbs is fast?**  
+**Q: My Intel Arc GPU shows low FPS in games but ExplorerLens is fast?**  
 A: Thumbnail generation uses compute shaders (good on Arc). Game performance is a different workload.
 
 ---
@@ -353,10 +353,11 @@ A: Thumbnail generation uses compute shaders (good on Arc). Game performance is 
 
 **Intel Graphics Drivers:** https://www.intel.com/content/www/us/en/download-center/home.html  
 **Intel Community Forums:** https://community.intel.com/t5/Graphics/ct-p/graphics  
-**DarkThumbs GitHub Issues:** Report Intel-specific issues with DebugView logs
+**ExplorerLens GitHub Issues:** Report Intel-specific issues with DebugView logs
 
 ---
 
 **Last Updated:** November 24, 2025  
 **Tested On:** Intel Arc A770, Iris Xe (11th gen), UHD 630, HD 4000  
 **Status:** Fully Supported ✅
+

@@ -1,7 +1,7 @@
 #pragma once
 // =============================================================================
-// ResourcePoolEngine.h — Sprint 240: Object Pool for Decoder/GPU Resource Reuse
-// DarkThumbs Engine — Core Module
+// ResourcePoolEngine.h — Object Pool for Decoder/GPU Resource Reuse
+// ExplorerLens Engine — Core Module
 // =============================================================================
 
 #include <string>
@@ -11,7 +11,7 @@
 #include <functional>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 /// Resource types managed by the pool
 enum class ResourceType : uint32_t {
@@ -104,4 +104,5 @@ private:
     PooledResource CreateResource(ResourceType type);
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

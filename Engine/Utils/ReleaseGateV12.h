@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// v10.2 KPI dimensions (16 total)
 enum class GateKPIV12 : uint32_t {
@@ -51,4 +51,4 @@ private:
     double m_thresholds[16];
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine

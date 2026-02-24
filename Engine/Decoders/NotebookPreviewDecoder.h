@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 282: Notebook Preview (Jupyter .ipynb)
+// ExplorerLens Engine — Notebook Preview (Jupyter .ipynb)
 // Jupyter notebook thumbnail with cell rendering and output preview.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Notebook cell type
 enum class NotebookCellType : uint8_t {
@@ -101,4 +101,5 @@ public:
     static constexpr size_t KernelCount() { return static_cast<size_t>(NotebookKernel::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

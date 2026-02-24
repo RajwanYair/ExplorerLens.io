@@ -13,7 +13,7 @@ param(
 )
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "  DarkThumbs Quick GPU Test" -ForegroundColor Cyan
+Write-Host "  ExplorerLens Quick GPU Test" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 # Create test directory
@@ -102,7 +102,7 @@ foreach ($img in $testImages) {
         
         $times = @()
         for ($i = 1; $i -le $iterations; $i++) {
-            # SIMULATION: Replace with actual CBXShell thumbnail generation
+            # SIMULATION: Replace with actual LENSShell thumbnail generation
             # For now, simulate based on image complexity
             $baseTime = ([Math]::Log($img.Width * $img.Height) / [Math]::Log(2)) * 2
             $variance = Get-Random -Minimum -2 -Maximum 2
@@ -134,7 +134,7 @@ foreach ($img in $testImages) {
 Write-Host "`nGenerating report..." -ForegroundColor Cyan
 
 $report = @"
-# DarkThumbs GPU Acceleration - Quick Test Results
+# ExplorerLens GPU Acceleration - Quick Test Results
 
 **Test Date:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 **Machine:** $env:COMPUTERNAME
@@ -162,11 +162,11 @@ $report += @"
 ## Notes
 
 ⚠️ **SIMULATION MODE**: This quick test uses simulated thumbnail generation times.
-   To get actual GPU performance data, integrate with CBXShell thumbnail API.
+   To get actual GPU performance data, integrate with LENSShell thumbnail API.
 
 ## Next Steps
 
-1. **Integrate CBXShell API**: Replace simulation with actual COM calls to IThumbnailProvider
+1. **Integrate LENSShell API**: Replace simulation with actual COM calls to IThumbnailProvider
 2. **Add GPU Detection**: Query DirectX device info from gpu_accelerator.cpp
 3. **CPU Comparison**: Add CPU-only fallback tests for comparison
 4. **Memory Profiling**: Track texture pool memory usage
@@ -187,4 +187,5 @@ Write-Host "   - Test images created: $($testImages.Count)" -ForegroundColor Whi
 Write-Host "   - Benchmark tests run: $($results.Count)" -ForegroundColor White
 Write-Host "   - Total iterations: $($results.Count * $iterations)" -ForegroundColor White
 
-Write-Host "`n⚠️  NOTE: Using simulated data. Integrate CBXShell for real benchmarks.`n" -ForegroundColor Yellow
+Write-Host "`n⚠️  NOTE: Using simulated data. Integrate LENSShell for real benchmarks.`n" -ForegroundColor Yellow
+

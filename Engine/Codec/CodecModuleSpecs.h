@@ -1,7 +1,7 @@
 //==============================================================================
-// DarkThumbs Engine — Per-Format Codec DLL Specifications
-// Sprint 36+: Execution Optimization — Per-Format DLL Architecture
-// Copyright (c) 2026 — DarkThumbs Project
+// ExplorerLens Engine — Per-Format Codec DLL Specifications
+// Execution Optimization — Per-Format DLL Architecture
+// Copyright (c) 2026 — ExplorerLens Project
 //
 // PURPOSE:
 //   Define the concrete codec DLL modules that implement ICodecModule.h.
@@ -10,28 +10,28 @@
 //
 // ARCHITECTURE:
 //   ┌─────────────────────────────────────────────────────────────────┐
-//   │  CBXShell.dll  (COM shell extension — always loaded)           │
+//   │  LENSShell.dll  (COM shell extension — always loaded)           │
 //   │   ├─ WIC ImageDecoder (JPEG/PNG/BMP/GIF/TIFF) — in-process    │
 //   │   ├─ ICODecoder, DDSDecoder, EXRDecoder       — in-process    │
 //   │   └─ CodecLoader (demand-loads codec DLLs below)               │
 //   ├─────────────────────────────────────────────────────────────────┤
-//   │  DarkThumbs_Codec_WebP.dll    (~4 MB)  — libwebp 1.5.0        │
-//   │  DarkThumbs_Codec_HEIF.dll    (~8 MB)  — libheif + libde265   │
-//   │  DarkThumbs_Codec_JXL.dll     (~12 MB) — libjxl + brotli + hwy│
-//   │  DarkThumbs_Codec_RAW.dll     (~18 MB) — LibRaw 0.21.3        │
-//   │  DarkThumbs_Codec_AVIF.dll    (~6 MB)  — libavif + dav1d      │
-//   │  DarkThumbs_Codec_Archive.dll (~5 MB)  — minizip + zstd + lz4 │
-//   │  DarkThumbs_Codec_SVG.dll     (~1 MB)  — GDI+ + zlib          │
-//   │  DarkThumbs_Codec_HDR.dll     (~0.5MB) — custom (SSE)         │
-//   │  DarkThumbs_Codec_PSD.dll     (~0.5MB) — custom parser        │
-//   │  DarkThumbs_Codec_Video.dll   (~2 MB)  — Media Foundation     │
-//   │  DarkThumbs_Codec_Audio.dll   (~1 MB)  — ID3v2/FLAC parser    │
-//   │  DarkThumbs_Codec_Document.dll(~1 MB)  — ZIP + Shell fallback │
-//   │  DarkThumbs_Codec_Font.dll    (~1 MB)  — DirectWrite          │
-//   │  DarkThumbs_Codec_Model.dll   (~3 MB)  — Direct3D 11          │
-//   │  DarkThumbs_Codec_QOI.dll     (~0.2MB) — custom (qoi.h)       │
-//   │  DarkThumbs_Codec_TGA.dll     (~0.3MB) — custom (RLE)         │
-//   │  DarkThumbs_Codec_PPM.dll     (~0.2MB) — custom parser        │
+//   │  ExplorerLens_Codec_WebP.dll    (~4 MB)  — libwebp 1.5.0        │
+//   │  ExplorerLens_Codec_HEIF.dll    (~8 MB)  — libheif + libde265   │
+//   │  ExplorerLens_Codec_JXL.dll     (~12 MB) — libjxl + brotli + hwy│
+//   │  ExplorerLens_Codec_RAW.dll     (~18 MB) — LibRaw 0.21.3        │
+//   │  ExplorerLens_Codec_AVIF.dll    (~6 MB)  — libavif + dav1d      │
+//   │  ExplorerLens_Codec_Archive.dll (~5 MB)  — minizip + zstd + lz4 │
+//   │  ExplorerLens_Codec_SVG.dll     (~1 MB)  — GDI+ + zlib          │
+//   │  ExplorerLens_Codec_HDR.dll     (~0.5MB) — custom (SSE)         │
+//   │  ExplorerLens_Codec_PSD.dll     (~0.5MB) — custom parser        │
+//   │  ExplorerLens_Codec_Video.dll   (~2 MB)  — Media Foundation     │
+//   │  ExplorerLens_Codec_Audio.dll   (~1 MB)  — ID3v2/FLAC parser    │
+//   │  ExplorerLens_Codec_Document.dll(~1 MB)  — ZIP + Shell fallback │
+//   │  ExplorerLens_Codec_Font.dll    (~1 MB)  — DirectWrite          │
+//   │  ExplorerLens_Codec_Model.dll   (~3 MB)  — Direct3D 11          │
+//   │  ExplorerLens_Codec_QOI.dll     (~0.2MB) — custom (qoi.h)       │
+//   │  ExplorerLens_Codec_TGA.dll     (~0.3MB) — custom (RLE)         │
+//   │  ExplorerLens_Codec_PPM.dll     (~0.2MB) — custom parser        │
 //   └─────────────────────────────────────────────────────────────────┘
 //
 // MEMORY SAVINGS EXAMPLE:
@@ -53,7 +53,7 @@
 #include <vector>
 #include <cstring>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Codec {
 
@@ -62,8 +62,8 @@ namespace Codec {
 //==============================================================================
 struct CodecModuleSpec
 {
-    const char*     codecId;            ///< e.g. "darkthumbs.codec.webp"
-    const wchar_t*  dllName;            ///< e.g. L"DarkThumbs_Codec_WebP.dll"
+    const char*     codecId;            ///< e.g. "explorerlens.codec.webp"
+    const wchar_t*  dllName;            ///< e.g. L"ExplorerLens_Codec_WebP.dll"
     const wchar_t*  displayName;        ///< e.g. L"WebP Codec"
     const wchar_t*  version;            ///< e.g. L"1.5.0 (libwebp)"
     uint64_t        estimatedMemoryMB;  ///< Working-set when loaded
@@ -89,8 +89,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 1) WebP Codec --------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.webp";
-        s.dllName = L"DarkThumbs_Codec_WebP.dll";
+        s.codecId = "explorerlens.codec.webp";
+        s.dllName = L"ExplorerLens_Codec_WebP.dll";
         s.displayName = L"WebP Codec";
         s.version = L"1.5.0 (libwebp)";
         s.estimatedMemoryMB = 4;
@@ -105,8 +105,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 2) HEIF Codec --------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.heif";
-        s.dllName = L"DarkThumbs_Codec_HEIF.dll";
+        s.codecId = "explorerlens.codec.heif";
+        s.dllName = L"ExplorerLens_Codec_HEIF.dll";
         s.displayName = L"HEIF/HEIC Codec";
         s.version = L"1.19.5 (libheif + libde265)";
         s.estimatedMemoryMB = 8;
@@ -121,8 +121,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 3) JPEG XL Codec ----------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.jxl";
-        s.dllName = L"DarkThumbs_Codec_JXL.dll";
+        s.codecId = "explorerlens.codec.jxl";
+        s.dllName = L"ExplorerLens_Codec_JXL.dll";
         s.displayName = L"JPEG XL Codec";
         s.version = L"0.11.1 (libjxl)";
         s.estimatedMemoryMB = 12;
@@ -138,8 +138,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 4) RAW Codec ---------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.raw";
-        s.dllName = L"DarkThumbs_Codec_RAW.dll";
+        s.codecId = "explorerlens.codec.raw";
+        s.dllName = L"ExplorerLens_Codec_RAW.dll";
         s.displayName = L"Camera RAW Codec";
         s.version = L"0.21.3 (LibRaw)";
         s.estimatedMemoryMB = 18;
@@ -159,8 +159,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 5) AVIF Codec --------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.avif";
-        s.dllName = L"DarkThumbs_Codec_AVIF.dll";
+        s.codecId = "explorerlens.codec.avif";
+        s.dllName = L"ExplorerLens_Codec_AVIF.dll";
         s.displayName = L"AVIF Codec";
         s.version = L"1.3.0 (libavif + dav1d)";
         s.estimatedMemoryMB = 6;
@@ -175,8 +175,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 6) Archive Codec -----------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.archive";
-        s.dllName = L"DarkThumbs_Codec_Archive.dll";
+        s.codecId = "explorerlens.codec.archive";
+        s.dllName = L"ExplorerLens_Codec_Archive.dll";
         s.displayName = L"Archive Codec";
         s.version = L"4.0.10 (minizip-ng + zstd + lz4 + LZMA)";
         s.estimatedMemoryMB = 5;
@@ -194,8 +194,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 7) SVG Codec ---------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.svg";
-        s.dllName = L"DarkThumbs_Codec_SVG.dll";
+        s.codecId = "explorerlens.codec.svg";
+        s.dllName = L"ExplorerLens_Codec_SVG.dll";
         s.displayName = L"SVG Vector Codec";
         s.version = L"1.0.0 (GDI+ + zlib)";
         s.estimatedMemoryMB = 1;
@@ -210,8 +210,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 8) HDR Codec ---------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.hdr";
-        s.dllName = L"DarkThumbs_Codec_HDR.dll";
+        s.codecId = "explorerlens.codec.hdr";
+        s.dllName = L"ExplorerLens_Codec_HDR.dll";
         s.displayName = L"Radiance HDR Codec";
         s.version = L"1.0.0 (custom RGBE + SSE)";
         s.estimatedMemoryMB = 0;  // < 0.5 MB
@@ -226,8 +226,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 9) PSD Codec ---------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.psd";
-        s.dllName = L"DarkThumbs_Codec_PSD.dll";
+        s.codecId = "explorerlens.codec.psd";
+        s.dllName = L"ExplorerLens_Codec_PSD.dll";
         s.displayName = L"Photoshop Codec";
         s.version = L"1.0.0 (custom parser)";
         s.estimatedMemoryMB = 0;
@@ -242,8 +242,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 10) Video Codec ------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.video";
-        s.dllName = L"DarkThumbs_Codec_Video.dll";
+        s.codecId = "explorerlens.codec.video";
+        s.dllName = L"ExplorerLens_Codec_Video.dll";
         s.displayName = L"Video Thumbnail Codec";
         s.version = L"1.0.0 (Media Foundation)";
         s.estimatedMemoryMB = 2;
@@ -262,8 +262,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 11) Audio Codec ------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.audio";
-        s.dllName = L"DarkThumbs_Codec_Audio.dll";
+        s.codecId = "explorerlens.codec.audio";
+        s.dllName = L"ExplorerLens_Codec_Audio.dll";
         s.displayName = L"Audio Album Art Codec";
         s.version = L"1.0.0 (ID3v2/FLAC parser)";
         s.estimatedMemoryMB = 1;
@@ -281,8 +281,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 12) Document Codec ---------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.document";
-        s.dllName = L"DarkThumbs_Codec_Document.dll";
+        s.codecId = "explorerlens.codec.document";
+        s.dllName = L"ExplorerLens_Codec_Document.dll";
         s.displayName = L"Document Thumbnail Codec";
         s.version = L"1.0.0 (ZIP + Shell)";
         s.estimatedMemoryMB = 1;
@@ -300,8 +300,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 13) Font Codec -------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.font";
-        s.dllName = L"DarkThumbs_Codec_Font.dll";
+        s.codecId = "explorerlens.codec.font";
+        s.dllName = L"ExplorerLens_Codec_Font.dll";
         s.displayName = L"Font Preview Codec";
         s.version = L"1.0.0 (DirectWrite)";
         s.estimatedMemoryMB = 1;
@@ -316,8 +316,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 14) 3D Model Codec ---------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.model";
-        s.dllName = L"DarkThumbs_Codec_Model.dll";
+        s.codecId = "explorerlens.codec.model";
+        s.dllName = L"ExplorerLens_Codec_Model.dll";
         s.displayName = L"3D Model Codec";
         s.version = L"1.0.0 (Direct3D 11)";
         s.estimatedMemoryMB = 3;
@@ -332,8 +332,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 15) QOI Codec --------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.qoi";
-        s.dllName = L"DarkThumbs_Codec_QOI.dll";
+        s.codecId = "explorerlens.codec.qoi";
+        s.dllName = L"ExplorerLens_Codec_QOI.dll";
         s.displayName = L"QOI Codec";
         s.version = L"1.0.0 (reference impl)";
         s.estimatedMemoryMB = 0;
@@ -348,8 +348,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 16) TGA Codec --------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.tga";
-        s.dllName = L"DarkThumbs_Codec_TGA.dll";
+        s.codecId = "explorerlens.codec.tga";
+        s.dllName = L"ExplorerLens_Codec_TGA.dll";
         s.displayName = L"TGA Codec";
         s.version = L"1.0.0 (custom RLE)";
         s.estimatedMemoryMB = 0;
@@ -364,8 +364,8 @@ inline std::vector<CodecModuleSpec> GetAllCodecSpecs()
     //--- 17) PPM Codec --------------------------------------------------------
     {
         CodecModuleSpec s{};
-        s.codecId = "darkthumbs.codec.ppm";
-        s.dllName = L"DarkThumbs_Codec_PPM.dll";
+        s.codecId = "explorerlens.codec.ppm";
+        s.dllName = L"ExplorerLens_Codec_PPM.dll";
         s.displayName = L"Netpbm Codec";
         s.version = L"1.0.0 (custom parser)";
         s.estimatedMemoryMB = 0;
@@ -496,4 +496,5 @@ inline MemoryImpactReport AnalyzeMemoryImpact(
 
 } // namespace Codec
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

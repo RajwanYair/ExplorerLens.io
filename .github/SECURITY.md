@@ -78,10 +78,11 @@ We provide security updates for the following versions:
 
 1. **Plugin Sources:** Only install plugins from trusted sources
 2. **Digital Signatures:** Verify plugin signatures before installation
-3. **Updates:** Keep DarkThumbs and plugins updated
+3. **Updates:** Keep ExplorerLens and plugins updated
 4. **Permissions:** Review plugin permissions before approval
 5. **Trust Management:** Regularly audit trusted publishers
 
 ## Security Contacts
 
 For security-related questions or to report vulnerabilities privately, please contact the project maintainers through the repository.
+

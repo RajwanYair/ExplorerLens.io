@@ -5,7 +5,7 @@
     Production Baseline Verification - Priority 1 Testing Suite
 
 .DESCRIPTION
-    Comprehensive testing framework for DarkThumbs v5.3.0 production baseline verification.
+    Comprehensive testing framework for ExplorerLens v5.3.0 production baseline verification.
     Orchestrates all testing activities for Priority 1 milestone completion.
     
     Tests performed:
@@ -45,7 +45,7 @@
     Skip performance benchmarks
 
 .NOTES
-    Author: DarkThumbs Development Team
+    Author: ExplorerLens Development Team
     Created: January 12, 2026
     Version: 1.0.0
     Requires: PowerShell 7.0+, Windows 11, Administrator privileges for COM registration
@@ -172,8 +172,8 @@ function Test-BuildVerification {
     # Check critical outputs directly
     $projectRoot = Split-Path -Parent $PSScriptRoot
     $outputs = @(
-        (Join-Path $projectRoot "x64\Release\CBXShell.dll"),
-        (Join-Path $projectRoot "x64\Release\CBXManager.exe")
+        (Join-Path $projectRoot "x64\Release\LENSShell.dll"),
+        (Join-Path $projectRoot "x64\Release\LENSManager.exe")
     )
     
     foreach ($output in $outputs) {
@@ -202,15 +202,15 @@ function Test-COMRegistration {
     $failed = 0
     $clsid = "{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
     $projectRoot = Split-Path -Parent $PSScriptRoot
-    $dllPath = Join-Path $projectRoot "x64\Release\CBXShell.dll"
+    $dllPath = Join-Path $projectRoot "x64\Release\LENSShell.dll"
     
-    # Test 1: Check if CBXShell.dll exists
+    # Test 1: Check if LENSShell.dll exists
     if (Test-Path $dllPath) {
         $passed++
-        Write-Success "CBXShell.dll found"
+        Write-Success "LENSShell.dll found"
     } else {
         $failed++
-        Write-Failure "CBXShell.dll not found"
+        Write-Failure "LENSShell.dll not found"
         Add-TestResult -Suite "COM Registration" -Passed $passed -Failed $failed
         return
     }
@@ -220,10 +220,10 @@ function Test-COMRegistration {
         $regResult = regsvr32 /s $dllPath 2>&1
         if ($LASTEXITCODE -eq 0) {
             $passed++
-            Write-Success "CBXShell.dll registration successful"
+            Write-Success "LENSShell.dll registration successful"
         } else {
             $failed++
-            Write-Failure "CBXShell.dll registration failed (exit code: $LASTEXITCODE)"
+            Write-Failure "LENSShell.dll registration failed (exit code: $LASTEXITCODE)"
         }
     } catch {
         $failed++
@@ -363,7 +363,7 @@ function Test-PerformanceBaseline {
     $passed = 0
     $failed = 0
     $projectRoot = Split-Path -Parent $PSScriptRoot
-    $dllPath = Join-Path $projectRoot "x64\Release\CBXShell.dll"
+    $dllPath = Join-Path $projectRoot "x64\Release\LENSShell.dll"
     
     # Simple performance check: measure DLL load time
     if (Test-Path $dllPath) {
@@ -405,14 +405,14 @@ function Test-PerformanceBaseline {
 # ============================================================================
 
 Write-Host "`n$script:Magenta╔══════════════════════════════════════════════════════════════╗$script:Reset"
-Write-Host "$script:Magenta║     DarkThumbs v5.3.0 Production Baseline Verification      ║$script:Reset"
+Write-Host "$script:Magenta║     ExplorerLens v5.3.0 Production Baseline Verification      ║$script:Reset"
 Write-Host "$script:Magenta║              Priority 1 Testing Suite v1.0.0                ║$script:Reset"
 Write-Host "$script:Magenta╚══════════════════════════════════════════════════════════════╝$script:Reset"
 
 Write-Host "`n$script:Cyan📋 Test Configuration:$script:Reset"
 Write-Host "  Start Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 Write-Host "  Test Mode: $(if($QuickTest){'Quick Test'}else{'Full Verification'})"
-Write-Host "  Project: DarkThumbs v5.3.0"
+Write-Host "  Project: ExplorerLens v5.3.0"
 Write-Host "  Phase: Priority 1 - Production Baseline Verification"
 
 # Execute test suites
@@ -511,3 +511,4 @@ if ($script:FailedTests -eq 0 -and $script:PassedTests -gt 0) {
     Write-Host "`n$script:Red✗ $script:FailedTests test(s) failed. Review and fix issues before release.$script:Reset"
     exit 1
 }
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 252: Shell Registration Expansion V2
+// ExplorerLens Engine — Shell Registration Expansion V2
 // Validates shell registration completeness and manages extension lists.
 //==============================================================================
 #pragma once
@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include <algorithm>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Represents a single shell registration entry
 struct ShellRegEntry {
@@ -104,4 +104,5 @@ private:
     std::unordered_set<std::wstring>    m_registeredSet;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -17,7 +17,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "=== DarkThumbs Test Corpus Organization ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens Test Corpus Organization ===" -ForegroundColor Cyan
 Write-Host "Source: $SourceDir"
 Write-Host "Target: $CorpusDir"
 Write-Host ""
@@ -150,7 +150,7 @@ if ($CreateInvalidFiles) {
 # Create README for corpus
 $readmePath = Join-Path $CorpusDir "README.md"
 $readmeContent = @"
-# DarkThumbs Test Corpus
+# ExplorerLens Test Corpus
 
 This directory contains a comprehensive test file collection for validating decoder functionality.
 
@@ -179,7 +179,7 @@ These files test decoder robustness and crash resistance.
 Run the validator tool to test all formats:
 
 ``````powershell
-.\tools\DarkThumbsValidator\x64\Release\DarkThumbsValidator.exe tests\data\corpus -v -o results.csv
+.\tools\ExplorerLensValidator\x64\Release\ExplorerLensValidator.exe tests\data\corpus -v -o results.csv
 ``````
 
 ## Maintenance
@@ -208,5 +208,6 @@ Write-Host "Total categories: $($categories.Count)" -ForegroundColor Cyan
 Write-Host "Corpus location: $CorpusDir" -ForegroundColor Cyan
 Write-Host "`nNext steps:" -ForegroundColor Yellow
 Write-Host "  1. Add real-world sample files to each category" -ForegroundColor Gray
-Write-Host "  2. Build validator: cmake --build build --target DarkThumbsValidator" -ForegroundColor Gray
-Write-Host "  3. Run validation: DarkThumbsValidator.exe tests\data\corpus" -ForegroundColor Gray
+Write-Host "  2. Build validator: cmake --build build --target ExplorerLensValidator" -ForegroundColor Gray
+Write-Host "  3. Run validation: ExplorerLensValidator.exe tests\data\corpus" -ForegroundColor Gray
+

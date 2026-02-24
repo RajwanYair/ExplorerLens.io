@@ -1,16 +1,30 @@
 #==============================================================================
-# DarkThumbs Engine - CMake Build Configuration
-# Copyright (c) 2026 - DarkThumbs Project
-# Version: 7.0.0
+# ExplorerLens Engine - CMake Build Configuration
+# Copyright (c) 2026 - ExplorerLens.io Project
+# Version: 14.0.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
-project(DarkThumbsEngine
-    VERSION 10.5.0
-    DESCRIPTION "DarkThumbs Thumbnail Generation Engine"
+project(ExplorerLensEngine
+    VERSION 14.0.0
+    DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
+
+#==============================================================================
+# Architecture Guard (x64-only)
+#==============================================================================
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    message(FATAL_ERROR "ExplorerLensEngine is x64-only. Reconfigure with a 64-bit generator/platform.")
+endif()
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio" AND DEFINED CMAKE_GENERATOR_PLATFORM)
+    if(NOT CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
+        message(FATAL_ERROR "ExplorerLensEngine requires Visual Studio platform x64. Current: ${CMAKE_GENERATOR_PLATFORM}")
+    endif()
+endif()
 
 #==============================================================================
 # Project Options
@@ -18,22 +32,36 @@ project(DarkThumbsEngine
 
 option(BUILD_TESTS "Build unit tests" ON)  # Enabled for CI/CD
 option(BUILD_BENCHMARKS "Build performance benchmarks" ON)
-option(BUILD_SHARED_LIBS "Build as shared library" OFF)
+option(BUILD_SHARED_LIBS "Build as shared library" ON)
 option(ENABLE_GPU "Enable GPU acceleration" ON)
 option(ENABLE_CACHE "Enable thumbnail caching" ON)
 
-# Optional decoder library flags
-# Set these to ON when the corresponding libraries are built and available
-option(HAS_LIBJXL "Enable JPEG XL support (requires libjxl)" ON)
-option(HAS_LIBHEIF "Enable HEIF/HEIC support (requires libheif)" ON)
-option(HAS_LIBRAW "Enable Camera RAW support (requires LibRaw)" ON)
+# Media Foundation decoders (Windows built-in — always available)
+option(ENABLE_VIDEO_DECODER "Enable video thumbnail decoder" ON)
+option(ENABLE_AUDIO_DECODER "Enable audio thumbnail decoder" ON)
 
-# libheif/libde265 path resolution (install-first, build fallback)
+#==============================================================================
+# Auto-detect external libraries (resolves paths, sets HAS_* accordingly)
+#==============================================================================
+
+# --- JPEG XL (libjxl) ---
+set(LIBJXL_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libjxl-0.11.1/install")
+set(LIBJXL_ALT_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libjxl-0.11.1/build-msvc/lib")
+set(LIBJXL_INCLUDE_DIR "${LIBJXL_INSTALL_DIR}/include")
+if(NOT EXISTS "${LIBJXL_INCLUDE_DIR}")
+    set(LIBJXL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libjxl-0.11.1/lib/include")
+endif()
+if((EXISTS "${LIBJXL_INSTALL_DIR}/lib/jxl.lib" OR EXISTS "${LIBJXL_ALT_LIB_DIR}/jxl.lib") AND EXISTS "${LIBJXL_INCLUDE_DIR}")
+    set(HAS_LIBJXL ON CACHE BOOL "JPEG XL support auto-detected" FORCE)
+else()
+    set(HAS_LIBJXL OFF CACHE BOOL "JPEG XL support — libjxl not found" FORCE)
+endif()
+
+# --- libheif / libde265 ---
 set(LIBHEIF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/install/include")
 if(NOT EXISTS "${LIBHEIF_INCLUDE_DIR}/libheif/heif.h")
     set(LIBHEIF_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/libheif/api")
 endif()
-
 set(LIBHEIF_GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/build-vs")
 
 set(LIBHEIF_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libheif-1.19.5/install/lib/heif.lib")
@@ -49,13 +77,46 @@ if(NOT EXISTS "${LIBDE265_LIBRARY_PATH}")
     set(LIBDE265_LIBRARY_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libde265-1.0.15/install/lib/libde265.lib")
 endif()
 
+if(EXISTS "${LIBHEIF_LIBRARY_PATH}" AND EXISTS "${LIBDE265_LIBRARY_PATH}")
+    set(HAS_LIBHEIF ON CACHE BOOL "HEIF/HEIC support auto-detected" FORCE)
+else()
+    set(HAS_LIBHEIF OFF CACHE BOOL "HEIF/HEIC support — libheif or libde265 not found" FORCE)
+endif()
+
+# --- LibRaw ---
+set(LIBRAW_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/camera-libs/libraw-install")
+set(LIBRAW_ALT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/camera-libs/libraw")
+if((EXISTS "${LIBRAW_INSTALL_DIR}/lib/libraw_static.lib" OR EXISTS "${LIBRAW_ALT_DIR}/lib/libraw_static.lib") AND (EXISTS "${LIBRAW_INSTALL_DIR}/include" OR EXISTS "${LIBRAW_ALT_DIR}/libraw"))
+    set(HAS_LIBRAW ON CACHE BOOL "Camera RAW support auto-detected" FORCE)
+else()
+    set(HAS_LIBRAW OFF CACHE BOOL "Camera RAW support — LibRaw not found" FORCE)
+endif()
+
+# --- libavif / dav1d ---
+set(LIBAVIF_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libavif-1.3.0/install")
+set(LIBAVIF_ALT_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libavif-1.3.0/build")
+set(DAV1D_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/dav1d-1.5.1/install")
+if((EXISTS "${LIBAVIF_INSTALL_DIR}/lib/avif.lib" OR EXISTS "${LIBAVIF_ALT_LIB_DIR}/avif.lib") AND EXISTS "${DAV1D_INSTALL_DIR}/lib/dav1d.lib")
+    set(HAS_LIBAVIF ON CACHE BOOL "AVIF support auto-detected" FORCE)
+else()
+    set(HAS_LIBAVIF OFF CACHE BOOL "AVIF support — libavif or dav1d not found" FORCE)
+endif()
+
+# --- MuPDF ---
+set(MUPDF_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/platform/win32/x64/Release/libmupdf.lib")
+if(EXISTS "${MUPDF_LIB_PATH}")
+    set(HAS_MUPDF ON CACHE BOOL "PDF support auto-detected" FORCE)
+else()
+    set(HAS_MUPDF OFF CACHE BOOL "PDF support — MuPDF not built (see docs/build/BUILD_GUIDE.md)" FORCE)
+endif()
+
 #==============================================================================
 # Compiler Settings
 #==============================================================================
 
 set(CMAKE_CXX_STANDARD 20)  # C++20 for latest features
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 # Use /MD runtime (Multi-threaded DLL)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
@@ -73,473 +134,449 @@ add_compile_definitions(
 
 set(ENGINE_HEADERS
     Engine.h
-    Core/Types.h
-    Core/Config.h
-    Core/EngineAPI.h
+
+    # Core engine components
+    Core/AccessibilityPipeline.h
+    Core/AccessibilitySuiteV2.h
+    Core/AIThumbnailEnhancer.h
+    Core/AnimatedThumbnailEngine.h
+    Core/AsyncShellActivation.h
+    Core/AsyncShellExtension.h
+    Core/BatchProcessingEngine.h
     Core/BuildConfig.h
+    Core/CloudStorageIntegration.h
+    Core/CloudSyncProvider.h
+    Core/Config.h
+    Core/ConfigMigrationEngine.h
+    Core/ContentIndexer.h
+    Core/D3D12PipelineActivation.h
+    Core/DecoderHealthDashboard.h
     Core/DecoderHealthMonitor.h
+    Core/DiagnosticsExporter.h
+    Core/DocumentationSyncAudit.h
+    Core/EncoderExportEngine.h
+    Core/EngineAPI.h
     Core/ErrorContext.h
-    Core/IThumbnailDecoder.h
+    Core/ErrorRecoveryEngine.h
+    Core/ETWSinkComplete.h
+    Core/FormatConverterEngine.h
+    Core/FormatRegistry.h
+    Core/FormatTypes.h
+    Core/GPUMemoryPoolV2.h
+    Core/GPUPipelineV3.h
+    Core/HDRDisplayPipeline.h
+    Core/HighDPIScaling.h
+    Core/ICacheProvider.h
     Core/IFormatDetector.h
     Core/IGPURenderer.h
-    Core/ICacheProvider.h
+    Core/IThumbnailDecoder.h
     Core/Logger.h
-    Core/HighDPIScaling.h              # Sprint 194 — Per-monitor DPI scaling
-    Core/AsyncShellExtension.h         # Sprint 205 — Async shell extension V2
-    Core/EncoderExportEngine.h         # Sprint 206 — Export encoder engine
-    Core/TelemetryEngine.h             # Sprint 207 — Telemetry & health scoring
-    Core/SIMDAccelerator.h             # Sprint 208 — SIMD-accelerated processing
-    Core/AnimatedThumbnailEngine.h     # Sprint 215 — Animated image frame extraction
-    Core/ShellContextMenuV2.h          # Sprint 216 — Shell context menu integration
-    Core/NetworkProviderEngine.h       # Sprint 218 — Network path thumbnail support
-    Core/SecurityHardeningV2.h         # Sprint 219 — Security hardening & integrity
-    Core/CloudSyncProvider.h           # Sprint 221 — Cloud storage thumbnail sync
-    Core/FormatConverterEngine.h       # Sprint 222 — Batch format conversion
-    Core/WatchFolderEngine.h           # Sprint 225 — Filesystem watch auto-regen
-    Core/PerformanceBenchmarkV2.h      # Sprint 227 — Benchmark harness w/ percentiles
-    Core/ThemeEngine.h                 # Sprint 229 — Dark/light/custom themes
-    Core/UpdateEngine.h                # Sprint 231 — Auto-update lifecycle
-    Core/ShellPreviewHandler.h         # Sprint 232 — IPreviewHandler COM
-    Core/BatchProcessingEngine.h       # Sprint 233 — Multi-file batch ops
-    Core/RegistryManager.h             # Sprint 236 — Registry read/write
-    Core/ErrorRecoveryEngine.h         # Sprint 237 — Crash recovery & checkpoints
-    Core/ResourcePoolEngine.h          # Sprint 240 — Object pool for resource reuse
-    Core/MetadataExtractor.h           # Sprint 242 — EXIF/IPTC/XMP extraction
-    Core/ContentIndexer.h              # Sprint 245 — File content indexing
-    Core/ConfigMigrationEngine.h       # Sprint 247 — Settings migration
-    Core/FormatRegistry.h                # Sprint 250 — Format registry singleton
-    Core/FormatTypes.h                   # Sprint 251 — Format type lookup table
-    Core/ShellRegistrationManager.h      # Sprint 252 — Shell registration manager
-    
-    # Pipeline
-    Pipeline/ThumbnailPipeline.h
+    Core/MetadataExtractor.h
+    Core/MultiGPULoadBalancer.h
+    Core/NetworkProviderEngine.h
+    Core/ParallelBatchProcessor.h
+    Core/PerfRegressionGate.h
+    Core/PerformanceBenchmarkV2.h
+    Core/PerMonitorDPIV3.h
+    Core/PreviewPanelV2.h
+    Core/ProgressiveThumbnailLoader.h
+    Core/ProgramClosureV83.h
+    Core/QuickLookIntegration.h
+    Core/RegistryManager.h
+    Core/ReleaseGateV2.h
+    Core/ReleaseReadinessDashboard.h
+    Core/ReproducibleBuildVerifier.h
+    Core/ResourcePoolEngine.h
+    Core/RuntimeIntegrityVerifier.h
+    Core/SecurityHardeningV2.h
+    Core/ShaderCompilerV2.h
+    Core/SharePointTeamsIntegration.h
+    Core/ShellContextMenuV2.h
+    Core/ShellOverlayHandler.h
+    Core/ShellPreviewHandler.h
+    Core/ShellRegistrationManager.h
+    Core/SIMDAccelerationManager.h
+    Core/SIMDAccelerator.h
+    Core/TelemetryDashboard.h
+    Core/TelemetryEngine.h
+    Core/ThemeEngine.h
+    Core/ThumbnailAnimationEngineV2.h
+    Core/Types.h
+    Core/UpdateEngine.h
+    Core/VersionDriftDetector.h
+    Core/VersionDriftGate.h
+    Core/VersionSyncV14.h
+    Core/VulkanComputeActivation.h
+    Core/WatchFolderEngine.h
+    Core/WinRTAppSDKIntegrationV2.h
+
+    # Pipeline stages and scheduling
+    Pipeline/AsyncThumbnailProvider.h
+    Pipeline/BatchProcessor.h
     Pipeline/DecoderRegistry.h
+    Pipeline/ExplorerWorkScheduler.h
     Pipeline/FormatDetector.h
-    Pipeline/AsyncThumbnailProvider.h  # Sprint 187 — Async shell extension
-    Pipeline/ParallelBatchDecoder.h    # Sprint 189 — Parallel batch decode
-    
-    # Decoders
-    Decoders/ImageDecoder.h
-    Decoders/WebPDecoder.h
-    Decoders/AVIFDecoder.h
+    Pipeline/FormatFallbackEngine.h
+    Pipeline/ParallelBatchDecoder.h
+    Pipeline/ParallelIOPipeline.h
+    Pipeline/SmartFormatDetectorV2.h
+    Pipeline/ThumbnailPipeline.h
+    Pipeline/ZeroCopyPipeline.h
+
+    # Format decoders
+    Decoders/Advanced3DFormatDecoder.h
+    Decoders/AnimatedFormatHandler.h
+    Decoders/AnimatedThumbnailDecoder.h
     Decoders/ArchiveDecoder.h
-    Decoders/RAWDecoder.h         # Camera RAW decoder (LibRaw)
-    Decoders/JXLDecoder.h         # JPEG XL decoder
-    Decoders/HEIFDecoder.h        # HEIF/HEIC decoder
-    Decoders/ICODecoder.h         # Windows Icon/Cursor decoder
-    Decoders/TGADecoder.h         # Targa image decoder
-    Decoders/QOIDecoder.h         # Quite OK Image decoder
-    Decoders/PSDDecoder.h         # Adobe Photoshop PSD/PSB decoder
-    Decoders/DDSDecoder.h         # DirectDraw Surface decoder
-    Decoders/HDRDecoder.h         # Radiance HDR (RGBE) decoder
-    Decoders/PPMDecoder.h         # Netpbm format decoder
-    Decoders/EXRDecoder.h         # OpenEXR decoder (WIC)
-    Decoders/SVGDecoder.h         # SVG/SVGZ vector decoder
-    Decoders/VideoDecoder.h       # Video frame extraction (MF)
-    Decoders/AudioDecoder.h       # Audio album art/waveform
-    Decoders/PDFDecoder.h         # PDF document thumbnail
-    Decoders/DocumentDecoder.h    # Document format thumbnails
-    Decoders/FontDecoder.h        # Font preview renderer
-    Decoders/ModelDecoder.h       # 3D model decoder (Sprint 12)
-    Decoders/ColorSpaceManager.h  # Sprint 40 — Color space awareness & HDR tone mapping
-    Decoders/EPUBDecoder.h        # Sprint 15 — EPUB cover extractor
-    Decoders/OptimizedArchiveReader.h # Sprint 14 — Memory-mapped archive reader
-    # Decoders/ExampleDecoder.h   # Reference template (not compiled into engine)
-    Decoders/WMFDecoder.h         # Sprint 180 — Windows Metafile (WMF/EMF)
-    Decoders/PCXDecoder.h         # Sprint 180 — ZSoft PCX image
-    Decoders/FarbfeldDecoder.h    # Sprint 180 — Farbfeld (.ff) image
-    Decoders/EPSDecoder.h         # Sprint 183 — EPS/PostScript vector
-    Decoders/VTFDecoder.h          # Sprint 184 — Valve Texture Format
-    Decoders/OpenRasterDecoder.h   # Sprint 185 — OpenRaster (.ora)
-    Decoders/XCFDecoder.h          # Sprint 185 — GIMP XCF native
-    Decoders/SGIDecoder.h          # Sprint 186 — SGI/RGB image
-    Decoders/XPMDecoder.h          # Sprint 186 — X PixMap
-    Decoders/DICOMDecoder.h         # Sprint 199 — Medical DICOM imaging
-    Decoders/FITSDecoder.h          # Sprint 199 — Astronomy FITS imaging
-    Decoders/Advanced3DFormatDecoder.h # Sprint 200 — FBX/USD/3MF/STEP/IGES
-    Decoders/EBookDecoder.h              # Sprint 211 — eBook cover extraction
-    Decoders/GeospatialDecoder.h         # Sprint 212 — Geospatial format decoder
-    Decoders/DPXDecoder.h                # Sprint 255 — DPX/Cineon film format
-    Decoders/AnimatedFormatHandler.h     # Sprint 256 — APNG & animated formats
-    Decoders/TextPreviewDecoder.h        # Sprint 257 — Markdown/code preview
-    Decoders/DICOMDecoderV2.h            # Sprint 258 — DICOM decoder completion
-    Decoders/FITSDecoderV2.h             # Sprint 259 — FITS decoder completion
-    Decoders/ModelFormatHandler.h        # Sprint 260 — 3MF/USD format support
-    
-    # GPU
+    Decoders/ArchiveGridPreview.h
+    Decoders/AudioDecoder.h
+    Decoders/AudioVisualizationV2.h
+    Decoders/AVIFDecoder.h
+    Decoders/CADFormatDecoder.h
+    Decoders/CADFormatPlugin.h
+    Decoders/ColorSpaceManager.h
+    Decoders/DatabasePreviewDecoder.h
+    Decoders/DDSDecoder.h
+    Decoders/DICOMDecoder.h
+    Decoders/DICOMDecoderV2.h
+    Decoders/DocumentDecoder.h
+    Decoders/DPXDecoder.h
+    Decoders/EBookCoverExtractor.h
+    Decoders/EBookDecoder.h
+    Decoders/EPSDecoder.h
+    Decoders/EPUBDecoder.h
+    Decoders/ExtendedVideoDecoder.h
+    Decoders/EXRDecoder.h
+    Decoders/FarbfeldDecoder.h
+    Decoders/FITSDecoder.h
+    Decoders/FITSDecoderV2.h
+    Decoders/FontDecoder.h
+    Decoders/GeospatialDecoder.h
+    Decoders/GLTFModelDecoder.h
+    Decoders/HDRDecoder.h
+    Decoders/HEIFDecoder.h
+    Decoders/ICODecoder.h
+    Decoders/ImageDecoder.h
+    Decoders/JPEG2000Decoder.h
+    Decoders/JXLDecoder.h
+    Decoders/JXRWICDecoder.h
+    Decoders/KTXTextureDecoder.h
+    Decoders/LegacyImageDecoder.h
+    Decoders/Model3DRendererV2.h
+    Decoders/ModelDecoder.h
+    Decoders/ModelFormatHandler.h
+    Decoders/NIfTIDecoder.h
+    Decoders/NotebookPreviewDecoder.h
+    Decoders/OpenRasterDecoder.h
+    Decoders/OptimizedArchiveReader.h
+    Decoders/PCXDecoder.h
+    Decoders/PDFDecoder.h
+    Decoders/PPMDecoder.h
+    Decoders/PSDDecoder.h
+    Decoders/QOIDecoder.h
+    Decoders/RAWDecoder.h
+    Decoders/ScientificDataDecoder.h
+    Decoders/ScientificFormatPlugin.h
+    Decoders/SGIDecoder.h
+    Decoders/SpreadsheetPreviewDecoder.h
+    Decoders/StructuredDataDecoder.h
+    Decoders/SVGDecoder.h
+    Decoders/TextPreviewDecoder.h
+    Decoders/TGADecoder.h
+    Decoders/USDDecoder.h
+    Decoders/VectorFormatDecoder.h
+    Decoders/VTFDecoder.h
+    Decoders/VideoDecoder.h
+    Decoders/VideoEnhancer.h
+    Decoders/WebPDecoder.h
+    Decoders/WMFDecoder.h
+    Decoders/XCFDecoder.h
+    Decoders/XPMDecoder.h
+
+    # GPU rendering and compute
     GPU/D3D11Renderer.h
+    GPU/D3D12ComputePipeline.h
     GPU/GDIRenderer.h
-    GPU/D3D12ComputePipeline.h   # Sprint 188 — D3D12 compute pipeline
-    GPU/VulkanComputePipeline.h  # Sprint 202 — Vulkan compute pipeline
-    
-    # Cache
+    GPU/GPUDecodeAccelerationV2.h
+    GPU/VulkanComputePipeline.h
+
+    # Cache management
+    Cache/AdaptiveCacheBudgetManager.h
+    Cache/CacheWarmingService.h
+    Cache/MultiTenantCacheManager.h
+    Cache/MultiTierCache.h
+    Cache/PersistentCacheManager.h
+    Cache/PersistentDiskCache.h
+    Cache/PipelineStateCacheV2.h
+    Cache/SubMillisecondCacheEngine.h
     Cache/ThumbnailCache.h
-    Cache/PersistentDiskCache.h   # Sprint 192 — persistent disk cache with eviction
-    
-    # Plugin System
-    Plugin/PluginManager.h
-    Plugin/PluginDecoder.h
-    Plugin/PluginHostClient.h
+    Cache/USNCacheInvalidation.h
+
+    # Plugin system
     Plugin/CrashHandler.h
-    Plugin/IsolationModeSelector.h
+    Plugin/CrashIntelligence.h
     Plugin/IPC/PluginIPCProtocol.h
     Plugin/IPC/SharedMemoryManager.h
+    Plugin/IsolationModeSelector.h
+    Plugin/PluginActivation.h
+    Plugin/PluginCompatibilityKitV2.h
+    Plugin/PluginDebuggerIntegration.h
+    Plugin/PluginDecoder.h
+    Plugin/PluginHostClient.h
+    Plugin/PluginHotReload.h
+    Plugin/PluginManager.h
+    Plugin/PluginMarketplace.h
+    Plugin/PluginMarketplaceV2.h
+    Plugin/PluginMarketplaceV3.h
+    Plugin/PluginPerformanceProfiler.h
+    Plugin/PluginReferencePack.h
+    Plugin/PluginRuntimeTestMatrix.h
+    Plugin/PluginRuntimeValidation.h
+    Plugin/PluginSandboxPolicy.h
+    Plugin/PluginSDKV2.h
+    Plugin/PluginTrustChain.h
     Plugin/Security/JobObjectManager.h
-    Plugin/PluginMarketplaceV2.h     # Sprint 201 — Plugin marketplace V2
-    
-    # Utils
-    Utils/PerformanceProfiler.h
-    Utils/SIMDScaler.h
-    Utils/HardwareCapabilities.h
+
+    # AI/ML modules
+    AI/AISearchIntegration.h
+    AI/AIThumbnailEnhancer.h
+    AI/ImageQualityAssessor.h
+    AI/SceneUnderstandingEngine.h
+    AI/SmartCropV2.h
+
+    # Codec modules
+    Codec/CodecLoader.h
+    Codec/CodecModuleSpecs.h
+    Codec/FormatConverter.h
+    Codec/ICodecModule.h
+    Codec/LazyCodecManager.h
+
+    # Cloud integration
+    Cloud/CloudThumbnailProvider.h
+    Cloud/NetworkThumbnailProvider.h
+
+    # Memory management
+    Memory/ArchiveMemoryCompactor.h
+    Memory/BufferPoolAllocator.h
+    Memory/DecoderHotsetManager.h
+    Memory/DirectoryFormatProfiler.h
+    Memory/HotModeDirectoryEngine.h
+    Memory/MemoryFootprintOptimizerV2.h
+    Memory/MemoryOptimizationEngine.h
+    Memory/MemoryPressureControllerV2.h
+    Memory/MemorySoakValidator.h
+
+    # Shell integration
+    Shell/COMApartmentAudit.h
+    Shell/ContextMenuHandler.h
+    Shell/PreviewPaneHandler.h
+
+    # Utilities
+    Utils/AccessibilityEngine.h
+    Utils/AccessibilityFramework.h
+    Utils/AccessibilityI18n.h
+    Utils/ARM64BuildConfig.h
+    Utils/ARM64CIIntegration.h
+    Utils/ARM64HardwareValidator.h
+    Utils/ARM64LibraryMatrix.h
+    Utils/ARM64PerformanceBaseline.h
+    Utils/ARM64PerformanceOptimizer.h
+    Utils/ARM64PlatformValidator.h
+    Utils/ARM64RuntimeValidator.h
+    Utils/AutoDocGenerator.h
+    Utils/AutoUpdateEngine.h
+    Utils/CIValidator.h
+    Utils/CodeCoverageIntegration.h
+    Utils/CommandLineInterface.h
+    Utils/CompatibilityMatrix.h
+    Utils/ComplianceAuditLogger.h
+    Utils/ConfigMigrationEngine.h
+    Utils/ContinuousFuzzEngine.h
+    Utils/DarkModeManagerV2.h
+    Utils/DiagnosticDashboard.h
+    Utils/DocumentationExcellenceV2.h
+    Utils/EnterpriseDeployment.h
+    Utils/EnterpriseDeploymentManager.h
+    Utils/EnterprisePolicyEngineV2.h
     Utils/EXIFOrientation.h
+    Utils/FileHashEngine.h
+    Utils/FuzzTestingManager.h
+    Utils/GUIHardening.h
+    Utils/HardwareCapabilities.h
+    Utils/InstallerLifecycleAutomation.h
+    Utils/InstallerV2Manager.h
+    Utils/LocalizationEngine.h
+    Utils/LogRotationEngine.h
+    Utils/MalformedInputHandler.h
+    Utils/MatrixValidationFramework.h
     Utils/MemoryMappedFile.h
+    Utils/MemorySafetyAuditV2.h
+    Utils/MemorySafetyIntegration.h
+    Utils/MSIXPackageManager.h
+    Utils/MSIXPackagingManager.h
+    Utils/NetworkDiagnostics.h
+    Utils/NotificationEngine.h
+    Utils/ObservabilityPipeline.h
+    Utils/PerformancePolish.h
+    Utils/PerformanceProfiler.h
+    Utils/PerMonitorDPIManager.h
+    Utils/PortableMode.h
+    Utils/PortableModeManager.h
+    Utils/PythonSDK.h
+    Utils/QualityAssuranceV2.h
+    Utils/ReleaseGovernance.h
+    Utils/SIMDScaler.h
     Utils/SmallObjectPool.h
-    Utils/CodeCoverageIntegration.h  # Sprint 190 — Code coverage & fuzzing
-    Utils/MemorySafetyIntegration.h  # Sprint 191 — ASAN + memory-mapped I/O
-    Utils/ARM64HardwareValidator.h    # Sprint 193 — ARM64 hardware CI validation
-    Utils/MSIXPackageManager.h        # Sprint 195 — MSIX packaging & auto-update
-    Utils/TestSuiteExpansion.h         # Sprint 196 — Test framework expansion
-    Utils/MalformedInputHandler.h      # Sprint 197 — Malformed input hardening
-    Utils/ReleaseGateV3.h              # Sprint 198 — v9.2 release gate
-    Utils/PythonSDK.h                  # Sprint 203 — Python SDK bindings
-    Utils/ReleaseGateV10.h             # Sprint 204 — v10.0 release gate
-    Utils/Win11Integration.h           # Sprint 209 — Windows 11 native features
-    Utils/CIValidator.h                  # Sprint 210 — CI/CD pipeline validation
-    Utils/AutoDocGenerator.h             # Sprint 213 — Auto documentation generator
-    Utils/ConfigMigrationEngine.h        # Sprint 214 — Config migration engine
-    Utils/PortableModeManager.h           # Sprint 217 — Portable mode (USB/removable)
-    Utils/AccessibilityEngine.h           # Sprint 220 — Accessibility support
-    Utils/EnterpriseDeploymentManager.h   # Sprint 223 — Enterprise deployment
-    Utils/ReleaseGateV11.h                # Sprint 224 — v10.1 release gate
-    Utils/DiagnosticDashboard.h           # Sprint 226 — Runtime health metrics
-    Utils/LocalizationEngine.h            # Sprint 228 — i18n/l10n string tables
-    Utils/TelemetryEngine.h               # Sprint 230 — Anonymous usage telemetry
-    Utils/ReleaseGateV12.h                # Sprint 234 — v10.2 release gate
-    Utils/FileHashEngine.h                # Sprint 235 — SHA256/MD5/CRC32 hashing
-    Utils/LogRotationEngine.h             # Sprint 238 — Log rotation & cleanup
-    Utils/ReleaseGateV13.h                # Sprint 239 — v10.3 release gate
-    Utils/CommandLineInterface.h          # Sprint 241 — CLI argument parser
-    Utils/NotificationEngine.h            # Sprint 243 — Toast notifications
-    Utils/ReleaseGateV14.h                # Sprint 244 — v10.4 release gate
-    Utils/NetworkDiagnostics.h            # Sprint 246 — Network connectivity testing
-    Utils/ReleaseGateV15.h                # Sprint 248 — v10.5 release gate
-    Utils/TestInfrastructureV2.h           # Sprint 253 — Test infrastructure upgrade
-    Utils/ReleaseGateV16.h                # Sprint 254 — v10.6 release gate
-    Utils/ReleaseGateV17.h                # Sprint 261 — v11.0 release gate
-    Core/D3D12PipelineActivation.h        # Sprint 262 — D3D12 pipeline activation
-    Core/AsyncShellActivation.h           # Sprint 263 — Async shell extension
-    Core/SIMDAccelerationManager.h        # Sprint 264 — SIMD acceleration
-    Core/ParallelBatchProcessor.h         # Sprint 265 — Parallel batch decode
-    Cache/PersistentCacheManager.h        # Sprint 266 — Persistent cache & USN
-    Utils/ReleaseGateV18.h                # Sprint 267 — v11.1 performance release gate
-    Utils/ARM64PlatformValidator.h        # Sprint 268 — ARM64 validation
-    Utils/MSIXPackagingManager.h          # Sprint 269 — MSIX packaging
-    Utils/Win11IntegrationManager.h       # Sprint 270 — Windows 11 24H2 integration
-    Utils/TestSuiteExpansionV2.h          # Sprint 271 — Test suite expansion V2
-    Utils/FuzzTestingManager.h            # Sprint 272 — Fuzz testing activation
-    Utils/ReleaseGateV19.h               # Sprint 273 — v11.2 release gate
-    Core/VulkanComputeActivation.h       # Sprint 274 — Vulkan compute backend
-    Plugin/PluginMarketplaceV3.h          # Sprint 275 — Plugin marketplace V3
-    Core/AIThumbnailEnhancer.h            # Sprint 276 — AI-enhanced thumbnails
-    Decoders/SpreadsheetPreviewDecoder.h  # Sprint 277 — Spreadsheet/data preview
-    Decoders/USDDecoder.h                 # Sprint 278 — USD/USDZ support
-    Utils/AutoUpdateEngine.h              # Sprint 279 — Auto-update engine
-    Utils/ReleaseGateV20.h               # Sprint 280 — v12.0 release gate
-    Decoders/StructuredDataDecoder.h      # Sprint 281 — CSV/JSON preview
-    Decoders/NotebookPreviewDecoder.h     # Sprint 282 — Jupyter notebook preview
-    Decoders/DatabasePreviewDecoder.h     # Sprint 283 — Database preview
-    Decoders/LegacyImageDecoder.h         # Sprint 284 — FLIF/BPG legacy images
-    Decoders/VectorFormatDecoder.h        # Sprint 285 — CDR/Visio vector decoder
-    Decoders/ScientificDataDecoder.h      # Sprint 286 — HDF5/NetCDF scientific
-    Decoders/NIfTIDecoder.h               # Sprint 287 — NIfTI neuroimaging
-    Decoders/CADFormatDecoder.h           # Sprint 288 — STEP/IGES CAD decoder
-    Core/HDRDisplayPipeline.h             # Sprint 289 — HDR display pipeline
-    Core/PerMonitorDPIV3.h                # Sprint 290 — Per-monitor DPI V3
-    Core/ShellOverlayHandler.h            # Sprint 291 — Shell overlay icons
-    Cache/CacheWarmingService.h           # Sprint 292 — Cache warming service
-    Core/MultiGPULoadBalancer.h           # Sprint 293 — Multi-GPU load balancer
-    Utils/ReleaseGateV21.h                # Sprint 294 — Release gate V21 (v12.5)
-    Core/AccessibilityPipeline.h          # Sprint 295 — Accessibility pipeline
-    Utils/TelemetryAnalyticsEngine.h      # Sprint 296 — Telemetry & analytics
-    Core/CloudStorageIntegration.h        # Sprint 297 — Cloud storage integration
-    Utils/ReleaseGateV22.h                # Sprint 298 — Release gate V22 (v13.0)
+    Utils/SupplyChainIntegrityV2.h
+    Utils/SupplyChainSecurity.h
+    Utils/TelemetryAnalyticsEngine.h
+    Utils/TestInfrastructureV2.h
+    Utils/TestSuiteExpansion.h
+    Utils/TestSuiteExpansionV2.h
+    Utils/ThreatModelV2.h
+    Utils/UsageTelemetryEngine.h
+    Utils/VersionNormalization.h
+    Utils/Win11Integration.h
+    Utils/Win11IntegrationManager.h
+    Utils/Windows12Compatibility.h
 
-    # Sprint 299-348: v14.0 "Apex" Block
-    Core/VersionSyncV14.h                 # Sprint 299 — v14.0 version sync & architecture
-    Core/GPUPipelineV3.h                  # Sprint 300 — GPU Pipeline V3 enhanced DX12
-    Core/ShaderCompilerV2.h               # Sprint 301 — Shader compiler V2 with PSO cache
-    Cache/PipelineStateCacheV2.h          # Sprint 302 — Pipeline state cache V2
-    Core/GPUMemoryPoolV2.h                # Sprint 303 — GPU memory pool V2 with defrag
-    Utils/ReleaseGateV23.h                # Sprint 304 — Release gate V23 (GPU V3 phase)
-    Pipeline/SmartFormatDetectorV2.h      # Sprint 305 — Smart format detector V2
-    Decoders/ExtendedVideoDecoder.h       # Sprint 306 — Extended video codec support
-    Decoders/AudioVisualizationV2.h       # Sprint 307 — Audio visualization V2
-    Decoders/Model3DRendererV2.h          # Sprint 308 — 3D model renderer V2
-    Utils/ReleaseGateV24.h                # Sprint 309 — Release gate V24 (format intel)
-    Plugin/PluginSDKV2.h                  # Sprint 310 — Plugin SDK V2.0
-    Plugin/PluginDebuggerIntegration.h    # Sprint 311 — Plugin debugger integration
-    Plugin/PluginHotReload.h              # Sprint 312 — Plugin hot-reload system
-    Plugin/PluginPerformanceProfiler.h    # Sprint 313 — Plugin performance profiler
-    Utils/ReleaseGateV25.h                # Sprint 314 — Release gate V25 (dev experience)
-    Utils/ThreatModelV2.h                 # Sprint 315 — Threat model V2 (STRIDE)
-    Utils/MemorySafetyAuditV2.h           # Sprint 316 — Memory safety audit V2
-    Utils/SupplyChainIntegrityV2.h        # Sprint 317 — Supply chain integrity V2
-    Core/RuntimeIntegrityVerifier.h       # Sprint 318 — Runtime integrity verifier
-    Utils/ReleaseGateV26.h                # Sprint 319 — Release gate V26 (security)
-    Core/ProgressiveThumbnailLoader.h     # Sprint 320 — Progressive thumbnail loader
-    Core/ThumbnailAnimationEngineV2.h     # Sprint 321 — Thumbnail animation engine V2
-    Core/PreviewPanelV2.h                 # Sprint 322 — Preview panel V2
-    Core/QuickLookIntegration.h           # Sprint 323 — Quick look integration
-    Utils/ReleaseGateV27.h                # Sprint 324 — Release gate V27 (UX excellence)
-    AI/SceneUnderstandingEngine.h         # Sprint 325 — AI scene understanding engine
-    AI/SmartCropV2.h                      # Sprint 326 — Smart crop V2 saliency-driven
-    AI/ImageQualityAssessor.h             # Sprint 327 — AI image quality assessor
-    AI/AISearchIntegration.h              # Sprint 328 — AI-powered search integration
-    Utils/ReleaseGateV28.h                # Sprint 329 — Release gate V28 (AI/ML)
-    Utils/EnterprisePolicyEngineV2.h      # Sprint 330 — Enterprise policy engine V2
-    Core/SharePointTeamsIntegration.h     # Sprint 331 — SharePoint/Teams integration
-    Cache/MultiTenantCacheManager.h       # Sprint 332 — Multi-tenant cache manager
-    Utils/ComplianceAuditLogger.h         # Sprint 333 — Compliance & audit logging
-    Utils/ReleaseGateV29.h                # Sprint 334 — Release gate V29 (enterprise)
-    Utils/Windows12Compatibility.h        # Sprint 335 — Windows 12 compatibility
-    Utils/ARM64PerformanceOptimizer.h     # Sprint 336 — ARM64 performance optimizer
-    Core/WinRTAppSDKIntegrationV2.h       # Sprint 337 — WinRT/AppSDK integration V2
-    Utils/InstallerV2Manager.h            # Sprint 338 — Installer V2 modern packaging
-    Utils/ReleaseGateV30.h                # Sprint 339 — Release gate V30 (platform)
-    Cache/SubMillisecondCacheEngine.h     # Sprint 340 — Sub-millisecond cache engine
-    GPU/GPUDecodeAccelerationV2.h         # Sprint 341 — GPU decode acceleration V2
-    Pipeline/ParallelIOPipeline.h         # Sprint 342 — Parallel I/O pipeline
-    Memory/MemoryFootprintOptimizerV2.h   # Sprint 343 — Memory footprint optimizer V2
-    Utils/ReleaseGateV31.h                # Sprint 344 — Release gate V31 (perf summit)
-    Core/AccessibilitySuiteV2.h           # Sprint 345 — Accessibility suite V2
-    Utils/DocumentationExcellenceV2.h     # Sprint 346 — Documentation excellence V2
-    Utils/QualityAssuranceV2.h            # Sprint 347 — Quality assurance V2
-    Utils/ReleaseGateV32.h                # Sprint 348 — Release gate V32 (v14.0 Final)
-
-    # Sprint 8-12: Foundation & Activation
-    Utils/GUIHardening.h              # Sprint 8  — Dark mode, high-DPI
-    Utils/VersionNormalization.h      # Sprint 9  — Version audit, release notes
-    Utils/ReleaseGovernance.h         # Sprint 10 — Quality gates, CI pipeline
-    Plugin/PluginActivation.h         # Sprint 11 — Feature flags, IPC, lifecycle
-    Utils/ObservabilityPipeline.h     # Sprint 12 — ETW, JSON logger, privacy
-
-    # Sprint 23-25: AI & Store & OIIO
-    AI/AIThumbnailEnhancer.h          # Sprint 23 — DirectML/ONNX super-resolution
-
-    # Sprint 26-35: Advanced Features
-    Cloud/CloudThumbnailProvider.h    # Sprint 26 — OneDrive/GDrive/Dropbox
-    Cache/MultiTierCache.h            # Sprint 27 — Bloom filter, WAL SQLite
-    Decoders/VideoEnhancer.h          # Sprint 28 — Scene detection, HDR tone map
-    Plugin/PluginMarketplace.h        # Sprint 29 — Signing, security scan, REST
-    Utils/AccessibilityFramework.h    # Sprint 30 — UIA, WCAG, 5 languages
-    Utils/EnterpriseDeployment.h      # Sprint 31 — ADMX, GPO, network cache
-    Utils/PerformancePolish.h         # Sprint 32 — Micro-profiler, memory pool
-    Plugin/CrashIntelligence.h        # Sprint 33 — Minidump, symbols, bucketing
-    Utils/SupplyChainSecurity.h       # Sprint 34 — SBOM SPDX/CycloneDX
-    Cache/USNCacheInvalidation.h      # Sprint 35 — NTFS journal, file identity
-
-    # Sprint 36: Modular Codecs & Memory
-    Codec/ICodecModule.h              # Sprint 36 — C ABI codec interface
-    Codec/CodecLoader.h               # Sprint 36 — Demand-loading registry
-    Codec/CodecModuleSpecs.h          # Sprint 36 — 17 codec DLL specs
-    Codec/LazyCodecManager.h          # Sprint 36 — Directory-aware preloading
-    Memory/MemoryOptimizationEngine.h # Sprint 36 — Per-subsystem accounting
-
-    # Sprint 37-39: UX Enhancements
-    Shell/ContextMenuHandler.h        # Sprint 37 — Explorer right-click actions
-    Decoders/AnimatedThumbnailDecoder.h # Sprint 38 — Animated WebP/JXL/GIF
-    Decoders/ArchiveGridPreview.h     # Sprint 39 — 2x2 grid composite
-
-    # Sprint 40-49: Platform Maturity
-    Utils/PortableMode.h              # Sprint 42 — INI config, badges
-    Pipeline/BatchProcessor.h         # Sprint 43 — Priority queue, rate limit
-    Cloud/NetworkThumbnailProvider.h   # Sprint 44 — URL/proxy/retry/throttle
-    Shell/PreviewPaneHandler.h        # Sprint 45 — EXIF, tooltips, columns
-    Codec/FormatConverter.h           # Sprint 46 — 9 output formats, profiles
-    Utils/AccessibilityI18n.h         # Sprint 47 — WCAG, RTL, keyboard nav
-    Core/TelemetryDashboard.h         # Sprint 48 — Health scoring, diagnostics
-
-    # Sprint 125-149: v8.2 Program
-    Core/VersionDriftGate.h           # Sprint 125 — Version drift CI gate
-    Core/ETWSinkComplete.h            # Sprint 126 — ETW sink completion
-    Shell/COMApartmentAudit.h         # Sprint 127 — COM apartment audit
-    Plugin/PluginRuntimeValidation.h  # Sprint 128 — Plugin E2E validation
-    Memory/DirectoryFormatProfiler.h  # Sprint 129 — Directory format profiler
-    Memory/DecoderHotsetManager.h     # Sprint 130 — Decoder hotset manager
-    Memory/BufferPoolAllocator.h      # Sprint 131 — Buffer pool & slab allocator
-    Pipeline/ExplorerWorkScheduler.h  # Sprint 132 — Explorer work scheduler
-    Decoders/JPEG2000Decoder.h        # Sprint 133 — JPEG 2000 decoder
-    Decoders/KTXTextureDecoder.h      # Sprint 134 — KTX/KTX2 texture decoder
-    Decoders/JXRWICDecoder.h          # Sprint 135 — JPEG XR WIC decoder
-    Decoders/EBookCoverExtractor.h    # Sprint 136 — Extended eBook support
-    Utils/ContinuousFuzzEngine.h      # Sprint 137 — Continuous fuzzing engine
-    Utils/CompatibilityMatrix.h       # Sprint 138 — Win11 compatibility matrix
-    Memory/MemorySoakValidator.h      # Sprint 140 — Memory soak validation
-    Utils/DarkModeManagerV2.h         # Sprint 141 — DarkMode V2 complete
-    Utils/PerMonitorDPIManager.h      # Sprint 142 — Per-monitor DPI V2
-    Core/DecoderHealthDashboard.h     # Sprint 143 — Decoder health dashboard
-    Core/DiagnosticsExporter.h        # Sprint 144 — Diagnostics export finalization
-    Core/VersionDriftDetector.h       # Sprint 145 — Version drift CI integration
-    Core/PerfRegressionGate.h         # Sprint 146 — Performance regression CI gate V2
-    Core/ReproducibleBuildVerifier.h   # Sprint 147 — Reproducible build verification
-    Core/ReleaseReadinessDashboard.h   # Sprint 148 — Release readiness dashboard
-
-    # Sprint 150-174: v8.3.0 Block — Plugin Ecosystem, ARM64, Format Expansion, Memory Excellence, Release
-    Plugin/PluginRuntimeTestMatrix.h       # Sprint 150 — Plugin runtime test matrix
-    Plugin/PluginSandboxPolicy.h           # Sprint 151 — Plugin sandbox policy framework
-    Plugin/PluginCompatibilityKitV2.h      # Sprint 152 — Plugin compatibility kit V2
-    Plugin/PluginReferencePack.h           # Sprint 153 — Plugin reference implementation pack
-    Plugin/PluginTrustChain.h              # Sprint 154 — Plugin trust chain validation
-    Utils/ARM64BuildConfig.h              # Sprint 155 — ARM64 build configuration
-    Utils/ARM64LibraryMatrix.h            # Sprint 156 — ARM64 library compatibility matrix
-    Utils/ARM64RuntimeValidator.h         # Sprint 157 — ARM64 runtime validator
-    Utils/ARM64PerformanceBaseline.h      # Sprint 158 — ARM64 performance baseline
-    Utils/ARM64CIIntegration.h            # Sprint 159 — ARM64 CI integration
-    Decoders/CADFormatPlugin.h            # Sprint 161 — CAD format plugin (DWG/DXF/STEP/IGES)
-    Decoders/GLTFModelDecoder.h           # Sprint 162 — glTF/GLB 3D model decoder
-    Decoders/ScientificFormatPlugin.h     # Sprint 163 — Scientific format plugin (FITS/NIfTI)
-    Pipeline/FormatFallbackEngine.h       # Sprint 164 — Format fallback intelligence engine
-    Memory/ArchiveMemoryCompactor.h       # Sprint 165 — Archive memory compactor
-    Pipeline/ZeroCopyPipeline.h           # Sprint 166 — Zero-copy GPU upload pipeline
-    Cache/AdaptiveCacheBudgetManager.h    # Sprint 167 — Adaptive cache budget manager
-    Memory/HotModeDirectoryEngine.h       # Sprint 168 — Hot-mode directory pre-warm engine
-    Memory/MemoryPressureControllerV2.h   # Sprint 169 — Memory pressure controller V2
-    Utils/MatrixValidationFramework.h     # Sprint 170 — Matrix validation framework
-    Utils/InstallerLifecycleAutomation.h  # Sprint 171 — Installer lifecycle automation
-    Core/ReleaseGateV2.h                  # Sprint 172 — Release gate V2 (v8.3.0 KPIs)
-    Core/DocumentationSyncAudit.h         # Sprint 173 — Documentation sync audit
-    Core/ProgramClosureV83.h              # Sprint 174 — v8.3.0 program closure
+    # Release gate (unified)
+    Utils/ReleaseGate.h
+    Utils/ReleaseGateV3.h
+    Utils/ReleaseGateV10.h
+    Utils/ReleaseGateV11.h
+    Utils/ReleaseGateV12.h
+    Utils/ReleaseGateV13.h
+    Utils/ReleaseGateV14.h
+    Utils/ReleaseGateV15.h
 )
 
 set(ENGINE_SOURCES
     # Core implementations
+    Core/AnimatedThumbnailEngine.cpp
+    Core/AsyncShellExtension.cpp
+    Core/BatchProcessingEngine.cpp
+    Core/CloudSyncProvider.cpp
     Core/Config.cpp
+    Core/ConfigMigrationEngine.cpp
+    Core/ContentIndexer.cpp
+    Core/EncoderExportEngine.cpp
     Core/EngineAPI.cpp
-    Core/HighDPIScaling.cpp              # Sprint 194 — Per-monitor DPI scaling
-    Core/AsyncShellExtension.cpp         # Sprint 205 — Async shell extension V2
-    Core/EncoderExportEngine.cpp         # Sprint 206 — Export encoder engine
-    Core/TelemetryEngine.cpp             # Sprint 207 — Telemetry & health scoring
-    Core/SIMDAccelerator.cpp             # Sprint 208 — SIMD-accelerated processing
-    Core/AnimatedThumbnailEngine.cpp     # Sprint 215 — Animated image frame extraction
-    Core/ShellContextMenuV2.cpp          # Sprint 216 — Shell context menu integration
-    Core/NetworkProviderEngine.cpp       # Sprint 218 — Network path thumbnail support
-    Core/SecurityHardeningV2.cpp         # Sprint 219 — Security hardening & integrity
-    Core/CloudSyncProvider.cpp           # Sprint 221 — Cloud storage thumbnail sync
-    Core/FormatConverterEngine.cpp       # Sprint 222 — Batch format conversion
-    Core/WatchFolderEngine.cpp           # Sprint 225 — Filesystem watch auto-regen
-    Core/PerformanceBenchmarkV2.cpp      # Sprint 227 — Benchmark harness w/ percentiles
-    Core/ThemeEngine.cpp                 # Sprint 229 — Dark/light/custom themes
-    Core/UpdateEngine.cpp                # Sprint 231 — Auto-update lifecycle
-    Core/ShellPreviewHandler.cpp         # Sprint 232 — IPreviewHandler COM
-    Core/BatchProcessingEngine.cpp       # Sprint 233 — Multi-file batch ops
-    Core/RegistryManager.cpp             # Sprint 236 — Registry read/write
-    Core/ErrorRecoveryEngine.cpp         # Sprint 237 — Crash recovery & checkpoints
-    Core/ResourcePoolEngine.cpp          # Sprint 240 — Object pool for resource reuse
-    Core/MetadataExtractor.cpp           # Sprint 242 — EXIF/IPTC/XMP extraction
-    Core/ContentIndexer.cpp              # Sprint 245 — File content indexing
-    Core/ConfigMigrationEngine.cpp       # Sprint 247 — Settings migration
-    
+    Core/ErrorRecoveryEngine.cpp
+    Core/FormatConverterEngine.cpp
+    Core/HighDPIScaling.cpp
+    Core/MetadataExtractor.cpp
+    Core/NetworkProviderEngine.cpp
+    Core/PerformanceBenchmarkV2.cpp
+    Core/RegistryManager.cpp
+    Core/ResourcePoolEngine.cpp
+    Core/SecurityHardeningV2.cpp
+    Core/ShellContextMenuV2.cpp
+    Core/ShellPreviewHandler.cpp
+    Core/SIMDAccelerator.cpp
+    Core/TelemetryEngine.cpp
+    Core/ThemeEngine.cpp
+    Core/UpdateEngine.cpp
+    Core/WatchFolderEngine.cpp
+
     # Pipeline implementations
-    Pipeline/ThumbnailPipeline.cpp
+    Pipeline/AsyncThumbnailProvider.cpp
     Pipeline/DecoderRegistry.cpp
     Pipeline/FormatDetector.cpp
-    Pipeline/AsyncThumbnailProvider.cpp  # Sprint 187 — Async shell extension
-    Pipeline/ParallelBatchDecoder.cpp    # Sprint 189 — Parallel batch decode
-    
-    # Decoders
-    Decoders/ImageDecoder.cpp
-    Decoders/WebPDecoder.cpp
-    Decoders/AVIFDecoder.cpp
+    Pipeline/ParallelBatchDecoder.cpp
+    Pipeline/ThumbnailPipeline.cpp
+
+    # Decoder implementations
+    Decoders/Advanced3DFormatDecoder.cpp
     Decoders/ArchiveDecoder.cpp
-    Decoders/RAWDecoder.cpp       # Camera RAW decoder (LibRaw)
-    Decoders/JXLDecoder.cpp       # JPEG XL decoder
-    Decoders/HEIFDecoder.cpp      # HEIF/HEIC decoder
-    Decoders/ICODecoder.cpp       # Windows Icon/Cursor decoder
-    Decoders/TGADecoder.cpp       # Targa image decoder
-    Decoders/QOIDecoder.cpp       # Quite OK Image decoder
-    Decoders/PSDDecoder.cpp       # Adobe Photoshop PSD/PSB decoder
-    Decoders/DDSDecoder.cpp       # DirectDraw Surface decoder
-    Decoders/HDRDecoder.cpp       # Radiance HDR (RGBE) decoder
-    Decoders/PPMDecoder.cpp       # Netpbm format decoder
-    Decoders/EXRDecoder.cpp       # OpenEXR decoder (WIC)
-    Decoders/SVGDecoder.cpp       # SVG/SVGZ vector decoder
-    Decoders/VideoDecoder.cpp     # Video frame extraction (MF)
-    Decoders/AudioDecoder.cpp     # Audio album art/waveform
-    Decoders/PDFDecoder.cpp       # PDF document thumbnail
-    Decoders/DocumentDecoder.cpp  # Document format thumbnails
-    Decoders/FontDecoder.cpp      # Font preview renderer
-    Decoders/ModelDecoder.cpp     # 3D model decoder (Sprint 12)
-    Decoders/WMFDecoder.cpp       # Sprint 180 — Windows Metafile (WMF/EMF)
-    Decoders/PCXDecoder.cpp       # Sprint 180 — ZSoft PCX image
-    Decoders/FarbfeldDecoder.cpp  # Sprint 180 — Farbfeld (.ff) image
-    Decoders/JPEG2000Decoder.cpp  # Sprint 181 — JPEG 2000 (JP2/J2K/JPX)
-    Decoders/EPSDecoder.cpp       # Sprint 183 — EPS/PostScript vector
-    Decoders/KTXTextureDecoder.cpp # Sprint 184 — KTX/KTX2 texture decoder
-    Decoders/VTFDecoder.cpp        # Sprint 184 — Valve Texture Format
-    Decoders/OpenRasterDecoder.cpp # Sprint 185 — OpenRaster (.ora)
-    Decoders/XCFDecoder.cpp        # Sprint 185 — GIMP XCF native
-    Decoders/SGIDecoder.cpp        # Sprint 186 — SGI/RGB image
-    Decoders/XPMDecoder.cpp        # Sprint 186 — X PixMap
-    Decoders/DICOMDecoder.cpp       # Sprint 199 — Medical DICOM imaging
-    Decoders/FITSDecoder.cpp        # Sprint 199 — Astronomy FITS imaging
-    Decoders/Advanced3DFormatDecoder.cpp # Sprint 200 — FBX/USD/3MF/STEP/IGES
-    Decoders/EBookDecoder.cpp              # Sprint 211 — eBook cover extraction
-    Decoders/GeospatialDecoder.cpp         # Sprint 212 — Geospatial format decoder
-    
-    # GPU
+    Decoders/AudioDecoder.cpp
+    Decoders/AVIFDecoder.cpp
+    Decoders/DDSDecoder.cpp
+    Decoders/DICOMDecoder.cpp
+    Decoders/DocumentDecoder.cpp
+    Decoders/EBookDecoder.cpp
+    Decoders/EPSDecoder.cpp
+    Decoders/EXRDecoder.cpp
+    Decoders/FarbfeldDecoder.cpp
+    Decoders/FITSDecoder.cpp
+    Decoders/FontDecoder.cpp
+    Decoders/GeospatialDecoder.cpp
+    Decoders/HDRDecoder.cpp
+    Decoders/HEIFDecoder.cpp
+    Decoders/ICODecoder.cpp
+    Decoders/ImageDecoder.cpp
+    Decoders/JPEG2000Decoder.cpp
+    Decoders/JXLDecoder.cpp
+    Decoders/KTXTextureDecoder.cpp
+    Decoders/ModelDecoder.cpp
+    Decoders/OpenRasterDecoder.cpp
+    Decoders/PCXDecoder.cpp
+    Decoders/PDFDecoder.cpp
+    Decoders/PPMDecoder.cpp
+    Decoders/PSDDecoder.cpp
+    Decoders/QOIDecoder.cpp
+    Decoders/RAWDecoder.cpp
+    Decoders/SGIDecoder.cpp
+    Decoders/SVGDecoder.cpp
+    Decoders/TGADecoder.cpp
+    Decoders/VTFDecoder.cpp
+    Decoders/VideoDecoder.cpp
+    Decoders/WebPDecoder.cpp
+    Decoders/WMFDecoder.cpp
+    Decoders/XCFDecoder.cpp
+    Decoders/XPMDecoder.cpp
+
+    # GPU rendering implementations
     GPU/D3D11Renderer.cpp
+    GPU/D3D12ComputePipeline.cpp
     GPU/GDIRenderer.cpp
-    GPU/D3D12ComputePipeline.cpp   # Sprint 188 — D3D12 compute pipeline
-    GPU/VulkanComputePipeline.cpp  # Sprint 202 — Vulkan compute pipeline
-    
-    # Cache
+    GPU/VulkanComputePipeline.cpp
+
+    # Cache implementations
+    Cache/PersistentDiskCache.cpp
     Cache/ThumbnailCache.cpp
-    Cache/PersistentDiskCache.cpp   # Sprint 192 — persistent disk cache with eviction
-    
-    # Plugin System
-    Plugin/PluginManager.cpp
+
+    # Plugin system implementations
+    Plugin/CrashHandler.cpp
+    Plugin/IPC/SharedMemoryManager.cpp
+    Plugin/IsolationModeSelector.cpp
     Plugin/PluginDecoder.cpp
     Plugin/PluginHostClient.cpp
-    Plugin/CrashHandler.cpp
-    Plugin/IsolationModeSelector.cpp
-    Plugin/IPC/SharedMemoryManager.cpp
+    Plugin/PluginManager.cpp
+    Plugin/PluginMarketplaceV2.cpp
     Plugin/Security/JobObjectManager.cpp
-    Plugin/PluginMarketplaceV2.cpp     # Sprint 201 — Plugin marketplace V2
-    
-    # Utils
-    Utils/PerformanceProfiler.cpp
-    Utils/SIMDScaler.cpp
-    Utils/HardwareCapabilities.cpp
+
+    # Utility implementations
+    Utils/AccessibilityEngine.cpp
+    Utils/ARM64HardwareValidator.cpp
+    Utils/AutoDocGenerator.cpp
+    Utils/CIValidator.cpp
+    Utils/CodeCoverageIntegration.cpp
+    Utils/CommandLineInterface.cpp
+    Utils/ConfigMigrationEngine.cpp
+    Utils/DiagnosticDashboard.cpp
+    Utils/EnterpriseDeploymentManager.cpp
     Utils/EXIFOrientation.cpp
-    Utils/CodeCoverageIntegration.cpp  # Sprint 190 — Code coverage & fuzzing
-    Utils/MemorySafetyIntegration.cpp  # Sprint 191 — ASAN + memory-mapped I/O
-    Utils/ARM64HardwareValidator.cpp    # Sprint 193 — ARM64 hardware CI validation
-    Utils/MSIXPackageManager.cpp        # Sprint 195 — MSIX packaging & auto-update
-    Utils/TestSuiteExpansion.cpp         # Sprint 196 — Test framework expansion
-    Utils/MalformedInputHandler.cpp      # Sprint 197 — Malformed input hardening
-    Utils/ReleaseGateV3.cpp              # Sprint 198 — v9.2 release gate
-    Utils/PythonSDK.cpp                  # Sprint 203 — Python SDK bindings
-    Utils/ReleaseGateV10.cpp             # Sprint 204 — v10.0 release gate
-    Utils/Win11Integration.cpp           # Sprint 209 — Windows 11 native features
-    Utils/CIValidator.cpp                  # Sprint 210 — CI/CD pipeline validation
-    Utils/AutoDocGenerator.cpp             # Sprint 213 — Auto documentation generator
-    Utils/ConfigMigrationEngine.cpp        # Sprint 214 — Config migration engine
-    Utils/PortableModeManager.cpp           # Sprint 217 — Portable mode (USB/removable)
-    Utils/AccessibilityEngine.cpp           # Sprint 220 — Accessibility support
-    Utils/EnterpriseDeploymentManager.cpp   # Sprint 223 — Enterprise deployment
-    Utils/ReleaseGateV11.cpp                # Sprint 224 — v10.1 release gate
-    Utils/DiagnosticDashboard.cpp           # Sprint 226 — Runtime health metrics
-    Utils/LocalizationEngine.cpp            # Sprint 228 — i18n/l10n string tables
-    Utils/TelemetryEngine.cpp               # Sprint 230 — Anonymous usage telemetry
-    Utils/ReleaseGateV12.cpp                # Sprint 234 — v10.2 release gate
-    Utils/FileHashEngine.cpp                # Sprint 235 — SHA256/MD5/CRC32 hashing
-    Utils/LogRotationEngine.cpp             # Sprint 238 — Log rotation & cleanup
-    Utils/ReleaseGateV13.cpp                # Sprint 239 — v10.3 release gate
-    Utils/CommandLineInterface.cpp          # Sprint 241 — CLI argument parser
-    Utils/NotificationEngine.cpp            # Sprint 243 — Toast notifications
-    Utils/ReleaseGateV14.cpp                # Sprint 244 — v10.4 release gate
-    Utils/NetworkDiagnostics.cpp            # Sprint 246 — Network connectivity testing
-    Utils/ReleaseGateV15.cpp                # Sprint 248 — v10.5 release gate
+    Utils/FileHashEngine.cpp
+    Utils/HardwareCapabilities.cpp
+    Utils/LocalizationEngine.cpp
+    Utils/LogRotationEngine.cpp
+    Utils/MalformedInputHandler.cpp
+    Utils/MemorySafetyIntegration.cpp
+    Utils/MSIXPackageManager.cpp
+    Utils/NetworkDiagnostics.cpp
+    Utils/NotificationEngine.cpp
+    Utils/PerformanceProfiler.cpp
+    Utils/PortableModeManager.cpp
+    Utils/PythonSDK.cpp
+
+    Utils/SIMDScaler.cpp
+    Utils/TestSuiteExpansion.cpp
+    Utils/UsageTelemetryEngine.cpp
+    Utils/Win11Integration.cpp
+
+    # Release gate implementation
+    Utils/ReleaseGateUnified.cpp
 )
 
 #==============================================================================
@@ -548,15 +585,15 @@ set(ENGINE_SOURCES
 
 if(ENGINE_SOURCES)
     if(BUILD_SHARED_LIBS)
-        add_library(DarkThumbsEngine SHARED ${ENGINE_SOURCES} ${ENGINE_HEADERS})
-        target_compile_definitions(DarkThumbsEngine PRIVATE ENGINE_EXPORTS)
+        add_library(ExplorerLensEngine SHARED ${ENGINE_SOURCES} ${ENGINE_HEADERS})
+        target_compile_definitions(ExplorerLensEngine PRIVATE ENGINE_EXPORTS)
     else()
-        add_library(DarkThumbsEngine STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS})
+        add_library(ExplorerLensEngine STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS})
         # STATIC library: do NOT define ENGINE_EXPORTS, so ENGINE_API is empty
-        target_compile_definitions(DarkThumbsEngine PUBLIC ENGINE_STATIC)
+        target_compile_definitions(ExplorerLensEngine PUBLIC ENGINE_STATIC)
     endif()
     
-    target_include_directories(DarkThumbsEngine
+    target_include_directories(ExplorerLensEngine
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
             $<INSTALL_INTERFACE:include>
@@ -571,11 +608,15 @@ if(ENGINE_SOURCES)
             ${LIBHEIF_GENERATED_INCLUDE_DIR}
             # LibRaw includes
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/camera-libs/libraw-install/include
+            # AVIF includes
+            ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libavif-1.3.0/include
+            # MuPDF includes
+            ${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/include
     )
     
     # Windows-specific settings
     if(WIN32)
-        target_compile_definitions(DarkThumbsEngine PRIVATE
+        target_compile_definitions(ExplorerLensEngine PRIVATE
             _WINDOWS
             WIN32_LEAN_AND_MEAN
             NOMINMAX
@@ -583,58 +624,59 @@ if(ENGINE_SOURCES)
         
         # Conditional decoder feature flags
         if(HAS_LIBJXL)
-            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_LIBJXL JXL_STATIC_DEFINE)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBJXL JXL_STATIC_DEFINE)
             message(STATUS "JPEG XL support: ENABLED")
         else()
             message(STATUS "JPEG XL support: DISABLED (set -DHAS_LIBJXL=ON when libjxl is available)")
         endif()
         
         if(HAS_LIBHEIF)
-            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_LIBHEIF LIBHEIF_STATIC_BUILD)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBHEIF LIBHEIF_STATIC_BUILD)
             message(STATUS "HEIF/HEIC support: ENABLED")
         else()
             message(STATUS "HEIF/HEIC support: DISABLED (set -DHAS_LIBHEIF=ON when libheif is available)")
         endif()
         
         if(HAS_LIBRAW)
-            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_LIBRAW)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBRAW)
             message(STATUS "Camera RAW support: ENABLED")
         else()
             message(STATUS "Camera RAW support: DISABLED (set -DHAS_LIBRAW=ON when LibRaw is available)")
         endif()
 
         if(HAS_LIBAVIF)
-            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_LIBAVIF)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBAVIF)
             message(STATUS "AVIF support: ENABLED")
         else()
             message(STATUS "AVIF support: DISABLED (set -DHAS_LIBAVIF=ON when libavif is available)")
         endif()
 
         if(HAS_MUPDF)
-            target_compile_definitions(DarkThumbsEngine PRIVATE HAS_MUPDF)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_MUPDF)
             message(STATUS "PDF support (MuPDF): ENABLED")
         else()
             message(STATUS "PDF support (MuPDF): DISABLED (set -DHAS_MUPDF=ON when MuPDF is available)")
         endif()
 
         if(ENABLE_VIDEO_DECODER)
-            target_compile_definitions(DarkThumbsEngine PRIVATE ENABLE_VIDEO_DECODER)
+            target_compile_definitions(ExplorerLensEngine PRIVATE ENABLE_VIDEO_DECODER)
             message(STATUS "Video decoder: ENABLED")
         else()
             message(STATUS "Video decoder: DISABLED (set -DENABLE_VIDEO_DECODER=ON)")
         endif()
 
         if(ENABLE_AUDIO_DECODER)
-            target_compile_definitions(DarkThumbsEngine PRIVATE ENABLE_AUDIO_DECODER)
+            target_compile_definitions(ExplorerLensEngine PRIVATE ENABLE_AUDIO_DECODER)
             message(STATUS "Audio decoder: ENABLED")
         else()
             message(STATUS "Audio decoder: DISABLED (set -DENABLE_AUDIO_DECODER=ON)")
         endif()
         
-        target_link_libraries(DarkThumbsEngine
+        target_link_libraries(ExplorerLensEngine
             PRIVATE
                 gdiplus
                 d3d11
+                d3d12
                 dxgi
                 windowscodecs
                 shlwapi
@@ -649,7 +691,7 @@ if(ENGINE_SOURCES)
         )
         
         # Link libwebp
-        target_link_directories(DarkThumbsEngine
+        target_link_directories(ExplorerLensEngine
             PUBLIC
                 ${CMAKE_CURRENT_SOURCE_DIR}/../SDK/lib
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib
@@ -660,9 +702,15 @@ if(ENGINE_SOURCES)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libjxl-0.11.1/install/lib
                 # LibRaw libraries
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/camera-libs/libraw-install/lib
+                # AVIF libraries
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libavif-1.3.0/install/lib
+                # dav1d (AV1 codec for AVIF)
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/dav1d-1.5.1/install/lib
+                # MuPDF libraries
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/build/release
         )
         
-        target_link_libraries(DarkThumbsEngine
+        target_link_libraries(ExplorerLensEngine
             PUBLIC
                 libwebp
                 libsharpyuv
@@ -673,10 +721,10 @@ if(ENGINE_SOURCES)
         
         # Conditionally link optional decoder libraries
         if(HAS_LIBJXL)
-            target_link_libraries(DarkThumbsEngine PUBLIC jxl jxl_cms jxl_threads brotlicommon brotlidec hwy)
+            target_link_libraries(ExplorerLensEngine PUBLIC jxl jxl_cms jxl_threads brotlicommon brotlidec hwy)
         endif()
         if(HAS_LIBRAW)
-            target_link_libraries(DarkThumbsEngine PUBLIC libraw_static)
+            target_link_libraries(ExplorerLensEngine PUBLIC libraw_static)
         endif()
         if(HAS_LIBHEIF)
             if(NOT EXISTS "${LIBHEIF_LIBRARY_PATH}")
@@ -685,48 +733,48 @@ if(ENGINE_SOURCES)
             if(NOT EXISTS "${LIBDE265_LIBRARY_PATH}")
                 message(FATAL_ERROR "HAS_LIBHEIF=ON but libde265 library was not found. Expected at ${LIBDE265_LIBRARY_PATH}")
             endif()
-            target_link_libraries(DarkThumbsEngine PUBLIC "${LIBHEIF_LIBRARY_PATH}" "${LIBDE265_LIBRARY_PATH}")
+            target_link_libraries(ExplorerLensEngine PUBLIC "${LIBHEIF_LIBRARY_PATH}" "${LIBDE265_LIBRARY_PATH}")
+        endif()
+        if(HAS_LIBAVIF)
+            target_link_libraries(ExplorerLensEngine PUBLIC avif dav1d)
+        endif()
+        if(HAS_MUPDF)
+            set(MUPDF_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/platform/win32/x64/Release/libmupdf.lib")
+            if(EXISTS "${MUPDF_LIB_PATH}")
+                target_link_libraries(ExplorerLensEngine PUBLIC "${MUPDF_LIB_PATH}")
+            else()
+                message(WARNING "HAS_MUPDF=ON but libmupdf.lib not found at ${MUPDF_LIB_PATH}. PDF support will link but may fail.")
+            endif()
         endif()
     endif()
     
-    # Compiler warnings
-    if(MSVC OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            target_compile_options(DarkThumbsEngine PRIVATE
-                -Wall         # Enable all warnings
-                -Wextra       # Extra warnings
-                -mavx2        # Enable AVX2 instructions for SIMD operations
-                -mfma         # Enable FMA instructions
-            )
-        else()
-            target_compile_options(DarkThumbsEngine PRIVATE
-                /W4           # Warning level 4
-                /WX           # Warnings as errors - TEMPORARILY ENABLED TO FIND ALL WARNINGS
-                /permissive-  # Standards conformance
-                /arch:AVX2    # Enable AVX2 instructions for SIMD operations
-            )
-        endif()
-        
-        # CRT Runtime Linking Fix
-        # NOTE: This is a temporary workaround. The proper fix is to rebuild
-        # all external libraries with /MD (dynamic CRT) instead of /MT (static CRT).
-        # Affected libraries: libwebp, zlib, zstd, minizip-ng, brotli, highway
-        # 
-        # Proper solution:
-        #   1. Rerun CMake for each external library with: -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"
-        #   2. Or add set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL") to their CMakeLists.txt
-        #   3. Rebuild all Release libraries
-        # 
-        # Until fixed, we must ignore LIBCMT to avoid LNK4098 warnings/errors
-        target_link_options(DarkThumbsEngine PRIVATE
-            /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts
+    # Compiler warnings & flags (MSVC v145 preferred)
+    if(MSVC)
+        target_compile_options(ExplorerLensEngine PRIVATE
+            /W4           # Warning level 4
+            /WX-          # Warnings NOT as errors during consolidation
+            /permissive-  # Standards conformance
+            /arch:AVX2    # Enable AVX2 instructions for SIMD operations
+        )
+        # MSVC linker flags — only valid with link.exe, not lld-link
+        target_link_options(ExplorerLensEngine PRIVATE
+            /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts (libwebp uses /MT)
             /IGNORE:4099            # Ignore missing PDB warnings for external libs
+        )
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(ExplorerLensEngine PRIVATE
+            -Wall -Wextra -mavx2 -mfma
+        )
+        # clang + lld-link: use linker-passthrough for MSVC-style flags
+        target_link_options(ExplorerLensEngine PRIVATE
+            "LINKER:/NODEFAULTLIB:LIBCMT"
+            "LINKER:/IGNORE:4099"
         )
     endif()
 else()
     # Interface library for headers-only during initial development
-    add_library(DarkThumbsEngine INTERFACE)
-    target_include_directories(DarkThumbsEngine
+    add_library(ExplorerLensEngine INTERFACE)
+    target_include_directories(ExplorerLensEngine
         INTERFACE
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     )
@@ -745,15 +793,15 @@ endif()
 # PluginHost Executable
 #==============================================================================
 
-# API mismatches need to be fixed - deferred to Sprint 17
+# API mismatches are tracked and resolved in the active release pipeline
 # add_subdirectory(PluginHost)
 
 #==============================================================================
 # Installation
 #==============================================================================
 
-install(TARGETS DarkThumbsEngine
-    EXPORT DarkThumbsEngineTargets
+install(TARGETS ExplorerLensEngine
+    EXPORT ExplorerLensEngineTargets
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
@@ -761,7 +809,7 @@ install(TARGETS DarkThumbsEngine
 )
 
 install(FILES ${ENGINE_HEADERS}
-    DESTINATION include/DarkThumbs/Engine
+    DESTINATION include/ExplorerLens/Engine
 )
 
 #==============================================================================
@@ -771,21 +819,21 @@ install(FILES ${ENGINE_HEADERS}
 # include(CMakePackageConfigHelpers)
 # 
 # configure_package_config_file(
-#     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/DarkThumbsEngineConfig.cmake.in"
-#     "${CMAKE_CURRENT_BINARY_DIR}/DarkThumbsEngineConfig.cmake"
-#     INSTALL_DESTINATION lib/cmake/DarkThumbsEngine
+#     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ExplorerLensEngineConfig.cmake.in"
+#     "${CMAKE_CURRENT_BINARY_DIR}/ExplorerLensEngineConfig.cmake"
+#     INSTALL_DESTINATION lib/cmake/ExplorerLensEngine
 # )
 # 
 # write_basic_package_version_file(
-#     "${CMAKE_CURRENT_BINARY_DIR}/DarkThumbsEngineConfigVersion.cmake"
+#     "${CMAKE_CURRENT_BINARY_DIR}/ExplorerLensEngineConfigVersion.cmake"
 #     VERSION ${PROJECT_VERSION}
 #     COMPATIBILITY SameMajorVersion
 # )
 # 
 # install(FILES
-#     "${CMAKE_CURRENT_BINARY_DIR}/DarkThumbsEngineConfig.cmake"
-#     "${CMAKE_CURRENT_BINARY_DIR}/DarkThumbsEngineConfigVersion.cmake"
-#     DESTINATION lib/cmake/DarkThumbsEngine
+#     "${CMAKE_CURRENT_BINARY_DIR}/ExplorerLensEngineConfig.cmake"
+#     "${CMAKE_CURRENT_BINARY_DIR}/ExplorerLensEngineConfigVersion.cmake"
+#     DESTINATION lib/cmake/ExplorerLensEngine
 # )
 
 #==============================================================================
@@ -793,7 +841,7 @@ install(FILES ${ENGINE_HEADERS}
 #==============================================================================
 
 message(STATUS "")
-message(STATUS "DarkThumbs Engine Configuration:")
+message(STATUS "ExplorerLens Engine Configuration:")
 message(STATUS "  Version:           ${PROJECT_VERSION}")
 message(STATUS "  Build Type:        ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Shared Library:    ${BUILD_SHARED_LIBS}")
@@ -809,3 +857,4 @@ message(STATUS "    HAS_MUPDF:             ${HAS_MUPDF}")
 message(STATUS "    ENABLE_VIDEO_DECODER:  ${ENABLE_VIDEO_DECODER}")
 message(STATUS "    ENABLE_AUDIO_DECODER:  ${ENABLE_AUDIO_DECODER}")
 message(STATUS "")
+

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EngineTests.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EngineTests</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">EngineTests.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">EngineTests</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">EngineTests.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">EngineTests</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">EngineTests.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">EngineTests</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <BufferSecurityCheck></BufferSecurityCheck>
@@ -112,10 +112,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;JXL_STATIC_DEFINE;WINVER=0x0A00;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000000;ENGINE_STATIC;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -123,16 +123,16 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>..\Debug\DarkThumbsEngine.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;shlwapi.lib;gdiplus.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;bcrypt.lib;crypt32.lib;wintrust.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mf.lib;propsys.lib;libwebp.lib;libsharpyuv.lib;minizip.lib;zlibstatic.lib;zstd_static.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;libraw_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/libjxl-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/libjxl-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/brotli-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/brotli-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/highway-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/highway-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zlib-1.3.1/x64/Release;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zlib-1.3.1/x64/Release/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zstd-1.5.7/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zstd-1.5.7/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libjxl-0.11.1/install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libjxl-0.11.1/install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/camera-libs/libraw-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/camera-libs/libraw-install/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\Debug\ExplorerLensEngine.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;shlwapi.lib;gdiplus.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;bcrypt.lib;crypt32.lib;wintrust.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mf.lib;propsys.lib;libwebp.lib;libsharpyuv.lib;minizip.lib;zlibstatic.lib;zstd_static.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;libraw_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/libjxl-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/libjxl-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/brotli-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/brotli-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/highway-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/highway-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zlib-1.3.1/x64/Release;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zlib-1.3.1/x64/Release/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zstd-1.5.7/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zstd-1.5.7/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libjxl-0.11.1/install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libjxl-0.11.1/install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/camera-libs/libraw-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/camera-libs/libraw-install/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
-      <ImportLibrary>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/Debug/EngineTests.lib</ImportLibrary>
+      <ImportLibrary>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/Debug/EngineTests.lib</ImportLibrary>
       <LinkErrorReporting></LinkErrorReporting>
-      <ProgramDataBaseFile>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/Debug/EngineTests.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/Debug/EngineTests.pdb</ProgramDataBaseFile>
       <RandomizedBaseAddress></RandomizedBaseAddress>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -142,7 +142,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck></BufferSecurityCheck>
@@ -169,10 +169,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JXL_STATIC_DEFINE;WINVER=0x0A00;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000000;ENGINE_STATIC;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -180,16 +180,16 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>..\Release\DarkThumbsEngine.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;shlwapi.lib;gdiplus.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;bcrypt.lib;crypt32.lib;wintrust.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mf.lib;propsys.lib;libwebp.lib;libsharpyuv.lib;minizip.lib;zlibstatic.lib;zstd_static.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;libraw_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/libjxl-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/libjxl-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/brotli-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/brotli-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/highway-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/highway-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zlib-1.3.1/x64/Release;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zlib-1.3.1/x64/Release/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zstd-1.5.7/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zstd-1.5.7/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libjxl-0.11.1/install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libjxl-0.11.1/install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/camera-libs/libraw-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/camera-libs/libraw-install/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\Release\ExplorerLensEngine.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;shlwapi.lib;gdiplus.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;bcrypt.lib;crypt32.lib;wintrust.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mf.lib;propsys.lib;libwebp.lib;libsharpyuv.lib;minizip.lib;zlibstatic.lib;zstd_static.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;libraw_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/libjxl-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/libjxl-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/brotli-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/brotli-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/highway-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/highway-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zlib-1.3.1/x64/Release;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zlib-1.3.1/x64/Release/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zstd-1.5.7/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zstd-1.5.7/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libjxl-0.11.1/install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libjxl-0.11.1/install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/camera-libs/libraw-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/camera-libs/libraw-install/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
-      <ImportLibrary>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/Release/EngineTests.lib</ImportLibrary>
+      <ImportLibrary>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/Release/EngineTests.lib</ImportLibrary>
       <LinkErrorReporting></LinkErrorReporting>
-      <ProgramDataBaseFile>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/Release/EngineTests.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/Release/EngineTests.pdb</ProgramDataBaseFile>
       <RandomizedBaseAddress></RandomizedBaseAddress>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -199,7 +199,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck></BufferSecurityCheck>
@@ -226,10 +226,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JXL_STATIC_DEFINE;WINVER=0x0A00;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000000;ENGINE_STATIC;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -237,16 +237,16 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>..\MinSizeRel\DarkThumbsEngine.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;shlwapi.lib;gdiplus.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;bcrypt.lib;crypt32.lib;wintrust.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mf.lib;propsys.lib;libwebp.lib;libsharpyuv.lib;minizip.lib;zlibstatic.lib;zstd_static.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;libraw_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/libjxl-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/libjxl-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/brotli-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/brotli-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/highway-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/highway-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zlib-1.3.1/x64/Release;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zlib-1.3.1/x64/Release/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zstd-1.5.7/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zstd-1.5.7/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libjxl-0.11.1/install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libjxl-0.11.1/install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/camera-libs/libraw-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/camera-libs/libraw-install/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\MinSizeRel\ExplorerLensEngine.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;shlwapi.lib;gdiplus.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;bcrypt.lib;crypt32.lib;wintrust.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mf.lib;propsys.lib;libwebp.lib;libsharpyuv.lib;minizip.lib;zlibstatic.lib;zstd_static.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;libraw_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/libjxl-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/libjxl-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/brotli-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/brotli-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/highway-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/highway-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zlib-1.3.1/x64/Release;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zlib-1.3.1/x64/Release/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zstd-1.5.7/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zstd-1.5.7/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libjxl-0.11.1/install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libjxl-0.11.1/install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/camera-libs/libraw-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/camera-libs/libraw-install/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
-      <ImportLibrary>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/MinSizeRel/EngineTests.lib</ImportLibrary>
+      <ImportLibrary>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/MinSizeRel/EngineTests.lib</ImportLibrary>
       <LinkErrorReporting></LinkErrorReporting>
-      <ProgramDataBaseFile>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/MinSizeRel/EngineTests.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/MinSizeRel/EngineTests.pdb</ProgramDataBaseFile>
       <RandomizedBaseAddress></RandomizedBaseAddress>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -256,7 +256,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck></BufferSecurityCheck>
@@ -282,10 +282,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JXL_STATIC_DEFINE;WINVER=0x0A00;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000000;ENGINE_STATIC;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\..;C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -293,16 +293,16 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>..\RelWithDebInfo\DarkThumbsEngine.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;shlwapi.lib;gdiplus.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;bcrypt.lib;crypt32.lib;wintrust.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mf.lib;propsys.lib;libwebp.lib;libsharpyuv.lib;minizip.lib;zlibstatic.lib;zstd_static.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;libraw_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/libjxl-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/libjxl-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/brotli-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/brotli-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/highway-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/../../external/highway-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zlib-1.3.1/x64/Release;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zlib-1.3.1/x64/Release/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zstd-1.5.7/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/compression-libs/zstd-1.5.7/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libjxl-0.11.1/install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/image-libs/libjxl-0.11.1/install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/camera-libs/libraw-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/../external/camera-libs/libraw-install/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>..\RelWithDebInfo\ExplorerLensEngine.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;shlwapi.lib;gdiplus.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;bcrypt.lib;crypt32.lib;wintrust.lib;mfplat.lib;mfreadwrite.lib;mfuuid.lib;mf.lib;propsys.lib;libwebp.lib;libsharpyuv.lib;minizip.lib;zlibstatic.lib;zstd_static.lib;jxl.lib;jxl_threads.lib;hwy.lib;brotlicommon.lib;brotlidec.lib;libraw_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/libjxl-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/libjxl-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/brotli-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/brotli-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/highway-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/../../external/highway-install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../SDK/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../SDK/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/minizip-ng-4.0.10/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zlib-1.3.1/x64/Release;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zlib-1.3.1/x64/Release/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zstd-1.5.7/build-manual;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/compression-libs/zstd-1.5.7/build-manual/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libjxl-0.11.1/install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/image-libs/libjxl-0.11.1/install/lib/$(Configuration);C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/camera-libs/libraw-install/lib;C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/../external/camera-libs/libraw-install/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <DataExecutionPrevention></DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
-      <ImportLibrary>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/RelWithDebInfo/EngineTests.lib</ImportLibrary>
+      <ImportLibrary>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/RelWithDebInfo/EngineTests.lib</ImportLibrary>
       <LinkErrorReporting></LinkErrorReporting>
-      <ProgramDataBaseFile>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/RelWithDebInfo/EngineTests.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/RelWithDebInfo/EngineTests.pdb</ProgramDataBaseFile>
       <RandomizedBaseAddress></RandomizedBaseAddress>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -311,11 +311,11 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\CMakeLists.txt">
+    <CustomBuild Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" --check-stamp-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeFiles/generate.stamp"
+C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine" --check-stamp-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/CMakeFiles/generate.stamp"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -324,11 +324,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
-C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" --check-stamp-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeFiles/generate.stamp"
+C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine" --check-stamp-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/CMakeFiles/generate.stamp"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -337,11 +337,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
-C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" --check-stamp-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeFiles/generate.stamp"
+C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine" --check-stamp-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/CMakeFiles/generate.stamp"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -350,11 +350,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
-C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine" --check-stamp-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/Engine/Tests/CMakeFiles/generate.stamp"
+C:\Users\ryair\scoop\apps\cmake\current\bin\cmake.exe "-SC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine" "-BC:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine" --check-stamp-file "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens/Engine/Tests/CMakeFiles/generate.stamp"
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -363,25 +363,25 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\EngineTests.cpp" />
-    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\Tests\test_gpu.cpp" />
+    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\EngineTests.cpp" />
+    <ClCompile Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\Tests\test_gpu.cpp" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\ZERO_CHECK.vcxproj">
+    <ProjectReference Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\ZERO_CHECK.vcxproj">
       <Project>{627218D1-96B3-3E06-93D9-C4861F795BF4}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\Engine\DarkThumbsEngine.vcxproj">
+    <ProjectReference Include="C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\Engine\ExplorerLensEngine.vcxproj">
       <Project>{F4A5AA68-CFA7-3484-B4DB-A5952A26F0BD}</Project>
-      <Name>DarkThumbsEngine</Name>
+      <Name>ExplorerLensEngine</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

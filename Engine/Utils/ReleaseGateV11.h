@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class GateKPIV11 : uint8_t {
     BuildClean      = 0,
@@ -66,4 +66,4 @@ private:
     void InitializeThresholds();
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine

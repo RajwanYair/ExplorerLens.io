@@ -1,6 +1,6 @@
 //==============================================================================
 // OptimizedArchiveReader.h
-// Sprint 14: Memory-Mapped I/O & Archive Central Directory Optimization
+// Memory-Mapped I/O & Archive Central Directory Optimization
 // Provides optimized archive reading for large files (>100MB)
 // Date: February 17, 2026
 //==============================================================================
@@ -13,7 +13,7 @@
 #include <memory>
 #include <windows.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 /**
@@ -177,4 +177,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,4 +1,4 @@
-# DarkThumbs Engine Architecture Documentation
+# ExplorerLens Engine Architecture Documentation
 **Version:** 1.0.0  
 **Last Updated:** February 11, 2026
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-The DarkThumbs Engine is a high-performance, modular thumbnail generation library designed for Windows shell extensions. It supports 31+ file formats with GPU acceleration, intelligent caching, and SIMD optimizations.
+The ExplorerLens Engine is a high-performance, modular thumbnail generation library designed for Windows shell extensions. It supports 31+ file formats with GPU acceleration, intelligent caching, and SIMD optimizations.
 
 ---
 
@@ -85,7 +85,7 @@ Decoders are tried in registration order. First decoder that reports CanDecode()
 ```cpp
 PipelineConfig config;
 config.enableCache = true;  // Enable disk cache
-// Cache stored in: %LOCALAPPDATA%\DarkThumbs\cache\
+// Cache stored in: %LOCALAPPDATA%\ExplorerLens\cache\
 ```
 
 ---
@@ -280,7 +280,7 @@ auto quality = ScalingQuality::Bicubic;  // vs. Bilinear (default)
 
 ## Contact & Support
 
-**Project:** DarkThumbs  
+**Project:** ExplorerLens  
 **License:** MIT  
 **Repository:** (Internal)  
 **Issues:** See MASTER_PLAN.md for known issues and sprint planning
@@ -288,3 +288,4 @@ auto quality = ScalingQuality::Bicubic;  // vs. Bilinear (default)
 ---
 
 *Generated on February 11, 2026*
+

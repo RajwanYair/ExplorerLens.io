@@ -1,7 +1,7 @@
 // Sprint 142 — Per-Monitor DPI V2 Tests
 #include <gtest/gtest.h>
 #include "Utils/PerMonitorDPIManager.h"
-using namespace DarkThumbs::Utils;
+using namespace ExplorerLens::Utils;
 
 TEST(Sprint142_DPI, ScaleFactor_100) {
     EXPECT_DOUBLE_EQ(DPIScaleFactor(DPIScale::S100), 1.0);
@@ -86,3 +86,4 @@ TEST(Sprint142_DPI, Manager_Summary) {
     auto s = mgr.Summary();
     EXPECT_NE(s.find("PerMonitorDPI"), std::string::npos);
 }
+

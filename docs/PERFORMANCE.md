@@ -1,4 +1,4 @@
-# DarkThumbs Performance Tuning Guide
+# ExplorerLens Performance Tuning Guide
 **Sprint 177: Version Normalization**  
 **Version:** 8.4.0  
 **Last Updated:** June 2025
@@ -70,18 +70,18 @@
 
 **Verify current status:**
 ```powershell
-Get-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU
+Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU
 # Output: UseGPU : 1
 ```
 
 **Enable GPU (if disabled):**
 ```powershell
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU -Value 1
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
 ```
 
 **Disable GPU (force CPU):**
 ```powershell
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU -Value 0
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 0
 # Use case: GPU driver issues, remote desktop
 ```
 
@@ -110,7 +110,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU -Value 0
 
 ```powershell
 # Run benchmark with GPU
-cd "C:\Program Files\DarkThumbs"
+cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe --benchmark_filter="GPU"
 
 # Expected output:
@@ -144,7 +144,7 @@ cd "C:\Program Files\DarkThumbs"
 
 ### Cache Architecture
 
-**DarkThumbs uses a 2-level cache:**
+**ExplorerLens uses a 2-level cache:**
 
 1. **Memory Cache (L1):**
    - In-process LRU cache
@@ -154,7 +154,7 @@ cd "C:\Program Files\DarkThumbs"
 
 2. **Disk Cache (L2):**
    - Persistent file-based cache
-   - Location: `C:\ProgramData\DarkThumbs\Cache\`
+   - Location: `C:\ProgramData\ExplorerLens\Cache\`
    - Size: Configurable (default 500 MB)
    - Format: PNG thumbnails with metadata
 
@@ -164,23 +164,23 @@ cd "C:\Program Files\DarkThumbs"
 
 **View current size:**
 ```powershell
-Get-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB
+Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB
 # Output: CacheSizeMB : 500
 ```
 
 **Adjust cache size:**
 ```powershell
 # Small system (4 GB RAM, 128 GB SSD)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 250
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 250
 
 # Standard system (8 GB RAM, 512 GB SSD)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 500
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 500
 
 # High-performance system (16+ GB RAM, 1+ TB SSD)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 2048
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 2048
 
 # Unlimited cache (not recommended)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 0
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 0
 ```
 
 **Recommendation:**
@@ -192,16 +192,16 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 0
 
 ### Cache Location
 
-**Default:** `C:\ProgramData\DarkThumbs\Cache\`
+**Default:** `C:\ProgramData\ExplorerLens\Cache\`
 
 **Change location (e.g., to faster SSD):**
 ```powershell
 # Create new cache directory
-New-Item "D:\FastSSD\DarkThumbsCache" -ItemType Directory
+New-Item "D:\FastSSD\ExplorerLensCache" -ItemType Directory
 
 # Update registry
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CachePath `
-    -Value "D:\FastSSD\DarkThumbsCache"
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CachePath `
+    -Value "D:\FastSSD\ExplorerLensCache"
 
 # Restart Explorer
 Stop-Process -Name explorer -Force
@@ -225,10 +225,10 @@ Start-Process explorer.exe
 **Manual cache clearing:**
 ```powershell
 # Clear entire cache
-Remove-Item "C:\ProgramData\DarkThumbs\Cache\*" -Recurse -Force
+Remove-Item "C:\ProgramData\ExplorerLens\Cache\*" -Recurse -Force
 
 # Clear cache for specific extension
-Remove-Item "C:\ProgramData\DarkThumbs\Cache\*.webp.thumb" -Force
+Remove-Item "C:\ProgramData\ExplorerLens\Cache\*.webp.thumb" -Force
 ```
 
 ---
@@ -237,7 +237,7 @@ Remove-Item "C:\ProgramData\DarkThumbs\Cache\*.webp.thumb" -Force
 
 **Check cache statistics:**
 ```powershell
-cd "C:\Program Files\DarkThumbs"
+cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe --cache-stats
 
 # Output:
@@ -258,7 +258,7 @@ cd "C:\Program Files\DarkThumbs"
 **Use case:** Pre-generate thumbnails for large folders
 
 ```powershell
-cd "C:\Program Files\DarkThumbs"
+cd "C:\Program Files\ExplorerLens"
 
 # Pre-cache a photo library
 .\EngineBenchmark.exe --cache-warmup "C:\Photos"
@@ -274,7 +274,7 @@ cd "C:\Program Files\DarkThumbs"
 ```
 
 **Recommended scenarios:**
-- After installing DarkThumbs
+- After installing ExplorerLens
 - New photo library import
 - Network drive browsing
 - Scheduled maintenance (weekly task)
@@ -285,7 +285,7 @@ cd "C:\Program Files\DarkThumbs"
 
 ### Thread Pool Architecture
 
-**DarkThumbs uses a fixed-size thread pool:**
+**ExplorerLens uses a fixed-size thread pool:**
 - **Worker threads:** Decode thumbnails in parallel
 - **Default size:** CPU core count (detected automatically)
 - **Queue depth:** 256 pending requests
@@ -296,20 +296,20 @@ cd "C:\Program Files\DarkThumbs"
 
 **View current setting:**
 ```powershell
-Get-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads
+Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads
 # Output: MaxThreads : 8
 ```
 
 **Adjust thread count:**
 ```powershell
 # Low-end system (4 cores)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 4
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 4
 
 # Mid-range system (8 cores)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 8
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 8
 
 # High-end system (16+ cores)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 16
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 16
 ```
 
 **Guidelines:**
@@ -361,23 +361,23 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 16
 
 **View current limit:**
 ```powershell
-Get-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels
+Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels
 # Output: MaxImagePixels : 50000000 (50 MP)
 ```
 
 **Adjust limit:**
 ```powershell
 # Low memory system (4 GB RAM)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 25000000  # 25 MP
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 25000000  # 25 MP
 
 # Standard system (8 GB RAM)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 50000000  # 50 MP
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 50000000  # 50 MP
 
 # High memory system (16+ GB RAM)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 150000000 # 150 MP
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 150000000 # 150 MP
 
 # Unlimited (not recommended)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 0
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 0
 ```
 
 **Example limits:**
@@ -397,13 +397,13 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 0
 **Set file size limit:**
 ```powershell
 # Skip files > 100 MB
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxFileSizeMB -Value 100
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 100
 
 # Skip files > 500 MB
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxFileSizeMB -Value 500
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 500
 
 # No limit (default)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxFileSizeMB -Value 0
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 0
 ```
 
 **Use case:** Network drives with large files (RAW video, gigapixel panoramas)
@@ -412,7 +412,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxFileSizeMB -Value 0
 
 ### Memory Pressure Handling
 
-**DarkThumbs monitors system memory:**
+**ExplorerLens monitors system memory:**
 - **<20% free RAM** → Reduce cache size dynamically
 - **<10% free RAM** → Skip thumbnail generation
 - **Critical pressure** → Clear in-memory cache
@@ -443,14 +443,14 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxFileSizeMB -Value 0
 
 ```powershell
 # Pre-generate thumbnails for network share
-cd "C:\Program Files\DarkThumbs"
+cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe --cache-warmup "\\NAS\Photos"
 
 # Schedule weekly pre-caching
 $action = New-ScheduledTaskAction -Execute "PowerShell.exe" `
     -Argument "-File C:\Scripts\PreCacheNAS.ps1"
 $trigger = New-ScheduledTaskTrigger -Weekly -At 2am
-Register-ScheduledTask -TaskName "DarkThumbs PreCache" -Action $action -Trigger $trigger
+Register-ScheduledTask -TaskName "ExplorerLens PreCache" -Action $action -Trigger $trigger
 ```
 
 ---
@@ -459,7 +459,7 @@ Register-ScheduledTask -TaskName "DarkThumbs PreCache" -Action $action -Trigger 
 
 ```powershell
 # Avoid overwhelming NAS
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 2
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 2
 ```
 
 **Effect:** Fewer concurrent file reads (less network congestion)
@@ -470,7 +470,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 2
 
 ```powershell
 # Store more thumbnails locally
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 2048
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 2048
 ```
 
 **Effect:** Reduces need to re-fetch from network
@@ -481,7 +481,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 2048
 
 ```powershell
 # Don't transfer huge files over network
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxFileSizeMB -Value 50
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
 ```
 
 ---
@@ -514,10 +514,10 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxFileSizeMB -Value 50
 **Adjust:**
 ```powershell
 # Seek to 25% (skip intro sequences)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name VideoSeekPercent -Value 25
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoSeekPercent -Value 25
 
 # Seek to 5% (for short clips)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name VideoSeekPercent -Value 5
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoSeekPercent -Value 5
 ```
 
 ---
@@ -526,7 +526,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name VideoSeekPercent -Value 5
 
 **Enable GPU video decode (NVDEC/VCE/Quick Sync):**
 ```powershell
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name VideoHWAccel -Value 1
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoHWAccel -Value 1
 # Note: Requires FFmpeg with hwaccel support
 ```
 
@@ -541,7 +541,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name VideoHWAccel -Value 1
 
 **Enable embedded thumbnails:**
 ```powershell
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name RAWUseEmbedded -Value 1
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name RAWUseEmbedded -Value 1
 ```
 
 **Comparison:**
@@ -564,7 +564,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name RAWUseEmbedded -Value 1
 **Set mode:**
 ```powershell
 # Montage mode (comic book archives)
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name ArchivePreviewMode -Value 2
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name ArchivePreviewMode -Value 2
 ```
 
 ---
@@ -576,7 +576,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name ArchivePreviewMode -Value 2
 **Set limit:**
 ```powershell
 # Extract up to 4 files for montage
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name ArchiveMaxFiles -Value 4
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name ArchiveMaxFiles -Value 4
 ```
 
 ---
@@ -587,12 +587,12 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name ArchiveMaxFiles -Value 4
 
 **Full benchmark suite:**
 ```powershell
-cd "C:\Program Files\DarkThumbs"
+cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe
 
 # Output:
 # ==================================================
-# DarkThumbs Benchmark Suite - Version 8.4.0
+# ExplorerLens Benchmark Suite - Version 8.4.0
 # ==================================================
 # System: Intel Core i7-10700K, 16 GB RAM
 # GPU: NVIDIA RTX 3060 (12 GB VRAM)
@@ -648,7 +648,7 @@ cd "C:\Program Files\DarkThumbs"
 .\EngineBenchmark.exe --benchmark_out=baseline.json
 
 # Enable GPU
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU -Value 1
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
 
 # Measure with GPU
 .\EngineBenchmark.exe --benchmark_out=gpu_enabled.json
@@ -677,7 +677,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU -Value 1
    - Enable thumbnails view
 
 3. **Analyze results:**
-   - Hot Path: `CBXShell.dll!CThumbnailProvider::GetThumbnail`
+   - Hot Path: `LENSShell.dll!CThumbnailProvider::GetThumbnail`
    - Look for bottlenecks in decoder functions
 
 ---
@@ -744,12 +744,12 @@ wpa thumbnail_trace.etl
 
 1. **Enable GPU acceleration:**
    ```powershell
-   Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU -Value 1
+   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
    ```
 
 2. **Increase cache size:**
    ```powershell
-   Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 1024
+   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
    ```
 
 3. **Pre-cache photo library:**
@@ -772,18 +772,18 @@ wpa thumbnail_trace.etl
 
 **Low-end system (4 GB RAM, HDD):**
 ```powershell
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU -Value 0  # Use WARP
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 100
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 2
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 25000000
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 0  # Use WARP
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 100
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 2
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 25000000
 ```
 
 **High-end system (32 GB RAM, NVMe SSD, RTX 4090):**
 ```powershell
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU -Value 1
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 4096
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 24
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 150000000
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 4096
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 24
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 150000000
 ```
 
 ---
@@ -798,3 +798,4 @@ Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxImagePixels -Value 1500000
 **Last Updated:** June 2025  
 **Sprint:** 177 - Version Normalization  
 **Version:** 8.4.0
+

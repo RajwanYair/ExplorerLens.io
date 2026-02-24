@@ -1,4 +1,4 @@
-# DarkThumbs Plugin API Documentation
+# ExplorerLens Plugin API Documentation
 
 **Version:** 7.0.0 (Engine v7.0.0)  
 **Last Updated:** February 17, 2026  
@@ -20,7 +20,7 @@
 
 ## Overview
 
-The DarkThumbs Engine provides a plugin architecture for adding custom thumbnail decoders. Any format can be supported by implementing the `IThumbnailDecoder` interface. Decoders are registered with the `DecoderRegistry` and automatically invoked by the `ThumbnailPipeline` when matching file formats are detected.
+The ExplorerLens Engine provides a plugin architecture for adding custom thumbnail decoders. Any format can be supported by implementing the `IThumbnailDecoder` interface. Decoders are registered with the `DecoderRegistry` and automatically invoked by the `ThumbnailPipeline` when matching file formats are detected.
 
 **Key Features:**
 
@@ -305,7 +305,7 @@ struct ThumbnailResult {
 
 #include "../Core/IThumbnailDecoder.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class MyFormatDecoder : public IThumbnailDecoder {
@@ -329,7 +329,7 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 ```
 
 ### Step 2: Implement CPP File
@@ -341,7 +341,7 @@ private:
 #include <fstream>
 #include <vector>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* MyFormatDecoder::m_extensions[] = { L".myformat", nullptr };
@@ -464,7 +464,7 @@ const wchar_t** MyFormatDecoder::GetSupportedExtensions() const {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 ```
 
 ---
@@ -637,7 +637,7 @@ registry.RegisterDecoder(std::unique_ptr<IThumbnailDecoder>(CreateDecoder()));
 **Plugin DLL Requirements:**
 
 - Export `IThumbnailDecoder* CreateDecoder()` function
-- Link against DarkThumbsEngine.lib
+- Link against ExplorerLensEngine.lib
 - Use `/MD` runtime (multithreaded DLL)
 - Compatible ABI (C++17, MSVC 2022)
 
@@ -740,7 +740,7 @@ int main() {
     }
     
     // Use thumbnail engine
-    DarkThumbs::Engine::ThumbnailPipeline pipeline;
+    ExplorerLens::Engine::ThumbnailPipeline pipeline;
     // ...
     
     // Cleanup COM
@@ -774,7 +774,7 @@ Explorer automatically initializes COM before loading shell extensions. **No exp
 
 ## Support & Contributing
 
-**Questions?** Contact the DarkThumbs development team.
+**Questions?** Contact the ExplorerLens development team.
 
 **Contributing Decoders:**
 
@@ -792,5 +792,6 @@ Explorer automatically initializes COM before loading shell extensions. **No exp
 ---
 
 **Document Version:** 1.0  
-**Engine Version:** 1.0.0 (DarkThumbs 5.3.0)  
+**Engine Version:** 1.0.0 (ExplorerLens 5.3.0)  
 **Last Updated:** January 13, 2026
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 47 Tests: Accessibility & Internationalization
+// ExplorerLens — Sprint 47 Tests: Accessibility & Internationalization
 // Tests locale parsing, string tables, localization manager, screen reader
 // descriptions, contrast modes, keyboard navigation, accessibility config.
 //==============================================================================
@@ -10,7 +10,7 @@
 
 #include "../Engine/Utils/AccessibilityI18n.h"
 
-using namespace DarkThumbs::Engine::Utils;
+using namespace ExplorerLens::Engine::Utils;
 
 //==============================================================================
 // Locale Tests
@@ -107,7 +107,7 @@ TEST(StringTable, DefaultEnglish)
 {
     auto t = StringTable::DefaultEnglish();
     EXPECT_GT(t.Count(), 10u);
-    EXPECT_EQ(t.Get("app.name"), "DarkThumbs");
+    EXPECT_EQ(t.Get("app.name"), "ExplorerLens");
     EXPECT_TRUE(t.Has("action.regenerate"));
     EXPECT_TRUE(t.Has("status.loading"));
 }
@@ -144,7 +144,7 @@ TEST(LocalizationManager, ResolveEnglish)
     mgr.RegisterLocale("en-US", StringTable::DefaultEnglish());
     mgr.SetLocale(Locale::English());
 
-    EXPECT_EQ(mgr.Resolve("app.name"), "DarkThumbs");
+    EXPECT_EQ(mgr.Resolve("app.name"), "ExplorerLens");
     EXPECT_EQ(mgr.Resolve("action.regenerate"), "Regenerate Thumbnail");
 }
 
@@ -155,7 +155,7 @@ TEST(LocalizationManager, FallbackToEnglish)
     mgr.SetLocale(Locale::Japanese()); // No Japanese table registered
 
     // Should fall back to English
-    EXPECT_EQ(mgr.Resolve("app.name"), "DarkThumbs");
+    EXPECT_EQ(mgr.Resolve("app.name"), "ExplorerLens");
 }
 
 TEST(LocalizationManager, MissingKeyReturnsKey)
@@ -312,3 +312,4 @@ TEST(AccessibilityConfig, LowVision)
     EXPECT_FLOAT_EQ(c.fontScale, 1.5f);
     EXPECT_EQ(c.contrast.mode, ContrastMode::HighContrast);
 }
+

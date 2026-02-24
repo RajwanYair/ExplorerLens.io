@@ -1,11 +1,11 @@
 # Reorganize-Project.ps1
-# Systematically reorganize DarkThumbs project directory structure
+# Systematically reorganize ExplorerLens project directory structure
 
 $ErrorActionPreference = 'Stop'
 $rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $rootDir
 
-Write-Host "=== DarkThumbs Project Reorganization ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens Project Reorganization ===" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Create directory structure
@@ -58,7 +58,7 @@ foreach ($file in $buildScripts) {
 # 3. Move Install Scripts
 Write-Host "Moving install/uninstall scripts..." -ForegroundColor Yellow
 $installScripts = @(
-    "Deploy-DarkThumbs.ps1",
+    "Deploy-ExplorerLens.ps1",
     "install-pure64.cmd",
     "install-x64-fixed.cmd",
     "install-x64.ps1",
@@ -78,7 +78,7 @@ foreach ($file in $installScripts) {
 # 4. Move Test Scripts
 Write-Host "Moving test scripts..." -ForegroundColor Yellow
 $testScripts = @(
-    "Test-DarkThumbs.ps1",
+    "Test-ExplorerLens.ps1",
     "run-tests.ps1",
     "build-tests.cmd"
 )
@@ -194,3 +194,4 @@ Write-Host "Files remaining in root directory:" -ForegroundColor Yellow
 Get-ChildItem -Path . -File | Select-Object -ExpandProperty Name | ForEach-Object { Write-Host "  $_" }
 Write-Host ""
 Write-Host "Root directory file count: $((Get-ChildItem -Path . -File).Count)" -ForegroundColor Cyan
+

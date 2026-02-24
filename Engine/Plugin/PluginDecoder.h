@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Decoder Adapter
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Decoder Adapter
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Adapter class that wraps plugin instances and provides IThumbnailDecoder
  * interface for seamless integration with the Engine pipeline.
@@ -21,7 +21,7 @@
 #include <filesystem>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //============================================================================
@@ -143,4 +143,5 @@ public:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

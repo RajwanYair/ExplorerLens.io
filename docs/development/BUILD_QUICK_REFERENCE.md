@@ -1,4 +1,4 @@
-# DarkThumbs Build Quick Reference
+# ExplorerLens Build Quick Reference
 **For AI Assistants & Developers**  
 **Updated:** February 9, 2026
 
@@ -28,7 +28,7 @@ dtbuild Release
 # Build Engine only (CMake project)
 dtbuild Engine
 
-# Build CBXShell only
+# Build LENSShell only
 dtbuild Shell
 
 # Clean all build outputs
@@ -41,7 +41,7 @@ dtbuild Rebuild
 dttest
 
 # Show environment info
-Show-DarkThumbsInfo
+Show-ExplorerLensInfo
 ```
 
 ---
@@ -51,13 +51,13 @@ Show-DarkThumbsInfo
 ### MSBuild - Full Solution
 
 ```powershell
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
 ```
 
 ### MSBuild - Single Project
 
 ```powershell
-msbuild CBXShell\CBXShell.vcxproj /p:Configuration=Release /p:Platform=x64 /m
+msbuild LENSShell\LENSShell.vcxproj /p:Configuration=Release /p:Platform=x64 /m
 ```
 
 ### CMake - Engine
@@ -93,7 +93,7 @@ ctest --output-on-failure
 
 ```powershell
 # Already configured in Setup-DevEnvironment.ps1:
-$Global:DarkThumbsConfig = @{
+$Global:ExplorerLensConfig = @{
     VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
     MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
     CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
@@ -111,7 +111,7 @@ $Global:DarkThumbsConfig = @{
 Test-BuildTools
 
 # Show full environment details
-Show-DarkThumbsInfo
+Show-ExplorerLensInfo
 
 # Test specific tool
 cl.exe              # MSVC compiler
@@ -147,13 +147,13 @@ dttest                 # Run Engine tests
 ### Scenario 4: Debug Build
 
 ```powershell
-msbuild CBXShell.sln /p:Configuration=Debug /p:Platform=x64 /m
+msbuild LENSShell.sln /p:Configuration=Debug /p:Platform=x64 /m
 ```
 
 ### Scenario 5: Check for Errors Only
 
 ```powershell
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:quiet /clp:ErrorsOnly
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:quiet /clp:ErrorsOnly
 ```
 
 ---
@@ -162,8 +162,8 @@ msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:quiet /clp:E
 
 | Problem | Solution |
 |---------|----------|
-| "cl.exe not found" | Run `Load-MSVCEnvironment` or `Setup-DarkThumbsEnv -Force` |
-| "CMake generator not found" | Ensure VS Build Tools are installed, run `Setup-DarkThumbsEnv` |
+| "cl.exe not found" | Run `Load-MSVCEnvironment` or `Setup-ExplorerLensEnv -Force` |
+| "CMake generator not found" | Ensure VS Build Tools are installed, run `Setup-ExplorerLensEnv` |
 | "Build failed" | Check `build.log` or add `/v:detailed` to msbuild command |
 | Tools reset after reboot | Add setup script to `$PROFILE` for persistence |
 
@@ -172,12 +172,12 @@ msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:quiet /clp:E
 ## 📁 Project Structure
 
 ```
-DarkThumbs/
-├── CBXShell.sln              # Main VS solution
-├── CBXShell/                 # Shell extension DLL
-│   └── CBXShell.vcxproj
-├── CBXManager/               # Manager application
-│   └── CBXManager.vcxproj
+ExplorerLens/
+├── LENSShell.sln              # Main VS solution
+├── LENSShell/                 # Shell extension DLL
+│   └── LENSShell.vcxproj
+├── LENSManager/               # Manager application
+│   └── LENSManager.vcxproj
 ├── Engine/                   # CMake-based engine library
 │   ├── CMakeLists.txt
 │   └── Tests/                # Security tests, benchmarks
@@ -216,7 +216,7 @@ git diff --stat
 
 Typical build times on this machine:
 
-- **CBXShell.dll:** ~60 seconds (incremental), ~120 seconds (clean)
+- **LENSShell.dll:** ~60 seconds (incremental), ~120 seconds (clean)
 - **Engine library:** ~45 seconds (CMake + compile)
 - **Full solution:** ~3 minutes (clean build)
 
@@ -229,12 +229,12 @@ Use `/m` flag for parallel builds to maximize CPU usage.
 1. **Add to Profile for Auto-Load:**
    ```powershell
    notepad $PROFILE
-   # Add: . "C:\...\DarkThumbs\scripts\Setup-DevEnvironment.ps1"
+   # Add: . "C:\...\ExplorerLens\scripts\Setup-DevEnvironment.ps1"
    ```
 
 2. **Use Aliases:**
    ```powershell
-   dtbuild          # Instead of Invoke-DarkThumbsBuild
+   dtbuild          # Instead of Invoke-ExplorerLensBuild
    dtclean          # Instead of cleaning manually
    dttest           # Instead of navigating to test folder
    ```
@@ -265,3 +265,4 @@ Use `/m` flag for parallel builds to maximize CPU usage.
 ---
 
 *Auto-updated: February 9, 2026 - All tools verified working*
+

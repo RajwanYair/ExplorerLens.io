@@ -1,10 +1,10 @@
-site_name: DarkThumbs Documentation
+site_name: ExplorerLens Documentation
 site_description: Advanced Windows Shell Extension for Thumbnail Generation
-site_author: DarkThumbs Project
-site_url: https://darkthumbs.github.io
+site_author: ExplorerLens Project
+site_url: https://ExplorerLens.github.io
 
-repo_name: darkthumbs/darkthumbs
-repo_url: https://github.com/darkthumbs/darkthumbs
+repo_name: ExplorerLens/ExplorerLens
+repo_url: https://github.com/ExplorerLens/ExplorerLens
 edit_uri: edit/main/docs/
 
 theme:
@@ -122,8 +122,9 @@ extra:
     provider: mike
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/darkthumbs/darkthumbs
+      link: https://github.com/ExplorerLens/ExplorerLens
     - icon: fontawesome/brands/discord
-      link: https://discord.gg/darkthumbs
+      link: https://discord.gg/ExplorerLens
 
-copyright: Copyright &copy; 2024-2026 DarkThumbs Project
+copyright: Copyright &copy; 2024-2026 ExplorerLens Project
+

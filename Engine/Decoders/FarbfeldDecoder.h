@@ -1,7 +1,7 @@
 #pragma once
 //==============================================================================
 // FarbfeldDecoder.h — Farbfeld Image Decoder
-// DarkThumbs Engine v8.4.0 — Sprint 180: Easy Format Wins
+// ExplorerLens Engine v8.4.0 — Easy Format Wins
 //
 // Decodes Farbfeld (.ff) images — a simple lossless image format with
 // 8-byte magic ("farbfeld"), 32-bit width/height, and raw 16-bit RGBA pixels.
@@ -14,7 +14,7 @@
 #include <cstdint>
 #include <windows.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 /// Farbfeld (.ff) image decoder.
@@ -63,4 +63,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

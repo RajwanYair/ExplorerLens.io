@@ -5,9 +5,9 @@
 #include <vector>
 #include <string>
 
-namespace DarkThumbs::Engine::Interfaces {
+namespace ExplorerLens::Engine::Interfaces {
 
-    using namespace DarkThumbs::Engine::Contracts;
+    using namespace ExplorerLens::Engine::Contracts;
 
     class IThumbnailDecoder {
     public:
@@ -55,3 +55,4 @@ namespace DarkThumbs::Engine::Interfaces {
     };
 
 }
+

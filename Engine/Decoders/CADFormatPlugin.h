@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 161 — CAD Format Plugin Scaffold
+// CAD Format Plugin Scaffold
 // Plugin contract for DWG/DXF support via isolated plugin adapter.
 // Provides fallback badge thumbnail when no CAD plugin is loaded.
 
@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
 // ─── CAD extension types ──────────────────────────────────────────────────────
 
@@ -136,4 +136,5 @@ struct CADFormatPlugin {
     }
 };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

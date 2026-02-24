@@ -17,7 +17,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "=== DarkThumbs Archive Performance Benchmark ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens Archive Performance Benchmark ===" -ForegroundColor Cyan
 Write-Host "Sprint 14: Memory-Mapped I/O Optimization"
 Write-Host ""
 
@@ -235,3 +235,4 @@ Write-Host "  • Central directory seek avoids full archive scan" -ForegroundCo
 Write-Host "  • Lazy file enumeration reduces overhead" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Sprint 14 Memory-Mapped I/O benchmark complete! ✓" -ForegroundColor Green
+

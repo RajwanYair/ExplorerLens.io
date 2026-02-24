@@ -1,7 +1,7 @@
 #==============================================================================
-# DarkThumbs - Root CMake Configuration
-# Copyright (c) 2026 - DarkThumbs Project
-# Version: 7.0.0
+# ExplorerLens - Root CMake Configuration
+# Copyright (c) 2026 - ExplorerLens.io Project
+# Version: 14.0.0
 #
 # vcpkg Integration (Optional):
 #   cmake -B build -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
@@ -10,12 +10,26 @@
 
 cmake_minimum_required(VERSION 3.20)
 
-project(DarkThumbs
-    VERSION 7.0.0
-    DESCRIPTION "DarkThumbs - Advanced Thumbnail Generator for Windows"
+project(ExplorerLens
+    VERSION 14.0.0
+    DESCRIPTION "ExplorerLens.io - Universal File Preview Engine for Windows Explorer"
     LANGUAGES CXX
-    HOMEPAGE_URL "https://github.com/yourusername/DarkThumbs"
+    HOMEPAGE_URL "https://github.com/ExplorerLens/ExplorerLens.io"
 )
+
+#==============================================================================
+# Architecture Guard (x64-only)
+#==============================================================================
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    message(FATAL_ERROR "ExplorerLens is x64-only. Reconfigure with a 64-bit generator/platform.")
+endif()
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio" AND DEFINED CMAKE_GENERATOR_PLATFORM)
+    if(NOT CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
+        message(FATAL_ERROR "ExplorerLens requires Visual Studio platform x64. Current: ${CMAKE_GENERATOR_PLATFORM}")
+    endif()
+endif()
 
 #==============================================================================
 # Project-wide Options
@@ -24,7 +38,7 @@ project(DarkThumbs
 option(BUILD_TESTS "Build unit tests" ON)
 option(BUILD_BENCHMARKS "Build performance benchmarks" ON)
 option(BUILD_ENGINE_ONLY "Build only the engine library" OFF)
-option(BUILD_MODERN_RUNTIME "Build worker/shellhost/local-api runtime components" OFF)
+option(BUILD_MODERN_RUNTIME "Build worker/shellhost/local-api runtime components" ON)
 option(ENABLE_GPU "Enable GPU acceleration (DirectX 11)" ON)
 option(ENABLE_CACHE "Enable thumbnail caching" ON)
 
@@ -34,7 +48,7 @@ option(ENABLE_CACHE "Enable thumbnail caching" ON)
 
 set(CMAKE_CXX_STANDARD 20)  # C++20 for latest features (modules, concepts, coroutines)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 # Use /MD runtime (Multi-threaded DLL) to match existing project
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
@@ -62,6 +76,14 @@ endforeach()
 #==============================================================================
 # Compiler Warnings and Settings
 #==============================================================================
+
+# Report detected compiler
+message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "C++ Compiler Path: ${CMAKE_CXX_COMPILER}")
+if(MSVC)
+    message(STATUS "MSVC Toolset: ${CMAKE_VS_PLATFORM_TOOLSET}")
+    message(STATUS "Windows SDK: ${CMAKE_SYSTEM_VERSION}")
+endif()
 
 if(MSVC)
     add_compile_options(
@@ -100,11 +122,26 @@ if(MSVC)
         /IGNORE:4099                      # Ignore missing PDB warnings
     )
     
-    # Profile-Guided Optimization support (optional)
-    option(ENABLE_PGO "Enable Profile-Guided Optimization" OFF)
-    if(ENABLE_PGO)
+    # Profile-Guided Optimization support
+    # Usage:
+    #   Phase 1 (Instrument):  cmake -B build -DPGO_PHASE=INSTRUMENT && cmake --build build --config Release
+    #   Phase 2 (Train):       Run the instrumented binary with representative workloads
+    #   Phase 3 (Optimize):    cmake -B build -DPGO_PHASE=OPTIMIZE && cmake --build build --config Release
+    #   Disabled:              cmake -B build -DPGO_PHASE=OFF (default — uses standard LTCG)
+    set(PGO_PHASE "OFF" CACHE STRING "PGO phase: OFF, INSTRUMENT, or OPTIMIZE")
+    set_property(CACHE PGO_PHASE PROPERTY STRINGS OFF INSTRUMENT OPTIMIZE)
+
+    if(PGO_PHASE STREQUAL "INSTRUMENT")
+        message(STATUS "PGO Phase: INSTRUMENT — building with /GENPROFILE for profiling")
         add_compile_options($<$<CONFIG:Release>:/GL>)
-        add_link_options($<$<CONFIG:Release>:/LTCG:PGOptimize>)
+        add_link_options($<$<CONFIG:Release>:/LTCG> $<$<CONFIG:Release>:/GENPROFILE>)
+    elseif(PGO_PHASE STREQUAL "OPTIMIZE")
+        message(STATUS "PGO Phase: OPTIMIZE — building with /USEPROFILE from collected data")
+        add_compile_options($<$<CONFIG:Release>:/GL>)
+        add_link_options($<$<CONFIG:Release>:/LTCG> $<$<CONFIG:Release>:/USEPROFILE>)
+    else()
+        message(STATUS "PGO Phase: OFF — using standard LTCG optimization")
+        # /GL and /LTCG already set in Release flags above
     endif()
 endif()
 
@@ -113,7 +150,7 @@ endif()
 #==============================================================================
 
 set(EXTERNAL_DIR ${CMAKE_SOURCE_DIR}/external)
-set(COMPRESSION_DIR ${EXTERNAL_DIR}/compression)
+set(COMPRESSION_DIR ${EXTERNAL_DIR}/compression-libs)
 set(IMAGE_LIBS_DIR ${EXTERNAL_DIR}/image-libs)
 
 # Find external libraries
@@ -154,19 +191,19 @@ endif()
 #==============================================================================
 
 if(NOT BUILD_ENGINE_ONLY)
-    install(TARGETS DarkThumbsEngine
+    install(TARGETS ExplorerLensEngine
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
     )
     
     install(DIRECTORY Engine/Core Engine/Decoders Engine/Pipeline Engine/GPU Engine/Cache Engine/Utils
-        DESTINATION include/DarkThumbs
+        DESTINATION include/ExplorerLens
         FILES_MATCHING PATTERN "*.h"
     )
     
     install(FILES Engine/Engine.h
-        DESTINATION include/DarkThumbs
+        DESTINATION include/ExplorerLens
     )
 endif()
 
@@ -182,22 +219,22 @@ endif()
 # Package Configuration
 #==============================================================================
 
-set(CPACK_PACKAGE_NAME "DarkThumbs")
-set(CPACK_PACKAGE_VENDOR "DarkThumbs Project")
+set(CPACK_PACKAGE_NAME "ExplorerLens.io")
+set(CPACK_PACKAGE_VENDOR "ExplorerLens.io Project")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Advanced Thumbnail Generator for Windows")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "DarkThumbs")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "ExplorerLens.io")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
 
 # Windows-specific packaging
 if(WIN32)
     set(CPACK_GENERATOR "ZIP;NSIS")
-    set(CPACK_NSIS_DISPLAY_NAME "DarkThumbs ${PROJECT_VERSION}")
-    set(CPACK_NSIS_PACKAGE_NAME "DarkThumbs")
+    set(CPACK_NSIS_DISPLAY_NAME "ExplorerLens ${PROJECT_VERSION}")
+    set(CPACK_NSIS_PACKAGE_NAME "ExplorerLens")
     set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 endif()
 
@@ -209,7 +246,7 @@ include(CPack)
 
 message(STATUS "")
 message(STATUS "========================================")
-message(STATUS "DarkThumbs Build Configuration")
+message(STATUS "ExplorerLens Build Configuration")
 message(STATUS "========================================")
 message(STATUS "Version:           ${PROJECT_VERSION}")
 message(STATUS "Build type:        ${CMAKE_BUILD_TYPE}")
@@ -230,3 +267,4 @@ message(STATUS "  Library:  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 message(STATUS "  Archive:  ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
 message(STATUS "========================================")
 message(STATUS "")
+

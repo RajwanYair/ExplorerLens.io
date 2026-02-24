@@ -1,11 +1,11 @@
 //==============================================================================
-// DarkThumbs Engine - Public API Implementation
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Public API Implementation
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "EngineAPI.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 ENGINE_API const wchar_t* ENGINE_CALL GetEngineVersion() {
@@ -17,4 +17,5 @@ ENGINE_API const wchar_t* ENGINE_CALL GetEngineBuildDate() {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

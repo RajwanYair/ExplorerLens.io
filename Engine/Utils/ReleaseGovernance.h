@@ -1,12 +1,12 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 10: Release Governance & Packaging
+// ExplorerLens — Release Governance & Packaging
 // Release checklist validation, MSI/PortableZIP packaging verifier,
 // code-signing policy, CI pipeline quality gates, version consistency.
 //==============================================================================
 
-#ifndef DARKTHUMBS_RELEASE_GOVERNANCE_H
-#define DARKTHUMBS_RELEASE_GOVERNANCE_H
+#ifndef EXPLORERLENS_RELEASE_GOVERNANCE_H
+#define EXPLORERLENS_RELEASE_GOVERNANCE_H
 
 #include <string>
 #include <vector>
@@ -18,7 +18,7 @@
 #include <numeric>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine { namespace Release {
+namespace ExplorerLens { namespace Engine { namespace Release {
 
 //==============================================================================
 // Quality Gate — individual pass/fail check
@@ -110,7 +110,7 @@ class ReleaseChecklist
 public:
     ReleaseChecklist()
     {
-        // Core quality gates per Sprint 10 spec
+        // Core quality gates per spec
         gates_ = {
             {"BUILD_SUCCESS",    "Solution builds with 0 errors, 0 warnings", GateStatus::Pending, "", 0},
             {"TEST_PASS",        "All unit tests pass (100% pass rate)",       GateStatus::Pending, "", 0},
@@ -227,7 +227,7 @@ struct CodeSigningPolicy
     std::string hashAlgorithm = "SHA256";
     bool   dualSign          = false;  // SHA1 + SHA256 for legacy compat
     std::vector<std::string> requiredBinaries = {
-        "CBXShell.dll", "CBXManager.exe", "PluginHost.exe"
+        "LENSShell.dll", "LENSManager.exe", "PluginHost.exe"
     };
 
     bool IsConfigured() const { return method != SigningMethod::None; }
@@ -283,10 +283,10 @@ public:
     static std::vector<std::string> RequiredFiles()
     {
         return {
-            "CBXShell.dll",
-            "CBXManager.exe",
-            "DarkThumbs.Engine.dll",
-            "Install-DarkThumbs.ps1",
+            "LENSShell.dll",
+            "LENSManager.exe",
+            "ExplorerLens.Engine.dll",
+            "Install-ExplorerLens.ps1",
             "README.md",
             "LICENSE"
         };
@@ -296,7 +296,7 @@ public:
     static std::vector<std::string> MSISpecificFiles()
     {
         return {
-            "DarkThumbs.wxs",
+            "ExplorerLens.wxs",
             "Build-Installer.ps1"
         };
     }
@@ -441,7 +441,7 @@ struct ReleaseManifest
     std::string GenerateManifestMarkdown() const
     {
         std::ostringstream ss;
-        ss << "# DarkThumbs v" << version << " Release Manifest\n\n";
+        ss << "# ExplorerLens v" << version << " Release Manifest\n\n";
         ss << "- **Build Date:** " << buildDate << "\n";
         ss << "- **Commit:** " << commitHash << "\n";
         ss << "- **Config:** " << configuration << " / " << platform << "\n";
@@ -464,6 +464,8 @@ struct ReleaseManifest
     }
 };
 
-}}} // namespace DarkThumbs::Engine::Release
+}}} // namespace ExplorerLens::Engine::Release
 
-#endif // DARKTHUMBS_RELEASE_GOVERNANCE_H
+#endif // EXPLORERLENS_RELEASE_GOVERNANCE_H
+
+

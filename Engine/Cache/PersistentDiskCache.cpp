@@ -1,5 +1,5 @@
 //==============================================================================
-// PersistentDiskCache.cpp — Sprint 192
+// PersistentDiskCache.cpp
 // Persistent disk cache with warming, smart eviction, and integrity validation
 //==============================================================================
 
@@ -7,8 +7,9 @@
 #include <algorithm>
 #include <numeric>
 #include <cstring>
+#include <windows.h>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 //==============================================================================
 // CRC32 table (IEEE 802.3)
@@ -56,12 +57,12 @@ bool PersistentDiskCache::Open() {
     if (m_isOpen) return true;
 
     if (m_config.cacheDirPath.empty()) {
-        // Default to %LOCALAPPDATA%\DarkThumbs\Cache
+        // Default to %LOCALAPPDATA%\ExplorerLens\Cache
         wchar_t buf[MAX_PATH] = {};
         if (GetEnvironmentVariableW(L"LOCALAPPDATA", buf, MAX_PATH) > 0) {
-            m_config.cacheDirPath = std::wstring(buf) + L"\\DarkThumbs\\Cache";
+            m_config.cacheDirPath = std::wstring(buf) + L"\\ExplorerLens\\Cache";
         } else {
-            m_config.cacheDirPath = L"C:\\DarkThumbsCache";
+            m_config.cacheDirPath = L"C:\\ExplorerLensCache";
         }
     }
 
@@ -402,4 +403,5 @@ std::wstring PersistentDiskCache::GenerateCacheKey(const std::wstring& filePath,
     return std::wstring(buf);
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

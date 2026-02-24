@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 41 Tests: Duplicate Detection & Perceptual Hashing
+// ExplorerLens — Sprint 41 Tests: Duplicate Detection & Perceptual Hashing
 // Tests pHash/dHash computation, Hamming distance, similarity search,
 // duplicate grouping, scan results, CSV/JSON export.
 //==============================================================================
@@ -10,7 +10,7 @@
 
 #include "../Engine/Utils/PerceptualHashing.h"
 
-using namespace DarkThumbs::Engine::Utils;
+using namespace ExplorerLens::Engine::Utils;
 
 //==============================================================================
 // Hash Algorithm Tests
@@ -369,3 +369,4 @@ TEST(DupConfig, Strict)
     auto cfg = DuplicateDetectionConfig::Strict();
     EXPECT_EQ(cfg.similarityThreshold, 3u);
 }
+

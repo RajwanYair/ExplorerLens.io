@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 138 — Win11 Compatibility Matrix Execution
+// Win11 Compatibility Matrix Execution
 // Full OS/GPU/DPI matrix validation framework for Windows 10/11 builds.
 // Defines test scenarios, pass criteria, and compatibility reporting.
 
@@ -10,7 +10,7 @@
 #include <array>
 #include <algorithm>
 
-namespace DarkThumbs::Utils {
+namespace ExplorerLens::Utils {
 
 // ─── Windows build identifiers ───────────────────────────────────
 enum class WindowsBuild : uint16_t {
@@ -227,4 +227,5 @@ private:
     std::vector<CompatTestExecution> m_executions;
 };
 
-} // namespace DarkThumbs::Utils
+} // namespace ExplorerLens::Utils
+

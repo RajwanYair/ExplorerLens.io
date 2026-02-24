@@ -4,7 +4,7 @@
 #include <cstring>
 #include <sstream>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Worker {
 
 WorkerProcess::WorkerProcess(const WorkerConfig& config)
@@ -419,4 +419,5 @@ void WorkerWatchdog::MonitorLoop() {
 }
 
 } // namespace Worker
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

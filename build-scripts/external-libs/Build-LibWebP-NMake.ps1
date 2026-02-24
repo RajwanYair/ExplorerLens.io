@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build libwebp 1.5.0 using native Makefile.vc
+# ExplorerLens v7.0 - Build libwebp 1.5.0 using native Makefile.vc
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -48,21 +48,20 @@ try {
         Invoke-NMakeBuild -LibraryName "libwebp" -SourceDir $webpDir -Target "CFG=release-static RTLIBCFG=static OBJDIR=output\x64\Release" -MakefileVars @{
             'File' = 'Makefile.vc'
         }
-    }
-    else {
+    } else {
         Write-BuildLog "nmake not found in environment; falling back to CMake build" -Level Warning
         $cmakeBuildDir = Join-Path $webpDir "build-cmake"
         $cmakeOptions = @{
-            'BUILD_SHARED_LIBS'      = 'OFF'
-            'WEBP_BUILD_CWEBP'       = 'OFF'
-            'WEBP_BUILD_DWEBP'       = 'OFF'
-            'WEBP_BUILD_GIF2WEBP'    = 'OFF'
-            'WEBP_BUILD_IMG2WEBP'    = 'OFF'
-            'WEBP_BUILD_VWEBP'       = 'OFF'
-            'WEBP_BUILD_WEBPINFO'    = 'OFF'
-            'WEBP_BUILD_WEBPMUX'     = 'OFF'
-            'WEBP_BUILD_EXTRAS'      = 'OFF'
-            'WEBP_BUILD_ANIM_UTILS'  = 'OFF'
+            'BUILD_SHARED_LIBS'     = 'OFF'
+            'WEBP_BUILD_CWEBP'      = 'OFF'
+            'WEBP_BUILD_DWEBP'      = 'OFF'
+            'WEBP_BUILD_GIF2WEBP'   = 'OFF'
+            'WEBP_BUILD_IMG2WEBP'   = 'OFF'
+            'WEBP_BUILD_VWEBP'      = 'OFF'
+            'WEBP_BUILD_WEBPINFO'   = 'OFF'
+            'WEBP_BUILD_WEBPMUX'    = 'OFF'
+            'WEBP_BUILD_EXTRAS'     = 'ON'
+            'WEBP_BUILD_ANIM_UTILS' = 'ON'
         }
 
         Invoke-CMakeBuild `
@@ -127,6 +126,28 @@ try {
         Copy-Item $sharpyuvLib (Join-Path $outputDir "sharpyuv.lib") -Force
         Write-BuildLog "Copied sharpyuv.lib" -Level Success
     }
+
+    # Optional WebP companion libraries (present in some build variants)
+    $webpDemuxCandidates = @(
+        (Join-Path $outputLibDir "webpdemux.lib"),
+        (Join-Path $outputLibDir "libwebpdemux.lib")
+    )
+    $webpDecoderCandidates = @(
+        (Join-Path $outputLibDir "webpdecoder.lib"),
+        (Join-Path $outputLibDir "libwebpdecoder.lib")
+    )
+
+    $webpDemuxLib = $webpDemuxCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($webpDemuxLib) {
+        Copy-Item $webpDemuxLib (Join-Path $outputDir "webpdemux.lib") -Force
+        Write-BuildLog "Copied webpdemux.lib" -Level Success
+    }
+
+    $webpDecoderLib = $webpDecoderCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($webpDecoderLib) {
+        Copy-Item $webpDecoderLib (Join-Path $outputDir "webpdecoder.lib") -Force
+        Write-BuildLog "Copied webpdecoder.lib" -Level Success
+    }
     
     Write-BuildLog "libwebp 1.5.0 build completed successfully" -Level Success
     Write-BuildLog "Output: $outputDir" -Level Info
@@ -135,4 +156,5 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+
 

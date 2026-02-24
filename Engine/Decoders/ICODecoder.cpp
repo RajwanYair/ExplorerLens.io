@@ -1,5 +1,5 @@
 // ICODecoder.cpp - Windows Icon Decoder Implementation
-// DarkThumbs Engine v5.3.0+
+// ExplorerLens Engine v5.3.0+
 
 #include "ICODecoder.h"
 #include <algorithm>
@@ -7,7 +7,7 @@
 
 #pragma comment(lib, "windowscodecs.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Static members
@@ -306,4 +306,5 @@ bool ICODecoder::IsICOFormat(const wchar_t* path) {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,12 +1,12 @@
 /**
  * SamplePlugin.cpp - Reference Plugin Implementation
- * Demonstrates DarkThumbs Plugin SDK usage
+ * Demonstrates ExplorerLens Plugin SDK usage
  * 
  * This is a minimal example plugin that decodes a hypothetical ".xyz" format.
  * Use this as a template for creating your own plugins.
  */
 
-#include "DarkThumbsPlugin.h"
+#include "ExplorerLensPlugin.h"
 #include <windows.h>
 #include <gdiplus.h>
 #include <string>
@@ -25,10 +25,10 @@ static DT_PluginStatistics g_stats = {sizeof(DT_PluginStatistics)};
 // Plugin metadata
 static const DT_PluginInfo g_pluginInfo = {
     DT_PLUGIN_ABI_VERSION,                      // abiVersion
-    L"darkthumbs.plugin.sample",                // id
+    L"explorerlens.plugin.sample",                // id
     L"Sample XYZ Format Decoder",               // name
     L"1.0.0",                                   // version
-    L"DarkThumbs Project",                      // vendor
+    L"ExplorerLens Project",                      // vendor
     L"Reference plugin demonstrating SDK usage", // description
     DT_CAP_READ_FILE | DT_CAP_DECODE,           // capabilities
     DT_ENGINE_VERSION_5_4_0,                    // minEngineVersion
@@ -309,3 +309,4 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     }
     return TRUE;
 }
+

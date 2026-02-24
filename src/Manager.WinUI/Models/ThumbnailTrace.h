@@ -3,9 +3,9 @@
 #include <vector>
 #include "../../Engine/contracts/thumbnail_contracts.h"
 
-namespace DarkThumbs::Manager::Models {
+namespace ExplorerLens::Manager::Models {
 
-    using namespace DarkThumbs::Engine::Contracts;
+    using namespace ExplorerLens::Engine::Contracts;
 
     struct PipelineStageTrace {
         std::wstring StageName;
@@ -31,3 +31,4 @@ namespace DarkThumbs::Manager::Models {
 
     // VerifyPreviewViewModel would use this to show a visual tree of execution
 }
+

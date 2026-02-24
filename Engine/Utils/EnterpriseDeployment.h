@@ -1,6 +1,6 @@
-// EnterpriseDeployment.h - Enterprise Deployment & Group Policy (Sprint 31)
-// DarkThumbs Engine v7.0.0+
-// Copyright (c) 2026 DarkThumbs Project
+// EnterpriseDeployment.h - Enterprise Deployment & Group Policy
+// ExplorerLens Engine v7.0.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Features:
 // - Group Policy Object (GPO) support via ADMX/ADML templates
@@ -12,8 +12,8 @@
 // - Per-machine and per-user policy enforcement
 //
 // Architecture:
-//   GroupPolicyProvider  → reads HKLM/HKCU Software\Policies\DarkThumbs
-//   JsonConfigProvider   → reads darkthumbs.json from config paths
+//   GroupPolicyProvider  → reads HKLM/HKCU Software\Policies\ExplorerLens
+//   JsonConfigProvider   → reads explorerlens.json from config paths
 //   EnterpriseConfig     → merges policy + JSON + defaults (policy wins)
 //   NetworkCacheClient   → UNC path shared cache access
 //   TelemetryController  → opt-in/opt-out telemetry management
@@ -26,7 +26,7 @@
 #include <map>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // ============================================================================
@@ -36,10 +36,10 @@ namespace Engine {
 /// Configuration source priority (higher = overrides lower)
 enum class ConfigSource {
     Default = 0,        ///< Built-in defaults
-    UserConfig = 1,     ///< User's darkthumbs.json
-    MachineConfig = 2,  ///< Machine-wide darkthumbs.json
-    UserPolicy = 3,     ///< HKCU\...\Policies\DarkThumbs (GPO user)
-    MachinePolicy = 4   ///< HKLM\...\Policies\DarkThumbs (GPO machine)
+    UserConfig = 1,     ///< User's explorerlens.json
+    MachineConfig = 2,  ///< Machine-wide explorerlens.json
+    UserPolicy = 3,     ///< HKCU\...\Policies\ExplorerLens (GPO user)
+    MachinePolicy = 4   ///< HKLM\...\Policies\ExplorerLens (GPO machine)
 };
 
 /// A single configuration value with tracked source
@@ -91,11 +91,11 @@ struct PolicyDefinition {
 /// Registry-based policy reader
 class GroupPolicyProvider {
 public:
-    /// Registry paths for DarkThumbs policies
+    /// Registry paths for ExplorerLens policies
     static constexpr const char* kMachinePolicyKey = 
-        "SOFTWARE\\Policies\\DarkThumbs";
+        "SOFTWARE\\Policies\\ExplorerLens";
     static constexpr const char* kUserPolicyKey = 
-        "SOFTWARE\\Policies\\DarkThumbs";
+        "SOFTWARE\\Policies\\ExplorerLens";
 
     GroupPolicyProvider() {
         InitializePolicies();
@@ -135,13 +135,13 @@ public:
         admx += "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
         admx += "<policyDefinitions revision=\"1.0\" schemaVersion=\"1.0\">\n";
         admx += "  <policyNamespaces>\n";
-        admx += "    <target prefix=\"darkthumbs\" namespace=\"DarkThumbs.Policies\"/>\n";
+        admx += "    <target prefix=\"explorerlens\" namespace=\"ExplorerLens.Policies\"/>\n";
         admx += "  </policyNamespaces>\n";
         admx += "  <categories>\n";
-        admx += "    <category name=\"DarkThumbs\" displayName=\"DarkThumbs Shell Extension\"/>\n";
-        admx += "    <category name=\"Telemetry\" displayName=\"Telemetry\" parentCategory=\"DarkThumbs\"/>\n";
-        admx += "    <category name=\"Cache\" displayName=\"Cache\" parentCategory=\"DarkThumbs\"/>\n";
-        admx += "    <category name=\"Formats\" displayName=\"Formats\" parentCategory=\"DarkThumbs\"/>\n";
+        admx += "    <category name=\"ExplorerLens\" displayName=\"ExplorerLens Shell Extension\"/>\n";
+        admx += "    <category name=\"Telemetry\" displayName=\"Telemetry\" parentCategory=\"ExplorerLens\"/>\n";
+        admx += "    <category name=\"Cache\" displayName=\"Cache\" parentCategory=\"ExplorerLens\"/>\n";
+        admx += "    <category name=\"Formats\" displayName=\"Formats\" parentCategory=\"ExplorerLens\"/>\n";
         admx += "  </categories>\n";
 
         admx += "  <policies>\n";
@@ -166,7 +166,7 @@ private:
             "Disable telemetry collection",
             "When enabled, no usage data is collected or transmitted.",
             "Telemetry",
-            "SOFTWARE\\Policies\\DarkThumbs",
+            "SOFTWARE\\Policies\\ExplorerLens",
             "DisableTelemetry",
             PolicyDefinition::ValueType::Boolean
         };
@@ -175,7 +175,7 @@ private:
             "Telemetry collection level",
             "Controls the level of telemetry data collected.",
             "Telemetry",
-            "SOFTWARE\\Policies\\DarkThumbs",
+            "SOFTWARE\\Policies\\ExplorerLens",
             "TelemetryLevel",
             PolicyDefinition::ValueType::Enum,
             {{"Off", 0}, {"Basic", 1}, {"Enhanced", 2}, {"Full", 3}},
@@ -188,7 +188,7 @@ private:
             "Maximum cache size (MB)",
             "Sets the maximum disk cache size in megabytes.",
             "Cache",
-            "SOFTWARE\\Policies\\DarkThumbs",
+            "SOFTWARE\\Policies\\ExplorerLens",
             "MaxCacheSizeMB",
             PolicyDefinition::ValueType::Integer,
             {}, 50, 10240, 500
@@ -196,9 +196,9 @@ private:
         m_policies["NetworkCachePath"] = {
             "NetworkCachePath",
             "Network cache UNC path",
-            "UNC path to shared network cache (e.g., \\\\server\\darkthumbs-cache).",
+            "UNC path to shared network cache (e.g., \\\\server\\explorerlens-cache).",
             "Cache",
-            "SOFTWARE\\Policies\\DarkThumbs",
+            "SOFTWARE\\Policies\\ExplorerLens",
             "NetworkCachePath",
             PolicyDefinition::ValueType::String
         };
@@ -209,7 +209,7 @@ private:
             "Disabled file formats",
             "Comma-separated list of format extensions to disable (e.g., \"psd,ai,eps\").",
             "Formats",
-            "SOFTWARE\\Policies\\DarkThumbs",
+            "SOFTWARE\\Policies\\ExplorerLens",
             "DisabledFormats",
             PolicyDefinition::ValueType::String
         };
@@ -219,8 +219,8 @@ private:
             "DisableGPU",
             "Disable GPU acceleration",
             "Forces software rendering, disabling DirectX GPU acceleration.",
-            "DarkThumbs",
-            "SOFTWARE\\Policies\\DarkThumbs",
+            "ExplorerLens",
+            "SOFTWARE\\Policies\\ExplorerLens",
             "DisableGPU",
             PolicyDefinition::ValueType::Boolean
         };
@@ -236,17 +236,17 @@ private:
 
 /// JSON configuration file locations (searched in order)
 struct ConfigPaths {
-    /// Per-user config: %APPDATA%\DarkThumbs\darkthumbs.json
+    /// Per-user config: %APPDATA%\ExplorerLens\explorerlens.json
     static std::string GetUserConfigPath() {
-        return "%APPDATA%\\DarkThumbs\\darkthumbs.json";
+        return "%APPDATA%\\ExplorerLens\\explorerlens.json";
     }
 
-    /// Machine-wide config: %PROGRAMDATA%\DarkThumbs\darkthumbs.json
+    /// Machine-wide config: %PROGRAMDATA%\ExplorerLens\explorerlens.json
     static std::string GetMachineConfigPath() {
-        return "%PROGRAMDATA%\\DarkThumbs\\darkthumbs.json";
+        return "%PROGRAMDATA%\\ExplorerLens\\explorerlens.json";
     }
 
-    /// Network config: \\server\share\darkthumbs.json (set via GPO)
+    /// Network config: \\server\share\explorerlens.json (set via GPO)
     std::string networkConfigPath;
 };
 
@@ -316,7 +316,7 @@ struct SilentInstallConfig {
 class NetworkCacheClient {
 public:
     struct NetworkCacheConfig {
-        std::string uncPath;            ///< \\server\share\darkthumbs-cache
+        std::string uncPath;            ///< \\server\share\explorerlens-cache
         uint32_t timeoutMs = 5000;      ///< Network timeout
         uint32_t maxRetries = 2;        ///< Retry count on failure
         bool readOnly = false;          ///< Only read from network, write locally
@@ -497,4 +497,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

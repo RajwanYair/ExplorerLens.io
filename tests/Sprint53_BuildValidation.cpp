@@ -13,14 +13,14 @@
 namespace {
 
 TEST(Sprint53_BuildValidation, VersionInfo) {
-    using namespace DarkThumbs::BuildValidation;
+    using namespace ExplorerLens::BuildValidation;
     // Intentionally referencing BuildValidation via ObservabilityIntegration's namespace
     // to prove compilation linkage
     EXPECT_GE(7, 1);  // Major version >= 7
 }
 
 TEST(Sprint53_BuildValidation, ObservabilityIntegrationSingleton) {
-    auto& obs = DarkThumbs::ObservabilityIntegration::Get();
+    auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     obs.SetEnabled(true);
     EXPECT_TRUE(obs.IsEnabled());
 
@@ -38,26 +38,26 @@ TEST(Sprint53_BuildValidation, ObservabilityIntegrationSingleton) {
 }
 
 TEST(Sprint53_BuildValidation, ObservabilityPrivacyModes) {
-    auto& obs = DarkThumbs::ObservabilityIntegration::Get();
+    auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     
-    obs.SetPrivacyMode(DarkThumbs::PathPrivacy::Hashed);
-    EXPECT_EQ(obs.GetPrivacyMode(), DarkThumbs::PathPrivacy::Hashed);
+    obs.SetPrivacyMode(ExplorerLens::PathPrivacy::Hashed);
+    EXPECT_EQ(obs.GetPrivacyMode(), ExplorerLens::PathPrivacy::Hashed);
     
-    obs.SetPrivacyMode(DarkThumbs::PathPrivacy::Full);
-    EXPECT_EQ(obs.GetPrivacyMode(), DarkThumbs::PathPrivacy::Full);
+    obs.SetPrivacyMode(ExplorerLens::PathPrivacy::Full);
+    EXPECT_EQ(obs.GetPrivacyMode(), ExplorerLens::PathPrivacy::Full);
     
-    obs.SetPrivacyMode(DarkThumbs::PathPrivacy::Redacted);
-    EXPECT_EQ(obs.GetPrivacyMode(), DarkThumbs::PathPrivacy::Redacted);
+    obs.SetPrivacyMode(ExplorerLens::PathPrivacy::Redacted);
+    EXPECT_EQ(obs.GetPrivacyMode(), ExplorerLens::PathPrivacy::Redacted);
     
     // Reset to default
-    obs.SetPrivacyMode(DarkThumbs::PathPrivacy::Hashed);
+    obs.SetPrivacyMode(ExplorerLens::PathPrivacy::Hashed);
 }
 
 TEST(Sprint53_BuildValidation, ObservabilityLevels) {
-    auto& obs = DarkThumbs::ObservabilityIntegration::Get();
+    auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     
-    obs.SetMinLevel(DarkThumbs::ObservabilityLevel::Warning);
-    EXPECT_EQ(obs.GetMinLevel(), DarkThumbs::ObservabilityLevel::Warning);
+    obs.SetMinLevel(ExplorerLens::ObservabilityLevel::Warning);
+    EXPECT_EQ(obs.GetMinLevel(), ExplorerLens::ObservabilityLevel::Warning);
     
     // Verbose events should be suppressed at Warning level
     // (no crash = pass)
@@ -65,12 +65,12 @@ TEST(Sprint53_BuildValidation, ObservabilityLevels) {
     obs.OnCacheMiss(id, L"test.png");
     
     // Reset
-    obs.SetMinLevel(DarkThumbs::ObservabilityLevel::Info);
+    obs.SetMinLevel(ExplorerLens::ObservabilityLevel::Info);
     obs.ResetCounters();
 }
 
 TEST(Sprint53_BuildValidation, ObservabilityDisabled) {
-    auto& obs = DarkThumbs::ObservabilityIntegration::Get();
+    auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     obs.ResetCounters();
     obs.SetEnabled(false);
     
@@ -82,7 +82,7 @@ TEST(Sprint53_BuildValidation, ObservabilityDisabled) {
 }
 
 TEST(Sprint53_BuildValidation, PipelineEventStruct) {
-    DarkThumbs::PipelineEvent evt;
+    ExplorerLens::PipelineEvent evt;
     EXPECT_EQ(evt.requestId, 0u);
     EXPECT_EQ(evt.filePath, nullptr);
     EXPECT_EQ(evt.elapsedMs, 0.0);
@@ -94,7 +94,7 @@ TEST(Sprint53_BuildValidation, PipelineEventStruct) {
 }
 
 TEST(Sprint53_BuildValidation, MultipleRequestTracking) {
-    auto& obs = DarkThumbs::ObservabilityIntegration::Get();
+    auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     obs.ResetCounters();
     obs.SetEnabled(true);
     
@@ -117,3 +117,4 @@ TEST(Sprint53_BuildValidation, MultipleRequestTracking) {
 }
 
 } // namespace
+

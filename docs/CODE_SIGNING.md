@@ -1,4 +1,4 @@
-# DarkThumbs Code Signing Guide
+# ExplorerLens Code Signing Guide
 **Sprint 24: Code Signing Infrastructure**  
 **Date:** February 15, 2026
 
@@ -18,7 +18,7 @@
 ## Why Code Signing?
 
 ### **Requirements for Windows Shell Extensions**
-Code signing is **mandatory** for production deployment of DarkThumbs:
+Code signing is **mandatory** for production deployment of ExplorerLens:
 
 1. **Windows SmartScreen Filter**
    - Unsigned binaries trigger "Windows protected your PC" warnings
@@ -41,9 +41,9 @@ Code signing is **mandatory** for production deployment of DarkThumbs:
 
 ### **Files Requiring Signatures**
 **Critical (Required for deployment):**
-- `CBXShell.dll` - COM shell extension (loaded by explorer.exe)
-- `CBXManager.exe` - Configuration UI
-- `DarkThumbs-Setup.msi` - Installer package
+- `LENSShell.dll` - COM shell extension (loaded by explorer.exe)
+- `LENSManager.exe` - Configuration UI
+- `ExplorerLens-Setup.msi` - Installer package
 
 **Optional (Recommended):**
 - `EngineTests.exe`, `IntegrationTests.exe`, `EngineBenchmark.exe` - Test executables
@@ -179,7 +179,7 @@ cd build-scripts
 
 #### **With PFX File**
 ```powershell
-.\Sign-Binaries.ps1 -PfxFile "C:\Certs\DarkThumbs.pfx" -PfxPassword "SecurePassword123"
+.\Sign-Binaries.ps1 -PfxFile "C:\Certs\ExplorerLens.pfx" -PfxPassword "SecurePassword123"
 ```
 
 #### **Verify Existing Signatures**
@@ -205,30 +205,30 @@ signtool sign `
   /fd SHA256 `
   /tr http://timestamp.digicert.com `
   /td SHA256 `
-  /d "DarkThumbs Shell Extension" `
-  /du "https://github.com/YourOrg/DarkThumbs" `
-  CBXShell.dll
+  /d "ExplorerLens Shell Extension" `
+  /du "https://github.com/YourOrg/ExplorerLens" `
+  LENSShell.dll
 ```
 
 #### **Sign with PFX File**
 ```powershell
 signtool sign `
-  /f "C:\Certs\DarkThumbs.pfx" `
+  /f "C:\Certs\ExplorerLens.pfx" `
   /p "Password" `
   /fd SHA256 `
   /tr http://timestamp.digicert.com `
   /td SHA256 `
-  /d "DarkThumbs Configuration Manager" `
-  CBXManager.exe
+  /d "ExplorerLens Configuration Manager" `
+  LENSManager.exe
 ```
 
 #### **Dual Signing (Windows 7 Compatibility)**
 ```powershell
 # First signature: SHA-256 (Windows 8+)
-signtool sign /sha1 ... /fd SHA256 /tr ... CBXShell.dll
+signtool sign /sha1 ... /fd SHA256 /tr ... LENSShell.dll
 
 # Second signature: SHA-1 (Windows 7)
-signtool sign /sha1 ... /fd SHA1 /t http://timestamp.digicert.com /as CBXShell.dll
+signtool sign /sha1 ... /fd SHA1 /t http://timestamp.digicert.com /as LENSShell.dll
 ```
 - `/as` - Append signature (allows dual signing)
 - Use if targeting Windows 7 users (now deprecated)
@@ -259,7 +259,7 @@ http://timestamp.comodoca.com              (Deprecated, SHA-1 only)
 ### **PowerShell Verification**
 ```powershell
 # Check signature details
-Get-AuthenticodeSignature CBXShell.dll | Format-List *
+Get-AuthenticodeSignature LENSShell.dll | Format-List *
 
 # Expected output:
 #   Status         : Valid
@@ -276,15 +276,15 @@ Get-AuthenticodeSignature CBXShell.dll | Format-List *
 ### **SignTool Verification**
 ```powershell
 # Verify signature and certificate chain
-signtool verify /pa /v CBXShell.dll
+signtool verify /pa /v LENSShell.dll
 ```
 - `/pa` - Use default authentication policy
 - `/v` - Verbose output
 
 **Expected Output:**
 ```
-Verifying: CBXShell.dll
-Successfully verified: CBXShell.dll
+Verifying: LENSShell.dll
+Successfully verified: LENSShell.dll
 
 Number of files successfully Verified: 1
 Number of warnings: 0
@@ -326,7 +326,7 @@ winget install Microsoft.WindowsSDK
 **Cause:** Signing failed silently**Solution:**
 ```powershell
 # Re-run with verbose logging
-signtool sign [...args...] /v /debug CBXShell.dll
+signtool sign [...args...] /v /debug LENSShell.dll
 
 # Check specific error code
 $LASTEXITCODE
@@ -374,7 +374,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Build DarkThumbs
+      - name: Build ExplorerLens
         run: |
           cmake -S . -B build -G "Visual Studio 18 2026" -A x64
           cmake --build build --config Release
@@ -403,8 +403,8 @@ jobs:
         with:
           name: signed-binaries
           path: |
-            CBXShell/x64/Release/CBXShell.dll
-            CBXManager/x64/Release/CBXManager.exe
+            LENSShell/x64/Release/LENSShell.dll
+            LENSManager/x64/Release/LENSManager.exe
 ```
 
 **Secrets Configuration:**
@@ -440,13 +440,13 @@ steps:
 
 - task: VSBuild@1
   inputs:
-    solution: 'build/DarkThumbs.sln'
+    solution: 'build/ExplorerLens.sln'
     configuration: 'Release'
 
 - task: DownloadSecureFile@1
   name: codeSignCert
   inputs:
-    secureFile: 'DarkThumbs.pfx'
+    secureFile: 'ExplorerLens.pfx'
 
 - powershell: |
     .\build-scripts\Sign-Binaries.ps1 `
@@ -457,7 +457,7 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    pathToPublish: 'CBXShell/x64/Release'
+    pathToPublish: 'LENSShell/x64/Release'
     artifactName: 'signed-binaries'
 ```
 
@@ -528,3 +528,4 @@ steps:
 **Last Updated:** February 15, 2026  
 **Sprint:** 24 - Code Signing Infrastructure  
 **Status:** Complete (scripts + documentation)
+

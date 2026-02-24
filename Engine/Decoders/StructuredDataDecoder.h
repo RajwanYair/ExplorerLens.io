@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 281: CSV/JSON Preview Decoder
+// ExplorerLens Engine — CSV/JSON Preview Decoder
 // Structured data thumbnail generator for CSV, JSON, YAML, TOML, XML.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Structured data format
 enum class StructuredDataFormat : uint8_t {
@@ -102,4 +102,5 @@ public:
     static constexpr size_t StyleCount() { return static_cast<size_t>(DataPreviewStyle::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

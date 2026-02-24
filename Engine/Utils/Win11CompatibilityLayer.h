@@ -1,5 +1,5 @@
 // ============================================================================
-// Win11CompatibilityLayer.h — Sprint 7
+// Win11CompatibilityLayer.h
 // Windows 11 runtime version detection, DPI helpers, and feature queries
 //
 // Provides runtime detection of Win11 build variants (22H2/23H2/24H2),
@@ -20,7 +20,7 @@
 
 #pragma comment(lib, "Shcore.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 // ============================================================================
 // Windows 11 Build Detection
@@ -277,7 +277,7 @@ inline void LogCompatibilityReport(const CompatibilityReport& report) {
     char buf[512];
     
     snprintf(buf, sizeof(buf),
-        "[DarkThumbs] Win11 Compat: %s (build %lu), Arch=%ls, DarkMode=%s, HDR=%s, Monitors=%d, GPUs=%zu\n",
+        "[ExplorerLens] Win11 Compat: %s (build %lu), Arch=%ls, DarkMode=%s, HDR=%s, Monitors=%d, GPUs=%zu\n",
         Win11ReleaseName(report.win11Release),
         report.buildNumber,
         report.architecture.c_str(),
@@ -289,4 +289,5 @@ inline void LogCompatibilityReport(const CompatibilityReport& report) {
     OutputDebugStringA(buf);
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

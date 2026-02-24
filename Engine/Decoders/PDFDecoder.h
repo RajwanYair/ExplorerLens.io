@@ -1,6 +1,6 @@
 // PDFDecoder.h - PDF Document Thumbnail Decoder
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: PDF (.pdf)
 // Features:
@@ -14,7 +14,7 @@
 #include "../Core/IThumbnailDecoder.h"
 #include <cstdint>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class PDFDecoder : public IThumbnailDecoder {
@@ -49,4 +49,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

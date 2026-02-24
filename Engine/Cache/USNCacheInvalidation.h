@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs — Sprint 35: Smart Cache Invalidation via USN Journal
- * Copyright (c) 2026 — DarkThumbs Project
+ * ExplorerLens — Sprint 35: Smart Cache Invalidation via USN Journal
+ * Copyright (c) 2026 — ExplorerLens Project
  *
  * NTFS USN Journal watcher for real-time file change detection,
  * robust file identity cache keys, bounded invalidation queue,
@@ -27,7 +27,7 @@
 #include <filesystem>
 #include <cstdint>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace USNCache {
 
 //============================================================================
@@ -483,4 +483,5 @@ private:
 };
 
 } // namespace USNCache
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

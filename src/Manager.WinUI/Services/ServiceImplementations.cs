@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DarkThumbs.Manager.Contracts;
+using ExplorerLens.Manager.Contracts;
 
-namespace DarkThumbs.Manager.Services;
+namespace ExplorerLens.Manager.Services;
 
 /// <summary>
 /// Plugin service implementation
@@ -30,7 +30,7 @@ public class PluginService : IPluginService
         return new List<PluginInfo>
         {
             new PluginInfo(
-                "darkthumbs.plugin.psd",
+                "explorerlens.plugin.psd",
                 "Photoshop Document Decoder",
                 "1.2.3",
                 "Adobe Systems Inc.",

@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class GateKPIV13 : uint32_t {
     BuildClean        = 0,
@@ -51,4 +51,4 @@ private:
     double m_thresholds[17];
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine

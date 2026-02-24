@@ -64,7 +64,7 @@ if (-not (Test-Path $baselineFile)) {
 
 Write-Host ""
 Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host "  DarkThumbs Performance Regression Detection" -ForegroundColor Cyan
+Write-Host "  ExplorerLens Performance Regression Detection" -ForegroundColor Cyan
 Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
 Write-Host "Baseline:     $BaselineVersion" -ForegroundColor White
 Write-Host "Threshold:    $RegressionThreshold%" -ForegroundColor White
@@ -239,3 +239,4 @@ if ($FailOnRegression -and $regressions.Count -gt 0) {
 } else {
     exit 0
 }
+

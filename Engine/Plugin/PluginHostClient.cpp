@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Host Client Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Host Client Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  *****************************************************************************/
 
 #include "PluginHostClient.h"
@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // PluginHostClient Implementation
@@ -34,7 +34,7 @@ bool PluginHostClient::StartPluginHost(const std::wstring& plugin_path, uint32_t
     
     // Generate unique pipe name
     std::wostringstream oss;
-    oss << L"DarkThumbs-PluginHost-" << GetCurrentProcessId() 
+    oss << L"ExplorerLens-PluginHost-" << GetCurrentProcessId() 
         << L"-" << std::hex << std::setw(16) << std::setfill(L'0')
         << GenerateCorrelationId();
     pipe_name_ = oss.str();
@@ -139,7 +139,7 @@ IPC::IPCErrorCode PluginHostClient::RequestThumbnail(const DecodeRequest& reques
     result.width = ipc_response->width;
     result.height = ipc_response->height;
     
-    // Sprint 17.4: Convert bitmap data to HBITMAP
+    // Convert bitmap data to HBITMAP
     if (ipc_response->bitmapDataSize > 0 && ipc_response->resultCode == static_cast<uint32_t>(IPC::IPCErrorCode::SUCCESS)) {
         const uint8_t* pixel_data = response_payload.data() + sizeof(IPC::ThumbnailResponse);
         
@@ -470,7 +470,7 @@ bool PluginHostClient::SpawnPluginHostProcess() {
     job_object_ = std::make_unique<Security::JobObjectManager>();
     Security::JobObjectLimits limits;
     
-    if (!job_object_->Create(L"DarkThumbs-Plugin-" + pipe_name_, limits)) {
+    if (!job_object_->Create(L"ExplorerLens-Plugin-" + pipe_name_, limits)) {
         TerminateProcess(process_handle_, 1);
         CloseHandle(process_handle_);
         process_handle_ = nullptr;
@@ -627,4 +627,5 @@ bool PluginHostClient::CheckHeartbeat() {
     return elapsed < IPC::HEARTBEAT_TIMEOUT;
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

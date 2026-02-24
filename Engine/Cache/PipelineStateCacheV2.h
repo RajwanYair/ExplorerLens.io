@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 302: Pipeline State Cache V2
+// ExplorerLens Engine — Pipeline State Cache V2
 // Persistent PSO library with binary cache, async precompilation, and
 // versioned signature validation for near-zero first-draw latency.
 //==============================================================================
@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// PSO cache entry state
 enum class PSOCacheState : uint8_t {
@@ -100,4 +100,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

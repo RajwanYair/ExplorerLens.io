@@ -1,6 +1,6 @@
 //==============================================================================
 // JPEG2000Decoder.cpp — JPEG 2000 Thumbnail Decoder Implementation
-// DarkThumbs Engine v9.0.0-dev — Sprint 181
+// ExplorerLens Engine v9.0.0-dev
 //
 // Implements the JPEG2000Decoder with OpenJPEG integration.
 // Uses reduction-level decoding for efficient thumbnail generation from
@@ -17,7 +17,7 @@
 #include <openjpeg.h>
 #endif
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
 //==============================================================================
 // HBITMAP Creator Utility (shared with IThumbnailDecoder pipeline)
@@ -184,6 +184,7 @@ static JP2DecodeResult DecodeFallback(const uint8_t* data, size_t dataSize,
             if (m1 == 0xFF && m2 == 0x51) { // SIZ marker
                 if (pos + 10 >= dataSize) break;
                 uint16_t lsiz = (uint16_t(data[pos + 2]) << 8) | data[pos + 3];
+                if (pos + lsiz + 2 > dataSize) break;
                 // Skip Rsiz(2), read Xsiz(4), Ysiz(4)
                 uint32_t xsiz = (uint32_t(data[pos + 6]) << 24) | (uint32_t(data[pos + 7]) << 16) |
                                 (uint32_t(data[pos + 8]) << 8) | data[pos + 9];
@@ -252,7 +253,11 @@ HRESULT DecodeJPEG2000Thumbnail(const wchar_t* filePath, uint32_t requestedSize,
         if (dot != std::wstring::npos) {
             std::wstring ext = path.substr(dot);
             std::transform(ext.begin(), ext.end(), ext.begin(), ::towlower);
-            std::string extA(ext.begin(), ext.end());
+            std::string extA;
+            extA.reserve(ext.size());
+            for (wchar_t ch : ext) {
+                extA.push_back((ch <= 0x7F) ? static_cast<char>(ch) : '?');
+            }
             format = JP2Extensions::ClassifyExtension(extA);
         }
     }
@@ -275,4 +280,5 @@ HRESULT DecodeJPEG2000Thumbnail(const wchar_t* filePath, uint32_t requestedSize,
     return hBitmap ? S_OK : E_OUTOFMEMORY;
 }
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

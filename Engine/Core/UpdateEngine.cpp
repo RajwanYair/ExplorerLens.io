@@ -1,7 +1,7 @@
 #include "UpdateEngine.h"
 #include <sstream>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 UpdateEngine::UpdateEngine() = default;
 
@@ -66,4 +66,5 @@ bool UpdateEngine::VerifyHash(const std::wstring& expected, const std::wstring& 
     return expected == actual;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

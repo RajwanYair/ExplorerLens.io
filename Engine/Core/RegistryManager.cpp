@@ -1,7 +1,7 @@
 #include "RegistryManager.h"
 #include <algorithm>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 RegistryManager::RegistryManager() = default;
 
@@ -66,4 +66,5 @@ bool RegistryManager::DeleteValue(RegHive hive, const std::wstring& key, const s
     return true;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

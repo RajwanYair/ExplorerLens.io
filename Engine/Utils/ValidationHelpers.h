@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Validation Helpers
-// Copyright (c) 2026 - DarkThumbs Project  
+// ExplorerLens Engine - Validation Helpers
+// Copyright (c) 2026 - ExplorerLens Project  
 // Task B6: Reusable validation functions
 //==============================================================================
 
@@ -10,7 +10,7 @@
 #include <string>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Validation {
 
@@ -152,4 +152,5 @@ namespace Validation {
 
 } // namespace Validation
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

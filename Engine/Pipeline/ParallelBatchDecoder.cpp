@@ -1,5 +1,5 @@
 //==============================================================================
-// ParallelBatchDecoder — Sprint 189 Implementation
+// ParallelBatchDecoder
 // Thread pool decoder with format-aware parallelism
 //==============================================================================
 
@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cctype>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 //------------------------------------------------------------------------------
 // Construction / Destruction
@@ -75,6 +75,9 @@ uint64_t ParallelBatchDecoder::SubmitBatch(
     BatchProgressCallback progressCb,
     BatchCompleteCallback completeCb)
 {
+    (void)priority;
+    (void)progressCb;
+    (void)completeCb;
     if (!m_running.load() || files.empty())
         return 0;
 
@@ -288,4 +291,5 @@ std::wstring ParallelBatchDecoder::GetExtension(const std::wstring& path)
     return ext;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

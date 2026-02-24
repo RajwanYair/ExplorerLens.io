@@ -1,12 +1,12 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 12: Observability & Structured Logging Pipeline
+// ExplorerLens — Observability & Structured Logging Pipeline
 // ETW provider, JSON-lines logger, diagnostics export, privacy-safe
 // path hashing, request lifecycle tracing, diagnostic bundle builder.
 //==============================================================================
 
-#ifndef DARKTHUMBS_OBSERVABILITY_PIPELINE_H
-#define DARKTHUMBS_OBSERVABILITY_PIPELINE_H
+#ifndef EXPLORERLENS_OBSERVABILITY_PIPELINE_H
+#define EXPLORERLENS_OBSERVABILITY_PIPELINE_H
 
 #include <string>
 #include <vector>
@@ -19,7 +19,7 @@
 #include <array>
 #include <iomanip>
 
-namespace DarkThumbs { namespace Engine { namespace Observability {
+namespace ExplorerLens { namespace Engine { namespace Observability {
 
 //==============================================================================
 // ETW Event Definitions
@@ -70,7 +70,7 @@ inline const char* ETWEventName(ETWEventId id)
 // ETW Provider GUID: {3B2F8A9C-D1E7-4F5A-B6C2-8D9E0F1A2B3C}
 struct ETWProviderConfig
 {
-    static constexpr const char* ProviderName = "DarkThumbs-Engine-Core";
+    static constexpr const char* ProviderName = "ExplorerLens-Engine-Core";
     static constexpr const char* ProviderGUID = "{3B2F8A9C-D1E7-4F5A-B6C2-8D9E0F1A2B3C}";
 
     bool enabled = true;
@@ -375,7 +375,7 @@ struct SystemInfo
     std::string gpuModel       = "Unknown";
     uint64_t    ramMB          = 0;
     uint64_t    vramMB         = 0;
-    std::string darkThumbsVersion = "7.0.0";
+    std::string explorerLensVersion = "7.0.0";
 
     std::string ToJSON() const
     {
@@ -385,7 +385,7 @@ struct SystemInfo
            << ",\"gpu\":\"" << gpuModel << "\""
            << ",\"ramMB\":" << ramMB
            << ",\"vramMB\":" << vramMB
-           << ",\"version\":\"" << darkThumbsVersion << "\""
+           << ",\"version\":\"" << explorerLensVersion << "\""
            << "}";
         return ss.str();
     }
@@ -416,7 +416,7 @@ struct DiagnosticBundle
     std::string GenerateReport() const
     {
         std::ostringstream ss;
-        ss << "# DarkThumbs Diagnostic Report\n\n";
+        ss << "# ExplorerLens Diagnostic Report\n\n";
         ss << "## System Info\n" << systemInfo.ToJSON() << "\n\n";
 
         if (!decoderStatus.empty())
@@ -457,6 +457,8 @@ private:
     DiagnosticBundle bundle_;
 };
 
-}}} // namespace DarkThumbs::Engine::Observability
+}}} // namespace ExplorerLens::Engine::Observability
 
-#endif // DARKTHUMBS_OBSERVABILITY_PIPELINE_H
+#endif // EXPLORERLENS_OBSERVABILITY_PIPELINE_H
+
+

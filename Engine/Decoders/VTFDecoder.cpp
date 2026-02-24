@@ -1,16 +1,17 @@
 //==============================================================================
 // VTF (Valve Texture Format) Decoder — Implementation
-// Sprint 184: Game Texture Format Support
+// Game Texture Format Support
 // Handles VTF v7.0-7.5, DXT1/DXT5/RGB888/BGRA8888 formats
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "VTFDecoder.h"
 #include <fstream>
 #include <cstring>
 #include <algorithm>
+#include <cctype>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // Extension check
@@ -18,7 +19,8 @@ namespace DarkThumbs::Decoders {
     bool VTFDecoder::IsVTFExtension(const std::string& ext)
     {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         return lower == ".vtf";
     }
 
@@ -162,7 +164,10 @@ namespace DarkThumbs::Decoders {
         uint32_t bestMip = 0;
         {
             uint32_t w = info.width, h = info.height;
-            while (bestMip < info.mipmapCount - 1) {
+            const uint32_t maxMip = (info.mipmapCount > 0)
+                ? static_cast<uint32_t>(info.mipmapCount - 1)
+                : 0u;
+            while (bestMip < maxMip) {
                 uint32_t nextW = (w > 1) ? w / 2 : 1;
                 uint32_t nextH = (h > 1) ? h / 2 : 1;
                 if (nextW <= targetWidth && nextH <= targetWidth) break;
@@ -331,7 +336,6 @@ namespace DarkThumbs::Decoders {
     {
         uint32_t blocksW = (width + 3) / 4;
         uint32_t blocksH = (height + 3) / 4;
-        uint32_t stride = width * 4;
 
         for (uint32_t by = 0; by < blocksH; ++by) {
             for (uint32_t bx = 0; bx < blocksW; ++bx) {
@@ -411,4 +415,5 @@ namespace DarkThumbs::Decoders {
         }
     }
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

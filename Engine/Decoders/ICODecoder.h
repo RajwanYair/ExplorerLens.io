@@ -1,6 +1,6 @@
 // ICODecoder.h - Windows Icon (.ico, .cur) Decoder
-// DarkThumbs Engine v5.3.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v5.3.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: Windows Icons (.ico), Cursors (.cur)
 // Features:
@@ -18,7 +18,7 @@
 #include <wrl/client.h>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class ICODecoder : public IThumbnailDecoder {
@@ -58,4 +58,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

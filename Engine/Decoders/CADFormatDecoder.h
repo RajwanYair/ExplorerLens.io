@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 288: STEP/IGES CAD Decoder
+// ExplorerLens Engine — STEP/IGES CAD Decoder
 // ISO 10303 STEP and IGES CAD file thumbnail generation.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// CAD format type
 enum class CADFormat : uint8_t {
@@ -114,4 +114,5 @@ public:
     static constexpr size_t RenderModeCount() { return static_cast<size_t>(CADRenderMode::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

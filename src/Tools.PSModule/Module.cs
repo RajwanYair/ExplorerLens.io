@@ -2,7 +2,7 @@ using System;
 using System.Management.Automation;
 using System.Collections.Generic;
 
-namespace DarkThumbs.PS
+namespace ExplorerLens.PS
 {
     // Cmdlet: New-Thumbnail
     // Generates a thumbnail for a specific file.
@@ -25,10 +25,10 @@ namespace DarkThumbs.PS
         protected override void ProcessRecord()
         {
             WriteVerbose($"Generating thumbnail for {Path} at {Size}px...");
-            
-            // In a real implementation, this would P/Invoke DarkThumbs.Engine.dll
+
+            // In a real implementation, this would P/Invoke ExplorerLens.Engine.dll
             // or call the local CLI/Service.
-            
+
             if (!System.IO.File.Exists(Path))
             {
                 WriteError(new ErrorRecord(
@@ -46,14 +46,15 @@ namespace DarkThumbs.PS
         }
     }
 
-    // Cmdlet: Get-DarkThumbsInfo
+    // Cmdlet: Get-ExplorerLensInfo
     // Returns engine status and metrics.
-    [Cmdlet(VerbsCommon.Get, "DarkThumbsInfo")]
-    public class GetDarkThumbsInfoCmdlet : Cmdlet
+    [Cmdlet(VerbsCommon.Get, "ExplorerLensInfo")]
+    public class GetExplorerLensInfoCmdlet : Cmdlet
     {
         protected override void BeginProcessing()
         {
-            var info = new {
+            var info = new
+            {
                 Version = "6.0.0",
                 EngineState = "Running",
                 CacheSizeMB = 1024,
@@ -63,10 +64,10 @@ namespace DarkThumbs.PS
         }
     }
 
-    // Cmdlet: Get-DarkThumbsPlugin
+    // Cmdlet: Get-ExplorerLensPlugin
     // Lists installed plugins.
-    [Cmdlet(VerbsCommon.Get, "DarkThumbsPlugin")]
-    public class GetDarkThumbsPluginCmdlet : Cmdlet
+    [Cmdlet(VerbsCommon.Get, "ExplorerLensPlugin")]
+    public class GetExplorerLensPluginCmdlet : Cmdlet
     {
         [Parameter(Position = 0)]
         public string Id { get; set; }

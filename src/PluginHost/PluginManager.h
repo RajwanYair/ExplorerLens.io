@@ -1,8 +1,8 @@
 /**
- * PluginManager.h - DarkThumbs Plugin Management System
+ * PluginManager.h - ExplorerLens Plugin Management System
  * Version: 1.0.0
  *
- * Copyright (c) 2026 DarkThumbs Project
+ * Copyright (c) 2026 ExplorerLens Project
  *
  * Manages plugin lifecycle: discovery, loading, validation, execution, and
  * unloading. Enforces capability restrictions and compatibility requirements.
@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "DarkThumbsPlugin.h"
+#include "ExplorerLensPlugin.h"
 #include <functional>
 #include <memory>
 #include <string>
@@ -18,7 +18,7 @@
 #include <vector>
 #include <windows.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace PluginHost {
 
 /**
@@ -297,4 +297,5 @@ private:
 };
 
 } // namespace PluginHost
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

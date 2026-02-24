@@ -1,11 +1,11 @@
 // TGADecoder.cpp - Targa Image Decoder Implementation
-// DarkThumbs Engine v5.3.0+
+// ExplorerLens Engine v5.3.0+
 
 #include "TGADecoder.h"
 #include <fstream>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Static members
@@ -317,4 +317,5 @@ std::unique_ptr<uint8_t[]> TGADecoder::ReadFileData(const wchar_t* path, size_t&
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 42 Tests: Portable Mode & Thumbnail Overlay Badges
+// ExplorerLens — Sprint 42 Tests: Portable Mode & Thumbnail Overlay Badges
 // Tests portable detection, INI config, cache paths, format badges,
 // file-size badges, overlay config, deployment info.
 //==============================================================================
@@ -10,7 +10,7 @@
 
 #include "../Engine/Utils/PortableMode.h"
 
-using namespace DarkThumbs::Engine::Utils;
+using namespace ExplorerLens::Engine::Utils;
 
 //==============================================================================
 // Deployment Mode Tests
@@ -37,7 +37,7 @@ TEST(PortableDetector, NotPortableWhenEmpty)
 TEST(PortableDetector, PortableWhenIniExists)
 {
     PortableDetector det;
-    det.iniFilePath = "D:\\USB\\DarkThumbs\\portable.ini";
+    det.iniFilePath = "D:\\USB\\ExplorerLens\\portable.ini";
     EXPECT_TRUE(det.IsPortable());
     EXPECT_EQ(det.Detect(), DeploymentMode::Portable);
 }
@@ -155,17 +155,17 @@ TEST(PortableConfig, MissingSectionReturnsNull)
 
 TEST(PortablePaths, FromDllDir)
 {
-    auto p = PortablePaths::FromDllDir("D:\\USB\\DarkThumbs");
-    EXPECT_EQ(p.cacheDirectory, "D:\\USB\\DarkThumbs\\cache");
-    EXPECT_EQ(p.configFile, "D:\\USB\\DarkThumbs\\portable.ini");
-    EXPECT_EQ(p.logDirectory, "D:\\USB\\DarkThumbs\\logs");
-    EXPECT_EQ(p.pluginDirectory, "D:\\USB\\DarkThumbs\\plugins");
+    auto p = PortablePaths::FromDllDir("D:\\USB\\ExplorerLens");
+    EXPECT_EQ(p.cacheDirectory, "D:\\USB\\ExplorerLens\\cache");
+    EXPECT_EQ(p.configFile, "D:\\USB\\ExplorerLens\\portable.ini");
+    EXPECT_EQ(p.logDirectory, "D:\\USB\\ExplorerLens\\logs");
+    EXPECT_EQ(p.pluginDirectory, "D:\\USB\\ExplorerLens\\plugins");
 }
 
 TEST(PortablePaths, FromLocalAppData)
 {
     auto p = PortablePaths::FromLocalAppData("C:\\Users\\test\\AppData\\Local");
-    EXPECT_NE(p.cacheDirectory.find("DarkThumbs"), std::string::npos);
+    EXPECT_NE(p.cacheDirectory.find("ExplorerLens"), std::string::npos);
     EXPECT_NE(p.cacheDirectory.find("Cache"), std::string::npos);
     EXPECT_TRUE(p.configFile.empty()); // Uses registry
 }
@@ -213,8 +213,8 @@ TEST(FormatBadge, LabelForRAW)
 
 TEST(FormatBadge, LabelForComics)
 {
-    EXPECT_EQ(FormatBadge::LabelForExtension(".cbz"), "CBX");
-    EXPECT_EQ(FormatBadge::LabelForExtension(".cbr"), "CBX");
+    EXPECT_EQ(FormatBadge::LabelForExtension(".cbz"), "LENS");
+    EXPECT_EQ(FormatBadge::LabelForExtension(".cbr"), "LENS");
 }
 
 TEST(FormatBadge, LabelForMediaTypes)
@@ -338,3 +338,4 @@ TEST(DeploymentInfo, InstalledSummary)
     EXPECT_NE(s.find("Registry"), std::string::npos);
     EXPECT_NE(s.find("no"), std::string::npos);
 }
+

@@ -1,6 +1,6 @@
 #include "LocalizationEngine.h"
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 LocalizationEngine::LocalizationEngine() {
     m_activeLocale = Locale::EN_US;
@@ -55,4 +55,5 @@ std::wstring LocalizationEngine::GetString(const std::wstring& key) const {
     return key;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

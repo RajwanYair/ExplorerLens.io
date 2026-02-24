@@ -1,7 +1,7 @@
 #pragma once
 //==============================================================================
-// ShellContextMenuV2 — Sprint 216
-// Windows Shell context menu integration for DarkThumbs operations.
+// ShellContextMenuV2
+// Windows Shell context menu integration for ExplorerLens operations.
 // Supports right-click actions: regenerate, clear cache, export, info.
 //==============================================================================
 
@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class ContextAction : uint8_t {
     Regenerate   = 0,
@@ -63,7 +63,8 @@ public:
 
 private:
     std::vector<ContextMenuItem> m_items;
-    std::wstring m_subMenuLabel = L"DarkThumbs";
+    std::wstring m_subMenuLabel = L"ExplorerLens";
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

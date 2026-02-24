@@ -1,8 +1,8 @@
 //==============================================================================
 // XPM (X PixMap) Decoder — Implementation
-// Sprint 186: SGI/RGB & Legacy Format Support
+// SGI/RGB & Legacy Format Support
 // Parses XPM3 format (C source code format with color definitions).
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "XPMDecoder.h"
@@ -10,8 +10,9 @@
 #include <sstream>
 #include <cstring>
 #include <algorithm>
+#include <cctype>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // Extension check
@@ -19,7 +20,8 @@ namespace DarkThumbs::Decoders {
     bool XPMDecoder::IsXPMExtension(const std::string& ext)
     {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         return lower == ".xpm";
     }
 
@@ -59,7 +61,8 @@ namespace DarkThumbs::Decoders {
 
         // Convert to lowercase for named colors
         std::string lower = s;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
         // Transparent / None
         if (lower == "none" || lower == "transparent")
@@ -140,6 +143,7 @@ namespace DarkThumbs::Decoders {
     XPMDecoder::DecodeResult XPMDecoder::Decode(const std::string& filePath,
                                                  uint32_t targetWidth) const
     {
+        (void)targetWidth;
         DecodeResult result;
         std::ifstream file(filePath);
         if (!file.is_open()) {
@@ -240,4 +244,5 @@ namespace DarkThumbs::Decoders {
         return result;
     }
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

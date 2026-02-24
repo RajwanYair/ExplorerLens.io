@@ -11,8 +11,8 @@ Write-Host "Removing Win32/x86 configurations from Visual Studio projects..." -F
 Write-Host ""
 
 $projectFiles = @(
-    "CBXShell\CBXShell.vcxproj",
-    "CBXManager\CBXManager.vcxproj"
+    "LENSShell\LENSShell.vcxproj",
+    "LENSManager\LENSManager.vcxproj"
 )
 
 foreach ($projFile in $projectFiles) {
@@ -104,3 +104,4 @@ Write-Host "Changes made:" -ForegroundColor Cyan
 Write-Host "  - Removed Win32/x86 project configurations" -ForegroundColor White
 Write-Host "  - Removed Win32 PropertyGroups and ItemDefinitionGroups" -ForegroundColor White
 Write-Host "  - Updated preprocessor definitions for x64" -ForegroundColor White
+

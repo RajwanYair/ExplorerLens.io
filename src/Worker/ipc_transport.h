@@ -15,7 +15,7 @@
 #include <atomic>
 #include <condition_variable>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace IPC {
 
 // =============================================================================
@@ -244,4 +244,5 @@ private:
 };
 
 } // namespace IPC
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

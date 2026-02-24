@@ -1,4 +1,4 @@
-# DarkThumbs v7.1.0 - Quick Build Reference Card
+# ExplorerLens v7.1.0 - Quick Build Reference Card
 ## Fast Reference for Daily Development
 
 ---
@@ -10,10 +10,10 @@
 # VCPKG_ROOT is set: C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\vcpkg
 
 # 2. Install PowerShell profile (optional but recommended)
-Copy-Item ".\build-scripts\DarkThumbs-Profile.ps1" "$PROFILE"
+Copy-Item ".\build-scripts\ExplorerLens-Profile.ps1" "$PROFILE"
 # Restart PowerShell
 
-# 3. Build DarkThumbs
+# 3. Build ExplorerLens
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release -j 8
 ```
@@ -31,7 +31,7 @@ cmake --build build --config Release -j 8
 
 ### MSBuild (Traditional)
 ```powershell
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m
 ```
 **Time:** ~75 seconds (full rebuild)
 
@@ -49,13 +49,13 @@ cmake --build build --config Release -j 8
 ```powershell
 .\packaging\Build-Installer.ps1 -Configuration Release -Version "7.0.0"
 ```
-**Output:** `packaging\output\DarkThumbs-Setup-7.0.0.msi` (~58 MB)
+**Output:** `packaging\output\ExplorerLens-Setup-7.0.0.msi` (~58 MB)
 
 ### Inno Setup Installer
 ```powershell
-& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" .\packaging\inno\DarkThumbs-Installer.iss
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" .\packaging\inno\ExplorerLens-Installer.iss
 ```
-**Output:** `packaging\release-packages\DarkThumbs-v7.0.0-x64-Setup.exe` (~50 MB)
+**Output:** `packaging\release-packages\ExplorerLens-v7.0.0-x64-Setup.exe` (~50 MB)
 
 ---
 
@@ -158,11 +158,11 @@ $Cert = "YOUR_CERT_THUMBPRINT"
 $Timestamp = "http://timestamp.digicert.com"
 
 # Sign binaries
-& $SignTool sign /sha1 $Cert /fd SHA256 /t $Timestamp "x64\Release\CBXShell.dll"
-& $SignTool sign /sha1 $Cert /fd SHA256 /t $Timestamp "x64\Release\CBXManager.exe"
+& $SignTool sign /sha1 $Cert /fd SHA256 /t $Timestamp "x64\Release\LENSShell.dll"
+& $SignTool sign /sha1 $Cert /fd SHA256 /t $Timestamp "x64\Release\LENSManager.exe"
 
 # Sign installers
-& $SignTool sign /sha1 $Cert /fd SHA256 /t $Timestamp "packaging\output\DarkThumbs-Setup-7.0.0.msi"
+& $SignTool sign /sha1 $Cert /fd SHA256 /t $Timestamp "packaging\output\ExplorerLens-Setup-7.0.0.msi"
 ```
 
 ---
@@ -221,7 +221,7 @@ ctest --test-dir build -C Release
 .\packaging\Build-Installer.ps1 -Version "7.0.0"
 
 # 4. Create Inno Setup
-iscc .\packaging\inno\DarkThumbs-Installer.iss
+iscc .\packaging\inno\ExplorerLens-Installer.iss
 
 # 5. Generate checksums
 Get-FileHash packaging\output\*.msi,packaging\release-packages\*.exe -Algorithm SHA256
@@ -282,6 +282,7 @@ ctest --test-dir build -C Release --output-on-failure
 
 ---
 
-**DarkThumbs v7.1.0 - Quick Build Reference**  
+**ExplorerLens v7.1.0 - Quick Build Reference**  
 *Print this card for easy reference!*  
 *Last Updated: February 18, 2026*
+

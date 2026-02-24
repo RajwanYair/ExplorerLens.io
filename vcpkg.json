@@ -1,9 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "name": "darkthumbs",
+  "name": "ExplorerLens",
   "version": "7.0.0",
-  "description": "DarkThumbs - Advanced Thumbnail Handler for Windows 11",
-  "homepage": "https://github.com/yourusername/DarkThumbs",
+  "description": "ExplorerLens - Advanced Thumbnail Handler for Windows 11",
+  "homepage": "https://github.com/yourusername/ExplorerLens",
   "license": "MIT",
   "supports": "windows & x64",
   "dependencies": [

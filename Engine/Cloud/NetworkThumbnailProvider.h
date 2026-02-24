@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 44: Network & Remote Thumbnail Provider
+// ExplorerLens Engine — Network & Remote Thumbnail Provider
 //
 // Provides URL-based thumbnail fetching, network-aware caching with TTL,
 // bandwidth throttling, proxy support, retry logic, and remote storage
@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-namespace DarkThumbs::Engine::Cloud {
+namespace ExplorerLens::Engine::Cloud {
 
 //==============================================================================
 // Network Protocol — Supported remote access methods
@@ -458,4 +458,5 @@ struct NetworkConfig {
     }
 };
 
-} // namespace DarkThumbs::Engine::Cloud
+} // namespace ExplorerLens::Engine::Cloud
+

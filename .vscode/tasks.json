@@ -345,7 +345,7 @@
 				"-NoProfile",
 				"-NoLogo",
 				"-Command",
-				"Remove-Item -Path build,x64,packages,CBXShell\\x64,CBXManager\\x64 -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Clean complete' -ForegroundColor Green"
+				"Remove-Item -Path build,x64,packages,LENSShell\\x64,LENSManager\\x64 -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Clean complete' -ForegroundColor Green"
 			],
 			"problemMatcher": [],
 			"group": "build",
@@ -359,7 +359,7 @@
 			"type": "shell",
 			"command": "msbuild",
 			"args": [
-				"CBXShell.sln",
+				"LENSShell.sln",
 				"/p:Configuration=Release",
 				"/p:Platform=x64",
 				"/m",
@@ -384,7 +384,7 @@
 			"type": "shell",
 			"command": "msbuild",
 			"args": [
-				"CBXShell.sln",
+				"LENSShell.sln",
 				"/p:Configuration=Release",
 				"/p:Platform=x64",
 				"/t:Rebuild",
@@ -411,11 +411,10 @@
 			"command": "cmake",
 			"args": [
 				"--build",
-				"build",
-				"--config",
-				"Release",
+				"--preset",
+				"default-release",
 				"--target",
-				"DarkThumbsEngine",
+				"ExplorerLensEngine",
 				"-j",
 				"8"
 			],

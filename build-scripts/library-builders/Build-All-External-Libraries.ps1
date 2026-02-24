@@ -1,9 +1,9 @@
 # ===========================================================================
 # Build-All-External-Libraries.ps1
-# Build all external libraries required for DarkThumbs
+# Build all external libraries required for ExplorerLens
 # ===========================================================================
 # 
-# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# ⚠️  DEPRECATED: Use Build-All-ExplorerLens-V7.ps1 instead
 # This script is kept for reference only.
 # See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
 # 
@@ -17,7 +17,7 @@ $ProgressPreference = "SilentlyContinue"
 
 Write-Host ""
 Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host "Building All External Libraries for DarkThumbs v6.2" -ForegroundColor Cyan
+Write-Host "Building All External Libraries for ExplorerLens v6.2" -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -118,7 +118,7 @@ function Build-CMakeLibrary {
     New-Item -ItemType Directory -Path $BuildDir -Force | Out-Null
     
     # Build CMake arguments
-    $cmakeArgs = "-G `"$Generator`" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF"
+    $cmakeArgs = "-G `"$Generator`" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIB=ON"
     foreach ($key in $CMakeOptions.Keys) {
         $cmakeArgs += " -D$key=`"$($CMakeOptions[$key])`""
     }
@@ -237,10 +237,10 @@ $libraries = @(
         BuildDir     = "external\compression\zstd-1.5.7\build-vs"
         OutputLib    = "external\compression\zstd-1.5.7\build-vs\lib\Release\zstd_static.lib"
         CMakeOptions = @{
-            "ZSTD_BUILD_PROGRAMS" = "OFF"
-            "ZSTD_BUILD_CONTRIB"  = "OFF"
-            "ZSTD_BUILD_TESTS"    = "OFF"
-            "ZSTD_BUILD_SHARED"   = "OFF"
+            "ZSTD_BUILD_PROGRAMS" = "ON"
+            "ZSTD_BUILD_CONTRIB"  = "ON"
+            "ZSTD_BUILD_TESTS"    = "ON"
+            "ZSTD_BUILD_SHARED"   = "ON"
             "ZSTD_BUILD_STATIC"   = "ON"
         }
     },
@@ -273,7 +273,7 @@ $libraries = @(
         BuildDir     = "external\compression\minizip-ng-4.0.10\build-vs"
         OutputLib    = "external\compression\minizip-ng-4.0.10\build-vs\Release\minizip.lib"
         CMakeOptions = @{
-            "MZ_COMPAT"    = "OFF"
+            "MZ_COMPAT"    = "ON"
             "MZ_ZLIB"      = "ON"
             "MZ_BZIP2"     = "ON"
             "MZ_LZMA"      = "ON"
@@ -293,15 +293,15 @@ $libraries = @(
         BuildDir     = "external\image-libs\libwebp-1.5.0-build\build-vs"
         OutputLib    = "external\image-libs\libwebp-1.5.0-build\build-vs\Release\webp.lib"
         CMakeOptions = @{
-            "WEBP_BUILD_ANIM_UTILS" = "OFF"
-            "WEBP_BUILD_CWEBP"      = "OFF"
-            "WEBP_BUILD_DWEBP"      = "OFF"
-            "WEBP_BUILD_GIF2WEBP"   = "OFF"
-            "WEBP_BUILD_IMG2WEBP"   = "OFF"
-            "WEBP_BUILD_VWEBP"      = "OFF"
-            "WEBP_BUILD_WEBPINFO"   = "OFF"
-            "WEBP_BUILD_WEBPMUX"    = "OFF"
-            "WEBP_BUILD_EXTRAS"     = "OFF"
+            "WEBP_BUILD_ANIM_UTILS" = "ON"
+            "WEBP_BUILD_CWEBP"      = "ON"
+            "WEBP_BUILD_DWEBP"      = "ON"
+            "WEBP_BUILD_GIF2WEBP"   = "ON"
+            "WEBP_BUILD_IMG2WEBP"   = "ON"
+            "WEBP_BUILD_VWEBP"      = "ON"
+            "WEBP_BUILD_WEBPINFO"   = "ON"
+            "WEBP_BUILD_WEBPMUX"    = "ON"
+            "WEBP_BUILD_EXTRAS"     = "ON"
         }
     }
 )
@@ -394,10 +394,11 @@ Write-Host ""
 
 if ($failCount -eq 0) {
     Write-Host "All libraries built successfully!" -ForegroundColor Green
-    Write-Host "Ready to build CBXShell.sln" -ForegroundColor Cyan
+    Write-Host "Ready to build LENSShell.sln" -ForegroundColor Cyan
     exit 0
 } else {
     Write-Host "Some libraries failed to build." -ForegroundColor Yellow
-    Write-Host "CBXShell may still build if failed libraries are optional." -ForegroundColor Yellow
+    Write-Host "LENSShell may still build if failed libraries are optional." -ForegroundColor Yellow
     exit 1
 }
+

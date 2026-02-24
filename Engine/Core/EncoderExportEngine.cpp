@@ -1,5 +1,5 @@
 //==============================================================================
-// EncoderExportEngine — Sprint 206
+// EncoderExportEngine
 // Thumbnail export to multiple output formats
 //==============================================================================
 
@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 EncoderExportEngine::EncoderExportEngine() {}
 
@@ -266,4 +266,5 @@ const wchar_t* EncoderExportEngine::GetColorSpaceName(ExportColorSpace cs) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

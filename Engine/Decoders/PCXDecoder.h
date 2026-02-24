@@ -1,7 +1,7 @@
 #pragma once
 //==============================================================================
 // PCXDecoder.h — ZSoft PCX Image Decoder
-// DarkThumbs Engine v8.4.0 — Sprint 180: Easy Format Wins
+// ExplorerLens Engine v8.4.0 — Easy Format Wins
 //
 // Decodes PCX (PC Paintbrush) format images. PCX uses RLE compression
 // with planar color data. Supports 1/4/8/24-bit color depths.
@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <windows.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 /// PCX (ZSoft Paintbrush) format decoder.
@@ -80,4 +80,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

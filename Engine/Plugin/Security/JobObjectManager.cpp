@@ -1,12 +1,12 @@
 /******************************************************************************
- * DarkThumbs Job Object Manager Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Job Object Manager Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  *****************************************************************************/
 
 #include "JobObjectManager.h"
 #include <sstream>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Security {
 
 //============================================================================
@@ -237,7 +237,7 @@ JobObjectManager* CreatePluginJobObject(const std::wstring& plugin_id) {
     auto manager = new JobObjectManager();
     
     JobObjectLimits limits;
-    std::wstring job_name = L"DarkThumbs-Plugin-" + plugin_id;
+    std::wstring job_name = L"ExplorerLens-Plugin-" + plugin_id;
     
     if (!manager->Create(job_name, limits)) {
         delete manager;
@@ -248,4 +248,5 @@ JobObjectManager* CreatePluginJobObject(const std::wstring& plugin_id) {
 }
 
 } // namespace Security
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

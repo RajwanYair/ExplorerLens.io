@@ -57,7 +57,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ matrix.config }} `
             -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-windows-arm64.cmake `
             -DBUILD_TESTS=ON `
-            -DBUILD_BENCHMARKS=OFF `
+            -DBUILD_BENCHMARKS=ON `
             -DARM64_BUILD=ON
         shell: pwsh
 
@@ -69,9 +69,9 @@ jobs:
         uses: actions/upload-artifact@v4
         if: matrix.config == 'Release'
         with:
-          name: darkthumbs-arm64-${{ github.sha }}
+          name: ExplorerLens-arm64-${{ github.sha }}
           path: |
-            build-arm64/Engine/Release/DarkThumbsEngine.lib
+            build-arm64/Engine/Release/ExplorerLensEngine.lib
           retention-days: 7
 
   # ============================================================

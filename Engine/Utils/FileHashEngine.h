@@ -1,10 +1,10 @@
 #pragma once
-// Sprint 235: File Hash Engine — SHA256/MD5/CRC32 file hashing for integrity verification
+// File Hash Engine — SHA256/MD5/CRC32 file hashing for integrity verification
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Hash algorithm type
 enum class HashAlgorithm : uint32_t {
@@ -49,4 +49,5 @@ private:
     static void InitCRC32Table();
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

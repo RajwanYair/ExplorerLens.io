@@ -1,15 +1,15 @@
 # ============================================================================
-# DarkThumbs Development Environment Setup
+# ExplorerLens Development Environment Setup
 # Version: 1.0 - February 9, 2026
 # Auto-loaded in PowerShell profile for instant build tool availability
 # ============================================================================
 
 <#
 .SYNOPSIS
-    Configures complete build environment for DarkThumbs project
+    Configures complete build environment for ExplorerLens project
 
 .DESCRIPTION
-    Sets up all required tools and environment variables for building DarkThumbs:
+    Sets up all required tools and environment variables for building ExplorerLens:
     - Visual Studio 2026 Build Tools (MSVC 14.44.35207)
     - CMake 4.2.1
     - MSBuild 18.3.0
@@ -18,18 +18,18 @@
 
 .EXAMPLE
     # In PowerShell profile, add:
-    . "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\scripts\Setup-DevEnvironment.ps1"
+    . "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\scripts\Setup-DevEnvironment.ps1"
     
 .EXAMPLE
     # Manual load:
-    Setup-DarkThumbsEnv -Verbose
+    Setup-ExplorerLensEnv -Verbose
 #>
 
 # ============================================================================
 # Configuration
 # ============================================================================
 
-$Global:DarkThumbsConfig = @{
+$Global:ExplorerLensConfig = @{
     # Visual Studio 2026 Build Tools
     VSPath      = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
     MSVCVersion = "14.44.35207"
@@ -53,7 +53,7 @@ $Global:DarkThumbsConfig = @{
 # Main Setup Function
 # ============================================================================
 
-function Setup-DarkThumbsEnv {
+function Setup-ExplorerLensEnv {
     [CmdletBinding()]
     param(
         [switch]$Force,
@@ -61,9 +61,9 @@ function Setup-DarkThumbsEnv {
     )
     
     # Check if already loaded
-    if ($Global:DarkThumbsEnvLoaded -and -not $Force) {
+    if ($Global:ExplorerLensEnvLoaded -and -not $Force) {
         if (-not $Quiet) {
-            Write-Host "✓ DarkThumbs environment already loaded" -ForegroundColor Green
+            Write-Host "✓ ExplorerLens environment already loaded" -ForegroundColor Green
         }
         return
     }
@@ -71,7 +71,7 @@ function Setup-DarkThumbsEnv {
     if (-not $Quiet) {
         Write-Host "`n" -NoNewline
         Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
-        Write-Host " DarkThumbs Development Environment Setup" -ForegroundColor Cyan
+        Write-Host " ExplorerLens Development Environment Setup" -ForegroundColor Cyan
         Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
     }
     
@@ -82,14 +82,14 @@ function Setup-DarkThumbsEnv {
     Test-BuildTools -Quiet:$Quiet
     
     # Set convenient aliases
-    Set-DarkThumbsAliases
+    Set-ExplorerLensAliases
     
     # Mark as loaded
-    $Global:DarkThumbsEnvLoaded = $true
+    $Global:ExplorerLensEnvLoaded = $true
     
     if (-not $Quiet) {
         Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
-        Write-Host "✓ Environment ready for DarkThumbs builds" -ForegroundColor Green
+        Write-Host "✓ Environment ready for ExplorerLens builds" -ForegroundColor Green
         Write-Host "  Type 'dtbuild' for quick build commands" -ForegroundColor Gray
         Write-Host "═══════════════════════════════════════════════════════`n" -ForegroundColor Cyan
     }
@@ -120,7 +120,7 @@ function Load-MSVCEnvironment {
     
     try {
         # Run vcvarsall for x64 and capture environment vars
-        $vcvarsCmd = "`"$($Global:DarkThumbsConfig.VCVarsAll)`" x64"
+        $vcvarsCmd = "`"$($Global:ExplorerLensConfig.VCVarsAll)`" x64"
         cmd /c "$vcvarsCmd >nul 2>&1 && set" | Out-File -FilePath $tempFile -Encoding ASCII
         
         # Parse and set environment variables
@@ -139,8 +139,8 @@ function Load-MSVCEnvironment {
         
         if (-not $Quiet) {
             Write-Host "✓ MSVC environment loaded successfully" -ForegroundColor Green
-            Write-Host "  - Compiler: MSVC $($Global:DarkThumbsConfig.MSVCVersion)" -ForegroundColor Gray
-            Write-Host "  - Windows SDK: $($Global:DarkThumbsConfig.WindowsSDK)" -ForegroundColor Gray
+            Write-Host "  - Compiler: MSVC $($Global:ExplorerLensConfig.MSVCVersion)" -ForegroundColor Gray
+            Write-Host "  - Windows SDK: $($Global:ExplorerLensConfig.WindowsSDK)" -ForegroundColor Gray
             Write-Host "  - Tools: CL, Link, NMake, RC" -ForegroundColor Gray
         }
     } catch {
@@ -217,17 +217,17 @@ function Test-BuildTools {
 # Convenient Aliases and Functions
 # ============================================================================
 
-function Set-DarkThumbsAliases {
+function Set-ExplorerLensAliases {
     # Build shortcuts
-    Set-Alias -Name dtbuild -Value Invoke-DarkThumbsBuild -Scope Global -ErrorAction SilentlyContinue
-    Set-Alias -Name dtclean -Value Invoke-DarkThumbsClean -Scope Global -ErrorAction SilentlyContinue
-    Set-Alias -Name dttest -Value Invoke-DarkThumbsTest -Scope Global -ErrorAction SilentlyContinue
+    Set-Alias -Name dtbuild -Value Invoke-ExplorerLensBuild -Scope Global -ErrorAction SilentlyContinue
+    Set-Alias -Name dtclean -Value Invoke-ExplorerLensClean -Scope Global -ErrorAction SilentlyContinue
+    Set-Alias -Name dttest -Value Invoke-ExplorerLensTest -Scope Global -ErrorAction SilentlyContinue
 }
 
-function Invoke-DarkThumbsBuild {
+function Invoke-ExplorerLensBuild {
     <#
     .SYNOPSIS
-        Quick build commands for DarkThumbs
+        Quick build commands for ExplorerLens
     #>
     param(
         [Parameter(Position = 0)]
@@ -235,19 +235,19 @@ function Invoke-DarkThumbsBuild {
         [string]$Target = "Help"
     )
     
-    $projectRoot = $Global:DarkThumbsConfig.ProjectRoot
+    $projectRoot = $Global:ExplorerLensConfig.ProjectRoot
     
     switch ($Target) {
         "Release" {
-            Write-Host "Building DarkThumbs (Release)..." -ForegroundColor Cyan
+            Write-Host "Building ExplorerLens (Release)..." -ForegroundColor Cyan
             Push-Location $projectRoot
-            msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+            msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
             Pop-Location
         }
         "Debug" {
-            Write-Host "Building DarkThumbs (Debug)..." -ForegroundColor Cyan
+            Write-Host "Building ExplorerLens (Debug)..." -ForegroundColor Cyan
             Push-Location $projectRoot
-            msbuild CBXShell.sln /p:Configuration=Debug /p:Platform=x64 /m /v:minimal
+            msbuild LENSShell.sln /p:Configuration=Debug /p:Platform=x64 /m /v:minimal
             Pop-Location
         }
         "Engine" {
@@ -260,28 +260,28 @@ function Invoke-DarkThumbsBuild {
             Pop-Location
         }
         "Shell" {
-            Write-Host "Building CBXShell..." -ForegroundColor Cyan
+            Write-Host "Building LENSShell..." -ForegroundColor Cyan
             Push-Location $projectRoot
-            msbuild CBXShell\CBXShell.vcxproj /p:Configuration=Release /p:Platform=x64 /m
+            msbuild LENSShell\LENSShell.vcxproj /p:Configuration=Release /p:Platform=x64 /m
             Pop-Location
         }
         "Clean" {
             Write-Host "Cleaning build artifacts..." -ForegroundColor Yellow
             Push-Location $projectRoot
-            Remove-Item -Path build, x64, packages, CBXShell\x64, CBXManager\x64 -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path build, x64, packages, LENSShell\x64, LENSManager\x64 -Recurse -Force -ErrorAction SilentlyContinue
             Write-Host "✓ Clean complete" -ForegroundColor Green
             Pop-Location
         }
         "Rebuild" {
-            Invoke-DarkThumbsBuild -Target Clean
-            Invoke-DarkThumbsBuild -Target Release
+            Invoke-ExplorerLensBuild -Target Clean
+            Invoke-ExplorerLensBuild -Target Release
         }
         default {
-            Write-Host "`nDarkThumbs Quick Build Commands:" -ForegroundColor Cyan
+            Write-Host "`nExplorerLens Quick Build Commands:" -ForegroundColor Cyan
             Write-Host "  dtbuild Release  - Build full solution (Release)"
             Write-Host "  dtbuild Debug    - Build full solution (Debug)"
             Write-Host "  dtbuild Engine   - Build Engine only (CMake)"
-            Write-Host "  dtbuild Shell    - Build CBXShell only"
+            Write-Host "  dtbuild Shell    - Build LENSShell only"
             Write-Host "  dtbuild Clean    - Clean all build outputs"
             Write-Host "  dtbuild Rebuild  - Clean + Release build"
             Write-Host ""
@@ -289,32 +289,32 @@ function Invoke-DarkThumbsBuild {
     }
 }
 
-function Invoke-DarkThumbsClean {
-    Invoke-DarkThumbsBuild -Target Clean
+function Invoke-ExplorerLensClean {
+    Invoke-ExplorerLensBuild -Target Clean
 }
 
-function Invoke-DarkThumbsTest {
-    Write-Host "Running DarkThumbs tests..." -ForegroundColor Cyan
-    $projectRoot = $Global:DarkThumbsConfig.ProjectRoot
+function Invoke-ExplorerLensTest {
+    Write-Host "Running ExplorerLens tests..." -ForegroundColor Cyan
+    $projectRoot = $Global:ExplorerLensConfig.ProjectRoot
     Push-Location "$projectRoot\Engine\build"
     ctest --output-on-failure
     Pop-Location
 }
 
 # ============================================================================
-# Show-DarkThumbsInfo - Display environment information
+# Show-ExplorerLensInfo - Display environment information
 # ============================================================================
 
-function Show-DarkThumbsInfo {
+function Show-ExplorerLensInfo {
     Write-Host "`n" -NoNewline
     Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
-    Write-Host " DarkThumbs Development Environment" -ForegroundColor Cyan
+    Write-Host " ExplorerLens Development Environment" -ForegroundColor Cyan
     Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Visual Studio:" -ForegroundColor Yellow
-    Write-Host "  Path:    $($Global:DarkThumbsConfig.VSPath)" -ForegroundColor Gray
-    Write-Host "  MSVC:    $($Global:DarkThumbsConfig.MSVCVersion)" -ForegroundColor Gray
-    Write-Host "  SDK:     $($Global:DarkThumbsConfig.WindowsSDK)" -ForegroundColor Gray
+    Write-Host "  Path:    $($Global:ExplorerLensConfig.VSPath)" -ForegroundColor Gray
+    Write-Host "  MSVC:    $($Global:ExplorerLensConfig.MSVCVersion)" -ForegroundColor Gray
+    Write-Host "  SDK:     $($Global:ExplorerLensConfig.WindowsSDK)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Build Tools:" -ForegroundColor Yellow
     Write-Host "  MSBuild: $(if (Get-Command msbuild -EA SilentlyContinue) { (msbuild -version | Select-String '\d+\.\d+' | Select-Object -First 1).Matches.Value } else { 'Not found' })" -ForegroundColor Gray
@@ -322,7 +322,7 @@ function Show-DarkThumbsInfo {
     Write-Host "  Git:     $(if (Get-Command git -EA SilentlyContinue) { (git --version | Select-String '\d+\.\d+\.\d+' | Select-Object -First 1).Matches.Value } else { 'Not found' })" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Project:" -ForegroundColor Yellow
-    Write-Host "  Root:    $($Global:DarkThumbsConfig.ProjectRoot)" -ForegroundColor Gray
+    Write-Host "  Root:    $($Global:ExplorerLensConfig.ProjectRoot)" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Quick Commands:" -ForegroundColor Yellow
     Write-Host "  dtbuild          - Show build commands" -ForegroundColor Gray
@@ -337,7 +337,9 @@ function Show-DarkThumbsInfo {
 # ============================================================================
 
 # Automatically setup environment when script is dot-sourced
-# To disable auto-load, set $env:DARKTHUMBS_NO_AUTO_LOAD = "1"
-if (-not $env:DARKTHUMBS_NO_AUTO_LOAD) {
-    Setup-DarkThumbsEnv -Quiet
+# To disable auto-load, set $env:EXPLORERLENS_NO_AUTO_LOAD = "1"
+if (-not $env:EXPLORERLENS_NO_AUTO_LOAD) {
+    Setup-ExplorerLensEnv -Quiet
 }
+
+

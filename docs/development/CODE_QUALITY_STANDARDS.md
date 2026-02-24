@@ -1,10 +1,10 @@
-# DarkThumbs Code Quality Standards
+# ExplorerLens Code Quality Standards
 # Sprint 177: Version Normalization
 # Version: 8.4.0
 
 ## Overview
 
-DarkThumbs enforces code quality through multiple layers of static analysis,
+ExplorerLens enforces code quality through multiple layers of static analysis,
 both locally and in CI/CD pipelines.
 
 ## Tools
@@ -63,3 +63,4 @@ The `code-quality.yml` workflow runs on every push to `main`/`develop` and on PR
 3. **Header check job** — Validates include guards
 
 All three jobs must pass for a clean quality gate.
+

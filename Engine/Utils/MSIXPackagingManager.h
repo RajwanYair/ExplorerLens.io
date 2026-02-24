@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 269: MSIX Packaging
+// ExplorerLens Engine — MSIX Packaging
 // Modern MSIX package with capabilities declarations and auto-update foundation.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// MSIX packaging target
 enum class MSIXTarget : uint8_t {
@@ -90,4 +90,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,6 +1,6 @@
 // Engine/AI/AIThumbnailEnhancer.h
 // DirectML/ONNX integration for AI-assisted thumbnail generation
-// Part of Sprint 23: AI-Assisted Thumbnails
+// AI-Assisted Thumbnails
 
 #pragma once
 
@@ -13,7 +13,7 @@
 #include <memory>
 #include <optional>
 
-namespace DarkThumbs::AI {
+namespace ExplorerLens::AI {
 
 using Microsoft::WRL::ComPtr;
 
@@ -198,4 +198,5 @@ private:
     EnhancementMode m_mode;
 };
 
-} // namespace DarkThumbs::AI
+} // namespace ExplorerLens::AI
+

@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// Win11Integration — Sprint 209
+// Win11Integration
 // Windows 11 native features: mica, rounded corners, snap layouts, widget provider
 //==============================================================================
 
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Windows version info
 struct WindowsVersionInfo {
@@ -89,4 +89,5 @@ private:
     void DetectOS();
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

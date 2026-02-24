@@ -1,7 +1,7 @@
 // Sprint 138 — Win11 Compatibility Matrix Tests
 #include <gtest/gtest.h>
 #include "Utils/CompatibilityMatrix.h"
-using namespace DarkThumbs::Utils;
+using namespace ExplorerLens::Utils;
 
 TEST(Sprint138_Compat, WindowsBuildName) {
     EXPECT_STREQ(WindowsBuildName(WindowsBuild::Win11_24H2), "Windows 11 24H2 (26100)");
@@ -72,3 +72,4 @@ TEST(Sprint138_Compat, Stats_PassRate) {
     EXPECT_FALSE(stats.MeetsMinimum(0.95));
     EXPECT_TRUE(stats.MeetsMinimum(0.85));
 }
+

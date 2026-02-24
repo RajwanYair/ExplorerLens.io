@@ -1,6 +1,6 @@
 //==============================================================================
 // SIMDScaler.cpp - SIMD-accelerated image scaling implementation
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "SIMDScaler.h"
@@ -10,9 +10,9 @@
 #include <cmath>
 #include <intrin.h>
 
-using namespace DarkThumbs::Engine;
+using namespace ExplorerLens::Engine;
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace SIMD {
 
 //==============================================================================
@@ -844,4 +844,5 @@ void SIMDScaler::ConvertRGBtoBGR_Scalar(
 }
 
 } // namespace SIMD
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,7 +1,7 @@
 //==============================================================================
-// DarkThumbs Engine - Simple Logging Utility
+// ExplorerLens Engine - Simple Logging Utility
 // Version: 1.0.0
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //
 // Provides lightweight logging macros for debug and diagnostic output.
 // All logs output to OutputDebugString for viewing in DebugView or VS debugger.
@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <time.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -56,7 +56,7 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
 /// Log informational message
 #define LOG_INFO(fmt, ...)  do { \
     wchar_t _log_time[32]; \
-    DarkThumbs::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
+    ExplorerLens::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
     wchar_t _log_buf[2048]; \
     swprintf_s(_log_buf, L"[%s][INFO] " fmt L"\n", _log_time, ##__VA_ARGS__); \
     OutputDebugStringW(_log_buf); \
@@ -65,7 +65,7 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
 /// Log error message
 #define LOG_ERROR(fmt, ...) do { \
     wchar_t _log_time[32]; \
-    DarkThumbs::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
+    ExplorerLens::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
     wchar_t _log_buf[2048]; \
     swprintf_s(_log_buf, L"[%s][ERROR] " fmt L"\n", _log_time, ##__VA_ARGS__); \
     OutputDebugStringW(_log_buf); \
@@ -74,7 +74,7 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
 /// Log debug message
 #define LOG_DEBUG(fmt, ...) do { \
     wchar_t _log_time[32]; \
-    DarkThumbs::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
+    ExplorerLens::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
     wchar_t _log_buf[2048]; \
     swprintf_s(_log_buf, L"[%s][DEBUG] " fmt L"\n", _log_time, ##__VA_ARGS__); \
     OutputDebugStringW(_log_buf); \
@@ -83,7 +83,7 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
 /// Log warning message
 #define LOG_WARN(fmt, ...) do { \
     wchar_t _log_time[32]; \
-    DarkThumbs::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
+    ExplorerLens::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
     wchar_t _log_buf[2048]; \
     swprintf_s(_log_buf, L"[%s][WARN] " fmt L"\n", _log_time, ##__VA_ARGS__); \
     OutputDebugStringW(_log_buf); \
@@ -96,7 +96,7 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
 /// Log with HRESULT
 #define LOG_HRESULT(hr, fmt, ...) do { \
     wchar_t _log_time[32]; \
-    DarkThumbs::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
+    ExplorerLens::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
     wchar_t _log_buf[2048]; \
     swprintf_s(_log_buf, L"[%s][ERROR] " fmt L" (HRESULT=0x%08X)\n", \
                 _log_time, ##__VA_ARGS__, (hr)); \
@@ -106,7 +106,7 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
 /// Log performance timing
 #define LOG_PERF(operation, time_ms) do { \
     wchar_t _log_time[32]; \
-    DarkThumbs::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
+    ExplorerLens::Engine::_LogTimestamp(_log_time, _countof(_log_time)); \
     wchar_t _log_buf[2048]; \
     swprintf_s(_log_buf, L"[%s][PERF] %s took %llu ms\n", \
                 _log_time, (operation), (time_ms)); \
@@ -169,4 +169,5 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
     } _profile_guard{(name), _profile_start};
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

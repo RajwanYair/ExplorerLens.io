@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// ReleaseReadinessDashboard.h — Sprint 148
+// ReleaseReadinessDashboard.h
 // Aggregated release go/no-go dashboard combining all CI quality gates
 // ============================================================================
 
@@ -12,7 +12,7 @@
 #include <numeric>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 // ── Gate categories ────────────────────────────────────────────────────────
 
@@ -285,4 +285,5 @@ private:
     std::vector<ChecklistItem> m_checklist;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

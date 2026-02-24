@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 274: Vulkan Compute Backend
+// ExplorerLens Engine — Vulkan Compute Backend
 // Complete VulkanComputePipeline for Linux/Wine compatibility path.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Vulkan feature requirements
 enum class VulkanFeature : uint8_t {
@@ -101,4 +101,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

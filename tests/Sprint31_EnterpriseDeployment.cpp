@@ -13,14 +13,14 @@
 
 class GroupPolicyTest : public ::testing::Test {
 protected:
-    static constexpr const char* kPolicyKey = "SOFTWARE\\Policies\\DarkThumbs";
+    static constexpr const char* kPolicyKey = "SOFTWARE\\Policies\\ExplorerLens";
 };
 
 TEST_F(GroupPolicyTest, PolicyRegistryPath) {
     std::string path = kPolicyKey;
     EXPECT_TRUE(path.find("Policies") != std::string::npos)
         << "GPO values must be under Policies registry hive";
-    EXPECT_TRUE(path.find("DarkThumbs") != std::string::npos);
+    EXPECT_TRUE(path.find("ExplorerLens") != std::string::npos);
 }
 
 TEST_F(GroupPolicyTest, CorePoliciesDefined) {
@@ -40,12 +40,12 @@ TEST_F(GroupPolicyTest, CorePoliciesDefined) {
 TEST_F(GroupPolicyTest, ADMXTemplateGeneration) {
     // ADMX must include namespace, categories, and policy elements
     std::string admx = "<?xml version=\"1.0\"?>\n<policyDefinitions>\n"
-                       "  <target prefix=\"darkthumbs\"/>\n"
-                       "  <categories><category name=\"DarkThumbs\"/></categories>\n"
+                       "  <target prefix=\"explorerlens\"/>\n"
+                       "  <categories><category name=\"ExplorerLens\"/></categories>\n"
                        "</policyDefinitions>";
 
     EXPECT_TRUE(admx.find("policyDefinitions") != std::string::npos);
-    EXPECT_TRUE(admx.find("darkthumbs") != std::string::npos);
+    EXPECT_TRUE(admx.find("explorerlens") != std::string::npos);
     EXPECT_TRUE(admx.find("categories") != std::string::npos);
 }
 
@@ -125,7 +125,7 @@ TEST_F(ConfigPriorityTest, LockedValueCannotBeChanged) {
 class SilentInstallTest : public ::testing::Test {};
 
 TEST_F(SilentInstallTest, CommandLineGeneration) {
-    std::string msi = "DarkThumbs-7.0.0.msi";
+    std::string msi = "ExplorerLens-7.0.0.msi";
     std::string cmd = "msiexec /i \"" + msi + "\" /qn ALLUSERS=1";
 
     EXPECT_TRUE(cmd.find("/qn") != std::string::npos)
@@ -159,7 +159,7 @@ TEST_F(SilentInstallTest, DisableAutoUpdate) {
 class NetworkCacheTest : public ::testing::Test {};
 
 TEST_F(NetworkCacheTest, UNCPathFormat) {
-    std::string uncPath = "\\\\server\\darkthumbs-cache";
+    std::string uncPath = "\\\\server\\explorerlens-cache";
     EXPECT_TRUE(uncPath.substr(0, 2) == "\\\\")
         << "Network cache must use UNC paths";
 }
@@ -232,13 +232,13 @@ TEST_F(TelemetryControlTest, FullRequiresExplicitOptIn) {
 class JsonConfigTest : public ::testing::Test {};
 
 TEST_F(JsonConfigTest, UserConfigPath) {
-    std::string path = "%APPDATA%\\DarkThumbs\\darkthumbs.json";
+    std::string path = "%APPDATA%\\ExplorerLens\\explorerlens.json";
     EXPECT_TRUE(path.find("APPDATA") != std::string::npos);
-    EXPECT_TRUE(path.find("darkthumbs.json") != std::string::npos);
+    EXPECT_TRUE(path.find("explorerlens.json") != std::string::npos);
 }
 
 TEST_F(JsonConfigTest, MachineConfigPath) {
-    std::string path = "%PROGRAMDATA%\\DarkThumbs\\darkthumbs.json";
+    std::string path = "%PROGRAMDATA%\\ExplorerLens\\explorerlens.json";
     EXPECT_TRUE(path.find("PROGRAMDATA") != std::string::npos);
 }
 
@@ -267,3 +267,4 @@ TEST(EnterpriseIntegrationTest, DeploymentHeaderExists) {
                   fs::exists("Engine\\Utils\\EnterpriseDeployment.h");
     EXPECT_TRUE(exists) << "EnterpriseDeployment.h must exist for Sprint 31";
 }
+

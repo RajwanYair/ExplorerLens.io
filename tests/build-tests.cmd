@@ -1,11 +1,11 @@
-# DarkThumbs Unit Test Suite
+# ExplorerLens Unit Test Suite
 # Build and run tests with MSVC
 
 @echo off
 setlocal enabledelayedexpansion
 
 echo ==========================================
-echo DarkThumbs Unit Test Build Script
+echo ExplorerLens Unit Test Build Script
 echo ==========================================
 echo.
 
@@ -41,7 +41,7 @@ echo   Standard: C++17
 echo   Config:   Debug with symbols
 
 cl.exe /nologo /std:c++17 /EHsc /W3 /Zi /D_UNICODE /DUNICODE ^
-    /I"..\..\CBXShell" ^
+    /I"..\..\LENSShell" ^
     /I"..\..\external\wtl\Include" ^
     ..\UnitTests.cpp ^
     /link shlwapi.lib ^
@@ -80,3 +80,4 @@ if %TEST_RESULT% EQU 0 (
     echo Result: FAILURE - Some tests failed
     exit /b 1
 )
+

@@ -1,4 +1,4 @@
-# Build All Missing Image Libraries for DarkThumbs v5.1.0
+# Build All Missing Image Libraries for ExplorerLens v5.1.0
 # Builds: dav1d, libavif, libjxl and integrates them into the project
 
 param(
@@ -10,7 +10,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "=== DarkThumbs Image Libraries Build Script ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens Image Libraries Build Script ===" -ForegroundColor Cyan
 Write-Host "Building: dav1d 1.5.1, libavif 1.3.0, libjxl 0.11.1" -ForegroundColor Yellow
 Write-Host ""
 
@@ -138,12 +138,12 @@ if (-not $SkipLibavif) {
             -G "Visual Studio 18 2026" -A x64 `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_INSTALL_PREFIX="$LibavifInstall" `
-            -DBUILD_SHARED_LIBS=OFF `
+            -DBUILD_SHARED_LIBS=ON `
             -DAVIF_CODEC_DAV1D=LOCAL `
             -DAVIF_LOCAL_DAV1D="$Dav1dInstall" `
-            -DAVIF_CODEC_AOM=OFF `
-            -DAVIF_BUILD_APPS=OFF `
-            -DAVIF_BUILD_TESTS=OFF | Out-Null
+            -DAVIF_CODEC_AOM=ON `
+            -DAVIF_BUILD_APPS=ON `
+            -DAVIF_BUILD_TESTS=ON | Out-Null
         
         Write-Host "  Building libavif..." -ForegroundColor Gray
         cmake --build . --config Release | Out-Null
@@ -192,13 +192,13 @@ if (-not $SkipLibjxl) {
             -G "Visual Studio 18 2026" -A x64 `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_INSTALL_PREFIX="$LibjxlInstall" `
-            -DBUILD_SHARED_LIBS=OFF `
-            -DBUILD_TESTING=OFF `
-            -DJPEGXL_ENABLE_TOOLS=OFF `
-            -DJPEGXL_ENABLE_BENCHMARK=OFF `
-            -DJPEGXL_ENABLE_EXAMPLES=OFF `
-            -DJPEGXL_FORCE_SYSTEM_BROTLI=OFF `
-            -DJPEGXL_FORCE_SYSTEM_HWY=OFF | Out-Null
+            -DBUILD_SHARED_LIBS=ON `
+            -DBUILD_TESTING=ON `
+            -DJPEGXL_ENABLE_TOOLS=ON `
+            -DJPEGXL_ENABLE_BENCHMARK=ON `
+            -DJPEGXL_ENABLE_EXAMPLES=ON `
+            -DJPEGXL_FORCE_SYSTEM_BROTLI=ON `
+            -DJPEGXL_FORCE_SYSTEM_HWY=ON | Out-Null
         
         Write-Host "  Building libjxl (this may take several minutes)..." -ForegroundColor Gray
         cmake --build . --config Release | Out-Null
@@ -237,7 +237,8 @@ Write-Host ""
 Write-Host "=== Build Complete ===" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "  1. Update CBXShell.vcxproj to include new library paths" -ForegroundColor Gray
+Write-Host "  1. Update LENSShell.vcxproj to include new library paths" -ForegroundColor Gray
 Write-Host "  2. Uncomment jxl_decoder.cpp in project file" -ForegroundColor Gray
 Write-Host "  3. Add libavif/libjxl dependencies to linker" -ForegroundColor Gray
-Write-Host "  4. Rebuild CBXShell.sln" -ForegroundColor Gray
+Write-Host "  4. Rebuild LENSShell.sln" -ForegroundColor Gray
+

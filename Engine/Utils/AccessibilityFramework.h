@@ -1,6 +1,6 @@
-// AccessibilityFramework.h - Accessibility & Internationalization (Sprint 30)
-// DarkThumbs Engine v7.0.0+
-// Copyright (c) 2026 DarkThumbs Project
+// AccessibilityFramework.h - Accessibility & Internationalization
+// ExplorerLens Engine v7.0.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Features:
 // - Screen reader support via UI Automation (UIA) provider
@@ -27,7 +27,7 @@
 #include <functional>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // ============================================================================
@@ -207,11 +207,11 @@ public:
 
 private:
     void InitializeDefaultStrings() {
-        RegisterString("app.name", "DarkThumbs", {
-            {Language::German, "DarkThumbs"},
-            {Language::Japanese, "DarkThumbs"},
-            {Language::ChineseSimp, "DarkThumbs"},
-            {Language::Arabic, "DarkThumbs"}
+        RegisterString("app.name", "ExplorerLens", {
+            {Language::German, "ExplorerLens"},
+            {Language::Japanese, "ExplorerLens"},
+            {Language::ChineseSimp, "ExplorerLens"},
+            {Language::Arabic, "ExplorerLens"}
         });
         RegisterString("menu.settings", "Settings", {
             {Language::German, "Einstellungen"},
@@ -465,7 +465,7 @@ struct AccessibleColor {
 enum class WCAGLevel {
     None,       ///< Does not meet any level
     A,          ///< Basic accessibility
-    AA,         ///< Standard (target for DarkThumbs)
+    AA,         ///< Standard (target for ExplorerLens)
     AAA         ///< Enhanced
 };
 
@@ -497,4 +497,5 @@ struct AccessibilityStats {
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

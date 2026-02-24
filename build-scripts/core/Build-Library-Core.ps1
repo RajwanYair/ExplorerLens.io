@@ -1,5 +1,5 @@
 # Build-Library-Core.ps1
-# DarkThumbs v7.0 - Unified Build Library Core Functions
+# ExplorerLens v7.0 - Unified Build Library Core Functions
 # Consolidates common build patterns across all external library scripts
 #
 # USAGE:
@@ -7,7 +7,7 @@
 #   Invoke-CMakeBuild -LibraryName "zlib" -SourceDir $sourceDir -BuildDir $buildDir
 #
 # Date: February 16, 2026
-# Author: DarkThumbs Development Team
+# Author: ExplorerLens Development Team
 
 $ErrorActionPreference = 'Stop'
 
@@ -699,3 +699,4 @@ function Copy-LibraryArtifacts {
 # ============================================================================
 
 Write-BuildLog "Build-Library-Core.ps1 loaded successfully (v7.0)" -Level Success
+

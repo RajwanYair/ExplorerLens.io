@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Install barebone PowerShell profile for DarkThumbs development
+    Install barebone PowerShell profile for ExplorerLens development
 .DESCRIPTION
     Installs a minimal, high-performance PowerShell profile optimized for slow machines
     Backs up existing profile if present
@@ -104,9 +104,9 @@ Write-Host ""
 # Show available commands
 Write-Host "Available Commands:" -ForegroundColor Cyan
 Write-Host "  Navigation:" -ForegroundColor Yellow
-Write-Host "    dt               - Go to DarkThumbs root" -ForegroundColor Gray
+Write-Host "    dt               - Go to ExplorerLens root" -ForegroundColor Gray
 Write-Host "    bs               - Go to build-scripts" -ForegroundColor Gray
-Write-Host "    src              - Go to CBXShell source" -ForegroundColor Gray
+Write-Host "    src              - Go to LENSShell source" -ForegroundColor Gray
 Write-Host ""
 Write-Host "  Building:" -ForegroundColor Yellow
 Write-Host "    Build-Quick      - Quick build without libraries" -ForegroundColor Gray
@@ -158,3 +158,4 @@ Write-Host '  }' -ForegroundColor Gray
 Write-Host ""
 Write-Host "Documentation: docs\BUILD_MONITORING.md" -ForegroundColor Cyan
 Write-Host ""
+

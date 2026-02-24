@@ -1,7 +1,7 @@
 // Sprint 137 — Continuous Fuzzing Engine Tests
 #include <gtest/gtest.h>
 #include "Utils/ContinuousFuzzEngine.h"
-using namespace DarkThumbs::Utils;
+using namespace ExplorerLens::Utils;
 
 TEST(Sprint137_Fuzz, MutationName_Valid) {
     EXPECT_STREQ(MutationName(MutationStrategy::BitFlip), "BitFlip");
@@ -86,3 +86,4 @@ TEST(Sprint137_Fuzz, CorpusEntry_IsInteresting) {
     e.crashesFound = 1;
     EXPECT_TRUE(e.IsInteresting());
 }
+

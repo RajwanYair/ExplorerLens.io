@@ -2,7 +2,7 @@
 
 //==============================================================================
 // SIMDScaler.h - SIMD-accelerated image scaling
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 // 
 // High-performance image scaling using AVX2/AVX-512 intrinsics
 // Provides 3-4x speedup over naive implementations
@@ -14,7 +14,7 @@
 #include <immintrin.h>  // SIMD intrinsics
 #include "HardwareCapabilities.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace SIMD {
 
 //==============================================================================
@@ -135,7 +135,7 @@ public:
     );
 
     //==========================================================================
-    // Box Filter / Area Average (Sprint 6.2)
+    // Box Filter / Area Average
     // Best for downscaling — averages all source pixels contributing to each
     // destination pixel. Prevents aliasing that bilinear produces on high
     // reduction ratios (e.g., 4000x3000 → 256x192).
@@ -296,4 +296,5 @@ inline bool SIMDScaler::ValidateDimensions(
 }
 
 } // namespace SIMD
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

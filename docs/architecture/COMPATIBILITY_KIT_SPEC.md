@@ -28,13 +28,13 @@ tests/data/corpus/psd/
     └── deep_recursion.psd       (Stack overflow check)
 ```
 
-## 3. The Validation Tool: `DarkThumbs.Validator.exe`
+## 3. The Validation Tool: `ExplorerLens.Validator.exe`
 
 The validator runs against a plugin or the core engine.
 
 ### usage
 
-`DarkThumbs.Validator.exe --format psd --plugin path/to/plugin.dll --corpus tests/data/corpus/psd`
+`ExplorerLens.Validator.exe --format psd --plugin path/to/plugin.dll --corpus tests/data/corpus/psd`
 
 ### Checks Performed
 
@@ -63,3 +63,4 @@ The CK is integrated into GitHub Actions.
 - Prerequisite: Download corpus (Git LFS / Azure Blob).
 - Trigger: PR modifying `src/Plugins/Psd/*`.
 - Result: Pass/Fail check on the PR.
+

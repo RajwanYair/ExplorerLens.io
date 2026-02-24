@@ -1,5 +1,5 @@
 # GPU Abstraction Layer Architecture
-**DarkThumbs Engine v7.0.0 - Sprint 11**  
+**ExplorerLens Engine v7.0.0 - Sprint 11**  
 **Date:** February 17, 2026  
 **Status:** ✅ Complete
 
@@ -214,9 +214,10 @@ The GPU Abstraction Layer is **complete and production-ready**. It successfully 
 - Clean architecture for future enhancements
 - Seamless integration with ThumbnailPipeline
 
-This component is a **core strength** of the DarkThumbs Engine, enabling fast thumbnail generation across all Windows environments from high-end gaming PCs to headless servers.
+This component is a **core strength** of the ExplorerLens Engine, enabling fast thumbnail generation across all Windows environments from high-end gaming PCs to headless servers.
 
 ---
 
 **Sprint 11 Status:** GPU Abstraction Layer ✅ Complete (no further work needed)  
 **Next Priority:** Diagnostic logging for decoder failures
+

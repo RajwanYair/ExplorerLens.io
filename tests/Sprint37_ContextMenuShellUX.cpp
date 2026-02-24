@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 37 Tests: Context Menu & Shell UX Integration
+// ExplorerLens — Sprint 37 Tests: Context Menu & Shell UX Integration
 // Tests context menu actions, shell property handler, batch operations,
 // clipboard/export results, and supported extension detection.
 //==============================================================================
@@ -11,7 +11,7 @@
 // Header under test
 #include "../Engine/Shell/ContextMenuHandler.h"
 
-using namespace DarkThumbs::Engine::Shell;
+using namespace ExplorerLens::Engine::Shell;
 
 //==============================================================================
 // Context Menu Action Tests
@@ -28,10 +28,10 @@ TEST(ContextAction, ActionNames)
 
 TEST(ContextAction, VerbStrings)
 {
-    EXPECT_STREQ(ContextMenuVerb(ContextMenuAction::RegenerateThumbnail), "darkthumbs.regenerate");
-    EXPECT_STREQ(ContextMenuVerb(ContextMenuAction::CopyToClipboard), "darkthumbs.copy");
-    EXPECT_STREQ(ContextMenuVerb(ContextMenuAction::ExportAsPNG), "darkthumbs.export");
-    EXPECT_STREQ(ContextMenuVerb(ContextMenuAction::RegenerateFolder), "darkthumbs.regenerateall");
+    EXPECT_STREQ(ContextMenuVerb(ContextMenuAction::RegenerateThumbnail), "explorerlens.regenerate");
+    EXPECT_STREQ(ContextMenuVerb(ContextMenuAction::CopyToClipboard), "explorerlens.copy");
+    EXPECT_STREQ(ContextMenuVerb(ContextMenuAction::ExportAsPNG), "explorerlens.export");
+    EXPECT_STREQ(ContextMenuVerb(ContextMenuAction::RegenerateFolder), "explorerlens.regenerateall");
 }
 
 //==============================================================================
@@ -334,3 +334,4 @@ TEST(Export, SuccessResult)
     EXPECT_TRUE(r.success);
     EXPECT_NE(r.outputPath.find("thumbnail.png"), std::string::npos);
 }
+

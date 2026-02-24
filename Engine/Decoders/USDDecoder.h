@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 278: USD/USDZ Support
+// ExplorerLens Engine — USD/USDZ Support
 // Pixar Universal Scene Description decoder for 3D scene thumbnails.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// USD stage element type
 enum class USDElementType : uint8_t {
@@ -97,4 +97,5 @@ public:
     static constexpr size_t VariantCount() { return static_cast<size_t>(USDVariant::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

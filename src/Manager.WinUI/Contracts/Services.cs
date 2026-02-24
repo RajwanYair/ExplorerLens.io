@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DarkThumbs.Manager.Services;
+namespace ExplorerLens.Manager.Services;
 
 /// <summary>
-/// Core service interfaces for DarkThumbs Manager
+/// Core service interfaces for ExplorerLens Manager
 /// </summary>
 
 public interface ISettingsService

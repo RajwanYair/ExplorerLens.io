@@ -1,13 +1,13 @@
 #pragma once
-// Sprint 171 — Installer Lifecycle Automation
+// Installer Lifecycle Automation
 // Post-install registration, upgrade detection, uninstall cleanup, COM re-register.
-// Validates that CBXShell.dll CLSID is live after install.
+// Validates that LENSShell.dll CLSID is live after install.
 
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Utils {
+namespace ExplorerLens::Utils {
 
 // ─── Install action ──────────────────────────────────────────────────────────
 
@@ -114,7 +114,7 @@ public:
         addStep("ValidateCLSIDLive",   true,   15.0);
 
         result.comRecord         = COMRegistrationRecord::Expected();
-        result.comRecord.dllPath = "C:\\Program Files\\DarkThumbs\\CBXShell.dll";
+        result.comRecord.dllPath = "C:\\Program Files\\ExplorerLens\\LENSShell.dll";
         result.installedVersion  = CurrentVersion();
         result.overall           = result.FailedStepCount() == 0;
         return result;
@@ -140,4 +140,5 @@ public:
     }
 };
 
-} // namespace DarkThumbs::Utils
+} // namespace ExplorerLens::Utils
+

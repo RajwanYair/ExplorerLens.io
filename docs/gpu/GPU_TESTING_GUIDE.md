@@ -1,4 +1,4 @@
-# DarkThumbs GPU Testing Guide
+# ExplorerLens GPU Testing Guide
 
 **Version:** 7.1.0  
 **Date:** February 18, 2026  
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This guide covers testing and benchmarking the GPU-accelerated thumbnail generation in DarkThumbs v5.2.0.
+This guide covers testing and benchmarking the GPU-accelerated thumbnail generation in ExplorerLens v5.2.0.
 
 **GPU Vendor-Specific Guides:**
 - **[Intel GPU Optimization Guide](INTEL_GPU_GUIDE.md)** - Intel HD Graphics, Iris, Xe, Arc (2nd gen+ / 2011+)
@@ -71,7 +71,7 @@ Average time: 58.6 ms
 Total time: 175.8 ms
 ```
 
-### 2. CBXBench.exe
+### 2. LENSBench.exe
 
 **Purpose:** Performance benchmarking and validation of 6.5x speedup target.
 
@@ -84,7 +84,7 @@ Total time: 175.8 ms
 
 **Usage:**
 ```cmd
-CBXBench.exe [options]
+LENSBench.exe [options]
 
 Options:
   -i <folder>    Input folder with test images (required)
@@ -98,18 +98,18 @@ Options:
 **Examples:**
 ```cmd
 # Basic benchmark - 10 iterations per file
-CBXBench.exe -i C:\TestImages -o results.csv
+LENSBench.exe -i C:\TestImages -o results.csv
 
 # High-precision benchmark - 50 iterations
-CBXBench.exe -i C:\TestImages -o results.csv -n 50
+LENSBench.exe -i C:\TestImages -o results.csv -n 50
 
 # Quick benchmark - 5 iterations, verbose
-CBXBench.exe -i C:\TestImages -o results.csv -n 5 -v
+LENSBench.exe -i C:\TestImages -o results.csv -n 5 -v
 ```
 
 **Output:**
 ```
-=== CBXShell Performance Benchmark ===
+=== LENSShell Performance Benchmark ===
 Test folder: C:\TestImages
 Thumbnail size: 256px
 Iterations per file: 10
@@ -455,4 +455,5 @@ After running tests:
 
 **Last Updated:** November 24, 2025  
 **Tools Version:** 1.0.0  
-**Target:** DarkThumbs v5.2.0 Phase 2
+**Target:** ExplorerLens v5.2.0 Phase 2
+

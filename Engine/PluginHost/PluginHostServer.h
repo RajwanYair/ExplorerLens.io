@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Host Server
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Host Server
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Server-side implementation for PluginHost process. Manages plugin loading,
  * IPC communication, and request processing.
@@ -16,7 +16,7 @@
 #include <atomic>
 #include <thread>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace PluginHost {
 
 //============================================================================
@@ -89,4 +89,5 @@ private:
 };
 
 } // namespace PluginHost
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

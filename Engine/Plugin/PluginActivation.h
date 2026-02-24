@@ -1,12 +1,12 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 11: Plugin System Activation
+// ExplorerLens — Plugin System Activation
 // Feature-flag-gated plugin loading, IPC pipeline, plugin discovery,
 // lifecycle management, and sample plugin validation.
 //==============================================================================
 
-#ifndef DARKTHUMBS_PLUGIN_ACTIVATION_H
-#define DARKTHUMBS_PLUGIN_ACTIVATION_H
+#ifndef EXPLORERLENS_PLUGIN_ACTIVATION_H
+#define EXPLORERLENS_PLUGIN_ACTIVATION_H
 
 #include <string>
 #include <vector>
@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace DarkThumbs { namespace Engine { namespace Plugin {
+namespace ExplorerLens { namespace Engine { namespace Plugin {
 
 //==============================================================================
 // Plugin Feature Flags — gate all plugin activation behind toggles
@@ -164,8 +164,8 @@ public:
     static std::vector<std::string> DefaultSearchPaths()
     {
         return {
-            "%LocalAppData%\\DarkThumbs\\Plugins",
-            "%ProgramData%\\DarkThumbs\\Plugins",
+            "%LocalAppData%\\ExplorerLens\\Plugins",
+            "%ProgramData%\\ExplorerLens\\Plugins",
             ".\\plugins"    // Portable mode
         };
     }
@@ -237,7 +237,7 @@ struct IPCMessage
 class IPCChannel
 {
 public:
-    explicit IPCChannel(const std::string& pipeName = "\\\\.\\pipe\\DarkThumbs-PluginHost")
+    explicit IPCChannel(const std::string& pipeName = "\\\\.\\pipe\\ExplorerLens-PluginHost")
         : pipeName_(pipeName) {}
 
     std::string PipeName() const { return pipeName_; }
@@ -392,11 +392,11 @@ struct SamplePluginSpec
     static PluginDescriptor MinimalPlugin()
     {
         PluginDescriptor p;
-        p.id          = "com.darkthumbs.minimal-plugin";
+        p.id          = "com.explorerlens.minimal-plugin";
         p.name        = "Minimal Plugin";
         p.version     = "1.0.0";
-        p.author      = "DarkThumbs Team";
-        p.description = "Reference implementation for DarkThumbs plugin API";
+        p.author      = "ExplorerLens Team";
+        p.description = "Reference implementation for ExplorerLens plugin API";
         p.dllPath     = "plugins\\minimal-plugin\\minimal-plugin.dll";
         p.supportedFormats = {".custom", ".test"};
         p.isSigned    = true;
@@ -406,10 +406,10 @@ struct SamplePluginSpec
     static PluginDescriptor RawEnhancedPlugin()
     {
         PluginDescriptor p;
-        p.id          = "com.darkthumbs.raw-enhanced";
+        p.id          = "com.explorerlens.raw-enhanced";
         p.name        = "RAW Enhanced Decoder";
         p.version     = "1.0.0";
-        p.author      = "DarkThumbs Team";
+        p.author      = "ExplorerLens Team";
         p.description = "Enhanced RAW processing with custom demosaic";
         p.dllPath     = "plugins\\raw-enhanced\\raw-enhanced.dll";
         p.supportedFormats = {".nef", ".cr3", ".arw", ".orf", ".rw2"};
@@ -418,6 +418,8 @@ struct SamplePluginSpec
     }
 };
 
-}}} // namespace DarkThumbs::Engine::Plugin
+}}} // namespace ExplorerLens::Engine::Plugin
 
-#endif // DARKTHUMBS_PLUGIN_ACTIVATION_H
+#endif // EXPLORERLENS_PLUGIN_ACTIVATION_H
+
+

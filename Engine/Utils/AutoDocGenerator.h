@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// AutoDocGenerator — Sprint 213
+// AutoDocGenerator
 // Automated documentation generation from code analysis
 //==============================================================================
 
@@ -9,7 +9,7 @@
 #include <vector>
 #include <map>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class DocSection : uint8_t {
     Overview = 0,
@@ -78,4 +78,5 @@ private:
     std::wstring FormatMarkdown(DocSection section) const;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

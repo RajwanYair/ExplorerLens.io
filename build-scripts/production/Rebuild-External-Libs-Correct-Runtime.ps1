@@ -2,10 +2,10 @@
 
 <#
 .SYNOPSIS
-    Rebuild external libraries with correct runtime libraries to match CBXShell
+    Rebuild external libraries with correct runtime libraries to match LENSShell
 .DESCRIPTION
-    CBXShell Release uses /MT (MultiThreaded static), so external libs must also use /MT
-    CBXShell Debug uses /MTd (MultiThreaded Debug static), so external libs must use /MTd for Debug
+    LENSShell Release uses /MT (MultiThreaded static), so external libs must also use /MT
+    LENSShell Debug uses /MTd (MultiThreaded Debug static), so external libs must use /MTd for Debug
     This eliminates all /NODEFAULTLIB workarounds
 #>
 
@@ -20,8 +20,8 @@ Set-StrictMode -Version Latest
 
 Write-Host "`n=== Rebuilding External Libraries with Correct Runtime ===" -ForegroundColor Cyan
 Write-Host "Configuration: $Configuration" -ForegroundColor Gray
-Write-Host "CBXShell Release uses /MT (static)" -ForegroundColor Gray
-Write-Host "CBXShell Debug uses /MTd (static debug)" -ForegroundColor Gray
+Write-Host "LENSShell Release uses /MT (static)" -ForegroundColor Gray
+Write-Host "LENSShell Debug uses /MTd (static debug)" -ForegroundColor Gray
 Write-Host "`nRebuilding external libs to match (no MSVCRT/LIBCMT conflicts)`n" -ForegroundColor Gray
 
 # Initialize Visual Studio environment
@@ -249,9 +249,10 @@ Write-Host "`nTotal: $success succeeded, $failed failed" -ForegroundColor $(if (
 
 if ($failed -eq 0) {
     Write-Host "`n✓ All libraries built with correct runtime" -ForegroundColor Green
-    Write-Host "  Ready to remove /NODEFAULTLIB from CBXShell.vcxproj" -ForegroundColor Gray
+    Write-Host "  Ready to remove /NODEFAULTLIB from LENSShell.vcxproj" -ForegroundColor Gray
     exit 0
 } else {
     Write-Host "`n⚠ Some builds failed" -ForegroundColor Yellow
     exit 1
 }
+

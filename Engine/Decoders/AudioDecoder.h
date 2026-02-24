@@ -1,6 +1,6 @@
 // AudioDecoder.h - Audio Album Art / Waveform Thumbnail Decoder
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: MP3, FLAC, WMA, AAC, M4A, OGG, OPUS, WAV, AIFF, APE, WV
 // Features:
@@ -16,7 +16,7 @@
 #include <memory>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class AudioDecoder : public IThumbnailDecoder {
@@ -34,7 +34,7 @@ public:
     bool SupportsGPU() const override { return false; }
     bool IsArchiveDecoder() const override { return false; }
 
-    // Audio metadata extraction (Sprint 7)
+    // Audio metadata extraction
     struct AudioMetadata {
         std::wstring artist;
         std::wstring album;
@@ -70,4 +70,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

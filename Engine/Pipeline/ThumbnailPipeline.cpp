@@ -36,7 +36,7 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 namespace {
@@ -288,7 +288,7 @@ public:
         decoderRegistry.RegisterDecoder(modelDecoder.get());
         decoders.push_back(std::move(modelDecoder));
         
-        // 4. Scan for and load third-party plugins (Sprint 11 - feature flag controlled)
+        // 4. Scan for and load third-party plugins (feature flag controlled)
         if (config.enablePlugins) {
             LoadPlugins();
         } else {
@@ -735,4 +735,5 @@ size_t ThumbnailPipeline::GetTotalExtensionCount() const {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

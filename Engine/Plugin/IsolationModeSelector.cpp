@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Isolation Mode Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Isolation Mode Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  *****************************************************************************/
 
 #include "IsolationModeSelector.h"
@@ -13,7 +13,7 @@
 #pragma comment(lib, "crypt32.lib")
 #pragma comment(lib, "wintrust.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // IsolationModeSelector Implementation
@@ -162,9 +162,9 @@ bool IsolationModeSelector::IsPluginDeniedByPolicy(const std::wstring& plugin_id
 void IsolationModeSelector::LoadConfiguration() {
     std::lock_guard<std::mutex> lock(mutex_);
     
-    // Load from registry: HKCU\Software\DarkThumbs\Plugins
+    // Load from registry: HKCU\Software\ExplorerLens\Plugins
     HKEY key;
-    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\DarkThumbs\\Plugins",
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\Plugins",
                      0, KEY_READ, &key) != ERROR_SUCCESS) {
         return;
     }
@@ -206,7 +206,7 @@ void IsolationModeSelector::LoadConfiguration() {
     RegCloseKey(key);
     
     // Load enterprise policy from HKLM
-    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\DarkThumbs\\Plugins",
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\ExplorerLens\\Plugins",
                      0, KEY_READ, &key) == ERROR_SUCCESS) {
         // Minimum isolation mode
         DWORD min_mode = 1;  // Default: PluginHost
@@ -244,9 +244,9 @@ void IsolationModeSelector::LoadConfiguration() {
 }
 
 void IsolationModeSelector::SaveConfiguration() {
-    // Save to registry: HKCU\Software\DarkThumbs\Plugins
+    // Save to registry: HKCU\Software\ExplorerLens\Plugins
     HKEY key;
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\DarkThumbs\\Plugins",
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\Plugins",
                        0, nullptr, 0, KEY_WRITE, nullptr, &key, nullptr) != ERROR_SUCCESS) {
         return;
     }
@@ -285,7 +285,7 @@ bool IsTrustedVendor(const std::wstring& vendor) {
         L"Adobe Systems Incorporated",
         L"Google LLC",
         L"Apple Inc.",
-        L"DarkThumbs Project",  // Our own plugins
+        L"ExplorerLens Project",  // Our own plugins
     };
     
     return trusted_vendors.find(vendor) != trusted_vendors.end();
@@ -379,4 +379,5 @@ std::wstring GetPluginPublisher(const std::filesystem::path& plugin_path) {
     return publisher;
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

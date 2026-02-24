@@ -1,17 +1,17 @@
 // Engine/AI/AIThumbnailEnhancer.cpp
 // Implementation of AI-assisted thumbnail enhancements
-// Part of Sprint 23: AI-Assisted Thumbnails
+// AI-Assisted Thumbnails
 
 #include "AIThumbnailEnhancer.h"
 #include "../Core/Logger.h"
 #include <algorithm>
 #include <chrono>
 
-using namespace DarkThumbs::AI;
+using namespace ExplorerLens::AI;
 using namespace std::chrono;
 
 namespace {
-    // Model filenames (loaded from %LocalAppData%\DarkThumbs\Models\)
+    // Model filenames (loaded from %LocalAppData%\ExplorerLens\Models\)
     constexpr const wchar_t* ESRGAN_2X_MODEL = L"esrgan_2x.onnx";
     constexpr const wchar_t* ESRGAN_4X_MODEL = L"esrgan_4x.onnx";
     constexpr const wchar_t* NSFW_MODEL = L"nsfw_mobilenet_v2.onnx";
@@ -22,7 +22,7 @@ namespace {
     std::wstring GetModelDirectory() {
         wchar_t localAppData[MAX_PATH];
         if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, localAppData))) {
-            return std::wstring(localAppData) + L"\\DarkThumbs\\Models\\";
+            return std::wstring(localAppData) + L"\\ExplorerLens\\Models\\";
         }
         return L"";
     }
@@ -30,7 +30,7 @@ namespace {
 
 AIThumbnailEnhancer::AIThumbnailEnhancer() {
     // Initialize ONNX Runtime environment
-    m_ortEnv = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "DarkThumbsAI");
+    m_ortEnv = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "ExplorerLensAI");
 }
 
 AIThumbnailEnhancer::~AIThumbnailEnhancer() {
@@ -548,3 +548,4 @@ std::wstring AIThumbnailEnhancer::DetermineNSFWCategory(float score) {
     if (score < 0.7f) return L"suggestive";
     return L"explicit";
 }
+

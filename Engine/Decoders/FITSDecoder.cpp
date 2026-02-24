@@ -1,5 +1,5 @@
 //==============================================================================
-// FITSDecoder — Sprint 199
+// FITSDecoder
 // FITS astronomy image format decoder implementation
 //==============================================================================
 
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <cstring>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 static const wchar_t* s_fitsExtensions[] = { L".fits", L".fit", L".fts" };
 
@@ -192,7 +192,7 @@ void FITSDecoder::ComputeMinMax(const uint8_t* data, size_t size) {
 
     size_t bpp = GetBytesPerPixel(m_info.bitpix);
     double localMin = 1e30, localMax = -1e30;
-    size_t stride = (std::max)(size_t(1), (m_info.naxis1 * m_info.naxis2) / 10000);
+    size_t stride = (std::max)(size_t(1), static_cast<size_t>(m_info.naxis1) * m_info.naxis2 / 10000);
 
     for (size_t i = 0; i < m_info.naxis1 * m_info.naxis2; i += stride) {
         size_t offset = m_info.dataOffset + i * bpp;
@@ -270,4 +270,5 @@ const wchar_t* FITSDecoder::GetStretchName(FITSStretch s) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

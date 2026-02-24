@@ -1,17 +1,18 @@
 //==============================================================================
 // XCF (GIMP Native) Decoder — Implementation
-// Sprint 185: Open image editor format support
+// Open image editor format support
 // Parses XCF file headers (versions 0-14+), extracts canvas dimensions,
 // color mode, version, and generates thumbnail from header info.
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "XCFDecoder.h"
 #include <fstream>
 #include <cstring>
 #include <algorithm>
+#include <cctype>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // Extension check
@@ -19,7 +20,8 @@ namespace DarkThumbs::Decoders {
     bool XCFDecoder::IsXCFExtension(const std::string& ext)
     {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         return lower == ".xcf";
     }
 
@@ -166,4 +168,5 @@ namespace DarkThumbs::Decoders {
         return result;
     }
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

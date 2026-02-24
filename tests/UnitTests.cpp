@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////
-// DarkThumbs Unit Test Suite
+// ExplorerLens Unit Test Suite
 // Comprehensive tests for all core functionality
 ///////////////////////////////////////////////
 
@@ -32,22 +32,22 @@ int g_testsFailed = 0;
 ///////////////////////////////////////////////
 
 namespace TestMocks {
-    // Mock CBXTYPE definitions (match cbxArchive.h)
-    #define CBXTYPE int
-    #define CBXTYPE_NONE 0
-    #define CBXTYPE_ZIP  1
-    #define CBXTYPE_CBZ  2
-    #define CBXTYPE_RAR  3
-    #define CBXTYPE_CBR  4
-    #define CBXTYPE_EPUB 5
-    #define CBXTYPE_7Z   6
-    #define CBXTYPE_CB7  7
-    #define CBXTYPE_TAR  8
-    #define CBXTYPE_CBT  9
-    #define CBXTYPE_MOBI 10
-    #define CBXTYPE_FB2  11
+    // Mock LENSTYPE definitions (match lensArchive.h)
+    #define LENSTYPE int
+    #define LENSTYPE_NONE 0
+    #define LENSTYPE_ZIP  1
+    #define LENSTYPE_CBZ  2
+    #define LENSTYPE_RAR  3
+    #define LENSTYPE_CBR  4
+    #define LENSTYPE_EPUB 5
+    #define LENSTYPE_7Z   6
+    #define LENSTYPE_CB7  7
+    #define LENSTYPE_TAR  8
+    #define LENSTYPE_CBT  9
+    #define LENSTYPE_MOBI 10
+    #define LENSTYPE_FB2  11
 
-    // Helper function (copied from cbxArchive.h for testing)
+    // Helper function (copied from lensArchive.h for testing)
     inline BOOL StrEqual(LPCTSTR psz1, LPCTSTR psz2) {
         return (::StrCmpI(psz1, psz2) == 0);
     }
@@ -76,31 +76,31 @@ namespace TestMocks {
         return FALSE;
     }
 
-    // Function under test: GetCBXType
-    inline CBXTYPE GetCBXType(LPCTSTR szExt) {
+    // Function under test: GetLENSType
+    inline LENSTYPE GetLENSType(LPCTSTR szExt) {
         // Comic book archives
-        if (StrEqual(szExt, _T(".cbz"))) return CBXTYPE_CBZ;
-        if (StrEqual(szExt, _T(".cbr"))) return CBXTYPE_CBR;
-        if (StrEqual(szExt, _T(".cb7"))) return CBXTYPE_CB7;
-        if (StrEqual(szExt, _T(".cbt"))) return CBXTYPE_CBT;
+        if (StrEqual(szExt, _T(".cbz"))) return LENSTYPE_CBZ;
+        if (StrEqual(szExt, _T(".cbr"))) return LENSTYPE_CBR;
+        if (StrEqual(szExt, _T(".cb7"))) return LENSTYPE_CB7;
+        if (StrEqual(szExt, _T(".cbt"))) return LENSTYPE_CBT;
         
         // Generic archives
-        if (StrEqual(szExt, _T(".zip"))) return CBXTYPE_ZIP;
-        if (StrEqual(szExt, _T(".rar"))) return CBXTYPE_RAR;
-        if (StrEqual(szExt, _T(".7z")))  return CBXTYPE_7Z;
-        if (StrEqual(szExt, _T(".tar"))) return CBXTYPE_TAR;
+        if (StrEqual(szExt, _T(".zip"))) return LENSTYPE_ZIP;
+        if (StrEqual(szExt, _T(".rar"))) return LENSTYPE_RAR;
+        if (StrEqual(szExt, _T(".7z")))  return LENSTYPE_7Z;
+        if (StrEqual(szExt, _T(".tar"))) return LENSTYPE_TAR;
         
         // Ebook formats
-        if (StrEqual(szExt, _T(".epub"))) return CBXTYPE_EPUB;
-        if (StrEqual(szExt, _T(".mobi"))) return CBXTYPE_MOBI;
-        if (StrEqual(szExt, _T(".azw")))  return CBXTYPE_MOBI;
-        if (StrEqual(szExt, _T(".azw3"))) return CBXTYPE_MOBI;
-        if (StrEqual(szExt, _T(".fb2")))  return CBXTYPE_FB2;
+        if (StrEqual(szExt, _T(".epub"))) return LENSTYPE_EPUB;
+        if (StrEqual(szExt, _T(".mobi"))) return LENSTYPE_MOBI;
+        if (StrEqual(szExt, _T(".azw")))  return LENSTYPE_MOBI;
+        if (StrEqual(szExt, _T(".azw3"))) return LENSTYPE_MOBI;
+        if (StrEqual(szExt, _T(".fb2")))  return LENSTYPE_FB2;
         
         // Photo archives
-        if (StrEqual(szExt, _T(".phz"))) return CBXTYPE_CBZ;
+        if (StrEqual(szExt, _T(".phz"))) return LENSTYPE_CBZ;
         
-        return CBXTYPE_NONE;
+        return LENSTYPE_NONE;
     }
 }
 
@@ -110,72 +110,72 @@ namespace TestMocks {
 
 TEST_SUITE(FormatDetectionTests)
 
-TEST_CASE(TestGetCBXType_ComicArchives) {
+TEST_CASE(TestGetLENSType_ComicArchives) {
     std::cout << "  Testing comic book archive format detection..." << std::endl;
     
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cbz")), CBXTYPE_CBZ);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cbr")), CBXTYPE_CBR);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cb7")), CBXTYPE_CB7);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cbt")), CBXTYPE_CBT);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cbz")), LENSTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cbr")), LENSTYPE_CBR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cb7")), LENSTYPE_CB7);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cbt")), LENSTYPE_CBT);
     
     // Case insensitive
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".CBZ")), CBXTYPE_CBZ);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".CbR")), CBXTYPE_CBR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".CBZ")), LENSTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".CbR")), LENSTYPE_CBR);
 }
 
-TEST_CASE(TestGetCBXType_GenericArchives) {
+TEST_CASE(TestGetLENSType_GenericArchives) {
     std::cout << "  Testing generic archive format detection..." << std::endl;
     
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".zip")), CBXTYPE_ZIP);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".rar")), CBXTYPE_RAR);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".7z")), CBXTYPE_7Z);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".tar")), CBXTYPE_TAR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".zip")), LENSTYPE_ZIP);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".rar")), LENSTYPE_RAR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".7z")), LENSTYPE_7Z);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".tar")), LENSTYPE_TAR);
     
     // Case insensitive
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".ZIP")), CBXTYPE_ZIP);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".Tar")), CBXTYPE_TAR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".ZIP")), LENSTYPE_ZIP);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".Tar")), LENSTYPE_TAR);
 }
 
-TEST_CASE(TestGetCBXType_EbookFormats) {
+TEST_CASE(TestGetLENSType_EbookFormats) {
     std::cout << "  Testing ebook format detection..." << std::endl;
     
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".epub")), CBXTYPE_EPUB);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".mobi")), CBXTYPE_MOBI);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".azw")), CBXTYPE_MOBI);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".azw3")), CBXTYPE_MOBI);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".fb2")), CBXTYPE_FB2);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".epub")), LENSTYPE_EPUB);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".mobi")), LENSTYPE_MOBI);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".azw")), LENSTYPE_MOBI);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".azw3")), LENSTYPE_MOBI);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".fb2")), LENSTYPE_FB2);
     
     // Case insensitive
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".EPUB")), CBXTYPE_EPUB);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".Mobi")), CBXTYPE_MOBI);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".EPUB")), LENSTYPE_EPUB);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".Mobi")), LENSTYPE_MOBI);
 }
 
-TEST_CASE(TestGetCBXType_PhotoArchives) {
+TEST_CASE(TestGetLENSType_PhotoArchives) {
     std::cout << "  Testing photo archive format detection..." << std::endl;
     
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".phz")), CBXTYPE_CBZ);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".PHZ")), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".phz")), LENSTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".PHZ")), LENSTYPE_CBZ);
 }
 
-TEST_CASE(TestGetCBXType_UnsupportedFormats) {
+TEST_CASE(TestGetLENSType_UnsupportedFormats) {
     std::cout << "  Testing unsupported format detection..." << std::endl;
     
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".txt")), CBXTYPE_NONE);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".pdf")), CBXTYPE_NONE);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".doc")), CBXTYPE_NONE);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".exe")), CBXTYPE_NONE);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T("")), CBXTYPE_NONE);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T("noextension")), CBXTYPE_NONE);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".txt")), LENSTYPE_NONE);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".pdf")), LENSTYPE_NONE);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".doc")), LENSTYPE_NONE);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".exe")), LENSTYPE_NONE);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T("")), LENSTYPE_NONE);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T("noextension")), LENSTYPE_NONE);
 }
 
-TEST_CASE(TestGetCBXType_EdgeCases) {
+TEST_CASE(TestGetLENSType_EdgeCases) {
     std::cout << "  Testing edge cases..." << std::endl;
     
     // Multiple dots
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".backup.cbz")), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".backup.cbz")), LENSTYPE_CBZ);
     
     // Single character before extension
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T("a.zip")), CBXTYPE_ZIP);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T("a.zip")), LENSTYPE_ZIP);
 }
 
 END_TEST_SUITE()
@@ -303,26 +303,26 @@ TEST_CASE(TestAllArchiveFormatsSupported) {
     std::cout << "  Verifying all 12 archive formats are detected..." << std::endl;
     
     std::vector<std::pair<std::wstring, int>> formats = {
-        {L".zip", CBXTYPE_ZIP},
-        {L".cbz", CBXTYPE_CBZ},
-        {L".rar", CBXTYPE_RAR},
-        {L".cbr", CBXTYPE_CBR},
-        {L".epub", CBXTYPE_EPUB},
-        {L".7z", CBXTYPE_7Z},
-        {L".cb7", CBXTYPE_CB7},
-        {L".tar", CBXTYPE_TAR},
-        {L".cbt", CBXTYPE_CBT},
-        {L".mobi", CBXTYPE_MOBI},
-        {L".azw", CBXTYPE_MOBI},
-        {L".azw3", CBXTYPE_MOBI},
-        {L".fb2", CBXTYPE_FB2},
-        {L".phz", CBXTYPE_CBZ}
+        {L".zip", LENSTYPE_ZIP},
+        {L".cbz", LENSTYPE_CBZ},
+        {L".rar", LENSTYPE_RAR},
+        {L".cbr", LENSTYPE_CBR},
+        {L".epub", LENSTYPE_EPUB},
+        {L".7z", LENSTYPE_7Z},
+        {L".cb7", LENSTYPE_CB7},
+        {L".tar", LENSTYPE_TAR},
+        {L".cbt", LENSTYPE_CBT},
+        {L".mobi", LENSTYPE_MOBI},
+        {L".azw", LENSTYPE_MOBI},
+        {L".azw3", LENSTYPE_MOBI},
+        {L".fb2", LENSTYPE_FB2},
+        {L".phz", LENSTYPE_CBZ}
     };
     
     int supportedCount = 0;
     for (const auto& fmt : formats) {
-        CBXTYPE result = TestMocks::GetCBXType(fmt.first.c_str());
-        if (result != CBXTYPE_NONE) {
+        LENSTYPE result = TestMocks::GetLENSType(fmt.first.c_str());
+        if (result != LENSTYPE_NONE) {
             supportedCount++;
             ASSERT_EQUAL(result, fmt.second);
         }
@@ -358,18 +358,18 @@ TEST_CASE(TestNoFormatCollisions) {
     std::cout << "  Testing for format type collisions..." << std::endl;
     
     // Ensure each format type is unique
-    ASSERT_TRUE(CBXTYPE_NONE != CBXTYPE_ZIP);
-    ASSERT_TRUE(CBXTYPE_ZIP != CBXTYPE_CBZ);
-    ASSERT_TRUE(CBXTYPE_RAR != CBXTYPE_CBR);
-    ASSERT_TRUE(CBXTYPE_7Z != CBXTYPE_CB7);
-    ASSERT_TRUE(CBXTYPE_TAR != CBXTYPE_CBT);
-    ASSERT_TRUE(CBXTYPE_MOBI != CBXTYPE_FB2);
-    ASSERT_TRUE(CBXTYPE_EPUB != CBXTYPE_MOBI);
+    ASSERT_TRUE(LENSTYPE_NONE != LENSTYPE_ZIP);
+    ASSERT_TRUE(LENSTYPE_ZIP != LENSTYPE_CBZ);
+    ASSERT_TRUE(LENSTYPE_RAR != LENSTYPE_CBR);
+    ASSERT_TRUE(LENSTYPE_7Z != LENSTYPE_CB7);
+    ASSERT_TRUE(LENSTYPE_TAR != LENSTYPE_CBT);
+    ASSERT_TRUE(LENSTYPE_MOBI != LENSTYPE_FB2);
+    ASSERT_TRUE(LENSTYPE_EPUB != LENSTYPE_MOBI);
     
     // Verify type value ranges
-    ASSERT_TRUE(CBXTYPE_NONE == 0);
-    ASSERT_TRUE(CBXTYPE_ZIP == 1);
-    ASSERT_TRUE(CBXTYPE_FB2 == 11);
+    ASSERT_TRUE(LENSTYPE_NONE == 0);
+    ASSERT_TRUE(LENSTYPE_ZIP == 1);
+    ASSERT_TRUE(LENSTYPE_FB2 == 11);
 }
 
 END_TEST_SUITE()
@@ -383,13 +383,13 @@ TEST_SUITE(RegressionTests)
 TEST_CASE(TestBackwardCompatibility_OriginalFormats) {
     std::cout << "  Testing backward compatibility with original 6 formats..." << std::endl;
     
-    // Original DarkThumbs supported these 6 formats
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".zip")), CBXTYPE_ZIP);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cbz")), CBXTYPE_CBZ);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".rar")), CBXTYPE_RAR);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cbr")), CBXTYPE_CBR);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".epub")), CBXTYPE_EPUB);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".phz")), CBXTYPE_CBZ);
+    // Original ExplorerLens supported these 6 formats
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".zip")), LENSTYPE_ZIP);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cbz")), LENSTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".rar")), LENSTYPE_RAR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cbr")), LENSTYPE_CBR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".epub")), LENSTYPE_EPUB);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".phz")), LENSTYPE_CBZ);
 }
 
 TEST_CASE(TestBackwardCompatibility_OriginalImages) {
@@ -409,12 +409,12 @@ TEST_CASE(TestEnhancement_NewArchiveFormats) {
     std::cout << "  Testing enhancement: 6 new archive formats..." << std::endl;
     
     // New formats added in Windows 11 modernization
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".7z")), CBXTYPE_7Z);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cb7")), CBXTYPE_CB7);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".tar")), CBXTYPE_TAR);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cbt")), CBXTYPE_CBT);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".mobi")), CBXTYPE_MOBI);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".fb2")), CBXTYPE_FB2);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".7z")), LENSTYPE_7Z);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cb7")), LENSTYPE_CB7);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".tar")), LENSTYPE_TAR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cbt")), LENSTYPE_CBT);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".mobi")), LENSTYPE_MOBI);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".fb2")), LENSTYPE_FB2);
 }
 
 TEST_CASE(TestEnhancement_NewImageFormats) {
@@ -442,14 +442,14 @@ TEST_CASE(TestPathExtraction_WindowsPaths) {
     
     ASSERT_TRUE(TestMocks::IsImage(_T("C:\\Users\\Test\\image.jpg")));
     ASSERT_TRUE(TestMocks::IsImage(_T("C:\\Program Files\\app\\data\\photo.png")));
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T("D:\\Comics\\book.cbz")), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T("D:\\Comics\\book.cbz")), LENSTYPE_CBZ);
 }
 
 TEST_CASE(TestPathExtraction_NetworkPaths) {
     std::cout << "  Testing UNC network path handling..." << std::endl;
     
     ASSERT_TRUE(TestMocks::IsImage(_T("\\\\server\\share\\image.webp")));
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T("\\\\nas\\comics\\book.cbr")), CBXTYPE_CBR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T("\\\\nas\\comics\\book.cbr")), LENSTYPE_CBR);
 }
 
 TEST_CASE(TestPathExtraction_RelativePaths) {
@@ -457,7 +457,7 @@ TEST_CASE(TestPathExtraction_RelativePaths) {
     
     ASSERT_TRUE(TestMocks::IsImage(_T("..\\folder\\image.avif")));
     ASSERT_TRUE(TestMocks::IsImage(_T(".\\current\\pic.jxl")));
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T("subfolder\\archive.7z")), CBXTYPE_7Z);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T("subfolder\\archive.7z")), LENSTYPE_7Z);
 }
 
 TEST_CASE(TestPathExtraction_LongPaths) {
@@ -477,7 +477,7 @@ TEST_CASE(TestPathExtraction_SpecialCharacters) {
     
     ASSERT_TRUE(TestMocks::IsImage(_T("C:\\Users\\Test (Admin)\\My Photos\\pic.jpg")));
     ASSERT_TRUE(TestMocks::IsImage(_T("C:\\Files & Folders\\image_2024-11-18.webp")));
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T("C:\\Comics [Collection]\\book.cbz")), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T("C:\\Comics [Collection]\\book.cbz")), LENSTYPE_CBZ);
 }
 
 END_TEST_SUITE()
@@ -492,7 +492,7 @@ TEST_CASE(TestEmptyStrings) {
     std::cout << "  Testing empty string handling..." << std::endl;
     
     ASSERT_FALSE(TestMocks::IsImage(_T("")));
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T("")), CBXTYPE_NONE);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T("")), LENSTYPE_NONE);
 }
 
 TEST_CASE(TestNullTerminatedStrings) {
@@ -503,7 +503,7 @@ TEST_CASE(TestNullTerminatedStrings) {
     ASSERT_TRUE(TestMocks::IsImage(buffer));
     
     wcscpy_s(buffer, _T("archive.cbz"));
-    ASSERT_EQUAL(TestMocks::GetCBXType(PathFindExtension(buffer)), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(PathFindExtension(buffer)), LENSTYPE_CBZ);
 }
 
 TEST_CASE(TestVeryLongFilenames) {
@@ -515,7 +515,7 @@ TEST_CASE(TestVeryLongFilenames) {
     
     longName = std::wstring(500, L'b') + L".cbz";
     LPWSTR ext = PathFindExtension(longName.c_str());
-    ASSERT_EQUAL(TestMocks::GetCBXType(ext), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(ext), LENSTYPE_CBZ);
 }
 
 TEST_CASE(TestMultipleDotsInFilename) {
@@ -523,7 +523,7 @@ TEST_CASE(TestMultipleDotsInFilename) {
     
     ASSERT_TRUE(TestMocks::IsImage(_T("my.photo.backup.jpg")));
     ASSERT_TRUE(TestMocks::IsImage(_T("file.v1.2.3.png")));
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".backup.copy.cbz")), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".backup.copy.cbz")), LENSTYPE_CBZ);
 }
 
 TEST_CASE(TestUnicodeFilenames) {
@@ -540,7 +540,7 @@ TEST_CASE(TestUnicodeFilenames) {
     LPWSTR ext1 = PathFindExtension(_T("画像.jpg"));
     LPWSTR ext2 = PathFindExtension(_T("komiks.cbz"));
     ASSERT_TRUE(TestMocks::IsImage(_T("画像.jpg")));
-    ASSERT_EQUAL(TestMocks::GetCBXType(ext2), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(ext2), LENSTYPE_CBZ);
 }
 
 END_TEST_SUITE()
@@ -554,29 +554,29 @@ TEST_SUITE(IntegrationTests)
 TEST_CASE(TestRealWorldComicBookNames) {
     std::cout << "  Testing real-world comic book filenames..." << std::endl;
     
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cbz")), CBXTYPE_CBZ);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cbr")), CBXTYPE_CBR);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".cb7")), CBXTYPE_CB7);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cbz")), LENSTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cbr")), LENSTYPE_CBR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".cb7")), LENSTYPE_CB7);
     
     // Common patterns
     std::wstring ext = PathFindExtension(L"Batman Vol 1 #001 (1940).cbz");
-    ASSERT_EQUAL(TestMocks::GetCBXType(ext.c_str()), CBXTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(ext.c_str()), LENSTYPE_CBZ);
     
     ext = PathFindExtension(L"Spider-Man_Annual_001.cbr");
-    ASSERT_EQUAL(TestMocks::GetCBXType(ext.c_str()), CBXTYPE_CBR);
+    ASSERT_EQUAL(TestMocks::GetLENSType(ext.c_str()), LENSTYPE_CBR);
 }
 
 TEST_CASE(TestRealWorldEbookNames) {
     std::cout << "  Testing real-world ebook filenames..." << std::endl;
     
     std::wstring ext = PathFindExtension(L"The Great Book.epub");
-    ASSERT_EQUAL(TestMocks::GetCBXType(ext.c_str()), CBXTYPE_EPUB);
+    ASSERT_EQUAL(TestMocks::GetLENSType(ext.c_str()), LENSTYPE_EPUB);
     
     ext = PathFindExtension(L"Novel_2024.mobi");
-    ASSERT_EQUAL(TestMocks::GetCBXType(ext.c_str()), CBXTYPE_MOBI);
+    ASSERT_EQUAL(TestMocks::GetLENSType(ext.c_str()), LENSTYPE_MOBI);
     
     ext = PathFindExtension(L"Kindle_Book.azw3");
-    ASSERT_EQUAL(TestMocks::GetCBXType(ext.c_str()), CBXTYPE_MOBI);
+    ASSERT_EQUAL(TestMocks::GetLENSType(ext.c_str()), LENSTYPE_MOBI);
 }
 
 TEST_CASE(TestRealWorldImageNames) {
@@ -591,8 +591,8 @@ TEST_CASE(TestRealWorldImageNames) {
 TEST_CASE(TestMixedCaseExtensions) {
     std::cout << "  Testing mixed case extensions (real world)..." << std::endl;
     
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".Cbz")), CBXTYPE_CBZ);
-    ASSERT_EQUAL(TestMocks::GetCBXType(_T(".ePub")), CBXTYPE_EPUB);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".Cbz")), LENSTYPE_CBZ);
+    ASSERT_EQUAL(TestMocks::GetLENSType(_T(".ePub")), LENSTYPE_EPUB);
     ASSERT_TRUE(TestMocks::IsImage(_T("file.JpG")));
     ASSERT_TRUE(TestMocks::IsImage(_T("file.WebP")));
 }
@@ -605,7 +605,7 @@ END_TEST_SUITE()
 
 void PrintTestHeader() {
     std::cout << "=========================================" << std::endl;
-    std::cout << "DarkThumbs Unit Test Suite" << std::endl;
+    std::cout << "ExplorerLens Unit Test Suite" << std::endl;
     std::cout << "Version: 4.6 (Windows 11 Modernized)" << std::endl;
     std::cout << "=========================================" << std::endl;
     std::cout << std::endl;
@@ -634,12 +634,12 @@ int main() {
     PrintTestHeader();
     
     std::cout << "[Suite 1/8] Format Detection Tests" << std::endl;
-    RUN_TEST(FormatDetectionTests::TestGetCBXType_ComicArchives);
-    RUN_TEST(FormatDetectionTests::TestGetCBXType_GenericArchives);
-    RUN_TEST(FormatDetectionTests::TestGetCBXType_EbookFormats);
-    RUN_TEST(FormatDetectionTests::TestGetCBXType_PhotoArchives);
-    RUN_TEST(FormatDetectionTests::TestGetCBXType_UnsupportedFormats);
-    RUN_TEST(FormatDetectionTests::TestGetCBXType_EdgeCases);
+    RUN_TEST(FormatDetectionTests::TestGetLENSType_ComicArchives);
+    RUN_TEST(FormatDetectionTests::TestGetLENSType_GenericArchives);
+    RUN_TEST(FormatDetectionTests::TestGetLENSType_EbookFormats);
+    RUN_TEST(FormatDetectionTests::TestGetLENSType_PhotoArchives);
+    RUN_TEST(FormatDetectionTests::TestGetLENSType_UnsupportedFormats);
+    RUN_TEST(FormatDetectionTests::TestGetLENSType_EdgeCases);
     std::cout << std::endl;
     
     std::cout << "[Suite 2/8] Image Format Tests" << std::endl;
@@ -697,3 +697,4 @@ int main() {
     
     return (g_testsFailed == 0) ? 0 : 1;
 }
+

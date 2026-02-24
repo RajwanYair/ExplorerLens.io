@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 135 — JPEG XR / WDP / HDP WIC Decoder
+// JPEG XR / WDP / HDP WIC Decoder
 // Microsoft JPEG XR (HD Photo) format support via Windows Imaging Component.
 // Leverages built-in WIC codec for .wdp, .hdp, .jxr files.
 
@@ -10,7 +10,7 @@
 #include <array>
 #include <algorithm>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
 // ─── JPEG XR sub-formats ─────────────────────────────────────────
 enum class JXRFormat : uint8_t {
@@ -256,4 +256,5 @@ private:
     bool m_wicAvailable = true;
 };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

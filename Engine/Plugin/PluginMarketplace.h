@@ -1,6 +1,6 @@
-// PluginMarketplace.h - Plugin Marketplace & Distribution (Sprint 29)
-// DarkThumbs Engine v7.0.0+
-// Copyright (c) 2026 DarkThumbs Project
+// PluginMarketplace.h - Plugin Marketplace & Distribution
+// ExplorerLens Engine v7.0.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Features:
 // - REST API client for marketplace catalog
@@ -26,7 +26,7 @@
 #include <chrono>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // ============================================================================
@@ -78,7 +78,7 @@ struct PluginManifest {
     uint32_t versionMajor = 1;
     uint32_t versionMinor = 0;
     uint32_t versionPatch = 0;
-    VersionRange compatibleWith;    ///< DarkThumbs version compatibility
+    VersionRange compatibleWith;    ///< ExplorerLens version compatibility
     PluginArch architecture = PluginArch::x64;
     
     // Classification
@@ -371,12 +371,12 @@ struct MarketplaceResponse {
     bool hasMore = false;
 };
 
-/// REST API client for the DarkThumbs plugin marketplace
+/// REST API client for the ExplorerLens plugin marketplace
 class MarketplaceClient {
 public:
     /// Marketplace server configuration
     struct ServerConfig {
-        std::string baseUrl = "https://marketplace.darkthumbs.io/api/v1";
+        std::string baseUrl = "https://marketplace.explorerlens.io/api/v1";
         std::string apiKey;
         uint32_t timeoutMs = 30000;
         bool useTLS = true;
@@ -554,4 +554,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

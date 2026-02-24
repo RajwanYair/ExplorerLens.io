@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Host
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Host
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Separate process host for running untrusted plugins in isolation.
  * 
@@ -24,7 +24,7 @@ struct CommandLineArgs {
 };
 
 void PrintUsage() {
-    std::wcout << L"DarkThumbs PluginHost v1.0\n";
+    std::wcout << L"ExplorerLens PluginHost v1.0\n";
     std::wcout << L"\n";
     std::wcout << L"Usage:\n";
     std::wcout << L"  PluginHost.exe --plugin <path> --pipe <name> [--timeout <ms>]\n";
@@ -95,13 +95,13 @@ int wmain(int argc, wchar_t* argv[]) {
         return 1;
     }
     
-    std::wcout << L"DarkThumbs PluginHost starting...\n";
+    std::wcout << L"ExplorerLens PluginHost starting...\n";
     std::wcout << L"  Plugin: " << args.plugin_path << L"\n";
     std::wcout << L"  Pipe: " << args.pipe_name << L"\n";
     std::wcout << L"  Timeout: " << args.timeout_ms << L" ms\n";
     
     // Create plugin host server
-    DarkThumbs::PluginHost::PluginHostServer server;
+    ExplorerLens::PluginHost::PluginHostServer server;
     
     // Initialize
     if (!server.Initialize(args.plugin_path, args.pipe_name, args.timeout_ms)) {
@@ -121,3 +121,4 @@ int wmain(int argc, wchar_t* argv[]) {
     
     return 0;
 }
+

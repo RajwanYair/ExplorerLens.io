@@ -1,4 +1,4 @@
-# DarkThumbs Developer Guide
+# ExplorerLens Developer Guide
 **Version:** 7.1.0  
 **Last Updated:** February 18, 2026  
 **Target Audience:** Contributors, Plugin Developers, Maintainers  
@@ -27,9 +27,9 @@
                   │ IThumbnailProvider Interface
                   ▼
 ┌─────────────────────────────────────────────────────┐
-│            CBXShell.dll (Shell Extension)           │
+│            LENSShell.dll (Shell Extension)           │
 │  ┌────────────────────────────────────────────────┐ │
-│  │  CBXShellClass (IThumbnailProvider impl)      │ │
+│  │  LENSShellClass (IThumbnailProvider impl)      │ │
 │  │  - COM Registration                            │ │
 │  │  - IThumbnailProvider::GetThumbnail()         │ │
 │  │  - SEH Exception Handling                     │ │
@@ -38,7 +38,7 @@
                      │ Engine API
                      ▼
 ┌─────────────────────────────────────────────────────┐
-│         DarkThumbsEngine.lib (Core Engine)          │
+│         ExplorerLensEngine.lib (Core Engine)          │
 │  ┌────────────────────────────────────────────────┐ │
 │  │  ImageEngine (Main API)                       │ │
 │  │  - InitializeForThumbnails()                  │ │
@@ -75,20 +75,20 @@
 
 ### Key Components
 
-1. **CBXShell.dll** - Windows Shell Extension (COM DLL)
+1. **LENSShell.dll** - Windows Shell Extension (COM DLL)
    - Implements `IThumbnailProvider` COM interface
    - Handles Explorer integration
    - SEH exception protection wrapper
-   - Delegates to `DarkThumbsEngine.lib`
+   - Delegates to `ExplorerLensEngine.lib`
 
-2. **DarkThumbsEngine.lib** - Core thumbnail engine (static library)
+2. **ExplorerLensEngine.lib** - Core thumbnail engine (static library)
    - Format detection and dispatching
    - Decoder implementations
    - GPU acceleration via DirectX 11
    - SIMD-optimized image processing
    - Circuit breaker pattern for failing decoders
 
-3. **CBXManager.exe** - Configuration utility (WinUI 3 / Win32)
+3. **LENSManager.exe** - Configuration utility (WinUI 3 / Win32)
    - Handler registration/unregistration
    - Cache management
    - GPU selection
@@ -130,7 +130,7 @@ Or manually install:
 ### Repository Structure
 
 ```
-DarkThumbs/
+ExplorerLens/
 ├── Engine/               # Core thumbnail engine (C++20)
 │   ├── Core/            # API surface, initialization
 │   ├── Decoders/        # Format-specific decoders
@@ -138,15 +138,15 @@ DarkThumbs/
 │   ├── Utils/           # Utilities, SIMD, profiling
 │   └── CMakeLists.txt
 │
-├── CBXShell/            # Shell extension (COM DLL)
-│   ├── CBXShellClass.cpp/.h    # IThumbnailProvider impl
-│   ├── CBXShell.idl            # COM interface definition
-│   └── CBXShell.vcxproj        # MSBuild project
+├── LENSShell/            # Shell extension (COM DLL)
+│   ├── LENSShellClass.cpp/.h    # IThumbnailProvider impl
+│   ├── LENSShell.idl            # COM interface definition
+│   └── LENSShell.vcxproj        # MSBuild project
 │
-├── CBXManager/          # Configuration utility
+├── LENSManager/          # Configuration utility
 │   ├── MainDlg.cpp/.h          # Main dialog
 │   ├── DarkModeHelper.h        # Dark mode support
-│   └── CBXManager.vcxproj
+│   └── LENSManager.vcxproj
 │
 ├── external/            # Third-party libraries
 │   ├── compression-libs/  # zlib, zstd, lz4, lzma, minizip-ng
@@ -206,7 +206,7 @@ DarkThumbs/
 # With package installation
 .\build-scripts\Setup-Vcpkg.ps1 -InstallPackages
 
-# Note: DarkThumbs currently builds most libraries from source
+# Note: ExplorerLens currently builds most libraries from source
 ```
 
 #### 1. Build External Libraries
@@ -250,25 +250,25 @@ cmake -S . -B build -G Ninja `
   -DCMAKE_C_COMPILER=clang
 
 # Build
-cmake --build build --config Release --target DarkThumbsEngine -j 8
+cmake --build build --config Release --target ExplorerLensEngine -j 8
 
-# Output: build/lib/Release/DarkThumbsEngine.lib
+# Output: build/lib/Release/ExplorerLensEngine.lib
 ```
 
-#### 3. Build CBXShell (MSBuild)
+#### 3. Build LENSShell (MSBuild)
 
 ```powershell
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /t:CBXShell /m
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /t:LENSShell /m
 
-# Output: x64/Release/CBXShell.dll
+# Output: x64/Release/LENSShell.dll
 ```
 
-#### 4. Build CBXManager
+#### 4. Build LENSManager
 
 ```powershell
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /t:CBXManager /m
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /t:LENSManager /m
 
-# Output: x64/Release/CBXManager.exe
+# Output: x64/Release/LENSManager.exe
 ```
 
 ### Build Configurations
@@ -288,7 +288,7 @@ msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /t:CBXManager /m
 **Header:** `Engine/Core/EngineAPI.h`
 
 ```cpp
-class DarkThumbsEngine {
+class ExplorerLensEngine {
 public:
     static bool InitializeForThumbnails(HWND hwnd = nullptr);
     static bool CreateThumbnailFromFile(
@@ -409,13 +409,13 @@ test: Add fuzzing tests for RAR archives
 
 ```powershell
 # Build tests
-cmake --build build --target DarkThumbsTests
+cmake --build build --target ExplorerLensTests
 
 # Run all tests
 ctest --test-dir build --output-on-failure
 
 # Run specific test
-.\build\tests\DarkThumbsTests.exe --gtest_filter=*PNGDecoder*
+.\build\tests\ExplorerLensTests.exe --gtest_filter=*PNGDecoder*
 ```
 
 ### Integration Tests
@@ -433,10 +433,10 @@ ctest --test-dir build --output-on-failure
 ```powershell
 # Enable CRT debug heap
 $env:_NO_DEBUG_HEAP = 0
-.\build\tests\DarkThumbsTests.exe
+.\build\tests\ExplorerLensTests.exe
 
 # Or use Application Verifier
-appverif /verify handles locks heaps memory /for CBXShell.dll
+appverif /verify handles locks heaps memory /for LENSShell.dll
 ```
 
 ---
@@ -451,7 +451,7 @@ Shell extensions run in Explorer process. Use:
 # Method 1: Attach to Explorer
 # 1. Build Debug configuration
 # 2. Open Visual Studio → Debug → Attach to Process → explorer.exe
-# 3. Set breakpoint in CBXShellClass::GetThumbnail
+# 3. Set breakpoint in LENSShellClass::GetThumbnail
 # 4. Navigate to folder with target file in Explorer
 
 # Method 2: Standalone test harness
@@ -464,7 +464,7 @@ Enable debug output:
 
 ```cpp
 // Engine/Utils/DebugLog.h
-#define DARKTHUMBS_DEBUG_LOG 1
+#define ExplorerLens_DEBUG_LOG 1
 
 // Logs to OutputDebugString, viewable in DebugView
 LOG_DEBUG(L"Decoding file: %s", filePath.c_str());
@@ -477,7 +477,7 @@ View logs with **DebugView** (Sysinternals):
 # Download and run
 .\DebugView.exe
 
-# Filter: darkthumbs*
+# Filter: ExplorerLens*
 ```
 
 ### Performance Profiling
@@ -508,3 +508,4 @@ View logs with **DebugView** (Sysinternals):
 ---
 
 **Happy coding! 🚀**
+

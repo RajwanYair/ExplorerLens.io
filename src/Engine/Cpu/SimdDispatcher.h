@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace DarkThumbs::Engine::Cpu {
+namespace ExplorerLens::Engine::Cpu {
 
     enum class CpuInstructionSet {
         Generic,
@@ -46,3 +46,4 @@ namespace DarkThumbs::Engine::Cpu {
     ISimdDispatcher* GetSimdDispatcher();
 
 }
+

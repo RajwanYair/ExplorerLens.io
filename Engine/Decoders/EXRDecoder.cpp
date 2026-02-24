@@ -1,5 +1,5 @@
 // EXRDecoder.cpp - OpenEXR Image Decoder Implementation
-// DarkThumbs Engine v6.1.0+
+// ExplorerLens Engine v6.1.0+
 // Uses WIC with Windows built-in or third-party OpenEXR codec
 // Falls back gracefully if no EXR codec is installed
 
@@ -8,7 +8,7 @@
 #include <cstring>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* EXRDecoder::m_extensions[] = { L".exr" };
@@ -176,4 +176,5 @@ std::unique_ptr<uint8_t[]> EXRDecoder::ReadFileData(const wchar_t* path, size_t&
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

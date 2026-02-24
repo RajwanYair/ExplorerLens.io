@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 297: Cloud Storage Integration
+// ExplorerLens Engine — Cloud Storage Integration
 // OneDrive, Google Drive, and SharePoint thumbnail integration pipeline.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Cloud storage provider
 enum class CloudProvider : uint8_t {
@@ -110,4 +110,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

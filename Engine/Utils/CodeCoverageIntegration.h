@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// CodeCoverageIntegration — Sprint 190
+// CodeCoverageIntegration
 // OpenCppCoverage integration + LibFuzzer harness for decoders
 //
 // Provides:
@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <functional>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Coverage metric types
 enum class CoverageMetric : uint8_t {
@@ -155,4 +155,5 @@ private:
     CoverageThresholds m_thresholds;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

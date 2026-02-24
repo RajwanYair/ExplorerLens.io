@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// FITSDecoder — Sprint 199
+// FITSDecoder
 // Astronomy FITS (Flexible Image Transport System) format decoder.
 // Supports .fits, .fit, .fts files with basic HDU parsing.
 //
@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// FITS data type (BITPIX values)
 enum class FITSBitpix : int16_t {
@@ -96,4 +96,5 @@ private:
     double ReadPixelValue(const uint8_t* data, size_t offset) const;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

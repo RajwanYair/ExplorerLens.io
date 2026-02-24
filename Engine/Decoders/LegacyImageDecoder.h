@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 284: FLIF/BPG Legacy Image Decoder
+// ExplorerLens Engine — FLIF/BPG Legacy Image Decoder
 // Free Lossless Image Format and Better Portable Graphics decoders.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Legacy image format type
 enum class LegacyImageFormat : uint8_t {
@@ -93,4 +93,5 @@ public:
     static constexpr size_t ColorSpaceCount() { return static_cast<size_t>(LegacyColorSpace::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

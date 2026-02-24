@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DarkThumbs Test Data Generator
+ExplorerLens Test Data Generator
 Creates sample archive files for integration testing
 """
 
@@ -202,9 +202,9 @@ class TestDataGenerator:
     
     def create_readme(self):
         """Create README for test data"""
-        readme_content = """# DarkThumbs Test Data
+        readme_content = """# ExplorerLens Test Data
 
-This directory contains test files for DarkThumbs unit and integration testing.
+This directory contains test files for ExplorerLens unit and integration testing.
 
 ## Test Files
 
@@ -260,7 +260,7 @@ python generate_test_data.py
     def generate_all(self, keep_images=True):
         """Generate all test data"""
         print("=" * 50)
-        print("DarkThumbs Test Data Generator")
+        print("ExplorerLens Test Data Generator")
         print("=" * 50)
         print()
         
@@ -291,3 +291,4 @@ python generate_test_data.py
 if __name__ == "__main__":
     generator = TestDataGenerator()
     generator.generate_all(keep_images=True)
+

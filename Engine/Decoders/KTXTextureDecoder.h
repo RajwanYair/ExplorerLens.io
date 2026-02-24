@@ -1,8 +1,8 @@
 #pragma once
-// Sprint 134+184 — KTX/KTX2 Texture Decoder
+// KTX/KTX2 Texture Decoder
 // GPU-native texture container support for Khronos KTX and KTX2 formats.
 // Extracts thumbnails from compressed GPU textures (BC1-BC7, ASTC, ETC2).
-// Sprint 184: Full implementation with KTX1/KTX2 header parsing, BC1 decompression.
+// Full implementation with KTX1/KTX2 header parsing, BC1 decompression.
 
 #include <cstdint>
 #include <cstddef>
@@ -10,8 +10,9 @@
 #include <string>
 #include <array>
 #include <algorithm>
+#include <cctype>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
 // ─── KTX version ──────────────────────────────────────────────────
 enum class KTXVersion : uint8_t {
@@ -143,7 +144,8 @@ struct KTXExtensions {
 
     static bool IsSupported(const std::string& ext) {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         for (auto& e : ALL) {
             if (lower == e) return true;
         }
@@ -152,7 +154,8 @@ struct KTXExtensions {
 
     static KTXVersion VersionFromExtension(const std::string& ext) {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         if (lower == ".ktx") return KTXVersion::KTX1;
         if (lower == ".ktx2") return KTXVersion::KTX2;
         return KTXVersion::Unknown;
@@ -229,4 +232,5 @@ private:
                             uint32_t outputStride) const;
 };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

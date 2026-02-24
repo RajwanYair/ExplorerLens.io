@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Decoder Adapter Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Decoder Adapter Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  *****************************************************************************/
 
 #include "PluginDecoder.h"
@@ -11,7 +11,7 @@
 #include <codecvt>
 #include <locale>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //============================================================================
@@ -442,4 +442,5 @@ std::unique_ptr<PluginDecoder> PluginDecoderFactory::CreateDecoderWithMode(
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

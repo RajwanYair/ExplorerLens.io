@@ -1,12 +1,12 @@
 //==============================================================================
-// ConfigMigrationEngine — Sprint 214
+// ConfigMigrationEngine
 //==============================================================================
 
 #include "ConfigMigrationEngine.h"
 #include <chrono>
 #include <fstream>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 ConfigMigrationEngine::ConfigMigrationEngine() {
     // Default schema entries
@@ -166,4 +166,5 @@ const wchar_t* ConfigMigrationEngine::GetActionName(MigrationAction action) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

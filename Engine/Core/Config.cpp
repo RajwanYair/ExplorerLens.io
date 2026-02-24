@@ -1,12 +1,12 @@
 //==============================================================================
-// DarkThumbs Engine - Configuration Implementation
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Configuration Implementation
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "Config.h"
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -197,4 +197,5 @@ ENGINE_API EngineConfig& GetEngineConfig() {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

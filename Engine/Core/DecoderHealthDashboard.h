@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 143 — Decoder Health Dashboard
+// Decoder Health Dashboard
 // Live status panel model with circuit breaker visualization.
 // Provides data model for real-time decoder health monitoring UI.
 
@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace DarkThumbs::Core {
+namespace ExplorerLens::Core {
 
 // ─── Circuit breaker state ──────────────────────────────────────
 enum class CircuitState : uint8_t {
@@ -258,4 +258,5 @@ private:
     }
 };
 
-} // namespace DarkThumbs::Core
+} // namespace ExplorerLens::Core
+

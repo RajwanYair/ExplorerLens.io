@@ -10,7 +10,7 @@ param(
     [switch]$Verbose
 )
 
-Write-Host "=== DarkThumbs GPU Test Suite ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens GPU Test Suite ===" -ForegroundColor Cyan
 Write-Host ""
 
 # Build test tools
@@ -61,7 +61,7 @@ if ($Verbose) {
 & "$PSScriptRoot\GPUThumbnailTest.exe" $args
 
 Write-Host ""
-Write-Host "=== Running CBXBench ===" -ForegroundColor Cyan
+Write-Host "=== Running LENSBench ===" -ForegroundColor Cyan
 Write-Host ""
 
 $csvPath = "$PSScriptRoot\benchmark_results_$(Get-Date -Format 'yyyyMMdd_HHmmss').csv"
@@ -70,8 +70,9 @@ if ($Verbose) {
     $benchArgs += "-v"
 }
 
-& "$PSScriptRoot\CBXBench.exe" $benchArgs
+& "$PSScriptRoot\LENSBench.exe" $benchArgs
 
 Write-Host ""
 Write-Host "=== Test Suite Complete ===" -ForegroundColor Green
 Write-Host "Benchmark results saved to: $csvPath" -ForegroundColor Cyan
+

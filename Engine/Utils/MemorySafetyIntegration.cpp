@@ -1,5 +1,5 @@
 //==============================================================================
-// MemorySafetyIntegration — Sprint 191 Implementation
+// MemorySafetyIntegration
 // ASAN integration + memory-mapped I/O
 //==============================================================================
 
@@ -13,7 +13,7 @@
 #include <windows.h>
 #endif
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 MemorySafetyIntegration::MemorySafetyIntegration()
 {
@@ -140,6 +140,7 @@ bool MemorySafetyIntegration::ValidateAccess(
 MemorySafetyReport MemorySafetyIntegration::RunDecoderSafetyCheck(
     const std::wstring& decoderName) const
 {
+    (void)decoderName;
     MemorySafetyReport report;
     report.mode = IsASANEnabled() ? SanitizerMode::AddressSanitizer : SanitizerMode::None;
     report.passed = true;
@@ -195,4 +196,5 @@ bool MemorySafetyIntegration::IsSafeToMap(uint64_t fileSize)
     return fileSize > 0 && fileSize <= GetMaxMappableSize();
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

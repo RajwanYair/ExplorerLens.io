@@ -1,6 +1,6 @@
 # Minimal Plugin Example
 
-This is the simplest possible DarkThumbs plugin that demonstrates the basic structure.
+This is the simplest possible ExplorerLens plugin that demonstrates the basic structure.
 
 ## What It Does
 
@@ -87,3 +87,4 @@ plugin-tester.exe minimal_plugin.dll test.txtimg
 ## License
 
 MIT License - See LICENSE.txt
+

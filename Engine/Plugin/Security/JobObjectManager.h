@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Job Object Manager
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Job Object Manager
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Manages Job Objects for enforcing resource limits on plugin processes.
  *****************************************************************************/
@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Security {
 
 //============================================================================
@@ -104,4 +104,5 @@ inline LARGE_INTEGER MillisecondsToFileTime(uint64_t milliseconds) {
 }
 
 } // namespace Security
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

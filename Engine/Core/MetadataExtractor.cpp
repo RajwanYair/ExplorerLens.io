@@ -1,6 +1,6 @@
 // =============================================================================
-// MetadataExtractor.cpp — Sprint 242: EXIF/IPTC/XMP Metadata Extraction
-// DarkThumbs Engine — Core Module
+// MetadataExtractor.cpp — EXIF/IPTC/XMP Metadata Extraction
+// ExplorerLens Engine — Core Module
 // =============================================================================
 
 #include "MetadataExtractor.h"
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 MetadataExtractor::MetadataExtractor() {
     // Enable all standards by default
@@ -157,4 +157,5 @@ const wchar_t* MetadataExtractor::GetFieldName(MetadataField field) {
     }
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

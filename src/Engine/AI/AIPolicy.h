@@ -1,6 +1,6 @@
 #pragma once
 
-namespace DarkThumbs::Engine::AI {
+namespace ExplorerLens::Engine::AI {
 
     enum class AIProcessingLevel {
         None = 0,               // Strictly disabled
@@ -39,3 +39,4 @@ namespace DarkThumbs::Engine::AI {
     };
 
 }
+

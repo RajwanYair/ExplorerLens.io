@@ -1,7 +1,7 @@
 // Sprint 127 — COM Apartment Model Audit Tests
 #include <gtest/gtest.h>
 #include "Shell/COMApartmentAudit.h"
-using namespace DarkThumbs::COM;
+using namespace ExplorerLens::COM;
 
 TEST(Sprint127_COMApartment, AuditEntry_Compliant) {
     InterfaceAuditEntry e;
@@ -84,3 +84,4 @@ TEST(Sprint127_COMApartment, AuditResult_ComplianceZeroInterfaces) {
     ApartmentAuditResult r;
     EXPECT_DOUBLE_EQ(r.CompliancePercent(), 100.0);
 }
+

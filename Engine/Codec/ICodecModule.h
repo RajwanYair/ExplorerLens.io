@@ -1,12 +1,12 @@
 //==============================================================================
-// DarkThumbs Engine — Modular Codec Interface (ICodecModule)
-// Sprint 36+: Execution Optimization — Per-Format DLL Architecture
-// Copyright (c) 2026 — DarkThumbs Project
+// ExplorerLens Engine — Modular Codec Interface (ICodecModule)
+// Execution Optimization — Per-Format DLL Architecture
+// Copyright (c) 2026 — ExplorerLens Project
 //
 // PURPOSE:
 //   Define the binary-stable C ABI that every codec DLL exports.
 //   Each codec DLL is a self-contained decoder for one family of file formats.
-//   The shell extension (CBXShell.dll) loads codec DLLs on demand so that
+//   The shell extension (LENSShell.dll) loads codec DLLs on demand so that
 //   browsing a directory containing only JPEGs never pages in the RAW or
 //   HEIF codec — cutting working-set by 10-40 MB per unused codec.
 //
@@ -25,12 +25,12 @@
 //
 // BUILD NOTES:
 //   Codec DLLs link ONLY against the libraries they need:
-//     DarkThumbs_Codec_WebP.dll  → libwebp, libsharpyuv
-//     DarkThumbs_Codec_HEIF.dll  → libheif, libde265
-//     DarkThumbs_Codec_JXL.dll   → libjxl, brotli, highway
-//     DarkThumbs_Codec_RAW.dll   → LibRaw
+//     ExplorerLens_Codec_WebP.dll  → libwebp, libsharpyuv
+//     ExplorerLens_Codec_HEIF.dll  → libheif, libde265
+//     ExplorerLens_Codec_JXL.dll   → libjxl, brotli, highway
+//     ExplorerLens_Codec_RAW.dll   → LibRaw
 //     … etc.
-//   The host (CBXShell.dll) links against NONE of these.
+//   The host (LENSShell.dll) links against NONE of these.
 //==============================================================================
 
 #pragma once
@@ -115,7 +115,7 @@ typedef struct DtCodecModuleInfo
     uint64_t    estimatedMemoryBytes;
 
     /// Unique codec identifier for registry / logging.
-    /// Convention: "darkthumbs.codec.<family>", e.g. "darkthumbs.codec.webp"
+    /// Convention: "explorerlens.codec.<family>", e.g. "explorerlens.codec.webp"
     const char* codecId;
 
 } DtCodecModuleInfo;
@@ -251,3 +251,4 @@ typedef uint32_t (__stdcall *PFN_DtCodec_GetHealth)(DtCodecHealth* health);
 #ifdef __cplusplus
 } // extern "C"
 #endif
+

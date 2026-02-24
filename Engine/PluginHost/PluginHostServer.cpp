@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Host Server Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Host Server Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  *****************************************************************************/
 
 #include "PluginHostServer.h"
@@ -8,7 +8,7 @@
 #include <iostream>
 #include <chrono>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace PluginHost {
 
 //============================================================================
@@ -239,7 +239,7 @@ void PluginHostServer::HandleRequestThumbnail(uint64_t correlation_id,
     std::wcout << L"  File: " << file_path << L"\n";
     std::wcout << L"  Size: " << request->targetWidth << L"x" << request->targetHeight << L"\n";
     
-    // Sprint 17.5: Implement actual plugin decoding
+    // Implement actual plugin decoding
     IPC::ThumbnailResponse response;
     std::vector<uint8_t> bitmap_data;
     
@@ -497,4 +497,5 @@ void PluginHostServer::HeartbeatThreadProc() {
 }
 
 } // namespace PluginHost
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

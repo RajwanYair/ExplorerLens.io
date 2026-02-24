@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 301: Shader Compiler V2
+// ExplorerLens Engine — Shader Compiler V2
 // Advanced HLSL shader compilation with PSO library caching, hot-reload,
 // and multi-target (SM6.6/SM6.7) support for thumbnail rendering shaders.
 //==============================================================================
@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Shader model target
 enum class ShaderModel : uint8_t {
@@ -98,4 +98,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

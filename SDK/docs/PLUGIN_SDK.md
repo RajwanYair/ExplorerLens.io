@@ -1,4 +1,4 @@
-# DarkThumbs Plugin SDK Documentation
+# ExplorerLens Plugin SDK Documentation
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@
 
 ## Introduction
 
-The DarkThumbs Plugin SDK enables developers to extend DarkThumbs with custom thumbnail decoders for new file formats. Plugins use a stable C ABI that ensures binary compatibility across DarkThumbs versions.
+The ExplorerLens Plugin SDK enables developers to extend ExplorerLens with custom thumbnail decoders for new file formats. Plugins use a stable C ABI that ensures binary compatibility across ExplorerLens versions.
 
 ### Key Features
 
@@ -28,7 +28,7 @@ The DarkThumbs Plugin SDK enables developers to extend DarkThumbs with custom th
 
 ### System Requirements
 
-- **DarkThumbs**: Version 8.4.0 or later
+- **ExplorerLens**: Version 8.4.0 or later
 - **Compiler**: MSVC 2026+ v145 toolset (Windows), GCC 11+ (Linux), Clang 14+ (macOS)
 - **C++ Standard**: C++20 or C11
 - **Windows SDK**: 10.0.26100.0 or later
@@ -74,7 +74,7 @@ SDK/
 3. **Build as DLL**:
    ```cmake
    add_library(myplugin SHARED myplugin.cpp)
-   target_link_libraries(myplugin PRIVATE DarkThumbs::SDK)
+   target_link_libraries(myplugin PRIVATE ExplorerLens::SDK)
    ```
 
 4. **Test the plugin**:
@@ -99,7 +99,7 @@ SDK/
 
 ```
 ┌─────────────────────────────────────────────────┐
-│ Host Application (DarkThumbs)                   │
+│ Host Application (ExplorerLens)                   │
 ├─────────────────────────────────────────────────┤
 │ 1. Plugin Discovery                             │
 │    - Scan plugin directory                      │
@@ -182,7 +182,7 @@ static const PluginInfo info = {
     .plugin_author = "Your Name",
     .plugin_description = "WebP image decoder with animation support",
     .plugin_license = "MIT",
-    .api_version = DARKTHUMBS_PLUGIN_API_VERSION,
+    .api_version = EXPLORERLENS_PLUGIN_API_VERSION,
     .supported_extensions = supported_extensions,
     .mime_types = mime_types,
     .capabilities = PLUGIN_CAP_STILL_IMAGE | PLUGIN_CAP_ANIMATION | PLUGIN_CAP_ALPHA,
@@ -391,7 +391,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include SDK header
-include_directories(${DARKTHUMBS_SDK_DIR})
+include_directories(${EXPLORERLENS_SDK_DIR})
 
 # Build plugin DLL
 add_library(myplugin SHARED
@@ -411,7 +411,7 @@ target_link_libraries(myplugin PRIVATE
 
 # Export plugin functions
 target_compile_definitions(myplugin PRIVATE
-    DARKTHUMBS_PLUGIN_EXPORTS
+    EXPLORERLENS_PLUGIN_EXPORTS
 )
 ```
 
@@ -432,7 +432,7 @@ static const PluginInfo g_info = {
     .plugin_author = "Your Name",
     .plugin_description = "Decoder for MY custom format",
     .plugin_license = "MIT",
-    .api_version = DARKTHUMBS_PLUGIN_API_VERSION,
+    .api_version = EXPLORERLENS_PLUGIN_API_VERSION,
     .supported_extensions = supported_exts,
     .mime_types = mime_types,
     .capabilities = PLUGIN_CAP_STILL_IMAGE | PLUGIN_CAP_ALPHA,
@@ -564,7 +564,7 @@ myplugin.dtplugin/
 
 ### Compatibility
 
-1. **API Version**: Always check `DARKTHUMBS_PLUGIN_API_VERSION`
+1. **API Version**: Always check `EXPLORERLENS_PLUGIN_API_VERSION`
 2. **Calling Convention**: Use `PLUGIN_CALL` (__stdcall on Windows)
 3. **C ABI**: Don't expose C++ classes in API
 4. **Dependencies**: Document all external dependencies
@@ -618,19 +618,19 @@ TEST(MyPluginTest, DecodeReturnsValidResult) {
 ### Installation
 
 Users install by copying `.dtplugin` folder to:
-- Windows: `%APPDATA%\DarkThumbs\Plugins\`
-- Linux: `~/.config/darkthumbs/plugins/`
-- macOS: `~/Library/Application Support/DarkThumbs/Plugins/`
+- Windows: `%APPDATA%\ExplorerLens\Plugins\`
+- Linux: `~/.config/explorerlens/plugins/`
+- macOS: `~/Library/Application Support/ExplorerLens/Plugins/`
 
 ---
 
 ## Support
 
-- **Documentation**: [https://darkthumbs.dev/docs/plugin-sdk](https://darkthumbs.dev/docs/plugin-sdk)
+- **Documentation**: [https://explorerlens.dev/docs/plugin-sdk](https://explorerlens.dev/docs/plugin-sdk)
 - **API Reference**: `SDK/docs/API_REFERENCE.md`
 - **Examples**: `SDK/examples/`
-- **Issues**: [GitHub Issues](https://github.com/darkthumbs/darkthumbs/issues)
-- **Discussion**: [GitHub Discussions](https://github.com/darkthumbs/darkthumbs/discussions)
+- **Issues**: [GitHub Issues](https://github.com/explorerlens/explorerlens/issues)
+- **Discussion**: [GitHub Discussions](https://github.com/explorerlens/explorerlens/discussions)
 
 ## License
 
@@ -638,4 +638,6 @@ MIT License - See `LICENSE.txt`
 
 ---
 
-**Copyright © 2026 DarkThumbs Project**
+**Copyright © 2026 ExplorerLens Project**
+
+

@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    Pre-installation verification tests for DarkThumbs (no admin required)
+    Pre-installation verification tests for ExplorerLens (no admin required)
 .DESCRIPTION
     Verifies that the build outputs are ready for installation without requiring
     administrator privileges. This runs the pre-checks before the full installation test.
@@ -40,43 +40,43 @@ Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "SPRINT 7: PRE-INSTALLATION VERIFICATION" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
-# Test 1: Verify CBXShell.dll exists in build directory
+# Test 1: Verify LENSShell.dll exists in build directory
 Write-Host "Phase 1: Build Output Verification" -ForegroundColor Yellow
 Write-Host "-----------------------------------" -ForegroundColor Gray
 
-$dllPath = "x64\Release\CBXShell.dll"
+$dllPath = "x64\Release\LENSShell.dll"
 if (Test-Path $dllPath) {
     $dll = Get-Item $dllPath
     $sizeOK = $dll.Length -gt 1MB
-    Write-TestResult "CBXShell.dll exists" $true "Size: $([Math]::Round($dll.Length/1MB,2)) MB, Modified: $($dll.LastWriteTime)"
-    Write-TestResult "CBXShell.dll size check" $sizeOK "Expected > 1 MB"
+    Write-TestResult "LENSShell.dll exists" $true "Size: $([Math]::Round($dll.Length/1MB,2)) MB, Modified: $($dll.LastWriteTime)"
+    Write-TestResult "LENSShell.dll size check" $sizeOK "Expected > 1 MB"
 }
 else {
-    Write-TestResult "CBXShell.dll exists" $false "File not found at $dllPath"
+    Write-TestResult "LENSShell.dll exists" $false "File not found at $dllPath"
 }
 
-$exePath = "x64\Release\CBXManager.exe"
+$exePath = "x64\Release\LENSManager.exe"
 if (Test-Path $exePath) {
     $exe = Get-Item $exePath
     $sizeOK = $exe.Length -gt 100KB
-    Write-TestResult "CBXManager.exe exists" $true "Size: $([Math]::Round($exe.Length/1KB,0)) KB, Modified: $($exe.LastWriteTime)"
-    Write-TestResult "CBXManager.exe size check" $sizeOK "Expected > 100 KB"
+    Write-TestResult "LENSManager.exe exists" $true "Size: $([Math]::Round($exe.Length/1KB,0)) KB, Modified: $($exe.LastWriteTime)"
+    Write-TestResult "LENSManager.exe size check" $sizeOK "Expected > 100 KB"
 }
 else {
-    Write-TestResult "CBXManager.exe exists" $false "File not found at $exePath"
+    Write-TestResult "LENSManager.exe exists" $false "File not found at $exePath"
 }
 
 # Test 2: Verify installation directory
 Write-Host "`nPhase 2: Installation Directory Check" -ForegroundColor Yellow
 Write-Host "--------------------------------------" -ForegroundColor Gray
 
-$installDll = "install\x64\CBXShell.dll"
+$installDll = "install\x64\LENSShell.dll"
 if (Test-Path $installDll) {
     $dll = Get-Item $installDll
-    Write-TestResult "install\x64\CBXShell.dll exists" $true "Ready for deployment"
+    Write-TestResult "install\x64\LENSShell.dll exists" $true "Ready for deployment"
     
     # Verify it matches the build output
-    $buildDll = Get-Item "x64\Release\CBXShell.dll" -ErrorAction SilentlyContinue
+    $buildDll = Get-Item "x64\Release\LENSShell.dll" -ErrorAction SilentlyContinue
     if ($buildDll -and ($dll.Length -eq $buildDll.Length)) {
         Write-TestResult "DLL matches build output" $true "Sizes match"
     }
@@ -85,26 +85,26 @@ if (Test-Path $installDll) {
     }
 }
 else {
-    Write-TestResult "install\x64\CBXShell.dll exists" $false "File not found - run copy command"
+    Write-TestResult "install\x64\LENSShell.dll exists" $false "File not found - run copy command"
 }
 
-$installExe = "install\x64\CBXManager.exe"
+$installExe = "install\x64\LENSManager.exe"
 if (Test-Path $installExe) {
-    Write-TestResult "install\x64\CBXManager.exe exists" $true "Ready for deployment"
+    Write-TestResult "install\x64\LENSManager.exe exists" $true "Ready for deployment"
 }
 else {
-    Write-TestResult "install\x64\CBXManager.exe exists" $false "File not found"
+    Write-TestResult "install\x64\LENSManager.exe exists" $false "File not found"
 }
 
-# Test 3: Verify darkthumbs.ps1 install script
+# Test 3: Verify explorerlens.ps1 install script
 Write-Host "`nPhase 3: Installation Script Check" -ForegroundColor Yellow
 Write-Host "-----------------------------------" -ForegroundColor Gray
 
-if (Test-Path "darkthumbs.ps1") {
-    Write-TestResult "darkthumbs.ps1 exists" $true "Installation script found"
+if (Test-Path "explorerlens.ps1") {
+    Write-TestResult "explorerlens.ps1 exists" $true "Installation script found"
     
     # Check if it has install parameter support
-    $scriptContent = Get-Content "darkthumbs.ps1" -Raw
+    $scriptContent = Get-Content "explorerlens.ps1" -Raw
     if ($scriptContent -match "install") {
         Write-TestResult "Install parameter support" $true "Script supports -install"
     }
@@ -113,7 +113,7 @@ if (Test-Path "darkthumbs.ps1") {
     }
 }
 else {
-    Write-TestResult "darkthumbs.ps1 exists" $false "Installation script not found"
+    Write-TestResult "explorerlens.ps1 exists" $false "Installation script not found"
 }
 
 # Test 4: Check for required DLL dependencies
@@ -122,7 +122,7 @@ Write-Host "------------------------------" -ForegroundColor Gray
 
 try {
     # Try to load the DLL information (doesn't require admin)
-    $dllInfo = [System.Reflection.AssemblyName]::GetAssemblyName("x64\Release\CBXShell.dll")
+    $dllInfo = [System.Reflection.AssemblyName]::GetAssemblyName("x64\Release\LENSShell.dll")
     Write-TestResult "DLL is valid .NET assembly" $true "Version: $($dllInfo.Version)"
 }
 catch {
@@ -201,7 +201,7 @@ if ($testResults.Failed.Count -eq 0) {
     Write-Host "2. Navigate to project directory" -ForegroundColor White
     Write-Host "3. Execute: .\tests\Test-Installation.ps1 -SkipUninstall" -ForegroundColor Yellow
     Write-Host "`nOr install directly:" -ForegroundColor Cyan
-    Write-Host "   .\darkthumbs.ps1 install" -ForegroundColor Yellow
+    Write-Host "   .\explorerlens.ps1 install" -ForegroundColor Yellow
 }
 else {
     Write-Host "`n❌ PRE-INSTALLATION VERIFICATION FAILED!" -ForegroundColor Red
@@ -209,3 +209,4 @@ else {
 }
 
 Write-Host ""
+

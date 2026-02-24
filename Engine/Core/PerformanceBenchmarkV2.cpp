@@ -3,7 +3,7 @@
 #include <numeric>
 #include <cmath>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 PerformanceBenchmarkV2::PerformanceBenchmarkV2() = default;
 
@@ -73,4 +73,5 @@ bool PerformanceBenchmarkV2::MeetsTarget(const BenchmarkResult& result, double t
     return result.p95Ms <= targetP95Ms;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

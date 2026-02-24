@@ -1,6 +1,6 @@
 //==============================================================================
 // GDIRenderer.h - CPU Fallback Renderer using GDI+
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //
 // Purpose: Software-based thumbnail rendering when GPU is unavailable
 // Features:
@@ -25,7 +25,7 @@
 
 #pragma comment(lib, "gdiplus.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 /// CPU-based renderer using GDI+ as fallback when GPU unavailable
@@ -87,4 +87,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

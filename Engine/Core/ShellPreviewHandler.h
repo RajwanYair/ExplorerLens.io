@@ -1,10 +1,10 @@
 #pragma once
-// Sprint 232: Shell Preview Handler — IPreviewHandler COM for Windows file preview pane
+// Shell Preview Handler — IPreviewHandler COM for Windows file preview pane
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Preview rendering mode
 enum class PreviewMode : uint32_t {
@@ -60,4 +60,5 @@ private:
     PreviewParams m_params;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,4 +1,4 @@
-# Build DarkThumbs Installer Package
+# Build ExplorerLens Installer Package
 # Sprint 23: Packaging & Deployment
 # Requires: WiX Toolset v4.0+ or v5.0+
 
@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Installer Build Script" -ForegroundColor Cyan
+Write-Host "ExplorerLens Installer Build Script" -ForegroundColor Cyan
 Write-Host "Sprint 23: MSI Package Creation" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
@@ -37,8 +37,8 @@ Write-Host ""
 Write-Host "[2/5] Verifying build artifacts..." -ForegroundColor Yellow
 
 $BinariesToCheck = @(
-    "x64\$Configuration\CBXShell.dll",
-    "x64\$Configuration\CBXManager.exe"
+    "x64\$Configuration\LENSShell.dll",
+    "x64\$Configuration\LENSManager.exe"
 )
 
 $AllExist = $true
@@ -56,7 +56,7 @@ foreach ($binary in $BinariesToCheck) {
 if (-not $AllExist) {
     Write-Host ""
     Write-Host "[ERROR] One or more binaries missing. Build the solution first:" -ForegroundColor Red
-    Write-Host "  msbuild CBXShell.sln /p:Configuration=$Configuration /p:Platform=x64 /m" -ForegroundColor Yellow
+    Write-Host "  msbuild LENSShell.sln /p:Configuration=$Configuration /p:Platform=x64 /m" -ForegroundColor Yellow
     exit 1
 }
 Write-Host ""
@@ -72,8 +72,8 @@ Write-Host ""
 
 # Build MSI package
 Write-Host "[4/5] Building MSI installer..." -ForegroundColor Yellow
-$WxsFile = Join-Path $PackagingDir "DarkThumbs.wxs"
-$MsiFile = Join-Path $OutputDir "DarkThumbs-Setup-$Version.msi"
+$WxsFile = Join-Path $PackagingDir "ExplorerLens.wxs"
+$MsiFile = Join-Path $OutputDir "ExplorerLens-Setup-$Version.msi"
 
 Write-Host "  Source: $WxsFile" -ForegroundColor Gray
 Write-Host "  Target: $MsiFile" -ForegroundColor Gray
@@ -119,3 +119,4 @@ Write-Host "  1. Test installer: msiexec /i `"$MsiFile`" /l*v install.log" -Fore
 Write-Host "  2. Uninstall test: msiexec /x `"$MsiFile`" /l*v uninstall.log" -ForegroundColor Gray
 Write-Host "  3. Code signing:   signtool sign /sha1 <thumbprint> /t http://timestamp.digicert.com `"$MsiFile`"" -ForegroundColor Gray
 Write-Host ""
+

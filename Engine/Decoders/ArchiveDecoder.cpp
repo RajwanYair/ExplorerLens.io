@@ -20,7 +20,7 @@ extern "C" {
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "windowscodecs.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Static data
@@ -734,4 +734,5 @@ bool ArchiveDecoder::GetArchiveMetadata(const wchar_t* filePath, ArchiveMetadata
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

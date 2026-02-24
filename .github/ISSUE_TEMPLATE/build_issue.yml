@@ -15,8 +15,8 @@ body:
       description: Which component is failing to build?
       options:
         - External Libraries (zlib, lzma, zstd, etc.)
-        - CBXShell.dll
-        - CBXManager
+        - LENSShell.dll
+        - LENSManager
         - Installer
         - Other
     validations:
@@ -66,3 +66,4 @@ body:
     attributes:
       label: Additional Context
       description: Any other relevant information
+

@@ -3,7 +3,7 @@
 #include <vector>
 #include <future>
 
-namespace DarkThumbs::Manager::Services {
+namespace ExplorerLens::Manager::Services {
 
     struct LogEntry {
         std::wstring Timestamp;
@@ -29,3 +29,4 @@ namespace DarkThumbs::Manager::Services {
         virtual void ToggleETWTracing(bool enable) = 0;
     };
 }
+

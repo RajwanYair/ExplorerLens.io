@@ -1,10 +1,10 @@
 #pragma once
 //==============================================================================
 // XPM (X PixMap) Decoder
-// Sprint 186: SGI/RGB & Legacy Format Support
+// SGI/RGB & Legacy Format Support
 // Parses XPM2 and XPM3 format files (ASCII-based pixel art format).
 // Used in X11/Unix UI systems for icons and cursors.
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include <cstdint>
@@ -12,7 +12,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     class XPMDecoder {
     public:
@@ -55,4 +55,5 @@ namespace DarkThumbs::Decoders {
         static std::string ExtractQuoted(const std::string& line);
     };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

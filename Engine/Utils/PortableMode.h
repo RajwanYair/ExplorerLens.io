@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 42: Portable Mode & Thumbnail Overlay Badges
+// ExplorerLens — Portable Mode & Thumbnail Overlay Badges
 // Registry-free portable operation, INI-based config, file-based cache,
 // format icon badges, file-size badges, overlay rendering.
 //==============================================================================
@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-namespace DarkThumbs::Engine::Utils {
+namespace ExplorerLens::Engine::Utils {
 
 //------------------------------------------------------------------------------
 // Portable Mode Detection & Configuration
@@ -33,7 +33,7 @@ inline const char* DeploymentModeName(DeploymentMode mode) {
 
 // Check for portable.ini adjacent to the DLL
 struct PortableDetector {
-    std::string dllDirectory;    // Directory containing CBXShell.dll
+    std::string dllDirectory;    // Directory containing LENSShell.dll
     std::string iniFilePath;     // Full path to portable.ini
 
     // Detect portable mode: look for portable.ini next to the DLL
@@ -173,7 +173,7 @@ struct PortablePaths {
 
     static PortablePaths FromLocalAppData(const std::string& appDataDir) {
         PortablePaths p;
-        p.baseDirectory = appDataDir + "\\DarkThumbs";
+        p.baseDirectory = appDataDir + "\\ExplorerLens";
         p.cacheDirectory = p.baseDirectory + "\\Cache";
         p.configFile = "";  // Uses registry
         p.logDirectory = p.baseDirectory + "\\Logs";
@@ -233,7 +233,7 @@ struct FormatBadge {
         if (lower == ".dng" || lower == ".cr2" || lower == ".cr3" ||
             lower == ".nef" || lower == ".arw" || lower == ".orf" ||
             lower == ".gpr") return "RAW";
-        if (lower == ".cbz" || lower == ".cbr" || lower == ".cb7") return "CBX";
+        if (lower == ".cbz" || lower == ".cbr" || lower == ".cb7") return "LENS";
         if (lower == ".epub") return "EPUB";
         if (lower == ".pdf") return "PDF";
         if (lower == ".mp4" || lower == ".mkv" || lower == ".avi" ||
@@ -320,10 +320,11 @@ struct DeploymentInfo {
     bool registeredWithShell = false;  // regsvr32 done?
 
     std::string Summary() const {
-        return "DarkThumbs v" + version + " [" +
+        return "ExplorerLens v" + version + " [" +
                DeploymentModeName(mode) + "] config=" + configSource +
                " registered=" + (registeredWithShell ? "yes" : "no");
     }
 };
 
-} // namespace DarkThumbs::Engine::Utils
+} // namespace ExplorerLens::Engine::Utils
+

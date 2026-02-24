@@ -1,16 +1,15 @@
-# DarkThumbs - GPU-Accelerated Thumbnail Generator
+# ExplorerLens.io - GPU-Accelerated Thumbnail Generator
 
-**High-Performance Windows Shell Extension for 200+ File Formats**
+**High-performance Windows Shell extension for 200+ file formats**
 
-DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11/12 GPU acceleration** and **multi-threaded processing**. Version 10.5.0 encompasses 248 development sprints spanning GPU pipeline V2, async decode, format detection V2, observability, accessibility, cloud sync, enterprise, batch processing, and comprehensive release gates.
+ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11/12 GPU acceleration** and **multi-threaded processing**. The project root directory is `ExplorerLens.io`, and this repository is the production codebase for the Explorer extension, engine, and manager UI.
 
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
 ![Platform](https://img.shields.io/badge/Platform-x64%20|%20ARM64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-10.5.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-14.0.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Sprints](https://img.shields.io/badge/Sprints-248-success)
-![Tests](https://img.shields.io/badge/Tests-687%20pass-success)
+![Tests](https://img.shields.io/badge/Tests-EngineUnitTests%20pass-success)
 ![Warnings](https://img.shields.io/badge/Warnings-0-green)
 
 ---
@@ -111,7 +110,7 @@ DarkThumbs generates thumbnails for images, videos, documents, 3D models, fonts,
 
 ```cmd
 REM Open "x64 Native Tools Command Prompt for VS 2022/2026"
-cd DarkThumbs
+cd ExplorerLens
 RUN-BUILD.bat
 ```
 
@@ -122,26 +121,26 @@ See [Build Quick Reference](docs/development/BUILD_QUICK_REFERENCE.md) for detai
 ```cmd
 REM Register DLL (as Administrator)
 cd x64\Release
-regsvr32 CBXShell.dll
+regsvr32 LENSShell.dll
 ```
 
 ### Configure
 
-Run `CBXManager.exe` to enable/disable file format categories.
+Run `LENSManager.exe` to enable/disable file format categories.
 
 ---
 
 ## 🏗️ Project Structure
 
 ```
-DarkThumbs/
-├── CBXShell/              # Main COM shell extension
-├── CBXManager/            # Configuration GUI tool
+ExplorerLens/
+├── LENSShell/              # Main COM shell extension
+├── LENSManager/            # Configuration GUI tool
 ├── build-scripts/         # Build automation
 ├── docs/                  # Documentation
 ├── external/              # Third-party libraries
 ├── .github/               # GitHub workflows and templates
-├── CBXShell.sln          # Visual Studio solution
+├── LENSShell.sln          # Visual Studio solution
 ├── LICENSE               # MIT License
 ├── MASTER_PLAN.md        # Unified roadmap and execution plan
 └── RUN-BUILD.bat         # Quick build script
@@ -224,3 +223,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 **Built with ❤️ using C++20 and DirectX 11/12**
 
 _Last Updated: June 2025 (v8.4.0)_
+

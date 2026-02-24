@@ -4,7 +4,7 @@
 
 ## Overview
 
-DarkThumbs now supports 50+ camera RAW formats from all major manufacturers through a Windows Imaging Component (WIC) based decoder. This provides native Windows integration without requiring external libraries.
+ExplorerLens now supports 50+ camera RAW formats from all major manufacturers through a Windows Imaging Component (WIC) based decoder. This provides native Windows integration without requiring external libraries.
 
 ## Implementation Details
 
@@ -12,8 +12,8 @@ DarkThumbs now supports 50+ camera RAW formats from all major manufacturers thro
 - **Decoder Engine**: Windows Imaging Component (WIC)  
 - **Format Support**: Canon, Nikon, Sony, Olympus, Panasonic, Pentax, Fujifilm, DNG, and more
 - **Codec Requirement**: Microsoft Camera Codec Pack (Windows Feature On Demand)
-- **Implementation**: [CBXShell/raw_decoder.cpp](../CBXShell/raw_decoder.cpp) (233 lines)
-- **Header**: [CBXShell/raw_decoder.h](../CBXShell/raw_decoder.h) (371 lines)
+- **Implementation**: [LENSShell/raw_decoder.cpp](../LENSShell/raw_decoder.cpp) (233 lines)
+- **Header**: [LENSShell/raw_decoder.h](../LENSShell/raw_decoder.h) (371 lines)
 
 ### Key Features
 
@@ -52,10 +52,10 @@ DarkThumbs now supports 50+ camera RAW formats from all major manufacturers thro
 
 ## Code Architecture
 
-### DarkThumbs::RAWDecoder Class
+### ExplorerLens::RAWDecoder Class
 
 ```cpp
-namespace DarkThumbs {
+namespace ExplorerLens {
     class RAWDecoder {
     public:
         // Get image dimensions without full decode
@@ -91,29 +91,29 @@ namespace RawDecoder {
 
 ### 1. File Extension Detection
 
-[CBXShell/cbxArchive.h](../CBXShell/cbxArchive.h#L2048-L2095)
+[LENSShell/lensArchive.h](../LENSShell/lensArchive.h#L2048-L2095)
 
 ```cpp
 #ifdef ENABLE_RAW_SUPPORT
     // Canon
-    if (StrEqual(szExt, _T(".cr2"))) return CBXTYPE_RAW;
-    if (StrEqual(szExt, _T(".cr3"))) return CBXTYPE_RAW;
+    if (StrEqual(szExt, _T(".cr2"))) return LENSTYPE_RAW;
+    if (StrEqual(szExt, _T(".cr3"))) return LENSTYPE_RAW;
     // Nikon
-    if (StrEqual(szExt, _T(".nef"))) return CBXTYPE_RAW;
+    if (StrEqual(szExt, _T(".nef"))) return LENSTYPE_RAW;
     // Sony
-    if (StrEqual(szExt, _T(".arw"))) return CBXTYPE_RAW;
+    if (StrEqual(szExt, _T(".arw"))) return LENSTYPE_RAW;
     // ... and 10 more formats ...
 #endif
 ```
 
 ### 2. Decoder Invocation
 
-[CBXShell/cbxArchive.h](../CBXShell/cbxArchive.h#L2304-L2320)
+[LENSShell/lensArchive.h](../LENSShell/lensArchive.h#L2304-L2320)
 
 ```cpp
 #ifdef ENABLE_RAW_SUPPORT
     if (RawDecoder::IsSupported()) {
-        HRESULT hrRaw = DarkThumbs::RAWDecoder::DecodeToHBITMAP(
+        HRESULT hrRaw = ExplorerLens::RAWDecoder::DecodeToHBITMAP(
             buffer.data(), streamSize, &hModernBitmap,
             pThumbSize ? pThumbSize->cx : 512, 
             pThumbSize ? pThumbSize->cy : 512
@@ -127,7 +127,7 @@ namespace RawDecoder {
 
 ### 3. Build Configuration
 
-[CBXShell/CBXShell.vcxproj](../CBXShell/CBXShell.vcxproj)
+[LENSShell/LENSShell.vcxproj](../LENSShell/LENSShell.vcxproj)
 
 - **Preprocessor**: `ENABLE_RAW_SUPPORT` defined for Release builds
 - **Compilation**: `raw_decoder.cpp` added to ClCompile items
@@ -175,7 +175,7 @@ The Camera Codec Pack provides native WIC codecs for:
 1. **Try embedded thumbnail first** (IWICBitmapDecoder::GetPreview)
 2. **Fall back to frame decode** if no preview available
 3. **Scale at decode time** using WIC scaler (high-quality)
-4. **Cache results** using DarkThumbs thumbnail cache (10-100x boost)
+4. **Cache results** using ExplorerLens thumbnail cache (10-100x boost)
 
 ## Testing
 
@@ -287,7 +287,7 @@ test-raw-formats/
 
 ✅ **Integration Complete**:
 - File extension detection (14 extensions)
-- Decoder routing in cbxArchive.h
+- Decoder routing in lensArchive.h
 - Build configuration updated
 - Zero warnings compilation
 
@@ -299,3 +299,4 @@ test-raw-formats/
 **Status**: Ready for testing with real RAW files
 
 **Next Sprint**: Test with Canon CR2, Nikon NEF, Sony ARW, DNG samples
+

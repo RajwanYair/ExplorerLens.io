@@ -1,12 +1,12 @@
 #pragma once
 //==============================================================================
-// ETWSinkComplete.h — Sprint 126
+// ETWSinkComplete.h
 // Complete ETW provider sink wiring with retention policy, auto-rotation,
 // schema versioning, and structured event emission for the full pipeline.
 //
 // Usage:
 //   #include "Core/ETWSinkComplete.h"
-//   auto& sink = DarkThumbs::ETW::ETWSinkManager::Get();
+//   auto& sink = ExplorerLens::ETW::ETWSinkManager::Get();
 //   sink.Configure(ETWSinkConfig::Production());
 //   sink.EmitDecodeEvent(event);
 //==============================================================================
@@ -24,7 +24,7 @@
 #include <windows.h>
 #endif
 
-namespace DarkThumbs { namespace ETW {
+namespace ExplorerLens { namespace ETW {
 
 /// ETW event schema version for forward compatibility
 struct SchemaVersion {
@@ -99,7 +99,7 @@ struct ETWEvent {
     }
 };
 
-/// Well-known event IDs for DarkThumbs pipeline
+/// Well-known event IDs for ExplorerLens pipeline
 struct EventIds {
     static constexpr uint16_t RequestStart     = 100;
     static constexpr uint16_t RequestComplete  = 101;
@@ -142,8 +142,8 @@ struct ETWSinkConfig {
     uint8_t minLevel = 4;   // Info
     uint64_t enabledKeywords = Keywords::All;
     RetentionPolicy retention;
-    std::string logDirectory;   // Empty = %LocalAppData%\DarkThumbs\Logs
-    std::string providerName = "DarkThumbs-Engine-Core";
+    std::string logDirectory;   // Empty = %LocalAppData%\ExplorerLens\Logs
+    std::string providerName = "ExplorerLens-Engine-Core";
 
     static ETWSinkConfig Production() {
         ETWSinkConfig c;
@@ -308,4 +308,5 @@ private:
     std::mutex m_mutex;
 };
 
-}} // namespace DarkThumbs::ETW
+}} // namespace ExplorerLens::ETW
+

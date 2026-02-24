@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 287: NIfTI Neuroimaging Decoder
+// ExplorerLens Engine — NIfTI Neuroimaging Decoder
 // Neuroimaging Informatics Technology Initiative (.nii/.nii.gz) decoder.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// NIfTI data type codes
 enum class NIfTIDataType : uint8_t {
@@ -107,4 +107,5 @@ public:
     static constexpr size_t VariantCount() { return static_cast<size_t>(NIfTIVariant::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

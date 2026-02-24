@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// TestSuiteExpansion — Sprint 196
+// TestSuiteExpansion
 // Comprehensive test framework expansion with format-specific test archives,
 // property-based testing infrastructure, and test coverage tracking
 //==============================================================================
@@ -11,7 +11,7 @@
 #include <functional>
 #include <unordered_map>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Test category for organizing test suites
 enum class TestCategory : uint8_t {
@@ -136,4 +136,5 @@ private:
     TestExpansionConfig m_config;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

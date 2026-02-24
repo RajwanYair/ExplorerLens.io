@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 289: HDR Display Pipeline
+// ExplorerLens Engine — HDR Display Pipeline
 // High Dynamic Range display output with tone mapping and wide color gamut.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Tone mapping operator
 enum class ToneMappingOp : uint8_t {
@@ -108,4 +108,5 @@ public:
     static bool ValidateExposure(float exp) { return exp > 0.0f && exp <= 20.0f; }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

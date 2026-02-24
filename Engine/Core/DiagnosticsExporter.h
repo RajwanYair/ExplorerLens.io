@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 144 — Diagnostics Export Finalization
+// Diagnostics Export Finalization
 // One-click ZIP bundle export for support diagnostics.
 // Collects system info, decoder health, ETW logs, and config into a ZIP.
 
@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <sstream>
 
-namespace DarkThumbs::Core {
+namespace ExplorerLens::Core {
 
 // ─── Diagnostic data category ───────────────────────────────────
 enum class DiagCategory : uint8_t {
@@ -62,7 +62,7 @@ struct DiagEntry {
 
 // ─── Export configuration ───────────────────────────────────────
 struct DiagExportConfig {
-    std::string outputPath = "DarkThumbs_Diagnostics.zip";
+    std::string outputPath = "ExplorerLens_Diagnostics.zip";
     bool includeSensitive = false;
     bool includeETW = true;
     bool includePerformance = true;
@@ -233,4 +233,5 @@ private:
     std::vector<DiagEntry> m_entries;
 };
 
-} // namespace DarkThumbs::Core
+} // namespace ExplorerLens::Core
+

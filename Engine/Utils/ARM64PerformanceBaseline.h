@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 158 — ARM64 Performance Baseline
+// ARM64 Performance Baseline
 // Captures ARM64-specific throughput and latency baselines for CI trend tracking.
 // Includes NEON vs scalar fallback comparison.
 
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Platform {
+namespace ExplorerLens::Platform {
 
 // ─── KPI constants ────────────────────────────────────────────────────────────
 
@@ -130,4 +130,5 @@ struct BaselineTrendResult {
     }
 };
 
-} // namespace DarkThumbs::Platform
+} // namespace ExplorerLens::Platform
+

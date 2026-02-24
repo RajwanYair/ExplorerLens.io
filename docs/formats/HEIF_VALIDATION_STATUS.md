@@ -4,10 +4,10 @@
 **Last Updated**: February 17, 2026
 
 ## Overview
-DarkThumbs has **two HEIF/HEIC decoder implementations** for different components:
+ExplorerLens has **two HEIF/HEIC decoder implementations** for different components:
 
-### 1. CBXShell WIC Decoder (Production-Ready)
-**Location**: `CBXShell/heif_decoder_native.cpp` (194 lines)  
+### 1. LENSShell WIC Decoder (Production-Ready)
+**Location**: `LENSShell/heif_decoder_native.cpp` (194 lines)  
 **Implementation**: Windows Imaging Component (WIC)  
 **Status**: ✅ Complete, integrated and shipping in v7.0.0
 
@@ -79,7 +79,7 @@ DarkThumbs has **two HEIF/HEIC decoder implementations** for different component
 
 ## Integration Status
 
-### CBXShell Integration
+### LENSShell Integration
 - [x] Decoder implementation complete
 - [x] Format detection (IsHEIFFormat)
 - [x] WIC pipeline integration
@@ -169,7 +169,7 @@ Write-Host "`nReady for manual testing!" -ForegroundColor Green
 
 ## Completed Steps
 1. **Test files acquired** — iPhone HEIC photos, multi-image HEIF, transparent HEIF, 4K images tested.
-2. **Validation complete** — CBXShell WIC + Engine libheif paths both produce thumbnails.
+2. **Validation complete** — LENSShell WIC + Engine libheif paths both produce thumbnails.
 3. **Performance benchmarked** — WIC: ~30ms, libheif: ~60ms (embedded thumbnail), both within target.
 4. **Production-ready** — Windows 10 codec check implemented, graceful fallback in place.
 
@@ -184,3 +184,4 @@ Write-Host "`nReady for manual testing!" -ForegroundColor Green
 ---
 **Status Legend**:  
 ✅ Complete | ⚠️ Needs Testing | ❌ Not Started | 🚧 In Progress
+

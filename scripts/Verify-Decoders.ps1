@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Verifies DarkThumbs decoder source files exist and have expected structure.
+    Verifies ExplorerLens decoder source files exist and have expected structure.
 
 .DESCRIPTION
     Checks that all decoder source files are present, contain expected class/function 
@@ -16,13 +16,13 @@
     .\Verify-Decoders.ps1 -CheckOnly Engine
 
 .NOTES
-    Part of DarkThumbs Sprint 15C audit tooling.
+    Part of ExplorerLens Sprint 15C audit tooling.
     Does NOT require build tools — pure file/text analysis.
 #>
 
 [CmdletBinding()]
 param(
-    [ValidateSet("All", "Engine", "CBXShell")]
+    [ValidateSet("All", "Engine", "LENSShell")]
     [string]$CheckOnly = "All"
 )
 
@@ -167,7 +167,7 @@ function Test-UnitTests {
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host " DarkThumbs Decoder Verification" -ForegroundColor Cyan
+Write-Host " ExplorerLens Decoder Verification" -ForegroundColor Cyan
 Write-Host " Project: $projectRoot" -ForegroundColor Gray
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
@@ -214,42 +214,42 @@ if ($CheckOnly -in "All", "Engine") {
     Test-UnitTests
 }
 
-# --- CBXShell Legacy Decoders ---
-if ($CheckOnly -in "All", "CBXShell") {
+# --- LENSShell Legacy Decoders ---
+if ($CheckOnly -in "All", "LENSShell") {
     Write-Host ""
-    Write-Host "--- CBXShell Legacy Decoders ---" -ForegroundColor Yellow
+    Write-Host "--- LENSShell Legacy Decoders ---" -ForegroundColor Yellow
 
-    Test-DecoderFile -Path "CBXShell\avif_decoder.cpp" -Name "AVIF (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\avif_decoder.cpp" -Name "AVIF (Legacy)" `
         -RequiredPatterns @("DecodeToHBITMAP|AVIF", "\.avif")
 
-    Test-DecoderFile -Path "CBXShell\webp_decoder.cpp" -Name "WebP (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\webp_decoder.cpp" -Name "WebP (Legacy)" `
         -RequiredPatterns @("DecodeToHBITMAP|WebP", "\.webp")
 
-    Test-DecoderFile -Path "CBXShell\jxl_decoder.cpp" -Name "JXL (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\jxl_decoder.cpp" -Name "JXL (Legacy)" `
         -RequiredPatterns @("DecodeToHBITMAP|JXL", "\.jxl")
 
-    Test-DecoderFile -Path "CBXShell\heif_decoder_native.cpp" -Name "HEIF Native (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\heif_decoder_native.cpp" -Name "HEIF Native (Legacy)" `
         -RequiredPatterns @("DecodeToHBITMAP|HEIF", "\.heif|\.heic")
 
-    Test-DecoderFile -Path "CBXShell\raw_decoder.cpp" -Name "RAW (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\raw_decoder.cpp" -Name "RAW (Legacy)" `
         -RequiredPatterns @("DecodeToHBITMAP|RAW|RawDecoder", "\.cr2|\.nef|\.dng")
 
-    Test-DecoderFile -Path "CBXShell\pdf_decoder.cpp" -Name "PDF (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\pdf_decoder.cpp" -Name "PDF (Legacy)" `
         -RequiredPatterns @("PDF|pdf", "\.pdf")
 
-    Test-DecoderFile -Path "CBXShell\svg_decoder.h" -Name "SVG (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\svg_decoder.h" -Name "SVG (Legacy)" `
         -RequiredPatterns @("SVG|svg", "\.svg")
 
-    Test-DecoderFile -Path "CBXShell\video_thumbnail.cpp" -Name "Video (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\video_thumbnail.cpp" -Name "Video (Legacy)" `
         -RequiredPatterns @("VideoThumbnail|ExtractFrame", "DirectShow|dshow")
 
-    Test-DecoderFile -Path "CBXShell\audio_thumbnail.cpp" -Name "Audio (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\audio_thumbnail.cpp" -Name "Audio (Legacy)" `
         -RequiredPatterns @("AudioThumbnail|ExtractAlbumArt", "\.mp3|\.flac")
 
-    Test-DecoderFile -Path "CBXShell\document_thumbnail.cpp" -Name "Document (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\document_thumbnail.cpp" -Name "Document (Legacy)" `
         -RequiredPatterns @("DocumentThumbnail|ExtractDocumentThumbnail", "\.docx|\.doc")
 
-    Test-DecoderFile -Path "CBXShell\font_preview.cpp" -Name "Font (Legacy)" `
+    Test-DecoderFile -Path "LENSShell\font_preview.cpp" -Name "Font (Legacy)" `
         -RequiredPatterns @("FontPreview|GenerateFontPreview", "\.ttf|\.otf")
 }
 
@@ -281,3 +281,4 @@ else {
     Write-Host "  RESULT: ALL CHECKS PASSED" -ForegroundColor Green
     exit 0
 }
+

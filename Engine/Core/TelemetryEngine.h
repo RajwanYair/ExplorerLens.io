@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// TelemetryEngine — Sprint 207
+// TelemetryEngine
 // Structured telemetry collection, privacy-preserving analytics, health scoring
 //==============================================================================
 
@@ -10,7 +10,7 @@
 #include <map>
 #include <mutex>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Telemetry event severity
 enum class TelemetrySeverity : uint8_t {
@@ -122,4 +122,5 @@ private:
     uint64_t m_sessionStartMs = 0;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

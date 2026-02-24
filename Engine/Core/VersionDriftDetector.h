@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// VersionDriftDetector.h — Sprint 145
+// VersionDriftDetector.h
 // Automated version-drift CI detection across docs, headers, and configs
 // ============================================================================
 
@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 // ── Version component ──────────────────────────────────────────────────────
 
@@ -278,4 +278,5 @@ private:
     std::vector<std::pair<std::string, ArtifactKind>> m_artifacts;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

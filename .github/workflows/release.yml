@@ -46,7 +46,7 @@ jobs:
       - name: Build All Libraries & Create MSI
         shell: pwsh
         run: |
-          Write-Host "Building complete DarkThumbs release package..." -ForegroundColor Cyan
+          Write-Host "Building complete ExplorerLens release package..." -ForegroundColor Cyan
 
           # Use unified build script
           $buildScript = "${{ github.workspace }}\build-scripts\production\Build-All-And-Package.ps1"
@@ -57,7 +57,7 @@ jobs:
             Write-Host "Warning: Build-All-And-Package.ps1 not found, using legacy build" -ForegroundColor Yellow
             
             # Fallback to manual build steps
-            msbuild CBXShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+            msbuild LENSShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /m /v:minimal
           }
 
       - name: Run Build Verification
@@ -70,19 +70,19 @@ jobs:
         shell: pwsh
         run: |
           $version = if ($env:GITHUB_REF -match 'refs/tags/v(.+)') { $matches[1] } else { "dev" }
-          $archiveName = "DarkThumbs-$version-x64.zip"
+          $archiveName = "ExplorerLens-$version-x64.zip"
 
           Write-Host "Creating release archive: $archiveName" -ForegroundColor Cyan
 
           # Package binaries
           $files = @(
-            'x64\Release\CBXShell.dll',
-            'x64\Release\CBXManager.exe',
-            'build\bin\Release\DarkThumbsEngine.dll',
+            'x64\Release\LENSShell.dll',
+            'x64\Release\LENSManager.exe',
+            'build\bin\Release\ExplorerLensEngine.dll',
             'README.md',
             'LICENSE',
             'USER_GUIDE.md',
-            'Install-DarkThumbs.ps1'
+            'Install-ExplorerLens.ps1'
           )
 
           $validFiles = $files | Where-Object { Test-Path $_ }
@@ -113,16 +113,16 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            DarkThumbs-*.zip
+            ExplorerLens-*.zip
             ${{ steps.find-msi.outputs.msi-path }}
           draft: true
           generate_release_notes: true
           body: |
-            # DarkThumbs Release ${{ github.ref_name }}
+            # ExplorerLens Release ${{ github.ref_name }}
 
             ## Installation
             - **MSI Installer (Recommended)**: Run `${{ steps.find-msi.outputs.msi-name }}` for automated installation
-            - **Manual Installation**: Extract ZIP and run `Install-DarkThumbs.ps1` as Administrator
+            - **Manual Installation**: Extract ZIP and run `Install-ExplorerLens.ps1` as Administrator
 
             ## What's New
             See the full [CHANGELOG](CHANGELOG.md) for details.
@@ -139,7 +139,8 @@ jobs:
         with:
           name: release-package
           path: |
-            DarkThumbs-*.zip
+            ExplorerLens-*.zip
             packaging/output/*.msi
             build-logs/verification-report-*.json
           retention-days: 30
+

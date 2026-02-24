@@ -1,7 +1,7 @@
 // =============================================================================
-// DarkThumbs Engine — Cloud Thumbnail Provider
-// Sprint 26: Cloud Integration & Sync
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine — Cloud Thumbnail Provider
+// Cloud Integration & Sync
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Provides cloud-aware thumbnail resolution for files stored in
 // OneDrive, Google Drive, and Dropbox via their respective APIs.
@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <cstdint>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Cloud {
 
 // ============================================================================
@@ -338,4 +338,5 @@ constexpr DWORD IO_REPARSE_TAG_CLOUD_2        = 0x9000201A;
 constexpr DWORD IO_REPARSE_TAG_ONEDRIVE        = 0x9000301A;
 
 } // namespace Cloud
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

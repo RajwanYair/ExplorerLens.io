@@ -1,6 +1,6 @@
 // SVGDecoder.h - SVG/SVGZ Vector Image Decoder
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: SVG (.svg), SVGZ (.svgz - gzip-compressed SVG)
 // Features:
@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class SVGDecoder : public IThumbnailDecoder {
@@ -65,4 +65,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

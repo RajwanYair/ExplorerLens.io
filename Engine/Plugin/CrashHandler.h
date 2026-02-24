@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Crash Handler
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Crash Handler
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Detects and recovers from plugin crashes. Automatically disables crashed
  * plugins and provides crash reporting.
@@ -16,7 +16,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // Crash Information
@@ -148,4 +148,5 @@ bool IsCrashExitCode(DWORD exit_code);
 // Format crash info for logging
 std::wstring FormatCrashInfo(const CrashInfo& crash_info);
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

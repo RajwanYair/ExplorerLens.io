@@ -1,13 +1,13 @@
 // =============================================================================
-// ResourcePoolEngine.cpp — Sprint 240: Object Pool for Decoder/GPU Resource Reuse
-// DarkThumbs Engine — Core Module
+// ResourcePoolEngine.cpp — Object Pool for Decoder/GPU Resource Reuse
+// ExplorerLens Engine — Core Module
 // =============================================================================
 
 #include "ResourcePoolEngine.h"
 #include <algorithm>
 #include <chrono>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 static uint64_t NowMs() {
     return static_cast<uint64_t>(
@@ -175,4 +175,5 @@ const wchar_t* ResourcePoolEngine::GetResourceStateName(ResourceState state) {
     }
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

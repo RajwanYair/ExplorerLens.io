@@ -1,5 +1,5 @@
 // PPMDecoder.cpp - Netpbm Format Decoder Implementation
-// DarkThumbs Engine v6.1.0+
+// ExplorerLens Engine v6.1.0+
 // Supports P1-P6 magic, PFM float format
 
 #include "PPMDecoder.h"
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* PPMDecoder::m_extensions[] = {
@@ -342,4 +342,5 @@ std::unique_ptr<uint8_t[]> PPMDecoder::ReadFileData(const wchar_t* path, size_t&
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

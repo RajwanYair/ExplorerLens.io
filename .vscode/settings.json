@@ -1,5 +1,12 @@
 {
-    "cmake.sourceDirectory": "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/DarkThumbs/CBXManager",
+    "cmake.sourceDirectory": "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens.io",
+    "cmake.useCMakePresets": "always",
+    "cmake.generator": "Ninja",
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.configureSettings": {
+        "CMAKE_MAKE_PROGRAM": "C:/Users/ryair/scoop/shims/ninja.exe"
+    },
     "files.associations": {
         "xstring": "cpp",
         "algorithm": "cpp"
@@ -40,26 +47,26 @@
     "files.autoSaveDelay": 1000,
     // Build and task timeouts (extended for slow machines)
     "task.slowProviderWarning": false,
-    "task.autoDetect": "off",
+    "task.autoDetect": "on",
     "terminal.integrated.commandsToSkipShell": [],
     // Disable shell integration that can slow down terminals
-    "terminal.integrated.shellIntegration.enabled": false,
+    "terminal.integrated.shellIntegration.enabled": true,
     // C++ IntelliSense optimizations
-    "C_Cpp.intelliSenseEngine": "disabled",
-    "C_Cpp.autocomplete": "disabled",
-    "C_Cpp.errorSquiggles": "disabled",
+    "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.autocomplete": "Default",
+    "C_Cpp.errorSquiggles": "Enabled",
     // Git optimizations
-    "git.autorefresh": false,
-    "git.autofetch": false,
+    "git.autorefresh": true,
+    "git.autofetch": true,
     // Editor performance
     "editor.quickSuggestions": {
-        "other": false,
+        "other": true,
         "comments": false,
         "strings": false
     },
-    "editor.suggestOnTriggerCharacters": false,
-    "editor.acceptSuggestionOnEnter": "off",
-    "editor.parameterHints.enabled": false,
+    "editor.suggestOnTriggerCharacters": true,
+    "editor.acceptSuggestionOnEnter": "on",
+    "editor.parameterHints.enabled": true,
     // PowerShell integration - use latest PowerShell 7 (pwsh)
     "terminal.integrated.defaultProfile.windows": "PowerShell 7 (Admin)",
     "terminal.integrated.profiles.windows": {

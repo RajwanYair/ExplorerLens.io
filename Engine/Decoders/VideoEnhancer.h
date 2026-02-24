@@ -1,6 +1,6 @@
-// VideoEnhancer.h - Advanced Video Thumbnail Enhancement (Sprint 28)
-// DarkThumbs Engine v7.0.0+
-// Copyright (c) 2026 DarkThumbs Project
+// VideoEnhancer.h - Advanced Video Thumbnail Enhancement
+// ExplorerLens Engine v7.0.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Features:
 // - Scene detection to avoid black/blank frames
@@ -24,7 +24,7 @@
 #include <cmath>
 #include <chrono>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // ============================================================================
@@ -294,7 +294,7 @@ public:
         // In real implementation: encode frames using format-specific library
         // Placeholder — set output to indicate format
         uint8_t formatByte = static_cast<uint8_t>(m_config.format);
-        output = { 'D', 'T', 'A', formatByte };  // "DarkThumbs Animated" magic
+        output = { 'D', 'T', 'A', formatByte };  // "ExplorerLens Animated" magic
         return true;
     }
 
@@ -610,4 +610,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

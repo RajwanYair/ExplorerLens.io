@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// ParallelBatchDecoder — Sprint 189
+// ParallelBatchDecoder
 // Thread pool decoder with per-format parallelism controls
 //
 // Architecture:
@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Parallelism strategy per format category
 enum class ParallelismLevel : uint8_t {
@@ -177,4 +177,5 @@ private:
     BatchStats m_stats;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

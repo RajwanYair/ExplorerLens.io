@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 7: Windows 11 Compatibility Matrix
+// ExplorerLens — Windows 11 Compatibility Matrix
 //
 // Comprehensive compatibility layer for Windows 11 22H2/23H2/24H2, covering
 // OS version detection, dark mode integration, HDR display awareness,
@@ -21,7 +21,7 @@
 
 #pragma comment(lib, "dxgi.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Compat {
 
@@ -629,4 +629,5 @@ private:
 
 } // namespace Compat
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

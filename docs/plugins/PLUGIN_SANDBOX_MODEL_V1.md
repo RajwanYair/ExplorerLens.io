@@ -8,7 +8,7 @@
 
 ## Overview
 
-DarkThumbs plugins execute untrusted code to decode potentially malicious files. A robust sandbox model is critical to prevent plugins from:
+ExplorerLens plugins execute untrusted code to decode potentially malicious files. A robust sandbox model is critical to prevent plugins from:
 
 - Crashing Explorer
 - Accessing sensitive data
@@ -48,8 +48,8 @@ This document defines three isolation modes with increasing security levels.
 {
   "isolationMode": "in-worker",
   "trustedPlugins": [
-    "darkthumbs.plugin.psd",
-    "darkthumbs.plugin.webp"
+    "explorerlens.plugin.psd",
+    "explorerlens.plugin.webp"
   ]
 }
 ```
@@ -100,8 +100,8 @@ limits.PerProcessUserTimeLimit.QuadPart = 60 * 10000000; // 60 sec CPU time
 ##### File System Access
 
 - Read-only access to:
-  - Plugin directory: `%LocalAppData%\DarkThumbs\Plugins\{plugin-id}\`
-  - Temp directory: `%TEMP%\DarkThumbs\{plugin-id}\`
+  - Plugin directory: `%LocalAppData%\ExplorerLens\Plugins\{plugin-id}\`
+  - Temp directory: `%TEMP%\ExplorerLens\{plugin-id}\`
   - Requested file path (thumbnail source)
 - No write access to:
   - System directories
@@ -120,7 +120,7 @@ limits.PerProcessUserTimeLimit.QuadPart = 60 * 10000000; // 60 sec CPU time
 ##### Pipe Naming
 
 ```
-\\.\pipe\DarkThumbs-PluginHost-{ProcessId}-{PluginId}
+\\.\pipe\ExplorerLens-PluginHost-{ProcessId}-{PluginId}
 ```
 
 ##### Message Format (Binary)
@@ -165,7 +165,7 @@ struct PluginMessage {
 
 For files > 1MB:
 
-- Create shared memory section: `Global\DarkThumbs-{CorrelationId}`
+- Create shared memory section: `Global\ExplorerLens-{CorrelationId}`
 - Map into both Worker and PluginHost processes
 - Pass offset/size via pipe message
 - Unmap and delete after request completes
@@ -359,7 +359,7 @@ When a plugin crashes:
 ```json
 {
   "event": "plugin_crash",
-  "pluginId": "darkthumbs.plugin.psd",
+  "pluginId": "explorerlens.plugin.psd",
   "pluginVersion": "1.2.3",
   "correlationId": "0x123456789ABCDEF0",
   "exitCode": "0xC0000005",
@@ -377,7 +377,7 @@ Admins can enforce isolation mode via Group Policy:
 ### Registry Keys
 
 ```
-HKLM\SOFTWARE\Policies\DarkThumbs\Plugins
+HKLM\SOFTWARE\Policies\ExplorerLens\Plugins
   MinIsolationMode (DWORD)
     0 = Allow all modes
     1 = Require PluginHost (block In-Worker for untrusted)
@@ -444,3 +444,4 @@ HKLM\SOFTWARE\Policies\DarkThumbs\Plugins
 | **Recommended For** | Trusted only | Most plugins | Untrusted |
 
 **Recommendation:** Use **PluginHost** mode by default. Only allow **In-Worker** for explicitly trusted, verified plugins.
+

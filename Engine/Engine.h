@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Public API
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Public API
+// Copyright (c) 2026 - ExplorerLens Project
 // Version: 6.0.0
 //==============================================================================
 
@@ -15,31 +15,31 @@
 #include "Core/IGPURenderer.h"
 #include "Core/ICacheProvider.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
-/// DarkThumbs Engine Version Information
+/// ExplorerLens Engine Version Information
 //==============================================================================
 
 // Define version macros if not already defined by CMake
-#ifndef DARKTHUMBS_ENGINE_VERSION_MAJOR
-#define DARKTHUMBS_ENGINE_VERSION_MAJOR 6
+#ifndef EXPLORERLENS_ENGINE_VERSION_MAJOR
+#define EXPLORERLENS_ENGINE_VERSION_MAJOR 6
 #endif
 
-#ifndef DARKTHUMBS_ENGINE_VERSION_MINOR
-#define DARKTHUMBS_ENGINE_VERSION_MINOR 0
+#ifndef EXPLORERLENS_ENGINE_VERSION_MINOR
+#define EXPLORERLENS_ENGINE_VERSION_MINOR 0
 #endif
 
-#ifndef DARKTHUMBS_ENGINE_VERSION_PATCH
-#define DARKTHUMBS_ENGINE_VERSION_PATCH 0
+#ifndef EXPLORERLENS_ENGINE_VERSION_PATCH
+#define EXPLORERLENS_ENGINE_VERSION_PATCH 0
 #endif
 
-#ifndef DARKTHUMBS_ENGINE_VERSION
-#define DARKTHUMBS_ENGINE_VERSION \
-    ((DARKTHUMBS_ENGINE_VERSION_MAJOR << 16) | \
-     (DARKTHUMBS_ENGINE_VERSION_MINOR << 8) | \
-     DARKTHUMBS_ENGINE_VERSION_PATCH)
+#ifndef EXPLORERLENS_ENGINE_VERSION
+#define EXPLORERLENS_ENGINE_VERSION \
+    ((EXPLORERLENS_ENGINE_VERSION_MAJOR << 16) | \
+     (EXPLORERLENS_ENGINE_VERSION_MINOR << 8) | \
+     EXPLORERLENS_ENGINE_VERSION_PATCH)
 #endif
 
 // Function declarations (implemented in EngineAPI.cpp)
@@ -51,22 +51,22 @@ namespace Engine {
 
 /// Get engine name
 inline const wchar_t* GetEngineName() {
-    return L"DarkThumbs Thumbnail Engine";
+    return L"ExplorerLens Thumbnail Engine";
 }
 
 /// Get engine copyright
 inline const wchar_t* GetEngineCopyright() {
-    return L"Copyright (c) 2026 - DarkThumbs Project";
+    return L"Copyright (c) 2026 - ExplorerLens Project";
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
 
 //==============================================================================
 // Usage Example:
 //
 // #include <Engine.h>
-// using namespace DarkThumbs::Engine;
+// using namespace ExplorerLens::Engine;
 //
 // // Create decoder
 // IThumbnailDecoder* decoder = new MyCustomDecoder();
@@ -87,3 +87,5 @@ inline const wchar_t* GetEngineCopyright() {
 // }
 //
 //==============================================================================
+
+

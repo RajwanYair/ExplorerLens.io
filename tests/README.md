@@ -1,8 +1,8 @@
-# DarkThumbs Test Suite Documentation
+# ExplorerLens Test Suite Documentation
 
 ## Overview
 
-Comprehensive testing framework for DarkThumbs Windows 11 shell extension. The test suite ensures all core functionality remains stable across code changes, refactoring, and platform migrations.
+Comprehensive testing framework for ExplorerLens Windows 11 shell extension. The test suite ensures all core functionality remains stable across code changes, refactoring, and platform migrations.
 
 ## Test Structure
 
@@ -173,12 +173,12 @@ tests\build\
 ### Successful Run
 ```
 =========================================
-DarkThumbs Unit Test Suite
+ExplorerLens Unit Test Suite
 Version: 8.4.0 (GPU-Accelerated)
 =========================================
 
 [Suite 1/8] Format Detection Tests
-Running TestGetCBXType_ComicArchives...
+Running TestGetLENSType_ComicArchives...
   Testing comic book archive format detection...
   Completed.
 ...
@@ -441,10 +441,11 @@ When adding new features:
 
 ## License
 
-Same as DarkThumbs project. Tests are MIT-compatible and freely redistributable.
+Same as ExplorerLens project. Tests are MIT-compatible and freely redistributable.
 
 ---
 
 **Last Updated:** November 18, 2024  
 **Test Suite Version:** 2.0  
-**DarkThumbs Version:** 8.4.0 (GPU-Accelerated)
+**ExplorerLens Version:** 8.4.0 (GPU-Accelerated)
+

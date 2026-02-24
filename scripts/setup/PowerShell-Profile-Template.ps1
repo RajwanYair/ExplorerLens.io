@@ -1,4 +1,4 @@
-# PowerShell Profile Configuration for DarkThumbs Development
+# PowerShell Profile Configuration for ExplorerLens Development
 # This file should be placed at: $PROFILE.CurrentUserAllHosts
 # Location: C:\Users\<username>\OneDrive - Intel Corporation\Documents\PowerShell\profile.ps1
 
@@ -140,10 +140,10 @@ function Add-DevelopmentTools {
     return $toolsAdded
 }
 
-# DarkThumbs-specific functions
-function Set-DarkThumbsEnvironment {
+# ExplorerLens-specific functions
+function Set-ExplorerLensEnvironment {
     param(
-        [string]$ProjectPath = "$env:USERPROFILE\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs",
+        [string]$ProjectPath = "$env:USERPROFILE\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens",
         [switch]$InitializeVS,
         [switch]$Quiet
     )
@@ -151,13 +151,13 @@ function Set-DarkThumbsEnvironment {
     if (-not $Quiet) {
         Write-Host ""
         Write-Host "+===============================================================+" -ForegroundColor Cyan
-        Write-Host "|         DarkThumbs Development Environment                    |" -ForegroundColor Cyan
+        Write-Host "|         ExplorerLens Development Environment                    |" -ForegroundColor Cyan
         Write-Host "+===============================================================+" -ForegroundColor Cyan
         Write-Host ""
     }
     
     # Set project location
-    $Global:DarkThumbsPath = $ProjectPath
+    $Global:ExplorerLensPath = $ProjectPath
     Set-Location $ProjectPath -ErrorAction SilentlyContinue
     
     # Add development tools
@@ -169,38 +169,38 @@ function Set-DarkThumbsEnvironment {
     }
     
     if (-not $Quiet) {
-        Write-Host "[OK] DarkThumbs environment ready!" -ForegroundColor Green
+        Write-Host "[OK] ExplorerLens environment ready!" -ForegroundColor Green
         Write-Host ""
     }
 }
 
 # Quick navigation aliases
-function dt { Set-Location $Global:DarkThumbsPath }
-function dt-build { Set-Location (Join-Path $Global:DarkThumbsPath "scripts\build") }
-function dt-scripts { Set-Location (Join-Path $Global:DarkThumbsPath "scripts") }
-function dt-docs { Set-Location (Join-Path $Global:DarkThumbsPath "documentation") }
+function dt { Set-Location $Global:ExplorerLensPath }
+function dt-build { Set-Location (Join-Path $Global:ExplorerLensPath "scripts\build") }
+function dt-scripts { Set-Location (Join-Path $Global:ExplorerLensPath "scripts") }
+function dt-docs { Set-Location (Join-Path $Global:ExplorerLensPath "documentation") }
 
 # Build helpers
-function Build-DarkThumbs {
+function Build-ExplorerLens {
     param(
         [ValidateSet('build', 'clean', 'test', 'install', 'uninstall', 'verify')]
         [string]$Action = 'build',
         [switch]$Initialize
     )
     
-    Push-Location $Global:DarkThumbsPath
+    Push-Location $Global:ExplorerLensPath
     
     if ($Initialize) {
         Initialize-VSBuildTools
     }
     
-    & ".\darkthumbs.ps1" $Action
+    & ".\explorerlens.ps1" $Action
     
     Pop-Location
 }
 
 # Tool verification
-function Test-DarkThumbsTools {
+function Test-ExplorerLensTools {
     Write-Host ""
     Write-Host "+===============================================================+" -ForegroundColor Cyan
     Write-Host "|         Development Tools Check                               |" -ForegroundColor Cyan
@@ -248,11 +248,12 @@ function prompt {
 
 # Display initialization message
 Write-Host ""
-Write-Host "DarkThumbs PowerShell Profile Loaded" -ForegroundColor Cyan
+Write-Host "ExplorerLens PowerShell Profile Loaded" -ForegroundColor Cyan
 Write-Host "Run " -NoNewline
-Write-Host "Set-DarkThumbsEnvironment" -NoNewline -ForegroundColor Yellow
+Write-Host "Set-ExplorerLensEnvironment" -NoNewline -ForegroundColor Yellow
 Write-Host " to initialize development environment"
 Write-Host "Run " -NoNewline
-Write-Host "Test-DarkThumbsTools" -NoNewline -ForegroundColor Yellow
+Write-Host "Test-ExplorerLensTools" -NoNewline -ForegroundColor Yellow
 Write-Host " to verify all tools"
 Write-Host ""
+

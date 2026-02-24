@@ -1,5 +1,5 @@
 # Build-Helpers.ps1
-# DarkThumbs v7.0 - Build Helper Module
+# ExplorerLens v7.0 - Build Helper Module
 # Provides vcpkg integration and additional helper functions
 #
 # USAGE:
@@ -8,7 +8,7 @@
 #   Install-VcpkgIfNeeded
 #
 # Date: February 16, 2026
-# Author: DarkThumbs Development Team
+# Author: ExplorerLens Development Team
 
 $ErrorActionPreference = 'Stop'
 
@@ -498,3 +498,4 @@ function Compare-LibraryVersions {
 # ============================================================================
 
 Write-Host "✓ Build-Helpers.ps1 loaded successfully (v7.0)" -ForegroundColor Green
+

@@ -1,7 +1,7 @@
 // =============================================================================
-// DarkThumbs Engine — Advanced Multi-Tier Cache
-// Sprint 27: Advanced Caching & Database Optimization
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine — Advanced Multi-Tier Cache
+// Advanced Caching & Database Optimization
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Adds Bloom filter negative-cache, WAL-mode SQLite, multi-tier hierarchy,
 // background maintenance, and a cache statistics dashboard feed.
@@ -20,7 +20,7 @@
 #include <chrono>
 #include <unordered_map>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Cache {
 
 // ============================================================================
@@ -322,4 +322,5 @@ private:
 };
 
 } // namespace Cache
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

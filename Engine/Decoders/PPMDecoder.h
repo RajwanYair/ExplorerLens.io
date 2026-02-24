@@ -1,12 +1,12 @@
 // PPMDecoder.h - Netpbm Format Decoder
-// DarkThumbs Engine v6.1.0+
+// ExplorerLens Engine v6.1.0+
 // Supports: PPM (P3/P6), PGM (P2/P5), PBM (P1/P4), PNM, PAM, PFM
 
 #pragma once
 #include "../Core/IThumbnailDecoder.h"
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class PPMDecoder : public IThumbnailDecoder {
@@ -40,4 +40,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

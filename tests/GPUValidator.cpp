@@ -1,6 +1,6 @@
 // GPUValidator.cpp - GPU Detection and Validation Tool
-// DarkThumbs v5.2.0 - Multi-GPU Testing
-// Copyright (c) 2025 DarkThumbs Project
+// ExplorerLens v5.2.0 - Multi-GPU Testing
+// Copyright (c) 2025 ExplorerLens Project
 //
 // Tests GPU detection, capabilities, and fallback mechanisms
 // Validates behavior across Intel, NVIDIA, AMD, and WARP renderers
@@ -230,9 +230,9 @@ void PrintGPUInfo(const GPUInfo& gpu, int index) {
     bool csSupport = gpu.featureLevel >= D3D_FEATURE_LEVEL_11_0;
     std::wcout << L"Compute Shaders:       " << (csSupport ? L"✓ Supported" : L"✗ Not Supported") << L"\n";
 
-    // DarkThumbs compatibility
+    // ExplorerLens compatibility
     bool compatible = gpu.featureLevel >= D3D_FEATURE_LEVEL_11_0;
-    std::wcout << L"DarkThumbs GPU Mode:   " << (compatible ? L"✓ ENABLED" : L"✗ CPU Fallback") << L"\n";
+    std::wcout << L"ExplorerLens GPU Mode:   " << (compatible ? L"✓ ENABLED" : L"✗ CPU Fallback") << L"\n";
 
     // Intel GPU type detection
     if (gpu.vendorId == 0x8086) {
@@ -273,7 +273,7 @@ void PrintSummary(const std::vector<GPUInfo>& gpus, const GPUInfo* warp) {
         if (gpu.vendorId == 0x1002) amdCount++;
     }
 
-    std::wcout << L"DarkThumbs Compatible: " << compatibleCount << L" GPU(s)\n";
+    std::wcout << L"ExplorerLens Compatible: " << compatibleCount << L" GPU(s)\n";
     if (intelCount > 0) std::wcout << L"Intel GPUs:            " << intelCount << L"\n";
     if (nvidiaCount > 0) std::wcout << L"NVIDIA GPUs:           " << nvidiaCount << L"\n";
     if (amdCount > 0) std::wcout << L"AMD GPUs:              " << amdCount << L"\n";
@@ -286,20 +286,20 @@ void PrintSummary(const std::vector<GPUInfo>& gpus, const GPUInfo* warp) {
 
     std::wcout << L"\n";
     if (compatibleCount > 0) {
-        std::wcout << L"✓ DarkThumbs will use GPU acceleration\n";
+        std::wcout << L"✓ ExplorerLens will use GPU acceleration\n";
         std::wcout << L"✓ Expected speedup: 4-10x depending on GPU\n";
     } else if (warp) {
-        std::wcout << L"⚠ DarkThumbs will use WARP software renderer\n";
+        std::wcout << L"⚠ ExplorerLens will use WARP software renderer\n";
         std::wcout << L"⚠ Performance may be similar to CPU fallback\n";
     } else {
-        std::wcout << L"✗ DarkThumbs will use CPU-only rendering\n";
+        std::wcout << L"✗ ExplorerLens will use CPU-only rendering\n";
         std::wcout << L"✗ No GPU acceleration available\n";
     }
 }
 
 int main(int argc, char* argv[]) {
     std::wcout << L"=================================================\n";
-    std::wcout << L"DarkThumbs GPU Validator v5.2.0\n";
+    std::wcout << L"ExplorerLens GPU Validator v5.2.0\n";
     std::wcout << L"Multi-GPU Detection and Validation Tool\n";
     std::wcout << L"=================================================\n\n";
 
@@ -331,3 +331,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+

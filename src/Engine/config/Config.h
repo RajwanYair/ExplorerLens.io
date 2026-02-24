@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs::Engine::Config {
+namespace ExplorerLens::Engine::Config {
 
     struct ConfigValue {
         enum Source {
@@ -41,3 +41,4 @@ namespace DarkThumbs::Engine::Config {
     };
 
 }
+

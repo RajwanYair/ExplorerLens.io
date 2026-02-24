@@ -12,7 +12,7 @@ $ErrorActionPreference = "Continue"
 
 Write-Host ""
 Write-Host "==========================================================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Path Validation (V7)" -ForegroundColor Cyan
+Write-Host "ExplorerLens Path Validation (V7)" -ForegroundColor Cyan
 Write-Host "==========================================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -160,3 +160,4 @@ if ($AutoFix) {
 
 # Exit with error code if errors found
 exit $(if ($ErrorCount -gt 0) { 1 } else { 0 })
+

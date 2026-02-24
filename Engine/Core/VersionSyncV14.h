@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 299: Version Sync & v14.0 Architecture Overview
+// ExplorerLens Engine — Version Sync & v14.0 Architecture Overview
 // Version bootstrap and architectural baseline declaration for v14.0 block.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// v14.0 version components
 struct V14Version {
@@ -103,4 +103,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

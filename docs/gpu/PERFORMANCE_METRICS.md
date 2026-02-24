@@ -1,7 +1,7 @@
 # Performance Metrics System
 
 ## Overview
-DarkThumbs includes a comprehensive performance metrics system to track thumbnail generation statistics, memory usage, and format-specific performance data.
+ExplorerLens includes a comprehensive performance metrics system to track thumbnail generation statistics, memory usage, and format-specific performance data.
 
 ## Features
 
@@ -31,7 +31,7 @@ Core metrics collection system with:
 ### 2. Thumbnail Metrics Scope
 RAII helper for automatic metrics recording:
 ```cpp
-DarkThumbs::ThumbnailMetricsScope metricsScope("cbz");
+ExplorerLens::ThumbnailMetricsScope metricsScope("cbz");
 // ... generate thumbnail ...
 metricsScope.SetSuccess(true);
 // Metrics recorded on scope exit
@@ -52,23 +52,23 @@ Command-line tool to view and export metrics.
 ### Enable Profiling
 Add registry key to enable performance profiling:
 ```
-HKEY_CURRENT_USER\Software\DarkThumbs\Settings
+HKEY_CURRENT_USER\Software\ExplorerLens\Settings
 EnableProfiling = 1 (DWORD)
 ```
 
 ### View Metrics in Real-Time
 ```powershell
 # Display current metrics
-.\tools\DarkThumbsMetrics.exe
+.\tools\ExplorerLensMetrics.exe
 
 # Or
-.\tools\DarkThumbsMetrics.exe show
+.\tools\ExplorerLensMetrics.exe show
 ```
 
 Output example:
 ```
 ============================================================
-DarkThumbs Performance Metrics
+ExplorerLens Performance Metrics
 ============================================================
 
 📊 Thumbnail Generation
@@ -98,12 +98,12 @@ DarkThumbs Performance Metrics
 
 **CSV Export:**
 ```powershell
-.\tools\DarkThumbsMetrics.exe export csv metrics.csv
+.\tools\ExplorerLensMetrics.exe export csv metrics.csv
 ```
 
 **JSON Export:**
 ```powershell
-.\tools\DarkThumbsMetrics.exe export json metrics.json
+.\tools\ExplorerLensMetrics.exe export json metrics.json
 ```
 
 JSON format:
@@ -136,7 +136,7 @@ JSON format:
 
 ### Reset Metrics
 ```powershell
-.\tools\DarkThumbsMetrics.exe reset
+.\tools\ExplorerLensMetrics.exe reset
 ```
 
 ## Integration
@@ -153,7 +153,7 @@ Add metrics to custom code:
 #include "metrics_collector.h"
 
 // Track a thumbnail generation attempt
-DarkThumbs::ThumbnailMetricsScope scope("custom_format");
+ExplorerLens::ThumbnailMetricsScope scope("custom_format");
 bool success = GenerateCustomThumbnail();
 scope.SetSuccess(success);
 
@@ -180,10 +180,10 @@ All metrics operations are thread-safe using:
 Schedule metrics exports:
 ```powershell
 # Windows Task Scheduler - Daily at 2 AM
-$action = New-ScheduledTaskAction -Execute "DarkThumbsMetrics.exe" `
+$action = New-ScheduledTaskAction -Execute "ExplorerLensMetrics.exe" `
     -Argument "export json C:\Logs\metrics_$(Get-Date -Format 'yyyyMMdd').json"
 $trigger = New-ScheduledTaskTrigger -Daily -At 2am
-Register-ScheduledTask -TaskName "DarkThumbs Metrics Export" `
+Register-ScheduledTask -TaskName "ExplorerLens Metrics Export" `
     -Action $action -Trigger $trigger
 ```
 
@@ -207,12 +207,12 @@ Get-ChildItem C:\Logs\metrics_*.json | ForEach-Object {
 ### Metrics Not Recording
 1. **Check profiling is enabled**:
    ```
-   HKEY_CURRENT_USER\Software\DarkThumbs\Settings\EnableProfiling = 1
+   HKEY_CURRENT_USER\Software\ExplorerLens\Settings\EnableProfiling = 1
    ```
 
 2. **Verify shell extension is loaded**:
    - Open test archive in Explorer
-   - Check Event Viewer for DarkThumbs events
+   - Check Event Viewer for ExplorerLens events
 
 3. **Restart Explorer**:
    ```powershell
@@ -222,7 +222,7 @@ Get-ChildItem C:\Logs\metrics_*.json | ForEach-Object {
 
 ### High Memory Usage
 If peak memory exceeds expectations:
-1. Export metrics: `DarkThumbsMetrics.exe export json report.json`
+1. Export metrics: `ExplorerLensMetrics.exe export json report.json`
 2. Check `formatBreakdown` for problematic formats
 3. Review `totalAllocatedMB` vs `peakMB` ratio
 4. Enable detailed logging for memory profiling
@@ -231,7 +231,7 @@ If peak memory exceeds expectations:
 If success rate < 90%:
 1. Check format breakdown for failing formats
 2. Review Windows Event Viewer for errors
-3. Test failing formats manually with CBXManager
+3. Test failing formats manually with LENSManager
 4. Check build configuration (Debug vs Release)
 
 ## Best Practices
@@ -252,7 +252,7 @@ If success rate < 90%:
 ```yaml
 # Example: Azure Pipelines
 - script: |
-    DarkThumbsMetrics.exe export json $(Build.ArtifactStagingDirectory)/metrics.json
+    ExplorerLensMetrics.exe export json $(Build.ArtifactStagingDirectory)/metrics.json
   displayName: 'Export Performance Metrics'
   condition: succeededOrFailed()
   
@@ -275,6 +275,7 @@ Planned features:
 ---
 
 **See Also:**
-- [performance_profiler.h](../CBXShell/performance_profiler.h) - Timing metrics
-- [metrics_collector.h](../CBXShell/metrics_collector.h) - Core metrics system
-- [DarkThumbsMetrics.cpp](../tools/DarkThumbsMetrics.cpp) - Viewer tool source
+- [performance_profiler.h](../LENSShell/performance_profiler.h) - Timing metrics
+- [metrics_collector.h](../LENSShell/metrics_collector.h) - Core metrics system
+- [ExplorerLensMetrics.cpp](../tools/ExplorerLensMetrics.cpp) - Viewer tool source
+

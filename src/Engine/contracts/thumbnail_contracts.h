@@ -4,7 +4,7 @@
 #include <string>
 #include <windows.h>
 
-namespace DarkThumbs::Engine::Contracts {
+namespace ExplorerLens::Engine::Contracts {
 
     // Bit flags for ThumbnailRequest::flags
     enum RequestFlags : uint32_t {
@@ -54,3 +54,4 @@ namespace DarkThumbs::Engine::Contracts {
     };
 
 }
+

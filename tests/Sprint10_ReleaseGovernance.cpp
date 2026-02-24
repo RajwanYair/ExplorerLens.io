@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 10 Tests: Release Governance & Packaging
+// ExplorerLens — Sprint 10 Tests: Release Governance & Packaging
 // Tests quality gates, code signing policy, packaging validators,
 // CI pipeline registry, release manifest, and artifact management.
 //==============================================================================
@@ -11,7 +11,7 @@
 // Header under test
 #include "../Engine/Utils/ReleaseGovernance.h"
 
-using namespace DarkThumbs::Engine::Release;
+using namespace ExplorerLens::Engine::Release;
 
 //==============================================================================
 // Quality Gate Tests
@@ -70,7 +70,7 @@ TEST(Artifact, ValidCheck)
 {
     ReleaseArtifact a;
     EXPECT_FALSE(a.IsValid());
-    a.name = "CBXShell.dll";
+    a.name = "LENSShell.dll";
     a.sizeBytes = 2940 * 1024;
     EXPECT_TRUE(a.IsValid());
 }
@@ -85,7 +85,7 @@ TEST(Artifact, SizeMB)
 TEST(Artifact, SizeLarger)
 {
     ReleaseArtifact a;
-    a.sizeBytes = 2940 * 1024;  // ~2.87 MB (CBXShell.dll typical)
+    a.sizeBytes = 2940 * 1024;  // ~2.87 MB (LENSShell.dll typical)
     auto s = a.SizeMB();
     EXPECT_NE(s.find("MB"), std::string::npos);
 }
@@ -203,8 +203,8 @@ TEST(Signing, RequiredBinaries)
 {
     CodeSigningPolicy policy;
     EXPECT_EQ(policy.RequiredCount(), 3u);
-    EXPECT_TRUE(policy.RequiresSigning("CBXShell.dll"));
-    EXPECT_TRUE(policy.RequiresSigning("CBXManager.exe"));
+    EXPECT_TRUE(policy.RequiresSigning("LENSShell.dll"));
+    EXPECT_TRUE(policy.RequiresSigning("LENSManager.exe"));
     EXPECT_TRUE(policy.RequiresSigning("PluginHost.exe"));
     EXPECT_FALSE(policy.RequiresSigning("readme.txt"));
 }
@@ -322,8 +322,8 @@ TEST(Manifest, DefaultVersion)
 TEST(Manifest, TotalSize)
 {
     ReleaseManifest manifest;
-    manifest.artifacts.push_back({"CBXShell.dll", "x64/Release/", ArtifactType::DLL, 2940*1024, true, true, ""});
-    manifest.artifacts.push_back({"CBXManager.exe", "x64/Release/", ArtifactType::EXE, 400*1024, true, true, ""});
+    manifest.artifacts.push_back({"LENSShell.dll", "x64/Release/", ArtifactType::DLL, 2940*1024, true, true, ""});
+    manifest.artifacts.push_back({"LENSManager.exe", "x64/Release/", ArtifactType::EXE, 400*1024, true, true, ""});
     EXPECT_EQ(manifest.TotalArtifacts(), 2u);
     EXPECT_GT(manifest.TotalSizeBytes(), 3000000u);
 }
@@ -337,7 +337,7 @@ TEST(Manifest, NotReadyByDefault)
 TEST(Manifest, ReadyWhenComplete)
 {
     ReleaseManifest manifest;
-    manifest.artifacts.push_back({"CBXShell.dll", "", ArtifactType::DLL, 2940*1024, true, true, ""});
+    manifest.artifacts.push_back({"LENSShell.dll", "", ArtifactType::DLL, 2940*1024, true, true, ""});
     for (auto& g : manifest.checklist.Gates())
         manifest.checklist.SetGate(g.id, GateStatus::Passed);
     manifest.signingPolicy.method = SigningMethod::EV;
@@ -349,9 +349,10 @@ TEST(Manifest, MarkdownOutput)
     ReleaseManifest manifest;
     manifest.buildDate = "2025-07-11";
     manifest.commitHash = "abc1234";
-    manifest.artifacts.push_back({"CBXShell.dll", "", ArtifactType::DLL, 2940*1024, true, true, ""});
+    manifest.artifacts.push_back({"LENSShell.dll", "", ArtifactType::DLL, 2940*1024, true, true, ""});
     auto md = manifest.GenerateManifestMarkdown();
     EXPECT_NE(md.find("v7.0.0"), std::string::npos);
-    EXPECT_NE(md.find("CBXShell.dll"), std::string::npos);
+    EXPECT_NE(md.find("LENSShell.dll"), std::string::npos);
     EXPECT_NE(md.find("abc1234"), std::string::npos);
 }
+

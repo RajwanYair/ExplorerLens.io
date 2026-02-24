@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// Advanced3DFormatDecoder — Sprint 200
+// Advanced3DFormatDecoder
 // Extended 3D format support: FBX (Autodesk), USD (Pixar/Apple), 3MF (3D print)
 //
 // Design:
@@ -16,7 +16,7 @@
 #include <vector>
 #include <array>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// 3D format type
 enum class Advanced3DFormat : uint8_t {
@@ -138,4 +138,5 @@ private:
     void ComputeBounds();
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

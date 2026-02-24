@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 293: Multi-GPU Load Balancer
+// ExplorerLens Engine — Multi-GPU Load Balancer
 // Distribute thumbnail generation across multiple GPUs for throughput scaling.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// GPU load balancing strategy
 enum class GPUBalanceStrategy : uint8_t {
@@ -91,4 +91,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

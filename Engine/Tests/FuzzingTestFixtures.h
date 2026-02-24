@@ -1,6 +1,6 @@
 // ============================================================================
-// FuzzingTestFixtures.h — Sprint 6, Task 6.1
-// Malformed/corrupt archive test payload generation for DarkThumbs
+// FuzzingTestFixtures.h, Task 6.1
+// Malformed/corrupt archive test payload generation for ExplorerLens
 //
 // Generates intentionally corrupt archive payloads for SEH fuzzing tests.
 // Each fixture creates a minimal valid-looking header followed by garbage
@@ -25,7 +25,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Testing {
 
 /// A single fuzzing test fixture representing a corrupt file payload
@@ -156,7 +156,7 @@ private:
         wchar_t tempPath[MAX_PATH];
         GetTempPathW(MAX_PATH, tempPath);
         
-        auto dir = std::filesystem::path(tempPath) / L"DarkThumbs_Fuzz";
+        auto dir = std::filesystem::path(tempPath) / L"ExplorerLens_Fuzz";
         std::filesystem::create_directories(dir);
         return dir;
     }
@@ -376,4 +376,5 @@ private:
 };
 
 } // namespace Testing
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

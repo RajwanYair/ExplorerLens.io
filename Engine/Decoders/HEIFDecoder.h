@@ -1,5 +1,5 @@
 // HEIFDecoder.h - HEIF/HEIC format decoder
-// Part of DarkThumbs Engine v5.3.0+
+// Part of ExplorerLens Engine v5.3.0+
 // High Efficiency Image Format - Apple's default photo format
 
 #pragma once
@@ -8,7 +8,7 @@
 #include <string>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -95,7 +95,7 @@ namespace Engine {
     [[maybe_unused]] bool m_preferEmbeddedThumbnail;  // Use embedded thumbnail if available
         
         // Supported extensions (HEIF, HEIC, Apple variants)
-        // Sprint 175: Fixed overlap — HEIFDecoder handles HEIF container formats (HEVC codec)
+        // Fixed overlap — HEIFDecoder handles HEIF container formats (HEVC codec)
         // AVIF (.avif/.avifs) is handled by AVIFDecoder (AV1 codec)
         static constexpr const wchar_t* s_extensions[10] = {
             L".heif", L".heic", L".hif", L".heifs", L".heics",
@@ -104,4 +104,5 @@ namespace Engine {
     };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

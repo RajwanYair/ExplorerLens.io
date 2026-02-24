@@ -1,6 +1,6 @@
 //==============================================================================
 // FarbfeldDecoder.cpp — Farbfeld Image Decoder
-// DarkThumbs Engine v8.4.0 — Sprint 180
+// ExplorerLens Engine v8.4.0
 //==============================================================================
 
 #include "FarbfeldDecoder.h"
@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <cstring>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 bool FarbfeldDecoder::CanDecode(const wchar_t* filePath) const {
@@ -90,4 +90,5 @@ HRESULT FarbfeldDecoder::Decode(const wchar_t* filePath, uint32_t requestedSize,
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

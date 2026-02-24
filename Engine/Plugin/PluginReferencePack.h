@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 153 — Plugin Reference Pack
+// Plugin Reference Pack
 // Production-grade reference plugin descriptors for 3 format families:
 // (1) Minimal image generator, (2) Metadata-only, (3) Watermark overlay.
 
@@ -9,7 +9,7 @@
 #include <optional>
 #include <functional>
 
-namespace DarkThumbs::Plugin {
+namespace ExplorerLens::Plugin {
 
 // ─── Plugin capability flags ──────────────────────────────────────────────────
 
@@ -57,13 +57,13 @@ struct ReferencePluginDescriptor {
 
 inline ReferencePluginDescriptor MinimalImageGeneratorPlugin() {
     return {
-        "com.darkthumbs.ref.minimal",
+        "com.explorerlens.ref.minimal",
         "Minimal Image Generator",
         "Generates a solid-color placeholder thumbnail for unknown file types",
         "1.0.0",
         PluginCapability::Decode,
         { ".*" },   // wildcard — handles any extension as fallback
-        "\\\\.\\pipe\\DarkThumbs_Plugin_Minimal",
+        "\\\\.\\pipe\\ExplorerLens_Plugin_Minimal",
         50,
         16ULL * 1024 * 1024
     };
@@ -83,14 +83,14 @@ struct SolidColorThumbnail {
 
 inline ReferencePluginDescriptor MetadataOnlyPlugin() {
     return {
-        "com.darkthumbs.ref.metadata",
+        "com.explorerlens.ref.metadata",
         "Metadata Reader",
         "Reads EXIF/XMP/IPTC metadata without full pixel decode",
         "1.0.0",
         PluginCapability::MetadataOnly | PluginCapability::Decode,
         { ".jpg", ".jpeg", ".tiff", ".tif", ".heic", ".heif", ".avif",
           ".png", ".webp", ".raw", ".cr2", ".cr3", ".nef", ".arw" },
-        "\\\\.\\pipe\\DarkThumbs_Plugin_Metadata",
+        "\\\\.\\pipe\\ExplorerLens_Plugin_Metadata",
         200,    // metadata read allowed up to 200ms
         8ULL * 1024 * 1024
     };
@@ -119,21 +119,21 @@ struct EmbeddedMetadata {
 
 inline ReferencePluginDescriptor WatermarkPlugin() {
     return {
-        "com.darkthumbs.ref.watermark",
+        "com.explorerlens.ref.watermark",
         "Watermark Overlay",
         "Applies configurable branding or copyright overlay to thumbnails",
         "1.0.0",
         PluginCapability::PostProcess | PluginCapability::Decode,
         { ".jpg", ".jpeg", ".png", ".webp", ".tiff", ".bmp", ".heic",
           ".avif", ".jxl", ".gif", ".dng" },
-        "\\\\.\\pipe\\DarkThumbs_Plugin_Watermark",
+        "\\\\.\\pipe\\ExplorerLens_Plugin_Watermark",
         80,
         32ULL * 1024 * 1024
     };
 }
 
 struct WatermarkConfig {
-    std::string text            { "© DarkThumbs" };
+    std::string text            { "© ExplorerLens" };
     uint8_t     alpha           { 128 };            // 0=transparent, 255=opaque
     uint8_t     r { 255 }, g { 255 }, b { 255 };    // text colour
 
@@ -176,4 +176,5 @@ struct ReferencePluginPack {
     }
 };
 
-} // namespace DarkThumbs::Plugin
+} // namespace ExplorerLens::Plugin
+

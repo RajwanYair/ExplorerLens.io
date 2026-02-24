@@ -1,5 +1,5 @@
 // JXLDecoder.h - JPEG XL (JXL) format decoder
-// Part of DarkThumbs Engine v5.3.0+
+// Part of ExplorerLens Engine v5.3.0+
 // Modern high-efficiency image format with superior compression
 
 #pragma once
@@ -8,7 +8,7 @@
 #include <string>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -85,4 +85,5 @@ namespace Engine {
     };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

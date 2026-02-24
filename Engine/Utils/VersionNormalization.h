@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 9: Version Normalization & Release Notes Engine
+// ExplorerLens — Version Normalization & Release Notes Engine
 //
 // Automated version header scanning, stale reference detection,
 // release notes generation, decoder status reporting, and documentation
@@ -19,7 +19,7 @@
 #include <sstream>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Docs {
 
@@ -352,7 +352,7 @@ public:
 
     std::string Generate() const {
         std::string md;
-        md += "# Release Notes — DarkThumbs " + m_version.ToString() + "\n\n";
+        md += "# Release Notes — ExplorerLens " + m_version.ToString() + "\n\n";
         md += "**Release Date:** " + CurrentDateString() + "\n\n";
 
         // Group by category
@@ -424,7 +424,7 @@ struct DocIntegrityReport {
 //==============================================================================
 class StaleDocTracker {
 public:
-    // Register the 12 stale docs identified in Sprint 9 audit
+    // Register the 12 stale docs identified in audit
     void RegisterKnownStaleDocs() {
         m_staleDocs = {
             "DECODER_STATUS.md",
@@ -482,4 +482,5 @@ private:
 
 } // namespace Docs
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

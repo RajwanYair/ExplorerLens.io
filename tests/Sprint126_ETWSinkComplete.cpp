@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include "Core/ETWSinkComplete.h"
 
-using namespace DarkThumbs::ETW;
+using namespace ExplorerLens::ETW;
 
 // ── Schema Version ───────────────────────────────────────────────
 
@@ -99,7 +99,7 @@ TEST(Sprint126_ETWSink, SinkManager_Configure) {
     auto& mgr = ETWSinkManager::Get();
     mgr.Configure(ETWSinkConfig::Production());
     EXPECT_TRUE(mgr.IsConfigured());
-    EXPECT_EQ(mgr.Config().providerName, "DarkThumbs-Engine-Core");
+    EXPECT_EQ(mgr.Config().providerName, "ExplorerLens-Engine-Core");
 }
 
 TEST(Sprint126_ETWSink, SinkManager_EmitDecodeEvent) {
@@ -180,3 +180,4 @@ TEST(Sprint126_ETWSink, RetentionDays_Config) {
     EXPECT_EQ(mgr.RetentionDays(), 90);
     EXPECT_EQ(mgr.MaxLogFiles(), 50);
 }
+

@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Telemetry Hooks
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Telemetry Hooks
+// Copyright (c) 2026 - ExplorerLens Project
 // Task B7: Lightweight telemetry system
 //==============================================================================
 
@@ -11,7 +11,7 @@
 #include <atomic>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -123,7 +123,8 @@ namespace Engine {
     };
 
     #define DT_TELEMETRY(event, category) \
-        DarkThumbs::Engine::TelemetryScope __dtTelem(event, category)
+        ExplorerLens::Engine::TelemetryScope __dtTelem(event, category)
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

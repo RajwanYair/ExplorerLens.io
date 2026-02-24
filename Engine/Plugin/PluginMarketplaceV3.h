@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 275: Plugin Marketplace V3
+// ExplorerLens Engine — Plugin Marketplace V3
 // Enhanced discovery, trust chain, sandboxed execution, auto-update, ratings.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Plugin marketplace category V3
 enum class PluginCategoryV3 : uint8_t {
@@ -97,4 +97,5 @@ public:
     static constexpr size_t SandboxPolicyCount() { return static_cast<size_t>(SandboxPolicy::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

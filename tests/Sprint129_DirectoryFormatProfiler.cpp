@@ -1,7 +1,7 @@
 // Sprint 129 — Directory Format Profiler Tests
 #include <gtest/gtest.h>
 #include "Memory/DirectoryFormatProfiler.h"
-using namespace DarkThumbs::Memory;
+using namespace ExplorerLens::Memory;
 
 TEST(Sprint129_DirProfiler, ClassifyExtension_JPEG) {
     auto p = DirectoryFormatProfiler::Create();
@@ -81,3 +81,4 @@ TEST(Sprint129_DirProfiler, ProfileDirectory_SupportedCount) {
     EXPECT_EQ(profile.supportedFiles, 2);
     EXPECT_EQ(profile.unsupportedFiles, 2);
 }
+

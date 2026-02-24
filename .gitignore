@@ -49,7 +49,7 @@ documentation/
 # docs/archive/ is now tracked for historical reference
 
 # x86/32-bit build directories (project is 64-bit only)
-DarkThumbsSetup_x86/
+ExplorerLensSetup_x86/
 
 # Downloaded library archives (except in downloads/)
 *.tar.gz
@@ -422,7 +422,7 @@ Engine/INSTALL.vcxproj
 Engine/INSTALL.vcxproj.filters
 Engine/RUN_TESTS.vcxproj
 Engine/RUN_TESTS.vcxproj.filters
-Engine/DarkThumbsEngine.slnx
+Engine/ExplorerLensEngine.slnx
 Engine/test-output.txt
 Engine/Release/
 Engine/Debug/

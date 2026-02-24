@@ -1,7 +1,7 @@
 // Sprint 143 — Decoder Health Dashboard Tests
 #include <gtest/gtest.h>
 #include "Core/DecoderHealthDashboard.h"
-using namespace DarkThumbs::Core;
+using namespace ExplorerLens::Core;
 
 TEST(Sprint143_Health, CircuitStateName_Coverage) {
     EXPECT_STREQ(CircuitStateName(CircuitState::Closed), "Closed");
@@ -107,3 +107,4 @@ TEST(Sprint143_Health, Dashboard_Summary) {
     EXPECT_NE(s.find("DecoderHealth"), std::string::npos);
     EXPECT_NE(s.find("1 decoders"), std::string::npos);
 }
+

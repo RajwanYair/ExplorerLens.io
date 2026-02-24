@@ -1,14 +1,14 @@
-# DarkThumbs Plugin Marketplace - Beta Registry
+# ExplorerLens Plugin Marketplace - Beta Registry
 
 ## Overview
 
-The DarkThumbs Plugin Marketplace provides a centralized registry for discovering, installing, and updating plugins that extend format support and functionality.
+The ExplorerLens Plugin Marketplace provides a centralized registry for discovering, installing, and updating plugins that extend format support and functionality.
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              DarkThumbs Manager UI                       │
+│              ExplorerLens Manager UI                       │
 │  • Browse marketplace                                    │
 │  • Search & filter plugins                               │
 │  • Install/update/remove                                 │
@@ -40,9 +40,9 @@ The DarkThumbs Plugin Marketplace provides a centralized registry for discoverin
 {
   "version": "1.0.0",
   "registry": {
-    "name": "DarkThumbs Plugin Marketplace Beta",
+    "name": "ExplorerLens Plugin Marketplace Beta",
     "description": "Official plugin registry",
-    "baseUrl": "https://marketplace.darkthumbs.org/api/v1",
+    "baseUrl": "https://marketplace.explorerlens.org/api/v1",
     "updateIntervalHours": 24
   },
   "channels": {
@@ -60,11 +60,11 @@ The DarkThumbs Plugin Marketplace provides a centralized registry for discoverin
 
 ```json
 {
-  "id": "darkthumbs.plugin.psd",
+  "id": "explorerlens.plugin.psd",
   "name": "Adobe Photoshop (PSD) Support",
   "version": "1.0.0",
   "description": "...",
-  "author": "DarkThumbs Project",
+  "author": "ExplorerLens Project",
   "category": "Creative Formats",
   "channel": "stable",
   "verified": true,
@@ -88,7 +88,7 @@ The DarkThumbs Plugin Marketplace provides a centralized registry for discoverin
 - **Target Audience:** Production users
 - **Requirements:**
   - Code signed
-  - Verified by DarkThumbs team
+  - Verified by ExplorerLens team
   - Passed compatibility test kit
   - 30-day beta period completed
 - **Auto-Update:** Enabled by default
@@ -134,7 +134,7 @@ To achieve "Verified" status, plugins must pass:
 - [ ] Documentation provided
 - [ ] Sample files included for testing
 - [ ] Error handling (no unhandled exceptions)
-- [ ] Logging integrated with DarkThumbs
+- [ ] Logging integrated with ExplorerLens
 
 ### 4. Legal Compliance
 
@@ -165,7 +165,7 @@ To achieve "Verified" status, plugins must pass:
 3. **Submit for Review**
    - Create GitHub repository
    - Tag release (e.g., v1.0.0)
-   - Open submission issue: <https://github.com/darkthumbs/marketplace/issues/new>
+   - Open submission issue: <https://github.com/explorerlens/marketplace/issues/new>
    - Template will request:
      - Plugin ID
      - Repository URL
@@ -189,7 +189,7 @@ To achieve "Verified" status, plugins must pass:
 
 ### Signature Verification
 
-All plugins must be signed. DarkThumbs verifies:
+All plugins must be signed. ExplorerLens verifies:
 
 1. **DLL Signature**
    - Code signing certificate valid
@@ -226,7 +226,7 @@ If a plugin is found to be malicious or vulnerable:
 
 ```json
 {
-  "pluginId": "darkthumbs.plugin.malicious",
+  "pluginId": "explorerlens.plugin.malicious",
   "reason": "Security vulnerability CVE-2026-XXXXX",
   "revokedAt": "2026-01-01T00:00:00Z",
   "severity": "critical",
@@ -264,7 +264,7 @@ Get detailed information for specific plugin.
 
 ```json
 {
-  "id": "darkthumbs.plugin.psd",
+  "id": "explorerlens.plugin.psd",
   "name": "Adobe Photoshop (PSD) Support",
   ...
 }
@@ -289,13 +289,13 @@ Get list of revoked plugins.
 }
 ```
 
-## Integration with DarkThumbs Manager
+## Integration with ExplorerLens Manager
 
 ### Plugin Discovery
 
 ```cpp
 // Manager fetches registry periodically
-auto registry = PluginRegistry::Load("https://marketplace.darkthumbs.org/api/v1/plugins");
+auto registry = PluginRegistry::Load("https://marketplace.explorerlens.org/api/v1/plugins");
 
 // Filter by category
 auto creativePlugins = registry.GetByCategory("Creative Formats");
@@ -340,7 +340,7 @@ Organizations can host private registries:
 1. **Fork Registry Schema**
 
    ```bash
-   git clone https://github.com/darkthumbs/marketplace
+   git clone https://github.com/explorerlens/marketplace
    ```
 
 2. **Configure Base URL**
@@ -356,7 +356,7 @@ Organizations can host private registries:
 3. **Update Manager Configuration**
 
    ```
-   HKCU\Software\DarkThumbs\Marketplace\RegistryUrl = "https://internal.company.com/plugins/registry.json"
+   HKCU\Software\ExplorerLens\Marketplace\RegistryUrl = "https://internal.company.com/plugins/registry.json"
    ```
 
 ### Enterprise Considerations
@@ -368,7 +368,7 @@ Organizations can host private registries:
 
 ## Future Enhancements (Post-v6.0)
 
-- **Web UI:** Browse marketplace at marketplace.darkthumbs.org
+- **Web UI:** Browse marketplace at marketplace.explorerlens.org
 - **Ratings & Reviews:** User feedback system
 - **Plugin Analytics:** Download stats, usage metrics
 - **Automated Testing:** CI/CD for plugin submissions
@@ -377,12 +377,13 @@ Organizations can host private registries:
 
 ## Support
 
-- **Plugin Submission Questions:** <marketplace@darkthumbs.org>
-- **Security Issues:** <security@darkthumbs.org>
-- **General Support:** <support@darkthumbs.org>
+- **Plugin Submission Questions:** <marketplace@explorerlens.org>
+- **Security Issues:** <security@explorerlens.org>
+- **General Support:** <support@explorerlens.org>
 
 ---
 
 **Registry Version:** 1.0.0  
 **Last Updated:** January 6, 2026  
 **Status:** Beta (v6.0.0 Launch)
+

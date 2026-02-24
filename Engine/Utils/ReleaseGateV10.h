@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// v10 KPI category
 enum class V10KPICategory : uint8_t {
@@ -137,4 +137,4 @@ private:
     uint32_t m_shellRegistrations = 0;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine

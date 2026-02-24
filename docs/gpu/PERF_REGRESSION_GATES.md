@@ -7,7 +7,7 @@
 
 "Fast is a feature. Regressions are bugs."
 
-DarkThumbs v6.0 introduces strict automated gates. If a PR makes the engine slower than the baseline (without justification), the build fails.
+ExplorerLens v6.0 introduces strict automated gates. If a PR makes the engine slower than the baseline (without justification), the build fails.
 
 ## 2. Metrics Baseline Database
 
@@ -53,7 +53,7 @@ The CI pipeline runs a `BenchmarkJob`:
 
 When we legitimately add heavy features or optimize code:
 
-1. Run the benchmark tool locally: `DarkThumbs.Perf.exe --update-baseline`
+1. Run the benchmark tool locally: `ExplorerLens.Perf.exe --update-baseline`
 2. Commit the updated JSON.
 3. PR Reviewer must explicitly approve the "performance cost".
 
@@ -66,3 +66,4 @@ In production (Manager App Dashboard), we track:
 - `Scheduler Queue Depth`
 
 If global MTTT spikes > 20% in a new release, a "Performance Incident" is raised.
+

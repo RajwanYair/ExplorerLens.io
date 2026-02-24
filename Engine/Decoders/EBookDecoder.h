@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// EBookDecoder — Sprint 211
+// EBookDecoder
 // E-Book format decoder (EPUB, MOBI, FB2, AZW3) — cover extraction
 //==============================================================================
 
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class EBookFormat : uint8_t {
     EPUB = 0,
@@ -75,4 +75,5 @@ private:
     bool ParseOPFMetadata(const std::string& opfContent, EBookMetadata& meta) const;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

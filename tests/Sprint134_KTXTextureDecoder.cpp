@@ -1,7 +1,7 @@
 // Sprint 134 — KTX/KTX2 Texture Decoder Tests
 #include <gtest/gtest.h>
 #include "Decoders/KTXTextureDecoder.h"
-using namespace DarkThumbs::Decoders;
+using namespace ExplorerLens::Decoders;
 
 TEST(Sprint134_KTX, Extensions_Supported) {
     EXPECT_TRUE(KTXExtensions::IsSupported(".ktx"));
@@ -72,3 +72,4 @@ TEST(Sprint134_KTX, TextureInfo_HasMipmaps) {
     info.mipLevels = 8;
     EXPECT_TRUE(info.HasMipmaps());
 }
+

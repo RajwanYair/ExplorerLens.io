@@ -1,4 +1,4 @@
-# DarkThumbs Plugin Package Format (.dtplugin)
+# ExplorerLens Plugin Package Format (.dtplugin)
 
 **Version:** 1.0  
 **Status:** Draft  
@@ -46,15 +46,15 @@ MyPlugin.dtplugin (ZIP archive)
 
 ```json
 {
-  "$schema": "https://darkthumbs.dev/schemas/plugin-manifest-v1.json",
+  "$schema": "https://explorerlens.dev/schemas/plugin-manifest-v1.json",
   "manifestVersion": 1,
   "plugin": {
-    "id": "darkthumbs.plugin.psd",
+    "id": "explorerlens.plugin.psd",
     "name": "Photoshop Document Decoder",
     "version": "1.2.3",
     "vendor": "Adobe Systems Inc.",
     "description": "Native PSD thumbnail decoder with layer support",
-    "homepage": "https://github.com/darkthumbs/plugin-psd",
+    "homepage": "https://github.com/explorerlens/plugin-psd",
     "icon": "assets/icons/icon-256.png"
   },
   "abiVersion": 1,
@@ -102,7 +102,7 @@ MyPlugin.dtplugin (ZIP archive)
     "plugins": []
   },
   "configuration": {
-    "schemaUri": "https://darkthumbs.dev/schemas/plugin-config/psd-v1.json",
+    "schemaUri": "https://explorerlens.dev/schemas/plugin-config/psd-v1.json",
     "defaults": {
       "maxLayers": 10,
       "includeHiddenLayers": false,
@@ -135,7 +135,7 @@ MyPlugin.dtplugin (ZIP archive)
   "testing": {
     "compatibilityTestPassed": true,
     "testKitVersion": "1.0.0",
-    "testResults": "https://darkthumbs.dev/plugin-tests/psd-1.2.3.html"
+    "testResults": "https://explorerlens.dev/plugin-tests/psd-1.2.3.html"
   }
 }
 ```
@@ -297,7 +297,7 @@ Additional requirements:
    - Verify plugin dependencies
 
 5. **Installation**
-   - Extract to plugin directory: `%LocalAppData%\DarkThumbs\Plugins\{plugin-id}`
+   - Extract to plugin directory: `%LocalAppData%\ExplorerLens\Plugins\{plugin-id}`
    - Register plugin in plugin database
    - Update format handler registry
 
@@ -314,7 +314,7 @@ Additional requirements:
 
 ### 1. Official Marketplace
 
-- <https://marketplace.darkthumbs.dev>
+- <https://marketplace.explorerlens.dev>
 - Curated, verified plugins
 - Automatic updates
 - User reviews and ratings
@@ -348,7 +348,7 @@ Hosted by plugin vendor:
 ```json
 {
   "plugin": {
-    "id": "darkthumbs.plugin.psd",
+    "id": "explorerlens.plugin.psd",
     "name": "Photoshop Document Decoder"
   },
   "channels": {
@@ -389,7 +389,7 @@ If a plugin is found to be malicious or severely buggy:
 {
   "revocations": [
     {
-      "pluginId": "darkthumbs.plugin.psd",
+      "pluginId": "explorerlens.plugin.psd",
       "version": "1.0.5",
       "reason": "Critical security vulnerability (CVE-2026-1234)",
       "date": "2026-01-06",
@@ -400,7 +400,7 @@ If a plugin is found to be malicious or severely buggy:
 }
 ```
 
-Hosted at: <https://revocations.darkthumbs.dev/revocations.json>
+Hosted at: <https://revocations.explorerlens.dev/revocations.json>
 
 Actions:
 
@@ -457,7 +457,7 @@ minimal.dtplugin
 {
   "manifestVersion": 1,
   "plugin": {
-    "id": "darkthumbs.plugin.minimal",
+    "id": "explorerlens.plugin.minimal",
     "name": "Minimal Example Plugin",
     "version": "1.0.0",
     "vendor": "Example Corp"
@@ -517,3 +517,4 @@ minimal.dtplugin
 - WebAssembly plugin support
 - Plugin marketplace API
 - Automatic compatibility testing service
+

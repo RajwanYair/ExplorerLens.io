@@ -1,6 +1,6 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - vcpkg Setup Script
-# Detects, installs, and configures vcpkg for DarkThumbs project
+# ExplorerLens v7.0 - vcpkg Setup Script
+# Detects, installs, and configures vcpkg for ExplorerLens project
 #
 # USAGE:
 #   .\Setup-Vcpkg.ps1                  # Detect and install if needed
@@ -30,7 +30,7 @@ if (-not (Test-Path $helperModule)) {
 
 Write-Host ""
 Write-Host ("=" * 80) -ForegroundColor Cyan
-Write-Host "  DarkThumbs v7.0 - vcpkg Setup" -ForegroundColor Cyan
+Write-Host "  ExplorerLens v7.0 - vcpkg Setup" -ForegroundColor Cyan
 Write-Host ("=" * 80) -ForegroundColor Cyan
 Write-Host ""
 
@@ -44,7 +44,7 @@ if ($vcpkgInstalled -and -not $Force) {
     
     if (-not $InstallPackages) {
         Write-Host ""
-        Write-Host "Use -InstallPackages to install DarkThumbs dependencies" -ForegroundColor Yellow
+        Write-Host "Use -InstallPackages to install ExplorerLens dependencies" -ForegroundColor Yellow
         exit 0
     }
 } else {
@@ -66,12 +66,12 @@ if ($vcpkgInstalled -and -not $Force) {
 if ($InstallPackages) {
     Write-Host ""
     Write-Host ("=" * 80) -ForegroundColor Cyan
-    Write-Host "  Installing DarkThumbs Dependencies" -ForegroundColor Cyan
+    Write-Host "  Installing ExplorerLens Dependencies" -ForegroundColor Cyan
     Write-Host ("=" * 80) -ForegroundColor Cyan
     Write-Host ""
     
-    # Define packages needed for DarkThumbs
-    # Note: DarkThumbs currently builds most dependencies from source,
+    # Define packages needed for ExplorerLens
+    # Note: ExplorerLens currently builds most dependencies from source,
     # but vcpkg can be used for future dependency management
     $requiredPackages = @(
         # Core compression libraries (optional - we build from source)
@@ -95,7 +95,7 @@ if ($InstallPackages) {
     }
     
     Write-Host ""
-    Write-Host "Note: DarkThumbs currently builds most libraries from source." -ForegroundColor Yellow
+    Write-Host "Note: ExplorerLens currently builds most libraries from source." -ForegroundColor Yellow
     Write-Host "vcpkg is available for future dependency management." -ForegroundColor Yellow
     Write-Host ""
     
@@ -141,3 +141,4 @@ Write-Host "For more information, visit: https://vcpkg.io" -ForegroundColor Gray
 Write-Host ""
 
 exit 0
+

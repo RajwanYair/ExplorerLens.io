@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 131 — Buffer Pool & Slab Allocator
+// Buffer Pool & Slab Allocator
 // Decode buffer reuse by dimension/format class to reduce heap churn
 // during Explorer thumbnail batch operations.
 
@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <unordered_map>
 
-namespace DarkThumbs::Memory {
+namespace ExplorerLens::Memory {
 
 // ─── Slab size classes ──────────────────────────────────────────────
 enum class SlabClass : uint8_t {
@@ -299,4 +299,5 @@ private:
     size_t m_lastReused[static_cast<int>(SlabClass::COUNT)] = {};
 };
 
-} // namespace DarkThumbs::Memory
+} // namespace ExplorerLens::Memory
+

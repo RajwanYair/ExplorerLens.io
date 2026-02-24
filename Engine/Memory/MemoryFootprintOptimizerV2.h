@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 343: Memory Footprint Optimizer V2
+// ExplorerLens Engine — Memory Footprint Optimizer V2
 // Working-set trim automation, custom allocator selection per workload,
 // large-page mapping for GPU staging buffers, paged-memory compaction,
 // and heap defragmentation heuristics.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class AllocatorType     : uint8_t { SystemHeap=0, MiMalloc, JEMalloc, SegAlloc, PoolSlab, COUNT };
 enum class TrimStrategy      : uint8_t { Immediate=0, Deferred, Idle, Pressure, COUNT };
@@ -69,4 +69,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

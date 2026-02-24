@@ -1,7 +1,7 @@
 // Sprint 140 — Memory Soak Validation Tests
 #include <gtest/gtest.h>
 #include "Memory/MemorySoakValidator.h"
-using namespace DarkThumbs::Memory;
+using namespace ExplorerLens::Memory;
 
 TEST(Sprint140_Soak, Snapshot_WorkingSetMB) {
     MemorySnapshot s;
@@ -84,3 +84,4 @@ TEST(Sprint140_Soak, Validator_SnapshotCount) {
     v.RecordSnapshot(s);
     EXPECT_EQ(v.SnapshotCount(), 2u);
 }
+

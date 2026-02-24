@@ -1,12 +1,12 @@
 // =============================================================================
-// NetworkDiagnostics.cpp — Sprint 246: Network Connectivity Testing
-// DarkThumbs Engine — Utils Module
+// NetworkDiagnostics.cpp — Network Connectivity Testing
+// ExplorerLens Engine — Utils Module
 // =============================================================================
 
 #include "NetworkDiagnostics.h"
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 NetworkDiagnostics::NetworkDiagnostics() {
     // Default targets for connectivity checks
@@ -114,4 +114,5 @@ const wchar_t* NetworkDiagnostics::GetTestStatusName(NetTestStatus status) {
     }
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

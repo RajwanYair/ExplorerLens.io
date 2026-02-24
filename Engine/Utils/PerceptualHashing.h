@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 41: Duplicate Detection & Perceptual Hashing
+// ExplorerLens — Duplicate Detection & Perceptual Hashing
 // pHash/dHash computation, Hamming distance API, duplicate grouping,
 // similarity search, CSV/JSON export for external tools.
 //==============================================================================
@@ -15,7 +15,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace DarkThumbs::Engine::Utils {
+namespace ExplorerLens::Engine::Utils {
 
 //------------------------------------------------------------------------------
 // Hash Types
@@ -376,4 +376,5 @@ struct DuplicateDetectionConfig {
     }
 };
 
-} // namespace DarkThumbs::Engine::Utils
+} // namespace ExplorerLens::Engine::Utils
+

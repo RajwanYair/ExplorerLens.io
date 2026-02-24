@@ -1,15 +1,15 @@
 // =============================================================================
-// CommandLineInterface.cpp — Sprint 241: CLI Argument Parser for CBXManager
-// DarkThumbs Engine — Utils Module
+// CommandLineInterface.cpp — CLI Argument Parser for LENSManager
+// ExplorerLens Engine — Utils Module
 // =============================================================================
 
 #include "CommandLineInterface.h"
 #include <sstream>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
-CommandLineInterface::CommandLineInterface() : m_appName(L"DarkThumbs") {}
+CommandLineInterface::CommandLineInterface() : m_appName(L"ExplorerLens") {}
 
 CommandLineInterface::CommandLineInterface(const std::wstring& appName) : m_appName(appName) {}
 
@@ -173,4 +173,5 @@ const wchar_t* CommandLineInterface::GetParseStatusName(ParseStatus status) {
     }
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

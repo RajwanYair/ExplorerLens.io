@@ -1,0 +1,41 @@
+// LENSShell.idl : IDL source for LENSShell.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (LENSShell.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+	
+	[
+		object,
+		uuid(677D0B3B-E0A8-4ECC-BD7E-1BCC96E388EA),
+		dual,
+		helpstring("ILENSShell Interface"),
+		pointer_default(unique)
+	]
+	interface ILENSShell : IDispatch
+	{
+	};
+
+[
+	uuid(FC1558B6-3992-4ACE-B032-EB3273751A1B),
+	version(1.0),
+	helpstring("LENSShell 1.0 Type Library")
+]
+library LENSShellLib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	
+	[
+		uuid(9E6ECB90-5A61-42BD-B851-D3297D9C7F39),
+		helpstring("LENSShell Class")
+	]
+	coclass LENSShell
+	{
+		[default] interface ILENSShell;
+	};
+};
+

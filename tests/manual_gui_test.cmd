@@ -1,13 +1,13 @@
 @echo off
-REM Quick CBXManager GUI Validation Script
-REM Launches CBXManager and provides manual checklist
+REM Quick LENSManager GUI Validation Script
+REM Launches LENSManager and provides manual checklist
 
 echo ========================================
-echo CBXManager GUI Manual Validation
+echo LENSManager GUI Manual Validation
 echo ========================================
 echo.
-echo Starting CBXManager.exe...
-start "" "..\..\x64\Release\CBXManager.exe"
+echo Starting LENSManager.exe...
+start "" "..\..\x64\Release\LENSManager.exe"
 timeout /t 2 /nobreak >nul
 echo.
 echo Please verify the following items:
@@ -53,3 +53,4 @@ echo If ALL checks pass, the GUI is working correctly!
 echo If ANY checks fail, report the issue number.
 echo.
 pause
+

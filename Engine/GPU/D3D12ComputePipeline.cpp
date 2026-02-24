@@ -1,5 +1,5 @@
 //==============================================================================
-// D3D12ComputePipeline — Sprint 188 Implementation
+// D3D12ComputePipeline
 // GPU compute shader scaling with D3D11/CPU fallback
 //==============================================================================
 
@@ -9,7 +9,7 @@
 #include <cmath>
 #include <cstring>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 //------------------------------------------------------------------------------
 // Construction / Destruction
@@ -394,4 +394,5 @@ void D3D12ComputePipeline::CalculateDispatch(
     groupsY = (height + m_config.workGroupSizeY - 1) / m_config.workGroupSizeY;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

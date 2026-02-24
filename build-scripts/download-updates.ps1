@@ -1,4 +1,4 @@
-# DarkThumbs - Download Remaining Library Updates
+# ExplorerLens - Download Remaining Library Updates
 # Downloads zstd 1.5.7 and unrar 7.2.2
 # Date: November 19, 2025
 
@@ -72,3 +72,4 @@ if (Test-Path $unrarDir) {
 
 Write-Host "`n=== Download Complete ===" -ForegroundColor Green
 Write-Host "Next: Build the updated libraries" -ForegroundColor Cyan
+

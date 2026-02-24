@@ -9,7 +9,7 @@ param(
     [string]$TestCorpusPath = "$PSScriptRoot\data\corpus",
     
     [Parameter()]
-    [string]$ValidatorPath = "$PSScriptRoot\..\build\bin\Release\DarkThumbsValidator.exe",
+    [string]$ValidatorPath = "$PSScriptRoot\..\build\bin\Release\ExplorerLensValidator.exe",
     
     [Parameter()]
     [switch]$Verbose
@@ -17,14 +17,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "=== DarkThumbs Advanced Decoder Testing ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens Advanced Decoder Testing ===" -ForegroundColor Cyan
 Write-Host "Sprint 15: PSD, SVG, EPUB Format Support" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if validator exists
 if (-not (Test-Path $ValidatorPath)) {
     Write-Host "ERROR: Validator not found: $ValidatorPath" -ForegroundColor Red
-    Write-Host "Build it first: cmake --build build --config Release --target DarkThumbsValidator" -ForegroundColor Yellow
+    Write-Host "Build it first: cmake --build build --config Release --target ExplorerLensValidator" -ForegroundColor Yellow
     exit 1
 }
 
@@ -192,3 +192,4 @@ if ($fail edTests -gt 0) {
 Write-Host "Advanced decoder testing complete." -ForegroundColor Cyan
 
 exit $(if ($exitCriteriaMet) { 0 } else { 1 })
+

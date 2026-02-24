@@ -1,6 +1,6 @@
 // DocumentDecoder.cpp - Document Thumbnail Decoder Implementation
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 
 #include "DocumentDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
@@ -27,7 +27,7 @@
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* DocumentDecoder::m_extensions[] = {
@@ -486,4 +486,5 @@ bool DocumentDecoder::GetDocumentMetadata(const wchar_t* filePath, DocumentMetad
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

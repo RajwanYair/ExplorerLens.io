@@ -23,7 +23,7 @@ namespace fs = std::filesystem;
 //   - Pixar .tex     — Pixar texture format
 //   - Deep EXR       — Multi-layer OpenEXR with deep data
 //
-// The integration plan is to wrap OIIO behind a DarkThumbs IDecoder so it
+// The integration plan is to wrap OIIO behind a ExplorerLens IDecoder so it
 // slots into the existing decoder pipeline seamlessly.
 // ---------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ protected:
 // ---------------------------------------------------------------------------
 
 TEST_F(OIIOIntegrationTest, EXRDecoderAlreadyExists) {
-    // DarkThumbs already has an EXR decoder — OIIO would enhance it with deep EXR
+    // ExplorerLens already has an EXR decoder — OIIO would enhance it with deep EXR
     EXPECT_TRUE(DecoderExists("EXRDecoder"))
         << "EXRDecoder should already exist before OIIO integration";
 }
@@ -111,7 +111,7 @@ TEST_F(OIIOIntegrationTest, DeepEXRMultiLayerSupport) {
     // Deep EXR extends OpenEXR with per-pixel depth samples
     // - Used for compositing in VFX (deep compositing)
     // - OIIO can read deep data and extract beauty/composite layers
-    // - DarkThumbs should show the composite or beauty layer as thumbnail
+    // - ExplorerLens should show the composite or beauty layer as thumbnail
     //
     // The existing EXRDecoder handles standard EXR;
     // OIIO integration would add deep data + layer selection
@@ -160,7 +160,7 @@ TEST_F(OIIOIntegrationTest, TextureCacheConcept) {
     // - Mipmap selection based on output resolution
     // - Thread-safe concurrent access
     //
-    // For DarkThumbs thumbnails (typically 256x256), the texture cache
+    // For ExplorerLens thumbnails (typically 256x256), the texture cache
     // should select the appropriate mip level to avoid loading full-res data.
     //
     // This test validates the concept; actual integration is Sprint 25 deliverable #4.
@@ -247,3 +247,4 @@ TEST_F(OIIOIntegrationTest, TotalExoticFormatCount) {
     EXPECT_GE(oiioExoticExtensions.size(), 5u)
         << "OIIO should add at least 5 new exotic format extensions";
 }
+

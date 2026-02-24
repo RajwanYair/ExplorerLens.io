@@ -17,7 +17,7 @@
 
 namespace fs = std::filesystem;
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 namespace {
@@ -233,7 +233,7 @@ std::wstring ThumbnailCache::GenerateKey(const wchar_t* filePath, uint32_t width
 std::wstring ThumbnailCache::GetCacheDirectory() const {
     wchar_t localAppData[MAX_PATH];
     if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, localAppData))) {
-        return std::wstring(localAppData) + L"\\DarkThumbs\\cache";
+        return std::wstring(localAppData) + L"\\ExplorerLens\\cache";
     }
     return L"";
 }
@@ -607,7 +607,7 @@ void ThumbnailCache::ResetStatistics() {
 }
 
 //==============================================================================
-// Sprint 21: Enhanced Cache Optimization
+// Enhanced Cache Optimization
 //==============================================================================
 
 void ThumbnailCache::SetCompressionLevel(CompressionLevel level) {
@@ -722,4 +722,5 @@ ICacheProvider* CreateThumbnailCache() {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

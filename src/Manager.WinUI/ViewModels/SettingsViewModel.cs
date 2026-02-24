@@ -1,11 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DarkThumbs.Manager.Contracts;
+using ExplorerLens.Manager.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DarkThumbs.Manager.ViewModels;
+namespace ExplorerLens.Manager.ViewModels;
 
 /// <summary>
 /// ViewModel for Settings page
@@ -29,7 +29,7 @@ public partial class SettingsViewModel : ObservableObject
     private long _cacheMaxSizeMB = 2048;
 
     [ObservableProperty]
-    private string _cacheLocation = @"C:\ProgramData\DarkThumbs\Cache";
+    private string _cacheLocation = @"C:\ProgramData\ExplorerLens.io\Cache";
 
     [ObservableProperty]
     private int _cacheRetentionDays = 30;
@@ -106,7 +106,7 @@ public partial class SettingsViewModel : ObservableObject
 
             // Cache
             CacheMaxSizeMB = await _settingsService.GetSettingAsync<long>("cache.max_size_mb") ?? 2048;
-            CacheLocation = await _settingsService.GetSettingAsync<string>("cache.location") ?? @"C:\ProgramData\DarkThumbs\Cache";
+            CacheLocation = await _settingsService.GetSettingAsync<string>("cache.location") ?? @"C:\ProgramData\ExplorerLens.io\Cache";
             CacheRetentionDays = await _settingsService.GetSettingAsync<int>("cache.retention_days") ?? 30;
             AutoClearCache = await _settingsService.GetSettingAsync<bool>("cache.auto_clear") ?? true;
 

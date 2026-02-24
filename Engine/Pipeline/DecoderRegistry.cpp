@@ -1,13 +1,13 @@
 //==============================================================================
-// DarkThumbs Engine - Decoder Registry Implementation
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Decoder Registry Implementation
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "DecoderRegistry.h"
 #include <algorithm>
 #include <cwchar>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -167,4 +167,5 @@ void DecoderRegistry::GetStats(
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

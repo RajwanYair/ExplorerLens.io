@@ -1,10 +1,10 @@
 //==============================================================================
 // ExampleDecoder.h - Reference Implementation Template
-// DarkThumbs Engine v1.0.0
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine v1.0.0
+// Copyright (c) 2026 - ExplorerLens Project
 //
 // This is a complete reference implementation showing how to create a custom
-// thumbnail decoder plugin for the DarkThumbs Engine.
+// thumbnail decoder plugin for the ExplorerLens Engine.
 //
 // USAGE:
 // 1. Copy this file and ExampleDecoder.cpp to your project
@@ -22,7 +22,7 @@
 #include <vector>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -142,4 +142,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

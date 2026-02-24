@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 44 Tests: Network & Remote Thumbnail Provider
+// ExplorerLens — Sprint 44 Tests: Network & Remote Thumbnail Provider
 // Tests URL parsing, protocol detection, download progress, network cache,
 // proxy config, retry policy, bandwidth throttle, network config.
 //==============================================================================
@@ -10,7 +10,7 @@
 
 #include "../Engine/Cloud/NetworkThumbnailProvider.h"
 
-using namespace DarkThumbs::Engine::Cloud;
+using namespace ExplorerLens::Engine::Cloud;
 
 //==============================================================================
 // Network Protocol Tests
@@ -490,3 +490,4 @@ TEST(NetworkConfig, Corporate)
     EXPECT_TRUE(c.proxy.IsConfigured());
     EXPECT_EQ(c.cacheTTLMs, 7200000);
 }
+

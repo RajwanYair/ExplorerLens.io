@@ -1,6 +1,6 @@
 // TGADecoder.h - Targa Image Format Decoder
-// DarkThumbs Engine v5.3.0+
-// Sprint 15 - HDR/Professional Format Support
+// ExplorerLens Engine v5.3.0+
+// HDR/Professional Format Support
 //
 // Supports: Truevision TGA/TARGA (.tga, .tpic)
 // Features:
@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class TGADecoder : public IThumbnailDecoder {
@@ -88,4 +88,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

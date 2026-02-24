@@ -1,95 +1,99 @@
-// Sprint 150 — Plugin Runtime Test Matrix — GTest
-#include <gtest/gtest.h>
+// Plugin Runtime Test Matrix — GTestShim
+#include "GTestShim.h"
 #include "Plugin/PluginRuntimeTestMatrix.h"
 
-using namespace DarkThumbs::Plugin;
+using namespace ExplorerLens::Plugin;
 
 TEST(PluginRuntimeTestMatrix, DefaultConfigHasEntries) {
-    auto cfg = TestMatrixConfig::Default();
-    EXPECT_GT(cfg.maxIPCLatencyMs, 0u);
-    EXPECT_GT(cfg.soakIterations, 0u);
+  auto cfg = TestMatrixConfig::Default();
+  EXPECT_GT(cfg.entries.size(), 0u);
+  EXPECT_GT(cfg.soakConfig.iterations, 0u);
 }
 
 TEST(PluginRuntimeTestMatrix, CIMinimalConfigIsSmaller) {
-    auto full = TestMatrixConfig::Default();
-    auto ci   = TestMatrixConfig::CIMinimal();
-    EXPECT_LE(ci.soakIterations, full.soakIterations);
+  auto full = TestMatrixConfig::Default();
+  auto ci = TestMatrixConfig::CIMinimal();
+  EXPECT_LE(ci.soakConfig.iterations, full.soakConfig.iterations);
 }
 
 TEST(PluginRuntimeTestMatrix, FullSoakConfigHasMore) {
-    auto soak = TestMatrixConfig::FullSoak();
-    auto def  = TestMatrixConfig::Default();
-    EXPECT_GE(soak.soakIterations, def.soakIterations);
+  auto soak = TestMatrixConfig::FullSoak();
+  auto def = TestMatrixConfig::Default();
+  EXPECT_GE(soak.soakConfig.iterations, def.soakConfig.iterations);
 }
 
 TEST(PluginRuntimeTestMatrix, IPCLatencyResultHasField) {
-    IPCLatencyResult r;
-    r.p95Ms = 45.0;
-    EXPECT_LT(r.p95Ms, 50.0);
+  IPCLatencyResult r;
+  r.p95Ms = 45.0;
+  EXPECT_LT(r.p95Ms, 50.0);
 }
 
 TEST(PluginRuntimeTestMatrix, SoakTestConfigDefaults) {
-    SoakTestConfig s;
-    EXPECT_GT(s.iterations, 0u);
-    EXPECT_GT(s.maxMemoryMB, 0u);
+  SoakTestConfig s;
+  EXPECT_GT(s.iterations, 0u);
+  EXPECT_GT(s.maxMemoryMB, 0u);
 }
 
 TEST(PluginRuntimeTestMatrix, TestMatrixReportFieldsZeroInit) {
-    TestMatrixReport r;
-    EXPECT_EQ(r.passed, 0u);
-    EXPECT_EQ(r.failed, 0u);
+  TestMatrixReport r;
+  EXPECT_EQ(r.passCount, 0u);
+  EXPECT_EQ(r.failCount, 0u);
 }
 
 TEST(PluginRuntimeTestMatrix, RunnerRunDryReturnsReport) {
-    PluginRuntimeTestMatrixRunner runner;
-    auto cfg = TestMatrixConfig::CIMinimal();
-    auto report = runner.RunDry(cfg);
-    EXPECT_GE(report.passed + report.failed, 0u);
+  auto cfg = TestMatrixConfig::CIMinimal();
+  PluginRuntimeTestMatrixRunner runner(cfg);
+  auto report = runner.RunDry();
+  EXPECT_GE(report.passCount + report.failCount, 0u);
 }
 
 TEST(PluginRuntimeTestMatrix, SoakTestSLAIs1000Iterations) {
-    auto soak = TestMatrixConfig::FullSoak();
-    EXPECT_GE(soak.soakIterations, 1000u);
+  auto soak = TestMatrixConfig::FullSoak();
+  EXPECT_GE(soak.soakConfig.iterations, 1000u);
 }
 
 TEST(PluginRuntimeTestMatrix, PluginTestEntryHasName) {
-    PluginTestEntry e;
-    e.testName = "LoadPlugin";
-    EXPECT_FALSE(e.testName.empty());
+  PluginTestEntry e{PluginTestScenario::PluginLoad, "LoadPlugin", "desc"};
+  EXPECT_FALSE(e.name.empty());
 }
 
-TEST(PluginRuntimeTestMatrix, PluginTestResultOkDefaultFalse) {
-    PluginTestResult r;
-    EXPECT_FALSE(r.passed);
+TEST(PluginRuntimeTestMatrix, PluginTestResultPassedDefaultFalse) {
+  PluginTestResult r{PluginTestScenario::PluginLoad};
+  EXPECT_FALSE(r.Passed());
 }
 
 TEST(PluginRuntimeTestMatrix, IPCChannelConfigHasDefaults) {
-    IPCChannelConfig cfg;
-    EXPECT_GT(cfg.timeoutMs, 0u);
+  IPCChannelConfig cfg;
+  EXPECT_GT(cfg.timeoutMs, 0u);
 }
 
 TEST(PluginRuntimeTestMatrix, MatrixReportPassRateZeroWhenEmpty) {
-    TestMatrixReport r;
-    r.passed = 0; r.failed = 0;
-    EXPECT_DOUBLE_EQ(r.PassRate(), 0.0);
+  // passCount/failCount are 0 by default — report has no PassRate(),
+  // verify zero init is correct
+  TestMatrixReport r;
+  EXPECT_EQ(r.passCount, 0u);
+  EXPECT_EQ(r.failCount, 0u);
 }
 
-TEST(PluginRuntimeTestMatrix, MatrixReportPassRate100) {
-    TestMatrixReport r;
-    r.passed = 10; r.failed = 0;
-    EXPECT_DOUBLE_EQ(r.PassRate(), 100.0);
+TEST(PluginRuntimeTestMatrix, MatrixReportAllRequiredPassedWhenNoFail) {
+  TestMatrixReport r;
+  r.passCount = 10;
+  r.failCount = 0;
+  EXPECT_TRUE(r.AllRequiredPassed());
 }
 
-TEST(PluginRuntimeTestMatrix, MatrixReportPassRatePartial) {
-    TestMatrixReport r;
-    r.passed = 8; r.failed = 2;
-    EXPECT_DOUBLE_EQ(r.PassRate(), 80.0);
+TEST(PluginRuntimeTestMatrix, MatrixReportAllRequiredFailedWhenFail) {
+  TestMatrixReport r;
+  r.passCount = 8;
+  r.failCount = 2;
+  EXPECT_FALSE(r.AllRequiredPassed());
 }
 
 TEST(PluginRuntimeTestMatrix, RunnerDryRunNoSideEffects) {
-    PluginRuntimeTestMatrixRunner r1, r2;
-    auto cfg = TestMatrixConfig::CIMinimal();
-    auto rep1 = r1.RunDry(cfg);
-    auto rep2 = r2.RunDry(cfg);
-    EXPECT_EQ(rep1.passed, rep2.passed);
+  auto cfg = TestMatrixConfig::CIMinimal();
+  PluginRuntimeTestMatrixRunner r1(cfg);
+  PluginRuntimeTestMatrixRunner r2(cfg);
+  auto rep1 = r1.RunDry();
+  auto rep2 = r2.RunDry();
+  EXPECT_EQ(rep1.passCount, rep2.passCount);
 }

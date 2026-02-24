@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 154 — Plugin Marketplace Trust Workflow
+// Plugin Marketplace Trust Workflow
 // Certificate chain validation, trust levels, revocation, publisher policy enforcement.
 
 #include <string>
@@ -8,12 +8,12 @@
 #include <optional>
 #include <functional>
 
-namespace DarkThumbs::Plugin {
+namespace ExplorerLens::Plugin {
 
 // ─── Trust level ──────────────────────────────────────────────────────────────
 
 enum class PluginTrustLevel : uint32_t {
-    Trusted     = 0,  // verified by DarkThumbs signing authority
+    Trusted     = 0,  // verified by ExplorerLens signing authority
     Verified    = 1,  // signed by known 3rd-party certificate
     Community   = 2,  // self-signed, user-accepted
     Untrusted   = 3,  // no valid signature
@@ -102,9 +102,9 @@ struct PublisherPolicy {
     }
 
     static PublisherPolicy Open() { return {}; }
-    static PublisherPolicy DarkThumbsOfficial() {
+    static PublisherPolicy ExplorerLensOfficial() {
         PublisherPolicy p;
-        p.allowedPublishers = { "DarkThumbs", "Intel Corporation" };
+        p.allowedPublishers = { "ExplorerLens", "Intel Corporation" };
         p.enforceStrict = false;
         return p;
     }
@@ -187,7 +187,7 @@ struct TrustBadge {
 
     static TrustBadge For(PluginTrustLevel l) {
         switch (l) {
-            case PluginTrustLevel::Trusted:    return { l, "icon_trust_verified",  "Officially verified by DarkThumbs" };
+            case PluginTrustLevel::Trusted:    return { l, "icon_trust_verified",  "Officially verified by ExplorerLens" };
             case PluginTrustLevel::Verified:   return { l, "icon_trust_checked",   "Signed by verified publisher" };
             case PluginTrustLevel::Community:  return { l, "icon_trust_community", "Community plugin — use with care" };
             case PluginTrustLevel::Untrusted:  return { l, "icon_trust_none",      "Unsigned plugin — not recommended" };
@@ -197,4 +197,5 @@ struct TrustBadge {
     }
 };
 
-} // namespace DarkThumbs::Plugin
+} // namespace ExplorerLens::Plugin
+

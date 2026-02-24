@@ -2,9 +2,9 @@
 #include <string>
 #include <vector>
 #include <future>
-#include "../../SDK/include/DarkThumbsPlugin.h" // Reuse SDK definitions
+#include "../../SDK/include/ExplorerLensPlugin.h" // Reuse SDK definitions
 
-namespace DarkThumbs::Manager::Services {
+namespace ExplorerLens::Manager::Services {
 
     struct MarketplacePlugin {
         std::wstring Id;
@@ -31,3 +31,4 @@ namespace DarkThumbs::Manager::Services {
         virtual std::future<bool> UpdatePluginAsync(const std::wstring& pluginId) = 0;
     };
 }
+

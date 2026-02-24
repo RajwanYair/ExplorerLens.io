@@ -1,7 +1,7 @@
 // Sprint 136 — Extended eBook Support Tests
 #include <gtest/gtest.h>
 #include "Decoders/EBookCoverExtractor.h"
-using namespace DarkThumbs::Decoders;
+using namespace ExplorerLens::Decoders;
 
 TEST(Sprint136_EBook, Extensions_AllSupported) {
     EXPECT_TRUE(EBookExtensions::IsSupported(".epub"));
@@ -72,3 +72,4 @@ TEST(Sprint136_EBook, CoverResult_HasImage) {
     r.imageData.push_back(0xFF);
     EXPECT_TRUE(r.HasImage());
 }
+

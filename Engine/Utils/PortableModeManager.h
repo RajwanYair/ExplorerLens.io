@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// PortableModeManager — Sprint 217
+// PortableModeManager
 // Enables registry-free portable mode for USB/removable drives.
 // Configuration stored in local INI files alongside the executable.
 //==============================================================================
@@ -10,7 +10,7 @@
 #include <map>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class PortableStatus : uint8_t {
     Installed   = 0,  // Normal registry-based installation
@@ -71,4 +71,5 @@ private:
     uint64_t m_maxCacheBytes = 256 * 1024 * 1024; // 256 MB default
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

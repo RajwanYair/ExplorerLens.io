@@ -1,6 +1,6 @@
 // VideoDecoder.h - Video Thumbnail Decoder (Media Foundation)
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: MP4, MKV, AVI, WMV, MOV, FLV, WEBM, M4V, MPG, MPEG, TS, MTS
 // Features:
@@ -17,7 +17,7 @@
 // Forward declarations for Media Foundation types
 struct IMFSourceReader;
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class VideoDecoder : public IThumbnailDecoder {
@@ -81,4 +81,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,7 +1,7 @@
 // Sprint 135 — JPEG XR WIC Decoder Tests
 #include <gtest/gtest.h>
 #include "Decoders/JXRWICDecoder.h"
-using namespace DarkThumbs::Decoders;
+using namespace ExplorerLens::Decoders;
 
 TEST(Sprint135_JXR, Extensions_Supported) {
     EXPECT_TRUE(JXRExtensions::IsSupported(".wdp"));
@@ -70,3 +70,4 @@ TEST(Sprint135_JXR, ImageInfo_EstimateSize) {
     info.pixelFormat = JXRPixelFormat::BGRA32;
     EXPECT_EQ(info.EstimateDecodedSize(), 1920u * 1080 * 4);
 }
+

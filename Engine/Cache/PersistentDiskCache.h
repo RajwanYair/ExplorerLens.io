@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// PersistentDiskCache — Sprint 192
+// PersistentDiskCache
 // Persistent disk cache with warming, smart eviction, and integrity validation
 //
 // Architecture:
@@ -18,7 +18,7 @@
 #include <chrono>
 #include <mutex>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Cache eviction strategy
 enum class EvictionStrategy : uint8_t {
@@ -187,4 +187,5 @@ private:
     double m_totalMissTimeMs = 0.0;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,8 +1,8 @@
 #==============================================================================
-# DarkThumbs - Code Signing Automation Script
+# ExplorerLens - Code Signing Automation Script
 # Sprint 24: Code signing infrastructure
 # 
-# Signs all DarkThumbs binaries with Authenticode certificate
+# Signs all ExplorerLens binaries with Authenticode certificate
 # Requires: Code signing certificate installed in Windows Certificate Store
 #           OR valid PFX file with password
 #==============================================================================
@@ -27,7 +27,7 @@ $ErrorActionPreference = "Stop"
 
 function Show-Usage {
     Write-Host @"
-DarkThumbs Code Signing Script
+ExplorerLens Code Signing Script
 ==============================
 
 Usage:
@@ -127,47 +127,47 @@ $BinariesRootFolder = Join-Path $ProjectRoot "bin" $Configuration
 $BinariesToSign = @(
     # Core DLL (required for Windows SmartScreen)
     @{
-        Path        = Join-Path $ProjectRoot "CBXShell\x64\$Configuration\CBXShell.dll"
-        Description = "DarkThumbs Shell Extension"
+        Path        = Join-Path $ProjectRoot "LENSShell\x64\$Configuration\LENSShell.dll"
+        Description = "ExplorerLens Shell Extension"
         Critical    = $true
     },
     # Manager executable
     @{
-        Path        = Join-Path $ProjectRoot "CBXManager\x64\$Configuration\CBXManager.exe"
-        Description = "DarkThumbs Configuration Manager"
+        Path        = Join-Path $ProjectRoot "LENSManager\x64\$Configuration\LENSManager.exe"
+        Description = "ExplorerLens Configuration Manager"
         Critical    = $true
     },
     # Engine library (optional, static lib doesn't need signing)
     @{
-        Path        = Join-Path $ProjectRoot "build\lib\$Configuration\DarkThumbsEngine.lib"
-        Description = "DarkThumbs Engine Library"
+        Path        = Join-Path $ProjectRoot "build\lib\$Configuration\ExplorerLensEngine.lib"
+        Description = "ExplorerLens Engine Library"
         Critical    = $false
         Skip        = $true  # Static libraries don't get signed
     },
     # Test executables (optional)
     @{
         Path        = Join-Path $ProjectRoot "build\bin\$Configuration\EngineTests.exe"
-        Description = "DarkThumbs Unit Tests"
+        Description = "ExplorerLens Unit Tests"
         Critical    = $false
     },
     @{
         Path        = Join-Path $ProjectRoot "build\bin\$Configuration\IntegrationTests.exe"
-        Description = "DarkThumbs Integration Tests"
+        Description = "ExplorerLens Integration Tests"
         Critical    = $false
     },
     @{
         Path        = Join-Path $ProjectRoot "build\bin\$Configuration\EngineBenchmark.exe"
-        Description = "DarkThumbs Performance Benchmark"
+        Description = "ExplorerLens Performance Benchmark"
         Critical    = $false
     }
 )
 
 # Add installer if it exists
-$InstallerPath = Join-Path $ProjectRoot "packaging\output\DarkThumbs-Setup.msi"
+$InstallerPath = Join-Path $ProjectRoot "packaging\output\ExplorerLens-Setup.msi"
 if (Test-Path $InstallerPath) {
     $BinariesToSign += @{
         Path        = $InstallerPath
-        Description = "DarkThumbs Installer"
+        Description = "ExplorerLens Installer"
         Critical    = $true
     }
 }
@@ -199,7 +199,7 @@ function Sign-File {
     $signArgs += "/tr", $TimestampServer  # RFC 3161 timestamp
     $signArgs += "/td", "SHA256"  # Timestamp digest algorithm
     $signArgs += "/d", $Description  # Description
-    $signArgs += "/du", "https://github.com/YourOrg/DarkThumbs"  # URL
+    $signArgs += "/du", "https://github.com/YourOrg/ExplorerLens"  # URL
 
     # Append/dual signing for compatibility
     # First signature uses SHA-256, second uses SHA-1 for Windows 7 compatibility
@@ -247,7 +247,7 @@ function Verify-Signature {
 
 Write-Host ""
 Write-Host "======================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Code Signing" -ForegroundColor Cyan
+Write-Host "ExplorerLens Code Signing" -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -410,7 +410,7 @@ Write-Host ""
 
 if ($criticalFailed) {
     Write-Host "CRITICAL: One or more critical binaries failed to sign!" -ForegroundColor Red
-    Write-Host "  Required for production deployment: CBXShell.dll, CBXManager.exe" -ForegroundColor Yellow
+    Write-Host "  Required for production deployment: LENSShell.dll, LENSManager.exe" -ForegroundColor Yellow
     exit 1
 }
 
@@ -421,3 +421,4 @@ if ($failedCount -gt 0) {
 
 Write-Host "✓ All binaries processed successfully!" -ForegroundColor Green
 exit 0
+

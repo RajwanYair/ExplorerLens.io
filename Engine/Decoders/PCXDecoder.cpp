@@ -1,13 +1,13 @@
 //==============================================================================
 // PCXDecoder.cpp — ZSoft PCX Image Decoder
-// DarkThumbs Engine v8.4.0 — Sprint 180
+// ExplorerLens Engine v8.4.0
 //==============================================================================
 
 #include "PCXDecoder.h"
 #include <fstream>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 bool PCXDecoder::CanDecode(const wchar_t* filePath) const {
@@ -170,4 +170,5 @@ HRESULT PCXDecoder::DecodePCXData(const uint8_t* data, size_t dataSize,
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,6 +1,6 @@
 // DocumentDecoder.h - Document Thumbnail Decoder
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: EPUB, MOBI, AZW/AZW3, FB2, DOCX, XLSX, PPTX, XPS, OXPS, DJVU
 // Features:
@@ -16,7 +16,7 @@
 #include <memory>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Document metadata structure
@@ -71,4 +71,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

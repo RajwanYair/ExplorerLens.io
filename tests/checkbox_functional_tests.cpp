@@ -1,4 +1,4 @@
-// CBXManager Checkbox Functional Tests
+// LENSManager Checkbox Functional Tests
 // Tests that each checkbox correctly enables/disables its registry handler
 // Compile: msbuild checkbox_tests.vcxproj /p:Configuration=Release /p:Platform=x64
 
@@ -37,9 +37,9 @@ void DeleteRegistryKey(const wstring& keyPath) {
     RegDeleteKey(HKEY_CURRENT_USER, keyPath.c_str());
 }
 
-// Find CBXManager window
-HWND FindCBXManager() {
-    return FindWindow(L"#32770", L"CBX Shell Manager - Thumbnail Configuration");
+// Find LENSManager window
+HWND FindLENSManager() {
+    return FindWindow(L"#32770", L"LENS Shell Manager - Thumbnail Configuration");
 }
 
 // Click checkbox helper
@@ -236,25 +236,25 @@ void RunCheckboxTests(HWND hDlg) {
 }
 
 int main() {
-    wcout << L"CBXManager Checkbox Functional Test Suite\n";
+    wcout << L"LENSManager Checkbox Functional Test Suite\n";
     wcout << L"==========================================\n\n";
     
-    // Find CBXManager window
-    wcout << L"Waiting for CBXManager window...\n";
+    // Find LENSManager window
+    wcout << L"Waiting for LENSManager window...\n";
     HWND hDlg = NULL;
     for (int i = 0; i < 100; i++) {
-        hDlg = FindCBXManager();
+        hDlg = FindLENSManager();
         if (hDlg) break;
         Sleep(100);
     }
     
     if (!hDlg) {
-        wcout << L"ERROR: CBXManager window not found!\n";
-        wcout << L"Please launch CBXManager.exe first.\n";
+        wcout << L"ERROR: LENSManager window not found!\n";
+        wcout << L"Please launch LENSManager.exe first.\n";
         return 1;
     }
     
-    wcout << L"CBXManager found!\n\n";
+    wcout << L"LENSManager found!\n\n";
     wcout << L"WARNING: This test will modify registry settings.\n";
     wcout << L"It will enable/disable handlers to verify functionality.\n";
     wcout << L"Press Enter to continue or Ctrl+C to cancel...\n";
@@ -267,3 +267,4 @@ int main() {
     
     return 0;
 }
+

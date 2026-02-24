@@ -1,12 +1,12 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 37: Context Menu & Shell UX Integration
+// ExplorerLens — Context Menu & Shell UX Integration
 // Explorer right-click actions: Regenerate Thumbnail, Copy to Clipboard,
 // Export as PNG. Shell property handler, batch folder operations.
 //==============================================================================
 
-#ifndef DARKTHUMBS_CONTEXT_MENU_HANDLER_H
-#define DARKTHUMBS_CONTEXT_MENU_HANDLER_H
+#ifndef EXPLORERLENS_CONTEXT_MENU_HANDLER_H
+#define EXPLORERLENS_CONTEXT_MENU_HANDLER_H
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine { namespace Shell {
+namespace ExplorerLens { namespace Engine { namespace Shell {
 
 //==============================================================================
 // Context Menu Action — individual right-click command
@@ -47,13 +47,13 @@ inline const char* ContextMenuActionName(ContextMenuAction a)
 inline const char* ContextMenuVerb(ContextMenuAction a)
 {
     switch (a) {
-        case ContextMenuAction::RegenerateThumbnail: return "darkthumbs.regenerate";
-        case ContextMenuAction::CopyToClipboard:     return "darkthumbs.copy";
-        case ContextMenuAction::ExportAsPNG:          return "darkthumbs.export";
-        case ContextMenuAction::RegenerateFolder:     return "darkthumbs.regenerateall";
-        case ContextMenuAction::ShowProperties:       return "darkthumbs.properties";
+        case ContextMenuAction::RegenerateThumbnail: return "explorerlens.regenerate";
+        case ContextMenuAction::CopyToClipboard:     return "explorerlens.copy";
+        case ContextMenuAction::ExportAsPNG:          return "explorerlens.export";
+        case ContextMenuAction::RegenerateFolder:     return "explorerlens.regenerateall";
+        case ContextMenuAction::ShowProperties:       return "explorerlens.properties";
     }
-    return "darkthumbs.unknown";
+    return "explorerlens.unknown";
 }
 
 struct ContextMenuItem
@@ -79,16 +79,16 @@ class ContextMenuHandler
 public:
     ContextMenuHandler()
     {
-        // Register default menu items per Sprint 37 spec
+        // Register default menu items per spec
         items_ = {
             {ContextMenuAction::RegenerateThumbnail, "Regenerate Thumbnail",
-             "darkthumbs.regenerate", "Force re-decode and update cached thumbnail", 0, false, true},
+             "explorerlens.regenerate", "Force re-decode and update cached thumbnail", 0, false, true},
             {ContextMenuAction::CopyToClipboard, "Copy Thumbnail to Clipboard",
-             "darkthumbs.copy", "Copy decoded thumbnail as PNG to clipboard", 0, false, true},
+             "explorerlens.copy", "Copy decoded thumbnail as PNG to clipboard", 0, false, true},
             {ContextMenuAction::ExportAsPNG, "Export Thumbnail as PNG...",
-             "darkthumbs.export", "Save decoded thumbnail to chosen location", 0, false, true},
+             "explorerlens.export", "Save decoded thumbnail to chosen location", 0, false, true},
             {ContextMenuAction::RegenerateFolder, "Regenerate All Thumbnails",
-             "darkthumbs.regenerateall", "Re-decode all thumbnails in this folder", 0, true, true},
+             "explorerlens.regenerateall", "Re-decode all thumbnails in this folder", 0, true, true},
         };
     }
 
@@ -344,6 +344,8 @@ struct ExportResult
     std::string errorMessage;
 };
 
-}}} // namespace DarkThumbs::Engine::Shell
+}}} // namespace ExplorerLens::Engine::Shell
 
-#endif // DARKTHUMBS_CONTEXT_MENU_HANDLER_H
+#endif // EXPLORERLENS_CONTEXT_MENU_HANDLER_H
+
+

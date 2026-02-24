@@ -1,69 +1,149 @@
-# DarkThumbs — Copilot Instructions
+# ExplorerLens — Copilot Instructions
 
 ## Project Overview
 
-DarkThumbs is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
+ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
 - **Version:** 14.0.0 (Codename: Apex)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
-- **Build System:** CMake 3.20+ (Engine) + MSBuild (Shell/Manager)
+- **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
+- **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
 - **GPU:** DirectX 11 + DirectX 12 + Vulkan Compute with CPU fallback
 - **COM CLSID:** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-- **Sprint Count:** 348 completed (v14.0.0 block: Sprints 299–348 ✅)
 - **Build Status:** 0 errors, 0 warnings
 
 ## Architecture
 
 ```
-CBXShell.dll (2940 KB)     — COM Shell Extension (IThumbnailProvider)
-CBXManager.exe (400 KB)    — GUI Configuration Utility
-DarkThumbsEngine.lib       — Core decode + render pipeline
+LENSShell.dll (2940 KB)     — COM Shell Extension (IThumbnailProvider)
+LENSManager.exe (400 KB)    — GUI Configuration Utility
+ExplorerLensEngine.lib       — Core decode + render pipeline
 ```
 
 ### Key Directories
 
-| Directory                      | Purpose                                                           |
-| ------------------------------ | ----------------------------------------------------------------- |
-| `CBXShell/`                    | Shell extension DLL (COM registration, thumbnail provider)        |
-| `CBXManager/`                  | WTL-based admin GUI for registration/settings                     |
-| `Engine/`                      | Core library — decoders, GPU pipeline, caching, observability     |
-| `Engine/Core/`                 | Decode pipeline, GPU renderer, resource management                |
-| `Engine/Decoders/`             | Format-specific decoders (25+ total, incl. CAD/glTF/Scientific)   |
-| `Engine/Plugin/`               | Plugin ecosystem (trust chain, sandbox, compat kit, ref pack)     |
+| Directory                      | Purpose                                                                           |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| `LENSShell/`                   | Shell extension DLL (COM registration, thumbnail provider)                        |
+| `LENSManager/`                 | WTL-based admin GUI for registration/settings                                     |
+| `Engine/`                      | Core library — decoders, GPU pipeline, caching, observability                     |
+| `Engine/Core/`                 | Decode pipeline, GPU renderer, resource management                                |
+| `Engine/Decoders/`             | Format-specific decoders (25+ total, incl. CAD/glTF/Scientific)                   |
+| `Engine/Plugin/`               | Plugin ecosystem (trust chain, sandbox, compat kit, ref pack)                     |
 | `Engine/Memory/`               | Memory management (compactor, hot-mode, pressure controller, footprint optimizer) |
-| `Engine/Pipeline/`             | Pipeline stages (fallback engine, zero-copy upload, parallel I/O) |
-| `Engine/Cache/`                | Cache management (adaptive budget, PSO cache, sub-ms cache, multi-tenant) |
-| `Engine/Utils/`                | Utilities (ARM64 support, matrix validation, installer lifecycle) |
-| `Engine/Tests/`                | GTest unit tests + Google Benchmark                               |
-| `Engine/AI/`                   | AI/ML modules (scene understanding, smart crop, IQA, search)      |
-| `Engine/GPU/`                  | GPU decode acceleration (NVDEC/QuickSync/AMF vendor routing)      |
-| `build-scripts/`               | PowerShell build automation                                       |
-| `build-scripts/core/`          | Build-Library-Core.ps1 — unified build module                     |
-| `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.)                 |
-| `cmake/`                       | CMake toolchain files (incl. toolchain-windows-arm64.cmake)       |
-| `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                             |
-| `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                                  |
-| `docs/`                        | All documentation                                                 |
-| `docs/development/sprints-v8/` | Per-sprint markdown docs (SPRINT_1.md … SPRINT_348.md)            |
-| `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                                 |
+| `Engine/Pipeline/`             | Pipeline stages (fallback engine, zero-copy upload, parallel I/O)                 |
+| `Engine/Cache/`                | Cache management (adaptive budget, PSO cache, sub-ms cache, multi-tenant)         |
+| `Engine/Utils/`                | Utilities (ARM64 support, matrix validation, installer lifecycle)                 |
+| `Engine/Tests/`                | Unit tests + Google Benchmark                                                     |
+| `Engine/AI/`                   | AI/ML modules (scene understanding, smart crop, IQA, search)                      |
+| `Engine/GPU/`                  | GPU decode acceleration (NVDEC/QuickSync/AMF vendor routing)                      |
+| `build-scripts/`               | PowerShell build automation                                                       |
+| `build-scripts/core/`          | Build-Library-Core.ps1 — unified build module                                     |
+| `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.)                                 |
+| `cmake/`                       | CMake toolchain files (incl. toolchain-windows-arm64.cmake)                       |
+| `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                                             |
+| `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                                                  |
+| `docs/`                        | All documentation                                                                 |
+| `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                                                 |
+
+## Toolchain & Build Tools
+
+### Required: VS 18 2026 BuildTools + MSVC v145
+
+All builds **must** use MSVC v145 toolset from Visual Studio 18 (2026) BuildTools.
+
+| Tool             | Version      | Location                                                                                                        |
+| ---------------- | ------------ | --------------------------------------------------------------------------------------------------------------- |
+| **cl.exe**       | 19.50.35720  | `C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe` |
+| **link.exe**     | 14.50.35717  | Same MSVC bin dir                                                                                               |
+| **lib.exe**      | 14.50.35717  | Same MSVC bin dir                                                                                               |
+| **msbuild.exe**  | 18.3         | `...\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe`                                                          |
+| **vcvars64.bat** | —            | `...\BuildTools\VC\Auxiliary\Build\vcvars64.bat`                                                                |
+| **vcpkg**        | 2025-11-19   | `...\BuildTools\VC\vcpkg\vcpkg.exe` (bundled)                                                                   |
+| **Windows SDK**  | 10.0.26100.0 | `C:\Program Files (x86)\Windows Kits\10`                                                                        |
+
+### Additional Tools (Scoop — preferred for latest versions)
+
+| Tool  | Version | Path                      |
+| ----- | ------- | ------------------------- |
+| cmake | 4.2.3   | `~/scoop/shims/cmake.exe` |
+| ninja | 1.13.2  | `~/scoop/shims/ninja.exe` |
+| git   | 2.53.0  | `~/scoop/shims/git.exe`   |
+| nasm  | 3.01    | `~/scoop/shims/nasm.exe`  |
+| meson | 1.10.0  | `~/scoop/shims/meson.exe` |
+| nuget | 7.3.0   | `~/scoop/shims/nuget.exe` |
+| 7zip  | 26.00   | `~/scoop/shims/7z.exe`    |
+| WiX   | 6.0.2   | `~/.dotnet/tools/wix.exe` |
+
+### MSVC Toolset Versions Available
+
+| Toolset     | cl.exe Version | Status      |
+| ----------- | -------------- | ----------- |
+| 14.50.35717 | 19.50.35720    | **Primary** |
+| 14.44.35207 | 19.44.35222    | Fallback    |
 
 ## Build Commands
 
+### Recommended: CMake Preset + Build Script (sources vcvars64 automatically)
+
 ```powershell
-# CMake + Ninja (recommended, ~55 sec)
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release -j 8
+# One-command build (recommended — handles vcvars, cmake, ninja)
+.\build-scripts\Build-MSVC.ps1
 
-# MSBuild (traditional, ~75 sec)
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m
+# Clean build
+.\build-scripts\Build-MSVC.ps1 -Clean
 
-# Run tests
+# With tests
+.\build-scripts\Build-MSVC.ps1 -Clean -Test
+
+# vcpkg preset
+.\build-scripts\Build-MSVC.ps1 -Preset vcpkg-release
+```
+
+### Manual: CMake Presets (requires vcvars64 sourced first)
+
+```powershell
+# IMPORTANT: Source vcvars first! Without this, CMake picks Clang from PATH.
+cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat" -vcvars_ver=14.50.35717 && powershell'
+
+# Configure + Build
+cmake --preset default-release
+cmake --build --preset default-release -j 8
+
+# Test
 ctest --test-dir build -C Release --output-on-failure
+```
 
-# Production build (all libraries + packaging)
+### Available CMake Presets
+
+| Preset            | Generator | Compiler  | Dependencies    |
+| ----------------- | --------- | --------- | --------------- |
+| `default-release` | Ninja     | MSVC v145 | Local external/ |
+| `default-debug`   | Ninja     | MSVC v145 | Local external/ |
+| `vcpkg-release`   | Ninja     | MSVC v145 | vcpkg           |
+| `vcpkg-debug`     | Ninja     | MSVC v145 | vcpkg           |
+| `vs2026`          | VS 18     | MSVC v145 | Local external/ |
+
+### MSBuild (Shell + Manager only)
+
+```powershell
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+```
+
+### Production Build (all libraries + packaging)
+
+```powershell
 .\build-scripts\Build-All-And-Package.ps1
 ```
+
+## CRT Linkage
+
+All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). One exception:
+
+- **libwebp** was built with `/MT` (static CRT) — this requires `/NODEFAULTLIB:LIBCMT` workaround
+- **Proper fix:** Rebuild libwebp with `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL`
+- The linker flags in `Engine/CMakeLists.txt` handle this automatically for both MSVC and Clang
 
 ## External Libraries (Statically Linked)
 
@@ -94,33 +174,35 @@ ctest --test-dir build -C Release --output-on-failure
 
 ## Key Types
 
-- `cbxArchive` — Main archive handler, routes formats to decoders
-- `CBXTYPE` — Enum of supported archive/format types (cbxArchive.h)
-- `IThumbnailProvider` — Windows COM interface implemented by CBXShell
-- `DarkThumbsEngine` — Core engine library linking all decoders
+- `LENSArchive` — Main archive handler, routes formats to decoders
+- `LENSTYPE` — Enum of supported archive/format types (LENSArchive.h)
+- `IThumbnailProvider` — Windows COM interface implemented by LENSShell
+- `ExplorerLensEngine` — Core engine library linking all decoders
 - `ObservabilityIntegration` — ETW + structured logger singleton
 - `BuildValidation` — Compile-time version/feature flag validation
 
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~1187 unit tests (100 original + 337 Sprints 150–174 + 250 Sprints 199–248 + 250 Sprints 249–298 + 250 Sprints 299–348), 5 benchmarks
+- **Test count:** ~1187 unit tests, 5 benchmarks
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
 ## Important Rules for AI Assistants
 
-1. **Never break the zero-warnings build** — all changes must compile cleanly
-2. **New headers must be registered** in `Engine/CMakeLists.txt` ENGINE_HEADERS
-3. **New source files must be registered** in ENGINE_SOURCES
-4. **New test files must be registered** in `Engine/Tests/CMakeLists.txt` EngineTests target
-5. **COM CLSID is fixed** — do not change `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-6. **CBXTYPE enum values must not collide** — check existing values in cbxArchive.h
-7. **Build scripts use Build-Library-Core.ps1** — don't duplicate utility functions
-8. **Documentation versions must stay in sync** — update all docs when version changes
-9. **Git commits must have descriptive messages** — include sprint number if applicable
-10. **Test changes with:** `cmake --build build --config Release -j 8`
-11. **Validate with:** `ctest --test-dir build -C Release --output-on-failure`
+1. **Never break the zero-warnings build** — all changes must compile cleanly with MSVC v145
+2. **Always use MSVC v145** — never configure CMake without vcvars64.bat sourced; use `Build-MSVC.ps1`
+3. **New headers must be registered** in `Engine/CMakeLists.txt` ENGINE_HEADERS
+4. **New source files must be registered** in ENGINE_SOURCES
+5. **New test files must be registered** in `Engine/Tests/CMakeLists.txt` EngineTests target
+6. **COM CLSID is fixed** — do not change `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
+7. **LENSTYPE enum values must not collide** — check existing values in LENSArchive.h
+8. **Build scripts use Build-Library-Core.ps1** — don't duplicate utility functions
+9. **Documentation versions must stay in sync** — update all docs when version changes
+10. **Git commits must have descriptive messages**
+11. **Build with:** `.\build-scripts\Build-MSVC.ps1` (or `cmake --preset default-release` after vcvars)
+12. **Test with:** `ctest --test-dir build -C Release --output-on-failure`
+13. **Linker flags** (`/NODEFAULTLIB`, `/IGNORE`) are MSVC link.exe only — guard with `if(MSVC)` in CMake
 
 ## External Libraries Directory Structure (Post-Cleanup)
 
@@ -144,128 +226,21 @@ external/
 
 - **Current version:** v14.0.0 "Apex" (Sprints 299-348 complete)
 - **Next roadmap block:** Sprints 349+ (next improvement plan TBD)
-- **Execution package docs:** `docs/development/sprints-v8/SPRINT_XX.md`
 - **Source of truth:** `MASTER_PLAN.md`
 - **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
-- **Sprint deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, doc in `docs/development/sprints-v8/`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
-- **Batch pattern:** Create 5 sprints' source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → create sprint docs → git commit each individually
+- **Sprint deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
+- **Batch pattern:** Create 5 sprints' source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
 - **CMakeLists.txt insertion points:** Core headers before `# Pipeline`, Core sources before `# Pipeline implementations`, Utils headers before `# Sprint 8-12:`, Utils sources before closing `)`
 - **EngineTests.cpp insertion points:** New includes after last sprint include, TEST() functions before `//== Sprint 6:` section, RUN_TEST() calls before `// Sprint 6: Isolation & Stability Tests`
 
-## v10.5.0 Block Summary (Sprints 199–248 ✅)
+## Key Architecture Patterns
 
-| Phase | Sprints | Title                                                                                             |
-| ----- | ------- | ------------------------------------------------------------------------------------------------- |
-| P1    | 199–204 | GPU Pipeline V2, D3D12 Compute, Shader Compiler, Pipeline Cache, GPU Memory Pool, Release Gate V5 |
-| P2    | 205–209 | Async Decode, Thread Pool V2, Priority Queue, Decode Cache V2, Release Gate V6                    |
-| P3    | 210–214 | Format Detection V2, MIME Resolver, Codec Registry, Stream Analyzer, Release Gate V7              |
-| P4    | 215–219 | ETW Provider V2, Perf Counters, Diagnostic Logger, Health Monitor, Release Gate V8                |
-| P5    | 220–224 | Accessibility, Cloud Sync, Format Converter, Enterprise Deploy, Release Gate V11                  |
-| P6    | 225–229 | Watch Folder, Diagnostics Dashboard, Benchmark V2, Localization, Theme Engine                     |
-| P7    | 230–234 | Telemetry, Update Engine, Shell Preview, Batch Processing, Release Gate V12                       |
-| P8    | 235–239 | File Hash, Registry Manager, Error Recovery, Log Rotation, Release Gate V13                       |
-| P9    | 240–244 | Resource Pool, CLI Parser, Metadata Extractor, Notifications, Release Gate V14                    |
-| P10   | 245–248 | Content Indexer, Network Diagnostics, Config Migration, Release Gate V15 (milestone)              |
-
-## v8.4.0 Block Summary (Sprints 175–177 ✅)
-
-| Sprint | Title                        | Key Changes                                                                         |
-| ------ | ---------------------------- | ----------------------------------------------------------------------------------- |
-| 175    | Critical Bug Fixes           | Fixed djvu→CBXTYPE_DJVU, added model routing, AVIF/HEIF separation, HEIF extensions |
-| 176    | Shell Registration Expansion | CBXShell.rgs 47→93 extensions (archives, RAW, docs, models, fonts)                  |
-| 177    | Version Normalization        | All docs updated to v8.4.0, CHANGELOG v8.0-8.4 entries added                        |
-
-## v8.3.0 Block Summary (Sprints 150–174 ✅)
-
-| Phase | Sprints | Title                                                                                       |
-| ----- | ------- | ------------------------------------------------------------------------------------------- |
-| P1    | 150–154 | Plugin Ecosystem Hardening (sandbox, trust chain, compat kit, ref pack)                     |
-| P2    | 155–159 | ARM64 Foundation (build config, lib matrix, runtime validator, CI)                          |
-| P3    | 160–164 | Format Expansion (JPEG2000, CAD/glTF/Scientific, fallback engine)                           |
-| P4    | 165–169 | Memory Excellence (compactor, zero-copy, adaptive cache, hot-mode, pressure V2)             |
-| P5    | 170–174 | v8.3.0 Release (matrix validation, installer lifecycle, release gate V2, doc sync, closure) |
-
-## New Patterns Discovered in v8.3.0 Sprints
-
-- **ARM64 cross-compile:** Use `cmake/toolchain-windows-arm64.cmake` with MSVC `amd64_arm64` arch; CI in `.github/workflows/arm64.yml`
-- **Plugin architecture:** Plugin files go in `Engine/Plugin/`; use `ICADDecoderPlugin` / `IThumbnailPlugin` patterns from Sprint 161/153
-- **Memory pressure ladder:** 5-tier (None/Low/Medium/High/Critical) with bitmask `PressureAction` flags — see `MemoryPressureControllerV2.h`
-- **Format fallback:** `FormatFallbackEngine` routes via `FallbackTrigger` bitmask flags; default chains in `CreateDefault()`
-- **Zero-copy pipeline:** `ZeroCopyPipeline` uses scatter-gather DMA descriptors; fallback for non-mappable buffers automatic
-- **Cache budget:** `AdaptiveCacheBudgetManager` maintains hot/warm/cold tier budget sum invariant (total = 512MB default)
-- **Release gate:** `ReleaseGateV2` requires ALL 9 KPI dimensions to pass; `ReleaseKPIThresholds::ForV83()` has exact thresholds
-- **Doc sync audit:** Sprint 173 `DocumentationSyncAudit` checks 7 artifacts — run before declaring any release done
-
-## New Patterns Discovered in v10.5.0 Sprints
-
-- **Resource pooling:** `ResourcePoolEngine` manages checkout/return lifecycle with TTL eviction and prewarming (Sprint 240)
-- **CLI parsing:** `CommandLineInterface` supports Flag/String/Int/FilePath/Enum arg types with validation and help generation (Sprint 241)
-- **Metadata extraction:** `MetadataExtractor` handles 5 standards (EXIF/IPTC/XMP/ICC/GPS) with 16 fields and formatting utilities (Sprint 242)
-- **Notification system:** `NotificationEngine` manages 7 event types with priority-scaled duration (Critical=3x, High=2x) and max-cap overflow (Sprint 243)
-- **Content indexing:** `ContentIndexer` classifies 40+ extensions into 8 content types with batch indexing and multi-axis search (Sprint 245)
-- **Network diagnostics:** `NetworkDiagnostics` tests 5 connectivity types (Ping/DNS/HTTP/Proxy/TLS) with proxy config support (Sprint 246)
-- **Config migration:** `ConfigMigrationEngine` supports 5 migration actions (Copy/Rename/Transform/Delete/SetDefault) with backup-based rollback (Sprint 247)
-- **Release gates:** Gates evolve from V5 (12 KPIs) through V15 (20 KPIs) — each adds KPIs validating new sprint deliverables
+- **Namespace:** All engine classes use `namespace ExplorerLens { namespace Engine { } }` — use `using namespace ExplorerLens::Engine;` in tests
 - **Test framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with `g_testsRun/g_testsPassed/g_testsFailed` counters — NOT GTest
-- **Batch sprint execution:** 5 sprints per batch — create source files → register CMakeLists.txt → add tests → create sprint docs → git commit each individually
-- **Namespace:** All engine classes use `namespace DarkThumbs { namespace Engine { } }` — use `using namespace DarkThumbs::Engine;` in tests
-- **File collision handling:** If a header name exists from a prior sprint, create a V2/V3 variant (e.g., TestSuiteExpansionV2.h, PluginMarketplaceV3.h)
-- **CMakeLists.txt insertion:** After last registered sprint header, before `# Sprint 8-12:` comment
-- **EngineTests.cpp insertion:** Includes before `#include <iostream>`, TEST() before `// Main Test Runner`, RUN_TEST() before `// Sprint 6: Isolation`
-
-## v13.0.0 Block Summary (Sprints 249–298 ✅)
-
-| Phase | Sprints | Title                                                                                              |
-| ----- | ------- | -------------------------------------------------------------------------------------------------- |
-| P1    | 249–254 | Version Sync, Architecture Docs, Quality Foundation, CI Hardening, Perf Baseline, Release Gate V16 |
-| P2    | 255–259 | DPX/Cineon, APNG, Text Preview, DICOM V2, FITS V2 (format expansion)                               |
-| P3    | 260–264 | 3MF/USD Decoders, Release Gate V17, D3D12 Async Compute, Async Shell Registration, SIMD Pipeline   |
-| P4    | 265–269 | Parallel Batch, Persistent Cache, Release Gate V18, ARM64 Detection V2, MSIX Packaging             |
-| P5    | 270–274 | Win11 24H2, Test Suite V2, Fuzz Testing, Release Gate V19, Vulkan Compute Activation               |
-| P6    | 275–279 | Plugin Marketplace V3, AI Thumbnails, Spreadsheet Preview, USD/USDZ, Auto-Update Engine            |
-| P7    | 280–284 | Release Gate V20 (v12.0), Structured Data, Notebook Preview, Database Preview, Legacy Images       |
-| P8    | 285–289 | Vector Formats (CDR/Visio), Scientific Data (HDF5/NetCDF), NIfTI, CAD (STEP/IGES), HDR Display     |
-| P9    | 290–294 | Per-Monitor DPI V3, Shell Overlay, Cache Warming, Multi-GPU Load Balancer, Release Gate V21        |
-| P10   | 295–298 | Accessibility Pipeline, Telemetry Analytics, Cloud Storage, Release Gate V22 (v13.0 Final)         |
-
-## New Patterns Discovered in v13.0.0 Sprints
-
-- **Decoder expansion:** New decoders in `Engine/Decoders/` for spreadsheets (SpreadsheetPreviewDecoder), notebooks (NotebookPreviewDecoder), databases (DatabasePreviewDecoder), legacy images (LegacyImageDecoder), vector formats (VectorFormatDecoder), scientific data (ScientificDataDecoder), NIfTI (NIfTIDecoder), CAD (CADFormatDecoder), structured data (StructuredDataDecoder), USD (USDDecoder)
-- **GPU pipeline:** HDRDisplayPipeline (6 tone map operators), MultiGPULoadBalancer (5 strategies), VulkanComputeActivation (7 features), PerMonitorDPIV3 (8 DPI scales)
-- **Cache system:** CacheWarmingService (5 warming strategies, battery-aware), AdaptiveCacheBudgetManager updates
-- **Shell integration:** ShellOverlayHandler (7 overlay icon types), CloudStorageIntegration (6 providers, hydration strategies)
-- **Quality infrastructure:** FuzzTestingManager (4 backends), AccessibilityPipeline (6 features, 5 color blind modes), TelemetryAnalyticsEngine (privacy-first, opt-in)
-- **Release gates:** Gates V16–V22, culminating in V22 (23 KPIs) for v13.0 final release
-- **Auto-update:** AutoUpdateEngine (4 channels: Stable/Beta/Dev/Canary, semantic versioning)
-- **AI integration:** AIThumbnailEnhancer (7 enhancements, 4 backends: DirectML/ONNX/OpenVINO/CPU)
-
-## v14.0.0 Block Summary (Sprints 299–348 ✅)
-
-| Phase | Sprints | Title                                                                                                    |
-| ----- | ------- | -------------------------------------------------------------------------------------------------------- |
-| P1    | 299–304 | Version Sync V14, GPU Pipeline V3, Shader Compiler V2, PSO Cache V2, GPU Memory Pool V2, Gate V23        |
-| P2    | 305–309 | Smart Format Detector V2, Extended Video, Audio Vis V2, 3D Renderer V2, Release Gate V24                 |
-| P3    | 310–314 | Plugin SDK V2, Plugin Debugger, Plugin Hot Reload, Plugin Perf Profiler, Release Gate V25                |
-| P4    | 315–319 | Threat Model V2, Memory Safety Audit V2, Supply Chain V2, Runtime Integrity, Release Gate V26            |
-| P5    | 320–324 | Progressive Thumbnail Loader, Animation Engine V2, Preview Panel V2, Quick Look, Release Gate V27        |
-| P6    | 325–329 | Scene Understanding, Smart Crop V2, Image Quality Assessor, AI Search, Release Gate V28                  |
-| P7    | 330–334 | Enterprise Policy V2, SharePoint/Teams, Multi-Tenant Cache, Compliance Audit, Release Gate V29           |
-| P8    | 335–339 | Windows 12 Compat, ARM64 Perf Optimizer, WinRT App SDK V2, Installer V2, Release Gate V30               |
-| P9    | 340–344 | Sub-Ms Cache Engine, GPU Decode V2, Parallel I/O, Memory Footprint V2, Release Gate V31                  |
-| P10   | 345–348 | Accessibility Suite V2, Doc Excellence V2, Quality Assurance V2, Release Gate V32 (v14.0 Final)          |
-
-## New Patterns Discovered in v14.0.0 Sprints
-
-- **New Engine subdirectories:** `Engine/AI/` (scene understanding, smart crop, IQA, semantic search), `Engine/GPU/` (GPU decode vendor routing), `Engine/Memory/` (footprint optimizer V2)
-- **Two release gate API patterns:**
-  - Gates V23–V28: `Evaluate(const std::vector<GateVxxResult>&)` → `GateVxxVerdict { bool approved; uint32_t passed; uint32_t failed; }`
-  - Gates V29–V32: `Evaluate(bool kpiResults[])` → `ReleaseGateVxxResult { bool allKPIsPass; uint8_t kpiPassCount; float gateScore; bool advanceRecommended/v14ShipApproved; }`
-- **Final gate KPI count:** ReleaseGateV32 has 23 KPIs; first value is `GPUV3PipelineStable` (index 0)
-- **AI/ML module pattern:** Classes in `Engine/AI/` use `SceneMLBackend` / `EmbeddingModel` enum for backend selection (DirectML/ONNX/OpenVINO/CPU)
-- **GPU decode routing:** `GPUDecodeAccelerationV2` in `Engine/GPU/` routes by `GPUDecodeVendor` at runtime; capability probe at startup
-- **Plugin V2 pattern:** `PluginSDKV2Capability` bitmask (9 flags), lifecycle via `PluginSDKV2LifeCycle`, hot-reload via shadow DLL copy
-- **Security pattern:** Supply chain via `SupplyChainIntegrityV2` (SPDX/CycloneDX SBOM + OSV.dev CVE feed); runtime PE hash in `RuntimeIntegrityVerifier`
+- **Release gates:** Unified `Utils/ReleaseGate.h` — single header covering all gate versions (V2–V32)
+- **Plugin architecture:** Plugin files go in `Engine/Plugin/`; use `ICADDecoderPlugin` / `IThumbnailPlugin` patterns
+- **Memory pressure ladder:** 5-tier (None/Low/Medium/High/Critical) with bitmask `PressureAction` flags
+- **Sub-ms cache:** `SubMillisecondCacheEngine` uses robin-hood open-addressing with `CacheHashAlgo::XXH3` default
+- **AI/ML modules:** Classes in `Engine/AI/` use `SceneMLBackend` / `EmbeddingModel` enum for backend selection (DirectML/ONNX/OpenVINO/CPU)
+- **GPU decode routing:** `GPUDecodeAccelerationV2` in `Engine/GPU/` routes by `GPUDecodeVendor` at runtime
 - **Enterprise pattern:** Policy source hierarchy: `EnterprisePolicyEngineV2` (GPO → Intune → ConfigMgr → Manual)
-- **Sub-ms cache:** `SubMillisecondCacheEngine` uses robin-hood open-addressing with `CacheHashAlgo::XXH3` default and NUMA-local allocation
-- **CMakeLists.txt insertion:** New headers go after last Sprint 298 entry, grouped under `# Sprint 299-348: v14.0 "Apex" Block` comment
-- **EngineTests.cpp insertion:** Includes before `#include <iostream>`, TEST() before `// Main Test Runner`, RUN_TEST() before `// Sprint 6: Isolation`

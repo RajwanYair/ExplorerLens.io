@@ -1,7 +1,7 @@
 #pragma once
 // =============================================================================
-// CommandLineInterface.h — Sprint 241: CLI Argument Parser for CBXManager
-// DarkThumbs Engine — Utils Module
+// CommandLineInterface.h — CLI Argument Parser for LENSManager
+// ExplorerLens Engine — Utils Module
 // =============================================================================
 
 #include <string>
@@ -9,7 +9,7 @@
 #include <map>
 #include <cstdint>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 /// Argument value type
 enum class ArgType : uint32_t {
@@ -93,4 +93,5 @@ private:
     std::wstring NormalizeName(const std::wstring& name) const;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

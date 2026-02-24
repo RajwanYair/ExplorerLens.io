@@ -30,7 +30,7 @@ Push-Location $RootDir
 
 try {
     Write-Host "=============================================" -ForegroundColor Cyan
-    Write-Host "DarkThumbs v$Version - Release Pipeline Validation" -ForegroundColor Cyan
+    Write-Host "ExplorerLens v$Version - Release Pipeline Validation" -ForegroundColor Cyan
     Write-Host "=============================================" -ForegroundColor Cyan
     if ($DryRun) { Write-Host "(DRY RUN - no artifacts will be created)" -ForegroundColor Yellow }
     Write-Host ""
@@ -88,9 +88,9 @@ try {
     Write-StepHeader "Step 2: Build Artifact Verification"
 
     $artifacts = @(
-        @{ Path = "x64\Release\CBXShell.dll"; MinMB = 2.5; Desc = "Shell Extension DLL" }
-        @{ Path = "x64\Release\CBXManager.exe"; MinMB = 0.3; Desc = "Manager Application" }
-        @{ Path = "build\lib\DarkThumbsEngine.lib"; MinMB = 90; Desc = "Engine Static Library" }
+        @{ Path = "x64\Release\LENSShell.dll"; MinMB = 2.5; Desc = "Shell Extension DLL" }
+        @{ Path = "x64\Release\LENSManager.exe"; MinMB = 0.3; Desc = "Manager Application" }
+        @{ Path = "build\lib\ExplorerLensEngine.lib"; MinMB = 90; Desc = "Engine Static Library" }
     )
 
     foreach ($art in $artifacts) {
@@ -115,7 +115,7 @@ try {
     # =========================================================================
     Write-StepHeader "Step 3: Test Suite Gate"
 
-    $testExe = Join-Path $RootDir "build\bin\Release\DarkThumbsTests.exe"
+    $testExe = Join-Path $RootDir "build\bin\Release\ExplorerLensTests.exe"
     if (Test-Path $testExe) {
         if (-not $DryRun) {
             Write-Host "  Running tests..." -ForegroundColor Gray
@@ -146,7 +146,7 @@ try {
         @{ Path = "README.md"; Pattern = "Current Version.*$Version" }
         @{ Path = "MASTER_PLAN.md"; Pattern = "v$Version" }
         @{ Path = "CHANGELOG.md"; Pattern = $Version }
-        @{ Path = "packaging\DarkThumbs.wxs"; Pattern = $Version }
+        @{ Path = "packaging\ExplorerLens.wxs"; Pattern = $Version }
         @{ Path = ".github\standards\IMPLEMENTATION_STATUS.md"; Pattern = "v$Version" }
     )
 
@@ -174,7 +174,7 @@ try {
 
     # MSI check
     if (-not $SkipMSI) {
-        $msiPath = Join-Path $RootDir "packaging\DarkThumbs-Setup-$Version.msi"
+        $msiPath = Join-Path $RootDir "packaging\ExplorerLens-Setup-$Version.msi"
         if (Test-Path $msiPath) {
             $msiSizeMB = [math]::Round((Get-Item $msiPath).Length / 1MB, 2)
             Add-Step "MSI installer" "PASS" "$msiSizeMB MB"
@@ -187,7 +187,7 @@ try {
 
     # Portable ZIP check
     if (-not $SkipPortableZip) {
-        $zipPath = Join-Path $RootDir "packaging\output\DarkThumbs-$Version-Portable.zip"
+        $zipPath = Join-Path $RootDir "packaging\output\ExplorerLens-$Version-Portable.zip"
         if (Test-Path $zipPath) {
             $zipSizeMB = [math]::Round((Get-Item $zipPath).Length / 1MB, 2)
             Add-Step "Portable ZIP" "PASS" "$zipSizeMB MB"
@@ -203,15 +203,15 @@ try {
     # =========================================================================
     Write-StepHeader "Step 6: Code Signing Verification"
 
-    $dllPath = Join-Path $RootDir "x64\Release\CBXShell.dll"
+    $dllPath = Join-Path $RootDir "x64\Release\LENSShell.dll"
     if ((Test-Path $dllPath) -and (Get-Command signtool -ErrorAction SilentlyContinue)) {
         $sigResult = signtool verify /pa $dllPath 2>&1
         if ($LASTEXITCODE -eq 0) {
-            Add-Step "CBXShell.dll signed" "PASS"
-            Write-Host "  ✓ CBXShell.dll: Valid signature" -ForegroundColor Green
+            Add-Step "LENSShell.dll signed" "PASS"
+            Write-Host "  ✓ LENSShell.dll: Valid signature" -ForegroundColor Green
         } else {
-            Add-Step "CBXShell.dll signed" "WARN" "Not signed"
-            Write-Host "  ⚠ CBXShell.dll: Not signed (sign before release)" -ForegroundColor Yellow
+            Add-Step "LENSShell.dll signed" "WARN" "Not signed"
+            Write-Host "  ⚠ LENSShell.dll: Not signed (sign before release)" -ForegroundColor Yellow
         }
     } else {
         Add-Step "Code signing check" "SKIP" "signtool or DLL not available"
@@ -272,3 +272,4 @@ try {
 } finally {
     Pop-Location
 }
+

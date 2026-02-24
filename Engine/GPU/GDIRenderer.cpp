@@ -8,7 +8,7 @@
 
 using namespace Gdiplus;
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 GDIRenderer::GDIRenderer()
@@ -272,4 +272,5 @@ HRESULT GDIRenderer::GetGPUInfo(
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

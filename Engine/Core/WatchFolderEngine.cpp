@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 WatchFolderEngine::WatchFolderEngine() = default;
 
@@ -67,4 +67,5 @@ void WatchFolderEngine::SimulateChange(const std::wstring& path, FileChangeType 
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

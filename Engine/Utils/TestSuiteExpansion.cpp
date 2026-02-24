@@ -1,5 +1,5 @@
 //==============================================================================
-// TestSuiteExpansion.cpp — Sprint 196
+// TestSuiteExpansion.cpp
 // Test framework expansion with decoder test specs and coverage tracking
 //==============================================================================
 
@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 TestSuiteExpansion::TestSuiteExpansion() = default;
 
@@ -194,4 +194,5 @@ const wchar_t* TestSuiteExpansion::GetVerdictName(TestVerdict verdict) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

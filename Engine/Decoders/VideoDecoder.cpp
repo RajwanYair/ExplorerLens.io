@@ -1,6 +1,6 @@
 // VideoDecoder.cpp - Video Thumbnail Decoder Implementation
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 
 #include "VideoDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
@@ -22,7 +22,7 @@
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "propsys.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Supported extensions — broad video format coverage
@@ -400,4 +400,5 @@ bool VideoDecoder::GetMetadata(const wchar_t* filePath, VideoMetadata& metadata)
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

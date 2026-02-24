@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 347: Quality Assurance V2
+// ExplorerLens Engine — Quality Assurance V2
 // Final QA matrix aggregating unit, integration, fuzzing, regression, and
 // performance test results into a unified pass/fail signal. Tracks defect
 // density, escape rate, and test-age staleness for v14.0 ship criteria.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class QATestCategory  : uint8_t { Unit=0,Integration,Performance,Fuzz,Regression,Accessibility,COUNT };
 enum class QADefectSeverity: uint8_t { Critical=0,High,Medium,Low,Info,COUNT };
@@ -76,4 +76,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,7 +1,7 @@
 #pragma once
 //==============================================================================
-// PythonSDK — Sprint 203
-// Python bindings for DarkThumbs engine. Exposes thumbnail generation,
+// PythonSDK
+// Python bindings for ExplorerLens engine. Exposes thumbnail generation,
 // format detection, and decoder capabilities through a C-compatible ABI
 // that can be loaded via ctypes or wrapped with pybind11.
 //
@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Python SDK configuration
 struct PythonSDKConfig {
@@ -139,7 +139,7 @@ private:
     void PopulateDecoders();
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
 
 //==============================================================================
 // C ABI Exports (for ctypes)
@@ -149,25 +149,26 @@ extern "C" {
 #endif
 
 /// Initialize the SDK (returns handle)
-void* DarkThumbs_Init(void);
+void* ExplorerLens_Init(void);
 
 /// Generate thumbnail from file (returns pixel data via out params)
-int DarkThumbs_GenerateThumbnail(void* handle, const wchar_t* path,
+int ExplorerLens_GenerateThumbnail(void* handle, const wchar_t* path,
                                   uint32_t width, uint32_t height,
                                   uint8_t** outPixels, uint32_t* outSize);
 
 /// Free pixel data
-void DarkThumbs_FreePixels(uint8_t* pixels);
+void ExplorerLens_FreePixels(uint8_t* pixels);
 
 /// Get version string
-const wchar_t* DarkThumbs_GetVersion(void);
+const wchar_t* ExplorerLens_GetVersion(void);
 
 /// Get decoder count
-uint32_t DarkThumbs_GetDecoderCount(void* handle);
+uint32_t ExplorerLens_GetDecoderCount(void* handle);
 
 /// Cleanup
-void DarkThumbs_Destroy(void* handle);
+void ExplorerLens_Destroy(void* handle);
 
 #ifdef __cplusplus
 }
 #endif
+

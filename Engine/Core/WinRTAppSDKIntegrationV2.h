@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 337: WinRT / App SDK Integration V2
+// ExplorerLens Engine — WinRT / App SDK Integration V2
 // Windows App SDK 2.0 thumbnail provider contracts, WinRT thumbnail
 // stream interface, ExternalLocation activation, and Bootstrap API
 // lifecycle for packaged + unpackaged DLL scenarios.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class WinRTActivationKind  : uint8_t { Unpackaged=0,Packaged,ExternalLocation,SparsePackage,COUNT };
 enum class AppSDKBootstrapPhase : uint8_t { Initialize=0,Bootstrap,MainInstance,Unload,COUNT };
@@ -64,4 +64,5 @@ public:
     static constexpr size_t StreamModeCount()      { return static_cast<size_t>(WinRTStreamMode::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

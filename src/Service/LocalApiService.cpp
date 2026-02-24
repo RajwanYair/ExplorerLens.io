@@ -6,7 +6,7 @@
 
 #include "../Worker/ipc_transport.h"
 
-namespace DarkThumbs::Service {
+namespace ExplorerLens::Service {
 
 namespace {
 std::string MakeRouteKey(const std::string& method, const std::string& path) {
@@ -63,7 +63,7 @@ void LocalApiService::ListenHttp() {
 
 void LocalApiService::ListenPipe() {
     IPC::TransportConfig transport{};
-    transport.pipeName = m_config.pipeName.empty() ? L"\\.\\pipe\\DarkThumbs.LocalApi" : m_config.pipeName;
+    transport.pipeName = m_config.pipeName.empty() ? L"\\.\\pipe\\ExplorerLens.LocalApi" : m_config.pipeName;
 
     IPC::IPCServer server(transport);
     if (!server.Start()) {
@@ -84,7 +84,7 @@ void LocalApiService::ListenPipe() {
         }
 
         // Lightweight status response for initial integration.
-        const std::string body = "{\"service\":\"DarkThumbs.LocalApi\",\"status\":\"ok\"}";
+        const std::string body = "{\"service\":\"ExplorerLens.LocalApi\",\"status\":\"ok\"}";
         IPC::MessageHeader response = IPC::CreateHeader(
             IPC::MessageType::RESPONSE_PONG,
             header.correlationId,
@@ -96,4 +96,5 @@ void LocalApiService::ListenPipe() {
     server.Stop();
 }
 
-} // namespace DarkThumbs::Service
+} // namespace ExplorerLens::Service
+

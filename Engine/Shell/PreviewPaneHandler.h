@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 45: Preview Pane & Rich Tooltip Integration
+// ExplorerLens Engine — Preview Pane & Rich Tooltip Integration
 //
 // Provides IPreviewHandler framework, property store handler for Explorer
 // Details pane, EXIF metadata extraction for rich tooltips, column handler
@@ -16,7 +16,7 @@
 #include <functional>
 #include <algorithm>
 
-namespace DarkThumbs::Engine::Shell {
+namespace ExplorerLens::Engine::Shell {
 
 //==============================================================================
 // Preview Mode — How the Preview Pane renders content
@@ -306,13 +306,13 @@ struct PropertyColumn {
 
     static std::vector<PropertyColumn> DefaultColumns() {
         return {
-            {"DarkThumbs.Format",     "Image Format",  90, true},
-            {"DarkThumbs.Dimensions", "Dimensions",   120, true},
-            {"DarkThumbs.Codec",      "Decoder",       80, false},
-            {"DarkThumbs.ColorSpace", "Color Space",   90, false},
-            {"DarkThumbs.DecodeTime", "Decode Time",   80, false},
-            {"DarkThumbs.Camera",     "Camera",       120, false},
-            {"DarkThumbs.Exposure",   "Exposure",     150, false},
+            {"ExplorerLens.Format",     "Image Format",  90, true},
+            {"ExplorerLens.Dimensions", "Dimensions",   120, true},
+            {"ExplorerLens.Codec",      "Decoder",       80, false},
+            {"ExplorerLens.ColorSpace", "Color Space",   90, false},
+            {"ExplorerLens.DecodeTime", "Decode Time",   80, false},
+            {"ExplorerLens.Camera",     "Camera",       120, false},
+            {"ExplorerLens.Exposure",   "Exposure",     150, false},
         };
     }
 
@@ -360,4 +360,5 @@ struct PreviewPaneConfig {
     }
 };
 
-} // namespace DarkThumbs::Engine::Shell
+} // namespace ExplorerLens::Engine::Shell
+

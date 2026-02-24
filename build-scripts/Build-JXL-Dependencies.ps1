@@ -1,5 +1,5 @@
 # Build libjxl dependencies (brotli, highway) for JPEG XL Support
-# DarkThumbs External Library Build Script
+# ExplorerLens External Library Build Script
 
 param(
     [switch]$Clean,
@@ -64,7 +64,7 @@ function Build-Library {
         "-A", "x64",
         "-DCMAKE_INSTALL_PREFIX=$installDir",
         "-DCMAKE_BUILD_TYPE=$Configuration",
-        "-DBUILD_SHARED_LIBS=OFF"
+        "-DBUILD_SHARED_LIBS=ON"
     )
     
     # Add custom options
@@ -111,7 +111,7 @@ Build-Library -Name "brotli" `
     -Version "v1.1.0" `
     -CMakeOptions @{
     "BROTLI_DISABLE_TESTS" = "ON"
-    "BROTLI_BUNDLED_MODE"  = "OFF"
+    "BROTLI_BUNDLED_MODE"  = "ON"
 }
 
 # Build highway (SIMD library)
@@ -119,9 +119,9 @@ Build-Library -Name "highway" `
     -GitUrl "https://github.com/google/highway.git" `
     -Version "1.2.0" `
     -CMakeOptions @{
-    "BUILD_TESTING"       = "OFF"
-    "HWY_ENABLE_EXAMPLES" = "OFF"
-    "HWY_ENABLE_TESTS"    = "OFF"
+    "BUILD_TESTING"       = "ON"
+    "HWY_ENABLE_EXAMPLES" = "ON"
+    "HWY_ENABLE_TESTS"    = "ON"
 }
 
 Write-Host ""
@@ -150,3 +150,4 @@ Write-Host "3. Uncomment JXLDecoder.h/cpp in CMakeLists.txt" -ForegroundColor Wh
 Write-Host "4. Implement JXLDecoder::DecodeJXLImage() method" -ForegroundColor White
 Write-Host "5. Add unit tests and test with sample .jxl files" -ForegroundColor White
 Write-Host ""
+

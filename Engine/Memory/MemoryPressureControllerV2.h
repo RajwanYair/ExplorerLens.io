@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 169 — Memory Pressure Controller V2
+// Memory Pressure Controller V2
 // Kernel-level low-memory notification hook, tiered response ladder,
 // proactive pre-eviction, ETW emission on each pressure transition.
 
@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace DarkThumbs::Memory {
+namespace ExplorerLens::Memory {
 
 // ─── Pressure level ──────────────────────────────────────────────────────────
 
@@ -140,4 +140,5 @@ private:
     PressureTransitionCallback          m_callback;
 };
 
-} // namespace DarkThumbs::Memory
+} // namespace ExplorerLens::Memory
+

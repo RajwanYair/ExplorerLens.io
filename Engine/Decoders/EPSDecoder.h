@@ -1,7 +1,7 @@
 //==============================================================================
 // EPS Decoder - Encapsulated PostScript Thumbnail Provider
-// Sprint 183: Vector Format Expansion
-// Copyright (c) 2026 - DarkThumbs Project
+// Vector Format Expansion
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #pragma once
@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -25,7 +25,7 @@ namespace Engine {
     ///   - Contains offsets to TIFF and/or WMF preview images
     ///
     /// Supported: .eps, .epsf, .ps
-    /// CBXTYPE: CBXTYPE_EPS (87)
+    /// LENSTYPE: LENSTYPE_EPS (87)
     /// </summary>
     class EPSDecoder : public IThumbnailDecoder
     {
@@ -83,4 +83,5 @@ namespace Engine {
     };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

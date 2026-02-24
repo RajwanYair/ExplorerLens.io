@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Isolation Mode
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Isolation Mode
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Determines whether plugins should run in-process or in separate PluginHost.
  *****************************************************************************/
@@ -14,7 +14,7 @@
 #include <mutex>
 #include <Windows.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // Isolation Mode
@@ -100,4 +100,5 @@ bool IsTrustedVendor(const std::wstring& vendor);
 // Get plugin signature publisher name
 std::wstring GetPluginPublisher(const std::filesystem::path& plugin_path);
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

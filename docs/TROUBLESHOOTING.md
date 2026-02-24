@@ -1,4 +1,4 @@
-# DarkThumbs Troubleshooting Guide
+# ExplorerLens Troubleshooting Guide
 **Sprint 25: Documentation Completion**  
 **Date:** February 15, 2026
 
@@ -26,7 +26,7 @@
 1. Right-click installer → **Run as Administrator**
 2. Or: Open elevated PowerShell:
    ```powershell
-   Start-Process -FilePath "DarkThumbs-Setup.msi" -Verb RunAs
+   Start-Process -FilePath "ExplorerLens-Setup.msi" -Verb RunAs
    ```
 
 ---
@@ -55,16 +55,16 @@
 
 2. **Manual cleanup:**
    ```powershell
-   # Run CBXManager as admin
-   cd "C:\Program Files\DarkThumbs"
-   .\CBXManager.exe
+   # Run LENSManager as admin
+   cd "C:\Program Files\ExplorerLens"
+   .\LENSManager.exe
    # Click "Uninstall All" button
    ```
 
 3. **Registry cleanup (advanced):**
    - Open `regedit.exe` as Administrator
    - Delete: `HKEY_CLASSES_ROOT\CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}`
-   - Delete: `HKEY_LOCAL_MACHINE\SOFTWARE\DarkThumbs`
+   - Delete: `HKEY_LOCAL_MACHINE\SOFTWARE\ExplorerLens`
 
 ---
 
@@ -90,11 +90,11 @@ Start-Process explorer.exe
 
 **Cause #2:** Shell extension not registered
 
-**Solution:** Re-register CBXShell.dll:
+**Solution:** Re-register LENSShell.dll:
 ```powershell
-cd "C:\Program Files\DarkThumbs"
-regsvr32 /u CBXShell.dll  # Unregister
-regsvr32 CBXShell.dll      # Re-register
+cd "C:\Program Files\ExplorerLens"
+regsvr32 /u LENSShell.dll  # Unregister
+regsvr32 LENSShell.dll      # Re-register
 ```
 
 **Verify registration:**
@@ -109,7 +109,7 @@ Test-Path "HKCR:\CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}"
 **Cause #3:** Conflicting thumbnail provider
 
 **Solution:** Check for conflicts:
-1. Open **CBXManager.exe**
+1. Open **LENSManager.exe**
 2. Click "Scan for Conflicts" button
 3. Review "Third-Party Handlers" tab
 4. Backup and remove conflicting handlers if needed
@@ -128,8 +128,8 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 # Should show: (default) = "{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}"
 ```
 
-**Re-register via CBXManager:**
-1. Open CBXManager.exe as Administrator
+**Re-register via LENSManager:**
+1. Open LENSManager.exe as Administrator
 2. Select desired formats
 3. Click "Install" button
 
@@ -168,7 +168,7 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 
 3. **Check file size limits:**
    - Default max: 50 MP for images, 4K for videos
-   - Edit: `HKLM\SOFTWARE\DarkThumbs\MaxImageSize` (pixels)
+   - Edit: `HKLM\SOFTWARE\ExplorerLens\MaxImageSize` (pixels)
 
 ---
 
@@ -190,14 +190,14 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 3. **Enable caching:**
    - Verify cache enabled:
      ```powershell
-     Get-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name EnableCache
+     Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name EnableCache
      # Should be: 1
      ```
 
 4. **Increase cache size:**
    ```powershell
    # Set cache to 1 GB (default: 500 MB)
-   Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name CacheSizeMB -Value 1024
+   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
    ```
 
 ---
@@ -210,20 +210,20 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 1. **Check GPU acceleration:**
    ```powershell
    # Verify GPU enabled
-   Get-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name UseGPU
+   Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU
    # Should be: 1
    ```
 
 2. **Limit concurrent decodes:**
    ```powershell
    # Reduce thread count (default: CPU core count)
-   Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxThreads -Value 4
+   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 4
    ```
 
 3. **Skip large files:**
    ```powershell
    # Set max file size (default: unlimited)
-   Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name MaxFileSizeMB -Value 50
+   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
    ```
 
 ---
@@ -237,7 +237,7 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 - **Pre-generate cache:**
    ```powershell
    # Use benchmark tool to pre-populate cache
-   cd "C:\Program Files\DarkThumbs"
+   cd "C:\Program Files\ExplorerLens"
    .\EngineBenchmark.exe --cache-warmup "C:\Photos"
    ```
 
@@ -253,7 +253,7 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 1. **Check dependencies:**
    ```powershell
    # Use Dependency Walker or dumpbin
-   dumpbin /dependents "CBXShell.dll"
+   dumpbin /dependents "LENSShell.dll"
    ```
 
 2. **Install Visual C++ Redistributable:**
@@ -263,8 +263,8 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 
 3. **Verify DLL bitness:**
    ```powershell
-   # CBXShell.dll MUST be 64-bit for modern Windows
-   dumpbin /headers CBXShell.dll | Select-String "machine"
+   # LENSShell.dll MUST be 64-bit for modern Windows
+   dumpbin /headers LENSShell.dll | Select-String "machine"
    # Should show: 8664 machine (x64)
    ```
 
@@ -277,14 +277,14 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Solution:**
 1. **Verify DLLs present:**
    ```powershell
-   Test-Path "C:\Program Files\DarkThumbs\libwebp.dll"
-   Test-Path "C:\Program Files\DarkThumbs\libavif.dll"
+   Test-Path "C:\Program Files\ExplorerLens\libwebp.dll"
+   Test-Path "C:\Program Files\ExplorerLens\libavif.dll"
    ```
 
 2. **Reinstall from MSI:** Ensures all dependencies copied
 
 3. **Manual DLL placement:**
-   - Copy DLLs from `SDK/bin/` to `C:\Program Files\DarkThumbs\`
+   - Copy DLLs from `SDK/bin/` to `C:\Program Files\ExplorerLens\`
 
 ---
 
@@ -297,7 +297,7 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Solution:**
 ```powershell
 # Check libwebp version
-cd "C:\Program Files\DarkThumbs"
+cd "C:\Program Files\ExplorerLens"
 .\EngineTests.exe --gtest_filter="*WebP*"
 
 # Expected: All WebP tests pass
@@ -315,8 +315,8 @@ cd "C:\Program Files\DarkThumbs"
 **Solution:**
 1. **Check libavif + dav1d present:**
    ```powershell
-   Test-Path "C:\Program Files\DarkThumbs\avif.dll"
-   Test-Path "C:\Program Files\DarkThumbs\dav1d.dll"
+   Test-Path "C:\Program Files\ExplorerLens\avif.dll"
+   Test-Path "C:\Program Files\ExplorerLens\dav1d.dll"
    ```
 
 2. **Verify decoder registration:**
@@ -354,7 +354,7 @@ cd "C:\Program Files\DarkThumbs"
 **Solution:**
 1. **Verify LibRaw linkage:**
    ```powershell
-   dumpbin /imports CBXShell.dll | Select-String "libraw"
+   dumpbin /imports LENSShell.dll | Select-String "libraw"
    ```
 
 2. **Test specific RAW format:**
@@ -363,7 +363,7 @@ cd "C:\Program Files\DarkThumbs"
    ```
 
 3. **Metadata stripping:** Some RAW files have no embedded thumbnails
-   - DarkThumbs will decode full image (slower)
+   - ExplorerLens will decode full image (slower)
 
 ---
 
@@ -379,7 +379,7 @@ cd "C:\Program Files\DarkThumbs"
 $clsid = "{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}"
 New-Item "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" -Force
 Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" `
-    -Name $clsid -Value "DarkThumbs Shell Extension"
+    -Name $clsid -Value "ExplorerLens Shell Extension"
 ```
 
 ---
@@ -391,12 +391,12 @@ Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensio
 **Solution:**
 1. **Enable crash dumps:**
    ```powershell
-   Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name EnableCrashDumps -Value 1
+   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name EnableCrashDumps -Value 1
    ```
 
 2. **Reproduce crash:**
    - Navigate to problematic folder
-   - Crash dump saved to: `C:\ProgramData\DarkThumbs\Crashes\`
+   - Crash dump saved to: `C:\ProgramData\ExplorerLens\Crashes\`
 
 3. **Report crash:**
    - Open dump in WinDbg or Visual Studio
@@ -487,12 +487,12 @@ $env:PATH += ";$PWD\SDK\bin"
 
 ```powershell
 # Enable verbose logging
-Set-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name LogLevel -Value 4
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name LogLevel -Value 4
 
 # Levels: 0=Off, 1=Error, 2=Warn, 3=Info, 4=Debug
 
 # View logs
-Get-Content "C:\ProgramData\DarkThumbs\Logs\Engine.log" -Tail 50 -Wait
+Get-Content "C:\ProgramData\ExplorerLens\Logs\Engine.log" -Tail 50 -Wait
 ```
 
 ---
@@ -527,9 +527,9 @@ Get-Content "C:\ProgramData\DarkThumbs\Logs\Engine.log" -Tail 50 -Wait
 ### 🔍 **Registry Dump for Support**
 
 ```powershell
-# Export DarkThumbs registry for debugging
-reg export "HKLM\SOFTWARE\DarkThumbs" darkthumbs_config.reg
-reg export "HKCR\CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" darkthumbs_com.reg
+# Export ExplorerLens registry for debugging
+reg export "HKLM\SOFTWARE\ExplorerLens" ExplorerLens_config.reg
+reg export "HKCR\CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" ExplorerLens_com.reg
 
 # Attach .reg files to GitHub issue
 ```
@@ -560,8 +560,8 @@ $testFile = "C:\Photos\sample.webp"
 | **0x80070002** | File not found | Verify file path and permissions |
 | **0x8007000E** | Out of memory | Close other apps, increase page file |
 | **0x80070005** | Access denied | Run as Administrator or check ACLs |
-| **0x800401F3** | Invalid class string | Re-register COM server: `regsvr32 CBXShell.dll` |
-| **0x80040154** | Class not registered | Reinstall DarkThumbs or run CBXManager |
+| **0x800401F3** | Invalid class string | Re-register COM server: `regsvr32 LENSShell.dll` |
+| **0x80040154** | Class not registered | Reinstall ExplorerLens or run LENSManager |
 
 ---
 
@@ -574,20 +574,21 @@ $testFile = "C:\Photos\sample.webp"
 4. ✅ Run diagnostic tests: `.\EngineTests.exe`
 
 ### **GitHub Issues:**
-- Repository: https://github.com/YourOrg/DarkThumbs/issues
+- Repository: https://github.com/YourOrg/ExplorerLens/issues
 - Include:
   - Windows version (`winver`)
-  - DarkThumbs version (`Get-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name Version`)
-  - Log files (`C:\ProgramData\DarkThumbs\Logs\`)
+  - ExplorerLens version (`Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name Version`)
+  - Log files (`C:\ProgramData\ExplorerLens\Logs\`)
   - Screenshot of issue
   - Steps to reproduce
 
 ### **Community Support:**
-- Discussions: https://github.com/YourOrg/DarkThumbs/discussions
-- Discord: https://discord.gg/darkthumbs
+- Discussions: https://github.com/YourOrg/ExplorerLens/discussions
+- Discord: https://discord.gg/ExplorerLens
 
 ---
 
 **Last Updated:** February 15, 2026  
 **Sprint:** 25 - Documentation Completion  
 **Version:** 6.2.0
+

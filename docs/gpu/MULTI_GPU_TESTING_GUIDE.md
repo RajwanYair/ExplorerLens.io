@@ -1,12 +1,12 @@
 # Multi-GPU Testing Guide
 
-**DarkThumbs v5.2.0 - GPU Validation and Testing**
+**ExplorerLens v5.2.0 - GPU Validation and Testing**
 
 ---
 
 ## Overview
 
-This guide covers testing DarkThumbs GPU acceleration across different hardware configurations: Intel integrated GPUs, NVIDIA discrete GPUs, AMD GPUs, and WARP software renderer.
+This guide covers testing ExplorerLens GPU acceleration across different hardware configurations: Intel integrated GPUs, NVIDIA discrete GPUs, AMD GPUs, and WARP software renderer.
 
 ---
 
@@ -20,7 +20,7 @@ This guide covers testing DarkThumbs GPU acceleration across different hardware 
 - Enumerates all DirectX 11 capable GPUs
 - Tests WARP software renderer availability
 - Validates compute shader support
-- Reports DarkThumbs compatibility
+- Reports ExplorerLens compatibility
 - Intel GPU type detection (Arc, Iris Xe, HD, UHD)
 
 **Build:**
@@ -36,7 +36,7 @@ tests\build\GPUValidator.exe
 **Example Output:**
 ```
 =================================================
-DarkThumbs GPU Validator v5.2.0
+ExplorerLens GPU Validator v5.2.0
 Multi-GPU Detection and Validation Tool
 =================================================
 
@@ -49,7 +49,7 @@ Device Type:           Hardware
 Dedicated VRAM:        128 MB
 Shared System:         8.0 GB
 Compute Shaders:       ✓ Supported
-DarkThumbs GPU Mode:   ✓ ENABLED
+ExplorerLens GPU Mode:   ✓ ENABLED
 Intel GPU Type:        Iris Xe (High-Performance)
 
 =================================================
@@ -60,7 +60,7 @@ Feature Level:         DirectX 12.1
 Device Type:           Hardware
 Dedicated VRAM:        12.0 GB
 Compute Shaders:       ✓ Supported
-DarkThumbs GPU Mode:   ✓ ENABLED
+ExplorerLens GPU Mode:   ✓ ENABLED
 
 =================================================
 GPU #3: WARP Software Renderer
@@ -69,18 +69,18 @@ Vendor:                Microsoft (0x1414)
 Feature Level:         DirectX 11.1
 Device Type:           Software
 Compute Shaders:       ✓ Supported
-DarkThumbs GPU Mode:   ✓ ENABLED
+ExplorerLens GPU Mode:   ✓ ENABLED
 
 =================================================
 SUMMARY
 =================================================
 Total GPUs Found:      2
-DarkThumbs Compatible: 2 GPU(s)
+ExplorerLens Compatible: 2 GPU(s)
 Intel GPUs:            1
 NVIDIA GPUs:           1
 WARP Fallback:         ✓ Available (DirectX 11.1)
 
-✓ DarkThumbs will use GPU acceleration
+✓ ExplorerLens will use GPU acceleration
 ✓ Expected speedup: 4-10x depending on GPU
 ```
 
@@ -98,7 +98,7 @@ WARP Fallback:         ✓ Available (DirectX 11.1)
 1. GPUValidator detects Intel Iris Xe
 2. Feature Level: DirectX 11.1
 3. Shared memory: 4-8 GB
-4. DarkThumbs uses GPU acceleration
+4. ExplorerLens uses GPU acceleration
 5. Expected speedup: 6-8x vs CPU
 
 **Validation Steps:**
@@ -106,7 +106,7 @@ WARP Fallback:         ✓ Available (DirectX 11.1)
 # 1. Run GPU validator
 tests\build\GPUValidator.exe
 
-# 2. Install DarkThumbs
+# 2. Install ExplorerLens
 install-x64-fixed.cmd
 
 # 3. Run DebugView (as Admin)
@@ -121,7 +121,7 @@ install-x64-fixed.cmd
 [GPU] Compute shader support enabled
 
 # 5. Run benchmark
-tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
+tests\build\LENSBench.exe -i C:\TestImages -n 100 -s 256
 
 # Expected: 6-8x speedup over CPU
 ```
@@ -136,7 +136,7 @@ tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
 1. GPUValidator detects NVIDIA RTX 3070
 2. Feature Level: DirectX 12.1
 3. Dedicated VRAM: 8 GB
-4. DarkThumbs uses GPU acceleration
+4. ExplorerLens uses GPU acceleration
 5. Expected speedup: 8-10x vs CPU
 
 **Validation Steps:**
@@ -151,7 +151,7 @@ tests\build\GPUValidator.exe
 [GPU] High performance mode enabled (dedicated GPU)
 
 # 3. Benchmark
-tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
+tests\build\LENSBench.exe -i C:\TestImages -n 100 -s 256
 
 # Expected: 8-10x speedup
 ```
@@ -166,7 +166,7 @@ tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
 1. GPUValidator detects AMD Radeon
 2. Feature Level: DirectX 12.0+
 3. Dedicated VRAM: 12 GB
-4. DarkThumbs uses GPU acceleration
+4. ExplorerLens uses GPU acceleration
 5. Expected speedup: 7-9x vs CPU
 
 **Validation Steps:**
@@ -180,7 +180,7 @@ tests\build\GPUValidator.exe
 [GPU] High performance mode enabled
 
 # 3. Benchmark
-tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
+tests\build\LENSBench.exe -i C:\TestImages -n 100 -s 256
 
 # Expected: 7-9x speedup
 ```
@@ -194,9 +194,9 @@ tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
 
 **Expected Behavior:**
 1. GPUValidator detects both GPUs
-2. Windows automatically selects dGPU for DarkThumbs
+2. Windows automatically selects dGPU for ExplorerLens
 3. Feature Level: DirectX 12.1
-4. DarkThumbs uses NVIDIA GPU by default
+4. ExplorerLens uses NVIDIA GPU by default
 5. Expected speedup: 8-10x vs CPU
 
 **Validation Steps:**
@@ -213,17 +213,17 @@ GPU #2: NVIDIA GeForce RTX 3060 Laptop GPU
 
 # 3. Force Intel iGPU (optional test):
 # - Open Intel Graphics Command Center
-# - Add CBXShell.dll to app list
+# - Add LENSShell.dll to app list
 # - Set to "Integrated Graphics"
 # - DebugView should now show:
 [GPU] Vendor: Intel (0x8086)
 
 # 4. Benchmark both GPUs:
 # NVIDIA dGPU:
-tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
+tests\build\LENSBench.exe -i C:\TestImages -n 100 -s 256
 
 # Intel iGPU (after forcing):
-tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
+tests\build\LENSBench.exe -i C:\TestImages -n 100 -s 256
 
 # Compare results
 ```
@@ -236,7 +236,7 @@ tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
 
 **Expected Behavior:**
 1. GPUValidator detects GPU but marks as incompatible
-2. DarkThumbs falls back to CPU rendering
+2. ExplorerLens falls back to CPU rendering
 3. No GPU acceleration (DirectX 11.0 required)
 
 **Validation Steps:**
@@ -247,7 +247,7 @@ tests\build\GPUValidator.exe
 # Expected:
 Feature Level:         DirectX 10.1
 Compute Shaders:       ✗ Not Supported
-DarkThumbs GPU Mode:   ✗ CPU Fallback
+ExplorerLens GPU Mode:   ✗ CPU Fallback
 
 # 2. DebugView output:
 [GPU] Feature level too low for compute shaders
@@ -264,7 +264,7 @@ DarkThumbs GPU Mode:   ✗ CPU Fallback
 
 **Expected Behavior:**
 1. GPUValidator detects WARP software renderer
-2. DarkThumbs uses WARP (software emulation)
+2. ExplorerLens uses WARP (software emulation)
 3. Feature Level: DirectX 11.1
 4. Performance similar to CPU fallback
 
@@ -281,7 +281,7 @@ WARP Fallback:         ✓ Available (DirectX 11.1)
 [GPU] Using software renderer
 
 # 3. Benchmark (expect minimal speedup)
-tests\build\CBXBench.exe -i C:\TestImages -n 100 -s 256
+tests\build\LENSBench.exe -i C:\TestImages -n 100 -s 256
 
 # Expected: 1.0-1.5x speedup (WARP overhead may be slower)
 ```
@@ -326,7 +326,7 @@ hr = D3D11CreateDevice(
 
 **Rebuild:**
 ```cmd
-msbuild CBXShell\CBXShell.vcxproj /p:Configuration=Debug /p:Platform=x64
+msbuild LENSShell\LENSShell.vcxproj /p:Configuration=Debug /p:Platform=x64
 ```
 
 **Run with DebugView:**
@@ -450,7 +450,7 @@ D3D11 ERROR: Resource still mapped during rendering
 - OS: [e.g., Windows 11 23H2]
 - System RAM: [e.g., 16 GB]
 
-**DarkThumbs Version:**
+**ExplorerLens Version:**
 - Version: v5.2.0
 - DLL Size: 1,476,096 bytes
 - Build Date: November 24, 2025
@@ -462,7 +462,7 @@ D3D11 ERROR: Resource still mapped during rendering
 
 **DebugView Logs:**
 ```
-[Paste relevant DarkThumbs GPU logs]
+[Paste relevant ExplorerLens GPU logs]
 ```
 
 **Benchmark Results:**
@@ -486,7 +486,7 @@ D3D11 ERROR: Resource still mapped during rendering
 
 ### Pre-Testing
 - [ ] Update GPU drivers to latest version
-- [ ] Install DarkThumbs v5.2.0
+- [ ] Install ExplorerLens v5.2.0
 - [ ] Download DebugView (Sysinternals)
 - [ ] Prepare test image set (100+ images)
 - [ ] Build GPUValidator.exe
@@ -506,7 +506,7 @@ D3D11 ERROR: Resource still mapped during rendering
 - [ ] Check for error messages in DebugView
 
 ### Performance
-- [ ] Run CBXBench.exe with 100+ images
+- [ ] Run LENSBench.exe with 100+ images
 - [ ] Record total time
 - [ ] Calculate speedup vs CPU baseline
 - [ ] Verify texture pool hit rate >90%
@@ -537,7 +537,7 @@ D3D11 ERROR: Resource still mapped during rendering
 
 **Tools:**
 - GPUValidator.exe - GPU detection
-- CBXBench.exe - Performance benchmarking
+- LENSBench.exe - Performance benchmarking
 - GPUThumbnailTest.exe - Functional testing
 - DebugView - Log capture
 
@@ -548,3 +548,4 @@ D3D11 ERROR: Resource still mapped during rendering
 **Last Updated:** November 24, 2025  
 **Tested Configurations:** Intel Iris Xe, NVIDIA RTX 3060, AMD RX 6700 XT, WARP  
 **Status:** Production Ready ✅
+

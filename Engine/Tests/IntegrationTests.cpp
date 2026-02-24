@@ -1,8 +1,8 @@
 //==============================================================================
-// DarkThumbs Engine - Integration Tests
-// Sprint 16+: End-to-end pipeline testing with real files
+// ExplorerLens Engine - Integration Tests
+// End-to-end pipeline testing with real files
 // Updated v7.0.0 - All 24 decoders
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "../Pipeline/ThumbnailPipeline.h"
@@ -33,7 +33,7 @@
 #include <vector>
 #include <string>
 
-using namespace DarkThumbs::Engine;
+using namespace ExplorerLens::Engine;
 
 //==============================================================================
 // Integration Test Framework
@@ -270,7 +270,7 @@ INTEGRATION_TEST(TestPipeline_FontFormats)
 
 INTEGRATION_TEST(TestPipeline_3DModelFormats)
 {
-    // 3D model thumbnails (Sprint 12)
+    // 3D model thumbnails
     auto* registry = new DecoderRegistry();
     registry->RegisterDecoder(new ModelDecoder());
 
@@ -510,7 +510,7 @@ INTEGRATION_TEST(TestPipeline_ThreadSafety)
 int main()
 {
     std::wcout << L"========================================" << std::endl;
-    std::wcout << L"DarkThumbs Engine - Integration Tests" << std::endl;
+    std::wcout << L"ExplorerLens Engine - Integration Tests" << std::endl;
     std::wcout << L"v7.0.0: All 24 Decoders Pipeline Tests" << std::endl;
     std::wcout << L"========================================" << std::endl << std::endl;
 
@@ -546,3 +546,4 @@ int main()
 
     return g_integrationTestsFailed > 0 ? 1 : 0;
 }
+

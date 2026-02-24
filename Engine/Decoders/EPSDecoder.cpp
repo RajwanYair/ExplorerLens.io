@@ -1,11 +1,12 @@
 //==============================================================================
 // EPS Decoder - Encapsulated PostScript Thumbnail Provider Implementation
-// Sprint 183: Vector Format Expansion
-// Copyright (c) 2026 - DarkThumbs Project
+// Vector Format Expansion
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "EPSDecoder.h"
 #include <windows.h>
+#include <objidl.h>
 #include <gdiplus.h>
 #include <fstream>
 #include <sstream>
@@ -16,7 +17,7 @@
 
 #pragma comment(lib, "gdiplus.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     static const uint32_t EPS_BINARY_MAGIC = 0xC5D0D3C6;
@@ -364,4 +365,5 @@ namespace Engine {
     }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Verify DarkThumbs project organization compliance
+    Verify ExplorerLens project organization compliance
     
 .DESCRIPTION
-    Validates that the DarkThumbs project structure conforms to industrial
+    Validates that the ExplorerLens project structure conforms to industrial
     open-source standards. Checks directory structure, documentation, and
     file organization.
     
@@ -20,7 +20,7 @@ param(
 $ErrorActionPreference = "Continue"
 $WorkspaceRoot = Split-Path -Parent $PSScriptRoot
 
-Write-Host "`n=== DarkThumbs Project Structure Verification ===" -ForegroundColor Cyan
+Write-Host "`n=== ExplorerLens Project Structure Verification ===" -ForegroundColor Cyan
 Write-Host "Workspace: $WorkspaceRoot`n" -ForegroundColor Gray
 
 $issues = @()
@@ -90,7 +90,7 @@ Test-FileExists "MASTER_PLAN.md" "MASTER_PLAN.md exists"
 Test-FileExists "LICENSE" "LICENSE file exists"
 Test-FileExists "docs\architecture\PROJECT_STRUCTURE.md" "PROJECT_STRUCTURE.md exists"
 Test-FileExists "CMakeLists.txt" "Root CMakeLists.txt exists"
-Test-FileExists "CBXShell.sln" "Visual Studio solution exists"
+Test-FileExists "LENSShell.sln" "Visual Studio solution exists"
 Test-FileExists ".gitignore" ".gitignore exists"
 Test-FileExists ".gitattributes" ".gitattributes exists"
 
@@ -186,8 +186,8 @@ Test-FileExists "external\LIBRARY_INVENTORY.md" "Library inventory exists"
 Write-Host "`n[6/7] Verifying Core Components..." -ForegroundColor Cyan
 Write-Host "────────────────────────────────────────────" -ForegroundColor DarkGray
 
-Test-DirectoryExists "CBXShell" "CBXShell directory exists"
-Test-DirectoryExists "CBXManager" "CBXManager directory exists"
+Test-DirectoryExists "LENSShell" "LENSShell directory exists"
+Test-DirectoryExists "LENSManager" "LENSManager directory exists"
 Test-DirectoryExists "Engine" "Engine directory exists"
 Test-DirectoryExists "SDK" "SDK directory exists"
 Test-DirectoryExists "tests" "tests directory exists"
@@ -257,3 +257,4 @@ if ($checks -eq $passed) {
 } else {
     exit 1
 }
+

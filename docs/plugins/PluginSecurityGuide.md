@@ -1,11 +1,11 @@
 # Plugin Security Guide
-## DarkThumbs v5.3.0 - Sprint 14 Integration
+## ExplorerLens v5.3.0 - Sprint 14 Integration
 
 ---
 
 ## Overview
 
-DarkThumbs implements a comprehensive **dual-mode plugin security architecture** that provides flexibility and protection. Plugins can execute in  two modes:
+ExplorerLens implements a comprehensive **dual-mode plugin security architecture** that provides flexibility and protection. Plugins can execute in  two modes:
 
 1. **In-Worker Mode**: Direct execution within the thumbnail worker process (trusted plugins)
 2. **PluginHost Mode**: Isolated execution in a separate sandboxed process (untrusted plugins)
@@ -168,7 +168,7 @@ handler.EnablePlugin(L"ProblematicPlugin");
 
 **Configuration**:
 ```cpp
-JobObjectManager job(L"DarkThumbs_Plugin_MyPlugin");
+JobObjectManager job(L"ExplorerLens_Plugin_MyPlugin");
 
 // Set resource limits
 job.SetMemoryLimit(512 * 1024 * 1024);  // 512 MB
@@ -257,7 +257,7 @@ section.Read(buffer, data_size, 0);
 
 All configuration is stored under:
 ```
-HKEY_CURRENT_USER\Software\DarkThumbs\PluginSecurity
+HKEY_CURRENT_USER\Software\ExplorerLens\PluginSecurity
 ```
 
 **Keys**:
@@ -352,13 +352,13 @@ IsolationModeSelector::Instance().SetMinimumIsolationMode(IsolationMode::PluginH
 
 Or via registry:
 ```
-HKEY_LOCAL_MACHINE\Software\DarkThumbs\PluginSecurity
+HKEY_LOCAL_MACHINE\Software\ExplorerLens\PluginSecurity
 MinimumIsolationMode = 1
 ```
 
 #### 2. Whitelist Trusted Plugins
 ```
-HKEY_LOCAL_MACHINE\Software\DarkThumbs\PluginSecurity
+HKEY_LOCAL_MACHINE\Software\ExplorerLens\PluginSecurity
 TrustedPlugins = REG_MULTI_SZ: 
     "OfficialImagePlugin"
     "SignedVideoPlugin"
@@ -387,7 +387,7 @@ A: In PluginHost mode, only the PluginHost process crashes. The worker continues
 A: Use `CrashHandler::Instance().EnablePlugin(L"PluginName")` or wait 24 hours for automatic re-enable.
 
 **Q: Can I use PluginHost mode for local testing?**  
-A: Yes, set `DARKTHUMBS_FORCE_PLUGINHOST=1` in environment variables.
+A: Yes, set `EXPLORERLENS_FORCE_PLUGINHOST=1` in environment variables.
 
 ---
 
@@ -435,3 +435,5 @@ cd Engine/Tests
 ---
 
 *Last Updated: February 9, 2026 - Sprint 14: Plugin Security Infrastructure*
+
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 335: Windows 12 Compatibility Layer
+// ExplorerLens Engine — Windows 12 Compatibility Layer
 // Runtime detection of Windows 12 shell APIs, adaptive rendering paths for
 // new window compositor features, Fluent v4 style adaptation, and
 // graceful fallback to Windows 11 behaviour.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class Win12Feature : uint8_t {
     DynamicIsland   = 0,  // Windows 12 Dynamic Island shell integration
@@ -64,4 +64,5 @@ public:
     static constexpr size_t APIFamilyCount()  { return static_cast<size_t>(Win12APIFamily::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

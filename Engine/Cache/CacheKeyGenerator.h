@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Fast Cache Key Generator
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Fast Cache Key Generator
+// Copyright (c) 2026 - ExplorerLens Project
 // Task B8: Optimized cache key generation
 //==============================================================================
 
@@ -11,7 +11,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Cache {
 
@@ -140,4 +140,5 @@ namespace Cache {
 
 } // namespace Cache
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

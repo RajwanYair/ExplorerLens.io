@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 136 — Extended eBook Support
+// Extended eBook Support
 // MOBI/AZW3/FB2 cover extraction for thumbnail generation.
 // Extends existing EPUB support to additional eBook formats.
 
@@ -10,7 +10,7 @@
 #include <array>
 #include <algorithm>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
 // ─── eBook format types ──────────────────────────────────────────
 enum class EBookFormat : uint8_t {
@@ -244,4 +244,5 @@ private:
     }
 };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

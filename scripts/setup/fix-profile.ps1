@@ -4,13 +4,13 @@
 $profilePath = "$env:USERPROFILE\OneDrive - Intel Corporation\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 
 $minimalProfile = @'
-# DarkThumbs Development Environment - Minimal Profile
+# ExplorerLens Development Environment - Minimal Profile
 # Version: 3.0 - 2025-11-25
 
 # Intel Proxy Configuration
 [System.Net.Http.HttpClient]::DefaultProxy = New-Object System.Net.WebProxy('http://proxy-dmz.intel.com:912', $true)
 
-Write-Host "Loading DarkThumbs environment..." -ForegroundColor Cyan
+Write-Host "Loading ExplorerLens environment..." -ForegroundColor Cyan
 
 # Load MSVC Environment
 $VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
@@ -31,15 +31,15 @@ if (Test-Path $VSPath) {
 }
 
 # Project navigation
-$global:DarkThumbsPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$global:ExplorerLensPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 function dt {
-    Set-Location $global:DarkThumbsPath
+    Set-Location $global:ExplorerLensPath
 }
 
-function Build-DarkThumbs {
+function Build-ExplorerLens {
     param([switch]$Clean)
-    Push-Location $global:DarkThumbsPath
+    Push-Location $global:ExplorerLensPath
     if ($Clean) {
         & .\clean-rebuild.ps1
     } else {
@@ -48,7 +48,7 @@ function Build-DarkThumbs {
     Pop-Location
 }
 
-function Check-DarkThumbsTools {
+function Check-ExplorerLensTools {
     Write-Host "Checking development tools..." -ForegroundColor Cyan
     
     $tools = @('git', 'cmake', 'ninja', 'cl', 'msbuild', 'python', 'gcc')
@@ -61,12 +61,12 @@ function Check-DarkThumbsTools {
     }
 }
 
-Write-Host "[OK] Environment ready! Commands: dt, Build-DarkThumbs, Check-DarkThumbsTools" -ForegroundColor Green
+Write-Host "[OK] Environment ready! Commands: dt, Build-ExplorerLens, Check-ExplorerLensTools" -ForegroundColor Green
 '@
 
 # Backup old profile if it exists
 if (Test-Path $profilePath) {
-    $backupPath = "$env:USERPROFILE\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\profile-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss').ps1"
+    $backupPath = "$env:USERPROFILE\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\profile-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss').ps1"
     Copy-Item $profilePath $backupPath -Force
     Write-Host "Backed up old profile to: $backupPath" -ForegroundColor Yellow
 }
@@ -76,3 +76,4 @@ Set-Content -Path $profilePath -Value $minimalProfile -Force -Encoding UTF8
 
 Write-Host "[OK] Profile fixed and saved to: $profilePath" -ForegroundColor Green
 Write-Host "Please restart PowerShell to test the new profile" -ForegroundColor Cyan
+

@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// GeospatialDecoder — Sprint 212
+// GeospatialDecoder
 // Geospatial format decoder (GeoTIFF, Shapefile, KML, GeoJSON)
 //==============================================================================
 
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class GeoFormat : uint8_t {
     GeoTIFF = 0,
@@ -74,4 +74,5 @@ private:
     bool ParseGeoJSON(const uint8_t* data, size_t size, GeoLayerInfo& info) const;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

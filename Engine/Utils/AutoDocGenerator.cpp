@@ -1,12 +1,12 @@
 //==============================================================================
-// AutoDocGenerator — Sprint 213
+// AutoDocGenerator
 //==============================================================================
 
 #include "AutoDocGenerator.h"
 #include <sstream>
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 AutoDocGenerator::AutoDocGenerator() {}
 
@@ -53,7 +53,7 @@ std::wstring AutoDocGenerator::FormatMarkdown(DocSection section) const {
             ss << GenerateDecoderTable();
             break;
         case DocSection::Overview:
-            ss << L"DarkThumbs is a Windows Shell Extension providing GPU-accelerated\n";
+            ss << L"ExplorerLens is a Windows Shell Extension providing GPU-accelerated\n";
             ss << L"thumbnails for " << GetTotalExtensions() << L"+ file formats.\n";
             break;
         case DocSection::Testing:
@@ -144,4 +144,5 @@ const wchar_t* AutoDocGenerator::GetFormatExtension(DocFormat format) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

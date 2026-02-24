@@ -1,5 +1,5 @@
 # Production-Cleanup.ps1
-# Clean and organize DarkThumbs project for production readiness
+# Clean and organize ExplorerLens project for production readiness
 
 param([switch]$WhatIf = $false)
 
@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot | Split-Path
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Production Cleanup" -ForegroundColor Cyan
+Write-Host "ExplorerLens Production Cleanup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -19,7 +19,7 @@ if ($WhatIf) {
 # Clean Build Artifacts
 Write-Host "Cleaning Build Artifacts..." -ForegroundColor Green
 
-$artifactDirs = @("build", "x64", "packages", "CBXShell\x64", "CBXManager\x64")
+$artifactDirs = @("build", "x64", "packages", "LENSShell\x64", "LENSManager\x64")
 
 foreach ($dir in $artifactDirs) {
     $path = Join-Path $root $dir
@@ -57,3 +57,4 @@ if (Test-Path (Join-Path $root "jxl-test-build.log")) {
 Write-Host "`n✅ Cleanup Complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next: Run full rebuild to verify project" -ForegroundColor Cyan
+

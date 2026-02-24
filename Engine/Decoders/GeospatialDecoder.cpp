@@ -1,5 +1,5 @@
 //==============================================================================
-// GeospatialDecoder — Sprint 212
+// GeospatialDecoder
 //==============================================================================
 
 #include "GeospatialDecoder.h"
@@ -10,7 +10,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 GeospatialDecoder::GeospatialDecoder() {}
 
@@ -111,4 +111,5 @@ bool GeospatialDecoder::ParseGeoJSON(const uint8_t* data, size_t size, GeoLayerI
     return true;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

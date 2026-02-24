@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Engine::AI::Stages {
+namespace ExplorerLens::Engine::AI::Stages {
 
     struct Rect {
         int x, y, width, height;
@@ -28,3 +28,4 @@ namespace DarkThumbs::Engine::AI::Stages {
     };
 
 }
+

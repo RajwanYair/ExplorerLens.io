@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 43 Tests: Batch Processing & Queue Management
+// ExplorerLens — Sprint 43 Tests: Batch Processing & Queue Management
 // Tests job priority queue, batch processor, progress tracking,
 // rate limiting, pause/cancel, result aggregation.
 //==============================================================================
@@ -10,7 +10,7 @@
 
 #include "../Engine/Pipeline/BatchProcessor.h"
 
-using namespace DarkThumbs::Engine::Pipeline;
+using namespace ExplorerLens::Engine::Pipeline;
 
 //==============================================================================
 // Job Priority Tests
@@ -507,3 +507,4 @@ TEST(BatchProcessingConfig, HighPerformance)
     EXPECT_EQ(c.rateLimit.maxConcurrentJobs, 8u);
     EXPECT_EQ(c.progressIntervalMs, 250u);
 }
+

@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build dav1d 1.5.1 (AV1 Video Decoder)
+# ExplorerLens v7.0 - Build dav1d 1.5.1 (AV1 Video Decoder)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -59,7 +59,19 @@ try {
     
     # Configure with Meson
     $buildNinja = Join-Path $buildDir "build.ninja"
-    if ((-not (Test-Path $buildDir)) -or (-not (Test-Path $buildNinja))) {
+    $needsReconfigure = (-not (Test-Path $buildDir)) -or (-not (Test-Path $buildNinja))
+
+    if ((-not $needsReconfigure) -and (Test-Path $buildNinja)) {
+        $ninjaContent = Get-Content $buildNinja -Raw -ErrorAction SilentlyContinue
+        $escapedRootDir = [Regex]::Escape($rootDir)
+        if ($ninjaContent -notmatch $escapedRootDir) {
+            Write-BuildLog "Stale dav1d build directory detected (source path mismatch). Reconfiguring..." -Level Warning
+            Remove-Item $buildDir -Recurse -Force -ErrorAction SilentlyContinue
+            $needsReconfigure = $true
+        }
+    }
+
+    if ($needsReconfigure) {
         if ((Test-Path $buildDir) -and (-not (Test-Path $buildNinja))) {
             Write-BuildLog "Stale/incomplete dav1d build directory detected (build.ninja missing). Reconfiguring..." -Level Warning
             Remove-Item $buildDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -118,3 +130,4 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+

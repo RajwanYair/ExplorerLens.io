@@ -8,7 +8,7 @@
 #include <mutex>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
     // Enum for profiling different components
     enum class ProfileComponent {
@@ -151,9 +151,10 @@ namespace DarkThumbs {
 
     // Helper macros for easy profiling
     #define PROFILE_SCOPE(component) \
-        DarkThumbs::ScopedTimer _scopedTimer##__LINE__(component)
+        ExplorerLens::ScopedTimer _scopedTimer##__LINE__(component)
 
     #define PROFILE_FUNCTION(component) \
         PROFILE_SCOPE(component)
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,11 +1,11 @@
 #pragma once
-// Sprint 228: Localization Engine — i18n/l10n string tables, RTL support, locale detection
+// Localization Engine — i18n/l10n string tables, RTL support, locale detection
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Supported locale identifiers
 enum class Locale : uint32_t {
@@ -66,4 +66,5 @@ private:
     std::unordered_map<std::wstring, std::unordered_map<uint32_t, std::wstring>> m_strings;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

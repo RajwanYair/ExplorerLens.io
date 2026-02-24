@@ -1,4 +1,4 @@
-# ⚠️ ARCHIVED — DarkThumbs Format Support Analysis & Implementation Plan
+# ⚠️ ARCHIVED — ExplorerLens Format Support Analysis & Implementation Plan
 
 > **This document is archived as of v8.4.0 (Sprint 178).** It was written for v5.3.0 and is
 > severely outdated. Many formats listed as "Not Yet Implemented" have since been implemented.
@@ -40,7 +40,7 @@
 **Files**: 
 - `Engine/Decoders/HEIFDecoder.h` ✅ (interface complete)
 - `Engine/Decoders/HEIFDecoder.cpp` ⚠️ (stub - needs libheif integration)
-- `CBXShell/heif_decoder_native.h/cpp` (legacy code)
+- `LENSShell/heif_decoder_native.h/cpp` (legacy code)
 
 **Extensions**: .heif, .heic, .hif, .heifs, .heics, .avci, .avcs, .heif-sequence, .heic-sequence
 
@@ -67,7 +67,7 @@
 **Files**:
 - `Engine/Decoders/JXLDecoder.h` ✅ (interface complete)
 - `Engine/Decoders/JXLDecoder.cpp` ⚠️ (stub - needs libjxl integration)
-- `CBXShell/jxl_decoder.h/cpp` (legacy code)
+- `LENSShell/jxl_decoder.h/cpp` (legacy code)
 
 **Extensions**: .jxl
 
@@ -116,7 +116,7 @@
 1. Build libtiff library
 2. Create `TIFFDecoder.h/.cpp` implementing IThumbnailDecoder
 3. Support multi-page extraction
-4. Add page selection UI in CBXManager
+4. Add page selection UI in LENSManager
 5. Link libtiff.lib in CMakeLists.txt
 6. Add to Engine/CMakeLists.txt
 7. Unit tests for various TIFF variants
@@ -543,7 +543,7 @@ Decoders/HEIFDecoder.cpp
 
 ### Step 4: Link libraries
 ```cmake
-target_link_libraries(DarkThumbsEngine PRIVATE
+target_link_libraries(ExplorerLensEngine PRIVATE
     heif
     jxl
     jxl_threads
@@ -584,3 +584,4 @@ EngineTests.exe
 **Document Version**: 1.0  
 **Last Updated**: February 5, 2026  
 **Next Review**: After Sprint 13 completion
+

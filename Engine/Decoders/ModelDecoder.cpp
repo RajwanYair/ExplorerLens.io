@@ -1,7 +1,7 @@
 //==============================================================================
 // Model Decoder - 3D Model Thumbnail Provider Implementation
-// Sprint 12: Basic 3D model format support
-// Sprint 182: Enhanced model decoder — PLY, DAE, flat-shading lighting
+// Basic 3D model format support
+// Enhanced model decoder — PLY, DAE, flat-shading lighting
 //==============================================================================
 
 #include "ModelDecoder.h"
@@ -11,7 +11,7 @@
 #include <cmath>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     // Static extension array — 8 formats supported
@@ -343,7 +343,7 @@ namespace Engine {
 
     //==========================================================================
     // PLY Parser — Stanford Polygon Format (ASCII and binary little-endian)
-    // Sprint 182: Added PLY support for point clouds and triangle meshes
+    // Added PLY support for point clouds and triangle meshes
     //==========================================================================
     bool ModelDecoder::LoadPLY(const wchar_t* filePath, MeshData& mesh)
     {
@@ -547,7 +547,7 @@ namespace Engine {
 
     //==========================================================================
     // DAE (COLLADA) Parser — XML-based 3D exchange format
-    // Sprint 182: Lightweight COLLADA parser extracting first geometry
+    // Lightweight COLLADA parser extracting first geometry
     //==========================================================================
     bool ModelDecoder::LoadDAE(const wchar_t* filePath, MeshData& mesh)
     {
@@ -696,7 +696,7 @@ namespace Engine {
     }
 
     //==========================================================================
-    // Sprint 182: Compute face normals for triangles that lack them
+    // Compute face normals for triangles that lack them
     //==========================================================================
     void ModelDecoder::ComputeFaceNormals(MeshData& mesh)
     {
@@ -736,7 +736,7 @@ namespace Engine {
     }
 
     //==========================================================================
-    // Sprint 182: Flat-shading lighting system
+    // Flat-shading lighting system
     //==========================================================================
     ModelDecoder::LightParams ModelDecoder::GetDefaultLighting() const
     {
@@ -774,7 +774,7 @@ namespace Engine {
 
     HBITMAP ModelDecoder::RenderMeshPreview(const MeshData& mesh, uint32_t width, uint32_t height)
     {
-        // Sprint 182: Flat-shaded rendering with directional lighting
+        // Flat-shaded rendering with directional lighting
         // Projects 3D triangles to 2D using isometric-like view and fills with lit color
 
         HDC hdc = GetDC(NULL);
@@ -983,4 +983,5 @@ namespace Engine {
     }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,4 +1,4 @@
-# DarkThumbs Implementation Status
+# ExplorerLens Implementation Status
 
 **Last Updated:** February 18, 2026  
 **Version:** v7.0.0  
@@ -10,12 +10,12 @@
 
 ✅ **Build Status:** 0 errors, 0 warnings (Release x64)  
 ✅ **Architecture:** 64-bit only (Win32 removed)  
-✅ **Engine:** DarkThumbsEngine.lib integrated via EngineAdapter  
+✅ **Engine:** ExplorerLensEngine.lib integrated via EngineAdapter  
 ✅ **Plugin System:** `LoadPlugins()` activated behind `config.enablePlugins` feature flag (default: true)  
 ✅ **Libraries:** Core dependencies built and linked (HEIF enabled)  
 ✅ **Decoders:** 25 decoder files covering 200+ extensions  
 ✅ **Testing:** 100 unit tests, 5 benchmarks — 100% pass rate  
-✅ **UI (WTL):** CBXManager with format toggles, tooltips, config snapshots  
+✅ **UI (WTL):** LENSManager with format toggles, tooltips, config snapshots  
 🔄 **UI (WinUI 3):** Settings page created, integration ongoing  
 ✅ **Observability:** ETW provider, StructuredLogger, ObservabilityIntegration wired into pipeline  
 🔄 **Distribution:** MSI infrastructure ready, signing planned (Sprint 10)  
@@ -117,7 +117,7 @@
 ## What's Complete ✅
 
 ### Core Infrastructure
-- [x] Engine library (DarkThumbsEngine.lib, 133 MB)
+- [x] Engine library (ExplorerLensEngine.lib, 133 MB)
 - [x] Engine integration in shell extension (EngineAdapter enabled)
 - [x] Plugin SDK built (active behind config.enablePlugins feature flag)
 - [x] 64-bit enforcement (Win32 configs removed)
@@ -150,7 +150,7 @@
 | 3D Models | .obj, .stl, .fbx, .gltf, .glb | ModelDecoder |
 
 ### Build System
-- [x] MSBuild: CBXShell.sln — VS 18 2026, v145 toolset
+- [x] MSBuild: LENSShell.sln — VS 18 2026, v145 toolset
 - [x] CMake: Engine with Ninja + VS 18 generators
 - [x] Build-Library-Core.ps1 unified module (680 lines)
 - [x] Build-All-And-Package.ps1 orchestrator
@@ -169,7 +169,7 @@
 
 ### GUI (✅ Sprint 8 Complete)
 1. ~~Missing format checkboxes~~ → **12 new format toggles added** (PSD, DDS, HDR, EXR, PPM, ICO, QOI, TGA, AUDIO, DOCUMENT, FONT, MODEL)
-2. ~~Incomplete format plumbing~~ → **12 CBX_ constants + 24 registry keys** added to RegManager.h
+2. ~~Incomplete format plumbing~~ → **12 LENS_ constants + 24 registry keys** added to RegManager.h
 3. ~~Dark mode disabled~~ → **InitDarkMode() re-enabled**, OnCtlColor handlers conditionally apply theme
 4. **Dynamic layout:** OnSize handler still exits immediately (cosmetic — Sprint 37+)
 
@@ -196,9 +196,9 @@
 | Batch throughput (20 images) | 235.3 img/sec |
 | Format detection | 0.03-0.54 μs/detection |
 | SIMD scaling (8K AVX2) | 24,296 Mpix/s |
-| CBXShell.dll | 2,940 KB |
-| CBXManager.exe | 400 KB |
-| DarkThumbsEngine.lib | 133 MB |
+| LENSShell.dll | 2,940 KB |
+| LENSManager.exe | 400 KB |
+| ExplorerLensEngine.lib | 133 MB |
 
 ---
 
@@ -234,3 +234,4 @@
 - **Sprint history:** MASTER_PLAN.md Section 6
 - **Build reference:** [QUICK_BUILD_REFERENCE.md](../../QUICK_BUILD_REFERENCE.md)
 - **Developer guide:** [DEVELOPER_GUIDE.md](../../DEVELOPER_GUIDE.md)
+

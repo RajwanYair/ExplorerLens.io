@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Plugin System Test" -ForegroundColor Cyan
+Write-Host "ExplorerLens Plugin System Test" -ForegroundColor Cyan
 Write-Host "Sprint 11: Plugin System Activation" -ForegroundColor Cyan
 Write-Host "============================================`n" -ForegroundColor Cyan
 
@@ -25,9 +25,9 @@ $SamplePluginDir = Join-Path $SDKDir "examples\minimal-plugin"
 Write-Host "[1/6] Verifying plugin directories..." -ForegroundColor Yellow
 
 $PluginSearchPaths = @(
-    "$env:ProgramData\DarkThumbs\Plugins",
-    "$env:LOCALAPPDATA\DarkThumbs\Plugins",
-    "$env:APPDATA\DarkThumbs\Plugins"
+    "$env:ProgramData\ExplorerLens\Plugins",
+    "$env:LOCALAPPDATA\ExplorerLens\Plugins",
+    "$env:APPDATA\ExplorerLens\Plugins"
 )
 
 foreach ($path in $PluginSearchPaths) {
@@ -143,7 +143,7 @@ Write-Host "`n[5/6] Checking Plugin API..." -ForegroundColor Yellow
 
 $apiHeaders = @(
     "SDK\plugin_api.h",
-    "SDK\include\DarkThumbsPlugin.h"
+    "SDK\include\ExplorerLensPlugin.h"
 )
 
 foreach ($header in $apiHeaders) {
@@ -160,7 +160,7 @@ foreach ($header in $apiHeaders) {
 # =============================================================================
 Write-Host "`n[6/6] Checking configuration..." -ForegroundColor Yellow
 
-$regPath = "HKCU:\Software\DarkThumbs"
+$regPath = "HKCU:\Software\ExplorerLens"
 if (Test-Path $regPath) {
     try {
         $pluginsEnabled = Get-ItemProperty -Path $regPath -Name "PluginsEnabled" -ErrorAction SilentlyContinue
@@ -174,7 +174,7 @@ if (Test-Path $regPath) {
         Write-Host "  ⚠ Could not read registry: $_" -ForegroundColor Yellow
     }
 } else {
-    Write-Host "  ⚠ DarkThumbs registry key not found (will be created on first run)" -ForegroundColor Yellow
+    Write-Host "  ⚠ ExplorerLens registry key not found (will be created on first run)" -ForegroundColor Yellow
 }
 
 # =============================================================================
@@ -191,9 +191,9 @@ Write-Host "  ✓ Plugin API headers present" -ForegroundColor Green
 
 Write-Host "`nNext Steps:" -ForegroundColor Yellow
 Write-Host "  1. Build sample plugin: .\Test-PluginSystem.ps1 -BuildSamplePlugin" -ForegroundColor Cyan
-Write-Host "  2. Copy plugin DLL to: %LOCALAPPDATA%\DarkThumbs\Plugins\" -ForegroundColor Cyan
+Write-Host "  2. Copy plugin DLL to: %LOCALAPPDATA%\ExplorerLens\Plugins\" -ForegroundColor Cyan
 Write-Host "  3. Create manifest.json alongside plugin DLL" -ForegroundColor Cyan
-Write-Host "  4. Test with CBXManager.exe plugin management UI" -ForegroundColor Cyan
+Write-Host "  4. Test with LENSManager.exe plugin management UI" -ForegroundColor Cyan
 
 Write-Host "`nDocumentation:" -ForegroundColor Yellow
 Write-Host "  - Plugin SDK: SDK\README.md" -ForegroundColor Cyan
@@ -201,3 +201,4 @@ Write-Host "  - Sample Plugin: SDK\examples\minimal-plugin\README.md" -Foregroun
 Write-Host "  - Plugin API: SDK\docs\plugin-development-guide.md" -ForegroundColor Cyan
 
 Write-Host "`n============================================`n" -ForegroundColor Cyan
+

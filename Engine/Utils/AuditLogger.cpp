@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Engine - Audit Logger Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Engine - Audit Logger Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * See AuditLogger.h for API documentation and usage examples.
  *****************************************************************************/
@@ -14,7 +14,7 @@
 
 #pragma comment(lib, "Shell32.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // Singleton
@@ -59,7 +59,7 @@ bool AuditLogger::Initialize()
         return true;
     }
 
-    // Build log directory path: %LOCALAPPDATA%\DarkThumbs\Logs
+    // Build log directory path: %LOCALAPPDATA%\ExplorerLens\Logs
     wchar_t appDataPath[MAX_PATH] = {};
     HRESULT hr = SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA,
                                    nullptr, 0, appDataPath);
@@ -71,7 +71,7 @@ bool AuditLogger::Initialize()
     }
 
     std::filesystem::path logDir = 
-        std::filesystem::path(appDataPath) / L"DarkThumbs" / L"Logs";
+        std::filesystem::path(appDataPath) / L"ExplorerLens" / L"Logs";
 
     // Create directories if needed
     std::error_code ec;
@@ -106,7 +106,7 @@ bool AuditLogger::ReadEnabledFromRegistry() const
     HKEY hKey = nullptr;
     LONG result = RegOpenKeyExW(
         HKEY_LOCAL_MACHINE,
-        L"Software\\DarkThumbs",
+        L"Software\\ExplorerLens",
         0,
         KEY_READ | KEY_WOW64_64KEY,
         &hKey);
@@ -116,7 +116,7 @@ bool AuditLogger::ReadEnabledFromRegistry() const
         // Key doesn't exist - check HKCU as fallback
         result = RegOpenKeyExW(
             HKEY_CURRENT_USER,
-            L"Software\\DarkThumbs",
+            L"Software\\ExplorerLens",
             0,
             KEY_READ,
             &hKey);
@@ -288,4 +288,5 @@ std::wstring AuditLogger::FormatTimestamp()
     return buf;
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 257: Markdown/Code Preview Decoder
+// ExplorerLens Engine — Markdown/Code Preview Decoder
 // Custom text→bitmap renderer with syntax highlighting for .md, .txt, .c,
 // .cpp, .py, .js, .ts, .json, .xml, .yaml source file thumbnails.
 //==============================================================================
@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <unordered_map>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Supported text preview language categories
 enum class TextLanguage : uint8_t {
@@ -160,4 +160,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

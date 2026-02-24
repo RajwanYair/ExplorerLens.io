@@ -1,5 +1,5 @@
 // PluginSystemTests.cpp - Plugin System Validation Tests (Sprint 19)
-// DarkThumbs Engine v6.2.0+
+// ExplorerLens Engine v6.2.0+
 
 #include <windows.h>
 #include <iostream>
@@ -29,7 +29,7 @@ int g_testsFailed = 0;
 void TestPluginDirectoryScanning() {
     std::cout << "\n=== Test: Plugin Directory Scanning ===" << std::endl;
     
-    auto& manager = DarkThumbs::PluginManager::Instance();
+    auto& manager = ExplorerLens::PluginManager::Instance();
     
     // Create test plugin directory if it doesn't exist
     fs::path pluginDir = fs::current_path() / "Plugins";
@@ -62,9 +62,9 @@ void TestPluginDirectoryScanning() {
 void TestPluginAPIVersionCompatibility() {
     std::cout << "\n=== Test: Plugin API Version Compatibility ===" << std::endl;
     
-    uint32_t expectedVersion = DARKTHUMBS_PLUGIN_API_VERSION;
-    uint32_t majorVersion = DARKTHUMBS_PLUGIN_API_VERSION_MAJOR;
-    uint32_t minorVersion = DARKTHUMBS_PLUGIN_API_VERSION_MINOR;
+    uint32_t expectedVersion = EXPLORERLENS_PLUGIN_API_VERSION;
+    uint32_t majorVersion = EXPLORERLENS_PLUGIN_API_VERSION_MAJOR;
+    uint32_t minorVersion = EXPLORERLENS_PLUGIN_API_VERSION_MINOR;
     
     std::cout << "  Plugin API Version: " << majorVersion << "."
              << minorVersion << std::endl;
@@ -77,7 +77,7 @@ void TestPluginMemoryAllocation() {
     std::cout << "\n=== Test: Plugin Memory Allocation ===" << std::endl;
     
     // Test plugin memory allocator functions
-    void* memory = DarkThumbs::PluginManager::PluginAlloc(1024, nullptr);
+    void* memory = ExplorerLens::PluginManager::PluginAlloc(1024, nullptr);
     
     TEST_ASSERT(memory != nullptr, "Plugin allocator should provide memory");
     
@@ -90,7 +90,7 @@ void TestPluginMemoryAllocation() {
         TEST_ASSERT(patternValid, "Allocated memory should be writable");
         
         // Free memory
-        DarkThumbs::PluginManager::PluginFree(memory, nullptr);
+        ExplorerLens::PluginManager::PluginFree(memory, nullptr);
     }
 }
 
@@ -98,7 +98,7 @@ void TestPluginSandboxing() {
     std::cout << "\n=== Test: Plugin Sandboxing ===" << std::endl;
     
     // Verify plugins are loaded in a controlled manner
-    auto& manager = DarkThumbs::PluginManager::Instance();
+    auto& manager = ExplorerLens::PluginManager::Instance();
     
     size_t pluginCount = manager.GetPluginCount();
     std::cout << "  Loaded plugin count: " << pluginCount << std::endl;
@@ -113,13 +113,13 @@ void TestPluginDecodeRequest() {
     
     // Test DecodeRequest structure validation
     DecodeRequest request = {};
-    request.version = DARKTHUMBS_PLUGIN_API_VERSION;
+    request.version = EXPLORERLENS_PLUGIN_API_VERSION;
     request.file_path = L"test.bmp";
     request.target_width = 256;
     request.target_height = 256;
     request.quality = DECODE_QUALITY_BALANCED;
     
-    TEST_ASSERT(request.version == DARKTHUMBS_PLUGIN_API_VERSION,
+    TEST_ASSERT(request.version == EXPLORERLENS_PLUGIN_API_VERSION,
                 "DecodeRequest version should match API");
     TEST_ASSERT(request.target_width > 0, "Target width should be positive");
     TEST_ASSERT(request.target_height > 0, "Target height should be positive");
@@ -140,7 +140,7 @@ void TestPluginErrorHandling() {
 void TestPluginUnload() {
     std::cout << "\n=== Test: Plugin Unload ===" << std::endl;
     
-    auto& manager = DarkThumbs::PluginManager::Instance();
+    auto& manager = ExplorerLens::PluginManager::Instance();
     
     // Get plugin names before unload
     auto pluginNames = manager.GetPluginNames();
@@ -173,7 +173,7 @@ void TestPluginUpdateMechanism() {
     std::cout << "\n=== Test: Plugin Update Mechanism ===" << std::endl;
     
     // Verify version checking works
-    uint32_t currentVersion = DARKTHUMBS_PLUGIN_API_VERSION;
+    uint32_t currentVersion = EXPLORERLENS_PLUGIN_API_VERSION;
     uint32_t futureVersion = 0x00020000; // v2.0
     
     bool isCompatible = (currentVersion >> 16) == (futureVersion >> 16);
@@ -206,7 +206,7 @@ void TestPluginIPCCommunication() {
 
 void PrintTestHeader() {
     std::cout << "=========================================" << std::endl;
-    std::cout << "DarkThumbs Plugin System Validation Tests" << std::endl;
+    std::cout << "ExplorerLens Plugin System Validation Tests" << std::endl;
     std::cout << "Sprint 19: Plugin System Activation" << std::endl;
     std::cout << "=========================================" << std::endl;
 }
@@ -253,3 +253,5 @@ int main() {
     
     return (g_testsFailed == 0) ? 0 : 1;
 }
+
+

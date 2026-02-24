@@ -1,12 +1,12 @@
 //==============================================================================
-// Win11Integration — Sprint 209
+// Win11Integration
 // Windows 11 native features
 //==============================================================================
 
 #include "Win11Integration.h"
 #include <Windows.h>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 Win11Integration::Win11Integration() {
     DetectOS();
@@ -155,4 +155,5 @@ uint32_t Win11Integration::GetFeatureCount() {
     return static_cast<uint32_t>(Win11Feature::FeatureCount);
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

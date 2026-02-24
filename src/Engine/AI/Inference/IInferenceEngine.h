@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace DarkThumbs::Engine::AI::Inference {
+namespace ExplorerLens::Engine::AI::Inference {
 
     enum class ExecutionProvider {
         CPU,
@@ -49,3 +49,4 @@ namespace DarkThumbs::Engine::AI::Inference {
     // Factory
     std::shared_ptr<IInferenceEngine> CreateInferenceEngine();
 }
+

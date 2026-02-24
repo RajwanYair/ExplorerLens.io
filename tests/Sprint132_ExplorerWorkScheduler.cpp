@@ -1,7 +1,7 @@
 // Sprint 132 — Explorer Work Scheduler Tests
 #include <gtest/gtest.h>
 #include "Pipeline/ExplorerWorkScheduler.h"
-using namespace DarkThumbs::Pipeline;
+using namespace ExplorerLens::Pipeline;
 
 TEST(Sprint132_Scheduler, Submit_ReturnsId) {
     auto sched = ExplorerWorkScheduler::Create();
@@ -85,3 +85,4 @@ TEST(Sprint132_Scheduler, WorkItem_Timing) {
     EXPECT_DOUBLE_EQ(item.LatencyMs(), 0.0);
     EXPECT_DOUBLE_EQ(item.QueueWaitMs(), 0.0);
 }
+

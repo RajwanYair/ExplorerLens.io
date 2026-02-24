@@ -1,5 +1,5 @@
 # ============================================================================
-# DarkThumbs - Barebone PowerShell Profile (Optimized for Slow Machines)
+# ExplorerLens - Barebone PowerShell Profile (Optimized for Slow Machines)
 # Version: 4.0 - 2026-01-06
 # ============================================================================
 # This is a minimal profile designed for maximum performance
@@ -17,18 +17,18 @@ function prompt {
     "PS $(Get-Location)> "
 }
 
-# Essential DarkThumbs variables
-$global:DarkThumbsPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+# Essential ExplorerLens variables
+$global:ExplorerLensPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 # Quick navigation aliases
-function dt { Set-Location $global:DarkThumbsPath }
-function bs { Set-Location "$global:DarkThumbsPath\build-scripts" }
-function src { Set-Location "$global:DarkThumbsPath\CBXShell" }
+function dt { Set-Location $global:ExplorerLensPath }
+function bs { Set-Location "$global:ExplorerLensPath\build-scripts" }
+function src { Set-Location "$global:ExplorerLensPath\LENSShell" }
 
 # Essential build functions (no MSVC environment loading)
 function Build-Quick {
     param([switch]$Clean)
-    Push-Location $global:DarkThumbsPath
+    Push-Location $global:ExplorerLensPath
     if ($Clean) {
         & .\Build-Production.ps1 -Clean
     } else {
@@ -39,7 +39,7 @@ function Build-Quick {
 
 function Build-Monitor {
     param([string]$LogFile = "build-logs\production-build-*.log")
-    $logs = Get-ChildItem "$global:DarkThumbsPath\$LogFile" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    $logs = Get-ChildItem "$global:ExplorerLensPath\$LogFile" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
     if ($logs) {
         $latest = $logs[0]
         Write-Host "Monitoring: $($latest.Name)" -ForegroundColor Cyan
@@ -50,7 +50,7 @@ function Build-Monitor {
 }
 
 function Build-Status {
-    $logDir = "$global:DarkThumbsPath\build-logs"
+    $logDir = "$global:ExplorerLensPath\build-logs"
     if (Test-Path $logDir) {
         Write-Host "Recent builds:" -ForegroundColor Cyan
         Get-ChildItem $logDir -Filter "*.log" | 
@@ -75,7 +75,7 @@ function Start-BuildMonitor {
         [int]$RefreshSeconds = 10
     )
     
-    $logDir = "$global:DarkThumbsPath\build-logs"
+    $logDir = "$global:ExplorerLensPath\build-logs"
     Write-Host "Starting file-based build monitor..." -ForegroundColor Cyan
     Write-Host "Log directory: $logDir" -ForegroundColor Gray
     Write-Host "Refresh interval: $RefreshSeconds seconds" -ForegroundColor Gray
@@ -120,5 +120,6 @@ function Start-BuildMonitor {
 }
 
 # Display help on startup (optional - comment out for even faster startup)
-# Write-Host "DarkThumbs Barebone Profile Loaded" -ForegroundColor Green
+# Write-Host "ExplorerLens Barebone Profile Loaded" -ForegroundColor Green
 # Write-Host "Commands: dt, bs, src, Build-Quick, Build-Monitor, Build-Status, Start-BuildMonitor" -ForegroundColor Gray
+

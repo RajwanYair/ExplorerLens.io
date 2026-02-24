@@ -1,6 +1,6 @@
 // QOIDecoder.h - Quite OK Image Format Decoder
-// DarkThumbs Engine v5.3.0+
-// Sprint 15 - Modern Format Support
+// ExplorerLens Engine v5.3.0+
+// Modern Format Support
 //
 // Supports: QOI - The "Quite OK Image Format"
 // Features:
@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class QOIDecoder : public IThumbnailDecoder {
@@ -79,4 +79,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

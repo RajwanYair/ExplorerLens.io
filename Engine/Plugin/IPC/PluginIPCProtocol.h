@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin IPC Protocol
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin IPC Protocol
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Defines the inter-process communication protocol between the Engine and
  * PluginHost processes for secure plugin isolation.
@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace IPC {
 
 //============================================================================
@@ -20,7 +20,7 @@ namespace IPC {
 //============================================================================
 
 // Magic number for message validation
-constexpr uint32_t PLUGIN_IPC_MAGIC = 0x44545048;  // 'DTPH' (DarkThumbs Plugin Host)
+constexpr uint32_t PLUGIN_IPC_MAGIC = 0x44545048;  // 'DTPH' (ExplorerLens Plugin Host)
 
 // Protocol version
 constexpr uint32_t PLUGIN_IPC_VERSION = 1;
@@ -364,4 +364,5 @@ inline const char* ErrorCodeToString(IPCErrorCode code) {
 }
 
 } // namespace IPC
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

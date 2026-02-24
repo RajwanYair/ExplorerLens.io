@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// COMApartmentAudit.h — Sprint 127
+// COMApartmentAudit.h
 // COM apartment model audit, STA/MTA regression tests, and stability
 // improvements for the shell extension's threading model.
 //==============================================================================
@@ -18,7 +18,7 @@
 #include <objbase.h>
 #endif
 
-namespace DarkThumbs { namespace COM {
+namespace ExplorerLens { namespace COM {
 
 /// COM apartment types
 enum class ApartmentType : uint8_t {
@@ -215,4 +215,5 @@ private:
     }
 };
 
-}} // namespace DarkThumbs::COM
+}} // namespace ExplorerLens::COM
+

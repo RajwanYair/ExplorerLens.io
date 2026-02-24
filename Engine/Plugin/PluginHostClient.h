@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Host Client
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Host Client
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Engine-side client for communicating with PluginHost processes.
  * Manages process spawning, IPC communication, and crash detection.
@@ -19,7 +19,7 @@
 #include <mutex>
 #include <chrono>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // Plugin Host Client
@@ -113,4 +113,5 @@ private:
     mutable std::mutex mutex_;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

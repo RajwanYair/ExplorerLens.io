@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Error Context Tracker
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Error Context Tracker
+// Copyright (c) 2026 - ExplorerLens Project
 // Task A24: Rich error context for diagnostics
 //==============================================================================
 
@@ -12,7 +12,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -137,8 +137,9 @@ namespace Engine {
         ScopedErrorContext& operator=(const ScopedErrorContext&) = delete;
     };
 
-    #define DT_ERROR_SCOPE(op) DarkThumbs::Engine::ScopedErrorContext __dtErrorCtx(op, nullptr)
-    #define DT_ERROR_SCOPE_DECODER(op, decoder) DarkThumbs::Engine::ScopedErrorContext __dtErrorCtx(op, decoder)
+    #define DT_ERROR_SCOPE(op) ExplorerLens::Engine::ScopedErrorContext __dtErrorCtx(op, nullptr)
+    #define DT_ERROR_SCOPE_DECODER(op, decoder) ExplorerLens::Engine::ScopedErrorContext __dtErrorCtx(op, decoder)
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

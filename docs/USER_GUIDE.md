@@ -1,4 +1,4 @@
-# DarkThumbs User Guide
+# ExplorerLens User Guide
 **Version:** 7.1.0  
 **Last Updated:** February 18, 2026
 
@@ -22,17 +22,17 @@
 
 ### Installation Steps
 
-1. **Download** the latest installer from the [Releases](https://github.com/yourusername/DarkThumbs/releases) page
+1. **Download** the latest installer from the [Releases](https://github.com/yourusername/ExplorerLens/releases) page
 
 2. **Run the installer** as Administrator:
    ```powershell
    # Right-click installer → "Run as Administrator"
-   .\DarkThumbs-Setup-7.0.0.msi
+   .\ExplorerLens-Setup-7.0.0.msi
    ```
 
 3. **Follow the wizard**:
    - Accept the license agreement
-   - Choose installation directory (default: `C:\Program Files\DarkThumbs`)
+   - Choose installation directory (default: `C:\Program Files\ExplorerLens`)
    - Select file type associations
    - Click "Install"
 
@@ -48,10 +48,10 @@ Use the PowerShell script for custom installations:
 
 ```powershell
 # Clone or extract source
-cd DarkThumbs
+cd ExplorerLens
 
 # Run installation script
-.\Install-DarkThumbs.ps1 -Verbose
+.\Install-ExplorerLens.ps1 -Verbose
 
 # Restart Explorer
 Stop-Process -Name explorer -Force
@@ -74,13 +74,13 @@ Stop-Process -Name explorer -Force
    - Videos (`.mp4`, `.mkv`, `.avi`, `.mov`, etc.)
    - Audio (`.mp3`, `.flac`, `.wav` with album art)
 
-### Using CBXManager
+### Using LENSManager
 
-**CBXManager** is the configuration utility for DarkThumbs.
+**LENSManager** is the configuration utility for ExplorerLens.
 
-1. **Launch CBXManager**:
-   - Search for "CBXManager" in Start Menu
-   - Or run: `C:\Program Files\DarkThumbs\CBXManager.exe`
+1. **Launch LENSManager**:
+   - Search for "LENSManager" in Start Menu
+   - Or run: `C:\Program Files\ExplorerLens\LENSManager.exe`
 
 2. **Configuration Options**:
    - **Enable/Disable** thumbnail handler
@@ -91,8 +91,8 @@ Stop-Process -Name explorer -Force
    - **Force cache clear**
 
 3. **Quick Actions**:
-   - **Register Handler:** Enables DarkThumbs for all file types
-   - **Unregister Handler:** Disables DarkThumbs temporarily
+   - **Register Handler:** Enables ExplorerLens for all file types
+   - **Unregister Handler:** Disables ExplorerLens temporarily
    - **Clear Thumbnail Cache:** Removes all cached thumbnails
    - **Rebuild Cache:** Forces regeneration of thumbnails
 
@@ -100,7 +100,7 @@ Stop-Process -Name explorer -Force
 
 ## Supported Formats
 
-DarkThumbs supports **200+ file formats** across multiple categories:
+ExplorerLens supports **200+ file formats** across multiple categories:
 
 ### Archives & Comic Books
 - **Comic Books:** `.cbz`, `.cbr`, `.cb7`, `.cbt`
@@ -138,17 +138,17 @@ DarkThumbs supports **200+ file formats** across multiple categories:
 **For fast machines** (8+ cores, SSD, dedicated GPU):
 ```powershell
 # High quality, no compromises
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "Quality" -Value "High"
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "CacheSize" -Value 2048
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "GPUAcceleration" -Value 1
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "Quality" -Value "High"
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "CacheSize" -Value 2048
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "GPUAcceleration" -Value 1
 ```
 
 **For slow machines** (4 cores, HDD, integrated GPU):
 ```powershell
 # Balanced quality, faster decoding
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "Quality" -Value "Balanced"
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "CacheSize" -Value 512
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "GPUAcceleration" -Value 1
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "Quality" -Value "Balanced"
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "CacheSize" -Value 512
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "GPUAcceleration" -Value 1
 ```
 
 ### GPU Selection
@@ -157,23 +157,23 @@ If you have multiple GPUs (e.g., Intel iGPU + NVIDIA dGPU):
 
 ```powershell
 # List available GPUs
-.\CBXManager.exe /ListGPUs
+.\LENSManager.exe /ListGPUs
 
 # Set preferred GPU (0 = default, 1 = second GPU, etc.)
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "PreferredGPU" -Value 1
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "PreferredGPU" -Value 1
 ```
 
 ### Cache Configuration
 
 ```powershell
-# Cache location (default: %LOCALAPPDATA%\DarkThumbs\Cache)
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "CachePath" -Value "D:\Cache\DarkThumbs"
+# Cache location (default: %LOCALAPPDATA%\ExplorerLens\Cache)
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "CachePath" -Value "D:\Cache\ExplorerLens"
 
 # Cache size in MB (default: 1024 MB)
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "CacheSize" -Value 2048
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "CacheSize" -Value 2048
 
 # Clear cache
-Remove-Item "$env:LOCALAPPDATA\DarkThumbs\Cache\*" -Recurse -Force
+Remove-Item "$env:LOCALAPPDATA\ExplorerLens\Cache\*" -Recurse -Force
 ```
 
 ---
@@ -189,12 +189,12 @@ Remove-Item "$env:LOCALAPPDATA\DarkThumbs\Cache\*" -Recurse -Force
 
 2. **Clear thumbnail cache**:
    ```powershell
-   .\CBXManager.exe /ClearCache
+   .\LENSManager.exe /ClearCache
    ```
 
 3. **Re-register handler**:
    ```powershell
-   regsvr32 /i "C:\Program Files\DarkThumbs\CBXShell.dll"
+   regsvr32 /i "C:\Program Files\ExplorerLens\LENSShell.dll"
    ```
 
 4. **Check Windows thumbnail settings**:
@@ -206,20 +206,20 @@ Remove-Item "$env:LOCALAPPDATA\DarkThumbs\Cache\*" -Recurse -Force
 
 - **Increase thumbnail size**: Thumbnails > 256x256 take longer
 - **Check disk speed**: HDDs are slower than SSDs
-- **Verify GPU acceleration**: Open CBXManager → GPU Status
-- **Reduce image quality**: Set Quality to "Fast" in CBXManager
+- **Verify GPU acceleration**: Open LENSManager → GPU Status
+- **Reduce image quality**: Set Quality to "Fast" in LENSManager
 
 ### Crashes or Errors
 
 1. **Check Event Viewer**:
    ```powershell
-   Get-EventLog -LogName Application -Source DarkThumbs -Newest 10
+   Get-EventLog -LogName Application -Source ExplorerLens -Newest 10
    ```
 
 2. **Enable debug logging**:
    ```powershell
-   Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "DebugLog" -Value 1
-   # Logs written to: %TEMP%\DarkThumbs-Debug.log
+   Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "DebugLog" -Value 1
+   # Logs written to: %TEMP%\ExplorerLens-Debug.log
    ```
 
 3. **Report issues** on GitHub with:
@@ -233,49 +233,49 @@ Remove-Item "$env:LOCALAPPDATA\DarkThumbs\Cache\*" -Recurse -Force
 
 ### Via Control Panel
 1. Open **Settings** → **Apps** → **Installed apps**
-2. Find **DarkThumbs**
+2. Find **ExplorerLens**
 3. Click **Uninstall**
 
 ### Via PowerShell
 ```powershell
 # Unregister handler
-regsvr32 /u "C:\Program Files\DarkThumbs\CBXShell.dll"
+regsvr32 /u "C:\Program Files\ExplorerLens\LENSShell.dll"
 
 # Remove registry keys
-Remove-Item -Path "HKLM:\Software\DarkThumbs" -Recurse -Force
+Remove-Item -Path "HKLM:\Software\ExplorerLens" -Recurse -Force
 
 # Clear cache
-Remove-Item "$env:LOCALAPPDATA\DarkThumbs" -Recurse -Force
+Remove-Item "$env:LOCALAPPDATA\ExplorerLens" -Recurse -Force
 
 # Uninstall MSI
-msiexec /x {DARKTHUMBS-GUID} /quiet
+msiexec /x {ExplorerLens-GUID} /quiet
 ```
 
 ---
 
 ## FAQ
 
-**Q: Does DarkThumbs replace Windows thumbnail providers?**  
-A: No, DarkThumbs *extends* Windows thumbnail support. Native formats (JPG, PNG) still use Windows providers.
+**Q: Does ExplorerLens replace Windows thumbnail providers?**  
+A: No, ExplorerLens *extends* Windows thumbnail support. Native formats (JPG, PNG) still use Windows providers.
 
-**Q: Can I use DarkThumbs with network drives?**  
+**Q: Can I use ExplorerLens with network drives?**  
 A: Yes, but performance depends on network speed. Enable caching for best results.
 
 **Q: Is GPU acceleration required?**  
-A: No, DarkThumbs works with CPU-only decoding. GPU acceleration improves performance for large images.
+A: No, ExplorerLens works with CPU-only decoding. GPU acceleration improves performance for large images.
 
-**Q: How much memory does DarkThumbs use?**  
+**Q: How much memory does ExplorerLens use?**  
 A: ~50-100 MB idle, ~200-500 MB when actively decoding large files.
 
 **Q: Can I customize thumbnail appearance (borders, shadows)?**  
-A: Thumbnail appearance is controlled by Windows Explorer. DarkThumbs only provides the image data.
+A: Thumbnail appearance is controlled by Windows Explorer. ExplorerLens only provides the image data.
 
 ---
 
 ## Additional Resources
 
-- **GitHub Repository:** https://github.com/yourusername/DarkThumbs
-- **Issue Tracker:** https://github.com/yourusername/DarkThumbs/issues
+- **GitHub Repository:** https://github.com/yourusername/ExplorerLens
+- **Issue Tracker:** https://github.com/yourusername/ExplorerLens/issues
 - **Developer Guide:** [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
 - **Build Instructions:** [.github/standards/BUILD_METHOD.md](.github/standards/BUILD_METHOD.md)
 
@@ -284,3 +284,4 @@ A: Thumbnail appearance is controlled by Windows Explorer. DarkThumbs only provi
 ---
 
 **Enjoy seamless thumbnail previews for all your files! 🎨**
+

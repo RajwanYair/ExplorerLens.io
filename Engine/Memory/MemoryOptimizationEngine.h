@@ -1,7 +1,7 @@
 //==============================================================================
-// DarkThumbs Engine — Memory Optimization Engine
-// Sprint 36+: Execution Optimization — Minimal Memory Footprint
-// Copyright (c) 2026 — DarkThumbs Project
+// ExplorerLens Engine — Memory Optimization Engine
+// Execution Optimization — Minimal Memory Footprint
+// Copyright (c) 2026 — ExplorerLens Project
 //
 // PURPOSE:
 //   Holistic memory management layer that works alongside the modular codec
@@ -36,7 +36,7 @@
 
 #pragma comment(lib, "psapi.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Memory {
 
@@ -703,7 +703,7 @@ public:
     {
         auto snap = WorkingSetMonitor::GetCurrentSnapshot();
         std::string report;
-        report += "=== DarkThumbs Memory Report ===\n";
+        report += "=== ExplorerLens Memory Report ===\n";
         report += "Process Working Set: " +
                   std::to_string(static_cast<int>(snap.workingSetMB)) + " MB\n";
         report += "Private Bytes:       " +
@@ -770,4 +770,5 @@ private:
 
 } // namespace Memory
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

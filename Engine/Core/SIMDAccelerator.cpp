@@ -1,5 +1,5 @@
 //==============================================================================
-// SIMDAccelerator — Sprint 208
+// SIMDAccelerator
 // SIMD-accelerated image processing
 //==============================================================================
 
@@ -13,7 +13,7 @@
 #include <intrin.h>
 #endif
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 SIMDAccelerator::SIMDAccelerator() {
     DetectCPUFeatures();
@@ -228,4 +228,5 @@ size_t SIMDAccelerator::GetOptimalAlignment(SIMDLevel level) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

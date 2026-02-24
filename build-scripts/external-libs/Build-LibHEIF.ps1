@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build libheif 1.19.5 (HEIF/HEIC Support)
+# ExplorerLens v7.0 - Build libheif 1.19.5 (HEIF/HEIC Support)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -152,9 +152,9 @@ if (-not $de265ImportLib) {
     $de265Options = @{
         'CMAKE_BUILD_TYPE'  = 'Release'
         'BUILD_SHARED_LIBS' = 'ON'
-        'ENABLE_SDL'        = 'OFF'
+        'ENABLE_SDL'        = 'ON'
         'ENABLE_DECODER'    = 'ON'
-        'ENABLE_ENCODER'    = 'OFF'
+        'ENABLE_ENCODER'    = 'ON'
     }
 
     try {
@@ -227,17 +227,17 @@ $libde265LibraryPath = $de265ImportLib
 
 $cmakeOptions = @{
     'CMAKE_BUILD_TYPE'      = 'Release'
-    'BUILD_SHARED_LIBS'     = 'OFF'
+    'BUILD_SHARED_LIBS'     = 'ON'
     'CMAKE_C_FLAGS'         = '/DLIBDE265_STATIC_BUILD'
     'CMAKE_CXX_FLAGS'       = '/DLIBDE265_STATIC_BUILD /EHsc'
-    'BUILD_TESTING'         = 'OFF'
-    'WITH_EXAMPLES'         = 'OFF'
-    'WITH_GDK_PIXBUF'       = 'OFF'
+    'BUILD_TESTING'         = 'ON'
+    'WITH_EXAMPLES'         = 'ON'
+    'WITH_GDK_PIXBUF'       = 'ON'
     'WITH_LIBDE265'         = 'ON'
-    'WITH_X265'             = 'OFF'
-    'WITH_DAV1D'            = 'OFF'
-    'WITH_AOM_DECODER'      = 'OFF'
-    'WITH_AOM_ENCODER'      = 'OFF'
+    'WITH_X265'             = 'ON'
+    'WITH_DAV1D'            = 'ON'
+    'WITH_AOM_DECODER'      = 'ON'
+    'WITH_AOM_ENCODER'      = 'ON'
     'LIBDE265_STATIC_BUILD' = '1'
     'LIBDE265_INCLUDE_DIR'  = $libde265IncludeDir
     'LIBDE265_LIBRARY'      = $libde265LibraryPath
@@ -291,7 +291,6 @@ try {
 
     Write-BuildLog "libheif 1.19.5 build completed successfully" -Level Success
     Write-BuildLog "Features: HEIF/HEIC decoding (iPhone photos), HDR, burst photos" -Level Info
-    Write-BuildLog "" -Level Info
     Write-BuildLog "Integration steps:" -Level Info
     Write-BuildLog "  1. Set -DHAS_LIBHEIF=ON in Engine CMake configuration" -Level Info
     Write-BuildLog "  2. Add libheif include/lib paths to Engine CMakeLists.txt" -Level Info
@@ -301,3 +300,4 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+

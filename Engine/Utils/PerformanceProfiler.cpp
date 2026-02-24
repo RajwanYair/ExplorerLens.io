@@ -4,7 +4,7 @@
 #include <fstream>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
     // ScopedTimer Implementation
     ScopedTimer::ScopedTimer(ProfileComponent component)
@@ -322,14 +322,14 @@ namespace DarkThumbs {
         std::lock_guard<std::mutex> lock(m_mutex);
         std::wostringstream html;
 
-        html << L"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>DarkThumbs Performance Report</title>" << std::endl;
+        html << L"<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>ExplorerLens Performance Report</title>" << std::endl;
         html << L"<style>body{font-family:Arial,sans-serif;margin:20px;background:#f5f5f5;}" << std::endl;
         html << L"h1{color:#2c3e50;}table{border-collapse:collapse;width:100%;background:white;box-shadow:0 2px 4px rgba(0,0,0,0.1);}" << std::endl;
         html << L"th{background:#3498db;color:white;padding:12px;text-align:left;}td{padding:10px;border-bottom:1px solid #ddd;}" << std::endl;
         html << L"tr:hover{background:#f8f9fa;}.metric{font-weight:bold;color:#27ae60;}" << std::endl;
         html << L"</style></head><body>" << std::endl;
 
-        html << L"<h1>DarkThumbs Performance Report</h1>" << std::endl;
+        html << L"<h1>ExplorerLens Performance Report</h1>" << std::endl;
 
         // Summary metrics
         double totalTime = GetTotalTimeMs();
@@ -494,4 +494,5 @@ namespace DarkThumbs {
         return hints;
     }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

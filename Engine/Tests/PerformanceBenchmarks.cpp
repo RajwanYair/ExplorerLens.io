@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Performance Benchmarks
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Performance Benchmarks
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Comprehensive performance analysis for plugin security infrastructure:
  * - IPC overhead measurements
@@ -23,8 +23,8 @@
 #include <Windows.h>
 #include <Psapi.h>
 
-using namespace DarkThumbs;
-using namespace DarkThumbs::Engine;
+using namespace ExplorerLens;
+using namespace ExplorerLens::Engine;
 
 //============================================================================
 // Timing Utilities
@@ -134,7 +134,7 @@ void BenchmarkIPCOverhead() {
     latencies.reserve(iterations);
     
     // Create test pipe
-    std::wstring pipe_name = L"\\\\.\\pipe\\DarkThumbs_Benchmark_" + 
+    std::wstring pipe_name = L"\\\\.\\pipe\\ExplorerLens_Benchmark_" + 
                             std::to_wstring(GetCurrentProcessId());
     
     HANDLE hPipe = CreateNamedPipeW(
@@ -192,7 +192,7 @@ void BenchmarkSharedMemory() {
     std::cout << "Benchmark 2: Shared Memory Throughput\n";
     std::cout << "=================================================\n\n";
     
-    const wchar_t* section_name = L"DarkThumbs_Benchmark_SharedMem";
+    const wchar_t* section_name = L"ExplorerLens_Benchmark_SharedMem";
     const size_t test_sizes[] = { 1024, 16 * 1024, 256 * 1024, 1024 * 1024, 4 * 1024 * 1024 };
     
     for (size_t size : test_sizes) {
@@ -256,7 +256,7 @@ void BenchmarkExecutionModes() {
     
     const int iterations = 50;
     std::wstring test_plugin = L"BenchmarkTestPlugin";
-    std::filesystem::path plugin_path = L"C:\\Program Files\\DarkThumbs\\Plugins\\test_plugin.dll";
+    std::filesystem::path plugin_path = L"C:\\Program Files\\ExplorerLens\\Plugins\\test_plugin.dll";
     
     // Check if plugin exists
     if (!std::filesystem::exists(plugin_path)) {
@@ -422,7 +422,7 @@ void BenchmarkThroughput() {
 
 int main(int argc, char** argv) {
     std::cout << "===================================================\n";
-    std::cout << " DarkThumbs Performance Benchmarks\n";
+    std::cout << " ExplorerLens Performance Benchmarks\n";
     std::cout << " Sprint 14 - Plugin Security Infrastructure\n";
     std::cout << "===================================================\n";
     
@@ -445,3 +445,4 @@ int main(int argc, char** argv) {
     
     return 0;
 }
+

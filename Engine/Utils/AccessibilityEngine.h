@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// AccessibilityEngine — Sprint 220
+// AccessibilityEngine
 // Accessibility support: screen reader integration, high contrast detection,
 // keyboard navigation, reduced motion, and WCAG compliance checking.
 //==============================================================================
@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class A11yFeature : uint8_t {
     ScreenReader     = 0,
@@ -67,4 +67,5 @@ private:
     uint32_t m_enabledFeatures = 0;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

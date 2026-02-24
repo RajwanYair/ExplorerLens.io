@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs — Sprint 34: Supply-Chain Security & Reproducible Releases
- * Copyright (c) 2026 — DarkThumbs Project
+ * ExplorerLens — Sprint 34: Supply-Chain Security & Reproducible Releases
+ * Copyright (c) 2026 — ExplorerLens Project
  *
  * SBOM generation (SPDX/CycloneDX), reproducible build settings,
  * dependency provenance tracking, CI policy gates, and signed release
@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace SupplyChain {
 
 //============================================================================
@@ -93,7 +93,7 @@ struct DependencyProvenance {
 };
 
 //============================================================================
-// Built-in DarkThumbs Dependency Registry
+// Built-in ExplorerLens Dependency Registry
 //============================================================================
 
 class DependencyRegistry {
@@ -229,10 +229,10 @@ class SBOMGenerator {
 public:
     struct Config {
         SBOMFormat format = SBOMFormat::SPDX_2_3;
-        std::wstring product_name = L"DarkThumbs";
+        std::wstring product_name = L"ExplorerLens";
         std::wstring product_version = L"7.0.0";
-        std::wstring supplier = L"Organization: DarkThumbs Project";
-        std::wstring namespace_uri = L"https://darkthumbs.dev/spdx";
+        std::wstring supplier = L"Organization: ExplorerLens Project";
+        std::wstring namespace_uri = L"https://explorerlens.dev/spdx";
     };
 
     explicit SBOMGenerator(const Config& config = {}) : config_(config) {}
@@ -248,7 +248,7 @@ public:
         ss << L"  \"documentNamespace\": \"" << config_.namespace_uri << L"/" << config_.product_version << L"\",\n";
         ss << L"  \"creationInfo\": {\n";
         ss << L"    \"created\": \"" << GetTimestampISO() << L"\",\n";
-        ss << L"    \"creators\": [\"Tool: DarkThumbs-SBOM-1.0\"]\n";
+        ss << L"    \"creators\": [\"Tool: ExplorerLens-SBOM-1.0\"]\n";
         ss << L"  },\n";
         ss << L"  \"packages\": [\n";
 
@@ -258,7 +258,7 @@ public:
         ss << L"      \"name\": \"" << config_.product_name << L"\",\n";
         ss << L"      \"versionInfo\": \"" << config_.product_version << L"\",\n";
         ss << L"      \"supplier\": \"" << config_.supplier << L"\",\n";
-        ss << L"      \"downloadLocation\": \"https://github.com/nickel-org/DarkThumbs\"\n";
+        ss << L"      \"downloadLocation\": \"https://github.com/nickel-org/ExplorerLens\"\n";
         ss << L"    }";
 
         // Dependencies
@@ -551,4 +551,5 @@ private:
 };
 
 } // namespace SupplyChain
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

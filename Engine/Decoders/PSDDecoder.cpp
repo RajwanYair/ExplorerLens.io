@@ -1,5 +1,5 @@
 // PSDDecoder.cpp - Adobe Photoshop PSD/PSB Decoder Implementation
-// DarkThumbs Engine v6.1.0+
+// ExplorerLens Engine v6.1.0+
 // Specification: Adobe Photoshop File Formats Specification (2024)
 
 #include "PSDDecoder.h"
@@ -12,7 +12,7 @@
 
 #pragma comment(lib, "gdiplus.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Static members
@@ -360,4 +360,5 @@ std::unique_ptr<uint8_t[]> PSDDecoder::ReadFileData(const wchar_t* path, size_t&
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

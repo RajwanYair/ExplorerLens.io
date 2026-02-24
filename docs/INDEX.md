@@ -1,6 +1,6 @@
-# DarkThumbs Documentation Index
+# ExplorerLens Documentation Index
 
-**Project:** DarkThumbs  
+**Project:** ExplorerLens  
 **Current Version:** v7.1.0  
 **Planning Authority:** [MASTER_PLAN.md](../MASTER_PLAN.md)  
 **Sprints Completed:** 74  
@@ -122,3 +122,4 @@
 ---
 
 For roadmap, sprint status, and backlog priorities, use [MASTER_PLAN.md](../MASTER_PLAN.md).
+

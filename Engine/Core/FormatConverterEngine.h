@@ -1,86 +1,82 @@
 #pragma once
 //==============================================================================
-// FormatConverterEngine — Sprint 222
+// FormatConverterEngine
 // Batch format conversion between supported thumbnail types.
 // Supports quality presets, metadata preservation, and batch scheduling.
 //==============================================================================
 
+#include "EncoderExportEngine.h"
 #include <cstdint>
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 enum class ConvertFormat : uint8_t {
-    PNG   = 0,
-    JPEG  = 1,
-    WebP  = 2,
-    BMP   = 3,
-    TIFF  = 4,
-    AVIF  = 5,
-    JXL   = 6,
-    FormatCount = 7
-};
-
-enum class QualityPreset : uint8_t {
-    Lossless  = 0,
-    High      = 1,
-    Medium    = 2,
-    Low       = 3,
-    Thumbnail = 4,
-    PresetCount = 5
+  PNG = 0,
+  JPEG = 1,
+  WebP = 2,
+  BMP = 3,
+  TIFF = 4,
+  AVIF = 5,
+  JXL = 6,
+  FormatCount = 7
 };
 
 struct ConversionJob {
-    std::wstring inputPath;
-    std::wstring outputPath;
-    ConvertFormat sourceFormat = ConvertFormat::PNG;
-    ConvertFormat targetFormat = ConvertFormat::JPEG;
-    QualityPreset quality = QualityPreset::High;
-    uint32_t maxWidth = 0;
-    uint32_t maxHeight = 0;
-    bool preserveMetadata = true;
+  std::wstring inputPath;
+  std::wstring outputPath;
+  ConvertFormat sourceFormat = ConvertFormat::PNG;
+  ConvertFormat targetFormat = ConvertFormat::JPEG;
+  QualityPreset quality = QualityPreset::High;
+  uint32_t maxWidth = 0;
+  uint32_t maxHeight = 0;
+  bool preserveMetadata = true;
 };
 
 struct ConversionResult {
-    bool success = false;
-    std::wstring inputPath;
-    std::wstring outputPath;
-    uint64_t inputSize = 0;
-    uint64_t outputSize = 0;
-    double conversionTimeMs = 0.0;
-    double compressionRatio = 0.0;
+  bool success = false;
+  std::wstring inputPath;
+  std::wstring outputPath;
+  uint64_t inputSize = 0;
+  uint64_t outputSize = 0;
+  double conversionTimeMs = 0.0;
+  double compressionRatio = 0.0;
 };
 
 struct BatchConversionResult {
-    uint32_t totalJobs = 0;
-    uint32_t succeeded = 0;
-    uint32_t failed = 0;
-    double totalTimeMs = 0.0;
-    uint64_t totalInputBytes = 0;
-    uint64_t totalOutputBytes = 0;
-    std::vector<ConversionResult> results;
+  uint32_t totalJobs = 0;
+  uint32_t succeeded = 0;
+  uint32_t failed = 0;
+  double totalTimeMs = 0.0;
+  uint64_t totalInputBytes = 0;
+  uint64_t totalOutputBytes = 0;
+  std::vector<ConversionResult> results;
 };
 
 class FormatConverterEngine {
 public:
-    FormatConverterEngine();
+  FormatConverterEngine();
 
-    ConversionResult Convert(const ConversionJob& job);
-    BatchConversionResult ConvertBatch(const std::vector<ConversionJob>& jobs);
+  ConversionResult Convert(const ConversionJob &job);
+  BatchConversionResult ConvertBatch(const std::vector<ConversionJob> &jobs);
 
-    void SetThreadCount(uint32_t threads) { m_threadCount = threads; }
-    uint32_t GetThreadCount() const { return m_threadCount; }
+  void SetThreadCount(uint32_t threads) { m_threadCount = threads; }
+  uint32_t GetThreadCount() const { return m_threadCount; }
 
-    static ConvertFormat DetectFormat(const std::wstring& filePath);
-    static const wchar_t* GetFormatName(ConvertFormat format);
-    static const wchar_t* GetFormatExtension(ConvertFormat format);
-    static const wchar_t* GetPresetName(QualityPreset preset);
-    static uint32_t GetQualityValue(QualityPreset preset);
-    static uint32_t GetFormatCount() { return static_cast<uint32_t>(ConvertFormat::FormatCount); }
+  static ConvertFormat DetectFormat(const std::wstring &filePath);
+  static const wchar_t *GetFormatName(ConvertFormat format);
+  static const wchar_t *GetFormatExtension(ConvertFormat format);
+  static const wchar_t *GetPresetName(QualityPreset preset);
+  static uint32_t GetQualityValue(QualityPreset preset);
+  static uint32_t GetFormatCount() {
+    return static_cast<uint32_t>(ConvertFormat::FormatCount);
+  }
 
 private:
-    uint32_t m_threadCount = 4;
+  uint32_t m_threadCount = 4;
 };
 
-}} // namespace DarkThumbs::Engine
+} // namespace Engine
+} // namespace ExplorerLens

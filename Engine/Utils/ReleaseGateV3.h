@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// KPI dimension for release gate
 enum class ReleaseKPIDimension : uint8_t {
@@ -135,4 +135,4 @@ private:
                                 bool hasBlockers) const;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine

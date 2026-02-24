@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Shared Memory Manager
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Shared Memory Manager
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Manages shared memory sections for transferring large files between
  * Engine and PluginHost processes.
@@ -13,7 +13,7 @@
 #include <string>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace IPC {
 
 //============================================================================
@@ -121,4 +121,5 @@ private:
 };
 
 } // namespace IPC
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

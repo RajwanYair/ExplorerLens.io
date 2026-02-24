@@ -1,4 +1,4 @@
-# Test Archives - DarkThumbs Format Validation
+# Test Archives - ExplorerLens Format Validation
 
 This directory contains test samples for validating thumbnail generation across all supported formats.
 
@@ -120,12 +120,12 @@ test-archives/
 
 ### Run All Tests
 ```powershell
-.\scripts\test\Test-DarkThumbs.ps1 -TestDirectory "test-archives" -Recursive
+.\scripts\test\Test-ExplorerLens.ps1 -TestDirectory "test-archives" -Recursive
 ```
 
 ### Test Specific Format
 ```powershell
-.\scripts\test\Test-DarkThumbs.ps1 -Format "webp" -InputPath "test-archives\modern"
+.\scripts\test\Test-ExplorerLens.ps1 -Format "webp" -InputPath "test-archives\modern"
 ```
 
 ### Benchmark Performance
@@ -162,3 +162,4 @@ test-archives/
 - **v6.0.0** (2025-10): Refactored to Engine-based architecture
 - **v5.3.0** (2025-06): Added JPEG XL, AVIF support
 - **v1.0.0** (2024-01): Initial release with JPEG, PNG, WebP, RAW
+

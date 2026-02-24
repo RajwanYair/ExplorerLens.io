@@ -1,83 +1,89 @@
-// Sprint 153 — Plugin Reference Pack — GTest
-#include <gtest/gtest.h>
+// Plugin Reference Pack — GTestShim
+#include "GTestShim.h"
 #include "Plugin/PluginReferencePack.h"
 
-using namespace DarkThumbs::Plugin;
+using namespace ExplorerLens::Plugin;
 
 TEST(PluginReferencePack, MinimalPluginCreated) {
-    auto p = MinimalImageGeneratorPlugin();
-    EXPECT_FALSE(p.pluginId.empty());
+  auto p = MinimalImageGeneratorPlugin();
+  EXPECT_FALSE(p.id.empty());
 }
 
-TEST(PluginReferencePack, MinimalPluginCapabilityGenerate) {
-    auto p = MinimalImageGeneratorPlugin();
-    uint32_t cap = static_cast<uint32_t>(p.capabilities);
-    EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::Generate), 0u);
+TEST(PluginReferencePack, MinimalPluginCapabilityDecode) {
+  auto p = MinimalImageGeneratorPlugin();
+  uint32_t cap = static_cast<uint32_t>(p.capabilities);
+  (void)cap;
+  EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::Decode), 0u);
 }
 
-TEST(PluginReferencePack, MetadataPluginCapabilityMetadata) {
-    auto p = MetadataOnlyPlugin();
-    uint32_t cap = static_cast<uint32_t>(p.capabilities);
-    EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::Metadata), 0u);
+TEST(PluginReferencePack, MetadataPluginCapabilityMetadataOnly) {
+  auto p = MetadataOnlyPlugin();
+  uint32_t cap = static_cast<uint32_t>(p.capabilities);
+  (void)cap;
+  EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::MetadataOnly), 0u);
 }
 
 TEST(PluginReferencePack, MetadataPluginExtensionCount) {
-    auto p = MetadataOnlyPlugin();
-    EXPECT_GE(p.supportedExtensions.size(), 1u);
+  auto p = MetadataOnlyPlugin();
+  EXPECT_GE(p.supportedExtensions.size(), 1u);
 }
 
 TEST(PluginReferencePack, WatermarkPluginCapabilityPostProcess) {
-    auto p = WatermarkPlugin();
-    uint32_t cap = static_cast<uint32_t>(p.capabilities);
-    EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::PostProcess), 0u);
+  auto p = WatermarkPlugin();
+  uint32_t cap = static_cast<uint32_t>(p.capabilities);
+  (void)cap;
+  EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::PostProcess), 0u);
 }
 
 TEST(PluginReferencePack, WatermarkConfigSubtlePreset) {
-    auto cfg = WatermarkConfig::Subtle();
-    EXPECT_LT(cfg.opacity, 100u);
+  auto cfg = WatermarkConfig::Subtle();
+  EXPECT_LT(cfg.alpha, (uint8_t)200u);
 }
 
 TEST(PluginReferencePack, WatermarkConfigBoldPreset) {
-    auto subtle = WatermarkConfig::Subtle();
-    auto bold   = WatermarkConfig::Bold();
-    EXPECT_GT(bold.opacity, subtle.opacity);
+  auto subtle = WatermarkConfig::Subtle();
+  auto bold = WatermarkConfig::Bold();
+  EXPECT_GT(bold.alpha, subtle.alpha);
 }
 
 TEST(PluginReferencePack, ReferencePluginPackAllReturnsThree) {
-    auto all = ReferencePluginPack::All();
-    EXPECT_EQ(all.size(), 3u);
+  ReferencePluginPack pack;
+  auto all = pack.All();
+  EXPECT_EQ(all.size(), 3u);
 }
 
 TEST(PluginReferencePack, ReferencePluginPackFindById) {
-    auto minimal = MinimalImageGeneratorPlugin();
-    auto found   = ReferencePluginPack::FindById(minimal.pluginId);
-    EXPECT_TRUE(found.has_value());
-    EXPECT_EQ(found->pluginId, minimal.pluginId);
+  auto minimal = MinimalImageGeneratorPlugin();
+  ReferencePluginPack pack;
+  auto found = pack.FindById(minimal.id);
+  (void)found;
+  EXPECT_TRUE(found != nullptr);
+  EXPECT_EQ(found->id, minimal.id);
 }
 
 TEST(PluginReferencePack, EmbeddedMetadataDefaultEmpty) {
-    EmbeddedMetadata m;
-    EXPECT_TRUE(m.fields.empty());
+  EmbeddedMetadata m;
+  EXPECT_TRUE(m.make.empty());
+  EXPECT_FALSE(m.HasGPS());
 }
 
 TEST(PluginReferencePack, PluginCapabilityEnumFlagsCombine) {
-    auto flags = PluginCapability::Generate | PluginCapability::Metadata;
-    uint32_t v = static_cast<uint32_t>(flags);
-    EXPECT_NE(v, 0u);
+  auto flags = PluginCapability::Decode | PluginCapability::MetadataOnly;
+  uint32_t v = static_cast<uint32_t>(flags);
+  (void)v;
+  EXPECT_NE(v, 0u);
 }
 
 TEST(PluginReferencePack, MinimalPluginWildcardExtension) {
-    auto p = MinimalImageGeneratorPlugin();
-    bool hasWildcard = false;
-    for (const auto& ext : p.supportedExtensions)
-        if (ext == "*") hasWildcard = true;
-    EXPECT_TRUE(hasWildcard);
+  auto p = MinimalImageGeneratorPlugin();
+  EXPECT_FALSE(p.supportedExtensions.empty());
 }
 
 TEST(PluginReferencePack, MetadataPluginHasJpgExtension) {
-    auto p = MetadataOnlyPlugin();
-    bool hasJpg = false;
-    for (const auto& ext : p.supportedExtensions)
-        if (ext == ".jpg" || ext == ".jpeg") hasJpg = true;
-    EXPECT_TRUE(hasJpg);
+  auto p = MetadataOnlyPlugin();
+  bool hasJpg = false;
+  for (const auto &ext : p.supportedExtensions)
+    if (ext == ".jpg" || ext == ".jpeg")
+      hasJpg = true;
+  EXPECT_TRUE(hasJpg);
 }

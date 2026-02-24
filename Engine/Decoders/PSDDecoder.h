@@ -1,6 +1,6 @@
 // PSDDecoder.h - Adobe Photoshop PSD/PSB Decoder
-// DarkThumbs Engine v6.1.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.1.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: Adobe Photoshop (.psd), Large Document Format (.psb)
 // Features:
@@ -15,7 +15,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class PSDDecoder : public IThumbnailDecoder {
@@ -76,4 +76,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

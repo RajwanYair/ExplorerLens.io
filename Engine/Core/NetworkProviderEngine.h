@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// NetworkProviderEngine — Sprint 218
+// NetworkProviderEngine
 // Handles thumbnail generation for network paths (UNC, SMB, WebDAV, FTP).
 // Includes timeout management, credential caching, and retry logic.
 //==============================================================================
@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class NetworkProtocol : uint8_t {
     UNC    = 0,
@@ -70,4 +70,5 @@ private:
     uint32_t m_maxRetries = 3;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

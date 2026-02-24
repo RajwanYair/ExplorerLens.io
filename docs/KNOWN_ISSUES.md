@@ -1,4 +1,4 @@
-# DarkThumbs Known Issues & Troubleshooting
+# ExplorerLens Known Issues & Troubleshooting
 **Version:** 7.1.0  
 **Last Updated:** February 18, 2026  
 **Audit Status:** ✅ All entries verified against current codebase (Sprint 60)
@@ -45,7 +45,7 @@
 **Affected Formats:** `.zip`, `.rar`, `.7z`, `.cbz`, `.cbr` over 500MB
 
 **Mitigation:**
-- DarkThumbs only extracts the first image file (not entire archive)
+- ExplorerLens only extracts the first image file (not entire archive)
 - Performance depends on archive structure (first file position)
 - Central directory reading adds overhead for very large archives
 
@@ -65,7 +65,7 @@
 **Resolution:** K-Lite Codec Pack provides DirectShow and Media Foundation filters for all major video codecs.
 
 **Details:**
-DarkThumbs uses Media Foundation (primary) and Shell IThumbnailProvider (fallback) for video thumbnails. K-Lite Codec Pack 19.4.5 Basic installs LAV Filters which provide:
+ExplorerLens uses Media Foundation (primary) and Shell IThumbnailProvider (fallback) for video thumbnails. K-Lite Codec Pack 19.4.5 Basic installs LAV Filters which provide:
 - ✅ H.264/H.265/HEVC - All containers (MP4, MKV, MOV)
 - ✅ AV1 - WebM and MP4 containers
 - ✅ VP8/VP9 - WebM containers
@@ -75,7 +75,7 @@ DarkThumbs uses Media Foundation (primary) and Shell IThumbnailProvider (fallbac
 
 **K-Lite Integration Notes:**
 - K-Lite registers system-wide Media Foundation transforms (MFTs) and DirectShow filters
-- DarkThumbs automatically picks up these codecs via `MFCreateSourceReaderFromURL()`
+- ExplorerLens automatically picks up these codecs via `MFCreateSourceReaderFromURL()`
 - The Shell fallback path (`ExtractFrameShell()`) also benefits from K-Lite's IThumbnailProvider
 - No code changes needed - K-Lite codec detection is automatic
 - DXVA2 hardware acceleration works with K-Lite for H.264/H.265/AV1
@@ -90,7 +90,7 @@ If K-Lite is not installed on user machines:
 ```
 
 #### 6. Explorer Thumbnail Cache Corruption
-**Status:** Windows bug (external to DarkThumbs)  
+**Status:** Windows bug (external to ExplorerLens)  
 **Impact:** Thumbnails disappear or show wrong images  
 **Workaround:** Clear Windows thumbnail cache
 
@@ -101,17 +101,17 @@ cleanmgr /sageset:65535 /sagerun:65535
 # Method 2: Manual delete
 Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\*.db" -Force
 
-# Method 3: CBXManager
-.\CBXManager.exe /ClearCache
+# Method 3: LENSManager
+.\LENSManager.exe /ClearCache
 ```
 
 ---
 
 ### Low Priority (P3)
 
-#### 7. Dark Mode Support in CBXManager
+#### 7. Dark Mode Support in LENSManager
 **Status:** Partial implementation  
-**Impact:** CBXManager UI doesn't fully respect Windows dark mode  
+**Impact:** LENSManager UI doesn't fully respect Windows dark mode  
 **Workaround:** None. Cosmetic issue only.
 
 **Note:** DarkModeHelper.h implements dark mode for dialogs. Dark mode was re-enabled in Sprint 8 with conditional OnCtlColor handlers. WinUI 3 manager (Sprint 18-19) provides a fully modern alternative.
@@ -123,8 +123,8 @@ Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\*.db" -Force
 
 ```powershell
 # Increase cache size for network drives
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "CacheSize" -Value 4096
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "NetworkCacheTTL" -Value 3600
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "CacheSize" -Value 4096
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "NetworkCacheTTL" -Value 3600
 ```
 
 #### 9. Multi-Monitor DPI Scaling
@@ -136,7 +136,7 @@ Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "NetworkCacheTTL" -Valu
 - Explorer requests thumbnail size based on primary monitor DPI
 - Shell extensions receive fixed pixel size (e.g., 256x256)
 - If secondary monitor has different DPI, scaling artifacts occur
-- Limitation affects all shell extensions, not just DarkThumbs
+- Limitation affects all shell extensions, not just ExplorerLens
 
 ---
 
@@ -149,8 +149,8 @@ Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "NetworkCacheTTL" -Valu
 
 ### ✅ Explorer Crashes with Malformed Archives (Sprint 22)
 **Was:** Access violations caused Explorer crashes  
-**Fixed:** SEH exception wrapper in `CBXShellClass::GetThumbnail`  
-**Details:** See `CBXShell/CBXShellClass.cpp` lines 172-188
+**Fixed:** SEH exception wrapper in `LENSShellClass::GetThumbnail`  
+**Details:** See `LENSShell/LENSShellClass.cpp` lines 172-188
 
 ### ✅ Infinite Retry Loop on Corrupted Decoders (Sprint 22)
 **Was:** Bad decoder keeps retrying, freezing Explorer  
@@ -174,16 +174,16 @@ Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "NetworkCacheTTL" -Valu
 
 ```powershell
 # Enable debug logging
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "DebugLog" -Value 1
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "DebugLog" -Value 1
 
 # Reproduce issue
 # Navigate to problem file in Explorer
 
 # Collect logs
-Copy-Item "$env:TEMP\DarkThumbs-Debug.log" "DarkThumbs-Debug-Issue.log"
+Copy-Item "$env:TEMP\ExplorerLens-Debug.log" "ExplorerLens-Debug-Issue.log"
 
 # Check Event Viewer
-Get-EventLog -LogName Application -Source DarkThumbs -Newest 10 | Format-List
+Get-EventLog -LogName Application -Source ExplorerLens -Newest 10 | Format-List
 ```
 
 ### Issue Template
@@ -192,7 +192,7 @@ When opening a GitHub issue, include:
 
 1. **Environment:**
    - Windows version (e.g., Windows 11 23H2)
-   - DarkThumbs version (e.g., 6.2.0)
+   - ExplorerLens version (e.g., 6.2.0)
    - GPU model (e.g., NVIDIA RTX 4090)
 
 2. **Problem Description:**
@@ -205,7 +205,7 @@ When opening a GitHub issue, include:
    - Or provide file characteristics (format, size, tool used to create)
 
 4. **Logs:**
-   - Attach `DarkThumbs-Debug.log`
+   - Attach `ExplorerLens-Debug.log`
    - Event Viewer errors
    - Screenshot of problem (if visual)
 
@@ -269,7 +269,7 @@ If still no GPU usage:
 
 ```powershell
 # Force GPU acceleration
-Set-ItemProperty -Path "HKLM:\Software\DarkThumbs" -Name "ForceGPU" -Value 1
+Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "ForceGPU" -Value 1
 ```
 
 ---
@@ -330,8 +330,8 @@ High memory usage is temporary and released after thumbnail generation completes
 
 ## Getting Help
 
-- **GitHub Issues:** https://github.com/yourusername/DarkThumbs/issues
-- **Discussions:** https://github.com/yourusername/DarkThumbs/discussions
+- **GitHub Issues:** https://github.com/yourusername/ExplorerLens/issues
+- **Discussions:** https://github.com/yourusername/ExplorerLens/discussions
 - **User Guide:** [USER_GUIDE.md](USER_GUIDE.md)
 - **Developer Guide:** [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
 
@@ -341,3 +341,4 @@ High memory usage is temporary and released after thumbnail generation completes
 
 **Document Version:** 1.1  
 **Last Updated:** February 17, 2026
+

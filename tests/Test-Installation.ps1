@@ -3,7 +3,7 @@
 
 <#
 .SYNOPSIS
-    Installation and registration testing for DarkThumbs CBXShell extension
+    Installation and registration testing for ExplorerLens LENSShell extension
 .DESCRIPTION
     Tests the complete installation workflow including:
     - File deployment to install directory
@@ -54,39 +54,39 @@ function Write-TestWarning {
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "  DarkThumbs Installation Test Suite" -ForegroundColor Cyan
+Write-Host "  ExplorerLens Installation Test Suite" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 # Test 1: Pre-installation checks
 Write-Host "📋 Phase 1: Pre-Installation Checks" -ForegroundColor Cyan
 
-$dllPath = "install\x64\CBXShell.dll"
-Write-TestResult "CBXShell.dll exists" (Test-Path $dllPath) -Message (if (Test-Path $dllPath) { "Found at: $dllPath" } else { "Not found!" })
+$dllPath = "install\x64\LENSShell.dll"
+Write-TestResult "LENSShell.dll exists" (Test-Path $dllPath) -Message (if (Test-Path $dllPath) { "Found at: $dllPath" } else { "Not found!" })
 
 if (Test-Path $dllPath) {
     $dll = Get-Item $dllPath
     $expectedSize = 1.0  # MB minimum
     $actualSize = [Math]::Round($dll.Length / 1MB, 2)
-    Write-TestResult "CBXShell.dll size check" ($actualSize -gt $expectedSize) -Message "$actualSize MB"
+    Write-TestResult "LENSShell.dll size check" ($actualSize -gt $expectedSize) -Message "$actualSize MB"
 }
 
-$managerPath = "install\x64\CBXManager.exe"
-Write-TestResult "CBXManager.exe exists" (Test-Path $managerPath)
+$managerPath = "install\x64\LENSManager.exe"
+Write-TestResult "LENSManager.exe exists" (Test-Path $managerPath)
 
 # Test 2: Installation
 Write-Host "`n📦 Phase 2: Installation" -ForegroundColor Cyan
 
 try {
-    Write-Host "  Running: .\darkthumbs.ps1 -Install" -ForegroundColor Yellow
+    Write-Host "  Running: .\explorerlens.ps1 -Install" -ForegroundColor Yellow
     
     # Backup current state
-    $backupNeeded = Test-Path "$env:SystemRoot\System32\CBXShell.dll"
+    $backupNeeded = Test-Path "$env:SystemRoot\System32\LENSShell.dll"
     if ($backupNeeded) {
-        Write-TestWarning "CBXShell.dll already exists in System32 - will be replaced"
+        Write-TestWarning "LENSShell.dll already exists in System32 - will be replaced"
     }
     
     # Run installation
-    $installOutput = & ".\darkthumbs.ps1" -Install 2>&1
+    $installOutput = & ".\explorerlens.ps1" -Install 2>&1
     
     if ($LASTEXITCODE -eq 0 -or $?) {
         Write-TestResult "Installation completed" $true -Message "Exit code: $LASTEXITCODE"
@@ -103,8 +103,8 @@ catch {
 # Test 3: File deployment verification
 Write-Host "`n📁 Phase 3: File Deployment Verification" -ForegroundColor Cyan
 
-$system32Dll = "$env:SystemRoot\System32\CBXShell.dll"
-Write-TestResult "CBXShell.dll in System32" (Test-Path $system32Dll)
+$system32Dll = "$env:SystemRoot\System32\LENSShell.dll"
+Write-TestResult "LENSShell.dll in System32" (Test-Path $system32Dll)
 
 if (Test-Path $system32Dll) {
     $deployedDll = Get-Item $system32Dll
@@ -117,20 +117,20 @@ Write-Host "`n🔧 Phase 4: DLL Registration" -ForegroundColor Cyan
 
 try {
     # Check if DLL is registered by looking for known CLSIDs
-    # Note: Actual CLSID would need to be extracted from CBXShell.idl
+    # Note: Actual CLSID would need to be extracted from LENSShell.idl
     $regPath = "HKCR:\CLSID"
     
     if (Test-Path "Registry::HKEY_CLASSES_ROOT\CLSID") {
         Write-TestResult "Registry CLSID hive accessible" $true
         
-        # Search for CBXShell registration
+        # Search for LENSShell registration
         # This is a heuristic - actual CLSID should be known
         $foundRegistration = $false
         try {
             $clsids = Get-ChildItem "Registry::HKEY_CLASSES_ROOT\CLSID" -ErrorAction SilentlyContinue
             foreach ($clsid in $clsids) {
                 $inprocServer = Get-ItemProperty -Path "$($clsid.PSPath)\InprocServer32" -ErrorAction SilentlyContinue
-                if ($inprocServer -and $inprocServer.'(default)' -like "*CBXShell.dll") {
+                if ($inprocServer -and $inprocServer.'(default)' -like "*LENSShell.dll") {
                     $foundRegistration = $true
                     Write-Host "     Found CLSID: $($clsid.PSChildName)" -ForegroundColor Gray
                     break
@@ -141,7 +141,7 @@ try {
             Write-TestWarning "Could not enumerate CLSIDs: $_"
         }
         
-        Write-TestResult "CBXShell CLSID registered" $foundRegistration
+        Write-TestResult "LENSShell CLSID registered" $foundRegistration
     }
     else {
         Write-TestWarning "Cannot access HKCR registry hive"
@@ -204,7 +204,7 @@ try {
         LogName   = 'Application'
         Level     = 2  # Error
         StartTime = (Get-Date).AddMinutes(-5)
-    } -ErrorAction SilentlyContinue | Where-Object { $_.Message -like "*CBX*" -or $_.Message -like "*DarkThumbs*" }
+    } -ErrorAction SilentlyContinue | Where-Object { $_.Message -like "*LENS*" -or $_.Message -like "*ExplorerLens*" }
     
     if ($recentErrors) {
         Write-TestResult "No installation errors in event log" $false -Message "Found $($recentErrors.Count) errors"
@@ -224,10 +224,10 @@ catch {
 if (-not $SkipUninstall) {
     Write-Host "`n🗑️  Phase 8: Uninstallation Test" -ForegroundColor Cyan
     
-    Write-Host "  Running: .\darkthumbs.ps1 -Uninstall" -ForegroundColor Yellow
+    Write-Host "  Running: .\explorerlens.ps1 -Uninstall" -ForegroundColor Yellow
     
     try {
-        $uninstallOutput = & ".\darkthumbs.ps1" -Uninstall 2>&1
+        $uninstallOutput = & ".\explorerlens.ps1" -Uninstall 2>&1
         
         Write-TestResult "Uninstallation completed" ($LASTEXITCODE -eq 0 -or $?)
         
@@ -235,7 +235,7 @@ if (-not $SkipUninstall) {
         Start-Sleep -Seconds 2  # Give Windows time to release the DLL
         
         $dllGone = -not (Test-Path $system32Dll)
-        Write-TestResult "CBXShell.dll removed from System32" $dllGone
+        Write-TestResult "LENSShell.dll removed from System32" $dllGone
         
         # Note: Registry cleanup verification would require knowing the exact CLSIDs
         
@@ -292,7 +292,7 @@ if (-not (Test-Path "tests\test-results")) {
 }
 
 @"
-DarkThumbs Installation Test Results
+ExplorerLens Installation Test Results
 =====================================
 Date: $(Get-Date)
 Test Duration: N/A
@@ -313,3 +313,4 @@ $($testResults.Warnings | ForEach-Object { "  - $_" } | Out-String)
 "@ | Out-File -FilePath $reportPath -Encoding UTF8
 
 Write-Host "Report saved to: $reportPath`n" -ForegroundColor Gray
+

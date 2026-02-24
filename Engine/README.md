@@ -1,4 +1,4 @@
-# DarkThumbs Engine
+# ExplorerLens Engine
 
 **Version:** 7.0.0
 **Created:** January 7, 2026
@@ -8,7 +8,7 @@
 
 ## Overview
 
-The DarkThumbs Engine is a standalone, reusable thumbnail generation library extracted from the CBXShell COM extension. It provides a clean interface-based architecture that enables:
+The ExplorerLens Engine is a standalone, reusable thumbnail generation library extracted from the LENSShell COM extension. It provides a clean interface-based architecture that enables:
 
 - **Independent Development**: Engine can be developed and tested without COM overhead
 - **Plugin Support**: Third-party plugins can implement `IThumbnailDecoder`
@@ -103,7 +103,7 @@ public:
 
 ```cpp
 #include <Engine.h>
-using namespace DarkThumbs::Engine;
+using namespace ExplorerLens::Engine;
 
 // Create thumbnail request
 ThumbnailRequest request;
@@ -187,7 +187,7 @@ The Engine includes comprehensive unit tests:
 - [ ] GPU renderer extraction (D3D11Renderer)
 - [ ] CPU fallback renderer
 - [ ] Thumbnail pipeline
-- [ ] CBXShell integration
+- [ ] LENSShell integration
 - [ ] Comprehensive unit tests (50+ tests target)
 
 ---
@@ -211,6 +211,7 @@ The Engine includes comprehensive unit tests:
 
 ---
 
-**Engine Development Lead:** DarkThumbs Team
+**Engine Development Lead:** ExplorerLens Team
 **Created:** January 7, 2026
 **Target Completion:** February 2026 (Sprint 11)
+

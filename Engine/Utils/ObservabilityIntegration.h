@@ -1,7 +1,7 @@
 //==============================================================================
 // ObservabilityIntegration.h - Pipeline Observability Wiring
-// Sprint 12: Connects ETW + StructuredLogger + DiagnosticsExport
-// Copyright (c) 2026 - DarkThumbs Project
+// Connects ETW + StructuredLogger + DiagnosticsExport
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #pragma once
@@ -16,7 +16,7 @@
 #include <filesystem>
 #include <ShlObj.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Observability {
 
 //==============================================================================
@@ -152,7 +152,7 @@ private:
     std::wstring GetLogFilePath() {
         wchar_t* appDataPath = nullptr;
         if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &appDataPath))) {
-            std::wstring logDir = std::wstring(appDataPath) + L"\\DarkThumbs\\Logs";
+            std::wstring logDir = std::wstring(appDataPath) + L"\\ExplorerLens\\Logs";
             CoTaskMemFree(appDataPath);
 
             std::filesystem::create_directories(logDir);
@@ -166,9 +166,9 @@ private:
             wchar_t dateBuf[32];
             wcsftime(dateBuf, 32, L"%Y-%m-%d", &tmBuf);
             
-            return logDir + L"\\darkthumbs-" + dateBuf + L".jsonl";
+            return logDir + L"\\explorerlens-" + dateBuf + L".jsonl";
         }
-        return L"darkthumbs.jsonl";
+        return L"explorerlens.jsonl";
     }
 
     bool m_initialized = false;
@@ -217,7 +217,7 @@ public:
         std::wofstream out(outputPath);
         if (!out.is_open()) return false;
 
-        out << L"=== DarkThumbs Diagnostics Export ===" << std::endl;
+        out << L"=== ExplorerLens Diagnostics Export ===" << std::endl;
         out << L"Exported: " << bundle.timestamp << std::endl;
         out << L"Version: 7.0.0" << std::endl;
         out << std::endl;
@@ -296,9 +296,9 @@ private:
         std::wstringstream ss;
         
         HKEY hKey;
-        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\DarkThumbs",
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\ExplorerLens",
                           0, KEY_READ, &hKey) == ERROR_SUCCESS) {
-            ss << L"HKLM\\SOFTWARE\\DarkThumbs found" << std::endl;
+            ss << L"HKLM\\SOFTWARE\\ExplorerLens found" << std::endl;
             
             // Enumerate values
             DWORD index = 0;
@@ -311,7 +311,7 @@ private:
             }
             RegCloseKey(hKey);
         } else {
-            ss << L"HKLM\\SOFTWARE\\DarkThumbs not found" << std::endl;
+            ss << L"HKLM\\SOFTWARE\\ExplorerLens not found" << std::endl;
         }
         
         return ss.str();
@@ -333,7 +333,7 @@ private:
         // Find the most recent log file
         wchar_t* appDataPath = nullptr;
         if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &appDataPath))) {
-            std::wstring logDir = std::wstring(appDataPath) + L"\\DarkThumbs\\Logs";
+            std::wstring logDir = std::wstring(appDataPath) + L"\\ExplorerLens\\Logs";
             CoTaskMemFree(appDataPath);
 
             if (std::filesystem::exists(logDir)) {
@@ -402,7 +402,8 @@ private:
 
 /// Convenience macro for scoped tracing
 #define TRACE_SCOPE(component, operation) \
-    DarkThumbs::Observability::ScopedTrace _scopedTrace##__LINE__(L##component, L##operation)
+    ExplorerLens::Observability::ScopedTrace _scopedTrace##__LINE__(L##component, L##operation)
 
 } // namespace Observability
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

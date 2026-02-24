@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs::Manager::ViewModels {
+namespace ExplorerLens::Manager::ViewModels {
 
     class DashboardViewModel {
     public:
@@ -24,3 +24,4 @@ namespace DarkThumbs::Manager::ViewModels {
         int m_pluginCount;
     };
 }
+

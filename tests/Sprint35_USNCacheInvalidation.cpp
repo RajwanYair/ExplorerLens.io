@@ -1,5 +1,5 @@
 /******************************************************************************
- * DarkThumbs — Sprint 35: USN Cache Invalidation Tests
+ * ExplorerLens — Sprint 35: USN Cache Invalidation Tests
  * 22 GTest cases covering file identity, USN change detection,
  * invalidation queue with backpressure, consistency sweeps,
  * stale-hit metrics, and benchmark targets.
@@ -281,3 +281,4 @@ TEST(USNCacheInvalidation, WatchedExtensionNoMatch) {
     }
     EXPECT_FALSE(found);
 }
+

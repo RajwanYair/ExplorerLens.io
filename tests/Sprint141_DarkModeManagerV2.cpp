@@ -1,7 +1,7 @@
 // Sprint 141 — DarkMode V2 Complete Tests
 #include <gtest/gtest.h>
 #include "Utils/DarkModeManagerV2.h"
-using namespace DarkThumbs::Utils;
+using namespace ExplorerLens::Utils;
 
 TEST(Sprint141_DarkMode, ThemeColor_FromRGB) {
     auto c = ThemeColor::FromRGB(30, 30, 30);
@@ -77,3 +77,4 @@ TEST(Sprint141_DarkMode, AllControlTypesSupported) {
     EXPECT_TRUE(DarkModeManagerV2::IsControlSupported(ControlType::Button));
     EXPECT_TRUE(DarkModeManagerV2::IsControlSupported(ControlType::StatusBar));
 }
+

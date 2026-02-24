@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 163 — Scientific Format Plugin (FITS/NIfTI)
+// Scientific Format Plugin (FITS/NIfTI)
 // Header parser, slice extractor, channel normalisation, false-colour LUT mapping.
 
 #include <string>
@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
 // ─── Scientific format variant ────────────────────────────────────────────────
 
@@ -157,4 +157,5 @@ struct ScientificFormatPlugin {
     }
 };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

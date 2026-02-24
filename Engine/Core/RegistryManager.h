@@ -1,11 +1,11 @@
 #pragma once
-// Sprint 236: Registry Manager — Windows registry read/write for settings persistence
+// Registry Manager — Windows registry read/write for settings persistence
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Registry hive
 enum class RegHive : uint32_t {
@@ -52,12 +52,13 @@ public:
     /// Get all entries
     const std::vector<RegEntry>& GetEntries() const { return m_entries; }
 
-    /// Get DarkThumbs registry base path
-    static std::wstring GetBasePath() { return L"SOFTWARE\\DarkThumbs"; }
+    /// Get ExplorerLens registry base path
+    static std::wstring GetBasePath() { return L"SOFTWARE\\ExplorerLens"; }
 
 private:
     std::vector<RegEntry> m_entries;
     std::wstring MakeKey(RegHive hive, const std::wstring& key, const std::wstring& name) const;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

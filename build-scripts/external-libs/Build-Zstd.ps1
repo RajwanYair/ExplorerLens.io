@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build zstd 1.5.7 (Zstandard Compression)
+# ExplorerLens v7.0 - Build zstd 1.5.7 (Zstandard Compression)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -47,10 +47,10 @@ try {
     
     $cmakeOptions = @{
         'CMAKE_BUILD_TYPE'        = 'Release'
-        'ZSTD_BUILD_SHARED'       = 'OFF'
+        'ZSTD_BUILD_SHARED'       = 'ON'
         'ZSTD_BUILD_STATIC'       = 'ON'
-        'ZSTD_BUILD_PROGRAMS'     = 'OFF'
-        'ZSTD_BUILD_TESTS'        = 'OFF'
+        'ZSTD_BUILD_PROGRAMS'     = 'ON'
+        'ZSTD_BUILD_TESTS'        = 'ON'
         'CMAKE_C_FLAGS_RELEASE'   = '/MT /O2'
         'CMAKE_CXX_FLAGS_RELEASE' = '/MT /O2'
     }
@@ -80,3 +80,4 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+

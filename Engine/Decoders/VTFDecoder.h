@@ -1,17 +1,17 @@
 #pragma once
 //==============================================================================
 // VTF (Valve Texture Format) Decoder
-// Sprint 184: Game Texture Format Support
+// Game Texture Format Support
 // Supports VTF versions 7.0-7.5 (Source Engine textures)
 // Handles DXT1/DXT5/BGRA8888/RGB888 image formats
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include <cstdint>
 #include <string>
 #include <vector>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // VTF image formats (subset relevant for thumbnail extraction)
@@ -129,4 +129,5 @@ namespace DarkThumbs::Decoders {
                                        uint32_t outputStride);
     };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

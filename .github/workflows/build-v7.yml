@@ -74,7 +74,7 @@ jobs:
         run: |
           cmake --preset vcpkg-${{ matrix.config == 'Release' && 'release' || 'debug' }}
 
-      - name: Build DarkThumbs
+      - name: Build ExplorerLens
         shell: pwsh
         run: |
           cmake --build --preset vcpkg-${{ matrix.config == 'Release' && 'release' || 'debug' }} --parallel 4
@@ -94,10 +94,10 @@ jobs:
         uses: actions/upload-artifact@v4
         if: matrix.config == 'Release'
         with:
-          name: darkthumbs-binaries-${{ github.sha }}
+          name: ExplorerLens-binaries-${{ github.sha }}
           path: |
-            x64/Release/CBXShell.dll
-            x64/Release/CBXManager.exe
+            x64/Release/LENSShell.dll
+            x64/Release/LENSManager.exe
             x64/Release/*.pdb
           retention-days: 7
 
@@ -125,14 +125,14 @@ jobs:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: darkthumbs-binaries-${{ github.sha }}
+          name: ExplorerLens-binaries-${{ github.sha }}
           path: x64/Release/
 
       - name: Get version
         id: get_version
         shell: pwsh
         run: |
-          $version = (Select-String -Path "CMakeLists.txt" -Pattern 'project\(DarkThumbs VERSION ([\d.]+)\)').Matches.Groups[1].Value
+          $version = (Select-String -Path "CMakeLists.txt" -Pattern 'project\(ExplorerLens VERSION ([\d.]+)\)').Matches.Groups[1].Value
           echo "version=$version" >> $env:GITHUB_OUTPUT
           echo "Version: $version"
 
@@ -140,15 +140,15 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ steps.get_version.outputs.version }}"
-          $zipName = "DarkThumbs-v$version-Portable-x64.zip"
+          $zipName = "ExplorerLens-v$version-Portable-x64.zip"
 
           # Create package directory
           $pkgDir = "package-temp"
           New-Item -ItemType Directory -Path $pkgDir -Force
 
           # Copy binaries
-          Copy-Item "x64/Release/CBXShell.dll" -Destination $pkgDir
-          Copy-Item "x64/Release/CBXManager.exe" -Destination $pkgDir
+          Copy-Item "x64/Release/LENSShell.dll" -Destination $pkgDir
+          Copy-Item "x64/Release/LENSManager.exe" -Destination $pkgDir
 
           # Copy documentation
           Copy-Item "README.md" -Destination $pkgDir
@@ -170,8 +170,8 @@ jobs:
         with:
           name: release-package-${{ steps.get_version.outputs.version }}
           path: |
-            DarkThumbs-*.zip
-            DarkThumbs-*.sha256
+            ExplorerLens-*.zip
+            ExplorerLens-*.sha256
           retention-days: 30
 
       - name: Create Release (on main branch)
@@ -179,30 +179,30 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
-          name: DarkThumbs v${{ steps.get_version.outputs.version }}
+          name: ExplorerLens v${{ steps.get_version.outputs.version }}
           draft: true
           prerelease: false
           files: |
-            DarkThumbs-*.zip
-            DarkThumbs-*.sha256
+            ExplorerLens-*.zip
+            ExplorerLens-*.sha256
           body: |
-            ## DarkThumbs v${{ steps.get_version.outputs.version }}
+            ## ExplorerLens v${{ steps.get_version.outputs.version }}
 
             ### What's New
             - See [CHANGELOG.md](CHANGELOG.md) for details
 
             ### Installation
-            1. Download `DarkThumbs-v${{ steps.get_version.outputs.version }}-Portable-x64.zip`
-            2. Extract to a folder (e.g., `C:\Program Files\DarkThumbs`)
-            3. Run `CBXManager.exe` as Administrator
+            1. Download `ExplorerLens-v${{ steps.get_version.outputs.version }}-Portable-x64.zip`
+            2. Extract to a folder (e.g., `C:\Program Files\ExplorerLens`)
+            3. Run `LENSManager.exe` as Administrator
             4. Click "Register" to install the thumbnail provider
             5. Restart Windows Explorer
 
             ### Verification
             ```powershell
             # Verify SHA256 checksum
-            $expected = Get-Content "DarkThumbs-v${{ steps.get_version.outputs.version }}-Portable-x64.zip.sha256"
-            $actual = (Get-FileHash "DarkThumbs-v${{ steps.get_version.outputs.version }}-Portable-x64.zip").Hash
+            $expected = Get-Content "ExplorerLens-v${{ steps.get_version.outputs.version }}-Portable-x64.zip.sha256"
+            $actual = (Get-FileHash "ExplorerLens-v${{ steps.get_version.outputs.version }}-Portable-x64.zip").Hash
             if ($actual -eq $expected.Split()[0]) { "✓ Checksum OK" } else { "✗ Checksum FAILED" }
             ```
 
@@ -245,3 +245,4 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+

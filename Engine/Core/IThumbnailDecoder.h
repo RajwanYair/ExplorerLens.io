@@ -1,13 +1,13 @@
 //==============================================================================
-// DarkThumbs Engine - Thumbnail Decoder Interface
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Thumbnail Decoder Interface
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #pragma once
 
 #include "Types.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -114,4 +114,5 @@ public:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

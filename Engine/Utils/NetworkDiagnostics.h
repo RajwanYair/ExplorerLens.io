@@ -1,14 +1,14 @@
 #pragma once
 // =============================================================================
-// NetworkDiagnostics.h — Sprint 246: Network Connectivity Testing
-// DarkThumbs Engine — Utils Module
+// NetworkDiagnostics.h — Network Connectivity Testing
+// ExplorerLens Engine — Utils Module
 // =============================================================================
 
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 /// Network test type
 enum class NetTestType : uint32_t {
@@ -88,4 +88,5 @@ private:
     uint32_t                    m_timeoutMs = 5000;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

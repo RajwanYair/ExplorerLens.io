@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 137 — Continuous Fuzzing Engine
+// Continuous Fuzzing Engine
 // Automated fuzz test framework with crash budget gating, corpus management,
 // and per-decoder mutation strategies for malformed payload hardening.
 
@@ -13,7 +13,7 @@
 #include <random>
 #include <unordered_map>
 
-namespace DarkThumbs::Utils {
+namespace ExplorerLens::Utils {
 
 // ─── Mutation strategies ─────────────────────────────────────────
 enum class MutationStrategy : uint8_t {
@@ -333,4 +333,5 @@ private:
     uint64_t                m_nextId = 0;
 };
 
-} // namespace DarkThumbs::Utils
+} // namespace ExplorerLens::Utils
+

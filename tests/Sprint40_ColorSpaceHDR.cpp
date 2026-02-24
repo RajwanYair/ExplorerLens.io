@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 40 Tests: Color Space Awareness & HDR Tone Mapping
+// ExplorerLens — Sprint 40 Tests: Color Space Awareness & HDR Tone Mapping
 // Tests ICC profile extraction, gamut mapping, tone mapping operators,
 // color accuracy metrics, WCS config, and per-format color defaults.
 //==============================================================================
@@ -11,7 +11,7 @@
 
 #include "../Engine/Decoders/ColorSpaceManager.h"
 
-using namespace DarkThumbs::Engine::Decoders;
+using namespace ExplorerLens::Engine::Decoders;
 
 //==============================================================================
 // Color Space Identification
@@ -418,3 +418,4 @@ TEST(FormatDefaults, UnknownFormatIsSRGB)
 {
     EXPECT_EQ(DefaultColorSpaceForFormat("UNKNOWN"), ColorSpace::sRGB);
 }
+

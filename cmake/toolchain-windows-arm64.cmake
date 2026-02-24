@@ -60,7 +60,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/arm64/bin")
 # when cross-compiling, or use a Windows-on-ARM device / emulator.
 #==============================================================================
 
-set(DARKTHUMBS_ARM64_CROSS_COMPILE ON)
+set(ExplorerLens_ARM64_CROSS_COMPILE ON)
 set(CTEST_CUSTOM_PRE_TEST
     "message(STATUS \"[ARM64] Cross-compiled tests skipped on x64 host.\")")
 
@@ -79,6 +79,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 # Status message
 #==============================================================================
 
-message(STATUS "[DarkThumbs] Toolchain: Windows ARM64 cross-compile (host: amd64)")
-message(STATUS "[DarkThumbs] MSVC cross-compiler: cl (amd64_arm64)")
-message(STATUS "[DarkThumbs] Linker machine: ARM64")
+message(STATUS "[ExplorerLens] Toolchain: Windows ARM64 cross-compile (host: amd64)")
+message(STATUS "[ExplorerLens] MSVC cross-compiler: cl (amd64_arm64)")
+message(STATUS "[ExplorerLens] Linker machine: ARM64")
+

@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build LZMA SDK 26.00 (7-Zip compression)
+# ExplorerLens v7.0 - Build LZMA SDK 26.00 (7-Zip compression)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -105,3 +105,4 @@ catch {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+

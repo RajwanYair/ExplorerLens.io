@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build zlib 1.3.1 (DEFLATE Compression)
+# ExplorerLens v7.0 - Build zlib 1.3.1 (DEFLATE Compression)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -46,7 +46,7 @@ try {
         
         $cmakeOptions = @{
             'CMAKE_BUILD_TYPE'  = 'Release'
-            'BUILD_SHARED_LIBS' = 'OFF'
+            'BUILD_SHARED_LIBS' = 'ON'
         }
         
         Invoke-CMakeBuild `
@@ -91,3 +91,4 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+

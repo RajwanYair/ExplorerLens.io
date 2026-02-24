@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 6 Tests: Worker/Isolation Stabilization
+// ExplorerLens — Sprint 6 Tests: Worker/Isolation Stabilization
 // Tests SEH fuzzing engine, circuit breaker hardening, decoder timeout
 // enforcement, memory leak regression, and worker isolation monitoring.
 //==============================================================================
@@ -17,8 +17,8 @@
 #include "../Engine/Utils/DecoderCircuitBreaker.h"
 #include "../Engine/Utils/DecoderTimeout.h"
 
-using namespace DarkThumbs::Engine::Isolation;
-using namespace DarkThumbs;
+using namespace ExplorerLens::Engine::Isolation;
+using namespace ExplorerLens;
 
 //==============================================================================
 // Corruption Strategy Tests
@@ -473,3 +473,4 @@ TEST(CampaignReport, ZeroIterationsNoDiv)
     EXPECT_DOUBLE_EQ(report.SEHRate(), 0.0);
     EXPECT_DOUBLE_EQ(report.GracefulRate(), 0.0);
 }
+

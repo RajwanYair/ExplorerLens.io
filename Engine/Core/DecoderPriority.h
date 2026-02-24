@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Decoder Priority System
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Decoder Priority System
+// Copyright (c) 2026 - ExplorerLens Project
 // Task B10: Smart decoder selection and fallback chains
 //==============================================================================
 
@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -171,4 +171,5 @@ namespace Engine {
     };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

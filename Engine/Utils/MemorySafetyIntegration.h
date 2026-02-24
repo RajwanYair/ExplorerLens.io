@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// MemorySafetyIntegration — Sprint 191
+// MemorySafetyIntegration
 // AddressSanitizer (ASAN) integration + memory-mapped I/O for large files
 //
 // Features:
@@ -16,7 +16,7 @@
 #include <vector>
 #include <functional>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// ASAN detection mode
 enum class SanitizerMode : uint8_t {
@@ -173,4 +173,5 @@ private:
     static bool IsSafeToMap(uint64_t fileSize);
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

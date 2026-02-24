@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// PluginMarketplaceV2 — Sprint 201
+// PluginMarketplaceV2
 // Online plugin discovery, installation, and lifecycle management.
 //
 // Features:
@@ -8,7 +8,7 @@
 //   - Semantic versioning with dependency resolution
 //   - Download with integrity verification (SHA-256 + Authenticode)
 //   - Auto-update checking and staged rollout
-//   - Plugin bundle format (.dtp — DarkThumbs Plugin archive)
+//   - Plugin bundle format (.dtp — ExplorerLens Plugin archive)
 //==============================================================================
 
 #include <cstdint>
@@ -16,7 +16,7 @@
 #include <vector>
 #include <map>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Plugin category
 enum class PluginCategory : uint8_t {
@@ -163,4 +163,5 @@ private:
     std::vector<InstalledPlugin> m_installed;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -43,7 +43,7 @@ $Libraries = @(
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
-            "-DBUILD_SHARED_LIBS=OFF"
+            "-DBUILD_SHARED_LIBS=ON"
         )
         BuildDir     = "build-md"
         Outputs      = @("zlib.lib")
@@ -56,9 +56,9 @@ $Libraries = @(
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
-            "-DBUILD_SHARED_LIBS=OFF"
-            "-DZSTD_BUILD_PROGRAMS=OFF"
-            "-DZSTD_BUILD_TESTS=OFF"
+            "-DBUILD_SHARED_LIBS=ON"
+            "-DZSTD_BUILD_PROGRAMS=ON"
+            "-DZSTD_BUILD_TESTS=ON"
         )
         BuildDir     = "build-md"
         Outputs      = @("zstd.lib")
@@ -71,9 +71,9 @@ $Libraries = @(
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
-            "-DBUILD_SHARED_LIBS=OFF"
-            "-DLZ4_BUILD_CLI=OFF"
-            "-DLZ4_BUILD_LEGACY_LZ4C=OFF"
+            "-DBUILD_SHARED_LIBS=ON"
+            "-DLZ4_BUILD_CLI=ON"
+            "-DLZ4_BUILD_LEGACY_LZ4C=ON"
         )
         BuildDir     = "build-md"
         Outputs      = @("lz4.lib")
@@ -86,8 +86,8 @@ $Libraries = @(
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
-            "-DBUILD_SHARED_LIBS=OFF"
-            "-DMZ_COMPAT=OFF"
+            "-DBUILD_SHARED_LIBS=ON"
+            "-DMZ_COMPAT=ON"
             "-DMZ_ZLIB=ON"
             "-DMZ_BZIP2=ON"
             "-DMZ_LZMA=ON"
@@ -104,7 +104,7 @@ $Libraries = @(
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
-            "-DBUILD_SHARED_LIBS=OFF"
+            "-DBUILD_SHARED_LIBS=ON"
         )
         BuildDir     = "build-md"
         Outputs      = @("bzip2.lib")
@@ -117,7 +117,7 @@ $Libraries = @(
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
-            "-DBUILD_SHARED_LIBS=OFF"
+            "-DBUILD_SHARED_LIBS=ON"
         )
         BuildDir     = "build-md"
         Outputs      = @("liblzma.lib")
@@ -130,14 +130,14 @@ $Libraries = @(
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
-            "-DBUILD_SHARED_LIBS=OFF"
-            "-DWEBP_BUILD_ANIM_UTILS=OFF"
-            "-DWEBP_BUILD_CWEBP=OFF"
-            "-DWEBP_BUILD_DWEBP=OFF"
-            "-DWEBP_BUILD_IMG2WEBP=OFF"
-            "-DWEBP_BUILD_WEBPINFO=OFF"
-            "-DWEBP_BUILD_WEBPMUX=OFF"
-            "-DWEBP_BUILD_EXTRAS=OFF"
+            "-DBUILD_SHARED_LIBS=ON"
+            "-DWEBP_BUILD_ANIM_UTILS=ON"
+            "-DWEBP_BUILD_CWEBP=ON"
+            "-DWEBP_BUILD_DWEBP=ON"
+            "-DWEBP_BUILD_IMG2WEBP=ON"
+            "-DWEBP_BUILD_WEBPINFO=ON"
+            "-DWEBP_BUILD_WEBPMUX=ON"
+            "-DWEBP_BUILD_EXTRAS=ON"
         )
         BuildDir     = "build-md"
         Outputs      = @("webp.lib", "webpdecoder.lib", "webpdemux.lib", "sharpyuv.lib")
@@ -163,10 +163,10 @@ $Libraries = @(
         CMakeOptions = @(
             "-DCMAKE_BUILD_TYPE=Release"
             "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
-            "-DBUILD_SHARED_LIBS=OFF"
+            "-DBUILD_SHARED_LIBS=ON"
             "-DAVIF_CODEC_DAV1D=ON"
-            "-DAVIF_BUILD_APPS=OFF"
-            "-DAVIF_BUILD_TESTS=OFF"
+            "-DAVIF_BUILD_APPS=ON"
+            "-DAVIF_BUILD_TESTS=ON"
         )
         BuildDir     = "build-md"
         Outputs      = @("avif.lib")
@@ -452,11 +452,12 @@ if ($failedLibraries.Count -eq 0) {
     Write-Host ""
     Write-Host "Next steps:" -ForegroundColor Cyan
     Write-Host "  1. Remove /NODEFAULTLIB:LIBCMT from Engine/CMakeLists.txt" -ForegroundColor Gray
-    Write-Host "  2. Rebuild DarkThumbs Engine" -ForegroundColor Gray
-    Write-Host "  3. Rebuild CBXShell solution" -ForegroundColor Gray
+    Write-Host "  2. Rebuild ExplorerLens Engine" -ForegroundColor Gray
+    Write-Host "  3. Rebuild LENSShell solution" -ForegroundColor Gray
     Write-Host "  4. Verify clean build with zero warnings" -ForegroundColor Gray
     exit 0
 } else {
     Write-Host "✗ Some libraries failed to build" -ForegroundColor Red
     exit 1
 }
+

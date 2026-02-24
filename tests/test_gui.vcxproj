@@ -38,8 +38,9 @@
   </ItemDefinitionGroup>
   
   <ItemGroup>
-    <ClCompile Include="test_cbxmanager_gui.cpp" />
+    <ClCompile Include="test_lensmanager_gui.cpp" />
   </ItemGroup>
   
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
+

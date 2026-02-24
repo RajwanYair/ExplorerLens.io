@@ -1,7 +1,7 @@
 //==============================================================================
-// DarkThumbs Engine — Codec Loader (Demand-Loaded Codec DLL Registry)
-// Sprint 36+: Execution Optimization — Per-Format DLL Architecture
-// Copyright (c) 2026 — DarkThumbs Project
+// ExplorerLens Engine — Codec Loader (Demand-Loaded Codec DLL Registry)
+// Execution Optimization — Per-Format DLL Architecture
+// Copyright (c) 2026 — ExplorerLens Project
 //
 // PURPOSE:
 //   Discover, load, and manage codec DLLs at runtime.  LoadLibrary is
@@ -9,7 +9,7 @@
 //   a folder of PNGs never pages in libheif/libjxl/LibRaw.
 //
 // LOADING STRATEGY:
-//   1. At startup, scan the codec directory for DarkThumbs_Codec_*.dll
+//   1. At startup, scan the codec directory for ExplorerLens_Codec_*.dll
 //   2. Read the extension→codec mapping from a sidecar manifest
 //      (codec-manifest.json) — NO LoadLibrary needed for mapping
 //   3. On first decode request for an extension, LoadLibrary + resolve
@@ -39,7 +39,7 @@
 #include <algorithm>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Codec {
 
@@ -63,7 +63,7 @@ struct CodecHandle
     /// DLL path (absolute)
     std::wstring                dllPath;
 
-    /// Codec identifier from manifest (e.g. "darkthumbs.codec.webp")
+    /// Codec identifier from manifest (e.g. "explorerlens.codec.webp")
     std::string                 codecId;
 
     /// Module handle (nullptr if not loaded)
@@ -119,8 +119,8 @@ struct CodecHandle
 //   {
 //     "codecs": [
 //       {
-//         "id": "darkthumbs.codec.webp",
-//         "dll": "DarkThumbs_Codec_WebP.dll",
+//         "id": "explorerlens.codec.webp",
+//         "dll": "ExplorerLens_Codec_WebP.dll",
 //         "extensions": [".webp"],
 //         "estimatedMemoryMB": 4,
 //         "priority": 100,
@@ -145,7 +145,7 @@ struct CodecManifestEntry
 //==============================================================================
 struct CodecLoaderConfig
 {
-    /// Directory containing codec DLLs (default: same dir as CBXShell.dll)
+    /// Directory containing codec DLLs (default: same dir as LENSShell.dll)
     std::wstring    codecDirectory;
 
     /// Path to codec-manifest.json (default: codecDirectory / codec-manifest.json)
@@ -822,4 +822,5 @@ private:
 
 } // namespace Codec
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

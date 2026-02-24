@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 292: Thumbnail Cache Warming Service
+// ExplorerLens Engine — Thumbnail Cache Warming Service
 // Background service for proactive thumbnail generation and cache warming.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Cache warming strategy
 enum class WarmingStrategy : uint8_t {
@@ -101,4 +101,5 @@ public:
     static constexpr size_t JobStatusCount() { return static_cast<size_t>(WarmingJobStatus::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

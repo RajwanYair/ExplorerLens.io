@@ -26,7 +26,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "=== DarkThumbs GitHub Release Publisher ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens GitHub Release Publisher ===" -ForegroundColor Cyan
 Write-Host "Version: $Version" -ForegroundColor Cyan
 Write-Host "Prerelease: $Prerelease" -ForegroundColor Cyan
 Write-Host ""
@@ -94,13 +94,13 @@ New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
 
 # 1. Portable ZIP
 Write-Host "Creating portable ZIP..." -ForegroundColor Cyan
-& "$PSScriptRoot\..\..\packaging\Build-PortableZip.ps1" -Version $Version -OutputPath "$releaseDir\DarkThumbs-v$Version-Portable.zip"
+& "$PSScriptRoot\..\..\packaging\Build-PortableZip.ps1" -Version $Version -OutputPath "$releaseDir\ExplorerLens-v$Version-Portable.zip"
 
 # 2. MSI Installer (if exists)
-$msiPath = "$PSScriptRoot\..\..\packaging\DarkThumbs-Setup.msi"
+$msiPath = "$PSScriptRoot\..\..\packaging\ExplorerLens-Setup.msi"
 if (Test-Path $msiPath) {
     Write-Host "Copying MSI installer..." -ForegroundColor Cyan
-    Copy-Item -Path $msiPath -Destination "$releaseDir\DarkThumbs-v$Version-Setup.msi"
+    Copy-Item -Path $msiPath -Destination "$releaseDir\ExplorerLens-v$Version-Setup.msi"
 }
 
 # 3. Generate SHA256 checksums
@@ -162,7 +162,7 @@ Write-Host "=== Publishing to GitHub ===" -ForegroundColor Yellow
 $releaseArgs = @(
     "release", "create",
     "v$Version",
-    "--title", "DarkThumbs v$Version",
+    "--title", "ExplorerLens v$Version",
     "--notes-file", $releaseNotesPath
 )
 
@@ -185,7 +185,7 @@ try {
         Write-Host ""
         Write-Host "✓ Release published successfully!" -ForegroundColor Green
         Write-Host ""
-        Write-Host "View release: https://github.com/YOUR_ORG/DarkThumbs/releases/tag/v$Version" -ForegroundColor Cyan
+        Write-Host "View release: https://github.com/YOUR_ORG/ExplorerLens/releases/tag/v$Version" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "Next steps:" -ForegroundColor Yellow
         Write-Host "  1. Update package managers (Scoop, WinGet)" -ForegroundColor Gray
@@ -200,3 +200,4 @@ try {
     Write-Host "ERROR: $(_)" -ForegroundColor Red
     exit 1
 }
+

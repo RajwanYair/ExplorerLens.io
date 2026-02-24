@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 12 Tests: Observability & Structured Logging
+// ExplorerLens — Sprint 12 Tests: Observability & Structured Logging
 // Tests ETW events, JSON-lines logger, privacy filters, request tracing,
 // diagnostics bundle building, and log level filtering.
 //==============================================================================
@@ -11,7 +11,7 @@
 // Header under test
 #include "../Engine/Utils/ObservabilityPipeline.h"
 
-using namespace DarkThumbs::Engine::Observability;
+using namespace ExplorerLens::Engine::Observability;
 
 //==============================================================================
 // ETW Event Tests
@@ -32,7 +32,7 @@ TEST(ETWEvents, EventNames)
 TEST(ETWEvents, ProviderConfig)
 {
     ETWProviderConfig config;
-    EXPECT_STREQ(config.ProviderName, "DarkThumbs-Engine-Core");
+    EXPECT_STREQ(config.ProviderName, "ExplorerLens-Engine-Core");
     EXPECT_TRUE(config.enabled);
     EXPECT_EQ(ETWProviderConfig::TotalEventTypes, 15u);
 }
@@ -365,7 +365,7 @@ TEST(RequestTracer, P95Latency)
 TEST(DiagBundle, SystemInfo)
 {
     SystemInfo info;
-    EXPECT_EQ(info.darkThumbsVersion, "7.0.0");
+    EXPECT_EQ(info.explorerLensVersion, "7.0.0");
     auto json = info.ToJSON();
     EXPECT_NE(json.find("\"version\":\"7.0.0\""), std::string::npos);
 }
@@ -414,3 +414,5 @@ TEST(DiagBundle, Report)
     EXPECT_NE(report.find("Diagnostic Report"), std::string::npos);
     EXPECT_NE(report.find("JPEG: Stable"), std::string::npos);
 }
+
+

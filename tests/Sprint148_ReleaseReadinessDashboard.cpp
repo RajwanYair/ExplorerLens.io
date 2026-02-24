@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include "../Engine/Core/ReleaseReadinessDashboard.h"
 
-using namespace DarkThumbs;
+using namespace ExplorerLens;
 
 // ── Gate Category Names ────────────────────────────────────────────────────
 
@@ -196,3 +196,4 @@ TEST(Sprint148_ReleaseReadiness, AddCustomChecklistItem) {
     dashboard.AddChecklistItem(custom);
     EXPECT_GT(dashboard.Checklist().size(), 10);
 }
+

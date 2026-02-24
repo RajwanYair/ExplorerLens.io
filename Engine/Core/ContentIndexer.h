@@ -1,7 +1,7 @@
 #pragma once
 // =============================================================================
-// ContentIndexer.h — Sprint 245: File Content Indexing for Search
-// DarkThumbs Engine — Core Module
+// ContentIndexer.h — File Content Indexing for Search
+// ExplorerLens Engine — Core Module
 // =============================================================================
 
 #include <string>
@@ -9,7 +9,7 @@
 #include <map>
 #include <cstdint>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 /// Content type classification
 enum class ContentType : uint32_t {
@@ -98,4 +98,5 @@ private:
     std::wstring ExtractFileName(const std::wstring& path) const;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

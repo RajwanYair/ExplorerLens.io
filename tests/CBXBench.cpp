@@ -1,4 +1,4 @@
-// CBXBench.cpp - CBXShell Performance Benchmark Tool
+// LENSBench.cpp - LENSShell Performance Benchmark Tool
 // Measures CPU baseline, GPU Phase 1, GPU Phase 2 performance
 // Validates 6.5x speedup target across all formats
 
@@ -51,9 +51,9 @@ struct FormatStats {
     double speedupVsBaseline;
 };
 
-class CBXBenchmark {
+class LENSBenchmark {
 public:
-    CBXBenchmark() : m_wicFactory(nullptr), m_baselineTimeMs(0.0) {}
+    LENSBenchmark() : m_wicFactory(nullptr), m_baselineTimeMs(0.0) {}
     
     HRESULT Initialize() {
         HRESULT hr = CoInitialize(nullptr);
@@ -250,7 +250,7 @@ public:
     }
     
     void RunBenchmark(const BenchConfig& config) {
-        std::wcout << L"\n=== CBXShell Performance Benchmark ===\n";
+        std::wcout << L"\n=== LENSShell Performance Benchmark ===\n";
         std::wcout << L"Test folder: " << config.testFolder << L"\n";
         std::wcout << L"Thumbnail size: " << config.thumbnailSize << L"px\n";
         std::wcout << L"Iterations per file: " << config.iterations << L"\n\n";
@@ -340,8 +340,8 @@ private:
 };
 
 void PrintUsage() {
-    std::wcout << L"CBXBench - CBXShell Performance Benchmark Tool\n\n";
-    std::wcout << L"Usage: CBXBench.exe [options]\n\n";
+    std::wcout << L"LENSBench - LENSShell Performance Benchmark Tool\n\n";
+    std::wcout << L"Usage: LENSBench.exe [options]\n\n";
     std::wcout << L"Options:\n";
     std::wcout << L"  -i <folder>    Input folder with test images (required)\n";
     std::wcout << L"  -o <file>      Output CSV file (optional)\n";
@@ -350,7 +350,7 @@ void PrintUsage() {
     std::wcout << L"  -v             Verbose output\n";
     std::wcout << L"  -h, --help     Show this help\n\n";
     std::wcout << L"Example:\n";
-    std::wcout << L"  CBXBench.exe -i C:\\TestImages -o results.csv -s 256 -n 20 -v\n";
+    std::wcout << L"  LENSBench.exe -i C:\\TestImages -o results.csv -s 256 -n 20 -v\n";
 }
 
 int wmain(int argc, wchar_t* argv[]) {
@@ -393,7 +393,7 @@ int wmain(int argc, wchar_t* argv[]) {
     }
     
     // Run benchmark
-    CBXBenchmark bench;
+    LENSBenchmark bench;
     HRESULT hr = bench.Initialize();
     if (FAILED(hr)) {
         std::wcerr << L"Failed to initialize benchmark: 0x" << std::hex << hr << L"\n";
@@ -405,3 +405,4 @@ int wmain(int argc, wchar_t* argv[]) {
     
     return 0;
 }
+

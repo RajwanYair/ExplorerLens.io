@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Engine - Plugin Decoder Wrapper Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Engine - Plugin Decoder Wrapper Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  *****************************************************************************/
 
 #include "PluginDecoder.h"
@@ -8,7 +8,7 @@
 #include <codecvt>
 #include <locale>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //============================================================================
@@ -286,4 +286,5 @@ std::wstring PluginDecoder::Utf8ToWide(const char* str) {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

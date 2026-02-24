@@ -1,7 +1,7 @@
 // Sprint 131 — Buffer Pool & Slab Allocator Tests
 #include <gtest/gtest.h>
 #include "Memory/BufferPoolAllocator.h"
-using namespace DarkThumbs::Memory;
+using namespace ExplorerLens::Memory;
 
 TEST(Sprint131_BufferPool, ClassifyDimension_Tiny) {
     EXPECT_EQ(ClassifyDimension(32, 64), SlabClass::Tiny);
@@ -72,3 +72,4 @@ TEST(Sprint131_BufferPool, PooledBuffer_Clear) {
 TEST(Sprint131_BufferPool, SlabClassName_Valid) {
     EXPECT_STREQ(SlabClassName(SlabClass::Medium), "Medium (≤256x256)");
 }
+

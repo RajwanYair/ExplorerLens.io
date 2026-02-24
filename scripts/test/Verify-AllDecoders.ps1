@@ -1,6 +1,6 @@
 # ==============================================================================
 # Verify-AllDecoders.ps1 - Comprehensive Decoder Validation Script
-# DarkThumbs v7.0.0
+# ExplorerLens v7.0.0
 # ==============================================================================
 # DESCRIPTION:
 #   Verifies that all 24 decoders are properly implemented, compiled, and linked.
@@ -196,11 +196,11 @@ Write-Host "  Result: $passed passed, $failed failed, $skipped skipped" -Foregro
 if (-not $Quick) {
     Write-Section "Test 4: Verifying Build Artifacts"
     
-    $buildPath = Join-Path $repoRoot "build\lib\Release\DarkThumbsEngine.lib"
+    $buildPath = Join-Path $repoRoot "build\lib\Release\ExplorerLensEngine.lib"
     
     if (Test-Path $buildPath) {
         $fileSize = (Get-Item $buildPath).Length / 1MB
-        Write-Pass "DarkThumbsEngine.lib exists ($([math]::Round($fileSize, 2)) MB)"
+        Write-Pass "ExplorerLensEngine.lib exists ($([math]::Round($fileSize, 2)) MB)"
         
         # Check if library was built recently (within 24 hours)
         $lastWrite = (Get-Item $buildPath).LastWriteTime
@@ -211,16 +211,16 @@ if (-not $Quick) {
             Write-Warn "Build is old ($([math]::Round($age.TotalDays, 1)) days old) - consider rebuilding"
         }
     } else {
-        Write-Fail "DarkThumbsEngine.lib not found"
+        Write-Fail "ExplorerLensEngine.lib not found"
         Write-Info "Run: cmake --build build --config Release"
     }
     
-    # Check CBXShell.dll
-    $shellPath = Join-Path $repoRoot "x64\Release\CBXShell.dll"
+    # Check LENSShell.dll
+    $shellPath = Join-Path $repoRoot "x64\Release\LENSShell.dll"
     if (Test-Path $shellPath) {
-        Write-Pass "CBXShell.dll exists"
+        Write-Pass "LENSShell.dll exists"
     } else {
-        Write-Warn "CBXShell.dll not found (may not be built yet)"
+        Write-Warn "LENSShell.dll not found (may not be built yet)"
     }
 }
 
@@ -347,7 +347,7 @@ Write-Host ""
 # Check critical issues
 $criticalIssues = @()
 
-if (-not (Test-Path (Join-Path $repoRoot "build\lib\Release\DarkThumbsEngine.lib"))) {
+if (-not (Test-Path (Join-Path $repoRoot "build\lib\Release\ExplorerLensEngine.lib"))) {
     $criticalIssues += "Engine not built"
 }
 
@@ -375,7 +375,8 @@ if ($criticalIssues.Count -gt 0) {
 Write-Host "  Recommendations:" -ForegroundColor Cyan
 Write-Host "    • Build libheif for iPhone photo support (.heic)" -ForegroundColor Yellow
 Write-Host "    • Install OpenEXR WIC codec for .exr support" -ForegroundColor Yellow
-Write-Host "    • Run integration tests: .\scripts\test\Test-DarkThumbs.ps1" -ForegroundColor White
+Write-Host "    • Run integration tests: .\scripts\test\Test-ExplorerLens.ps1" -ForegroundColor White
 Write-Host ""
 
 exit 0
+

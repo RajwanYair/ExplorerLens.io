@@ -1,5 +1,5 @@
 //==============================================================================
-// AccessibilityEngine — Sprint 220
+// AccessibilityEngine
 //==============================================================================
 
 #include "AccessibilityEngine.h"
@@ -10,7 +10,7 @@
 #endif
 #include <windows.h>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 AccessibilityEngine::AccessibilityEngine() {
     // Auto-detect system accessibility settings
@@ -127,4 +127,5 @@ const wchar_t* AccessibilityEngine::GetContrastModeName(ContrastMode mode) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

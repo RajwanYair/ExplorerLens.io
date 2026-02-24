@@ -3,7 +3,7 @@
 **Date:** June 2025  
 **Sprint:** Sprint 178 — Documentation Rewrite P1  
 **Engine Version:** v8.4.0  
-**Auditor:** DarkThumbs Engineering Team  
+**Auditor:** ExplorerLens Engineering Team  
 **Status:** ✅ COMPLIANT
 
 ---
@@ -184,3 +184,4 @@ The Sprint 11 audit covered 5 decoders. Since then, 20 additional decoders have 
 *This report supersedes the Sprint 11 Decoder Audit Report.*  
 *Next scheduled audit: v9.0.0 release gate*  
 *See also: FORMAT_SUPPORT_MATRIX_V8.md for the full format/extension reference*
+

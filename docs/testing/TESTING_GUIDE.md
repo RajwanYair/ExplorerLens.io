@@ -1,4 +1,4 @@
-# DarkThumbs Engine - Automated Test Suite
+# ExplorerLens Engine - Automated Test Suite
 
 ## Overview
 
@@ -117,7 +117,7 @@ cd Engine\Tests\Release
 
 ### Visual Studio
 
-1. Open `Engine/DarkThumbsEngine.slnx`
+1. Open `Engine/ExplorerLensEngine.slnx`
 2. Set `EngineTests` as startup project
 3. Press F5 or Ctrl+F5
 
@@ -134,7 +134,7 @@ Engine/Tests/Release/EngineTests.exe --junit-output=test-results.xml
 ### Console Output
 
 ```
-DarkThumbs Engine Tests - v7.0.0
+ExplorerLens Engine Tests - v7.0.0
 ================================
 
 Running 100 tests...
@@ -162,7 +162,7 @@ Status: ✅ ALL TESTS PASSED
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="DarkThumbsEngineTests" tests="100" failures="0" time="4.200">
+<testsuites name="ExplorerLensEngineTests" tests="100" failures="0" time="4.200">
   <testsuite name="DecoderTests" tests="25" failures="0" time="1.203">
     <testcase name="test_decoder_registration_add" time="0.002"/>
     <testcase name="test_image_decoder_png" time="0.015"/>
@@ -226,7 +226,7 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1
       - name: Build Engine
-        run: msbuild Engine/DarkThumbsEngine.vcxproj /p:Configuration=Release
+        run: msbuild Engine/ExplorerLensEngine.vcxproj /p:Configuration=Release
       - name: Build Tests
         run: msbuild Engine/Tests/EngineTests.vcxproj /p:Configuration=Release
       - name: Run Tests
@@ -319,7 +319,7 @@ devenv Engine/Tests/Debug/EngineTests.exe
 - [ ] Fuzzing tests for malformed inputs
 - [ ] Stress tests for high-load scenarios
 - [ ] Platform-specific tests (Win 10 vs Win 11)
-- [ ] Integration tests with CBXShell COM interface
+- [ ] Integration tests with LENSShell COM interface
 - [ ] UI automation tests for Explorer integration
 
 ### Test Infrastructure
@@ -336,3 +336,4 @@ devenv Engine/Tests/Debug/EngineTests.exe
 **Test Framework Version:** 1.0  
 **Total Tests:** 22 (22 passing)  
 **Code Coverage:** ~65% (Core + Decoders + Pipeline)
+

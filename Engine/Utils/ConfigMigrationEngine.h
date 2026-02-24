@@ -1,7 +1,7 @@
 #pragma once
 //==============================================================================
-// ConfigMigrationEngine — Sprint 214
-// Handles configuration migration between DarkThumbs versions.
+// ConfigMigrationEngine
+// Handles configuration migration between ExplorerLens versions.
 // Supports schema versioning, value mapping, backup/restore, and validation.
 //==============================================================================
 
@@ -10,7 +10,7 @@
 #include <vector>
 #include <map>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class ConfigVersion : uint8_t {
     V7_0 = 0,
@@ -87,4 +87,5 @@ private:
     void AddDefaults(ConfigVersion targetVersion, MigrationResult& result);
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

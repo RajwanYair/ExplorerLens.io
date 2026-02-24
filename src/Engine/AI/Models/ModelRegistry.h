@@ -5,7 +5,7 @@
 #include <future>
 #include <cstdint>
 
-namespace DarkThumbs::Engine::AI::Models {
+namespace ExplorerLens::Engine::AI::Models {
 
     enum class ModelType {
         SaliencyDetection,  // For Smart Crop
@@ -42,3 +42,4 @@ namespace DarkThumbs::Engine::AI::Models {
     };
 
 }
+

@@ -1,6 +1,6 @@
 // HDRDecoder.h - Radiance RGBE HDR Image Decoder
-// DarkThumbs Engine v6.1.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.1.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: Radiance HDR (.hdr) - High Dynamic Range images
 // Features:
@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class HDRDecoder : public IThumbnailDecoder {
@@ -53,4 +53,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,5 +1,5 @@
 // HEIFDecoder.cpp - HEIF/HEIC format decoder implementation
-// Part of DarkThumbs Engine v5.3.0+
+// Part of ExplorerLens Engine v5.3.0+
 
 #include "HEIFDecoder.h"
 #include <fstream>
@@ -15,7 +15,7 @@ HRESULT DecodeHEIFWithWIC(
     const wchar_t* filePath,
     uint32_t targetWidth,
     uint32_t targetHeight,
-    DarkThumbs::Engine::ThumbnailResult& result)
+    ExplorerLens::Engine::ThumbnailResult& result)
 {
     static std::mutex wicFactoryMutex;
     static Microsoft::WRL::ComPtr<IWICImagingFactory> wicFactory;
@@ -145,7 +145,7 @@ HRESULT DecodeHEIFWithWIC(
 #pragma comment(lib, "heif.lib")
 #endif
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     HEIFDecoder::HEIFDecoder()
@@ -631,4 +631,5 @@ namespace Engine {
     }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

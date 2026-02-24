@@ -1,9 +1,9 @@
 /******************************************************************************
- * DarkThumbs Engine - Audit Logger
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Engine - Audit Logger
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Enterprise audit logging for file access, plugin usage, and system events.
- * Logs are written to %LOCALAPPDATA%\DarkThumbs\Logs\audit.log with
+ * Logs are written to %LOCALAPPDATA%\ExplorerLens\Logs\audit.log with
  * automatic rotation by size.
  * 
  * Thread Safety: All public methods are thread-safe via internal mutex.
@@ -20,7 +20,7 @@
  * 
  * Configuration:
  *   Logging can be enabled/disabled via registry key or group policy:
- *   HKLM\Software\DarkThumbs\AuditLogging = 1 (DWORD)
+ *   HKLM\Software\ExplorerLens\AuditLogging = 1 (DWORD)
  *   Maximum log file size defaults to 10MB before rotation.
  *****************************************************************************/
 
@@ -31,7 +31,7 @@
 #include <mutex>
 #include <cstdint>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // Audit Event Types
@@ -169,4 +169,5 @@ private:
     mutable std::mutex mutex_;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

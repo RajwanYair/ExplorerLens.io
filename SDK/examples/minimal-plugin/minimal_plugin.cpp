@@ -1,5 +1,5 @@
 /******************************************************************************
- * Minimal DarkThumbs Plugin Example
+ * Minimal ExplorerLens Plugin Example
  * 
  * This is the simplest possible plugin that demonstrates the basic structure.
  * It decodes a custom text-based image format.
@@ -36,10 +36,10 @@ static const char* s_mime_types[] = {"text/x-txtimg", NULL};
 static const PluginInfo s_plugin_info = {
     .plugin_name = "Text Image Decoder",
     .plugin_version = "1.0.0",
-    .plugin_author = "DarkThumbs Team",
+    .plugin_author = "ExplorerLens Team",
     .plugin_description = "Simple ASCII art image format decoder",
     .plugin_license = "MIT",
-    .api_version = DARKTHUMBS_PLUGIN_API_VERSION,
+    .api_version = EXPLORERLENS_PLUGIN_API_VERSION,
     .supported_extensions = s_extensions,
     .mime_types = s_mime_types,
     .capabilities = PLUGIN_CAP_STILL_IMAGE,
@@ -346,3 +346,5 @@ PLUGIN_API void PLUGIN_CALL plugin_free_result(DecodeResult* result) {
         result->metadata = nullptr;
     }
 }
+
+

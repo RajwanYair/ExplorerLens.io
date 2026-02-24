@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 140 — Memory Soak Validation
+// Memory Soak Validation
 // 10K preview soak test framework with leak diffing and working-set gates.
 // Validates memory stability under sustained thumbnail generation load.
 
@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace DarkThumbs::Memory {
+namespace ExplorerLens::Memory {
 
 // ─── Memory snapshot ────────────────────────────────────────────
 struct MemorySnapshot {
@@ -214,4 +214,5 @@ private:
     size_t                      m_peakWorkingSet = 0;
 };
 
-} // namespace DarkThumbs::Memory
+} // namespace ExplorerLens::Memory
+

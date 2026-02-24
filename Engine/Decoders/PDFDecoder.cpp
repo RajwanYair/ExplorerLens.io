@@ -1,6 +1,6 @@
 // PDFDecoder.cpp - PDF Document Thumbnail Decoder Implementation
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 
 #include "PDFDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
@@ -16,7 +16,7 @@
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* PDFDecoder::m_extensions[] = { L".pdf", nullptr };
@@ -208,4 +208,5 @@ bool PDFDecoder::IsPDFFormat(const wchar_t* path) {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

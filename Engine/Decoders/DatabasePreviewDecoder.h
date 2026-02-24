@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 283: Database Preview (SQLite)
+// ExplorerLens Engine — Database Preview (SQLite)
 // SQLite/database file thumbnail with schema and data grid rendering.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Database engine type
 enum class DatabaseEngine : uint8_t {
@@ -110,4 +110,5 @@ public:
     static constexpr size_t PreviewStyleCount() { return static_cast<size_t>(DatabasePreviewStyle::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    Format support testing for DarkThumbs thumbnail generation
+    Format support testing for ExplorerLens thumbnail generation
 .DESCRIPTION
     Tests thumbnail generation capabilities across all supported image and archive formats.
     Creates test images for each format and validates thumbnail extraction.
@@ -169,8 +169,8 @@ foreach ($fmt in $expectedFormats) {
     }
 }
 
-# Phase 3: Format capability check (what CBXShell should support)
-Write-Host "`nPhase 3: CBXShell Format Capabilities" -ForegroundColor Yellow
+# Phase 3: Format capability check (what LENSShell should support)
+Write-Host "`nPhase 3: LENSShell Format Capabilities" -ForegroundColor Yellow
 Write-Host "--------------------------------------" -ForegroundColor Gray
 
 $supportedFormats = @(
@@ -281,7 +281,7 @@ Write-Host "Total Test Files: $(($testFiles | Measure-Object).Count)" -Foregroun
 if ($testResults.Failed.Count -eq 0) {
     Write-Host "`n✅ FORMAT SUPPORT TEST PREPARATION COMPLETE!" -ForegroundColor Green
     Write-Host "`nNext Steps:" -ForegroundColor Cyan
-    Write-Host "1. Install CBXShell (requires admin)" -ForegroundColor White
+    Write-Host "1. Install LENSShell (requires admin)" -ForegroundColor White
     Write-Host "2. Test thumbnail generation in Windows Explorer" -ForegroundColor White
     Write-Host "3. Verify each format renders correctly" -ForegroundColor White
 }
@@ -299,3 +299,4 @@ return @{
     Skipped   = $testResults.Skipped.Count
     TestFiles = $testFiles
 }
+

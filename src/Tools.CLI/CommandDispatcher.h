@@ -6,7 +6,7 @@
 #include <functional>
 #include <memory>
 
-namespace DarkThumbs::Tools::CLI {
+namespace ExplorerLens::Tools::CLI {
 
     enum class CommandType {
         Generate,
@@ -72,3 +72,4 @@ namespace DarkThumbs::Tools::CLI {
         std::wstring GetUsage() const override { return L"info <file>"; }
     };
 }
+

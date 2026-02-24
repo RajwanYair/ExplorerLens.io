@@ -1,4 +1,4 @@
-// plugin_host.h - DarkThumbs Plugin Host Process Architecture v1.0
+// plugin_host.h - ExplorerLens Plugin Host Process Architecture v1.0
 // Part of Sprint 20: Plugin Sandbox v2 + Trust/Signing (v6.2)
 //
 // PURPOSE:
@@ -30,7 +30,7 @@
 #include <mutex>
 #include <map>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace PluginHost {
 
 // Version
@@ -399,4 +399,5 @@ SecurityLevel GetSecurityLevelFromPolicy(const std::wstring& pluginPath);
 uint32_t GetPluginCapabilities(const std::wstring& pluginPath);
 
 } // namespace PluginHost
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

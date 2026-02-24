@@ -1,6 +1,6 @@
 #include "ThemeEngine.h"
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 ThemeEngine::ThemeEngine() {
     m_activeTheme = CreateDarkTheme();
@@ -66,4 +66,5 @@ ThemeDefinition ThemeEngine::CreateHighContrastTheme() {
     return t;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace DarkThumbs::Engine::Security {
+namespace ExplorerLens::Engine::Security {
 
     // Hard limits to prevent Denial of Service (DoS) via "Zip Bombs" or massive images
     
@@ -35,3 +35,4 @@ namespace DarkThumbs::Engine::Security {
     };
 
 }
+

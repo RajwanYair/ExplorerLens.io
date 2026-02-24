@@ -1,6 +1,6 @@
 # Texture Pooling Optimization
 
-**DarkThumbs v5.2.0 - GPU Acceleration Enhancement**
+**ExplorerLens v5.2.0 - GPU Acceleration Enhancement**
 
 ---
 
@@ -580,3 +580,4 @@ if (dedicatedVideoMemory < 512 MB) {
 **Implementation:** v5.2.0 (November 24, 2025)  
 **Status:** Production Ready ✅  
 **Binary Size Impact:** +5.12 KB (+0.35%)
+

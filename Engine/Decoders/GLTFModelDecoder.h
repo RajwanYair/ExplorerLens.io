@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 162 — glTF/GLB 3D Model Decoder
+// glTF/GLB 3D Model Decoder
 // Asset parse, scene bounding box, camera placement, D3D11 rasterization.
 // Fallback: bounding-box wireframe or PBR base-color texture for complex scenes.
 
@@ -9,7 +9,7 @@
 #include <optional>
 #include <array>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
 // ─── Asset variant ────────────────────────────────────────────────────────────
 
@@ -146,4 +146,5 @@ struct GLTFModelDecoder {
     }
 };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

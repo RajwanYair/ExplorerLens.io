@@ -1,17 +1,17 @@
 #pragma once
 //==============================================================================
 // SGI Image Decoder (.sgi/.rgb/.rgba/.bw/.int/.inta)
-// Sprint 186: SGI/RGB & Legacy Format Support
+// SGI/RGB & Legacy Format Support
 // Handles SGI image format used in IRIX/workstation graphics.
 // Supports RLE and verbatim (uncompressed) encoding, 1-4 channels.
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include <cstdint>
 #include <string>
 #include <vector>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // SGI Image storage types
@@ -65,4 +65,5 @@ namespace DarkThumbs::Decoders {
                                         uint8_t* dst, size_t dstLen);
     };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

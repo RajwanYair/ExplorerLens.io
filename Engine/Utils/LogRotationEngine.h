@@ -1,10 +1,10 @@
 #pragma once
-// Sprint 238: Log Rotation Engine — log file rotation, compression, and cleanup
+// Log Rotation Engine — log file rotation, compression, and cleanup
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Log rotation policy
 enum class RotationPolicy : uint32_t {
@@ -32,7 +32,7 @@ struct RotationConfig {
     uint32_t       maxFiles     = 5;
     uint32_t       maxAgeDays   = 30;
     std::wstring   logDirectory;
-    std::wstring   filePattern  = L"darkthumbs_{n}.log";
+    std::wstring   filePattern  = L"explorerlens_{n}.log";
 };
 
 /// Info about a rotated log file
@@ -70,4 +70,5 @@ private:
     std::vector<RotatedLogFile> m_rotatedFiles;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

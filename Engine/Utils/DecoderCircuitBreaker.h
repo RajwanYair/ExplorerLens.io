@@ -1,6 +1,6 @@
 // ============================================================================
 // DecoderCircuitBreaker.h
-// Sprint 22, Task 22.3: Circuit breaker to disable failing decoders
+// Circuit breaker to disable failing decoders
 // Prevents repeated failures from impacting system performance
 // ============================================================================
 
@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 // ============================================================================
 // Circuit Breaker States
@@ -82,7 +82,7 @@ public:
                 m_successCount = 0;
                 
                 OutputDebugStringA(
-                    ("[DarkThumbs] Circuit breaker CLOSED for decoder: " + 
+                    ("[ExplorerLens] Circuit breaker CLOSED for decoder: " + 
                      m_decoderName + " (recovered)\n").c_str());
             }
             break;
@@ -107,7 +107,7 @@ public:
                 // Too many failures - open circuit
                 m_state = CircuitState::OPEN;
                 
-                std::string msg = "[DarkThumbs] Circuit breaker OPENED for decoder: " + 
+                std::string msg = "[ExplorerLens] Circuit breaker OPENED for decoder: " + 
                                   m_decoderName + 
                                   " (threshold: " + std::to_string(m_failureThreshold) + 
                                   " failures)";
@@ -127,7 +127,7 @@ public:
             m_failureCount++;
             
             OutputDebugStringA(
-                ("[DarkThumbs] Circuit breaker reopened for decoder: " + 
+                ("[ExplorerLens] Circuit breaker reopened for decoder: " + 
                  m_decoderName + " (recovery test failed)\n").c_str());
             break;
             
@@ -151,7 +151,7 @@ public:
         m_successCount = 0;
         
         OutputDebugStringA(
-            ("[DarkThumbs] Circuit breaker RESET for decoder: " + 
+            ("[ExplorerLens] Circuit breaker RESET for decoder: " + 
              m_decoderName + "\n").c_str());
     }
     
@@ -258,15 +258,16 @@ private:
 // ============================================================================
 
 #define DECODER_CIRCUIT_CHECK(decoderName) \
-    auto& __circuitBreaker = DarkThumbs::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName); \
+    auto& __circuitBreaker = ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName); \
     if (!__circuitBreaker.IsAvailable()) { \
         return E_FAIL; /* Decoder disabled by circuit breaker */ \
     }
 
 #define DECODER_CIRCUIT_SUCCESS(decoderName) \
-    DarkThumbs::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName).ReportSuccess()
+    ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName).ReportSuccess()
 
 #define DECODER_CIRCUIT_FAILURE(decoderName, reason) \
-    DarkThumbs::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName).ReportFailure(reason)
+    ExplorerLens::CircuitBreakerManager::Instance().GetCircuitBreaker(decoderName).ReportFailure(reason)
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

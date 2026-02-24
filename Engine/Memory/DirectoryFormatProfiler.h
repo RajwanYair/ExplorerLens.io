@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// DirectoryFormatProfiler.h — Sprint 129
+// DirectoryFormatProfiler.h
 // Lightweight extension histogram per folder, dominant-format detection,
 // and single-format hot mode activation for memory optimization.
 //==============================================================================
@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <mutex>
 
-namespace DarkThumbs { namespace Memory {
+namespace ExplorerLens { namespace Memory {
 
 /// Format family classification for memory budgeting
 enum class FormatFamily : uint8_t {
@@ -225,4 +225,5 @@ private:
     }
 };
 
-}} // namespace DarkThumbs::Memory
+}} // namespace ExplorerLens::Memory
+

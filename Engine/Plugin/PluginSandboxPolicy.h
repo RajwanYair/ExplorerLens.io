@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 151 — Plugin Sandbox Policy Hardening
+// Plugin Sandbox Policy Hardening
 // Job Object limits, timeout kill chain, memory quota, and handle leak detection.
 
 #include <string>
@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace DarkThumbs::Plugin {
+namespace ExplorerLens::Plugin {
 
 // ─── Resource limits ─────────────────────────────────────────────────────────
 
@@ -188,4 +188,5 @@ private:
     SandboxPolicy m_policy;
 };
 
-} // namespace DarkThumbs::Plugin
+} // namespace ExplorerLens::Plugin
+

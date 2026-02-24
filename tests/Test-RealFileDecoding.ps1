@@ -9,7 +9,7 @@ param(
     [string]$CorpusPath = "$PSScriptRoot\data\corpus",
     
     [Parameter()]
-    [string]$ValidatorPath = "$PSScriptRoot\..\build\bin\Release\DarkThumbsValidator.exe",
+    [string]$ValidatorPath = "$PSScriptRoot\..\build\bin\Release\ExplorerLensValidator.exe",
     
     [Parameter()]
     [string]$OutputPath = "$PSScriptRoot\validation-results.csv",
@@ -20,7 +20,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "=== DarkThumbs Real-File Decoding Test ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens Real-File Decoding Test ===" -ForegroundColor Cyan
 Write-Host "Corpus: $CorpusPath"
 Write-Host "Validator: $ValidatorPath"
 Write-Host ""
@@ -28,7 +28,7 @@ Write-Host ""
 # Check if validator exists
 if (-not (Test-Path $ValidatorPath)) {
     Write-Host "ERROR: Validator not found: $ValidatorPath" -ForegroundColor Red
-    Write-Host "Build it first: cmake --build build --config Release --target DarkThumbsValidator" -ForegroundColor Yellow
+    Write-Host "Build it first: cmake --build build --config Release --target ExplorerLensValidator" -ForegroundColor Yellow
     exit 1
 }
 
@@ -91,3 +91,4 @@ try {
         exit 1
     }
 }
+

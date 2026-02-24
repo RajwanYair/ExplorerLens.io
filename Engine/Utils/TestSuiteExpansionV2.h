@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 271: Test Suite Expansion V2
+// ExplorerLens Engine — Test Suite Expansion V2
 // 100+ real-file decoder tests, COM IThumbnailProvider integration testing,
 // test corpus management, and automated test generation.
 //==============================================================================
@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <unordered_map>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Test file category V2
 enum class TestFileCategoryV2 : uint8_t {
@@ -110,4 +110,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

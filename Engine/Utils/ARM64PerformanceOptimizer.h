@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 336: ARM64 Performance Optimizer
+// ExplorerLens Engine — ARM64 Performance Optimizer
 // NEON/SVE2 SIMD acceleration profiles, efficiency core scheduling hints,
 // memory bandwidth optimisation for ARM64 topology, and thermal-aware
 // clock ramp strategy for thumbnail decode workloads.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class ARM64SIMDExt  : uint8_t { NEON=0, SVE, SVE2, SME, COUNT };
 enum class ARM64CoreType : uint8_t { BigCore=0, LittleCore, MiddleCore, COUNT };
@@ -64,4 +64,5 @@ public:
     static constexpr size_t ThermalHintCount(){ return static_cast<size_t>(ARM64ThermalHint::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

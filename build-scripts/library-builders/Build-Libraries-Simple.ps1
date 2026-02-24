@@ -3,7 +3,7 @@
 # Build required external libraries using existing build systems
 # ===========================================================================
 # 
-# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# ⚠️  DEPRECATED: Use Build-All-ExplorerLens-V7.ps1 instead
 # This script is kept for reference only.
 # See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
 # 
@@ -217,10 +217,11 @@ Write-Host "Built: $builtCount / $($requiredLibs.Count)" -ForegroundColor $(if (
 
 if ($missingCount -eq 0) {
     Write-Host ""
-    Write-Host "All libraries ready! You can now build CBXShell.sln" -ForegroundColor Green
+    Write-Host "All libraries ready! You can now build LENSShell.sln" -ForegroundColor Green
     exit 0
 } else {
     Write-Host ""
-    Write-Host "Some libraries are missing. CBXShell build may fail." -ForegroundColor Yellow
+    Write-Host "Some libraries are missing. LENSShell build may fail." -ForegroundColor Yellow
     exit 1
 }
+

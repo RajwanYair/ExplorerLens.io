@@ -1,7 +1,7 @@
 //==============================================================================
 // ExampleDecoder.cpp - Reference Implementation Template
-// DarkThumbs Engine v1.0.0
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine v1.0.0
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "ExampleDecoder.h"
@@ -9,7 +9,7 @@
 #include <cmath>
 #include <cstdarg>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -493,4 +493,5 @@ void ExampleDecoder::LogDebug(const wchar_t* format, ...) const {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

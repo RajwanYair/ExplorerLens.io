@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 150 — Plugin Runtime E2E Test Matrix
+// Plugin Runtime E2E Test Matrix
 // Comprehensive end-to-end test matrix covering all plugin activation paths,
 // IPC channels, and failure/recovery modes.
 
@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace DarkThumbs::Plugin {
+namespace ExplorerLens::Plugin {
 
 // ─── Test scenario classification ───────────────────────────────────────────
 
@@ -65,7 +65,7 @@ struct IPCChannelConfig {
     bool            asyncMode       { true };
 
     // Named pipe defaults
-    std::wstring    pipeName        { L"\\\\.\\pipe\\DarkThumbs_Plugin_Test" };
+    std::wstring    pipeName        { L"\\\\.\\pipe\\ExplorerLens_Plugin_Test" };
 
     static IPCChannelConfig Default() { return {}; }
     static IPCChannelConfig FastLocal() {
@@ -255,4 +255,5 @@ private:
     TestMatrixConfig m_config;
 };
 
-} // namespace DarkThumbs::Plugin
+} // namespace ExplorerLens::Plugin
+

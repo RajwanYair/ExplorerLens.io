@@ -1,7 +1,7 @@
 #include "LogRotationEngine.h"
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 LogRotationEngine::LogRotationEngine() = default;
 
@@ -54,4 +54,5 @@ std::vector<std::wstring> LogRotationEngine::GetFilesToCleanup() const {
     return cleanup;
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

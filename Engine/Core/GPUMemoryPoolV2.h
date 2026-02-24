@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 303: GPU Memory Pool V2
+// ExplorerLens Engine — GPU Memory Pool V2
 // Defragmenting GPU heap allocator with tier-aware budgets, residency
 // management, and background compaction for sustained rendering throughput.
 //==============================================================================
@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// GPU memory heap type
 enum class GPUHeapType : uint8_t {
@@ -104,4 +104,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

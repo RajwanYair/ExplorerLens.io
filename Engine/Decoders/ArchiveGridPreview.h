@@ -1,12 +1,12 @@
 #pragma once
 //==============================================================================
-// DarkThumbs — Sprint 39: Archive Content Grid Preview
+// ExplorerLens — Archive Content Grid Preview
 // 2x2 grid thumbnail for archives, grid layout engine, page-count badge,
 // CBZ/CBR cover layout, archive format detection, configuration toggle.
 //==============================================================================
 
-#ifndef DARKTHUMBS_ARCHIVE_GRID_PREVIEW_H
-#define DARKTHUMBS_ARCHIVE_GRID_PREVIEW_H
+#ifndef EXPLORERLENS_ARCHIVE_GRID_PREVIEW_H
+#define EXPLORERLENS_ARCHIVE_GRID_PREVIEW_H
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@
 #include <cmath>
 #include <array>
 
-namespace DarkThumbs { namespace Engine { namespace Decoders {
+namespace ExplorerLens { namespace Engine { namespace Decoders {
 
 //==============================================================================
 // Archive Format Classification
@@ -323,6 +323,8 @@ struct ArchiveGridResult
     }
 };
 
-}}} // namespace DarkThumbs::Engine::Decoders
+}}} // namespace ExplorerLens::Engine::Decoders
 
-#endif // DARKTHUMBS_ARCHIVE_GRID_PREVIEW_H
+#endif // EXPLORERLENS_ARCHIVE_GRID_PREVIEW_H
+
+

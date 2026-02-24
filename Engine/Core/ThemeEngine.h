@@ -1,10 +1,10 @@
 #pragma once
-// Sprint 229: Theme Engine — dark/light/custom theme management for shell extension UI
+// Theme Engine — dark/light/custom theme management for shell extension UI
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Built-in theme types
 enum class ThemeType : uint32_t {
@@ -71,4 +71,5 @@ private:
     std::vector<ThemeDefinition> m_themes;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

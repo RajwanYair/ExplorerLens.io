@@ -1,11 +1,11 @@
 #pragma once
-// Sprint 225: Watch Folder Engine — filesystem monitoring for auto-thumbnail regeneration
+// Watch Folder Engine — filesystem monitoring for auto-thumbnail regeneration
 #include <string>
 #include <vector>
 #include <cstdint>
 #include <functional>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Type of filesystem change detected
 enum class FileChangeType : uint32_t {
@@ -74,4 +74,5 @@ private:
     ChangeCallback           m_callback;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

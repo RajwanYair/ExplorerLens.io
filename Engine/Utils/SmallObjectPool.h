@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Small Object Memory Pool  
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Small Object Memory Pool  
+// Copyright (c) 2026 - ExplorerLens Project
 // Task A25: Fast allocation for small objects
 //==============================================================================
 
@@ -11,7 +11,7 @@
 #include <mutex>
 #include <atomic>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -133,4 +133,5 @@ namespace Engine {
     };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

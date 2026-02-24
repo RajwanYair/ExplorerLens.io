@@ -5,7 +5,7 @@
 #include <memory>
 #include <cstdint>
 
-namespace DarkThumbs::Engine::Gpu {
+namespace ExplorerLens::Engine::Gpu {
 
     enum class GpuVendor {
         Unknown,
@@ -53,3 +53,4 @@ namespace DarkThumbs::Engine::Gpu {
     std::shared_ptr<IDeviceManager> CreateDeviceManager();
 
 }
+

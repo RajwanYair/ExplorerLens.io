@@ -1,6 +1,6 @@
-// CBXManager GUI Test Suite
+// LENSManager GUI Test Suite
 // Tests dialog layout, checkbox functionality, and state persistence
-// Compile: cl /std:c++17 /EHsc /DUNICODE /D_UNICODE test_cbxmanager_gui.cpp /link user32.lib
+// Compile: cl /std:c++17 /EHsc /DUNICODE /D_UNICODE test_lensmanager_gui.cpp /link user32.lib
 
 #include <windows.h>
 #include <commctrl.h>
@@ -23,8 +23,8 @@ struct TestResult {
 vector<TestResult> testResults;
 
 // Helper function to find window by class and title
-HWND FindCBXManagerWindow() {
-    return FindWindow(L"#32770", L"CBX Shell Manager - Thumbnail Configuration");
+HWND FindLENSManagerWindow() {
+    return FindWindow(L"#32770", L"LENS Shell Manager - Thumbnail Configuration");
 }
 
 // Test 1: Verify dialog exists and has correct size
@@ -32,10 +32,10 @@ TestResult Test_DialogExists() {
     TestResult result;
     result.testName = L"Dialog Window Exists";
     
-    HWND hDlg = FindCBXManagerWindow();
+    HWND hDlg = FindLENSManagerWindow();
     if (!hDlg) {
         result.passed = false;
-        result.message = L"CBXManager window not found. Launch CBXManager.exe first.";
+        result.message = L"LENSManager window not found. Launch LENSManager.exe first.";
         return result;
     }
     
@@ -68,10 +68,10 @@ TestResult Test_AllCheckboxesExist() {
     TestResult result;
     result.testName = L"All Format Checkboxes Exist";
     
-    HWND hDlg = FindCBXManagerWindow();
+    HWND hDlg = FindLENSManagerWindow();
     if (!hDlg) {
         result.passed = false;
-        result.message = L"CBXManager window not found";
+        result.message = L"LENSManager window not found";
         return result;
     }
     
@@ -120,10 +120,10 @@ TestResult Test_GroupBoxesNoOverlap() {
     TestResult result;
     result.testName = L"Group Boxes Do Not Overlap";
     
-    HWND hDlg = FindCBXManagerWindow();
+    HWND hDlg = FindLENSManagerWindow();
     if (!hDlg) {
         result.passed = false;
-        result.message = L"CBXManager window not found";
+        result.message = L"LENSManager window not found";
         return result;
     }
     
@@ -177,10 +177,10 @@ TestResult Test_RAWCheckboxPosition() {
     TestResult result;
     result.testName = L"RAW Checkbox Position";
     
-    HWND hDlg = FindCBXManagerWindow();
+    HWND hDlg = FindLENSManagerWindow();
     if (!hDlg) {
         result.passed = false;
-        result.message = L"CBXManager window not found";
+        result.message = L"LENSManager window not found";
         return result;
     }
     
@@ -225,10 +225,10 @@ TestResult Test_CheckboxToggle() {
     TestResult result;
     result.testName = L"Checkbox Toggle Functionality";
     
-    HWND hDlg = FindCBXManagerWindow();
+    HWND hDlg = FindLENSManagerWindow();
     if (!hDlg) {
         result.passed = false;
-        result.message = L"CBXManager window not found";
+        result.message = L"LENSManager window not found";
         return result;
     }
     
@@ -267,10 +267,10 @@ TestResult Test_StatusBarExists() {
     TestResult result;
     result.testName = L"Status Bar Exists";
     
-    HWND hDlg = FindCBXManagerWindow();
+    HWND hDlg = FindLENSManagerWindow();
     if (!hDlg) {
         result.passed = false;
-        result.message = L"CBXManager window not found";
+        result.message = L"LENSManager window not found";
         return result;
     }
     
@@ -309,10 +309,10 @@ TestResult Test_ButtonsExist() {
     TestResult result;
     result.testName = L"Action Buttons Exist";
     
-    HWND hDlg = FindCBXManagerWindow();
+    HWND hDlg = FindLENSManagerWindow();
     if (!hDlg) {
         result.passed = false;
-        result.message = L"CBXManager window not found";
+        result.message = L"LENSManager window not found";
         return result;
     }
     
@@ -343,10 +343,10 @@ TestResult Test_CheckboxGrouping() {
     TestResult result;
     result.testName = L"Checkbox Proper Grouping";
     
-    HWND hDlg = FindCBXManagerWindow();
+    HWND hDlg = FindLENSManagerWindow();
     if (!hDlg) {
         result.passed = false;
-        result.message = L"CBXManager window not found";
+        result.message = L"LENSManager window not found";
         return result;
     }
     
@@ -385,23 +385,23 @@ TestResult Test_CheckboxGrouping() {
 
 // Run all tests
 void RunAllTests() {
-    wcout << L"\n=== CBXManager GUI Test Suite ===\n\n";
+    wcout << L"\n=== LENSManager GUI Test Suite ===\n\n";
     
     // Wait for window to be ready
-    wcout << L"Waiting for CBXManager window...\n";
+    wcout << L"Waiting for LENSManager window...\n";
     int attempts = 0;
-    while (!FindCBXManagerWindow() && attempts < 50) {
+    while (!FindLENSManagerWindow() && attempts < 50) {
         Sleep(100);
         attempts++;
     }
     
-    if (!FindCBXManagerWindow()) {
-        wcout << L"ERROR: CBXManager window not found after 5 seconds.\n";
-        wcout << L"Please launch CBXManager.exe before running tests.\n";
+    if (!FindLENSManagerWindow()) {
+        wcout << L"ERROR: LENSManager window not found after 5 seconds.\n";
+        wcout << L"Please launch LENSManager.exe before running tests.\n";
         return;
     }
     
-    wcout << L"CBXManager window found!\n\n";
+    wcout << L"LENSManager window found!\n\n";
     
     // Run tests
     testResults.push_back(Test_DialogExists());
@@ -442,7 +442,7 @@ int main() {
     // Set console to UTF-16
     _setmode(_fileno(stdout), _O_U16TEXT);
     
-    wcout << L"CBXManager GUI Automated Test Suite\n";
+    wcout << L"LENSManager GUI Automated Test Suite\n";
     wcout << L"====================================\n";
     wcout << L"\nThis test suite verifies:\n";
     wcout << L"  - Dialog layout and sizing\n";
@@ -453,7 +453,7 @@ int main() {
     wcout << L"  - Status bar presence\n";
     wcout << L"  - Action buttons\n\n";
     
-    wcout << L"Press Enter to start tests (make sure CBXManager.exe is running)...\n";
+    wcout << L"Press Enter to start tests (make sure LENSManager.exe is running)...\n";
     wcin.get();
     
     RunAllTests();
@@ -463,3 +463,4 @@ int main() {
     
     return 0;
 }
+

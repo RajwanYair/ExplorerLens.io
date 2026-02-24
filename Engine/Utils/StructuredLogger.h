@@ -1,7 +1,7 @@
 //==============================================================================
 // StructuredLogger.h - JSON-Lines Structured Logging
-// Copyright (c) 2026 - DarkThumbs Project
-// Sprint 12: Observability & Structured Logging
+// Copyright (c) 2026 - ExplorerLens Project
+// Observability & Structured Logging
 // 
 //Provides structured logging to JSON-lines format as fallback for non-ETW
 //==============================================================================
@@ -16,7 +16,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Logging {
 
 //==============================================================================
@@ -279,28 +279,29 @@ private:
 //==============================================================================
 
 #define STRUCTURED_LOG_INIT(path) \
-    DarkThumbs::Logging::StructuredLogger::Get().Initialize(path)
+    ExplorerLens::Logging::StructuredLogger::Get().Initialize(path)
 
 #define STRUCTURED_LOG_SHUTDOWN() \
-    DarkThumbs::Logging::StructuredLogger::Get().Shutdown()
+    ExplorerLens::Logging::StructuredLogger::Get().Shutdown()
 
 #define LOG_TRACE(component, message) \
-    DarkThumbs::Logging::StructuredLogger::Get().LogTrace(component, message)
+    ExplorerLens::Logging::StructuredLogger::Get().LogTrace(component, message)
 
 #define LOG_DEBUG(component, message) \
-    DarkThumbs::Logging::StructuredLogger::Get().LogDebug(component, message)
+    ExplorerLens::Logging::StructuredLogger::Get().LogDebug(component, message)
 
 #define LOG_INFO(component, message) \
-    DarkThumbs::Logging::StructuredLogger::Get().LogInfo(component, message)
+    ExplorerLens::Logging::StructuredLogger::Get().LogInfo(component, message)
 
 #define LOG_WARNING(component, message) \
-    DarkThumbs::Logging::StructuredLogger::Get().LogWarning(component, message)
+    ExplorerLens::Logging::StructuredLogger::Get().LogWarning(component, message)
 
 #define LOG_ERROR(component, message) \
-    DarkThumbs::Logging::StructuredLogger::Get().LogError(component, message)
+    ExplorerLens::Logging::StructuredLogger::Get().LogError(component, message)
 
 #define LOG_CRITICAL(component, message) \
-    DarkThumbs::Logging::StructuredLogger::Get().LogCritical(component, message)
+    ExplorerLens::Logging::StructuredLogger::Get().LogCritical(component, message)
 
 } // namespace Logging
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

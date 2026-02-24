@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Public API Export Definitions
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Public API Export Definitions
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #pragma once
@@ -33,7 +33,7 @@
 #define ENGINE_VERSION_MINOR 2
 #define ENGINE_VERSION_PATCH 0
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 /// Get engine version as wide string
@@ -43,4 +43,5 @@ ENGINE_API const wchar_t* ENGINE_CALL GetEngineVersion();
 ENGINE_API const wchar_t* ENGINE_CALL GetEngineBuildDate();
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

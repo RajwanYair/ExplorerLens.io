@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 167 — Adaptive Cache Budget Manager
+// Adaptive Cache Budget Manager
 // Runtime memory sensing, per-tier budget allocation, rebalancing triggers.
 // Supports D3D11 texture cache, CPU pixel cache, and archive metadata cache.
 
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Cache {
+namespace ExplorerLens::Cache {
 
 // ─── Cache tier ──────────────────────────────────────────────────────────────
 
@@ -134,4 +134,5 @@ private:
     std::vector<TierBudget> m_budgets;
 };
 
-} // namespace DarkThumbs::Cache
+} // namespace ExplorerLens::Cache
+

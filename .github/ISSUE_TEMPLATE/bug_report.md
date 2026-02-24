@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug or issue with DarkThumbs
+about: Report a bug or issue with ExplorerLens
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -24,7 +24,7 @@ What actually happened instead.
 ## System Information
 - **OS:** Windows 11 [Version]
 - **GPU:** [e.g., Intel Arc A770, NVIDIA RTX 4090]
-- **DarkThumbs Version:** [e.g., v7.1.0]
+- **ExplorerLens Version:** [e.g., v7.1.0]
 - **Build:** x64 Release
 - **GPU Acceleration:** [D3D11 / D3D12 / CPU fallback]
 
@@ -41,3 +41,4 @@ Add any other context about the problem here.
 
 ## Logs
 If applicable, attach relevant log files from `build-logs/` or Windows Event Viewer.
+

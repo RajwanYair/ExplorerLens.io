@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Hardware Capabilities Implementation
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Hardware Capabilities Implementation
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "HardwareCapabilities.h"
@@ -18,7 +18,7 @@
 
 using Microsoft::WRL::ComPtr;
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -378,7 +378,7 @@ const GPUInfo* HardwareCapabilities::GetPreferredGPU() const {
 std::string HardwareCapabilities::GetFullReport() const {
     std::ostringstream oss;
     
-    oss << "=== DarkThumbs Hardware Report ===\n\n";
+    oss << "=== ExplorerLens Hardware Report ===\n\n";
     
     // CPU Information
     oss << "CPU:\n";
@@ -507,4 +507,5 @@ void HardwareCapabilities::RefreshGPUs() {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -9,35 +9,35 @@ param(
 
 $ErrorActionPreference = "Continue"
 
-Write-Host "`n🔍 DarkThumbs Build Output Verification" -ForegroundColor Cyan
+Write-Host "`n🔍 ExplorerLens Build Output Verification" -ForegroundColor Cyan
 Write-Host "═══════════════════════════════════════`n" -ForegroundColor Cyan
 
 # Define expected outputs
 $outputs = @(
     @{
-        Name    = "DarkThumbs Engine Library"
+        Name    = "ExplorerLens Engine Library"
         Paths   = @(
-            "Engine\Release\DarkThumbsEngine.lib",
-            "Engine\x64\Release\DarkThumbsEngine.lib",
-            "Engine\build\Release\DarkThumbsEngine.lib"
+            "Engine\Release\ExplorerLensEngine.lib",
+            "Engine\x64\Release\ExplorerLensEngine.lib",
+            "Engine\build\Release\ExplorerLensEngine.lib"
         )
         Type    = "Static Library"
         MinSize = 1MB
     },
     @{
-        Name    = "CBXShell Extension DLL"
+        Name    = "LENSShell Extension DLL"
         Paths   = @(
-            "CBXShell\x64\Release\CBXShell.dll",
-            "x64\Release\CBXShell.dll"
+            "LENSShell\x64\Release\LENSShell.dll",
+            "x64\Release\LENSShell.dll"
         )
         Type    = "Dynamic Library"
         MinSize = 1MB
     },
     @{
-        Name    = "CBXManager Application"
+        Name    = "LENSManager Application"
         Paths   = @(
-            "CBXManager\x64\Release\CBXManager.exe",
-            "x64\Release\CBXManager.exe"
+            "LENSManager\x64\Release\LENSManager.exe",
+            "x64\Release\LENSManager.exe"
         )
         Type    = "Executable"
         MinSize = 100KB
@@ -140,3 +140,4 @@ if ($found -eq $total -and $issues.Count -eq 0) {
     Write-Host "`n✗ Build verification failed" -ForegroundColor Red
     exit 2
 }
+

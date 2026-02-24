@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build LZ4 1.10.0 (Fast Compression)
+# ExplorerLens v7.0 - Build LZ4 1.10.0 (Fast Compression)
 # Refactored to use Build-Library-Core.ps1 module
 # Date: February 18, 2026
 #
@@ -50,9 +50,9 @@ try {
             $cmakeBuildDir = Join-Path $lz4Dir "build-vs"
             $cmakeOptions = @{
                 'CMAKE_BUILD_TYPE'      = 'Release'
-                'BUILD_SHARED_LIBS'     = 'OFF'
-                'LZ4_BUILD_CLI'         = 'OFF'
-                'LZ4_BUILD_LEGACY_LZ4C' = 'OFF'
+                'BUILD_SHARED_LIBS'     = 'ON'
+                'LZ4_BUILD_CLI'         = 'ON'
+                'LZ4_BUILD_LEGACY_LZ4C' = 'ON'
             }
             
             Invoke-CMakeBuild `
@@ -96,3 +96,4 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
+

@@ -3,7 +3,7 @@
 #include <memory>
 #include "../Services/IPluginService.h"
 
-namespace DarkThumbs::Manager::ViewModels {
+namespace ExplorerLens::Manager::ViewModels {
 
     class PluginStoreViewModel {
     public:
@@ -25,3 +25,4 @@ namespace DarkThumbs::Manager::ViewModels {
         std::shared_ptr<Services::IPluginService> m_service;
     };
 }
+

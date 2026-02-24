@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Manager Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Manager Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Manages plugin discovery, loading, and lifecycle.
  *****************************************************************************/
@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // PluginHandle Implementation
@@ -116,7 +116,7 @@ bool PluginHandle::LoadPlugin() {
     
     // Check API version compatibility (major version must match)
     uint32_t plugin_major = (info_->api_version >> 16) & 0xFFFF;
-    uint32_t host_major = (DARKTHUMBS_PLUGIN_API_VERSION >> 16) & 0xFFFF;
+    uint32_t host_major = (EXPLORERLENS_PLUGIN_API_VERSION >> 16) & 0xFFFF;
     
     if (plugin_major != host_major) {
         UnloadPlugin();
@@ -595,14 +595,14 @@ std::vector<std::filesystem::path> PluginDiscovery::GetPluginSearchPaths() {
     // 1. User's local app data
     wchar_t local_appdata[MAX_PATH];
     if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, local_appdata))) {
-        auto user_plugins = std::filesystem::path(local_appdata) / L"DarkThumbs" / L"Plugins";
+        auto user_plugins = std::filesystem::path(local_appdata) / L"ExplorerLens" / L"Plugins";
         paths.push_back(user_plugins);
     }
     
     // 2. Program Files installation
     wchar_t program_files[MAX_PATH];
     if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PROGRAM_FILES, nullptr, 0, program_files))) {
-        auto system_plugins = std::filesystem::path(program_files) / L"DarkThumbs" / L"Plugins";
+        auto system_plugins = std::filesystem::path(program_files) / L"ExplorerLens" / L"Plugins";
         paths.push_back(system_plugins);
     }
     
@@ -619,7 +619,7 @@ std::vector<std::filesystem::path> PluginDiscovery::GetPluginSearchPaths() {
 std::filesystem::path PluginDiscovery::GetDefaultPluginDirectory() {
     wchar_t local_appdata[MAX_PATH];
     if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, local_appdata))) {
-        return std::filesystem::path(local_appdata) / L"DarkThumbs" / L"Plugins";
+        return std::filesystem::path(local_appdata) / L"ExplorerLens" / L"Plugins";
     }
     
     return std::filesystem::path();
@@ -718,4 +718,6 @@ std::optional<PluginManifest> PluginManifest::LoadFromJSON(const std::string& js
     return manifest;
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+
+

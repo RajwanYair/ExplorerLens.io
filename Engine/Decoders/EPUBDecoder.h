@@ -1,6 +1,6 @@
 //==============================================================================
 // EPUBDecoder.h
-// Sprint 15: EPUB (Electronic Publication) thumbnail decoder
+// EPUB (Electronic Publication) thumbnail decoder
 // Extracts cover image from EPUB container
 // Date: February 17, 2026
 //==============================================================================
@@ -12,7 +12,7 @@
 #include <string>
 #include <windows.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 /**
@@ -82,4 +82,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

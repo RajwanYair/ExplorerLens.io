@@ -1,6 +1,5 @@
 name: Performance Regression Gate
 
-# Trigger on PRs and main branch pushes
 on:
   pull_request:
     branches: [main]
@@ -26,29 +25,49 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history for baseline lookup
+          fetch-depth: 0
 
       - name: Setup MSVC
         uses: microsoft/setup-msbuild@v2
         with:
-          vs-version: "latest"
+          vs-version: latest
 
       - name: Setup vcpkg
+        shell: pwsh
         run: |
-          git clone https://github.com/Microsoft/vcpkg.git
+          git clone https://github.com/microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
           .\vcpkg\vcpkg integrate install
 
       - name: Install Google Benchmark
+        shell: pwsh
         run: |
           .\vcpkg\vcpkg install benchmark:x64-windows
 
       - name: Configure CMake
+        shell: pwsh
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
-      - name: Build DarkThumbs
+      - name: Build Benchmark Target
+        shell: pwsh
         run: |
-          cmake --build build --config Release --target DarkThumbsEngine -j 8
+          cmake --build build --config Release --target EngineBenchmark -j 8
 
-      - name: Build Benchmark Executable
+      - name: Run Benchmarks
+        shell: pwsh
+        run: |
+          $benchmarkExe = "build\Engine\Tests\Release\EngineBenchmark.exe"
+          if (-not (Test-Path $benchmarkExe)) {
+            Write-Host "Benchmark executable not found: $benchmarkExe" -ForegroundColor Red
+            exit 1
+          }
+          & $benchmarkExe --benchmark_format=json --benchmark_out=build-logs/perf-results.json
+
+      - name: Upload Benchmark Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-results-${{ github.run_number }}
+          path: build-logs/perf-results.json
+          retention-days: 30

@@ -1,10 +1,10 @@
 // DDSDecoder.cpp - DirectDraw Surface Texture Decoder Implementation
-// DarkThumbs Engine v6.1.0+
+// ExplorerLens Engine v6.1.0+
 // Uses WIC (Windows Imaging Component) which has native DDS support on Win10+
 
 #include "DDSDecoder.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* DDSDecoder::m_extensions[] = { L".dds" };
@@ -157,4 +157,5 @@ HRESULT DDSDecoder::DecodeFromFile(const wchar_t* path, UINT targetWidth,
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 uint32_t FileHashEngine::s_crc32Table[256] = {};
 bool FileHashEngine::s_tableInit = false;
@@ -71,4 +71,5 @@ uint32_t FileHashEngine::GetHashLength(HashAlgorithm algo) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

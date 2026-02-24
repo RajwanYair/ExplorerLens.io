@@ -1,4 +1,4 @@
-# Generate Checksums for DarkThumbs Release Packages
+# Generate Checksums for ExplorerLens Release Packages
 # Creates SHA256, SHA512, and MD5 checksums for distribution
 
 param(
@@ -76,7 +76,7 @@ function Format-FileSize {
     }
 }
 
-Write-Header "DarkThumbs Checksum Generator v1.0.0"
+Write-Header "ExplorerLens Checksum Generator v1.0.0"
 
 # Validate version format
 if ($Version -notmatch '^\d+\.\d+\.\d+$') {
@@ -100,9 +100,9 @@ $PackageDir = Resolve-Path $PackageDir
 Write-Header "Scanning for Release Packages"
 
 $packages = @(
-    "DarkThumbs-Setup-$Version.msi",
-    "DarkThumbs-v$Version-x64-Setup.exe",
-    "DarkThumbs-v$Version-Portable-x64.zip"
+    "ExplorerLens-Setup-$Version.msi",
+    "ExplorerLens-v$Version-x64-Setup.exe",
+    "ExplorerLens-v$Version-Portable-x64.zip"
 )
 
 $foundFiles = @()
@@ -163,7 +163,7 @@ Write-Header "Generating Checksum Files"
 # SHA256SUMS (primary, Unix-style format)
 $sha256File = Join-Path $PackageDir "SHA256SUMS"
 $sha256Content = @()
-$sha256Content += "# DarkThumbs v$Version - SHA256 Checksums"
+$sha256Content += "# ExplorerLens v$Version - SHA256 Checksums"
 $sha256Content += "# Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')"
 $sha256Content += "# "
 $sha256Content += "# Verify with: Get-FileHash <filename> -Algorithm SHA256"
@@ -181,7 +181,7 @@ Write-Success "Created: SHA256SUMS"
 # CHECKSUMS.txt (Windows-friendly format with all algorithms)
 $checksumFile = Join-Path $PackageDir "CHECKSUMS.txt"
 $checksumContent = @()
-$checksumContent += "DarkThumbs v$Version - Package Checksums"
+$checksumContent += "ExplorerLens v$Version - Package Checksums"
 $checksumContent += "=" * 80
 $checksumContent += "Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 $checksumContent += ""
@@ -225,7 +225,7 @@ foreach ($file in $foundFiles) {
 if ($IncludeSHA512) {
     $sha512File = Join-Path $PackageDir "SHA512SUMS"
     $sha512Content = @()
-    $sha512Content += "# DarkThumbs v$Version - SHA512 Checksums"
+    $sha512Content += "# ExplorerLens v$Version - SHA512 Checksums"
     $sha512Content += "# Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')"
     $sha512Content += ""
     
@@ -244,7 +244,7 @@ if ($IncludeSHA512) {
 if ($IncludeMD5) {
     $md5File = Join-Path $PackageDir "MD5SUMS"
     $md5Content = @()
-    $md5Content += "# DarkThumbs v$Version - MD5 Checksums (legacy)"
+    $md5Content += "# ExplorerLens v$Version - MD5 Checksums (legacy)"
     $md5Content += "# WARNING: MD5 is insecure. Use SHA256 for verification."
     $md5Content += ""
     
@@ -317,3 +317,4 @@ Write-Host "`n  Linux/macOS:" -ForegroundColor Yellow
 Write-Host "    sha256sum -c SHA256SUMS" -ForegroundColor Gray
 
 Write-Host ""
+

@@ -1,7 +1,7 @@
 # Deprecated Build Scripts
 
 **Date:** February 18, 2026  
-**Version:** DarkThumbs v7.1.0  
+**Version:** ExplorerLens v7.1.0  
 **Reason:** Consolidated into Build-Library-Core.ps1 module  
 **Sprints:** 74 sprints completed
 
@@ -39,8 +39,8 @@ The following scripts have been deprecated and replaced by the unified build sys
 - **Replacement:** Use `Build-All-And-Package.ps1`
 - **Status:** ⚠️ Consider deprecating if functionality duplicated
 
-### 7. build-cbxshell-quick.ps1
-- **Location:** `build-scripts/build-cbxshell-quick.ps1`
+### 7. build-LENSShell-quick.ps1
+- **Location:** `build-scripts/build-LENSShell-quick.ps1`
 - **Replacement:** Use `Build-All-And-Package.ps1 -SkipDependencies`
 - **Status:** ⚠️ Evaluate for consolidation
 
@@ -114,7 +114,7 @@ All external library scripts now use Build-Library-Core.ps1:
 - Evaluate test-builds.ps1 vs Build-All-And-Package.ps1
 - Consolidate quick-build scripts
 - Update VS Code tasks to use new scripts
-- Retire Build-All-DarkThumbs-V7.ps1 in favor of Build-All-And-Package.ps1
+- Retire Build-All-ExplorerLens-V7.ps1 in favor of Build-All-And-Package.ps1
 
 ## Questions or Issues?
 
@@ -138,3 +138,4 @@ The new unified build system is located at:
 - `Find-CMakePath` - Locate CMake executable
 - `Test-VisualStudioTools` - Verify build environment
 - `Write-BuildLog` - Unified logging with color coding
+

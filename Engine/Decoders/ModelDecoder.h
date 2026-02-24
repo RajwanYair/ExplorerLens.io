@@ -1,8 +1,8 @@
 //==============================================================================
 // Model Decoder - 3D Model Thumbnail Provider
-// Sprint 12: Basic 3D model format support (OBJ, FBX, STL, GLTF)
-// Sprint 182: Enhanced model decoder (PLY, DAE, flat-shading lighting)
-// Copyright (c) 2026 - DarkThumbs Project
+// Basic 3D model format support (OBJ, FBX, STL, GLTF)
+// Enhanced model decoder (PLY, DAE, flat-shading lighting)
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #pragma once
@@ -14,7 +14,7 @@
 #include <memory>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -99,4 +99,5 @@ namespace Engine {
     };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

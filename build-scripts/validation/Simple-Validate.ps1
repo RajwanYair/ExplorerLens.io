@@ -3,15 +3,15 @@
 
 $ErrorActionPreference = "Continue"
 
-Write-Host "`nDarkThumbs Build Validation`n" -ForegroundColor Cyan
+Write-Host "`nExplorerLens Build Validation`n" -ForegroundColor Cyan
 
 # Check new headers
 Write-Host "Checking new header files..." -ForegroundColor Yellow
 $headers = @(
-    "CBXShell\error_logger.h",
-    "CBXShell\performance_profiler.h",
-    "CBXShell\memory_utils.h",
-    "CBXShell\enhanced_cache.h"
+    "LENSShell\error_logger.h",
+    "LENSShell\performance_profiler.h",
+    "LENSShell\memory_utils.h",
+    "LENSShell\enhanced_cache.h"
 )
 
 $headerCount = 0
@@ -27,23 +27,23 @@ Write-Host "Headers: $headerCount / $($headers.Count)`n"
 
 # Check build outputs
 Write-Host "Checking build outputs..." -ForegroundColor Yellow
-$dll = "CBXShell\x64\Release\CBXShell.dll"
-$exe = "CBXManager\x64\Release\CBXManager.exe"
+$dll = "LENSShell\x64\Release\LENSShell.dll"
+$exe = "LENSManager\x64\Release\LENSManager.exe"
 
 if (Test-Path $dll) {
     $size = (Get-Item $dll).Length / 1MB
     $date = (Get-Item $dll).LastWriteTime
-    Write-Host "  [OK] CBXShell.dll - $([math]::Round($size, 2)) MB - $date" -ForegroundColor Green
+    Write-Host "  [OK] LENSShell.dll - $([math]::Round($size, 2)) MB - $date" -ForegroundColor Green
 } else {
-    Write-Host "  [MISS] CBXShell.dll" -ForegroundColor Red
+    Write-Host "  [MISS] LENSShell.dll" -ForegroundColor Red
 }
 
 if (Test-Path $exe) {
     $size = (Get-Item $exe).Length / 1MB
     $date = (Get-Item $exe).LastWriteTime
-    Write-Host "  [OK] CBXManager.exe - $([math]::Round($size, 2)) MB - $date" -ForegroundColor Green
+    Write-Host "  [OK] LENSManager.exe - $([math]::Round($size, 2)) MB - $date" -ForegroundColor Green
 } else {
-    Write-Host "  [MISS] CBXManager.exe" -ForegroundColor Red
+    Write-Host "  [MISS] LENSManager.exe" -ForegroundColor Red
 }
 
 # Check static libraries
@@ -74,3 +74,4 @@ if ($libCount -eq $libs.Count) {
 }
 
 Write-Host "`nValidation complete!`n" -ForegroundColor Cyan
+

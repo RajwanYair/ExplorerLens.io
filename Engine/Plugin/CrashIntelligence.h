@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs — Sprint 33: Crash Intelligence & Symbol Pipeline
- * Copyright (c) 2026 — DarkThumbs Project
+ * ExplorerLens — Sprint 33: Crash Intelligence & Symbol Pipeline
+ * Copyright (c) 2026 — ExplorerLens Project
  *
  * Automated minidump capture, symbol pipeline, crash bucketing, and
  * diagnostic integration for fast crash triage across shell/engine/plugin.
@@ -27,7 +27,7 @@
 
 #pragma comment(lib, "dbghelp.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace CrashIntel {
 
 //============================================================================
@@ -141,7 +141,7 @@ struct CrashBucket {
 class MinidumpCapturer {
 public:
     struct Config {
-        std::filesystem::path dump_directory;       // e.g. %LOCALAPPDATA%/DarkThumbs/CrashDumps
+        std::filesystem::path dump_directory;       // e.g. %LOCALAPPDATA%/ExplorerLens/CrashDumps
         uint32_t max_dump_count = 50;               // Auto-purge oldest beyond this
         uint64_t max_total_size_mb = 500;            // Cap total dump storage
         bool include_heap = false;                   // MiniDumpWithFullMemory (large!)
@@ -155,7 +155,7 @@ public:
         if (config_.dump_directory.empty()) {
             wchar_t appdata[MAX_PATH] = {};
             if (GetEnvironmentVariableW(L"LOCALAPPDATA", appdata, MAX_PATH)) {
-                config_.dump_directory = std::filesystem::path(appdata) / L"DarkThumbs" / L"CrashDumps";
+                config_.dump_directory = std::filesystem::path(appdata) / L"ExplorerLens" / L"CrashDumps";
             }
         }
     }
@@ -178,14 +178,14 @@ public:
         std::error_code ec;
         std::filesystem::create_directories(config_.dump_directory, ec);
 
-        // Build dump filename: DarkThumbs_YYYYMMDD_HHMMSS_<id>.dmp
+        // Build dump filename: ExplorerLens_YYYYMMDD_HHMMSS_<id>.dmp
         auto t = std::chrono::system_clock::to_time_t(meta.timestamp);
         std::tm tm_buf = {};
         localtime_s(&tm_buf, &t);
         wchar_t time_str[64] = {};
         wcsftime(time_str, 64, L"%Y%m%d_%H%M%S", &tm_buf);
 
-        std::wstring filename = L"DarkThumbs_" + std::wstring(time_str) +
+        std::wstring filename = L"ExplorerLens_" + std::wstring(time_str) +
                                 L"_" + meta.dump_id.substr(0, 8) + L".dmp";
         meta.dump_path = (config_.dump_directory / filename).wstring();
 
@@ -306,8 +306,8 @@ private:
 //============================================================================
 
 struct SymbolServerConfig {
-    std::wstring server_url;           // e.g. "https://symbols.darkthumbs.dev"
-    std::filesystem::path local_cache; // e.g. %TEMP%/DarkThumbs/SymbolCache
+    std::wstring server_url;           // e.g. "https://symbols.explorerlens.dev"
+    std::filesystem::path local_cache; // e.g. %TEMP%/ExplorerLens/SymbolCache
     std::wstring product_version;
     bool auto_publish = false;         // CI mode: push .pdb on build
     uint32_t timeout_ms = 30000;
@@ -321,8 +321,8 @@ struct SymbolServerConfig {
 };
 
 struct PdbInfo {
-    std::wstring module_name;     // e.g. "CBXShell.dll"
-    std::wstring pdb_name;        // e.g. "CBXShell.pdb"
+    std::wstring module_name;     // e.g. "LENSShell.dll"
+    std::wstring pdb_name;        // e.g. "LENSShell.pdb"
     std::wstring guid;            // PDB signature GUID
     uint32_t age = 0;             // PDB age
     std::wstring version;         // Product version at build time
@@ -359,7 +359,7 @@ public:
         if (config_.local_cache.empty()) {
             wchar_t tmp[MAX_PATH] = {};
             if (GetTempPathW(MAX_PATH, tmp)) {
-                config_.local_cache = std::filesystem::path(tmp) / L"DarkThumbs" / L"SymbolCache";
+                config_.local_cache = std::filesystem::path(tmp) / L"ExplorerLens" / L"SymbolCache";
             }
         }
     }
@@ -549,7 +549,7 @@ private:
 };
 
 //============================================================================
-// Diagnostics Integration (for CBXManager)
+// Diagnostics Integration (for LENSManager)
 //============================================================================
 
 struct DiagnosticsCrashSummary {
@@ -598,7 +598,7 @@ public:
         return summary;
     }
 
-    // Format summary for CBXManager display
+    // Format summary for LENSManager display
     std::wstring FormatForDisplay() const {
         auto summary = GenerateSummary();
         std::wostringstream ss;
@@ -701,4 +701,5 @@ private:
 };
 
 } // namespace CrashIntel
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

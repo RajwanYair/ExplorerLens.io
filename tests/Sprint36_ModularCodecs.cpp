@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 36 Tests: Modular Codec DLLs & Memory Optimization
+// ExplorerLens — Sprint 36 Tests: Modular Codec DLLs & Memory Optimization
 // Tests the per-format DLL architecture, lazy loading, memory budgeting,
 // bitmap pools, decode buffer recycling, and directory-aware preloading.
 //==============================================================================
@@ -17,8 +17,8 @@
 #include "../Engine/Codec/LazyCodecManager.h"
 #include "../Engine/Memory/MemoryOptimizationEngine.h"
 
-using namespace DarkThumbs::Engine::Codec;
-using namespace DarkThumbs::Engine::Memory;
+using namespace ExplorerLens::Engine::Codec;
+using namespace ExplorerLens::Engine::Memory;
 
 //==============================================================================
 // ICodecModule ABI Tests
@@ -147,10 +147,10 @@ TEST(CodecSpecs, WebPCodecDetails)
 {
     auto specs = GetAllCodecSpecs();
     auto it = std::find_if(specs.begin(), specs.end(),
-        [](const CodecModuleSpec& s) { return s.codecId == std::string("darkthumbs.codec.webp"); });
+        [](const CodecModuleSpec& s) { return s.codecId == std::string("explorerlens.codec.webp"); });
     ASSERT_NE(it, specs.end());
 
-    EXPECT_STREQ(it->dllName, L"DarkThumbs_Codec_WebP.dll");
+    EXPECT_STREQ(it->dllName, L"ExplorerLens_Codec_WebP.dll");
     EXPECT_EQ(it->estimatedMemoryMB, 4u);
     EXPECT_TRUE(it->capabilities & DT_CAP_ANIMATION);
     EXPECT_TRUE(it->capabilities & DT_CAP_THREAD_SAFE);
@@ -162,7 +162,7 @@ TEST(CodecSpecs, RAWCodecExtensionCount)
 {
     auto specs = GetAllCodecSpecs();
     auto it = std::find_if(specs.begin(), specs.end(),
-        [](const CodecModuleSpec& s) { return s.codecId == std::string("darkthumbs.codec.raw"); });
+        [](const CodecModuleSpec& s) { return s.codecId == std::string("explorerlens.codec.raw"); });
     ASSERT_NE(it, specs.end());
 
     // RAW codec should cover 23+ camera format extensions
@@ -175,7 +175,7 @@ TEST(CodecSpecs, ArchiveCodecCapabilities)
 {
     auto specs = GetAllCodecSpecs();
     auto it = std::find_if(specs.begin(), specs.end(),
-        [](const CodecModuleSpec& s) { return s.codecId == std::string("darkthumbs.codec.archive"); });
+        [](const CodecModuleSpec& s) { return s.codecId == std::string("explorerlens.codec.archive"); });
     ASSERT_NE(it, specs.end());
 
     EXPECT_TRUE(it->capabilities & DT_CAP_ARCHIVE);
@@ -202,12 +202,12 @@ TEST(CodecSpecs, ManifestGeneration)
     EXPECT_FALSE(manifest.empty());
     EXPECT_NE(manifest.find("\"version\": 1"), std::string::npos);
     EXPECT_NE(manifest.find("\"codecs\""), std::string::npos);
-    EXPECT_NE(manifest.find("darkthumbs.codec.webp"), std::string::npos);
-    EXPECT_NE(manifest.find("darkthumbs.codec.heif"), std::string::npos);
-    EXPECT_NE(manifest.find("darkthumbs.codec.jxl"), std::string::npos);
-    EXPECT_NE(manifest.find("darkthumbs.codec.raw"), std::string::npos);
+    EXPECT_NE(manifest.find("explorerlens.codec.webp"), std::string::npos);
+    EXPECT_NE(manifest.find("explorerlens.codec.heif"), std::string::npos);
+    EXPECT_NE(manifest.find("explorerlens.codec.jxl"), std::string::npos);
+    EXPECT_NE(manifest.find("explorerlens.codec.raw"), std::string::npos);
     EXPECT_NE(manifest.find(".webp"), std::string::npos);
-    EXPECT_NE(manifest.find("DarkThumbs_Codec_WebP.dll"), std::string::npos);
+    EXPECT_NE(manifest.find("ExplorerLens_Codec_WebP.dll"), std::string::npos);
 }
 
 //==============================================================================
@@ -507,7 +507,7 @@ TEST(MemoryEngine, InitializeAndReport)
 
     std::string report = engine.GetMemoryReport();
     EXPECT_FALSE(report.empty());
-    EXPECT_NE(report.find("DarkThumbs Memory Report"), std::string::npos);
+    EXPECT_NE(report.find("ExplorerLens Memory Report"), std::string::npos);
     EXPECT_NE(report.find("BitmapPool"), std::string::npos);
     EXPECT_NE(report.find("Trims"), std::string::npos);
 
@@ -644,13 +644,13 @@ TEST(Integration, PriorityOrdering)
 
     // Archive codec should have highest priority (lowest number)
     auto archiveIt = std::find_if(specs.begin(), specs.end(),
-        [](const CodecModuleSpec& s) { return s.codecId == std::string("darkthumbs.codec.archive"); });
+        [](const CodecModuleSpec& s) { return s.codecId == std::string("explorerlens.codec.archive"); });
     ASSERT_NE(archiveIt, specs.end());
     EXPECT_LE(archiveIt->priority, 10);
 
     // Document/Font codecs should have lower priority (higher number)
     auto docIt = std::find_if(specs.begin(), specs.end(),
-        [](const CodecModuleSpec& s) { return s.codecId == std::string("darkthumbs.codec.document"); });
+        [](const CodecModuleSpec& s) { return s.codecId == std::string("explorerlens.codec.document"); });
     ASSERT_NE(docIt, specs.end());
     EXPECT_GE(docIt->priority, 50);
 }
@@ -663,3 +663,4 @@ int main(int argc, char** argv)
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+

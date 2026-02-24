@@ -18,7 +18,7 @@ param(
     [string]$BinaryDirectory = "$PSScriptRoot\..\ x64\Release",
     
     [Parameter()]
-    [string]$MSIPath = "$PSScriptRoot\..\packaging\DarkThumbs-Setup.msi",
+    [string]$MSIPath = "$PSScriptRoot\..\packaging\ExplorerLens-Setup.msi",
     
     [Parameter()]
     [switch]$SkipBinaries,
@@ -32,7 +32,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "=== DarkThumbs Release Signing ===" -ForegroundColor Cyan
+Write-Host "=== ExplorerLens Release Signing ===" -ForegroundColor Cyan
 Write-Host "Sprint 16: Code Signing & Distribution"
 Write-Host ""
 
@@ -49,9 +49,9 @@ if (-not $CertificatePath) {
     } else {
         # Check common certificate locations
         $certPaths = @(
-            "$env:USERPROFILE\Documents\Certificates\darkthumbs.pfx",
-            "$PSScriptRoot\..\certs\darkthumbs.pfx",
-            "C:\Certificates\darkthumbs.pfx"
+            "$env:USERPROFILE\Documents\Certificates\ExplorerLens.pfx",
+            "$PSScriptRoot\..\certs\ExplorerLens.pfx",
+            "C:\Certificates\ExplorerLens.pfx"
         )
         
         foreach ($path in $certPaths) {
@@ -67,7 +67,7 @@ if (-not $CertificatePath) {
             Write-Host "  To enable signing:" -ForegroundColor Gray
             Write-Host "  1. Obtain EV code signing certificate from DigiCert/Sectigo" -ForegroundColor Gray
             Write-Host "  2. Install to Windows Certificate Store (preferred)" -ForegroundColor Gray
-            Write-Host "  3. Or place PFX at: $env:USERPROFILE\Documents\Certificates\darkthumbs.pfx" -ForegroundColor Gray
+            Write-Host "  3. Or place PFX at: $env:USERPROFILE\Documents\Certificates\ExplorerLens.pfx" -ForegroundColor Gray
             Write-Host ""
             Write-Host "Continuing without signing (development/testing only)..." -ForegroundColor Yellow
             exit 0
@@ -104,7 +104,7 @@ Write-Host ""
 function Sign-File {
     param(
         [string]$FilePath,
-        [string]$Description = "DarkThumbs Thumbnail Provider"
+        [string]$Description = "ExplorerLens Thumbnail Provider"
     )
     
     if (-not (Test-Path $FilePath)) {
@@ -172,15 +172,15 @@ if (-not $SkipBinaries) {
     Write-Host ""
     
     $binaries = @(
-        "CBXShell.dll",
-        "CBXManager.exe",
+        "LENSShell.dll",
+        "LENSManager.exe",
         "PluginHost.exe",
-        "DarkThumbsEngine.dll"
+        "ExplorerLensEngine.dll"
     )
     
     foreach ($binary in $binaries) {
         $binaryPath = Join-Path $BinaryDirectory $binary
-        if (Sign-File -FilePath $binaryPath -Description "DarkThumbs $($binary -replace '\.(dll|exe)$', '')") {
+        if (Sign-File -FilePath $binaryPath -Description "ExplorerLens $($binary -replace '\.(dll|exe)$', '')") {
             $signedCount++
         } else {
             $failedCount++
@@ -195,14 +195,14 @@ if (-not $SkipMSI) {
     Write-Host "=== Signing MSI Installer ===" -ForegroundColor Yellow
     
     if (Test-Path $MSIPath) {
-        if (Sign-File -FilePath $MSIPath -Description "DarkThumbs Installer") {
+        if (Sign-File -FilePath $MSIPath -Description "ExplorerLens Installer") {
             $signedCount++
         } else {
             $failedCount++
         }
     } else {
         Write-Host "⚠ MSI not found: $MSIPath" -ForegroundColor Yellow
-        Write-Host "  Build MSI first: msbuild packaging\DarkThumbs.wixproj /p:Configuration=Release" -ForegroundColor Gray
+        Write-Host "  Build MSI first: msbuild packaging\ExplorerLens.wixproj /p:Configuration=Release" -ForegroundColor Gray
     }
     
     Write-Host ""
@@ -232,3 +232,4 @@ if ($failedCount -eq 0 -and $signedCount -gt 0) {
     Write-Host "✗ Some files failed to sign" -ForegroundColor Red
     exit 1
 }
+

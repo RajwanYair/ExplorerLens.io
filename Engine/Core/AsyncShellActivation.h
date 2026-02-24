@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 263: Async Shell Extension
+// ExplorerLens Engine — Async Shell Extension
 // Activate AsyncThumbnailProvider for non-blocking Explorer integration.
 // Progress indication for slow decodes, timeout management, priority scheduling.
 //==============================================================================
@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Async decode request state
 enum class AsyncDecodeState : uint8_t {
@@ -112,4 +112,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

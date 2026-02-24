@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Configuration & Feature Flags
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Configuration & Feature Flags
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #pragma once
@@ -9,7 +9,7 @@
 #include <windows.h>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -77,7 +77,7 @@ struct EngineConfig {
     /// @return true if at least one setting was loaded
     bool LoadFromRegistry(
         HKEY rootKey = HKEY_CURRENT_USER,
-        const wchar_t* subKey = L"Software\\DarkThumbs\\Engine");
+        const wchar_t* subKey = L"Software\\ExplorerLens\\Engine");
     
     /// Save configuration to registry
     /// @param rootKey Registry root
@@ -85,7 +85,7 @@ struct EngineConfig {
     /// @return true if saved successfully
     bool SaveToRegistry(
         HKEY rootKey = HKEY_CURRENT_USER,
-        const wchar_t* subKey = L"Software\\DarkThumbs\\Engine") const;
+        const wchar_t* subKey = L"Software\\ExplorerLens\\Engine") const;
     
 private:
     static bool ReadRegistryBool(HKEY key, const wchar_t* valueName, bool defaultValue);
@@ -103,4 +103,5 @@ private:
 ENGINE_API EngineConfig& GetEngineConfig();
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

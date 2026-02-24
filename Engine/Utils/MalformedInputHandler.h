@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// MalformedInputHandler — Sprint 197
+// MalformedInputHandler
 // Robust handling of corrupt, truncated, and adversarial file inputs
 //
 // Architecture:
@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Input corruption type
 enum class CorruptionType : uint8_t {
@@ -134,4 +134,5 @@ private:
     MalformedInputConfig m_config;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 38 Tests: Animated & Multi-Frame Thumbnail Support
+// ExplorerLens — Sprint 38 Tests: Animated & Multi-Frame Thumbnail Support
 // Tests animation format detection, frame info, composition strategies,
 // frame count badges, stacked preview layout, Live Photo detection.
 //==============================================================================
@@ -12,7 +12,7 @@
 // Header under test
 #include "../Engine/Decoders/AnimatedThumbnailDecoder.h"
 
-using namespace DarkThumbs::Engine::Decoders;
+using namespace ExplorerLens::Engine::Decoders;
 
 //==============================================================================
 // Animation Format Tests
@@ -320,3 +320,4 @@ TEST(DecoderConfig, Performance)
     EXPECT_FALSE(config.enableStackedPDFPreview);
     EXPECT_EQ(config.maxFramesToDecode, 1u);
 }
+

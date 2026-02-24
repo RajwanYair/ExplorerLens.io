@@ -1,4 +1,4 @@
-# DarkThumbs v7.1.0 — Integration Test Matrix
+# ExplorerLens v7.1.0 — Integration Test Matrix
 # Sprint 72: Comprehensive test coverage tracking
 
 ## Test Categories
@@ -74,3 +74,4 @@
 
 **Last Updated:** February 18, 2026  
 **Sprint:** 72 / 74
+

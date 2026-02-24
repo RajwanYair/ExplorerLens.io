@@ -155,9 +155,9 @@ cmake --build build-msvc --config Release
 
 ---
 
-## Integration with DarkThumbs
+## Integration with ExplorerLens
 
-### Include Paths (CBXShell.vcxproj)
+### Include Paths (LENSShell.vcxproj)
 ```xml
 <AdditionalIncludeDirectories>
   ..\Engine;
@@ -173,7 +173,7 @@ cmake --build build-msvc --config Release
 </AdditionalIncludeDirectories>
 ```
 
-### Library Paths (CBXShell.vcxproj)
+### Library Paths (LENSShell.vcxproj)
 ```xml
 <AdditionalLibraryDirectories>
   ..\Engine\Release\Release;
@@ -188,10 +188,10 @@ cmake --build build-msvc --config Release
 </AdditionalLibraryDirectories>
 ```
 
-### Linked Libraries (CBXShell.vcxproj)
+### Linked Libraries (LENSShell.vcxproj)
 ```xml
 <AdditionalDependencies>
-  DarkThumbsEngine.lib;
+  ExplorerLensEngine.lib;
   zlibstatic.lib;
   liblz4_static.lib;
   zstd_static.lib;
@@ -285,3 +285,4 @@ cmake --build build --config Release
 - libwebp: https://github.com/webmproject/libwebp
 - libavif: https://github.com/AOMediaCodec/libavif
 - libjxl: https://github.com/libjxl/libjxl
+

@@ -1,6 +1,6 @@
 @echo off
 REM build-tests.cmd - Build GPU test tools
-REM Builds GPUThumbnailTest.exe and CBXBench.exe
+REM Builds GPUThumbnailTest.exe and LENSBench.exe
 
 setlocal enabledelayedexpansion
 
@@ -57,17 +57,17 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo ========================================
-echo Building CBXBench.exe
+echo Building LENSBench.exe
 echo ========================================
 echo.
 
-cl.exe /EHsc /std:c++20 /O2 /Fe:CBXBench.exe ^
-    tests\CBXBench.cpp ^
+cl.exe /EHsc /std:c++20 /O2 /Fe:LENSBench.exe ^
+    tests\LENSBench.cpp ^
     /I. ^
     /link windowscodecs.lib
 
 if %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Failed to build CBXBench.exe
+    echo ERROR: Failed to build LENSBench.exe
     exit /b 1
 )
 
@@ -80,13 +80,14 @@ echo Executables:
 if exist GPUThumbnailTest.exe (
     dir GPUThumbnailTest.exe | findstr "GPUThumbnailTest.exe"
 )
-if exist CBXBench.exe (
-    dir CBXBench.exe | findstr "CBXBench.exe"
+if exist LENSBench.exe (
+    dir LENSBench.exe | findstr "LENSBench.exe"
 )
 
 echo.
 echo Usage:
 echo   GPUThumbnailTest.exe -i C:\TestImages -o C:\Thumbnails -s 256 -v
-echo   CBXBench.exe -i C:\TestImages -o results.csv -s 256 -n 10
+echo   LENSBench.exe -i C:\TestImages -o results.csv -s 256 -n 10
 
 endlocal
+

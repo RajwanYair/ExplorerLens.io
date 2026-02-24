@@ -1,5 +1,5 @@
 /******************************************************************************
- * DarkThumbs — Sprint 33: Crash Intelligence Tests
+ * ExplorerLens — Sprint 33: Crash Intelligence Tests
  * 22 GTest cases covering minidump capture, symbol pipeline, crash bucketing,
  * diagnostics integration, and CI symbol verification.
  *****************************************************************************/
@@ -84,7 +84,7 @@ struct CrashBucket {
 
 TEST(CrashIntelligence, StackFrameIsSymbolized) {
     CrashIntel::StackFrame frame;
-    frame.function_name = L"CBXShell::DecodeImage";
+    frame.function_name = L"LENSShell::DecodeImage";
     EXPECT_TRUE(frame.IsSymbolized());
 }
 
@@ -105,11 +105,11 @@ TEST(CrashIntelligence, StackFrameNotSymbolizedWhenEmpty) {
 
 TEST(CrashIntelligence, SignatureBucketKeyFormat) {
     CrashIntel::CrashSignature sig;
-    sig.module = L"CBXShell.dll";
+    sig.module = L"LENSShell.dll";
     sig.exception_code = STATUS_ACCESS_VIOLATION;
     sig.top_frames = {L"DecodeImage", L"LoadBuffer", L"ReadFile"};
     auto key = sig.ToBucketKey();
-    EXPECT_TRUE(key.find(L"CBXShell.dll") != std::wstring::npos);
+    EXPECT_TRUE(key.find(L"LENSShell.dll") != std::wstring::npos);
     EXPECT_TRUE(key.find(L"0xC0000005") != std::wstring::npos);
     EXPECT_TRUE(key.find(L"DecodeImage") != std::wstring::npos);
 }
@@ -201,17 +201,17 @@ TEST(CrashIntelligence, BucketMaxDumpIds) {
 //============================================================================
 
 TEST(CrashIntelligence, PrivacySanitizePath) {
-    std::wstring path = L"C:\\Users\\john.doe\\AppData\\DarkThumbs\\CBXShell.dll";
+    std::wstring path = L"C:\\Users\\john.doe\\AppData\\ExplorerLens\\LENSShell.dll";
     auto pos = path.find_last_of(L"\\/");
     std::wstring sanitized = L"<path>\\" + path.substr(pos + 1);
-    EXPECT_EQ(sanitized, L"<path>\\CBXShell.dll");
+    EXPECT_EQ(sanitized, L"<path>\\LENSShell.dll");
 }
 
 TEST(CrashIntelligence, PrivacySanitizeNoPath) {
-    std::wstring path = L"CBXShell.dll";
+    std::wstring path = L"LENSShell.dll";
     auto pos = path.find_last_of(L"\\/");
     if (pos == std::wstring::npos) {
-        EXPECT_EQ(path, L"CBXShell.dll");
+        EXPECT_EQ(path, L"LENSShell.dll");
     }
 }
 
@@ -221,9 +221,9 @@ TEST(CrashIntelligence, PrivacySanitizeNoPath) {
 
 TEST(CrashIntelligence, SymbolVerificationAllPresent) {
     // Simulate: all binaries have matching PDBs
-    std::vector<std::wstring> binaries = {L"CBXShell.dll", L"CBXManager.exe"};
+    std::vector<std::wstring> binaries = {L"LENSShell.dll", L"LENSManager.exe"};
     std::unordered_map<std::wstring, bool> pdbs = {
-        {L"CBXShell.dll", true}, {L"CBXManager.exe", true}
+        {L"LENSShell.dll", true}, {L"LENSManager.exe", true}
     };
     uint32_t matched = 0;
     for (auto& b : binaries) {
@@ -234,9 +234,9 @@ TEST(CrashIntelligence, SymbolVerificationAllPresent) {
 }
 
 TEST(CrashIntelligence, SymbolVerificationMissing) {
-    std::vector<std::wstring> binaries = {L"CBXShell.dll", L"CBXManager.exe", L"PluginHost.exe"};
+    std::vector<std::wstring> binaries = {L"LENSShell.dll", L"LENSManager.exe", L"PluginHost.exe"};
     std::unordered_map<std::wstring, bool> pdbs = {
-        {L"CBXShell.dll", true}, {L"CBXManager.exe", true}
+        {L"LENSShell.dll", true}, {L"LENSManager.exe", true}
     };
     uint32_t missing = 0;
     std::vector<std::wstring> missing_modules;
@@ -274,3 +274,4 @@ TEST(CrashIntelligence, DiagnosticsSummaryNoCrashesOldWindow) {
     bool hasRecent = (now - last_crash) < std::chrono::hours(24);
     EXPECT_FALSE(hasRecent);
 }
+

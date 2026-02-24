@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 132 — Explorer Work Scheduler
+// Explorer Work Scheduler
 // Viewport-aware thumbnail request prioritization with cancel-on-scroll
 // and adaptive concurrency for Explorer batch operations.
 
@@ -14,7 +14,7 @@
 #include <functional>
 #include <queue>
 
-namespace DarkThumbs::Pipeline {
+namespace ExplorerLens::Pipeline {
 
 // ─── Work item priority ────────────────────────────────────────────
 enum class WorkPriority : uint8_t {
@@ -300,4 +300,5 @@ private:
     mutable std::mutex m_mutex;
 };
 
-} // namespace DarkThumbs::Pipeline
+} // namespace ExplorerLens::Pipeline
+

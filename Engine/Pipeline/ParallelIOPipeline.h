@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 342: Parallel I/O Pipeline
+// ExplorerLens Engine — Parallel I/O Pipeline
 // Overlapped async I/O with scatter-gather DMA staging, read-ahead
 // distance tuning, I/O priority clamping, and per-volume queue depth
 // optimization for thumbnail decode throughput.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class IOBackend    : uint8_t { Win32Overlapped=0, IOCP, WinRTAsync, DirectStorage, COUNT };
 enum class IOPriority   : uint8_t { Critical=0,High,Normal,Low,Idle,COUNT };
@@ -69,4 +69,5 @@ public:
     static constexpr size_t VolumeTypeCount() { return static_cast<size_t>(VolumeType::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

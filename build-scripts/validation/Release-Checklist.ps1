@@ -24,7 +24,7 @@ function Write-Fail { param([string]$Text) Write-Host "  ✗ " -ForegroundColor 
 function Write-Warn { param([string]$Text) Write-Host "  ⚠ " -ForegroundColor Yellow -NoNewline; Write-Host $Text; $script:ChecksWarned++ }
 
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs v$Version Release Checklist" -ForegroundColor Cyan
+Write-Host "ExplorerLens v$Version Release Checklist" -ForegroundColor Cyan
 Write-Host "Sprint 10: Release Governance & Packaging" -ForegroundColor Cyan
 Write-Host "============================================`n" -ForegroundColor Cyan
 
@@ -41,8 +41,8 @@ try {
         "MASTER_PLAN.md"             = $Version
         "README.md"                  = $Version
         "CHANGELOG.md"               = $Version
-        "packaging/DarkThumbs.wxs"   = $Version
-        "CBXShell/CBXShellClass.cpp" = $Version
+        "packaging/ExplorerLens.wxs"   = $Version
+        "LENSShell/LENSShellClass.cpp" = $Version
     }
     
     $VersionMismatches = @()
@@ -70,9 +70,9 @@ try {
         Write-CheckHeader "2. Build Artifacts"
         
         $BuildArtifacts = @{
-            "x64/Release/CBXShell.dll"       = 2800000  # ~2.8 MB minimum
-            "x64/Release/CBXManager.exe"     = 350000  # ~350 KB minimum
-            "build/lib/DarkThumbsEngine.lib" = 100000000  # ~100 MB minimum
+            "x64/Release/LENSShell.dll"       = 2800000  # ~2.8 MB minimum
+            "x64/Release/LENSManager.exe"     = 350000  # ~350 KB minimum
+            "build/lib/ExplorerLensEngine.lib" = 100000000  # ~100 MB minimum
         }
         
         foreach ($artifact in $BuildArtifacts.Keys) {
@@ -94,7 +94,7 @@ try {
         }
         
         # Check for debug symbols
-        $pdbFiles = @("x64/Release/CBXShell.pdb", "x64/Release/CBXManager.pdb")
+        $pdbFiles = @("x64/Release/LENSShell.pdb", "x64/Release/LENSManager.pdb")
         foreach ($pdb in $pdbFiles) {
             $pdbPath = Join-Path $RootDir $pdb
             if (Test-Path $pdbPath) {
@@ -111,7 +111,7 @@ try {
     if (-not $SkipTests) {
         Write-CheckHeader "3. Test Suite Execution"
         
-        $testExecutable = Join-Path $RootDir "build\bin\Release\DarkThumbsTests.exe"
+        $testExecutable = Join-Path $RootDir "build\bin\Release\ExplorerLensTests.exe"
         if (Test-Path $testExecutable) {
             Write-Host "  Running test suite..." -ForegroundColor Gray
             
@@ -211,16 +211,16 @@ try {
         Write-CheckHeader "5. Packaging Readiness"
         
         # Check MSI installer
-        $msiPath = Join-Path $RootDir "packaging\DarkThumbs-Setup-$Version.msi"
+        $msiPath = Join-Path $RootDir "packaging\ExplorerLens-Setup-$Version.msi"
         if (Test-Path $msiPath) {
             $msiSize = [math]::Round((Get-Item $msiPath).Length / 1MB, 2)
             Write-Pass "MSI installer exists ($msiSize MB)"
         } else {
-            Write-Warn "MSI installer not found at: DarkThumbs-Setup-$Version.msi"
+            Write-Warn "MSI installer not found at: ExplorerLens-Setup-$Version.msi"
         }
         
         # Check portable ZIP
-        $zipPath = Join-Path $RootDir "packaging\output\DarkThumbs-$Version-Portable.zip"
+        $zipPath = Join-Path $RootDir "packaging\output\ExplorerLens-$Version-Portable.zip"
         if (Test-Path $zipPath) {
             $zipSize = [math]::Round((Get-Item $zipPath).Length / 1MB, 2)
             Write-Pass "Portable ZIP exists ($zipSize MB)"
@@ -237,7 +237,7 @@ try {
         }
         
         # Check for code signing certificate
-        $certPath = Join-Path $RootDir "certs\darkthumbs-codesign.pfx"
+        $certPath = Join-Path $RootDir "certs\ExplorerLens-codesign.pfx"
         if (Test-Path $certPath) {
             Write-Pass "Code signing certificate available"
         } else {
@@ -370,3 +370,4 @@ try {
 } finally {
     Pop-Location
 }
+

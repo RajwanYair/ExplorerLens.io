@@ -1,11 +1,11 @@
 # Find-All-Tools.ps1
-# Detects all required build tools for DarkThumbs
+# Detects all required build tools for ExplorerLens
 
 $ErrorActionPreference = "Continue"
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Build Tools Detector" -ForegroundColor Cyan
+Write-Host "ExplorerLens Build Tools Detector" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -170,7 +170,7 @@ Write-Host ""
 
 if ($allFound) {
     Write-Host "All build tools found!" -ForegroundColor Green
-    Write-Host "You can now build DarkThumbs." -ForegroundColor Cyan
+    Write-Host "You can now build ExplorerLens." -ForegroundColor Cyan
 } else {
     Write-Host "Some tools are missing." -ForegroundColor Yellow
     Write-Host "Please refer to .github\WINDOWS_BUILD_TOOLS.md for installation instructions." -ForegroundColor Yellow
@@ -180,3 +180,4 @@ Write-Host ""
 
 # Return tools object
 return $tools
+

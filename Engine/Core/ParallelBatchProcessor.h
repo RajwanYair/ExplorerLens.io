@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 265: Parallel Batch Decode
+// ExplorerLens Engine — Parallel Batch Decode
 // Activate ParallelBatchDecoder with thread pool and per-format concurrency.
 //==============================================================================
 #pragma once
@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Batch decode scheduling policy
 enum class BatchPolicy : uint8_t {
@@ -86,4 +86,5 @@ public:
     }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Decoder Registry
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Decoder Registry
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #pragma once
@@ -9,7 +9,7 @@
 #include <vector>
 #include <memory>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -129,4 +129,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

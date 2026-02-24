@@ -1,5 +1,5 @@
 // HDRDecoder.cpp - Radiance RGBE HDR Image Decoder Implementation
-// DarkThumbs Engine v6.1.0+
+// ExplorerLens Engine v6.1.0+
 // Specification: Radiance HDR (RGBE) format - Greg Ward
 
 #include "HDRDecoder.h"
@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <smmintrin.h>  // SSE4.1
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* HDRDecoder::m_extensions[] = { L".hdr" };
@@ -296,4 +296,5 @@ std::unique_ptr<uint8_t[]> HDRDecoder::ReadFileData(const wchar_t* path, size_t&
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

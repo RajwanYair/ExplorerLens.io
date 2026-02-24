@@ -1,9 +1,9 @@
 # ===========================================================================
 # Build-Critical-Libraries.ps1
-# Build critical missing libraries for DarkThumbs using NMake
+# Build critical missing libraries for ExplorerLens using NMake
 # ===========================================================================
 # 
-# ⚠️  DEPRECATED: Use Build-All-DarkThumbs-V7.ps1 instead
+# ⚠️  DEPRECATED: Use Build-All-ExplorerLens-V7.ps1 instead
 # This script is kept for reference only.
 # See docs/development/PATH_UPDATE_SUMMARY_2026-02-16.md for current build workflow.
 # 
@@ -51,7 +51,7 @@ if (-not (Test-Path $zstdOutput)) {
     New-Item -ItemType Directory -Path $zstdBuild -Force | Out-Null
     
     $cmd = @"
-call "$vcvarsall" x64 && cd /d "$PWD\$zstdBuild" && cmake "$PWD\$zstdSrc" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DZSTD_BUILD_PROGRAMS=OFF -DZSTD_BUILD_SHARED=OFF -DZSTD_BUILD_STATIC=ON && nmake
+call "$vcvarsall" x64 && cd /d "$PWD\$zstdBuild" && cmake "$PWD\$zstdSrc" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DZSTD_BUILD_PROGRAMS=ON -DZSTD_BUILD_SHARED=ON -DZSTD_BUILD_STATIC=ON && nmake
 "@
     
     Write-Host "  Configuring and building..." -ForegroundColor White
@@ -91,7 +91,7 @@ if (-not (Test-Path $bzip2Output)) {
     New-Item -ItemType Directory -Path $bzip2Build -Force | Out-Null
     
     $cmd = @"
-call "$vcvarsall" x64 && cd /d "$PWD\$bzip2Build" && cmake "$PWD\$bzip2Src" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF && nmake
+call "$vcvarsall" x64 && cd /d "$PWD\$bzip2Build" && cmake "$PWD\$bzip2Src" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON && nmake
 "@
     
     Write-Host "  Configuring and building..." -ForegroundColor White
@@ -142,7 +142,7 @@ if (-not ((Test-Path $webpOutput) -and (Test-Path $sharpyuvOutput))) {
     New-Item -ItemType Directory -Path $webpBuild -Force | Out-Null
     
     $cmd = @"
-call "$vcvarsall" x64 && cd /d "$PWD\$webpBuild" && cmake "$PWD\$webpSrc" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DWEBP_BUILD_ANIM_UTILS=OFF -DWEBP_BUILD_CWEBP=OFF -DWEBP_BUILD_DWEBP=OFF -DWEBP_BUILD_GIF2WEBP=OFF -DWEBP_BUILD_IMG2WEBP=OFF -DWEBP_BUILD_VWEBP=OFF -DWEBP_BUILD_WEBPINFO=OFF -DWEBP_BUILD_WEBPMUX=OFF -DWEBP_BUILD_EXTRAS=OFF -DBUILD_SHARED_LIBS=OFF && nmake
+call "$vcvarsall" x64 && cd /d "$PWD\$webpBuild" && cmake "$PWD\$webpSrc" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DWEBP_BUILD_ANIM_UTILS=ON -DWEBP_BUILD_CWEBP=ON -DWEBP_BUILD_DWEBP=ON -DWEBP_BUILD_GIF2WEBP=ON -DWEBP_BUILD_IMG2WEBP=ON -DWEBP_BUILD_VWEBP=ON -DWEBP_BUILD_WEBPINFO=ON -DWEBP_BUILD_WEBPMUX=ON -DWEBP_BUILD_EXTRAS=ON -DBUILD_SHARED_LIBS=ON && nmake
 "@
     
     Write-Host "  Configuring and building..." -ForegroundColor White
@@ -208,7 +208,7 @@ if (-not (Test-Path $minizipOutput)) {
     $lzmaRoot = (Resolve-Path "external\compression-libs\lzma-26.00").Path
     
     $cmd = @"
-call "$vcvarsall" x64 && cd /d "$PWD\$minizipBuild" && cmake "$PWD\$minizipSrc" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=OFF -DMZ_ZLIB=ON -DMZ_BZIP2=ON -DMZ_LZMA=ON -DMZ_ZSTD=ON -DZLIB_ROOT="$zlibRoot" -DBZIP2_ROOT="$bzip2Root" -DZSTD_ROOT="$zstdRoot" -DLIBLZMA_ROOT="$lzmaRoot" && nmake
+call "$vcvarsall" x64 && cd /d "$PWD\$minizipBuild" && cmake "$PWD\$minizipSrc" -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DMZ_COMPAT=ON -DMZ_ZLIB=ON -DMZ_BZIP2=ON -DMZ_LZMA=ON -DMZ_ZSTD=ON -DZLIB_ROOT="$zlibRoot" -DBZIP2_ROOT="$bzip2Root" -DZSTD_ROOT="$zstdRoot" -DLIBLZMA_ROOT="$lzmaRoot" && nmake
 "@
     
     Write-Host "  Configuring and building..." -ForegroundColor White
@@ -272,10 +272,11 @@ Write-Host "Ready: $ready / $($allLibs.Count)" -ForegroundColor $(if ($ready -eq
 
 if ($missing -eq 0) {
     Write-Host ""
-    Write-Host "All critical libraries built! Ready to build CBXShell." -ForegroundColor Green
+    Write-Host "All critical libraries built! Ready to build LENSShell." -ForegroundColor Green
     exit 0
 } else {
     Write-Host ""
     Write-Host "Some libraries are missing. Will attempt to build anyway." -ForegroundColor Yellow
     exit 0
 }
+

@@ -1,6 +1,6 @@
 # Sample Plugin - Reference Implementation
 
-This is a reference plugin implementation for the DarkThumbs Plugin SDK. It demonstrates how to create a plugin that decodes a custom image format (.xyz).
+This is a reference plugin implementation for the ExplorerLens Plugin SDK. It demonstrates how to create a plugin that decodes a custom image format (.xyz).
 
 ## Overview
 
@@ -20,7 +20,7 @@ The Sample Plugin shows:
 
 - Visual Studio 2022 or later
 - Windows SDK 10.0.26100.0 or later
-- DarkThumbs SDK headers
+- ExplorerLens SDK headers
 
 ### Steps
 
@@ -65,7 +65,7 @@ Compress-Archive -Path manifest.json,plugin.dll,assets,licenses,docs -Destinatio
 
 ## Installation
 
-1. Open DarkThumbs Manager
+1. Open ExplorerLens Manager
 2. Go to Plugins → Install Plugin
 3. Select `SamplePlugin.dtplugin`
 4. Review capabilities and click Install
@@ -108,7 +108,7 @@ Edit `SamplePlugin.cpp`:
 ```cpp
 static const DT_PluginInfo g_pluginInfo = {
     DT_PLUGIN_ABI_VERSION,
-    L"darkthumbs.plugin.myplugin",      // Change ID
+    L"explorerlens.plugin.myplugin",      // Change ID
     L"My Custom Plugin",                 // Change name
     L"1.0.0",                           
     L"Your Name",                        // Change vendor
@@ -154,7 +154,7 @@ Edit `manifest.json`:
 ```json
 {
   "plugin": {
-    "id": "darkthumbs.plugin.myplugin",
+    "id": "explorerlens.plugin.myplugin",
     "name": "My Custom Plugin",
     ...
   },
@@ -284,7 +284,7 @@ cat results.json
 
 ## Resources
 
-- [DarkThumbs Plugin SDK Documentation](../../docs/PLUGIN_SDK.md)
+- [ExplorerLens Plugin SDK Documentation](../../docs/PLUGIN_SDK.md)
 - [Plugin Package Format](../../docs/PLUGIN_PACKAGE_FORMAT_V1.md)
 - [Marketplace Submission Guide](../../docs/PLUGIN_MARKETPLACE_PROTOCOL_V1.md)
 - [Plugin Sandbox Model](../../docs/PLUGIN_SANDBOX_MODEL_V1.md)
@@ -295,6 +295,7 @@ MIT License - see LICENSE.txt
 
 ## Support
 
-- GitHub Issues: <https://github.com/darkthumbs/plugin-samples/issues>
-- Documentation: <https://docs.darkthumbs.dev>
-- Discord: <https://discord.gg/darkthumbs>
+- GitHub Issues: <https://github.com/explorerlens/plugin-samples/issues>
+- Documentation: <https://docs.explorerlens.dev>
+- Discord: <https://discord.gg/explorerlens>
+

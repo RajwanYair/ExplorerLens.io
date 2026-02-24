@@ -1,11 +1,11 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build Progress Tracking Module
+# ExplorerLens v7.0 - Build Progress Tracking Module
 # Provides real-time build progress tracking with elapsed time, step indicators, and estimates
 # Date: February 16, 2026
 
 <#
 .SYNOPSIS
-    Progress tracking module for DarkThumbs build system
+    Progress tracking module for ExplorerLens build system
 
 .DESCRIPTION
     Provides functions to track build progress with:
@@ -21,7 +21,7 @@
     Complete-BuildProgress -Progress $progress
 
 .NOTES
-    Author: DarkThumbs Development Team
+    Author: ExplorerLens Development Team
     Version: 7.0
 #>
 
@@ -320,3 +320,4 @@ function Show-BuildSpinner {
 
 # Functions are automatically available when dot-sourced
 # No export needed for script files
+

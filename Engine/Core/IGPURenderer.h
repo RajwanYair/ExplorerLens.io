@@ -1,13 +1,13 @@
 //==============================================================================
-// DarkThumbs Engine - GPU Renderer Interface
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - GPU Renderer Interface
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #pragma once
 
 #include "Types.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
@@ -87,4 +87,5 @@ public:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

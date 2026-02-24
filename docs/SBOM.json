@@ -3,20 +3,20 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:darkthumbs-v6.0.0-2026-01-06",
+  "serialNumber": "urn:uuid:ExplorerLens-v6.0.0-2026-01-06",
   "metadata": {
     "timestamp": "2026-01-06T09:00:00Z",
     "tools": [
       {
-        "vendor": "DarkThumbs Project",
+        "vendor": "ExplorerLens Project",
         "name": "SBOM Generator",
         "version": "1.0.0"
       }
     ],
     "component": {
       "type": "application",
-      "bom-ref": "darkthumbs-main",
-      "name": "DarkThumbs",
+      "bom-ref": "ExplorerLens-main",
+      "name": "ExplorerLens",
       "version": "6.0.0",
       "description": "Advanced Windows Shell Extension for thumbnail generation supporting 50+ formats with GPU acceleration",
       "licenses": [
@@ -27,7 +27,7 @@
           }
         }
       ],
-      "copyright": "Copyright (c) 2024-2026 DarkThumbs Project"
+      "copyright": "Copyright (c) 2024-2026 ExplorerLens Project"
     }
   },
   "components": [
@@ -222,7 +222,7 @@
   ],
   "dependencies": [
     {
-      "ref": "darkthumbs-main",
+      "ref": "ExplorerLens-main",
       "dependsOn": [
         "zlib-1.3.1",
         "zstd-1.5.7",
@@ -259,7 +259,7 @@
     {
       "aggregate": "complete",
       "assemblies": [
-        "darkthumbs-main"
+        "ExplorerLens-main"
       ]
     }
   ]

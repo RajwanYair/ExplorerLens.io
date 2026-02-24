@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 46: Format Conversion & Export Pipeline
+// ExplorerLens Engine — Format Conversion & Export Pipeline
 //
 // Provides image format conversion between supported formats, batch
 // conversion with queue management, quality/size optimization,
@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace DarkThumbs::Engine::Codec {
+namespace ExplorerLens::Engine::Codec {
 
 //==============================================================================
 // Output Format — Supported conversion targets
@@ -382,4 +382,5 @@ public:
     }
 };
 
-} // namespace DarkThumbs::Engine::Codec
+} // namespace ExplorerLens::Engine::Codec
+

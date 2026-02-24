@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Build DarkThumbs (Release)",
+      "name": "Build ExplorerLens (Release)",
       "type": "PowerShell",
       "request": "launch",
       "script": "${workspaceFolder}/scripts/build.ps1",
@@ -14,7 +14,7 @@
       "createTemporaryIntegratedConsole": false
     },
     {
-      "name": "Build DarkThumbs (Debug)",
+      "name": "Build ExplorerLens (Debug)",
       "type": "PowerShell",
       "request": "launch",
       "script": "${workspaceFolder}/scripts/build.ps1",
@@ -39,7 +39,7 @@
       "createTemporaryIntegratedConsole": false
     },
     {
-      "name": "Install DarkThumbs (Admin Required)",
+      "name": "Install ExplorerLens (Admin Required)",
       "type": "PowerShell",
       "request": "launch",
       "script": "${workspaceFolder}/scripts/install.ps1",
@@ -51,7 +51,7 @@
       "createTemporaryIntegratedConsole": false
     },
     {
-      "name": "Uninstall DarkThumbs (Admin Required)",
+      "name": "Uninstall ExplorerLens (Admin Required)",
       "type": "PowerShell",
       "request": "launch",
       "script": "${workspaceFolder}/scripts/install.ps1",
@@ -130,10 +130,10 @@
       "createTemporaryIntegratedConsole": false
     },
     {
-      "name": "C++: Launch CBXManager",
+      "name": "C++: Launch LENSManager",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}\\x64\\Release\\CBXManager.exe",
+      "program": "${workspaceFolder}\\x64\\Release\\LENSManager.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -141,10 +141,10 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "C++: Debug CBXManager",
+      "name": "C++: Debug LENSManager",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}\\x64\\Debug\\CBXManager.exe",
+      "program": "${workspaceFolder}\\x64\\Debug\\LENSManager.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

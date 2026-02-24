@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 166 — Zero-Copy Pipeline
+// Zero-Copy Pipeline
 // Map-view decode, scatter-gather readback, pinned memory handoff to GPU.
 // Eliminates intermediate copy for Direct3D 11 texture upload.
 
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs::Pipeline {
+namespace ExplorerLens::Pipeline {
 
 // ─── Buffer origin ────────────────────────────────────────────────────────────
 
@@ -114,4 +114,5 @@ public:
     }
 };
 
-} // namespace DarkThumbs::Pipeline
+} // namespace ExplorerLens::Pipeline
+

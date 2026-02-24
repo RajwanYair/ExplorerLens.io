@@ -1,6 +1,6 @@
 // ImageDecoder.h - WIC-based Image Decoder for Core Formats
-// DarkThumbs Engine v1.0.0
-// Copyright (c) 2025 DarkThumbs Project
+// ExplorerLens Engine v1.0.0
+// Copyright (c) 2025 ExplorerLens Project
 //
 // Supports: JPEG, PNG, BMP, GIF, TIFF using Windows Imaging Component
 // Features:
@@ -18,7 +18,7 @@
 #include <wrl/client.h>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class ImageDecoder : public IThumbnailDecoder {
@@ -62,4 +62,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

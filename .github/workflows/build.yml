@@ -1,4 +1,4 @@
-name: Build DarkThumbs
+name: Build ExplorerLens
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 env:
   BUILD_TYPE: Release
-  SOLUTION_FILE: CBXShell.sln
+  SOLUTION_FILE: LENSShell.sln
 
 jobs:
   build:
@@ -246,8 +246,8 @@ jobs:
           Write-Host ""
 
           $outputs = @(
-            @{ Path = "x64\Release\CBXShell.dll"; Description = "Main shell extension DLL" },
-            @{ Path = "x64\Release\CBXManager.exe"; Description = "Configuration utility" }
+            @{ Path = "x64\Release\LENSShell.dll"; Description = "Main shell extension DLL" },
+            @{ Path = "x64\Release\LENSManager.exe"; Description = "Configuration utility" }
           )
 
           $missing = @()
@@ -280,10 +280,10 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: DarkThumbs-x64-Release
+          name: ExplorerLens-x64-Release
           path: |
-            x64/Release/CBXShell.dll
-            x64/Release/CBXManager.exe
+            x64/Release/LENSShell.dll
+            x64/Release/LENSManager.exe
             x64/Release/*.pdb
           retention-days: 30
 
@@ -329,4 +329,5 @@ jobs:
 
           Write-Host "" >> $env:GITHUB_STEP_SUMMARY
           Write-Host "---" >> $env:GITHUB_STEP_SUMMARY
-          Write-Host "*Built with DarkThumbs CI/CD Pipeline*" >> $env:GITHUB_STEP_SUMMARY
+          Write-Host "*Built with ExplorerLens CI/CD Pipeline*" >> $env:GITHUB_STEP_SUMMARY
+

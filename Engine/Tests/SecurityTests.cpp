@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Security Test Suite
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Security Test Suite
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Comprehensive tests for plugin security infrastructure including:
  * - Isolation mode selection
@@ -12,7 +12,7 @@
  * - Trust management
  *****************************************************************************/
 
-#include <gtest/gtest.h>
+#include "GTestShim.h"
 #include "../Plugin/PluginManager.h"
 #include "../Plugin/PluginDecoder.h"
 #include "../Plugin/IsolationModeSelector.h"
@@ -24,8 +24,8 @@
 #include <thread>
 #include <chrono>
 
-using namespace DarkThumbs;
-using namespace DarkThumbs::Engine;
+using namespace ExplorerLens;
+using namespace ExplorerLens::Engine;
 
 //============================================================================
 // Test Fixtures
@@ -35,7 +35,7 @@ class SecurityTestFixture : public ::testing::Test {
 protected:
     void SetUp() override {
         // Create test plugin directory
-        test_plugin_dir_ = std::filesystem::temp_directory_path() / "darkthumbs_test_plugins";
+        test_plugin_dir_ = std::filesystem::temp_directory_path() / "explorerlens_test_plugins";
         std::filesystem::create_directories(test_plugin_dir_);
         
         // Load IsolationModeSelector configuration
@@ -178,7 +178,7 @@ TEST_F(SecurityTestFixture, IPC_NamedPipe_ConnectionEstablished) {
     // Named pipe connection is tested implicitly through PluginHost tests
     // This test verifies the concept
     
-    std::wstring pipe_name = L"\\\\.\\pipe\\DarkThumbs_Test_" + 
+    std::wstring pipe_name = L"\\\\.\\pipe\\ExplorerLens_Test_" + 
                             std::to_wstring(GetCurrentProcessId());
     
     // Create pipe
@@ -196,7 +196,7 @@ TEST_F(SecurityTestFixture, IPC_NamedPipe_ConnectionEstablished) {
 }
 
 TEST_F(SecurityTestFixture, IPC_SharedMemory_ReadWrite) {
-    const wchar_t* test_section_name = L"DarkThumbs_Test_SharedMem";
+    const wchar_t* test_section_name = L"ExplorerLens_Test_SharedMem";
     const size_t test_size = 4096;
     
     SharedMemorySection shared_mem(test_section_name, test_size);
@@ -273,7 +273,7 @@ TEST_F(SecurityTestFixture, Crash_MultiplePlugins_IndependentTracking) {
 //============================================================================
 
 TEST_F(SecurityTestFixture, JobObject_CreationAndConfiguration) {
-    std::wstring job_name = L"DarkThumbs_Test_Job";
+    std::wstring job_name = L"ExplorerLens_Test_Job";
     JobObjectManager job_mgr(job_name);
     
     EXPECT_TRUE(job_mgr.IsValid()) << "Job object should be created successfully";
@@ -294,7 +294,7 @@ TEST_F(SecurityTestFixture, JobObject_CreationAndConfiguration) {
 }
 
 TEST_F(SecurityTestFixture, JobObject_ProcessRestrictions) {
-    std::wstring job_name = L"DarkThumbs_Test_Restricted_Job";
+    std::wstring job_name = L"ExplorerLens_Test_Restricted_Job";
     JobObjectManager job_mgr(job_name);
     
     if (job_mgr.IsValid()) {
@@ -393,7 +393,7 @@ int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     
     std::cout << "===================================================\n";
-    std::cout << " DarkThumbs Security Test Suite\n";
+    std::cout << " ExplorerLens Security Test Suite\n";
     std::cout << " Sprint 14 - Plugin Security Infrastructure\n";
     std::cout << "===================================================\n\n";
     
@@ -405,3 +405,4 @@ int main(int argc, char** argv) {
     
     return result;
 }
+

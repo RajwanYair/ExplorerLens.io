@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// PerfRegressionGate.h — Sprint 146
+// PerfRegressionGate.h
 // CI-enforceable performance regression gate with KPI thresholds and trends
 // ============================================================================
 
@@ -13,7 +13,7 @@
 #include <numeric>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 // ── KPI identifiers ────────────────────────────────────────────────────────
 
@@ -305,4 +305,5 @@ private:
     std::map<PerfKPI, std::vector<PerfSample>> m_history;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

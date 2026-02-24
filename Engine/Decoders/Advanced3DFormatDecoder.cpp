@@ -1,5 +1,5 @@
 //==============================================================================
-// Advanced3DFormatDecoder — Sprint 200
+// Advanced3DFormatDecoder
 // Extended 3D format (FBX/USD/3MF) decoder implementation
 //==============================================================================
 
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <cstring>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 static const wchar_t* s_3dExtensions[] = {
     L".fbx", L".usd", L".usda", L".usdc", L".usdz",
@@ -136,6 +136,8 @@ bool Advanced3DFormatDecoder::ParseFBXBinary(const uint8_t* data, size_t size) {
 
 //------------------------------------------------------------------------------
 bool Advanced3DFormatDecoder::ParseUSDA(const uint8_t* data, size_t size) {
+    (void)data;
+    (void)size;
     m_meshInfo.name = L"USD Scene";
     // Placeholder geometry (tetrahedron)
     m_vertices = {{0, 1, 0}, {-1, -1, 0.5f}, {1, -1, 0.5f}, {0, -1, -1}};
@@ -148,6 +150,8 @@ bool Advanced3DFormatDecoder::ParseUSDA(const uint8_t* data, size_t size) {
 
 //------------------------------------------------------------------------------
 bool Advanced3DFormatDecoder::Parse3MF(const uint8_t* data, size_t size) {
+    (void)data;
+    (void)size;
     m_meshInfo.name = L"3MF Object";
     m_meshInfo.units = L"mm";
     // Placeholder: simple pyramid
@@ -267,4 +271,5 @@ const wchar_t* Advanced3DFormatDecoder::GetRenderModeName(Render3DMode mode) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

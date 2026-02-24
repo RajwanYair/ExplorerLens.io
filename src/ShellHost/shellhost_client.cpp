@@ -7,7 +7,7 @@
 #include <sstream>
 #include <thread>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace ShellHost {
 
 ShellHostClient::ShellHostClient(const Worker::WorkerConfig& workerConfig)
@@ -550,4 +550,5 @@ bool IsLegacyPathAvailable() {
 } // namespace Legacy
 
 } // namespace ShellHost
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

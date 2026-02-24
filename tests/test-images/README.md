@@ -1,4 +1,4 @@
-# DarkThumbs Test Images
+# ExplorerLens Test Images
 
 This directory contains test images for validating decoder functionality and performance testing.
 
@@ -107,3 +107,4 @@ Recommended sources for test images:
 - Developers should populate this directory with their own test images
 - CI/CD pipelines should download or generate test images as needed
 - Total test image collection should be kept under 100 MB for practical reasons
+

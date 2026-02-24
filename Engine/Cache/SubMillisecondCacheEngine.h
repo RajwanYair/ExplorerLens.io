@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 340: Sub-Millisecond Cache Engine
+// ExplorerLens Engine — Sub-Millisecond Cache Engine
 // Lock-free hash map with open-addressing, NUMA-aware slab allocator,
 // prefetch pipeline, and adaptive hash function selection targeting
 // < 1 ms P99 lookup latency for hot thumbnail records.
@@ -8,7 +8,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class CacheHashAlgo       : uint8_t { FNV1a=0, CRC32C, WyHash, XXHash3, COUNT };
 enum class SubMsCacheEviction  : uint8_t { CLOCK=0, TinyLFU, SLRUClock, COUNT };
@@ -64,4 +64,5 @@ public:
     static bool MeetsSLA(const SubMsCachePerfReport& r) { return r.p99LookupNs < 1000000ULL; }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

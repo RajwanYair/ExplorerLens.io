@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 8 Tests: GUI Hardening
+// ExplorerLens — Sprint 8 Tests: GUI Hardening
 // Tests DarkModeHelper, high-DPI scaling, decoder health dashboard,
 // diagnostics exporter, theme colors, and control type enumeration.
 //==============================================================================
@@ -11,7 +11,7 @@
 // Header under test
 #include "../Engine/Utils/GUIHardening.h"
 
-using namespace DarkThumbs::Engine::GUI;
+using namespace ExplorerLens::Engine::GUI;
 
 //==============================================================================
 // Theme Colors Tests
@@ -356,3 +356,4 @@ TEST(Diagnostics, MultipleSections)
     EXPECT_EQ(exporter.SectionCount(), 3u);
     EXPECT_EQ(exporter.TotalEntries(), 3u);
 }
+

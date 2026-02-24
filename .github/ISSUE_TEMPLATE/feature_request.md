@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a new feature for DarkThumbs
+about: Suggest a new feature for ExplorerLens
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
@@ -33,3 +33,4 @@ Have you checked if this aligns with the [MASTER_PLAN.md](../../MASTER_PLAN.md)?
 - [ ] Yes, aligns with existing plans
 - [ ] No, this is a new direction
 - [ ] Not sure
+

@@ -1,6 +1,6 @@
 // ImageDecoder.cpp - WIC-based Image Decoder Implementation
-// DarkThumbs Engine v1.0.0
-// Copyright (c) 2025 DarkThumbs Project
+// ExplorerLens Engine v1.0.0
+// Copyright (c) 2025 ExplorerLens Project
 
 #include "ImageDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
@@ -9,7 +9,7 @@
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "shlwapi.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 using Microsoft::WRL::ComPtr;
@@ -477,4 +477,5 @@ HRESULT ImageDecoder::ApplyEXIFOrientation(IWICBitmapFrameDecode* pFrame,
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

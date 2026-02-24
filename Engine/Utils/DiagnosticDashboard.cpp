@@ -1,7 +1,7 @@
 #include "DiagnosticDashboard.h"
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 DiagnosticDashboard::DiagnosticDashboard() = default;
 
@@ -69,4 +69,5 @@ void DiagnosticDashboard::Reset() {
     m_metrics.clear();
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

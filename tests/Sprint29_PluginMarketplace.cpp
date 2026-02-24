@@ -44,7 +44,7 @@ TEST_F(PluginPackageTest, VersionRangeCompatibility) {
         return ver >= minV && ver <= maxV;
     };
 
-    // DarkThumbs 7.0.0 compatible with range [7.0.0, 8.0.0]
+    // ExplorerLens 7.0.0 compatible with range [7.0.0, 8.0.0]
     EXPECT_TRUE(inRange(7, 0, 0, 7, 0, 0, 8, 0, 0));
     EXPECT_TRUE(inRange(7, 5, 3, 7, 0, 0, 8, 0, 0));
     EXPECT_FALSE(inRange(6, 9, 9, 7, 0, 0, 8, 0, 0));
@@ -212,7 +212,7 @@ TEST_F(RatingSystemTest, ReviewValidation) {
 
 class MarketplaceAPITest : public ::testing::Test {
 protected:
-    std::string baseUrl = "https://marketplace.darkthumbs.io/api/v1";
+    std::string baseUrl = "https://marketplace.explorerlens.io/api/v1";
 };
 
 TEST_F(MarketplaceAPITest, SearchEndpoint) {
@@ -294,3 +294,4 @@ TEST(MarketplaceIntegrationTest, ExistingRegistryPreserved) {
                   fs::exists("packaging\\marketplace\\registry.json");
     EXPECT_TRUE(exists) << "Existing marketplace registry.json should be preserved";
 }
+

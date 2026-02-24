@@ -1,7 +1,7 @@
 //==============================================================================
-// DarkThumbs Engine - Thumbnail Cache Implementation
+// ExplorerLens Engine - Thumbnail Cache Implementation
 // Engine v1.0.0 - Persistent Disk-Backed Cache with LRU Eviction
-// Copyright (c) 2026 DarkThumbs Project
+// Copyright (c) 2026 ExplorerLens Project
 //
 // FEATURES:
 // - Disk-backed persistent cache (survives application restarts)
@@ -26,8 +26,8 @@
 // - Typical hit rate: 60-80% (varies by user access patterns)
 //
 // STORAGE LOCATION:
-// %LOCALAPPDATA%\DarkThumbs\cache\
-// Example: C:\Users\<name>\AppData\Local\DarkThumbs\cache\
+// %LOCALAPPDATA%\ExplorerLens\cache\
+// Example: C:\Users\<name>\AppData\Local\ExplorerLens\cache\
 //
 // CACHE KEY FORMAT:
 // MD5(filepath + filesize + lastmodified + width + height)
@@ -49,13 +49,13 @@
 #include <unordered_map>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //==============================================================================
 /// Persistent thumbnail cache with LRU eviction
 /// 
-/// Stores thumbnails as PNG files in %LOCALAPPDATA%\DarkThumbs\cache\
+/// Stores thumbnails as PNG files in %LOCALAPPDATA%\ExplorerLens\cache\
 /// Uses MD5 hashing for cache keys and LRU policy for eviction.
 //==============================================================================
 class ThumbnailCache : public ICacheProvider {
@@ -75,7 +75,7 @@ public:
     HRESULT Initialize(uint32_t maxSizeMB = 500);
     void Shutdown();
 
-    // Sprint 21: Enhanced cache configuration
+    // Enhanced cache configuration
     enum class CompressionLevel {
         None = 0,         // No compression (fastest, largest size)
         Fast = 3,         // Fast compression (good for testing)
@@ -157,4 +157,5 @@ extern "C" {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

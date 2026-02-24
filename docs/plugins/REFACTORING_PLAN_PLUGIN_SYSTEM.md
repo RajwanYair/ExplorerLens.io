@@ -316,7 +316,7 @@ Plugin/Security/JobObjectManager.cpp
 
 #### **Task 4.1: Clean build**
 ```powershell
-cd c:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs
+cd c:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens
 cmake --build build --config Release --clean-first
 ```
 
@@ -324,7 +324,7 @@ cmake --build build --config Release --clean-first
 - ✅ Zero compile errors (100+ errors should be gone)
 - ✅ Zero warnings (project uses `/WX` warnings-as-errors)
 - ✅ Engine.lib builds successfully with plugin system included
-- ✅ CBXShell.dll links successfully
+- ✅ LENSShell.dll links successfully
 
 #### **Task 4.3: Run unit tests**
 ```powershell
@@ -473,3 +473,4 @@ Files that will be **verified** (no changes needed):
 ---
 
 **End of Refactoring Plan**
+

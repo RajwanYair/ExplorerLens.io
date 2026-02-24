@@ -1,4 +1,4 @@
-# DarkThumbs Test Suite - Validation Checklist
+# ExplorerLens Test Suite - Validation Checklist
 
 ## Pre-Deployment Validation
 
@@ -75,12 +75,12 @@ UnitTests.exe
 **Expected Results:**
 ```
 [Suite 1/8] Format Detection Tests
-  ✓ TestGetCBXType_ComicArchives
-  ✓ TestGetCBXType_GenericArchives
-  ✓ TestGetCBXType_EbookFormats
-  ✓ TestGetCBXType_PhotoArchives
-  ✓ TestGetCBXType_UnsupportedFormats
-  ✓ TestGetCBXType_EdgeCases
+  ✓ TestGetLENSType_ComicArchives
+  ✓ TestGetLENSType_GenericArchives
+  ✓ TestGetLENSType_EbookFormats
+  ✓ TestGetLENSType_PhotoArchives
+  ✓ TestGetLENSType_UnsupportedFormats
+  ✓ TestGetLENSType_EdgeCases
 
 [Suite 2/8] Image Format Tests
   ✓ TestIsImage_TraditionalFormats
@@ -247,7 +247,7 @@ ctest --test-dir build_cmake --output-on-failure
 
 **Expected CTest Output:**
 ```
-Test project C:/path/to/DarkThumbs/tests/build_cmake
+Test project C:/path/to/ExplorerLens/tests/build_cmake
     Start 1: UnitTests
 1/2 Test #1: UnitTests ....................   Passed    1.23 sec
     Start 2: IntegrationTests
@@ -401,3 +401,4 @@ run-all-tests.cmd && echo VALIDATION PASSED || echo VALIDATION FAILED
 ---
 
 **This checklist ensures the test suite is fully functional and ready for production use.**
+

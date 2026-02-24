@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 47: Accessibility & Internationalization
+// ExplorerLens Engine — Accessibility & Internationalization
 //
 // Provides screen reader support for thumbnails and badges, high-contrast
 // mode rendering, localization framework for UI strings, RTL layout
@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <functional>
 
-namespace DarkThumbs::Engine::Utils {
+namespace ExplorerLens::Engine::Utils {
 
 //==============================================================================
 // Locale — Language + region identifier
@@ -98,10 +98,10 @@ public:
     static StringTable DefaultEnglish() {
         StringTable t;
         // General
-        t.Set("app.name", "DarkThumbs");
+        t.Set("app.name", "ExplorerLens");
         t.Set("app.version", "v7.0.0");
         // Configuration
-        t.Set("config.title", "DarkThumbs Configuration");
+        t.Set("config.title", "ExplorerLens Configuration");
         t.Set("config.general", "General");
         t.Set("config.formats", "Formats");
         t.Set("config.cache", "Cache");
@@ -349,4 +349,5 @@ struct AccessibilityConfig {
     }
 };
 
-} // namespace DarkThumbs::Engine::Utils
+} // namespace ExplorerLens::Engine::Utils
+

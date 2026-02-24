@@ -5,7 +5,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs::Engine::Scheduler {
+namespace ExplorerLens::Engine::Scheduler {
 
     enum class TaskPriority {
         Background, // Prefetching
@@ -43,3 +43,4 @@ namespace DarkThumbs::Engine::Scheduler {
     };
 
 }
+

@@ -1,4 +1,4 @@
-# DarkThumbs Library Update Script
+# ExplorerLens Library Update Script
 # Updates all external open-source libraries to latest stable versions
 # Dynamically fetches latest versions from GitHub and other sources
 # Date: February 18, 2026
@@ -24,7 +24,7 @@ function Get-LatestGitHubRelease {
     
     try {
         $apiUrl = "https://api.github.com/repos/$Repo/releases/latest"
-        $headers = @{ "User-Agent" = "DarkThumbs-Updater" }
+        $headers = @{ "User-Agent" = "ExplorerLens-Updater" }
         
         if ($UseProxy) {
             $response = Invoke-RestMethod -Uri $apiUrl -Headers $headers -Proxy $ProxyUrl -UseBasicParsing
@@ -69,7 +69,7 @@ $imageLibsDir = Join-Path $externalDir "image-libs"
 New-Item -ItemType Directory -Force -Path $compressionDir | Out-Null
 New-Item -ItemType Directory -Force -Path $imageLibsDir | Out-Null
 
-Write-Host "`n=== DarkThumbs Library Update Utility ===" -ForegroundColor Green
+Write-Host "`n=== ExplorerLens Library Update Utility ===" -ForegroundColor Green
 Write-Host "Fetching latest versions from sources...`n" -ForegroundColor Cyan
 
 # Fetch latest versions dynamically
@@ -297,7 +297,8 @@ Write-Host "`n=== Library Update Complete ===" -ForegroundColor Green
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Review the extracted library versions in external/ directory" -ForegroundColor White
 Write-Host "  2. Update build scripts if paths changed (e.g., zstd-1.5.7 vs zstd-1.5.8)" -ForegroundColor White
-Write-Host "  3. Run .\scripts\build.ps1 to rebuild DarkThumbs with updated libraries" -ForegroundColor White
+Write-Host "  3. Run .\scripts\build.ps1 to rebuild ExplorerLens with updated libraries" -ForegroundColor White
 Write-Host "  4. Test thoroughly before committing changes" -ForegroundColor White
 Write-Host "`nNote: Current version tracking in this script should be updated after successful build" -ForegroundColor Yellow
+
 

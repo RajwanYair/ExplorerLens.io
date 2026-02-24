@@ -1,21 +1,23 @@
 //==============================================================================
 // OpenRaster (.ora) Decoder — Implementation
-// Sprint 185: Open image editor format support
+// Open image editor format support
 // Extracts thumbnail.png or mergedimage.png from OpenRaster ZIP archives.
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "OpenRasterDecoder.h"
 #include <fstream>
 #include <cstring>
 #include <algorithm>
+#include <cctype>
 #include <windows.h>
+#include <objidl.h>
 #include <gdiplus.h>
 #include <shlwapi.h>
 
 #pragma comment(lib, "gdiplus.lib")
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // Extension check
@@ -23,7 +25,8 @@ namespace DarkThumbs::Decoders {
     bool OpenRasterDecoder::IsORAExtension(const std::string& ext)
     {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         return lower == ".ora";
     }
 
@@ -70,9 +73,11 @@ namespace DarkThumbs::Decoders {
 
             // Case-insensitive name comparison
             std::string lowerName = fileName;
-            std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+            std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
+                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
             std::string lowerTarget = targetName;
-            std::transform(lowerTarget.begin(), lowerTarget.end(), lowerTarget.begin(), ::tolower);
+            std::transform(lowerTarget.begin(), lowerTarget.end(), lowerTarget.begin(),
+                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
             if (lowerName == lowerTarget) {
                 if (hdr->compressionMethod == 0) {
@@ -183,6 +188,7 @@ namespace DarkThumbs::Decoders {
     OpenRasterDecoder::DecodeResult OpenRasterDecoder::Decode(const std::string& filePath,
                                                                uint32_t targetWidth) const
     {
+        (void)targetWidth;
         DecodeResult result;
         std::ifstream file(filePath, std::ios::binary | std::ios::ate);
         if (!file.is_open()) {
@@ -233,4 +239,5 @@ namespace DarkThumbs::Decoders {
         return result;
     }
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

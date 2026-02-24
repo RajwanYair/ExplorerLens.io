@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Engine::AI::Stages {
+namespace ExplorerLens::Engine::AI::Stages {
 
     struct PageScore {
         uint32_t pageIndex;
@@ -25,3 +25,4 @@ namespace DarkThumbs::Engine::AI::Stages {
     };
 
 }
+

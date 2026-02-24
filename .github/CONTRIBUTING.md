@@ -1,6 +1,6 @@
-# Contributing to DarkThumbs
+# Contributing to ExplorerLens
 
-Thank you for your interest in contributing to DarkThumbs!
+Thank you for your interest in contributing to ExplorerLens!
 
 ## Getting Started
 
@@ -20,24 +20,24 @@ Thank you for your interest in contributing to DarkThumbs!
 
 ```cmd
 # Open "x64 Native Tools Command Prompt for VS 2026"
-cd path\to\DarkThumbs
+cd path\to\ExplorerLens
 
 # Build external libraries first (see docs/BUILD_GUIDE.md)
 # Then build the main project:
-msbuild CBXShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
+msbuild LENSShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
 ```
 
 ### Testing Your Changes
 
 ```cmd
 # Register the DLL
-regsvr32 /s x64\Release\CBXShell.dll
+regsvr32 /s x64\Release\LENSShell.dll
 
 # Test in Windows Explorer
 # Navigate to a folder with supported file types
 
 # Unregister when done
-regsvr32 /u /s x64\Release\CBXShell.dll
+regsvr32 /u /s x64\Release\LENSShell.dll
 ```
 
 ## Code Standards
@@ -172,3 +172,4 @@ Open an issue with:
 - Open a GitHub Discussion for general questions
 
 Thank you for contributing!
+

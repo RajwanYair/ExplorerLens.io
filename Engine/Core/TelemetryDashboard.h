@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 48: Telemetry & Diagnostics Dashboard
+// ExplorerLens Engine — Telemetry & Diagnostics Dashboard
 //
 // Provides structured diagnostic collection (decode times, cache hit rates,
 // error counts), health scoring for decoders, performance trend analysis,
@@ -19,7 +19,7 @@
 #include <numeric>
 #include <cmath>
 
-namespace DarkThumbs::Engine::Core {
+namespace ExplorerLens::Engine::Core {
 
 //==============================================================================
 // Health Level — Component health status
@@ -325,7 +325,7 @@ struct DashboardData {
 struct DiagnosticExport {
     static std::string ToText(const DashboardData& data) {
         std::ostringstream ss;
-        ss << "=== DarkThumbs Diagnostics ===" << "\n"
+        ss << "=== ExplorerLens Diagnostics ===" << "\n"
            << "Version: " << data.version << "\n"
            << "Uptime: " << data.UptimeHuman() << "\n"
            << "Overall Health: " << HealthLevelName(data.OverallHealth()) << "\n"
@@ -409,4 +409,5 @@ struct DiagnosticsConfig {
     }
 };
 
-} // namespace DarkThumbs::Engine::Core
+} // namespace ExplorerLens::Engine::Core
+

@@ -1,8 +1,8 @@
 //==============================================================================
 // KTX Texture Decoder - Full Implementation
-// Sprint 184: Game Texture Format Support
-// Implements KTX/KTX2 decoding from the Sprint 134 header
-// Copyright (c) 2026 - DarkThumbs Project
+// Game Texture Format Support
+// Implements KTX/KTX2 decoding from the header
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include "KTXTextureDecoder.h"
@@ -12,7 +12,7 @@
 #include <cmath>
 #include <windows.h>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     //==========================================================================
     // KTX1 Header (12-byte identifier + structured header)
@@ -251,6 +251,7 @@ namespace DarkThumbs::Decoders {
                                                            const KTXTextureInfo& info,
                                                            uint32_t mipLevel) const
     {
+        (void)data;
         KTXDecodeResult result;
         result.info = info;
         result.usedMipLevel = mipLevel;
@@ -367,4 +368,5 @@ namespace DarkThumbs::Decoders {
         return result;
     }
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 11 Tests: Plugin System Activation
+// ExplorerLens — Sprint 11 Tests: Plugin System Activation
 // Tests feature flags, plugin state machine, discovery, IPC channel,
 // lifecycle management, and sample plugin specifications.
 //==============================================================================
@@ -11,7 +11,7 @@
 // Header under test
 #include "../Engine/Plugin/PluginActivation.h"
 
-using namespace DarkThumbs::Engine::Plugin;
+using namespace ExplorerLens::Engine::Plugin;
 
 //==============================================================================
 // Plugin Feature Flag Tests
@@ -180,7 +180,7 @@ TEST(IPCChannel, MessageTypeNames)
 TEST(IPCChannel, DefaultPipeName)
 {
     IPCChannel ch;
-    EXPECT_NE(ch.PipeName().find("DarkThumbs"), std::string::npos);
+    EXPECT_NE(ch.PipeName().find("ExplorerLens"), std::string::npos);
 }
 
 TEST(IPCChannel, ConnectDisconnect)
@@ -265,7 +265,7 @@ TEST(Lifecycle, ActivatePlugin)
 {
     PluginLifecycleManager mgr(PluginFeatureFlags::Production());
     mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
-    auto ok = mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
+    auto ok = mgr.ActivatePlugin("com.explorerlens.minimal-plugin");
     EXPECT_TRUE(ok);
     EXPECT_EQ(mgr.ActivePlugins(), 1u);
 }
@@ -274,11 +274,11 @@ TEST(Lifecycle, SuspendPlugin)
 {
     PluginLifecycleManager mgr(PluginFeatureFlags::Production());
     mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
-    mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
-    auto ok = mgr.SuspendPlugin("com.darkthumbs.minimal-plugin");
+    mgr.ActivatePlugin("com.explorerlens.minimal-plugin");
+    auto ok = mgr.SuspendPlugin("com.explorerlens.minimal-plugin");
     EXPECT_TRUE(ok);
     EXPECT_EQ(mgr.ActivePlugins(), 0u);
-    auto* p = mgr.GetPlugin("com.darkthumbs.minimal-plugin");
+    auto* p = mgr.GetPlugin("com.explorerlens.minimal-plugin");
     ASSERT_NE(p, nullptr);
     EXPECT_EQ(p->state, PluginState::Suspended);
 }
@@ -287,9 +287,9 @@ TEST(Lifecycle, UnloadPlugin)
 {
     PluginLifecycleManager mgr(PluginFeatureFlags::Production());
     mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
-    mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
-    mgr.UnloadPlugin("com.darkthumbs.minimal-plugin");
-    auto* p = mgr.GetPlugin("com.darkthumbs.minimal-plugin");
+    mgr.ActivatePlugin("com.explorerlens.minimal-plugin");
+    mgr.UnloadPlugin("com.explorerlens.minimal-plugin");
+    auto* p = mgr.GetPlugin("com.explorerlens.minimal-plugin");
     ASSERT_NE(p, nullptr);
     EXPECT_EQ(p->state, PluginState::Unloaded);
 }
@@ -317,8 +317,8 @@ TEST(Lifecycle, GetActivePluginIds)
     PluginLifecycleManager mgr(PluginFeatureFlags::Production());
     mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
     mgr.RegisterPlugin(SamplePluginSpec::RawEnhancedPlugin());
-    mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
-    mgr.ActivatePlugin("com.darkthumbs.raw-enhanced");
+    mgr.ActivatePlugin("com.explorerlens.minimal-plugin");
+    mgr.ActivatePlugin("com.explorerlens.raw-enhanced");
     auto ids = mgr.GetActivePluginIds();
     EXPECT_EQ(ids.size(), 2u);
 }
@@ -327,7 +327,7 @@ TEST(Lifecycle, StatusReport)
 {
     PluginLifecycleManager mgr(PluginFeatureFlags::Production());
     mgr.RegisterPlugin(SamplePluginSpec::MinimalPlugin());
-    mgr.ActivatePlugin("com.darkthumbs.minimal-plugin");
+    mgr.ActivatePlugin("com.explorerlens.minimal-plugin");
     auto report = mgr.StatusReport();
     EXPECT_NE(report.find("Plugin Status Report"), std::string::npos);
     EXPECT_NE(report.find("Minimal Plugin"), std::string::npos);
@@ -340,7 +340,7 @@ TEST(Lifecycle, StatusReport)
 TEST(SamplePlugin, MinimalPlugin)
 {
     auto p = SamplePluginSpec::MinimalPlugin();
-    EXPECT_EQ(p.id, "com.darkthumbs.minimal-plugin");
+    EXPECT_EQ(p.id, "com.explorerlens.minimal-plugin");
     EXPECT_EQ(p.version, "1.0.0");
     EXPECT_TRUE(p.isSigned);
     EXPECT_EQ(p.FormatCount(), 2u);
@@ -349,7 +349,8 @@ TEST(SamplePlugin, MinimalPlugin)
 TEST(SamplePlugin, RawEnhanced)
 {
     auto p = SamplePluginSpec::RawEnhancedPlugin();
-    EXPECT_EQ(p.id, "com.darkthumbs.raw-enhanced");
+    EXPECT_EQ(p.id, "com.explorerlens.raw-enhanced");
     EXPECT_GE(p.FormatCount(), 5u);
     EXPECT_TRUE(p.isSigned);
 }
+

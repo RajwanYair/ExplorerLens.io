@@ -1,16 +1,16 @@
 /**
  * Test HEIF and JXL Decoder Implementations
- * DarkThumbs v5.3+ - Format Support Verification
+ * ExplorerLens v5.3+ - Format Support Verification
  */
 
 #include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "../CBXShell/heif_decoder_native.h"
-#include "../CBXShell/jxl_decoder.h"
+#include "../LENSShell/heif_decoder_native.h"
+#include "../LENSShell/jxl_decoder.h"
 
-using namespace DarkThumbs;
+using namespace ExplorerLens;
 
 // Helper to read file into memory
 std::vector<BYTE> ReadFile(const wchar_t* path) {
@@ -132,7 +132,7 @@ void TestFormatRegistration() {
 
 int wmain(int argc, wchar_t* argv[]) {
     std::wcout << L"╔══════════════════════════════════════════════════════╗\n";
-    std::wcout << L"║  DarkThumbs HEIF/JXL Decoder Test Suite            ║\n";
+    std::wcout << L"║  ExplorerLens HEIF/JXL Decoder Test Suite            ║\n";
     std::wcout << L"║  Version 7.0.0 - Format Support Verification      ║\n";
     std::wcout << L"╚══════════════════════════════════════════════════════╝\n";
     
@@ -147,9 +147,10 @@ int wmain(int argc, wchar_t* argv[]) {
     std::wcout << L"✅ JXL decoder: Using libjxl 0.11.1 with parallel runner\n";
     std::wcout << L"\n📝 To test in Windows Explorer:\n";
     std::wcout << L"   1. Copy .heic/.jxl files to test-archives\\\n";
-    std::wcout << L"   2. Register CBXShell.dll: regsvr32 x64\\Release\\CBXShell.dll\n";
+    std::wcout << L"   2. Register LENSShell.dll: regsvr32 x64\\Release\\LENSShell.dll\n";
     std::wcout << L"   3. Open test-archives\\ in Explorer and check thumbnails\n";
     
     CoUninitialize();
     return 0;
 }
+

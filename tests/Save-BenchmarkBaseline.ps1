@@ -56,7 +56,7 @@ $baselineFile = Join-Path $baselineDir "baseline-$Version.json"
 
 Write-Host ""
 Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host "  DarkThumbs Benchmark Baseline Capture" -ForegroundColor Cyan
+Write-Host "  ExplorerLens Benchmark Baseline Capture" -ForegroundColor Cyan
 Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
 Write-Host "Version:    $Version" -ForegroundColor White
 Write-Host "Output:     $baselineFile" -ForegroundColor White
@@ -149,3 +149,4 @@ Write-Host ""
 Write-Host "Usage in CI:" -ForegroundColor Cyan
 Write-Host "  .\tests\Compare-BenchmarkBaseline.ps1 -BaselineVersion `"$Version`"" -ForegroundColor Gray
 Write-Host ""
+

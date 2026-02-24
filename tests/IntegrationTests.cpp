@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////
-// DarkThumbs Integration Test Suite
+// ExplorerLens Integration Test Suite
 // Tests actual file operations and COM integration
 ///////////////////////////////////////////////
 
@@ -489,7 +489,7 @@ INTEGRATION_TEST(TestPerformanceTimeout) {
 
 void PrintIntegrationHeader() {
     std::cout << "=========================================" << std::endl;
-    std::cout << "DarkThumbs Integration Test Suite" << std::endl;
+    std::cout << "ExplorerLens Integration Test Suite" << std::endl;
     std::cout << "=========================================" << std::endl;
     std::cout << std::endl;
 }
@@ -557,3 +557,4 @@ int main() {
     
     return (g_integrationTestsFailed == 0) ? 0 : 1;
 }
+

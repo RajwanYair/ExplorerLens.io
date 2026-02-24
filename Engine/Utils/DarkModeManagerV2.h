@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 141 — DarkMode V2 Complete
+// DarkMode V2 Complete
 // Native Win32 control dark mode with sub-class theming.
 // Provides comprehensive dark mode support for WTL/Win32 GUIs.
 
@@ -10,7 +10,7 @@
 #include <functional>
 #include <algorithm>
 
-namespace DarkThumbs::Utils {
+namespace ExplorerLens::Utils {
 
 // ─── Theme colors ───────────────────────────────────────────────
 struct ThemeColor {
@@ -260,4 +260,5 @@ private:
     }
 };
 
-} // namespace DarkThumbs::Utils
+} // namespace ExplorerLens::Utils
+

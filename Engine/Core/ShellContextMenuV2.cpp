@@ -1,11 +1,11 @@
 //==============================================================================
-// ShellContextMenuV2 — Sprint 216
+// ShellContextMenuV2
 //==============================================================================
 
 #include "ShellContextMenuV2.h"
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 ShellContextMenuV2::ShellContextMenuV2() {
     m_items = GetDefaultMenu();
@@ -62,7 +62,7 @@ std::vector<ContextMenuItem> ShellContextMenuV2::GetDefaultMenu() {
     items.push_back({ContextAction::ExportAs, L"Export As...", L"export", true, true, MenuPosition::SubMenu});
     items.push_back({ContextAction::ShowInfo, L"Thumbnail Info", L"info", true, false, MenuPosition::SubMenu});
     items.push_back({ContextAction::CopyThumbnail, L"Copy Thumbnail", L"copy", true, false, MenuPosition::SubMenu});
-    items.push_back({ContextAction::Settings, L"DarkThumbs Settings", L"settings", true, true, MenuPosition::SubMenu});
+    items.push_back({ContextAction::Settings, L"ExplorerLens Settings", L"settings", true, true, MenuPosition::SubMenu});
 
     return items;
 }
@@ -89,4 +89,5 @@ const wchar_t* ShellContextMenuV2::GetPositionName(MenuPosition position) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

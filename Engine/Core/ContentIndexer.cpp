@@ -1,13 +1,13 @@
 // =============================================================================
-// ContentIndexer.cpp — Sprint 245: File Content Indexing for Search
-// DarkThumbs Engine — Core Module
+// ContentIndexer.cpp — File Content Indexing for Search
+// ExplorerLens Engine — Core Module
 // =============================================================================
 
 #include "ContentIndexer.h"
 #include <algorithm>
 #include <chrono>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 static uint64_t NowMs() {
     return static_cast<uint64_t>(
@@ -206,4 +206,5 @@ const wchar_t* ContentIndexer::GetIndexStateName(IndexState state) {
     }
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

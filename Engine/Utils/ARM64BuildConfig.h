@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 155 — ARM64 Build Configuration
+// ARM64 Build Configuration
 // Architecture detection, NEON intrinsics availability, capability flags,
 // CMake toolchain configuration descriptors.
 
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Platform {
+namespace ExplorerLens::Platform {
 
 // ─── Architecture detection ───────────────────────────────────────────────────
 
@@ -181,4 +181,5 @@ struct ARM64LibraryInventory {
     }
 };
 
-} // namespace DarkThumbs::Platform
+} // namespace ExplorerLens::Platform
+

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 170 — Matrix Validation Framework
+// Matrix Validation Framework
 // Cross-validation driver: runs all decoder, cache, and memory sub-system validators
 // and renders a pass/fail matrix report for CI gate and release readiness.
 
@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace DarkThumbs::Utils {
+namespace ExplorerLens::Utils {
 
 // ─── Validation domain ───────────────────────────────────────────────────────
 
@@ -164,4 +164,5 @@ private:
     std::vector<ValidatorEntry> m_validators;
 };
 
-} // namespace DarkThumbs::Utils
+} // namespace ExplorerLens::Utils
+

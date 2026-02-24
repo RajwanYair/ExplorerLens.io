@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 173 — Documentation Sync Audit
+// Documentation Sync Audit
 // Validates that VERSION, CHANGELOG, README, copilot-instructions, and sprint docs
 // are consistent with the current MASTER_PLAN.md and binary version.
 
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Core {
+namespace ExplorerLens::Core {
 
 // ─── Doc artifact ────────────────────────────────────────────────────────────
 
@@ -119,4 +119,5 @@ public:
     }
 };
 
-} // namespace DarkThumbs::Core
+} // namespace ExplorerLens::Core
+

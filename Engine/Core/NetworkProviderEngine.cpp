@@ -1,12 +1,12 @@
 //==============================================================================
-// NetworkProviderEngine — Sprint 218
+// NetworkProviderEngine
 //==============================================================================
 
 #include "NetworkProviderEngine.h"
 #include <chrono>
 #include <algorithm>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 NetworkProviderEngine::NetworkProviderEngine() {}
 
@@ -112,4 +112,5 @@ const wchar_t* NetworkProviderEngine::GetStatusName(NetworkStatus status) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

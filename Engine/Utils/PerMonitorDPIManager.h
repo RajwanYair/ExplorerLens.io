@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 142 — Per-Monitor DPI V2
+// Per-Monitor DPI V2
 // Handle DPI changes mid-session, rescale controls in real time.
 // Provides per-monitor DPI awareness with live re-layout.
 
@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <functional>
 
-namespace DarkThumbs::Utils {
+namespace ExplorerLens::Utils {
 
 // ─── DPI scale tiers ────────────────────────────────────────────
 enum class DPIScale : uint8_t {
@@ -201,4 +201,5 @@ private:
     std::vector<DPIChangeCallback> m_callbacks;
 };
 
-} // namespace DarkThumbs::Utils
+} // namespace ExplorerLens::Utils
+

@@ -1,5 +1,5 @@
 // EXRDecoder.h - OpenEXR Image Decoder
-// DarkThumbs Engine v6.1.0+
+// ExplorerLens Engine v6.1.0+
 // Uses WIC when Microsoft OpenEXR codec is available, basic header extraction otherwise
 
 #pragma once
@@ -9,7 +9,7 @@
 #include <wrl/client.h>
 #include <mutex>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 class EXRDecoder : public IThumbnailDecoder {
@@ -41,4 +41,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

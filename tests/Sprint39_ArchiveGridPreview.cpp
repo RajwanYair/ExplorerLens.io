@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 39 Tests: Archive Content Grid Preview
+// ExplorerLens — Sprint 39 Tests: Archive Content Grid Preview
 // Tests archive format detection, grid layout engine, comic book layout,
 // page count badges, archive grid config, and grid result summaries.
 //==============================================================================
@@ -12,7 +12,7 @@
 // Header under test
 #include "../Engine/Decoders/ArchiveGridPreview.h"
 
-using namespace DarkThumbs::Engine::Decoders;
+using namespace ExplorerLens::Engine::Decoders;
 
 //==============================================================================
 // Archive Format Detection Tests
@@ -304,3 +304,4 @@ TEST(GridResult, ErrorResult)
     EXPECT_FALSE(result.HasContent());
     EXPECT_EQ(result.errorMessage, "Archive corrupted");
 }
+

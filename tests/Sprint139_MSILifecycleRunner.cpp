@@ -1,7 +1,7 @@
 // Sprint 139 — MSI Lifecycle E2E Automation Tests
 #include <gtest/gtest.h>
 #include "Release/MSILifecycleRunner.h"
-using namespace DarkThumbs::Release;
+using namespace ExplorerLens::Release;
 
 TEST(Sprint139_MSI, OperationName) {
     EXPECT_STREQ(OperationName(InstallerOperation::Install), "Install");
@@ -66,3 +66,4 @@ TEST(Sprint139_MSI, MSIResultName) {
     EXPECT_STREQ(MSIResultName(MSITestResult::Pass), "PASS");
     EXPECT_STREQ(MSIResultName(MSITestResult::SkippedNoAdmin), "SKIPPED (No Admin)");
 }
+

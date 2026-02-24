@@ -1,12 +1,12 @@
 #pragma once
 //==============================================================================
-// VersionDriftGate.h — Sprint 125
+// VersionDriftGate.h
 // Automated version consistency enforcement across documentation and code.
 // Detects stale version references and enforces canonical version strings.
 //
 // Usage:
 //   #include "Core/VersionDriftGate.h"
-//   auto gate = DarkThumbs::VersionDrift::VersionDriftGate::Create("7.1.0");
+//   auto gate = ExplorerLens::VersionDrift::VersionDriftGate::Create("7.1.0");
 //   gate.RegisterSource("MASTER_PLAN.md", "7.1.0");
 //   auto report = gate.Validate();
 //==============================================================================
@@ -21,7 +21,7 @@
 #include <numeric>
 #include <cstdint>
 
-namespace DarkThumbs { namespace VersionDrift {
+namespace ExplorerLens { namespace VersionDrift {
 
 /// Semantic version with parse, compare, and format support
 struct SemanticVersion {
@@ -305,4 +305,5 @@ struct GatePolicies {
     }
 };
 
-}} // namespace DarkThumbs::VersionDrift
+}} // namespace ExplorerLens::VersionDrift
+

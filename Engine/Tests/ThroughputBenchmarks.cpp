@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Per-Decoder Throughput Benchmarks
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Per-Decoder Throughput Benchmarks
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Google Benchmark-compatible decoder throughput tests for CI regression gates.
  * Measures: decode throughput, memory usage, p50/p95/p99 latency
@@ -20,14 +20,14 @@
 #include <Windows.h>
 #include <Psapi.h>
 
-using namespace DarkThumbs;
-using namespace DarkThumbs::Engine;
+using namespace ExplorerLens;
+using namespace ExplorerLens::Engine;
 
 //============================================================================
 // Test Data Paths (configure per environment)
 //============================================================================
 
-const wchar_t* TEST_DATA_DIR = L"C:\\Users\\ryair\\OneDrive - Intel Corporation\\Documents\\MyScripts\\DarkThumbs\\data\\corpus\\";
+const wchar_t* TEST_DATA_DIR = L"C:\\Users\\ryair\\OneDrive - Intel Corporation\\Documents\\MyScripts\\ExplorerLens\\data\\corpus\\";
 
 struct TestImage {
     const wchar_t* name;
@@ -391,7 +391,7 @@ static void BM_ZipCentralDirectory_Small(benchmark::State& state) {
             const uint8_t* data = static_cast<const uint8_t*>(mmap.GetData());
             size_t size = mmap.GetSize();
             
-            // Seek from end for EOCD signature (optimization from Sprint 14)
+            // Seek from end for EOCD signature
             size_t eocd_offset = size - 22;  // Minimum EOCD size
             // ... parsing logic ...
         }
@@ -420,7 +420,7 @@ static void BM_ZipMemoryMapped_vs_Traditional(benchmark::State& state) {
     std::wstring path = std::wstring(TEST_DATA_DIR) + L"archives\\medium-100mb.zip";
     
     if (state.range(0) == 0) {
-        // Memory-mapped I/O (Sprint 14 optimization)
+        // Memory-mapped I/O
         for (auto _ : state) {
             MemoryMappedFile mmap(path.c_str());
             if (mmap.IsValid()) {
@@ -568,3 +568,4 @@ BENCHMARK(BM_EndToEnd_WarmCache)->Unit(benchmark::kMicrosecond)->Repetitions(50)
 //============================================================================
 
 BENCHMARK_MAIN();
+

@@ -1,4 +1,4 @@
-# DarkThumbs Test Corpus
+# ExplorerLens Test Corpus
 
 This directory contains a comprehensive test file collection for validating decoder functionality.
 
@@ -27,7 +27,7 @@ These files test decoder robustness and crash resistance.
 Run the validator tool to test all formats:
 
 ```powershell
-.\tools\DarkThumbsValidator\x64\Release\DarkThumbsValidator.exe tests\data\corpus -v -o results.csv
+.\tools\ExplorerLensValidator\x64\Release\ExplorerLensValidator.exe tests\data\corpus -v -o results.csv
 ```
 
 ## Maintenance
@@ -47,3 +47,4 @@ To refresh the corpus with new test files:
 
 **Last Updated:** February 17, 2026  
 **Version:** v7.0.0
+

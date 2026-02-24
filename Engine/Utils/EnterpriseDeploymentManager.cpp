@@ -1,12 +1,12 @@
 //==============================================================================
-// EnterpriseDeploymentManager — Sprint 223
+// EnterpriseDeploymentManager
 //==============================================================================
 
 #include "EnterpriseDeploymentManager.h"
 #include <chrono>
 #include <sstream>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 EnterpriseDeploymentManager::EnterpriseDeploymentManager() {}
 
@@ -54,11 +54,11 @@ std::map<std::wstring, std::wstring> EnterpriseDeploymentManager::GenerateMSIPro
 std::wstring EnterpriseDeploymentManager::GenerateGPOTemplate() const {
     std::wstringstream ss;
     ss << L"CLASS MACHINE\n";
-    ss << L"CATEGORY \"DarkThumbs\"\n";
+    ss << L"CATEGORY \"ExplorerLens\"\n";
     for (const auto& policy : m_policies) {
         if (policy.type == PolicyType::MachinePol || policy.type == PolicyType::RegistryPol) {
             ss << L"  POLICY \"" << policy.name << L"\"\n";
-            ss << L"    KEYNAME \"Software\\DarkThumbs\"\n";
+            ss << L"    KEYNAME \"Software\\ExplorerLens\"\n";
             ss << L"    VALUENAME \"" << policy.key << L"\"\n";
             ss << L"    VALUEON \"" << policy.value << L"\"\n";
             ss << L"  END POLICY\n";
@@ -70,7 +70,7 @@ std::wstring EnterpriseDeploymentManager::GenerateGPOTemplate() const {
 
 std::wstring EnterpriseDeploymentManager::GenerateIntuneConfig() const {
     std::wstringstream ss;
-    ss << L"{\n  \"name\": \"DarkThumbs Configuration\",\n";
+    ss << L"{\n  \"name\": \"ExplorerLens Configuration\",\n";
     ss << L"  \"settings\": [\n";
     bool first = true;
     for (const auto& policy : m_policies) {
@@ -111,4 +111,5 @@ const wchar_t* EnterpriseDeploymentManager::GetPolicyTypeName(PolicyType type) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

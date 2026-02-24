@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 164 — Format Fallback Intelligence Engine
+// Format Fallback Intelligence Engine
 // Ranked fallback chain, trigger conditions, per-format fallback map, telemetry.
 
 #include <string>
@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace DarkThumbs::Pipeline {
+namespace ExplorerLens::Pipeline {
 
 // ─── Fallback trigger ────────────────────────────────────────────────────────
 
@@ -151,4 +151,5 @@ struct FormatFallbackEngine {
     }
 };
 
-} // namespace DarkThumbs::Pipeline
+} // namespace ExplorerLens::Pipeline
+

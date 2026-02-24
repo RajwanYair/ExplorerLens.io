@@ -3,7 +3,7 @@
 
 ## Overview
 
-The DarkThumbs plugin system allows third-party developers to create custom thumbnail decoders for formats not natively supported by the engine. As of Sprint 11, the plugin system is **fully activated** and ready for use.
+The ExplorerLens plugin system allows third-party developers to create custom thumbnail decoders for formats not natively supported by the engine. As of Sprint 11, the plugin system is **fully activated** and ready for use.
 
 ## Architecture
 
@@ -18,9 +18,9 @@ The DarkThumbs plugin system allows third-party developers to create custom thum
                  └──> PluginManager (Sprint 11 activated)
                        │
                        ├──> Plugin Discovery
-                       │    - Scans %LocalAppData%\DarkThumbs\Plugins\
-                       │    - Scans %ProgramData%\DarkThumbs\Plugins\
-                       │    - Scans %AppData%\DarkThumbs\Plugins\
+                       │    - Scans %LocalAppData%\ExplorerLens\Plugins\
+                       │    - Scans %ProgramData%\ExplorerLens\Plugins\
+                       │    - Scans %AppData%\ExplorerLens\Plugins\
                        │
                        ├──> Plugin Loading
                        │    - Validates manifest.json
@@ -60,7 +60,7 @@ pipeline.Initialize(config);
 Plugins can be enabled/disabled globally via registry:
 
 ```
-HKEY_CURRENT_USER\Software\DarkThumbs\PluginsEnabled (DWORD)
+HKEY_CURRENT_USER\Software\ExplorerLens\PluginsEnabled (DWORD)
   0 = Disabled
   1 = Enabled (default)
 ```
@@ -68,9 +68,9 @@ HKEY_CURRENT_USER\Software\DarkThumbs\PluginsEnabled (DWORD)
 ### Plugin Directories
 
 Plugins are discovered from (in order):
-1. `%LocalAppData%\DarkThumbs\Plugins\` (user-specific)
-2. `%ProgramData%\DarkThumbs\Plugins\` (system-wide)
-3. `%AppData%\DarkThumbs\Plugins\` (roaming profile)
+1. `%LocalAppData%\ExplorerLens\Plugins\` (user-specific)
+2. `%ProgramData%\ExplorerLens\Plugins\` (system-wide)
+3. `%AppData%\ExplorerLens\Plugins\` (roaming profile)
 
 Each plugin must be in its own subdirectory with:
 - `plugin_name.dll` - Plugin binary
@@ -84,7 +84,7 @@ A minimal working plugin is provided in `SDK/examples/minimal-plugin/`:
 
 ```cpp
 // minimal_plugin.cpp
-#include "DarkThumbsPlugin.h"
+#include "ExplorerLensPlugin.h"
 
 extern "C" {
     __declspec(dllexport) const PluginInfo* plugin_get_info() {
@@ -127,8 +127,8 @@ cmake_minimum_required(VERSION 3.20)
 project(my_plugin)
 
 add_library(my_plugin SHARED plugin.cpp)
-target_include_directories(my_plugin PRIVATE ${DARKTHUMBS_SDK_INCLUDE})
-target_link_libraries(my_plugin DarkThumbsPluginSDK)
+target_include_directories(my_plugin PRIVATE ${ExplorerLens_SDK_INCLUDE})
+target_link_libraries(my_plugin ExplorerLensPluginSDK)
 ```
 
 2. **Build:**
@@ -142,7 +142,7 @@ cmake --build . --config Release
 3. **Deploy:**
 ```powershell
 # Copy to user plugin directory
-$pluginDir = "$env:LOCALAPPDATA\DarkThumbs\Plugins\my_plugin"
+$pluginDir = "$env:LOCALAPPDATA\ExplorerLens\Plugins\my_plugin"
 New-Item -ItemType Directory -Path $pluginDir -Force
 Copy-Item Release\my_plugin.dll $pluginDir\
 Copy-Item manifest.json $pluginDir\
@@ -179,7 +179,7 @@ Copy-Item manifest.json $pluginDir\
 ### Manual Testing
 
 1. **Enable Debug Output:**
-   - Set `HKCU\Software\DarkThumbs\DebugMode` = 1
+   - Set `HKCU\Software\ExplorerLens\DebugMode` = 1
    - Use DebugView to see plugin loading messages
 
 2. **Test Plugin Loading:**
@@ -208,16 +208,16 @@ Copy-Item manifest.json $pluginDir\
    }
    ```
 
-## CBXManager UI Integration
+## LENSManager UI Integration
 
-The plugin management UI in CBXManager allows users to:
+The plugin management UI in LENSManager allows users to:
 - **View Loaded Plugins:** See all discovered plugins
 - **Enable/Disable Plugins:** Toggle individual plugins
 - **View Plugin Details:** Author, version, supported formats
 - **Refresh Plugin List:** Rescan
 
 To access:
-1. Open CBXManager.exe
+1. Open LENSManager.exe
 2. Navigate to "Plugins" tab
 3. View/manage plugins
 
@@ -226,7 +226,7 @@ To access:
 ### Plugin Not Loading
 
 **Check:**
-1. DLL is in correct directory (`%LOCALAPPDATA%\DarkThumbs\Plugins\<plugin_name>\`)
+1. DLL is in correct directory (`%LOCALAPPDATA%\ExplorerLens\Plugins\<plugin_name>\`)
 2. `manifest.json` exists alongside DLL
 3. API version matches (check `PLUGIN_API_VERSION` in SDK)
 4. No missing dependencies (use Dependency Walker)
@@ -307,7 +307,7 @@ See `SDK/docs/plugin-api-reference.md` for complete API documentation.
 
 ⚠ **Deferred** (future sprints):
 - PluginHost.exe IPC isolation (Sprint 17)
-- Plugin UI in CBXManager (Sprint 19: WinUI 3 migration)
+- Plugin UI in LENSManager (Sprint 19: WinUI 3 migration)
 - Code signing verification (Sprint 16)
 - Sandbox security (Sprint 20)
 
@@ -317,13 +317,13 @@ See `SDK/docs/plugin-api-reference.md` for complete API documentation.
 1. Read `SDK/docs/plugin-development-guide.md`
 2. Study sample plugin: `SDK/examples/minimal-plugin/`
 3. Build your plugin following the template
-4. Test with DarkThumbs v7.0+
+4. Test with ExplorerLens v7.0+
 
 **For Users:**
 1. Download plugins from trusted sources
-2. Extract to `%LOCALAPPDATA%\DarkThumbs\Plugins\`
+2. Extract to `%LOCALAPPDATA%\ExplorerLens\Plugins\`
 3. Restart Explorer to activate
-4. Check plugin status in CBXManager
+4. Check plugin status in LENSManager
 
 **For Contributors:**
 - See `MASTER_PLAN.md` Sprint 17 for IPC isolation work
@@ -334,3 +334,4 @@ See `SDK/docs/plugin-api-reference.md` for complete API documentation.
 **Plugin System Status:** ✅ **ACTIVE** (Sprint 11 complete)  
 **IPC Isolation:** ⚠ Planned (Sprint 17)  
 **UI Management:** ⚠ Planned (Sprint 19)
+

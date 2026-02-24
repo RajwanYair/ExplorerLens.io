@@ -1,6 +1,6 @@
 // ============================================================================
 // MemoryLeakDetection.h
-// Sprint 14, Task 14.1: CRT Debug Heap for memory leak detection
+// CRT Debug Heap for memory leak detection
 // Automatically included in Debug builds
 // ============================================================================
 
@@ -29,15 +29,15 @@ public:
         _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
         _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_DEBUG);
         
-        OutputDebugStringA("[DarkThumbs] Memory leak detection ENABLED\n");
+        OutputDebugStringA("[ExplorerLens] Memory leak detection ENABLED\n");
     }
     
     ~MemoryLeakDetector() {
         // Report any leaks found
         if (_CrtDumpMemoryLeaks()) {
-            OutputDebugStringA("[DarkThumbs] WARNING: Memory leaks detected!\n");
+            OutputDebugStringA("[ExplorerLens] WARNING: Memory leaks detected!\n");
         } else {
-            OutputDebugStringA("[DarkThumbs] No memory leaks detected\n");
+            OutputDebugStringA("[ExplorerLens] No memory leaks detected\n");
         }
     }
     
@@ -66,7 +66,7 @@ private:
 static MemoryLeakDetector g_memoryLeakDetector;
 
 // ============================================================================
-// RAII Handle Wrappers - Sprint 14, Task 14.6
+// RAII Handle Wrappers
 // ============================================================================
 
 // HBITMAP wrapper
@@ -243,3 +243,4 @@ public:
 #include "../Engine/Utils/HandleWrappers.h"
 
 #endif // _DEBUG
+

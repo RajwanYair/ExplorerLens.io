@@ -1,4 +1,4 @@
-# DarkThumbs - Master Rebuild Script (PowerShell)
+# ExplorerLens - Master Rebuild Script (PowerShell)
 # Rebuilds all compression libraries without /GL (LTCG) to avoid linking issues
 # Date: November 19, 2025
 
@@ -48,7 +48,7 @@ $buildConfig = @{
     "Optimization"             = "MaxSpeed"  # /O2
 }
 
-Write-Host "=== DarkThumbs Compression Libraries Rebuild ===" -ForegroundColor Green
+Write-Host "=== ExplorerLens Compression Libraries Rebuild ===" -ForegroundColor Green
 Write-Host "Build Configuration:" -ForegroundColor Cyan
 $buildConfig.GetEnumerator() | ForEach-Object {
     Write-Host "  $($_.Key): $($_.Value)" -ForegroundColor White
@@ -97,7 +97,7 @@ if (Test-Path $zlibDir) {
     
     cmake .. -G "$generator" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
-        -DBUILD_SHARED_LIBS=OFF `
+        -DBUILD_SHARED_LIBS=ON `
         -DCMAKE_C_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_CXX_FLAGS_RELEASE="/MT /O2"
     
@@ -159,7 +159,7 @@ if ($zstdDir) {
     # Configure with CMake
     cmake ..\build\cmake -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
-        -DZSTD_BUILD_SHARED=OFF `
+        -DZSTD_BUILD_SHARED=ON `
         -DZSTD_BUILD_STATIC=ON `
         -DCMAKE_C_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_CXX_FLAGS_RELEASE="/MT /O2"
@@ -196,7 +196,7 @@ if (Test-Path $lz4Dir) {
     # Configure with CMake
     cmake ..\build\cmake -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
-        -DBUILD_SHARED_LIBS=OFF `
+        -DBUILD_SHARED_LIBS=ON `
         -DCMAKE_C_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_CXX_FLAGS_RELEASE="/MT /O2"
     
@@ -232,9 +232,9 @@ if (Test-Path $minizipDir) {
     # Configure with CMake - EXPLICITLY disable /GL
     cmake .. -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
-        -DMZ_BUILD_TESTS=OFF `
-        -DMZ_BUILD_UNIT_TESTS=OFF `
-        -DBUILD_SHARED_LIBS=OFF `
+        -DMZ_BUILD_TESTS=ON `
+        -DMZ_BUILD_UNIT_TESTS=ON `
+        -DBUILD_SHARED_LIBS=ON `
         -DCMAKE_C_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_CXX_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_POLICY_DEFAULT_CMP0091=NEW `
@@ -283,9 +283,10 @@ if ($unrarDir) {
 
 Write-Host "`n=== Compression Libraries Build Complete ===" -ForegroundColor Green
 Write-Host "All libraries built without /GL (LTCG disabled)" -ForegroundColor Cyan
-Write-Host "This should fix the LNK1257 error when linking CBXShell.dll`n" -ForegroundColor Cyan
+Write-Host "This should fix the LNK1257 error when linking LENSShell.dll`n" -ForegroundColor Cyan
 
 Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. Run: rebuild-all.cmd" -ForegroundColor White
-Write-Host "  2. Verify CBXShell.dll builds without LTCG errors" -ForegroundColor White
+Write-Host "  2. Verify LENSShell.dll builds without LTCG errors" -ForegroundColor White
 Write-Host "  3. Test thumbnail generation" -ForegroundColor White
+

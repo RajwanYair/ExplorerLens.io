@@ -1,77 +1,80 @@
-// Sprint 151 — Plugin Sandbox Policy — GTest
-#include <gtest/gtest.h>
+// Plugin Sandbox Policy — GTestShim
+#include "GTestShim.h"
 #include "Plugin/PluginSandboxPolicy.h"
 
-using namespace DarkThumbs::Plugin;
+using namespace ExplorerLens::Plugin;
 
 TEST(PluginSandboxPolicy, StrictPresetLowMemory) {
-    auto p = SandboxPolicy::Strict();
-    EXPECT_LE(p.limits.maxMemoryBytes, 64ULL * 1024 * 1024);
+  auto p = SandboxPolicy::Strict();
+  EXPECT_LE(p.limits.maxMemoryBytes, 64ULL * 1024 * 1024);
 }
 
 TEST(PluginSandboxPolicy, StandardPresetMediumMemory) {
-    auto p = SandboxPolicy::Standard();
-    EXPECT_GT(p.limits.maxMemoryBytes, 64ULL * 1024 * 1024);
-    EXPECT_LE(p.limits.maxMemoryBytes, 256ULL * 1024 * 1024);
+  auto p = SandboxPolicy::Standard();
+  EXPECT_GT(p.limits.maxMemoryBytes, 64ULL * 1024 * 1024);
+  EXPECT_LE(p.limits.maxMemoryBytes, 256ULL * 1024 * 1024);
 }
 
 TEST(PluginSandboxPolicy, DeveloperPresetHighMemory) {
-    auto p = SandboxPolicy::Developer();
-    EXPECT_GT(p.limits.maxMemoryBytes, 256ULL * 1024 * 1024);
+  auto p = SandboxPolicy::Developer();
+  EXPECT_GT(p.limits.maxMemoryBytes, 256ULL * 1024 * 1024);
 }
 
 TEST(PluginSandboxPolicy, StrictPresetNoUI) {
-    auto p = SandboxPolicy::Strict();
-    EXPECT_FALSE(p.limits.allowUIThread);
+  auto p = SandboxPolicy::Strict();
+  EXPECT_FALSE(p.limits.allowUIAccess);
 }
 
 TEST(PluginSandboxPolicy, DeveloperPresetAllowsUI) {
-    auto p = SandboxPolicy::Developer();
-    EXPECT_TRUE(p.limits.allowUIThread);
+  auto p = SandboxPolicy::Developer();
+  EXPECT_TRUE(p.limits.allowUIAccess);
 }
 
 TEST(PluginSandboxPolicy, TimeoutKillChainTotalWithinBound) {
-    auto chain = TimeoutKillChain::Default();
-    uint32_t total = chain.softSignalMs + chain.drainMs + chain.forceKillMs;
-    EXPECT_LE(total, TimeoutKillChain::kMaxKillTimeMs);
+  TimeoutKillChain chain;
+  uint32_t total = chain.TotalBudgetMs();
+  (void)total;
+  EXPECT_LE(total, TimeoutKillChain::kMaxKillTimeMs);
 }
 
 TEST(PluginSandboxPolicy, HandleLeakReportDefaultsZero) {
-    HandleLeakReport r;
-    EXPECT_EQ(r.handleCount, 0u);
+  HandleLeakReport r;
+  EXPECT_EQ(r.handleCountAtStart, 0u);
+  EXPECT_EQ(r.handleCountAtEnd, 0u);
+  EXPECT_EQ(r.leakCount, 0u);
 }
 
-TEST(PluginSandboxPolicy, TeardownResultDefaultNotSuccess) {
-    SandboxTeardownResult r;
-    EXPECT_FALSE(r.success);
+TEST(PluginSandboxPolicy, TeardownResultDefaultClean) {
+  SandboxTeardownResult r;
+  EXPECT_TRUE(r.WasClean());
 }
 
 TEST(PluginSandboxPolicy, ValidatorStrictPassesStrictPlugin) {
-    SandboxPolicyValidator v;
-    auto policy = SandboxPolicy::Strict();
-    auto result = v.Validate(policy);
-    EXPECT_TRUE(result.isValid);
+  auto policy = SandboxPolicy::Strict();
+  SandboxPolicyValidator v(policy);
+  EXPECT_TRUE(v.IsValid());
 }
 
 TEST(PluginSandboxPolicy, PolicyPresetEnumCoverage) {
-    EXPECT_EQ(static_cast<uint32_t>(SandboxPolicyPreset::Strict),   0u);
-    EXPECT_EQ(static_cast<uint32_t>(SandboxPolicyPreset::Standard),  1u);
-    EXPECT_EQ(static_cast<uint32_t>(SandboxPolicyPreset::Developer), 2u);
-    EXPECT_EQ(static_cast<uint32_t>(SandboxPolicyPreset::Disabled),  3u);
+  EXPECT_EQ(static_cast<uint32_t>(SandboxPolicyPreset::Strict), 0u);
+  EXPECT_EQ(static_cast<uint32_t>(SandboxPolicyPreset::Standard), 1u);
+  EXPECT_EQ(static_cast<uint32_t>(SandboxPolicyPreset::Developer), 2u);
+  EXPECT_EQ(static_cast<uint32_t>(SandboxPolicyPreset::Disabled), 3u);
 }
 
 TEST(PluginSandboxPolicy, JobObjectLimitsDefaults) {
-    JobObjectLimits lim;
-    EXPECT_GT(lim.maxMemoryBytes, 0u);
+  JobObjectLimits lim;
+  EXPECT_GT(lim.maxMemoryBytes, 0u);
 }
 
 TEST(PluginSandboxPolicy, TeardownReasonEnumCoverage) {
-    auto r = TeardownReason::Timeout;
-    EXPECT_EQ(static_cast<uint32_t>(r), 1u);
+  auto r = TeardownReason::TimeoutKill;
+  (void)r;
+  EXPECT_EQ(static_cast<uint32_t>(r), 1u);
 }
 
-TEST(PluginSandboxPolicy, PolicyViolationHasMessage) {
-    PolicyViolation v;
-    v.message = "exceeded memory";
-    EXPECT_FALSE(v.message.empty());
+TEST(PluginSandboxPolicy, PolicyViolationHasRule) {
+  PolicyViolation v;
+  v.rule = "exceeded-memory";
+  EXPECT_FALSE(v.rule.empty());
 }

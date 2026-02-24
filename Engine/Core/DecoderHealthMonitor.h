@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine - Decoder Health Monitor
-// Copyright (c) 2026 - DarkThumbs Project
+// ExplorerLens Engine - Decoder Health Monitor
+// Copyright (c) 2026 - ExplorerLens Project
 // Task A22: Decoder availability and health tracking system
 //==============================================================================
 
@@ -12,7 +12,7 @@
 #include <atomic>
 #include <chrono>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     /// <summary>
@@ -108,4 +108,5 @@ namespace Engine {
     };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

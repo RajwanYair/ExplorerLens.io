@@ -1,6 +1,6 @@
-# DarkThumbs Plugin SDK
+# ExplorerLens Plugin SDK
 
-The DarkThumbs Plugin SDK enables developers to extend DarkThumbs with custom thumbnail decoders for new file formats.
+The ExplorerLens Plugin SDK enables developers to extend ExplorerLens with custom thumbnail decoders for new file formats.
 
 ## 🚀 Quick Start
 
@@ -24,7 +24,7 @@ PLUGIN_API const PluginInfo* PLUGIN_CALL plugin_get_info(void) {
         .plugin_author = "Your Name",
         .plugin_description = "Decodes .myformat files",
         .plugin_license = "MIT",
-        .api_version = DARKTHUMBS_PLUGIN_API_VERSION,
+        .api_version = EXPLORERLENS_PLUGIN_API_VERSION,
         .supported_extensions = extensions,
         .mime_types = mime_types,
         .capabilities = PLUGIN_CAP_STILL_IMAGE,
@@ -78,11 +78,11 @@ project(MyFormatPlugin)
 add_library(myformat-plugin SHARED plugin.cpp)
 
 target_compile_definitions(myformat-plugin PRIVATE
-    DARKTHUMBS_PLUGIN_EXPORTS
+    EXPLORERLENS_PLUGIN_EXPORTS
 )
 
 target_include_directories(myformat-plugin PRIVATE
-    ${DARKTHUMBS_SDK_DIR}
+    ${EXPLORERLENS_SDK_DIR}
 )
 ```
 
@@ -142,7 +142,7 @@ myplugin.dtplugin/
 
 ## 🎯 API Stability
 
-The DarkThumbs Plugin API uses a stable C ABI that ensures binary compatibility:
+The ExplorerLens Plugin API uses a stable C ABI that ensures binary compatibility:
 
 - **Major version** must match between plugin and host
 - **Minor version** changes are backward compatible
@@ -184,7 +184,7 @@ Current API Version: **1.0** (65536)
 
 ## 🔒 Security
 
-Plugins run in the same process as DarkThumbs, so:
+Plugins run in the same process as ExplorerLens, so:
 
 - Validate all file input thoroughly
 - Be defensive against malformed/malicious files
@@ -213,7 +213,7 @@ See [examples/SamplePlugin/](examples/SamplePlugin/) for a full-featured example
 
 ## 📝 Requirements
 
-- **DarkThumbs:** 5.4.0+
+- **ExplorerLens:** 5.4.0+
 - **Compiler:** MSVC 2022+ / GCC 11+ / Clang 14+
 - **C++ Standard:** C++20 or C11
 - **Windows SDK:** 10.0.26100.0+
@@ -229,9 +229,9 @@ We welcome plugin contributions! To share your plugin:
 
 ## 📮 Support
 
-- **Issues:** [GitHub Issues](https://github.com/yourorg/darkthumbs/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourorg/darkthumbs/discussions)
-- **Email:** support@darkthumbs.example.com
+- **Issues:** [GitHub Issues](https://github.com/yourorg/explorerlens/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/yourorg/explorerlens/discussions)
+- **Email:** support@explorerlens.example.com
 
 ## 📄 License
 
@@ -242,3 +242,5 @@ Your plugins can use any license compatible with your use case.
 ---
 
 **Happy Plugin Development! 🎉**
+
+

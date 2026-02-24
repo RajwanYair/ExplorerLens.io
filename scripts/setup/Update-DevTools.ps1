@@ -7,7 +7,7 @@ param(
 )
 
 Write-Host "+===============================================================+" -ForegroundColor Cyan
-Write-Host "|      DarkThumbs Development Tools Update Script              |" -ForegroundColor Cyan
+Write-Host "|      ExplorerLens Development Tools Update Script              |" -ForegroundColor Cyan
 Write-Host "+===============================================================+" -ForegroundColor Cyan
 Write-Host ""
 
@@ -146,6 +146,7 @@ Write-Host "+===============================================================+" -
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "1. Close and reopen PowerShell to reload PATH" -ForegroundColor Gray
-Write-Host "2. Run 'Check-DarkThumbsTools' to verify all tools" -ForegroundColor Gray
+Write-Host "2. Run 'Check-ExplorerLensTools' to verify all tools" -ForegroundColor Gray
 Write-Host "3. Run '. `$PROFILE' to reload the development environment" -ForegroundColor Gray
 Write-Host ""
+

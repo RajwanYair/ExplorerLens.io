@@ -12,17 +12,17 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Diagnostics Bundle Export" -ForegroundColor Cyan
+Write-Host "ExplorerLens Diagnostics Bundle Export" -ForegroundColor Cyan
 Write-Host "Sprint 12: Observability & Structured Logging" -ForegroundColor Cyan
 Write-Host "============================================`n" -ForegroundColor Cyan
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
     $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-    $OutputPath = Join-Path $env:USERPROFILE "Desktop\DarkThumbs-Diagnostics-$timestamp.zip"
+    $OutputPath = Join-Path $env:USERPROFILE "Desktop\ExplorerLens-Diagnostics-$timestamp.zip"
 }
 
 # Create temporary directory for bundle contents
-$tempDir = Join-Path $env:TEMP "DarkThumbs-Diagnostics-$(Get-Random)"
+$tempDir = Join-Path $env:TEMP "ExplorerLens-Diagnostics-$(Get-Random)"
 New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
 try {
@@ -72,7 +72,7 @@ try {
     Write-Host "  ✓ System information" -ForegroundColor Green
     
     # =========================================================================
-    # 2. DarkThumbs Configuration
+    # 2. ExplorerLens Configuration
     # =========================================================================
     Write-Host "`n[2/8] Collecting configuration..." -ForegroundColor Yellow
     
@@ -83,8 +83,8 @@ try {
     
     # Registry settings
     $regPaths = @(
-        "HKCU:\Software\DarkThumbs",
-        "HKLM:\Software\DarkThumbs"
+        "HKCU:\Software\ExplorerLens",
+        "HKLM:\Software\ExplorerLens"
     )
     
     foreach ($regPath in $regPaths) {
@@ -99,8 +99,8 @@ try {
     
     # Configuration files
     $configFiles = @(
-        "$env:LOCALAPPDATA\DarkThumbs\config.json",
-        "$env:APPDATA\DarkThumbs\settings.json"
+        "$env:LOCALAPPDATA\ExplorerLens\config.json",
+        "$env:APPDATA\ExplorerLens\settings.json"
     )
     
     foreach ($configFile in $configFiles) {
@@ -119,9 +119,9 @@ try {
     Write-Host "`n[3/8] Collecting logs..." -ForegroundColor Yellow
     
     $logPaths = @(
-        "$env:LOCALAPPDATA\DarkThumbs\Logs\darkthumbs.log",
-        "$env:TEMP\DarkThumbs\darkthumbs.log",
-        "$env:APPDATA\DarkThumbs\Logs\darkthumbs.log"
+        "$env:LOCALAPPDATA\ExplorerLens\Logs\ExplorerLens.log",
+        "$env:TEMP\ExplorerLens\ExplorerLens.log",
+        "$env:APPDATA\ExplorerLens\Logs\ExplorerLens.log"
     )
     
     $logsDir = Join-Path $tempDir "logs"
@@ -157,7 +157,7 @@ try {
     $regContent = @"
 Windows Registry Editor Version 5.00
 
-; DarkThumbs Registry Snapshot
+; ExplorerLens Registry Snapshot
 ; Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 
 "@
@@ -198,7 +198,7 @@ Windows Registry Editor Version 5.00
         
         $dumpLocations = @(
             "$env:LOCALAPPDATA\CrashDumps\*.dmp",
-            "$env:TEMP\DarkThumbs\*.dmp",
+            "$env:TEMP\ExplorerLens\*.dmp",
             "C:\Windows\Minidump\*.dmp"
         )
         
@@ -238,7 +238,7 @@ Windows Registry Editor Version 5.00
         }
     }
     
-    # Get Explorer process memory usage (DarkThumbs runs in Explorer process)
+    # Get Explorer process memory usage (ExplorerLens runs in Explorer process)
     $explorer = Get-Process | Where-Object { $_.Name -eq "explorer" } | Select-Object -First 1
     if ($explorer) {
         $perfMetrics.memory_usage.workingSetMB = [math]::Round($explorer.WorkingSet64 / 1MB, 2)
@@ -313,7 +313,7 @@ Windows Registry Editor Version 5.00
     Write-Host "  Size:   $zipSize MB" -ForegroundColor Cyan
     Write-Host "`nBundle Contents:" -ForegroundColor Yellow
     Write-Host "  • system_info.json - System hardware/software" -ForegroundColor White
-    Write-Host "  • config_dump.json - DarkThumbs configuration" -ForegroundColor White
+    Write-Host "  • config_dump.json - ExplorerLens configuration" -ForegroundColor White
     Write-Host "  • logs/ - Recent log files" -ForegroundColor White
     Write-Host "  • registry_snapshot.reg - Registry settings" -ForegroundColor White
     if ($IncludeCrashDumps) {
@@ -335,3 +335,4 @@ Windows Registry Editor Version 5.00
         Remove-Item $tempDir -Recurse -Force
     }
 }
+

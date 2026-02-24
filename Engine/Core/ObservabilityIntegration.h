@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// ObservabilityIntegration.h — Sprint 52
+// ObservabilityIntegration.h
 // Connects ETW tracing + Structured Logger to the decode pipeline.
 // Provides unified request tracing from ScopedTimer profiling hooks.
 //
@@ -22,7 +22,7 @@
 #include <windows.h>
 #endif
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 /// Event severity levels matching ETW and JSON-lines logger
 enum class ObservabilityLevel : uint8_t {
@@ -214,4 +214,5 @@ private:
     std::atomic<uint64_t>     m_totalCacheHits{0};
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

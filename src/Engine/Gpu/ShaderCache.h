@@ -4,7 +4,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs::Engine::Gpu {
+namespace ExplorerLens::Engine::Gpu {
 
     struct ShaderKey {
         uint32_t pipelineVersion;
@@ -31,3 +31,4 @@ namespace DarkThumbs::Engine::Gpu {
     };
 
 }
+

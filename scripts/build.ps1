@@ -2,10 +2,10 @@
 
 <#
 .SYNOPSIS
-    DarkThumbs build script with logging and monitoring support
+    ExplorerLens build script with logging and monitoring support
 
 .DESCRIPTION
-    Builds DarkThumbs shell extension and Engine library
+    Builds ExplorerLens shell extension and Engine library
     - Enforces x64 only
     - Pipes output to logs for VS Code monitoring
     - Supports clean builds
@@ -75,7 +75,7 @@ function Write-Log {
 
 # Start build
 Write-Log "========================================" 
-Write-Log "DarkThumbs Build Script"
+Write-Log "ExplorerLens Build Script"
 Write-Log "Configuration: $Configuration"
 Write-Log "Clean Build: $Clean"
 Write-Log "Build Engine: $BuildEngine"
@@ -115,8 +115,8 @@ if ($Clean) {
     $cleanPaths = @(
         "build",
         "x64",
-        "CBXShell\x64",
-        "CBXManager\x64",
+        "LENSShell\x64",
+        "LENSManager\x64",
         "Engine\Release",
         "Engine\Debug"
     )
@@ -194,14 +194,14 @@ if ($BuildEngine) {
         Write-Log "Engine build complete"
         
         # Verify Engine library
-        $engineLib = Join-Path $engineBuildDir "$Configuration\DarkThumbsEngine.lib"
+        $engineLib = Join-Path $engineBuildDir "$Configuration\ExplorerLensEngine.lib"
         if (-not (Test-Path $engineLib)) {
             Write-Log "ERROR: Engine library not found at $engineLib" "ERROR"
             exit 1
         }
         
         $libSize = (Get-Item $engineLib).Length / 1MB
-        Write-Log "✓ DarkThumbsEngine.lib: $([math]::Round($libSize, 2)) MB"
+        Write-Log "✓ ExplorerLensEngine.lib: $([math]::Round($libSize, 2)) MB"
         
     } finally {
         Set-Location $WorkspaceRoot
@@ -215,7 +215,7 @@ Write-Log "========================================"
 
 try {
     $msbuildArgs = @(
-        "CBXShell.sln",
+        "LENSShell.sln",
         "/p:Configuration=$Configuration",
         "/p:Platform=x64",
         "/m",
@@ -245,8 +245,8 @@ if (-not $SkipVerification) {
     
     $outputDir = Join-Path $WorkspaceRoot "x64\$Configuration"
     $expectedFiles = @(
-        "CBXShell.dll",
-        "CBXManager.exe"
+        "LENSShell.dll",
+        "LENSManager.exe"
     )
     
     $allFound = $true
@@ -280,3 +280,4 @@ Write-Host "`n✅ Build complete! Open log file in VS Code to review details:" -
 Write-Host "   $LogFile`n" -ForegroundColor Cyan
 
 exit 0
+

@@ -1,7 +1,7 @@
-using DarkThumbs.Manager.ViewModels;
+using ExplorerLens.Manager.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 
-namespace DarkThumbs.Manager.Views;
+namespace ExplorerLens.Manager.Views;
 
 /// <summary>
 /// Diagnostics page code-behind

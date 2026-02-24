@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 46 Tests: Format Conversion & Export Pipeline
+// ExplorerLens — Sprint 46 Tests: Format Conversion & Export Pipeline
 // Tests output formats, quality presets, resize modes, metadata handling,
 // conversion profiles, conversion results, batch results, compatibility.
 //==============================================================================
@@ -10,7 +10,7 @@
 
 #include "../Engine/Codec/FormatConverter.h"
 
-using namespace DarkThumbs::Engine::Codec;
+using namespace ExplorerLens::Engine::Codec;
 
 //==============================================================================
 // Output Format Tests
@@ -306,3 +306,4 @@ TEST(FormatCompatibility, LosslessFormats)
         EXPECT_NE(f, OutputFormat::JPEG);
     }
 }
+

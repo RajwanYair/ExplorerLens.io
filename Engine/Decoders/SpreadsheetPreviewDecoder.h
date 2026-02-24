@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 277: Spreadsheet/Data Preview
+// ExplorerLens Engine — Spreadsheet/Data Preview
 // CSV, Excel, ODS thumbnail generation with cell grid rendering.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Spreadsheet format type
 enum class SpreadsheetFormat : uint8_t {
@@ -99,4 +99,5 @@ public:
     static constexpr size_t CellTypeCount() { return static_cast<size_t>(CellDataType::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 286: HDF5/NetCDF Scientific Decoder
+// ExplorerLens Engine — HDF5/NetCDF Scientific Decoder
 // Hierarchical Data Format 5 and NetCDF scientific data visualization.
 //==============================================================================
 #pragma once
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Scientific data format
 enum class ScientificDataFormat : uint8_t {
@@ -114,4 +114,5 @@ public:
     static constexpr size_t VisModeCount() { return static_cast<size_t>(SciVisMode::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

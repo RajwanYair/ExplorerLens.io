@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include "../Engine/Core/PerfRegressionGate.h"
 
-using namespace DarkThumbs;
+using namespace ExplorerLens;
 
 // ── KPI Names ──────────────────────────────────────────────────────────────
 
@@ -146,3 +146,4 @@ TEST(Sprint146_PerfRegressionGate, CustomThresholdOverride) {
     auto result = gate.Evaluate(current);
     EXPECT_EQ(result.overall, GateVerdict::Fail);
 }
+

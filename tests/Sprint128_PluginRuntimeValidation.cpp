@@ -1,7 +1,7 @@
 // Sprint 128 — Plugin Runtime E2E Validation Tests
 #include <gtest/gtest.h>
 #include "Plugin/PluginRuntimeValidation.h"
-using namespace DarkThumbs::Plugin;
+using namespace ExplorerLens::Plugin;
 
 TEST(Sprint128_PluginE2E, LifecycleTransition_Valid) {
     auto v = PluginRuntimeValidator::Create();
@@ -91,3 +91,4 @@ TEST(Sprint128_PluginE2E, PluginCapability_Defaults) {
     EXPECT_FALSE(cap.supportsGPU);
     EXPECT_TRUE(cap.requiresSandbox);
 }
+

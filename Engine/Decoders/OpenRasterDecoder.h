@@ -1,17 +1,17 @@
 #pragma once
 //==============================================================================
 // OpenRaster (.ora) Decoder
-// Sprint 185: Open image editor format support
+// Open image editor format support
 // OpenRaster is a ZIP archive containing a merged PNG image.
 // Used by GIMP, Krita, MyPaint, and other editors.
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
 #include <cstdint>
 #include <string>
 #include <vector>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
     class OpenRasterDecoder {
     public:
@@ -49,4 +49,5 @@ namespace DarkThumbs::Decoders {
         static constexpr const char* EXTENSIONS[] = { ".ora", nullptr };
     };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

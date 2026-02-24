@@ -1,12 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DarkThumbs.Manager.Contracts;
+using ExplorerLens.Manager.Contracts;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DarkThumbs.Manager.ViewModels;
+namespace ExplorerLens.Manager.ViewModels;
 
 /// <summary>
 /// ViewModel for Plugins page

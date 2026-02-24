@@ -1,6 +1,6 @@
 //==============================================================================
 // ETWTracing.h - Event Tracing for Windows Integration
-// Copyright (c) 2026 - DarkThumbs Project
+// Copyright (c) 2026 - ExplorerLens Project
 // 
 // Provides performance tracing for Windows Performance Analyzer (WPA)
 //==============================================================================
@@ -13,15 +13,15 @@
 
 #pragma comment(lib, "Advapi32.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Tracing {
 
 //==============================================================================
 // ETW Provider GUID: {A1B2C3D4-E5F6-4748-9A8B-9C8D7E6F5A4B}
-// Register with: wevtutil im DarkThumbsManifest.xml
+// Register with: wevtutil im ExplorerLensManifest.xml
 //==============================================================================
 
-const GUID DARKTHUMBS_PROVIDER_GUID = {
+const GUID EXPLORERLENS_PROVIDER_GUID = {
     0xA1B2C3D4, 0xE5F6, 0x4748,
     {0x9A, 0x8B, 0x9C, 0x8D, 0x7E, 0x6F, 0x5A, 0x4B}
 };
@@ -141,16 +141,18 @@ private:
 
 // Convenience macros
 #define ETW_TRACE_THUMBNAIL(filePath) \
-    DarkThumbs::Tracing::ETWScope _etwScope_##__LINE__( \
-        DarkThumbs::Tracing::EventID::ThumbnailGeneration_Start, \
-        DarkThumbs::Tracing::EventID::ThumbnailGeneration_Stop, \
+    ExplorerLens::Tracing::ETWScope _etwScope_##__LINE__( \
+        ExplorerLens::Tracing::EventID::ThumbnailGeneration_Start, \
+        ExplorerLens::Tracing::EventID::ThumbnailGeneration_Stop, \
         filePath)
 
 #define ETW_TRACE_DECODE(decoderName) \
-    DarkThumbs::Tracing::ETWScope _etwScope_##__LINE__( \
-        DarkThumbs::Tracing::EventID::Decode_Start, \
-        DarkThumbs::Tracing::EventID::Decode_Stop, \
+    ExplorerLens::Tracing::ETWScope _etwScope_##__LINE__( \
+        ExplorerLens::Tracing::EventID::Decode_Start, \
+        ExplorerLens::Tracing::EventID::Decode_Stop, \
         decoderName)
 
 } // namespace Tracing
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+
+

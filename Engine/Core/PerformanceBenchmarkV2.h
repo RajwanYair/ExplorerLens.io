@@ -1,10 +1,10 @@
 #pragma once
-// Sprint 227: Performance Benchmark V2 — benchmark harness with percentile statistics
+// Performance Benchmark V2 — benchmark harness with percentile statistics
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Type of benchmark workload
 enum class BenchmarkType : uint32_t {
@@ -57,4 +57,5 @@ private:
     std::vector<BenchmarkResult> m_results;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

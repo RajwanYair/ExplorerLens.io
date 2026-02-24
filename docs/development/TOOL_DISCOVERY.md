@@ -1,4 +1,4 @@
-# Tool Discovery Guide - DarkThumbs Project
+# Tool Discovery Guide - ExplorerLens Project
 
 **Last Updated:** January 8, 2026  
 **Purpose:** Automated detection of required build tools  
@@ -34,7 +34,7 @@ Save as `build-scripts/Find-BuildTools.ps1`:
 
 ```powershell
 # Find-BuildTools.ps1
-# Automatically locates all required build tools for DarkThumbs
+# Automatically locates all required build tools for ExplorerLens
 # Usage: .\build-scripts\Find-BuildTools.ps1 -Verbose
 
 param(
@@ -45,7 +45,7 @@ param(
 $ErrorActionPreference = "Continue"
 $tools = @{}
 
-Write-Host "`n🔍 DarkThumbs Build Tool Discovery`n" -ForegroundColor Cyan
+Write-Host "`n🔍 ExplorerLens Build Tool Discovery`n" -ForegroundColor Cyan
 
 # 1. Find Visual Studio Installations
 Write-Host "1️⃣  Visual Studio Instances:" -ForegroundColor Yellow
@@ -283,7 +283,7 @@ Git:
 $global:BuildTools = .\build-scripts\Find-BuildTools.ps1
 
 # Step 2: Use detected tools
-& $BuildTools.MSBuild CBXShell.vcxproj /p:Configuration=Release /p:Platform=x64
+& $BuildTools.MSBuild LENSShell.vcxproj /p:Configuration=Release /p:Platform=x64
 
 # Step 3: Verify tools are still valid
 if (-not (Test-Path $BuildTools.MSBuild)) {
@@ -309,10 +309,10 @@ This project **ONLY** supports 64-bit builds. 32-bit (Win32/x86) is NOT supporte
 **Build Commands:**
 ```powershell
 # Always specify Platform=x64
-msbuild CBXShell.sln /p:Platform=x64 /p:Configuration=Release
+msbuild LENSShell.sln /p:Platform=x64 /p:Configuration=Release
 
 # Do NOT use Win32 or x86
-# msbuild CBXShell.sln /p:Platform=Win32  # ❌ Will fail
+# msbuild LENSShell.sln /p:Platform=Win32  # ❌ Will fail
 ```
 
 ---
@@ -385,4 +385,5 @@ Install via:
 ---
 
 **Last Updated:** January 8, 2026  
-**Maintained By:** DarkThumbs Project Team
+**Maintained By:** ExplorerLens Project Team
+

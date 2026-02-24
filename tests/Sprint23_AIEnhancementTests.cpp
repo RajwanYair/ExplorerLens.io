@@ -8,7 +8,7 @@
 #include <d3d12.h>
 #include <wrl/client.h>
 
-using namespace DarkThumbs::AI;
+using namespace ExplorerLens::AI;
 using Microsoft::WRL::ComPtr;
 
 class AIEnhancementTest : public ::testing::Test {
@@ -446,3 +446,4 @@ TEST_F(AIEnhancementTest, TestNullTextureHandling) {
 // ✅ NSFW detection >95% accuracy on test dataset
 // ✅ Performance targets met (<500ms super-resolution, <100ms NSFW)
 // ✅ No memory leaks in 100-iteration stress test
+

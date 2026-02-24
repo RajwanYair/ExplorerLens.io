@@ -1,7 +1,7 @@
 // Sprint 130 — Decoder Hotset Manager Tests
 #include <gtest/gtest.h>
 #include "Memory/DecoderHotsetManager.h"
-using namespace DarkThumbs::Memory;
+using namespace ExplorerLens::Memory;
 
 TEST(Sprint130_Hotset, Create_InitializesDecoders) {
     auto mgr = DecoderHotsetManager::Create();
@@ -75,3 +75,4 @@ TEST(Sprint130_Hotset, UnloadCandidate_Priority) {
     b.priority = 50.0;
     EXPECT_TRUE(b < a);
 }
+

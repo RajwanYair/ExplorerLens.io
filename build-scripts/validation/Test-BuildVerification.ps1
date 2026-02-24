@@ -1,11 +1,11 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Build Verification Suite
+# ExplorerLens v7.0 - Build Verification Suite
 # Comprehensive verification system for build outputs and library dependencies
 # Date: February 16, 2026
 
 <#
 .SYNOPSIS
-    Comprehensive build verification suite for DarkThumbs
+    Comprehensive build verification suite for ExplorerLens
 
 .DESCRIPTION
     Verifies:
@@ -24,7 +24,7 @@
     .\Test-BuildVerification.ps1 -VerifyLibraries -VerifyEngine -CreateReport
 
 .NOTES
-    Author: DarkThumbs Development Team
+    Author: ExplorerLens Development Team
     Version: 7.0
 #>
 
@@ -102,12 +102,12 @@ function Test-LibraryBuild {
 }
 
 function Test-EngineBuild {
-    $engineDll = Join-Path $rootDir "build\bin\Release\DarkThumbsEngine.dll"
+    $engineDll = Join-Path $rootDir "build\bin\Release\ExplorerLensEngine.dll"
     
     $results.TotalTests++
     
     if (-not (Test-Path $engineDll)) {
-        Write-Host " ✗ DarkThumbsEngine.dll not found" -ForegroundColor Red
+        Write-Host " ✗ ExplorerLensEngine.dll not found" -ForegroundColor Red
         Write-Host "   Expected: $engineDll" -ForegroundColor DarkRed
         $results.FailedTests++
         return $false
@@ -116,7 +116,7 @@ function Test-EngineBuild {
     # Check DLL exports
     try {
         $dllSize = (Get-Item $engineDll).Length / 1MB
-        Write-Host " ✓ DarkThumbsEngine.dll found ($([math]::Round($dllSize, 2)) MB)" -ForegroundColor Green
+        Write-Host " ✓ ExplorerLensEngine.dll found ($([math]::Round($dllSize, 2)) MB)" -ForegroundColor Green
         
         # Verify it's a valid PE file
         $bytes = [System.IO.File]::ReadAllBytes($engineDll)[0..1]
@@ -139,19 +139,19 @@ function Test-EngineBuild {
 }
 
 function Test-ShellExtension {
-    $cbxShellDll = Join-Path $rootDir "x64\Release\CBXShell.dll"
+    $LENSShellDll = Join-Path $rootDir "x64\Release\LENSShell.dll"
     
     $results.TotalTests++
     
-    if (-not (Test-Path $cbxShellDll)) {
-        Write-Host " ✗ CBXShell.dll not found" -ForegroundColor Red
-        Write-Host "   Expected: $cbxShellDll" -ForegroundColor DarkRed
+    if (-not (Test-Path $LENSShellDll)) {
+        Write-Host " ✗ LENSShell.dll not found" -ForegroundColor Red
+        Write-Host "   Expected: $LENSShellDll" -ForegroundColor DarkRed
         $results.FailedTests++
         return $false
     }
     
-    $dllSize = (Get-Item $cbxShellDll).Length / 1MB
-    Write-Host " ✓ CBXShell.dll found ($([math]::Round($dllSize, 2)) MB)" -ForegroundColor Green
+    $dllSize = (Get-Item $LENSShellDll).Length / 1MB
+    Write-Host " ✓ LENSShell.dll found ($([math]::Round($dllSize, 2)) MB)" -ForegroundColor Green
     $results.PassedTests++
     return $true
 }
@@ -175,7 +175,7 @@ function Test-PackagingPrerequisites {
 
 # Main verification
 Write-Host "`n═══════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host " DarkThumbs v7.0 - Build Verification Suite" -ForegroundColor Cyan
+Write-Host " ExplorerLens v7.0 - Build Verification Suite" -ForegroundColor Cyan
 Write-Host "═══════════════════════════════════════════════════════`n" -ForegroundColor Cyan
 
 $allPassed = $true
@@ -209,7 +209,7 @@ if ($VerifyLibraries) {
 
 # Verify Engine
 if ($VerifyEngine) {
-    Write-Host "[2/4] Verifying DarkThumbs Engine..." -ForegroundColor Yellow
+    Write-Host "[2/4] Verifying ExplorerLens Engine..." -ForegroundColor Yellow
     Write-Host ""
     $engineOK = Test-EngineBuild
     $allPassed = $allPassed -and $engineOK
@@ -281,3 +281,4 @@ else {
     Write-Host " ✓ Verification PASSED - All tests successful!" -ForegroundColor Green
     exit 0
 }
+

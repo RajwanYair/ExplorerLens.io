@@ -1,4 +1,4 @@
-# DarkThumbs Build Scripts & Environment Setup
+# ExplorerLens Build Scripts & Environment Setup
 
 ## 🚀 Quick Start
 
@@ -7,12 +7,12 @@
 Make all build tools available automatically in every PowerShell session:
 
 ```powershell
-cd C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs\scripts
+cd C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens\scripts
 .\Install-DevEnvironment.ps1
 ```
 
 **What this does:**
-- ✅ Adds DarkThumbs environment to your PowerShell profile
+- ✅ Adds ExplorerLens environment to your PowerShell profile
 - ✅ Loads MSVC tools (CL, NMake, Link, RC) automatically
 - ✅ Verifies CMake, MSBuild, Git availability
 - ✅ Creates convenient build aliases (dtbuild, dttest, dtclean)
@@ -62,14 +62,14 @@ After installation, these tools are immediately available:
 ### Hard-Coded Paths (No Searching!)
 
 ```powershell
-$Global:DarkThumbsConfig = @{
+$Global:ExplorerLensConfig = @{
     VSPath      = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
     MSVCVersion = "14.44.35207"
     WindowsSDK  = "10.0.26100.0"
     MSBuild     = "...\MSBuild.exe"
     CMake       = "C:\Users\ryair\scoop\shims\cmake.exe"
     Git         = "C:\Users\ryair\scoop\shims\git.exe"
-    ProjectRoot = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\DarkThumbs"
+    ProjectRoot = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens"
 }
 ```
 
@@ -84,7 +84,7 @@ After environment is loaded:
 dtbuild          # Show available commands
 dtbuild Release  # Build full solution (Release, x64)
 dtbuild Engine   # Build Engine only (CMake)
-dtbuild Shell    # Build CBXShell only
+dtbuild Shell    # Build LENSShell only
 dtbuild Clean    # Clean all artifacts
 dtbuild Rebuild  # Clean + Release build
 
@@ -92,7 +92,7 @@ dtbuild Rebuild  # Clean + Release build
 dttest           # Run Engine tests
 
 # Information
-Show-DarkThumbsInfo  # Display environment details
+Show-ExplorerLensInfo  # Display environment details
 Test-BuildTools      # Verify all tools work
 ```
 
@@ -104,11 +104,11 @@ Test-BuildTools      # Verify all tools work
 
 ```powershell
 # After installing to profile, restart PowerShell and run:
-Show-DarkThumbsInfo
+Show-ExplorerLensInfo
 
 # Expected output:
 # ═══════════════════════════════════════════════════════
-#  DarkThumbs Development Environment
+#  ExplorerLens Development Environment
 # ═══════════════════════════════════════════════════════
 # 
 # Visual Studio:
@@ -158,7 +158,7 @@ Your profile will be backed up before any changes.
 
 ```powershell
 # Reload environment
-Setup-DarkThumbsEnv -Force
+Setup-ExplorerLensEnv -Force
 
 # Or manually load MSVC
 Load-MSVCEnvironment
@@ -168,7 +168,7 @@ Load-MSVCEnvironment
 
 ```powershell
 # Check profile exists and has the entry
-Get-Content $PROFILE | Select-String "DarkThumbs"
+Get-Content $PROFILE | Select-String "ExplorerLens"
 
 # If not found, reinstall:
 .\Install-DevEnvironment.ps1 -Force
@@ -178,7 +178,7 @@ Get-Content $PROFILE | Select-String "DarkThumbs"
 
 ```powershell
 # Reload full environment
-Setup-DarkThumbsEnv -Force
+Setup-ExplorerLensEnv -Force
 ```
 
 ---
@@ -212,3 +212,4 @@ Environment setup is optimized for speed:
 ---
 
 *Last Updated: February 9, 2026*
+

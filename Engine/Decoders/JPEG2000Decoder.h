@@ -1,7 +1,7 @@
 #pragma once
-// Sprint 133 — JPEG 2000 Decoder Interface (enhanced Sprint 160)
+// JPEG 2000 Decoder Interface 
 // JP2/J2K/JPF/JPX format support via OpenJPEG-compatible interface.
-// Sprint 160: tile streaming, colour-space conversion, 256 MB memory ceiling.
+// tile streaming, colour-space conversion, 256 MB memory ceiling.
 // Provides thumbnail extraction from JPEG 2000 wavelet-compressed images.
 
 #include <cstdint>
@@ -10,8 +10,9 @@
 #include <string>
 #include <array>
 #include <algorithm>
+#include <cctype>
 
-namespace DarkThumbs::Decoders {
+namespace ExplorerLens::Decoders {
 
 // ─── JPEG 2000 sub-formats ────────────────────────────────────────
 enum class JP2Format : uint8_t {
@@ -41,7 +42,8 @@ struct JP2Extensions {
 
     static bool IsSupported(const std::string& ext) {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         for (auto& e : ALL) {
             if (lower == e) return true;
         }
@@ -50,7 +52,8 @@ struct JP2Extensions {
 
     static JP2Format ClassifyExtension(const std::string& ext) {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         if (lower == ".jp2") return JP2Format::JP2;
         if (lower == ".j2k" || lower == ".j2c" || lower == ".jpc") return JP2Format::J2K;
         if (lower == ".jpx" || lower == ".jpf") return JP2Format::JPX;
@@ -77,7 +80,7 @@ struct JP2ImageInfo {
         if (numResolutionLevels <= 1) return 0;
         uint32_t level = 0;
         uint32_t w = width, h = height;
-        while (level < numResolutionLevels - 1) {
+        while (level + 1 < static_cast<uint32_t>(numResolutionLevels)) {
             uint32_t nextW = w / 2;
             uint32_t nextH = h / 2;
             if (nextW < targetWidth || nextH < targetHeight) break;
@@ -239,4 +242,5 @@ private:
     bool m_available = true;  // assume available for testing
 };
 
-} // namespace DarkThumbs::Decoders
+} // namespace ExplorerLens::Decoders
+

@@ -1,4 +1,4 @@
-# DarkThumbs Integration Architecture
+# ExplorerLens Integration Architecture
 
 **Document Version:** 1.0  
 **Date:** January 12, 2026  
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This document describes the complete integration architecture between the COM-based Windows Shell Extension (CBXShell.dll) and the standalone DarkThumbs Engine library. The architecture uses a clean adapter pattern to bridge COM and modern C++ interfaces.
+This document describes the complete integration architecture between the COM-based Windows Shell Extension (LENSShell.dll) and the standalone ExplorerLens Engine library. The architecture uses a clean adapter pattern to bridge COM and modern C++ interfaces.
 
 ---
 
@@ -24,10 +24,10 @@ This document describes the complete integration architecture between the COM-ba
                                 │ IExtractImage2
                                 │
 ┌───────────────────────────────▼─────────────────────────────────┐
-│                        CBXShell.dll                              │
+│                        LENSShell.dll                              │
 │                   (COM Shell Extension)                          │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │                  CCBXShell                                 │  │
+│  │                  CLENSShell                                 │  │
 │  │           (COM Object Implementation)                      │  │
 │  │                                                            │  │
 │  │  + IThumbnailProvider::GetThumbnail()                     │  │
@@ -55,7 +55,7 @@ This document describes the complete integration architecture between the COM-ba
                               │ C++ API
                               │
 ┌─────────────────────────────▼─────────────────────────────────┐
-│                  DarkThumbsEngine.lib                          │
+│                  ExplorerLensEngine.lib                          │
 │                  (Standalone Library)                          │
 │  ┌────────────────────────────────────────────────────────┐   │
 │  │               ThumbnailPipeline                        │   │
@@ -114,18 +114,18 @@ This document describes the complete integration architecture between the COM-ba
 
 ## Component Specifications
 
-### 1. CBXShell.dll (COM Shell Extension)
+### 1. LENSShell.dll (COM Shell Extension)
 
 **Purpose:** Windows Shell Extension that implements thumbnail generation for Windows Explorer
 
 **Language:** C++/ATL/COM  
 **Build Target:** x64 DLL  
 **Size:** ~1.39 MB (Release)  
-**Dependencies:** ATL, Windows SDK, DarkThumbsEngine.lib
+**Dependencies:** ATL, Windows SDK, ExplorerLensEngine.lib
 
 **Key Classes:**
 
-#### 1.1 CCBXShell (COM Object)
+#### 1.1 CLENSShell (COM Object)
 
 **COM Interfaces:**
 - `IThumbnailProvider` - Windows 7+ thumbnail API
@@ -134,7 +134,7 @@ This document describes the complete integration architecture between the COM-ba
 
 **Member Variables:**
 ```cpp
-std::unique_ptr<DarkThumbs::EngineAdapter> m_engineAdapter;
+std::unique_ptr<ExplorerLens::EngineAdapter> m_engineAdapter;
 std::wstring m_filePath;
 MetricsCollector m_metrics;
 DarkModeHelper m_darkMode;
@@ -160,8 +160,8 @@ HRESULT hr = m_engineAdapter->GenerateThumbnail(
 
 **Initialization:**
 ```cpp
-CCBXShell::CCBXShell() {
-    m_engineAdapter = std::make_unique<DarkThumbs::EngineAdapter>();
+CLENSShell::CLENSShell() {
+    m_engineAdapter = std::make_unique<ExplorerLens::EngineAdapter>();
     if (m_engineAdapter->Initialize()) {
         m_useEngine = true;
     } else {
@@ -172,7 +172,7 @@ CCBXShell::CCBXShell() {
 
 **Statistics Collection:**
 ```cpp
-// Metrics are collected in CCBXShell and forwarded from Engine
+// Metrics are collected in CLENSShell and forwarded from Engine
 m_metrics.RecordSuccess(durationMs);
 m_metrics.RecordCacheHit();
 m_metrics.RecordFormat(formatType);
@@ -184,8 +184,8 @@ m_metrics.RecordFormat(formatType);
 
 **Purpose:** Bridge between COM HBITMAP interface and Engine's modern C++ API
 
-**Header:** [CBXShell/EngineAdapter.h](../CBXShell/EngineAdapter.h)  
-**Implementation:** [CBXShell/EngineAdapter.cpp](../CBXShell/EngineAdapter.cpp)  
+**Header:** [LENSShell/EngineAdapter.h](../LENSShell/EngineAdapter.h)  
+**Implementation:** [LENSShell/EngineAdapter.cpp](../LENSShell/EngineAdapter.cpp)  
 **Lines of Code:** ~205 lines
 
 **Class Definition:**
@@ -315,7 +315,7 @@ HRESULT EngineAdapter::GenerateThumbnail(
 
 ---
 
-### 3. DarkThumbsEngine.lib (Core Library)
+### 3. ExplorerLensEngine.lib (Core Library)
 
 **Purpose:** Standalone thumbnail generation engine with zero COM dependencies
 
@@ -504,8 +504,8 @@ public:
    └─► Windows Explorer requests thumbnail
        └─► Calls IThumbnailProvider::GetThumbnail(cx, phbmp, alphaType)
 
-2. COM Layer (CBXShell.dll)
-   └─► CCBXShell::GetThumbnail()
+2. COM Layer (LENSShell.dll)
+   └─► CLENSShell::GetThumbnail()
        └─► Checks m_useEngine flag
            └─► TRUE: Route through EngineAdapter ✅
            └─► FALSE: Legacy GDI+ fallback
@@ -541,7 +541,7 @@ public:
        └─► Returns HRESULT + HBITMAP to COM
 
 6. COM Return
-   └─► CCBXShell returns HBITMAP to Explorer
+   └─► CLENSShell returns HBITMAP to Explorer
        └─► Explorer displays thumbnail to user
 ```
 
@@ -609,8 +609,8 @@ if (SUCCEEDED(result.status)) {
 
 | Component | Memory Footprint | Notes |
 |-----------|------------------|-------|
-| **CBXShell.dll** | ~1.39 MB | Loaded once per Explorer process |
-| **DarkThumbsEngine.lib** | ~1.97 MB | Static library, linked into DLL |
+| **LENSShell.dll** | ~1.39 MB | Loaded once per Explorer process |
+| **ExplorerLensEngine.lib** | ~1.97 MB | Static library, linked into DLL |
 | **Per-thumbnail** | ~4-16 MB | Temporary buffers, freed after |
 | **Cache** | Configurable | Default: 100 MB, 1000 entries |
 | **GPU Textures** | ~2-8 MB | Only when GPU rendering |
@@ -709,21 +709,21 @@ cd x64\Release
 
 **Manual Test Procedure:**
 
-1. **Build CBXShell.dll:**
+1. **Build LENSShell.dll:**
    ```powershell
-   msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64
+   msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64
    ```
 
 2. **Register Shell Extension:**
    ```powershell
-   regsvr32 x64\Release\CBXShell.dll
+   regsvr32 x64\Release\LENSShell.dll
    ```
 
 3. **Test with Explorer:**
    - Navigate to folder with test images
    - Enable thumbnail view
    - Verify thumbnails appear correctly
-   - Check Performance Monitor for DarkThumbsEngine activity
+   - Check Performance Monitor for ExplorerLensEngine activity
 
 4. **Verify Formats:**
    - JPEG: ✅ Should work
@@ -752,7 +752,7 @@ cd x64\Release
 ### Current Limitations
 
 1. **DLL Lock Issue** ⚠️
-   - **Problem:** CBXShell.dll locked by Explorer during development
+   - **Problem:** LENSShell.dll locked by Explorer during development
    - **Impact:** Cannot rebuild while shell extension is loaded
    - **Workaround:** Restart Explorer or unregister DLL before rebuild
    - **Fix:** Create test harness that doesn't require Explorer
@@ -808,9 +808,9 @@ cd x64\Release
 
 ### Architecture Validation ✅
 
-- [x] **Separation of Concerns:** COM layer (CBXShell) separate from Engine
+- [x] **Separation of Concerns:** COM layer (LENSShell) separate from Engine
 - [x] **Clean Interfaces:** EngineAdapter provides clean bridge
-- [x] **No COM in Engine:** DarkThumbsEngine.lib has zero COM dependencies
+- [x] **No COM in Engine:** ExplorerLensEngine.lib has zero COM dependencies
 - [x] **Non-owning Registry:** DecoderRegistry doesn't manage decoder lifetime
 - [x] **Interface Standardization:** All decoders implement IThumbnailDecoder
 - [x] **Error Handling:** Clean HRESULT propagation
@@ -818,7 +818,7 @@ cd x64\Release
 
 ### Code Quality ✅
 
-- [x] **Compilation:** Both CBXShell and Engine compile successfully
+- [x] **Compilation:** Both LENSShell and Engine compile successfully
 - [x] **Unit Tests:** 38/38 tests passing (100%)
 - [x] **Zero Crashes:** No crashes in test suite
 - [x] **Zero Memory Leaks:** No leaks detected
@@ -828,7 +828,7 @@ cd x64\Release
 ### Integration Validation ⏳
 
 - [x] **EngineAdapter exists:** ✅ Implemented
-- [x] **CCBXShell uses EngineAdapter:** ✅ Integrated
+- [x] **CLENSShell uses EngineAdapter:** ✅ Integrated
 - [x] **Decoder Registration:** ✅ 4 decoders registered
 - [ ] **End-to-end test:** ⏳ Blocked by DLL lock (awaiting Explorer restart)
 - [ ] **Performance profiling:** ⏳ Requires rebuild
@@ -854,16 +854,16 @@ cd Engine
 cmake -B build -A x64
 cmake --build build --config Release
 
-# 2. Build CBXShell (includes EngineAdapter)
+# 2. Build LENSShell (includes EngineAdapter)
 cd ..
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64
 
 # 3. Run Engine tests
 cd x64\Release
 .\EngineTests.exe
 
 # 4. Register shell extension
-regsvr32 CBXShell.dll
+regsvr32 LENSShell.dll
 ```
 
 ### Debugging Integration
@@ -871,7 +871,7 @@ regsvr32 CBXShell.dll
 **Enable Debug Logging:**
 
 ```cpp
-// In CCBXShell constructor
+// In CLENSShell constructor
 DT_LOG_LEVEL = LogLevel::LVL_DEBUG;
 
 // In EngineAdapter::Initialize()
@@ -912,3 +912,4 @@ DT_LOG_DEBUG(LogCategory::ENGINE, "Initializing Engine adapter");
 **Document Status:** ✅ COMPLETE  
 **Last Updated:** January 12, 2026  
 **Next Review:** Week 6 (after GPU abstraction implementation)
+

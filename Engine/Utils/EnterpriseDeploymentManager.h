@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// EnterpriseDeploymentManager — Sprint 223
+// EnterpriseDeploymentManager
 // Enterprise deployment configuration for GPO, SCCM, Intune, and manual.
 // Handles policy-driven settings, silent install, and compliance reporting.
 //==============================================================================
@@ -10,7 +10,7 @@
 #include <vector>
 #include <map>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class DeploymentMethod : uint8_t {
     Manual    = 0,
@@ -69,4 +69,5 @@ private:
     std::vector<DeploymentPolicy> m_policies;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

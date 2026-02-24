@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 266: Persistent Cache & USN Journal
+// ExplorerLens Engine — Persistent Cache & USN Journal
 // Activate PersistentDiskCache with USN journal cache invalidation.
 // Cache warming on folder open, cross-session persistence.
 //==============================================================================
@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Cache storage backend
 enum class CacheBackend : uint8_t {
@@ -112,4 +112,5 @@ public:
     static constexpr size_t PolicyCount() { return 5; }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

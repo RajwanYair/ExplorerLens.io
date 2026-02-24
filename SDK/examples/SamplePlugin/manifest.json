@@ -1,13 +1,13 @@
 {
-  "$schema": "https://darkthumbs.dev/schemas/plugin-manifest-v1.json",
+  "$schema": "https://explorerlens.dev/schemas/plugin-manifest-v1.json",
   "manifestVersion": 1,
   "plugin": {
-    "id": "darkthumbs.plugin.sample",
+    "id": "explorerlens.plugin.sample",
     "name": "Sample XYZ Format Decoder",
     "version": "1.0.0",
-    "vendor": "DarkThumbs Project",
+    "vendor": "ExplorerLens Project",
     "description": "Reference plugin demonstrating SDK usage for custom XYZ format",
-    "homepage": "https://github.com/darkthumbs/plugin-samples",
+    "homepage": "https://github.com/explorerlens/plugin-samples",
     "icon": "assets/icons/icon-256.png"
   },
   "abiVersion": 1,
@@ -42,7 +42,7 @@
     "plugins": []
   },
   "configuration": {
-    "schemaUri": "https://darkthumbs.dev/schemas/plugin-config/sample-v1.json",
+    "schemaUri": "https://explorerlens.dev/schemas/plugin-config/sample-v1.json",
     "defaults": {
       "maxImageSize": 10000,
       "quality": "high"
@@ -57,7 +57,7 @@
     }
   },
   "metadata": {
-    "author": "DarkThumbs Team <team@darkthumbs.dev>",
+    "author": "ExplorerLens Team <team@explorerlens.dev>",
     "license": "MIT",
     "tags": ["sample", "example", "reference", "xyz"],
     "category": "Image Decoders",
@@ -70,3 +70,4 @@
     "testResults": null
   }
 }
+

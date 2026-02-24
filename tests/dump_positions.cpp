@@ -5,9 +5,9 @@
 #include <iomanip>
 
 int main() {
-    HWND hDlg = FindWindow(L"#32770", L"CBX Shell Manager - Thumbnail Configuration");
+    HWND hDlg = FindWindow(L"#32770", L"LENS Shell Manager - Thumbnail Configuration");
     if (!hDlg) {
-        std::wcout << L"CBXManager window not found!\n";
+        std::wcout << L"LENSManager window not found!\n";
         return 1;
     }
     
@@ -46,3 +46,4 @@ int main() {
     
     return 0;
 }
+

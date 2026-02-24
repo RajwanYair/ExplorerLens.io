@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# DarkThumbs v7.0 - Complete Build & Package Script
+# ExplorerLens v7.0 - Complete Build & Package Script
 # Builds all dependencies, projects, and creates MSI installer
 #
 # USAGE:
@@ -14,6 +14,7 @@ param(
     [string]$Configuration = 'Release',
     
     [switch]$SkipDependencies,
+    [switch]$SkipTests,
     [switch]$Clean,
     [switch]$SkipPackaging,
     [string]$Version = "7.0.0"
@@ -43,7 +44,7 @@ $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
 Write-Host ""
 Write-Host ("=" * 80) -ForegroundColor Cyan
-Write-Host "  DarkThumbs v$Version - Complete Build Pipeline" -ForegroundColor Cyan
+Write-Host "  ExplorerLens v$Version - Complete Build Pipeline" -ForegroundColor Cyan
 Write-Host ("=" * 80) -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Configuration: $Configuration" -ForegroundColor Yellow
@@ -117,53 +118,57 @@ if (-not $SkipDependencies) {
 }
 
 # ============================================================================
-# Phase 2: Build DarkThumbs Engine (CMake)
+# Phase 2: Build ExplorerLens Engine (CMake)
 # ============================================================================
 
 Write-Host ""
 Write-Host ("=" * 80) -ForegroundColor Cyan
-Write-Host "  Phase 2: Building DarkThumbs Engine" -ForegroundColor Cyan
+Write-Host "  Phase 2: Building ExplorerLens Engine" -ForegroundColor Cyan
 Write-Host ("=" * 80) -ForegroundColor Cyan
 Write-Host ""
 
-$engineBuildDir = Join-Path $rootDir "build"
-$cmakeLists = Join-Path $rootDir "CMakeLists.txt"
+$buildMsvcScript = Join-Path $buildScriptsDir "Build-MSVC.ps1"
 
-if (Test-Path $cmakeLists) {
+if (Test-Path $buildMsvcScript) {
     try {
-        $cmakeOptions = @{
-            'CMAKE_BUILD_TYPE'  = $Configuration
-            'BUILD_SHARED_LIBS' = 'OFF'
+        $preset = if ($Configuration -eq 'Debug') { 'default-debug' } else { 'default-release' }
+
+        Write-Host "Using Build-MSVC pipeline (preset: $preset, target: ExplorerLensEngine)" -ForegroundColor Cyan
+
+        $buildArgs = @{
+            Preset = $preset
+            Jobs = 8
+            Target = "ExplorerLensEngine"
+            Clean = $Clean
+        }
+
+        & $buildMsvcScript @buildArgs
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "Build-MSVC failed with exit code $LASTEXITCODE"
         }
         
-        Invoke-CMakeBuild `
-            -LibraryName "DarkThumbsEngine" `
-            -SourceDir $rootDir `
-            -BuildDir $engineBuildDir `
-            -Configuration $Configuration `
-            -CMakeOptions $cmakeOptions `
-            -Clean:$Clean
-        
-        Write-Host "✓ Phase 2 Complete: DarkThumbs Engine built" -ForegroundColor Green
+        Write-Host "✓ Phase 2 Complete: ExplorerLens Engine built" -ForegroundColor Green
     } catch {
         Write-Host "✗ Engine build failed: $($_.Exception.Message)" -ForegroundColor Red
         exit 1
     }
 } else {
-    Write-Host "⚠ CMakeLists.txt not found, skipping Engine build" -ForegroundColor Yellow
+    Write-Host "✗ Build script not found: $buildMsvcScript" -ForegroundColor Red
+    exit 1
 }
 
 # ============================================================================
-# Phase 3: Build CBXShell & CBXManager (MSBuild)
+# Phase 3: Build LENSShell & LENSManager (MSBuild)
 # ============================================================================
 
 Write-Host ""
 Write-Host ("=" * 80) -ForegroundColor Cyan
-Write-Host "  Phase 3: Building CBXShell Solution" -ForegroundColor Cyan
+Write-Host "  Phase 3: Building LENSShell Solution" -ForegroundColor Cyan
 Write-Host ("=" * 80) -ForegroundColor Cyan
 Write-Host ""
 
-$solutionFile = Join-Path $rootDir "CBXShell.sln"
+$solutionFile = Join-Path $rootDir "LENSShell.sln"
 
 if (Test-Path $solutionFile) {
     try {
@@ -193,7 +198,7 @@ if (Test-Path $solutionFile) {
         }
         
         Write-Host ""
-        Write-Host "✓ Phase 3 Complete: CBXShell solution built" -ForegroundColor Green
+        Write-Host "✓ Phase 3 Complete: LENSShell solution built" -ForegroundColor Green
     } catch {
         Write-Host "✗ Solution build failed: $($_.Exception.Message)" -ForegroundColor Red
         exit 1
@@ -228,7 +233,7 @@ if (-not $SkipPackaging) {
             Write-Host "✓ Phase 4 Complete: MSI installer created" -ForegroundColor Green
         } catch {
             Write-Host "✗ Packaging failed: $($_.Exception.Message)" -ForegroundColor Red
-            Write-Host "   Note: This is not critical. Binaries are built successfully." -ForegroundColor Yellow
+            exit 1
         }
     } else {
         Write-Host "⚠ Packaging script not found: $packagingScript" -ForegroundColor Yellow
@@ -255,22 +260,23 @@ Write-Host "Total Time: $($elapsed.ToString('hh\:mm\:ss'))" -ForegroundColor Cya
 Write-Host "Configuration: $Configuration" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Build Artifacts:" -ForegroundColor Yellow
-Write-Host "  • DarkThumbs Engine: build\lib\$Configuration\" -ForegroundColor Gray
-Write-Host "  • CBXShell DLL:      CBXShell\x64\$Configuration\CBXShell.dll" -ForegroundColor Gray
-Write-Host "  • CBXManager EXE:    CBXManager\x64\$Configuration\CBXManager.exe" -ForegroundColor Gray
+Write-Host "  • ExplorerLens Engine: build\lib\$Configuration\" -ForegroundColor Gray
+Write-Host "  • LENSShell DLL:      LENSShell\x64\$Configuration\LENSShell.dll" -ForegroundColor Gray
+Write-Host "  • LENSManager EXE:    LENSManager\x64\$Configuration\LENSManager.exe" -ForegroundColor Gray
 
 if (-not $SkipPackaging) {
-    $msiFile = Join-Path $rootDir "packaging\output\DarkThumbs-Setup-$Version.msi"
+    $msiFile = Join-Path $rootDir "packaging\output\ExplorerLens-Setup-$Version.msi"
     if (Test-Path $msiFile) {
-        Write-Host "  • MSI Installer:     packaging\output\DarkThumbs-Setup-$Version.msi" -ForegroundColor Gray
+        Write-Host "  • MSI Installer:     packaging\output\ExplorerLens-Setup-$Version.msi" -ForegroundColor Gray
     }
 }
 
 Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Yellow
 Write-Host "  • Run tests:      .\scripts\run-tests.ps1" -ForegroundColor Gray
-Write-Host "  • Install MSI:    msiexec /i packaging\output\DarkThumbs-Setup-$Version.msi" -ForegroundColor Gray
-Write-Host "  • Register COM:   regsvr32 CBXShell\x64\$Configuration\CBXShell.dll" -ForegroundColor Gray
+Write-Host "  • Install MSI:    msiexec /i packaging\output\ExplorerLens-Setup-$Version.msi" -ForegroundColor Gray
+Write-Host "  • Register COM:   regsvr32 LENSShell\x64\$Configuration\LENSShell.dll" -ForegroundColor Gray
 Write-Host ""
 
 exit 0
+

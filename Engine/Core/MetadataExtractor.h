@@ -1,7 +1,7 @@
 #pragma once
 // =============================================================================
-// MetadataExtractor.h — Sprint 242: EXIF/IPTC/XMP Metadata Extraction
-// DarkThumbs Engine — Core Module
+// MetadataExtractor.h — EXIF/IPTC/XMP Metadata Extraction
+// ExplorerLens Engine — Core Module
 // =============================================================================
 
 #include <string>
@@ -9,7 +9,7 @@
 #include <map>
 #include <cstdint>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 /// Metadata standard type
 enum class MetadataStandard : uint32_t {
@@ -88,4 +88,5 @@ private:
     std::vector<MetadataStandard> m_enabledStandards;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

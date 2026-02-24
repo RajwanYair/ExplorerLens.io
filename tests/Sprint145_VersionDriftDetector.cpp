@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include "../Engine/Core/VersionDriftDetector.h"
 
-using namespace DarkThumbs;
+using namespace ExplorerLens;
 
 // ── SemanticVersion Tests ──────────────────────────────────────────────────
 
@@ -101,7 +101,7 @@ TEST(Sprint145_VersionDriftDetector, FullScanClean) {
     VersionDriftDetector det;
     det.AddArtifact("README.md", ArtifactKind::Documentation);
     det.AddArtifact("config.h", ArtifactKind::Header);
-    auto result = det.Scan([](const std::string&) { return "DarkThumbs v7.1.0"; });
+    auto result = det.Scan([](const std::string&) { return "ExplorerLens v7.1.0"; });
     EXPECT_TRUE(result.IsClean());
     EXPECT_EQ(result.totalFilesScanned, 2);
     EXPECT_EQ(result.Score(), 100);
@@ -137,3 +137,4 @@ TEST(Sprint145_VersionDriftDetector, FormatReportContainsStatus) {
     EXPECT_NE(report.find("PASS"), std::string::npos);
     EXPECT_NE(report.find("Files scanned: 10"), std::string::npos);
 }
+

@@ -1,5 +1,5 @@
 //==============================================================================
-// TelemetryEngine — Sprint 207
+// TelemetryEngine
 // Structured telemetry with privacy and health scoring
 //==============================================================================
 
@@ -8,7 +8,7 @@
 #include <chrono>
 #include <sstream>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 TelemetryEngine::TelemetryEngine() {
     auto now = std::chrono::steady_clock::now();
@@ -208,4 +208,5 @@ const wchar_t* TelemetryEngine::GetDimensionName(HealthDimension dimension) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

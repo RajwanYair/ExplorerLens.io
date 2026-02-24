@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 157 — ARM64 Runtime Validator
+// ARM64 Runtime Validator
 // Platform probe, decoder availability, GPU capability, and shell registration
 // verification for ARM64 target.
 
@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Platform {
+namespace ExplorerLens::Platform {
 
 // ─── Platform probe ──────────────────────────────────────────────────────────
 
@@ -120,7 +120,7 @@ struct ARM64RuntimeValidationReport {
         r.platform = { "Windows 11 24H2", "ARM64", true, false, false, false, 8, 8192 };
         r.gpu = { true, true, "Qualcomm Adreno 690", 0, true };
         r.comRegistration = { "9E6ECB90-5A61-42BD-B851-D3297D9C7F39", true,
-                              "C:\\Windows\\System32\\CBXShell.dll", true };
+                              "C:\\Windows\\System32\\LENSShell.dll", true };
         r.decoderTests = {
             { ".jpg",  "ImageDecoder",  DecoderConfidenceLevel::FullPass, 12.0, "" },
             { ".png",  "ImageDecoder",  DecoderConfidenceLevel::FullPass, 9.0,  "" },
@@ -134,4 +134,5 @@ struct ARM64RuntimeValidationReport {
     }
 };
 
-} // namespace DarkThumbs::Platform
+} // namespace ExplorerLens::Platform
+

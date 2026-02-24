@@ -9,7 +9,7 @@
 #include <thread>
 #include "../Engine/contracts/thumbnail_contracts.h"
 
-namespace DarkThumbs::Service {
+namespace ExplorerLens::Service {
 
     enum class ServiceTransport {
         NamedPipe,
@@ -59,3 +59,4 @@ namespace DarkThumbs::Service {
     };
 
 }
+

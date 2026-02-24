@@ -13,7 +13,7 @@
 #include <chrono>
 #include <atomic>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace IPC {
 
 // =============================================================================
@@ -246,14 +246,14 @@ struct HeartbeatMessage {
 
 struct TransportConfig {
     // Named Pipe Configuration
-    std::wstring pipeName = L"\\\\.\\pipe\\DarkThumbs_Worker_";
+    std::wstring pipeName = L"\\\\.\\pipe\\ExplorerLens_Worker_";
     uint32_t pipeBufferSize = 65536;     // 64 KB
     uint32_t maxInstances = 4;           // Max concurrent connections
     
     // Shared Memory Configuration (optional for large payloads)
     bool useSharedMemory = false;
     uint32_t sharedMemorySize = 16777216; // 16 MB
-    std::wstring sharedMemoryName = L"DarkThumbs_SharedMem_";
+    std::wstring sharedMemoryName = L"ExplorerLens_SharedMem_";
     
     // Timeouts
     uint32_t connectTimeoutMs = 5000;    // 5 seconds
@@ -329,4 +329,5 @@ enum class IPCStatus {
 };
 
 } // namespace IPC
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// DecoderHotsetManager.h — Sprint 130
+// DecoderHotsetManager.h
 // Single-format hot mode runtime: load only required decoders for dominant
 // format family, defer all others to cold state, timed unload for inactive.
 //==============================================================================
@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Memory {
+namespace ExplorerLens { namespace Memory {
 
 /// Decoder load state
 enum class DecoderLoadState : uint8_t {
@@ -243,4 +243,5 @@ private:
     }
 };
 
-}} // namespace DarkThumbs::Memory
+}} // namespace ExplorerLens::Memory
+

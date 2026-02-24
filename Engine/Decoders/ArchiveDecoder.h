@@ -1,5 +1,5 @@
 // ArchiveDecoder.h
-// Archive (ZIP/CBZ/7Z/RAR/TAR) thumbnail decoder for DarkThumbs Engine
+// Archive (ZIP/CBZ/7Z/RAR/TAR) thumbnail decoder for ExplorerLens Engine
 // Extracts and decodes the best cover image from various archive formats
 // Primary support: ZIP/CBZ using minizip-ng
 // Future support: 7Z, RAR, TAR, CAB, ISO (requires additional libraries)
@@ -11,7 +11,7 @@
 #include <vector>
 #include <wincodec.h>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Archive metadata structure
@@ -78,4 +78,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

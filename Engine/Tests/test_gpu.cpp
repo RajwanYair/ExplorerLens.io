@@ -5,8 +5,8 @@
 #include <vector>
 #include <cstring>
 
-using namespace DarkThumbs;
-using namespace DarkThumbs::Engine;
+using namespace ExplorerLens;
+using namespace ExplorerLens::Engine;
 
 // Test helpers
 void PrintTestHeader(const char* testName) {
@@ -315,6 +315,7 @@ void RunGPUTests() {
     
     #undef RUN_TEST
 }
+
 
 
 

@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// BuildValidation.h — Sprint 53
+// BuildValidation.h
 // Compile-time and runtime build validation checks.
 // Ensures all subsystem headers compile cleanly and are accessible.
 //==============================================================================
@@ -10,11 +10,11 @@
 #include "Core/Config.h"
 #include "Core/ObservabilityIntegration.h"
 
-// ── Sprint 6-12 Foundation headers ──
+// ── Foundation headers ──
 // These are validated via their respective test files; this header serves
 // as a quick compilation smoke-test for the full header set.
 
-namespace DarkThumbs { namespace BuildValidation {
+namespace ExplorerLens { namespace BuildValidation {
 
 /// Build configuration snapshot for diagnostics
 struct BuildInfo {
@@ -59,4 +59,5 @@ inline bool ValidateRuntime() {
     return osvi.dwOSVersionInfoSize > 0;
 }
 
-}} // namespace DarkThumbs::BuildValidation
+}} // namespace ExplorerLens::BuildValidation
+

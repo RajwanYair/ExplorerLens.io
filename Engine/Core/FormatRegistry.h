@@ -1,6 +1,6 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 250: Format Registry Refactor
-// Replaces #define CBXTYPE with enum class FormatType.
+// ExplorerLens Engine — Format Registry Refactor
+// Replaces #define LENSTYPE with enum class FormatType.
 // Central registry mapping extension → type → decoder → shell registration.
 //==============================================================================
 #pragma once
@@ -9,9 +9,9 @@
 #include <unordered_map>
 #include <functional>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
-/// Strongly-typed format identifier replacing legacy #define CBXTYPE int
+/// Strongly-typed format identifier replacing legacy #define LENSTYPE int
 enum class FormatType : uint16_t {
     Unknown         = 0,
     ZIP             = 1,   CBZ            = 2,   CBR            = 3,
@@ -188,4 +188,5 @@ private:
     std::unordered_map<std::wstring, FormatType>    m_extensionMap;
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,7 +1,7 @@
 #include "ShellPreviewHandler.h"
 #include <algorithm>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 ShellPreviewHandler::ShellPreviewHandler() = default;
 
@@ -58,4 +58,5 @@ void ShellPreviewHandler::Unload() {
     m_params = PreviewParams{};
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

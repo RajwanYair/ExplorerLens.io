@@ -1,4 +1,4 @@
-# Build Scripts - DarkThumbs v7.0
+# Build Scripts - ExplorerLens v7.0
 
 **Unified Build System for Windows 11**  
 Comprehensive build infrastructure for external dependencies, engine, and installer packaging.
@@ -63,12 +63,12 @@ build-scripts/
 .\build-scripts\external-libs\build-libjxl.ps1
 .\build-scripts\external-libs\build-libavif.ps1
 
-# Build DarkThumbs Engine (CMake)
+# Build ExplorerLens Engine (CMake)
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 
-# Build CBXShell solution (MSBuild)
-msbuild CBXShell.sln /p:Configuration=Release /p:Platform=x64 /m
+# Build LENSShell solution (MSBuild)
+msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m
 
 # Create MSI installer
 .\packaging\Build-Installer.ps1 -Version 7.0.0
@@ -156,8 +156,8 @@ See [build-scripts/core/](./core/) for full documentation.
 
 - 🆕 **Build-All-And-Package.ps1** - Complete build orchestrator (recommended)
 - 🆕 **Setup-Vcpkg.ps1** - Automated vcpkg setup and package installation
-- **scripts/build.ps1** - Main build orchestrator for DarkThumbs solution
-- **build-cbxshell-quick.ps1** - Quick incremental build
+- **scripts/build.ps1** - Main build orchestrator for ExplorerLens solution
+- **build-LENSShell-quick.ps1** - Quick incremental build
 - ⚠️  **Find-MSBuild.ps1** - DEPRECATED - Use `Find-MSBuildPath` from Build-Library-Core
 - **Test-Build-Environment.ps1** - Verify build prerequisites
 
@@ -192,8 +192,8 @@ Scripts for production builds and releases:
 Build monitoring and diagnostic utilities:
 
 - **Monitor-Build.ps1** - Real-time build monitoring
-- **darkthumbs.ps1** - DarkThumbs command-line interface
-- **Enable-DarkThumbsDiagnostics.ps1** - Enable diagnostic logging
+- **ExplorerLens.ps1** - ExplorerLens command-line interface
+- **Enable-ExplorerLensDiagnostics.ps1** - Enable diagnostic logging
 
 ### Validation (`validation/`)
 
@@ -236,9 +236,9 @@ Build verification and testing:
 
 The build system respects these environment variables:
 
-- `DARKTHUMBS_ROOT` - Project root directory (auto-detected)
-- `DARKTHUMBS_BUILD_TYPE` - Override configuration (Debug/Release)
-- `DARKTHUMBS_EXTERNAL_LIBS` - External libraries directory
+- `ExplorerLens_ROOT` - Project root directory (auto-detected)
+- `ExplorerLens_BUILD_TYPE` - Override configuration (Debug/Release)
+- `ExplorerLens_EXTERNAL_LIBS` - External libraries directory
 - `CMAKE_GENERATOR` - CMake generator (default: Visual Studio 18 2026)
 
 ## Build Output
@@ -316,4 +316,5 @@ For build issues:
 ---
 
 **Last Updated:** February 16, 2026  
-**Maintainer:** DarkThumbs Development Team
+**Maintainer:** ExplorerLens Development Team
+

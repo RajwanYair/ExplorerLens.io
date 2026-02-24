@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include "Core/VersionDriftGate.h"
 
-using namespace DarkThumbs::VersionDrift;
+using namespace ExplorerLens::VersionDrift;
 
 // ── SemanticVersion Parsing ──────────────────────────────────────
 
@@ -219,3 +219,4 @@ TEST(Sprint125_VersionDrift, DriftReport_CompliancePercent_NoRefs) {
     r.staleReferences = 0;
     EXPECT_DOUBLE_EQ(r.CompliancePercent(), 100.0);
 }
+

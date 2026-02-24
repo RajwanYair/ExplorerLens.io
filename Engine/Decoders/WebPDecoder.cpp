@@ -1,6 +1,6 @@
 // WebPDecoder.cpp - libwebp Decoder Implementation
-// DarkThumbs Engine v1.0.0
-// Copyright (c) 2025 DarkThumbs Project
+// ExplorerLens Engine v1.0.0
+// Copyright (c) 2025 ExplorerLens Project
 
 #include "WebPDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
@@ -14,7 +14,7 @@
 #pragma comment(lib, "shlwapi.lib")
 // Note: libwebp.lib will be added to CMakeLists.txt
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Extension list (null-terminated)
@@ -318,4 +318,5 @@ void WebPDecoder::AddAnimationBadge(HBITMAP hBitmap, int width, int height) {
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

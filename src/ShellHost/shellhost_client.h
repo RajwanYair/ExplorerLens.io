@@ -19,7 +19,7 @@
 #include <condition_variable>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace ShellHost {
 
 // =============================================================================
@@ -322,4 +322,5 @@ bool IsLegacyPathAvailable();
 } // namespace Legacy
 
 } // namespace ShellHost
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -1,14 +1,14 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using DarkThumbs.Manager.Services;
-using DarkThumbs.Manager.Views;
+using ExplorerLens.Manager.Services;
+using ExplorerLens.Manager.Views;
 using System;
 
-namespace DarkThumbs.Manager;
+namespace ExplorerLens.Manager;
 
 /// <summary>
-/// DarkThumbs Manager Application
-/// Modern WinUI 3 application for managing DarkThumbs configuration, plugins, and diagnostics.
+/// ExplorerLens Manager Application
+/// Modern WinUI 3 application for managing ExplorerLens configuration, plugins, and diagnostics.
 /// </summary>
 public partial class App : Application
 {

@@ -1,4 +1,4 @@
-# DarkThumbs Decoder Status Matrix
+# ExplorerLens Decoder Status Matrix
 **Version:** 8.4.0  
 **Last Updated:** June 2025 (Sprint 177)
 
@@ -35,7 +35,7 @@ These implement `IThumbnailDecoder` and are registered with `ThumbnailPipeline`.
 
 ---
 
-## CBXShell Legacy Decoders (CBXShell/)
+## LENSShell Legacy Decoders (LENSShell/)
 
 These are static-method classes used by the COM shell extension directly. They do NOT implement `IThumbnailDecoder`.
 
@@ -113,4 +113,5 @@ Decoders without unit tests (candidates for Sprint 19):
 1. **RAWDecoder** (Engine) — High priority, complex code
 2. **TGADecoder** (Engine) — Medium priority, native code
 3. **QOIDecoder** (Engine) — Low priority, simple reference impl
-4. All CBXShell legacy decoders — Not Engine-based, harder to unit test
+4. All LENSShell legacy decoders — Not Engine-based, harder to unit test
+

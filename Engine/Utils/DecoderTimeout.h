@@ -1,6 +1,6 @@
 // ============================================================================
-// DecoderTimeout.h — Sprint 6, Task 6.3
-// Hard-kill decoder timeout enforcement for DarkThumbs
+// DecoderTimeout.h, Task 6.3
+// Hard-kill decoder timeout enforcement for ExplorerLens
 //
 // Wraps decoder invocations with a wall-clock timeout. If a decoder exceeds
 // the configured timeout (default 5s), the operation is abandoned and the
@@ -25,7 +25,7 @@
 #include <atomic>
 #include "DecoderCircuitBreaker.h"
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 /// Timeout result codes
 enum class TimeoutResult {
@@ -93,7 +93,7 @@ public:
                 cb.ReportFailure("Soft timeout exceeded: " + std::to_string(elapsedMs) + "ms");
                 
                 OutputDebugStringA(
-                    ("[DarkThumbs] Decoder " + m_decoderName + 
+                    ("[ExplorerLens] Decoder " + m_decoderName + 
                      " soft timeout: " + std::to_string(elapsedMs) + "ms\n").c_str());
             } else if (SUCCEEDED(hr)) {
                 m_result = TimeoutResult::SUCCESS;
@@ -108,7 +108,7 @@ public:
             cb.ReportFailure("SEH exception: 0x" + FormatHex(m_exceptionCode));
             
             OutputDebugStringA(
-                ("[DarkThumbs] SEH exception in " + m_decoderName + 
+                ("[ExplorerLens] SEH exception in " + m_decoderName + 
                  ": 0x" + FormatHex(m_exceptionCode) + "\n").c_str());
         }
 
@@ -163,12 +163,13 @@ private:
 /// Usage: DECODER_WITH_TIMEOUT("WebPDecoder", 5000, decoder->Decode(path, result))
 #define DECODER_WITH_TIMEOUT(decoderName, timeoutMs, operation) \
     [&]() -> HRESULT { \
-        DarkThumbs::DecoderTimeoutGuard guard(decoderName, timeoutMs); \
+        ExplorerLens::DecoderTimeoutGuard guard(decoderName, timeoutMs); \
         auto result = guard.Execute([&]() -> HRESULT { return (operation); }); \
-        if (result == DarkThumbs::TimeoutResult::SUCCESS) return S_OK; \
-        if (result == DarkThumbs::TimeoutResult::CIRCUIT_OPEN) return HRESULT_FROM_WIN32(ERROR_SERVICE_DISABLED); \
-        if (result == DarkThumbs::TimeoutResult::TIMED_OUT) return HRESULT_FROM_WIN32(ERROR_TIMEOUT); \
+        if (result == ExplorerLens::TimeoutResult::SUCCESS) return S_OK; \
+        if (result == ExplorerLens::TimeoutResult::CIRCUIT_OPEN) return HRESULT_FROM_WIN32(ERROR_SERVICE_DISABLED); \
+        if (result == ExplorerLens::TimeoutResult::TIMED_OUT) return HRESULT_FROM_WIN32(ERROR_TIMEOUT); \
         return E_FAIL; \
     }()
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

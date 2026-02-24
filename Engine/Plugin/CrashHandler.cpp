@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Crash Handler Implementation
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Crash Handler Implementation
+ * Copyright (c) 2026 - ExplorerLens Project
  *****************************************************************************/
 
 #include "CrashHandler.h"
@@ -14,7 +14,7 @@
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "shell32.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 //============================================================================
 // CrashHandler Implementation
@@ -118,9 +118,9 @@ void CrashHandler::ClearHistory() {
 void CrashHandler::LoadDisabledPlugins() {
     std::lock_guard<std::mutex> lock(mutex_);
     
-    // Load from registry: HKCU\Software\DarkThumbs\DisabledPlugins
+    // Load from registry: HKCU\Software\ExplorerLens\DisabledPlugins
     HKEY key;
-    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\DarkThumbs\\DisabledPlugins",
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\DisabledPlugins",
                      0, KEY_READ, &key) != ERROR_SUCCESS) {
         return;
     }
@@ -147,9 +147,9 @@ void CrashHandler::LoadDisabledPlugins() {
 }
 
 void CrashHandler::SaveDisabledPlugins() {
-    // Save to registry: HKCU\Software\DarkThumbs\DisabledPlugins
+    // Save to registry: HKCU\Software\ExplorerLens\DisabledPlugins
     HKEY key;
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\DarkThumbs\\DisabledPlugins",
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\DisabledPlugins",
                        0, nullptr, 0, KEY_WRITE, nullptr, &key, nullptr) != ERROR_SUCCESS) {
         return;
     }
@@ -198,7 +198,7 @@ void CrashHandler::NotifyCrash(const CrashInfo& crash_info) {
     // Log to file
     wchar_t local_app_data[MAX_PATH];
     if (SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, local_app_data) == S_OK) {
-        std::wstring log_dir = std::wstring(local_app_data) + L"\\DarkThumbs";
+        std::wstring log_dir = std::wstring(local_app_data) + L"\\ExplorerLens";
         CreateDirectoryW(log_dir.c_str(), nullptr);
         
         std::wstring log_file = log_dir + L"\\crash-log.txt";
@@ -271,4 +271,5 @@ std::wstring FormatCrashInfo(const CrashInfo& crash_info) {
     return oss.str();
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

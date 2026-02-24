@@ -1,6 +1,6 @@
-// PerformancePolish.h - Performance Polish & Optimization (Sprint 32)
-// DarkThumbs Engine v7.0.0+
-// Copyright (c) 2026 DarkThumbs Project
+// PerformancePolish.h - Performance Polish & Optimization
+// ExplorerLens Engine v7.0.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Features:
 // - Micro-profiler with scope-based timing & percentile tracking
@@ -10,7 +10,7 @@
 // - Bottleneck detection (>10ms p95 threshold)
 // - Per-decoder performance breakdown
 //
-// Extends existing PerformanceProfiler.h with Sprint 32 targets
+// Extends existing PerformanceProfiler.h with targets
 
 #pragma once
 
@@ -26,7 +26,7 @@
 #include <atomic>
 #include <cmath>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace Sprint32 {
 
@@ -286,4 +286,5 @@ struct PerformanceReport {
 
 } // namespace Sprint32
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include "../Engine/Core/ReproducibleBuildVerifier.h"
 
-using namespace DarkThumbs;
+using namespace ExplorerLens;
 
 // ── BuildHash Tests ────────────────────────────────────────────────────────
 
@@ -58,7 +58,7 @@ TEST(Sprint147_ReproducibleBuild, RelaxedPolicyDefaults) {
 TEST(Sprint147_ReproducibleBuild, IdenticalBuildsAreReproducible) {
     auto hash = BuildHash::FromHex("aabbccdd");
     BuildArtifact art;
-    art.path = "CBXShell.dll";
+    art.path = "LENSShell.dll";
     art.type = ArtifactType::DLL;
     art.sizeBytes = 2940 * 1024;
     art.contentHash = hash;
@@ -76,7 +76,7 @@ TEST(Sprint147_ReproducibleBuild, IdenticalBuildsAreReproducible) {
 
 TEST(Sprint147_ReproducibleBuild, DifferentHashesAreNonReproducible) {
     BuildArtifact artA, artB;
-    artA.path = artB.path = "CBXShell.dll";
+    artA.path = artB.path = "LENSShell.dll";
     artA.sizeBytes = artB.sizeBytes = 2940 * 1024;
     artA.contentHash = artA.strippedHash = BuildHash::FromHex("aa");
     artB.contentHash = artB.strippedHash = BuildHash::FromHex("bb");
@@ -93,7 +93,7 @@ TEST(Sprint147_ReproducibleBuild, DifferentHashesAreNonReproducible) {
 TEST(Sprint147_ReproducibleBuild, TimestampDriftDetected) {
     auto stripped = BuildHash::FromHex("aa");
     BuildArtifact artA, artB;
-    artA.path = artB.path = "CBXShell.dll";
+    artA.path = artB.path = "LENSShell.dll";
     artA.sizeBytes = artB.sizeBytes = 1000;
     artA.contentHash = BuildHash::FromHex("cc");   // raw differs
     artB.contentHash = BuildHash::FromHex("dd");
@@ -111,7 +111,7 @@ TEST(Sprint147_ReproducibleBuild, TimestampDriftDetected) {
 
 TEST(Sprint147_ReproducibleBuild, MissingArtifactDetected) {
     BuildArtifact art;
-    art.path = "CBXShell.dll";
+    art.path = "LENSShell.dll";
     art.sizeBytes = 1000;
     art.contentHash = art.strippedHash = BuildHash::FromHex("aa");
 
@@ -157,8 +157,9 @@ TEST(Sprint147_ReproducibleBuild, FormatReportContainsStatus) {
 
 TEST(Sprint147_ReproducibleBuild, ManifestFindArtifact) {
     BuildArtifact art;
-    art.path = "CBXShell.dll";
+    art.path = "LENSShell.dll";
     auto manifest = ReproducibleBuildVerifier::CreateManifest("abc", "main", "Release", {art});
-    EXPECT_NE(manifest.FindArtifact("CBXShell.dll"), nullptr);
+    EXPECT_NE(manifest.FindArtifact("LENSShell.dll"), nullptr);
     EXPECT_EQ(manifest.FindArtifact("missing.dll"), nullptr);
 }
+

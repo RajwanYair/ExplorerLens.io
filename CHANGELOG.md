@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to DarkThumbs will be documented in this file.
+All notable changes to ExplorerLens will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -144,13 +144,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [8.4.0] - 2025-06 (Sprints 175-177)
 
 ### Added
-- **Sprint 175: Critical Bug Fixes** — Fixed `.djvu`/`.djv` routing to `CBXTYPE_DJVU` (was incorrectly mapped to `CBXTYPE_EPUB`), added 8 model format extensions to `GetCBXType()`, clean AVIF/HEIF decoder separation, added `.hif`/`.avci`/`.avcs` HEIF extensions
-- **Sprint 176: Shell Registration Expansion** — Expanded `CBXShell.rgs` from 47 to 93 registered extensions including archives (.tar/.iso/.cab/.deb), 15 additional camera RAW formats, legacy Office documents, 3D model formats, and HEIF variants
+- **Sprint 175: Critical Bug Fixes** — Fixed `.djvu`/`.djv` routing to `LENSTYPE_DJVU` (was incorrectly mapped to `LENSTYPE_EPUB`), added 8 model format extensions to `GetLENSTYPE()`, clean AVIF/HEIF decoder separation, added `.hif`/`.avci`/`.avcs` HEIF extensions
+- **Sprint 176: Shell Registration Expansion** — Expanded `LENSShell.rgs` from 47 to 93 registered extensions including archives (.tar/.iso/.cab/.deb), 15 additional camera RAW formats, legacy Office documents, 3D model formats, and HEIF variants
 - **Sprint 177: Version Normalization** — Updated all documentation from v7.x/v6.x to v8.4.0, added CHANGELOG entries for v8.0-v8.4, synced version across README, CAPABILITY_AUDIT, PERFORMANCE, DECODER_STATUS, CODE_QUALITY_STANDARDS, PLUGIN_SDK, and tests/README
 
 ### Fixed
 - **Critical:** `.djvu`/`.djv` files now correctly use DjVu decoder instead of EPUB decoder
-- **Critical:** `CBXTYPE_MODEL` extensions now properly routed in `GetCBXType()`
+- **Critical:** `LENSTYPE_MODEL` extensions now properly routed in `GetLENSTYPE()`
 - **Fixed:** AVIF/HEIF decoder overlap — AVIFDecoder handles `.avif`/`.avifs` only; HEIFDecoder handles `.heif`/`.heic`/`.hif`/`.avci`/`.avcs` etc.
 - **Fixed:** 46 file extensions were supported by code but missing shell handler registration
 
@@ -195,7 +195,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RAW photo decoder via LibRaw 0.21.3 with 27 camera format support
 - PDF decoder via MuPDF integration
 - Archive decoder expansion (TAR, CPIO, ISO, CAB, DEB, XAR)
-- CBXTYPE enum expansion (values 40-81) for all new format categories
+- LENSTYPE enum expansion (values 40-81) for all new format categories
 
 ### Changed
 - **Version:** 8.0.0 → 8.1.0
@@ -214,7 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Version:** 7.1.0 → 8.0.0
 - **Sprint count:** 74 → 99
-- **Architecture:** Introduced DarkThumbsEngine.lib as separate static library
+- **Architecture:** Introduced ExplorerLensEngine.lib as separate static library
 - **Build system:** Added CMake 3.20+ support alongside MSBuild
 
 ## [7.1.0] - 2026-02-18
@@ -222,7 +222,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Sprint 50: MSIX CLSID Fix** — Replaced `YOUR-CLSID-HERE` placeholder with actual COM CLSID `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
-- **Sprint 50: CBXTYPE Enum Expansion** — Added `CBXTYPE_ICO` (58), `CBXTYPE_QOI` (59), `CBXTYPE_TGA` (75), `CBXTYPE_BMP` (76), `CBXTYPE_GIF` (77), `CBXTYPE_MODEL` (80), `CBXTYPE_DOCUMENT` (81)
+- **Sprint 50: LENSTYPE Enum Expansion** — Added `LENSTYPE_ICO` (58), `LENSTYPE_QOI` (59), `LENSTYPE_TGA` (75), `LENSTYPE_BMP` (76), `LENSTYPE_GIF` (77), `LENSTYPE_MODEL` (80), `LENSTYPE_DOCUMENT` (81)
 - **Sprint 50: MSIX File Type Associations** — Expanded from 8 to 17 supported file types in AppxManifest.xml (HEIC, HEIF, PSD, DDS, HDR, EXR, TGA, ICO, QOI, SVG, TIFF, DNG, CR2, NEF, ARW)
 - **Sprint 51: CMake Header Registration** — Registered 40+ Sprint 6-49 headers in ENGINE_HEADERS (AI, Cloud, Cache, Codec, Memory, Shell, Release subsystems)
 - **Sprint 52: Observability Integration** — `ObservabilityIntegration.h` singleton connecting ETW + structured logger to decode pipeline with `IObservabilitySink` interface, `PipelineEvent` struct, privacy modes, request lifecycle counters
@@ -251,8 +251,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **MSIX CLSID Placeholder:** Replaced non-functional `YOUR-CLSID-HERE` with production CLSID from CBXShell.idl
-- **Missing CBXTYPE Defines:** ICO, QOI, TGA, BMP, GIF, MODEL, DOCUMENT types now have proper numeric IDs
+- **MSIX CLSID Placeholder:** Replaced non-functional `YOUR-CLSID-HERE` with production CLSID from LENSShell.idl
+- **Missing LENSTYPE Defines:** ICO, QOI, TGA, BMP, GIF, MODEL, DOCUMENT types now have proper numeric IDs
 - **Stale Doc Versions:** 6 documentation files updated from v5.x/v6.x to v7.0.0/v7.1.0
 - **CMake Header Gaps:** Sprint 6-49 headers were not registered in ENGINE_HEADERS build target
 - **Observability Disconnection:** ETW and structured logger were implemented but not wired to decode pipeline
@@ -297,24 +297,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Issue #2 (HEIF) → 🔄 In Progress (build scripts ready)
   - Issue #5 (Video Codecs) → ✅ Resolved (K-Lite installed)
 - **Build-All-And-Package.ps1**: Expanded from 4 to 12 library build scripts
-- **CBXShellClass.cpp**: Updated version references from v6.2.0 to v7.0.0
+- **LENSShellClass.cpp**: Updated version references from v6.2.0 to v7.0.0
 - **LIBRARY_RESEARCH_2026.md**: Major status update - corrected 10+ entries reflecting actual implementation (QOI, SVG, EXR, Video, Audio, PDF, etc. all already implemented)
 - **Integration Tests**: Updated includes from 9 to 22 decoder headers, FullInitialization test now registers all 22 decoder instances
 - **Build-LibHEIF.ps1**: Corrected `libde265` library naming (`libde265.lib`), fixed CMake argument quoting for paths with spaces, explicit `LIBDE265_*` wiring, and resilient artifact verification
 - **Engine/CMakeLists.txt**: Added libheif install/build fallback include+library path resolution, corrected `libde265` linkage handling, and enforced artifact checks when `HAS_LIBHEIF=ON`
-- **CBXShell.vcxproj**: Corrected HEIF/de265 linker dependencies to use `de265.lib` import library path and added Release runtime deployment for `libde265.dll`
+- **LENSShell.vcxproj**: Corrected HEIF/de265 linker dependencies to use `de265.lib` import library path and added Release runtime deployment for `libde265.dll`
 - **build-scripts/Update-All-Libraries.ps1**: Updated default proxy URL to `http://proxy-chain.intel.com:928`
 
 ### Changed
 
 - **Build Results**: Full clean build — 0 errors, 0 warnings:
-  - CBXShell.dll: 2940 KB (x64\Release\)
-  - CBXManager.exe: 400 KB (x64\Release\)
-  - DarkThumbsEngine.lib: 130 MB (build\lib\Release\)
-- **Architecture Audit (Sprint 3)**: Verified single Engine adapter path, legacy decoders gated behind CBXSHELL_LEGACY_DECODERS, all 24 decoders registered in ThumbnailPipeline
+  - LENSShell.dll: 2940 KB (x64\Release\)
+  - LENSManager.exe: 400 KB (x64\Release\)
+  - ExplorerLensEngine.lib: 130 MB (build\lib\Release\)
+- **Architecture Audit (Sprint 3)**: Verified single Engine adapter path, legacy decoders gated behind LENSShell_LEGACY_DECODERS, all 24 decoders registered in ThumbnailPipeline
 - **Project Cleanup**: Removed 3 empty directories, moved 6 legacy docs to docs/development/, removed leftover xz tarball
 - **HEIF Build Status**: `HAS_LIBHEIF=ON` now validated in project configuration, with `heif.lib` produced from local source at `external/image-libs/libheif-1.19.5/build-vs/libheif/Release/heif.lib`
-- **HEIF Link Status**: Production Release link now resolves `heif.lib` + `de265.lib` successfully (`CBXShell.dll` built in `x64/Release`)
+- **HEIF Link Status**: Production Release link now resolves `heif.lib` + `de265.lib` successfully (`LENSShell.dll` built in `x64/Release`)
 
 ### Removed
 
@@ -339,7 +339,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **LZMA SDK Updated**: Upgraded from 24.08/25.00 to **26.00** (latest stable release)
   - Created `build-lzma-sdk-26.00.ps1` with proper `/MD` (MultiThreadedDLL) CRT linkage
-  - Updated all project references (CBXShell.vcxproj, LIBRARY_INVENTORY.md)
+  - Updated all project references (LENSShell.vcxproj, LIBRARY_INVENTORY.md)
   - Removed obsolete versions (LZMA 25.00 directory, build-sdk-24.08.ps1 script)
 
 - **Path Standardization**: Converted 7+ scripts from hardcoded absolute paths to relative paths using `$PSScriptRoot`:
@@ -355,18 +355,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Conditional compilation: Clang gets `-Wall -Wextra -mavx2`, MSVC gets `/W4 /WX /arch:AVX2`
   - Resolved "unknown warning option '-W4'" error with Clang
   
-- **Library Path Resolution**: Fixed MSBuild linker error "cannot open input file 'DarkThumbsEngine.lib'"
+- **Library Path Resolution**: Fixed MSBuild linker error "cannot open input file 'ExplorerLensEngine.lib'"
   - Copied library to `build/lib/Release/` for MSBuild compatibility
-  - CBXShell.dll now builds successfully (3.18 MB)
+  - LENSShell.dll now builds successfully (3.18 MB)
 
 - **README Accuracy**: Updated format count from 130+ to **155+**, version from 6.0.0 to **6.2.0**, LZMA version from 24.08 to **26.00**
 
 ### Changed
 
 - **Build System Enhancements**:
-  - DarkThumbsEngine.lib: 3.66 MB (AVX2-optimized)
-  - CBXShell.dll: 3.18 MB (3261 KB)
-  - CBXManager.exe: 400.5 KB
+  - ExplorerLensEngine.lib: 3.66 MB (AVX2-optimized)
+  - LENSShell.dll: 3.18 MB (3261 KB)
+  - LENSManager.exe: 400.5 KB
   - All builds use `/MD` runtime for consistency
 
 - **Documentation Structure**: Established comprehensive documentation framework:
@@ -403,12 +403,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Header Data IPC Protocol**: PluginHostClient now fully implements `CanDecode(header_data, size)` method. Plugins can identify formats from file headers (512-2048 bytes) without reading entire files, improving performance by 50-70% for  large files.
 - **Minizip-NG Integration**: Replaced 60-line unzip stub with complete minizip-ng 4.0.7 implementation. Full ZIP archive support active (382 lines) with password support, UTF-8 paths, and modern memory-safe API. Fixes hotspot H-02.
 - **Warning-Free Release Build**: Eliminated 4 of 6 compiler warnings. Reduced from 6 warnings to 2 non-critical LIBCMT linker warnings. Fixed macro redefinition (C4005) and unreferenced parameter (C4100) warnings.
-- **Production Build System**: MSBuild now produces CBXShell.dll (1121.5 KB) and CBXManager.exe (305 KB) in x64/Release configuration alongside CMake Engine build.
+- **Production Build System**: MSBuild now produces LENSShell.dll (1121.5 KB) and LENSManager.exe (305 KB) in x64/Release configuration alongside CMake Engine build.
 
 ### Fixed
 
 - **Build Warnings Eliminated**: 
-  - C4005 macro redefinition warnings (DARKTHUMBS_ENGINE_VERSION_*) fixed by adding `#ifndef` guards in Engine.h
+  - C4005 macro redefinition warnings (ExplorerLens_ENGINE_VERSION_*) fixed by adding `#ifndef` guards in Engine.h
   - C4100 unreferenced parameter warning in EngineTests.cpp fixed with explicit `(void)` cast
 - **IPC Header Protocol**: Fixed "// TODO: Send header data with query" in PluginHostClient.cpp. Now implements complete request/response cycle with payload serialization. Fixes hotspot C-03.
 - **Unzip Placeholder**: Replaced "Temporary stub until minizip-ng integration" with full implementation. ZIP/CBZ archives now fully supported. Fixes hotspot H-02.
@@ -423,7 +423,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - docs/planning/PROJECT_STATUS.md: Updated versions
   - docs/planning/UNDEVELOPED_FEATURES.md: Updated version
   - tests/README.md: Updated version references (2 locations)
-  - SDK/include/DarkThumbsPlugin.h: Updated ABI version comment to v6.0.0
+  - SDK/include/ExplorerLensPlugin.h: Updated ABI version comment to v6.0.0
   - SDK/docs/PLUGIN_SDK.md: Updated minimum version requirement
   - Plugin documentation: Updated minEngineVersion to 6.0.0 in package format and marketplace protocol specs
 
@@ -457,9 +457,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build Systems:** Both CMake (Engine) and MSBuild (Shell extension) confirmed working
 - **Compilation Time:** Clean full build: 43.67 seconds, Incremental rebuild: ~5-10 seconds
 - **Library Sizes:** 
-  - DarkThumbsEngine.lib: 81.95 MB
-  - CBXShell.dll: 1121.5 KB
-  - CBXManager.exe: 305 KB
+  - ExplorerLensEngine.lib: 81.95 MB
+  - LENSShell.dll: 1121.5 KB
+  - LENSManager.exe: 305 KB
 - **Test Suite:** 42+ unit tests defined, all passing (excluding benchmark DLL dependency issue)
 
 ### Sprint Completion
@@ -519,6 +519,7 @@ Completed work from:
 - **Testing** for test-related changes
 - **Technical Debt** for code quality improvements
 
-[6.0.0]: https://github.com/yourusername/DarkThumbs/compare/v5.4.0...v6.0.0
-[5.4.0]: https://github.com/yourusername/DarkThumbs/compare/v5.3.0...v5.4.0
-[5.3.0]: https://github.com/yourusername/DarkThumbs/releases/tag/v5.3.0
+[6.0.0]: https://github.com/yourusername/ExplorerLens/compare/v5.4.0...v6.0.0
+[5.4.0]: https://github.com/yourusername/ExplorerLens/compare/v5.3.0...v5.4.0
+[5.3.0]: https://github.com/yourusername/ExplorerLens/releases/tag/v5.3.0
+

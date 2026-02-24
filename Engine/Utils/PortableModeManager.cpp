@@ -1,5 +1,5 @@
 //==============================================================================
-// PortableModeManager — Sprint 217
+// PortableModeManager
 //==============================================================================
 
 #include "PortableModeManager.h"
@@ -11,7 +11,7 @@
 #endif
 #include <windows.h>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 PortableModeManager::PortableModeManager() {
     m_config.status = PortableStatus::Unknown;
@@ -90,7 +90,7 @@ bool PortableModeManager::SaveConfig(
     _wfopen_s(&f, path.c_str(), L"w");
     if (!f) return false;
 
-    fwprintf(f, L"[DarkThumbs]\n");
+    fwprintf(f, L"[ExplorerLens]\n");
     for (const auto& [key, value] : settings) {
         fwprintf(f, L"%s=%s\n", key.c_str(), value.c_str());
     }
@@ -126,4 +126,5 @@ const wchar_t* PortableModeManager::GetLocationName(StorageLocation location) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,6 +1,6 @@
 // AudioDecoder.cpp - Audio Album Art / Waveform Thumbnail Decoder Implementation
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 
 #include "AudioDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
@@ -21,7 +21,7 @@
 #pragma comment(lib, "propsys.lib")
 #pragma comment(lib, "windowscodecs.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 const wchar_t* AudioDecoder::m_extensions[] = {
@@ -260,7 +260,7 @@ HRESULT AudioDecoder::ExtractAlbumArtFLAC(const uint8_t* data, size_t size, HBIT
 }
 
 // ============================================================================
-// OGG Album Art Extraction (Sprint 7)
+// OGG Album Art Extraction
 // ============================================================================
 
 HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size, HBITMAP* phBitmap) {
@@ -272,7 +272,7 @@ HRESULT AudioDecoder::ExtractAlbumArtOGG(const uint8_t* data, size_t size, HBITM
 }
 
 // ============================================================================
-// M4A/AAC Album Art Extraction (Sprint 7)
+// M4A/AAC Album Art Extraction
 // ============================================================================
 
 HRESULT AudioDecoder::ExtractAlbumArtM4A(const uint8_t* data, size_t size, HBITMAP* phBitmap) {
@@ -307,7 +307,7 @@ HRESULT AudioDecoder::ExtractAlbumArtM4A(const uint8_t* data, size_t size, HBITM
 }
 
 // ============================================================================
-// WMA Album Art Extraction (Sprint 7)
+// WMA Album Art Extraction
 // ============================================================================
 
 HRESULT AudioDecoder::ExtractAlbumArtWMA(const wchar_t* filePath, HBITMAP* phBitmap) {
@@ -538,7 +538,7 @@ bool AudioDecoder::IsAudioFormat(const wchar_t* path) {
 }
 
 // ============================================================================
-// Audio Metadata Extraction (Sprint 7)
+// Audio Metadata Extraction
 // ============================================================================
 
 bool AudioDecoder::GetAudioMetadata(const wchar_t* filePath, AudioMetadata& metadata) {
@@ -597,4 +597,5 @@ bool AudioDecoder::GetAudioMetadata(const wchar_t* filePath, AudioMetadata& meta
 }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

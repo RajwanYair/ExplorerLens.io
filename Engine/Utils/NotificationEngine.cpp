@@ -1,13 +1,13 @@
 // =============================================================================
-// NotificationEngine.cpp — Sprint 243: Toast Notifications for Batch/Update Events
-// DarkThumbs Engine — Utils Module
+// NotificationEngine.cpp — Toast Notifications for Batch/Update Events
+// ExplorerLens Engine — Utils Module
 // =============================================================================
 
 #include "NotificationEngine.h"
 #include <chrono>
 #include <algorithm>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 static uint64_t NowMs() {
     return static_cast<uint64_t>(
@@ -151,4 +151,5 @@ const wchar_t* NotificationEngine::GetStateName(NotifyState state) {
     }
 }
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

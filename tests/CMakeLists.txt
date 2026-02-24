@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(DarkThumbsTests VERSION 1.0.0 LANGUAGES CXX)
+project(ExplorerLensTests VERSION 1.0.0 LANGUAGES CXX)
 
 # Set C++17 standard
 set(CMAKE_CXX_STANDARD 17)
@@ -11,7 +11,7 @@ enable_testing()
 
 # Include directories
 include_directories(
-    ${CMAKE_SOURCE_DIR}/../CBXShell
+    ${CMAKE_SOURCE_DIR}/../LENSShell
     ${CMAKE_SOURCE_DIR}/../packages/wtl.10.0.10320/lib/native/include
 )
 
@@ -90,7 +90,7 @@ set_tests_properties(IntegrationTests PROPERTIES
 add_custom_target(run_all_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --verbose
     DEPENDS UnitTests IntegrationTests
-    COMMENT "Running all DarkThumbs tests..."
+    COMMENT "Running all ExplorerLens tests..."
 )
 
 # Installation (optional)
@@ -99,7 +99,7 @@ install(TARGETS UnitTests IntegrationTests
 )
 
 # Print configuration
-message(STATUS "DarkThumbs Test Suite Configuration")
+message(STATUS "ExplorerLens Test Suite Configuration")
 message(STATUS "====================================")
 message(STATUS "C++ Standard:     ${CMAKE_CXX_STANDARD}")
 message(STATUS "Build Type:       ${CMAKE_BUILD_TYPE}")
@@ -107,3 +107,4 @@ message(STATUS "Compiler:         ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_
 message(STATUS "Shlwapi Library:  ${SHLWAPI_LIB}")
 message(STATUS "Ole32 Library:    ${OLE32_LIB}")
 message(STATUS "====================================")
+

@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "DarkThumbs Build Validation" -ForegroundColor Cyan
+Write-Host "ExplorerLens Build Validation" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 $script:Errors = @()
@@ -122,8 +122,8 @@ function Test-BuildOutputs {
     Write-Host "`nChecking Build Outputs..." -ForegroundColor Yellow
     
     $outputs = @{
-        "CBXShell.dll" = "CBXShell\x64\Release\CBXShell.dll"
-        "CBXManager.exe" = "CBXManager\x64\Release\CBXManager.exe"
+        "LENSShell.dll" = "LENSShell\x64\Release\LENSShell.dll"
+        "LENSManager.exe" = "LENSManager\x64\Release\LENSManager.exe"
     }
     
     $allExist = $true
@@ -140,10 +140,10 @@ function Test-HeaderFiles {
     Write-Host "`nValidating Header Files..." -ForegroundColor Yellow
     
     $headers = @(
-        "CBXShell\error_logger.h",
-        "CBXShell\performance_profiler.h",
-        "CBXShell\memory_utils.h",
-        "CBXShell\enhanced_cache.h"
+        "LENSShell\error_logger.h",
+        "LENSShell\performance_profiler.h",
+        "LENSShell\memory_utils.h",
+        "LENSShell\enhanced_cache.h"
     )
     
     $allExist = $true
@@ -176,8 +176,8 @@ function Test-ProjectFiles {
     Write-Host "`nValidating Project Files..." -ForegroundColor Yellow
     
     $projects = @(
-        "CBXShell\CBXShell.vcxproj",
-        "CBXManager\CBXManager.vcxproj"
+        "LENSShell\LENSShell.vcxproj",
+        "LENSManager\LENSManager.vcxproj"
     )
     
     $allValid = $true
@@ -218,25 +218,25 @@ function Invoke-Rebuild {
     
     # Clean first
     Write-Host "  Cleaning..." -ForegroundColor Gray
-    & $msbuild CBXShell\CBXShell.vcxproj /t:Clean /p:Configuration=Release /p:Platform=x64 /v:m /nologo
-    & $msbuild CBXManager\CBXManager.vcxproj /t:Clean /p:Configuration=Release /p:Platform=x64 /v:m /nologo
+    & $msbuild LENSShell\LENSShell.vcxproj /t:Clean /p:Configuration=Release /p:Platform=x64 /v:m /nologo
+    & $msbuild LENSManager\LENSManager.vcxproj /t:Clean /p:Configuration=Release /p:Platform=x64 /v:m /nologo
     
-    # Build CBXShell
-    Write-Host "  Building CBXShell.dll..." -ForegroundColor Gray
-    $result = & $msbuild CBXShell\CBXShell.vcxproj /t:Build /p:Configuration=Release /p:Platform=x64 /v:m /nologo 2>&1
+    # Build LENSShell
+    Write-Host "  Building LENSShell.dll..." -ForegroundColor Gray
+    $result = & $msbuild LENSShell\LENSShell.vcxproj /t:Build /p:Configuration=Release /p:Platform=x64 /v:m /nologo 2>&1
     
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "CBXShell build failed"
+        Write-Error "LENSShell build failed"
         Write-Host $result -ForegroundColor Red
         return $false
     }
     
-    # Build CBXManager
-    Write-Host "  Building CBXManager.exe..." -ForegroundColor Gray
-    $result = & $msbuild CBXManager\CBXManager.vcxproj /t:Build /p:Configuration=Release /p:Platform=x64 /v:m /nologo 2>&1
+    # Build LENSManager
+    Write-Host "  Building LENSManager.exe..." -ForegroundColor Gray
+    $result = & $msbuild LENSManager\LENSManager.vcxproj /t:Build /p:Configuration=Release /p:Platform=x64 /v:m /nologo 2>&1
     
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "CBXManager build failed"
+        Write-Error "LENSManager build failed"
         Write-Host $result -ForegroundColor Red
         return $false
     }
@@ -248,8 +248,8 @@ function Invoke-Rebuild {
 function Invoke-Tests {
     Write-Host "`nRunning Test Suite..." -ForegroundColor Yellow
     
-    if (Test-Path ".\Test-DarkThumbs.ps1") {
-        $result = & .\Test-DarkThumbs.ps1 -Quick
+    if (Test-Path ".\Test-ExplorerLens.ps1") {
+        $result = & .\Test-ExplorerLens.ps1 -Quick
         return ($LASTEXITCODE -eq 0)
     } else {
         Write-Warning "Test suite not found"
@@ -329,3 +329,4 @@ if ($allPassed -and $script:Errors.Count -eq 0) {
     Write-Host "✗ VALIDATION FAILED" -ForegroundColor Red
     exit 1
 }
+

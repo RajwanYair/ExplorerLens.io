@@ -52,13 +52,13 @@
    - **Status:** NEEDS FIX - Status bar may not be initialized on startup
 
 7. **Action Buttons Exist** - FAIL
-   - Issue: "CBXManager window not found"
+   - Issue: "LENSManager window not found"
    - Window was found in earlier tests
    - Test may have run after window closed
    - **Status:** TEST TIMING ISSUE
 
 8. **Checkbox Proper Grouping** - FAIL
-   - Issue: "CBXManager window not found"
+   - Issue: "LENSManager window not found"
    - Same timing issue as #7
    - **Status:** TEST TIMING ISSUE
 
@@ -69,7 +69,7 @@
 #### HIGH PRIORITY
 
 **Status Bar Empty Text**
-- Location: `CBXManager/MainDlg.cpp` - InitUI() or OnInitDialog()
+- Location: `LENSManager/MainDlg.cpp` - InitUI() or OnInitDialog()
 - Problem: Status bar created but text not set on initial load
 - Fix: Call `UpdateStatusBar()` in `OnInitDialog()` after `InitUI()`
 
@@ -129,7 +129,7 @@
 
 ### ✅ What's Working
 
-- ✅ CBXManager.exe launches successfully
+- ✅ LENSManager.exe launches successfully
 - ✅ Dialog window appears with correct size
 - ✅ All 25 format checkboxes present
 - ✅ Action buttons (OK, Cancel, Apply) accessible
@@ -151,3 +151,4 @@
 ---
 
 **Overall Assessment:** GUI is functional, test suite needs refinement for owner-draw controls and timing.
+

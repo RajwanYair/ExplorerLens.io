@@ -1,6 +1,6 @@
 // FontDecoder.h - Font Preview Thumbnail Decoder
-// DarkThumbs Engine v6.2.0+
-// Copyright (c) 2026 DarkThumbs Project
+// ExplorerLens Engine v6.2.0+
+// Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: TTF, OTF, WOFF, WOFF2, TTC, FON
 // Features:
@@ -14,7 +14,7 @@
 #include <cstdint>
 #include <string>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 // Font metadata structure
@@ -64,4 +64,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

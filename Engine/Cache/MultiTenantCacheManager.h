@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 332: Multi-Tenant Cache Manager
+// ExplorerLens Engine — Multi-Tenant Cache Manager
 // Isolated per-tenant cache namespaces with quota enforcement, cross-tenant
 // eviction fairness, tenant activity scoring, and namespace migration.
 //==============================================================================
@@ -7,7 +7,7 @@
 #include <string>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class TenantCacheTier   : uint8_t { Hot=0,Warm,Cold,Evicted,COUNT };
 enum class TenantIsolation   : uint8_t { Strict=0,Soft,Shared,COUNT };
@@ -66,4 +66,5 @@ public:
     static bool IsQuotaExceeded(const TenantCacheStats& s) { return s.usedBytes > s.quotaBytes; }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,6 +1,6 @@
 /******************************************************************************
- * DarkThumbs Plugin Types - Unified Type Bridge
- * Copyright (c) 2026 - DarkThumbs Project
+ * ExplorerLens Plugin Types - Unified Type Bridge
+ * Copyright (c) 2026 - ExplorerLens Project
  * 
  * Shared type definitions and conversion utilities used by:
  *   - Engine pipeline (ThumbnailRequest/ThumbnailResult)
@@ -32,7 +32,7 @@
 #include <string>
 #include <cstring>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 //============================================================================
@@ -296,4 +296,5 @@ struct PluginTypeConvert
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

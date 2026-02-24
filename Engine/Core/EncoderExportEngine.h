@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// EncoderExportEngine — Sprint 206
+// EncoderExportEngine
 // Thumbnail export to multiple output formats (PNG, JPEG, WebP, BMP, TIFF, etc.)
 //==============================================================================
 
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 /// Supported export formats
 enum class ExportFormat : uint8_t {
@@ -105,4 +105,5 @@ private:
                   const ExportConfig& config, std::vector<uint8_t>& output);
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

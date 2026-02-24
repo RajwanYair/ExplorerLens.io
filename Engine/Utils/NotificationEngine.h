@@ -1,7 +1,7 @@
 #pragma once
 // =============================================================================
-// NotificationEngine.h — Sprint 243: Toast Notifications for Batch/Update Events
-// DarkThumbs Engine — Utils Module
+// NotificationEngine.h — Toast Notifications for Batch/Update Events
+// ExplorerLens Engine — Utils Module
 // =============================================================================
 
 #include <string>
@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 
 /// Notification priority level
 enum class NotifyPriority : uint32_t {
@@ -57,7 +57,7 @@ struct Notification {
 /// Notification callback
 using NotifyCallback = std::function<void(const Notification&)>;
 
-/// NotificationEngine — manages toast notifications for DarkThumbs events
+/// NotificationEngine — manages toast notifications for ExplorerLens events
 class NotificationEngine {
 public:
     NotificationEngine();
@@ -97,4 +97,5 @@ private:
     uint32_t                    m_maxNotifications = 100;
 };
 
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

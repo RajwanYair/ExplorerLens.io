@@ -1,12 +1,12 @@
 //==============================================================================
-// PluginMarketplaceV2 — Sprint 201
+// PluginMarketplaceV2
 // Plugin marketplace implementation
 //==============================================================================
 
 #include "PluginMarketplaceV2.h"
 #include <algorithm>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 //------------------------------------------------------------------------------
 PluginVersion PluginVersion::Parse(const std::wstring& str) {
@@ -29,7 +29,7 @@ PluginVersion PluginVersion::Parse(const std::wstring& str) {
 
 //------------------------------------------------------------------------------
 PluginMarketplaceV2::PluginMarketplaceV2()
-    : m_catalogUrl(L"https://plugins.darkthumbs.dev/v1") {}
+    : m_catalogUrl(L"https://plugins.explorerlens.dev/v1") {}
 
 PluginMarketplaceV2::PluginMarketplaceV2(const std::wstring& catalogUrl)
     : m_catalogUrl(catalogUrl) {}
@@ -82,7 +82,7 @@ bool PluginMarketplaceV2::Install(const PluginListing& plugin) {
     ip.listing = plugin;
     ip.state = PluginInstallState::Installed;
     ip.installedVersion = plugin.version;
-    ip.installPath = L"C:\\ProgramData\\DarkThumbs\\plugins\\" + plugin.id;
+    ip.installPath = L"C:\\ProgramData\\ExplorerLens\\plugins\\" + plugin.id;
     m_installed.push_back(ip);
     return true;
 }
@@ -153,4 +153,5 @@ const wchar_t* PluginMarketplaceV2::GetStateName(PluginInstallState state) {
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

@@ -1,5 +1,5 @@
 # Install-PowerShellProfile.ps1
-# Installs the DarkThumbs PowerShell profile for automatic environment setup
+# Installs the ExplorerLens PowerShell profile for automatic environment setup
 
 [CmdletBinding()]
 param(
@@ -14,7 +14,7 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host ""
 Write-Host "+===============================================================+" -ForegroundColor Cyan
-Write-Host "|         DarkThumbs PowerShell Profile Installer               |" -ForegroundColor Cyan
+Write-Host "|         ExplorerLens PowerShell Profile Installer               |" -ForegroundColor Cyan
 Write-Host "+===============================================================+" -ForegroundColor Cyan
 Write-Host ""
 
@@ -48,7 +48,7 @@ if ((Test-Path $profilePath) -and -not $Force) {
     Write-Host "[WARN]  Profile already exists!" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Options:" -ForegroundColor Cyan
-    Write-Host "  1. Append DarkThumbs configuration (recommended)"
+    Write-Host "  1. Append ExplorerLens configuration (recommended)"
     Write-Host "  2. Replace entire profile"
     Write-Host "  3. Cancel"
     Write-Host ""
@@ -63,34 +63,34 @@ if ((Test-Path $profilePath) -and -not $Force) {
                 exit 1
             }
             
-            Write-Host "[...] Appending DarkThumbs configuration..." -ForegroundColor Yellow
+            Write-Host "[...] Appending ExplorerLens configuration..." -ForegroundColor Yellow
             
-            # Check if already contains DarkThumbs config
+            # Check if already contains ExplorerLens config
             $existingContent = Get-Content $profilePath -Raw
-            if ($existingContent -like "*DarkThumbs Development Environment*") {
-                Write-Warning "Profile already contains DarkThumbs configuration!"
-                $overwrite = Read-Host "Overwrite existing DarkThumbs section? (y/n)"
+            if ($existingContent -like "*ExplorerLens Development Environment*") {
+                Write-Warning "Profile already contains ExplorerLens configuration!"
+                $overwrite = Read-Host "Overwrite existing ExplorerLens section? (y/n)"
                 if ($overwrite -ne 'y') {
                     Write-Host "[FAIL] Installation cancelled" -ForegroundColor Red
                     exit 0
                 }
                 
-                # Remove old DarkThumbs section
+                # Remove old ExplorerLens section
                 $lines = Get-Content $profilePath
-                $inDarkThumbsSection = $false
+                $inExplorerLensSection = $false
                 $newLines = @()
                 
                 foreach ($line in $lines) {
-                    if ($line -like "*# PowerShell Profile Configuration for DarkThumbs Development*") {
-                        $inDarkThumbsSection = $true
+                    if ($line -like "*# PowerShell Profile Configuration for ExplorerLens Development*") {
+                        $inExplorerLensSection = $true
                     }
                     
-                    if (-not $inDarkThumbsSection) {
+                    if (-not $inExplorerLensSection) {
                         $newLines += $line
                     }
                     
-                    if ($inDarkThumbsSection -and $line.Trim() -eq "" -and $newLines.Count -gt 0) {
-                        $inDarkThumbsSection = $false
+                    if ($inExplorerLensSection -and $line.Trim() -eq "" -and $newLines.Count -gt 0) {
+                        $inExplorerLensSection = $false
                     }
                 }
                 
@@ -99,10 +99,10 @@ if ((Test-Path $profilePath) -and -not $Force) {
             
             # Append template
             $templateContent = Get-Content $templatePath -Raw
-            Add-Content $profilePath "`n`n# ===============================================================`n# DarkThumbs Development Configuration (Auto-Generated)`n# ===============================================================`n"
+            Add-Content $profilePath "`n`n# ===============================================================`n# ExplorerLens Development Configuration (Auto-Generated)`n# ===============================================================`n"
             Add-Content $profilePath $templateContent
             
-            Write-Host "[OK] DarkThumbs configuration appended to profile" -ForegroundColor Green
+            Write-Host "[OK] ExplorerLens configuration appended to profile" -ForegroundColor Green
         }
         "2" {
             # Replace mode
@@ -161,27 +161,27 @@ Write-Host "  1. Open a new PowerShell window (or run: " -NoNewline
 Write-Host ". `$PROFILE" -NoNewline -ForegroundColor Yellow
 Write-Host ")"
 Write-Host "  2. Run: " -NoNewline
-Write-Host "Set-DarkThumbsEnvironment -InitializeVS" -ForegroundColor Yellow
+Write-Host "Set-ExplorerLensEnvironment -InitializeVS" -ForegroundColor Yellow
 Write-Host "  3. Run: " -NoNewline
-Write-Host "Test-DarkThumbsTools" -ForegroundColor Yellow
+Write-Host "Test-ExplorerLensTools" -ForegroundColor Yellow
 Write-Host ""
 
 Write-Host "Available Commands:" -ForegroundColor Cyan
 Write-Host "  " -NoNewline
-Write-Host "Set-DarkThumbsEnvironment" -NoNewline -ForegroundColor Yellow
+Write-Host "Set-ExplorerLensEnvironment" -NoNewline -ForegroundColor Yellow
 Write-Host " - Initialize development environment"
 Write-Host "  " -NoNewline
 Write-Host "Initialize-VSBuildTools" -NoNewline -ForegroundColor Yellow
 Write-Host "    - Load MSVC environment"
 Write-Host "  " -NoNewline
-Write-Host "Test-DarkThumbsTools" -NoNewline -ForegroundColor Yellow
+Write-Host "Test-ExplorerLensTools" -NoNewline -ForegroundColor Yellow
 Write-Host "       - Verify all tools"
 Write-Host "  " -NoNewline
-Write-Host "Build-DarkThumbs" -NoNewline -ForegroundColor Yellow
+Write-Host "Build-ExplorerLens" -NoNewline -ForegroundColor Yellow
 Write-Host "          - Build project"
 Write-Host "  " -NoNewline
 Write-Host "dt" -NoNewline -ForegroundColor Yellow
-Write-Host "                        - Navigate to DarkThumbs"
+Write-Host "                        - Navigate to ExplorerLens"
 Write-Host "  " -NoNewline
 Write-Host "dt-build" -NoNewline -ForegroundColor Yellow
 Write-Host ", " -NoNewline
@@ -202,3 +202,4 @@ try {
 }
 
 Write-Host ""
+

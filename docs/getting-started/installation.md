@@ -2,7 +2,7 @@
 
 ## Overview
 
-DarkThumbs v6.0.0 is available in multiple package formats to suit different deployment scenarios.
+ExplorerLens v6.0.0 is available in multiple package formats to suit different deployment scenarios.
 
 ## Package Options
 
@@ -10,14 +10,14 @@ DarkThumbs v6.0.0 is available in multiple package formats to suit different dep
 
 **Best for:** Windows 11 users, Microsoft Store distribution, automatic updates
 
-**Download:** `DarkThumbs_v6.0.0_x64.msix`
+**Download:** `ExplorerLens_v6.0.0_x64.msix`
 
 **Installation:**
 
 1. Double-click the MSIX file
 2. Click "Install" when prompted
 3. Grant necessary permissions
-4. Launch "DarkThumbs Manager" from Start Menu
+4. Launch "ExplorerLens Manager" from Start Menu
 
 **Advantages:**
 
@@ -30,19 +30,19 @@ DarkThumbs v6.0.0 is available in multiple package formats to suit different dep
 
 **Best for:** Enterprise deployments, Group Policy installation, IT management
 
-**Download:** `DarkThumbs_v6.0.0_x64.msi`
+**Download:** `ExplorerLens_v6.0.0_x64.msi`
 
 **Installation:**
 
 ```powershell
 # Silent installation
-msiexec /i DarkThumbs_v6.0.0_x64.msi /quiet
+msiexec /i ExplorerLens_v6.0.0_x64.msi /quiet
 
 # With logging
-msiexec /i DarkThumbs_v6.0.0_x64.msi /quiet /l*v install.log
+msiexec /i ExplorerLens_v6.0.0_x64.msi /quiet /l*v install.log
 
 # Install for all users
-msiexec /i DarkThumbs_v6.0.0_x64.msi ALLUSERS=1 /quiet
+msiexec /i ExplorerLens_v6.0.0_x64.msi ALLUSERS=1 /quiet
 ```
 
 **Advantages:**
@@ -56,13 +56,13 @@ msiexec /i DarkThumbs_v6.0.0_x64.msi ALLUSERS=1 /quiet
 
 **Best for:** Testing, portable drives, no-admin scenarios
 
-**Download:** `DarkThumbs_v6.0.0_Portable.zip`
+**Download:** `ExplorerLens_v6.0.0_Portable.zip`
 
 **Installation:**
 
 1. Extract ZIP to any folder
 2. Right-click `Install.cmd` → "Run as administrator"
-3. Launch `CBXManager.exe` to configure
+3. Launch `LENSManager.exe` to configure
 
 **Uninstallation:**
 
@@ -115,7 +115,7 @@ For optimal performance with GPU acceleration:
 1. **Download Package**
 
    ```
-   Download DarkThumbs_v6.0.0_x64.msix from releases
+   Download ExplorerLens_v6.0.0_x64.msix from releases
    ```
 
 2. **Verify Signature** (Optional but recommended)
@@ -132,7 +132,7 @@ For optimal performance with GPU acceleration:
 
 4. **Configure**
    - Open Start Menu
-   - Search for "DarkThumbs Manager"
+   - Search for "ExplorerLens Manager"
    - Launch the application
    - Select desired formats
    - Click "Apply"
@@ -147,7 +147,7 @@ For optimal performance with GPU acceleration:
 1. **Download Package**
 
    ```
-   Download DarkThumbs_v6.0.0_x64.msi from releases
+   Download ExplorerLens_v6.0.0_x64.msi from releases
    ```
 
 2. **Interactive Installation**
@@ -161,18 +161,18 @@ For optimal performance with GPU acceleration:
 
    ```powershell
    # Basic silent install
-   msiexec /i "DarkThumbs_v6.0.0_x64.msi" /quiet /norestart
+   msiexec /i "ExplorerLens_v6.0.0_x64.msi" /quiet /norestart
    
    # With full logging
-   msiexec /i "DarkThumbs_v6.0.0_x64.msi" /quiet /norestart /l*v "%TEMP%\darkthumbs_install.log"
+   msiexec /i "ExplorerLens_v6.0.0_x64.msi" /quiet /norestart /l*v "%TEMP%\explorerlens_install.log"
    
    # Custom install location
-   msiexec /i "DarkThumbs_v6.0.0_x64.msi" /quiet INSTALLDIR="C:\Program Files\DarkThumbs"
+   msiexec /i "ExplorerLens_v6.0.0_x64.msi" /quiet INSTALLDIR="C:\Program Files\ExplorerLens"
    ```
 
 4. **Verify Installation**
    - Check installation directory
-   - Run CBXManager.exe
+   - Run LENSManager.exe
    - Test thumbnail generation
 
 ### Portable Installation (Detailed)
@@ -180,8 +180,8 @@ For optimal performance with GPU acceleration:
 1. **Extract Package**
 
    ```
-   Extract DarkThumbs_v6.0.0_Portable.zip to desired location
-   Example: C:\Tools\DarkThumbs
+   Extract ExplorerLens_v6.0.0_Portable.zip to desired location
+   Example: C:\Tools\ExplorerLens
    ```
 
 2. **Register Shell Extension**
@@ -190,7 +190,7 @@ For optimal performance with GPU acceleration:
    - Wait for "SUCCESS" message
 
 3. **Configure**
-   - Launch `CBXManager.exe`
+   - Launch `LENSManager.exe`
    - Configure format support
    - Click "Apply"
 
@@ -205,8 +205,8 @@ For optimal performance with GPU acceleration:
 1. **Launch Manager**
 
    ```
-   Start Menu → DarkThumbs Manager
-   Or: C:\Program Files\DarkThumbs\CBXManager.exe
+   Start Menu → ExplorerLens Manager
+   Or: C:\Program Files\ExplorerLens\LENSManager.exe
    ```
 
 2. **Enable Formats**
@@ -231,10 +231,10 @@ For optimal performance with GPU acceleration:
 
    ```powershell
    # Via Registry
-   Get-ItemProperty "HKLM:\SOFTWARE\DarkThumbs" -Name Version
+   Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name Version
    
    # Via CLI (if installed)
-   darkthumbs --version
+   explorerlens --version
    ```
 
 2. **Test Thumbnail Generation**
@@ -246,7 +246,7 @@ For optimal performance with GPU acceleration:
 3. **Check Logs** (if issues occur)
 
    ```
-   %LOCALAPPDATA%\DarkThumbs\logs\
+   %LOCALAPPDATA%\ExplorerLens\logs\
    ```
 
 ## Troubleshooting Installation
@@ -262,7 +262,7 @@ For optimal performance with GPU acceleration:
 **Solution:**
 
 - Click "More info"
-- Verify publisher: "DarkThumbs Project"
+- Verify publisher: "ExplorerLens Project"
 - Click "Run anyway" (only if you trust the source)
 
 #### Installation Fails with Error Code
@@ -271,10 +271,10 @@ For optimal performance with GPU acceleration:
 
 ```powershell
 # Check logs
-Get-Content "$env:TEMP\darkthumbs_install.log" -Tail 50
+Get-Content "$env:TEMP\explorerlens_install.log" -Tail 50
 
 # Try with full logging
-msiexec /i "DarkThumbs_v6.0.0_x64.msi" /l*v "%TEMP%\install.log"
+msiexec /i "ExplorerLens_v6.0.0_x64.msi" /l*v "%TEMP%\install.log"
 ```
 
 #### "Access Denied" During Installation
@@ -284,7 +284,7 @@ msiexec /i "DarkThumbs_v6.0.0_x64.msi" /l*v "%TEMP%\install.log"
 ```powershell
 # Right-click installer → "Run as administrator"
 # Or via PowerShell:
-Start-Process -FilePath "DarkThumbs_v6.0.0_x64.msi" -Verb RunAs
+Start-Process -FilePath "ExplorerLens_v6.0.0_x64.msi" -Verb RunAs
 ```
 
 #### Thumbnails Don't Appear After Installation
@@ -322,14 +322,14 @@ Start-Process -FilePath "DarkThumbs_v6.0.0_x64.msi" -Verb RunAs
    msiexec /x {OLD-PRODUCT-CODE} /quiet
    
    # If portable
-   regsvr32 /u CBXShell.dll
+   regsvr32 /u LENSShell.dll
    ```
 
 2. **Backup Settings** (optional)
 
    ```powershell
    # Export registry settings
-   reg export "HKCU\Software\DarkThumbs" darkthumbs_settings.reg
+   reg export "HKCU\Software\ExplorerLens" explorerlens_settings.reg
    ```
 
 3. **Install v6.0**
@@ -351,20 +351,20 @@ Start-Process -FilePath "DarkThumbs_v6.0.0_x64.msi" -Verb RunAs
 
 1. **Via Settings**
    - Open Settings → Apps → Installed apps
-   - Find "DarkThumbs"
+   - Find "ExplorerLens"
    - Click "..." → "Uninstall"
 
 2. **Via PowerShell**
 
    ```powershell
-   Get-AppxPackage -Name "DarkThumbs" | Remove-AppxPackage
+   Get-AppxPackage -Name "ExplorerLens" | Remove-AppxPackage
    ```
 
 ### MSI Uninstallation
 
 1. **Via Control Panel**
    - Control Panel → Programs → Uninstall a program
-   - Select "DarkThumbs"
+   - Select "ExplorerLens"
    - Click "Uninstall"
 
 2. **Via Command Line**
@@ -372,7 +372,7 @@ Start-Process -FilePath "DarkThumbs_v6.0.0_x64.msi" -Verb RunAs
    ```powershell
    msiexec /x {PRODUCT-CODE} /quiet
    # Or by path
-   msiexec /x "DarkThumbs_v6.0.0_x64.msi" /quiet
+   msiexec /x "ExplorerLens_v6.0.0_x64.msi" /quiet
    ```
 
 ### Portable Uninstallation
@@ -388,10 +388,10 @@ To remove all traces:
 # Uninstall (via appropriate method above)
 
 # Remove cache
-Remove-Item "$env:LOCALAPPDATA\DarkThumbs" -Recurse -Force
+Remove-Item "$env:LOCALAPPDATA\ExplorerLens" -Recurse -Force
 
 # Remove settings
-Remove-Item "HKCU:\Software\DarkThumbs" -Recurse -Force
+Remove-Item "HKCU:\Software\ExplorerLens" -Recurse -Force
 
 # Clear thumbnail cache
 Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*.db" -Force
@@ -419,3 +419,4 @@ See [Enterprise Deployment Guide](../enterprise/deployment.md) for:
 
 **Last Updated:** January 6, 2026  
 **Version:** 6.0.0
+

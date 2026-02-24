@@ -1,4 +1,4 @@
-# DarkThumbs Minimal Plugin Example - CMakeLists.txt
+# ExplorerLens Minimal Plugin Example - CMakeLists.txt
 cmake_minimum_required(VERSION 3.20)
 project(MinimalPlugin VERSION 1.0.0 LANGUAGES CXX)
 
@@ -8,8 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Include SDK
-set(DARKTHUMBS_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../.." CACHE PATH "DarkThumbs SDK directory")
-include_directories(${DARKTHUMBS_SDK_DIR})
+set(EXPLORERLENS_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../.." CACHE PATH "ExplorerLens SDK directory")
+include_directories(${EXPLORERLENS_SDK_DIR})
 
 # Build plugin as shared library
 add_library(minimal_plugin SHARED
@@ -24,7 +24,7 @@ set_target_properties(minimal_plugin PROPERTIES
 
 # Export plugin functions
 target_compile_definitions(minimal_plugin PRIVATE
-    DARKTHUMBS_PLUGIN_EXPORTS
+    EXPLORERLENS_PLUGIN_EXPORTS
 )
 
 # Windows-specific settings
@@ -61,3 +61,5 @@ install(TARGETS minimal_plugin
     DESTINATION "plugins/minimal_plugin.dtplugin"
     RENAME "plugin.dll"
 )
+
+

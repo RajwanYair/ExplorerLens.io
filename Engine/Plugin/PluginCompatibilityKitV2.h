@@ -1,12 +1,12 @@
 #pragma once
-// Sprint 152 — Plugin Compatibility Kit v2.0
+// Plugin Compatibility Kit v2.0
 // ABI stability tests, perf/memory policy gates, crash injection, conformance report.
 
 #include <string>
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs::Plugin {
+namespace ExplorerLens::Plugin {
 
 // ─── ABI version ──────────────────────────────────────────────────────────────
 
@@ -202,4 +202,5 @@ private:
     ABIStableSurface m_current;
 };
 
-} // namespace DarkThumbs::Plugin
+} // namespace ExplorerLens::Plugin
+

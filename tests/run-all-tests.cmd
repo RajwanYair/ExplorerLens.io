@@ -1,11 +1,11 @@
-# DarkThumbs Master Test Runner
+# ExplorerLens Master Test Runner
 # Runs all test suites and generates summary report
 
 @echo off
 setlocal enabledelayedexpansion
 
 echo ==========================================
-echo DarkThumbs Complete Test Suite
+echo ExplorerLens Complete Test Suite
 echo ==========================================
 echo.
 
@@ -54,7 +54,7 @@ cd build
 
 echo   [1/2] Compiling UnitTests.cpp...
 cl.exe /nologo /std:c++17 /EHsc /W3 /Zi /D_UNICODE /DUNICODE ^
-    /I"..\..\CBXShell" ^
+    /I"..\..\LENSShell" ^
     ..\UnitTests.cpp ^
     /link shlwapi.lib ^
     /OUT:UnitTests.exe >nul 2>&1
@@ -150,3 +150,4 @@ if %FAILED_SUITES% EQU 0 (
     echo ==========================================
     exit /b 1
 )
+

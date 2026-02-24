@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs — Sprint 8: GUI Hardening
+// ExplorerLens — GUI Hardening
 //
 // DarkModeHelper expansion for all WTL controls, high-DPI multi-monitor
 // support, export diagnostics, and decoder health dashboard data model.
@@ -24,7 +24,7 @@
 #pragma comment(lib, "uxtheme.lib")
 #pragma comment(lib, "dwmapi.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 namespace GUI {
 
@@ -541,4 +541,5 @@ private:
 
 } // namespace GUI
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

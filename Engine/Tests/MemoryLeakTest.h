@@ -1,5 +1,5 @@
 // ============================================================================
-// MemoryLeakTest.h — Sprint 6, Task 6.4
+// MemoryLeakTest.h, Task 6.4
 // Memory leak regression test for decode loops
 //
 // Runs N decode iterations and asserts that peak working-set memory stays
@@ -7,10 +7,10 @@
 // would otherwise accumulate in long-running Explorer sessions.
 //
 // USAGE (in CTest):
-//   DarkThumbs::Testing::MemoryLeakTest::Config cfg;
+//   ExplorerLens::Testing::MemoryLeakTest::Config cfg;
 //   cfg.iterations = 100;
 //   cfg.maxGrowthFactorPct = 20;  // Allow 20% growth
-//   auto result = DarkThumbs::Testing::MemoryLeakTest::Run(cfg);
+//   auto result = ExplorerLens::Testing::MemoryLeakTest::Run(cfg);
 //   ASSERT_TRUE(result.passed) << result.report;
 // ============================================================================
 
@@ -28,7 +28,7 @@
 
 #pragma comment(lib, "Psapi.lib")
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Testing {
 
 /// Memory snapshot at a point in time
@@ -181,4 +181,5 @@ private:
 };
 
 } // namespace Testing
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

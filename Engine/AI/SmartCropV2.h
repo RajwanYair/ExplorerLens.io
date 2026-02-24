@@ -1,5 +1,5 @@
 //==============================================================================
-// DarkThumbs Engine — Sprint 326: Smart Crop V2
+// ExplorerLens Engine — Smart Crop V2
 // Saliency-map-driven crop with face centering, rule-of-thirds composition,
 // aspect-ratio-aware padding, and golden ratio placement.
 //==============================================================================
@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 enum class CropStrategy : uint8_t {
     CenterCrop=0,SaliencyMap,FaceCentered,RuleOfThirds,GoldenRatio,SubjectAware,COUNT
@@ -68,4 +68,5 @@ public:
     static constexpr size_t PaddingCount()     { return static_cast<size_t>(CropPaddingMode::COUNT); }
 };
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

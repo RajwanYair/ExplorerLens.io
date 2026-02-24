@@ -1,12 +1,12 @@
 //==============================================================================
-// AnimatedThumbnailEngine — Sprint 215
+// AnimatedThumbnailEngine
 //==============================================================================
 
 #include "AnimatedThumbnailEngine.h"
 #include <algorithm>
 #include <chrono>
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 AnimatedThumbnailEngine::AnimatedThumbnailEngine() {}
 
@@ -107,4 +107,5 @@ const wchar_t* AnimatedThumbnailEngine::GetStrategyName(FrameStrategy strategy) 
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

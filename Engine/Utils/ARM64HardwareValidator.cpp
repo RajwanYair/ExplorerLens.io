@@ -1,5 +1,5 @@
 //==============================================================================
-// ARM64HardwareValidator.cpp — Sprint 193
+// ARM64HardwareValidator.cpp
 // ARM64 hardware CI validation, feature detection, and performance baseline
 //==============================================================================
 
@@ -10,7 +10,7 @@
 #include <windows.h>
 #endif
 
-namespace DarkThumbs { namespace Engine {
+namespace ExplorerLens { namespace Engine {
 
 ARM64HardwareValidator::ARM64HardwareValidator(const ARM64CIConfig& config)
     : m_config(config) {}
@@ -269,4 +269,5 @@ const wchar_t* ARM64HardwareValidator::GetPerfCategoryName(PerfCategory category
     }
 }
 
-}} // namespace DarkThumbs::Engine
+}} // namespace ExplorerLens::Engine
+

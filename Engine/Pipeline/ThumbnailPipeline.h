@@ -45,7 +45,7 @@
 #include <string>
 #include <vector>
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
 /// Configuration for the thumbnail pipeline
@@ -57,7 +57,7 @@ namespace Engine {
 struct PipelineConfig {
     bool enableCache = true;             ///< Enable disk-backed LRU cache
     bool enableGPU = true;               ///< Use GPU for scaling/rendering
-    bool enablePlugins = true;           ///< Enable third-party plugin loading (Sprint 11)
+    bool enablePlugins = true;           ///< Enable third-party plugin loading
     bool preserveAspectRatio = true;     ///< Maintain original aspect ratio
     bool enableParallelDecode = false;   ///< Enable parallel batch decoding
     uint32_t defaultWidth = 256;         ///< Default thumbnail width in pixels
@@ -166,4 +166,5 @@ private:
 };
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+

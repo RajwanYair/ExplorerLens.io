@@ -71,7 +71,7 @@ TEST_F(MSIXPackagingTest, IdentityHasPublisher) {
 }
 
 TEST_F(MSIXPackagingTest, PropertiesHaveDisplayName) {
-    EXPECT_TRUE(ManifestContains("<DisplayName>DarkThumbs</DisplayName>"));
+    EXPECT_TRUE(ManifestContains("<DisplayName>ExplorerLens</DisplayName>"));
 }
 
 TEST_F(MSIXPackagingTest, PropertiesHaveDescription) {
@@ -108,9 +108,9 @@ TEST_F(MSIXPackagingTest, MaxVersionTestedIsRecent) {
 // Application Entry Point Tests
 // ---------------------------------------------------------------------------
 
-TEST_F(MSIXPackagingTest, EntryPointIsCBXManager) {
-    EXPECT_TRUE(ManifestContains("Executable=\"CBXManager.exe\""))
-        << "Primary executable must be CBXManager.exe";
+TEST_F(MSIXPackagingTest, EntryPointIsLENSManager) {
+    EXPECT_TRUE(ManifestContains("Executable=\"LENSManager.exe\""))
+        << "Primary executable must be LENSManager.exe";
 }
 
 TEST_F(MSIXPackagingTest, EntryPointIsFullTrust) {
@@ -227,9 +227,10 @@ TEST_F(MSIXPackagingTest, PackagingDirectoryExists) {
 }
 
 TEST_F(MSIXPackagingTest, MSIPackagingAlsoAvailable) {
-    // DarkThumbs supports both MSI and MSIX packaging
+    // ExplorerLens supports both MSI and MSIX packaging
     bool hasMsi = fs::exists("packaging/msi") || fs::exists("packaging\\msi");
     bool hasWix = fs::exists("packaging/wix") || fs::exists("packaging\\wix");
     EXPECT_TRUE(hasMsi || hasWix)
         << "Traditional MSI/WiX packaging should coexist with MSIX for non-Store distribution";
 }
+

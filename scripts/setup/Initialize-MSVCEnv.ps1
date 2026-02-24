@@ -1,4 +1,4 @@
-# DarkThumbs MSVC Environment Setup for PowerShell
+# ExplorerLens MSVC Environment Setup for PowerShell
 # This script configures Visual Studio Build Tools environment
 
 $VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
@@ -35,3 +35,4 @@ if (Test-Path $VCVarsAll) {
     Write-Warning "Visual Studio Build Tools not found at: $VSPath"
     Write-Warning "Please install Visual Studio Build Tools 2022/2026"
 }
+

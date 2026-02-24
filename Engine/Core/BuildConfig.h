@@ -1,12 +1,12 @@
 //==============================================================================
-// DarkThumbs Engine - Build Configuration
-// Copyright (c) 2026 - DarkThumbs Project  
+// ExplorerLens Engine - Build Configuration
+// Copyright (c) 2026 - ExplorerLens Project  
 // Task A23: Compile-time optimization and debug control
 //==============================================================================
 
 #pragma once
 
-namespace DarkThumbs {
+namespace ExplorerLens {
 namespace Engine {
 
     // Build configuration detection
@@ -98,4 +98,5 @@ namespace Engine {
     }
 
 } // namespace Engine
-} // namespace DarkThumbs
+} // namespace ExplorerLens
+
