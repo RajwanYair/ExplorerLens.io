@@ -6,7 +6,6 @@ This directory contains comprehensive documentation for developers working on Ex
 
 ### Build & Environment
 
-- **[AI_BUILD_INSTRUCTIONS.md](AI_BUILD_INSTRUCTIONS.md)** - Instructions for AI assistants on building the project
 - **[BUILD_QUICK_REFERENCE.md](BUILD_QUICK_REFERENCE.md)** - Quick reference for common build commands
 - **[WINDOWS_BUILD_TOOLS.md](WINDOWS_BUILD_TOOLS.md)** - Windows-specific build tools setup
 - **[TOOL_DISCOVERY.md](TOOL_DISCOVERY.md)** - How the build system discovers tools

@@ -17,7 +17,7 @@
 | [CHANGELOG.md](../CHANGELOG.md) | Release history and change log |
 | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) | Current known issues and mitigations |
 | [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
-| [ENHANCEMENT_PLAN_V15.md](ENHANCEMENT_PLAN_V15.md) | v15.0 development roadmap (45 sprints) |
+| [archive/ENHANCEMENT_PLAN_V15.md](archive/ENHANCEMENT_PLAN_V15.md) | v15.0 development roadmap (45 sprints, completed) |
 | [WINUI3_MIGRATION_PLAN.md](WINUI3_MIGRATION_PLAN.md) | WinUI 3 / XAML Islands migration plan |
 
 ## Development
@@ -51,8 +51,6 @@
 | [PERFORMANCE.md](PERFORMANCE.md) | Top-level performance guidance |
 | [gpu/GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing, benchmarking, and Intel GPU guide |
 | [gpu/PERFORMANCE_METRICS.md](gpu/PERFORMANCE_METRICS.md) | Metrics definitions |
-| [gpu/GPU_ABSTRACTION_LAYER.md](gpu/GPU_ABSTRACTION_LAYER.md) | GPU abstraction architecture |
-| [gpu/TEXTURE_POOLING.md](gpu/TEXTURE_POOLING.md) | Texture pooling details |
 | [performance/BENCHMARK_GUIDE_V7.md](performance/BENCHMARK_GUIDE_V7.md) | Benchmarking guide with baseline results |
 
 ## Plugins

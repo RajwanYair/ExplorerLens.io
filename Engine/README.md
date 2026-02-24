@@ -211,7 +211,7 @@ ctest --test-dir build -C Release --output-on-failure
 
 - [docs/formats/FORMAT_SUPPORT_MATRIX.md](../docs/formats/FORMAT_SUPPORT_MATRIX.md) — Format support and decoder compliance
 - [docs/architecture/INTEGRATION_ARCHITECTURE.md](../docs/architecture/INTEGRATION_ARCHITECTURE.md) — Integration architecture
-- [docs/ENHANCEMENT_PLAN_V15.md](../docs/ENHANCEMENT_PLAN_V15.md) — Next iteration roadmap
+- [docs/archive/ENHANCEMENT_PLAN_V15.md](../docs/archive/ENHANCEMENT_PLAN_V15.md) — v15.0 roadmap (completed)
 
 ---
 
