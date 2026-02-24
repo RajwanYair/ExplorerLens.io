@@ -50,7 +50,7 @@
 1. **Clean uninstall:**
    ```powershell
    # Force remove via product code
-   msiexec /x {A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078} /qn
+   msiexec /x {9E6ECB90-5A61-42BD-B851-D3297D9C7F39} /qn
    ```
 
 2. **Manual cleanup:**
@@ -63,7 +63,7 @@
 
 3. **Registry cleanup (advanced):**
    - Open `regedit.exe` as Administrator
-   - Delete: `HKEY_CLASSES_ROOT\CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}`
+   - Delete: `HKEY_CLASSES_ROOT\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}`
    - Delete: `HKEY_LOCAL_MACHINE\SOFTWARE\ExplorerLens`
 
 ---
@@ -100,7 +100,7 @@ regsvr32 LENSShell.dll      # Re-register
 **Verify registration:**
 ```powershell
 # Check CLSID exists
-Test-Path "HKCR:\CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}"
+Test-Path "HKCR:\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
 # Should return: True
 ```
 
@@ -125,7 +125,7 @@ Test-Path "HKCR:\CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}"
 # Check .webp extension
 Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 
-# Should show: (default) = "{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}"
+# Should show: (default) = "{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
 ```
 
 **Re-register via LENSManager:**
@@ -376,7 +376,7 @@ cd "C:\Program Files\ExplorerLens"
 **Solution:**
 ```powershell
 # Add to approved shell extensions
-$clsid = "{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}"
+$clsid = "{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
 New-Item "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" -Force
 Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" `
     -Name $clsid -Value "ExplorerLens Shell Extension"
@@ -529,7 +529,7 @@ Get-Content "C:\ProgramData\ExplorerLens\Logs\Engine.log" -Tail 50 -Wait
 ```powershell
 # Export ExplorerLens registry for debugging
 reg export "HKLM\SOFTWARE\ExplorerLens" ExplorerLens_config.reg
-reg export "HKCR\CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" ExplorerLens_com.reg
+reg export "HKCR\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" ExplorerLens_com.reg
 
 # Attach .reg files to GitHub issue
 ```

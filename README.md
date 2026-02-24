@@ -7,7 +7,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
 ![Platform](https://img.shields.io/badge/Platform-x64%20|%20ARM64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-14.0.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-15.0.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Tests](https://img.shields.io/badge/Tests-EngineUnitTests%20pass-success)
 ![Warnings](https://img.shields.io/badge/Warnings-0-green)
@@ -164,11 +164,11 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 8.4.0  
+**Current Version:** 15.0.0 "Zenith"  
 **Build Status:** 0 errors / 0 warnings  
-**Test Status:** 437 unit tests, 5 benchmarks (100% pass rate)  
-**Sprints Completed:** 176  
-**Next Milestone:** v9.0.0 — Format expansion, async shell extension, D3D12 compute pipeline
+**Test Status:** 1,187 unit tests, 5 benchmarks (100% pass rate)  
+**Sprints Completed:** 393  
+**Codename:** Zenith — GPU-accelerated thumbnails for 200+ formats across 25 decoders
 
 See [MASTER_PLAN.md](MASTER_PLAN.md) for the complete development plan.
 
@@ -222,5 +222,5 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 **Built with ❤️ using C++20 and DirectX 11/12**
 
-_Last Updated: June 2025 (v8.4.0)_
+_Last Updated: July 2025 (v15.0.0 "Zenith")_
 

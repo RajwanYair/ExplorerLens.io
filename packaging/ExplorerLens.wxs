@@ -89,7 +89,7 @@
         
         <!-- COM Registration -->
         <RegistryValue Root="HKCR" 
-                       Key="CLSID\{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" 
+                       Key="CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" 
                        Value="ExplorerLens Thumbnail Provider"
                        Type="string" />
       </Component>
@@ -137,39 +137,39 @@
       <Component Id="ThumbnailProviderRegistry" Guid="48394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <!-- Register as Thumbnail Provider for supported extensions -->
         <RegistryKey Root="HKCR" Key=".cbz\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
-          <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
+          <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
         
         <RegistryKey Root="HKCR" Key=".cbr\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
-          <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
+          <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
         
         <RegistryKey Root="HKCR" Key=".cb7\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
-          <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
+          <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
         
         <!-- WebP -->
         <RegistryKey Root="HKCR" Key=".webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
-          <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
+          <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
         
         <!-- AVIF -->
         <RegistryKey Root="HKCR" Key=".avif\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
-          <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
+          <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
         
         <!-- JPEG XL -->
         <RegistryKey Root="HKCR" Key=".jxl\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
-          <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
+          <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
         
         <!-- 3D Models (Sprint 12) -->
         <RegistryKey Root="HKCR" Key=".obj\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
-          <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
+          <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
         
         <RegistryKey Root="HKCR" Key=".stl\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
-          <RegistryValue Value="{A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078}" Type="string" />
+          <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
       </Component>
       
@@ -177,7 +177,7 @@
       <Component Id="ConfigurationRegistry" Guid="58394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <RegistryKey Root="HKLM" Key="SOFTWARE\ExplorerLens">
           <RegistryValue Name="InstallPath" Value="[INSTALLFOLDER]" Type="string" />
-          <RegistryValue Name="Version" Value="7.0.0" Type="string" />
+          <RegistryValue Name="Version" Value="15.0.0" Type="string" />
           <RegistryValue Name="CacheMaxSizeMB" Value="500" Type="integer" />
           <RegistryValue Name="GPUEnabled" Value="1" Type="integer" />
         </RegistryKey>
