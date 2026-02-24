@@ -26,7 +26,6 @@
 |----------|-------------|
 | [development/DEVELOPER_GUIDE.md](development/DEVELOPER_GUIDE.md) | Developer setup and architecture guide |
 | [development/BUILD_QUICK_REFERENCE.md](development/BUILD_QUICK_REFERENCE.md) | Build quick reference |
-| [development/CODE_QUALITY_STANDARDS.md](development/CODE_QUALITY_STANDARDS.md) | Code quality and static analysis standards |
 | [development/THIRD_PARTY.md](development/THIRD_PARTY.md) | Third-party dependency inventory |
 
 ## Architecture

@@ -18,8 +18,8 @@ This document defines the coding standards and conventions for the ExplorerLens 
 ### Language Version
 
 - **Standard:** C++20
-- **Compiler:** MSVC 19.30+ (Visual Studio 2022)
-- **Platform:** Windows x64 only
+- **Compiler:** MSVC 19.50+ (Visual Studio 18 2026, v145 toolset)
+- **Platform:** Windows x64 + ARM64
 
 ### Naming Conventions
 
@@ -629,6 +629,44 @@ markdownlint *.md
 
 ---
 
+## Static Analysis & CI Quality Gates
+
+### Clang-Tidy
+
+Configuration: `.clang-tidy` in project root.
+
+```powershell
+# Single file
+clang-tidy Engine/Core/ThumbnailDecoder.h -- -std=c++20 -I Engine/include
+
+# All engine headers
+Get-ChildItem Engine -Recurse -Include *.h,*.cpp | ForEach-Object {
+    clang-tidy $_.FullName -- -std=c++20
+}
+```
+
+**Key checks enabled:**
+- `bugprone-*` — Common bug patterns
+- `modernize-*` — C++17/20 modernization
+- `performance-*` — Performance anti-patterns
+- `readability-*` — Code readability
+- `cppcoreguidelines-*` — C++ Core Guidelines
+
+### MSVC Code Analysis (CI)
+
+Enabled via `/p:EnableCppCoreCheck=true /p:RunCodeAnalysis=true` in CI builds.
+
+### Header Guard Validation
+
+Automated check that all `.h` files contain `#pragma once`. Use `NOLINT` comments sparingly and with justification:
+
+```cpp
+// NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) — COM interface cast required by Windows API
+auto* ptr = reinterpret_cast<IStream*>(stream);
+```
+
+---
+
 ## Questions?
 
 For questions about coding standards:
@@ -639,7 +677,7 @@ For questions about coding standards:
 
 ---
 
-**Last Updated:** February 11, 2026  
-**Version:** 1.0  
+**Last Updated:** July 2025  
+**Version:** v15.0.0 "Zenith"  
 **Maintained by:** ExplorerLens Development Team
 
