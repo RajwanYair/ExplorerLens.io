@@ -2,6 +2,13 @@
 #include <sstream>
 #include <iomanip>
 
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
+#include <windows.h>
+#include <bcrypt.h>
+#pragma comment(lib, "bcrypt.lib")
+
 namespace ExplorerLens { namespace Engine {
 
 uint32_t FileHashEngine::s_crc32Table[256] = {};
@@ -49,11 +56,68 @@ std::wstring FileHashEngine::ComputeHash(const uint8_t* data, size_t size, HashA
         ss << std::hex << std::setw(8) << std::setfill(L'0') << crc;
         return ss.str();
     }
-    // For non-CRC32, return a placeholder (real impl would use WinCrypt/BCrypt)
+
+    // Map algorithm enum to BCrypt algorithm identifier
+    LPCWSTR bcryptAlgo = nullptr;
+    switch (algo) {
+        case HashAlgorithm::MD5:    bcryptAlgo = BCRYPT_MD5_ALGORITHM;    break;
+        case HashAlgorithm::SHA1:   bcryptAlgo = BCRYPT_SHA1_ALGORITHM;   break;
+        case HashAlgorithm::SHA256: bcryptAlgo = BCRYPT_SHA256_ALGORITHM; break;
+        case HashAlgorithm::SHA512: bcryptAlgo = BCRYPT_SHA512_ALGORITHM; break;
+        default: return std::wstring();
+    }
+
+    BCRYPT_ALG_HANDLE hAlg = nullptr;
+    BCRYPT_HASH_HANDLE hHash = nullptr;
+    NTSTATUS status = 0;
+    std::wstring result;
+
+    status = BCryptOpenAlgorithmProvider(&hAlg, bcryptAlgo, nullptr, 0);
+    if (!BCRYPT_SUCCESS(status)) return std::wstring();
+
+    // Query hash length
+    DWORD hashLength = 0;
+    DWORD cbResult = 0;
+    status = BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH,
+        reinterpret_cast<PBYTE>(&hashLength), sizeof(hashLength), &cbResult, 0);
+    if (!BCRYPT_SUCCESS(status)) {
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        return std::wstring();
+    }
+
+    std::vector<uint8_t> hashBuffer(hashLength);
+
+    status = BCryptCreateHash(hAlg, &hHash, nullptr, 0, nullptr, 0, 0);
+    if (!BCRYPT_SUCCESS(status)) {
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        return std::wstring();
+    }
+
+    status = BCryptHashData(hHash, const_cast<PUCHAR>(data), static_cast<ULONG>(size), 0);
+    if (!BCRYPT_SUCCESS(status)) {
+        BCryptDestroyHash(hHash);
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        return std::wstring();
+    }
+
+    status = BCryptFinishHash(hHash, hashBuffer.data(), hashLength, 0);
+    if (!BCRYPT_SUCCESS(status)) {
+        BCryptDestroyHash(hHash);
+        BCryptCloseAlgorithmProvider(hAlg, 0);
+        return std::wstring();
+    }
+
+    // Convert to hex string
     std::wstringstream ss;
-    uint32_t hashLen = GetHashLength(algo);
-    for (uint32_t i = 0; i < hashLen; ++i) ss << L"0";
-    return ss.str();
+    ss << std::hex << std::setfill(L'0');
+    for (DWORD i = 0; i < hashLength; ++i) {
+        ss << std::setw(2) << static_cast<unsigned>(hashBuffer[i]);
+    }
+    result = ss.str();
+
+    BCryptDestroyHash(hHash);
+    BCryptCloseAlgorithmProvider(hAlg, 0);
+    return result;
 }
 
 bool FileHashEngine::VerifyHash(const std::wstring& expected, const std::wstring& actual) {
