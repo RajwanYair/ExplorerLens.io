@@ -1,7 +1,7 @@
 //==============================================================================
 // ExplorerLens Engine - Public API
 // Copyright (c) 2026 - ExplorerLens Project
-// Version: 6.0.0
+// Version: 14.0.0
 //==============================================================================
 
 #pragma once
@@ -24,7 +24,7 @@ namespace Engine {
 
 // Define version macros if not already defined by CMake
 #ifndef EXPLORERLENS_ENGINE_VERSION_MAJOR
-#define EXPLORERLENS_ENGINE_VERSION_MAJOR 6
+#define EXPLORERLENS_ENGINE_VERSION_MAJOR 14
 #endif
 
 #ifndef EXPLORERLENS_ENGINE_VERSION_MINOR

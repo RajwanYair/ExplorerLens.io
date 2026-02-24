@@ -1,50 +1,54 @@
 ﻿# External Library Inventory
 
-**Last Updated:** February 15, 2026  
+**Last Updated:** February 24, 2026
 **Note:** All libraries must be built with `-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"` for proper CRT linkage.
 
 ---
 
 ## Compression Libraries (compression-libs/)
 
-| Library | Version | Latest | Status | Build System |
-|---------|---------|--------|--------|--------------|
-| zlib | 1.3.1 | 1.3.1 | ✅ Up-to-date | CMake |
-| zstd | 1.5.7 | 1.5.7 | ✅ Up-to-date | CMake |
-| lz4 | 1.10.0 | 1.10.0 | ✅ Up-to-date | CMake |
-| minizip-ng | 4.0.10 | 4.0.10 | ✅ Up-to-date | CMake |
-| bzip2 | 1.0.8 | 1.0.8 | ✅ Up-to-date | CMake |
-| lzma | 26.00 | 26.00 | ✅ Up-to-date | Custom build |
-| xz | 5.6.3 | 5.6.3 | ✅ Up-to-date | CMake |
-| unrar | 7.2.2 | 7.2.2 | ✅ Up-to-date | Custom build |
-| libarchive | 3.7.6 | 3.7.6 | ✅ Up-to-date | CMake |
+| Library | Version | Latest | Status | Build Status | Build System |
+|---------|---------|--------|--------|--------------|--------------|
+| zlib | 1.3.1 | 1.3.1 | ✅ Up-to-date | Built | CMake |
+| zstd | 1.5.7 | 1.5.7 | ✅ Up-to-date | Built | CMake |
+| lz4 | 1.10.0 | 1.10.0 | ✅ Up-to-date | Built | CMake |
+| minizip-ng | 4.0.10 | 4.0.10 | ✅ Up-to-date | Built | CMake |
+| bzip2 | 1.0.8 | 1.0.8 | ✅ Up-to-date | Built | CMake |
+| lzma | 26.00 | 26.00 | ✅ Up-to-date | Built | Custom build |
+| xz | 5.6.3 | 5.6.3 | ✅ Up-to-date | Built | CMake |
+| unrar | 7.2.2 | 7.2.2 | ✅ Up-to-date | Built | Custom build |
+| libarchive | 3.7.6 | 3.7.6 | ✅ Up-to-date | Built | CMake |
 
 ## Image Libraries (image-libs/)
 
-| Library | Version | Latest | Status | Build System |
-|---------|---------|--------|--------|--------------|
-| libwebp | 1.5.0 | 1.5.0 | ✅ Up-to-date | NMake |
-| libavif | 1.3.0 | 1.3.0 | ✅ Up-to-date | CMake |
-| dav1d | 1.5.1 | 1.5.1 | ✅ Up-to-date | Meson |
-| libjxl | 0.11.1 | 0.11.1 | ✅ Up-to-date | CMake |
+| Library | Version | Latest | Status | Build Status | Build System |
+|---------|---------|--------|--------|--------------|--------------|
+| libwebp | 1.5.0 | 1.5.0 | ✅ Up-to-date | Built (⚠️ /MT — needs /MD rebuild) | NMake |
+| libavif | 1.3.0 | 1.3.0 | ✅ Up-to-date | Built | CMake |
+| dav1d | 1.5.1 | 1.5.1 | ✅ Up-to-date | Built | Meson |
+| libjxl | 0.11.1 | 0.11.1 | ✅ Up-to-date | Built | CMake |
+| libheif | 1.19.5 | 1.19.5 | ✅ Up-to-date | Built | CMake |
+| libde265 | 1.0.15 | 1.0.15 | ✅ Up-to-date | Built (HEVC decoder for libheif) | CMake |
+| brotli | — | — | ✅ Bundled | Built (libjxl dependency) | CMake |
+| highway | — | — | ✅ Bundled | Built (libjxl dependency) | CMake |
 
 ## PDF Libraries (pdf-libs/)
 
-| Library | Version | Status | Build System |
-|---------|---------|--------|--------------|
-| mupdf | 1.24.11 | ✅ Available | NMake |
+| Library | Version | Status | Build Status | Build System |
+|---------|---------|--------|--------------|--------------|
+| mupdf | 1.24.11 | ✅ Available | ⚠️ Not Built (HAS_MUPDF=OFF) | NMake |
 
 ## Camera RAW Libraries (camera-libs/)
 
-| Library | Version | Status | Build System |
-|---------|---------|--------|--------------|
-| LibRaw | 0.21.3 | ⚠️ Optional | CMake |
+| Library | Version | Status | Build Status | Build System |
+|---------|---------|--------|--------------|--------------|
+| LibRaw | 0.21.3 | ⚠️ Optional | Built | CMake |
 
 ## UI Frameworks (ui-libs/)
 
-| Library | Version | Status |
-|---------|---------|--------|
-| wtl | 10.0.10320 | ✅ Header-only |
+| Library | Version | Status | Build Status |
+|---------|---------|--------|--------------|
+| wtl | 10.0.10320 | ✅ Header-only | N/A |
 
 ---
 
