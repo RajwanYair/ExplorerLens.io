@@ -1,7 +1,8 @@
 # ExplorerLens Build Method - Standard Operating Procedure
 
-**Last Updated:** January 8, 2026  
-**Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring
+**Last Updated:** June 2026  
+**Version:** 14.0.0 (Codename: Apex)  
+**Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring, zero-warnings enforcement
 
 ---
 
@@ -10,17 +11,19 @@
 ### Supported Configurations
 - **Platform**: x64 ONLY (32-bit builds are not supported)
 - **Configurations**: Debug, Release
-- **Toolchain**: Visual Studio 2026 Build Tools (v145), MSVC 19.3+
+- **Toolchain**: Visual Studio 18 2026 Build Tools (v145 toolset), MSVC 19.50.35720.0
 - **Build Systems**: 
+  - **CMake + Ninja** for Engine library + tests + benchmarks + ModernRuntime (preferred)
   - MSBuild for shell extension (LENSShell.sln)
-  - CMake + Ninja for Engine library
+- **Compilation Units**: 147 total (Engine lib ~108 + tests/benchmarks ~39)
 
 ### Tool Paths (Auto-detected on this machine)
 ```powershell
-# Visual Studio Build Tools 18.3.0 (2026)
-$VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
-$MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
-$vcvarsall = "$VSPath\VC\Auxiliary\Build\vcvarsall.bat"
+# Visual Studio Build Tools 18.3.0 (2026) — MSVC v145 toolset
+$VSPath   = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
+$MSBuild  = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
+$vcvars64 = "$VSPath\VC\Auxiliary\Build\vcvars64.bat"   # Preferred over vcvarsall
+$cl       = "$VSPath\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe"  # v19.50.35720
 
 # CMake 4.2.3 (via Scoop)
 $CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
@@ -31,6 +34,16 @@ $Ninja = "C:\Users\ryair\scoop\shims\ninja.exe"
 
 **Note:** Tools are auto-detected by `build-scripts\Find-All-Tools.ps1`. If not in PATH, the script searches standard installation locations.
 
+### CRITICAL: Always Source vcvars64 Before CMake
+
+CMake must be invoked after sourcing `vcvars64.bat` — otherwise it may pick up Clang from PATH instead of MSVC.
+
+```powershell
+# The Build-MSVC.ps1 script handles this automatically.
+# For manual builds:
+cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat" -vcvars_ver=14.50.35717 && powershell'
+```
+
 ### Compiler Flags
 **Release configuration:**
 - `/W4` - Warning level 4
@@ -39,36 +52,78 @@ $Ninja = "C:\Users\ryair\scoop\shims\ninja.exe"
 - `/GL` - Whole program optimization
 - `/arch:AVX2` - AVX2 instruction set
 - `/std:c++20` - C++20 standard
-- `/MT` - Static runtime (or `/MD` for DLL runtime)
+- `/MD` - Dynamic CRT runtime (MultiThreadedDLL) — **all targets use /MD**
 
 **Debug configuration:**
 - `/W4` - Warning level 4
 - `/Od` - No optimization
 - `/Zi` - Full debug info
-- `/MTd` or `/MDd` - Debug runtime
+- `/MDd` - Debug dynamic CRT runtime
+
+### Global Preprocessor Defines (CMakeLists.txt)
+```
+WIN32_LEAN_AND_MEAN   — Excludes rarely-used Windows headers (impacts header compatibility!)
+NOMINMAX              — Prevents min/max macro conflicts with STL
+_WIN32_WINNT=0x0A00   — Targets Windows 10+
+WINVER=0x0A00         — Targets Windows 10+
+UNICODE / _UNICODE    — Unicode build
+```
+
+> **WARNING**: `WIN32_LEAN_AND_MEAN` excludes many Windows SDK sub-headers (e.g., `<mmsystem.h>`, `<winsock2.h>`).
+> Headers like `<versionhelpers.h>` that depend on types from excluded headers will fail to compile.
+> See [BUILD_TROUBLESHOOTING.md](BUILD_TROUBLESHOOTING.md) Issue #4 for details.
 
 ---
 
 ## Build Process
 
-### Clean Build (Recommended)
+### Recommended: One-Command Build Script
 ```powershell
-# Clean all build artifacts
-Remove-Item -Recurse -Force build, x64, LENSShell\x64, LENSManager\x64, Engine\Release -ErrorAction SilentlyContinue
+# Standard clean build (handles vcvars, CMake preset, Ninja, logging)
+.\build-scripts\Build-MSVC.ps1 -Clean
 
-# Build Engine library first
-cd Engine
-cmake -S . -B Release -G "Visual Studio 18 2026" -A x64 -DCMAKE_BUILD_TYPE=Release
-cmake --build Release --config Release
+# Incremental build (faster, reuses previous build state)
+.\build-scripts\Build-MSVC.ps1
 
-# Build shell extension
-cd ..
+# With tests
+.\build-scripts\Build-MSVC.ps1 -Clean -Test
+
+# vcpkg preset (uses vcpkg for dependencies instead of local external/)
+.\build-scripts\Build-MSVC.ps1 -Preset vcpkg-release
+```
+
+### Manual: CMake Presets (requires vcvars64 sourced first)
+```powershell
+# IMPORTANT: Source vcvars first! Without this, CMake picks Clang from PATH.
+cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat" -vcvars_ver=14.50.35717 && powershell'
+
+# Configure (generates build/build.ninja)
+cmake --preset default-release
+
+# Build (all 147 targets)
+cmake --build --preset default-release -j 8
+
+# Test
+ctest --test-dir build -C Release --output-on-failure
+```
+
+### Available CMake Presets
+| Preset            | Generator | Compiler  | Dependencies    |
+| ----------------- | --------- | --------- | --------------- |
+| `default-release` | Ninja     | MSVC v145 | Local external/ |
+| `default-debug`   | Ninja     | MSVC v145 | Local external/ |
+| `vcpkg-release`   | Ninja     | MSVC v145 | vcpkg           |
+| `vcpkg-debug`     | Ninja     | MSVC v145 | vcpkg           |
+| `vs2026`          | VS 18     | MSVC v145 | Local external/ |
+
+### MSBuild (Shell Extension + Manager only)
+```powershell
 msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
 ```
 
-### Incremental Build
+### Production Build (all libraries + packaging)
 ```powershell
-msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+.\build-scripts\Build-All-And-Package.ps1
 ```
 
 ### With Logging (REQUIRED for slow machines)
@@ -77,7 +132,7 @@ $LogDir = "build-logs"
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $LogFile = "$LogDir\build_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 
-msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal 2>&1 | Tee-Object -FilePath $LogFile
+cmake --build --preset default-release -j 8 2>&1 | Tee-Object -FilePath $LogFile
 ```
 
 ---
@@ -127,10 +182,15 @@ jobs:
 After each build:
 - [ ] 0 errors in output
 - [ ] 0 warnings in Release (enforced by `/WX`)
-- [ ] Output files exist:
-  - `x64\Release\LENSShell.dll` (~1.3 MB)
-  - `x64\Release\LENSManager.exe` (~300 KB)
-  - `Engine\Release\ExplorerLensEngine.lib` (~1.9 MB)
+- [ ] Output files exist (CMake preset build):
+  - `build/lib/ExplorerLensEngine.lib` — Core engine static library
+  - `build/lib/ExplorerLensModernRuntime.lib` — Modern runtime static library
+  - `build/bin/EngineTests.exe` — Unit test executable
+  - `build/bin/EngineBenchmark.exe` — Benchmark executable
+  - `build/bin/IntegrationTests.exe` — Integration test executable
+- [ ] Output files exist (MSBuild):
+  - `x64/Release/LENSShell.dll` (~2940 KB) — COM Shell Extension
+  - `x64/Release/LENSManager.exe` (~400 KB) — GUI Configuration Utility
 - [ ] Log file saved to `/build-logs`
 - [ ] No build artifacts committed to Git
 
@@ -177,9 +237,149 @@ See [LIBRARY_INVENTORY.md](../../external/LIBRARY_INVENTORY.md) for complete ver
 **Important:** All libraries MUST be built with `-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"` (dynamic CRT `/MD`) 
 to prevent LIBCMT conflicts. See [REFACTOR_PLAN.md](../../REFACTOR_PLAN.md) for rebuild instructions.
 
+**Exception:** libwebp was historically built with `/MT` (static CRT). The linker flags `/NODEFAULTLIB:LIBCMT` in `Engine/CMakeLists.txt` handle this automatically as a workaround.
+
 ---
 
-## Recent Build Fixes (February 2026)
+## CRT Linkage Policy
+
+All targets use **`/MD`** (dynamic CRT — `MultiThreadedDLL`). This is enforced via:
+```cmake
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+```
+
+| Component             | CRT   | Notes                                    |
+| --------------------- | ----- | ---------------------------------------- |
+| ExplorerLensEngine    | `/MD` | Core library                             |
+| ExplorerLensModernRuntime | `/MD` | Modern runtime library               |
+| EngineTests           | `/MD` | Test executable                          |
+| EngineBenchmark       | `/MD` | Benchmark executable                     |
+| IntegrationTests      | `/MD` | Integration tests                        |
+| LENSShell.dll         | `/MD` | COM shell extension                      |
+| LENSManager.exe       | `/MD` | GUI utility                              |
+| libwebp (external)    | `/MT` | **Exception** — needs rebuild with `/MD` |
+
+When external libs use `/MT` and project uses `/MD`, linker will warn about LIBCMT conflicts.
+Current workaround: `/NODEFAULTLIB:LIBCMT` and `/IGNORE:4099` in CMake linker flags.
+
+---
+
+## CMakeLists.txt Maintenance Rules
+
+### Registering New Files (MANDATORY)
+
+1. **New headers** must be added to `ENGINE_HEADERS` in `Engine/CMakeLists.txt`
+2. **New source files** must be added to `ENGINE_SOURCES` in `Engine/CMakeLists.txt`
+3. **New test files** must be added to `Engine/Tests/CMakeLists.txt` EngineTests target
+4. Missing registrations cause IDE IntelliSense issues and may break `install()` targets
+
+### Insertion Points
+- Core headers: before `# Pipeline` comment
+- Core sources: before `# Pipeline implementations` comment
+- Utils headers: before `# Sprint 8-12:` comment
+- Utils sources: before closing `)`
+
+### CMakePresets.json Notes
+- Do NOT set `CMAKE_C_COMPILER` — project is C++ only, setting it triggers a CMake warning
+- The `vcpkg` presets use `VCPKG_ROOT` toolchain file
+- All presets use Ninja generator except `vs2026` which uses Visual Studio 18
+
+---
+
+## .gitignore Coverage
+
+The following MUST be gitignored (verified June 2026):
+- `build/` — CMake + Ninja build output
+- `build-vcpkg/` — vcpkg preset build output (contains generated CMake cache/API files)
+- `x64/` — MSBuild output
+- `build-logs/` — Build log files
+- `.vscode/c_cpp_properties.json` — Machine-local IntelliSense configuration
+- `packages/` — NuGet packages
+- External library build artifacts
+
+---
+
+## Recent Build Fixes (June 2026)
+
+### Issue #4: versionhelpers.h + WIN32_LEAN_AND_MEAN Conflict (CRITICAL)
+
+**Symptom:**
+```
+MSIXPackageManager.cpp
+fatal error C1083: Cannot open include file: 'versionhelpers.h'
+-- OR --
+error C2065: 'WORD': undeclared identifier (from versionhelpers.h)
+error C2065: 'BOOL': undeclared identifier  
+error C3861: 'IsWindows10OrGreater': identifier not found
+```
+
+**Root Cause:**
+`WIN32_LEAN_AND_MEAN` is globally defined in `Engine/CMakeLists.txt`. This preprocessor define
+excludes many Windows SDK sub-headers that `<versionhelpers.h>` depends on for its type definitions 
+(`WORD`, `BOOL`, `OSVERSIONINFOEXW`, etc.). Even changing include order does not fix this — the types
+are excluded at the preprocessor level.
+
+**Fix Applied:**
+Removed `<versionhelpers.h>` entirely from `Engine/Utils/MSIXPackageManager.cpp`. Replaced 
+`IsWindows10OrGreater()` with direct `RtlGetVersion()` calls via `ntdll.dll`:
+
+```cpp
+// Instead of: #include <versionhelpers.h> + IsWindows10OrGreater()
+// Use: Direct RtlGetVersion via ntdll.dll (always available on Windows)
+typedef NTSTATUS(WINAPI* RtlGetVersionFunc)(PRTL_OSVERSIONINFOW);
+
+bool IsWindows10OrGreaterViaRtl() {
+    HMODULE ntdll = GetModuleHandleW(L\"ntdll.dll\");
+    if (!ntdll) return false;
+    auto pRtlGetVersion = (RtlGetVersionFunc)GetProcAddress(ntdll, \"RtlGetVersion\");
+    if (!pRtlGetVersion) return false;
+    RTL_OSVERSIONINFOW osvi = {};
+    osvi.dwOSVersionInfoSize = sizeof(osvi);
+    if (pRtlGetVersion(&osvi) != 0) return false;
+    return (osvi.dwMajorVersion >= 10);
+}
+```
+
+**Key Learning:**
+> **NEVER use `<versionhelpers.h>` in any file when `WIN32_LEAN_AND_MEAN` is globally defined.**
+> Use `RtlGetVersion()` from `ntdll.dll` instead — it's always available and doesn't depend on 
+> excluded Windows SDK types. This is also more reliable than `GetVersionEx()` which is deprecated
+> and returns incorrect results on Windows 10+ without a manifest.
+
+### Issue #5: Unused Includes Waste Compilation Time
+
+**Files cleaned (June 2026):**
+- `Engine/Utils/MSIXPackageManager.cpp`: Removed `<sstream>` (unused)
+- `Engine/Utils/ConfigMigrationEngine.cpp`: Removed `<fstream>` (unused)
+- `Engine/Core/ConfigMigrationEngine.h`: Removed `<functional>` (unused)
+
+**Best Practice:**
+- Run periodic include audits; each unused `#include` adds compilation time
+- Prefer forward declarations over includes in headers
+- Use `#pragma once` consistently (already enforced)
+
+### Issue #6: Missing CMake Header Registrations
+
+**Symptom:** Headers compile fine (found via `#include` paths) but aren't listed in CMakeLists.txt `ENGINE_HEADERS`. This causes:
+- Files missing from IDE project views
+- `install()` targets not shipping the headers
+- Potential issues with dependency tracking
+
+**Fix Applied:** Registered 17 missing ReleaseGateV16–V32 headers in `Engine/CMakeLists.txt` ENGINE_HEADERS.
+
+**Prevention Rule:** When creating any new `.h` file under `Engine/`, always add it to `ENGINE_HEADERS` in the same commit.
+
+### Issue #7: vcpkg.json Name Must Be Lowercase
+
+**Symptom:** vcpkg manifest validation warning when package name contains uppercase.
+
+**Fix:** Changed `\"name\": \"ExplorerLens\"` → `\"name\": \"explorerlens\"` in `vcpkg.json`.
+
+### Issue #8: CMAKE_C_COMPILER Warning
+
+**Symptom:** CMake warning during configuration: `CMAKE_C_COMPILER is not used by this project`.
+
+**Fix:** Removed `CMAKE_C_COMPILER` from `CMakePresets.json` — project is C++ only.
 
 ### Issue #1: LNK4098 - LIBCMT Conflict in Test Executables
 
@@ -267,11 +467,32 @@ Common causes in test code:
 ## Build Validation Checklist
 
 After CMake configuration changes:
-- [ ] Clean build: `cmake --build build --target clean`  
-- [ ] Rebuild all: `cmake --build build --config Release -j 8`
+- [ ] Clean build: `.\build-scripts\Build-MSVC.ps1 -Clean`
+- [ ] Or manual: `cmake --preset default-release && cmake --build --preset default-release -j 8`
 - [ ] Check for LNK4098 warnings (LIBCMT conflicts)
 - [ ] Check for C4456 warnings (variable shadowing)
 - [ ] Check for C4702 warnings (unreachable code)
+- [ ] Grep build log: `Select-String -Path "build-logs\*.txt" -Pattern "FAILED|error C|warning C" -CaseSensitive`
 - [ ] Run tests: `ctest --test-dir build -C Release --output-on-failure`
-- [ ] Verify zero warnings in Release builds
+- [ ] Verify zero warnings AND zero errors in Release builds
+- [ ] All 147/147 compilation steps complete
+
+### Quick Verification Commands
+```powershell
+# Check for any errors/warnings in latest build log
+$log = Get-ChildItem build-logs\*.txt | Sort-Object LastWriteTime | Select-Object -Last 1
+Select-String -Path $log -Pattern "FAILED|error C|fatal error|warning C" -CaseSensitive
+
+# Verify all build artifacts exist
+@(
+    "build/lib/ExplorerLensEngine.lib",
+    "build/lib/ExplorerLensModernRuntime.lib", 
+    "build/bin/EngineTests.exe",
+    "build/bin/EngineBenchmark.exe",
+    "build/bin/IntegrationTests.exe"
+) | ForEach-Object { 
+    $exists = Test-Path $_
+    Write-Host "$_ : $exists" -ForegroundColor $(if($exists){"Green"}else{"Red"})
+}
+```
 

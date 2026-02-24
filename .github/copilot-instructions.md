@@ -221,6 +221,16 @@ external/
 
 - The `Release/` pattern in `.gitignore` blocks `Engine/Release/` — use `git add -f` for files there
 - Stale `CMakeCache.txt` files from directory renames are auto-detected by `Build-Library-Core.ps1`
+- `build-vcpkg/` is gitignored — never track generated CMake cache/API reply files
+- `.vscode/c_cpp_properties.json` is gitignored — machine-local IntelliSense paths
+
+## Windows SDK Header Rules (CRITICAL)
+
+Because `WIN32_LEAN_AND_MEAN` is globally defined:
+- **NEVER** include `<versionhelpers.h>` — use `RtlGetVersion()` from ntdll.dll instead
+- **NEVER** include headers that depend on types excluded by `WIN32_LEAN_AND_MEAN`
+- Always verify new Windows SDK includes compile under `WIN32_LEAN_AND_MEAN`
+- See `.github/standards/BUILD_TROUBLESHOOTING.md` for the full compatibility list
 
 ## Sprint Execution Guidance (v14.0+)
 
