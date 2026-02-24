@@ -227,6 +227,7 @@ external/
 ## Windows SDK Header Rules (CRITICAL)
 
 Because `WIN32_LEAN_AND_MEAN` is globally defined:
+
 - **NEVER** include `<versionhelpers.h>` — use `RtlGetVersion()` from ntdll.dll instead
 - **NEVER** include headers that depend on types excluded by `WIN32_LEAN_AND_MEAN`
 - Always verify new Windows SDK includes compile under `WIN32_LEAN_AND_MEAN`
