@@ -4,15 +4,15 @@
 
 #include "PDFDecoder.h"
 #include "../Utils/PerformanceProfiler.h"
-#include <windows.h>
-#include <objidl.h>
-#include <gdiplus.h>
 #include <algorithm>
 #include <cwchar>
+#include <gdiplus.h>
 #include <memory>
+#include <objidl.h>
 #include <shlwapi.h>
 #include <shobjidl.h>
 #include <thumbcache.h>
+#include <windows.h>
 
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
