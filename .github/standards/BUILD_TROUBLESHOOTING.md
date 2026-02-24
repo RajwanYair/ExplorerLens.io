@@ -1,53 +1,44 @@
 # ExplorerLens Build Troubleshooting Guide
 
-**Last Updated:** June 2026  
-**Version:** 14.0.0 (Codename: Apex)
-
-This document captures all build issues encountered and their resolutions, organized as a knowledge base
-for future reference. Each issue includes root cause analysis and prevention guidance.
+**Last Updated:** February 2026
+**Applies To:** v14.0.0 "Apex", VS 18 2026 Build Tools, MSVC v145 toolset
 
 ---
 
-## Table of Contents
+## Issue #1: Windows SDK Header Compatibility with WIN32_LEAN_AND_MEAN
 
-1. [Windows SDK Header Compatibility](#1-windows-sdk-header-compatibility)
-2. [CRT Linkage Conflicts](#2-crt-linkage-conflicts)
-3. [CMake Configuration Issues](#3-cmake-configuration-issues)
-4. [Compiler Warnings (W4/WX)](#4-compiler-warnings-w4wx)
-5. [Git & Source Control](#5-git--source-control)
-6. [Build Script Issues](#6-build-script-issues)
-7. [Quick Diagnostic Commands](#7-quick-diagnostic-commands)
+### Symptom
 
----
-
-## 1. Windows SDK Header Compatibility
-
-### 1.1 `<versionhelpers.h>` + `WIN32_LEAN_AND_MEAN` (CRITICAL)
-
-**Severity:** Build-breaking  
-**First seen:** June 2026  
-**Affects:** Any file including `<versionhelpers.h>` when `WIN32_LEAN_AND_MEAN` is globally defined
-
-**Symptom:**
-```
-error C2065: 'WORD': undeclared identifier
+```text
+fatal error C1083: Cannot open include file: 'versionhelpers.h'
+-- OR --
+error C2065: 'WORD': undeclared identifier (from versionhelpers.h)
 error C2065: 'BOOL': undeclared identifier
 error C3861: 'IsWindows10OrGreater': identifier not found
 ```
 
-**Root Cause:**  
-`WIN32_LEAN_AND_MEAN` is defined globally in `Engine/CMakeLists.txt` as a compile definition. 
-This macro causes `<windows.h>` to **exclude** many SDK sub-headers that `<versionhelpers.h>` depends on.
-The missing types (`WORD`, `DWORD`, `BOOL`, `OSVERSIONINFOEXW`) are defined in those excluded headers.
+### Root Cause
 
-Attempting to fix include order (putting `<windows.h>` before `<versionhelpers.h>`) does **NOT** work —
-the types are excluded at the preprocessor level regardless of order.
+`WIN32_LEAN_AND_MEAN` is globally defined in `Engine/CMakeLists.txt`.
+This excludes many Windows SDK sub-headers. The `<versionhelpers.h>` header
+depends on types (`WORD`, `BOOL`, `OSVERSIONINFOEXW`) from these excluded headers.
 
-**Solution:**  
-Use `RtlGetVersion()` from `ntdll.dll` instead:
+### Headers Incompatible with WIN32_LEAN_AND_MEAN
+
+| Header                | Excluded Types / Subsystem           | Alternative               |
+| --------------------- | ------------------------------------ | ------------------------- |
+| `<versionhelpers.h>`  | `WORD`, `RTL_OSVERSIONINFOW`         | `RtlGetVersion()` direct  |
+| `<mmsystem.h>`        | Multimedia types                     | Include after windows.h   |
+| `<winsock2.h>`        | Socket types                         | Include before windows.h  |
+| `<shellapi.h>`        | Shell types (partial)                | Usually works, test first |
+| `<commdlg.h>`         | Common dialog types                  | Include after windows.h   |
+
+### Solution Applied
+
+Use `RtlGetVersion()` from ntdll.dll instead of `<versionhelpers.h>`:
+
 ```cpp
 typedef NTSTATUS(WINAPI* RtlGetVersionFunc)(PRTL_OSVERSIONINFOW);
-
 bool IsWindows10OrGreaterViaRtl() {
     HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
     if (!ntdll) return false;
@@ -55,281 +46,287 @@ bool IsWindows10OrGreaterViaRtl() {
     if (!pRtlGetVersion) return false;
     RTL_OSVERSIONINFOW osvi = {};
     osvi.dwOSVersionInfoSize = sizeof(osvi);
-    if (pRtlGetVersion(&osvi) != 0) return false;
-    return (osvi.dwMajorVersion >= 10);
+    return (pRtlGetVersion(&osvi) == 0 && osvi.dwMajorVersion >= 10);
 }
 ```
 
-**Prevention Rule:**
-> **NEVER** include `<versionhelpers.h>` in any file in this project.  
-> **NEVER** include any Windows SDK header that depends on types excluded by `WIN32_LEAN_AND_MEAN`.  
-> Use `RtlGetVersion()` for OS version checks — it's more accurate than deprecated `GetVersionEx()` anyway.
+### Prevention Rule
 
-**Affected headers to avoid (non-exhaustive):**
-- `<versionhelpers.h>` — OS version checks
-- `<mmsystem.h>` — Multimedia (include manually if needed)
-- `<winsock2.h>` — Must be included BEFORE `<windows.h>` 
-- `<ddeml.h>` — DDE messaging
-
-### 1.2 Include Order for Windows Headers
-
-**Rule:** When manually including Windows SDK sub-headers alongside `<windows.h>`:
-1. `<winsock2.h>` (if needed) — MUST come before `<windows.h>`  
-2. `<windows.h>` — Main header
-3. `<winternl.h>` — If using NT internals
-4. Other SDK headers (`<shlobj.h>`, `<shobjidl.h>`, etc.)
-
-The project already defines `WIN32_LEAN_AND_MEAN`, `NOMINMAX`, `UNICODE`, `_UNICODE` globally.
+> **NEVER** include `<versionhelpers.h>` in any source file. Always verify new
+> Windows SDK includes compile under `WIN32_LEAN_AND_MEAN` before committing.
 
 ---
 
-## 2. CRT Linkage Conflicts
+## Issue #2: CRT Linkage Conflicts (LNK4098)
 
-### 2.1 LNK4098 — LIBCMT Conflicts
+### Symptom
 
-**Severity:** Warning (becomes error with /WX)  
-**First seen:** February 2026
-
-**Symptom:**
-```
-LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs
+```text
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs;
+use /NODEFAULTLIB:library
 ```
 
-**Root Cause:**  
-External libraries (especially libwebp) built with `/MT` (static CRT) while project uses `/MD` (dynamic CRT).
-Mixing `/MT` and `/MD` in the same link produces this warning.
+### Root Cause
 
-**Current Workaround:**
+Project uses `/MD` (dynamic CRT) but some external libraries (libwebp, older
+builds) use `/MT` (static CRT). The linker sees both `MSVCRT.lib` (from `/MD`)
+and `LIBCMT.lib` (from `/MT`) and warns about the conflict.
+
+### Solution (Workaround)
+
 ```cmake
+# In CMakeLists.txt for targets that link mixed-CRT libraries:
 if(MSVC)
-    target_link_options(ExplorerLensEngine PRIVATE /NODEFAULTLIB:LIBCMT /IGNORE:4099)
-    target_link_options(EngineTests PRIVATE /NODEFAULTLIB:LIBCMT /IGNORE:4099)
-    target_link_options(EngineBenchmark PRIVATE /NODEFAULTLIB:LIBCMT /IGNORE:4099)
+    target_link_options(MyTarget PRIVATE
+        /NODEFAULTLIB:LIBCMT    # Suppress static CRT from /MT libs
+        /IGNORE:4099            # Suppress missing PDB warnings
+    )
 endif()
 ```
 
-**Proper Fix:** Rebuild ALL external libraries with `/MD`:
+### Proper Solution
+
+Rebuild all external libraries with matching CRT:
+
 ```powershell
+# Rebuild all libs with /MD (dynamic CRT)
 .\build-scripts\Rebuild-All-With-MD.ps1
 ```
 
-**Prevention Rule:**
-> All external library build scripts MUST use `-DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL"`
+### Applied Locations
 
-### 2.2 Linker Flags Are MSVC-Only
+- `Engine/CMakeLists.txt` — ExplorerLensEngine target
+- `Engine/Tests/CMakeLists.txt` — EngineTests, EngineBenchmark targets
 
-**Rule:** Always guard linker flags with `if(MSVC)`:
-```cmake
-# CORRECT:
-if(MSVC)
-    target_link_options(MyTarget PRIVATE /NODEFAULTLIB:LIBCMT)
-endif()
+### Important Notes
 
-# WRONG (breaks Clang/GCC):
-target_link_options(MyTarget PRIVATE /NODEFAULTLIB:LIBCMT)
-```
+- Linker flags like `/NODEFAULTLIB` and `/IGNORE` are MSVC-specific
+- Always guard with `if(MSVC)` in CMake
+- Never use these flags with Clang or GCC toolchains
 
 ---
 
-## 3. CMake Configuration Issues
+## Issue #3: CMake Configuration Issues
 
-### 3.1 CMAKE_C_COMPILER Not Needed
+### 3a: Wrong Compiler Selected
 
-**Severity:** Warning  
-**Symptom:** `CMake Warning: CMAKE_C_COMPILER is not used by this project`
+**Symptom:**
 
-**Root Cause:** Project is C++ only — no C sources. Setting `CMAKE_C_COMPILER` in CMakePresets.json triggers warning.  
-**Fix:** Remove `CMAKE_C_COMPILER` from presets. Only set `CMAKE_CXX_COMPILER`.
+```text
+-- The CXX compiler identification is Clang 19.1.7
+```
 
-### 3.2 CMake Picks Clang Instead of MSVC
+**Expected:** `MSVC 19.50.35720.0`
 
-**Severity:** Build-breaking (different ABI, missing MSVC features)
+**Cause:** `vcvars64.bat` not sourced before running CMake. Clang from PATH
+takes priority.
 
-**Symptom:** Build fails with Clang-specific errors or produces incompatible binaries.
+**Fix:**
 
-**Root Cause:** Clang is in PATH (e.g., from LLVM install) and CMake finds it before MSVC.
-
-**Fix:** Always source `vcvars64.bat` before running CMake:
 ```powershell
-# Build-MSVC.ps1 does this automatically
-# For manual builds:
+# Always source vcvars first:
 cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat" -vcvars_ver=14.50.35717 && powershell'
+
+# Or use the automated script (handles vcvars internally):
+.\build-scripts\Build-MSVC.ps1
 ```
 
-**Prevention Rule:**
-> **NEVER** run `cmake` without sourcing vcvars64 first.  
-> **ALWAYS** use `Build-MSVC.ps1` which handles this automatically.
+### 3b: Stale CMake Cache
 
-### 3.3 Stale CMakeCache.txt After Directory Renames
+**Symptom:** CMake remembers old compiler/paths after toolchain changes.
 
-**Severity:** Configuration failure
+**Fix:**
 
-**Symptom:** CMake configure fails after renaming directories, with errors about missing paths.
-
-**Fix:** `Build-Library-Core.ps1` auto-detects stale caches. For manual fix:
 ```powershell
-Remove-Item build/CMakeCache.txt -Force
-Remove-Item -Recurse build/CMakeFiles -Force
-cmake --preset default-release  # Re-configure from scratch
+# Delete build directory and reconfigure
+Remove-Item -Recurse -Force build
+cmake --preset default-release
+cmake --build --preset default-release -j 8
 ```
 
-### 3.4 vcpkg Manifest Name Must Be Lowercase
+### 3c: CMAKE_C_COMPILER Warning
 
-**Severity:** Warning/validation error
+**Symptom:**
 
-**Symptom:** vcpkg warns about non-lowercase package name.
+```text
+CMake Warning: Manually-specified variables were not used by the project: CMAKE_C_COMPILER
+```
 
-**Fix:** In `vcpkg.json`, use lowercase: `"name": "explorerlens"` (not `"ExplorerLens"`).
+**Cause:** Project is C++ only. Setting `CMAKE_C_COMPILER` in presets triggers this.
+
+**Fix:** Remove `CMAKE_C_COMPILER` from `CMakePresets.json`. Only `CMAKE_CXX_COMPILER` is needed.
 
 ---
 
-## 4. Compiler Warnings (W4/WX)
+## Issue #4: Compiler Warnings (W4 + WX)
 
-### 4.1 C4456 — Variable Shadowing
+### 4a: C4456 — Variable Shadowing
 
-**Symptom:** `warning C4456: declaration of 'x' hides previous local declaration`
-
-**Prevention:**
-- Use descriptive variable names: `formatIterations`, `scaleIterations` (not generic `iterations`)
-- Avoid reusing names in nested scopes
-- Prefix loop variables when nesting: `outerIdx`, `innerIdx`
-
-### 4.2 C4702 — Unreachable Code
-
-**Symptom:** `warning C4702: unreachable code`
-
-**Common causes in this project:**
-- Code after `ASSERT()` macros (which may throw/abort)
-- Code after unconditional `return` statements
-- Dead branches in `switch` statements after `default:` with return
-
-**Fix:** Remove the unreachable code. Use `[[maybe_unused]]` for intentionally unused paths.
-
-### 4.3 C4100 — Unused Parameters
-
-**Fix:** Use `[[maybe_unused]]` or `(void)paramName;` to suppress.
-
-### 4.4 C4189 — Unused Local Variables
-
-**Fix:** Remove the variable or mark with `[[maybe_unused]]` if intentionally retained for debugging.
-
----
-
-## 5. Git & Source Control
-
-### 5.1 build-vcpkg/ Tracked Accidentally
-
-**Symptom:** `build-vcpkg/.cmake/api/v1/reply/error-*.json` files (25+ files) show up in git status.
-
-**Root Cause:** `build-vcpkg/` was not in `.gitignore`.
-
-**Fix:** Added `build-vcpkg/` to `.gitignore` and removed tracked files:
-```powershell
-git rm -r --cached build-vcpkg/
-echo "build-vcpkg/" >> .gitignore
+```text
+warning C4456: declaration of 'x' hides previous local declaration
 ```
 
-### 5.2 .vscode/c_cpp_properties.json Is Machine-Local
+**Fix:** Rename inner variable to avoid shadowing:
 
-**Rule:** `.vscode/c_cpp_properties.json` contains machine-specific IntelliSense paths.
-It MUST be gitignored. Only `.vscode/tasks.json` and `.vscode/launch.json` should be tracked.
+```cpp
+// BAD
+int iterations = 100;
+for (int iterations = 0; iterations < 10; ++iterations) { ... }  // shadows!
 
-### 5.3 Engine/Release/ Blocked by .gitignore
+// GOOD
+int totalIterations = 100;
+for (int i = 0; i < 10; ++i) { ... }
+```
 
-The pattern `Release/` in `.gitignore` matches `Engine/Release/`. If you need to add files there:
-```powershell
-git add -f Engine/Release/needed-file.txt
+### 4b: C4702 — Unreachable Code
+
+```text
+warning C4702: unreachable code
+```
+
+**Fix:** Remove dead code after return/throw/break statements.
+
+### 4c: C4100 — Unreferenced Formal Parameter
+
+```text
+warning C4100: 'param': unreferenced formal parameter
+```
+
+**Fix:**
+
+```cpp
+// Option 1: Comment out parameter name
+void MyFunc(int /*unused*/) { }
+
+// Option 2: Use [[maybe_unused]] attribute
+void MyFunc([[maybe_unused]] int param) { }
+```
+
+### 4d: External Library Warnings
+
+**Fix:** Use MSVC's `/external:` mechanism:
+
+```cmake
+# Suppress warnings from external headers
+target_compile_options(MyTarget PRIVATE /external:anglebrackets /external:W0)
 ```
 
 ---
 
-## 6. Build Script Issues
+## Issue #5: Git & Source Control
 
-### 6.1 NMake Build Scripts — Makefile Parameter
+### 5a: Release/ Pattern in .gitignore
 
-**Context:** Some external libraries (e.g., libwebp) use NMake with `Makefile.vc` instead of CMake.
+**Symptom:** Files under `Engine/Release/` are ignored by Git.
 
-**Pattern:** Use the `-Makefile` parameter in `Build-Library-Core.ps1`:
+**Cause:** `.gitignore` has a `Release/` pattern that matches any `Release/` directory.
+
+**Fix:** Use `git add -f <file>` to force-add files under ignored paths, or make
+the `.gitignore` pattern more specific (e.g., `x64/Release/`).
+
+### 5b: Build Artifacts Committed Accidentally
+
+**Prevention Checklist:**
+
 ```powershell
-# Build-LibWebP-NMake.ps1 uses:
-Invoke-BuildStep "Build" {
-    Build-WithNMake -SourceDir $srcDir -Makefile "Makefile.vc" -Args @("CFG=release-static")
-}
+# Before committing, verify no build artifacts:
+git status
+git diff --cached --name-only | Select-String "\.obj$|\.lib$|\.dll$|\.exe$|\.pdb$"
 ```
-
-### 6.2 Build-Library-Core.ps1 Root Dir Resolution
-
-**Pattern:** All build scripts resolve the project root via:
-```powershell
-$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-```
-This assumes the script is two levels deep under the project root.
 
 ---
 
-## 7. Quick Diagnostic Commands
+## Issue #6: Build Script Issues
 
-### Check for Build Errors
-```powershell
-# In latest build log
-$log = Get-ChildItem build-logs\*.txt | Sort-Object LastWriteTime | Select-Object -Last 1
-Select-String -Path $log -Pattern "FAILED|error C|fatal error" -CaseSensitive
+### 6a: Build-Library-Core.ps1 Cannot Find vcvars
+
+**Symptom:**
+
+```text
+ERROR: Could not find vcvars64.bat
 ```
 
-### Check for Build Warnings
+**Fix:** Verify Visual Studio Build Tools installation path matches the script's search paths. The script checks:
+
+1. `$env:VS_PATH` environment variable
+2. Standard VS installation directories
+3. vswhere.exe output
+
+### 6b: External Library Build Fails
+
+**Common causes:**
+
+- Missing prerequisite library (e.g., libavif needs zlib + dav1d)
+- Wrong CRT linkage (`/MT` vs `/MD`)
+- Stale CMake cache in library build directory
+
+**Fix:**
+
 ```powershell
-Select-String -Path $log -Pattern "warning C" -CaseSensitive
+# Clean and rebuild individual library
+.\build-scripts\external-libs\Build-<Library>.ps1 -Clean
 ```
 
-### Verify Build Artifacts
-```powershell
-@("build/lib/ExplorerLensEngine.lib",
-  "build/lib/ExplorerLensModernRuntime.lib",
-  "build/bin/EngineTests.exe",
-  "build/bin/EngineBenchmark.exe",
-  "build/bin/IntegrationTests.exe"
-) | ForEach-Object {
-    $exists = Test-Path $_
-    Write-Host "$_ : $exists" -ForegroundColor $(if($exists){"Green"}else{"Red"})
-}
-```
+---
 
-### Check Compiler Version
+## Quick Diagnostic Commands
+
 ```powershell
-# After sourcing vcvars:
+# Check compiler version
 cl.exe 2>&1 | Select-String "Version"
 # Expected: Microsoft (R) C/C++ Optimizing Compiler Version 19.50.35720
-```
 
-### Check CMake Configuration
-```powershell
-cmake --preset default-release 2>&1 | Select-String "Compiler|Version|Build type"
-```
+# Check CMake version and generator
+cmake --version
+cmake --preset default-release -N 2>&1 | Select-String "generator|compiler"
 
-### Full Clean + Rebuild
-```powershell
-Remove-Item -Recurse -Force build, x64, LENSShell\x64, LENSManager\x64 -ErrorAction SilentlyContinue
-.\build-scripts\Build-MSVC.ps1 -Clean
+# Verify vcvars was sourced (check for MSVC env vars)
+$env:VSCMD_VER  # Should show "18.x.y"
+$env:VCToolsVersion  # Should show "14.50.35717"
+
+# Find all errors/warnings in build logs
+Get-ChildItem build-logs\*.log, build-logs\*.txt |
+    Select-String -Pattern "error C|fatal error|warning C|FAILED" -CaseSensitive |
+    Select-Object Path, LineNumber, Line
+
+# Check if external libraries are built
+@(
+    "external/compression-libs/zlib-1.3.1/install/lib/zlibstatic.lib",
+    "external/image-libs/libwebp-1.5.0-original/output/x64/Release/webp.lib",
+    "external/image-libs/libavif-1.3.0/install/lib/avif.lib",
+    "external/image-libs/dav1d-1.5.1/build/src/libdav1d.a"
+) | ForEach-Object {
+    $ok = Test-Path $_
+    Write-Host "$_ : $ok" -ForegroundColor $(if($ok){"Green"}else{"Red"})
+}
 ```
 
 ---
 
 ## Appendix: Header Registrations
 
-Every new `.h` or `.cpp` file must be registered in CMake. Here's the mapping:
+All headers under `Engine/` must be registered in `Engine/CMakeLists.txt` ENGINE_HEADERS.
+The following headers were added in the February 2026 cleanup:
 
-| File Location | Register In | Section |
-|---|---|---|
-| `Engine/Core/*.h` | `Engine/CMakeLists.txt` | `ENGINE_HEADERS` |
-| `Engine/Core/*.cpp` | `Engine/CMakeLists.txt` | `ENGINE_SOURCES` |
-| `Engine/Utils/*.h` | `Engine/CMakeLists.txt` | `ENGINE_HEADERS` |
-| `Engine/Utils/*.cpp` | `Engine/CMakeLists.txt` | `ENGINE_SOURCES` |
-| `Engine/Pipeline/*.h` | `Engine/CMakeLists.txt` | `ENGINE_HEADERS` |
-| `Engine/Cache/*.h` | `Engine/CMakeLists.txt` | `ENGINE_HEADERS` |
-| `Engine/Memory/*.h` | `Engine/CMakeLists.txt` | `ENGINE_HEADERS` |
-| `Engine/Plugin/*.h` | `Engine/CMakeLists.txt` | `ENGINE_HEADERS` |
-| `Engine/AI/*.h` | `Engine/CMakeLists.txt` | `ENGINE_HEADERS` |
-| `Engine/GPU/*.h` | `Engine/CMakeLists.txt` | `ENGINE_HEADERS` |
-| `Engine/Tests/*.cpp` | `Engine/Tests/CMakeLists.txt` | `EngineTests target` |
+| Header                        | Subsystem | Sprint     |
+| ----------------------------- | --------- | ---------- |
+| `Utils/ReleaseGateV16.h`      | Utils     | Sprint 299 |
+| `Utils/ReleaseGateV17.h`      | Utils     | Sprint 301 |
+| `Utils/ReleaseGateV18.h`      | Utils     | Sprint 303 |
+| `Utils/ReleaseGateV19.h`      | Utils     | Sprint 305 |
+| `Utils/ReleaseGateV20.h`      | Utils     | Sprint 307 |
+| `Utils/ReleaseGateV21.h`      | Utils     | Sprint 309 |
+| `Utils/ReleaseGateV22.h`      | Utils     | Sprint 311 |
+| `Utils/ReleaseGateV23.h`      | Utils     | Sprint 313 |
+| `Utils/ReleaseGateV24.h`      | Utils     | Sprint 315 |
+| `Utils/ReleaseGateV25.h`      | Utils     | Sprint 317 |
+| `Utils/ReleaseGateV26.h`      | Utils     | Sprint 319 |
+| `Utils/ReleaseGateV27.h`      | Utils     | Sprint 321 |
+| `Utils/ReleaseGateV28.h`      | Utils     | Sprint 323 |
+| `Utils/ReleaseGateV29.h`      | Utils     | Sprint 325 |
+| `Utils/ReleaseGateV30.h`      | Utils     | Sprint 327 |
+| `Utils/ReleaseGateV31.h`      | Utils     | Sprint 329 |
+| `Utils/ReleaseGateV32.h`      | Utils     | Sprint 331 |
 
-**Failure to register = files missing from IDE and install targets.**
+> **Rule:** When creating a new `.h` file under `Engine/`, add it to
+> `ENGINE_HEADERS` in the same commit.

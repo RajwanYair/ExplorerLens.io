@@ -23,6 +23,7 @@ param(
 $rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $sourceDir = Join-Path $rootDir "external\image-libs\libavif-1.3.0"
 $dav1dDir = Join-Path $rootDir "external\image-libs\dav1d-1.5.1\install"
+$zlibDir = Join-Path $rootDir "external\compression-libs\zlib-1.3.1\install"
 $buildDir = Join-Path $sourceDir "build-msvc"
 $installDir = Join-Path $sourceDir "install"
 
@@ -45,6 +46,7 @@ Write-BuildLog "Source: $sourceDir" -Level Info
 Write-BuildLog "Build: $buildDir" -Level Info
 Write-BuildLog "Install: $installDir" -Level Info
 Write-BuildLog "DAV1D: $dav1dDir" -Level Info
+Write-BuildLog "ZLIB: $zlibDir" -Level Info
 
 try {
     # Create dav1d CMake config for find_package(dav1d) discovery
@@ -70,7 +72,7 @@ set(dav1d_FOUND TRUE)
         'BUILD_SHARED_LIBS'                         = 'ON'
         'AVIF_CODEC_DAV1D'                          = 'SYSTEM'
         'AVIF_LIBYUV'                               = 'ON'
-        'CMAKE_PREFIX_PATH'                         = $dav1dDir
+        'CMAKE_PREFIX_PATH'                         = "$dav1dDir;$zlibDir"
         'AVIF_CODEC_AOM'                            = 'ON'
         'AVIF_BUILD_APPS'                           = 'ON'
         'AVIF_BUILD_TESTS'                          = 'ON'

@@ -149,9 +149,13 @@ endif()
 if(MSVC)
     target_compile_options(EngineTests PRIVATE
         /W4
+        /wd4189     # C4189: local variable initialized but not referenced
+                    # Expected in tests: assert() is no-op in Release, so
+                    # variables used only in EXPECT_* macros appear unused
     )
     target_compile_options(EngineBenchmark PRIVATE
         /W4
+        /wd4189     # Same rationale as above
     )
     
     # Fix LIBCMT conflict - external libraries built with /MT need this
