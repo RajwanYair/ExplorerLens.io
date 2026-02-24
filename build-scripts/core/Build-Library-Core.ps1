@@ -359,7 +359,7 @@ function Invoke-CMakeBuild {
     Write-BuildLog "CMake command: $cmake $($cmakeArgs -join ' ')" -Level Info
     
     $configureCmd = "& `"$cmake`" $($cmakeArgs -join ' ')"
-    $configureResult = Invoke-Expression $configureCmd
+    Invoke-Expression $configureCmd
 
     if ($LASTEXITCODE -ne 0) {
         $cachePath = Join-Path $BuildDir "CMakeCache.txt"
@@ -367,7 +367,7 @@ function Invoke-CMakeBuild {
             Write-BuildLog "CMake configuration failed; stale cache/toolset mismatch suspected. Cleaning build dir and retrying once..." -Level Warning
             Remove-Item -Path $BuildDir -Recurse -Force -ErrorAction SilentlyContinue
             New-CleanDirectory -Path $BuildDir
-            $configureResult = Invoke-Expression $configureCmd
+            Invoke-Expression $configureCmd
         }
 
         if ($LASTEXITCODE -ne 0) {
@@ -526,6 +526,9 @@ function Invoke-NMakeBuild {
         [string]$Target = 'all',
         
         [Parameter()]
+        [string]$Makefile = '',
+        
+        [Parameter()]
         [hashtable]$MakefileVars = @{},
         
         [Parameter()]
@@ -570,6 +573,12 @@ function Invoke-NMakeBuild {
     # Build nmake arguments
     $nmakeArgs = @()
     
+    # Add /F <makefile> if specified
+    if ($Makefile) {
+        $nmakeArgs += "/F"
+        $nmakeArgs += $Makefile
+    }
+    
     # Add makefile variables
     foreach ($key in $MakefileVars.Keys) {
         $value = $MakefileVars[$key]
@@ -583,13 +592,15 @@ function Invoke-NMakeBuild {
         # Clean if requested
         if ($Clean) {
             Write-BuildLog "Cleaning..." -Level Info
-            & nmake clean 2>&1 | Out-Null
+            $cleanArgs = if ($Makefile) { @('/F', $Makefile, 'clean') } else { @('clean') }
+            & nmake @cleanArgs 2>&1 | Out-Null
         }
         
         # Build
         Write-BuildLog "Building target: $Target" -Level Info
-        $nmakeCmd = "& nmake $Target $($nmakeArgs -join ' ')"
-        Invoke-Expression $nmakeCmd
+        $allArgs = $nmakeArgs + ($Target -split '\s+')
+        Write-BuildLog "NMake command: nmake $($allArgs -join ' ')" -Level Info
+        & nmake @allArgs
         
         if ($LASTEXITCODE -ne 0) {
             Write-BuildLog "NMake build failed" -Level Error

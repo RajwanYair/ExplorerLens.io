@@ -449,6 +449,23 @@ set(ENGINE_HEADERS
     Utils/ReleaseGateV13.h
     Utils/ReleaseGateV14.h
     Utils/ReleaseGateV15.h
+    Utils/ReleaseGateV16.h
+    Utils/ReleaseGateV17.h
+    Utils/ReleaseGateV18.h
+    Utils/ReleaseGateV19.h
+    Utils/ReleaseGateV20.h
+    Utils/ReleaseGateV21.h
+    Utils/ReleaseGateV22.h
+    Utils/ReleaseGateV23.h
+    Utils/ReleaseGateV24.h
+    Utils/ReleaseGateV25.h
+    Utils/ReleaseGateV26.h
+    Utils/ReleaseGateV27.h
+    Utils/ReleaseGateV28.h
+    Utils/ReleaseGateV29.h
+    Utils/ReleaseGateV30.h
+    Utils/ReleaseGateV31.h
+    Utils/ReleaseGateV32.h
 )
 
 set(ENGINE_SOURCES

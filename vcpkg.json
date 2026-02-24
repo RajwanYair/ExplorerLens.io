@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-  "name": "ExplorerLens",
-  "version": "7.0.0",
+  "name": "explorerlens",
+  "version": "14.0.0",
   "description": "ExplorerLens - Advanced Thumbnail Handler for Windows 11",
   "homepage": "https://github.com/yourusername/ExplorerLens",
   "license": "MIT",

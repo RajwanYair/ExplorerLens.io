@@ -44,12 +44,19 @@ if ($Clean) {
 try {
     # Build with NMake if available, otherwise fallback to CMake
     $nmake = Get-Command nmake.exe -ErrorAction SilentlyContinue
-    if ($nmake) {
-        Invoke-NMakeBuild -LibraryName "libwebp" -SourceDir $webpDir -Target "CFG=release-static RTLIBCFG=static OBJDIR=output\x64\Release" -MakefileVars @{
-            'File' = 'Makefile.vc'
+    $makefilePath = Join-Path $webpDir "Makefile.vc"
+    if ($nmake -and (Test-Path $makefilePath)) {
+        Invoke-NMakeBuild -LibraryName "libwebp" -SourceDir $webpDir -Makefile "Makefile.vc" -MakefileVars @{
+            'CFG'      = 'release-static'
+            'RTLIBCFG' = 'dynamic'
+            'OBJDIR'   = 'output\x64\Release'
         }
     } else {
-        Write-BuildLog "nmake not found in environment; falling back to CMake build" -Level Warning
+        if (-not $nmake) {
+            Write-BuildLog "nmake not found in environment; falling back to CMake build" -Level Warning
+        } elseif (-not (Test-Path $makefilePath)) {
+            Write-BuildLog "Makefile.vc not found in source tree; falling back to CMake build" -Level Warning
+        }
         $cmakeBuildDir = Join-Path $webpDir "build-cmake"
         $cmakeOptions = @{
             'BUILD_SHARED_LIBS'     = 'OFF'

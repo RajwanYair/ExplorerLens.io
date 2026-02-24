@@ -14,6 +14,9 @@
 *.userosscache
 *.sln.docstates
 
+# VS Code user-specific (machine-local IntelliSense)
+.vscode/c_cpp_properties.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -35,6 +38,7 @@ bld/
 [Ll]og/
 [Ll]ogs/
 build/
+build-vcpkg/
 build-logs/
 
 # Build output logs directory

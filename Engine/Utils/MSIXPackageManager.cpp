@@ -4,11 +4,10 @@
 //==============================================================================
 
 #include "MSIXPackageManager.h"
-#include <sstream>
 
 #ifdef _WIN32
-#include <versionhelpers.h>
 #include <windows.h>
+#include <versionhelpers.h>
 #endif
 
 namespace ExplorerLens {

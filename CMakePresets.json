@@ -22,7 +22,6 @@
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_MAKE_PROGRAM": "C:/Users/ryair/scoop/shims/ninja.exe",
-        "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe",
         "CMAKE_LINKER": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/link.exe",
         "CMAKE_AR": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/lib.exe",
