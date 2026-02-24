@@ -1,7 +1,7 @@
 # ExplorerLens Known Issues & Troubleshooting
-**Version:** 14.0.0 "Apex"  
+**Version:** 15.0.0 "Zenith"  
 **Last Updated:** July 2025  
-**Audit Status:** ✅ All entries verified against current codebase (Sprint 348)
+**Audit Status:** ✅ All entries verified against current codebase (Sprint 393)
 
 ## Current Known Issues
 

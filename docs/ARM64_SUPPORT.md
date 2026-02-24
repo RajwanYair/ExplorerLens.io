@@ -1,8 +1,8 @@
-# ARM64 Support — ExplorerLens v8.3.0
+# ARM64 Support — ExplorerLens v15.0.0
 
 ## Overview
 
-ExplorerLens v8.3.0 introduces foundational ARM64 support as part of the Sprints 155–159 block.
+ExplorerLens v15.0.0 introduces foundational ARM64 support as part of the Sprints 155–159 block.
 This document describes the build configuration, library compatibility matrix, runtime validation
 approach, performance baseline targets, and CI integration strategy for Windows ARM64.
 
@@ -126,7 +126,7 @@ Triggers: push to `main`/`develop`/`release/*`, PRs to `main`/`develop`, manual 
 
 ---
 
-## Known Limitations (v8.3.0)
+## Known Limitations
 
 - `LENSShell.dll` (COM shell extension) is **not yet packaged as ARM64** — the native shell
   extension requires ARM64EC or native ARM64 COM registration; planned for v9.0.0.
@@ -150,5 +150,5 @@ Triggers: push to `main`/`develop`/`release/*`, PRs to `main`/`develop`, manual 
 
 ---
 
-*Document created: Sprint 159 | Version: v8.3.0 | Last updated: Sprint 159*
+*Document created: Sprint 159 | Version: v15.0.0 | Last updated: Sprint 159*
 

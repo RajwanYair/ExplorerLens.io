@@ -1,9 +1,9 @@
-# Build Scripts - ExplorerLens v7.0
+# Build Scripts - ExplorerLens v15.0.0
 
 **Unified Build System for Windows 11**  
 Comprehensive build infrastructure for external dependencies, engine, and installer packaging.
 
-> **⚡ NEW in v7.0:** Unified build modules, 50% code reduction, vcpkg integration
+> **⚡ NEW in v15.0.0:** Unified build modules, 50% code reduction, vcpkg integration
 
 ---
 
@@ -81,7 +81,7 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m
 
 ---
 
-## 📚 Core Module Reference (NEW in v7.0)
+## 📚 Core Module Reference (NEW in v15.0.0)
 
 ### Build-Library-Core.ps1
 
@@ -207,7 +207,7 @@ Build verification and testing:
 
 ### Required Tools
 
-- **Visual Studio 2022** (17.8+) with VC++ 143 toolset
+- **Visual Studio 18 2026** (17.8+) with VC++ 143 toolset
 - **CMake** 3.20+ (for external libraries)
 - **NASM** 2.15+ (for libavif, dav1d)
 - **PowerShell** 7.0+ (recommended) or 5.1+
@@ -255,7 +255,7 @@ The build system respects these environment variables:
 **"MSBuild not found"**
 ```powershell
 .\Find-MSBuild.ps1  # Locate installation
-# Install Visual Studio 2022 if missing
+# Install Visual Studio 18 2026 if missing
 ```
 
 **"NASM not found"**

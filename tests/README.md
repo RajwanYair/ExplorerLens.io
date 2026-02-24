@@ -132,7 +132,7 @@ tests/
 ### Prerequisites
 
 - **Windows 10/11**
-- **MSVC Compiler** (Visual Studio 2022 Build Tools or full VS)
+- **MSVC Compiler** (Visual Studio 18 2026 Build Tools or full VS)
 - **Python 3.6+** (for test data generation)
 
 ### Quick Start
@@ -148,10 +148,10 @@ build-tests.cmd
 # Or run individually:
 
 # Build unit tests
-cl /std:c++17 /EHsc UnitTests.cpp /link shlwapi.lib /OUT:UnitTests.exe
+cl /std:c++20 /EHsc UnitTests.cpp /link shlwapi.lib /OUT:UnitTests.exe
 
 # Build integration tests
-cl /std:c++17 /EHsc IntegrationTests.cpp /link shlwapi.lib ole32.lib /OUT:IntegrationTests.exe
+cl /std:c++20 /EHsc IntegrationTests.cpp /link shlwapi.lib ole32.lib /OUT:IntegrationTests.exe
 
 # Run tests
 UnitTests.exe
@@ -174,7 +174,7 @@ tests\build\
 ```
 =========================================
 ExplorerLens Unit Test Suite
-Version: 8.4.0 (GPU-Accelerated)
+Version: 15.0.0 (GPU-Accelerated)
 =========================================
 
 [Suite 1/8] Format Detection Tests
@@ -447,5 +447,5 @@ Same as ExplorerLens project. Tests are MIT-compatible and freely redistributabl
 
 **Last Updated:** November 18, 2024  
 **Test Suite Version:** 2.0  
-**ExplorerLens Version:** 8.4.0 (GPU-Accelerated)
+**ExplorerLens Version:** 15.0.0 (GPU-Accelerated)
 

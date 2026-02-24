@@ -1,7 +1,7 @@
 # ExplorerLens Build Method - Standard Operating Procedure
 
 **Last Updated:** February 2026
-**Version:** 14.0.0 (Codename: Apex)
+**Version:** 15.0.0 (Codename: Zenith)
 **Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring, zero-warnings enforcement
 
 ---

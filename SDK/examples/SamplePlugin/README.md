@@ -18,7 +18,7 @@ The Sample Plugin shows:
 
 ### Prerequisites
 
-- Visual Studio 2022 or later
+- Visual Studio 18 2026 or later
 - Windows SDK 10.0.26100.0 or later
 - ExplorerLens SDK headers
 

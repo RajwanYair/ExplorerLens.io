@@ -1,7 +1,7 @@
-# Format Support Matrix — ExplorerLens v14.0.0
+# Format Support Matrix — ExplorerLens v15.0.0
 
 **Last Updated:** February 2026  
-**Engine Version:** 14.0.0 "Apex" (Sprint 348)  
+**Engine Version:** 15.0.0 "Zenith" (Sprint 393)  
 **Total Formats:** 200+ file extensions across 25 decoders  
 **Shell Registrations:** 93 extensions in LENSShell.rgs  
 **Decoder Compliance:** 25/25 (100%)

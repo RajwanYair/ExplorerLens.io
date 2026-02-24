@@ -1,6 +1,6 @@
-# Testing Guide — ExplorerLens v14.0.0
+# Testing Guide — ExplorerLens v15.0.0
 
-**Version:** 14.0.0 "Apex"  
+**Version:** 15.0.0 "Zenith"  
 **Framework:** Custom C++ test harness (`TEST()`, `RUN_TEST()`, `ASSERT()` macros)  
 **Test Count:** ~1,187 unit tests + 5 benchmarks  
 **Pass Rate:** 100%

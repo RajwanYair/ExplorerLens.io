@@ -1,5 +1,5 @@
 # ExplorerLens Developer Guide
-**Version:** 14.0.0 "Apex"  
+**Version:** 15.0.0 "Zenith"  
 **Last Updated:** July 2025  
 **Target Audience:** Contributors, Plugin Developers, Maintainers  
 **Sprints Completed:** 348  

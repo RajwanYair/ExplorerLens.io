@@ -1,7 +1,7 @@
 # Third-Party Libraries - Build & Integration Guide
 
 **Last Updated:** July 2025  
-**Version:** 14.0.0  
+**Version:** 15.0.0  
 **Policy:** All libraries must be x64 and use `/MD` (dynamic CRT — `MultiThreadedDLL`) for Release builds
 
 ---

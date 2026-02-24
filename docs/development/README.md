@@ -117,7 +117,7 @@ Enable verbose logging and diagnostics:
 
 ### Required
 
-- **Visual Studio 2022** (17.8+) - Primary IDE
+- **Visual Studio 18 2026** (17.8+) - Primary IDE
 - **Git** (2.40+) - Version control
 - **PowerShell 7+** - Build automation
 - **CMake 3.20+** - External library builds
@@ -198,7 +198,7 @@ See [Testing Guide](../testing/TESTING_GUIDE.md) for comprehensive testing docum
 **"Cannot find MSBuild.exe"**
 ```powershell
 .\build-scripts\Find-MSBuild.ps1
-# Ensure Visual Studio 2022 is installed
+# Ensure Visual Studio 18 2026 is installed
 ```
 
 **"Library not found: *.lib"**

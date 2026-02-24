@@ -1,7 +1,7 @@
 # ExplorerLens Build Troubleshooting Guide
 
 **Last Updated:** February 2026
-**Applies To:** v14.0.0 "Apex", VS 18 2026 Build Tools, MSVC v145 toolset
+**Applies To:** v15.0.0 "Zenith", VS 18 2026 Build Tools, MSVC v145 toolset
 
 ---
 

@@ -1,6 +1,6 @@
-# GPU Testing & Optimization Guide — ExplorerLens v14.0.0
+# GPU Testing & Optimization Guide — ExplorerLens v15.0.0
 
-**Version:** 14.0.0 "Apex"  
+**Version:** 15.0.0 "Zenith"  
 **Last Updated:** February 2026  
 **Status:** GPU Testing Operational (D3D11 + D3D12 + Vulkan Compute)
 

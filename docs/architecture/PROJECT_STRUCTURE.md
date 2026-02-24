@@ -1,7 +1,7 @@
 # ExplorerLens Project Structure
 
 **Last Updated:** July 2025  
-**Version:** 14.0.0 "Apex"  
+**Version:** 15.0.0 "Zenith"  
 **Organization Standard:** Industrial Open Source
 
 This document describes the complete directory structure and organization of the ExplorerLens project.

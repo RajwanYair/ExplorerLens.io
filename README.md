@@ -103,13 +103,13 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ### Requirements
 
 - Windows 10 1809+ or Windows 11 (64-bit)
-- Visual Studio 2022/2026 BuildTools
+- Visual Studio 18 2026 BuildTools (MSVC v145 toolset)
 - Administrator privileges for installation
 
 ### Build
 
 ```cmd
-REM Open "x64 Native Tools Command Prompt for VS 2022/2026"
+REM Open "x64 Native Tools Command Prompt for VS 2026"
 cd ExplorerLens
 RUN-BUILD.bat
 ```
