@@ -3,6 +3,10 @@
 // Map-view decode, scatter-gather readback, pinned memory handoff to GPU.
 // Eliminates intermediate copy for Direct3D 11 texture upload.
 
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
+#include <windows.h>
 #include <cstdint>
 #include <cstddef>
 #include <string>
@@ -87,9 +91,21 @@ public:
         ZeroCopyBuffer buf;
         buf.sizeBytes = sizeBytes;
         buf.origin    = BufferOrigin::PinnedVirtual;
-        // Stub: real impl calls VirtualAlloc(NULL, sizeBytes, MEM_COMMIT, PAGE_READWRITE)
-        buf.ptr       = nullptr;  // placeholder
+        buf.ptr = ::VirtualAlloc(NULL, sizeBytes, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        if (buf.ptr) {
+            // Lock pages in physical memory to prevent paging (best-effort for DMA)
+            ::VirtualLock(buf.ptr, sizeBytes);
+        }
         return buf;
+    }
+
+    static void FreePinned(ZeroCopyBuffer& buf) {
+        if (buf.ptr && buf.origin == BufferOrigin::PinnedVirtual) {
+            ::VirtualUnlock(buf.ptr, buf.sizeBytes);
+            ::VirtualFree(buf.ptr, 0, MEM_RELEASE);
+            buf.ptr = nullptr;
+            buf.sizeBytes = 0;
+        }
     }
 
     static bool UploadToGPU(const GPUUploadDescriptor& desc, ZeroCopyStats& stats) {
