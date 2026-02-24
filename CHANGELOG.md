@@ -5,6 +5,127 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [15.0.0] "Zenith" - 2026-07 (Sprints 349-393)
+
+### Added
+- **45-sprint enhancement plan** — production-polishing initiative across Engine, Libraries, and UX
+- **libarchive 3.7.6** — Integrated as static library, replacing per-format archive handlers
+- **SVG Direct2D rendering** — Real ID2D1DeviceContext5 SVG rendering replacing gradient stub
+- **BCrypt hashing** — FileHashEngine now uses Windows BCrypt API (MD5/SHA1/SHA256/SHA512)
+- **ZeroCopyPipeline** — VirtualAlloc + VirtualLock pinned memory allocation
+- **DPX/Cineon decoder** — Full SMPTE 268M parsing with 10-bit log-to-linear decode
+- **OGG album art** — Vorbis comment METADATA_BLOCK_PICTURE extraction with base64 decode
+- **MOBI cover extraction** — PalmDB/MOBI/EXTH record parsing for cover image records
+- **FB2 cover extraction** — XML coverpage + base64 binary element image decode
+- **PluginMarketplaceV2::VerifyHash** — BCrypt SHA-256 file integrity verification
+- **HotModeDirectoryEngine** — Real FindFirstFileExW with FIND_FIRST_EX_LARGE_FETCH
+- **Sprints 349-393:** Critical fixes, library builds, LENSArchive refactor, GUI modernization, GPU shader pipeline, property handlers, stub elimination, performance tuning
+
+### Fixed
+- **Critical: COM CLSID mismatch** — WiX installer registered wrong CLSID `{A8394D0D-...}` instead of canonical `{9E6ECB90-...}` (DLL would not load)
+- **Critical: TROUBLESHOOTING.md** — 6 instances of wrong CLSID corrected
+- **README.md** — Version badge 14→15, sprints 176→393, tests 437→1187
+- **Version chaos** — Bulk update across 17+ docs from v14/v8/v7 era to v15.0.0
+- **VS references** — Updated "Visual Studio 2022" → "Visual Studio 18 2026" across 7 files
+- **Dead code** — Removed obsolete unzip.cpp stub (replaced by minizip-ng)
+
+### Changed
+- **Version:** 14.0.0 "Apex" → 15.0.0 "Zenith"
+- **Sprint count:** 348 → 393
+- **Total unit tests:** 1187+
+- **Codename:** Apex → Zenith
+
+### Removed
+- 6 obsolete documentation files (GPU_PERFORMANCE_REPORT, TEXTURE_POOLING, GPU_ABSTRACTION_LAYER, stale TEST_RESULTS, AI_BUILD_INSTRUCTIONS)
+- CODE_QUALITY_STANDARDS.md (merged into CODING_STANDARDS.md)
+- ENHANCEMENT_PLAN_V15.md (archived to docs/archive/)
+- Dead unzip.cpp stub
+
+---
+
+## [14.0.0] "Apex" - 2026-06 (Sprints 299-348)
+
+### Added
+- **50-sprint block** with 350 new tests across 10 phases:
+  - **Phase 1 (300-304):** GPU Pipeline V3 — DX12 Ultimate mesh shaders, DXR, VRS, SM6.7 DXIL, PSO disk cache, GPU memory pool V2
+  - **Phase 2 (305-309):** Format Intelligence — Smart format detector V2, extended video (HEVC/VP9/AV1/ProRes), audio visualization V2, 3D model renderer V2
+  - **Phase 3 (310-314):** Plugin Ecosystem V2 — Plugin SDK V2 (9 capabilities), debugger integration, hot reload, performance profiler
+  - **Phase 4 (315-319):** Security Hardening V2 — Threat model V2 (STRIDE/CVSS), memory safety (ASan), supply chain integrity (SBOM/CVE), runtime integrity verifier
+  - **Phase 5 (320-324):** UX Polish V2 — Progressive thumbnail loader, animation engine V2, preview panel V2, Quick Look integration
+  - **Phase 6 (325-329):** AI Intelligence V2 — Scene understanding (ML classification), smart crop V2 (saliency map), image quality assessor (BRISQUE/NIQE), AI search (CLIP embeddings)
+  - **Phase 7 (330-334):** Enterprise & Cloud V2 — Enterprise policy engine V2 (GPO/MDM), SharePoint/Teams integration, multi-tenant cache, compliance audit logger (GDPR/HIPAA/SOX)
+  - **Phase 8 (335-339):** Platform Modernization — Windows 12 compatibility, ARM64 performance optimizer (NEON/SVE), WinRT App SDK V2, installer V2 (MSI/MSIX/NSIS), sub-millisecond cache engine
+  - **Phase 9 (340-344):** Performance Excellence — GPU decode acceleration V2 (NVDEC/QuickSync/AMF), parallel I/O pipeline (IOCP scatter-gather), memory footprint optimizer V2 (slab allocator)
+  - **Phase 10 (345-348):** Quality Assurance — Accessibility suite V2 (WCAG 2.1 AA), documentation excellence V2, QA gate V2, Release Gate V32 (23 KPIs)
+- **Engine/AI/** — New module directory for ML-based features
+- **Engine/GPU/** — GPU decode acceleration with vendor routing
+- **Engine/Memory/** — Advanced memory management (compactor, pressure controller, footprint optimizer)
+
+### Changed
+- **Version:** 13.0.0 → 14.0.0 "Apex"
+- **Sprint count:** 298 → 348
+- **Total unit tests:** 937 → 1187
+- **Release gates:** V23-V32 (10 new release gates)
+
+---
+
+## [13.0.0] - 2026-05 (Sprints 285-298)
+
+### Added
+- **Sprint 285-289:** CDR/Visio vector decoder, HDF5/NetCDF scientific data, NIfTI neuroimaging, STEP/IGES CAD formats, HDR display pipeline — 25 tests
+- **Sprint 290-294:** Per-monitor DPI V3, shell overlay icons, cache warming engine, multi-GPU load balancer, Release Gate V21 — 25 tests
+- **Sprint 295-298:** Accessibility pipeline, telemetry analytics, cloud storage integration, Release Gate V22 (v13.0 final) — 20 tests
+
+### Changed
+- **Version:** 12.0.0 → 13.0.0
+- **Sprint count:** 284 → 298
+- **Total unit tests:** 837 → 937
+
+---
+
+## [12.0.0] - 2026-04 (Sprints 265-284)
+
+### Added
+- **Sprint 265-269:** Parallel batch processing, persistent cache/USN journal, Release Gate V18, ARM64 validation V2, MSIX packaging V2 — 25 tests
+- **Sprint 270-274:** Windows 11 24H2 integration, test suite V2, fuzz testing engine, Release Gate V19, Vulkan compute pipeline — 25 tests
+- **Sprint 275-279:** Plugin marketplace V3, AI-assisted thumbnails, spreadsheet preview, USD/USDZ 3D format, auto-update engine — 25 tests
+- **Sprint 280-284:** Release Gate V20 (v12.0), CSV/JSON data preview, Notebook/Jupyter preview, database/SQLite preview, FLIF/BPG legacy format support — 25 tests
+
+### Changed
+- **Version:** 11.0.0 → 12.0.0
+- **Sprint count:** 264 → 284
+- **Total unit tests:** 737 → 837
+
+---
+
+## [11.0.0] - 2026-03 (Sprints 255-264)
+
+### Added
+- **Sprint 255-259:** DPX/Cineon film format, APNG/animated format, text/code preview, DICOM V2 (medical imaging), FITS V2 (astronomy) — 25 tests
+- **Sprint 260-264:** 3MF/USD 3D printing, Release Gate V17, D3D12 pipeline activation, async shell extension V2, SIMD acceleration V2 — 25 tests
+
+### Changed
+- **Version:** 10.6.0 → 11.0.0
+- **Sprint count:** 254 → 264
+- **Total unit tests:** 712 → 737
+
+---
+
+## [10.6.0] - 2026-03 (Sprints 249-254)
+
+### Added
+- **Sprint 249:** Version sync and documentation cleanup — aligned all project files to v10.5.0
+- **Sprint 250:** Format registry refactor — enum class FormatType, FormatRegistry singleton, extension lookup
+- **Sprint 251:** cbxArchive.h split — FormatTypeLookup with 80+ extension mappings
+- **Sprint 252-254:** Shell registration manager, test infrastructure V2, Release Gate V16
+
+### Changed
+- **Version:** 10.5.0 → 10.6.0
+- **Sprint count:** 248 → 254
+- **Total unit tests:** 687 → 712
+
+---
+
 ## [10.5.0] - 2026-02 (Sprints 235-248)
 
 ### Added
@@ -519,6 +640,12 @@ Completed work from:
 - **Testing** for test-related changes
 - **Technical Debt** for code quality improvements
 
+[15.0.0]: https://github.com/yourusername/ExplorerLens/compare/v14.0.0...v15.0.0
+[14.0.0]: https://github.com/yourusername/ExplorerLens/compare/v13.0.0...v14.0.0
+[13.0.0]: https://github.com/yourusername/ExplorerLens/compare/v12.0.0...v13.0.0
+[12.0.0]: https://github.com/yourusername/ExplorerLens/compare/v11.0.0...v12.0.0
+[11.0.0]: https://github.com/yourusername/ExplorerLens/compare/v10.6.0...v11.0.0
+[10.6.0]: https://github.com/yourusername/ExplorerLens/compare/v10.5.0...v10.6.0
 [6.0.0]: https://github.com/yourusername/ExplorerLens/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/yourusername/ExplorerLens/compare/v5.3.0...v5.4.0
 [5.3.0]: https://github.com/yourusername/ExplorerLens/releases/tag/v5.3.0
