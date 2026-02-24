@@ -1,0 +1,256 @@
+# ci-matrix.yml — Enhanced CI Pipeline with Full Build Matrix
+# ExplorerLens v15.0.0 "Zenith" — Sprint 379
+# Builds x64 Debug/Release + ARM64 cross-compile, runs tests, coverage, static analysis
+
+name: CI Matrix Build
+
+on:
+  push:
+    branches: [main, develop, release/**]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_coverage:
+        description: "Run code coverage"
+        type: boolean
+        default: false
+      run_static_analysis:
+        description: "Run clang-tidy"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CMAKE_PRESET_RELEASE: default-release
+  CMAKE_PRESET_DEBUG: default-debug
+  SOLUTION_FILE: LENSShell.sln
+
+jobs:
+  # ============================================================================
+  # Job 1: Engine build + test matrix
+  # ============================================================================
+  engine:
+    name: Engine (${{ matrix.config }})
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [Release, Debug]
+        include:
+          - config: Release
+            preset: default-release
+            build_preset: default-release
+          - config: Debug
+            preset: default-debug
+            build_preset: default-debug
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: "14.40"
+          arch: x64
+
+      - name: Install Ninja
+        run: choco install ninja -y
+
+      - name: Configure Engine
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build Engine
+        run: cmake --build --preset ${{ matrix.build_preset }} -j ${{ runner.os == 'Windows' && '4' || '2' }}
+
+      - name: Run Tests
+        if: matrix.config == 'Release'
+        run: ctest --test-dir build -C Release --output-on-failure --timeout 120
+
+      - name: Upload Engine Artifact
+        if: matrix.config == 'Release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine-lib-${{ matrix.config }}
+          path: |
+            build/lib/*.lib
+            build/bin/*.exe
+          retention-days: 7
+
+  # ============================================================================
+  # Job 2: Shell DLL + Manager MSBuild
+  # ============================================================================
+  shell:
+    name: Shell + Manager (x64 Release)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    needs: engine
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: "14.40"
+          arch: x64
+
+      - name: Download Engine Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: engine-lib-Release
+          path: build/
+
+      - name: Build Shell DLL
+        run: msbuild ${{ env.SOLUTION_FILE }} /p:Configuration=Release /p:Platform=x64 /m /v:minimal /warnaserror
+
+      - name: Verify DLL Size
+        shell: pwsh
+        run: |
+          $dll = Get-Item "x64/Release/LENSShell.dll" -ErrorAction SilentlyContinue
+          if ($dll) {
+            $sizeKB = [math]::Round($dll.Length / 1KB)
+            Write-Host "LENSShell.dll: ${sizeKB} KB" -ForegroundColor Cyan
+            if ($sizeKB -gt 5000) {
+              Write-Warning "DLL size exceeds 5MB budget: ${sizeKB} KB"
+            }
+          }
+
+      - name: Upload Shell DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: shell-dll
+          path: |
+            x64/Release/LENSShell.dll
+            x64/Release/LENSManager.exe
+          retention-days: 14
+
+  # ============================================================================
+  # Job 3: ARM64 Cross-Compile (Engine only)
+  # ============================================================================
+  arm64:
+    name: ARM64 Cross-Compile
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSVC ARM64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: "14.40"
+          arch: amd64_arm64
+
+      - name: Install Ninja
+        run: choco install ninja -y
+
+      - name: Configure ARM64
+        run: >
+          cmake -G Ninja -B build-arm64
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-windows-arm64.cmake
+          -DCMAKE_SYSTEM_PROCESSOR=ARM64
+
+      - name: Build ARM64
+        run: cmake --build build-arm64 -j 4 --target ExplorerLensEngine
+
+  # ============================================================================
+  # Job 4: Code Coverage (optional)
+  # ============================================================================
+  coverage:
+    name: Code Coverage
+    runs-on: windows-latest
+    timeout-minutes: 45
+    if: github.event.inputs.run_coverage == 'true' || github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: "14.40"
+          arch: x64
+
+      - name: Install Tools
+        run: |
+          choco install ninja opencppcoverage -y
+
+      - name: Build with Debug Info
+        run: |
+          cmake --preset default-debug
+          cmake --build --preset default-debug -j 4
+
+      - name: Run Coverage
+        shell: pwsh
+        run: |
+          $testExe = "build/bin/EngineTests.exe"
+          if (Test-Path $testExe) {
+            OpenCppCoverage --sources "Engine\*" --excluded_sources "external\*" --excluded_sources "gtest\*" `
+              --export_type=cobertura:coverage.xml -- $testExe
+          }
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ============================================================================
+  # Job 5: Static Analysis Gate (optional)
+  # ============================================================================
+  static-analysis:
+    name: Static Analysis
+    runs-on: windows-latest
+    timeout-minutes: 30
+    if: github.event.inputs.run_static_analysis == 'true' || github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: "14.40"
+          arch: x64
+
+      - name: Install Tools
+        run: choco install ninja llvm -y
+
+      - name: Configure
+        run: cmake --preset default-release
+
+      - name: Run clang-tidy
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Path "Engine" -Filter "*.cpp" -Recurse |
+            Where-Object { $_.FullName -notmatch "external|gtest|Tests" } |
+            Select-Object -First 50
+
+          $errors = 0
+          foreach ($f in $files) {
+            $result = clang-tidy $f.FullName -p build --warnings-as-errors="*" 2>&1
+            if ($LASTEXITCODE -ne 0) { $errors++ }
+          }
+
+          if ($errors -gt 0) {
+            Write-Error "$errors files have clang-tidy warnings"
+            exit 1
+          }

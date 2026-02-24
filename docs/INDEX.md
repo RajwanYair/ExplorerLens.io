@@ -1,9 +1,9 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens  
-**Current Version:** v14.0.0 "Apex"  
+**Current Version:** v15.0.0 "Zenith"  
 **Planning Authority:** [MASTER_PLAN.md](../MASTER_PLAN.md)  
-**Sprints Completed:** 348  
+**Sprints Completed:** 393  
 **Last Updated:** July 2025
 
 ---
@@ -18,6 +18,7 @@
 | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) | Current known issues and mitigations |
 | [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
 | [ENHANCEMENT_PLAN_V15.md](ENHANCEMENT_PLAN_V15.md) | v15.0 development roadmap (45 sprints) |
+| [WINUI3_MIGRATION_PLAN.md](WINUI3_MIGRATION_PLAN.md) | WinUI 3 / XAML Islands migration plan |
 
 ## Development
 

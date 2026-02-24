@@ -258,28 +258,29 @@ void PluginHostServer::HandleRequestThumbnail(uint64_t correlation_id,
         decode_req.target_width = request->targetWidth;
         decode_req.target_height = request->targetHeight;
         
-        DecodeResult decode_result = plugin_->Decode(decode_req);
+        DecodeResult decode_result{};
+        PluginErrorCode err = plugin_->Decode(&decode_req, &decode_result);
         
-        if (decode_result.resultCode == PluginErrorCode::PLUGIN_SUCCESS && decode_result.bitmap) {
-            // Success - prepare bitmap data for IPC
+        if (err == PluginErrorCode::PLUGIN_SUCCESS && decode_result.pixels) {
+            // Success - prepare pixel data for IPC
             response.resultCode = static_cast<uint32_t>(IPC::IPCErrorCode::SUCCESS);
             response.width = decode_result.width;
             response.height = decode_result.height;
             response.pixelFormat = 0;  // BGRA32
-            response.stride = decode_result.width * 4;
+            response.stride = decode_result.stride;
             
-            // Get bitmap data from HBITMAP
-            BITMAP bmp;
-            GetObject(decode_result.bitmap, sizeof(BITMAP), &bmp);
-            size_t data_size = bmp.bmWidthBytes * bmp.bmHeight;
-            bitmap_data.resize(data_size);
-            GetBitmapBits(decode_result.bitmap, static_cast<LONG>(data_size), bitmap_data.data());
+            // Copy pixel buffer directly
+            size_t data_size = static_cast<size_t>(decode_result.stride) * decode_result.height;
+            if (decode_result.buffer_size > 0 && decode_result.buffer_size < data_size) {
+                data_size = decode_result.buffer_size;
+            }
+            bitmap_data.assign(decode_result.pixels, decode_result.pixels + data_size);
             
             response.bitmapDataSize = static_cast<uint32_t>(bitmap_data.size());
             response.useSharedMemory = 0;  // Use inline for now (TODO: implement shared memory for large bitmaps)
             
             // Clean up plugin result
-            DeleteObject(decode_result.bitmap);
+            plugin_->FreeResult(&decode_result);
         } else {
             // Decode failed
             response.resultCode = static_cast<uint32_t>(IPC::IPCErrorCode::PLUGIN_DECODE_FAILED);
@@ -302,7 +303,7 @@ void PluginHostServer::HandleRequestThumbnail(uint64_t correlation_id,
     }
     
     // Write message
-    if (!WriteMessage(header, full_payload.data(), full_payload.size())) {
+    if (!WriteMessage(header, full_payload.data(), static_cast<uint32_t>(full_payload.size()))) {
         std::wcerr << L"Failed to send thumbnail response\n";
     }
 }
@@ -353,22 +354,28 @@ void PluginHostServer::HandleGetPluginInfo(uint64_t correlation_id) {
     
     IPC::PluginInfoResponse response;
     response.apiVersion = info->api_version;
-    strncpy_s(response.pluginId, info->plugin_id, sizeof(response.pluginId) - 1);
-    strncpy_s(response.pluginName, info->name, sizeof(response.pluginName) - 1);
-    strncpy_s(response.pluginVersion, info->version, sizeof(response.pluginVersion) - 1);
-    strncpy_s(response.vendor, info->vendor, sizeof(response.vendor) - 1);
+    strncpy_s(response.pluginId, info->plugin_name, sizeof(response.pluginId) - 1);
+    strncpy_s(response.pluginName, info->plugin_name, sizeof(response.pluginName) - 1);
+    strncpy_s(response.pluginVersion, info->plugin_version, sizeof(response.pluginVersion) - 1);
+    strncpy_s(response.vendor, info->plugin_author, sizeof(response.vendor) - 1);
     response.capabilities = info->capabilities;
-    response.extensionCount = info->extension_count;
+    
+    // Count extensions from null-terminated array
+    uint32_t extCount = 0;
+    if (info->supported_extensions) {
+        while (info->supported_extensions[extCount] != nullptr && extCount < 32) ++extCount;
+    }
+    response.extensionCount = extCount;
     
     // Build full payload with extensions
     std::vector<uint8_t> payload;
-    payload.resize(sizeof(response) + info->extension_count * 16);
+    payload.resize(sizeof(response) + extCount * 16);
     memcpy(payload.data(), &response, sizeof(response));
     
     // Copy extensions
     char* ext_ptr = reinterpret_cast<char*>(payload.data() + sizeof(response));
-    for (uint32_t i = 0; i < info->extension_count && i < 32; ++i) {
-        strncpy_s(ext_ptr + i * 16, 16, info->extensions[i], 15);
+    for (uint32_t i = 0; i < extCount; ++i) {
+        strncpy_s(ext_ptr + i * 16, 16, info->supported_extensions[i], 15);
     }
     
     IPC::MessageHeader header;
@@ -440,9 +447,8 @@ bool PluginHostServer::LoadPlugin() {
         
         const auto* info = plugin_->GetInfo();
         if (info) {
-            std::wcout << L"Plugin loaded: " << info->name << L" v" << info->version << L"\n";
-            std::wcout << L"  ID: " << info->plugin_id << L"\n";
-            std::wcout << L"  Vendor: " << info->vendor << L"\n";
+            std::wcout << L"Plugin loaded: " << info->plugin_name << L" v" << info->plugin_version << L"\n";
+            std::wcout << L"  Author: " << info->plugin_author << L"\n";
         }
         
         return true;

@@ -5,8 +5,10 @@
 #include "LENSShell.h" // MIDL generated - defines CLSID_LENSShell, ILENSShell, etc.
 #include "resource.h" // main symbols
 
-#include "LENSArchive.h"
 #include "EngineAdapter.h"
+#include "LENSArchive.h"
+#include "PropertyStoreImpl.h"
+#include <propsys.h>    // IPropertyStore, IPropertyStoreCapabilities
 #include <thumbcache.h> // IThumbnailProvider
 
 /////////////////////////////////////////////////////////////////////////////
@@ -20,7 +22,9 @@ class ATL_NO_VTABLE CLENSShell
       public IExtractImage2,
       public IThumbnailProvider,
       public IInitializeWithStream,
-      public IQueryInfo {
+      public IQueryInfo,
+      public IPropertyStore,
+      public IPropertyStoreCapabilities {
 public:
   HRESULT FinalConstruct(void);
   void FinalRelease(void);
@@ -36,6 +40,9 @@ public:
   COM_INTERFACE_ENTRY(IExtractImage)
   COM_INTERFACE_ENTRY(IExtractImage2)
   COM_INTERFACE_ENTRY(IDispatch)
+  // Property store for Explorer Details Pane (v15.0.0)
+  COM_INTERFACE_ENTRY(IPropertyStore)
+  COM_INTERFACE_ENTRY(IPropertyStoreCapabilities)
   END_COM_MAP()
 
   DECLARE_REGISTRY_RESOURCEID(IDR_LENSShell)
@@ -81,17 +88,30 @@ public:
   // IInitializeWithStream - Modern stream-based initialization
   STDMETHOD(Initialize)(IStream *pstream, DWORD grfMode);
 
+  // IPropertyStore - Explorer Details Pane metadata (v15.0.0)
+  STDMETHOD(GetCount)(DWORD *cProps);
+  STDMETHOD(GetAt)(DWORD iProp, PROPERTYKEY *pkey);
+  STDMETHOD(GetValue)(REFPROPERTYKEY key, PROPVARIANT *pv);
+  STDMETHOD(SetValue)(REFPROPERTYKEY key, REFPROPVARIANT propvar);
+  STDMETHOD(Commit)();
+
+  // IPropertyStoreCapabilities
+  STDMETHOD(IsPropertyWritable)(REFPROPERTYKEY key);
+
 private:
   // Internal thumbnail generation (Sprint 22: SEH-safe implementation)
-  HRESULT GetThumbnail_Internal(UINT cx, HBITMAP *phBmpThumbnail, WTS_ALPHATYPE *pdwAlpha);
-  
+  HRESULT GetThumbnail_Internal(UINT cx, HBITMAP *phBmpThumbnail,
+                                WTS_ALPHATYPE *pdwAlpha);
+
   __LENS::CLENSArchive m_LENS;
   CComPtr<IStream> m_spStream; // For IInitializeWithStream
-  
+
+  // Property store (v15.0.0)
+  ExplorerLens::CLENSPropertyStore m_propertyStore;
+
   // Engine integration (v5.3.0)
   std::unique_ptr<ExplorerLens::EngineAdapter> m_engineAdapter;
   bool m_useEngine; // Toggle between Engine and legacy implementation
 };
 
 #endif //_LENSShellCLASS_541926D5_D807_4CCB_9F35_8464657CC196_
-

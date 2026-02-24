@@ -1,7 +1,7 @@
 #Requires -Version 7.0
-# ExplorerLens v7.0 - Build libwebp 1.5.0 using native Makefile.vc
+# ExplorerLens v15.0 "Zenith" — Build libwebp 1.5.0 using native Makefile.vc
+# Sprint 351: Ensures /MD (dynamic CRT) to eliminate NODEFAULTLIB:LIBCMT workaround
 # Refactored to use Build-Library-Core.ps1 module
-# Date: February 18, 2026
 #
 # Directory structure (post-cleanup):
 #   Project root:       <repo>\
@@ -59,16 +59,17 @@ try {
         }
         $cmakeBuildDir = Join-Path $webpDir "build-cmake"
         $cmakeOptions = @{
-            'BUILD_SHARED_LIBS'     = 'OFF'
-            'WEBP_BUILD_CWEBP'      = 'OFF'
-            'WEBP_BUILD_DWEBP'      = 'OFF'
-            'WEBP_BUILD_GIF2WEBP'   = 'OFF'
-            'WEBP_BUILD_IMG2WEBP'   = 'OFF'
-            'WEBP_BUILD_VWEBP'      = 'OFF'
-            'WEBP_BUILD_WEBPINFO'   = 'OFF'
-            'WEBP_BUILD_WEBPMUX'    = 'OFF'
-            'WEBP_BUILD_EXTRAS'     = 'ON'
-            'WEBP_BUILD_ANIM_UTILS' = 'ON'
+            'BUILD_SHARED_LIBS'          = 'OFF'
+            'CMAKE_MSVC_RUNTIME_LIBRARY' = 'MultiThreadedDLL'
+            'WEBP_BUILD_CWEBP'           = 'OFF'
+            'WEBP_BUILD_DWEBP'           = 'OFF'
+            'WEBP_BUILD_GIF2WEBP'        = 'OFF'
+            'WEBP_BUILD_IMG2WEBP'        = 'OFF'
+            'WEBP_BUILD_VWEBP'           = 'OFF'
+            'WEBP_BUILD_WEBPINFO'        = 'OFF'
+            'WEBP_BUILD_WEBPMUX'         = 'OFF'
+            'WEBP_BUILD_EXTRAS'          = 'ON'
+            'WEBP_BUILD_ANIM_UTILS'      = 'ON'
         }
 
         Invoke-CMakeBuild `

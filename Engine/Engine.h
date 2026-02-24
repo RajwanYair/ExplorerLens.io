@@ -24,7 +24,7 @@ namespace Engine {
 
 // Define version macros if not already defined by CMake
 #ifndef EXPLORERLENS_ENGINE_VERSION_MAJOR
-#define EXPLORERLENS_ENGINE_VERSION_MAJOR 14
+#define EXPLORERLENS_ENGINE_VERSION_MAJOR 15
 #endif
 
 #ifndef EXPLORERLENS_ENGINE_VERSION_MINOR

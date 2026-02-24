@@ -4,7 +4,7 @@
   Sprint 23: Packaging & Deployment
   
   Build Instructions:
-    wix build ExplorerLens.wxs -out ExplorerLens-Setup-7.0.0.msi
+    wix build ExplorerLens.wxs -out ExplorerLens-Setup-15.0.0.msi
   
   Prerequisites:
     - WiX Toolset v6.0+
@@ -16,7 +16,7 @@
   <!-- Package Information (WiX v6 syntax) -->
   <Package Name="ExplorerLens"
            Language="1033"
-           Version="7.0.0.0"
+           Version="15.0.0.0"
            Manufacturer="ExplorerLens Project"
            UpgradeCode="A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078"
            InstallerVersion="500"
@@ -241,4 +241,3 @@
   </Fragment>
   
 </Wix>
-

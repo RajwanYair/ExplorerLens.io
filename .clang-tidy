@@ -1,5 +1,6 @@
 ---
-# ExplorerLens.io v14.0.0 - Clang-Tidy Configuration
+# ExplorerLens.io v15.0.0 "Zenith" - Clang-Tidy Configuration
+# Updated Sprint 384: Added concurrency checks, stricter warnings-as-errors
 
 Checks: >
   -*,
@@ -30,9 +31,11 @@ Checks: >
   -readability-uppercase-literal-suffix,
   misc-*,
   -misc-non-private-member-variables-in-classes,
-  -misc-no-recursion
+  -misc-no-recursion,
+  concurrency-*,
+  -concurrency-mt-unsafe
 
-WarningsAsErrors: ""
+WarningsAsErrors: "bugprone-use-after-move,bugprone-dangling-handle,cert-err34-c"
 
 HeaderFilterRegex: '(Engine|LENSShell|LENSManager)/.*\.h$'
 

@@ -203,6 +203,8 @@ if exist "..\external\image-libs\libde265-1.0.15\build-vs\libde265\Release\libde
     <ClCompile Include="gpu_accelerator.cpp" />
     <!-- Engine Integration (v5.3.0) -->
     <ClCompile Include="EngineAdapter.cpp" />
+    <!-- Property Store for Explorer Details Pane (v15.0.0) -->
+    <ClCompile Include="PropertyStoreImpl.cpp" />
     <!-- External Library Wrappers (v5.2+) -->
     <!-- libarchive_wrapper.cpp - Planned for future when libarchive is built -->
     <!-- <ClCompile Include="libarchive_wrapper.cpp" /> -->
@@ -236,6 +238,9 @@ if exist "..\external\image-libs\libde265-1.0.15\build-vs\libde265\Release\libde
     <ClInclude Include="gpu_accelerator.h" />
     <!-- Engine Integration (v5.3.0) -->
     <ClInclude Include="EngineAdapter.h" />
+    <!-- Property Store for Explorer Details Pane (v15.0.0) -->
+    <ClInclude Include="PropertyStoreImpl.h" />
+    <ClInclude Include="LENSTypes.h" />
     <!-- External Library Wrappers (v5.2+) -->
     <ClInclude Include="libarchive_wrapper.h" />
     <!-- Phase 10 Infrastructure (Code Quality & Performance) -->

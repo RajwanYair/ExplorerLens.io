@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 14.0.0
+# Version: 15.0.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 14.0.0
+    VERSION 15.0.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -110,6 +110,23 @@ else()
     set(HAS_MUPDF OFF CACHE BOOL "PDF support — MuPDF not built (see docs/build/BUILD_GUIDE.md)" FORCE)
 endif()
 
+# --- OpenJPEG (Sprint 365) ---
+set(OPENJPEG_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/openjp2.lib")
+set(OPENJPEG_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/openjpeg-install")
+if(EXISTS "${OPENJPEG_LIB_PATH}")
+    set(HAS_OPENJPEG ON CACHE BOOL "JPEG 2000 support auto-detected" FORCE)
+else()
+    set(HAS_OPENJPEG OFF CACHE BOOL "JPEG 2000 support — OpenJPEG not built (run Build-OpenJPEG.ps1)" FORCE)
+endif()
+
+# --- FreeType (Sprint 366) ---
+set(FREETYPE_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/freetype.lib")
+if(EXISTS "${FREETYPE_LIB_PATH}")
+    set(HAS_FREETYPE ON CACHE BOOL "Enhanced font rendering auto-detected" FORCE)
+else()
+    set(HAS_FREETYPE OFF CACHE BOOL "Enhanced font — FreeType not built (run Build-FreeType.ps1)" FORCE)
+endif()
+
 #==============================================================================
 # Compiler Settings
 #==============================================================================
@@ -200,6 +217,7 @@ set(ENGINE_HEADERS
     Core/TelemetryDashboard.h
     Core/TelemetryEngine.h
     Core/ThemeEngine.h
+    Core/PerformanceActivation.h
     Core/ThumbnailAnimationEngineV2.h
     Core/Types.h
     Core/UpdateEngine.h
@@ -357,6 +375,7 @@ set(ENGINE_HEADERS
 
     # Memory management
     Memory/ArchiveMemoryCompactor.h
+    Memory/BitmapPool.h
     Memory/BufferPoolAllocator.h
     Memory/DecoderHotsetManager.h
     Memory/DirectoryFormatProfiler.h
@@ -587,6 +606,9 @@ set(ENGINE_SOURCES
     Utils/PortableModeManager.cpp
     Utils/PythonSDK.cpp
 
+    # Memory implementations
+    Memory/BitmapPool.cpp
+
     Utils/SIMDScaler.cpp
     Utils/TestSuiteExpansion.cpp
     Utils/UsageTelemetryEngine.cpp
@@ -673,6 +695,20 @@ if(ENGINE_SOURCES)
             message(STATUS "PDF support (MuPDF): ENABLED")
         else()
             message(STATUS "PDF support (MuPDF): DISABLED (set -DHAS_MUPDF=ON when MuPDF is available)")
+        endif()
+
+        if(HAS_OPENJPEG)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_OPENJPEG)
+            message(STATUS "JPEG 2000 support (OpenJPEG): ENABLED")
+        else()
+            message(STATUS "JPEG 2000 support (OpenJPEG): DISABLED (run Build-OpenJPEG.ps1)")
+        endif()
+
+        if(HAS_FREETYPE)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_FREETYPE)
+            message(STATUS "Enhanced font rendering (FreeType): ENABLED")
+        else()
+            message(STATUS "Enhanced font rendering (FreeType): DISABLED (run Build-FreeType.ps1)")
         endif()
 
         if(ENABLE_VIDEO_DECODER)
@@ -763,6 +799,12 @@ if(ENGINE_SOURCES)
                 message(WARNING "HAS_MUPDF=ON but libmupdf.lib not found at ${MUPDF_LIB_PATH}. PDF support will link but may fail.")
             endif()
         endif()
+        if(HAS_OPENJPEG)
+            target_link_libraries(ExplorerLensEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/openjp2.lib")
+        endif()
+        if(HAS_FREETYPE)
+            target_link_libraries(ExplorerLensEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/freetype.lib")
+        endif()
     endif()
     
     # Compiler warnings & flags (MSVC v145 preferred)
@@ -773,9 +815,8 @@ if(ENGINE_SOURCES)
             /permissive-  # Standards conformance
             /arch:AVX2    # Enable AVX2 instructions for SIMD operations
         )
-        # MSVC linker flags — only valid with link.exe, not lld-link
+        # MSVC linker flags
         target_link_options(ExplorerLensEngine PRIVATE
-            /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts (libwebp uses /MT)
             /IGNORE:4099            # Ignore missing PDB warnings for external libs
         )
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -784,7 +825,6 @@ if(ENGINE_SOURCES)
         )
         # clang + lld-link: use linker-passthrough for MSVC-style flags
         target_link_options(ExplorerLensEngine PRIVATE
-            "LINKER:/NODEFAULTLIB:LIBCMT"
             "LINKER:/IGNORE:4099"
         )
     endif()
@@ -810,8 +850,8 @@ endif()
 # PluginHost Executable
 #==============================================================================
 
-# API mismatches are tracked and resolved in the active release pipeline
-# add_subdirectory(PluginHost)
+# Enabled in v15.0.0 "Zenith" (Sprint 362)
+add_subdirectory(PluginHost)
 
 #==============================================================================
 # Installation

@@ -1,6 +1,6 @@
 # ExplorerLens Engine
 
-**Version:** 14.0.0
+**Version:** 15.0.0
 **Created:** January 7, 2026
 **Status:** Active Development (v14.0 "Apex" Complete)
 

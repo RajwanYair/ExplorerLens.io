@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 14.0.0 (Codename: Apex)
+- **Version:** 15.0.0 (Codename: Zenith)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -233,10 +233,10 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - Always verify new Windows SDK includes compile under `WIN32_LEAN_AND_MEAN`
 - See `.github/standards/BUILD_TROUBLESHOOTING.md` for the full compatibility list
 
-## Sprint Execution Guidance (v14.0+)
+## Sprint Execution Guidance (v15.0+)
 
-- **Current version:** v14.0.0 "Apex" (Sprints 299-348 complete)
-- **Next roadmap block:** Sprints 349+ (next improvement plan TBD)
+- **Current version:** v15.0.0 "Zenith" (Sprints 299-393 complete)
+- **Next roadmap block:** Sprints 394+ (next improvement plan TBD)
 - **Source of truth:** `MASTER_PLAN.md`
 - **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
 - **Sprint deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
