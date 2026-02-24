@@ -6,10 +6,10 @@ We provide security updates for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 7.1.x   | :white_check_mark: Current |
-| 7.0.x   | :white_check_mark: |
-| 6.x.x   | :white_check_mark: Security fixes only |
-| < 6.0   | :x:                |
+| 14.0.x  | :white_check_mark: Current |
+| 13.x.x  | :white_check_mark: |
+| 12.x.x  | :white_check_mark: Security fixes only |
+| < 12.0  | :x:                |
 
 ## Reporting a Vulnerability
 

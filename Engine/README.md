@@ -119,12 +119,49 @@ HRESULT hr = decoder->Decode(request, result);
 
 if (SUCCEEDED(hr)) {
     // Use result.hBitmap
-    // ...
-  
-    // Cleanup
     DeleteObject(result.hBitmap);
 }
 ```
+
+---
+
+## Internal Architecture
+
+### ThumbnailPipeline (Main Entry Point)
+
+Orchestrates the full thumbnail generation process. Thread-safe for `GenerateThumbnail()` calls.
+
+**Performance Baseline:**
+- First call: ~50–100ms (cold cache, decoder init)
+- Cache hit: <1ms (sub-millisecond cache engine)
+- Average (warm): ~17ms per thumbnail
+- Batch throughput: ~235 img/sec
+
+### Decoder System
+
+Plugin-based architecture with `IThumbnailDecoder` interface. 25 built-in decoders covering 200+ formats. Decoders are tried in registration order; first `CanDecode() = true` match handles the file.
+
+### Cache System
+
+Disk-backed LRU cache with adaptive budget control. Cache keys derived from `MD5(filepath + filesize + mtime + width + height)`. Sub-millisecond cache engine uses robin-hood open-addressing with XXH3 hashing.
+
+### SIMD Optimization
+
+Runtime CPU feature detection for AVX2 (~3–4x), SSE4.1 (~2–3x), or scalar fallback. Used for color conversion (RGBA ↔ BGRA), image scaling, and RAW demosaicing.
+
+### GPU Acceleration
+
+DirectX 11/12 compute shaders for image scaling >4K, batch requests, and HEIF/AVIF decode via WIC GPU path. Falls back to CPU automatically on GPU init failure. Requires DirectX 11.0+, WDDM 2.0+ driver, 256MB VRAM minimum.
+
+### Format Detection
+
+Three-stage detection: extension check (fast path) → magic bytes (first 16 bytes) → full decoder scan (last resort).
+
+### Threading Model
+
+- **Thread-safe:** `GenerateThumbnail()`, cache operations, most decoders (stateless)
+- **Main thread only:** `Initialize()`, `Shutdown()`, decoder registration
+- **Special:** RAWDecoder requires serialization (LibRaw global state)
 
 ---
 
@@ -132,63 +169,30 @@ if (SUCCEEDED(hr)) {
 
 ### Requirements
 
-- Visual Studio 2026 or later
-- CMake 3.20+
-- Windows SDK 10.0.26200 or later
+- Visual Studio 18 2026 BuildTools (MSVC v145 toolset)
+- CMake 3.25+
+- Windows SDK 10.0.26100.0
 
 ### Build Commands
 
 ```powershell
-# Configure
-cmake -B build -G "Visual Studio 17 2026" -A x64
+# Recommended (handles vcvars automatically)
+.\build-scripts\Build-MSVC.ps1
 
-# Build
-cmake --build build --config Release
-
-# Test
-cd build/Release
-.\EngineTests.exe
+# Manual (requires vcvars64 sourced first)
+cmake --preset default-release
+cmake --build --preset default-release -j 8
 ```
 
 ---
 
 ## Testing
 
-The Engine includes comprehensive unit tests:
+~1,187 unit tests + 5 benchmark suites. 100% pass rate.
 
-- **Format Detection Tests** (15 tests): Extension detection, file signatures
-- **Decoder Tests** (20 tests): Image decoding, archive extraction, error handling
-- **Pipeline Tests** (15 tests): End-to-end thumbnail generation, performance
-
-**Target:** 50+ tests, 100% pass rate
-
----
-
-## Status
-
-### ✅ Completed (Week 1, Days 1-5)
-
-- [X] Directory structure created
-- [X] Core interfaces defined (IThumbnailDecoder, IFormatDetector, IGPURenderer, ICacheProvider)
-- [X] Common types defined (ThumbnailRequest, ThumbnailResult, FormatType)
-- [X] Public API header (Engine.h)
-- [X] DecoderRegistry implemented (136 lines)
-- [X] FormatDetector implemented (224 lines)
-- [X] Unit tests created (14+ tests)
-- [X] CMake build system configured
-
-### 🔄 In Progress (Week 2)
-
-- [ ] Decoder implementations (ImageDecoder, WebPDecoder, AVIFDecoder, ArchiveDecoder)
-- [ ] Unit test execution and verification
-
-### ⏳ Planned (Weeks 3-4)
-
-- [ ] GPU renderer extraction (D3D11Renderer)
-- [ ] CPU fallback renderer
-- [ ] Thumbnail pipeline
-- [ ] LENSShell integration
-- [ ] Comprehensive unit tests (50+ tests target)
+```powershell
+ctest --test-dir build -C Release --output-on-failure
+```
 
 ---
 
@@ -205,13 +209,11 @@ The Engine includes comprehensive unit tests:
 
 ## References
 
-- [MASTER_PLAN.md](../MASTER_PLAN.md) - Overall project status and roadmap
-- [docs/formats/DECODER_AUDIT_REPORT.md](../docs/formats/DECODER_AUDIT_REPORT.md) - Decoder implementation audit
-- [docs/architecture/INTEGRATION_ARCHITECTURE.md](../docs/architecture/INTEGRATION_ARCHITECTURE.md) - Integration architecture
+- [docs/formats/FORMAT_SUPPORT_MATRIX.md](../docs/formats/FORMAT_SUPPORT_MATRIX.md) — Format support and decoder compliance
+- [docs/architecture/INTEGRATION_ARCHITECTURE.md](../docs/architecture/INTEGRATION_ARCHITECTURE.md) — Integration architecture
+- [docs/ENHANCEMENT_PLAN_V15.md](../docs/ENHANCEMENT_PLAN_V15.md) — Next iteration roadmap
 
 ---
 
-**Engine Development Lead:** ExplorerLens Team
 **Created:** January 7, 2026
-**Target Completion:** February 2026 (Sprint 11)
 

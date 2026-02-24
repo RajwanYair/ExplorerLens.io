@@ -6,14 +6,14 @@
 
 #pragma once
 
-#include <windows.h>  // For wchar_t and __DATE__/__TIME__ macros
+#include <windows.h> // For wchar_t and __DATE__/__TIME__ macros
 
 // Core types and interfaces
-#include "Core/Types.h"
-#include "Core/IThumbnailDecoder.h"
+#include "Core/ICacheProvider.h"
 #include "Core/IFormatDetector.h"
 #include "Core/IGPURenderer.h"
-#include "Core/ICacheProvider.h"
+#include "Core/IThumbnailDecoder.h"
+#include "Core/Types.h"
 
 namespace ExplorerLens {
 namespace Engine {
@@ -36,10 +36,10 @@ namespace Engine {
 #endif
 
 #ifndef EXPLORERLENS_ENGINE_VERSION
-#define EXPLORERLENS_ENGINE_VERSION \
-    ((EXPLORERLENS_ENGINE_VERSION_MAJOR << 16) | \
-     (EXPLORERLENS_ENGINE_VERSION_MINOR << 8) | \
-     EXPLORERLENS_ENGINE_VERSION_PATCH)
+#define EXPLORERLENS_ENGINE_VERSION                                            \
+  ((EXPLORERLENS_ENGINE_VERSION_MAJOR << 16) |                                 \
+   (EXPLORERLENS_ENGINE_VERSION_MINOR << 8) |                                  \
+   EXPLORERLENS_ENGINE_VERSION_PATCH)
 #endif
 
 // Function declarations (implemented in EngineAPI.cpp)
@@ -50,13 +50,13 @@ namespace Engine {
 //==============================================================================
 
 /// Get engine name
-inline const wchar_t* GetEngineName() {
-    return L"ExplorerLens Thumbnail Engine";
+inline const wchar_t *GetEngineName() {
+  return L"ExplorerLens Thumbnail Engine";
 }
 
 /// Get engine copyright
-inline const wchar_t* GetEngineCopyright() {
-    return L"Copyright (c) 2026 - ExplorerLens Project";
+inline const wchar_t *GetEngineCopyright() {
+  return L"Copyright (c) 2026 - ExplorerLens Project";
 }
 
 } // namespace Engine
@@ -87,5 +87,3 @@ inline const wchar_t* GetEngineCopyright() {
 // }
 //
 //==============================================================================
-
-

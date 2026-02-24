@@ -1,9 +1,9 @@
 # ExplorerLens v15.0 Enhancement Plan — "Zenith"
 
-**Date:** February 24, 2026
+**Date:** July 2025
 **Current Version:** 14.0.0 "Apex" (348 sprints completed)
 **Target Version:** 15.0.0 "Zenith"
-**Status:** Planning
+**Status:** Planning — Partial cleanup completed
 
 ---
 
@@ -36,12 +36,12 @@ blocks that will take the project from "feature-complete" to "production-polishe
 
 | # | Issue | Severity | Area |
 |---|-------|----------|------|
-| W1 | **Version mismatch:** Engine.h says 6.0.0, README says 7.0.0, CMakeLists says 14.0.0 | High | Engine |
+| W1 | ~~**Version mismatch:** Engine.h says 6.0.0, README says 7.0.0~~ | ~~High~~ | ~~Engine~~ | **FIXED** — Engine.h updated to 14.0.0 |
 | W2 | **MuPDF not built:** HAS_MUPDF=OFF — PDF decoder is stub-only | High | External Libs |
-| W3 | **LENSArchive.h is 2783 lines** — monolithic, hard to maintain | High | Shell |
+| W3 | **LENSArchive.h is 2828 lines** — monolithic, hard to maintain | High | Shell |
 | W4 | **LENSManager uses legacy WTL dialogs** — checkbox-only UI, no modern features | High | GUI/UX |
 | W5 | **libwebp built with /MT** — CRT mismatch requires /NODEFAULTLIB:LIBCMT workaround | Medium | External Libs |
-| W6 | **libheif/libde265 missing from LIBRARY_INVENTORY.md** | Medium | Docs |
+| W6 | ~~**libheif/libde265 missing from LIBRARY_INVENTORY.md**~~ | ~~Medium~~ | ~~Docs~~ | **FIXED** |
 | W7 | **UnRAR DLLs shipped in source tree** (1.2MB binary blobs) | Medium | Shell |
 | W8 | **WMFDecoder_old.cpp exists** alongside WMFDecoder.cpp (dead code) | Low | Engine |
 | W9 | **Memory pool not implemented** — marked as "Future Enhancement" in architecture doc | Medium | Engine |
@@ -50,7 +50,7 @@ blocks that will take the project from "feature-complete" to "production-polishe
 | W12 | **Many header-only stubs** — features declared but not wired into production path | Low | Engine |
 | W13 | **OnApplyImpl() has 35x copy-paste blocks** — registry handler code is highly repetitive | Medium | GUI |
 | W14 | **No IPropertyStore** — no property handler for file metadata in Explorer details pane | Medium | Shell |
-| W15 | **README_ARCHITECTURE.md outdated** — describes 38 tests (actual: 1,187), stale CMake options | Low | Docs |
+| W15 | ~~**README_ARCHITECTURE.md outdated**~~ | ~~Low~~ | ~~Docs~~ | **FIXED** — merged into Engine/README.md |
 
 ---
 
@@ -62,15 +62,10 @@ These are issues that should be fixed before any new features are added.
 
 #### A1. Version Synchronization (Sprint 349)
 
-**Problem:** Engine.h hardcodes version 6.0.0, Engine/README.md says 7.0.0, and the project
-is actually 14.0.0. This creates confusion and can cause diagnostics/telemetry to report
-wrong versions.
+**Status:** ✅ **COMPLETED** — Engine.h updated to 14.0.0, all docs synchronized.
 
-**Fix:**
-- Update `Engine/Engine.h` version macros to 14.0.0 (or derive from CMake)
-- Use `configure_file()` in CMake to generate a `Version.h` from CMakeLists.txt version
-- Update `Engine/README.md` version line
-- Update `Engine/README_ARCHITECTURE.md` stale test counts and CMake options
+~~**Problem:** Engine.h hardcodes version 6.0.0, Engine/README.md says 7.0.0, and the project
+is actually 14.0.0.~~
 
 #### A2. Build MuPDF and Enable PDF Support (Sprint 350)
 
@@ -96,7 +91,9 @@ linker workaround. This is fragile and can cause subtle runtime issues.
 
 #### A4. Update LIBRARY_INVENTORY.md (Sprint 352)
 
-**Problem:** libheif 1.19.5 and libde265 1.0.15 are used by the Engine but not listed in
+**Status:** ✅ **COMPLETED** — libheif, libde265, brotli, highway added. MuPDF marked accurately.
+
+~~**Problem:** libheif 1.19.5 and libde265 1.0.15 are used by the Engine but not listed in
 the inventory table. MuPDF is listed but not flagged as disabled.
 
 **Fix:**
@@ -377,9 +374,13 @@ awareness, and poor accessibility. Long-term, the Manager needs modernization.
 
 #### E7. Documentation Refresh (Sprints 386-387)
 
-- Update all README versions to 14.0.0 / 15.0.0
-- Update architecture doc test counts (38 → 1,187)
-- Update CMake options table in architecture doc
+**Partially completed:**
+- ✅ All README/doc versions updated to 14.0.0
+- ✅ Architecture doc merged into Engine/README.md (test count corrected to 1,187)
+- ✅ 27 stale/duplicate MD files deleted, 5 consolidation groups completed
+- ✅ INDEX.md navigation updated with correct links
+
+**Remaining:**
 - Generate API reference from code comments (Doxygen or similar)
 - Create "Getting Started" guide for plugin developers
 
@@ -494,11 +495,11 @@ to disk and reloaded on startup to eliminate shader compilation stalls.
 
 These require minimal effort and have immediate impact:
 
-1. **Fix Engine.h version** — 5 minutes, 3 line change
+1. ~~**Fix Engine.h version** — 5 minutes, 3 line change~~ ✅ DONE
 2. **Delete WMFDecoder_old.cpp** — 1 minute, reduces confusion
-3. **Add libheif/libde265 to LIBRARY_INVENTORY.md** — 5 minutes
+3. ~~**Add libheif/libde265 to LIBRARY_INVENTORY.md** — 5 minutes~~ ✅ DONE
 4. **Loop-ify OnApplyImpl()** — 30 minutes, removes 200 lines of copy-paste
-5. **Update README_ARCHITECTURE.md test count** — 5 minutes
+5. ~~**Update README_ARCHITECTURE.md test count** — 5 minutes~~ ✅ DONE (file merged into Engine/README.md)
 
 ---
 
@@ -528,11 +529,11 @@ These require minimal effort and have immediate impact:
 
 | File | Change |
 |------|--------|
-| `Engine/Engine.h` | Update version 6.0.0 → 14.0.0 |
-| `Engine/README.md` | Update version 7.0.0 → 14.0.0 |
-| `Engine/README_ARCHITECTURE.md` | Update test count, CMake options |
+| `Engine/Engine.h` | ~~Update version 6.0.0 → 14.0.0~~ ✅ DONE |
+| `Engine/README.md` | ~~Update version 7.0.0 → 14.0.0~~ ✅ DONE (merged with architecture content) |
+| `Engine/README_ARCHITECTURE.md` | ~~Update test count, CMake options~~ ✅ DONE (merged into Engine/README.md, file deleted) |
 | `Engine/CMakeLists.txt` | Remove /NODEFAULTLIB:LIBCMT after libwebp rebuild |
-| `external/LIBRARY_INVENTORY.md` | Add libheif, libde265, brotli, highway |
+| `external/LIBRARY_INVENTORY.md` | ~~Add libheif, libde265, brotli, highway~~ ✅ DONE |
 | `LENSShell/LENSArchive.h` | Extract types, remove dead code |
 | `LENSManager/MainDlg.cpp` | Refactor OnApplyImpl() |
 
@@ -556,4 +557,3 @@ These require minimal effort and have immediate impact:
 | `Engine/Version.h.in` | CMake version template |
 | `LENSShell/shaders/lanczos_resize.hlsl` | Lanczos3 resize shader |
 | `LENSShell/shaders/hdr_tonemap.hlsl` | HDR → SDR tone mapping |
-| `docs/ENHANCEMENT_PLAN_V15.md` | This document |

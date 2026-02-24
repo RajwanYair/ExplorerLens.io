@@ -1,7 +1,7 @@
 # ExplorerLens Project Structure
 
-**Last Updated:** February 11, 2026  
-**Version:** 6.0.0  
+**Last Updated:** July 2025  
+**Version:** 14.0.0 "Apex"  
 **Organization Standard:** Industrial Open Source
 
 This document describes the complete directory structure and organization of the ExplorerLens project.

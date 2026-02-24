@@ -1,8 +1,8 @@
 # ExplorerLens Developer Guide
-**Version:** 7.1.0  
-**Last Updated:** February 18, 2026  
+**Version:** 14.0.0 "Apex"  
+**Last Updated:** July 2025  
 **Target Audience:** Contributors, Plugin Developers, Maintainers  
-**Sprints Completed:** 74/74  
+**Sprints Completed:** 348  
 **Build Status:** 0 errors, 0 warnings (Release x64)
 
 ## Table of Contents

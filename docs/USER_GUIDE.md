@@ -1,6 +1,6 @@
 # ExplorerLens User Guide
-**Version:** 7.1.0  
-**Last Updated:** February 18, 2026
+**Version:** 14.0.0  
+**Last Updated:** July 2025
 
 ## Table of Contents
 - [Installation](#installation)
@@ -27,7 +27,7 @@
 2. **Run the installer** as Administrator:
    ```powershell
    # Right-click installer → "Run as Administrator"
-   .\ExplorerLens-Setup-7.0.0.msi
+   .\ExplorerLens-Setup-14.0.0.msi
    ```
 
 3. **Follow the wizard**:

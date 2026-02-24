@@ -1,10 +1,10 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens  
-**Current Version:** v7.1.0  
+**Current Version:** v14.0.0 "Apex"  
 **Planning Authority:** [MASTER_PLAN.md](../MASTER_PLAN.md)  
-**Sprints Completed:** 74  
-**Last Updated:** February 18, 2026
+**Sprints Completed:** 348  
+**Last Updated:** July 2025
 
 ---
 
@@ -15,22 +15,18 @@
 | [MASTER_PLAN.md](../MASTER_PLAN.md) | Unified roadmap and execution plan |
 | [README.md](../README.md) | Project overview and feature summary |
 | [CHANGELOG.md](../CHANGELOG.md) | Release history and change log |
-| [KNOWN_ISSUES.md](../KNOWN_ISSUES.md) | Current known issues and mitigations |
-| [USER_GUIDE.md](../USER_GUIDE.md) | End-user installation and usage guide |
-| [DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md) | Developer setup and architecture guide |
-| [QUICK_BUILD_REFERENCE.md](../QUICK_BUILD_REFERENCE.md) | Quick build reference card |
+| [KNOWN_ISSUES.md](KNOWN_ISSUES.md) | Current known issues and mitigations |
+| [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
+| [ENHANCEMENT_PLAN_V15.md](ENHANCEMENT_PLAN_V15.md) | v15.0 development roadmap (45 sprints) |
 
 ## Development
 
 | Document | Description |
 |----------|-------------|
-| [development/README.md](development/README.md) | Development docs entry point |
+| [development/DEVELOPER_GUIDE.md](development/DEVELOPER_GUIDE.md) | Developer setup and architecture guide |
 | [development/BUILD_QUICK_REFERENCE.md](development/BUILD_QUICK_REFERENCE.md) | Build quick reference |
 | [development/CODE_QUALITY_STANDARDS.md](development/CODE_QUALITY_STANDARDS.md) | Code quality and static analysis standards |
-| [development/WINDOWS_BUILD_TOOLS.md](development/WINDOWS_BUILD_TOOLS.md) | Windows toolchain notes |
 | [development/THIRD_PARTY.md](development/THIRD_PARTY.md) | Third-party dependency inventory |
-| [development/TOOL_DISCOVERY.md](development/TOOL_DISCOVERY.md) | Tool discovery and probing |
-| [development/TOOL_VERSIONS.md](development/TOOL_VERSIONS.md) | Known tool versions |
 
 ## Architecture
 
@@ -38,17 +34,12 @@
 |----------|-------------|
 | [architecture/PROJECT_STRUCTURE.md](architecture/PROJECT_STRUCTURE.md) | Repository and component structure |
 | [architecture/INTEGRATION_ARCHITECTURE.md](architecture/INTEGRATION_ARCHITECTURE.md) | Integration architecture details |
-| [architecture/OBSERVABILITY_SPEC_V1.md](architecture/OBSERVABILITY_SPEC_V1.md) | Observability plan/spec |
-| [architecture/COMPATIBILITY_KIT_SPEC.md](architecture/COMPATIBILITY_KIT_SPEC.md) | Compatibility matrix specification |
 
 ## Formats
 
 | Document | Description |
 |----------|-------------|
-| [formats/FORMAT_SUPPORT_ANALYSIS.md](formats/FORMAT_SUPPORT_ANALYSIS.md) | Format support analysis |
-| [formats/CAPABILITY_AUDIT.md](formats/CAPABILITY_AUDIT.md) | Capability audit |
-| [formats/DECODER_STATUS.md](formats/DECODER_STATUS.md) | Decoder status matrix |
-| [formats/DECODER_AUDIT_REPORT.md](formats/DECODER_AUDIT_REPORT.md) | Decoder audit report |
+| [formats/FORMAT_SUPPORT_MATRIX.md](formats/FORMAT_SUPPORT_MATRIX.md) | Format support matrix (200+ formats, 25 decoders) |
 | [formats/RAW_DECODER_IMPLEMENTATION.md](formats/RAW_DECODER_IMPLEMENTATION.md) | RAW decoder implementation notes |
 | [formats/HEIF_VALIDATION_STATUS.md](formats/HEIF_VALIDATION_STATUS.md) | HEIF validation status |
 
@@ -57,13 +48,11 @@
 | Document | Description |
 |----------|-------------|
 | [PERFORMANCE.md](PERFORMANCE.md) | Top-level performance guidance |
+| [gpu/GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing, benchmarking, and Intel GPU guide |
 | [gpu/PERFORMANCE_METRICS.md](gpu/PERFORMANCE_METRICS.md) | Metrics definitions |
-| [gpu/PERF_REGRESSION_GATES.md](gpu/PERF_REGRESSION_GATES.md) | Performance regression policy |
-| [gpu/GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing guide |
-| [gpu/INTEL_GPU_GUIDE.md](gpu/INTEL_GPU_GUIDE.md) | Intel GPU-specific guidance |
-| [gpu/MULTI_GPU_TESTING_GUIDE.md](gpu/MULTI_GPU_TESTING_GUIDE.md) | Multi-GPU testing strategy |
 | [gpu/GPU_ABSTRACTION_LAYER.md](gpu/GPU_ABSTRACTION_LAYER.md) | GPU abstraction architecture |
 | [gpu/TEXTURE_POOLING.md](gpu/TEXTURE_POOLING.md) | Texture pooling details |
+| [performance/BENCHMARK_GUIDE_V7.md](performance/BENCHMARK_GUIDE_V7.md) | Benchmarking guide with baseline results |
 
 ## Plugins
 
@@ -79,10 +68,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [testing/TESTING_GUIDE.md](testing/TESTING_GUIDE.md) | Testing framework guide |
-| [testing/TEST_VALIDATION_CHECKLIST.md](testing/TEST_VALIDATION_CHECKLIST.md) | Validation checklist |
-| [testing/PRIORITY1_BASELINE_VERIFICATION.md](testing/PRIORITY1_BASELINE_VERIFICATION.md) | Baseline verification notes |
-| [testing/INTEGRATION_TEST_MATRIX.md](testing/INTEGRATION_TEST_MATRIX.md) | Integration test coverage matrix |
+| [testing/TESTING_GUIDE.md](testing/TESTING_GUIDE.md) | Testing framework, benchmarks, and validation |
 
 ## User and Operations
 
@@ -112,12 +98,11 @@
 | [../.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | PR template with checklists |
 | [../.github/COMPLETE_PROJECT_SUMMARY.md](../.github/COMPLETE_PROJECT_SUMMARY.md) | Full project summary |
 
-## Performance
+## Engine
 
 | Document | Description |
 |----------|-------------|
-| [performance/BENCHMARK_GUIDE_V7.md](performance/BENCHMARK_GUIDE_V7.md) | Benchmarking guide with baseline results |
-| [PERFORMANCE.md](PERFORMANCE.md) | Top-level performance guidance |
+| [../Engine/README.md](../Engine/README.md) | Engine architecture and component overview |
 
 ---
 

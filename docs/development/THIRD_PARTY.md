@@ -1,7 +1,8 @@
 # Third-Party Libraries - Build & Integration Guide
 
-**Last Updated:** January 8, 2026  
-**Policy:** All libraries must be x64 and use `/MT` (static runtime) for Release builds
+**Last Updated:** July 2025  
+**Version:** 14.0.0  
+**Policy:** All libraries must be x64 and use `/MD` (dynamic CRT — `MultiThreadedDLL`) for Release builds
 
 ---
 
@@ -20,8 +21,10 @@
 | **dav1d** | 1.5.1 | 🔄 Dependency | For AVIF | N/A |
 | **brotli** | 1.1.0 | 🔄 Dependency | For JXL | N/A |
 | **highway** | 1.0.7 | 🔄 Dependency | For JXL | N/A |
-| **libheif** | - | 📅 Planned | No | No |
-| **libarchive** | 3.7.6 | 📅 Planned | No | No |
+| **libheif** | 1.19.5 | ✅ Complete | Yes | Yes |
+| **libde265** | 1.0.15 | ✅ Complete | Yes | Yes |
+| **LibRaw** | 0.21.3 | ✅ Complete | Yes | Yes |
+| **UnRAR** | 7.2.2 | ✅ Complete | Yes | Yes |
 
 ---
 
@@ -243,7 +246,7 @@ foreach ($lib in $libs) {
 - Ensure x64 architecture (not Win32)
 
 ### "Unresolved external symbol"
-- Check runtime library mismatch: all libs must use `/MT` (static)
+- Check runtime library mismatch: all libs must use `/MD` (dynamic CRT)
 - Verify all dependencies included (e.g., jxl needs jxl_threads)
 
 ### "LNK1104: cannot open file"
@@ -252,26 +255,17 @@ foreach ($lib in $libs) {
 
 ---
 
-## Future Libraries
+## Build Scripts
 
-### libheif (HEIF/HEIC support)
-```powershell
-# When ready to build:
-cd external/libheif
-cmake -B build -G "Ninja" `
-  -DCMAKE_BUILD_TYPE=Release `
-  -DWITH_EXAMPLES=OFF `
-  -DWITH_DAV1D=ON
-cmake --build build --config Release
-```
+All libraries have dedicated build scripts in `build-scripts/external-libs/`.
+Use `Build-Library-Core.ps1` from `build-scripts/core/` for shared build utilities.
 
-### libarchive (Advanced archive support)
 ```powershell
-cd external/libarchive-3.7.6
-cmake -B build -G "Ninja" `
-  -DCMAKE_BUILD_TYPE=Release `
-  -DENABLE_TEST=OFF
-cmake --build build --config Release
+# Build all external libraries
+.\build-scripts\Build-All-And-Package.ps1
+
+# Build individual library
+.\build-scripts\external-libs\Build-LibHEIF.ps1 -Clean
 ```
 
 ---

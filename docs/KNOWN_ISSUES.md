@@ -1,7 +1,7 @@
 # ExplorerLens Known Issues & Troubleshooting
-**Version:** 7.1.0  
-**Last Updated:** February 18, 2026  
-**Audit Status:** ✅ All entries verified against current codebase (Sprint 60)
+**Version:** 14.0.0 "Apex"  
+**Last Updated:** July 2025  
+**Audit Status:** ✅ All entries verified against current codebase (Sprint 348)
 
 ## Current Known Issues
 

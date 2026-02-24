@@ -1,34 +1,23 @@
-# ExplorerLens GPU Testing Guide
+# GPU Testing & Optimization Guide — ExplorerLens v14.0.0
 
-**Version:** 7.1.0  
-**Date:** February 18, 2026  
-**Status:** ✅ GPU Testing Operational (D3D11 + D3D12)
+**Version:** 14.0.0 "Apex"  
+**Last Updated:** February 2026  
+**Status:** GPU Testing Operational (D3D11 + D3D12 + Vulkan Compute)
 
 ---
 
 ## Overview
 
-This guide covers testing and benchmarking the GPU-accelerated thumbnail generation in ExplorerLens v5.2.0.
+ExplorerLens uses GPU-accelerated thumbnail generation via DirectX 11/12 compute shaders with CPU fallback. This guide covers testing, benchmarking, and GPU-specific optimization across Intel, NVIDIA, and AMD hardware.
 
-**GPU Vendor-Specific Guides:**
-- **[Intel GPU Optimization Guide](INTEL_GPU_GUIDE.md)** - Intel HD Graphics, Iris, Xe, Arc (2nd gen+ / 2011+)
-- NVIDIA GPU Guide (coming soon)
-- AMD GPU Guide (coming soon)
+---
 
-## Test Tools
+## 1. Test Tools
 
-### 1. GPUThumbnailTest.exe
+### GPUThumbnailTest.exe
 
-**Purpose:** Validate GPU thumbnail generation functionality and quality.
+Validates GPU thumbnail generation functionality and quality.
 
-**Features:**
-- Loads test images from a folder
-- Generates thumbnails using CPU baseline (WIC Fant scaler)
-- Saves output thumbnails for visual inspection
-- Reports timing and success/failure for each file
-- Supports JPEG, PNG, WebP, BMP, TIFF formats
-
-**Usage:**
 ```cmd
 GPUThumbnailTest.exe [options]
 
@@ -37,52 +26,12 @@ Options:
   -o <folder>    Output folder for thumbnails (optional)
   -s <size>      Thumbnail size in pixels (default: 256)
   -v             Verbose output
-  -h, --help     Show help
 ```
 
-**Examples:**
-```cmd
-# Basic test - generate thumbnails from test images
-GPUThumbnailTest.exe -i C:\TestImages -o C:\Thumbnails
+### LENSBench.exe
 
-# Specify custom size and verbose output
-GPUThumbnailTest.exe -i C:\TestImages -o C:\Thumbnails -s 512 -v
+Performance benchmarking against CPU baseline.
 
-# Test without saving outputs (timing only)
-GPUThumbnailTest.exe -i C:\TestImages -s 256
-```
-
-**Output:**
-```
-=== GPU Thumbnail Test Suite ===
-Input folder: C:\TestImages
-Output folder: C:\Thumbnails
-Thumbnail size: 256px
-
-Testing: sample1.jpg ... OK (256x192, 45.2 ms)
-Testing: sample2.png ... OK (256x256, 78.5 ms)
-Testing: sample3.webp ... OK (256x144, 52.1 ms)
-
-=== Test Summary ===
-Total tests: 3
-Passed: 3
-Failed: 0
-Average time: 58.6 ms
-Total time: 175.8 ms
-```
-
-### 2. LENSBench.exe
-
-**Purpose:** Performance benchmarking and validation of 6.5x speedup target.
-
-**Features:**
-- Measures thumbnail generation performance
-- Runs multiple iterations per file for statistical accuracy
-- Calculates min/max/avg/stddev timing
-- Groups results by format (JPEG, PNG, WebP, etc.)
-- Exports detailed CSV results
-
-**Usage:**
 ```cmd
 LENSBench.exe [options]
 
@@ -92,368 +41,236 @@ Options:
   -s <size>      Thumbnail size in pixels (default: 256)
   -n <count>     Iterations per file (default: 10)
   -v             Verbose output
-  -h, --help     Show help
 ```
 
-**Examples:**
+### GPUValidator.exe
+
+Detects and validates all GPUs in the system.
+
 ```cmd
-# Basic benchmark - 10 iterations per file
-LENSBench.exe -i C:\TestImages -o results.csv
-
-# High-precision benchmark - 50 iterations
-LENSBench.exe -i C:\TestImages -o results.csv -n 50
-
-# Quick benchmark - 5 iterations, verbose
-LENSBench.exe -i C:\TestImages -o results.csv -n 5 -v
+tests\build\GPUValidator.exe
 ```
 
-**Output:**
+Reports vendor, feature level, VRAM, compute shader support, and ExplorerLens compatibility for each detected GPU.
+
+---
+
+## 2. Test Scenarios
+
+### Scenario 1: Intel Integrated GPU Only (Laptop)
+
+- Hardware: Intel Core i7-1165G7 + Intel Iris Xe
+- Expected: DirectX 11.1, 6–8x speedup, shared system memory
+
+### Scenario 2: NVIDIA Discrete GPU (Desktop)
+
+- Hardware: NVIDIA GeForce RTX 3070
+- Expected: DirectX 12.1, 8–10x speedup, dedicated VRAM
+
+### Scenario 3: AMD Discrete GPU
+
+- Hardware: AMD Radeon RX 6700 XT
+- Expected: DirectX 12.0+, 7–9x speedup, dedicated VRAM
+
+### Scenario 4: Dual GPU (Intel iGPU + NVIDIA dGPU)
+
+- Windows automatically selects dGPU for ExplorerLens
+- Test both GPUs by forcing via Intel Graphics Command Center
+
+### Scenario 5: Old GPU (DirectX 10.x — CPU Fallback)
+
+- Intel HD Graphics 2000 or similar (DirectX 10.1)
+- Falls back to CPU rendering (no compute shader support)
+
+### Scenario 6: No GPU (WARP Software Renderer)
+
+- Virtual machines or cloud instances with no physical GPU
+- DirectX 11.1 via software emulation, ~1.0–1.5x speedup
+
+**Validation for all scenarios:**
+```cmd
+tests\build\GPUValidator.exe
+tests\build\LENSBench.exe -i C:\TestImages -n 100 -s 256
 ```
-=== LENSShell Performance Benchmark ===
-Test folder: C:\TestImages
-Thumbnail size: 256px
-Iterations per file: 10
 
-[1] Benchmarking: test1.jpg ... 42.5 ms (min: 40.2, max: 45.8)
-[2] Benchmarking: test2.png ... 75.3 ms (min: 72.1, max: 79.5)
-[3] Benchmarking: test3.webp ... 48.9 ms (min: 46.5, max: 52.3)
-
-=== Format Summary ===
-Format          Files      Avg Time (ms)
-----------------------------------------
-JPEG            10         43.2
-PNG             5          76.8
-WebP            3          49.5
-
-Results saved to: results.csv
+Monitor DebugView (Sysinternals) for GPU initialization logs:
 ```
-
-**CSV Output Format:**
-```csv
-Filename,Format,SourceWidth,SourceHeight,AvgTime(ms),MinTime(ms),MaxTime(ms),StdDev(ms),Samples
-test1.jpg,JPEG,3840,2160,42.500,40.200,45.800,1.750,10
-test2.png,PNG,1920,1080,75.300,72.100,79.500,2.340,10
-test3.webp,WebP,2560,1440,48.900,46.500,52.300,1.890,10
+[GPU] Device created successfully (Hardware)
+[GPU] Vendor: Intel (0x8086)  / NVIDIA (0x10de)  / AMD (0x1002)
+[GPU] Feature Level: DirectX 11.x / 12.x
+[GPU] Compute shader support enabled
 ```
 
 ---
 
-## Automated Testing
+## 3. Performance Expectations by GPU
 
-### PowerShell Test Runner
+### Decode Time (256×256 thumbnail)
 
-**run-tests.ps1** - Automated build and test execution
-
-**Usage:**
-```powershell
-# Build only
-.\run-tests.ps1 -BuildOnly
-
-# Build and run tests
-.\run-tests.ps1 -TestFolder C:\TestImages
-
-# Full test suite with output folder
-.\run-tests.ps1 -TestFolder C:\TestImages -OutputFolder C:\Thumbnails
-
-# High-precision benchmarking
-.\run-tests.ps1 -TestFolder C:\TestImages -Iterations 50 -Verbose
-
-# Quick validation
-.\run-tests.ps1 -TestFolder C:\TestImages -Iterations 5
-```
-
-**Parameters:**
-- `-TestFolder <path>` - Folder containing test images (required)
-- `-OutputFolder <path>` - Output folder for thumbnails (optional)
-- `-ThumbnailSize <pixels>` - Thumbnail size (default: 256)
-- `-Iterations <count>` - Benchmark iterations (default: 10)
-- `-BuildOnly` - Only build tools, don't run tests
-- `-Verbose` - Verbose output
-
----
-
-## Test Image Preparation
-
-### Recommended Test Set
-
-Create a test folder with diverse images:
-
-**JPEG (10+ files):**
-- Small: 640x480
-- Medium: 1920x1080
-- Large: 3840x2160 (4K)
-- Ultra: 7680x4320 (8K)
-
-**PNG (5+ files):**
-- Simple (no transparency)
-- Complex (transparency + alpha)
-- Indexed color
-- Grayscale
-
-**WebP (3+ files):**
-- Lossy
-- Lossless
-- Animated
-
-**AVIF (3+ files):**
-- Standard
-- HDR
-- 10-bit color
-
-**HEIF/HEIC (3+ files):**
-- iPhone photos
-- HDR
-- Burst shots
-
-**PDF (2+ files):**
-- Simple document
-- Complex graphics
-
-**Video (5+ files):**
-- MP4 (H.264)
-- MKV (H.265/HEVC)
-- AVI
-- MOV
-- WebM
-
-### Download Test Images
-
-Use free stock photo sites:
-- **Unsplash** - https://unsplash.com (JPEG, high quality)
-- **Pexels** - https://pexels.com (JPEG, video)
-- **Pixabay** - https://pixabay.com (PNG, JPEG)
-- **Sample Videos** - https://sample-videos.com (MP4, AVI, MOV)
-
----
-
-## Performance Validation
-
-### Expected Results (v5.2.0 Phase 2)
-
-Based on 6.5x average speedup target:
-
-| Format | Baseline (CPU) | Target (GPU) | Speedup |
-|--------|----------------|--------------|---------|
-| JPEG 4K | 100 ms | 15 ms | 6.7x |
-| PNG Complex | 150 ms | 30 ms | 5.0x |
-| WebP Animated | 80 ms | 11 ms | 7.3x |
-| AVIF HDR | 120 ms | 20 ms | 6.0x |
-| HEIF/HEIC | 110 ms | 18 ms | 6.1x |
-| PDF Rasterized | 200 ms | 44 ms | 4.5x |
-| Video Frame | 90 ms | 11 ms | 8.2x |
-
-**Average Speedup:** 6.5x
+| GPU Type | Speedup | 300 Images Total Time | Pool Hit Rate |
+|----------|---------|----------------------|---------------|
+| Intel Arc A770 | 8–10x | 3.5–4.0s | 95%+ |
+| NVIDIA RTX 3070 | 8–10x | 3.2–3.8s | 95%+ |
+| AMD RX 6700 XT | 7–9x | 3.8–4.5s | 95%+ |
+| Intel Iris Xe | 6–8x | 4.5–5.5s | 95%+ |
+| Intel UHD 630 | 4–6x | 6.0–8.0s | 95%+ |
+| Intel HD 4000 | 3–5x | 8.0–10.0s | 95%+ |
+| WARP | 1.0–1.5x | 28–32s | 95%+ |
+| CPU baseline | 1.0x | 30–35s | N/A |
 
 ### Validation Criteria
 
-✅ **Pass:** Average speedup ≥ 6.0x  
-⚠️ **Warning:** Average speedup 4.0x - 6.0x (acceptable, investigate)  
-❌ **Fail:** Average speedup < 4.0x (needs optimization)
+- **Pass:** Average speedup ≥ 6.0x
+- **Warning:** Average speedup 4.0–6.0x (acceptable, investigate)
+- **Fail:** Average speedup < 4.0x (needs optimization)
 
 ---
 
-## GPU Detection Testing
+## 4. Intel GPU Support
 
-### Test Scenarios
+### Supported Intel GPUs
 
-1. **Intel Integrated GPU**
-   - Intel HD Graphics 3000+
-   - Intel Iris Xe
-   - Expected: Hardware GPU, compute shader active
+| Tier | GPU Family | Generations | DirectX | Expected Speedup |
+|------|-----------|-------------|---------|-----------------|
+| Excellent | Intel Arc | A770, A750, A580, A380, A310 | 12.1 | 8–10x |
+| Excellent | Iris Xe | 11th–13th gen | 12.1 | 6–8x |
+| Very Good | Iris Plus | 10th gen | 12.1 | 5–7x |
+| Good | Iris/Iris Pro | 4th–9th gen | 11.0–11.2 | 4–6x |
+| Good | UHD Graphics | 8th–10th gen | 12.0 | 4–6x |
+| Good | HD Graphics | 2nd–7th gen (2011+) | 11.0 | 3–5x |
+| CPU Fallback | HD Graphics | 1st gen and older | 10.x | N/A |
 
-2. **NVIDIA Discrete GPU**
-   - GeForce GTX 400+
-   - RTX series
-   - Expected: Best performance, full feature support
+### Intel-Specific Optimizations
 
-3. **AMD Discrete GPU**
-   - Radeon HD 5000+
-   - RX series
-   - Expected: Hardware GPU, validate vendor-specific behavior
+- **Shared memory optimization:** Zero-copy texture uploads, efficient shared allocation
+- **Compute shader tuning:** 8×8 thread groups optimal for Intel execution units
+- **DirectX 11.1 fast semantics:** Faster resource creation on HD 4000+
 
-4. **WARP Software Renderer**
-   - Disable GPU in Device Manager
-   - Expected: WARP fallback, slower but functional
+### Intel GPU Benchmark Data
 
-5. **Multi-GPU Systems**
-   - Intel integrated + NVIDIA/AMD discrete
-   - Expected: Uses discrete GPU (higher performance)
+| Format | Arc A770 | Iris Xe | HD 630 | HD 4000 |
+|--------|----------|---------|--------|---------|
+| JPEG 4K | 10ms (10.0x) | 14ms (7.1x) | 20ms (5.0x) | 25ms (4.0x) |
+| PNG Complex | 18ms (8.3x) | 25ms (6.0x) | 35ms (4.3x) | 42ms (3.6x) |
+| WebP Animated | 9ms (8.9x) | 11ms (7.3x) | 15ms (5.3x) | 18ms (4.4x) |
+| AVIF HDR | 15ms (8.0x) | 18ms (6.7x) | 25ms (4.8x) | 30ms (4.0x) |
 
-### DebugView Monitoring
+### Intel Processor Quick Reference
 
-**Download:** https://learn.microsoft.com/sysinternals/downloads/debugview
+| Generation | Codename | Year | GPU | DirectX |
+|------------|----------|------|-----|---------|
+| 14th Gen | Meteor Lake | 2023 | Intel Arc Graphics | 12.1 |
+| 13th Gen | Raptor Lake | 2022 | UHD/Iris Xe | 12.1 |
+| 12th Gen | Alder Lake | 2021 | UHD/Iris Xe | 12.1 |
+| 11th Gen | Tiger Lake | 2020 | Iris Xe | 12.1 |
+| 10th Gen | Ice Lake | 2019 | Iris Plus | 12.1 |
+| 8th–9th Gen | Coffee Lake | 2017–18 | UHD 630 | 12.0 |
+| 7th Gen | Kaby Lake | 2016 | HD 630 | 12.0 |
+| 6th Gen | Skylake | 2015 | HD 530 | 12.0 |
+| 4th Gen | Haswell | 2013 | HD 4600 | 11.1 |
+| 3rd Gen | Ivy Bridge | 2012 | HD 4000 | **11.0** ✅ |
+| 2nd Gen | Sandy Bridge | 2011 | HD 3000 | **11.0** ✅ |
 
-**Expected Debug Output:**
-```
-[GPU] Initializing GPU accelerator...
-[GPU] Device created successfully (Hardware)
-[GPU] GPU: Intel(R) Iris(R) Xe Graphics
-[GPU] Feature Level: DirectX 11.1
-[GPU] VRAM: 512 MB dedicated, 8192 MB shared
-[GPU] Vendor: Intel (0x8086)
-[GPU] Lanczos3 compute shader compiled successfully
-[GPU] GPU acceleration ready
-```
-
-**Error Scenarios:**
-```
-[GPU] Failed to create D3D11 device, trying WARP...
-[GPU] Device created successfully (WARP)
-[GPU] Using software renderer (CPU emulation)
-```
+Minimum: 2nd Gen Sandy Bridge (2011) with DirectX 11.0 support.
 
 ---
 
-## Quality Validation
-
-### Visual Inspection
+## 5. Quality Validation
 
 Compare GPU-generated thumbnails to CPU baseline:
 
-1. **Color Accuracy**
-   - Check for color shifts (gamma correction working?)
-   - Verify sRGB conversion (no washed-out colors)
-
-2. **Sharpness**
-   - Lanczos3 should preserve detail better than Fant
-   - Check for blurriness or over-sharpening
-
-3. **Artifacts**
-   - No ringing/halos around edges
-   - No banding in gradients
-   - No color fringing
-
-4. **Transparency**
-   - PNG alpha channels preserved
-   - WebP transparency correct
-
-### Automated Quality Metrics (Future)
-
-Planned for v5.2.1:
-- PSNR (Peak Signal-to-Noise Ratio)
-- SSIM (Structural Similarity Index)
-- MSE (Mean Squared Error)
+1. **Color Accuracy** — Check for color shifts, verify sRGB conversion
+2. **Sharpness** — Lanczos3 should preserve detail better than Fant scaler
+3. **Artifacts** — No ringing/halos, no banding in gradients, no color fringing
+4. **Transparency** — PNG alpha channels and WebP transparency preserved
 
 ---
 
-## Troubleshooting
+## 6. Test Image Preparation
 
-### Build Errors
+### Recommended Test Set
 
-**Error: MSBuild not found**
-```
-Solution: Install Visual Studio Build Tools 2022
-Download: https://visualstudio.microsoft.com/downloads/
-```
-
-**Error: C++ compiler not found**
-```
-Solution: Install "Desktop development with C++" workload
-Run: Visual Studio Installer → Modify → Check "Desktop development with C++"
-```
-
-### Runtime Errors
-
-**Error: Failed to initialize tester**
-```
-Solution: Install Windows Imaging Component (WIC)
-Usually pre-installed on Windows 10/11
-Check: Windows Features → Enable .NET Framework 3.5
-```
-
-**Error: No GPU detected**
-```
-Solution 1: Update GPU drivers
-Solution 2: Check Device Manager → Display adapters
-Solution 3: WARP fallback should work (software renderer)
-```
-
-**Error: Shader compilation failed**
-```
-Solution 1: Check for d3dcompiler_47.dll in System32
-Solution 2: Install DirectX End-User Runtime
-Solution 3: Automatic WIC fallback should activate
-```
+| Format | Count | Resolutions |
+|--------|-------|-------------|
+| JPEG | 10+ | 640×480, 1920×1080, 3840×2160, 7680×4320 |
+| PNG | 5+ | Simple, alpha, indexed, grayscale |
+| WebP | 3+ | Lossy, lossless, animated |
+| AVIF | 3+ | Standard, HDR, 10-bit |
+| HEIF/HEIC | 3+ | iPhone photos, HDR, burst |
+| Video | 5+ | MP4 (H.264), MKV (HEVC), AVI, MOV, WebM |
 
 ---
 
-## Performance Tips
+## 7. Troubleshooting
 
-### Optimal Test Conditions
+### GPU Not Detected
 
-1. **Close Background Applications**
-   - Web browsers (GPU-intensive)
-   - Video players
-   - Games
+1. Update GPU drivers (Intel Download Center / NVIDIA GeForce / AMD Adrenalin)
+2. Check Device Manager → Display adapters
+3. Verify BIOS has integrated graphics enabled (if applicable)
+4. WARP fallback activates automatically if no hardware GPU available
 
-2. **Disable GPU Power Saving**
-   - Windows Power Plan: High Performance
-   - NVIDIA Control Panel: Prefer Maximum Performance
-   - AMD Radeon Settings: High Performance
+### Poor Performance
 
-3. **Use SSD Storage**
-   - Test images on SSD (not HDD)
-   - Reduces I/O overhead in benchmarks
+1. Set Windows Power Plan to High Performance
+2. Close GPU-intensive background apps (browsers, video players)
+3. Check for thermal throttling (CPU/GPU temps)
+4. Ensure 8+ GB RAM for Intel integrated GPUs
+5. Use SSD storage for test images
 
-4. **Sufficient Iterations**
-   - Minimum: 10 iterations per file
-   - Recommended: 20-50 iterations
-   - High precision: 100+ iterations
+### Intel Arc Issues
 
-### Benchmark Best Practices
+1. Update to latest Arc drivers (31.0.101.4953+)
+2. Enable Resizable BAR in BIOS
+3. Install DirectX End-User Runtime for d3dcompiler_47.dll
 
-1. **Warmup Run**
-   - First run may be slower (shader compilation)
-   - Discard first iteration results
-   - Use subsequent runs for measurement
+### Shader Compilation Errors
 
-2. **Consistent Environment**
-   - Same test images across runs
-   - Same system state (no updates running)
-   - Same GPU power mode
-
-3. **Statistical Validation**
-   - Check standard deviation (should be low)
-   - High StdDev = inconsistent performance
-   - Filter outliers (>2σ from mean)
+1. Verify d3dcompiler_47.dll exists in System32
+2. Install DirectX End-User Runtime
+3. WIC fallback activates automatically on shader failure
 
 ---
 
-## Next Steps
+## 8. Debug Layer Testing
 
-After running tests:
+Enable DirectX debug layer for detailed GPU diagnostics:
 
-1. **Review Results**
-   - Check CSV for anomalies
-   - Identify slow formats
-   - Calculate overall speedup
-
-2. **Visual Validation**
-   - Compare thumbnails to originals
-   - Check for quality issues
-   - Verify color accuracy
-
-3. **Document Findings**
-   - Update V5.2.0_SPRINT_SUMMARY.md
-   - Add benchmark results table
-   - Note any issues found
-
-4. **Optimize if Needed**
-   - Texture pooling (if memory overhead high)
-   - Shader bytecode embedding (if compile time high)
-   - Multi-resolution optimization
+1. Install Graphics Tools: Windows Settings → Apps → Optional Features → "Graphics Tools"
+2. Rebuild in Debug configuration with `D3D11_CREATE_DEVICE_DEBUG` flag
+3. Monitor DebugView for D3D11 INFO/WARNING/ERROR messages
 
 ---
 
-## Support
+## 9. Benchmark Best Practices
 
-**DebugView Logs:** Enable OutputDebugString capture  
-**GPU Profilers:** NSight (NVIDIA), Radeon GPU Profiler (AMD), Intel GPA  
-**GitHub Issues:** Report bugs with benchmark CSV attached
+- **Warmup:** First run compiles shaders — discard first iteration
+- **Iterations:** Minimum 10, recommended 20–50, high precision 100+
+- **Environment:** Close background apps, high-performance power plan, SSD storage
+- **Statistics:** Check standard deviation; filter outliers >2σ from mean
+- **Consistency:** Same test images and system state across runs
 
 ---
 
-**Last Updated:** November 24, 2025  
-**Tools Version:** 1.0.0  
-**Target:** ExplorerLens v5.2.0 Phase 2
+## 10. Testing Checklist
 
+### Pre-Testing
+- [ ] Update GPU drivers to latest
+- [ ] Prepare test image set (100+ images)
+- [ ] Download DebugView (Sysinternals)
+
+### Validation
+- [ ] Run GPUValidator.exe — verify vendor, feature level, compute shaders
+- [ ] Run LENSBench.exe — verify speedup meets expectations
+- [ ] Monitor DebugView — no GPU errors
+- [ ] Visual inspection — thumbnails match CPU baseline quality
+
+### Stress Testing
+- [ ] Generate 1000+ thumbnails consecutively
+- [ ] Verify stable VRAM usage (no memory leaks)
+- [ ] Verify no crashes or hangs
+- [ ] Check texture pool cleanup logs
+
+---
+
+*This document consolidates GPU_TESTING_GUIDE.md, MULTI_GPU_TESTING_GUIDE.md, and INTEL_GPU_GUIDE.md.*
