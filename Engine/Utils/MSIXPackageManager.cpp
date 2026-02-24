@@ -7,7 +7,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include <versionhelpers.h>
 #endif
 
 namespace ExplorerLens {
@@ -166,6 +165,7 @@ bool MSIXPackageManager::IsMSIXSupported() {
 #ifdef _WIN32
   // MSIX requires Windows 10 1709+ (build 16299)
   // Use RtlGetVersion to bypass compatibility manifesting issues
+  // (avoids versionhelpers.h which conflicts with WIN32_LEAN_AND_MEAN)
   typedef LONG(WINAPI * RtlGetVersionFunc)(PRTL_OSVERSIONINFOW);
   HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
   if (hNtdll) {
@@ -179,8 +179,7 @@ bool MSIXPackageManager::IsMSIXSupported() {
       }
     }
   }
-  // Fallback
-  return IsWindows10OrGreater();
+  return false; // Cannot determine OS version
 #else
   return false;
 #endif
@@ -189,10 +188,22 @@ bool MSIXPackageManager::IsMSIXSupported() {
 bool MSIXPackageManager::MeetsMinVersion(const std::wstring &minVersion) {
   if (minVersion.empty())
     return true;
-  // Parse version and compare against running OS
-  // Format: "10.0.17763.0"
 #ifdef _WIN32
-  return IsWindows10OrGreater();
+  // Check against running OS via RtlGetVersion
+  typedef LONG(WINAPI * RtlGetVersionFunc)(PRTL_OSVERSIONINFOW);
+  HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
+  if (hNtdll) {
+    auto pRtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(
+        GetProcAddress(hNtdll, "RtlGetVersion"));
+    if (pRtlGetVersion) {
+      RTL_OSVERSIONINFOW vi = {};
+      vi.dwOSVersionInfoSize = sizeof(vi);
+      if (pRtlGetVersion(&vi) == 0) {
+        return vi.dwMajorVersion >= 10;
+      }
+    }
+  }
+  return false;
 #else
   (void)minVersion;
   return false;
