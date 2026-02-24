@@ -119,6 +119,24 @@ else()
     set(HAS_OPENJPEG OFF CACHE BOOL "JPEG 2000 support — OpenJPEG not built (run Build-OpenJPEG.ps1)" FORCE)
 endif()
 
+# --- libarchive (Multi-format archive support) ---
+set(LIBARCHIVE_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/libarchive-3.7.6/install")
+set(LIBARCHIVE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/libarchive-3.7.6/build-vs")
+set(LIBARCHIVE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/libarchive-3.7.6/libarchive")
+# Check multiple possible output locations for archive_static.lib
+if(EXISTS "${LIBARCHIVE_INSTALL_DIR}/lib/archive_static.lib")
+    set(LIBARCHIVE_LIBRARY_PATH "${LIBARCHIVE_INSTALL_DIR}/lib/archive_static.lib")
+    set(HAS_LIBARCHIVE ON CACHE BOOL "libarchive support auto-detected (install)" FORCE)
+elseif(EXISTS "${LIBARCHIVE_INSTALL_DIR}/lib/archive.lib")
+    set(LIBARCHIVE_LIBRARY_PATH "${LIBARCHIVE_INSTALL_DIR}/lib/archive.lib")
+    set(HAS_LIBARCHIVE ON CACHE BOOL "libarchive support auto-detected (install)" FORCE)
+elseif(EXISTS "${LIBARCHIVE_BUILD_DIR}/libarchive/Release/archive_static.lib")
+    set(LIBARCHIVE_LIBRARY_PATH "${LIBARCHIVE_BUILD_DIR}/libarchive/Release/archive_static.lib")
+    set(HAS_LIBARCHIVE ON CACHE BOOL "libarchive support auto-detected (build)" FORCE)
+else()
+    set(HAS_LIBARCHIVE OFF CACHE BOOL "libarchive not built (run Build-Libarchive.ps1)" FORCE)
+endif()
+
 # --- FreeType (Sprint 366) ---
 set(FREETYPE_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/freetype.lib")
 if(EXISTS "${FREETYPE_LIB_PATH}")
@@ -711,6 +729,13 @@ if(ENGINE_SOURCES)
             message(STATUS "Enhanced font rendering (FreeType): DISABLED (run Build-FreeType.ps1)")
         endif()
 
+        if(HAS_LIBARCHIVE)
+            target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBARCHIVE LIBARCHIVE_STATIC ENABLE_LIBARCHIVE_SUPPORT)
+            message(STATUS "libarchive support: ENABLED (TAR/CPIO/ISO/XAR/AR/CAB)")
+        else()
+            message(STATUS "libarchive support: DISABLED (run Build-Libarchive.ps1)")
+        endif()
+
         if(ENABLE_VIDEO_DECODER)
             target_compile_definitions(ExplorerLensEngine PRIVATE ENABLE_VIDEO_DECODER)
             message(STATUS "Video decoder: ENABLED")
@@ -761,6 +786,9 @@ if(ENGINE_SOURCES)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/dav1d-1.5.1/install/lib
                 # MuPDF libraries
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/build/release
+                # libarchive libraries
+                ${LIBARCHIVE_INSTALL_DIR}/lib
+                ${LIBARCHIVE_BUILD_DIR}/libarchive/Release
         )
         
         target_link_libraries(ExplorerLensEngine
@@ -804,6 +832,9 @@ if(ENGINE_SOURCES)
         endif()
         if(HAS_FREETYPE)
             target_link_libraries(ExplorerLensEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/freetype.lib")
+        endif()
+        if(HAS_LIBARCHIVE)
+            target_link_libraries(ExplorerLensEngine PUBLIC "${LIBARCHIVE_LIBRARY_PATH}")
         endif()
     endif()
     
@@ -911,6 +942,9 @@ message(STATUS "    HAS_LIBHEIF:           ${HAS_LIBHEIF}")
 message(STATUS "    HAS_LIBRAW:            ${HAS_LIBRAW}")
 message(STATUS "    HAS_LIBAVIF:           ${HAS_LIBAVIF}")
 message(STATUS "    HAS_MUPDF:             ${HAS_MUPDF}")
+message(STATUS "    HAS_LIBARCHIVE:        ${HAS_LIBARCHIVE}")
+message(STATUS "    HAS_OPENJPEG:          ${HAS_OPENJPEG}")
+message(STATUS "    HAS_FREETYPE:          ${HAS_FREETYPE}")
 message(STATUS "    ENABLE_VIDEO_DECODER:  ${ENABLE_VIDEO_DECODER}")
 message(STATUS "    ENABLE_AUDIO_DECODER:  ${ENABLE_AUDIO_DECODER}")
 message(STATUS "")
