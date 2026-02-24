@@ -7,14 +7,14 @@
 #include <algorithm>
 #include <cstring>
 #include <cwchar>
-#include <gdiplus.h>
+#include <windows.h>
 #include <objidl.h>
+#include <gdiplus.h>
 #include <propkey.h>
 #include <propsys.h>
 #include <shlwapi.h>
 #include <shobjidl.h>
 #include <wincodec.h>
-#include <windows.h>
 
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")

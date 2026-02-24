@@ -12,8 +12,13 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <bcrypt.h>
 #include <windows.h>
+
+// bcrypt.h requires NTSTATUS which may be missing under WIN32_LEAN_AND_MEAN
+#ifndef _NTDEF_
+typedef LONG NTSTATUS;
+#endif
+#include <bcrypt.h>
 
 namespace ExplorerLens {
 namespace Engine {

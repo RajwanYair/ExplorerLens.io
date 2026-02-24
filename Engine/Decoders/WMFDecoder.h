@@ -9,10 +9,11 @@
 //==============================================================================
 
 #include "../Core/IThumbnailDecoder.h"
+#include <windows.h>
+#include <objidl.h>
 #include <gdiplus.h>
 #include <string>
 #include <vector>
-#include <windows.h>
 
 namespace ExplorerLens {
 namespace Engine {

@@ -5,8 +5,13 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0A00
 #endif
-#include <bcrypt.h>
 #include <windows.h>
+
+// bcrypt.h requires NTSTATUS which may be missing under WIN32_LEAN_AND_MEAN
+#ifndef _NTDEF_
+typedef LONG NTSTATUS;
+#endif
+#include <bcrypt.h>
 #pragma comment(lib, "bcrypt.lib")
 
 namespace ExplorerLens {
