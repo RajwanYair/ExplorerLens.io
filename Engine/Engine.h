@@ -1,7 +1,7 @@
 //==============================================================================
 // ExplorerLens Engine - Public API
 // Copyright (c) 2026 - ExplorerLens Project
-// Version: 14.0.0
+// Version: 15.0.0 "Zenith"
 //==============================================================================
 
 #pragma once
@@ -42,8 +42,15 @@ namespace Engine {
    EXPLORERLENS_ENGINE_VERSION_PATCH)
 #endif
 
-// Function declarations (implemented in EngineAPI.cpp)
+} // namespace Engine
+} // namespace ExplorerLens
+
+// Function declarations (implemented in EngineAPI.cpp) - included at global
+// scope to avoid creating nested ExplorerLens::Engine::ExplorerLens namespace
 #include "Core/EngineAPI.h"
+
+namespace ExplorerLens {
+namespace Engine {
 
 //==============================================================================
 /// Engine Information

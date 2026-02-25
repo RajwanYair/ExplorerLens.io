@@ -173,12 +173,14 @@ set(ENGINE_HEADERS
     # Core engine components
     Core/AccessibilityPipeline.h
     Core/AccessibilitySuiteV2.h
+    Core/AdaptiveDecoderRouter.h
     Core/AIThumbnailEnhancer.h
     Core/AnimatedThumbnailEngine.h
     Core/AsyncShellActivation.h
     Core/AsyncShellExtension.h
     Core/BatchProcessingEngine.h
     Core/BuildConfig.h
+    Core/CloudNativeSync.h
     Core/CloudStorageIntegration.h
     Core/CloudSyncProvider.h
     Core/Config.h
@@ -205,6 +207,7 @@ set(ENGINE_HEADERS
     Core/IFormatDetector.h
     Core/IGPURenderer.h
     Core/IThumbnailDecoder.h
+    Core/LivePreviewEngine.h
     Core/Logger.h
     Core/MetadataExtractor.h
     Core/MultiGPULoadBalancer.h
@@ -234,8 +237,10 @@ set(ENGINE_HEADERS
     Core/SIMDAccelerator.h
     Core/TelemetryDashboard.h
     Core/TelemetryEngine.h
+    Core/TelemetryPipeline.h
     Core/ThemeEngine.h
     Core/PerformanceActivation.h
+    Core/ThumbnailQualityAnalyzer.h
     Core/ThumbnailAnimationEngineV2.h
     Core/Types.h
     Core/UpdateEngine.h
@@ -503,6 +508,59 @@ set(ENGINE_HEADERS
     Utils/ReleaseGateV30.h
     Utils/ReleaseGateV31.h
     Utils/ReleaseGateV32.h
+    Utils/ReleaseGateV33.h
+
+    # Sprint 399-448: Zenith Ascent Feature Headers
+    Core/HDRToneMappingPipeline.h
+    Core/ColorSpaceEngine.h
+    Core/GPUTextureCompressionPipeline.h
+    Core/AdaptiveDPIScaler.h
+    Core/FormatFingerprintDB.h
+    Core/NestedArchivePreview.h
+    Core/MultiPageNavigator.h
+    Core/AnimatedFormatController.h
+    Core/MetadataExtractionPipeline.h
+    Core/ContentAwareThumbnailSelector.h
+    Core/FaceDetectionOrientation.h
+    Core/DocumentLayoutAnalyzer.h
+    Core/VisualSimilarityIndex.h
+    Core/SmartQualityPredictor.h
+    Pipeline/LockFreeDecodePipeline.h
+    Pipeline/MemoryMappedIOOptimizer.h
+    GPU/GPUTextureAtlasManager.h
+    Pipeline/PredictivePrefetchEngine.h
+    Pipeline/ThreadPoolOptimizer.h
+    Core/ARM64NEONScaler.h
+    Core/WindowsSearchProtocol.h
+    Core/VirtualFilesystemAbstraction.h
+    Core/RoleBasedFormatPolicy.h
+    Core/AuditTrailLogger.h
+    Core/ContentInspectionGateway.h
+    Core/CertificateTrustValidator.h
+    Core/EncryptedFormatHandler.h
+    Core/SelfHealingDecoder.h
+    Core/CrashAnalyticsCollector.h
+    Core/PerformanceAnomalyDetector.h
+    Core/DiagnosticReportGeneratorV2.h
+    Core/HealthCheckEndpoint.h
+    Core/PreviewTooltipRenderer.h
+    Core/FormatGalleryCompositor.h
+    Core/QuickActionsOverlay.h
+    Core/AccessibilityNarratorBridge.h
+    Core/UsageAnalyticsDashboard.h
+    Core/DecoderPerformanceProfiler.h
+    Cache/CacheEfficiencyAnalyzer.h
+    Core/FormatPopularityTracker.h
+    Core/SystemResourceMonitor.h
+    Core/MultiMonitorColorProfile.h
+    Core/RustFFIBridge.h
+    Core/DirectStorage12Integration.h
+    Core/NeuralTextureCompression.h
+    Core/QuantumReadyHashPipeline.h
+    GPU/WebGPUThumbnailRenderer.h
+    Core/WASMDecoderSandbox.h
+    Core/TelemetryPipelineV2.h
+    Core/LivePreviewStreamingProtocol.h
 )
 
 set(ENGINE_SOURCES

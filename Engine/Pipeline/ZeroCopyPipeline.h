@@ -92,6 +92,31 @@ struct ZeroCopyStats {
 
 class ZeroCopyPipeline {
 public:
+  /// Zero-copy pipeline stage
+  enum class ZeroCopyStage : uint8_t {
+    FileMap = 0,
+    GPUUpload,
+    CacheStore,
+    COUNT
+  };
+
+  static constexpr size_t StageCount() {
+    return static_cast<size_t>(ZeroCopyStage::COUNT);
+  }
+
+  static const wchar_t *StageName(ZeroCopyStage s) {
+    switch (s) {
+    case ZeroCopyStage::FileMap:
+      return L"File Map";
+    case ZeroCopyStage::GPUUpload:
+      return L"GPU Upload";
+    case ZeroCopyStage::CacheStore:
+      return L"Cache Store";
+    default:
+      return L"Unknown";
+    }
+  }
+
   static ZeroCopyBuffer AllocatePinned(size_t sizeBytes) {
     ZeroCopyBuffer buf;
     buf.sizeBytes = sizeBytes;
@@ -139,3 +164,15 @@ public:
 };
 
 } // namespace ExplorerLens::Pipeline
+
+// Expose to ExplorerLens::Engine namespace for test compatibility
+namespace ExplorerLens {
+namespace Engine {
+
+using ExplorerLens::Pipeline::BufferOrigin;
+using ExplorerLens::Pipeline::ZeroCopyBuffer;
+using ExplorerLens::Pipeline::ZeroCopyPipeline;
+using ZeroCopyStage = ZeroCopyPipeline::ZeroCopyStage;
+
+} // namespace Engine
+} // namespace ExplorerLens

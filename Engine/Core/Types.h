@@ -23,10 +23,10 @@ namespace Engine {
 // Version Information
 //==============================================================================
 
-#define EXPLORERLENS_ENGINE_VERSION_MAJOR 1
-#define EXPLORERLENS_ENGINE_VERSION_MINOR 0
-#define EXPLORERLENS_ENGINE_VERSION_PATCH 0
-#define EXPLORERLENS_ENGINE_VERSION "1.0.0"
+// Version Information — canonical version defined in Engine/Engine.h
+// These are kept in sync; use EXPLORERLENS_ENGINE_VERSION_MAJOR/MINOR/PATCH
+// from Engine.h for numeric checks, or EXPLORERLENS_ENGINE_VERSION_STRING
+// below.
 
 //==============================================================================
 // Forward Declarations
