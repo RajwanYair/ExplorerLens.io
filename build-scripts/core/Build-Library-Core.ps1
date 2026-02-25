@@ -326,10 +326,12 @@ function Invoke-CMakeBuild {
         }
     }
     
-    # Build CMake arguments
+    # Build CMake arguments (use forward slashes for CMake path compatibility)
+    $sourceDirCMake = $SourceDir.Replace('\', '/')
+    $buildDirCMake = $BuildDir.Replace('\', '/')
     $cmakeArgs = @(
-        "-S", "`"$SourceDir`"",
-        "-B", "`"$BuildDir`"",
+        "-S", "`"$sourceDirCMake`"",
+        "-B", "`"$buildDirCMake`"",
         "-G", "`"$($Script:BuildConfig.CMakeGenerator)`"",
         "-A", "x64",
         "-T", $Script:BuildConfig.CMakeToolset
@@ -337,15 +339,18 @@ function Invoke-CMakeBuild {
     
     # Add install directory if specified
     if ($InstallDir) {
-        $cmakeArgs += "-DCMAKE_INSTALL_PREFIX=`"$InstallDir`""
+        $installDirCMake = $InstallDir.Replace('\', '/')
+        $cmakeArgs += "-DCMAKE_INSTALL_PREFIX=`"$installDirCMake`""
     }
     
     # Add common options
     $cmakeArgs += "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded`$<`$<CONFIG:Debug>:Debug>DLL"
     
-    # Add custom options
+    # Add custom options (convert backslashes to forward slashes for CMake compatibility)
     foreach ($key in $CMakeOptions.Keys) {
         $value = [string]$CMakeOptions[$key]
+        # CMake treats backslashes as escape sequences — always use forward slashes in paths
+        $value = $value.Replace('\', '/')
         if ($value -match '[\s"]') {
             $escapedValue = $value.Replace('"', '`"')
             $cmakeArgs += "-D${key}=`"$escapedValue`""

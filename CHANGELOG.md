@@ -116,7 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Sprint 249:** Version sync and documentation cleanup — aligned all project files to v10.5.0
 - **Sprint 250:** Format registry refactor — enum class FormatType, FormatRegistry singleton, extension lookup
-- **Sprint 251:** cbxArchive.h split — FormatTypeLookup with 80+ extension mappings
+- **Sprint 251:** LENSArchive.h split — FormatTypeLookup with 80+ extension mappings
 - **Sprint 252-254:** Shell registration manager, test infrastructure V2, Release Gate V16
 
 ### Changed
