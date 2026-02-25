@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 234: Release Gate V12 — v10.2 release quality gate with 16 KPIs
+// ReleaseGateV12.h — Release Gate V12 — v10.2 release quality gate with 16 KPIs
 #include <string>
 #include <vector>
 #include <cstdint>

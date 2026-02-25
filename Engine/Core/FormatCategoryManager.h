@@ -1,5 +1,4 @@
 // FormatCategoryManager.h — Categorized Format Group Manager
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 369
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Organizes 200+ supported file formats into logical categories for the

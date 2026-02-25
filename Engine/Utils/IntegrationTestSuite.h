@@ -1,5 +1,4 @@
 // IntegrationTestSuite.h — Pre-Built Integration Test Suite
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 382
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Pre-defined integration test cases covering all 25 decoder families

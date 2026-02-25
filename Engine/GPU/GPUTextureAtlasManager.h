@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 415: GPU Texture Atlas Manager
+// GPUTextureAtlasManager.h — GPU Texture Atlas Manager
 // Batches multiple thumbnails into GPU texture atlases for efficient
 // rendering and reduced draw calls — supports dynamic sub-allocation.
 #include <algorithm>

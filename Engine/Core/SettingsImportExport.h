@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 371: Settings Import/Export
+// SettingsImportExport.h — Settings Import/Export
 // JSON-based settings serialization with preview and rollback.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

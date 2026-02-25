@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 414: Memory-Mapped I/O Optimizer
+// MemoryMappedIOOptimizer.h — Memory-Mapped I/O Optimizer
 // Direct file mapping for zero-copy decode of large images,
 // bypassing read() syscall overhead with demand-paged virtual memory.
 #include <cstdint>

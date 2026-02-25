@@ -1,5 +1,4 @@
 // PerformanceDashboard.h — Real-Time Performance Metrics for LENSManager
-// ExplorerLens Manager v15.0.0 "Zenith" — Sprint 372
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides a data model and UI helper for a performance dashboard tab in

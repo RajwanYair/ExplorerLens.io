@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 407: Metadata Extraction Pipeline
+// MetadataExtractionPipeline.h — Metadata Extraction Pipeline
 // Unified EXIF/XMP/IPTC/ICC metadata extraction with overlay rendering on
 // thumbnails — camera info, GPS, color profile, copyright, and ratings.
 #include <cstdint>

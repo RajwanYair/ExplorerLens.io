@@ -1,5 +1,4 @@
 // PDFDecoder.cpp - PDF Document Thumbnail Decoder Implementation
-// ExplorerLens Engine v15.0.0 "Zenith"
 // Copyright (c) 2026 ExplorerLens Project
 
 #include "PDFDecoder.h"
@@ -102,7 +101,7 @@ const wchar_t **PDFDecoder::GetSupportedExtensions() const {
 }
 
 // ============================================================================
-// MuPDF Native Rendering (Sprint 350)
+// MuPDF Native Rendering
 // ============================================================================
 
 #ifdef HAS_MUPDF

@@ -1,5 +1,4 @@
 // SystemTrayIcon.h — System Tray Integration for LENSManager
-// ExplorerLens Manager v15.0.0 "Zenith" — Sprint 375
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides notification area icon with context menu, balloon tips,

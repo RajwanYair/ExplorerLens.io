@@ -1,5 +1,4 @@
 // PerformanceDashboard.h — Real-Time Performance Statistics Dashboard
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 372
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Collects and displays engine performance metrics: cache hit rates,

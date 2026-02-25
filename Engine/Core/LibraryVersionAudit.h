@@ -1,5 +1,4 @@
 // LibraryVersionAudit.h — External Library Version Tracker and Auditor
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 364
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Maintains a compile-time registry of all external library versions.

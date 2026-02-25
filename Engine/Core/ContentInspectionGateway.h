@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 423: Content Inspection Gateway
+// ContentInspectionGateway.h — Content Inspection Gateway
 // DLP-compatible content inspection for enterprise environments — scans
 // thumbnails and source files for sensitive content before display.
 #include <cstdint>

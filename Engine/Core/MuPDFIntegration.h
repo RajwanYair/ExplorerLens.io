@@ -1,5 +1,4 @@
 // MuPDFIntegration.h — MuPDF PDF Rendering Integration Layer
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 350
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides a high-level wrapper around MuPDF's C API for PDF thumbnail

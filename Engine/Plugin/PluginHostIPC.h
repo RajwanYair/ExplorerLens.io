@@ -1,5 +1,4 @@
 // PluginHostIPC.h — Named Pipe IPC for Plugin Host Communication
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 363
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Implements the named pipe protocol between LENSShell.dll (in-process

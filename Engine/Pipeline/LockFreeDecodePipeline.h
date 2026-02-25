@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 413: Lock-Free Decode Pipeline
+// LockFreeDecodePipeline.h — Lock-Free Decode Pipeline
 // Wait-free concurrent thumbnail decode pipeline using MPSC queues and
 // atomic state machines — zero mutex contention under high load.
 #include <atomic>

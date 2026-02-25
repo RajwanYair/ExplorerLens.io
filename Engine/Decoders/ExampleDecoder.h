@@ -1,6 +1,5 @@
 //==============================================================================
 // ExampleDecoder.h - Reference Implementation Template
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2026 - ExplorerLens Project
 //
 // This is a complete reference implementation showing how to create a custom

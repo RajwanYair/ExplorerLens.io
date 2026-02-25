@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 419: Windows Search Protocol Handler
+// WindowsSearchProtocol.h — Windows Search Protocol Handler
 // IFilter + ISearchProtocol implementation for Windows Desktop Search
 // integration, enabling thumbnail metadata to appear in Windows Search results.
 #include <cstdint>

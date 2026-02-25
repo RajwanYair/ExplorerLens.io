@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 380: Code Coverage Engine
+// CodeCoverageEngine.h — Code Coverage Engine
 // Integrates OpenCppCoverage for tracking test coverage metrics.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

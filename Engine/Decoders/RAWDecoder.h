@@ -1,5 +1,4 @@
 // RAWDecoder.h - LibRaw Decoder for Camera RAW Formats
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: Canon CR2/CR3, Nikon NEF, Sony ARW, Adobe DNG, and 20+ camera RAW formats

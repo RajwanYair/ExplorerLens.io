@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 440: Multi-Monitor Color Profile Engine
+// MultiMonitorColorProfile.h — Multi-Monitor Color Profile Engine
 // Per-monitor ICC color profile application for thumbnails, ensuring
 // accurate color reproduction across displays with different gamuts.
 #include <cstdint>

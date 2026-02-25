@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 441: Rust FFI Bridge
+// RustFFIBridge.h — Rust FFI Bridge
 // Infrastructure for calling Rust-compiled decoders via C ABI,
 // enabling memory-safe decoder implementations while maintaining
 // performance through zero-copy buffer sharing.

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 448: Live Preview Streaming Protocol
+// LivePreviewStreamingProtocol.h — Live Preview Streaming Protocol
 // Real-time thumbnail streaming for remote/cloud files via
 // progressive decode with adaptive quality based on bandwidth.
 #include <cstddef>

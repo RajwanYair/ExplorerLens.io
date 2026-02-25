@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 373-374: Dark Mode Engine
+// DarkModeEngine.h — Dark Mode Engine
 // Full dark mode with owner-drawn controls and theme detection.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

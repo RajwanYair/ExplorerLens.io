@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 376-378: WinUI 3 Migration Engine
+// WinUI3MigrationEngine.h — WinUI 3 Migration Engine
 // Hybrid WTL + WinUI 3 UI framework with shared backend.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

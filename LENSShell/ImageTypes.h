@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // ImageTypes.h — Image format type constants
 //
-// Extracted from LENSArchive.h (Sprint 355) to support modular header
+// Extracted from LENSArchive.h to support modular header
 // organization. These constants identify image sub-formats detected within
 // archive/eBook containers for routing to the correct image decoder.
 //

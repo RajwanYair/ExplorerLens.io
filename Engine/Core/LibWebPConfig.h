@@ -1,5 +1,4 @@
 // LibWebPConfig.h — libwebp CRT Configuration and Runtime Validator
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 351
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Validates that libwebp is linked with matching CRT (/MD vs /MT) at compile

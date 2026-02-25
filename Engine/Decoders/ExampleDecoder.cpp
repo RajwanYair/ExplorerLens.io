@@ -1,6 +1,5 @@
 //==============================================================================
 // ExampleDecoder.cpp - Reference Implementation Template
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 

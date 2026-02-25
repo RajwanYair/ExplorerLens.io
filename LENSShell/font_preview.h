@@ -5,7 +5,7 @@
 #include <d2d1.h>
 #include <dwrite.h>
 
-// Sprint 9 Phase 1: Font File Preview Rendering
+// font_preview.h — Font File Preview Rendering
 // Supports: TTF, OTF, WOFF, WOFF2
 //
 // Uses DirectWrite for high-quality font rendering

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 400: Color Space Management Engine
+// ColorSpaceEngine.h — Color Space Management Engine
 // ICC profile-aware color pipeline for accurate thumbnail color reproduction.
 // Handles wide gamut (DCI-P3, Rec.2020, ProPhoto) to sRGB conversion.
 #include <array>

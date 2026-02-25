@@ -1,5 +1,4 @@
 // DeadCodeAudit.h — Dead Code Detection and Cleanup Tracker
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 353
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Tracks deprecated files, stale references, and dead code paths
@@ -64,7 +63,7 @@ public:
         return instance;
     }
 
-    /// Get all findings from the v15.0 cleanup audit
+    /// Get all findings from the cleanup audit
     const std::vector<DeadCodeFinding>& GetFindings() const { return m_findings; }
 
     /// Count findings by status
@@ -143,7 +142,7 @@ public:
 
 private:
     DeadCodeAudit() {
-        // Populate with known findings from v15.0 audit
+        // Populate with known findings from dead code audit
         m_findings = {
             { "Engine/Decoders/WMFDecoder_old.cpp",
               "Obsolete WMF decoder superseded by WMFDecoder.cpp",

@@ -1,12 +1,11 @@
 /******************************************************************************
- * ExplorerLens — Sprint 34: Supply-Chain Security & Reproducible Releases
+ * SupplyChainSecurity.h — Supply-Chain Security & Reproducible Releases
  * Copyright (c) 2026 — ExplorerLens Project
  *
  * SBOM generation (SPDX/CycloneDX), reproducible build settings,
  * dependency provenance tracking, CI policy gates, and signed release
  * manifests for deterministic, traceable release artifacts.
  *
- * Exit criteria: release artifacts reproducible & fully traceable
  *                with SBOM + signed checksums.
  *****************************************************************************/
 

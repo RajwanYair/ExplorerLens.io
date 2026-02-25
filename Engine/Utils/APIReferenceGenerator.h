@@ -1,5 +1,4 @@
 // APIReferenceGenerator.h — Engine API Reference Generator
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 387
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Generates API reference documentation from engine headers.

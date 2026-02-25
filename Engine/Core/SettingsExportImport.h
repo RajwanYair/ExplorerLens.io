@@ -1,5 +1,4 @@
 // SettingsExportImport.h — JSON-Based Settings Export/Import
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 371
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Enables users to export/import ExplorerLens configuration as JSON files.

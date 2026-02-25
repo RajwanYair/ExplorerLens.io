@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 353: Dead Code Auditor
+// DeadCodeAuditor.h — Dead Code Auditor
 // Identifies and tracks dead/stale code across the codebase.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

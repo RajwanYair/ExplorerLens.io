@@ -1,5 +1,4 @@
 // OpenJPEGIntegration.h — OpenJPEG 2.5.x JPEG 2000 Decoder Integration
-// ExplorerLens Engine v15.0.0 "Zenith"
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides JPEG 2000 Part 1/2 decoding via OpenJPEG library, replacing the

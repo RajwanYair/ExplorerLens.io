@@ -1,7 +1,7 @@
 /******************************************************************************
  * audio_thumbnail.cpp
- * Audio Thumbnail Generation Implementation for ExplorerLens
- * Sprint 8: Extract album art from audio files and generate waveform visualizations
+ * audio_thumbnail.cpp — Audio Thumbnail Generation Implementation
+ * Extracts album art from audio files and generates waveform visualizations
  ******************************************************************************/
 
 #include "StdAfx.h"

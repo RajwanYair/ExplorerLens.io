@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 426: Self-Healing Decoder Pipeline
+// SelfHealingDecoder.h — Self-Healing Decoder Pipeline
 // Auto-recovery from decoder crashes via process isolation, watchdog timers,
 // and automatic retry with degraded quality fallback.
 #include <cstdint>

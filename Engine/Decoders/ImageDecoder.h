@@ -1,5 +1,4 @@
 // ImageDecoder.h - WIC-based Image Decoder for Core Formats
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2025 ExplorerLens Project
 //
 // Supports: JPEG, PNG, BMP, GIF, TIFF using Windows Imaging Component

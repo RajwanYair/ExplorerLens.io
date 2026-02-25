@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 425: Encrypted Format Handler
+// EncryptedFormatHandler.h — Encrypted Format Handler
 // Support for password-protected and encrypted file formats (encrypted
 // ZIP/RAR/7z, encrypted PDF, EFS/BitLocker-protected files) with secure key
 // management.

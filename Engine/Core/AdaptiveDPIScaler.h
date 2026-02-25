@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 402: Adaptive DPI Scaler
+// AdaptiveDPIScaler.h — Adaptive DPI Scaler
 // Per-monitor DPI-aware thumbnail scaling with fractional scale factors,
 // ensuring pixel-perfect rendering on mixed-DPI multi-monitor setups.
 #include <algorithm>

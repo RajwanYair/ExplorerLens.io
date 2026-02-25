@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 437: Cache Efficiency Analyzer
+// CacheEfficiencyAnalyzer.h — Cache Efficiency Analyzer
 // Analyzes cache performance patterns — identifies cold spots, wasted capacity,
 // optimal eviction parameters, and recommends budget adjustments.
 #include <cstdint>

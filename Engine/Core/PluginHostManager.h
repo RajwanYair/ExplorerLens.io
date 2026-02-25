@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 362-363: Plugin Host Manager
+// PluginHostManager.h — Plugin Host Manager
 // Out-of-process plugin execution with named pipe IPC.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

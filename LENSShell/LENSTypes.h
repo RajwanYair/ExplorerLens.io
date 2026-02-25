@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // LENSTypes.h — Format type constants and image type identifiers
 //
-// Extracted from LENSArchive.h (Sprint 354) to reduce monolithic header size.
+// Extracted from LENSArchive.h to reduce monolithic header size.
 // These constants define the file format identifiers used throughout the
 // LENSShell extension for routing files to the appropriate decoder.
 //

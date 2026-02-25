@@ -1,12 +1,11 @@
 /******************************************************************************
- * ExplorerLens — Sprint 33: Crash Intelligence & Symbol Pipeline
+ * CrashIntelligence.h — Crash Intelligence & Symbol Pipeline
  * Copyright (c) 2026 — ExplorerLens Project
  *
  * Automated minidump capture, symbol pipeline, crash bucketing, and
  * diagnostic integration for fast crash triage across shell/engine/plugin.
  * Extends Engine/Plugin/CrashHandler.h with deep crash analysis.
  *
- * Exit criteria: any crash symbolized & bucketed in <5 minutes.
  *****************************************************************************/
 
 #pragma once

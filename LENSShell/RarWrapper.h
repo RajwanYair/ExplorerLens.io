@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // RarWrapper.h — RAR Archive Reader
 //
-// Extracted from LENSArchive.h (Sprint 355). Wraps the UnRAR DLL API
+// Extracted from LENSArchive.h. Wraps the UnRAR DLL API
 // to provide a simple C++ interface for reading RAR-based archives
 // (RAR, CBR). Supports RAR5 and legacy RAR4 formats.
 //

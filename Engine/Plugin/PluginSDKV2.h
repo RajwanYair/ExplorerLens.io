@@ -35,8 +35,8 @@ enum class PluginSDKV2LifeCycle : uint8_t {
 
 enum class PluginAPIVersion : uint8_t {
   V1_0 = 0,  // Original
-  V1_5,      // Sprint 150 — sandbox
-  V2_0,      // Sprint 310 — full async + typed returns
+  V1_5,// Sandbox
+  V2_0,// Full async + typed returns
   V2 = V2_0, // compat alias
   COUNT = V2_0 + 1
 };

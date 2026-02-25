@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 445: WebGPU Thumbnail Renderer
+// WebGPUThumbnailRenderer.h — WebGPU Thumbnail Renderer
 // Cross-API GPU rendering backend using WebGPU (Dawn) for
 // future-proof GPU abstraction beyond D3D11/D3D12/Vulkan.
 #include <cstddef>

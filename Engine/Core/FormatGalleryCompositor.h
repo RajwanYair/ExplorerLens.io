@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 432: Format Gallery Compositor
+// FormatGalleryCompositor.h — Format Gallery Compositor
 // Generates composite gallery views from folders — mosaic, grid, collage,
 // and fan layouts for folder thumbnail previews in Explorer.
 #include <algorithm>

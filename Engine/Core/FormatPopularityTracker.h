@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 438: Format Popularity Tracker
+// FormatPopularityTracker.h — Format Popularity Tracker
 // Tracks format usage statistics to optimize decoder loading order,
 // cache eviction priority, and resource allocation.
 #include <cstdint>

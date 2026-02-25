@@ -1,5 +1,4 @@
 // FreeTypeIntegration.h — FreeType 2.x Font Rendering Integration
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 366
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides high‐quality font preview rendering using FreeType + HarfBuzz.

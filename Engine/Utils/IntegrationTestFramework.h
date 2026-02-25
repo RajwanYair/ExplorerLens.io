@@ -1,5 +1,4 @@
 // IntegrationTestFramework.h — Integration Test Infrastructure
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 381
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides infrastructure for integration tests that exercise the full

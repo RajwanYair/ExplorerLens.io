@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 444: Quantum-Ready Hash Pipeline
+// QuantumReadyHashPipeline.h — Quantum-Ready Hash Pipeline
 // Future-proof content hashing using post-quantum algorithms (SHAKE-256,
 // BLAKE3) alongside traditional SHA-256 for smooth migration path.
 #include <cstddef>

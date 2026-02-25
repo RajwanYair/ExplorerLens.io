@@ -1,6 +1,5 @@
-// PropertyStoreImpl.cpp — IPropertyStore implementation for Explorer Details
-// Pane ExplorerLens Engine v15.0.0 "Zenith" — Sprint 358-359 Copyright (c) 2026
-// ExplorerLens Project
+// PropertyStoreImpl.cpp — IPropertyStore implementation for Explorer Details Pane
+// Copyright (c) 2026 ExplorerLens Project
 
 #include "PropertyStoreImpl.h"
 #include "LENSTypes.h"

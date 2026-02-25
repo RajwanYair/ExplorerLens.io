@@ -1,5 +1,4 @@
 // FormatStatusProvider.h — Live format status for Settings UI traffic lights
-// ExplorerLens Manager v15.0.0 "Zenith" — Sprint 370
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Bridges DecoderHealthCheck with the dialog UI to show green/yellow/red

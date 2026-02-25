@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 429: Diagnostic Report Generator V2
+// DiagnosticReportGeneratorV2.h — Diagnostic Report Generator V2
 // Comprehensive one-click diagnostic report generation covering system info,
 // GPU capabilities, decoder health, cache stats, and recent errors.
 #include <cstdint>

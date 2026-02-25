@@ -1,5 +1,4 @@
 // PDFDecoder.h - PDF Document Thumbnail Decoder
-// ExplorerLens Engine v15.0.0 "Zenith"
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Supports: PDF (.pdf)

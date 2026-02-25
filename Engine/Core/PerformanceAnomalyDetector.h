@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 428: Performance Anomaly Detector
+// PerformanceAnomalyDetector.h — Performance Anomaly Detector
 // Runtime performance monitoring that detects decode time spikes, memory leaks,
 // GPU stalls, and throughput degradation — alerts via ETW and UI.
 #include <cstdint>

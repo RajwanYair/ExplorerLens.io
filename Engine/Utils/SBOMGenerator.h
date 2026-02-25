@@ -1,5 +1,4 @@
 // SBOMGenerator.h — Software Bill of Materials Generator
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 385
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Generates SPDX and CycloneDX SBOM documents for ExplorerLens, listing

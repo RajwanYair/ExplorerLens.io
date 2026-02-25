@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 424: Certificate Trust Validator
+// CertificateTrustValidator.h — Certificate Trust Validator
 // Validates code-signing certificates for plugins and decode libraries,
 // enforcing trust chains rooted in approved CAs.
 #include <cstdint>

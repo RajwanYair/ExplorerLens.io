@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 411: Visual Similarity Index
+// VisualSimilarityIndex.h — Visual Similarity Index
 // Perceptual hashing (pHash/dHash/aHash) and embedding-based similarity search
 // for duplicate detection and visual clustering in large thumbnail caches.
 #include <cmath>

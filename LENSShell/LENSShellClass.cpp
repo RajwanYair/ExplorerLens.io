@@ -167,7 +167,7 @@ HRESULT CLENSShell::GetThumbnail_Internal(UINT cx, HBITMAP *phBmpThumbnail,
 
 // ============================================================================
 // IThumbnailProvider::GetThumbnail - Modern Windows 10/11 interface
-// SEH wrapper for crash protection (Sprint 22, Task 22.1)
+// SEH wrapper for crash protection
 // ============================================================================
 STDMETHODIMP CLENSShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
                                       WTS_ALPHATYPE *pdwAlpha) {
@@ -176,7 +176,7 @@ STDMETHODIMP CLENSShell::GetThumbnail(UINT cx, HBITMAP *phBmpThumbnail,
 
   // ========================================================================
   // CRITICAL: SEH wrapper to prevent Explorer crashes
-  // Sprint 22, Task 22.1: Structured exception handling
+  // Uses structured exception handling to isolate decoder faults
   // ========================================================================
   __try {
     return GetThumbnail_Internal(cx, phBmpThumbnail, pdwAlpha);
@@ -245,7 +245,7 @@ STDMETHODIMP CLENSShell::Initialize(IStream *pstream, DWORD grfMode) {
 }
 
 // ============================================================================
-// IPropertyStore — Explorer Details Pane metadata (v15.0.0, Sprint 358-359)
+// IPropertyStore — Explorer Details Pane metadata
 // ============================================================================
 
 STDMETHODIMP CLENSShell::GetCount(DWORD *cProps) {

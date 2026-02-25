@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 409: Face Detection Orientation Engine
+// FaceDetectionOrientation.h — Face Detection Orientation Engine
 // EXIF orientation correction + face detection for auto-rotation of portrait
 // thumbnails, ensuring faces are always upright and centered.
 #include <cstdint>

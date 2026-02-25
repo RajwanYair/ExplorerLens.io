@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 447: Telemetry Pipeline V2
+// TelemetryPipelineV2.h — Telemetry Pipeline V2
 // Privacy-first structured telemetry with differential privacy,
 // local aggregation, and configurable data retention policies.
 #include <cstddef>

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 420: Virtual Filesystem Abstraction
+// VirtualFilesystemAbstraction.h — Virtual Filesystem Abstraction
 // Unified file access layer for local, cloud, network, and virtual filesystems
 // (OneDrive placeholders, FUSE mounts, WSL, etc.) with transparent caching.
 #include <cstdint>

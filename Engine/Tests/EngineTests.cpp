@@ -175,108 +175,108 @@
 #include "../Utils/Win11IntegrationManager.h"
 #include "../Utils/Windows12Compatibility.h"
 
-// ===== v15.0.0 "Zenith" Sprint Includes (349-398) =====
+// ===== Feature Module Includes =====
 
-// Sprint 350: MuPDF PDF support
+// EngineTests.h — MuPDF PDF support
 #include "../Core/MuPDFIntegration.h"
 
-// Sprint 351: libwebp CRT fix
+// EngineTests.h — libwebp CRT fix
 #include "../Core/LibWebPConfig.h"
 
-// Sprint 354-355: LENSArchive refactoring
+// EngineTests.h — LENSArchive refactoring
 #include "../Core/ArchiveRefactorEngine.h"
 
-// Sprint 356: Bitmap Pool
+// EngineTests.h — Bitmap Pool
 #include "../Memory/BitmapPool.h"
 
-// Sprint 358-359: IPropertyStore
+// EngineTests.h — IPropertyStore
 #include "../Core/PropertyStoreHandler.h"
 
-// Sprint 360-361: GPU Shader Library
+// EngineTests.h — GPU Shader Library
 #include "../Core/GPUShaderLibrary.h"
 
-// Sprint 362-363: PluginHost
+// EngineTests.h — PluginHost
 #include "../Core/PluginHostManager.h"
 
-// Sprint 364: Library Version Audit
+// EngineTests.h — Library Version Audit
 #include "../Core/LibraryVersionAudit.h"
 
-// Sprint 365: OpenJPEG
+// EngineTests.h — OpenJPEG
 #include "../Core/OpenJPEGIntegration.h"
 
-// Sprint 366: FreeType
+// EngineTests.h — FreeType
 #include "../Core/FreeTypeIntegration.h"
 
-// Sprint 367-368: FFmpeg
+// EngineTests.h — FFmpeg
 #include "../Core/FFmpegIntegration.h"
 
-// Sprint 369: Format Categories
+// EngineTests.h — Format Categories
 #include "../Core/FormatCategoryManager.h"
 
-// Sprint 370: Format Status
+// EngineTests.h — Format Status
 #include "../Core/FormatStatusIndicator.h"
 
-// Sprint 371: Settings Import/Export
+// EngineTests.h — Settings Import/Export
 #include "../Core/SettingsExportImport.h"
 
-// Sprint 372: Performance Dashboard
+// EngineTests.h — Performance Dashboard
 #include "../Core/PerformanceDashboard.h"
 
-// Sprint 373-374: Dark Mode
+// EngineTests.h — Dark Mode
 #include "../Core/DarkModeEngine.h"
 
-// Sprint 375: System Tray
+// EngineTests.h — System Tray
 #include "../Core/SystemTrayManager.h"
 
-// Sprint 376-378: WinUI 3 Migration
+// EngineTests.h — WinUI 3 Migration
 #include "../Core/WinUI3MigrationEngine.h"
 
-// Sprint 379: CI Hardening
+// EngineTests.h — CI Hardening
 #include "../Core/CIHardeningEngine.h"
 
-// Sprint 380: Code Coverage
+// EngineTests.h — Code Coverage
 #include "../Core/CodeCoverageEngine.h"
 
-// Sprint 383: Fuzzing Campaign
+// EngineTests.h — Fuzzing Campaign
 #include "../Utils/FuzzingCampaign.h"
 
-// Sprint 384: Static Analysis
+// EngineTests.h — Static Analysis
 #include "../Utils/StaticAnalysisGate.h"
 
-// Sprint 385: SBOM
+// EngineTests.h — SBOM
 #include "../Utils/SBOMGenerator.h"
 
-// Sprint 389: Zero-Copy Pipeline
+// EngineTests.h — Zero-Copy Pipeline
 #include "../Pipeline/ZeroCopyPipeline.h"
 
-// Sprint 390: Parallel I/O
+// EngineTests.h — Parallel I/O
 #include "../Pipeline/ParallelIOPipeline.h"
 
-// Sprint 391: SIMD Scaler
+// EngineTests.h — SIMD Scaler
 #include "../Utils/SIMDScaler.h"
 
-// Sprint 392: PSO Cache
+// EngineTests.h — PSO Cache
 #include "../Cache/PipelineStateCacheV2.h"
 
-// Sprint 393: Cache Warming
+// EngineTests.h — Cache Warming
 #include "../Cache/CacheWarmingService.h"
 
-// Sprint 394: Thumbnail Quality Analyzer
+// EngineTests.h — Thumbnail Quality Analyzer
 #include "../Core/ThumbnailQualityAnalyzer.h"
 
-// Sprint 395: Adaptive Decoder Router
+// EngineTests.h — Adaptive Decoder Router
 #include "../Core/AdaptiveDecoderRouter.h"
 
-// Sprint 396: Telemetry Pipeline
+// EngineTests.h — Telemetry Pipeline
 #include "../Core/TelemetryPipeline.h"
 
-// Sprint 397: Live Preview Engine
+// EngineTests.h — Live Preview Engine
 #include "../Core/LivePreviewEngine.h"
 
-// Sprint 398: Cloud Native Sync
+// EngineTests.h — Cloud Native Sync
 #include "../Core/CloudNativeSync.h"
 
-// Sprint 399-448: Zenith Ascent Feature Headers
+// EngineTests.h — Zenith Ascent Feature Headers
 #include "../Cache/CacheEfficiencyAnalyzer.h"
 #include "../Core/ARM64NEONScaler.h"
 #include "../Core/AccessibilityNarratorBridge.h"
@@ -8726,10 +8726,10 @@ TEST(TestGateV32_v14Approved) {
 }
 
 //==============================================================================
-// v15.0.0 "Zenith" Sprint Tests (349-398)
+// Feature Module Tests
 //==============================================================================
 
-// ---- Sprint 349: Version Synchronization ----
+// ---- Version Synchronization ----
 TEST(TestZenith_VersionMajor) {
   ASSERT(EXPLORERLENS_ENGINE_VERSION_MAJOR == 15);
 }
@@ -8744,7 +8744,7 @@ TEST(TestZenith_VersionComposite) {
   ASSERT(v == ((15 << 16) | (0 << 8) | 0));
 }
 
-// ---- Sprint 350: MuPDF PDF Support ----
+// ---- MuPDF PDF Support ----
 TEST(TestZenith_MuPDFBackendNames) {
   ASSERT(std::wstring(MuPDFIntegration::BackendName(MuPDFBackend::Native)) ==
          L"MuPDF Native");
@@ -8760,7 +8760,7 @@ TEST(TestZenith_MuPDFPageConfig) {
   ASSERT(cfg.maxPages == 1);
 }
 
-// ---- Sprint 351: libwebp CRT Clean ----
+// ---- libwebp CRT Clean ----
 TEST(TestZenith_LibWebPConfigDefaults) {
   LibWebPConfig cfg;
   ASSERT(cfg.useDynamicCRT == true);
@@ -8773,7 +8773,7 @@ TEST(TestZenith_LibWebPConfigName) {
          L"Static (/MT)");
 }
 
-// ---- Sprint 354-355: LENSArchive Refactoring ----
+// ---- LENSArchive Refactoring ----
 TEST(TestZenith_ArchiveRefactorModules) {
   ASSERT(ArchiveRefactorEngine::ModuleCount() >= 4);
 }
@@ -8786,7 +8786,7 @@ TEST(TestZenith_ArchiveRefactorModuleNames) {
              RefactorModule::RarWrapper)) == L"RarWrapper");
 }
 
-// ---- Sprint 356: Bitmap Pool ----
+// ---- Bitmap Pool ----
 TEST(TestZenith_BitmapPoolConfig) {
   BitmapPoolConfig cfg;
   ASSERT(cfg.width == 256);
@@ -8806,7 +8806,7 @@ TEST(TestZenith_BitmapPoolStatsHitRate) {
   ASSERT(stats.HitRate() == 85.0);
 }
 
-// ---- Sprint 358-359: IPropertyStore Handler ----
+// ---- IPropertyStore Handler ----
 TEST(TestZenith_PropertyIDNames) {
   ASSERT(static_cast<uint32_t>(PropertyID::ImageWidth) == 0x1001);
   ASSERT(static_cast<uint32_t>(PropertyID::ImageHeight) == 0x1002);
@@ -8827,7 +8827,7 @@ TEST(TestZenith_PropertyCapabilities) {
   ASSERT(caps == 0x0F);
 }
 
-// ---- Sprint 360-361: GPU Shader Library ----
+// ---- GPU Shader Library ----
 TEST(TestZenith_GPUShaderTypes) {
   ASSERT(std::wstring(GPUShaderLibrary::ShaderName(
              GPUShaderLibrary::ShaderType::LanczosResize)) == L"LanczosResize");
@@ -8851,7 +8851,7 @@ TEST(TestZenith_GPUColorSpaces) {
   ASSERT(static_cast<int>(GPUShaderLibrary::ColorSpace::COUNT) >= 5);
 }
 
-// ---- Sprint 362-363: PluginHost Out-of-Process ----
+// ---- PluginHost Out-of-Process ----
 TEST(TestZenith_PluginHostModes) {
   ASSERT(PluginHostManager::ModeCount() >= 3);
 }
@@ -8862,7 +8862,7 @@ TEST(TestZenith_PluginHostModeNames) {
              PluginHostMode::OutOfProcess)) == L"Out-of-Process");
 }
 
-// ---- Sprint 364: Library Version Audit ----
+// ---- Library Version Audit ----
 TEST(TestZenith_LibVersionAuditFields) {
   ASSERT(LibraryVersionAudit::LibraryCount() >= 10);
 }
@@ -8873,7 +8873,7 @@ TEST(TestZenith_LibVersionAuditNames) {
              LibraryStatus::UpdateAvailable)) == L"Update Available");
 }
 
-// ---- Sprint 365: OpenJPEG JPEG 2000 ----
+// ---- OpenJPEG JPEG 2000 ----
 TEST(TestZenith_OpenJPEGProfiles) {
   ASSERT(OpenJPEGIntegration::ProfileCount() >= 3);
 }
@@ -8884,7 +8884,7 @@ TEST(TestZenith_OpenJPEGProfileNames) {
              JPEG2000Profile::Part2)) == L"Part 2 (JPX)");
 }
 
-// ---- Sprint 366: FreeType Font Rendering ----
+// ---- FreeType Font Rendering ----
 TEST(TestZenith_FreeTypeRenderModes) {
   ASSERT(FreeTypeIntegration::RenderModeCount() >= 3);
 }
@@ -8895,7 +8895,7 @@ TEST(TestZenith_FreeTypeRenderModeNames) {
              FontRenderMode::Subpixel)) == L"Subpixel");
 }
 
-// ---- Sprint 367-368: FFmpeg Integration ----
+// ---- FFmpeg Integration ----
 TEST(TestZenith_FFmpegCodecFamilies) {
   ASSERT(static_cast<int>(FFmpegCodecFamily::H264) == 1);
   ASSERT(static_cast<int>(FFmpegCodecFamily::VP9) == 4);
@@ -8918,7 +8918,7 @@ TEST(TestZenith_FFmpegFrameResult) {
   ASSERT(fr.pixelData.empty());
 }
 
-// ---- Sprint 369: Format Category Manager ----
+// ---- Format Category Manager ----
 TEST(TestZenith_FormatCategoryCount) {
   ASSERT(FormatCategoryManager::CategoryCount() >= 6);
 }
@@ -8931,7 +8931,7 @@ TEST(TestZenith_FormatCategoryNames) {
              FormatCategoryGroup::Video)) == L"Video");
 }
 
-// ---- Sprint 370: Format Status Indicator ----
+// ---- Format Status Indicator ----
 TEST(TestZenith_FormatStatusLevels) {
   ASSERT(FormatStatusIndicator::StatusCount() >= 3);
 }
@@ -8944,7 +8944,7 @@ TEST(TestZenith_FormatStatusNames) {
              FormatStatus::Unavailable)) == L"Unavailable");
 }
 
-// ---- Sprint 371: Settings Import/Export ----
+// ---- Settings Import/Export ----
 TEST(TestZenith_SettingsFormatNames) {
   ASSERT(SettingsExportImport::FormatCount() >= 2);
 }
@@ -8953,7 +8953,7 @@ TEST(TestZenith_SettingsFormatJSON) {
          L"JSON");
 }
 
-// ---- Sprint 372: Performance Dashboard ----
+// ---- Performance Dashboard ----
 TEST(TestZenith_PerfDashboardMetrics) {
   ASSERT(PerformanceDashboard::MetricCount() >= 5);
 }
@@ -8964,7 +8964,7 @@ TEST(TestZenith_PerfDashboardMetricNames) {
              DashboardMetric::CacheHitRate)) == L"Cache Hit Rate");
 }
 
-// ---- Sprint 373-374: Dark Mode Engine ----
+// ---- Dark Mode Engine ----
 TEST(TestZenith_DarkModeThemes) { ASSERT(DarkModeEngine::ThemeCount() >= 3); }
 TEST(TestZenith_DarkModeThemeNames) {
   ASSERT(std::wstring(DarkModeEngine::ThemeName(AppTheme::Light)) == L"Light");
@@ -8973,7 +8973,7 @@ TEST(TestZenith_DarkModeThemeNames) {
          L"System");
 }
 
-// ---- Sprint 375: System Tray Manager ----
+// ---- System Tray Manager ----
 TEST(TestZenith_SystemTrayActions) {
   ASSERT(SystemTrayManager::ActionCount() >= 3);
 }
@@ -8984,7 +8984,7 @@ TEST(TestZenith_SystemTrayActionNames) {
          L"Show Status");
 }
 
-// ---- Sprint 376-378: WinUI 3 Migration ----
+// ---- WinUI 3 Migration ----
 TEST(TestZenith_WinUI3PhaseCount) {
   ASSERT(WinUI3MigrationEngine::PhaseCount() >= 3);
 }
@@ -8997,7 +8997,7 @@ TEST(TestZenith_WinUI3PhaseNames) {
              MigrationPhase::FeatureParity)) == L"Feature Parity");
 }
 
-// ---- Sprint 379: CI Hardening ----
+// ---- CI Hardening ----
 TEST(TestZenith_CIConfigCount) {
   ASSERT(CIHardeningEngine::ConfigCount() >= 3);
 }
@@ -9010,7 +9010,7 @@ TEST(TestZenith_CIConfigNames) {
          L"ARM64 Cross-Compile");
 }
 
-// ---- Sprint 380: Code Coverage ----
+// ---- Code Coverage ----
 TEST(TestZenith_CoverageTargets) {
   ASSERT(CodeCoverageEngine::TargetCount() >= 3);
 }
@@ -9022,7 +9022,7 @@ TEST(TestZenith_CoverageTargetNames) {
              CodeCoverageEngine::CoverageTarget::Decoders)) == L"Decoders");
 }
 
-// ---- Sprint 383: Fuzzing Campaign ----
+// ---- Fuzzing Campaign ----
 TEST(TestZenith_FuzzingStrategies) {
   ASSERT(FuzzingCampaign::StrategyCount() >= 3);
 }
@@ -9033,7 +9033,7 @@ TEST(TestZenith_FuzzingStrategyNames) {
              FuzzStrategy::StructureAware)) == L"Structure-Aware");
 }
 
-// ---- Sprint 384: Static Analysis Gate ----
+// ---- Static Analysis Gate ----
 TEST(TestZenith_StaticAnalysisTools) {
   ASSERT(StaticAnalysisGate::ToolCount() >= 2);
 }
@@ -9044,7 +9044,7 @@ TEST(TestZenith_StaticAnalysisToolNames) {
          L"cppcheck");
 }
 
-// ---- Sprint 385: SBOM Generator ----
+// ---- SBOM Generator ----
 TEST(TestZenith_SBOMFormats) { ASSERT(SBOMGenerator::FormatCount() >= 2); }
 TEST(TestZenith_SBOMFormatNames) {
   ASSERT(std::wstring(SBOMGenerator::FormatName(SBOMOutputFormat::SPDX)) ==
@@ -9053,7 +9053,7 @@ TEST(TestZenith_SBOMFormatNames) {
          L"CycloneDX");
 }
 
-// ---- Sprint 389: Zero-Copy Pipeline ----
+// ---- Zero-Copy Pipeline ----
 TEST(TestZenith_ZeroCopyStages) { ASSERT(ZeroCopyPipeline::StageCount() >= 3); }
 TEST(TestZenith_ZeroCopyStageNames) {
   ASSERT(std::wstring(ZeroCopyPipeline::StageName(ZeroCopyStage::FileMap)) ==
@@ -9064,7 +9064,7 @@ TEST(TestZenith_ZeroCopyStageNames) {
          L"Cache Store");
 }
 
-// ---- Sprint 390: Parallel I/O Pipeline ----
+// ---- Parallel I/O Pipeline ----
 TEST(TestZenith_ParallelIOPolicies) {
   ASSERT(ParallelIOPipeline::PolicyCount() >= 3);
 }
@@ -9075,7 +9075,7 @@ TEST(TestZenith_ParallelIOPolicyNames) {
              IOPolicy::ParallelBatch)) == L"Parallel Batch");
 }
 
-// ---- Sprint 391: SIMD Scaler ----
+// ---- SIMD Scaler ----
 TEST(TestZenith_SIMDScalerPaths) { ASSERT(SIMDScaler::PathCount() >= 3); }
 TEST(TestZenith_SIMDScalerPathNames) {
   ASSERT(std::wstring(SIMDScaler::PathName(SIMDPath::Scalar)) == L"Scalar");
@@ -9083,7 +9083,7 @@ TEST(TestZenith_SIMDScalerPathNames) {
   ASSERT(std::wstring(SIMDScaler::PathName(SIMDPath::AVX2)) == L"AVX2");
 }
 
-// ---- Sprint 392: PSO Cache ----
+// ---- PSO Cache ----
 TEST(TestZenith_PSOCacheStrategies) {
   ASSERT(PipelineStateCacheV2::StrategyCount() >= 2);
 }
@@ -9094,7 +9094,7 @@ TEST(TestZenith_PSOCacheStrategyNames) {
              PSOCacheStrategy::PersistentDisk)) == L"Persistent Disk");
 }
 
-// ---- Sprint 393: Cache Warming ----
+// ---- Cache Warming ----
 TEST(TestZenith_CacheWarmingModes) {
   ASSERT(CacheWarmingService::ModeCount() >= 3);
 }
@@ -9107,7 +9107,7 @@ TEST(TestZenith_CacheWarmingModeNames) {
          L"On Demand");
 }
 
-// ---- Sprint 394: Thumbnail Quality Analyzer ----
+// ---- Thumbnail Quality Analyzer ----
 TEST(TestZenith_QualityMetrics) {
   ASSERT(ThumbnailQualityAnalyzer::MetricCount() == 8);
 }
@@ -9150,7 +9150,7 @@ TEST(TestZenith_QualityThresholds) {
   ASSERT(t.maxDeltaE == 3.0);
 }
 
-// ---- Sprint 395: Adaptive Decoder Router ----
+// ---- Adaptive Decoder Router ----
 TEST(TestZenith_RouterStrategies) {
   ASSERT(AdaptiveDecoderRouter::StrategyCount() == 5);
 }
@@ -9205,7 +9205,7 @@ TEST(TestZenith_RouterDecisionDefault) {
   ASSERT(rd.isFallback == false);
 }
 
-// ---- Sprint 396: Telemetry Pipeline ----
+// ---- Telemetry Pipeline ----
 TEST(TestZenith_TelemetryCategoryCount) {
   ASSERT(TelemetryPipeline::CategoryCount() == 10);
 }
@@ -9239,7 +9239,7 @@ TEST(TestZenith_TelemetryHealthSnapshot) {
   ASSERT(snap.activeDecoderThreads == 0);
 }
 
-// ---- Sprint 397: Live Preview Engine ----
+// ---- Live Preview Engine ----
 TEST(TestZenith_LivePreviewModes) {
   ASSERT(LivePreviewEngine::ModeCount() == 5);
 }
@@ -9290,7 +9290,7 @@ TEST(TestZenith_LivePreviewConfig) {
   ASSERT(cfg.maxMemoryBytes == 16 * 1024 * 1024);
 }
 
-// ---- Sprint 398: Cloud Native Sync ----
+// ---- Cloud Native Sync ----
 TEST(TestZenith_CloudProviderCount) {
   ASSERT(CloudNativeSync::ProviderCount() >= 10);
 }
@@ -9327,7 +9327,7 @@ TEST(TestZenith_CloudDetectProviders) {
   ASSERT(providers.size() >= 0); // Non-negative (may be 0 in CI)
 }
 
-//== Sprint 399: HDR Tone Mapping Pipeline ==
+//== HDR Tone Mapping Pipeline ==
 TEST(TestZenith_HDROperatorCount) {
   ASSERT(HDRToneMappingPipeline::OperatorCount() == 6);
 }
@@ -9343,7 +9343,7 @@ TEST(TestZenith_HDRConfigDefaults) {
   ASSERT(cfg.exposure == 0.0f);
 }
 
-//== Sprint 400: Color Space Engine ==
+//== Color Space Engine ==
 TEST(TestZenith_ColorSpaceCount) {
   ASSERT(ColorSpaceEngine::SpaceCount() == 9);
 }
@@ -9358,7 +9358,7 @@ TEST(TestZenith_ColorSpaceConversion) {
   ASSERT(ColorSpaceEngine::LinearToSRGB(0.0f) == 0.0f);
 }
 
-//== Sprint 401: GPU Texture Compression ==
+//== GPU Texture Compression ==
 TEST(TestZenith_TextureFormatCount) {
   ASSERT(GPUTextureCompressionPipeline::FormatCount() == 9);
 }
@@ -9375,7 +9375,7 @@ TEST(TestZenith_TextureBPP) {
              TextureFormat::Uncompressed_BGRA) == 32);
 }
 
-//== Sprint 402: Adaptive DPI Scaler ==
+//== Adaptive DPI Scaler ==
 TEST(TestZenith_DPIStrategyCount) {
   ASSERT(AdaptiveDPIScaler::StrategyCount() == 5);
 }
@@ -9388,7 +9388,7 @@ TEST(TestZenith_DPIScaledSize) {
   ASSERT(AdaptiveDPIScaler::ScaledSize(256, 2.0f) == 512);
 }
 
-//== Sprint 403: Format Fingerprint DB ==
+//== Format Fingerprint DB ==
 TEST(TestZenith_FormatFamilyCount) {
   ASSERT(FormatFingerprintDB::FamilyCount() == 15);
 }
@@ -9403,7 +9403,7 @@ TEST(TestZenith_FingerprintMatchesJPEG) {
   ASSERT(FormatFingerprintDB::MatchesJPEG(jpegMagic, 3) == true);
 }
 
-//== Sprint 404: Nested Archive Preview ==
+//== Nested Archive Preview ==
 TEST(TestZenith_NestingPolicyCount) {
   ASSERT(NestedArchivePreview::PolicyCount() == 4);
 }
@@ -9414,7 +9414,7 @@ TEST(TestZenith_NestingEffectiveDepth) {
          10);
 }
 
-//== Sprint 405: Multi-Page Navigator ==
+//== Multi-Page Navigator ==
 TEST(TestZenith_PageStrategyCount) {
   ASSERT(MultiPageNavigator::StrategyCount() == 6);
 }
@@ -9427,7 +9427,7 @@ TEST(TestZenith_PageSelectLast) {
                                         100) == 50);
 }
 
-//== Sprint 406: Animated Format Controller ==
+//== Animated Format Controller ==
 TEST(TestZenith_FrameSelectionCount) {
   ASSERT(AnimatedFormatController::ModeCount() == 6);
 }
@@ -9438,7 +9438,7 @@ TEST(TestZenith_AnimSelectFrame) {
                                                50) == 25);
 }
 
-//== Sprint 407: Metadata Extraction Pipeline ==
+//== Metadata Extraction Pipeline ==
 TEST(TestZenith_MetadataSourceCount) {
   ASSERT(MetadataExtractionPipeline::SourceCount() == 8);
 }
@@ -9449,7 +9449,7 @@ TEST(TestZenith_MetadataSourceNames) {
              MetadataSource::XMP)) == L"XMP");
 }
 
-//== Sprint 408: Content-Aware Thumbnail Selector ==
+//== Content-Aware Thumbnail Selector ==
 TEST(TestZenith_SaliencyAlgoCount) {
   ASSERT(ContentAwareThumbnailSelector::AlgorithmCount() == 5);
 }
@@ -9459,7 +9459,7 @@ TEST(TestZenith_CenterCropCalc) {
   ASSERT(crop.srcW <= 1920);
 }
 
-//== Sprint 409: Face Detection & Orientation ==
+//== Face Detection & Orientation ==
 TEST(TestZenith_EXIFOrientationDegrees) {
   ASSERT(FaceDetectionOrientation::OrientationToDegrees(
              EXIFOrientation::Rotate180) == 180);
@@ -9473,7 +9473,7 @@ TEST(TestZenith_EXIFDimensionSwap) {
              EXIFOrientation::Normal) == false);
 }
 
-//== Sprint 410: Document Layout Analyzer ==
+//== Document Layout Analyzer ==
 TEST(TestZenith_DocRegionTypeCount) {
   ASSERT(DocumentLayoutAnalyzer::RegionTypeCount() == 11);
 }
@@ -9481,7 +9481,7 @@ TEST(TestZenith_DocTextDensity) {
   ASSERT(DocumentLayoutAnalyzer::EstimateTextDensity(500, 800, 600) > 0.0);
 }
 
-//== Sprint 411: Visual Similarity Index ==
+//== Visual Similarity Index ==
 TEST(TestZenith_HashAlgoCount) {
   ASSERT(VisualSimilarityIndex::AlgorithmCount() == 5);
 }
@@ -9494,7 +9494,7 @@ TEST(TestZenith_SimilarityClassify) {
   ASSERT(VisualSimilarityIndex::Classify(30) == SimilarityClass::Different);
 }
 
-//== Sprint 412: Smart Quality Predictor ==
+//== Smart Quality Predictor ==
 TEST(TestZenith_ImageComplexityCount) {
   ASSERT(SmartQualityPredictor::ComplexityCount() == 5);
 }
@@ -9503,7 +9503,7 @@ TEST(TestZenith_PredictJPEGQuality) {
   ASSERT(q >= 60 && q <= 100);
 }
 
-//== Sprint 413: Lock-Free Decode Pipeline ==
+//== Lock-Free Decode Pipeline ==
 TEST(TestZenith_PipelineStageStateCount) {
   ASSERT(LockFreeDecodePipeline::StageStateCount() == 7);
 }
@@ -9516,7 +9516,7 @@ TEST(TestZenith_IsPowerOf2) {
   ASSERT(LockFreeDecodePipeline::IsPowerOf2(63) == false);
 }
 
-//== Sprint 414: Memory-Mapped I/O Optimizer ==
+//== Memory-Mapped I/O Optimizer ==
 TEST(TestZenith_MappingStrategyCount) {
   ASSERT(MemoryMappedIOOptimizer::StrategyCount() == 5);
 }
@@ -9525,7 +9525,7 @@ TEST(TestZenith_MMapAlignOffset) {
   ASSERT(MemoryMappedIOOptimizer::AlignOffset(100, 65536) == 0);
 }
 
-//== Sprint 415: GPU Texture Atlas Manager ==
+//== GPU Texture Atlas Manager ==
 TEST(TestZenith_AtlasPackingAlgoCount) {
   ASSERT(GPUTextureAtlasManager::PackingCount() == 4);
 }
@@ -9537,7 +9537,7 @@ TEST(TestZenith_AtlasMaxSlots) {
   ASSERT(GPUTextureAtlasManager::MaxSlotsPerAtlas(4096, 256) == 256);
 }
 
-//== Sprint 416: Predictive Prefetch Engine ==
+//== Predictive Prefetch Engine ==
 TEST(TestZenith_PrefetchStrategyCount) {
   ASSERT(PredictivePrefetchEngine::StrategyCount() == 5);
 }
@@ -9545,7 +9545,7 @@ TEST(TestZenith_PrefetchCalcHitRate) {
   ASSERT(PredictivePrefetchEngine::CalcHitRate(90, 10) > 0.89);
 }
 
-//== Sprint 417: Thread Pool Optimizer ==
+//== Thread Pool Optimizer ==
 TEST(TestZenith_PoolSizingPolicyCount) {
   ASSERT(ThreadPoolOptimizer::PolicyCount() == 5);
 }
@@ -9555,7 +9555,7 @@ TEST(TestZenith_ThreadPoolRecommend) {
   ASSERT(n >= 1);
 }
 
-//== Sprint 418: ARM64 NEON Scaler ==
+//== ARM64 NEON Scaler ==
 TEST(TestZenith_ARM64CapabilityCount) {
   ASSERT(ARM64NEONScaler::CapabilityCount() == 6);
 }
@@ -9567,7 +9567,7 @@ TEST(TestZenith_ARM64IsARM64) {
 #endif
 }
 
-//== Sprint 419: Windows Search Protocol ==
+//== Windows Search Protocol ==
 TEST(TestZenith_SearchFieldCount) {
   ASSERT(WindowsSearchProtocol::FieldCount() == 10);
 }
@@ -9576,7 +9576,7 @@ TEST(TestZenith_SearchFieldNames) {
              SearchIndexField::FileName)) == L"File Name");
 }
 
-//== Sprint 420: Virtual Filesystem Abstraction ==
+//== Virtual Filesystem Abstraction ==
 TEST(TestZenith_VFSBackendCount) {
   ASSERT(VirtualFilesystemAbstraction::BackendCount() == 8);
 }
@@ -9587,7 +9587,7 @@ TEST(TestZenith_VFSNeedsDownload) {
              FileAvailability::FullyLocal) == false);
 }
 
-//== Sprint 421: Role-Based Format Policy ==
+//== Role-Based Format Policy ==
 TEST(TestZenith_FormatPolicyActionCount) {
   ASSERT(RoleBasedFormatPolicy::ActionCount() == 5);
 }
@@ -9602,7 +9602,7 @@ TEST(TestZenith_FormatPolicyPriority) {
       FormatPolicySource::GroupPolicy);
 }
 
-//== Sprint 422: Audit Trail Logger ==
+//== Audit Trail Logger ==
 TEST(TestZenith_AuditSeverityCount) {
   ASSERT(AuditTrailLogger::SeverityCount() == 5);
 }
@@ -9616,7 +9616,7 @@ TEST(TestZenith_AuditSeverityNames) {
              AuditSeverity::Critical)) == L"Critical");
 }
 
-//== Sprint 423: Content Inspection Gateway ==
+//== Content Inspection Gateway ==
 TEST(TestZenith_ContentClassificationCount) {
   ASSERT(ContentInspectionGateway::ClassificationCount() == 5);
 }
@@ -9631,7 +9631,7 @@ TEST(TestZenith_ContentShouldBlock) {
   ASSERT(ContentInspectionGateway::ShouldBlock(safe, cfg) == false);
 }
 
-//== Sprint 424: Certificate Trust Validator ==
+//== Certificate Trust Validator ==
 TEST(TestZenith_CertValidationCount) {
   ASSERT(CertificateTrustValidator::ValidationCount() == 7);
 }
@@ -9643,7 +9643,7 @@ TEST(TestZenith_CertSufficientTrust) {
              CertTrustLevel::Untrusted, CertTrustLevel::UserTrusted) == false);
 }
 
-//== Sprint 425: Encrypted Format Handler ==
+//== Encrypted Format Handler ==
 TEST(TestZenith_EncryptionTypeCount) {
   ASSERT(EncryptedFormatHandler::EncryptionCount() == 10);
 }
@@ -9654,7 +9654,7 @@ TEST(TestZenith_StrongEncryption) {
              EncryptionType::ZipZipCrypto) == false);
 }
 
-//== Sprint 426: Self-Healing Decoder ==
+//== Self-Healing Decoder ==
 TEST(TestZenith_RecoveryStrategyCount) {
   ASSERT(SelfHealingDecoder::StrategyCount() == 5);
 }
@@ -9667,7 +9667,7 @@ TEST(TestZenith_DecoderHealthClassify) {
          DecoderHealthState::Quarantined);
 }
 
-//== Sprint 427: Crash Analytics Collector ==
+//== Crash Analytics Collector ==
 TEST(TestZenith_CrashCategoryCount) {
   ASSERT(CrashAnalyticsCollector::CategoryCount() == 8);
 }
@@ -9677,7 +9677,7 @@ TEST(TestZenith_CrashDumpSize) {
   ASSERT(size > 0);
 }
 
-//== Sprint 428: Performance Anomaly Detector ==
+//== Performance Anomaly Detector ==
 TEST(TestZenith_AnomalyTypeCount) {
   ASSERT(PerformanceAnomalyDetector::TypeCount() == 8);
 }
@@ -9692,7 +9692,7 @@ TEST(TestZenith_AnomalyIsAnomaly) {
   ASSERT(PerformanceAnomalyDetector::IsAnomaly(1.0, 2.0, 3.0) == false);
 }
 
-//== Sprint 429: Diagnostic Report Generator V2 ==
+//== Diagnostic Report Generator V2 ==
 TEST(TestZenith_DiagReportSectionCount) {
   ASSERT(DiagnosticReportGeneratorV2::SectionCount() == 9);
 }
@@ -9703,7 +9703,7 @@ TEST(TestZenith_DiagReportMimeType) {
              DiagReportFormat::JSON)) == "application/json");
 }
 
-//== Sprint 430: Health Check Endpoint ==
+//== Health Check Endpoint ==
 TEST(TestZenith_HealthStatusCount) {
   ASSERT(HealthCheckEndpoint::StatusCount() == 5);
 }
@@ -9716,7 +9716,7 @@ TEST(TestZenith_HealthAggregateDegraded) {
          HealthStatus::Degraded);
 }
 
-//== Sprint 431: Preview Tooltip Renderer ==
+//== Preview Tooltip Renderer ==
 TEST(TestZenith_TooltipStyleCount) {
   ASSERT(PreviewTooltipRenderer::StyleCount() == 5);
 }
@@ -9727,7 +9727,7 @@ TEST(TestZenith_TooltipStyleNames) {
          L"Rich");
 }
 
-//== Sprint 432: Format Gallery Compositor ==
+//== Format Gallery Compositor ==
 TEST(TestZenith_GalleryLayoutCount) {
   ASSERT(FormatGalleryCompositor::LayoutCount() == 6);
 }
@@ -9736,7 +9736,7 @@ TEST(TestZenith_GalleryGridCellSize) {
   ASSERT(cell > 0);
 }
 
-//== Sprint 433: Quick Actions Overlay ==
+//== Quick Actions Overlay ==
 TEST(TestZenith_QuickActionTypeCount) {
   ASSERT(QuickActionsOverlay::ActionCount() == 9);
 }
@@ -9747,7 +9747,7 @@ TEST(TestZenith_QuickActionNames) {
              QuickActionType::ShareFile)) == L"Share");
 }
 
-//== Sprint 434: Accessibility Narrator Bridge ==
+//== Accessibility Narrator Bridge ==
 TEST(TestZenith_A11yFeatureCount) {
   ASSERT(AccessibilityNarratorBridge::FeatureCount() == 6);
 }
@@ -9757,7 +9757,7 @@ TEST(TestZenith_A11yNarratorText) {
   ASSERT(std::wstring(text).length() > 0);
 }
 
-//== Sprint 435: Usage Analytics Dashboard ==
+//== Usage Analytics Dashboard ==
 TEST(TestZenith_AnalyticsMetricCount) {
   ASSERT(UsageAnalyticsDashboard::MetricCount() == 8);
 }
@@ -9766,7 +9766,7 @@ TEST(TestZenith_AnalyticsMetricNames) {
              AnalyticsMetric::ThumbnailsGenerated)) == L"Thumbnails Generated");
 }
 
-//== Sprint 436: Decoder Performance Profiler ==
+//== Decoder Performance Profiler ==
 TEST(TestZenith_ProfileGranularityCount) {
   ASSERT(DecoderPerformanceProfiler::GranularityCount() == 4);
 }
@@ -9775,7 +9775,7 @@ TEST(TestZenith_ProfileIsRegression) {
   ASSERT(DecoderPerformanceProfiler::IsRegression(5.0, 5.0, 0.10) == false);
 }
 
-//== Sprint 437: Cache Efficiency Analyzer ==
+//== Cache Efficiency Analyzer ==
 TEST(TestZenith_CacheZoneCount) {
   ASSERT(CacheEfficiencyAnalyzer::ZoneCount() == 5);
 }
@@ -9786,7 +9786,7 @@ TEST(TestZenith_CacheAnalyze) {
   ASSERT(rec2 == CacheRecommendation::IncreaseBudget);
 }
 
-//== Sprint 438: Format Popularity Tracker ==
+//== Format Popularity Tracker ==
 TEST(TestZenith_PopularityTierCount) {
   ASSERT(FormatPopularityTracker::TierCount() == 5);
 }
@@ -9795,7 +9795,7 @@ TEST(TestZenith_PopularityClassify) {
   ASSERT(FormatPopularityTracker::Classify(0.5f) == PopularityTier::Rare);
 }
 
-//== Sprint 439: System Resource Monitor ==
+//== System Resource Monitor ==
 TEST(TestZenith_MonitoredResourceCount) {
   ASSERT(SystemResourceMonitor::ResourceCount() == 6);
 }
@@ -9806,7 +9806,7 @@ TEST(TestZenith_ResourceThrottle) {
          ThrottleLevel::None);
 }
 
-//== Sprint 440: Multi-Monitor Color Profile ==
+//== Multi-Monitor Color Profile ==
 TEST(TestZenith_MonitorProfileTypeCount) {
   ASSERT(MultiMonitorColorProfile::ProfileTypeCount() == 6);
 }
@@ -9821,7 +9821,7 @@ TEST(TestZenith_GamutMapping) {
              MonitorProfileType::sRGB, MonitorProfileType::sRGB) == false);
 }
 
-//== Sprint 441: Rust FFI Bridge ==
+//== Rust FFI Bridge ==
 TEST(TestZenith_RustLibStatusCount) {
   ASSERT(RustFFIBridge::StatusCount() == 5);
 }
@@ -9833,7 +9833,7 @@ TEST(TestZenith_RustABICompat) {
   ASSERT(RustFFIBridge::IsABICompatible(11, cfg) == false);
 }
 
-//== Sprint 442: DirectStorage 1.2 Integration ==
+//== DirectStorage 1.2 Integration ==
 TEST(TestZenith_DStorageSupportCount) {
   ASSERT(DirectStorage12Integration::SupportCount() == 5);
 }
@@ -9844,7 +9844,7 @@ TEST(TestZenith_DStorageSpeedup) {
              DStorageSupport::Emulated) == 1.0);
 }
 
-//== Sprint 443: Neural Texture Compression ==
+//== Neural Texture Compression ==
 TEST(TestZenith_NeuralBackendCount) {
   ASSERT(NeuralTextureCompression::BackendCount() == 5);
 }
@@ -9857,7 +9857,7 @@ TEST(TestZenith_NeuralDecodeTimeFactor) {
   ASSERT(f < 1.0); // GPU-accelerated small model should be < 1x BC7
 }
 
-//== Sprint 444: Quantum-Ready Hash Pipeline ==
+//== Quantum-Ready Hash Pipeline ==
 TEST(TestZenith_QRHashAlgoCount) {
   ASSERT(QuantumReadyHashPipeline::AlgorithmCount() == 6);
 }
@@ -9874,7 +9874,7 @@ TEST(TestZenith_QRHashQuantumSafe) {
          false);
 }
 
-//== Sprint 445: WebGPU Thumbnail Renderer ==
+//== WebGPU Thumbnail Renderer ==
 TEST(TestZenith_WebGPUBackendCount) {
   ASSERT(WebGPUThumbnailRenderer::BackendCount() == 5);
 }
@@ -9885,7 +9885,7 @@ TEST(TestZenith_WebGPUAsyncCompute) {
              WebGPUBackend::Emscripten) == false);
 }
 
-//== Sprint 446: WASM Decoder Sandbox ==
+//== WASM Decoder Sandbox ==
 TEST(TestZenith_WASMRuntimeCount) {
   ASSERT(WASMDecoderSandbox::RuntimeCount() == 5);
 }
@@ -9896,7 +9896,7 @@ TEST(TestZenith_WASMMemoryLimitBytes) {
          1024ULL * 1024 * 1024);
 }
 
-//== Sprint 447: Telemetry Pipeline V2 ==
+//== Telemetry Pipeline V2 ==
 TEST(TestZenith_TelemetryV2LevelCount) {
   ASSERT(TelemetryPipelineV2::LevelCount() == 5);
 }
@@ -9911,7 +9911,7 @@ TEST(TestZenith_TelemetryV2MinPrivacy) {
          PrivacyMechanism::KAnonymity);
 }
 
-//== Sprint 448: Live Preview Streaming Protocol ==
+//== Live Preview Streaming Protocol ==
 TEST(TestZenith_StreamQualityCount) {
   ASSERT(LivePreviewStreamingProtocol::QualityCount() == 5);
 }
@@ -9934,7 +9934,7 @@ TEST(TestZenith_StreamBandwidthSufficient) {
              0.1, StreamQuality::Full) == false);
 }
 
-// ---- Release Gate V33 (v15.0 "Zenith" Ship Gate) ----
+// ---- Release Gate V33 Ship Gate ----
 TEST(TestGateV33_KPINames) {
   ASSERT(std::wstring(ReleaseGateV33::GetKPIName(GateV33KPI::VersionSync15)) ==
          L"Version Sync 15.0.0");
@@ -11619,136 +11619,136 @@ int main() {
 
   std::wcout << std::endl;
 
-  // ======== v15.0.0 "Zenith" Sprint Tests ========
-  std::wcout << L"v15.0 Zenith Sprint Tests..." << std::endl;
+  // ======== Feature Module Tests ========
+  std::wcout << L"Feature Module Tests..." << std::endl;
 
-  // Sprint 349: Version Synchronization
+  // EngineTests.h — Version Synchronization
   RUN_TEST(TestZenith_VersionMajor);
   RUN_TEST(TestZenith_VersionMinor);
   RUN_TEST(TestZenith_VersionPatch);
   RUN_TEST(TestZenith_VersionComposite);
 
-  // Sprint 350: MuPDF
+  // EngineTests.h — MuPDF
   RUN_TEST(TestZenith_MuPDFBackendNames);
   RUN_TEST(TestZenith_MuPDFCaps);
   RUN_TEST(TestZenith_MuPDFPageConfig);
 
-  // Sprint 351: libwebp CRT
+  // EngineTests.h — libwebp CRT
   RUN_TEST(TestZenith_LibWebPConfigDefaults);
   RUN_TEST(TestZenith_LibWebPConfigName);
 
-  // Sprint 354-355: LENSArchive Refactoring
+  // EngineTests.h — LENSArchive Refactoring
   RUN_TEST(TestZenith_ArchiveRefactorModules);
   RUN_TEST(TestZenith_ArchiveRefactorModuleNames);
 
-  // Sprint 356: Bitmap Pool
+  // EngineTests.h — Bitmap Pool
   RUN_TEST(TestZenith_BitmapPoolConfig);
   RUN_TEST(TestZenith_BitmapPoolStats);
   RUN_TEST(TestZenith_BitmapPoolStatsHitRate);
 
-  // Sprint 358-359: IPropertyStore
+  // EngineTests.h — IPropertyStore
   RUN_TEST(TestZenith_PropertyIDNames);
   RUN_TEST(TestZenith_PropertyTypes);
   RUN_TEST(TestZenith_PropertyValueDefault);
   RUN_TEST(TestZenith_PropertyCapabilities);
 
-  // Sprint 360-361: GPU Shader Library
+  // EngineTests.h — GPU Shader Library
   RUN_TEST(TestZenith_GPUShaderTypes);
   RUN_TEST(TestZenith_GPUShaderCount);
   RUN_TEST(TestZenith_ToneMapAlgorithms);
   RUN_TEST(TestZenith_GPUColorSpaces);
 
-  // Sprint 362-363: PluginHost
+  // EngineTests.h — PluginHost
   RUN_TEST(TestZenith_PluginHostModes);
   RUN_TEST(TestZenith_PluginHostModeNames);
 
-  // Sprint 364: Library Version Audit
+  // EngineTests.h — Library Version Audit
   RUN_TEST(TestZenith_LibVersionAuditFields);
   RUN_TEST(TestZenith_LibVersionAuditNames);
 
-  // Sprint 365: OpenJPEG
+  // EngineTests.h — OpenJPEG
   RUN_TEST(TestZenith_OpenJPEGProfiles);
   RUN_TEST(TestZenith_OpenJPEGProfileNames);
 
-  // Sprint 366: FreeType
+  // EngineTests.h — FreeType
   RUN_TEST(TestZenith_FreeTypeRenderModes);
   RUN_TEST(TestZenith_FreeTypeRenderModeNames);
 
-  // Sprint 367-368: FFmpeg
+  // EngineTests.h — FFmpeg
   RUN_TEST(TestZenith_FFmpegCodecFamilies);
   RUN_TEST(TestZenith_FFmpegContainerFormats);
   RUN_TEST(TestZenith_FFmpegVideoStreamInfo);
   RUN_TEST(TestZenith_FFmpegFrameResult);
 
-  // Sprint 369: Format Category Manager
+  // EngineTests.h — Format Category Manager
   RUN_TEST(TestZenith_FormatCategoryCount);
   RUN_TEST(TestZenith_FormatCategoryNames);
 
-  // Sprint 370: Format Status Indicator
+  // EngineTests.h — Format Status Indicator
   RUN_TEST(TestZenith_FormatStatusLevels);
   RUN_TEST(TestZenith_FormatStatusNames);
 
-  // Sprint 371: Settings Import/Export
+  // EngineTests.h — Settings Import/Export
   RUN_TEST(TestZenith_SettingsFormatNames);
   RUN_TEST(TestZenith_SettingsFormatJSON);
 
-  // Sprint 372: Performance Dashboard
+  // EngineTests.h — Performance Dashboard
   RUN_TEST(TestZenith_PerfDashboardMetrics);
   RUN_TEST(TestZenith_PerfDashboardMetricNames);
 
-  // Sprint 373-374: Dark Mode Engine
+  // EngineTests.h — Dark Mode Engine
   RUN_TEST(TestZenith_DarkModeThemes);
   RUN_TEST(TestZenith_DarkModeThemeNames);
 
-  // Sprint 375: System Tray Manager
+  // EngineTests.h — System Tray Manager
   RUN_TEST(TestZenith_SystemTrayActions);
   RUN_TEST(TestZenith_SystemTrayActionNames);
 
-  // Sprint 376-378: WinUI 3 Migration
+  // EngineTests.h — WinUI 3 Migration
   RUN_TEST(TestZenith_WinUI3PhaseCount);
   RUN_TEST(TestZenith_WinUI3PhaseNames);
 
-  // Sprint 379: CI Hardening
+  // EngineTests.h — CI Hardening
   RUN_TEST(TestZenith_CIConfigCount);
   RUN_TEST(TestZenith_CIConfigNames);
 
-  // Sprint 380: Code Coverage
+  // EngineTests.h — Code Coverage
   RUN_TEST(TestZenith_CoverageTargets);
   RUN_TEST(TestZenith_CoverageTargetNames);
 
-  // Sprint 383: Fuzzing Campaign
+  // EngineTests.h — Fuzzing Campaign
   RUN_TEST(TestZenith_FuzzingStrategies);
   RUN_TEST(TestZenith_FuzzingStrategyNames);
 
-  // Sprint 384: Static Analysis Gate
+  // EngineTests.h — Static Analysis Gate
   RUN_TEST(TestZenith_StaticAnalysisTools);
   RUN_TEST(TestZenith_StaticAnalysisToolNames);
 
-  // Sprint 385: SBOM Generator
+  // EngineTests.h — SBOM Generator
   RUN_TEST(TestZenith_SBOMFormats);
   RUN_TEST(TestZenith_SBOMFormatNames);
 
-  // Sprint 389: Zero-Copy Pipeline
+  // EngineTests.h — Zero-Copy Pipeline
   RUN_TEST(TestZenith_ZeroCopyStages);
   RUN_TEST(TestZenith_ZeroCopyStageNames);
 
-  // Sprint 390: Parallel I/O Pipeline
+  // EngineTests.h — Parallel I/O Pipeline
   RUN_TEST(TestZenith_ParallelIOPolicies);
   RUN_TEST(TestZenith_ParallelIOPolicyNames);
 
-  // Sprint 391: SIMD Scaler
+  // EngineTests.h — SIMD Scaler
   RUN_TEST(TestZenith_SIMDScalerPaths);
   RUN_TEST(TestZenith_SIMDScalerPathNames);
 
-  // Sprint 392: PSO Cache
+  // EngineTests.h — PSO Cache
   RUN_TEST(TestZenith_PSOCacheStrategies);
   RUN_TEST(TestZenith_PSOCacheStrategyNames);
 
-  // Sprint 393: Cache Warming
+  // EngineTests.h — Cache Warming
   RUN_TEST(TestZenith_CacheWarmingModes);
   RUN_TEST(TestZenith_CacheWarmingModeNames);
 
-  // Sprint 394: Thumbnail Quality Analyzer
+  // EngineTests.h — Thumbnail Quality Analyzer
   RUN_TEST(TestZenith_QualityMetrics);
   RUN_TEST(TestZenith_QualityMetricNames);
   RUN_TEST(TestZenith_QualityGradeFromSSIM);
@@ -11756,7 +11756,7 @@ int main() {
   RUN_TEST(TestZenith_QualityReportDefault);
   RUN_TEST(TestZenith_QualityThresholds);
 
-  // Sprint 395: Adaptive Decoder Router
+  // EngineTests.h — Adaptive Decoder Router
   RUN_TEST(TestZenith_RouterStrategies);
   RUN_TEST(TestZenith_RouterStrategyNames);
   RUN_TEST(TestZenith_RouterBuiltinSignatures);
@@ -11767,14 +11767,14 @@ int main() {
   RUN_TEST(TestZenith_RouterSignatureNull);
   RUN_TEST(TestZenith_RouterDecisionDefault);
 
-  // Sprint 396: Telemetry Pipeline
+  // EngineTests.h — Telemetry Pipeline
   RUN_TEST(TestZenith_TelemetryCategoryCount);
   RUN_TEST(TestZenith_TelemetryCategoryNames);
   RUN_TEST(TestZenith_TelemetryWindowCount);
   RUN_TEST(TestZenith_TelemetryWindowNames);
   RUN_TEST(TestZenith_TelemetryHealthSnapshot);
 
-  // Sprint 397: Live Preview Engine
+  // EngineTests.h — Live Preview Engine
   RUN_TEST(TestZenith_LivePreviewModes);
   RUN_TEST(TestZenith_LivePreviewModeNames);
   RUN_TEST(TestZenith_LivePreviewRecommendGIF);
@@ -11786,232 +11786,232 @@ int main() {
   RUN_TEST(TestZenith_LivePreviewFitToBudget);
   RUN_TEST(TestZenith_LivePreviewConfig);
 
-  // Sprint 398: Cloud Native Sync
+  // EngineTests.h — Cloud Native Sync
   RUN_TEST(TestZenith_CloudProviderCount);
   RUN_TEST(TestZenith_CloudProviderNames);
   RUN_TEST(TestZenith_CloudSyncStatusNames);
   RUN_TEST(TestZenith_CloudSyncConfigDefaults);
   RUN_TEST(TestZenith_CloudDetectProviders);
 
-  // Sprint 399: HDR Tone Mapping Pipeline
+  // EngineTests.h — HDR Tone Mapping Pipeline
   RUN_TEST(TestZenith_HDROperatorCount);
   RUN_TEST(TestZenith_HDROperatorNames);
   RUN_TEST(TestZenith_HDRConfigDefaults);
 
-  // Sprint 400: Color Space Engine
+  // EngineTests.h — Color Space Engine
   RUN_TEST(TestZenith_ColorSpaceCount);
   RUN_TEST(TestZenith_ColorSpaceNames);
   RUN_TEST(TestZenith_ColorSpaceConversion);
 
-  // Sprint 401: GPU Texture Compression
+  // EngineTests.h — GPU Texture Compression
   RUN_TEST(TestZenith_TextureFormatCount);
   RUN_TEST(TestZenith_TextureFormatNames);
   RUN_TEST(TestZenith_TextureBPP);
 
-  // Sprint 402: Adaptive DPI Scaler
+  // EngineTests.h — Adaptive DPI Scaler
   RUN_TEST(TestZenith_DPIStrategyCount);
   RUN_TEST(TestZenith_DPIClassify);
   RUN_TEST(TestZenith_DPIScaledSize);
 
-  // Sprint 403: Format Fingerprint DB
+  // EngineTests.h — Format Fingerprint DB
   RUN_TEST(TestZenith_FormatFamilyCount);
   RUN_TEST(TestZenith_FingerprintMatchesPNG);
   RUN_TEST(TestZenith_FingerprintMatchesJPEG);
 
-  // Sprint 404: Nested Archive Preview
+  // EngineTests.h — Nested Archive Preview
   RUN_TEST(TestZenith_NestingPolicyCount);
   RUN_TEST(TestZenith_NestingEffectiveDepth);
 
-  // Sprint 405: Multi-Page Navigator
+  // EngineTests.h — Multi-Page Navigator
   RUN_TEST(TestZenith_PageStrategyCount);
   RUN_TEST(TestZenith_PageSelectFirst);
   RUN_TEST(TestZenith_PageSelectLast);
 
-  // Sprint 406: Animated Format Controller
+  // EngineTests.h — Animated Format Controller
   RUN_TEST(TestZenith_FrameSelectionCount);
   RUN_TEST(TestZenith_AnimSelectFrame);
 
-  // Sprint 407: Metadata Extraction Pipeline
+  // EngineTests.h — Metadata Extraction Pipeline
   RUN_TEST(TestZenith_MetadataSourceCount);
   RUN_TEST(TestZenith_MetadataSourceNames);
 
-  // Sprint 408: Content-Aware Thumbnail Selector
+  // EngineTests.h — Content-Aware Thumbnail Selector
   RUN_TEST(TestZenith_SaliencyAlgoCount);
   RUN_TEST(TestZenith_CenterCropCalc);
 
-  // Sprint 409: Face Detection & Orientation
+  // EngineTests.h — Face Detection & Orientation
   RUN_TEST(TestZenith_EXIFOrientationDegrees);
   RUN_TEST(TestZenith_EXIFDimensionSwap);
 
-  // Sprint 410: Document Layout Analyzer
+  // EngineTests.h — Document Layout Analyzer
   RUN_TEST(TestZenith_DocRegionTypeCount);
   RUN_TEST(TestZenith_DocTextDensity);
 
-  // Sprint 411: Visual Similarity Index
+  // EngineTests.h — Visual Similarity Index
   RUN_TEST(TestZenith_HashAlgoCount);
   RUN_TEST(TestZenith_HammingDistance);
   RUN_TEST(TestZenith_SimilarityClassify);
 
-  // Sprint 412: Smart Quality Predictor
+  // EngineTests.h — Smart Quality Predictor
   RUN_TEST(TestZenith_ImageComplexityCount);
   RUN_TEST(TestZenith_PredictJPEGQuality);
 
-  // Sprint 413: Lock-Free Decode Pipeline
+  // EngineTests.h — Lock-Free Decode Pipeline
   RUN_TEST(TestZenith_PipelineStageStateCount);
   RUN_TEST(TestZenith_NextPowerOf2);
   RUN_TEST(TestZenith_IsPowerOf2);
 
-  // Sprint 414: Memory-Mapped I/O Optimizer
+  // EngineTests.h — Memory-Mapped I/O Optimizer
   RUN_TEST(TestZenith_MappingStrategyCount);
   RUN_TEST(TestZenith_MMapAlignOffset);
 
-  // Sprint 415: GPU Texture Atlas Manager
+  // EngineTests.h — GPU Texture Atlas Manager
   RUN_TEST(TestZenith_AtlasPackingAlgoCount);
   RUN_TEST(TestZenith_AtlasCalcVRAM);
   RUN_TEST(TestZenith_AtlasMaxSlots);
 
-  // Sprint 416: Predictive Prefetch Engine
+  // EngineTests.h — Predictive Prefetch Engine
   RUN_TEST(TestZenith_PrefetchStrategyCount);
   RUN_TEST(TestZenith_PrefetchCalcHitRate);
 
-  // Sprint 417: Thread Pool Optimizer
+  // EngineTests.h — Thread Pool Optimizer
   RUN_TEST(TestZenith_PoolSizingPolicyCount);
   RUN_TEST(TestZenith_ThreadPoolRecommend);
 
-  // Sprint 418: ARM64 NEON Scaler
+  // EngineTests.h — ARM64 NEON Scaler
   RUN_TEST(TestZenith_ARM64CapabilityCount);
   RUN_TEST(TestZenith_ARM64IsARM64);
 
-  // Sprint 419: Windows Search Protocol
+  // EngineTests.h — Windows Search Protocol
   RUN_TEST(TestZenith_SearchFieldCount);
   RUN_TEST(TestZenith_SearchFieldNames);
 
-  // Sprint 420: Virtual Filesystem Abstraction
+  // EngineTests.h — Virtual Filesystem Abstraction
   RUN_TEST(TestZenith_VFSBackendCount);
   RUN_TEST(TestZenith_VFSNeedsDownload);
 
-  // Sprint 421: Role-Based Format Policy
+  // EngineTests.h — Role-Based Format Policy
   RUN_TEST(TestZenith_FormatPolicyActionCount);
   RUN_TEST(TestZenith_FormatPolicyPriority);
 
-  // Sprint 422: Audit Trail Logger
+  // EngineTests.h — Audit Trail Logger
   RUN_TEST(TestZenith_AuditSeverityCount);
   RUN_TEST(TestZenith_AuditCategoryCount);
   RUN_TEST(TestZenith_AuditSeverityNames);
 
-  // Sprint 423: Content Inspection Gateway
+  // EngineTests.h — Content Inspection Gateway
   RUN_TEST(TestZenith_ContentClassificationCount);
   RUN_TEST(TestZenith_ContentShouldBlock);
 
-  // Sprint 424: Certificate Trust Validator
+  // EngineTests.h — Certificate Trust Validator
   RUN_TEST(TestZenith_CertValidationCount);
   RUN_TEST(TestZenith_CertSufficientTrust);
 
-  // Sprint 425: Encrypted Format Handler
+  // EngineTests.h — Encrypted Format Handler
   RUN_TEST(TestZenith_EncryptionTypeCount);
   RUN_TEST(TestZenith_StrongEncryption);
 
-  // Sprint 426: Self-Healing Decoder
+  // EngineTests.h — Self-Healing Decoder
   RUN_TEST(TestZenith_RecoveryStrategyCount);
   RUN_TEST(TestZenith_DecoderHealthClassify);
 
-  // Sprint 427: Crash Analytics Collector
+  // EngineTests.h — Crash Analytics Collector
   RUN_TEST(TestZenith_CrashCategoryCount);
   RUN_TEST(TestZenith_CrashDumpSize);
 
-  // Sprint 428: Performance Anomaly Detector
+  // EngineTests.h — Performance Anomaly Detector
   RUN_TEST(TestZenith_AnomalyTypeCount);
   RUN_TEST(TestZenith_AnomalyClassifySeverity);
   RUN_TEST(TestZenith_AnomalyIsAnomaly);
 
-  // Sprint 429: Diagnostic Report Generator V2
+  // EngineTests.h — Diagnostic Report Generator V2
   RUN_TEST(TestZenith_DiagReportSectionCount);
   RUN_TEST(TestZenith_DiagReportMimeType);
 
-  // Sprint 430: Health Check Endpoint
+  // EngineTests.h — Health Check Endpoint
   RUN_TEST(TestZenith_HealthStatusCount);
   RUN_TEST(TestZenith_HealthAggregateAllHealthy);
   RUN_TEST(TestZenith_HealthAggregateDegraded);
 
-  // Sprint 431: Preview Tooltip Renderer
+  // EngineTests.h — Preview Tooltip Renderer
   RUN_TEST(TestZenith_TooltipStyleCount);
   RUN_TEST(TestZenith_TooltipStyleNames);
 
-  // Sprint 432: Format Gallery Compositor
+  // EngineTests.h — Format Gallery Compositor
   RUN_TEST(TestZenith_GalleryLayoutCount);
   RUN_TEST(TestZenith_GalleryGridCellSize);
 
-  // Sprint 433: Quick Actions Overlay
+  // EngineTests.h — Quick Actions Overlay
   RUN_TEST(TestZenith_QuickActionTypeCount);
   RUN_TEST(TestZenith_QuickActionNames);
 
-  // Sprint 434: Accessibility Narrator Bridge
+  // EngineTests.h — Accessibility Narrator Bridge
   RUN_TEST(TestZenith_A11yFeatureCount);
   RUN_TEST(TestZenith_A11yNarratorText);
 
-  // Sprint 435: Usage Analytics Dashboard
+  // EngineTests.h — Usage Analytics Dashboard
   RUN_TEST(TestZenith_AnalyticsMetricCount);
   RUN_TEST(TestZenith_AnalyticsMetricNames);
 
-  // Sprint 436: Decoder Performance Profiler
+  // EngineTests.h — Decoder Performance Profiler
   RUN_TEST(TestZenith_ProfileGranularityCount);
   RUN_TEST(TestZenith_ProfileIsRegression);
 
-  // Sprint 437: Cache Efficiency Analyzer
+  // EngineTests.h — Cache Efficiency Analyzer
   RUN_TEST(TestZenith_CacheZoneCount);
   RUN_TEST(TestZenith_CacheAnalyze);
 
-  // Sprint 438: Format Popularity Tracker
+  // EngineTests.h — Format Popularity Tracker
   RUN_TEST(TestZenith_PopularityTierCount);
   RUN_TEST(TestZenith_PopularityClassify);
 
-  // Sprint 439: System Resource Monitor
+  // EngineTests.h — System Resource Monitor
   RUN_TEST(TestZenith_MonitoredResourceCount);
   RUN_TEST(TestZenith_ResourceThrottle);
 
-  // Sprint 440: Multi-Monitor Color Profile
+  // EngineTests.h — Multi-Monitor Color Profile
   RUN_TEST(TestZenith_MonitorProfileTypeCount);
   RUN_TEST(TestZenith_MonitorProfileNames);
   RUN_TEST(TestZenith_GamutMapping);
 
-  // Sprint 441: Rust FFI Bridge
+  // EngineTests.h — Rust FFI Bridge
   RUN_TEST(TestZenith_RustLibStatusCount);
   RUN_TEST(TestZenith_RustABICompat);
 
-  // Sprint 442: DirectStorage 1.2 Integration
+  // EngineTests.h — DirectStorage 1.2 Integration
   RUN_TEST(TestZenith_DStorageSupportCount);
   RUN_TEST(TestZenith_DStorageSpeedup);
 
-  // Sprint 443: Neural Texture Compression
+  // EngineTests.h — Neural Texture Compression
   RUN_TEST(TestZenith_NeuralBackendCount);
   RUN_TEST(TestZenith_NeuralModelTierCount);
   RUN_TEST(TestZenith_NeuralDecodeTimeFactor);
 
-  // Sprint 444: Quantum-Ready Hash Pipeline
+  // EngineTests.h — Quantum-Ready Hash Pipeline
   RUN_TEST(TestZenith_QRHashAlgoCount);
   RUN_TEST(TestZenith_QRHashRecommend);
   RUN_TEST(TestZenith_QRHashQuantumSafe);
 
-  // Sprint 445: WebGPU Thumbnail Renderer
+  // EngineTests.h — WebGPU Thumbnail Renderer
   RUN_TEST(TestZenith_WebGPUBackendCount);
   RUN_TEST(TestZenith_WebGPUAsyncCompute);
 
-  // Sprint 446: WASM Decoder Sandbox
+  // EngineTests.h — WASM Decoder Sandbox
   RUN_TEST(TestZenith_WASMRuntimeCount);
   RUN_TEST(TestZenith_WASMMemoryLimitBytes);
 
-  // Sprint 447: Telemetry Pipeline V2
+  // EngineTests.h — Telemetry Pipeline V2
   RUN_TEST(TestZenith_TelemetryV2LevelCount);
   RUN_TEST(TestZenith_TelemetryV2Consent);
   RUN_TEST(TestZenith_TelemetryV2MinPrivacy);
 
-  // Sprint 448: Live Preview Streaming Protocol
+  // EngineTests.h — Live Preview Streaming Protocol
   RUN_TEST(TestZenith_StreamQualityCount);
   RUN_TEST(TestZenith_StreamQualityPixels);
   RUN_TEST(TestZenith_StreamSelectQuality);
   RUN_TEST(TestZenith_StreamBandwidthSufficient);
 
-  // Release Gate V33 (v15.0 "Zenith" Ship Gate)
+  // Release Gate V33 Ship Gate
   RUN_TEST(TestGateV33_KPINames);
   RUN_TEST(TestGateV33_KPICount);
   RUN_TEST(TestGateV33_Evaluate);

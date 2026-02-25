@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 421: Role-Based Format Policy Engine
+// RoleBasedFormatPolicy.h — Role-Based Format Policy Engine
 // Enterprise policy enforcement for format access control — restricts which
 // file formats can generate thumbnails based on AD group membership or GPO.
 #include <cstdint>

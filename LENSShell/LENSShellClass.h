@@ -40,7 +40,7 @@ public:
   COM_INTERFACE_ENTRY(IExtractImage)
   COM_INTERFACE_ENTRY(IExtractImage2)
   COM_INTERFACE_ENTRY(IDispatch)
-  // Property store for Explorer Details Pane (v15.0.0)
+  // Property store for Explorer Details Pane
   COM_INTERFACE_ENTRY(IPropertyStore)
   COM_INTERFACE_ENTRY(IPropertyStoreCapabilities)
   END_COM_MAP()
@@ -88,7 +88,7 @@ public:
   // IInitializeWithStream - Modern stream-based initialization
   STDMETHOD(Initialize)(IStream *pstream, DWORD grfMode);
 
-  // IPropertyStore - Explorer Details Pane metadata (v15.0.0)
+  // IPropertyStore - Explorer Details Pane metadata
   STDMETHOD(GetCount)(DWORD *cProps);
   STDMETHOD(GetAt)(DWORD iProp, PROPERTYKEY *pkey);
   STDMETHOD(GetValue)(REFPROPERTYKEY key, PROPVARIANT *pv);
@@ -99,14 +99,14 @@ public:
   STDMETHOD(IsPropertyWritable)(REFPROPERTYKEY key);
 
 private:
-  // Internal thumbnail generation (Sprint 22: SEH-safe implementation)
+  // Internal thumbnail generation (SEH-safe implementation)
   HRESULT GetThumbnail_Internal(UINT cx, HBITMAP *phBmpThumbnail,
                                 WTS_ALPHATYPE *pdwAlpha);
 
   __LENS::CLENSArchive m_LENS;
   CComPtr<IStream> m_spStream; // For IInitializeWithStream
 
-  // Property store (v15.0.0)
+  // Property store for Explorer Details Pane
   ExplorerLens::CLENSPropertyStore m_propertyStore;
 
   // Engine integration (v5.3.0)

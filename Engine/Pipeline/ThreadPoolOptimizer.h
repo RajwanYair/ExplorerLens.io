@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 417: Thread Pool Optimizer
+// ThreadPoolOptimizer.h — Thread Pool Optimizer
 // Adaptive thread pool sizing based on CPU topology, thermal state,
 // power profile, and current system load — avoids oversubscription.
 #include <algorithm>

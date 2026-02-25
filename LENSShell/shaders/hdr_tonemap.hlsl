@@ -1,5 +1,4 @@
 // hdr_tonemap.hlsl — HDR to SDR Tone Mapping Compute Shader
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 360
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Converts HDR (EXR/HDR/AVIF) pixel data to SDR for thumbnail display.

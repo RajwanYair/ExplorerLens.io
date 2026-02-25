@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 442: DirectStorage 1.2 Integration
+// DirectStorage12Integration.h — DirectStorage 1.2 Integration
 // GPU-direct file I/O pipeline using DirectStorage API for
 // bypassing CPU staging when loading textures to GPU memory.
 #include <cstddef>

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 401: GPU Texture Compression Pipeline
+// GPUTextureCompressionPipeline.h — GPU Texture Compression Pipeline
 // Real-time BCn/ASTC/ETC2 compression for thumbnail atlas storage,
 // reducing VRAM footprint by 4-8x while maintaining visual quality.
 #include <cstdint>

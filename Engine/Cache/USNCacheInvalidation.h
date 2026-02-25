@@ -1,12 +1,11 @@
 /******************************************************************************
- * ExplorerLens — Sprint 35: Smart Cache Invalidation via USN Journal
+ * USNCacheInvalidation.h — Smart Cache Invalidation via USN Journal
  * Copyright (c) 2026 — ExplorerLens Project
  *
  * NTFS USN Journal watcher for real-time file change detection,
  * robust file identity cache keys, bounded invalidation queue,
  * full consistency sweep recovery, and stale-hit metrics.
  *
- * Exit criteria: stale thumbnail incidents reduced ≥80% in
  *                rename-heavy and sync-heavy workflows.
  *****************************************************************************/
 

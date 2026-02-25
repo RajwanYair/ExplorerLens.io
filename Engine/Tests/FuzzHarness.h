@@ -1,5 +1,4 @@
 // FuzzHarness.h — Fuzz Testing Harness for ExplorerLens Decoders
-// ExplorerLens v15.0.0 "Zenith" — Sprint 383
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides fuzz target functions for each decoder, compatible with

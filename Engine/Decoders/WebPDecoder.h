@@ -1,5 +1,4 @@
 // WebPDecoder.h - libwebp Decoder for WebP Format
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2025 ExplorerLens Project
 //
 // Supports: WebP (lossy and lossless) using libwebp 1.5.0

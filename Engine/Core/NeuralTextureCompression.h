@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 443: Neural Texture Compression
+// NeuralTextureCompression.h — Neural Texture Compression
 // ML-driven texture compression using trained neural codecs,
 // achieving superior quality at same bitrate vs traditional BC7.
 #include <cstddef>

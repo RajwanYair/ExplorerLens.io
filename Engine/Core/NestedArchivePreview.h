@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 404: Nested Archive Preview Engine
+// NestedArchivePreview.h — Nested Archive Preview Engine
 // Recursive extraction and thumbnail generation for archives-within-archives
 // (e.g., .tar.gz, .zip containing .7z), with depth limits and memory budgets.
 #include <cstdint>

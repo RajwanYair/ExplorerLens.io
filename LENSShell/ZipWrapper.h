@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // ZipWrapper.h — Lightweight ZIP Archive Reader
 //
-// Extracted from LENSArchive.h (Sprint 355). Wraps minizip-ng (mz_zip)
+// Extracted from LENSArchive.h. Wraps minizip-ng (mz_zip)
 // to provide a simple C++ interface for reading ZIP-based archives
 // (ZIP, CBZ, EPUB, DOCX, XLSX, ODP, etc.).
 //

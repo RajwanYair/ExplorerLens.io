@@ -1,5 +1,4 @@
 // bicubic_resize.hlsl — Mitchell-Netravali Bicubic Resize Compute Shader
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 361
 // Copyright (c) 2026 ExplorerLens Project
 //
 // High-quality bicubic interpolation using Mitchell-Netravali filter.

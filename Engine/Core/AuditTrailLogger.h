@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 422: Audit Trail Logger
+// AuditTrailLogger.h — Audit Trail Logger
 // Structured, tamper-evident audit logging for enterprise compliance —
 // logs all thumbnail operations with ISO 27001/SOC 2 compatible fields.
 #include <cstdint>

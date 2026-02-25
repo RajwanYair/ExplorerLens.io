@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 436: Decoder Performance Profiler
+// DecoderPerformanceProfiler.h — Decoder Performance Profiler
 // Per-decoder performance profiling with flame-graph-ready trace data,
 // bottleneck identification, and regression detection.
 #include <cstdint>

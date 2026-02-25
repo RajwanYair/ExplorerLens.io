@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 369: Format Group Manager
+// FormatGroupManager.h — Format Group Manager
 // Organizes file formats into collapsible UI categories.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

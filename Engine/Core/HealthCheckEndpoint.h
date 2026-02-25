@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 430: Health Check Endpoint
+// HealthCheckEndpoint.h — Health Check Endpoint
 // HTTP-style health check API for monitoring tools — exposes liveness,
 // readiness, and detailed component health via named pipe or local socket.
 #include <cstdint>

@@ -1,5 +1,4 @@
 // StaticAnalysisGate.h — Static Analysis Quality Gate
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 384
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Defines quality gates for static analysis tools (clang-tidy, MSVC /analyze,

@@ -1,7 +1,7 @@
 /******************************************************************************
  * audio_thumbnail.h
- * Audio Thumbnail Generation for ExplorerLens
- * Sprint 8: Extract album art from audio files and generate waveform visualizations
+ * audio_thumbnail.h — Audio Thumbnail Generation
+ * Extracts album art from audio files and generates waveform visualizations
  ******************************************************************************/
 
 #pragma once

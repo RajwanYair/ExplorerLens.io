@@ -1,5 +1,4 @@
 // IntegrationTests.h — Integration Test Suite for ExplorerLens Engine
-// ExplorerLens v15.0.0 "Zenith" — Sprint 381-382
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Tests real file decode paths with actual test corpus files.

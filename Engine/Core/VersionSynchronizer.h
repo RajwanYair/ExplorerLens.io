@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 349: Version Synchronization
+// VersionSynchronizer.h — Version Synchronization
 // Ensures all version references are consistent across the codebase.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

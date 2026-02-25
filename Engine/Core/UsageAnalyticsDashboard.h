@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 435: Usage Analytics Dashboard
+// UsageAnalyticsDashboard.h — Usage Analytics Dashboard
 // Aggregated usage statistics dashboard — format popularity, decode times,
 // cache hit rates, and user interaction patterns (anonymized).
 #include <cstdint>

@@ -1,6 +1,6 @@
 #pragma once
 //==============================================================================
-// ReleaseGateV11 — Sprint 224
+// ReleaseGateV11 — Release Quality Gate
 // v10.1.0 release quality gate with 15 KPI dimensions.
 // Evaluates build health, test coverage, performance, security, and docs.
 //==============================================================================

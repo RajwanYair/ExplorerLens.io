@@ -1,5 +1,4 @@
 // LivePreviewEngine.h — Real-Time Live Preview for Animated/Video Content
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 397
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Generates animated preview sequences for GIF, WebP, APNG, video files
@@ -65,7 +64,7 @@ struct PreviewResult {
   std::wstring sourceFormat;
 };
 
-/// Live Preview Engine — Sprint 397
+/// Live Preview Engine
 class LivePreviewEngine {
 public:
   static const wchar_t *ModeName(LivePreviewMode m) {

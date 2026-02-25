@@ -1,5 +1,4 @@
 // WebPDecoder.cpp - libwebp Decoder Implementation
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2025 ExplorerLens Project
 
 #include "WebPDecoder.h"

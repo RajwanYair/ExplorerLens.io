@@ -1,5 +1,4 @@
 // DocumentationGenerator.h — Auto-Documentation Generator
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 386
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Generates comprehensive documentation from source code: format support

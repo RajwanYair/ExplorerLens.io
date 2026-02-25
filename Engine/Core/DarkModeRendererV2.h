@@ -1,5 +1,4 @@
 // DarkModeRendererV2.h — Owner-Draw Dark Mode Rendering Engine
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 373
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides owner-draw rendering routines for dark mode controls in the

@@ -1,5 +1,4 @@
 // PropertyStoreHandler.h — IPropertyStore COM Handler for File Metadata
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprints 358-359
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Exposes file metadata (dimensions, codec, color depth, format version)

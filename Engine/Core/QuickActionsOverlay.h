@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 433: Quick Actions Overlay
+// QuickActionsOverlay.h — Quick Actions Overlay
 // Contextual action buttons overlaid on thumbnails — rotate, crop, convert,
 // share, and open-with shortcuts accessible on hover.
 #include <cstdint>

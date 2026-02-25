@@ -1,9 +1,9 @@
 #pragma once
 //==============================================================================
-// ReleaseGateV10 — Sprint 204
+// ReleaseGateV10 — Release Quality Gate
 // v10.0.0 Release validation gate with extended KPI matrix.
 //
-// Builds on ReleaseGateV3 (Sprint 198) with:
+// Builds on ReleaseGateV3 with:
 //   1. Scientific format validation (DICOM/FITS)
 //   2. Advanced 3D format coverage
 //   3. Plugin marketplace readiness

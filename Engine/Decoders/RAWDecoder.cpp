@@ -1,5 +1,4 @@
 // RAWDecoder.cpp - LibRaw Implementation
-// ExplorerLens Engine v1.0.0
 
 #include "RAWDecoder.h"
 #include "../Core/Logger.h"

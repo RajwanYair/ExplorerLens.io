@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 427: Crash Analytics Collector
+// CrashAnalyticsCollector.h — Crash Analytics Collector
 // Structured crash dump collection with minidump generation, stack walking,
 // and anonymous telemetry for decoder stability tracking.
 #include <cstdint>

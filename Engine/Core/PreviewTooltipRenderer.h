@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 431: Preview Tooltip Renderer
+// PreviewTooltipRenderer.h — Preview Tooltip Renderer
 // Rich tooltip preview on hover — shows larger thumbnail, metadata badges,
 // format info, and file properties in a smooth animated popup.
 #include <cstdint>

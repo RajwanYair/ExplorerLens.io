@@ -1,5 +1,4 @@
 // CodeCoverageConfig.h — Code Coverage Configuration & Tracking
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 380
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Configures code coverage collection for MSVC builds using OpenCppCoverage

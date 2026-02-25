@@ -1,5 +1,4 @@
 // PluginHostBridge.h — Out-of-Process Plugin Host Bridge
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 362
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Manages the lifecycle of PluginHost.exe, an out-of-process host for

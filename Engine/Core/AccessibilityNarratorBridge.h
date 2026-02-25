@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 434: Accessibility Narrator Bridge
+// AccessibilityNarratorBridge.h — Accessibility Narrator Bridge
 // Full MSAA/UIA automation support for thumbnail previews — screen reader
 // announcements, keyboard navigation, high-contrast modes.
 #include <cstdint>

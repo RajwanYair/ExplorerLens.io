@@ -1,5 +1,4 @@
 // HybridUIBridge.h — WTL + WinUI 3 XAML Islands Interop Bridge
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 377
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides the hosting infrastructure for embedding WinUI 3 content

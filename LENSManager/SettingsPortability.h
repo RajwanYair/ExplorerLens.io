@@ -1,5 +1,4 @@
 // SettingsPortability.h — Settings Import/Export for ExplorerLens Manager
-// ExplorerLens Manager v15.0.0 "Zenith" — Sprint 371
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides JSON-based settings export and import with preview/diff.

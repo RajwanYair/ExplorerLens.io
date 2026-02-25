@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 399: HDR Tone-Mapping Pipeline
+// HDRToneMappingPipeline.h — HDR Tone-Mapping Pipeline
 // Maps HDR (Rec.2020/PQ, scRGB, EXR) content to SDR thumbnails with
 // perceptually accurate brightness and color preservation.
 #include <cstdint>

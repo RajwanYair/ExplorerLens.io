@@ -1,5 +1,4 @@
 // BitmapPool.h — Pre-allocated Bitmap Pool for Thumbnail Generation
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 356
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Reduces allocation overhead by maintaining a pool of pre-allocated

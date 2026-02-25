@@ -1,5 +1,4 @@
 // AVIFDecoder.cpp - WIC-based AVIF/HEIF Decoder Implementation
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2025 ExplorerLens Project
 
 #include "AVIFDecoder.h"

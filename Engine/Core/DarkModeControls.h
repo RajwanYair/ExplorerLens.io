@@ -1,5 +1,4 @@
 // DarkModeControls.h — Dark Mode Owner-Draw Control Library
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 374
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Custom owner-draw implementations for common Windows controls in dark mode:

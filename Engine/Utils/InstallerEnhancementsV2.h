@@ -1,5 +1,4 @@
 // InstallerEnhancementsV2.h — Installer Experience Improvements
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 388
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Defines installer UX enhancements: progress feedback, prerequisite

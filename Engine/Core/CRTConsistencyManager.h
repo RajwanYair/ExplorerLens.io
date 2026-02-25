@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 351: LibWebP CRT Fix
+// CRTConsistencyManager.h — LibWebP CRT Fix
 // Ensures libwebp uses /MD CRT to match all other libraries.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

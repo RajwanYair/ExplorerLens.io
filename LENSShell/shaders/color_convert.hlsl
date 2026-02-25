@@ -1,5 +1,4 @@
 // color_convert.hlsl — Wide Gamut Color Space Conversion Compute Shader
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 360
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Converts images from wide-gamut color spaces (Display P3, Rec. 2020, Adobe RGB)

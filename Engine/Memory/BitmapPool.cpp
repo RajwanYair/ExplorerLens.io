@@ -1,5 +1,4 @@
 // BitmapPool.cpp — Pre-allocated Bitmap Pool Implementation
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 356
 // Copyright (c) 2026 ExplorerLens Project
 
 #include "BitmapPool.h"

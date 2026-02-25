@@ -1,9 +1,9 @@
 #pragma once
 //==============================================================================
-// ReleaseGateV3 — Sprint 198
+// ReleaseGateV3 — Release Quality Gate
 // v9.2 Release validation gate with comprehensive KPI checks
 //
-// Builds on ReleaseGateV2 (Sprint 172) with:
+// Builds on ReleaseGateV2 with:
 //   1. Platform coverage validation (x64 + ARM64)
 //   2. MSIX package validation
 //   3. High-DPI compatibility matrix

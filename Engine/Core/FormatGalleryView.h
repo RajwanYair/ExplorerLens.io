@@ -1,5 +1,4 @@
 // FormatGalleryView.h — Visual Format Gallery with Live Previews
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 378
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides a visual gallery view for the LENSManager showing sample

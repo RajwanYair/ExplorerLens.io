@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 354-355: Archive Refactor Engine
+// ArchiveRefactorEngine.h — Archive Refactor Engine
 // Manages the LENSArchive.h decomposition into modular components.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

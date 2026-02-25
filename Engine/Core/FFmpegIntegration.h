@@ -1,5 +1,4 @@
 // FFmpegIntegration.h — FFmpeg libavcodec/libavformat Integration
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 367
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides extended video codec support via FFmpeg libraries.

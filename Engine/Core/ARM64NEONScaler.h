@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 418: ARM64 NEON Scaler
+// ARM64NEONScaler.h — ARM64 NEON Scaler
 // NEON intrinsics-based bilinear/bicubic scaler for ARM64 Windows devices,
 // with runtime detection and transparent fallback to scalar code.
 #include <cstdint>

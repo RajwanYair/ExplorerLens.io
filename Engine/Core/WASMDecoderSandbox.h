@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 446: WASM Decoder Sandbox
+// WASMDecoderSandbox.h — WASM Decoder Sandbox
 // WebAssembly-based decoder sandboxing using WAMR (WebAssembly Micro Runtime)
 // for isolating untrusted format decoders in a memory-safe sandbox.
 #include <cstddef>

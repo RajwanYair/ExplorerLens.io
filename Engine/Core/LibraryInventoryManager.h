@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 352: Library Inventory Manager
+// LibraryInventoryManager.h — Library Inventory Manager
 // Tracks all external library versions, build status, and dependencies.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 405: Multi-Page Document Navigator
+// MultiPageNavigator.h — Multi-Page Document Navigator
 // Page selection intelligence for multi-page documents (PDF, TIFF, PSD layers),
 // choosing the most visually representative page for thumbnail generation.
 #include <cstdint>

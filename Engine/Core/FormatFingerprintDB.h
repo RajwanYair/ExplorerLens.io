@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 403: Format Fingerprint Database
+// FormatFingerprintDB.h — Format Fingerprint Database
 // Binary signature database for 250+ file formats with O(1) magic-byte lookup,
 // MIME type resolution, and confidence scoring for ambiguous formats.
 #include <cstdint>

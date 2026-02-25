@@ -1,5 +1,4 @@
 // AVIFDecoder.h - WIC-based AVIF/HEIF Decoder
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2025 ExplorerLens Project
 //
 // Supports: AVIF, HEIF using Windows Imaging Component

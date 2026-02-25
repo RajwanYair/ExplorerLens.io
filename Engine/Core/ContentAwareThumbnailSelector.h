@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 408: Content-Aware Thumbnail Selector
+// ContentAwareThumbnailSelector.h — Content-Aware Thumbnail Selector
 // ML-driven selection of the most visually interesting region for thumbnail
 // cropping, using saliency maps, rule-of-thirds, and face-aware composition.
 #include <algorithm>

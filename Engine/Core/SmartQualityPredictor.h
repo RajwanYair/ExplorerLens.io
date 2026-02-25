@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 412: Smart Quality Predictor
+// SmartQualityPredictor.h — Smart Quality Predictor
 // Predicts optimal output quality (JPEG quality, scale factor, sharpening)
 // based on source characteristics — avoiding wasted compute on simple images.
 #include <cstdint>

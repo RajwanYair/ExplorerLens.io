@@ -1,5 +1,4 @@
 // VideoCodecRouter.h — Intelligent Video Codec Routing Engine
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 368
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Routes video thumbnail requests to the best available decoder backend:

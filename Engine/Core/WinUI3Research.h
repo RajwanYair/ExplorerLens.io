@@ -1,5 +1,4 @@
 // WinUI3Research.h — WinUI 3 / Windows App SDK Modernization Feasibility
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 376
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Documents the feasibility study for migrating LENSManager from WTL to

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 416: Predictive Prefetch Engine
+// PredictivePrefetchEngine.h — Predictive Prefetch Engine
 // Predicts which thumbnails the user will request next based on scroll
 // direction, folder navigation patterns, and recently-accessed heuristics.
 #include <cstdint>

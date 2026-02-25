@@ -1,5 +1,4 @@
 // PerformanceActivation.h — Performance Feature Activation Controller
-// ExplorerLens v15.0.0 "Zenith" — Sprint 389-393
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Central controller that activates and coordinates the performance
@@ -18,7 +17,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 // ============================================================================
-// SIMD capability detection (Sprint 391)
+// SIMD capability detection
 // ============================================================================
 
 enum class SIMDCapability : uint32_t {
@@ -105,26 +104,26 @@ public:
   PerformanceProfile DetectAndConfigure() {
     PerformanceProfile profile;
 
-    // SIMD Detection (Sprint 391)
+    // SIMD Detection
     profile.simdCaps = DetectSIMDCapabilities();
     profile.simdScalerEnabled =
         HasCapability(profile.simdCaps, SIMDCapability::SSE41);
 
-    // Zero-copy is available on all Windows 10+ systems (Sprint 389)
+    // Zero-copy is available on all Windows 10+ systems
     profile.zeroCopyEnabled = true;
 
-    // Parallel I/O scales with CPU cores (Sprint 390)
+    // Parallel I/O scales with CPU cores
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     profile.ioThreadCount = (si.dwNumberOfProcessors > 4) ? 4 : 2;
     profile.parallelIOEnabled = (si.dwNumberOfProcessors >= 4);
     profile.maxParallelDecodes = si.dwNumberOfProcessors;
 
-    // PSO cache — always enabled, sizes scale with GPU memory (Sprint 392)
+    // PSO cache — always enabled, sizes scale with GPU memory
     profile.psoCacheEnabled = true;
     profile.psoCacheMaxEntries = 256;
 
-    // Cache warming — enable for systems with enough memory (Sprint 393)
+    // Cache warming — enable for systems with enough memory
     MEMORYSTATUSEX memStatus;
     memStatus.dwLength = sizeof(memStatus);
     GlobalMemoryStatusEx(&memStatus);

@@ -1,5 +1,4 @@
 // FormatGroupHelper.h — Format categorization and group management
-// ExplorerLens Manager v15.0.0 "Zenith" — Sprint 369
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides logical grouping of 35+ format types into categories for

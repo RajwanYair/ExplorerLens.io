@@ -1,5 +1,4 @@
 // CIHardeningConfig.h — CI/CD Pipeline Hardening Configuration
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 379
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Defines CI pipeline configuration for hardened builds: reproducible

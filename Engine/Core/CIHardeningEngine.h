@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 379: CI Hardening
+// CIHardeningEngine.h — CI Hardening
 // GitHub Actions matrix build, automated test, caching.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

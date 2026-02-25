@@ -1,5 +1,4 @@
 // FuzzingCampaign.h — Fuzzing Campaign Configuration
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 383
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Configures automated fuzzing campaigns for decoder robustness testing.

@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Sprint 360-361: GPU Shader Library
+// GPUShaderLibrary.h — GPU Shader Library
 // Manages HLSL shader compilation, caching, and runtime selection.
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================

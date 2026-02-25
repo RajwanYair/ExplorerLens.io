@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens.io Engine — Release Gate V33 — v15.0 "Zenith" Ship Gate
+// ReleaseGateV33.h — Release Gate V33 Ship Gate
 // Validates all 28 ship-blocking KPIs spanning Foundation, Architecture,
 // External Libraries, GUI/UX, Quality/DevOps, and Performance Optimization.
 // Copyright (c) 2026 ExplorerLens Project

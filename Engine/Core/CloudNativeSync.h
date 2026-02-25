@@ -1,5 +1,4 @@
 // CloudNativeSync.h — Cloud-Native Thumbnail Sync & Distribution
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 398
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Synchronizes thumbnail cache across devices via cloud storage providers
@@ -89,7 +88,7 @@ struct SyncResult {
   std::wstring errorMessage;
 };
 
-/// Cloud Native Sync — Sprint 398
+/// Cloud Native Sync
 class CloudNativeSync {
 public:
   static const wchar_t *ProviderName(NativeCloudProvider p) {

@@ -1,5 +1,5 @@
 // PropertyStoreImpl.h — IPropertyStore / IPropertyStoreCapabilities for
-// Explorer Details Pane ExplorerLens Engine v15.0.0 "Zenith" — Sprint 358-359
+// Explorer Details Pane
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides read-only metadata to Windows Explorer Details Pane for all

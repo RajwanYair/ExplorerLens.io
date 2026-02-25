@@ -1,5 +1,4 @@
 // DarkModeController.h — Unified Dark Mode Controller for LENSManager
-// ExplorerLens Manager v15.0.0 "Zenith" — Sprint 373-374
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Orchestrates dark mode across the entire Manager UI using DarkModeHelper.h.

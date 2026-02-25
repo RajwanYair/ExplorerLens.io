@@ -1,5 +1,4 @@
 // Lanczos3 Resize Compute Shader
-// ExplorerLens v15.0.0 "Zenith" — Sprint 360
 //
 // High-quality image downscaling using Lanczos3 kernel.
 // Produces sharper thumbnails than bilinear filtering, especially

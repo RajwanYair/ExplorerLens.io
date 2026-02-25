@@ -1,5 +1,4 @@
 // AdaptiveDecoderRouter.h — Intelligent Decoder Selection Based on Content
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 395
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Uses file signature analysis, historical performance data, and system state
@@ -59,7 +58,7 @@ struct RoutingDecision {
   double estimatedTimeMs = 0.0;
 };
 
-/// Adaptive Decoder Router — Sprint 395
+/// Adaptive Decoder Router
 class AdaptiveDecoderRouter {
 public:
   static const wchar_t *StrategyName(RoutingStrategy s) {

@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 410: Document Layout Analyzer
+// DocumentLayoutAnalyzer.h — Document Layout Analyzer
 // Structural analysis of document pages for smart thumbnail cropping —
 // identifies title blocks, text regions, figures, tables, and headers.
 #include <cstdint>

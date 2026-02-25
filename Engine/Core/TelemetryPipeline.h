@@ -1,5 +1,4 @@
 // TelemetryPipeline.h — Production Telemetry Pipeline for v15 Zenith
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 396
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Unified telemetry pipeline aggregating decode metrics, GPU utilization,
@@ -83,7 +82,7 @@ struct SystemHealthSnapshot {
   uint64_t uptimeSeconds = 0;
 };
 
-/// Telemetry Pipeline — Sprint 396
+/// Telemetry Pipeline
 class TelemetryPipeline {
 public:
   static const wchar_t *CategoryName(PipelineTelemetryCategory c) {

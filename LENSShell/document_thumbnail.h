@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-// Sprint 9 Phase 1: Office Document Thumbnail Extraction
+// document_thumbnail.h — Office Document Thumbnail Extraction
 // Supports: DOCX, PPTX, XLSX, PDF (enhanced)
 //
 // Uses multiple strategies:

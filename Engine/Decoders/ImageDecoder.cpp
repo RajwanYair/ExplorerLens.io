@@ -1,5 +1,4 @@
 // ImageDecoder.cpp - WIC-based Image Decoder Implementation
-// ExplorerLens Engine v1.0.0
 // Copyright (c) 2025 ExplorerLens Project
 
 #include "ImageDecoder.h"

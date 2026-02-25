@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 406: Animated Format Controller
+// AnimatedFormatController.h — Animated Format Controller
 // Intelligent frame selection for animated formats (GIF, APNG, WebP, AVIF
 // sequences), choosing the most representative frame or generating a filmstrip
 // composite.

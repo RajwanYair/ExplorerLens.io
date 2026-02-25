@@ -1,5 +1,5 @@
 #pragma once
-// Sprint 439: System Resource Monitor
+// SystemResourceMonitor.h — System Resource Monitor
 // Real-time monitoring of CPU, GPU, memory, and I/O utilization to
 // dynamically throttle thumbnail generation under resource pressure.
 #include <algorithm>

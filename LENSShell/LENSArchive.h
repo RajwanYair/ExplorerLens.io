@@ -2691,10 +2691,10 @@ public:
     }
   }
 
-  // Get current file path (for Engine integration v5.3.0)
+  // Get current file path (for Engine integration)
   const wchar_t *GetFilePath() const { return m_LENSFile; }
 
-  // Get detected file type (for PropertyStore v15.0.0)
+  // Get detected file type (for PropertyStore)
   LENSTYPE GetFileType() const { return m_LENSTYPE; }
 
 #ifdef _DEBUG

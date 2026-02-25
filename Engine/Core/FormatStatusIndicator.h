@@ -1,5 +1,4 @@
 // FormatStatusIndicator.h — Traffic-Light Status Indicator for Format Decoders
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 370
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides visual status indicators for each format decoder:

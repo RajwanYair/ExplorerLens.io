@@ -1,5 +1,4 @@
 // ThumbnailQualityAnalyzer.h — Automated Thumbnail Quality Assessment
-// ExplorerLens Engine v15.0.0 "Zenith" — Sprint 394
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Evaluates generated thumbnails for visual quality using structural similarity
@@ -75,7 +74,7 @@ struct QualityThresholds {
   double maxArtifactScore = 0.15;
 };
 
-/// Thumbnail Quality Analyzer — Sprint 394
+/// Thumbnail Quality Analyzer
 class ThumbnailQualityAnalyzer {
 public:
   static const wchar_t *MetricName(QualityMetric m) {
