@@ -13,32 +13,31 @@ project(EngineTests LANGUAGES CXX)
 add_executable(EngineTests
     EngineTests.cpp
     test_gpu.cpp
-    # Sprint 150-174: v8.3.0 Block test suites
-    Sprint150_PluginTestMatrix.cpp
-    Sprint151_PluginSandboxPolicy.cpp
-    Sprint152_PluginCompatKitV2.cpp
-    Sprint153_PluginReferencePack.cpp
-    Sprint154_PluginTrustChain.cpp
-    Sprint155_ARM64BuildConfig.cpp
-    Sprint156_ARM64LibraryMatrix.cpp
-    Sprint157_ARM64RuntimeValidator.cpp
-    Sprint158_ARM64PerfBaseline.cpp
-    Sprint159_ARM64CIIntegration.cpp
-    Sprint160_JPEG2000Decoder.cpp
-    Sprint161_CADFormat.cpp
-    Sprint162_GLTFModel.cpp
-    Sprint163_Scientific.cpp
-    Sprint164_FallbackEngine.cpp
-    Sprint165_ArchiveMemory.cpp
-    Sprint166_ZeroCopy.cpp
-    Sprint167_AdaptiveCache.cpp
-    Sprint168_HotMode.cpp
-    Sprint169_MemPressure.cpp
-    Sprint170_MatrixValidation.cpp
-    Sprint171_InstallerLifecycle.cpp
-    Sprint172_ReleaseGate.cpp
-    Sprint173_DocSync.cpp
-    Sprint174_ProgramClosure.cpp
+    PluginTestMatrixTests.cpp
+    PluginSandboxPolicyTests.cpp
+    PluginCompatKitTests.cpp
+    PluginReferencePackTests.cpp
+    PluginTrustChainTests.cpp
+    ARM64BuildConfigTests.cpp
+    ARM64LibraryMatrixTests.cpp
+    ARM64RuntimeValidatorTests.cpp
+    ARM64PerfBaselineTests.cpp
+    ARM64CIIntegrationTests.cpp
+    JPEG2000DecoderTests.cpp
+    CADFormatDecoderTests.cpp
+    GLTFModelDecoderTests.cpp
+    ScientificDecoderTests.cpp
+    FallbackEngineTests.cpp
+    ArchiveMemoryTests.cpp
+    ZeroCopyPipelineTests.cpp
+    AdaptiveCacheBudgetTests.cpp
+    HotModeDirectoryTests.cpp
+    MemoryPressureTests.cpp
+    MatrixValidationTests.cpp
+    InstallerLifecycleTests.cpp
+    ReleaseGateTests.cpp
+    DocumentationSyncTests.cpp
+    ProgramClosureTests.cpp
 )
 
 # Link JXL libraries if enabled
@@ -50,8 +49,6 @@ endif()
 add_executable(EngineBenchmark
     EngineBenchmark.cpp
 )
-
-# Sprint 16: Integration Tests
 add_executable(IntegrationTests
     IntegrationTests.cpp
 )
@@ -157,14 +154,12 @@ if(MSVC)
         /W4
         /wd4189     # Same rationale as above
     )
-    
-    # Fix LIBCMT conflict - external libraries built with /MT need this
+
+    # libwebp rebuilt with /MD — no NODEFAULTLIB:LIBCMT workaround needed
     target_link_options(EngineTests PRIVATE
-        /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts from external libs
         /IGNORE:4099            # Ignore missing PDB warnings
     )
     target_link_options(EngineBenchmark PRIVATE
-        /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts from external libs
         /IGNORE:4099            # Ignore missing PDB warnings
     )
 endif()
@@ -213,5 +208,3 @@ if(WIN32)
         )
     endif()
 endif()
-
-

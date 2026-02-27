@@ -118,10 +118,9 @@ if(MSVC)
         /DYNAMICBASE        # ASLR support
         /NXCOMPAT          # DEP support
         /HIGHENTROPYVA     # 64-bit ASLR
-        /NODEFAULTLIB:LIBCMT              # Fix LIBCMT conflict
         /IGNORE:4099                      # Ignore missing PDB warnings
     )
-    
+
     # Profile-Guided Optimization support
     # Usage:
     #   Phase 1 (Instrument):  cmake -B build -DPGO_PHASE=INSTRUMENT && cmake --build build --config Release
@@ -179,7 +178,7 @@ if(NOT BUILD_ENGINE_ONLY)
     # Build the shell extension and manager
     # Note: These require additional COM setup and are primarily built via MSBuild
     # This CMake integration is for CI/CD and cross-platform build testing
-    
+
     message(STATUS "Full project build enabled")
     message(STATUS "  - Engine library: ON")
     message(STATUS "  - Shell extension: Via MSBuild (COM dependency)")
@@ -196,12 +195,12 @@ if(NOT BUILD_ENGINE_ONLY)
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
     )
-    
+
     install(DIRECTORY Engine/Core Engine/Decoders Engine/Pipeline Engine/GPU Engine/Cache Engine/Utils
         DESTINATION include/ExplorerLens
         FILES_MATCHING PATTERN "*.h"
     )
-    
+
     install(FILES Engine/Engine.h
         DESTINATION include/ExplorerLens
     )
@@ -267,4 +266,3 @@ message(STATUS "  Library:  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 message(STATUS "  Archive:  ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
 message(STATUS "========================================")
 message(STATUS "")
-

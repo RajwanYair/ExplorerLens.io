@@ -110,7 +110,7 @@ else()
     set(HAS_MUPDF OFF CACHE BOOL "PDF support — MuPDF not built (see docs/build/BUILD_GUIDE.md)" FORCE)
 endif()
 
-# --- OpenJPEG (Sprint 365) ---
+# --- OpenJPEG ---
 set(OPENJPEG_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/openjp2.lib")
 set(OPENJPEG_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/openjpeg-install")
 if(EXISTS "${OPENJPEG_LIB_PATH}")
@@ -137,7 +137,7 @@ else()
     set(HAS_LIBARCHIVE OFF CACHE BOOL "libarchive not built (run Build-Libarchive.ps1)" FORCE)
 endif()
 
-# --- FreeType (Sprint 366) ---
+# --- FreeType ---
 set(FREETYPE_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/freetype.lib")
 if(EXISTS "${FREETYPE_LIB_PATH}")
     set(HAS_FREETYPE ON CACHE BOOL "Enhanced font rendering auto-detected" FORCE)
@@ -171,6 +171,8 @@ set(ENGINE_HEADERS
     Engine.h
 
     # Core engine components
+    Core/Accessibility.h
+    Core/AccessibilityNarratorBridge.h
     Core/AccessibilityPipeline.h
     Core/AccessibilitySuiteV2.h
     Core/AdaptiveDecoderRouter.h
@@ -187,6 +189,13 @@ set(ENGINE_HEADERS
     Core/ConfigMigrationEngine.h
     Core/ContentIndexer.h
     Core/D3D12PipelineActivation.h
+    Core/DarkMode.h
+    Core/DarkModeControls.h
+    Core/DarkModeEngine.h
+    Core/DarkModeRendererV2.h
+    Core/DeadCodeAnalysis.h
+    Core/DeadCodeAudit.h
+    Core/DeadCodeAuditor.h
     Core/DecoderHealthDashboard.h
     Core/DecoderHealthMonitor.h
     Core/DiagnosticsExporter.h
@@ -196,6 +205,7 @@ set(ENGINE_HEADERS
     Core/ErrorContext.h
     Core/ErrorRecoveryEngine.h
     Core/ETWSinkComplete.h
+    Core/ETWTraceProvider.h
     Core/FormatConverterEngine.h
     Core/FormatRegistry.h
     Core/FormatTypes.h
@@ -221,7 +231,6 @@ set(ENGINE_HEADERS
     Core/ProgramClosureV83.h
     Core/QuickLookIntegration.h
     Core/RegistryManager.h
-    Core/ReleaseGateV2.h
     Core/ReleaseReadinessDashboard.h
     Core/ReproducibleBuildVerifier.h
     Core/ResourcePoolEngine.h
@@ -235,17 +244,24 @@ set(ENGINE_HEADERS
     Core/ShellRegistrationManager.h
     Core/SIMDAccelerationManager.h
     Core/SIMDAccelerator.h
+    Core/Telemetry.h
     Core/TelemetryDashboard.h
     Core/TelemetryEngine.h
+    Core/TelemetryHooks.h
     Core/TelemetryPipeline.h
     Core/ThemeEngine.h
+    Core/ObservabilityIntegration.h
     Core/PerformanceActivation.h
     Core/ThumbnailQualityAnalyzer.h
     Core/ThumbnailAnimationEngineV2.h
     Core/Types.h
     Core/UpdateEngine.h
+    Core/LibraryInventoryManager.h
+    Core/LibraryVersionAudit.h
     Core/VersionDriftDetector.h
     Core/VersionDriftGate.h
+    Core/VersionManagement.h
+    Core/VersionSynchronizer.h
     Core/VersionSyncV14.h
     Core/VulkanComputeActivation.h
     Core/WatchFolderEngine.h
@@ -363,10 +379,14 @@ set(ENGINE_HEADERS
     Plugin/PluginCompatibilityKitV2.h
     Plugin/PluginDebuggerIntegration.h
     Plugin/PluginDecoder.h
+    Plugin/PluginHostBridge.h
     Plugin/PluginHostClient.h
+    Plugin/PluginHostIPC.h
     Plugin/PluginHotReload.h
+    Plugin/PluginLifecycle.h
     Plugin/PluginManager.h
     Plugin/PluginMarketplace.h
+    Plugin/PluginMarketplaceUnified.h
     Plugin/PluginMarketplaceV2.h
     Plugin/PluginMarketplaceV3.h
     Plugin/PluginPerformanceProfiler.h
@@ -375,6 +395,7 @@ set(ENGINE_HEADERS
     Plugin/PluginRuntimeValidation.h
     Plugin/PluginSandboxPolicy.h
     Plugin/PluginSDKV2.h
+    Plugin/PluginSecurity.h
     Plugin/PluginTrustChain.h
     Plugin/Security/JobObjectManager.h
 
@@ -415,102 +436,63 @@ set(ENGINE_HEADERS
 
     # Utilities
     Utils/AccessibilityEngine.h
-    Utils/AccessibilityFramework.h
-    Utils/AccessibilityI18n.h
-    Utils/ARM64BuildConfig.h
-    Utils/ARM64CIIntegration.h
     Utils/ARM64HardwareValidator.h
-    Utils/ARM64LibraryMatrix.h
-    Utils/ARM64PerformanceBaseline.h
-    Utils/ARM64PerformanceOptimizer.h
-    Utils/ARM64PlatformValidator.h
-    Utils/ARM64RuntimeValidator.h
+    Utils/ARM64Platform.h
+    Utils/CIPipeline.h
+    Utils/CodeCoverage.h
+    Utils/DocGenerator.h
+    Utils/FuzzingEngine.h
+    Utils/InstallerManager.h
+    Utils/MemorySafety.h
+    Utils/Observability.h
+    Utils/PerformanceTools.h
+    Utils/QualityGates.h
+    Utils/SecurityCompliance.h
+    Utils/TestFramework.h
+    Utils/WindowsCompat.h
+    Utils/WindowsUI.h
+    # Individual utility headers
+    Utils/AuditLogger.h
     Utils/AutoDocGenerator.h
     Utils/AutoUpdateEngine.h
     Utils/CIValidator.h
     Utils/CodeCoverageIntegration.h
     Utils/CommandLineInterface.h
-    Utils/CompatibilityMatrix.h
-    Utils/ComplianceAuditLogger.h
     Utils/ConfigMigrationEngine.h
-    Utils/ContinuousFuzzEngine.h
-    Utils/DarkModeManagerV2.h
     Utils/DiagnosticDashboard.h
-    Utils/DocumentationExcellenceV2.h
+    Utils/Enterprise.h
     Utils/EnterpriseDeployment.h
     Utils/EnterpriseDeploymentManager.h
-    Utils/EnterprisePolicyEngineV2.h
     Utils/EXIFOrientation.h
     Utils/FileHashEngine.h
-    Utils/FuzzTestingManager.h
-    Utils/GUIHardening.h
+
     Utils/HardwareCapabilities.h
-    Utils/InstallerLifecycleAutomation.h
-    Utils/InstallerV2Manager.h
+    Utils/Installer.h
     Utils/LocalizationEngine.h
     Utils/LogRotationEngine.h
     Utils/MalformedInputHandler.h
-    Utils/MatrixValidationFramework.h
     Utils/MemoryMappedFile.h
-    Utils/MemorySafetyAuditV2.h
     Utils/MemorySafetyIntegration.h
     Utils/MSIXPackageManager.h
-    Utils/MSIXPackagingManager.h
     Utils/NetworkDiagnostics.h
     Utils/NotificationEngine.h
-    Utils/ObservabilityPipeline.h
-    Utils/PerformancePolish.h
     Utils/PerformanceProfiler.h
-    Utils/PerMonitorDPIManager.h
-    Utils/PortableMode.h
     Utils/PortableModeManager.h
     Utils/PythonSDK.h
-    Utils/QualityAssuranceV2.h
-    Utils/ReleaseGovernance.h
+    Utils/SecurityTesting.h
     Utils/SIMDScaler.h
     Utils/SmallObjectPool.h
-    Utils/SupplyChainIntegrityV2.h
-    Utils/SupplyChainSecurity.h
-    Utils/TelemetryAnalyticsEngine.h
-    Utils/TestInfrastructureV2.h
+    Utils/TestInfrastructure.h
     Utils/TestSuiteExpansion.h
-    Utils/TestSuiteExpansionV2.h
-    Utils/ThreatModelV2.h
     Utils/UsageTelemetryEngine.h
+    Utils/ValidationHelpers.h
     Utils/VersionNormalization.h
     Utils/Win11Integration.h
-    Utils/Win11IntegrationManager.h
-    Utils/Windows12Compatibility.h
 
     # Release gate (unified)
     Utils/ReleaseGate.h
-    Utils/ReleaseGateV3.h
-    Utils/ReleaseGateV10.h
-    Utils/ReleaseGateV11.h
-    Utils/ReleaseGateV12.h
-    Utils/ReleaseGateV13.h
-    Utils/ReleaseGateV14.h
-    Utils/ReleaseGateV15.h
-    Utils/ReleaseGateV16.h
-    Utils/ReleaseGateV17.h
-    Utils/ReleaseGateV18.h
-    Utils/ReleaseGateV19.h
-    Utils/ReleaseGateV20.h
-    Utils/ReleaseGateV21.h
-    Utils/ReleaseGateV22.h
-    Utils/ReleaseGateV23.h
-    Utils/ReleaseGateV24.h
-    Utils/ReleaseGateV25.h
-    Utils/ReleaseGateV26.h
-    Utils/ReleaseGateV27.h
-    Utils/ReleaseGateV28.h
-    Utils/ReleaseGateV29.h
-    Utils/ReleaseGateV30.h
-    Utils/ReleaseGateV31.h
-    Utils/ReleaseGateV32.h
-    Utils/ReleaseGateV33.h
 
-    # Sprint 399-448: Zenith Ascent Feature Headers
+    # Zenith Feature Headers
     Core/HDRToneMappingPipeline.h
     Core/ColorSpaceEngine.h
     Core/GPUTextureCompressionPipeline.h
@@ -541,6 +523,7 @@ set(ENGINE_HEADERS
     Core/SelfHealingDecoder.h
     Core/CrashAnalyticsCollector.h
     Core/PerformanceAnomalyDetector.h
+    Core/PerformanceDashboard.h
     Core/DiagnosticReportGeneratorV2.h
     Core/HealthCheckEndpoint.h
     Core/PreviewTooltipRenderer.h
@@ -587,6 +570,7 @@ set(ENGINE_SOURCES
     Core/ShellPreviewHandler.cpp
     Core/SIMDAccelerator.cpp
     Core/TelemetryEngine.cpp
+    Core/ETWTraceProvider.cpp
     Core/ThemeEngine.cpp
     Core/UpdateEngine.cpp
     Core/WatchFolderEngine.cpp
@@ -661,6 +645,7 @@ set(ENGINE_SOURCES
     # Utility implementations
     Utils/AccessibilityEngine.cpp
     Utils/ARM64HardwareValidator.cpp
+    Utils/AuditLogger.cpp
     Utils/AutoDocGenerator.cpp
     Utils/CIValidator.cpp
     Utils/CodeCoverageIntegration.cpp
@@ -707,7 +692,7 @@ if(ENGINE_SOURCES)
         # STATIC library: do NOT define ENGINE_EXPORTS, so ENGINE_API is empty
         target_compile_definitions(ExplorerLensEngine PUBLIC ENGINE_STATIC)
     endif()
-    
+
     target_include_directories(ExplorerLensEngine
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
@@ -728,15 +713,16 @@ if(ENGINE_SOURCES)
             # MuPDF includes
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/include
     )
-    
+
     # Windows-specific settings
     if(WIN32)
         target_compile_definitions(ExplorerLensEngine PRIVATE
             _WINDOWS
             WIN32_LEAN_AND_MEAN
             NOMINMAX
+            LIBWEBP_REBUILT_WITH_MD   # libwebp 1.5.0 rebuilt with /MD — no NODEFAULTLIB:LIBCMT needed
         )
-        
+
         # Conditional decoder feature flags
         if(HAS_LIBJXL)
             target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBJXL JXL_STATIC_DEFINE)
@@ -744,14 +730,14 @@ if(ENGINE_SOURCES)
         else()
             message(STATUS "JPEG XL support: DISABLED (set -DHAS_LIBJXL=ON when libjxl is available)")
         endif()
-        
+
         if(HAS_LIBHEIF)
             target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBHEIF LIBHEIF_STATIC_BUILD)
             message(STATUS "HEIF/HEIC support: ENABLED")
         else()
             message(STATUS "HEIF/HEIC support: DISABLED (set -DHAS_LIBHEIF=ON when libheif is available)")
         endif()
-        
+
         if(HAS_LIBRAW)
             target_compile_definitions(ExplorerLensEngine PRIVATE HAS_LIBRAW)
             message(STATUS "Camera RAW support: ENABLED")
@@ -807,7 +793,7 @@ if(ENGINE_SOURCES)
         else()
             message(STATUS "Audio decoder: DISABLED (set -DENABLE_AUDIO_DECODER=ON)")
         endif()
-        
+
         target_link_libraries(ExplorerLensEngine
             PRIVATE
                 gdiplus
@@ -825,12 +811,12 @@ if(ENGINE_SOURCES)
                 mf              # Media Foundation
                 propsys         # Property System for audio metadata
         )
-        
+
         # Link libwebp
         target_link_directories(ExplorerLensEngine
             PUBLIC
                 ${CMAKE_CURRENT_SOURCE_DIR}/../SDK/lib
-                ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libwebp-1.5.0-original/output/x64/Release/release-static/x64/lib
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libwebp-1.5.0-build/build-cmake/Release
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/minizip-ng-4.0.10/build-manual
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/zlib-1.3.1/install/lib
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/zstd-1.5.7/build-manual
@@ -843,12 +829,12 @@ if(ENGINE_SOURCES)
                 # dav1d (AV1 codec for AVIF)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/dav1d-1.5.1/install/lib
                 # MuPDF libraries
-                ${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/build/release
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/platform/win32/x64/Release
                 # libarchive libraries
                 ${LIBARCHIVE_INSTALL_DIR}/lib
                 ${LIBARCHIVE_BUILD_DIR}/libarchive/Release
         )
-        
+
         target_link_libraries(ExplorerLensEngine
             PUBLIC
                 libwebp
@@ -857,7 +843,7 @@ if(ENGINE_SOURCES)
                 zlibstatic
                 zstd_static
         )
-        
+
         # Conditionally link optional decoder libraries
         if(HAS_LIBJXL)
             target_link_libraries(ExplorerLensEngine PUBLIC jxl jxl_cms jxl_threads brotlicommon brotlidec hwy)
@@ -878,9 +864,17 @@ if(ENGINE_SOURCES)
             target_link_libraries(ExplorerLensEngine PUBLIC avif dav1d)
         endif()
         if(HAS_MUPDF)
-            set(MUPDF_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/platform/win32/x64/Release/libmupdf.lib")
+            set(MUPDF_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/platform/win32/x64/Release")
+            set(MUPDF_LIB_PATH "${MUPDF_LIB_DIR}/libmupdf.lib")
             if(EXISTS "${MUPDF_LIB_PATH}")
-                target_link_libraries(ExplorerLensEngine PUBLIC "${MUPDF_LIB_PATH}")
+                target_link_libraries(ExplorerLensEngine PUBLIC
+                    "${MUPDF_LIB_DIR}/libmupdf.lib"
+                    "${MUPDF_LIB_DIR}/libthirdparty.lib"
+                    "${MUPDF_LIB_DIR}/libresources.lib"
+                    "${MUPDF_LIB_DIR}/libharfbuzz.lib"
+                    "${MUPDF_LIB_DIR}/libextract.lib"
+                    "${MUPDF_LIB_DIR}/libpkcs7.lib"
+                )
             else()
                 message(WARNING "HAS_MUPDF=ON but libmupdf.lib not found at ${MUPDF_LIB_PATH}. PDF support will link but may fail.")
             endif()
@@ -895,7 +889,7 @@ if(ENGINE_SOURCES)
             target_link_libraries(ExplorerLensEngine PUBLIC "${LIBARCHIVE_LIBRARY_PATH}")
         endif()
     endif()
-    
+
     # Compiler warnings & flags (MSVC v145 preferred)
     if(MSVC)
         target_compile_options(ExplorerLensEngine PRIVATE
@@ -939,7 +933,7 @@ endif()
 # PluginHost Executable
 #==============================================================================
 
-# Enabled in v15.0.0 "Zenith" (Sprint 362)
+# Enabled in v15.0.0 "Zenith"
 add_subdirectory(PluginHost)
 
 #==============================================================================
@@ -963,19 +957,19 @@ install(FILES ${ENGINE_HEADERS}
 #==============================================================================
 
 # include(CMakePackageConfigHelpers)
-# 
+#
 # configure_package_config_file(
 #     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ExplorerLensEngineConfig.cmake.in"
 #     "${CMAKE_CURRENT_BINARY_DIR}/ExplorerLensEngineConfig.cmake"
 #     INSTALL_DESTINATION lib/cmake/ExplorerLensEngine
 # )
-# 
+#
 # write_basic_package_version_file(
 #     "${CMAKE_CURRENT_BINARY_DIR}/ExplorerLensEngineConfigVersion.cmake"
 #     VERSION ${PROJECT_VERSION}
 #     COMPATIBILITY SameMajorVersion
 # )
-# 
+#
 # install(FILES
 #     "${CMAKE_CURRENT_BINARY_DIR}/ExplorerLensEngineConfig.cmake"
 #     "${CMAKE_CURRENT_BINARY_DIR}/ExplorerLensEngineConfigVersion.cmake"
@@ -1006,4 +1000,3 @@ message(STATUS "    HAS_FREETYPE:          ${HAS_FREETYPE}")
 message(STATUS "    ENABLE_VIDEO_DECODER:  ${ENABLE_VIDEO_DECODER}")
 message(STATUS "    ENABLE_AUDIO_DECODER:  ${ENABLE_AUDIO_DECODER}")
 message(STATUS "")
-
