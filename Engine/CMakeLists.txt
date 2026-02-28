@@ -315,7 +315,10 @@ set(ENGINE_HEADERS
     Pipeline/ParallelIOPipeline.h
     Pipeline/SmartFormatDetectorV2.h
     Pipeline/ShellProgressIndicator.h
+    Pipeline/SIMDDispatchRouter.h
+    Pipeline/StreamingDecodeEngine.h
     Pipeline/ThumbnailPipeline.h
+    Pipeline/ZeroCopyActivation.h
     Pipeline/ZeroCopyPipeline.h
 
     # Format decoders
@@ -387,6 +390,8 @@ set(ENGINE_HEADERS
     Decoders/WMFDecoder.h
     Decoders/XCFDecoder.h
     Decoders/ExampleDecoder.h
+    Decoders/MultiPageStripRenderer.h
+    Decoders/VideoKeyframeExtractor.h
     Decoders/XPMDecoder.h
 
     # GPU rendering and compute
@@ -394,6 +399,9 @@ set(ENGINE_HEADERS
     GPU/D3D12ComputePipeline.h
     GPU/GDIRenderer.h
     GPU/GPUDecodeAccelerationV2.h
+    GPU/AdaptiveGPUScheduler.h
+    GPU/HDRToneMapKernel.h
+    GPU/LanczosGPUKernel.h
     GPU/VulkanComputePipeline.h
 
     # Cache management
@@ -407,6 +415,8 @@ set(ENGINE_HEADERS
     Cache/SubMillisecondCacheEngine.h
     Cache/ThumbnailCache.h
     Cache/CacheKeyGenerator.h
+    Cache/PredictiveCacheEngine.h
+    Cache/PSOPersistenceManager.h
     Cache/USNCacheInvalidation.h
 
     # Plugin system
@@ -587,6 +597,8 @@ set(ENGINE_HEADERS
     Core/WASMDecoderSandbox.h
     Core/TelemetryPipelineV2.h
     Core/LivePreviewStreamingProtocol.h
+    Core/DragDropThumbnailPreview.h
+    Core/ExplorerColumnProvider.h
 )
 
 set(ENGINE_SOURCES

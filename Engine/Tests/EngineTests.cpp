@@ -333,6 +333,28 @@
 // Plugin C ABI bridge
 #include "../Plugin/PluginLoaderV2.h"
 
+// Performance pipeline & zero-copy
+#include "../Pipeline/ZeroCopyActivation.h"
+#include "../Pipeline/SIMDDispatchRouter.h"
+#include "../Pipeline/StreamingDecodeEngine.h"
+
+// GPU compute kernels
+#include "../GPU/LanczosGPUKernel.h"
+#include "../GPU/HDRToneMapKernel.h"
+#include "../GPU/AdaptiveGPUScheduler.h"
+
+// Cache engines
+#include "../Cache/PSOPersistenceManager.h"
+#include "../Cache/PredictiveCacheEngine.h"
+
+// Shell deep integration
+#include "../Core/ExplorerColumnProvider.h"
+#include "../Core/DragDropThumbnailPreview.h"
+
+// Advanced decoders
+#include "../Decoders/MultiPageStripRenderer.h"
+#include "../Decoders/VideoKeyframeExtractor.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))
@@ -10606,6 +10628,487 @@ TEST(TestPluginLoaderV2_LoadInvalidDLL) {
     ASSERT(!loader.GetLastError().empty());
 }
 
+// ============================================================================
+// Zero-Copy Activation Tests
+// ============================================================================
+
+TEST(TestZeroCopy_ModeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ZeroCopyModeToString(ZeroCopyMode::Disabled)) == "Disabled");
+    ASSERT(std::string(ZeroCopyModeToString(ZeroCopyMode::DirectStorage)) == "DirectStorage");
+    ASSERT(std::string(ZeroCopyModeToString(ZeroCopyMode::PinnedMemory)) == "PinnedMemory");
+}
+
+TEST(TestZeroCopy_StatsInitial) {
+    using namespace ExplorerLens::Engine;
+    ZeroCopyStats stats;
+    ASSERT(stats.totalTransfers == 0);
+    ASSERT(stats.GetZeroCopyRate() == 0.0);
+    ASSERT(stats.GetBandwidthSavingPercent() == 0.0);
+}
+
+TEST(TestZeroCopy_Initialize) {
+    using namespace ExplorerLens::Engine;
+    ZeroCopyActivation zca;
+    ASSERT(zca.Activate());
+    ASSERT(zca.IsActive());
+    ASSERT(zca.GetActiveMode() != ZeroCopyMode::Disabled);
+}
+
+TEST(TestZeroCopy_StagingBuffer) {
+    using namespace ExplorerLens::Engine;
+    ZeroCopyActivation zca;
+    ASSERT(zca.Activate());
+    auto buf = zca.AcquireStaging(1024);
+    ASSERT(buf.IsValid());
+    ASSERT(buf.size >= 1024);
+    zca.ReleaseStaging(buf);
+}
+
+// ============================================================================
+// SIMD Dispatch Router Tests
+// ============================================================================
+
+TEST(TestSIMD_TierStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SIMDTierToString(SIMDTier::Scalar)) == "Scalar");
+    ASSERT(std::string(SIMDTierToString(SIMDTier::AVX2)) == "AVX2");
+    ASSERT(std::string(SIMDTierToString(SIMDTier::NEON)) == "NEON");
+}
+
+TEST(TestSIMD_FeatureFlags) {
+    using namespace ExplorerLens::Engine;
+    SIMDFeature combined = SIMDFeature::SSE2 | SIMDFeature::AVX2;
+    ASSERT(HasFeature(combined, SIMDFeature::SSE2));
+    ASSERT(HasFeature(combined, SIMDFeature::AVX2));
+    ASSERT(!HasFeature(combined, SIMDFeature::AVX512F));
+}
+
+TEST(TestSIMD_RouterDetection) {
+    using namespace ExplorerLens::Engine;
+    auto& router = SIMDDispatchRouter::Instance();
+    auto caps = router.GetCapabilities();
+    // x86-64 always has SSE2
+    ASSERT(HasFeature(caps.features, SIMDFeature::SSE2));
+    ASSERT(caps.bestTier >= SIMDTier::SSE);
+}
+
+TEST(TestSIMD_KernelSelection) {
+    using namespace ExplorerLens::Engine;
+    auto& router = SIMDDispatchRouter::Instance();
+    ASSERT(router.GetActiveTier() >= SIMDTier::SSE);
+    ASSERT(router.GetCapabilities().vendorString[0] != '\0');
+}
+
+// ============================================================================
+// PSO Persistence Manager Tests
+// ============================================================================
+
+TEST(TestPSO_TypeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PSOTypeToString(PSOType::Graphics)) == "Graphics");
+    ASSERT(std::string(PSOTypeToString(PSOType::Compute)) == "Compute");
+    ASSERT(std::string(PSOTypeToString(PSOType::RayTracing)) == "RayTracing");
+}
+
+TEST(TestPSO_Initialize) {
+    using namespace ExplorerLens::Engine;
+    PSOPersistenceManager mgr;
+    ASSERT(mgr.Initialize(0x1234, 0x5678));
+    auto stats = mgr.GetStats();
+    ASSERT(stats.totalEntries == 0);
+}
+
+TEST(TestPSO_StoreAndLookup) {
+    using namespace ExplorerLens::Engine;
+    PSOPersistenceManager mgr;
+    mgr.Initialize(0x1234, 0x5678);
+    uint8_t blob[] = { 1, 2, 3, 4 };
+    ASSERT(mgr.StorePSO("TestShader", 42, PSOType::Compute, blob, 4, 5000));
+    auto* entry = mgr.LookupPSO(42);
+    ASSERT(entry != nullptr);
+    ASSERT(entry->name == "TestShader");
+    ASSERT(entry->hitCount == 1);
+}
+
+TEST(TestPSO_InvalidateAndPurge) {
+    using namespace ExplorerLens::Engine;
+    PSOPersistenceManager mgr;
+    mgr.Initialize(0x1234, 0x5678);
+    uint8_t blob[] = { 1, 2, 3 };
+    mgr.StorePSO("A", 1, PSOType::Graphics, blob, 3, 1000);
+    mgr.StorePSO("B", 2, PSOType::Compute, blob, 3, 2000);
+    mgr.InvalidateAll();
+    ASSERT(mgr.LookupPSO(1) == nullptr);
+    uint32_t purged = mgr.PurgeStale();
+    ASSERT(purged == 2);
+}
+
+// ============================================================================
+// Predictive Cache Engine Tests
+// ============================================================================
+
+TEST(TestPredictive_Initialize) {
+    using namespace ExplorerLens::Engine;
+    PredictionConfig cfg;
+    cfg.maxHistorySize = 100;
+    PredictiveCacheEngine engine(cfg);
+    ASSERT(engine.GetHistorySize() == 0);
+    ASSERT(engine.GetProfileCount() == 0);
+}
+
+TEST(TestPredictive_RecordNavigation) {
+    using namespace ExplorerLens::Engine;
+    PredictiveCacheEngine engine;
+    NavigationEvent ev;
+    ev.directoryPath = L"C:\\Photos";
+    ev.fileCount = 50;
+    ev.timestamp = 1000000;
+    ev.dwellTimeMs = 5000;
+    engine.RecordNavigation(ev);
+    ASSERT(engine.GetHistorySize() == 1);
+    ASSERT(engine.GetProfileCount() == 1);
+}
+
+TEST(TestPredictive_PredictNext) {
+    using namespace ExplorerLens::Engine;
+    PredictiveCacheEngine engine;
+    NavigationEvent ev1;
+    ev1.directoryPath = L"C:\\Photos";
+    ev1.timestamp = 1000000;
+    ev1.dwellTimeMs = 5000;
+    engine.RecordNavigation(ev1);
+    NavigationEvent ev2;
+    ev2.directoryPath = L"C:\\Docs";
+    ev2.timestamp = 1006000;
+    ev2.dwellTimeMs = 3000;
+    engine.RecordNavigation(ev2);
+    auto predictions = engine.PredictNext(L"C:\\Docs");
+    // Should predict C:\Photos as a candidate
+    ASSERT(engine.GetStats().totalPredictions == 1);
+}
+
+TEST(TestPredictive_PinDirectory) {
+    using namespace ExplorerLens::Engine;
+    PredictiveCacheEngine engine;
+    NavigationEvent ev;
+    ev.directoryPath = L"C:\\Important";
+    ev.timestamp = 1000000;
+    engine.RecordNavigation(ev);
+    engine.PinDirectory(L"C:\\Important");
+    // Pinned directories should always be predicted
+    ASSERT(engine.GetProfileCount() == 1);
+}
+
+// ============================================================================
+// Lanczos GPU Kernel Tests
+// ============================================================================
+
+TEST(TestLanczos_FilterStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ResampleFilterToString(ResampleFilter::Lanczos3)) == "Lanczos3");
+    ASSERT(std::string(ResampleFilterToString(ResampleFilter::Bilinear)) == "Bilinear");
+}
+
+TEST(TestLanczos_DispatchParams) {
+    using namespace ExplorerLens::Engine;
+    auto params = ShaderDispatchParams::ForTexture(256, 256, 8);
+    ASSERT(params.threadGroupsX == 32);
+    ASSERT(params.threadGroupsY == 32);
+    ASSERT(params.threadsPerGroup == 64);
+}
+
+TEST(TestLanczos_KernelWeights) {
+    using namespace ExplorerLens::Engine;
+    // Lanczos3 weight at center should be 1.0
+    float centerWeight = LanczosGPUKernel::LanczosWeight(0.0f, 3);
+    ASSERT(centerWeight > 0.99f && centerWeight <= 1.0f);
+    // Weight outside window should be 0
+    float outsideWeight = LanczosGPUKernel::LanczosWeight(4.0f, 3);
+    ASSERT(outsideWeight == 0.0f);
+}
+
+TEST(TestLanczos_Initialize) {
+    using namespace ExplorerLens::Engine;
+    LanczosGPUKernel kernel;
+    ASSERT(kernel.Initialize());
+    ASSERT(kernel.IsInitialized());
+    auto stats = kernel.GetStats();
+    ASSERT(stats.totalResamples == 0);
+}
+
+// ============================================================================
+// HDR Tone Map Kernel Tests
+// ============================================================================
+
+TEST(TestHDR_OperatorStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ToneMapMethodToString(ToneMapMethod::ACESFilmic)) == "ACESFilmic");
+    ASSERT(std::string(ToneMapMethodToString(ToneMapMethod::Reinhard)) == "Reinhard");
+}
+
+TEST(TestHDR_ReinhardToneMap) {
+    using namespace ExplorerLens::Engine;
+    float result = HDRToneMapKernel::ToneMapReinhard(1.0f);
+    ASSERT(result > 0.49f && result < 0.51f);  // 1/(1+1) = 0.5
+}
+
+TEST(TestHDR_ACESToneMap) {
+    using namespace ExplorerLens::Engine;
+    float result = HDRToneMapKernel::ToneMapACES(1.0f);
+    ASSERT(result > 0.0f && result <= 1.0f);
+}
+
+TEST(TestHDR_SceneAnalysis) {
+    using namespace ExplorerLens::Engine;
+    // Create a simple 2x2 HDR image
+    float hdr[] = { 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f, 2.0f, 2.0f, 2.0f };
+    auto scene = HDRToneMapKernel::AnalyzeScene(hdr, 2, 2, 3);
+    ASSERT(scene.maxLuminance > scene.minLuminance);
+    ASSERT(scene.avgLuminance > 0.0f);
+}
+
+// ============================================================================
+// Adaptive GPU Scheduler Tests
+// ============================================================================
+
+TEST(TestGPUSched_BackendStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ProcessingBackendToString(ProcessingBackend::CPU)) == "CPU");
+    ASSERT(std::string(ProcessingBackendToString(ProcessingBackend::GPU_D3D12)) == "D3D12");
+}
+
+TEST(TestGPUSched_SystemLoadSnapshot) {
+    using namespace ExplorerLens::Engine;
+    SystemLoadSnapshot snap;
+    snap.gpuUtilization = 95.0f;
+    snap.gpuThrottled = true;
+    ASSERT(snap.IsGPUOverloaded());
+    ASSERT(!snap.IsCPUOverloaded());
+}
+
+TEST(TestGPUSched_Initialize) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveGPUScheduler scheduler;
+    ASSERT(scheduler.Initialize());
+    auto stats = scheduler.GetStats();
+    ASSERT(stats.totalScheduled == 0);
+}
+
+TEST(TestGPUSched_RouteWork) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveGPUScheduler scheduler;
+    scheduler.Initialize();
+    ScheduledWorkItem item;
+    item.id = 1;
+    item.filePath = L"test.jpg";
+    item.formatType = L"JPEG";
+    item.fileSize = 1024 * 1024;
+    auto backend = scheduler.RouteWork(item);
+    ASSERT(backend != ProcessingBackend::Auto);  // Should resolve to specific
+}
+
+// ============================================================================
+// Explorer Column Provider Tests
+// ============================================================================
+
+TEST(TestColumn_Definitions) {
+    using namespace ExplorerLens::Engine;
+    auto* cols = GetColumnDefinitions();
+    ASSERT(cols != nullptr);
+    ASSERT(std::wstring(cols[0].displayName) == L"Dimensions");
+    ASSERT(cols[0].id == ColumnID::Dimensions);
+}
+
+TEST(TestColumn_ValueMake) {
+    using namespace ExplorerLens::Engine;
+    auto val = ColumnValue::Make(ColumnID::Dimensions, L"1920 x 1080", 1920 * 1080);
+    ASSERT(val.isAvailable);
+    ASSERT(val.numericValue == 1920 * 1080);
+}
+
+TEST(TestColumn_ProviderInit) {
+    using namespace ExplorerLens::Engine;
+    ExplorerColumnProvider provider;
+    auto cols = provider.GetRegisteredColumns();
+    ASSERT(cols.size() == static_cast<size_t>(ColumnID::COUNT));
+}
+
+TEST(TestColumn_CategorizeFile) {
+    using namespace ExplorerLens::Engine;
+    ExplorerColumnProvider provider;
+    auto result = provider.QueryMetadata(L"test.jpg");
+    ASSERT(result.success);
+    // JPEG should be categorized as Image
+    auto* catCol = result.GetColumn(ColumnID::FileCategory);
+    ASSERT(catCol != nullptr && catCol->isAvailable);
+}
+
+// ============================================================================
+// Drag-Drop Thumbnail Preview Tests
+// ============================================================================
+
+TEST(TestDragDrop_StyleStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DragVisualStyleToString(DragVisualStyle::StackedPreview)) == "StackedPreview");
+    ASSERT(std::string(DragVisualStyleToString(DragVisualStyle::MiniGrid)) == "MiniGrid");
+}
+
+TEST(TestDragDrop_Initialize) {
+    using namespace ExplorerLens::Engine;
+    DragDropThumbnailPreview dd;
+    DragVisualConfig config;
+    config.style = DragVisualStyle::StackedPreview;
+    dd.SetConfig(config);
+    auto cfg = dd.GetConfig();
+    ASSERT(cfg.style == DragVisualStyle::StackedPreview);
+}
+
+TEST(TestDragDrop_ComputeSize) {
+    using namespace ExplorerLens::Engine;
+    DragDropThumbnailPreview dd;
+    DragVisualConfig config;
+    config.thumbnailSize = 96;
+    dd.SetConfig(config);
+    uint32_t w = 0, h = 0;
+    dd.ComputeVisualSize(3, w, h);
+    ASSERT(w > 0 && h > 0);
+}
+
+TEST(TestDragDrop_RenderEmpty) {
+    using namespace ExplorerLens::Engine;
+    DragDropThumbnailPreview dd;
+    std::vector<DragItem> items;
+    auto bitmap = dd.RenderDragVisual(items);
+    // Empty items should return invalid bitmap
+    ASSERT(!bitmap.IsValid());
+}
+
+// ============================================================================
+// Streaming Decode Engine Tests
+// ============================================================================
+
+TEST(TestStreaming_LoDStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DecodeLoDToString(DecodeLoD::Placeholder)) == "Placeholder");
+    ASSERT(std::string(DecodeLoDToString(DecodeLoD::FullRes)) == "FullRes");
+}
+
+TEST(TestStreaming_Initialize) {
+    using namespace ExplorerLens::Engine;
+    StreamingDecodeConfig cfg;
+    cfg.minProgressiveSize = 512 * 1024;
+    StreamingDecodeEngine engine(cfg);
+    ASSERT(engine.ShouldUseProgressive(1024 * 1024));
+}
+
+TEST(TestStreaming_SessionLifecycle) {
+    using namespace ExplorerLens::Engine;
+    StreamingDecodeEngine engine;
+    uint32_t session = engine.BeginDecode(L"test.tiff", 2 * 1024 * 1024);
+    ASSERT(session != 0);
+    // New session should use progressive for large files
+    ASSERT(engine.ShouldUseProgressive(2 * 1024 * 1024));
+    engine.EndDecode(session);
+}
+
+TEST(TestStreaming_QualityMapping) {
+    using namespace ExplorerLens::Engine;
+    StreamingDecodeEngine engine;
+    float q0 = engine.GetQualityForLevel(DecodeLoD::Placeholder);
+    float q6 = engine.GetQualityForLevel(DecodeLoD::Enhanced);
+    ASSERT(q0 < q6);
+    ASSERT(q6 > 0.9f);
+}
+
+// ============================================================================
+// Multi-Page Strip Renderer Tests
+// ============================================================================
+
+TEST(TestStrip_LayoutStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(StripLayoutToString(StripLayout::Grid2x2)) == "Grid2x2");
+    ASSERT(std::string(StripLayoutToString(StripLayout::FanSpread)) == "FanSpread");
+}
+
+TEST(TestStrip_AutoSelectLayout) {
+    using namespace ExplorerLens::Engine;
+    auto layout1 = StripRenderConfig::AutoSelectLayout(1, 0.75);
+    ASSERT(layout1 == StripLayout::CoverPlusPeek);
+    auto layout4 = StripRenderConfig::AutoSelectLayout(4, 0.75);
+    ASSERT(layout4 == StripLayout::Grid2x2);
+}
+
+TEST(TestStrip_Initialize) {
+    using namespace ExplorerLens::Engine;
+    MultiPageStripRenderer renderer;
+    StripRenderConfig config;
+    config.outputWidth = 256;
+    config.outputHeight = 256;
+    renderer.SetConfig(config);
+    ASSERT(renderer.GetConfig().outputWidth == 256);
+}
+
+TEST(TestStrip_ComputeLayout) {
+    using namespace ExplorerLens::Engine;
+    MultiPageStripRenderer renderer;
+    StripRenderConfig config;
+    config.layout = StripLayout::Grid2x2;
+    config.outputWidth = 256;
+    config.outputHeight = 256;
+    renderer.SetConfig(config);
+    std::vector<PageThumbnail> pages(4);
+    for (uint32_t i = 0; i < 4; i++) {
+        pages[i].pageNumber = i + 1;
+        pages[i].width = 200;
+        pages[i].height = 300;
+        pages[i].hasContent = true;
+        pages[i].UpdateFromDimensions(200, 300);
+    }
+    renderer.SetPages(pages);
+    auto composition = renderer.ComputeComposition();
+    ASSERT(composition.placements.size() == 4);
+}
+
+// ============================================================================
+// Video Keyframe Extractor Tests
+// ============================================================================
+
+TEST(TestKeyframe_StrategyStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(KeyframeStrategyToString(KeyframeStrategy::SmartSelect)) == "SmartSelect");
+    ASSERT(std::string(KeyframeStrategyToString(KeyframeStrategy::HighestEntropy)) == "HighestEntropy");
+}
+
+TEST(TestKeyframe_QualityScore) {
+    using namespace ExplorerLens::Engine;
+    CandidateKeyframe frame;
+    frame.brightness = 0.5f;
+    frame.contrast = 0.6f;
+    frame.entropy = 0.7f;
+    frame.colorfulness = 0.5f;
+    frame.sharpness = 0.5f;
+    float score = frame.ComputeQualityScore();
+    ASSERT(score > 0.0f && score <= 1.0f);
+}
+
+TEST(TestKeyframe_BlackFramePenalty) {
+    using namespace ExplorerLens::Engine;
+    CandidateKeyframe black;
+    black.isBlack = true;
+    ASSERT(black.ComputeQualityScore() == 0.0f);
+    CandidateKeyframe credits;
+    credits.isCredits = true;
+    ASSERT(credits.ComputeQualityScore() == 0.0f);
+}
+
+TEST(TestKeyframe_Initialize) {
+    using namespace ExplorerLens::Engine;
+    VideoKeyframeExtractor extractor;
+    ASSERT(extractor.GetStrategy() == KeyframeStrategy::SmartSelect);
+    ASSERT(extractor.GetCandidateCount() == 0);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -12707,6 +13210,90 @@ int main() {
     RUN_TEST(TestPluginLoaderV2_DescriptorDefaults);
     RUN_TEST(TestPluginLoaderV2_FindNonexistent);
     RUN_TEST(TestPluginLoaderV2_LoadInvalidDLL);
+
+    // Zero-Copy Activation Tests
+    std::wcout << L"\nZero-Copy Activation Tests:" << std::endl;
+    RUN_TEST(TestZeroCopy_ModeStrings);
+    RUN_TEST(TestZeroCopy_StatsInitial);
+    RUN_TEST(TestZeroCopy_Initialize);
+    RUN_TEST(TestZeroCopy_StagingBuffer);
+
+    // SIMD Dispatch Router Tests
+    std::wcout << L"\nSIMD Dispatch Router Tests:" << std::endl;
+    RUN_TEST(TestSIMD_TierStrings);
+    RUN_TEST(TestSIMD_FeatureFlags);
+    RUN_TEST(TestSIMD_RouterDetection);
+    RUN_TEST(TestSIMD_KernelSelection);
+
+    // PSO Persistence Manager Tests
+    std::wcout << L"\nPSO Persistence Manager Tests:" << std::endl;
+    RUN_TEST(TestPSO_TypeStrings);
+    RUN_TEST(TestPSO_Initialize);
+    RUN_TEST(TestPSO_StoreAndLookup);
+    RUN_TEST(TestPSO_InvalidateAndPurge);
+
+    // Predictive Cache Engine Tests
+    std::wcout << L"\nPredictive Cache Engine Tests:" << std::endl;
+    RUN_TEST(TestPredictive_Initialize);
+    RUN_TEST(TestPredictive_RecordNavigation);
+    RUN_TEST(TestPredictive_PredictNext);
+    RUN_TEST(TestPredictive_PinDirectory);
+
+    // Lanczos GPU Kernel Tests
+    std::wcout << L"\nLanczos GPU Kernel Tests:" << std::endl;
+    RUN_TEST(TestLanczos_FilterStrings);
+    RUN_TEST(TestLanczos_DispatchParams);
+    RUN_TEST(TestLanczos_KernelWeights);
+    RUN_TEST(TestLanczos_Initialize);
+
+    // HDR Tone Map Kernel Tests
+    std::wcout << L"\nHDR Tone Map Kernel Tests:" << std::endl;
+    RUN_TEST(TestHDR_OperatorStrings);
+    RUN_TEST(TestHDR_ReinhardToneMap);
+    RUN_TEST(TestHDR_ACESToneMap);
+    RUN_TEST(TestHDR_SceneAnalysis);
+
+    // Adaptive GPU Scheduler Tests
+    std::wcout << L"\nAdaptive GPU Scheduler Tests:" << std::endl;
+    RUN_TEST(TestGPUSched_BackendStrings);
+    RUN_TEST(TestGPUSched_SystemLoadSnapshot);
+    RUN_TEST(TestGPUSched_Initialize);
+    RUN_TEST(TestGPUSched_RouteWork);
+
+    // Explorer Column Provider Tests
+    std::wcout << L"\nExplorer Column Provider Tests:" << std::endl;
+    RUN_TEST(TestColumn_Definitions);
+    RUN_TEST(TestColumn_ValueMake);
+    RUN_TEST(TestColumn_ProviderInit);
+    RUN_TEST(TestColumn_CategorizeFile);
+
+    // Drag-Drop Thumbnail Preview Tests
+    std::wcout << L"\nDrag-Drop Thumbnail Preview Tests:" << std::endl;
+    RUN_TEST(TestDragDrop_StyleStrings);
+    RUN_TEST(TestDragDrop_Initialize);
+    RUN_TEST(TestDragDrop_ComputeSize);
+    RUN_TEST(TestDragDrop_RenderEmpty);
+
+    // Streaming Decode Engine Tests
+    std::wcout << L"\nStreaming Decode Engine Tests:" << std::endl;
+    RUN_TEST(TestStreaming_LoDStrings);
+    RUN_TEST(TestStreaming_Initialize);
+    RUN_TEST(TestStreaming_SessionLifecycle);
+    RUN_TEST(TestStreaming_QualityMapping);
+
+    // Multi-Page Strip Renderer Tests
+    std::wcout << L"\nMulti-Page Strip Renderer Tests:" << std::endl;
+    RUN_TEST(TestStrip_LayoutStrings);
+    RUN_TEST(TestStrip_AutoSelectLayout);
+    RUN_TEST(TestStrip_Initialize);
+    RUN_TEST(TestStrip_ComputeLayout);
+
+    // Video Keyframe Extractor Tests
+    std::wcout << L"\nVideo Keyframe Extractor Tests:" << std::endl;
+    RUN_TEST(TestKeyframe_StrategyStrings);
+    RUN_TEST(TestKeyframe_QualityScore);
+    RUN_TEST(TestKeyframe_BlackFramePenalty);
+    RUN_TEST(TestKeyframe_Initialize);
 
     std::wcout << std::endl;
 
