@@ -54,11 +54,8 @@ set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 # Target modern Windows 11 (10.0.22000+)
-add_compile_definitions(
-    WINVER=0x0A00           # Windows 10+
-    _WIN32_WINNT=0x0A00     # Windows 10+
-    NTDDI_VERSION=0x0A000000 # Windows 10
-)
+# Note: WINVER/_WIN32_WINNT set per-target (Engine, Shell, Manager)
+# to avoid conflicts with per-component stdafx.h definitions
 
 # Output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -175,14 +172,24 @@ if(BUILD_MODERN_RUNTIME)
 endif()
 
 if(NOT BUILD_ENGINE_ONLY)
-    # Build the shell extension and manager
-    # Note: These require additional COM setup and are primarily built via MSBuild
-    # This CMake integration is for CI/CD and cross-platform build testing
+    # Build the shell extension and manager via unified CMake
+    # OFF by default — LENSShell has pre-existing source issues under /W4 /permissive-
+    # Enable with: cmake -DBUILD_SHELL=ON -DBUILD_MANAGER=ON
+    option(BUILD_SHELL "Build LENSShell COM DLL (requires ATL)" OFF)
+    option(BUILD_MANAGER "Build LENSManager GUI app (requires WTL)" OFF)
+
+    if(BUILD_SHELL)
+        add_subdirectory(LENSShell)
+    endif()
+
+    if(BUILD_MANAGER)
+        add_subdirectory(LENSManager)
+    endif()
 
     message(STATUS "Full project build enabled")
     message(STATUS "  - Engine library: ON")
-    message(STATUS "  - Shell extension: Via MSBuild (COM dependency)")
-    message(STATUS "  - Manager app: Via MSBuild (WTL dependency)")
+    message(STATUS "  - Shell extension: ${BUILD_SHELL}")
+    message(STATUS "  - Manager app: ${BUILD_MANAGER}")
 endif()
 
 #==============================================================================
@@ -205,6 +212,35 @@ if(NOT BUILD_ENGINE_ONLY)
         DESTINATION include/ExplorerLens
     )
 endif()
+
+#==============================================================================
+# Plugin SDK Installation (cmake --install build --component SDK)
+#==============================================================================
+
+install(FILES SDK/plugin_api.h
+    DESTINATION sdk/include
+    COMPONENT SDK
+)
+
+install(FILES SDK/include/ExplorerLensPlugin.h
+    DESTINATION sdk/include
+    COMPONENT SDK
+)
+
+install(DIRECTORY SDK/docs/
+    DESTINATION sdk/docs
+    COMPONENT SDK
+)
+
+install(DIRECTORY SDK/examples/
+    DESTINATION sdk/examples
+    COMPONENT SDK
+)
+
+install(FILES SDK/README.md
+    DESTINATION sdk
+    COMPONENT SDK
+)
 
 #==============================================================================
 # CTest Integration

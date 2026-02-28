@@ -217,6 +217,7 @@ set(ENGINE_HEADERS
     Core/IFormatDetector.h
     Core/IGPURenderer.h
     Core/IThumbnailDecoder.h
+    Core/JumpListIntegration.h
 
     # Core interfaces (canonical location)
     Core/Interfaces/ICacheProvider.h
@@ -249,6 +250,7 @@ set(ENGINE_HEADERS
     Core/ShellOverlayHandler.h
     Core/ShellPreviewHandler.h
     Core/ShellRegistrationManager.h
+    Core/ShellSearchProtocolHandler.h
     Core/SIMDAccelerationManager.h
     Core/SIMDAccelerator.h
     Core/Telemetry.h
@@ -312,6 +314,7 @@ set(ENGINE_HEADERS
     Pipeline/ParallelBatchDecoder.h
     Pipeline/ParallelIOPipeline.h
     Pipeline/SmartFormatDetectorV2.h
+    Pipeline/ShellProgressIndicator.h
     Pipeline/ThumbnailPipeline.h
     Pipeline/ZeroCopyPipeline.h
 
@@ -421,6 +424,7 @@ set(ENGINE_HEADERS
     Plugin/PluginHostIPC.h
     Plugin/PluginHotReload.h
     Plugin/PluginLifecycle.h
+    Plugin/PluginLoaderV2.h
     Plugin/PluginManager.h
     Plugin/PluginMarketplace.h
     Plugin/PluginMarketplaceUnified.h

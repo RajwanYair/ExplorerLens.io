@@ -214,7 +214,7 @@ PluginCompatibilityKitV2). Key areas:
 1. ~~**P2:** Consolidate `PluginMarketplace.h` + `PluginMarketplaceV2.h/.cpp` + `PluginMarketplaceV3.h` → single impl~~ ✅ Done → `PluginMarketplaceUnified.h` (V2+V3; V1 excluded due to PackageType/CertificateInfo collisions)
 2. ~~**P2:** Merge `PluginSandboxPolicy.h` + `PluginRuntimeValidation.h` → `PluginSecurity.h`~~ ✅ Done
 3. ~~**P2:** Merge `PluginActivation.h` + `PluginHotReload.h` → `PluginLifecycle.h`~~ ✅ Done
-4. **P3:** Implement actual plugin loading via LoadLibrary + C ABI bridge
+4. ~~**P3:** Implement actual plugin loading via LoadLibrary + C ABI bridge~~ ✅ Done → `PluginLoaderV2.h` (LoadLibraryExW, C ABI symbol resolution, ABI version negotiation, extension routing, hot-reload)
 
 ---
 
@@ -255,9 +255,9 @@ PluginCompatibilityKitV2). Key areas:
 
 ### Proposed Actions
 
-1. **P2:** Migrate LENSShell from MSBuild-only to CMake (unified build)
-2. **P2:** Migrate LENSManager from MSBuild-only to CMake
-3. **P2:** Add `cmake --install` target for SDK headers
+1. **P2:** Migrate LENSShell from MSBuild-only to CMake (unified build) ✅ Done
+2. **P2:** Migrate LENSManager from MSBuild-only to CMake ✅ Done
+3. **P2:** Add `cmake --install` target for SDK headers ✅ Done
 4. **P3:** Implement incremental library builds (skip if .lib is newer than source)
 5. ~~**P3:** Add build time tracking to `Build-MSVC.ps1`~~ ✅ Done (Stopwatch timing + JSONL history at build-logs/build-history.jsonl)
 
@@ -274,10 +274,10 @@ PluginCompatibilityKitV2). Key areas:
 
 ### Proposed Actions
 
-1. **P2:** Implement Windows 11 context menu integration (`IExplorerCommand`)
-2. **P2:** Add thumbnail progress indicator for large files
-3. **P3:** Implement shell search protocol handler (`ISearchProtocolHandler`)
-4. **P3:** Add Jump List integration for recently browsed folders
+1. **P2:** Implement Windows 11 context menu integration (`IExplorerCommand`) ✅ Done (v14 — LENSShellContextMenu)
+2. ~~**P2:** Add thumbnail progress indicator for large files~~ ✅ Done → `ShellProgressIndicator.h` (ThumbnailStage pipeline, ETA, batch tracking, 6 tests)
+3. ~~**P3:** Implement shell search protocol handler (`ISearchProtocolHandler`)~~ ✅ Done → `ShellSearchProtocolHandler.h` (index, extension filter, relevance scoring, 4 tests)
+4. ~~**P3:** Add Jump List integration for recently browsed folders~~ ✅ Done → `JumpListIntegration.h` (recent/frequent/pinned categories, COM stub, 5 tests)
 
 ---
 
@@ -325,7 +325,7 @@ PluginCompatibilityKitV2). Key areas:
 |---|------|--------|--------|
 | 11 | Plugin system consolidation | Medium | ✅ Done (PluginMarketplaceUnified.h, PluginSecurity.h, PluginLifecycle.h — 3 umbrellas, 11 tests) |
 | 12 | AI module implementations | High | ✅ Done (perceptual hashing, blur detection, smart crop, scene classification — 16 tests) |
-| 13 | Build system unification (CMake) | High | Not started |
+| 13 | Build system unification (CMake) | High | ✅ Done (LENSShell + LENSManager CMakeLists.txt, root integration, SDK install target) |
 | 14 | Shell integration (Win11 context menu) | Medium | ✅ Done (LENSShellContextMenu.h/.cpp — IExplorerCommand, 6 sub-commands, IDL/vcxproj/ObjectMap integrated) |
 
 ### Step 4 (Long-term — v17.0.0)

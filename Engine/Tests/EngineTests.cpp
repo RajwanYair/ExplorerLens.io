@@ -323,7 +323,15 @@
 #include "../Pipeline/LockFreeDecodePipeline.h"
 #include "../Pipeline/MemoryMappedIOOptimizer.h"
 #include "../Pipeline/PredictivePrefetchEngine.h"
+#include "../Pipeline/ShellProgressIndicator.h"
 #include "../Pipeline/ThreadPoolOptimizer.h"
+
+// Shell integration features
+#include "../Core/JumpListIntegration.h"
+#include "../Core/ShellSearchProtocolHandler.h"
+
+// Plugin C ABI bridge
+#include "../Plugin/PluginLoaderV2.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -10361,9 +10369,242 @@ TEST(TestWindowsCompat_Umbrella) {
     ASSERT(build >= 10240);  // At least Windows 10 on any dev machine
 }
 
-//==============================================================================
-// Main Test Runner
-//==============================================================================
+//== Shell Progress Indicator ==
+TEST(TestShellProgress_StageNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ThumbnailStageToString(ThumbnailStage::Detection)) == "Detection");
+    ASSERT(std::string(ThumbnailStageToString(ThumbnailStage::Decode)) == "Decode");
+    ASSERT(std::string(ThumbnailStageToString(ThumbnailStage::Complete)) == "Complete");
+    ASSERT(std::string(ThumbnailStageToString(ThumbnailStage::Failed)) == "Failed");
+}
+
+TEST(TestShellProgress_BeginEnd) {
+    using namespace ExplorerLens::Engine;
+    ShellProgressIndicator indicator;
+    indicator.BeginFile(L"test.zip", 100 * 1024 * 1024);  // 100 MB
+    auto prog = indicator.GetProgress();
+    ASSERT(prog.fileSize == 100 * 1024 * 1024);
+    ASSERT(prog.percentComplete == 0);
+    ASSERT(!prog.cancelled);
+    indicator.EndFile(true);
+    prog = indicator.GetProgress();
+    ASSERT(prog.currentStage == ThumbnailStage::Complete);
+    ASSERT(prog.percentComplete == 100);
+}
+
+TEST(TestShellProgress_AdvanceStage) {
+    using namespace ExplorerLens::Engine;
+    ShellProgressIndicator indicator;
+    indicator.BeginFile(L"test.rar", 60 * 1024 * 1024);
+    indicator.AdvanceStage(ThumbnailStage::Extraction);
+    ASSERT(indicator.GetProgress().currentStage == ThumbnailStage::Extraction);
+    indicator.AdvanceStage(ThumbnailStage::Decode);
+    ASSERT(indicator.GetProgress().currentStage == ThumbnailStage::Decode);
+}
+
+TEST(TestShellProgress_Cancellation) {
+    using namespace ExplorerLens::Engine;
+    ShellProgressIndicator indicator;
+    indicator.BeginFile(L"test.7z", 200 * 1024 * 1024);
+    ASSERT(!indicator.IsCancelled());
+    indicator.RequestCancel();
+    ASSERT(indicator.IsCancelled());
+}
+
+TEST(TestShellProgress_BatchTracker) {
+    using namespace ExplorerLens::Engine;
+    BatchProgressTracker tracker;
+    tracker.Begin(10);
+    ASSERT(tracker.GetTotalFiles() == 10);
+    ASSERT(tracker.GetCompletedFiles() == 0);
+    tracker.OnFileComplete(true);
+    tracker.OnFileComplete(true);
+    tracker.OnFileComplete(false);
+    ASSERT(tracker.GetCompletedFiles() == 3);
+    ASSERT(tracker.GetFailedFiles() == 1);
+    ASSERT(tracker.GetBatchPercentComplete() == 30);
+}
+
+TEST(TestShellProgress_SmallFileNoReport) {
+    using namespace ExplorerLens::Engine;
+    // Files below threshold should not trigger reporting
+    ASSERT(ShellProgressIndicator::SMALL_FILE_THRESHOLD == 1 * 1024 * 1024);
+    ASSERT(ShellProgressIndicator::LARGE_FILE_THRESHOLD == 50 * 1024 * 1024);
+}
+
+//== Shell Search Protocol Handler ==
+TEST(TestSearchProtocol_Initialize) {
+    using namespace ExplorerLens::Engine;
+    ShellSearchProtocolHandler handler;
+    ASSERT(handler.GetState() == SearchHandlerState::Uninitialized);
+    ASSERT(handler.Initialize());
+    ASSERT(handler.GetState() == SearchHandlerState::Ready);
+    ASSERT(handler.GetIndexSize() == 0);
+    handler.Shutdown();
+    ASSERT(handler.GetState() == SearchHandlerState::Uninitialized);
+}
+
+TEST(TestSearchProtocol_AddAndSearch) {
+    using namespace ExplorerLens::Engine;
+    ShellSearchProtocolHandler handler;
+    handler.Initialize();
+
+    SearchIndexEntry entry;
+    entry.filePath = L"C:\\Archives\\test.zip";
+    entry.displayName = L"test.zip";
+    entry.formatType = L"ZIP";
+    entry.fileSize = 1024;
+    entry.hasThumbnail = true;
+    handler.AddEntry(entry);
+    ASSERT(handler.GetIndexSize() == 1);
+
+    SearchQuery query;
+    query.queryText = L"test";
+    auto results = handler.Search(query);
+    ASSERT(results.totalMatches == 1);
+    ASSERT(results.results[0].relevanceScore > 0.0f);
+}
+
+TEST(TestSearchProtocol_ExtensionFilter) {
+    using namespace ExplorerLens::Engine;
+    ShellSearchProtocolHandler handler;
+    handler.Initialize();
+
+    SearchIndexEntry zip;
+    zip.filePath = L"C:\\doc.zip";
+    zip.displayName = L"doc.zip";
+    zip.formatType = L"ZIP";
+    handler.AddEntry(zip);
+
+    SearchIndexEntry rar;
+    rar.filePath = L"C:\\doc.rar";
+    rar.displayName = L"doc.rar";
+    rar.formatType = L"RAR";
+    handler.AddEntry(rar);
+
+    SearchQuery query;
+    query.queryText = L"doc";
+    query.extensionFilter = L".zip";
+    auto results = handler.Search(query);
+    ASSERT(results.totalMatches == 1);
+}
+
+TEST(TestSearchProtocol_ClearIndex) {
+    using namespace ExplorerLens::Engine;
+    ShellSearchProtocolHandler handler;
+    handler.Initialize();
+
+    SearchIndexEntry entry;
+    entry.filePath = L"C:\\test.7z";
+    entry.displayName = L"test.7z";
+    handler.AddEntry(entry);
+    ASSERT(handler.GetIndexSize() == 1);
+    handler.ClearIndex();
+    ASSERT(handler.GetIndexSize() == 0);
+}
+
+//== Jump List Integration ==
+TEST(TestJumpList_Initialize) {
+    using namespace ExplorerLens::Engine;
+    JumpListIntegration jumpList;
+    ASSERT(!jumpList.IsInitialized());
+    ASSERT(jumpList.Initialize(L"ExplorerLens.Shell.15"));
+    ASSERT(jumpList.IsInitialized());
+    ASSERT(jumpList.GetRecentCount() == 0);
+    jumpList.Shutdown();
+    ASSERT(!jumpList.IsInitialized());
+}
+
+TEST(TestJumpList_RecordAccess) {
+    using namespace ExplorerLens::Engine;
+    JumpListIntegration jumpList;
+    jumpList.Initialize(L"ExplorerLens.Shell.15");
+    jumpList.RecordAccess(L"C:\\test.zip", L"test.zip", L"ZIP", 1024, 5);
+    ASSERT(jumpList.GetRecentCount() == 1);
+    jumpList.RecordAccess(L"C:\\test.rar", L"test.rar", L"RAR", 2048, 10);
+    ASSERT(jumpList.GetRecentCount() == 2);
+}
+
+TEST(TestJumpList_PinEntry) {
+    using namespace ExplorerLens::Engine;
+    JumpListIntegration jumpList;
+    jumpList.Initialize(L"ExplorerLens.Shell.15");
+    jumpList.RecordAccess(L"C:\\pinned.zip", L"pinned.zip", L"ZIP");
+    ASSERT(jumpList.PinEntry(L"C:\\pinned.zip"));
+    ASSERT(jumpList.GetPinnedCount() == 1);
+    ASSERT(jumpList.UnpinEntry(L"C:\\pinned.zip"));
+    ASSERT(jumpList.GetPinnedCount() == 0);
+}
+
+TEST(TestJumpList_Categories) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(JumpListCategoryToString(JumpListCategory::Recent)) == "Recent");
+    ASSERT(std::string(JumpListCategoryToString(JumpListCategory::Frequent)) == "Frequent");
+    ASSERT(std::string(JumpListCategoryToString(JumpListCategory::Pinned)) == "Pinned");
+}
+
+TEST(TestJumpList_ExportImport) {
+    using namespace ExplorerLens::Engine;
+    JumpListIntegration jumpList;
+    jumpList.Initialize(L"ExplorerLens.Shell.15");
+    jumpList.RecordAccess(L"C:\\a.zip", L"a.zip", L"ZIP");
+    jumpList.RecordAccess(L"C:\\b.rar", L"b.rar", L"RAR");
+    auto exported = jumpList.ExportAllEntries();
+    ASSERT(exported.size() == 2);
+
+    JumpListIntegration jumpList2;
+    jumpList2.Initialize(L"ExplorerLens.Shell.15");
+    jumpList2.ImportEntries(exported);
+    ASSERT(jumpList2.GetRecentCount() == 2);
+}
+
+//== Plugin Loader V2 (C ABI) ==
+TEST(TestPluginLoaderV2_Create) {
+    using namespace ExplorerLens::Engine;
+    PluginLoaderV2 loader;
+    ASSERT(loader.GetPluginCount() == 0);
+    ASSERT(loader.GetLastError().empty());
+}
+
+TEST(TestPluginLoaderV2_ABIVersion) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(HOST_ABI_VERSION.major == 1);
+    ASSERT(HOST_ABI_VERSION.minor == 0);
+    PluginABIVersion compatible = { 1, 0 };
+    ASSERT(compatible.IsCompatibleWith(HOST_ABI_VERSION));
+    PluginABIVersion incompatible = { 2, 0 };
+    ASSERT(!incompatible.IsCompatibleWith(HOST_ABI_VERSION));
+}
+
+TEST(TestPluginLoaderV2_PluginState) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PluginStateToString(PluginState::Unloaded)) == "Unloaded");
+    ASSERT(std::string(PluginStateToString(PluginState::Active)) == "Active");
+    ASSERT(std::string(PluginStateToString(PluginState::Error)) == "Error");
+}
+
+TEST(TestPluginLoaderV2_DescriptorDefaults) {
+    using namespace ExplorerLens::Engine;
+    PluginDescriptor desc;
+    ASSERT(desc.state == PluginState::Unloaded);
+    ASSERT(desc.abiVersion.major == 0);
+    ASSERT(desc.totalDecodes == 0);
+    ASSERT(desc.failedDecodes == 0);
+}
+
+TEST(TestPluginLoaderV2_FindNonexistent) {
+    using namespace ExplorerLens::Engine;
+    PluginLoaderV2 loader;
+    auto* plugin = loader.FindPluginForExtension(".xyz");
+    ASSERT(plugin == nullptr);
+}
+
+TEST(TestPluginLoaderV2_LoadInvalidDLL) {
+    using namespace ExplorerLens::Engine;
+    PluginLoaderV2 loader;
+    ASSERT(!loader.LoadPlugin(L"C:\\nonexistent_path\\FakePlugin.dll"));
+    ASSERT(!loader.GetLastError().empty());
+}
 
 int main() {
     std::wcout << L"========================================" << std::endl;
@@ -12433,6 +12674,39 @@ int main() {
     RUN_TEST(TestTestInfrastructure_Components);
     RUN_TEST(TestDocGenerator_Umbrella);
     RUN_TEST(TestWindowsCompat_Umbrella);
+
+    // Shell Progress Indicator Tests
+    std::wcout << L"\nShell Progress Indicator Tests:" << std::endl;
+    RUN_TEST(TestShellProgress_StageNames);
+    RUN_TEST(TestShellProgress_BeginEnd);
+    RUN_TEST(TestShellProgress_AdvanceStage);
+    RUN_TEST(TestShellProgress_Cancellation);
+    RUN_TEST(TestShellProgress_BatchTracker);
+    RUN_TEST(TestShellProgress_SmallFileNoReport);
+
+    // Shell Search Protocol Tests
+    std::wcout << L"\nShell Search Protocol Tests:" << std::endl;
+    RUN_TEST(TestSearchProtocol_Initialize);
+    RUN_TEST(TestSearchProtocol_AddAndSearch);
+    RUN_TEST(TestSearchProtocol_ExtensionFilter);
+    RUN_TEST(TestSearchProtocol_ClearIndex);
+
+    // Jump List Integration Tests
+    std::wcout << L"\nJump List Integration Tests:" << std::endl;
+    RUN_TEST(TestJumpList_Initialize);
+    RUN_TEST(TestJumpList_RecordAccess);
+    RUN_TEST(TestJumpList_PinEntry);
+    RUN_TEST(TestJumpList_Categories);
+    RUN_TEST(TestJumpList_ExportImport);
+
+    // Plugin Loader V2 (C ABI) Tests
+    std::wcout << L"\nPlugin Loader V2 (C ABI) Tests:" << std::endl;
+    RUN_TEST(TestPluginLoaderV2_Create);
+    RUN_TEST(TestPluginLoaderV2_ABIVersion);
+    RUN_TEST(TestPluginLoaderV2_PluginState);
+    RUN_TEST(TestPluginLoaderV2_DescriptorDefaults);
+    RUN_TEST(TestPluginLoaderV2_FindNonexistent);
+    RUN_TEST(TestPluginLoaderV2_LoadInvalidDLL);
 
     std::wcout << std::endl;
 

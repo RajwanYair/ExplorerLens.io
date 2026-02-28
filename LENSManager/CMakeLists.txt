@@ -1,16 +1,30 @@
+#==============================================================================
+# LENSManager — GUI Configuration Utility (WTL-based)
+#
+# This CMakeLists.txt mirrors the MSBuild LENSManager.vcxproj configuration
+# for unified CMake build system integration.
+#==============================================================================
+
 cmake_minimum_required(VERSION 3.20)
+project(LENSManager LANGUAGES CXX)
 
-# LENSManager - Manager Application
-project(LENSManager)
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    message(FATAL_ERROR "LENSManager is x64-only.")
+endif()
 
-# Source files
+#==============================================================================
+# Source Files
+#==============================================================================
+
 set(SOURCES
+    About.cpp
     LENSManager.cpp
     MainDlg.cpp
     stdafx.cpp
 )
 
 set(HEADERS
+    # Core
     About.h
     LENSManager.h
     MainDlg.h
@@ -18,34 +32,76 @@ set(HEADERS
     resource.h
     stdafx.h
     tools.h
+
+    # UI (v15.0.0 — Dark Mode / Mica / Acrylic)
+    ChangeSummaryDlg.h
+    DarkModeController.h
+    DarkModeHelper.h
+    SystemTrayIcon.h
+
+    # Diagnostics & Health
+    DecoderHealthCheck.h
+    ExportDiagnostics.h
+    PerformanceDashboard.h
+
+    # Format Management
+    FormatGroupHelper.h
+    FormatStatusProvider.h
+
+    # Settings
+    SettingsPortability.h
 )
 
 set(RESOURCES
     LENSManager.rc
 )
 
-# Create the executable
+#==============================================================================
+# Executable Target
+#==============================================================================
+
 add_executable(LENSManager WIN32
     ${SOURCES}
     ${HEADERS}
     ${RESOURCES}
 )
 
-# Include directories
+#==============================================================================
+# Precompiled Header (stdafx.h)
+#==============================================================================
+
+target_precompile_headers(LENSManager PRIVATE stdafx.h)
+
+#==============================================================================
+# Include Directories
+#==============================================================================
+
+# WTL include path (NuGet package or external)
+set(WTL_DIR ${CMAKE_SOURCE_DIR}/packages/wtl.10.0.10320/lib/native/include)
+if(NOT EXISTS ${WTL_DIR})
+    set(WTL_DIR ${CMAKE_SOURCE_DIR}/external/ui-libs/wtl)
+endif()
+
 target_include_directories(LENSManager PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${WTL_INCLUDE_DIR}
+    ${WTL_DIR}
 )
 
-# Preprocessor definitions
+#==============================================================================
+# Preprocessor Definitions
+#==============================================================================
+
 target_compile_definitions(LENSManager PRIVATE
-    $<$<CONFIG:Debug>:_DEBUG>
-    $<$<CONFIG:Release>:NDEBUG>
     _WINDOWS
     STRICT
+    $<$<CONFIG:Debug>:_DEBUG>
+    $<$<CONFIG:Release>:NDEBUG>
 )
 
-# Link libraries
+#==============================================================================
+# Link Libraries
+#==============================================================================
+
 target_link_libraries(LENSManager PRIVATE
     comctl32
     ole32
@@ -56,22 +112,33 @@ target_link_libraries(LENSManager PRIVATE
     advapi32
     shell32
     htmlhelp
+    uxtheme
+    dwmapi
 )
 
-# Set subsystem
+#==============================================================================
+# Target Properties
+#==============================================================================
+
 set_target_properties(LENSManager PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-# Embed manifest
+#==============================================================================
+# Linker Options (manifest embedding)
+#==============================================================================
+
 if(MSVC)
-    set_target_properties(LENSManager PROPERTIES
-        LINK_FLAGS "/MANIFEST:EMBED /MANIFESTINPUT:\"${CMAKE_CURRENT_SOURCE_DIR}/LENSManager.manifest\""
+    target_link_options(LENSManager PRIVATE
+        /MANIFEST:EMBED
+        "/MANIFESTINPUT:${CMAKE_CURRENT_SOURCE_DIR}/LENSManager.manifest"
     )
 endif()
 
+#==============================================================================
 # Installation
+#==============================================================================
+
 install(TARGETS LENSManager
     RUNTIME DESTINATION bin
 )
-
