@@ -18,17 +18,17 @@ namespace ExplorerLens::Decoders {
 enum class EBookFormat : uint8_t {
   EPUB = 0, // Already supported — EPUB 2/3
   MOBI = 1, // Mobipocket (Amazon legacy)
-  AZW = 2,  // Amazon Kindle (DRM wrapper)
+  AZW = 2, // Amazon Kindle (DRM wrapper)
   AZW3 = 3, // Kindle Format 8 (KF8)
-  FB2 = 4,  // FictionBook 2 (XML-based)
+  FB2 = 4, // FictionBook 2 (XML-based)
   FB2Z = 5, // FictionBook 2 compressed (.fb2.zip)
-  CBZ = 6,  // Comic Book ZIP (already handled by archive decoder)
-  CBR = 7,  // Comic Book RAR (already handled by archive decoder)
+  CBZ = 6, // Comic Book ZIP (already handled by archive decoder)
+  CBR = 7, // Comic Book RAR (already handled by archive decoder)
   DJVU = 8, // DjVu document format
   Unknown = 255
 };
 
-inline const char *EBookFormatName(EBookFormat f) {
+inline const char* EBookFormatName(EBookFormat f) {
   switch (f) {
   case EBookFormat::EPUB:
     return "EPUB";
@@ -66,7 +66,7 @@ enum class CoverExtractionStatus : uint8_t {
   InternalError
 };
 
-inline const char *CoverStatusName(CoverExtractionStatus s) {
+inline const char* CoverStatusName(CoverExtractionStatus s) {
   switch (s) {
   case CoverExtractionStatus::Success:
     return "Success";
@@ -121,7 +121,7 @@ struct MOBIHeaderInfo {
 struct CoverImageResult {
   CoverExtractionStatus status = CoverExtractionStatus::InternalError;
   std::vector<uint8_t> imageData; // Raw JPEG/PNG bytes
-  std::string mimeType;           // "image/jpeg", "image/png"
+  std::string mimeType; // "image/jpeg", "image/png"
   uint32_t width = 0;
   uint32_t height = 0;
   EBookFormat sourceFormat = EBookFormat::Unknown;
@@ -134,36 +134,36 @@ struct CoverImageResult {
 // ─── Supported extensions ────────────────────────────────────────
 struct EBookExtensions {
   static constexpr size_t COUNT = 9;
-  static constexpr std::array<const char *, COUNT> ALL = {
-      ".epub",    ".mobi", ".azw", ".azw3", ".fb2",
-      ".fb2.zip", ".djvu", ".cbz", ".cbr"};
+  static constexpr std::array<const char*, COUNT> ALL = {
+  ".epub", ".mobi", ".azw", ".azw3", ".fb2",
+  ".fb2.zip", ".djvu", ".cbz", ".cbr" };
 
-  // New formats added in this sprint (EPUB/CBZ/CBR already supported)
+  // Additional supported formats (MOBI, AZW, FB2, DJVU)
   static constexpr size_t NEW_COUNT = 5;
-  static constexpr std::array<const char *, NEW_COUNT> NEW_FORMATS = {
-      ".mobi", ".azw", ".azw3", ".fb2", ".djvu"};
+  static constexpr std::array<const char*, NEW_COUNT> NEW_FORMATS = {
+  ".mobi", ".azw", ".azw3", ".fb2", ".djvu" };
 
-  static bool IsSupported(const std::string &ext) {
+  static bool IsSupported(const std::string& ext) {
     std::string lower = ext;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-    for (auto &e : ALL) {
+    for (auto& e : ALL) {
       if (lower == e)
         return true;
     }
     return false;
   }
 
-  static bool IsNewFormat(const std::string &ext) {
+  static bool IsNewFormat(const std::string& ext) {
     std::string lower = ext;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-    for (auto &e : NEW_FORMATS) {
+    for (auto& e : NEW_FORMATS) {
       if (lower == e)
         return true;
     }
     return false;
   }
 
-  static EBookFormat ClassifyExtension(const std::string &ext) {
+  static EBookFormat ClassifyExtension(const std::string& ext) {
     std::string lower = ext;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
     if (lower == ".epub")
@@ -193,7 +193,7 @@ class EBookCoverExtractor {
 public:
   EBookCoverExtractor() = default;
 
-  CoverImageResult ExtractCover(const std::string &filePath) const {
+  CoverImageResult ExtractCover(const std::string& filePath) const {
     CoverImageResult result;
     size_t dot = filePath.rfind('.');
     if (dot == std::string::npos) {
@@ -225,18 +225,18 @@ public:
     }
   }
 
-  bool CanExtract(const std::string &ext) const {
+  bool CanExtract(const std::string& ext) const {
     return EBookExtensions::IsSupported(ext);
   }
 
-  bool IsNewFormat(const std::string &ext) const {
+  bool IsNewFormat(const std::string& ext) const {
     return EBookExtensions::IsNewFormat(ext);
   }
 
   static EBookCoverExtractor Create() { return EBookCoverExtractor(); }
 
 private:
-  CoverImageResult ExtractMOBICover(const std::string &filePath) const {
+  CoverImageResult ExtractMOBICover(const std::string& filePath) const {
     CoverImageResult result;
     result.sourceFormat = EBookFormat::MOBI;
 
@@ -253,8 +253,8 @@ private:
     }
     file.seekg(0);
     std::vector<uint8_t> data(fileSize);
-    file.read(reinterpret_cast<char *>(data.data()),
-              static_cast<std::streamsize>(fileSize));
+    file.read(reinterpret_cast<char*>(data.data()),
+      static_cast<std::streamsize>(fileSize));
     file.close();
 
     // PalmDB header: 78 bytes
@@ -269,10 +269,10 @@ private:
     // attr/id[4])
     auto readBE32 = [&](size_t off) -> uint32_t {
       return (static_cast<uint32_t>(data[off]) << 24) |
-             (static_cast<uint32_t>(data[off + 1]) << 16) |
-             (static_cast<uint32_t>(data[off + 2]) << 8) |
-             static_cast<uint32_t>(data[off + 3]);
-    };
+        (static_cast<uint32_t>(data[off + 1]) << 16) |
+        (static_cast<uint32_t>(data[off + 2]) << 8) |
+        static_cast<uint32_t>(data[off + 3]);
+      };
 
     // Record 0 offset
     if (78 + 8 > fileSize) {
@@ -320,7 +320,7 @@ private:
       // EXTH header starts after MOBI header + full name
       size_t exthStart = mobiStart + mobiHeaderLen;
       if (exthStart + 12 <= fileSize &&
-          std::memcmp(data.data() + exthStart, "EXTH", 4) == 0) {
+        std::memcmp(data.data() + exthStart, "EXTH", 4) == 0) {
         uint32_t exthLen = readBE32(exthStart + 4);
         uint32_t exthCount = readBE32(exthStart + 8);
         size_t pos = exthStart + 12;
@@ -342,7 +342,7 @@ private:
 
     // Get cover image record
     uint32_t coverRecIdx =
-        hasCoverOffset ? firstImageIdx + coverImageOffset : firstImageIdx;
+      hasCoverOffset ? firstImageIdx + coverImageOffset : firstImageIdx;
 
     if (coverRecIdx >= numRecords) {
       result.status = CoverExtractionStatus::InternalError;
@@ -357,8 +357,8 @@ private:
     }
     uint32_t recOff = readBE32(recListEntry);
     uint32_t nextOff = (coverRecIdx + 1 < numRecords)
-                           ? readBE32(recListEntry + 8)
-                           : static_cast<uint32_t>(fileSize);
+      ? readBE32(recListEntry + 8)
+      : static_cast<uint32_t>(fileSize);
 
     if (recOff >= nextOff || recOff >= fileSize) {
       result.status = CoverExtractionStatus::InternalError;
@@ -370,7 +370,7 @@ private:
       imgSize = fileSize - recOff;
 
     result.imageData.assign(data.begin() + recOff,
-                            data.begin() + recOff + imgSize);
+      data.begin() + recOff + imgSize);
     // Detect MIME from magic bytes
     if (imgSize >= 3 && data[recOff] == 0xFF && data[recOff + 1] == 0xD8)
       result.mimeType = "image/jpeg";
@@ -384,7 +384,7 @@ private:
     return result;
   }
 
-  CoverImageResult ExtractFB2Cover(const std::string &filePath) const {
+  CoverImageResult ExtractFB2Cover(const std::string& filePath) const {
     CoverImageResult result;
     result.sourceFormat = EBookFormat::FB2;
 
@@ -420,7 +420,7 @@ private:
 
     // Find <binary> element with matching id (or first binary)
     std::string searchTag =
-        coverId.empty() ? std::string("<binary ") : ("id=\"" + coverId + "\"");
+      coverId.empty() ? std::string("<binary ") : ("id=\"" + coverId + "\"");
     size_t binPos = xml.find(searchTag);
     if (binPos == std::string::npos && !coverId.empty())
       binPos = xml.find("<binary ");
@@ -455,25 +455,25 @@ private:
 
     // Base64 decode
     static const uint8_t b64[256] = {
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 62,  255, 255, 255, 63,  52,  53,  54,  55,  56,  57,  58,  59,
-        60,  61,  255, 255, 255, 0,   255, 255, 255, 0,   1,   2,   3,   4,
-        5,   6,   7,   8,   9,   10,  11,  12,  13,  14,  15,  16,  17,  18,
-        19,  20,  21,  22,  23,  24,  25,  255, 255, 255, 255, 255, 255, 26,
-        27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,
-        41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255};
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 62, 255, 255, 255, 63, 52, 53, 54, 55, 56, 57, 58, 59,
+    60, 61, 255, 255, 255, 0, 255, 255, 255, 0, 1, 2, 3, 4,
+    5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+    19, 20, 21, 22, 23, 24, 25, 255, 255, 255, 255, 255, 255, 26,
+    27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255 };
 
     result.imageData.reserve((dataEnd - dataStart) * 3 / 4);
     uint32_t accum = 0;
@@ -487,7 +487,7 @@ private:
       if (bits >= 8) {
         bits -= 8;
         result.imageData.push_back(
-            static_cast<uint8_t>((accum >> bits) & 0xFF));
+          static_cast<uint8_t>((accum >> bits) & 0xFF));
       }
     }
 
@@ -501,7 +501,7 @@ private:
     return result;
   }
 
-  CoverImageResult ExtractDjVuCover(const std::string & /*filePath*/) const {
+  CoverImageResult ExtractDjVuCover(const std::string& /*filePath*/) const {
     CoverImageResult result;
     // Stub: In production, decode first page of DjVu document
     result.status = CoverExtractionStatus::Success;

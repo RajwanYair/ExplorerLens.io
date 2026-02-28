@@ -1,7 +1,7 @@
 # ExplorerLens Plugin Package Format (.dtplugin)
 
-**Version:** 1.0  
-**Status:** Draft  
+**Version:** 1.0 
+**Status:** Draft 
 **Created:** January 6, 2026
 
 ---
@@ -16,28 +16,28 @@ A `.dtplugin` file is a ZIP archive containing a thumbnail decoder plugin with i
 
 ```
 MyPlugin.dtplugin (ZIP archive)
-├── manifest.json              # Required: Plugin metadata and requirements
-├── plugin.dll                 # Required: Main plugin binary (x64)
-├── plugin_x86.dll             # Optional: x86 binary for 32-bit support
-├── plugin_arm64.dll           # Optional: ARM64 binary
-├── assets/                    # Optional: Plugin-specific assets
-│   ├── icons/
-│   │   ├── icon-16.png
-│   │   ├── icon-32.png
-│   │   └── icon-256.png
-│   ├── shaders/               # For GPU-accelerated plugins
-│   │   └── decode.hlsl
-│   └── samples/               # Sample files for format detection testing
-│       └── sample.psd
-├── licenses/                  # Optional: License files
-│   ├── LICENSE.txt
-│   └── THIRD_PARTY_NOTICES.txt
-├── docs/                      # Optional: Documentation
-│   ├── README.md
-│   └── CHANGELOG.md
-└── signatures/                # Optional: Code signatures and hashes
-    ├── plugin.dll.sig
-    └── hashes.json
+├── manifest.json # Required: Plugin metadata and requirements
+├── plugin.dll # Required: Main plugin binary (x64)
+├── plugin_x86.dll # Optional: x86 binary for 32-bit support
+├── plugin_arm64.dll # Optional: ARM64 binary
+├── assets/ # Optional: Plugin-specific assets
+│ ├── icons/
+│ │ ├── icon-16.png
+│ │ ├── icon-32.png
+│ │ └── icon-256.png
+│ ├── shaders/ # For GPU-accelerated plugins
+│ │ └── decode.hlsl
+│ └── samples/ # Sample files for format detection testing
+│ └── sample.psd
+├── licenses/ # Optional: License files
+│ ├── LICENSE.txt
+│ └── THIRD_PARTY_NOTICES.txt
+├── docs/ # Optional: Documentation
+│ ├── README.md
+│ └── CHANGELOG.md
+└── signatures/ # Optional: Code signatures and hashes
+ ├── plugin.dll.sig
+ └── hashes.json
 ```
 
 ---
@@ -46,97 +46,97 @@ MyPlugin.dtplugin (ZIP archive)
 
 ```json
 {
-  "$schema": "https://explorerlens.dev/schemas/plugin-manifest-v1.json",
-  "manifestVersion": 1,
-  "plugin": {
-    "id": "explorerlens.plugin.psd",
-    "name": "Photoshop Document Decoder",
-    "version": "1.2.3",
-    "vendor": "Adobe Systems Inc.",
-    "description": "Native PSD thumbnail decoder with layer support",
-    "homepage": "https://github.com/explorerlens/plugin-psd",
-    "icon": "assets/icons/icon-256.png"
-  },
-  "abiVersion": 1,
-  "engineVersion": {
-    "min": "5.4.0",
-    "max": "6.9.99"
-  },
-  "capabilities": [
-    "read_file",
-    "decode",
-    "metadata"
-  ],
-  "formats": [
-    {
-      "extension": ".psd",
-      "mimeType": "image/vnd.adobe.photoshop",
-      "description": "Adobe Photoshop Document",
-      "priority": 100,
-      "magicBytes": "38425053"
-    },
-    {
-      "extension": ".psb",
-      "mimeType": "image/vnd.adobe.photoshop",
-      "description": "Adobe Photoshop Large Document",
-      "priority": 100,
-      "magicBytes": "38425053"
-    }
-  ],
-  "binaries": {
-    "x64": {
-      "path": "plugin.dll",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 2458624
-    },
-    "x86": {
-      "path": "plugin_x86.dll",
-      "sha256": "...",
-      "size": 1843200
-    }
-  },
-  "dependencies": {
-    "runtime": [
-      "vcredist.x64.14.0"
-    ],
-    "plugins": []
-  },
-  "configuration": {
-    "schemaUri": "https://explorerlens.dev/schemas/plugin-config/psd-v1.json",
-    "defaults": {
-      "maxLayers": 10,
-      "includeHiddenLayers": false,
-      "renderQuality": "high"
-    }
-  },
-  "security": {
-    "signatureType": "authenticode",
-    "certificate": {
-      "thumbprint": "A1B2C3D4E5F6...",
-      "subject": "CN=Adobe Systems Inc., O=Adobe Systems Inc., L=San Jose, S=California, C=US",
-      "issuer": "CN=DigiCert SHA2 Code Signing CA, O=DigiCert Inc, C=US",
-      "validFrom": "2025-01-01T00:00:00Z",
-      "validTo": "2028-01-01T00:00:00Z"
-    },
-    "permissions": {
-      "allowNetworkAccess": false,
-      "allowFileSystemWrite": false,
-      "allowRegistryAccess": false
-    }
-  },
-  "metadata": {
-    "author": "John Doe <john@adobe.com>",
-    "license": "MIT",
-    "tags": ["photoshop", "psd", "layers", "adobe"],
-    "category": "Image Decoders",
-    "releaseDate": "2026-01-06",
-    "changelog": "docs/CHANGELOG.md"
-  },
-  "testing": {
-    "compatibilityTestPassed": true,
-    "testKitVersion": "1.0.0",
-    "testResults": "https://explorerlens.dev/plugin-tests/psd-1.2.3.html"
-  }
+ "$schema": "https://explorerlens.dev/schemas/plugin-manifest-v1.json",
+ "manifestVersion": 1,
+ "plugin": {
+ "id": "explorerlens.plugin.psd",
+ "name": "Photoshop Document Decoder",
+ "version": "1.2.3",
+ "vendor": "Adobe Systems Inc.",
+ "description": "Native PSD thumbnail decoder with layer support",
+ "homepage": "https://github.com/explorerlens/plugin-psd",
+ "icon": "assets/icons/icon-256.png"
+ },
+ "abiVersion": 1,
+ "engineVersion": {
+ "min": "5.4.0",
+ "max": "6.9.99"
+ },
+ "capabilities": [
+ "read_file",
+ "decode",
+ "metadata"
+ ],
+ "formats": [
+ {
+ "extension": ".psd",
+ "mimeType": "image/vnd.adobe.photoshop",
+ "description": "Adobe Photoshop Document",
+ "priority": 100,
+ "magicBytes": "38425053"
+ },
+ {
+ "extension": ".psb",
+ "mimeType": "image/vnd.adobe.photoshop",
+ "description": "Adobe Photoshop Large Document",
+ "priority": 100,
+ "magicBytes": "38425053"
+ }
+ ],
+ "binaries": {
+ "x64": {
+ "path": "plugin.dll",
+ "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "size": 2458624
+ },
+ "x86": {
+ "path": "plugin_x86.dll",
+ "sha256": "...",
+ "size": 1843200
+ }
+ },
+ "dependencies": {
+ "runtime": [
+ "vcredist.x64.14.0"
+ ],
+ "plugins": []
+ },
+ "configuration": {
+ "schemaUri": "https://explorerlens.dev/schemas/plugin-config/psd-v1.json",
+ "defaults": {
+ "maxLayers": 10,
+ "includeHiddenLayers": false,
+ "renderQuality": "high"
+ }
+ },
+ "security": {
+ "signatureType": "authenticode",
+ "certificate": {
+ "thumbprint": "A1B2C3D4E5F6...",
+ "subject": "CN=Adobe Systems Inc., O=Adobe Systems Inc., L=San Jose, S=California, C=US",
+ "issuer": "CN=DigiCert SHA2 Code Signing CA, O=DigiCert Inc, C=US",
+ "validFrom": "2025-01-01T00:00:00Z",
+ "validTo": "2028-01-01T00:00:00Z"
+ },
+ "permissions": {
+ "allowNetworkAccess": false,
+ "allowFileSystemWrite": false,
+ "allowRegistryAccess": false
+ }
+ },
+ "metadata": {
+ "author": "John Doe <john@adobe.com>",
+ "license": "MIT",
+ "tags": ["photoshop", "psd", "layers", "adobe"],
+ "category": "Image Decoders",
+ "releaseDate": "2026-01-06",
+ "changelog": "docs/CHANGELOG.md"
+ },
+ "testing": {
+ "compatibilityTestPassed": true,
+ "testKitVersion": "1.0.0",
+ "testResults": "https://explorerlens.dev/plugin-tests/psd-1.2.3.html"
+ }
 }
 ```
 
@@ -204,11 +204,11 @@ Each format entry describes a file format the plugin can handle.
 
 ```json
 {
-  "extension": ".psd",
-  "mimeType": "image/vnd.adobe.photoshop",
-  "description": "Adobe Photoshop Document",
-  "priority": 100,
-  "magicBytes": "38425053"
+ "extension": ".psd",
+ "mimeType": "image/vnd.adobe.photoshop",
+ "description": "Adobe Photoshop Document",
+ "priority": 100,
+ "magicBytes": "38425053"
 }
 ```
 
@@ -228,19 +228,19 @@ For integrity verification:
 
 ```json
 {
-  "version": 1,
-  "timestamp": "2026-01-06T14:30:00Z",
-  "files": {
-    "plugin.dll": {
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "sha512": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce...",
-      "size": 2458624
-    },
-    "manifest.json": {
-      "sha256": "...",
-      "size": 4096
-    }
-  }
+ "version": 1,
+ "timestamp": "2026-01-06T14:30:00Z",
+ "files": {
+ "plugin.dll": {
+ "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "sha512": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce...",
+ "size": 2458624
+ },
+ "manifest.json": {
+ "sha256": "...",
+ "size": 4096
+ }
+ }
 }
 ```
 
@@ -275,38 +275,38 @@ Additional requirements:
 ## Installation Process
 
 1. **Package Validation**
-   - Verify ZIP integrity
-   - Parse manifest.json
-   - Validate manifest schema
-   - Check ABI version compatibility
+ - Verify ZIP integrity
+ - Parse manifest.json
+ - Validate manifest schema
+ - Check ABI version compatibility
 
 2. **Binary Verification**
-   - Verify SHA-256 hashes match
-   - Check code signature (if present)
-   - Verify certificate chain
-   - Check revocation status
+ - Verify SHA-256 hashes match
+ - Check code signature (if present)
+ - Verify certificate chain
+ - Check revocation status
 
 3. **Capability Check**
-   - Review requested capabilities
-   - Prompt user for approval (if necessary)
-   - Apply enterprise policy restrictions
+ - Review requested capabilities
+ - Prompt user for approval (if necessary)
+ - Apply enterprise policy restrictions
 
 4. **Compatibility Check**
-   - Verify engine version compatibility
-   - Check runtime dependencies
-   - Verify plugin dependencies
+ - Verify engine version compatibility
+ - Check runtime dependencies
+ - Verify plugin dependencies
 
 5. **Installation**
-   - Extract to plugin directory: `%LocalAppData%\ExplorerLens\Plugins\{plugin-id}`
-   - Register plugin in plugin database
-   - Update format handler registry
+ - Extract to plugin directory: `%LocalAppData%\ExplorerLens\Plugins\{plugin-id}`
+ - Register plugin in plugin database
+ - Update format handler registry
 
 6. **Verification**
-   - Load plugin DLL
-   - Call DT_GetPluginInfo()
-   - Verify info matches manifest
-   - Call DT_Initialize()
-   - Add to active plugins list
+ - Load plugin DLL
+ - Call DT_GetPluginInfo()
+ - Verify info matches manifest
+ - Call DT_Initialize()
+ - Add to active plugins list
 
 ---
 
@@ -347,33 +347,33 @@ Hosted by plugin vendor:
 
 ```json
 {
-  "plugin": {
-    "id": "explorerlens.plugin.psd",
-    "name": "Photoshop Document Decoder"
-  },
-  "channels": {
-    "stable": {
-      "version": "1.2.3",
-      "releaseDate": "2026-01-06",
-      "downloadUrl": "https://cdn.example.com/psd-1.2.3.dtplugin",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 2458624,
-      "changelog": "Fixed layer rendering bug, improved performance",
-      "breaking": false,
-      "minEngineVersion": "6.0.0"
-    },
-    "beta": {
-      "version": "1.3.0-beta.1",
-      "releaseDate": "2026-01-05",
-      "downloadUrl": "https://cdn.example.com/psd-1.3.0-beta.1.dtplugin",
-      "sha256": "...",
-      "size": 2459136,
-      "changelog": "Added Smart Object support",
-      "breaking": false
-    }
-  },
-  "deprecated": false,
-  "replacedBy": null
+ "plugin": {
+ "id": "explorerlens.plugin.psd",
+ "name": "Photoshop Document Decoder"
+ },
+ "channels": {
+ "stable": {
+ "version": "1.2.3",
+ "releaseDate": "2026-01-06",
+ "downloadUrl": "https://cdn.example.com/psd-1.2.3.dtplugin",
+ "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "size": 2458624,
+ "changelog": "Fixed layer rendering bug, improved performance",
+ "breaking": false,
+ "minEngineVersion": "6.0.0"
+ },
+ "beta": {
+ "version": "1.3.0-beta.1",
+ "releaseDate": "2026-01-05",
+ "downloadUrl": "https://cdn.example.com/psd-1.3.0-beta.1.dtplugin",
+ "sha256": "...",
+ "size": 2459136,
+ "changelog": "Added Smart Object support",
+ "breaking": false
+ }
+ },
+ "deprecated": false,
+ "replacedBy": null
 }
 ```
 
@@ -387,16 +387,16 @@ If a plugin is found to be malicious or severely buggy:
 
 ```json
 {
-  "revocations": [
-    {
-      "pluginId": "explorerlens.plugin.psd",
-      "version": "1.0.5",
-      "reason": "Critical security vulnerability (CVE-2026-1234)",
-      "date": "2026-01-06",
-      "severity": "critical",
-      "action": "block"
-    }
-  ]
+ "revocations": [
+ {
+ "pluginId": "explorerlens.plugin.psd",
+ "version": "1.0.5",
+ "reason": "Critical security vulnerability (CVE-2026-1234)",
+ "date": "2026-01-06",
+ "severity": "critical",
+ "action": "block"
+ }
+ ]
 }
 ```
 
@@ -417,29 +417,29 @@ Plugins seeking "Verified" status must pass the Compatibility Test Kit.
 ### Test Categories
 
 1. **ABI Compliance**
-   - All required exports present
-   - Correct function signatures
-   - Structure size validation
+ - All required exports present
+ - Correct function signatures
+ - Structure size validation
 
 2. **Format Handling**
-   - Correctly identifies supported formats
-   - Handles corrupt/truncated files gracefully
-   - Respects timeout limits
+ - Correctly identifies supported formats
+ - Handles corrupt/truncated files gracefully
+ - Respects timeout limits
 
 3. **Performance**
-   - Thumbnail generation < 500ms (typical case)
-   - Memory usage < 100MB per request
-   - No memory leaks
+ - Thumbnail generation < 500ms (typical case)
+ - Memory usage < 100MB per request
+ - No memory leaks
 
 4. **Stability**
-   - No crashes during 10,000 thumbnail requests
-   - Proper error handling and reporting
-   - Clean shutdown (no resource leaks)
+ - No crashes during 10,000 thumbnail requests
+ - Proper error handling and reporting
+ - Clean shutdown (no resource leaks)
 
 5. **Security**
-   - No buffer overflows
-   - Safe handling of untrusted input
-   - Respects capability restrictions
+ - No buffer overflows
+ - Safe handling of untrusted input
+ - Respects capability restrictions
 
 ---
 
@@ -455,33 +455,33 @@ minimal.dtplugin
 
 ```json
 {
-  "manifestVersion": 1,
-  "plugin": {
-    "id": "explorerlens.plugin.minimal",
-    "name": "Minimal Example Plugin",
-    "version": "1.0.0",
-    "vendor": "Example Corp"
-  },
-  "abiVersion": 1,
-  "engineVersion": {
-    "min": "5.4.0"
-  },
-  "capabilities": ["decode"],
-  "formats": [
-    {
-      "extension": ".xyz",
-      "mimeType": "image/x-xyz",
-      "description": "XYZ Format",
-      "priority": 50
-    }
-  ],
-  "binaries": {
-    "x64": {
-      "path": "plugin.dll",
-      "sha256": "...",
-      "size": 65536
-    }
-  }
+ "manifestVersion": 1,
+ "plugin": {
+ "id": "explorerlens.plugin.minimal",
+ "name": "Minimal Example Plugin",
+ "version": "1.0.0",
+ "vendor": "Example Corp"
+ },
+ "abiVersion": 1,
+ "engineVersion": {
+ "min": "5.4.0"
+ },
+ "capabilities": ["decode"],
+ "formats": [
+ {
+ "extension": ".xyz",
+ "mimeType": "image/x-xyz",
+ "description": "XYZ Format",
+ "priority": 50
+ }
+ ],
+ "binaries": {
+ "x64": {
+ "path": "plugin.dll",
+ "sha256": "...",
+ "size": 65536
+ }
+ }
 }
 ```
 

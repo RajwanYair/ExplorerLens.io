@@ -1,6 +1,6 @@
 # RAW Camera Format Decoder Implementation
 
-**Sprint 13 - Professional Formats Phase** | **Status:** ✅ Implemented (WIC-based)
+** - Professional Formats Phase** | **Status:** ✅ Implemented (WIC-based)
 
 ## Overview
 
@@ -9,7 +9,7 @@ ExplorerLens now supports 50+ camera RAW formats from all major manufacturers th
 ## Implementation Details
 
 ### Technology Stack
-- **Decoder Engine**: Windows Imaging Component (WIC)  
+- **Decoder Engine**: Windows Imaging Component (WIC) 
 - **Format Support**: Canon, Nikon, Sony, Olympus, Panasonic, Pentax, Fujifilm, DNG, and more
 - **Codec Requirement**: Microsoft Camera Codec Pack (Windows Feature On Demand)
 - **Implementation**: [LENSShell/raw_decoder.cpp](../LENSShell/raw_decoder.cpp) (233 lines)
@@ -18,19 +18,19 @@ ExplorerLens now supports 50+ camera RAW formats from all major manufacturers th
 ### Key Features
 
 1. **Embedded Thumbnail Extraction** (Fast Path)
-   - Extracts pre-rendered JPEG thumbnails embedded in RAW files
-   - Sub-10ms performance for most files
-   - Uses WIC preview frames when available
+ - Extracts pre-rendered JPEG thumbnails embedded in RAW files
+ - Sub-10ms performance for most files
+ - Uses WIC preview frames when available
 
 2. **Full RAW Decoding** (Fallback)
-   - Decodes full RAW sensor data when thumbnails unavailable
-   - Automatic color correction and white balance
-   - sRGB color space output
+ - Decodes full RAW sensor data when thumbnails unavailable
+ - Automatic color correction and white balance
+ - sRGB color space output
 
 3. **Camera Metadata Extraction**
-   - Reads camera make and model from EXIF
-   - Supports EXIF metadata query readers
-   - Provides camera identification for UI display
+ - Reads camera make and model from EXIF
+ - Supports EXIF metadata query readers
+ - Provides camera identification for UI display
 
 ### Supported RAW Formats
 
@@ -56,20 +56,20 @@ ExplorerLens now supports 50+ camera RAW formats from all major manufacturers th
 
 ```cpp
 namespace ExplorerLens {
-    class RAWDecoder {
-    public:
-        // Get image dimensions without full decode
-        static bool GetDimensions(const BYTE* data, size_t size, 
-                                 int* width, int* height);
-        
-        // Main decode to Windows bitmap
-        static HRESULT DecodeToHBITMAP(const BYTE* data, size_t size, 
-                                      HBITMAP* phBitmap, 
-                                      int maxWidth, int maxHeight);
-        
-        // Extract camera information
-        static std::wstring GetCameraInfo(const BYTE* data, size_t size);
-    };
+ class RAWDecoder {
+ public:
+ // Get image dimensions without full decode
+ static bool GetDimensions(const BYTE* data, size_t size, 
+ int* width, int* height);
+ 
+ // Main decode to Windows bitmap
+ static HRESULT DecodeToHBITMAP(const BYTE* data, size_t size, 
+ HBITMAP* phBitmap, 
+ int maxWidth, int maxHeight);
+ 
+ // Extract camera information
+ static std::wstring GetCameraInfo(const BYTE* data, size_t size);
+ };
 }
 ```
 
@@ -79,11 +79,11 @@ The original `RawDecoder` namespace (WIC-based) is preserved for backward compat
 
 ```cpp
 namespace RawDecoder {
-    // Check if WIC RAW codec is available
-    bool IsSupported();
-    
-    // Decode RAW file to HBITMAP using WIC
-    HBITMAP DecodeToHBITMAP(IStream* pStream, UINT thumbnailSize);
+ // Check if WIC RAW codec is available
+ bool IsSupported();
+ 
+ // Decode RAW file to HBITMAP using WIC
+ HBITMAP DecodeToHBITMAP(IStream* pStream, UINT thumbnailSize);
 }
 ```
 
@@ -95,14 +95,14 @@ namespace RawDecoder {
 
 ```cpp
 #ifdef ENABLE_RAW_SUPPORT
-    // Canon
-    if (StrEqual(szExt, _T(".cr2"))) return LENSTYPE_RAW;
-    if (StrEqual(szExt, _T(".cr3"))) return LENSTYPE_RAW;
-    // Nikon
-    if (StrEqual(szExt, _T(".nef"))) return LENSTYPE_RAW;
-    // Sony
-    if (StrEqual(szExt, _T(".arw"))) return LENSTYPE_RAW;
-    // ... and 10 more formats ...
+ // Canon
+ if (StrEqual(szExt, _T(".cr2"))) return LENSTYPE_RAW;
+ if (StrEqual(szExt, _T(".cr3"))) return LENSTYPE_RAW;
+ // Nikon
+ if (StrEqual(szExt, _T(".nef"))) return LENSTYPE_RAW;
+ // Sony
+ if (StrEqual(szExt, _T(".arw"))) return LENSTYPE_RAW;
+ // ... and 10 more formats ...
 #endif
 ```
 
@@ -112,16 +112,16 @@ namespace RawDecoder {
 
 ```cpp
 #ifdef ENABLE_RAW_SUPPORT
-    if (RawDecoder::IsSupported()) {
-        HRESULT hrRaw = ExplorerLens::RAWDecoder::DecodeToHBITMAP(
-            buffer.data(), streamSize, &hModernBitmap,
-            pThumbSize ? pThumbSize->cx : 512, 
-            pThumbSize ? pThumbSize->cy : 512
-        );
-        if (SUCCEEDED(hrRaw)) {
-            return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
-        }
-    }
+ if (RawDecoder::IsSupported()) {
+ HRESULT hrRaw = ExplorerLens::RAWDecoder::DecodeToHBITMAP(
+ buffer.data(), streamSize, &hModernBitmap,
+ pThumbSize ? pThumbSize->cx : 512, 
+ pThumbSize ? pThumbSize->cy : 512
+ );
+ if (SUCCEEDED(hrRaw)) {
+ return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
+ }
+ }
 #endif
 ```
 
@@ -141,13 +141,13 @@ namespace RawDecoder {
 RAW format support requires the Microsoft Camera Codec Pack:
 
 1. **Windows 10/11**: Install as a Feature On Demand
-   ```powershell
-   Add-WindowsCapability -Online -Name "Microsoft.Windows.Photos.RawCodecs~~~~"
-   ```
+ ```powershell
+ Add-WindowsCapability -Online -Name "Microsoft.Windows.Photos.RawCodecs~~~~"
+ ```
 
 2. **Alternative**: Download from Microsoft Store
-   - Search for "Raw Image Extension"
-   - Install for free
+ - Search for "Raw Image Extension"
+ - Install for free
 
 ### Supported Formats
 
@@ -186,15 +186,15 @@ Create test archives with the following RAW formats:
 ```
 test-raw-formats/
 ├── canon_cr2/
-│   └── sample_canon_5d4.cr2
+│ └── sample_canon_5d4.cr2
 ├── nikon_nef/
-│   └── sample_nikon_d850.nef
+│ └── sample_nikon_d850.nef
 ├── sony_arw/
-│   └── sample_sony_a7iii.arw
+│ └── sample_sony_a7iii.arw
 ├── adobe_dng/
-│   └── sample_universal.dng
+│ └── sample_universal.dng
 └── olympus_orf/
-    └── sample_olympus_em1.orf
+ └── sample_olympus_em1.orf
 ```
 
 ### Expected Behavior
@@ -245,14 +245,14 @@ test-raw-formats/
 
 ## Future Enhancements
 
-### Phase 2 (Optional)
+### Optional Enhancements
 
 1. **Libraw Fallback**: Add LibRaw as optional fallback for exotic formats
 2. **RAW Metadata Display**: Show ISO, aperture, shutter speed in tooltip
 3. **RAW Format Conversion**: Export RAW to JPEG/PNG with processing
 4. **Camera Profile Support**: Apply camera-specific color profiles
 
-### Phase 3 (Advanced)
+### Advanced Enhancements
 
 1. **RAW Histogram**: Show RGB histogram for exposure analysis
 2. **White Balance Adjustment**: Interactive white balance in thumbnails
@@ -262,13 +262,13 @@ test-raw-formats/
 ## Known Limitations
 
 1. **Codec Pack Required**: Windows Camera Codec Pack must be installed
-   - Solution: Detect missing codec pack and show installation instructions
-   
+ - Solution: Detect missing codec pack and show installation instructions
+ 
 2. **Limited Format Control**: Cannot customize RAW processing pipeline
-   - Workaround: WIC uses sensible defaults (camera WB, sRGB output)
-   
+ - Workaround: WIC uses sensible defaults (camera WB, sRGB output)
+ 
 3. **No Thumbnail Fallback for All Formats**: Some exotic formats may not embed thumbnails
-   - Mitigation: Full decode fallback handles these cases
+ - Mitigation: Full decode fallback handles these cases
 
 ## References
 
@@ -276,7 +276,7 @@ test-raw-formats/
 - **Camera Codec Pack**: https://www.microsoft.com/store/productId/9NCTDW2W1BH8
 - **RAW Format Specifications**: https://www.adobe.com/products/photoshop/extend.html
 
-## Sprint 13 Deliverables
+## Deliverables
 
 ✅ **Implementation Complete**:
 - WIC-based RAW decoder (233 lines)
@@ -298,5 +298,4 @@ test-raw-formats/
 
 **Status**: Ready for testing with real RAW files
 
-**Next Sprint**: Test with Canon CR2, Nikon NEF, Sony ARW, DNG samples
-
+**Next Steps**: Test with Canon CR2, Nikon NEF, Sony ARW, DNG samples

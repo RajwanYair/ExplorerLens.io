@@ -37,7 +37,7 @@ function Write-TestWarning {
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "SPRINT 7: PRE-INSTALLATION VERIFICATION" -ForegroundColor Cyan
+Write-Host "PRE-INSTALLATION VERIFICATION" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 # Test 1: Verify LENSShell.dll exists in build directory

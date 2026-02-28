@@ -26,7 +26,7 @@ This document defines the coding standards and conventions for the ExplorerLens 
 ```cpp
 // Classes: PascalCase
 class ThumbnailEngine { };
-class IFormatDecoder { };  // Interfaces start with 'I'
+class IFormatDecoder { }; // Interfaces start with 'I'
 
 // Functions/Methods: PascalCase
 void GenerateThumbnail();
@@ -38,8 +38,8 @@ std::string filePath;
 
 // Member variables: camelCase with m_ prefix
 class Example {
-    int m_count;
-    std::string m_name;
+ int m_count;
+ std::string m_name;
 };
 
 // Constants: UPPER_CASE or kPascalCase
@@ -52,10 +52,10 @@ namespace ExplorerLens::decoders { }
 
 // Enums: PascalCase for type, UPPER_CASE for values
 enum class ImageFormat {
-    UNKNOWN,
-    JPEG,
-    PNG,
-    WEBP
+ UNKNOWN,
+ JPEG,
+ PNG,
+ WEBP
 };
 
 // Type aliases: PascalCase with _t suffix
@@ -65,9 +65,9 @@ using ImageBuffer_t = std::vector<uint8_t>;
 ### File Naming
 
 ```
-ThumbnailEngine.h         // Header file: PascalCase
-ThumbnailEngine.cpp       // Implementation: PascalCase
-format_utils.h            // Utility headers: lowercase with underscores
+ThumbnailEngine.h // Header file: PascalCase
+ThumbnailEngine.cpp // Implementation: PascalCase
+format_utils.h // Utility headers: lowercase with underscores
 ```
 
 ### Code Formatting
@@ -75,11 +75,11 @@ format_utils.h            // Utility headers: lowercase with underscores
 ```cpp
 // Indentation: 4 spaces (NO TABS)
 class Example {
-    void Method() {
-        if (condition) {
-            DoSomething();
-        }
-    }
+ void Method() {
+ if (condition) {
+ DoSomething();
+ }
+ }
 };
 
 // Line length: 120 characters maximum
@@ -87,24 +87,24 @@ class Example {
 
 // Braces: K&R style (opening brace on same line)
 if (condition) {
-    DoSomething();
+ DoSomething();
 } else {
-    DoSomethingElse();
+ DoSomethingElse();
 }
 
 // Function definitions: opening brace on same line
 void Function() {
-    // ...
+ // ...
 }
 
 // Namespaces: no indentation inside
 namespace ExplorerLens {
 
 class MyClass {
-    // ...
+ // ...
 };
 
-}  // namespace ExplorerLens
+} // namespace ExplorerLens
 ```
 
 ### Header Files
@@ -120,18 +120,18 @@ class MyClass {
 // 4. Third-party library headers
 // 5. Project headers
 
-#include "ThumbnailEngine.h"  // Corresponding header
+#include "ThumbnailEngine.h" // Corresponding header
 
-#include <windows.h>           // C system headers
+#include <windows.h> // C system headers
 #include <d3d11.h>
 
-#include <string>              // C++ standard library
+#include <string> // C++ standard library
 #include <vector>
 #include <memory>
 
-#include <webp/decode.h>       // Third-party libraries
+#include <webp/decode.h> // Third-party libraries
 
-#include "Types.h"             // Project headers
+#include "Types.h" // Project headers
 #include "Logger.h"
 
 // Forward declarations when possible
@@ -155,14 +155,14 @@ HRESULT GenerateThumbnail(const std::wstring& filePath, int size);
 
 class ThumbnailEngine {
 public:
-    /// @brief Initialize the thumbnail engine
-    /// @param config Engine configuration
-    /// @return S_OK on success, error code on failure
-    HRESULT Initialize(const EngineConfig& config);
+ /// @brief Initialize the thumbnail engine
+ /// @param config Engine configuration
+ /// @return S_OK on success, error code on failure
+ HRESULT Initialize(const EngineConfig& config);
 
 private:
-    // Internal implementation detail
-    void ProcessQueue();
+ // Internal implementation detail
+ void ProcessQueue();
 };
 ```
 
@@ -171,30 +171,30 @@ private:
 ```cpp
 // Use HRESULT for Windows APIs and COM
 HRESULT LoadImage(const std::wstring& path) {
-    if (path.empty()) {
-        return E_INVALIDARG;
-    }
-    
-    HRESULT hr = DoSomething();
-    if (FAILED(hr)) {
-        LogError(L"Failed to do something", hr);
-        return hr;
-    }
-    
-    return S_OK;
+ if (path.empty()) {
+ return E_INVALIDARG;
+ }
+ 
+ HRESULT hr = DoSomething();
+ if (FAILED(hr)) {
+ LogError(L"Failed to do something", hr);
+ return hr;
+ }
+ 
+ return S_OK;
 }
 
 // Use exceptions sparingly (only in Engine, not in COM code)
 void ParseConfig(const std::string& json) {
-    if (json.empty()) {
-        throw std::invalid_argument("Empty JSON");
-    }
-    // ...
+ if (json.empty()) {
+ throw std::invalid_argument("Empty JSON");
+ }
+ // ...
 }
 
 // Check pointers before use
 if (!ptr) {
-    return E_POINTER;
+ return E_POINTER;
 }
 ```
 
@@ -211,7 +211,7 @@ auto result = CalculateSomethingComplex();
 
 // Range-based for loops
 for (const auto& item : collection) {
-    ProcessItem(item);
+ ProcessItem(item);
 }
 
 // Structured bindings (C++17)
@@ -235,16 +235,16 @@ constexpr int kMaxSize = 1024;
 /// @note All public methods are thread-safe
 class ThumbnailCache {
 public:
-    void Put(const std::wstring& key, const Image& image);
-    
+ void Put(const std::wstring& key, const Image& image);
+ 
 private:
-    mutable std::mutex m_mutex;  // Protect shared data
+ mutable std::mutex m_mutex; // Protect shared data
 };
 
 // Use RAII for lock management
 void Method() {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    // Critical section
+ std::lock_guard<std::mutex> lock(m_mutex);
+ // Critical section
 }
 
 // Prefer std::atomic for simple flags
@@ -260,35 +260,35 @@ std::atomic<bool> m_running{false};
 ```powershell
 <#
 .SYNOPSIS
-    Brief one-line description
-    
+ Brief one-line description
+ 
 .DESCRIPTION
-    Detailed multi-line description of what the script does
-    
+ Detailed multi-line description of what the script does
+ 
 .PARAMETER Configuration
-    Build configuration (Debug or Release)
-    
+ Build configuration (Debug or Release)
+ 
 .PARAMETER Clean
-    Perform a clean build
-    
+ Perform a clean build
+ 
 .EXAMPLE
-    .\build.ps1 -Configuration Release
-    
+ .\build.ps1 -Configuration Release
+ 
 .EXAMPLE
-    .\build.ps1 -Configuration Debug -Clean
-    
+ .\build.ps1 -Configuration Debug -Clean
+ 
 .NOTES
-    Version: 1.0.0
-    Author: ExplorerLens Team
-    Last Updated: 2026-02-11
+ Version: 1.0.0
+ Author: ExplorerLens Team
+ Last Updated: 2026-02-11
 #>
 
 param(
-    [Parameter(Mandatory=$false)]
-    [ValidateSet("Debug", "Release")]
-    [string]$Configuration = "Release",
-    
-    [switch]$Clean
+ [Parameter(Mandatory=$false)]
+ [ValidateSet("Debug", "Release")]
+ [string]$Configuration = "Release",
+ 
+ [switch]$Clean
 )
 
 $ErrorActionPreference = "Stop"
@@ -307,8 +307,8 @@ Test-Environment.ps1
 
 # Parameters: PascalCase
 param(
-    [string]$ProjectPath,
-    [int]$RetryCount
+ [string]$ProjectPath,
+ [int]$RetryCount
 )
 
 # Variables: camelCase
@@ -347,19 +347,19 @@ $ErrorActionPreference = "Stop"
 
 # Handle specific errors
 try {
-    $result = Invoke-Command -ScriptBlock { ... }
+ $result = Invoke-Command -ScriptBlock { ... }
 } catch [System.IO.FileNotFoundException] {
-    Write-Error "File not found: $_"
-    return
+ Write-Error "File not found: $_"
+ return
 } catch {
-    Write-Error "Unexpected error: $_"
-    throw
+ Write-Error "Unexpected error: $_"
+ throw
 }
 
 # Check command success
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Command failed with exit code: $LASTEXITCODE"
-    exit $LASTEXITCODE
+ Write-Error "Command failed with exit code: $LASTEXITCODE"
+ exit $LASTEXITCODE
 }
 ```
 
@@ -380,9 +380,9 @@ Write-Host "✗ Build failed" -ForegroundColor Red
 
 # Use structured output for data
 $result = @{
-    Success = $true
-    BuildTime = $elapsed.TotalSeconds
-    Warnings = 0
+ Success = $true
+ BuildTime = $elapsed.TotalSeconds
+ Warnings = 0
 }
 return $result
 ```
@@ -414,7 +414,7 @@ Content...
 
 - Unordered list item 1
 - Unordered list item 2
-  - Nested item
+ - Nested item
 
 1. Ordered list item 1
 2. Ordered list item 2
@@ -426,7 +426,7 @@ Use language-specific fencing:
 ```cpp
 // C++ code
 void Function() {
-    // ...
+ // ...
 }
 ```
 
@@ -444,7 +444,7 @@ Get-ChildItem -Path "C:\Temp"
 
 | Column 1 | Column 2 | Column 3 |
 |----------|----------|----------|
-| Data 1   | Data 2   | Data 3   |
+| Data 1 | Data 2 | Data 3 |
 ```
 
 ### README Files
@@ -641,7 +641,7 @@ clang-tidy Engine/Core/ThumbnailDecoder.h -- -std=c++20 -I Engine/include
 
 # All engine headers
 Get-ChildItem Engine -Recurse -Include *.h,*.cpp | ForEach-Object {
-    clang-tidy $_.FullName -- -std=c++20
+ clang-tidy $_.FullName -- -std=c++20
 }
 ```
 
@@ -677,7 +677,7 @@ For questions about coding standards:
 
 ---
 
-**Last Updated:** July 2025  
-**Version:** v15.0.0 "Zenith"  
+**Last Updated:** July 2025 
+**Version:** v15.0.0 "Zenith" 
 **Maintained by:** ExplorerLens Development Team
 

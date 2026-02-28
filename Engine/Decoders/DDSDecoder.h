@@ -23,28 +23,28 @@ namespace Engine {
 
 class DDSDecoder : public IThumbnailDecoder {
 public:
-    DDSDecoder();
-    ~DDSDecoder() override;
+ DDSDecoder();
+ ~DDSDecoder() override;
 
-    bool CanDecode(const wchar_t* filePath) override;
-    HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
-    DecoderInfo GetInfo() const override;
-    const wchar_t* GetName() const override { return L"DDSDecoder"; }
-    const wchar_t** GetSupportedExtensions() const override;
-    uint32_t GetExtensionCount() const override { return m_extensionCount; }
-    bool SupportsGPU() const override { return true; } // WIC + D3D11
-    bool IsArchiveDecoder() const override { return false; }
+ bool CanDecode(const wchar_t* filePath) override;
+ HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
+ DecoderInfo GetInfo() const override;
+ const wchar_t* GetName() const override { return L"DDSDecoder"; }
+ const wchar_t** GetSupportedExtensions() const override;
+ uint32_t GetExtensionCount() const override { return m_extensionCount; }
+ bool SupportsGPU() const override { return true; } // WIC + D3D11
+ bool IsArchiveDecoder() const override { return false; }
 
 private:
-    static Microsoft::WRL::ComPtr<IWICImagingFactory> GetWICFactory();
-    static std::mutex s_factoryMutex;
+ static Microsoft::WRL::ComPtr<IWICImagingFactory> GetWICFactory();
+ static std::mutex s_factoryMutex;
 
-    HRESULT DecodeFromFile(const wchar_t* path, UINT targetWidth,
-                           UINT targetHeight, HBITMAP* phBitmap);
-    bool IsDDSFormat(const wchar_t* path);
+ HRESULT DecodeFromFile(const wchar_t* path, UINT targetWidth,
+ UINT targetHeight, HBITMAP* phBitmap);
+ bool IsDDSFormat(const wchar_t* path);
 
-    static const wchar_t* m_extensions[];
-    static const uint32_t m_extensionCount;
+ static const wchar_t* m_extensions[];
+ static const uint32_t m_extensionCount;
 };
 
 } // namespace Engine

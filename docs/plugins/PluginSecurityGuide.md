@@ -1,11 +1,11 @@
 # Plugin Security Guide
-## ExplorerLens v5.3.0 - Sprint 14 Integration
+## ExplorerLens v5.3.0 - Integration
 
 ---
 
 ## Overview
 
-ExplorerLens implements a comprehensive **dual-mode plugin security architecture** that provides flexibility and protection. Plugins can execute in  two modes:
+ExplorerLens implements a comprehensive **dual-mode plugin security architecture** that provides flexibility and protection. Plugins can execute in two modes:
 
 1. **In-Worker Mode**: Direct execution within the thumbnail worker process (trusted plugins)
 2. **PluginHost Mode**: Isolated execution in a separate sandboxed process (untrusted plugins)
@@ -31,8 +31,8 @@ This guide covers the security infrastructure, how it works, and best practices 
 ```cpp
 // Check current mode for a plugin
 IsolationMode mode = IsolationModeSelector::Instance().DetermineMode(
-    L"MyPlugin", 
-    L"C:\\Plugins\\MyPlugin.dll");
+ L"MyPlugin", 
+ L"C:\\Plugins\\MyPlugin.dll");
 
 // Add to trusted list (requires admin)
 IsolationModeSelector::Instance().AddTrustedPlugin(L"MyPlugin");
@@ -57,16 +57,16 @@ IsolationModeSelector::Instance().SetMinimumIsolationMode(IsolationMode::PluginH
 ```cpp
 // Create decoder with automatic mode selection
 auto decoder = PluginDecoderFactory::CreateDecoder(
-    plugin_handle,    // nullptr if using PluginHost
-    L"ImagePlugin",
-    L"C:\\Plugins\\ImagePlugin.dll");
+ plugin_handle, // nullptr if using PluginHost
+ L"ImagePlugin",
+ L"C:\\Plugins\\ImagePlugin.dll");
 
 // Decode thumbnail (mode is transparent)
 HBITMAP hBitmap = nullptr;
 HRESULT hr = decoder->Decode(L"image.raw", 256, 256, &hBitmap);
 
 if (SUCCEEDED(hr)) {
-    // Use thumbnail...
+ // Use thumbnail...
 }
 
 // Check statistics
@@ -87,21 +87,21 @@ auto stats = decoder->GetStatistics();
 
 **IPC Protocol**:
 ```
-Client                      PluginHost
-  |                              |
-  |------- StartupHandshake ---->|
-  |<----- HandshakeResponse -----|
-  |                              |
-  |------- DecodeRequest ------->|
-  |         (via named pipe)     |
-  |                              | [Loads plugin]
-  |                              | [Decodes image]
-  |                              | [Writes to shared memory]
-  |<----- DecodeResponse --------|
-  |       (metadata + handle)    |
-  |                              |
-  |------- Shutdown ------------>|
-  |                              | [Exit]
+Client PluginHost
+ | |
+ |------- StartupHandshake ---->|
+ |<----- HandshakeResponse -----|
+ | |
+ |------- DecodeRequest ------->|
+ | (via named pipe) |
+ | | [Loads plugin]
+ | | [Decodes image]
+ | | [Writes to shared memory]
+ |<----- DecodeResponse --------|
+ | (metadata + handle) |
+ | |
+ |------- Shutdown ------------>|
+ | | [Exit]
 ```
 
 **Configuration**:
@@ -140,14 +140,14 @@ CrashHandler& handler = CrashHandler::Instance();
 
 // Check if plugin is disabled
 if (handler.IsPluginDisabled(L"ProblematicPlugin")) {
-    // Skip or show warning
-    return E_FAIL;
+ // Skip or show warning
+ return E_FAIL;
 }
 
 // Get crash count
 uint32_t crashes = handler.GetCrashCount(L"ProblematicPlugin");
 if (crashes > 0) {
-    LogWarning(L"Plugin has %u previous crashes", crashes);
+ LogWarning(L"Plugin has %u previous crashes", crashes);
 }
 
 // Manually re-enable (requires admin)
@@ -171,9 +171,9 @@ handler.EnablePlugin(L"ProblematicPlugin");
 JobObjectManager job(L"ExplorerLens_Plugin_MyPlugin");
 
 // Set resource limits
-job.SetMemoryLimit(512 * 1024 * 1024);  // 512 MB
-job.SetCPUTimeLimit(60);                 // 60 seconds
-job.SetProcessCountLimit(1);             // No child processes
+job.SetMemoryLimit(512 * 1024 * 1024); // 512 MB
+job.SetCPUTimeLimit(60); // 60 seconds
+job.SetProcessCountLimit(1); // No child processes
 
 // Apply restrictions
 job.ApplyTokenRestrictions();
@@ -240,12 +240,12 @@ section.Read(buffer, data_size, 0);
 
 ## Performance Impact
 
-| Metric                  | In-Worker  | PluginHost | Difference  |
+| Metric | In-Worker | PluginHost | Difference |
 |-------------------------|------------|------------|-------------|
-| **Decode Latency**      | 2-5ms      | 8-15ms     | 3-10ms      |
-| **Throughput**          | 200-500/s  | 60-120/s   | ~3x slower  |
-| **Memory Overhead**     | ~1MB       | ~10MB      | +9MB        |
-| **Process Creation**    | None       | 40-80ms    | First only  |
+| **Decode Latency** | 2-5ms | 8-15ms | 3-10ms |
+| **Throughput** | 200-500/s | 60-120/s | ~3x slower |
+| **Memory Overhead** | ~1MB | ~10MB | +9MB |
+| **Process Creation** | None | 40-80ms | First only |
 
 **Recommendation**: Use PluginHost for untrusted plugins despite performance cost. Security benefit justifies the overhead.
 
@@ -320,22 +320,22 @@ These are automatically translated to HRESULT by `PluginDecoder`.
 // MyPlugin.cpp
 extern "C" __declspec(dllexport)
 int DecodeImage(const wchar_t* path, int width, int height, PluginResult* result) {
-    // Load image
-    if (!FileExists(path)) return 1;
-    
-    // Decode
-    uint8_t* pixels = LoadAndDecode(path, width, height);
-    if (!pixels) return 3;
-    
-    // Fill result
-    result->width = width;
-    result->height = height;
-    result->format = PixelFormat_RGBA;
-    result->stride = width * 4;
-    result->data = pixels;
-    result->data_size = width * height * 4;
-    
-    return 0; // Success
+ // Load image
+ if (!FileExists(path)) return 1;
+ 
+ // Decode
+ uint8_t* pixels = LoadAndDecode(path, width, height);
+ if (!pixels) return 3;
+ 
+ // Fill result
+ result->width = width;
+ result->height = height;
+ result->format = PixelFormat_RGBA;
+ result->stride = width * 4;
+ result->data = pixels;
+ result->data_size = width * height * 4;
+ 
+ return 0; // Success
 }
 ```
 
@@ -360,8 +360,8 @@ MinimumIsolationMode = 1
 ```
 HKEY_LOCAL_MACHINE\Software\ExplorerLens\PluginSecurity
 TrustedPlugins = REG_MULTI_SZ: 
-    "OfficialImagePlugin"
-    "SignedVideoPlugin"
+ "OfficialImagePlugin"
+ "SignedVideoPlugin"
 ```
 
 #### 3. Block Unsigned Plugins
@@ -374,19 +374,19 @@ IsolationModeSelector::Instance().SetRequireSignature(true);
 
 ## FAQ
 
-**Q: Why is my plugin slower in PluginHost mode?**  
+**Q: Why is my plugin slower in PluginHost mode?** 
 A: IPC overhead adds 8-15ms per decode. This is acceptable for security. Consider optimizing your plugin for batch operations.
 
-**Q: Can I force In-Worker mode for my plugin?**  
+**Q: Can I force In-Worker mode for my plugin?** 
 A: No, the user/admin must trust your plugin. Sign it with Authenticode to improve trustworthiness.
 
-**Q: What happens if a plugin crashes?**  
+**Q: What happens if a plugin crashes?** 
 A: In PluginHost mode, only the PluginHost process crashes. The worker continues. After 3 crashes, the plugin is automatically disabled.
 
-**Q: How do I re-enable a disabled plugin?**  
+**Q: How do I re-enable a disabled plugin?** 
 A: Use `CrashHandler::Instance().EnablePlugin(L"PluginName")` or wait 24 hours for automatic re-enable.
 
-**Q: Can I use PluginHost mode for local testing?**  
+**Q: Can I use PluginHost mode for local testing?** 
 A: Yes, set `EXPLORERLENS_FORCE_PLUGINHOST=1` in environment variables.
 
 ---
@@ -428,12 +428,10 @@ cd Engine/Tests
 
 ## Additional Resources
 
-- **MASTER_PLAN.md**: Overall project roadmap and sprint planning
-- **SDK Documentation**: Plugin development SDK (coming in Sprint 15)
+- **CHANGELOG.md**: Project history and release notes
+- **SDK Documentation**: Plugin development SDK (coming in )
 - **API Reference**: Engine API documentation (auto-generated from code)
 
 ---
 
-*Last Updated: February 9, 2026 - Sprint 14: Plugin Security Infrastructure*
-
-
+*Last Updated: February 9, 2026 - Plugin Security Infrastructure*

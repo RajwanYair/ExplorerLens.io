@@ -63,13 +63,13 @@ After installation, these tools are immediately available:
 
 ```powershell
 $Global:ExplorerLensConfig = @{
-    VSPath      = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
-    MSVCVersion = "14.44.35207"
-    WindowsSDK  = "10.0.26100.0"
-    MSBuild     = "...\MSBuild.exe"
-    CMake       = "C:\Users\ryair\scoop\shims\cmake.exe"
-    Git         = "C:\Users\ryair\scoop\shims\git.exe"
-    ProjectRoot = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens"
+ VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
+ MSVCVersion = "14.44.35207"
+ WindowsSDK = "10.0.26100.0"
+ MSBuild = "...\MSBuild.exe"
+ CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
+ Git = "C:\Users\ryair\scoop\shims\git.exe"
+ ProjectRoot = "C:\Users\ryair\OneDrive - Intel Corporation\Documents\MyScripts\ExplorerLens"
 }
 ```
 
@@ -81,19 +81,19 @@ After environment is loaded:
 
 ```powershell
 # Quick build commands
-dtbuild          # Show available commands
-dtbuild Release  # Build full solution (Release, x64)
-dtbuild Engine   # Build Engine only (CMake)
-dtbuild Shell    # Build LENSShell only
-dtbuild Clean    # Clean all artifacts
-dtbuild Rebuild  # Clean + Release build
+dtbuild # Show available commands
+dtbuild Release # Build full solution (Release, x64)
+dtbuild Engine # Build Engine only (CMake)
+dtbuild Shell # Build LENSShell only
+dtbuild Clean # Clean all artifacts
+dtbuild Rebuild # Clean + Release build
 
 # Testing
-dttest           # Run Engine tests
+dttest # Run Engine tests
 
 # Information
-Show-ExplorerLensInfo  # Display environment details
-Test-BuildTools      # Verify all tools work
+Show-ExplorerLensInfo # Display environment details
+Test-BuildTools # Verify all tools work
 ```
 
 ---
@@ -108,18 +108,18 @@ Show-ExplorerLensInfo
 
 # Expected output:
 # ═══════════════════════════════════════════════════════
-#  ExplorerLens Development Environment
+# ExplorerLens Development Environment
 # ═══════════════════════════════════════════════════════
 # 
 # Visual Studio:
-#   Path:    C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools
-#   MSVC:    14.44.35207
-#   SDK:     10.0.26100.0
+# Path: C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools
+# MSVC: 14.44.35207
+# SDK: 10.0.26100.0
 # 
 # Build Tools:
-#   MSBuild: 18.3.0
-#   CMake:   4.2.1
-#   Git:     2.x.x
+# MSBuild: 18.3.0
+# CMake: 4.2.1
+# Git: 2.x.x
 ```
 
 ### Test Build Tools
@@ -128,14 +128,14 @@ Show-ExplorerLensInfo
 Test-BuildTools
 
 # Expected output:
-#   ✅ MSBuild (18.3.0)
-#   ✅ CMake (4.2.1)
-#   ✅ Git (2.x.x)
-#   ✅ MSVC (CL) (19.44.x)
-#   ✅ NMake
-#   ✅ Link
-#   ✅ RC
-#   ✅ Ninja (1.x.x)
+# ✅ MSBuild (18.3.0)
+# ✅ CMake (4.2.1)
+# ✅ Git (2.x.x)
+# ✅ MSVC (CL) (19.44.x)
+# ✅ NMake
+# ✅ Link
+# ✅ RC
+# ✅ Ninja (1.x.x)
 ```
 
 ---
@@ -188,7 +188,7 @@ Setup-ExplorerLensEnv -Force
 - **Tool Versions:** `.github/TOOL_VERSIONS.md`
 - **Quick Reference:** `.github/BUILD_QUICK_REFERENCE.md`
 - **AI Instructions:** `.github/AI_BUILD_INSTRUCTIONS.md`
-- **Project Roadmap:** `../MASTER_PLAN.md`
+- **Project Roadmap:** `../CHANGELOG.md`
 
 ---
 
@@ -212,4 +212,3 @@ Environment setup is optimized for speed:
 ---
 
 *Last Updated: February 9, 2026*
-

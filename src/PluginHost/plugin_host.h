@@ -1,5 +1,4 @@
 // plugin_host.h - ExplorerLens Plugin Host Process Architecture v1.0
-// Part of Sprint 20: Plugin Sandbox v2 + Trust/Signing (v6.2)
 //
 // PURPOSE:
 //   PluginHost is a restricted sandboxed process that loads and executes

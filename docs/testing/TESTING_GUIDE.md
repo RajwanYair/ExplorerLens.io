@@ -1,8 +1,8 @@
 # Testing Guide — ExplorerLens v15.0.0
 
-**Version:** 15.0.0 "Zenith"  
-**Framework:** Custom C++ test harness (`TEST()`, `RUN_TEST()`, `ASSERT()` macros)  
-**Test Count:** ~1,187 unit tests + 5 benchmarks  
+**Version:** 15.0.0 "Zenith" 
+**Framework:** Custom C++ test harness (`TEST()`, `RUN_TEST()`, `ASSERT()` macros) 
+**Test Count:** ~1,187 unit tests + 5 benchmarks 
 **Pass Rate:** 100%
 
 ---
@@ -48,7 +48,7 @@ ctest --test-dir build -C Release --output-on-failure
 | BuildValidation | 8 | Version, feature flags, compile-time |
 | FormatDetection | 15 | Extension + magic byte detection |
 | Pipeline | 4 | End-to-end integration |
-| Sprint 6: Isolation | 6 | Malformed payloads, circuit breaker |
+| Isolation | 6 | Malformed payloads, circuit breaker |
 
 All suites: **✅ Pass**
 
@@ -115,15 +115,15 @@ The project uses custom test macros, NOT Google Test.
 // In Engine/Tests/EngineTests.cpp
 
 TEST(MyNewFeatureTest) {
-    // Arrange
-    auto component = CreateMyComponent();
-    
-    // Act
-    auto result = component->Process();
-    
-    // Assert
-    ASSERT(result != nullptr);
-    ASSERT(result->IsValid());
+ // Arrange
+ auto component = CreateMyComponent();
+ 
+ // Act
+ auto result = component->Process();
+ 
+ // Assert
+ ASSERT(result != nullptr);
+ ASSERT(result->IsValid());
 }
 
 // Add to main():

@@ -71,6 +71,18 @@ typedef struct LENSShell LENSShell;
 #endif 	/* __LENSShell_FWD_DEFINED__ */
 
 
+#ifndef __LENSShellContextMenu_FWD_DEFINED__
+#define __LENSShellContextMenu_FWD_DEFINED__
+
+#ifdef __cplusplus
+typedef class LENSShellContextMenu LENSShellContextMenu;
+#else
+typedef struct LENSShellContextMenu LENSShellContextMenu;
+#endif /* __cplusplus */
+
+#endif 	/* __LENSShellContextMenu_FWD_DEFINED__ */
+
+
 /* header files for imported files */
 #include "oaidl.h"
 #include "ocidl.h"
@@ -223,6 +235,14 @@ EXTERN_C const CLSID CLSID_LENSShell;
 
 class DECLSPEC_UUID("9E6ECB90-5A61-42BD-B851-D3297D9C7F39")
 LENSShell;
+#endif
+
+EXTERN_C const CLSID CLSID_LENSShellContextMenu;
+
+#ifdef __cplusplus
+
+class DECLSPEC_UUID("A7B3F4E1-9C2D-4E8F-B6A1-3D5E7F9C2B4A")
+LENSShellContextMenu;
 #endif
 #endif /* __LENSShellLib_LIBRARY_DEFINED__ */
 

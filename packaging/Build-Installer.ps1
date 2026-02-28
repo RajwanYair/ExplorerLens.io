@@ -1,17 +1,16 @@
 # Build ExplorerLens Installer Package
-# Sprint 23: Packaging & Deployment
 # Requires: WiX Toolset v4.0+ or v5.0+
 
 param(
     [string]$Configuration = "Release",
-    [string]$Version = "7.0.0"
+    [string]$Version = "15.0.0"
 )
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "ExplorerLens Installer Build Script" -ForegroundColor Cyan
-Write-Host "Sprint 23: MSI Package Creation" -ForegroundColor Cyan
+Write-Host "MSI Package Creation" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -85,11 +84,11 @@ try {
         -define "BuildDir=$RootDir" `
         -define "Version=$Version" `
         -arch x64
-    
+
     if ($LASTEXITCODE -ne 0) {
         throw "WiX build failed with exit code $LASTEXITCODE"
     }
-    
+
     Write-Host "[OK] MSI package created successfully" -ForegroundColor Green
 } catch {
     Write-Host "[ERROR] MSI build failed: $($_.Exception.Message)" -ForegroundColor Red
@@ -119,4 +118,3 @@ Write-Host "  1. Test installer: msiexec /i `"$MsiFile`" /l*v install.log" -Fore
 Write-Host "  2. Uninstall test: msiexec /x `"$MsiFile`" /l*v uninstall.log" -ForegroundColor Gray
 Write-Host "  3. Code signing:   signtool sign /sha1 <thumbprint> /t http://timestamp.digicert.com `"$MsiFile`"" -ForegroundColor Gray
 Write-Host ""
-

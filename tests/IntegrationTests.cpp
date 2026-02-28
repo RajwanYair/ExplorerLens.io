@@ -319,7 +319,7 @@ INTEGRATION_TEST(TestMultipleFileFormats) {
 }
 
 ///////////////////////////////////////////////
-// COM Integration Tests (Sprint 16 expansion)
+// COM Integration Tests 
 ///////////////////////////////////////////////
 
 INTEGRATION_TEST(TestCOMInitialization) {
@@ -541,7 +541,7 @@ int main() {
     RUN_INTEGRATION_TEST(TestMultipleFileFormats);
     std::cout << std::endl;
     
-    std::cout << "[Suite 5/5] Advanced Integration Tests (Sprint 16)" << std::endl;
+    std::cout << "[Suite 5/5] Advanced Integration Tests " << std::endl;
     RUN_INTEGRATION_TEST(TestShellInterfaces);
     RUN_INTEGRATION_TEST(TestDecoderChainExecution);
     RUN_INTEGRATION_TEST(TestErrorHandlingChain);

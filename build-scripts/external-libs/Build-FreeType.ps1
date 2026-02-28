@@ -5,7 +5,7 @@
 .DESCRIPTION
     Downloads and builds FreeType as a static library with /MD runtime.
     Optionally builds HarfBuzz for advanced text shaping.
-    ExplorerLens v15.0.0 "Zenith" — Sprint 366
+    ExplorerLens v15.0.0 "Zenith" — 
 
 .PARAMETER Clean
     Remove existing build artifacts before building.

@@ -217,6 +217,13 @@ set(ENGINE_HEADERS
     Core/IFormatDetector.h
     Core/IGPURenderer.h
     Core/IThumbnailDecoder.h
+
+    # Core interfaces (canonical location)
+    Core/Interfaces/ICacheProvider.h
+    Core/Interfaces/IFormatDetector.h
+    Core/Interfaces/IGPURenderer.h
+    Core/Interfaces/IThumbnailDecoder.h
+
     Core/LivePreviewEngine.h
     Core/Logger.h
     Core/MetadataExtractor.h
@@ -266,6 +273,34 @@ set(ENGINE_HEADERS
     Core/VulkanComputeActivation.h
     Core/WatchFolderEngine.h
     Core/WinRTAppSDKIntegrationV2.h
+
+    # Dead code audit — previously unregistered Core headers
+    Core/ArchiveRefactorEngine.h
+    Core/BuildValidation.h
+    Core/CIHardeningEngine.h
+    Core/CodeCoverageEngine.h
+    Core/CRTConsistencyManager.h
+    Core/DecoderPriority.h
+    Core/FFmpegIntegration.h
+    Core/FormatCategoryManager.h
+    Core/FormatGalleryView.h
+    Core/FormatGroupManager.h
+    Core/FormatStatusIndicator.h
+    Core/FreeTypeIntegration.h
+    Core/GPUShaderLibrary.h
+    Core/HybridUIBridge.h
+    Core/LibWebPConfig.h
+    Core/MuPDFIntegration.h
+    Core/OpenJPEGIntegration.h
+    Core/PluginHostManager.h
+    Core/PluginTypes.h
+    Core/PropertyStoreHandler.h
+    Core/SettingsExportImport.h
+    Core/SettingsImportExport.h
+    Core/SystemTrayManager.h
+    Core/VideoCodecRouter.h
+    Core/WinUI3MigrationEngine.h
+    Core/WinUI3Research.h
 
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
@@ -348,6 +383,7 @@ set(ENGINE_HEADERS
     Decoders/WebPDecoder.h
     Decoders/WMFDecoder.h
     Decoders/XCFDecoder.h
+    Decoders/ExampleDecoder.h
     Decoders/XPMDecoder.h
 
     # GPU rendering and compute
@@ -367,6 +403,7 @@ set(ENGINE_HEADERS
     Cache/PipelineStateCacheV2.h
     Cache/SubMillisecondCacheEngine.h
     Cache/ThumbnailCache.h
+    Cache/CacheKeyGenerator.h
     Cache/USNCacheInvalidation.h
 
     # Plugin system
@@ -487,6 +524,8 @@ set(ENGINE_HEADERS
     Utils/UsageTelemetryEngine.h
     Utils/ValidationHelpers.h
     Utils/VersionNormalization.h
+    Utils/DecoderCircuitBreaker.h
+    Utils/PerceptualHashing.h
     Utils/Win11Integration.h
 
     # Release gate (unified)

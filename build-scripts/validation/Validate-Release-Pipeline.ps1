@@ -1,5 +1,4 @@
 # Validate-Release-Pipeline.ps1
-# Sprint 10: End-to-end release pipeline validation
 # Verifies: Build → Test → Package → Sign → Verify workflow
 # Version: 1.0.0
 

@@ -7,13 +7,10 @@ This directory contains comprehensive documentation for developers working on Ex
 ### Build & Environment
 
 - **[BUILD_QUICK_REFERENCE.md](BUILD_QUICK_REFERENCE.md)** - Quick reference for common build commands
-- **[WINDOWS_BUILD_TOOLS.md](WINDOWS_BUILD_TOOLS.md)** - Windows-specific build tools setup
-- **[TOOL_DISCOVERY.md](TOOL_DISCOVERY.md)** - How the build system discovers tools
-- **[TOOL_VERSIONS.md](TOOL_VERSIONS.md)** - Required and tested tool versions
+- **[TOOL_VERSIONS.md](../../.github/standards/TOOL_VERSIONS.md)** - Required and tested tool versions
 
 ### Project Organization
 
-- **[PROJECT_ORGANIZATION.md](PROJECT_ORGANIZATION.md)** - Project structure and conventions
 - **[THIRD_PARTY.md](THIRD_PARTY.md)** - Third-party dependencies and licenses
 
 ## Quick Links
@@ -195,19 +192,22 @@ See [Testing Guide](../testing/TESTING_GUIDE.md) for comprehensive testing docum
 
 ### Common Errors
 
-**"Cannot find MSBuild.exe"**
+### "Cannot find MSBuild.exe"
+
 ```powershell
 .\build-scripts\Find-MSBuild.ps1
 # Ensure Visual Studio 18 2026 is installed
 ```
 
-**"Library not found: *.lib"**
+### "Library not found: *.lib"
+
 ```powershell
 # Rebuild external libraries
 .\build-scripts\production\Rebuild-External-Libs-Correct-Runtime.ps1
 ```
 
-**"LNK1104: cannot open file"**
+### "LNK1104: cannot open file"
+
 ```powershell
 # Clean and rebuild
 .\build-scripts\build.ps1 -Configuration Release -Clean
@@ -311,6 +311,5 @@ For development questions:
 
 ---
 
-**Last Updated:** February 11, 2026  
+**Last Updated:** February 11, 2026
 **Maintained by:** ExplorerLens Development Team
-

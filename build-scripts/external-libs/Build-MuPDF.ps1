@@ -1,6 +1,5 @@
 #Requires -Version 7.0
 # ExplorerLens v15.0 "Zenith" — Build MuPDF 1.24.11 Static Library
-# Sprint 350: Enable PDF support via native MuPDF rendering
 #
 # Directory structure:
 #   Project root:       <repo>\

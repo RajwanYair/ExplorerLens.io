@@ -21,8 +21,8 @@ struct SemanticVersion {
     int major = 0;
     int minor = 0;
     int patch = 0;
-    std::string preRelease;   // e.g. "beta.1"
-    std::string buildMeta;    // e.g. "20260218"
+    std::string preRelease; // e.g. "beta.1"
+    std::string buildMeta; // e.g. "20260218"
 
     bool operator==(const SemanticVersion& o) const {
         return major == o.major && minor == o.minor && patch == o.patch
@@ -41,10 +41,10 @@ struct SemanticVersion {
 
     std::string ToString() const {
         std::string s = std::to_string(major) + "." +
-                        std::to_string(minor) + "." +
-                        std::to_string(patch);
+            std::to_string(minor) + "." +
+            std::to_string(patch);
         if (!preRelease.empty()) s += "-" + preRelease;
-        if (!buildMeta.empty())  s += "+" + buildMeta;
+        if (!buildMeta.empty()) s += "+" + buildMeta;
         return s;
     }
 
@@ -58,7 +58,7 @@ struct SemanticVersion {
             v.minor = std::stoi(m[2].str());
             v.patch = std::stoi(m[3].str());
             if (m[4].matched) v.preRelease = m[4].str();
-            if (m[5].matched) v.buildMeta  = m[5].str();
+            if (m[5].matched) v.buildMeta = m[5].str();
         }
         return v;
     }
@@ -67,10 +67,10 @@ struct SemanticVersion {
 // ── Drift entry ────────────────────────────────────────────────────────────
 
 enum class DriftSeverity {
-    Info,       // Minor cosmetic drift
-    Warning,    // Version behind by patch
-    Error,      // Version behind by minor or major
-    Critical    // Version conflict in release-facing artifact
+    Info, // Minor cosmetic drift
+    Warning, // Version behind by patch
+    Error, // Version behind by minor or major
+    Critical // Version conflict in release-facing artifact
 };
 
 enum class ArtifactKind {
@@ -85,31 +85,31 @@ enum class ArtifactKind {
 
 struct DriftEntry {
     std::string filePath;
-    int         lineNumber = 0;
+    int lineNumber = 0;
     std::string foundVersion;
     std::string expectedVersion;
     DriftSeverity severity = DriftSeverity::Warning;
-    ArtifactKind  artifact = ArtifactKind::Documentation;
-    std::string   context;     // surrounding text snippet
+    ArtifactKind artifact = ArtifactKind::Documentation;
+    std::string context; // surrounding text snippet
 };
 
 // ── Scan policy ────────────────────────────────────────────────────────────
 
 struct DriftScanPolicy {
-    SemanticVersion canonicalVersion;         // the "truth" version
-    bool  allowPatchDrift   = true;           // patch mismatch → warning not error
-    bool  checkPreRelease   = false;          // compare pre-release tags
-    bool  checkBuildMeta    = false;          // compare build metadata
-    int   maxAcceptableDrift = 1;             // max patch-level gap before error
+    SemanticVersion canonicalVersion; // the "truth" version
+    bool allowPatchDrift = true; // patch mismatch → warning not error
+    bool checkPreRelease = false; // compare pre-release tags
+    bool checkBuildMeta = false; // compare build metadata
+    int maxAcceptableDrift = 1; // max patch-level gap before error
     std::vector<std::string> excludePatterns; // glob patterns to skip
     std::vector<std::string> includePatterns; // glob patterns to scan
 };
 
 static DriftScanPolicy DefaultPolicy() {
     DriftScanPolicy p;
-    p.canonicalVersion = SemanticVersion{7, 1, 0};
-    p.includePatterns  = {"*.md", "*.h", "*.ps1", "*.cmake", "*.wxs"};
-    p.excludePatterns  = {"external/*", "build/*", "x64/*"};
+    p.canonicalVersion = SemanticVersion{ 15, 0, 0 };
+    p.includePatterns = { "*.md", "*.h", "*.ps1", "*.cmake", "*.wxs" };
+    p.excludePatterns = { "external/*", "build/*", "x64/*" };
     return p;
 }
 
@@ -118,12 +118,12 @@ static DriftScanPolicy DefaultPolicy() {
 struct DriftScanResult {
     int totalFilesScanned = 0;
     int totalDriftEntries = 0;
-    int infoCount    = 0;
+    int infoCount = 0;
     int warningCount = 0;
-    int errorCount   = 0;
+    int errorCount = 0;
     int criticalCount = 0;
     std::vector<DriftEntry> entries;
-    std::chrono::milliseconds scanDuration{0};
+    std::chrono::milliseconds scanDuration{ 0 };
 
     bool IsClean() const { return errorCount == 0 && criticalCount == 0; }
 
@@ -131,9 +131,9 @@ struct DriftScanResult {
         // 100 = pristine, deductions for drift
         int score = 100;
         score -= criticalCount * 25;
-        score -= errorCount    * 10;
-        score -= warningCount  * 3;
-        score -= infoCount     * 1;
+        score -= errorCount * 10;
+        score -= warningCount * 3;
+        score -= infoCount * 1;
         return std::max(0, score);
     }
 };
@@ -143,17 +143,18 @@ struct DriftScanResult {
 class VersionDriftDetector {
 public:
     explicit VersionDriftDetector(DriftScanPolicy policy = DefaultPolicy())
-        : m_policy(std::move(policy)) {}
+        : m_policy(std::move(policy)) {
+    }
 
     // Register an artifact for scanning
     void AddArtifact(const std::string& path, ArtifactKind kind) {
-        m_artifacts.push_back({path, kind});
+        m_artifacts.push_back({ path, kind });
     }
 
     // Scan a single content string as if from a file
     std::vector<DriftEntry> ScanContent(const std::string& path,
-                                         const std::string& content,
-                                         ArtifactKind kind) const {
+        const std::string& content,
+        ArtifactKind kind) const {
         std::vector<DriftEntry> drifts;
         std::regex versionRe(R"(v?(\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?))");
 
@@ -172,13 +173,13 @@ public:
                     continue; // matches — no drift
 
                 DriftEntry e;
-                e.filePath        = path;
-                e.lineNumber      = lineNum;
-                e.foundVersion    = found.ToString();
+                e.filePath = path;
+                e.lineNumber = lineNum;
+                e.foundVersion = found.ToString();
                 e.expectedVersion = m_policy.canonicalVersion.ToString();
-                e.artifact        = kind;
-                e.context         = line.substr(0, 120);
-                e.severity        = ClassifySeverity(found);
+                e.artifact = kind;
+                e.context = line.substr(0, 120);
+                e.severity = ClassifySeverity(found);
                 drifts.push_back(std::move(e));
             }
         }
@@ -198,10 +199,10 @@ public:
             auto entries = ScanContent(path, content, kind);
             for (auto& e : entries) {
                 switch (e.severity) {
-                    case DriftSeverity::Info:     result.infoCount++;     break;
-                    case DriftSeverity::Warning:  result.warningCount++;  break;
-                    case DriftSeverity::Error:    result.errorCount++;    break;
-                    case DriftSeverity::Critical: result.criticalCount++; break;
+                case DriftSeverity::Info: result.infoCount++; break;
+                case DriftSeverity::Warning: result.warningCount++; break;
+                case DriftSeverity::Error: result.errorCount++; break;
+                case DriftSeverity::Critical: result.criticalCount++; break;
                 }
                 result.entries.push_back(std::move(e));
             }
@@ -219,19 +220,19 @@ public:
         report += "=== Version Drift CI Report ===\n";
         report += "Files scanned: " + std::to_string(r.totalFilesScanned) + "\n";
         report += "Drift entries: " + std::to_string(r.totalDriftEntries) + "\n";
-        report += "  Critical: " + std::to_string(r.criticalCount) + "\n";
-        report += "  Error:    " + std::to_string(r.errorCount) + "\n";
-        report += "  Warning:  " + std::to_string(r.warningCount) + "\n";
-        report += "  Info:     " + std::to_string(r.infoCount) + "\n";
+        report += " Critical: " + std::to_string(r.criticalCount) + "\n";
+        report += " Error: " + std::to_string(r.errorCount) + "\n";
+        report += " Warning: " + std::to_string(r.warningCount) + "\n";
+        report += " Info: " + std::to_string(r.infoCount) + "\n";
         report += "Score: " + std::to_string(r.Score()) + "/100\n";
         report += "Status: " + std::string(r.IsClean() ? "PASS" : "FAIL") + "\n";
         if (!r.entries.empty()) {
             report += "\n--- Drift Details ---\n";
             for (auto& e : r.entries) {
                 report += "[" + SeverityLabel(e.severity) + "] "
-                       + e.filePath + ":" + std::to_string(e.lineNumber)
-                       + " — found " + e.foundVersion
-                       + " expected " + e.expectedVersion + "\n";
+                    + e.filePath + ":" + std::to_string(e.lineNumber)
+                    + " — found " + e.foundVersion
+                    + " expected " + e.expectedVersion + "\n";
             }
         }
         return report;
@@ -266,10 +267,10 @@ private:
 
     static std::string SeverityLabel(DriftSeverity s) {
         switch (s) {
-            case DriftSeverity::Info:     return "INFO";
-            case DriftSeverity::Warning:  return "WARN";
-            case DriftSeverity::Error:    return "ERROR";
-            case DriftSeverity::Critical: return "CRIT";
+        case DriftSeverity::Info: return "INFO";
+        case DriftSeverity::Warning: return "WARN";
+        case DriftSeverity::Error: return "ERROR";
+        case DriftSeverity::Critical: return "CRIT";
         }
         return "UNKNOWN";
     }
@@ -279,4 +280,3 @@ private:
 };
 
 } // namespace ExplorerLens
-

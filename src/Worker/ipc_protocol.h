@@ -1,7 +1,6 @@
 // =============================================================================
 // ipc_protocol.h - Inter-Process Communication Protocol v1.0
 // =============================================================================
-// Sprint 19: Out-of-Process Worker + IPC Protocol
 // Defines communication between ShellHost (in-proc) and Worker (out-of-proc)
 // =============================================================================
 

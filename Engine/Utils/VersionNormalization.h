@@ -30,13 +30,13 @@ struct VersionInfo {
     uint32_t major = 7;
     uint32_t minor = 0;
     uint32_t patch = 0;
-    std::string preRelease;    // e.g., "rc1", "beta2", ""
-    std::string buildMeta;     // e.g., "build.1234"
+    std::string preRelease; // e.g., "rc1", "beta2", ""
+    std::string buildMeta; // e.g., "build.1234"
 
     std::string ToString() const {
         std::string v = "v" + std::to_string(major) + "." +
-                         std::to_string(minor) + "." +
-                         std::to_string(patch);
+            std::to_string(minor) + "." +
+            std::to_string(patch);
         if (!preRelease.empty()) v += "-" + preRelease;
         if (!buildMeta.empty()) v += "+" + buildMeta;
         return v;
@@ -62,11 +62,11 @@ struct VersionInfo {
 //==============================================================================
 struct VersionReference {
     std::string filePath;
-    uint32_t    lineNumber = 0;
+    uint32_t lineNumber = 0;
     std::string lineText;
-    std::string detectedVersion;   // What version was found
-    bool        isStale = false;   // Doesn't match canonical
-    std::string suggestedFix;      // How to fix
+    std::string detectedVersion; // What version was found
+    bool isStale = false; // Doesn't match canonical
+    std::string suggestedFix; // How to fix
 
     std::string Location() const {
         return filePath + ":" + std::to_string(lineNumber);
@@ -79,20 +79,20 @@ struct VersionReference {
 struct ScannerConfig {
     VersionInfo canonicalVersion = VersionInfo::Current();
     std::vector<std::string> staleVersionPatterns = {
-        "v5.0", "v5.1", "v5.2", "v5.3", "v5.4",
-        "v6.0", "v6.1", "v6.2",
-        "5.0.0", "5.4.0", "6.0.0", "6.2.0"
+    "v5.0", "v5.1", "v5.2", "v5.3", "v5.4",
+    "v6.0", "v6.1", "v6.2",
+    "5.0.0", "5.4.0", "6.0.0", "6.2.0"
     };
     std::vector<std::string> excludePatterns = {
-        "CHANGELOG.md",        // Changelog intentionally has old versions
-        ".git/",               // Git internal
-        "node_modules/",       // Dependencies
-        "build/",              // Build artifacts
-        "x64/",                // Build output
-        "packages/"            // Packages
+    "CHANGELOG.md", // Changelog intentionally has old versions
+    ".git/", // Git internal
+    "node_modules/", // Dependencies
+    "build/", // Build artifacts
+    "x64/", // Build output
+    "packages/" // Packages
     };
     std::vector<std::string> targetExtensions = {
-        ".md", ".h", ".cpp", ".ps1", ".yml", ".yaml", ".json"
+    ".md", ".h", ".cpp", ".ps1", ".yml", ".yaml", ".json"
     };
 };
 
@@ -102,13 +102,12 @@ struct ScannerConfig {
 class VersionScanner {
 public:
     explicit VersionScanner(const ScannerConfig& config = {})
-        : m_config(config)
-    {}
+        : m_config(config) {
+    }
 
     // Scan a single file content for stale references
     std::vector<VersionReference> ScanContent(const std::string& filePath,
-                                                const std::string& content) const
-    {
+        const std::string& content) const {
         std::vector<VersionReference> refs;
 
         // Check exclusions
@@ -144,10 +143,10 @@ public:
     bool IsCanonical(const std::string& version) const {
         auto& curr = m_config.canonicalVersion;
         return version == curr.ToString() ||
-               version == curr.ToShort() ||
-               version == std::to_string(curr.major) + "." +
-                           std::to_string(curr.minor) + "." +
-                           std::to_string(curr.patch);
+            version == curr.ToShort() ||
+            version == std::to_string(curr.major) + "." +
+            std::to_string(curr.minor) + "." +
+            std::to_string(curr.patch);
     }
 
     // Count stale references in content
@@ -173,17 +172,17 @@ private:
 // Decoder Status for Documentation
 //==============================================================================
 enum class DecoderStatus : uint32_t {
-    Stable      = 0,   // Production ready
-    Beta        = 1,   // Working but needs testing
-    Experimental = 2,  // Early stage
-    Planned     = 3,   // Not yet implemented
-    Deprecated  = 4,   // Being removed
-    External    = 5    // Handled by external library
+    Stable = 0, // Production ready
+    Beta = 1, // Working but needs testing
+    Experimental = 2, // Early stage
+    Planned = 3, // Not yet implemented
+    Deprecated = 4, // Being removed
+    External = 5 // Handled by external library
 };
 
 inline const char* DecoderStatusName(DecoderStatus s) {
     static const char* names[] = {
-        "Stable", "Beta", "Experimental", "Planned", "Deprecated", "External"
+    "Stable", "Beta", "Experimental", "Planned", "Deprecated", "External"
     };
     return names[static_cast<uint32_t>(s) <= 5 ? static_cast<uint32_t>(s) : 5];
 }
@@ -191,18 +190,18 @@ inline const char* DecoderStatusName(DecoderStatus s) {
 struct DecoderDocEntry {
     std::string name;
     DecoderStatus status = DecoderStatus::Planned;
-    std::string library;           // e.g., "libwebp 1.5.0"
+    std::string library; // e.g., "libwebp 1.5.0"
     std::vector<std::string> formats;
     std::string notes;
 
     std::string StatusBadge() const {
         switch (status) {
-        case DecoderStatus::Stable:       return "[STABLE]";
-        case DecoderStatus::Beta:         return "[BETA]";
+        case DecoderStatus::Stable: return "[STABLE]";
+        case DecoderStatus::Beta: return "[BETA]";
         case DecoderStatus::Experimental: return "[EXPERIMENTAL]";
-        case DecoderStatus::Planned:      return "[PLANNED]";
-        case DecoderStatus::Deprecated:   return "[DEPRECATED]";
-        case DecoderStatus::External:     return "[EXTERNAL]";
+        case DecoderStatus::Planned: return "[PLANNED]";
+        case DecoderStatus::Deprecated: return "[DEPRECATED]";
+        case DecoderStatus::External: return "[EXTERNAL]";
         default: return "[UNKNOWN]";
         }
     }
@@ -246,7 +245,7 @@ public:
         md += "|---------|--------|---------|---------|\n";
         for (auto& d : m_decoders) {
             md += "| " + d.name + " | " + d.StatusBadge() + " | " +
-                  d.library + " | ";
+                d.library + " | ";
             for (size_t i = 0; i < d.formats.size(); ++i) {
                 md += d.formats[i];
                 if (i + 1 < d.formats.size()) md += ", ";
@@ -259,57 +258,57 @@ public:
 private:
     void RegisterAllDecoders() {
         m_decoders = {
-            {"JPEG/JFIF",   DecoderStatus::Stable, "WIC (built-in)",
-             {".jpg", ".jpeg", ".jpe", ".jfif"}, "Windows Imaging Component"},
-            {"PNG",          DecoderStatus::Stable, "WIC (built-in)",
-             {".png"}, ""},
-            {"BMP",          DecoderStatus::Stable, "WIC (built-in)",
-             {".bmp", ".dib"}, ""},
-            {"GIF",          DecoderStatus::Stable, "WIC (built-in)",
-             {".gif"}, "First frame only"},
-            {"TIFF",         DecoderStatus::Stable, "WIC (built-in)",
-             {".tif", ".tiff"}, "Multi-page via multi-frame"},
-            {"ICO/CUR",      DecoderStatus::Stable, "Custom",
-             {".ico", ".cur"}, "Best-size extraction"},
-            {"WebP",         DecoderStatus::Stable, "libwebp 1.5.0",
-             {".webp"}, "Animated first frame"},
-            {"JPEG XL",      DecoderStatus::Stable, "libjxl 0.11.1",
-             {".jxl"}, "Animated first frame"},
-            {"HEIF/HEIC",    DecoderStatus::Stable, "libheif 1.19.5",
-             {".heif", ".heic", ".hif"}, "libde265 backend"},
-            {"AVIF",         DecoderStatus::Stable, "libavif 1.3.0",
-             {".avif"}, "dav1d backend"},
-            {"RAW (Camera)", DecoderStatus::Stable, "LibRaw 0.21.3",
-             {".cr2", ".cr3", ".nef", ".arw", ".orf", ".rw2",
-              ".raf", ".dng", ".srw", ".pef", ".gpr", ".raw"},
-             "Embedded preview extraction"},
-            {"PSD",          DecoderStatus::Stable, "Custom",
-             {".psd", ".psb"}, "Composite preview"},
-            {"TGA",          DecoderStatus::Stable, "Custom",
-             {".tga", ".targa"}, "Truevision"},
-            {"DDS",          DecoderStatus::Stable, "WIC + D3D11",
-             {".dds"}, "GPU-accelerated BC decompression"},
-            {"QOI",          DecoderStatus::Stable, "Custom",
-             {".qoi"}, "Quite OK Image format"},
-            {"SVG",          DecoderStatus::Stable, "Direct2D",
-             {".svg", ".svgz"}, "Vector rasterization"},
-            {"EXR",          DecoderStatus::Stable, "Custom",
-             {".exr"}, "OpenEXR HDR"},
-            {"HDR",          DecoderStatus::Stable, "Custom",
-             {".hdr"}, "Radiance HDR"},
-            {"PDF",          DecoderStatus::Stable, "WIC/Shell",
-             {".pdf"}, "First page thumbnail"},
-            {"ZIP Archives", DecoderStatus::Stable, "minizip-ng 4.0.10",
-             {".zip", ".cbz"}, "First image extraction"},
-            {"RAR Archives", DecoderStatus::Stable, "UnRAR 7.2.2",
-             {".rar", ".cbr"}, "First image extraction"},
-            {"7z Archives",  DecoderStatus::Stable, "LZMA 26.00",
-             {".7z", ".cb7"}, "First image extraction"},
-            {"TAR Archives", DecoderStatus::Stable, "Custom",
-             {".tar", ".tar.gz", ".tar.bz2", ".tar.xz"}, "Streaming"},
-            {"Video",        DecoderStatus::External, "Media Foundation",
-             {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm"},
-             "Scene frame selection"},
+        {"JPEG/JFIF", DecoderStatus::Stable, "WIC (built-in)",
+        {".jpg", ".jpeg", ".jpe", ".jfif"}, "Windows Imaging Component"},
+        {"PNG", DecoderStatus::Stable, "WIC (built-in)",
+        {".png"}, ""},
+        {"BMP", DecoderStatus::Stable, "WIC (built-in)",
+        {".bmp", ".dib"}, ""},
+        {"GIF", DecoderStatus::Stable, "WIC (built-in)",
+        {".gif"}, "First frame only"},
+        {"TIFF", DecoderStatus::Stable, "WIC (built-in)",
+        {".tif", ".tiff"}, "Multi-page via multi-frame"},
+        {"ICO/CUR", DecoderStatus::Stable, "Custom",
+        {".ico", ".cur"}, "Best-size extraction"},
+        {"WebP", DecoderStatus::Stable, "libwebp 1.5.0",
+        {".webp"}, "Animated first frame"},
+        {"JPEG XL", DecoderStatus::Stable, "libjxl 0.11.1",
+        {".jxl"}, "Animated first frame"},
+        {"HEIF/HEIC", DecoderStatus::Stable, "libheif 1.19.5",
+        {".heif", ".heic", ".hif"}, "libde265 backend"},
+        {"AVIF", DecoderStatus::Stable, "libavif 1.3.0",
+        {".avif"}, "dav1d backend"},
+        {"RAW (Camera)", DecoderStatus::Stable, "LibRaw 0.21.3",
+        {".cr2", ".cr3", ".nef", ".arw", ".orf", ".rw2",
+        ".raf", ".dng", ".srw", ".pef", ".gpr", ".raw"},
+        "Embedded preview extraction"},
+        {"PSD", DecoderStatus::Stable, "Custom",
+        {".psd", ".psb"}, "Composite preview"},
+        {"TGA", DecoderStatus::Stable, "Custom",
+        {".tga", ".targa"}, "Truevision"},
+        {"DDS", DecoderStatus::Stable, "WIC + D3D11",
+        {".dds"}, "GPU-accelerated BC decompression"},
+        {"QOI", DecoderStatus::Stable, "Custom",
+        {".qoi"}, "Quite OK Image format"},
+        {"SVG", DecoderStatus::Stable, "Direct2D",
+        {".svg", ".svgz"}, "Vector rasterization"},
+        {"EXR", DecoderStatus::Stable, "Custom",
+        {".exr"}, "OpenEXR HDR"},
+        {"HDR", DecoderStatus::Stable, "Custom",
+        {".hdr"}, "Radiance HDR"},
+        {"PDF", DecoderStatus::Stable, "WIC/Shell",
+        {".pdf"}, "First page thumbnail"},
+        {"ZIP Archives", DecoderStatus::Stable, "minizip-ng 4.0.10",
+        {".zip", ".cbz"}, "First image extraction"},
+        {"RAR Archives", DecoderStatus::Stable, "UnRAR 7.2.2",
+        {".rar", ".cbr"}, "First image extraction"},
+        {"7z Archives", DecoderStatus::Stable, "LZMA 26.00",
+        {".7z", ".cb7"}, "First image extraction"},
+        {"TAR Archives", DecoderStatus::Stable, "Custom",
+        {".tar", ".tar.gz", ".tar.bz2", ".tar.xz"}, "Streaming"},
+        {"Video", DecoderStatus::External, "Media Foundation",
+        {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm"},
+        "Scene frame selection"},
         };
     }
 
@@ -320,18 +319,18 @@ private:
 // Release Notes Generator
 //==============================================================================
 struct ReleaseNote {
-    std::string category;     // e.g., "New Features", "Bug Fixes"
+    std::string category; // e.g., "New Features", "Bug Fixes"
     std::string description;
 };
 
 class ReleaseNotesGenerator {
 public:
     explicit ReleaseNotesGenerator(const VersionInfo& version = VersionInfo::Current())
-        : m_version(version)
-    {}
+        : m_version(version) {
+    }
 
     void AddNote(const std::string& category, const std::string& description) {
-        m_notes.push_back({category, description});
+        m_notes.push_back({ category, description });
     }
 
     void AddFeature(const std::string& desc) {
@@ -390,7 +389,7 @@ private:
     static std::string CurrentDateString() {
         auto now = std::chrono::system_clock::now();
         auto time = std::chrono::system_clock::to_time_t(now);
-        struct tm tm_buf{};
+        struct tm tm_buf {};
         localtime_s(&tm_buf, &time);
         char buf[32]{};
         strftime(buf, sizeof(buf), "%Y-%m-%d", &tm_buf);
@@ -405,10 +404,10 @@ private:
 // Documentation Integrity Report
 //==============================================================================
 struct DocIntegrityReport {
-    size_t filesScanned      = 0;
-    size_t staleReferences   = 0;
-    size_t staleDocs         = 0;   // Files with any stale ref
-    size_t cleanDocs         = 0;
+    size_t filesScanned = 0;
+    size_t staleReferences = 0;
+    size_t staleDocs = 0; // Files with any stale ref
+    size_t cleanDocs = 0;
     std::vector<VersionReference> allReferences;
 
     double IntegrityPercent() const {
@@ -427,18 +426,17 @@ public:
     // Register the 12 stale docs identified in audit
     void RegisterKnownStaleDocs() {
         m_staleDocs = {
-            "DECODER_STATUS.md",
-            "TESTING_GUIDE.md",
-            "README.md",
-            "DEVELOPER_GUIDE.md",
-            "USER_GUIDE.md",
-            "KNOWN_ISSUES.md",
-            "docs/FORMAT_SUPPORT_ANALYSIS.md",
-            "docs/WINDOWS_BUILD_TOOLS.md",
-            "docs/BUILD_METHOD_COMPARISON.md",
-            "SDK/README.md",
-            ".github/COMPLETE_PROJECT_SUMMARY.md",
-            ".github/SPRINTS_6-22_SUMMARY.md"
+        "DECODER_STATUS.md",
+        "TESTING_GUIDE.md",
+        "README.md",
+        "DEVELOPER_GUIDE.md",
+        "USER_GUIDE.md",
+        "KNOWN_ISSUES.md",
+        "docs/FORMAT_SUPPORT_ANALYSIS.md",
+        "docs/WINDOWS_BUILD_TOOLS.md",
+        "docs/BUILD_METHOD_COMPARISON.md",
+        "SDK/README.md",
+        ".github/COMPLETE_PROJECT_SUMMARY.md"
         };
     }
 
@@ -483,4 +481,3 @@ private:
 } // namespace Docs
 } // namespace Engine
 } // namespace ExplorerLens
-

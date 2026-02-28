@@ -21,7 +21,7 @@ extern CComModule _Module;
 #include <shlobj.h>
 #include <wrl/client.h>
 
-// Phase 10 Infrastructure (v5.2.0)
+// Core infrastructure includes
 #include "error_logger.h"
 #include "performance_profiler.h"
 #include "memory_utils.h"

@@ -4,6 +4,7 @@
 #include "tools.h"
 #include "regmanager.h"
 #include "ChangeSummaryDlg.h"
+#include "DarkModeController.h"
 
 #include <Htmlhelp.h>
 #include <map>
@@ -11,7 +12,7 @@
 #pragma comment(lib,"Htmlhelp.lib")
 
 class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>, public CDialogDrag<CMainDlg>,
-		public CMessageFilter, public CIdleHandler, public CSnapWindow<CMainDlg>, public CDialogHelp<CMainDlg>
+	public CMessageFilter, public CIdleHandler, public CSnapWindow<CMainDlg>, public CDialogHelp<CMainDlg>
 {
 public:
 	enum { IDD = IDD_MAINDLG };
@@ -30,6 +31,11 @@ public:
 		MESSAGE_HANDLER(WM_GETMINMAXINFO, OnGetMinMaxInfo)
 		MESSAGE_HANDLER(WM_KEYDOWN, OnKeyDown)
 		MESSAGE_HANDLER(WM_MOUSEWHEEL, OnMouseWheel)
+		MESSAGE_HANDLER(WM_SETTINGCHANGE, OnSettingChange)
+		MESSAGE_HANDLER(WM_CTLCOLORDLG, OnCtlColor)
+		MESSAGE_HANDLER(WM_CTLCOLORSTATIC, OnCtlColor)
+		MESSAGE_HANDLER(WM_CTLCOLORBTN, OnCtlColor)
+		MESSAGE_HANDLER(WM_CTLCOLOREDIT, OnCtlColor)
 		COMMAND_ID_HANDLER(IDOK, OnOK)
 		COMMAND_ID_HANDLER(IDC_APPLY, OnApply)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
@@ -69,10 +75,10 @@ public:
 		CHAIN_MSG_MAP(CDialogHelp<CMainDlg>)
 	END_MSG_MAP()
 
-// Handler prototypes (uncomment arguments if needed):
-//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
+	// Handler prototypes (uncomment arguments if needed):
+	//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+	//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
 
 	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
@@ -80,6 +86,8 @@ public:
 	LRESULT OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& /*bHandled*/);
 	LRESULT OnKeyDown(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnMouseWheel(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnSettingChange(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM lParam, BOOL& /*bHandled*/);
+	LRESULT OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
 
 	LRESULT OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
@@ -101,24 +109,24 @@ private:
 	CRegManager m_reg;
 	CToolTipCtrl m_tooltip;
 	CStatusBarCtrl m_statusBar;
-	
+
 	// Handler status mapping for tooltips
 	std::map<int, HandlerStatus> m_checkboxStatus;
-	
+
 	// Font resize support
 	HFONT m_hFont = NULL;
 	int m_fontSize = 8;       // Current font size in points (default: 8)
 	static const int FONT_SIZE_MIN = 7;
 	static const int FONT_SIZE_MAX = 16;
-	
+
 	// Layout anchoring for resize
 	struct ControlAnchor {
 		int id;
 		RECT initialRect;   // Position in initial dialog DU (stored as pixels at init)
 	};
 	std::vector<ControlAnchor> m_anchors;
-	SIZE m_initialSize = {0, 0};  // Initial dialog client size
-	
+	SIZE m_initialSize = { 0, 0 };  // Initial dialog client size
+
 	// Helper methods
 	void InitTooltips();
 	void AddTooltipWithStatus(int ctrlID, int LENSTYPE, LPCTSTR formatName);
@@ -127,7 +135,7 @@ private:
 	int GetEnabledFormatCount();
 	void RecreateFont(int pointSize);
 	void RelayoutControls(int clientWidth, int clientHeight);
-	
+
 	// Configuration management
 	ConfigSnapshot CaptureCurrentConfig();
 	void ApplyConfigSnapshot(const ConfigSnapshot& config);
@@ -135,4 +143,3 @@ private:
 	bool LoadConfigFromRegFile(LPCTSTR filename, ConfigSnapshot& outConfig);
 };
 #endif//_MAINDLG_A8394D0D_EE2B_4A00_9FAC_AB8D3B03F078_
-

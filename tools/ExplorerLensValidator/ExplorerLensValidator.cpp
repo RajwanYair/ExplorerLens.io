@@ -1,5 +1,4 @@
 // ExplorerLens.Validator.exe
-// Sprint 13: Real-File Test Fixtures & Compatibility Kit
 // Validates decoder functionality across the test corpus
 // Date: February 17, 2026
 

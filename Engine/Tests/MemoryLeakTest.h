@@ -1,5 +1,5 @@
 // ============================================================================
-// MemoryLeakTest.h, Task 6.4
+// MemoryLeakTest.h
 // Memory leak regression test for decode loops
 //
 // Runs N decode iterations and asserts that peak working-set memory stays
@@ -7,11 +7,11 @@
 // would otherwise accumulate in long-running Explorer sessions.
 //
 // USAGE (in CTest):
-//   ExplorerLens::Testing::MemoryLeakTest::Config cfg;
-//   cfg.iterations = 100;
-//   cfg.maxGrowthFactorPct = 20;  // Allow 20% growth
-//   auto result = ExplorerLens::Testing::MemoryLeakTest::Run(cfg);
-//   ASSERT_TRUE(result.passed) << result.report;
+// ExplorerLens::Testing::MemoryLeakTest::Config cfg;
+// cfg.iterations = 100;
+// cfg.maxGrowthFactorPct = 20; // Allow 20% growth
+// auto result = ExplorerLens::Testing::MemoryLeakTest::Run(cfg);
+// ASSERT_TRUE(result.passed) << result.report;
 // ============================================================================
 
 #pragma once
@@ -45,8 +45,8 @@ struct MemorySnapshot {
         PROCESS_MEMORY_COUNTERS_EX pmc = {};
         pmc.cb = sizeof(pmc);
         if (GetProcessMemoryInfo(GetCurrentProcess(),
-                                 reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
-                                 sizeof(pmc))) {
+            reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
+            sizeof(pmc))) {
             snap.workingSetMB = static_cast<double>(pmc.WorkingSetSize) / (1024.0 * 1024.0);
             snap.privateBytesMB = static_cast<double>(pmc.PrivateUsage) / (1024.0 * 1024.0);
             snap.pageFaultCount = static_cast<double>(pmc.PageFaultCount);
@@ -57,15 +57,15 @@ struct MemorySnapshot {
 
 /// Result of a memory leak test run
 struct MemoryLeakResult {
-    bool passed = false;              ///< True if memory growth within bounds
-    double baselineMB = 0.0;          ///< Working set after warmup
-    double peakMB = 0.0;              ///< Peak working set during test
-    double finalMB = 0.0;             ///< Working set at test end
-    double growthPct = 0.0;           ///< Percent growth from baseline to peak
-    double allowedGrowthPct = 0.0;    ///< Configured limit
-    int iterations = 0;              ///< Number of iterations run
+    bool passed = false; ///< True if memory growth within bounds
+    double baselineMB = 0.0; ///< Working set after warmup
+    double peakMB = 0.0; ///< Peak working set during test
+    double finalMB = 0.0; ///< Working set at test end
+    double growthPct = 0.0; ///< Percent growth from baseline to peak
+    double allowedGrowthPct = 0.0; ///< Configured limit
+    int iterations = 0; ///< Number of iterations run
     double elapsedSeconds = 0.0;
-    std::string report;               ///< Human-readable summary
+    std::string report; ///< Human-readable summary
     std::vector<MemorySnapshot> snapshots;
 };
 
@@ -74,10 +74,10 @@ class MemoryLeakTest {
 public:
     /// Test configuration
     struct Config {
-        int iterations = 100;              ///< Number of decode loop iterations
-        int warmupIterations = 5;          ///< Iterations before baseline capture
-        int sampleInterval = 10;           ///< Capture memory every N iterations
-        double maxGrowthFactorPct = 20.0;  ///< Fail if growth exceeds this percent
+        int iterations = 100; ///< Number of decode loop iterations
+        int warmupIterations = 5; ///< Iterations before baseline capture
+        int sampleInterval = 10; ///< Capture memory every N iterations
+        double maxGrowthFactorPct = 20.0; ///< Fail if growth exceeds this percent
     };
 
     /// Run the memory leak test using a user-supplied decode function
@@ -86,8 +86,7 @@ public:
     /// @return MemoryLeakResult with pass/fail and diagnostics
     static MemoryLeakResult Run(
         const Config& cfg,
-        std::function<HRESULT()> decodeFn)
-    {
+        std::function<HRESULT()> decodeFn) {
         MemoryLeakResult result;
         result.allowedGrowthPct = cfg.maxGrowthFactorPct;
         result.iterations = cfg.iterations;
@@ -152,13 +151,13 @@ private:
         oss << std::fixed << std::setprecision(2);
 
         oss << "=== Memory Leak Regression Test ===\n";
-        oss << "Status:     " << (result.passed ? "PASSED" : "FAILED") << "\n";
+        oss << "Status: " << (result.passed ? "PASSED" : "FAILED") << "\n";
         oss << "Iterations: " << result.iterations << "\n";
-        oss << "Duration:   " << result.elapsedSeconds << "s\n";
-        oss << "Baseline:   " << result.baselineMB << " MB\n";
-        oss << "Peak:       " << result.peakMB << " MB\n";
-        oss << "Final:      " << result.finalMB << " MB\n";
-        oss << "Growth:     " << result.growthPct << "% "
+        oss << "Duration: " << result.elapsedSeconds << "s\n";
+        oss << "Baseline: " << result.baselineMB << " MB\n";
+        oss << "Peak: " << result.peakMB << " MB\n";
+        oss << "Final: " << result.finalMB << " MB\n";
+        oss << "Growth: " << result.growthPct << "% "
             << "(limit: " << result.allowedGrowthPct << "%)\n";
 
         if (!result.passed) {
@@ -168,11 +167,11 @@ private:
         }
 
         oss << "\n--- Memory Snapshots ---\n";
-        oss << "Iter     WorkingSet(MB)  Private(MB)\n";
+        oss << "Iter WorkingSet(MB) Private(MB)\n";
         for (const auto& snap : result.snapshots) {
             oss << std::setw(6) << snap.iteration
-                << "   " << std::setw(12) << snap.workingSetMB
-                << "   " << std::setw(12) << snap.privateBytesMB
+                << " " << std::setw(12) << snap.workingSetMB
+                << " " << std::setw(12) << snap.privateBytesMB
                 << "\n";
         }
 
@@ -182,4 +181,3 @@ private:
 
 } // namespace Testing
 } // namespace ExplorerLens
-

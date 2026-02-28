@@ -255,7 +255,7 @@ struct SandboxConfig {
 
 /**
  * Plugin Host Process Manager
- * Manages out-of-process plugin execution (Sprint 12.4)
+ * Manages out-of-process plugin execution 
  */
 class PluginHostManager {
 public:

@@ -1,7 +1,7 @@
 # ExplorerLens Integration Architecture
 
-**Document Version:** 1.0  
-**Date:** January 12, 2026  
+**Document Version:** 1.0 
+**Date:** January 12, 2026 
 **Status:** ✅ VALIDATED
 
 ---
@@ -16,97 +16,97 @@ This document describes the complete integration architecture between the COM-ba
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      Windows Explorer                            │
-│                    (or other Shell Host)                         │
+│ Windows Explorer │
+│ (or other Shell Host) │
 └───────────────────────────────┬─────────────────────────────────┘
-                                │
-                                │ IThumbnailProvider
-                                │ IExtractImage2
-                                │
+ │
+ │ IThumbnailProvider
+ │ IExtractImage2
+ │
 ┌───────────────────────────────▼─────────────────────────────────┐
-│                        LENSShell.dll                              │
-│                   (COM Shell Extension)                          │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                  CLENSShell                                 │  │
-│  │           (COM Object Implementation)                      │  │
-│  │                                                            │  │
-│  │  + IThumbnailProvider::GetThumbnail()                     │  │
-│  │  + IPersistFile::Load()                                   │  │
-│  │  + IExtractImage2::GetLocation()                          │  │
-│  │                                                            │  │
-│  │  - std::unique_ptr<EngineAdapter> m_engineAdapter         │  │
-│  │  - MetricsCollector m_metrics                             │  │
-│  │  - DarkModeHelper m_darkMode                              │  │
-│  └──────────────────────────┬────────────────────────────────┘  │
-│                             │                                    │
-│  ┌──────────────────────────▼─────────────────────────────────┐ │
-│  │                  EngineAdapter                             │ │
-│  │               (COM → Engine Bridge)                        │ │
-│  │                                                            │ │
-│  │  + Initialize()         → Setup Engine                    │ │
-│  │  + GenerateThumbnail()  → COM HBITMAP output              │ │
-│  │  + IsFormatSupported()  → Format checking                 │ │
-│  │  + GetStatistics()      → Metrics collection              │ │
-│  │                                                            │ │
-│  │  - std::unique_ptr<ThumbnailPipeline> m_pipeline          │ │
-│  └──────────────────────────┬────────────────────────────────┘ │
+│ LENSShell.dll │
+│ (COM Shell Extension) │
+│ ┌───────────────────────────────────────────────────────────┐ │
+│ │ CLENSShell │ │
+│ │ (COM Object Implementation) │ │
+│ │ │ │
+│ │ + IThumbnailProvider::GetThumbnail() │ │
+│ │ + IPersistFile::Load() │ │
+│ │ + IExtractImage2::GetLocation() │ │
+│ │ │ │
+│ │ - std::unique_ptr<EngineAdapter> m_engineAdapter │ │
+│ │ - MetricsCollector m_metrics │ │
+│ │ - DarkModeHelper m_darkMode │ │
+│ └──────────────────────────┬────────────────────────────────┘ │
+│ │ │
+│ ┌──────────────────────────▼─────────────────────────────────┐ │
+│ │ EngineAdapter │ │
+│ │ (COM → Engine Bridge) │ │
+│ │ │ │
+│ │ + Initialize() → Setup Engine │ │
+│ │ + GenerateThumbnail() → COM HBITMAP output │ │
+│ │ + IsFormatSupported() → Format checking │ │
+│ │ + GetStatistics() → Metrics collection │ │
+│ │ │ │
+│ │ - std::unique_ptr<ThumbnailPipeline> m_pipeline │ │
+│ └──────────────────────────┬────────────────────────────────┘ │
 └─────────────────────────────┼────────────────────────────────────┘
-                              │
-                              │ C++ API
-                              │
+ │
+ │ C++ API
+ │
 ┌─────────────────────────────▼─────────────────────────────────┐
-│                  ExplorerLensEngine.lib                          │
-│                  (Standalone Library)                          │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │               ThumbnailPipeline                        │   │
-│  │           (Main Orchestration)                         │   │
-│  │                                                        │   │
-│  │  + Initialize(config)                                 │   │
-│  │  + GenerateThumbnail(request) → Result                │   │
-│  │  + IsFormatSupported(path) → bool                     │   │
-│  │  + GetDecoderRegistry() → DecoderRegistry&            │   │
-│  │  + SetGPURenderer(), SetCacheProvider()               │   │
-│  │                                                        │   │
-│  │  - std::unique_ptr<IFormatDetector> m_detector        │   │
-│  │  - std::unique_ptr<IGPURenderer> m_gpuRenderer        │   │
-│  │  - std::unique_ptr<ICacheProvider> m_cache            │   │
-│  │  - DecoderRegistry m_registry                         │   │
-│  └────────────────────────┬───────────────────────────────┘   │
-│                           │                                    │
-│  ┌────────────────────────▼─────────────────────────────────┐ │
-│  │              DecoderRegistry                            │ │
-│  │         (Non-owning Decoder Storage)                    │ │
-│  │                                                         │ │
-│  │  + RegisterDecoder(decoder*)                           │ │
-│  │  + FindDecoder(extension) → IThumbnailDecoder*         │ │
-│  │  + GetDecoderCount() → size_t                          │ │
-│  │                                                         │ │
-│  │  - std::vector<IThumbnailDecoder*> m_decoders          │ │
-│  └────────────────────────┬────────────────────────────────┘ │
-│                           │                                    │
-│  ┌────────────────────────▼─────────────────────────────────┐ │
-│  │           Decoders (IThumbnailDecoder)                  │ │
-│  │                                                         │ │
-│  │  ┌───────────────┐  ┌───────────────┐                 │ │
-│  │  │ ImageDecoder  │  │ WebPDecoder   │  (Active)       │ │
-│  │  └───────────────┘  └───────────────┘                 │ │
-│  │                                                         │ │
-│  │  ┌───────────────┐  ┌───────────────┐                 │ │
-│  │  │ AVIFDecoder   │  │ArchiveDecoder │  (Active)       │ │
-│  │  └───────────────┘  └───────────────┘                 │ │
-│  │                                                         │ │
-│  │  ┌───────────────┐  ┌───────────────┐                 │ │
-│  │  │  JXLDecoder   │  │ HEIFDecoder   │  (Interface    │ │
-│  │  │  (stub impl)  │  │  (stub impl)  │   only)         │ │
-│  │  └───────────────┘  └───────────────┘                 │ │
-│  │                                                         │ │
-│  │  Each implements:                                      │ │
-│  │  + GetInfo() → DecoderInfo                            │ │
-│  │  + GetSupportedExtensions() → const wchar_t**         │ │
-│  │  + GetExtensionCount() → uint32_t                     │ │
-│  │  + SupportsGPU() → bool                               │ │
-│  │  + Decode(request, result) → HRESULT                  │ │
-│  └─────────────────────────────────────────────────────────┘ │
+│ ExplorerLensEngine.lib │
+│ (Standalone Library) │
+│ ┌────────────────────────────────────────────────────────┐ │
+│ │ ThumbnailPipeline │ │
+│ │ (Main Orchestration) │ │
+│ │ │ │
+│ │ + Initialize(config) │ │
+│ │ + GenerateThumbnail(request) → Result │ │
+│ │ + IsFormatSupported(path) → bool │ │
+│ │ + GetDecoderRegistry() → DecoderRegistry& │ │
+│ │ + SetGPURenderer(), SetCacheProvider() │ │
+│ │ │ │
+│ │ - std::unique_ptr<IFormatDetector> m_detector │ │
+│ │ - std::unique_ptr<IGPURenderer> m_gpuRenderer │ │
+│ │ - std::unique_ptr<ICacheProvider> m_cache │ │
+│ │ - DecoderRegistry m_registry │ │
+│ └────────────────────────┬───────────────────────────────┘ │
+│ │ │
+│ ┌────────────────────────▼─────────────────────────────────┐ │
+│ │ DecoderRegistry │ │
+│ │ (Non-owning Decoder Storage) │ │
+│ │ │ │
+│ │ + RegisterDecoder(decoder*) │ │
+│ │ + FindDecoder(extension) → IThumbnailDecoder* │ │
+│ │ + GetDecoderCount() → size_t │ │
+│ │ │ │
+│ │ - std::vector<IThumbnailDecoder*> m_decoders │ │
+│ └────────────────────────┬────────────────────────────────┘ │
+│ │ │
+│ ┌────────────────────────▼─────────────────────────────────┐ │
+│ │ Decoders (IThumbnailDecoder) │ │
+│ │ │ │
+│ │ ┌───────────────┐ ┌───────────────┐ │ │
+│ │ │ ImageDecoder │ │ WebPDecoder │ (Active) │ │
+│ │ └───────────────┘ └───────────────┘ │ │
+│ │ │ │
+│ │ ┌───────────────┐ ┌───────────────┐ │ │
+│ │ │ AVIFDecoder │ │ArchiveDecoder │ (Active) │ │
+│ │ └───────────────┘ └───────────────┘ │ │
+│ │ │ │
+│ │ ┌───────────────┐ ┌───────────────┐ │ │
+│ │ │ JXLDecoder │ │ HEIFDecoder │ (Interface │ │
+│ │ │ (stub impl) │ │ (stub impl) │ only) │ │
+│ │ └───────────────┘ └───────────────┘ │ │
+│ │ │ │
+│ │ Each implements: │ │
+│ │ + GetInfo() → DecoderInfo │ │
+│ │ + GetSupportedExtensions() → const wchar_t** │ │
+│ │ + GetExtensionCount() → uint32_t │ │
+│ │ + SupportsGPU() → bool │ │
+│ │ + Decode(request, result) → HRESULT │ │
+│ └─────────────────────────────────────────────────────────┘ │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -118,9 +118,9 @@ This document describes the complete integration architecture between the COM-ba
 
 **Purpose:** Windows Shell Extension that implements thumbnail generation for Windows Explorer
 
-**Language:** C++/ATL/COM  
-**Build Target:** x64 DLL  
-**Size:** ~1.39 MB (Release)  
+**Language:** C++/ATL/COM 
+**Build Target:** x64 DLL 
+**Size:** ~1.39 MB (Release) 
 **Dependencies:** ATL, Windows SDK, ExplorerLensEngine.lib
 
 **Key Classes:**
@@ -138,7 +138,7 @@ std::unique_ptr<ExplorerLens::EngineAdapter> m_engineAdapter;
 std::wstring m_filePath;
 MetricsCollector m_metrics;
 DarkModeHelper m_darkMode;
-bool m_useEngine;  // Toggle Engine vs. legacy path
+bool m_useEngine; // Toggle Engine vs. legacy path
 ```
 
 **Key Methods:**
@@ -146,27 +146,27 @@ bool m_useEngine;  // Toggle Engine vs. legacy path
 ```cpp
 // IThumbnailProvider::GetThumbnail
 IFACEMETHODIMP GetThumbnail(
-    UINT cx,                    // Width in pixels
-    HBITMAP* phbmp,             // Output bitmap
-    WTS_ALPHATYPE* pdwAlpha);   // Alpha type
+ UINT cx, // Width in pixels
+ HBITMAP* phbmp, // Output bitmap
+ WTS_ALPHATYPE* pdwAlpha); // Alpha type
 
 // Implementation routes through EngineAdapter:
 HRESULT hr = m_engineAdapter->GenerateThumbnail(
-    m_filePath.c_str(),
-    cx, cx,           // Width and height
-    true,             // Use GPU
-    phbmp);
+ m_filePath.c_str(),
+ cx, cx, // Width and height
+ true, // Use GPU
+ phbmp);
 ```
 
 **Initialization:**
 ```cpp
 CLENSShell::CLENSShell() {
-    m_engineAdapter = std::make_unique<ExplorerLens::EngineAdapter>();
-    if (m_engineAdapter->Initialize()) {
-        m_useEngine = true;
-    } else {
-        m_useEngine = false;  // Fallback to legacy
-    }
+ m_engineAdapter = std::make_unique<ExplorerLens::EngineAdapter>();
+ if (m_engineAdapter->Initialize()) {
+ m_useEngine = true;
+ } else {
+ m_useEngine = false; // Fallback to legacy
+ }
 }
 ```
 
@@ -184,8 +184,8 @@ m_metrics.RecordFormat(formatType);
 
 **Purpose:** Bridge between COM HBITMAP interface and Engine's modern C++ API
 
-**Header:** [LENSShell/EngineAdapter.h](../LENSShell/EngineAdapter.h)  
-**Implementation:** [LENSShell/EngineAdapter.cpp](../LENSShell/EngineAdapter.cpp)  
+**Header:** [LENSShell/EngineAdapter.h](../LENSShell/EngineAdapter.h) 
+**Implementation:** [LENSShell/EngineAdapter.cpp](../LENSShell/EngineAdapter.cpp) 
 **Lines of Code:** ~205 lines
 
 **Class Definition:**
@@ -193,33 +193,33 @@ m_metrics.RecordFormat(formatType);
 ```cpp
 class EngineAdapter {
 public:
-    EngineAdapter();
-    ~EngineAdapter();
+ EngineAdapter();
+ ~EngineAdapter();
 
-    bool Initialize();
-    void Shutdown();
+ bool Initialize();
+ void Shutdown();
 
-    HRESULT GenerateThumbnail(
-        const wchar_t* filePath,
-        uint32_t width,
-        uint32_t height,
-        bool useGPU,
-        HBITMAP* phBitmap);
+ HRESULT GenerateThumbnail(
+ const wchar_t* filePath,
+ uint32_t width,
+ uint32_t height,
+ bool useGPU,
+ HBITMAP* phBitmap);
 
-    bool IsFormatSupported(const wchar_t* filePath) const;
-    
-    void GetStatistics(
-        uint64_t& totalRequests,
-        uint64_t& cacheHits,
-        double& averageTimeMs) const;
+ bool IsFormatSupported(const wchar_t* filePath) const;
+ 
+ void GetStatistics(
+ uint64_t& totalRequests,
+ uint64_t& cacheHits,
+ double& averageTimeMs) const;
 
-    bool IsInitialized() const;
+ bool IsInitialized() const;
 
 private:
-    std::unique_ptr<Engine::ThumbnailPipeline> m_pipeline;
-    bool m_initialized;
+ std::unique_ptr<Engine::ThumbnailPipeline> m_pipeline;
+ bool m_initialized;
 
-    void RegisterDecoders();
+ void RegisterDecoders();
 };
 ```
 
@@ -227,28 +227,28 @@ private:
 
 ```cpp
 bool EngineAdapter::Initialize() {
-    // Create pipeline
-    m_pipeline = std::make_unique<Engine::ThumbnailPipeline>();
+ // Create pipeline
+ m_pipeline = std::make_unique<Engine::ThumbnailPipeline>();
 
-    // Configure pipeline
-    Engine::PipelineConfig config;
-    config.enableCache = true;
-    config.enableGPU = true;
-    config.preserveAspectRatio = true;
-    config.defaultWidth = 256;
-    config.defaultHeight = 256;
-    config.maxFileSize = 100 * 1024 * 1024;  // 100MB
-    config.timeoutMs = 5000;  // 5 seconds
+ // Configure pipeline
+ Engine::PipelineConfig config;
+ config.enableCache = true;
+ config.enableGPU = true;
+ config.preserveAspectRatio = true;
+ config.defaultWidth = 256;
+ config.defaultHeight = 256;
+ config.maxFileSize = 100 * 1024 * 1024; // 100MB
+ config.timeoutMs = 5000; // 5 seconds
 
-    if (!m_pipeline->Initialize(config)) {
-        return false;
-    }
+ if (!m_pipeline->Initialize(config)) {
+ return false;
+ }
 
-    // Register all decoders
-    RegisterDecoders();
-    
-    m_initialized = true;
-    return true;
+ // Register all decoders
+ RegisterDecoders();
+ 
+ m_initialized = true;
+ return true;
 }
 ```
 
@@ -256,17 +256,17 @@ bool EngineAdapter::Initialize() {
 
 ```cpp
 void EngineAdapter::RegisterDecoders() {
-    auto& registry = m_pipeline->GetDecoderRegistry();
+ auto& registry = m_pipeline->GetDecoderRegistry();
 
-    // Active decoders (fully implemented)
-    registry.RegisterDecoder(new Engine::ImageDecoder());
-    registry.RegisterDecoder(new Engine::WebPDecoder());
-    registry.RegisterDecoder(new Engine::AVIFDecoder());
-    registry.RegisterDecoder(new Engine::ArchiveDecoder());
+ // Active decoders (fully implemented)
+ registry.RegisterDecoder(new Engine::ImageDecoder());
+ registry.RegisterDecoder(new Engine::WebPDecoder());
+ registry.RegisterDecoder(new Engine::AVIFDecoder());
+ registry.RegisterDecoder(new Engine::ArchiveDecoder());
 
-    // Future decoders (interface ready, awaiting implementation)
-    // registry.RegisterDecoder(new Engine::JXLDecoder());
-    // registry.RegisterDecoder(new Engine::HEIFDecoder());
+ // Future decoders (interface ready, awaiting implementation)
+ // registry.RegisterDecoder(new Engine::JXLDecoder());
+ // registry.RegisterDecoder(new Engine::HEIFDecoder());
 }
 ```
 
@@ -274,34 +274,34 @@ void EngineAdapter::RegisterDecoders() {
 
 ```cpp
 HRESULT EngineAdapter::GenerateThumbnail(
-    const wchar_t* filePath,
-    uint32_t width,
-    uint32_t height,
-    bool useGPU,
-    HBITMAP* phBitmap)
+ const wchar_t* filePath,
+ uint32_t width,
+ uint32_t height,
+ bool useGPU,
+ HBITMAP* phBitmap)
 {
-    // Create Engine request
-    Engine::ThumbnailRequest request;
-    request.filePath = filePath;
-    request.width = width;
-    request.height = height;
-    request.flags = Engine::ThumbnailFlags::PreserveAspect | 
-                    Engine::ThumbnailFlags::UseCache;
-    
-    if (useGPU) {
-        request.flags = request.flags | Engine::ThumbnailFlags::UseGPU;
-    }
+ // Create Engine request
+ Engine::ThumbnailRequest request;
+ request.filePath = filePath;
+ request.width = width;
+ request.height = height;
+ request.flags = Engine::ThumbnailFlags::PreserveAspect | 
+ Engine::ThumbnailFlags::UseCache;
+ 
+ if (useGPU) {
+ request.flags = request.flags | Engine::ThumbnailFlags::UseGPU;
+ }
 
-    // Generate through pipeline
-    Engine::ThumbnailResult result = m_pipeline->GenerateThumbnail(request);
+ // Generate through pipeline
+ Engine::ThumbnailResult result = m_pipeline->GenerateThumbnail(request);
 
-    // Extract HBITMAP for COM
-    if (SUCCEEDED(result.status)) {
-        *phBitmap = result.hBitmap;  // Direct ownership transfer
-        return S_OK;
-    }
-    
-    return result.status;
+ // Extract HBITMAP for COM
+ if (SUCCEEDED(result.status)) {
+ *phBitmap = result.hBitmap; // Direct ownership transfer
+ return S_OK;
+ }
+ 
+ return result.status;
 }
 ```
 
@@ -319,16 +319,16 @@ HRESULT EngineAdapter::GenerateThumbnail(
 
 **Purpose:** Standalone thumbnail generation engine with zero COM dependencies
 
-**Language:** Modern C++17  
-**Build System:** CMake + MSBuild  
-**Size:** 1.97 MB (Release x64)  
+**Language:** Modern C++17 
+**Build System:** CMake + MSBuild 
+**Size:** 1.97 MB (Release x64) 
 **Dependencies:** Windows SDK, DirectX 11, image libraries (WIC, libwebp, libavif)
 
 **Key Components:**
 
 #### 3.1 ThumbnailPipeline
 
-**Header:** [Engine/Pipeline/ThumbnailPipeline.h](../Engine/Pipeline/ThumbnailPipeline.h)  
+**Header:** [Engine/Pipeline/ThumbnailPipeline.h](../Engine/Pipeline/ThumbnailPipeline.h) 
 **Implementation:** [Engine/Pipeline/ThumbnailPipeline.cpp](../Engine/Pipeline/ThumbnailPipeline.cpp)
 
 **Responsibilities:**
@@ -344,23 +344,23 @@ HRESULT EngineAdapter::GenerateThumbnail(
 ```cpp
 class ThumbnailPipeline {
 public:
-    bool Initialize(const PipelineConfig& config);
-    void Shutdown();
+ bool Initialize(const PipelineConfig& config);
+ void Shutdown();
 
-    ThumbnailResult GenerateThumbnail(const ThumbnailRequest& request);
-    bool IsFormatSupported(const std::wstring& filePath) const;
+ ThumbnailResult GenerateThumbnail(const ThumbnailRequest& request);
+ bool IsFormatSupported(const std::wstring& filePath) const;
 
-    DecoderRegistry& GetDecoderRegistry();
-    
-    void SetFormatDetector(std::unique_ptr<IFormatDetector> detector);
-    void SetGPURenderer(std::unique_ptr<IGPURenderer> renderer);
-    void SetCacheProvider(std::unique_ptr<ICacheProvider> cache);
+ DecoderRegistry& GetDecoderRegistry();
+ 
+ void SetFormatDetector(std::unique_ptr<IFormatDetector> detector);
+ void SetGPURenderer(std::unique_ptr<IGPURenderer> renderer);
+ void SetCacheProvider(std::unique_ptr<ICacheProvider> cache);
 
-    void GetStatistics(
-        uint64_t& totalRequests,
-        uint64_t& cacheHits,
-        uint64_t& cacheMisses,
-        double& averageTimeMs) const;
+ void GetStatistics(
+ uint64_t& totalRequests,
+ uint64_t& cacheHits,
+ uint64_t& cacheMisses,
+ double& averageTimeMs) const;
 };
 ```
 
@@ -368,31 +368,31 @@ public:
 
 ```
 GenerateThumbnail(request)
-    │
-    ├─► 1. Validate request (file exists, parameters valid)
-    │
-    ├─► 2. Check cache (if enabled)
-    │   └─► Cache hit? → Return cached result ✅
-    │
-    ├─► 3. Detect format (FormatDetector::DetectFormat)
-    │
-    ├─► 4. Find decoder (DecoderRegistry::FindDecoder)
-    │   └─► No decoder? → Return E_NOT_SUPPORTED ❌
-    │
-    ├─► 5. Decode image (IThumbnailDecoder::Decode)
-    │   └─► Decode failed? → Return error ❌
-    │
-    ├─► 6. GPU rendering (if enabled and supported)
-    │   └─► IGPURenderer::Render()
-    │
-    ├─► 7. Cache result (if enabled)
-    │
-    └─► 8. Return result ✅
+ │
+ ├─► 1. Validate request (file exists, parameters valid)
+ │
+ ├─► 2. Check cache (if enabled)
+ │ └─► Cache hit? → Return cached result ✅
+ │
+ ├─► 3. Detect format (FormatDetector::DetectFormat)
+ │
+ ├─► 4. Find decoder (DecoderRegistry::FindDecoder)
+ │ └─► No decoder? → Return E_NOT_SUPPORTED ❌
+ │
+ ├─► 5. Decode image (IThumbnailDecoder::Decode)
+ │ └─► Decode failed? → Return error ❌
+ │
+ ├─► 6. GPU rendering (if enabled and supported)
+ │ └─► IGPURenderer::Render()
+ │
+ ├─► 7. Cache result (if enabled)
+ │
+ └─► 8. Return result ✅
 ```
 
 #### 3.2 DecoderRegistry
 
-**Header:** [Engine/Pipeline/DecoderRegistry.h](../Engine/Pipeline/DecoderRegistry.h)  
+**Header:** [Engine/Pipeline/DecoderRegistry.h](../Engine/Pipeline/DecoderRegistry.h) 
 **Implementation:** [Engine/Pipeline/DecoderRegistry.cpp](../Engine/Pipeline/DecoderRegistry.cpp)
 
 **Design Pattern:** Non-owning registry (stores pointers, doesn't manage lifetime)
@@ -404,20 +404,20 @@ GenerateThumbnail(request)
 ```cpp
 class DecoderRegistry {
 public:
-    // Register a decoder (non-owning, caller manages lifetime)
-    void RegisterDecoder(IThumbnailDecoder* decoder);
+ // Register a decoder (non-owning, caller manages lifetime)
+ void RegisterDecoder(IThumbnailDecoder* decoder);
 
-    // Find decoder for file extension
-    IThumbnailDecoder* FindDecoder(const std::wstring& extension) const;
+ // Find decoder for file extension
+ IThumbnailDecoder* FindDecoder(const std::wstring& extension) const;
 
-    // Get all decoders
-    const std::vector<IThumbnailDecoder*>& GetDecoders() const;
+ // Get all decoders
+ const std::vector<IThumbnailDecoder*>& GetDecoders() const;
 
-    // Statistics
-    size_t GetDecoderCount() const;
+ // Statistics
+ size_t GetDecoderCount() const;
 
-    // Clear registry (does NOT delete decoders)
-    void Clear();
+ // Clear registry (does NOT delete decoders)
+ void Clear();
 };
 ```
 
@@ -432,21 +432,21 @@ public:
 ```cpp
 class IThumbnailDecoder {
 public:
-    virtual ~IThumbnailDecoder() = default;
+ virtual ~IThumbnailDecoder() = default;
 
-    // Decoder information
-    virtual DecoderInfo GetInfo() const = 0;
-    virtual const wchar_t** GetSupportedExtensions() const = 0;
-    virtual uint32_t GetExtensionCount() const = 0;
+ // Decoder information
+ virtual DecoderInfo GetInfo() const = 0;
+ virtual const wchar_t** GetSupportedExtensions() const = 0;
+ virtual uint32_t GetExtensionCount() const = 0;
 
-    // Capabilities
-    virtual bool SupportsGPU() const = 0;
-    virtual bool IsArchiveDecoder() const = 0;
+ // Capabilities
+ virtual bool SupportsGPU() const = 0;
+ virtual bool IsArchiveDecoder() const = 0;
 
-    // Core decoding
-    virtual HRESULT Decode(
-        const ThumbnailRequest& request,
-        ThumbnailResult& result) = 0;
+ // Core decoding
+ virtual HRESULT Decode(
+ const ThumbnailRequest& request,
+ ThumbnailResult& result) = 0;
 };
 ```
 
@@ -466,30 +466,30 @@ public:
 ```cpp
 class ImageDecoder : public IThumbnailDecoder {
 public:
-    DecoderInfo GetInfo() const override {
-        DecoderInfo info;
-        info.name = L"Image Decoder";
-        info.priority = 100;
-        info.version = L"1.0";
-        return info;
-    }
+ DecoderInfo GetInfo() const override {
+ DecoderInfo info;
+ info.name = L"Image Decoder";
+ info.priority = 100;
+ info.version = L"1.0";
+ return info;
+ }
 
-    const wchar_t** GetSupportedExtensions() const override {
-        static constexpr const wchar_t* extensions[] = {
-            L".jpg", L".jpeg", L".png", L".bmp", 
-            L".gif", L".tiff", L".tif", nullptr
-        };
-        return extensions;
-    }
+ const wchar_t** GetSupportedExtensions() const override {
+ static constexpr const wchar_t* extensions[] = {
+ L".jpg", L".jpeg", L".png", L".bmp", 
+ L".gif", L".tiff", L".tif", nullptr
+ };
+ return extensions;
+ }
 
-    uint32_t GetExtensionCount() const override { return 7; }
-    
-    bool SupportsGPU() const override { return false; }
-    bool IsArchiveDecoder() const override { return false; }
+ uint32_t GetExtensionCount() const override { return 7; }
+ 
+ bool SupportsGPU() const override { return false; }
+ bool IsArchiveDecoder() const override { return false; }
 
-    HRESULT Decode(
-        const ThumbnailRequest& request,
-        ThumbnailResult& result) override;
+ HRESULT Decode(
+ const ThumbnailRequest& request,
+ ThumbnailResult& result) override;
 };
 ```
 
@@ -501,48 +501,48 @@ public:
 
 ```
 1. User Action
-   └─► Windows Explorer requests thumbnail
-       └─► Calls IThumbnailProvider::GetThumbnail(cx, phbmp, alphaType)
+ └─► Windows Explorer requests thumbnail
+ └─► Calls IThumbnailProvider::GetThumbnail(cx, phbmp, alphaType)
 
 2. COM Layer (LENSShell.dll)
-   └─► CLENSShell::GetThumbnail()
-       └─► Checks m_useEngine flag
-           └─► TRUE: Route through EngineAdapter ✅
-           └─► FALSE: Legacy GDI+ fallback
+ └─► CLENSShell::GetThumbnail()
+ └─► Checks m_useEngine flag
+ └─► TRUE: Route through EngineAdapter ✅
+ └─► FALSE: Legacy GDI+ fallback
 
 3. Adapter Layer
-   └─► EngineAdapter::GenerateThumbnail()
-       └─► Create Engine::ThumbnailRequest
-           ├─► filePath: m_filePath
-           ├─► width: cx
-           ├─► height: cx
-           └─► flags: PreserveAspect | UseCache | UseGPU
-       └─► Call m_pipeline->GenerateThumbnail(request)
+ └─► EngineAdapter::GenerateThumbnail()
+ └─► Create Engine::ThumbnailRequest
+ ├─► filePath: m_filePath
+ ├─► width: cx
+ ├─► height: cx
+ └─► flags: PreserveAspect | UseCache | UseGPU
+ └─► Call m_pipeline->GenerateThumbnail(request)
 
 4. Engine Pipeline
-   └─► ThumbnailPipeline::GenerateThumbnail(request)
-       ├─► Step 1: Validate request
-       ├─► Step 2: Check cache
-       │   └─► Hit? → Return cached HBITMAP
-       ├─► Step 3: FormatDetector::DetectFormat(filePath)
-       │   └─► Returns FormatType (JPEG, PNG, WebP, etc.)
-       ├─► Step 4: DecoderRegistry::FindDecoder(extension)
-       │   └─► Returns IThumbnailDecoder* or nullptr
-       ├─► Step 5: decoder->Decode(request, result)
-       │   └─► Decoder reads file, generates bitmap
-       ├─► Step 6: GPU rendering (if UseGPU)
-       │   └─► D3D11Renderer::Render()
-       ├─► Step 7: Cache result (if UseCache)
-       └─► Step 8: Return ThumbnailResult
+ └─► ThumbnailPipeline::GenerateThumbnail(request)
+ ├─► Step 1: Validate request
+ ├─► Step 2: Check cache
+ │ └─► Hit? → Return cached HBITMAP
+ ├─► Step 3: FormatDetector::DetectFormat(filePath)
+ │ └─► Returns FormatType (JPEG, PNG, WebP, etc.)
+ ├─► Step 4: DecoderRegistry::FindDecoder(extension)
+ │ └─► Returns IThumbnailDecoder* or nullptr
+ ├─► Step 5: decoder->Decode(request, result)
+ │ └─► Decoder reads file, generates bitmap
+ ├─► Step 6: GPU rendering (if UseGPU)
+ │ └─► D3D11Renderer::Render()
+ ├─► Step 7: Cache result (if UseCache)
+ └─► Step 8: Return ThumbnailResult
 
 5. Result Unwrapping
-   └─► EngineAdapter receives ThumbnailResult
-       └─► Extracts result.hBitmap
-       └─► Returns HRESULT + HBITMAP to COM
+ └─► EngineAdapter receives ThumbnailResult
+ └─► Extracts result.hBitmap
+ └─► Returns HRESULT + HBITMAP to COM
 
 6. COM Return
-   └─► CLENSShell returns HBITMAP to Explorer
-       └─► Explorer displays thumbnail to user
+ └─► CLENSShell returns HBITMAP to Explorer
+ └─► Explorer displays thumbnail to user
 ```
 
 **Timeline:** Typically 5-50ms depending on:
@@ -566,14 +566,14 @@ Engine Error → Adapter Translation → COM HRESULT
 ```cpp
 // Engine/Core/Types.h
 enum class ThumbnailError {
-    Success = 0,
-    FileNotFound,
-    FormatNotSupported,
-    DecodeFailed,
-    OutOfMemory,
-    Timeout,
-    GPUNotAvailable,
-    CacheError
+ Success = 0,
+ FileNotFound,
+ FormatNotSupported,
+ DecodeFailed,
+ OutOfMemory,
+ Timeout,
+ GPUNotAvailable,
+ CacheError
 };
 ```
 
@@ -582,11 +582,11 @@ enum class ThumbnailError {
 ```cpp
 // EngineAdapter::GenerateThumbnail
 if (SUCCEEDED(result.status)) {
-    *phBitmap = result.hBitmap;
-    return S_OK;
+ *phBitmap = result.hBitmap;
+ return S_OK;
 } else {
-    // result.status is already an HRESULT
-    return result.status;
+ // result.status is already an HRESULT
+ return result.status;
 }
 ```
 
@@ -647,13 +647,13 @@ if (SUCCEEDED(result.status)) {
 // EngineAdapter::Initialize()
 Engine::PipelineConfig config;
 
-config.enableCache = true;             // Enable thumbnail caching
-config.enableGPU = true;               // Enable GPU acceleration
-config.preserveAspectRatio = true;     // Maintain aspect ratio
-config.defaultWidth = 256;             // Default thumbnail width
-config.defaultHeight = 256;            // Default thumbnail height
+config.enableCache = true; // Enable thumbnail caching
+config.enableGPU = true; // Enable GPU acceleration
+config.preserveAspectRatio = true; // Maintain aspect ratio
+config.defaultWidth = 256; // Default thumbnail width
+config.defaultHeight = 256; // Default thumbnail height
 config.maxFileSize = 100 * 1024 * 1024; // 100MB file size limit
-config.timeoutMs = 5000;               // 5 second timeout
+config.timeoutMs = 5000; // 5 second timeout
 ```
 
 **Configuration Options:**
@@ -681,12 +681,12 @@ config.timeoutMs = 5000;               // 5 second timeout
 TEST SUMMARY: 38/38 PASSED (100%)
 ========================================
 
-Decoder Registry Tests:     6/6 ✅
-Format Detector Tests:       8/8 ✅
-Image Decoder Tests:         8/8 ✅
-WebP Decoder Tests:          5/5 ✅
-AVIF Decoder Tests:          5/5 ✅
-Archive Decoder Tests:       6/6 ✅
+Decoder Registry Tests: 6/6 ✅
+Format Detector Tests: 8/8 ✅
+Image Decoder Tests: 8/8 ✅
+WebP Decoder Tests: 5/5 ✅
+AVIF Decoder Tests: 5/5 ✅
+Archive Decoder Tests: 6/6 ✅
 ```
 
 **Test Execution:**
@@ -710,27 +710,27 @@ cd x64\Release
 **Manual Test Procedure:**
 
 1. **Build LENSShell.dll:**
-   ```powershell
-   msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64
-   ```
+ ```powershell
+ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64
+ ```
 
 2. **Register Shell Extension:**
-   ```powershell
-   regsvr32 x64\Release\LENSShell.dll
-   ```
+ ```powershell
+ regsvr32 x64\Release\LENSShell.dll
+ ```
 
 3. **Test with Explorer:**
-   - Navigate to folder with test images
-   - Enable thumbnail view
-   - Verify thumbnails appear correctly
-   - Check Performance Monitor for ExplorerLensEngine activity
+ - Navigate to folder with test images
+ - Enable thumbnail view
+ - Verify thumbnails appear correctly
+ - Check Performance Monitor for ExplorerLensEngine activity
 
 4. **Verify Formats:**
-   - JPEG: ✅ Should work
-   - PNG: ✅ Should work
-   - WebP: ✅ Should work
-   - AVIF: ✅ Should work
-   - ZIP/CBZ: ✅ Should work
+ - JPEG: ✅ Should work
+ - PNG: ✅ Should work
+ - WebP: ✅ Should work
+ - AVIF: ✅ Should work
+ - ZIP/CBZ: ✅ Should work
 
 ### Integration Test Results (Expected)
 
@@ -752,25 +752,25 @@ cd x64\Release
 ### Current Limitations
 
 1. **DLL Lock Issue** ⚠️
-   - **Problem:** LENSShell.dll locked by Explorer during development
-   - **Impact:** Cannot rebuild while shell extension is loaded
-   - **Workaround:** Restart Explorer or unregister DLL before rebuild
-   - **Fix:** Create test harness that doesn't require Explorer
+ - **Problem:** LENSShell.dll locked by Explorer during development
+ - **Impact:** Cannot rebuild while shell extension is loaded
+ - **Workaround:** Restart Explorer or unregister DLL before rebuild
+ - **Fix:** Create test harness that doesn't require Explorer
 
 2. **JXL/HEIF Decoders** ⏳
-   - **Status:** Interface declarations complete, implementation pending
-   - **Impact:** .jxl and .heif files not yet supported
-   - **Timeline:** Sprint 12 (after library integration)
+ - **Status:** Interface declarations complete, implementation pending
+ - **Impact:** .jxl and .heif files not yet supported
+ - **Timeline:** (after library integration)
 
 3. **GPU Rendering** 🔄
-   - **Status:** Interface exists, implementation pending validation
-   - **Impact:** GPU acceleration not yet verified
-   - **Timeline:** This sprint (Week 5-6)
+ - **Status:** Interface exists, implementation pending validation
+ - **Impact:** GPU acceleration not yet verified
+ - **Timeline:** Near-term (Week 5-6)
 
 4. **Cache Persistence** ⏳
-   - **Status:** In-memory cache works, disk persistence not implemented
-   - **Impact:** Cache cleared on restart
-   - **Timeline:** Sprint 13
+ - **Status:** In-memory cache works, disk persistence not implemented
+ - **Impact:** Cache cleared on restart
+ - **Timeline:** 
 
 ### Performance Issues
 
@@ -782,22 +782,22 @@ cd x64\Release
 
 ## Future Enhancements
 
-### Sprint 12: Library Integration
+### Library Integration
 - Complete JXL decoder implementation (libjxl integration)
 - Complete HEIF decoder implementation (libheif integration)
 - Re-enable JXL/HEIF unit tests
 
-### Sprint 13: Cache Persistence
+### Cache Persistence
 - Implement disk-based cache
 - Add cache invalidation logic
 - Cache cleanup and size limits
 
-### Sprint 14: GPU Optimization
+### GPU Optimization
 - Profile GPU rendering performance
 - Optimize texture uploads
 - Add CPU fallback for small images
 
-### Sprint 15: Plugin Architecture
+### Plugin Architecture
 - Define plugin API
 - Create sample external decoder
 - Document plugin development
@@ -901,7 +901,7 @@ DT_LOG_DEBUG(LogCategory::ENGINE, "Initializing Engine adapter");
 
 ## References
 
-- **Sprint 11 Plan:** [SPRINT11_PLATFORM_FOUNDATION.md](SPRINT11_PLATFORM_FOUNDATION.md)
+- **Platform Foundation Plan:** [SPRINT11_PLATFORM_FOUNDATION.md](SPRINT11_PLATFORM_FOUNDATION.md)
 - **Engine Test Results:** [ENGINE_TEST_RESULTS.md](ENGINE_TEST_RESULTS.md)
 - **Week 5 Summary:** [SPRINT11_WEEK5_SUMMARY.md](SPRINT11_WEEK5_SUMMARY.md)
 - **Engine API:** [Engine/Engine.h](../Engine/Engine.h)
@@ -909,7 +909,6 @@ DT_LOG_DEBUG(LogCategory::ENGINE, "Initializing Engine adapter");
 
 ---
 
-**Document Status:** ✅ COMPLETE  
-**Last Updated:** January 12, 2026  
+**Document Status:** ✅ COMPLETE 
+**Last Updated:** January 12, 2026 
 **Next Review:** Week 6 (after GPU abstraction implementation)
-

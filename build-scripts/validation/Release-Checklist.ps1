@@ -1,5 +1,4 @@
 # Release-Checklist.ps1
-# Sprint 10: Release Governance & Packaging
 # Comprehensive release readiness verification script
 # Version: 1.0.0
 
@@ -25,7 +24,7 @@ function Write-Warn { param([string]$Text) Write-Host "  ⚠ " -ForegroundColor 
 
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "ExplorerLens v$Version Release Checklist" -ForegroundColor Cyan
-Write-Host "Sprint 10: Release Governance & Packaging" -ForegroundColor Cyan
+Write-Host ": Release Governance & Packaging" -ForegroundColor Cyan
 Write-Host "============================================`n" -ForegroundColor Cyan
 
 $RootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)

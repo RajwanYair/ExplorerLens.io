@@ -1,7 +1,6 @@
 # Plugin Sandbox & Isolation Model v1.0
 
-**Version:** 1.0  
-**Sprint:** 12 (Sprint 12.4)  
+**Version:** 1.0 
 **Created:** January 6, 2026
 
 ---
@@ -23,8 +22,8 @@ This document defines three isolation modes with increasing security levels.
 
 ### Mode 1: In-Worker (Trusted Only)
 
-**Use Case:** First-party plugins, fully trusted vendors  
-**Security Level:** Low  
+**Use Case:** First-party plugins, fully trusted vendors 
+**Security Level:** Low 
 **Performance:** Highest (no process boundary)
 
 #### Characteristics
@@ -46,11 +45,11 @@ This document defines three isolation modes with increasing security levels.
 
 ```json
 {
-  "isolationMode": "in-worker",
-  "trustedPlugins": [
-    "explorerlens.plugin.psd",
-    "explorerlens.plugin.webp"
-  ]
+ "isolationMode": "in-worker",
+ "trustedPlugins": [
+ "explorerlens.plugin.psd",
+ "explorerlens.plugin.webp"
+ ]
 }
 ```
 
@@ -58,8 +57,8 @@ This document defines three isolation modes with increasing security levels.
 
 ### Mode 2: PluginHost Process (Default)
 
-**Use Case:** Most plugins  
-**Security Level:** Medium  
+**Use Case:** Most plugins 
+**Security Level:** Medium 
 **Performance:** Good (IPC overhead ~5-10ms)
 
 #### Characteristics
@@ -75,21 +74,21 @@ This document defines three isolation modes with increasing security levels.
 ##### Token Restrictions
 
 - `SECURITY_RESTRICTED_TOKEN` with:
-  - `DISABLE_MAX_PRIVILEGE` - Disable all privileges
-  - `SANDBOX_INERT` - Disable UIPI bypass
-  - No admin privileges
-  - Limited SIDs (deny dangerous groups)
+ - `DISABLE_MAX_PRIVILEGE` - Disable all privileges
+ - `SANDBOX_INERT` - Disable UIPI bypass
+ - No admin privileges
+ - Limited SIDs (deny dangerous groups)
 
 ##### Job Object Limits
 
 ```cpp
 JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits = {};
 limits.BasicLimitInformation.LimitFlags = 
-    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE |        // Kill when job closed
-    JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION | // Die on crash
-    JOB_OBJECT_LIMIT_ACTIVE_PROCESS |           // Max 1 process
-    JOB_OBJECT_LIMIT_JOB_MEMORY |               // Memory limit
-    JOB_OBJECT_LIMIT_PROCESS_TIME;              // CPU time limit
+ JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | // Kill when job closed
+ JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION | // Die on crash
+ JOB_OBJECT_LIMIT_ACTIVE_PROCESS | // Max 1 process
+ JOB_OBJECT_LIMIT_JOB_MEMORY | // Memory limit
+ JOB_OBJECT_LIMIT_PROCESS_TIME; // CPU time limit
 
 limits.BasicLimitInformation.ActiveProcessLimit = 1;
 limits.JobMemoryLimit = 512 * 1024 * 1024; // 512 MB
@@ -100,13 +99,13 @@ limits.PerProcessUserTimeLimit.QuadPart = 60 * 10000000; // 60 sec CPU time
 ##### File System Access
 
 - Read-only access to:
-  - Plugin directory: `%LocalAppData%\ExplorerLens\Plugins\{plugin-id}\`
-  - Temp directory: `%TEMP%\ExplorerLens\{plugin-id}\`
-  - Requested file path (thumbnail source)
+ - Plugin directory: `%LocalAppData%\ExplorerLens\Plugins\{plugin-id}\`
+ - Temp directory: `%TEMP%\ExplorerLens\{plugin-id}\`
+ - Requested file path (thumbnail source)
 - No write access to:
-  - System directories
-  - User directories (except temp)
-  - Registry
+ - System directories
+ - User directories (except temp)
+ - Registry
 
 ##### Network Access
 
@@ -127,33 +126,33 @@ limits.PerProcessUserTimeLimit.QuadPart = 60 * 10000000; // 60 sec CPU time
 
 ```cpp
 struct PluginMessage {
-    uint32_t magic;          // 0x44545048 ('DTPH')
-    uint32_t version;        // Protocol version (1)
-    uint32_t messageType;    // Request, Response, Error, Shutdown
-    uint64_t correlationId;  // Matches request to response
-    uint32_t dataSize;       // Size of payload
-    // Followed by payload data
+ uint32_t magic; // 0x44545048 ('DTPH')
+ uint32_t version; // Protocol version (1)
+ uint32_t messageType; // Request, Response, Error, Shutdown
+ uint64_t correlationId; // Matches request to response
+ uint32_t dataSize; // Size of payload
+ // Followed by payload data
 };
 ```
 
 ##### Message Types
 
 1. **REQUEST_THUMBNAIL** (0x01)
-   - Payload: Serialized `DT_ThumbnailRequest`
-   - File data sent via pipe or shared memory
+ - Payload: Serialized `DT_ThumbnailRequest`
+ - File data sent via pipe or shared memory
 
 2. **RESPONSE_THUMBNAIL** (0x02)
-   - Payload: Serialized `DT_ThumbnailResult`
-   - Bitmap data sent via pipe or shared memory
+ - Payload: Serialized `DT_ThumbnailResult`
+ - Bitmap data sent via pipe or shared memory
 
 3. **ERROR** (0x03)
-   - Payload: Error code + message
+ - Payload: Error code + message
 
 4. **SHUTDOWN** (0x04)
-   - Graceful shutdown request
+ - Graceful shutdown request
 
 5. **HEARTBEAT** (0x05)
-   - Keepalive ping/pong
+ - Keepalive ping/pong
 
 ##### Timeout Handling
 
@@ -174,8 +173,8 @@ For files > 1MB:
 
 ### Mode 3: AppContainer (Future - v6.x)
 
-**Use Case:** Untrusted plugins, maximum security  
-**Security Level:** High  
+**Use Case:** Untrusted plugins, maximum security 
+**Security Level:** High 
 **Performance:** Lower (additional isolation overhead)
 
 #### Characteristics
@@ -185,15 +184,15 @@ For files > 1MB:
 - No access to most system resources by default
 - Capabilities explicitly granted
 - Network isolation via named proxy
-- **Planned for Sprint 20**
+- **Planned for **
 
 #### Capabilities (AppContainer)
 
 ```xml
 <Capabilities>
-  <Capability Name="documentsLibrary" />
-  <Capability Name="picturesLibrary" />
-  <Capability Name="internetClient" Restricted="true" />
+ <Capability Name="documentsLibrary" />
+ <Capability Name="picturesLibrary" />
+ <Capability Name="internetClient" Restricted="true" />
 </Capabilities>
 ```
 
@@ -213,80 +212,80 @@ For files > 1MB:
 
 1. **Validate All Input**
 
-   ```cpp
-   if (!request || request->structSize != sizeof(DT_ThumbnailRequest)) {
-       return DT_ERROR_INVALID_ARGUMENT;
-   }
-   if (!request->filePath && !request->stream) {
-       return DT_ERROR_INVALID_ARGUMENT;
-   }
-   ```
+ ```cpp
+ if (!request || request->structSize != sizeof(DT_ThumbnailRequest)) {
+ return DT_ERROR_INVALID_ARGUMENT;
+ }
+ if (!request->filePath && !request->stream) {
+ return DT_ERROR_INVALID_ARGUMENT;
+ }
+ ```
 
 2. **Handle Corrupt Files Gracefully**
 
-   ```cpp
-   try {
-       // Decode logic
-   } catch (const std::exception& ex) {
-       LogError("Decode failed: %s", ex.what());
-       return DT_ERROR_CORRUPT_DATA;
-   }
-   ```
+ ```cpp
+ try {
+ // Decode logic
+ } catch (const std::exception& ex) {
+ LogError("Decode failed: %s", ex.what());
+ return DT_ERROR_CORRUPT_DATA;
+ }
+ ```
 
 3. **Respect Timeouts**
 
-   ```cpp
-   auto start = std::chrono::steady_clock::now();
-   while (decoding) {
-       auto elapsed = std::chrono::steady_clock::now() - start;
-       if (elapsed > std::chrono::milliseconds(request->timeoutMs)) {
-           return DT_ERROR_TIMEOUT;
-       }
-   }
-   ```
+ ```cpp
+ auto start = std::chrono::steady_clock::now();
+ while (decoding) {
+ auto elapsed = std::chrono::steady_clock::now() - start;
+ if (elapsed > std::chrono::milliseconds(request->timeoutMs)) {
+ return DT_ERROR_TIMEOUT;
+ }
+ }
+ ```
 
 4. **Limit Memory Usage**
 
-   ```cpp
-   // Don't allocate unbounded memory based on file data
-   if (width * height > 100'000'000) { // 100 megapixels
-       return DT_ERROR_OUT_OF_MEMORY;
-   }
-   ```
+ ```cpp
+ // Don't allocate unbounded memory based on file data
+ if (width * height > 100'000'000) { // 100 megapixels
+ return DT_ERROR_OUT_OF_MEMORY;
+ }
+ ```
 
 5. **No External Dependencies**
-   - Minimize DLL dependencies
-   - Statically link runtime libraries
-   - Don't spawn external processes (unless capability declared)
+ - Minimize DLL dependencies
+ - Statically link runtime libraries
+ - Don't spawn external processes (unless capability declared)
 
 ### For Engine/PluginHost
 
 1. **Kill on Timeout**
 
-   ```cpp
-   if (WaitForSingleObject(hProcess, timeoutMs) == WAIT_TIMEOUT) {
-       TerminateProcess(hProcess, E_FAIL);
-   }
-   ```
+ ```cpp
+ if (WaitForSingleObject(hProcess, timeoutMs) == WAIT_TIMEOUT) {
+ TerminateProcess(hProcess, E_FAIL);
+ }
+ ```
 
 2. **Monitor Resource Usage**
 
-   ```cpp
-   PROCESS_MEMORY_COUNTERS pmc;
-   GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc));
-   if (pmc.WorkingSetSize > maxMemoryBytes) {
-       TerminateProcess(hProcess, E_OUTOFMEMORY);
-   }
-   ```
+ ```cpp
+ PROCESS_MEMORY_COUNTERS pmc;
+ GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc));
+ if (pmc.WorkingSetSize > maxMemoryBytes) {
+ TerminateProcess(hProcess, E_OUTOFMEMORY);
+ }
+ ```
 
 3. **Validate Responses**
 
-   ```cpp
-   if (result->hBitmap && !IsValidBitmap(result->hBitmap)) {
-       DeleteObject(result->hBitmap);
-       return DT_ERROR_CORRUPT_DATA;
-   }
-   ```
+ ```cpp
+ if (result->hBitmap && !IsValidBitmap(result->hBitmap)) {
+ DeleteObject(result->hBitmap);
+ return DT_ERROR_CORRUPT_DATA;
+ }
+ ```
 
 ---
 
@@ -294,23 +293,23 @@ For files > 1MB:
 
 ```cpp
 IsolationMode DetermineIsolationMode(const LoadedPlugin* plugin) {
-    // Check if explicitly trusted
-    if (IsTrustedPlugin(plugin->GetManifest().id)) {
-        return IsolationMode::InWorker;
-    }
-    
-    // Check if signed and verified
-    if (plugin->GetManifest().verified && 
-        plugin->GetManifest().signatureValid) {
-        
-        // Check user preference
-        if (UserPrefersTrusted(plugin->GetManifest().id)) {
-            return IsolationMode::InWorker;
-        }
-    }
-    
-    // Default to separate process
-    return IsolationMode::SeparateProcess;
+ // Check if explicitly trusted
+ if (IsTrustedPlugin(plugin->GetManifest().id)) {
+ return IsolationMode::InWorker;
+ }
+ 
+ // Check if signed and verified
+ if (plugin->GetManifest().verified && 
+ plugin->GetManifest().signatureValid) {
+ 
+ // Check user preference
+ if (UserPrefersTrusted(plugin->GetManifest().id)) {
+ return IsolationMode::InWorker;
+ }
+ }
+ 
+ // Default to separate process
+ return IsolationMode::SeparateProcess;
 }
 ```
 
@@ -336,13 +335,13 @@ IsolationMode DetermineIsolationMode(const LoadedPlugin* plugin) {
 ```cpp
 DWORD exitCode;
 if (GetExitCodeProcess(hProcess, &exitCode)) {
-    if (exitCode == STATUS_ACCESS_VIOLATION ||
-        exitCode == STATUS_STACK_OVERFLOW) {
-        // Plugin crashed - log and disable
-        LogError("Plugin %ls crashed with code 0x%X", 
-                 pluginId.c_str(), exitCode);
-        DisablePlugin(pluginId);
-    }
+ if (exitCode == STATUS_ACCESS_VIOLATION ||
+ exitCode == STATUS_STACK_OVERFLOW) {
+ // Plugin crashed - log and disable
+ LogError("Plugin %ls crashed with code 0x%X", 
+ pluginId.c_str(), exitCode);
+ DisablePlugin(pluginId);
+ }
 }
 ```
 
@@ -358,13 +357,13 @@ When a plugin crashes:
 
 ```json
 {
-  "event": "plugin_crash",
-  "pluginId": "explorerlens.plugin.psd",
-  "pluginVersion": "1.2.3",
-  "correlationId": "0x123456789ABCDEF0",
-  "exitCode": "0xC0000005",
-  "filePath": "C:\\..\\image.psd",
-  "timestamp": "2026-01-06T14:30:00Z"
+ "event": "plugin_crash",
+ "pluginId": "explorerlens.plugin.psd",
+ "pluginVersion": "1.2.3",
+ "correlationId": "0x123456789ABCDEF0",
+ "exitCode": "0xC0000005",
+ "filePath": "C:\\..\\image.psd",
+ "timestamp": "2026-01-06T14:30:00Z"
 }
 ```
 
@@ -378,20 +377,20 @@ Admins can enforce isolation mode via Group Policy:
 
 ```
 HKLM\SOFTWARE\Policies\ExplorerLens\Plugins
-  MinIsolationMode (DWORD)
-    0 = Allow all modes
-    1 = Require PluginHost (block In-Worker for untrusted)
-    2 = Require AppContainer (block In-Worker and PluginHost)
-    
-  AllowedPlugins (REG_MULTI_SZ)
-    List of plugin IDs allowed to run
-    Empty = allow all
-    
-  DeniedPlugins (REG_MULTI_SZ)
-    List of plugin IDs blocked from running
-    
-  TrustedPlugins (REG_MULTI_SZ)
-    List of plugin IDs allowed In-Worker mode
+ MinIsolationMode (DWORD)
+ 0 = Allow all modes
+ 1 = Require PluginHost (block In-Worker for untrusted)
+ 2 = Require AppContainer (block In-Worker and PluginHost)
+ 
+ AllowedPlugins (REG_MULTI_SZ)
+ List of plugin IDs allowed to run
+ Empty = allow all
+ 
+ DeniedPlugins (REG_MULTI_SZ)
+ List of plugin IDs blocked from running
+ 
+ TrustedPlugins (REG_MULTI_SZ)
+ List of plugin IDs allowed In-Worker mode
 ```
 
 ---
@@ -401,24 +400,24 @@ HKLM\SOFTWARE\Policies\ExplorerLens\Plugins
 ### Security Test Suite
 
 1. **Escape Tests**
-   - Try to break out of sandbox
-   - Try to access forbidden files
-   - Try to spawn privileged processes
+ - Try to break out of sandbox
+ - Try to access forbidden files
+ - Try to spawn privileged processes
 
 2. **Resource Exhaustion**
-   - Allocate excessive memory
-   - Create excessive threads
-   - Consume excessive CPU
+ - Allocate excessive memory
+ - Create excessive threads
+ - Consume excessive CPU
 
 3. **Crash Resilience**
-   - Intentional crashes (access violation, divide by zero)
-   - Verify Worker survives
-   - Verify plugin is disabled
+ - Intentional crashes (access violation, divide by zero)
+ - Verify Worker survives
+ - Verify plugin is disabled
 
 4. **IPC Security**
-   - Malformed messages
-   - Oversized payloads
-   - Replay attacks
+ - Malformed messages
+ - Oversized payloads
+ - Replay attacks
 
 ---
 
@@ -444,4 +443,3 @@ HKLM\SOFTWARE\Policies\ExplorerLens\Plugins
 | **Recommended For** | Trusted only | Most plugins | Untrusted |
 
 **Recommendation:** Use **PluginHost** mode by default. Only allow **In-Worker** for explicitly trusted, verified plugins.
-

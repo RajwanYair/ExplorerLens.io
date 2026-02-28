@@ -1,133 +1,38 @@
 {
+  // ExplorerLens.io — Launch Configurations
+  // C++ debugging (cppvsdbg) + PowerShell build/install scripts
   "version": "0.2.0",
   "configurations": [
+    // ── C++ Debugging ────────────────────────────────────────
     {
-      "name": "Build ExplorerLens (Release)",
-      "type": "PowerShell",
+      "name": "C++: Run Engine Tests",
+      "type": "cppvsdbg",
       "request": "launch",
-      "script": "${workspaceFolder}/scripts/build.ps1",
-      "cwd": "${workspaceFolder}",
-      "args": [
-        "-Configuration",
-        "Release"
-      ],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "Build ExplorerLens (Debug)",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}/scripts/build.ps1",
-      "cwd": "${workspaceFolder}",
-      "args": [
-        "-Configuration",
-        "Debug"
-      ],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "Clean Build (Release)",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}/scripts/build.ps1",
-      "cwd": "${workspaceFolder}",
-      "args": [
-        "-Configuration",
-        "Release",
-        "-Clean"
-      ],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "Install ExplorerLens (Admin Required)",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}/scripts/install.ps1",
-      "cwd": "${workspaceFolder}",
-      "args": [
-        "-Configuration",
-        "Release"
-      ],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "Uninstall ExplorerLens (Admin Required)",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}/scripts/install.ps1",
-      "cwd": "${workspaceFolder}",
-      "args": [
-        "-Unregister"
-      ],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "Verify Build Tools",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}/scripts/verify-tools.ps1",
-      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}\\build\\bin\\EngineTests.exe",
       "args": [],
-      "createTemporaryIntegratedConsole": false
-    },
-    {
-      "name": "PowerShell: Build All Libraries",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}\\build-scripts\\production\\Build-Production-SlowMachine.ps1",
+      "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
-      "createTemporaryIntegratedConsole": false,
-      "args": [
-        "-Clean"
-      ]
+      "environment": [],
+      "console": "integratedTerminal",
+      "preLaunchTask": "Build Engine (CMake Release)"
     },
     {
-      "name": "PowerShell: Test Format Support",
-      "type": "PowerShell",
+      "name": "C++: Debug Engine Tests",
+      "type": "cppvsdbg",
       "request": "launch",
-      "script": "${workspaceFolder}\\tests\\Test-FormatSupport.ps1",
+      "program": "${workspaceFolder}\\build\\bin\\EngineTests.exe",
+      "args": [],
+      "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
-      "createTemporaryIntegratedConsole": false,
-      "args": []
-    },
-    {
-      "name": "PowerShell: Test GPU Acceleration",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}\\tests\\Test-GPUAcceleration.ps1",
-      "cwd": "${workspaceFolder}",
-      "createTemporaryIntegratedConsole": false,
-      "args": []
-    },
-    {
-      "name": "PowerShell: Check Build Status",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}\\build-scripts\\Check-Build-Status.ps1",
-      "cwd": "${workspaceFolder}",
-      "createTemporaryIntegratedConsole": false,
-      "args": []
-    },
-    {
-      "name": "PowerShell: Build LZMA (with monitoring)",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${workspaceFolder}\\build-scripts\\Build-With-Monitoring.ps1",
-      "cwd": "${workspaceFolder}",
-      "createTemporaryIntegratedConsole": false,
-      "args": [
-        "-ScriptPath",
-        "${workspaceFolder}\\build-scripts\\external-libs\\build-lzma-sdk-24.08.ps1",
-        "-Watch"
-      ]
-    },
-    {
-      "name": "PowerShell: Current Script",
-      "type": "PowerShell",
-      "request": "launch",
-      "script": "${file}",
-      "cwd": "${fileDirname}",
-      "createTemporaryIntegratedConsole": false
+      "environment": [
+        {
+          "name": "LENS_LOG_LEVEL",
+          "value": "DEBUG"
+        }
+      ],
+      "console": "integratedTerminal",
+      "symbolSearchPath": "${workspaceFolder}\\build\\bin",
+      "sourceFileMap": {}
     },
     {
       "name": "C++: Launch LENSManager",
@@ -149,7 +54,125 @@
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "symbolSearchPath": "${workspaceFolder}\\x64\\Debug"
+    },
+    {
+      "name": "C++: Attach to Explorer.exe",
+      "type": "cppvsdbg",
+      "request": "attach",
+      "processId": "${command:pickProcess}",
+      "sourceFileMap": {},
+      "symbolSearchPath": "${workspaceFolder}\\x64\\Release"
+    },
+    // ── PowerShell Build Scripts ─────────────────────────────
+    {
+      "name": "PS: Build Release",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/build-scripts/Build-MSVC.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Clean Build",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/build-scripts/Build-MSVC.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Clean"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Build & Test",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/build-scripts/Build-MSVC.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Clean",
+        "-Test"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Build All & Package MSI",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/build-scripts/Build-All-And-Package.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Install (Admin)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/install.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Configuration",
+        "Release"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Uninstall (Admin)",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/install.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-Unregister"
+      ],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Verify Tools",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/scripts/verify-tools.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Test Format Support",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/tests/Test-FormatSupport.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Test GPU Acceleration",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/tests/Test-GPUAcceleration.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Check Build Status",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${workspaceFolder}/build-scripts/Check-Build-Status.ps1",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "createTemporaryIntegratedConsole": false
+    },
+    {
+      "name": "PS: Current Script",
+      "type": "PowerShell",
+      "request": "launch",
+      "script": "${file}",
+      "cwd": "${fileDirname}",
+      "createTemporaryIntegratedConsole": false
     }
   ]
 }

@@ -15,56 +15,56 @@ The ExplorerLens Plugin SDK enables developers to extend ExplorerLens with custo
 ```cpp
 // Get plugin information
 PLUGIN_API const PluginInfo* PLUGIN_CALL plugin_get_info(void) {
-    static const char* extensions[] = { ".myformat", NULL };
-    static const char* mime_types[] = { "image/myformat", NULL };
-    
-    static PluginInfo info = {
-        .plugin_name = "My Format Decoder",
-        .plugin_version = "1.0.0",
-        .plugin_author = "Your Name",
-        .plugin_description = "Decodes .myformat files",
-        .plugin_license = "MIT",
-        .api_version = EXPLORERLENS_PLUGIN_API_VERSION,
-        .supported_extensions = extensions,
-        .mime_types = mime_types,
-        .capabilities = PLUGIN_CAP_STILL_IMAGE,
-        .max_threads = 0,
-        .requires_gpu = false,
-        .supports_background_loading = true
-    };
-    return &info;
+ static const char* extensions[] = { ".myformat", NULL };
+ static const char* mime_types[] = { "image/myformat", NULL };
+ 
+ static PluginInfo info = {
+ .plugin_name = "My Format Decoder",
+ .plugin_version = "1.0.0",
+ .plugin_author = "Your Name",
+ .plugin_description = "Decodes .myformat files",
+ .plugin_license = "MIT",
+ .api_version = EXPLORERLENS_PLUGIN_API_VERSION,
+ .supported_extensions = extensions,
+ .mime_types = mime_types,
+ .capabilities = PLUGIN_CAP_STILL_IMAGE,
+ .max_threads = 0,
+ .requires_gpu = false,
+ .supports_background_loading = true
+ };
+ return &info;
 }
 
 // Initialize plugin
 PLUGIN_API PluginErrorCode PLUGIN_CALL plugin_init(const PluginAllocator* allocator) {
-    // Store allocator, initialize resources
-    return PLUGIN_SUCCESS;
+ // Store allocator, initialize resources
+ return PLUGIN_SUCCESS;
 }
 
 // Cleanup
 PLUGIN_API void PLUGIN_CALL plugin_cleanup(void) {
-    // Free resources
+ // Free resources
 }
 
 // Check if file can be decoded
 PLUGIN_API bool PLUGIN_CALL plugin_can_decode(const char* file_path,
-                                                const uint8_t* data,
-                                                size_t data_size) {
-    // Check file header/magic bytes
-    return true;
+ const uint8_t* data,
+ size_t data_size) {
+ // Check file header/magic bytes
+ return true;
 }
 
 // Decode to thumbnail
 PLUGIN_API PluginErrorCode PLUGIN_CALL plugin_decode(const DecodeRequest* request,
-                                                       DecodeResult* result,
-                                                       PluginProgressCallback progress) {
-    // Decode image and populate result
-    return PLUGIN_SUCCESS;
+ DecodeResult* result,
+ PluginProgressCallback progress) {
+ // Decode image and populate result
+ return PLUGIN_SUCCESS;
 }
 
 // Free decode result
 PLUGIN_API void PLUGIN_CALL plugin_free_result(DecodeResult* result) {
-    // Free allocated buffers
+ // Free allocated buffers
 }
 ```
 
@@ -78,11 +78,11 @@ project(MyFormatPlugin)
 add_library(myformat-plugin SHARED plugin.cpp)
 
 target_compile_definitions(myformat-plugin PRIVATE
-    EXPLORERLENS_PLUGIN_EXPORTS
+ EXPLORERLENS_PLUGIN_EXPORTS
 )
 
 target_include_directories(myformat-plugin PRIVATE
-    ${EXPLORERLENS_SDK_DIR}
+ ${EXPLORERLENS_SDK_DIR}
 )
 ```
 
@@ -105,38 +105,38 @@ plugin-tester.exe myformat-plugin.dll --test sample.myformat
 - **[Plugin SDK Guide](docs/PLUGIN_SDK.md)** - Complete developer guide
 - **[API Reference](plugin_api.h)** - Full API documentation
 - **[Examples](examples/)** - Sample plugin implementations
-  - [minimal-plugin](examples/minimal-plugin/) - Minimal template
-  - [SamplePlugin](examples/SamplePlugin/) - Full example
+ - [minimal-plugin](examples/minimal-plugin/) - Minimal template
+ - [SamplePlugin](examples/SamplePlugin/) - Full example
 
 ## 🔧 Tools
 
 - **plugin-tester.exe** - Test and validate plugins
-  ```bash
-  plugin-tester.exe <plugin.dll> [--info] [--test <file>] [--size WxH]
-  ```
+ ```bash
+ plugin-tester.exe <plugin.dll> [--info] [--test <file>] [--size WxH]
+ ```
 
 ## 📦 Plugin Package Format (.dtplugin)
 
 ```
 myplugin.dtplugin/
-├── plugin.dll         # Your plugin DLL
-├── manifest.json      # Metadata
-├── icon.png          # Plugin icon (optional)
-└── LICENSE.txt       # License file
+├── plugin.dll # Your plugin DLL
+├── manifest.json # Metadata
+├── icon.png # Plugin icon (optional)
+└── LICENSE.txt # License file
 ```
 
 **manifest.json:**
 ```json
 {
-  "name": "My Format Decoder",
-  "version": "1.0.0",
-  "author": "Your Name",
-  "description": "Decodes .myformat files",
-  "license": "MIT",
-  "api_version": 65536,
-  "supported_extensions": [".myformat"],
-  "mime_types": ["image/myformat"],
-  "requires_gpu": false
+ "name": "My Format Decoder",
+ "version": "1.0.0",
+ "author": "Your Name",
+ "description": "Decodes .myformat files",
+ "license": "MIT",
+ "api_version": 65536,
+ "supported_extensions": [".myformat"],
+ "mime_types": ["image/myformat"],
+ "requires_gpu": false
 }
 ```
 
@@ -191,7 +191,7 @@ Plugins run in the same process as ExplorerLens, so:
 - Avoid buffer overflows
 - Handle errors gracefully
 
-**Future:** Plugin sandboxing via AppContainer (Sprint 14)
+**Future:** Plugin sandboxing via AppContainer 
 
 ## 📖 Examples
 

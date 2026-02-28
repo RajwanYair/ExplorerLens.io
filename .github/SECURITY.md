@@ -4,12 +4,12 @@
 
 We provide security updates for the following versions:
 
-| Version | Supported          |
+| Version | Supported |
 | ------- | ------------------ |
-| 14.0.x  | :white_check_mark: Current |
-| 13.x.x  | :white_check_mark: |
-| 12.x.x  | :white_check_mark: Security fixes only |
-| < 12.0  | :x:                |
+| 15.0.x | :white_check_mark: Current |
+| 14.x.x | :white_check_mark: |
+| 13.x.x | :white_check_mark: Security fixes only |
+| < 13.0 | :x: |
 
 ## Reporting a Vulnerability
 
@@ -19,19 +19,19 @@ We provide security updates for the following versions:
 
 1. **Email:** Send details to the project maintainers (check repository for contact info)
 2. **Include:**
-   - Description of the vulnerability
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if available)
+ - Description of the vulnerability
+ - Steps to reproduce
+ - Potential impact
+ - Suggested fix (if available)
 
 ### What to Expect
 
 - **Initial Response:** Within 48 hours
 - **Status Updates:** Every 7 days until resolved
 - **Resolution Timeline:**
-  - Critical vulnerabilities: 7 days
-  - High severity: 30 days
-  - Medium/Low severity: 90 days
+ - Critical vulnerabilities: 7 days
+ - High severity: 30 days
+ - Medium/Low severity: 90 days
 
 ### Responsible Disclosure
 
@@ -85,4 +85,3 @@ We provide security updates for the following versions:
 ## Security Contacts
 
 For security-related questions or to report vulnerabilities privately, please contact the project maintainers through the repository.
-

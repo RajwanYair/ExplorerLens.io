@@ -1,6 +1,5 @@
 #==============================================================================
 # ExplorerLens - Code Signing Automation Script
-# Sprint 24: Code signing infrastructure
 # 
 # Signs all ExplorerLens binaries with Authenticode certificate
 # Requires: Code signing certificate installed in Windows Certificate Store
@@ -311,7 +310,6 @@ foreach ($binary in $BinariesToSign) {
 }
 
 #==============================================================================
-# Sprint 24: Enhanced Signing Features
 #==============================================================================
 
 # Generate SHA-256 checksums for all signed binaries

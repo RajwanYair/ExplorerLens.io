@@ -6,17 +6,17 @@ This directory contains test samples for validating thumbnail generation across 
 
 ```
 test-archives/
-├── images/           # Standard image formats
-├── modern/           # Modern formats (WebP, AVIF, JXL, HEIF)
-├── raw/              # Camera RAW formats
-├── professional/     # PSD, EXR, HDR, DDS
-├── vector/           # SVG, PDF
-├── archives/         # ZIP, RAR, 7Z, TAR
-├── video/            # MP4, AVI, MKV, WEBM
-├── audio/            # MP3, FLAC, M4A (album art)
-├── documents/        # PDF, DOCX, XLSX, EPUB
-├── fonts/            # TTF, OTF
-└── models/           # OBJ, STL, GLTF
+├── images/ # Standard image formats
+├── modern/ # Modern formats (WebP, AVIF, JXL, HEIF)
+├── raw/ # Camera RAW formats
+├── professional/ # PSD, EXR, HDR, DDS
+├── vector/ # SVG, PDF
+├── archives/ # ZIP, RAR, 7Z, TAR
+├── video/ # MP4, AVI, MKV, WEBM
+├── audio/ # MP3, FLAC, M4A (album art)
+├── documents/ # PDF, DOCX, XLSX, EPUB
+├── fonts/ # TTF, OTF
+└── models/ # OBJ, STL, GLTF
 ```
 
 ## Format Coverage Matrix

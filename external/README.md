@@ -1,6 +1,6 @@
 # External Dependencies
 
-This directory contains third-party libraries and dependencies used by DarkThumbs.
+This directory contains third-party libraries and dependencies used by ExplorerLens.
 
 ## Purpose
 
@@ -102,14 +102,14 @@ External libraries are built automatically by scripts in `build-scripts/external
 - **NMake** - Some Windows-specific builds (LibRaw, LibWebP)
 - **Visual Studio** - Direct .sln/.vcxproj builds (zlib, WTL)
 
-## Usage in DarkThumbs
+## Usage in ExplorerLens
 
 ### Linking
 
-External libraries are linked into DarkThumbs via:
+External libraries are linked into ExplorerLens via:
 
 ```cpp
-// In CBXShell.vcxproj:
+// In LENSShell.vcxproj:
 <AdditionalIncludeDirectories>
   $(SolutionDir)external\libwebp-1.5.0\src\;
   $(SolutionDir)external\image-libs\libjxl\install\include\;
@@ -135,7 +135,7 @@ External libraries are linked into DarkThumbs via:
 
 ### Static vs Dynamic Linking
 
-DarkThumbs uses **static linking** for external libraries to:
+ExplorerLens uses **static linking** for external libraries to:
 - ✅ Simplify deployment (no external DLLs)
 - ✅ Avoid DLL conflicts with other software
 - ✅ Enable whole program optimization
@@ -182,7 +182,7 @@ To update an external library to a new version:
 1. **Download** new version to `downloads/`
 2. **Update** build script with new version number
 3. **Test** build: `.\build-scripts\external-libs\Build-[Library].ps1`
-4. **Test** DarkThumbs with new version
+4. **Test** ExplorerLens with new version
 5. **Update** `LIBRARY_INVENTORY.md`
 6. **Remove** old version from `external/`
 
@@ -334,7 +334,7 @@ For issues with external libraries:
 - [LIBRARY_INVENTORY.md](LIBRARY_INVENTORY.md) - Complete dependency list
 - [THIRD_PARTY.md](../docs/development/THIRD_PARTY.md) - License information
 - [Build Scripts](../build-scripts/external-libs/) - Individual library builders
-- [Build Guide](../docs/build/BUILD_GUIDE.md) - Building DarkThumbs
+- [Build Guide](../docs/build/BUILD_GUIDE.md) - Building ExplorerLens
 
 ---
 

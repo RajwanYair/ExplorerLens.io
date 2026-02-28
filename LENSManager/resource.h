@@ -65,7 +65,6 @@
 #define IDC_CB_FONT                             1061
 #define IDC_CB_EXR                              1062
 #define IDC_PRO_IMAGE_GROUP                     1063
-// Sprint 8: New format checkbox resource IDs
 #define IDC_CB_ICO                              1064
 #define IDC_CB_QOI                              1065
 #define IDC_CB_PPM                              1066

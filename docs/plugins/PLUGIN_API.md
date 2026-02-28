@@ -1,7 +1,7 @@
 # ExplorerLens Plugin API Documentation
 
-**Version:** 7.0.0 (Engine v7.0.0)  
-**Last Updated:** February 17, 2026  
+**Version:** 7.0.0 (Engine v7.0.0) 
+**Last Updated:** February 17, 2026 
 **Target Audience:** Plugin developers creating custom thumbnail decoders
 
 ## Table of Contents
@@ -50,25 +50,25 @@ All decoders must implement this interface located in `Engine/Core/IThumbnailDec
 class IThumbnailDecoder
 {
 public:
-    virtual ~IThumbnailDecoder() = default;
-    
-    // Format Detection
-    virtual bool CanDecode(const wchar_t* filePath) = 0;
-    
-    // Thumbnail Generation
-    virtual HRESULT Decode(
-        const ThumbnailRequest& request, 
-        ThumbnailResult& result) = 0;
-    
-    // Metadata
-    virtual DecoderInfo GetInfo() const = 0;
-    virtual const wchar_t* GetName() const = 0;
-    virtual const wchar_t** GetSupportedExtensions() const = 0;
-    virtual uint32_t GetExtensionCount() const = 0;
-    
-    // Capabilities
-    virtual bool SupportsGPU() const = 0;
-    virtual bool IsArchiveDecoder() const = 0;
+ virtual ~IThumbnailDecoder() = default;
+ 
+ // Format Detection
+ virtual bool CanDecode(const wchar_t* filePath) = 0;
+ 
+ // Thumbnail Generation
+ virtual HRESULT Decode(
+ const ThumbnailRequest& request, 
+ ThumbnailResult& result) = 0;
+ 
+ // Metadata
+ virtual DecoderInfo GetInfo() const = 0;
+ virtual const wchar_t* GetName() const = 0;
+ virtual const wchar_t** GetSupportedExtensions() const = 0;
+ virtual uint32_t GetExtensionCount() const = 0;
+ 
+ // Capabilities
+ virtual bool SupportsGPU() const = 0;
+ virtual bool IsArchiveDecoder() const = 0;
 };
 ```
 
@@ -99,10 +99,10 @@ public:
 
 ```cpp
 bool CanDecode(const wchar_t* filePath) override {
-    const wchar_t* ext = wcsrchr(filePath, L'.');
-    if (!ext) return false;
-    
-    return (_wcsicmp(ext, L".webp") == 0);
+ const wchar_t* ext = wcsrchr(filePath, L'.');
+ if (!ext) return false;
+ 
+ return (_wcsicmp(ext, L".webp") == 0);
 }
 ```
 
@@ -147,41 +147,41 @@ bool CanDecode(const wchar_t* filePath) override {
 
 ```cpp
 HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override {
-    result.hBitmap = nullptr;
-    result.status = E_FAIL;
-    
-    // Validate input
-    if (!request.filePath || request.width == 0 || request.height == 0) {
-        result.status = E_INVALIDARG;
-        return E_INVALIDARG;
-    }
-    
-    // Decode file (implementation specific)
-    int imageWidth, imageHeight;
-    BYTE* pixelData = DecodeImageFile(request.filePath, &imageWidth, &imageHeight);
-    if (!pixelData) {
-        result.status = E_FAIL;
-        return E_FAIL;
-    }
-    
-    // Scale to target size
-    BYTE* scaled = ScaleImage(pixelData, imageWidth, imageHeight, 
-                             request.width, request.height);
-    free(pixelData);
-    
-    // Create HBITMAP
-    result.hBitmap = CreateBGRABitmap(scaled, request.width, request.height);
-    free(scaled);
-    
-    if (!result.hBitmap) {
-        result.status = E_OUTOFMEMORY;
-        return E_OUTOFMEMORY;
-    }
-    
-    result.width = request.width;
-    result.height = request.height;
-    result.status = S_OK;
-    return S_OK;
+ result.hBitmap = nullptr;
+ result.status = E_FAIL;
+ 
+ // Validate input
+ if (!request.filePath || request.width == 0 || request.height == 0) {
+ result.status = E_INVALIDARG;
+ return E_INVALIDARG;
+ }
+ 
+ // Decode file (implementation specific)
+ int imageWidth, imageHeight;
+ BYTE* pixelData = DecodeImageFile(request.filePath, &imageWidth, &imageHeight);
+ if (!pixelData) {
+ result.status = E_FAIL;
+ return E_FAIL;
+ }
+ 
+ // Scale to target size
+ BYTE* scaled = ScaleImage(pixelData, imageWidth, imageHeight, 
+ request.width, request.height);
+ free(pixelData);
+ 
+ // Create HBITMAP
+ result.hBitmap = CreateBGRABitmap(scaled, request.width, request.height);
+ free(scaled);
+ 
+ if (!result.hBitmap) {
+ result.status = E_OUTOFMEMORY;
+ return E_OUTOFMEMORY;
+ }
+ 
+ result.width = request.width;
+ result.height = request.height;
+ result.status = S_OK;
+ return S_OK;
 }
 ```
 
@@ -191,11 +191,11 @@ Returns decoder metadata:
 
 ```cpp
 struct DecoderInfo {
-    const wchar_t* name;           // e.g., L"WebP Decoder"
-    const wchar_t* version;        // e.g., L"1.0.0"
-    const wchar_t* description;    // e.g., L"WebP image decoder using libwebp 1.5.0"
-    bool supportsGPU;              // GPU acceleration available
-    bool isArchiveDecoder;         // Handles archives (ZIP, RAR)
+ const wchar_t* name; // e.g., L"WebP Decoder"
+ const wchar_t* version; // e.g., L"1.0.0"
+ const wchar_t* description; // e.g., L"WebP image decoder using libwebp 1.5.0"
+ bool supportsGPU; // GPU acceleration available
+ bool isArchiveDecoder; // Handles archives (ZIP, RAR)
 };
 ```
 
@@ -216,11 +216,11 @@ struct DecoderInfo {
 static const wchar_t* m_extensions[] = { L".webp", nullptr };
 
 const wchar_t** GetSupportedExtensions() const override {
-    return m_extensions;
+ return m_extensions;
 }
 
 uint32_t GetExtensionCount() const override {
-    return 1; // Not including nullptr terminator
+ return 1; // Not including nullptr terminator
 }
 ```
 
@@ -234,11 +234,11 @@ Input structure passed to `Decode()`:
 
 ```cpp
 struct ThumbnailRequest {
-    const wchar_t* filePath;       // Full path: "C:\Images\photo.webp"
-    uint32_t width;                // Target width (pixels)
-    uint32_t height;               // Target height (pixels)
-    ThumbnailFlags flags;          // Generation flags (bitfield)
-    const wchar_t* archiveEntry;   // Archive entry path (optional)
+ const wchar_t* filePath; // Full path: "C:\Images\photo.webp"
+ uint32_t width; // Target width (pixels)
+ uint32_t height; // Target height (pixels)
+ ThumbnailFlags flags; // Generation flags (bitfield)
+ const wchar_t* archiveEntry; // Archive entry path (optional)
 };
 ```
 
@@ -246,12 +246,12 @@ struct ThumbnailRequest {
 
 ```cpp
 enum class ThumbnailFlags : uint32_t {
-    None            = 0,
-    FastMode        = 1 << 0,  // Speed over quality
-    UseGPU          = 1 << 1,  // Enable GPU acceleration
-    UseCache        = 1 << 2,  // Check cache first
-    HighQuality     = 1 << 3,  // High-quality filtering
-    PreserveAspect  = 1 << 4,  // Preserve aspect ratio (default)
+ None = 0,
+ FastMode = 1 << 0, // Speed over quality
+ UseGPU = 1 << 1, // Enable GPU acceleration
+ UseCache = 1 << 2, // Check cache first
+ HighQuality = 1 << 3, // High-quality filtering
+ PreserveAspect = 1 << 4, // Preserve aspect ratio (default)
 };
 ```
 
@@ -259,14 +259,14 @@ enum class ThumbnailFlags : uint32_t {
 
 ```cpp
 if (request.flags & ThumbnailFlags::FastMode) {
-    // Use fast decoding path
+ // Use fast decoding path
 }
 
 if (request.flags & ThumbnailFlags::PreserveAspect) {
-    // Calculate aspect-preserving dimensions
-    float aspectRatio = (float)imageWidth / imageHeight;
-    uint32_t scaledWidth = request.width;
-    uint32_t scaledHeight = (uint32_t)(scaledWidth / aspectRatio);
+ // Calculate aspect-preserving dimensions
+ float aspectRatio = (float)imageWidth / imageHeight;
+ uint32_t scaledWidth = request.width;
+ uint32_t scaledHeight = (uint32_t)(scaledWidth / aspectRatio);
 }
 ```
 
@@ -276,13 +276,13 @@ Output structure filled by `Decode()`:
 
 ```cpp
 struct ThumbnailResult {
-    HBITMAP hBitmap;              // Generated bitmap (required)
-    uint32_t width;               // Actual width (required)
-    uint32_t height;              // Actual height (required)
-    HRESULT status;               // Result code (required)
-    bool fromCache;               // Set by pipeline, not decoder
-    bool usedGPU;                 // True if GPU acceleration used
-    uint32_t generationTimeMs;    // Set by pipeline, not decoder
+ HBITMAP hBitmap; // Generated bitmap (required)
+ uint32_t width; // Actual width (required)
+ uint32_t height; // Actual height (required)
+ HRESULT status; // Result code (required)
+ bool fromCache; // Set by pipeline, not decoder
+ bool usedGPU; // True if GPU acceleration used
+ uint32_t generationTimeMs; // Set by pipeline, not decoder
 };
 ```
 
@@ -310,22 +310,22 @@ namespace Engine {
 
 class MyFormatDecoder : public IThumbnailDecoder {
 public:
-    MyFormatDecoder();
-    ~MyFormatDecoder() override = default;
+ MyFormatDecoder();
+ ~MyFormatDecoder() override = default;
 
-    // IThumbnailDecoder interface
-    bool CanDecode(const wchar_t* filePath) override;
-    HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
-    DecoderInfo GetInfo() const override;
-    const wchar_t* GetName() const override { return L"MyFormatDecoder"; }
-    const wchar_t** GetSupportedExtensions() const override;
-    uint32_t GetExtensionCount() const override { return 1; }
-    bool SupportsGPU() const override { return false; }
-    bool IsArchiveDecoder() const override { return false; }
+ // IThumbnailDecoder interface
+ bool CanDecode(const wchar_t* filePath) override;
+ HRESULT Decode(const ThumbnailRequest& request, ThumbnailResult& result) override;
+ DecoderInfo GetInfo() const override;
+ const wchar_t* GetName() const override { return L"MyFormatDecoder"; }
+ const wchar_t** GetSupportedExtensions() const override;
+ uint32_t GetExtensionCount() const override { return 1; }
+ bool SupportsGPU() const override { return false; }
+ bool IsArchiveDecoder() const override { return false; }
 
 private:
-    // Extension list (static for lifetime guarantee)
-    static const wchar_t* m_extensions[];
+ // Extension list (static for lifetime guarantee)
+ static const wchar_t* m_extensions[];
 };
 
 } // namespace Engine
@@ -347,120 +347,120 @@ namespace Engine {
 const wchar_t* MyFormatDecoder::m_extensions[] = { L".myformat", nullptr };
 
 MyFormatDecoder::MyFormatDecoder() {
-    // Initialize decoder (load libraries, allocate resources)
+ // Initialize decoder (load libraries, allocate resources)
 }
 
 bool MyFormatDecoder::CanDecode(const wchar_t* filePath) {
-    if (!filePath) return false;
-    
-    const wchar_t* ext = wcsrchr(filePath, L'.');
-    if (!ext) return false;
-    
-    return (_wcsicmp(ext, L".myformat") == 0);
+ if (!filePath) return false;
+ 
+ const wchar_t* ext = wcsrchr(filePath, L'.');
+ if (!ext) return false;
+ 
+ return (_wcsicmp(ext, L".myformat") == 0);
 }
 
 HRESULT MyFormatDecoder::Decode(
-    const ThumbnailRequest& request, 
-    ThumbnailResult& result) 
+ const ThumbnailRequest& request, 
+ ThumbnailResult& result) 
 {
-    result.hBitmap = nullptr;
-    result.status = E_FAIL;
-    
-    // 1. Validate input
-    if (!request.filePath) {
-        result.status = E_INVALIDARG;
-        return E_INVALIDARG;
-    }
-    
-    // 2. Read file
-    std::ifstream file(request.filePath, std::ios::binary | std::ios::ate);
-    if (!file.is_open()) {
-        result.status = HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
-        return result.status;
-    }
-    
-    size_t fileSize = file.tellg();
-    file.seekg(0);
-    std::vector<BYTE> fileData(fileSize);
-    file.read((char*)fileData.data(), fileSize);
-    file.close();
-    
-    // 3. Decode format-specific data
-    int imageWidth, imageHeight;
-    std::vector<BYTE> rgbaPixels = DecodeMyFormat(
-        fileData.data(), fileSize, &imageWidth, &imageHeight);
-    
-    if (rgbaPixels.empty()) {
-        result.status = E_FAIL;
-        return E_FAIL;
-    }
-    
-    // 4. Calculate target dimensions (preserve aspect if requested)
-    uint32_t targetWidth = request.width;
-    uint32_t targetHeight = request.height;
-    
-    if (request.flags & ThumbnailFlags::PreserveAspect) {
-        float aspect = (float)imageWidth / imageHeight;
-        targetHeight = (uint32_t)(targetWidth / aspect);
-        if (targetHeight > request.height) {
-            targetHeight = request.height;
-            targetWidth = (uint32_t)(targetHeight * aspect);
-        }
-    }
-    
-    // 5. Scale image (use bilinear or better filtering)
-    std::vector<BYTE> scaled = ScaleRGBA(
-        rgbaPixels.data(), imageWidth, imageHeight,
-        targetWidth, targetHeight);
-    
-    // 6. Convert RGBA to BGRA (Windows format)
-    for (size_t i = 0; i < scaled.size(); i += 4) {
-        std::swap(scaled[i], scaled[i + 2]); // Swap R and B
-    }
-    
-    // 7. Create HBITMAP (32-bit BGRA DIB section)
-    BITMAPINFO bmi = {};
-    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = targetWidth;
-    bmi.bmiHeader.biHeight = -(int)targetHeight; // Top-down DIB
-    bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 32;
-    bmi.bmiHeader.biCompression = BI_RGB;
-    
-    void* pBits = nullptr;
-    HBITMAP hBitmap = CreateDIBSection(
-        nullptr, &bmi, DIB_RGB_COLORS, &pBits, nullptr, 0);
-    
-    if (!hBitmap) {
-        result.status = E_OUTOFMEMORY;
-        return E_OUTOFMEMORY;
-    }
-    
-    // 8. Copy pixels to bitmap
-    memcpy(pBits, scaled.data(), targetWidth * targetHeight * 4);
-    
-    // 9. Fill result structure
-    result.hBitmap = hBitmap;
-    result.width = targetWidth;
-    result.height = targetHeight;
-    result.status = S_OK;
-    result.usedGPU = false;
-    
-    return S_OK;
+ result.hBitmap = nullptr;
+ result.status = E_FAIL;
+ 
+ // 1. Validate input
+ if (!request.filePath) {
+ result.status = E_INVALIDARG;
+ return E_INVALIDARG;
+ }
+ 
+ // 2. Read file
+ std::ifstream file(request.filePath, std::ios::binary | std::ios::ate);
+ if (!file.is_open()) {
+ result.status = HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+ return result.status;
+ }
+ 
+ size_t fileSize = file.tellg();
+ file.seekg(0);
+ std::vector<BYTE> fileData(fileSize);
+ file.read((char*)fileData.data(), fileSize);
+ file.close();
+ 
+ // 3. Decode format-specific data
+ int imageWidth, imageHeight;
+ std::vector<BYTE> rgbaPixels = DecodeMyFormat(
+ fileData.data(), fileSize, &imageWidth, &imageHeight);
+ 
+ if (rgbaPixels.empty()) {
+ result.status = E_FAIL;
+ return E_FAIL;
+ }
+ 
+ // 4. Calculate target dimensions (preserve aspect if requested)
+ uint32_t targetWidth = request.width;
+ uint32_t targetHeight = request.height;
+ 
+ if (request.flags & ThumbnailFlags::PreserveAspect) {
+ float aspect = (float)imageWidth / imageHeight;
+ targetHeight = (uint32_t)(targetWidth / aspect);
+ if (targetHeight > request.height) {
+ targetHeight = request.height;
+ targetWidth = (uint32_t)(targetHeight * aspect);
+ }
+ }
+ 
+ // 5. Scale image (use bilinear or better filtering)
+ std::vector<BYTE> scaled = ScaleRGBA(
+ rgbaPixels.data(), imageWidth, imageHeight,
+ targetWidth, targetHeight);
+ 
+ // 6. Convert RGBA to BGRA (Windows format)
+ for (size_t i = 0; i < scaled.size(); i += 4) {
+ std::swap(scaled[i], scaled[i + 2]); // Swap R and B
+ }
+ 
+ // 7. Create HBITMAP (32-bit BGRA DIB section)
+ BITMAPINFO bmi = {};
+ bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+ bmi.bmiHeader.biWidth = targetWidth;
+ bmi.bmiHeader.biHeight = -(int)targetHeight; // Top-down DIB
+ bmi.bmiHeader.biPlanes = 1;
+ bmi.bmiHeader.biBitCount = 32;
+ bmi.bmiHeader.biCompression = BI_RGB;
+ 
+ void* pBits = nullptr;
+ HBITMAP hBitmap = CreateDIBSection(
+ nullptr, &bmi, DIB_RGB_COLORS, &pBits, nullptr, 0);
+ 
+ if (!hBitmap) {
+ result.status = E_OUTOFMEMORY;
+ return E_OUTOFMEMORY;
+ }
+ 
+ // 8. Copy pixels to bitmap
+ memcpy(pBits, scaled.data(), targetWidth * targetHeight * 4);
+ 
+ // 9. Fill result structure
+ result.hBitmap = hBitmap;
+ result.width = targetWidth;
+ result.height = targetHeight;
+ result.status = S_OK;
+ result.usedGPU = false;
+ 
+ return S_OK;
 }
 
 DecoderInfo MyFormatDecoder::GetInfo() const {
-    DecoderInfo info;
-    info.name = L"My Format Decoder";
-    info.version = L"1.0.0";
-    info.description = L"Decodes .myformat files";
-    info.supportsGPU = false;
-    info.isArchiveDecoder = false;
-    return info;
+ DecoderInfo info;
+ info.name = L"My Format Decoder";
+ info.version = L"1.0.0";
+ info.description = L"Decodes .myformat files";
+ info.supportsGPU = false;
+ info.isArchiveDecoder = false;
+ return info;
 }
 
 const wchar_t** MyFormatDecoder::GetSupportedExtensions() const {
-    return m_extensions;
+ return m_extensions;
 }
 
 } // namespace Engine
@@ -474,54 +474,54 @@ const wchar_t** MyFormatDecoder::GetSupportedExtensions() const {
 ### Performance
 
 1. **Fast Format Detection**
-   - `CanDecode()` must be < 1ms
-   - Check extension first, magic bytes second
-   - Avoid file I/O if possible
+ - `CanDecode()` must be < 1ms
+ - Check extension first, magic bytes second
+ - Avoid file I/O if possible
 
 2. **Efficient Decoding**
-   - Use incremental/streaming decoding for large files
-   - Support partial decoding (decode only thumbnail resolution)
-   - Implement fast paths for common cases
+ - Use incremental/streaming decoding for large files
+ - Support partial decoding (decode only thumbnail resolution)
+ - Implement fast paths for common cases
 
 3. **Memory Management**
-   - Minimize allocations
-   - Reuse buffers across calls (thread-local storage)
-   - Free resources immediately after use
+ - Minimize allocations
+ - Reuse buffers across calls (thread-local storage)
+ - Free resources immediately after use
 
 4. **Threading**
-   - All methods **MUST** be thread-safe
-   - Multiple simultaneous `Decode()` calls are expected
-   - Use thread-local state or mutex protection
+ - All methods **MUST** be thread-safe
+ - Multiple simultaneous `Decode()` calls are expected
+ - Use thread-local state or mutex protection
 
 ### Quality
 
 1. **Scaling Algorithms**
-   - Use high-quality filtering (bilinear minimum, bicubic preferred)
-   - Respect `ThumbnailFlags::HighQuality` flag
-   - Consider pre-scaling for large images (512x512 → 256x256)
+ - Use high-quality filtering (bilinear minimum, bicubic preferred)
+ - Respect `ThumbnailFlags::HighQuality` flag
+ - Consider pre-scaling for large images (512x512 → 256x256)
 
 2. **Aspect Ratio**
-   - Always respect `ThumbnailFlags::PreserveAspect`
-   - Default behavior should preserve aspect ratio
-   - Center or pad if exact dimensions required
+ - Always respect `ThumbnailFlags::PreserveAspect`
+ - Default behavior should preserve aspect ratio
+ - Center or pad if exact dimensions required
 
 3. **Color Management**
-   - Preserve embedded color profiles when possible
-   - Convert to sRGB for display
-   - Handle alpha channel correctly (pre-multiplied vs straight)
+ - Preserve embedded color profiles when possible
+ - Convert to sRGB for display
+ - Handle alpha channel correctly (pre-multiplied vs straight)
 
 ### Error Handling
 
 1. **Graceful Failures**
-   - Return appropriate `HRESULT` codes
-   - Set `result.status` and `result.hBitmap = nullptr` on error
-   - Never throw exceptions (performance penalty)
-   - Log errors using `OutputDebugString` for diagnostics
+ - Return appropriate `HRESULT` codes
+ - Set `result.status` and `result.hBitmap = nullptr` on error
+ - Never throw exceptions (performance penalty)
+ - Log errors using `OutputDebugString` for diagnostics
 
 2. **Resource Cleanup**
-   - Free all resources on error paths
-   - Use RAII patterns (smart pointers, scoped guards)
-   - Verify bitmap creation succeeded before returning
+ - Free all resources on error paths
+ - Use RAII patterns (smart pointers, scoped guards)
+ - Verify bitmap creation succeeded before returning
 
 ---
 
@@ -533,73 +533,73 @@ Reference implementation from `Engine/Decoders/WebPDecoder.cpp`:
 
 ```cpp
 HRESULT WebPDecoder::Decode(
-    const ThumbnailRequest& request, 
-    ThumbnailResult& result) 
+ const ThumbnailRequest& request, 
+ ThumbnailResult& result) 
 {
-    result.hBitmap = nullptr;
-    result.status = E_FAIL;
-    
-    // Validate
-    if (!request.filePath) return E_INVALIDARG;
-    
-    // Read file
-    std::ifstream file(request.filePath, std::ios::binary | std::ios::ate);
-    if (!file.is_open()) {
-        return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
-    }
-    
-    size_t size = file.tellg();
-    file.seekg(0);
-    std::vector<uint8_t> data(size);
-    file.read((char*)data.data(), size);
-    file.close();
-    
-    // Decode WebP (libwebp)
-    int width, height;
-    uint8_t* rgba = WebPDecodeRGBA(data.data(), size, &width, &height);
-    if (!rgba) return E_FAIL;
-    
-    // Calculate aspect-preserving dimensions
-    uint32_t targetWidth = request.width;
-    uint32_t targetHeight = request.height;
-    
-    if (request.flags & ThumbnailFlags::PreserveAspect) {
-        float aspect = (float)width / height;
-        targetHeight = (uint32_t)(targetWidth / aspect);
-    }
-    
-    // Scale using stb_image_resize
-    std::vector<uint8_t> scaled(targetWidth * targetHeight * 4);
-    stbir_resize_uint8(rgba, width, height, 0,
-                      scaled.data(), targetWidth, targetHeight, 0, 4);
-    WebPFree(rgba);
-    
-    // Convert RGBA → BGRA
-    for (size_t i = 0; i < scaled.size(); i += 4) {
-        std::swap(scaled[i], scaled[i + 2]);
-    }
-    
-    // Create HBITMAP
-    BITMAPINFO bmi = {};
-    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = targetWidth;
-    bmi.bmiHeader.biHeight = -(int)targetHeight;
-    bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 32;
-    bmi.bmiHeader.biCompression = BI_RGB;
-    
-    void* pBits = nullptr;
-    result.hBitmap = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, &pBits, nullptr, 0);
-    if (!result.hBitmap) return E_OUTOFMEMORY;
-    
-    memcpy(pBits, scaled.data(), scaled.size());
-    
-    result.width = targetWidth;
-    result.height = targetHeight;
-    result.status = S_OK;
-    result.usedGPU = false;
-    
-    return S_OK;
+ result.hBitmap = nullptr;
+ result.status = E_FAIL;
+ 
+ // Validate
+ if (!request.filePath) return E_INVALIDARG;
+ 
+ // Read file
+ std::ifstream file(request.filePath, std::ios::binary | std::ios::ate);
+ if (!file.is_open()) {
+ return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+ }
+ 
+ size_t size = file.tellg();
+ file.seekg(0);
+ std::vector<uint8_t> data(size);
+ file.read((char*)data.data(), size);
+ file.close();
+ 
+ // Decode WebP (libwebp)
+ int width, height;
+ uint8_t* rgba = WebPDecodeRGBA(data.data(), size, &width, &height);
+ if (!rgba) return E_FAIL;
+ 
+ // Calculate aspect-preserving dimensions
+ uint32_t targetWidth = request.width;
+ uint32_t targetHeight = request.height;
+ 
+ if (request.flags & ThumbnailFlags::PreserveAspect) {
+ float aspect = (float)width / height;
+ targetHeight = (uint32_t)(targetWidth / aspect);
+ }
+ 
+ // Scale using stb_image_resize
+ std::vector<uint8_t> scaled(targetWidth * targetHeight * 4);
+ stbir_resize_uint8(rgba, width, height, 0,
+ scaled.data(), targetWidth, targetHeight, 0, 4);
+ WebPFree(rgba);
+ 
+ // Convert RGBA → BGRA
+ for (size_t i = 0; i < scaled.size(); i += 4) {
+ std::swap(scaled[i], scaled[i + 2]);
+ }
+ 
+ // Create HBITMAP
+ BITMAPINFO bmi = {};
+ bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+ bmi.bmiHeader.biWidth = targetWidth;
+ bmi.bmiHeader.biHeight = -(int)targetHeight;
+ bmi.bmiHeader.biPlanes = 1;
+ bmi.bmiHeader.biBitCount = 32;
+ bmi.bmiHeader.biCompression = BI_RGB;
+ 
+ void* pBits = nullptr;
+ result.hBitmap = CreateDIBSection(nullptr, &bmi, DIB_RGB_COLORS, &pBits, nullptr, 0);
+ if (!result.hBitmap) return E_OUTOFMEMORY;
+ 
+ memcpy(pBits, scaled.data(), scaled.size());
+ 
+ result.width = targetWidth;
+ result.height = targetHeight;
+ result.status = S_OK;
+ result.usedGPU = false;
+ 
+ return S_OK;
 }
 ```
 
@@ -615,11 +615,11 @@ Edit `Engine/Pipeline/DecoderRegistry.cpp`:
 #include "MyFormatDecoder.h"
 
 DecoderRegistry::DecoderRegistry() {
-    RegisterDecoder(std::make_unique<ImageDecoder>());
-    RegisterDecoder(std::make_unique<WebPDecoder>());
-    RegisterDecoder(std::make_unique<AVIFDecoder>());
-    RegisterDecoder(std::make_unique<ArchiveDecoder>());
-    RegisterDecoder(std::make_unique<MyFormatDecoder>());  // ADD YOUR DECODER
+ RegisterDecoder(std::make_unique<ImageDecoder>());
+ RegisterDecoder(std::make_unique<WebPDecoder>());
+ RegisterDecoder(std::make_unique<AVIFDecoder>());
+ RegisterDecoder(std::make_unique<ArchiveDecoder>());
+ RegisterDecoder(std::make_unique<MyFormatDecoder>()); // ADD YOUR DECODER
 }
 ```
 
@@ -668,10 +668,10 @@ Use `OutputDebugString` for Windows debug logging:
 #include <stdio.h>
 
 void LogDecodeError(const wchar_t* filePath, HRESULT hr) {
-    wchar_t msg[512];
-    swprintf_s(msg, L"[MyFormatDecoder] Failed to decode %s: HRESULT=0x%08X\n",
-              filePath, hr);
-    OutputDebugStringW(msg);
+ wchar_t msg[512];
+ swprintf_s(msg, L"[MyFormatDecoder] Failed to decode %s: HRESULT=0x%08X\n",
+ filePath, hr);
+ OutputDebugStringW(msg);
 }
 ```
 
@@ -702,24 +702,24 @@ Your decoder should aim for:
 ### Optimization Tips
 
 1. **Incremental Decoding**
-   - Decode only required resolution
-   - Use progressive/subsampled decoding
-   - Example: JPEG can decode 1/2, 1/4, 1/8 scale
+ - Decode only required resolution
+ - Use progressive/subsampled decoding
+ - Example: JPEG can decode 1/2, 1/4, 1/8 scale
 
 2. **Caching**
-   - Cache file metadata (dimensions, format)
-   - Reuse decoded buffers (thread-local storage)
-   - Engine handles thumbnail caching automatically
+ - Cache file metadata (dimensions, format)
+ - Reuse decoded buffers (thread-local storage)
+ - Engine handles thumbnail caching automatically
 
 3. **SIMD Optimization**
-   - Use SSE/AVX for pixel operations
-   - RGBA→BGRA conversion benefits from SIMD
-   - Scaling algorithms benefit from SIMD
+ - Use SSE/AVX for pixel operations
+ - RGBA→BGRA conversion benefits from SIMD
+ - Scaling algorithms benefit from SIMD
 
 4. **GPU Acceleration**
-   - Set `SupportsGPU() = true` if using GPU
-   - Use Direct3D 11 or compute shaders
-   - Handle GPU unavailable gracefully (fallback to CPU)
+ - Set `SupportsGPU() = true` if using GPU
+ - Use Direct3D 11 or compute shaders
+ - Handle GPU unavailable gracefully (fallback to CPU)
 
 ---
 
@@ -733,19 +733,19 @@ If your decoder uses COM-based Windows APIs (WIC, DirectX, Media Foundation), **
 #include <objbase.h>
 
 int main() {
-    // Initialize COM (REQUIRED for WIC, DirectX, etc.)
-    HRESULT hrCOM = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-    if (FAILED(hrCOM)) {
-        return -1;
-    }
-    
-    // Use thumbnail engine
-    ExplorerLens::Engine::ThumbnailPipeline pipeline;
-    // ...
-    
-    // Cleanup COM
-    CoUninitialize();
-    return 0;
+ // Initialize COM (REQUIRED for WIC, DirectX, etc.)
+ HRESULT hrCOM = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+ if (FAILED(hrCOM)) {
+ return -1;
+ }
+ 
+ // Use thumbnail engine
+ ExplorerLens::Engine::ThumbnailPipeline pipeline;
+ // ...
+ 
+ // Cleanup COM
+ CoUninitialize();
+ return 0;
 }
 ```
 
@@ -763,10 +763,10 @@ Explorer automatically initializes COM before loading shell extensions. **No exp
 
 - **Engine Source Code:** `Engine/` directory
 - **Example Decoders:**
-  - `Engine/Decoders/ImageDecoder.cpp` - WIC-based decoder (JPEG, PNG, BMP, GIF, TIFF)
-  - `Engine/Decoders/WebPDecoder.cpp` - libwebp-based decoder
-  - `Engine/Decoders/AVIFDecoder.cpp` - libavif-based decoder
-  - `Engine/Decoders/ArchiveDecoder.cpp` - Archive extraction decoder
+ - `Engine/Decoders/ImageDecoder.cpp` - WIC-based decoder (JPEG, PNG, BMP, GIF, TIFF)
+ - `Engine/Decoders/WebPDecoder.cpp` - libwebp-based decoder
+ - `Engine/Decoders/AVIFDecoder.cpp` - libavif-based decoder
+ - `Engine/Decoders/ArchiveDecoder.cpp` - Archive extraction decoder
 - **Testing:** `Engine/Tests/EngineBenchmark.cpp` - Performance validation tool
 - **Type Definitions:** `Engine/Core/Types.h` - All core structures and enums
 
@@ -785,13 +785,13 @@ Explorer automatically initializes COM before loading shell extensions. **No exp
 
 **Roadmap:**
 
-- **Sprint 11 (Current):** API documentation, performance optimization
-- **Sprint 12 (Week 6):** Dynamic plugin loading, JXL decoder update
-- **Sprint 13:** Plugin SDK, developer samples, marketplace integration
+- ** (Current):** API documentation, performance optimization
+- ** (Week 6):** Dynamic plugin loading, JXL decoder update
+- **** Plugin SDK, developer samples, marketplace integration
 
 ---
 
-**Document Version:** 1.0  
-**Engine Version:** 1.0.0 (ExplorerLens 5.3.0)  
+**Document Version:** 1.0 
+**Engine Version:** 1.0.0 (ExplorerLens 5.3.0) 
 **Last Updated:** January 13, 2026
 

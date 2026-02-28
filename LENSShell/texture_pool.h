@@ -1,5 +1,4 @@
-// GPU Texture Pool for ExplorerLens v5.2.1
-// Phase 11 Week 2: GPU Texture Pooling Implementation
+// GPU Texture Pool for ExplorerLens
 // Reduces allocation overhead by 80%, memory usage by 20%
 
 #pragma once
@@ -33,8 +32,9 @@ struct PooledTexture {
   uint32_t useCount;
 
   PooledTexture()
-      : width(0), height(0), format(DXGI_FORMAT_UNKNOWN), inUse(false),
-        useCount(0), lastUsed(std::chrono::steady_clock::now()) {}
+    : width(0), height(0), format(DXGI_FORMAT_UNKNOWN), inUse(false),
+    useCount(0), lastUsed(std::chrono::steady_clock::now()) {
+  }
 };
 
 // GPU Texture Pool - Thread-safe texture reuse system
@@ -59,12 +59,13 @@ private:
 
 public:
   TexturePool()
-      : m_allocations(0), m_reuses(0), m_evictions(0), m_totalMemoryBytes(0) {}
+    : m_allocations(0), m_reuses(0), m_evictions(0), m_totalMemoryBytes(0) {
+  }
 
   ~TexturePool() { Cleanup(); }
 
   // Initialize with D3D device
-  HRESULT Initialize(ID3D11Device *device, ID3D11DeviceContext *context) {
+  HRESULT Initialize(ID3D11Device* device, ID3D11DeviceContext* context) {
     PROFILE_FUNCTION();
 
     if (!device || !context) {
@@ -81,9 +82,9 @@ public:
 
   // Acquire texture from pool or create new
   HRESULT AcquireTexture(UINT width, UINT height, DXGI_FORMAT format,
-                         ID3D11Texture2D **outTexture,
-                         ID3D11ShaderResourceView **outSRV,
-                         ID3D11UnorderedAccessView **outUAV) {
+    ID3D11Texture2D** outTexture,
+    ID3D11ShaderResourceView** outSRV,
+    ID3D11UnorderedAccessView** outUAV) {
     PROFILE_SCOPE("TexturePool::AcquireTexture");
 
     if (!m_device || !outTexture) {
@@ -93,9 +94,9 @@ public:
     std::lock_guard<std::mutex> lock(m_mutex);
 
     // Search for available texture with matching size
-    for (auto &entry : m_pool) {
+    for (auto& entry : m_pool) {
       if (!entry->inUse && entry->width == width && entry->height == height &&
-          entry->format == format) {
+        entry->format == format) {
 
         // Reuse existing texture
         entry->inUse = true;
@@ -118,8 +119,8 @@ public:
         m_reuses++;
 
         std::string poolInfo = "Texture reused: " + std::to_string(width) +
-                               "x" + std::to_string(height) + " (use count: " +
-                               std::to_string(entry->useCount) + ")";
+          "x" + std::to_string(height) + " (use count: " +
+          std::to_string(entry->useCount) + ")";
         DT_LOG_DEBUG(LogCategory::GPU, poolInfo);
 
         return S_OK;
@@ -128,7 +129,7 @@ public:
 
     // No available texture, create new
     HRESULT hr =
-        CreateNewTexture(width, height, format, outTexture, outSRV, outUAV);
+      CreateNewTexture(width, height, format, outTexture, outSRV, outUAV);
     if (SUCCEEDED(hr)) {
       m_allocations++;
     }
@@ -137,7 +138,7 @@ public:
   }
 
   // Release texture back to pool
-  void ReleaseTexture(ID3D11Texture2D *texture) {
+  void ReleaseTexture(ID3D11Texture2D* texture) {
     PROFILE_SCOPE("TexturePool::ReleaseTexture");
 
     if (!texture)
@@ -146,7 +147,7 @@ public:
     std::lock_guard<std::mutex> lock(m_mutex);
 
     // Find texture in pool
-    for (auto &entry : m_pool) {
+    for (auto& entry : m_pool) {
       if (entry->texture.Get() == texture) {
         entry->inUse = false;
         entry->lastUsed = std::chrono::steady_clock::now();
@@ -173,36 +174,36 @@ public:
 
     // Remove textures unused for too long
     m_pool.erase(
-        std::remove_if(
-            m_pool.begin(), m_pool.end(),
-            [&](const std::unique_ptr<PooledTexture> &entry) {
-              if (entry->inUse)
-                return false;
+      std::remove_if(
+        m_pool.begin(), m_pool.end(),
+        [&](const std::unique_ptr<PooledTexture>& entry) {
+          if (entry->inUse)
+            return false;
 
-              auto age = std::chrono::duration_cast<std::chrono::seconds>(
-                  now - entry->lastUsed);
+          auto age = std::chrono::duration_cast<std::chrono::seconds>(
+            now - entry->lastUsed);
 
-              if (age > threshold) {
-                uint64_t texSize = CalculateTextureSize(entry.get());
-                m_totalMemoryBytes -= texSize;
-                m_evictions++;
+          if (age > threshold) {
+            uint64_t texSize = CalculateTextureSize(entry.get());
+            m_totalMemoryBytes -= texSize;
+            m_evictions++;
 
-                std::string evictInfo =
-                    "Evicted texture: " + std::to_string(entry->width) + "x" +
-                    std::to_string(entry->height) +
-                    " (age: " + std::to_string(age.count()) + "s)";
-                DT_LOG_DEBUG(LogCategory::GPU, evictInfo);
+            std::string evictInfo =
+              "Evicted texture: " + std::to_string(entry->width) + "x" +
+              std::to_string(entry->height) +
+              " (age: " + std::to_string(age.count()) + "s)";
+            DT_LOG_DEBUG(LogCategory::GPU, evictInfo);
 
-                return true;
-              }
-              return false;
-            }),
-        m_pool.end());
+            return true;
+          }
+          return false;
+        }),
+      m_pool.end());
 
     size_t evicted = beforeCount - m_pool.size();
     if (evicted > 0) {
       std::string evictSummary =
-          "Evicted " + std::to_string(evicted) + " textures from pool";
+        "Evicted " + std::to_string(evicted) + " textures from pool";
       DT_LOG_INFO(LogCategory::GPU, evictSummary);
     }
   }
@@ -217,9 +218,9 @@ public:
 
     if (m_totalMemoryBytes > maxBytes) {
       std::string pressureInfo =
-          "Memory pressure detected: " +
-          std::to_string(m_totalMemoryBytes / (1024 * 1024)) + " MB / " +
-          std::to_string(MAX_MEMORY_MB) + " MB";
+        "Memory pressure detected: " +
+        std::to_string(m_totalMemoryBytes / (1024 * 1024)) + " MB / " +
+        std::to_string(MAX_MEMORY_MB) + " MB";
       DT_LOG_WARNING(LogCategory::GPU, pressureInfo);
 
       // Evict least recently used textures
@@ -229,12 +230,12 @@ public:
 
   // Get pool statistics
   std::string GetStatistics() const {
-    std::lock_guard<std::mutex> lock(const_cast<std::mutex &>(m_mutex));
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_mutex));
 
     size_t inUse = 0;
     size_t available = 0;
 
-    for (const auto &entry : m_pool) {
+    for (const auto& entry : m_pool) {
       if (entry->inUse)
         inUse++;
       else
@@ -242,21 +243,21 @@ public:
     }
 
     double reuseRate = (m_allocations + m_reuses) > 0
-                           ? (static_cast<double>(m_reuses) /
-                              (m_allocations + m_reuses) * 100.0)
-                           : 0.0;
+      ? (static_cast<double>(m_reuses) /
+        (m_allocations + m_reuses) * 100.0)
+      : 0.0;
 
     std::ostringstream oss;
     oss << "Texture Pool Statistics:\n"
-        << "  Pool Size: " << m_pool.size() << " textures\n"
-        << "  In Use: " << inUse << " textures\n"
-        << "  Available: " << available << " textures\n"
-        << "  Total Memory: " << (m_totalMemoryBytes / (1024 * 1024)) << " MB\n"
-        << "  Allocations: " << m_allocations << "\n"
-        << "  Reuses: " << m_reuses << "\n"
-        << "  Evictions: " << m_evictions << "\n"
-        << "  Reuse Rate: " << std::fixed << std::setprecision(1) << reuseRate
-        << "%";
+      << "  Pool Size: " << m_pool.size() << " textures\n"
+      << "  In Use: " << inUse << " textures\n"
+      << "  Available: " << available << " textures\n"
+      << "  Total Memory: " << (m_totalMemoryBytes / (1024 * 1024)) << " MB\n"
+      << "  Allocations: " << m_allocations << "\n"
+      << "  Reuses: " << m_reuses << "\n"
+      << "  Evictions: " << m_evictions << "\n"
+      << "  Reuse Rate: " << std::fixed << std::setprecision(1) << reuseRate
+      << "%";
 
     return oss.str();
   }
@@ -269,8 +270,8 @@ public:
 
     if (!m_pool.empty()) {
       std::string cleanupInfo =
-          "Cleaning up texture pool: " + std::to_string(m_pool.size()) +
-          " textures";
+        "Cleaning up texture pool: " + std::to_string(m_pool.size()) +
+        " textures";
       DT_LOG_INFO(LogCategory::GPU, cleanupInfo);
     }
 
@@ -281,9 +282,9 @@ public:
 private:
   // Create new texture and add to pool
   HRESULT CreateNewTexture(UINT width, UINT height, DXGI_FORMAT format,
-                           ID3D11Texture2D **outTexture,
-                           ID3D11ShaderResourceView **outSRV,
-                           ID3D11UnorderedAccessView **outUAV) {
+    ID3D11Texture2D** outTexture,
+    ID3D11ShaderResourceView** outSRV,
+    ID3D11UnorderedAccessView** outUAV) {
     // Check if pool is full
     if (m_pool.size() >= MAX_POOL_SIZE) {
       // Evict oldest unused texture
@@ -300,24 +301,24 @@ private:
     texDesc.SampleDesc.Count = 1;
     texDesc.Usage = D3D11_USAGE_DEFAULT;
     texDesc.BindFlags =
-        D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+      D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 
     auto entry = std::make_unique<PooledTexture>();
 
     HRESULT hr = m_device->CreateTexture2D(&texDesc, nullptr, &entry->texture);
     if (FAILED(hr)) {
       DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU,
-                     "Failed to create pooled texture", hr);
+        "Failed to create pooled texture", hr);
       return hr;
     }
 
     // Create SRV if requested
     if (outSRV) {
       hr = m_device->CreateShaderResourceView(entry->texture.Get(), nullptr,
-                                              &entry->srv);
+        &entry->srv);
       if (FAILED(hr)) {
         DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU,
-                       "Failed to create SRV for pooled texture", hr);
+          "Failed to create SRV for pooled texture", hr);
         return hr;
       }
     }
@@ -325,10 +326,10 @@ private:
     // Create UAV if requested
     if (outUAV) {
       hr = m_device->CreateUnorderedAccessView(entry->texture.Get(), nullptr,
-                                               &entry->uav);
+        &entry->uav);
       if (FAILED(hr)) {
         DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU,
-                       "Failed to create UAV for pooled texture", hr);
+          "Failed to create UAV for pooled texture", hr);
         return hr;
       }
     }
@@ -359,8 +360,8 @@ private:
     m_pool.push_back(std::move(entry));
 
     std::string allocInfo = "Created new texture: " + std::to_string(width) +
-                            "x" + std::to_string(height) + " (" +
-                            std::to_string(texSize / 1024) + " KB)";
+      "x" + std::to_string(height) + " (" +
+      std::to_string(texSize / 1024) + " KB)";
     DT_LOG_DEBUG(LogCategory::GPU, allocInfo);
 
     return S_OK;
@@ -388,8 +389,8 @@ private:
       m_evictions++;
 
       std::string evictInfo =
-          "LRU evicted: " + std::to_string((*oldest)->width) + "x" +
-          std::to_string((*oldest)->height);
+        "LRU evicted: " + std::to_string((*oldest)->width) + "x" +
+        std::to_string((*oldest)->height);
       DT_LOG_DEBUG(LogCategory::GPU, evictInfo);
 
       m_pool.erase(oldest);
@@ -419,7 +420,7 @@ private:
   }
 
   // Calculate texture memory size
-  uint64_t CalculateTextureSize(const PooledTexture *entry) const {
+  uint64_t CalculateTextureSize(const PooledTexture* entry) const {
     uint32_t bitsPerPixel = 32; // RGBA8 = 32 bits
 
     // Adjust for format
@@ -439,9 +440,8 @@ private:
     }
 
     return static_cast<uint64_t>(entry->width) * entry->height * bitsPerPixel /
-           8;
+      8;
   }
 };
 
 } // namespace ExplorerLens
-

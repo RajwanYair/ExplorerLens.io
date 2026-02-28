@@ -1,7 +1,6 @@
 // =============================================================================
 // shellhost_client.h - ShellHost IPC Client with Circuit Breaker
 // =============================================================================
-// Sprint 19: Out-of-Process Worker
 // Thin client in ShellHost (Explorer) that communicates with Worker process
 // =============================================================================
 

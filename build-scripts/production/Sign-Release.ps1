@@ -1,5 +1,4 @@
 # Sign-Release.ps1
-# Sprint 16: Code Signing & Distribution Automation
 # Signs binaries and MSI installer with Authenticode certificate
 # Date: February 17, 2026
 
@@ -33,7 +32,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "=== ExplorerLens Release Signing ===" -ForegroundColor Cyan
-Write-Host "Sprint 16: Code Signing & Distribution"
+Write-Host ": Code Signing & Distribution"
 Write-Host ""
 
 # Certificate discovery

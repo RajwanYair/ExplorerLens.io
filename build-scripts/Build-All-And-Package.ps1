@@ -1,23 +1,21 @@
 #Requires -Version 7.0
-# ExplorerLens v7.0 - Complete Build & Package Script
+# ExplorerLens v15.0.0 "Zenith" - Complete Build & Package Script
 # Builds all dependencies, projects, and creates MSI installer
 #
 # USAGE:
 #   .\Build-All-And-Package.ps1                    # Build everything
 #   .\Build-All-And-Package.ps1 -SkipDependencies  # Skip external libs
 #   .\Build-All-And-Package.ps1 -Configuration Debug
-#
-# Date: February 16, 2026
 
 param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
-    
+
     [switch]$SkipDependencies,
     [switch]$SkipTests,
     [switch]$Clean,
     [switch]$SkipPackaging,
-    [string]$Version = "7.0.0"
+    [string]$Version = "15.0.0"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -66,7 +64,7 @@ if (-not $SkipDependencies) {
     Write-Host "  Phase 1: Building External Dependencies" -ForegroundColor Cyan
     Write-Host ("=" * 80) -ForegroundColor Cyan
     Write-Host ""
-    
+
     $libScripts = @(
         # Compression libraries (build order matters - zlib first)
         "Build-Zlib.ps1",
@@ -84,22 +82,22 @@ if (-not $SkipDependencies) {
         # Camera RAW
         "Build-LibRaw.ps1"
     )
-    
+
     foreach ($script in $libScripts) {
         $scriptPath = Join-Path $externalLibsDir $script
-        
+
         if (Test-Path $scriptPath) {
             Write-Host ""
             Write-Host "Building: $script" -ForegroundColor Cyan
             Write-Host ("-" * 80) -ForegroundColor Gray
-            
+
             try {
                 & $scriptPath -Configuration $Configuration -Clean:$Clean
-                
+
                 if ($LASTEXITCODE -ne 0) {
                     throw "Build failed with exit code $LASTEXITCODE"
                 }
-                
+
                 Write-Host "✓ $script completed" -ForegroundColor Green
             } catch {
                 Write-Host "✗ $script failed: $($_.Exception.Message)" -ForegroundColor Red
@@ -109,7 +107,7 @@ if (-not $SkipDependencies) {
             Write-Host "⚠ Script not found: $script (skipping)" -ForegroundColor Yellow
         }
     }
-    
+
     Write-Host ""
     Write-Host "✓ Phase 1 Complete: All external dependencies built" -ForegroundColor Green
 } else {
@@ -137,9 +135,9 @@ if (Test-Path $buildMsvcScript) {
 
         $buildArgs = @{
             Preset = $preset
-            Jobs = 8
+            Jobs   = 8
             Target = "ExplorerLensEngine"
-            Clean = $Clean
+            Clean  = $Clean
         }
 
         & $buildMsvcScript @buildArgs
@@ -147,7 +145,7 @@ if (Test-Path $buildMsvcScript) {
         if ($LASTEXITCODE -ne 0) {
             throw "Build-MSVC failed with exit code $LASTEXITCODE"
         }
-        
+
         Write-Host "✓ Phase 2 Complete: ExplorerLens Engine built" -ForegroundColor Green
     } catch {
         Write-Host "✗ Engine build failed: $($_.Exception.Message)" -ForegroundColor Red
@@ -173,17 +171,17 @@ $solutionFile = Join-Path $rootDir "LENSShell.sln"
 if (Test-Path $solutionFile) {
     try {
         $msbuildPath = Find-MSBuildPath
-        
+
         if (-not $msbuildPath) {
             throw "MSBuild not found"
         }
-        
+
         Write-Host "Using MSBuild: $msbuildPath" -ForegroundColor Cyan
         Write-Host "Building solution: $solutionFile" -ForegroundColor Cyan
         Write-Host ""
-        
+
         $target = if ($Clean) { 'Rebuild' } else { 'Build' }
-        
+
         & $msbuildPath `
             $solutionFile `
             /p:Configuration=$Configuration `
@@ -192,11 +190,11 @@ if (Test-Path $solutionFile) {
             /m `
             /v:minimal `
             /nologo
-        
+
         if ($LASTEXITCODE -ne 0) {
             throw "MSBuild failed with exit code $LASTEXITCODE"
         }
-        
+
         Write-Host ""
         Write-Host "✓ Phase 3 Complete: LENSShell solution built" -ForegroundColor Green
     } catch {
@@ -218,17 +216,17 @@ if (-not $SkipPackaging) {
     Write-Host "  Phase 4: Creating MSI Installer Package" -ForegroundColor Cyan
     Write-Host ("=" * 80) -ForegroundColor Cyan
     Write-Host ""
-    
+
     $packagingScript = Join-Path $rootDir "packaging\Build-Installer.ps1"
-    
+
     if (Test-Path $packagingScript) {
         try {
             & $packagingScript -Configuration $Configuration -Version $Version
-            
+
             if ($LASTEXITCODE -ne 0) {
                 throw "Packaging failed with exit code $LASTEXITCODE"
             }
-            
+
             Write-Host ""
             Write-Host "✓ Phase 4 Complete: MSI installer created" -ForegroundColor Green
         } catch {
@@ -279,4 +277,3 @@ Write-Host "  • Register COM:   regsvr32 LENSShell\x64\$Configuration\LENSShel
 Write-Host ""
 
 exit 0
-

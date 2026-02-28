@@ -1,7 +1,6 @@
 # Plugin Marketplace & Registry Protocol v1.0
 
-**Version:** 1.0  
-**Sprint:** 12 (Sprint 12.5)  
+**Version:** 1.0 
 **Created:** January 6, 2026
 
 ---
@@ -38,30 +37,30 @@ Base URL: `https://api.marketplace.explorerlens.dev/v1`
 
 ```json
 {
-  "version": "1.0",
-  "timestamp": "2026-01-06T14:30:00Z",
-  "total": 127,
-  "page": 1,
-  "limit": 20,
-  "plugins": [
-    {
-      "id": "explorerlens.plugin.psd",
-      "name": "Photoshop Document Decoder",
-      "vendor": "Adobe Systems Inc.",
-      "description": "Native PSD thumbnail decoder with layer support",
-      "version": "1.2.3",
-      "category": "Image Decoders",
-      "verified": true,
-      "rating": 4.8,
-      "downloads": 125000,
-      "lastUpdated": "2026-01-05T10:00:00Z",
-      "icon": "https://cdn.marketplace.explorerlens.dev/plugins/psd/icon-256.png",
-      "formats": [".psd", ".psb"],
-      "abiVersion": 1,
-      "minEngineVersion": "6.0.0",
-      "maxEngineVersion": "6.9.99"
-    }
-  ]
+ "version": "1.0",
+ "timestamp": "2026-01-06T14:30:00Z",
+ "total": 127,
+ "page": 1,
+ "limit": 20,
+ "plugins": [
+ {
+ "id": "explorerlens.plugin.psd",
+ "name": "Photoshop Document Decoder",
+ "vendor": "Adobe Systems Inc.",
+ "description": "Native PSD thumbnail decoder with layer support",
+ "version": "1.2.3",
+ "category": "Image Decoders",
+ "verified": true,
+ "rating": 4.8,
+ "downloads": 125000,
+ "lastUpdated": "2026-01-05T10:00:00Z",
+ "icon": "https://cdn.marketplace.explorerlens.dev/plugins/psd/icon-256.png",
+ "formats": [".psd", ".psb"],
+ "abiVersion": 1,
+ "minEngineVersion": "6.0.0",
+ "maxEngineVersion": "6.9.99"
+ }
+ ]
 }
 ```
 
@@ -75,96 +74,96 @@ Base URL: `https://api.marketplace.explorerlens.dev/v1`
 
 ```json
 {
-  "id": "explorerlens.plugin.psd",
-  "name": "Photoshop Document Decoder",
-  "vendor": "Adobe Systems Inc.",
-  "description": "Native PSD thumbnail decoder with layer support",
-  "longDescription": "Full markdown description...",
-  "version": "1.2.3",
-  "category": "Image Decoders",
-  "verified": true,
-  "rating": 4.8,
-  "ratingsCount": 3425,
-  "downloads": 125000,
-  "lastUpdated": "2026-01-05T10:00:00Z",
-  "created": "2025-03-15T08:00:00Z",
-  "homepage": "https://github.com/adobe/explorerlens-psd",
-  "repository": "https://github.com/adobe/explorerlens-psd",
-  "license": "MIT",
-  "author": {
-    "name": "John Doe",
-    "email": "john@adobe.com",
-    "url": "https://adobe.com"
-  },
-  "icon": "https://cdn.marketplace.explorerlens.dev/plugins/psd/icon-256.png",
-  "screenshots": [
-    "https://cdn.marketplace.explorerlens.dev/plugins/psd/screenshot-1.png",
-    "https://cdn.marketplace.explorerlens.dev/plugins/psd/screenshot-2.png"
-  ],
-  "formats": [
-    {
-      "extension": ".psd",
-      "mimeType": "image/vnd.adobe.photoshop",
-      "description": "Adobe Photoshop Document"
-    },
-    {
-      "extension": ".psb",
-      "mimeType": "image/vnd.adobe.photoshop",
-      "description": "Adobe Photoshop Large Document"
-    }
-  ],
-  "capabilities": ["read_file", "decode", "metadata"],
-  "abiVersion": 1,
-  "minEngineVersion": "5.4.0",
-  "maxEngineVersion": "6.9.99",
-  "dependencies": {
-    "runtime": ["vcredist.x64.14.0"],
-    "plugins": []
-  },
-  "channels": {
-    "stable": {
-      "version": "1.2.3",
-      "releaseDate": "2026-01-05",
-      "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.2.3.dtplugin",
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "size": 2458624,
-      "changelog": "Fixed layer rendering bug, improved performance"
-    },
-    "beta": {
-      "version": "1.3.0-beta.1",
-      "releaseDate": "2026-01-01",
-      "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.3.0-beta.1.dtplugin",
-      "sha256": "...",
-      "size": 2459136,
-      "changelog": "Added Smart Object support"
-    }
-  },
-  "verification": {
-    "verified": true,
-    "verifiedDate": "2025-12-15",
-    "certificate": {
-      "thumbprint": "A1B2C3D4E5F6...",
-      "subject": "CN=Adobe Systems Inc.",
-      "issuer": "CN=DigiCert SHA2 Code Signing CA",
-      "validFrom": "2025-01-01T00:00:00Z",
-      "validTo": "2028-01-01T00:00:00Z"
-    },
-    "compatibilityTestPassed": true,
-    "testKitVersion": "1.0.0",
-    "sourceReview": true,
-    "securityAudit": true
-  },
-  "reviews": {
-    "average": 4.8,
-    "count": 3425,
-    "breakdown": {
-      "5": 2850,
-      "4": 425,
-      "3": 100,
-      "2": 35,
-      "1": 15
-    }
-  }
+ "id": "explorerlens.plugin.psd",
+ "name": "Photoshop Document Decoder",
+ "vendor": "Adobe Systems Inc.",
+ "description": "Native PSD thumbnail decoder with layer support",
+ "longDescription": "Full markdown description...",
+ "version": "1.2.3",
+ "category": "Image Decoders",
+ "verified": true,
+ "rating": 4.8,
+ "ratingsCount": 3425,
+ "downloads": 125000,
+ "lastUpdated": "2026-01-05T10:00:00Z",
+ "created": "2025-03-15T08:00:00Z",
+ "homepage": "https://github.com/adobe/explorerlens-psd",
+ "repository": "https://github.com/adobe/explorerlens-psd",
+ "license": "MIT",
+ "author": {
+ "name": "John Doe",
+ "email": "john@adobe.com",
+ "url": "https://adobe.com"
+ },
+ "icon": "https://cdn.marketplace.explorerlens.dev/plugins/psd/icon-256.png",
+ "screenshots": [
+ "https://cdn.marketplace.explorerlens.dev/plugins/psd/screenshot-1.png",
+ "https://cdn.marketplace.explorerlens.dev/plugins/psd/screenshot-2.png"
+ ],
+ "formats": [
+ {
+ "extension": ".psd",
+ "mimeType": "image/vnd.adobe.photoshop",
+ "description": "Adobe Photoshop Document"
+ },
+ {
+ "extension": ".psb",
+ "mimeType": "image/vnd.adobe.photoshop",
+ "description": "Adobe Photoshop Large Document"
+ }
+ ],
+ "capabilities": ["read_file", "decode", "metadata"],
+ "abiVersion": 1,
+ "minEngineVersion": "5.4.0",
+ "maxEngineVersion": "6.9.99",
+ "dependencies": {
+ "runtime": ["vcredist.x64.14.0"],
+ "plugins": []
+ },
+ "channels": {
+ "stable": {
+ "version": "1.2.3",
+ "releaseDate": "2026-01-05",
+ "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.2.3.dtplugin",
+ "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+ "size": 2458624,
+ "changelog": "Fixed layer rendering bug, improved performance"
+ },
+ "beta": {
+ "version": "1.3.0-beta.1",
+ "releaseDate": "2026-01-01",
+ "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.3.0-beta.1.dtplugin",
+ "sha256": "...",
+ "size": 2459136,
+ "changelog": "Added Smart Object support"
+ }
+ },
+ "verification": {
+ "verified": true,
+ "verifiedDate": "2025-12-15",
+ "certificate": {
+ "thumbprint": "A1B2C3D4E5F6...",
+ "subject": "CN=Adobe Systems Inc.",
+ "issuer": "CN=DigiCert SHA2 Code Signing CA",
+ "validFrom": "2025-01-01T00:00:00Z",
+ "validTo": "2028-01-01T00:00:00Z"
+ },
+ "compatibilityTestPassed": true,
+ "testKitVersion": "1.0.0",
+ "sourceReview": true,
+ "securityAudit": true
+ },
+ "reviews": {
+ "average": 4.8,
+ "count": 3425,
+ "breakdown": {
+ "5": 2850,
+ "4": 425,
+ "3": 100,
+ "2": 35,
+ "1": 15
+ }
+ }
 }
 ```
 
@@ -204,18 +203,18 @@ Base URL: `https://api.marketplace.explorerlens.dev/v1`
 
 ```json
 {
-  "plugins": [
-    {
-      "id": "explorerlens.plugin.psd",
-      "version": "1.2.0",
-      "channel": "stable"
-    },
-    {
-      "id": "explorerlens.plugin.webp",
-      "version": "2.1.5",
-      "channel": "stable"
-    }
-  ]
+ "plugins": [
+ {
+ "id": "explorerlens.plugin.psd",
+ "version": "1.2.0",
+ "channel": "stable"
+ },
+ {
+ "id": "explorerlens.plugin.webp",
+ "version": "2.1.5",
+ "channel": "stable"
+ }
+ ]
 }
 ```
 
@@ -223,25 +222,25 @@ Base URL: `https://api.marketplace.explorerlens.dev/v1`
 
 ```json
 {
-  "updates": [
-    {
-      "id": "explorerlens.plugin.psd",
-      "currentVersion": "1.2.0",
-      "availableVersion": "1.2.3",
-      "updateAvailable": true,
-      "breaking": false,
-      "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.2.3.dtplugin",
-      "sha256": "...",
-      "size": 2458624,
-      "changelog": "Fixed layer rendering bug, improved performance"
-    },
-    {
-      "id": "explorerlens.plugin.webp",
-      "currentVersion": "2.1.5",
-      "availableVersion": "2.1.5",
-      "updateAvailable": false
-    }
-  ]
+ "updates": [
+ {
+ "id": "explorerlens.plugin.psd",
+ "currentVersion": "1.2.0",
+ "availableVersion": "1.2.3",
+ "updateAvailable": true,
+ "breaking": false,
+ "downloadUrl": "https://cdn.marketplace.explorerlens.dev/plugins/psd/psd-1.2.3.dtplugin",
+ "sha256": "...",
+ "size": 2458624,
+ "changelog": "Fixed layer rendering bug, improved performance"
+ },
+ {
+ "id": "explorerlens.plugin.webp",
+ "currentVersion": "2.1.5",
+ "availableVersion": "2.1.5",
+ "updateAvailable": false
+ }
+ ]
 }
 ```
 
@@ -255,19 +254,19 @@ Base URL: `https://api.marketplace.explorerlens.dev/v1`
 
 ```json
 {
-  "version": 1,
-  "timestamp": "2026-01-06T14:30:00Z",
-  "revocations": [
-    {
-      "pluginId": "explorerlens.plugin.malicious",
-      "version": "1.0.5",
-      "reason": "Critical security vulnerability (CVE-2026-1234)",
-      "date": "2026-01-06",
-      "severity": "critical",
-      "action": "block",
-      "details": "https://security.explorerlens.dev/CVE-2026-1234"
-    }
-  ]
+ "version": 1,
+ "timestamp": "2026-01-06T14:30:00Z",
+ "revocations": [
+ {
+ "pluginId": "explorerlens.plugin.malicious",
+ "version": "1.0.5",
+ "reason": "Critical security vulnerability (CVE-2026-1234)",
+ "date": "2026-01-06",
+ "severity": "critical",
+ "action": "block",
+ "details": "https://security.explorerlens.dev/CVE-2026-1234"
+ }
+ ]
 }
 ```
 
@@ -329,9 +328,9 @@ Run automated test suite covering:
 
 # Submit results
 curl -X POST https://api.marketplace.explorerlens.dev/v1/verification/submit \
-  -H "Authorization: Bearer {api-key}" \
-  -F "pluginId=explorerlens.plugin.myplugin" \
-  -F "results=@results.json"
+ -H "Authorization: Bearer {api-key}" \
+ -F "pluginId=explorerlens.plugin.myplugin" \
+ -F "results=@results.json"
 ```
 
 ### 2. Source Code Review
@@ -339,10 +338,10 @@ curl -X POST https://api.marketplace.explorerlens.dev/v1/verification/submit \
 - Public GitHub repository (preferred)
 - Or: Submit source for private review
 - Reviewers check for:
-  - Security vulnerabilities
-  - Malicious code
-  - License compliance
-  - Code quality
+ - Security vulnerabilities
+ - Malicious code
+ - License compliance
+ - Code quality
 
 ### 3. Security Audit
 
@@ -373,28 +372,28 @@ curl -X POST https://api.marketplace.explorerlens.dev/v1/verification/submit \
 
 ```cpp
 bool VerifyPluginSignature(const std::wstring& pluginPath) {
-    // 1. Verify Authenticode signature
-    if (!VerifyAuthenticodeSignature(pluginPath)) {
-        return false;
-    }
-    
-    // 2. Check certificate chain
-    if (!VerifyCertificateChain(pluginPath)) {
-        return false;
-    }
-    
-    // 3. Check revocation status (OCSP/CRL)
-    if (IsCertificateRevoked(pluginPath)) {
-        return false;
-    }
-    
-    // 4. Verify hash matches manifest
-    std::string actualHash = ComputeSha256(pluginPath);
-    if (actualHash != manifestHash) {
-        return false;
-    }
-    
-    return true;
+ // 1. Verify Authenticode signature
+ if (!VerifyAuthenticodeSignature(pluginPath)) {
+ return false;
+ }
+ 
+ // 2. Check certificate chain
+ if (!VerifyCertificateChain(pluginPath)) {
+ return false;
+ }
+ 
+ // 3. Check revocation status (OCSP/CRL)
+ if (IsCertificateRevoked(pluginPath)) {
+ return false;
+ }
+ 
+ // 4. Verify hash matches manifest
+ std::string actualHash = ComputeSha256(pluginPath);
+ if (actualHash != manifestHash) {
+ return false;
+ }
+ 
+ return true;
 }
 ```
 
@@ -402,25 +401,25 @@ bool VerifyPluginSignature(const std::wstring& pluginPath) {
 
 ```cpp
 bool VerifyPluginIntegrity(LoadedPlugin* plugin) {
-    // 1. Re-verify hash (detect tampering)
-    std::string actualHash = ComputeSha256(plugin->GetBinaryPath());
-    if (actualHash != plugin->GetManifest().binarySha256) {
-        return false;
-    }
-    
-    // 2. Check revocation list
-    if (IsPluginRevoked(plugin->GetManifest().id, 
-                        plugin->GetManifest().version)) {
-        return false;
-    }
-    
-    // 3. Verify ABI compatibility
-    const DT_PluginInfo* info = plugin->GetInfo();
-    if (info->abiVersion != DT_PLUGIN_ABI_VERSION) {
-        return false;
-    }
-    
-    return true;
+ // 1. Re-verify hash (detect tampering)
+ std::string actualHash = ComputeSha256(plugin->GetBinaryPath());
+ if (actualHash != plugin->GetManifest().binarySha256) {
+ return false;
+ }
+ 
+ // 2. Check revocation list
+ if (IsPluginRevoked(plugin->GetManifest().id, 
+ plugin->GetManifest().version)) {
+ return false;
+ }
+ 
+ // 3. Verify ABI compatibility
+ const DT_PluginInfo* info = plugin->GetInfo();
+ if (info->abiVersion != DT_PLUGIN_ABI_VERSION) {
+ return false;
+ }
+ 
+ return true;
 }
 ```
 
@@ -474,28 +473,28 @@ Hosted at plugin repository root:
 
 ```json
 {
-  "plugin": {
-    "id": "explorerlens.plugin.psd",
-    "name": "Photoshop Document Decoder",
-    "vendor": "Adobe Systems Inc."
-  },
-  "marketplace": {
-    "category": "Image Decoders",
-    "tags": ["photoshop", "psd", "layers", "adobe"],
-    "icon": "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/assets/icon-256.png",
-    "screenshots": [
-      "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/assets/screenshot-1.png"
-    ]
-  },
-  "support": {
-    "homepage": "https://github.com/adobe/explorerlens-psd",
-    "issues": "https://github.com/adobe/explorerlens-psd/issues",
-    "email": "support@adobe.com",
-    "documentation": "https://github.com/adobe/explorerlens-psd/wiki"
-  },
-  "updates": {
-    "updateUrl": "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/update.json"
-  }
+ "plugin": {
+ "id": "explorerlens.plugin.psd",
+ "name": "Photoshop Document Decoder",
+ "vendor": "Adobe Systems Inc."
+ },
+ "marketplace": {
+ "category": "Image Decoders",
+ "tags": ["photoshop", "psd", "layers", "adobe"],
+ "icon": "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/assets/icon-256.png",
+ "screenshots": [
+ "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/assets/screenshot-1.png"
+ ]
+ },
+ "support": {
+ "homepage": "https://github.com/adobe/explorerlens-psd",
+ "issues": "https://github.com/adobe/explorerlens-psd/issues",
+ "email": "support@adobe.com",
+ "documentation": "https://github.com/adobe/explorerlens-psd/wiki"
+ },
+ "updates": {
+ "updateUrl": "https://raw.githubusercontent.com/adobe/explorerlens-psd/main/update.json"
+ }
 }
 ```
 
@@ -507,26 +506,26 @@ Hosted at plugin repository root:
 
 ```json
 {
-  "pluginId": "explorerlens.plugin.psd",
-  "version": "1.2.3",
-  "metrics": {
-    "totalRequests": 1523,
-    "successfulRequests": 1489,
-    "failedRequests": 34,
-    "avgElapsedUs": 45000,
-    "p50ElapsedUs": 38000,
-    "p95ElapsedUs": 89000,
-    "p99ElapsedUs": 125000,
-    "crashCount": 0,
-    "timeoutCount": 2
-  },
-  "system": {
-    "os": "Windows 11 23H2",
-    "cpu": "Intel Core i7-12700K",
-    "gpu": "NVIDIA RTX 4070",
-    "engineVersion": "5.4.0"
-  },
-  "timestamp": "2026-01-06T14:30:00Z"
+ "pluginId": "explorerlens.plugin.psd",
+ "version": "1.2.3",
+ "metrics": {
+ "totalRequests": 1523,
+ "successfulRequests": 1489,
+ "failedRequests": 34,
+ "avgElapsedUs": 45000,
+ "p50ElapsedUs": 38000,
+ "p95ElapsedUs": 89000,
+ "p99ElapsedUs": 125000,
+ "crashCount": 0,
+ "timeoutCount": 2
+ },
+ "system": {
+ "os": "Windows 11 23H2",
+ "cpu": "Intel Core i7-12700K",
+ "gpu": "NVIDIA RTX 4070",
+ "engineVersion": "5.4.0"
+ },
+ "timestamp": "2026-01-06T14:30:00Z"
 }
 ```
 
@@ -617,13 +616,12 @@ Plugin packages hosted on global CDN:
 ## Summary
 
 The Plugin Marketplace provides:
-✅ Centralized plugin discovery  
-✅ Trusted, verified plugins  
-✅ Automatic updates  
-✅ Revocation mechanism  
-✅ Performance telemetry  
-✅ Secure distribution  
+✅ Centralized plugin discovery 
+✅ Trusted, verified plugins 
+✅ Automatic updates 
+✅ Revocation mechanism 
+✅ Performance telemetry 
+✅ Secure distribution 
 ✅ Developer analytics
 
-**Status:** Specification complete, ready for implementation in Sprint 12.
-
+**Status:** Specification complete, ready for implementation in 

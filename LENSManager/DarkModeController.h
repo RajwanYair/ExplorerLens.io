@@ -17,7 +17,7 @@ namespace ExplorerLens {
 
 class DarkModeController {
 public:
-  static DarkModeController &Instance() {
+  static DarkModeController& Instance() {
     static DarkModeController s_instance;
     return s_instance;
   }
@@ -30,7 +30,7 @@ public:
     // Detect current system theme
     m_isDarkMode = DarkMode::IsSystemDarkMode();
     m_colors =
-        m_isDarkMode ? DarkMode::GetDarkTheme() : DarkMode::GetLightTheme();
+      m_isDarkMode ? DarkMode::GetDarkTheme() : DarkMode::GetLightTheme();
     m_accentColor = DarkMode::GetSystemAccentColor();
 
     // Set preferred app mode
@@ -53,6 +53,18 @@ public:
     DarkMode::ApplyThemeToDialog(hWnd, m_colors);
     DarkMode::ApplyDarkScrollbars(hWnd, m_isDarkMode);
 
+    // Windows 11: Rounded corners
+    DarkMode::SetRoundedCorners(hWnd, DarkMode::DWMWCP_ROUND);
+
+    // Windows 11 22H2+: Mica backdrop (only in dark mode for best effect)
+    if (m_isDarkMode) {
+      DarkMode::EnableMicaBackdrop(hWnd);
+    }
+    else {
+      // In light mode, use Mica Alt for a subtle tinted backdrop
+      DarkMode::EnableMicaAltBackdrop(hWnd);
+    }
+
     // Track managed windows
     m_managedWindows.push_back(hWnd);
   }
@@ -63,7 +75,7 @@ public:
   bool OnSettingChange(HWND hWnd, LPARAM lParam) {
     // Check if the "ImmersiveColorSet" setting changed
     if (lParam) {
-      const wchar_t *setting = reinterpret_cast<const wchar_t *>(lParam);
+      const wchar_t* setting = reinterpret_cast<const wchar_t*>(lParam);
       if (wcscmp(setting, L"ImmersiveColorSet") == 0) {
         bool wasDark = m_isDarkMode;
         m_isDarkMode = DarkMode::IsSystemDarkMode();
@@ -71,7 +83,7 @@ public:
         if (wasDark != m_isDarkMode) {
           // Theme changed — refresh everything
           m_colors = m_isDarkMode ? DarkMode::GetDarkTheme()
-                                  : DarkMode::GetLightTheme();
+            : DarkMode::GetLightTheme();
           m_accentColor = DarkMode::GetSystemAccentColor();
 
           DarkMode::SetAppDarkMode(m_isDarkMode);
@@ -100,7 +112,7 @@ public:
   // ====================================================================
 
   // Draw a themed group box
-  void DrawGroupBox(HDC hdc, RECT &rc, const wchar_t *text) {
+  void DrawGroupBox(HDC hdc, RECT& rc, const wchar_t* text) {
     // Fill background
     HBRUSH bgBrush = CreateSolidBrush(m_colors.groupBox);
     FillRect(hdc, &rc, bgBrush);
@@ -119,25 +131,25 @@ public:
     if (text && text[0]) {
       SetTextColor(hdc, m_colors.text);
       SetBkColor(hdc, m_colors.groupBox);
-      RECT textRc = {rc.left + 10, rc.top, rc.left + 200, rc.top + 16};
+      RECT textRc = { rc.left + 10, rc.top, rc.left + 200, rc.top + 16 };
       DrawTextW(hdc, text, -1, &textRc, DT_LEFT | DT_SINGLELINE);
     }
   }
 
   // Draw a themed checkbox
-  void DrawCheckBox(DRAWITEMSTRUCT *dis, bool checked, const wchar_t *text) {
+  void DrawCheckBox(DRAWITEMSTRUCT* dis, bool checked, const wchar_t* text) {
     // Background
     HBRUSH bgBrush = CreateSolidBrush(m_colors.background);
     FillRect(dis->hDC, &dis->rcItem, bgBrush);
     DeleteObject(bgBrush);
 
     // Checkbox square
-    RECT boxRc = {dis->rcItem.left, dis->rcItem.top + 2, dis->rcItem.left + 13,
-                  dis->rcItem.top + 15};
+    RECT boxRc = { dis->rcItem.left, dis->rcItem.top + 2, dis->rcItem.left + 13,
+                  dis->rcItem.top + 15 };
     HPEN pen = CreatePen(PS_SOLID, 1, m_colors.border);
     HPEN oldPen = (HPEN)SelectObject(dis->hDC, pen);
     HBRUSH boxBrush =
-        CreateSolidBrush(checked ? m_accentColor : m_colors.buttonFace);
+      CreateSolidBrush(checked ? m_accentColor : m_colors.buttonFace);
     HBRUSH oldBrush = (HBRUSH)SelectObject(dis->hDC, boxBrush);
     Rectangle(dis->hDC, boxRc.left, boxRc.top, boxRc.right, boxRc.bottom);
     SelectObject(dis->hDC, oldBrush);
@@ -150,25 +162,25 @@ public:
       SetTextColor(dis->hDC, RGB(255, 255, 255));
       RECT chkRc = boxRc;
       DrawTextW(dis->hDC, L"\x2713", -1, &chkRc,
-                DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        DT_CENTER | DT_VCENTER | DT_SINGLELINE);
     }
 
     // Label text
-    RECT textRc = {boxRc.right + 5, dis->rcItem.top, dis->rcItem.right,
-                   dis->rcItem.bottom};
+    RECT textRc = { boxRc.right + 5, dis->rcItem.top, dis->rcItem.right,
+                   dis->rcItem.bottom };
     SetTextColor(dis->hDC, (dis->itemState & ODS_DISABLED)
-                               ? m_colors.disabledText
-                               : m_colors.text);
+      ? m_colors.disabledText
+      : m_colors.text);
     SetBkMode(dis->hDC, TRANSPARENT);
     DrawTextW(dis->hDC, text, -1, &textRc,
-              DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+      DT_LEFT | DT_VCENTER | DT_SINGLELINE);
   }
 
   // ====================================================================
   // Accessors
   // ====================================================================
   bool IsDarkMode() const { return m_isDarkMode; }
-  const DarkMode::ThemeColors &Colors() const { return m_colors; }
+  const DarkMode::ThemeColors& Colors() const { return m_colors; }
   COLORREF AccentColor() const { return m_accentColor; }
 
 private:

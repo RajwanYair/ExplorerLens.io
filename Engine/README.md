@@ -19,31 +19,31 @@ The ExplorerLens Engine is a standalone, reusable thumbnail generation library e
 
 ## Architecture
 
-```
+```text
 Engine/
-├── Core/                        # Core interfaces and types
-│   ├── Types.h                  # Common types (ThumbnailRequest, ThumbnailResult, etc.)
-│   ├── IThumbnailDecoder.h      # Decoder interface
-│   ├── IFormatDetector.h        # Format detection interface
-│   ├── IGPURenderer.h           # GPU rendering interface
-│   └── ICacheProvider.h         # Cache interface
-├── Decoders/                    # Format-specific decoders
-│   ├── ImageDecoder.cpp         # JPEG, PNG, BMP, GIF, TIFF
-│   ├── WebPDecoder.cpp          # WebP format
-│   ├── AVIFDecoder.cpp          # AVIF format
-│   └── ArchiveDecoder.cpp       # ZIP, RAR, 7z archives
-├── Pipeline/                    # Orchestration
-│   ├── ThumbnailPipeline.cpp    # Main pipeline implementation
-│   ├── DecoderRegistry.cpp      # Decoder management
-│   └── FormatDetector.cpp       # Format detection implementation
-├── GPU/                         # GPU rendering
-│   ├── D3D11Renderer.cpp        # DirectX 11 renderer
-│   └── CPURenderer.cpp          # CPU fallback
-├── Tests/                       # Unit tests
-│   ├── FormatDetectionTests.cpp
-│   ├── DecoderTests.cpp
-│   └── PipelineTests.cpp
-└── Engine.h                     # Public API header
+├── Core/ # Core interfaces and types
+│ ├── Types.h # Common types (ThumbnailRequest, ThumbnailResult, etc.)
+│ ├── IThumbnailDecoder.h # Decoder interface
+│ ├── IFormatDetector.h # Format detection interface
+│ ├── IGPURenderer.h # GPU rendering interface
+│ └── ICacheProvider.h # Cache interface
+├── Decoders/ # Format-specific decoders
+│ ├── ImageDecoder.cpp # JPEG, PNG, BMP, GIF, TIFF
+│ ├── WebPDecoder.cpp # WebP format
+│ ├── AVIFDecoder.cpp # AVIF format
+│ └── ArchiveDecoder.cpp # ZIP, RAR, 7z archives
+├── Pipeline/ # Orchestration
+│ ├── ThumbnailPipeline.cpp # Main pipeline implementation
+│ ├── DecoderRegistry.cpp # Decoder management
+│ └── FormatDetector.cpp # Format detection implementation
+├── GPU/ # GPU rendering
+│ ├── D3D11Renderer.cpp # DirectX 11 renderer
+│ └── CPURenderer.cpp # CPU fallback
+├── Tests/ # Unit tests
+│ ├── FormatDetectionTests.cpp
+│ ├── DecoderTests.cpp
+│ └── PipelineTests.cpp
+└── Engine.h # Public API header
 ```
 
 ---
@@ -57,12 +57,12 @@ Core interface that all decoders must implement:
 ```cpp
 class IThumbnailDecoder {
 public:
-    virtual bool CanDecode(const wchar_t* filePath) = 0;
-    virtual HRESULT Decode(const ThumbnailRequest& request, 
-                          ThumbnailResult& result) = 0;
-    virtual DecoderInfo GetInfo() const = 0;
-    virtual const wchar_t* GetName() const = 0;
-    virtual const wchar_t** GetSupportedExtensions() const = 0;
+ virtual bool CanDecode(const wchar_t* filePath) = 0;
+ virtual HRESULT Decode(const ThumbnailRequest& request, 
+ ThumbnailResult& result) = 0;
+ virtual DecoderInfo GetInfo() const = 0;
+ virtual const wchar_t* GetName() const = 0;
+ virtual const wchar_t** GetSupportedExtensions() const = 0;
 };
 ```
 
@@ -73,10 +73,10 @@ Detects file formats by extension or signature:
 ```cpp
 class IFormatDetector {
 public:
-    virtual FormatType DetectFormat(const wchar_t* filePath) = 0;
-    virtual FormatType DetectFromExtension(const wchar_t* extension) = 0;
-    virtual bool IsImageFormat(const wchar_t* extension) const = 0;
-    virtual bool IsArchiveFormat(const wchar_t* extension) const = 0;
+ virtual FormatType DetectFormat(const wchar_t* filePath) = 0;
+ virtual FormatType DetectFromExtension(const wchar_t* extension) = 0;
+ virtual bool IsImageFormat(const wchar_t* extension) const = 0;
+ virtual bool IsArchiveFormat(const wchar_t* extension) const = 0;
 };
 ```
 
@@ -87,13 +87,13 @@ GPU acceleration abstraction:
 ```cpp
 class IGPURenderer {
 public:
-    virtual HRESULT Initialize() = 0;
-    virtual bool IsAvailable() const = 0;
-    virtual HRESULT RenderThumbnail(
-        const uint8_t* imageData, 
-        uint32_t imageWidth, uint32_t imageHeight,
-        uint32_t thumbWidth, uint32_t thumbHeight,
-        HBITMAP* outBitmap) = 0;
+ virtual HRESULT Initialize() = 0;
+ virtual bool IsAvailable() const = 0;
+ virtual HRESULT RenderThumbnail(
+ const uint8_t* imageData, 
+ uint32_t imageWidth, uint32_t imageHeight,
+ uint32_t thumbWidth, uint32_t thumbHeight,
+ HBITMAP* outBitmap) = 0;
 };
 ```
 
@@ -118,8 +118,8 @@ ThumbnailResult result;
 HRESULT hr = decoder->Decode(request, result);
 
 if (SUCCEEDED(hr)) {
-    // Use result.hBitmap
-    DeleteObject(result.hBitmap);
+ // Use result.hBitmap
+ DeleteObject(result.hBitmap);
 }
 ```
 
@@ -216,4 +216,3 @@ ctest --test-dir build -C Release --output-on-failure
 ---
 
 **Created:** January 7, 2026
-

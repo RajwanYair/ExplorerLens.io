@@ -42,7 +42,6 @@ struct ConfigSnapshot
 	bool phz, fb2;
 	bool webp, heif, avif, jxl;
 	bool video, pdf, tiff, svg, raw;
-	// Sprint 8: Professional & Specialized Formats
 	bool psd, dds, hdr, exr;
 	bool ppm, ico, qoi, tga;
 	bool audio, document, font, model;

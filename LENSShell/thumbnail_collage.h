@@ -1,7 +1,7 @@
 /******************************************************************************
  * thumbnail_collage.h
  * Multi-Page Thumbnail Collage for ExplorerLens
- * Sprint C2: Show multiple pages in a grid (2x2, 3x3, 4x4)
+ * Renders multiple pages in a grid layout (2x2, 3x3, 4x4)
  ******************************************************************************/
 
 #pragma once
@@ -49,4 +49,3 @@ private:
 };
 
 } // namespace ExplorerLens
-

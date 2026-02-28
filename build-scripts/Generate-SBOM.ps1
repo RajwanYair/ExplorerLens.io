@@ -1,7 +1,6 @@
 <#
 .SYNOPSIS
     Generate-SBOM.ps1 — Generate CycloneDX SBOM for ExplorerLens
-    Sprint 385 — ExplorerLens v15.0.0 "Zenith"
 
 .DESCRIPTION
     Generates a CycloneDX 1.6 Software Bill of Materials from the project's

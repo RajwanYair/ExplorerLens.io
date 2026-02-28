@@ -205,6 +205,8 @@ if exist "..\external\image-libs\libde265-1.0.15\build-vs\libde265\Release\libde
     <ClCompile Include="EngineAdapter.cpp" />
     <!-- Property Store for Explorer Details Pane (v15.0.0) -->
     <ClCompile Include="PropertyStoreImpl.cpp" />
+    <!-- Win11 Context Menu (v15.0.0) -->
+    <ClCompile Include="LENSShellContextMenu.cpp" />
     <!-- External Library Wrappers (v5.2+) -->
     <!-- libarchive_wrapper.cpp - libarchive 3.7.6 static library integration (v15.0.0) -->
     <ClCompile Include="libarchive_wrapper.cpp" />
@@ -240,6 +242,8 @@ if exist "..\external\image-libs\libde265-1.0.15\build-vs\libde265\Release\libde
     <ClInclude Include="EngineAdapter.h" />
     <!-- Property Store for Explorer Details Pane (v15.0.0) -->
     <ClInclude Include="PropertyStoreImpl.h" />
+    <!-- Win11 Context Menu (v15.0.0) -->
+    <ClInclude Include="LENSShellContextMenu.h" />
     <ClInclude Include="LENSTypes.h" />
     <!-- External Library Wrappers (v5.2+) -->
     <ClInclude Include="libarchive_wrapper.h" />

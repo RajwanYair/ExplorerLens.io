@@ -1,6 +1,6 @@
 # Build Scripts - ExplorerLens v15.0.0
 
-**Unified Build System for Windows 11**  
+**Unified Build System for Windows 11** 
 Comprehensive build infrastructure for external dependencies, engine, and installer packaging.
 
 > **⚡ NEW in v15.0.0:** Unified build modules, 50% code reduction, vcpkg integration
@@ -11,29 +11,29 @@ Comprehensive build infrastructure for external dependencies, engine, and instal
 
 ```
 build-scripts/
-├── core/                           # 🆕 Core build modules
-│   ├── Build-Library-Core.ps1      #     Unified build functions (CMake, MSBuild, NMake)
-│   └── Build-Helpers.ps1           #     vcpkg integration, Git helpers, environment
+├── core/ # 🆕 Core build modules
+│ ├── Build-Library-Core.ps1 # Unified build functions (CMake, MSBuild, NMake)
+│ └── Build-Helpers.ps1 # vcpkg integration, Git helpers, environment
 │
-├── external-libs/                  # External library build scripts
-│   ├── Build-LibWebP-NMake.ps1     #     ✅ Refactored (175 → 102 lines)
-│   ├── Build-MinizipNG.ps1         #     ✅ Refactored (104 → 60 lines)
-│   ├── build-libjxl.ps1            #     ✅ Refactored (150 → 90 lines)
-│   ├── build-libavif.ps1           #     ✅ Refactored (150 → 80 lines)
-│   └── [other libraries...]        #     🔄 Migration in progress
+├── external-libs/ # External library build scripts
+│ ├── Build-LibWebP-NMake.ps1 # ✅ Refactored (175 → 102 lines)
+│ ├── Build-MinizipNG.ps1 # ✅ Refactored (104 → 60 lines)
+│ ├── build-libjxl.ps1 # ✅ Refactored (150 → 90 lines)
+│ ├── build-libavif.ps1 # ✅ Refactored (150 → 80 lines)
+│ └── [other libraries...] # 🔄 Migration in progress
 │
-├── library-builders/               # Library orchestration scripts
-├── production/                     # Production build orchestrators
-├── utilities/                      # Build utilities and helpers
-├── validation/                     # Build validation scripts
-│   └── check-tools.ps1             #     Verify build environment
+├── library-builders/ # Library orchestration scripts
+├── production/ # Production build orchestrators
+├── utilities/ # Build utilities and helpers
+├── validation/ # Build validation scripts
+│ └── check-tools.ps1 # Verify build environment
 │
-├── Build-All-And-Package.ps1       # 🆕 Complete build orchestrator (recommended)
-├── Setup-Vcpkg.ps1                 # 🆕 vcpkg package manager setup
-├── DEPRECATED.md                   # 🆕 List of deprecated scripts
-├── Find-MSBuild.ps1                # ⚠️  Deprecated - use Build-Library-Core
-├── Test-Build-Environment.ps1      #     Environment verification
-└── README.md                       #     This file
+├── Build-All-And-Package.ps1 # 🆕 Complete build orchestrator (recommended)
+├── Setup-Vcpkg.ps1 # 🆕 vcpkg package manager setup
+├── DEPRECATED.md # 🆕 List of deprecated scripts
+├── Find-MSBuild.ps1 # ⚠️ Deprecated - use Build-Library-Core
+├── Test-Build-Environment.ps1 # Environment verification
+└── README.md # This file
 ```
 
 ---
@@ -96,18 +96,18 @@ Build CMake-based libraries with automatic configuration and verification.
 . "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
 $cmakeOptions = @{
-    'CMAKE_BUILD_TYPE'  = 'Release'
-    'BUILD_SHARED_LIBS' = 'OFF'
+ 'CMAKE_BUILD_TYPE' = 'Release'
+ 'BUILD_SHARED_LIBS' = 'OFF'
 }
 
 Invoke-CMakeBuild `
-    -LibraryName "MyLibrary" `
-    -SourceDir $sourceDir `
-    -BuildDir $buildDir `
-    -InstallDir $installDir `
-    -Configuration $Configuration `
-    -CMakeOptions $cmakeOptions `
-    -Clean:$Clean
+ -LibraryName "MyLibrary" `
+ -SourceDir $sourceDir `
+ -BuildDir $buildDir `
+ -InstallDir $installDir `
+ -Configuration $Configuration `
+ -CMakeOptions $cmakeOptions `
+ -Clean:$Clean
 ```
 
 ##### `Invoke-MSBuildLibrary` | `Invoke-NMakeBuild`
@@ -120,10 +120,10 @@ Automatically locate and verify build tools.
 Unified colored logging across all scripts.
 
 ```powershell
-Write-BuildLog "Starting build..." -Level Info      # Blue
-Write-BuildLog "Build successful!" -Level Success   # Green
-Write-BuildLog "Warning!" -Level Warning             # Yellow
-Write-BuildLog "Build failed!" -Level Error          # Red
+Write-BuildLog "Starting build..." -Level Info # Blue
+Write-BuildLog "Build successful!" -Level Success # Green
+Write-BuildLog "Warning!" -Level Warning # Yellow
+Write-BuildLog "Build failed!" -Level Error # Red
 ```
 
 ### Build-Helpers.ps1
@@ -135,7 +135,7 @@ Additional helper functions for vcpkg, Git, and environment management.
 
 # vcpkg integration
 if (-not (Test-VcpkgInstalled)) {
-    Install-VcpkgIfNeeded
+ Install-VcpkgIfNeeded
 }
 Install-VcpkgPackage -PackageName "zlib:x64-windows-static"
 
@@ -158,7 +158,7 @@ See [build-scripts/core/](./core/) for full documentation.
 - 🆕 **Setup-Vcpkg.ps1** - Automated vcpkg setup and package installation
 - **scripts/build.ps1** - Main build orchestrator for ExplorerLens solution
 - **build-LENSShell-quick.ps1** - Quick incremental build
-- ⚠️  **Find-MSBuild.ps1** - DEPRECATED - Use `Find-MSBuildPath` from Build-Library-Core
+- ⚠️ **Find-MSBuild.ps1** - DEPRECATED - Use `Find-MSBuildPath` from Build-Library-Core
 - **Test-Build-Environment.ps1** - Verify build prerequisites
 
 ### External Library Builders (`external-libs/`)
@@ -254,7 +254,7 @@ The build system respects these environment variables:
 
 **"MSBuild not found"**
 ```powershell
-.\Find-MSBuild.ps1  # Locate installation
+.\Find-MSBuild.ps1 # Locate installation
 # Install Visual Studio 18 2026 if missing
 ```
 
@@ -303,7 +303,6 @@ When adding new build scripts:
 - [Build Guide](../docs/build/BUILD_GUIDE.md) - Comprehensive build documentation
 - [Development Guide](../docs/development/) - Development workflow
 - [Third-Party Libraries](../docs/development/THIRD_PARTY.md) - Dependency information
-- [Tool Discovery](../docs/development/TOOL_DISCOVERY.md) - Build tool detection
 
 ## Support
 
@@ -315,6 +314,5 @@ For build issues:
 
 ---
 
-**Last Updated:** February 16, 2026  
+**Last Updated:** February 16, 2026 
 **Maintainer:** ExplorerLens Development Team
-

@@ -1,7 +1,6 @@
 <#
 .SYNOPSIS
     Run-CodeCoverage.ps1 — Code Coverage Analysis for ExplorerLens Engine
-    Sprint 380 — ExplorerLens v15.0.0 "Zenith"
 
 .DESCRIPTION
     Uses OpenCppCoverage to generate code coverage reports for the Engine test suite.
@@ -31,7 +30,7 @@ $rootDir = Split-Path -Parent $PSScriptRoot
 
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host "  ExplorerLens Code Coverage Analysis" -ForegroundColor Cyan
-Write-Host "  v15.0.0 Zenith — Sprint 380" -ForegroundColor DarkCyan
+Write-Host "  v15.0.0 Zenith — " -ForegroundColor DarkCyan
 Write-Host "=============================================" -ForegroundColor Cyan
 
 # Check for OpenCppCoverage

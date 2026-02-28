@@ -1,5 +1,4 @@
 # Organize-TestCorpus.ps1
-# Sprint 13: Real-File Test Fixtures & Compatibility Kit
 # Reorganizes test files into a structured corpus for validation
 # Date: February 17, 2026
 
@@ -190,7 +189,7 @@ To refresh the corpus with new test files:
 .\tests\Organize-TestCorpus.ps1 -CreateInvalidFiles
 ``````
 
-## Test Requirements (Sprint 13)
+## Test Requirements 
 
 - ✅ At least 1 valid file per supported format
 - ✅ Invalid/corrupt files for fuzzing

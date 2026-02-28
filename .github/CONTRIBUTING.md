@@ -5,14 +5,14 @@ Thank you for your interest in contributing to ExplorerLens!
 ## Getting Started
 
 1. **Review the documentation:**
-   - [README.md](../README.md) - Project overview
-   - [MASTER_PLAN.md](../MASTER_PLAN.md) - Development roadmap
-   - [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) - Build instructions
+ - [README.md](../README.md) - Project overview
+ - [CHANGELOG.md](../CHANGELOG.md) - Development history
+ - [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) - Build instructions
 
 2. **Set up your development environment:**
-   - Visual Studio 2026 BuildTools with MSVC v19.50+
-   - CMake 3.20+
-   - See [WINDOWS_BUILD_TOOLS.md](../docs/development/WINDOWS_BUILD_TOOLS.md) for detailed setup
+ - Visual Studio 2026 BuildTools with MSVC v19.50+
+ - CMake 3.20+
+ - See [BUILD_QUICK_REFERENCE.md](../docs/development/BUILD_QUICK_REFERENCE.md) for detailed setup
 
 ## Development Workflow
 
@@ -48,7 +48,7 @@ regsvr32 /u /s x64\Release\LENSShell.dll
 - **DirectX 11 + DirectX 12** for GPU acceleration
 - **Zero warnings** policy — build must produce 0 warnings
 - Follow `.clang-tidy` rules (see project root)
-- See `docs/development/CODE_QUALITY_STANDARDS.md` for naming conventions
+- See `.github/standards/CODING_STANDARDS.md` for naming conventions
 - All headers must use `#pragma once`
 
 ## Submitting Changes
@@ -103,7 +103,7 @@ Get-ChildItem docs -Recurse -Filter "*.md" | Select-String "Installation"
 - Major docs: UPPERCASE_WITH_UNDERSCORES: `BUILD_GUIDE.md`
 - Subdirectory docs: lowercase-with-hyphens: `getting-started/installation.md`
 - Session notes: `SESSION_SUMMARY_2026-01-08.md`
-- Sprint notes: `SPRINT12_COMPLETION_REPORT.md`
+- Completion reports: `COMPLETION_REPORT_YYYY-MM-DD.md`
 
 ### Documentation Standards
 
@@ -142,7 +142,7 @@ docs: update build guide with VS 2026 support
 - `build-scripts/` - Library-specific builds
 - `docs/` - All documentation
 - `docs/archive/` - Historical summaries
-- `docs/development/` - Sprint notes, changelogs
+- `docs/development/` - Development notes, changelogs
 
 **Avoid:**
 - Duplicate scripts in `scripts/install/*.ps1` (use `scripts/install.ps1`)
@@ -168,8 +168,7 @@ Open an issue with:
 
 - Check [docs/BUILD_GUIDE.md](../docs/BUILD_GUIDE.md) for build issues
 - Check [docs/build/BUILD_GUIDE.md](../docs/build/BUILD_GUIDE.md) for build issues
-- Review [MASTER_PLAN.md](../MASTER_PLAN.md) for project direction
+- Review [CHANGELOG.md](../CHANGELOG.md) for project direction
 - Open a GitHub Discussion for general questions
 
 Thank you for contributing!
-

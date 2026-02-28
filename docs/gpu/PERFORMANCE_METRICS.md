@@ -72,26 +72,26 @@ ExplorerLens Performance Metrics
 ============================================================
 
 📊 Thumbnail Generation
-  Total Attempts:  1243
-  Successful:      1189 (95.7%)
-  Failed:          54
+ Total Attempts: 1243
+ Successful: 1189 (95.7%)
+ Failed: 54
 
 💾 Cache Performance
-  Cache Hits:      876
-  Cache Misses:    367
-  Hit Rate:        70.5%
+ Cache Hits: 876
+ Cache Misses: 367
+ Hit Rate: 70.5%
 
 📁 Format Breakdown
-  ZIP:     342
-  CBZ:     487
-  7Z:      156
-  WebP:    189
-  AVIF:     69
+ ZIP: 342
+ CBZ: 487
+ 7Z: 156
+ WebP: 189
+ AVIF: 69
 
 💻 Memory Usage
-  Peak Memory:     124.45 MB
-  Total Allocated: 1874.32 MB
-  Current Usage:   42.18 MB
+ Peak Memory: 124.45 MB
+ Total Allocated: 1874.32 MB
+ Current Usage: 42.18 MB
 ```
 
 ### Export Metrics
@@ -109,28 +109,28 @@ ExplorerLens Performance Metrics
 JSON format:
 ```json
 {
-  "thumbnailGeneration": {
-    "totalAttempts": 1243,
-    "successCount": 1189,
-    "failureCount": 54,
-    "successRate": 95.7
-  },
-  "cache": {
-    "hits": 876,
-    "misses": 367,
-    "hitRate": 70.5
-  },
-  "formatBreakdown": {
-    "zip": 342,
-    "cbz": 487,
-    "7z": 156,
-    "webp": 189,
-    "avif": 69
-  },
-  "memory": {
-    "peakMB": 124.45,
-    "totalAllocatedMB": 1874.32
-  }
+ "thumbnailGeneration": {
+ "totalAttempts": 1243,
+ "successCount": 1189,
+ "failureCount": 54,
+ "successRate": 95.7
+ },
+ "cache": {
+ "hits": 876,
+ "misses": 367,
+ "hitRate": 70.5
+ },
+ "formatBreakdown": {
+ "zip": 342,
+ "cbz": 487,
+ "7z": 156,
+ "webp": 189,
+ "avif": 69
+ },
+ "memory": {
+ "peakMB": 124.45,
+ "totalAllocatedMB": 1874.32
+ }
 }
 ```
 
@@ -181,10 +181,10 @@ Schedule metrics exports:
 ```powershell
 # Windows Task Scheduler - Daily at 2 AM
 $action = New-ScheduledTaskAction -Execute "ExplorerLensMetrics.exe" `
-    -Argument "export json C:\Logs\metrics_$(Get-Date -Format 'yyyyMMdd').json"
+ -Argument "export json C:\Logs\metrics_$(Get-Date -Format 'yyyyMMdd').json"
 $trigger = New-ScheduledTaskTrigger -Daily -At 2am
 Register-ScheduledTask -TaskName "ExplorerLens Metrics Export" `
-    -Action $action -Trigger $trigger
+ -Action $action -Trigger $trigger
 ```
 
 ### Log Analysis
@@ -192,13 +192,13 @@ Parse exported JSON for trends:
 ```powershell
 # Check success rate over time
 Get-ChildItem C:\Logs\metrics_*.json | ForEach-Object {
-    $data = Get-Content $_ | ConvertFrom-Json
-    [PSCustomObject]@{
-        Date = $_.BaseName -replace 'metrics_',''
-        SuccessRate = $data.thumbnailGeneration.successRate
-        CacheHitRate = $data.cache.hitRate
-        PeakMemoryMB = $data.memory.peakMB
-    }
+ $data = Get-Content $_ | ConvertFrom-Json
+ [PSCustomObject]@{
+ Date = $_.BaseName -replace 'metrics_',''
+ SuccessRate = $data.thumbnailGeneration.successRate
+ CacheHitRate = $data.cache.hitRate
+ PeakMemoryMB = $data.memory.peakMB
+ }
 } | Format-Table -AutoSize
 ```
 
@@ -206,19 +206,19 @@ Get-ChildItem C:\Logs\metrics_*.json | ForEach-Object {
 
 ### Metrics Not Recording
 1. **Check profiling is enabled**:
-   ```
-   HKEY_CURRENT_USER\Software\ExplorerLens\Settings\EnableProfiling = 1
-   ```
+ ```
+ HKEY_CURRENT_USER\Software\ExplorerLens\Settings\EnableProfiling = 1
+ ```
 
 2. **Verify shell extension is loaded**:
-   - Open test archive in Explorer
-   - Check Event Viewer for ExplorerLens events
+ - Open test archive in Explorer
+ - Check Event Viewer for ExplorerLens events
 
 3. **Restart Explorer**:
-   ```powershell
-   taskkill /f /im explorer.exe
-   start explorer.exe
-   ```
+ ```powershell
+ taskkill /f /im explorer.exe
+ start explorer.exe
+ ```
 
 ### High Memory Usage
 If peak memory exceeds expectations:
@@ -252,14 +252,14 @@ If success rate < 90%:
 ```yaml
 # Example: Azure Pipelines
 - script: |
-    ExplorerLensMetrics.exe export json $(Build.ArtifactStagingDirectory)/metrics.json
-  displayName: 'Export Performance Metrics'
-  condition: succeededOrFailed()
-  
+ ExplorerLensMetrics.exe export json $(Build.ArtifactStagingDirectory)/metrics.json
+ displayName: 'Export Performance Metrics'
+ condition: succeededOrFailed()
+ 
 - task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)/metrics.json'
-    artifactName: 'performance-metrics'
+ inputs:
+ pathToPublish: '$(Build.ArtifactStagingDirectory)/metrics.json'
+ artifactName: 'performance-metrics'
 ```
 
 ## Future Enhancements

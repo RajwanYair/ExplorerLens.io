@@ -38,13 +38,13 @@ To refresh the corpus with new test files:
 .\tests\Organize-TestCorpus.ps1 -CreateInvalidFiles
 ```
 
-## Test Requirements (Sprint 13)
+## Test Requirements 
 
 - ✅ At least 1 valid file per supported format
 - ✅ Invalid/corrupt files for fuzzing
 - ✅ Performance baseline files (various sizes)
 - ✅ Real-world samples (not synthetic)
 
-**Last Updated:** February 17, 2026  
+**Last Updated:** February 17, 2026 
 **Version:** v7.0.0
 

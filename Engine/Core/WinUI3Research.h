@@ -15,10 +15,10 @@ namespace Engine {
 
 /// Migration feasibility assessment
 enum class MigrationFeasibility : uint8_t {
-    NotFeasible    = 0,   ///< Cannot migrate
-    PartialOnly    = 1,   ///< Some components can migrate
-    FullyFeasible  = 2,   ///< Complete migration possible
-    Recommended    = 3    ///< Migration recommended
+    NotFeasible = 0, ///< Cannot migrate
+    PartialOnly = 1, ///< Some components can migrate
+    FullyFeasible = 2, ///< Complete migration possible
+    Recommended = 3 ///< Migration recommended
 };
 
 /// WinUI 3 component assessment
@@ -34,10 +34,10 @@ struct WinUI3Assessment {
 
 /// XAML Islands integration status
 enum class XamlIslandsStatus : uint8_t {
-    NotAvailable   = 0,   ///< OS version too old
-    Available      = 1,   ///< Can be used
-    Initialized    = 2,   ///< Hosting initialized
-    Active         = 3    ///< Controls rendered
+    NotAvailable = 0, ///< OS version too old
+    Available = 1, ///< Can be used
+    Initialized = 2, ///< Hosting initialized
+    Active = 3 ///< Controls rendered
 };
 
 /// WinUI 3 modernization research results
@@ -50,7 +50,7 @@ public:
 
     /// Overall migration assessment
     MigrationFeasibility GetOverallFeasibility() const {
-        return MigrationFeasibility::PartialOnly;  // Hybrid approach recommended
+        return MigrationFeasibility::PartialOnly; // Hybrid approach recommended
     }
 
     /// Get assessment for each component
@@ -60,87 +60,87 @@ public:
         if (index >= ASSESSMENT_COUNT) return {};
 
         static const WinUI3Assessment assessments[] = {
-            {
-                "LENSManager GUI",
-                "WTL 10.0 (ATL Dialog)",
-                "WinUI 3 XAML",
-                MigrationFeasibility::PartialOnly,
-                "Admin elevation conflicts with WinUI 3 app model; "
-                "WinUI 3 doesn't support running elevated by default",
-                "Hybrid approach using XAML Islands is the recommended path",
-                30
-            },
-            {
-                "Shell Extension DLL",
-                "ATL COM (IThumbnailProvider)",
-                "Keep as-is (COM required)",
-                MigrationFeasibility::NotFeasible,
-                "IThumbnailProvider MUST be COM DLL loaded by explorer.exe; "
-                "WinUI 3 cannot host in-process COM servers",
-                "Shell extension stays as native COM DLL — non-negotiable",
-                0
-            },
-            {
-                "Settings Dialog",
-                "WTL CPropertySheet",
-                "WinUI 3 NavigationView",
-                MigrationFeasibility::FullyFeasible,
-                nullptr,
-                "Settings page is the best candidate for XAML modernization. "
-                "Can use ContentDialog + NavigationView for tabbed layout",
-                15
-            },
-            {
-                "Format Registration",
-                "Win32 CheckBoxes + Registry",
-                "WinUI 3 ToggleSwitch + TreeView",
-                MigrationFeasibility::FullyFeasible,
-                nullptr,
-                "TreeView with ToggleSwitches would greatly improve UX. "
-                "Category grouping becomes natural with TreeViewItem hierarchy",
-                10
-            },
-            {
-                "Theme Support",
-                "Owner-draw dark mode (uxtheme hacks)",
-                "WinUI 3 native dark/light theme",
-                MigrationFeasibility::Recommended,
-                nullptr,
-                "WinUI 3 handles dark mode natively with RequestedTheme. "
-                "Eliminates need for DarkModeRendererV2 hacks",
-                5
-            },
-            {
-                "Performance Charts",
-                "GDI+ custom drawing",
-                "WinUI 3 + Win2D charts",
-                MigrationFeasibility::FullyFeasible,
-                nullptr,
-                "Win2D provides GPU-accelerated 2D rendering for charts. "
-                "Significantly better than GDI+ for real-time stats",
-                12
-            },
-            {
-                "COM Registration",
-                "RegSvr32 + manual registry",
-                "MSIX sparse package + AppExtension",
-                MigrationFeasibility::PartialOnly,
-                "MSIX sparse packages support COM registration but require "
-                "Windows 10 2004+. Classic reg approach must remain as fallback",
-                "MSIX sparse package gives clean install/uninstall + auto-update. "
-                "Dual-path: MSIX for modern OS, traditional for older",
-                20
-            },
-            {
-                "Installer",
-                "WiX 6 MSI + Inno Setup",
-                "MSIX + MSI bridge",
-                MigrationFeasibility::PartialOnly,
-                "MSIX doesn't support all COM registration scenarios. "
-                "Shell extension COM needs SxS manifest or sparse package",
-                "Recommended: Keep MSI as primary, add MSIX as optional modern path",
-                15
-            }
+        {
+        "LENSManager GUI",
+        "WTL 10.0 (ATL Dialog)",
+        "WinUI 3 XAML",
+        MigrationFeasibility::PartialOnly,
+        "Admin elevation conflicts with WinUI 3 app model; "
+        "WinUI 3 doesn't support running elevated by default",
+        "Hybrid approach using XAML Islands is the recommended path",
+        30
+        },
+        {
+        "Shell Extension DLL",
+        "ATL COM (IThumbnailProvider)",
+        "Keep as-is (COM required)",
+        MigrationFeasibility::NotFeasible,
+        "IThumbnailProvider MUST be COM DLL loaded by explorer.exe; "
+        "WinUI 3 cannot host in-process COM servers",
+        "Shell extension stays as native COM DLL — non-negotiable",
+        0
+        },
+        {
+        "Settings Dialog",
+        "WTL CPropertySheet",
+        "WinUI 3 NavigationView",
+        MigrationFeasibility::FullyFeasible,
+        nullptr,
+        "Settings page is the best candidate for XAML modernization. "
+        "Can use ContentDialog + NavigationView for tabbed layout",
+        15
+        },
+        {
+        "Format Registration",
+        "Win32 CheckBoxes + Registry",
+        "WinUI 3 ToggleSwitch + TreeView",
+        MigrationFeasibility::FullyFeasible,
+        nullptr,
+        "TreeView with ToggleSwitches would greatly improve UX. "
+        "Category grouping becomes natural with TreeViewItem hierarchy",
+        10
+        },
+        {
+        "Theme Support",
+        "Owner-draw dark mode (uxtheme hacks)",
+        "WinUI 3 native dark/light theme",
+        MigrationFeasibility::Recommended,
+        nullptr,
+        "WinUI 3 handles dark mode natively with RequestedTheme. "
+        "Eliminates need for DarkModeRendererV2 hacks",
+        5
+        },
+        {
+        "Performance Charts",
+        "GDI+ custom drawing",
+        "WinUI 3 + Win2D charts",
+        MigrationFeasibility::FullyFeasible,
+        nullptr,
+        "Win2D provides GPU-accelerated 2D rendering for charts. "
+        "Significantly better than GDI+ for real-time stats",
+        12
+        },
+        {
+        "COM Registration",
+        "RegSvr32 + manual registry",
+        "MSIX sparse package + AppExtension",
+        MigrationFeasibility::PartialOnly,
+        "MSIX sparse packages support COM registration but require "
+        "Windows 10 2004+. Classic reg approach must remain as fallback",
+        "MSIX sparse package gives clean install/uninstall + auto-update. "
+        "Dual-path: MSIX for modern OS, traditional for older",
+        20
+        },
+        {
+        "Installer",
+        "WiX 6 MSI + Inno Setup",
+        "MSIX + MSI bridge",
+        MigrationFeasibility::PartialOnly,
+        "MSIX doesn't support all COM registration scenarios. "
+        "Shell extension COM needs SxS manifest or sparse package",
+        "Recommended: Keep MSI as primary, add MSIX as optional modern path",
+        15
+        }
         };
 
         return assessments[index];
@@ -169,7 +169,7 @@ public:
             "- WindowsAppRuntime redistributable or self-contained\n"
             "- C++/WinRT header generation for XAML interop\n"
             "\n"
-            "TIMELINE: ~4-6 sprints for Phase 1 (settings panel only)";
+            "TIMELINE: ~4-6 development cycles for initial settings panel migration";
     }
 
     /// Check Windows App SDK availability

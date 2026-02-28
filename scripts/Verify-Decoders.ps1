@@ -16,7 +16,7 @@
     .\Verify-Decoders.ps1 -CheckOnly Engine
 
 .NOTES
-    Part of ExplorerLens Sprint 15C audit tooling.
+    Part of ExplorerLens C audit tooling.
     Does NOT require build tools — pure file/text analysis.
 #>
 

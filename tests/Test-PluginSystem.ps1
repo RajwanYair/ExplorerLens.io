@@ -1,5 +1,4 @@
 # Test-PluginSystem.ps1
-# Sprint 11: Plugin System Activation
 # Tests plugin discovery, loading, and IPC functionality
 
 param(
@@ -11,7 +10,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "ExplorerLens Plugin System Test" -ForegroundColor Cyan
-Write-Host "Sprint 11: Plugin System Activation" -ForegroundColor Cyan
+Write-Host "Plugin System Activation" -ForegroundColor Cyan
 Write-Host "============================================`n" -ForegroundColor Cyan
 
 $ScriptDir = Split-Path -Parent $PSCommandPath

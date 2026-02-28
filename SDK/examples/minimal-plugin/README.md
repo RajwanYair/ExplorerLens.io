@@ -6,7 +6,7 @@ This is the simplest possible ExplorerLens plugin that demonstrates the basic st
 
 Decodes a custom text-based image format called "TXTIMG" where ASCII characters represent pixels:
 - Space ` ` = White pixel
-- `#` = Black pixel  
+- `#` = Black pixel 
 - `@` = Very dark gray
 - `+` = Medium gray
 - `.` = Light gray
@@ -23,12 +23,12 @@ TXTIMG <width> <height>
 ```
 TXTIMG 8 8
 ########
-#      #
+# #
 # #### #
-# #  # #
-# #  # #
+# # # #
+# # # #
 # #### #
-#      #
+# #
 ########
 ```
 
@@ -47,16 +47,16 @@ Create a test file `test.txtimg`:
 ```
 TXTIMG 16 16
 ################
-#              #
-#  ##########  #
-#  #        #  #
-#  #  ####  #  #
-#  #  #  #  #  #
-#  #  #  #  #  #
-#  #  ####  #  #
-#  #        #  #
-#  ##########  #
-#              #
+# #
+# ########## #
+# # # #
+# # #### # #
+# # # # # #
+# # # # # #
+# # #### # #
+# # # #
+# ########## #
+# #
 ################
 ```
 

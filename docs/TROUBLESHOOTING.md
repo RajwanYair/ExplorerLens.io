@@ -1,5 +1,5 @@
 # ExplorerLens Troubleshooting Guide
-**Sprint 25: Documentation Completion**  
+**Documentation Completion** 
 **Date:** February 15, 2026
 
 ---
@@ -7,7 +7,7 @@
 ## Table of Contents
 1. [Installation Issues](#installation-issues)
 2. [Thumbnails Not Showing](#thumbnails-not-showing)
-3. [Performance Problems](#performance-problems)  
+3. [Performance Problems](#performance-problems) 
 4. [COM Registration Failures](#com-registration-failures)
 5. [File Format Issues](#file-format-issues)
 6. [Windows Explorer Integration](#windows-explorer-integration)
@@ -25,9 +25,9 @@
 **Solution:**
 1. Right-click installer → **Run as Administrator**
 2. Or: Open elevated PowerShell:
-   ```powershell
-   Start-Process -FilePath "ExplorerLens-Setup.msi" -Verb RunAs
-   ```
+ ```powershell
+ Start-Process -FilePath "ExplorerLens-Setup.msi" -Verb RunAs
+ ```
 
 ---
 
@@ -48,23 +48,23 @@
 
 **Solution:**
 1. **Clean uninstall:**
-   ```powershell
-   # Force remove via product code
-   msiexec /x {9E6ECB90-5A61-42BD-B851-D3297D9C7F39} /qn
-   ```
+ ```powershell
+ # Force remove via product code
+ msiexec /x {9E6ECB90-5A61-42BD-B851-D3297D9C7F39} /qn
+ ```
 
 2. **Manual cleanup:**
-   ```powershell
-   # Run LENSManager as admin
-   cd "C:\Program Files\ExplorerLens"
-   .\LENSManager.exe
-   # Click "Uninstall All" button
-   ```
+ ```powershell
+ # Run LENSManager as admin
+ cd "C:\Program Files\ExplorerLens"
+ .\LENSManager.exe
+ # Click "Uninstall All" button
+ ```
 
 3. **Registry cleanup (advanced):**
-   - Open `regedit.exe` as Administrator
-   - Delete: `HKEY_CLASSES_ROOT\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}`
-   - Delete: `HKEY_LOCAL_MACHINE\SOFTWARE\ExplorerLens`
+ - Open `regedit.exe` as Administrator
+ - Delete: `HKEY_CLASSES_ROOT\CLSID\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}`
+ - Delete: `HKEY_LOCAL_MACHINE\SOFTWARE\ExplorerLens`
 
 ---
 
@@ -93,8 +93,8 @@ Start-Process explorer.exe
 **Solution:** Re-register LENSShell.dll:
 ```powershell
 cd "C:\Program Files\ExplorerLens"
-regsvr32 /u LENSShell.dll  # Unregister
-regsvr32 LENSShell.dll      # Re-register
+regsvr32 /u LENSShell.dll # Unregister
+regsvr32 LENSShell.dll # Re-register
 ```
 
 **Verify registration:**
@@ -141,13 +141,13 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 
 **Solution:**
 1. **Increase thumbnail size:**
-   - Right-click Explorer folder view
-   - Choose "Extra Large Icons" or "Large Icons"
+ - Right-click Explorer folder view
+ - Choose "Extra Large Icons" or "Large Icons"
 
 2. **Adjust DPI scaling (4K displays):**
-   - Right-click desktop → **Display settings**
-   - Set "Scale" to 150% or 200%
-   - Restart Explorer
+ - Right-click desktop → **Display settings**
+ - Set "Scale" to 150% or 200%
+ - Restart Explorer
 
 ---
 
@@ -157,18 +157,18 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 
 **Solution:**
 1. **Check file permissions:**
-   ```powershell
-   Get-Acl "problem_file.jpg" | Format-List
-   # Ensure current user has Read permissions
-   ```
+ ```powershell
+ Get-Acl "problem_file.jpg" | Format-List
+ # Ensure current user has Read permissions
+ ```
 
 2. **Test file validity:**
-   - Try opening file in native app (Photoshop, VLC, etc.)
-   - Corrupted files won't generate thumbnails
+ - Try opening file in native app (Photoshop, VLC, etc.)
+ - Corrupted files won't generate thumbnails
 
 3. **Check file size limits:**
-   - Default max: 50 MP for images, 4K for videos
-   - Edit: `HKLM\SOFTWARE\ExplorerLens\MaxImageSize` (pixels)
+ - Default max: 50 MP for images, 4K for videos
+ - Edit: `HKLM\SOFTWARE\ExplorerLens\MaxImageSize` (pixels)
 
 ---
 
@@ -180,25 +180,25 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 
 **Solution:**
 1. **Reduce thumbnail size:**
-   - File Explorer → View → Smaller icons
-   - Reduces processing load per thumbnail
+ - File Explorer → View → Smaller icons
+ - Reduces processing load per thumbnail
 
 2. **Disable preview pane:**
-   - View → Preview pane (toggle off)
-   - Pane forces immediate thumbnail generation
+ - View → Preview pane (toggle off)
+ - Pane forces immediate thumbnail generation
 
 3. **Enable caching:**
-   - Verify cache enabled:
-     ```powershell
-     Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name EnableCache
-     # Should be: 1
-     ```
+ - Verify cache enabled:
+ ```powershell
+ Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name EnableCache
+ # Should be: 1
+ ```
 
 4. **Increase cache size:**
-   ```powershell
-   # Set cache to 1 GB (default: 500 MB)
-   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
-   ```
+ ```powershell
+ # Set cache to 1 GB (default: 500 MB)
+ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
+ ```
 
 ---
 
@@ -208,23 +208,23 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 
 **Solution:**
 1. **Check GPU acceleration:**
-   ```powershell
-   # Verify GPU enabled
-   Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU
-   # Should be: 1
-   ```
+ ```powershell
+ # Verify GPU enabled
+ Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU
+ # Should be: 1
+ ```
 
 2. **Limit concurrent decodes:**
-   ```powershell
-   # Reduce thread count (default: CPU core count)
-   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 4
-   ```
+ ```powershell
+ # Reduce thread count (default: CPU core count)
+ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 4
+ ```
 
 3. **Skip large files:**
-   ```powershell
-   # Set max file size (default: unlimited)
-   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
-   ```
+ ```powershell
+ # Set max file size (default: unlimited)
+ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
+ ```
 
 ---
 
@@ -235,11 +235,11 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 **Solution:**
 - **Expected behavior:** First view is slow, subsequent views fast (cached)
 - **Pre-generate cache:**
-   ```powershell
-   # Use benchmark tool to pre-populate cache
-   cd "C:\Program Files\ExplorerLens"
-   .\EngineBenchmark.exe --cache-warmup "C:\Photos"
-   ```
+ ```powershell
+ # Use benchmark tool to pre-populate cache
+ cd "C:\Program Files\ExplorerLens"
+ .\EngineBenchmark.exe --cache-warmup "C:\Photos"
+ ```
 
 ---
 
@@ -251,40 +251,40 @@ Get-ItemProperty "HKCR:\.webp\shellex\{e357fccd-a995-4576-b01f-234630154e96}"
 
 **Solution:**
 1. **Check dependencies:**
-   ```powershell
-   # Use Dependency Walker or dumpbin
-   dumpbin /dependents "LENSShell.dll"
-   ```
+ ```powershell
+ # Use Dependency Walker or dumpbin
+ dumpbin /dependents "LENSShell.dll"
+ ```
 
 2. **Install Visual C++ Redistributable:**
-   ```powershell
-   winget install Microsoft.VCRedist.2022.x64
-   ```
+ ```powershell
+ winget install Microsoft.VCRedist.2022.x64
+ ```
 
 3. **Verify DLL bitness:**
-   ```powershell
-   # LENSShell.dll MUST be 64-bit for modern Windows
-   dumpbin /headers LENSShell.dll | Select-String "machine"
-   # Should show: 8664 machine (x64)
-   ```
+ ```powershell
+ # LENSShell.dll MUST be 64-bit for modern Windows
+ dumpbin /headers LENSShell.dll | Select-String "machine"
+ # Should show: 8664 machine (x64)
+ ```
 
 ---
 
-###  ❌ **Problem: "LoadLibrary failed with error 126"**
+### ❌ **Problem: "LoadLibrary failed with error 126"**
 
 **Cause:** Missing external DLLs (libwebp, libavif, etc.)
 
 **Solution:**
 1. **Verify DLLs present:**
-   ```powershell
-   Test-Path "C:\Program Files\ExplorerLens\libwebp.dll"
-   Test-Path "C:\Program Files\ExplorerLens\libavif.dll"
-   ```
+ ```powershell
+ Test-Path "C:\Program Files\ExplorerLens\libwebp.dll"
+ Test-Path "C:\Program Files\ExplorerLens\libavif.dll"
+ ```
 
 2. **Reinstall from MSI:** Ensures all dependencies copied
 
 3. **Manual DLL placement:**
-   - Copy DLLs from `SDK/bin/` to `C:\Program Files\ExplorerLens\`
+ - Copy DLLs from `SDK/bin/` to `C:\Program Files\ExplorerLens\`
 
 ---
 
@@ -314,16 +314,16 @@ cd "C:\Program Files\ExplorerLens"
 
 **Solution:**
 1. **Check libavif + dav1d present:**
-   ```powershell
-   Test-Path "C:\Program Files\ExplorerLens\avif.dll"
-   Test-Path "C:\Program Files\ExplorerLens\dav1d.dll"
-   ```
+ ```powershell
+ Test-Path "C:\Program Files\ExplorerLens\avif.dll"
+ Test-Path "C:\Program Files\ExplorerLens\dav1d.dll"
+ ```
 
 2. **Verify decoder registration:**
-   ```powershell
-   .\IntegrationTests.exe
-   # Should show: AVIFDecoder registered (9 total decoders)
-   ```
+ ```powershell
+ .\IntegrationTests.exe
+ # Should show: AVIFDecoder registered (9 total decoders)
+ ```
 
 ---
 
@@ -333,17 +333,17 @@ cd "C:\Program Files\ExplorerLens"
 
 **Solution:**
 1. **Check CMake flag:**
-   ```powershell
-   cd build
-   cat CMakeCache.txt | Select-String "HAS_LIBJXL"
-   # Should show: HAS_LIBJXL:BOOL=ON
-   ```
+ ```powershell
+ cd build
+ cat CMakeCache.txt | Select-String "HAS_LIBJXL"
+ # Should show: HAS_LIBJXL:BOOL=ON
+ ```
 
 2. **Rebuild with JXL:**
-   ```powershell
-   cmake -S . -B build -DHAS_LIBJXL=ON
-   cmake --build build --config Release
-   ```
+ ```powershell
+ cmake -S . -B build -DHAS_LIBJXL=ON
+ cmake --build build --config Release
+ ```
 
 ---
 
@@ -353,17 +353,17 @@ cd "C:\Program Files\ExplorerLens"
 
 **Solution:**
 1. **Verify LibRaw linkage:**
-   ```powershell
-   dumpbin /imports LENSShell.dll | Select-String "libraw"
-   ```
+ ```powershell
+ dumpbin /imports LENSShell.dll | Select-String "libraw"
+ ```
 
 2. **Test specific RAW format:**
-   ```powershell
-   .\EngineTests.exe --gtest_filter="*CR3*"
-   ```
+ ```powershell
+ .\EngineTests.exe --gtest_filter="*CR3*"
+ ```
 
 3. **Metadata stripping:** Some RAW files have no embedded thumbnails
-   - ExplorerLens will decode full image (slower)
+ - ExplorerLens will decode full image (slower)
 
 ---
 
@@ -379,7 +379,7 @@ cd "C:\Program Files\ExplorerLens"
 $clsid = "{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}"
 New-Item "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" -Force
 Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" `
-    -Name $clsid -Value "ExplorerLens Shell Extension"
+ -Name $clsid -Value "ExplorerLens Shell Extension"
 ```
 
 ---
@@ -390,17 +390,17 @@ Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensio
 
 **Solution:**
 1. **Enable crash dumps:**
-   ```powershell
-   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name EnableCrashDumps -Value 1
-   ```
+ ```powershell
+ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name EnableCrashDumps -Value 1
+ ```
 
 2. **Reproduce crash:**
-   - Navigate to problematic folder
-   - Crash dump saved to: `C:\ProgramData\ExplorerLens\Crashes\`
+ - Navigate to problematic folder
+ - Crash dump saved to: `C:\ProgramData\ExplorerLens\Crashes\`
 
 3. **Report crash:**
-   - Open dump in WinDbg or Visual Studio
-   - File GitHub issue with stack trace
+ - Open dump in WinDbg or Visual Studio
+ - File GitHub issue with stack trace
 
 ---
 
@@ -410,14 +410,14 @@ Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensio
 
 **Solution:**
 1. **Monitor registry changes:**
-   ```powershell
-   # Use Process Monitor (procmon.exe) to track writes to:
-   # HKCR\.webp\shellex\{e357fccd-...}
-   ```
+ ```powershell
+ # Use Process Monitor (procmon.exe) to track writes to:
+ # HKCR\.webp\shellex\{e357fccd-...}
+ ```
 
 2. **Lock registry key (advanced):**
-   - Set permissions to prevent write access
-   - regedit → Right-click key → Permissions → Advanced
+ - Set permissions to prevent write access
+ - regedit → Right-click key → Permissions → Advanced
 
 ---
 
@@ -448,18 +448,18 @@ cmake -S . -B build --debug-output
 
 **Solution:**
 1. **Check CMakeLists.txt:**
-   - Ensure `target_link_libraries()` includes all deps
+ - Ensure `target_link_libraries()` includes all deps
 
 2. **Verify library exists:**
-   ```powershell
-   Test-Path "SDK/lib/libwebp.lib"
-   ```
+ ```powershell
+ Test-Path "SDK/lib/libwebp.lib"
+ ```
 
 3. **Check library bitness:**
-   ```powershell
-   dumpbin /headers SDK/lib/libwebp.lib | Select-String "machine"
-   # Should match: x64
-   ```
+ ```powershell
+ dumpbin /headers SDK/lib/libwebp.lib | Select-String "machine"
+ # Should match: x64
+ ```
 
 ---
 
@@ -576,11 +576,11 @@ $testFile = "C:\Photos\sample.webp"
 ### **GitHub Issues:**
 - Repository: https://github.com/YourOrg/ExplorerLens/issues
 - Include:
-  - Windows version (`winver`)
-  - ExplorerLens version (`Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name Version`)
-  - Log files (`C:\ProgramData\ExplorerLens\Logs\`)
-  - Screenshot of issue
-  - Steps to reproduce
+ - Windows version (`winver`)
+ - ExplorerLens version (`Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name Version`)
+ - Log files (`C:\ProgramData\ExplorerLens\Logs\`)
+ - Screenshot of issue
+ - Steps to reproduce
 
 ### **Community Support:**
 - Discussions: https://github.com/YourOrg/ExplorerLens/discussions
@@ -588,7 +588,5 @@ $testFile = "C:\Photos\sample.webp"
 
 ---
 
-**Last Updated:** February 15, 2026  
-**Sprint:** 25 - Documentation Completion  
+**Last Updated:** February 15, 2026 
 **Version:** 6.2.0
-

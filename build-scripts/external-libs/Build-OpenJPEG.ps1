@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Downloads and builds OpenJPEG as a static library with /MD runtime.
-    ExplorerLens v15.0.0 "Zenith" — Sprint 365
+    ExplorerLens v15.0.0 "Zenith" — 
 
 .PARAMETER Clean
     Remove existing build artifacts before building.

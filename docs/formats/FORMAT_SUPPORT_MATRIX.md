@@ -1,9 +1,9 @@
 # Format Support Matrix — ExplorerLens v15.0.0
 
-**Last Updated:** February 2026  
-**Engine Version:** 15.0.0 "Zenith" (Sprint 393)  
-**Total Formats:** 200+ file extensions across 25 decoders  
-**Shell Registrations:** 93 extensions in LENSShell.rgs  
+**Last Updated:** February 2026 
+**Engine Version:** 15.0.0 "Zenith" 
+**Total Formats:** 200+ file extensions across 25 decoders 
+**Shell Registrations:** 93 extensions in LENSShell.rgs 
 **Decoder Compliance:** 25/25 (100%)
 
 ---
@@ -274,7 +274,7 @@ Rendered via DirectX 11 viewport with wireframe fallback.
 All 25 decoders implement the `IThumbnailDecoder` interface. Each must provide:
 
 - `CanDecode()` — Format detection
-- `Decode()` — Decoding logic  
+- `Decode()` — Decoding logic 
 - `GetInfo()` — Capability reporting
 - `GetName()` — Decoder identification
 - `GetSupportedExtensions()` / `GetExtensionCount()` — Extension enumeration
@@ -419,9 +419,9 @@ The Shell extension DLL includes dedicated decoders that do NOT use the `IThumbn
 Set in `Engine/CMakeLists.txt`:
 
 ```cmake
-option(HAS_LIBJXL  "Enable JPEG XL support via libjxl"  ON)
+option(HAS_LIBJXL "Enable JPEG XL support via libjxl" ON)
 option(HAS_LIBHEIF "Enable HEIF/HEIC support via libheif" ON)
-option(HAS_LIBRAW  "Enable Camera RAW support via LibRaw" ON)
+option(HAS_LIBRAW "Enable Camera RAW support via LibRaw" ON)
 option(HAS_LIBAVIF "Enable AVIF support via libavif" ON)
 option(ENABLE_VIDEO_DECODER "Enable Video thumbnail support" ON)
 option(ENABLE_AUDIO_DECODER "Enable Audio thumbnail support" ON)
@@ -442,11 +442,11 @@ option(ENABLE_AUDIO_DECODER "Enable Audio thumbnail support" ON)
 
 ### Performance Targets
 
-- Single thumbnail: 17ms  
-- Batch throughput: 235 img/sec  
+- Single thumbnail: 17ms 
+- Batch throughput: 235 img/sec 
 - Cache hit: <5ms
 
 ---
 
-*This document consolidates FORMAT_SUPPORT_MATRIX_V8.md, DECODER_STATUS.md, DECODER_AUDIT_REPORT.md, and CAPABILITY_AUDIT.md.*  
+*This document consolidates FORMAT_SUPPORT_MATRIX_V8.md, DECODER_STATUS.md, DECODER_AUDIT_REPORT.md, and CAPABILITY_AUDIT.md.* 
 *Synchronized with LENSArchive.h LENSTYPE enum and LENSShell.rgs.*

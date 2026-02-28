@@ -2,8 +2,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "resource.h"
 #include "stdafx.h"
+#include "resource.h"
 
 #include "MainDlg.h"
 #include "about.h"
@@ -11,7 +11,7 @@
 #include <map>
 #include <vector>
 
-BOOL CMainDlg::PreTranslateMessage(MSG *pMsg) {
+BOOL CMainDlg::PreTranslateMessage(MSG* pMsg) {
   // Forward mouse messages to tooltip control
   if (m_tooltip.m_hWnd) {
     m_tooltip.RelayEvent(pMsg);
@@ -21,24 +21,24 @@ BOOL CMainDlg::PreTranslateMessage(MSG *pMsg) {
 BOOL CMainDlg::OnIdle() { return FALSE; }
 
 LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/,
-                               LPARAM /*lParam*/, BOOL & /*bHandled*/) {
+  LPARAM /*lParam*/, BOOL& /*bHandled*/) {
   // center the dialog on the screen
   CenterWindow();
 
   // set icons
   HICON hIcon = (HICON)::LoadImage(
-      _Module.GetResourceInstance(), MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
-      ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON),
-      LR_DEFAULTCOLOR);
+    _Module.GetResourceInstance(), MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
+    ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON),
+    LR_DEFAULTCOLOR);
   SetIcon(hIcon, TRUE);
   HICON hIconSmall = (HICON)::LoadImage(
-      _Module.GetResourceInstance(), MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
-      ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON),
-      LR_DEFAULTCOLOR);
+    _Module.GetResourceInstance(), MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
+    ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON),
+    LR_DEFAULTCOLOR);
   SetIcon(hIconSmall, FALSE);
 
   // register object for message filtering and idle updates
-  CMessageLoop *pLoop = _Module.GetMessageLoop();
+  CMessageLoop* pLoop = _Module.GetMessageLoop();
   ATLASSERT(pLoop != NULL);
   pLoop->AddMessageFilter(this);
   pLoop->AddIdleHandler(this);
@@ -82,7 +82,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/,
     RECT childRect;
     ::GetWindowRect(hChild, &childRect);
     ::MapWindowPoints(HWND_DESKTOP, m_hWnd, (LPPOINT)&childRect, 2);
-    m_anchors.push_back({id, childRect});
+    m_anchors.push_back({ id, childRect });
     hChild = ::GetWindow(hChild, GW_HWNDNEXT);
   }
 
@@ -97,7 +97,7 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/,
       IDC_CB_HEIF, IDC_CB_AVIF,  IDC_CB_JXL,      IDC_CB_VIDEO, IDC_CB_PDF,
       IDC_CB_TIFF, IDC_CB_SVG,   IDC_CB_RAW,      IDC_CB_PSD,   IDC_CB_DDS,
       IDC_CB_HDR,  IDC_CB_EXR,   IDC_CB_PPM,      IDC_CB_ICO,   IDC_CB_QOI,
-      IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL};
+      IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL };
   for (int id : allCheckboxes) {
     HWND hCheck = GetDlgItem(id);
     if (hCheck) {
@@ -108,11 +108,17 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/,
 
   // set focus to Cancel btn
   GotoDlgCtrl(GetDlgItem(IDCANCEL));
+
+  // Initialize dark mode and Windows 11 visual enhancements
+  auto& darkCtrl = ExplorerLens::DarkModeController::Instance();
+  darkCtrl.Initialize();
+  darkCtrl.ApplyToWindow(m_hWnd);
+
   return FALSE;
 }
 
 LRESULT CMainDlg::OnSize(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam,
-                         BOOL & /*bHandled*/) {
+  BOOL& /*bHandled*/) {
   if (wParam == SIZE_MINIMIZED)
     return 0;
   if (m_initialSize.cx == 0 || m_anchors.empty())
@@ -137,7 +143,7 @@ void CMainDlg::RelayoutControls(int clientWidth, int clientHeight) {
   if (!hDwp)
     return;
 
-  for (const auto &anchor : m_anchors) {
+  for (const auto& anchor : m_anchors) {
     HWND hCtrl = GetDlgItem(anchor.id);
     if (!hCtrl)
       continue;
@@ -146,8 +152,8 @@ void CMainDlg::RelayoutControls(int clientWidth, int clientHeight) {
     if (anchor.id == IDC_STATUSBAR) {
       int sbHeight = anchor.initialRect.bottom - anchor.initialRect.top;
       hDwp = ::DeferWindowPos(hDwp, hCtrl, NULL, 0, clientHeight - sbHeight,
-                              clientWidth, sbHeight,
-                              SWP_NOZORDER | SWP_SHOWWINDOW);
+        clientWidth, sbHeight,
+        SWP_NOZORDER | SWP_SHOWWINDOW);
       continue;
     }
 
@@ -155,9 +161,9 @@ void CMainDlg::RelayoutControls(int clientWidth, int clientHeight) {
     int newX = (int)(anchor.initialRect.left * scaleX);
     int newY = (int)(anchor.initialRect.top * scaleY);
     int newW =
-        (int)((anchor.initialRect.right - anchor.initialRect.left) * scaleX);
+      (int)((anchor.initialRect.right - anchor.initialRect.left) * scaleX);
     int newH =
-        (int)((anchor.initialRect.bottom - anchor.initialRect.top) * scaleY);
+      (int)((anchor.initialRect.bottom - anchor.initialRect.top) * scaleY);
 
     // Clamp minimum sizes
     if (newW < 20)
@@ -166,7 +172,7 @@ void CMainDlg::RelayoutControls(int clientWidth, int clientHeight) {
       newH = 8;
 
     hDwp = ::DeferWindowPos(hDwp, hCtrl, NULL, newX, newY, newW, newH,
-                            SWP_NOZORDER | SWP_SHOWWINDOW);
+      SWP_NOZORDER | SWP_SHOWWINDOW);
   }
 
   ::EndDeferWindowPos(hDwp);
@@ -174,7 +180,7 @@ void CMainDlg::RelayoutControls(int clientWidth, int clientHeight) {
 }
 
 LRESULT CMainDlg::OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/,
-                                  LPARAM lParam, BOOL & /*bHandled*/) {
+  LPARAM lParam, BOOL& /*bHandled*/) {
   LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
   lpMMI->ptMinTrackSize.x = 360; // Minimum width
   lpMMI->ptMinTrackSize.y = 460; // Minimum height
@@ -217,8 +223,6 @@ void CMainDlg::InitUI() {
   Button_SetCheck(GetDlgItem(IDC_CB_TIFF), m_reg.HasTH(LENS_TIFF));
   Button_SetCheck(GetDlgItem(IDC_CB_SVG), m_reg.HasTH(LENS_SVG));
   Button_SetCheck(GetDlgItem(IDC_CB_RAW), m_reg.HasTH(LENS_RAW));
-
-  // Sprint 8: Professional & Specialized Formats
   Button_SetCheck(GetDlgItem(IDC_CB_PSD), m_reg.HasTH(LENS_PSD));
   Button_SetCheck(GetDlgItem(IDC_CB_DDS), m_reg.HasTH(LENS_DDS));
   Button_SetCheck(GetDlgItem(IDC_CB_HDR), m_reg.HasTH(LENS_HDR));
@@ -232,7 +236,7 @@ void CMainDlg::InitUI() {
   Button_SetCheck(GetDlgItem(IDC_CB_FONT), m_reg.HasTH(LENS_FONT));
   Button_SetCheck(GetDlgItem(IDC_CB_MODEL), m_reg.HasTH(LENS_MODEL));
 
-  // Collage Mode (Sprint C2)
+  // Collage Mode
   DWORD collageMode = m_reg.GetCollageMode();
   Button_SetCheck(GetDlgItem(IDC_RADIO_1X1), (collageMode == 1));
   Button_SetCheck(GetDlgItem(IDC_RADIO_2X2), (collageMode == 4));
@@ -260,58 +264,56 @@ void CMainDlg::OnApplyImpl() {
     bRefresh = TRUE;
     m_reg.SetShowIconOpt(bRet);
   }
-
-  // Sprint 357: Data-driven format handler sync — replaces 35 copy-paste blocks
   // Each entry maps a dialog checkbox control ID to its LENS_* registry type ID
   static const struct {
     int ctrlId;
     int lensType;
   } formatHandlers[] = {
-      // Comic Book Formats
-      {IDC_CB_CBZ, LENS_CBZ},
-      {IDC_CB_CBR, LENS_CBR},
-      {IDC_CB_CB7, LENS_CB7},
-      {IDC_CB_CBT, LENS_CBT},
-      // E-Book Formats
-      {IDC_CB_EPUB, LENS_EPUB},
-      {IDC_CB_MOBI, LENS_MOBI},
-      {IDC_CB_AZW, LENS_AZW},
-      {IDC_CB_AZW3, LENS_AZW3},
-      // Archive Formats
-      {IDC_CB_ZIP, LENS_ZIP},
-      {IDC_CB_RAR, LENS_RAR},
-      {IDC_CB_7Z, LENS_7Z},
-      {IDC_CB_TAR, LENS_TAR},
-      // Photo & Other Formats
-      {IDC_CB_PHZ, LENS_PHZ},
-      {IDC_CB_FB2, LENS_FB2},
-      // Modern Image Formats
-      {IDC_CB_WEBP, LENS_WEBP},
-      {IDC_CB_HEIF, LENS_HEIF},
-      {IDC_CB_AVIF, LENS_AVIF},
-      {IDC_CB_JXL, LENS_JXL},
-      // Media & Documents
-      {IDC_CB_VIDEO, LENS_VIDEO},
-      {IDC_CB_PDF, LENS_PDF},
-      {IDC_CB_TIFF, LENS_TIFF},
-      {IDC_CB_SVG, LENS_SVG},
-      {IDC_CB_RAW, LENS_RAW},
-      // Professional & Specialized Formats
-      {IDC_CB_PSD, LENS_PSD},
-      {IDC_CB_DDS, LENS_DDS},
-      {IDC_CB_HDR, LENS_HDR},
-      {IDC_CB_EXR, LENS_EXR},
-      {IDC_CB_PPM, LENS_PPM},
-      {IDC_CB_ICO, LENS_ICO},
-      {IDC_CB_QOI, LENS_QOI},
-      {IDC_CB_TGA, LENS_TGA},
-      {IDC_CB_AUDIO, LENS_AUDIO},
-      {IDC_CB_DOCUMENT, LENS_DOCUMENT},
-      {IDC_CB_FONT, LENS_FONT},
-      {IDC_CB_MODEL, LENS_MODEL},
+    // Comic Book Formats
+    {IDC_CB_CBZ, LENS_CBZ},
+    {IDC_CB_CBR, LENS_CBR},
+    {IDC_CB_CB7, LENS_CB7},
+    {IDC_CB_CBT, LENS_CBT},
+    // E-Book Formats
+    {IDC_CB_EPUB, LENS_EPUB},
+    {IDC_CB_MOBI, LENS_MOBI},
+    {IDC_CB_AZW, LENS_AZW},
+    {IDC_CB_AZW3, LENS_AZW3},
+    // Archive Formats
+    {IDC_CB_ZIP, LENS_ZIP},
+    {IDC_CB_RAR, LENS_RAR},
+    {IDC_CB_7Z, LENS_7Z},
+    {IDC_CB_TAR, LENS_TAR},
+    // Photo & Other Formats
+    {IDC_CB_PHZ, LENS_PHZ},
+    {IDC_CB_FB2, LENS_FB2},
+    // Modern Image Formats
+    {IDC_CB_WEBP, LENS_WEBP},
+    {IDC_CB_HEIF, LENS_HEIF},
+    {IDC_CB_AVIF, LENS_AVIF},
+    {IDC_CB_JXL, LENS_JXL},
+    // Media & Documents
+    {IDC_CB_VIDEO, LENS_VIDEO},
+    {IDC_CB_PDF, LENS_PDF},
+    {IDC_CB_TIFF, LENS_TIFF},
+    {IDC_CB_SVG, LENS_SVG},
+    {IDC_CB_RAW, LENS_RAW},
+    // Professional & Specialized Formats
+    {IDC_CB_PSD, LENS_PSD},
+    {IDC_CB_DDS, LENS_DDS},
+    {IDC_CB_HDR, LENS_HDR},
+    {IDC_CB_EXR, LENS_EXR},
+    {IDC_CB_PPM, LENS_PPM},
+    {IDC_CB_ICO, LENS_ICO},
+    {IDC_CB_QOI, LENS_QOI},
+    {IDC_CB_TGA, LENS_TGA},
+    {IDC_CB_AUDIO, LENS_AUDIO},
+    {IDC_CB_DOCUMENT, LENS_DOCUMENT},
+    {IDC_CB_FONT, LENS_FONT},
+    {IDC_CB_MODEL, LENS_MODEL},
   };
 
-  for (const auto &fh : formatHandlers) {
+  for (const auto& fh : formatHandlers) {
     bRet = (BST_CHECKED == Button_GetCheck(GetDlgItem(fh.ctrlId)));
     if (bRet != m_reg.HasTH(fh.lensType)) {
       bRefresh = TRUE;
@@ -319,7 +321,7 @@ void CMainDlg::OnApplyImpl() {
     }
   }
 
-  // Collage Mode (Sprint C2)
+  // Collage Mode
   DWORD newCollageMode = 1; // Default: single page
   if (BST_CHECKED == Button_GetCheck(GetDlgItem(IDC_RADIO_2X2)))
     newCollageMode = 4;
@@ -337,16 +339,16 @@ void CMainDlg::OnApplyImpl() {
     ATLTRACE("refreshing FS\n");
     m_statusBar.SetText(0, _T("Refreshing Explorer..."));
     SHChangeNotify(SHCNE_ASSOCCHANGED,
-                   SHCNF_IDLIST | SHCNF_FLUSHNOWAIT | SHCNF_NOTIFYRECURSIVE,
-                   NULL, NULL);
+      SHCNF_IDLIST | SHCNF_FLUSHNOWAIT | SHCNF_NOTIFYRECURSIVE,
+      NULL, NULL);
   }
 
   InitUI();          // reload
-  UpdateStatusBar(); // Update status bar after changes (Sprint D3)
+  UpdateStatusBar();
 }
 
 LRESULT CMainDlg::OnApply(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
-                          BOOL & /*bHandled*/) {
+  BOOL& /*bHandled*/) {
   // Capture state before changes
   ConfigSnapshot oldConfig = CaptureCurrentConfig();
 
@@ -363,14 +365,14 @@ LRESULT CMainDlg::OnApply(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
   if (result == IDC_BTN_RESTORE && dlg.ShouldRestore()) {
     ApplyConfigSnapshot(oldConfig);
     MessageBox(_T("Previous configuration has been restored."),
-               _T("Configuration Restored"), MB_OK | MB_ICONINFORMATION);
+      _T("Configuration Restored"), MB_OK | MB_ICONINFORMATION);
   }
 
   return 0;
 }
 
 LRESULT CMainDlg::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
-                       BOOL & /*bHandled*/) {
+  BOOL& /*bHandled*/) {
   // Capture state before changes
   ConfigSnapshot oldConfig = CaptureCurrentConfig();
 
@@ -387,7 +389,7 @@ LRESULT CMainDlg::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
   if (result == IDC_BTN_RESTORE && dlg.ShouldRestore()) {
     ApplyConfigSnapshot(oldConfig);
     MessageBox(_T("Previous configuration has been restored."),
-               _T("Configuration Restored"), MB_OK | MB_ICONINFORMATION);
+      _T("Configuration Restored"), MB_OK | MB_ICONINFORMATION);
     return 0; // Don't close dialog
   }
 
@@ -396,7 +398,7 @@ LRESULT CMainDlg::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
 }
 
 LRESULT CMainDlg::OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam,
-                               BOOL &bHandled) {
+  BOOL& bHandled) {
   if (wParam != IDC_APPABOUT)
     return ::DefWindowProc(m_hWnd, uMsg, wParam, lParam);
   CAboutDlg _a;
@@ -405,7 +407,7 @@ LRESULT CMainDlg::OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam,
 }
 
 LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
-                            BOOL & /*bHandled*/) {
+  BOOL& /*bHandled*/) {
   // Clean up font
   if (m_hFont) {
     ::DeleteObject(m_hFont);
@@ -413,15 +415,30 @@ LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
   }
 
   // unregister message filtering and idle updates
-  CMessageLoop *pLoop = _Module.GetMessageLoop();
+  CMessageLoop* pLoop = _Module.GetMessageLoop();
   ATLASSERT(pLoop != NULL);
   pLoop->RemoveMessageFilter(this);
   pLoop->RemoveIdleHandler(this);
   return 0;
 }
 
+LRESULT CMainDlg::OnSettingChange(UINT /*uMsg*/, WPARAM /*wParam*/,
+  LPARAM lParam, BOOL& /*bHandled*/) {
+  auto& darkCtrl = ExplorerLens::DarkModeController::Instance();
+  darkCtrl.OnSettingChange(m_hWnd, lParam);
+  return 0;
+}
+
+LRESULT CMainDlg::OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam,
+  BOOL& /*bHandled*/) {
+  auto& darkCtrl = ExplorerLens::DarkModeController::Instance();
+  return reinterpret_cast<LRESULT>(
+    darkCtrl.OnCtlColor(reinterpret_cast<HDC>(wParam),
+      reinterpret_cast<HWND>(lParam)));
+}
+
 LRESULT CMainDlg::OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/,
-                           BOOL & /*bHandled*/) {
+  BOOL& /*bHandled*/) {
   CloseDialog(wID);
   return 0;
 }
@@ -441,32 +458,32 @@ LRESULT CMainDlg::OnAppHelp(LPHELPINFO lphi) {
   case IDC_CB_RAR:
     // '#' anchors must use id attribute
     HtmlHelp(m_hWnd, _T("LENSShellHelp.chm::manager.html#optth"),
-             HH_DISPLAY_TOPIC, NULL);
+      HH_DISPLAY_TOPIC, NULL);
     break;
 
   case IDC_SORT_ADVOPTGROUP:
     HtmlHelp(m_hWnd, _T("LENSShellHelp.chm::manager.html#advopt"),
-             HH_DISPLAY_TOPIC, NULL);
+      HH_DISPLAY_TOPIC, NULL);
     break;
 
   case IDC_CB_SORT:
   case IDC_SORT_DESC:
     ATLTRACE("HH sort opt\n");
     HtmlHelp(m_hWnd, _T("LENSShellHelp.chm::FAQ.html#custth"), HH_DISPLAY_TOPIC,
-             NULL);
+      NULL);
     break;
 
   default:
     ATLTRACE("HH default\n");
     HtmlHelp(m_hWnd, _T("LENSShellHelp.chm::manager.html"), HH_DISPLAY_TOPIC,
-             NULL); // about?
+      NULL); // about?
     break;
   }
   return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Sprint D1: Tooltip support with handler status indicators
+// Tooltip support with handler status indicators
 //////////////////////////////////////////////////////////////////////////
 
 void CMainDlg::InitTooltips() {
@@ -478,192 +495,190 @@ void CMainDlg::InitTooltips() {
 
   // Comic Book Formats - Add tooltips with file extensions and details
   AddTooltipWithStatus(IDC_CB_CBZ, LENS_CBZ,
-                       _T("CBZ - Comic Book ZIP Archive\nExtensions: .cbz"));
+    _T("CBZ - Comic Book ZIP Archive\nExtensions: .cbz"));
   AddTooltipWithStatus(IDC_CB_CBR, LENS_CBR,
-                       _T("CBR - Comic Book RAR Archive\nExtensions: ")
-                       _T(".cbr\nRequires: UnRAR library"));
+    _T("CBR - Comic Book RAR Archive\nExtensions: ")
+    _T(".cbr\nRequires: UnRAR library"));
   AddTooltipWithStatus(IDC_CB_CB7, LENS_CB7,
-                       _T("CB7 - Comic Book 7-Zip Archive\nExtensions: .cb7"));
+    _T("CB7 - Comic Book 7-Zip Archive\nExtensions: .cb7"));
   AddTooltipWithStatus(IDC_CB_CBT, LENS_CBT,
-                       _T("CBT - Comic Book TAR Archive\nExtensions: .cbt"));
+    _T("CBT - Comic Book TAR Archive\nExtensions: .cbt"));
 
   // E-Book Formats
   AddTooltipWithStatus(IDC_CB_EPUB, LENS_EPUB,
-                       _T("EPUB - Electronic Publication\nExtensions: ")
-                       _T(".epub\nSupports: Cover extraction from metadata"));
+    _T("EPUB - Electronic Publication\nExtensions: ")
+    _T(".epub\nSupports: Cover extraction from metadata"));
   AddTooltipWithStatus(IDC_CB_MOBI, LENS_MOBI,
-                       _T("MOBI - Mobipocket E-Book\nExtensions: .mobi"));
+    _T("MOBI - Mobipocket E-Book\nExtensions: .mobi"));
   AddTooltipWithStatus(IDC_CB_AZW, LENS_AZW,
-                       _T("AZW - Amazon Kindle Format\nExtensions: .azw"));
+    _T("AZW - Amazon Kindle Format\nExtensions: .azw"));
   AddTooltipWithStatus(IDC_CB_AZW3, LENS_AZW3,
-                       _T("AZW3 - Kindle Format 8 (KF8)\nExtensions: .azw3"));
+    _T("AZW3 - Kindle Format 8 (KF8)\nExtensions: .azw3"));
 
   // Archive Formats
   AddTooltipWithStatus(IDC_CB_ZIP, LENS_ZIP,
-                       _T("ZIP - Standard ZIP Archive\nExtensions: ")
-                       _T(".zip\nThumbnails from first image inside"));
+    _T("ZIP - Standard ZIP Archive\nExtensions: ")
+    _T(".zip\nThumbnails from first image inside"));
   AddTooltipWithStatus(
-      IDC_CB_RAR, LENS_RAR,
-      _T("RAR - WinRAR Archive\nExtensions: .rar\nRequires: UnRAR library"));
+    IDC_CB_RAR, LENS_RAR,
+    _T("RAR - WinRAR Archive\nExtensions: .rar\nRequires: UnRAR library"));
   AddTooltipWithStatus(
-      IDC_CB_7Z, LENS_7Z,
-      _T("7Z - 7-Zip Archive\nExtensions: .7z\nHigh compression ratio"));
+    IDC_CB_7Z, LENS_7Z,
+    _T("7Z - 7-Zip Archive\nExtensions: .7z\nHigh compression ratio"));
   AddTooltipWithStatus(
-      IDC_CB_TAR, LENS_TAR,
-      _T("TAR - Tape Archive\nExtensions: .tar, .tar.gz, .tar.bz2"));
+    IDC_CB_TAR, LENS_TAR,
+    _T("TAR - Tape Archive\nExtensions: .tar, .tar.gz, .tar.bz2"));
 
   // Photo Albums & Other
   AddTooltipWithStatus(IDC_CB_PHZ, LENS_PHZ,
-                       _T("PHZ - Photo ZIP Album\nExtensions: .phz\nOptimized ")
-                       _T("for photo collections"));
+    _T("PHZ - Photo ZIP Album\nExtensions: .phz\nOptimized ")
+    _T("for photo collections"));
   AddTooltipWithStatus(
-      IDC_CB_FB2, LENS_FB2,
-      _T("FB2 - FictionBook E-Book\nExtensions: .fb2\nXML-based format"));
+    IDC_CB_FB2, LENS_FB2,
+    _T("FB2 - FictionBook E-Book\nExtensions: .fb2\nXML-based format"));
 
   // Modern Image Formats
   AddTooltipWithStatus(IDC_CB_WEBP, LENS_WEBP,
-                       _T("WebP - Modern Image Format\nExtensions: ")
-                       _T(".webp\nPerformance: Fast, built-in decoder"));
+    _T("WebP - Modern Image Format\nExtensions: ")
+    _T(".webp\nPerformance: Fast, built-in decoder"));
   AddTooltipWithStatus(IDC_CB_HEIF, LENS_HEIF,
-                       _T("HEIF/HEIC - High Efficiency Image\nExtensions: ")
-                       _T(".heif, .heic\nUsed by: iPhone photos\nRequires: ")
-                       _T("HEIF Image Extensions (Microsoft Store)"));
+    _T("HEIF/HEIC - High Efficiency Image\nExtensions: ")
+    _T(".heif, .heic\nUsed by: iPhone photos\nRequires: ")
+    _T("HEIF Image Extensions (Microsoft Store)"));
   AddTooltipWithStatus(
-      IDC_CB_AVIF, LENS_AVIF,
-      _T("AVIF - AV1 Image Format\nExtensions: .avif\nRequires: AV1 Video ")
-      _T("Extension (Microsoft Store)\nPerformance: Fast via WIC"));
+    IDC_CB_AVIF, LENS_AVIF,
+    _T("AVIF - AV1 Image Format\nExtensions: .avif\nRequires: AV1 Video ")
+    _T("Extension (Microsoft Store)\nPerformance: Fast via WIC"));
   AddTooltipWithStatus(IDC_CB_JXL, LENS_JXL,
-                       _T("JPEG XL - Next-Gen Image Format\nExtensions: ")
-                       _T(".jxl\nRequires: Windows Imaging Component support"));
+    _T("JPEG XL - Next-Gen Image Format\nExtensions: ")
+    _T(".jxl\nRequires: Windows Imaging Component support"));
 
   // Media & Documents
   AddTooltipWithStatus(
-      IDC_CB_VIDEO, LENS_VIDEO,
-      _T("Video Files - Extract Frame Thumbnails\nExtensions: .mp4, .avi, ")
-      _T(".mkv, .mov, .wmv\nRequires: DirectShow codecs\nPerformance: Cached ")
-      _T("for speed"));
+    IDC_CB_VIDEO, LENS_VIDEO,
+    _T("Video Files - Extract Frame Thumbnails\nExtensions: .mp4, .avi, ")
+    _T(".mkv, .mov, .wmv\nRequires: DirectShow codecs\nPerformance: Cached ")
+    _T("for speed"));
   AddTooltipWithStatus(IDC_CB_PDF, LENS_PDF,
-                       _T("PDF Documents\nExtensions: .pdf\nPerformance: ")
-                       _T("Fast, uses embedded thumbnails when available"));
+    _T("PDF Documents\nExtensions: .pdf\nPerformance: ")
+    _T("Fast, uses embedded thumbnails when available"));
   AddTooltipWithStatus(IDC_CB_TIFF, LENS_TIFF,
-                       _T("TIFF Images\nExtensions: .tif, .tiff\nSupports: ")
-                       _T("Multi-page TIFF files"));
+    _T("TIFF Images\nExtensions: .tif, .tiff\nSupports: ")
+    _T("Multi-page TIFF files"));
   AddTooltipWithStatus(IDC_CB_SVG, LENS_SVG,
-                       _T("SVG Vector Graphics\nExtensions: .svg, ")
-                       _T(".svgz\nScalable vector format"));
+    _T("SVG Vector Graphics\nExtensions: .svg, ")
+    _T(".svgz\nScalable vector format"));
   AddTooltipWithStatus(
-      IDC_CB_RAW, LENS_RAW,
-      _T("RAW Camera Photos\nExtensions: .dng, .cr2, .cr3, .nef, .arw, ")
-      _T(".orf\nRequires: Microsoft Camera Codec Pack (free)\nPerformance: ")
-      _T("Fast (uses embedded preview)"));
-
-  // Sprint 8: Professional & Specialized Formats
+    IDC_CB_RAW, LENS_RAW,
+    _T("RAW Camera Photos\nExtensions: .dng, .cr2, .cr3, .nef, .arw, ")
+    _T(".orf\nRequires: Microsoft Camera Codec Pack (free)\nPerformance: ")
+    _T("Fast (uses embedded preview)"));
   AddTooltipWithStatus(IDC_CB_PSD, LENS_PSD,
-                       _T("PSD - Adobe Photoshop Document\nExtensions: .psd, ")
-                       _T(".psb\nShows: Composite preview layer"));
+    _T("PSD - Adobe Photoshop Document\nExtensions: .psd, ")
+    _T(".psb\nShows: Composite preview layer"));
   AddTooltipWithStatus(IDC_CB_DDS, LENS_DDS,
-                       _T("DDS - DirectDraw Surface\nExtensions: .dds\nUsed ")
-                       _T("by: Games, 3D applications"));
+    _T("DDS - DirectDraw Surface\nExtensions: .dds\nUsed ")
+    _T("by: Games, 3D applications"));
   AddTooltipWithStatus(
-      IDC_CB_HDR, LENS_HDR,
-      _T("HDR - Radiance High Dynamic Range\nExtensions: .hdr\nUsed by: ")
-      _T("Professional photography, 3D rendering"));
+    IDC_CB_HDR, LENS_HDR,
+    _T("HDR - Radiance High Dynamic Range\nExtensions: .hdr\nUsed by: ")
+    _T("Professional photography, 3D rendering"));
   AddTooltipWithStatus(IDC_CB_EXR, LENS_EXR,
-                       _T("EXR - OpenEXR High Dynamic Range\nExtensions: ")
-                       _T(".exr\nUsed by: VFX, film production"));
+    _T("EXR - OpenEXR High Dynamic Range\nExtensions: ")
+    _T(".exr\nUsed by: VFX, film production"));
   AddTooltipWithStatus(IDC_CB_PPM, LENS_PPM,
-                       _T("PPM - Portable Pixmap\nExtensions: .ppm, .pgm, ")
-                       _T(".pbm\nUsed by: Scientific imaging, CLI tools"));
+    _T("PPM - Portable Pixmap\nExtensions: .ppm, .pgm, ")
+    _T(".pbm\nUsed by: Scientific imaging, CLI tools"));
   AddTooltipWithStatus(IDC_CB_ICO, LENS_ICO,
-                       _T("ICO - Windows Icon\nExtensions: .ico, .cur\nShows: ")
-                       _T("Largest available icon size"));
+    _T("ICO - Windows Icon\nExtensions: .ico, .cur\nShows: ")
+    _T("Largest available icon size"));
   AddTooltipWithStatus(IDC_CB_QOI, LENS_QOI,
-                       _T("QOI - Quite OK Image Format\nExtensions: ")
-                       _T(".qoi\nFast lossless compression"));
+    _T("QOI - Quite OK Image Format\nExtensions: ")
+    _T(".qoi\nFast lossless compression"));
   AddTooltipWithStatus(IDC_CB_TGA, LENS_TGA,
-                       _T("TGA - Targa Image\nExtensions: .tga\nUsed by: ")
-                       _T("Games, 3D applications"));
+    _T("TGA - Targa Image\nExtensions: .tga\nUsed by: ")
+    _T("Games, 3D applications"));
   AddTooltipWithStatus(IDC_CB_AUDIO, LENS_AUDIO,
-                       _T("Audio Cover Art\nExtensions: .mp3, .flac, .ogg, ")
-                       _T(".wma, .aac\nShows: Embedded album art thumbnail"));
+    _T("Audio Cover Art\nExtensions: .mp3, .flac, .ogg, ")
+    _T(".wma, .aac\nShows: Embedded album art thumbnail"));
   AddTooltipWithStatus(IDC_CB_DOCUMENT, LENS_DOCUMENT,
-                       _T("Document Thumbnails\nExtensions: .docx, .xlsx, ")
-                       _T(".pptx\nShows: First page preview via OLE/COM"));
+    _T("Document Thumbnails\nExtensions: .docx, .xlsx, ")
+    _T(".pptx\nShows: First page preview via OLE/COM"));
   AddTooltipWithStatus(IDC_CB_FONT, LENS_FONT,
-                       _T("Font Preview Thumbnails\nExtensions: .ttf, .otf, ")
-                       _T(".woff\nShows: Sample text rendering"));
+    _T("Font Preview Thumbnails\nExtensions: .ttf, .otf, ")
+    _T(".woff\nShows: Sample text rendering"));
   AddTooltipWithStatus(IDC_CB_MODEL, LENS_MODEL,
-                       _T("3D Model Thumbnails\nExtensions: .stl, .obj, ")
-                       _T(".ply\nShows: Wireframe/solid preview"));
+    _T("3D Model Thumbnails\nExtensions: .stl, .obj, ")
+    _T(".ply\nShows: Wireframe/solid preview"));
 
   // Options tooltips (no status needed)
   m_tooltip.AddTool(GetDlgItem(IDC_CB_SORT),
-                    _T("Sort images alphabetically by filename\nUncheck to ")
-                    _T("use archive order (creation/modification time)"));
+    _T("Sort images alphabetically by filename\nUncheck to ")
+    _T("use archive order (creation/modification time)"));
   m_tooltip.AddTool(GetDlgItem(IDC_CB_SHOWICON),
-                    _T("Show archive type icon overlay on thumbnails\nHelps ")
-                    _T("identify CBZ vs CBR vs ZIP, etc."));
+    _T("Show archive type icon overlay on thumbnails\nHelps ")
+    _T("identify CBZ vs CBR vs ZIP, etc."));
 
   // Button tooltips
   m_tooltip.AddTool(
-      GetDlgItem(IDC_BTN_LOAD_CONFIG),
-      _T("Load configuration from REG or JSON file\nDouble-click .reg files ")
-      _T("to import directly via Registry Editor"));
+    GetDlgItem(IDC_BTN_LOAD_CONFIG),
+    _T("Load configuration from REG or JSON file\nDouble-click .reg files ")
+    _T("to import directly via Registry Editor"));
   m_tooltip.AddTool(GetDlgItem(IDOK), _T("Apply changes and close (Enter)"));
   m_tooltip.AddTool(GetDlgItem(IDC_APPLY),
-                    _T("Apply changes without closing (Ctrl+S)"));
+    _T("Apply changes without closing (Ctrl+S)"));
   m_tooltip.AddTool(GetDlgItem(IDCANCEL),
-                    _T("Close without saving changes (Esc)"));
+    _T("Close without saving changes (Esc)"));
 
   // Collage mode tooltips
   m_tooltip.AddTool(GetDlgItem(IDC_RADIO_1X1),
-                    _T("Single Page Mode - Show only the first page\nDefault ")
-                    _T("for most formats"));
+    _T("Single Page Mode - Show only the first page\nDefault ")
+    _T("for most formats"));
   m_tooltip.AddTool(
-      GetDlgItem(IDC_RADIO_2X2),
-      _T("2x2 Grid Mode - Show first 4 pages in grid\nGood for quick preview"));
+    GetDlgItem(IDC_RADIO_2X2),
+    _T("2x2 Grid Mode - Show first 4 pages in grid\nGood for quick preview"));
   m_tooltip.AddTool(
-      GetDlgItem(IDC_RADIO_3X3),
-      _T("3x3 Grid Mode - Show first 9 pages in grid\nBalanced view"));
+    GetDlgItem(IDC_RADIO_3X3),
+    _T("3x3 Grid Mode - Show first 9 pages in grid\nBalanced view"));
   m_tooltip.AddTool(GetDlgItem(IDC_RADIO_4X4),
-                    _T("4x4 Grid Mode - Show first 16 pages in grid\nBest for ")
-                    _T("comic books and quick content overview"));
+    _T("4x4 Grid Mode - Show first 16 pages in grid\nBest for ")
+    _T("comic books and quick content overview"));
 }
 
 void CMainDlg::AddTooltipWithStatus(int ctrlID, int LENSTYPE,
-                                    LPCTSTR formatName) {
-  // Sprint 18A: Enhanced with program name detection
+  LPCTSTR formatName) {
+  // Enhanced with program name detection
   CString programName;
   HandlerStatus status = m_reg.GetHandlerStatusEx(
-      LENSTYPE, m_reg.GetExtension(LENSTYPE), programName);
+    LENSTYPE, m_reg.GetExtension(LENSTYPE), programName);
   CString tooltip;
 
   switch (status) {
   case HANDLER_ExplorerLens:
     tooltip.Format(_T("%s\n\n\xE2\x9C\x85 Active Handler: ")
-                   _T("ExplorerLens\nStatus: Enabled and working"),
-                   formatName);
+      _T("ExplorerLens\nStatus: Enabled and working"),
+      formatName);
     break;
 
   case HANDLER_NATIVE:
     tooltip.Format(
-        _T("%s\n\n\xF0\x9F\x94\xB7 Current Handler: %s (Windows ")
-        _T("built-in)\nNote: Enable ExplorerLens to use enhanced features"),
-        formatName, (LPCTSTR)programName);
+      _T("%s\n\n\xF0\x9F\x94\xB7 Current Handler: %s (Windows ")
+      _T("built-in)\nNote: Enable ExplorerLens to use enhanced features"),
+      formatName, (LPCTSTR)programName);
     break;
 
   case HANDLER_NONE:
     tooltip.Format(
-        _T("%s\n\n\xE2\xAD\x95 No Handler: No thumbnail provider ")
-        _T("installed\nAction: Enable ExplorerLens to generate thumbnails"),
-        formatName);
+      _T("%s\n\n\xE2\xAD\x95 No Handler: No thumbnail provider ")
+      _T("installed\nAction: Enable ExplorerLens to generate thumbnails"),
+      formatName);
     break;
 
   case HANDLER_THIRD_PARTY:
     tooltip.Format(
-        _T("%s\n\n\xE2\x9A\xA0 Current Handler: %s (Third-party)\nAction: ")
-        _T("Click Apply to use ExplorerLens instead"),
-        formatName, (LPCTSTR)programName);
+      _T("%s\n\n\xE2\x9A\xA0 Current Handler: %s (Third-party)\nAction: ")
+      _T("Click Apply to use ExplorerLens instead"),
+      formatName, (LPCTSTR)programName);
     break;
 
   default:
@@ -681,10 +696,7 @@ void CMainDlg::AddTooltipWithStatus(int ctrlID, int LENSTYPE,
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Sprint D3: Dark mode and modern UI support
-// NOTE: Dark mode has been removed for plain system-themed GUI.
-// The dark mode infrastructure (DarkModeHelper.h) is retained
-// but not used. The dialog uses standard Windows system colors.
+// Status bar and UI updates
 //////////////////////////////////////////////////////////////////////////
 
 void CMainDlg::UpdateStatusBar() {
@@ -693,17 +705,17 @@ void CMainDlg::UpdateStatusBar() {
 
   int enabledCount = GetEnabledFormatCount();
 
-  // Sprint 18A: Count conflicts (third-party handlers)
+  // Count conflicts (third-party handlers)
   int conflictCount = 0;
   const int allFormats[] = {
       LENS_CBZ,   LENS_CBR,  LENS_CB7,  LENS_CBT,  LENS_EPUB, LENS_MOBI,
       LENS_AZW,   LENS_AZW3, LENS_ZIP,  LENS_RAR,  LENS_7Z,   LENS_TAR,
       LENS_PHZ,   LENS_FB2,  LENS_WEBP, LENS_HEIF, LENS_AVIF, LENS_JXL,
-      LENS_VIDEO, LENS_PDF,  LENS_TIFF, LENS_SVG,  LENS_RAW};
+      LENS_VIDEO, LENS_PDF,  LENS_TIFF, LENS_SVG,  LENS_RAW };
 
   for (int format : allFormats) {
     HandlerStatus status =
-        m_reg.GetHandlerStatus(format, m_reg.GetExtension(format));
+      m_reg.GetHandlerStatus(format, m_reg.GetExtension(format));
     if (status == HANDLER_THIRD_PARTY)
       conflictCount++;
   }
@@ -711,12 +723,13 @@ void CMainDlg::UpdateStatusBar() {
   CString statusText;
   if (conflictCount > 0) {
     statusText.Format(_T("Ready - %d of 31+ formats enabled | \xE2\x9A\xA0 %d ")
-                      _T("conflict(s) detected (hover for details)"),
-                      enabledCount, conflictCount);
-  } else {
+      _T("conflict(s) detected (hover for details)"),
+      enabledCount, conflictCount);
+  }
+  else {
     statusText.Format(
-        _T("Ready - %d of 31+ formats enabled | Windows 11 25H2 Compatible"),
-        enabledCount);
+      _T("Ready - %d of 31+ formats enabled | Windows 11 25H2 Compatible"),
+      enabledCount);
   }
 
   m_statusBar.SetText(0, statusText);
@@ -782,8 +795,6 @@ int CMainDlg::GetEnabledFormatCount() {
     count++;
   if (m_reg.HasTH(LENS_RAW))
     count++;
-
-  // Sprint 8: Professional & Specialized Formats (12)
   if (m_reg.HasTH(LENS_PSD))
     count++;
   if (m_reg.HasTH(LENS_DDS))
@@ -825,101 +836,99 @@ void CMainDlg::InitStatusIcons() {
 
   // Comic Book Formats
   m_checkboxStatus[IDC_CB_CBZ] =
-      m_reg.GetHandlerStatus(LENS_CBZ, m_reg.GetExtension(LENS_CBZ));
+    m_reg.GetHandlerStatus(LENS_CBZ, m_reg.GetExtension(LENS_CBZ));
   m_checkboxStatus[IDC_CB_CBR] =
-      m_reg.GetHandlerStatus(LENS_CBR, m_reg.GetExtension(LENS_CBR));
+    m_reg.GetHandlerStatus(LENS_CBR, m_reg.GetExtension(LENS_CBR));
   m_checkboxStatus[IDC_CB_CB7] =
-      m_reg.GetHandlerStatus(LENS_CB7, m_reg.GetExtension(LENS_CB7));
+    m_reg.GetHandlerStatus(LENS_CB7, m_reg.GetExtension(LENS_CB7));
   m_checkboxStatus[IDC_CB_CBT] =
-      m_reg.GetHandlerStatus(LENS_CBT, m_reg.GetExtension(LENS_CBT));
+    m_reg.GetHandlerStatus(LENS_CBT, m_reg.GetExtension(LENS_CBT));
 
   // E-Book Formats
   m_checkboxStatus[IDC_CB_EPUB] =
-      m_reg.GetHandlerStatus(LENS_EPUB, m_reg.GetExtension(LENS_EPUB));
+    m_reg.GetHandlerStatus(LENS_EPUB, m_reg.GetExtension(LENS_EPUB));
   m_checkboxStatus[IDC_CB_MOBI] =
-      m_reg.GetHandlerStatus(LENS_MOBI, m_reg.GetExtension(LENS_MOBI));
+    m_reg.GetHandlerStatus(LENS_MOBI, m_reg.GetExtension(LENS_MOBI));
   m_checkboxStatus[IDC_CB_AZW] =
-      m_reg.GetHandlerStatus(LENS_AZW, m_reg.GetExtension(LENS_AZW));
+    m_reg.GetHandlerStatus(LENS_AZW, m_reg.GetExtension(LENS_AZW));
   m_checkboxStatus[IDC_CB_AZW3] =
-      m_reg.GetHandlerStatus(LENS_AZW3, m_reg.GetExtension(LENS_AZW3));
+    m_reg.GetHandlerStatus(LENS_AZW3, m_reg.GetExtension(LENS_AZW3));
 
   // Archive Formats
   m_checkboxStatus[IDC_CB_ZIP] =
-      m_reg.GetHandlerStatus(LENS_ZIP, m_reg.GetExtension(LENS_ZIP));
+    m_reg.GetHandlerStatus(LENS_ZIP, m_reg.GetExtension(LENS_ZIP));
   m_checkboxStatus[IDC_CB_RAR] =
-      m_reg.GetHandlerStatus(LENS_RAR, m_reg.GetExtension(LENS_RAR));
+    m_reg.GetHandlerStatus(LENS_RAR, m_reg.GetExtension(LENS_RAR));
   m_checkboxStatus[IDC_CB_7Z] =
-      m_reg.GetHandlerStatus(LENS_7Z, m_reg.GetExtension(LENS_7Z));
+    m_reg.GetHandlerStatus(LENS_7Z, m_reg.GetExtension(LENS_7Z));
   m_checkboxStatus[IDC_CB_TAR] =
-      m_reg.GetHandlerStatus(LENS_TAR, m_reg.GetExtension(LENS_TAR));
+    m_reg.GetHandlerStatus(LENS_TAR, m_reg.GetExtension(LENS_TAR));
 
   // Photo & Other Formats
   m_checkboxStatus[IDC_CB_PHZ] =
-      m_reg.GetHandlerStatus(LENS_PHZ, m_reg.GetExtension(LENS_PHZ));
+    m_reg.GetHandlerStatus(LENS_PHZ, m_reg.GetExtension(LENS_PHZ));
   m_checkboxStatus[IDC_CB_FB2] =
-      m_reg.GetHandlerStatus(LENS_FB2, m_reg.GetExtension(LENS_FB2));
+    m_reg.GetHandlerStatus(LENS_FB2, m_reg.GetExtension(LENS_FB2));
 
   // Modern Image Formats
   m_checkboxStatus[IDC_CB_WEBP] =
-      m_reg.GetHandlerStatus(LENS_WEBP, m_reg.GetExtension(LENS_WEBP));
+    m_reg.GetHandlerStatus(LENS_WEBP, m_reg.GetExtension(LENS_WEBP));
   m_checkboxStatus[IDC_CB_HEIF] =
-      m_reg.GetHandlerStatus(LENS_HEIF, m_reg.GetExtension(LENS_HEIF));
+    m_reg.GetHandlerStatus(LENS_HEIF, m_reg.GetExtension(LENS_HEIF));
   m_checkboxStatus[IDC_CB_AVIF] =
-      m_reg.GetHandlerStatus(LENS_AVIF, m_reg.GetExtension(LENS_AVIF));
+    m_reg.GetHandlerStatus(LENS_AVIF, m_reg.GetExtension(LENS_AVIF));
   m_checkboxStatus[IDC_CB_JXL] =
-      m_reg.GetHandlerStatus(LENS_JXL, m_reg.GetExtension(LENS_JXL));
+    m_reg.GetHandlerStatus(LENS_JXL, m_reg.GetExtension(LENS_JXL));
 
   // Media & Documents
   m_checkboxStatus[IDC_CB_VIDEO] =
-      m_reg.GetHandlerStatus(LENS_VIDEO, m_reg.GetExtension(LENS_VIDEO));
+    m_reg.GetHandlerStatus(LENS_VIDEO, m_reg.GetExtension(LENS_VIDEO));
   m_checkboxStatus[IDC_CB_PDF] =
-      m_reg.GetHandlerStatus(LENS_PDF, m_reg.GetExtension(LENS_PDF));
+    m_reg.GetHandlerStatus(LENS_PDF, m_reg.GetExtension(LENS_PDF));
   m_checkboxStatus[IDC_CB_TIFF] =
-      m_reg.GetHandlerStatus(LENS_TIFF, m_reg.GetExtension(LENS_TIFF));
+    m_reg.GetHandlerStatus(LENS_TIFF, m_reg.GetExtension(LENS_TIFF));
   m_checkboxStatus[IDC_CB_SVG] =
-      m_reg.GetHandlerStatus(LENS_SVG, m_reg.GetExtension(LENS_SVG));
+    m_reg.GetHandlerStatus(LENS_SVG, m_reg.GetExtension(LENS_SVG));
   m_checkboxStatus[IDC_CB_RAW] =
-      m_reg.GetHandlerStatus(LENS_RAW, m_reg.GetExtension(LENS_RAW));
-
-  // Sprint 8: Professional & Specialized Formats
+    m_reg.GetHandlerStatus(LENS_RAW, m_reg.GetExtension(LENS_RAW));
   m_checkboxStatus[IDC_CB_PSD] =
-      m_reg.GetHandlerStatus(LENS_PSD, m_reg.GetExtension(LENS_PSD));
+    m_reg.GetHandlerStatus(LENS_PSD, m_reg.GetExtension(LENS_PSD));
   m_checkboxStatus[IDC_CB_DDS] =
-      m_reg.GetHandlerStatus(LENS_DDS, m_reg.GetExtension(LENS_DDS));
+    m_reg.GetHandlerStatus(LENS_DDS, m_reg.GetExtension(LENS_DDS));
   m_checkboxStatus[IDC_CB_HDR] =
-      m_reg.GetHandlerStatus(LENS_HDR, m_reg.GetExtension(LENS_HDR));
+    m_reg.GetHandlerStatus(LENS_HDR, m_reg.GetExtension(LENS_HDR));
   m_checkboxStatus[IDC_CB_EXR] =
-      m_reg.GetHandlerStatus(LENS_EXR, m_reg.GetExtension(LENS_EXR));
+    m_reg.GetHandlerStatus(LENS_EXR, m_reg.GetExtension(LENS_EXR));
   m_checkboxStatus[IDC_CB_PPM] =
-      m_reg.GetHandlerStatus(LENS_PPM, m_reg.GetExtension(LENS_PPM));
+    m_reg.GetHandlerStatus(LENS_PPM, m_reg.GetExtension(LENS_PPM));
   m_checkboxStatus[IDC_CB_ICO] =
-      m_reg.GetHandlerStatus(LENS_ICO, m_reg.GetExtension(LENS_ICO));
+    m_reg.GetHandlerStatus(LENS_ICO, m_reg.GetExtension(LENS_ICO));
   m_checkboxStatus[IDC_CB_QOI] =
-      m_reg.GetHandlerStatus(LENS_QOI, m_reg.GetExtension(LENS_QOI));
+    m_reg.GetHandlerStatus(LENS_QOI, m_reg.GetExtension(LENS_QOI));
   m_checkboxStatus[IDC_CB_TGA] =
-      m_reg.GetHandlerStatus(LENS_TGA, m_reg.GetExtension(LENS_TGA));
+    m_reg.GetHandlerStatus(LENS_TGA, m_reg.GetExtension(LENS_TGA));
   m_checkboxStatus[IDC_CB_AUDIO] =
-      m_reg.GetHandlerStatus(LENS_AUDIO, m_reg.GetExtension(LENS_AUDIO));
+    m_reg.GetHandlerStatus(LENS_AUDIO, m_reg.GetExtension(LENS_AUDIO));
   m_checkboxStatus[IDC_CB_DOCUMENT] =
-      m_reg.GetHandlerStatus(LENS_DOCUMENT, m_reg.GetExtension(LENS_DOCUMENT));
+    m_reg.GetHandlerStatus(LENS_DOCUMENT, m_reg.GetExtension(LENS_DOCUMENT));
   m_checkboxStatus[IDC_CB_FONT] =
-      m_reg.GetHandlerStatus(LENS_FONT, m_reg.GetExtension(LENS_FONT));
+    m_reg.GetHandlerStatus(LENS_FONT, m_reg.GetExtension(LENS_FONT));
   m_checkboxStatus[IDC_CB_MODEL] =
-      m_reg.GetHandlerStatus(LENS_MODEL, m_reg.GetExtension(LENS_MODEL));
+    m_reg.GetHandlerStatus(LENS_MODEL, m_reg.GetExtension(LENS_MODEL));
 }
 
 // Handle checkbox clicks - BS_AUTO3STATE handles toggling automatically
 LRESULT CMainDlg::OnCheckboxClicked(WORD /*wNotifyCode*/, WORD wID,
-                                    HWND hWndCtl, BOOL & /*bHandled*/) {
+  HWND hWndCtl, BOOL& /*bHandled*/) {
   return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Keyboard Shortcuts - Sprint E Integration
+// Keyboard Shortcuts
 //////////////////////////////////////////////////////////////////////////
 
 LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/,
-                            BOOL & /*bHandled*/) {
+  BOOL& /*bHandled*/) {
   bool ctrlPressed = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
 
   if (ctrlPressed) {
@@ -952,32 +961,33 @@ LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/,
       RecreateFont(8);
       return 0;
     }
-  } else {
+  }
+  else {
     switch (wParam) {
     case VK_F1: // F1: Show help
       // Display comprehensive help dialog
       MessageBox(_T("ExplorerLens Shell Manager - Quick Help\n\n")
-                 _T("KEYBOARD SHORTCUTS:\n")
-                 _T("  Ctrl+A     - Select all formats\n")
-                 _T("  Ctrl+D     - Deselect all formats\n")
-                 _T("  Ctrl+S     - Apply changes\n")
-                 _T("  Ctrl+=     - Increase font size\n")
-                 _T("  Ctrl+-     - Decrease font size\n")
-                 _T("  Ctrl+0     - Reset font size\n")
-                 _T("  Ctrl+Wheel - Zoom font in/out\n")
-                 _T("  F1         - Show this help\n")
-                 _T("  F5         - Refresh status\n\n")
-                 _T("FEATURES:\n")
-                 _T("  \x2022 50+ supported formats\n")
-                 _T("  \x2022 Modern images: WebP, AVIF, JXL, HEIF\n")
-                 _T("  \x2022 Conflict detection\n")
-                 _T("  \x2022 Resizable window with font scaling\n")
-                 _T("  \x2022 Windows 11 25H2 compatible\n\n")
-                 _T("TIPS:\n")
-                 _T("  \x2022 Hover over icons for details\n")
-                 _T("  \x2022 Check status bar for count\n")
-                 _T("\nFor full docs, press F1 on any control."),
-                 _T("ExplorerLens Help"), MB_OK | MB_ICONINFORMATION);
+        _T("KEYBOARD SHORTCUTS:\n")
+        _T("  Ctrl+A     - Select all formats\n")
+        _T("  Ctrl+D     - Deselect all formats\n")
+        _T("  Ctrl+S     - Apply changes\n")
+        _T("  Ctrl+=     - Increase font size\n")
+        _T("  Ctrl+-     - Decrease font size\n")
+        _T("  Ctrl+0     - Reset font size\n")
+        _T("  Ctrl+Wheel - Zoom font in/out\n")
+        _T("  F1         - Show this help\n")
+        _T("  F5         - Refresh status\n\n")
+        _T("FEATURES:\n")
+        _T("  \x2022 50+ supported formats\n")
+        _T("  \x2022 Modern images: WebP, AVIF, JXL, HEIF\n")
+        _T("  \x2022 Conflict detection\n")
+        _T("  \x2022 Resizable window with font scaling\n")
+        _T("  \x2022 Windows 11 25H2 compatible\n\n")
+        _T("TIPS:\n")
+        _T("  \x2022 Hover over icons for details\n")
+        _T("  \x2022 Check status bar for count\n")
+        _T("\nFor full docs, press F1 on any control."),
+        _T("ExplorerLens Help"), MB_OK | MB_ICONINFORMATION);
       return 0;
     }
   }
@@ -986,7 +996,7 @@ LRESULT CMainDlg::OnKeyDown(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/,
 }
 
 LRESULT CMainDlg::OnMouseWheel(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/,
-                               BOOL &bHandled) {
+  BOOL& bHandled) {
   bool ctrlPressed = (LOWORD(wParam) & MK_CONTROL) != 0;
   if (!ctrlPressed) {
     bHandled = FALSE;
@@ -996,7 +1006,8 @@ LRESULT CMainDlg::OnMouseWheel(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/,
   short zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
   if (zDelta > 0 && m_fontSize < FONT_SIZE_MAX) {
     RecreateFont(m_fontSize + 1);
-  } else if (zDelta < 0 && m_fontSize > FONT_SIZE_MIN) {
+  }
+  else if (zDelta < 0 && m_fontSize > FONT_SIZE_MIN) {
     RecreateFont(m_fontSize - 1);
   }
 
@@ -1020,16 +1031,16 @@ void CMainDlg::RecreateFont(int pointSize) {
   int lfHeight = -MulDiv(pointSize, logPixelsY, 72);
 
   m_hFont = ::CreateFont(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-                         DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                         CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                         DEFAULT_PITCH | FF_DONTCARE, _T("Segoe UI"));
+    DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+    CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
+    DEFAULT_PITCH | FF_DONTCARE, _T("Segoe UI"));
 
   if (!m_hFont) {
     // Fallback to MS Shell Dlg
     m_hFont = ::CreateFont(lfHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-                           DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                           CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                           DEFAULT_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
+      DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+      CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
+      DEFAULT_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
   }
 
   if (m_hFont) {
@@ -1051,7 +1062,7 @@ void CMainDlg::RecreateFont(int pointSize) {
 }
 
 void CMainDlg::OnSelectAll() {
-  // Select all 35 format checkboxes (Sprint 8: added 12 specialized formats)
+  // Select all format checkboxes
   int formatCheckboxes[] = {
       IDC_CB_CBZ,  IDC_CB_CBR,   IDC_CB_CB7,      IDC_CB_CBT,   IDC_CB_EPUB,
       IDC_CB_MOBI, IDC_CB_AZW,   IDC_CB_AZW3,     IDC_CB_ZIP,   IDC_CB_RAR,
@@ -1059,7 +1070,7 @@ void CMainDlg::OnSelectAll() {
       IDC_CB_HEIF, IDC_CB_AVIF,  IDC_CB_JXL,      IDC_CB_VIDEO, IDC_CB_PDF,
       IDC_CB_TIFF, IDC_CB_SVG,   IDC_CB_RAW,      IDC_CB_PSD,   IDC_CB_DDS,
       IDC_CB_HDR,  IDC_CB_EXR,   IDC_CB_PPM,      IDC_CB_ICO,   IDC_CB_QOI,
-      IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL};
+      IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL };
 
   for (int id : formatCheckboxes) {
     Button_SetCheck(GetDlgItem(id), BST_CHECKED);
@@ -1067,7 +1078,7 @@ void CMainDlg::OnSelectAll() {
 }
 
 void CMainDlg::OnDeselectAll() {
-  // Deselect all 35 format checkboxes (Sprint 8: added 12 specialized formats)
+  // Deselect all format checkboxes
   int formatCheckboxes[] = {
       IDC_CB_CBZ,  IDC_CB_CBR,   IDC_CB_CB7,      IDC_CB_CBT,   IDC_CB_EPUB,
       IDC_CB_MOBI, IDC_CB_AZW,   IDC_CB_AZW3,     IDC_CB_ZIP,   IDC_CB_RAR,
@@ -1075,7 +1086,7 @@ void CMainDlg::OnDeselectAll() {
       IDC_CB_HEIF, IDC_CB_AVIF,  IDC_CB_JXL,      IDC_CB_VIDEO, IDC_CB_PDF,
       IDC_CB_TIFF, IDC_CB_SVG,   IDC_CB_RAW,      IDC_CB_PSD,   IDC_CB_DDS,
       IDC_CB_HDR,  IDC_CB_EXR,   IDC_CB_PPM,      IDC_CB_ICO,   IDC_CB_QOI,
-      IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL};
+      IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL };
 
   for (int id : formatCheckboxes) {
     Button_SetCheck(GetDlgItem(id), BST_UNCHECKED);
@@ -1085,7 +1096,7 @@ void CMainDlg::OnDeselectAll() {
 // Configuration Management Functions
 
 ConfigSnapshot CMainDlg::CaptureCurrentConfig() {
-  ConfigSnapshot config = {0};
+  ConfigSnapshot config = { 0 };
 
   // Capture format states
   config.cbz = (m_reg.HasTH(LENS_CBZ) != FALSE);
@@ -1111,7 +1122,6 @@ ConfigSnapshot CMainDlg::CaptureCurrentConfig() {
   config.tiff = (m_reg.HasTH(LENS_TIFF) != FALSE);
   config.svg = (m_reg.HasTH(LENS_SVG) != FALSE);
   config.raw = (m_reg.HasTH(LENS_RAW) != FALSE);
-  // Sprint 8: Professional & Specialized Formats
   config.psd = (m_reg.HasTH(LENS_PSD) != FALSE);
   config.dds = (m_reg.HasTH(LENS_DDS) != FALSE);
   config.hdr = (m_reg.HasTH(LENS_HDR) != FALSE);
@@ -1133,7 +1143,7 @@ ConfigSnapshot CMainDlg::CaptureCurrentConfig() {
   return config;
 }
 
-void CMainDlg::ApplyConfigSnapshot(const ConfigSnapshot &config) {
+void CMainDlg::ApplyConfigSnapshot(const ConfigSnapshot& config) {
   // Apply format handlers
   m_reg.SetHandlers(LENS_CBZ, config.cbz);
   m_reg.SetHandlers(LENS_CBR, config.cbr);
@@ -1158,7 +1168,6 @@ void CMainDlg::ApplyConfigSnapshot(const ConfigSnapshot &config) {
   m_reg.SetHandlers(LENS_TIFF, config.tiff);
   m_reg.SetHandlers(LENS_SVG, config.svg);
   m_reg.SetHandlers(LENS_RAW, config.raw);
-  // Sprint 8: Professional & Specialized Formats
   m_reg.SetHandlers(LENS_PSD, config.psd);
   m_reg.SetHandlers(LENS_DDS, config.dds);
   m_reg.SetHandlers(LENS_HDR, config.hdr);
@@ -1179,18 +1188,18 @@ void CMainDlg::ApplyConfigSnapshot(const ConfigSnapshot &config) {
 
   // Refresh Explorer
   SHChangeNotify(SHCNE_ASSOCCHANGED,
-                 SHCNF_IDLIST | SHCNF_FLUSHNOWAIT | SHCNF_NOTIFYRECURSIVE, NULL,
-                 NULL);
+    SHCNF_IDLIST | SHCNF_FLUSHNOWAIT | SHCNF_NOTIFYRECURSIVE, NULL,
+    NULL);
 
   // Reload UI
   InitUI();
   UpdateStatusBar();
 }
 
-bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot &outConfig) {
+bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot& outConfig) {
   CAtlFile file;
   HRESULT hr =
-      file.Create(filename, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
+    file.Create(filename, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
   if (FAILED(hr))
     return false;
 
@@ -1202,7 +1211,7 @@ bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot &outConfig) {
   }
 
   CStringA jsonData;
-  char *buffer = jsonData.GetBuffer((int)fileSize + 1);
+  char* buffer = jsonData.GetBuffer((int)fileSize + 1);
   DWORD bytesRead = 0;
   hr = file.Read(buffer, (DWORD)fileSize, bytesRead);
   jsonData.ReleaseBuffer(bytesRead);
@@ -1213,7 +1222,7 @@ bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot &outConfig) {
 
   // Simple JSON parsing (basic approach - looks for true/false after field
   // names)
-  auto getBool = [&jsonData](const char *key) -> bool {
+  auto getBool = [&jsonData](const char* key) -> bool {
     CStringA searchKey;
     searchKey.Format("\"%s\"", key);
     int pos = jsonData.Find(searchKey);
@@ -1233,9 +1242,9 @@ bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot &outConfig) {
     if (falsePos != -1 && falsePos < endPos)
       return false;
     return false;
-  };
+    };
 
-  auto getInt = [&jsonData](const char *key) -> int {
+  auto getInt = [&jsonData](const char* key) -> int {
     CStringA searchKey;
     searchKey.Format("\"%s\"", key);
     int pos = jsonData.Find(searchKey);
@@ -1247,19 +1256,19 @@ bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot &outConfig) {
 
     // Skip whitespace
     while (valuePos < jsonData.GetLength() &&
-           (jsonData[valuePos] == ':' || jsonData[valuePos] == ' ' ||
-            jsonData[valuePos] == '\t'))
+      (jsonData[valuePos] == ':' || jsonData[valuePos] == ' ' ||
+        jsonData[valuePos] == '\t'))
       valuePos++;
 
     // Parse integer
     int value = 0;
     while (valuePos < jsonData.GetLength() && jsonData[valuePos] >= '0' &&
-           jsonData[valuePos] <= '9') {
+      jsonData[valuePos] <= '9') {
       value = value * 10 + (jsonData[valuePos] - '0');
       valuePos++;
     }
     return value;
-  };
+    };
 
   // Parse formats
   outConfig.cbz = getBool("cbz");
@@ -1285,8 +1294,6 @@ bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot &outConfig) {
   outConfig.tiff = getBool("tiff");
   outConfig.svg = getBool("svg");
   outConfig.raw = getBool("raw");
-
-  // Sprint 8: Professional & Specialized Formats
   outConfig.psd = getBool("psd");
   outConfig.dds = getBool("dds");
   outConfig.hdr = getBool("hdr");
@@ -1307,7 +1314,7 @@ bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot &outConfig) {
 
   // Validate collage mode
   if (outConfig.collageMode != 1 && outConfig.collageMode != 4 &&
-      outConfig.collageMode != 9 && outConfig.collageMode != 16) {
+    outConfig.collageMode != 9 && outConfig.collageMode != 16) {
     outConfig.collageMode = 1; // Default to single page
   }
 
@@ -1315,10 +1322,10 @@ bool CMainDlg::LoadConfigFromFile(LPCTSTR filename, ConfigSnapshot &outConfig) {
 }
 
 bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
-                                     ConfigSnapshot &outConfig) {
+  ConfigSnapshot& outConfig) {
   CAtlFile file;
   HRESULT hr =
-      file.Create(filename, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
+    file.Create(filename, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING);
   if (FAILED(hr))
     return false;
 
@@ -1330,7 +1337,7 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
   }
 
   CStringA regData;
-  char *buffer = regData.GetBuffer((int)fileSize + 1);
+  char* buffer = regData.GetBuffer((int)fileSize + 1);
   DWORD bytesRead = 0;
   hr = file.Read(buffer, (DWORD)fileSize, bytesRead);
   regData.ReleaseBuffer(bytesRead);
@@ -1340,11 +1347,11 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
     return false;
 
   // Simple .reg parser - looks for handler GUID presence/absence
-  auto isFormatEnabled = [&regData](const char *ext) -> bool {
+  auto isFormatEnabled = [&regData](const char* ext) -> bool {
     CStringA searchKey;
     searchKey.Format("SOFTWARE\\Classes\\.%s\\shellex\\{BB2E617C-0920-11d1-"
-                     "9A0B-00C04FC2D6C1}",
-                     ext);
+      "9A0B-00C04FC2D6C1}",
+      ext);
     int pos = regData.Find(searchKey);
     if (pos == -1)
       return false;
@@ -1355,7 +1362,7 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
       return false;
 
     int guidPos =
-        regData.Find("{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}", nextLine);
+      regData.Find("{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}", nextLine);
     int deletePos = regData.Find("@=-", nextLine);
 
     // If GUID found before next section or delete marker
@@ -1363,9 +1370,9 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
       return true;
     }
     return false;
-  };
+    };
 
-  auto getDwordValue = [&regData](const char *valueName) -> DWORD {
+  auto getDwordValue = [&regData](const char* valueName) -> DWORD {
     CStringA searchKey;
     searchKey.Format("\"%s\"=dword:", valueName);
     int pos = regData.Find(searchKey);
@@ -1376,7 +1383,7 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
     DWORD value = 0;
     sscanf_s(regData.Mid(pos, 8).GetString(), "%x", &value);
     return value;
-  };
+    };
 
   // Parse format handlers
   outConfig.cbz = isFormatEnabled("cbz");
@@ -1402,8 +1409,6 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
   outConfig.tiff = isFormatEnabled("tif") || isFormatEnabled("tiff");
   outConfig.svg = isFormatEnabled("svg");
   outConfig.raw = isFormatEnabled("dng"); // Use dng as proxy for all RAW
-
-  // Sprint 8: Professional & Specialized Formats
   outConfig.psd = isFormatEnabled("psd");
   outConfig.dds = isFormatEnabled("dds");
   outConfig.hdr = isFormatEnabled("hdr");
@@ -1414,10 +1419,10 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
   outConfig.tga = isFormatEnabled("tga");
   outConfig.audio = isFormatEnabled("mp3"); // Use mp3 as proxy for all audio
   outConfig.document =
-      isFormatEnabled("docx"); // Use docx as proxy for all documents
+    isFormatEnabled("docx"); // Use docx as proxy for all documents
   outConfig.font = isFormatEnabled("ttf"); // Use ttf as proxy for all fonts
   outConfig.model =
-      isFormatEnabled("stl"); // Use stl as proxy for all 3D models
+    isFormatEnabled("stl"); // Use stl as proxy for all 3D models
 
   // Parse options
   outConfig.sortOpt = (getDwordValue("SortOpt") != 0);
@@ -1426,7 +1431,7 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
 
   // Validate collage mode
   if (outConfig.collageMode != 1 && outConfig.collageMode != 4 &&
-      outConfig.collageMode != 9 && outConfig.collageMode != 16) {
+    outConfig.collageMode != 9 && outConfig.collageMode != 16) {
     outConfig.collageMode = 1;
   }
 
@@ -1434,10 +1439,10 @@ bool CMainDlg::LoadConfigFromRegFile(LPCTSTR filename,
 }
 
 LRESULT CMainDlg::OnLoadConfig(WORD /*wNotifyCode*/, WORD /*wID*/,
-                               HWND /*hWndCtl*/, BOOL & /*bHandled*/) {
+  HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
   CFileDialog dlg(TRUE, _T("reg"), NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST,
-                  _T("Windows Registry File (*.reg)\0*.reg\0JSON ")
-                  _T("Configuration (*.json)\0*.json\0All Files (*.*)\0*.*\0"));
+    _T("Windows Registry File (*.reg)\0*.reg\0JSON ")
+    _T("Configuration (*.json)\0*.json\0All Files (*.*)\0*.*\0"));
 
   if (dlg.DoModal() == IDOK) {
     CString filename(dlg.m_szFileName);
@@ -1447,25 +1452,25 @@ LRESULT CMainDlg::OnLoadConfig(WORD /*wNotifyCode*/, WORD /*wID*/,
       // For .reg files, offer to import directly or use shell execute
       CString msg;
       msg.Format(_T("Registry file selected:\r\n%s\r\n\r\n")
-                 _T("How do you want to import this configuration?\r\n\r\n")
-                 _T("YES = Import via Registry Editor (recommended)\r\n")
-                 _T("NO = Load and apply through ExplorerLens\r\n")
-                 _T("CANCEL = Cancel operation"),
-                 dlg.m_szFileName);
+        _T("How do you want to import this configuration?\r\n\r\n")
+        _T("YES = Import via Registry Editor (recommended)\r\n")
+        _T("NO = Load and apply through ExplorerLens\r\n")
+        _T("CANCEL = Cancel operation"),
+        dlg.m_szFileName);
 
       int result = MessageBox(msg, _T("Import Registry File"),
-                              MB_YESNOCANCEL | MB_ICONQUESTION);
+        MB_YESNOCANCEL | MB_ICONQUESTION);
 
       if (result == IDYES) {
         // Use regedit to import the file
         CString cmdLine;
         cmdLine.Format(_T("regedit.exe /s \"%s\""), dlg.m_szFileName);
 
-        STARTUPINFO si = {sizeof(STARTUPINFO)};
-        PROCESS_INFORMATION pi = {0};
+        STARTUPINFO si = { sizeof(STARTUPINFO) };
+        PROCESS_INFORMATION pi = { 0 };
 
         if (CreateProcess(NULL, cmdLine.GetBuffer(), NULL, NULL, FALSE,
-                          CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+          CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
           // Wait for regedit to complete
           WaitForSingleObject(pi.hProcess, 10000); // 10 second timeout
           CloseHandle(pi.hProcess);
@@ -1473,59 +1478,64 @@ LRESULT CMainDlg::OnLoadConfig(WORD /*wNotifyCode*/, WORD /*wID*/,
 
           // Refresh Explorer
           SHChangeNotify(SHCNE_ASSOCCHANGED,
-                         SHCNF_IDLIST | SHCNF_FLUSHNOWAIT |
-                             SHCNF_NOTIFYRECURSIVE,
-                         NULL, NULL);
+            SHCNF_IDLIST | SHCNF_FLUSHNOWAIT |
+            SHCNF_NOTIFYRECURSIVE,
+            NULL, NULL);
 
           // Reload UI to reflect registry changes
           InitUI();
           UpdateStatusBar();
 
           MessageBox(_T("Registry configuration imported successfully!\r\n\r\n")
-                     _T("Windows Explorer has been refreshed.\r\n")
-                     _T("The UI has been updated to reflect the new settings."),
-                     _T("Import Complete"), MB_OK | MB_ICONINFORMATION);
-        } else {
-          MessageBox(
-              _T("Failed to launch Registry Editor.\r\n\r\n")
-              _T("You can manually double-click the .reg file to import it."),
-              _T("Import Error"), MB_OK | MB_ICONERROR);
+            _T("Windows Explorer has been refreshed.\r\n")
+            _T("The UI has been updated to reflect the new settings."),
+            _T("Import Complete"), MB_OK | MB_ICONINFORMATION);
         }
-      } else if (result == IDNO) {
+        else {
+          MessageBox(
+            _T("Failed to launch Registry Editor.\r\n\r\n")
+            _T("You can manually double-click the .reg file to import it."),
+            _T("Import Error"), MB_OK | MB_ICONERROR);
+        }
+      }
+      else if (result == IDNO) {
         // Parse .reg file and apply through our code
         ConfigSnapshot loadedConfig;
         if (LoadConfigFromRegFile(dlg.m_szFileName, loadedConfig)) {
           ApplyConfigSnapshot(loadedConfig);
           MessageBox(_T("Configuration applied successfully!\r\n\r\n")
-                     _T("Windows Explorer has been refreshed."),
-                     _T("Configuration Applied"), MB_OK | MB_ICONINFORMATION);
-        } else {
+            _T("Windows Explorer has been refreshed."),
+            _T("Configuration Applied"), MB_OK | MB_ICONINFORMATION);
+        }
+        else {
           MessageBox(_T("Failed to parse registry file."), _T("Load Error"),
-                     MB_OK | MB_ICONERROR);
+            MB_OK | MB_ICONERROR);
         }
       }
-    } else {
+    }
+    else {
       // JSON file handling (existing code)
       ConfigSnapshot loadedConfig;
       if (LoadConfigFromFile(dlg.m_szFileName, loadedConfig)) {
         CString msg;
         msg.Format(
-            _T("Configuration loaded from:\r\n%s\r\n\r\n")
-            _T("Do you want to apply this configuration?\r\n\r\n")
-            _T("This will change your current thumbnail handler settings."),
-            dlg.m_szFileName);
+          _T("Configuration loaded from:\r\n%s\r\n\r\n")
+          _T("Do you want to apply this configuration?\r\n\r\n")
+          _T("This will change your current thumbnail handler settings."),
+          dlg.m_szFileName);
 
         if (MessageBox(msg, _T("Apply Configuration?"),
-                       MB_YESNO | MB_ICONQUESTION) == IDYES) {
+          MB_YESNO | MB_ICONQUESTION) == IDYES) {
           ApplyConfigSnapshot(loadedConfig);
           MessageBox(_T("Configuration applied successfully!\r\n\r\n")
-                     _T("Windows Explorer has been refreshed."),
-                     _T("Configuration Applied"), MB_OK | MB_ICONINFORMATION);
+            _T("Windows Explorer has been refreshed."),
+            _T("Configuration Applied"), MB_OK | MB_ICONINFORMATION);
         }
-      } else {
+      }
+      else {
         MessageBox(_T("Failed to load configuration file.\r\n\r\n")
-                   _T("The file may be corrupted or in an unsupported format."),
-                   _T("Load Error"), MB_OK | MB_ICONERROR);
+          _T("The file may be corrupted or in an unsupported format."),
+          _T("Load Error"), MB_OK | MB_ICONERROR);
       }
     }
   }

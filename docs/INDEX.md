@@ -1,9 +1,7 @@
 # ExplorerLens Documentation Index
 
-**Project:** ExplorerLens  
-**Current Version:** v15.0.0 "Zenith"  
-**Planning Authority:** [MASTER_PLAN.md](../MASTER_PLAN.md)  
-**Sprints Completed:** 393  
+**Project:** ExplorerLens 
+**Current Version:** v15.0.0 "Zenith" 
 **Last Updated:** July 2025
 
 ---
@@ -12,12 +10,11 @@
 
 | Document | Description |
 |----------|-------------|
-| [MASTER_PLAN.md](../MASTER_PLAN.md) | Unified roadmap and execution plan |
 | [README.md](../README.md) | Project overview and feature summary |
 | [CHANGELOG.md](../CHANGELOG.md) | Release history and change log |
 | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) | Current known issues and mitigations |
 | [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
-| [archive/ENHANCEMENT_PLAN_V15.md](archive/ENHANCEMENT_PLAN_V15.md) | v15.0 development roadmap (45 sprints, completed) |
+| [archive/ENHANCEMENT_PLAN_V15.md](archive/ENHANCEMENT_PLAN_V15.md) | v15.0 development roadmap (completed) |
 | [WINUI3_MIGRATION_PLAN.md](WINUI3_MIGRATION_PLAN.md) | WinUI 3 / XAML Islands migration plan |
 
 ## Development
@@ -104,5 +101,4 @@
 
 ---
 
-For roadmap, sprint status, and backlog priorities, use [MASTER_PLAN.md](../MASTER_PLAN.md).
-
+For project history and releases, see [CHANGELOG.md](../CHANGELOG.md).

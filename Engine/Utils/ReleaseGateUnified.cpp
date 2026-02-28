@@ -1,10 +1,4 @@
-#include "ReleaseGateV10.h"
-#include "ReleaseGateV11.h"
-#include "ReleaseGateV12.h"
-#include "ReleaseGateV13.h"
-#include "ReleaseGateV14.h"
-#include "ReleaseGateV15.h"
-#include "ReleaseGateV3.h"
+#include "ReleaseGate.h"
 
 #include <algorithm>
 #include <cstring>
@@ -71,15 +65,15 @@ ReleaseGateResult ReleaseGateV3::Evaluate() const {
 std::wstring ReleaseGateV3::GenerateChecklist() const {
   std::wostringstream oss;
   oss << L"ReleaseGateV3 Checklist (v9.2)\n";
-  oss << L"  [ ] Zero warnings\n";
-  oss << L"  [ ] 100% test pass rate\n";
-  oss << L"  [ ] ARM64 CI green\n";
-  oss << L"  [ ] MSIX package built\n";
-  oss << L"  [ ] High-DPI compliance verified\n";
-  oss << L"  [ ] Malformed input fuzz passed\n";
-  oss << L"  [ ] Plugin ecosystem health OK\n";
+  oss << L" [ ] Zero warnings\n";
+  oss << L" [ ] 100% test pass rate\n";
+  oss << L" [ ] ARM64 CI green\n";
+  oss << L" [ ] MSIX package built\n";
+  oss << L" [ ] High-DPI compliance verified\n";
+  oss << L" [ ] Malformed input fuzz passed\n";
+  oss << L" [ ] Plugin ecosystem health OK\n";
   for (const auto &m : m_measurements) {
-    oss << L"  [" << (m.passed ? L"PASS" : L"FAIL") << L"] " << m.name << L": "
+    oss << L" [" << (m.passed ? L"PASS" : L"FAIL") << L"] " << m.name << L": "
         << m.value << m.unit << L"\n";
   }
   return oss.str();
@@ -90,7 +84,7 @@ ReleaseGateV3::GenerateReleaseNotes(const ReleaseGateResult &result) const {
   std::wostringstream oss;
   oss << L"Release Notes " << result.version << L" — Gate "
       << GetVerdictName(result.verdict) << L"\n";
-  oss << L"  Score: " << result.overallScore << L"% (" << result.passedKPIs
+  oss << L" Score: " << result.overallScore << L"% (" << result.passedKPIs
       << L"/" << result.totalKPIs << L" KPIs)\n";
   return oss.str();
 }
@@ -197,10 +191,10 @@ V10ReleaseResult ReleaseGateV10::Evaluate() const {
 std::wstring ReleaseGateV10::GenerateChangelog() const {
   std::wostringstream oss;
   oss << L"v10.0.0 Changelog\n";
-  oss << L"  - Added DICOM decoder V2 with enhanced metadata support\n";
-  oss << L"  - FITS scientific format decoder\n";
-  oss << L"  - NIfTI neuroimaging format support\n";
-  oss << L"  Decoders: " << m_decoderCount << L"\n";
+  oss << L" - Added DICOM decoder V2 with enhanced metadata support\n";
+  oss << L" - FITS scientific format decoder\n";
+  oss << L" - NIfTI neuroimaging format support\n";
+  oss << L" Decoders: " << m_decoderCount << L"\n";
   return oss.str();
 }
 
@@ -209,7 +203,7 @@ ReleaseGateV10::GenerateReleaseNotes(const V10ReleaseResult &result) const {
   std::wostringstream oss;
   oss << L"Release Notes v10.0.0 — " << (result.passed ? L"PASSED" : L"FAILED")
       << L"\n";
-  oss << L"  Score: " << result.overallScore << L"%\n";
+  oss << L" Score: " << result.overallScore << L"%\n";
   return oss.str();
 }
 
@@ -479,8 +473,6 @@ const wchar_t *ReleaseGateV13::GetKPIName(GateKPIV13 kpi) {
   return L"Unknown";
 }
 
-} // namespace Engine
-
 ReleaseGateV14::ReleaseGateV14() { InitializeDefaults(); }
 
 void ReleaseGateV14::InitializeDefaults() {
@@ -687,4 +679,5 @@ const wchar_t *ReleaseGateV15::GetKPIName(GateKPIV15 kpi) {
   return L"Unknown";
 }
 
+} // namespace Engine
 } // namespace ExplorerLens

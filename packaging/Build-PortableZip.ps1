@@ -1,5 +1,4 @@
 # Build-PortableZip.ps1
-# Sprint 10: Release Governance & Packaging
 # Creates portable ZIP distribution of ExplorerLens
 
 param(

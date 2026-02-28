@@ -1,4 +1,4 @@
-// PluginSystemTests.cpp - Plugin System Validation Tests (Sprint 19)
+// PluginSystemTests.cpp - Plugin System Validation Tests 
 // ExplorerLens Engine v6.2.0+
 
 #include <windows.h>
@@ -23,7 +23,7 @@ int g_testsFailed = 0;
     }
 
 //============================================================================
-// Plugin System Validation Tests (Sprint 19)
+// Plugin System Validation Tests 
 //============================================================================
 
 void TestPluginDirectoryScanning() {
@@ -207,7 +207,7 @@ void TestPluginIPCCommunication() {
 void PrintTestHeader() {
     std::cout << "=========================================" << std::endl;
     std::cout << "ExplorerLens Plugin System Validation Tests" << std::endl;
-    std::cout << "Sprint 19: Plugin System Activation" << std::endl;
+    std::cout << "Plugin System Activation" << std::endl;
     std::cout << "=========================================" << std::endl;
 }
 
@@ -221,7 +221,7 @@ void PrintTestSummary() {
     
     if (g_testsFailed == 0) {
         std::cout << "\n*** ALL PLUGIN SYSTEM TESTS PASSED ***" << std::endl;
-        std::cout << "Sprint 19: Plugin System - VALIDATED ✅" << std::endl;
+        std::cout << "Plugin System - VALIDATED ✅" << std::endl;
     } else {
         std::cout << "\n!!! SOME PLUGIN SYSTEM TESTS FAILED !!!" << std::endl;
     }

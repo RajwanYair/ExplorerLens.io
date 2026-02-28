@@ -113,17 +113,17 @@ jobs:
           }
         shell: pwsh
 
-      - name: Validate ARM64BuildConfig header
+      - name: Validate ARM64Platform header
         run: |
-          $headerPath = "Engine/Utils/ARM64BuildConfig.h"
+          $headerPath = "Engine/Utils/ARM64Platform.h"
           if (Test-Path $headerPath) {
-              Write-Host "ARM64BuildConfig.h found ✓" -ForegroundColor Green
+              Write-Host "ARM64Platform.h found ✓" -ForegroundColor Green
               $content = Get-Content $headerPath -Raw
               if ($content -match "ARM64BuildConfig") {
                   Write-Host "Header content valid ✓" -ForegroundColor Green
               }
           } else {
-              Write-Error "ARM64BuildConfig.h missing!"
+              Write-Error "ARM64Platform.h missing!"
           }
         shell: pwsh
 

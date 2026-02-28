@@ -1,7 +1,6 @@
 // =============================================================================
 // ipc_transport.h - IPC Transport Layer (Named Pipes + Shared Memory)
 // =============================================================================
-// Sprint 19: Out-of-Process Worker
 // Cross-platform transport abstraction for IPC communication
 // =============================================================================
 

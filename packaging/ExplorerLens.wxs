@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ExplorerLens Windows Installer (WiX Toolset v6.x)
-  Sprint 23: Packaging & Deployment
   
   Build Instructions:
     wix build ExplorerLens.wxs -out ExplorerLens-Setup-15.0.0.msi
@@ -163,7 +162,7 @@
           <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>
         
-        <!-- 3D Models (Sprint 12) -->
+        
         <RegistryKey Root="HKCR" Key=".obj\shellex\{e357fccd-a995-4576-b01f-234630154e96}">
           <RegistryValue Value="{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}" Type="string" />
         </RegistryKey>

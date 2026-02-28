@@ -1,5 +1,4 @@
 # Test-RealFileDecoding.ps1
-# Sprint 13: Real-File Test Fixtures & Compatibility Kit
 # Integration test script for real file decoding
 # Date: February 17, 2026
 

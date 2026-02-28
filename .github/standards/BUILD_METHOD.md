@@ -14,18 +14,18 @@
 - **Configurations**: Debug, Release
 - **Toolchain**: Visual Studio 18 2026 Build Tools (v145 toolset), MSVC 19.50.35720.0
 - **Build Systems**:
-  - **CMake + Ninja** for Engine library + tests + benchmarks + ModernRuntime (preferred)
-  - MSBuild for shell extension (LENSShell.sln)
+ - **CMake + Ninja** for Engine library + tests + benchmarks + ModernRuntime (preferred)
+ - MSBuild for shell extension (LENSShell.sln)
 - **Compilation Units**: 147 total (Engine lib ~108 + tests/benchmarks ~39)
 
 ### Tool Paths (Auto-detected on this machine)
 
 ```powershell
 # Visual Studio Build Tools 18.3.0 (2026) — MSVC v145 toolset
-$VSPath   = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
-$MSBuild  = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
-$vcvars64 = "$VSPath\VC\Auxiliary\Build\vcvars64.bat"   # Preferred over vcvarsall
-$cl       = "$VSPath\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe"  # v19.50.35720
+$VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
+$MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
+$vcvars64 = "$VSPath\VC\Auxiliary\Build\vcvars64.bat" # Preferred over vcvarsall
+$cl = "$VSPath\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe" # v19.50.35720
 
 # CMake 4.2.3 (via Scoop)
 $CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
@@ -70,11 +70,11 @@ cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxilia
 ### Global Preprocessor Defines (CMakeLists.txt)
 
 ```text
-WIN32_LEAN_AND_MEAN   — Excludes rarely-used Windows headers (impacts header compatibility!)
-NOMINMAX              — Prevents min/max macro conflicts with STL
-_WIN32_WINNT=0x0A00   — Targets Windows 10+
-WINVER=0x0A00         — Targets Windows 10+
-UNICODE / _UNICODE    — Unicode build
+WIN32_LEAN_AND_MEAN — Excludes rarely-used Windows headers (impacts header compatibility!)
+NOMINMAX — Prevents min/max macro conflicts with STL
+_WIN32_WINNT=0x0A00 — Targets Windows 10+
+WINVER=0x0A00 — Targets Windows 10+
+UNICODE / _UNICODE — Unicode build
 ```
 
 > **WARNING**: `WIN32_LEAN_AND_MEAN` excludes many Windows SDK sub-headers
@@ -121,13 +121,13 @@ ctest --test-dir build -C Release --output-on-failure
 
 ### Available CMake Presets
 
-| Preset            | Generator | Compiler  | Dependencies    |
+| Preset | Generator | Compiler | Dependencies |
 | ----------------- | --------- | --------- | --------------- |
-| `default-release` | Ninja     | MSVC v145 | Local external/ |
-| `default-debug`   | Ninja     | MSVC v145 | Local external/ |
-| `vcpkg-release`   | Ninja     | MSVC v145 | vcpkg           |
-| `vcpkg-debug`     | Ninja     | MSVC v145 | vcpkg           |
-| `vs2026`          | VS 18     | MSVC v145 | Local external/ |
+| `default-release` | Ninja | MSVC v145 | Local external/ |
+| `default-debug` | Ninja | MSVC v145 | Local external/ |
+| `vcpkg-release` | Ninja | MSVC v145 | vcpkg |
+| `vcpkg-debug` | Ninja | MSVC v145 | vcpkg |
+| `vs2026` | VS 18 | MSVC v145 | Local external/ |
 
 ### MSBuild (Shell Extension + Manager only)
 
@@ -172,9 +172,9 @@ cmake --build --preset default-release -j 8 2>&1 | Tee-Object -FilePath $LogFile
 
 ```text
 /build-logs/
-  build_20260108_134500.log
-  build_20260108_140230.log
-  ...
+ build_20260108_134500.log
+ build_20260108_140230.log
+ ...
 ```
 
 *Note: `/build-logs` is gitignored*
@@ -193,8 +193,8 @@ cmake --build --preset default-release -j 8 2>&1 | Tee-Object -FilePath $LogFile
 
 ```yaml
 jobs:
-  build:
-    timeout-minutes: 120
+ build:
+ timeout-minutes: 120
 ```
 
 ---
@@ -206,14 +206,14 @@ After each build:
 - [ ] 0 errors in output
 - [ ] 0 warnings in Release (enforced by `/WX`)
 - [ ] Output files exist (CMake preset build):
-  - `build/lib/ExplorerLensEngine.lib` — Core engine static library
-  - `build/lib/ExplorerLensModernRuntime.lib` — Modern runtime static library
-  - `build/bin/EngineTests.exe` — Unit test executable
-  - `build/bin/EngineBenchmark.exe` — Benchmark executable
-  - `build/bin/IntegrationTests.exe` — Integration test executable
+ - `build/lib/ExplorerLensEngine.lib` — Core engine static library
+ - `build/lib/ExplorerLensModernRuntime.lib` — Modern runtime static library
+ - `build/bin/EngineTests.exe` — Unit test executable
+ - `build/bin/EngineBenchmark.exe` — Benchmark executable
+ - `build/bin/IntegrationTests.exe` — Integration test executable
 - [ ] Output files exist (MSBuild):
-  - `x64/Release/LENSShell.dll` (~2940 KB) — COM Shell Extension
-  - `x64/Release/LENSManager.exe` (~400 KB) — GUI Configuration Utility
+ - `x64/Release/LENSShell.dll` (~2940 KB) — COM Shell Extension
+ - `x64/Release/LENSManager.exe` (~400 KB) — GUI Configuration Utility
 - [ ] Log file saved to `/build-logs`
 - [ ] No build artifacts committed to Git
 
@@ -280,16 +280,16 @@ All targets use **`/MD`** (dynamic CRT — `MultiThreadedDLL`). This is enforced
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 ```
 
-| Component                 | CRT   | Notes                                    |
+| Component | CRT | Notes |
 | ------------------------- | ----- | ---------------------------------------- |
-| ExplorerLensEngine        | `/MD` | Core library                             |
-| ExplorerLensModernRuntime | `/MD` | Modern runtime library                   |
-| EngineTests               | `/MD` | Test executable                          |
-| EngineBenchmark           | `/MD` | Benchmark executable                     |
-| IntegrationTests          | `/MD` | Integration tests                        |
-| LENSShell.dll             | `/MD` | COM shell extension                      |
-| LENSManager.exe           | `/MD` | GUI utility                              |
-| libwebp (external)        | `/MT` | **Exception** — needs rebuild with `/MD` |
+| ExplorerLensEngine | `/MD` | Core library |
+| ExplorerLensModernRuntime | `/MD` | Modern runtime library |
+| EngineTests | `/MD` | Test executable |
+| EngineBenchmark | `/MD` | Benchmark executable |
+| IntegrationTests | `/MD` | Integration tests |
+| LENSShell.dll | `/MD` | COM shell extension |
+| LENSManager.exe | `/MD` | GUI utility |
+| libwebp (external) | `/MT` | **Exception** — needs rebuild with `/MD` |
 
 When external libs use `/MT` and project uses `/MD`, linker will warn about LIBCMT conflicts.
 Current workaround: `/NODEFAULTLIB:LIBCMT` and `/IGNORE:4099` in CMake linker flags.
@@ -309,7 +309,7 @@ Current workaround: `/NODEFAULTLIB:LIBCMT` and `/IGNORE:4099` in CMake linker fl
 
 - Core headers: before `# Pipeline` comment
 - Core sources: before `# Pipeline implementations` comment
-- Utils headers: before `# Sprint 8-12:` comment
+- Utils headers: before `# ` comment
 - Utils sources: before closing `)`
 
 ### CMakePresets.json Notes
@@ -367,14 +367,14 @@ Replaced `IsWindows10OrGreater()` with direct `RtlGetVersion()` calls via
 typedef NTSTATUS(WINAPI* RtlGetVersionFunc)(PRTL_OSVERSIONINFOW);
 
 bool IsWindows10OrGreaterViaRtl() {
-    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
-    if (!ntdll) return false;
-    auto pRtlGetVersion = (RtlGetVersionFunc)GetProcAddress(ntdll, "RtlGetVersion");
-    if (!pRtlGetVersion) return false;
-    RTL_OSVERSIONINFOW osvi = {};
-    osvi.dwOSVersionInfoSize = sizeof(osvi);
-    if (pRtlGetVersion(&osvi) != 0) return false;
-    return (osvi.dwMajorVersion >= 10);
+ HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+ if (!ntdll) return false;
+ auto pRtlGetVersion = (RtlGetVersionFunc)GetProcAddress(ntdll, "RtlGetVersion");
+ if (!pRtlGetVersion) return false;
+ RTL_OSVERSIONINFOW osvi = {};
+ osvi.dwOSVersionInfoSize = sizeof(osvi);
+ if (pRtlGetVersion(&osvi) != 0) return false;
+ return (osvi.dwMajorVersion >= 10);
 }
 ```
 
@@ -449,14 +449,14 @@ Added `/NODEFAULTLIB:LIBCMT` and `/IGNORE:4099` to test executables in
 
 ```cmake
 if(MSVC)
-    target_link_options(EngineTests PRIVATE
-        /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts from external libs
-        /IGNORE:4099            # Ignore missing PDB warnings
-    )
-    target_link_options(EngineBenchmark PRIVATE
-        /NODEFAULTLIB:LIBCMT    # Ignore static CRT conflicts from external libs
-        /IGNORE:4099            # Ignore missing PDB warnings
-    )
+ target_link_options(EngineTests PRIVATE
+ /NODEFAULTLIB:LIBCMT # Ignore static CRT conflicts from external libs
+ /IGNORE:4099 # Ignore missing PDB warnings
+ )
+ target_link_options(EngineBenchmark PRIVATE
+ /NODEFAULTLIB:LIBCMT # Ignore static CRT conflicts from external libs
+ /IGNORE:4099 # Ignore missing PDB warnings
+ )
 endif()
 ```
 
@@ -545,14 +545,14 @@ Select-String -Path $log -Pattern "FAILED|error C|fatal error|warning C" -CaseSe
 
 # Verify all build artifacts exist
 @(
-    "build/lib/ExplorerLensEngine.lib",
-    "build/lib/ExplorerLensModernRuntime.lib",
-    "build/bin/EngineTests.exe",
-    "build/bin/EngineBenchmark.exe",
-    "build/bin/IntegrationTests.exe"
+ "build/lib/ExplorerLensEngine.lib",
+ "build/lib/ExplorerLensModernRuntime.lib",
+ "build/bin/EngineTests.exe",
+ "build/bin/EngineBenchmark.exe",
+ "build/bin/IntegrationTests.exe"
 ) | ForEach-Object {
-    $exists = Test-Path $_
-    Write-Host "$_ : $exists" -ForegroundColor $(if($exists){"Green"}else{"Red"})
+ $exists = Test-Path $_
+ Write-Host "$_ : $exists" -ForegroundColor $(if($exists){"Green"}else{"Red"})
 }
 ```
 

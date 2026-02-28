@@ -109,7 +109,7 @@ function New-TestImage {
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "SPRINT 7: FORMAT SUPPORT TESTING" -ForegroundColor Cyan
+Write-Host "FORMAT SUPPORT TESTING" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 # Ensure output directory exists

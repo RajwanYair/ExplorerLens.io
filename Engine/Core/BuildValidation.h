@@ -20,46 +20,46 @@ namespace BuildValidation {
 
 /// Build configuration snapshot for diagnostics
 struct BuildInfo {
-  static constexpr int MajorVersion = 15;
-  static constexpr int MinorVersion = 0;
-  static constexpr int PatchVersion = 0;
-  static constexpr const char *VersionString = "15.0.0";
-  static constexpr const char *Codename = "Zenith";
-  static constexpr const char *BuildDate = __DATE__;
-  static constexpr const char *BuildTime = __TIME__;
+    static constexpr int MajorVersion = 15;
+    static constexpr int MinorVersion = 0;
+    static constexpr int PatchVersion = 0;
+    static constexpr const char* VersionString = "15.0.0";
+    static constexpr const char* Codename = "Zenith";
+    static constexpr const char* BuildDate = __DATE__;
+    static constexpr const char* BuildTime = __TIME__;
 
 #ifdef _DEBUG
-  static constexpr bool IsDebug = true;
+    static constexpr bool IsDebug = true;
 #else
-  static constexpr bool IsDebug = false;
+    static constexpr bool IsDebug = false;
 #endif
 
 #ifdef _M_X64
-  static constexpr const char *Architecture = "x64";
+    static constexpr const char* Architecture = "x64";
 #elif defined(_M_ARM64)
-  static constexpr const char *Architecture = "ARM64";
+    static constexpr const char* Architecture = "ARM64";
 #else
-  static constexpr const char *Architecture = "x86";
+    static constexpr const char* Architecture = "x86";
 #endif
 
-  // Feature flags
-  static constexpr int TotalSprints = 448;
-  static constexpr int CompletedSprints = 448;
+    // Feature flags
+    static constexpr int TotalMilestones = 448;
+    static constexpr int CompletedMilestones = 448;
 
-  // Subsystem count
-  static constexpr int DecoderCount = 25;
-  static constexpr int SupportedExtensions = 200;
-  static constexpr int UnitTestCount = 1242;
-  static constexpr int BenchmarkSuites = 5;
+    // Subsystem count
+    static constexpr int DecoderCount = 25;
+    static constexpr int SupportedExtensions = 200;
+    static constexpr int UnitTestCount = 1242;
+    static constexpr int BenchmarkSuites = 5;
 };
 
 /// Validates runtime environment for diagnostics export
 inline bool ValidateRuntime() {
-  // Check Windows version >= 10.0.19041
-  OSVERSIONINFOEXW osvi = {};
-  osvi.dwOSVersionInfoSize = sizeof(osvi);
-  // Build validation passes if we can construct this struct
-  return osvi.dwOSVersionInfoSize > 0;
+    // Check Windows version >= 10.0.19041
+    OSVERSIONINFOEXW osvi = {};
+    osvi.dwOSVersionInfoSize = sizeof(osvi);
+    // Build validation passes if we can construct this struct
+    return osvi.dwOSVersionInfoSize > 0;
 }
 
 } // namespace BuildValidation

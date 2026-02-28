@@ -1,8 +1,7 @@
 # ExplorerLens Developer Guide
-**Version:** 15.0.0 "Zenith"  
-**Last Updated:** July 2025  
-**Target Audience:** Contributors, Plugin Developers, Maintainers  
-**Sprints Completed:** 348  
+**Version:** 15.0.0 "Zenith" 
+**Last Updated:** July 2025 
+**Target Audience:** Contributors, Plugin Developers, Maintainers 
 **Build Status:** 0 errors, 0 warnings (Release x64)
 
 ## Table of Contents
@@ -22,77 +21,77 @@
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│              Windows Explorer (Shell)               │
+│ Windows Explorer (Shell) │
 └─────────────────┬───────────────────────────────────┘
-                  │ IThumbnailProvider Interface
-                  ▼
+ │ IThumbnailProvider Interface
+ ▼
 ┌─────────────────────────────────────────────────────┐
-│            LENSShell.dll (Shell Extension)           │
-│  ┌────────────────────────────────────────────────┐ │
-│  │  LENSShellClass (IThumbnailProvider impl)      │ │
-│  │  - COM Registration                            │ │
-│  │  - IThumbnailProvider::GetThumbnail()         │ │
-│  │  - SEH Exception Handling                     │ │
-│  └─────────────────┬──────────────────────────────┘ │
+│ LENSShell.dll (Shell Extension) │
+│ ┌────────────────────────────────────────────────┐ │
+│ │ LENSShellClass (IThumbnailProvider impl) │ │
+│ │ - COM Registration │ │
+│ │ - IThumbnailProvider::GetThumbnail() │ │
+│ │ - SEH Exception Handling │ │
+│ └─────────────────┬──────────────────────────────┘ │
 └────────────────────┼────────────────────────────────┘
-                     │ Engine API
-                     ▼
+ │ Engine API
+ ▼
 ┌─────────────────────────────────────────────────────┐
-│         ExplorerLensEngine.lib (Core Engine)          │
-│  ┌────────────────────────────────────────────────┐ │
-│  │  ImageEngine (Main API)                       │ │
-│  │  - InitializeForThumbnails()                  │ │
-│  │  - CreateThumbnailFromFile()                  │ │
-│  └─────────────────┬──────────────────────────────┘ │
-│                    │                                 │
-│  ┌────────────────┼──────────────────────────────┐ │
-│  │  Decoder Pipeline                             │ │
-│  │  ├─ Archive Decoders (ZIP, RAR, 7Z, CBZ/CBR) │ │
-│  │  ├─ Image Decoders (JPEG, PNG, WebP, JXL     │ │
-│  │  ├─ RAW Decoders (CR2, NEF, ARW via LibRaw)  │ │
-│  │  ├─ Video Decoders (MP4, MKV via DirectShow) │ │
-│  │  └─ Audio Decoders (MP3, FLAC album art)     │ │
-│  └─────────────────┬──────────────────────────────┘ │
-│                    │                                 │
-│  ┌────────────────┼──────────────────────────────┐ │
-│  │  GPU Acceleration (D3D11)                     │ │
-│  │  - SIMDScaler (AVX2 optimized resizing)      │ │
-│  │  - D3D11TextureRenderer (GPU compositing)    │ │
-│  │  - Shader compilation & caching              │ │
-│  └───────────────────────────────────────────────┘ │
+│ ExplorerLensEngine.lib (Core Engine) │
+│ ┌────────────────────────────────────────────────┐ │
+│ │ ImageEngine (Main API) │ │
+│ │ - InitializeForThumbnails() │ │
+│ │ - CreateThumbnailFromFile() │ │
+│ └─────────────────┬──────────────────────────────┘ │
+│ │ │
+│ ┌────────────────┼──────────────────────────────┐ │
+│ │ Decoder Pipeline │ │
+│ │ ├─ Archive Decoders (ZIP, RAR, 7Z, CBZ/CBR) │ │
+│ │ ├─ Image Decoders (JPEG, PNG, WebP, JXL │ │
+│ │ ├─ RAW Decoders (CR2, NEF, ARW via LibRaw) │ │
+│ │ ├─ Video Decoders (MP4, MKV via DirectShow) │ │
+│ │ └─ Audio Decoders (MP3, FLAC album art) │ │
+│ └─────────────────┬──────────────────────────────┘ │
+│ │ │
+│ ┌────────────────┼──────────────────────────────┐ │
+│ │ GPU Acceleration (D3D11) │ │
+│ │ - SIMDScaler (AVX2 optimized resizing) │ │
+│ │ - D3D11TextureRenderer (GPU compositing) │ │
+│ │ - Shader compilation & caching │ │
+│ └───────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────┘
-                     │
-                     ▼
+ │
+ ▼
 ┌─────────────────────────────────────────────────────┐
-│          External Libraries (Static linking)        │
-│  - zlib 1.3.1, zstd 1.5.7, LZ4 1.10.0, LZMA 26.00  │
-│  - minizip-ng 4.0.10, UnRAR 7.2.2                  │
-│  - libwebp 1.5.0, libjxl 0.11.1                    │
-│  - LibRaw 0.21.3 (RAW photos)                      │
-│  - DirectX 11, Windows WIC                         │
+│ External Libraries (Static linking) │
+│ - zlib 1.3.1, zstd 1.5.7, LZ4 1.10.0, LZMA 26.00 │
+│ - minizip-ng 4.0.10, UnRAR 7.2.2 │
+│ - libwebp 1.5.0, libjxl 0.11.1 │
+│ - LibRaw 0.21.3 (RAW photos) │
+│ - DirectX 11, Windows WIC │
 └─────────────────────────────────────────────────────┘
 ```
 
 ### Key Components
 
 1. **LENSShell.dll** - Windows Shell Extension (COM DLL)
-   - Implements `IThumbnailProvider` COM interface
-   - Handles Explorer integration
-   - SEH exception protection wrapper
-   - Delegates to `ExplorerLensEngine.lib`
+ - Implements `IThumbnailProvider` COM interface
+ - Handles Explorer integration
+ - SEH exception protection wrapper
+ - Delegates to `ExplorerLensEngine.lib`
 
 2. **ExplorerLensEngine.lib** - Core thumbnail engine (static library)
-   - Format detection and dispatching
-   - Decoder implementations
-   - GPU acceleration via DirectX 11
-   - SIMD-optimized image processing
-   - Circuit breaker pattern for failing decoders
+ - Format detection and dispatching
+ - Decoder implementations
+ - GPU acceleration via DirectX 11
+ - SIMD-optimized image processing
+ - Circuit breaker pattern for failing decoders
 
 3. **LENSManager.exe** - Configuration utility (WinUI 3 / Win32)
-   - Handler registration/unregistration
-   - Cache management
-   - GPU selection
-   - Statistics and diagnostics
+ - Handler registration/unregistration
+ - Cache management
+ - GPU selection
+ - Statistics and diagnostics
 
 ---
 
@@ -109,18 +108,18 @@ Install using the provided script:
 Or manually install:
 
 - **Visual Studio 2026** (18.x+) with:
-  - C++ desktop development workload
-  - Windows 11 SDK (10.0.22621.0+)
-  - CMake tools
+ - C++ desktop development workload
+ - Windows 11 SDK (10.0.22621.0+)
+ - CMake tools
 
 - **Build Tools:**
-  - CMake 3.28+
-  - Ninja 1.11+
-  - PowerShell 7+
+ - CMake 3.28+
+ - Ninja 1.11+
+ - PowerShell 7+
 
 - **Compilers:**
-  - MSVC v145+ (Visual Studio 2026)
-  - Clang 17+ (optional, for LLVM builds)
+ - MSVC v145+ (Visual Studio 2026)
+ - Clang 17+ (optional, for LLVM builds)
 
 - **Verification:**
 ```powershell
@@ -131,38 +130,38 @@ Or manually install:
 
 ```
 ExplorerLens/
-├── Engine/               # Core thumbnail engine (C++20)
-│   ├── Core/            # API surface, initialization
-│   ├── Decoders/        # Format-specific decoders
-│   ├── GPU/             # DirectX 11 acceleration
-│   ├── Utils/           # Utilities, SIMD, profiling
-│   └── CMakeLists.txt
+├── Engine/ # Core thumbnail engine (C++20)
+│ ├── Core/ # API surface, initialization
+│ ├── Decoders/ # Format-specific decoders
+│ ├── GPU/ # DirectX 11 acceleration
+│ ├── Utils/ # Utilities, SIMD, profiling
+│ └── CMakeLists.txt
 │
-├── LENSShell/            # Shell extension (COM DLL)
-│   ├── LENSShellClass.cpp/.h    # IThumbnailProvider impl
-│   ├── LENSShell.idl            # COM interface definition
-│   └── LENSShell.vcxproj        # MSBuild project
+├── LENSShell/ # Shell extension (COM DLL)
+│ ├── LENSShellClass.cpp/.h # IThumbnailProvider impl
+│ ├── LENSShell.idl # COM interface definition
+│ └── LENSShell.vcxproj # MSBuild project
 │
-├── LENSManager/          # Configuration utility
-│   ├── MainDlg.cpp/.h          # Main dialog
-│   ├── DarkModeHelper.h        # Dark mode support
-│   └── LENSManager.vcxproj
+├── LENSManager/ # Configuration utility
+│ ├── MainDlg.cpp/.h # Main dialog
+│ ├── DarkModeHelper.h # Dark mode support
+│ └── LENSManager.vcxproj
 │
-├── external/            # Third-party libraries
-│   ├── compression-libs/  # zlib, zstd, lz4, lzma, minizip-ng
-│   ├── archive-libs/      # unrar
-│   ├── image-libs/        # libwebp, libjxl
-│   └── camera-libs/       # LibRaw
+├── external/ # Third-party libraries
+│ ├── compression-libs/ # zlib, zstd, lz4, lzma, minizip-ng
+│ ├── archive-libs/ # unrar
+│ ├── image-libs/ # libwebp, libjxl
+│ └── camera-libs/ # LibRaw
 │
-├── build-scripts/       # Build automation
-│   ├── external-libs/   # Library build scripts
-│   ├── production/      # Production build pipelines
-│   └── Build-With-Monitoring.ps1
+├── build-scripts/ # Build automation
+│ ├── external-libs/ # Library build scripts
+│ ├── production/ # Production build pipelines
+│ └── Build-With-Monitoring.ps1
 │
-├── tests/               # Unit tests (Google Test)
-├── docs/                # Documentation
-├── packaging/           # WiX installer
-└── CMakeLists.txt       # CMake entry point
+├── tests/ # Unit tests (Google Test)
+├── docs/ # Documentation
+├── packaging/ # WiX installer
+└── CMakeLists.txt # CMake entry point
 ```
 
 ---
@@ -215,10 +214,10 @@ ExplorerLens/
 
 ```powershell
 # Using new unified build modules (50% less code)
-.\build-scripts\external-libs\Build-LibWebP-NMake.ps1  -Configuration Release -Clean
-.\build-scripts\external-libs\Build-MinizipNG.ps1      -Configuration Release -Clean
-.\build-scripts\external-libs\build-libjxl.ps1         -Configuration Release -Clean
-.\build-scripts\external-libs\build-libavif.ps1        -Configuration Release -Clean
+.\build-scripts\external-libs\Build-LibWebP-NMake.ps1 -Configuration Release -Clean
+.\build-scripts\external-libs\Build-MinizipNG.ps1 -Configuration Release -Clean
+.\build-scripts\external-libs\build-libjxl.ps1 -Configuration Release -Clean
+.\build-scripts\external-libs\build-libavif.ps1 -Configuration Release -Clean
 
 # Remaining libraries (legacy scripts - being refactored)
 .\build-scripts\external-libs\build-lzma-sdk-26.00.ps1
@@ -245,9 +244,9 @@ ExplorerLens/
 ```powershell
 # Configure
 cmake -S . -B build -G Ninja `
-  -DCMAKE_BUILD_TYPE=Release `
-  -DCMAKE_CXX_COMPILER=clang++ `
-  -DCMAKE_C_COMPILER=clang
+ -DCMAKE_BUILD_TYPE=Release `
+ -DCMAKE_CXX_COMPILER=clang++ `
+ -DCMAKE_C_COMPILER=clang
 
 # Build
 cmake --build build --config Release --target ExplorerLensEngine -j 8
@@ -275,9 +274,9 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /t:LENSManager /m
 
 | Configuration | Compiler | Optimization | Debug Info | Runtime |
 |---------------|----------|--------------|------------|---------|
-| Debug         | MSVC     | O0           | Full       | /MDd    |
-| Release       | MSVC/Clang | O2/O3       | None       | /MD     |
-| RelWithDebInfo| MSVC     | O2           | Full       | /MD     |
+| Debug | MSVC | O0 | Full | /MDd |
+| Release | MSVC/Clang | O2/O3 | None | /MD |
+| RelWithDebInfo| MSVC | O2 | Full | /MD |
 
 ---
 
@@ -290,14 +289,14 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /t:LENSManager /m
 ```cpp
 class ExplorerLensEngine {
 public:
-    static bool InitializeForThumbnails(HWND hwnd = nullptr);
-    static bool CreateThumbnailFromFile(
-        LPCWSTR pszPath,
-        UINT cx,                    // Requested width
-        HBITMAP* phBitmap,
-        WTS_ALPHATYPE* pdwAlpha
-    );
-    static void Shutdown();
+ static bool InitializeForThumbnails(HWND hwnd = nullptr);
+ static bool CreateThumbnailFromFile(
+ LPCWSTR pszPath,
+ UINT cx, // Requested width
+ HBITMAP* phBitmap,
+ WTS_ALPHATYPE* pdwAlpha
+ );
+ static void Shutdown();
 };
 ```
 
@@ -308,13 +307,13 @@ All decoders implement:
 ```cpp
 class IDecoder {
 public:
-    virtual ~IDecoder() = default;
-    virtual bool CanDecode(const std::wstring& extension) = 0;
-    virtual DecoderResult Decode(
-        const std::wstring& filePath,
-        uint32_t maxWidth,
-        uint32_t maxHeight
-    ) = 0;
+ virtual ~IDecoder() = default;
+ virtual bool CanDecode(const std::wstring& extension) = 0;
+ virtual DecoderResult Decode(
+ const std::wstring& filePath,
+ uint32_t maxWidth,
+ uint32_t maxHeight
+ ) = 0;
 };
 ```
 
@@ -326,10 +325,10 @@ public:
 // Engine/Decoders/PNGDecoder.h
 class PNGDecoder : public IDecoder {
 public:
-    bool CanDecode(const std::wstring& extension) override;
-    DecoderResult Decode(...) override;
+ bool CanDecode(const std::wstring& extension) override;
+ DecoderResult Decode(...) override;
 private:
-    // Implementation
+ // Implementation
 };
 ```
 
@@ -337,8 +336,8 @@ private:
 
 ```cpp
 void DecoderRegistry::Initialize() {
-    RegisterDecoder(std::make_unique<PNGDecoder>());
-    // ... other decoders
+ RegisterDecoder(std::make_unique<PNGDecoder>());
+ // ... other decoders
 }
 ```
 
@@ -346,10 +345,10 @@ void DecoderRegistry::Initialize() {
 
 ```cpp
 TEST(PNGDecoderTest, DecodeValidPNG) {
-    PNGDecoder decoder;
-    auto result = decoder.Decode(L"test.png", 256, 256);
-    ASSERT_TRUE(result.success);
-    ASSERT_NE(result.bitmap, nullptr);
+ PNGDecoder decoder;
+ auto result = decoder.Decode(L"test.png", 256, 256);
+ ASSERT_TRUE(result.success);
+ ASSERT_NE(result.bitmap, nullptr);
 }
 ```
 
@@ -362,32 +361,32 @@ TEST(PNGDecoderTest, DecodeValidPNG) {
 - **C++ Standard:** C++20
 - **Formatting:** clang-format (Google style)
 - **Naming:**
-  - Classes: `PascalCase`
-  - Functions: `PascalCase`
-  - Variables: `camelCase`
-  - Constants: `UPPER_SNAKE_CASE`
+ - Classes: `PascalCase`
+ - Functions: `PascalCase`
+ - Variables: `camelCase`
+ - Constants: `UPPER_SNAKE_CASE`
 
 ### Pull Request Process
 
 1. **Fork** the repository
 2. **Create branch** from `main`:
-   ```bash
-   git checkout -b feature/amazing-decoder
-   ```
+ ```bash
+ git checkout -b feature/amazing-decoder
+ ```
 3. **Implement** your changes
 4. **Add tests** (required for new features)
 5. **Run test suite**:
-   ```powershell
-   ctest --test-dir build --output-on-failure
-   ```
+ ```powershell
+ ctest --test-dir build --output-on-failure
+ ```
 6. **Build with zero warnings**:
-   ```powershell
-   msbuild /p:TreatWarningsAsErrors=true
-   ```
+ ```powershell
+ msbuild /p:TreatWarningsAsErrors=true
+ ```
 7. **Submit PR** with:
-   - Clear description
-   - Test coverage report
-   - Before/after performance metrics (if applicable)
+ - Clear description
+ - Test coverage report
+ - Before/after performance metrics (if applicable)
 
 ### Commit Messages
 
@@ -498,7 +497,6 @@ View logs with **DebugView** (Sysinternals):
 ## Additional Resources
 
 - **Build Instructions:** [BUILD_METHOD.md](.github/standards/BUILD_METHOD.md)
-- **Sprint Plan:** [MASTER_PLAN.md](MASTER_PLAN.md)
 - **Library Inventory:** [external/LIBRARY_INVENTORY.md](external/LIBRARY_INVENTORY.md)
 - **User Guide:** [USER_GUIDE.md](USER_GUIDE.md)
 - **Plugin SDK:** [SDK/docs/PLUGIN_SDK.md](SDK/docs/PLUGIN_SDK.md)
@@ -508,4 +506,3 @@ View logs with **DebugView** (Sysinternals):
 ---
 
 **Happy coding! 🚀**
-

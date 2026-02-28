@@ -1,7 +1,7 @@
 # GPU Testing & Optimization Guide — ExplorerLens v15.0.0
 
-**Version:** 15.0.0 "Zenith"  
-**Last Updated:** February 2026  
+**Version:** 15.0.0 "Zenith" 
+**Last Updated:** February 2026 
 **Status:** GPU Testing Operational (D3D11 + D3D12 + Vulkan Compute)
 
 ---
@@ -22,10 +22,10 @@ Validates GPU thumbnail generation functionality and quality.
 GPUThumbnailTest.exe [options]
 
 Options:
-  -i <folder>    Input folder with test images (required)
-  -o <folder>    Output folder for thumbnails (optional)
-  -s <size>      Thumbnail size in pixels (default: 256)
-  -v             Verbose output
+ -i <folder> Input folder with test images (required)
+ -o <folder> Output folder for thumbnails (optional)
+ -s <size> Thumbnail size in pixels (default: 256)
+ -v Verbose output
 ```
 
 ### LENSBench.exe
@@ -36,11 +36,11 @@ Performance benchmarking against CPU baseline.
 LENSBench.exe [options]
 
 Options:
-  -i <folder>    Input folder with test images (required)
-  -o <file>      Output CSV file (optional)
-  -s <size>      Thumbnail size in pixels (default: 256)
-  -n <count>     Iterations per file (default: 10)
-  -v             Verbose output
+ -i <folder> Input folder with test images (required)
+ -o <file> Output CSV file (optional)
+ -s <size> Thumbnail size in pixels (default: 256)
+ -n <count> Iterations per file (default: 10)
+ -v Verbose output
 ```
 
 ### GPUValidator.exe
@@ -96,7 +96,7 @@ tests\build\LENSBench.exe -i C:\TestImages -n 100 -s 256
 Monitor DebugView (Sysinternals) for GPU initialization logs:
 ```
 [GPU] Device created successfully (Hardware)
-[GPU] Vendor: Intel (0x8086)  / NVIDIA (0x10de)  / AMD (0x1002)
+[GPU] Vendor: Intel (0x8086) / NVIDIA (0x10de) / AMD (0x1002)
 [GPU] Feature Level: DirectX 11.x / 12.x
 [GPU] Compute shader support enabled
 ```

@@ -1,5 +1,10 @@
 {
-    "cmake.sourceDirectory": "C:/Users/ryair/OneDrive - Intel Corporation/Documents/MyScripts/ExplorerLens.io",
+    // ═══════════════════════════════════════════════════════════════
+    //  ExplorerLens.io — VS Code Workspace Settings
+    //  Version: 15.0.0 "Zenith" | C++20 / MSVC v145 / CMake + Ninja
+    // ═══════════════════════════════════════════════════════════════
+    // ── CMake Tools ──────────────────────────────────────────────
+    "cmake.sourceDirectory": "${workspaceFolder}",
     "cmake.useCMakePresets": "always",
     "cmake.generator": "Ninja",
     "cmake.configureOnOpen": false,
@@ -7,58 +12,42 @@
     "cmake.configureSettings": {
         "CMAKE_MAKE_PROGRAM": "C:/Users/ryair/scoop/shims/ninja.exe"
     },
-    "files.associations": {
-        "xstring": "cpp",
-        "algorithm": "cpp"
-    },
-    "chat.agent.maxRequests": 125,
-    // Performance optimizations for slow machines
-    "terminal.integrated.persistentSessionReviveProcess": "never",
-    "terminal.integrated.enablePersistentSessions": false,
-    "terminal.integrated.scrollback": 50000,
-    "terminal.integrated.fastScrollSensitivity": 5,
-    // File watchers - keep build-logs monitored
-    "files.watcherExclude": {
-        "**/.git/objects/**": true,
-        "**/.git/subtree-cache/**": true,
-        "**/node_modules/*/**": true,
-        "**/build/**": true,
-        "**/x64/**": true,
-        "**/external/**/build*": true,
-        "**/packages/**": true,
-        "**/build-logs": false
-    },
-    // Search configuration - allow searching build-logs
-    "search.exclude": {
-        "**/build": true,
-        "**/x64": true,
-        "**/external/**/build*": true,
-        "**/packages": true,
-        "**/.vs": true,
-        "**/build-logs": false
-    },
-    "files.exclude": {
-        "**/.vs": true,
-        "**/x64/Debug": true,
-        "**/ipch": true
-    },
-    // Auto-save for monitoring log changes
-    "files.autoSave": "afterDelay",
-    "files.autoSaveDelay": 1000,
-    // Build and task timeouts (extended for slow machines)
-    "task.slowProviderWarning": false,
-    "task.autoDetect": "on",
-    "terminal.integrated.commandsToSkipShell": [],
-    // Disable shell integration that can slow down terminals
-    "terminal.integrated.shellIntegration.enabled": true,
-    // C++ IntelliSense optimizations
+    "cmake.configureOnEdit": false,
+    "cmake.automaticReconfigure": false,
+    "cmake.buildBeforeRun": true,
+    "cmake.ctest.allowParallelJobs": true,
+    "cmake.parallelJobs": 8,
+    "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+    // ── C/C++ IntelliSense ───────────────────────────────────────
     "C_Cpp.intelliSenseEngine": "default",
     "C_Cpp.autocomplete": "Default",
-    "C_Cpp.errorSquiggles": "Enabled",
-    // Git optimizations
-    "git.autorefresh": true,
-    "git.autofetch": true,
-    // Editor performance
+    "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.default.cppStandard": "c++20",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+    "C_Cpp.default.compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/cl.exe",
+    "C_Cpp.codeAnalysis.runAutomatically": true,
+    "C_Cpp.enhancedColorization": "enabled",
+    "C_Cpp.formatting": "vcFormat",
+    "C_Cpp.vcFormat.indent.braces": false,
+    "C_Cpp.vcFormat.indent.namespaceContents": false,
+    "C_Cpp.vcFormat.newLine.beforeOpenBrace.function": "sameLine",
+    "C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "sameLine",
+    // ── File Associations ────────────────────────────────────────
+    "files.associations": {
+        "xstring": "cpp",
+        "algorithm": "cpp",
+        "*.h.in": "cpp",
+        "*.h": "cpp",
+        "*.cmake": "cmake",
+        "CMakeLists.txt": "cmake",
+        "*.ps1": "powershell",
+        "*.psm1": "powershell",
+        "*.manifest": "xml",
+        "*.rc": "cpp",
+        "*.def": "cpp"
+    },
+    // ── Editor ───────────────────────────────────────────────────
     "editor.quickSuggestions": {
         "other": true,
         "comments": false,
@@ -67,15 +56,75 @@
     "editor.suggestOnTriggerCharacters": true,
     "editor.acceptSuggestionOnEnter": "on",
     "editor.parameterHints.enabled": true,
-    // PowerShell integration - use latest PowerShell 7 (pwsh)
-    "terminal.integrated.defaultProfile.windows": "PowerShell 7 (Admin)",
+    "editor.formatOnSave": false,
+    "editor.renderWhitespace": "boundary",
+    "editor.rulers": [
+        120
+    ],
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.stickyScroll.enabled": true,
+    // ── Files ────────────────────────────────────────────────────
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.encoding": "utf8",
+    "files.eol": "\r\n",
+    "files.exclude": {
+        "**/.vs": true,
+        "**/x64/Debug": true,
+        "**/ipch": true,
+        "**/*.user": true,
+        "**/*.suo": true
+    },
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/build/**": true,
+        "**/build-vcpkg/**": true,
+        "**/x64/**": true,
+        "**/external/**/build*": true,
+        "**/packages/**": true,
+        "**/build-logs": false
+    },
+    // ── Search ───────────────────────────────────────────────────
+    "search.exclude": {
+        "**/build": true,
+        "**/build-vcpkg": true,
+        "**/x64": true,
+        "**/external/**/build*": true,
+        "**/packages": true,
+        "**/.vs": true,
+        "**/build-logs": false,
+        "**/*.lib": true,
+        "**/*.obj": true,
+        "**/*.pdb": true,
+        "**/*.exe": true,
+        "**/*.dll": true
+    },
+    // ── Terminal ──────────────────────────────────────────────────
+    "terminal.integrated.defaultProfile.windows": "PowerShell 7",
     "terminal.integrated.profiles.windows": {
-        "PowerShell 7 (Admin)": {
+        "PowerShell 7": {
             "path": "pwsh.exe",
             "icon": "terminal-powershell",
             "args": [
                 "-NoProfile",
                 "-NoLogo"
+            ]
+        },
+        "Developer PowerShell (vcvars64)": {
+            "path": "pwsh.exe",
+            "icon": "tools",
+            "args": [
+                "-NoProfile",
+                "-NoLogo",
+                "-NoExit",
+                "-Command",
+                "& cmd /c '\"C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat\" -vcvars_ver=14.50.35717 >nul 2>&1 && set' | ForEach-Object { if ($_ -match '^(.+?)=(.*)$') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }; Write-Host '✓ MSVC v145 environment loaded' -ForegroundColor Green"
             ]
         },
         "PowerShell (Legacy)": {
@@ -86,5 +135,99 @@
                 "-NoLogo"
             ]
         }
+    },
+    "terminal.integrated.shellIntegration.enabled": true,
+    "terminal.integrated.persistentSessionReviveProcess": "never",
+    "terminal.integrated.enablePersistentSessions": false,
+    "terminal.integrated.scrollback": 50000,
+    "terminal.integrated.fastScrollSensitivity": 5,
+    "terminal.integrated.commandsToSkipShell": [],
+    // ── Tasks & Build ────────────────────────────────────────────
+    "task.slowProviderWarning": false,
+    "task.autoDetect": "on",
+    // ── Git ──────────────────────────────────────────────────────
+    "git.autorefresh": true,
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+    // ── Markdown ─────────────────────────────────────────────────
+    "markdownlint.config": {
+        "MD033": false,
+        "MD013": false,
+        "MD024": {
+            "siblings_only": true
+        }
+    },
+    // ── Spell Checker ────────────────────────────────────────────
+    "cSpell.words": [
+        "ExplorerLens",
+        "LENS",
+        "LENSShell",
+        "LENSManager",
+        "libwebp",
+        "libavif",
+        "libjxl",
+        "libheif",
+        "libde265",
+        "libraw",
+        "dav1d",
+        "minizip",
+        "zstd",
+        "LZMA",
+        "MuPDF",
+        "OpenJPEG",
+        "avif",
+        "heif",
+        "heic",
+        "jxl",
+        "webp",
+        "MSVC",
+        "vcvars",
+        "vcpkg",
+        "Ninja",
+        "CMake",
+        "regsvr",
+        "CLSID",
+        "HKCR",
+        "InprocServer",
+        "DirectX",
+        "Vulkan",
+        "GDI",
+        "WTL",
+        "WinUI",
+        "SIMD",
+        "AVX",
+        "NEON",
+        "SSE",
+        "thumbcache",
+        "IThumbnailProvider",
+        "IPreviewHandler",
+        "ETW",
+        "SBOM",
+        "STRIDE",
+        "CVSS",
+        "camelCase",
+        "PascalCase"
+    ],
+    // ── PowerShell ───────────────────────────────────────────────
+    "powershell.codeFormatting.preset": "OTBS",
+    "powershell.integratedConsole.showOnStartup": false,
+    // ── Copilot ──────────────────────────────────────────────────
+    "chat.agent.maxRequests": 125,
+    // ── Miscellaneous ────────────────────────────────────────────
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": false
+        },
+        "files.trimTrailingWhitespace": false
+    },
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "[c]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
     }
 }

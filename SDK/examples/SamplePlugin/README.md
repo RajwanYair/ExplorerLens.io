@@ -38,19 +38,19 @@ msbuild SamplePlugin.vcxproj /p:Configuration=Release /p:Platform=x64
 
 ```
 SamplePlugin/
-├── SamplePlugin.cpp        # Main plugin implementation
-├── SamplePlugin.vcxproj    # Visual Studio project
-├── manifest.json           # Plugin manifest
+├── SamplePlugin.cpp # Main plugin implementation
+├── SamplePlugin.vcxproj # Visual Studio project
+├── manifest.json # Plugin manifest
 ├── assets/
-│   └── icons/
-│       ├── icon-16.png
-│       ├── icon-32.png
-│       └── icon-256.png
+│ └── icons/
+│ ├── icon-16.png
+│ ├── icon-32.png
+│ └── icon-256.png
 ├── docs/
-│   ├── README.md           # This file
-│   └── CHANGELOG.md
+│ ├── README.md # This file
+│ └── CHANGELOG.md
 └── licenses/
-    └── LICENSE.txt
+ └── LICENSE.txt
 ```
 
 ## Packaging
@@ -78,19 +78,19 @@ The Sample Plugin decodes a fictitious ".xyz" format with this structure:
 ```
 Offset | Size | Description
 -------|------|------------
-0x00   | 4    | Magic bytes: "XYZ1"
-0x04   | 4    | Width (uint32_t, little endian)
-0x08   | 4    | Height (uint32_t, little endian)
-0x0C   | N    | Pixel data (width * height * 4 bytes, BGRA format)
+0x00 | 4 | Magic bytes: "XYZ1"
+0x04 | 4 | Width (uint32_t, little endian)
+0x08 | 4 | Height (uint32_t, little endian)
+0x0C | N | Pixel data (width * height * 4 bytes, BGRA format)
 ```
 
 Example:
 
 ```
-58 59 5A 31           # Magic "XYZ1"
-00 02 00 00           # Width: 512
-00 02 00 00           # Height: 512
-[pixel data...]       # 512 * 512 * 4 = 1,048,576 bytes
+58 59 5A 31 # Magic "XYZ1"
+00 02 00 00 # Width: 512
+00 02 00 00 # Height: 512
+[pixel data...] # 512 * 512 * 4 = 1,048,576 bytes
 ```
 
 ## Creating Your Own Plugin
@@ -107,15 +107,15 @@ Edit `SamplePlugin.cpp`:
 
 ```cpp
 static const DT_PluginInfo g_pluginInfo = {
-    DT_PLUGIN_ABI_VERSION,
-    L"explorerlens.plugin.myplugin",      // Change ID
-    L"My Custom Plugin",                 // Change name
-    L"1.0.0",                           
-    L"Your Name",                        // Change vendor
-    L"Decodes XYZ format",
-    DT_CAP_READ_FILE | DT_CAP_DECODE,
-    DT_ENGINE_VERSION_5_4_0,
-    0
+ DT_PLUGIN_ABI_VERSION,
+ L"explorerlens.plugin.myplugin", // Change ID
+ L"My Custom Plugin", // Change name
+ L"1.0.0", 
+ L"Your Name", // Change vendor
+ L"Decodes XYZ format",
+ DT_CAP_READ_FILE | DT_CAP_DECODE,
+ DT_ENGINE_VERSION_5_4_0,
+ 0
 };
 ```
 
@@ -123,12 +123,12 @@ static const DT_PluginInfo g_pluginInfo = {
 
 ```cpp
 static const DT_FormatInfo g_formats[] = {
-    {
-        L".myformat",                    // Your extension
-        L"image/x-myformat",             // Your MIME type
-        L"My Custom Format",
-        50
-    }
+ {
+ L".myformat", // Your extension
+ L"image/x-myformat", // Your MIME type
+ L"My Custom Format",
+ 50
+ }
 };
 ```
 
@@ -138,12 +138,12 @@ Replace `DecodeXYZFile()` with your format decoder:
 
 ```cpp
 static HBITMAP DecodeMyFormat(const wchar_t* filePath, uint32_t sizePx) {
-    // 1. Read file
-    // 2. Parse format
-    // 3. Decode to BGRA pixels
-    // 4. Create HBITMAP
-    // 5. Resize to thumbnail
-    return hBitmap;
+ // 1. Read file
+ // 2. Parse format
+ // 3. Decode to BGRA pixels
+ // 4. Create HBITMAP
+ // 5. Resize to thumbnail
+ return hBitmap;
 }
 ```
 
@@ -153,17 +153,17 @@ Edit `manifest.json`:
 
 ```json
 {
-  "plugin": {
-    "id": "explorerlens.plugin.myplugin",
-    "name": "My Custom Plugin",
-    ...
-  },
-  "formats": [
-    {
-      "extension": ".myformat",
-      ...
-    }
-  ]
+ "plugin": {
+ "id": "explorerlens.plugin.myplugin",
+ "name": "My Custom Plugin",
+ ...
+ },
+ "formats": [
+ {
+ "extension": ".myformat",
+ ...
+ }
+ ]
 }
 ```
 
@@ -182,7 +182,7 @@ Always validate input:
 
 ```cpp
 if (!request || request->structSize != sizeof(DT_ThumbnailRequest)) {
-    return DT_ERROR_INVALID_ARGUMENT;
+ return DT_ERROR_INVALID_ARGUMENT;
 }
 ```
 
@@ -193,10 +193,10 @@ Check timeout periodically:
 ```cpp
 auto start = std::chrono::steady_clock::now();
 while (decoding) {
-    auto elapsed = std::chrono::steady_clock::now() - start;
-    if (elapsed > std::chrono::milliseconds(request->timeoutMs)) {
-        return DT_ERROR_TIMEOUT;
-    }
+ auto elapsed = std::chrono::steady_clock::now() - start;
+ if (elapsed > std::chrono::milliseconds(request->timeoutMs)) {
+ return DT_ERROR_TIMEOUT;
+ }
 }
 ```
 
@@ -206,7 +206,7 @@ Limit memory usage:
 
 ```cpp
 if (width * height > 100'000'000) { // 100 megapixels
-    return DT_ERROR_OUT_OF_MEMORY;
+ return DT_ERROR_OUT_OF_MEMORY;
 }
 ```
 
@@ -219,7 +219,7 @@ g_stats.totalRequests++;
 auto start = std::chrono::high_resolution_clock::now();
 // ... do work ...
 auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
-    std::chrono::high_resolution_clock::now() - start
+ std::chrono::high_resolution_clock::now() - start
 ).count();
 g_stats.totalElapsedUs += elapsed;
 g_stats.successfulRequests++;

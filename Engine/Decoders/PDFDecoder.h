@@ -14,9 +14,12 @@
 #include <cstdint>
 
 #ifdef HAS_MUPDF
+#pragma warning(push)
+#pragma warning(disable: 4100 4611)  // MuPDF headers: unreferenced parameter, setjmp non-portable
 extern "C" {
 #include <mupdf/fitz.h>
 }
+#pragma warning(pop)
 #endif
 
 namespace ExplorerLens {
@@ -28,12 +31,12 @@ public:
   ~PDFDecoder() override;
 
   // IThumbnailDecoder interface
-  bool CanDecode(const wchar_t *filePath) override;
-  HRESULT Decode(const ThumbnailRequest &request,
-                 ThumbnailResult &result) override;
+  bool CanDecode(const wchar_t* filePath) override;
+  HRESULT Decode(const ThumbnailRequest& request,
+    ThumbnailResult& result) override;
   DecoderInfo GetInfo() const override;
-  const wchar_t *GetName() const override { return L"PDFDecoder"; }
-  const wchar_t **GetSupportedExtensions() const override;
+  const wchar_t* GetName() const override { return L"PDFDecoder"; }
+  const wchar_t** GetSupportedExtensions() const override;
   uint32_t GetExtensionCount() const override { return m_extensionCount; }
   bool SupportsGPU() const override { return false; }
   bool IsArchiveDecoder() const override { return false; }
@@ -44,22 +47,22 @@ public:
 private:
 #ifdef HAS_MUPDF
   // MuPDF native rendering (preferred path)
-  HRESULT RenderWithMuPDF(const wchar_t *filePath, uint32_t width,
-                          uint32_t height, HBITMAP *phBitmap);
+  HRESULT RenderWithMuPDF(const wchar_t* filePath, uint32_t width,
+    uint32_t height, HBITMAP* phBitmap);
 #endif
 
   // Shell-based thumbnail extraction (fallback)
-  HRESULT ExtractThumbnailShell(const wchar_t *filePath, uint32_t width,
-                                uint32_t height, HBITMAP *phBitmap);
+  HRESULT ExtractThumbnailShell(const wchar_t* filePath, uint32_t width,
+    uint32_t height, HBITMAP* phBitmap);
 
   // Placeholder generation
   HBITMAP CreatePDFPlaceholder(uint32_t width, uint32_t height,
-                               const wchar_t *filePath);
+    const wchar_t* filePath);
 
   // Verify PDF signature (%PDF)
-  bool IsPDFFormat(const wchar_t *path);
+  bool IsPDFFormat(const wchar_t* path);
 
-  static const wchar_t *m_extensions[];
+  static const wchar_t* m_extensions[];
   static const uint32_t m_extensionCount;
 };
 

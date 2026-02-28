@@ -1,6 +1,6 @@
 # ExplorerLens — Development Learnings & Best Practices
 
-**Last Updated:** v15.0.0 "Zenith" — July 2025
+**Last Updated:** v15.0.0 "Zenith" — February 2026
 
 This file captures hard-won lessons from iterative development sessions to avoid repeating
 mistakes and to accelerate future work.
@@ -16,8 +16,11 @@ mistakes and to accelerate future work.
 
 ### CRT linkage must be /MD everywhere
 - All external libraries MUST be built with `/MD` (MultiThreadedDLL)
-- libwebp was historically built with `/MT` — requires `/NODEFAULTLIB:LIBCMT` workaround
-- Proper fix: rebuild with `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL`
+- **libwebp FIX (2026-02):** Switched link path from `libwebp-1.5.0-original` (/MT) to
+  `libwebp-1.5.0-build/build-cmake/Release` (/MD). Removed all 3 `/NODEFAULTLIB:LIBCMT`
+  workarounds from CMakeLists.txt (root, Engine, Engine/Tests). Added `LIBWEBP_REBUILT_WITH_MD`
+  compile definition. Verified via `dumpbin /directives`: `/DEFAULTLIB:MSVCRT` = correct.
+- Validate with: `dumpbin /directives libwebp.lib | Select-String "DEFAULTLIB"`
 
 ### Static libraries over DLLs
 - Prefer static linking (`*.lib`) over dynamic (`*.dll`) for external deps
@@ -80,7 +83,7 @@ When bumping versions, update ALL of these:
 - `CHANGELOG.md` (new version entry)
 - `packaging/ExplorerLens.wxs` (version registry value)
 - `docs/INDEX.md`, `docs/PERFORMANCE.md`, `tests/README.md`
-- `.github/copilot-instructions.md` (version + sprint count)
+- `.github/copilot-instructions.md` (version info)
 - `LENSShellClass.cpp` (version string)
 
 ### CLSID management
@@ -105,11 +108,11 @@ When bumping versions, update ALL of these:
 ### External library directory structure
 ```
 external/
-  compression-libs/   — zlib, lz4, zstd, minizip-ng, lzma, unrar, bzip2, libarchive, xz
-  image-libs/         — libwebp, libjxl, libavif, libheif, libde265, dav1d
-  camera-libs/        — libraw, libraw-install
-  pdf-libs/           — mupdf
-  ui-libs/            — wtl
+ compression-libs/ — zlib, lz4, zstd, minizip-ng, lzma, unrar, bzip2, libarchive, xz
+ image-libs/ — libwebp, libjxl, libavif, libheif, libde265, dav1d
+ camera-libs/ — libraw, libraw-install
+ pdf-libs/ — mupdf
+ ui-libs/ — wtl
 ```
 
 ### Feature flags
@@ -119,34 +122,34 @@ external/
 
 ---
 
-## 5. Sprint Execution
+## 5. Feature Delivery
 
-### Sprint deliverable pattern
+### Feature deliverable pattern
 1. Create header/source file in appropriate `Engine/` subdirectory
 2. Register in `Engine/CMakeLists.txt` (ENGINE_HEADERS and/or ENGINE_SOURCES)
 3. Add `#include` in `Engine/Tests/EngineTests.cpp`
 4. Add `TEST(name)` function and `RUN_TEST(name)` call
 5. Register test file in `Engine/Tests/CMakeLists.txt` if separate
-6. Git commit with descriptive message: `Sprint N: Description — details`
+6. Git commit with descriptive message: `feat: Description — details`
 
-### Batch sprint pattern (for bulk work)
+### Batch delivery pattern (for bulk work)
 1. Create all source files first
 2. Register all in CMakeLists.txt in one multi-replace operation
 3. Add all includes + TEST() + RUN_TEST() to EngineTests.cpp
 4. Build verify: `cmake --build --preset default-release -j 8`
-5. Git commit each sprint individually (or batch 5 at a time)
+5. Git commit each feature individually (or batch 5 at a time)
 
 ### CMakeLists.txt insertion points
 - Core headers: before `# Pipeline`
 - Core sources: before `# Pipeline implementations`
-- Utils headers: before `# Sprint 8-12:`
+- Utils headers: before `# `
 - Utils sources: before closing `)`
 - Check these haven't moved — `grep_search` for nearby markers before inserting
 
 ### Test insertion points in EngineTests.cpp
-- New includes: after last sprint include block
-- TEST() functions: before `//== Sprint 6:` section
-- RUN_TEST() calls: before `// Sprint 6: Isolation & Stability Tests`
+- New includes: after last feature include block
+- TEST() functions: before `//== ` section
+- RUN_TEST() calls: before `// Isolation & Stability Tests`
 
 ---
 
@@ -197,7 +200,7 @@ external/
 - `build:` — Build system changes (CMake, scripts)
 
 ### Commit granularity
-- One commit per logical change (fix, feature, or sprint)
+- One commit per logical change (fix, feature, or milestone)
 - Batch related changes (e.g., "delete 6 obsolete files") into single commits
 - Never mix bug fixes with unrelated features in one commit
 
@@ -205,3 +208,42 @@ external/
 - Verify `git status --short` before starting new work
 - Commit or stash outstanding changes before switching tasks
 - Use `git add -f` for files in gitignored directories (like `Engine/Release/`)
+
+---
+
+## 9. Architecture Patterns (v15.0 "Zenith")
+
+### Umbrella header pattern
+- Consolidate related headers into one umbrella (e.g., `TestInfrastructure.h`, `WindowsCompat.h`)
+- **Type conflict rule:** If two headers define the same enum/class, EXCLUDE one from the umbrella
+  and document the conflict. Known conflicts:
+  - `CodeCoverage.h` vs `TestFramework.h`/`CodeCoverageIntegration.h` — CoverageTool, CoverageMetric
+  - `WindowsUI.h` vs `WindowsCompat.h` — DPIScale enum (different member names)
+  - V1 PluginMarketplace.h vs MSIXPackageManager.h — PackageType/CertificateInfo
+
+### Interface consolidation pattern
+- Core interfaces (`I*.h`) live in `Engine/Core/Interfaces/` (canonical location)
+- Original files in `Engine/Core/` are thin forwarding headers: `#include "Interfaces/X.h"`
+- Both canonical and forwarding headers registered in CMakeLists.txt
+
+### Dead code tracking
+- `Engine/Core/DeadCodeAudit.h` tracks all findings with type/severity/status
+- Audit report: `docs/DEAD_CODE_AUDIT.md`
+- 16.7% of engine headers (63/377) have zero consumers
+- 39% of headers (147/377) are test-only — no production caller
+
+### Build time tracking
+- `Build-MSVC.ps1` captures per-phase timing (vcvars, configure, build, test)
+- Appends JSONL entries to `build-logs/build-history.jsonl`
+- Typical times: vcvars ~7s, configure ~2s, incremental build <1s, full LTCG ~270s
+
+### Singleton test pattern
+- Many engine classes are singletons — use `ClassName::Instance()`, NOT direct construction
+- `IntegrationTestFramework`, `DeadCodeAudit`, `LibWebPConfig` all use this pattern
+- Some classes expose free functions in namespace — `ExplorerLens::GetWindowsBuildNumber()`, not
+  `Win11CompatibilityLayer::GetWindowsBuildNumber()`
+
+### Header registration audit
+- New headers MUST be registered in `Engine/CMakeLists.txt` or subdirectory CMakeLists.txt
+- Dead code audit (2026-02) found 31 unregistered headers — all now registered
+- Run periodic audit: search for `.h` files not in any CMakeLists.txt

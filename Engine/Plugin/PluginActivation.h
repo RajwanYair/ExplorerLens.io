@@ -18,7 +18,9 @@
 #include <cstdint>
 #include <memory>
 
-namespace ExplorerLens { namespace Engine { namespace Plugin {
+namespace ExplorerLens {
+namespace Engine {
+namespace Plugin {
 
 //==============================================================================
 // Plugin Feature Flags — gate all plugin activation behind toggles
@@ -26,56 +28,52 @@ namespace ExplorerLens { namespace Engine { namespace Plugin {
 
 struct PluginFeatureFlags
 {
-    bool enablePlugins       = false;   // Master switch
-    bool enableIPC           = false;   // Named-pipe IPC to PluginHost.exe
-    bool enableDiscovery     = true;    // Auto-scan plugin directories
-    bool enableMarketplace   = false;   // Online plugin marketplace
-    bool enableSandbox       = true;    // Process-isolated plugin execution
-    bool enableHotReload     = false;   // Live reload on DLL change
-    uint32_t maxPlugins      = 32;      // Max concurrent plugins
-    uint32_t ipcTimeoutMs    = 5000;    // IPC call timeout
+    bool enablePlugins = false; // Master switch
+    bool enableIPC = false; // Named-pipe IPC to PluginHost.exe
+    bool enableDiscovery = true; // Auto-scan plugin directories
+    bool enableMarketplace = false; // Online plugin marketplace
+    bool enableSandbox = true; // Process-isolated plugin execution
+    bool enableHotReload = false; // Live reload on DLL change
+    uint32_t maxPlugins = 32; // Max concurrent plugins
+    uint32_t ipcTimeoutMs = 5000; // IPC call timeout
 
     // Standard production config
-    static PluginFeatureFlags Production()
-    {
+    static PluginFeatureFlags Production() {
         PluginFeatureFlags f;
-        f.enablePlugins    = true;
-        f.enableIPC        = true;
-        f.enableDiscovery  = true;
+        f.enablePlugins = true;
+        f.enableIPC = true;
+        f.enableDiscovery = true;
         f.enableMarketplace = false;
-        f.enableSandbox    = true;
-        f.enableHotReload  = false;
+        f.enableSandbox = true;
+        f.enableHotReload = false;
         return f;
     }
 
     // All features enabled (dev/test)
-    static PluginFeatureFlags AllEnabled()
-    {
+    static PluginFeatureFlags AllEnabled() {
         PluginFeatureFlags f;
-        f.enablePlugins     = true;
-        f.enableIPC         = true;
-        f.enableDiscovery   = true;
+        f.enablePlugins = true;
+        f.enableIPC = true;
+        f.enableDiscovery = true;
         f.enableMarketplace = true;
-        f.enableSandbox     = true;
-        f.enableHotReload   = true;
+        f.enableSandbox = true;
+        f.enableHotReload = true;
         return f;
     }
 
     // Disabled (safe mode)
-    static PluginFeatureFlags Disabled()
-    {
+    static PluginFeatureFlags Disabled() {
         return PluginFeatureFlags{};
     }
 
-    size_t EnabledCount() const
-    {
+    size_t EnabledCount() const {
         size_t n = 0;
-        if (enablePlugins)     ++n;
-        if (enableIPC)         ++n;
-        if (enableDiscovery)   ++n;
+        if (enablePlugins) ++n;
+        if (enableIPC) ++n;
+        if (enableDiscovery) ++n;
         if (enableMarketplace) ++n;
-        if (enableSandbox)     ++n;
-        if (enableHotReload)   ++n;
+        if (enableSandbox) ++n;
+        if (enableHotReload) ++n;
         return n;
     }
 };
@@ -86,31 +84,29 @@ struct PluginFeatureFlags
 
 enum class PluginState
 {
-    Discovered,     // Found on disk
-    Validated,      // Manifest parsed successfully
-    Loading,        // DLL being loaded
-    Active,         // Running and serving decode requests
-    Suspended,      // Temporarily disabled (user toggle)
-    Error,          // Failed to load or crashed
-    Unloaded        // Explicitly unloaded
+    Discovered, // Found on disk
+    Validated, // Manifest parsed successfully
+    Loading, // DLL being loaded
+    Active, // Running and serving decode requests
+    Suspended, // Temporarily disabled (user toggle)
+    Error, // Failed to load or crashed
+    Unloaded // Explicitly unloaded
 };
 
-inline const char* PluginStateName(PluginState s)
-{
+inline const char* PluginStateName(PluginState s) {
     switch (s) {
-        case PluginState::Discovered: return "Discovered";
-        case PluginState::Validated:  return "Validated";
-        case PluginState::Loading:    return "Loading";
-        case PluginState::Active:     return "Active";
-        case PluginState::Suspended:  return "Suspended";
-        case PluginState::Error:      return "Error";
-        case PluginState::Unloaded:   return "Unloaded";
+    case PluginState::Discovered: return "Discovered";
+    case PluginState::Validated: return "Validated";
+    case PluginState::Loading: return "Loading";
+    case PluginState::Active: return "Active";
+    case PluginState::Suspended: return "Suspended";
+    case PluginState::Error: return "Error";
+    case PluginState::Unloaded: return "Unloaded";
     }
     return "Unknown";
 }
 
-inline bool IsOperational(PluginState s)
-{
+inline bool IsOperational(PluginState s) {
     return s == PluginState::Active || s == PluginState::Suspended;
 }
 
@@ -120,32 +116,30 @@ inline bool IsOperational(PluginState s)
 
 struct PluginDescriptor
 {
-    std::string id;             // Unique identifier
-    std::string name;           // Human-readable name
-    std::string version;        // SemVer
+    std::string id; // Unique identifier
+    std::string name; // Human-readable name
+    std::string version; // SemVer
     std::string author;
     std::string description;
-    std::string dllPath;        // Path to plugin DLL
-    std::vector<std::string> supportedFormats;  // File extensions
+    std::string dllPath; // Path to plugin DLL
+    std::vector<std::string> supportedFormats; // File extensions
     PluginState state = PluginState::Discovered;
-    bool        isSigned = false;
-    uint64_t    loadTimeMs = 0;
-    uint64_t    decodeCount = 0;
-    uint64_t    errorCount = 0;
+    bool isSigned = false;
+    uint64_t loadTimeMs = 0;
+    uint64_t decodeCount = 0;
+    uint64_t errorCount = 0;
 
     bool IsActive() const { return state == PluginState::Active; }
     bool HasErrors() const { return errorCount > 0; }
 
-    double ErrorRate() const
-    {
+    double ErrorRate() const {
         if (decodeCount == 0) return 0.0;
         return (static_cast<double>(errorCount) / decodeCount) * 100.0;
     }
 
     size_t FormatCount() const { return supportedFormats.size(); }
 
-    std::string StatusBadge() const
-    {
+    std::string StatusBadge() const {
         std::string badge = "[";
         badge += PluginStateName(state);
         badge += "]";
@@ -161,12 +155,11 @@ class PluginDiscovery
 {
 public:
     // Standard plugin search directories
-    static std::vector<std::string> DefaultSearchPaths()
-    {
+    static std::vector<std::string> DefaultSearchPaths() {
         return {
-            "%LocalAppData%\\ExplorerLens\\Plugins",
-            "%ProgramData%\\ExplorerLens\\Plugins",
-            ".\\plugins"    // Portable mode
+        "%LocalAppData%\\ExplorerLens\\Plugins",
+        "%ProgramData%\\ExplorerLens\\Plugins",
+        ".\\plugins" // Portable mode
         };
     }
 
@@ -174,16 +167,14 @@ public:
     static std::string ManifestFilename() { return "plugin.json"; }
 
     // Scan a directory for plugins (returns descriptors)
-    std::vector<PluginDescriptor> ScanDirectory(const std::string& path)
-    {
+    std::vector<PluginDescriptor> ScanDirectory(const std::string& /*path*/) {
         // In production, this would walk the filesystem
         // For testing, we return pre-configured results
         return scannedPlugins_;
     }
 
     // Register a discovered plugin (for testing)
-    void AddPlugin(const PluginDescriptor& plugin)
-    {
+    void AddPlugin(const PluginDescriptor& plugin) {
         scannedPlugins_.push_back(plugin);
     }
 
@@ -201,25 +192,24 @@ private:
 
 enum class IPCMessageType
 {
-    Ping,               // Health check
-    DecodeRequest,      // Send file for decoding
-    DecodeResult,       // Receive decoded thumbnail
-    Shutdown,           // Graceful stop
-    PluginList,         // Query loaded plugins
-    HealthCheck,        // Detailed health response
-    Error               // Error response
+    Ping, // Health check
+    DecodeRequest, // Send file for decoding
+    DecodeResult, // Receive decoded thumbnail
+    Shutdown, // Graceful stop
+    PluginList, // Query loaded plugins
+    HealthCheck, // Detailed health response
+    Error // Error response
 };
 
-inline const char* IPCMessageTypeName(IPCMessageType t)
-{
+inline const char* IPCMessageTypeName(IPCMessageType t) {
     switch (t) {
-        case IPCMessageType::Ping:          return "Ping";
-        case IPCMessageType::DecodeRequest: return "DecodeRequest";
-        case IPCMessageType::DecodeResult:  return "DecodeResult";
-        case IPCMessageType::Shutdown:      return "Shutdown";
-        case IPCMessageType::PluginList:    return "PluginList";
-        case IPCMessageType::HealthCheck:   return "HealthCheck";
-        case IPCMessageType::Error:         return "Error";
+    case IPCMessageType::Ping: return "Ping";
+    case IPCMessageType::DecodeRequest: return "DecodeRequest";
+    case IPCMessageType::DecodeResult: return "DecodeResult";
+    case IPCMessageType::Shutdown: return "Shutdown";
+    case IPCMessageType::PluginList: return "PluginList";
+    case IPCMessageType::HealthCheck: return "HealthCheck";
+    case IPCMessageType::Error: return "Error";
     }
     return "Unknown";
 }
@@ -227,9 +217,9 @@ inline const char* IPCMessageTypeName(IPCMessageType t)
 struct IPCMessage
 {
     IPCMessageType type;
-    std::string    payload;
-    uint32_t       sequenceId = 0;
-    bool           isResponse = false;
+    std::string payload;
+    uint32_t sequenceId = 0;
+    bool isResponse = false;
 
     std::string TypeName() const { return IPCMessageTypeName(type); }
 };
@@ -238,34 +228,31 @@ class IPCChannel
 {
 public:
     explicit IPCChannel(const std::string& pipeName = "\\\\.\\pipe\\ExplorerLens-PluginHost")
-        : pipeName_(pipeName) {}
+        : pipeName_(pipeName) {
+    }
 
     std::string PipeName() const { return pipeName_; }
 
-    bool Connect()
-    {
+    bool Connect() {
         connected_ = true;
         return true;
     }
 
     bool IsConnected() const { return connected_; }
 
-    void Disconnect()
-    {
+    void Disconnect() {
         connected_ = false;
     }
 
     // Send message (simulated)
-    bool Send(const IPCMessage& msg)
-    {
+    bool Send(const IPCMessage& msg) {
         if (!connected_) return false;
         sentMessages_.push_back(msg);
         return true;
     }
 
     // Receive response (simulated)
-    IPCMessage Receive()
-    {
+    IPCMessage Receive() {
         if (!sentMessages_.empty()) {
             auto& last = sentMessages_.back();
             IPCMessage response;
@@ -276,14 +263,14 @@ public:
             response.sequenceId = last.sequenceId;
             return response;
         }
-        return {IPCMessageType::Error, "No pending messages", 0, true};
+        return { IPCMessageType::Error, "No pending messages", 0, true };
     }
 
     size_t MessagesSent() const { return sentMessages_.size(); }
 
 private:
     std::string pipeName_;
-    bool        connected_ = false;
+    bool connected_ = false;
     std::vector<IPCMessage> sentMessages_;
 };
 
@@ -295,13 +282,13 @@ class PluginLifecycleManager
 {
 public:
     explicit PluginLifecycleManager(const PluginFeatureFlags& flags = PluginFeatureFlags::Production())
-        : flags_(flags) {}
+        : flags_(flags) {
+    }
 
     bool IsEnabled() const { return flags_.enablePlugins; }
 
     // Register a plugin
-    bool RegisterPlugin(const PluginDescriptor& plugin)
-    {
+    bool RegisterPlugin(const PluginDescriptor& plugin) {
         if (!flags_.enablePlugins) return false;
         if (plugins_.size() >= flags_.maxPlugins) return false;
         plugins_[plugin.id] = plugin;
@@ -310,8 +297,7 @@ public:
     }
 
     // Activate a plugin
-    bool ActivatePlugin(const std::string& id)
-    {
+    bool ActivatePlugin(const std::string& id) {
         auto it = plugins_.find(id);
         if (it == plugins_.end()) return false;
         it->second.state = PluginState::Active;
@@ -319,8 +305,7 @@ public:
     }
 
     // Suspend a plugin
-    bool SuspendPlugin(const std::string& id)
-    {
+    bool SuspendPlugin(const std::string& id) {
         auto it = plugins_.find(id);
         if (it == plugins_.end()) return false;
         if (it->second.state != PluginState::Active) return false;
@@ -329,8 +314,7 @@ public:
     }
 
     // Unload a plugin
-    bool UnloadPlugin(const std::string& id)
-    {
+    bool UnloadPlugin(const std::string& id) {
         auto it = plugins_.find(id);
         if (it == plugins_.end()) return false;
         it->second.state = PluginState::Unloaded;
@@ -340,22 +324,19 @@ public:
     // Query
     size_t TotalPlugins() const { return plugins_.size(); }
 
-    size_t ActivePlugins() const
-    {
+    size_t ActivePlugins() const {
         size_t n = 0;
         for (auto& [id, p] : plugins_)
             if (p.IsActive()) ++n;
         return n;
     }
 
-    const PluginDescriptor* GetPlugin(const std::string& id) const
-    {
+    const PluginDescriptor* GetPlugin(const std::string& id) const {
         auto it = plugins_.find(id);
         return (it != plugins_.end()) ? &it->second : nullptr;
     }
 
-    std::vector<std::string> GetActivePluginIds() const
-    {
+    std::vector<std::string> GetActivePluginIds() const {
         std::vector<std::string> ids;
         for (auto& [id, p] : plugins_)
             if (p.IsActive()) ids.push_back(id);
@@ -363,17 +344,16 @@ public:
     }
 
     // Generate status report
-    std::string StatusReport() const
-    {
+    std::string StatusReport() const {
         std::ostringstream ss;
         ss << "# Plugin Status Report\n\n";
         ss << "| Plugin | State | Formats | Decodes | Errors |\n";
         ss << "|--------|-------|---------|---------|--------|\n";
         for (auto& [id, p] : plugins_) {
             ss << "| " << p.name << " | " << PluginStateName(p.state)
-               << " | " << p.FormatCount()
-               << " | " << p.decodeCount
-               << " | " << p.errorCount << " |\n";
+                << " | " << p.FormatCount()
+                << " | " << p.decodeCount
+                << " | " << p.errorCount << " |\n";
         }
         return ss.str();
     }
@@ -389,37 +369,35 @@ private:
 
 struct SamplePluginSpec
 {
-    static PluginDescriptor MinimalPlugin()
-    {
+    static PluginDescriptor MinimalPlugin() {
         PluginDescriptor p;
-        p.id          = "com.explorerlens.minimal-plugin";
-        p.name        = "Minimal Plugin";
-        p.version     = "1.0.0";
-        p.author      = "ExplorerLens Team";
+        p.id = "com.explorerlens.minimal-plugin";
+        p.name = "Minimal Plugin";
+        p.version = "1.0.0";
+        p.author = "ExplorerLens Team";
         p.description = "Reference implementation for ExplorerLens plugin API";
-        p.dllPath     = "plugins\\minimal-plugin\\minimal-plugin.dll";
-        p.supportedFormats = {".custom", ".test"};
-        p.isSigned    = true;
+        p.dllPath = "plugins\\minimal-plugin\\minimal-plugin.dll";
+        p.supportedFormats = { ".custom", ".test" };
+        p.isSigned = true;
         return p;
     }
 
-    static PluginDescriptor RawEnhancedPlugin()
-    {
+    static PluginDescriptor RawEnhancedPlugin() {
         PluginDescriptor p;
-        p.id          = "com.explorerlens.raw-enhanced";
-        p.name        = "RAW Enhanced Decoder";
-        p.version     = "1.0.0";
-        p.author      = "ExplorerLens Team";
+        p.id = "com.explorerlens.raw-enhanced";
+        p.name = "RAW Enhanced Decoder";
+        p.version = "1.0.0";
+        p.author = "ExplorerLens Team";
         p.description = "Enhanced RAW processing with custom demosaic";
-        p.dllPath     = "plugins\\raw-enhanced\\raw-enhanced.dll";
-        p.supportedFormats = {".nef", ".cr3", ".arw", ".orf", ".rw2"};
-        p.isSigned    = true;
+        p.dllPath = "plugins\\raw-enhanced\\raw-enhanced.dll";
+        p.supportedFormats = { ".nef", ".cr3", ".arw", ".orf", ".rw2" };
+        p.isSigned = true;
         return p;
     }
 };
 
-}}} // namespace ExplorerLens::Engine::Plugin
+}
+}
+} // namespace ExplorerLens::Engine::Plugin
 
 #endif // EXPLORERLENS_PLUGIN_ACTIVATION_H
-
-

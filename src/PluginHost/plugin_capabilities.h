@@ -1,5 +1,4 @@
 // plugin_capabilities.h - ExplorerLens Plugin Capability Gate System v1.0
-// Part of Sprint 20: Plugin Sandbox v2 + Trust/Signing (v6.2)
 //
 // PURPOSE:
 //   Runtime capability enforcement and permission checking for plugins.

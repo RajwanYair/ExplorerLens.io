@@ -1,5 +1,4 @@
 # CMake Toolchain File — Windows ARM64 (Cross-compile from x64 host)
-# Sprint 159: ARM64 CI Integration
 # Usage: cmake -B build-arm64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-windows-arm64.cmake
 
 cmake_minimum_required(VERSION 3.20)

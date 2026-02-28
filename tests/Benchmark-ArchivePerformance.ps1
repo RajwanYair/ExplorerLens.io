@@ -1,5 +1,4 @@
 # Benchmark-ArchivePerformance.ps1
-# Sprint 14: Memory-Mapped I/O & Lazy Decoder Init
 # Benchmarks archive thumbnail generation before/after optimization
 # Date: February 17, 2026
 
@@ -18,7 +17,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "=== ExplorerLens Archive Performance Benchmark ===" -ForegroundColor Cyan
-Write-Host "Sprint 14: Memory-Mapped I/O Optimization"
+Write-Host "Memory-Mapped I/O Optimization"
 Write-Host ""
 
 # Check if test archive exists or create one
@@ -174,13 +173,13 @@ Write-Host "  Average:  -$improvementPct% ($([math]::Round($baselineAvg - $optim
 Write-Host "  P95:      -$p95ImprovementPct% ($($baselineP95 - $optimizedP95) ms faster)" -ForegroundColor Green
 Write-Host ""
 
-# Sprint 14 exit criteria check
+# ExplorerLens
 $exitCriteriaP95 = 30.0 # ≥30% reduction in p95 latency for >100 MB archives
 
 if ($p95ImprovementPct -ge $exitCriteriaP95) {
-    Write-Host "✓ Sprint 14 Exit Criteria MET: $p95ImprovementPct% ≥ $exitCriteriaP95% p95 improvement" -ForegroundColor Green
+    Write-Host "✓  Exit Criteria MET: $p95ImprovementPct% ≥ $exitCriteriaP95% p95 improvement" -ForegroundColor Green
 } else {
-    Write-Host "✗ Sprint 14 Exit Criteria NOT MET: $p95ImprovementPct% < $exitCriteriaP95% p95 improvement" -ForegroundColor Red
+    Write-Host "✗  Exit Criteria NOT MET: $p95ImprovementPct% < $exitCriteriaP95% p95 improvement" -ForegroundColor Red
 }
 
 Write-Host ""
@@ -234,5 +233,5 @@ Write-Host "  • Zero-copy file access via Windows memory mapping" -ForegroundC
 Write-Host "  • Central directory seek avoids full archive scan" -ForegroundColor Gray
 Write-Host "  • Lazy file enumeration reduces overhead" -ForegroundColor Gray
 Write-Host ""
-Write-Host "Sprint 14 Memory-Mapped I/O benchmark complete! ✓" -ForegroundColor Green
+Write-Host " Memory-Mapped I/O benchmark complete! ✓" -ForegroundColor Green
 

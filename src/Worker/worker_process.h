@@ -1,7 +1,6 @@
 // =============================================================================
 // worker_process.h - Worker Process Architecture
 // =============================================================================
-// Sprint 19: Out-of-Process Worker
 // Worker process hosts thumbnail generation pipeline isolated from Explorer
 // =============================================================================
 

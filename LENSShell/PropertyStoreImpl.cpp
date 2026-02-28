@@ -1,9 +1,9 @@
-// PropertyStoreImpl.cpp — IPropertyStore implementation for Explorer Details Pane
-// Copyright (c) 2026 ExplorerLens Project
+// PropertyStoreImpl.cpp — IPropertyStore implementation for Explorer Details
+// Pane Copyright (c) 2026 ExplorerLens Project
 
+#include "StdAfx.h"
 #include "PropertyStoreImpl.h"
 #include "LENSTypes.h"
-#include "StdAfx.h"
 #include <algorithm>
 #include <shlwapi.h>
 
@@ -15,8 +15,8 @@ namespace ExplorerLens {
 // Property Initialization
 // ============================================================================
 
-HRESULT CLENSPropertyStore::InitializeProperties(const wchar_t *filePath,
-                                                 int lensType) {
+HRESULT CLENSPropertyStore::InitializeProperties(const wchar_t* filePath,
+  int lensType) {
   if (m_initialized)
     return S_OK;
 
@@ -50,7 +50,8 @@ HRESULT CLENSPropertyStore::InitializeProperties(const wchar_t *filePath,
   std::wstring desc = typeText;
   if (IsArchiveType(lensType)) {
     desc += L" — Archive with embedded images";
-  } else if (IsImageType(lensType)) {
+  }
+  else if (IsImageType(lensType)) {
     desc += L" — Image file";
   }
   if (!desc.empty()) {
@@ -65,7 +66,7 @@ HRESULT CLENSPropertyStore::InitializeProperties(const wchar_t *filePath,
 // IPropertyStore Implementation
 // ============================================================================
 
-HRESULT CLENSPropertyStore::PropertyStore_GetCount(DWORD *cProps) {
+HRESULT CLENSPropertyStore::PropertyStore_GetCount(DWORD* cProps) {
   if (!cProps)
     return E_POINTER;
   *cProps = static_cast<DWORD>(m_properties.size());
@@ -73,7 +74,7 @@ HRESULT CLENSPropertyStore::PropertyStore_GetCount(DWORD *cProps) {
 }
 
 HRESULT CLENSPropertyStore::PropertyStore_GetAt(DWORD iProp,
-                                                PROPERTYKEY *pkey) {
+  PROPERTYKEY* pkey) {
   if (!pkey)
     return E_POINTER;
   if (iProp >= m_properties.size())
@@ -83,12 +84,12 @@ HRESULT CLENSPropertyStore::PropertyStore_GetAt(DWORD iProp,
 }
 
 HRESULT CLENSPropertyStore::PropertyStore_GetValue(REFPROPERTYKEY key,
-                                                   PROPVARIANT *pv) {
+  PROPVARIANT* pv) {
   if (!pv)
     return E_POINTER;
   PropVariantInit(pv);
 
-  const StoredProperty *prop = FindProperty(key);
+  const StoredProperty* prop = FindProperty(key);
   if (!prop) {
     return S_OK; // Property not found — return VT_EMPTY (normal behavior)
   }
@@ -97,7 +98,7 @@ HRESULT CLENSPropertyStore::PropertyStore_GetValue(REFPROPERTYKEY key,
 }
 
 HRESULT CLENSPropertyStore::PropertyStore_SetValue(REFPROPERTYKEY /*key*/,
-                                                   REFPROPVARIANT /*propvar*/) {
+  REFPROPVARIANT /*propvar*/) {
   return STG_E_ACCESSDENIED; // Read-only property store
 }
 
@@ -110,7 +111,7 @@ HRESULT CLENSPropertyStore::PropertyStore_Commit() {
 // ============================================================================
 
 HRESULT CLENSPropertyStore::PropertyStoreCapabilities_IsPropertyWritable(
-    REFPROPERTYKEY /*key*/) {
+  REFPROPERTYKEY /*key*/) {
   return S_FALSE; // All properties are read-only
 }
 
@@ -119,7 +120,7 @@ HRESULT CLENSPropertyStore::PropertyStoreCapabilities_IsPropertyWritable(
 // ============================================================================
 
 void CLENSPropertyStore::AddStringProperty(REFPROPERTYKEY key,
-                                           const wchar_t *value) {
+  const wchar_t* value) {
   StoredProperty prop;
   prop.key = key;
   if (SUCCEEDED(InitPropVariantFromString(value, &prop.value))) {
@@ -135,18 +136,18 @@ void CLENSPropertyStore::AddUInt32Property(REFPROPERTYKEY key, UINT32 value) {
 }
 
 void CLENSPropertyStore::AddStringVectorProperty(REFPROPERTYKEY key,
-                                                 const wchar_t *value) {
+  const wchar_t* value) {
   StoredProperty prop;
   prop.key = key;
-  const wchar_t *vals[] = {value};
+  const wchar_t* vals[] = { value };
   if (SUCCEEDED(InitPropVariantFromStringAsVector(value, &prop.value))) {
     m_properties.push_back(std::move(prop));
   }
 }
 
-const CLENSPropertyStore::StoredProperty *
+const CLENSPropertyStore::StoredProperty*
 CLENSPropertyStore::FindProperty(REFPROPERTYKEY key) const {
-  for (const auto &prop : m_properties) {
+  for (const auto& prop : m_properties) {
     if (IsEqualPropertyKey(prop.key, key)) {
       return &prop;
     }
@@ -159,11 +160,11 @@ CLENSPropertyStore::FindProperty(REFPROPERTYKEY key) const {
 // ============================================================================
 
 std::wstring
-CLENSPropertyStore::GetMimeTypeForExtension(const wchar_t *filePath) {
+CLENSPropertyStore::GetMimeTypeForExtension(const wchar_t* filePath) {
   if (!filePath)
     return L"";
 
-  const wchar_t *ext = PathFindExtensionW(filePath);
+  const wchar_t* ext = PathFindExtensionW(filePath);
   if (!ext || !*ext)
     return L"";
 
@@ -264,10 +265,10 @@ CLENSPropertyStore::GetMimeTypeForExtension(const wchar_t *filePath) {
     return L"application/epub+zip";
   if (lext == L".docx")
     return L"application/"
-           L"vnd.openxmlformats-officedocument.wordprocessingml.document";
+    L"vnd.openxmlformats-officedocument.wordprocessingml.document";
   if (lext == L".pptx")
     return L"application/"
-           L"vnd.openxmlformats-officedocument.presentationml.presentation";
+    L"vnd.openxmlformats-officedocument.presentationml.presentation";
   if (lext == L".xlsx")
     return L"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
   if (lext == L".djvu" || lext == L".djv")
@@ -340,7 +341,7 @@ CLENSPropertyStore::GetMimeTypeForExtension(const wchar_t *filePath) {
 
 std::wstring CLENSPropertyStore::GetItemTypeText(int lensType) {
   switch (lensType) {
-  // Archives
+    // Archives
   case LENSTYPE_ZIP:
     return L"ZIP Archive";
   case LENSTYPE_CBZ:
@@ -382,7 +383,7 @@ std::wstring CLENSPropertyStore::GetItemTypeText(int lensType) {
   case LENSTYPE_CAB:
     return L"Microsoft Cabinet";
 
-  // eBooks
+    // eBooks
   case LENSTYPE_EPUB:
     return L"EPUB eBook";
   case LENSTYPE_MOBI:
@@ -394,7 +395,7 @@ std::wstring CLENSPropertyStore::GetItemTypeText(int lensType) {
   case LENSTYPE_AZW3:
     return L"Amazon Kindle (AZW3)";
 
-  // Images — Modern
+    // Images — Modern
   case LENSTYPE_WEBP:
     return L"WebP Image";
   case LENSTYPE_AVIF:
@@ -456,7 +457,7 @@ std::wstring CLENSPropertyStore::GetItemTypeText(int lensType) {
   case LENSTYPE_XPM:
     return L"X PixMap Image";
 
-  // Documents
+    // Documents
   case LENSTYPE_PDF:
     return L"PDF Document";
   case LENSTYPE_DJVU:
@@ -480,17 +481,17 @@ std::wstring CLENSPropertyStore::GetItemTypeText(int lensType) {
   case LENSTYPE_XLS:
     return L"Legacy Excel Spreadsheet";
 
-  // Media
+    // Media
   case LENSTYPE_VIDEO:
     return L"Video File";
   case LENSTYPE_AUDIO:
     return L"Audio File";
 
-  // Fonts
+    // Fonts
   case LENSTYPE_FONT:
     return L"Font File";
 
-  // 3D
+    // 3D
   case LENSTYPE_MODEL:
     return L"3D Model";
 
@@ -535,22 +536,22 @@ std::wstring CLENSPropertyStore::GetKindString(int lensType) {
 
 bool CLENSPropertyStore::IsImageType(int lensType) {
   return (lensType >= LENSTYPE_WEBP && lensType <= LENSTYPE_RAW) ||
-         (lensType >= LENSTYPE_PSD && lensType <= LENSTYPE_PPM) ||
-         (lensType >= LENSTYPE_ICO && lensType <= LENSTYPE_QOI) ||
-         (lensType >= LENSTYPE_TGA && lensType <= LENSTYPE_XPM) ||
-         lensType == LENSTYPE_HDR || lensType == LENSTYPE_EXR;
+    (lensType >= LENSTYPE_PSD && lensType <= LENSTYPE_PPM) ||
+    (lensType >= LENSTYPE_ICO && lensType <= LENSTYPE_QOI) ||
+    (lensType >= LENSTYPE_TGA && lensType <= LENSTYPE_XPM) ||
+    lensType == LENSTYPE_HDR || lensType == LENSTYPE_EXR;
 }
 
 bool CLENSPropertyStore::IsArchiveType(int lensType) {
   return lensType == LENSTYPE_ZIP || lensType == LENSTYPE_CBZ ||
-         lensType == LENSTYPE_7Z || lensType == LENSTYPE_CB7 ||
-         lensType == LENSTYPE_TAR || lensType == LENSTYPE_CBT ||
-         (lensType >= LENSTYPE_BZIP2 && lensType <= LENSTYPE_LZMA) ||
-         lensType == LENSTYPE_LZ4 ||
-         (lensType >= LENSTYPE_TAR_GZ && lensType <= LENSTYPE_CPIO) ||
-         lensType == LENSTYPE_ISO || lensType == LENSTYPE_XAR ||
-         lensType == LENSTYPE_AR || lensType == LENSTYPE_DEB ||
-         lensType == LENSTYPE_CAB;
+    lensType == LENSTYPE_7Z || lensType == LENSTYPE_CB7 ||
+    lensType == LENSTYPE_TAR || lensType == LENSTYPE_CBT ||
+    (lensType >= LENSTYPE_BZIP2 && lensType <= LENSTYPE_LZMA) ||
+    lensType == LENSTYPE_LZ4 ||
+    (lensType >= LENSTYPE_TAR_GZ && lensType <= LENSTYPE_CPIO) ||
+    lensType == LENSTYPE_ISO || lensType == LENSTYPE_XAR ||
+    lensType == LENSTYPE_AR || lensType == LENSTYPE_DEB ||
+    lensType == LENSTYPE_CAB;
 }
 
 } // namespace ExplorerLens

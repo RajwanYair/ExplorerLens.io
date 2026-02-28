@@ -156,10 +156,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="About.h" />
+    <ClInclude Include="ChangeSummaryDlg.h" />
+    <ClInclude Include="DarkModeController.h" />
+    <ClInclude Include="DarkModeHelper.h" />
+    <ClInclude Include="DecoderHealthCheck.h" />
+    <ClInclude Include="ExportDiagnostics.h" />
+    <ClInclude Include="FormatGroupHelper.h" />
+    <ClInclude Include="FormatStatusProvider.h" />
     <ClInclude Include="MainDlg.h" />
+    <ClInclude Include="PerformanceDashboard.h" />
     <ClInclude Include="RegManager.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SettingsPortability.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SystemTrayIcon.h" />
     <ClInclude Include="tools.h" />
   </ItemGroup>
   <ItemGroup>

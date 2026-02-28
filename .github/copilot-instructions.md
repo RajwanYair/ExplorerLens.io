@@ -16,36 +16,36 @@ GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 ## Architecture
 
 ```
-LENSShell.dll (2940 KB)     — COM Shell Extension (IThumbnailProvider)
-LENSManager.exe (400 KB)    — GUI Configuration Utility
-ExplorerLensEngine.lib       — Core decode + render pipeline
+LENSShell.dll (2940 KB) — COM Shell Extension (IThumbnailProvider)
+LENSManager.exe (400 KB) — GUI Configuration Utility
+ExplorerLensEngine.lib — Core decode + render pipeline
 ```
 
 ### Key Directories
 
-| Directory                      | Purpose                                                                           |
+| Directory | Purpose |
 | ------------------------------ | --------------------------------------------------------------------------------- |
-| `LENSShell/`                   | Shell extension DLL (COM registration, thumbnail provider)                        |
-| `LENSManager/`                 | WTL-based admin GUI for registration/settings                                     |
-| `Engine/`                      | Core library — decoders, GPU pipeline, caching, observability                     |
-| `Engine/Core/`                 | Decode pipeline, GPU renderer, resource management                                |
-| `Engine/Decoders/`             | Format-specific decoders (25+ total, incl. CAD/glTF/Scientific)                   |
-| `Engine/Plugin/`               | Plugin ecosystem (trust chain, sandbox, compat kit, ref pack)                     |
-| `Engine/Memory/`               | Memory management (compactor, hot-mode, pressure controller, footprint optimizer) |
-| `Engine/Pipeline/`             | Pipeline stages (fallback engine, zero-copy upload, parallel I/O)                 |
-| `Engine/Cache/`                | Cache management (adaptive budget, PSO cache, sub-ms cache, multi-tenant)         |
-| `Engine/Utils/`                | Utilities (ARM64 support, matrix validation, installer lifecycle)                 |
-| `Engine/Tests/`                | Unit tests + Google Benchmark                                                     |
-| `Engine/AI/`                   | AI/ML modules (scene understanding, smart crop, IQA, search)                      |
-| `Engine/GPU/`                  | GPU decode acceleration (NVDEC/QuickSync/AMF vendor routing)                      |
-| `build-scripts/`               | PowerShell build automation                                                       |
-| `build-scripts/core/`          | Build-Library-Core.ps1 — unified build module                                     |
-| `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.)                                 |
-| `cmake/`                       | CMake toolchain files (incl. toolchain-windows-arm64.cmake)                       |
-| `packaging/`                   | MSI (WiX), Inno Setup, MSIX manifests                                             |
-| `SDK/`                         | Plugin SDK (C ABI, plugin_api.h)                                                  |
-| `docs/`                        | All documentation                                                                 |
-| `.github/workflows/`           | CI/CD pipelines (incl. arm64.yml)                                                 |
+| `LENSShell/` | Shell extension DLL (COM registration, thumbnail provider) |
+| `LENSManager/` | WTL-based admin GUI for registration/settings |
+| `Engine/` | Core library — decoders, GPU pipeline, caching, observability |
+| `Engine/Core/` | Decode pipeline, GPU renderer, resource management |
+| `Engine/Decoders/` | Format-specific decoders (25+ total, incl. CAD/glTF/Scientific) |
+| `Engine/Plugin/` | Plugin ecosystem (trust chain, sandbox, compat kit, ref pack) |
+| `Engine/Memory/` | Memory management (compactor, hot-mode, pressure controller, footprint optimizer) |
+| `Engine/Pipeline/` | Pipeline stages (fallback engine, zero-copy upload, parallel I/O) |
+| `Engine/Cache/` | Cache management (adaptive budget, PSO cache, sub-ms cache, multi-tenant) |
+| `Engine/Utils/` | Utilities (ARM64 support, matrix validation, installer lifecycle) |
+| `Engine/Tests/` | Unit tests + Google Benchmark |
+| `Engine/AI/` | AI/ML modules (scene understanding, smart crop, IQA, search) |
+| `Engine/GPU/` | GPU decode acceleration (NVDEC/QuickSync/AMF vendor routing) |
+| `build-scripts/` | PowerShell build automation |
+| `build-scripts/core/` | Build-Library-Core.ps1 — unified build module |
+| `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.) |
+| `cmake/` | CMake toolchain files (incl. toolchain-windows-arm64.cmake) |
+| `packaging/` | MSI (WiX), Inno Setup, MSIX manifests |
+| `SDK/` | Plugin SDK (C ABI, plugin_api.h) |
+| `docs/` | All documentation |
+| `.github/workflows/` | CI/CD pipelines (incl. arm64.yml) |
 
 ## Toolchain & Build Tools
 
@@ -53,35 +53,35 @@ ExplorerLensEngine.lib       — Core decode + render pipeline
 
 All builds **must** use MSVC v145 toolset from Visual Studio 18 (2026) BuildTools.
 
-| Tool             | Version      | Location                                                                                                        |
+| Tool | Version | Location |
 | ---------------- | ------------ | --------------------------------------------------------------------------------------------------------------- |
-| **cl.exe**       | 19.50.35720  | `C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe` |
-| **link.exe**     | 14.50.35717  | Same MSVC bin dir                                                                                               |
-| **lib.exe**      | 14.50.35717  | Same MSVC bin dir                                                                                               |
-| **msbuild.exe**  | 18.3         | `...\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe`                                                          |
-| **vcvars64.bat** | —            | `...\BuildTools\VC\Auxiliary\Build\vcvars64.bat`                                                                |
-| **vcpkg**        | 2025-11-19   | `...\BuildTools\VC\vcpkg\vcpkg.exe` (bundled)                                                                   |
-| **Windows SDK**  | 10.0.26100.0 | `C:\Program Files (x86)\Windows Kits\10`                                                                        |
+| **cl.exe** | 19.50.35720 | `C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe` |
+| **link.exe** | 14.50.35717 | Same MSVC bin dir |
+| **lib.exe** | 14.50.35717 | Same MSVC bin dir |
+| **msbuild.exe** | 18.3 | `...\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe` |
+| **vcvars64.bat** | — | `...\BuildTools\VC\Auxiliary\Build\vcvars64.bat` |
+| **vcpkg** | 2025-11-19 | `...\BuildTools\VC\vcpkg\vcpkg.exe` (bundled) |
+| **Windows SDK** | 10.0.26100.0 | `C:\Program Files (x86)\Windows Kits\10` |
 
 ### Additional Tools (Scoop — preferred for latest versions)
 
-| Tool  | Version | Path                      |
+| Tool | Version | Path |
 | ----- | ------- | ------------------------- |
-| cmake | 4.2.3   | `~/scoop/shims/cmake.exe` |
-| ninja | 1.13.2  | `~/scoop/shims/ninja.exe` |
-| git   | 2.53.0  | `~/scoop/shims/git.exe`   |
-| nasm  | 3.01    | `~/scoop/shims/nasm.exe`  |
-| meson | 1.10.0  | `~/scoop/shims/meson.exe` |
-| nuget | 7.3.0   | `~/scoop/shims/nuget.exe` |
-| 7zip  | 26.00   | `~/scoop/shims/7z.exe`    |
-| WiX   | 6.0.2   | `~/.dotnet/tools/wix.exe` |
+| cmake | 4.2.3 | `~/scoop/shims/cmake.exe` |
+| ninja | 1.13.2 | `~/scoop/shims/ninja.exe` |
+| git | 2.53.0 | `~/scoop/shims/git.exe` |
+| nasm | 3.01 | `~/scoop/shims/nasm.exe` |
+| meson | 1.10.0 | `~/scoop/shims/meson.exe` |
+| nuget | 7.3.0 | `~/scoop/shims/nuget.exe` |
+| 7zip | 26.00 | `~/scoop/shims/7z.exe` |
+| WiX | 6.0.2 | `~/.dotnet/tools/wix.exe` |
 
 ### MSVC Toolset Versions Available
 
-| Toolset     | cl.exe Version | Status      |
+| Toolset | cl.exe Version | Status |
 | ----------- | -------------- | ----------- |
-| 14.50.35717 | 19.50.35720    | **Primary** |
-| 14.44.35207 | 19.44.35222    | Fallback    |
+| 14.50.35717 | 19.50.35720 | **Primary** |
+| 14.44.35207 | 19.44.35222 | Fallback |
 
 ## Build Commands
 
@@ -117,13 +117,13 @@ ctest --test-dir build -C Release --output-on-failure
 
 ### Available CMake Presets
 
-| Preset            | Generator | Compiler  | Dependencies    |
+| Preset | Generator | Compiler | Dependencies |
 | ----------------- | --------- | --------- | --------------- |
-| `default-release` | Ninja     | MSVC v145 | Local external/ |
-| `default-debug`   | Ninja     | MSVC v145 | Local external/ |
-| `vcpkg-release`   | Ninja     | MSVC v145 | vcpkg           |
-| `vcpkg-debug`     | Ninja     | MSVC v145 | vcpkg           |
-| `vs2026`          | VS 18     | MSVC v145 | Local external/ |
+| `default-release` | Ninja | MSVC v145 | Local external/ |
+| `default-debug` | Ninja | MSVC v145 | Local external/ |
+| `vcpkg-release` | Ninja | MSVC v145 | vcpkg |
+| `vcpkg-debug` | Ninja | MSVC v145 | vcpkg |
+| `vs2026` | VS 18 | MSVC v145 | Local external/ |
 
 ### MSBuild (Shell + Manager only)
 
@@ -147,20 +147,20 @@ All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). One exception:
 
 ## External Libraries (Statically Linked)
 
-| Library    | Version | Purpose                   |
+| Library | Version | Purpose |
 | ---------- | ------- | ------------------------- |
-| zlib       | 1.3.1   | ZIP/deflate compression   |
-| LZ4        | 1.10.0  | Fast compression          |
-| zstd       | 1.5.7   | Zstandard compression     |
-| LZMA SDK   | 26.00   | 7z archives               |
-| minizip-ng | 4.0.10  | ZIP archive handling      |
-| UnRAR      | 7.2.2   | RAR archive extraction    |
-| libwebp    | 1.5.0   | WebP images               |
-| libavif    | 1.3.0   | AVIF images               |
-| libjxl     | 0.11.1  | JPEG XL images            |
-| libheif    | 1.19.5  | HEIF/HEIC images          |
-| libde265   | 1.0.15  | HEVC decoding for libheif |
-| LibRaw     | 0.21.3  | RAW camera formats        |
+| zlib | 1.3.1 | ZIP/deflate compression |
+| LZ4 | 1.10.0 | Fast compression |
+| zstd | 1.5.7 | Zstandard compression |
+| LZMA SDK | 26.00 | 7z archives |
+| minizip-ng | 4.0.10 | ZIP archive handling |
+| UnRAR | 7.2.2 | RAR archive extraction |
+| libwebp | 1.5.0 | WebP images |
+| libavif | 1.3.0 | AVIF images |
+| libjxl | 0.11.1 | JPEG XL images |
+| libheif | 1.19.5 | HEIF/HEIC images |
+| libde265 | 1.0.15 | HEVC decoding for libheif |
+| LibRaw | 0.21.3 | RAW camera formats |
 
 ## Code Conventions
 
@@ -169,7 +169,7 @@ All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). One exception:
 - Private members: `m_` prefix, constants: `UPPER_CASE`
 - **Zero warnings policy** — build must produce 0 warnings
 - See `.clang-tidy` for static analysis config
-- See `docs/development/CODE_QUALITY_STANDARDS.md` for full guide
+- See `.github/standards/CODING_STANDARDS.md` for full guide
 - COM interfaces follow Windows SDK patterns (IUnknown, AddRef/Release)
 
 ## Key Types
@@ -208,11 +208,11 @@ All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). One exception:
 
 ```
 external/
-  compression-libs/   — zlib, lz4, zstd, minizip-ng, lzma, unrar, bzip2, libarchive, xz
-  image-libs/          — libwebp, libjxl, libavif, libheif, libde265, dav1d
-  camera-libs/         — libraw, libraw-install
-  pdf-libs/            — mupdf
-  ui-libs/             — wtl
+ compression-libs/ — zlib, lz4, zstd, minizip-ng, lzma, unrar, bzip2, libarchive, xz
+ image-libs/ — libwebp, libjxl, libavif, libheif, libde265, dav1d
+ camera-libs/ — libraw, libraw-install
+ pdf-libs/ — mupdf
+ ui-libs/ — wtl
 ```
 
 > **Note:** Build scripts use `$rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)` to resolve the project root. All scripts import `Build-Library-Core.ps1` from `build-scripts/core/`.
@@ -233,16 +233,15 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - Always verify new Windows SDK includes compile under `WIN32_LEAN_AND_MEAN`
 - See `.github/standards/BUILD_TROUBLESHOOTING.md` for the full compatibility list
 
-## Sprint Execution Guidance (v15.0+)
+## Development Guidance (v15.0+)
 
-- **Current version:** v15.0.0 "Zenith" (Sprints 299-393 complete)
-- **Next roadmap block:** Sprints 394+ (next improvement plan TBD)
-- **Source of truth:** `MASTER_PLAN.md`
-- **Per sprint commit policy:** one clear commit per sprint with objective + impacted areas
-- **Sprint deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
-- **Batch pattern:** Create 5 sprints' source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
-- **CMakeLists.txt insertion points:** Core headers before `# Pipeline`, Core sources before `# Pipeline implementations`, Utils headers before `# Sprint 8-12:`, Utils sources before closing `)`
-- **EngineTests.cpp insertion points:** New includes after last sprint include, TEST() functions before `//== Sprint 6:` section, RUN_TEST() calls before `// Sprint 6: Isolation & Stability Tests`
+- **Current version:** v15.0.0 "Zenith" (complete)
+- **Source of truth:** `CHANGELOG.md`
+- **Per feature commit policy:** one clear commit per feature with objective + impacted areas
+- **Deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
+- **Batch pattern:** Create 5 source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
+- **CMakeLists.txt insertion points:** Core headers before `# Pipeline`, Core sources before `# Pipeline implementations`, Utils headers before `# `, Utils sources before closing `)`
+- **EngineTests.cpp insertion points:** New includes after last feature include, TEST() functions before `//== ` section, RUN_TEST() calls before `// Isolation & Stability Tests`
 
 ## Key Architecture Patterns
 

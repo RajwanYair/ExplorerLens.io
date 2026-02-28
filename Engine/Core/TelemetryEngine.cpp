@@ -3,12 +3,13 @@
 // Structured telemetry with privacy and health scoring
 //==============================================================================
 
-#include "TelemetryEngine.h"
+#include "Telemetry.h"
 #include <algorithm>
 #include <chrono>
 #include <sstream>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
 TelemetryEngine::TelemetryEngine() {
     auto now = std::chrono::steady_clock::now();
@@ -30,8 +31,7 @@ void TelemetryEngine::RecordEvent(const TelemetryEvent& event) {
 }
 
 void TelemetryEngine::RecordMetric(TelemetryCategory category,
-    const std::wstring& name, double value, const std::wstring& unit)
-{
+    const std::wstring& name, double value, const std::wstring& unit) {
     TelemetryEvent evt;
     evt.severity = TelemetrySeverity::Info;
     evt.category = category;
@@ -155,9 +155,9 @@ std::wstring TelemetryEngine::ExportJSON() const {
         const auto& e = m_events[i];
         if (i > 0) ss << L",";
         ss << L"{\"name\":\"" << e.eventName
-           << L"\",\"severity\":\"" << GetSeverityName(e.severity)
-           << L"\",\"category\":\"" << GetCategoryName(e.category)
-           << L"\",\"value\":" << e.value << L"}";
+            << L"\",\"severity\":\"" << GetSeverityName(e.severity)
+            << L"\",\"category\":\"" << GetCategoryName(e.category)
+            << L"\",\"value\":" << e.value << L"}";
     }
     ss << L"]}";
     return ss.str();
@@ -171,42 +171,42 @@ void TelemetryEngine::PurgeEvents() {
 //------------------------------------------------------------------------------
 const wchar_t* TelemetryEngine::GetSeverityName(TelemetrySeverity severity) {
     switch (severity) {
-        case TelemetrySeverity::Debug:    return L"Debug";
-        case TelemetrySeverity::Info:     return L"Info";
-        case TelemetrySeverity::Warning:  return L"Warning";
-        case TelemetrySeverity::Error:    return L"Error";
-        case TelemetrySeverity::Critical: return L"Critical";
-        default: return L"Unknown";
+    case TelemetrySeverity::Debug: return L"Debug";
+    case TelemetrySeverity::Info: return L"Info";
+    case TelemetrySeverity::Warning: return L"Warning";
+    case TelemetrySeverity::Error: return L"Error";
+    case TelemetrySeverity::Critical: return L"Critical";
+    default: return L"Unknown";
     }
 }
 
 const wchar_t* TelemetryEngine::GetCategoryName(TelemetryCategory category) {
     switch (category) {
-        case TelemetryCategory::Decode:  return L"Decode";
-        case TelemetryCategory::Render:  return L"Render";
-        case TelemetryCategory::Cache:   return L"Cache";
-        case TelemetryCategory::Plugin:  return L"Plugin";
-        case TelemetryCategory::Shell:   return L"Shell";
-        case TelemetryCategory::GPU:     return L"GPU";
-        case TelemetryCategory::Memory:  return L"Memory";
-        case TelemetryCategory::IO:      return L"IO";
-        case TelemetryCategory::Network: return L"Network";
-        case TelemetryCategory::System:  return L"System";
-        default: return L"Unknown";
+    case TelemetryCategory::Decode: return L"Decode";
+    case TelemetryCategory::Render: return L"Render";
+    case TelemetryCategory::Cache: return L"Cache";
+    case TelemetryCategory::Plugin: return L"Plugin";
+    case TelemetryCategory::Shell: return L"Shell";
+    case TelemetryCategory::GPU: return L"GPU";
+    case TelemetryCategory::Memory: return L"Memory";
+    case TelemetryCategory::IO: return L"IO";
+    case TelemetryCategory::Network: return L"Network";
+    case TelemetryCategory::System: return L"System";
+    default: return L"Unknown";
     }
 }
 
 const wchar_t* TelemetryEngine::GetDimensionName(HealthDimension dimension) {
     switch (dimension) {
-        case HealthDimension::Performance:   return L"Performance";
-        case HealthDimension::Reliability:   return L"Reliability";
-        case HealthDimension::Compatibility: return L"Compatibility";
-        case HealthDimension::Coverage:      return L"Coverage";
-        case HealthDimension::Memory:        return L"Memory";
-        case HealthDimension::GPU:           return L"GPU";
-        default: return L"Unknown";
+    case HealthDimension::Performance: return L"Performance";
+    case HealthDimension::Reliability: return L"Reliability";
+    case HealthDimension::Compatibility: return L"Compatibility";
+    case HealthDimension::Coverage: return L"Coverage";
+    case HealthDimension::Memory: return L"Memory";
+    case HealthDimension::GPU: return L"GPU";
+    default: return L"Unknown";
     }
 }
 
-}} // namespace ExplorerLens::Engine
-
+}
+} // namespace ExplorerLens::Engine

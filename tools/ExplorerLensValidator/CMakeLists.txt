@@ -1,5 +1,4 @@
 # ExplorerLens Validator Tool
-# Sprint 13: Real-File Test Fixtures & Compatibility Kit
 
 cmake_minimum_required(VERSION 3.26)
 

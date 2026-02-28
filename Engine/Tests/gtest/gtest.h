@@ -49,14 +49,14 @@
 #endif
 
 #ifndef EXPECT_NO_THROW
-#define EXPECT_NO_THROW(statement)                     \
-    do {                                               \
-        try {                                          \
-            statement;                                 \
-        } catch (...) {                                \
-            assert(!"Expected no exception");         \
-        }                                              \
-    } while (0)
+#define EXPECT_NO_THROW(statement) \
+ do { \
+ try { \
+ statement; \
+ } catch (...) { \
+ assert(!"Expected no exception"); \
+ } \
+ } while (0)
 #endif
 
 #ifndef ASSERT_TRUE

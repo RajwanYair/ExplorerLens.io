@@ -25,12 +25,11 @@ target_link_libraries(PluginHost PRIVATE
 if(MSVC)
     target_compile_options(PluginHost PRIVATE
         /W4           # Warning level 4
-        /WX           # Warnings as errors
-        /std:c++20    # C++20 standard
+        /WX-          # Warnings NOT as errors (matches project convention)
         /permissive-  # Standards conformance
         /Zc:__cplusplus  # Correct __cplusplus macro
     )
-    
+
     # Link options
     target_link_options(PluginHost PRIVATE
         /SUBSYSTEM:CONSOLE     # Console application
@@ -53,4 +52,3 @@ add_custom_command(TARGET PluginHost POST_BUILD
         ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/PluginHost.exe
     COMMENT "Copying PluginHost.exe to output directory"
 )
-

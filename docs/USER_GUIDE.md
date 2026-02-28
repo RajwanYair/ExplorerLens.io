@@ -1,5 +1,5 @@
 # ExplorerLens User Guide
-**Version:** 15.0.0  
+**Version:** 15.0.0 
 **Last Updated:** July 2025
 
 ## Table of Contents
@@ -25,22 +25,22 @@
 1. **Download** the latest installer from the [Releases](https://github.com/yourusername/ExplorerLens/releases) page
 
 2. **Run the installer** as Administrator:
-   ```powershell
-   # Right-click installer → "Run as Administrator"
-   .\ExplorerLens-Setup-15.0.0.msi
-   ```
+ ```powershell
+ # Right-click installer → "Run as Administrator"
+ .\ExplorerLens-Setup-15.0.0.msi
+ ```
 
 3. **Follow the wizard**:
-   - Accept the license agreement
-   - Choose installation directory (default: `C:\Program Files\ExplorerLens`)
-   - Select file type associations
-   - Click "Install"
+ - Accept the license agreement
+ - Choose installation directory (default: `C:\Program Files\ExplorerLens`)
+ - Select file type associations
+ - Click "Install"
 
 4. **Verify installation**:
-   - Open **File Explorer**
-   - Navigate to a folder with `.cbz`, `.webp`, or `.jxl` files
-   - Thumbnails should appear automatically
-   - If not, see [Troubleshooting](#troubleshooting)
+ - Open **File Explorer**
+ - Navigate to a folder with `.cbz`, `.webp`, or `.jxl` files
+ - Thumbnails should appear automatically
+ - If not, see [Troubleshooting](#troubleshooting)
 
 ### Alternative: Manual Installation
 
@@ -67,34 +67,34 @@ Stop-Process -Name explorer -Force
 2. **Navigate** to a folder with supported files
 3. **Change view** to Large Icons, Extra Large Icons, or Tiles
 4. **Thumbnails appear automatically** for:
-   - Comic books (`.cbz`, `.cbr`, `.cb7`, `.cbt`)
-   - Archives (`.zip`, `.rar`, `.7z`, `.tar`, `.gz`)
-   - Modern images (`.webp`, `.jxl`, `.avif`, `.heic`)
-   - RAW photos (`.cr2`, `.nef`, `.arw`, `.dng`, etc.)
-   - Videos (`.mp4`, `.mkv`, `.avi`, `.mov`, etc.)
-   - Audio (`.mp3`, `.flac`, `.wav` with album art)
+ - Comic books (`.cbz`, `.cbr`, `.cb7`, `.cbt`)
+ - Archives (`.zip`, `.rar`, `.7z`, `.tar`, `.gz`)
+ - Modern images (`.webp`, `.jxl`, `.avif`, `.heic`)
+ - RAW photos (`.cr2`, `.nef`, `.arw`, `.dng`, etc.)
+ - Videos (`.mp4`, `.mkv`, `.avi`, `.mov`, etc.)
+ - Audio (`.mp3`, `.flac`, `.wav` with album art)
 
 ### Using LENSManager
 
 **LENSManager** is the configuration utility for ExplorerLens.
 
 1. **Launch LENSManager**:
-   - Search for "LENSManager" in Start Menu
-   - Or run: `C:\Program Files\ExplorerLens\LENSManager.exe`
+ - Search for "LENSManager" in Start Menu
+ - Or run: `C:\Program Files\ExplorerLens\LENSManager.exe`
 
 2. **Configuration Options**:
-   - **Enable/Disable** thumbnail handler
-   - **Set thumbnail quality** (Fast, Balanced, High Quality)
-   - **Configure cache settings**
-   - **Choose GPU** (if multiple GPUs available)
-   - **View statistics** (cache hits, decode times)
-   - **Force cache clear**
+ - **Enable/Disable** thumbnail handler
+ - **Set thumbnail quality** (Fast, Balanced, High Quality)
+ - **Configure cache settings**
+ - **Choose GPU** (if multiple GPUs available)
+ - **View statistics** (cache hits, decode times)
+ - **Force cache clear**
 
 3. **Quick Actions**:
-   - **Register Handler:** Enables ExplorerLens for all file types
-   - **Unregister Handler:** Disables ExplorerLens temporarily
-   - **Clear Thumbnail Cache:** Removes all cached thumbnails
-   - **Rebuild Cache:** Forces regeneration of thumbnails
+ - **Register Handler:** Enables ExplorerLens for all file types
+ - **Unregister Handler:** Disables ExplorerLens temporarily
+ - **Clear Thumbnail Cache:** Removes all cached thumbnails
+ - **Rebuild Cache:** Forces regeneration of thumbnails
 
 ---
 
@@ -183,24 +183,24 @@ Remove-Item "$env:LOCALAPPDATA\ExplorerLens\Cache\*" -Recurse -Force
 ### Thumbnails Not Appearing
 
 1. **Restart File Explorer**:
-   ```powershell
-   Stop-Process -Name explorer -Force
-   ```
+ ```powershell
+ Stop-Process -Name explorer -Force
+ ```
 
 2. **Clear thumbnail cache**:
-   ```powershell
-   .\LENSManager.exe /ClearCache
-   ```
+ ```powershell
+ .\LENSManager.exe /ClearCache
+ ```
 
 3. **Re-register handler**:
-   ```powershell
-   regsvr32 /i "C:\Program Files\ExplorerLens\LENSShell.dll"
-   ```
+ ```powershell
+ regsvr32 /i "C:\Program Files\ExplorerLens\LENSShell.dll"
+ ```
 
 4. **Check Windows thumbnail settings**:
-   - Open **File Explorer Options**
-   - Go to **View** tab
-   - Ensure "Always show icons, never thumbnails" is **unchecked**
+ - Open **File Explorer Options**
+ - Go to **View** tab
+ - Ensure "Always show icons, never thumbnails" is **unchecked**
 
 ### Slow Thumbnail Generation
 
@@ -212,20 +212,20 @@ Remove-Item "$env:LOCALAPPDATA\ExplorerLens\Cache\*" -Recurse -Force
 ### Crashes or Errors
 
 1. **Check Event Viewer**:
-   ```powershell
-   Get-EventLog -LogName Application -Source ExplorerLens -Newest 10
-   ```
+ ```powershell
+ Get-EventLog -LogName Application -Source ExplorerLens -Newest 10
+ ```
 
 2. **Enable debug logging**:
-   ```powershell
-   Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "DebugLog" -Value 1
-   # Logs written to: %TEMP%\ExplorerLens-Debug.log
-   ```
+ ```powershell
+ Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "DebugLog" -Value 1
+ # Logs written to: %TEMP%\ExplorerLens-Debug.log
+ ```
 
 3. **Report issues** on GitHub with:
-   - Windows version
-   - File type causing crash
-   - Debug log excerpt
+ - Windows version
+ - File type causing crash
+ - Debug log excerpt
 
 ---
 
@@ -255,19 +255,19 @@ msiexec /x {ExplorerLens-GUID} /quiet
 
 ## FAQ
 
-**Q: Does ExplorerLens replace Windows thumbnail providers?**  
+**Q: Does ExplorerLens replace Windows thumbnail providers?** 
 A: No, ExplorerLens *extends* Windows thumbnail support. Native formats (JPG, PNG) still use Windows providers.
 
-**Q: Can I use ExplorerLens with network drives?**  
+**Q: Can I use ExplorerLens with network drives?** 
 A: Yes, but performance depends on network speed. Enable caching for best results.
 
-**Q: Is GPU acceleration required?**  
+**Q: Is GPU acceleration required?** 
 A: No, ExplorerLens works with CPU-only decoding. GPU acceleration improves performance for large images.
 
-**Q: How much memory does ExplorerLens use?**  
+**Q: How much memory does ExplorerLens use?** 
 A: ~50-100 MB idle, ~200-500 MB when actively decoding large files.
 
-**Q: Can I customize thumbnail appearance (borders, shadows)?**  
+**Q: Can I customize thumbnail appearance (borders, shadows)?** 
 A: Thumbnail appearance is controlled by Windows Explorer. ExplorerLens only provides the image data.
 
 ---

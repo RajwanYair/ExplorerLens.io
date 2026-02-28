@@ -91,11 +91,11 @@ constexpr bool EnableAsserts = DT_ENABLE_ASSERTS;
 constexpr int VersionMajor = 15;
 constexpr int VersionMinor = 0;
 constexpr int VersionPatch = 0;
-constexpr const wchar_t *VersionString = L"15.0.0";
-constexpr const wchar_t *Codename = L"Zenith";
-constexpr int SprintCount = 448;
+constexpr const wchar_t* VersionString = L"15.0.0";
+constexpr const wchar_t* Codename = L"Zenith";
+constexpr int MilestoneCount = 448;
 constexpr int TestCount = 1242;
-constexpr const wchar_t *BuildDate = __TIMESTAMP__;
+constexpr const wchar_t* BuildDate = __TIMESTAMP__;
 } // namespace BuildConfig
 
 } // namespace Engine

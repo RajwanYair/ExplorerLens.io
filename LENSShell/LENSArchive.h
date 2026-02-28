@@ -92,7 +92,7 @@
 #endif
 #endif
 
-#include "LENSTypes.h" // Sprint 354: Extracted type constants
+#include "LENSTypes.h" // Extracted type constants
 #include "unzip.h"
 #include <string>
 // LENSTYPE_*, IMGTYPE_*, LENS_APP_KEY — now defined in LENSTypes.h

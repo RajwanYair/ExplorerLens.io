@@ -25,7 +25,6 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 **Project Organization:**
 
 - [Project Structure](docs/architecture/PROJECT_STRUCTURE.md) - Complete directory organization
-- [Master Plan](MASTER_PLAN.md) - Unified roadmap and execution plan
 - [Documentation Index](docs/INDEX.md) - Complete documentation index
 
 **Development:**
@@ -86,7 +85,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 - **DDS:** `.dds` (DirectX textures)
 - **HDR:** `.hdr`, `.pic` (Radiance RGBE)
 
-**Legend:**  
+**Legend:**
 ✅ = Production ready | ⚠️ = Requires external dependency | 📋 = Planned
 
 ### Performance
@@ -132,18 +131,17 @@ Run `LENSManager.exe` to enable/disable file format categories.
 
 ## 🏗️ Project Structure
 
-```
+```text
 ExplorerLens/
-├── LENSShell/              # Main COM shell extension
-├── LENSManager/            # Configuration GUI tool
-├── build-scripts/         # Build automation
-├── docs/                  # Documentation
-├── external/              # Third-party libraries
-├── .github/               # GitHub workflows and templates
-├── LENSShell.sln          # Visual Studio solution
-├── LICENSE               # MIT License
-├── MASTER_PLAN.md        # Unified roadmap and execution plan
-└── RUN-BUILD.bat         # Quick build script
+├── LENSShell/ # Main COM shell extension
+├── LENSManager/ # Configuration GUI tool
+├── build-scripts/ # Build automation
+├── docs/ # Documentation
+├── external/ # Third-party libraries
+├── .github/ # GitHub workflows and templates
+├── LENSShell.sln # Visual Studio solution
+├── LICENSE # MIT License
+└── RUN-BUILD.bat # Quick build script
 ```
 
 ---
@@ -164,13 +162,12 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 15.0.0 "Zenith"  
-**Build Status:** 0 errors / 0 warnings  
-**Test Status:** 1,187 unit tests, 5 benchmarks (100% pass rate)  
-**Sprints Completed:** 393  
+**Current Version:** 15.0.0 "Zenith"
+**Build Status:** 0 errors / 0 warnings
+**Test Status:** 1,187 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Zenith — GPU-accelerated thumbnails for 200+ formats across 25 decoders
 
-See [MASTER_PLAN.md](MASTER_PLAN.md) for the complete development plan.
+See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 
 ---
 
@@ -198,10 +195,10 @@ See [Troubleshooting Guide](docs/TROUBLESHOOTING.md) for more troubleshooting.
 
 ## 📦 External Libraries
 
-**Compression:** zlib 1.3.1, LZ4 1.10.0, zstd 1.5.7, LZMA 26.00, minizip-ng 4.0.10  
-**Images:** libwebp 1.5.0, libavif 1.3.0 (dav1d 1.5.1), libjxl 0.11.1, LibRaw 0.21.3  
-**Archives:** UnRAR 7.2.1, minizip-ng 4.0.10  
-**Video:** Windows Media Foundation (system API)  
+**Compression:** zlib 1.3.1, LZ4 1.10.0, zstd 1.5.7, LZMA 26.00, minizip-ng 4.0.10
+**Images:** libwebp 1.5.0, libavif 1.3.0 (dav1d 1.5.1), libjxl 0.11.1, LibRaw 0.21.3
+**Archives:** UnRAR 7.2.1, minizip-ng 4.0.10
+**Video:** Windows Media Foundation (system API)
 **Rendering:** DirectX 11, GDI+
 
 ---
@@ -223,4 +220,3 @@ MIT License - See [LICENSE](LICENSE) for details.
 **Built with ❤️ using C++20 and DirectX 11/12**
 
 _Last Updated: July 2025 (v15.0.0 "Zenith")_
-

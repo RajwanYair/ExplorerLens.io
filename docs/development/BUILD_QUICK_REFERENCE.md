@@ -1,5 +1,5 @@
 # ExplorerLens Build Quick Reference
-**For AI Assistants & Developers**  
+**For AI Assistants & Developers** 
 **Updated:** February 9, 2026
 
 ---
@@ -94,11 +94,11 @@ ctest --output-on-failure
 ```powershell
 # Already configured in Setup-DevEnvironment.ps1:
 $Global:ExplorerLensConfig = @{
-    VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
-    MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
-    CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
-    Git = "C:\Users\ryair\scoop\shims\git.exe"
-    VCVarsAll = "$VSPath\VC\Auxiliary\Build\vcvarsall.bat"
+ VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
+ MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
+ CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
+ Git = "C:\Users\ryair\scoop\shims\git.exe"
+ VCVarsAll = "$VSPath\VC\Auxiliary\Build\vcvarsall.bat"
 }
 ```
 
@@ -114,11 +114,11 @@ Test-BuildTools
 Show-ExplorerLensInfo
 
 # Test specific tool
-cl.exe              # MSVC compiler
-nmake /?            # NMake make tool
-msbuild -version    # MSBuild
-cmake --version     # CMake
-git --version       # Git
+cl.exe # MSVC compiler
+nmake /? # NMake make tool
+msbuild -version # MSBuild
+cmake --version # CMake
+git --version # Git
 ```
 
 ---
@@ -128,20 +128,20 @@ git --version       # Git
 ### Scenario 1: Quick Test Build
 
 ```powershell
-dtbuild Release        # Fast build with /m (parallel)
+dtbuild Release # Fast build with /m (parallel)
 ```
 
 ### Scenario 2: Clean Rebuild
 
 ```powershell
-dtbuild Rebuild        # Cleans then builds
+dtbuild Rebuild # Cleans then builds
 ```
 
 ### Scenario 3: Engine Development
 
 ```powershell
-dtbuild Engine         # Build Engine with CMake
-dttest                 # Run Engine tests
+dtbuild Engine # Build Engine with CMake
+dttest # Run Engine tests
 ```
 
 ### Scenario 4: Debug Build
@@ -173,20 +173,20 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:quiet /clp:
 
 ```
 ExplorerLens/
-├── LENSShell.sln              # Main VS solution
-├── LENSShell/                 # Shell extension DLL
-│   └── LENSShell.vcxproj
-├── LENSManager/               # Manager application
-│   └── LENSManager.vcxproj
-├── Engine/                   # CMake-based engine library
-│   ├── CMakeLists.txt
-│   └── Tests/                # Security tests, benchmarks
-├── external/                 # Pre-built dependencies
-├── scripts/                  # Build & utility scripts
-│   └── Setup-DevEnvironment.ps1  # ⭐ Main setup script
-└── .github/                  # Build documentation
-    ├── TOOL_VERSIONS.md      # Detailed tool info (this file)
-    └── BUILD_QUICK_REFERENCE.txt
+├── LENSShell.sln # Main VS solution
+├── LENSShell/ # Shell extension DLL
+│ └── LENSShell.vcxproj
+├── LENSManager/ # Manager application
+│ └── LENSManager.vcxproj
+├── Engine/ # CMake-based engine library
+│ ├── CMakeLists.txt
+│ └── Tests/ # Security tests, benchmarks
+├── external/ # Pre-built dependencies
+├── scripts/ # Build & utility scripts
+│ └── Setup-DevEnvironment.ps1 # ⭐ Main setup script
+└── .github/ # Build documentation
+ ├── TOOL_VERSIONS.md # Detailed tool info (this file)
+ └── BUILD_QUICK_REFERENCE.txt
 ```
 
 ---
@@ -227,30 +227,30 @@ Use `/m` flag for parallel builds to maximize CPU usage.
 ## ⚡ Pro Tips
 
 1. **Add to Profile for Auto-Load:**
-   ```powershell
-   notepad $PROFILE
-   # Add: . "C:\...\ExplorerLens\scripts\Setup-DevEnvironment.ps1"
-   ```
+ ```powershell
+ notepad $PROFILE
+ # Add: . "C:\...\ExplorerLens\scripts\Setup-DevEnvironment.ps1"
+ ```
 
 2. **Use Aliases:**
-   ```powershell
-   dtbuild          # Instead of Invoke-ExplorerLensBuild
-   dtclean          # Instead of cleaning manually
-   dttest           # Instead of navigating to test folder
-   ```
+ ```powershell
+ dtbuild # Instead of Invoke-ExplorerLensBuild
+ dtclean # Instead of cleaning manually
+ dttest # Instead of navigating to test folder
+ ```
 
 3. **Monitor Builds:**
-   ```powershell
-   # In separate terminal:
-   Get-Content build.log -Wait
-   ```
+ ```powershell
+ # In separate terminal:
+ Get-Content build.log -Wait
+ ```
 
 4. **Check Build Output:**
-   ```powershell
-   # List recent DLLs:
-   Get-ChildItem -Recurse -Filter "*.dll" | 
-       Where LastWriteTime -gt (Get-Date).AddMinutes(-5)
-   ```
+ ```powershell
+ # List recent DLLs:
+ Get-ChildItem -Recurse -Filter "*.dll" | 
+ Where LastWriteTime -gt (Get-Date).AddMinutes(-5)
+ ```
 
 ---
 
@@ -259,10 +259,8 @@ Use `/m` flag for parallel builds to maximize CPU usage.
 - **Detailed Tool Docs:** `.github/TOOL_VERSIONS.md`
 - **Environment Script:** `scripts/Setup-DevEnvironment.ps1`
 - **Build Scripts:** `build-scripts/`
-- **Project Roadmap:** `MASTER_PLAN.md`
-- **Sprint 14 Docs:** `docs/PluginSecurityGuide.md`
+- ** Docs:** `docs/PluginSecurityGuide.md`
 
 ---
 
 *Auto-updated: February 9, 2026 - All tools verified working*
-

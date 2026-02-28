@@ -1,5 +1,4 @@
 # Export-DiagnosticsBundle.ps1
-# Sprint 12: Observability & Structured Logging
 # Creates comprehensive diagnostics ZIP bundle for troubleshooting
 
 param(
@@ -13,7 +12,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "ExplorerLens Diagnostics Bundle Export" -ForegroundColor Cyan
-Write-Host "Sprint 12: Observability & Structured Logging" -ForegroundColor Cyan
+Write-Host ": Observability & Structured Logging" -ForegroundColor Cyan
 Write-Host "============================================`n" -ForegroundColor Cyan
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {

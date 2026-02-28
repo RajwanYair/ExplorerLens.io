@@ -1,5 +1,4 @@
 // plugin_trust.h - ExplorerLens Plugin Trust and Signature Verification v1.0
-// Part of Sprint 20: Plugin Sandbox v2 + Trust/Signing (v6.2)
 //
 // PURPOSE:
 //   Provides signature verification, certificate chain validation, hash checking,

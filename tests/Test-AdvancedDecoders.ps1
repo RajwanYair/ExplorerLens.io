@@ -1,5 +1,4 @@
 # Test-AdvancedDecoders.ps1
-# Sprint 15: PSD & Advanced Format Decoders
 # Validates PSD, SVG, and EPUB decoder functionality
 # Date: February 17, 2026
 
@@ -18,7 +17,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "=== ExplorerLens Advanced Decoder Testing ===" -ForegroundColor Cyan
-Write-Host "Sprint 15: PSD, SVG, EPUB Format Support" -ForegroundColor Cyan
+Write-Host "PSD, SVG, EPUB Format Support" -ForegroundColor Cyan
 Write-Host ""
 
 # Check if validator exists
@@ -28,7 +27,7 @@ if (-not (Test-Path $ValidatorPath)) {
     exit 1
 }
 
-# Test formats for Sprint 15
+# Test formats for this module
 $testFormats = @{
     "PSD" = @{
         Path = Join-Path $TestCorpusPath "images\psd"
@@ -161,17 +160,17 @@ foreach ($group in $groupedResults) {
 
 Write-Host ""
 
-# Sprint 15 exit criteria check
+# ExplorerLens
 $exitCriteriaMet = ($passedTests -eq $totalTests) -and ($totalTests -gt 0)
 
 if ($exitCriteriaMet) {
-    Write-Host "✓ Sprint 15 Exit Criteria MET: All advanced decoders operational" -ForegroundColor Green
+    Write-Host "✓  Exit Criteria MET: All advanced decoders operational" -ForegroundColor Green
 } else {
     if ($totalTests -eq 0) {
-        Write-Host "⚠ Sprint 15 Exit Criteria INCONCLUSIVE: No test files found" -ForegroundColor Yellow
+        Write-Host "⚠  Exit Criteria INCONCLUSIVE: No test files found" -ForegroundColor Yellow
         Write-Host "  Add test files to ${TestCorpusPath}\images\psd, ${TestCorpusPath}\svg, ${TestCorpusPath}\documents\epub" -ForegroundColor Gray
     } else {
-        Write-Host "✗ Sprint 15 Exit Criteria NOT MET: $failedTests decoder failures" -ForegroundColor Red
+        Write-Host "✗  Exit Criteria NOT MET: $failedTests decoder failures" -ForegroundColor Red
     }
 }
 

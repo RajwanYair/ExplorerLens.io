@@ -1,6 +1,6 @@
 # ExplorerLens Performance Tuning Guide
-**Sprint 177: Version Normalization**  
-**Version:** 15.0.0  
+**Version Normalization** 
+**Version:** 15.0.0 
 **Last Updated:** June 2025
 
 ---
@@ -114,9 +114,9 @@ cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe --benchmark_filter="GPU"
 
 # Expected output:
-# DecodeWebP_GPU    102 ms  (vs 520 ms CPU)
-# DecodeAVIF_GPU     85 ms  (vs 680 ms CPU)
-# ResizeLarge_GPU    12 ms  (vs  95 ms CPU)
+# DecodeWebP_GPU 102 ms (vs 520 ms CPU)
+# DecodeAVIF_GPU 85 ms (vs 680 ms CPU)
+# ResizeLarge_GPU 12 ms (vs 95 ms CPU)
 ```
 
 ---
@@ -133,7 +133,7 @@ cd "C:\Program Files\ExplorerLens"
 ```powershell
 # Capture GPU workload
 "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\WinPixGpuCapturer.exe" `
-    -captureGPU -programToCapture "explorer.exe"
+ -captureGPU -programToCapture "explorer.exe"
 
 # Open .wpix file in PIX for analysis
 ```
@@ -147,16 +147,16 @@ cd "C:\Program Files\ExplorerLens"
 **ExplorerLens uses a 2-level cache:**
 
 1. **Memory Cache (L1):**
-   - In-process LRU cache
-   - Stores decoded bitmaps
-   - Size: Dynamic (up to 100 MB)
-   - Eviction: Least Recently Used
+ - In-process LRU cache
+ - Stores decoded bitmaps
+ - Size: Dynamic (up to 100 MB)
+ - Eviction: Least Recently Used
 
 2. **Disk Cache (L2):**
-   - Persistent file-based cache
-   - Location: `C:\ProgramData\ExplorerLens\Cache\`
-   - Size: Configurable (default 500 MB)
-   - Format: PNG thumbnails with metadata
+ - Persistent file-based cache
+ - Location: `C:\ProgramData\ExplorerLens\Cache\`
+ - Size: Configurable (default 500 MB)
+ - Format: PNG thumbnails with metadata
 
 ---
 
@@ -201,7 +201,7 @@ New-Item "D:\FastSSD\ExplorerLensCache" -ItemType Directory
 
 # Update registry
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CachePath `
-    -Value "D:\FastSSD\ExplorerLensCache"
+ -Value "D:\FastSSD\ExplorerLensCache"
 
 # Restart Explorer
 Stop-Process -Name explorer -Force
@@ -268,7 +268,7 @@ cd "C:\Program Files\ExplorerLens"
 
 # Output:
 # Scanning folder: C:\Photos (5,234 files)
-# Generating thumbnails: [=========>  ] 52% (2,721 / 5,234)
+# Generating thumbnails: [=========> ] 52% (2,721 / 5,234)
 # Elapsed: 3m 42s | Remaining: 3m 18s
 # Cache Hit Rate: 12% (first pass expected)
 ```
@@ -332,9 +332,9 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 16
 .\EngineBenchmark.exe --benchmark_filter="Thread" --benchmark_repetitions=10
 
 # Output shows optimal thread count:
-# 2 threads:  2.1 sec
-# 4 threads:  1.3 sec
-# 8 threads:  0.9 sec (optimal)
+# 2 threads: 2.1 sec
+# 4 threads: 1.3 sec
+# 8 threads: 0.9 sec (optimal)
 # 16 threads: 1.1 sec (diminishing returns)
 # 32 threads: 1.4 sec (contention overhead)
 ```
@@ -368,10 +368,10 @@ Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels
 **Adjust limit:**
 ```powershell
 # Low memory system (4 GB RAM)
-Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 25000000  # 25 MP
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 25000000 # 25 MP
 
 # Standard system (8 GB RAM)
-Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 50000000  # 50 MP
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 50000000 # 50 MP
 
 # High memory system (16+ GB RAM)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 150000000 # 150 MP
@@ -448,7 +448,7 @@ cd "C:\Program Files\ExplorerLens"
 
 # Schedule weekly pre-caching
 $action = New-ScheduledTaskAction -Execute "PowerShell.exe" `
-    -Argument "-File C:\Scripts\PreCacheNAS.ps1"
+ -Argument "-File C:\Scripts\PreCacheNAS.ps1"
 $trigger = New-ScheduledTaskTrigger -Weekly -At 2am
 Register-ScheduledTask -TaskName "ExplorerLens PreCache" -Action $action -Trigger $trigger
 ```
@@ -491,11 +491,11 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
 ```powershell
 # Measure network drive performance
 .\EngineBenchmark.exe --benchmark_filter="Network" `
-    --network-path="\\NAS\Photos"
+ --network-path="\\NAS\Photos"
 
 # Output:
-# Local SSD:       92 ms per thumbnail
-# NAS (cached):   105 ms per thumbnail
+# Local SSD: 92 ms per thumbnail
+# NAS (cached): 105 ms per thumbnail
 # NAS (uncached): 842 ms per thumbnail (8x slower)
 ```
 
@@ -536,7 +536,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoHWAccel -Value 1
 
 #### **Use Embedded Thumbnails** (default: OFF)
 
-**OFF (default):** Decode full RAW image (high quality, slower)  
+**OFF (default):** Decode full RAW image (high quality, slower) 
 **ON:** Extract embedded JPEG preview (lower quality, 5x faster)
 
 **Enable embedded thumbnails:**
@@ -598,14 +598,14 @@ cd "C:\Program Files\ExplorerLens"
 # GPU: NVIDIA RTX 3060 (12 GB VRAM)
 # ==================================================
 # 
-# DecodeJPEG_Small      12.5 ms   80.0 MB/s
-# DecodeJPEG_Large      89.3 ms  112.1 MB/s
-# DecodeWebP_Lossy      24.1 ms   41.5 MB/s
-# DecodeWebP_Lossless   52.8 ms   18.9 MB/s
-# DecodeAVIF_10bit     104.7 ms    9.5 MB/s
-# DecodeJXL_Lossy       38.2 ms   26.2 MB/s
-# DecodeRAW_CR3        523.1 ms   19.1 MB/s
-# DecodeVideo_MP4      215.4 ms    4.6 MB/s
+# DecodeJPEG_Small 12.5 ms 80.0 MB/s
+# DecodeJPEG_Large 89.3 ms 112.1 MB/s
+# DecodeWebP_Lossy 24.1 ms 41.5 MB/s
+# DecodeWebP_Lossless 52.8 ms 18.9 MB/s
+# DecodeAVIF_10bit 104.7 ms 9.5 MB/s
+# DecodeJXL_Lossy 38.2 ms 26.2 MB/s
+# DecodeRAW_CR3 523.1 ms 19.1 MB/s
+# DecodeVideo_MP4 215.4 ms 4.6 MB/s
 # ...
 ```
 
@@ -657,8 +657,8 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
 .\EngineBenchmark.exe --benchmark_compare=baseline.json,gpu_enabled.json
 
 # Output:
-# DecodeWebP_Large:  520 ms → 102 ms (5.1x speedup)
-# DecodeAVIF_10bit:  680 ms →  85 ms (8.0x speedup)
+# DecodeWebP_Large: 520 ms → 102 ms (5.1x speedup)
+# DecodeAVIF_10bit: 680 ms → 85 ms (8.0x speedup)
 ```
 
 ---
@@ -668,17 +668,17 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
 ### CPU Profiling (Visual Studio)
 
 1. **Attach to Explorer:**
-   - Debug → Performance Profiler → Attach to Process
-   - Select `explorer.exe`
-   - Choose "CPU Usage" profiler
+ - Debug → Performance Profiler → Attach to Process
+ - Select `explorer.exe`
+ - Choose "CPU Usage" profiler
 
 2. **Trigger thumbnail generation:**
-   - Navigate to folder with images
-   - Enable thumbnails view
+ - Navigate to folder with images
+ - Enable thumbnails view
 
 3. **Analyze results:**
-   - Hot Path: `LENSShell.dll!CThumbnailProvider::GetThumbnail`
-   - Look for bottlenecks in decoder functions
+ - Hot Path: `LENSShell.dll!CThumbnailProvider::GetThumbnail`
+ - Look for bottlenecks in decoder functions
 
 ---
 
@@ -743,19 +743,19 @@ wpa thumbnail_trace.etl
 ### Quick Wins (5 minutes)
 
 1. **Enable GPU acceleration:**
-   ```powershell
-   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
-   ```
+ ```powershell
+ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
+ ```
 
 2. **Increase cache size:**
-   ```powershell
-   Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
-   ```
+ ```powershell
+ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
+ ```
 
 3. **Pre-cache photo library:**
-   ```powershell
-   .\EngineBenchmark.exe --cache-warmup "C:\Photos"
-   ```
+ ```powershell
+ .\EngineBenchmark.exe --cache-warmup "C:\Photos"
+ ```
 
 ---
 
@@ -772,7 +772,7 @@ wpa thumbnail_trace.etl
 
 **Low-end system (4 GB RAM, HDD):**
 ```powershell
-Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 0  # Use WARP
+Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 0 # Use WARP
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 100
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 2
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 25000000
@@ -795,7 +795,5 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 15000
 
 ---
 
-**Last Updated:** June 2025  
-**Sprint:** 177 - Version Normalization  
+**Last Updated:** June 2025 
 **Version:** 15.0.0
-

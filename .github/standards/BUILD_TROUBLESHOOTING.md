@@ -25,13 +25,13 @@ depends on types (`WORD`, `BOOL`, `OSVERSIONINFOEXW`) from these excluded header
 
 ### Headers Incompatible with WIN32_LEAN_AND_MEAN
 
-| Header                | Excluded Types / Subsystem           | Alternative               |
+| Header | Excluded Types / Subsystem | Alternative |
 | --------------------- | ------------------------------------ | ------------------------- |
-| `<versionhelpers.h>`  | `WORD`, `RTL_OSVERSIONINFOW`         | `RtlGetVersion()` direct  |
-| `<mmsystem.h>`        | Multimedia types                     | Include after windows.h   |
-| `<winsock2.h>`        | Socket types                         | Include before windows.h  |
-| `<shellapi.h>`        | Shell types (partial)                | Usually works, test first |
-| `<commdlg.h>`         | Common dialog types                  | Include after windows.h   |
+| `<versionhelpers.h>` | `WORD`, `RTL_OSVERSIONINFOW` | `RtlGetVersion()` direct |
+| `<mmsystem.h>` | Multimedia types | Include after windows.h |
+| `<winsock2.h>` | Socket types | Include before windows.h |
+| `<shellapi.h>` | Shell types (partial) | Usually works, test first |
+| `<commdlg.h>` | Common dialog types | Include after windows.h |
 
 ### Solution Applied
 
@@ -40,13 +40,13 @@ Use `RtlGetVersion()` from ntdll.dll instead of `<versionhelpers.h>`:
 ```cpp
 typedef NTSTATUS(WINAPI* RtlGetVersionFunc)(PRTL_OSVERSIONINFOW);
 bool IsWindows10OrGreaterViaRtl() {
-    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
-    if (!ntdll) return false;
-    auto pRtlGetVersion = (RtlGetVersionFunc)GetProcAddress(ntdll, "RtlGetVersion");
-    if (!pRtlGetVersion) return false;
-    RTL_OSVERSIONINFOW osvi = {};
-    osvi.dwOSVersionInfoSize = sizeof(osvi);
-    return (pRtlGetVersion(&osvi) == 0 && osvi.dwMajorVersion >= 10);
+ HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+ if (!ntdll) return false;
+ auto pRtlGetVersion = (RtlGetVersionFunc)GetProcAddress(ntdll, "RtlGetVersion");
+ if (!pRtlGetVersion) return false;
+ RTL_OSVERSIONINFOW osvi = {};
+ osvi.dwOSVersionInfoSize = sizeof(osvi);
+ return (pRtlGetVersion(&osvi) == 0 && osvi.dwMajorVersion >= 10);
 }
 ```
 
@@ -77,10 +77,10 @@ and `LIBCMT.lib` (from `/MT`) and warns about the conflict.
 ```cmake
 # In CMakeLists.txt for targets that link mixed-CRT libraries:
 if(MSVC)
-    target_link_options(MyTarget PRIVATE
-        /NODEFAULTLIB:LIBCMT    # Suppress static CRT from /MT libs
-        /IGNORE:4099            # Suppress missing PDB warnings
-    )
+ target_link_options(MyTarget PRIVATE
+ /NODEFAULTLIB:LIBCMT # Suppress static CRT from /MT libs
+ /IGNORE:4099 # Suppress missing PDB warnings
+ )
 endif()
 ```
 
@@ -171,7 +171,7 @@ warning C4456: declaration of 'x' hides previous local declaration
 ```cpp
 // BAD
 int iterations = 100;
-for (int iterations = 0; iterations < 10; ++iterations) { ... }  // shadows!
+for (int iterations = 0; iterations < 10; ++iterations) { ... } // shadows!
 
 // GOOD
 int totalIterations = 100;
@@ -281,23 +281,23 @@ cmake --version
 cmake --preset default-release -N 2>&1 | Select-String "generator|compiler"
 
 # Verify vcvars was sourced (check for MSVC env vars)
-$env:VSCMD_VER  # Should show "18.x.y"
-$env:VCToolsVersion  # Should show "14.50.35717"
+$env:VSCMD_VER # Should show "18.x.y"
+$env:VCToolsVersion # Should show "14.50.35717"
 
 # Find all errors/warnings in build logs
 Get-ChildItem build-logs\*.log, build-logs\*.txt |
-    Select-String -Pattern "error C|fatal error|warning C|FAILED" -CaseSensitive |
-    Select-Object Path, LineNumber, Line
+ Select-String -Pattern "error C|fatal error|warning C|FAILED" -CaseSensitive |
+ Select-Object Path, LineNumber, Line
 
 # Check if external libraries are built
 @(
-    "external/compression-libs/zlib-1.3.1/install/lib/zlibstatic.lib",
-    "external/image-libs/libwebp-1.5.0-original/output/x64/Release/webp.lib",
-    "external/image-libs/libavif-1.3.0/install/lib/avif.lib",
-    "external/image-libs/dav1d-1.5.1/build/src/libdav1d.a"
+ "external/compression-libs/zlib-1.3.1/install/lib/zlibstatic.lib",
+ "external/image-libs/libwebp-1.5.0-original/output/x64/Release/webp.lib",
+ "external/image-libs/libavif-1.3.0/install/lib/avif.lib",
+ "external/image-libs/dav1d-1.5.1/build/src/libdav1d.a"
 ) | ForEach-Object {
-    $ok = Test-Path $_
-    Write-Host "$_ : $ok" -ForegroundColor $(if($ok){"Green"}else{"Red"})
+ $ok = Test-Path $_
+ Write-Host "$_ : $ok" -ForegroundColor $(if($ok){"Green"}else{"Red"})
 }
 ```
 
@@ -308,25 +308,25 @@ Get-ChildItem build-logs\*.log, build-logs\*.txt |
 All headers under `Engine/` must be registered in `Engine/CMakeLists.txt` ENGINE_HEADERS.
 The following headers were added in the February 2026 cleanup:
 
-| Header                        | Subsystem | Sprint     |
+| Header | Subsystem | Version |
 | ----------------------------- | --------- | ---------- |
-| `Utils/ReleaseGateV16.h`      | Utils     | Sprint 299 |
-| `Utils/ReleaseGateV17.h`      | Utils     | Sprint 301 |
-| `Utils/ReleaseGateV18.h`      | Utils     | Sprint 303 |
-| `Utils/ReleaseGateV19.h`      | Utils     | Sprint 305 |
-| `Utils/ReleaseGateV20.h`      | Utils     | Sprint 307 |
-| `Utils/ReleaseGateV21.h`      | Utils     | Sprint 309 |
-| `Utils/ReleaseGateV22.h`      | Utils     | Sprint 311 |
-| `Utils/ReleaseGateV23.h`      | Utils     | Sprint 313 |
-| `Utils/ReleaseGateV24.h`      | Utils     | Sprint 315 |
-| `Utils/ReleaseGateV25.h`      | Utils     | Sprint 317 |
-| `Utils/ReleaseGateV26.h`      | Utils     | Sprint 319 |
-| `Utils/ReleaseGateV27.h`      | Utils     | Sprint 321 |
-| `Utils/ReleaseGateV28.h`      | Utils     | Sprint 323 |
-| `Utils/ReleaseGateV29.h`      | Utils     | Sprint 325 |
-| `Utils/ReleaseGateV30.h`      | Utils     | Sprint 327 |
-| `Utils/ReleaseGateV31.h`      | Utils     | Sprint 329 |
-| `Utils/ReleaseGateV32.h`      | Utils     | Sprint 331 |
+| `Utils/ReleaseGateV16.h` | Utils | |
+| `Utils/ReleaseGateV17.h` | Utils | |
+| `Utils/ReleaseGateV18.h` | Utils | |
+| `Utils/ReleaseGateV19.h` | Utils | |
+| `Utils/ReleaseGateV20.h` | Utils | |
+| `Utils/ReleaseGateV21.h` | Utils | |
+| `Utils/ReleaseGateV22.h` | Utils | |
+| `Utils/ReleaseGateV23.h` | Utils | |
+| `Utils/ReleaseGateV24.h` | Utils | |
+| `Utils/ReleaseGateV25.h` | Utils | |
+| `Utils/ReleaseGateV26.h` | Utils | |
+| `Utils/ReleaseGateV27.h` | Utils | |
+| `Utils/ReleaseGateV28.h` | Utils | |
+| `Utils/ReleaseGateV29.h` | Utils | |
+| `Utils/ReleaseGateV30.h` | Utils | |
+| `Utils/ReleaseGateV31.h` | Utils | |
+| `Utils/ReleaseGateV32.h` | Utils | |
 
 > **Rule:** When creating a new `.h` file under `Engine/`, add it to
 > `ENGINE_HEADERS` in the same commit.

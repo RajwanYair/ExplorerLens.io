@@ -1,5 +1,4 @@
 // plugin_verification.h - ExplorerLens Verified Plugin Compatibility Test Kit v1.0
-// Part of Sprint 20: Plugin Sandbox v2 + Trust/Signing (v6.2)
 //
 // PURPOSE:
 //   Comprehensive testing framework for plugin certification and verification.

@@ -1,7 +1,7 @@
 /******************************************************************************
  * video_thumbnail.h
  * Video Frame Extraction for ExplorerLens
- * Sprint C3: Extract thumbnails from video files using DirectShow
+ * Extracts thumbnails from video files using DirectShow
  ******************************************************************************/
 
 #pragma once
@@ -40,4 +40,3 @@ private:
 };
 
 } // namespace ExplorerLens
-

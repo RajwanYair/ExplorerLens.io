@@ -6,7 +6,7 @@
 
 import "oaidl.idl";
 import "ocidl.idl";
-	
+
 	[
 		object,
 		uuid(677D0B3B-E0A8-4ECC-BD7E-1BCC96E388EA),
@@ -28,7 +28,7 @@ library LENSShellLib
 	importlib("stdole32.tlb");
 	importlib("stdole2.tlb");
 
-	
+
 	[
 		uuid(9E6ECB90-5A61-42BD-B851-D3297D9C7F39),
 		helpstring("LENSShell Class")
@@ -37,5 +37,13 @@ library LENSShellLib
 	{
 		[default] interface ILENSShell;
 	};
-};
 
+	[
+		uuid(A7B3F4E1-9C2D-4E8F-B6A1-3D5E7F9C2B4A),
+		helpstring("LENSShell Context Menu — Win11 IExplorerCommand")
+	]
+	coclass LENSShellContextMenu
+	{
+		[default] interface IUnknown;
+	};
+};

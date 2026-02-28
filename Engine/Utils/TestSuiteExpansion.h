@@ -11,20 +11,21 @@
 #include <functional>
 #include <unordered_map>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-/// Test category for organizing test suites
-enum class TestCategory : uint8_t {
-    UnitTest,           ///< Single function/class test
-    IntegrationTest,    ///< Multi-component test
-    DecoderTest,        ///< Format-specific decoder test
-    PerformanceTest,    ///< Benchmark/timing test
-    FuzzTest,           ///< Fuzz/randomized test
-    RegressionTest,     ///< Bug regression test
-    StressTest,         ///< High-load/concurrency test
-    EndToEndTest,       ///< Full pipeline test
-    COMTest,            ///< COM interface test
-    PlatformTest        ///< Platform-specific test
+/// Test category for organizing test suites (expansion-local — see TestFramework.h for canonical TestCategory)
+enum class TestSuiteCategory : uint8_t {
+    UnitTest, ///< Single function/class test
+    IntegrationTest, ///< Multi-component test
+    DecoderTest, ///< Format-specific decoder test
+    PerformanceTest, ///< Benchmark/timing test
+    FuzzTest, ///< Fuzz/randomized test
+    RegressionTest, ///< Bug regression test
+    StressTest, ///< High-load/concurrency test
+    EndToEndTest, ///< Full pipeline test
+    COMTest, ///< COM interface test
+    PlatformTest ///< Platform-specific test
 };
 
 /// Test result verdict
@@ -34,34 +35,34 @@ enum class TestVerdict : uint8_t {
     Skip,
     Error,
     Timeout,
-    Flaky       ///< Intermittent pass/fail
+    Flaky ///< Intermittent pass/fail
 };
 
 /// Decoder test specification
 struct DecoderTestSpec {
-    std::wstring formatName;        ///< e.g., "PNG", "JPEG", "RAW"
-    std::wstring decoderClass;      ///< e.g., "ImageDecoder", "RAWDecoder"
-    uint32_t minTestCount = 10;     ///< Target tests per decoder
+    std::wstring formatName; ///< e.g., "PNG", "JPEG", "RAW"
+    std::wstring decoderClass; ///< e.g., "ImageDecoder", "RAWDecoder"
+    uint32_t minTestCount = 10; ///< Target tests per decoder
     uint32_t currentTestCount = 0;
-    bool hasValidFile = false;      ///< Has valid test file
-    bool hasTruncatedFile = false;  ///< Has truncated input test
-    bool hasCorruptFile = false;    ///< Has corrupt header test
-    bool hasZeroByteFile = false;   ///< Has zero-byte test
-    bool hasLargeFile = false;      ///< Has oversized file test
-    bool hasAnimated = false;       ///< Has animated/multi-frame test
-    bool hasExifTest = false;       ///< Has EXIF orientation test
-    bool hasPerformance = false;    ///< Has decode timing test
+    bool hasValidFile = false; ///< Has valid test file
+    bool hasTruncatedFile = false; ///< Has truncated input test
+    bool hasCorruptFile = false; ///< Has corrupt header test
+    bool hasZeroByteFile = false; ///< Has zero-byte test
+    bool hasLargeFile = false; ///< Has oversized file test
+    bool hasAnimated = false; ///< Has animated/multi-frame test
+    bool hasExifTest = false; ///< Has EXIF orientation test
+    bool hasPerformance = false; ///< Has decode timing test
     double coveragePercent = 0.0;
 };
 
 /// Test execution result
 struct TestResult {
     std::wstring testName;
-    TestCategory category = TestCategory::UnitTest;
+    TestSuiteCategory category = TestSuiteCategory::UnitTest;
     TestVerdict verdict = TestVerdict::Pass;
     double durationMs = 0.0;
     std::wstring message;
-    std::wstring filePath;       ///< Source file
+    std::wstring filePath; ///< Source file
     uint32_t lineNumber = 0;
 };
 
@@ -129,12 +130,12 @@ public:
     const TestExpansionConfig& GetConfig() const { return m_config; }
 
     /// Static name helpers
-    static const wchar_t* GetCategoryName(TestCategory category);
+    static const wchar_t* GetCategoryName(TestSuiteCategory category);
     static const wchar_t* GetVerdictName(TestVerdict verdict);
 
 private:
     TestExpansionConfig m_config;
 };
 
-}} // namespace ExplorerLens::Engine
-
+}
+} // namespace ExplorerLens::Engine

@@ -44,14 +44,14 @@
 #define EXPECT_FLOAT_EQ(lhs, rhs) assert((std::fabs((lhs) - (rhs)) <= 1e-6f))
 #endif
 #ifndef EXPECT_NO_THROW
-#define EXPECT_NO_THROW(statement)                                             \
-  do {                                                                         \
-    try {                                                                      \
-      statement;                                                               \
-    } catch (...) {                                                            \
-      assert(!"Expected no exception");                                        \
-    }                                                                          \
-  } while (0)
+#define EXPECT_NO_THROW(statement) \
+ do { \
+ try { \
+ statement; \
+ } catch (...) { \
+ assert(!"Expected no exception"); \
+ } \
+ } while (0)
 #endif
 #ifndef ASSERT_TRUE
 #define ASSERT_TRUE(condition) assert((condition))

@@ -37,7 +37,7 @@ Describe how you tested these changes:
 <!-- If applicable, add screenshots showing the changes (especially for thumbnail changes) -->
 
 ## Checklist
-- [ ] My code follows the project's code style (see `.clang-tidy` and `docs/development/CODE_QUALITY_STANDARDS.md`)
+- [ ] My code follows the project's code style (see `.clang-tidy` and `.github/standards/CODING_STANDARDS.md`)
 - [ ] All headers use `#pragma once`
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have updated the documentation accordingly

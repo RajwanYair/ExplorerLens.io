@@ -35,10 +35,10 @@ namespace Engine {
 #endif
 
 #ifndef EXPLORERLENS_ENGINE_VERSION
-#define EXPLORERLENS_ENGINE_VERSION                                            \
-  ((EXPLORERLENS_ENGINE_VERSION_MAJOR << 16) |                                 \
-   (EXPLORERLENS_ENGINE_VERSION_MINOR << 8) |                                  \
-   EXPLORERLENS_ENGINE_VERSION_PATCH)
+#define EXPLORERLENS_ENGINE_VERSION \
+ ((EXPLORERLENS_ENGINE_VERSION_MAJOR << 16) | \
+ (EXPLORERLENS_ENGINE_VERSION_MINOR << 8) | \
+ EXPLORERLENS_ENGINE_VERSION_PATCH)
 #endif
 
 } // namespace Engine
@@ -57,12 +57,12 @@ namespace Engine {
 
 /// Get engine name
 inline const wchar_t *GetEngineName() {
-  return L"ExplorerLens Thumbnail Engine";
+ return L"ExplorerLens Thumbnail Engine";
 }
 
 /// Get engine copyright
 inline const wchar_t *GetEngineCopyright() {
-  return L"Copyright (c) 2026 - ExplorerLens Project";
+ return L"Copyright (c) 2026 - ExplorerLens Project";
 }
 
 } // namespace Engine
@@ -88,8 +88,8 @@ inline const wchar_t *GetEngineCopyright() {
 // ThumbnailResult result;
 // HRESULT hr = decoder->Decode(request, result);
 // if (SUCCEEDED(hr)) {
-//     // Use result.hBitmap
-//     DeleteObject(result.hBitmap);
+// // Use result.hBitmap
+// DeleteObject(result.hBitmap);
 // }
 //
 //==============================================================================

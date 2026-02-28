@@ -92,6 +92,10 @@ Write-Host "`n========================================" -ForegroundColor Green
 Write-Host " ExplorerLens — MSVC v145 Build" -ForegroundColor Green
 Write-Host "========================================`n" -ForegroundColor Green
 
+# Start build timer
+$buildTimer = [System.Diagnostics.Stopwatch]::StartNew()
+$phaseTimings = @{}
+
 # 1. Verify vcvars
 if (-not (Test-Path $VCVARS64)) {
     Write-Error "vcvars64.bat not found at: $VCVARS64`nInstall VS 18 2026 BuildTools with C++ workload."
@@ -120,6 +124,7 @@ if (-not $cl) {
 $clVersion = (& cl.exe 2>&1 | Select-String "Version") -replace '.*Version\s+', ''
 Write-Host "  cl.exe  : $($cl.Source)" -ForegroundColor Cyan
 Write-Host "  version : $clVersion" -ForegroundColor Cyan
+$phaseTimings["vcvars"] = $buildTimer.Elapsed.TotalSeconds
 
 # 3. Resolve cmake and ninja
 Write-Host "`n[2/4] Resolving build tools..." -ForegroundColor Yellow
@@ -160,6 +165,7 @@ try {
         Write-Error "CMake configure failed (exit code $LASTEXITCODE)"
     }
     Write-Host "  Configure: OK" -ForegroundColor Green
+    $phaseTimings["configure"] = $buildTimer.Elapsed.TotalSeconds - ($phaseTimings.Values | Measure-Object -Sum).Sum
 
     if (-not $Configure) {
         # 6. Build
@@ -177,6 +183,7 @@ try {
             Write-Error "Build failed (exit code $LASTEXITCODE)"
         }
         Write-Host "`n  Build: OK" -ForegroundColor Green
+        $phaseTimings["build"] = $buildTimer.Elapsed.TotalSeconds - ($phaseTimings.Values | Measure-Object -Sum).Sum
 
         # 7. Test (if requested)
         if ($Test) {
@@ -191,12 +198,43 @@ try {
                 if (-not $binDir) { $binDir = "build" }
                 & ctest --test-dir (Join-Path $PROJECT_ROOT $binDir) -C Release --output-on-failure
             }
+            $phaseTimings["test"] = $buildTimer.Elapsed.TotalSeconds - ($phaseTimings.Values | Measure-Object -Sum).Sum
         }
     }
 } finally {
     Pop-Location
 }
 
+# === Build Timing Summary ===
+$buildTimer.Stop()
+$totalSeconds = $buildTimer.Elapsed.TotalSeconds
+
 Write-Host "`n========================================" -ForegroundColor Green
 Write-Host " Build Complete!" -ForegroundColor Green
-Write-Host "========================================`n" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
+Write-Host "`n  Timing Breakdown:" -ForegroundColor Cyan
+foreach ($phase in @("vcvars", "configure", "build", "test")) {
+    if ($phaseTimings.ContainsKey($phase)) {
+        $secs = [math]::Round($phaseTimings[$phase], 2)
+        $phaseName = $phase.PadRight(12)
+        Write-Host "    $phaseName $secs s" -ForegroundColor White
+    }
+}
+$totalFormatted = [math]::Round($totalSeconds, 2)
+Write-Host "    --------------------" -ForegroundColor DarkGray
+Write-Host "    Total         $totalFormatted s" -ForegroundColor Yellow
+Write-Host ""
+
+# Append to build history log (JSONL)
+$historyPath = Join-Path $PROJECT_ROOT "build-logs" "build-history.jsonl"
+$historyDir = Split-Path $historyPath -Parent
+if (-not (Test-Path $historyDir)) { New-Item -ItemType Directory -Path $historyDir -Force | Out-Null }
+$entry = [ordered]@{
+    timestamp = (Get-Date -Format "o")
+    preset    = $Preset
+    clean     = [bool]$Clean
+    target    = $Target
+    phases    = $phaseTimings
+    totalSec  = [math]::Round($totalSeconds, 2)
+}
+$entry | ConvertTo-Json -Compress | Add-Content -Path $historyPath -Encoding UTF8

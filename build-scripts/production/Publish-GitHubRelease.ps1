@@ -1,5 +1,4 @@
 # Publish-GitHubRelease.ps1
-# Sprint 16: GitHub Releases automation
 # Builds, signs, packages, and publishes release to GitHub
 # Date: February 17, 2026
 
