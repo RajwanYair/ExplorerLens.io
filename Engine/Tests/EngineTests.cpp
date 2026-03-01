@@ -247,6 +247,9 @@
 #include "../Utils/ContinuousFuzzOrchestrator.h"
 #include "../Utils/StaticAnalysisCIGate.h"
 
+// Batch 4: Documentation Sync
+#include "../Core/DocumentationSyncAudit.h"
+
 // EngineTests.h — Fuzzing Campaign
 // (merged into FuzzingEngine.h)
 
@@ -12047,6 +12050,254 @@ TEST(TestSAGate_EvaluatePassFail) {
     ASSERT(r3.verdict == SAGateVerdict::Fail);
 }
 
+// ============================================================================
+// Batch 4: Sprints 385-393 — Final Enhancement Tests
+// ============================================================================
+
+// --- Sprint 385: Security Compliance (SupplyChainIntegrityV2 + ComplianceAuditLogger) ---
+TEST(TestSecComp_RegulationNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ComplianceAuditLogger::RegulationName(ComplianceRegulation::GDPR)) == L"GDPR");
+    ASSERT(std::wstring(ComplianceAuditLogger::RegulationName(ComplianceRegulation::HIPAA)) == L"HIPAA");
+    ASSERT(std::wstring(ComplianceAuditLogger::RegulationName(ComplianceRegulation::SOX)) == L"SOX");
+    ASSERT(ComplianceAuditLogger::RegulationCount() == 5);
+}
+TEST(TestSecComp_DataClassNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ComplianceAuditLogger::DataClassificationName(DataClassification::Public)) == L"Public");
+    ASSERT(std::wstring(ComplianceAuditLogger::DataClassificationName(DataClassification::Restricted)) == L"Restricted");
+    ASSERT(ComplianceAuditLogger::DataClassCount() == 4);
+}
+TEST(TestSecComp_AuditEventNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ComplianceAuditLogger::AuditEventTypeName(AuditEventType::Access)) == L"Access");
+    ASSERT(std::wstring(ComplianceAuditLogger::AuditEventTypeName(AuditEventType::Consent)) == L"Consent");
+    ASSERT(ComplianceAuditLogger::AuditEventCount() == 6);
+}
+TEST(TestSecComp_SupplyChainFormats) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(SupplyChainIntegrityV2::SBOMFormatName(SBOMFormat::SPDX_2_3)) == L"SPDX 2.3");
+    ASSERT(std::wstring(SupplyChainIntegrityV2::SBOMFormatName(SBOMFormat::CycloneDX_1_6)) == L"CycloneDX 1.6");
+    ASSERT(std::wstring(SupplyChainIntegrityV2::VulnStatusName(DepVulnStatus::Fixed)) == L"Fixed");
+    ASSERT(SupplyChainIntegrityV2::ReprodCheckCount() == 4);
+}
+
+// --- Sprint 386-387: Documentation (AutoDocGenerator + DocumentationSyncAudit) ---
+TEST(TestDocGen_SectionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(AutoDocGenerator::GetSectionName(DocSection::Overview)) != L"");
+    ASSERT(std::wstring(AutoDocGenerator::GetSectionName(DocSection::Decoders)) != L"");
+    ASSERT(std::wstring(AutoDocGenerator::GetSectionName(DocSection::Performance)) != L"");
+}
+TEST(TestDocGen_FormatNamesAndExt) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(AutoDocGenerator::GetFormatName(DocFormat::Markdown)) != L"");
+    ASSERT(std::wstring(AutoDocGenerator::GetFormatExtension(DocFormat::Markdown)) != L"");
+    ASSERT(std::wstring(AutoDocGenerator::GetFormatName(DocFormat::HTML)) != L"");
+}
+TEST(TestDocGen_RegisterDecoder) {
+    using namespace ExplorerLens::Engine;
+    AutoDocGenerator gen;
+    ASSERT(gen.GetDecoderCount() == 0);
+    DecoderDocEntry entry;
+    entry.name = L"TestDecoder";
+    entry.description = L"A test decoder";
+    entry.extensions.push_back(L".test");
+    entry.testCount = 5;
+    gen.RegisterDecoder(entry);
+    ASSERT(gen.GetDecoderCount() == 1);
+    ASSERT(gen.GetTotalExtensions() == 1);
+    ASSERT(gen.GetTotalTests() == 5);
+}
+TEST(TestDocSync_MockAudit) {
+    auto result = ExplorerLens::Core::DocSyncAuditResult::CreateMock(true);
+    ASSERT(result.passedCount >= 5);
+    ASSERT(result.checks.size() == 7);
+    ASSERT(result.versionRef == "v8.3.0");
+    uint32_t passCount = 0;
+    for (size_t i = 0; i < result.checks.size(); ++i) {
+        if (result.checks[i].passed) ++passCount;
+    }
+    ASSERT(passCount == result.passedCount);
+}
+
+// --- Sprint 388: Installer (InstallerEnhancementsV2 + MSIXPackageManager) ---
+TEST(TestInstaller_PrereqCount) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(InstallerEnhancementsV2::PREREQ_COUNT == 5);
+    auto p0 = InstallerEnhancementsV2::CheckPrerequisite(0);
+    ASSERT(p0.name != nullptr);
+    ASSERT(p0.isRequired == true);
+}
+TEST(TestInstaller_PhaseEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint8_t>(InstallPhase::PreCheck) == 0);
+    ASSERT(static_cast<uint8_t>(InstallPhase::Verify) == 7);
+    ASSERT(static_cast<uint8_t>(InstallPhase::PhaseCount) == 8);
+}
+TEST(TestInstaller_TypeEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint8_t>(InstallerType::MSI) == 0);
+    ASSERT(static_cast<uint8_t>(InstallerType::MSIX) == 2);
+    ASSERT(static_cast<uint8_t>(InstallerType::Scoop) == 4);
+}
+TEST(TestInstaller_MSIXChannels) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(MSIXPackageManager::GetChannelName(PackageChannel::Stable)) == L"Stable");
+    ASSERT(std::wstring(MSIXPackageManager::GetChannelName(PackageChannel::Beta)) == L"Beta");
+}
+
+// --- Sprint 389: Zero-Copy Pipeline Activation ---
+TEST(TestZeroCopyAct_ModeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ZeroCopyModeToString(ZeroCopyMode::Disabled)) == "Disabled");
+    ASSERT(std::string(ZeroCopyModeToString(ZeroCopyMode::DirectStorage)) == "DirectStorage");
+    ASSERT(std::string(ZeroCopyModeToString(ZeroCopyMode::PinnedMemory)) == "PinnedMemory");
+}
+TEST(TestZeroCopyAct_StagingBuffer) {
+    using namespace ExplorerLens::Engine;
+    StagingBuffer buf;
+    ASSERT(!buf.IsValid());
+    buf.data = reinterpret_cast<void*>(0x1000);
+    buf.size = 4096;
+    ASSERT(buf.IsValid());
+}
+TEST(TestZeroCopyAct_Stats) {
+    using namespace ExplorerLens::Engine;
+    ZeroCopyStats stats;
+    stats.totalTransfers = 100;
+    stats.zeroCopyTransfers = 80;
+    stats.fallbackTransfers = 20;
+    stats.totalBytesTransferred = 1000;
+    stats.bytesSavedByCopy = 500;
+    ASSERT(stats.GetZeroCopyRate() > 79.0 && stats.GetZeroCopyRate() < 81.0);
+    double saving = stats.GetBandwidthSavingPercent();
+    ASSERT(saving > 32.0 && saving < 34.0); // 500/1500 ≈ 33.3%
+}
+TEST(TestZeroCopyAct_Lifecycle) {
+    using namespace ExplorerLens::Engine;
+    ZeroCopyActivation act;
+    ASSERT(!act.IsActive());
+    ASSERT(act.GetActiveMode() == ZeroCopyMode::Disabled);
+}
+
+// --- Sprint 390: Parallel I/O Pipeline ---
+TEST(TestParallelIO_BackendNamesV2) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ParallelIOPipeline::BackendName(IOBackend::IOCP)) == L"I/O Completion Port");
+    ASSERT(std::wstring(ParallelIOPipeline::BackendName(IOBackend::DirectStorage)) == L"DirectStorage");
+    ASSERT(ParallelIOPipeline::BackendCount() == 4);
+}
+TEST(TestParallelIO_PriorityNamesV2) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ParallelIOPipeline::PriorityName(IOPriority::Critical)) == L"Critical");
+    ASSERT(std::wstring(ParallelIOPipeline::PriorityName(IOPriority::Idle)) == L"Idle");
+    ASSERT(ParallelIOPipeline::PriorityCount() == 5);
+}
+TEST(TestParallelIO_VolumeTypes) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ParallelIOPipeline::VolumeTypeName(VolumeType::NVMe)) == L"NVMe SSD");
+    ASSERT(std::wstring(ParallelIOPipeline::VolumeTypeName(VolumeType::RAM_Disk)) == L"RAM Disk");
+    ASSERT(ParallelIOPipeline::VolumeTypeCount() == 5);
+}
+TEST(TestParallelIO_DefaultConfig) {
+    using namespace ExplorerLens::Engine;
+    ParallelIOConfig cfg;
+    ASSERT(cfg.backend == IOBackend::IOCP);
+    ASSERT(cfg.priority == IOPriority::Normal);
+    ASSERT(cfg.queueDepth == 32);
+    ASSERT(cfg.readAheadKB == 256);
+    ASSERT(cfg.scatterGather == true);
+}
+
+// --- Sprint 391: SIMD Scaler + ARM64 NEON ---
+TEST(TestSIMDScal_PathNames) {
+    using namespace ExplorerLens::SIMD;
+    ASSERT(std::wstring(SIMDScaler::PathName(SIMDScaler::SIMDPath::Scalar)) == L"Scalar");
+    ASSERT(std::wstring(SIMDScaler::PathName(SIMDScaler::SIMDPath::AVX2)) == L"AVX2");
+    ASSERT(std::wstring(SIMDScaler::PathName(SIMDScaler::SIMDPath::AVX512)) == L"AVX-512");
+    ASSERT(SIMDScaler::PathCount() == 4);
+}
+TEST(TestSIMDScal_ValidateDimensions) {
+    using namespace ExplorerLens::SIMD;
+    ASSERT(SIMDScaler::ValidateDimensions(100, 100, 50, 50));
+    ASSERT(!SIMDScaler::ValidateDimensions(0, 100, 50, 50));
+    ASSERT(!SIMDScaler::ValidateDimensions(100, 100, 0, 50));
+}
+TEST(TestSIMDScal_CalculateSize) {
+    using namespace ExplorerLens::SIMD;
+    uint32_t w = 0, h = 0;
+    SIMDScaler::CalculateScaledSize(4000, 3000, 256, w, h);
+    ASSERT(w == 256 && h > 0 && h <= 256);
+    // Aspect ratio preservation: 4000/3000 = 4/3, so 256 * 3/4 = 192
+    ASSERT(h == 192);
+}
+TEST(TestARM64_CapNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ARM64NEONScaler::CapabilityName(ARM64Capability::NEON_Base)) == L"NEON Base");
+    ASSERT(std::wstring(ARM64NEONScaler::ImplName(ARM64ScalerImpl::NEONBicubic)) == L"NEON Bicubic");
+    ASSERT(ARM64NEONScaler::SelectImpl(ARM64Capability::NEON_Base) == ARM64ScalerImpl::NEONBicubic);
+    ASSERT(ARM64NEONScaler::SelectImpl(ARM64Capability::Scalar) == ARM64ScalerImpl::ScalarC);
+}
+
+// --- Sprint 392: Pipeline State Cache V2 ---
+TEST(TestPSOCacheV2_StateNamesV2) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(PipelineStateCacheV2::CacheStateName(PSOCacheState::NotCached)) == L"Not Cached");
+    ASSERT(std::wstring(PipelineStateCacheV2::CacheStateName(PSOCacheState::Cached)) == L"Cached");
+    ASSERT(PipelineStateCacheV2::CacheStateCount() == 4);
+}
+TEST(TestPSOCacheV2_PipelineTypes) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(PipelineStateCacheV2::PipelineTypeName(PipelineType::Compute)) == L"Compute");
+    ASSERT(std::wstring(PipelineStateCacheV2::PipelineTypeName(PipelineType::MeshShader)) == L"Mesh Shader");
+    ASSERT(PipelineStateCacheV2::PipelineTypeCount() == 4);
+}
+TEST(TestPSOCacheV2_WarmupStrategies) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(PipelineStateCacheV2::WarmupStrategyName(PSOWarmupStrategy::Lazy)) == L"Lazy");
+    ASSERT(std::wstring(PipelineStateCacheV2::WarmupStrategyName(PSOWarmupStrategy::Background)) == L"Background");
+    ASSERT(PipelineStateCacheV2::WarmupStrategyCount() == 3);
+}
+TEST(TestPSOCacheV2_EntryDefaults) {
+    using namespace ExplorerLens::Engine;
+    PSOCacheEntry entry;
+    ASSERT(entry.type == PipelineType::Compute);
+    ASSERT(entry.state == PSOCacheState::NotCached);
+    ASSERT(entry.version == 1);
+    ASSERT(entry.valid == false);
+}
+
+// --- Sprint 393: Cache Warming Service ---
+TEST(TestCacheWarm_StrategyNamesV2) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CacheWarmingService::StrategyName(WarmingStrategy::MostRecent)) == L"Most Recent");
+    ASSERT(std::wstring(CacheWarmingService::StrategyName(WarmingStrategy::Predictive)) == L"Predictive");
+    ASSERT(CacheWarmingService::StrategyCount() == 5);
+}
+TEST(TestCacheWarm_PriorityNamesV2) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CacheWarmingService::PriorityName(WarmingPriority::Idle)) == L"Idle");
+    ASSERT(std::wstring(CacheWarmingService::PriorityName(WarmingPriority::High)) == L"High");
+    ASSERT(CacheWarmingService::PriorityCount() == 4);
+}
+TEST(TestCacheWarm_JobStatusNamesV2) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CacheWarmingService::JobStatusName(WarmingJobStatus::Queued)) == L"Queued");
+    ASSERT(std::wstring(CacheWarmingService::JobStatusName(WarmingJobStatus::Cancelled)) == L"Cancelled");
+    ASSERT(CacheWarmingService::JobStatusCount() == 6);
+}
+TEST(TestCacheWarm_DefaultConfigV2) {
+    using namespace ExplorerLens::Engine;
+    CacheWarmingConfig cfg;
+    ASSERT(cfg.strategy == WarmingStrategy::MostRecent);
+    ASSERT(cfg.priority == WarmingPriority::Idle);
+    ASSERT(cfg.maxConcurrent == 2);
+    ASSERT(cfg.maxFilesPerSession == 1000);
+    ASSERT(cfg.respectPowerMode == true);
+    ASSERT(cfg.pauseOnUserActivity == true);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -14400,6 +14651,62 @@ int main() {
     RUN_TEST(TestSAGate_VerdictStrings);
     RUN_TEST(TestSAGate_EnableDisable);
     RUN_TEST(TestSAGate_EvaluatePassFail);
+
+    // Batch 4: Security Compliance Tests (Sprint 385)
+    std::wcout << L"\nSecurity Compliance Tests:" << std::endl;
+    RUN_TEST(TestSecComp_RegulationNames);
+    RUN_TEST(TestSecComp_DataClassNames);
+    RUN_TEST(TestSecComp_AuditEventNames);
+    RUN_TEST(TestSecComp_SupplyChainFormats);
+
+    // Batch 4: Documentation Generator Tests (Sprints 386-387)
+    std::wcout << L"\nDocumentation Generator Tests:" << std::endl;
+    RUN_TEST(TestDocGen_SectionNames);
+    RUN_TEST(TestDocGen_FormatNamesAndExt);
+    RUN_TEST(TestDocGen_RegisterDecoder);
+    RUN_TEST(TestDocSync_MockAudit);
+
+    // Batch 4: Installer Tests (Sprint 388)
+    std::wcout << L"\nInstaller Tests:" << std::endl;
+    RUN_TEST(TestInstaller_PrereqCount);
+    RUN_TEST(TestInstaller_PhaseEnum);
+    RUN_TEST(TestInstaller_TypeEnum);
+    RUN_TEST(TestInstaller_MSIXChannels);
+
+    // Batch 4: Zero-Copy Activation Tests (Sprint 389)
+    std::wcout << L"\nZero-Copy Activation Tests:" << std::endl;
+    RUN_TEST(TestZeroCopyAct_ModeStrings);
+    RUN_TEST(TestZeroCopyAct_StagingBuffer);
+    RUN_TEST(TestZeroCopyAct_Stats);
+    RUN_TEST(TestZeroCopyAct_Lifecycle);
+
+    // Batch 4: Parallel I/O Pipeline Tests (Sprint 390)
+    std::wcout << L"\nParallel I/O Pipeline Tests:" << std::endl;
+    RUN_TEST(TestParallelIO_BackendNamesV2);
+    RUN_TEST(TestParallelIO_PriorityNamesV2);
+    RUN_TEST(TestParallelIO_VolumeTypes);
+    RUN_TEST(TestParallelIO_DefaultConfig);
+
+    // Batch 4: SIMD Scaler + ARM64 Tests (Sprint 391)
+    std::wcout << L"\nSIMD Scaler + ARM64 Tests:" << std::endl;
+    RUN_TEST(TestSIMDScal_PathNames);
+    RUN_TEST(TestSIMDScal_ValidateDimensions);
+    RUN_TEST(TestSIMDScal_CalculateSize);
+    RUN_TEST(TestARM64_CapNames);
+
+    // Batch 4: PSO Cache V2 Tests (Sprint 392)
+    std::wcout << L"\nPSO Cache V2 Tests:" << std::endl;
+    RUN_TEST(TestPSOCacheV2_StateNamesV2);
+    RUN_TEST(TestPSOCacheV2_PipelineTypes);
+    RUN_TEST(TestPSOCacheV2_WarmupStrategies);
+    RUN_TEST(TestPSOCacheV2_EntryDefaults);
+
+    // Batch 4: Cache Warming Service Tests (Sprint 393)
+    std::wcout << L"\nCache Warming Service Tests:" << std::endl;
+    RUN_TEST(TestCacheWarm_StrategyNamesV2);
+    RUN_TEST(TestCacheWarm_PriorityNamesV2);
+    RUN_TEST(TestCacheWarm_JobStatusNamesV2);
+    RUN_TEST(TestCacheWarm_DefaultConfigV2);
 
     std::wcout << std::endl;
 
