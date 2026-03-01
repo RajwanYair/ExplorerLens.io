@@ -134,7 +134,7 @@ struct DriftScanResult {
         score -= errorCount * 10;
         score -= warningCount * 3;
         score -= infoCount * 1;
-        return std::max(0, score);
+        return (std::max)(0, score);
     }
 };
 

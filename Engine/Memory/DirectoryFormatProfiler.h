@@ -61,7 +61,7 @@ struct DirectoryProfile {
 
  std::vector<std::string> ActiveExtensions(int topN = 5) const {
  std::vector<std::string> result;
- int n = std::min(topN, static_cast<int>(histogram.size()));
+ int n = (std::min)(topN, static_cast<int>(histogram.size()));
  for (int i = 0; i < n; i++) {
  result.push_back(histogram[i].extension);
  }

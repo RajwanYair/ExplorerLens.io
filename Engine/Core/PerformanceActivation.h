@@ -8,7 +8,6 @@
 
 #include "../Cache/CacheWarmingService.h"
 #include "../Cache/PipelineStateCacheV2.h"
-#include "../Pipeline/ParallelIOPipeline.h"
 #include "../Pipeline/ZeroCopyPipeline.h"
 #include <cstdint>
 #include <string>

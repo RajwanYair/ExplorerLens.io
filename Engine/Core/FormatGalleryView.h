@@ -19,7 +19,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Gallery tile size presets
-enum class GalleryTileSize : uint8_t {
+enum class GalleryTileSize : uint32_t {
  Small = 64, ///< 64x64 compact view
  Medium = 128, ///< 128x128 default
  Large = 256, ///< 256x256 detailed
@@ -51,7 +51,7 @@ struct GalleryTile {
 };
 
 /// Gallery view configuration
-struct GalleryConfig {
+struct GalleryViewConfig {
  GalleryTileSize tileSize = GalleryTileSize::Medium;
  GallerySortOrder sortOrder = GallerySortOrder::ByCategory;
  uint32_t tilesPerRow = 6;
@@ -76,7 +76,7 @@ public:
  }
 
  /// Initialize gallery with sample tiles
- void Initialize(const GalleryConfig& config = {}) {
+ void Initialize(const GalleryViewConfig& config = {}) {
  m_config = config;
  BuildDefaultTiles();
  }
@@ -86,8 +86,8 @@ public:
  uint32_t GetTileCount() const { return m_tileCount; }
 
  /// Get configuration
- const GalleryConfig& GetConfig() const { return m_config; }
- void SetConfig(const GalleryConfig& config) { m_config = config; }
+ const GalleryViewConfig& GetConfig() const { return m_config; }
+ void SetConfig(const GalleryViewConfig& config) { m_config = config; }
 
  /// Calculate layout dimensions
  uint32_t GetRowCount() const {
@@ -263,7 +263,7 @@ private:
  t.isEnabled = true;
  }
 
- GalleryConfig m_config;
+ GalleryViewConfig m_config;
  GalleryTile m_tiles[MAX_TILES] = {};
  uint32_t m_tileCount = 0;
 };

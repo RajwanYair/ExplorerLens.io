@@ -163,6 +163,20 @@ public:
  m_freeList.clear();
  }
 
+ // Non-copyable (has mutex)
+ SlabPool(const SlabPool&) = delete;
+ SlabPool& operator=(const SlabPool&) = delete;
+
+ // Moveable (safe only during construction before any thread uses the pool)
+ SlabPool(SlabPool&& other) noexcept
+ : m_class(other.m_class)
+ , m_bufferSize(other.m_bufferSize)
+ , m_maxFree(other.m_maxFree)
+ , m_freeList(std::move(other.m_freeList))
+ , m_stats(other.m_stats)
+ {}
+ SlabPool& operator=(SlabPool&&) = delete;
+
 private:
  SlabClass m_class;
  size_t m_bufferSize;

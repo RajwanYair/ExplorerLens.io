@@ -120,18 +120,7 @@ struct EventIds {
  static constexpr uint16_t HealthCheck = 800;
 };
 
-/// ETW keyword flags (bit masks for event filtering)
-struct Keywords {
- static constexpr uint64_t Pipeline = 0x0001;
- static constexpr uint64_t Cache = 0x0002;
- static constexpr uint64_t Decoder = 0x0004;
- static constexpr uint64_t GPU = 0x0008;
- static constexpr uint64_t Plugin = 0x0010;
- static constexpr uint64_t Memory = 0x0020;
- static constexpr uint64_t Config = 0x0040;
- static constexpr uint64_t Health = 0x0080;
- static constexpr uint64_t All = 0xFFFF;
-};
+// Keywords defined in ETWTraceProvider.h (namespace ExplorerLens::ETW::Keywords)
 
 /// Sink configuration
 struct ETWSinkConfig {
@@ -289,7 +278,13 @@ public:
 
  // ─── Statistics ──────────────────────────────────────────────
  const SinkStatistics& Stats() const { return m_stats; }
- void ResetStats() { m_stats = SinkStatistics{}; }
+ void ResetStats() {
+ m_stats.eventsEmitted.store(0);
+ m_stats.eventsDropped.store(0);
+ m_stats.bytesWritten.store(0);
+ m_stats.rotationsPerformed.store(0);
+ m_stats.filesCleanedUp.store(0);
+ }
 
 private:
  ETWSinkManager() = default;

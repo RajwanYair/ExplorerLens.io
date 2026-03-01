@@ -446,7 +446,7 @@ public:
  // Prefetch the first 64KB for header parsing
  WIN32_MEMORY_RANGE_ENTRY range;
  range.VirtualAddress = m_view;
- range.NumberOfBytes = static_cast<SIZE_T>(std::min(m_size, 65536ULL));
+ range.NumberOfBytes = static_cast<SIZE_T>((std::min)(m_size, 65536ULL));
  ::PrefetchVirtualMemory(::GetCurrentProcess(), 1, &range, 0);
  }
  }
@@ -548,7 +548,7 @@ public:
  {
  // Initialize subsystem accounting
  for (int i = 0; i < static_cast<int>(MemorySubsystem::COUNT); i++) {
- m_subsystems[static_cast<MemorySubsystem>(i)] = {};
+ (void)m_subsystems[static_cast<MemorySubsystem>(i)]; // default-construct entries
  }
  }
 

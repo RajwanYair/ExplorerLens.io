@@ -675,8 +675,7 @@ public:
  // 3. Build signature and file into bucket
  auto sig = buckets_->BuildSignature(meta.faulting_module,
  meta.exception_code,
- stack,
- meta.dump_id);
+ stack);
 
  // Note: BuildSignature doesn't take dump_id, use FileCrash
  auto signature = CrashSignature{};

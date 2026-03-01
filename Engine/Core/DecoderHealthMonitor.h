@@ -9,7 +9,6 @@
 #include <string>
 #include <unordered_map>
 #include <mutex>
-#include <atomic>
 #include <chrono>
 
 namespace ExplorerLens {
@@ -21,9 +20,9 @@ namespace Engine {
  class DecoderHealthMonitor {
  public:
  struct DecoderStats {
- std::atomic<uint64_t> successCount{0};
- std::atomic<uint64_t> failureCount{0};
- std::atomic<uint64_t> timeoutCount{0};
+ uint64_t successCount{0};
+ uint64_t failureCount{0};
+ uint64_t timeoutCount{0};
  std::chrono::steady_clock::time_point lastSuccess;
  std::chrono::steady_clock::time_point lastFailure;
  bool isAvailable{true};

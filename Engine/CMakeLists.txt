@@ -342,7 +342,6 @@ set(ENGINE_HEADERS
     Pipeline/FormatDetector.h
     Pipeline/FormatFallbackEngine.h
     Pipeline/ParallelBatchDecoder.h
-    Pipeline/ParallelIOPipeline.h
     Pipeline/SmartFormatDetectorV2.h
     Pipeline/ShellProgressIndicator.h
     Pipeline/SIMDDispatchRouter.h
@@ -434,7 +433,6 @@ set(ENGINE_HEADERS
     GPU/D3D11Renderer.h
     GPU/D3D12ComputePipeline.h
     GPU/GDIRenderer.h
-    GPU/GPUDecodeAccelerationV2.h
     GPU/AdaptiveGPUScheduler.h
     GPU/HDRToneMapKernel.h
     GPU/LanczosGPUKernel.h
@@ -452,7 +450,6 @@ set(ENGINE_HEADERS
     Cache/PersistentCacheManager.h
     Cache/PersistentDiskCache.h
     Cache/PipelineStateCacheV2.h
-    Cache/SubMillisecondCacheEngine.h
     Cache/ThumbnailCache.h
     Cache/CacheKeyGenerator.h
     Cache/PredictiveCacheEngine.h
@@ -518,7 +515,6 @@ set(ENGINE_HEADERS
     Memory/DecoderHotsetManager.h
     Memory/DirectoryFormatProfiler.h
     Memory/HotModeDirectoryEngine.h
-    Memory/MemoryFootprintOptimizerV2.h
     Memory/MemoryOptimizationEngine.h
     Memory/MemoryPressureControllerV2.h
     Memory/MemorySoakValidator.h
@@ -637,7 +633,6 @@ set(ENGINE_HEADERS
     Core/AccessibilityNarratorBridge.h
     Core/UsageAnalyticsDashboard.h
     Core/DecoderPerformanceProfiler.h
-    Cache/CacheEfficiencyAnalyzer.h
     Core/FormatPopularityTracker.h
     Core/SystemResourceMonitor.h
     Core/MultiMonitorColorProfile.h

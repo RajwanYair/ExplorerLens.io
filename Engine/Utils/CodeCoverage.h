@@ -17,7 +17,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Coverage tool selection
-enum class CoverageTool : uint8_t {
+enum class CodeCoverageTool : uint8_t {
  None = 0,
  OpenCppCoverage = 1, ///< Open source, works with MSVC
  MSVCProfile = 2, ///< /Profile instrumentation
@@ -26,7 +26,7 @@ enum class CoverageTool : uint8_t {
 };
 
 /// Coverage metric type
-enum class CoverageMetric : uint8_t {
+enum class CodeCoverageMetric : uint8_t {
  Line = 0, ///< Line coverage
  Function = 1, ///< Function coverage
  Branch = 2, ///< Branch coverage
@@ -55,7 +55,7 @@ struct ModuleCoverageReport {
 };
 
 /// Coverage threshold targets
-struct CoverageThresholds {
+struct CodeCoverageThresholds {
  float minLineCoverage = 70.0f; ///< Minimum line coverage %
  float minFunctionCoverage = 80.0f; ///< Minimum function coverage %
  float minBranchCoverage = 50.0f; ///< Minimum branch coverage %
@@ -89,7 +89,8 @@ public:
  cmd += " --excluded_sources build\\";
 
  // Add exclusion patterns
- for (const auto& ex : GetExclusions()) {
+ for (uint32_t i = 0; i < EXCLUSION_COUNT; i++) {
+ const auto& ex = GetExclusions()[i];
  cmd += " --excluded_sources ";
  cmd += ex.pattern;
  }
@@ -113,8 +114,8 @@ public:
  }
 
  /// Get coverage thresholds
- const CoverageThresholds& GetThresholds() const { return m_thresholds; }
- void SetThresholds(const CoverageThresholds& t) { m_thresholds = t; }
+ const CodeCoverageThresholds& GetThresholds() const { return m_thresholds; }
+ void SetThresholds(const CodeCoverageThresholds& t) { m_thresholds = t; }
 
  /// Default exclusion patterns
  static constexpr uint32_t EXCLUSION_COUNT = 6;
@@ -131,7 +132,7 @@ public:
  }
 
  /// Selected coverage tool
- CoverageTool tool = CoverageTool::OpenCppCoverage;
+ CodeCoverageTool tool = CodeCoverageTool::OpenCppCoverage;
 
  /// Report format
  bool generateHTML = true;
@@ -158,7 +159,7 @@ public:
 
 private:
  CodeCoverageConfig() = default;
- CoverageThresholds m_thresholds;
+ CodeCoverageThresholds m_thresholds;
 };
 
 } // namespace Engine

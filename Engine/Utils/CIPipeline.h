@@ -25,7 +25,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// CI pipeline stage
-enum class CIStage : uint8_t {
+enum class CIPipelineStage : uint8_t {
     Checkout = 0,
     DependencyPin = 1,
     Configure = 2,
@@ -82,31 +82,31 @@ public:
     }
 
     /// Get stage name
-    static const char* StageName(CIStage s) {
+    static const char* StageName(CIPipelineStage s) {
         switch (s) {
-        case CIStage::Checkout: return "checkout";
-        case CIStage::DependencyPin: return "dependency-pin";
-        case CIStage::Configure: return "configure";
-        case CIStage::Build: return "build";
-        case CIStage::UnitTest: return "unit-test";
-        case CIStage::IntegrationTest: return "integration-test";
-        case CIStage::StaticAnalysis: return "static-analysis";
-        case CIStage::SecurityScan: return "security-scan";
-        case CIStage::ArtifactSign: return "artifact-sign";
-        case CIStage::SBOMGenerate: return "sbom-generate";
-        case CIStage::Package: return "package";
-        case CIStage::Publish: return "publish";
+        case CIPipelineStage::Checkout: return "checkout";
+        case CIPipelineStage::DependencyPin: return "dependency-pin";
+        case CIPipelineStage::Configure: return "configure";
+        case CIPipelineStage::Build: return "build";
+        case CIPipelineStage::UnitTest: return "unit-test";
+        case CIPipelineStage::IntegrationTest: return "integration-test";
+        case CIPipelineStage::StaticAnalysis: return "static-analysis";
+        case CIPipelineStage::SecurityScan: return "security-scan";
+        case CIPipelineStage::ArtifactSign: return "artifact-sign";
+        case CIPipelineStage::SBOMGenerate: return "sbom-generate";
+        case CIPipelineStage::Package: return "package";
+        case CIPipelineStage::Publish: return "publish";
         default: return "unknown";
         }
     }
 
     /// Check if a stage is enabled
-    bool IsStageEnabled(CIStage stage) const {
+    bool IsStageEnabled(CIPipelineStage stage) const {
         return (m_enabledStages & (1u << static_cast<uint32_t>(stage))) != 0;
     }
 
     /// Enable/disable a stage
-    void SetStageEnabled(CIStage stage, bool enabled) {
+    void SetStageEnabled(CIPipelineStage stage, bool enabled) {
         uint32_t bit = 1u << static_cast<uint32_t>(stage);
         if (enabled) m_enabledStages |= bit;
         else m_enabledStages &= ~bit;
