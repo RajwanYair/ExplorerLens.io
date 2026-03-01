@@ -355,6 +355,28 @@
 #include "../Decoders/MultiPageStripRenderer.h"
 #include "../Decoders/VideoKeyframeExtractor.h"
 
+// Batch 2 — Decoders
+#include "../Decoders/AnimatedImageDecoder.h"
+#include "../Decoders/ProgressiveJPEGDecoder.h"
+
+// Batch 2 — Core
+#include "../Core/TaskbarPreviewManager.h"
+#include "../Core/SearchFederatedProvider.h"
+#include "../Core/ThumbnailQualityValidator.h"
+
+// Batch 2 — Utils
+#include "../Utils/RemoteDesktopOptimizer.h"
+#include "../Utils/PowerThrottleManager.h"
+
+// Batch 2 — GPU
+#include "../GPU/AsyncTextureSampler.h"
+#include "../GPU/ShaderCacheCompiler.h"
+
+// Batch 2 — Pipeline / Memory / Cache
+#include "../Pipeline/FormatSignatureDetector.h"
+#include "../Memory/SmartPointerPool.h"
+#include "../Cache/ThumbnailPersistenceLayer.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))
@@ -1035,7 +1057,7 @@ TEST(TestJXLDecoder_Extensions) {
             foundJXL = true;
             break;
         }
-    }
+}
     ASSERT(foundJXL);
 }
 
@@ -11109,6 +11131,461 @@ TEST(TestKeyframe_Initialize) {
     ASSERT(extractor.GetCandidateCount() == 0);
 }
 
+// ============================================================================
+// Animated Image Decoder Tests
+// ============================================================================
+
+TEST(TestAnimated_FormatStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AnimatedImageFmtToString(AnimatedImageFmt::GIF89a)) == "GIF89a");
+    ASSERT(std::string(AnimatedImageFmtToString(AnimatedImageFmt::WebPAnim)) == "WebP-Anim");
+}
+
+TEST(TestAnimated_StrategyStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FrameSelectionStrategyToString(FrameSelectionStrategy::MostComplex)) == "MostComplex");
+    ASSERT(std::string(FrameSelectionStrategyToString(FrameSelectionStrategy::LeastBlurry)) == "LeastBlurry");
+}
+
+TEST(TestAnimated_FrameQuality) {
+    using namespace ExplorerLens::Engine;
+    AnimationFrame frame;
+    frame.complexity = 0.7f;
+    frame.sharpness = 0.8f;
+    frame.isKeyframe = true;
+    float score = frame.GetQualityScore();
+    ASSERT(score > 0.0f && score <= 1.0f);
+}
+
+TEST(TestAnimated_Initialize) {
+    using namespace ExplorerLens::Engine;
+    AnimatedImageDecoder decoder;
+    auto info = decoder.GetInfo();
+    ASSERT(info.frameCount == 0);
+    ASSERT(info.totalDurationMs == 0u);
+}
+
+// ============================================================================
+// Progressive JPEG Decoder Tests
+// ============================================================================
+
+TEST(TestProgJPEG_ScanTypeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(JPEGScanTypeToString(JPEGScanType::Progressive_DC)) == "Progressive-DC");
+    ASSERT(std::string(JPEGScanTypeToString(JPEGScanType::Successive)) == "Successive");
+}
+
+TEST(TestProgJPEG_MarkerValues) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint16_t>(JPEGMarker::SOI) == 0xFFD8);
+    ASSERT(static_cast<uint16_t>(JPEGMarker::SOS) == 0xFFDA);
+}
+
+TEST(TestProgJPEG_QualityThreshold) {
+    using namespace ExplorerLens::Engine;
+    ProgressiveJPEGDecoder decoder;
+    decoder.SetQualityThreshold(0.8f);
+    ASSERT(decoder.GetQualityThreshold() > 0.79f && decoder.GetQualityThreshold() < 0.81f);
+    decoder.SetEarlyExitEnabled(true);
+    ASSERT(decoder.IsEarlyExitEnabled());
+}
+
+TEST(TestProgJPEG_Initialize) {
+    using namespace ExplorerLens::Engine;
+    ProgressiveJPEGDecoder decoder;
+    auto scans = decoder.GetScans();
+    ASSERT(scans.empty());
+}
+
+// ============================================================================
+// Taskbar Preview Manager Tests
+// ============================================================================
+
+TEST(TestTaskbar_ModeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(TaskbarThumbnailModeToString(TaskbarThumbnailMode::IconicStatic)) == "IconicStatic");
+    ASSERT(std::string(TaskbarThumbnailModeToString(TaskbarThumbnailMode::IconicLive)) == "IconicLive");
+}
+
+TEST(TestTaskbar_DefaultStats) {
+    using namespace ExplorerLens::Engine;
+    TaskbarPreviewStats stats;
+    ASSERT(stats.thumbnailUpdates == 0);
+    ASSERT(stats.livePreviewUpdates == 0);
+}
+
+TEST(TestTaskbar_TabCreation) {
+    using namespace ExplorerLens::Engine;
+    TaskbarTab tab;
+    tab.title = L"Test.png";
+    tab.tooltip = L"C:\\Images\\Test.png";
+    tab.isActive = true;
+    ASSERT(tab.isActive);
+    ASSERT(tab.title == L"Test.png");
+}
+
+TEST(TestTaskbar_Initialize) {
+    using namespace ExplorerLens::Engine;
+    TaskbarPreviewManager mgr;
+    ASSERT(!mgr.IsInitialized());
+    auto stats = mgr.GetStats();
+    ASSERT(stats.thumbnailUpdates == 0);
+}
+
+// ============================================================================
+// Search Federated Provider Tests
+// ============================================================================
+
+TEST(TestFedSearch_QueryTypeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FederatedQueryTypeToString(FederatedQueryType::FullText)) == "FullText");
+    ASSERT(std::string(FederatedQueryTypeToString(FederatedQueryType::Property)) == "Property");
+}
+
+TEST(TestFedSearch_Initialize) {
+    using namespace ExplorerLens::Engine;
+    SearchFederatedProvider provider;
+    ASSERT(provider.Initialize());
+    ASSERT(provider.IsInitialized());
+}
+
+TEST(TestFedSearch_IndexFile) {
+    using namespace ExplorerLens::Engine;
+    SearchFederatedProvider provider;
+    provider.Initialize();
+    ASSERT(provider.IndexFile(L"test.png", L"image/png", 256, 256, 1024));
+    auto stats = provider.GetStats();
+    ASSERT(stats.indexedFiles == 1);
+}
+
+TEST(TestFedSearch_Search) {
+    using namespace ExplorerLens::Engine;
+    SearchFederatedProvider provider;
+    provider.Initialize();
+    provider.IndexFile(L"landscape.jpg", L"image/jpeg", 1920, 1080, 2048);
+    provider.IndexFile(L"portrait.png", L"image/png", 800, 600, 1024);
+    FederatedQuery query;
+    query.type = FederatedQueryType::FullText;
+    query.searchText = L"landscape";
+    query.minRelevance = 0.1f;
+    auto results = provider.Search(query);
+    ASSERT(results.size() == 1);
+}
+
+// ============================================================================
+// Thumbnail Quality Validator Tests
+// ============================================================================
+
+TEST(TestQualityVal_FlagOperators) {
+    using namespace ExplorerLens::Engine;
+    auto combined = QualityCheckFlag::IsBlank | QualityCheckFlag::IsSolidColor;
+    ASSERT(HasQualityFlag(combined, QualityCheckFlag::IsBlank));
+    ASSERT(!HasQualityFlag(combined, QualityCheckFlag::IsTooBlurry));
+}
+
+TEST(TestQualityVal_DefaultThresholds) {
+    using namespace ExplorerLens::Engine;
+    QualityValidatorThresholds thresholds;
+    ASSERT(thresholds.minBrightness >= 0.0f);
+    ASSERT(thresholds.maxBrightness > 0.0f);
+    ASSERT(thresholds.minOverallScore >= 0.0f);
+}
+
+TEST(TestQualityVal_SetThresholds) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailQualityValidator validator;
+    QualityValidatorThresholds t;
+    t.minSharpness = 0.1f;
+    validator.SetThresholds(t);
+    ASSERT(validator.GetThresholds().minSharpness > 0.09f);
+}
+
+TEST(TestQualityVal_BlackImage) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailQualityValidator validator;
+    // All-black 4x4 image (BGRA, all zeros)
+    std::vector<uint8_t> black(4 * 4 * 4, 0);
+    auto result = validator.Validate(black.data(), 4, 4, 4 * 4);
+    // Black image should fail brightness check
+    ASSERT(!result.passed || result.overallScore < 0.5f);
+}
+
+// ============================================================================
+// Remote Desktop Optimizer Tests
+// ============================================================================
+
+TEST(TestRemoteRDP_SessionTypeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(RemoteSessionTypeToString(RemoteSessionType::Local)) == "Local");
+    ASSERT(std::string(RemoteSessionTypeToString(RemoteSessionType::RDP)) == "RDP");
+}
+
+TEST(TestRemoteRDP_BandwidthTierStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(BandwidthTierToString(BandwidthTier::Local)) == "Local");
+    ASSERT(std::string(BandwidthTierToString(BandwidthTier::HighSpeed)) == "HighSpeed");
+}
+
+TEST(TestRemoteRDP_ProfileForTier) {
+    using namespace ExplorerLens::Engine;
+    auto local = RemoteRenderProfile::ForTier(BandwidthTier::Local);
+    auto constrained = RemoteRenderProfile::ForTier(BandwidthTier::Constrained);
+    ASSERT(local.maxThumbnailSize >= constrained.maxThumbnailSize);
+    ASSERT(local.jpegQuality >= constrained.jpegQuality);
+}
+
+TEST(TestRemoteRDP_Initialize) {
+    using namespace ExplorerLens::Engine;
+    RemoteDesktopOptimizer opt;
+    ASSERT(opt.Initialize());
+    ASSERT(opt.IsInitialized());
+    // On a local dev machine, should detect Local session
+    auto sessionType = opt.GetSessionType();
+    ASSERT(sessionType == RemoteSessionType::Local || sessionType == RemoteSessionType::RDP);
+}
+
+// ============================================================================
+// Power Throttle Manager Tests
+// ============================================================================
+
+TEST(TestPowerThrottle_LevelStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PowerThrottleLevelToString(PowerThrottleLevel::None)) == "None");
+    ASSERT(std::string(PowerThrottleLevelToString(PowerThrottleLevel::Emergency)) == "Emergency");
+}
+
+TEST(TestPowerThrottle_ProfileForLevel) {
+    using namespace ExplorerLens::Engine;
+    auto none = ThrottleProfile::ForLevel(PowerThrottleLevel::None);
+    auto emergency = ThrottleProfile::ForLevel(PowerThrottleLevel::Emergency);
+    ASSERT(none.maxThreads > emergency.maxThreads);
+    ASSERT(none.enableGPUDecode);
+    ASSERT(!emergency.enableGPUDecode);
+}
+
+TEST(TestPowerThrottle_SourceStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PowerSourceToString(PowerSource::AC)) == "AC");
+    ASSERT(std::string(PowerSourceToString(PowerSource::Battery)) == "Battery");
+}
+
+TEST(TestPowerThrottle_Initialize) {
+    using namespace ExplorerLens::Engine;
+    PowerThrottleManager mgr;
+    ASSERT(!mgr.IsInitialized());
+    ASSERT(mgr.Initialize());
+    ASSERT(mgr.IsInitialized());
+    // On AC desktop, should recommend high threads
+    ASSERT(mgr.GetRecommendedThreads() >= 1);
+}
+
+// ============================================================================
+// Async Texture Sampler Tests
+// ============================================================================
+
+TEST(TestTexSampler_FormatStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SamplerTextureFormatToString(SamplerTextureFormat::BGRA8)) == "BGRA8");
+    ASSERT(std::string(SamplerTextureFormatToString(SamplerTextureFormat::RGBA16F)) == "RGBA16F");
+}
+
+TEST(TestTexSampler_FilterStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SamplerFilterModeToString(SamplerFilterMode::Bilinear)) == "Bilinear");
+    ASSERT(std::string(SamplerFilterModeToString(SamplerFilterMode::Anisotropic)) == "Anisotropic");
+}
+
+TEST(TestTexSampler_MipChainLevels) {
+    using namespace ExplorerLens::Engine;
+    MipmapChain chain;
+    chain.levels.push_back({ 0, 1024, 1024, 0, 4ULL * 1024 * 1024, 0.0f });
+    chain.levels.push_back({ 1, 512, 512, 0, 1024ULL * 1024, 0.0f });
+    chain.levels.push_back({ 2, 256, 256, 0, 256ULL * 1024, 0.0f });
+    chain.levels.push_back({ 3, 128, 128, 0, 64ULL * 1024, 0.0f });
+    ASSERT(chain.levels.size() == 4);
+    uint32_t levelIdx = chain.FindLevelForSize(200);
+    ASSERT(levelIdx <= 3);  // Should find a valid level index
+}
+
+TEST(TestTexSampler_Initialize) {
+    using namespace ExplorerLens::Engine;
+    AsyncTextureSampler sampler;
+    ASSERT(sampler.Initialize());
+    ASSERT(sampler.IsInitialized());
+}
+
+// ============================================================================
+// Shader Cache Compiler Tests
+// ============================================================================
+
+TEST(TestShaderCache_StageStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ShaderStageToTarget(ShaderStageType::Vertex)) == "vs_5_1");
+    ASSERT(std::string(ShaderStageToTarget(ShaderStageType::Compute)) == "cs_5_1");
+}
+
+TEST(TestShaderCache_VariantHash) {
+    using namespace ExplorerLens::Engine;
+    ShaderVariant v;
+    v.name = "ThumbnailScale";
+    v.defines.push_back(std::make_pair(std::string("USE_LANCZOS"), std::string("1")));
+    v.ComputeHash();
+    ASSERT(v.hash != 0);
+}
+
+TEST(TestShaderCache_Initialize) {
+    using namespace ExplorerLens::Engine;
+    ShaderCacheCompiler compiler;
+    ASSERT(compiler.Initialize());
+    ASSERT(compiler.IsInitialized());
+}
+
+TEST(TestShaderCache_Stats) {
+    using namespace ExplorerLens::Engine;
+    ShaderCacheCompilerStats stats;
+    stats.totalCompilations = 10;
+    stats.cacheHits = 7;
+    stats.cacheMisses = 3;
+    double rate = stats.GetCacheHitRate();
+    ASSERT(rate > 69.0 && rate < 71.0);
+}
+
+// ============================================================================
+// Format Signature Detector Tests
+// ============================================================================
+
+TEST(TestFmtSig_ClassStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FormatClassToString(FormatClass::Image)) == "Image");
+    ASSERT(std::string(FormatClassToString(FormatClass::Archive)) == "Archive");
+}
+
+TEST(TestFmtSig_BuiltinSignatures) {
+    using namespace ExplorerLens::Engine;
+    FormatSignatureDetector detector;
+    // Should have builtin signatures registered
+    auto allResults = detector.DetectAll(reinterpret_cast<const uint8_t*>("\x89PNG\r\n\x1a\n"), 8);
+    ASSERT(!allResults.empty());
+    ASSERT(allResults[0].formatId == "PNG");
+}
+
+TEST(TestFmtSig_DetectJPEG) {
+    using namespace ExplorerLens::Engine;
+    FormatSignatureDetector detector;
+    uint8_t jpegHeader[] = { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10 };
+    auto result = detector.Detect(jpegHeader, sizeof(jpegHeader));
+    ASSERT(!result.formatId.empty());
+    ASSERT(result.confidence > 0.8f);
+}
+
+TEST(TestFmtSig_IsImageFormat) {
+    using namespace ExplorerLens::Engine;
+    FormatSignatureDetector detector;
+    uint8_t pngHeader[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+    ASSERT(detector.IsImageFormat(pngHeader, sizeof(pngHeader)));
+}
+
+// ============================================================================
+// Smart Pointer Pool Tests
+// ============================================================================
+
+TEST(TestSmartPool_SizeClassStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PoolSizeClassToString(PoolSizeClass::Tiny)) == "Tiny");
+    ASSERT(std::string(PoolSizeClassToString(PoolSizeClass::Huge)) == "Huge");
+}
+
+TEST(TestSmartPool_ClassifySize) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(ClassifySize(32) == PoolSizeClass::Tiny);
+    ASSERT(ClassifySize(128) == PoolSizeClass::Small);
+    ASSERT(ClassifySize(512) == PoolSizeClass::Medium);
+    ASSERT(ClassifySize(2048) == PoolSizeClass::Large);
+    ASSERT(ClassifySize(100000) == PoolSizeClass::Custom);
+}
+
+TEST(TestSmartPool_AcquireRelease) {
+    using namespace ExplorerLens::Engine;
+    SmartPointerPool pool;
+    pool.Initialize();
+    auto* block = pool.Acquire(64);
+    ASSERT(block != nullptr);
+    ASSERT(block->inUse);
+    pool.Release(block);
+    ASSERT(!block->inUse);
+}
+
+TEST(TestSmartPool_PoolHit) {
+    using namespace ExplorerLens::Engine;
+    SmartPointerPool pool;
+    pool.Initialize();
+    auto* b1 = pool.Acquire(32);
+    pool.Release(b1);
+    // Second acquire should hit pool
+    auto* b2 = pool.Acquire(32);
+    ASSERT(b2 != nullptr);
+    auto stats = pool.GetStats();
+    ASSERT(stats.poolHits >= 1);
+    pool.Release(b2);
+}
+
+// ============================================================================
+// Thumbnail Persistence Layer Tests
+// ============================================================================
+
+TEST(TestPersistence_EvictionPolicyStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PersistenceEvictionPolicyToString(PersistenceEvictionPolicy::LRU)) == "LRU");
+    ASSERT(std::string(PersistenceEvictionPolicyToString(PersistenceEvictionPolicy::SizeBased)) == "SizeBased");
+}
+
+TEST(TestPersistence_Initialize) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailPersistenceLayer layer;
+    ASSERT(!layer.IsInitialized());
+    ASSERT(layer.Initialize(L"C:\\Temp\\ThumbnailCache"));
+    ASSERT(layer.IsInitialized());
+}
+
+TEST(TestPersistence_StoreAndLookup) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailPersistenceLayer layer;
+    layer.Initialize(L"C:\\Temp\\Cache");
+    ThumbnailCacheKey key;
+    key.filePath = L"C:\\Images\\test.png";
+    key.fileSize = 1024;
+    key.lastModifiedTime = 100000;
+    key.requestedWidth = 256;
+    key.requestedHeight = 256;
+    uint8_t data[] = { 0xFF, 0xD8, 0xFF, 0xE0 };
+    ASSERT(layer.Store(key, data, sizeof(data)));
+    PersistentCacheEntry entry;
+    ASSERT(layer.Lookup(key, entry));
+    ASSERT(entry.dataSize == sizeof(data));
+}
+
+TEST(TestPersistence_HitRate) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailPersistenceLayer layer;
+    layer.Initialize(L"C:\\Temp\\Cache");
+    ThumbnailCacheKey key;
+    key.filePath = L"C:\\test.bmp";
+    key.fileSize = 512;
+    key.requestedWidth = 128;
+    key.requestedHeight = 128;
+    uint8_t d[] = { 1, 2, 3 };
+    layer.Store(key, d, 3);
+    PersistentCacheEntry e;
+    layer.Lookup(key, e);  // hit
+    ThumbnailCacheKey miss;
+    miss.filePath = L"C:\\miss.bmp";
+    layer.Lookup(miss, e); // miss
+    auto stats = layer.GetStats();
+    ASSERT(stats.cacheHits == 1);
+    ASSERT(stats.cacheMisses == 1);
+    ASSERT(stats.GetHitRate() > 49.0 && stats.GetHitRate() < 51.0);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -13294,6 +13771,90 @@ int main() {
     RUN_TEST(TestKeyframe_QualityScore);
     RUN_TEST(TestKeyframe_BlackFramePenalty);
     RUN_TEST(TestKeyframe_Initialize);
+
+    // Animated Image Decoder Tests
+    std::wcout << L"\nAnimated Image Decoder Tests:" << std::endl;
+    RUN_TEST(TestAnimated_FormatStrings);
+    RUN_TEST(TestAnimated_StrategyStrings);
+    RUN_TEST(TestAnimated_FrameQuality);
+    RUN_TEST(TestAnimated_Initialize);
+
+    // Progressive JPEG Decoder Tests
+    std::wcout << L"\nProgressive JPEG Decoder Tests:" << std::endl;
+    RUN_TEST(TestProgJPEG_ScanTypeStrings);
+    RUN_TEST(TestProgJPEG_MarkerValues);
+    RUN_TEST(TestProgJPEG_QualityThreshold);
+    RUN_TEST(TestProgJPEG_Initialize);
+
+    // Taskbar Preview Manager Tests
+    std::wcout << L"\nTaskbar Preview Manager Tests:" << std::endl;
+    RUN_TEST(TestTaskbar_ModeStrings);
+    RUN_TEST(TestTaskbar_DefaultStats);
+    RUN_TEST(TestTaskbar_TabCreation);
+    RUN_TEST(TestTaskbar_Initialize);
+
+    // Search Federated Provider Tests
+    std::wcout << L"\nSearch Federated Provider Tests:" << std::endl;
+    RUN_TEST(TestFedSearch_QueryTypeStrings);
+    RUN_TEST(TestFedSearch_Initialize);
+    RUN_TEST(TestFedSearch_IndexFile);
+    RUN_TEST(TestFedSearch_Search);
+
+    // Thumbnail Quality Validator Tests
+    std::wcout << L"\nThumbnail Quality Validator Tests:" << std::endl;
+    RUN_TEST(TestQualityVal_FlagOperators);
+    RUN_TEST(TestQualityVal_DefaultThresholds);
+    RUN_TEST(TestQualityVal_SetThresholds);
+    RUN_TEST(TestQualityVal_BlackImage);
+
+    // Remote Desktop Optimizer Tests
+    std::wcout << L"\nRemote Desktop Optimizer Tests:" << std::endl;
+    RUN_TEST(TestRemoteRDP_SessionTypeStrings);
+    RUN_TEST(TestRemoteRDP_BandwidthTierStrings);
+    RUN_TEST(TestRemoteRDP_ProfileForTier);
+    RUN_TEST(TestRemoteRDP_Initialize);
+
+    // Power Throttle Manager Tests
+    std::wcout << L"\nPower Throttle Manager Tests:" << std::endl;
+    RUN_TEST(TestPowerThrottle_LevelStrings);
+    RUN_TEST(TestPowerThrottle_ProfileForLevel);
+    RUN_TEST(TestPowerThrottle_SourceStrings);
+    RUN_TEST(TestPowerThrottle_Initialize);
+
+    // Async Texture Sampler Tests
+    std::wcout << L"\nAsync Texture Sampler Tests:" << std::endl;
+    RUN_TEST(TestTexSampler_FormatStrings);
+    RUN_TEST(TestTexSampler_FilterStrings);
+    RUN_TEST(TestTexSampler_MipChainLevels);
+    RUN_TEST(TestTexSampler_Initialize);
+
+    // Shader Cache Compiler Tests
+    std::wcout << L"\nShader Cache Compiler Tests:" << std::endl;
+    RUN_TEST(TestShaderCache_StageStrings);
+    RUN_TEST(TestShaderCache_VariantHash);
+    RUN_TEST(TestShaderCache_Initialize);
+    RUN_TEST(TestShaderCache_Stats);
+
+    // Format Signature Detector Tests
+    std::wcout << L"\nFormat Signature Detector Tests:" << std::endl;
+    RUN_TEST(TestFmtSig_ClassStrings);
+    RUN_TEST(TestFmtSig_BuiltinSignatures);
+    RUN_TEST(TestFmtSig_DetectJPEG);
+    RUN_TEST(TestFmtSig_IsImageFormat);
+
+    // Smart Pointer Pool Tests
+    std::wcout << L"\nSmart Pointer Pool Tests:" << std::endl;
+    RUN_TEST(TestSmartPool_SizeClassStrings);
+    RUN_TEST(TestSmartPool_ClassifySize);
+    RUN_TEST(TestSmartPool_AcquireRelease);
+    RUN_TEST(TestSmartPool_PoolHit);
+
+    // Thumbnail Persistence Layer Tests
+    std::wcout << L"\nThumbnail Persistence Layer Tests:" << std::endl;
+    RUN_TEST(TestPersistence_EvictionPolicyStrings);
+    RUN_TEST(TestPersistence_Initialize);
+    RUN_TEST(TestPersistence_StoreAndLookup);
+    RUN_TEST(TestPersistence_HitRate);
 
     std::wcout << std::endl;
 

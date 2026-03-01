@@ -320,6 +320,7 @@ set(ENGINE_HEADERS
     Pipeline/ThumbnailPipeline.h
     Pipeline/ZeroCopyActivation.h
     Pipeline/ZeroCopyPipeline.h
+    Pipeline/FormatSignatureDetector.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -392,6 +393,8 @@ set(ENGINE_HEADERS
     Decoders/ExampleDecoder.h
     Decoders/MultiPageStripRenderer.h
     Decoders/VideoKeyframeExtractor.h
+    Decoders/AnimatedImageDecoder.h
+    Decoders/ProgressiveJPEGDecoder.h
     Decoders/XPMDecoder.h
 
     # GPU rendering and compute
@@ -402,6 +405,8 @@ set(ENGINE_HEADERS
     GPU/AdaptiveGPUScheduler.h
     GPU/HDRToneMapKernel.h
     GPU/LanczosGPUKernel.h
+    GPU/AsyncTextureSampler.h
+    GPU/ShaderCacheCompiler.h
     GPU/VulkanComputePipeline.h
 
     # Cache management
@@ -417,6 +422,7 @@ set(ENGINE_HEADERS
     Cache/CacheKeyGenerator.h
     Cache/PredictiveCacheEngine.h
     Cache/PSOPersistenceManager.h
+    Cache/ThumbnailPersistenceLayer.h
     Cache/USNCacheInvalidation.h
 
     # Plugin system
@@ -479,6 +485,7 @@ set(ENGINE_HEADERS
     Memory/MemoryOptimizationEngine.h
     Memory/MemoryPressureControllerV2.h
     Memory/MemorySoakValidator.h
+    Memory/SmartPointerPool.h
 
     # Shell integration
     Shell/COMApartmentAudit.h
@@ -540,6 +547,8 @@ set(ENGINE_HEADERS
     Utils/VersionNormalization.h
     Utils/DecoderCircuitBreaker.h
     Utils/PerceptualHashing.h
+    Utils/RemoteDesktopOptimizer.h
+    Utils/PowerThrottleManager.h
     Utils/Win11Integration.h
 
     # Release gate (unified)
@@ -599,6 +608,9 @@ set(ENGINE_HEADERS
     Core/LivePreviewStreamingProtocol.h
     Core/DragDropThumbnailPreview.h
     Core/ExplorerColumnProvider.h
+    Core/TaskbarPreviewManager.h
+    Core/SearchFederatedProvider.h
+    Core/ThumbnailQualityValidator.h
 )
 
 set(ENGINE_SOURCES
