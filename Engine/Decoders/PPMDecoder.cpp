@@ -7,6 +7,7 @@
 #include <cstring>
 #include <cmath>
 #include <algorithm>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -263,7 +264,6 @@ HRESULT PPMDecoder::DecodePFM(const uint8_t* data, size_t size, HBITMAP* phBitma
  }
  if (negative) scale = -scale;
  bool littleEndian = (scale < 0);
- (void)littleEndian; // TODO: byte-swap floats for big-endian PFM files
  scale = fabsf(scale);
  if (scale == 0.0f) scale = 1.0f;
 
@@ -275,6 +275,20 @@ HRESULT PPMDecoder::DecodePFM(const uint8_t* data, size_t size, HBITMAP* phBitma
  const float* fp = reinterpret_cast<const float*>(p);
  size_t floatsNeeded = (size_t)width * height * channels;
  if ((const char*)(fp + floatsNeeded) > end) return E_FAIL;
+
+ // Byte-swap floats for big-endian PFM files (positive scale indicates big-endian)
+ std::vector<float> swapped;
+ if (!littleEndian) {
+ swapped.resize(floatsNeeded);
+ for (size_t i = 0; i < floatsNeeded; ++i) {
+ uint32_t bits;
+ memcpy(&bits, &fp[i], sizeof(bits));
+ bits = ((bits >> 24) & 0xFF) | ((bits >> 8) & 0xFF00) |
+ ((bits << 8) & 0xFF0000) | ((bits << 24) & 0xFF000000);
+ memcpy(&swapped[i], &bits, sizeof(bits));
+ }
+ fp = swapped.data();
+ }
 
  auto bgra = std::make_unique<uint8_t[]>(width * height * 4);
  const float gamma = 1.0f / 2.2f;

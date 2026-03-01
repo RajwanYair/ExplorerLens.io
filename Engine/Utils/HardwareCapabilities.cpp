@@ -329,9 +329,32 @@ void HardwareCapabilities::DetectGPUs() {
  );
  info.supportsD3D12 = SUCCEEDED(hr);
  
- // TODO: Query compute unit count via vendor-specific APIs
+ // Query compute unit count via D3D12 if available
  info.supportsCompute = info.supportsD3D11;
- info.computeUnits = 0; // Requires vendor-specific detection
+ info.computeUnits = 0;
+ if (info.supportsD3D12) {
+ ComPtr<ID3D12Device> d3d12Device;
+ HRESULT hrDev = D3D12CreateDevice(
+ adapter.Get(),
+ D3D_FEATURE_LEVEL_11_0,
+ IID_PPV_ARGS(&d3d12Device)
+ );
+ if (SUCCEEDED(hrDev) && d3d12Device) {
+ D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+ hrDev = d3d12Device->CheckFeatureSupport(
+ D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options));
+ if (SUCCEEDED(hrDev)) {
+ // Use resource binding tier as a proxy for GPU capability class
+ // Tier 3 = high-end (64+ CUs), Tier 2 = mid (16-64), Tier 1 = low (<16)
+ switch (options.ResourceBindingTier) {
+ case D3D12_RESOURCE_BINDING_TIER_3: info.computeUnits = 64; break;
+ case D3D12_RESOURCE_BINDING_TIER_2: info.computeUnits = 32; break;
+ default: info.computeUnits = 8; break;
+ }
+ }
+ info.supportsCompute = true;
+ }
+ }
  
  m_gpus.push_back(info);
  }

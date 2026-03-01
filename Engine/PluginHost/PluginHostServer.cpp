@@ -285,8 +285,21 @@ void PluginHostServer::HandleRequestThumbnail(
  decode_result.pixels + data_size);
 
  response.bitmapDataSize = static_cast<uint32_t>(bitmap_data.size());
- response.useSharedMemory = 0; // Use inline for now (TODO: implement
- // shared memory for large bitmaps)
+
+ // Use shared memory for bitmaps larger than threshold to avoid
+ // pipe throughput bottleneck (named pipes serialize large writes)
+ if (IPC::SharedMemoryManager::RequiresSharedMemory(bitmap_data.size())) {
+ auto sharedMem = IPC::SharedMemoryManager::CreateForBitmap(
+ correlation_id, bitmap_data.data(), bitmap_data.size());
+ if (sharedMem && sharedMem->IsValid()) {
+ response.useSharedMemory = 1;
+ bitmap_data.clear(); // Don't send inline — reader uses shared mem
+ } else {
+ response.useSharedMemory = 0; // Fallback to inline
+ }
+ } else {
+ response.useSharedMemory = 0; // Small bitmap — inline is faster
+ }
 
  // Clean up plugin result
  plugin_->FreeResult(&decode_result);

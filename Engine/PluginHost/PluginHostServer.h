@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../Plugin/IPC/PluginIPCProtocol.h"
+#include "../Plugin/IPC/SharedMemoryManager.h"
 #include "../Plugin/PluginManager.h"
 #include <Windows.h>
 #include <string>
