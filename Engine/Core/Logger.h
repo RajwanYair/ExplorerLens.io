@@ -47,10 +47,10 @@ namespace Engine {
 
 /// Internal helper to format timestamp
 inline void _LogTimestamp(wchar_t* buffer, size_t size) {
- time_t now = time(nullptr);
- struct tm timeinfo;
- localtime_s(&timeinfo, &now);
- wcsftime(buffer, size, L"%H:%M:%S", &timeinfo);
+    time_t now = time(nullptr);
+    struct tm timeinfo;
+    localtime_s(&timeinfo, &now);
+    wcsftime(buffer, size, L"%H:%M:%S", &timeinfo);
 }
 
 /// Log informational message
@@ -153,9 +153,10 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
 //==============================================================================
 // Performance Profiling Macro
 //==============================================================================
- 
+
 /// Auto-log function execution time
 /// Usage: PROFILE_SCOPE(L"MyFunction");
+#ifndef PROFILE_SCOPE
 #define PROFILE_SCOPE(name) \
  auto _profile_start = std::chrono::high_resolution_clock::now(); \
  struct _ProfileGuard { \
@@ -167,7 +168,7 @@ inline void _LogTimestamp(wchar_t* buffer, size_t size) {
  LOG_PERF(_name, _dur); \
  } \
  } _profile_guard{(name), _profile_start};
+#endif
 
 } // namespace Engine
 } // namespace ExplorerLens
-

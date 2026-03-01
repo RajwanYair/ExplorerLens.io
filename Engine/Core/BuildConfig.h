@@ -95,7 +95,9 @@ constexpr const wchar_t* VersionString = L"15.0.0";
 constexpr const wchar_t* Codename = L"Zenith";
 constexpr int MilestoneCount = 448;
 constexpr int TestCount = 1242;
-constexpr const wchar_t* BuildDate = __TIMESTAMP__;
+#define LENS_WIDEN2(x) L ## x
+#define LENS_WIDEN(x) LENS_WIDEN2(x)
+constexpr const wchar_t* BuildDate = LENS_WIDEN(__TIMESTAMP__);
 } // namespace BuildConfig
 
 } // namespace Engine
