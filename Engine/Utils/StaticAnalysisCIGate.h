@@ -181,10 +181,10 @@ public:
             if (f.isNewInDiff) result.newInDiff++;
 
             switch (f.severity) {
-                case SAFindingSeverity::Critical: result.criticals++; break;
-                case SAFindingSeverity::Error:    result.errors++; break;
-                case SAFindingSeverity::Warning:  result.warnings++; break;
-                case SAFindingSeverity::Note:     result.notes++; break;
+            case SAFindingSeverity::Critical: result.criticals++; break;
+            case SAFindingSeverity::Error:    result.errors++; break;
+            case SAFindingSeverity::Warning:  result.warnings++; break;
+            case SAFindingSeverity::Note:     result.notes++; break;
             }
         }
 
@@ -192,11 +192,14 @@ public:
         if (result.criticals > m_thresholds.maxCriticals ||
             result.errors > m_thresholds.maxErrors) {
             result.verdict = SAGateVerdict::Fail;
-        } else if (result.warnings > m_thresholds.maxWarnings) {
+        }
+        else if (result.warnings > m_thresholds.maxWarnings) {
             result.verdict = SAGateVerdict::Fail;
-        } else if (result.totalFindings > 0) {
+        }
+        else if (result.totalFindings > 0) {
             result.verdict = SAGateVerdict::Warn;
-        } else {
+        }
+        else {
             result.verdict = SAGateVerdict::Pass;
         }
 

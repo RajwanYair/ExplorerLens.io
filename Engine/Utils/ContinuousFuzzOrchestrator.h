@@ -151,7 +151,7 @@ public:
 
     /// Record a crash finding
     void RecordCrash(const std::string& decoder, CrashSeverity severity,
-                     const std::string& inputHash, uint64_t inputSize) {
+        const std::string& inputHash, uint64_t inputSize) {
         // Check for duplicate
         for (const auto& c : m_crashes) {
             if (c.inputHash == inputHash) {

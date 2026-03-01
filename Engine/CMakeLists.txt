@@ -304,6 +304,36 @@ set(ENGINE_HEADERS
     Core/WinUI3MigrationEngine.h
     Core/WinUI3Research.h
 
+    # Batch 5 — Sprints 394-405
+    Core/FileIntegrityMonitor.h
+    Core/ThumbnailDiffEngine.h
+    Core/DecoderSandboxPolicy.h
+    Core/IntelligentPrefetchV2.h
+    Core/CompressionBenchmark.h
+    Core/ExplorerBandIntegration.h
+    Core/ThumbnailStreamProtocol.h
+    Core/HotReloadConfigEngine.h
+    Core/COMDiagnosticsEngine.h
+
+    Core/ThumbnailWatermark.h
+    Core/BatchRenamePreview.h
+    Core/DuplicateFileDetector.h
+    Core/ThumbnailAnnotation.h
+    Core/ExplorerContextMenuExtension.h
+    Core/ThumbnailCompareView.h
+    Core/FileTypeStatistics.h
+    Core/ShellNotificationEngine.h
+    Core/ThumbnailExportEngine.h
+    Core/ThumbnailVersionControl.h
+    Core/FilePreviewRouter.h
+    Core/ClipboardThumbnailManager.h
+    Core/FormatConversionPipeline.h
+    Core/ErrorReportingPipeline.h
+    Core/EnterpriseAuditPipeline.h
+    Core/ResourceQuotaManager.h
+    Core/AccessTokenValidator.h
+    Core/ExplorerPreviewPane.h
+
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
     Pipeline/BatchProcessor.h
@@ -321,6 +351,9 @@ set(ENGINE_HEADERS
     Pipeline/ZeroCopyActivation.h
     Pipeline/ZeroCopyPipeline.h
     Pipeline/FormatSignatureDetector.h
+    Pipeline/AdaptiveQualityScaler.h
+    Pipeline/DecoderPriorityScheduler.h
+    Pipeline/FilesystemWatchdog.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -408,6 +441,8 @@ set(ENGINE_HEADERS
     GPU/AsyncTextureSampler.h
     GPU/ShaderCacheCompiler.h
     GPU/VulkanComputePipeline.h
+    GPU/VulkanMemoryAllocator.h
+    GPU/GPUWorkloadBalancer.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -424,6 +459,8 @@ set(ENGINE_HEADERS
     Cache/PSOPersistenceManager.h
     Cache/ThumbnailPersistenceLayer.h
     Cache/USNCacheInvalidation.h
+    Cache/CacheMigrationEngine.h
+    Cache/CacheEncryptionLayer.h
 
     # Plugin system
     Plugin/CrashHandler.h
@@ -486,6 +523,7 @@ set(ENGINE_HEADERS
     Memory/MemoryPressureControllerV2.h
     Memory/MemorySoakValidator.h
     Memory/SmartPointerPool.h
+    Memory/MemoryDefragmenter.h
 
     # Shell integration
     Shell/COMApartmentAudit.h
@@ -554,6 +592,7 @@ set(ENGINE_HEADERS
     Utils/ContinuousFuzzOrchestrator.h
     Utils/StaticAnalysisCIGate.h
     Utils/Win11Integration.h
+    Utils/RegistrySnapshotManager.h
 
     # Release gate (unified)
     Utils/ReleaseGate.h
@@ -615,6 +654,22 @@ set(ENGINE_HEADERS
     Core/TaskbarPreviewManager.h
     Core/SearchFederatedProvider.h
     Core/ThumbnailQualityValidator.h
+
+    # Batch 8 (Sprints 430-443)
+    Core/DirectShowThumbnailBridge.h
+    Core/ShellExtensionHealthMonitor.h
+    Core/ThumbnailColorSpace.h
+    Pipeline/AsyncIOCompletionEngine.h
+    Core/ExifOrientationFixer.h
+    Core/MultiMonitorDPIScaler.h
+    Memory/VirtualAllocOptimizer.h
+    Core/ThumbnailHistogram.h
+    Core/FileAssociationManager.h
+    GPU/DX12FenceManager.h
+    Core/LocalizationEngine.h
+    Core/ThumbnailSpriteSheet.h
+    Cache/CacheTelemetryCollector.h
+    Core/WindowsSearchIntegration.h
 )
 
 set(ENGINE_SOURCES

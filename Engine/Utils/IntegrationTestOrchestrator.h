@@ -146,7 +146,7 @@ public:
 
     /// Add a scenario
     void AddScenario(const std::string& name, ScenarioType type,
-                     OrchestratorMode mode = OrchestratorMode::Full) {
+        OrchestratorMode mode = OrchestratorMode::Full) {
         TestScenario scenario;
         scenario.name = name;
         scenario.type = type;
@@ -156,7 +156,7 @@ public:
 
     /// Add a step to the last added scenario
     void AddStep(const std::string& stepName, StepFunc func,
-                 const std::vector<uint32_t>& deps = {}) {
+        const std::vector<uint32_t>& deps = {}) {
         if (m_scenarios.empty()) return;
         auto& scenario = m_scenarios.back();
         TestStep step;
@@ -201,7 +201,7 @@ public:
                 }
 
                 // Execute step
-                auto it = m_stepFuncs.find({si, stIdx});
+                auto it = m_stepFuncs.find({ si, stIdx });
                 if (it == m_stepFuncs.end()) {
                     step.result = StepResult::Skipped;
                     continue;
@@ -209,14 +209,16 @@ public:
 
                 auto start = std::chrono::steady_clock::now();
                 bool ok = false;
-                try { ok = it->second(); } catch (...) { ok = false; }
+                try { ok = it->second(); }
+                catch (...) { ok = false; }
                 auto end = std::chrono::steady_clock::now();
                 step.durationMs = std::chrono::duration<double, std::milli>(end - start).count();
 
                 if (ok) {
                     step.result = StepResult::Success;
                     stats.passedSteps++;
-                } else {
+                }
+                else {
                     step.result = StepResult::Failure;
                     stats.failedSteps++;
                     scenarioFailed = true;

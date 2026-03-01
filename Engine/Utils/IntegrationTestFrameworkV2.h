@@ -123,7 +123,7 @@ public:
 
     /// Register a test case
     void RegisterTest(const std::string& name, IntegTestCategory category,
-                      TestFunc func, uint32_t timeoutMs = 30000) {
+        TestFunc func, uint32_t timeoutMs = 30000) {
         IntegTestCase tc;
         tc.name = name;
         tc.category = category;
@@ -145,7 +145,8 @@ public:
             bool success = false;
             try {
                 success = m_funcs[i]();
-            } catch (...) {
+            }
+            catch (...) {
                 success = false;
                 tc.failureMessage = "Exception thrown";
             }
@@ -155,7 +156,8 @@ public:
             if (success) {
                 tc.status = IntegTestStatus::Passed;
                 result.passed++;
-            } else {
+            }
+            else {
                 tc.status = IntegTestStatus::Failed;
                 result.failed++;
             }
@@ -175,14 +177,16 @@ public:
 
             auto start = std::chrono::steady_clock::now();
             bool success = false;
-            try { success = m_funcs[i](); } catch (...) { success = false; }
+            try { success = m_funcs[i](); }
+            catch (...) { success = false; }
             auto end = std::chrono::steady_clock::now();
             tc.durationMs = std::chrono::duration<double, std::milli>(end - start).count();
 
             if (success) {
                 tc.status = IntegTestStatus::Passed;
                 result.passed++;
-            } else {
+            }
+            else {
                 tc.status = IntegTestStatus::Failed;
                 result.failed++;
             }

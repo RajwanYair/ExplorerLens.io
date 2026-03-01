@@ -392,6 +392,62 @@
 #include "../Memory/SmartPointerPool.h"
 #include "../Cache/ThumbnailPersistenceLayer.h"
 
+// Batch 5 — Sprints 394-405
+#include "../Core/FileIntegrityMonitor.h"
+#include "../Core/ThumbnailDiffEngine.h"
+#include "../Core/DecoderSandboxPolicy.h"
+#include "../Core/IntelligentPrefetchV2.h"
+#include "../GPU/GPUWorkloadBalancer.h"
+#include "../Pipeline/FilesystemWatchdog.h"
+#include "../Core/CompressionBenchmark.h"
+#include "../Core/ExplorerBandIntegration.h"
+#include "../Core/ThumbnailStreamProtocol.h"
+#include "../Utils/RegistrySnapshotManager.h"
+#include "../Core/HotReloadConfigEngine.h"
+#include "../Core/COMDiagnosticsEngine.h"
+
+// Batch 6 — Sprints 406-417
+#include "../Core/ThumbnailWatermark.h"
+#include "../Core/BatchRenamePreview.h"
+#include "../Core/DuplicateFileDetector.h"
+#include "../Core/ThumbnailAnnotation.h"
+#include "../Cache/CacheMigrationEngine.h"
+#include "../Core/ExplorerContextMenuExtension.h"
+#include "../Pipeline/AdaptiveQualityScaler.h"
+#include "../Core/ThumbnailCompareView.h"
+#include "../Core/FileTypeStatistics.h"
+#include "../Memory/MemoryDefragmenter.h"
+#include "../Core/ShellNotificationEngine.h"
+#include "../Core/ThumbnailExportEngine.h"
+
+// Batch 7 — Sprints 418-429
+#include "../Core/ThumbnailVersionControl.h"
+#include "../Core/FilePreviewRouter.h"
+#include "../Core/ClipboardThumbnailManager.h"
+#include "../Core/FormatConversionPipeline.h"
+#include "../GPU/VulkanMemoryAllocator.h"
+#include "../Pipeline/DecoderPriorityScheduler.h"
+#include "../Core/ErrorReportingPipeline.h"
+#include "../Core/EnterpriseAuditPipeline.h"
+#include "../Core/ResourceQuotaManager.h"
+#include "../Core/AccessTokenValidator.h"
+#include "../Cache/CacheEncryptionLayer.h"
+#include "../Core/ExplorerPreviewPane.h"
+#include "../Core/DirectShowThumbnailBridge.h"
+#include "../Core/ShellExtensionHealthMonitor.h"
+#include "../Core/ThumbnailColorSpace.h"
+#include "../Pipeline/AsyncIOCompletionEngine.h"
+#include "../Core/ExifOrientationFixer.h"
+#include "../Core/MultiMonitorDPIScaler.h"
+#include "../Memory/VirtualAllocOptimizer.h"
+#include "../Core/ThumbnailHistogram.h"
+#include "../Core/FileAssociationManager.h"
+#include "../GPU/DX12FenceManager.h"
+#include "../Core/LocalizationEngine.h"
+#include "../Core/ThumbnailSpriteSheet.h"
+#include "../Cache/CacheTelemetryCollector.h"
+#include "../Core/WindowsSearchIntegration.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))
@@ -1072,7 +1128,7 @@ TEST(TestJXLDecoder_Extensions) {
             foundJXL = true;
             break;
         }
-}
+    }
     ASSERT(foundJXL);
 }
 
@@ -11766,8 +11822,8 @@ TEST(TestHybridUI_InitialState) {
     auto state = bridge.GetState();
     // Either NotInitialized or Active — both valid
     ASSERT(state == XamlHostState::NotInitialized ||
-           state == XamlHostState::Active ||
-           state == XamlHostState::Unsupported);
+        state == XamlHostState::Active ||
+        state == XamlHostState::Unsupported);
 }
 
 // ============================================================================
@@ -11945,7 +12001,7 @@ TEST(TestOrch_DependencyFailure) {
     IntegrationTestOrchestrator orch;
     orch.AddScenario("DepTest", ScenarioType::Sequential);
     orch.AddStep("Step0", []() { return false; });  // fails
-    orch.AddStep("Step1", []() { return true; }, {0}); // depends on 0
+    orch.AddStep("Step1", []() { return true; }, { 0 }); // depends on 0
     auto stats = orch.Run();
     ASSERT(stats.failedSteps == 2); // Step0 Failed + Step1 DependencyFailed
     ASSERT(stats.passedSteps == 0);
@@ -11970,7 +12026,7 @@ TEST(TestFuzzOrch_SeverityStrings) {
 TEST(TestFuzzOrch_CorpusAndCrash) {
     using namespace ExplorerLens::Engine;
     ContinuousFuzzOrchestrator fuzz;
-    fuzz.Initialize({"JPEGDecoder", "PNGDecoder"});
+    fuzz.Initialize({ "JPEGDecoder", "PNGDecoder" });
     ASSERT(fuzz.IsInitialized());
     fuzz.AddCorpusEntry("abc123", 1024, 42);
     fuzz.AddCorpusEntry("def456", 512, 0);  // not interesting
@@ -11985,7 +12041,7 @@ TEST(TestFuzzOrch_CorpusAndCrash) {
 TEST(TestFuzzOrch_MinimizeCorpus) {
     using namespace ExplorerLens::Engine;
     ContinuousFuzzOrchestrator fuzz;
-    fuzz.Initialize({"TestDecoder"});
+    fuzz.Initialize({ "TestDecoder" });
     fuzz.AddCorpusEntry("h1", 100, 10); // interesting
     fuzz.AddCorpusEntry("h2", 200, 0);  // not interesting
     fuzz.AddCorpusEntry("h3", 150, 5);  // interesting
@@ -12296,6 +12352,1287 @@ TEST(TestCacheWarm_DefaultConfigV2) {
     ASSERT(cfg.maxFilesPerSession == 1000);
     ASSERT(cfg.respectPowerMode == true);
     ASSERT(cfg.pauseOnUserActivity == true);
+}
+
+//== File Integrity Monitor (Sprint 394) ==
+TEST(TestIntegrityMon_CheckTypeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FileIntegrityCheckTypeName(FileIntegrityCheckType::Hash)) == "Hash");
+    ASSERT(std::string(FileIntegrityCheckTypeName(FileIntegrityCheckType::Timestamp)) == "Timestamp");
+    ASSERT(std::string(FileIntegrityCheckTypeName(FileIntegrityCheckType::Quick)) == "Quick");
+}
+TEST(TestIntegrityMon_StatusNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FileIntegrityStatusName(FileIntegrityStatus::Valid)) == "Valid");
+    ASSERT(std::string(FileIntegrityStatusName(FileIntegrityStatus::Corrupted)) == "Corrupted");
+    ASSERT(std::string(FileIntegrityStatusName(FileIntegrityStatus::Missing)) == "Missing");
+}
+TEST(TestIntegrityMon_DefaultConstruction) {
+    using namespace ExplorerLens::Engine;
+    FileIntegrityMonitor mon;
+    FileIntegrityRecord rec;
+    ASSERT(rec.status == FileIntegrityStatus::Valid);
+    ASSERT(rec.lastCheckType == FileIntegrityCheckType::Quick);
+}
+TEST(TestIntegrityMon_RecordFields) {
+    using namespace ExplorerLens::Engine;
+    FileIntegrityRecord rec;
+    rec.filePath = L"C:\\test.txt";
+    rec.status = FileIntegrityStatus::Modified;
+    rec.lastCheckType = FileIntegrityCheckType::FullScan;
+    ASSERT(rec.filePath == L"C:\\test.txt");
+    ASSERT(rec.status == FileIntegrityStatus::Modified);
+}
+
+//== Thumbnail Diff Engine (Sprint 395) ==
+TEST(TestDiffEngine_AlgorithmNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DiffAlgorithmName(DiffAlgorithm::PixelWise)) == "PixelWise");
+    ASSERT(std::string(DiffAlgorithmName(DiffAlgorithm::SSIM)) == "SSIM");
+    ASSERT(std::string(DiffAlgorithmName(DiffAlgorithm::Histogram)) == "Histogram");
+}
+TEST(TestDiffEngine_SeverityNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DiffSeverityName(DiffSeverity::Identical)) == "Identical");
+    ASSERT(std::string(DiffSeverityName(DiffSeverity::Minor)) == "Minor");
+    ASSERT(std::string(DiffSeverityName(DiffSeverity::Major)) == "Major");
+}
+TEST(TestDiffEngine_DefaultResult) {
+    using namespace ExplorerLens::Engine;
+    DiffResult result;
+    ASSERT(result.severity == DiffSeverity::Identical);
+    ASSERT(result.algorithm == DiffAlgorithm::PixelWise);
+}
+TEST(TestDiffEngine_Construction) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailDiffEngine engine;
+    DiffThresholdConfig cfg;
+    ASSERT(cfg.minorThreshold >= 0.0f);
+}
+
+//== Decoder Sandbox Policy (Sprint 396) ==
+TEST(TestSandboxPolicy_LevelNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DecoderSandboxLevelName(DecoderSandboxLevel::None)) == "None");
+    ASSERT(std::string(DecoderSandboxLevelName(DecoderSandboxLevel::Strict)) == "Strict");
+    ASSERT(std::string(DecoderSandboxLevelName(DecoderSandboxLevel::Paranoid)) == "Paranoid");
+}
+TEST(TestSandboxPolicy_ResourceLimitNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SandboxResourceLimitName(SandboxResourceLimit::Memory)) == "Memory");
+    ASSERT(std::string(SandboxResourceLimitName(SandboxResourceLimit::CPU)) == "CPU");
+    ASSERT(std::string(SandboxResourceLimitName(SandboxResourceLimit::Disk)) == "Disk");
+}
+TEST(TestSandboxPolicy_DefaultConstruction) {
+    using namespace ExplorerLens::Engine;
+    DecoderSandboxPolicy policy;
+    DecoderSandboxRule sp;
+    ASSERT(sp.level == DecoderSandboxLevel::Standard);
+}
+TEST(TestSandboxPolicy_MaxMemory) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(DecoderSandboxPolicy::MAX_MEMORY_MB == 512);
+    DecoderSandboxViolation viol;
+    viol.resource = SandboxResourceLimit::Memory;
+    ASSERT(viol.resource == SandboxResourceLimit::Memory);
+}
+
+//== Intelligent Prefetch V2 (Sprint 397) ==
+TEST(TestPrefetchV2_StrategyNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PrefetchStrategyV2Name(PrefetchStrategyV2::None)) == "None");
+    ASSERT(std::string(PrefetchStrategyV2Name(PrefetchStrategyV2::Sequential)) == "Sequential");
+    ASSERT(std::string(PrefetchStrategyV2Name(PrefetchStrategyV2::Predictive)) == "Predictive");
+}
+TEST(TestPrefetchV2_PatternNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AccessPatternV2Name(AccessPatternV2::Random)) == "Random");
+    ASSERT(std::string(AccessPatternV2Name(AccessPatternV2::Sequential)) == "Sequential");
+    ASSERT(std::string(AccessPatternV2Name(AccessPatternV2::Temporal)) == "Temporal");
+}
+TEST(TestPrefetchV2_Prediction) {
+    using namespace ExplorerLens::Engine;
+    PrefetchPrediction pred;
+    ASSERT(pred.confidence >= 0.0f);
+    ASSERT(pred.strategy == PrefetchStrategyV2::None);
+}
+TEST(TestPrefetchV2_ConfidenceThreshold) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(IntelligentPrefetchV2::CONFIDENCE_THRESHOLD > 0.0f);
+    ASSERT(IntelligentPrefetchV2::CONFIDENCE_THRESHOLD <= 1.0f);
+    IntelligentPrefetchV2 prefetcher;
+    (void)prefetcher;
+}
+
+//== GPU Workload Balancer (Sprint 398) ==
+TEST(TestGPUBalance_StrategyNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(BalancingStrategyName(BalancingStrategy::RoundRobin)) == "RoundRobin");
+    ASSERT(std::string(BalancingStrategyName(BalancingStrategy::LoadBased)) == "LoadBased");
+    ASSERT(std::string(BalancingStrategyName(BalancingStrategy::CapabilityBased)) == "CapabilityBased");
+}
+TEST(TestGPUBalance_WorkloadTypeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(GPUWorkloadTypeName(GPUWorkloadType::Decode)) == "Decode");
+    ASSERT(std::string(GPUWorkloadTypeName(GPUWorkloadType::Resize)) == "Resize");
+    ASSERT(std::string(GPUWorkloadTypeName(GPUWorkloadType::Compute)) == "Compute");
+}
+TEST(TestGPUBalance_Construction) {
+    using namespace ExplorerLens::Engine;
+    GPUWorkloadBalancer balancer;
+    ASSERT(balancer.GetActiveGPUCount() == 0);
+    ASSERT(balancer.GetTotalSubmitted() == 0);
+}
+TEST(TestGPUBalance_MaxGPUs) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(GPUWorkloadBalancer::MAX_GPUS == 8);
+    GPUWorkItem item;
+    item.workloadType = GPUWorkloadType::Decode;
+    ASSERT(item.workloadType == GPUWorkloadType::Decode);
+}
+
+//== Filesystem Watchdog (Sprint 399) ==
+TEST(TestFSWatchdog_EventNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FSWatchEventName(FSWatchEvent::Created)) == "Created");
+    ASSERT(std::string(FSWatchEventName(FSWatchEvent::Modified)) == "Modified");
+    ASSERT(std::string(FSWatchEventName(FSWatchEvent::Deleted)) == "Deleted");
+}
+TEST(TestFSWatchdog_ScopeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FSWatchScopeName(FSWatchScope::File)) == "File");
+    ASSERT(std::string(FSWatchScopeName(FSWatchScope::Directory)) == "Directory");
+    ASSERT(std::string(FSWatchScopeName(FSWatchScope::Recursive)) == "Recursive");
+}
+TEST(TestFSWatchdog_DefaultConstruction) {
+    using namespace ExplorerLens::Engine;
+    FilesystemWatchdog watchdog;
+    FSWatchChangeEvent evt;
+    evt.eventType = FSWatchEvent::Created;
+    ASSERT(evt.eventType == FSWatchEvent::Created);
+}
+TEST(TestFSWatchdog_MaxDirectories) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(FilesystemWatchdog::MAX_WATCH_DIRS == 64);
+    FSWatchDirConfig cfg;
+    cfg.scope = FSWatchScope::Recursive;
+    ASSERT(cfg.scope == FSWatchScope::Recursive);
+}
+
+//== Compression Benchmark (Sprint 400) ==
+TEST(TestCompBench_AlgoNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CompressionAlgoName(CompressionAlgo::Deflate)) == "Deflate");
+    ASSERT(std::string(CompressionAlgoName(CompressionAlgo::LZ4)) == "LZ4");
+    ASSERT(std::string(CompressionAlgoName(CompressionAlgo::Zstd)) == "Zstd");
+}
+TEST(TestCompBench_MetricNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CompressionBenchMetricName(CompressionBenchMetric::CompressSpeed)) == "CompressSpeed");
+    ASSERT(std::string(CompressionBenchMetricName(CompressionBenchMetric::DecompressSpeed)) == "DecompressSpeed");
+    ASSERT(std::string(CompressionBenchMetricName(CompressionBenchMetric::Ratio)) == "Ratio");
+}
+TEST(TestCompBench_DefaultResult) {
+    using namespace ExplorerLens::Engine;
+    CompressionBenchResult result;
+    ASSERT(result.algorithm == CompressionAlgo::Deflate);
+    ASSERT(result.metric == CompressionBenchMetric::CompressSpeed);
+}
+TEST(TestCompBench_Iterations) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(CompressionBenchmark::ITERATIONS_DEFAULT == 100);
+    CompressionBenchmark bench;
+    (void)bench;
+}
+
+//== Explorer Band Integration (Sprint 401) ==
+TEST(TestBandInteg_PositionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(BandPositionName(BandPosition::Top)) == "Top");
+    ASSERT(std::string(BandPositionName(BandPosition::Bottom)) == "Bottom");
+    ASSERT(std::string(BandPositionName(BandPosition::Left)) == "Left");
+}
+TEST(TestBandInteg_StateNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(BandStateName(BandState::Hidden)) == "Hidden");
+    ASSERT(std::string(BandStateName(BandState::Visible)) == "Visible");
+    ASSERT(std::string(BandStateName(BandState::Minimized)) == "Minimized");
+}
+TEST(TestBandInteg_DefaultConfig) {
+    using namespace ExplorerLens::Engine;
+    BandConfig cfg;
+    cfg.position = BandPosition::Top;
+    ASSERT(cfg.position == BandPosition::Top);
+}
+TEST(TestBandInteg_Construction) {
+    using namespace ExplorerLens::Engine;
+    ExplorerBandIntegration band;
+    BandRegistrationInfo info;
+    info.isRegistered = false;
+    ASSERT(info.isRegistered == false);
+}
+
+//== Thumbnail Stream Protocol (Sprint 402) ==
+TEST(TestStreamProto_ProtocolNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(TSProtoTypeName(TSProtoType::HTTP)) == "HTTP");
+    ASSERT(std::string(TSProtoTypeName(TSProtoType::WebSocket)) == "WebSocket");
+    ASSERT(std::string(TSProtoTypeName(TSProtoType::NamedPipe)) == "NamedPipe");
+}
+TEST(TestStreamProto_StateNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(TSProtoStateName(TSProtoState::Idle)) == "Idle");
+    ASSERT(std::string(TSProtoStateName(TSProtoState::Streaming)) == "Streaming");
+    ASSERT(std::string(TSProtoStateName(TSProtoState::Error)) == "Error");
+}
+TEST(TestStreamProto_EndpointConfig) {
+    using namespace ExplorerLens::Engine;
+    StreamEndpoint endpoint;
+    endpoint.protocol = TSProtoType::NamedPipe;
+    ASSERT(endpoint.protocol == TSProtoType::NamedPipe);
+    ASSERT(endpoint.timeoutMs == 5000);
+}
+TEST(TestStreamProto_Timeout) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(ThumbnailStreamProtocol::TIMEOUT_MS == 5000);
+    ThumbnailStreamProtocol proto;
+    (void)proto;
+}
+
+//== Registry Snapshot Manager (Sprint 403) ==
+TEST(TestRegSnap_ScopeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SnapshotScopeName(SnapshotScope::CurrentUser)) == "CurrentUser");
+    ASSERT(std::string(SnapshotScopeName(SnapshotScope::LocalMachine)) == "LocalMachine");
+    ASSERT(std::string(SnapshotScopeName(SnapshotScope::ClassesRoot)) == "ClassesRoot");
+}
+TEST(TestRegSnap_ActionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SnapshotActionName(SnapshotAction::Backup)) == "Backup");
+    ASSERT(std::string(SnapshotActionName(SnapshotAction::Restore)) == "Restore");
+    ASSERT(std::string(SnapshotActionName(SnapshotAction::Compare)) == "Compare");
+}
+TEST(TestRegSnap_Construction) {
+    using namespace ExplorerLens::Engine;
+    RegistrySnapshotManager mgr;
+    RegistrySnapshot snapshot;
+    snapshot.scope = SnapshotScope::CurrentUser;
+    ASSERT(snapshot.scope == SnapshotScope::CurrentUser);
+}
+TEST(TestRegSnap_MaxSnapshots) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(RegistrySnapshotManager::MAX_SNAPSHOTS == 10);
+    SnapshotComparisonResult result;
+    ASSERT(result.identical == true);
+}
+
+//== Hot Reload Config Engine (Sprint 404) ==
+TEST(TestHotReload_SourceNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(HotReloadSourceName(HotReloadSource::Registry)) == "Registry");
+    ASSERT(std::string(HotReloadSourceName(HotReloadSource::File)) == "File");
+    ASSERT(std::string(HotReloadSourceName(HotReloadSource::Environment)) == "Environment");
+}
+TEST(TestHotReload_TriggerNamesV2) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ConfigReloadTriggerName(ConfigReloadTrigger::Manual)) == "Manual");
+    ASSERT(std::string(ConfigReloadTriggerName(ConfigReloadTrigger::FileChange)) == "FileChange");
+    ASSERT(std::string(ConfigReloadTriggerName(ConfigReloadTrigger::Timer)) == "Timer");
+}
+TEST(TestHotReload_DefaultResult) {
+    using namespace ExplorerLens::Engine;
+    HotReloadResult result;
+    result.source = HotReloadSource::Registry;
+    result.trigger = ConfigReloadTrigger::Manual;
+    ASSERT(result.source == HotReloadSource::Registry);
+}
+TEST(TestHotReload_PollInterval) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(HotReloadConfigEngine::POLL_INTERVAL_MS == 1000);
+    HotReloadConfigEngine engine;
+    (void)engine;
+}
+
+//== COM Diagnostics Engine (Sprint 405) ==
+TEST(TestCOMDiag_HealthStatusNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(COMHealthStatusName(COMHealthStatus::Healthy)) == "Healthy");
+    ASSERT(std::string(COMHealthStatusName(COMHealthStatus::Degraded)) == "Degraded");
+    ASSERT(std::string(COMHealthStatusName(COMHealthStatus::Broken)) == "Broken");
+}
+TEST(TestCOMDiag_RepairActionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(COMRepairActionName(COMRepairAction::Reregister)) == "Reregister");
+    ASSERT(std::string(COMRepairActionName(COMRepairAction::CleanKeys)) == "CleanKeys");
+    ASSERT(std::string(COMRepairActionName(COMRepairAction::FullRepair)) == "FullRepair");
+}
+TEST(TestCOMDiag_DiagnosticResult) {
+    using namespace ExplorerLens::Engine;
+    COMDiagnosticResult result;
+    result.status = COMHealthStatus::Healthy;
+    ASSERT(result.status == COMHealthStatus::Healthy);
+}
+TEST(TestCOMDiag_CLSIDConstant) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(COMDiagnosticsEngine::CLSID_LENS) == L"9E6ECB90-5A61-42BD-B851-D3297D9C7F39");
+    COMDiagnosticsEngine engine;
+    (void)engine;
+}
+
+//== Thumbnail Watermark (Sprint 406) ==
+TEST(TestWatermark_PositionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(WatermarkPositionName(WatermarkPosition::TopLeft)) == "TopLeft");
+    ASSERT(std::string(WatermarkPositionName(WatermarkPosition::BottomRight)) == "BottomRight");
+    ASSERT(std::string(WatermarkPositionName(WatermarkPosition::Center)) == "Center");
+}
+TEST(TestWatermark_TypeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(WatermarkTypeName(WatermarkType::Text)) == "Text");
+    ASSERT(std::string(WatermarkTypeName(WatermarkType::QRCode)) == "QRCode");
+    ASSERT(std::string(WatermarkTypeName(WatermarkType::None)) == "None");
+}
+TEST(TestWatermark_ApplyAndConfig) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailWatermark wm;
+    ASSERT(!wm.IsActive());
+    WatermarkConfig cfg;
+    cfg.type = WatermarkType::Text;
+    cfg.text = "DRAFT";
+    cfg.opacity = 0.8f;
+    wm.SetConfig(cfg);
+    ASSERT(wm.IsActive());
+    uint8_t pixels[16] = {};
+    ASSERT(wm.Apply(pixels, 2, 2));
+    ASSERT(wm.GetAppliedCount() == 1);
+    ASSERT(wm.GetSupportedTypes().size() == 4);
+}
+
+//== Batch Rename Preview (Sprint 407) ==
+TEST(TestRenamePreview_PatternNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(RenamePatternName(RenamePattern::Sequential)) == "Sequential");
+    ASSERT(std::string(RenamePatternName(RenamePattern::RegexReplace)) == "RegexReplace");
+    ASSERT(std::string(RenamePatternName(RenamePattern::Custom)) == "Custom");
+}
+TEST(TestRenamePreview_StateNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(RenamePreviewStateName(RenamePreviewState::Idle)) == "Idle");
+    ASSERT(std::string(RenamePreviewStateName(RenamePreviewState::Ready)) == "Ready");
+    ASSERT(std::string(RenamePreviewStateName(RenamePreviewState::Error)) == "Error");
+}
+TEST(TestRenamePreview_GenerateAndGet) {
+    using namespace ExplorerLens::Engine;
+    BatchRenamePreview brp;
+    ASSERT(brp.GetItemCount() == 0);
+    std::vector<std::string> files = { "a.txt", "b.txt", "c.txt" };
+    ASSERT(brp.GeneratePreviews(files, RenamePattern::Sequential));
+    ASSERT(brp.GetItemCount() == 3);
+    ASSERT(brp.GetState() == RenamePreviewState::Ready);
+    auto* item = brp.GetPreview(0);
+    ASSERT(item != nullptr);
+    ASSERT(item->newName == "file_1");
+}
+
+//== Duplicate File Detector (Sprint 408) ==
+TEST(TestDupDetect_HashMethodNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DuplicateHashMethodName(DuplicateHashMethod::MD5)) == "MD5");
+    ASSERT(std::string(DuplicateHashMethodName(DuplicateHashMethod::Perceptual)) == "Perceptual");
+    ASSERT(std::string(DuplicateHashMethodName(DuplicateHashMethod::DifferenceHash)) == "DifferenceHash");
+}
+TEST(TestDupDetect_ConfidenceNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DuplicateConfidenceName(DuplicateConfidence::Exact)) == "Exact");
+    ASSERT(std::string(DuplicateConfidenceName(DuplicateConfidence::VeryHigh)) == "VeryHigh");
+    ASSERT(std::string(DuplicateConfidenceName(DuplicateConfidence::Low)) == "Low");
+}
+TEST(TestDupDetect_ScanDirectory) {
+    using namespace ExplorerLens::Engine;
+    DuplicateFileDetector det;
+    ASSERT(!det.IsScanComplete());
+    ASSERT(det.ScanDirectory("C:\\test", DuplicateHashMethod::SHA256));
+    ASSERT(det.IsScanComplete());
+    ASSERT(det.GetGroupCount() >= 1);
+    ASSERT(det.GetMethod() == DuplicateHashMethod::SHA256);
+}
+
+//== Thumbnail Annotation (Sprint 409) ==
+TEST(TestAnnotation_TypeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AnnotationTypeName(AnnotationType::Resolution)) == "Resolution");
+    ASSERT(std::string(AnnotationTypeName(AnnotationType::Duration)) == "Duration");
+    ASSERT(std::string(AnnotationTypeName(AnnotationType::PageCount)) == "PageCount");
+}
+TEST(TestAnnotation_StyleNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AnnotationStyleName(AnnotationStyle::Badge)) == "Badge");
+    ASSERT(std::string(AnnotationStyleName(AnnotationStyle::Overlay)) == "Overlay");
+}
+TEST(TestAnnotation_AddRemoveRender) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailAnnotation ann;
+    ASSERT(ann.GetAnnotationCount() == 0);
+    AnnotationConfig cfg;
+    cfg.type = AnnotationType::FileSize;
+    cfg.style = AnnotationStyle::Corner;
+    ASSERT(ann.AddAnnotation(cfg));
+    ASSERT(ann.GetAnnotationCount() == 1);
+    for (int i = 0; i < 4; i++) ann.AddAnnotation(cfg);
+    ASSERT(ann.IsFull());
+    ASSERT(!ann.AddAnnotation(cfg)); // exceeds MAX_ANNOTATIONS
+    ASSERT(ann.RemoveAnnotation(0));
+    ASSERT(ann.GetAnnotationCount() == 4);
+    uint8_t px[16] = {};
+    ASSERT(ann.Render(px, 2, 2));
+}
+
+//== Cache Migration Engine (Sprint 410) ==
+TEST(TestCacheMigration_FormatNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CacheMigrationFormatName(CacheMigrationFormat::V1Binary)) == "V1Binary");
+    ASSERT(std::string(CacheMigrationFormatName(CacheMigrationFormat::Current)) == "Current");
+}
+TEST(TestCacheMigration_StateNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CacheMigrationStateName(CacheMigrationState::NotStarted)) == "NotStarted");
+    ASSERT(std::string(CacheMigrationStateName(CacheMigrationState::Complete)) == "Complete");
+}
+TEST(TestCacheMigration_MigrateFlow) {
+    using namespace ExplorerLens::Engine;
+    CacheMigrationEngine eng;
+    ASSERT(eng.CanMigrate(CacheMigrationFormat::V1Binary, CacheMigrationFormat::Current));
+    ASSERT(!eng.CanMigrate(CacheMigrationFormat::Current, CacheMigrationFormat::V1Binary));
+    ASSERT(eng.StartMigration("C:\\cache", CacheMigrationFormat::V1Binary, CacheMigrationFormat::Current));
+    ASSERT(eng.GetProgress().state == CacheMigrationState::Complete);
+    ASSERT(eng.GetCompletionPercent() == 100.0f);
+    ASSERT(eng.GetMigrationCount() == 1);
+}
+
+//== Explorer Context Menu Extension (Sprint 411) ==
+TEST(TestCtxMenu_ActionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ExtMenuActionName(ExtMenuAction::RegenerateThumbnail)) == "RegenerateThumbnail");
+    ASSERT(std::string(ExtMenuActionName(ExtMenuAction::ExportFullSize)) == "ExportFullSize");
+}
+TEST(TestCtxMenu_ItemStateNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ExtMenuItemStateName(ExtMenuItemState::Enabled)) == "Enabled");
+    ASSERT(std::string(ExtMenuItemStateName(ExtMenuItemState::Submenu)) == "Submenu");
+}
+TEST(TestCtxMenu_BuildAndExecute) {
+    using namespace ExplorerLens::Engine;
+    ExplorerContextMenuExtension ext;
+    ASSERT(ext.BuildMenu("C:\\test.zip"));
+    ASSERT(ext.GetMenuItemCount() == 5);
+    ASSERT(ext.ExecuteAction(ExtMenuAction::CopyThumbnail));
+    ASSERT(ext.GetExecutionCount() == 1);
+    ASSERT(ext.GetLastAction() == ExtMenuAction::CopyThumbnail);
+}
+
+//== Adaptive Quality Scaler (Sprint 412) ==
+TEST(TestQualityScaler_TierNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(QualityTierName(QualityTier::Ultra)) == "Ultra");
+    ASSERT(std::string(QualityTierName(QualityTier::Minimum)) == "Minimum");
+}
+TEST(TestQualityScaler_ReasonNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ScalingReasonName(ScalingReason::CPULoad)) == "CPULoad");
+    ASSERT(std::string(ScalingReasonName(ScalingReason::BatteryLow)) == "BatteryLow");
+}
+TEST(TestQualityScaler_Evaluate) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveQualityScaler scaler;
+    auto d = scaler.Evaluate(10.0f, 20.0f, 10.0f, false);
+    ASSERT(d.tier == QualityTier::Ultra);
+    d = scaler.Evaluate(95.0f, 50.0f, 50.0f, false);
+    ASSERT(d.tier == QualityTier::Minimum);
+    ASSERT(d.reason == ScalingReason::CPULoad);
+    d = scaler.Evaluate(10.0f, 10.0f, 10.0f, true);
+    ASSERT(d.tier == QualityTier::Medium);
+    ASSERT(d.reason == ScalingReason::BatteryLow);
+}
+
+//== Thumbnail Compare View (Sprint 413) ==
+TEST(TestCompare_ModeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CompareModeName(CompareMode::SideBySide)) == "SideBySide");
+    ASSERT(std::string(CompareModeName(CompareMode::Difference)) == "Difference");
+}
+TEST(TestCompare_SourceNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CompareSourceName(CompareSource::Cache)) == "Cache");
+    ASSERT(std::string(CompareSourceName(CompareSource::Memory)) == "Memory");
+}
+TEST(TestCompare_RunComparison) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailCompareView cv;
+    ASSERT(!cv.HasResult());
+    uint8_t a[16] = { 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255 };
+    uint8_t b[16] = { 0,0,0,255, 0,0,0,255, 0,0,0,255, 0,0,0,255 };
+    ASSERT(cv.Compare(a, 2, 2, b, 2, 2, CompareMode::Difference));
+    ASSERT(cv.HasResult());
+    ASSERT(cv.GetResult().matchPercent == 100.0f);
+    ASSERT(cv.GetResult().diffPixels == 0);
+}
+
+//== File Type Statistics (Sprint 414) ==
+TEST(TestFileStats_CategoryNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(StatCategoryName(StatCategory::DecodeCount)) == "DecodeCount");
+    ASSERT(std::string(StatCategoryName(StatCategory::CacheHitRate)) == "CacheHitRate");
+}
+TEST(TestFileStats_TimeRangeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(StatTimeRangeName(StatTimeRange::LastHour)) == "LastHour");
+    ASSERT(std::string(StatTimeRangeName(StatTimeRange::AllTime)) == "AllTime");
+}
+TEST(TestFileStats_RecordAndQuery) {
+    using namespace ExplorerLens::Engine;
+    FileTypeStatistics stats;
+    stats.RecordDecode(".png", 5.0, 1024, true, false);
+    stats.RecordDecode(".png", 3.0, 2048, false, false);
+    stats.RecordDecode(".jpg", 2.0, 512, true, false);
+    auto s = stats.GetStats(".png", StatCategory::DecodeCount);
+    ASSERT(s.value == 2.0);
+    auto top = stats.GetTopFormats(5);
+    ASSERT(top.size() == 2);
+    ASSERT(top[0] == ".png");
+    ASSERT(stats.GetTotalRecords() == 3);
+}
+
+//== Memory Defragmenter (Sprint 415) ==
+TEST(TestDefrag_LevelNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FragmentationLevelName(FragmentationLevel::None)) == "None");
+    ASSERT(std::string(FragmentationLevelName(FragmentationLevel::Critical)) == "Critical");
+}
+TEST(TestDefrag_StrategyNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DefragStrategyName(DefragStrategy::Compact)) == "Compact");
+    ASSERT(std::string(DefragStrategyName(DefragStrategy::FullSweep)) == "FullSweep");
+}
+TEST(TestDefrag_AnalyzeAndDefrag) {
+    using namespace ExplorerLens::Engine;
+    MemoryDefragmenter defrag;
+    auto lvl = defrag.Analyze(45.0f);
+    ASSERT(lvl == FragmentationLevel::High);
+    ASSERT(defrag.NeedsDefrag());
+    auto result = defrag.Defragment(DefragStrategy::FullSweep);
+    ASSERT(result.beforeFragPercent == 45.0f);
+    ASSERT(result.afterFragPercent < 45.0f);
+    ASSERT(result.bytesReclaimed > 0);
+    ASSERT(defrag.GetDefragCount() == 1);
+}
+
+//== Shell Notification Engine (Sprint 416) ==
+TEST(TestShellNotify_TypeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ShellNotifyTypeName(ShellNotifyType::AssocChanged)) == "AssocChanged");
+    ASSERT(std::string(ShellNotifyTypeName(ShellNotifyType::Delete)) == "Delete");
+}
+TEST(TestShellNotify_PriorityNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ShellNotifyPriorityName(ShellNotifyPriority::Immediate)) == "Immediate");
+    ASSERT(std::string(ShellNotifyPriorityName(ShellNotifyPriority::Batched)) == "Batched");
+}
+TEST(TestShellNotify_SendAndFlush) {
+    using namespace ExplorerLens::Engine;
+    ShellNotificationEngine eng;
+    ShellNotification n;
+    n.type = ShellNotifyType::UpdateDir;
+    n.priority = ShellNotifyPriority::Batched;
+    n.itemPath = "C:\\Users";
+    ASSERT(eng.SendNotification(n));
+    ASSERT(eng.GetPendingCount() == 1);
+    n.priority = ShellNotifyPriority::Immediate;
+    ASSERT(eng.SendNotification(n));
+    ASSERT(eng.GetPendingCount() == 1); // immediate goes straight out
+    ASSERT(eng.BatchFlush() == 1);
+    ASSERT(eng.GetPendingCount() == 0);
+    ASSERT(eng.GetTotalSent() == 2);
+}
+
+//== Thumbnail Export Engine (Sprint 417) ==
+TEST(TestThumbExport_FormatNamesV2) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ThumbnailExportFormatName(ThumbnailExportFormat::PNG)) == "PNG");
+    ASSERT(std::string(ThumbnailExportFormatName(ThumbnailExportFormat::TIFF)) == "TIFF");
+}
+TEST(TestThumbExport_DestNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ExportDestinationName(ExportDestination::File)) == "File");
+    ASSERT(std::string(ExportDestinationName(ExportDestination::Network)) == "Network");
+}
+TEST(TestThumbExport_SingleExport) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailExportEngine eng;
+    uint8_t px[64] = {};
+    ThumbnailExportConfig cfg;
+    cfg.format = ThumbnailExportFormat::JPEG;
+    cfg.destination = ExportDestination::File;
+    cfg.quality = 85;
+    ASSERT(eng.Export(px, 4, 4, cfg, "C:\\out.jpg"));
+    ASSERT(eng.GetExportCount() == 1);
+    ASSERT(eng.GetLastFormat() == ThumbnailExportFormat::JPEG);
+    ASSERT(eng.GetSupportedFormats().size() == 5);
+}
+
+//== Thumbnail Version Control (Sprint 418) ==
+TEST(TestTVC_VersionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ThumbnailVersionName(ThumbnailVersion::Original)) == "Original");
+    ASSERT(std::string(ThumbnailVersionName(ThumbnailVersion::Draft)) == "Draft");
+}
+TEST(TestTVC_ActionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(VersionActionName(VersionAction::Create)) == "Create");
+    ASSERT(std::string(VersionActionName(VersionAction::Archive)) == "Archive");
+}
+TEST(TestTVC_CreateAndRollback) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailVersionControl tvc;
+    ASSERT(tvc.CreateVersion(L"test.png", 0xABCD, 1024));
+    ASSERT(tvc.CreateVersion(L"test.png", 0xDEF0, 2048));
+    ASSERT(tvc.GetHistory().size() == 2);
+    ASSERT(tvc.Rollback());
+    ASSERT(tvc.GetHistory().size() == 3);
+    ASSERT(tvc.GetRollbackCount() == 1);
+}
+
+//== File Preview Router (Sprint 419) ==
+TEST(TestFPR_HandlerNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PreviewHandlerName(PreviewHandler::Internal)) == "Internal");
+    ASSERT(std::string(PreviewHandlerName(PreviewHandler::External)) == "External");
+}
+TEST(TestFPR_PriorityNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(RoutingPriorityName(RoutingPriority::Speed)) == "Speed");
+    ASSERT(std::string(RoutingPriorityName(RoutingPriority::ForceRegenerate)) == "ForceRegenerate");
+}
+TEST(TestFPR_RouteAndRegister) {
+    using namespace ExplorerLens::Engine;
+    FilePreviewRouter router;
+    auto route = router.Route(L"test.webp", RoutingPriority::Speed);
+    ASSERT(route.handler == PreviewHandler::Internal);
+    ASSERT(route.estimatedMs > 0.0);
+    ASSERT(router.RegisterHandler(".webp", PreviewHandler::Plugin));
+    ASSERT(router.GetRegisteredCount() == 1);
+}
+
+//== Clipboard Thumbnail Manager (Sprint 420) ==
+TEST(TestClip_FormatNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ClipboardFormatName(ClipboardFormat::PNG)) == "PNG");
+    ASSERT(std::string(ClipboardFormatName(ClipboardFormat::DIB)) == "DIB");
+}
+TEST(TestClip_TargetNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PasteTargetName(PasteTarget::Explorer)) == "Explorer");
+    ASSERT(std::string(PasteTargetName(PasteTarget::Document)) == "Document");
+}
+TEST(TestClip_CopyAndPaste) {
+    using namespace ExplorerLens::Engine;
+    ClipboardThumbnailManager mgr;
+    ASSERT(mgr.CopyToClipboard(L"test.png", ClipboardFormat::PNG));
+    ASSERT(mgr.GetCopyCount() == 1);
+    ClipboardEntry entry;
+    ASSERT(mgr.PasteFromClipboard(PasteTarget::Explorer, entry));
+    ASSERT(entry.format == ClipboardFormat::PNG);
+    ASSERT(mgr.GetFormats().size() == 1);
+}
+
+//== Format Conversion Pipeline (Sprint 421) ==
+TEST(TestFCP_TargetNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ConvertTargetName(ConvertTarget::WebP)) == "WebP");
+    ASSERT(std::string(ConvertTargetName(ConvertTarget::JXL)) == "JXL");
+}
+TEST(TestFCP_QualityNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ConversionQualityName(ConversionQuality::Lossless)) == "Lossless");
+    ASSERT(std::string(ConversionQualityName(ConversionQuality::Minimal)) == "Minimal");
+}
+TEST(TestFCP_ConvertSingle) {
+    using namespace ExplorerLens::Engine;
+    FormatConversionPipeline pipe;
+    FormatConversionJob job;
+    ASSERT(pipe.Convert(L"in.png", ConvertTarget::AVIF, ConversionQuality::Balanced, job));
+    ASSERT(job.target == ConvertTarget::AVIF);
+    ASSERT(pipe.GetTotalConversions() == 1);
+    ASSERT(pipe.GetBestTarget(50000, false) == ConvertTarget::WebP);
+}
+
+//== Vulkan Memory Allocator (Sprint 422) ==
+TEST(TestVMA_TierNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(VkMemoryTierName(VkMemoryTier::DeviceLocal)) == "DeviceLocal");
+    ASSERT(std::string(VkMemoryTierName(VkMemoryTier::Shared)) == "Shared");
+}
+TEST(TestVMA_StrategyNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(VkAllocStrategyName(VkAllocStrategy::BestFit)) == "BestFit");
+    ASSERT(std::string(VkAllocStrategyName(VkAllocStrategy::Suballocate)) == "Suballocate");
+}
+TEST(TestVMA_AllocAndFree) {
+    using namespace ExplorerLens::Engine;
+    VulkanMemoryAllocator vma;
+    VkMemoryBlock blk;
+    ASSERT(vma.Allocate(VkMemoryTier::DeviceLocal, VkAllocStrategy::BestFit, 4096, blk));
+    ASSERT(vma.GetUsageBytes() == 4096);
+    ASSERT(vma.GetBlockCount() == 1);
+    ASSERT(vma.Free(0));
+    ASSERT(vma.GetUsageBytes() == 0);
+}
+
+//== Decoder Priority Scheduler (Sprint 423) ==
+TEST(TestDPS_PriorityNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DecoderTaskPriorityName(DecoderTaskPriority::Urgent)) == "Urgent");
+    ASSERT(std::string(DecoderTaskPriorityName(DecoderTaskPriority::Deferred)) == "Deferred");
+}
+TEST(TestDPS_PolicyNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SchedulerPolicyName(SchedulerPolicy::FIFO)) == "FIFO");
+    ASSERT(std::string(SchedulerPolicyName(SchedulerPolicy::Weighted)) == "Weighted");
+}
+TEST(TestDPS_SubmitAndCancel) {
+    using namespace ExplorerLens::Engine;
+    DecoderPriorityScheduler sched;
+    DecoderTask t1; t1.priority = DecoderTaskPriority::Background; t1.decoderName = "LibRaw";
+    DecoderTask t2; t2.priority = DecoderTaskPriority::Urgent; t2.decoderName = "LibWebP";
+    auto id1 = sched.Submit(t1);
+    sched.Submit(t2);
+    ASSERT(sched.GetQueueDepth() == 2);
+    ASSERT(sched.Cancel(id1));
+    ASSERT(sched.GetQueueDepth() == 1);
+}
+
+//== Error Reporting Pipeline (Sprint 424) ==
+TEST(TestERP_DomainNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ErrorDomainName(ErrorDomain::Decoder)) == "Decoder");
+    ASSERT(std::string(ErrorDomainName(ErrorDomain::COM)) == "COM");
+}
+TEST(TestERP_AggregationNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ErrorAggregationName(ErrorAggregation::PerFile)) == "PerFile");
+    ASSERT(std::string(ErrorAggregationName(ErrorAggregation::Total)) == "Total");
+}
+TEST(TestERP_ReportAndQuery) {
+    using namespace ExplorerLens::Engine;
+    ErrorReportingPipeline erp;
+    erp.Report(ErrorDomain::Decoder, ErrorAggregation::PerFile, "decode failed");
+    erp.Report(ErrorDomain::Decoder, ErrorAggregation::PerFile, "decode failed");
+    erp.Report(ErrorDomain::GPU, ErrorAggregation::Total, "shader compile");
+    ASSERT(erp.GetBucketCount() == 2);
+    ASSERT(erp.GetTotalErrorCount() == 3);
+    auto top = erp.GetTopErrors(1);
+    ASSERT(top.size() == 1 && top[0].count == 2);
+}
+
+//== Enterprise Audit Pipeline (Sprint 425) ==
+TEST(TestEAP_ActionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AuditActionName(AuditAction::FileAccessed)) == "FileAccessed");
+    ASSERT(std::string(AuditActionName(AuditAction::PluginLoaded)) == "PluginLoaded");
+}
+TEST(TestEAP_DestNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AuditDestinationName(AuditDestination::ETW)) == "ETW");
+    ASSERT(std::string(AuditDestinationName(AuditDestination::Database)) == "Database");
+}
+TEST(TestEAP_LogAndRetrieve) {
+    using namespace ExplorerLens::Engine;
+    EnterpriseAuditPipeline eap;
+    eap.SetDestination(AuditDestination::File);
+    eap.LogAction(AuditAction::ThumbnailGenerated, L"test.png", "user1");
+    eap.LogAction(AuditAction::CacheHit, L"test.png", "user1", "from disk");
+    ASSERT(eap.GetEntryCount() == 2);
+    auto recent = eap.GetRecentEntries(1);
+    ASSERT(recent.size() == 1);
+    ASSERT(eap.GetDestination() == AuditDestination::File);
+}
+
+//== Resource Quota Manager (Sprint 426) ==
+TEST(TestRQM_ResourceNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(QuotaResourceName(QuotaResource::Memory)) == "Memory");
+    ASSERT(std::string(QuotaResourceName(QuotaResource::GPUMemory)) == "GPUMemory");
+}
+TEST(TestRQM_EnforcementNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(QuotaEnforcementName(QuotaEnforcement::SoftLimit)) == "SoftLimit");
+    ASSERT(std::string(QuotaEnforcementName(QuotaEnforcement::Deny)) == "Deny");
+}
+TEST(TestRQM_SetAndCheck) {
+    using namespace ExplorerLens::Engine;
+    ResourceQuotaManager rqm;
+    rqm.SetQuota(QuotaResource::Memory, QuotaEnforcement::HardLimit, 1048576, "bytes");
+    ASSERT(!rqm.IsOverQuota());
+    rqm.RecordUsage(QuotaResource::Memory, 2000000);
+    ASSERT(rqm.IsOverQuota());
+    ASSERT(rqm.GetUsage(QuotaResource::Memory) == 2000000);
+    rqm.ResetUsage();
+    ASSERT(!rqm.IsOverQuota());
+}
+
+//== Access Token Validator (Sprint 427) ==
+TEST(TestATV_TypeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(TokenTypeName(TokenType::Process)) == "Process");
+    ASSERT(std::string(TokenTypeName(TokenType::Anonymous)) == "Anonymous");
+}
+TEST(TestATV_ResultNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ValidationResultName(ValidationResult::Valid)) == "Valid");
+    ASSERT(std::string(ValidationResultName(ValidationResult::Malformed)) == "Malformed");
+}
+TEST(TestATV_Validate) {
+    using namespace ExplorerLens::Engine;
+    AccessTokenValidator atv;
+    AccessTokenInfo info;
+    auto result = atv.ValidateToken(12345, info);
+    ASSERT(result == ValidationResult::Valid);
+    ASSERT(info.integrity == AccessTokenValidator::INTEGRITY_MEDIUM);
+    ASSERT(!atv.IsElevated());
+    ASSERT(atv.CheckIntegrity(AccessTokenValidator::INTEGRITY_MEDIUM));
+}
+
+//== Cache Encryption Layer (Sprint 428) ==
+TEST(TestCEL_AlgoNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(EncryptionAlgorithmName(EncryptionAlgorithm::AES256)) == "AES256");
+    ASSERT(std::string(EncryptionAlgorithmName(EncryptionAlgorithm::None)) == "None");
+}
+TEST(TestCEL_KDFNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(KeyDerivationName(KeyDerivation::PBKDF2)) == "PBKDF2");
+    ASSERT(std::string(KeyDerivationName(KeyDerivation::Direct)) == "Direct");
+}
+TEST(TestCEL_EncryptDecrypt) {
+    using namespace ExplorerLens::Engine;
+    CacheEncryptionLayer cel;
+    EncryptionConfig cfg;
+    cfg.algorithm = EncryptionAlgorithm::AES256;
+    cel.Configure(cfg);
+    ASSERT(cel.IsEncrypted());
+    std::vector<uint8_t> plain = { 1, 2, 3, 4 };
+    std::vector<uint8_t> cipher, decrypted;
+    ASSERT(cel.Encrypt(plain, cipher));
+    ASSERT(cel.Decrypt(cipher, decrypted));
+    ASSERT(decrypted == plain);
+    ASSERT(cel.RotateKey());
+    ASSERT(cel.GetKeyRotations() == 1);
+}
+
+//== Explorer Preview Pane (Sprint 429) ==
+TEST(TestEPP_ModeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PreviewPaneModeName(PreviewPaneMode::Thumbnail)) == "Thumbnail");
+    ASSERT(std::string(PreviewPaneModeName(PreviewPaneMode::Split)) == "Split");
+}
+TEST(TestEPP_LayoutNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PreviewPaneLayoutName(PreviewPaneLayout::Standard)) == "Standard");
+    ASSERT(std::string(PreviewPaneLayoutName(PreviewPaneLayout::Custom)) == "Custom");
+}
+TEST(TestEPP_ActivateAndRefresh) {
+    using namespace ExplorerLens::Engine;
+    ExplorerPreviewPane pane;
+    ASSERT(!pane.IsActive());
+    ASSERT(pane.Activate(L"test.png"));
+    ASSERT(pane.IsActive());
+    ASSERT(pane.GetCurrentFile() == L"test.png");
+    pane.SetMode(PreviewPaneMode::FullPreview);
+    ASSERT(pane.GetConfig().mode == PreviewPaneMode::FullPreview);
+    ASSERT(pane.Refresh());
+    ASSERT(pane.GetRefreshCount() == 1);
+}
+
+//== DirectShow Thumbnail Bridge (Sprint 430) ==
+TEST(Test_DirectShowBridge_FilterTypeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DSFilterTypeName(DSFilterType::Source)) == "Source");
+    ASSERT(std::string(DSFilterTypeName(DSFilterType::Mux)) == "Mux");
+}
+TEST(Test_DirectShowBridge_StatusNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DSBridgeStatusName(DSBridgeStatus::Ready)) == "Ready");
+    ASSERT(std::string(DSBridgeStatusName(DSBridgeStatus::Error)) == "Error");
+}
+TEST(Test_DirectShowBridge_ConnectDisconnect) {
+    using namespace ExplorerLens::Engine;
+    DirectShowThumbnailBridge bridge;
+    ASSERT(bridge.GetStatus() == DSBridgeStatus::Ready);
+    ASSERT(bridge.Connect(L"test.avi"));
+    ASSERT(bridge.GetStatus() == DSBridgeStatus::Connected);
+    bridge.Disconnect();
+    ASSERT(bridge.GetStatus() == DSBridgeStatus::Ready);
+}
+TEST(Test_DirectShowBridge_GrabFrame) {
+    using namespace ExplorerLens::Engine;
+    DirectShowThumbnailBridge bridge;
+    bridge.Connect(L"video.mp4");
+    auto frame = bridge.GrabFrame();
+    ASSERT(frame.width == 320);
+    ASSERT(frame.height == 240);
+    ASSERT(bridge.GetGrabCount() == 1);
+}
+
+//== Shell Extension Health Monitor (Sprint 431) ==
+TEST(Test_HealthMonitor_StatusNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ShellHealthStatusName(ShellHealthStatus::Healthy)) == "Healthy");
+    ASSERT(std::string(ShellHealthStatusName(ShellHealthStatus::Crashed)) == "Crashed");
+}
+TEST(Test_HealthMonitor_RecoveryNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(RecoveryActionName(RecoveryAction::Restart)) == "Restart");
+    ASSERT(std::string(RecoveryActionName(RecoveryAction::Escalate)) == "Escalate");
+}
+TEST(Test_HealthMonitor_CheckHealth) {
+    using namespace ExplorerLens::Engine;
+    ShellExtensionHealthMonitor mon;
+    auto result = mon.CheckHealth();
+    ASSERT(result.status == ShellHealthStatus::Healthy);
+    ASSERT(mon.GetCheckCount() == 1);
+}
+TEST(Test_HealthMonitor_AutoRecover) {
+    using namespace ExplorerLens::Engine;
+    ShellExtensionHealthMonitor mon;
+    mon.SimulateFailure(ShellHealthStatus::Degraded);
+    ASSERT(mon.AutoRecover());
+    ASSERT(mon.GetStatus() == ShellHealthStatus::Healthy);
+}
+
+//== Thumbnail Color Space (Sprint 432) ==
+TEST(Test_ColorSpace_TypeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ColorSpaceTypeName(ColorSpaceType::SRGB)) == "sRGB");
+    ASSERT(std::string(ColorSpaceTypeName(ColorSpaceType::DisplayP3)) == "DisplayP3");
+}
+TEST(Test_ColorSpace_GammaNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(GammaMappingName(GammaMapping::Linear)) == "Linear");
+    ASSERT(std::string(GammaMappingName(GammaMapping::PQ)) == "PQ");
+}
+TEST(Test_ColorSpace_SetWorkingSpace) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailColorSpace cs;
+    cs.SetWorkingSpace(ColorSpaceType::Rec2020);
+    ASSERT(cs.GetProfile().colorSpace == ColorSpaceType::Rec2020);
+}
+TEST(Test_ColorSpace_ConvertNoOp) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailColorSpace cs;
+    float r = 0.5f, g = 0.6f, b = 0.7f;
+    ASSERT(cs.Convert(r, g, b));
+    ASSERT(r >= 0.0f && r <= 1.0f);
+}
+
+//== Async IO Completion Engine (Sprint 433) ==
+TEST(Test_AsyncIOCP_PriorityNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AsyncIOPriorityName(AsyncIOPriority::Critical)) == "Critical");
+    ASSERT(std::string(AsyncIOPriorityName(AsyncIOPriority::Background)) == "Background");
+}
+TEST(Test_AsyncIOCP_StatusNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AsyncIOStatusName(AsyncIOStatus::Pending)) == "Pending");
+    ASSERT(std::string(AsyncIOStatusName(AsyncIOStatus::Timeout)) == "Timeout");
+}
+TEST(Test_AsyncIOCP_SubmitAndPoll) {
+    using namespace ExplorerLens::Engine;
+    AsyncIOCompletionEngine engine;
+    auto id = engine.Submit(L"test.bin", 0, 4096);
+    ASSERT(id > 0);
+    ASSERT(engine.GetPending() == 1);
+    auto completed = engine.Poll();
+    ASSERT(completed == 1);
+    ASSERT(engine.GetPending() == 0);
+}
+TEST(Test_AsyncIOCP_Cancel) {
+    using namespace ExplorerLens::Engine;
+    AsyncIOCompletionEngine engine;
+    engine.Submit(L"data.raw", 0, 1024);
+    ASSERT(engine.Cancel(1));
+    ASSERT(engine.GetCancelledCount() == 1);
+}
+
+//== EXIF Orientation Fixer (Sprint 434) ==
+TEST(Test_ExifFixer_OrientationNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ExifOrientationName(ExifOrientation::Normal)) == "Normal");
+    ASSERT(std::string(ExifOrientationName(ExifOrientation::Rotate270)) == "Rotate270");
+}
+TEST(Test_ExifFixer_ModeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FixApplicationModeName(FixApplicationMode::Auto)) == "Auto");
+    ASSERT(std::string(FixApplicationModeName(FixApplicationMode::Silent)) == "Silent");
+}
+TEST(Test_ExifFixer_ApplyRotation) {
+    using namespace ExplorerLens::Engine;
+    ExifOrientationFixer fixer;
+    uint32_t w = 1920, h = 1080;
+    ASSERT(fixer.ApplyFix(ExifOrientation::Rotate90, w, h));
+    ASSERT(w == 1080 && h == 1920);
+}
+TEST(Test_ExifFixer_ReadOrientation) {
+    using namespace ExplorerLens::Engine;
+    ExifOrientationFixer fixer;
+    auto result = fixer.ReadOrientation(L"photo.jpg");
+    ASSERT(result.hasExif);
+    ASSERT(result.orientation == ExifOrientation::Normal);
+}
+
+//== Multi-Monitor DPI Scaler (Sprint 435) ==
+TEST(Test_DPIScaler_ModeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DPIScaleModeName(DPIScaleMode::PerMonitorV2)) == "PerMonitorV2");
+    ASSERT(std::string(DPIScaleModeName(DPIScaleMode::Unaware)) == "Unaware");
+}
+TEST(Test_DPIScaler_ProfileNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(MonitorProfileName(MonitorProfile::Standard)) == "Standard");
+    ASSERT(std::string(MonitorProfileName(MonitorProfile::UltraHiDPI)) == "UltraHiDPI");
+}
+TEST(Test_DPIScaler_ScaleFactor) {
+    using namespace ExplorerLens::Engine;
+    MultiMonitorDPIScaler scaler;
+    ASSERT(scaler.GetScaleFactor(96) >= 0.99f && scaler.GetScaleFactor(96) <= 1.01f);
+    ASSERT(scaler.GetScaleFactor(192) >= 1.99f && scaler.GetScaleFactor(192) <= 2.01f);
+}
+TEST(Test_DPIScaler_ScaleForMonitor) {
+    using namespace ExplorerLens::Engine;
+    MultiMonitorDPIScaler scaler;
+    ASSERT(scaler.ScaleForMonitor(128, 192) == 256);
+    ASSERT(scaler.GetMonitorProfile(192) == MonitorProfile::UltraHiDPI);
+}
+
+//== VirtualAlloc Optimizer (Sprint 436) ==
+TEST(Test_VAlloc_StrategyNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(VAllocStrategyName(VAllocStrategy::ReserveCommit)) == "ReserveCommit");
+    ASSERT(std::string(VAllocStrategyName(VAllocStrategy::LargePages)) == "LargePages");
+}
+TEST(Test_VAlloc_ProtectionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PageProtectionName(PageProtection::ReadOnly)) == "ReadOnly");
+    ASSERT(std::string(PageProtectionName(PageProtection::Guard)) == "Guard");
+}
+TEST(Test_VAlloc_AllocateAndRelease) {
+    using namespace ExplorerLens::Engine;
+    VirtualAllocOptimizer opt;
+    auto addr = opt.Allocate(4096, VAllocStrategy::ReserveCommit);
+    ASSERT(addr != 0);
+    ASSERT(opt.GetAllocationCount() == 1);
+    ASSERT(opt.Release(addr));
+    ASSERT(opt.GetReleaseCount() == 1);
+}
+TEST(Test_VAlloc_OptimizeWorking) {
+    using namespace ExplorerLens::Engine;
+    VirtualAllocOptimizer opt;
+    opt.Allocate(1024 * 1024, VAllocStrategy::ReserveCommit);
+    auto reclaimed = opt.OptimizeWorking();
+    ASSERT(reclaimed > 0);
+}
+
+//== Thumbnail Histogram (Sprint 437) ==
+TEST(Test_Histogram_ChannelNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(HistogramChannelName(HistogramChannel::Red)) == "Red");
+    ASSERT(std::string(HistogramChannelName(HistogramChannel::Luminance)) == "Luminance");
+}
+TEST(Test_Histogram_BinSizeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(HistogramBinSizeName(HistogramBinSize::Bin256)) == "256");
+    ASSERT(std::string(HistogramBinSizeName(HistogramBinSize::Bin1024)) == "1024");
+}
+TEST(Test_Histogram_Compute) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailHistogram hist;
+    uint8_t data[] = { 100, 100, 200, 200, 50 };
+    auto result = hist.ComputeHistogram(data, 5, HistogramChannel::Luminance);
+    ASSERT(result.totalPixels == 5);
+    ASSERT(result.meanValue > 0.0f);
+}
+TEST(Test_Histogram_PeakAndMean) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailHistogram hist;
+    uint8_t data[] = { 128, 128, 128, 128 };
+    auto result = hist.ComputeHistogram(data, 4, HistogramChannel::Green);
+    ASSERT(hist.GetPeakBin(result) == 128);
+    ASSERT(hist.GetMeanBrightness(result) >= 127.0f);
+}
+
+//== File Association Manager (Sprint 438) ==
+TEST(Test_FileAssoc_ScopeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AssociationScopeName(AssociationScope::User)) == "User");
+    ASSERT(std::string(AssociationScopeName(AssociationScope::GPOManaged)) == "GPOManaged");
+}
+TEST(Test_FileAssoc_ConflictNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AssociationConflictName(AssociationConflict::Overwrite)) == "Overwrite");
+    ASSERT(std::string(AssociationConflictName(AssociationConflict::Prompt)) == "Prompt");
+}
+TEST(Test_FileAssoc_RegisterUnregister) {
+    using namespace ExplorerLens::Engine;
+    FileAssociationManager mgr;
+    ASSERT(mgr.Register(L".psd"));
+    ASSERT(mgr.IsRegistered(L".psd"));
+    ASSERT(mgr.Unregister(L".psd"));
+    ASSERT(!mgr.IsRegistered(L".psd"));
+}
+TEST(Test_FileAssoc_GetConflicts) {
+    using namespace ExplorerLens::Engine;
+    FileAssociationManager mgr;
+    mgr.Register(L".jpg");
+    mgr.Register(L".png");
+    auto report = mgr.GetConflicts();
+    ASSERT(report.totalExtensions == 2);
+}
+
+//== DX12 Fence Manager (Sprint 439) ==
+TEST(Test_DX12Fence_StateNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FenceStateName(FenceState::Unsignaled)) == "Unsignaled");
+    ASSERT(std::string(FenceStateName(FenceState::Signaled)) == "Signaled");
+}
+TEST(Test_DX12Fence_WaitModeNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FenceWaitModeName(FenceWaitMode::Blocking)) == "Blocking");
+    ASSERT(std::string(FenceWaitModeName(FenceWaitMode::Hybrid)) == "Hybrid");
+}
+TEST(Test_DX12Fence_CreateAndSignal) {
+    using namespace ExplorerLens::Engine;
+    DX12FenceManager mgr;
+    auto id = mgr.CreateFence();
+    ASSERT(id > 0);
+    ASSERT(mgr.Signal(id, 42));
+    ASSERT(mgr.GetCompletedValue(id) == 42);
+}
+TEST(Test_DX12Fence_WaitForFence) {
+    using namespace ExplorerLens::Engine;
+    DX12FenceManager mgr;
+    auto id = mgr.CreateFence();
+    mgr.Signal(id, 10);
+    ASSERT(mgr.WaitForFence(id, 10));
+    ASSERT(mgr.GetWaitCount() == 1);
+}
+
+//== Localization Engine (Sprint 440) ==
+TEST(Test_Locale_IdNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(LocaleIdName(LocaleId::EnUS)) == "en-US");
+    ASSERT(std::string(LocaleIdName(LocaleId::JaJP)) == "ja-JP");
+}
+TEST(Test_Locale_CategoryNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(StringCategoryName(StringCategory::UI)) == "UI");
+    ASSERT(std::string(StringCategoryName(StringCategory::Accessibility)) == "Accessibility");
+}
+TEST(Test_Locale_SetAndGetLocale) {
+    using namespace ExplorerLens::Engine;
+    CoreLocalizationEngine loc;
+    loc.SetLocale(LocaleId::DeDE);
+    ASSERT(loc.GetCurrentLocale() == LocaleId::DeDE);
+    ASSERT(loc.GetSupportedLocales().size() == 5);
+}
+TEST(Test_Locale_GetString) {
+    using namespace ExplorerLens::Engine;
+    CoreLocalizationEngine loc;
+    loc.AddString("btn_ok", "OK");
+    ASSERT(loc.GetString("btn_ok") == "OK");
+    ASSERT(loc.GetString("missing") == "[missing]");
+}
+
+//== Thumbnail Sprite Sheet (Sprint 441) ==
+TEST(Test_SpriteSheet_LayoutNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SpriteLayoutName(SpriteLayout::Grid)) == "Grid");
+    ASSERT(std::string(SpriteLayoutName(SpriteLayout::TreePack)) == "TreePack");
+}
+TEST(Test_SpriteSheet_FormatNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SpriteOutputFormatName(SpriteOutputFormat::PNG)) == "PNG");
+    ASSERT(std::string(SpriteOutputFormatName(SpriteOutputFormat::DDS)) == "DDS");
+}
+TEST(Test_SpriteSheet_AddAndGenerate) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailSpriteSheet sheet;
+    sheet.AddThumbnail(L"a.png");
+    sheet.AddThumbnail(L"b.png");
+    auto result = sheet.Generate();
+    ASSERT(result.success);
+    ASSERT(result.spriteCount == 2);
+    ASSERT(result.totalWidth > 0);
+}
+TEST(Test_SpriteSheet_EstimatedSize) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailSpriteSheet sheet;
+    sheet.AddThumbnail(L"img1.jpg");
+    ASSERT(sheet.GetEstimatedSize() > 0);
+    ASSERT(sheet.GetSpriteCount() == 1);
+}
+
+//== Cache Telemetry Collector (Sprint 442) ==
+TEST(Test_CacheTelemetry_EventNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CacheTelemetryEventName(CacheTelemetryEvent::CacheHit)) == "CacheHit");
+    ASSERT(std::string(CacheTelemetryEventName(CacheTelemetryEvent::Corruption)) == "Corruption");
+}
+TEST(Test_CacheTelemetry_IntervalNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CacheTelemetryIntervalName(CacheTelemetryInterval::Realtime)) == "Realtime");
+    ASSERT(std::string(CacheTelemetryIntervalName(CacheTelemetryInterval::Session)) == "Session");
+}
+TEST(Test_CacheTelemetry_RecordAndHitRate) {
+    using namespace ExplorerLens::Engine;
+    CacheTelemetryCollector col;
+    col.Record(CacheTelemetryEvent::CacheHit);
+    col.Record(CacheTelemetryEvent::CacheHit);
+    col.Record(CacheTelemetryEvent::CacheMiss);
+    ASSERT(col.GetHitRate() > 0.6f);
+    ASSERT(col.GetTotalEvents() == 3);
+}
+TEST(Test_CacheTelemetry_Export) {
+    using namespace ExplorerLens::Engine;
+    CacheTelemetryCollector col;
+    col.Record(CacheTelemetryEvent::Eviction);
+    auto snap = col.Export();
+    ASSERT(snap.evictions == 1);
+    ASSERT(snap.evictionRate > 0.0f);
+}
+
+//== Windows Search Integration (Sprint 443) ==
+TEST(Test_WinSearch_PropertyNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SearchPropertyTypeName(SearchPropertyType::Thumbnail)) == "Thumbnail");
+    ASSERT(std::string(SearchPropertyTypeName(SearchPropertyType::Duration)) == "Duration");
+}
+TEST(Test_WinSearch_IndexingStateNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(IndexingStateName(IndexingState::Idle)) == "Idle");
+    ASSERT(std::string(IndexingStateName(IndexingState::Complete)) == "Complete");
+}
+TEST(Test_WinSearch_RegisterProvider) {
+    using namespace ExplorerLens::Engine;
+    WindowsSearchIntegration wsi;
+    ASSERT(!wsi.IsRegistered());
+    ASSERT(wsi.RegisterProvider(L"C:\\TestScope"));
+    ASSERT(wsi.IsRegistered());
+    ASSERT(wsi.GetRegisterCount() == 1);
+}
+TEST(Test_WinSearch_QueryProperties) {
+    using namespace ExplorerLens::Engine;
+    WindowsSearchIntegration wsi;
+    wsi.RegisterProvider(L"C:\\Scope");
+    auto props = wsi.QueryProperties(L"image.png");
+    ASSERT(props.size() == 3);
 }
 
 int main() {
@@ -14707,6 +16044,332 @@ int main() {
     RUN_TEST(TestCacheWarm_PriorityNamesV2);
     RUN_TEST(TestCacheWarm_JobStatusNamesV2);
     RUN_TEST(TestCacheWarm_DefaultConfigV2);
+
+    // Batch 5: File Integrity Monitor Tests (Sprint 394)
+    std::wcout << L"\nFile Integrity Monitor Tests:" << std::endl;
+    RUN_TEST(TestIntegrityMon_CheckTypeNames);
+    RUN_TEST(TestIntegrityMon_StatusNames);
+    RUN_TEST(TestIntegrityMon_DefaultConstruction);
+    RUN_TEST(TestIntegrityMon_RecordFields);
+
+    // Batch 5: Thumbnail Diff Engine Tests (Sprint 395)
+    std::wcout << L"\nThumbnail Diff Engine Tests:" << std::endl;
+    RUN_TEST(TestDiffEngine_AlgorithmNames);
+    RUN_TEST(TestDiffEngine_SeverityNames);
+    RUN_TEST(TestDiffEngine_DefaultResult);
+    RUN_TEST(TestDiffEngine_Construction);
+
+    // Batch 5: Decoder Sandbox Policy Tests (Sprint 396)
+    std::wcout << L"\nDecoder Sandbox Policy Tests:" << std::endl;
+    RUN_TEST(TestSandboxPolicy_LevelNames);
+    RUN_TEST(TestSandboxPolicy_ResourceLimitNames);
+    RUN_TEST(TestSandboxPolicy_DefaultConstruction);
+    RUN_TEST(TestSandboxPolicy_MaxMemory);
+
+    // Batch 5: Intelligent Prefetch V2 Tests (Sprint 397)
+    std::wcout << L"\nIntelligent Prefetch V2 Tests:" << std::endl;
+    RUN_TEST(TestPrefetchV2_StrategyNames);
+    RUN_TEST(TestPrefetchV2_PatternNames);
+    RUN_TEST(TestPrefetchV2_Prediction);
+    RUN_TEST(TestPrefetchV2_ConfidenceThreshold);
+
+    // Batch 5: GPU Workload Balancer Tests (Sprint 398)
+    std::wcout << L"\nGPU Workload Balancer Tests:" << std::endl;
+    RUN_TEST(TestGPUBalance_StrategyNames);
+    RUN_TEST(TestGPUBalance_WorkloadTypeNames);
+    RUN_TEST(TestGPUBalance_Construction);
+    RUN_TEST(TestGPUBalance_MaxGPUs);
+
+    // Batch 5: Filesystem Watchdog Tests (Sprint 399)
+    std::wcout << L"\nFilesystem Watchdog Tests:" << std::endl;
+    RUN_TEST(TestFSWatchdog_EventNames);
+    RUN_TEST(TestFSWatchdog_ScopeNames);
+    RUN_TEST(TestFSWatchdog_DefaultConstruction);
+    RUN_TEST(TestFSWatchdog_MaxDirectories);
+
+    // Batch 5: Compression Benchmark Tests (Sprint 400)
+    std::wcout << L"\nCompression Benchmark Tests:" << std::endl;
+    RUN_TEST(TestCompBench_AlgoNames);
+    RUN_TEST(TestCompBench_MetricNames);
+    RUN_TEST(TestCompBench_DefaultResult);
+    RUN_TEST(TestCompBench_Iterations);
+
+    // Batch 5: Explorer Band Integration Tests (Sprint 401)
+    std::wcout << L"\nExplorer Band Integration Tests:" << std::endl;
+    RUN_TEST(TestBandInteg_PositionNames);
+    RUN_TEST(TestBandInteg_StateNames);
+    RUN_TEST(TestBandInteg_DefaultConfig);
+    RUN_TEST(TestBandInteg_Construction);
+
+    // Batch 5: Thumbnail Stream Protocol Tests (Sprint 402)
+    std::wcout << L"\nThumbnail Stream Protocol Tests:" << std::endl;
+    RUN_TEST(TestStreamProto_ProtocolNames);
+    RUN_TEST(TestStreamProto_StateNames);
+    RUN_TEST(TestStreamProto_EndpointConfig);
+    RUN_TEST(TestStreamProto_Timeout);
+
+    // Batch 5: Registry Snapshot Manager Tests (Sprint 403)
+    std::wcout << L"\nRegistry Snapshot Manager Tests:" << std::endl;
+    RUN_TEST(TestRegSnap_ScopeNames);
+    RUN_TEST(TestRegSnap_ActionNames);
+    RUN_TEST(TestRegSnap_Construction);
+    RUN_TEST(TestRegSnap_MaxSnapshots);
+
+    // Batch 5: Hot Reload Config Engine Tests (Sprint 404)
+    std::wcout << L"\nHot Reload Config Engine Tests:" << std::endl;
+    RUN_TEST(TestHotReload_SourceNames);
+    RUN_TEST(TestHotReload_TriggerNamesV2);
+    RUN_TEST(TestHotReload_DefaultResult);
+    RUN_TEST(TestHotReload_PollInterval);
+
+    // Batch 5: COM Diagnostics Engine Tests (Sprint 405)
+    std::wcout << L"\nCOM Diagnostics Engine Tests:" << std::endl;
+    RUN_TEST(TestCOMDiag_HealthStatusNames);
+    RUN_TEST(TestCOMDiag_RepairActionNames);
+    RUN_TEST(TestCOMDiag_DiagnosticResult);
+    RUN_TEST(TestCOMDiag_CLSIDConstant);
+
+    // Batch 6: Thumbnail Watermark Tests (Sprint 406)
+    std::wcout << L"\nThumbnail Watermark Tests:" << std::endl;
+    RUN_TEST(TestWatermark_PositionNames);
+    RUN_TEST(TestWatermark_TypeNames);
+    RUN_TEST(TestWatermark_ApplyAndConfig);
+
+    // Batch 6: Batch Rename Preview Tests (Sprint 407)
+    std::wcout << L"\nBatch Rename Preview Tests:" << std::endl;
+    RUN_TEST(TestRenamePreview_PatternNames);
+    RUN_TEST(TestRenamePreview_StateNames);
+    RUN_TEST(TestRenamePreview_GenerateAndGet);
+
+    // Batch 6: Duplicate File Detector Tests (Sprint 408)
+    std::wcout << L"\nDuplicate File Detector Tests:" << std::endl;
+    RUN_TEST(TestDupDetect_HashMethodNames);
+    RUN_TEST(TestDupDetect_ConfidenceNames);
+    RUN_TEST(TestDupDetect_ScanDirectory);
+
+    // Batch 6: Thumbnail Annotation Tests (Sprint 409)
+    std::wcout << L"\nThumbnail Annotation Tests:" << std::endl;
+    RUN_TEST(TestAnnotation_TypeNames);
+    RUN_TEST(TestAnnotation_StyleNames);
+    RUN_TEST(TestAnnotation_AddRemoveRender);
+
+    // Batch 6: Cache Migration Engine Tests (Sprint 410)
+    std::wcout << L"\nCache Migration Engine Tests:" << std::endl;
+    RUN_TEST(TestCacheMigration_FormatNames);
+    RUN_TEST(TestCacheMigration_StateNames);
+    RUN_TEST(TestCacheMigration_MigrateFlow);
+
+    // Batch 6: Explorer Context Menu Tests (Sprint 411)
+    std::wcout << L"\nExplorer Context Menu Tests:" << std::endl;
+    RUN_TEST(TestCtxMenu_ActionNames);
+    RUN_TEST(TestCtxMenu_ItemStateNames);
+    RUN_TEST(TestCtxMenu_BuildAndExecute);
+
+    // Batch 6: Adaptive Quality Scaler Tests (Sprint 412)
+    std::wcout << L"\nAdaptive Quality Scaler Tests:" << std::endl;
+    RUN_TEST(TestQualityScaler_TierNames);
+    RUN_TEST(TestQualityScaler_ReasonNames);
+    RUN_TEST(TestQualityScaler_Evaluate);
+
+    // Batch 6: Thumbnail Compare View Tests (Sprint 413)
+    std::wcout << L"\nThumbnail Compare View Tests:" << std::endl;
+    RUN_TEST(TestCompare_ModeNames);
+    RUN_TEST(TestCompare_SourceNames);
+    RUN_TEST(TestCompare_RunComparison);
+
+    // Batch 6: File Type Statistics Tests (Sprint 414)
+    std::wcout << L"\nFile Type Statistics Tests:" << std::endl;
+    RUN_TEST(TestFileStats_CategoryNames);
+    RUN_TEST(TestFileStats_TimeRangeNames);
+    RUN_TEST(TestFileStats_RecordAndQuery);
+
+    // Batch 6: Memory Defragmenter Tests (Sprint 415)
+    std::wcout << L"\nMemory Defragmenter Tests:" << std::endl;
+    RUN_TEST(TestDefrag_LevelNames);
+    RUN_TEST(TestDefrag_StrategyNames);
+    RUN_TEST(TestDefrag_AnalyzeAndDefrag);
+
+    // Batch 6: Shell Notification Engine Tests (Sprint 416)
+    std::wcout << L"\nShell Notification Engine Tests:" << std::endl;
+    RUN_TEST(TestShellNotify_TypeNames);
+    RUN_TEST(TestShellNotify_PriorityNames);
+    RUN_TEST(TestShellNotify_SendAndFlush);
+
+    // Batch 6: Thumbnail Export Engine Tests (Sprint 417)
+    std::wcout << L"\nThumbnail Export Engine Tests:" << std::endl;
+    RUN_TEST(TestThumbExport_FormatNamesV2);
+    RUN_TEST(TestThumbExport_DestNames);
+    RUN_TEST(TestThumbExport_SingleExport);
+
+    // Batch 7: Thumbnail Version Control Tests (Sprint 418)
+    std::wcout << L"\nThumbnail Version Control Tests:" << std::endl;
+    RUN_TEST(TestTVC_VersionNames);
+    RUN_TEST(TestTVC_ActionNames);
+    RUN_TEST(TestTVC_CreateAndRollback);
+
+    // Batch 7: File Preview Router Tests (Sprint 419)
+    std::wcout << L"\nFile Preview Router Tests:" << std::endl;
+    RUN_TEST(TestFPR_HandlerNames);
+    RUN_TEST(TestFPR_PriorityNames);
+    RUN_TEST(TestFPR_RouteAndRegister);
+
+    // Batch 7: Clipboard Thumbnail Manager Tests (Sprint 420)
+    std::wcout << L"\nClipboard Thumbnail Manager Tests:" << std::endl;
+    RUN_TEST(TestClip_FormatNames);
+    RUN_TEST(TestClip_TargetNames);
+    RUN_TEST(TestClip_CopyAndPaste);
+
+    // Batch 7: Format Conversion Pipeline Tests (Sprint 421)
+    std::wcout << L"\nFormat Conversion Pipeline Tests:" << std::endl;
+    RUN_TEST(TestFCP_TargetNames);
+    RUN_TEST(TestFCP_QualityNames);
+    RUN_TEST(TestFCP_ConvertSingle);
+
+    // Batch 7: Vulkan Memory Allocator Tests (Sprint 422)
+    std::wcout << L"\nVulkan Memory Allocator Tests:" << std::endl;
+    RUN_TEST(TestVMA_TierNames);
+    RUN_TEST(TestVMA_StrategyNames);
+    RUN_TEST(TestVMA_AllocAndFree);
+
+    // Batch 7: Decoder Priority Scheduler Tests (Sprint 423)
+    std::wcout << L"\nDecoder Priority Scheduler Tests:" << std::endl;
+    RUN_TEST(TestDPS_PriorityNames);
+    RUN_TEST(TestDPS_PolicyNames);
+    RUN_TEST(TestDPS_SubmitAndCancel);
+
+    // Batch 7: Error Reporting Pipeline Tests (Sprint 424)
+    std::wcout << L"\nError Reporting Pipeline Tests:" << std::endl;
+    RUN_TEST(TestERP_DomainNames);
+    RUN_TEST(TestERP_AggregationNames);
+    RUN_TEST(TestERP_ReportAndQuery);
+
+    // Batch 7: Enterprise Audit Pipeline Tests (Sprint 425)
+    std::wcout << L"\nEnterprise Audit Pipeline Tests:" << std::endl;
+    RUN_TEST(TestEAP_ActionNames);
+    RUN_TEST(TestEAP_DestNames);
+    RUN_TEST(TestEAP_LogAndRetrieve);
+
+    // Batch 7: Resource Quota Manager Tests (Sprint 426)
+    std::wcout << L"\nResource Quota Manager Tests:" << std::endl;
+    RUN_TEST(TestRQM_ResourceNames);
+    RUN_TEST(TestRQM_EnforcementNames);
+    RUN_TEST(TestRQM_SetAndCheck);
+
+    // Batch 7: Access Token Validator Tests (Sprint 427)
+    std::wcout << L"\nAccess Token Validator Tests:" << std::endl;
+    RUN_TEST(TestATV_TypeNames);
+    RUN_TEST(TestATV_ResultNames);
+    RUN_TEST(TestATV_Validate);
+
+    // Batch 7: Cache Encryption Layer Tests (Sprint 428)
+    std::wcout << L"\nCache Encryption Layer Tests:" << std::endl;
+    RUN_TEST(TestCEL_AlgoNames);
+    RUN_TEST(TestCEL_KDFNames);
+    RUN_TEST(TestCEL_EncryptDecrypt);
+
+    // Batch 7: Explorer Preview Pane Tests (Sprint 429)
+    std::wcout << L"\nExplorer Preview Pane Tests:" << std::endl;
+    RUN_TEST(TestEPP_ModeNames);
+    RUN_TEST(TestEPP_LayoutNames);
+    RUN_TEST(TestEPP_ActivateAndRefresh);
+
+    // Batch 8: DirectShow Thumbnail Bridge Tests (Sprint 430)
+    std::wcout << L"\nDirectShow Thumbnail Bridge Tests:" << std::endl;
+    RUN_TEST(Test_DirectShowBridge_FilterTypeNames);
+    RUN_TEST(Test_DirectShowBridge_StatusNames);
+    RUN_TEST(Test_DirectShowBridge_ConnectDisconnect);
+    RUN_TEST(Test_DirectShowBridge_GrabFrame);
+
+    // Batch 8: Shell Extension Health Monitor Tests (Sprint 431)
+    std::wcout << L"\nShell Extension Health Monitor Tests:" << std::endl;
+    RUN_TEST(Test_HealthMonitor_StatusNames);
+    RUN_TEST(Test_HealthMonitor_RecoveryNames);
+    RUN_TEST(Test_HealthMonitor_CheckHealth);
+    RUN_TEST(Test_HealthMonitor_AutoRecover);
+
+    // Batch 8: Thumbnail Color Space Tests (Sprint 432)
+    std::wcout << L"\nThumbnail Color Space Tests:" << std::endl;
+    RUN_TEST(Test_ColorSpace_TypeNames);
+    RUN_TEST(Test_ColorSpace_GammaNames);
+    RUN_TEST(Test_ColorSpace_SetWorkingSpace);
+    RUN_TEST(Test_ColorSpace_ConvertNoOp);
+
+    // Batch 8: Async IO Completion Engine Tests (Sprint 433)
+    std::wcout << L"\nAsync IO Completion Engine Tests:" << std::endl;
+    RUN_TEST(Test_AsyncIOCP_PriorityNames);
+    RUN_TEST(Test_AsyncIOCP_StatusNames);
+    RUN_TEST(Test_AsyncIOCP_SubmitAndPoll);
+    RUN_TEST(Test_AsyncIOCP_Cancel);
+
+    // Batch 8: EXIF Orientation Fixer Tests (Sprint 434)
+    std::wcout << L"\nEXIF Orientation Fixer Tests:" << std::endl;
+    RUN_TEST(Test_ExifFixer_OrientationNames);
+    RUN_TEST(Test_ExifFixer_ModeNames);
+    RUN_TEST(Test_ExifFixer_ApplyRotation);
+    RUN_TEST(Test_ExifFixer_ReadOrientation);
+
+    // Batch 8: Multi-Monitor DPI Scaler Tests (Sprint 435)
+    std::wcout << L"\nMulti-Monitor DPI Scaler Tests:" << std::endl;
+    RUN_TEST(Test_DPIScaler_ModeNames);
+    RUN_TEST(Test_DPIScaler_ProfileNames);
+    RUN_TEST(Test_DPIScaler_ScaleFactor);
+    RUN_TEST(Test_DPIScaler_ScaleForMonitor);
+
+    // Batch 8: VirtualAlloc Optimizer Tests (Sprint 436)
+    std::wcout << L"\nVirtualAlloc Optimizer Tests:" << std::endl;
+    RUN_TEST(Test_VAlloc_StrategyNames);
+    RUN_TEST(Test_VAlloc_ProtectionNames);
+    RUN_TEST(Test_VAlloc_AllocateAndRelease);
+    RUN_TEST(Test_VAlloc_OptimizeWorking);
+
+    // Batch 8: Thumbnail Histogram Tests (Sprint 437)
+    std::wcout << L"\nThumbnail Histogram Tests:" << std::endl;
+    RUN_TEST(Test_Histogram_ChannelNames);
+    RUN_TEST(Test_Histogram_BinSizeNames);
+    RUN_TEST(Test_Histogram_Compute);
+    RUN_TEST(Test_Histogram_PeakAndMean);
+
+    // Batch 8: File Association Manager Tests (Sprint 438)
+    std::wcout << L"\nFile Association Manager Tests:" << std::endl;
+    RUN_TEST(Test_FileAssoc_ScopeNames);
+    RUN_TEST(Test_FileAssoc_ConflictNames);
+    RUN_TEST(Test_FileAssoc_RegisterUnregister);
+    RUN_TEST(Test_FileAssoc_GetConflicts);
+
+    // Batch 8: DX12 Fence Manager Tests (Sprint 439)
+    std::wcout << L"\nDX12 Fence Manager Tests:" << std::endl;
+    RUN_TEST(Test_DX12Fence_StateNames);
+    RUN_TEST(Test_DX12Fence_WaitModeNames);
+    RUN_TEST(Test_DX12Fence_CreateAndSignal);
+    RUN_TEST(Test_DX12Fence_WaitForFence);
+
+    // Batch 8: Localization Engine Tests (Sprint 440)
+    std::wcout << L"\nLocalization Engine Tests:" << std::endl;
+    RUN_TEST(Test_Locale_IdNames);
+    RUN_TEST(Test_Locale_CategoryNames);
+    RUN_TEST(Test_Locale_SetAndGetLocale);
+    RUN_TEST(Test_Locale_GetString);
+
+    // Batch 8: Thumbnail Sprite Sheet Tests (Sprint 441)
+    std::wcout << L"\nThumbnail Sprite Sheet Tests:" << std::endl;
+    RUN_TEST(Test_SpriteSheet_LayoutNames);
+    RUN_TEST(Test_SpriteSheet_FormatNames);
+    RUN_TEST(Test_SpriteSheet_AddAndGenerate);
+    RUN_TEST(Test_SpriteSheet_EstimatedSize);
+
+    // Batch 8: Cache Telemetry Collector Tests (Sprint 442)
+    std::wcout << L"\nCache Telemetry Collector Tests:" << std::endl;
+    RUN_TEST(Test_CacheTelemetry_EventNames);
+    RUN_TEST(Test_CacheTelemetry_IntervalNames);
+    RUN_TEST(Test_CacheTelemetry_RecordAndHitRate);
+    RUN_TEST(Test_CacheTelemetry_Export);
+
+    // Batch 8: Windows Search Integration Tests (Sprint 443)
+    std::wcout << L"\nWindows Search Integration Tests:" << std::endl;
+    RUN_TEST(Test_WinSearch_PropertyNames);
+    RUN_TEST(Test_WinSearch_IndexingStateNames);
+    RUN_TEST(Test_WinSearch_RegisterProvider);
+    RUN_TEST(Test_WinSearch_QueryProperties);
 
     std::wcout << std::endl;
 

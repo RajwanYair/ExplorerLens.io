@@ -79,7 +79,7 @@ struct StripRenderConfig {
     uint32_t pageNumberFontSize = 9;
 
     /// Auto-select layout based on page count and aspect ratio
-    static StripLayout AutoSelectLayout(uint32_t pageCount, double avgAspectRatio) {
+    static StripLayout AutoSelectLayout(uint32_t pageCount, double /*avgAspectRatio*/) {
         if (pageCount == 1) return StripLayout::CoverPlusPeek;
         if (pageCount == 2) return StripLayout::HorizontalStrip;
         if (pageCount <= 4) return StripLayout::Grid2x2;

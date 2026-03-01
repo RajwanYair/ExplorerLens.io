@@ -245,7 +245,7 @@ private:
         }
     }
 
-    uint32_t RenderThumbnails(DragVisualBitmap& bitmap, const std::vector<DragItem>& items) const {
+    uint32_t RenderThumbnails(DragVisualBitmap& /*bitmap*/, const std::vector<DragItem>& items) const {
         uint32_t rendered = 0;
         uint32_t maxRender = (std::min)(static_cast<uint32_t>(items.size()), m_config.maxPreviewCount);
 

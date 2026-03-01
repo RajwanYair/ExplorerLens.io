@@ -220,7 +220,7 @@ public:
     }
 
     /// Validate a prediction (user actually visited the directory)
-    void ValidatePrediction(const std::wstring& actualDir) {
+    void ValidatePrediction(const std::wstring& /*actualDir*/) {
         m_stats.correctPredictions++;
         m_stats.cacheHitsDueToPrefetch++;
     }
