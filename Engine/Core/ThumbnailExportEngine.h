@@ -1,6 +1,13 @@
 #pragma once
-// ThumbnailExportEngine.h — Export thumbnails to various formats/destinations
-// Sprint 417 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// ThumbnailExportEngine.h — Multi-format thumbnail export
+//                           (PNG/JPEG/BMP/TIFF)
+//
+// Purpose:   Multi-format thumbnail export (PNG/JPEG/BMP/TIFF)
+// Provides:  ExportFormat, ExportQuality enums, ExportConfig struct,
+//            ThumbnailExportEngine class
+// Used by:   Context menu export action
+// ============================================================================
 
 #include <string>
 #include <vector>

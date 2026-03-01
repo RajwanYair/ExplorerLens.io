@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// HotReloadConfigEngine.h — Live configuration reload with file-system watching
+//
+// Purpose:   Live configuration reload with file-system watching
+// Provides:  HotReloadSource, ConfigReloadTrigger enums, HotReloadResult,
+//            HotReloadConfigEntry structs, and HotReloadConfigEngine class
+// Used by:   Settings pipeline
+// ============================================================================
 
 #include <string>
 #include <vector>

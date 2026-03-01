@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// FilesystemWatchdog.h — Directory change notification monitoring
+//
+// Purpose:   Directory change notification monitoring via ReadDirectoryChangesW
+// Provides:  FSWatchEvent, FSWatchScope enums, FSWatchChangeEvent,
+//            FSWatchDirConfig structs, and FilesystemWatchdog class
+// Used by:   Hot-reload and cache invalidation
+// ============================================================================
 
 #include <string>
 #include <vector>

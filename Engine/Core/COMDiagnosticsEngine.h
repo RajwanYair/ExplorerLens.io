@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// COMDiagnosticsEngine.h — COM registration health check and auto-repair
+//
+// Purpose:   COM registration health check and auto-repair
+// Provides:  COMHealthStatus, COMRepairAction enums, COMDiagnosticResult
+//            struct, and COMDiagnosticsEngine class
+// Used by:   Shell extension health monitoring
+// ============================================================================
 
 #include <string>
 #include <vector>

@@ -1,6 +1,12 @@
 #pragma once
-// EnterpriseAuditPipeline.h — Enterprise-grade audit trail for compliance
-// Sprint 425 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// EnterpriseAuditPipeline.h — Enterprise audit trail for compliance logging
+//
+// Purpose:   Enterprise audit trail for compliance logging
+// Provides:  AuditEventType, AuditSeverity enums, AuditEntry struct,
+//            EnterpriseAuditPipeline class
+// Used by:   Enterprise policy engine
+// ============================================================================
 
 #include <cstdint>
 #include <string>

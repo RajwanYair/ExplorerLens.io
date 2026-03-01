@@ -1,6 +1,13 @@
 #pragma once
-// ThumbnailHistogram.h — Generate image histograms for quality analysis
-// Sprint 437 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ThumbnailHistogram.h — Histogram computation and analysis for thumbnail
+//                        images
+//
+// Purpose:   Histogram computation and analysis for thumbnail images
+// Provides:  HistogramChannel, HistogramType enums, HistogramData struct,
+//            ThumbnailHistogram class
+// Used by:   Quality assessment and auto-exposure
+// ============================================================================
 
 #include <cstdint>
 #include <string>

@@ -1,6 +1,12 @@
 #pragma once
-// FormatConversionPipeline.h — Convert between image formats during thumbnail generation
-// Sprint 421 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// FormatConversionPipeline.h — Batch format conversion with progress tracking
+//
+// Purpose:   Batch format conversion with progress tracking
+// Provides:  ConversionFormat, ConversionStatus enums,
+//            FormatConversionJob struct, FormatConversionPipeline class
+// Used by:   Export engine
+// ============================================================================
 
 #include <cstdint>
 #include <string>

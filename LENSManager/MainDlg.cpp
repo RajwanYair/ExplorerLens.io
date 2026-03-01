@@ -571,8 +571,8 @@ void CMainDlg::InitTooltips() {
   AddTooltipWithStatus(
     IDC_CB_RAW, LENS_RAW,
     _T("RAW Camera Photos\nExtensions: .dng, .cr2, .cr3, .nef, .arw, ")
-    _T(".orf\nRequires: Microsoft Camera Codec Pack (free)\nPerformance: ")
-    _T("Fast (uses embedded preview)"));
+    _T(".orf, .rw2, .pef, .raf, .srw, .nrw\nRequires: LibRaw\n")
+    _T("Performance: Fast (uses embedded preview)"));
   AddTooltipWithStatus(IDC_CB_PSD, LENS_PSD,
     _T("PSD - Adobe Photoshop Document\nExtensions: .psd, ")
     _T(".psb\nShows: Composite preview layer"));
@@ -599,17 +599,17 @@ void CMainDlg::InitTooltips() {
     _T("TGA - Targa Image\nExtensions: .tga\nUsed by: ")
     _T("Games, 3D applications"));
   AddTooltipWithStatus(IDC_CB_AUDIO, LENS_AUDIO,
-    _T("Audio Cover Art\nExtensions: .mp3, .flac, .ogg, ")
-    _T(".wma, .aac\nShows: Embedded album art thumbnail"));
+    _T("Audio Cover Art\nExtensions: .mp3, .flac, .wav, .ogg, ")
+    _T(".m4a, .wma, .aac, .opus\nShows: Embedded album art thumbnail"));
   AddTooltipWithStatus(IDC_CB_DOCUMENT, LENS_DOCUMENT,
-    _T("Document Thumbnails\nExtensions: .docx, .xlsx, ")
-    _T(".pptx\nShows: First page preview via OLE/COM"));
+    _T("Document Thumbnails\nExtensions: .docx, .pptx, .xlsx, ")
+    _T(".doc, .ppt, .xls\nShows: First page preview via OLE/COM"));
   AddTooltipWithStatus(IDC_CB_FONT, LENS_FONT,
     _T("Font Preview Thumbnails\nExtensions: .ttf, .otf, ")
-    _T(".woff\nShows: Sample text rendering"));
+    _T(".woff, .woff2\nShows: Sample text rendering"));
   AddTooltipWithStatus(IDC_CB_MODEL, LENS_MODEL,
-    _T("3D Model Thumbnails\nExtensions: .stl, .obj, ")
-    _T(".ply\nShows: Wireframe/solid preview"));
+    _T("3D Model Thumbnails\nExtensions: .stl, .obj, .gltf, ")
+    _T(".glb, .fbx, .3ds, .ply\nShows: Wireframe/solid preview"));
 
   // Options tooltips (no status needed)
   m_tooltip.AddTool(GetDlgItem(IDC_CB_SORT),

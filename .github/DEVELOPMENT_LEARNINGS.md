@@ -1,6 +1,6 @@
 # ExplorerLens — Development Learnings & Best Practices
 
-**Last Updated:** v15.0.0 "Zenith" — February 2026
+**Last Updated:** v15.0.0 "Zenith" — June 2026
 
 This file captures hard-won lessons from iterative development sessions to avoid repeating
 mistakes and to accelerate future work.
@@ -247,3 +247,105 @@ external/
 - New headers MUST be registered in `Engine/CMakeLists.txt` or subdirectory CMakeLists.txt
 - Dead code audit (2026-02) found 31 unregistered headers — all now registered
 - Run periodic audit: search for `.h` files not in any CMakeLists.txt
+---
+
+## 10. Code Quality Polish (v15.0 Post-Release)
+
+### Sprint comment removal pattern
+- Batch/sprint comments (`// Sprint NNN — ExplorerLens v15.0.0 Zenith`) accumulate during delivery
+- Remove with PowerShell regex: `$content -replace '(?m)^// Sprint \d+[^\r\n]*\r?\n', ''`
+- Applied across 38 header files in one pass, verified with `Select-String` afterward
+- Keep meaningful file-level doc blocks; remove only tracking/versioning artifacts
+
+### Header documentation standard
+- Every header should have a structured doc block immediately after `#pragma once`:
+```cpp
+#pragma once
+// ============================================================================
+// FileName.h — Brief one-line description
+//
+// Purpose:   What this module provides and why it exists
+// Provides:  Key classes, enums, constants, free functions
+// Used by:   Consumer modules, pipelines, test harness
+// ============================================================================
+```
+- Prefer block-level comments over inline comments
+- Document inputs/outputs at function level for non-trivial public methods
+- Remove dead comments: "merged into X.h", "moved to Y.h", "Batch N" markers
+
+### EngineTests.cpp include organization
+- Group includes by functional category with `// --- Category Name ---` section headers
+- 20 categories identified: Pipeline, Rendering, Core Architecture, Memory, Cache, etc.
+- Remove per-include comments (`// EngineTests.h — description`) — they add clutter
+- Keep the section headers concise: `// --- GPU & Rendering ---` not paragraph descriptions
+
+### Stub replacement methodology
+1. Search for stubs: `return 0`, `return path`, `placeholder`, `itemsTotal = 100`
+2. Read exact file content first (whitespace matters for `replace_string_in_file`)
+3. Prefer Windows native APIs: `FindFirstFileW`/`FindNextFileW` for directory scans,
+   `std::chrono::system_clock::now()` for timestamps, `std::regex_replace` for string transforms
+4. Only add `#include` headers genuinely needed by the implementation
+5. Leave stubs for external library calls (djvulibre, MuPDF) as graceful degradation
+
+### Name collision patterns in large header sets
+- When creating 50+ headers in batch, name collisions are common:
+  - `PrefetchStrategy` enum used by multiple prefetch headers → prefix with module name
+  - `StreamProtocol` struct in both ThumbnailStreamProtocol.h and existing pipeline code
+  - `SandboxPolicy` class vs existing DecoderSandbox policy enums
+  - `MEM_RESET` Windows SDK macro conflicts with custom memory reset enums
+  - ZSTD compression library macros conflict with Zstandard-related class names
+- Prevention: search for the symbol name across the codebase before declaring it
+- Fix pattern: use fully-qualified namespace names or add unique prefixes
+
+### Global regex rename dangers
+- Bulk rename operations (e.g., renaming a class across all files) can corrupt unrelated code
+- Pre-existing test functions named similarly to the target can be accidentally modified
+- Always use precise patterns: `\bOldName\b` word-boundary regex, not substring match
+- Verify diff covers only intended files before committing
+
+### C4100 unused parameter warning pattern
+- MSVC /W4 warns on unused function parameters
+- Standard fix: `(void)paramName;` at function start
+- Do NOT rename parameters to `/*paramName*/` — reduces readability
+- Do NOT remove parameter names from declarations — breaks documentation
+
+---
+
+## 11. GUI Format Coverage (LENSManager)
+
+### GUI architecture
+- WTL/ATL-based dialog in `LENSManager/MainDlg.h` + `MainDlg.cpp`
+- 35 format checkboxes (IDC_CB_*) defined in `resource.h` (IDs 1004–1068)
+- Format-to-registry mapping in `OnApplyImpl()` via `formatHandlers[]` array
+- Each checkbox toggles shell extension registration via `CRegManager::SetHandlers()`
+
+### Format type ID spaces are separate
+- `LENSTYPE_*` (in `LENSShell/LENSTypes.h`) = engine-internal format routing IDs
+- `LENS_*` (in `LENSManager/RegManager.h`) = GUI/registry toggle IDs
+- These numeric values intentionally differ (e.g., LENS_WEBP=15, LENSTYPE_WEBP=40)
+- The `CRegManager` maps between them using per-format TH/IH registry key macros
+- Comment "must match LENSTYPE in LENSArchive.h" only applies where values align (TIFF=45, SVG=46, etc.)
+
+### Group vs individual toggles
+- Group toggles (VIDEO, AUDIO, RAW, DOCUMENT, FONT, MODEL) control multiple file extensions each
+- Sub-types (TAR_GZ, TAR_BZ2, CPIO, ISO, DEB, DOCX/PPTX/XLSX, TTF/OTF) inherit from parent group
+- Format-specific sub-types don't need individual checkboxes — the parent controls them
+- Windows-native formats (BMP, GIF) are not toggled because Windows handles them natively
+
+### FormatGroupHelper categorization
+- 12 categories in `FormatGroupHelper.h` with `FormatCategory` enum
+- `FormatStatusProvider.h` provides traffic-light status (ACTIVE/DEGRADED/UNAVAILABLE/UNKNOWN)
+- Status colors: Green=Active (34,139,34), Yellow=Degraded (218,165,32), Red=Unavailable (178,34,34)
+- `DecoderHealthCheck::CheckAll()` populates live status on dialog init
+
+### Adding a new format to the GUI
+1. Define `LENS_NEWFORMAT <id>` in `RegManager.h` (unique, non-colliding)
+2. Define `LENS_NEWFORMATTH_KEY` and `LENS_NEWFORMATIH_KEY` registry key macros
+3. Add `IDC_CB_NEWFORMAT <id>` in `resource.h` (next available ID)
+4. Add checkbox control in dialog resource (.rc file)
+5. Add `COMMAND_HANDLER(IDC_CB_NEWFORMAT, BN_CLICKED, OnCheckboxClicked)` in MainDlg.h message map
+6. Add `Button_SetCheck(GetDlgItem(IDC_CB_NEWFORMAT), m_reg.HasTH(LENS_NEWFORMAT))` in `InitUI()`
+7. Add `{IDC_CB_NEWFORMAT, LENS_NEWFORMAT}` to `formatHandlers[]` in `OnApplyImpl()`
+8. Add to `allCheckboxes[]` array in `OnInitDialog()`, `OnSelectAll()`, `OnDeselectAll()`
+9. Add tooltip in `InitTooltips()` and status icon in `InitStatusIcons()`
+10. Add to `FormatGroupHelper.h` `FormatEntry` table under appropriate category

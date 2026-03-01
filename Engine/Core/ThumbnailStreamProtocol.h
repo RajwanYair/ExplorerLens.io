@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// ThumbnailStreamProtocol.h — Custom URI protocol for thumbnail streaming
+//
+// Purpose:   Custom URI protocol for streaming thumbnails over localhost
+// Provides:  TSProtoType, TSProtoState enums, StreamEndpoint struct,
+//            and ThumbnailStreamProtocol class
+// Used by:   Network preview providers
+// ============================================================================
 
 #include <string>
 #include <cstdint>

@@ -1,6 +1,13 @@
 #pragma once
-// DirectShowThumbnailBridge.h — Bridge between DirectShow and thumbnail pipeline
-// Sprint 430 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// DirectShowThumbnailBridge.h — Legacy DirectShow filter graph bridge
+//
+// Purpose:   Legacy DirectShow filter graph bridge for video thumbnail
+//            extraction when Media Foundation is unavailable
+// Provides:  DSFilterType, DSBridgeStatus enums, DSBridgeConfig,
+//            DSGrabbedFrame structs, and DirectShowThumbnailBridge class
+// Used by:   Video decoder fallback path
+// ============================================================================
 
 #include <cstdint>
 #include <string>

@@ -1,6 +1,13 @@
 #pragma once
-// WindowsSearchIntegration.h — Integration with Windows Search indexer
-// Sprint 443 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// WindowsSearchIntegration.h — Windows Search protocol handler for indexed
+//                              thumbnail metadata
+//
+// Purpose:   Windows Search protocol handler for indexed thumbnail metadata
+// Provides:  SearchScope, SearchResultType enums, SearchResult struct,
+//            WindowsSearchIntegration class
+// Used by:   Shell search provider
+// ============================================================================
 
 #include <cstdint>
 #include <string>

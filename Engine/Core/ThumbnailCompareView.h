@@ -1,6 +1,12 @@
 #pragma once
-// ThumbnailCompareView.h — Side-by-side thumbnail comparison
-// Sprint 413 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// ThumbnailCompareView.h — Side-by-side thumbnail comparison viewport
+//
+// Purpose:   Side-by-side thumbnail comparison viewport
+// Provides:  CompareMode, CompareLayout enums, CompareSession struct,
+//            ThumbnailCompareView class
+// Used by:   Diff engine UI
+// ============================================================================
 
 #include <string>
 #include <vector>

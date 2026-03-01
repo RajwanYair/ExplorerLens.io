@@ -1,6 +1,13 @@
 #pragma once
-// ThumbnailColorSpace.h — Color space conversion pipeline
-// Sprint 432 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ThumbnailColorSpace.h — Color space conversion and ICC profile management
+//                         for thumbnails
+//
+// Purpose:   Color space conversion and ICC profile management for thumbnails
+// Provides:  ColorSpaceType, RenderingIntent enums, ColorProfile struct,
+//            ThumbnailColorSpace class
+// Used by:   Render pipeline
+// ============================================================================
 
 #include <cstdint>
 #include <string>

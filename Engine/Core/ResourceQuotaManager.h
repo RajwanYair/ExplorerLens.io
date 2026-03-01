@@ -1,6 +1,13 @@
 #pragma once
-// ResourceQuotaManager.h — Per-session resource quotas (memory, CPU, disk)
-// Sprint 426 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ResourceQuotaManager.h — Per-process resource quota enforcement
+//                          (memory, CPU, handles)
+//
+// Purpose:   Per-process resource quota enforcement (memory, CPU, handles)
+// Provides:  ResourceType, QuotaAction enums, ResourceQuota struct,
+//            ResourceQuotaManager class
+// Used by:   Sandbox and memory management
+// ============================================================================
 
 #include <cstdint>
 #include <string>

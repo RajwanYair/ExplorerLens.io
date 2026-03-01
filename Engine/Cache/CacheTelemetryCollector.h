@@ -1,6 +1,12 @@
 #pragma once
-// CacheTelemetryCollector.h — Collect and report cache performance telemetry
-// Sprint 442 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// CacheTelemetryCollector.h — Cache performance metrics collection
+//
+// Purpose:   Cache performance metrics collection and aggregation
+// Provides:  CacheTelemetryEvent, CacheTelemetryInterval enums, and
+//            CacheTelemetryCollector class
+// Used by:   Telemetry pipeline for hit-rate and efficiency monitoring
+// ============================================================================
 
 #include <cstdint>
 #include <string>

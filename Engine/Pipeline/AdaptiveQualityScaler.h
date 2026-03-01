@@ -1,6 +1,11 @@
 #pragma once
+// ============================================================================
 // AdaptiveQualityScaler.h — Dynamic quality scaling based on system load
-// Sprint 412 · Batch 6 · ExplorerLens v15.0.0
+//
+// Purpose:   Dynamic quality scaling based on system load and display DPI
+// Provides:  QualityTier, ScalingReason enums, and AdaptiveQualityScaler class
+// Used by:   Render pipeline to balance quality vs performance
+// ============================================================================
 
 #include <string>
 #include <cstdint>

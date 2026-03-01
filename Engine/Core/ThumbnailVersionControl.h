@@ -1,10 +1,17 @@
 #pragma once
-// ThumbnailVersionControl.h — Version control for thumbnail cache entries
-// Sprint 418 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ThumbnailVersionControl.h — Cache entry version history with rollback
+//
+// Purpose:   Cache entry version history with rollback and audit trail
+// Provides:  ThumbnailVersion, VersionAction enums, ThumbnailVersionEntry
+//            struct, and ThumbnailVersionControl class
+// Used by:   Cache management for version tracking
+// ============================================================================
 
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <chrono>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -128,9 +135,12 @@ public:
     }
 
 private:
+    /// Returns the current time as epoch milliseconds (UTC) via std::chrono.
     static uint64_t GetCurrentTimestamp() noexcept {
-        // Placeholder — production uses QueryPerformanceCounter epoch conversion
-        return 0;
+        auto now = std::chrono::system_clock::now();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            now.time_since_epoch());
+        return static_cast<uint64_t>(ms.count());
     }
 
     std::vector<ThumbnailVersionEntry> m_history;

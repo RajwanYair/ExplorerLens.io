@@ -1,6 +1,12 @@
 #pragma once
-// LocalizationEngine.h — Multi-language support for UI strings and error messages
-// Sprint 440 — ExplorerLens v15.0.0 Zenith (Core)
+// ============================================================================
+// LocalizationEngine.h — String localization and locale management
+//
+// Purpose:   String localization and locale management
+// Provides:  LocaleId enum, LocEngineString struct,
+//            LocalizationEngine class
+// Used by:   UI layer and error messages
+// ============================================================================
 
 #include <cstdint>
 #include <string>

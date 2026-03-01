@@ -1,6 +1,13 @@
 #pragma once
-// VulkanMemoryAllocator.h — Vulkan-specific memory pool management
-// Sprint 422 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// VulkanMemoryAllocator.h — Vulkan device memory allocation and
+//                           suballocation strategy
+//
+// Purpose:   Vulkan device memory allocation and suballocation strategy
+// Provides:  VkMemoryTier, VkAllocStrategy enums, VkMemoryBlock struct,
+//            VulkanMemoryAllocator class
+// Used by:   Vulkan compute pipeline
+// ============================================================================
 
 #include <cstdint>
 #include <string>

@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// ExplorerBandIntegration.h — Windows Explorer band COM integration
+//
+// Purpose:   Windows Explorer band (toolbar/info band) COM integration
+// Provides:  BandPosition, BandState enums, BandConfig,
+//            BandRegistrationInfo structs, and ExplorerBandIntegration class
+// Used by:   Shell extension registration
+// ============================================================================
 
 #include <string>
 #include <cstdint>

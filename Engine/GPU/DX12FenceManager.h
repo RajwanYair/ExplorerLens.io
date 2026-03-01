@@ -1,6 +1,12 @@
 #pragma once
-// DX12FenceManager.h — DirectX 12 fence synchronization for GPU decode pipeline
-// Sprint 439 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// DX12FenceManager.h — DirectX 12 GPU fence synchronization for
+//                      multi-frame rendering
+//
+// Purpose:   DirectX 12 GPU fence synchronization for multi-frame rendering
+// Provides:  FenceState enum, FenceEntry struct, DX12FenceManager class
+// Used by:   DX12 compute pipeline
+// ============================================================================
 
 #include <cstdint>
 #include <string>

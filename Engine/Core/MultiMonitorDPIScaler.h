@@ -1,6 +1,12 @@
 #pragma once
+// ============================================================================
 // MultiMonitorDPIScaler.h — Per-monitor DPI-aware thumbnail scaling
-// Sprint 435 — ExplorerLens v15.0.0 Zenith
+//
+// Purpose:   Per-monitor DPI-aware thumbnail scaling
+// Provides:  ScaleMode enum, MonitorDPIScaleConfig struct,
+//            MultiMonitorDPIScaler class
+// Used by:   Render pipeline for multi-display setups
+// ============================================================================
 
 #include <cstdint>
 #include <string>

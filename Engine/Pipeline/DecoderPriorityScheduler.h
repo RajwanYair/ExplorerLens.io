@@ -1,6 +1,12 @@
 #pragma once
-// DecoderPriorityScheduler.h — Priority-based decoder task scheduling
-// Sprint 423 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// DecoderPriorityScheduler.h — Priority-queue scheduler for decoder tasks
+//
+// Purpose:   Priority-queue scheduler for decoder task ordering
+// Provides:  DecoderTaskPriority, SchedulerPolicy enums, and
+//            DecoderPriorityScheduler class
+// Used by:   Batch decode pipeline to prioritize visible thumbnails
+// ============================================================================
 
 #include <cstdint>
 #include <string>
@@ -95,7 +101,7 @@ public:
         return static_cast<uint32_t>(m_queue.size());
     }
 
-    /// Number of actively running tasks (placeholder)
+    /// Number of actively running tasks (incremented by PopNext, decremented by MarkCompleted)
     uint32_t GetActiveCount() const noexcept { return m_activeCount; }
 
     /// Peek at the next task without removing it

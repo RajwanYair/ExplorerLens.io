@@ -1,6 +1,12 @@
 #pragma once
-// ThumbnailAnnotation.h — Overlay metadata annotations on thumbnails
-// Sprint 409 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// ThumbnailAnnotation.h — Overlay annotation system for thumbnail badges
+//
+// Purpose:   Overlay annotation system for thumbnail metadata badges
+// Provides:  AnnotationType, AnnotationPosition enums, and
+//            ThumbnailAnnotation class
+// Used by:   Render pipeline for status/badge overlays
+// ============================================================================
 
 #include <string>
 #include <vector>

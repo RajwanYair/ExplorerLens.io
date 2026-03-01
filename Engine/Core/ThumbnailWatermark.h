@@ -1,6 +1,12 @@
 #pragma once
-// ThumbnailWatermark.h — Watermark overlay engine for branded thumbnails
-// Sprint 406 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// ThumbnailWatermark.h — Watermark overlay for branded/enterprise thumbnails
+//
+// Purpose:   Watermark overlay for branded/enterprise thumbnails
+// Provides:  WatermarkPosition, WatermarkType enums, WatermarkConfig struct,
+//            and ThumbnailWatermark class
+// Used by:   Thumbnail render pipeline for branding overlays
+// ============================================================================
 
 #include <string>
 #include <vector>

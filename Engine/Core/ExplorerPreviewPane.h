@@ -1,6 +1,12 @@
 #pragma once
-// ExplorerPreviewPane.h — Enhanced Explorer preview pane integration
-// Sprint 429 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ExplorerPreviewPane.h — Windows Explorer preview pane integration handler
+//
+// Purpose:   Windows Explorer preview pane integration handler
+// Provides:  PreviewPaneState, PreviewPaneAction enums,
+//            PreviewPaneConfig struct, ExplorerPreviewPane class
+// Used by:   Shell extension
+// ============================================================================
 
 #include <cstdint>
 #include <string>

@@ -1,6 +1,13 @@
 #pragma once
-// ExifOrientationFixer.h — Parse and apply EXIF orientation tags
-// Sprint 434 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ExifOrientationFixer.h — Auto-rotate thumbnails based on EXIF orientation
+//                          tag
+//
+// Purpose:   Auto-rotate thumbnails based on EXIF orientation tag
+// Provides:  ExifOrientation enum, OrientationFixResult struct,
+//            ExifOrientationFixer class
+// Used by:   Image decoder post-processing
+// ============================================================================
 
 #include <cstdint>
 #include <string>

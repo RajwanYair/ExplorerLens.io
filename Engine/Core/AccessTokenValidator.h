@@ -1,6 +1,13 @@
 #pragma once
-// AccessTokenValidator.h — Validate COM access tokens and impersonation
-// Sprint 427 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// AccessTokenValidator.h — Windows security token validation for
+//                          ACL-protected files
+//
+// Purpose:   Windows security token validation for ACL-protected files
+// Provides:  TokenValidationResult, AccessLevel enums, TokenInfo struct,
+//            AccessTokenValidator class
+// Used by:   File access layer
+// ============================================================================
 
 #include <cstdint>
 #include <string>

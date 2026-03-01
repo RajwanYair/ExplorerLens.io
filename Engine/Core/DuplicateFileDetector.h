@@ -1,6 +1,12 @@
 #pragma once
-// DuplicateFileDetector.h — Visual duplicate detection using perceptual hashing
-// Sprint 408 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// DuplicateFileDetector.h — Content-hash-based duplicate file detection
+//
+// Purpose:   Content-hash-based duplicate file detection
+// Provides:  DuplicateGroup, DuplicateResult structs, and
+//            DuplicateFileDetector class
+// Used by:   File management utilities
+// ============================================================================
 
 #include <string>
 #include <vector>

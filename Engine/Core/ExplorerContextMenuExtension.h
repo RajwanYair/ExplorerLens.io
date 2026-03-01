@@ -1,6 +1,13 @@
 #pragma once
-// ExplorerContextMenuExtension.h — Extended right-click context menu
-// Sprint 411 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// ExplorerContextMenuExtension.h — Custom context menu verb registration
+//                                  for Explorer
+//
+// Purpose:   Custom context menu verb registration for Explorer
+// Provides:  ContextMenuAction, ContextMenuScope enums,
+//            ContextMenuItem struct, ExplorerContextMenuExtension class
+// Used by:   Shell extension DLL
+// ============================================================================
 
 #include <string>
 #include <vector>

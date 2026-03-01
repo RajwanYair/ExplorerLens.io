@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// RegistrySnapshotManager.h — Windows registry snapshot and diff comparison
+//
+// Purpose:   Windows registry snapshot capture and differential comparison
+// Provides:  SnapshotScope, SnapshotAction enums, RegistrySnapshot,
+//            SnapshotComparisonResult structs, and RegistrySnapshotManager class
+// Used by:   Installer verification and diagnostics
+// ============================================================================
 
 #include <string>
 #include <vector>

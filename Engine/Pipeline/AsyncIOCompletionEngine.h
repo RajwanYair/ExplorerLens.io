@@ -1,6 +1,12 @@
 #pragma once
-// AsyncIOCompletionEngine.h — Overlapped I/O completion port management
-// Sprint 433 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// AsyncIOCompletionEngine.h — Windows I/O completion port async file ops
+//
+// Purpose:   Windows I/O completion port based async file operations
+// Provides:  AsyncIOPriority, AsyncIOStatus enums, and
+//            AsyncIOCompletionEngine class
+// Used by:   Decode pipeline for non-blocking file reads
+// ============================================================================
 
 #include <cstdint>
 #include <string>

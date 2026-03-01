@@ -1,6 +1,13 @@
 #pragma once
-// ClipboardThumbnailManager.h — Clipboard integration for thumbnail copy/paste
-// Sprint 420 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ClipboardThumbnailManager.h — Clipboard-aware thumbnail operations
+//                                (copy/paste thumbnail data)
+//
+// Purpose:   Clipboard-aware thumbnail operations (copy/paste thumbnail data)
+// Provides:  ClipboardFormat, ClipboardAction enums, ClipboardEntry struct,
+//            ClipboardThumbnailManager class
+// Used by:   Shell context menu
+// ============================================================================
 
 #include <cstdint>
 #include <string>

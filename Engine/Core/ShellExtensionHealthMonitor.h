@@ -1,6 +1,13 @@
 #pragma once
-// ShellExtensionHealthMonitor.h — Monitor shell extension health and auto-recover
-// Sprint 431 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ShellExtensionHealthMonitor.h — Continuous health monitoring for COM shell
+//                                 extension registration
+//
+// Purpose:   Continuous health monitoring for COM shell extension registration
+// Provides:  HealthCheckType, HealthStatus enums, HealthCheckResult struct,
+//            ShellExtensionHealthMonitor class
+// Used by:   System tray and diagnostics
+// ============================================================================
 
 #include <cstdint>
 #include <string>

@@ -1,4 +1,13 @@
 #pragma once
+// ============================================================================
+// DecoderSandboxPolicy.h — Security sandbox configuration for format decoders
+//
+// Purpose:   Security sandbox configuration for format decoders
+// Provides:  DecoderSandboxLevel, SandboxResourceLimit enums,
+//            DecoderSandboxRule, DecoderSandboxViolation structs,
+//            and DecoderSandboxPolicy class
+// Used by:   Decoder execution context
+// ============================================================================
 
 #include <string>
 #include <cstdint>

@@ -1,10 +1,16 @@
 #pragma once
-// BatchRenamePreview.h — Preview thumbnails for batch file rename operations
-// Sprint 407 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// BatchRenamePreview.h — Dry-run rename preview without modifying files
+//
+// Purpose:   Dry-run rename preview without modifying files
+// Provides:  RenamePattern, RenamePreviewResult, and BatchRenamePreview class
+// Used by:   Shell context menu extensions
+// ============================================================================
 
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <regex>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -117,8 +123,18 @@ private:
             return arg + path;
         case RenamePattern::DateTime:
             return "20260301_" + std::to_string(index);
-        case RenamePattern::RegexReplace:
-            return path; // placeholder
+        case RenamePattern::RegexReplace: {
+            // arg format: "pattern|replacement" — applies std::regex_replace on the filename
+            auto sep = arg.find('|');
+            if (sep == std::string::npos || sep == 0)
+                return path; // No valid pattern|replacement pair provided
+            try {
+                std::regex re(arg.substr(0, sep));
+                return std::regex_replace(path, re, arg.substr(sep + 1));
+            } catch (const std::regex_error&) {
+                return path; // Invalid regex — return original path unchanged
+            }
+        }
         case RenamePattern::Custom:
             return arg.empty() ? path : arg + "_" + std::to_string(index);
         default:

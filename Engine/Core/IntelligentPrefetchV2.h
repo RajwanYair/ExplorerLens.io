@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// IntelligentPrefetchV2.h — Predictive file prefetching via access patterns
+//
+// Purpose:   Predictive file prefetching based on access pattern analysis
+// Provides:  PrefetchStrategyV2, AccessPatternV2 enums, PrefetchRequest
+//            struct, and IntelligentPrefetchV2 class
+// Used by:   Pipeline I/O layer
+// ============================================================================
 
 #include <string>
 #include <vector>

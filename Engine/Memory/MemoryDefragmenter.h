@@ -1,6 +1,12 @@
 #pragma once
-// MemoryDefragmenter.h — Defragment memory pool to reduce fragmentation
-// Sprint 415 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// MemoryDefragmenter.h — Heap compaction and memory block defragmentation
+//
+// Purpose:   Heap compaction and memory block defragmentation
+// Provides:  FragmentationLevel, DefragStrategy enums, and
+//            MemoryDefragmenter class
+// Used by:   Memory management to reduce fragmentation under sustained load
+// ============================================================================
 
 #include <string>
 #include <cstdint>

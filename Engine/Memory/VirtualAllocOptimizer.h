@@ -1,6 +1,12 @@
 #pragma once
-// VirtualAllocOptimizer.h — Optimize VirtualAlloc usage for large decode buffers
-// Sprint 436 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// VirtualAllocOptimizer.h — VirtualAlloc strategy for large buffer management
+//
+// Purpose:   VirtualAlloc strategy selection for large buffer management
+// Provides:  VAllocStrategy, PageProtection enums, and
+//            VirtualAllocOptimizer class
+// Used by:   GPU upload and decode buffer allocation
+// ============================================================================
 
 #include <cstdint>
 #include <string>

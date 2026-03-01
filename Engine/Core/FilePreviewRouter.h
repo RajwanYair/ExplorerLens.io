@@ -1,6 +1,14 @@
 #pragma once
-// FilePreviewRouter.h — Route files to optimal preview handler
-// Sprint 419 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// FilePreviewRouter.h — Route file preview requests to appropriate decoder
+//                        based on format detection
+//
+// Purpose:   Route file preview requests to appropriate decoder based on
+//            format detection
+// Provides:  PreviewTarget, PreviewRouteAction enums, PreviewRoute struct,
+//            FilePreviewRouter class
+// Used by:   Shell preview handler
+// ============================================================================
 
 #include <cstdint>
 #include <string>

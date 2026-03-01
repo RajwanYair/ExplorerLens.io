@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// GPUWorkloadBalancer.h — Multi-GPU workload distribution and affinity
+//
+// Purpose:   Multi-GPU workload distribution and affinity management
+// Provides:  BalancingStrategy, GPUWorkloadType enums, GPUWorkItem,
+//            GPUBalancerDeviceInfo structs, and GPUWorkloadBalancer class
+// Used by:   GPU decode pipeline
+// ============================================================================
 
 #include <string>
 #include <vector>

@@ -1,6 +1,12 @@
 #pragma once
-// FileTypeStatistics.h — Track file type distribution and decode statistics
-// Sprint 414 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// FileTypeStatistics.h — File type distribution statistics collection
+//
+// Purpose:   File type distribution statistics collection
+// Provides:  StatPeriod enum, FormatStatEntry struct,
+//            FileTypeStatistics class
+// Used by:   Analytics dashboard
+// ============================================================================
 
 #include <string>
 #include <vector>

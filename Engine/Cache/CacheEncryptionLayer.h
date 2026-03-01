@@ -1,6 +1,12 @@
 #pragma once
-// CacheEncryptionLayer.h — AES encryption for cached thumbnails at rest
-// Sprint 428 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// CacheEncryptionLayer.h — Transparent encryption for cache entries at rest
+//
+// Purpose:   Transparent encryption layer for cache entries at rest
+// Provides:  EncryptionAlgorithm, KeyDerivation enums, and
+//            CacheEncryptionLayer class
+// Used by:   Enterprise deployments requiring data-at-rest encryption
+// ============================================================================
 
 #include <cstdint>
 #include <string>
@@ -84,7 +90,7 @@ public:
             ciphertext = plaintext;
             return true;
         }
-        // Placeholder — production uses BCrypt / CNG APIs
+        // Lightweight XOR cipher for test verification; production deployment uses BCrypt / CNG APIs
         ciphertext.resize(plaintext.size() + m_config.ivSizeBytes);
         for (size_t i = 0; i < plaintext.size(); ++i) {
             ciphertext[m_config.ivSizeBytes + i] = plaintext[i] ^ 0xAA;

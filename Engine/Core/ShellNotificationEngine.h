@@ -1,6 +1,13 @@
 #pragma once
-// ShellNotificationEngine.h — Windows Shell change notifications management
-// Sprint 416 · Batch 6 · ExplorerLens v15.0.0
+// ============================================================================
+// ShellNotificationEngine.h — Shell change notification broadcasting
+//                             (SHChangeNotify wrapper)
+//
+// Purpose:   Shell change notification broadcasting (SHChangeNotify wrapper)
+// Provides:  NotifyEvent, NotifyScope enums, ShellNotification struct,
+//            ShellNotificationEngine class
+// Used by:   Registration and cache invalidation
+// ============================================================================
 
 #include <string>
 #include <vector>

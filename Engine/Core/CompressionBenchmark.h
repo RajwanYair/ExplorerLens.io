@@ -1,4 +1,13 @@
 #pragma once
+// ============================================================================
+// CompressionBenchmark.h — Compression algorithm benchmarking for cache
+//
+// Purpose:   Compression algorithm benchmarking for cache optimization
+// Provides:  CompressionAlgo enum, CompressionBenchMetric,
+//            CompressionBenchResult, CompressionAlgoProfile structs,
+//            and CompressionBenchmark class
+// Used by:   Cache tier selection
+// ============================================================================
 
 #include <string>
 #include <vector>

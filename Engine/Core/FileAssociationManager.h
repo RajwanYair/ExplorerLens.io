@@ -1,6 +1,13 @@
 #pragma once
-// FileAssociationManager.h — Manage file type associations for thumbnail handlers
-// Sprint 438 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// FileAssociationManager.h — Windows file type association management for
+//                            shell extension
+//
+// Purpose:   Windows file type association management for shell extension
+// Provides:  AssociationScope, AssociationAction enums,
+//            FileAssociation struct, FileAssociationManager class
+// Used by:   Installer and settings
+// ============================================================================
 
 #include <cstdint>
 #include <string>

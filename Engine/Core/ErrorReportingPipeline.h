@@ -1,6 +1,12 @@
 #pragma once
-// ErrorReportingPipeline.h — Structured error reporting and aggregation
-// Sprint 424 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ErrorReportingPipeline.h — Structured error collection and reporting
+//
+// Purpose:   Structured error collection and reporting
+// Provides:  ErrorSeverity, ErrorCategory enums, ErrorReport struct,
+//            ErrorReportingPipeline class
+// Used by:   All engine modules for centralized error handling
+// ============================================================================
 
 #include <cstdint>
 #include <string>

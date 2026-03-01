@@ -1,4 +1,12 @@
 #pragma once
+// ============================================================================
+// ThumbnailDiffEngine.h — Structural similarity comparison between thumbnails
+//
+// Purpose:   Structural similarity comparison between thumbnail versions
+// Provides:  DiffAlgorithm, DiffSeverity enums, DiffResult,
+//            DiffThresholdConfig structs, and ThumbnailDiffEngine class
+// Used by:   Cache validation and quality comparison
+// ============================================================================
 
 #include <string>
 #include <cstdint>

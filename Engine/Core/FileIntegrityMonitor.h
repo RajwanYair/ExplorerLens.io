@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Windows.h>
 #include <string>
 #include <vector>
 #include <cstdint>
@@ -113,14 +114,71 @@ public:
         return record.status;
     }
 
+    /// Enumerate all files in the given directory and register/check each one.
+    /// Returns the number of files discovered and checked.
     uint32_t ScanDirectory(const std::wstring& directoryPath, FileIntegrityCheckType checkType) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        // In production this would enumerate files via FindFirstFileW/FindNextFileW
-        // and check each against the USN journal. Stub returns 0 for testability.
         m_lastScanDirectory = directoryPath;
         m_lastScanType = checkType;
         m_scanCount++;
-        return 0;
+
+        // Build search pattern: directoryPath\*
+        std::wstring searchPattern = directoryPath;
+        if (!searchPattern.empty() && searchPattern.back() != L'\\')
+            searchPattern += L'\\';
+        searchPattern += L"*";
+
+        WIN32_FIND_DATAW findData{};
+        HANDLE hFind = FindFirstFileW(searchPattern.c_str(), &findData);
+        if (hFind == INVALID_HANDLE_VALUE)
+            return 0;
+
+        uint32_t fileCount = 0;
+        do {
+            // Skip "." and ".." directory entries
+            if (findData.cFileName[0] == L'.' &&
+                (findData.cFileName[1] == L'\0' ||
+                 (findData.cFileName[1] == L'.' && findData.cFileName[2] == L'\0')))
+                continue;
+
+            // Skip subdirectories — only process regular files
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                continue;
+
+            std::wstring filePath = directoryPath;
+            if (!filePath.empty() && filePath.back() != L'\\')
+                filePath += L'\\';
+            filePath += findData.cFileName;
+
+            // Register or update each discovered file
+            auto it = m_records.find(filePath);
+            if (it == m_records.end()) {
+                FileIntegrityRecord record{};
+                record.filePath = filePath;
+                record.status = FileIntegrityStatus::Valid;
+                record.lastCheckType = checkType;
+                record.lastCheckMs = GetCurrentTimeMs();
+                record.fileSizeBytes =
+                    (static_cast<uint64_t>(findData.nFileSizeHigh) << 32) |
+                    findData.nFileSizeLow;
+                if (checkType == FileIntegrityCheckType::Hash ||
+                    checkType == FileIntegrityCheckType::FullScan) {
+                    record.lastHash = ComputeSimpleHash(filePath);
+                }
+                m_records[filePath] = record;
+            } else {
+                it->second.lastCheckType = checkType;
+                it->second.lastCheckMs = GetCurrentTimeMs();
+                it->second.fileSizeBytes =
+                    (static_cast<uint64_t>(findData.nFileSizeHigh) << 32) |
+                    findData.nFileSizeLow;
+            }
+            m_totalChecks++;
+            fileCount++;
+        } while (FindNextFileW(hFind, &findData));
+
+        FindClose(hFind);
+        return fileCount;
     }
 
     size_t GetRecordCount() const {

@@ -1,6 +1,12 @@
 #pragma once
-// ThumbnailSpriteSheet.h — Generate sprite sheets from multiple thumbnails
-// Sprint 441 — ExplorerLens v15.0.0 Zenith
+// ============================================================================
+// ThumbnailSpriteSheet.h — Sprite sheet packing for batch thumbnail atlasing
+//
+// Purpose:   Sprite sheet packing for batch thumbnail atlasing
+// Provides:  SpriteLayout, SpritePackStrategy enums, SpriteEntry struct,
+//            ThumbnailSpriteSheet class
+// Used by:   Web preview and batch export
+// ============================================================================
 
 #include <cstdint>
 #include <string>

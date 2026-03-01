@@ -172,123 +172,63 @@
 
 // ===== Feature Module Includes =====
 
-// EngineTests.h — MuPDF PDF support
+// --- Feature Module Integrations ---
 #include "../Core/MuPDFIntegration.h"
-
-// EngineTests.h — libwebp CRT fix
 #include "../Core/LibWebPConfig.h"
-
-// EngineTests.h — LENSArchive refactoring
 #include "../Core/ArchiveRefactorEngine.h"
-
-// EngineTests.h — Bitmap Pool
-#include "../Memory/BitmapPool.h"
-
-// EngineTests.h — IPropertyStore
-#include "../Core/PropertyStoreHandler.h"
-
-// EngineTests.h — GPU Shader Library
-#include "../Core/GPUShaderLibrary.h"
-
-// EngineTests.h — PluginHost
-#include "../Core/PluginHostManager.h"
-
-// EngineTests.h — Library Version Audit
 #include "../Core/LibraryVersionAudit.h"
-
-// EngineTests.h — OpenJPEG
 #include "../Core/OpenJPEGIntegration.h"
-
-// EngineTests.h — FreeType
 #include "../Core/FreeTypeIntegration.h"
-
-// EngineTests.h — FFmpeg
 #include "../Core/FFmpegIntegration.h"
 
-// EngineTests.h — Format Categories
+// --- Memory Management ---
+#include "../Memory/BitmapPool.h"
+
+// --- Shell Integration ---
+#include "../Core/PropertyStoreHandler.h"
+#include "../Core/GPUShaderLibrary.h"
+#include "../Core/PluginHostManager.h"
 #include "../Core/FormatCategoryManager.h"
-
-// EngineTests.h — Format Status
 #include "../Core/FormatStatusIndicator.h"
-
-// EngineTests.h — Settings Import/Export
 #include "../Core/SettingsExportImport.h"
-
-// EngineTests.h — Performance Dashboard
 #include "../Core/PerformanceDashboard.h"
 
-// EngineTests.h — ETW TraceLogging Provider
+// --- Observability & DevOps ---
 #include "../Core/ETWTraceProvider.h"
-
-// EngineTests.h — Dark Mode
-#include "../Core/DarkModeEngine.h"
-
-// EngineTests.h — System Tray
-#include "../Core/SystemTrayManager.h"
-
-// EngineTests.h — WinUI 3 Migration
-#include "../Core/WinUI3MigrationEngine.h"
-
-// EngineTests.h — CI Hardening
 #include "../Core/CIHardeningEngine.h"
-
-// EngineTests.h — Code Coverage
 #include "../Core/CodeCoverageEngine.h"
 
-// Batch 3: Dark Mode Controls + Renderer
+// --- UI & Theming ---
+#include "../Core/DarkModeEngine.h"
+#include "../Core/SystemTrayManager.h"
+#include "../Core/WinUI3MigrationEngine.h"
 #include "../Core/DarkModeControls.h"
 #include "../Core/DarkModeRendererV2.h"
 #include "../Core/WinUI3Research.h"
 #include "../Core/HybridUIBridge.h"
 
-// Batch 3: Integration Test / Fuzzing / Static Analysis
+// --- Test Infrastructure ---
 #include "../Utils/IntegrationTestFrameworkV2.h"
 #include "../Utils/IntegrationTestOrchestrator.h"
 #include "../Utils/ContinuousFuzzOrchestrator.h"
 #include "../Utils/StaticAnalysisCIGate.h"
 
-// Batch 4: Documentation Sync
+// --- Documentation ---
 #include "../Core/DocumentationSyncAudit.h"
 
-// EngineTests.h — Fuzzing Campaign
-// (merged into FuzzingEngine.h)
-
-// EngineTests.h — Static Analysis
-// StaticAnalysisGate now in QualityGates.h
-
-// EngineTests.h — SBOM (now in SecurityCompliance.h)
-
-// EngineTests.h — Zero-Copy Pipeline
+// --- Pipeline & Performance ---
 #include "../Pipeline/ZeroCopyPipeline.h"
-
-// EngineTests.h — Parallel I/O
 #include "../Pipeline/ParallelIOPipeline.h"
-
-// EngineTests.h — SIMD Scaler
 #include "../Utils/SIMDScaler.h"
-
-// EngineTests.h — PSO Cache
 #include "../Cache/PipelineStateCacheV2.h"
-
-// EngineTests.h — Cache Warming
 #include "../Cache/CacheWarmingService.h"
 
-// EngineTests.h — Thumbnail Quality Analyzer
+// --- Core Features ---
 #include "../Core/ThumbnailQualityAnalyzer.h"
-
-// EngineTests.h — Adaptive Decoder Router
 #include "../Core/AdaptiveDecoderRouter.h"
-
-// EngineTests.h — Telemetry Pipeline
 #include "../Core/TelemetryPipeline.h"
-
-// EngineTests.h — Live Preview Engine
 #include "../Core/LivePreviewEngine.h"
-
-// EngineTests.h — Cloud Native Sync
 #include "../Core/CloudNativeSync.h"
-
-// EngineTests.h — Zenith Ascent Feature Headers
 #include "../Cache/CacheEfficiencyAnalyzer.h"
 #include "../Core/ARM64NEONScaler.h"
 #include "../Core/AccessibilityNarratorBridge.h"
@@ -341,58 +281,54 @@
 #include "../Pipeline/ShellProgressIndicator.h"
 #include "../Pipeline/ThreadPoolOptimizer.h"
 
-// Shell integration features
+// --- Shell Deep Integration ---
 #include "../Core/JumpListIntegration.h"
 #include "../Core/ShellSearchProtocolHandler.h"
 
-// Plugin C ABI bridge
+// --- Plugin System ---
 #include "../Plugin/PluginLoaderV2.h"
 
-// Performance pipeline & zero-copy
+// --- Streaming & SIMD ---
 #include "../Pipeline/ZeroCopyActivation.h"
 #include "../Pipeline/SIMDDispatchRouter.h"
 #include "../Pipeline/StreamingDecodeEngine.h"
 
-// GPU compute kernels
+// --- GPU Compute ---
 #include "../GPU/LanczosGPUKernel.h"
 #include "../GPU/HDRToneMapKernel.h"
 #include "../GPU/AdaptiveGPUScheduler.h"
 
-// Cache engines
+// --- Cache Layer ---
 #include "../Cache/PSOPersistenceManager.h"
 #include "../Cache/PredictiveCacheEngine.h"
 
-// Shell deep integration
+// --- Shell & Decoders ---
 #include "../Core/ExplorerColumnProvider.h"
 #include "../Core/DragDropThumbnailPreview.h"
-
-// Advanced decoders
 #include "../Decoders/MultiPageStripRenderer.h"
 #include "../Decoders/VideoKeyframeExtractor.h"
-
-// Batch 2 — Decoders
 #include "../Decoders/AnimatedImageDecoder.h"
 #include "../Decoders/ProgressiveJPEGDecoder.h"
 
-// Batch 2 — Core
+// --- Batch Processing & Validation ---
 #include "../Core/TaskbarPreviewManager.h"
 #include "../Core/SearchFederatedProvider.h"
 #include "../Core/ThumbnailQualityValidator.h"
 
-// Batch 2 — Utils
+// --- Optimization & Power ---
 #include "../Utils/RemoteDesktopOptimizer.h"
 #include "../Utils/PowerThrottleManager.h"
 
-// Batch 2 — GPU
+// --- GPU Sampling & Compilation ---
 #include "../GPU/AsyncTextureSampler.h"
 #include "../GPU/ShaderCacheCompiler.h"
 
-// Batch 2 — Pipeline / Memory / Cache
+// --- Format Detection & Storage ---
 #include "../Pipeline/FormatSignatureDetector.h"
 #include "../Memory/SmartPointerPool.h"
 #include "../Cache/ThumbnailPersistenceLayer.h"
 
-// Batch 5 — Sprints 394-405
+// --- File Integrity & Monitoring ---
 #include "../Core/FileIntegrityMonitor.h"
 #include "../Core/ThumbnailDiffEngine.h"
 #include "../Core/DecoderSandboxPolicy.h"
@@ -406,7 +342,7 @@
 #include "../Core/HotReloadConfigEngine.h"
 #include "../Core/COMDiagnosticsEngine.h"
 
-// Batch 6 — Sprints 406-417
+// --- Watermark & Annotation ---
 #include "../Core/ThumbnailWatermark.h"
 #include "../Core/BatchRenamePreview.h"
 #include "../Core/DuplicateFileDetector.h"
@@ -420,7 +356,7 @@
 #include "../Core/ShellNotificationEngine.h"
 #include "../Core/ThumbnailExportEngine.h"
 
-// Batch 7 — Sprints 418-429
+// --- Version Control & Preview ---
 #include "../Core/ThumbnailVersionControl.h"
 #include "../Core/FilePreviewRouter.h"
 #include "../Core/ClipboardThumbnailManager.h"
@@ -433,6 +369,8 @@
 #include "../Core/AccessTokenValidator.h"
 #include "../Cache/CacheEncryptionLayer.h"
 #include "../Core/ExplorerPreviewPane.h"
+
+// --- DirectShow & Health ---
 #include "../Core/DirectShowThumbnailBridge.h"
 #include "../Core/ShellExtensionHealthMonitor.h"
 #include "../Core/ThumbnailColorSpace.h"

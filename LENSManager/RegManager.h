@@ -824,11 +824,13 @@ public:
 			return;
 		}
 		else if (LENSTYPE == LENS_HEIF) {
-			// HEIF formats: .heif, .heic
-			const LPCTSTR heifExts[] = { LENS_HEIFTH_KEY, LENS_HEICTH_KEY };
-			const LPCTSTR heifInfoTips[] = { LENS_HEIFIH_KEY, LENS_HEICIH_KEY };
-			const LPCTSTR backupNames[] = { _T("heif_th"), _T("heic_th") };
-			const LPCTSTR backupNamesInfo[] = { _T("heif_ih"), _T("heic_ih") };
+			// HEIF formats: .heif, .heic, .hif
+			const LPCTSTR heifExts[] = { LENS_HEIFTH_KEY, LENS_HEICTH_KEY,
+				_T("SOFTWARE\\Classes\\.HIF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR heifInfoTips[] = { LENS_HEIFIH_KEY, LENS_HEICIH_KEY,
+				_T("SOFTWARE\\Classes\\.HIF\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("heif_th"), _T("heic_th"), _T("hif_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("heif_ih"), _T("heic_ih"), _T("hif_ih") };
 
 			for (int i = 0; i < _countof(heifExts); i++) {
 				if (bSet) {
@@ -963,6 +965,16 @@ public:
 									   _T("SOFTWARE\\Classes\\.ARW\\shellex\\{")
 									   _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
 									   _T("SOFTWARE\\Classes\\.ORF\\shellex\\{")
+									   _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+									   _T("SOFTWARE\\Classes\\.RW2\\shellex\\{")
+									   _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+									   _T("SOFTWARE\\Classes\\.PEF\\shellex\\{")
+									   _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+									   _T("SOFTWARE\\Classes\\.RAF\\shellex\\{")
+									   _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+									   _T("SOFTWARE\\Classes\\.SRW\\shellex\\{")
+									   _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+									   _T("SOFTWARE\\Classes\\.NRW\\shellex\\{")
 									   _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
 			const LPCTSTR rawInfoTips[] = {
 				LENS_DNGIH_KEY,
@@ -975,12 +987,27 @@ public:
 				_T("SOFTWARE\\Classes\\.ARW\\shellex\\{00021500-0000-0000-C000-")
 				_T("000000000046}"),
 				_T("SOFTWARE\\Classes\\.ORF\\shellex\\{00021500-0000-0000-C000-")
+				_T("000000000046}"),
+				_T("SOFTWARE\\Classes\\.RW2\\shellex\\{00021500-0000-0000-C000-")
+				_T("000000000046}"),
+				_T("SOFTWARE\\Classes\\.PEF\\shellex\\{00021500-0000-0000-C000-")
+				_T("000000000046}"),
+				_T("SOFTWARE\\Classes\\.RAF\\shellex\\{00021500-0000-0000-C000-")
+				_T("000000000046}"),
+				_T("SOFTWARE\\Classes\\.SRW\\shellex\\{00021500-0000-0000-C000-")
+				_T("000000000046}"),
+				_T("SOFTWARE\\Classes\\.NRW\\shellex\\{00021500-0000-0000-C000-")
 				_T("000000000046}") };
 			const LPCTSTR backupNames[] = { _T("dng_th"), _T("cr2_th"), _T("cr3_th"),
-										   _T("nef_th"), _T("arw_th"), _T("orf_th") };
+										   _T("nef_th"), _T("arw_th"), _T("orf_th"),
+										   _T("rw2_th"), _T("pef_th"), _T("raf_th"),
+										   _T("srw_th"), _T("nrw_th") };
 			const LPCTSTR backupNamesInfo[] = { _T("dng_ih"), _T("cr2_ih"),
 											   _T("cr3_ih"), _T("nef_ih"),
-											   _T("arw_ih"), _T("orf_ih") };
+											   _T("arw_ih"), _T("orf_ih"),
+											   _T("rw2_ih"), _T("pef_ih"),
+											   _T("raf_ih"), _T("srw_ih"),
+											   _T("nrw_ih") };
 
 			for (int i = 0; i < _countof(rawExts); i++) {
 				if (bSet) {
@@ -1032,6 +1059,262 @@ public:
 						}
 						else
 							rk.Close();
+					}
+				}
+			}
+			return;
+		}
+		else if (LENSTYPE == LENS_AUDIO) {
+			// Audio formats: .mp3, .flac, .wav, .ogg, .m4a, .wma, .aac, .opus
+			const LPCTSTR audioExts[] = {
+				LENS_MP3TH_KEY,
+				_T("SOFTWARE\\Classes\\.FLAC\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.WAV\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.OGG\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.M4A\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.WMA\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.AAC\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.OPUS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR audioInfoTips[] = {
+				LENS_MP3IH_KEY,
+				_T("SOFTWARE\\Classes\\.FLAC\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.WAV\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.OGG\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.M4A\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.WMA\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.AAC\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.OPUS\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("mp3_th"), _T("flac_th"), _T("wav_th"),
+				_T("ogg_th"), _T("m4a_th"), _T("wma_th"), _T("aac_th"), _T("opus_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("mp3_ih"), _T("flac_ih"), _T("wav_ih"),
+				_T("ogg_ih"), _T("m4a_ih"), _T("wma_ih"), _T("aac_ih"), _T("opus_ih") };
+			for (int i = 0; i < _countof(audioExts); i++) {
+				if (bSet) {
+					BackupHandler(LENSTYPE, audioExts[i], backupNames[i]);
+					BackupHandler(LENSTYPE, audioInfoTips[i], backupNamesInfo[i]);
+					CRegKey rkt, rki;
+					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, audioExts[i], NULL,
+						REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rkt.SetStringValue(NULL, LENS_GUID_KEY);
+					if (ERROR_SUCCESS == rki.Create(HKEY_CURRENT_USER, audioInfoTips[i],
+						NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rki.SetStringValue(NULL, LENS_GUID_KEY);
+				}
+				else {
+					TCHAR currentGuid[256] = { 0 };
+					ULONG len = 256;
+					CRegKey rk;
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, audioExts[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(audioExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, audioExts[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, audioInfoTips[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(audioInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, audioInfoTips[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+				}
+			}
+			return;
+		}
+		else if (LENSTYPE == LENS_DOCUMENT) {
+			// Document formats: .docx, .pptx, .xlsx, .doc, .ppt, .xls
+			const LPCTSTR docExts[] = {
+				LENS_DOCXTH_KEY,
+				_T("SOFTWARE\\Classes\\.PPTX\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.XLSX\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.DOC\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.PPT\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.XLS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR docInfoTips[] = {
+				LENS_DOCXIH_KEY,
+				_T("SOFTWARE\\Classes\\.PPTX\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.XLSX\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.DOC\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.PPT\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.XLS\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("docx_th"), _T("pptx_th"), _T("xlsx_th"),
+				_T("doc_th"), _T("ppt_th"), _T("xls_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("docx_ih"), _T("pptx_ih"), _T("xlsx_ih"),
+				_T("doc_ih"), _T("ppt_ih"), _T("xls_ih") };
+			for (int i = 0; i < _countof(docExts); i++) {
+				if (bSet) {
+					BackupHandler(LENSTYPE, docExts[i], backupNames[i]);
+					BackupHandler(LENSTYPE, docInfoTips[i], backupNamesInfo[i]);
+					CRegKey rkt, rki;
+					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, docExts[i], NULL,
+						REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rkt.SetStringValue(NULL, LENS_GUID_KEY);
+					if (ERROR_SUCCESS == rki.Create(HKEY_CURRENT_USER, docInfoTips[i],
+						NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rki.SetStringValue(NULL, LENS_GUID_KEY);
+				}
+				else {
+					TCHAR currentGuid[256] = { 0 };
+					ULONG len = 256;
+					CRegKey rk;
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, docExts[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(docExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, docExts[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, docInfoTips[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(docInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, docInfoTips[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+				}
+			}
+			return;
+		}
+		else if (LENSTYPE == LENS_FONT) {
+			// Font formats: .ttf, .otf, .woff, .woff2
+			const LPCTSTR fontExts[] = {
+				LENS_TTFTH_KEY,
+				_T("SOFTWARE\\Classes\\.OTF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.WOFF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.WOFF2\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR fontInfoTips[] = {
+				LENS_TTFIH_KEY,
+				_T("SOFTWARE\\Classes\\.OTF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.WOFF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.WOFF2\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("ttf_th"), _T("otf_th"), _T("woff_th"), _T("woff2_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("ttf_ih"), _T("otf_ih"), _T("woff_ih"), _T("woff2_ih") };
+			for (int i = 0; i < _countof(fontExts); i++) {
+				if (bSet) {
+					BackupHandler(LENSTYPE, fontExts[i], backupNames[i]);
+					BackupHandler(LENSTYPE, fontInfoTips[i], backupNamesInfo[i]);
+					CRegKey rkt, rki;
+					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, fontExts[i], NULL,
+						REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rkt.SetStringValue(NULL, LENS_GUID_KEY);
+					if (ERROR_SUCCESS == rki.Create(HKEY_CURRENT_USER, fontInfoTips[i],
+						NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rki.SetStringValue(NULL, LENS_GUID_KEY);
+				}
+				else {
+					TCHAR currentGuid[256] = { 0 };
+					ULONG len = 256;
+					CRegKey rk;
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, fontExts[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(fontExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, fontExts[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, fontInfoTips[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(fontInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, fontInfoTips[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+				}
+			}
+			return;
+		}
+		else if (LENSTYPE == LENS_MODEL) {
+			// 3D Model formats: .stl, .obj, .gltf, .glb, .fbx, .3ds, .ply
+			const LPCTSTR modelExts[] = {
+				LENS_STLTH_KEY,
+				_T("SOFTWARE\\Classes\\.OBJ\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.GLTF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.GLB\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.FBX\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.3DS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.PLY\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR modelInfoTips[] = {
+				LENS_STLIH_KEY,
+				_T("SOFTWARE\\Classes\\.OBJ\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.GLTF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.GLB\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.FBX\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.3DS\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.PLY\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("stl_th"), _T("obj_th"), _T("gltf_th"),
+				_T("glb_th"), _T("fbx_th"), _T("3ds_th"), _T("ply_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("stl_ih"), _T("obj_ih"), _T("gltf_ih"),
+				_T("glb_ih"), _T("fbx_ih"), _T("3ds_ih"), _T("ply_ih") };
+			for (int i = 0; i < _countof(modelExts); i++) {
+				if (bSet) {
+					BackupHandler(LENSTYPE, modelExts[i], backupNames[i]);
+					BackupHandler(LENSTYPE, modelInfoTips[i], backupNamesInfo[i]);
+					CRegKey rkt, rki;
+					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, modelExts[i], NULL,
+						REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rkt.SetStringValue(NULL, LENS_GUID_KEY);
+					if (ERROR_SUCCESS == rki.Create(HKEY_CURRENT_USER, modelInfoTips[i],
+						NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rki.SetStringValue(NULL, LENS_GUID_KEY);
+				}
+				else {
+					TCHAR currentGuid[256] = { 0 };
+					ULONG len = 256;
+					CRegKey rk;
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, modelExts[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(modelExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, modelExts[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, modelInfoTips[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(modelInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, modelInfoTips[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
 					}
 				}
 			}
