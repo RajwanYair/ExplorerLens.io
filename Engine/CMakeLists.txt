@@ -549,6 +549,10 @@ set(ENGINE_HEADERS
     Utils/PerceptualHashing.h
     Utils/RemoteDesktopOptimizer.h
     Utils/PowerThrottleManager.h
+    Utils/IntegrationTestFrameworkV2.h
+    Utils/IntegrationTestOrchestrator.h
+    Utils/ContinuousFuzzOrchestrator.h
+    Utils/StaticAnalysisCIGate.h
     Utils/Win11Integration.h
 
     # Release gate (unified)

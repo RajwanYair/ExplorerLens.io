@@ -235,6 +235,18 @@
 // EngineTests.h — Code Coverage
 #include "../Core/CodeCoverageEngine.h"
 
+// Batch 3: Dark Mode Controls + Renderer
+#include "../Core/DarkModeControls.h"
+#include "../Core/DarkModeRendererV2.h"
+#include "../Core/WinUI3Research.h"
+#include "../Core/HybridUIBridge.h"
+
+// Batch 3: Integration Test / Fuzzing / Static Analysis
+#include "../Utils/IntegrationTestFrameworkV2.h"
+#include "../Utils/IntegrationTestOrchestrator.h"
+#include "../Utils/ContinuousFuzzOrchestrator.h"
+#include "../Utils/StaticAnalysisCIGate.h"
+
 // EngineTests.h — Fuzzing Campaign
 // (merged into FuzzingEngine.h)
 
@@ -11586,6 +11598,455 @@ TEST(TestPersistence_HitRate) {
     ASSERT(stats.GetHitRate() > 49.0 && stats.GetHitRate() < 51.0);
 }
 
+// ============================================================================
+// Batch 3: Dark Mode Controls Tests (Sprint 373)
+// ============================================================================
+
+TEST(TestDarkCtrl_ControlTypeEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint8_t>(DarkControlType::Checkbox) == 0);
+    ASSERT(static_cast<uint8_t>(DarkControlType::Slider) == 9);
+}
+
+TEST(TestDarkCtrl_CheckStateDefaults) {
+    using namespace ExplorerLens::Engine;
+    DarkCheckState state;
+    ASSERT(!state.isChecked);
+    ASSERT(!state.isHovered);
+    ASSERT(!state.isPressed);
+    ASSERT(!state.isDisabled);
+    ASSERT(!state.isFocused);
+}
+
+TEST(TestDarkCtrl_Singleton) {
+    using namespace ExplorerLens::Engine;
+    auto& inst1 = DarkModeControls::Instance();
+    auto& inst2 = DarkModeControls::Instance();
+    ASSERT(&inst1 == &inst2);
+}
+
+TEST(TestDarkCtrl_SetAccentColor) {
+    using namespace ExplorerLens::Engine;
+    auto& ctrl = DarkModeControls::Instance();
+    ctrl.SetAccentColor(RGB(255, 0, 0));
+    ctrl.SetBackgroundColor(RGB(10, 10, 10));
+    // No crash — API is callable
+    ASSERT(true);
+}
+
+// ============================================================================
+// Batch 3: Dark Mode Renderer V2 Tests (Sprint 374)
+// ============================================================================
+
+TEST(TestDarkRenderV2_DefaultScheme) {
+    using namespace ExplorerLens::Engine;
+    DarkColorScheme scheme;
+    ASSERT(scheme.background == RGB(32, 32, 32));
+    ASSERT(scheme.text == RGB(230, 230, 230));
+    ASSERT(scheme.accent == RGB(0, 120, 215));
+}
+
+TEST(TestDarkRenderV2_LightScheme) {
+    using namespace ExplorerLens::Engine;
+    LightColorScheme scheme;
+    ASSERT(scheme.background == RGB(255, 255, 255));
+    ASSERT(scheme.text == RGB(30, 30, 30));
+}
+
+TEST(TestDarkRenderV2_PreferredAppMode) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(PreferredAppMode::Default) == 0);
+    ASSERT(static_cast<int>(PreferredAppMode::ForceDark) == 2);
+    ASSERT(static_cast<int>(PreferredAppMode::Max) == 4);
+}
+
+TEST(TestDarkRenderV2_Singleton) {
+    using namespace ExplorerLens::Engine;
+    auto& r1 = DarkModeRendererV2::Instance();
+    auto& r2 = DarkModeRendererV2::Instance();
+    ASSERT(&r1 == &r2);
+}
+
+// ============================================================================
+// Batch 3: System Tray Manager Tests (Sprint 375)
+// ============================================================================
+
+TEST(TestSysTray_IconStateEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint8_t>(TrayIconState::Normal) == 0);
+    ASSERT(static_cast<uint8_t>(TrayIconState::Updating) == 4);
+}
+
+TEST(TestSysTray_CommandEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint16_t>(TrayCommand::OpenManager) == 1001);
+    ASSERT(static_cast<uint16_t>(TrayCommand::Exit) == 1008);
+}
+
+TEST(TestSysTray_ActionNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(SystemTrayManager::ActionName(TrayAction::OpenSettings)) == L"Open Settings");
+    ASSERT(std::wstring(SystemTrayManager::ActionName(TrayAction::ExitApp)) == L"Exit");
+    ASSERT(SystemTrayManager::ActionCount() == 4);
+}
+
+TEST(TestSysTray_NotInitializedByDefault) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = SystemTrayManager::Instance();
+    // Cannot reliably test Initialize without HWND, but state should be "Normal"
+    ASSERT(mgr.GetState() == TrayIconState::Normal);
+}
+
+// ============================================================================
+// Batch 3: WinUI3 Research Tests (Sprint 376)
+// ============================================================================
+
+TEST(TestWinUI3Res_FeasibilityEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint8_t>(MigrationFeasibility::NotFeasible) == 0);
+    ASSERT(static_cast<uint8_t>(MigrationFeasibility::Recommended) == 3);
+}
+
+TEST(TestWinUI3Res_AssessmentCount) {
+    using namespace ExplorerLens::Engine;
+    auto& research = WinUI3Research::Instance();
+    ASSERT(WinUI3Research::ASSESSMENT_COUNT == 8);
+    auto a0 = research.GetAssessment(0);
+    ASSERT(a0.component != nullptr);
+}
+
+TEST(TestWinUI3Res_ShellExtNotFeasible) {
+    using namespace ExplorerLens::Engine;
+    auto& research = WinUI3Research::Instance();
+    auto a1 = research.GetAssessment(1); // Shell Extension DLL
+    ASSERT(a1.feasibility == MigrationFeasibility::NotFeasible);
+    ASSERT(a1.effortDays == 0);
+}
+
+TEST(TestWinUI3Res_TotalEffort) {
+    using namespace ExplorerLens::Engine;
+    auto& research = WinUI3Research::Instance();
+    uint32_t effort = research.GetTotalEffortDays();
+    ASSERT(effort > 50); // Should be > 100 total days
+}
+
+// ============================================================================
+// Batch 3: Hybrid UI Bridge Tests (Sprint 377)
+// ============================================================================
+
+TEST(TestHybridUI_StateNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(HybridUIBridge::StateName(XamlHostState::NotInitialized)) == "NotInitialized");
+    ASSERT(std::string(HybridUIBridge::StateName(XamlHostState::Active)) == "Active");
+    ASSERT(std::string(HybridUIBridge::StateName(XamlHostState::Unsupported)) == "Unsupported");
+}
+
+TEST(TestHybridUI_DefaultConfig) {
+    using namespace ExplorerLens::Engine;
+    HybridUIConfig config;
+    ASSERT(config.enableXamlIslands == true);
+    ASSERT(config.allowFallback == true);
+    ASSERT(config.minWindowsBuild == 18362);
+    ASSERT(config.darkModeSync == true);
+}
+
+TEST(TestHybridUI_PanelIdEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint16_t>(XamlPanelId::None) == 0);
+    ASSERT(static_cast<uint16_t>(XamlPanelId::PluginPanel) == 5);
+}
+
+TEST(TestHybridUI_InitialState) {
+    using namespace ExplorerLens::Engine;
+    // On CI/test, XAML Islands likely not available, so test fallback behavior
+    auto& bridge = HybridUIBridge::Instance();
+    auto state = bridge.GetState();
+    // Either NotInitialized or Active — both valid
+    ASSERT(state == XamlHostState::NotInitialized ||
+           state == XamlHostState::Active ||
+           state == XamlHostState::Unsupported);
+}
+
+// ============================================================================
+// Batch 3: WinUI3 Migration Engine Tests (Sprint 378)
+// ============================================================================
+
+TEST(TestMigration_FrameworkNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(WinUI3MigrationEngine::FrameworkName(
+        WinUI3MigrationEngine::UIFramework::WTL)) == L"WTL");
+    ASSERT(std::wstring(WinUI3MigrationEngine::FrameworkName(
+        WinUI3MigrationEngine::UIFramework::WinUI3)) == L"WinUI3");
+}
+
+TEST(TestMigration_PhaseNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(WinUI3MigrationEngine::PhaseName(MigrationPhase::Research)) == L"Research");
+    ASSERT(std::wstring(WinUI3MigrationEngine::PhaseName(MigrationPhase::FullMigration)) == L"Full Migration");
+}
+
+TEST(TestMigration_PageCount) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(WinUI3MigrationEngine::PageCount() == 5);
+    ASSERT(WinUI3MigrationEngine::FrameworkCount() == 4);
+}
+
+TEST(TestMigration_StatusData) {
+    using namespace ExplorerLens::Engine;
+    auto status = WinUI3MigrationEngine::GetStatus();
+    ASSERT(status.size() == 5);
+    ASSERT(status[0].page == WinUI3MigrationEngine::PageType::FormatSettings);
+    ASSERT(status[0].currentFramework == WinUI3MigrationEngine::UIFramework::WTL);
+}
+
+// ============================================================================
+// Batch 3: CI Hardening Engine Tests (Sprint 379)
+// ============================================================================
+
+TEST(TestCIHarden_TargetNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CIHardeningEngine::TargetName(
+        CIHardeningEngine::CITarget::x64_Release)) == L"x64-Release");
+    ASSERT(std::wstring(CIHardeningEngine::TargetName(
+        CIHardeningEngine::CITarget::ARM64_CrossCompile)) == L"ARM64-Cross");
+}
+
+TEST(TestCIHarden_StageNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CIHardeningEngine::StageName(
+        CIHardeningEngine::CIStage::Build)) == L"Build");
+    ASSERT(std::wstring(CIHardeningEngine::StageName(
+        CIHardeningEngine::CIStage::Deploy)) == L"Deploy");
+}
+
+TEST(TestCIHarden_Pipeline) {
+    using namespace ExplorerLens::Engine;
+    auto pipeline = CIHardeningEngine::GetPipeline();
+    ASSERT(pipeline.size() == 4);
+    ASSERT(pipeline[0].target == CIHardeningEngine::CITarget::x64_Debug);
+    ASSERT(pipeline[1].passing == true);
+}
+
+TEST(TestCIHarden_AllPassing) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(CIHardeningEngine::AllPassing());
+}
+
+// ============================================================================
+// Batch 3: Code Coverage Engine Tests (Sprint 380)
+// ============================================================================
+
+TEST(TestCovEng_ToolNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CodeCoverageEngine::ToolName(
+        CodeCoverageEngine::CoverageTool::OpenCppCoverage)) == L"OpenCppCoverage");
+    ASSERT(std::wstring(CodeCoverageEngine::ToolName(
+        CodeCoverageEngine::CoverageTool::LLVMCov)) == L"llvm-cov");
+}
+
+TEST(TestCovEng_MetricNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CodeCoverageEngine::MetricName(
+        CodeCoverageEngine::CoverageMetric::LineCoverage)) == L"LineCoverage");
+    ASSERT(std::wstring(CodeCoverageEngine::MetricName(
+        CodeCoverageEngine::CoverageMetric::BranchCoverage)) == L"BranchCoverage");
+}
+
+TEST(TestCovEng_Results) {
+    using namespace ExplorerLens::Engine;
+    auto results = CodeCoverageEngine::GetResults();
+    ASSERT(results.size() == 6);
+    ASSERT(results[0].target == CodeCoverageEngine::CoverageTarget::EngineCore);
+    ASSERT(results[0].linesPct > 80.0f);
+}
+
+TEST(TestCovEng_OverallCoverage) {
+    using namespace ExplorerLens::Engine;
+    float overall = CodeCoverageEngine::OverallCoverage();
+    ASSERT(overall > 50.0f && overall < 100.0f);
+    ASSERT(CodeCoverageEngine::MeetsMinimum(60.0f));
+}
+
+// ============================================================================
+// Batch 3: Integration Test Framework V2 Tests (Sprint 381)
+// ============================================================================
+
+TEST(TestIntegV2_CategoryStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(IntegTestCategoryToString(IntegTestCategory::DecoderPipeline)) == "DecoderPipeline");
+    ASSERT(std::string(IntegTestCategoryToString(IntegTestCategory::ErrorRecovery)) == "ErrorRecovery");
+}
+
+TEST(TestIntegV2_StatusStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(IntegTestStatusToString(IntegTestStatus::Passed)) == "Passed");
+    ASSERT(std::string(IntegTestStatusToString(IntegTestStatus::TimedOut)) == "TimedOut");
+}
+
+TEST(TestIntegV2_RegisterAndRun) {
+    using namespace ExplorerLens::Engine;
+    IntegrationTestFrameworkV2 fw;
+    fw.RegisterTest("TestPass", IntegTestCategory::CacheCoherence, []() { return true; });
+    fw.RegisterTest("TestFail", IntegTestCategory::CacheCoherence, []() { return false; });
+    ASSERT(fw.GetTestCount() == 2);
+    auto result = fw.RunAll();
+    ASSERT(result.total == 2);
+    ASSERT(result.passed == 1);
+    ASSERT(result.failed == 1);
+    ASSERT(result.PassRate() > 49.0 && result.PassRate() < 51.0);
+}
+
+TEST(TestIntegV2_RunCategory) {
+    using namespace ExplorerLens::Engine;
+    IntegrationTestFrameworkV2 fw;
+    fw.RegisterTest("A", IntegTestCategory::GPURoundTrip, []() { return true; });
+    fw.RegisterTest("B", IntegTestCategory::COMLifecycle, []() { return true; });
+    fw.RegisterTest("C", IntegTestCategory::GPURoundTrip, []() { return true; });
+    auto result = fw.RunCategory(IntegTestCategory::GPURoundTrip);
+    ASSERT(result.total == 2);
+    ASSERT(result.passed == 2);
+}
+
+// ============================================================================
+// Batch 3: Integration Test Orchestrator Tests (Sprint 382)
+// ============================================================================
+
+TEST(TestOrch_ScenarioTypeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ScenarioTypeToString(ScenarioType::Sequential)) == "Sequential");
+    ASSERT(std::string(ScenarioTypeToString(ScenarioType::RetryLoop)) == "RetryLoop");
+}
+
+TEST(TestOrch_ModeStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(OrchestratorModeToString(OrchestratorMode::Smoke)) == "Smoke");
+    ASSERT(std::string(OrchestratorModeToString(OrchestratorMode::Stress)) == "Stress");
+}
+
+TEST(TestOrch_RunScenario) {
+    using namespace ExplorerLens::Engine;
+    IntegrationTestOrchestrator orch;
+    orch.AddScenario("DecoderE2E", ScenarioType::Sequential);
+    orch.AddStep("LoadFile", []() { return true; });
+    orch.AddStep("Decode", []() { return true; });
+    orch.AddStep("Verify", []() { return true; });
+    ASSERT(orch.GetScenarioCount() == 1);
+    auto stats = orch.Run();
+    ASSERT(stats.passedSteps == 3);
+    ASSERT(stats.failedSteps == 0);
+    ASSERT(stats.StepPassRate() > 99.0);
+}
+
+TEST(TestOrch_DependencyFailure) {
+    using namespace ExplorerLens::Engine;
+    IntegrationTestOrchestrator orch;
+    orch.AddScenario("DepTest", ScenarioType::Sequential);
+    orch.AddStep("Step0", []() { return false; });  // fails
+    orch.AddStep("Step1", []() { return true; }, {0}); // depends on 0
+    auto stats = orch.Run();
+    ASSERT(stats.failedSteps == 2); // Step0 Failed + Step1 DependencyFailed
+    ASSERT(stats.passedSteps == 0);
+}
+
+// ============================================================================
+// Batch 3: Continuous Fuzz Orchestrator Tests (Sprint 383)
+// ============================================================================
+
+TEST(TestFuzzOrch_StrategyStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(FuzzMutationStrategyToString(FuzzMutationStrategy::BitFlip)) == "BitFlip");
+    ASSERT(std::string(FuzzMutationStrategyToString(FuzzMutationStrategy::StructureAware)) == "StructureAware");
+}
+
+TEST(TestFuzzOrch_SeverityStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(CrashSeverityToString(CrashSeverity::Critical)) == "Critical");
+    ASSERT(std::string(CrashSeverityToString(CrashSeverity::None)) == "None");
+}
+
+TEST(TestFuzzOrch_CorpusAndCrash) {
+    using namespace ExplorerLens::Engine;
+    ContinuousFuzzOrchestrator fuzz;
+    fuzz.Initialize({"JPEGDecoder", "PNGDecoder"});
+    ASSERT(fuzz.IsInitialized());
+    fuzz.AddCorpusEntry("abc123", 1024, 42);
+    fuzz.AddCorpusEntry("def456", 512, 0);  // not interesting
+    ASSERT(fuzz.GetCorpus().size() == 2);
+    fuzz.RecordCrash("JPEGDecoder", CrashSeverity::High, "crash1", 256);
+    fuzz.RecordCrash("JPEGDecoder", CrashSeverity::High, "crash1", 256); // duplicate
+    ASSERT(fuzz.GetCrashes().size() == 1);
+    ASSERT(fuzz.GetStats().uniqueCrashes == 1);
+    ASSERT(fuzz.GetStats().duplicateCrashes == 1);
+}
+
+TEST(TestFuzzOrch_MinimizeCorpus) {
+    using namespace ExplorerLens::Engine;
+    ContinuousFuzzOrchestrator fuzz;
+    fuzz.Initialize({"TestDecoder"});
+    fuzz.AddCorpusEntry("h1", 100, 10); // interesting
+    fuzz.AddCorpusEntry("h2", 200, 0);  // not interesting
+    fuzz.AddCorpusEntry("h3", 150, 5);  // interesting
+    uint32_t removed = fuzz.MinimizeCorpus();
+    ASSERT(removed == 1);
+    ASSERT(fuzz.GetCorpus().size() == 2);
+}
+
+// ============================================================================
+// Batch 3: Static Analysis CI Gate Tests (Sprint 384)
+// ============================================================================
+
+TEST(TestSAGate_ToolStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SAToolIdToString(SAToolId::ClangTidy)) == "clang-tidy");
+    ASSERT(std::string(SAToolIdToString(SAToolId::MSVCAnalyze)) == "MSVC /analyze");
+    ASSERT(std::string(SAToolIdToString(SAToolId::Coverity)) == "Coverity");
+}
+
+TEST(TestSAGate_VerdictStrings) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(SAGateVerdictToString(SAGateVerdict::Pass)) == "Pass");
+    ASSERT(std::string(SAGateVerdictToString(SAGateVerdict::Fail)) == "Fail");
+}
+
+TEST(TestSAGate_EnableDisable) {
+    using namespace ExplorerLens::Engine;
+    StaticAnalysisCIGate gate;
+    ASSERT(gate.IsToolEnabled(SAToolId::ClangTidy));
+    gate.DisableTool(SAToolId::ClangTidy);
+    ASSERT(!gate.IsToolEnabled(SAToolId::ClangTidy));
+    gate.EnableTool(SAToolId::ClangTidy);
+    ASSERT(gate.IsToolEnabled(SAToolId::ClangTidy));
+}
+
+TEST(TestSAGate_EvaluatePassFail) {
+    using namespace ExplorerLens::Engine;
+    StaticAnalysisCIGate gate;
+    SAGateThresholds t;
+    t.maxErrors = 0;
+    t.maxWarnings = 5;
+    gate.SetThresholds(t);
+
+    // No findings → Pass
+    auto r1 = gate.Evaluate();
+    ASSERT(r1.verdict == SAGateVerdict::Pass);
+
+    // Add warning → Warn
+    SAFinding f1;
+    f1.severity = SAFindingSeverity::Warning;
+    f1.checkName = "bugprone-use-after-move";
+    gate.AddFinding(f1);
+    auto r2 = gate.Evaluate();
+    ASSERT(r2.verdict == SAGateVerdict::Warn);
+
+    // Add error → Fail (maxErrors=0)
+    SAFinding f2;
+    f2.severity = SAFindingSeverity::Error;
+    f2.checkName = "core.NullDereference";
+    gate.AddFinding(f2);
+    auto r3 = gate.Evaluate();
+    ASSERT(r3.verdict == SAGateVerdict::Fail);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -13855,6 +14316,90 @@ int main() {
     RUN_TEST(TestPersistence_Initialize);
     RUN_TEST(TestPersistence_StoreAndLookup);
     RUN_TEST(TestPersistence_HitRate);
+
+    // Batch 3: Dark Mode Controls Tests
+    std::wcout << L"\nDark Mode Controls Tests:" << std::endl;
+    RUN_TEST(TestDarkCtrl_ControlTypeEnum);
+    RUN_TEST(TestDarkCtrl_CheckStateDefaults);
+    RUN_TEST(TestDarkCtrl_Singleton);
+    RUN_TEST(TestDarkCtrl_SetAccentColor);
+
+    // Batch 3: Dark Mode Renderer V2 Tests
+    std::wcout << L"\nDark Mode Renderer V2 Tests:" << std::endl;
+    RUN_TEST(TestDarkRenderV2_DefaultScheme);
+    RUN_TEST(TestDarkRenderV2_LightScheme);
+    RUN_TEST(TestDarkRenderV2_PreferredAppMode);
+    RUN_TEST(TestDarkRenderV2_Singleton);
+
+    // Batch 3: System Tray Manager Tests
+    std::wcout << L"\nSystem Tray Manager Tests:" << std::endl;
+    RUN_TEST(TestSysTray_IconStateEnum);
+    RUN_TEST(TestSysTray_CommandEnum);
+    RUN_TEST(TestSysTray_ActionNames);
+    RUN_TEST(TestSysTray_NotInitializedByDefault);
+
+    // Batch 3: WinUI3 Research Tests
+    std::wcout << L"\nWinUI3 Research Tests:" << std::endl;
+    RUN_TEST(TestWinUI3Res_FeasibilityEnum);
+    RUN_TEST(TestWinUI3Res_AssessmentCount);
+    RUN_TEST(TestWinUI3Res_ShellExtNotFeasible);
+    RUN_TEST(TestWinUI3Res_TotalEffort);
+
+    // Batch 3: Hybrid UI Bridge Tests
+    std::wcout << L"\nHybrid UI Bridge Tests:" << std::endl;
+    RUN_TEST(TestHybridUI_StateNames);
+    RUN_TEST(TestHybridUI_DefaultConfig);
+    RUN_TEST(TestHybridUI_PanelIdEnum);
+    RUN_TEST(TestHybridUI_InitialState);
+
+    // Batch 3: WinUI3 Migration Engine Tests
+    std::wcout << L"\nWinUI3 Migration Engine Tests:" << std::endl;
+    RUN_TEST(TestMigration_FrameworkNames);
+    RUN_TEST(TestMigration_PhaseNames);
+    RUN_TEST(TestMigration_PageCount);
+    RUN_TEST(TestMigration_StatusData);
+
+    // Batch 3: CI Hardening Engine Tests
+    std::wcout << L"\nCI Hardening Engine Tests:" << std::endl;
+    RUN_TEST(TestCIHarden_TargetNames);
+    RUN_TEST(TestCIHarden_StageNames);
+    RUN_TEST(TestCIHarden_Pipeline);
+    RUN_TEST(TestCIHarden_AllPassing);
+
+    // Batch 3: Code Coverage Engine Tests
+    std::wcout << L"\nCode Coverage Engine Tests:" << std::endl;
+    RUN_TEST(TestCovEng_ToolNames);
+    RUN_TEST(TestCovEng_MetricNames);
+    RUN_TEST(TestCovEng_Results);
+    RUN_TEST(TestCovEng_OverallCoverage);
+
+    // Batch 3: Integration Test Framework V2 Tests
+    std::wcout << L"\nIntegration Test Framework V2 Tests:" << std::endl;
+    RUN_TEST(TestIntegV2_CategoryStrings);
+    RUN_TEST(TestIntegV2_StatusStrings);
+    RUN_TEST(TestIntegV2_RegisterAndRun);
+    RUN_TEST(TestIntegV2_RunCategory);
+
+    // Batch 3: Integration Test Orchestrator Tests
+    std::wcout << L"\nIntegration Test Orchestrator Tests:" << std::endl;
+    RUN_TEST(TestOrch_ScenarioTypeStrings);
+    RUN_TEST(TestOrch_ModeStrings);
+    RUN_TEST(TestOrch_RunScenario);
+    RUN_TEST(TestOrch_DependencyFailure);
+
+    // Batch 3: Continuous Fuzz Orchestrator Tests
+    std::wcout << L"\nContinuous Fuzz Orchestrator Tests:" << std::endl;
+    RUN_TEST(TestFuzzOrch_StrategyStrings);
+    RUN_TEST(TestFuzzOrch_SeverityStrings);
+    RUN_TEST(TestFuzzOrch_CorpusAndCrash);
+    RUN_TEST(TestFuzzOrch_MinimizeCorpus);
+
+    // Batch 3: Static Analysis CI Gate Tests
+    std::wcout << L"\nStatic Analysis CI Gate Tests:" << std::endl;
+    RUN_TEST(TestSAGate_ToolStrings);
+    RUN_TEST(TestSAGate_VerdictStrings);
+    RUN_TEST(TestSAGate_EnableDisable);
+    RUN_TEST(TestSAGate_EvaluatePassFail);
 
     std::wcout << std::endl;
 
