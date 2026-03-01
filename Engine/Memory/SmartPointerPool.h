@@ -1,6 +1,5 @@
 // ============================================================================
 // SmartPointerPool.h — Intrusive Reference-Counted Object Pool
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // High-performance object pool with intrusive reference counting for

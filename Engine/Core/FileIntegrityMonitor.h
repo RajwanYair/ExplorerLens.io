@@ -138,7 +138,7 @@ public:
             // Skip "." and ".." directory entries
             if (findData.cFileName[0] == L'.' &&
                 (findData.cFileName[1] == L'\0' ||
-                 (findData.cFileName[1] == L'.' && findData.cFileName[2] == L'\0')))
+                    (findData.cFileName[1] == L'.' && findData.cFileName[2] == L'\0')))
                 continue;
 
             // Skip subdirectories — only process regular files
@@ -166,7 +166,8 @@ public:
                     record.lastHash = ComputeSimpleHash(filePath);
                 }
                 m_records[filePath] = record;
-            } else {
+            }
+            else {
                 it->second.lastCheckType = checkType;
                 it->second.lastCheckMs = GetCurrentTimeMs();
                 it->second.fileSizeBytes =

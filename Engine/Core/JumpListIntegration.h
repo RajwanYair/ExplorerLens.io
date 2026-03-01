@@ -17,6 +17,17 @@
 #include <chrono>
 #include <algorithm>
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <objbase.h>
+#include <shlguid.h>
+#include <shobjidl_core.h>
+#include <objectarray.h>
+#include <propsys.h>
+#include <propkey.h>
+
 namespace ExplorerLens {
 namespace Engine {
 
@@ -354,22 +365,181 @@ private:
         }
     }
 
-    /// Stub for COM ICustomDestinationList interaction
-    /// In production, this calls CoCreateInstance(CLSID_DestinationList)
+    /// Commit current entries to the Windows Jump List via COM.
+    /// Creates ICustomDestinationList, populates Recent/Pinned categories
+    /// and Tasks via IShellLink items, then commits.  Returns false if any
+    /// critical COM call fails; non-critical failures are logged and skipped.
     bool UpdateJumpListCOMLocked() {
         m_lastUpdateTime = std::chrono::steady_clock::now();
         m_updateCount++;
 
-        // Production implementation would:
-        // 1. CoCreateInstance(CLSID_DestinationList, ...)
-        // 2. BeginList() to get removed items
-        // 3. Add "Recent" category via AppendKnownCategory(KDC_RECENT)
-        // 4. Add "Frequent" custom category
-        // 5. Add "Pinned" custom category
-        // 6. Add Tasks category
-        // 7. CommitList()
+        // Helper — create an IShellLinkW with target path, display title,
+        // description, and optional icon.  Caller owns the returned pointer.
+        auto MakeShellLink = [](const std::wstring& target,
+            const std::wstring& title,
+            const std::wstring& desc,
+            const std::wstring& icon,
+            int32_t iconIdx) -> IShellLinkW* {
+                IShellLinkW* pLink = nullptr;
+                HRESULT hr = CoCreateInstance(CLSID_ShellLink, nullptr,
+                    CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pLink));
+                if (FAILED(hr)) return nullptr;
+                pLink->SetPath(target.c_str());
+                pLink->SetDescription(desc.c_str());
+                if (!icon.empty())
+                    pLink->SetIconLocation(icon.c_str(), iconIdx);
+                // Set the display title via IPropertyStore on the shell link
+                IPropertyStore* pPS = nullptr;
+                if (SUCCEEDED(pLink->QueryInterface(IID_PPV_ARGS(&pPS)))) {
+                    PROPVARIANT pv = {};
+                    pv.vt = VT_LPWSTR;
+                    pv.pwszVal = static_cast<LPWSTR>(
+                        CoTaskMemAlloc((title.size() + 1) * sizeof(wchar_t)));
+                    if (pv.pwszVal) {
+                        memcpy(pv.pwszVal, title.c_str(),
+                            (title.size() + 1) * sizeof(wchar_t));
+                        pPS->SetValue(PKEY_Title, pv);
+                        pPS->Commit();
+                        CoTaskMemFree(pv.pwszVal);
+                    }
+                    pPS->Release();
+                }
+                return pLink;
+            };
 
-        return true;  // Stub — always succeeds
+        // Step 1 — Create the ICustomDestinationList COM object
+        ICustomDestinationList* pDest = nullptr;
+        HRESULT hr = CoCreateInstance(CLSID_DestinationList, nullptr,
+            CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDest));
+        if (FAILED(hr)) {
+            OutputDebugStringW(L"[ExplorerLens] CoCreateInstance(CLSID_DestinationList) failed\n");
+            return false;
+        }
+
+        // Step 2 — Bind the App User Model ID so the list targets our app
+        if (!m_appUserModelId.empty()) {
+            hr = pDest->SetAppID(m_appUserModelId.c_str());
+            if (FAILED(hr)) {
+                OutputDebugStringW(L"[ExplorerLens] SetAppID failed\n");
+                pDest->Release();
+                return false;
+            }
+        }
+
+        // Step 3 — BeginList: retrieve max slots and previously-removed items
+        UINT maxSlots = 0;
+        IObjectArray* pRemoved = nullptr;
+        hr = pDest->BeginList(&maxSlots, IID_PPV_ARGS(&pRemoved));
+        if (FAILED(hr)) {
+            OutputDebugStringW(L"[ExplorerLens] BeginList failed\n");
+            pDest->Release();
+            return false;
+        }
+        if (pRemoved) pRemoved->Release();
+
+        // Step 4 — Append "Recent Archives" custom category
+        if (!m_recentEntries.empty()) {
+            IObjectCollection* pColl = nullptr;
+            hr = CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr,
+                CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
+            if (SUCCEEDED(hr)) {
+                uint32_t added = 0;
+                for (const auto& e : m_recentEntries) {
+                    if (added >= maxSlots) break;
+                    IShellLinkW* pLink = MakeShellLink(
+                        e.filePath, e.displayName, e.displayName,
+                        e.iconPath, e.iconIndex);
+                    if (pLink) {
+                        pColl->AddObject(pLink);
+                        pLink->Release();
+                        ++added;
+                    }
+                }
+                IObjectArray* pArr = nullptr;
+                if (SUCCEEDED(pColl->QueryInterface(IID_PPV_ARGS(&pArr)))) {
+                    pDest->AppendCategory(L"Recent Archives", pArr);
+                    pArr->Release();
+                }
+                pColl->Release();
+            }
+        }
+
+        // Step 5 — Append "Pinned Archives" custom category
+        if (!m_pinnedEntries.empty()) {
+            IObjectCollection* pColl = nullptr;
+            hr = CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr,
+                CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
+            if (SUCCEEDED(hr)) {
+                for (const auto& e : m_pinnedEntries) {
+                    IShellLinkW* pLink = MakeShellLink(
+                        e.filePath, e.displayName, e.displayName,
+                        e.iconPath, e.iconIndex);
+                    if (pLink) {
+                        pColl->AddObject(pLink);
+                        pLink->Release();
+                    }
+                }
+                IObjectArray* pArr = nullptr;
+                if (SUCCEEDED(pColl->QueryInterface(IID_PPV_ARGS(&pArr)))) {
+                    pDest->AppendCategory(L"Pinned Archives", pArr);
+                    pArr->Release();
+                }
+                pColl->Release();
+            }
+        }
+
+        // Step 6 — Add user tasks (Open Manager, Clear Cache, etc.)
+        if (!m_tasks.empty()) {
+            IObjectCollection* pColl = nullptr;
+            hr = CoCreateInstance(CLSID_EnumerableObjectCollection, nullptr,
+                CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pColl));
+            if (SUCCEEDED(hr)) {
+                for (const auto& t : m_tasks) {
+                    IShellLinkW* pLink = nullptr;
+                    hr = CoCreateInstance(CLSID_ShellLink, nullptr,
+                        CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pLink));
+                    if (SUCCEEDED(hr)) {
+                        pLink->SetPath(t.commandPath.c_str());
+                        pLink->SetArguments(t.arguments.c_str());
+                        pLink->SetDescription(t.description.c_str());
+                        if (!t.iconPath.empty())
+                            pLink->SetIconLocation(t.iconPath.c_str(), t.iconIndex);
+                        IPropertyStore* pPS = nullptr;
+                        if (SUCCEEDED(pLink->QueryInterface(IID_PPV_ARGS(&pPS)))) {
+                            PROPVARIANT pv = {};
+                            pv.vt = VT_LPWSTR;
+                            pv.pwszVal = static_cast<LPWSTR>(
+                                CoTaskMemAlloc((t.title.size() + 1) * sizeof(wchar_t)));
+                            if (pv.pwszVal) {
+                                memcpy(pv.pwszVal, t.title.c_str(),
+                                    (t.title.size() + 1) * sizeof(wchar_t));
+                                pPS->SetValue(PKEY_Title, pv);
+                                pPS->Commit();
+                                CoTaskMemFree(pv.pwszVal);
+                            }
+                            pPS->Release();
+                        }
+                        pColl->AddObject(pLink);
+                        pLink->Release();
+                    }
+                }
+                IObjectArray* pArr = nullptr;
+                if (SUCCEEDED(pColl->QueryInterface(IID_PPV_ARGS(&pArr)))) {
+                    pDest->AddUserTasks(pArr);
+                    pArr->Release();
+                }
+                pColl->Release();
+            }
+        }
+
+        // Step 7 — Commit the assembled list to the taskbar
+        hr = pDest->CommitList();
+        pDest->Release();
+        if (FAILED(hr)) {
+            OutputDebugStringW(L"[ExplorerLens] CommitList failed\n");
+            return false;
+        }
+        return true;
     }
 
     static uint64_t GetCurrentFileTime() {

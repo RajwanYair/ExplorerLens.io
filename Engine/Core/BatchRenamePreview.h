@@ -131,7 +131,8 @@ private:
             try {
                 std::regex re(arg.substr(0, sep));
                 return std::regex_replace(path, re, arg.substr(sep + 1));
-            } catch (const std::regex_error&) {
+            }
+            catch (const std::regex_error&) {
                 return path; // Invalid regex — return original path unchanged
             }
         }

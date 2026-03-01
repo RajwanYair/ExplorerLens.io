@@ -293,6 +293,12 @@ public:
         m_stats.corpusSize = m_corpus.size();
     }
 
+    /// Decoder callback type for fuzz target invocation.
+    using DecoderFn = std::function<bool(const uint8_t*, size_t)>;
+
+    /// Register the decoder to be exercised during fuzzing.
+    void SetDecoder(DecoderFn fn) { m_decoderFn = std::move(fn); }
+
     FuzzExecution RunSingle(const std::vector<uint8_t>& input,
         const std::string& decoderName,
         MutationStrategy strategy) {
@@ -303,9 +309,14 @@ public:
 
         auto mutated = m_mutator.Mutate(input, strategy);
 
-        // Stub: In production, would invoke actual decoder with SEH wrapper
-        exec.result = FuzzResult::NoError;
-        exec.durationMs = 1.0;
+        // Invoke the decoder through SEH protection so access violations,
+        // stack overflows, and other structured exceptions are caught
+        // instead of tearing down the host process.
+        auto start = std::chrono::steady_clock::now();
+        exec.result = InvokeDecoderSEH(mutated.data(), mutated.size());
+        auto end = std::chrono::steady_clock::now();
+        exec.durationMs =
+            std::chrono::duration<double, std::milli>(end - start).count();
         exec.memoryPeakBytes = mutated.size() * 4;
 
         m_config.budget.Record(exec.result);
@@ -346,10 +357,50 @@ private:
         }
     }
 
+    /// Invoke the registered decoder within SEH protection.
+    /// Returns Crash on structured exception, ErrorHandled when the decoder
+    /// returns false, and NoError on success.
+    FuzzResult InvokeDecoderSEH(const uint8_t* data, size_t size) {
+        if (!m_decoderFn) return FuzzResult::NoError;
+#ifdef _MSC_VER
+        bool completed = false;
+        bool sehFired = InvokeSEHGuarded(m_decoderFn, data, size, completed);
+        if (sehFired) return FuzzResult::Crash;
+        return completed ? FuzzResult::NoError : FuzzResult::ErrorHandled;
+#else
+        try {
+            bool ok = m_decoderFn(data, size);
+            return ok ? FuzzResult::NoError : FuzzResult::ErrorHandled;
+        }
+        catch (...) {
+            return FuzzResult::Crash;
+        }
+#endif
+    }
+
+#ifdef _MSC_VER
+    /// Separated into its own function to satisfy MSVC C2712:
+    /// __try blocks cannot coexist with C++ objects that require unwinding.
+    /// Parameters are references/pointers only — no local destructors.
+    static bool InvokeSEHGuarded(std::function<bool(const uint8_t*, size_t)>& fn,
+        const uint8_t* data, size_t size,
+        bool& completed) {
+        __try {
+            completed = fn(data, size);
+            return false;
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            completed = false;
+            return true;
+        }
+    }
+#endif
+
     FuzzConfig m_config;
     FuzzStats m_stats;
     ByteMutator m_mutator;
     std::vector<CorpusEntry> m_corpus;
+    DecoderFn m_decoderFn;
     uint64_t m_nextId = 0;
 };
 

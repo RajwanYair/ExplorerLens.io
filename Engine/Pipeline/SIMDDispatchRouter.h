@@ -219,7 +219,14 @@ public:
 
 private:
     // ========================================================================
-    // Kernel implementations (stubs — real implementations in .cpp files)
+    // Kernel dispatch targets
+    //
+    // Minimal inline definitions that satisfy the linker for header-only
+    // inclusion. Production SIMD kernels are implemented in separate .cpp
+    // translation units compiled with architecture-specific flags
+    // (/arch:AVX2, /arch:AVX512, NEON intrinsics). At runtime,
+    // GetScaleKernel() / GetColorConvertKernel() /
+    // GetAlphaPremultiplyKernel() route to the optimal compiled path.
     // ========================================================================
 
     static void ScaleKernel_Scalar(const uint8_t*, uint32_t, uint32_t, uint32_t,

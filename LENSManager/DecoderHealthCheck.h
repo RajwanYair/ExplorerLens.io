@@ -1,5 +1,5 @@
 // DecoderHealthCheck.h - Decoder availability and health status
-// ExplorerLens v6.2.0
+// ExplorerLens v15.0.0
 // Reports which decoders are available and their library dependencies
 
 #pragma once
@@ -150,4 +150,3 @@ private:
 };
 
 } // namespace ExplorerLens
-

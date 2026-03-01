@@ -70,6 +70,13 @@ public:
 		COMMAND_HANDLER(IDC_CB_DOCUMENT, BN_CLICKED, OnCheckboxClicked)
 		COMMAND_HANDLER(IDC_CB_FONT, BN_CLICKED, OnCheckboxClicked)
 		COMMAND_HANDLER(IDC_CB_EXR, BN_CLICKED, OnCheckboxClicked)
+		COMMAND_HANDLER(IDC_CB_ICO, BN_CLICKED, OnCheckboxClicked)
+		COMMAND_HANDLER(IDC_CB_QOI, BN_CLICKED, OnCheckboxClicked)
+		COMMAND_HANDLER(IDC_CB_PPM, BN_CLICKED, OnCheckboxClicked)
+		COMMAND_HANDLER(IDC_CB_TGA, BN_CLICKED, OnCheckboxClicked)
+		COMMAND_HANDLER(IDC_CB_MODEL, BN_CLICKED, OnCheckboxClicked)
+		COMMAND_ID_HANDLER(IDC_BTN_RESET_DEFAULTS, OnResetDefaults)
+		COMMAND_ID_HANDLER(IDC_BTN_EXPORT_CONFIG, OnExportConfig)
 		CHAIN_MSG_MAP(CDialogDrag<CMainDlg>)
 		CHAIN_MSG_MAP(CSnapWindow<CMainDlg>)
 		CHAIN_MSG_MAP(CDialogHelp<CMainDlg>)
@@ -95,6 +102,8 @@ public:
 	LRESULT OnApply(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnCheckboxClicked(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnLoadConfig(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnResetDefaults(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnExportConfig(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	void OnSelectAll();
 	void OnDeselectAll();
 	void InitUI();

@@ -1,6 +1,5 @@
 // ============================================================================
 // PowerThrottleManager.h — Battery-Aware CPU/GPU Power Throttling
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Monitors system power state and dynamically adjusts CPU thread counts,

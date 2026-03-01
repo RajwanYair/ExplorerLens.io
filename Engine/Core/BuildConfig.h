@@ -93,8 +93,8 @@ constexpr int VersionMinor = 0;
 constexpr int VersionPatch = 0;
 constexpr const wchar_t* VersionString = L"15.0.0";
 constexpr const wchar_t* Codename = L"Zenith";
-constexpr int MilestoneCount = 448;
-constexpr int TestCount = 1242;
+constexpr int MilestoneCount = 543;
+constexpr int TestCount = 2051;
 #define LENS_WIDEN2(x) L ## x
 #define LENS_WIDEN(x) LENS_WIDEN2(x)
 constexpr const wchar_t* BuildDate = LENS_WIDEN(__TIMESTAMP__);

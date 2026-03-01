@@ -11,6 +11,8 @@
 #include <functional>
 #include <chrono>
 #include <atomic>
+#include <algorithm>
+#include <mutex>
 #include <cstdint>
 
 #ifdef _WIN32

@@ -349,3 +349,167 @@ external/
 8. Add to `allCheckboxes[]` array in `OnInitDialog()`, `OnSelectAll()`, `OnDeselectAll()`
 9. Add tooltip in `InitTooltips()` and status icon in `InitStatusIcons()`
 10. Add to `FormatGroupHelper.h` `FormatEntry` table under appropriate category
+
+---
+
+## 12. Dynamic DLL Loading (WIN32_LEAN_AND_MEAN Environments)
+
+### When to use dynamic loading
+- Any API from a header excluded by `WIN32_LEAN_AND_MEAN` (e.g., `wintrust.h`, WIC headers)
+- Optional codec libraries that may not be installed (e.g., `openjp2.dll`)
+- Vendor-specific GPU decode SDKs (NVDEC, AMF, QuickSync)
+
+### Pattern: LoadLibrary + GetProcAddress
+```cpp
+// 1. Define function pointer types matching the target API
+typedef LONG (WINAPI* PFN_WinVerifyTrust)(HWND, GUID*, LPVOID);
+
+// 2. Load library dynamically (use W variant)
+HMODULE hLib = LoadLibraryW(L"wintrust.dll");
+if (!hLib) return false;
+
+// 3. Resolve function pointers
+auto pfn = reinterpret_cast<PFN_WinVerifyTrust>(GetProcAddress(hLib, "WinVerifyTrust"));
+
+// 4. Define inline struct replicas if original header is unavailable
+// Mirror the Windows SDK struct layout exactly — field names/types must match
+struct WINTRUST_FILE_INFO { DWORD cbStruct; LPCWSTR pcwszFilePath; ... };
+
+// 5. Call and cleanup
+LONG result = pfn(nullptr, &actionGUID, &trustData);
+FreeLibrary(hLib);
+```
+
+### Caching pattern for repeated probes
+```cpp
+static bool IsAvailable() {
+    static int cached = -1;  // -1=unchecked, 0=no, 1=yes
+    if (cached >= 0) return cached == 1;
+    HMODULE h = LoadLibraryW(L"openjp2.dll");
+    cached = h ? 1 : 0;
+    if (h) FreeLibrary(h);
+    return cached == 1;
+}
+```
+
+### WinHTTP for HTTP clients
+- Include `<winhttp.h>` and link `winhttp.lib` (safe under WIN32_LEAN_AND_MEAN)
+- Pattern: `WinHttpOpen` → `WinHttpConnect` → `WinHttpOpenRequest` → `WinHttpSendRequest` → `WinHttpReceiveResponse` → `WinHttpQueryDataAvailable` → `WinHttpReadData`
+- Always close handles in reverse order with `WinHttpCloseHandle`
+- Set timeout via `WinHttpSetTimeouts(hSession, 10000, 10000, 10000, 30000)`
+
+---
+
+## 13. Binary Format Parsing Patterns
+
+### General approach
+- Read first 64KB of file via `CreateFileW` + `ReadFile` into stack buffer
+- Parse by checking magic bytes, then walking structured headers
+- Always bounds-check every offset before dereferencing
+
+### JPEG2000 (JP2 / J2K)
+- JP2 container: 12-byte signature `\x00\x00\x00\x0C jP \r\n\x87\n`, then walk JP2 boxes
+  (each box: 4-byte size + 4-byte type). Find `ihdr` box → 4-byte height + 4-byte width
+- Raw J2K: Starts with `\xFF\x4F` (SOC marker), look for SIZ marker `\xFF\x51` →
+  skip 4 bytes → 4-byte width (XSiz) + 4-byte height (YSiz) as big-endian uint32
+
+### JPEG XR (JXR)
+- Magic: `II` (little-endian TIFF) + `0xBC01` at offset 2
+- Walk IFD entries (12 bytes each): tag + type + count + value
+- Key tags: `0xBC80` (ImageWidth), `0xBC81` (ImageHeight), `0xBCC0`–`0xBCC2` (color info)
+
+### DjVu
+- Magic: `AT&TFORM` (8 bytes) or `AT&T` prefix variants
+- IFF85 chunk structure: 4-byte ID + 4-byte big-endian size
+- `INFO` chunk: 2-byte width + 2-byte height (little-endian) at chunk start
+- Cover image data in `BG44` (background) or `FG44` (foreground) chunks
+
+### glTF / GLB
+- GLB binary: 12-byte header (magic `glTF` + version + length), then JSON chunk (type `JSON`)
+- Parse JSON for `meshes[].primitives[].attributes.POSITION` accessor index
+- Look up accessor in `accessors[]` array → `count` field = vertex count
+- Triangle count ≈ vertex count (approximation without index buffer parsing)
+
+### GIF frame counting
+- After header (GIF87a/GIF89a) + LSD + optional GCT, walk blocks
+- Extension blocks: `0x21` + sub-type + skip sub-blocks
+- Image descriptors: `0x2C` → increment frame counter + skip sub-blocks
+- Trailer: `0x3B` → done
+
+---
+
+## 14. COM Integration Patterns
+
+### JumpList implementation
+```
+ICustomDestinationList → BeginList → Create IShellLink items →
+Add to IObjectCollection → AppendCategory → CommitList
+```
+- Use `CoCreateInstance(CLSID_DestinationList, ...)` (requires `shobjidl_core.h`)
+- Each task: `CoCreateInstance(CLSID_ShellLink, ...)` → `SetPath` + `SetArguments` + `SetDescription`
+- Set `PKEY_Title` via `IPropertyStore` on each `IShellLink`
+- Cleanup: `Release()` all COM pointers in reverse order
+
+### Safe COM header inclusion
+- `shobjidl_core.h` is safe under WIN32_LEAN_AND_MEAN
+- `objectarray.h`, `propsys.h`, `propkey.h` are safe
+- `shlguid.h` (for CLSID_ShellLink) may need `INITGUID` defined beforehand
+- Always test compilation after adding new COM headers
+
+---
+
+## 15. Security Scanning Patterns
+
+### PE import table scanning
+- Memory-map the executable with `CreateFileMappingW` + `MapViewOfFile`
+- Parse DOS header (`IMAGE_DOS_HEADER`), follow `e_lfanew` to NT headers
+- Walk `IMAGE_IMPORT_DESCRIPTOR` array from data directory entry 1
+- For each import DLL, walk `IMAGE_THUNK_DATA` → `IMAGE_IMPORT_BY_NAME` → check function name
+- Blocklist: `CreateRemoteThread`, `WriteProcessMemory`, `VirtualAllocEx`, `NtCreateProcess`,
+  `SetWindowsHookEx`, `LoadLibraryA` (in plugin context), etc.
+
+### Authenticode verification
+- Use `WinVerifyTrust` with `WINTRUST_ACTION_GENERIC_VERIFY_V2` action GUID
+- Requires dynamic loading of `wintrust.dll` under WIN32_LEAN_AND_MEAN
+- `dwUIChoice = WTD_UI_NONE`, `dwProvFlags = WTD_REVOCATION_CHECK_NONE` for silent check
+- Return codes: `ERROR_SUCCESS` = valid, `TRUST_E_NOSIGNATURE` = unsigned,
+  `TRUST_E_BAD_DIGEST` = tampered
+
+---
+
+## 16. SEH Exception Handling (Fuzzing)
+
+### __try/__except pattern for decoder fuzzing
+- Wrap decoder calls in `__try / __except(EXCEPTION_EXECUTE_HANDLER)` to catch access violations
+- **MSVC C2712 constraint:** Functions using `__try` cannot contain objects with destructors
+- Workaround: Extract the `__try` block into a separate helper function with no local C++ objects
+```cpp
+// Separate function — no C++ objects with destructors allowed here
+static DWORD InvokeDecoderSEH(DecoderFunc func, const uint8_t* data, size_t size) {
+    __try { func(data, size); return 0; }
+    __except(EXCEPTION_EXECUTE_HANDLER) { return GetExceptionCode(); }
+}
+// Caller function can freely use std::string, std::vector, etc.
+```
+- This pattern lets the fuzzing engine detect crashes without terminating the process
+
+---
+
+## 17. GUI Version Synchronization
+
+### Files requiring version updates for LENSManager
+In addition to the Engine version checklist (Section 3), the GUI has its own version locations:
+- `LENSManager/LENSManager.rc` — `FILEVERSION`, `PRODUCTVERSION`, string table, about dialog text
+- `LENSManager/About.cpp` — version string in about dialog, decoder count, format count
+- `LENSManager/ExportDiagnostics.h` — baseline filename, version string in diagnostic export
+- `LENSManager/DecoderHealthCheck.h` — version comment in health check header
+- `LENSManager/MainDlg.cpp` — status bar format count text (e.g., "200+ formats")
+
+### GUI feature wiring pattern
+1. Add control ID in `resource.h` (next available IDC_BTN_*, IDC_CB_* etc.)
+2. Add control to dialog template in `.rc` file with positioning
+3. Add `COMMAND_HANDLER(IDC_*, BN_CLICKED, OnHandler)` to message map in MainDlg.h
+4. Declare handler: `LRESULT OnHandler(WORD, WORD, HWND, BOOL&);`
+5. Implement handler in MainDlg.cpp
+6. For Reset Defaults: iterate `allCheckboxes[]` array and set `BST_CHECKED`
+7. For Export Config: use `CFileDialog` save dialog → serialize settings to JSON

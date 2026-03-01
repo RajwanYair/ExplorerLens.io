@@ -71,4 +71,5 @@
 #define IDC_CB_TGA                              1067
 #define IDC_CB_MODEL                            1068
 #define IDC_SPECIALIZED_GROUP                   1069
-
+#define IDC_BTN_RESET_DEFAULTS                  1070
+#define IDC_BTN_EXPORT_CONFIG                   1071

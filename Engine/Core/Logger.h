@@ -1,6 +1,6 @@
 //==============================================================================
 // ExplorerLens Engine - Simple Logging Utility
-// Version: 1.0.0
+// Version: 15.0.0
 // Copyright (c) 2026 - ExplorerLens Project
 //
 // Provides lightweight logging macros for debug and diagnostic output.
@@ -37,6 +37,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <time.h>
+#include <chrono>
 
 namespace ExplorerLens {
 namespace Engine {

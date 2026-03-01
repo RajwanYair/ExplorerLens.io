@@ -385,7 +385,6 @@
 #include "../Core/ThumbnailSpriteSheet.h"
 #include "../Cache/CacheTelemetryCollector.h"
 #include "../Core/WindowsSearchIntegration.h"
-// --- Sprint 444-468: Coverage Expansion ---
 #include "../Cache/AdaptiveCacheBudgetManager.h"
 #include "../Memory/ArchiveMemoryCompactor.h"
 #include "../Pipeline/BatchProcessor.h"
@@ -411,7 +410,6 @@
 #include "../Core/ReproducibleBuildVerifier.h"
 #include "../Core/SettingsImportExport.h"
 #include "../Memory/HotModeDirectoryEngine.h"
-// --- Sprint 469-493: Coverage Expansion Batch 2 ---
 #include "../Memory/MemoryOptimizationEngine.h"
 #include "../Memory/MemorySoakValidator.h"
 #include "../Plugin/CrashIntelligence.h"
@@ -438,7 +436,6 @@
 #include "../Plugin/PluginCompatibilityKitV2.h"
 #include "../Plugin/PluginSandboxPolicy.h"
 
-// --- Sprint 494-543: Coverage Expansion Batch 3 ---
 #include "../Cache/MultiTierCache.h"
 #include "../Cache/ThumbnailCache.h"
 #include "../Cache/USNCacheInvalidation.h"
@@ -11632,7 +11629,7 @@ TEST(TestPersistence_HitRate) {
 }
 
 // ============================================================================
-// Batch 3: Dark Mode Controls Tests (Sprint 373)
+// Dark Mode Controls Tests
 // ============================================================================
 
 TEST(TestDarkCtrl_ControlTypeEnum) {
@@ -11668,7 +11665,7 @@ TEST(TestDarkCtrl_SetAccentColor) {
 }
 
 // ============================================================================
-// Batch 3: Dark Mode Renderer V2 Tests (Sprint 374)
+// Dark Mode Renderer V2 Tests
 // ============================================================================
 
 TEST(TestDarkRenderV2_DefaultScheme) {
@@ -11701,7 +11698,7 @@ TEST(TestDarkRenderV2_Singleton) {
 }
 
 // ============================================================================
-// Batch 3: System Tray Manager Tests (Sprint 375)
+// System Tray Manager Tests
 // ============================================================================
 
 TEST(TestSysTray_IconStateEnum) {
@@ -11731,7 +11728,7 @@ TEST(TestSysTray_NotInitializedByDefault) {
 }
 
 // ============================================================================
-// Batch 3: WinUI3 Research Tests (Sprint 376)
+// WinUI3 Research Tests
 // ============================================================================
 
 TEST(TestWinUI3Res_FeasibilityEnum) {
@@ -11764,7 +11761,7 @@ TEST(TestWinUI3Res_TotalEffort) {
 }
 
 // ============================================================================
-// Batch 3: Hybrid UI Bridge Tests (Sprint 377)
+// Hybrid UI Bridge Tests
 // ============================================================================
 
 TEST(TestHybridUI_StateNames) {
@@ -11801,7 +11798,7 @@ TEST(TestHybridUI_InitialState) {
 }
 
 // ============================================================================
-// Batch 3: WinUI3 Migration Engine Tests (Sprint 378)
+// WinUI3 Migration Engine Tests
 // ============================================================================
 
 TEST(TestMigration_FrameworkNames) {
@@ -11833,7 +11830,7 @@ TEST(TestMigration_StatusData) {
 }
 
 // ============================================================================
-// Batch 3: CI Hardening Engine Tests (Sprint 379)
+// CI Hardening Engine Tests
 // ============================================================================
 
 TEST(TestCIHarden_TargetNames) {
@@ -11866,7 +11863,7 @@ TEST(TestCIHarden_AllPassing) {
 }
 
 // ============================================================================
-// Batch 3: Code Coverage Engine Tests (Sprint 380)
+// Code Coverage Engine Tests
 // ============================================================================
 
 TEST(TestCovEng_ToolNames) {
@@ -11901,7 +11898,7 @@ TEST(TestCovEng_OverallCoverage) {
 }
 
 // ============================================================================
-// Batch 3: Integration Test Framework V2 Tests (Sprint 381)
+// Integration Test Framework V2 Tests
 // ============================================================================
 
 TEST(TestIntegV2_CategoryStrings) {
@@ -11941,7 +11938,7 @@ TEST(TestIntegV2_RunCategory) {
 }
 
 // ============================================================================
-// Batch 3: Integration Test Orchestrator Tests (Sprint 382)
+// Integration Test Orchestrator Tests
 // ============================================================================
 
 TEST(TestOrch_ScenarioTypeStrings) {
@@ -11982,7 +11979,7 @@ TEST(TestOrch_DependencyFailure) {
 }
 
 // ============================================================================
-// Batch 3: Continuous Fuzz Orchestrator Tests (Sprint 383)
+// Continuous Fuzz Orchestrator Tests
 // ============================================================================
 
 TEST(TestFuzzOrch_StrategyStrings) {
@@ -12025,7 +12022,7 @@ TEST(TestFuzzOrch_MinimizeCorpus) {
 }
 
 // ============================================================================
-// Batch 3: Static Analysis CI Gate Tests (Sprint 384)
+// Static Analysis CI Gate Tests
 // ============================================================================
 
 TEST(TestSAGate_ToolStrings) {
@@ -12080,11 +12077,8 @@ TEST(TestSAGate_EvaluatePassFail) {
     ASSERT(r3.verdict == SAGateVerdict::Fail);
 }
 
-// ============================================================================
-// Batch 4: Sprints 385-393 — Final Enhancement Tests
-// ============================================================================
 
-// --- Sprint 385: Security Compliance (SupplyChainIntegrityV2 + ComplianceAuditLogger) ---
+// Security Compliance (SupplyChainIntegrityV2 + ComplianceAuditLogger)
 TEST(TestSecComp_RegulationNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::wstring(ComplianceAuditLogger::RegulationName(ComplianceRegulation::GDPR)) == L"GDPR");
@@ -12112,7 +12106,7 @@ TEST(TestSecComp_SupplyChainFormats) {
     ASSERT(SupplyChainIntegrityV2::ReprodCheckCount() == 4);
 }
 
-// --- Sprint 386-387: Documentation (AutoDocGenerator + DocumentationSyncAudit) ---
+// Documentation (AutoDocGenerator + DocumentationSyncAudit)
 TEST(TestDocGen_SectionNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::wstring(AutoDocGenerator::GetSectionName(DocSection::Overview)) != L"");
@@ -12151,7 +12145,7 @@ TEST(TestDocSync_MockAudit) {
     ASSERT(passCount == result.passedCount);
 }
 
-// --- Sprint 388: Installer (InstallerEnhancementsV2 + MSIXPackageManager) ---
+// Installer (InstallerEnhancementsV2 + MSIXPackageManager)
 TEST(TestInstaller_PrereqCount) {
     using namespace ExplorerLens::Engine;
     ASSERT(InstallerEnhancementsV2::PREREQ_COUNT == 5);
@@ -12177,7 +12171,7 @@ TEST(TestInstaller_MSIXChannels) {
     ASSERT(std::wstring(MSIXPackageManager::GetChannelName(PackageChannel::Beta)) == L"Beta");
 }
 
-// --- Sprint 389: Zero-Copy Pipeline Activation ---
+// Zero-Copy Pipeline Activation
 TEST(TestZeroCopyAct_ModeStrings) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ZeroCopyModeToString(ZeroCopyMode::Disabled)) == "Disabled");
@@ -12211,13 +12205,13 @@ TEST(TestZeroCopyAct_Lifecycle) {
     ASSERT(act.GetActiveMode() == ZeroCopyMode::Disabled);
 }
 
-// --- Sprint 390: Parallel I/O Pipeline — disabled: header removed ---
+// Parallel I/O Pipeline — disabled: header removed
 TEST(TestParallelIO_BackendNamesV2) { ASSERT(true); }
 TEST(TestParallelIO_PriorityNamesV2) { ASSERT(true); }
 TEST(TestParallelIO_VolumeTypes) { ASSERT(true); }
 TEST(TestParallelIO_DefaultConfig) { ASSERT(true); }
 
-// --- Sprint 391: SIMD Scaler + ARM64 NEON ---
+// SIMD Scaler + ARM64 NEON
 TEST(TestSIMDScal_PathNames) {
     using namespace ExplorerLens::SIMD;
     ASSERT(std::wstring(SIMDScaler::PathName(SIMDScaler::SIMDPath::Scalar)) == L"Scalar");
@@ -12247,7 +12241,7 @@ TEST(TestARM64_CapNames) {
     ASSERT(ARM64NEONScaler::SelectImpl(ARM64Capability::Scalar) == ARM64ScalerImpl::ScalarC);
 }
 
-// --- Sprint 392: Pipeline State Cache V2 ---
+// Pipeline State Cache V2
 TEST(TestPSOCacheV2_StateNamesV2) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::wstring(PipelineStateCacheV2::CacheStateName(PSOCacheState::NotCached)) == L"Not Cached");
@@ -12275,7 +12269,7 @@ TEST(TestPSOCacheV2_EntryDefaults) {
     ASSERT(entry.valid == false);
 }
 
-// --- Sprint 393: Cache Warming Service ---
+// Cache Warming Service
 TEST(TestCacheWarm_StrategyNamesV2) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::wstring(CacheWarmingService::StrategyName(WarmingStrategy::MostRecent)) == L"Most Recent");
@@ -12305,7 +12299,7 @@ TEST(TestCacheWarm_DefaultConfigV2) {
     ASSERT(cfg.pauseOnUserActivity == true);
 }
 
-//== File Integrity Monitor (Sprint 394) ==
+//== File Integrity Monitor ==
 TEST(TestIntegrityMon_CheckTypeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(FileIntegrityCheckTypeName(FileIntegrityCheckType::Hash)) == "Hash");
@@ -12335,7 +12329,7 @@ TEST(TestIntegrityMon_RecordFields) {
     ASSERT(rec.status == FileIntegrityStatus::Modified);
 }
 
-//== Thumbnail Diff Engine (Sprint 395) ==
+//== Thumbnail Diff Engine ==
 TEST(TestDiffEngine_AlgorithmNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(DiffAlgorithmName(DiffAlgorithm::PixelWise)) == "PixelWise");
@@ -12361,7 +12355,7 @@ TEST(TestDiffEngine_Construction) {
     ASSERT(cfg.minorThreshold >= 0.0f);
 }
 
-//== Decoder Sandbox Policy (Sprint 396) ==
+//== Decoder Sandbox Policy ==
 TEST(TestSandboxPolicy_LevelNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(DecoderSandboxLevelName(DecoderSandboxLevel::None)) == "None");
@@ -12388,7 +12382,7 @@ TEST(TestSandboxPolicy_MaxMemory) {
     ASSERT(viol.resource == SandboxResourceLimit::Memory);
 }
 
-//== Intelligent Prefetch V2 (Sprint 397) ==
+//== Intelligent Prefetch V2 ==
 TEST(TestPrefetchV2_StrategyNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(PrefetchStrategyV2Name(PrefetchStrategyV2::None)) == "None");
@@ -12415,7 +12409,7 @@ TEST(TestPrefetchV2_ConfidenceThreshold) {
     (void)prefetcher;
 }
 
-//== GPU Workload Balancer (Sprint 398) ==
+//== GPU Workload Balancer ==
 TEST(TestGPUBalance_StrategyNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(BalancingStrategyName(BalancingStrategy::RoundRobin)) == "RoundRobin");
@@ -12442,7 +12436,7 @@ TEST(TestGPUBalance_MaxGPUs) {
     ASSERT(item.workloadType == GPUWorkloadType::Decode);
 }
 
-//== Filesystem Watchdog (Sprint 399) ==
+//== Filesystem Watchdog ==
 TEST(TestFSWatchdog_EventNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(FSWatchEventName(FSWatchEvent::Created)) == "Created");
@@ -12470,7 +12464,7 @@ TEST(TestFSWatchdog_MaxDirectories) {
     ASSERT(cfg.scope == FSWatchScope::Recursive);
 }
 
-//== Compression Benchmark (Sprint 400) ==
+//== Compression Benchmark ==
 TEST(TestCompBench_AlgoNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(CompressionAlgoName(CompressionAlgo::Deflate)) == "Deflate");
@@ -12496,7 +12490,7 @@ TEST(TestCompBench_Iterations) {
     (void)bench;
 }
 
-//== Explorer Band Integration (Sprint 401) ==
+//== Explorer Band Integration ==
 TEST(TestBandInteg_PositionNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(BandPositionName(BandPosition::Top)) == "Top");
@@ -12523,7 +12517,7 @@ TEST(TestBandInteg_Construction) {
     ASSERT(info.isRegistered == false);
 }
 
-//== Thumbnail Stream Protocol (Sprint 402) ==
+//== Thumbnail Stream Protocol ==
 TEST(TestStreamProto_ProtocolNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(TSProtoTypeName(TSProtoType::HTTP)) == "HTTP");
@@ -12550,7 +12544,7 @@ TEST(TestStreamProto_Timeout) {
     (void)proto;
 }
 
-//== Registry Snapshot Manager (Sprint 403) ==
+//== Registry Snapshot Manager ==
 TEST(TestRegSnap_ScopeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(SnapshotScopeName(SnapshotScope::CurrentUser)) == "CurrentUser");
@@ -12577,7 +12571,7 @@ TEST(TestRegSnap_MaxSnapshots) {
     ASSERT(result.identical == true);
 }
 
-//== Hot Reload Config Engine (Sprint 404) ==
+//== Hot Reload Config Engine ==
 TEST(TestHotReload_SourceNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(HotReloadSourceName(HotReloadSource::Registry)) == "Registry");
@@ -12604,7 +12598,7 @@ TEST(TestHotReload_PollInterval) {
     (void)engine;
 }
 
-//== COM Diagnostics Engine (Sprint 405) ==
+//== COM Diagnostics Engine ==
 TEST(TestCOMDiag_HealthStatusNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(COMHealthStatusName(COMHealthStatus::Healthy)) == "Healthy");
@@ -12630,7 +12624,7 @@ TEST(TestCOMDiag_CLSIDConstant) {
     (void)engine;
 }
 
-//== Thumbnail Watermark (Sprint 406) ==
+//== Thumbnail Watermark ==
 TEST(TestWatermark_PositionNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(WatermarkPositionName(WatermarkPosition::TopLeft)) == "TopLeft");
@@ -12659,7 +12653,7 @@ TEST(TestWatermark_ApplyAndConfig) {
     ASSERT(wm.GetSupportedTypes().size() == 4);
 }
 
-//== Batch Rename Preview (Sprint 407) ==
+//== Batch Rename Preview ==
 TEST(TestRenamePreview_PatternNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(RenamePatternName(RenamePattern::Sequential)) == "Sequential");
@@ -12685,7 +12679,7 @@ TEST(TestRenamePreview_GenerateAndGet) {
     ASSERT(item->newName == "file_1");
 }
 
-//== Duplicate File Detector (Sprint 408) ==
+//== Duplicate File Detector ==
 TEST(TestDupDetect_HashMethodNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(DuplicateHashMethodName(DuplicateHashMethod::MD5)) == "MD5");
@@ -12708,7 +12702,7 @@ TEST(TestDupDetect_ScanDirectory) {
     ASSERT(det.GetMethod() == DuplicateHashMethod::SHA256);
 }
 
-//== Thumbnail Annotation (Sprint 409) ==
+//== Thumbnail Annotation ==
 TEST(TestAnnotation_TypeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(AnnotationTypeName(AnnotationType::Resolution)) == "Resolution");
@@ -12738,7 +12732,7 @@ TEST(TestAnnotation_AddRemoveRender) {
     ASSERT(ann.Render(px, 2, 2));
 }
 
-//== Cache Migration Engine (Sprint 410) ==
+//== Cache Migration Engine ==
 TEST(TestCacheMigration_FormatNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(CacheMigrationFormatName(CacheMigrationFormat::V1Binary)) == "V1Binary");
@@ -12760,7 +12754,7 @@ TEST(TestCacheMigration_MigrateFlow) {
     ASSERT(eng.GetMigrationCount() == 1);
 }
 
-//== Explorer Context Menu Extension (Sprint 411) ==
+//== Explorer Context Menu Extension ==
 TEST(TestCtxMenu_ActionNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ExtMenuActionName(ExtMenuAction::RegenerateThumbnail)) == "RegenerateThumbnail");
@@ -12781,7 +12775,7 @@ TEST(TestCtxMenu_BuildAndExecute) {
     ASSERT(ext.GetLastAction() == ExtMenuAction::CopyThumbnail);
 }
 
-//== Adaptive Quality Scaler (Sprint 412) ==
+//== Adaptive Quality Scaler ==
 TEST(TestQualityScaler_TierNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(QualityTierName(QualityTier::Ultra)) == "Ultra");
@@ -12805,7 +12799,7 @@ TEST(TestQualityScaler_Evaluate) {
     ASSERT(d.reason == ScalingReason::BatteryLow);
 }
 
-//== Thumbnail Compare View (Sprint 413) ==
+//== Thumbnail Compare View ==
 TEST(TestCompare_ModeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(CompareModeName(CompareMode::SideBySide)) == "SideBySide");
@@ -12828,7 +12822,7 @@ TEST(TestCompare_RunComparison) {
     ASSERT(cv.GetResult().diffPixels == 0);
 }
 
-//== File Type Statistics (Sprint 414) ==
+//== File Type Statistics ==
 TEST(TestFileStats_CategoryNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(StatCategoryName(StatCategory::DecodeCount)) == "DecodeCount");
@@ -12853,7 +12847,7 @@ TEST(TestFileStats_RecordAndQuery) {
     ASSERT(stats.GetTotalRecords() == 3);
 }
 
-//== Memory Defragmenter (Sprint 415) ==
+//== Memory Defragmenter ==
 TEST(TestDefrag_LevelNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(FragmentationLevelName(FragmentationLevel::None)) == "None");
@@ -12877,7 +12871,7 @@ TEST(TestDefrag_AnalyzeAndDefrag) {
     ASSERT(defrag.GetDefragCount() == 1);
 }
 
-//== Shell Notification Engine (Sprint 416) ==
+//== Shell Notification Engine ==
 TEST(TestShellNotify_TypeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ShellNotifyTypeName(ShellNotifyType::AssocChanged)) == "AssocChanged");
@@ -12905,7 +12899,7 @@ TEST(TestShellNotify_SendAndFlush) {
     ASSERT(eng.GetTotalSent() == 2);
 }
 
-//== Thumbnail Export Engine (Sprint 417) ==
+//== Thumbnail Export Engine ==
 TEST(TestThumbExport_FormatNamesV2) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ThumbnailExportFormatName(ThumbnailExportFormat::PNG)) == "PNG");
@@ -12930,7 +12924,7 @@ TEST(TestThumbExport_SingleExport) {
     ASSERT(eng.GetSupportedFormats().size() == 5);
 }
 
-//== Thumbnail Version Control (Sprint 418) ==
+//== Thumbnail Version Control ==
 TEST(TestTVC_VersionNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ThumbnailVersionName(ThumbnailVersion::Original)) == "Original");
@@ -12952,7 +12946,7 @@ TEST(TestTVC_CreateAndRollback) {
     ASSERT(tvc.GetRollbackCount() == 1);
 }
 
-//== File Preview Router (Sprint 419) ==
+//== File Preview Router ==
 TEST(TestFPR_HandlerNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(PreviewHandlerName(PreviewHandler::Internal)) == "Internal");
@@ -12973,7 +12967,7 @@ TEST(TestFPR_RouteAndRegister) {
     ASSERT(router.GetRegisteredCount() == 1);
 }
 
-//== Clipboard Thumbnail Manager (Sprint 420) ==
+//== Clipboard Thumbnail Manager ==
 TEST(TestClip_FormatNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ClipboardFormatName(ClipboardFormat::PNG)) == "PNG");
@@ -12995,7 +12989,7 @@ TEST(TestClip_CopyAndPaste) {
     ASSERT(mgr.GetFormats().size() == 1);
 }
 
-//== Format Conversion Pipeline (Sprint 421) ==
+//== Format Conversion Pipeline ==
 TEST(TestFCP_TargetNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ConvertTargetName(ConvertTarget::WebP)) == "WebP");
@@ -13016,7 +13010,7 @@ TEST(TestFCP_ConvertSingle) {
     ASSERT(pipe.GetBestTarget(50000, false) == ConvertTarget::WebP);
 }
 
-//== Vulkan Memory Allocator (Sprint 422) ==
+//== Vulkan Memory Allocator ==
 TEST(TestVMA_TierNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(VkMemoryTierName(VkMemoryTier::DeviceLocal)) == "DeviceLocal");
@@ -13038,7 +13032,7 @@ TEST(TestVMA_AllocAndFree) {
     ASSERT(vma.GetUsageBytes() == 0);
 }
 
-//== Decoder Priority Scheduler (Sprint 423) ==
+//== Decoder Priority Scheduler ==
 TEST(TestDPS_PriorityNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(DecoderTaskPriorityName(DecoderTaskPriority::Urgent)) == "Urgent");
@@ -13061,7 +13055,7 @@ TEST(TestDPS_SubmitAndCancel) {
     ASSERT(sched.GetQueueDepth() == 1);
 }
 
-//== Error Reporting Pipeline (Sprint 424) ==
+//== Error Reporting Pipeline ==
 TEST(TestERP_DomainNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ErrorDomainName(ErrorDomain::Decoder)) == "Decoder");
@@ -13084,7 +13078,7 @@ TEST(TestERP_ReportAndQuery) {
     ASSERT(top.size() == 1 && top[0].count == 2);
 }
 
-//== Enterprise Audit Pipeline (Sprint 425) ==
+//== Enterprise Audit Pipeline ==
 TEST(TestEAP_ActionNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(AuditActionName(AuditAction::FileAccessed)) == "FileAccessed");
@@ -13107,7 +13101,7 @@ TEST(TestEAP_LogAndRetrieve) {
     ASSERT(eap.GetDestination() == AuditDestination::File);
 }
 
-//== Resource Quota Manager (Sprint 426) ==
+//== Resource Quota Manager ==
 TEST(TestRQM_ResourceNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(QuotaResourceName(QuotaResource::Memory)) == "Memory");
@@ -13130,7 +13124,7 @@ TEST(TestRQM_SetAndCheck) {
     ASSERT(!rqm.IsOverQuota());
 }
 
-//== Access Token Validator (Sprint 427) ==
+//== Access Token Validator ==
 TEST(TestATV_TypeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(TokenTypeName(TokenType::Process)) == "Process");
@@ -13152,7 +13146,7 @@ TEST(TestATV_Validate) {
     ASSERT(atv.CheckIntegrity(AccessTokenValidator::INTEGRITY_MEDIUM));
 }
 
-//== Cache Encryption Layer (Sprint 428) ==
+//== Cache Encryption Layer ==
 TEST(TestCEL_AlgoNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(EncryptionAlgorithmName(EncryptionAlgorithm::AES256)) == "AES256");
@@ -13179,7 +13173,7 @@ TEST(TestCEL_EncryptDecrypt) {
     ASSERT(cel.GetKeyRotations() == 1);
 }
 
-//== Explorer Preview Pane (Sprint 429) ==
+//== Explorer Preview Pane ==
 TEST(TestEPP_ModeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(PreviewPaneModeName(PreviewPaneMode::Thumbnail)) == "Thumbnail");
@@ -13203,7 +13197,7 @@ TEST(TestEPP_ActivateAndRefresh) {
     ASSERT(pane.GetRefreshCount() == 1);
 }
 
-//== DirectShow Thumbnail Bridge (Sprint 430) ==
+//== DirectShow Thumbnail Bridge ==
 TEST(Test_DirectShowBridge_FilterTypeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(DSFilterTypeName(DSFilterType::Source)) == "Source");
@@ -13233,7 +13227,7 @@ TEST(Test_DirectShowBridge_GrabFrame) {
     ASSERT(bridge.GetGrabCount() == 1);
 }
 
-//== Shell Extension Health Monitor (Sprint 431) ==
+//== Shell Extension Health Monitor ==
 TEST(Test_HealthMonitor_StatusNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ShellHealthStatusName(ShellHealthStatus::Healthy)) == "Healthy");
@@ -13259,7 +13253,7 @@ TEST(Test_HealthMonitor_AutoRecover) {
     ASSERT(mon.GetStatus() == ShellHealthStatus::Healthy);
 }
 
-//== Thumbnail Color Space (Sprint 432) ==
+//== Thumbnail Color Space ==
 TEST(Test_ColorSpace_TypeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ColorSpaceTypeName(ColorSpaceType::SRGB)) == "sRGB");
@@ -13284,7 +13278,7 @@ TEST(Test_ColorSpace_ConvertNoOp) {
     ASSERT(r >= 0.0f && r <= 1.0f);
 }
 
-//== Async IO Completion Engine (Sprint 433) ==
+//== Async IO Completion Engine ==
 TEST(Test_AsyncIOCP_PriorityNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(AsyncIOPriorityName(AsyncIOPriority::Critical)) == "Critical");
@@ -13313,7 +13307,7 @@ TEST(Test_AsyncIOCP_Cancel) {
     ASSERT(engine.GetCancelledCount() == 1);
 }
 
-//== EXIF Orientation Fixer (Sprint 434) ==
+//== EXIF Orientation Fixer ==
 TEST(Test_ExifFixer_OrientationNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(ExifOrientationName(ExifOrientation::Normal)) == "Normal");
@@ -13339,7 +13333,7 @@ TEST(Test_ExifFixer_ReadOrientation) {
     ASSERT(result.orientation == ExifOrientation::Normal);
 }
 
-//== Multi-Monitor DPI Scaler (Sprint 435) ==
+//== Multi-Monitor DPI Scaler ==
 TEST(Test_DPIScaler_ModeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(DPIScaleModeName(DPIScaleMode::PerMonitorV2)) == "PerMonitorV2");
@@ -13363,7 +13357,7 @@ TEST(Test_DPIScaler_ScaleForMonitor) {
     ASSERT(scaler.GetMonitorProfile(192) == MonitorProfile::UltraHiDPI);
 }
 
-//== VirtualAlloc Optimizer (Sprint 436) ==
+//== VirtualAlloc Optimizer ==
 TEST(Test_VAlloc_StrategyNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(VAllocStrategyName(VAllocStrategy::ReserveCommit)) == "ReserveCommit");
@@ -13391,7 +13385,7 @@ TEST(Test_VAlloc_OptimizeWorking) {
     ASSERT(reclaimed > 0);
 }
 
-//== Thumbnail Histogram (Sprint 437) ==
+//== Thumbnail Histogram ==
 TEST(Test_Histogram_ChannelNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(HistogramChannelName(HistogramChannel::Red)) == "Red");
@@ -13419,7 +13413,7 @@ TEST(Test_Histogram_PeakAndMean) {
     ASSERT(hist.GetMeanBrightness(result) >= 127.0f);
 }
 
-//== File Association Manager (Sprint 438) ==
+//== File Association Manager ==
 TEST(Test_FileAssoc_ScopeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(AssociationScopeName(AssociationScope::User)) == "User");
@@ -13447,7 +13441,7 @@ TEST(Test_FileAssoc_GetConflicts) {
     ASSERT(report.totalExtensions == 2);
 }
 
-//== DX12 Fence Manager (Sprint 439) ==
+//== DX12 Fence Manager ==
 TEST(Test_DX12Fence_StateNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(FenceStateName(FenceState::Unsignaled)) == "Unsignaled");
@@ -13475,7 +13469,7 @@ TEST(Test_DX12Fence_WaitForFence) {
     ASSERT(mgr.GetWaitCount() == 1);
 }
 
-//== Localization Engine (Sprint 440) ==
+//== Localization Engine ==
 TEST(Test_Locale_IdNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(LocaleIdName(LocaleId::EnUS)) == "en-US");
@@ -13501,7 +13495,7 @@ TEST(Test_Locale_GetString) {
     ASSERT(loc.GetString("missing") == "[missing]");
 }
 
-//== Thumbnail Sprite Sheet (Sprint 441) ==
+//== Thumbnail Sprite Sheet ==
 TEST(Test_SpriteSheet_LayoutNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(SpriteLayoutName(SpriteLayout::Grid)) == "Grid");
@@ -13530,7 +13524,7 @@ TEST(Test_SpriteSheet_EstimatedSize) {
     ASSERT(sheet.GetSpriteCount() == 1);
 }
 
-//== Cache Telemetry Collector (Sprint 442) ==
+//== Cache Telemetry Collector ==
 TEST(Test_CacheTelemetry_EventNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(CacheTelemetryEventName(CacheTelemetryEvent::CacheHit)) == "CacheHit");
@@ -13559,7 +13553,7 @@ TEST(Test_CacheTelemetry_Export) {
     ASSERT(snap.evictionRate > 0.0f);
 }
 
-//== Windows Search Integration (Sprint 443) ==
+//== Windows Search Integration ==
 TEST(Test_WinSearch_PropertyNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(SearchPropertyTypeName(SearchPropertyType::Thumbnail)) == "Thumbnail");
@@ -13586,11 +13580,8 @@ TEST(Test_WinSearch_QueryProperties) {
     ASSERT(props.size() == 3);
 }
 
-//==============================================================================
-// Sprint 444-468 Tests — Coverage Expansion Batch 9
-//==============================================================================
 
-// Sprint 444: AdaptiveCacheBudgetManager Tests
+// AdaptiveCacheBudgetManager Tests
 TEST(Test_ACBudget_TierNames) {
     ASSERT(true);
 }
@@ -13610,7 +13601,7 @@ TEST(Test_ACBudget_Rebalance) {
     ASSERT(true);
 }
 
-// Sprint 445: ArchiveMemoryCompactor Tests
+// ArchiveMemoryCompactor Tests
 TEST(Test_AMemCompact_SlabStates) {
     using namespace ExplorerLens::Memory;
     ASSERT(static_cast<int>(SlabState::Free) == 0);
@@ -13635,7 +13626,7 @@ TEST(Test_AMemCompact_Compact) {
     ASSERT(true);
 }
 
-// Sprint 446: BatchProcessor Tests
+// BatchProcessor Tests
 TEST(Test_BatchProc_JobPriorities) {
     using namespace ExplorerLens::Engine::Pipeline;
     ASSERT(static_cast<int>(JobPriority::Critical) == 0);
@@ -13659,7 +13650,7 @@ TEST(Test_BatchProc_PauseResume) {
     ASSERT(!bp.IsPaused());
 }
 
-// Sprint 447: BufferPoolAllocator Tests
+// BufferPoolAllocator Tests
 TEST(Test_BufPool_SlabClassNames) {
     using namespace ExplorerLens::Memory;
     ASSERT(std::string(SlabClassName(SlabClass::Tiny)) != "");
@@ -13690,7 +13681,7 @@ TEST(Test_BufPool_PoolStats) {
     pool.Release(buf);
 }
 
-// Sprint 448: CacheKeyGenerator Tests
+// CacheKeyGenerator Tests
 TEST(Test_CacheKey_Generate) {
     using namespace ExplorerLens::Engine::Cache;
     auto key = CacheKeyGenerator::Generate(L"C:\\test.png", 256, 256);
@@ -13718,7 +13709,7 @@ TEST(Test_CacheKey_GenerateWithTime) {
     ASSERT(!key.empty());
 }
 
-// Sprint 449: CRTConsistencyManager Tests
+// CRTConsistencyManager Tests
 TEST(Test_CRT_ModeNames) {
     ASSERT(true);
 }
@@ -13737,7 +13728,7 @@ TEST(Test_CRT_AuditLibraries) {
     ASSERT(CRTConsistencyManager::LibraryCount() > 0);
 }
 
-// Sprint 450: DeadCodeAudit Tests
+// DeadCodeAudit Tests
 TEST(Test_DCAudit_TypeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::string(DeadCodeAudit::TypeName(DeadCodeType::ObsoleteFile)) != "");
@@ -13761,7 +13752,7 @@ TEST(Test_DCAudit_CountByStatus) {
     ASSERT(cleaned >= 0);
 }
 
-// Sprint 451: DeadCodeAuditor Tests
+// DeadCodeAuditor Tests
 TEST(Test_DCAuditor_CategoryNames) {
     ASSERT(true);
 }
@@ -13779,7 +13770,7 @@ TEST(Test_DCAuditor_AllResolved) {
     ASSERT(resolved >= 0);
 }
 
-// Sprint 452: DecoderHealthDashboard Tests
+// DecoderHealthDashboard Tests
 TEST(Test_DHDash_CircuitStates) {
     using namespace ExplorerLens::Core;
     ASSERT(static_cast<int>(CircuitState::Closed) == 0);
@@ -13806,7 +13797,7 @@ TEST(Test_DHDash_RecordAndStats) {
     ASSERT(stats.totalDecodes >= 2);
 }
 
-// Sprint 453: DecoderHealthMonitor Tests
+// DecoderHealthMonitor Tests
 TEST(Test_DHMon_RecordSuccess) {
     using namespace ExplorerLens::Engine;
     auto& mon = DecoderHealthMonitor::GetInstance();
@@ -13839,7 +13830,7 @@ TEST(Test_DHMon_IsHealthy) {
     ASSERT(stats.IsHealthy());
 }
 
-// Sprint 454: DecoderHotsetManager Tests
+// DecoderHotsetManager Tests
 TEST(Test_DHotset_LoadStates) {
     using namespace ExplorerLens::Memory;
     ASSERT(static_cast<int>(DecoderLoadState::Cold) == 0);
@@ -13866,7 +13857,7 @@ TEST(Test_DHotset_LoadUnload) {
     ASSERT(mgr.UnloadDecoder("PNG"));
 }
 
-// Sprint 455: DecoderPriority Tests
+// DecoderPriority Tests
 TEST(Test_DPriority_Levels) {
     using namespace ExplorerLens::Engine;
     ASSERT(static_cast<int>(DecoderPriority::Critical) == 0);
@@ -13895,7 +13886,7 @@ TEST(Test_DPriority_Availability) {
     mgr.SetDecoderAvailable(L"AvailTest", true);
 }
 
-// Sprint 456: DiagnosticsExporter Tests
+// DiagnosticsExporter Tests
 TEST(Test_DiagExport_Categories) {
     using namespace ExplorerLens::Core;
     ASSERT(static_cast<int>(DiagCategory::SystemInfo) == 0);
@@ -13927,7 +13918,7 @@ TEST(Test_DiagExport_Export) {
     ASSERT(static_cast<int>(result.status) >= 0);
 }
 
-// Sprint 457: DirectoryFormatProfiler Tests
+// DirectoryFormatProfiler Tests
 TEST(Test_DirProfile_FormatFamilies) {
     ASSERT(true);
 }
@@ -13948,7 +13939,7 @@ TEST(Test_DirProfile_Budget) {
     ASSERT(true);
 }
 
-// Sprint 458: ErrorContext Tests
+// ErrorContext Tests
 TEST(Test_ErrCtx_PushPop) {
     using namespace ExplorerLens::Engine;
     ErrorContextManager::PushContext(L"Decode", L"WebPDecoder");
@@ -13973,7 +13964,7 @@ TEST(Test_ErrCtx_FilePath) {
     ASSERT(ctx.filePath == L"C:\\images\\photo.jpg");
 }
 
-// Sprint 459: ETWSinkComplete Tests
+// ETWSinkComplete Tests
 TEST(Test_ETWSink_Channels) {
     using namespace ExplorerLens::ETW;
     ASSERT(static_cast<int>(ETWChannel::Admin) == 0);
@@ -13993,7 +13984,7 @@ TEST(Test_ETWSink_ConfigFactories) {
     ASSERT(true);
 }
 
-// Sprint 460: ExplorerWorkScheduler Tests
+// ExplorerWorkScheduler Tests
 TEST(Test_WorkSched_Priorities) {
     using namespace ExplorerLens::Pipeline;
     ASSERT(static_cast<int>(WorkPriority::Critical) == 0);
@@ -14020,7 +14011,7 @@ TEST(Test_WorkSched_Dequeue) {
     ASSERT(!item.filePath.empty());
 }
 
-// Sprint 461: FormatFallbackEngine Tests
+// FormatFallbackEngine Tests
 TEST(Test_FmtFallback_Triggers) {
     using namespace ExplorerLens::Pipeline;
     ASSERT(static_cast<int>(FallbackTrigger::None) == 0);
@@ -14044,7 +14035,7 @@ TEST(Test_FmtFallback_HasTrigger) {
     ASSERT(!HasTrigger(combined, FallbackTrigger::GPUInitFailed));
 }
 
-// Sprint 462: FormatGalleryView Tests
+// FormatGalleryView Tests
 TEST(Test_FmtGallery_TileSizes) {
     using namespace ExplorerLens::Engine;
     ASSERT(static_cast<int>(GalleryTileSize::Small) == 64);
@@ -14070,7 +14061,7 @@ TEST(Test_FmtGallery_Initialize) {
     ASSERT(gv.GetConfig().tileSize == GalleryTileSize::Medium);
 }
 
-// Sprint 463: FormatGroupManager Tests
+// FormatGroupManager Tests
 TEST(Test_FmtGroup_GroupNames) {
     ASSERT(true);
 }
@@ -14088,7 +14079,7 @@ TEST(Test_FmtGroup_GetGroups) {
     ASSERT(groups.size() == FormatGroupManager::GroupCount());
 }
 
-// Sprint 464: ProgramClosureV83 Tests
+// ProgramClosureV83 Tests
 TEST(Test_ProgClosure_States) {
     using namespace ExplorerLens::Core;
     ASSERT(static_cast<int>(DeliverableState::Complete) == 0);
@@ -14108,7 +14099,7 @@ TEST(Test_ProgClosure_DefaultSeed) {
     ASSERT(true);
 }
 
-// Sprint 465: ReleaseReadinessDashboard Tests
+// ReleaseReadinessDashboard Tests
 TEST(Test_RelReady_Categories) {
     using namespace ExplorerLens;
     ASSERT(static_cast<int>(GateCategory::Build) == 0);
@@ -14130,7 +14121,7 @@ TEST(Test_RelReady_FormatReport) {
     ASSERT(!report.empty());
 }
 
-// Sprint 466: ReproducibleBuildVerifier Tests
+// ReproducibleBuildVerifier Tests
 TEST(Test_ReproBuild_ArtifactTypes) {
     ASSERT(true);
 }
@@ -14146,7 +14137,7 @@ TEST(Test_ReproBuild_RelaxedPolicy) {
     ASSERT(true);
 }
 
-// Sprint 467: SettingsImportExport Tests
+// SettingsImportExport Tests
 TEST(Test_Settings_CategoryNames) {
     ASSERT(true);
 }
@@ -14163,7 +14154,7 @@ TEST(Test_Settings_ValidateJSON) {
     ASSERT(SettingsImportExport::ValidateJSON(L""));
 }
 
-// Sprint 468: HotModeDirectoryEngine Tests
+// HotModeDirectoryEngine Tests
 TEST(Test_HotModeDir_ChangeTypes) {
     using namespace ExplorerLens::Memory;
     ASSERT(static_cast<int>(DirChangeType::FileAdded) == 0);
@@ -14181,7 +14172,7 @@ TEST(Test_HotModeDir_IsHotMode) {
     ASSERT(true);
 }
 
-//== Sprint 469: MemoryOptimizationEngine Tests ==
+//== MemoryOptimizationEngine Tests ==
 
 TEST(Test_MemOpt_Config) {
     using namespace ExplorerLens::Engine::Memory;
@@ -14211,7 +14202,7 @@ TEST(Test_MemOpt_BudgetCheck) {
     ASSERT(true);
 }
 
-//== Sprint 470: MemorySoakValidator Tests ==
+//== MemorySoakValidator Tests ==
 
 TEST(Test_MemSoak_Verdict) {
     using namespace ExplorerLens::Memory;
@@ -14255,7 +14246,7 @@ TEST(Test_MemSoak_Evaluate) {
     ASSERT(result.completedIterations == 1000);
 }
 
-//== Sprint 471: CrashIntelligence Tests ==
+//== CrashIntelligence Tests ==
 
 TEST(Test_CrashInt_StackFrame) {
     using namespace ExplorerLens::CrashIntel;
@@ -14295,7 +14286,7 @@ TEST(Test_CrashInt_Bucket) {
     ASSERT(bucket.ComputeSeverity() == L"Low");
 }
 
-//== Sprint 472: IsolationModeSelector Tests ==
+//== IsolationModeSelector Tests ==
 
 TEST(Test_IsoMode_Enum) {
     using namespace ExplorerLens;
@@ -14326,7 +14317,7 @@ TEST(Test_IsoMode_Trust) {
     ASSERT(trusted || !trusted);
 }
 
-//== Sprint 473: SmallObjectPool Tests ==
+//== SmallObjectPool Tests ==
 
 TEST(Test_SmallPool_Create) {
     ExplorerLens::Engine::SmallObjectPool<int, 16> pool;
@@ -14367,7 +14358,7 @@ TEST(Test_SmallPool_Stats) {
     ASSERT(pool.GetFreeCount() == 4);
 }
 
-//== Sprint 474: ValidationHelpers Tests ==
+//== ValidationHelpers Tests ==
 
 TEST(Test_ValHelp_FilePath) {
     using namespace ExplorerLens::Engine::Validation;
@@ -14401,7 +14392,7 @@ TEST(Test_ValHelp_Extension) {
     ASSERT(!IsValidExtension(L"."));
 }
 
-//== Sprint 475: VersionDriftDetector Tests ==
+//== VersionDriftDetector Tests ==
 
 TEST(Test_VDDetect_SemVer) {
     auto v = ExplorerLens::SemanticVersion::Parse("15.0.0");
@@ -14425,7 +14416,7 @@ TEST(Test_VDDetect_Scan) {
     ASSERT(entries.empty());
 }
 
-//== Sprint 476: VersionDriftGate Tests ==
+//== VersionDriftGate Tests ==
 
 TEST(Test_VDGate_Create) {
     using namespace ExplorerLens::VersionDrift;
@@ -14459,7 +14450,7 @@ TEST(Test_VDGate_Policy) {
     ASSERT(perm.failOnAnyMajorDrift == false);
 }
 
-//== Sprint 477: PluginActivation Tests ==
+//== PluginActivation Tests ==
 
 TEST(Test_PlugAct_Flags) {
     using namespace ExplorerLens::Engine::Plugin;
@@ -14494,7 +14485,7 @@ TEST(Test_PlugAct_Lifecycle) {
     ASSERT(mgr.ActivePlugins() == 1);
 }
 
-//== Sprint 478: PluginHostBridge Tests ==
+//== PluginHostBridge Tests ==
 
 TEST(Test_PHBridge_States) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::PluginHostState::NotStarted) == 0);
@@ -14523,7 +14514,7 @@ TEST(Test_PHBridge_Instance) {
     ASSERT(true);
 }
 
-//== Sprint 479: PluginHostClient Tests ==
+//== PluginHostClient Tests ==
 
 TEST(Test_PHClient_Compile) {
     ASSERT(sizeof(ExplorerLens::PluginHostClient) > 0);
@@ -14543,7 +14534,7 @@ TEST(Test_PHClient_Size) {
     ASSERT(sizeof(ExplorerLens::PluginHostClient) >= sizeof(void*));
 }
 
-//== Sprint 480: PluginHostIPC Tests ==
+//== PluginHostIPC Tests ==
 
 TEST(Test_PHIPC_MsgType) {
     using namespace ExplorerLens::Engine;
@@ -14571,7 +14562,7 @@ TEST(Test_PHIPC_MsgName) {
     ASSERT(PluginHostIPC::GetMessageTypeCount() == 15);
 }
 
-//== Sprint 481: PluginRuntimeValidation Tests ==
+//== PluginRuntimeValidation Tests ==
 
 TEST(Test_PRunVal_State) {
     ASSERT(true);
@@ -14596,7 +14587,7 @@ TEST(Test_PRunVal_Validator) {
     ASSERT(true);
 }
 
-//== Sprint 482: EXIFOrientation Tests ==
+//== EXIFOrientation Tests ==
 
 TEST(Test_EXIF_Normal) {
     ASSERT(true);
@@ -14614,7 +14605,7 @@ TEST(Test_EXIF_AllCases) {
     ASSERT(true);
 }
 
-//== Sprint 483: AuditLogger Tests ==
+//== AuditLogger Tests ==
 
 TEST(Test_AuditLog_Events) {
     ASSERT(true);
@@ -14645,7 +14636,7 @@ TEST(Test_AuditLog_LogAccess) {
     ASSERT(true);
 }
 
-//== Sprint 484: CIPipeline Tests ==
+//== CIPipeline Tests ==
 
 TEST(Test_CI_Stages) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::CIPipelineStage::Checkout) == 0);
@@ -14671,7 +14662,7 @@ TEST(Test_CI_Flags) {
     ASSERT(std::string(linkFlags).find("/NXCOMPAT") != std::string::npos);
 }
 
-//== Sprint 485: CodeCoverage Tests ==
+//== CodeCoverage Tests ==
 
 TEST(Test_CodeCov_Tool) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::CodeCoverageTool::None) == 0);
@@ -14703,7 +14694,7 @@ TEST(Test_CodeCov_Threshold) {
     ASSERT(ExplorerLens::Engine::CodeCoverageConfig::EXCLUSION_COUNT == 6);
 }
 
-//== Sprint 486: BitmapPool Tests ==
+//== BitmapPool Tests ==
 
 TEST(Test_BmpPool_Config) {
     ExplorerLens::Engine::BitmapPoolConfig config;
@@ -14734,7 +14725,7 @@ TEST(Test_BmpPool_Instance) {
     ASSERT(&pool == &pool2);
 }
 
-//== Sprint 487: DecoderCircuitBreaker Tests ==
+//== DecoderCircuitBreaker Tests ==
 
 TEST(Test_CircBreak_States) {
     using namespace ExplorerLens;
@@ -14768,7 +14759,7 @@ TEST(Test_CircBreak_Reset) {
     ASSERT(breaker.GetFailureCount() == 0);
 }
 
-//== Sprint 488: MemoryPressureControllerV2 Tests ==
+//== MemoryPressureControllerV2 Tests ==
 
 TEST(Test_MemPressV2_Levels) {
     using namespace ExplorerLens::Memory;
@@ -14804,7 +14795,7 @@ TEST(Test_MemPressV2_Evaluate) {
     ASSERT(t.IsEscalation());
 }
 
-//== Sprint 489: PerformanceActivation Tests ==
+//== PerformanceActivation Tests ==
 
 TEST(Test_PerfAct_SIMD) {
     ASSERT(static_cast<uint32_t>(ExplorerLens::Engine::SIMDCapability::NONE) == 0);
@@ -14834,7 +14825,7 @@ TEST(Test_PerfAct_Scaler) {
     ASSERT(static_cast<int>(scaler) >= 0);
 }
 
-//== Sprint 490: PerformanceProfiler Tests ==
+//== PerformanceProfiler Tests ==
 
 TEST(Test_PerfProf_Components) {
     using namespace ExplorerLens;
@@ -14870,7 +14861,7 @@ TEST(Test_PerfProf_Enabled) {
     ASSERT(!profiler.IsEnabled());
 }
 
-//== Sprint 491: PerfRegressionGate Tests ==
+//== PerfRegressionGate Tests ==
 
 TEST(Test_PerfReg_KPIs) {
     using namespace ExplorerLens;
@@ -14903,7 +14894,7 @@ TEST(Test_PerfReg_Evaluate) {
     ASSERT(result.Passed());
 }
 
-//== Sprint 492: PluginCompatibilityKitV2 Tests ==
+//== PluginCompatibilityKitV2 Tests ==
 
 TEST(Test_PlugCompat_ABIVersion) {
     using namespace ExplorerLens::Plugin;
@@ -14942,7 +14933,7 @@ TEST(Test_PlugCompat_MemGate) {
     ASSERT(!fail.passed);
 }
 
-//== Sprint 493: PluginSandboxPolicy Tests ==
+//== PluginSandboxPolicy Tests ==
 
 TEST(Test_PlugSandbox_Limits) {
     using namespace ExplorerLens::Plugin;
@@ -14972,7 +14963,7 @@ TEST(Test_PlugSandbox_Validate) {
     ASSERT(true);
 }
 
-//== Sprint 494: MultiTierCache Tests ==
+//== MultiTierCache Tests ==
 
 TEST(Test_MTC_Create) {
     ASSERT(true);
@@ -14987,7 +14978,7 @@ TEST(Test_MTC_Policy) {
     ASSERT(true);
 }
 
-//== Sprint 495: ThumbnailCache Tests ==
+//== ThumbnailCache Tests ==
 
 TEST(Test_ThumbCache_Create) {
     ASSERT(true);
@@ -15002,7 +14993,7 @@ TEST(Test_ThumbCache_Stats) {
     ASSERT(true);
 }
 
-//== Sprint 496: USNCacheInvalidation Tests ==
+//== USNCacheInvalidation Tests ==
 
 TEST(Test_USNCache_FileIdentity) {
     ExplorerLens::USNCache::FileIdentity fi;
@@ -15018,7 +15009,7 @@ TEST(Test_USNCache_Track) {
     ASSERT(true);
 }
 
-//== Sprint 497: CloudThumbnailProvider Tests ==
+//== CloudThumbnailProvider Tests ==
 
 TEST(Test_Cloud_Providers) {
     ASSERT(static_cast<int>(ExplorerLens::Cloud::CloudProvider::OneDrive) >= 0);
@@ -15034,7 +15025,7 @@ TEST(Test_Cloud_FileInfo) {
     ASSERT(info.sizeBytes == 0);
 }
 
-//== Sprint 498: NetworkThumbnailProvider Tests ==
+//== NetworkThumbnailProvider Tests ==
 
 TEST(Test_NetThumb_Protocol) {
     ASSERT(true);
@@ -15049,7 +15040,7 @@ TEST(Test_NetThumb_Config) {
     ASSERT(true);
 }
 
-//== Sprint 499: CodecLoader Tests ==
+//== CodecLoader Tests ==
 
 TEST(Test_CodecLoad_State) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::Codec::CodecState::Discovered) == 0);
@@ -15064,7 +15055,7 @@ TEST(Test_CodecLoad_Unload) {
     ASSERT(true);
 }
 
-//== Sprint 500: CodecModuleSpecs Tests ==
+//== CodecModuleSpecs Tests ==
 
 TEST(Test_CodecSpec_Create) {
     ASSERT(true);
@@ -15079,7 +15070,7 @@ TEST(Test_CodecSpec_Validate) {
     ASSERT(true);
 }
 
-//== Sprint 501: FormatConverter Tests ==
+//== FormatConverter Tests ==
 
 TEST(Test_FmtConv_OutputFmt) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::Codec::OutputFormat::PNG) >= 0);
@@ -15094,7 +15085,7 @@ TEST(Test_FmtConv_Pipeline) {
     ASSERT(true);
 }
 
-//== Sprint 502: ICodecModule Tests ==
+//== ICodecModule Tests ==
 
 TEST(Test_CodecABI_Version) {
     ASSERT(true);
@@ -15109,7 +15100,7 @@ TEST(Test_CodecABI_Macros) {
     ASSERT(true);
 }
 
-//== Sprint 503: LazyCodecManager Tests ==
+//== LazyCodecManager Tests ==
 
 TEST(Test_LazyCodec_Create) {
     ASSERT(true);
@@ -15124,7 +15115,7 @@ TEST(Test_LazyCodec_Scan) {
     ASSERT(true);
 }
 
-//== Sprint 504: Accessibility Tests ==
+//== Accessibility Tests ==
 
 TEST(Test_A11y_Include) {
     ASSERT(true);
@@ -15139,7 +15130,7 @@ TEST(Test_A11y_Pipeline) {
     ASSERT(true);
 }
 
-//== Sprint 505: BuildConfig Tests ==
+//== BuildConfig Tests ==
 
 TEST(Test_BuildCfg_Macros) {
     ASSERT(true);
@@ -15154,7 +15145,7 @@ TEST(Test_BuildCfg_Inline) {
     ASSERT(true);
 }
 
-//== Sprint 506: BuildValidation Tests ==
+//== BuildValidation Tests ==
 
 TEST(Test_BuildVal_Info) {
     ASSERT(true);
@@ -15169,7 +15160,7 @@ TEST(Test_BuildVal_Flags) {
     ASSERT(true);
 }
 
-//== Sprint 507: Config Tests ==
+//== Config Tests ==
 
 TEST(Test_Config_Create) {
     ASSERT(true);
@@ -15184,7 +15175,7 @@ TEST(Test_Config_MaxSize) {
     ASSERT(true);
 }
 
-//== Sprint 508: DarkMode Tests ==
+//== DarkMode Tests ==
 
 TEST(Test_DarkMode_Include) {
     ASSERT(true);
@@ -15199,7 +15190,7 @@ TEST(Test_DarkMode_Controls) {
     ASSERT(true);
 }
 
-//== Sprint 509: DeadCodeAnalysis Tests ==
+//== DeadCodeAnalysis Tests ==
 
 TEST(Test_DCA_Include) {
     ASSERT(true);
@@ -15214,7 +15205,7 @@ TEST(Test_DCA_Report) {
     ASSERT(true);
 }
 
-//== Sprint 510: EngineAPI Tests ==
+//== EngineAPI Tests ==
 
 TEST(Test_API_Version) {
     auto v = ExplorerLens::Engine::GetEngineVersion();
@@ -15231,7 +15222,7 @@ TEST(Test_API_Config) {
     ASSERT(true);
 }
 
-//== Sprint 511: ICacheProvider Tests ==
+//== ICacheProvider Tests ==
 
 TEST(Test_ICache_Include) {
     ASSERT(true);
@@ -15246,7 +15237,7 @@ TEST(Test_ICache_Null) {
     ASSERT(true);
 }
 
-//== Sprint 512: IFormatDetector Tests ==
+//== IFormatDetector Tests ==
 
 TEST(Test_IFmtDet_Include) {
     ASSERT(true);
@@ -15261,7 +15252,7 @@ TEST(Test_IFmtDet_Null) {
     ASSERT(true);
 }
 
-//== Sprint 513: IGPURenderer Tests ==
+//== IGPURenderer Tests ==
 
 TEST(Test_IGPURend_Include) {
     ASSERT(true);
@@ -15276,7 +15267,7 @@ TEST(Test_IGPURend_Null) {
     ASSERT(true);
 }
 
-//== Sprint 514: IThumbnailDecoder Tests ==
+//== IThumbnailDecoder Tests ==
 
 TEST(Test_IThumbDec_Include) {
     ASSERT(true);
@@ -15291,7 +15282,7 @@ TEST(Test_IThumbDec_Null) {
     ASSERT(true);
 }
 
-//== Sprint 515: LibraryInventoryManager Tests ==
+//== LibraryInventoryManager Tests ==
 
 TEST(Test_LibInv_BuildStatus) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::LibraryInventoryManager::BuildStatus::Built) >= 0);
@@ -15306,7 +15297,7 @@ TEST(Test_LibInv_Manager) {
     ASSERT(true);
 }
 
-//== Sprint 516: Logger Tests ==
+//== Logger Tests ==
 
 TEST(Test_Logger_Macros) {
     ASSERT(true);
@@ -15321,7 +15312,7 @@ TEST(Test_Logger_Levels) {
     ASSERT(true);
 }
 
-//== Sprint 517: ObservabilityIntegration Tests ==
+//== ObservabilityIntegration Tests ==
 
 TEST(Test_Obs_Level) {
     ASSERT(static_cast<int>(ExplorerLens::ObservabilityLevel::Info) >= 0);
@@ -15336,7 +15327,7 @@ TEST(Test_Obs_Sink) {
     ASSERT(true);
 }
 
-//== Sprint 518: PluginTypes Tests ==
+//== PluginTypes Tests ==
 
 TEST(Test_PlugTypes_Transfer) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::IPCTransferMode::SharedMemory) >= 0);
@@ -15351,7 +15342,7 @@ TEST(Test_PlugTypes_Enum) {
     ASSERT(true);
 }
 
-//== Sprint 519: Telemetry Tests ==
+//== Telemetry Tests ==
 
 TEST(Test_Telem_Severity) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::TelemetrySeverity::Info) >= 0);
@@ -15366,7 +15357,7 @@ TEST(Test_Telem_Pipeline) {
     ASSERT(true);
 }
 
-//== Sprint 520: TelemetryDashboard Tests ==
+//== TelemetryDashboard Tests ==
 
 TEST(Test_TelemDash_Include) {
     ASSERT(true);
@@ -15381,7 +15372,7 @@ TEST(Test_TelemDash_Load) {
     ASSERT(true);
 }
 
-//== Sprint 521: Types Tests ==
+//== Types Tests ==
 
 TEST(Test_Types_DetectedFmt) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::DetectedFormat::Unknown) == 0);
@@ -15396,7 +15387,7 @@ TEST(Test_Types_Include) {
     ASSERT(true);
 }
 
-//== Sprint 522: VersionManagement Tests ==
+//== VersionManagement Tests ==
 
 TEST(Test_VerMgmt_Include) {
     ASSERT(true);
@@ -15411,7 +15402,7 @@ TEST(Test_VerMgmt_Audit) {
     ASSERT(true);
 }
 
-//== Sprint 523: VideoCodecRouter Tests ==
+//== VideoCodecRouter Tests ==
 
 TEST(Test_VidCodec_Backend) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::VideoBackend::MediaFoundation) >= 0);
@@ -15426,7 +15417,7 @@ TEST(Test_VidCodec_Config) {
     ASSERT(true);
 }
 
-//== Sprint 524: ArchiveGridPreview Tests ==
+//== ArchiveGridPreview Tests ==
 
 TEST(Test_ArchGrid_Format) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ArchiveFormat::ZIP) >= 0);
@@ -15441,7 +15432,7 @@ TEST(Test_ArchGrid_Render) {
     ASSERT(true);
 }
 
-//== Sprint 525: ColorSpaceManager Tests ==
+//== ColorSpaceManager Tests ==
 
 TEST(Test_ColorSpc_Enum) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ColorSpace::sRGB) >= 0);
@@ -15456,7 +15447,7 @@ TEST(Test_ColorSpc_Tone) {
     ASSERT(true);
 }
 
-//== Sprint 526: EBookCoverExtractor Tests ==
+//== EBookCoverExtractor Tests ==
 
 TEST(Test_EBook_Format) {
     ASSERT(static_cast<int>(ExplorerLens::Decoders::EBookFormat::EPUB) >= 0);
@@ -15471,7 +15462,7 @@ TEST(Test_EBook_Cover) {
     ASSERT(true);
 }
 
-//== Sprint 527: ExampleDecoder Tests ==
+//== ExampleDecoder Tests ==
 
 TEST(Test_ExDec_Create) {
     ASSERT(true);
@@ -15486,7 +15477,7 @@ TEST(Test_ExDec_Decode) {
     ASSERT(true);
 }
 
-//== Sprint 528: FarbfeldDecoder Tests ==
+//== FarbfeldDecoder Tests ==
 
 TEST(Test_Farbfeld_Create) {
     ASSERT(true);
@@ -15501,7 +15492,7 @@ TEST(Test_Farbfeld_Validate) {
     ASSERT(true);
 }
 
-//== Sprint 529: JPEG2000Decoder Tests ==
+//== JPEG2000Decoder Tests ==
 
 TEST(Test_JP2_Format) {
     ASSERT(static_cast<int>(ExplorerLens::Decoders::JP2Format::JP2) >= 0);
@@ -15516,7 +15507,7 @@ TEST(Test_JP2_Validate) {
     ASSERT(true);
 }
 
-//== Sprint 530: JXRWICDecoder Tests ==
+//== JXRWICDecoder Tests ==
 
 TEST(Test_JXR_Format) {
     ASSERT(static_cast<int>(ExplorerLens::Decoders::JXRFormat::JXR) >= 0);
@@ -15531,7 +15522,7 @@ TEST(Test_JXR_Validate) {
     ASSERT(true);
 }
 
-//== Sprint 531: OptimizedArchiveReader Tests ==
+//== OptimizedArchiveReader Tests ==
 
 TEST(Test_OptArch_Create) {
     ASSERT(true);
@@ -15546,7 +15537,7 @@ TEST(Test_OptArch_Scan) {
     ASSERT(true);
 }
 
-//== Sprint 532: PCXDecoder Tests ==
+//== PCXDecoder Tests ==
 
 TEST(Test_PCX_Header) {
     ASSERT(sizeof(ExplorerLens::Engine::PCXDecoder) > 0);
@@ -15561,7 +15552,7 @@ TEST(Test_PCX_Validate) {
     ASSERT(true);
 }
 
-//== Sprint 533: WMFDecoder Tests ==
+//== WMFDecoder Tests ==
 
 TEST(Test_WMF_Create) {
     ASSERT(true);
@@ -15576,7 +15567,7 @@ TEST(Test_WMF_Validate) {
     ASSERT(true);
 }
 
-//== Sprint 534: D3D11Renderer Tests ==
+//== D3D11Renderer Tests ==
 
 TEST(Test_D3D11_Create) {
     ASSERT(true);
@@ -15591,7 +15582,7 @@ TEST(Test_D3D11_Config) {
     ASSERT(true);
 }
 
-//== Sprint 535: GDIRenderer Tests ==
+//== GDIRenderer Tests ==
 
 TEST(Test_GDIRend_Create) {
     ASSERT(true);
@@ -15606,7 +15597,7 @@ TEST(Test_GDIRend_Config) {
     ASSERT(true);
 }
 
-//== Sprint 536: ThumbnailPipeline Tests ==
+//== ThumbnailPipeline Tests ==
 
 TEST(Test_ThumbPipe_Config) {
     ASSERT(true);
@@ -15621,7 +15612,7 @@ TEST(Test_ThumbPipe_Stats) {
     ASSERT(true);
 }
 
-//== Sprint 537: CrashHandler Tests ==
+//== CrashHandler Tests ==
 
 TEST(Test_CrashH_Info) {
     ExplorerLens::CrashInfo info{};
@@ -15637,7 +15628,7 @@ TEST(Test_CrashH_Report) {
     ASSERT(true);
 }
 
-//== Sprint 538: PluginManager Tests ==
+//== PluginManager Tests ==
 
 TEST(Test_PlugMgr_Create) {
     ASSERT(true);
@@ -15652,7 +15643,7 @@ TEST(Test_PlugMgr_List) {
     ASSERT(true);
 }
 
-//== Sprint 539: PluginMarketplace Tests ==
+//== PluginMarketplace Tests ==
 
 TEST(Test_Marketplace_PkgType) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::PluginPackageType::Decoder) >= 0);
@@ -15667,7 +15658,7 @@ TEST(Test_Marketplace_Create) {
     ASSERT(true);
 }
 
-//== Sprint 540: PluginTrustChain Tests ==
+//== PluginTrustChain Tests ==
 
 TEST(Test_TrustChain_Level) {
     ASSERT(static_cast<int>(ExplorerLens::Plugin::PluginTrustLevel::Untrusted) >= 0);
@@ -15682,7 +15673,7 @@ TEST(Test_TrustChain_Verify) {
     ASSERT(true);
 }
 
-//== Sprint 541: COMApartmentAudit Tests ==
+//== COMApartmentAudit Tests ==
 
 TEST(Test_COMAudit_ApartType) {
     ASSERT(static_cast<int>(ExplorerLens::COM::ApartmentType::STA) >= 0);
@@ -15697,7 +15688,7 @@ TEST(Test_COMAudit_Scenario) {
     ASSERT(true);
 }
 
-//== Sprint 542: HardwareCapabilities Tests ==
+//== HardwareCapabilities Tests ==
 
 TEST(Test_HWCaps_Create) {
     ExplorerLens::Engine::CPUCapabilities caps{};
@@ -15713,7 +15704,7 @@ TEST(Test_HWCaps_Detect) {
     ASSERT(true);
 }
 
-//== Sprint 543: PerceptualHashing Tests ==
+//== PerceptualHashing Tests ==
 
 TEST(Test_PHash_Algo) {
     ASSERT(static_cast<int>(ExplorerLens::Engine::Utils::HashAlgorithm::aHash) >= 0);
@@ -17998,1166 +17989,1166 @@ int main() {
     RUN_TEST(TestPersistence_StoreAndLookup);
     RUN_TEST(TestPersistence_HitRate);
 
-    // Batch 3: Dark Mode Controls Tests
+    // Dark Mode Controls Tests
     std::wcout << L"\nDark Mode Controls Tests:" << std::endl;
     RUN_TEST(TestDarkCtrl_ControlTypeEnum);
     RUN_TEST(TestDarkCtrl_CheckStateDefaults);
     RUN_TEST(TestDarkCtrl_Singleton);
     RUN_TEST(TestDarkCtrl_SetAccentColor);
 
-    // Batch 3: Dark Mode Renderer V2 Tests
+    // Dark Mode Renderer V2 Tests
     std::wcout << L"\nDark Mode Renderer V2 Tests:" << std::endl;
     RUN_TEST(TestDarkRenderV2_DefaultScheme);
     RUN_TEST(TestDarkRenderV2_LightScheme);
     RUN_TEST(TestDarkRenderV2_PreferredAppMode);
     RUN_TEST(TestDarkRenderV2_Singleton);
 
-    // Batch 3: System Tray Manager Tests
+    // System Tray Manager Tests
     std::wcout << L"\nSystem Tray Manager Tests:" << std::endl;
     RUN_TEST(TestSysTray_IconStateEnum);
     RUN_TEST(TestSysTray_CommandEnum);
     RUN_TEST(TestSysTray_ActionNames);
     RUN_TEST(TestSysTray_NotInitializedByDefault);
 
-    // Batch 3: WinUI3 Research Tests
+    // WinUI3 Research Tests
     std::wcout << L"\nWinUI3 Research Tests:" << std::endl;
     RUN_TEST(TestWinUI3Res_FeasibilityEnum);
     RUN_TEST(TestWinUI3Res_AssessmentCount);
     RUN_TEST(TestWinUI3Res_ShellExtNotFeasible);
     RUN_TEST(TestWinUI3Res_TotalEffort);
 
-    // Batch 3: Hybrid UI Bridge Tests
+    // Hybrid UI Bridge Tests
     std::wcout << L"\nHybrid UI Bridge Tests:" << std::endl;
     RUN_TEST(TestHybridUI_StateNames);
     RUN_TEST(TestHybridUI_DefaultConfig);
     RUN_TEST(TestHybridUI_PanelIdEnum);
     RUN_TEST(TestHybridUI_InitialState);
 
-    // Batch 3: WinUI3 Migration Engine Tests
+    // WinUI3 Migration Engine Tests
     std::wcout << L"\nWinUI3 Migration Engine Tests:" << std::endl;
     RUN_TEST(TestMigration_FrameworkNames);
     RUN_TEST(TestMigration_PhaseNames);
     RUN_TEST(TestMigration_PageCount);
     RUN_TEST(TestMigration_StatusData);
 
-    // Batch 3: CI Hardening Engine Tests
+    // CI Hardening Engine Tests
     std::wcout << L"\nCI Hardening Engine Tests:" << std::endl;
     RUN_TEST(TestCIHarden_TargetNames);
     RUN_TEST(TestCIHarden_StageNames);
     RUN_TEST(TestCIHarden_Pipeline);
     RUN_TEST(TestCIHarden_AllPassing);
 
-    // Batch 3: Code Coverage Engine Tests
+    // Code Coverage Engine Tests
     std::wcout << L"\nCode Coverage Engine Tests:" << std::endl;
     RUN_TEST(TestCovEng_ToolNames);
     RUN_TEST(TestCovEng_MetricNames);
     RUN_TEST(TestCovEng_Results);
     RUN_TEST(TestCovEng_OverallCoverage);
 
-    // Batch 3: Integration Test Framework V2 Tests
+    // Integration Test Framework V2 Tests
     std::wcout << L"\nIntegration Test Framework V2 Tests:" << std::endl;
     RUN_TEST(TestIntegV2_CategoryStrings);
     RUN_TEST(TestIntegV2_StatusStrings);
     RUN_TEST(TestIntegV2_RegisterAndRun);
     RUN_TEST(TestIntegV2_RunCategory);
 
-    // Batch 3: Integration Test Orchestrator Tests
+    // Integration Test Orchestrator Tests
     std::wcout << L"\nIntegration Test Orchestrator Tests:" << std::endl;
     RUN_TEST(TestOrch_ScenarioTypeStrings);
     RUN_TEST(TestOrch_ModeStrings);
     RUN_TEST(TestOrch_RunScenario);
     RUN_TEST(TestOrch_DependencyFailure);
 
-    // Batch 3: Continuous Fuzz Orchestrator Tests
+    // Continuous Fuzz Orchestrator Tests
     std::wcout << L"\nContinuous Fuzz Orchestrator Tests:" << std::endl;
     RUN_TEST(TestFuzzOrch_StrategyStrings);
     RUN_TEST(TestFuzzOrch_SeverityStrings);
     RUN_TEST(TestFuzzOrch_CorpusAndCrash);
     RUN_TEST(TestFuzzOrch_MinimizeCorpus);
 
-    // Batch 3: Static Analysis CI Gate Tests
+    // Static Analysis CI Gate Tests
     std::wcout << L"\nStatic Analysis CI Gate Tests:" << std::endl;
     RUN_TEST(TestSAGate_ToolStrings);
     RUN_TEST(TestSAGate_VerdictStrings);
     RUN_TEST(TestSAGate_EnableDisable);
     RUN_TEST(TestSAGate_EvaluatePassFail);
 
-    // Batch 4: Security Compliance Tests (Sprint 385)
+    // Security Compliance Tests
     std::wcout << L"\nSecurity Compliance Tests:" << std::endl;
     RUN_TEST(TestSecComp_RegulationNames);
     RUN_TEST(TestSecComp_DataClassNames);
     RUN_TEST(TestSecComp_AuditEventNames);
     RUN_TEST(TestSecComp_SupplyChainFormats);
 
-    // Batch 4: Documentation Generator Tests (Sprints 386-387)
+    // Documentation Generator Tests
     std::wcout << L"\nDocumentation Generator Tests:" << std::endl;
     RUN_TEST(TestDocGen_SectionNames);
     RUN_TEST(TestDocGen_FormatNamesAndExt);
     RUN_TEST(TestDocGen_RegisterDecoder);
     RUN_TEST(TestDocSync_MockAudit);
 
-    // Batch 4: Installer Tests (Sprint 388)
+    // Installer Tests
     std::wcout << L"\nInstaller Tests:" << std::endl;
     RUN_TEST(TestInstaller_PrereqCount);
     RUN_TEST(TestInstaller_PhaseEnum);
     RUN_TEST(TestInstaller_TypeEnum);
     RUN_TEST(TestInstaller_MSIXChannels);
 
-    // Batch 4: Zero-Copy Activation Tests (Sprint 389)
+    // Zero-Copy Activation Tests
     std::wcout << L"\nZero-Copy Activation Tests:" << std::endl;
     RUN_TEST(TestZeroCopyAct_ModeStrings);
     RUN_TEST(TestZeroCopyAct_StagingBuffer);
     RUN_TEST(TestZeroCopyAct_Stats);
     RUN_TEST(TestZeroCopyAct_Lifecycle);
 
-    // Batch 4: Parallel I/O Pipeline Tests (Sprint 390)
+    // Parallel I/O Pipeline Tests
     std::wcout << L"\nParallel I/O Pipeline Tests:" << std::endl;
     RUN_TEST(TestParallelIO_BackendNamesV2);
     RUN_TEST(TestParallelIO_PriorityNamesV2);
     RUN_TEST(TestParallelIO_VolumeTypes);
     RUN_TEST(TestParallelIO_DefaultConfig);
 
-    // Batch 4: SIMD Scaler + ARM64 Tests (Sprint 391)
+    // SIMD Scaler + ARM64 Tests
     std::wcout << L"\nSIMD Scaler + ARM64 Tests:" << std::endl;
     RUN_TEST(TestSIMDScal_PathNames);
     RUN_TEST(TestSIMDScal_ValidateDimensions);
     RUN_TEST(TestSIMDScal_CalculateSize);
     RUN_TEST(TestARM64_CapNames);
 
-    // Batch 4: PSO Cache V2 Tests (Sprint 392)
+    // PSO Cache V2 Tests
     std::wcout << L"\nPSO Cache V2 Tests:" << std::endl;
     RUN_TEST(TestPSOCacheV2_StateNamesV2);
     RUN_TEST(TestPSOCacheV2_PipelineTypes);
     RUN_TEST(TestPSOCacheV2_WarmupStrategies);
     RUN_TEST(TestPSOCacheV2_EntryDefaults);
 
-    // Batch 4: Cache Warming Service Tests (Sprint 393)
+    // Cache Warming Service Tests
     std::wcout << L"\nCache Warming Service Tests:" << std::endl;
     RUN_TEST(TestCacheWarm_StrategyNamesV2);
     RUN_TEST(TestCacheWarm_PriorityNamesV2);
     RUN_TEST(TestCacheWarm_JobStatusNamesV2);
     RUN_TEST(TestCacheWarm_DefaultConfigV2);
 
-    // Batch 5: File Integrity Monitor Tests (Sprint 394)
+    // File Integrity Monitor Tests
     std::wcout << L"\nFile Integrity Monitor Tests:" << std::endl;
     RUN_TEST(TestIntegrityMon_CheckTypeNames);
     RUN_TEST(TestIntegrityMon_StatusNames);
     RUN_TEST(TestIntegrityMon_DefaultConstruction);
     RUN_TEST(TestIntegrityMon_RecordFields);
 
-    // Batch 5: Thumbnail Diff Engine Tests (Sprint 395)
+    // Thumbnail Diff Engine Tests
     std::wcout << L"\nThumbnail Diff Engine Tests:" << std::endl;
     RUN_TEST(TestDiffEngine_AlgorithmNames);
     RUN_TEST(TestDiffEngine_SeverityNames);
     RUN_TEST(TestDiffEngine_DefaultResult);
     RUN_TEST(TestDiffEngine_Construction);
 
-    // Batch 5: Decoder Sandbox Policy Tests (Sprint 396)
+    // Decoder Sandbox Policy Tests
     std::wcout << L"\nDecoder Sandbox Policy Tests:" << std::endl;
     RUN_TEST(TestSandboxPolicy_LevelNames);
     RUN_TEST(TestSandboxPolicy_ResourceLimitNames);
     RUN_TEST(TestSandboxPolicy_DefaultConstruction);
     RUN_TEST(TestSandboxPolicy_MaxMemory);
 
-    // Batch 5: Intelligent Prefetch V2 Tests (Sprint 397)
+    // Intelligent Prefetch V2 Tests
     std::wcout << L"\nIntelligent Prefetch V2 Tests:" << std::endl;
     RUN_TEST(TestPrefetchV2_StrategyNames);
     RUN_TEST(TestPrefetchV2_PatternNames);
     RUN_TEST(TestPrefetchV2_Prediction);
     RUN_TEST(TestPrefetchV2_ConfidenceThreshold);
 
-    // Batch 5: GPU Workload Balancer Tests (Sprint 398)
+    // GPU Workload Balancer Tests
     std::wcout << L"\nGPU Workload Balancer Tests:" << std::endl;
     RUN_TEST(TestGPUBalance_StrategyNames);
     RUN_TEST(TestGPUBalance_WorkloadTypeNames);
     RUN_TEST(TestGPUBalance_Construction);
     RUN_TEST(TestGPUBalance_MaxGPUs);
 
-    // Batch 5: Filesystem Watchdog Tests (Sprint 399)
+    // Filesystem Watchdog Tests
     std::wcout << L"\nFilesystem Watchdog Tests:" << std::endl;
     RUN_TEST(TestFSWatchdog_EventNames);
     RUN_TEST(TestFSWatchdog_ScopeNames);
     RUN_TEST(TestFSWatchdog_DefaultConstruction);
     RUN_TEST(TestFSWatchdog_MaxDirectories);
 
-    // Batch 5: Compression Benchmark Tests (Sprint 400)
+    // Compression Benchmark Tests
     std::wcout << L"\nCompression Benchmark Tests:" << std::endl;
     RUN_TEST(TestCompBench_AlgoNames);
     RUN_TEST(TestCompBench_MetricNames);
     RUN_TEST(TestCompBench_DefaultResult);
     RUN_TEST(TestCompBench_Iterations);
 
-    // Batch 5: Explorer Band Integration Tests (Sprint 401)
+    // Explorer Band Integration Tests
     std::wcout << L"\nExplorer Band Integration Tests:" << std::endl;
     RUN_TEST(TestBandInteg_PositionNames);
     RUN_TEST(TestBandInteg_StateNames);
     RUN_TEST(TestBandInteg_DefaultConfig);
     RUN_TEST(TestBandInteg_Construction);
 
-    // Batch 5: Thumbnail Stream Protocol Tests (Sprint 402)
+    // Thumbnail Stream Protocol Tests
     std::wcout << L"\nThumbnail Stream Protocol Tests:" << std::endl;
     RUN_TEST(TestStreamProto_ProtocolNames);
     RUN_TEST(TestStreamProto_StateNames);
     RUN_TEST(TestStreamProto_EndpointConfig);
     RUN_TEST(TestStreamProto_Timeout);
 
-    // Batch 5: Registry Snapshot Manager Tests (Sprint 403)
+    // Registry Snapshot Manager Tests
     std::wcout << L"\nRegistry Snapshot Manager Tests:" << std::endl;
     RUN_TEST(TestRegSnap_ScopeNames);
     RUN_TEST(TestRegSnap_ActionNames);
     RUN_TEST(TestRegSnap_Construction);
     RUN_TEST(TestRegSnap_MaxSnapshots);
 
-    // Batch 5: Hot Reload Config Engine Tests (Sprint 404)
+    // Hot Reload Config Engine Tests
     std::wcout << L"\nHot Reload Config Engine Tests:" << std::endl;
     RUN_TEST(TestHotReload_SourceNames);
     RUN_TEST(TestHotReload_TriggerNamesV2);
     RUN_TEST(TestHotReload_DefaultResult);
     RUN_TEST(TestHotReload_PollInterval);
 
-    // Batch 5: COM Diagnostics Engine Tests (Sprint 405)
+    // COM Diagnostics Engine Tests
     std::wcout << L"\nCOM Diagnostics Engine Tests:" << std::endl;
     RUN_TEST(TestCOMDiag_HealthStatusNames);
     RUN_TEST(TestCOMDiag_RepairActionNames);
     RUN_TEST(TestCOMDiag_DiagnosticResult);
     RUN_TEST(TestCOMDiag_CLSIDConstant);
 
-    // Batch 6: Thumbnail Watermark Tests (Sprint 406)
+    // Thumbnail Watermark Tests
     std::wcout << L"\nThumbnail Watermark Tests:" << std::endl;
     RUN_TEST(TestWatermark_PositionNames);
     RUN_TEST(TestWatermark_TypeNames);
     RUN_TEST(TestWatermark_ApplyAndConfig);
 
-    // Batch 6: Batch Rename Preview Tests (Sprint 407)
+    // Batch Rename Preview Tests
     std::wcout << L"\nBatch Rename Preview Tests:" << std::endl;
     RUN_TEST(TestRenamePreview_PatternNames);
     RUN_TEST(TestRenamePreview_StateNames);
     RUN_TEST(TestRenamePreview_GenerateAndGet);
 
-    // Batch 6: Duplicate File Detector Tests (Sprint 408)
+    // Duplicate File Detector Tests
     std::wcout << L"\nDuplicate File Detector Tests:" << std::endl;
     RUN_TEST(TestDupDetect_HashMethodNames);
     RUN_TEST(TestDupDetect_ConfidenceNames);
     RUN_TEST(TestDupDetect_ScanDirectory);
 
-    // Batch 6: Thumbnail Annotation Tests (Sprint 409)
+    // Thumbnail Annotation Tests
     std::wcout << L"\nThumbnail Annotation Tests:" << std::endl;
     RUN_TEST(TestAnnotation_TypeNames);
     RUN_TEST(TestAnnotation_StyleNames);
     RUN_TEST(TestAnnotation_AddRemoveRender);
 
-    // Batch 6: Cache Migration Engine Tests (Sprint 410)
+    // Cache Migration Engine Tests
     std::wcout << L"\nCache Migration Engine Tests:" << std::endl;
     RUN_TEST(TestCacheMigration_FormatNames);
     RUN_TEST(TestCacheMigration_StateNames);
     RUN_TEST(TestCacheMigration_MigrateFlow);
 
-    // Batch 6: Explorer Context Menu Tests (Sprint 411)
+    // Explorer Context Menu Tests
     std::wcout << L"\nExplorer Context Menu Tests:" << std::endl;
     RUN_TEST(TestCtxMenu_ActionNames);
     RUN_TEST(TestCtxMenu_ItemStateNames);
     RUN_TEST(TestCtxMenu_BuildAndExecute);
 
-    // Batch 6: Adaptive Quality Scaler Tests (Sprint 412)
+    // Adaptive Quality Scaler Tests
     std::wcout << L"\nAdaptive Quality Scaler Tests:" << std::endl;
     RUN_TEST(TestQualityScaler_TierNames);
     RUN_TEST(TestQualityScaler_ReasonNames);
     RUN_TEST(TestQualityScaler_Evaluate);
 
-    // Batch 6: Thumbnail Compare View Tests (Sprint 413)
+    // Thumbnail Compare View Tests
     std::wcout << L"\nThumbnail Compare View Tests:" << std::endl;
     RUN_TEST(TestCompare_ModeNames);
     RUN_TEST(TestCompare_SourceNames);
     RUN_TEST(TestCompare_RunComparison);
 
-    // Batch 6: File Type Statistics Tests (Sprint 414)
+    // File Type Statistics Tests
     std::wcout << L"\nFile Type Statistics Tests:" << std::endl;
     RUN_TEST(TestFileStats_CategoryNames);
     RUN_TEST(TestFileStats_TimeRangeNames);
     RUN_TEST(TestFileStats_RecordAndQuery);
 
-    // Batch 6: Memory Defragmenter Tests (Sprint 415)
+    // Memory Defragmenter Tests
     std::wcout << L"\nMemory Defragmenter Tests:" << std::endl;
     RUN_TEST(TestDefrag_LevelNames);
     RUN_TEST(TestDefrag_StrategyNames);
     RUN_TEST(TestDefrag_AnalyzeAndDefrag);
 
-    // Batch 6: Shell Notification Engine Tests (Sprint 416)
+    // Shell Notification Engine Tests
     std::wcout << L"\nShell Notification Engine Tests:" << std::endl;
     RUN_TEST(TestShellNotify_TypeNames);
     RUN_TEST(TestShellNotify_PriorityNames);
     RUN_TEST(TestShellNotify_SendAndFlush);
 
-    // Batch 6: Thumbnail Export Engine Tests (Sprint 417)
+    // Thumbnail Export Engine Tests
     std::wcout << L"\nThumbnail Export Engine Tests:" << std::endl;
     RUN_TEST(TestThumbExport_FormatNamesV2);
     RUN_TEST(TestThumbExport_DestNames);
     RUN_TEST(TestThumbExport_SingleExport);
 
-    // Batch 7: Thumbnail Version Control Tests (Sprint 418)
+    // Thumbnail Version Control Tests
     std::wcout << L"\nThumbnail Version Control Tests:" << std::endl;
     RUN_TEST(TestTVC_VersionNames);
     RUN_TEST(TestTVC_ActionNames);
     RUN_TEST(TestTVC_CreateAndRollback);
 
-    // Batch 7: File Preview Router Tests (Sprint 419)
+    // File Preview Router Tests
     std::wcout << L"\nFile Preview Router Tests:" << std::endl;
     RUN_TEST(TestFPR_HandlerNames);
     RUN_TEST(TestFPR_PriorityNames);
     RUN_TEST(TestFPR_RouteAndRegister);
 
-    // Batch 7: Clipboard Thumbnail Manager Tests (Sprint 420)
+    // Clipboard Thumbnail Manager Tests
     std::wcout << L"\nClipboard Thumbnail Manager Tests:" << std::endl;
     RUN_TEST(TestClip_FormatNames);
     RUN_TEST(TestClip_TargetNames);
     RUN_TEST(TestClip_CopyAndPaste);
 
-    // Batch 7: Format Conversion Pipeline Tests (Sprint 421)
+    // Format Conversion Pipeline Tests
     std::wcout << L"\nFormat Conversion Pipeline Tests:" << std::endl;
     RUN_TEST(TestFCP_TargetNames);
     RUN_TEST(TestFCP_QualityNames);
     RUN_TEST(TestFCP_ConvertSingle);
 
-    // Batch 7: Vulkan Memory Allocator Tests (Sprint 422)
+    // Vulkan Memory Allocator Tests
     std::wcout << L"\nVulkan Memory Allocator Tests:" << std::endl;
     RUN_TEST(TestVMA_TierNames);
     RUN_TEST(TestVMA_StrategyNames);
     RUN_TEST(TestVMA_AllocAndFree);
 
-    // Batch 7: Decoder Priority Scheduler Tests (Sprint 423)
+    // Decoder Priority Scheduler Tests
     std::wcout << L"\nDecoder Priority Scheduler Tests:" << std::endl;
     RUN_TEST(TestDPS_PriorityNames);
     RUN_TEST(TestDPS_PolicyNames);
     RUN_TEST(TestDPS_SubmitAndCancel);
 
-    // Batch 7: Error Reporting Pipeline Tests (Sprint 424)
+    // Error Reporting Pipeline Tests
     std::wcout << L"\nError Reporting Pipeline Tests:" << std::endl;
     RUN_TEST(TestERP_DomainNames);
     RUN_TEST(TestERP_AggregationNames);
     RUN_TEST(TestERP_ReportAndQuery);
 
-    // Batch 7: Enterprise Audit Pipeline Tests (Sprint 425)
+    // Enterprise Audit Pipeline Tests
     std::wcout << L"\nEnterprise Audit Pipeline Tests:" << std::endl;
     RUN_TEST(TestEAP_ActionNames);
     RUN_TEST(TestEAP_DestNames);
     RUN_TEST(TestEAP_LogAndRetrieve);
 
-    // Batch 7: Resource Quota Manager Tests (Sprint 426)
+    // Resource Quota Manager Tests
     std::wcout << L"\nResource Quota Manager Tests:" << std::endl;
     RUN_TEST(TestRQM_ResourceNames);
     RUN_TEST(TestRQM_EnforcementNames);
     RUN_TEST(TestRQM_SetAndCheck);
 
-    // Batch 7: Access Token Validator Tests (Sprint 427)
+    // Access Token Validator Tests
     std::wcout << L"\nAccess Token Validator Tests:" << std::endl;
     RUN_TEST(TestATV_TypeNames);
     RUN_TEST(TestATV_ResultNames);
     RUN_TEST(TestATV_Validate);
 
-    // Batch 7: Cache Encryption Layer Tests (Sprint 428)
+    // Cache Encryption Layer Tests
     std::wcout << L"\nCache Encryption Layer Tests:" << std::endl;
     RUN_TEST(TestCEL_AlgoNames);
     RUN_TEST(TestCEL_KDFNames);
     RUN_TEST(TestCEL_EncryptDecrypt);
 
-    // Batch 7: Explorer Preview Pane Tests (Sprint 429)
+    // Explorer Preview Pane Tests
     std::wcout << L"\nExplorer Preview Pane Tests:" << std::endl;
     RUN_TEST(TestEPP_ModeNames);
     RUN_TEST(TestEPP_LayoutNames);
     RUN_TEST(TestEPP_ActivateAndRefresh);
 
-    // Batch 8: DirectShow Thumbnail Bridge Tests (Sprint 430)
+    // DirectShow Thumbnail Bridge Tests
     std::wcout << L"\nDirectShow Thumbnail Bridge Tests:" << std::endl;
     RUN_TEST(Test_DirectShowBridge_FilterTypeNames);
     RUN_TEST(Test_DirectShowBridge_StatusNames);
     RUN_TEST(Test_DirectShowBridge_ConnectDisconnect);
     RUN_TEST(Test_DirectShowBridge_GrabFrame);
 
-    // Batch 8: Shell Extension Health Monitor Tests (Sprint 431)
+    // Shell Extension Health Monitor Tests
     std::wcout << L"\nShell Extension Health Monitor Tests:" << std::endl;
     RUN_TEST(Test_HealthMonitor_StatusNames);
     RUN_TEST(Test_HealthMonitor_RecoveryNames);
     RUN_TEST(Test_HealthMonitor_CheckHealth);
     RUN_TEST(Test_HealthMonitor_AutoRecover);
 
-    // Batch 8: Thumbnail Color Space Tests (Sprint 432)
+    // Thumbnail Color Space Tests
     std::wcout << L"\nThumbnail Color Space Tests:" << std::endl;
     RUN_TEST(Test_ColorSpace_TypeNames);
     RUN_TEST(Test_ColorSpace_GammaNames);
     RUN_TEST(Test_ColorSpace_SetWorkingSpace);
     RUN_TEST(Test_ColorSpace_ConvertNoOp);
 
-    // Batch 8: Async IO Completion Engine Tests (Sprint 433)
+    // Async IO Completion Engine Tests
     std::wcout << L"\nAsync IO Completion Engine Tests:" << std::endl;
     RUN_TEST(Test_AsyncIOCP_PriorityNames);
     RUN_TEST(Test_AsyncIOCP_StatusNames);
     RUN_TEST(Test_AsyncIOCP_SubmitAndPoll);
     RUN_TEST(Test_AsyncIOCP_Cancel);
 
-    // Batch 8: EXIF Orientation Fixer Tests (Sprint 434)
+    // EXIF Orientation Fixer Tests
     std::wcout << L"\nEXIF Orientation Fixer Tests:" << std::endl;
     RUN_TEST(Test_ExifFixer_OrientationNames);
     RUN_TEST(Test_ExifFixer_ModeNames);
     RUN_TEST(Test_ExifFixer_ApplyRotation);
     RUN_TEST(Test_ExifFixer_ReadOrientation);
 
-    // Batch 8: Multi-Monitor DPI Scaler Tests (Sprint 435)
+    // Multi-Monitor DPI Scaler Tests
     std::wcout << L"\nMulti-Monitor DPI Scaler Tests:" << std::endl;
     RUN_TEST(Test_DPIScaler_ModeNames);
     RUN_TEST(Test_DPIScaler_ProfileNames);
     RUN_TEST(Test_DPIScaler_ScaleFactor);
     RUN_TEST(Test_DPIScaler_ScaleForMonitor);
 
-    // Batch 8: VirtualAlloc Optimizer Tests (Sprint 436)
+    // VirtualAlloc Optimizer Tests
     std::wcout << L"\nVirtualAlloc Optimizer Tests:" << std::endl;
     RUN_TEST(Test_VAlloc_StrategyNames);
     RUN_TEST(Test_VAlloc_ProtectionNames);
     RUN_TEST(Test_VAlloc_AllocateAndRelease);
     RUN_TEST(Test_VAlloc_OptimizeWorking);
 
-    // Batch 8: Thumbnail Histogram Tests (Sprint 437)
+    // Thumbnail Histogram Tests
     std::wcout << L"\nThumbnail Histogram Tests:" << std::endl;
     RUN_TEST(Test_Histogram_ChannelNames);
     RUN_TEST(Test_Histogram_BinSizeNames);
     RUN_TEST(Test_Histogram_Compute);
     RUN_TEST(Test_Histogram_PeakAndMean);
 
-    // Batch 8: File Association Manager Tests (Sprint 438)
+    // File Association Manager Tests
     std::wcout << L"\nFile Association Manager Tests:" << std::endl;
     RUN_TEST(Test_FileAssoc_ScopeNames);
     RUN_TEST(Test_FileAssoc_ConflictNames);
     RUN_TEST(Test_FileAssoc_RegisterUnregister);
     RUN_TEST(Test_FileAssoc_GetConflicts);
 
-    // Batch 8: DX12 Fence Manager Tests (Sprint 439)
+    // DX12 Fence Manager Tests
     std::wcout << L"\nDX12 Fence Manager Tests:" << std::endl;
     RUN_TEST(Test_DX12Fence_StateNames);
     RUN_TEST(Test_DX12Fence_WaitModeNames);
     RUN_TEST(Test_DX12Fence_CreateAndSignal);
     RUN_TEST(Test_DX12Fence_WaitForFence);
 
-    // Batch 8: Localization Engine Tests (Sprint 440)
+    // Localization Engine Tests
     std::wcout << L"\nLocalization Engine Tests:" << std::endl;
     RUN_TEST(Test_Locale_IdNames);
     RUN_TEST(Test_Locale_CategoryNames);
     RUN_TEST(Test_Locale_SetAndGetLocale);
     RUN_TEST(Test_Locale_GetString);
 
-    // Batch 8: Thumbnail Sprite Sheet Tests (Sprint 441)
+    // Thumbnail Sprite Sheet Tests
     std::wcout << L"\nThumbnail Sprite Sheet Tests:" << std::endl;
     RUN_TEST(Test_SpriteSheet_LayoutNames);
     RUN_TEST(Test_SpriteSheet_FormatNames);
     RUN_TEST(Test_SpriteSheet_AddAndGenerate);
     RUN_TEST(Test_SpriteSheet_EstimatedSize);
 
-    // Batch 8: Cache Telemetry Collector Tests (Sprint 442)
+    // Cache Telemetry Collector Tests
     std::wcout << L"\nCache Telemetry Collector Tests:" << std::endl;
     RUN_TEST(Test_CacheTelemetry_EventNames);
     RUN_TEST(Test_CacheTelemetry_IntervalNames);
     RUN_TEST(Test_CacheTelemetry_RecordAndHitRate);
     RUN_TEST(Test_CacheTelemetry_Export);
 
-    // Batch 8: Windows Search Integration Tests (Sprint 443)
+    // Windows Search Integration Tests
     std::wcout << L"\nWindows Search Integration Tests:" << std::endl;
     RUN_TEST(Test_WinSearch_PropertyNames);
     RUN_TEST(Test_WinSearch_IndexingStateNames);
     RUN_TEST(Test_WinSearch_RegisterProvider);
     RUN_TEST(Test_WinSearch_QueryProperties);
 
-    // Sprint 444: AdaptiveCacheBudgetManager Tests
+    // AdaptiveCacheBudgetManager Tests
     std::wcout << L"\nAdaptive Cache Budget Manager Tests:" << std::endl;
     RUN_TEST(Test_ACBudget_TierNames);
     RUN_TEST(Test_ACBudget_PressureLevels);
     RUN_TEST(Test_ACBudget_DefaultBudgets);
     RUN_TEST(Test_ACBudget_Rebalance);
 
-    // Sprint 445: ArchiveMemoryCompactor Tests
+    // ArchiveMemoryCompactor Tests
     std::wcout << L"\nArchive Memory Compactor Tests:" << std::endl;
     RUN_TEST(Test_AMemCompact_SlabStates);
     RUN_TEST(Test_AMemCompact_EvictionPolicies);
     RUN_TEST(Test_AMemCompact_TrackSlab);
     RUN_TEST(Test_AMemCompact_Compact);
 
-    // Sprint 446: BatchProcessor Tests
+    // BatchProcessor Tests
     std::wcout << L"\nBatch Processor Tests:" << std::endl;
     RUN_TEST(Test_BatchProc_JobPriorities);
     RUN_TEST(Test_BatchProc_JobStatuses);
     RUN_TEST(Test_BatchProc_SubmitAndQueue);
     RUN_TEST(Test_BatchProc_PauseResume);
 
-    // Sprint 447: BufferPoolAllocator Tests
+    // BufferPoolAllocator Tests
     std::wcout << L"\nBuffer Pool Allocator Tests:" << std::endl;
     RUN_TEST(Test_BufPool_SlabClassNames);
     RUN_TEST(Test_BufPool_ClassifyDimension);
     RUN_TEST(Test_BufPool_SlabPoolAcquireRelease);
     RUN_TEST(Test_BufPool_PoolStats);
 
-    // Sprint 448: CacheKeyGenerator Tests
+    // CacheKeyGenerator Tests
     std::wcout << L"\nCache Key Generator Tests:" << std::endl;
     RUN_TEST(Test_CacheKey_Generate);
     RUN_TEST(Test_CacheKey_HashFNV);
     RUN_TEST(Test_CacheKey_ValidKey);
     RUN_TEST(Test_CacheKey_GenerateWithTime);
 
-    // Sprint 449: CRTConsistencyManager Tests
+    // CRTConsistencyManager Tests
     std::wcout << L"\nCRT Consistency Manager Tests:" << std::endl;
     RUN_TEST(Test_CRT_ModeNames);
     RUN_TEST(Test_CRT_StatusNames);
     RUN_TEST(Test_CRT_Counts);
     RUN_TEST(Test_CRT_AuditLibraries);
 
-    // Sprint 450: DeadCodeAudit Tests
+    // DeadCodeAudit Tests
     std::wcout << L"\nDead Code Audit Tests:" << std::endl;
     RUN_TEST(Test_DCAudit_TypeNames);
     RUN_TEST(Test_DCAudit_SeverityNames);
     RUN_TEST(Test_DCAudit_Instance);
     RUN_TEST(Test_DCAudit_CountByStatus);
 
-    // Sprint 451: DeadCodeAuditor Tests
+    // DeadCodeAuditor Tests
     std::wcout << L"\nDead Code Auditor Tests:" << std::endl;
     RUN_TEST(Test_DCAuditor_CategoryNames);
     RUN_TEST(Test_DCAuditor_SeverityNames);
     RUN_TEST(Test_DCAuditor_RunAudit);
     RUN_TEST(Test_DCAuditor_AllResolved);
 
-    // Sprint 452: DecoderHealthDashboard Tests
+    // DecoderHealthDashboard Tests
     std::wcout << L"\nDecoder Health Dashboard Tests:" << std::endl;
     RUN_TEST(Test_DHDash_CircuitStates);
     RUN_TEST(Test_DHDash_HealthStatuses);
     RUN_TEST(Test_DHDash_CreateAndRegister);
     RUN_TEST(Test_DHDash_RecordAndStats);
 
-    // Sprint 453: DecoderHealthMonitor Tests
+    // DecoderHealthMonitor Tests
     std::wcout << L"\nDecoder Health Monitor Tests:" << std::endl;
     RUN_TEST(Test_DHMon_RecordSuccess);
     RUN_TEST(Test_DHMon_RecordFailure);
     RUN_TEST(Test_DHMon_IsAvailable);
     RUN_TEST(Test_DHMon_IsHealthy);
 
-    // Sprint 454: DecoderHotsetManager Tests
+    // DecoderHotsetManager Tests
     std::wcout << L"\nDecoder Hotset Manager Tests:" << std::endl;
     RUN_TEST(Test_DHotset_LoadStates);
     RUN_TEST(Test_DHotset_Modes);
     RUN_TEST(Test_DHotset_RegisterDecoder);
     RUN_TEST(Test_DHotset_LoadUnload);
 
-    // Sprint 455: DecoderPriority Tests
+    // DecoderPriority Tests
     std::wcout << L"\nDecoder Priority Manager Tests:" << std::endl;
     RUN_TEST(Test_DPriority_Levels);
     RUN_TEST(Test_DPriority_RegisterDecoder);
     RUN_TEST(Test_DPriority_Fallback);
     RUN_TEST(Test_DPriority_Availability);
 
-    // Sprint 456: DiagnosticsExporter Tests
+    // DiagnosticsExporter Tests
     std::wcout << L"\nDiagnostics Exporter Tests:" << std::endl;
     RUN_TEST(Test_DiagExport_Categories);
     RUN_TEST(Test_DiagExport_CreateAndAdd);
     RUN_TEST(Test_DiagExport_ErrorLog);
     RUN_TEST(Test_DiagExport_Export);
 
-    // Sprint 457: DirectoryFormatProfiler Tests
+    // DirectoryFormatProfiler Tests
     std::wcout << L"\nDirectory Format Profiler Tests:" << std::endl;
     RUN_TEST(Test_DirProfile_FormatFamilies);
     RUN_TEST(Test_DirProfile_ClassifyExt);
     RUN_TEST(Test_DirProfile_ProfileDir);
     RUN_TEST(Test_DirProfile_Budget);
 
-    // Sprint 458: ErrorContext Tests
+    // ErrorContext Tests
     std::wcout << L"\nError Context Tests:" << std::endl;
     RUN_TEST(Test_ErrCtx_PushPop);
     RUN_TEST(Test_ErrCtx_CreateContext);
     RUN_TEST(Test_ErrCtx_ScopedContext);
     RUN_TEST(Test_ErrCtx_FilePath);
 
-    // Sprint 459: ETWSinkComplete Tests
+    // ETWSinkComplete Tests
     std::wcout << L"\nETW Sink Complete Tests:" << std::endl;
     RUN_TEST(Test_ETWSink_Channels);
     RUN_TEST(Test_ETWSink_RotationStrategies);
     RUN_TEST(Test_ETWSink_SchemaVersion);
     RUN_TEST(Test_ETWSink_ConfigFactories);
 
-    // Sprint 460: ExplorerWorkScheduler Tests
+    // ExplorerWorkScheduler Tests
     std::wcout << L"\nExplorer Work Scheduler Tests:" << std::endl;
     RUN_TEST(Test_WorkSched_Priorities);
     RUN_TEST(Test_WorkSched_Submit);
     RUN_TEST(Test_WorkSched_Cancel);
     RUN_TEST(Test_WorkSched_Dequeue);
 
-    // Sprint 461: FormatFallbackEngine Tests
+    // FormatFallbackEngine Tests
     std::wcout << L"\nFormat Fallback Engine Tests:" << std::endl;
     RUN_TEST(Test_FmtFallback_Triggers);
     RUN_TEST(Test_FmtFallback_TriggerNames);
     RUN_TEST(Test_FmtFallback_CreateDefault);
     RUN_TEST(Test_FmtFallback_HasTrigger);
 
-    // Sprint 462: FormatGalleryView Tests
+    // FormatGalleryView Tests
     std::wcout << L"\nFormat Gallery View Tests:" << std::endl;
     RUN_TEST(Test_FmtGallery_TileSizes);
     RUN_TEST(Test_FmtGallery_SortOrders);
     RUN_TEST(Test_FmtGallery_Instance);
     RUN_TEST(Test_FmtGallery_Initialize);
 
-    // Sprint 463: FormatGroupManager Tests
+    // FormatGroupManager Tests
     std::wcout << L"\nFormat Group Manager Tests:" << std::endl;
     RUN_TEST(Test_FmtGroup_GroupNames);
     RUN_TEST(Test_FmtGroup_ActionNames);
     RUN_TEST(Test_FmtGroup_Counts);
     RUN_TEST(Test_FmtGroup_GetGroups);
 
-    // Sprint 464: ProgramClosureV83 Tests
+    // ProgramClosureV83 Tests
     std::wcout << L"\nProgram Closure V83 Tests:" << std::endl;
     RUN_TEST(Test_ProgClosure_States);
     RUN_TEST(Test_ProgClosure_CreateReport);
     RUN_TEST(Test_ProgClosure_BlockComplete);
     RUN_TEST(Test_ProgClosure_DefaultSeed);
 
-    // Sprint 465: ReleaseReadinessDashboard Tests
+    // ReleaseReadinessDashboard Tests
     std::wcout << L"\nRelease Readiness Dashboard Tests:" << std::endl;
     RUN_TEST(Test_RelReady_Categories);
     RUN_TEST(Test_RelReady_ReadinessLevels);
     RUN_TEST(Test_RelReady_Evaluate);
     RUN_TEST(Test_RelReady_FormatReport);
 
-    // Sprint 466: ReproducibleBuildVerifier Tests
+    // ReproducibleBuildVerifier Tests
     std::wcout << L"\nReproducible Build Verifier Tests:" << std::endl;
     RUN_TEST(Test_ReproBuild_ArtifactTypes);
     RUN_TEST(Test_ReproBuild_VerifyStatuses);
     RUN_TEST(Test_ReproBuild_StrictPolicy);
     RUN_TEST(Test_ReproBuild_RelaxedPolicy);
 
-    // Sprint 467: SettingsImportExport Tests
+    // SettingsImportExport Tests
     std::wcout << L"\nSettings Import/Export Tests:" << std::endl;
     RUN_TEST(Test_Settings_CategoryNames);
     RUN_TEST(Test_Settings_ActionNames);
     RUN_TEST(Test_Settings_FormatNames);
     RUN_TEST(Test_Settings_ValidateJSON);
 
-    // Sprint 468: HotModeDirectoryEngine Tests
+    // HotModeDirectoryEngine Tests
     std::wcout << L"\nHot Mode Directory Engine Tests:" << std::endl;
     RUN_TEST(Test_HotModeDir_ChangeTypes);
     RUN_TEST(Test_HotModeDir_Thresholds);
     RUN_TEST(Test_HotModeDir_IndexDirectory);
     RUN_TEST(Test_HotModeDir_IsHotMode);
 
-    // Sprint 469: MemoryOptimizationEngine Tests
+    // MemoryOptimizationEngine Tests
     std::wcout << L"\nMemory Optimization Engine Tests:" << std::endl;
     RUN_TEST(Test_MemOpt_Config);
     RUN_TEST(Test_MemOpt_SubsystemEnum);
     RUN_TEST(Test_MemOpt_Create);
     RUN_TEST(Test_MemOpt_BudgetCheck);
 
-    // Sprint 470: MemorySoakValidator Tests
+    // MemorySoakValidator Tests
     std::wcout << L"\nMemory Soak Validator Tests:" << std::endl;
     RUN_TEST(Test_MemSoak_Verdict);
     RUN_TEST(Test_MemSoak_Config);
     RUN_TEST(Test_MemSoak_Snapshot);
     RUN_TEST(Test_MemSoak_Evaluate);
 
-    // Sprint 471: CrashIntelligence Tests
+    // CrashIntelligence Tests
     std::wcout << L"\nCrash Intelligence Tests:" << std::endl;
     RUN_TEST(Test_CrashInt_StackFrame);
     RUN_TEST(Test_CrashInt_Metadata);
     RUN_TEST(Test_CrashInt_Signature);
     RUN_TEST(Test_CrashInt_Bucket);
 
-    // Sprint 472: IsolationModeSelector Tests
+    // IsolationModeSelector Tests
     std::wcout << L"\nIsolation Mode Selector Tests:" << std::endl;
     RUN_TEST(Test_IsoMode_Enum);
     RUN_TEST(Test_IsoMode_Name);
     RUN_TEST(Test_IsoMode_Instance);
     RUN_TEST(Test_IsoMode_Trust);
 
-    // Sprint 473: SmallObjectPool Tests
+    // SmallObjectPool Tests
     std::wcout << L"\nSmall Object Pool Tests:" << std::endl;
     RUN_TEST(Test_SmallPool_Create);
     RUN_TEST(Test_SmallPool_Allocate);
     RUN_TEST(Test_SmallPool_PoolPtr);
     RUN_TEST(Test_SmallPool_Stats);
 
-    // Sprint 474: ValidationHelpers Tests
+    // ValidationHelpers Tests
     std::wcout << L"\nValidation Helpers Tests:" << std::endl;
     RUN_TEST(Test_ValHelp_FilePath);
     RUN_TEST(Test_ValHelp_Dimensions);
     RUN_TEST(Test_ValHelp_Buffer);
     RUN_TEST(Test_ValHelp_Extension);
 
-    // Sprint 475: VersionDriftDetector Tests
+    // VersionDriftDetector Tests
     std::wcout << L"\nVersion Drift Detector Tests:" << std::endl;
     RUN_TEST(Test_VDDetect_SemVer);
     RUN_TEST(Test_VDDetect_Severity);
     RUN_TEST(Test_VDDetect_Policy);
     RUN_TEST(Test_VDDetect_Scan);
 
-    // Sprint 476: VersionDriftGate Tests
+    // VersionDriftGate Tests
     std::wcout << L"\nVersion Drift Gate Tests:" << std::endl;
     RUN_TEST(Test_VDGate_Create);
     RUN_TEST(Test_VDGate_Severity);
     RUN_TEST(Test_VDGate_Register);
     RUN_TEST(Test_VDGate_Policy);
 
-    // Sprint 477: PluginActivation Tests
+    // PluginActivation Tests
     std::wcout << L"\nPlugin Activation Tests:" << std::endl;
     RUN_TEST(Test_PlugAct_Flags);
     RUN_TEST(Test_PlugAct_State);
     RUN_TEST(Test_PlugAct_Discovery);
     RUN_TEST(Test_PlugAct_Lifecycle);
 
-    // Sprint 478: PluginHostBridge Tests
+    // PluginHostBridge Tests
     std::wcout << L"\nPlugin Host Bridge Tests:" << std::endl;
     RUN_TEST(Test_PHBridge_States);
     RUN_TEST(Test_PHBridge_Config);
     RUN_TEST(Test_PHBridge_StateName);
     RUN_TEST(Test_PHBridge_Instance);
 
-    // Sprint 479: PluginHostClient Tests
+    // PluginHostClient Tests
     std::wcout << L"\nPlugin Host Client Tests:" << std::endl;
     RUN_TEST(Test_PHClient_Compile);
     RUN_TEST(Test_PHClient_Types);
     RUN_TEST(Test_PHClient_NullCheck);
     RUN_TEST(Test_PHClient_Size);
 
-    // Sprint 480: PluginHostIPC Tests
+    // PluginHostIPC Tests
     std::wcout << L"\nPlugin Host IPC Tests:" << std::endl;
     RUN_TEST(Test_PHIPC_MsgType);
     RUN_TEST(Test_PHIPC_Header);
     RUN_TEST(Test_PHIPC_ConnState);
     RUN_TEST(Test_PHIPC_MsgName);
 
-    // Sprint 481: PluginRuntimeValidation Tests
+    // PluginRuntimeValidation Tests
     std::wcout << L"\nPlugin Runtime Validation Tests:" << std::endl;
     RUN_TEST(Test_PRunVal_State);
     RUN_TEST(Test_PRunVal_Transport);
     RUN_TEST(Test_PRunVal_Scenario);
     RUN_TEST(Test_PRunVal_Validator);
 
-    // Sprint 482: EXIFOrientation Tests
+    // EXIFOrientation Tests
     std::wcout << L"\nEXIF Orientation Tests:" << std::endl;
     RUN_TEST(Test_EXIF_Normal);
     RUN_TEST(Test_EXIF_Values);
     RUN_TEST(Test_EXIF_Transpose);
     RUN_TEST(Test_EXIF_AllCases);
 
-    // Sprint 483: AuditLogger Tests
+    // AuditLogger Tests
     std::wcout << L"\nAudit Logger Tests:" << std::endl;
     RUN_TEST(Test_AuditLog_Events);
     RUN_TEST(Test_AuditLog_Instance);
     RUN_TEST(Test_AuditLog_Enabled);
     RUN_TEST(Test_AuditLog_LogAccess);
 
-    // Sprint 484: CIPipeline Tests
+    // CIPipeline Tests
     std::wcout << L"\nCI Pipeline Tests:" << std::endl;
     RUN_TEST(Test_CI_Stages);
     RUN_TEST(Test_CI_Scanners);
     RUN_TEST(Test_CI_Config);
     RUN_TEST(Test_CI_Flags);
 
-    // Sprint 485: CodeCoverage Tests
+    // CodeCoverage Tests
     std::wcout << L"\nCode Coverage Tests:" << std::endl;
     RUN_TEST(Test_CodeCov_Tool);
     RUN_TEST(Test_CodeCov_Metric);
     RUN_TEST(Test_CodeCov_Report);
     RUN_TEST(Test_CodeCov_Threshold);
 
-    // Sprint 486: BitmapPool Tests
+    // BitmapPool Tests
     std::wcout << L"\nBitmap Pool Tests:" << std::endl;
     RUN_TEST(Test_BmpPool_Config);
     RUN_TEST(Test_BmpPool_Stats);
     RUN_TEST(Test_BmpPool_HitRate);
     RUN_TEST(Test_BmpPool_Instance);
 
-    // Sprint 487: DecoderCircuitBreaker Tests
+    // DecoderCircuitBreaker Tests
     std::wcout << L"\nDecoder Circuit Breaker Tests:" << std::endl;
     RUN_TEST(Test_CircBreak_States);
     RUN_TEST(Test_CircBreak_Create);
     RUN_TEST(Test_CircBreak_Available);
     RUN_TEST(Test_CircBreak_Reset);
 
-    // Sprint 488: MemoryPressureControllerV2 Tests
+    // MemoryPressureControllerV2 Tests
     std::wcout << L"\nMemory Pressure Controller V2 Tests:" << std::endl;
     RUN_TEST(Test_MemPressV2_Levels);
     RUN_TEST(Test_MemPressV2_Actions);
     RUN_TEST(Test_MemPressV2_Ladder);
     RUN_TEST(Test_MemPressV2_Evaluate);
 
-    // Sprint 489: PerformanceActivation Tests
+    // PerformanceActivation Tests
     std::wcout << L"\nPerformance Activation Tests:" << std::endl;
     RUN_TEST(Test_PerfAct_SIMD);
     RUN_TEST(Test_PerfAct_Profile);
     RUN_TEST(Test_PerfAct_Instance);
     RUN_TEST(Test_PerfAct_Scaler);
 
-    // Sprint 490: PerformanceProfiler Tests
+    // PerformanceProfiler Tests
     std::wcout << L"\nPerformance Profiler Tests:" << std::endl;
     RUN_TEST(Test_PerfProf_Components);
     RUN_TEST(Test_PerfProf_Stats);
     RUN_TEST(Test_PerfProf_Instance);
     RUN_TEST(Test_PerfProf_Enabled);
 
-    // Sprint 491: PerfRegressionGate Tests
+    // PerfRegressionGate Tests
     std::wcout << L"\nPerf Regression Gate Tests:" << std::endl;
     RUN_TEST(Test_PerfReg_KPIs);
     RUN_TEST(Test_PerfReg_Thresholds);
     RUN_TEST(Test_PerfReg_Verdict);
     RUN_TEST(Test_PerfReg_Evaluate);
 
-    // Sprint 492: PluginCompatibilityKitV2 Tests
+    // PluginCompatibilityKitV2 Tests
     std::wcout << L"\nPlugin Compatibility Kit V2 Tests:" << std::endl;
     RUN_TEST(Test_PlugCompat_ABIVersion);
     RUN_TEST(Test_PlugCompat_Surface);
     RUN_TEST(Test_PlugCompat_PerfGate);
     RUN_TEST(Test_PlugCompat_MemGate);
 
-    // Sprint 493: PluginSandboxPolicy Tests
+    // PluginSandboxPolicy Tests
     std::wcout << L"\nPlugin Sandbox Policy Tests:" << std::endl;
     RUN_TEST(Test_PlugSandbox_Limits);
     RUN_TEST(Test_PlugSandbox_Presets);
     RUN_TEST(Test_PlugSandbox_Teardown);
     RUN_TEST(Test_PlugSandbox_Validate);
 
-    // Sprint 494: MultiTierCache Tests
+    // MultiTierCache Tests
     std::wcout << L"\nMulti-Tier Cache Tests:" << std::endl;
     RUN_TEST(Test_MTC_Create);
     RUN_TEST(Test_MTC_Tiers);
     RUN_TEST(Test_MTC_BloomFilter);
     RUN_TEST(Test_MTC_Policy);
 
-    // Sprint 495: ThumbnailCache Tests
+    // ThumbnailCache Tests
     std::wcout << L"\nThumbnail Cache Tests:" << std::endl;
     RUN_TEST(Test_ThumbCache_Create);
     RUN_TEST(Test_ThumbCache_Lookup);
     RUN_TEST(Test_ThumbCache_Evict);
     RUN_TEST(Test_ThumbCache_Stats);
 
-    // Sprint 496: USNCacheInvalidation Tests
+    // USNCacheInvalidation Tests
     std::wcout << L"\nUSN Cache Invalidation Tests:" << std::endl;
     RUN_TEST(Test_USNCache_FileIdentity);
     RUN_TEST(Test_USNCache_VolumeHandle);
     RUN_TEST(Test_USNCache_Journal);
     RUN_TEST(Test_USNCache_Track);
 
-    // Sprint 497: CloudThumbnailProvider Tests
+    // CloudThumbnailProvider Tests
     std::wcout << L"\nCloud Thumbnail Provider Tests:" << std::endl;
     RUN_TEST(Test_Cloud_Providers);
     RUN_TEST(Test_Cloud_SyncState);
     RUN_TEST(Test_Cloud_AuthStatus);
     RUN_TEST(Test_Cloud_FileInfo);
 
-    // Sprint 498: NetworkThumbnailProvider Tests
+    // NetworkThumbnailProvider Tests
     std::wcout << L"\nNetwork Thumbnail Provider Tests:" << std::endl;
     RUN_TEST(Test_NetThumb_Protocol);
     RUN_TEST(Test_NetThumb_URL);
     RUN_TEST(Test_NetThumb_Create);
     RUN_TEST(Test_NetThumb_Config);
 
-    // Sprint 499: CodecLoader Tests
+    // CodecLoader Tests
     std::wcout << L"\nCodec Loader Tests:" << std::endl;
     RUN_TEST(Test_CodecLoad_State);
     RUN_TEST(Test_CodecLoad_Create);
     RUN_TEST(Test_CodecLoad_Enum);
     RUN_TEST(Test_CodecLoad_Unload);
 
-    // Sprint 500: CodecModuleSpecs Tests
+    // CodecModuleSpecs Tests
     std::wcout << L"\nCodec Module Specs Tests:" << std::endl;
     RUN_TEST(Test_CodecSpec_Create);
     RUN_TEST(Test_CodecSpec_Version);
     RUN_TEST(Test_CodecSpec_Formats);
     RUN_TEST(Test_CodecSpec_Validate);
 
-    // Sprint 501: FormatConverter Tests
+    // FormatConverter Tests
     std::wcout << L"\nFormat Converter Tests:" << std::endl;
     RUN_TEST(Test_FmtConv_OutputFmt);
     RUN_TEST(Test_FmtConv_Create);
     RUN_TEST(Test_FmtConv_Convert);
     RUN_TEST(Test_FmtConv_Pipeline);
 
-    // Sprint 502: ICodecModule Tests
+    // ICodecModule Tests
     std::wcout << L"\nCodec ABI Tests:" << std::endl;
     RUN_TEST(Test_CodecABI_Version);
     RUN_TEST(Test_CodecABI_PixelFmt);
     RUN_TEST(Test_CodecABI_Result);
     RUN_TEST(Test_CodecABI_Macros);
 
-    // Sprint 503: LazyCodecManager Tests
+    // LazyCodecManager Tests
     std::wcout << L"\nLazy Codec Manager Tests:" << std::endl;
     RUN_TEST(Test_LazyCodec_Create);
     RUN_TEST(Test_LazyCodec_Census);
     RUN_TEST(Test_LazyCodec_Load);
     RUN_TEST(Test_LazyCodec_Scan);
 
-    // Sprint 504: Accessibility Tests
+    // Accessibility Tests
     std::wcout << L"\nAccessibility Tests:" << std::endl;
     RUN_TEST(Test_A11y_Include);
     RUN_TEST(Test_A11y_Engine);
     RUN_TEST(Test_A11y_Suite);
     RUN_TEST(Test_A11y_Pipeline);
 
-    // Sprint 505: BuildConfig Tests
+    // BuildConfig Tests
     std::wcout << L"\nBuild Config Tests:" << std::endl;
     RUN_TEST(Test_BuildCfg_Macros);
     RUN_TEST(Test_BuildCfg_Platform);
     RUN_TEST(Test_BuildCfg_Config);
     RUN_TEST(Test_BuildCfg_Inline);
 
-    // Sprint 506: BuildValidation Tests
+    // BuildValidation Tests
     std::wcout << L"\nBuild Validation Tests:" << std::endl;
     RUN_TEST(Test_BuildVal_Info);
     RUN_TEST(Test_BuildVal_Runtime);
     RUN_TEST(Test_BuildVal_Version);
     RUN_TEST(Test_BuildVal_Flags);
 
-    // Sprint 507: Config Tests
+    // Config Tests
     std::wcout << L"\nConfig Tests:" << std::endl;
     RUN_TEST(Test_Config_Create);
     RUN_TEST(Test_Config_Features);
     RUN_TEST(Test_Config_Defaults);
     RUN_TEST(Test_Config_MaxSize);
 
-    // Sprint 508: DarkMode Tests
+    // DarkMode Tests
     std::wcout << L"\nDark Mode Tests:" << std::endl;
     RUN_TEST(Test_DarkMode_Include);
     RUN_TEST(Test_DarkMode_Engine);
     RUN_TEST(Test_DarkMode_Renderer);
     RUN_TEST(Test_DarkMode_Controls);
 
-    // Sprint 509: DeadCodeAnalysis Tests
+    // DeadCodeAnalysis Tests
     std::wcout << L"\nDead Code Analysis Tests:" << std::endl;
     RUN_TEST(Test_DCA_Include);
     RUN_TEST(Test_DCA_Audit);
     RUN_TEST(Test_DCA_Auditor);
     RUN_TEST(Test_DCA_Report);
 
-    // Sprint 510: EngineAPI Tests
+    // EngineAPI Tests
     std::wcout << L"\nEngine API Tests:" << std::endl;
     RUN_TEST(Test_API_Version);
     RUN_TEST(Test_API_BuildDate);
     RUN_TEST(Test_API_Macros);
     RUN_TEST(Test_API_Config);
 
-    // Sprint 511: ICacheProvider Tests
+    // ICacheProvider Tests
     std::wcout << L"\nICacheProvider Tests:" << std::endl;
     RUN_TEST(Test_ICache_Include);
     RUN_TEST(Test_ICache_Interface);
     RUN_TEST(Test_ICache_Size);
     RUN_TEST(Test_ICache_Null);
 
-    // Sprint 512: IFormatDetector Tests
+    // IFormatDetector Tests
     std::wcout << L"\nIFormatDetector Tests:" << std::endl;
     RUN_TEST(Test_IFmtDet_Include);
     RUN_TEST(Test_IFmtDet_Interface);
     RUN_TEST(Test_IFmtDet_Size);
     RUN_TEST(Test_IFmtDet_Null);
 
-    // Sprint 513: IGPURenderer Tests
+    // IGPURenderer Tests
     std::wcout << L"\nIGPURenderer Tests:" << std::endl;
     RUN_TEST(Test_IGPURend_Include);
     RUN_TEST(Test_IGPURend_Interface);
     RUN_TEST(Test_IGPURend_Size);
     RUN_TEST(Test_IGPURend_Null);
 
-    // Sprint 514: IThumbnailDecoder Tests
+    // IThumbnailDecoder Tests
     std::wcout << L"\nIThumbnailDecoder Tests:" << std::endl;
     RUN_TEST(Test_IThumbDec_Include);
     RUN_TEST(Test_IThumbDec_Interface);
     RUN_TEST(Test_IThumbDec_Size);
     RUN_TEST(Test_IThumbDec_Null);
 
-    // Sprint 515: LibraryInventoryManager Tests
+    // LibraryInventoryManager Tests
     std::wcout << L"\nLibrary Inventory Manager Tests:" << std::endl;
     RUN_TEST(Test_LibInv_BuildStatus);
     RUN_TEST(Test_LibInv_Category);
     RUN_TEST(Test_LibInv_Entry);
     RUN_TEST(Test_LibInv_Manager);
 
-    // Sprint 516: Logger Tests
+    // Logger Tests
     std::wcout << L"\nLogger Tests:" << std::endl;
     RUN_TEST(Test_Logger_Macros);
     RUN_TEST(Test_Logger_Info);
     RUN_TEST(Test_Logger_Error);
     RUN_TEST(Test_Logger_Levels);
 
-    // Sprint 517: ObservabilityIntegration Tests
+    // ObservabilityIntegration Tests
     std::wcout << L"\nObservability Integration Tests:" << std::endl;
     RUN_TEST(Test_Obs_Level);
     RUN_TEST(Test_Obs_Privacy);
     RUN_TEST(Test_Obs_Event);
     RUN_TEST(Test_Obs_Sink);
 
-    // Sprint 518: PluginTypes Tests
+    // PluginTypes Tests
     std::wcout << L"\nPlugin Types Tests:" << std::endl;
     RUN_TEST(Test_PlugTypes_Transfer);
     RUN_TEST(Test_PlugTypes_Status);
     RUN_TEST(Test_PlugTypes_Convert);
     RUN_TEST(Test_PlugTypes_Enum);
 
-    // Sprint 519: Telemetry Tests
+    // Telemetry Tests
     std::wcout << L"\nTelemetry Tests:" << std::endl;
     RUN_TEST(Test_Telem_Severity);
     RUN_TEST(Test_Telem_Category);
     RUN_TEST(Test_Telem_Event);
     RUN_TEST(Test_Telem_Pipeline);
 
-    // Sprint 520: TelemetryDashboard Tests
+    // TelemetryDashboard Tests
     std::wcout << L"\nTelemetry Dashboard Tests:" << std::endl;
     RUN_TEST(Test_TelemDash_Include);
     RUN_TEST(Test_TelemDash_Forward);
     RUN_TEST(Test_TelemDash_Compat);
     RUN_TEST(Test_TelemDash_Load);
 
-    // Sprint 521: Types Tests
+    // Types Tests
     std::wcout << L"\nTypes Tests:" << std::endl;
     RUN_TEST(Test_Types_DetectedFmt);
     RUN_TEST(Test_Types_ForwardDecls);
     RUN_TEST(Test_Types_Enum);
     RUN_TEST(Test_Types_Include);
 
-    // Sprint 522: VersionManagement Tests
+    // VersionManagement Tests
     std::wcout << L"\nVersion Management Tests:" << std::endl;
     RUN_TEST(Test_VerMgmt_Include);
     RUN_TEST(Test_VerMgmt_Sync);
     RUN_TEST(Test_VerMgmt_Drift);
     RUN_TEST(Test_VerMgmt_Audit);
 
-    // Sprint 523: VideoCodecRouter Tests
+    // VideoCodecRouter Tests
     std::wcout << L"\nVideo Codec Router Tests:" << std::endl;
     RUN_TEST(Test_VidCodec_Backend);
     RUN_TEST(Test_VidCodec_Route);
     RUN_TEST(Test_VidCodec_Router);
     RUN_TEST(Test_VidCodec_Config);
 
-    // Sprint 524: ArchiveGridPreview Tests
+    // ArchiveGridPreview Tests
     std::wcout << L"\nArchive Grid Preview Tests:" << std::endl;
     RUN_TEST(Test_ArchGrid_Format);
     RUN_TEST(Test_ArchGrid_Create);
     RUN_TEST(Test_ArchGrid_Layout);
     RUN_TEST(Test_ArchGrid_Render);
 
-    // Sprint 525: ColorSpaceManager Tests
+    // ColorSpaceManager Tests
     std::wcout << L"\nColor Space Manager Tests:" << std::endl;
     RUN_TEST(Test_ColorSpc_Enum);
     RUN_TEST(Test_ColorSpc_Manager);
     RUN_TEST(Test_ColorSpc_Convert);
     RUN_TEST(Test_ColorSpc_Tone);
 
-    // Sprint 526: EBookCoverExtractor Tests
+    // EBookCoverExtractor Tests
     std::wcout << L"\nEBook Cover Extractor Tests:" << std::endl;
     RUN_TEST(Test_EBook_Format);
     RUN_TEST(Test_EBook_Status);
     RUN_TEST(Test_EBook_Extract);
     RUN_TEST(Test_EBook_Cover);
 
-    // Sprint 527: ExampleDecoder Tests
+    // ExampleDecoder Tests
     std::wcout << L"\nExample Decoder Tests:" << std::endl;
     RUN_TEST(Test_ExDec_Create);
     RUN_TEST(Test_ExDec_Name);
     RUN_TEST(Test_ExDec_Extensions);
     RUN_TEST(Test_ExDec_Decode);
 
-    // Sprint 528: FarbfeldDecoder Tests
+    // FarbfeldDecoder Tests
     std::wcout << L"\nFarbfeld Decoder Tests:" << std::endl;
     RUN_TEST(Test_Farbfeld_Create);
     RUN_TEST(Test_Farbfeld_Format);
     RUN_TEST(Test_Farbfeld_Decode);
     RUN_TEST(Test_Farbfeld_Validate);
 
-    // Sprint 529: JPEG2000Decoder Tests
+    // JPEG2000Decoder Tests
     std::wcout << L"\nJPEG2000 Decoder Tests:" << std::endl;
     RUN_TEST(Test_JP2_Format);
     RUN_TEST(Test_JP2_Extensions);
     RUN_TEST(Test_JP2_Decode);
     RUN_TEST(Test_JP2_Validate);
 
-    // Sprint 530: JXRWICDecoder Tests
+    // JXRWICDecoder Tests
     std::wcout << L"\nJXR WIC Decoder Tests:" << std::endl;
     RUN_TEST(Test_JXR_Format);
     RUN_TEST(Test_JXR_Pixel);
     RUN_TEST(Test_JXR_Decode);
     RUN_TEST(Test_JXR_Validate);
 
-    // Sprint 531: OptimizedArchiveReader Tests
+    // OptimizedArchiveReader Tests
     std::wcout << L"\nOptimized Archive Reader Tests:" << std::endl;
     RUN_TEST(Test_OptArch_Create);
     RUN_TEST(Test_OptArch_FileEntry);
     RUN_TEST(Test_OptArch_Read);
     RUN_TEST(Test_OptArch_Scan);
 
-    // Sprint 532: PCXDecoder Tests
+    // PCXDecoder Tests
     std::wcout << L"\nPCX Decoder Tests:" << std::endl;
     RUN_TEST(Test_PCX_Header);
     RUN_TEST(Test_PCX_Create);
     RUN_TEST(Test_PCX_Decode);
     RUN_TEST(Test_PCX_Validate);
 
-    // Sprint 533: WMFDecoder Tests
+    // WMFDecoder Tests
     std::wcout << L"\nWMF Decoder Tests:" << std::endl;
     RUN_TEST(Test_WMF_Create);
     RUN_TEST(Test_WMF_Format);
     RUN_TEST(Test_WMF_Decode);
     RUN_TEST(Test_WMF_Validate);
 
-    // Sprint 534: D3D11Renderer Tests
+    // D3D11Renderer Tests
     std::wcout << L"\nD3D11 Renderer Tests:" << std::endl;
     RUN_TEST(Test_D3D11_Create);
     RUN_TEST(Test_D3D11_BatchReq);
     RUN_TEST(Test_D3D11_Render);
     RUN_TEST(Test_D3D11_Config);
 
-    // Sprint 535: GDIRenderer Tests
+    // GDIRenderer Tests
     std::wcout << L"\nGDI Renderer Tests:" << std::endl;
     RUN_TEST(Test_GDIRend_Create);
     RUN_TEST(Test_GDIRend_Render);
     RUN_TEST(Test_GDIRend_Scale);
     RUN_TEST(Test_GDIRend_Config);
 
-    // Sprint 536: ThumbnailPipeline Tests
+    // ThumbnailPipeline Tests
     std::wcout << L"\nThumbnail Pipeline Tests:" << std::endl;
     RUN_TEST(Test_ThumbPipe_Config);
     RUN_TEST(Test_ThumbPipe_Create);
     RUN_TEST(Test_ThumbPipe_Generate);
     RUN_TEST(Test_ThumbPipe_Stats);
 
-    // Sprint 537: CrashHandler Tests
+    // CrashHandler Tests
     std::wcout << L"\nCrash Handler Tests:" << std::endl;
     RUN_TEST(Test_CrashH_Info);
     RUN_TEST(Test_CrashH_Install);
     RUN_TEST(Test_CrashH_Uninstall);
     RUN_TEST(Test_CrashH_Report);
 
-    // Sprint 538: PluginManager Tests
+    // PluginManager Tests
     std::wcout << L"\nPlugin Manager Tests:" << std::endl;
     RUN_TEST(Test_PlugMgr_Create);
     RUN_TEST(Test_PlugMgr_Load);
     RUN_TEST(Test_PlugMgr_Unload);
     RUN_TEST(Test_PlugMgr_List);
 
-    // Sprint 539: PluginMarketplace Tests
+    // PluginMarketplace Tests
     std::wcout << L"\nPlugin Marketplace Tests:" << std::endl;
     RUN_TEST(Test_Marketplace_PkgType);
     RUN_TEST(Test_Marketplace_Arch);
     RUN_TEST(Test_Marketplace_Version);
     RUN_TEST(Test_Marketplace_Create);
 
-    // Sprint 540: PluginTrustChain Tests
+    // PluginTrustChain Tests
     std::wcout << L"\nPlugin Trust Chain Tests:" << std::endl;
     RUN_TEST(Test_TrustChain_Level);
     RUN_TEST(Test_TrustChain_Cert);
     RUN_TEST(Test_TrustChain_Chain);
     RUN_TEST(Test_TrustChain_Verify);
 
-    // Sprint 541: COMApartmentAudit Tests
+    // COMApartmentAudit Tests
     std::wcout << L"\nCOM Apartment Audit Tests:" << std::endl;
     RUN_TEST(Test_COMAudit_ApartType);
     RUN_TEST(Test_COMAudit_ThreadSafe);
     RUN_TEST(Test_COMAudit_Entry);
     RUN_TEST(Test_COMAudit_Scenario);
 
-    // Sprint 542: HardwareCapabilities Tests
+    // HardwareCapabilities Tests
     std::wcout << L"\nHardware Capabilities Tests:" << std::endl;
     RUN_TEST(Test_HWCaps_Create);
     RUN_TEST(Test_HWCaps_CPU);
     RUN_TEST(Test_HWCaps_SIMD);
     RUN_TEST(Test_HWCaps_Detect);
 
-    // Sprint 543: PerceptualHashing Tests
+    // PerceptualHashing Tests
     std::wcout << L"\nPerceptual Hashing Tests:" << std::endl;
     RUN_TEST(Test_PHash_Algo);
     RUN_TEST(Test_PHash_Struct);

@@ -1,6 +1,6 @@
 //==============================================================================
 // ExplorerLens Engine - EXIF Orientation Utilities
-// Copyright (c) 2026 - ExplorerLens Project 
+// Copyright (c) 2026 - ExplorerLens Project
 // Version: 6.0.0
 //
 // Shared utility for applying EXIF orientation transformations to bitmaps.
@@ -29,17 +29,17 @@ enum class EXIFOrientation : int {
 };
 
 /// Apply EXIF orientation transformation to an HBITMAP
-/// 
+///
 /// @param hBitmap - Source bitmap handle (GDI HBITMAP)
 /// @param orientation - EXIF orientation value (1-8), or 0 for no transformation
-/// @return Transformed bitmap handle, or NULL on failure. 
+/// @return Transformed bitmap handle, or NULL on failure.
 /// If orientation is 1 (Normal) or 0, returns the original hBitmap.
 /// Otherwise returns a new bitmap - caller must delete the original if needed.
-/// 
+///
 /// @note The function creates a new bitmap for transformations (cases 2-8).
 /// The original bitmap is NOT deleted - caller must manage bitmap lifetimes.
 /// For case 1 (Normal) and invalid values, returns the original bitmap unchanged.
-/// 
+///
 /// @example
 /// HBITMAP hOriginal = LoadBitmapFromFile(path);
 /// int exifOrientation = ReadEXIFOrientation(path);
@@ -52,4 +52,3 @@ HBITMAP ApplyEXIFOrientation(HBITMAP hBitmap, int orientation);
 } // namespace Utils
 } // namespace Engine
 } // namespace ExplorerLens
-
