@@ -254,8 +254,7 @@ public:
                     info.numComponents = static_cast<uint8_t>(cSiz > 255 ? 255 : cSiz);
                     // First component Ssiz byte follows Csiz
                     if (file.gcount() >= 36) {
-                        uint8_t ssiz = siz[36 - 1]; // last byte we read isn't right, re-read
-                        // Actually, component info starts at offset 36 in our buffer.
+                        // Component info starts at offset 36 in our buffer.
                         // We need one more byte.  Read it:
                         uint8_t ssizByte = 0;
                         file.read(reinterpret_cast<char*>(&ssizByte), 1);
@@ -278,7 +277,6 @@ public:
                     (uint32_t(p[2]) << 8) | uint32_t(p[3]);
                 };
 
-            constexpr uint32_t BOX_FTYP = 0x66747970; // 'ftyp'
             constexpr uint32_t BOX_JP2H = 0x6A703268; // 'jp2h'
             constexpr uint32_t BOX_IHDR = 0x69686472; // 'ihdr'
 

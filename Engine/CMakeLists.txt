@@ -112,7 +112,7 @@ endif()
 
 # --- OpenJPEG ---
 set(OPENJPEG_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../x64/Release/openjp2.lib")
-set(OPENJPEG_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/openjpeg-install")
+set(OPENJPEG_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/openjpeg-2.5.3/install")
 if(EXISTS "${OPENJPEG_LIB_PATH}")
     set(HAS_OPENJPEG ON CACHE BOOL "JPEG 2000 support auto-detected" FORCE)
 else()
@@ -694,6 +694,68 @@ set(ENGINE_HEADERS
     Core/ThumbnailSpriteSheet.h
     Cache/CacheTelemetryCollector.h
     Core/WindowsSearchIntegration.h
+
+    # Sprints 594-643 — New Decoders, Pipeline, Core, AI features
+    # Batch 1: Advanced Decoders (594-598)
+    Decoders/APNGDecoder.h
+    Decoders/FLIFDecoder.h
+    Decoders/BPGDecoder.h
+    Decoders/RGBEDecoder.h
+    Decoders/WebP2Decoder.h
+    # Batch 2: Document & Text (599-603)
+    Decoders/MarkdownPreviewRenderer.h
+    Decoders/SourceCodeThumbnail.h
+    Decoders/RTFDecoder.h
+    Decoders/LaTeXPreviewDecoder.h
+    Decoders/StructuredDataVisualizer.h
+    # Batch 3: Archive & Compression (604-608)
+    Decoders/ZstdFrameDecoder.h
+    Decoders/BrotliStreamInspector.h
+    Decoders/LZ4FrameDecoder.h
+    Decoders/XZStreamDecoder.h
+    Decoders/SnappyFrameDecoder.h
+    # Batch 4: 3D & CAD (609-613)
+    Decoders/PLYPointCloudDecoder.h
+    Decoders/OBJMeshDecoder.h
+    Decoders/STLMeshDecoder.h
+    Decoders/COLLADADecoder.h
+    Decoders/FBXInspector.h
+    # Batch 5: Media Enhancement (614-618)
+    Decoders/MIDIVisualizer.h
+    Decoders/WaveformGenerator.h
+    Decoders/SpectrogramRenderer.h
+    Decoders/VideoTimelineStrip.h
+    Decoders/SubtitlePreviewDecoder.h
+    # Batch 6: Enterprise & Security (619-623)
+    Decoders/CertificateViewer.h
+    Decoders/RegistryExportViewer.h
+    Decoders/ShortcutInspector.h
+    Decoders/MSIPackageInspector.h
+    Decoders/DiskImagePreview.h
+    # Batch 7: Performance Optimization (624-628)
+    Pipeline/ThreadLocalBufferPool.h
+    Pipeline/DecodeMemoizationEngine.h
+    Pipeline/AsyncPrefetchQueue.h
+    Pipeline/PriorityDecodeScheduler.h
+    Pipeline/MemoryMappedDecodePath.h
+    # Batch 8: Quality & Observability (629-633)
+    Core/DecodeLatencyHistogram.h
+    Core/ErrorCategorizationEngine.h
+    Core/HealthScoreAggregator.h
+    Core/PerformanceRegressionDetector.h
+    Core/ResourceUsageProfiler.h
+    # Batch 9: Smart Features (634-638)
+    AI/ThumbnailRelevanceScorer.h
+    AI/ColorPaletteExtractor.h
+    AI/ImageComplexityAnalyzer.h
+    AI/FormatMigrationAdvisor.h
+    AI/DecodeStrategyOptimizer.h
+    # Batch 10: Platform & Integration (639-643)
+    Core/ClipboardMonitorIntegration.h
+    Core/ShellNotificationProvider.h
+    Core/ExplorerStatusBarProvider.h
+    Core/FileSummaryTooltipGenerator.h
+    Core/BatchProgressReporter.h
 )
 
 set(ENGINE_SOURCES
@@ -862,6 +924,10 @@ if(ENGINE_SOURCES)
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libavif-1.3.0/include
             # MuPDF includes
             ${CMAKE_CURRENT_SOURCE_DIR}/../external/pdf-libs/mupdf-1.24.11-source/include
+            # OpenJPEG includes (JPEG 2000 support)
+            ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/openjpeg-2.5.3/install/include/openjpeg-2.5
+            # FreeType includes (font rendering)
+            ${CMAKE_CURRENT_SOURCE_DIR}/../external/ui-libs/freetype-2.13.3/include
     )
 
     # Windows-specific settings
