@@ -1,8 +1,15 @@
+// DecoderOutputValidator.h — HBITMAP Output Validation
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Post-decode validator that examines each HBITMAP output for structural
+// correctness (null handle, zero dimensions, invalid bit depth, corrupted
+// BITMAPINFOHEADER) and content quality (all-black / all-white detection
+// via sparse pixel sampling). Dimension tolerance is configurable. Stats
+// per failure reason are tracked atomically for thread safety.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// DecoderOutputValidator.h — Binary pass/fail validation of decoder output
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -15,7 +22,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Output validation failure reasons
 enum class OutputValidationFailure : uint32_t {
     None = 0,
     NullBitmap = 1,
@@ -40,7 +46,6 @@ static const wchar_t* OutputValidationFailureName(OutputValidationFailure f) {
     return (idx < static_cast<uint32_t>(OutputValidationFailure::Count)) ? names[idx] : L"Unknown";
 }
 
-// Validation result
 struct OutputValidationResult {
     bool                    passed = false;
     OutputValidationFailure failure = OutputValidationFailure::None;
@@ -50,7 +55,6 @@ struct OutputValidationResult {
     double                  uniqueColorRatio = 0.0; // Fraction of sampled pixels that differ
 };
 
-// Configuration
 struct OutputValidatorConfig {
     bool     checkAllBlack = true;
     bool     checkAllWhite = true;
@@ -60,7 +64,6 @@ struct OutputValidatorConfig {
     double   monochromeThreshold = 0.01; // <1% unique colors = monochrome
 };
 
-// Stats
 struct OutputValidatorStats {
     std::atomic<uint64_t> totalValidated{ 0 };
     std::atomic<uint64_t> totalPassed{ 0 };

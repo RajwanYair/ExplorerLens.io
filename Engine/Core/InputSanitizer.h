@@ -1,8 +1,15 @@
+// InputSanitizer.h — Centralized Path and Buffer Sanitization
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Security layer that scrubs file paths for null-byte injection, embedded
+// control characters, NTFS Alternate Data Streams, trailing dots/spaces,
+// and MAX_PATH violations. Returns a modified safe path along with a list
+// of warnings. Also provides a buffer validator for raw data scanning.
+// All sanitization flags are composable via bitmask.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// InputSanitizer.h — Centralized file path and buffer sanitization
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -16,7 +23,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Sanitization flags
 enum class SanitizeFlags : uint32_t {
     None = 0,
     NullByteInjection = 1 << 0,
@@ -36,7 +42,6 @@ inline bool HasFlag(SanitizeFlags flags, SanitizeFlags test) {
     return (static_cast<uint32_t>(flags) & static_cast<uint32_t>(test)) != 0;
 }
 
-// Sanitization result
 struct SanitizeResult {
     bool         safe = false;
     bool         modified = false;
@@ -45,7 +50,6 @@ struct SanitizeResult {
     uint32_t     issuesFound = 0;
 };
 
-// Buffer sanitization result
 struct BufferSanitizeResult {
     bool     safe = false;
     uint32_t nullBytes = 0;

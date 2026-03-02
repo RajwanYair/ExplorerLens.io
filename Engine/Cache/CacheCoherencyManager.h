@@ -1,8 +1,15 @@
+// CacheCoherencyManager.h — Multi-Process Cache Consistency
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Implements multi-process cache coherency using a Windows named mutex for
+// locking and a shared-memory ring buffer for cross-process invalidation
+// events. When any Explorer host process detects a file change it posts an
+// invalidation entry visible to all other processes, ensuring stale
+// thumbnails are evicted. Readers skip entries from their own PID.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// CacheCoherencyManager.h — Multi-process cache consistency via named mutexes
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -17,7 +24,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Coherency event types
 enum class CoherencyEvent : uint32_t {
     FileModified = 0,
     FileDeleted = 1,
@@ -28,7 +34,6 @@ enum class CoherencyEvent : uint32_t {
     ProcessDetach = 6
 };
 
-// Invalidation request
 struct CacheInvalidationRequest {
     std::wstring filePath;
     CoherencyEvent event = CoherencyEvent::FileModified;
@@ -36,7 +41,6 @@ struct CacheInvalidationRequest {
     uint32_t      sourceProcessId = 0;
 };
 
-// Coherency stats
 struct CacheCoherencyStats {
     uint64_t invalidationsSent = 0;
     uint64_t invalidationsReceived = 0;
@@ -46,7 +50,6 @@ struct CacheCoherencyStats {
     uint32_t activeProcesses = 0;
 };
 
-// Configuration
 struct CacheCoherencyConfig {
     std::wstring mutexName = L"Global\\ExplorerLensCacheCoherency";
     std::wstring sharedMemName = L"Local\\ExplorerLensCacheInvalidation";

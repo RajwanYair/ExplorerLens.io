@@ -1,8 +1,15 @@
+// MemoryBudgetEnforcer.h — Process Working-Set Budget Enforcement
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Monitors the process working set (via GetProcessMemoryInfo) against a
+// configurable memory budget and enforces a four-tier response ladder:
+// Permissive (warnings only), Moderate (reject new allocations), Strict
+// (trigger cache eviction), Emergency (compact + evict). CanAllocate()
+// is the primary gate, intended to be called before large allocations.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// MemoryBudgetEnforcer.h — Total working-set budget enforcement for pipeline
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -17,7 +24,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Budget enforcement level
 enum class BudgetEnforcementLevel : uint32_t {
     Permissive = 0,   // Log warnings only
     Moderate = 1,   // Reject new allocations, don't free existing
@@ -25,7 +31,6 @@ enum class BudgetEnforcementLevel : uint32_t {
     Emergency = 3    // Reject + evict + compact
 };
 
-// Budget status
 struct MemoryBudgetStatus {
     uint64_t budgetBytes = 0;
     uint64_t currentWorkingSet = 0;
@@ -37,7 +42,6 @@ struct MemoryBudgetStatus {
     bool     overBudget = false;
 };
 
-// Configuration
 struct BudgetEnforcerConfig {
     uint64_t budgetBytes = 512ULL * 1024 * 1024;  // 512 MB
     double   warningThreshold = 0.70;

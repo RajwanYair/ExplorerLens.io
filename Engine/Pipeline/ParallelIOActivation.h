@@ -32,38 +32,38 @@ namespace Engine {
 
 /// Configuration for parallel I/O activation
 struct ParallelIOConfig {
-    uint32_t maxConcurrency      = 0;   // 0 = auto (core count)
-    uint32_t maxQueueDepth       = 256; // Max pending I/O operations
-    uint32_t maxFileSizeMB       = 512; // Skip parallel path for very large files
-    uint32_t readBufferSizeKB    = 256; // Per-read buffer size
-    bool     enableDirectIO      = false; // FILE_FLAG_NO_BUFFERING
-    bool     enablePrefetch      = true;  // Prefetch adjacent files
-    bool     fallbackToSync      = true;  // Fall back to sync on IOCP failure
-    uint32_t timeoutMs           = 5000;  // Per-file timeout
+    uint32_t maxConcurrency = 0;   // 0 = auto (core count)
+    uint32_t maxQueueDepth = 256; // Max pending I/O operations
+    uint32_t maxFileSizeMB = 512; // Skip parallel path for very large files
+    uint32_t readBufferSizeKB = 256; // Per-read buffer size
+    bool     enableDirectIO = false; // FILE_FLAG_NO_BUFFERING
+    bool     enablePrefetch = true;  // Prefetch adjacent files
+    bool     fallbackToSync = true;  // Fall back to sync on IOCP failure
+    uint32_t timeoutMs = 5000;  // Per-file timeout
 };
 
 /// Result of a parallel read operation
 struct ParallelIOResult {
     std::wstring filePath;
     std::vector<uint8_t> data;
-    uint32_t   bytesRead   = 0;
-    double     readTimeMs  = 0.0;
-    bool       success     = false;
+    uint32_t   bytesRead = 0;
+    double     readTimeMs = 0.0;
+    bool       success = false;
     bool       usedFallback = false;  // True if sync fallback was used
-    uint32_t   errorCode   = 0;
+    uint32_t   errorCode = 0;
 };
 
 /// Aggregate statistics for parallel I/O
 struct ParallelIOStats {
-    uint64_t totalReads        = 0;
-    uint64_t successfulReads   = 0;
-    uint64_t failedReads       = 0;
-    uint64_t fallbackReads     = 0;
-    uint64_t totalBytesRead    = 0;
-    double   avgReadTimeMs     = 0.0;
+    uint64_t totalReads = 0;
+    uint64_t successfulReads = 0;
+    uint64_t failedReads = 0;
+    uint64_t fallbackReads = 0;
+    uint64_t totalBytesRead = 0;
+    double   avgReadTimeMs = 0.0;
     double   peakBandwidthMBps = 0.0;
     uint32_t activeConcurrency = 0;
-    uint32_t peakQueueDepth    = 0;
+    uint32_t peakQueueDepth = 0;
 };
 
 /// Production-grade parallel I/O with automatic tuning and fallback.
@@ -89,7 +89,7 @@ public:
 
         // Create IOCP
         m_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0,
-                                         m_config.maxConcurrency);
+            m_config.maxConcurrency);
         if (!m_iocp) {
             m_lastError = GetLastError();
             return false;
@@ -110,11 +110,13 @@ public:
 
             if (m_active.load()) {
                 ReadFileAsync(path, r);
-            } else if (m_config.fallbackToSync) {
+            }
+            else if (m_config.fallbackToSync) {
                 ReadFileSync(path, r);
                 r.usedFallback = true;
                 m_stats.fallbackReads++;
-            } else {
+            }
+            else {
                 r.success = false;
                 r.errorCode = ERROR_NOT_READY;
                 m_stats.failedReads++;
@@ -195,14 +197,17 @@ private:
                 GetOverlappedResult(hFile, &ov, &bytesRead, FALSE);
                 result.success = true;
                 result.bytesRead = bytesRead;
-            } else {
+            }
+            else {
                 CancelIoEx(hFile, &ov);
                 result.errorCode = ERROR_TIMEOUT;
             }
-        } else if (readOk) {
+        }
+        else if (readOk) {
             result.success = true;
             result.bytesRead = bytesRead;
-        } else {
+        }
+        else {
             result.errorCode = GetLastError();
         }
 
@@ -235,10 +240,11 @@ private:
         result.data.resize(static_cast<size_t>(fileSize.QuadPart));
         DWORD bytesRead = 0;
         if (::ReadFile(hFile, result.data.data(),
-                static_cast<DWORD>(fileSize.QuadPart), &bytesRead, nullptr)) {
+            static_cast<DWORD>(fileSize.QuadPart), &bytesRead, nullptr)) {
             result.success = true;
             result.bytesRead = bytesRead;
-        } else {
+        }
+        else {
             result.errorCode = GetLastError();
         }
 
@@ -250,7 +256,7 @@ private:
     ParallelIOConfig  m_config;
     HANDLE            m_iocp = nullptr;
     uint32_t          m_lastError = 0;
-    std::atomic<bool> m_active{false};
+    std::atomic<bool> m_active{ false };
     ParallelIOStats   m_stats{};
 };
 

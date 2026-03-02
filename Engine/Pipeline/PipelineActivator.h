@@ -33,10 +33,10 @@ namespace Engine {
 // ============================================================================
 
 enum class PipelineSubsystem : uint8_t {
-    ParallelIO     = 0,
-    ZeroCopy       = 1,
-    CacheWarming   = 2,
-    PSOCache       = 3,
+    ParallelIO = 0,
+    ZeroCopy = 1,
+    CacheWarming = 2,
+    PSOCache = 3,
     COUNT
 };
 
@@ -51,39 +51,39 @@ inline const char* SubsystemName(PipelineSubsystem s) {
 // ============================================================================
 
 enum class SubsystemState : uint8_t {
-    NotStarted  = 0,
-    Activating  = 1,
-    Active      = 2,
-    Degraded    = 3,   // Running with reduced functionality
-    Failed      = 4,
-    Disabled    = 5    // Explicitly disabled by config
+    NotStarted = 0,
+    Activating = 1,
+    Active = 2,
+    Degraded = 3,   // Running with reduced functionality
+    Failed = 4,
+    Disabled = 5    // Explicitly disabled by config
 };
 
 struct SubsystemStatus {
     PipelineSubsystem subsystem = PipelineSubsystem::ParallelIO;
-    SubsystemState    state     = SubsystemState::NotStarted;
+    SubsystemState    state = SubsystemState::NotStarted;
     std::string       message;
     double            activationTimeMs = 0.0;
-    uint32_t          retryCount       = 0;
+    uint32_t          retryCount = 0;
 };
 
 struct PipelineActivationConfig {
-    bool     enableParallelIO       = true;
-    bool     enableZeroCopy         = true;
-    bool     enableCacheWarming     = true;
-    bool     enablePSOCache         = true;
-    uint32_t parallelIOConcurrency  = 4;       // IOCP thread count
-    uint32_t zeroCopyBufferSizeMB   = 16;      // Staging buffer size
-    uint32_t cacheWarmingDelayMs    = 500;      // Delay before warming starts
-    uint32_t maxRetries             = 2;        // Per-subsystem retry count
+    bool     enableParallelIO = true;
+    bool     enableZeroCopy = true;
+    bool     enableCacheWarming = true;
+    bool     enablePSOCache = true;
+    uint32_t parallelIOConcurrency = 4;       // IOCP thread count
+    uint32_t zeroCopyBufferSizeMB = 16;      // Staging buffer size
+    uint32_t cacheWarmingDelayMs = 500;      // Delay before warming starts
+    uint32_t maxRetries = 2;        // Per-subsystem retry count
     std::wstring psoCachePath;                  // PSO cache file path
 };
 
 struct PipelineActivationResult {
-    bool allSucceeded  = false;
+    bool allSucceeded = false;
     uint32_t activated = 0;
-    uint32_t failed    = 0;
-    uint32_t disabled  = 0;
+    uint32_t failed = 0;
+    uint32_t disabled = 0;
     double   totalTimeMs = 0.0;
     std::array<SubsystemStatus, static_cast<size_t>(PipelineSubsystem::COUNT)> statuses;
 };
@@ -139,7 +139,8 @@ public:
             if (ok) {
                 status.state = SubsystemState::Active;
                 result.activated++;
-            } else {
+            }
+            else {
                 status.state = SubsystemState::Failed;
                 result.failed++;
             }
@@ -179,11 +180,11 @@ private:
 
     bool IsEnabled(PipelineSubsystem sys) const {
         switch (sys) {
-            case PipelineSubsystem::ParallelIO:   return m_config.enableParallelIO;
-            case PipelineSubsystem::ZeroCopy:      return m_config.enableZeroCopy;
-            case PipelineSubsystem::CacheWarming:  return m_config.enableCacheWarming;
-            case PipelineSubsystem::PSOCache:      return m_config.enablePSOCache;
-            default: return false;
+        case PipelineSubsystem::ParallelIO:   return m_config.enableParallelIO;
+        case PipelineSubsystem::ZeroCopy:      return m_config.enableZeroCopy;
+        case PipelineSubsystem::CacheWarming:  return m_config.enableCacheWarming;
+        case PipelineSubsystem::PSOCache:      return m_config.enablePSOCache;
+        default: return false;
         }
     }
 
@@ -193,21 +194,21 @@ private:
             bool ok = false;
 
             switch (sys) {
-                case PipelineSubsystem::ParallelIO:
-                    ok = ActivateParallelIO(status);
-                    break;
-                case PipelineSubsystem::ZeroCopy:
-                    ok = ActivateZeroCopy(status);
-                    break;
-                case PipelineSubsystem::CacheWarming:
-                    ok = ActivateCacheWarming(status);
-                    break;
-                case PipelineSubsystem::PSOCache:
-                    ok = ActivatePSOCache(status);
-                    break;
-                default:
-                    status.message = "Unknown subsystem";
-                    return false;
+            case PipelineSubsystem::ParallelIO:
+                ok = ActivateParallelIO(status);
+                break;
+            case PipelineSubsystem::ZeroCopy:
+                ok = ActivateZeroCopy(status);
+                break;
+            case PipelineSubsystem::CacheWarming:
+                ok = ActivateCacheWarming(status);
+                break;
+            case PipelineSubsystem::PSOCache:
+                ok = ActivatePSOCache(status);
+                break;
+            default:
+                status.message = "Unknown subsystem";
+                return false;
             }
 
             if (ok) return true;
@@ -218,7 +219,7 @@ private:
     bool ActivateParallelIO(SubsystemStatus& status) {
         // ParallelIO uses IOCP — verify we can create a completion port
         HANDLE iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0,
-                                              m_config.parallelIOConcurrency);
+            m_config.parallelIOConcurrency);
         if (!iocp) {
             status.message = "Failed to create IOCP: " + std::to_string(GetLastError());
             return false;
@@ -234,7 +235,8 @@ private:
             && m_config.enableParallelIO) {
             status.state = SubsystemState::Degraded;
             status.message = "ZeroCopy active in degraded mode (no ParallelIO)";
-        } else {
+        }
+        else {
             status.message = "ZeroCopy ready (" + std::to_string(m_config.zeroCopyBufferSizeMB) + " MB staging)";
         }
         return true;
@@ -251,7 +253,8 @@ private:
             wchar_t appData[MAX_PATH] = {};
             if (GetEnvironmentVariableW(L"LOCALAPPDATA", appData, MAX_PATH) > 0) {
                 m_config.psoCachePath = std::wstring(appData) + L"\\ExplorerLens\\pso.cache";
-            } else {
+            }
+            else {
                 status.message = "Cannot determine cache path";
                 return false;
             }
@@ -262,7 +265,7 @@ private:
 
     PipelineActivationConfig m_config;
     std::array<SubsystemState, static_cast<size_t>(PipelineSubsystem::COUNT)> m_subsystemStates;
-    std::atomic<bool> m_activated{false};
+    std::atomic<bool> m_activated{ false };
 };
 
 } // namespace Engine

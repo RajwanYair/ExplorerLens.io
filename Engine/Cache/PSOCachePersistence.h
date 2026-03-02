@@ -38,43 +38,43 @@ namespace Engine {
 // On-disk structures
 // ============================================================================
 
-static constexpr uint32_t PSO_CACHE_MAGIC   = 0x434F5350; // "PSOC"
-static constexpr uint32_t PSO_CACHE_VERSION  = 2;
-static constexpr uint32_t PSO_MAX_ENTRIES    = 4096;
-static constexpr uint32_t PSO_MAX_BLOB_SIZE  = 64 * 1024 * 1024; // 64 MB max
+static constexpr uint32_t PSO_CACHE_MAGIC = 0x434F5350; // "PSOC"
+static constexpr uint32_t PSO_CACHE_VERSION = 2;
+static constexpr uint32_t PSO_MAX_ENTRIES = 4096;
+static constexpr uint32_t PSO_MAX_BLOB_SIZE = 64 * 1024 * 1024; // 64 MB max
 
 #pragma pack(push, 1)
 struct PSOCacheHeader {
-    uint32_t magic       = PSO_CACHE_MAGIC;
-    uint32_t version     = PSO_CACHE_VERSION;
-    uint32_t entryCount  = 0;
-    uint32_t reserved    = 0;
-    uint64_t blobOffset  = 0;      // Offset to blob data region
-    uint64_t totalSize   = 0;      // Total file size
-    uint64_t timestamp   = 0;      // Last write timestamp (100ns intervals)
-    uint32_t checksum    = 0;      // CRC32 of entry table + blob data
-    uint32_t driverHash  = 0;      // Hash of GPU driver version (invalidate on update)
-    uint8_t  pad[16]     = {};     // Reserved for future use
+    uint32_t magic = PSO_CACHE_MAGIC;
+    uint32_t version = PSO_CACHE_VERSION;
+    uint32_t entryCount = 0;
+    uint32_t reserved = 0;
+    uint64_t blobOffset = 0;      // Offset to blob data region
+    uint64_t totalSize = 0;      // Total file size
+    uint64_t timestamp = 0;      // Last write timestamp (100ns intervals)
+    uint32_t checksum = 0;      // CRC32 of entry table + blob data
+    uint32_t driverHash = 0;      // Hash of GPU driver version (invalidate on update)
+    uint8_t  pad[16] = {};     // Reserved for future use
 };
 static_assert(sizeof(PSOCacheHeader) == 64, "PSOCacheHeader must be 64 bytes");
 
 struct PSODiskEntry {
-    uint64_t keyHash     = 0;      // XXH3 hash of PSO description
-    uint32_t blobOffset  = 0;      // Offset within blob region
-    uint32_t blobSize    = 0;      // Size of compiled PSO blob
-    uint32_t flags       = 0;      // PSOEntryFlags bitmask
-    uint32_t hitCount    = 0;      // Access frequency for eviction
-    uint64_t lastAccess  = 0;      // Timestamp of last use
+    uint64_t keyHash = 0;      // XXH3 hash of PSO description
+    uint32_t blobOffset = 0;      // Offset within blob region
+    uint32_t blobSize = 0;      // Size of compiled PSO blob
+    uint32_t flags = 0;      // PSOEntryFlags bitmask
+    uint32_t hitCount = 0;      // Access frequency for eviction
+    uint64_t lastAccess = 0;      // Timestamp of last use
 };
 static_assert(sizeof(PSODiskEntry) == 32, "PSODiskEntry must be 32 bytes");
 #pragma pack(pop)
 
 /// Flags for cache entries
 enum class PSOEntryFlags : uint32_t {
-    None       = 0,
-    Validated  = 1 << 0,  // PSO has been validated after load
-    Stale      = 1 << 1,  // Marked for re-compilation
-    Pinned     = 1 << 2,  // Never evict (critical PSO)
+    None = 0,
+    Validated = 1 << 0,  // PSO has been validated after load
+    Stale = 1 << 1,  // Marked for re-compilation
+    Pinned = 1 << 2,  // Never evict (critical PSO)
     Compressed = 1 << 3,  // Blob is LZ4-compressed
 };
 
@@ -95,10 +95,10 @@ struct PSODescription {
     std::string pixelShader;
     std::string computeShader;
     uint32_t    renderTargetFormat = 0;   // DXGI_FORMAT
-    uint32_t    depthFormat        = 0;
-    uint32_t    sampleCount        = 1;
-    uint32_t    blendMode          = 0;
-    bool        enableDepthTest    = false;
+    uint32_t    depthFormat = 0;
+    uint32_t    sampleCount = 1;
+    uint32_t    blendMode = 0;
+    bool        enableDepthTest = false;
 
     /// Compute a stable 64-bit hash for cache lookup
     uint64_t ComputeHash() const {
@@ -110,7 +110,7 @@ struct PSODescription {
                 h ^= p[i];
                 h *= 1099511628211ULL;
             }
-        };
+            };
         feed(vertexShader.data(), vertexShader.size());
         feed(pixelShader.data(), pixelShader.size());
         feed(computeShader.data(), computeShader.size());
@@ -125,7 +125,7 @@ struct PSODescription {
 
 /// Result of a cache lookup
 struct PSOLookupResult {
-    bool   found    = false;
+    bool   found = false;
     const uint8_t* blobData = nullptr;
     uint32_t blobSize = 0;
     uint32_t hitCount = 0;
@@ -133,17 +133,17 @@ struct PSOLookupResult {
 
 /// Statistics for the PSO cache
 struct PSODiskStats {
-    uint32_t totalEntries    = 0;
-    uint32_t validEntries    = 0;
-    uint32_t staleEntries    = 0;
-    uint64_t totalBlobBytes  = 0;
-    uint64_t lookups         = 0;
-    uint64_t hits            = 0;
-    uint64_t misses          = 0;
-    uint64_t evictions       = 0;
-    uint64_t diskWriteBytes  = 0;
-    double   hitRate         = 0.0;
-    double   avgLoadTimeMs   = 0.0;
+    uint32_t totalEntries = 0;
+    uint32_t validEntries = 0;
+    uint32_t staleEntries = 0;
+    uint64_t totalBlobBytes = 0;
+    uint64_t lookups = 0;
+    uint64_t hits = 0;
+    uint64_t misses = 0;
+    uint64_t evictions = 0;
+    uint64_t diskWriteBytes = 0;
+    double   hitRate = 0.0;
+    double   avgLoadTimeMs = 0.0;
 };
 
 // ============================================================================
@@ -230,10 +230,12 @@ public:
                 result.blobSize = entry.blobSize;
                 result.hitCount = ++entry.hitCount;
                 m_stats.hits++;
-            } else {
+            }
+            else {
                 m_stats.misses++;
             }
-        } else {
+        }
+        else {
             m_stats.misses++;
         }
 
@@ -258,7 +260,8 @@ public:
             entry.flags = static_cast<uint32_t>(PSOEntryFlags::Validated);
             entry.hitCount = 0;
             m_blobs.insert(m_blobs.end(), blobData, blobData + blobSize);
-        } else {
+        }
+        else {
             // New entry
             if (m_entries.size() >= PSO_MAX_ENTRIES) {
                 EvictLeastUsed();
@@ -437,7 +440,7 @@ private:
     }
 
     static uint32_t ComputeCRC32(const void* data1, size_t len1,
-                                  const void* data2, size_t len2) {
+        const void* data2, size_t len2) {
         // Simple CRC32 (same polynomial as zlib)
         uint32_t crc = 0xFFFFFFFF;
         auto process = [&](const uint8_t* p, size_t len) {
@@ -446,7 +449,7 @@ private:
                 for (int j = 0; j < 8; ++j)
                     crc = (crc >> 1) ^ (0xEDB88320 & (~(crc & 1) + 1));
             }
-        };
+            };
         if (data1) process(static_cast<const uint8_t*>(data1), len1);
         if (data2) process(static_cast<const uint8_t*>(data2), len2);
         return crc ^ 0xFFFFFFFF;
@@ -460,7 +463,7 @@ private:
     std::vector<PSODiskEntry>               m_entries;
     std::vector<uint8_t>                     m_blobs;
     std::unordered_map<uint64_t, uint32_t>   m_lookupMap; // keyHash → index
-    std::atomic<bool>                        m_dirty{false};
+    std::atomic<bool>                        m_dirty{ false };
     mutable PSODiskStats                    m_stats{};
 };
 

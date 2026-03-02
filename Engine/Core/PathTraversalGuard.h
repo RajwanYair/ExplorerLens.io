@@ -1,8 +1,15 @@
+// PathTraversalGuard.h — Archive Extraction Path Traversal Prevention
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Security guard that validates paths extracted from archives to prevent
+// directory traversal attacks. Checks for ../ traversal, absolute/UNC/
+// device-path injection, symlink/junction escape (via reparse point
+// inspection), and Windows reserved device names (CON, NUL, etc.).
+// Every blocked attempt is categorized and counted for security auditing.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// PathTraversalGuard.h — Path traversal and symlink escape prevention
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -16,7 +23,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Traversal detection result
 enum class TraversalDetection : uint32_t {
     Safe = 0,
     DotDotTraversal = 1,
@@ -37,7 +43,6 @@ static const wchar_t* TraversalDetectionName(TraversalDetection d) {
     return (idx <= 7) ? names[idx] : L"Unknown";
 }
 
-// Path check result
 struct PathTraversalResult {
     bool                safe = false;
     TraversalDetection  detection = TraversalDetection::Safe;
@@ -45,7 +50,6 @@ struct PathTraversalResult {
     std::wstring        reason;
 };
 
-// Guard stats
 struct PathTraversalGuardStats {
     uint64_t totalChecks = 0;
     uint64_t totalBlocked = 0;

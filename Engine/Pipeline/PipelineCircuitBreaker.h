@@ -1,8 +1,16 @@
+// PipelineCircuitBreaker.h — Pipeline-Level Aggregate Circuit Breaker
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Implements Closed -> Open -> HalfOpen circuit-breaker semantics at the
+// aggregate pipeline level. A sliding window tracks the failure rate; once
+// it exceeds a configurable threshold the breaker trips, rejecting all
+// incoming requests for a cooldown period before allowing a small number
+// of probe requests. Successful probes close the circuit; any probe failure
+// re-trips it.
+//
+// Thread-safe singleton via atomics.
+
 #pragma once
-// ============================================================================
-// PipelineCircuitBreaker.h — Pipeline-level aggregate circuit breaker
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -32,7 +40,6 @@ static const wchar_t* PipelineCircuitStateName(PipelineCircuitState s) {
     }
 }
 
-// Configuration for pipeline circuit breaker
 struct PipelineBreakerConfig {
     double   failureRateThreshold = 0.50;       // Trip at 50% failure rate
     uint32_t minimumRequests = 10;          // Minimum requests before evaluating
@@ -42,7 +49,6 @@ struct PipelineBreakerConfig {
     uint32_t slidingWindowSize = 100;         // Window size for rate calculation
 };
 
-// Status snapshot
 struct PipelineCircuitBreakerStatus {
     PipelineCircuitState state = PipelineCircuitState::Closed;
     uint64_t     totalRequests = 0;

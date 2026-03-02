@@ -1,8 +1,16 @@
+// GPUMemoryTracker.h — Per-Category VRAM Tracking with Budget Enforcement
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Tracks GPU VRAM consumption across six categories (textures, render
+// targets, staging buffers, shader resources, pipeline states, general)
+// with atomic counters for thread safety. A configurable budget with
+// three threshold tiers (Elevated / High / Critical) triggers enforcement
+// actions. Allocations can be hard-rejected when the budget is exceeded.
+// Snapshots provide a per-category breakdown for diagnostics.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// GPUMemoryTracker.h — VRAM consumption tracking and budget enforcement
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -17,7 +25,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// VRAM allocation category
 enum class VRAMCategory : uint32_t {
     Texture = 0,
     RenderTarget = 1,
@@ -37,7 +44,6 @@ static const wchar_t* VRAMCategoryName(VRAMCategory c) {
     return (idx < static_cast<uint32_t>(VRAMCategory::Count)) ? names[idx] : L"Unknown";
 }
 
-// VRAM budget status
 enum class VRAMBudgetLevel : uint32_t {
     Normal = 0,   // Under 50% budget
     Elevated = 1,   // 50-75% budget
@@ -45,7 +51,6 @@ enum class VRAMBudgetLevel : uint32_t {
     Critical = 3    // >90% or over budget
 };
 
-// Per-category usage
 struct VRAMCategoryUsage {
     std::atomic<uint64_t> allocated{ 0 };
     std::atomic<uint64_t> peakAllocated{ 0 };
@@ -67,7 +72,6 @@ struct VRAMCategoryUsage {
     }
 };
 
-// VRAM snapshot
 struct VRAMSnapshot {
     uint64_t budgetBytes = 0;
     uint64_t totalAllocated = 0;
@@ -78,7 +82,6 @@ struct VRAMSnapshot {
     uint32_t categoryAllocCounts[static_cast<size_t>(VRAMCategory::Count)] = {};
 };
 
-// Configuration
 struct GPUMemoryTrackerConfig {
     uint64_t vramBudgetBytes = 512ULL * 1024 * 1024;  // 512 MB default
     double   elevatedThreshold = 0.50;

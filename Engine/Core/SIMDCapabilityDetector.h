@@ -32,19 +32,19 @@ namespace Engine {
 
 /// Individual SIMD features that can be detected
 enum class SIMDCap : uint8_t {
-    SSE2     = 0,
-    SSE3     = 1,
-    SSSE3    = 2,
-    SSE41    = 3,
-    SSE42    = 4,
-    AVX      = 5,
-    AVX2     = 6,
-    FMA      = 7,
-    AVX512F  = 8,
+    SSE2 = 0,
+    SSE3 = 1,
+    SSSE3 = 2,
+    SSE41 = 3,
+    SSE42 = 4,
+    AVX = 5,
+    AVX2 = 6,
+    FMA = 7,
+    AVX512F = 8,
     AVX512BW = 9,
-    POPCNT   = 10,
-    BMI1     = 11,
-    BMI2     = 12,
+    POPCNT = 10,
+    BMI1 = 11,
+    BMI2 = 12,
     COUNT
 };
 
@@ -63,10 +63,10 @@ struct SIMDDetectionResult {
     std::array<bool, static_cast<size_t>(SIMDCap::COUNT)> supported{};
     std::array<bool, static_cast<size_t>(SIMDCap::COUNT)> verified{};
     std::string cpuBrand;
-    uint32_t    cpuFamily   = 0;
-    uint32_t    cpuModel    = 0;
+    uint32_t    cpuFamily = 0;
+    uint32_t    cpuModel = 0;
     uint32_t    cpuStepping = 0;
-    bool        osSupportsAVX    = false;
+    bool        osSupportsAVX = false;
     bool        osSupportsAVX512 = false;
 
     /// Get the highest verified SIMD level
@@ -80,7 +80,7 @@ struct SIMDDetectionResult {
     /// Human-readable summary
     std::string Summary() const {
         std::string s = "CPU: " + cpuBrand + " | Max SIMD: " +
-                        SIMDCapName(GetMaxVerified()) + " | Features: ";
+            SIMDCapName(GetMaxVerified()) + " | Features: ";
         bool first = true;
         for (size_t i = 0; i < static_cast<size_t>(SIMDCap::COUNT); ++i) {
             if (verified[i]) {
@@ -140,38 +140,38 @@ private:
         int regs[4]{};
         __cpuid(regs, 1);
         m_result.cpuStepping = regs[0] & 0xF;
-        m_result.cpuModel    = ((regs[0] >> 4) & 0xF) | (((regs[0] >> 16) & 0xF) << 4);
-        m_result.cpuFamily   = ((regs[0] >> 8) & 0xF) + ((regs[0] >> 20) & 0xFF);
+        m_result.cpuModel = ((regs[0] >> 4) & 0xF) | (((regs[0] >> 16) & 0xF) << 4);
+        m_result.cpuFamily = ((regs[0] >> 8) & 0xF) + ((regs[0] >> 20) & 0xFF);
 
         int ecx1 = regs[2];
         int edx1 = regs[3];
 
-        m_result.supported[idx(SIMDCap::SSE2)]   = (edx1 >> 26) & 1;
-        m_result.supported[idx(SIMDCap::SSE3)]   = ecx1 & 1;
-        m_result.supported[idx(SIMDCap::SSSE3)]  = (ecx1 >> 9) & 1;
-        m_result.supported[idx(SIMDCap::SSE41)]  = (ecx1 >> 19) & 1;
-        m_result.supported[idx(SIMDCap::SSE42)]  = (ecx1 >> 20) & 1;
+        m_result.supported[idx(SIMDCap::SSE2)] = (edx1 >> 26) & 1;
+        m_result.supported[idx(SIMDCap::SSE3)] = ecx1 & 1;
+        m_result.supported[idx(SIMDCap::SSSE3)] = (ecx1 >> 9) & 1;
+        m_result.supported[idx(SIMDCap::SSE41)] = (ecx1 >> 19) & 1;
+        m_result.supported[idx(SIMDCap::SSE42)] = (ecx1 >> 20) & 1;
         m_result.supported[idx(SIMDCap::POPCNT)] = (ecx1 >> 23) & 1;
-        m_result.supported[idx(SIMDCap::AVX)]    = (ecx1 >> 28) & 1;
-        m_result.supported[idx(SIMDCap::FMA)]    = (ecx1 >> 12) & 1;
+        m_result.supported[idx(SIMDCap::AVX)] = (ecx1 >> 28) & 1;
+        m_result.supported[idx(SIMDCap::FMA)] = (ecx1 >> 12) & 1;
 
         // Check OS support for AVX (XSAVE + OSXSAVE)
         bool osxsave = (ecx1 >> 27) & 1;
         if (osxsave) {
             // Check XCR0 register for AVX state save support
             uint64_t xcr0 = _xgetbv(0);
-            m_result.osSupportsAVX    = (xcr0 & 0x6) == 0x6;           // SSE + AVX
+            m_result.osSupportsAVX = (xcr0 & 0x6) == 0x6;           // SSE + AVX
             m_result.osSupportsAVX512 = (xcr0 & 0xE6) == 0xE6;        // SSE + AVX + opmask + ZMM
         }
 
         // CPUID leaf 7: extended features
         __cpuidex(regs, 7, 0);
         int ebx7 = regs[1];
-        m_result.supported[idx(SIMDCap::AVX2)]    = (ebx7 >> 5) & 1;
-        m_result.supported[idx(SIMDCap::BMI1)]    = (ebx7 >> 3) & 1;
-        m_result.supported[idx(SIMDCap::BMI2)]    = (ebx7 >> 8) & 1;
+        m_result.supported[idx(SIMDCap::AVX2)] = (ebx7 >> 5) & 1;
+        m_result.supported[idx(SIMDCap::BMI1)] = (ebx7 >> 3) & 1;
+        m_result.supported[idx(SIMDCap::BMI2)] = (ebx7 >> 8) & 1;
         m_result.supported[idx(SIMDCap::AVX512F)] = (ebx7 >> 16) & 1;
-        m_result.supported[idx(SIMDCap::AVX512BW)]= (ebx7 >> 30) & 1;
+        m_result.supported[idx(SIMDCap::AVX512BW)] = (ebx7 >> 30) & 1;
 
         // Verify: feature supported by CPU AND enabled by OS
         for (size_t i = 0; i < static_cast<size_t>(SIMDCap::COUNT); ++i) {

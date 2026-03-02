@@ -1,8 +1,16 @@
+// DeploymentPreflightCheck.h — Pre-Deployment System Validation
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Validates system readiness for deploying the shell extension by running
+// five checks: COM CLSID registration, critical system DLL presence
+// (kernel32, user32, gdi32, ole32, shell32, d3d11), temp-directory write
+// permissions, Windows 10+ version requirement (via RtlGetVersion), and
+// sufficient disk space. The report's deployReady flag is true only when
+// no checks fail.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// DeploymentPreflightCheck.h — Pre-deployment validation of dependencies
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -15,7 +23,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Check result status
 enum class PreflightCheckStatus : uint32_t {
     Pass = 0,
     Warning = 1,
@@ -23,7 +30,6 @@ enum class PreflightCheckStatus : uint32_t {
     Skipped = 3
 };
 
-// Individual check result
 struct PreflightCheckResult {
     std::wstring          checkName;
     PreflightCheckStatus  status = PreflightCheckStatus::Skipped;
@@ -31,7 +37,6 @@ struct PreflightCheckResult {
     uint32_t              durationMs = 0;
 };
 
-// Overall preflight report
 struct PreflightReport {
     uint64_t                          timestamp = 0;
     uint32_t                          totalChecks = 0;

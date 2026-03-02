@@ -1,8 +1,15 @@
+// PluginResourceLimiter.h — Per-Plugin Resource Quota Enforcement
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Enforces per-plugin resource quotas (memory, CPU time, file handles,
+// threads, disk I/O) with three escalating enforcement actions: Warning,
+// Throttle, Terminate. Memory exceeding quota by 20% triggers throttling,
+// 50% triggers termination. Each plugin can receive a custom quota or
+// inherit the default. Usage is tracked per-plugin for monitoring.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// PluginResourceLimiter.h — Per-plugin resource quota enforcement
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -15,7 +22,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Resource limit definition
 struct PluginResourceQuota {
     uint64_t maxMemoryBytes = 256ULL * 1024 * 1024;  // 256 MB
     uint64_t maxCpuTimeMs = 30000;                  // 30s CPU time
@@ -27,7 +33,6 @@ struct PluginResourceQuota {
     bool     enableHandleLimit = true;
 };
 
-// Per-plugin resource usage
 struct PluginResourceUsage {
     std::wstring pluginId;
     uint64_t     memoryBytes = 0;
@@ -40,7 +45,6 @@ struct PluginResourceUsage {
     bool         terminated = false;
 };
 
-// Enforcement action
 enum class ResourceLimitAction : uint32_t {
     None = 0,
     Warning = 1,
@@ -48,7 +52,6 @@ enum class ResourceLimitAction : uint32_t {
     Terminate = 3
 };
 
-// Limiter stats
 struct PluginResourceLimiterStats {
     uint64_t totalWarnings = 0;
     uint64_t totalThrottles = 0;

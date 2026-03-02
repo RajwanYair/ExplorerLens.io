@@ -1,8 +1,15 @@
+// GPUFallbackChain.h — Ordered GPU Backend Fallback Chain
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Manages an ordered chain of GPU rendering backends (DX12 -> DX11 ->
+// Vulkan -> CPU) and selects the best available one for each request.
+// Backends that accumulate consecutive failures are temporarily demoted
+// and skip-listed; after a cooldown they are automatically re-promoted.
+// CPU is always the last-resort fallback that cannot be demoted.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// GPUFallbackChain.h — Ordered GPU backend fallback with per-format overrides
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -17,7 +24,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// GPU backend enumeration (ordered by preference)
+/// Backends listed in preference order; first available wins.
 enum class GPUBackendId : uint32_t {
     DX12 = 0,
     DX11 = 1,
@@ -33,7 +40,6 @@ static const wchar_t* GPUBackendName(GPUBackendId id) {
     return (idx < static_cast<uint32_t>(GPUBackendId::Count)) ? names[idx] : L"Unknown";
 }
 
-// Backend availability status
 struct GPUBackendStatus {
     GPUBackendId id = GPUBackendId::None;
     bool         available = false;
@@ -44,7 +50,6 @@ struct GPUBackendStatus {
     double       avgLatencyMs = 0.0;
 };
 
-// Fallback chain configuration
 struct GPUFallbackConfig {
     uint32_t maxConsecutiveFailures = 3;     // Failures before demotion
     uint32_t demotionCooldownMs = 60000; // 60s cooldown
@@ -54,7 +59,6 @@ struct GPUFallbackConfig {
     bool     alwaysFallbackCPU = true;  // CPU always available as last resort
 };
 
-// Chain selection result
 struct GPUBackendSelection {
     GPUBackendId selectedBackend = GPUBackendId::CPU;
     uint32_t     attemptIndex = 0;    // Which position in chain (0=primary)
@@ -62,7 +66,6 @@ struct GPUBackendSelection {
     const wchar_t* reason = L"";
 };
 
-// Chain stats
 struct GPUFallbackStats {
     uint64_t totalSelections = 0;
     uint64_t fallbackSelections = 0;

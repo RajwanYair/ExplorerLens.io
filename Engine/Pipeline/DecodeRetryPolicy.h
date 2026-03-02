@@ -1,8 +1,16 @@
+// DecodeRetryPolicy.h — Configurable Retry with Exponential Backoff
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Encapsulates retry logic for transient decode failures, categorized into
+// six failure kinds (IOTimeout, GPUDeviceLost, MemoryPressure, CodecBusy,
+// NetworkTimeout, FileLocked) each independently togglable. Supports four
+// backoff strategies from fixed delay through exponential-with-jitter.
+// Evaluate() returns a RetryDecision with computed delay, and cumulative
+// stats are maintained for observability.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// DecodeRetryPolicy.h — Configurable retry strategy for transient decode failures
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -16,7 +24,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Types of transient failures that can be retried
 enum class DecodeFailureKind : uint32_t {
     IOTimeout = 0,
     GPUDeviceLost = 1,
@@ -37,7 +44,6 @@ static const wchar_t* DecodeFailureKindName(DecodeFailureKind k) {
     return (idx < static_cast<uint32_t>(DecodeFailureKind::Count)) ? names[idx] : L"Unknown";
 }
 
-// Backoff strategy type
 enum class BackoffStrategy : uint32_t {
     Fixed = 0,  // Same delay every time
     Linear = 1,  // delay * attempt
@@ -45,7 +51,6 @@ enum class BackoffStrategy : uint32_t {
     ExponentialWithJitter = 3  // Exponential + random jitter
 };
 
-// Configuration for retry policy
 struct DecodeRetryConfig {
     uint32_t        maxAttempts = 3;
     uint32_t        baseDelayMs = 50;
@@ -59,7 +64,6 @@ struct DecodeRetryConfig {
     bool            retryOnFileLocked = true;
 };
 
-// Result of a retry decision
 struct RetryDecision {
     bool     shouldRetry = false;
     uint32_t delayMs = 0;
@@ -67,7 +71,6 @@ struct RetryDecision {
     DecodeFailureKind failureKind = DecodeFailureKind::Unknown;
 };
 
-// Stats for retry tracking
 struct DecodeRetryStats {
     uint64_t totalAttempts = 0;
     uint64_t totalRetries = 0;

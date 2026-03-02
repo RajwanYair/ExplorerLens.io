@@ -1,8 +1,15 @@
+// PluginCrashRecovery.h — Automatic Plugin Crash Detection and Recovery
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Monitors plugin crashes and applies a graduated response: immediate
+// auto-restart for the first few crashes, quarantine for repeated
+// crashers, and permanent disable after exceeding max recovery attempts.
+// Crash counters auto-reset after a configurable time window (default
+// 1 hour). IsPluginAvailable() gates access based on recovery state.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// PluginCrashRecovery.h — Automatic plugin crash detection and recovery
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -16,7 +23,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Plugin recovery state
 enum class PluginRecoveryState : uint32_t {
     Healthy = 0,
     Crashed = 1,
@@ -32,7 +38,6 @@ static const wchar_t* PluginRecoveryStateName(PluginRecoveryState s) {
     return names[static_cast<uint32_t>(s)];
 }
 
-// Per-plugin crash record
 struct PluginCrashRecord {
     std::wstring         pluginId;
     PluginRecoveryState  state = PluginRecoveryState::Healthy;
@@ -44,7 +49,6 @@ struct PluginCrashRecord {
     std::wstring         lastCrashReason;
 };
 
-// Configuration
 struct PluginCrashRecoveryConfig {
     uint32_t maxCrashesBeforeQuarantine = 3;
     uint32_t quarantineDurationMs = 300000;  // 5 minutes
@@ -54,7 +58,6 @@ struct PluginCrashRecoveryConfig {
     bool     permanentDisableOnExceed = true;    // Disable after max attempts
 };
 
-// Recovery stats
 struct PluginCrashRecoveryStats {
     uint64_t totalCrashes = 0;
     uint64_t totalRecoveries = 0;

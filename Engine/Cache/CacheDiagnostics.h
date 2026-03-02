@@ -1,8 +1,15 @@
+// CacheDiagnostics.h — Cache Health Dashboard
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Real-time health dashboard for the thumbnail cache. Hit rate, eviction
+// pressure, and memory utilization are combined to compute a five-tier
+// health classification (Excellent -> Critical). Atomic counters allow
+// thread-safe recording of cache events, and GenerateReport() produces
+// a timestamped snapshot of all diagnostic metrics.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// CacheDiagnostics.h — Cache health analysis and diagnostics dashboard
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -17,7 +24,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Cache health tier
 enum class CacheHealthTier : uint32_t {
     Excellent = 0,  // Hit rate > 90%, no pressure
     Good = 1,  // Hit rate > 70%, low pressure
@@ -33,7 +39,6 @@ static const wchar_t* CacheHealthTierName(CacheHealthTier t) {
     return names[static_cast<uint32_t>(t)];
 }
 
-// Partition usage info
 struct CachePartitionInfo {
     std::wstring name;
     uint64_t     capacityBytes = 0;
@@ -47,7 +52,6 @@ struct CachePartitionInfo {
     }
 };
 
-// Full diagnostic report
 struct CacheDiagnosticReport {
     CacheHealthTier  healthTier = CacheHealthTier::Good;
     double           overallHitRate = 0.0;

@@ -1,8 +1,15 @@
+// ThumbnailRequestValidator.h — Pre-Pipeline Request Validation
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Front-gate validator that checks thumbnail requests for null/empty paths,
+// path-length limits, invalid characters, dimension bounds, and optionally
+// file existence/size before entering the decode pipeline. Each rejection
+// reason is tracked in per-error-code counters for diagnostics. The
+// file-existence check is off by default to avoid I/O on the hot path.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// ThumbnailRequestValidator.h — Input validation for thumbnail requests
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -16,7 +23,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Validation error codes
 enum class RequestValidationError : uint32_t {
     None = 0,
     NullPath = 1,
@@ -44,7 +50,6 @@ static const wchar_t* RequestValidationErrorName(RequestValidationError e) {
     return (idx <= 12) ? names[idx] : L"Unknown";
 }
 
-// Validation result
 struct RequestValidationResult {
     bool                              valid = false;
     std::vector<RequestValidationError> errors;
@@ -59,7 +64,6 @@ struct RequestValidationResult {
     }
 };
 
-// Validation constraints
 struct RequestValidationLimits {
     uint32_t maxWidth = 4096;
     uint32_t maxHeight = 4096;
@@ -69,7 +73,6 @@ struct RequestValidationLimits {
     bool     checkFileSize = false;
 };
 
-// Validation stats
 struct RequestValidationStats {
     uint64_t totalValidated = 0;
     uint64_t totalValid = 0;

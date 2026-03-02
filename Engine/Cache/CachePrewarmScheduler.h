@@ -1,8 +1,15 @@
+// CachePrewarmScheduler.h — MRU-Driven Cache Prewarm Scheduling
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Predicts which directories the user will browse next using a
+// frequency + recency MRU model, then schedules cache pre-warm tasks in
+// priority order. Tasks are priority-inserted into a bounded queue; LRU
+// eviction trims the MRU table at capacity. Explicit scheduling at
+// configurable priority levels is also supported.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// CachePrewarmScheduler.h — Intelligent pre-warming schedule based on patterns
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -18,7 +25,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Scheduling priority for prewarm
 enum class PrewarmPriority : uint32_t {
     Critical = 0,  // User just opened this directory
     High = 1,  // Recently visited, high MRU rank
@@ -27,7 +33,6 @@ enum class PrewarmPriority : uint32_t {
     Idle = 4   // Only when system is idle
 };
 
-// A single prewarm task
 struct PrewarmTask {
     std::wstring directoryPath;
     PrewarmPriority priority = PrewarmPriority::Medium;
@@ -38,7 +43,6 @@ struct PrewarmTask {
     bool      cancelled = false;
 };
 
-// MRU entry for directory access tracking
 struct DirectoryMRUEntry {
     std::wstring path;
     uint32_t accessCount = 0;
@@ -58,7 +62,6 @@ struct DirectoryMRUEntry {
     }
 };
 
-// Scheduler configuration
 struct PrewarmSchedulerConfig {
     uint32_t maxMRUEntries = 128;
     uint32_t maxConcurrentTasks = 4;
@@ -68,7 +71,6 @@ struct PrewarmSchedulerConfig {
     double   recencyWeight = 0.3;
 };
 
-// Scheduler stats
 struct PrewarmSchedulerStats {
     uint64_t totalScheduled = 0;
     uint64_t totalCompleted = 0;

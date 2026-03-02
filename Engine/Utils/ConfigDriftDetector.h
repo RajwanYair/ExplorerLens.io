@@ -1,8 +1,14 @@
+// ConfigDriftDetector.h — Configuration Drift Detection
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Captures a baseline of configuration key-value pairs and compares them
+// against current runtime values to detect drift. Missing keys, changed
+// values, and unexpected new keys are each flagged with appropriate
+// severity. A quick HasDrift() check is available for gate logic.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// ConfigDriftDetector.h — Configuration drift detection
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -16,7 +22,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Drift severity
 enum class ConfigDriftSeverity : uint32_t {
     None = 0,
     Info = 1,
@@ -24,7 +29,6 @@ enum class ConfigDriftSeverity : uint32_t {
     Critical = 3
 };
 
-// A single drift finding
 struct ConfigDriftFinding {
     std::wstring        key;
     std::wstring        expectedValue;
@@ -33,14 +37,12 @@ struct ConfigDriftFinding {
     std::wstring        description;
 };
 
-// Snapshot of config values
 struct ConfigSnapshot {
     uint64_t timestamp = 0;
     uint32_t entryCount = 0;
     std::unordered_map<std::wstring, std::wstring> values;
 };
 
-// Drift report
 struct ConfigDriftReport {
     uint64_t                          checkTimestamp = 0;
     uint32_t                          totalKeys = 0;

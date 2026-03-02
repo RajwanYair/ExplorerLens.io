@@ -7936,7 +7936,7 @@ TEST(TestGateV22_AllKPIsPresent) {
 }
 
 //==============================================================================
-// v14.0 "Apex" Tests
+// Advanced Format & Pipeline Tests
 //==============================================================================
 
 // VersionSyncV14
@@ -16876,7 +16876,7 @@ TEST(TestSIMDCapabilityDetector_Detect) {
     ASSERT(!result.cpuBrand.empty());
 }
 
-// ===== Batch 2: Pipeline Reliability & Observability =====
+// --- Pipeline Reliability & Observability ---
 
 TEST(TestPipelineMetricsCollector_Init) {
     auto& mc = PipelineMetricsCollector::Instance();
@@ -16928,7 +16928,7 @@ TEST(TestDecoderOutputValidator_Init) {
     ASSERT(result.failure == OutputValidationFailure::NullBitmap);
 }
 
-// ===== Batch 2: Cache Infrastructure =====
+// --- Cache Infrastructure ---
 
 TEST(TestCacheCoherencyManager_Init) {
     auto& cm = CacheCoherencyManager::Instance();
@@ -16959,7 +16959,7 @@ TEST(TestCacheDiagnostics_Health) {
     ASSERT(tier != CacheHealthTier::Critical);
 }
 
-// ===== Batch 2: GPU & Memory =====
+// --- GPU & Memory Management ---
 
 TEST(TestGPUFallbackChain_Select) {
     auto& fc = GPUFallbackChain::Instance();
@@ -17009,7 +17009,7 @@ TEST(TestAllocationTracker_Track) {
     at.TrackFree(dummyBuf);
 }
 
-// ===== Batch 2: Plugin Ecosystem =====
+// --- Plugin Ecosystem ---
 
 TEST(TestPluginDependencyResolver_Resolve) {
     auto& dr = PluginDependencyResolver::Instance();
@@ -17045,7 +17045,7 @@ TEST(TestPluginResourceLimiter_Quota) {
     ASSERT(!rl.IsOverQuota(L"TestPlugin"));
 }
 
-// ===== Batch 2: Security & Input Validation =====
+// --- Security & Input Validation ---
 
 TEST(TestInputSanitizer_Path) {
     auto& is = InputSanitizer::Instance();
@@ -17071,7 +17071,7 @@ TEST(TestPathTraversalGuard_Detect) {
     ASSERT(unsafe.detection == TraversalDetection::DotDotTraversal);
 }
 
-// ===== Batch 2: Quality Assurance & Operations =====
+// --- Quality Assurance & Operations ---
 
 TEST(TestConfigDriftDetector_Drift) {
     auto& dd = ConfigDriftDetector::Instance();
@@ -20748,8 +20748,8 @@ int main() {
     RUN_TEST(TestFormatStatusProvider_Formats);
     RUN_TEST(TestSIMDCapabilityDetector_Detect);
 
-    // Batch 2: Pipeline Reliability, Cache, GPU, Memory, Plugin, Security, Operations
-    std::wcout << L"Batch 2: Reliability & Operations Tests..." << std::endl;
+    // Reliability, Cache, GPU, Memory, Plugin, Security & Operations Tests
+    std::wcout << L"Reliability & Operations Tests..." << std::endl;
     RUN_TEST(TestPipelineMetricsCollector_Init);
     RUN_TEST(TestPipelineCircuitBreaker_State);
     RUN_TEST(TestDecodeRetryPolicy_Evaluate);

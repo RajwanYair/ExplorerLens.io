@@ -1,8 +1,15 @@
+// OperationalReadinessChecker.h — Runtime Subsystem Health Probe
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Probes five subsystems for operational readiness: GPU availability
+// (D3D11), disk I/O (free space), physical memory headroom, WIC codec
+// availability, and basic memory allocation capability for cache. Each
+// subsystem is graded Ready, Degraded, or Unavailable. The system is
+// considered operational only when no subsystem is Unavailable.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// OperationalReadinessChecker.h — Runtime subsystem readiness probe
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -15,7 +22,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Subsystem readiness
 enum class SubsystemReadiness : uint32_t {
     Ready = 0,
     Degraded = 1,
@@ -23,7 +29,6 @@ enum class SubsystemReadiness : uint32_t {
     NotChecked = 3
 };
 
-// Individual subsystem probe result
 struct SubsystemProbeResult {
     std::wstring         name;
     SubsystemReadiness   readiness = SubsystemReadiness::NotChecked;
@@ -31,7 +36,6 @@ struct SubsystemProbeResult {
     uint32_t             latencyMs = 0;
 };
 
-// Operational readiness report
 struct OperationalReadinessReport {
     uint64_t                             timestamp = 0;
     uint32_t                             totalProbes = 0;

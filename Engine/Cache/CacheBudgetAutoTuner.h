@@ -38,11 +38,11 @@ namespace Engine {
 // ============================================================================
 
 enum class CacheBudgetTier : uint8_t {
-    Minimum  = 0,   //  64 MB
-    Compact  = 1,   // 128 MB
-    Default  = 2,   // 256 MB
-    Optimal  = 3,   // 512 MB
-    Maximum  = 4    //   1 GB
+    Minimum = 0,   //  64 MB
+    Compact = 1,   // 128 MB
+    Default = 2,   // 256 MB
+    Optimal = 3,   // 512 MB
+    Maximum = 4    //   1 GB
 };
 
 inline const char* BudgetTierName(CacheBudgetTier tier) {
@@ -62,27 +62,27 @@ inline uint64_t BudgetTierSizeMB(CacheBudgetTier tier) {
 // ============================================================================
 
 struct CacheBudgetConfig {
-    uint64_t minBudgetMB          = 64;
-    uint64_t maxBudgetMB          = 1024;
-    uint32_t tuningIntervalSec    = 30;
-    double   expandThreshold      = 0.85;   // Expand when utilization > 85%
-    double   shrinkThreshold      = 0.30;   // Shrink when utilization < 30%
+    uint64_t minBudgetMB = 64;
+    uint64_t maxBudgetMB = 1024;
+    uint32_t tuningIntervalSec = 30;
+    double   expandThreshold = 0.85;   // Expand when utilization > 85%
+    double   shrinkThreshold = 0.30;   // Shrink when utilization < 30%
     double   missRateExpandTrigger = 0.25;  // Expand when miss rate > 25%
-    double   minDiskFreePercent   = 10.0;   // Don't expand if disk < 10% free
+    double   minDiskFreePercent = 10.0;   // Don't expand if disk < 10% free
     bool     respectMemoryPressure = true;
-    bool     enableDiskSpaceCheck  = true;
+    bool     enableDiskSpaceCheck = true;
 };
 
 struct CacheBudgetSnapshot {
-    CacheBudgetTier currentTier     = CacheBudgetTier::Default;
+    CacheBudgetTier currentTier = CacheBudgetTier::Default;
     uint64_t        currentBudgetMB = 256;
-    uint64_t        usedMB          = 0;
-    double          utilizationPct  = 0.0;
-    double          hitRate         = 0.0;
-    double          missRate        = 0.0;
-    uint64_t        totalRAM_MB     = 0;
-    uint64_t        availRAM_MB     = 0;
-    uint64_t        diskFreeMB      = 0;
+    uint64_t        usedMB = 0;
+    double          utilizationPct = 0.0;
+    double          hitRate = 0.0;
+    double          missRate = 0.0;
+    uint64_t        totalRAM_MB = 0;
+    uint64_t        availRAM_MB = 0;
+    uint64_t        diskFreeMB = 0;
     uint32_t        adjustmentCount = 0;
     std::chrono::steady_clock::time_point lastTuning{};
     std::string     lastAction;
@@ -140,7 +140,7 @@ public:
         }
         // Low utilization → shrink
         else if (m_snapshot.utilizationPct < m_config.shrinkThreshold * 100 &&
-                 m_snapshot.currentBudgetMB > m_config.minBudgetMB) {
+            m_snapshot.currentBudgetMB > m_config.minBudgetMB) {
             newBudget = ShrinkBudget(m_snapshot.currentBudgetMB);
             action = "shrink";
         }
@@ -148,13 +148,13 @@ public:
         // Memory pressure override → force shrink
         if (m_config.respectMemoryPressure && IsUnderMemoryPressure()) {
             newBudget = (std::max)(m_config.minBudgetMB,
-                                    m_snapshot.currentBudgetMB / 2);
+                m_snapshot.currentBudgetMB / 2);
             action = "pressure-shrink";
         }
 
         // Apply bounds
         newBudget = (std::max)(m_config.minBudgetMB,
-                                (std::min)(m_config.maxBudgetMB, newBudget));
+            (std::min)(m_config.maxBudgetMB, newBudget));
 
         if (newBudget != m_snapshot.currentBudgetMB) {
             m_snapshot.adjustmentCount++;

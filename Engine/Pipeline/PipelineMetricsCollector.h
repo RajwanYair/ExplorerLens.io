@@ -1,8 +1,16 @@
+// PipelineMetricsCollector.h — Unified Pipeline Metrics Aggregation
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Lock-free, singleton metrics infrastructure for the thumbnail generation
+// pipeline. Each pipeline stage (I/O, decode, GPU render, cache, validation)
+// gets its own atomic counter set, and the collector captures consistent
+// point-in-time snapshots across all stages. StageTiming provides RAII
+// scope instrumentation. Overall throughput, error rates, and uptime are
+// tracked for observability dashboards.
+//
+// Thread-safe singleton — call PipelineMetricsCollector::Instance().
+
 #pragma once
-// ============================================================================
-// PipelineMetricsCollector.h — Unified pipeline-wide metrics aggregation
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -18,7 +26,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Pipeline stages tracked
 enum class PipelineStageId : uint32_t {
     FormatDetection = 0,
     Decode = 1,
@@ -40,7 +47,6 @@ static const wchar_t* PipelineStageName(PipelineStageId id) {
     return (idx < static_cast<uint32_t>(PipelineStageId::Count)) ? names[idx] : L"Unknown";
 }
 
-// Per-stage metrics snapshot
 struct StageMetricsSnapshot {
     uint64_t totalInvocations = 0;
     uint64_t totalErrors = 0;
@@ -51,7 +57,6 @@ struct StageMetricsSnapshot {
     uint32_t queueDepth = 0;
 };
 
-// Full pipeline metrics snapshot
 struct PipelineMetricsSnapshot {
     std::array<StageMetricsSnapshot, static_cast<size_t>(PipelineStageId::Count)> stages;
     uint64_t totalRequests = 0;
@@ -62,7 +67,6 @@ struct PipelineMetricsSnapshot {
     uint64_t snapshotTimestamp = 0;
 };
 
-// Per-stage atomic counters
 struct StageCounters {
     std::atomic<uint64_t> invocations{ 0 };
     std::atomic<uint64_t> errors{ 0 };
@@ -107,7 +111,6 @@ struct StageCounters {
     }
 };
 
-// RAII timing scope for a stage
 class StageTiming {
 public:
     StageTiming(StageCounters& counters) : m_counters(counters) {

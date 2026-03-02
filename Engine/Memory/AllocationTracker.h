@@ -1,8 +1,15 @@
+// AllocationTracker.h — Per-Site Memory Attribution and Leak Detection
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Debug-mode allocation tracker that records every allocation by call site
+// (file, line, function, component) and maps it to a registered site record.
+// Provides GetTopConsumers() for component-level memory profiling and
+// GetLeakSuspects() for sites whose allocation count exceeds free count.
+// All access is mutex-protected. Disabled by default in production builds.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// AllocationTracker.h — Per-site memory attribution and leak detection wrapper
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -19,7 +26,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Allocation tag for call-site identification
 struct AllocationTag {
     const char* file = nullptr;
     int         line = 0;
@@ -27,7 +33,6 @@ struct AllocationTag {
     const char* component = nullptr;  // e.g., "JPEG2000Decoder", "BitmapPool"
 };
 
-// Per-site allocation record
 struct AllocationSiteRecord {
     AllocationTag tag;
     uint64_t currentBytes = 0;
@@ -37,7 +42,6 @@ struct AllocationSiteRecord {
     uint32_t totalFrees = 0;
 };
 
-// Individual allocation entry for tracking
 struct TrackedAllocation {
     void* address = nullptr;
     uint64_t size = 0;
@@ -45,7 +49,6 @@ struct TrackedAllocation {
     uint64_t timestamp = 0;
 };
 
-// Summary by component
 struct ComponentMemorySummary {
     std::string component;
     uint64_t    currentBytes = 0;
@@ -53,7 +56,6 @@ struct ComponentMemorySummary {
     uint32_t    activeCount = 0;
 };
 
-// Global tracker stats
 struct AllocationTrackerStats {
     uint64_t totalAllocated = 0;
     uint64_t totalFreed = 0;

@@ -1,8 +1,15 @@
+// PluginDependencyResolver.h — Topological Plugin Dependency Resolution
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Builds a directed dependency graph of plugins and resolves a safe load
+// order using Kahn's topological sort. Checks for missing non-optional
+// dependencies and version constraint violations before sorting. Cycles
+// are detected when the sorted output is smaller than the node set.
+// Optional dependencies are tolerated as absent.
+//
+// Thread-safe singleton.
+
 #pragma once
-// ============================================================================
-// PluginDependencyResolver.h — Topological plugin dependency resolution
-// ExplorerLens Engine v15.0.0 "Zenith"
-// ============================================================================
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -18,7 +25,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-// Plugin dependency declaration
 struct PluginDependencyDecl {
     std::wstring pluginId;
     std::wstring dependsOnId;
@@ -27,7 +33,6 @@ struct PluginDependencyDecl {
     bool         optional = false;  // If true, missing dep doesn't block
 };
 
-// Plugin node for dependency graph
 struct PluginNode {
     std::wstring pluginId;
     uint32_t     versionMajor = 1;
@@ -37,7 +42,6 @@ struct PluginNode {
     uint32_t     loadOrder = 0;
 };
 
-// Resolution result
 enum class DependencyResolutionStatus : uint32_t {
     Success = 0,
     CyclicDependency = 1,
