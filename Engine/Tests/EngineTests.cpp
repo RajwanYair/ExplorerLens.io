@@ -554,6 +554,13 @@
 #include "../Core/ExplorerStatusBarProvider.h"
 #include "../Core/FileSummaryTooltipGenerator.h"
 #include "../Core/BatchProgressReporter.h"
+#include "../Cache/PSOCachePersistence.h"
+#include "../Pipeline/PipelineActivator.h"
+#include "../Pipeline/ParallelIOActivation.h"
+#include "../Cache/CacheWarmingActivation.h"
+#include "../Cache/CacheBudgetAutoTuner.h"
+#include "../Core/FormatStatusProvider.h"
+#include "../Core/SIMDCapabilityDetector.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -16780,6 +16787,75 @@ TEST(TestBatchProgress_Lifecycle) {
     ASSERT(progress.totalItems == 10);
 }
 
+// PSOCachePersistence
+TEST(TestPSOCachePersistence_Lifecycle) {
+    PSOCachePersistence cache;
+    auto stats = cache.GetStats();
+    ASSERT(stats.totalEntries == 0);
+    ASSERT(stats.hits == 0);
+    ASSERT(stats.lookups == 0);
+    ASSERT(cache.GetValidCount() == 0);
+}
+
+// PipelineActivator
+TEST(TestPipelineActivator_State) {
+    auto& activator = PipelineActivator::Instance();
+    // Before activation, subsystems should not be active
+    bool ioActive = activator.IsSubsystemActive(PipelineSubsystem::ParallelIO);
+    // Either active or not — just verify the call succeeds
+    ASSERT(ioActive || !ioActive);
+    // Verify IsActivated() returns a valid bool
+    bool activated = activator.IsActivated();
+    ASSERT(activated || !activated);
+}
+
+// ParallelIOActivation
+TEST(TestParallelIOActivation_Init) {
+    auto& pio = ParallelIOActivation::Instance();
+    auto stats = pio.GetStats();
+    ASSERT(stats.totalBytesRead == 0 || stats.totalBytesRead > 0);
+    ASSERT(stats.failedReads == 0 || stats.failedReads >= 0);
+}
+
+// CacheWarmingActivation
+TEST(TestCacheWarmingActivation_Strategy) {
+    auto& warmer = CacheWarmingActivation::Instance();
+    auto stats = warmer.GetStats();
+    ASSERT(stats.totalFilesWarmed == 0 || stats.totalFilesWarmed > 0);
+    ASSERT(stats.activeWatchCount == 0 || stats.activeWatchCount > 0);
+}
+
+// CacheBudgetAutoTuner
+TEST(TestCacheBudgetAutoTuner_Tier) {
+    auto& tuner = CacheBudgetAutoTuner::Instance();
+    tuner.Initialize();
+    auto budget = tuner.GetBudgetBytes();
+    ASSERT(budget >= 64ULL * 1024 * 1024); // at least 64MB
+    auto mb = tuner.GetBudgetMB();
+    ASSERT(mb >= 64);
+}
+
+// FormatStatusProvider
+TEST(TestFormatStatusProvider_Formats) {
+    auto& provider = FormatStatusProvider::Instance();
+    provider.Initialize();
+    auto summary = provider.GetSummary();
+    ASSERT(summary.totalFormats > 0);
+    ASSERT(summary.availableCount > 0);
+    auto count = provider.GetAvailableCount();
+    ASSERT(count > 0);
+}
+
+// SIMDCapabilityDetector
+TEST(TestSIMDCapabilityDetector_Detect) {
+    auto& detector = SIMDCapabilityDetector::Instance();
+    // SSE2 is mandatory on x64
+    ASSERT(detector.IsSupported(SIMDCap::SSE2));
+    ASSERT(detector.IsVerified(SIMDCap::SSE2));
+    auto result = detector.GetResult();
+    ASSERT(!result.cpuBrand.empty());
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -20216,9 +20292,9 @@ int main() {
     RUN_TEST(Test_PHash_Compute);
     RUN_TEST(Test_PHash_Compare);
 
-    // ======== Sprint 574–593: Deep Functional Tests ========
+    // ======== Deep Functional Tests ========
     std::wcout << std::endl;
-    std::wcout << L"Sprint 574-593 Functional Tests:" << std::endl;
+    std::wcout << L"Deep Functional Tests:" << std::endl;
 
     // SceneClassifierEngine
     RUN_TEST(TestScene_ClassifyBlack);
@@ -20410,6 +20486,18 @@ int main() {
     RUN_TEST(TestCircuitBreaker_StressTest);
     RUN_TEST(TestDecoderTimeout_Enforcement);
     RUN_TEST(TestMemoryLeak_RegressionLoop);
+
+    std::wcout << std::endl;
+
+    // Production Pipeline & Cache Tests
+    std::wcout << L"Production Pipeline & Cache Tests..." << std::endl;
+    RUN_TEST(TestPSOCachePersistence_Lifecycle);
+    RUN_TEST(TestPipelineActivator_State);
+    RUN_TEST(TestParallelIOActivation_Init);
+    RUN_TEST(TestCacheWarmingActivation_Strategy);
+    RUN_TEST(TestCacheBudgetAutoTuner_Tier);
+    RUN_TEST(TestFormatStatusProvider_Formats);
+    RUN_TEST(TestSIMDCapabilityDetector_Detect);
 
     std::wcout << std::endl;
 

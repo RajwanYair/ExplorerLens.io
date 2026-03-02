@@ -343,6 +343,10 @@ set(ENGINE_HEADERS
     Core/IntegrationTestRunner.h
     Core/SBOMGenerator.h
 
+    # Sprint 644 — PIpeline activation, status, SIMD detection
+    Core/FormatStatusProvider.h
+    Core/SIMDCapabilityDetector.h
+
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
     Pipeline/BatchProcessor.h
@@ -363,6 +367,8 @@ set(ENGINE_HEADERS
     Pipeline/DecoderPriorityScheduler.h
     Pipeline/FilesystemWatchdog.h
     Pipeline/ParallelIOPipeline.h
+    Pipeline/PipelineActivator.h
+    Pipeline/ParallelIOActivation.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -470,6 +476,9 @@ set(ENGINE_HEADERS
     Cache/CacheMigrationEngine.h
     Cache/CacheEncryptionLayer.h
     Cache/SubMillisecondCacheEngine.h
+    Cache/PSOCachePersistence.h
+    Cache/CacheWarmingActivation.h
+    Cache/CacheBudgetAutoTuner.h
 
     # Plugin system
     Plugin/CrashHandler.h
