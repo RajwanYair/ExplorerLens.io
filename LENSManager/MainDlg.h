@@ -5,6 +5,9 @@
 #include "regmanager.h"
 #include "ChangeSummaryDlg.h"
 #include "DarkModeController.h"
+#include "FormatStatusProvider.h"
+#include "PerformanceDashboard.h"
+#include "SystemTrayIcon.h"
 
 #include <Htmlhelp.h>
 #include <map>
@@ -36,10 +39,16 @@ public:
 		MESSAGE_HANDLER(WM_CTLCOLORSTATIC, OnCtlColor)
 		MESSAGE_HANDLER(WM_CTLCOLORBTN, OnCtlColor)
 		MESSAGE_HANDLER(WM_CTLCOLOREDIT, OnCtlColor)
+		MESSAGE_HANDLER(ExplorerLens::WM_TRAYICON, OnTrayMessage)
 		COMMAND_ID_HANDLER(IDOK, OnOK)
 		COMMAND_ID_HANDLER(IDC_APPLY, OnApply)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
 		COMMAND_ID_HANDLER(IDC_BTN_LOAD_CONFIG, OnLoadConfig)
+		COMMAND_ID_HANDLER(IDC_BTN_THEME, OnToggleTheme)
+		COMMAND_ID_HANDLER(IDC_BTN_EXPORT_DIAG, OnExportDiagnostics)
+		COMMAND_ID_HANDLER(ExplorerLens::ID_TRAY_OPEN, OnTrayOpen)
+		COMMAND_ID_HANDLER(ExplorerLens::ID_TRAY_ABOUT, OnTrayAbout)
+		COMMAND_ID_HANDLER(ExplorerLens::ID_TRAY_EXIT, OnTrayExit)
 		COMMAND_HANDLER(IDC_CB_CBZ, BN_CLICKED, OnCheckboxClicked)
 		COMMAND_HANDLER(IDC_CB_CBR, BN_CLICKED, OnCheckboxClicked)
 		COMMAND_HANDLER(IDC_CB_CB7, BN_CLICKED, OnCheckboxClicked)
@@ -108,6 +117,12 @@ public:
 	LRESULT OnLoadConfig(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnResetDefaults(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnExportConfig(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnToggleTheme(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnExportDiagnostics(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnTrayMessage(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
+	LRESULT OnTrayOpen(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnTrayAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnTrayExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	void OnSelectAll();
 	void OnDeselectAll();
 	void InitUI();
@@ -122,6 +137,7 @@ private:
 	CRegManager m_reg;
 	CToolTipCtrl m_tooltip;
 	CStatusBarCtrl m_statusBar;
+	ExplorerLens::SystemTrayIcon m_trayIcon;
 
 	// Handler status mapping for tooltips
 	std::map<int, HandlerStatus> m_checkboxStatus;

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "DarkModeHelper.h"
+#include <algorithm>
 #include <vector>
 #include <windows.h>
 
@@ -67,6 +68,29 @@ public:
 
     // Track managed windows
     m_managedWindows.push_back(hWnd);
+  }
+
+  // ====================================================================
+  // Toggle between dark and light mode (user-initiated)
+  // Flips the current theme and re-applies to all managed windows.
+  // ====================================================================
+  void ToggleTheme(HWND hWnd) {
+    m_isDarkMode = !m_isDarkMode;
+    m_colors = m_isDarkMode ? DarkMode::GetDarkTheme()
+                            : DarkMode::GetLightTheme();
+    m_accentColor = DarkMode::GetSystemAccentColor();
+    DarkMode::SetAppDarkMode(m_isDarkMode);
+
+    for (HWND hw : m_managedWindows) {
+      if (IsWindow(hw)) {
+        ApplyToWindow(hw);
+      }
+    }
+    // Also apply to the calling window if not already tracked
+    if (std::find(m_managedWindows.begin(), m_managedWindows.end(), hWnd) ==
+        m_managedWindows.end()) {
+      ApplyToWindow(hWnd);
+    }
   }
 
   // ====================================================================

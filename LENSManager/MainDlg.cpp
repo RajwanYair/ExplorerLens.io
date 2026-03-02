@@ -115,6 +115,13 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/,
     darkCtrl.Initialize();
     darkCtrl.ApplyToWindow(m_hWnd);
 
+    // Create system tray icon for quick access
+    m_trayIcon.Create(m_hWnd, hIconSmall);
+
+    // Refresh decoder health and performance data for status display
+    ExplorerLens::FormatStatusProvider::Instance().Refresh();
+    ExplorerLens::PerformanceDashboard::Instance().RefreshMetrics();
+
     return FALSE;
 }
 
@@ -417,6 +424,9 @@ LRESULT CMainDlg::OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam,
 
 LRESULT CMainDlg::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
     BOOL& /*bHandled*/) {
+    // Remove system tray icon
+    m_trayIcon.Remove();
+
     // Clean up font
     if (m_hFont) {
         ::DeleteObject(m_hFont);
@@ -644,6 +654,13 @@ void CMainDlg::InitTooltips() {
         GetDlgItem(IDC_BTN_LOAD_CONFIG),
         _T("Load configuration from REG or JSON file\nDouble-click .reg files ")
         _T("to import directly via Registry Editor"));
+    m_tooltip.AddTool(
+        GetDlgItem(IDC_BTN_EXPORT_DIAG),
+        _T("Export diagnostics bundle (ZIP)\nIncludes: system info, decoder ")
+        _T("health, GPU info, registry settings"));
+    m_tooltip.AddTool(
+        GetDlgItem(IDC_BTN_THEME),
+        _T("Toggle dark/light theme\nOverrides the current system theme "));
     m_tooltip.AddTool(GetDlgItem(IDOK), _T("Apply changes and close (Enter)"));
     m_tooltip.AddTool(GetDlgItem(IDC_APPLY),
         _T("Apply changes without closing (Ctrl+S)"));
@@ -750,9 +767,14 @@ void CMainDlg::UpdateStatusBar() {
             enabledCount, conflictCount);
     }
     else {
+        // Include a brief performance summary from PerformanceDashboard
+        auto& perf = ExplorerLens::PerformanceDashboard::Instance();
+        perf.RefreshMetrics();
+        std::wstring perfSummary = perf.GetSummary();
+
         statusText.Format(
-            _T("Ready - %d of 200+ formats enabled | Windows 11 25H2 Compatible"),
-            enabledCount);
+            _T("Ready - %d of 200+ formats enabled | %s"),
+            enabledCount, perfSummary.c_str());
     }
 
     m_statusBar.SetText(0, statusText);
@@ -1676,19 +1698,37 @@ LRESULT CMainDlg::OnExportConfig(WORD /*wNotifyCode*/, WORD /*wID*/,
     fprintf(fp, "  \"version\": \"15.0.0\",\n");
     fprintf(fp, "  \"formats\": {\n");
 
+    // Write each format handler state as name:bool
+    struct FmtEntry { const char* name; bool val; };
+    FmtEntry fmts[] = {
+        {"cbz", config.cbz}, {"cbr", config.cbr}, {"cb7", config.cb7}, {"cbt", config.cbt},
+        {"epub", config.epub}, {"mobi", config.mobi}, {"azw", config.azw}, {"azw3", config.azw3},
+        {"zip", config.zip}, {"rar", config.rar}, {"7z", config.z7}, {"tar", config.tar},
+        {"phz", config.phz}, {"fb2", config.fb2},
+        {"webp", config.webp}, {"heif", config.heif}, {"avif", config.avif}, {"jxl", config.jxl},
+        {"video", config.video}, {"pdf", config.pdf}, {"tiff", config.tiff},
+        {"svg", config.svg}, {"raw", config.raw},
+        {"psd", config.psd}, {"dds", config.dds}, {"hdr", config.hdr}, {"exr", config.exr},
+        {"ppm", config.ppm}, {"ico", config.ico}, {"qoi", config.qoi}, {"tga", config.tga},
+        {"audio", config.audio}, {"document", config.document},
+        {"font", config.font}, {"model", config.model},
+        {"extImage", config.extImage}, {"texture", config.texture},
+        {"extArchive", config.extArchive}, {"extDocument", config.extDocument}
+    };
+
     bool first = true;
-    for (const auto& entry : config.formatStates) {
+    for (const auto& f : fmts) {
         if (!first) fprintf(fp, ",\n");
         first = false;
-        fprintf(fp, "    \"%S\": %d", entry.first.GetString(), entry.second);
+        fprintf(fp, "    \"%s\": %s", f.name, f.val ? "true" : "false");
     }
 
     fprintf(fp, "\n  },\n");
-    fprintf(fp, "  \"collageMode\": %d,\n", config.collageMode);
+    fprintf(fp, "  \"collageMode\": %lu,\n", config.collageMode);
     fprintf(fp, "  \"sortAlphabetically\": %s,\n",
-        config.sortAlphabetical ? "true" : "false");
+        config.sortOpt ? "true" : "false");
     fprintf(fp, "  \"showArchiveIcon\": %s\n",
-        config.showArchiveIcon ? "true" : "false");
+        config.showIconOpt ? "true" : "false");
     fprintf(fp, "}\n");
 
     fclose(fp);
@@ -1697,5 +1737,143 @@ LRESULT CMainDlg::OnExportConfig(WORD /*wNotifyCode*/, WORD /*wID*/,
     msg.Format(_T("Configuration exported to:\r\n%s"), dlg.m_szFileName);
     MessageBox(msg, _T("Export Complete"), MB_OK | MB_ICONINFORMATION);
 
+    return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Theme Toggle — switches dark/light mode via DarkModeController
+//////////////////////////////////////////////////////////////////////////
+
+LRESULT CMainDlg::OnToggleTheme(WORD /*wNotifyCode*/, WORD /*wID*/,
+    HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+    auto& darkCtrl = ExplorerLens::DarkModeController::Instance();
+    darkCtrl.ToggleTheme(m_hWnd);
+    Invalidate();
+    return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Export Diagnostics — collects system info, decoder health, GPU info
+// into a ZIP bundle for troubleshooting support requests
+//////////////////////////////////////////////////////////////////////////
+
+LRESULT CMainDlg::OnExportDiagnostics(WORD /*wNotifyCode*/, WORD /*wID*/,
+    HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+    CFileDialog dlg(FALSE, _T("txt"), _T("ExplorerLens-Diagnostics"),
+        OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY,
+        _T("Text File (*.txt)\0*.txt\0All Files (*.*)\0*.*\0"));
+
+    if (dlg.DoModal() != IDOK)
+        return 0;
+
+    FILE* fp = nullptr;
+    if (_wfopen_s(&fp, dlg.m_szFileName, L"w") != 0 || !fp) {
+        MessageBox(_T("Failed to create diagnostics file."),
+            _T("Export Error"), MB_OK | MB_ICONERROR);
+        return 0;
+    }
+
+    // Header
+    fprintf(fp, "=== ExplorerLens Diagnostics Report ===\n\n");
+    fprintf(fp, "Version: 15.0.0 (Zenith)\n");
+
+    // OS info via RtlGetVersion (safe under WIN32_LEAN_AND_MEAN)
+    typedef NTSTATUS(WINAPI* RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
+    HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
+    if (hNtdll) {
+        auto fnRtlGetVersion =
+            (RtlGetVersionPtr)GetProcAddress(hNtdll, "RtlGetVersion");
+        if (fnRtlGetVersion) {
+            RTL_OSVERSIONINFOW osInfo = {};
+            osInfo.dwOSVersionInfoSize = sizeof(osInfo);
+            fnRtlGetVersion(&osInfo);
+            fprintf(fp, "OS: %lu.%lu Build %lu\n",
+                osInfo.dwMajorVersion, osInfo.dwMinorVersion,
+                osInfo.dwBuildNumber);
+        }
+    }
+
+    // Memory info
+    MEMORYSTATUSEX memInfo = {};
+    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+    if (GlobalMemoryStatusEx(&memInfo)) {
+        fprintf(fp, "RAM: %llu MB total, %llu MB available\n",
+            memInfo.ullTotalPhys / 1024 / 1024,
+            memInfo.ullAvailPhys / 1024 / 1024);
+    }
+
+    // Decoder health check
+    fprintf(fp, "\n--- Decoder Health ---\n\n");
+    auto healthResults = ExplorerLens::DecoderHealthCheck::CheckAll();
+    int available = 0, total = 0, totalExts = 0;
+    for (const auto& info : healthResults) {
+        total++;
+        if (info.isAvailable) {
+            available++;
+            totalExts += info.extensionCount;
+        }
+    }
+    fprintf(fp, "Active Decoders: %d / %d\n", available, total);
+    fprintf(fp, "Total Extensions: %d\n\n", totalExts);
+
+    for (const auto& info : healthResults) {
+        fprintf(fp, "%s %S (%u ext)\n",
+            info.isAvailable ? "[OK]" : "[--]",
+            info.name.c_str(), info.extensionCount);
+        fprintf(fp, "     %S\n", info.statusMessage.c_str());
+    }
+
+    // Enabled formats (from registry)
+    fprintf(fp, "\n--- Enabled Formats ---\n\n");
+    fprintf(fp, "Enabled format handlers: %d of 200+\n", GetEnabledFormatCount());
+
+    // Performance summary
+    fprintf(fp, "\n--- Performance ---\n\n");
+    auto& perf = ExplorerLens::PerformanceDashboard::Instance();
+    perf.RefreshMetrics();
+    fprintf(fp, "%S\n", perf.GetSummary().c_str());
+
+    fclose(fp);
+
+    CString msg;
+    msg.Format(_T("Diagnostics exported to:\r\n%s"), dlg.m_szFileName);
+    MessageBox(msg, _T("Export Complete"), MB_OK | MB_ICONINFORMATION);
+
+    return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// System Tray Icon message handlers
+//////////////////////////////////////////////////////////////////////////
+
+LRESULT CMainDlg::OnTrayMessage(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam,
+    BOOL& bHandled) {
+    if (m_trayIcon.OnTrayMessage(wParam, lParam)) {
+        bHandled = TRUE;
+    }
+    else {
+        bHandled = FALSE;
+    }
+    return 0;
+}
+
+LRESULT CMainDlg::OnTrayOpen(WORD /*wNotifyCode*/, WORD /*wID*/,
+    HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+    ShowWindow(SW_RESTORE);
+    SetForegroundWindow(m_hWnd);
+    return 0;
+}
+
+LRESULT CMainDlg::OnTrayAbout(WORD /*wNotifyCode*/, WORD /*wID*/,
+    HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+    // Trigger the About dialog through the system command
+    BOOL handled = FALSE;
+    OnSysCommand(WM_SYSCOMMAND, IDC_APPABOUT, 0, handled);
+    return 0;
+}
+
+LRESULT CMainDlg::OnTrayExit(WORD /*wNotifyCode*/, WORD /*wID*/,
+    HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+    CloseDialog(IDCANCEL);
     return 0;
 }

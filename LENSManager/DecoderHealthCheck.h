@@ -1,7 +1,8 @@
-// DecoderHealthCheck.h - Decoder availability and health status
-// ExplorerLens v15.0.0
-// Reports which decoders are available and their library dependencies
-
+// DecoderHealthCheck.h — Decoder Availability and Health Status
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Reports which decoders are available, their library dependencies,
+// and overall system health for the LENSManager settings UI.
 #pragma once
 
 #include <windows.h>

@@ -78,3 +78,4 @@
 #define IDC_CB_TEXTURE                          1074
 #define IDC_CB_EXT_ARCHIVE                      1075
 #define IDC_CB_EXT_DOCUMENT                     1076
+#define IDC_BTN_EXPORT_DIAG                     1077

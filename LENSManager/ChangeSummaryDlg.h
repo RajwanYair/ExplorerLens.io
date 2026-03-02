@@ -106,7 +106,7 @@ public:
 		CenterWindow(GetParent());
 
 		// Apply dark mode theming
-		DarkModeController& darkCtrl = DarkModeController::Instance();
+		auto& darkCtrl = ExplorerLens::DarkModeController::Instance();
 		darkCtrl.ApplyToWindow(m_hWnd);
 
 		// Set dialog title

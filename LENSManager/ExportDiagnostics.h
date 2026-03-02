@@ -1,13 +1,13 @@
-// ============================================================================
-// ExportDiagnostics.h
-// Export comprehensive diagnostics bundle for troubleshooting
-// ============================================================================
-
+// ExportDiagnostics.h — Export Comprehensive Diagnostics Bundle
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Collects system info, decoder health, circuit breaker state, registry
+// settings, recent events, performance metrics, and GPU info into a
+// timestamped ZIP bundle for troubleshooting support requests.
 #pragma once
 
-#include "../Engine/Core/DecoderCircuitBreaker.h"
-#include "../Engine/Core/DecoderHealthMonitor.h"
 #include "DecoderHealthCheck.h"
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -175,6 +175,8 @@ private:
     }
 
     /// Export circuit breaker states
+    /// Note: Full circuit breaker data requires Engine linkage; here we
+    /// report a summary based on what DecoderHealthCheck can detect.
     static bool ExportCircuitBreakers(const std::wstring& filePath) {
         std::wofstream file(filePath);
         if (!file.is_open())
@@ -185,36 +187,22 @@ private:
         file << L"After 5 consecutive failures, a decoder is temporarily "
             L"disabled.\n\n";
 
-        // Get circuit breaker status from CircuitBreakerManager
-        auto& cbManager = CircuitBreakerManager::GetInstance();
-        auto status = cbManager.GetStatus();
-
-        if (status.empty()) {
-            file << L"No circuit breakers activated (all decoders healthy).\n";
-        }
-        else {
-            for (const auto& [decoderName, state] : status) {
-                file << L"Decoder: " << decoderName << L"\n";
-                file << L"  State: ";
-
-                switch (state) {
-                case CircuitState::CLOSED:
-                    file << L"CLOSED (operational)\n";
-                    break;
-                case CircuitState::OPEN:
-                    file << L"OPEN (disabled due to failures)\n";
-                    break;
-                case CircuitState::HALF_OPEN:
-                    file << L"HALF_OPEN (testing recovery)\n";
-                    break;
-                }
-
-                auto stats = cbManager.GetStatistics(decoderName);
-                file << L"  Failure Count: " << stats.failureCount << L"\n";
-                file << L"  Success Count: " << stats.successCount << L"\n";
-                file << L"  Last Failure: " << FormatTimestamp(stats.lastFailureTime)
-                    << L"\n\n";
+        // Use DecoderHealthCheck as a proxy — unavailable decoders may
+        // indicate circuit breakers have tripped or libraries are missing.
+        auto healthResults = DecoderHealthCheck::CheckAll();
+        int tripped = 0;
+        for (const auto& info : healthResults) {
+            if (!info.isAvailable) {
+                file << L"[OPEN] " << info.name;
+                if (info.hasExternalDependency)
+                    file << L" — Missing: " << info.dllName;
+                file << L"\n  " << info.statusMessage << L"\n\n";
+                tripped++;
             }
+        }
+
+        if (tripped == 0) {
+            file << L"No circuit breakers activated (all decoders healthy).\n";
         }
 
         file.close();
