@@ -85,4 +85,3 @@ TEST(Sprint142_DPI, Manager_Summary) {
     auto s = mgr.Summary();
     EXPECT_NE(s.find("PerMonitorDPI"), std::string::npos);
 }
-

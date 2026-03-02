@@ -19,6 +19,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FB2 cover extraction** — XML coverpage + base64 binary element image decode
 - **PluginMarketplaceV2::VerifyHash** — BCrypt SHA-256 file integrity verification
 - **HotModeDirectoryEngine** — Real FindFirstFileExW with FIND_FIRST_EX_LARGE_FETCH
+
+#### Sprint 594-643: Advanced Decoders, Pipeline, Observability, AI & Platform (50 features)
+
+**Batch 1 — Next-Gen Image Decoders (594-598):**
+- APNGDecoder — Frame-by-frame animated PNG decoder with composite thumbnail
+- FLIFDecoder — Free Lossless Image Format decoder stub for legacy FLIF files
+- BPGDecoder — Better Portable Graphics (HEVC-based) image decoder
+- RGBEDecoder — Radiance HDR (.hdr) format tone-mapping → LDR thumbnail
+- WebP2Decoder — Experimental WebP2 format decoder placeholder
+
+**Batch 2 — Document & Text Renderers (599-603):**
+- MarkdownPreviewRenderer — Markdown → styled HTML-like thumbnail preview
+- SourceCodeThumbnail — Syntax-colorized source code mini-preview
+- RTFDecoder — Rich Text Format content extraction & thumbnail
+- LaTeXPreviewDecoder — LaTeX math/document preview renderer
+- StructuredDataVisualizer — JSON/YAML/TOML/XML tree-view thumbnail
+
+**Batch 3 — Archive & Compression Inspectors (604-608):**
+- ZstdFrameDecoder — Zstandard frame metadata inspector
+- BrotliStreamInspector — Brotli stream header analysis
+- LZ4FrameDecoder — LZ4 frame metadata decoder
+- XZStreamDecoder — XZ/LZMA2 stream header inspector
+- SnappyFrameDecoder — Snappy framing format metadata decoder
+
+**Batch 4 — 3D & CAD Decoders (609-613):**
+- PLYPointCloudDecoder — Stanford PLY point cloud wireframe thumbnail
+- OBJMeshDecoder — Wavefront OBJ mesh wireframe thumbnail
+- STLMeshDecoder — STL mesh (ASCII/binary) wireframe thumbnail
+- COLLADADecoder — COLLADA (.dae) scene hierarchy inspector
+- FBXInspector — FBX file metadata & scene graph inspector
+
+**Batch 5 — Media Enhancement Decoders (614-618):**
+- MIDIVisualizer — MIDI file piano-roll/note visualization
+- WaveformGenerator — Audio waveform visualizer for WAV/FLAC/MP3
+- SpectrogramRenderer — Audio spectrogram FFT-based frequency visualization
+- VideoTimelineStrip — Video timeline filmstrip multi-frame thumbnail
+- SubtitlePreviewDecoder — SRT/VTT/ASS subtitle text preview
+
+**Batch 6 — Enterprise & Security Viewers (619-623):**
+- CertificateViewer — X.509 certificate PEM/DER metadata viewer
+- RegistryExportViewer — Windows .reg file structure viewer
+- ShortcutInspector — Windows .lnk shortcut target/icon inspector
+- MSIPackageInspector — MSI installer metadata & component inspector
+- DiskImagePreview — ISO/VHD/VHDX disk image summary viewer
+
+**Batch 7 — Performance Optimization Pipeline (624-628):**
+- ThreadLocalBufferPool — Per-thread decode buffer recycling pool
+- DecodeMemoizationEngine — Deterministic decode result memoization engine
+- AsyncPrefetchQueue — Priority-sorted asynchronous file prefetch queue
+- PriorityDecodeScheduler — Urgency-based concurrent decode task scheduler
+- MemoryMappedDecodePath — Memory-mapped I/O fast path for large files
+
+**Batch 8 — Quality & Observability (629-633):**
+- DecodeLatencyHistogram — Decode latency distribution histogram
+- ErrorCategorizationEngine — Structured error classification & trending
+- HealthScoreAggregator — Multi-signal system health score aggregation (0-100)
+- PerformanceRegressionDetector — Statistical a/b regression detection
+- ResourceUsageProfiler — Per-decode process resource usage profiler
+
+**Batch 9 — Smart Features (AI) (634-638):**
+- ThumbnailRelevanceScorer — Content-aware thumbnail relevance scoring
+- ColorPaletteExtractor — Dominant color palette extraction via k-means
+- ImageComplexityAnalyzer — Format/resolution complexity estimation
+- FormatMigrationAdvisor — File format modernization recommendation engine
+- DecodeStrategyOptimizer — UCB1 bandit algorithm for decode strategy selection
+
+**Batch 10 — Platform & Integration (639-643):**
+- ClipboardMonitorIntegration — Clipboard image paste detection
+- ShellNotificationProvider — Windows Shell change notification provider
+- ExplorerStatusBarProvider — Explorer status bar decode metrics display
+- FileSummaryTooltipGenerator — Rich file summary tooltip data generator
+- BatchProgressReporter — Batch decode progress lifecycle reporter
 - **** Critical fixes, library builds, LENSArchive refactor, GUI modernization, GPU shader pipeline, property handlers, stub elimination, performance tuning
 
 ### Fixed
@@ -31,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Version:** 14.0.0 "Apex" → 15.0.0 "Zenith"
-- **Total unit tests:** 1187+
+- **Total unit tests:** 2171+
 - **Codename:** Apex → Zenith
 
 ### Removed

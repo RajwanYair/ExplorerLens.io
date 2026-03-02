@@ -486,7 +486,7 @@
 #include "../Utils/HardwareCapabilities.h"
 #include "../Utils/PerceptualHashing.h"
 
-// Sprint 574-593 headers
+// Additional module headers
 #include "../AI/SceneClassifierEngine.h"
 #include "../AI/SmartCropEngine.h"
 #include "../AI/ImageQualityAssessorV2.h"
@@ -502,6 +502,58 @@
 #include "../Core/SBOMGenerator.h"
 #include "../Utils/InstallerLifecycleManager.h"
 #include "../Utils/DocumentationGenerator.h"
+
+// Additional module headers
+#include "../Decoders/APNGDecoder.h"
+#include "../Decoders/FLIFDecoder.h"
+#include "../Decoders/BPGDecoder.h"
+#include "../Decoders/RGBEDecoder.h"
+#include "../Decoders/WebP2Decoder.h"
+#include "../Decoders/MarkdownPreviewRenderer.h"
+#include "../Decoders/SourceCodeThumbnail.h"
+#include "../Decoders/RTFDecoder.h"
+#include "../Decoders/LaTeXPreviewDecoder.h"
+#include "../Decoders/StructuredDataVisualizer.h"
+#include "../Decoders/ZstdFrameDecoder.h"
+#include "../Decoders/BrotliStreamInspector.h"
+#include "../Decoders/LZ4FrameDecoder.h"
+#include "../Decoders/XZStreamDecoder.h"
+#include "../Decoders/SnappyFrameDecoder.h"
+#include "../Decoders/PLYPointCloudDecoder.h"
+#include "../Decoders/OBJMeshDecoder.h"
+#include "../Decoders/STLMeshDecoder.h"
+#include "../Decoders/COLLADADecoder.h"
+#include "../Decoders/FBXInspector.h"
+#include "../Decoders/MIDIVisualizer.h"
+#include "../Decoders/WaveformGenerator.h"
+#include "../Decoders/SpectrogramRenderer.h"
+#include "../Decoders/VideoTimelineStrip.h"
+#include "../Decoders/SubtitlePreviewDecoder.h"
+#include "../Decoders/CertificateViewer.h"
+#include "../Decoders/RegistryExportViewer.h"
+#include "../Decoders/ShortcutInspector.h"
+#include "../Decoders/MSIPackageInspector.h"
+#include "../Decoders/DiskImagePreview.h"
+#include "../Pipeline/ThreadLocalBufferPool.h"
+#include "../Pipeline/DecodeMemoizationEngine.h"
+#include "../Pipeline/AsyncPrefetchQueue.h"
+#include "../Pipeline/PriorityDecodeScheduler.h"
+#include "../Pipeline/MemoryMappedDecodePath.h"
+#include "../Core/DecodeLatencyHistogram.h"
+#include "../Core/ErrorCategorizationEngine.h"
+#include "../Core/HealthScoreAggregator.h"
+#include "../Core/PerformanceRegressionDetector.h"
+#include "../Core/ResourceUsageProfiler.h"
+#include "../AI/ThumbnailRelevanceScorer.h"
+#include "../AI/ColorPaletteExtractor.h"
+#include "../AI/ImageComplexityAnalyzer.h"
+#include "../AI/FormatMigrationAdvisor.h"
+#include "../AI/DecodeStrategyOptimizer.h"
+#include "../Core/ClipboardMonitorIntegration.h"
+#include "../Core/ShellNotificationProvider.h"
+#include "../Core/ExplorerStatusBarProvider.h"
+#include "../Core/FileSummaryTooltipGenerator.h"
+#include "../Core/BatchProgressReporter.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -8722,7 +8774,7 @@ TEST(TestGateV30_Advance) {
     ASSERT(!res.advanceRecommended);
 }
 
-// SubMillisecondCacheEngine — Sprint 544 (restored)
+// SubMillisecondCacheEngine
 TEST(TestSubMsCache_HashNames) {
     SubMillisecondCacheEngine cache(256, CacheHashAlgo::FNV1a);
     std::vector<uint8_t> data = { 1,2,3,4 };
@@ -8760,7 +8812,7 @@ TEST(TestSubMsCache_EvictionCount) {
     ASSERT(!cache.Get(L"a.png", out));
 }
 
-// GPUDecodeAccelerationV2 — Sprint 545 (restored)
+// GPUDecodeAccelerationV2
 TEST(TestGPUDecV2_VendorNames) {
     ASSERT(GPUDecodeVendorName(GPUDecodeVendor::NVIDIA_NVDEC) != nullptr);
     ASSERT(GPUDecodeVendorName(GPUDecodeVendor::Intel_QuickSync) != nullptr);
@@ -8791,7 +8843,7 @@ TEST(TestGPUDecV2_APICount) {
     ASSERT(caps.supportedCodecs.size() >= 0);
 }
 
-// ParallelIOPipeline — Sprint 547 (restored)
+// ParallelIOPipeline
 TEST(TestParallelIO_BackendNames) {
     ParallelIOPipeline pipeline;
     ASSERT(pipeline.PendingCount() == 0);
@@ -8818,7 +8870,7 @@ TEST(TestParallelIO_PriorityCount) {
     pipeline.Shutdown();
 }
 
-// MemoryFootprintOptimizerV2 — Sprint 546 (restored)
+// MemoryFootprintOptimizerV2
 TEST(TestMemFootV2_AllocNames) {
     MemoryFootprintOptimizerV2 opt;
     auto stats = opt.GetStats();
@@ -15921,10 +15973,10 @@ TEST(Test_PHash_Compare) {
 }
 
 // =====================================================================
-// Sprint 574–593: Deep Functional Tests
+// Deep Functional Tests
 // =====================================================================
 
-// Sprint 574: SceneClassifierEngine -----------------------------------
+// SceneClassifierEngine -----------------------------------
 TEST(TestScene_ClassifyBlack) {
     SceneClassifierEngine engine;
     std::vector<uint8_t> black(64 * 64 * 4, 0);
@@ -15951,7 +16003,7 @@ TEST(TestScene_StatsAfterClassify) {
     ASSERT(stats.totalClassifications >= 1);
 }
 
-// Sprint 575: SmartCropEngine -----------------------------------------
+// SmartCropEngine -----------------------------------------
 TEST(TestSmartCrop_FindBest) {
     SmartCropEngine engine;
     std::vector<uint8_t> img(100 * 100 * 4, 128);
@@ -15977,7 +16029,7 @@ TEST(TestSmartCrop_Stats) {
     ASSERT(stats.cropsComputed >= 1);
 }
 
-// Sprint 576: ImageQualityAssessorV2 ----------------------------------
+// ImageQualityAssessorV2 ----------------------------------
 TEST(TestIQAv2_AssessBlack) {
     ImageQualityAssessorV2 assessor;
     std::vector<uint8_t> black(32 * 32 * 4, 0);
@@ -16005,7 +16057,7 @@ TEST(TestIQAv2_Stats) {
     ASSERT(stats.imagesAssessed >= 1);
 }
 
-// Sprint 577: ThumbnailSearchIndex ------------------------------------
+// ThumbnailSearchIndex ------------------------------------
 TEST(TestSearchIdx_AddAndCount) {
     ThumbnailSearchIndex idx;
     std::vector<uint8_t> img(16 * 16 * 4, 100);
@@ -16027,7 +16079,7 @@ TEST(TestSearchIdx_EmptyStats) {
     ASSERT(stats.indexedCount == 0);
 }
 
-// Sprint 578: PluginNamedPipeBridge -----------------------------------
+// PluginNamedPipeBridge -----------------------------------
 TEST(TestPipeBridge_InitState) {
     PluginNamedPipeBridge bridge;
     ASSERT(!bridge.IsConnected());
@@ -16040,7 +16092,7 @@ TEST(TestPipeBridge_Stats) {
     ASSERT(stats.messagesReceived == 0);
 }
 
-// Sprint 579: CrashIntelligenceEngine ---------------------------------
+// CrashIntelligenceEngine ---------------------------------
 TEST(TestCrashIntel_Singleton) {
     auto& eng1 = CrashIntelligenceEngine::Instance();
     auto& eng2 = CrashIntelligenceEngine::Instance();
@@ -16064,7 +16116,7 @@ TEST(TestCrashIntel_Stats) {
     ASSERT(stats.crashesCaught >= 0);
 }
 
-// Sprint 580: PluginHotReloadManager ----------------------------------
+// PluginHotReloadManager ----------------------------------
 TEST(TestHotReload_InitStats) {
     PluginHotReloadManager mgr;
     auto stats = mgr.GetStats();
@@ -16082,7 +16134,7 @@ TEST(TestHotReload_RegisterHash) {
     ASSERT(true);
 }
 
-// Sprint 581: PluginCompatibilityKit ----------------------------------
+// PluginCompatibilityKit ----------------------------------
 TEST(TestCompatKit_ABIVersion) {
     ASSERT(PluginCompatibilityKit::CURRENT_ABI_VERSION == 15);
 }
@@ -16099,7 +16151,7 @@ TEST(TestCompatKit_ValidateNonExistent) {
     ASSERT(!result.errors.empty());
 }
 
-// Sprint 582: PluginPerformanceProfiler --------------------------------
+// PluginPerformanceProfiler --------------------------------
 TEST(TestPluginProfiler_NoRecords) {
     PluginPerformanceProfiler profiler;
     auto recs = profiler.GetRecords(L"unknown_plugin");
@@ -16113,7 +16165,7 @@ TEST(TestPluginProfiler_BeginEnd) {
     ASSERT(recs.size() == 1);
 }
 
-// Sprint 583: PluginTrustChainValidator --------------------------------
+// PluginTrustChainValidator --------------------------------
 TEST(TestTrustChain_DefaultPolicy) {
     PluginTrustChainValidator validator;
     ASSERT(validator.GetPolicy() == ExplorerLens::Engine::TrustLevel::Untrusted);
@@ -16141,7 +16193,7 @@ TEST(TestTrustChain_Stats) {
     ASSERT(stats.pluginsValidated == 0);
 }
 
-// Sprint 584: PerformanceDashboard ------------------------------------
+// PerformanceDashboard ------------------------------------
 TEST(TestPerfDash_Singleton) {
     auto& d1 = PerformanceDashboard::Instance();
     auto& d2 = PerformanceDashboard::Instance();
@@ -16161,7 +16213,7 @@ TEST(TestPerfDash_Reset) {
     ASSERT(summary.sampleCount == 0);
 }
 
-// Sprint 585: SystemTrayManager ---------------------------------------
+// SystemTrayManager ---------------------------------------
 TEST(TestSysTray_Singleton) {
     SystemTrayManager t1;
     SystemTrayManager t2;
@@ -16170,7 +16222,7 @@ TEST(TestSysTray_Singleton) {
     ASSERT(!t2.IsVisible(0));
 }
 
-// Sprint 586: ThumbnailPreviewEngine ----------------------------------
+// ThumbnailPreviewEngine ----------------------------------
 TEST(TestPreview_LoadImage) {
     ThumbnailPreviewEngine engine;
     std::vector<uint8_t> rgba(32 * 32 * 4, 128);
@@ -16195,14 +16247,14 @@ TEST(TestPreview_ZoomClamp) {
     ASSERT(state.zoomLevel <= 10.0f);
 }
 
-// Sprint 587: FormatGroupManager --------------------------------------
+// FormatGroupManager --------------------------------------
 TEST(TestFmtGroup_NonZeroGroups) {
     FormatGroupManager fgm;
     ASSERT(!fgm.GetAllGroups().empty());
     ASSERT(fgm.GetTotalFormats() > 0);
 }
 
-// Sprint 588: DiagnosticsCollector ------------------------------------
+// DiagnosticsCollector ------------------------------------
 TEST(TestDiagCollect_SystemInfo) {
     DiagnosticsCollector dc;
     auto info = dc.CollectSystemInfo();
@@ -16229,7 +16281,7 @@ TEST(TestDiagCollect_FormatReport) {
     ASSERT(text.find(L"ExplorerLens Diagnostic Report") != std::wstring::npos);
 }
 
-// Sprint 589: IntegrationTestRunner -----------------------------------
+// IntegrationTestRunner -----------------------------------
 TEST(TestIntegRunner_EmptyRun) {
     IntegrationTestRunner runner;
     auto results = runner.RunAll();
@@ -16253,7 +16305,7 @@ TEST(TestIntegRunner_Stats) {
     ASSERT(stats.total == 0);
 }
 
-// Sprint 590: SBOMGeneratorEngine ------------------------------------
+// SBOMGeneratorEngine ------------------------------------
 TEST(TestSBOM_Defaults) {
     SBOMGeneratorEngine gen;
     auto deps = gen.GetAllDependencies();
@@ -16282,7 +16334,7 @@ TEST(TestSBOM_ProjectInfo) {
     ASSERT(info.find("ExplorerLens") != std::string::npos);
 }
 
-// Sprint 591: InstallerLifecycleManager --------------------------------
+// InstallerLifecycleManager --------------------------------
 TEST(TestInstaller_DetectState) {
     InstallerLifecycleManager mgr;
     auto state = mgr.DetectCurrentState();
@@ -16298,7 +16350,7 @@ TEST(TestInstaller_AppKey) {
         L"SOFTWARE\\ExplorerLens");
 }
 
-// Sprint 592: TelemetryEngine (via Core/Telemetry.h) ------------------
+// TelemetryEngine (via Core/Telemetry.h) ------------------
 TEST(TestTelemetryV2_PrivacyMode) {
     TelemetryEngine te;
     te.EnablePrivacyMode(true);
@@ -16323,7 +16375,7 @@ TEST(TestTelemetryV2_Purge) {
     ASSERT(te.GetEventCount() == 0);
 }
 
-// Sprint 593: APIDocumentationGenerator -------------------------------
+// APIDocumentationGenerator -------------------------------
 TEST(TestDocGen_Endpoints) {
     APIDocumentationGenerator gen;
     ASSERT(gen.GetTotalEndpoints() > 0);
@@ -16332,6 +16384,400 @@ TEST(TestDocGen_Markdown) {
     APIDocumentationGenerator gen;
     auto md = gen.GenerateMarkdown();
     ASSERT(!md.empty());
+}
+
+// APNGDecoder
+TEST(TestAPNG_CanDecode) {
+    APNGDecoder dec;
+    ASSERT(dec.CanDecode(L".apng"));
+    ASSERT(!dec.CanDecode(L".bmp"));
+}
+TEST(TestAPNG_GetName) {
+    ASSERT(std::wstring(APNGDecoder::GetName()) == L"APNGDecoder");
+}
+
+// FLIFDecoder
+TEST(TestFLIF_CanDecode) {
+    FLIFDecoder dec;
+    ASSERT(dec.CanDecode(L".flif"));
+    ASSERT(!dec.CanDecode(L".png"));
+}
+TEST(TestFLIF_GetName) {
+    ASSERT(std::wstring(FLIFDecoder::GetName()) == L"FLIFDecoder");
+}
+
+// BPGDecoder
+TEST(TestBPG_CanDecode) {
+    BPGDecoder dec;
+    ASSERT(dec.CanDecode(L".bpg"));
+    ASSERT(!dec.CanDecode(L".jpg"));
+}
+TEST(TestBPG_GetName) {
+    ASSERT(std::wstring(BPGDecoder::GetName()) == L"BPGDecoder");
+}
+
+// RGBEDecoder
+TEST(TestRGBE_CanDecode) {
+    RGBEDecoder dec;
+    ASSERT(dec.CanDecode(L".hdr"));
+    ASSERT(dec.CanDecode(L".rgbe"));
+    ASSERT(!dec.CanDecode(L".png"));
+}
+TEST(TestRGBE_GetName) {
+    ASSERT(std::wstring(RGBEDecoder::GetName()) == L"RGBEDecoder");
+}
+
+// WebP2Decoder
+TEST(TestWebP2_CanDecode) {
+    WebP2Decoder dec;
+    ASSERT(dec.CanDecode(L".wp2"));
+    ASSERT(!dec.CanDecode(L".webp"));
+}
+
+// MarkdownPreviewRenderer
+TEST(TestMarkdown_CanDecode) {
+    MarkdownPreviewRenderer dec;
+    ASSERT(dec.CanRender(L".md"));
+    ASSERT(dec.CanRender(L".markdown"));
+    ASSERT(!dec.CanRender(L".txt"));
+}
+TEST(TestMarkdown_GetName) {
+    ASSERT(std::wstring(MarkdownPreviewRenderer::GetName()) == L"MarkdownPreviewRenderer");
+}
+
+// SourceCodeThumbnail
+TEST(TestSourceCode_CanRender) {
+    SourceCodeThumbnail dec;
+    ASSERT(dec.CanRender(L".cpp"));
+    ASSERT(dec.CanRender(L".py"));
+    ASSERT(dec.CanRender(L".js"));
+}
+TEST(TestSourceCode_Analyze) {
+    SourceCodeThumbnail dec;
+    auto info = dec.Analyze(L"int main() {\n    return 0;\n}\n", SourceLanguage::CPP);
+    ASSERT(info.totalLines >= 3);
+}
+
+// RTFDecoder
+TEST(TestRTF_CanDecode) {
+    RTFDecoder dec;
+    ASSERT(dec.CanDecode(L".rtf"));
+    ASSERT(!dec.CanDecode(L".doc"));
+}
+
+// LaTeXPreviewDecoder
+TEST(TestLaTeX_CanDecode) {
+    LaTeXPreviewDecoder dec;
+    ASSERT(dec.CanDecode(L".tex"));
+    ASSERT(dec.CanDecode(L".latex"));
+}
+
+// StructuredDataVisualizer
+TEST(TestStructuredData_CanDecode) {
+    StructuredDataVisualizer dec;
+    ASSERT(dec.CanVisualize(L".json"));
+    ASSERT(dec.CanVisualize(L".xml"));
+    ASSERT(dec.CanVisualize(L".yaml"));
+    ASSERT(dec.CanVisualize(L".toml"));
+}
+
+// ZstdFrameDecoder
+TEST(TestZstd_CanDecode) {
+    ZstdFrameDecoder dec;
+    ASSERT(dec.CanDecode(L".zst"));
+    ASSERT(dec.CanDecode(L".zstd"));
+}
+
+// BrotliStreamInspector
+TEST(TestBrotli_CanDecode) {
+    BrotliStreamInspector dec;
+    ASSERT(dec.CanInspect(L".br"));
+    ASSERT(!dec.CanInspect(L".gz"));
+}
+
+// LZ4FrameDecoder
+TEST(TestLZ4Frame_CanDecode) {
+    LZ4FrameDecoder dec;
+    ASSERT(dec.CanDecode(L".lz4"));
+}
+
+// XZStreamDecoder
+TEST(TestXZ_CanDecode) {
+    XZStreamDecoder dec;
+    ASSERT(dec.CanDecode(L".xz"));
+    ASSERT(dec.CanDecode(L".lzma"));
+}
+
+// SnappyFrameDecoder
+TEST(TestSnappy_CanDecode) {
+    SnappyFrameDecoder dec;
+    ASSERT(dec.CanDecode(L".sz"));
+    ASSERT(dec.CanDecode(L".snappy"));
+}
+
+// PLYPointCloudDecoder
+TEST(TestPLY_CanDecode) {
+    PLYPointCloudDecoder dec;
+    ASSERT(dec.CanDecode(L".ply"));
+    ASSERT(!dec.CanDecode(L".obj"));
+}
+
+// OBJMeshDecoder
+TEST(TestOBJ_CanDecode) {
+    OBJMeshDecoder dec;
+    ASSERT(dec.CanDecode(L".obj"));
+}
+
+// STLMeshDecoder
+TEST(TestSTL_CanDecode) {
+    STLMeshDecoder dec;
+    ASSERT(dec.CanDecode(L".stl"));
+}
+
+// COLLADADecoder
+TEST(TestCOLLADA_CanDecode) {
+    COLLADADecoder dec;
+    ASSERT(dec.CanDecode(L".dae"));
+    ASSERT(dec.CanDecode(L".collada"));
+}
+
+// FBXInspector
+TEST(TestFBX_CanDecode) {
+    FBXInspector dec;
+    ASSERT(dec.CanDecode(L".fbx"));
+}
+
+// MIDIVisualizer
+TEST(TestMIDI_CanDecode) {
+    MIDIVisualizer dec;
+    ASSERT(dec.CanDecode(L".mid"));
+    ASSERT(dec.CanDecode(L".midi"));
+}
+
+// WaveformGenerator
+TEST(TestWaveform_CanDecode) {
+    WaveformGenerator dec;
+    ASSERT(dec.CanProcess(L".wav"));
+    ASSERT(!dec.CanProcess(L".mp3"));
+}
+
+// SpectrogramRenderer
+TEST(TestSpectrogram_GetName) {
+    ASSERT(std::wstring(SpectrogramRenderer::GetName()) == L"SpectrogramRenderer");
+}
+
+// VideoTimelineStrip
+TEST(TestVideoTimeline_GetName) {
+    ASSERT(std::wstring(VideoTimelineStrip::GetName()) == L"VideoTimelineStrip");
+}
+
+// SubtitlePreviewDecoder
+TEST(TestSubtitle_CanDecode) {
+    SubtitlePreviewDecoder dec;
+    ASSERT(dec.CanDecode(L".srt"));
+    ASSERT(dec.CanDecode(L".ass"));
+    ASSERT(dec.CanDecode(L".vtt"));
+}
+
+// CertificateViewer
+TEST(TestCert_CanDecode) {
+    CertificateViewer dec;
+    ASSERT(dec.CanDecode(L".pem"));
+    ASSERT(dec.CanDecode(L".crt"));
+    ASSERT(dec.CanDecode(L".cer"));
+}
+
+// RegistryExportViewer
+TEST(TestRegExport_CanDecode) {
+    RegistryExportViewer dec;
+    ASSERT(dec.CanDecode(L".reg"));
+}
+TEST(TestRegExport_Parse) {
+    RegistryExportViewer dec;
+    auto info = dec.Parse("Windows Registry Editor Version 5.00\n\n[HKEY_LOCAL_MACHINE\\SOFTWARE\\Test]\n\"Value\"=\"Data\"\n");
+    ASSERT(info.keyCount >= 1);
+}
+
+// ShortcutInspector
+TEST(TestShortcut_CanDecode) {
+    ShortcutInspector dec;
+    ASSERT(dec.CanDecode(L".lnk"));
+}
+
+// MSIPackageInspector
+TEST(TestMSI_CanDecode) {
+    MSIPackageInspector dec;
+    ASSERT(dec.CanDecode(L".msi"));
+    ASSERT(dec.CanDecode(L".msp"));
+}
+
+// DiskImagePreview
+TEST(TestDiskImage_CanDecode) {
+    DiskImagePreview dec;
+    ASSERT(dec.CanDecode(L".iso"));
+    ASSERT(dec.CanDecode(L".vhd"));
+    ASSERT(dec.CanDecode(L".vhdx"));
+}
+
+// ThreadLocalBufferPool
+TEST(TestBufferPool_AcquireRelease) {
+    ThreadLocalBufferPool pool;
+    auto* buf = pool.Acquire(4096);
+    ASSERT(buf != nullptr);
+    pool.Release(buf, 4096);
+    auto stats = pool.GetStats();
+    ASSERT(stats.allocations >= 1);
+}
+
+// DecodeMemoizationEngine
+TEST(TestMemoization_GetName) {
+    DecodeMemoizationEngine eng;
+    ASSERT(std::wstring(DecodeMemoizationEngine::GetName()) == L"DecodeMemoizationEngine");
+}
+TEST(TestMemoization_Stats) {
+    DecodeMemoizationEngine eng;
+    auto stats = eng.GetStats();
+    ASSERT(stats.hits == 0);
+}
+
+// AsyncPrefetchQueue
+TEST(TestPrefetch_EnqueueDequeue) {
+    AsyncPrefetchQueue q;
+    PrefetchRequest req;
+    req.filePath = L"test.jpg";
+    req.priority = PrefetchPriority::High;
+    ASSERT(q.Enqueue(req));
+    PrefetchRequest out;
+    ASSERT(q.Dequeue(out));
+    ASSERT(out.filePath == L"test.jpg");
+}
+
+// PriorityDecodeScheduler
+TEST(TestScheduler_Submit) {
+    PriorityDecodeScheduler sched;
+    auto id = sched.Submit(L"test.png", DecodeUrgency::Soon, 256);
+    ASSERT(id > 0);
+    auto stats = sched.GetStats();
+    ASSERT(stats.totalScheduled >= 1);
+}
+
+// MemoryMappedDecodePath
+TEST(TestMMap_ShouldUse) {
+    MemoryMappedDecodePath mmap;
+    ASSERT(!mmap.ShouldUseMmap(100));       // Too small
+    ASSERT(mmap.ShouldUseMmap(1024 * 1024)); // 1MB should use mmap
+}
+
+// DecodeLatencyHistogram
+TEST(TestHistogram_Record) {
+    DecodeLatencyHistogram hist;
+    hist.Record(1.5);
+    hist.Record(5.0);
+    hist.Record(0.3);
+    auto stats = hist.GetStats();
+    ASSERT(stats.totalSamples == 3);
+}
+
+// ErrorCategorizationEngine
+TEST(TestErrorCat_GetName) {
+    ErrorCategorizationEngine eng;
+    ASSERT(std::wstring(ErrorCategorizationEngine::GetName()) == L"ErrorCategorizationEngine");
+}
+
+// HealthScoreAggregator
+TEST(TestHealth_Signal) {
+    HealthScoreAggregator agg;
+    agg.UpdateSignal("decode_success_rate", 0.95, 95.0);
+    agg.UpdateSignal("cache_hit_rate", 0.80, 80.0);
+    auto stats = agg.GetStats();
+    ASSERT(stats.signalCount >= 2);
+}
+
+// PerformanceRegressionDetector
+TEST(TestRegression_GetName) {
+    PerformanceRegressionDetector det;
+    ASSERT(std::wstring(PerformanceRegressionDetector::GetName()) == L"PerformanceRegressionDetector");
+}
+
+// ResourceUsageProfiler
+TEST(TestResourceProfiler_Snapshot) {
+    ResourceUsageProfiler prof;
+    auto snap = prof.TakeSnapshot();
+    ASSERT(snap.workingSet > 0);
+}
+
+// ThumbnailRelevanceScorer
+TEST(TestRelevance_GetName) {
+    ThumbnailRelevanceScorer scorer;
+    ASSERT(std::wstring(ThumbnailRelevanceScorer::GetName()) == L"ThumbnailRelevanceScorer");
+}
+
+// ColorPaletteExtractor
+TEST(TestPalette_GetName) {
+    ColorPaletteExtractor ext;
+    ASSERT(std::wstring(ColorPaletteExtractor::GetName()) == L"ColorPaletteExtractor");
+}
+
+// ImageComplexityAnalyzer
+TEST(TestComplexity_Estimate) {
+    ImageComplexityAnalyzer analyzer;
+    auto est = analyzer.Estimate(1920, 1080, 32, "JPEG");
+    ASSERT(est.estimatedDecodeMs > 0.0);
+    ASSERT(est.estimatedMemoryBytes > 0);
+}
+
+// FormatMigrationAdvisor
+TEST(TestMigration_AnalyzeBMP) {
+    FormatMigrationAdvisor advisor;
+    auto analysis = advisor.Analyze("BMP", 1000000);
+    ASSERT(!analysis.recommendations.empty());
+    ASSERT(analysis.recommendations[0].targetFormat == "PNG");
+}
+
+// DecodeStrategyOptimizer
+TEST(TestStrategy_GetName) {
+    DecodeStrategyOptimizer opt;
+    ASSERT(std::wstring(DecodeStrategyOptimizer::GetName()) == L"DecodeStrategyOptimizer");
+}
+
+// ClipboardMonitorIntegration
+TEST(TestClipboard_GetName) {
+    ClipboardMonitorIntegration clip;
+    ASSERT(std::wstring(ClipboardMonitorIntegration::GetName()) == L"ClipboardMonitorIntegration");
+}
+
+// ShellNotificationProvider
+TEST(TestShellNotif_GetName) {
+    ShellNotificationProvider notif;
+    ASSERT(std::wstring(ShellNotificationProvider::GetName()) == L"ShellNotificationProvider");
+}
+
+// ExplorerStatusBarProvider
+TEST(TestStatusBar_Generate) {
+    ExplorerStatusBarProvider sb;
+    sb.SetDecodeCount(100, 80, 2);
+    sb.SetMemoryUsage(50 * 1024 * 1024, 256 * 1024 * 1024);
+    auto info = sb.Generate();
+    ASSERT(!info.primaryText.empty());
+}
+
+// FileSummaryTooltipGenerator
+TEST(TestTooltip_GetName) {
+    FileSummaryTooltipGenerator gen;
+    ASSERT(std::wstring(FileSummaryTooltipGenerator::GetName()) == L"FileSummaryTooltipGenerator");
+}
+
+// BatchProgressReporter
+TEST(TestBatchProgress_Lifecycle) {
+    BatchProgressReporter reporter;
+    reporter.BeginBatch(10);
+    ReporterItemResult r1; r1.filePath = L"file1.jpg"; r1.success = true;
+    ReporterItemResult r2; r2.filePath = L"file2.png"; r2.success = true;
+    reporter.ReportItem(r1);
+    reporter.ReportItem(r2);
+    auto progress = reporter.GetProgress();
+    ASSERT(progress.completedItems == 2);
+    ASSERT(progress.totalItems == 10);
 }
 
 int main() {
@@ -19774,107 +20220,185 @@ int main() {
     std::wcout << std::endl;
     std::wcout << L"Sprint 574-593 Functional Tests:" << std::endl;
 
-    // Sprint 574: SceneClassifierEngine
+    // SceneClassifierEngine
     RUN_TEST(TestScene_ClassifyBlack);
     RUN_TEST(TestScene_ClassifyWhite);
     RUN_TEST(TestScene_ExtractFeatures);
     RUN_TEST(TestScene_StatsAfterClassify);
 
-    // Sprint 575: SmartCropEngine
+    // SmartCropEngine
     RUN_TEST(TestSmartCrop_FindBest);
     RUN_TEST(TestSmartCrop_TopCrops);
     RUN_TEST(TestSmartCrop_NullInput);
     RUN_TEST(TestSmartCrop_Stats);
 
-    // Sprint 576: ImageQualityAssessorV2
+    // ImageQualityAssessorV2
     RUN_TEST(TestIQAv2_AssessBlack);
     RUN_TEST(TestIQAv2_AssessMidGray);
     RUN_TEST(TestIQAv2_SubMetrics);
     RUN_TEST(TestIQAv2_Stats);
 
-    // Sprint 577: ThumbnailSearchIndex
+    // ThumbnailSearchIndex
     RUN_TEST(TestSearchIdx_AddAndCount);
     RUN_TEST(TestSearchIdx_AddMultiple);
     RUN_TEST(TestSearchIdx_EmptyStats);
 
-    // Sprint 578: PluginNamedPipeBridge
+    // PluginNamedPipeBridge
     RUN_TEST(TestPipeBridge_InitState);
     RUN_TEST(TestPipeBridge_Stats);
 
-    // Sprint 579: CrashIntelligenceEngine
+    // CrashIntelligenceEngine
     RUN_TEST(TestCrashIntel_Singleton);
     RUN_TEST(TestCrashIntel_Initialize);
     RUN_TEST(TestCrashIntel_CaptureTrace);
     RUN_TEST(TestCrashIntel_Stats);
 
-    // Sprint 580: PluginHotReloadManager
+    // PluginHotReloadManager
     RUN_TEST(TestHotReload_InitStats);
     RUN_TEST(TestHotReload_SetDir);
     RUN_TEST(TestHotReload_RegisterHash);
 
-    // Sprint 581: PluginCompatibilityKit
+    // PluginCompatibilityKit
     RUN_TEST(TestCompatKit_ABIVersion);
     RUN_TEST(TestCompatKit_EmptyStats);
     RUN_TEST(TestCompatKit_ValidateNonExistent);
 
-    // Sprint 582: PluginPerformanceProfiler
+    // PluginPerformanceProfiler
     RUN_TEST(TestPluginProfiler_NoRecords);
     RUN_TEST(TestPluginProfiler_BeginEnd);
 
-    // Sprint 583: PluginTrustChainValidator
+    // PluginTrustChainValidator
     RUN_TEST(TestTrustChain_DefaultPolicy);
     RUN_TEST(TestTrustChain_SetPolicy);
     RUN_TEST(TestTrustChain_MeetsPolicy);
     RUN_TEST(TestTrustChain_Publisher);
     RUN_TEST(TestTrustChain_Stats);
 
-    // Sprint 584: PerformanceDashboard
+    // PerformanceDashboard
     RUN_TEST(TestPerfDash_Singleton);
     RUN_TEST(TestPerfDash_RecordAndGet);
     RUN_TEST(TestPerfDash_Reset);
 
-    // Sprint 585: SystemTrayManager
+    // SystemTrayManager
     RUN_TEST(TestSysTray_Singleton);
 
-    // Sprint 586: ThumbnailPreviewEngine
+    // ThumbnailPreviewEngine
     RUN_TEST(TestPreview_LoadImage);
     RUN_TEST(TestPreview_LoadNull);
     RUN_TEST(TestPreview_ZoomState);
     RUN_TEST(TestPreview_ZoomClamp);
 
-    // Sprint 587: FormatGroupManager
+    // FormatGroupManager
     RUN_TEST(TestFmtGroup_NonZeroGroups);
 
-    // Sprint 588: DiagnosticsCollector
+    // DiagnosticsCollector
     RUN_TEST(TestDiagCollect_SystemInfo);
     RUN_TEST(TestDiagCollect_Version);
     RUN_TEST(TestDiagCollect_Decoders);
     RUN_TEST(TestDiagCollect_FormatReport);
 
-    // Sprint 589: IntegrationTestRunner
+    // IntegrationTestRunner
     RUN_TEST(TestIntegRunner_EmptyRun);
     RUN_TEST(TestIntegRunner_AddCase);
     RUN_TEST(TestIntegRunner_Stats);
 
-    // Sprint 590: SBOMGenerator
+    // SBOMGenerator
     RUN_TEST(TestSBOM_Defaults);
     RUN_TEST(TestSBOM_AddDep);
     RUN_TEST(TestSBOM_GenerateSPDX);
     RUN_TEST(TestSBOM_ProjectInfo);
 
-    // Sprint 591: InstallerLifecycleManager
+    // InstallerLifecycleManager
     RUN_TEST(TestInstaller_DetectState);
     RUN_TEST(TestInstaller_CLSID);
     RUN_TEST(TestInstaller_AppKey);
 
-    // Sprint 592: TelemetryEngine
+    // TelemetryEngine
     RUN_TEST(TestTelemetryV2_PrivacyMode);
     RUN_TEST(TestTelemetryV2_RecordAndCount);
     RUN_TEST(TestTelemetryV2_Purge);
 
-    // Sprint 593: DocumentationGenerator
+    // DocumentationGenerator
     RUN_TEST(TestDocGen_Endpoints);
     RUN_TEST(TestDocGen_Markdown);
+
+    // Advanced Decoders
+    RUN_TEST(TestAPNG_CanDecode);
+    RUN_TEST(TestAPNG_GetName);
+    RUN_TEST(TestFLIF_CanDecode);
+    RUN_TEST(TestFLIF_GetName);
+    RUN_TEST(TestBPG_CanDecode);
+    RUN_TEST(TestBPG_GetName);
+    RUN_TEST(TestRGBE_CanDecode);
+    RUN_TEST(TestRGBE_GetName);
+    RUN_TEST(TestWebP2_CanDecode);
+
+    // Document & Text
+    RUN_TEST(TestMarkdown_CanDecode);
+    RUN_TEST(TestMarkdown_GetName);
+    RUN_TEST(TestSourceCode_CanRender);
+    RUN_TEST(TestSourceCode_Analyze);
+    RUN_TEST(TestRTF_CanDecode);
+    RUN_TEST(TestLaTeX_CanDecode);
+    RUN_TEST(TestStructuredData_CanDecode);
+
+    // Archive & Compression
+    RUN_TEST(TestZstd_CanDecode);
+    RUN_TEST(TestBrotli_CanDecode);
+    RUN_TEST(TestLZ4Frame_CanDecode);
+    RUN_TEST(TestXZ_CanDecode);
+    RUN_TEST(TestSnappy_CanDecode);
+
+    // 3D & CAD
+    RUN_TEST(TestPLY_CanDecode);
+    RUN_TEST(TestOBJ_CanDecode);
+    RUN_TEST(TestSTL_CanDecode);
+    RUN_TEST(TestCOLLADA_CanDecode);
+    RUN_TEST(TestFBX_CanDecode);
+
+    // Media Enhancement
+    RUN_TEST(TestMIDI_CanDecode);
+    RUN_TEST(TestWaveform_CanDecode);
+    RUN_TEST(TestSpectrogram_GetName);
+    RUN_TEST(TestVideoTimeline_GetName);
+    RUN_TEST(TestSubtitle_CanDecode);
+
+    // Enterprise & Security
+    RUN_TEST(TestCert_CanDecode);
+    RUN_TEST(TestRegExport_CanDecode);
+    RUN_TEST(TestRegExport_Parse);
+    RUN_TEST(TestShortcut_CanDecode);
+    RUN_TEST(TestMSI_CanDecode);
+    RUN_TEST(TestDiskImage_CanDecode);
+
+    // Performance Optimization
+    RUN_TEST(TestBufferPool_AcquireRelease);
+    RUN_TEST(TestMemoization_GetName);
+    RUN_TEST(TestMemoization_Stats);
+    RUN_TEST(TestPrefetch_EnqueueDequeue);
+    RUN_TEST(TestScheduler_Submit);
+    RUN_TEST(TestMMap_ShouldUse);
+
+    // Quality & Observability
+    RUN_TEST(TestHistogram_Record);
+    RUN_TEST(TestErrorCat_GetName);
+    RUN_TEST(TestHealth_Signal);
+    RUN_TEST(TestRegression_GetName);
+    RUN_TEST(TestResourceProfiler_Snapshot);
+
+    // Smart Features
+    RUN_TEST(TestRelevance_GetName);
+    RUN_TEST(TestPalette_GetName);
+    RUN_TEST(TestComplexity_Estimate);
+    RUN_TEST(TestMigration_AnalyzeBMP);
+    RUN_TEST(TestStrategy_GetName);
+
+    // Platform & Integration
+    RUN_TEST(TestClipboard_GetName);
+    RUN_TEST(TestShellNotif_GetName);
+    RUN_TEST(TestStatusBar_Generate);
+    RUN_TEST(TestTooltip_GetName);
+    RUN_TEST(TestBatchProgress_Lifecycle);
 
     std::wcout << std::endl;
 

@@ -76,4 +76,3 @@ TEST(Sprint141_DarkMode, AllControlTypesSupported) {
     EXPECT_TRUE(DarkModeManagerV2::IsControlSupported(ControlType::Button));
     EXPECT_TRUE(DarkModeManagerV2::IsControlSupported(ControlType::StatusBar));
 }
-

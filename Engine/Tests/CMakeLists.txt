@@ -40,6 +40,13 @@ add_executable(EngineTests
     ProgramClosureTests.cpp
 )
 
+# Windows-specific defines (NOMINMAX prevents min/max macro conflicts)
+if(WIN32)
+    target_compile_definitions(EngineTests PRIVATE
+        NOMINMAX
+    )
+endif()
+
 # Link JXL libraries if enabled
 if(HAS_LIBJXL)
     target_compile_definitions(EngineTests PRIVATE JXL_STATIC_DEFINE)

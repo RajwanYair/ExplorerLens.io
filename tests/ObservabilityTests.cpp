@@ -414,5 +414,3 @@ TEST(DiagBundle, Report)
     EXPECT_NE(report.find("Diagnostic Report"), std::string::npos);
     EXPECT_NE(report.find("JPEG: Stable"), std::string::npos);
 }
-
-

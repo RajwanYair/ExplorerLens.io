@@ -272,4 +272,3 @@ const wchar_t* FITSDecoder::GetStretchName(FITSStretch s) {
 }
 
 }} // namespace ExplorerLens::Engine
-

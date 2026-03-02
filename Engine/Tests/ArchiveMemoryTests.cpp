@@ -1,4 +1,4 @@
-// Archive Memory Compactor — Tests (Sprint 561)
+// Archive Memory Compactor — Tests
 #include "../Memory/ArchiveMemoryCompactor.h"
 #include "GTestShim.h"
 
