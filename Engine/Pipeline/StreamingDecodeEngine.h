@@ -1,5 +1,5 @@
 // ============================================================================
-// StreamingDecodeEngine.h — Progressive Streaming Decode (Sprint 553)
+// StreamingDecodeEngine.h — Progressive Streaming Decode
 // ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
@@ -142,7 +142,7 @@ struct StreamingDecodeConfig {
 };
 
 // ============================================================================
-// Sprint 553: Detected format from magic bytes
+// Detected format from magic bytes
 // ============================================================================
 
 enum class StreamFileFormat : uint8_t {
@@ -163,7 +163,7 @@ inline const char* StreamFileFormatToString(StreamFileFormat fmt) {
 }
 
 // ============================================================================
-// Sprint 553: Streaming session phases
+// Streaming session phases
 // ============================================================================
 
 enum class StreamPhase : uint8_t {
@@ -174,7 +174,7 @@ enum class StreamPhase : uint8_t {
 };
 
 // ============================================================================
-// Sprint 553: Streaming session descriptor
+// Streaming session descriptor
 // ============================================================================
 
 struct StreamingSession {
@@ -329,7 +329,7 @@ public:
     }
 
     // ====================================================================
-    // Sprint 553: Streaming decode sessions
+    // Streaming decode sessions
     // ====================================================================
 
     /// Begin a streaming decode session. Returns a unique session ID.
@@ -739,7 +739,7 @@ private:
     std::unordered_map<uint32_t, V14Session> m_v14Sessions;
     uint32_t m_nextV14SessionId = 1;
 
-    // Sprint 553 streaming sessions
+    // Streaming sessions
     std::unordered_map<uint64_t, StreamingSession> m_sessions;
     uint64_t m_nextSessionId = 1;
     uint32_t m_maxConcurrentSessions = 8;

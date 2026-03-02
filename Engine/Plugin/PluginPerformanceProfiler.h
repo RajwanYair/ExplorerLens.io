@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Plugin Performance Profiler (Sprint 582)
+// ExplorerLens Engine — Plugin Performance Profiler
 //
 // Profiles plugin execution with high-resolution QueryPerformanceCounter
 // timing and resource tracking. Features:
@@ -52,20 +52,20 @@ struct ProcessMemCounters {
 struct ProfileRecord {
     std::wstring pluginId;
     std::string  operation;
-    uint64_t     startUs         = 0;
-    uint64_t     endUs           = 0;
-    uint64_t     durationUs      = 0;
+    uint64_t     startUs = 0;
+    uint64_t     endUs = 0;
+    uint64_t     durationUs = 0;
     int64_t      memoryDeltaBytes = 0;
-    int32_t      gdiObjectDelta  = 0;
+    int32_t      gdiObjectDelta = 0;
 };
 
 struct ProfileSummary {
     std::wstring pluginId;
-    uint64_t     totalRecords    = 0;
-    uint64_t     avgDurationUs   = 0;
-    uint64_t     minDurationUs   = 0;
-    uint64_t     maxDurationUs   = 0;
-    uint64_t     p95DurationUs   = 0;
+    uint64_t     totalRecords = 0;
+    uint64_t     avgDurationUs = 0;
+    uint64_t     minDurationUs = 0;
+    uint64_t     maxDurationUs = 0;
+    uint64_t     p95DurationUs = 0;
     int64_t      memoryTrendBytes = 0; // positive = growing
     bool         gdiLeakDetected = false;
     std::unordered_map<std::string, uint64_t> avgPerOperation;
@@ -99,14 +99,14 @@ public:
 
     inline uint64_t BeginProfile(const std::wstring& pluginId, const std::string& operation) {
         ActiveSession session;
-        session.pluginId  = pluginId;
+        session.pluginId = pluginId;
         session.operation = operation;
 
         // Capture start QPC tick
         LARGE_INTEGER tick{};
         QueryPerformanceCounter(&tick);
         session.startTick = tick.QuadPart;
-        session.startUs   = TickToMicroseconds(tick.QuadPart);
+        session.startUs = TickToMicroseconds(tick.QuadPart);
 
         // Capture start memory
         session.startMemoryBytes = GetCurrentWorkingSetBytes();
@@ -147,13 +147,13 @@ public:
         const auto& session = it->second;
 
         ProfileRecord record;
-        record.pluginId         = session.pluginId;
-        record.operation        = session.operation;
-        record.startUs          = session.startUs;
-        record.endUs            = endUs;
-        record.durationUs       = (endUs > session.startUs) ? (endUs - session.startUs) : 0;
+        record.pluginId = session.pluginId;
+        record.operation = session.operation;
+        record.startUs = session.startUs;
+        record.endUs = endUs;
+        record.durationUs = (endUs > session.startUs) ? (endUs - session.startUs) : 0;
         record.memoryDeltaBytes = endMemory - session.startMemoryBytes;
-        record.gdiObjectDelta   = endGdi - session.startGdiObjects;
+        record.gdiObjectDelta = endGdi - session.startGdiObjects;
 
         // Store in per-plugin rolling window
         auto& records = m_records[record.pluginId];
@@ -315,10 +315,10 @@ private:
     struct ActiveSession {
         std::wstring pluginId;
         std::string  operation;
-        LONGLONG     startTick        = 0;
-        uint64_t     startUs          = 0;
+        LONGLONG     startTick = 0;
+        uint64_t     startUs = 0;
         int64_t      startMemoryBytes = 0;
-        int32_t      startGdiObjects  = 0;
+        int32_t      startGdiObjects = 0;
     };
 
     using GetProcessMemoryInfoFn = BOOL(WINAPI*)(HANDLE, ProcessMemCounters*, DWORD);
@@ -344,7 +344,7 @@ private:
     // Members
     mutable SRWLOCK m_lock{};
     LONGLONG        m_qpcFrequency = 1;
-    std::atomic<uint64_t> m_nextSessionId{1};
+    std::atomic<uint64_t> m_nextSessionId{ 1 };
     uint64_t        m_slowThresholdUs = 10000; // 10ms default
 
     std::unordered_map<uint64_t, ActiveSession> m_activeSessions;

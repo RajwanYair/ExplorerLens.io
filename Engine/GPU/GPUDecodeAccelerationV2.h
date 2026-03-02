@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// GPUDecodeAccelerationV2.h — GPU-accelerated decode routing (Sprint 545)
+// GPUDecodeAccelerationV2.h — GPU-accelerated decode routing
 //
 // Purpose:   Detects GPU vendor via DXGI adapter enumeration and routes
 //            decode operations to the appropriate hardware decoder

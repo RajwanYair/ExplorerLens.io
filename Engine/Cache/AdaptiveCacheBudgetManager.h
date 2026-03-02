@@ -1,7 +1,6 @@
 #pragma once
 /******************************************************************************
- * AdaptiveCacheBudgetManager.h — Sprint 554
- * ExplorerLens Engine v15.0.0
+ * AdaptiveCacheBudgetManager.h
  * Copyright (c) 2026 ExplorerLens Project
  *
  * PURPOSE:
@@ -42,10 +41,10 @@ namespace Cache {
 // ─── Cache tier ──────────────────────────────────────────────────────────────
 
 enum class CacheTier : uint32_t {
-    D3D11Texture     = 0,
-    CPUPixel         = 1,
-    ArchiveMetadata  = 2,
-    Thumbnail        = 3,
+    D3D11Texture = 0,
+    CPUPixel = 1,
+    ArchiveMetadata = 2,
+    Thumbnail = 3,
 };
 
 inline std::string ToString(CacheTier t) {
@@ -70,9 +69,9 @@ struct TierBudget {
 // ─── Memory pressure level (4-tier, backward-compatible) ─────────────────────
 
 enum class MemoryPressureLevel : uint32_t {
-    Normal   = 0,   // > 50% free physical RAM
+    Normal = 0,   // > 50% free physical RAM
     Moderate = 1,   // 25–50% free
-    High     = 2,   // 10–25% free
+    High = 2,   // 10–25% free
     Critical = 3,   // < 10% free — shed non-essential caches
 };
 
@@ -89,10 +88,10 @@ inline std::string ToString(MemoryPressureLevel p) {
 // ─── 5-tier pressure model for fine-grained budget control ───────────────────
 
 enum class MemoryPressureTier : uint32_t {
-    None     = 0,   // < 50% usage
-    Low      = 1,   // 50–70% usage
-    Medium   = 2,   // 70–85% usage
-    High     = 3,   // 85–95% usage
+    None = 0,   // < 50% usage
+    Low = 1,   // 50–70% usage
+    Medium = 2,   // 70–85% usage
+    High = 3,   // 85–95% usage
     Critical = 4,   // > 95% usage
 };
 
@@ -141,11 +140,11 @@ struct SystemMemorySnapshot {
         MEMORYSTATUSEX msx{};
         msx.dwLength = sizeof(msx);
         if (::GlobalMemoryStatusEx(&msx)) {
-            snap.totalPhysicalBytes   = msx.ullTotalPhys;
-            snap.availableBytes       = msx.ullAvailPhys;
-            snap.totalVirtualBytes    = msx.ullTotalVirtual;
+            snap.totalPhysicalBytes = msx.ullTotalPhys;
+            snap.availableBytes = msx.ullAvailPhys;
+            snap.totalVirtualBytes = msx.ullTotalVirtual;
             snap.availableVirtualBytes = msx.ullAvailVirtual;
-            snap.memoryLoadPercent    = msx.dwMemoryLoad;
+            snap.memoryLoadPercent = msx.dwMemoryLoad;
         }
         return snap;
     }
@@ -191,8 +190,7 @@ public:
         , m_autoUpdateRunning(false)
         , m_hysteresisCount(0)
         , m_pendingTier(MemoryPressureTier::None)
-        , m_adaptationCount(0)
-    {
+        , m_adaptationCount(0) {
         ::InitializeSRWLock(&m_srwLock);
         m_budgets = CreateDefaultBudgets(totalBudget);
         m_tierEntryTime = std::chrono::steady_clock::now();
@@ -228,23 +226,23 @@ public:
 
         switch (result.reason) {
         case MemoryPressureLevel::Critical:
-            result.triggered   = true;
-            result.newBudgets  = CreateDefaultBudgets(m_baseBudget / 4);
+            result.triggered = true;
+            result.newBudgets = CreateDefaultBudgets(m_baseBudget / 4);
             result.totalBudget = m_baseBudget / 4;
             break;
         case MemoryPressureLevel::High:
-            result.triggered   = true;
-            result.newBudgets  = CreateDefaultBudgets(m_baseBudget / 2);
+            result.triggered = true;
+            result.newBudgets = CreateDefaultBudgets(m_baseBudget / 2);
             result.totalBudget = m_baseBudget / 2;
             break;
         case MemoryPressureLevel::Moderate:
-            result.triggered   = true;
-            result.newBudgets  = CreateDefaultBudgets(m_baseBudget * 3 / 4);
+            result.triggered = true;
+            result.newBudgets = CreateDefaultBudgets(m_baseBudget * 3 / 4);
             result.totalBudget = m_baseBudget * 3 / 4;
             break;
         default:
-            result.triggered   = false;
-            result.newBudgets  = m_budgets;
+            result.triggered = false;
+            result.newBudgets = m_budgets;
             result.totalBudget = m_baseBudget;
             break;
         }
@@ -292,7 +290,8 @@ public:
         if (newTier != m_currentTier) {
             if (newTier == m_pendingTier) {
                 m_hysteresisCount++;
-            } else {
+            }
+            else {
                 m_pendingTier = newTier;
                 m_hysteresisCount = 1;
             }
@@ -312,7 +311,8 @@ public:
                 if (cb) cb(budget, tier);
                 return;
             }
-        } else {
+        }
+        else {
             m_hysteresisCount = 0;
             m_pendingTier = m_currentTier;
         }
@@ -330,7 +330,7 @@ public:
                     ::Sleep(100);
                 }
             }
-        });
+            });
     }
 
     void DisableAutoUpdate() {
@@ -350,18 +350,18 @@ public:
     BudgetStats GetStats() const {
         ::AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_srwLock));
         BudgetStats stats;
-        stats.currentTier       = m_currentTier;
-        stats.currentBudget     = m_currentBudget;
-        stats.physicalTotal     = m_lastSnapshot.totalPhysicalBytes;
+        stats.currentTier = m_currentTier;
+        stats.currentBudget = m_currentBudget;
+        stats.physicalTotal = m_lastSnapshot.totalPhysicalBytes;
         stats.physicalAvailable = m_lastSnapshot.availableBytes;
-        stats.virtualTotal      = m_lastSnapshot.totalVirtualBytes;
-        stats.virtualAvailable  = m_lastSnapshot.availableVirtualBytes;
-        stats.adaptationCount   = m_adaptationCount;
-        stats.timeInNoneMs      = static_cast<uint64_t>(m_tierDurations[0].count());
-        stats.timeInLowMs       = static_cast<uint64_t>(m_tierDurations[1].count());
-        stats.timeInMediumMs    = static_cast<uint64_t>(m_tierDurations[2].count());
-        stats.timeInHighMs      = static_cast<uint64_t>(m_tierDurations[3].count());
-        stats.timeInCriticalMs  = static_cast<uint64_t>(m_tierDurations[4].count());
+        stats.virtualTotal = m_lastSnapshot.totalVirtualBytes;
+        stats.virtualAvailable = m_lastSnapshot.availableVirtualBytes;
+        stats.adaptationCount = m_adaptationCount;
+        stats.timeInNoneMs = static_cast<uint64_t>(m_tierDurations[0].count());
+        stats.timeInLowMs = static_cast<uint64_t>(m_tierDurations[1].count());
+        stats.timeInMediumMs = static_cast<uint64_t>(m_tierDurations[2].count());
+        stats.timeInHighMs = static_cast<uint64_t>(m_tierDurations[3].count());
+        stats.timeInCriticalMs = static_cast<uint64_t>(m_tierDurations[4].count());
         ::ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_srwLock));
         return stats;
     }
@@ -406,4 +406,3 @@ private:
 
 } // namespace Cache
 } // namespace ExplorerLens
-

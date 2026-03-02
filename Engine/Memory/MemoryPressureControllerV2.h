@@ -1,7 +1,6 @@
 #pragma once
 /******************************************************************************
- * MemoryPressureControllerV2.h — Sprint 558
- * ExplorerLens Engine v15.0.0
+ * MemoryPressureControllerV2.h
  * Copyright (c) 2026 ExplorerLens Project
  *
  * PURPOSE:
@@ -49,10 +48,10 @@ namespace Memory {
 // ─── Pressure level (5-tier) ─────────────────────────────────────────────────
 
 enum class PressureLevel : uint32_t {
-    Normal   = 0,   // > 50% free
-    Low      = 1,   // 25–50% free — start background compaction
-    Medium   = 2,   // 10–25% free — shed D3D11 cache
-    High     = 3,   // 5–10% free — shed all caches
+    Normal = 0,   // > 50% free
+    Low = 1,   // 25–50% free — start background compaction
+    Medium = 2,   // 10–25% free — shed D3D11 cache
+    High = 3,   // 5–10% free — shed all caches
     Critical = 4,   // < 5% free — emergency eviction, no new decodes
 };
 
@@ -70,21 +69,21 @@ inline std::string ToString(PressureLevel p) {
 // ─── Response action bitmask ─────────────────────────────────────────────────
 
 enum class PressureAction : uint32_t {
-    None              = 0x00,
-    TrimDecodeCaches  = 0x01,
-    ReleasePooled     = 0x02,
-    FlushWriteBehind  = 0x04,
+    None = 0x00,
+    TrimDecodeCaches = 0x01,
+    ReleasePooled = 0x02,
+    FlushWriteBehind = 0x04,
     ReduceCacheBudget = 0x08,
-    EvictUnpinned     = 0x10,
-    CompactHeaps      = 0x20,
-    EmergencyRelease  = 0x40,
-    PauseDecodeQueue  = 0x80,
+    EvictUnpinned = 0x10,
+    CompactHeaps = 0x20,
+    EmergencyRelease = 0x40,
+    PauseDecodeQueue = 0x80,
     BackgroundCompact = 0x01,  // alias for TrimDecodeCaches
-    EvictD3D11Cache   = 0x10,  // alias for EvictUnpinned
+    EvictD3D11Cache = 0x10,  // alias for EvictUnpinned
     EvictCPUPixelCache = 0x10, // alias
     EvictMetadataCache = 0x10, // alias
-    BlockNewDecodes   = 0x80,  // alias for PauseDecodeQueue
-    EmitETWEvent      = 0x100,
+    BlockNewDecodes = 0x80,  // alias for PauseDecodeQueue
+    EmitETWEvent = 0x100,
 };
 
 inline PressureAction operator|(PressureAction a, PressureAction b) {
@@ -195,8 +194,7 @@ public:
         , m_pending(PressureLevel::Normal)
         , m_hysteresisCount(0)
         , m_escalationCount(0)
-        , m_pollingRunning(false)
-    {
+        , m_pollingRunning(false) {
         ::InitializeSRWLock(&m_srwLock);
         m_tierEntryTime = std::chrono::steady_clock::now();
         for (auto& t : m_tierDurations) t = std::chrono::milliseconds(0);
@@ -220,8 +218,7 @@ public:
         , m_escalationCount(other.m_escalationCount)
         , m_pollingRunning(other.m_pollingRunning.load())
         , m_pfnGetProcessMemoryInfo(other.m_pfnGetProcessMemoryInfo)
-        , m_psapiModule(other.m_psapiModule)
-    {
+        , m_psapiModule(other.m_psapiModule) {
         ::InitializeSRWLock(&m_srwLock);
         m_tierEntryTime = other.m_tierEntryTime;
         for (int i = 0; i < 5; ++i) m_tierDurations[i] = other.m_tierDurations[i];
@@ -299,8 +296,7 @@ public:
     // ── Callback registration ───────────────────────────────────────────────
 
     void RegisterPressureCallback(PressureLevel minTier,
-        std::function<void(PressureLevel, PressureAction)> fn)
-    {
+        std::function<void(PressureLevel, PressureAction)> fn) {
         ::AcquireSRWLockExclusive(&m_srwLock);
         m_callbacks.push_back({ minTier, std::move(fn) });
         ::ReleaseSRWLockExclusive(&m_srwLock);
@@ -321,7 +317,7 @@ public:
                     ::Sleep(100);
                 }
             }
-        });
+            });
     }
 
     void StopPolling() {
@@ -379,10 +375,10 @@ public:
         stats.systemMemoryLoad = msx.dwMemoryLoad;
 
         stats.escalationCount = m_escalationCount;
-        stats.timeInNormalMs   = static_cast<uint64_t>(m_tierDurations[0].count());
-        stats.timeInLowMs      = static_cast<uint64_t>(m_tierDurations[1].count());
-        stats.timeInMediumMs   = static_cast<uint64_t>(m_tierDurations[2].count());
-        stats.timeInHighMs     = static_cast<uint64_t>(m_tierDurations[3].count());
+        stats.timeInNormalMs = static_cast<uint64_t>(m_tierDurations[0].count());
+        stats.timeInLowMs = static_cast<uint64_t>(m_tierDurations[1].count());
+        stats.timeInMediumMs = static_cast<uint64_t>(m_tierDurations[2].count());
+        stats.timeInHighMs = static_cast<uint64_t>(m_tierDurations[3].count());
         stats.timeInCriticalMs = static_cast<uint64_t>(m_tierDurations[4].count());
 
         ::ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_srwLock));
@@ -433,9 +429,9 @@ private:
         ProcessMemoryCounters pmc{};
         pmc.cb = sizeof(pmc);
         if (m_pfnGetProcessMemoryInfo(::GetCurrentProcess(), &pmc, sizeof(pmc))) {
-            info.workingSetBytes     = pmc.WorkingSetSize;
+            info.workingSetBytes = pmc.WorkingSetSize;
             info.peakWorkingSetBytes = pmc.PeakWorkingSetSize;
-            info.privateBytes        = pmc.PagefileUsage;
+            info.privateBytes = pmc.PagefileUsage;
         }
         return info;
     }
@@ -459,13 +455,13 @@ private:
             return PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled;
         case PressureLevel::Medium:
             return PressureAction::TrimDecodeCaches | PressureAction::ReleasePooled
-                 | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget;
+                | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget;
         case PressureLevel::High:
             return PressureAction::EvictUnpinned | PressureAction::CompactHeaps
-                 | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget;
+                | PressureAction::FlushWriteBehind | PressureAction::ReduceCacheBudget;
         case PressureLevel::Critical:
             return PressureAction::EmergencyRelease | PressureAction::PauseDecodeQueue
-                 | PressureAction::EvictUnpinned | PressureAction::CompactHeaps;
+                | PressureAction::EvictUnpinned | PressureAction::CompactHeaps;
         default:
             return PressureAction::None;
         }
@@ -490,7 +486,8 @@ private:
         if (newLevel != m_current) {
             if (newLevel == m_pending) {
                 m_hysteresisCount++;
-            } else {
+            }
+            else {
                 m_pending = newLevel;
                 m_hysteresisCount = 1;
             }
@@ -501,7 +498,8 @@ private:
                 m_hysteresisCount = 0;
                 FireCallbacks(newLevel, GetRecommendedActionsForLevel(newLevel));
             }
-        } else {
+        }
+        else {
             m_hysteresisCount = 0;
             m_pending = m_current;
         }

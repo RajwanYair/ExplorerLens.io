@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// ParallelIOPipeline.h — IOCP-based parallel file reader (Sprint 547)
+// ParallelIOPipeline.h — IOCP-based parallel file reader
 //
 // Purpose:   I/O Completion Port (IOCP) powered parallel file reader for
 //            batch thumbnail generation. Opens files with FILE_FLAG_OVERLAPPED,

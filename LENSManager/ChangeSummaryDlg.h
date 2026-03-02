@@ -45,6 +45,7 @@ struct ConfigSnapshot
 	bool psd, dds, hdr, exr;
 	bool ppm, ico, qoi, tga;
 	bool audio, document, font, model;
+	bool extImage, texture, extArchive, extDocument;
 	
 	// Options
 	bool sortOpt;

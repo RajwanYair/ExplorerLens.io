@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// MemoryFootprintOptimizerV2.h — Slab allocator + memory compaction (Sprint 546)
+// MemoryFootprintOptimizerV2.h — Slab allocator + memory compaction
 //
 // Purpose:   Pre-allocates fixed-size memory slabs via VirtualAlloc for
 //            thumbnail buffer storage. Provides best-fit allocation,

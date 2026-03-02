@@ -1,4 +1,4 @@
-// ThumbnailPreviewEngine.h — Real-Time Thumbnail Preview Renderer (Sprint 586)
+// ThumbnailPreviewEngine.h — Real-Time Thumbnail Preview Renderer
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides an interactive thumbnail preview with zoom, pan, checkerboard
@@ -26,13 +26,13 @@ namespace Engine {
 
 /// Current view state for the preview engine.
 struct ThumbnailPreviewState {
-    float    zoomLevel      = 1.0f;
-    float    panX           = 0.0f;
-    float    panY           = 0.0f;
-    uint32_t viewportWidth  = 0;
+    float    zoomLevel = 1.0f;
+    float    panX = 0.0f;
+    float    panY = 0.0f;
+    uint32_t viewportWidth = 0;
     uint32_t viewportHeight = 0;
-    bool     showGrid       = false;
-    bool     showInfo       = false;
+    bool     showGrid = false;
+    bool     showInfo = false;
 };
 
 /// Interactive thumbnail preview renderer with zoom and pan.
@@ -59,14 +59,14 @@ public:
         size_t byteCount = static_cast<size_t>(width) * height * 4;
 
         AcquireSRWLockExclusive(&m_lock);
-        m_imageWidth  = width;
+        m_imageWidth = width;
         m_imageHeight = height;
         m_imageData.assign(rgbaData, rgbaData + byteCount);
 
         // Convert RGBA → BGRA for GDI (StretchDIBits expects BGRA in BI_RGB with 32bpp)
         for (size_t i = 0; i < byteCount; i += 4) {
-            uint8_t tmp       = m_imageData[i];      // R
-            m_imageData[i]     = m_imageData[i + 2];  // B
+            uint8_t tmp = m_imageData[i];      // R
+            m_imageData[i] = m_imageData[i + 2];  // B
             m_imageData[i + 2] = tmp;                  // R
         }
         ReleaseSRWLockExclusive(&m_lock);
@@ -79,7 +79,7 @@ public:
     inline bool RenderToHDC(HDC hdc, const RECT& destRect) {
         if (!hdc) return false;
 
-        int destW = destRect.right  - destRect.left;
+        int destW = destRect.right - destRect.left;
         int destH = destRect.bottom - destRect.top;
         if (destW <= 0 || destH <= 0) return false;
 
@@ -127,11 +127,11 @@ public:
 
             // Prepare BITMAPINFO for StretchDIBits (top-down BGRA)
             BITMAPINFO bmi{};
-            bmi.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
-            bmi.bmiHeader.biWidth       = static_cast<LONG>(imgW);
-            bmi.bmiHeader.biHeight      = -static_cast<LONG>(imgH);  // top-down
-            bmi.bmiHeader.biPlanes      = 1;
-            bmi.bmiHeader.biBitCount    = 32;
+            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi.bmiHeader.biWidth = static_cast<LONG>(imgW);
+            bmi.bmiHeader.biHeight = -static_cast<LONG>(imgH);  // top-down
+            bmi.bmiHeader.biPlanes = 1;
+            bmi.bmiHeader.biBitCount = 32;
             bmi.bmiHeader.biCompression = BI_RGB;
 
             StretchDIBits(memDC,
@@ -154,7 +154,7 @@ public:
 
         // BitBlt to target
         BitBlt(hdc, destRect.left, destRect.top, destW, destH,
-               memDC, 0, 0, SRCCOPY);
+            memDC, 0, 0, SRCCOPY);
 
         SelectObject(memDC, oldBmp);
         DeleteObject(memBmp);
@@ -188,7 +188,7 @@ public:
         m_state.zoomLevel = (std::max)(0.1f, (std::min)((std::min)(scaleX, scaleY), 10.0f));
         m_state.panX = 0.0f;
         m_state.panY = 0.0f;
-        m_state.viewportWidth  = viewportW;
+        m_state.viewportWidth = viewportW;
         m_state.viewportHeight = viewportH;
         ReleaseSRWLockExclusive(&m_lock);
     }
@@ -232,9 +232,9 @@ public:
     inline POINT ImageToScreen(float imgX, float imgY) const {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
         float zoom = m_state.zoomLevel;
-        float vpW  = static_cast<float>(m_state.viewportWidth);
-        float vpH  = static_cast<float>(m_state.viewportHeight);
-        float renderW = static_cast<float>(m_imageWidth)  * zoom;
+        float vpW = static_cast<float>(m_state.viewportWidth);
+        float vpH = static_cast<float>(m_state.viewportHeight);
+        float renderW = static_cast<float>(m_imageWidth) * zoom;
         float renderH = static_cast<float>(m_imageHeight) * zoom;
         float offX = (vpW - renderW) * 0.5f + m_state.panX * zoom;
         float offY = (vpH - renderH) * 0.5f + m_state.panY * zoom;
@@ -250,9 +250,9 @@ public:
     inline std::pair<float, float> ScreenToImage(int screenX, int screenY) const {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
         float zoom = m_state.zoomLevel;
-        float vpW  = static_cast<float>(m_state.viewportWidth);
-        float vpH  = static_cast<float>(m_state.viewportHeight);
-        float renderW = static_cast<float>(m_imageWidth)  * zoom;
+        float vpW = static_cast<float>(m_state.viewportWidth);
+        float vpH = static_cast<float>(m_state.viewportHeight);
+        float renderW = static_cast<float>(m_imageWidth) * zoom;
         float renderH = static_cast<float>(m_imageHeight) * zoom;
         float offX = (vpW - renderW) * 0.5f + m_state.panX * zoom;
         float offY = (vpH - renderH) * 0.5f + m_state.panY * zoom;
@@ -301,17 +301,17 @@ private:
     static void DrawCheckerboard(HDC hdc, int width, int height) {
         const int cellSize = 8;
         COLORREF light = RGB(255, 255, 255);
-        COLORREF dark  = RGB(204, 204, 204);
+        COLORREF dark = RGB(204, 204, 204);
         HBRUSH lightBr = CreateSolidBrush(light);
-        HBRUSH darkBr  = CreateSolidBrush(dark);
+        HBRUSH darkBr = CreateSolidBrush(dark);
 
         for (int y = 0; y < height; y += cellSize) {
             for (int x = 0; x < width; x += cellSize) {
                 bool isDark = ((x / cellSize) + (y / cellSize)) % 2 != 0;
                 RECT cell;
-                cell.left   = x;
-                cell.top    = y;
-                cell.right  = (std::min)(x + cellSize, width);
+                cell.left = x;
+                cell.top = y;
+                cell.right = (std::min)(x + cellSize, width);
                 cell.bottom = (std::min)(y + cellSize, height);
                 FillRect(hdc, &cell, isDark ? darkBr : lightBr);
             }
@@ -323,7 +323,7 @@ private:
     // ── Pixel grid ────────────────────────────────────────────────────────
     /// Draw grid lines between pixels at high zoom levels.
     static void DrawPixelGrid(HDC hdc, int dx, int dy,
-                              uint32_t imgW, uint32_t imgH, float zoom) {
+        uint32_t imgW, uint32_t imgH, float zoom) {
         HPEN pen = CreatePen(PS_SOLID, 1, RGB(180, 180, 180));
         HGDIOBJ oldPen = SelectObject(hdc, pen);
 
@@ -347,16 +347,16 @@ private:
     // ── Info overlay ──────────────────────────────────────────────────────
     /// Draw format / dimensions info in the bottom-left corner.
     static void DrawInfoOverlay(HDC hdc, int vpW, int vpH,
-                                uint32_t imgW, uint32_t imgH) {
+        uint32_t imgW, uint32_t imgH) {
         (void)vpW;
         wchar_t buf[128]{};
         _snwprintf_s(buf, _TRUNCATE, L"%ux%u  RGBA 32bpp", imgW, imgH);
 
         // Semi-transparent background bar
         RECT bar;
-        bar.left   = 0;
-        bar.top    = vpH - 24;
-        bar.right  = 300;
+        bar.left = 0;
+        bar.top = vpH - 24;
+        bar.right = 300;
         bar.bottom = vpH;
         HBRUSH barBr = CreateSolidBrush(RGB(40, 40, 40));
         FillRect(hdc, &bar, barBr);
@@ -381,10 +381,10 @@ private:
     ThumbnailPreviewState m_state{};
 
     std::vector<uint8_t> m_imageData;
-    uint32_t m_imageWidth  = 0;
+    uint32_t m_imageWidth = 0;
     uint32_t m_imageHeight = 0;
 
-    COLORREF m_bgColor        = RGB(48, 48, 48);
+    COLORREF m_bgColor = RGB(48, 48, 48);
     bool     m_useCheckerboard = true;
 };
 

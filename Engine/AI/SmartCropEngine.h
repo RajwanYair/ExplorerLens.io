@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Smart Crop Engine (Sprint 575)
+// ExplorerLens Engine — Smart Crop Engine
 //
 // Purpose:
 //   Intelligent image cropping that preserves the most visually important
@@ -43,18 +43,18 @@ namespace Engine {
 
 /// A candidate crop rectangle with its saliency score.
 struct CropRect {
-    uint32_t x      = 0;
-    uint32_t y      = 0;
-    uint32_t width  = 0;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t width = 0;
     uint32_t height = 0;
-    float    score   = 0.0f;
+    float    score = 0.0f;
 };
 
 /// Cumulative crop-operation statistics.
 struct CropStats {
-    uint64_t cropsComputed    = 0;
-    double   totalSaliency    = 0.0;
-    double   totalComputeMs   = 0.0;
+    uint64_t cropsComputed = 0;
+    double   totalSaliency = 0.0;
+    double   totalComputeMs = 0.0;
     double AvgSaliency()  const { return cropsComputed ? totalSaliency / static_cast<double>(cropsComputed) : 0.0; }
     double AvgComputeMs() const { return cropsComputed ? totalComputeMs / static_cast<double>(cropsComputed) : 0.0; }
 };
@@ -73,18 +73,18 @@ public:
 
     /// Find the single best crop rectangle.
     inline CropRect FindBestCrop(const uint8_t* rgbaData,
-                                  uint32_t srcWidth, uint32_t srcHeight,
-                                  uint32_t targetWidth, uint32_t targetHeight) {
+        uint32_t srcWidth, uint32_t srcHeight,
+        uint32_t targetWidth, uint32_t targetHeight) {
         auto crops = FindTopCrops(rgbaData, srcWidth, srcHeight, targetWidth, targetHeight, 1);
-        if (crops.empty()) return CropRect{0, 0, targetWidth, targetHeight, 0.0f};
+        if (crops.empty()) return CropRect{ 0, 0, targetWidth, targetHeight, 0.0f };
         return crops.front();
     }
 
     /// Find the top-N crop rectangles ranked by saliency score.
     inline std::vector<CropRect> FindTopCrops(const uint8_t* rgbaData,
-                                               uint32_t srcW, uint32_t srcH,
-                                               uint32_t targetW, uint32_t targetH,
-                                               uint32_t count) {
+        uint32_t srcW, uint32_t srcH,
+        uint32_t targetW, uint32_t targetH,
+        uint32_t count) {
         using Clock = std::chrono::high_resolution_clock;
         auto t0 = Clock::now();
 
@@ -99,7 +99,8 @@ public:
             cropH = srcH;
             cropW = static_cast<uint32_t>(srcH * targetAspect);
             cropW = (std::min)(cropW, srcW);
-        } else {
+        }
+        else {
             cropW = srcW;
             cropH = static_cast<uint32_t>(srcW / targetAspect);
             cropH = (std::min)(cropH, srcH);
@@ -127,22 +128,22 @@ public:
         for (uint32_t qy = 0; qy + qCropH <= qH; qy += stepY) {
             for (uint32_t qx = 0; qx + qCropW <= qW; qx += stepX) {
                 float s = SumRegion(saliency, qW, qx, qy, qCropW, qCropH);
-                candidates.push_back({qx, qy, s});
+                candidates.push_back({ qx, qy, s });
             }
         }
 
         // Sort descending by score
         std::sort(candidates.begin(), candidates.end(),
-                  [](const Candidate& a, const Candidate& b) { return a.score > b.score; });
+            [](const Candidate& a, const Candidate& b) { return a.score > b.score; });
 
         uint32_t n = (std::min)(count, static_cast<uint32_t>(candidates.size()));
         for (uint32_t i = 0; i < n; ++i) {
             CropRect cr;
-            cr.x      = (std::min)(candidates[i].qx * 4, srcW - cropW);
-            cr.y      = (std::min)(candidates[i].qy * 4, srcH - cropH);
-            cr.width  = cropW;
+            cr.x = (std::min)(candidates[i].qx * 4, srcW - cropW);
+            cr.y = (std::min)(candidates[i].qy * 4, srcH - cropH);
+            cr.width = cropW;
             cr.height = cropH;
-            cr.score  = candidates[i].score;
+            cr.score = candidates[i].score;
             results.push_back(cr);
         }
 
@@ -171,8 +172,8 @@ private:
 
     /// Build a combined saliency map at (qW x qH) resolution.
     inline std::vector<float> BuildSaliencyMap(const uint8_t* rgba,
-                                               uint32_t srcW, uint32_t srcH,
-                                               uint32_t qW, uint32_t qH) const {
+        uint32_t srcW, uint32_t srcH,
+        uint32_t qW, uint32_t qH) const {
         const uint32_t qCount = qW * qH;
         std::vector<float> gray(qCount, 0.0f);
         std::vector<float> contrastMap(qCount, 0.0f);
@@ -232,7 +233,7 @@ private:
                 centerBias[idx] = std::exp(-(dx * dx + dy * dy) * invDiag2);
 
                 // 6. Skin-tone detection (YCbCr range)
-                float Y  = 0.299f * r + 0.587f * g + 0.114f * b;
+                float Y = 0.299f * r + 0.587f * g + 0.114f * b;
                 float Cb = 128.0f - 0.168736f * r - 0.331264f * g + 0.5f * b;
                 float Cr = 128.0f + 0.5f * r - 0.418688f * g - 0.081312f * b;
                 (void)Y;
@@ -262,9 +263,9 @@ private:
         for (uint32_t qy = 1; qy + 1 < qH; ++qy) {
             for (uint32_t qx = 1; qx + 1 < qW; ++qx) {
                 float gx = -gray[(qy - 1) * qW + (qx - 1)] - 2.0f * gray[qy * qW + (qx - 1)] - gray[(qy + 1) * qW + (qx - 1)]
-                           + gray[(qy - 1) * qW + (qx + 1)] + 2.0f * gray[qy * qW + (qx + 1)] + gray[(qy + 1) * qW + (qx + 1)];
+                    + gray[(qy - 1) * qW + (qx + 1)] + 2.0f * gray[qy * qW + (qx + 1)] + gray[(qy + 1) * qW + (qx + 1)];
                 float gy = -gray[(qy - 1) * qW + (qx - 1)] - 2.0f * gray[(qy - 1) * qW + qx] - gray[(qy - 1) * qW + (qx + 1)]
-                           + gray[(qy + 1) * qW + (qx - 1)] + 2.0f * gray[(qy + 1) * qW + qx] + gray[(qy + 1) * qW + (qx + 1)];
+                    + gray[(qy + 1) * qW + (qx - 1)] + 2.0f * gray[(qy + 1) * qW + qx] + gray[(qy + 1) * qW + (qx + 1)];
                 edgeMap[qy * qW + qx] = std::sqrt(gx * gx + gy * gy) / 1442.0f; // max ~4*255*sqrt(2)
             }
         }
@@ -272,27 +273,27 @@ private:
         // Combine: saliency = 0.30*contrast + 0.25*edges + 0.20*colorUniq
         //                    + centerBiasWeight*center + 0.10*skinTone
         // Remaining weight filled by adjusting contrast weight
-        float wContrast  = 0.30f;
-        float wEdge      = 0.25f;
+        float wContrast = 0.30f;
+        float wEdge = 0.25f;
         float wColorUniq = 0.20f;
-        float wCenter    = m_centerBiasWeight;
-        float wSkin      = 0.10f;
+        float wCenter = m_centerBiasWeight;
+        float wSkin = 0.10f;
 
         std::vector<float> saliency(qCount, 0.0f);
         for (uint32_t i = 0; i < qCount; ++i) {
             saliency[i] = wContrast * contrastMap[i]
-                         + wEdge    * edgeMap[i]
-                         + wColorUniq * colorUniq[i]
-                         + wCenter  * centerBias[i]
-                         + wSkin    * skinMap[i];
+                + wEdge * edgeMap[i]
+                + wColorUniq * colorUniq[i]
+                + wCenter * centerBias[i]
+                + wSkin * skinMap[i];
         }
         return saliency;
     }
 
     /// Sum saliency in a rectangular region.
     static inline float SumRegion(const std::vector<float>& map, uint32_t mapW,
-                                  uint32_t rx, uint32_t ry,
-                                  uint32_t rw, uint32_t rh) {
+        uint32_t rx, uint32_t ry,
+        uint32_t rw, uint32_t rh) {
         float s = 0.0f;
         for (uint32_t y = ry; y < ry + rh; ++y) {
             for (uint32_t x = rx; x < rx + rw; ++x) {

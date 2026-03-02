@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Plugin Compatibility Kit (Sprint 581)
+// ExplorerLens Engine — Plugin Compatibility Kit
 //
 // Validates plugin binary compatibility before loading by inspecting PE
 // headers, export tables, import tables, bitness, and ABI version. Reads
@@ -33,15 +33,15 @@ struct CompatResult {
     std::vector<std::string> errors;
     std::vector<std::string> warnings;
     std::string              dllVersion;
-    uint32_t                 abiVersion  = 0;
-    bool                     is64bit     = false;
+    uint32_t                 abiVersion = 0;
+    bool                     is64bit = false;
     std::string              compiler;
 };
 
 struct CompatStats {
-    uint64_t pluginsChecked   = 0;
-    uint64_t pluginsPassed    = 0;
-    uint64_t pluginsFailed    = 0;
+    uint64_t pluginsChecked = 0;
+    uint64_t pluginsPassed = 0;
+    uint64_t pluginsFailed = 0;
     std::unordered_map<std::string, uint64_t> failureReasons;
 };
 
@@ -175,12 +175,13 @@ public:
                     result.errors.push_back(oss.str());
                     RecordFailure("abi_version_mismatch");
                 }
-            } else {
+            }
+            else {
                 result.warnings.push_back("GetABIVersion export not callable (loaded without resolving)");
             }
 
             // Try to get version string
-            using GetPluginInfoFn = const char*(*)();
+            using GetPluginInfoFn = const char* (*)();
             auto fnInfo = reinterpret_cast<GetPluginInfoFn>(
                 GetProcAddress(hMod, "GetPluginInfo"));
             if (fnInfo) {
@@ -189,7 +190,8 @@ public:
             }
 
             FreeLibrary(hMod);
-        } else {
+        }
+        else {
             result.warnings.push_back("Could not load DLL for ABI check (LoadLibraryExW failed)");
         }
 
@@ -199,7 +201,8 @@ public:
         AcquireSRWLockExclusive(&m_lock);
         if (result.compatible) {
             m_stats.pluginsPassed++;
-        } else {
+        }
+        else {
             m_stats.pluginsFailed++;
         }
         ReleaseSRWLockExclusive(&m_lock);
@@ -291,7 +294,7 @@ private:
             return exportNames;
         }
 
-        DWORD exportRVA  = nth->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+        DWORD exportRVA = nth->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
         DWORD exportSize = nth->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
         if (exportRVA == 0 || exportSize == 0) return exportNames;
 
@@ -303,7 +306,7 @@ private:
 
         auto* expDir = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(pe.data() + exportOffset);
         DWORD nameCount = expDir->NumberOfNames;
-        DWORD namesRVA  = expDir->AddressOfNames;
+        DWORD namesRVA = expDir->AddressOfNames;
         DWORD namesOffset = RvaToFileOffset(pe, nth, namesRVA);
         if (namesOffset == 0) return exportNames;
 
@@ -369,7 +372,7 @@ private:
         const auto* section = IMAGE_FIRST_SECTION(nth);
         for (WORD i = 0; i < nth->FileHeader.NumberOfSections; ++i) {
             DWORD secStart = section[i].VirtualAddress;
-            DWORD secEnd   = secStart + section[i].Misc.VirtualSize;
+            DWORD secEnd = secStart + section[i].Misc.VirtualSize;
             if (rva >= secStart && rva < secEnd) {
                 DWORD delta = rva - secStart;
                 DWORD fileOff = section[i].PointerToRawData + delta;

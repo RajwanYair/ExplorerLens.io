@@ -254,6 +254,22 @@
   _T("SOFTWARE\\Classes\\.STL\\shellex\\{00021500-0000-0000-C000-")            \
   _T("000000000046}")
 
+// Extended Image Formats (primary: .bmp)
+#define LENS_BMPTH_KEY _T("SOFTWARE\\Classes\\.BMP\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define LENS_BMPIH_KEY _T("SOFTWARE\\Classes\\.BMP\\shellex\\{00021500-0000-0000-C000-000000000046}")
+
+// Texture Formats (primary: .ktx)
+#define LENS_KTXTH_KEY _T("SOFTWARE\\Classes\\.KTX\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define LENS_KTXIH_KEY _T("SOFTWARE\\Classes\\.KTX\\shellex\\{00021500-0000-0000-C000-000000000046}")
+
+// Extended Archives (primary: .iso)
+#define LENS_ISOTH_KEY _T("SOFTWARE\\Classes\\.ISO\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define LENS_ISOIH_KEY _T("SOFTWARE\\Classes\\.ISO\\shellex\\{00021500-0000-0000-C000-000000000046}")
+
+// Extended Documents (primary: .djvu)
+#define LENS_DJVUTH_KEY _T("SOFTWARE\\Classes\\.DJVU\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}")
+#define LENS_DJVUIH_KEY _T("SOFTWARE\\Classes\\.DJVU\\shellex\\{00021500-0000-0000-C000-000000000046}")
+
 // LENS types (must match LENSTYPE in LENSArchive.h)
 #define LENS_NONE 0
 #define LENS_ZIP 1
@@ -294,6 +310,41 @@
 	 // (LENS_PDF=20 conflict)
 #define LENS_DOCUMENT 75 // Document thumbnails (DOCX, XLSX, PPTX)
 #define LENS_MODEL 76    // 3D Model thumbnails (STL, OBJ, PLY)
+
+// Extended format IDs (100+ to avoid conflicts with legacy IDs)
+#define LENS_BMP 100      // BMP/DIB bitmap
+#define LENS_GIF 101      // GIF animation
+#define LENS_WMF 102      // Windows Metafile
+#define LENS_EMF 103      // Enhanced Metafile
+#define LENS_PCX 104      // PCX paintbrush
+#define LENS_JP2 105      // JPEG 2000
+#define LENS_EPS 106      // Encapsulated PostScript
+#define LENS_KTX 107      // Khronos Texture
+#define LENS_VTF 108      // Valve Texture Format
+#define LENS_ORA 109      // OpenRaster
+#define LENS_XCF 110      // GIMP native format
+#define LENS_SGI 111      // SGI image
+#define LENS_XPM 112      // X Pixmap
+#define LENS_FARBFELD 113 // Farbfeld image
+#define LENS_ISO 114      // ISO disc image
+#define LENS_CAB 115      // Windows Cabinet archive
+#define LENS_DJVU 116     // DjVu document
+#define LENS_CHM 117      // Compiled HTML Help
+#define LENS_CPIO 118     // CPIO archive
+#define LENS_BZIP2 119    // Bzip2 compressed
+#define LENS_ZSTD 120     // Zstandard compressed
+#define LENS_LZMA 121     // LZMA compressed
+#define LENS_LZ4 122      // LZ4 compressed
+#define LENS_DOCX 123     // Word document
+#define LENS_PPTX 124     // PowerPoint presentation
+#define LENS_XLSX 125     // Excel spreadsheet
+#define LENS_ODT 126      // OpenDocument Text
+#define LENS_ODP 127      // OpenDocument Presentation
+
+#define LENS_EXT_IMAGE 130    // Extended images (BMP, GIF, WMF, EMF, PCX, JP2, EPS, etc.)
+#define LENS_TEXTURE 131      // Texture formats (KTX, VTF)
+#define LENS_EXT_ARCHIVE 132  // Extended archives (ISO, CAB, CPIO, compression)
+#define LENS_EXT_DOCUMENT 133 // Extended documents (DjVu, CHM, ODT, ODP)
 
 // Handler status enumeration
 enum HandlerStatus {
@@ -705,6 +756,94 @@ public:
 			return _T(".svg");
 		case LENS_RAW:
 			return _T(".dng"); // Representative RAW format (DNG, CR2, NEF, ARW)
+		case LENS_PSD:
+			return _T(".psd");
+		case LENS_DDS:
+			return _T(".dds");
+		case LENS_HDR:
+			return _T(".hdr");
+		case LENS_EXR:
+			return _T(".exr");
+		case LENS_PPM:
+			return _T(".ppm");
+		case LENS_FONT:
+			return _T(".ttf");
+		case LENS_ICO:
+			return _T(".ico");
+		case LENS_QOI:
+			return _T(".qoi");
+		case LENS_TGA:
+			return _T(".tga");
+		case LENS_AUDIO:
+			return _T(".mp3");
+		case LENS_DOCUMENT:
+			return _T(".docx");
+		case LENS_MODEL:
+			return _T(".stl");
+		case LENS_BMP:
+			return _T(".bmp");
+		case LENS_GIF:
+			return _T(".gif");
+		case LENS_WMF:
+			return _T(".wmf");
+		case LENS_EMF:
+			return _T(".emf");
+		case LENS_PCX:
+			return _T(".pcx");
+		case LENS_JP2:
+			return _T(".jp2");
+		case LENS_EPS:
+			return _T(".eps");
+		case LENS_KTX:
+			return _T(".ktx");
+		case LENS_VTF:
+			return _T(".vtf");
+		case LENS_ORA:
+			return _T(".ora");
+		case LENS_XCF:
+			return _T(".xcf");
+		case LENS_SGI:
+			return _T(".sgi");
+		case LENS_XPM:
+			return _T(".xpm");
+		case LENS_FARBFELD:
+			return _T(".ff");
+		case LENS_ISO:
+			return _T(".iso");
+		case LENS_CAB:
+			return _T(".cab");
+		case LENS_DJVU:
+			return _T(".djvu");
+		case LENS_CHM:
+			return _T(".chm");
+		case LENS_CPIO:
+			return _T(".cpio");
+		case LENS_BZIP2:
+			return _T(".bz2");
+		case LENS_ZSTD:
+			return _T(".zst");
+		case LENS_LZMA:
+			return _T(".lzma");
+		case LENS_LZ4:
+			return _T(".lz4");
+		case LENS_DOCX:
+			return _T(".docx");
+		case LENS_PPTX:
+			return _T(".pptx");
+		case LENS_XLSX:
+			return _T(".xlsx");
+		case LENS_ODT:
+			return _T(".odt");
+		case LENS_ODP:
+			return _T(".odp");
+		case LENS_EXT_IMAGE:
+			return _T(".bmp");
+		case LENS_TEXTURE:
+			return _T(".ktx");
+		case LENS_EXT_ARCHIVE:
+			return _T(".iso");
+		case LENS_EXT_DOCUMENT:
+			return _T(".djvu");
 		default:
 			break;
 		}
@@ -1320,6 +1459,264 @@ public:
 			}
 			return;
 		}
+		else if (LENSTYPE == LENS_EXT_IMAGE) {
+			// Extended Image formats: .bmp, .gif, .wmf, .emf, .pcx, .jp2, .eps, .ora, .xcf, .sgi, .xpm, .ff
+			const LPCTSTR extImgExts[] = {
+				LENS_BMPTH_KEY,
+				_T("SOFTWARE\\Classes\\.GIF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.WMF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.EMF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.PCX\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.JP2\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.EPS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.ORA\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.XCF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.SGI\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.XPM\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.FF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR extImgInfoTips[] = {
+				LENS_BMPIH_KEY,
+				_T("SOFTWARE\\Classes\\.GIF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.WMF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.EMF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.PCX\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.JP2\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.EPS\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.ORA\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.XCF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.SGI\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.XPM\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.FF\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("bmp_th"), _T("gif_th"), _T("wmf_th"),
+				_T("emf_th"), _T("pcx_th"), _T("jp2_th"), _T("eps_th"),
+				_T("ora_th"), _T("xcf_th"), _T("sgi_th"), _T("xpm_th"), _T("ff_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("bmp_ih"), _T("gif_ih"), _T("wmf_ih"),
+				_T("emf_ih"), _T("pcx_ih"), _T("jp2_ih"), _T("eps_ih"),
+				_T("ora_ih"), _T("xcf_ih"), _T("sgi_ih"), _T("xpm_ih"), _T("ff_ih") };
+			for (int i = 0; i < _countof(extImgExts); i++) {
+				if (bSet) {
+					BackupHandler(LENSTYPE, extImgExts[i], backupNames[i]);
+					BackupHandler(LENSTYPE, extImgInfoTips[i], backupNamesInfo[i]);
+					CRegKey rkt, rki;
+					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, extImgExts[i], NULL,
+						REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rkt.SetStringValue(NULL, LENS_GUID_KEY);
+					if (ERROR_SUCCESS == rki.Create(HKEY_CURRENT_USER, extImgInfoTips[i],
+						NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rki.SetStringValue(NULL, LENS_GUID_KEY);
+				}
+				else {
+					TCHAR currentGuid[256] = { 0 };
+					ULONG len = 256;
+					CRegKey rk;
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, extImgExts[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(extImgExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, extImgExts[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, extImgInfoTips[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(extImgInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, extImgInfoTips[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+				}
+			}
+			return;
+		}
+		else if (LENSTYPE == LENS_TEXTURE) {
+			// Texture formats: .ktx, .ktx2, .vtf
+			const LPCTSTR texExts[] = {
+				LENS_KTXTH_KEY,
+				_T("SOFTWARE\\Classes\\.KTX2\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.VTF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR texInfoTips[] = {
+				LENS_KTXIH_KEY,
+				_T("SOFTWARE\\Classes\\.KTX2\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.VTF\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("ktx_th"), _T("ktx2_th"), _T("vtf_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("ktx_ih"), _T("ktx2_ih"), _T("vtf_ih") };
+			for (int i = 0; i < _countof(texExts); i++) {
+				if (bSet) {
+					BackupHandler(LENSTYPE, texExts[i], backupNames[i]);
+					BackupHandler(LENSTYPE, texInfoTips[i], backupNamesInfo[i]);
+					CRegKey rkt, rki;
+					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, texExts[i], NULL,
+						REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rkt.SetStringValue(NULL, LENS_GUID_KEY);
+					if (ERROR_SUCCESS == rki.Create(HKEY_CURRENT_USER, texInfoTips[i],
+						NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rki.SetStringValue(NULL, LENS_GUID_KEY);
+				}
+				else {
+					TCHAR currentGuid[256] = { 0 };
+					ULONG len = 256;
+					CRegKey rk;
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, texExts[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(texExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, texExts[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, texInfoTips[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(texInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, texInfoTips[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+				}
+			}
+			return;
+		}
+		else if (LENSTYPE == LENS_EXT_ARCHIVE) {
+			// Extended Archive formats: .iso, .cab, .cpio, .bz2, .zst, .xz, .lz4
+			const LPCTSTR extArcExts[] = {
+				LENS_ISOTH_KEY,
+				_T("SOFTWARE\\Classes\\.CAB\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.CPIO\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.BZ2\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.ZST\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.XZ\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.LZ4\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR extArcInfoTips[] = {
+				LENS_ISOIH_KEY,
+				_T("SOFTWARE\\Classes\\.CAB\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.CPIO\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.BZ2\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.ZST\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.XZ\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.LZ4\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("iso_th"), _T("cab_th"), _T("cpio_th"),
+				_T("bz2_th"), _T("zst_th"), _T("xz_th"), _T("lz4_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("iso_ih"), _T("cab_ih"), _T("cpio_ih"),
+				_T("bz2_ih"), _T("zst_ih"), _T("xz_ih"), _T("lz4_ih") };
+			for (int i = 0; i < _countof(extArcExts); i++) {
+				if (bSet) {
+					BackupHandler(LENSTYPE, extArcExts[i], backupNames[i]);
+					BackupHandler(LENSTYPE, extArcInfoTips[i], backupNamesInfo[i]);
+					CRegKey rkt, rki;
+					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, extArcExts[i], NULL,
+						REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rkt.SetStringValue(NULL, LENS_GUID_KEY);
+					if (ERROR_SUCCESS == rki.Create(HKEY_CURRENT_USER, extArcInfoTips[i],
+						NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rki.SetStringValue(NULL, LENS_GUID_KEY);
+				}
+				else {
+					TCHAR currentGuid[256] = { 0 };
+					ULONG len = 256;
+					CRegKey rk;
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, extArcExts[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(extArcExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, extArcExts[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, extArcInfoTips[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(extArcInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, extArcInfoTips[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+				}
+			}
+			return;
+		}
+		else if (LENSTYPE == LENS_EXT_DOCUMENT) {
+			// Extended Document formats: .djvu, .chm, .odt, .odp
+			const LPCTSTR extDocExts[] = {
+				LENS_DJVUTH_KEY,
+				_T("SOFTWARE\\Classes\\.CHM\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.ODT\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.ODP\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			const LPCTSTR extDocInfoTips[] = {
+				LENS_DJVUIH_KEY,
+				_T("SOFTWARE\\Classes\\.CHM\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.ODT\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.ODP\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = { _T("djvu_th"), _T("chm_th"), _T("odt_th"), _T("odp_th") };
+			const LPCTSTR backupNamesInfo[] = { _T("djvu_ih"), _T("chm_ih"), _T("odt_ih"), _T("odp_ih") };
+			for (int i = 0; i < _countof(extDocExts); i++) {
+				if (bSet) {
+					BackupHandler(LENSTYPE, extDocExts[i], backupNames[i]);
+					BackupHandler(LENSTYPE, extDocInfoTips[i], backupNamesInfo[i]);
+					CRegKey rkt, rki;
+					if (ERROR_SUCCESS == rkt.Create(HKEY_CURRENT_USER, extDocExts[i], NULL,
+						REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rkt.SetStringValue(NULL, LENS_GUID_KEY);
+					if (ERROR_SUCCESS == rki.Create(HKEY_CURRENT_USER, extDocInfoTips[i],
+						NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE))
+						rki.SetStringValue(NULL, LENS_GUID_KEY);
+				}
+				else {
+					TCHAR currentGuid[256] = { 0 };
+					ULONG len = 256;
+					CRegKey rk;
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, extDocExts[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(extDocExts[i], backupNames[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, extDocExts[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+					len = 256;
+					ZeroMemory(currentGuid, sizeof(currentGuid));
+					if (ERROR_SUCCESS == rk.Open(HKEY_CURRENT_USER, extDocInfoTips[i], KEY_READ)) {
+						if (ERROR_SUCCESS == rk.QueryStringValue(NULL, currentGuid, &len)) {
+							if (StrCmpI(currentGuid, LENS_GUID_KEY) == 0) {
+								rk.Close();
+								if (!RestoreHandler(extDocInfoTips[i], backupNamesInfo[i]))
+									RegDeleteKey(HKEY_CURRENT_USER, extDocInfoTips[i]);
+							}
+							else rk.Close();
+						}
+						else rk.Close();
+					}
+				}
+			}
+			return;
+		}
 
 		// Standard single-extension formats
 		CString backupTH, backupIH;
@@ -1461,6 +1858,14 @@ public:
 			return LENS_DOCXTH_KEY; // Primary document format
 		case LENS_MODEL:
 			return LENS_STLTH_KEY; // Primary 3D model format
+		case LENS_EXT_IMAGE:
+			return LENS_BMPTH_KEY;
+		case LENS_TEXTURE:
+			return LENS_KTXTH_KEY;
+		case LENS_EXT_ARCHIVE:
+			return LENS_ISOTH_KEY;
+		case LENS_EXT_DOCUMENT:
+			return LENS_DJVUTH_KEY;
 		default:
 			break;
 		}
@@ -1539,6 +1944,14 @@ public:
 			return LENS_DOCXIH_KEY;
 		case LENS_MODEL:
 			return LENS_STLIH_KEY;
+		case LENS_EXT_IMAGE:
+			return LENS_BMPIH_KEY;
+		case LENS_TEXTURE:
+			return LENS_KTXIH_KEY;
+		case LENS_EXT_ARCHIVE:
+			return LENS_ISOIH_KEY;
+		case LENS_EXT_DOCUMENT:
+			return LENS_DJVUIH_KEY;
 		default:
 			break;
 		}

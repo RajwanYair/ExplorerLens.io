@@ -513,3 +513,105 @@ In addition to the Engine version checklist (Section 3), the GUI has its own ver
 5. Implement handler in MainDlg.cpp
 6. For Reset Defaults: iterate `allCheckboxes[]` array and set `BST_CHECKED`
 7. For Export Config: use `CFileDialog` save dialog → serialize settings to JSON
+
+---
+
+## 18. Aggregate Format Checkbox Pattern (v15.0 Post-Release)
+
+### When to use aggregate checkboxes
+- When adding many related formats that users would toggle as a group (not individually)
+- When dialog real estate cannot accommodate individual checkboxes for every extension
+- Examples: "Extended Images" (BMP, GIF, WMF, EMF, PCX, JP2, ...), "Texture" (KTX, VTF)
+
+### Implementation checklist for aggregate format groups
+Each aggregate checkbox requires changes in **5 files, 15+ locations**:
+
+1. **`resource.h`** — `IDC_CB_GROUPNAME` (next available ID in 1072+ range)
+2. **`RegManager.h`** — 7 changes:
+   - `LENS_GROUPNAME` define (unique ID in 130+ range)
+   - `LENS_PRIMARY_EXT_TH_KEY` / `LENS_PRIMARY_EXT_IH_KEY` registry path macros
+   - `GetExtension()` case returning primary extension string
+   - `GetTHKeyName()` / `GetIHKeyName()` cases returning primary key
+   - `SetHandlers()` multi-extension block with TH/IH arrays + backup name arrays
+3. **`LENSManager.rc`** — BS_AUTO3STATE checkbox in appropriate group box
+4. **`MainDlg.h`** — `COMMAND_HANDLER(IDC_CB_GROUPNAME, BN_CLICKED, OnCheckboxClicked)`
+5. **`MainDlg.cpp`** — 10+ locations:
+   - `OnInitDialog()` visibility array
+   - `InitUI()` `Button_SetCheck` call
+   - `OnApplyImpl()` `formatHandlers[]` entry
+   - `InitTooltips()` `AddTooltipWithStatus` call
+   - `UpdateStatusBar()` `allFormats[]` entry
+   - `GetEnabledFormatCount()` `HasTH` check
+   - `InitStatusIcons()` `m_checkboxStatus` mapping
+   - `OnSelectAll()` / `OnDeselectAll()` arrays
+   - `CaptureCurrentConfig()` / `ApplyConfigSnapshot()`
+   - `OnResetDefaults()` defaults array
+6. **`ChangeSummaryDlg.h`** — `ConfigSnapshot` struct: new `bool` field
+
+### SetHandlers multi-extension block pattern
+```cpp
+else if (LENSTYPE == LENS_GROUPNAME) {
+    const LPCTSTR thKeys[] = {
+        LENS_PRIMARY_TH_KEY,
+        _T("SOFTWARE\\Classes\\.EXT2\\shellex\\{BB2E617C-...}"),
+        // ... more extensions
+    };
+    const LPCTSTR ihKeys[] = { /* matching infotip paths */ };
+    const LPCTSTR backupTH[] = { _T("ext1_th"), _T("ext2_th"), ... };
+    const LPCTSTR backupIH[] = { _T("ext1_ih"), _T("ext2_ih"), ... };
+    for (int i = 0; i < _countof(thKeys); i++) {
+        if (bSet) { /* BackupHandler + Create keys */ }
+        else { /* Check GUID match + RestoreHandler or RegDeleteKey */ }
+    }
+    return;
+}
+```
+- All 4 arrays MUST have identical element counts
+- Use `_countof()` (not hardcoded length) for loop bounds
+- Always check `StrCmpI(currentGuid, LENS_GUID_KEY) == 0` before removing
+
+### GetExtension() NULL crash prevention
+- `GetExtension()` MUST return a non-NULL string for every `LENS_*` define
+- Missing cases cause NULL dereference in `GetHandlerStatus()` → `UpdateStatusBar()` → crash
+- When adding new LENS_* defines, ALWAYS add a matching GetExtension() case
+- Return the most representative extension (e.g., `.bmp` for LENS_EXT_IMAGE group)
+
+### LENS_* ID allocation scheme
+- 0–76: Original format IDs (LENS_ZIP through LENS_MODEL)
+- 100–127: Individual extended formats (LENS_BMP through LENS_ODP)
+- 130–133: Aggregate format groups (LENS_EXT_IMAGE through LENS_EXT_DOCUMENT)
+- Leave gaps for future growth — next individual at 128+, next aggregate at 134+
+
+---
+
+## 19. Sprint/Batch Comment Cleanup Methodology
+
+### Scale and scope
+- v15.0 "Zenith" delivered 50 headers across sprints 544–593
+- Each header had "(Sprint NNN)" in the file-level doc block and sometimes inline section comments
+- Cleanup removed ALL sprint/version references while preserving meaningful documentation
+
+### Sprint comment patterns to search for
+```
+(Sprint \d+)           — inline sprint markers
+@sprint \d+            — doxygen sprint tags
+Sprint \d+ —           — sprint header lines
+v15\.0\.0              — version references in sprint context
+ExplorerLens Engine v\d+\.\d+\.\d+ \(Sprint — full sprint header lines
+```
+
+### Cleanup procedure
+1. `grep_search` with `Sprint \d+` across `Engine/` to identify all affected files
+2. Process in batches of 10-15 files grouped by subdirectory (Cache, GPU, Memory, Pipeline, etc.)
+3. For file-level doc blocks: remove entire "(Sprint NNN)" suffix or "@sprint" doxygen tag
+4. For inline section comments (`// Sprint 553: Streaming buffers`): remove entirely
+5. For "@brief Sprint NNN — Description": change to "@brief Description" (preserve the description)
+6. Verify with `grep_search` for `Sprint \d+` returning 0 matches after each batch
+7. Final verification: 0 sprint references across entire Engine/ directory
+
+### What to preserve during cleanup
+- File-level `@brief` descriptions (only strip the sprint prefix)
+- `@param`, `@return`, `@throws` documentation blocks
+- Meaningful section separators (`// --- Category ---`)
+- Class/struct doc comments explaining purpose and usage
+- Copyright headers and license notices

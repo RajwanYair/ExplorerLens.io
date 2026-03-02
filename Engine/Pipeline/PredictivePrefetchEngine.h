@@ -1,7 +1,6 @@
 #pragma once
 // ============================================================================
-// PredictivePrefetchEngine.h — Predictive File Prefetch (Sprint 552)
-// ExplorerLens Engine v15.0.0
+// PredictivePrefetchEngine.h — Predictive File Prefetch
 // Copyright (c) 2026 ExplorerLens Project
 //
 // PURPOSE:
@@ -165,10 +164,6 @@ public:
         uint64_t total = hits + misses;
         return (total > 0) ? static_cast<float>(hits) / static_cast<float>(total) : 0.0f;
     }
-
-    // ====================================================================
-    // Sprint 552: Predictive prefetch engine
-    // ====================================================================
 
     /// Construct with sliding window size (number of recent accesses tracked).
     explicit PredictivePrefetchEngine(uint32_t windowSize = 100)

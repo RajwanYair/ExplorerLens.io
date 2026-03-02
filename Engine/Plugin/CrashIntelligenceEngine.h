@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Crash Intelligence Engine (Sprint 579)
+// ExplorerLens Engine — Crash Intelligence Engine
 //
 // Post-mortem crash analysis with real Windows debugging APIs. Provides
 // minidump generation, stack trace capture via dynamically-loaded dbghelp.dll,
@@ -53,10 +53,10 @@ static constexpr DWORD MINIDUMP_WITH_DATA_SEGS = 0x00000001;
 static constexpr DWORD MINIDUMP_WITH_HANDLE_DATA = 0x00000004;
 
 struct CrashStackFrame {
-    DWORD64      address      = 0;
+    DWORD64      address = 0;
     std::wstring moduleName;
     std::wstring symbolName;
-    uint32_t     lineNumber   = 0;
+    uint32_t     lineNumber = 0;
     std::wstring fileName;
 };
 
@@ -70,10 +70,10 @@ struct CrashReportEngine {
 };
 
 struct CrashStats {
-    uint64_t crashesCaught     = 0;
-    uint64_t dumpsWritten      = 0;
-    uint64_t symbolsResolved   = 0;
-    double   avgResolutionMs   = 0.0;
+    uint64_t crashesCaught = 0;
+    uint64_t dumpsWritten = 0;
+    uint64_t symbolsResolved = 0;
+    double   avgResolutionMs = 0.0;
 };
 
 class CrashIntelligenceEngine {
@@ -201,9 +201,9 @@ public:
             // Resolve module name
             HMODULE hMod = nullptr;
             if (GetModuleHandleExW(
-                    GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                    reinterpret_cast<LPCWSTR>(stack[i]),
-                    &hMod)) {
+                GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                reinterpret_cast<LPCWSTR>(stack[i]),
+                &hMod)) {
                 wchar_t modPath[MAX_PATH]{};
                 if (GetModuleFileNameW(hMod, modPath, MAX_PATH) > 0) {
                     // Extract just the filename
@@ -283,7 +283,8 @@ public:
             }
             if (!f.symbolName.empty()) {
                 oss << f.symbolName;
-            } else {
+            }
+            else {
                 oss << L"<unknown>";
             }
             if (!f.fileName.empty()) {
@@ -345,8 +346,8 @@ public:
 
     inline CrashStats GetStats() const {
         CrashStats s;
-        s.crashesCaught   = m_stats.crashesCaught.load(std::memory_order_relaxed);
-        s.dumpsWritten    = m_stats.dumpsWritten.load(std::memory_order_relaxed);
+        s.crashesCaught = m_stats.crashesCaught.load(std::memory_order_relaxed);
+        s.dumpsWritten = m_stats.dumpsWritten.load(std::memory_order_relaxed);
         s.symbolsResolved = m_stats.symbolsResolved.load(std::memory_order_relaxed);
         s.avgResolutionMs = m_stats.avgResolutionMsAccum.load(std::memory_order_relaxed);
         return s;
@@ -372,11 +373,11 @@ private:
             return false; // Fall back to address-only traces
         }
 
-        m_fnSymInitialize        = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "SymInitialize"));
-        m_fnSymCleanup           = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "SymCleanup"));
-        m_fnSymFromAddr          = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "SymFromAddr"));
+        m_fnSymInitialize = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "SymInitialize"));
+        m_fnSymCleanup = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "SymCleanup"));
+        m_fnSymFromAddr = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "SymFromAddr"));
         m_fnSymGetLineFromAddr64 = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "SymGetLineFromAddr64"));
-        m_fnMiniDumpWriteDump    = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "MiniDumpWriteDump"));
+        m_fnMiniDumpWriteDump = reinterpret_cast<void*>(GetProcAddress(m_dbgHelpModule, "MiniDumpWriteDump"));
 
         if (m_fnSymInitialize) {
             using SymInitFn = BOOL(WINAPI*)(HANDLE, PCSTR, BOOL);
@@ -431,24 +432,24 @@ private:
 
     // Members
     SRWLOCK       m_lock{};
-    HMODULE       m_dbgHelpModule        = nullptr;
-    bool          m_symInitialized       = false;
-    std::wstring  m_dumpDirectory        = L".\\";
+    HMODULE       m_dbgHelpModule = nullptr;
+    bool          m_symInitialized = false;
+    std::wstring  m_dumpDirectory = L".\\";
 
     // dbghelp function pointers (void* to avoid header dependency)
-    void*         m_fnSymInitialize        = nullptr;
-    void*         m_fnSymCleanup           = nullptr;
-    void*         m_fnSymFromAddr          = nullptr;
-    void*         m_fnSymGetLineFromAddr64  = nullptr;
-    void*         m_fnMiniDumpWriteDump    = nullptr;
+    void* m_fnSymInitialize = nullptr;
+    void* m_fnSymCleanup = nullptr;
+    void* m_fnSymFromAddr = nullptr;
+    void* m_fnSymGetLineFromAddr64 = nullptr;
+    void* m_fnMiniDumpWriteDump = nullptr;
 
     // Atomic stats
     struct AtomicStats {
-        std::atomic<uint64_t> crashesCaught{0};
-        std::atomic<uint64_t> dumpsWritten{0};
-        std::atomic<uint64_t> symbolsResolved{0};
-        std::atomic<uint64_t> resolutionCount{0};
-        std::atomic<double>   avgResolutionMsAccum{0.0};
+        std::atomic<uint64_t> crashesCaught{ 0 };
+        std::atomic<uint64_t> dumpsWritten{ 0 };
+        std::atomic<uint64_t> symbolsResolved{ 0 };
+        std::atomic<uint64_t> resolutionCount{ 0 };
+        std::atomic<double>   avgResolutionMsAccum{ 0.0 };
     } m_stats;
 };
 

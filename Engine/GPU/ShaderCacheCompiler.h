@@ -1,6 +1,5 @@
 // ============================================================================
 // ShaderCacheCompiler.h — Compile & Cache HLSL Compute Shaders to Disk
-// ExplorerLens Engine v15.0.0  (Sprint 566)
 // Copyright (c) 2026 ExplorerLens Project
 //
 // PURPOSE
@@ -55,10 +54,10 @@ namespace Engine {
 // CacheStats
 // -----------------------------------------------------------------------
 struct ShaderCacheStats {
-    uint32_t cachedShaders     = 0;
-    uint64_t totalSizeBytes    = 0;
-    uint64_t cacheHits         = 0;
-    uint64_t cacheMisses       = 0;
+    uint32_t cachedShaders = 0;
+    uint64_t totalSizeBytes = 0;
+    uint64_t cacheHits = 0;
+    uint64_t cacheMisses = 0;
     double   compileTimeSavedMs = 0.0;
 };
 
@@ -67,19 +66,19 @@ struct ShaderCacheStats {
 // -----------------------------------------------------------------------
 class ShaderCacheCompiler {
 public:
-    ShaderCacheCompiler()  = default;
+    ShaderCacheCompiler() = default;
     ~ShaderCacheCompiler() { Cleanup(); }
 
-    ShaderCacheCompiler(const ShaderCacheCompiler&)            = delete;
+    ShaderCacheCompiler(const ShaderCacheCompiler&) = delete;
     ShaderCacheCompiler& operator=(const ShaderCacheCompiler&) = delete;
 
     // ================================================================
     // CompileShader
     // ================================================================
     inline bool CompileShader(const std::string& hlslSource,
-                              const std::string& entryPoint,
-                              const std::string& target,
-                              std::vector<uint8_t>& outBytecode) {
+        const std::string& entryPoint,
+        const std::string& target,
+        std::vector<uint8_t>& outBytecode) {
         AcquireExclusive();
 
         EnsureModules();
@@ -88,7 +87,7 @@ public:
         auto t0 = std::chrono::steady_clock::now();
 
         ID3DBlob* blob = nullptr;
-        ID3DBlob* err  = nullptr;
+        ID3DBlob* err = nullptr;
         HRESULT hr = m_pfnCompile(
             hlslSource.data(), hlslSource.size(), nullptr, nullptr, nullptr,
             entryPoint.c_str(), target.c_str(),
@@ -113,8 +112,8 @@ public:
     // SHA-256 key generation via Windows CNG
     // ================================================================
     inline std::string MakeCacheKey(const std::string& source,
-                                    const std::string& entryPoint,
-                                    const std::string& target) {
+        const std::string& entryPoint,
+        const std::string& target) {
         AcquireShared();
         EnsureModules();
 
@@ -129,7 +128,7 @@ public:
     // SaveToCache
     // ================================================================
     inline bool SaveToCache(const std::string& key,
-                            const std::vector<uint8_t>& bytecode) {
+        const std::vector<uint8_t>& bytecode) {
         AcquireExclusive();
         EnsureCacheDir();
 
@@ -138,7 +137,7 @@ public:
         bool ok = false;
         if (f.is_open()) {
             f.write(reinterpret_cast<const char*>(bytecode.data()),
-                    static_cast<std::streamsize>(bytecode.size()));
+                static_cast<std::streamsize>(bytecode.size()));
             ok = f.good();
             f.close();
         }
@@ -155,7 +154,7 @@ public:
     // LoadFromCache
     // ================================================================
     inline bool LoadFromCache(const std::string& key,
-                              std::vector<uint8_t>& outBytecode) {
+        std::vector<uint8_t>& outBytecode) {
         AcquireShared();
 
         // in-memory first
@@ -244,7 +243,7 @@ public:
         FILETIME now{};
         ::GetSystemTimeAsFileTime(&now);
         ULARGE_INTEGER nowU;
-        nowU.LowPart  = now.dwLowDateTime;
+        nowU.LowPart = now.dwLowDateTime;
         nowU.HighPart = now.dwHighDateTime;
         uint64_t cutoff = nowU.QuadPart -
             static_cast<uint64_t>(maxAgeDays) * 24ULL * 3600ULL * 10000000ULL;
@@ -255,7 +254,7 @@ public:
         if (hFind != INVALID_HANDLE_VALUE) {
             do {
                 ULARGE_INTEGER ft;
-                ft.LowPart  = fd.ftLastWriteTime.dwLowDateTime;
+                ft.LowPart = fd.ftLastWriteTime.dwLowDateTime;
                 ft.HighPart = fd.ftLastWriteTime.dwHighDateTime;
                 if (ft.QuadPart < cutoff) {
                     std::wstring full = m_cacheDir + L"\\" + fd.cFileName;
@@ -284,11 +283,11 @@ private:
     SRWLOCK m_srw = SRWLOCK_INIT;
     inline void AcquireExclusive() { ::AcquireSRWLockExclusive(&m_srw); }
     inline void ReleaseExclusive() { ::ReleaseSRWLockExclusive(&m_srw); }
-    inline void AcquireShared()    { ::AcquireSRWLockShared(&m_srw);    }
-    inline void ReleaseShared()    { ::ReleaseSRWLockShared(&m_srw);    }
+    inline void AcquireShared() { ::AcquireSRWLockShared(&m_srw); }
+    inline void ReleaseShared() { ::ReleaseSRWLockShared(&m_srw); }
 
     // ---- dynamic modules ----
-    HMODULE m_hBcrypt   = nullptr;
+    HMODULE m_hBcrypt = nullptr;
     HMODULE m_hCompiler = nullptr;
 
     using PFN_D3DCompile = HRESULT(WINAPI*)(
@@ -310,7 +309,7 @@ private:
     using PFN_BCryptCloseAlgorithmProvider = NTSTATUS(WINAPI*)(
         BCRYPT_ALG_HANDLE, ULONG);
 
-    PFN_BCryptOpenAlgorithmProvider m_pfnBCryptOpen  = nullptr;
+    PFN_BCryptOpenAlgorithmProvider m_pfnBCryptOpen = nullptr;
     PFN_BCryptCreateHash            m_pfnBCryptCreate = nullptr;
     PFN_BCryptHashData              m_pfnBCryptHashData = nullptr;
     PFN_BCryptFinishHash            m_pfnBCryptFinish = nullptr;
@@ -338,12 +337,12 @@ private:
             m_hBcrypt = ::LoadLibraryW(L"bcrypt.dll");
         }
         if (m_hBcrypt && !m_pfnBCryptOpen) {
-            m_pfnBCryptOpen   = reinterpret_cast<PFN_BCryptOpenAlgorithmProvider>(::GetProcAddress(m_hBcrypt, "BCryptOpenAlgorithmProvider"));
+            m_pfnBCryptOpen = reinterpret_cast<PFN_BCryptOpenAlgorithmProvider>(::GetProcAddress(m_hBcrypt, "BCryptOpenAlgorithmProvider"));
             m_pfnBCryptCreate = reinterpret_cast<PFN_BCryptCreateHash>(::GetProcAddress(m_hBcrypt, "BCryptCreateHash"));
             m_pfnBCryptHashData = reinterpret_cast<PFN_BCryptHashData>(::GetProcAddress(m_hBcrypt, "BCryptHashData"));
             m_pfnBCryptFinish = reinterpret_cast<PFN_BCryptFinishHash>(::GetProcAddress(m_hBcrypt, "BCryptFinishHash"));
             m_pfnBCryptDestroy = reinterpret_cast<PFN_BCryptDestroyHash>(::GetProcAddress(m_hBcrypt, "BCryptDestroyHash"));
-            m_pfnBCryptClose  = reinterpret_cast<PFN_BCryptCloseAlgorithmProvider>(::GetProcAddress(m_hBcrypt, "BCryptCloseAlgorithmProvider"));
+            m_pfnBCryptClose = reinterpret_cast<PFN_BCryptCloseAlgorithmProvider>(::GetProcAddress(m_hBcrypt, "BCryptCloseAlgorithmProvider"));
         }
     }
 
@@ -354,7 +353,8 @@ private:
             wchar_t buf[MAX_PATH]{};
             if (::GetEnvironmentVariableW(L"LOCALAPPDATA", buf, MAX_PATH) > 0) {
                 m_cacheDir = std::wstring(buf) + L"\\ExplorerLens\\ShaderCache";
-            } else {
+            }
+            else {
                 m_cacheDir = L"C:\\Temp\\ExplorerLens\\ShaderCache";
             }
         }
@@ -440,20 +440,20 @@ private:
         if (hFind != INVALID_HANDLE_VALUE) {
             do {
                 ULARGE_INTEGER sz;
-                sz.LowPart  = fd.nFileSizeLow;
+                sz.LowPart = fd.nFileSizeLow;
                 sz.HighPart = fd.nFileSizeHigh;
                 totalSize += sz.QuadPart;
                 count++;
             } while (::FindNextFileW(hFind, &fd));
             ::FindClose(hFind);
         }
-        m_stats.cachedShaders  = count;
+        m_stats.cachedShaders = count;
         m_stats.totalSizeBytes = totalSize;
     }
 
     inline void Cleanup() {
         if (m_hCompiler) { ::FreeLibrary(m_hCompiler); m_hCompiler = nullptr; }
-        if (m_hBcrypt)   { ::FreeLibrary(m_hBcrypt);   m_hBcrypt = nullptr; }
+        if (m_hBcrypt) { ::FreeLibrary(m_hBcrypt);   m_hBcrypt = nullptr; }
         m_pfnCompile = nullptr;
         m_pfnBCryptOpen = nullptr;
     }

@@ -1,4 +1,4 @@
-// DiagnosticsCollector.h — Comprehensive System Diagnostics (Sprint 588)
+// DiagnosticsCollector.h — Comprehensive System Diagnostics
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Collects OS version (RtlGetVersion), CPU info (registry), RAM
@@ -32,11 +32,11 @@ namespace Engine {
 struct SystemInfo {
     std::wstring osVersion;
     std::wstring cpuName;
-    uint32_t     cpuCores      = 0;
-    uint64_t     totalRAM      = 0;   // bytes
-    uint64_t     availableRAM  = 0;   // bytes
+    uint32_t     cpuCores = 0;
+    uint64_t     totalRAM = 0;   // bytes
+    uint64_t     availableRAM = 0;   // bytes
     std::wstring gpuName;
-    uint64_t     gpuVRAM       = 0;   // bytes
+    uint64_t     gpuVRAM = 0;   // bytes
     std::wstring directxVersion;
 };
 
@@ -46,7 +46,7 @@ struct DiagReport {
     std::vector<std::string>    loadedDecoders;
     std::vector<std::string>    failedDecoders;
     std::vector<std::string>    warnings;
-    uint64_t                    cacheSize          = 0;  // bytes
+    uint64_t                    cacheSize = 0;  // bytes
     uint64_t                    thumbnailsGenerated = 0;
     std::wstring                version;
     std::wstring                installPath;
@@ -67,9 +67,9 @@ public:
     /// Collect all system hardware and OS information.
     inline SystemInfo CollectSystemInfo() const {
         SystemInfo info;
-        info.osVersion    = CollectOSVersion();
-        info.cpuName      = CollectCPUName();
-        info.cpuCores     = CollectCPUCoreCount();
+        info.osVersion = CollectOSVersion();
+        info.cpuName = CollectCPUName();
+        info.cpuCores = CollectCPUCoreCount();
         CollectMemoryInfo(info.totalRAM, info.availableRAM);
         CollectGPUInfo(info.gpuName, info.gpuVRAM);
         info.directxVersion = CollectDirectXVersion();
@@ -80,15 +80,15 @@ public:
     /// Aggregate all diagnostics into a single report.
     inline DiagReport CollectFullReport() const {
         DiagReport report;
-        report.system      = CollectSystemInfo();
-        report.version     = GetExplorerLensVersion();
+        report.system = CollectSystemInfo();
+        report.version = GetExplorerLensVersion();
         report.installPath = GetInstallPath();
 
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
-        report.loadedDecoders      = m_loadedDecoders;
-        report.failedDecoders      = m_failedDecoders;
-        report.warnings            = m_warnings;
-        report.cacheSize           = m_cacheSize;
+        report.loadedDecoders = m_loadedDecoders;
+        report.failedDecoders = m_failedDecoders;
+        report.warnings = m_warnings;
+        report.cacheSize = m_cacheSize;
         report.thumbnailsGenerated = m_thumbnailsGenerated;
         ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
 
@@ -149,7 +149,7 @@ public:
     inline bool SaveReport(const std::wstring& path, const DiagReport& report) const {
         std::wstring text = FormatReport(report);
         HANDLE hFile = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr,
-                                   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+            CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
         if (hFile == INVALID_HANDLE_VALUE) return false;
 
         // Write UTF-8 BOM + content
@@ -158,15 +158,15 @@ public:
         WriteFile(hFile, bom, 3, &written, nullptr);
 
         int len = WideCharToMultiByte(CP_UTF8, 0, text.c_str(),
-                                      static_cast<int>(text.size()),
-                                      nullptr, 0, nullptr, nullptr);
+            static_cast<int>(text.size()),
+            nullptr, 0, nullptr, nullptr);
         if (len > 0) {
             std::string utf8(static_cast<size_t>(len), '\0');
             WideCharToMultiByte(CP_UTF8, 0, text.c_str(),
-                                static_cast<int>(text.size()),
-                                utf8.data(), len, nullptr, nullptr);
+                static_cast<int>(text.size()),
+                utf8.data(), len, nullptr, nullptr);
             WriteFile(hFile, utf8.data(), static_cast<DWORD>(utf8.size()),
-                      &written, nullptr);
+                &written, nullptr);
         }
         CloseHandle(hFile);
         return true;
@@ -214,19 +214,19 @@ public:
         DWORD index = 0;
 
         while (RegEnumKeyExW(hKey, index++, name, &nameLen,
-                             nullptr, nullptr, nullptr, nullptr) == ERROR_SUCCESS) {
+            nullptr, nullptr, nullptr, nullptr) == ERROR_SUCCESS) {
             if (name[0] == L'.') {
                 // Check if this extension has our ShellEx ThumbnailProvider
                 std::wstring subkeyPath = std::wstring(name) +
                     L"\\ShellEx\\{E357FCCD-A995-4576-B01F-234630154E96}";
                 HKEY hSub = nullptr;
                 if (RegOpenKeyExW(HKEY_CLASSES_ROOT, subkeyPath.c_str(),
-                                  0, KEY_READ, &hSub) == ERROR_SUCCESS) {
+                    0, KEY_READ, &hSub) == ERROR_SUCCESS) {
                     wchar_t val[128]{};
                     DWORD valSize = sizeof(val);
                     DWORD type = 0;
                     if (RegQueryValueExW(hSub, nullptr, nullptr, &type,
-                                         reinterpret_cast<LPBYTE>(val), &valSize) == ERROR_SUCCESS) {
+                        reinterpret_cast<LPBYTE>(val), &valSize) == ERROR_SUCCESS) {
                         if (type == REG_SZ && std::wstring(val) == clsid) {
                             extensions.push_back(name);
                         }
@@ -290,8 +290,8 @@ private:
 
         std::wostringstream ss;
         ss << L"Windows " << osvi.dwMajorVersion << L"."
-           << osvi.dwMinorVersion << L" (Build "
-           << osvi.dwBuildNumber << L")";
+            << osvi.dwMinorVersion << L" (Build "
+            << osvi.dwBuildNumber << L")";
         return ss.str();
     }
 
@@ -314,7 +314,7 @@ private:
         MEMORYSTATUSEX memStatus{};
         memStatus.dwLength = sizeof(memStatus);
         if (GlobalMemoryStatusEx(&memStatus)) {
-            total     = memStatus.ullTotalPhys;
+            total = memStatus.ullTotalPhys;
             available = memStatus.ullAvailPhys;
         }
     }
@@ -323,7 +323,7 @@ private:
     static void CollectGPUInfo(std::wstring& name, uint64_t& vram) {
         IDXGIFactory1* factory = nullptr;
         HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1),
-                                        reinterpret_cast<void**>(&factory));
+            reinterpret_cast<void**>(&factory));
         if (FAILED(hr) || !factory) {
             name = L"Unknown";
             return;
@@ -338,7 +338,8 @@ private:
             if (!(desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)) {
                 name = desc.Description;
                 vram = desc.DedicatedVideoMemory;
-            } else {
+            }
+            else {
                 // Try next adapter
                 IDXGIAdapter1* adapter2 = nullptr;
                 if (factory->EnumAdapters1(1, &adapter2) == S_OK && adapter2) {
@@ -346,13 +347,15 @@ private:
                     name = desc.Description;
                     vram = desc.DedicatedVideoMemory;
                     adapter2->Release();
-                } else {
+                }
+                else {
                     name = desc.Description;
                     vram = desc.DedicatedVideoMemory;
                 }
             }
             adapter->Release();
-        } else {
+        }
+        else {
             name = L"No GPU adapter found";
         }
         factory->Release();
@@ -397,7 +400,8 @@ private:
             default:                     result = L"Unknown";       break;
             }
             device->Release();
-        } else {
+        }
+        else {
             result = L"Not available";
         }
         return result;
@@ -405,8 +409,8 @@ private:
 
     // ── Registry helper ───────────────────────────────────────────────────
     static std::wstring ReadRegistryString(HKEY root,
-                                           const wchar_t* subkey,
-                                           const wchar_t* valueName) {
+        const wchar_t* subkey,
+        const wchar_t* valueName) {
         HKEY hKey = nullptr;
         if (RegOpenKeyExW(root, subkey, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
             return {};
@@ -418,8 +422,8 @@ private:
         std::wstring result;
 
         if (RegQueryValueExW(hKey, valueName, nullptr, &type,
-                             reinterpret_cast<LPBYTE>(buffer),
-                             &bufSize) == ERROR_SUCCESS && type == REG_SZ) {
+            reinterpret_cast<LPBYTE>(buffer),
+            &bufSize) == ERROR_SUCCESS && type == REG_SZ) {
             result = buffer;
         }
         RegCloseKey(hKey);
@@ -431,13 +435,16 @@ private:
         std::wostringstream ss;
         if (bytes >= 1073741824ULL) {
             ss << std::fixed << std::setprecision(1)
-               << (static_cast<double>(bytes) / 1073741824.0) << L" GB";
-        } else if (bytes >= 1048576ULL) {
+                << (static_cast<double>(bytes) / 1073741824.0) << L" GB";
+        }
+        else if (bytes >= 1048576ULL) {
             ss << std::fixed << std::setprecision(1)
-               << (static_cast<double>(bytes) / 1048576.0) << L" MB";
-        } else if (bytes >= 1024ULL) {
+                << (static_cast<double>(bytes) / 1048576.0) << L" MB";
+        }
+        else if (bytes >= 1024ULL) {
             ss << (bytes / 1024) << L" KB";
-        } else {
+        }
+        else {
             ss << bytes << L" bytes";
         }
         return ss.str();
@@ -449,7 +456,7 @@ private:
     std::vector<std::string> m_loadedDecoders;
     std::vector<std::string> m_failedDecoders;
     std::vector<std::string> m_warnings;
-    uint64_t                 m_cacheSize          = 0;
+    uint64_t                 m_cacheSize = 0;
     uint64_t                 m_thumbnailsGenerated = 0;
 };
 

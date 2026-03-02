@@ -1,7 +1,6 @@
 #pragma once
 // ============================================================================
-// ThreadPoolOptimizer.h — Work-Stealing Thread Pool (Sprint 550)
-// ExplorerLens Engine v15.0.0
+// ThreadPoolOptimizer.h — Work-Stealing Thread Pool
 // Copyright (c) 2026 ExplorerLens Project
 //
 // PURPOSE:
@@ -152,10 +151,6 @@ public:
         }
         return (std::max)(1u, base);
     }
-
-    // ====================================================================
-    // Sprint 550: Work-stealing thread pool
-    // ====================================================================
 
     /// Construct a work-stealing pool. If threadCount is 0, defaults to
     /// hardware_concurrency (at least 1).

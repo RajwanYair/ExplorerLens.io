@@ -1,7 +1,6 @@
 #pragma once
 /******************************************************************************
- * USNCacheInvalidation.h — Sprint 557
- * ExplorerLens Engine v15.0.0
+ * USNCacheInvalidation.h
  * Copyright (c) 2026 ExplorerLens Project
  *
  * PURPOSE:
@@ -50,9 +49,9 @@ namespace USNCache {
 // ============================================================================
 
 struct FileIdentity {
-    uint64_t volume_id       = 0;
-    uint64_t file_id         = 0;
-    uint64_t file_size       = 0;
+    uint64_t volume_id = 0;
+    uint64_t file_id = 0;
+    uint64_t file_size = 0;
     uint64_t last_write_time = 0;
 
     uint64_t ToCacheKey() const {
@@ -62,7 +61,7 @@ struct FileIdentity {
                 hash ^= (val >> (i * 8)) & 0xFF;
                 hash *= 1099511628211ULL;
             }
-        };
+            };
         mix(volume_id);
         mix(file_id);
         mix(file_size);
@@ -72,16 +71,16 @@ struct FileIdentity {
 
     bool operator==(const FileIdentity& other) const {
         return volume_id == other.volume_id &&
-               file_id == other.file_id &&
-               file_size == other.file_size &&
-               last_write_time == other.last_write_time;
+            file_id == other.file_id &&
+            file_size == other.file_size &&
+            last_write_time == other.last_write_time;
     }
 
     bool operator!=(const FileIdentity& other) const { return !(*this == other); }
 
     bool IsStale(const FileIdentity& current) const {
         return file_size != current.file_size ||
-               last_write_time != current.last_write_time;
+            last_write_time != current.last_write_time;
     }
 };
 
@@ -90,10 +89,10 @@ inline FileIdentity GetFileIdentity(HANDLE hFile) {
     BY_HANDLE_FILE_INFORMATION info = {};
     if (::GetFileInformationByHandle(hFile, &info)) {
         id.volume_id = info.dwVolumeSerialNumber;
-        id.file_id   = (static_cast<uint64_t>(info.nFileIndexHigh) << 32) | info.nFileIndexLow;
+        id.file_id = (static_cast<uint64_t>(info.nFileIndexHigh) << 32) | info.nFileIndexLow;
         id.file_size = (static_cast<uint64_t>(info.nFileSizeHigh) << 32) | info.nFileSizeLow;
         ULARGE_INTEGER wt;
-        wt.LowPart  = info.ftLastWriteTime.dwLowDateTime;
+        wt.LowPart = info.ftLastWriteTime.dwLowDateTime;
         wt.HighPart = info.ftLastWriteTime.dwHighDateTime;
         id.last_write_time = wt.QuadPart;
     }
@@ -117,13 +116,13 @@ inline FileIdentity GetFileIdentityFromPath(const std::wstring& path) {
 // ============================================================================
 
 namespace USNReasons {
-    inline constexpr DWORD DataOverwrite   = 0x00000001;  // USN_REASON_DATA_OVERWRITE
-    inline constexpr DWORD DataExtend      = 0x00000002;  // USN_REASON_DATA_EXTEND
-    inline constexpr DWORD DataTruncation  = 0x00000004;  // USN_REASON_DATA_TRUNCATION
-    inline constexpr DWORD RenameNewName   = 0x00002000;  // USN_REASON_RENAME_NEW_NAME
-    inline constexpr DWORD FileDelete      = 0x00000200;  // USN_REASON_FILE_DELETE
-    inline constexpr DWORD RelevantMask    = DataOverwrite | DataExtend | DataTruncation
-                                           | RenameNewName | FileDelete;
+inline constexpr DWORD DataOverwrite = 0x00000001;  // USN_REASON_DATA_OVERWRITE
+inline constexpr DWORD DataExtend = 0x00000002;  // USN_REASON_DATA_EXTEND
+inline constexpr DWORD DataTruncation = 0x00000004;  // USN_REASON_DATA_TRUNCATION
+inline constexpr DWORD RenameNewName = 0x00002000;  // USN_REASON_RENAME_NEW_NAME
+inline constexpr DWORD FileDelete = 0x00000200;  // USN_REASON_FILE_DELETE
+inline constexpr DWORD RelevantMask = DataOverwrite | DataExtend | DataTruncation
+| RenameNewName | FileDelete;
 }
 
 // ============================================================================
@@ -131,12 +130,12 @@ namespace USNReasons {
 // ============================================================================
 
 struct USNStats {
-    uint64_t entriesProcessed        = 0;
-    uint64_t invalidationsTriggered  = 0;
-    double   journalReadsPerSecond   = 0.0;
-    bool     fallbackActive          = false;
-    uint64_t fallbackPolls           = 0;
-    uint32_t trackedFiles            = 0;
+    uint64_t entriesProcessed = 0;
+    uint64_t invalidationsTriggered = 0;
+    double   journalReadsPerSecond = 0.0;
+    bool     fallbackActive = false;
+    uint64_t fallbackPolls = 0;
+    uint32_t trackedFiles = 0;
 };
 
 // ============================================================================
@@ -233,10 +232,11 @@ public:
         m_monitorThread = std::thread([this]() {
             if (m_fallbackMode) {
                 FallbackPollingLoop();
-            } else {
+            }
+            else {
                 USNJournalLoop();
             }
-        });
+            });
     }
 
     void StopMonitoring() {
@@ -289,11 +289,11 @@ public:
     USNStats GetStats() const {
         ::AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_srwLock));
         USNStats stats;
-        stats.entriesProcessed       = m_entriesProcessed.load();
+        stats.entriesProcessed = m_entriesProcessed.load();
         stats.invalidationsTriggered = m_invalidationsTriggered.load();
-        stats.fallbackActive         = m_fallbackMode;
-        stats.fallbackPolls          = m_fallbackPolls.load();
-        stats.trackedFiles           = static_cast<uint32_t>(m_trackedByPath.size());
+        stats.fallbackActive = m_fallbackMode;
+        stats.fallbackPolls = m_fallbackPolls.load();
+        stats.trackedFiles = static_cast<uint32_t>(m_trackedByPath.size());
 
         auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration<double>(now - m_startTime).count();
@@ -316,12 +316,12 @@ private:
 
         while (m_monitorRunning.load()) {
             READ_USN_JOURNAL_DATA_V0 readData{};
-            readData.StartUsn          = m_nextUsn;
-            readData.ReasonMask        = USNReasons::RelevantMask;
+            readData.StartUsn = m_nextUsn;
+            readData.ReasonMask = USNReasons::RelevantMask;
             readData.ReturnOnlyOnClose = 0;
-            readData.Timeout           = 0;
-            readData.BytesToWaitFor    = 0;
-            readData.UsnJournalID      = m_journalId;
+            readData.Timeout = 0;
+            readData.BytesToWaitFor = 0;
+            readData.UsnJournalID = m_journalId;
 
             DWORD bytesReturned = 0;
             BOOL ok = ::DeviceIoControl(
@@ -375,7 +375,8 @@ private:
                 cb(path, reason);
             }
             m_invalidationsTriggered++;
-        } else {
+        }
+        else {
             ::ReleaseSRWLockShared(&m_srwLock);
         }
     }
@@ -395,7 +396,7 @@ private:
                 WIN32_FILE_ATTRIBUTE_DATA attrs{};
                 if (::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &attrs)) {
                     ULARGE_INTEGER wt;
-                    wt.LowPart  = attrs.ftLastWriteTime.dwLowDateTime;
+                    wt.LowPart = attrs.ftLastWriteTime.dwLowDateTime;
                     wt.HighPart = attrs.ftLastWriteTime.dwHighDateTime;
                     uint64_t currentWriteTime = wt.QuadPart;
                     uint64_t currentSize = (static_cast<uint64_t>(attrs.nFileSizeHigh) << 32) | attrs.nFileSizeLow;
@@ -416,7 +417,8 @@ private:
                         }
                         ::ReleaseSRWLockExclusive(&m_srwLock);
                     }
-                } else {
+                }
+                else {
                     // File deleted or inaccessible
                     if (cb) {
                         cb(path, USNReasons::FileDelete);

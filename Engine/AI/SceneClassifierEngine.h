@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Scene Classifier Engine (Sprint 574)
+// ExplorerLens Engine — Scene Classifier Engine
 //
 // Purpose:
 //   Classifies thumbnail content into scene categories (landscape, portrait,
@@ -45,21 +45,21 @@ namespace Engine {
 
 /// Scene category labels produced by the classifier.
 enum class ClassifiedScene : uint32_t {
-    Unknown      = 0,
-    Landscape    = 1,
-    Portrait     = 2,
-    Document     = 3,
-    Diagram      = 4,
-    Screenshot   = 5,
-    Icon         = 6,
-    Photo        = 7,
-    Art          = 8,
-    TextHeavy    = 9,
-    CodeSnippet  = 10,
-    Infographic  = 11,
-    Map          = 12,
-    Chart        = 13,
-    COUNT        = 14
+    Unknown = 0,
+    Landscape = 1,
+    Portrait = 2,
+    Document = 3,
+    Diagram = 4,
+    Screenshot = 5,
+    Icon = 6,
+    Photo = 7,
+    Art = 8,
+    TextHeavy = 9,
+    CodeSnippet = 10,
+    Infographic = 11,
+    Map = 12,
+    Chart = 13,
+    COUNT = 14
 };
 
 /// Raw numeric features extracted from the image.
@@ -67,21 +67,21 @@ struct SceneFeatures {
     std::array<float, 16> histR{};          // 16-bin red histogram (normalized)
     std::array<float, 16> histG{};          // 16-bin green histogram (normalized)
     std::array<float, 16> histB{};          // 16-bin blue histogram (normalized)
-    float edgeDensity      = 0.0f;          // fraction of high-gradient pixels
-    float aspectRatio      = 1.0f;          // width / height
-    uint32_t uniqueColors  = 0;             // unique 6-bit-quantized colors
-    float textRegionRatio  = 0.0f;          // fraction of rows classified as text
-    float meanSaturation   = 0.0f;          // average HSV saturation [0, 1]
+    float edgeDensity = 0.0f;          // fraction of high-gradient pixels
+    float aspectRatio = 1.0f;          // width / height
+    uint32_t uniqueColors = 0;             // unique 6-bit-quantized colors
+    float textRegionRatio = 0.0f;          // fraction of rows classified as text
+    float meanSaturation = 0.0f;          // average HSV saturation [0, 1]
     float histogramSparsity = 0.0f;         // fraction of empty histogram bins
-    float colorDiversity   = 0.0f;          // normalized unique-color ratio
+    float colorDiversity = 0.0f;          // normalized unique-color ratio
 };
 
 /// Cumulative classifier statistics.
 struct ClassifierStats {
     uint64_t totalClassifications = 0;
     std::array<uint64_t, static_cast<size_t>(ClassifiedScene::COUNT)> perCategoryCounts{};
-    double totalClassifyTimeMs  = 0.0;
-    double totalFeatureTimeMs   = 0.0;
+    double totalClassifyTimeMs = 0.0;
+    double totalFeatureTimeMs = 0.0;
     double AvgClassifyTimeMs() const {
         return totalClassifications ? totalClassifyTimeMs / static_cast<double>(totalClassifications) : 0.0;
     }
@@ -101,8 +101,8 @@ public:
 
     /// Extract all features from an RGBA image buffer.
     inline SceneFeatures ExtractFeatures(const uint8_t* rgbaData,
-                                         uint32_t width,
-                                         uint32_t height) const {
+        uint32_t width,
+        uint32_t height) const {
         SceneFeatures f{};
         if (!rgbaData || width == 0 || height == 0) return f;
 
@@ -128,7 +128,7 @@ public:
         f.uniqueColors = CountUniqueColors6Bit(rgbaData, pixelCount);
         const uint32_t maxPossible = 64; // 2^6
         f.colorDiversity = static_cast<float>((std::min)(f.uniqueColors, maxPossible)) /
-                           static_cast<float>(maxPossible);
+            static_cast<float>(maxPossible);
 
         // --- 4. Text region detection ----------------------------------------
         f.textRegionRatio = DetectTextRows(rgbaData, width, height);
@@ -141,15 +141,15 @@ public:
 
     /// Classify an RGBA image into a scene category.
     inline ClassifiedScene Classify(const uint8_t* rgbaData,
-                                     uint32_t width,
-                                     uint32_t height) {
+        uint32_t width,
+        uint32_t height) {
         using Clock = std::chrono::high_resolution_clock;
         auto t0 = Clock::now();
 
         auto featureStart = Clock::now();
         SceneFeatures f = ExtractFeatures(rgbaData, width, height);
-        auto featureEnd   = Clock::now();
-        double featureMs  = std::chrono::duration<double, std::milli>(featureEnd - featureStart).count();
+        auto featureEnd = Clock::now();
+        double featureMs = std::chrono::duration<double, std::milli>(featureEnd - featureStart).count();
 
         // ---- Weighted scoring per category ----------------------------------
         std::array<float, static_cast<size_t>(ClassifiedScene::COUNT)> scores{};
@@ -279,7 +279,7 @@ public:
         m_stats.totalClassifications++;
         m_stats.perCategoryCounts[static_cast<size_t>(best)]++;
         m_stats.totalClassifyTimeMs += totalMs;
-        m_stats.totalFeatureTimeMs  += featureMs;
+        m_stats.totalFeatureTimeMs += featureMs;
         ReleaseSRWLockExclusive(&m_statsLock);
 
         return best;
@@ -322,10 +322,10 @@ private:
 
     /// Compute normalized 16-bin histograms for R, G, B channels.
     static inline void ComputeColorHistograms(const uint8_t* rgba,
-                                              uint32_t pixelCount,
-                                              std::array<float, 16>& histR,
-                                              std::array<float, 16>& histG,
-                                              std::array<float, 16>& histB) {
+        uint32_t pixelCount,
+        std::array<float, 16>& histR,
+        std::array<float, 16>& histG,
+        std::array<float, 16>& histB) {
         histR.fill(0.0f);
         histG.fill(0.0f);
         histB.fill(0.0f);
@@ -345,8 +345,8 @@ private:
 
     /// Compute edge density via Sobel on grayscale approximation.
     static inline float ComputeEdgeDensity(const uint8_t* rgba,
-                                           uint32_t width,
-                                           uint32_t height) {
+        uint32_t width,
+        uint32_t height) {
         if (width < 3 || height < 3) return 0.0f;
         uint32_t edgePixels = 0;
         const float threshold = 60.0f;
@@ -355,11 +355,11 @@ private:
                 auto gray = [&](uint32_t px, uint32_t py) -> float {
                     uint32_t off = (py * width + px) * 4;
                     return 0.299f * rgba[off] + 0.587f * rgba[off + 1] + 0.114f * rgba[off + 2];
-                };
+                    };
                 float gx = -gray(x - 1, y - 1) - 2.0f * gray(x - 1, y) - gray(x - 1, y + 1)
-                           + gray(x + 1, y - 1) + 2.0f * gray(x + 1, y) + gray(x + 1, y + 1);
+                    + gray(x + 1, y - 1) + 2.0f * gray(x + 1, y) + gray(x + 1, y + 1);
                 float gy = -gray(x - 1, y - 1) - 2.0f * gray(x, y - 1) - gray(x + 1, y - 1)
-                           + gray(x - 1, y + 1) + 2.0f * gray(x, y + 1) + gray(x + 1, y + 1);
+                    + gray(x - 1, y + 1) + 2.0f * gray(x, y + 1) + gray(x + 1, y + 1);
                 float mag = std::sqrt(gx * gx + gy * gy);
                 if (mag > threshold) ++edgePixels;
             }
@@ -370,14 +370,14 @@ private:
 
     /// Count unique colors after quantization to 6-bit (2 bits per channel).
     static inline uint32_t CountUniqueColors6Bit(const uint8_t* rgba,
-                                                  uint32_t pixelCount) {
+        uint32_t pixelCount) {
         // 64 possible 6-bit colors; use a 64-bit bitset
         uint64_t seen = 0;
         for (uint32_t i = 0; i < pixelCount; ++i) {
             uint32_t off = i * 4;
             uint32_t q = ((rgba[off + 0] >> 6) << 4) |
-                         ((rgba[off + 1] >> 6) << 2) |
-                          (rgba[off + 2] >> 6);
+                ((rgba[off + 1] >> 6) << 2) |
+                (rgba[off + 2] >> 6);
             seen |= (1ULL << q);
         }
         // popcount
@@ -389,8 +389,8 @@ private:
 
     /// Detect rows likely containing text (high-contrast horizontal runs).
     static inline float DetectTextRows(const uint8_t* rgba,
-                                       uint32_t width,
-                                       uint32_t height) {
+        uint32_t width,
+        uint32_t height) {
         if (width < 8 || height < 4) return 0.0f;
         uint32_t textRows = 0;
         for (uint32_t y = 0; y < height; ++y) {
@@ -415,7 +415,7 @@ private:
 
     /// Compute mean saturation in HSV color space.
     static inline float ComputeMeanSaturation(const uint8_t* rgba,
-                                              uint32_t pixelCount) {
+        uint32_t pixelCount) {
         if (pixelCount == 0) return 0.0f;
         double satSum = 0.0;
         for (uint32_t i = 0; i < pixelCount; ++i) {
@@ -423,9 +423,9 @@ private:
             float r = rgba[off + 0] / 255.0f;
             float g = rgba[off + 1] / 255.0f;
             float b = rgba[off + 2] / 255.0f;
-            float cmax = (std::max)({r, g, b});
-            float cmin = (std::min)({r, g, b});
-            float sat  = (cmax > 1e-6f) ? ((cmax - cmin) / cmax) : 0.0f;
+            float cmax = (std::max)({ r, g, b });
+            float cmin = (std::min)({ r, g, b });
+            float sat = (cmax > 1e-6f) ? ((cmax - cmin) / cmax) : 0.0f;
             satSum += sat;
         }
         return static_cast<float>(satSum / static_cast<double>(pixelCount));

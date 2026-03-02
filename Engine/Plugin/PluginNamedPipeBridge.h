@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Plugin Named Pipe Bridge (Sprint 578)
+// ExplorerLens Engine — Plugin Named Pipe Bridge
 //
 // Purpose:
 //   Real named-pipe IPC bridge for out-of-process plugin communication.
@@ -54,19 +54,19 @@ namespace Engine {
 
 /// Message types in the named-pipe protocol.
 enum class PipeMessageType : uint32_t {
-    Query     = 1,
-    Response  = 2,
+    Query = 1,
+    Response = 2,
     Heartbeat = 3,
-    Shutdown  = 4
+    Shutdown = 4
 };
 
 /// Cumulative pipe I/O statistics.
 struct PipeStats {
-    uint64_t messagesSent      = 0;
-    uint64_t messagesReceived  = 0;
-    uint64_t bytesSent         = 0;
-    uint64_t bytesReceived     = 0;
-    double   totalLatencyMs    = 0.0;
+    uint64_t messagesSent = 0;
+    uint64_t messagesReceived = 0;
+    uint64_t bytesSent = 0;
+    uint64_t bytesReceived = 0;
+    double   totalLatencyMs = 0.0;
     double   connectionUptimeMs = 0.0;
     double AvgLatencyMs() const {
         uint64_t total = messagesSent + messagesReceived;
@@ -153,7 +153,8 @@ public:
                 if (!GetOverlappedResult(m_hPipe, &ol, &transferred, FALSE)) {
                     return false;
                 }
-            } else if (err != ERROR_PIPE_CONNECTED) {
+            }
+            else if (err != ERROR_PIPE_CONNECTED) {
                 return false;
             }
         }
@@ -172,27 +173,27 @@ public:
     /// Send a length-prefixed message.
     inline bool SendMessage(const std::vector<uint8_t>& data) {
         return SendRaw(static_cast<uint32_t>(PipeMessageType::Response),
-                       data.data(), static_cast<uint32_t>(data.size()));
+            data.data(), static_cast<uint32_t>(data.size()));
     }
 
     /// Send a typed message with message type.
     inline bool SendTypedMessage(PipeMessageType type,
-                                 const std::vector<uint8_t>& data) {
+        const std::vector<uint8_t>& data) {
         return SendRaw(static_cast<uint32_t>(type),
-                       data.data(), static_cast<uint32_t>(data.size()));
+            data.data(), static_cast<uint32_t>(data.size()));
     }
 
     /// Receive a length-prefixed message (blocking up to timeoutMs).
     inline bool ReceiveMessage(std::vector<uint8_t>& outData,
-                               uint32_t timeoutMs = 5000) {
+        uint32_t timeoutMs = 5000) {
         uint32_t msgType = 0;
         return ReceiveRaw(msgType, outData, timeoutMs);
     }
 
     /// Receive typed message with message type.
     inline bool ReceiveTypedMessage(uint32_t& outMsgType,
-                                    std::vector<uint8_t>& outData,
-                                    uint32_t timeoutMs = 5000) {
+        std::vector<uint8_t>& outData,
+        uint32_t timeoutMs = 5000) {
         return ReceiveRaw(outMsgType, outData, timeoutMs);
     }
 
@@ -222,7 +223,7 @@ public:
         Disconnect();
         m_serverRunning.store(false);
         if (m_hEvent) { CloseHandle(m_hEvent); m_hEvent = nullptr; }
-        if (m_hPipe)  { CloseHandle(m_hPipe);  m_hPipe  = nullptr; }
+        if (m_hPipe) { CloseHandle(m_hPipe);  m_hPipe = nullptr; }
     }
 
     // ---- Status queries ----------------------------------------------------
@@ -300,8 +301,8 @@ private:
     }
 
     inline bool ReceiveRaw(uint32_t& outMsgType,
-                           std::vector<uint8_t>& outData,
-                           uint32_t timeoutMs) {
+        std::vector<uint8_t>& outData,
+        uint32_t timeoutMs) {
         if (!m_hPipe || !m_clientConnected.load()) return false;
 
         using Clock = std::chrono::high_resolution_clock;
@@ -389,7 +390,7 @@ private:
                 }
             }
             m_readerRunning.store(false);
-        });
+            });
     }
 
     inline void StopReaderThread() {
@@ -403,7 +404,7 @@ private:
 
     /// Build a SECURITY_DESCRIPTOR with a DACL allowing only the current user.
     static inline bool BuildCurrentUserDACL(SECURITY_ATTRIBUTES* sa,
-                                            PSECURITY_DESCRIPTOR* ppSD) {
+        PSECURITY_DESCRIPTOR* ppSD) {
         // Get current user SID string
         HANDLE hToken = nullptr;
         if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) return false;
@@ -451,12 +452,12 @@ private:
     // ---- Member state ------------------------------------------------------
 
     std::wstring    m_pipeName;
-    HANDLE          m_hPipe  = nullptr;
+    HANDLE          m_hPipe = nullptr;
     HANDLE          m_hEvent = nullptr;
 
-    std::atomic<bool> m_serverRunning{false};
-    std::atomic<bool> m_clientConnected{false};
-    std::atomic<bool> m_readerRunning{false};
+    std::atomic<bool> m_serverRunning{ false };
+    std::atomic<bool> m_clientConnected{ false };
+    std::atomic<bool> m_readerRunning{ false };
 
     std::thread     m_readerThread;
     std::function<void(uint32_t, const std::vector<uint8_t>&)> m_messageCallback;

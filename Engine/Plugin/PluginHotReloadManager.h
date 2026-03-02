@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Plugin Hot Reload Manager (Sprint 580)
+// ExplorerLens Engine — Plugin Hot Reload Manager
 //
 // Watches plugin DLL directories for changes using ReadDirectoryChangesW and
 // hot-reloads modified plugins without restarting Explorer. Features:
@@ -35,9 +35,9 @@ namespace ExplorerLens {
 namespace Engine {
 
 struct HotReloadStats {
-    uint64_t filesWatched         = 0;
-    uint64_t reloadsTriggered     = 0;
-    uint64_t hashMismatches       = 0;
+    uint64_t filesWatched = 0;
+    uint64_t reloadsTriggered = 0;
+    uint64_t hashMismatches = 0;
     uint64_t falsePositivesFiltered = 0;
 };
 
@@ -341,7 +341,7 @@ private:
     std::unordered_map<std::wstring, std::vector<uint8_t>> m_knownHashes;
     std::thread     m_watchThread;
     HANDLE          m_stopEvent = nullptr;
-    std::atomic<bool> m_watching{false};
+    std::atomic<bool> m_watching{ false };
     HotReloadStats  m_stats{};
 };
 

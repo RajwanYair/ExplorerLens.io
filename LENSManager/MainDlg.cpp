@@ -97,7 +97,8 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/,
         IDC_CB_HEIF, IDC_CB_AVIF,  IDC_CB_JXL,      IDC_CB_VIDEO, IDC_CB_PDF,
         IDC_CB_TIFF, IDC_CB_SVG,   IDC_CB_RAW,      IDC_CB_PSD,   IDC_CB_DDS,
         IDC_CB_HDR,  IDC_CB_EXR,   IDC_CB_PPM,      IDC_CB_ICO,   IDC_CB_QOI,
-        IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL };
+        IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL,
+        IDC_CB_EXT_IMAGE, IDC_CB_TEXTURE, IDC_CB_EXT_ARCHIVE, IDC_CB_EXT_DOCUMENT };
     for (int id : allCheckboxes) {
         HWND hCheck = GetDlgItem(id);
         if (hCheck) {
@@ -235,6 +236,10 @@ void CMainDlg::InitUI() {
     Button_SetCheck(GetDlgItem(IDC_CB_DOCUMENT), m_reg.HasTH(LENS_DOCUMENT));
     Button_SetCheck(GetDlgItem(IDC_CB_FONT), m_reg.HasTH(LENS_FONT));
     Button_SetCheck(GetDlgItem(IDC_CB_MODEL), m_reg.HasTH(LENS_MODEL));
+    Button_SetCheck(GetDlgItem(IDC_CB_EXT_IMAGE), m_reg.HasTH(LENS_EXT_IMAGE));
+    Button_SetCheck(GetDlgItem(IDC_CB_TEXTURE), m_reg.HasTH(LENS_TEXTURE));
+    Button_SetCheck(GetDlgItem(IDC_CB_EXT_ARCHIVE), m_reg.HasTH(LENS_EXT_ARCHIVE));
+    Button_SetCheck(GetDlgItem(IDC_CB_EXT_DOCUMENT), m_reg.HasTH(LENS_EXT_DOCUMENT));
 
     // Collage Mode
     DWORD collageMode = m_reg.GetCollageMode();
@@ -311,6 +316,10 @@ void CMainDlg::OnApplyImpl() {
         {IDC_CB_DOCUMENT, LENS_DOCUMENT},
         {IDC_CB_FONT, LENS_FONT},
         {IDC_CB_MODEL, LENS_MODEL},
+        {IDC_CB_EXT_IMAGE, LENS_EXT_IMAGE},
+        {IDC_CB_TEXTURE, LENS_TEXTURE},
+        {IDC_CB_EXT_ARCHIVE, LENS_EXT_ARCHIVE},
+        {IDC_CB_EXT_DOCUMENT, LENS_EXT_DOCUMENT},
     };
 
     for (const auto& fh : formatHandlers) {
@@ -610,6 +619,17 @@ void CMainDlg::InitTooltips() {
     AddTooltipWithStatus(IDC_CB_MODEL, LENS_MODEL,
         _T("3D Model Thumbnails\nExtensions: .stl, .obj, .gltf, ")
         _T(".glb, .fbx, .3ds, .ply\nShows: Wireframe/solid preview"));
+    AddTooltipWithStatus(IDC_CB_EXT_IMAGE, LENS_EXT_IMAGE,
+        _T("Extended Image Formats\nExtensions: .bmp, .gif, .wmf, .emf, ")
+        _T(".pcx, .jp2, .eps, .ora, .xcf, .sgi, .xpm, .ff\nShows: Image thumbnail"));
+    AddTooltipWithStatus(IDC_CB_TEXTURE, LENS_TEXTURE,
+        _T("Texture Formats\nExtensions: .ktx, .ktx2, .vtf\nShows: GPU texture preview"));
+    AddTooltipWithStatus(IDC_CB_EXT_ARCHIVE, LENS_EXT_ARCHIVE,
+        _T("Extended Archive Formats\nExtensions: .iso, .cab, .cpio, ")
+        _T(".bz2, .zst, .xz, .lz4\nShows: Archive content preview"));
+    AddTooltipWithStatus(IDC_CB_EXT_DOCUMENT, LENS_EXT_DOCUMENT,
+        _T("Extended Document Formats\nExtensions: .djvu, .chm, ")
+        _T(".odt, .odp\nShows: First page preview"));
 
     // Options tooltips (no status needed)
     m_tooltip.AddTool(GetDlgItem(IDC_CB_SORT),
@@ -708,10 +728,13 @@ void CMainDlg::UpdateStatusBar() {
     // Count conflicts (third-party handlers)
     int conflictCount = 0;
     const int allFormats[] = {
-        LENS_CBZ,   LENS_CBR,  LENS_CB7,  LENS_CBT,  LENS_EPUB, LENS_MOBI,
-        LENS_AZW,   LENS_AZW3, LENS_ZIP,  LENS_RAR,  LENS_7Z,   LENS_TAR,
-        LENS_PHZ,   LENS_FB2,  LENS_WEBP, LENS_HEIF, LENS_AVIF, LENS_JXL,
-        LENS_VIDEO, LENS_PDF,  LENS_TIFF, LENS_SVG,  LENS_RAW };
+        LENS_CBZ,   LENS_CBR,  LENS_CB7,   LENS_CBT,   LENS_EPUB,  LENS_MOBI,
+        LENS_AZW,   LENS_AZW3, LENS_ZIP,   LENS_RAR,   LENS_7Z,    LENS_TAR,
+        LENS_PHZ,   LENS_FB2,  LENS_WEBP,  LENS_HEIF,  LENS_AVIF,  LENS_JXL,
+        LENS_VIDEO, LENS_PDF,  LENS_TIFF,  LENS_SVG,   LENS_RAW,   LENS_PSD,
+        LENS_DDS,   LENS_HDR,  LENS_EXR,   LENS_PPM,   LENS_ICO,   LENS_QOI,
+        LENS_TGA,   LENS_AUDIO,LENS_DOCUMENT, LENS_FONT, LENS_MODEL,
+        LENS_EXT_IMAGE, LENS_TEXTURE, LENS_EXT_ARCHIVE, LENS_EXT_DOCUMENT };
 
     for (int format : allFormats) {
         HandlerStatus status =
@@ -819,6 +842,14 @@ int CMainDlg::GetEnabledFormatCount() {
         count++;
     if (m_reg.HasTH(LENS_MODEL))
         count++;
+    if (m_reg.HasTH(LENS_EXT_IMAGE))
+        count++;
+    if (m_reg.HasTH(LENS_TEXTURE))
+        count++;
+    if (m_reg.HasTH(LENS_EXT_ARCHIVE))
+        count++;
+    if (m_reg.HasTH(LENS_EXT_DOCUMENT))
+        count++;
 
     // Note: We have 35 format handler checkboxes (50+ file extensions supported)
     // Format handlers: 4 comic + 4 ebook + 4 archive + 2 photo + 4 image + 5
@@ -915,6 +946,14 @@ void CMainDlg::InitStatusIcons() {
         m_reg.GetHandlerStatus(LENS_FONT, m_reg.GetExtension(LENS_FONT));
     m_checkboxStatus[IDC_CB_MODEL] =
         m_reg.GetHandlerStatus(LENS_MODEL, m_reg.GetExtension(LENS_MODEL));
+    m_checkboxStatus[IDC_CB_EXT_IMAGE] =
+        m_reg.GetHandlerStatus(LENS_EXT_IMAGE, m_reg.GetExtension(LENS_EXT_IMAGE));
+    m_checkboxStatus[IDC_CB_TEXTURE] =
+        m_reg.GetHandlerStatus(LENS_TEXTURE, m_reg.GetExtension(LENS_TEXTURE));
+    m_checkboxStatus[IDC_CB_EXT_ARCHIVE] =
+        m_reg.GetHandlerStatus(LENS_EXT_ARCHIVE, m_reg.GetExtension(LENS_EXT_ARCHIVE));
+    m_checkboxStatus[IDC_CB_EXT_DOCUMENT] =
+        m_reg.GetHandlerStatus(LENS_EXT_DOCUMENT, m_reg.GetExtension(LENS_EXT_DOCUMENT));
 }
 
 // Handle checkbox clicks - BS_AUTO3STATE handles toggling automatically
@@ -1070,7 +1109,8 @@ void CMainDlg::OnSelectAll() {
         IDC_CB_HEIF, IDC_CB_AVIF,  IDC_CB_JXL,      IDC_CB_VIDEO, IDC_CB_PDF,
         IDC_CB_TIFF, IDC_CB_SVG,   IDC_CB_RAW,      IDC_CB_PSD,   IDC_CB_DDS,
         IDC_CB_HDR,  IDC_CB_EXR,   IDC_CB_PPM,      IDC_CB_ICO,   IDC_CB_QOI,
-        IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL };
+        IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL,
+        IDC_CB_EXT_IMAGE, IDC_CB_TEXTURE, IDC_CB_EXT_ARCHIVE, IDC_CB_EXT_DOCUMENT };
 
     for (int id : formatCheckboxes) {
         Button_SetCheck(GetDlgItem(id), BST_CHECKED);
@@ -1086,7 +1126,8 @@ void CMainDlg::OnDeselectAll() {
         IDC_CB_HEIF, IDC_CB_AVIF,  IDC_CB_JXL,      IDC_CB_VIDEO, IDC_CB_PDF,
         IDC_CB_TIFF, IDC_CB_SVG,   IDC_CB_RAW,      IDC_CB_PSD,   IDC_CB_DDS,
         IDC_CB_HDR,  IDC_CB_EXR,   IDC_CB_PPM,      IDC_CB_ICO,   IDC_CB_QOI,
-        IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL };
+        IDC_CB_TGA,  IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT,  IDC_CB_MODEL,
+        IDC_CB_EXT_IMAGE, IDC_CB_TEXTURE, IDC_CB_EXT_ARCHIVE, IDC_CB_EXT_DOCUMENT };
 
     for (int id : formatCheckboxes) {
         Button_SetCheck(GetDlgItem(id), BST_UNCHECKED);
@@ -1134,6 +1175,10 @@ ConfigSnapshot CMainDlg::CaptureCurrentConfig() {
     config.document = (m_reg.HasTH(LENS_DOCUMENT) != FALSE);
     config.font = (m_reg.HasTH(LENS_FONT) != FALSE);
     config.model = (m_reg.HasTH(LENS_MODEL) != FALSE);
+    config.extImage = (m_reg.HasTH(LENS_EXT_IMAGE) != FALSE);
+    config.texture = (m_reg.HasTH(LENS_TEXTURE) != FALSE);
+    config.extArchive = (m_reg.HasTH(LENS_EXT_ARCHIVE) != FALSE);
+    config.extDocument = (m_reg.HasTH(LENS_EXT_DOCUMENT) != FALSE);
 
     // Capture options
     config.sortOpt = (m_reg.IsSortOpt() != FALSE);
@@ -1180,6 +1225,10 @@ void CMainDlg::ApplyConfigSnapshot(const ConfigSnapshot& config) {
     m_reg.SetHandlers(LENS_DOCUMENT, config.document);
     m_reg.SetHandlers(LENS_FONT, config.font);
     m_reg.SetHandlers(LENS_MODEL, config.model);
+    m_reg.SetHandlers(LENS_EXT_IMAGE, config.extImage);
+    m_reg.SetHandlers(LENS_TEXTURE, config.texture);
+    m_reg.SetHandlers(LENS_EXT_ARCHIVE, config.extArchive);
+    m_reg.SetHandlers(LENS_EXT_DOCUMENT, config.extDocument);
 
     // Apply options
     m_reg.SetSortOpt(config.sortOpt);
@@ -1571,7 +1620,8 @@ LRESULT CMainDlg::OnResetDefaults(WORD /*wNotifyCode*/, WORD /*wID*/,
       IDC_CB_PSD, IDC_CB_DDS, IDC_CB_HDR, IDC_CB_EXR,
       IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW,
       IDC_CB_PPM, IDC_CB_ICO, IDC_CB_QOI, IDC_CB_TGA,
-      IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT, IDC_CB_MODEL
+      IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT, IDC_CB_MODEL,
+      IDC_CB_EXT_IMAGE, IDC_CB_TEXTURE, IDC_CB_EXT_ARCHIVE, IDC_CB_EXT_DOCUMENT
     };
 
     for (int ctrlID : formatCheckboxes)

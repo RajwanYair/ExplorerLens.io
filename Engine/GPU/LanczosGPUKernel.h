@@ -1,6 +1,5 @@
 // ============================================================================
 // LanczosGPUKernel.h — High-Quality Lanczos Resampling via D3D11 Compute
-// ExplorerLens Engine v15.0.0  (Sprint 564)
 // Copyright (c) 2026 ExplorerLens Project
 //
 // PURPOSE
@@ -60,13 +59,13 @@ namespace Engine {
 // ResizeStats — returned by GetStats()
 // -----------------------------------------------------------------------
 struct ResizeStats {
-    bool     usedGPU            = false;
-    double   resizeTimeMicros   = 0.0;
-    uint64_t pixelsProcessed    = 0;
-    double   shaderCompileTimeMs= 0.0;
-    uint64_t totalResizes       = 0;
-    uint64_t gpuResizes         = 0;
-    uint64_t cpuResizes         = 0;
+    bool     usedGPU = false;
+    double   resizeTimeMicros = 0.0;
+    uint64_t pixelsProcessed = 0;
+    double   shaderCompileTimeMs = 0.0;
+    uint64_t totalResizes = 0;
+    uint64_t gpuResizes = 0;
+    uint64_t cpuResizes = 0;
 };
 
 // -----------------------------------------------------------------------
@@ -77,7 +76,7 @@ public:
     LanczosGPUKernel() = default;
     ~LanczosGPUKernel() { Shutdown(); }
 
-    LanczosGPUKernel(const LanczosGPUKernel&)            = delete;
+    LanczosGPUKernel(const LanczosGPUKernel&) = delete;
     LanczosGPUKernel& operator=(const LanczosGPUKernel&) = delete;
 
     // ---------------- public constants ----------------
@@ -99,7 +98,8 @@ public:
             m_device->AddRef();
             m_device->GetImmediateContext(&m_ctx);
             m_ownsDevice = false;
-        } else {
+        }
+        else {
             if (!CreateDevice()) {
                 // GPU unavailable — CPU-only mode is fine
                 m_ready = true;
@@ -119,7 +119,7 @@ public:
     // Resize
     // ================================================================
     inline bool Resize(const uint8_t* srcRGBA, uint32_t srcW, uint32_t srcH,
-                       uint8_t* dstRGBA, uint32_t dstW, uint32_t dstH) {
+        uint8_t* dstRGBA, uint32_t dstW, uint32_t dstH) {
         if (!srcRGBA || !dstRGBA || srcW == 0 || srcH == 0 || dstW == 0 || dstH == 0)
             return false;
 
@@ -136,9 +136,9 @@ public:
         auto t1 = std::chrono::steady_clock::now();
         double us = std::chrono::duration<double, std::micro>(t1 - t0).count();
 
-        m_stats.resizeTimeMicros   = us;
-        m_stats.pixelsProcessed    = static_cast<uint64_t>(dstW) * dstH;
-        m_stats.usedGPU            = gpu;
+        m_stats.resizeTimeMicros = us;
+        m_stats.pixelsProcessed = static_cast<uint64_t>(dstW) * dstH;
+        m_stats.usedGPU = gpu;
         m_stats.totalResizes++;
         if (gpu) m_stats.gpuResizes++; else m_stats.cpuResizes++;
         return true;
@@ -158,15 +158,15 @@ public:
 
 private:
     // ---- state ----
-    bool               m_ready       = false;
-    bool               m_ownsDevice  = true;
-    uint32_t           m_taps        = DEFAULT_TAPS;
-    HMODULE            m_hD3D11      = nullptr;
-    HMODULE            m_hCompiler   = nullptr;
-    ID3D11Device*      m_device      = nullptr;
-    ID3D11DeviceContext* m_ctx       = nullptr;
+    bool               m_ready = false;
+    bool               m_ownsDevice = true;
+    uint32_t           m_taps = DEFAULT_TAPS;
+    HMODULE            m_hD3D11 = nullptr;
+    HMODULE            m_hCompiler = nullptr;
+    ID3D11Device* m_device = nullptr;
+    ID3D11DeviceContext* m_ctx = nullptr;
     ID3D11ComputeShader* m_computeShader = nullptr;
-    ID3D11Buffer*      m_cbParams    = nullptr;
+    ID3D11Buffer* m_cbParams = nullptr;
     ResizeStats        m_stats{};
 
     // ---- constant buffer layout ----
@@ -268,12 +268,12 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
         D3D_FEATURE_LEVEL levels[] = { D3D_FEATURE_LEVEL_11_0 };
         D3D_FEATURE_LEVEL got{};
         HRESULT hr = pfn(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
-                         levels, 1, D3D11_SDK_VERSION,
-                         &m_device, &got, &m_ctx);
+            levels, 1, D3D11_SDK_VERSION,
+            &m_device, &got, &m_ctx);
         if (FAILED(hr)) {
             hr = pfn(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, 0,
-                     levels, 1, D3D11_SDK_VERSION,
-                     &m_device, &got, &m_ctx);
+                levels, 1, D3D11_SDK_VERSION,
+                &m_device, &got, &m_ctx);
         }
         if (FAILED(hr)) { m_device = nullptr; m_ctx = nullptr; return false; }
         m_ownsDevice = true;
@@ -297,10 +297,10 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
 
         const char* src = HLSLSource();
         ID3DBlob* blob = nullptr;
-        ID3DBlob* err  = nullptr;
+        ID3DBlob* err = nullptr;
         HRESULT hr = pfnCompile(src, strlen(src), "LanczosCS", nullptr,
-                                nullptr, "CSMain", "cs_5_0", 0, 0,
-                                &blob, &err);
+            nullptr, "CSMain", "cs_5_0", 0, 0,
+            &blob, &err);
         if (err) err->Release();
         if (FAILED(hr) || !blob) return;
 
@@ -309,16 +309,16 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
             std::chrono::duration<double, std::milli>(t1 - t0).count();
 
         m_device->CreateComputeShader(blob->GetBufferPointer(),
-                                      blob->GetBufferSize(), nullptr,
-                                      &m_computeShader);
+            blob->GetBufferSize(), nullptr,
+            &m_computeShader);
         blob->Release();
 
         // constant buffer
         D3D11_BUFFER_DESC bd{};
-        bd.ByteWidth      = sizeof(CBResize);
-        bd.Usage           = D3D11_USAGE_DYNAMIC;
-        bd.BindFlags       = D3D11_BIND_CONSTANT_BUFFER;
-        bd.CPUAccessFlags  = D3D11_CPU_ACCESS_WRITE;
+        bd.ByteWidth = sizeof(CBResize);
+        bd.Usage = D3D11_USAGE_DYNAMIC;
+        bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
         m_device->CreateBuffer(&bd, nullptr, &m_cbParams);
     }
 
@@ -326,23 +326,23 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ResizeGPU — upload → dispatch → readback
     // ================================================================
     inline bool ResizeGPU(const uint8_t* src, uint32_t srcW, uint32_t srcH,
-                          uint8_t* dst, uint32_t dstW, uint32_t dstH) {
+        uint8_t* dst, uint32_t dstW, uint32_t dstH) {
         if (!m_computeShader || !m_cbParams) return false;
 
         // -- source texture + SRV --
         D3D11_TEXTURE2D_DESC td{};
-        td.Width            = srcW;
-        td.Height           = srcH;
-        td.MipLevels        = 1;
-        td.ArraySize        = 1;
-        td.Format           = DXGI_FORMAT_R8G8B8A8_UNORM;
+        td.Width = srcW;
+        td.Height = srcH;
+        td.MipLevels = 1;
+        td.ArraySize = 1;
+        td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         td.SampleDesc.Count = 1;
-        td.Usage            = D3D11_USAGE_IMMUTABLE;
-        td.BindFlags        = D3D11_BIND_SHADER_RESOURCE;
+        td.Usage = D3D11_USAGE_IMMUTABLE;
+        td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
         D3D11_SUBRESOURCE_DATA init{};
-        init.pSysMem     = src;
-        init.SysMemPitch  = srcW * 4;
+        init.pSysMem = src;
+        init.SysMemPitch = srcW * 4;
 
         ID3D11Texture2D* srcTex = nullptr;
         if (FAILED(m_device->CreateTexture2D(&td, &init, &srcTex))) return false;
@@ -352,14 +352,14 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
 
         // -- output texture + UAV --
         D3D11_TEXTURE2D_DESC otd{};
-        otd.Width            = dstW;
-        otd.Height           = dstH;
-        otd.MipLevels        = 1;
-        otd.ArraySize        = 1;
-        otd.Format           = DXGI_FORMAT_R8G8B8A8_UNORM;
+        otd.Width = dstW;
+        otd.Height = dstH;
+        otd.MipLevels = 1;
+        otd.ArraySize = 1;
+        otd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         otd.SampleDesc.Count = 1;
-        otd.Usage            = D3D11_USAGE_DEFAULT;
-        otd.BindFlags        = D3D11_BIND_UNORDERED_ACCESS;
+        otd.Usage = D3D11_USAGE_DEFAULT;
+        otd.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 
         ID3D11Texture2D* outTex = nullptr;
         if (FAILED(m_device->CreateTexture2D(&otd, nullptr, &outTex))) {
@@ -371,14 +371,14 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
 
         // -- staging texture for readback --
         D3D11_TEXTURE2D_DESC std{};
-        std.Width            = dstW;
-        std.Height           = dstH;
-        std.MipLevels        = 1;
-        std.ArraySize        = 1;
-        std.Format           = DXGI_FORMAT_R8G8B8A8_UNORM;
+        std.Width = dstW;
+        std.Height = dstH;
+        std.MipLevels = 1;
+        std.ArraySize = 1;
+        std.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         std.SampleDesc.Count = 1;
-        std.Usage            = D3D11_USAGE_STAGING;
-        std.CPUAccessFlags   = D3D11_CPU_ACCESS_READ;
+        std.Usage = D3D11_USAGE_STAGING;
+        std.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 
         ID3D11Texture2D* stageTex = nullptr;
         if (FAILED(m_device->CreateTexture2D(&std, nullptr, &stageTex))) {
@@ -389,15 +389,15 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
         // -- update constant buffer --
         D3D11_MAPPED_SUBRESOURCE mapped{};
         m_ctx->Map(m_cbParams, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-        auto* cb    = static_cast<CBResize*>(mapped.pData);
-        cb->srcW    = srcW;
-        cb->srcH    = srcH;
-        cb->dstW    = dstW;
-        cb->dstH    = dstH;
-        cb->scaleX  = static_cast<float>(srcW) / static_cast<float>(dstW);
-        cb->scaleY  = static_cast<float>(srcH) / static_cast<float>(dstH);
-        cb->taps    = m_taps;
-        cb->_pad    = 0;
+        auto* cb = static_cast<CBResize*>(mapped.pData);
+        cb->srcW = srcW;
+        cb->srcH = srcH;
+        cb->dstW = dstW;
+        cb->dstH = dstH;
+        cb->scaleX = static_cast<float>(srcW) / static_cast<float>(dstW);
+        cb->scaleY = static_cast<float>(srcH) / static_cast<float>(dstH);
+        cb->taps = m_taps;
+        cb->_pad = 0;
         m_ctx->Unmap(m_cbParams, 0);
 
         // -- dispatch --
@@ -442,13 +442,13 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ResizeCPU — separable Lanczos (horizontal → vertical)
     // ================================================================
     inline void ResizeCPU(const uint8_t* src, uint32_t srcW, uint32_t srcH,
-                          uint8_t* dst, uint32_t dstW, uint32_t dstH) {
+        uint8_t* dst, uint32_t dstW, uint32_t dstH) {
         // Horizontal pass → intermediate buffer
         std::vector<float> tmp(static_cast<size_t>(dstW) * srcH * 4, 0.0f);
 
         const float sx = static_cast<float>(srcW) / static_cast<float>(dstW);
         const float sy = static_cast<float>(srcH) / static_cast<float>(dstH);
-        const int   a  = static_cast<int>(m_taps);
+        const int   a = static_cast<int>(m_taps);
         const float af = static_cast<float>(a);
 
         // -- horizontal --
@@ -463,10 +463,10 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
                     float w = LanczosWeight(cx - static_cast<float>(ix), af);
                     int   sx2 = (std::max)(0, (std::min)(static_cast<int>(srcW) - 1, ix));
                     const uint8_t* p = src + (static_cast<size_t>(y) * srcW + sx2) * 4;
-                    r   += w * p[0];
-                    g   += w * p[1];
-                    b   += w * p[2];
-                    aa  += w * p[3];
+                    r += w * p[0];
+                    g += w * p[1];
+                    b += w * p[2];
+                    aa += w * p[3];
                     wSum += w;
                 }
                 if (wSum > 0.0f) { r /= wSum; g /= wSum; b /= wSum; aa /= wSum; }
@@ -490,10 +490,10 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
                     float w = LanczosWeight(cy - static_cast<float>(iy), af);
                     int   sy2 = (std::max)(0, (std::min)(static_cast<int>(srcH) - 1, iy));
                     size_t idx = (static_cast<size_t>(sy2) * dstW + x) * 4;
-                    r   += w * tmp[idx + 0];
-                    g   += w * tmp[idx + 1];
-                    b2  += w * tmp[idx + 2];
-                    aa  += w * tmp[idx + 3];
+                    r += w * tmp[idx + 0];
+                    g += w * tmp[idx + 1];
+                    b2 += w * tmp[idx + 2];
+                    aa += w * tmp[idx + 3];
                     wSum += w;
                 }
                 if (wSum > 0.0f) { r /= wSum; g /= wSum; b2 /= wSum; aa /= wSum; }
@@ -501,7 +501,7 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
                 auto clamp8 = [](float v) -> uint8_t {
                     int i = static_cast<int>(v + 0.5f);
                     return static_cast<uint8_t>((std::max)(0, (std::min)(255, i)));
-                };
+                    };
                 size_t oi = (static_cast<size_t>(y) * dstW + x) * 4;
                 dst[oi + 0] = clamp8(r);
                 dst[oi + 1] = clamp8(g);
@@ -517,7 +517,7 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     static inline float LanczosWeight(float x, float a) {
         if (std::fabs(x) < 1e-7f) return 1.0f;
         if (std::fabs(x) >= a)    return 0.0f;
-        float px  = static_cast<float>(EXPLORELENS_LANCZOS_PI) * x;
+        float px = static_cast<float>(EXPLORELENS_LANCZOS_PI) * x;
         float pxa = px / a;
         return (std::sin(px) / px) * (std::sin(pxa) / pxa);
     }
@@ -526,13 +526,13 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // Shutdown
     // ================================================================
     inline void Shutdown() {
-        if (m_cbParams)       { m_cbParams->Release();       m_cbParams = nullptr; }
-        if (m_computeShader)  { m_computeShader->Release();  m_computeShader = nullptr; }
-        if (m_ctx)            { m_ctx->Release();            m_ctx = nullptr; }
+        if (m_cbParams) { m_cbParams->Release();       m_cbParams = nullptr; }
+        if (m_computeShader) { m_computeShader->Release();  m_computeShader = nullptr; }
+        if (m_ctx) { m_ctx->Release();            m_ctx = nullptr; }
         if (m_device && m_ownsDevice) { m_device->Release(); }
         m_device = nullptr;
-        if (m_hCompiler)      { ::FreeLibrary(m_hCompiler);  m_hCompiler = nullptr; }
-        if (m_hD3D11)         { ::FreeLibrary(m_hD3D11);     m_hD3D11 = nullptr; }
+        if (m_hCompiler) { ::FreeLibrary(m_hCompiler);  m_hCompiler = nullptr; }
+        if (m_hD3D11) { ::FreeLibrary(m_hD3D11);     m_hD3D11 = nullptr; }
         m_ready = false;
     }
 };

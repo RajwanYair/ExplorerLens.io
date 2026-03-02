@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// ArchiveMemoryCompactor.h — Sprint 561
+// ArchiveMemoryCompactor.h
 //
 // Purpose:
 //   Specialized memory compactor for archive extraction buffers.  When an
@@ -54,40 +54,40 @@ namespace Engine {
 // ── Buffer descriptor ────────────────────────────────────────────────────────
 
 struct ExtractedBuffer {
-    uint64_t archiveId   = 0;
-    uint32_t entryIndex  = 0;
-    void*    data        = nullptr;
-    size_t   size        = 0;
-    bool     pinned      = false;
-    bool     alive       = true;   // false after FreeBuffer
+    uint64_t archiveId = 0;
+    uint32_t entryIndex = 0;
+    void* data = nullptr;
+    size_t   size = 0;
+    bool     pinned = false;
+    bool     alive = true;   // false after FreeBuffer
 };
 
 // ── Compact result ───────────────────────────────────────────────────────────
 
 struct CompactResult {
-    uint32_t buffersMoved     = 0;
-    uint64_t bytesMoved       = 0;
-    uint32_t gapsFilled       = 0;
-    uint32_t fragmentsBefore  = 0;
-    uint32_t fragmentsAfter   = 0;
-    uint64_t durationUs       = 0;
+    uint32_t buffersMoved = 0;
+    uint64_t bytesMoved = 0;
+    uint32_t gapsFilled = 0;
+    uint32_t fragmentsBefore = 0;
+    uint32_t fragmentsAfter = 0;
+    uint64_t durationUs = 0;
 };
 
 // ── Statistics ───────────────────────────────────────────────────────────────
 
 struct CompactorStats {
-    size_t   arenaReserved       = 0;
-    size_t   arenaCommitted      = 0;
-    size_t   usedBytes           = 0;
-    size_t   freeBytes           = 0;
-    uint32_t bufferCount         = 0;
-    double   fragmentationRatio  = 0.0;
+    size_t   arenaReserved = 0;
+    size_t   arenaCommitted = 0;
+    size_t   usedBytes = 0;
+    size_t   freeBytes = 0;
+    uint32_t bufferCount = 0;
+    double   fragmentationRatio = 0.0;
     uint32_t compactionsPerformed = 0;
 };
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-static constexpr size_t kArenaChunkSize    = 16ULL * 1024 * 1024; // 16 MB
+static constexpr size_t kArenaChunkSize = 16ULL * 1024 * 1024; // 16 MB
 static constexpr size_t kDefaultArenaLimit = 512ULL * 1024 * 1024; // 512 MB
 static constexpr double kAutoCompactThreshold = 0.40; // 40% fragmentation
 
@@ -120,14 +120,14 @@ public:
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    ArchiveMemoryCompactor(const ArchiveMemoryCompactor&)            = delete;
+    ArchiveMemoryCompactor(const ArchiveMemoryCompactor&) = delete;
     ArchiveMemoryCompactor& operator=(const ArchiveMemoryCompactor&) = delete;
 
     // ── Allocation ───────────────────────────────────────────────
 
     ExtractedBuffer* AllocateBuffer(uint64_t archiveId,
-                                     uint32_t entryIndex,
-                                     size_t   size) {
+        uint32_t entryIndex,
+        size_t   size) {
         if (size == 0 || !m_arenaBase) return nullptr;
 
         AcquireSRWLockExclusive(&m_lock);
@@ -155,12 +155,12 @@ public:
         EnsureCommittedLocked(slot, alignedSize);
 
         ExtractedBuffer buf;
-        buf.archiveId  = archiveId;
+        buf.archiveId = archiveId;
         buf.entryIndex = entryIndex;
-        buf.data       = slot;
-        buf.size       = alignedSize;
-        buf.pinned     = false;
-        buf.alive      = true;
+        buf.data = slot;
+        buf.size = alignedSize;
+        buf.pinned = false;
+        buf.alive = true;
 
         m_buffers.push_back(buf);
         ExtractedBuffer* ptr = &m_buffers.back();
@@ -230,7 +230,7 @@ public:
         std::sort(m_buffers.begin(), m_buffers.end(),
             [](const ExtractedBuffer& a, const ExtractedBuffer& b) {
                 return reinterpret_cast<uintptr_t>(a.data) <
-                       reinterpret_cast<uintptr_t>(b.data);
+                    reinterpret_cast<uintptr_t>(b.data);
             });
 
         result.fragmentsBefore = CountGapsLocked();
@@ -265,7 +265,8 @@ public:
             auto& last = m_buffers.back();
             m_arenaUsedEnd = static_cast<size_t>(
                 static_cast<uint8_t*>(last.data) + last.size - m_arenaBase);
-        } else {
+        }
+        else {
             m_arenaUsedEnd = 0;
         }
 
@@ -300,16 +301,16 @@ public:
     CompactorStats GetStats() {
         AcquireSRWLockExclusive(&m_lock);
         CompactorStats stats{};
-        stats.arenaReserved        = m_arenaReserved;
-        stats.arenaCommitted       = m_arenaCommitted;
-        stats.usedBytes            = m_totalUsed;
-        stats.freeBytes            = m_arenaCommitted > m_totalUsed
-                                     ? m_arenaCommitted - m_totalUsed : 0;
-        stats.bufferCount          = 0;
+        stats.arenaReserved = m_arenaReserved;
+        stats.arenaCommitted = m_arenaCommitted;
+        stats.usedBytes = m_totalUsed;
+        stats.freeBytes = m_arenaCommitted > m_totalUsed
+            ? m_arenaCommitted - m_totalUsed : 0;
+        stats.bufferCount = 0;
         for (const auto& b : m_buffers) {
             if (b.alive) stats.bufferCount++;
         }
-        stats.fragmentationRatio   = ComputeFragmentationLocked();
+        stats.fragmentationRatio = ComputeFragmentationLocked();
         stats.compactionsPerformed = m_compactionsPerformed;
         ReleaseSRWLockExclusive(&m_lock);
         return stats;
@@ -324,19 +325,19 @@ private:
 
     void EnsureCommittedLocked(void* addr, size_t size) {
         uintptr_t start = reinterpret_cast<uintptr_t>(addr);
-        uintptr_t end   = start + size;
+        uintptr_t end = start + size;
         uintptr_t commitEnd = reinterpret_cast<uintptr_t>(m_arenaBase) +
-                              m_arenaCommitted;
+            m_arenaCommitted;
 
         if (end > commitEnd) {
             size_t needed = static_cast<size_t>(end - commitEnd);
             size_t commitSize = AlignUp(needed, kArenaChunkSize);
             commitSize = (std::min)(commitSize,
-                                    m_arenaReserved - m_arenaCommitted);
+                m_arenaReserved - m_arenaCommitted);
             if (commitSize > 0) {
                 void* commitAddr = m_arenaBase + m_arenaCommitted;
                 void* result = VirtualAlloc(commitAddr, commitSize,
-                                            MEM_COMMIT, PAGE_READWRITE);
+                    MEM_COMMIT, PAGE_READWRITE);
                 if (result) {
                     m_arenaCommitted += commitSize;
                 }
@@ -346,14 +347,14 @@ private:
 
     bool GrowArenaLocked(size_t needed) {
         size_t commitSize = (std::max)(kArenaChunkSize,
-                                       AlignUp(needed, m_pageSize));
+            AlignUp(needed, m_pageSize));
         if (m_arenaCommitted + commitSize > m_arenaReserved) {
             commitSize = m_arenaReserved - m_arenaCommitted;
         }
         if (commitSize == 0) return false;
 
         void* result = VirtualAlloc(m_arenaBase + m_arenaCommitted,
-                                    commitSize, MEM_COMMIT, PAGE_READWRITE);
+            commitSize, MEM_COMMIT, PAGE_READWRITE);
         if (!result) return false;
 
         m_arenaCommitted += commitSize;
@@ -374,7 +375,7 @@ private:
         std::sort(m_buffers.begin(), m_buffers.end(),
             [](const ExtractedBuffer& a, const ExtractedBuffer& b) {
                 return reinterpret_cast<uintptr_t>(a.data) <
-                       reinterpret_cast<uintptr_t>(b.data);
+                    reinterpret_cast<uintptr_t>(b.data);
             });
 
         // Check gap before first buffer
@@ -388,7 +389,7 @@ private:
         for (size_t i = 0; i + 1 < m_buffers.size(); ++i) {
             if (!m_buffers[i].alive) continue;
             uint8_t* endI = static_cast<uint8_t*>(m_buffers[i].data)
-                            + m_buffers[i].size;
+                + m_buffers[i].size;
             uint8_t* startNext = nullptr;
             for (size_t j = i + 1; j < m_buffers.size(); ++j) {
                 if (m_buffers[j].alive) {
@@ -411,7 +412,7 @@ private:
         }
         if (lastEnd) {
             size_t remaining = m_arenaCommitted -
-                               static_cast<size_t>(lastEnd - m_arenaBase);
+                static_cast<size_t>(lastEnd - m_arenaBase);
             if (remaining >= size) {
                 size_t newEnd = static_cast<size_t>(lastEnd - m_arenaBase) + size;
                 if (newEnd > m_arenaUsedEnd) m_arenaUsedEnd = newEnd;
@@ -440,7 +441,7 @@ private:
         if (m_arenaUsedEnd == 0 || m_totalUsed == 0) return 0.0;
         size_t totalSpan = m_arenaUsedEnd;
         size_t freeInSpan = totalSpan > m_totalUsed
-                            ? totalSpan - m_totalUsed : 0;
+            ? totalSpan - m_totalUsed : 0;
         if (freeInSpan == 0) return 0.0;
 
         // Find largest contiguous free block
@@ -463,20 +464,20 @@ private:
         }
 
         return 1.0 - (static_cast<double>(largestGap) /
-                       static_cast<double>(freeInSpan));
+            static_cast<double>(freeInSpan));
     }
 
     // ── Data members ─────────────────────────────────────────────
 
     SRWLOCK m_lock{};
 
-    uint8_t* m_arenaBase       = nullptr;
-    size_t   m_arenaReserved   = 0;
-    size_t   m_arenaCommitted  = 0;
-    size_t   m_arenaUsedEnd    = 0;   // high-water mark within arena
-    size_t   m_arenaLimit      = kDefaultArenaLimit;
-    size_t   m_totalUsed       = 0;
-    size_t   m_pageSize        = 4096;
+    uint8_t* m_arenaBase = nullptr;
+    size_t   m_arenaReserved = 0;
+    size_t   m_arenaCommitted = 0;
+    size_t   m_arenaUsedEnd = 0;   // high-water mark within arena
+    size_t   m_arenaLimit = kDefaultArenaLimit;
+    size_t   m_totalUsed = 0;
+    size_t   m_pageSize = 4096;
 
     std::vector<ExtractedBuffer> m_buffers;
 

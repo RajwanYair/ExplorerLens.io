@@ -1,5 +1,5 @@
 //==============================================================================
-// ExplorerLens Engine — Image Quality Assessor V2 (Sprint 576)
+// ExplorerLens Engine — Image Quality Assessor V2
 //
 // Purpose:
 //   No-reference image quality assessment inspired by BRISQUE, using natural
@@ -59,19 +59,19 @@ enum class QualityTierV2 : uint8_t {
 
 /// Per-axis quality sub-scores; all values in [0, 1].
 struct QualityScoreV2 {
-    float overall      = 0.0f;
-    float sharpness    = 0.0f;
-    float noise        = 0.0f;   // 1.0 = low noise (good), 0.0 = very noisy
-    float contrast     = 0.0f;
+    float overall = 0.0f;
+    float sharpness = 0.0f;
+    float noise = 0.0f;   // 1.0 = low noise (good), 0.0 = very noisy
+    float contrast = 0.0f;
     float colorfulness = 0.0f;
-    float exposure     = 0.0f;
+    float exposure = 0.0f;
 };
 
 /// Cumulative assessment statistics.
 struct AssessmentStatsV2 {
-    uint64_t imagesAssessed     = 0;
-    double   totalScore         = 0.0;
-    double   totalAssessTimeMs  = 0.0;
+    uint64_t imagesAssessed = 0;
+    double   totalScore = 0.0;
+    double   totalAssessTimeMs = 0.0;
     std::array<uint64_t, 5> tierDistribution{}; // [Excellent..Bad]
     double AvgScore()  const { return imagesAssessed ? totalScore / static_cast<double>(imagesAssessed) : 0.0; }
     double AvgTimeMs() const { return imagesAssessed ? totalAssessTimeMs / static_cast<double>(imagesAssessed) : 0.0; }
@@ -86,8 +86,8 @@ public:
 
     /// Full assessment returning all sub-metrics.
     inline QualityScoreV2 Assess(const uint8_t* rgbaData,
-                                 uint32_t width,
-                                 uint32_t height) {
+        uint32_t width,
+        uint32_t height) {
         using Clock = std::chrono::high_resolution_clock;
         auto t0 = Clock::now();
 
@@ -120,10 +120,10 @@ public:
 
         // Weighted overall
         qs.overall = 0.35f * qs.sharpness
-                   + 0.20f * qs.noise
-                   + 0.20f * qs.contrast
-                   + 0.15f * qs.colorfulness
-                   + 0.10f * qs.exposure;
+            + 0.20f * qs.noise
+            + 0.20f * qs.contrast
+            + 0.15f * qs.colorfulness
+            + 0.10f * qs.exposure;
         qs.overall = (std::max)(0.0f, (std::min)(qs.overall, 1.0f));
 
         auto t1 = Clock::now();
@@ -175,17 +175,17 @@ private:
 
     /// Sharpness via Laplacian variance. Returns [0, 1].
     static inline float ComputeSharpness(const std::vector<float>& lum,
-                                          uint32_t w, uint32_t h) {
+        uint32_t w, uint32_t h) {
         // Laplacian kernel: [0,-1,0; -1,4,-1; 0,-1,0]
         double sum = 0.0, sumSq = 0.0;
         uint32_t count = 0;
         for (uint32_t y = 1; y + 1 < h; ++y) {
             for (uint32_t x = 1; x + 1 < w; ++x) {
                 float lap = 4.0f * lum[y * w + x]
-                          - lum[(y - 1) * w + x]
-                          - lum[(y + 1) * w + x]
-                          - lum[y * w + (x - 1)]
-                          - lum[y * w + (x + 1)];
+                    - lum[(y - 1) * w + x]
+                    - lum[(y + 1) * w + x]
+                    - lum[y * w + (x - 1)]
+                    - lum[y * w + (x + 1)];
                 sum += lap;
                 sumSq += static_cast<double>(lap) * lap;
                 ++count;
@@ -202,7 +202,7 @@ private:
     /// Noise estimation via median absolute deviation in 3x3 blocks.
     /// Returns [0, 1] where 1.0 = minimal noise (good).
     static inline float ComputeNoiseScore(const std::vector<float>& lum,
-                                           uint32_t w, uint32_t h) {
+        uint32_t w, uint32_t h) {
         double madSum = 0.0;
         uint32_t blockCount = 0;
         std::array<float, 9> neighborhood{};
@@ -238,7 +238,7 @@ private:
 
     /// Michelson contrast in 16x16 blocks, averaged. Returns [0, 1].
     static inline float ComputeContrast(const std::vector<float>& lum,
-                                         uint32_t w, uint32_t h) {
+        uint32_t w, uint32_t h) {
         const uint32_t blockSize = 16;
         double contrastSum = 0.0;
         uint32_t blockCount = 0;
@@ -265,7 +265,7 @@ private:
 
     /// Hasler & Süsstrunk 2003 colorfulness metric. Returns [0, 1].
     static inline float ComputeColorfulness(const uint8_t* rgba,
-                                             uint32_t pixelCount) {
+        uint32_t pixelCount) {
         if (pixelCount == 0) return 0.0f;
 
         double sumRG = 0.0, sumYB = 0.0;
@@ -278,8 +278,8 @@ private:
             float b = rgba[off + 2] / 255.0f;
             float rg = r - g;
             float yb = 0.5f * (r + g) - b;
-            sumRG  += rg;
-            sumYB  += yb;
+            sumRG += rg;
+            sumYB += yb;
             sumRG2 += static_cast<double>(rg) * rg;
             sumYB2 += static_cast<double>(yb) * yb;
         }
@@ -287,13 +287,13 @@ private:
         double n = static_cast<double>(pixelCount);
         double meanRG = sumRG / n;
         double meanYB = sumYB / n;
-        double varRG  = sumRG2 / n - meanRG * meanRG;
-        double varYB  = sumYB2 / n - meanYB * meanYB;
+        double varRG = sumRG2 / n - meanRG * meanRG;
+        double varYB = sumYB2 / n - meanYB * meanYB;
         double sigmaRG = std::sqrt((std::max)(varRG, 0.0));
         double sigmaYB = std::sqrt((std::max)(varYB, 0.0));
 
         double colorfulness = std::sqrt(sigmaRG * sigmaRG + sigmaYB * sigmaYB)
-                            + 0.3 * std::sqrt(meanRG * meanRG + meanYB * meanYB);
+            + 0.3 * std::sqrt(meanRG * meanRG + meanYB * meanYB);
 
         // Typical colorfulness range: 0–0.8 for natural images
         float normalized = static_cast<float>(colorfulness / 0.75);
@@ -303,7 +303,7 @@ private:
     /// Exposure quality: penalize deviation from target 0.5 midpoint.
     /// Also penalize very dark (<0.1) or very bright (>0.9) areas.
     static inline float ComputeExposure(const std::vector<float>& lum,
-                                         uint32_t pixelCount) {
+        uint32_t pixelCount) {
         if (pixelCount == 0) return 0.0f;
 
         float sum = 0.0f;

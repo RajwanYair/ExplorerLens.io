@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// MemoryDefragmenter.h — Sprint 559
+// MemoryDefragmenter.h
 //
 // Purpose:
 //   Defragments thumbnail buffer memory by compacting live allocations toward
@@ -52,30 +52,30 @@ namespace Engine {
 // ── Region descriptor ────────────────────────────────────────────────────────
 
 struct MemoryRegion {
-    void*    base    = nullptr;
-    size_t   size    = 0;
-    bool     inUse   = true;
-    uint64_t tag     = 0;       // caller-defined tag for identification
+    void* base = nullptr;
+    size_t   size = 0;
+    bool     inUse = true;
+    uint64_t tag = 0;       // caller-defined tag for identification
 };
 
 // ── Defrag pass result ───────────────────────────────────────────────────────
 
 struct DefragResult {
-    uint64_t bytesMoved         = 0;
-    uint32_t regionsCompacted   = 0;
-    uint32_t fragmentsBefore    = 0;
-    uint32_t fragmentsAfter     = 0;
-    uint64_t durationUs         = 0;
+    uint64_t bytesMoved = 0;
+    uint32_t regionsCompacted = 0;
+    uint32_t fragmentsBefore = 0;
+    uint32_t fragmentsAfter = 0;
+    uint64_t durationUs = 0;
 };
 
 // ── Cumulative stats ─────────────────────────────────────────────────────────
 
 struct DefragStats {
-    uint32_t totalRegions       = 0;
-    uint32_t freeRegions        = 0;
+    uint32_t totalRegions = 0;
+    uint32_t freeRegions = 0;
     double   fragmentationRatio = 0.0;
-    uint32_t defragRuns         = 0;
-    uint64_t totalBytesMoved    = 0;
+    uint32_t defragRuns = 0;
+    uint64_t totalBytesMoved = 0;
 };
 
 // ── Main class ───────────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ public:
         DisableAutoDefrag();
     }
 
-    MemoryDefragmenter(const MemoryDefragmenter&)            = delete;
+    MemoryDefragmenter(const MemoryDefragmenter&) = delete;
     MemoryDefragmenter& operator=(const MemoryDefragmenter&) = delete;
 
     // ── Region management ────────────────────────────────────────
@@ -99,10 +99,10 @@ public:
         if (!base || size == 0) return;
         AcquireSRWLockExclusive(&m_lock);
         MemoryRegion r;
-        r.base  = base;
-        r.size  = size;
+        r.base = base;
+        r.size = size;
         r.inUse = true;
-        r.tag   = tag;
+        r.tag = tag;
         m_regions.push_back(r);
         ReleaseSRWLockExclusive(&m_lock);
     }
@@ -150,7 +150,7 @@ public:
         std::sort(m_regions.begin(), m_regions.end(),
             [](const MemoryRegion& a, const MemoryRegion& b) {
                 return reinterpret_cast<uintptr_t>(a.base) <
-                       reinterpret_cast<uintptr_t>(b.base);
+                    reinterpret_cast<uintptr_t>(b.base);
             });
 
         // Count free fragments before compaction
@@ -195,7 +195,8 @@ public:
                     if (remainingFree > 0) {
                         freeReg.base = remainingBase;
                         freeReg.size = remainingFree;
-                    } else {
+                    }
+                    else {
                         freeReg.size = 0; // mark for removal
                     }
 
@@ -242,7 +243,7 @@ public:
     // ── Auto-defrag ──────────────────────────────────────────────
 
     void EnableAutoDefrag(double fragmentationThreshold = 0.3,
-                          uint32_t checkIntervalMs = 10000) {
+        uint32_t checkIntervalMs = 10000) {
         DisableAutoDefrag();
 
         m_autoDefragEnabled.store(true, std::memory_order_release);
@@ -262,7 +263,7 @@ public:
                     Defragment();
                 }
             }
-        });
+            });
     }
 
     void DisableAutoDefrag() {
@@ -277,14 +278,14 @@ public:
     DefragStats GetStats() {
         AcquireSRWLockExclusive(&m_lock);
         DefragStats stats{};
-        stats.totalRegions       = static_cast<uint32_t>(m_regions.size());
-        stats.freeRegions        = 0;
+        stats.totalRegions = static_cast<uint32_t>(m_regions.size());
+        stats.freeRegions = 0;
         for (const auto& r : m_regions) {
             if (!r.inUse) stats.freeRegions++;
         }
         stats.fragmentationRatio = ComputeFragmentationLocked();
-        stats.defragRuns         = m_defragRuns;
-        stats.totalBytesMoved    = m_totalBytesMoved;
+        stats.defragRuns = m_defragRuns;
+        stats.totalBytesMoved = m_totalBytesMoved;
         ReleaseSRWLockExclusive(&m_lock);
         return stats;
     }
@@ -353,7 +354,7 @@ private:
             uintptr_t freeAddr = reinterpret_cast<uintptr_t>(m_regions[i].base);
             if (freeAddr < liveAddr && freeAddr < bestAddr) {
                 bestAddr = freeAddr;
-                bestIdx  = i;
+                bestIdx = i;
             }
         }
         return bestIdx;
@@ -364,14 +365,14 @@ private:
         std::sort(m_regions.begin(), m_regions.end(),
             [](const MemoryRegion& a, const MemoryRegion& b) {
                 return reinterpret_cast<uintptr_t>(a.base) <
-                       reinterpret_cast<uintptr_t>(b.base);
+                    reinterpret_cast<uintptr_t>(b.base);
             });
 
         // Merge adjacent free blocks
         for (size_t i = 0; i + 1 < m_regions.size(); ) {
             if (!m_regions[i].inUse && !m_regions[i + 1].inUse) {
                 uintptr_t endOfI = reinterpret_cast<uintptr_t>(m_regions[i].base)
-                                   + m_regions[i].size;
+                    + m_regions[i].size;
                 uintptr_t startOfNext = reinterpret_cast<uintptr_t>(
                     m_regions[i + 1].base);
 
@@ -379,7 +380,7 @@ private:
                     // Merge: extend region i, remove region i+1
                     m_regions[i].size += m_regions[i + 1].size;
                     m_regions.erase(m_regions.begin() +
-                                    static_cast<ptrdiff_t>(i + 1));
+                        static_cast<ptrdiff_t>(i + 1));
                     continue; // re-check at same index
                 }
             }
@@ -388,7 +389,7 @@ private:
     }
 
     double ComputeFragmentationLocked() const {
-        size_t totalFree   = 0;
+        size_t totalFree = 0;
         size_t largestFree = 0;
 
         for (const auto& r : m_regions) {
@@ -400,7 +401,7 @@ private:
 
         if (totalFree == 0) return 0.0;
         return 1.0 - (static_cast<double>(largestFree) /
-                       static_cast<double>(totalFree));
+            static_cast<double>(totalFree));
     }
 
     // ── Data members ─────────────────────────────────────────────
@@ -410,12 +411,12 @@ private:
 
     std::function<void(void*, void*, size_t)> m_relocationCb;
 
-    uint32_t m_defragRuns      = 0;
+    uint32_t m_defragRuns = 0;
     uint64_t m_totalBytesMoved = 0;
 
     // Auto-defrag
-    std::atomic<bool> m_autoDefragEnabled{false};
-    double            m_autoDefragThreshold  = 0.3;
+    std::atomic<bool> m_autoDefragEnabled{ false };
+    double            m_autoDefragThreshold = 0.3;
     uint32_t          m_autoDefragIntervalMs = 10000;
     std::thread       m_autoDefragThread;
 };

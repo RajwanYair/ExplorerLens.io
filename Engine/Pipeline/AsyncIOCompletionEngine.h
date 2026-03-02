@@ -1,7 +1,6 @@
 #pragma once
 // ============================================================================
 // AsyncIOCompletionEngine.h — Async file I/O with IOCP + scatter-gather
-//                              (Sprint 548)
 //
 // Purpose:   Higher-level async file I/O engine built on Windows I/O
 //            Completion Ports, with callback-based completion, scatter-gather

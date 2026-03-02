@@ -1,6 +1,5 @@
 // ============================================================================
 // HDRToneMapKernel.h — HDR-to-SDR Tone Mapping via GPU Compute Shader
-// ExplorerLens Engine v15.0.0  (Sprint 565)
 // Copyright (c) 2026 ExplorerLens Project
 //
 // PURPOSE
@@ -54,18 +53,18 @@ namespace Engine {
 // ToneMapKernelOp — selectable tone-mapping curve
 // -----------------------------------------------------------------------
 enum class ToneMapKernelOp : uint8_t {
-    Reinhard  = 0,
-    ACES      = 1,
-    Hable     = 2,
-    Exposure  = 3
+    Reinhard = 0,
+    ACES = 1,
+    Hable = 2,
+    Exposure = 3
 };
 
 inline const char* ToneMapKernelOpName(ToneMapKernelOp op) {
     switch (op) {
-        case ToneMapKernelOp::Reinhard: return "Reinhard";
-        case ToneMapKernelOp::ACES:     return "ACES";
-        case ToneMapKernelOp::Hable:    return "Hable";
-        case ToneMapKernelOp::Exposure: return "Exposure";
+    case ToneMapKernelOp::Reinhard: return "Reinhard";
+    case ToneMapKernelOp::ACES:     return "ACES";
+    case ToneMapKernelOp::Hable:    return "Hable";
+    case ToneMapKernelOp::Exposure: return "Exposure";
     }
     return "Unknown";
 }
@@ -74,13 +73,13 @@ inline const char* ToneMapKernelOpName(ToneMapKernelOp op) {
 // ToneMapStats
 // -----------------------------------------------------------------------
 struct ToneMapStats {
-    ToneMapKernelOp operatorUsed   = ToneMapKernelOp::ACES;
-    bool            usedGPU        = false;
+    ToneMapKernelOp operatorUsed = ToneMapKernelOp::ACES;
+    bool            usedGPU = false;
     double          processingTimeUs = 0.0;
     uint64_t        pixelsProcessed = 0;
-    uint64_t        totalCalls      = 0;
-    uint64_t        gpuCalls        = 0;
-    uint64_t        cpuCalls        = 0;
+    uint64_t        totalCalls = 0;
+    uint64_t        gpuCalls = 0;
+    uint64_t        cpuCalls = 0;
 };
 
 // -----------------------------------------------------------------------
@@ -88,10 +87,10 @@ struct ToneMapStats {
 // -----------------------------------------------------------------------
 class HDRToneMapKernel {
 public:
-    HDRToneMapKernel()  = default;
+    HDRToneMapKernel() = default;
     ~HDRToneMapKernel() { Shutdown(); }
 
-    HDRToneMapKernel(const HDRToneMapKernel&)            = delete;
+    HDRToneMapKernel(const HDRToneMapKernel&) = delete;
     HDRToneMapKernel& operator=(const HDRToneMapKernel&) = delete;
 
     // ================================================================
@@ -100,17 +99,17 @@ public:
     inline bool Initialize() {
         if (m_ready) return true;
 
-        m_hD3D11    = ::LoadLibraryW(L"d3d11.dll");
+        m_hD3D11 = ::LoadLibraryW(L"d3d11.dll");
         m_hCompiler = ::LoadLibraryW(L"d3dcompiler_47.dll");
         if (!m_hCompiler) m_hCompiler = ::LoadLibraryW(L"d3dcompiler_46.dll");
 
         CreateDevice();
 
         if (m_device && m_hCompiler) {
-            CompileVariant("TONEMAP_REINHARD",  0);
-            CompileVariant("TONEMAP_ACES",      1);
-            CompileVariant("TONEMAP_HABLE",     2);
-            CompileVariant("TONEMAP_EXPOSURE",  3);
+            CompileVariant("TONEMAP_REINHARD", 0);
+            CompileVariant("TONEMAP_ACES", 1);
+            CompileVariant("TONEMAP_HABLE", 2);
+            CompileVariant("TONEMAP_EXPOSURE", 3);
         }
         m_ready = true;
         return true;
@@ -120,8 +119,8 @@ public:
     // ToneMap — main entry
     // ================================================================
     inline bool ToneMap(const float* srcHDR, uint32_t width, uint32_t height,
-                        uint32_t channels, uint8_t* dstSDR,
-                        ToneMapKernelOp op = ToneMapKernelOp::ACES) {
+        uint32_t channels, uint8_t* dstSDR,
+        ToneMapKernelOp op = ToneMapKernelOp::ACES) {
         if (!srcHDR || !dstSDR || width == 0 || height == 0 || channels < 3)
             return false;
 
@@ -138,9 +137,9 @@ public:
 
         auto t1 = std::chrono::steady_clock::now();
         m_stats.processingTimeUs = std::chrono::duration<double, std::micro>(t1 - t0).count();
-        m_stats.pixelsProcessed  = static_cast<uint64_t>(width) * height;
-        m_stats.operatorUsed     = op;
-        m_stats.usedGPU          = gpu;
+        m_stats.pixelsProcessed = static_cast<uint64_t>(width) * height;
+        m_stats.operatorUsed = op;
+        m_stats.usedGPU = gpu;
         m_stats.totalCalls++;
         if (gpu) m_stats.gpuCalls++; else m_stats.cpuCalls++;
         return true;
@@ -152,15 +151,15 @@ public:
 
 private:
     // ---- state ----
-    bool               m_ready       = false;
-    float              m_exposureEV  = 0.0f;
-    float              m_gamma       = 2.2f;
-    HMODULE            m_hD3D11      = nullptr;
-    HMODULE            m_hCompiler   = nullptr;
-    ID3D11Device*      m_device      = nullptr;
-    ID3D11DeviceContext* m_ctx       = nullptr;
+    bool               m_ready = false;
+    float              m_exposureEV = 0.0f;
+    float              m_gamma = 2.2f;
+    HMODULE            m_hD3D11 = nullptr;
+    HMODULE            m_hCompiler = nullptr;
+    ID3D11Device* m_device = nullptr;
+    ID3D11DeviceContext* m_ctx = nullptr;
     ID3D11ComputeShader* m_shaders[4] = {};
-    ID3D11Buffer*      m_cbToneMap   = nullptr;
+    ID3D11Buffer* m_cbToneMap = nullptr;
     ToneMapStats       m_stats{};
 
     struct alignas(16) CBToneMap {
@@ -259,24 +258,24 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     inline void CreateDevice() {
         if (!m_hD3D11) return;
         using PFN = HRESULT(WINAPI*)(IDXGIAdapter*, D3D_DRIVER_TYPE, HMODULE,
-                                     UINT, const D3D_FEATURE_LEVEL*, UINT, UINT,
-                                     ID3D11Device**, D3D_FEATURE_LEVEL*, ID3D11DeviceContext**);
+            UINT, const D3D_FEATURE_LEVEL*, UINT, UINT,
+            ID3D11Device**, D3D_FEATURE_LEVEL*, ID3D11DeviceContext**);
         auto pfn = reinterpret_cast<PFN>(::GetProcAddress(m_hD3D11, "D3D11CreateDevice"));
         if (!pfn) return;
 
         D3D_FEATURE_LEVEL fl[] = { D3D_FEATURE_LEVEL_11_0 };
         D3D_FEATURE_LEVEL got{};
         HRESULT hr = pfn(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
-                         fl, 1, D3D11_SDK_VERSION, &m_device, &got, &m_ctx);
+            fl, 1, D3D11_SDK_VERSION, &m_device, &got, &m_ctx);
         if (FAILED(hr)) {
             pfn(nullptr, D3D_DRIVER_TYPE_WARP, nullptr, 0,
                 fl, 1, D3D11_SDK_VERSION, &m_device, &got, &m_ctx);
         }
         if (m_device) {
             D3D11_BUFFER_DESC bd{};
-            bd.ByteWidth     = sizeof(CBToneMap);
-            bd.Usage          = D3D11_USAGE_DYNAMIC;
-            bd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
+            bd.ByteWidth = sizeof(CBToneMap);
+            bd.Usage = D3D11_USAGE_DYNAMIC;
+            bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
             bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
             m_device->CreateBuffer(&bd, nullptr, &m_cbToneMap);
         }
@@ -287,29 +286,29 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ================================================================
     inline void CompileVariant(const char* define, uint32_t idx) {
         using PFN_Compile = HRESULT(WINAPI*)(LPCVOID, SIZE_T, LPCSTR,
-                                             const D3D_SHADER_MACRO*, ID3DInclude*,
-                                             LPCSTR, LPCSTR, UINT, UINT,
-                                             ID3DBlob**, ID3DBlob**);
+            const D3D_SHADER_MACRO*, ID3DInclude*,
+            LPCSTR, LPCSTR, UINT, UINT,
+            ID3DBlob**, ID3DBlob**);
         auto pfn = reinterpret_cast<PFN_Compile>(
             ::GetProcAddress(m_hCompiler, "D3DCompile"));
         if (!pfn) return;
 
         D3D_SHADER_MACRO macros[2] = {};
-        macros[0].Name       = define;
+        macros[0].Name = define;
         macros[0].Definition = "1";
-        macros[1].Name       = nullptr;
+        macros[1].Name = nullptr;
         macros[1].Definition = nullptr;
 
         const char* src = HLSLSource();
         ID3DBlob* blob = nullptr;
-        ID3DBlob* err  = nullptr;
+        ID3DBlob* err = nullptr;
         HRESULT hr = pfn(src, strlen(src), "ToneMapCS", macros,
-                         nullptr, "CSMain", "cs_5_0", 0, 0, &blob, &err);
+            nullptr, "CSMain", "cs_5_0", 0, 0, &blob, &err);
         if (err) err->Release();
         if (SUCCEEDED(hr) && blob) {
             m_device->CreateComputeShader(blob->GetBufferPointer(),
-                                          blob->GetBufferSize(), nullptr,
-                                          &m_shaders[idx]);
+                blob->GetBufferSize(), nullptr,
+                &m_shaders[idx]);
             blob->Release();
         }
     }
@@ -318,7 +317,7 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ToneMapGPU — upload float tex → dispatch → readback RGBA8
     // ================================================================
     inline bool ToneMapGPU(const float* srcHDR, uint32_t w, uint32_t h,
-                           uint32_t ch, uint8_t* dstSDR, uint32_t opIdx) {
+        uint32_t ch, uint8_t* dstSDR, uint32_t opIdx) {
         // -- HDR source as R32G32B32A32_FLOAT texture --
         // Convert to 4-channel if needed
         std::vector<float> rgba;
@@ -376,14 +375,14 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
         D3D11_MAPPED_SUBRESOURCE mapped{};
         m_ctx->Map(m_cbToneMap, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
         auto* cb = static_cast<CBToneMap*>(mapped.pData);
-        cb->width      = w;
-        cb->height     = h;
-        cb->exposure   = m_exposureEV;
-        cb->gamma      = m_gamma;
+        cb->width = w;
+        cb->height = h;
+        cb->exposure = m_exposureEV;
+        cb->gamma = m_gamma;
         cb->whitePoint = 4.0f;
-        cb->opIndex    = opIdx;
-        cb->channels   = ch;
-        cb->_pad       = 0;
+        cb->opIndex = opIdx;
+        cb->channels = ch;
+        cb->_pad = 0;
         m_ctx->Unmap(m_cbToneMap, 0);
 
         // -- dispatch --
@@ -418,11 +417,11 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     // ToneMapCPU — all 4 operators in software
     // ================================================================
     inline void ToneMapCPU(const float* srcHDR, uint32_t w, uint32_t h,
-                           uint32_t ch, uint8_t* dstSDR, ToneMapKernelOp op) {
+        uint32_t ch, uint8_t* dstSDR, ToneMapKernelOp op) {
         const float exposureMul = std::pow(2.0f, m_exposureEV);
-        const float invGamma    = 1.0f / m_gamma;
-        const float whitePoint  = 4.0f;
-        const uint64_t npix     = static_cast<uint64_t>(w) * h;
+        const float invGamma = 1.0f / m_gamma;
+        const float whitePoint = 4.0f;
+        const uint64_t npix = static_cast<uint64_t>(w) * h;
 
         for (uint64_t i = 0; i < npix; ++i) {
             float r = srcHDR[i * ch + 0] * exposureMul;
@@ -432,11 +431,11 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
 
             switch (op) {
             case ToneMapKernelOp::Reinhard: {
-                float lum  = 0.2126f * r + 0.7152f * g + 0.0722f * b;
-                float num  = lum * (1.0f + lum / (whitePoint * whitePoint));
-                float den  = 1.0f + lum;
+                float lum = 0.2126f * r + 0.7152f * g + 0.0722f * b;
+                float num = lum * (1.0f + lum / (whitePoint * whitePoint));
+                float den = 1.0f + lum;
                 float mapped = (den > 1e-7f) ? (num / den) : 0.0f;
-                float scale  = (lum > 1e-7f) ? (mapped / lum) : 1.0f;
+                float scale = (lum > 1e-7f) ? (mapped / lum) : 1.0f;
                 r *= scale; g *= scale; b *= scale;
             } break;
 
@@ -444,9 +443,9 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
                 // Stephen Hill's fit:  (x*(2.51x+0.03)) / (x*(2.43x+0.59)+0.14)
                 auto aces = [](float x) -> float {
                     float v = (x * (2.51f * x + 0.03f)) /
-                              (x * (2.43f * x + 0.59f) + 0.14f);
+                        (x * (2.43f * x + 0.59f) + 0.14f);
                     return (std::max)(0.0f, (std::min)(1.0f, v));
-                };
+                    };
                 r = aces(r); g = aces(g); b = aces(b);
             } break;
 
@@ -456,8 +455,8 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
                     const float A = 0.15f, B = 0.50f, C = 0.10f;
                     const float D = 0.20f, E = 0.02f, F = 0.30f;
                     return ((x * (A * x + C * B) + D * E) /
-                            (x * (A * x + B) + D * F)) - E / F;
-                };
+                        (x * (A * x + B) + D * F)) - E / F;
+                    };
                 const float W = 11.2f;
                 float denom = hable(W);
                 r = hable(r * 2.0f) / denom;
@@ -493,10 +492,10 @@ void CSMain(uint3 DTid : SV_DispatchThreadID) {
     inline void Shutdown() {
         if (m_cbToneMap) { m_cbToneMap->Release(); m_cbToneMap = nullptr; }
         for (auto& s : m_shaders) { if (s) { s->Release(); s = nullptr; } }
-        if (m_ctx)    { m_ctx->Release();    m_ctx = nullptr; }
+        if (m_ctx) { m_ctx->Release();    m_ctx = nullptr; }
         if (m_device) { m_device->Release(); m_device = nullptr; }
         if (m_hCompiler) { ::FreeLibrary(m_hCompiler); m_hCompiler = nullptr; }
-        if (m_hD3D11)    { ::FreeLibrary(m_hD3D11);    m_hD3D11 = nullptr; }
+        if (m_hD3D11) { ::FreeLibrary(m_hD3D11);    m_hD3D11 = nullptr; }
         m_ready = false;
     }
 };

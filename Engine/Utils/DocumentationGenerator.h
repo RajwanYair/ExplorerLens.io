@@ -4,7 +4,6 @@
  * @brief Auto-generates API documentation from registered components for SDK/plugin developers.
  * @version 15.0.0
  * @date 2026-03-02
- * @sprint 593
  *
  * Provides a documentation registry where API endpoints and classes are described,
  * then generates Markdown, HTML, and C SDK header outputs suitable for plugin
@@ -66,13 +65,13 @@ public:
 
     /// @brief Register a class with all its methods.
     inline void RegisterClass(const std::string& className,
-                              const std::string& description,
-                              const std::vector<APIEndpoint>& methods) {
+        const std::string& description,
+        const std::vector<APIEndpoint>& methods) {
         AcquireSRWLockExclusive(&m_lock);
         ClassInfo ci;
-        ci.name        = className;
+        ci.name = className;
         ci.description = description;
-        ci.methods     = methods;
+        ci.methods = methods;
         m_classes.emplace_back(std::move(ci));
 
         for (auto& m : methods) {
@@ -120,15 +119,15 @@ public:
     /// @brief Produce a full Markdown documentation string with TOC.
     inline std::string GenerateMarkdown() const {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
-        auto classes    = m_classes;
+        auto classes = m_classes;
         auto categories = m_categories;
-        auto endpoints  = m_endpoints;
+        auto endpoints = m_endpoints;
         ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
 
         std::ostringstream os;
         os << "# ExplorerLens Plugin SDK — API Reference\n\n"
-           << "**Version:** 15.0.0 (Zenith)  \n"
-           << "**Generated:** " << GetTimestamp() << "\n\n";
+            << "**Version:** 15.0.0 (Zenith)  \n"
+            << "**Generated:** " << GetTimestamp() << "\n\n";
 
         // Table of Contents
         os << "## Table of Contents\n\n";
@@ -155,7 +154,7 @@ public:
 
                 if (!ep.parameters.empty()) {
                     os << "| Parameter | Type | Description |\n"
-                       << "|-----------|------|-------------|\n";
+                        << "|-----------|------|-------------|\n";
                     for (auto& [type, name] : ep.parameters) {
                         os << "| `" << name << "` | `" << type << "` | — |\n";
                     }
@@ -171,10 +170,10 @@ public:
         // Classes
         for (auto& cls : classes) {
             os << "## " << cls.name << "\n\n"
-               << cls.description << "\n\n";
+                << cls.description << "\n\n";
             for (auto& m : cls.methods) {
                 os << "#### `" << m.returnType << " " << m.name << "(...)`\n\n"
-                   << m.description << "\n\n";
+                    << m.description << "\n\n";
             }
         }
 
@@ -188,36 +187,36 @@ public:
     /// @brief Produce a standalone HTML documentation page.
     inline std::string GenerateHTML() const {
         AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
-        auto classes    = m_classes;
+        auto classes = m_classes;
         auto categories = m_categories;
-        auto endpoints  = m_endpoints;
+        auto endpoints = m_endpoints;
         ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
 
         std::ostringstream os;
         os << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
-           << "  <meta charset=\"UTF-8\">\n"
-           << "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-           << "  <title>ExplorerLens SDK API Reference</title>\n"
-           << "  <style>\n"
-           << "    body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; }\n"
-           << "    nav { width: 260px; background: #1e1e2e; color: #cdd6f4; padding: 20px;\n"
-           << "          position: fixed; height: 100vh; overflow-y: auto; }\n"
-           << "    nav a { color: #89b4fa; text-decoration: none; display: block; padding: 4px 0; }\n"
-           << "    nav a:hover { color: #f5c2e7; }\n"
-           << "    main { margin-left: 300px; padding: 30px; max-width: 900px; }\n"
-           << "    h1 { color: #1e1e2e; border-bottom: 3px solid #89b4fa; padding-bottom: 8px; }\n"
-           << "    h2 { color: #313244; margin-top: 40px; }\n"
-           << "    h3 { color: #45475a; }\n"
-           << "    code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }\n"
-           << "    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px;\n"
-           << "          overflow-x: auto; }\n"
-           << "    table { border-collapse: collapse; width: 100%; margin: 12px 0; }\n"
-           << "    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }\n"
-           << "    th { background: #89b4fa; color: white; }\n"
-           << "  </style>\n"
-           << "</head>\n<body>\n"
-           << "<nav>\n"
-           << "  <h2>Navigation</h2>\n";
+            << "  <meta charset=\"UTF-8\">\n"
+            << "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+            << "  <title>ExplorerLens SDK API Reference</title>\n"
+            << "  <style>\n"
+            << "    body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; }\n"
+            << "    nav { width: 260px; background: #1e1e2e; color: #cdd6f4; padding: 20px;\n"
+            << "          position: fixed; height: 100vh; overflow-y: auto; }\n"
+            << "    nav a { color: #89b4fa; text-decoration: none; display: block; padding: 4px 0; }\n"
+            << "    nav a:hover { color: #f5c2e7; }\n"
+            << "    main { margin-left: 300px; padding: 30px; max-width: 900px; }\n"
+            << "    h1 { color: #1e1e2e; border-bottom: 3px solid #89b4fa; padding-bottom: 8px; }\n"
+            << "    h2 { color: #313244; margin-top: 40px; }\n"
+            << "    h3 { color: #45475a; }\n"
+            << "    code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }\n"
+            << "    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px;\n"
+            << "          overflow-x: auto; }\n"
+            << "    table { border-collapse: collapse; width: 100%; margin: 12px 0; }\n"
+            << "    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }\n"
+            << "    th { background: #89b4fa; color: white; }\n"
+            << "  </style>\n"
+            << "</head>\n<body>\n"
+            << "<nav>\n"
+            << "  <h2>Navigation</h2>\n";
 
         for (auto& cat : categories) {
             os << "  <a href=\"#" << AnchorId(cat) << "\">" << EscapeHtml(cat) << "</a>\n";
@@ -226,9 +225,9 @@ public:
             os << "  <a href=\"#" << AnchorId(cls.name) << "\">" << EscapeHtml(cls.name) << "</a>\n";
         }
         os << "</nav>\n<main>\n"
-           << "<h1>ExplorerLens Plugin SDK — API Reference</h1>\n"
-           << "<p><strong>Version:</strong> 15.0.0 (Zenith) | "
-           << "<strong>Generated:</strong> " << GetTimestamp() << "</p>\n";
+            << "<h1>ExplorerLens Plugin SDK — API Reference</h1>\n"
+            << "<p><strong>Version:</strong> 15.0.0 (Zenith) | "
+            << "<strong>Generated:</strong> " << GetTimestamp() << "</p>\n";
 
         // Categories
         for (auto& cat : categories) {
@@ -236,20 +235,20 @@ public:
             for (auto& ep : endpoints) {
                 if (ep.category != cat) continue;
                 os << "<h3><code>" << EscapeHtml(ep.returnType) << " "
-                   << EscapeHtml(ep.name) << "(";
+                    << EscapeHtml(ep.name) << "(";
                 for (size_t i = 0; i < ep.parameters.size(); ++i) {
                     if (i > 0) os << ", ";
                     os << EscapeHtml(ep.parameters[i].first) << " "
-                       << EscapeHtml(ep.parameters[i].second);
+                        << EscapeHtml(ep.parameters[i].second);
                 }
                 os << ")</code></h3>\n"
-                   << "<p>" << EscapeHtml(ep.description) << "</p>\n";
+                    << "<p>" << EscapeHtml(ep.description) << "</p>\n";
 
                 if (!ep.parameters.empty()) {
                     os << "<table><tr><th>Parameter</th><th>Type</th></tr>\n";
                     for (auto& [type, name] : ep.parameters) {
                         os << "<tr><td>" << EscapeHtml(name) << "</td><td><code>"
-                           << EscapeHtml(type) << "</code></td></tr>\n";
+                            << EscapeHtml(type) << "</code></td></tr>\n";
                     }
                     os << "</table>\n";
                 }
@@ -263,12 +262,12 @@ public:
         // Classes
         for (auto& cls : classes) {
             os << "<h2 id=\"" << AnchorId(cls.name) << "\">"
-               << EscapeHtml(cls.name) << "</h2>\n"
-               << "<p>" << EscapeHtml(cls.description) << "</p>\n";
+                << EscapeHtml(cls.name) << "</h2>\n"
+                << "<p>" << EscapeHtml(cls.description) << "</p>\n";
             for (auto& m : cls.methods) {
                 os << "<h3><code>" << EscapeHtml(m.returnType) << " "
-                   << EscapeHtml(m.name) << "(...)</code></h3>\n"
-                   << "<p>" << EscapeHtml(m.description) << "</p>\n";
+                    << EscapeHtml(m.name) << "(...)</code></h3>\n"
+                    << "<p>" << EscapeHtml(m.description) << "</p>\n";
             }
         }
 
@@ -288,23 +287,23 @@ public:
 
         std::ostringstream os;
         os << "/**\n"
-           << " * @file explorerlenssdk_generated.h\n"
-           << " * @brief Auto-generated ExplorerLens Plugin SDK declarations.\n"
-           << " * @version 15.0.0\n"
-           << " * @date " << GetTimestamp() << "\n"
-           << " *\n"
-           << " * DO NOT EDIT — generated by DocumentationGenerator.\n"
-           << " */\n\n"
-           << "#ifndef EXPLORERLENSSDK_GENERATED_H\n"
-           << "#define EXPLORERLENSSDK_GENERATED_H\n\n"
-           << "#include <stdint.h>\n"
-           << "#include <stdbool.h>\n\n"
-           << "#ifdef __cplusplus\n"
-           << "extern \"C\" {\n"
-           << "#endif\n\n";
+            << " * @file explorerlenssdk_generated.h\n"
+            << " * @brief Auto-generated ExplorerLens Plugin SDK declarations.\n"
+            << " * @version 15.0.0\n"
+            << " * @date " << GetTimestamp() << "\n"
+            << " *\n"
+            << " * DO NOT EDIT — generated by DocumentationGenerator.\n"
+            << " */\n\n"
+            << "#ifndef EXPLORERLENSSDK_GENERATED_H\n"
+            << "#define EXPLORERLENSSDK_GENERATED_H\n\n"
+            << "#include <stdint.h>\n"
+            << "#include <stdbool.h>\n\n"
+            << "#ifdef __cplusplus\n"
+            << "extern \"C\" {\n"
+            << "#endif\n\n";
 
         os << "/* ---- Plugin ABI version ---- */\n"
-           << "#define EXPLORERLENSSDK_ABI_VERSION 2\n\n";
+            << "#define EXPLORERLENSSDK_ABI_VERSION 2\n\n";
 
         // Group by category
         std::string lastCat;
@@ -324,7 +323,7 @@ public:
         }
 
         os << "#ifdef __cplusplus\n}\n#endif\n\n"
-           << "#endif /* EXPLORERLENSSDK_GENERATED_H */\n";
+            << "#endif /* EXPLORERLENSSDK_GENERATED_H */\n";
         return os.str();
     }
 
@@ -334,21 +333,22 @@ public:
 
     /// @brief Save documentation to file ("markdown" or "html").
     inline bool SaveDocumentation(const std::wstring& path,
-                                  const std::string& format = "markdown") const {
+        const std::string& format = "markdown") const {
         std::string content;
         if (format == "html") {
             content = GenerateHTML();
-        } else {
+        }
+        else {
             content = GenerateMarkdown();
         }
 
         HANDLE hFile = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr,
-                                   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+            CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
         if (hFile == INVALID_HANDLE_VALUE) return false;
 
         DWORD written = 0;
         BOOL ok = WriteFile(hFile, content.data(),
-                            static_cast<DWORD>(content.size()), &written, nullptr);
+            static_cast<DWORD>(content.size()), &written, nullptr);
         CloseHandle(hFile);
         return ok != FALSE;
     }
@@ -375,29 +375,29 @@ private:
             "Initialize", "Initialize the thumbnail plugin with engine context.",
             "bool",
             {{"void*", "engineContext"}, {"uint32_t", "version"}},
-            "if (!Initialize(ctx, 2)) { /* handle error */ }", cat});
+            "if (!Initialize(ctx, 2)) { /* handle error */ }", cat });
 
         m_endpoints.push_back({
             "Decode", "Decode a file into an RGBA thumbnail bitmap.",
             "bool",
             {{"const wchar_t*", "filePath"}, {"uint32_t", "maxWidth"}, {"uint32_t", "maxHeight"},
              {"uint8_t*", "outputRGBA"}, {"uint32_t*", "outWidth"}, {"uint32_t*", "outHeight"}},
-            "uint8_t buf[256*256*4];\nuint32_t w, h;\nDecode(L\"test.png\", 256, 256, buf, &w, &h);", cat});
+            "uint8_t buf[256*256*4];\nuint32_t w, h;\nDecode(L\"test.png\", 256, 256, buf, &w, &h);", cat });
 
         m_endpoints.push_back({
             "GetSupportedExtensions", "Return a null-terminated list of supported extensions.",
             "const wchar_t**", {},
-            "const wchar_t** exts = GetSupportedExtensions();", cat});
+            "const wchar_t** exts = GetSupportedExtensions();", cat });
 
         m_endpoints.push_back({
             "GetPluginInfo", "Return human-readable plugin info string.",
             "const char*", {},
-            "printf(\"%s\\n\", GetPluginInfo());", cat});
+            "printf(\"%s\\n\", GetPluginInfo());", cat });
 
         m_endpoints.push_back({
             "Shutdown", "Release all plugin resources.",
             "void", {},
-            "Shutdown();", cat});
+            "Shutdown();", cat });
 
         // ---- ICADDecoderPlugin ----
         cat = "ICADDecoderPlugin";
@@ -407,20 +407,20 @@ private:
             "LoadModel", "Load a 3D/CAD model from file.",
             "bool",
             {{"const wchar_t*", "filePath"}, {"void**", "outModelHandle"}},
-            "void* model = NULL;\nLoadModel(L\"part.step\", &model);", cat});
+            "void* model = NULL;\nLoadModel(L\"part.step\", &model);", cat });
 
         m_endpoints.push_back({
             "RenderView", "Render the model to an RGBA bitmap from a given viewpoint.",
             "bool",
             {{"void*", "modelHandle"}, {"uint32_t", "width"}, {"uint32_t", "height"},
              {"float", "rotX"}, {"float", "rotY"}, {"uint8_t*", "outputRGBA"}},
-            "RenderView(model, 512, 512, 30.0f, 45.0f, rgbaBuf);", cat});
+            "RenderView(model, 512, 512, 30.0f, 45.0f, rgbaBuf);", cat });
 
         m_endpoints.push_back({
             "GetModelInfo", "Get metadata about a loaded model (vertex count, face count, etc.).",
             "bool",
             {{"void*", "modelHandle"}, {"char*", "outInfoJson"}, {"uint32_t", "bufSize"}},
-            "char info[1024];\nGetModelInfo(model, info, sizeof(info));", cat});
+            "char info[1024];\nGetModelInfo(model, info, sizeof(info));", cat });
 
         // ---- Plugin Lifecycle ----
         cat = "Plugin Lifecycle";
@@ -430,22 +430,22 @@ private:
             "PluginInit", "Called once when the plugin DLL is loaded.",
             "bool",
             {{"uint32_t", "hostABIVersion"}},
-            "// Return false to abort loading\nreturn hostABIVersion >= 2;", cat});
+            "// Return false to abort loading\nreturn hostABIVersion >= 2;", cat });
 
         m_endpoints.push_back({
             "PluginShutdown", "Called once when the plugin DLL is about to be unloaded.",
             "void", {},
-            "// Free all resources\nPluginShutdown();", cat});
+            "// Free all resources\nPluginShutdown();", cat });
 
         m_endpoints.push_back({
             "GetABIVersion", "Return the ABI version this plugin was compiled against.",
             "uint32_t", {},
-            "return EXPLORERLENSSDK_ABI_VERSION;", cat});
+            "return EXPLORERLENSSDK_ABI_VERSION;", cat });
 
         m_endpoints.push_back({
             "GetPluginDescriptor", "Return a JSON string describing plugin capabilities.",
             "const char*", {},
-            "return \"{\\\"name\\\":\\\"MyPlugin\\\",\\\"version\\\":\\\"1.0\\\"}\";", cat});
+            "return \"{\\\"name\\\":\\\"MyPlugin\\\",\\\"version\\\":\\\"1.0\\\"}\";", cat });
     }
 
     // -- Utility --
@@ -455,7 +455,7 @@ private:
         GetLocalTime(&st);
         char buf[32]{};
         _snprintf_s(buf, _countof(buf), _TRUNCATE,
-                    "%04d-%02d-%02d", st.wYear, st.wMonth, st.wDay);
+            "%04d-%02d-%02d", st.wYear, st.wMonth, st.wDay);
         return std::string(buf);
     }
 
@@ -466,9 +466,11 @@ private:
         for (char c : text) {
             if (c >= 'A' && c <= 'Z') {
                 id += static_cast<char>(c - 'A' + 'a');
-            } else if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
+            }
+            else if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
                 id += c;
-            } else if (c == ' ' || c == '_') {
+            }
+            else if (c == ' ' || c == '_') {
                 id += '-';
             }
         }
@@ -480,11 +482,11 @@ private:
         out.reserve(s.size() + 16);
         for (char c : s) {
             switch (c) {
-                case '&':  out += "&amp;";  break;
-                case '<':  out += "&lt;";   break;
-                case '>':  out += "&gt;";   break;
-                case '"':  out += "&quot;"; break;
-                default:   out += c;        break;
+            case '&':  out += "&amp;";  break;
+            case '<':  out += "&lt;";   break;
+            case '>':  out += "&gt;";   break;
+            case '"':  out += "&quot;"; break;
+            default:   out += c;        break;
             }
         }
         return out;

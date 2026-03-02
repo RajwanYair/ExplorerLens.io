@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// MemorySoakValidator.h — Sprint 563
+// MemorySoakValidator.h
 //
 // Purpose:
 //   Long-running memory validation that detects leaks, double-frees, and
@@ -55,45 +55,45 @@ namespace Engine {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-static constexpr uint8_t  kCanaryByte      = 0xFD;
+static constexpr uint8_t  kCanaryByte = 0xFD;
 static constexpr uint8_t  kFreedPoisonByte = 0xDD;
-static constexpr uint8_t  kFreshAllocByte  = 0xCD;
-static constexpr size_t   kCanarySize      = 16;  // bytes before + after payload
+static constexpr uint8_t  kFreshAllocByte = 0xCD;
+static constexpr size_t   kCanarySize = 16;  // bytes before + after payload
 static constexpr size_t   kMaxSoakAllocSize = 16ULL * 1024 * 1024; // 16 MB
 
 // ── Allocation record ────────────────────────────────────────────────────────
 
 struct AllocationRecord {
-    void*       rawPtr    = nullptr;   // actual heap ptr (includes leading canary)
-    void*       userPtr   = nullptr;   // ptr returned to caller
-    size_t      size      = 0;
-    const char* tag       = nullptr;
+    void* rawPtr = nullptr;   // actual heap ptr (includes leading canary)
+    void* userPtr = nullptr;   // ptr returned to caller
+    size_t      size = 0;
+    const char* tag = nullptr;
     uint64_t    timestamp = 0;         // ms since epoch
-    bool        freed     = false;
+    bool        freed = false;
 };
 
 // ── Leak descriptor ──────────────────────────────────────────────────────────
 
 struct LeakRecord {
-    void*       address   = nullptr;
-    size_t      size      = 0;
-    const char* tag       = nullptr;
+    void* address = nullptr;
+    size_t      size = 0;
+    const char* tag = nullptr;
     uint64_t    timestamp = 0;
 };
 
 // ── Soak result ──────────────────────────────────────────────────────────────
 
 struct SoakResult {
-    size_t   peakAllocation     = 0;
-    size_t   currentAllocation  = 0;
-    uint32_t leakCount          = 0;
+    size_t   peakAllocation = 0;
+    size_t   currentAllocation = 0;
+    uint32_t leakCount = 0;
     uint32_t doubleFreeAttempts = 0;
-    uint32_t canaryViolations   = 0;
-    double   allocationRate     = 0.0;   // allocs/sec
-    double   deallocationRate   = 0.0;   // frees/sec
-    uint64_t totalAllocations   = 0;
-    uint64_t totalFrees         = 0;
-    double   durationSeconds    = 0.0;
+    uint32_t canaryViolations = 0;
+    double   allocationRate = 0.0;   // allocs/sec
+    double   deallocationRate = 0.0;   // frees/sec
+    uint64_t totalAllocations = 0;
+    uint64_t totalFrees = 0;
+    double   durationSeconds = 0.0;
 };
 
 // ── Main class ───────────────────────────────────────────────────────────────
@@ -126,7 +126,7 @@ public:
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    MemorySoakValidator(const MemorySoakValidator&)            = delete;
+    MemorySoakValidator(const MemorySoakValidator&) = delete;
     MemorySoakValidator& operator=(const MemorySoakValidator&) = delete;
 
     // ── Tracked allocation ───────────────────────────────────────
@@ -160,12 +160,12 @@ public:
 
         // Record
         AllocationRecord rec;
-        rec.rawPtr    = raw;
-        rec.userPtr   = userPtr;
-        rec.size      = size;
-        rec.tag       = tag;
+        rec.rawPtr = raw;
+        rec.userPtr = userPtr;
+        rec.size = size;
+        rec.tag = tag;
         rec.timestamp = NowMs();
-        rec.freed     = false;
+        rec.freed = false;
 
         m_allocations[reinterpret_cast<uintptr_t>(userPtr)] = rec;
 
@@ -204,9 +204,9 @@ public:
         }
 
         // Verify canaries
-        uint8_t* base     = static_cast<uint8_t*>(rec.rawPtr);
-        uint8_t* userPtr  = static_cast<uint8_t*>(rec.userPtr);
-        bool canaryOk     = true;
+        uint8_t* base = static_cast<uint8_t*>(rec.rawPtr);
+        uint8_t* userPtr = static_cast<uint8_t*>(rec.userPtr);
+        bool canaryOk = true;
 
         // Leading canary check
         for (size_t i = 0; i < kCanarySize; ++i) {
@@ -245,7 +245,7 @@ public:
         // We keep it to track double-frees on the same pointer
         // but free the heap memory
 
-        rec.rawPtr  = nullptr;
+        rec.rawPtr = nullptr;
         rec.userPtr = nullptr;
 
         ReleaseSRWLockExclusive(&m_lock);
@@ -256,7 +256,7 @@ public:
 
     bool StartSoakTest(uint32_t durationSeconds, uint32_t allocationPattern) {
         auto soakStart = std::chrono::steady_clock::now();
-        auto deadline  = soakStart + std::chrono::seconds(durationSeconds);
+        auto deadline = soakStart + std::chrono::seconds(durationSeconds);
 
         // Simple LCG for deterministic pseudo-random without external deps
         uint32_t rngState = 0x12345678u ^ (durationSeconds * 31u);
@@ -264,7 +264,7 @@ public:
         auto nextRng = [&rngState]() -> uint32_t {
             rngState = rngState * 1664525u + 1013904223u;
             return rngState;
-        };
+            };
 
         std::vector<void*> soakPtrs;
         soakPtrs.reserve(4096);
@@ -281,7 +281,8 @@ public:
                     size = (std::min)(size, static_cast<size_t>(64 * 1024));
                     void* p = TrackedAlloc(size, "soak_random");
                     if (p) soakPtrs.push_back(p);
-                } else if (!soakPtrs.empty()) {
+                }
+                else if (!soakPtrs.empty()) {
                     size_t idx = nextRng() % soakPtrs.size();
                     TrackedFree(soakPtrs[idx]);
                     soakPtrs[idx] = soakPtrs.back();
@@ -348,13 +349,13 @@ public:
     SoakResult GetSoakResult() {
         AcquireSRWLockExclusive(&m_lock);
         SoakResult result{};
-        result.peakAllocation     = m_peakAllocation;
-        result.currentAllocation  = m_currentAllocation;
+        result.peakAllocation = m_peakAllocation;
+        result.currentAllocation = m_currentAllocation;
         result.doubleFreeAttempts = m_doubleFreeAttempts;
-        result.canaryViolations   = m_canaryViolations;
-        result.totalAllocations   = m_totalAllocations;
-        result.totalFrees         = m_totalFrees;
-        result.durationSeconds    = m_lastSoakDuration;
+        result.canaryViolations = m_canaryViolations;
+        result.totalAllocations = m_totalAllocations;
+        result.totalFrees = m_totalFrees;
+        result.durationSeconds = m_lastSoakDuration;
 
         // Count leaks
         result.leakCount = 0;
@@ -363,7 +364,7 @@ public:
         }
 
         if (m_lastSoakDuration > 0.0) {
-            result.allocationRate   = m_totalAllocations / m_lastSoakDuration;
+            result.allocationRate = m_totalAllocations / m_lastSoakDuration;
             result.deallocationRate = m_totalFrees / m_lastSoakDuration;
         }
 
@@ -377,9 +378,9 @@ public:
         for (const auto& [key, rec] : m_allocations) {
             if (!rec.freed) {
                 LeakRecord lr;
-                lr.address   = rec.userPtr;
-                lr.size      = rec.size;
-                lr.tag       = rec.tag;
+                lr.address = rec.userPtr;
+                lr.size = rec.size;
+                lr.tag = rec.tag;
                 lr.timestamp = rec.timestamp;
                 leaks.push_back(lr);
             }
@@ -418,7 +419,8 @@ public:
 
         if (leaks.empty()) {
             ofs << "No leaks detected.\n";
-        } else {
+        }
+        else {
             ofs << "Leaked Allocations (" << leaks.size() << " total):\n";
             ofs << std::string(60, '-') << "\n";
             ofs << std::left << std::setw(18) << "Address"
@@ -430,8 +432,8 @@ public:
             for (const auto& lr : leaks) {
                 std::ostringstream addrStr;
                 addrStr << "0x" << std::hex << std::setfill('0')
-                        << std::setw(12)
-                        << reinterpret_cast<uintptr_t>(lr.address);
+                    << std::setw(12)
+                    << reinterpret_cast<uintptr_t>(lr.address);
 
                 ofs << std::left << std::setw(18) << addrStr.str()
                     << std::dec << std::setw(12) << lr.size
@@ -476,12 +478,12 @@ private:
     std::unordered_map<uintptr_t, AllocationRecord> m_allocations;
 
     size_t   m_currentAllocation = 0;
-    size_t   m_peakAllocation    = 0;
+    size_t   m_peakAllocation = 0;
     uint32_t m_doubleFreeAttempts = 0;
-    uint32_t m_canaryViolations  = 0;
-    uint64_t m_totalAllocations  = 0;
-    uint64_t m_totalFrees        = 0;
-    double   m_lastSoakDuration  = 0.0;
+    uint32_t m_canaryViolations = 0;
+    uint64_t m_totalAllocations = 0;
+    uint64_t m_totalFrees = 0;
+    double   m_lastSoakDuration = 0.0;
 
     std::chrono::steady_clock::time_point m_startTime;
 };

@@ -1,7 +1,6 @@
 #pragma once
 /******************************************************************************
- * PredictiveCacheEngine.h — Sprint 555
- * ExplorerLens Engine v15.0.0
+ * PredictiveCacheEngine.h
  * Copyright (c) 2026 ExplorerLens Project
  *
  * PURPOSE:
@@ -55,11 +54,11 @@ namespace Engine {
 
 struct NavigationEvent {
     std::wstring directoryPath;
-    uint32_t     fileCount       = 0;
-    uint32_t     imageCount      = 0;
-    uint64_t     timestamp       = 0;
-    uint32_t     dwellTimeMs     = 0;
-    bool         scrolledToEnd   = false;
+    uint32_t     fileCount = 0;
+    uint32_t     imageCount = 0;
+    uint64_t     timestamp = 0;
+    uint32_t     dwellTimeMs = 0;
+    bool         scrolledToEnd = false;
 };
 
 // ============================================================================
@@ -68,9 +67,9 @@ struct NavigationEvent {
 
 struct CachePrediction {
     std::wstring directoryPath;
-    float        confidence      = 0.0f;
-    uint32_t     estimatedFiles  = 0;
-    uint32_t     priority        = 0;
+    float        confidence = 0.0f;
+    uint32_t     estimatedFiles = 0;
+    uint32_t     priority = 0;
 
     bool operator>(const CachePrediction& other) const {
         return confidence > other.confidence;
@@ -83,12 +82,12 @@ struct CachePrediction {
 
 struct DirectoryProfile {
     std::wstring path;
-    uint32_t     accessCount     = 0;
-    uint32_t     totalDwellMs    = 0;
-    uint64_t     lastAccessTime  = 0;
+    uint32_t     accessCount = 0;
+    uint32_t     totalDwellMs = 0;
+    uint64_t     lastAccessTime = 0;
     float        accessFrequency = 0.0f;
     std::vector<std::wstring> nextDirectories;
-    bool         isPinned        = false;
+    bool         isPinned = false;
 
     float GetRecencyScore(uint64_t nowMs) const {
         if (lastAccessTime == 0) return 0.0f;
@@ -102,20 +101,20 @@ struct DirectoryProfile {
 // ============================================================================
 
 struct PredictionConfig {
-    uint32_t maxHistorySize          = 1000;
-    uint32_t maxProfiles             = 500;
-    uint32_t maxPredictions          = 10;
-    float    minConfidence           = 0.1f;
-    float    recencyWeight           = 0.4f;
-    float    frequencyWeight         = 0.3f;
-    float    sequenceWeight          = 0.3f;
-    uint32_t idlePrefetchDelayMs     = 2000;
-    uint32_t maxPrefetchBatch        = 50;
-    uint32_t maxTrackedPaths         = 10000;
-    uint32_t directoryPatternWindow  = 5;
-    float    directoryBoostFactor    = 0.15f;
-    float    decayFactor             = 0.95f;
-    uint32_t decayIntervalSeconds    = 60;
+    uint32_t maxHistorySize = 1000;
+    uint32_t maxProfiles = 500;
+    uint32_t maxPredictions = 10;
+    float    minConfidence = 0.1f;
+    float    recencyWeight = 0.4f;
+    float    frequencyWeight = 0.3f;
+    float    sequenceWeight = 0.3f;
+    uint32_t idlePrefetchDelayMs = 2000;
+    uint32_t maxPrefetchBatch = 50;
+    uint32_t maxTrackedPaths = 10000;
+    uint32_t directoryPatternWindow = 5;
+    float    directoryBoostFactor = 0.15f;
+    float    decayFactor = 0.95f;
+    uint32_t decayIntervalSeconds = 60;
 };
 
 // ============================================================================
@@ -123,12 +122,12 @@ struct PredictionConfig {
 // ============================================================================
 
 struct AccessEntry {
-    uint64_t accessCount           = 0;
-    uint64_t lastAccessTimeMs      = 0;
-    double   avgInterAccessTimeMs  = 0.0;
-    uint64_t prevAccessTimeMs      = 0;
-    float    decayedFrequency      = 0.0f;
-    float    directoryBoost        = 0.0f;
+    uint64_t accessCount = 0;
+    uint64_t lastAccessTimeMs = 0;
+    double   avgInterAccessTimeMs = 0.0;
+    uint64_t prevAccessTimeMs = 0;
+    float    decayedFrequency = 0.0f;
+    float    directoryBoost = 0.0f;
 };
 
 // ============================================================================
@@ -136,16 +135,16 @@ struct AccessEntry {
 // ============================================================================
 
 struct PredictionStats {
-    uint64_t totalPredictions          = 0;
-    uint64_t correctPredictions        = 0;
-    uint64_t wastedPrefetches          = 0;
-    uint64_t totalPrefetched           = 0;
-    uint64_t cacheHitsDueToPrefetch    = 0;
-    double   avgPredictionTimeUs       = 0.0;
-    uint32_t trackedPaths              = 0;
-    uint32_t predictionsMade           = 0;
-    uint32_t decayCycles               = 0;
-    uint32_t lruEvictions              = 0;
+    uint64_t totalPredictions = 0;
+    uint64_t correctPredictions = 0;
+    uint64_t wastedPrefetches = 0;
+    uint64_t totalPrefetched = 0;
+    uint64_t cacheHitsDueToPrefetch = 0;
+    double   avgPredictionTimeUs = 0.0;
+    uint32_t trackedPaths = 0;
+    uint32_t predictionsMade = 0;
+    uint32_t decayCycles = 0;
+    uint32_t lruEvictions = 0;
 
     double GetAccuracy() const {
         return (totalPredictions > 0)
@@ -173,8 +172,7 @@ public:
     }
 
     explicit PredictiveCacheEngine(const PredictionConfig& config)
-        : m_config(config)
-    {
+        : m_config(config) {
         ::InitializeSRWLock(&m_srwLock);
     }
 
@@ -208,7 +206,8 @@ public:
             m_accessTable[path] = entry;
             m_lruList.push_front(path);
             m_lruIterators[path] = m_lruList.begin();
-        } else {
+        }
+        else {
             auto& entry = it->second;
             entry.accessCount++;
             if (entry.prevAccessTimeMs > 0 && nowMs > entry.prevAccessTimeMs) {
@@ -262,7 +261,7 @@ public:
         for (const auto& [path, entry] : m_accessTable) {
             float s = ComputeProbabilityLocked(path);
             if (s > 0.0f) {
-                scored.push_back({path, s});
+                scored.push_back({ path, s });
             }
         }
 
@@ -314,7 +313,7 @@ public:
                 if (!m_decayRunning.load()) break;
                 ApplyDecay();
             }
-        });
+            });
     }
 
     void StopDecayThread() {
@@ -492,8 +491,8 @@ private:
 
         // Combined score with configurable weights
         float combined = recencyScore * m_config.recencyWeight
-                       + freqScore * m_config.frequencyWeight
-                       + entry.directoryBoost;
+            + freqScore * m_config.frequencyWeight
+            + entry.directoryBoost;
 
         return (std::min)(combined, 1.0f);
     }
@@ -576,7 +575,7 @@ private:
     void UpdateFrequenciesLocked() {
         if (m_history.size() < 2) return;
         uint64_t firstTime = m_history.front().timestamp;
-        uint64_t lastTime  = m_history.back().timestamp;
+        uint64_t lastTime = m_history.back().timestamp;
         double spanHours = (std::max)(1.0, static_cast<double>(lastTime - firstTime) / 3600000.0);
         for (auto& [path, profile] : m_profiles) {
             profile.accessFrequency = static_cast<float>(static_cast<double>(profile.accessCount) / spanHours);
@@ -588,7 +587,7 @@ private:
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()
             ).count()
-        );
+            );
     }
 
     // ── Data members ────────────────────────────────────────────────────────

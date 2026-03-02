@@ -4,7 +4,6 @@
  * @brief Manages ExplorerLens install / upgrade / uninstall lifecycle and COM registration.
  * @version 15.0.0
  * @date 2026-03-02
- * @sprint 591
  *
  * Detects installation state from the Windows registry, performs COM and shell-extension
  * registration/unregistration, handles backup/restore of registry state, and orchestrates
@@ -34,19 +33,19 @@ class InstallerLifecycleManager {
 public:
     /// @brief Type of installer action to perform.
     enum class InstallAction : uint32_t {
-        Install   = 0,
-        Upgrade   = 1,
-        Repair    = 2,
+        Install = 0,
+        Upgrade = 1,
+        Repair = 2,
         Uninstall = 3
     };
 
     /// @brief Snapshot of the current installation state.
     struct InstallState {
-        bool         isInstalled            = false;
+        bool         isInstalled = false;
         std::wstring version;
         std::wstring installPath;
-        bool         comRegistered          = false;
-        bool         shellExtRegistered     = false;
+        bool         comRegistered = false;
+        bool         shellExtRegistered = false;
         uint32_t     registeredExtensionCount = 0;
     };
 
@@ -74,8 +73,8 @@ public:
     InstallerLifecycleManager& operator=(const InstallerLifecycleManager&) = delete;
 
     // COM CLSID for ExplorerLens thumbnail handler
-    static constexpr const wchar_t* kCLSID   = L"{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}";
-    static constexpr const wchar_t* kAppKey   = L"SOFTWARE\\ExplorerLens";
+    static constexpr const wchar_t* kCLSID = L"{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}";
+    static constexpr const wchar_t* kAppKey = L"SOFTWARE\\ExplorerLens";
     // IThumbnailProvider handler GUID
     static constexpr const wchar_t* kShellExGUID = L"{E357FCCD-A995-4576-B01F-234630154E96}";
 
@@ -91,7 +90,7 @@ public:
         HKEY hKey = nullptr;
         if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, kAppKey, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
             st.isInstalled = true;
-            st.version     = ReadRegString(hKey, L"Version");
+            st.version = ReadRegString(hKey, L"Version");
             st.installPath = ReadRegString(hKey, L"InstallPath");
             RegCloseKey(hKey);
         }
@@ -115,7 +114,7 @@ public:
             }
         }
         st.registeredExtensionCount = extCount;
-        st.shellExtRegistered       = (extCount > 0);
+        st.shellExtRegistered = (extCount > 0);
 
         return st;
     }
@@ -248,63 +247,63 @@ public:
         log.action = action;
 
         switch (action) {
-            case InstallAction::Install:
-                AppendLog(log, L"Starting Install...", true);
-                if (!WriteAppRegistration(dllPath)) {
-                    AppendLog(log, L"Failed to write app registration", false);
-                    log.overallSuccess = false;
-                    break;
-                }
-                AppendLog(log, L"App key written", true);
-                if (!RegisterCOM(dllPath)) {
-                    AppendLog(log, L"COM registration failed", false);
-                    log.overallSuccess = false;
-                    break;
-                }
-                AppendLog(log, L"COM registered", true);
-                if (!RegisterAllExtensions()) {
-                    AppendLog(log, L"Some extensions failed to register", false);
-                }
-                AppendLog(log, L"Shell extensions registered", true);
-                NotifyShell();
-                AppendLog(log, L"Shell notified", true);
-                AppendLog(log, L"Install complete", true);
+        case InstallAction::Install:
+            AppendLog(log, L"Starting Install...", true);
+            if (!WriteAppRegistration(dllPath)) {
+                AppendLog(log, L"Failed to write app registration", false);
+                log.overallSuccess = false;
                 break;
+            }
+            AppendLog(log, L"App key written", true);
+            if (!RegisterCOM(dllPath)) {
+                AppendLog(log, L"COM registration failed", false);
+                log.overallSuccess = false;
+                break;
+            }
+            AppendLog(log, L"COM registered", true);
+            if (!RegisterAllExtensions()) {
+                AppendLog(log, L"Some extensions failed to register", false);
+            }
+            AppendLog(log, L"Shell extensions registered", true);
+            NotifyShell();
+            AppendLog(log, L"Shell notified", true);
+            AppendLog(log, L"Install complete", true);
+            break;
 
-            case InstallAction::Upgrade:
-                AppendLog(log, L"Starting Upgrade...", true);
-                UnregisterCOM();
-                AppendLog(log, L"Old COM unregistered", true);
-                if (!RegisterCOM(dllPath)) {
-                    AppendLog(log, L"COM re-registration failed", false);
-                    log.overallSuccess = false;
-                }
-                AppendLog(log, L"COM re-registered", true);
-                WriteAppRegistration(dllPath);
-                NotifyShell();
-                AppendLog(log, L"Upgrade complete", true);
-                break;
+        case InstallAction::Upgrade:
+            AppendLog(log, L"Starting Upgrade...", true);
+            UnregisterCOM();
+            AppendLog(log, L"Old COM unregistered", true);
+            if (!RegisterCOM(dllPath)) {
+                AppendLog(log, L"COM re-registration failed", false);
+                log.overallSuccess = false;
+            }
+            AppendLog(log, L"COM re-registered", true);
+            WriteAppRegistration(dllPath);
+            NotifyShell();
+            AppendLog(log, L"Upgrade complete", true);
+            break;
 
-            case InstallAction::Repair:
-                AppendLog(log, L"Starting Repair...", true);
-                RegisterCOM(dllPath);
-                RegisterAllExtensions();
-                WriteAppRegistration(dllPath);
-                NotifyShell();
-                AppendLog(log, L"Repair complete", true);
-                break;
+        case InstallAction::Repair:
+            AppendLog(log, L"Starting Repair...", true);
+            RegisterCOM(dllPath);
+            RegisterAllExtensions();
+            WriteAppRegistration(dllPath);
+            NotifyShell();
+            AppendLog(log, L"Repair complete", true);
+            break;
 
-            case InstallAction::Uninstall:
-                AppendLog(log, L"Starting Uninstall...", true);
-                UnregisterAllExtensions();
-                AppendLog(log, L"Extensions unregistered", true);
-                UnregisterCOM();
-                AppendLog(log, L"COM unregistered", true);
-                RemoveAppRegistration();
-                AppendLog(log, L"App key removed", true);
-                NotifyShell();
-                AppendLog(log, L"Uninstall complete", true);
-                break;
+        case InstallAction::Uninstall:
+            AppendLog(log, L"Starting Uninstall...", true);
+            UnregisterAllExtensions();
+            AppendLog(log, L"Extensions unregistered", true);
+            UnregisterCOM();
+            AppendLog(log, L"COM unregistered", true);
+            RemoveAppRegistration();
+            AppendLog(log, L"App key removed", true);
+            NotifyShell();
+            AppendLog(log, L"Uninstall complete", true);
+            break;
         }
         return log;
     }
@@ -319,29 +318,29 @@ private:
         HKEY hKey = nullptr;
         DWORD disp = 0;
         if (RegCreateKeyExW(HKEY_CLASSES_ROOT, clsidPath.c_str(), 0, nullptr,
-                            REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, &disp) != ERROR_SUCCESS)
+            REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, &disp) != ERROR_SUCCESS)
             return false;
 
         const wchar_t* desc = L"ExplorerLens Thumbnail Handler";
         RegSetValueExW(hKey, nullptr, 0, REG_SZ,
-                       reinterpret_cast<const BYTE*>(desc),
-                       static_cast<DWORD>((wcslen(desc) + 1) * sizeof(wchar_t)));
+            reinterpret_cast<const BYTE*>(desc),
+            static_cast<DWORD>((wcslen(desc) + 1) * sizeof(wchar_t)));
         RegCloseKey(hKey);
 
         // InprocServer32
         std::wstring ips32Path = clsidPath + L"\\InprocServer32";
         if (RegCreateKeyExW(HKEY_CLASSES_ROOT, ips32Path.c_str(), 0, nullptr,
-                            REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, &disp) != ERROR_SUCCESS)
+            REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, &disp) != ERROR_SUCCESS)
             return false;
 
         RegSetValueExW(hKey, nullptr, 0, REG_SZ,
-                       reinterpret_cast<const BYTE*>(dllPath.c_str()),
-                       static_cast<DWORD>((dllPath.size() + 1) * sizeof(wchar_t)));
+            reinterpret_cast<const BYTE*>(dllPath.c_str()),
+            static_cast<DWORD>((dllPath.size() + 1) * sizeof(wchar_t)));
 
         const wchar_t* model = L"Apartment";
         RegSetValueExW(hKey, L"ThreadingModel", 0, REG_SZ,
-                       reinterpret_cast<const BYTE*>(model),
-                       static_cast<DWORD>((wcslen(model) + 1) * sizeof(wchar_t)));
+            reinterpret_cast<const BYTE*>(model),
+            static_cast<DWORD>((wcslen(model) + 1) * sizeof(wchar_t)));
         RegCloseKey(hKey);
         return true;
     }
@@ -359,12 +358,12 @@ private:
         HKEY hKey = nullptr;
         DWORD disp = 0;
         if (RegCreateKeyExW(HKEY_CLASSES_ROOT, keyPath.c_str(), 0, nullptr,
-                            REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, &disp) != ERROR_SUCCESS)
+            REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, &disp) != ERROR_SUCCESS)
             return false;
 
         RegSetValueExW(hKey, nullptr, 0, REG_SZ,
-                       reinterpret_cast<const BYTE*>(kCLSID),
-                       static_cast<DWORD>((wcslen(kCLSID) + 1) * sizeof(wchar_t)));
+            reinterpret_cast<const BYTE*>(kCLSID),
+            static_cast<DWORD>((wcslen(kCLSID) + 1) * sizeof(wchar_t)));
         RegCloseKey(hKey);
         return true;
     }
@@ -384,17 +383,17 @@ private:
         HKEY hKey = nullptr;
         DWORD disp = 0;
         if (RegCreateKeyExW(HKEY_LOCAL_MACHINE, kAppKey, 0, nullptr,
-                            REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, &disp) != ERROR_SUCCESS)
+            REG_OPTION_NON_VOLATILE, KEY_WRITE, nullptr, &hKey, &disp) != ERROR_SUCCESS)
             return false;
 
         const wchar_t* ver = L"15.0.0";
         RegSetValueExW(hKey, L"Version", 0, REG_SZ,
-                       reinterpret_cast<const BYTE*>(ver),
-                       static_cast<DWORD>((wcslen(ver) + 1) * sizeof(wchar_t)));
+            reinterpret_cast<const BYTE*>(ver),
+            static_cast<DWORD>((wcslen(ver) + 1) * sizeof(wchar_t)));
 
         RegSetValueExW(hKey, L"InstallPath", 0, REG_SZ,
-                       reinterpret_cast<const BYTE*>(dllPath.c_str()),
-                       static_cast<DWORD>((dllPath.size() + 1) * sizeof(wchar_t)));
+            reinterpret_cast<const BYTE*>(dllPath.c_str()),
+            static_cast<DWORD>((dllPath.size() + 1) * sizeof(wchar_t)));
         RegCloseKey(hKey);
         return true;
     }
@@ -410,7 +409,7 @@ private:
         DWORD size = sizeof(buf);
         DWORD type = 0;
         if (RegQueryValueExW(hKey, valueName, nullptr, &type,
-                             reinterpret_cast<BYTE*>(buf), &size) == ERROR_SUCCESS && type == REG_SZ) {
+            reinterpret_cast<BYTE*>(buf), &size) == ERROR_SUCCESS && type == REG_SZ) {
             return std::wstring(buf);
         }
         return {};
@@ -421,20 +420,20 @@ private:
         GetLocalTime(&st);
         std::wostringstream ws;
         ws << std::setfill(L'0')
-           << st.wYear << L'-'
-           << std::setw(2) << st.wMonth << L'-'
-           << std::setw(2) << st.wDay   << L' '
-           << std::setw(2) << st.wHour  << L':'
-           << std::setw(2) << st.wMinute << L':'
-           << std::setw(2) << st.wSecond;
+            << st.wYear << L'-'
+            << std::setw(2) << st.wMonth << L'-'
+            << std::setw(2) << st.wDay << L' '
+            << std::setw(2) << st.wHour << L':'
+            << std::setw(2) << st.wMinute << L':'
+            << std::setw(2) << st.wSecond;
         return ws.str();
     }
 
     static inline void AppendLog(InstallLog& log, const std::wstring& msg, bool ok) {
         LogEntry e;
         e.timestamp = GetTimestamp();
-        e.message   = msg;
-        e.success   = ok;
+        e.message = msg;
+        e.success = ok;
         log.entries.emplace_back(std::move(e));
         if (!ok) log.overallSuccess = false;
     }

@@ -4,7 +4,6 @@
  * @brief Privacy-respecting, local-only telemetry engine for anonymous usage analytics.
  * @version 15.0.0
  * @date 2026-03-02
- * @sprint 592
  *
  * Collects anonymous performance and usage events to local JSONL files under
  * %LOCALAPPDATA%\ExplorerLens\telemetry\. Data NEVER leaves the machine.
@@ -38,10 +37,10 @@ class TelemetryEngine {
 public:
     /// @brief Controls what data is collected.
     enum class TelemetryLevel : uint32_t {
-        Off      = 0,  ///< Nothing collected
-        Basic    = 1,  ///< Session start/stop + error counts
+        Off = 0,  ///< Nothing collected
+        Basic = 1,  ///< Session start/stop + error counts
         Enhanced = 2,  ///< + format usage, cache stats
-        Full     = 3   ///< + per-file timing, all events
+        Full = 3   ///< + per-file timing, all events
     };
 
     /// @brief Singleton access.
@@ -81,13 +80,13 @@ public:
 
     /// @brief Record a named event with optional string properties.
     inline void RecordEvent(const std::string& eventName,
-                            const std::unordered_map<std::string, std::string>& properties = {}) {
+        const std::unordered_map<std::string, std::string>& properties = {}) {
         if (!ShouldRecord(TelemetryLevel::Basic)) return;
 
         std::ostringstream os;
         os << "{\"ts\":\"" << GetISO8601() << "\""
-           << ",\"sid\":" << m_sessionId
-           << ",\"event\":\"" << EscapeJson(eventName) << "\"";
+            << ",\"sid\":" << m_sessionId
+            << ",\"event\":\"" << EscapeJson(eventName) << "\"";
 
         if (!properties.empty()) {
             os << ",\"props\":{";
@@ -111,10 +110,10 @@ public:
 
         std::ostringstream os;
         os << "{\"ts\":\"" << GetISO8601() << "\""
-           << ",\"sid\":" << m_sessionId
-           << ",\"metric\":\"" << EscapeJson(name) << "\""
-           << ",\"value\":" << std::fixed << std::setprecision(3) << value
-           << "}\n";
+            << ",\"sid\":" << m_sessionId
+            << ",\"metric\":\"" << EscapeJson(name) << "\""
+            << ",\"value\":" << std::fixed << std::setprecision(3) << value
+            << "}\n";
 
         BufferLine(os.str());
     }
@@ -125,10 +124,10 @@ public:
 
         std::ostringstream os;
         os << "{\"ts\":\"" << GetISO8601() << "\""
-           << ",\"sid\":" << m_sessionId
-           << ",\"duration\":\"" << EscapeJson(name) << "\""
-           << ",\"us\":" << microseconds
-           << "}\n";
+            << ",\"sid\":" << m_sessionId
+            << ",\"duration\":\"" << EscapeJson(name) << "\""
+            << ",\"us\":" << microseconds
+            << "}\n";
 
         BufferLine(os.str());
     }
@@ -141,12 +140,12 @@ public:
     inline std::string GenerateUsageReport() const {
         std::ostringstream os;
         os << "=== ExplorerLens Telemetry Summary ===\n"
-           << "Session ID: " << m_sessionId << "\n"
-           << "Total events: " << m_totalEvents.load(std::memory_order_relaxed) << "\n"
-           << "Buffered lines: " << GetBufferSize() << "\n"
-           << "Enabled: " << (m_enabled.load() ? "yes" : "no") << "\n"
-           << "Level: " << static_cast<uint32_t>(GetLevel()) << "\n"
-           << "Telemetry dir: " << WideToUTF8(m_telemetryDir) << "\n";
+            << "Session ID: " << m_sessionId << "\n"
+            << "Total events: " << m_totalEvents.load(std::memory_order_relaxed) << "\n"
+            << "Buffered lines: " << GetBufferSize() << "\n"
+            << "Enabled: " << (m_enabled.load() ? "yes" : "no") << "\n"
+            << "Level: " << static_cast<uint32_t>(GetLevel()) << "\n"
+            << "Telemetry dir: " << WideToUTF8(m_telemetryDir) << "\n";
 
         // Count daily files
         uint32_t fileCount = 0;
@@ -163,8 +162,8 @@ public:
         }
 
         os << "Daily log files: " << fileCount << "\n"
-           << "Total log size: " << totalBytes << " bytes\n"
-           << "=====================================\n";
+            << "Total log size: " << totalBytes << " bytes\n"
+            << "=====================================\n";
         return os.str();
     }
 
@@ -173,7 +172,7 @@ public:
         FlushBuffer();
 
         HANDLE hOut = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr,
-                                  CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+            CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
         if (hOut == INVALID_HANDLE_VALUE) return false;
 
         WIN32_FIND_DATAW fd{};
@@ -183,7 +182,7 @@ public:
             do {
                 std::wstring filePath = m_telemetryDir + L"\\" + fd.cFileName;
                 HANDLE hIn = CreateFileW(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ,
-                                         nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+                    nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
                 if (hIn != INVALID_HANDLE_VALUE) {
                     char buf[8192];
                     DWORD bytesRead = 0;
@@ -246,7 +245,7 @@ private:
                     FlushBuffer();
                 }
             }
-        });
+            });
     }
 
     TelemetryEngine(const TelemetryEngine&) = delete;
@@ -254,14 +253,14 @@ private:
 
     // Members
     SRWLOCK          m_lock{};
-    std::atomic<uint32_t> m_level{static_cast<uint32_t>(TelemetryLevel::Basic)};
-    std::atomic<bool>     m_enabled{true};
+    std::atomic<uint32_t> m_level{ static_cast<uint32_t>(TelemetryLevel::Basic) };
+    std::atomic<bool>     m_enabled{ true };
     uint64_t         m_sessionId = 0;
     std::wstring     m_telemetryDir;
     std::vector<std::string> m_buffer;
-    std::atomic<uint64_t>    m_totalEvents{0};
+    std::atomic<uint64_t>    m_totalEvents{ 0 };
     std::thread      m_flushThread;
-    std::atomic<bool> m_stopFlush{false};
+    std::atomic<bool> m_stopFlush{ false };
 
     // -- Helpers --
 
@@ -312,7 +311,7 @@ private:
         std::wstring fullPath = m_telemetryDir + L"\\" + fileName;
 
         HANDLE hFile = CreateFileW(fullPath.c_str(), FILE_APPEND_DATA, FILE_SHARE_READ,
-                                   nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+            nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
         if (hFile == INVALID_HANDLE_VALUE) return;
 
         for (auto& line : lines) {
@@ -327,7 +326,7 @@ private:
         GetLocalTime(&st);
         wchar_t buf[32]{};
         _snwprintf_s(buf, _countof(buf), _TRUNCATE,
-                     L"%04d-%02d-%02d.jsonl", st.wYear, st.wMonth, st.wDay);
+            L"%04d-%02d-%02d.jsonl", st.wYear, st.wMonth, st.wDay);
         return std::wstring(buf);
     }
 
@@ -336,9 +335,9 @@ private:
         GetSystemTime(&st);
         char buf[32]{};
         _snprintf_s(buf, _countof(buf), _TRUNCATE,
-                    "%04d-%02d-%02dT%02d:%02d:%02dZ",
-                    st.wYear, st.wMonth, st.wDay,
-                    st.wHour, st.wMinute, st.wSecond);
+            "%04d-%02d-%02dT%02d:%02d:%02dZ",
+            st.wYear, st.wMonth, st.wDay,
+            st.wHour, st.wMinute, st.wSecond);
         return std::string(buf);
     }
 
@@ -348,7 +347,8 @@ private:
         std::wstring dir;
         if (len > 0 && len < MAX_PATH) {
             dir = std::wstring(appData, len);
-        } else {
+        }
+        else {
             dir = L"C:\\ProgramData";
         }
         dir += L"\\ExplorerLens\\telemetry";
@@ -370,7 +370,7 @@ private:
         GetSystemTimeAsFileTime(&now);
 
         ULARGE_INTEGER nowLi;
-        nowLi.LowPart  = now.dwLowDateTime;
+        nowLi.LowPart = now.dwLowDateTime;
         nowLi.HighPart = now.dwHighDateTime;
 
         // 100-nanosecond intervals per day
@@ -383,7 +383,7 @@ private:
 
         do {
             ULARGE_INTEGER ftWrite;
-            ftWrite.LowPart  = fd.ftLastWriteTime.dwLowDateTime;
+            ftWrite.LowPart = fd.ftLastWriteTime.dwLowDateTime;
             ftWrite.HighPart = fd.ftLastWriteTime.dwHighDateTime;
 
             if (nowLi.QuadPart > ftWrite.QuadPart &&
@@ -413,12 +413,12 @@ private:
         out.reserve(s.size() + 8);
         for (char c : s) {
             switch (c) {
-                case '"':  out += "\\\""; break;
-                case '\\': out += "\\\\"; break;
-                case '\n': out += "\\n";  break;
-                case '\r': out += "\\r";  break;
-                case '\t': out += "\\t";  break;
-                default:   out += c;      break;
+            case '"':  out += "\\\""; break;
+            case '\\': out += "\\\\"; break;
+            case '\n': out += "\\n";  break;
+            case '\r': out += "\\r";  break;
+            case '\t': out += "\\t";  break;
+            default:   out += c;      break;
             }
         }
         return out;
@@ -427,13 +427,13 @@ private:
     static inline std::string WideToUTF8(const std::wstring& wide) {
         if (wide.empty()) return {};
         int len = WideCharToMultiByte(CP_UTF8, 0, wide.data(),
-                                      static_cast<int>(wide.size()),
-                                      nullptr, 0, nullptr, nullptr);
+            static_cast<int>(wide.size()),
+            nullptr, 0, nullptr, nullptr);
         if (len <= 0) return {};
         std::string out(static_cast<size_t>(len), '\0');
         WideCharToMultiByte(CP_UTF8, 0, wide.data(),
-                            static_cast<int>(wide.size()),
-                            out.data(), len, nullptr, nullptr);
+            static_cast<int>(wide.size()),
+            out.data(), len, nullptr, nullptr);
         return out;
     }
 };

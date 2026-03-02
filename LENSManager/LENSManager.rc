@@ -72,6 +72,13 @@ FONT 8, "Ms Shell Dlg"
         CONTROL         "9-page grid (3x3)", IDC_RADIO_3X3, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 312, 145, 10
         CONTROL         "16-page grid (4x4)", IDC_RADIO_4X4, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 325, 145, 10
 
+        // Extended Formats (10, 342, 165, 62) — Grouped additional formats
+        CONTROL         "Extended Formats", IDC_EXTENDED_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 342, 165, 62
+        CONTROL         "Extended Images (BMP, WMF, ...)", IDC_CB_EXT_IMAGE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 355, 145, 10
+        CONTROL         "Texture (KTX, VTF)", IDC_CB_TEXTURE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 368, 145, 10
+        CONTROL         "Extended Archives (ISO, CAB, ...)", IDC_CB_EXT_ARCHIVE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 381, 145, 10
+        CONTROL         "Extended Docs (DjVu, CHM, ...)", IDC_CB_EXT_DOCUMENT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 394, 145, 10
+
         // ── Column 2 (right) ─────────────────────────────────────────────
 
         // E-Book Formats (185, 5, 165, 62)

@@ -8725,7 +8725,7 @@ TEST(TestGateV30_Advance) {
 // SubMillisecondCacheEngine — Sprint 544 (restored)
 TEST(TestSubMsCache_HashNames) {
     SubMillisecondCacheEngine cache(256, CacheHashAlgo::FNV1a);
-    std::vector<uint8_t> data = {1,2,3,4};
+    std::vector<uint8_t> data = { 1,2,3,4 };
     cache.Put(L"test.jpg", data.data(), data.size(), 60000);
     std::vector<uint8_t> out;
     bool found = cache.Get(L"test.jpg", out);
@@ -8734,7 +8734,7 @@ TEST(TestSubMsCache_HashNames) {
 }
 TEST(TestSubMsCache_EvictionNames) {
     SubMillisecondCacheEngine cache(64, CacheHashAlgo::XXH3);
-    std::vector<uint8_t> d = {1};
+    std::vector<uint8_t> d = { 1 };
     for (int i = 0; i < 60; ++i)
         cache.Put(L"f" + std::to_wstring(i), d.data(), d.size(), 0);
     auto stats = cache.GetStats();
@@ -8753,7 +8753,7 @@ TEST(TestSubMsCache_HashCount) {
 }
 TEST(TestSubMsCache_EvictionCount) {
     SubMillisecondCacheEngine cache(256, CacheHashAlgo::CityHash);
-    std::vector<uint8_t> d = {5,6};
+    std::vector<uint8_t> d = { 5,6 };
     cache.Put(L"a.png", d.data(), d.size(), 0);
     cache.Evict(L"a.png");
     std::vector<uint8_t> out;
@@ -11141,8 +11141,8 @@ TEST(TestGPUSched_RouteWork) {
     // ShouldUseGPU returns a concrete decision
     auto decision = scheduler.ShouldUseGPU(1024 * 1024, 1);
     ASSERT(decision == ScheduleDecision::GPU ||
-           decision == ScheduleDecision::CPU ||
-           decision == ScheduleDecision::Defer);
+        decision == ScheduleDecision::CPU ||
+        decision == ScheduleDecision::Defer);
 }
 
 // ============================================================================

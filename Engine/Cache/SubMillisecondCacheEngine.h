@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// SubMillisecondCacheEngine.h — Ultra-fast in-memory thumbnail cache (Sprint 544)
+// SubMillisecondCacheEngine.h — Ultra-fast in-memory thumbnail cache
 //
 // Purpose:   Robin-hood open-addressing hash map for sub-millisecond
 //            thumbnail cache lookups. Uses FNV-1a 64-bit hashing, SRWLOCK

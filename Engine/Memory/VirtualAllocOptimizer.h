@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// VirtualAllocOptimizer.h — Sprint 560
+// VirtualAllocOptimizer.h
 //
 // Purpose:
 //   Smart VirtualAlloc wrapper providing reserve/commit-on-demand memory
@@ -47,20 +47,20 @@ namespace Engine {
 // ── Region descriptor ────────────────────────────────────────────────────────
 
 struct VirtualRegion {
-    void*   base      = nullptr;
-    size_t  reserved  = 0;
+    void* base = nullptr;
+    size_t  reserved = 0;
     size_t  committed = 0;
-    DWORD   protect   = PAGE_READWRITE;
+    DWORD   protect = PAGE_READWRITE;
     bool    autoCommit = false;  // true when VEH auto-commit is active
 };
 
 // ── Aggregate statistics ─────────────────────────────────────────────────────
 
 struct CommitStats {
-    uint32_t regionsTracked      = 0;
-    size_t   totalReserved       = 0;
-    size_t   totalCommitted      = 0;
-    double   commitRatio         = 0.0;   // committed / reserved
+    uint32_t regionsTracked = 0;
+    size_t   totalReserved = 0;
+    size_t   totalCommitted = 0;
+    double   commitRatio = 0.0;   // committed / reserved
     uint64_t guardPageFaultsHandled = 0;
 };
 
@@ -74,7 +74,7 @@ public:
         // Query system page info once
         SYSTEM_INFO si{};
         GetSystemInfo(&si);
-        m_pageSize             = si.dwPageSize;
+        m_pageSize = si.dwPageSize;
         m_allocationGranularity = si.dwAllocationGranularity;
 
         // Install vectored exception handler for auto-commit guard pages
@@ -101,7 +101,7 @@ public:
         }
     }
 
-    VirtualAllocOptimizer(const VirtualAllocOptimizer&)            = delete;
+    VirtualAllocOptimizer(const VirtualAllocOptimizer&) = delete;
     VirtualAllocOptimizer& operator=(const VirtualAllocOptimizer&) = delete;
 
     // ── Reserve ──────────────────────────────────────────────────
@@ -113,10 +113,10 @@ public:
         void* base = VirtualAlloc(nullptr, aligned, MEM_RESERVE, protect);
         if (!base) return region;
 
-        region.base      = base;
-        region.reserved  = aligned;
+        region.base = base;
+        region.reserved = aligned;
         region.committed = 0;
-        region.protect   = protect;
+        region.protect = protect;
         region.autoCommit = false;
 
         AcquireSRWLockExclusive(&m_lock);
@@ -132,8 +132,8 @@ public:
         if (!region.base || size == 0) return false;
 
         size_t alignedOffset = AlignDown(offset, m_pageSize);
-        size_t alignedEnd    = AlignUp(offset + size, m_pageSize);
-        size_t commitSize    = alignedEnd - alignedOffset;
+        size_t alignedEnd = AlignUp(offset + size, m_pageSize);
+        size_t commitSize = alignedEnd - alignedOffset;
 
         // Clamp to region bounds
         if (alignedOffset + commitSize > region.reserved) {
@@ -142,7 +142,7 @@ public:
 
         void* addr = static_cast<uint8_t*>(region.base) + alignedOffset;
         void* result = VirtualAlloc(addr, commitSize,
-                                    MEM_COMMIT, region.protect);
+            MEM_COMMIT, region.protect);
         if (!result) return false;
 
         // Track committed range (approximate — overlaps are idempotent)
@@ -166,8 +166,8 @@ public:
         if (!region.base || size == 0) return false;
 
         size_t alignedOffset = AlignDown(offset, m_pageSize);
-        size_t alignedEnd    = AlignUp(offset + size, m_pageSize);
-        size_t decommitSize  = alignedEnd - alignedOffset;
+        size_t alignedEnd = AlignUp(offset + size, m_pageSize);
+        size_t decommitSize = alignedEnd - alignedOffset;
 
         if (alignedOffset + decommitSize > region.reserved) {
             decommitSize = region.reserved - alignedOffset;
@@ -180,7 +180,8 @@ public:
         AcquireSRWLockExclusive(&m_lock);
         if (region.committed >= decommitSize) {
             region.committed -= decommitSize;
-        } else {
+        }
+        else {
             region.committed = 0;
         }
         for (auto& r : m_regions) {
@@ -207,8 +208,8 @@ public:
         ReleaseSRWLockExclusive(&m_lock);
 
         VirtualFree(region.base, 0, MEM_RELEASE);
-        region.base      = nullptr;
-        region.reserved  = 0;
+        region.base = nullptr;
+        region.reserved = 0;
         region.committed = 0;
     }
 
@@ -227,14 +228,14 @@ public:
 
         DWORD oldProtect = 0;
         BOOL ok = VirtualProtect(addr, m_pageSize,
-                                 region.protect | PAGE_GUARD, &oldProtect);
+            region.protect | PAGE_GUARD, &oldProtect);
         return ok != FALSE;
     }
 
     // ── Reserve with auto-commit on guard-page fault ─────────────
 
     VirtualRegion ReserveWithAutoCommit(size_t maxSize,
-                                         size_t initialCommit) {
+        size_t initialCommit) {
         VirtualRegion region = Reserve(maxSize);
         if (!region.base) return region;
 
@@ -254,7 +255,7 @@ public:
             // Apply PAGE_GUARD
             DWORD oldProtect = 0;
             VirtualProtect(guardAddr, m_pageSize,
-                           PAGE_READWRITE | PAGE_GUARD, &oldProtect);
+                PAGE_READWRITE | PAGE_GUARD, &oldProtect);
         }
 
         region.autoCommit = true;
@@ -279,12 +280,12 @@ public:
         CommitStats stats{};
         stats.regionsTracked = static_cast<uint32_t>(m_regions.size());
         for (const auto& r : m_regions) {
-            stats.totalReserved  += r.reserved;
+            stats.totalReserved += r.reserved;
             stats.totalCommitted += r.committed;
         }
         stats.commitRatio = stats.totalReserved > 0
             ? static_cast<double>(stats.totalCommitted) /
-              static_cast<double>(stats.totalReserved)
+            static_cast<double>(stats.totalReserved)
             : 0.0;
         stats.guardPageFaultsHandled =
             s_guardFaultsHandled.load(std::memory_order_relaxed);
@@ -334,13 +335,13 @@ private:
         SYSTEM_INFO si{};
         GetSystemInfo(&si);
         uintptr_t pageBase = reinterpret_cast<uintptr_t>(faultAddr)
-                             & ~(static_cast<uintptr_t>(si.dwPageSize) - 1);
+            & ~(static_cast<uintptr_t>(si.dwPageSize) - 1);
         uintptr_t nextPage = pageBase + si.dwPageSize;
 
         // Commit next page and set its guard flag
         void* committed = VirtualAlloc(reinterpret_cast<void*>(nextPage),
-                                       si.dwPageSize, MEM_COMMIT,
-                                       PAGE_READWRITE | PAGE_GUARD);
+            si.dwPageSize, MEM_COMMIT,
+            PAGE_READWRITE | PAGE_GUARD);
         if (committed) {
             s_guardFaultsHandled.fetch_add(1, std::memory_order_relaxed);
         }
@@ -354,10 +355,10 @@ private:
     std::vector<VirtualRegion>  m_regions;
     PVOID                       m_vehHandle = nullptr;
 
-    size_t m_pageSize              = 4096;
+    size_t m_pageSize = 4096;
     size_t m_allocationGranularity = 65536;
 
-    inline static std::atomic<uint64_t> s_guardFaultsHandled{0};
+    inline static std::atomic<uint64_t> s_guardFaultsHandled{ 0 };
 };
 
 } // namespace Engine

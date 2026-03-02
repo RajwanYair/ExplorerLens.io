@@ -1,7 +1,6 @@
 #pragma once
 /******************************************************************************
- * CacheWarmingService.h — Sprint 556
- * ExplorerLens Engine v15.0.0
+ * CacheWarmingService.h
  * Copyright (c) 2026 ExplorerLens Project
  *
  * PURPOSE:
@@ -61,23 +60,23 @@ enum class WarmingJobStatus : uint8_t {
 };
 
 struct CacheWarmingStats {
-    uint64_t filesWarmed       = 0;
-    uint64_t bytesProcessed    = 0;
-    uint64_t cacheHitsAvoided  = 0;
-    uint32_t errorsSkipped     = 0;
-    double   totalTimeSeconds  = 0;
-    double   avgTimePerFile    = 0;
+    uint64_t filesWarmed = 0;
+    uint64_t bytesProcessed = 0;
+    uint64_t cacheHitsAvoided = 0;
+    uint32_t errorsSkipped = 0;
+    double   totalTimeSeconds = 0;
+    double   avgTimePerFile = 0;
     uint32_t directoriesWatched = 0;
-    uint32_t warmingQueueDepth  = 0;
+    uint32_t warmingQueueDepth = 0;
 };
 
 struct CacheWarmingConfig {
-    WarmingStrategy strategy          = WarmingStrategy::MostRecent;
-    WarmingPriority priority          = WarmingPriority::Idle;
-    uint32_t        maxConcurrent     = 2;
+    WarmingStrategy strategy = WarmingStrategy::MostRecent;
+    WarmingPriority priority = WarmingPriority::Idle;
+    uint32_t        maxConcurrent = 2;
     uint32_t        maxFilesPerSession = 1000;
-    uint64_t        maxFileSizeBytes  = 100 * 1024 * 1024;
-    bool            respectPowerMode  = true;
+    uint64_t        maxFileSizeBytes = 100 * 1024 * 1024;
+    bool            respectPowerMode = true;
     bool            pauseOnUserActivity = true;
 };
 
@@ -85,10 +84,10 @@ struct CacheWarmingConfig {
 
 struct WarmingStats {
     uint32_t directoriesWatched = 0;
-    uint64_t filesWarmed        = 0;
-    uint64_t cacheHitsAvoided   = 0;
-    uint32_t warmingQueueDepth  = 0;
-    uint32_t rateLimitDrops     = 0;
+    uint64_t filesWarmed = 0;
+    uint64_t cacheHitsAvoided = 0;
+    uint32_t warmingQueueDepth = 0;
+    uint32_t rateLimitDrops = 0;
 };
 
 // ─── Supported extensions ────────────────────────────────────────────────────
@@ -108,11 +107,11 @@ inline bool IsSupportedWarmExtension(const std::wstring& ext) {
 // ─── Directory watch context ─────────────────────────────────────────────────
 
 struct WatchContext {
-    HANDLE          hDir          = INVALID_HANDLE_VALUE;
-    OVERLAPPED      overlapped    = {};
+    HANDLE          hDir = INVALID_HANDLE_VALUE;
+    OVERLAPPED      overlapped = {};
     alignas(8) BYTE buffer[8192] = {};
     std::wstring    dirPath;
-    bool            active        = false;
+    bool            active = false;
 };
 
 // ─── CacheWarmingService ─────────────────────────────────────────────────────
@@ -247,8 +246,8 @@ public:
         ::AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_srwLock));
         WarmingStats stats;
         stats.directoriesWatched = static_cast<uint32_t>(m_watchedDirs.size());
-        stats.filesWarmed        = m_filesWarmed.load();
-        stats.cacheHitsAvoided   = m_cacheHitsAvoided.load();
+        stats.filesWarmed = m_filesWarmed.load();
+        stats.cacheHitsAvoided = m_cacheHitsAvoided.load();
         {
             std::lock_guard<std::mutex> ql(const_cast<std::mutex&>(m_queueMutex));
             stats.warmingQueueDepth = static_cast<uint32_t>(
@@ -303,10 +302,10 @@ public:
         }
     }
 
-    static constexpr size_t StrategyCount()  { return static_cast<size_t>(WarmingStrategy::COUNT); }
-    static constexpr size_t PriorityCount()  { return static_cast<size_t>(WarmingPriority::COUNT); }
+    static constexpr size_t StrategyCount() { return static_cast<size_t>(WarmingStrategy::COUNT); }
+    static constexpr size_t PriorityCount() { return static_cast<size_t>(WarmingPriority::COUNT); }
     static constexpr size_t JobStatusCount() { return static_cast<size_t>(WarmingJobStatus::COUNT); }
-    static constexpr size_t ModeCount()      { return static_cast<size_t>(WarmingMode::COUNT); }
+    static constexpr size_t ModeCount() { return static_cast<size_t>(WarmingMode::COUNT); }
 
 private:
     // ── IOCP directory monitoring ───────────────────────────────────────────
@@ -320,7 +319,7 @@ private:
             sizeof(ctx->buffer),
             FALSE,
             FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE
-                | FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_CREATION,
+            | FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_CREATION,
             &bytesReturned,
             &ctx->overlapped,
             nullptr
@@ -385,7 +384,8 @@ private:
         if (m_warmingQueue.size() < 10000) {
             m_warmingQueue.push(path);
             m_queueCV.notify_one();
-        } else {
+        }
+        else {
             m_rateLimitDrops++;
         }
     }

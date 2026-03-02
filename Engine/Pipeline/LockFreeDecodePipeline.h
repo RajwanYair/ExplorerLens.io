@@ -1,7 +1,6 @@
 #pragma once
 // ============================================================================
-// LockFreeDecodePipeline.h — Lock-Free MPMC Decode Queue (Sprint 549)
-// ExplorerLens Engine v15.0.0
+// LockFreeDecodePipeline.h — Lock-Free MPMC Decode Queue
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Suppress C4324 — intentional cache-line alignment padding
@@ -154,10 +153,6 @@ public:
     static inline bool IsPowerOf2(uint32_t v) {
         return v > 0 && (v & (v - 1)) == 0;
     }
-
-    // ====================================================================
-    // Sprint 549: Full lock-free MPMC queue
-    // ====================================================================
 
     /// Construct with ring buffer capacity (rounded to next power-of-2).
     /// Default capacity is 1024 slots.

@@ -1,7 +1,6 @@
 #pragma once
 // ============================================================================
-// MemoryMappedIOOptimizer.h — Zero-Copy Memory-Mapped File I/O (Sprint 551)
-// ExplorerLens Engine v15.0.0
+// MemoryMappedIOOptimizer.h — Zero-Copy Memory-Mapped File I/O
 // Copyright (c) 2026 ExplorerLens Project
 //
 // PURPOSE:
@@ -156,10 +155,6 @@ public:
             return MappingStrategy::Sequential;
         return MappingStrategy::LargePages;
     }
-
-    // ====================================================================
-    // Sprint 551: Full memory-mapped I/O with LRU cache
-    // ====================================================================
 
     /// Construct with a maximum number of cached mappings (LRU eviction).
     explicit MemoryMappedIOOptimizer(size_t maxCached = 16)

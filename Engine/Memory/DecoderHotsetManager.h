@@ -1,6 +1,6 @@
 #pragma once
 // ============================================================================
-// DecoderHotsetManager.h — Sprint 562
+// DecoderHotsetManager.h
 //
 // Purpose:
 //   Keeps frequently-used decoder instances resident in memory (the "hot set")
@@ -55,29 +55,29 @@ namespace Engine {
 // ── Instance descriptor ──────────────────────────────────────────────────────
 
 struct DecoderInstance {
-    uint32_t decoderType    = 0;
-    void*    instance       = nullptr;
+    uint32_t decoderType = 0;
+    void* instance = nullptr;
     size_t   memoryFootprint = 0;
-    uint64_t lastUsed       = 0;   // tick counter
-    uint32_t useCount       = 0;
+    uint64_t lastUsed = 0;   // tick counter
+    uint32_t useCount = 0;
 };
 
 // ── Factory pair ─────────────────────────────────────────────────────────────
 
 struct DecoderFactory {
-    std::function<void*()>    create;
+    std::function<void* ()>    create;
     std::function<void(void*)> destroy;
 };
 
 // ── Statistics ───────────────────────────────────────────────────────────────
 
 struct HotsetStats {
-    size_t   poolSizeBytes   = 0;
+    size_t   poolSizeBytes = 0;
     uint32_t instancesCached = 0;
-    uint32_t hotSetCount     = 0;
-    uint64_t cacheHits       = 0;
-    uint64_t cacheMisses     = 0;
-    uint64_t evictions       = 0;
+    uint32_t hotSetCount = 0;
+    uint64_t cacheHits = 0;
+    uint64_t cacheMisses = 0;
+    uint64_t evictions = 0;
 };
 
 // ── Main class ───────────────────────────────────────────────────────────────
@@ -85,7 +85,7 @@ struct HotsetStats {
 class DecoderHotsetManager {
 public:
     explicit DecoderHotsetManager(size_t maxPoolBytes = 256ULL * 1024 * 1024,
-                                   uint32_t hotSetSize = 8) noexcept
+        uint32_t hotSetSize = 8) noexcept
         : m_maxPoolBytes(maxPoolBytes), m_hotSetSize(hotSetSize) {
         InitializeSRWLock(&m_lock);
     }
@@ -110,17 +110,17 @@ public:
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    DecoderHotsetManager(const DecoderHotsetManager&)            = delete;
+    DecoderHotsetManager(const DecoderHotsetManager&) = delete;
     DecoderHotsetManager& operator=(const DecoderHotsetManager&) = delete;
 
     // ── Factory registration ─────────────────────────────────────
 
     void RegisterFactory(uint32_t decoderType,
-                         std::function<void*()> create,
-                         std::function<void(void*)> destroy) {
+        std::function<void* ()> create,
+        std::function<void(void*)> destroy) {
         AcquireSRWLockExclusive(&m_lock);
         DecoderFactory factory;
-        factory.create  = std::move(create);
+        factory.create = std::move(create);
         factory.destroy = std::move(destroy);
         m_factories[decoderType] = std::move(factory);
         ReleaseSRWLockExclusive(&m_lock);
@@ -170,7 +170,7 @@ public:
     }
 
     void ReleaseDecoder(uint32_t decoderType, void* instance,
-                        size_t footprint) {
+        size_t footprint) {
         if (!instance) return;
 
         AcquireSRWLockExclusive(&m_lock);
@@ -182,11 +182,11 @@ public:
         }
 
         DecoderInstance inst;
-        inst.decoderType    = decoderType;
-        inst.instance       = instance;
+        inst.decoderType = decoderType;
+        inst.instance = instance;
         inst.memoryFootprint = footprint;
-        inst.lastUsed       = m_globalTick;
-        inst.useCount       = static_cast<uint32_t>(m_usageCounts[decoderType]);
+        inst.lastUsed = m_globalTick;
+        inst.useCount = static_cast<uint32_t>(m_usageCounts[decoderType]);
 
         m_pool[decoderType].push_back(inst);
         m_currentPoolBytes += footprint;
@@ -219,7 +219,7 @@ public:
     HotsetStats GetStats() {
         AcquireSRWLockExclusive(&m_lock);
         HotsetStats stats = m_stats;
-        stats.poolSizeBytes   = m_currentPoolBytes;
+        stats.poolSizeBytes = m_currentPoolBytes;
         stats.instancesCached = 0;
         for (const auto& [type, instances] : m_pool) {
             stats.instancesCached += static_cast<uint32_t>(instances.size());
@@ -243,7 +243,7 @@ public:
                 if (!m_bgRunning.load(std::memory_order_acquire)) break;
                 RecalculateHotSet();
             }
-        });
+            });
     }
 
     void StopBackgroundThread() {
@@ -266,7 +266,7 @@ public:
         std::vector<TypeUsage> usageList;
         usageList.reserve(m_usageCounts.size());
         for (const auto& [type, count] : m_usageCounts) {
-            usageList.push_back({type, count});
+            usageList.push_back({ type, count });
         }
         std::sort(usageList.begin(), usageList.end(),
             [](const TypeUsage& a, const TypeUsage& b) {
@@ -276,7 +276,7 @@ public:
         // Top N become the hot set
         m_hotSet.clear();
         uint32_t n = (std::min)(m_hotSetSize,
-                                static_cast<uint32_t>(usageList.size()));
+            static_cast<uint32_t>(usageList.size()));
         for (uint32_t i = 0; i < n; ++i) {
             m_hotSet.push_back(usageList[i].type);
         }
@@ -289,7 +289,7 @@ public:
     bool IsInHotSet(uint32_t decoderType) {
         AcquireSRWLockExclusive(&m_lock);
         bool found = std::find(m_hotSet.begin(), m_hotSet.end(),
-                               decoderType) != m_hotSet.end();
+            decoderType) != m_hotSet.end();
         ReleaseSRWLockExclusive(&m_lock);
         return found;
     }
@@ -310,9 +310,9 @@ private:
 
     bool EvictLRULocked(size_t spaceNeeded) {
         // Find the pool entry with the oldest lastUsed that is NOT in hot set
-        uint32_t bestType     = UINT32_MAX;
-        size_t   bestIdx      = SIZE_MAX;
-        uint64_t oldestTick   = UINT64_MAX;
+        uint32_t bestType = UINT32_MAX;
+        size_t   bestIdx = SIZE_MAX;
+        uint64_t oldestTick = UINT64_MAX;
 
         for (auto& [type, instances] : m_pool) {
             if (instances.empty()) continue;
@@ -324,8 +324,8 @@ private:
             for (size_t i = 0; i < instances.size(); ++i) {
                 if (instances[i].lastUsed < oldestTick) {
                     oldestTick = instances[i].lastUsed;
-                    bestType   = type;
-                    bestIdx    = i;
+                    bestType = type;
+                    bestIdx = i;
                 }
             }
         }
@@ -337,8 +337,8 @@ private:
                 for (size_t i = 0; i < instances.size(); ++i) {
                     if (instances[i].lastUsed < oldestTick) {
                         oldestTick = instances[i].lastUsed;
-                        bestType   = type;
-                        bestIdx    = i;
+                        bestType = type;
+                        bestIdx = i;
                     }
                 }
             }
@@ -382,14 +382,14 @@ private:
     uint32_t m_hotSetSize = 8;
 
     // Memory budget
-    size_t m_maxPoolBytes     = 256ULL * 1024 * 1024;
+    size_t m_maxPoolBytes = 256ULL * 1024 * 1024;
     size_t m_currentPoolBytes = 0;
 
     // Cumulative stats
     HotsetStats m_stats{};
 
     // Background thread
-    std::atomic<bool> m_bgRunning{false};
+    std::atomic<bool> m_bgRunning{ false };
     uint32_t          m_bgIntervalMs = 30000;
     std::thread       m_bgThread;
 };

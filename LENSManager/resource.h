@@ -73,3 +73,8 @@
 #define IDC_SPECIALIZED_GROUP                   1069
 #define IDC_BTN_RESET_DEFAULTS                  1070
 #define IDC_BTN_EXPORT_CONFIG                   1071
+#define IDC_EXTENDED_GROUP                      1072
+#define IDC_CB_EXT_IMAGE                        1073
+#define IDC_CB_TEXTURE                          1074
+#define IDC_CB_EXT_ARCHIVE                      1075
+#define IDC_CB_EXT_DOCUMENT                     1076

@@ -1,6 +1,5 @@
 // ============================================================================
 // AdaptiveGPUScheduler.h — Dynamic GPU/CPU Work Scheduling
-// ExplorerLens Engine v15.0.0  (Sprint 567)
 // Copyright (c) 2026 ExplorerLens Project
 //
 // PURPOSE
@@ -51,10 +50,10 @@ namespace Engine {
 // GPULoadInfo
 // -----------------------------------------------------------------------
 struct GPULoadInfo {
-    uint64_t dedicatedUsed     = 0;
-    uint64_t dedicatedBudget   = 0;
-    uint64_t sharedUsed        = 0;
-    uint64_t sharedBudget      = 0;
+    uint64_t dedicatedUsed = 0;
+    uint64_t dedicatedBudget = 0;
+    uint64_t sharedUsed = 0;
+    uint64_t sharedBudget = 0;
 
     float DedicatedUsagePercent() const {
         return (dedicatedBudget > 0)
@@ -70,16 +69,16 @@ struct GPULoadInfo {
 // ScheduleDecision
 // -----------------------------------------------------------------------
 enum class ScheduleDecision : uint8_t {
-    GPU   = 0,
-    CPU   = 1,
+    GPU = 0,
+    CPU = 1,
     Defer = 2
 };
 
 inline const char* ScheduleDecisionName(ScheduleDecision d) {
     switch (d) {
-        case ScheduleDecision::GPU:   return "GPU";
-        case ScheduleDecision::CPU:   return "CPU";
-        case ScheduleDecision::Defer: return "Defer";
+    case ScheduleDecision::GPU:   return "GPU";
+    case ScheduleDecision::CPU:   return "CPU";
+    case ScheduleDecision::Defer: return "Defer";
     }
     return "Unknown";
 }
@@ -88,13 +87,13 @@ inline const char* ScheduleDecisionName(ScheduleDecision d) {
 // SchedulerStats
 // -----------------------------------------------------------------------
 struct SchedulerStats {
-    uint64_t gpuDecisions    = 0;
-    uint64_t cpuDecisions    = 0;
-    uint64_t deferredItems   = 0;
+    uint64_t gpuDecisions = 0;
+    uint64_t cpuDecisions = 0;
+    uint64_t deferredItems = 0;
     uint64_t workItemsQueued = 0;
-    uint64_t workItemsDone   = 0;
+    uint64_t workItemsDone = 0;
     GPULoadInfo lastGPULoad;
-    bool     onBattery       = false;
+    bool     onBattery = false;
 };
 
 // -----------------------------------------------------------------------
@@ -102,10 +101,10 @@ struct SchedulerStats {
 // -----------------------------------------------------------------------
 class AdaptiveGPUScheduler {
 public:
-    AdaptiveGPUScheduler()  = default;
+    AdaptiveGPUScheduler() = default;
     ~AdaptiveGPUScheduler() { Shutdown(); }
 
-    AdaptiveGPUScheduler(const AdaptiveGPUScheduler&)            = delete;
+    AdaptiveGPUScheduler(const AdaptiveGPUScheduler&) = delete;
     AdaptiveGPUScheduler& operator=(const AdaptiveGPUScheduler&) = delete;
 
     // ================================================================
@@ -123,7 +122,7 @@ public:
             if (pfn) {
                 IDXGIFactory1* factory = nullptr;
                 if (SUCCEEDED(pfn(__uuidof(IDXGIFactory1),
-                                  reinterpret_cast<void**>(&factory)))) {
+                    reinterpret_cast<void**>(&factory)))) {
                     IDXGIAdapter1* adapter1 = nullptr;
                     if (SUCCEEDED(factory->EnumAdapters1(0, &adapter1))) {
                         HRESULT hr = adapter1->QueryInterface(
@@ -151,13 +150,13 @@ public:
             DXGI_QUERY_VIDEO_MEMORY_INFO dedicated{};
             DXGI_QUERY_VIDEO_MEMORY_INFO shared{};
             if (SUCCEEDED(m_adapter->QueryVideoMemoryInfo(
-                    0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &dedicated))) {
-                info.dedicatedUsed   = dedicated.CurrentUsage;
+                0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &dedicated))) {
+                info.dedicatedUsed = dedicated.CurrentUsage;
                 info.dedicatedBudget = dedicated.Budget;
             }
             if (SUCCEEDED(m_adapter->QueryVideoMemoryInfo(
-                    0, DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL, &shared))) {
-                info.sharedUsed   = shared.CurrentUsage;
+                0, DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL, &shared))) {
+                info.sharedUsed = shared.CurrentUsage;
                 info.sharedBudget = shared.Budget;
             }
         }
@@ -170,7 +169,7 @@ public:
     // ShouldUseGPU — tri-state decision
     // ================================================================
     inline ScheduleDecision ShouldUseGPU(size_t estimatedVRAM,
-                                         uint32_t estimatedDispatchCount) {
+        uint32_t estimatedDispatchCount) {
         (void)estimatedDispatchCount;
         AcquireShared();
 
@@ -197,7 +196,7 @@ public:
 
         // Not enough available VRAM (including reserve)
         uint64_t available = load.DedicatedAvailable();
-        uint64_t required  = static_cast<uint64_t>(estimatedVRAM) + m_gpuMemReserve;
+        uint64_t required = static_cast<uint64_t>(estimatedVRAM) + m_gpuMemReserve;
         if (required > available) {
             m_stats.cpuDecisions++;
             ReleaseShared();
@@ -281,15 +280,15 @@ private:
     SRWLOCK m_srw = SRWLOCK_INIT;
     inline void AcquireExclusive() { ::AcquireSRWLockExclusive(&m_srw); }
     inline void ReleaseExclusive() { ::ReleaseSRWLockExclusive(&m_srw); }
-    inline void AcquireShared()    { ::AcquireSRWLockShared(&m_srw);    }
-    inline void ReleaseShared()    { ::ReleaseSRWLockShared(&m_srw);    }
+    inline void AcquireShared() { ::AcquireSRWLockShared(&m_srw); }
+    inline void ReleaseShared() { ::ReleaseSRWLockShared(&m_srw); }
 
     // ---- state ----
-    bool            m_ready            = false;
+    bool            m_ready = false;
     bool            m_preferCPUOnBattery = true;
-    size_t          m_gpuMemReserve    = 64 * 1024 * 1024;  // 64 MB default reserve
-    HMODULE         m_hDXGI            = nullptr;
-    IDXGIAdapter3*  m_adapter          = nullptr;
+    size_t          m_gpuMemReserve = 64 * 1024 * 1024;  // 64 MB default reserve
+    HMODULE         m_hDXGI = nullptr;
+    IDXGIAdapter3* m_adapter = nullptr;
     SchedulerStats  m_stats{};
     std::priority_queue<WorkItem> m_workQueue;
 
@@ -300,13 +299,13 @@ private:
             DXGI_QUERY_VIDEO_MEMORY_INFO dedicated{};
             DXGI_QUERY_VIDEO_MEMORY_INFO shared{};
             if (SUCCEEDED(m_adapter->QueryVideoMemoryInfo(
-                    0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &dedicated))) {
-                info.dedicatedUsed   = dedicated.CurrentUsage;
+                0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &dedicated))) {
+                info.dedicatedUsed = dedicated.CurrentUsage;
                 info.dedicatedBudget = dedicated.Budget;
             }
             if (SUCCEEDED(m_adapter->QueryVideoMemoryInfo(
-                    0, DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL, &shared))) {
-                info.sharedUsed   = shared.CurrentUsage;
+                0, DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL, &shared))) {
+                info.sharedUsed = shared.CurrentUsage;
                 info.sharedBudget = shared.Budget;
             }
         }
@@ -316,7 +315,7 @@ private:
     // ---- Shutdown ----
     inline void Shutdown() {
         if (m_adapter) { m_adapter->Release(); m_adapter = nullptr; }
-        if (m_hDXGI)   { ::FreeLibrary(m_hDXGI); m_hDXGI = nullptr; }
+        if (m_hDXGI) { ::FreeLibrary(m_hDXGI); m_hDXGI = nullptr; }
         m_ready = false;
     }
 };
