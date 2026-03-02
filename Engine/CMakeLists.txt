@@ -346,6 +346,8 @@ set(ENGINE_HEADERS
     # Sprint 644 — PIpeline activation, status, SIMD detection
     Core/FormatStatusProvider.h
     Core/SIMDCapabilityDetector.h
+    Core/InputSanitizer.h
+    Core/PathTraversalGuard.h
 
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
@@ -369,6 +371,11 @@ set(ENGINE_HEADERS
     Pipeline/ParallelIOPipeline.h
     Pipeline/PipelineActivator.h
     Pipeline/ParallelIOActivation.h
+    Pipeline/PipelineMetricsCollector.h
+    Pipeline/PipelineCircuitBreaker.h
+    Pipeline/DecodeRetryPolicy.h
+    Pipeline/ThumbnailRequestValidator.h
+    Pipeline/DecoderOutputValidator.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -458,6 +465,8 @@ set(ENGINE_HEADERS
     GPU/VulkanMemoryAllocator.h
     GPU/GPUWorkloadBalancer.h
     GPU/GPUDecodeAccelerationV2.h
+    GPU/GPUFallbackChain.h
+    GPU/GPUMemoryTracker.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -479,6 +488,9 @@ set(ENGINE_HEADERS
     Cache/PSOCachePersistence.h
     Cache/CacheWarmingActivation.h
     Cache/CacheBudgetAutoTuner.h
+    Cache/CacheCoherencyManager.h
+    Cache/CachePrewarmScheduler.h
+    Cache/CacheDiagnostics.h
 
     # Plugin system
     Plugin/CrashHandler.h
@@ -515,6 +527,9 @@ set(ENGINE_HEADERS
     Plugin/PluginCompatibilityKit.h
     Plugin/PluginTrustChainValidator.h
     Plugin/Security/JobObjectManager.h
+    Plugin/PluginDependencyResolver.h
+    Plugin/PluginCrashRecovery.h
+    Plugin/PluginResourceLimiter.h
 
     # AI/ML modules
     AI/AISearchIntegration.h
@@ -551,6 +566,8 @@ set(ENGINE_HEADERS
     Memory/SmartPointerPool.h
     Memory/MemoryDefragmenter.h
     Memory/MemoryFootprintOptimizerV2.h
+    Memory/MemoryBudgetEnforcer.h
+    Memory/AllocationTracker.h
 
     # Shell integration
     Shell/COMApartmentAudit.h
@@ -620,6 +637,9 @@ set(ENGINE_HEADERS
     Utils/StaticAnalysisCIGate.h
     Utils/Win11Integration.h
     Utils/RegistrySnapshotManager.h
+    Utils/ConfigDriftDetector.h
+    Utils/DeploymentPreflightCheck.h
+    Utils/OperationalReadinessChecker.h
 
     # Sprint 591-593
     Utils/InstallerLifecycleManager.h

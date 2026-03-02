@@ -561,6 +561,26 @@
 #include "../Cache/CacheBudgetAutoTuner.h"
 #include "../Core/FormatStatusProvider.h"
 #include "../Core/SIMDCapabilityDetector.h"
+#include "../Pipeline/PipelineMetricsCollector.h"
+#include "../Pipeline/PipelineCircuitBreaker.h"
+#include "../Pipeline/DecodeRetryPolicy.h"
+#include "../Pipeline/ThumbnailRequestValidator.h"
+#include "../Pipeline/DecoderOutputValidator.h"
+#include "../Cache/CacheCoherencyManager.h"
+#include "../Cache/CachePrewarmScheduler.h"
+#include "../Cache/CacheDiagnostics.h"
+#include "../GPU/GPUFallbackChain.h"
+#include "../GPU/GPUMemoryTracker.h"
+#include "../Memory/MemoryBudgetEnforcer.h"
+#include "../Memory/AllocationTracker.h"
+#include "../Plugin/PluginDependencyResolver.h"
+#include "../Plugin/PluginCrashRecovery.h"
+#include "../Plugin/PluginResourceLimiter.h"
+#include "../Core/InputSanitizer.h"
+#include "../Core/PathTraversalGuard.h"
+#include "../Utils/ConfigDriftDetector.h"
+#include "../Utils/DeploymentPreflightCheck.h"
+#include "../Utils/OperationalReadinessChecker.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -16856,6 +16876,235 @@ TEST(TestSIMDCapabilityDetector_Detect) {
     ASSERT(!result.cpuBrand.empty());
 }
 
+// ===== Batch 2: Pipeline Reliability & Observability =====
+
+TEST(TestPipelineMetricsCollector_Init) {
+    auto& mc = PipelineMetricsCollector::Instance();
+    mc.Initialize();
+    ASSERT(mc.IsInitialized());
+    auto snap = mc.CaptureSnapshot();
+    ASSERT(snap.totalRequests == 0);
+    ASSERT(mc.GetOverallErrorRate() == 0.0);
+}
+
+TEST(TestPipelineCircuitBreaker_State) {
+    auto& cb = PipelineCircuitBreaker::Instance();
+    cb.Initialize();
+    ASSERT(cb.IsInitialized());
+    ASSERT(cb.GetState() == PipelineCircuitState::Closed);
+    ASSERT(cb.AllowRequest());
+    cb.RecordSuccess();
+    auto status = cb.GetStatus();
+    ASSERT(status.state == PipelineCircuitState::Closed);
+}
+
+TEST(TestDecodeRetryPolicy_Evaluate) {
+    auto& rp = DecodeRetryPolicy::Instance();
+    rp.Initialize();
+    ASSERT(rp.IsInitialized());
+    ASSERT(rp.IsRetryable(DecodeFailureKind::IOTimeout));
+    ASSERT(!rp.IsRetryable(DecodeFailureKind::Unknown));
+    auto decision = rp.Evaluate(DecodeFailureKind::IOTimeout, 1);
+    ASSERT(decision.shouldRetry);
+    ASSERT(decision.delayMs > 0);
+}
+
+TEST(TestThumbnailRequestValidator_Validate) {
+    auto& rv = ThumbnailRequestValidator::Instance();
+    rv.Initialize();
+    ASSERT(rv.IsInitialized());
+    auto result = rv.Validate(L"C:\\test.jpg", 256, 256);
+    ASSERT(result.valid);
+    auto badResult = rv.Validate(L"", 256, 256);
+    ASSERT(!badResult.valid);
+}
+
+TEST(TestDecoderOutputValidator_Init) {
+    auto& ov = DecoderOutputValidator::Instance();
+    ov.Initialize();
+    ASSERT(ov.IsInitialized());
+    auto result = ov.ValidateBasic(nullptr);
+    ASSERT(!result.passed);
+    ASSERT(result.failure == OutputValidationFailure::NullBitmap);
+}
+
+// ===== Batch 2: Cache Infrastructure =====
+
+TEST(TestCacheCoherencyManager_Init) {
+    auto& cm = CacheCoherencyManager::Instance();
+    cm.Initialize();
+    ASSERT(cm.IsInitialized());
+    auto stats = cm.GetStats();
+    ASSERT(stats.invalidationsSent == 0);
+}
+
+TEST(TestCachePrewarmScheduler_Init) {
+    auto& ps = CachePrewarmScheduler::Instance();
+    ps.Initialize();
+    ASSERT(ps.IsInitialized());
+    ps.RecordAccess(L"C:\\Users\\Test\\Pictures");
+    auto predicted = ps.GetPredictedDirectories(5);
+    ASSERT(predicted.size() <= 5);
+}
+
+TEST(TestCacheDiagnostics_Health) {
+    auto& cd = CacheDiagnostics::Instance();
+    cd.Initialize();
+    ASSERT(cd.IsInitialized());
+    cd.RecordHit();
+    cd.RecordHit();
+    cd.RecordMiss();
+    ASSERT(cd.GetHitRate() > 0.5);
+    auto tier = cd.ComputeHealthTier();
+    ASSERT(tier != CacheHealthTier::Critical);
+}
+
+// ===== Batch 2: GPU & Memory =====
+
+TEST(TestGPUFallbackChain_Select) {
+    auto& fc = GPUFallbackChain::Instance();
+    fc.Initialize();
+    ASSERT(fc.IsInitialized());
+    auto selection = fc.Select();
+    // CPU should always be available
+    ASSERT(selection.selectedBackend == GPUBackendId::DX12 ||
+        selection.selectedBackend == GPUBackendId::DX11 ||
+        selection.selectedBackend == GPUBackendId::Vulkan ||
+        selection.selectedBackend == GPUBackendId::CPU);
+}
+
+TEST(TestGPUMemoryTracker_Budget) {
+    auto& mt = GPUMemoryTracker::Instance();
+    mt.Initialize();
+    ASSERT(mt.IsInitialized());
+    mt.TrackAllocation(VRAMCategory::Texture, 1024);
+    auto snap = mt.CaptureSnapshot();
+    ASSERT(snap.totalAllocated >= 1024);
+    mt.TrackDeallocation(VRAMCategory::Texture, 1024);
+}
+
+TEST(TestMemoryBudgetEnforcer_Level) {
+    auto& be = MemoryBudgetEnforcer::Instance();
+    be.Initialize();
+    ASSERT(be.IsInitialized());
+    auto level = be.GetEnforcementLevel();
+    ASSERT(level == BudgetEnforcementLevel::Permissive ||
+        level == BudgetEnforcementLevel::Moderate ||
+        level == BudgetEnforcementLevel::Strict ||
+        level == BudgetEnforcementLevel::Emergency);
+}
+
+TEST(TestAllocationTracker_Track) {
+    auto& at = AllocationTracker::Instance();
+    at.Initialize(true);
+    ASSERT(at.IsInitialized());
+    AllocationTag tag{ __FILE__, __LINE__, __FUNCTION__, "Test" };
+    auto siteId = at.RegisterSite(tag);
+    char dummyBuf[256];
+    at.TrackAlloc(dummyBuf, 256, siteId);
+    auto suspects = at.GetLeakSuspects();
+    // Should have at least one tracked allocation
+    auto stats = at.GetStats();
+    ASSERT(stats.currentOutstanding >= 256);
+    at.TrackFree(dummyBuf);
+}
+
+// ===== Batch 2: Plugin Ecosystem =====
+
+TEST(TestPluginDependencyResolver_Resolve) {
+    auto& dr = PluginDependencyResolver::Instance();
+    dr.Initialize();
+    ASSERT(dr.IsInitialized());
+    dr.RegisterPlugin(L"PluginA", 1, 0);
+    dr.RegisterPlugin(L"PluginB", 1, 0);
+    dr.AddDependency(L"PluginB", L"PluginA");
+    auto result = dr.Resolve();
+    ASSERT(result.status == DependencyResolutionStatus::Success);
+    ASSERT(result.loadOrder.size() == 2);
+}
+
+TEST(TestPluginCrashRecovery_Report) {
+    auto& cr = PluginCrashRecovery::Instance();
+    cr.Initialize();
+    ASSERT(cr.IsInitialized());
+    cr.RegisterPlugin(L"TestPlugin");
+    ASSERT(cr.IsPluginAvailable(L"TestPlugin"));
+    auto state = cr.ReportCrash(L"TestPlugin", 1, L"Test crash");
+    ASSERT(state == PluginRecoveryState::Recovering);
+    ASSERT(cr.GetCrashCount(L"TestPlugin") == 1);
+}
+
+TEST(TestPluginResourceLimiter_Quota) {
+    auto& rl = PluginResourceLimiter::Instance();
+    rl.Initialize();
+    ASSERT(rl.IsInitialized());
+    rl.RegisterPlugin(L"TestPlugin");
+    ASSERT(rl.GetPluginCount() == 1);
+    auto action = rl.RecordMemoryUsage(L"TestPlugin", 1024);
+    ASSERT(action == ResourceLimitAction::None);
+    ASSERT(!rl.IsOverQuota(L"TestPlugin"));
+}
+
+// ===== Batch 2: Security & Input Validation =====
+
+TEST(TestInputSanitizer_Path) {
+    auto& is = InputSanitizer::Instance();
+    is.Initialize();
+    ASSERT(is.IsInitialized());
+    auto result = is.SanitizePath(L"C:\\test\\file.jpg");
+    ASSERT(result.safe);
+    ASSERT(!result.modified);
+    auto adsResult = is.SanitizePath(L"C:\\test\\file.jpg:Zone.Identifier");
+    ASSERT(adsResult.modified); // ADS stripped
+    ASSERT(is.IsPathSafe(L"C:\\test\\file.jpg"));
+    ASSERT(!is.IsPathSafe(L"")); // Empty path
+}
+
+TEST(TestPathTraversalGuard_Detect) {
+    auto& pg = PathTraversalGuard::Instance();
+    pg.Initialize();
+    ASSERT(pg.IsInitialized());
+    auto safe = pg.ValidateExtractionPath(L"C:\\extract", L"images\\photo.jpg");
+    ASSERT(safe.safe);
+    auto unsafe = pg.ValidateExtractionPath(L"C:\\extract", L"..\\..\\windows\\system32\\calc.exe");
+    ASSERT(!unsafe.safe);
+    ASSERT(unsafe.detection == TraversalDetection::DotDotTraversal);
+}
+
+// ===== Batch 2: Quality Assurance & Operations =====
+
+TEST(TestConfigDriftDetector_Drift) {
+    auto& dd = ConfigDriftDetector::Instance();
+    dd.Initialize();
+    ASSERT(dd.IsInitialized());
+    dd.SetBaselineValue(L"MaxThumbnailSize", L"256");
+    dd.SetCurrentValue(L"MaxThumbnailSize", L"256");
+    auto report = dd.CheckDrift();
+    ASSERT(!report.hasDrift);
+    dd.SetCurrentValue(L"MaxThumbnailSize", L"512");
+    auto driftReport = dd.CheckDrift();
+    ASSERT(driftReport.hasDrift);
+    ASSERT(driftReport.driftedKeys == 1);
+}
+
+TEST(TestDeploymentPreflightCheck_Run) {
+    auto& pc = DeploymentPreflightCheck::Instance();
+    pc.Initialize();
+    ASSERT(pc.IsInitialized());
+    auto report = pc.RunAllChecks();
+    ASSERT(report.totalChecks >= 5);
+    ASSERT(report.passed > 0);
+}
+
+TEST(TestOperationalReadinessChecker_Check) {
+    auto& rc = OperationalReadinessChecker::Instance();
+    rc.Initialize();
+    ASSERT(rc.IsInitialized());
+    auto report = rc.CheckAll();
+    ASSERT(report.totalProbes >= 5);
+    ASSERT(report.ready > 0);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -20498,6 +20747,29 @@ int main() {
     RUN_TEST(TestCacheBudgetAutoTuner_Tier);
     RUN_TEST(TestFormatStatusProvider_Formats);
     RUN_TEST(TestSIMDCapabilityDetector_Detect);
+
+    // Batch 2: Pipeline Reliability, Cache, GPU, Memory, Plugin, Security, Operations
+    std::wcout << L"Batch 2: Reliability & Operations Tests..." << std::endl;
+    RUN_TEST(TestPipelineMetricsCollector_Init);
+    RUN_TEST(TestPipelineCircuitBreaker_State);
+    RUN_TEST(TestDecodeRetryPolicy_Evaluate);
+    RUN_TEST(TestThumbnailRequestValidator_Validate);
+    RUN_TEST(TestDecoderOutputValidator_Init);
+    RUN_TEST(TestCacheCoherencyManager_Init);
+    RUN_TEST(TestCachePrewarmScheduler_Init);
+    RUN_TEST(TestCacheDiagnostics_Health);
+    RUN_TEST(TestGPUFallbackChain_Select);
+    RUN_TEST(TestGPUMemoryTracker_Budget);
+    RUN_TEST(TestMemoryBudgetEnforcer_Level);
+    RUN_TEST(TestAllocationTracker_Track);
+    RUN_TEST(TestPluginDependencyResolver_Resolve);
+    RUN_TEST(TestPluginCrashRecovery_Report);
+    RUN_TEST(TestPluginResourceLimiter_Quota);
+    RUN_TEST(TestInputSanitizer_Path);
+    RUN_TEST(TestPathTraversalGuard_Detect);
+    RUN_TEST(TestConfigDriftDetector_Drift);
+    RUN_TEST(TestDeploymentPreflightCheck_Run);
+    RUN_TEST(TestOperationalReadinessChecker_Check);
 
     std::wcout << std::endl;
 
