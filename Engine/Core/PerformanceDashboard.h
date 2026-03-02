@@ -1,16 +1,24 @@
-// PerformanceDashboard.h — Real-Time Performance Statistics Dashboard
+// PerformanceDashboard.h — Real-Time Performance Monitoring Dashboard (Sprint 584)
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Collects and displays engine performance metrics: cache hit rates,
-// GPU utilization, decode throughput, memory pressure, and latency
-// percentiles. Feeds the LENSManager "Performance" tab.
+// Collects metrics from all subsystems (Decode, Cache, GPU, Memory, IO, Plugin)
+// using a rolling window of 10000 samples per metric. Provides percentile
+// computation (P95/P99), CSV export, and atomic snapshot capture. Thread-safe
+// via SRWLOCK for high-concurrency shell-extension workloads.
 
 #pragma once
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
+#include <cmath>
 #include <cstdint>
+#include <fstream>
+#include <numeric>
+#include <sstream>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -20,264 +28,270 @@
 namespace ExplorerLens {
 namespace Engine {
 
-/// Performance metric category (dashboard-specific — distinct from
-/// DiagnosticDashboard::DashboardMetricCategory)
-enum class DashboardMetricCategory : uint8_t {
- Cache = 0,
- GPU = 1,
- Decode = 2,
- Memory = 3,
- Pipeline = 4,
- IO = 5,
- Count = 6
+/// A single timestamped metric sample.
+struct MetricSample {
+    double value = 0.0;
+    std::chrono::steady_clock::time_point timestamp{};
 };
 
-/// A single tracked metric
-struct PerformanceMetric {
- const char *name = nullptr; ///< e.g., "CacheHitRate"
- const char *unit = nullptr; ///< e.g., "%", "ms", "MB"
- DashboardMetricCategory category = DashboardMetricCategory::Cache;
- double current = 0;
- double min = 0;
- double max = 0;
- double average = 0;
- uint64_t sampleCount = 0;
+/// Summary statistics for a named metric.
+struct MetricSummary {
+    double current = 0.0;
+    double min     = 0.0;
+    double max     = 0.0;
+    double avg     = 0.0;
+    double p95     = 0.0;
+    double p99     = 0.0;
+    uint64_t sampleCount = 0;
 };
 
-/// Latency histogram with percentile calculation
-struct LatencyHistogram {
- static constexpr uint32_t BUCKET_COUNT = 64;
- static constexpr uint32_t BUCKET_WIDTH_US =
- 500; // 500µs per bucket, up to 32ms
-
- uint32_t buckets[BUCKET_COUNT] = {};
- uint64_t totalSamples = 0;
- uint64_t totalTimeUs = 0;
-
- void Record(uint32_t timeUs) {
- uint32_t idx = timeUs / BUCKET_WIDTH_US;
- if (idx >= BUCKET_COUNT)
- idx = BUCKET_COUNT - 1;
- buckets[idx]++;
- totalSamples++;
- totalTimeUs += timeUs;
- }
-
- /// Get percentile value in microseconds
- uint32_t Percentile(double p) const {
- if (totalSamples == 0)
- return 0;
- uint64_t target =
- static_cast<uint64_t>(static_cast<double>(totalSamples) * p / 100.0);
- uint64_t cumulative = 0;
- for (uint32_t i = 0; i < BUCKET_COUNT; ++i) {
- cumulative += buckets[i];
- if (cumulative >= target)
- return (i + 1) * BUCKET_WIDTH_US;
- }
- return BUCKET_COUNT * BUCKET_WIDTH_US;
- }
-
- double AverageUs() const {
- return totalSamples > 0 ? static_cast<double>(totalTimeUs) /
- static_cast<double>(totalSamples)
- : 0.0;
- }
-
- void Reset() {
- memset(buckets, 0, sizeof(buckets));
- totalSamples = 0;
- totalTimeUs = 0;
- }
+/// Snapshot of all metric current values at a single instant.
+struct DashboardSnapshot {
+    struct Entry {
+        std::string category;
+        std::string name;
+        double      currentValue = 0.0;
+        uint64_t    sampleCount  = 0;
+    };
+    std::chrono::steady_clock::time_point capturedAt{};
+    std::vector<Entry> entries;
 };
 
-/// Named dashboard metric for GUI display
-enum class DashboardMetric : uint8_t {
- AvgDecodeTime = 0,
- CacheHitRate = 1,
- GPUUsage = 2,
- MemoryUsage = 3,
- Throughput = 4,
- DecodeP95 = 5,
- DecodeP99 = 6,
- VRAMUsage = 7,
- BitmapPoolMB = 8,
- Uptime = 9,
- MetricCount = 10
-};
-
-/// Performance dashboard — singleton data collector
+/// Real-time performance monitoring dashboard collecting metrics from all
+/// engine subsystems. Singleton, thread-safe, header-only.
 class PerformanceDashboard {
 public:
- static PerformanceDashboard &Instance() {
- static PerformanceDashboard inst;
- return inst;
- }
+    // ── Singleton ──────────────────────────────────────────────────────────
+    static PerformanceDashboard& Instance() {
+        static PerformanceDashboard s_instance;
+        return s_instance;
+    }
 
- /// Named metric count (for GUI)
- static constexpr uint32_t MetricCount() {
- return static_cast<uint32_t>(DashboardMetric::MetricCount);
- }
+    // ── Metric recording ──────────────────────────────────────────────────
+    /// Record a raw metric sample.  category must be one of the six supported
+    /// strings: "Decode", "Cache", "GPU", "Memory", "IO", "Plugin".
+    inline void RecordMetric(const std::string& category,
+                             const std::string& name,
+                             double value) {
+        MetricSample sample;
+        sample.value     = value;
+        sample.timestamp = std::chrono::steady_clock::now();
 
- /// Named metric display name
- static const wchar_t *MetricName(DashboardMetric m) {
- switch (m) {
- case DashboardMetric::AvgDecodeTime:
- return L"Avg Decode Time";
- case DashboardMetric::CacheHitRate:
- return L"Cache Hit Rate";
- case DashboardMetric::GPUUsage:
- return L"GPU Usage";
- case DashboardMetric::MemoryUsage:
- return L"Memory Usage";
- case DashboardMetric::Throughput:
- return L"Throughput";
- case DashboardMetric::DecodeP95:
- return L"Decode P95";
- case DashboardMetric::DecodeP99:
- return L"Decode P99";
- case DashboardMetric::VRAMUsage:
- return L"VRAM Usage";
- case DashboardMetric::BitmapPoolMB:
- return L"Bitmap Pool";
- case DashboardMetric::Uptime:
- return L"Uptime";
- default:
- return L"Unknown";
- }
- }
+        AcquireSRWLockExclusive(&m_lock);
+        auto& ring = m_metrics[category][name];
+        if (ring.samples.size() >= kMaxSamples) {
+            ring.samples[ring.writePos % kMaxSamples] = sample;
+        } else {
+            ring.samples.push_back(sample);
+        }
+        ring.writePos++;
+        ReleaseSRWLockExclusive(&m_lock);
+    }
 
- // ── Cache Metrics ──────────────────────────────────────
- void RecordCacheHit() { m_cacheHits++; }
- void RecordCacheMiss() { m_cacheMisses++; }
+    /// Convenience: record a latency measurement in microseconds.
+    inline void RecordLatency(const std::string& category,
+                              const std::string& name,
+                              uint64_t microseconds) {
+        RecordMetric(category, name, static_cast<double>(microseconds));
+    }
 
- double GetCacheHitRate() const {
- uint64_t total = m_cacheHits + m_cacheMisses;
- return total > 0 ? (static_cast<double>(m_cacheHits.load()) /
- static_cast<double>(total)) *
- 100.0
- : 0.0;
- }
+    /// Convenience: record a throughput measurement (items/second).
+    inline void RecordThroughput(const std::string& category,
+                                 const std::string& name,
+                                 double itemsPerSecond) {
+        RecordMetric(category, name, itemsPerSecond);
+    }
 
- uint64_t GetCacheHits() const { return m_cacheHits; }
- uint64_t GetCacheMisses() const { return m_cacheMisses; }
+    /// Convenience: increment a counter metric by 1.
+    inline void RecordCounter(const std::string& category,
+                              const std::string& name) {
+        AcquireSRWLockExclusive(&m_lock);
+        auto& ring = m_metrics[category][name];
+        double prev = 0.0;
+        if (!ring.samples.empty()) {
+            size_t lastIdx = (ring.writePos - 1) % ring.samples.size();
+            prev = ring.samples[lastIdx].value;
+        }
+        ReleaseSRWLockExclusive(&m_lock);
+        RecordMetric(category, name, prev + 1.0);
+    }
 
- // ── Decode Metrics ─────────────────────────────────────
- void RecordDecode(uint32_t durationUs, bool gpuAccel) {
- m_decodeLatency.Record(durationUs);
- m_totalDecodes++;
- if (gpuAccel)
- m_gpuDecodes++;
- }
+    // ── Queries ───────────────────────────────────────────────────────────
+    /// Compute summary (min/max/avg/p95/p99) over the rolling window.
+    inline MetricSummary GetMetricSummary(const std::string& category,
+                                          const std::string& name) const {
+        MetricSummary summary{};
+        AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
 
- uint64_t GetTotalDecodes() const { return m_totalDecodes; }
- uint64_t GetGPUDecodes() const { return m_gpuDecodes; }
+        auto catIt = m_metrics.find(category);
+        if (catIt == m_metrics.end()) {
+            ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+            return summary;
+        }
+        auto metIt = catIt->second.find(name);
+        if (metIt == catIt->second.end()) {
+            ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+            return summary;
+        }
 
- double GetDecodeP50Us() const {
- return static_cast<double>(m_decodeLatency.Percentile(50));
- }
- double GetDecodeP95Us() const {
- return static_cast<double>(m_decodeLatency.Percentile(95));
- }
- double GetDecodeP99Us() const {
- return static_cast<double>(m_decodeLatency.Percentile(99));
- }
- double GetDecodeAvgUs() const { return m_decodeLatency.AverageUs(); }
+        const auto& ring = metIt->second;
+        if (ring.samples.empty()) {
+            ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+            return summary;
+        }
 
- const LatencyHistogram &GetDecodeHistogram() const { return m_decodeLatency; }
+        // Copy values for percentile computation
+        std::vector<double> vals;
+        vals.reserve(ring.samples.size());
+        for (const auto& s : ring.samples) {
+            vals.push_back(s.value);
+        }
+        ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
 
- // ── Memory Metrics ─────────────────────────────────────
- void SetWorkingSetMB(double mb) { m_workingSetMB = mb; }
- void SetCommitChargeMB(double mb) { m_commitMB = mb; }
- void SetBitmapPoolSizeMB(double mb) { m_bitmapPoolMB = mb; }
+        summary.sampleCount = static_cast<uint64_t>(vals.size());
+        summary.current     = vals.back();
 
- double GetWorkingSetMB() const { return m_workingSetMB; }
- double GetCommitChargeMB() const { return m_commitMB; }
- double GetBitmapPoolSizeMB() const { return m_bitmapPoolMB; }
+        double total = 0.0;
+        summary.min  = vals[0];
+        summary.max  = vals[0];
+        for (double v : vals) {
+            total = total + v;
+            summary.min = (std::min)(summary.min, v);
+            summary.max = (std::max)(summary.max, v);
+        }
+        summary.avg = total / static_cast<double>(vals.size());
 
- // ── GPU Metrics ────────────────────────────────────────
- void SetGPUUsagePercent(float pct) { m_gpuUsagePct = pct; }
- void SetVRAMUsedMB(float mb) { m_vramUsedMB = mb; }
- void SetVRAMBudgetMB(float mb) { m_vramBudgetMB = mb; }
+        // P95 / P99 via sorted-array percentile selection
+        std::sort(vals.begin(), vals.end());
+        summary.p95 = PercentileFromSorted(vals, 0.95);
+        summary.p99 = PercentileFromSorted(vals, 0.99);
 
- float GetGPUUsagePercent() const { return m_gpuUsagePct; }
- float GetVRAMUsedMB() const { return m_vramUsedMB; }
- float GetVRAMBudgetMB() const { return m_vramBudgetMB; }
+        return summary;
+    }
 
- // ── Throughput ─────────────────────────────────────────
- void RecordBatchComplete(uint32_t imageCount, uint32_t durationMs) {
- m_batchCount++;
- m_batchImages += imageCount;
- if (durationMs > 0) {
- m_lastThroughput = static_cast<float>(imageCount) * 1000.0f /
- static_cast<float>(durationMs);
- }
- }
+    /// List all category names that have been recorded.
+    inline std::vector<std::string> GetCategories() const {
+        std::vector<std::string> result;
+        AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+        result.reserve(m_metrics.size());
+        for (const auto& kv : m_metrics) {
+            result.push_back(kv.first);
+        }
+        ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+        return result;
+    }
 
- float GetLastThroughput() const { return m_lastThroughput; }
- uint64_t GetTotalBatchImages() const { return m_batchImages; }
+    /// List all metric names within a category.
+    inline std::vector<std::string> GetMetricNames(const std::string& category) const {
+        std::vector<std::string> result;
+        AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+        auto catIt = m_metrics.find(category);
+        if (catIt != m_metrics.end()) {
+            result.reserve(catIt->second.size());
+            for (const auto& kv : catIt->second) {
+                result.push_back(kv.first);
+            }
+        }
+        ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+        return result;
+    }
 
- // ── Uptime ─────────────────────────────────────────────
- double GetUptimeSeconds() const {
- ULONGLONG now = GetTickCount64();
- return static_cast<double>(now - m_startTick) / 1000.0;
- }
+    /// Capture a snapshot of all metrics' current values at this instant.
+    inline DashboardSnapshot GetSnapshot() const {
+        DashboardSnapshot snap;
+        snap.capturedAt = std::chrono::steady_clock::now();
 
- // ── Reset ──────────────────────────────────────────────
- void ResetAll() {
- m_cacheHits = 0;
- m_cacheMisses = 0;
- m_totalDecodes = 0;
- m_gpuDecodes = 0;
- m_decodeLatency.Reset();
- m_batchCount = 0;
- m_batchImages = 0;
- m_lastThroughput = 0;
- m_startTick = GetTickCount64();
- }
+        AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+        for (const auto& catPair : m_metrics) {
+            for (const auto& metPair : catPair.second) {
+                DashboardSnapshot::Entry entry;
+                entry.category    = catPair.first;
+                entry.name        = metPair.first;
+                entry.sampleCount = static_cast<uint64_t>(metPair.second.samples.size());
+                if (!metPair.second.samples.empty()) {
+                    size_t lastIdx = (metPair.second.writePos - 1) % metPair.second.samples.size();
+                    entry.currentValue = metPair.second.samples[lastIdx].value;
+                }
+                snap.entries.push_back(std::move(entry));
+            }
+        }
+        ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+        return snap;
+    }
 
- // ── Summary string for status bar ──────────────────────
- std::string GetSummaryString() const {
- char buf[256];
- snprintf(buf, sizeof(buf),
- "Cache: %.1f%% | Decodes: %llu | P50: %.1fms | GPU: %.0f%% | Mem: "
- "%.0fMB",
- GetCacheHitRate(),
- static_cast<unsigned long long>(m_totalDecodes.load()),
- GetDecodeP50Us() / 1000.0, static_cast<double>(m_gpuUsagePct),
- m_workingSetMB);
- return buf;
- }
+    // ── Export / Reset ─────────────────────────────────────────────────────
+    /// Export all metric history to a CSV file.
+    inline void ExportCSV(const std::wstring& path) const {
+        std::ofstream ofs(path, std::ios::out | std::ios::trunc);
+        if (!ofs.is_open()) return;
+
+        ofs << "Category,Metric,Timestamp_us,Value\n";
+
+        auto epoch = std::chrono::steady_clock::time_point{};
+
+        AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+        for (const auto& catPair : m_metrics) {
+            for (const auto& metPair : catPair.second) {
+                const auto& ring = metPair.second;
+                // Iterate in chronological order
+                size_t count = ring.samples.size();
+                size_t start = (count >= kMaxSamples) ? (ring.writePos % kMaxSamples) : 0;
+                for (size_t i = 0; i < count; ++i) {
+                    size_t idx = (start + i) % count;
+                    const auto& s = ring.samples[idx];
+                    auto us = std::chrono::duration_cast<std::chrono::microseconds>(
+                        s.timestamp - epoch).count();
+                    ofs << catPair.first << ","
+                        << metPair.first << ","
+                        << us << ","
+                        << s.value << "\n";
+                }
+            }
+        }
+        ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_lock));
+        ofs.flush();
+    }
+
+    /// Clear all collected metrics.
+    inline void Reset() {
+        AcquireSRWLockExclusive(&m_lock);
+        m_metrics.clear();
+        ReleaseSRWLockExclusive(&m_lock);
+    }
 
 private:
- PerformanceDashboard() : m_startTick(GetTickCount64()) {}
+    PerformanceDashboard() {
+        InitializeSRWLock(&m_lock);
+    }
+    ~PerformanceDashboard() = default;
+    PerformanceDashboard(const PerformanceDashboard&) = delete;
+    PerformanceDashboard& operator=(const PerformanceDashboard&) = delete;
 
- // Cache
- std::atomic<uint64_t> m_cacheHits{0};
- std::atomic<uint64_t> m_cacheMisses{0};
+    /// Compute percentile from a pre-sorted vector (nearest-rank method).
+    static double PercentileFromSorted(const std::vector<double>& sorted, double p) {
+        if (sorted.empty()) return 0.0;
+        if (sorted.size() == 1) return sorted[0];
+        double rank = p * static_cast<double>(sorted.size() - 1);
+        size_t lo   = static_cast<size_t>(std::floor(rank));
+        size_t hi   = static_cast<size_t>(std::ceil(rank));
+        if (lo == hi) return sorted[lo];
+        double frac = rank - static_cast<double>(lo);
+        return sorted[lo] * (1.0 - frac) + sorted[hi] * frac;
+    }
 
- // Decode
- LatencyHistogram m_decodeLatency{};
- std::atomic<uint64_t> m_totalDecodes{0};
- std::atomic<uint64_t> m_gpuDecodes{0};
+    static constexpr size_t kMaxSamples = 10000;
 
- // Memory
- double m_workingSetMB = 0;
- double m_commitMB = 0;
- double m_bitmapPoolMB = 0;
+    /// Ring buffer for metric samples.
+    struct MetricRing {
+        std::vector<MetricSample> samples;
+        size_t writePos = 0;  ///< Total writes (monotonic), mod kMaxSamples for index
+    };
 
- // GPU
- float m_gpuUsagePct = 0;
- float m_vramUsedMB = 0;
- float m_vramBudgetMB = 0;
+    /// category -> (metric name -> ring buffer)
+    std::unordered_map<std::string,
+        std::unordered_map<std::string, MetricRing>> m_metrics;
 
- // Throughput
- std::atomic<uint64_t> m_batchCount{0};
- std::atomic<uint64_t> m_batchImages{0};
- float m_lastThroughput = 0;
-
- // Uptime
- ULONGLONG m_startTick = 0;
+    mutable SRWLOCK m_lock = SRWLOCK_INIT;
 };
 
 } // namespace Engine

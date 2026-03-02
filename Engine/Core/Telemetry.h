@@ -632,7 +632,7 @@ struct Statistics {
         s.max = values.back();
         s.median = values[values.size() / 2];
         s.p95 = values[static_cast<size_t>(values.size() * 0.95)];
-        s.p99 = values[std::min(static_cast<size_t>(values.size() * 0.99), values.size() - 1)];
+        s.p99 = values[(std::min)(static_cast<size_t>(values.size() * 0.99), values.size() - 1)];
 
         double sum = std::accumulate(values.begin(), values.end(), 0.0);
         s.mean = sum / static_cast<double>(s.count);

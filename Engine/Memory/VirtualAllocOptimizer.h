@@ -1,143 +1,363 @@
 #pragma once
 // ============================================================================
-// VirtualAllocOptimizer.h — VirtualAlloc strategy for large buffer management
+// VirtualAllocOptimizer.h — Sprint 560
 //
-// Purpose:   VirtualAlloc strategy selection for large buffer management
-// Provides:  VAllocStrategy, PageProtection enums, and
-//            VirtualAllocOptimizer class
-// Used by:   GPU upload and decode buffer allocation
+// Purpose:
+//   Smart VirtualAlloc wrapper providing reserve/commit-on-demand memory
+//   management with guard-page support.  Thumbnails often need large
+//   contiguous buffers whose actual usage varies at runtime; this class
+//   reserves large virtual ranges but only commits pages when accessed,
+//   keeping the working set small.
+//
+// Classes:
+//   VirtualAllocOptimizer — manages virtual regions (reserve, commit,
+//                           decommit, release) with optional guard pages
+//                           and vectored exception handler auto-commit.
+//
+// Key Types:
+//   VirtualRegion — describes one reserved/committed range
+//   CommitStats   — aggregate statistics for all managed regions
+//
+// Inputs:
+//   Reserve / Commit / Decommit / Release        — lifecycle management
+//   SetGuardPage                                  — detect-on-access
+//   ReserveWithAutoCommit                         — VEH auto-commit
+//
+// Outputs:
+//   GetStats()          — totals across all tracked regions
+//   GetActiveRegions()  — snapshot of current regions
+//
+// Thread Safety:
+//   All public methods are serialized with a Win32 SRWLOCK (exclusive).
+//
+// Dependencies:
+//   Windows API + C++ standard library only (header-only, no external libs).
 // ============================================================================
 
+#include <windows.h>
+#include <vector>
+#include <mutex>
+#include <atomic>
 #include <cstdint>
-#include <string>
+#include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
 
-/// Virtual memory allocation strategy
-enum class VAllocStrategy : uint8_t {
-    ReserveCommit = 0,  // Standard reserve + commit
-    LargePages = 1,  // Large page (2MB/1GB) allocations
-    MemReset = 2,  // MEM_RESET equivalent for reusable pages
-    AWE = 3,  // Address Windowing Extensions
-    Sections = 4   // Memory-mapped file sections
+// ── Region descriptor ────────────────────────────────────────────────────────
+
+struct VirtualRegion {
+    void*   base      = nullptr;
+    size_t  reserved  = 0;
+    size_t  committed = 0;
+    DWORD   protect   = PAGE_READWRITE;
+    bool    autoCommit = false;  // true when VEH auto-commit is active
 };
 
-inline const char* VAllocStrategyName(VAllocStrategy s) noexcept {
-    switch (s) {
-    case VAllocStrategy::ReserveCommit: return "ReserveCommit";
-    case VAllocStrategy::LargePages:    return "LargePages";
-    case VAllocStrategy::MemReset:     return "MemReset";
-    case VAllocStrategy::AWE:           return "AWE";
-    case VAllocStrategy::Sections:      return "Sections";
-    default:                            return "Unknown";
-    }
-}
+// ── Aggregate statistics ─────────────────────────────────────────────────────
 
-/// Page protection flags for allocated memory
-enum class PageProtection : uint8_t {
-    ReadOnly = 0,  // PAGE_READONLY
-    ReadWrite = 1,  // PAGE_READWRITE
-    Execute = 2,  // PAGE_EXECUTE_READ
-    Guard = 3,  // PAGE_GUARD
-    NoAccess = 4   // PAGE_NOACCESS
+struct CommitStats {
+    uint32_t regionsTracked      = 0;
+    size_t   totalReserved       = 0;
+    size_t   totalCommitted      = 0;
+    double   commitRatio         = 0.0;   // committed / reserved
+    uint64_t guardPageFaultsHandled = 0;
 };
 
-inline const char* PageProtectionName(PageProtection p) noexcept {
-    switch (p) {
-    case PageProtection::ReadOnly:  return "ReadOnly";
-    case PageProtection::ReadWrite: return "ReadWrite";
-    case PageProtection::Execute:   return "Execute";
-    case PageProtection::Guard:     return "Guard";
-    case PageProtection::NoAccess:  return "NoAccess";
-    default:                        return "Unknown";
-    }
-}
+// ── Main class ───────────────────────────────────────────────────────────────
 
-/// Allocation tracking record
-struct VAllocRecord {
-    uint64_t       address = 0;
-    uint64_t       sizeBytes = 0;
-    VAllocStrategy strategy = VAllocStrategy::ReserveCommit;
-    PageProtection protection = PageProtection::ReadWrite;
-    bool           committed = false;
-};
-
-/// Configuration for the VirtualAlloc optimizer
-struct VAllocConfig {
-    VAllocStrategy defaultStrategy = VAllocStrategy::ReserveCommit;
-    uint64_t       largePageThreshold = 2 * 1024 * 1024;  // 2 MB
-    uint32_t       maxAllocations = 4096;
-    bool           enableLargePages = false;
-    bool           trackAllocations = true;
-};
-
-/// Optimizes VirtualAlloc usage patterns for large image decode
-/// buffers, supporting large-page allocations, working-set
-/// optimization, and memory-reset recycling strategies.
 class VirtualAllocOptimizer {
 public:
-    VirtualAllocOptimizer() = default;
-    ~VirtualAllocOptimizer() = default;
+    VirtualAllocOptimizer() noexcept {
+        InitializeSRWLock(&m_lock);
 
-    VirtualAllocOptimizer(const VirtualAllocOptimizer&) = delete;
-    VirtualAllocOptimizer& operator=(const VirtualAllocOptimizer&) = delete;
-    VirtualAllocOptimizer(VirtualAllocOptimizer&&) noexcept = default;
-    VirtualAllocOptimizer& operator=(VirtualAllocOptimizer&&) noexcept = default;
+        // Query system page info once
+        SYSTEM_INFO si{};
+        GetSystemInfo(&si);
+        m_pageSize             = si.dwPageSize;
+        m_allocationGranularity = si.dwAllocationGranularity;
 
-    /// Allocate a buffer with the given strategy
-    uint64_t Allocate(uint64_t sizeBytes, VAllocStrategy strategy,
-        PageProtection protection = PageProtection::ReadWrite) {
-        (void)strategy;
-        (void)protection;
-        if (sizeBytes == 0) return 0;
-        m_totalAllocated += sizeBytes;
-        m_allocationCount++;
-        // Return a simulated address (non-zero)
-        return 0x10000 + (m_allocationCount * 0x10000);
+        // Install vectored exception handler for auto-commit guard pages
+        m_vehHandle = AddVectoredExceptionHandler(
+            1 /*first handler*/, &VirtualAllocOptimizer::VehHandler);
     }
 
-    /// Release a previously allocated buffer
-    bool Release(uint64_t address) {
-        if (address == 0) return false;
-        m_releaseCount++;
+    ~VirtualAllocOptimizer() {
+        // Release all regions
+        AcquireSRWLockExclusive(&m_lock);
+        for (auto& region : m_regions) {
+            if (region.base) {
+                VirtualFree(region.base, 0, MEM_RELEASE);
+                region.base = nullptr;
+            }
+        }
+        m_regions.clear();
+        ReleaseSRWLockExclusive(&m_lock);
+
+        // Remove VEH
+        if (m_vehHandle) {
+            RemoveVectoredExceptionHandler(m_vehHandle);
+            m_vehHandle = nullptr;
+        }
+    }
+
+    VirtualAllocOptimizer(const VirtualAllocOptimizer&)            = delete;
+    VirtualAllocOptimizer& operator=(const VirtualAllocOptimizer&) = delete;
+
+    // ── Reserve ──────────────────────────────────────────────────
+
+    VirtualRegion Reserve(size_t size, DWORD protect = PAGE_READWRITE) {
+        VirtualRegion region{};
+        size_t aligned = AlignUp(size, m_allocationGranularity);
+
+        void* base = VirtualAlloc(nullptr, aligned, MEM_RESERVE, protect);
+        if (!base) return region;
+
+        region.base      = base;
+        region.reserved  = aligned;
+        region.committed = 0;
+        region.protect   = protect;
+        region.autoCommit = false;
+
+        AcquireSRWLockExclusive(&m_lock);
+        m_regions.push_back(region);
+        ReleaseSRWLockExclusive(&m_lock);
+
+        return region;
+    }
+
+    // ── Commit a sub-range ───────────────────────────────────────
+
+    bool Commit(VirtualRegion& region, size_t offset, size_t size) {
+        if (!region.base || size == 0) return false;
+
+        size_t alignedOffset = AlignDown(offset, m_pageSize);
+        size_t alignedEnd    = AlignUp(offset + size, m_pageSize);
+        size_t commitSize    = alignedEnd - alignedOffset;
+
+        // Clamp to region bounds
+        if (alignedOffset + commitSize > region.reserved) {
+            commitSize = region.reserved - alignedOffset;
+        }
+
+        void* addr = static_cast<uint8_t*>(region.base) + alignedOffset;
+        void* result = VirtualAlloc(addr, commitSize,
+                                    MEM_COMMIT, region.protect);
+        if (!result) return false;
+
+        // Track committed range (approximate — overlaps are idempotent)
+        AcquireSRWLockExclusive(&m_lock);
+        region.committed += commitSize;
+        // Update our stored copy
+        for (auto& r : m_regions) {
+            if (r.base == region.base) {
+                r.committed = region.committed;
+                break;
+            }
+        }
+        ReleaseSRWLockExclusive(&m_lock);
+
         return true;
     }
 
-    /// Optimize working set by decommitting unused pages
-    uint64_t OptimizeWorking() {
-        uint64_t reclaimedBytes = m_totalAllocated / 4;  // Simulate 25% reclaim
-        m_optimizeCount++;
-        return reclaimedBytes;
+    // ── Decommit a sub-range ─────────────────────────────────────
+
+    bool Decommit(VirtualRegion& region, size_t offset, size_t size) {
+        if (!region.base || size == 0) return false;
+
+        size_t alignedOffset = AlignDown(offset, m_pageSize);
+        size_t alignedEnd    = AlignUp(offset + size, m_pageSize);
+        size_t decommitSize  = alignedEnd - alignedOffset;
+
+        if (alignedOffset + decommitSize > region.reserved) {
+            decommitSize = region.reserved - alignedOffset;
+        }
+
+        void* addr = static_cast<uint8_t*>(region.base) + alignedOffset;
+        BOOL ok = VirtualFree(addr, decommitSize, MEM_DECOMMIT);
+        if (!ok) return false;
+
+        AcquireSRWLockExclusive(&m_lock);
+        if (region.committed >= decommitSize) {
+            region.committed -= decommitSize;
+        } else {
+            region.committed = 0;
+        }
+        for (auto& r : m_regions) {
+            if (r.base == region.base) {
+                r.committed = region.committed;
+                break;
+            }
+        }
+        ReleaseSRWLockExclusive(&m_lock);
+
+        return true;
     }
 
-    /// Check if the system supports large pages
-    bool LargePageSupported() const noexcept {
-        // Large page support requires SeLockMemoryPrivilege
-        return m_config.enableLargePages;
+    // ── Release ──────────────────────────────────────────────────
+
+    void Release(VirtualRegion& region) {
+        if (!region.base) return;
+
+        AcquireSRWLockExclusive(&m_lock);
+        m_regions.erase(
+            std::remove_if(m_regions.begin(), m_regions.end(),
+                [&](const VirtualRegion& r) { return r.base == region.base; }),
+            m_regions.end());
+        ReleaseSRWLockExclusive(&m_lock);
+
+        VirtualFree(region.base, 0, MEM_RELEASE);
+        region.base      = nullptr;
+        region.reserved  = 0;
+        region.committed = 0;
     }
 
-    /// Get total allocated bytes
-    uint64_t GetTotalAllocated() const noexcept { return m_totalAllocated; }
+    // ── Guard page ───────────────────────────────────────────────
 
-    /// Get allocation count
-    uint64_t GetAllocationCount() const noexcept { return m_allocationCount; }
+    bool SetGuardPage(VirtualRegion& region, size_t offset) {
+        if (!region.base) return false;
 
-    /// Get release count
-    uint64_t GetReleaseCount() const noexcept { return m_releaseCount; }
+        size_t alignedOffset = AlignDown(offset, m_pageSize);
+        if (alignedOffset >= region.reserved) return false;
 
-    /// Apply configuration
-    void SetConfig(const VAllocConfig& cfg) noexcept { m_config = cfg; }
+        void* addr = static_cast<uint8_t*>(region.base) + alignedOffset;
 
-    /// Get current config
-    const VAllocConfig& GetConfig() const noexcept { return m_config; }
+        // Commit the page first if not already committed
+        VirtualAlloc(addr, m_pageSize, MEM_COMMIT, region.protect);
+
+        DWORD oldProtect = 0;
+        BOOL ok = VirtualProtect(addr, m_pageSize,
+                                 region.protect | PAGE_GUARD, &oldProtect);
+        return ok != FALSE;
+    }
+
+    // ── Reserve with auto-commit on guard-page fault ─────────────
+
+    VirtualRegion ReserveWithAutoCommit(size_t maxSize,
+                                         size_t initialCommit) {
+        VirtualRegion region = Reserve(maxSize);
+        if (!region.base) return region;
+
+        // Commit initial range
+        if (initialCommit > 0) {
+            size_t toCommit = (std::min)(initialCommit, region.reserved);
+            Commit(region, 0, toCommit);
+        }
+
+        // Place a guard page right after the committed range
+        size_t guardOffset = AlignUp(initialCommit, m_pageSize);
+        if (guardOffset < region.reserved) {
+            // Commit one guard page
+            void* guardAddr = static_cast<uint8_t*>(region.base) + guardOffset;
+            VirtualAlloc(guardAddr, m_pageSize, MEM_COMMIT, PAGE_READWRITE);
+
+            // Apply PAGE_GUARD
+            DWORD oldProtect = 0;
+            VirtualProtect(guardAddr, m_pageSize,
+                           PAGE_READWRITE | PAGE_GUARD, &oldProtect);
+        }
+
+        region.autoCommit = true;
+
+        // Update our stored copy
+        AcquireSRWLockExclusive(&m_lock);
+        for (auto& r : m_regions) {
+            if (r.base == region.base) {
+                r.autoCommit = true;
+                break;
+            }
+        }
+        ReleaseSRWLockExclusive(&m_lock);
+
+        return region;
+    }
+
+    // ── Statistics ───────────────────────────────────────────────
+
+    CommitStats GetStats() {
+        AcquireSRWLockExclusive(&m_lock);
+        CommitStats stats{};
+        stats.regionsTracked = static_cast<uint32_t>(m_regions.size());
+        for (const auto& r : m_regions) {
+            stats.totalReserved  += r.reserved;
+            stats.totalCommitted += r.committed;
+        }
+        stats.commitRatio = stats.totalReserved > 0
+            ? static_cast<double>(stats.totalCommitted) /
+              static_cast<double>(stats.totalReserved)
+            : 0.0;
+        stats.guardPageFaultsHandled =
+            s_guardFaultsHandled.load(std::memory_order_relaxed);
+        ReleaseSRWLockExclusive(&m_lock);
+        return stats;
+    }
+
+    std::vector<VirtualRegion> GetActiveRegions() {
+        AcquireSRWLockExclusive(&m_lock);
+        auto copy = m_regions;
+        ReleaseSRWLockExclusive(&m_lock);
+        return copy;
+    }
+
+    // ── System page info ─────────────────────────────────────────
+
+    size_t GetPageSize()             const noexcept { return m_pageSize; }
+    size_t GetAllocationGranularity() const noexcept { return m_allocationGranularity; }
 
 private:
-    VAllocConfig m_config;
-    uint64_t     m_totalAllocated = 0;
-    uint64_t     m_allocationCount = 0;
-    uint64_t     m_releaseCount = 0;
-    uint64_t     m_optimizeCount = 0;
+    // ── Alignment helpers ────────────────────────────────────────
+
+    static size_t AlignUp(size_t value, size_t alignment) noexcept {
+        if (alignment == 0) return value;
+        return (value + alignment - 1) & ~(alignment - 1);
+    }
+
+    static size_t AlignDown(size_t value, size_t alignment) noexcept {
+        if (alignment == 0) return value;
+        return value & ~(alignment - 1);
+    }
+
+    // ── Vectored exception handler (auto-commit) ─────────────────
+
+    static LONG CALLBACK VehHandler(PEXCEPTION_POINTERS pExInfo) {
+        if (pExInfo->ExceptionRecord->ExceptionCode != STATUS_GUARD_PAGE_VIOLATION) {
+            return EXCEPTION_CONTINUE_SEARCH;
+        }
+
+        // A guard page was hit — the system automatically removes the
+        // PAGE_GUARD attribute.  We commit the next page and set a new
+        // guard page one page ahead to allow further growth.
+        void* faultAddr =
+            reinterpret_cast<void*>(pExInfo->ExceptionRecord->ExceptionInformation[1]);
+
+        // Round to page boundary
+        SYSTEM_INFO si{};
+        GetSystemInfo(&si);
+        uintptr_t pageBase = reinterpret_cast<uintptr_t>(faultAddr)
+                             & ~(static_cast<uintptr_t>(si.dwPageSize) - 1);
+        uintptr_t nextPage = pageBase + si.dwPageSize;
+
+        // Commit next page and set its guard flag
+        void* committed = VirtualAlloc(reinterpret_cast<void*>(nextPage),
+                                       si.dwPageSize, MEM_COMMIT,
+                                       PAGE_READWRITE | PAGE_GUARD);
+        if (committed) {
+            s_guardFaultsHandled.fetch_add(1, std::memory_order_relaxed);
+        }
+
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
+
+    // ── Data members ─────────────────────────────────────────────
+
+    SRWLOCK                     m_lock{};
+    std::vector<VirtualRegion>  m_regions;
+    PVOID                       m_vehHandle = nullptr;
+
+    size_t m_pageSize              = 4096;
+    size_t m_allocationGranularity = 65536;
+
+    inline static std::atomic<uint64_t> s_guardFaultsHandled{0};
 };
 
 } // namespace Engine

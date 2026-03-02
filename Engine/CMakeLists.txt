@@ -333,6 +333,15 @@ set(ENGINE_HEADERS
     Core/ResourceQuotaManager.h
     Core/AccessTokenValidator.h
     Core/ExplorerPreviewPane.h
+    Core/FormatFallbackEngine.h
+    Core/SmartFormatDetectorV2.h
+    Core/DecoderPriorityScheduler.h
+    Core/ExplorerWorkScheduler.h
+    Core/BatchProcessor.h
+
+    # Sprint 589-590
+    Core/IntegrationTestRunner.h
+    Core/SBOMGenerator.h
 
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
@@ -353,6 +362,7 @@ set(ENGINE_HEADERS
     Pipeline/AdaptiveQualityScaler.h
     Pipeline/DecoderPriorityScheduler.h
     Pipeline/FilesystemWatchdog.h
+    Pipeline/ParallelIOPipeline.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -441,6 +451,7 @@ set(ENGINE_HEADERS
     GPU/VulkanComputePipeline.h
     GPU/VulkanMemoryAllocator.h
     GPU/GPUWorkloadBalancer.h
+    GPU/GPUDecodeAccelerationV2.h
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
@@ -458,6 +469,7 @@ set(ENGINE_HEADERS
     Cache/USNCacheInvalidation.h
     Cache/CacheMigrationEngine.h
     Cache/CacheEncryptionLayer.h
+    Cache/SubMillisecondCacheEngine.h
 
     # Plugin system
     Plugin/CrashHandler.h
@@ -487,15 +499,24 @@ set(ENGINE_HEADERS
     Plugin/PluginSandboxPolicy.h
     Plugin/PluginSDKV2.h
     Plugin/PluginSecurity.h
+    Plugin/PluginNamedPipeBridge.h
     Plugin/PluginTrustChain.h
+    Plugin/CrashIntelligenceEngine.h
+    Plugin/PluginHotReloadManager.h
+    Plugin/PluginCompatibilityKit.h
+    Plugin/PluginTrustChainValidator.h
     Plugin/Security/JobObjectManager.h
 
     # AI/ML modules
     AI/AISearchIntegration.h
     AI/AIThumbnailEnhancer.h
     AI/ImageQualityAssessor.h
+    AI/ImageQualityAssessorV2.h
+    AI/SceneClassifierEngine.h
     AI/SceneUnderstandingEngine.h
+    AI/SmartCropEngine.h
     AI/SmartCropV2.h
+    AI/ThumbnailSearchIndex.h
 
     # Codec modules
     Codec/CodecLoader.h
@@ -520,6 +541,7 @@ set(ENGINE_HEADERS
     Memory/MemorySoakValidator.h
     Memory/SmartPointerPool.h
     Memory/MemoryDefragmenter.h
+    Memory/MemoryFootprintOptimizerV2.h
 
     # Shell integration
     Shell/COMApartmentAudit.h
@@ -590,6 +612,11 @@ set(ENGINE_HEADERS
     Utils/Win11Integration.h
     Utils/RegistrySnapshotManager.h
 
+    # Sprint 591-593
+    Utils/InstallerLifecycleManager.h
+    Utils/TelemetryEngine.h
+    Utils/DocumentationGenerator.h
+
     # Release gate (unified)
     Utils/ReleaseGate.h
 
@@ -625,6 +652,8 @@ set(ENGINE_HEADERS
     Core/CrashAnalyticsCollector.h
     Core/PerformanceAnomalyDetector.h
     Core/PerformanceDashboard.h
+    Core/ThumbnailPreviewEngine.h
+    Core/DiagnosticsCollector.h
     Core/DiagnosticReportGeneratorV2.h
     Core/HealthCheckEndpoint.h
     Core/PreviewTooltipRenderer.h

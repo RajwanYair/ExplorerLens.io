@@ -1,292 +1,324 @@
 // ============================================================================
-// AdaptiveGPUScheduler.h — GPU/CPU Adaptive Workload Routing
-// ExplorerLens Engine v15.0.0
+// AdaptiveGPUScheduler.h — Dynamic GPU/CPU Work Scheduling
+// ExplorerLens Engine v15.0.0  (Sprint 567)
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Dynamically routes thumbnail decode/resize work between GPU and CPU based
-// on real-time load, power state, thermal throttling, and format suitability.
-// Maximizes throughput while avoiding GPU starvation or CPU bottlenecks.
+// PURPOSE
+//   Dynamically schedules thumbnail decode and resize work between GPU
+//   and CPU based on real-time GPU memory pressure and system power state.
+//   Queries GPU utilisation via IDXGIAdapter3::QueryVideoMemoryInfo
+//   (dynamically loaded), checks battery status with GetSystemPowerStatus,
+//   and maintains a priority-sorted work queue that is dispatched according
+//   to the current decision policy.
+//
+// CLASSES
+//   AdaptiveGPUScheduler — main scheduler
+//
+// KEY API
+//   Initialize()           — enumerate DXGI adapters, select primary
+//   QueryGPULoad()         — returns GPULoadInfo (dedicated/shared mem)
+//   ShouldUseGPU(...)      — tri-state decision: GPU / CPU / Defer
+//   SetGPUMemoryReserve()  — always keep this much VRAM free
+//   SetPreferCPUOnBattery()— reduce GPU usage on battery power
+//   SubmitGPUWork(fn, pri) — enqueue work; dispatched by ProcessQueue()
+//   ProcessQueue()         — drain the queue honouring current policy
+//   GetStats()             — SchedulerStats
+//
+// THREAD SAFETY
+//   All public methods guarded by SRWLOCK.
+//
+// DEPENDENCIES
+//   Windows API only.  dxgi.dll loaded dynamically — no .lib needed.
 // ============================================================================
-
 #pragma once
 
-#include <cstdint>
-#include <string>
+#include <windows.h>
+#include <dxgi1_4.h>
 #include <vector>
-#include <deque>
+#include <queue>
+#include <functional>
 #include <mutex>
 #include <atomic>
+#include <cstdint>
 #include <chrono>
+#include <string>
 #include <algorithm>
 
 namespace ExplorerLens {
 namespace Engine {
 
-// ============================================================================
-// Processing backend selection
-// ============================================================================
+// -----------------------------------------------------------------------
+// GPULoadInfo
+// -----------------------------------------------------------------------
+struct GPULoadInfo {
+    uint64_t dedicatedUsed     = 0;
+    uint64_t dedicatedBudget   = 0;
+    uint64_t sharedUsed        = 0;
+    uint64_t sharedBudget      = 0;
 
-enum class ProcessingBackend : uint8_t {
-    CPU = 0,  // Multi-threaded CPU decode
-    GPU_D3D11 = 1,  // D3D11 compute shader
-    GPU_D3D12 = 2,  // D3D12 compute (preferred)
-    GPU_Vulkan = 3,  // Vulkan compute
-    GPU_Vendor = 4,  // Vendor-specific (NVDEC/QuickSync/AMF)
-    Auto = 5   // Scheduler decides
-};
-
-inline const char* ProcessingBackendToString(ProcessingBackend backend) {
-    static const char* names[] = {
-        "CPU", "D3D11", "D3D12", "Vulkan", "Vendor", "Auto"
-    };
-    return names[static_cast<uint8_t>(backend)];
-}
-
-// ============================================================================
-// System load snapshot
-// ============================================================================
-
-struct SystemLoadSnapshot {
-    float cpuUtilization = 0.0f;  // 0-100%
-    float gpuUtilization = 0.0f;  // 0-100%
-    float gpuMemoryUsedMB = 0.0f;
-    float gpuMemoryTotalMB = 0.0f;
-    float gpuTemperatureC = 0.0f;
-    float cpuTemperatureC = 0.0f;
-    bool  gpuThrottled = false;
-    bool  onBatteryPower = false;
-    uint32_t pendingGPUWork = 0;
-    uint32_t pendingCPUWork = 0;
-    uint64_t timestamp = 0;
-
-    float GetGPUMemoryPercent() const {
-        return (gpuMemoryTotalMB > 0)
-            ? (gpuMemoryUsedMB / gpuMemoryTotalMB * 100.0f)
+    float DedicatedUsagePercent() const {
+        return (dedicatedBudget > 0)
+            ? (static_cast<float>(dedicatedUsed) / static_cast<float>(dedicatedBudget) * 100.0f)
             : 0.0f;
     }
-
-    bool IsGPUOverloaded() const {
-        return gpuUtilization > 90.0f || gpuThrottled ||
-            GetGPUMemoryPercent() > 85.0f;
-    }
-
-    bool IsCPUOverloaded() const {
-        return cpuUtilization > 85.0f;
+    uint64_t DedicatedAvailable() const {
+        return (dedicatedBudget > dedicatedUsed) ? (dedicatedBudget - dedicatedUsed) : 0;
     }
 };
 
-// ============================================================================
-// Work item for scheduling
-// ============================================================================
-
-struct ScheduledWorkItem {
-    uint64_t            id = 0;
-    std::wstring        filePath;
-    std::wstring        formatType;
-    uint64_t            fileSize = 0;
-    uint32_t            targetWidth = 256;
-    uint32_t            targetHeight = 256;
-    ProcessingBackend   preferredBackend = ProcessingBackend::Auto;
-    ProcessingBackend   assignedBackend = ProcessingBackend::Auto;
-    bool                assigned = false;
-    bool                completed = false;
-    double              estimatedTimeMs = 0.0;
-    double              actualTimeMs = 0.0;
-    uint32_t            priority = 0;  // Higher = more urgent
+// -----------------------------------------------------------------------
+// ScheduleDecision
+// -----------------------------------------------------------------------
+enum class ScheduleDecision : uint8_t {
+    GPU   = 0,
+    CPU   = 1,
+    Defer = 2
 };
 
-// ============================================================================
-// Scheduling statistics
-// ============================================================================
+inline const char* ScheduleDecisionName(ScheduleDecision d) {
+    switch (d) {
+        case ScheduleDecision::GPU:   return "GPU";
+        case ScheduleDecision::CPU:   return "CPU";
+        case ScheduleDecision::Defer: return "Defer";
+    }
+    return "Unknown";
+}
 
+// -----------------------------------------------------------------------
+// SchedulerStats
+// -----------------------------------------------------------------------
 struct SchedulerStats {
-    uint64_t totalScheduled = 0;
-    uint64_t cpuAssigned = 0;
-    uint64_t gpuAssigned = 0;
-    uint64_t routingDecisions = 0;
-    uint64_t rebalanceEvents = 0;  // GPU↔CPU migrations
-    double   avgCPUTimeMs = 0.0;
-    double   avgGPUTimeMs = 0.0;
-    double   throughputPerSec = 0.0;
-
-    double GetGPURatio() const {
-        return (totalScheduled > 0)
-            ? (static_cast<double>(gpuAssigned) / totalScheduled * 100.0)
-            : 0.0;
-    }
+    uint64_t gpuDecisions    = 0;
+    uint64_t cpuDecisions    = 0;
+    uint64_t deferredItems   = 0;
+    uint64_t workItemsQueued = 0;
+    uint64_t workItemsDone   = 0;
+    GPULoadInfo lastGPULoad;
+    bool     onBattery       = false;
 };
 
-// ============================================================================
-// Format GPU suitability score
-// ============================================================================
-
-struct FormatGPUAffinity {
-    std::wstring formatType;
-    float        gpuAffinity = 0.5f;  // 0.0 = CPU-only, 1.0 = GPU-strongly-preferred
-    float        minGPUSpeedup = 1.0f; // GPU must be this many times faster
-
-    /// Pre-scored format affinities
-    static float GetDefaultAffinity(const std::wstring& format) {
-        // Formats that benefit most from GPU
-        if (format == L"RAW" || format == L"EXR" || format == L"HDR") return 0.95f;
-        if (format == L"HEIF" || format == L"AVIF") return 0.9f;
-        if (format == L"JPEG" || format == L"WebP") return 0.8f;
-        if (format == L"TIFF" || format == L"PSD") return 0.75f;
-        if (format == L"Video") return 0.95f;  // Hardware decode
-        // Formats better suited to CPU
-        if (format == L"SVG" || format == L"Font") return 0.2f;
-        if (format == L"PDF" || format == L"Document") return 0.3f;
-        if (format == L"Archive") return 0.1f;  // I/O bound
-        return 0.5f;  // Default balanced
-    }
-};
-
-// ============================================================================
+// -----------------------------------------------------------------------
 // AdaptiveGPUScheduler
-// ============================================================================
-
+// -----------------------------------------------------------------------
 class AdaptiveGPUScheduler {
 public:
-    static constexpr uint32_t MAX_QUEUE_SIZE = 256;
-    static constexpr float GPU_OVERLOAD_THRESHOLD = 90.0f;
-    static constexpr float CPU_OVERLOAD_THRESHOLD = 85.0f;
-    static constexpr float REBALANCE_HYSTERESIS = 10.0f; // % change needed
-    static constexpr uint32_t LOAD_SAMPLE_INTERVAL_MS = 100;
+    AdaptiveGPUScheduler()  = default;
+    ~AdaptiveGPUScheduler() { Shutdown(); }
 
-    AdaptiveGPUScheduler() = default;
-    ~AdaptiveGPUScheduler() = default;
-
-    // Non-copyable
-    AdaptiveGPUScheduler(const AdaptiveGPUScheduler&) = delete;
+    AdaptiveGPUScheduler(const AdaptiveGPUScheduler&)            = delete;
     AdaptiveGPUScheduler& operator=(const AdaptiveGPUScheduler&) = delete;
 
-    // ========================================================================
-    // Initialization
-    // ========================================================================
+    // ================================================================
+    // Initialize — enumerate DXGI adapters
+    // ================================================================
+    inline bool Initialize() {
+        AcquireExclusive();
+        if (m_ready) { ReleaseExclusive(); return true; }
 
-    bool Initialize(bool gpuAvailable = true) {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_gpuAvailable = gpuAvailable;
-        m_initialized = true;
+        m_hDXGI = ::LoadLibraryW(L"dxgi.dll");
+        if (m_hDXGI) {
+            using PFN_CreateDXGIFactory1 = HRESULT(WINAPI*)(REFIID, void**);
+            auto pfn = reinterpret_cast<PFN_CreateDXGIFactory1>(
+                ::GetProcAddress(m_hDXGI, "CreateDXGIFactory1"));
+            if (pfn) {
+                IDXGIFactory1* factory = nullptr;
+                if (SUCCEEDED(pfn(__uuidof(IDXGIFactory1),
+                                  reinterpret_cast<void**>(&factory)))) {
+                    IDXGIAdapter1* adapter1 = nullptr;
+                    if (SUCCEEDED(factory->EnumAdapters1(0, &adapter1))) {
+                        HRESULT hr = adapter1->QueryInterface(
+                            __uuidof(IDXGIAdapter3),
+                            reinterpret_cast<void**>(&m_adapter));
+                        if (FAILED(hr)) m_adapter = nullptr;
+                        adapter1->Release();
+                    }
+                    factory->Release();
+                }
+            }
+        }
+        m_ready = true;
+        ReleaseExclusive();
         return true;
     }
 
-    bool IsInitialized() const { return m_initialized; }
-    bool IsGPUAvailable() const { return m_gpuAvailable; }
-
-    // ========================================================================
-    // Load monitoring
-    // ========================================================================
-
-    void UpdateSystemLoad(const SystemLoadSnapshot& load) {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_currentLoad = load;
-        m_loadHistory.push_back(load);
-        if (m_loadHistory.size() > 100) m_loadHistory.pop_front();
+    // ================================================================
+    // QueryGPULoad
+    // ================================================================
+    inline GPULoadInfo QueryGPULoad() {
+        AcquireShared();
+        GPULoadInfo info{};
+        if (m_adapter) {
+            DXGI_QUERY_VIDEO_MEMORY_INFO dedicated{};
+            DXGI_QUERY_VIDEO_MEMORY_INFO shared{};
+            if (SUCCEEDED(m_adapter->QueryVideoMemoryInfo(
+                    0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &dedicated))) {
+                info.dedicatedUsed   = dedicated.CurrentUsage;
+                info.dedicatedBudget = dedicated.Budget;
+            }
+            if (SUCCEEDED(m_adapter->QueryVideoMemoryInfo(
+                    0, DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL, &shared))) {
+                info.sharedUsed   = shared.CurrentUsage;
+                info.sharedBudget = shared.Budget;
+            }
+        }
+        m_stats.lastGPULoad = info;
+        ReleaseShared();
+        return info;
     }
 
-    SystemLoadSnapshot GetCurrentLoad() const { return m_currentLoad; }
+    // ================================================================
+    // ShouldUseGPU — tri-state decision
+    // ================================================================
+    inline ScheduleDecision ShouldUseGPU(size_t estimatedVRAM,
+                                         uint32_t estimatedDispatchCount) {
+        (void)estimatedDispatchCount;
+        AcquireShared();
 
-    // ========================================================================
-    // Work scheduling
-    // ========================================================================
+        // Check battery
+        SYSTEM_POWER_STATUS ps{};
+        ::GetSystemPowerStatus(&ps);
+        bool battery = (ps.ACLineStatus == 0);
+        m_stats.onBattery = battery;
 
-    /// Route a work item to the optimal backend
-    ProcessingBackend RouteWork(ScheduledWorkItem& item) {
-        std::lock_guard<std::mutex> lock(m_mutex);
-
-        m_stats.totalScheduled++;
-        m_stats.routingDecisions++;
-
-        // Explicit backend preference
-        if (item.preferredBackend != ProcessingBackend::Auto) {
-            item.assignedBackend = item.preferredBackend;
-            UpdateBackendStats(item.assignedBackend);
-            return item.assignedBackend;
+        if (battery && m_preferCPUOnBattery) {
+            m_stats.cpuDecisions++;
+            ReleaseShared();
+            return ScheduleDecision::CPU;
         }
 
-        // Get format GPU affinity
-        float affinity = FormatGPUAffinity::GetDefaultAffinity(item.formatType);
+        GPULoadInfo load = QueryGPULoadInternal();
 
-        // Decision factors
-        bool gpuOverloaded = m_currentLoad.IsGPUOverloaded();
-        bool cpuOverloaded = m_currentLoad.IsCPUOverloaded();
-        bool batteryMode = m_currentLoad.onBatteryPower;
-
-        ProcessingBackend chosen;
-
-        if (!m_gpuAvailable || (batteryMode && affinity < 0.8f)) {
-            chosen = ProcessingBackend::CPU;
-        }
-        else if (gpuOverloaded && !cpuOverloaded) {
-            chosen = ProcessingBackend::CPU;
-        }
-        else if (!gpuOverloaded && cpuOverloaded) {
-            chosen = ProcessingBackend::GPU_D3D12;
-        }
-        else if (affinity >= 0.7f && !gpuOverloaded) {
-            chosen = ProcessingBackend::GPU_D3D12;
-        }
-        else if (affinity <= 0.3f) {
-            chosen = ProcessingBackend::CPU;
-        }
-        else {
-            // Balanced — prefer GPU if queue is shorter
-            chosen = (m_currentLoad.pendingGPUWork < m_currentLoad.pendingCPUWork)
-                ? ProcessingBackend::GPU_D3D12
-                : ProcessingBackend::CPU;
+        // Dedicated memory > 80% of budget → CPU
+        if (load.DedicatedUsagePercent() > 80.0f) {
+            m_stats.cpuDecisions++;
+            ReleaseShared();
+            return ScheduleDecision::CPU;
         }
 
-        item.assignedBackend = chosen;
-        item.assigned = true;
-        UpdateBackendStats(chosen);
-        return chosen;
+        // Not enough available VRAM (including reserve)
+        uint64_t available = load.DedicatedAvailable();
+        uint64_t required  = static_cast<uint64_t>(estimatedVRAM) + m_gpuMemReserve;
+        if (required > available) {
+            m_stats.cpuDecisions++;
+            ReleaseShared();
+            return ScheduleDecision::CPU;
+        }
+
+        m_stats.gpuDecisions++;
+        ReleaseShared();
+        return ScheduleDecision::GPU;
     }
 
-    /// Report completion of a work item (for stats)
-    void ReportCompletion(const ScheduledWorkItem& item) {
-        std::lock_guard<std::mutex> lock(m_mutex);
+    // ================================================================
+    // Configuration
+    // ================================================================
+    inline void SetGPUMemoryReserve(size_t bytes) {
+        AcquireExclusive();
+        m_gpuMemReserve = bytes;
+        ReleaseExclusive();
+    }
 
-        if (item.assignedBackend == ProcessingBackend::CPU) {
-            m_stats.avgCPUTimeMs =
-                (m_stats.avgCPUTimeMs * (m_stats.cpuAssigned - 1) + item.actualTimeMs)
-                / m_stats.cpuAssigned;
+    inline void SetPreferCPUOnBattery(bool prefer) {
+        AcquireExclusive();
+        m_preferCPUOnBattery = prefer;
+        ReleaseExclusive();
+    }
+
+    // ================================================================
+    // Work queue
+    // ================================================================
+    inline void SubmitGPUWork(std::function<void()> work, uint32_t priority) {
+        AcquireExclusive();
+        m_workQueue.push({ std::move(work), priority });
+        m_stats.workItemsQueued++;
+        ReleaseExclusive();
+    }
+
+    inline void ProcessQueue() {
+        AcquireExclusive();
+
+        // Move queue items to a local vector sorted by priority
+        std::vector<WorkItem> items;
+        while (!m_workQueue.empty()) {
+            items.push_back(std::move(m_workQueue.top()));
+            m_workQueue.pop();
         }
-        else {
-            m_stats.avgGPUTimeMs =
-                (m_stats.avgGPUTimeMs * (m_stats.gpuAssigned - 1) + item.actualTimeMs)
-                / m_stats.gpuAssigned;
+        ReleaseExclusive();
+
+        // Execute outside lock
+        for (auto& item : items) {
+            if (item.work) {
+                item.work();
+            }
+            AcquireExclusive();
+            m_stats.workItemsDone++;
+            ReleaseExclusive();
         }
     }
 
-    // ========================================================================
-    // Statistics
-    // ========================================================================
-
-    SchedulerStats GetStats() const { return m_stats; }
-
-    /// Get format GPU affinity for a given type
-    float GetFormatAffinity(const std::wstring& formatType) const {
-        return FormatGPUAffinity::GetDefaultAffinity(formatType);
+    // ================================================================
+    // GetStats
+    // ================================================================
+    inline SchedulerStats GetStats() {
+        AcquireShared();
+        SchedulerStats copy = m_stats;
+        ReleaseShared();
+        return copy;
     }
 
 private:
-    void UpdateBackendStats(ProcessingBackend backend) {
-        if (backend == ProcessingBackend::CPU) {
-            m_stats.cpuAssigned++;
+    // ---- work item with priority ----
+    struct WorkItem {
+        std::function<void()> work;
+        uint32_t              priority = 0;
+
+        bool operator<(const WorkItem& rhs) const {
+            return priority < rhs.priority;  // max-heap: higher priority first
         }
-        else {
-            m_stats.gpuAssigned++;
+    };
+
+    // ---- SRWLOCK ----
+    SRWLOCK m_srw = SRWLOCK_INIT;
+    inline void AcquireExclusive() { ::AcquireSRWLockExclusive(&m_srw); }
+    inline void ReleaseExclusive() { ::ReleaseSRWLockExclusive(&m_srw); }
+    inline void AcquireShared()    { ::AcquireSRWLockShared(&m_srw);    }
+    inline void ReleaseShared()    { ::ReleaseSRWLockShared(&m_srw);    }
+
+    // ---- state ----
+    bool            m_ready            = false;
+    bool            m_preferCPUOnBattery = true;
+    size_t          m_gpuMemReserve    = 64 * 1024 * 1024;  // 64 MB default reserve
+    HMODULE         m_hDXGI            = nullptr;
+    IDXGIAdapter3*  m_adapter          = nullptr;
+    SchedulerStats  m_stats{};
+    std::priority_queue<WorkItem> m_workQueue;
+
+    // ---- internal GPU load query (no lock) ----
+    inline GPULoadInfo QueryGPULoadInternal() const {
+        GPULoadInfo info{};
+        if (m_adapter) {
+            DXGI_QUERY_VIDEO_MEMORY_INFO dedicated{};
+            DXGI_QUERY_VIDEO_MEMORY_INFO shared{};
+            if (SUCCEEDED(m_adapter->QueryVideoMemoryInfo(
+                    0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &dedicated))) {
+                info.dedicatedUsed   = dedicated.CurrentUsage;
+                info.dedicatedBudget = dedicated.Budget;
+            }
+            if (SUCCEEDED(m_adapter->QueryVideoMemoryInfo(
+                    0, DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL, &shared))) {
+                info.sharedUsed   = shared.CurrentUsage;
+                info.sharedBudget = shared.Budget;
+            }
         }
+        return info;
     }
 
-    // State
-    SystemLoadSnapshot m_currentLoad;
-    std::deque<SystemLoadSnapshot> m_loadHistory;
-    mutable std::mutex m_mutex;
-    SchedulerStats m_stats{};
-    bool m_gpuAvailable = false;
-    bool m_initialized = false;
+    // ---- Shutdown ----
+    inline void Shutdown() {
+        if (m_adapter) { m_adapter->Release(); m_adapter = nullptr; }
+        if (m_hDXGI)   { ::FreeLibrary(m_hDXGI); m_hDXGI = nullptr; }
+        m_ready = false;
+    }
 };
 
 } // namespace Engine

@@ -1,54 +1,68 @@
+#pragma once
 /******************************************************************************
- * USNCacheInvalidation.h — Smart Cache Invalidation via USN Journal
- * Copyright (c) 2026 — ExplorerLens Project
+ * USNCacheInvalidation.h — Sprint 557
+ * ExplorerLens Engine v15.0.0
+ * Copyright (c) 2026 ExplorerLens Project
  *
- * NTFS USN Journal watcher for real-time file change detection,
- * robust file identity cache keys, bounded invalidation queue,
- * full consistency sweep recovery, and stale-hit metrics.
+ * PURPOSE:
+ *   Uses NTFS USN (Update Sequence Number) Journal to detect file changes
+ *   for cache invalidation. Opens volume handle, queries USN journal via
+ *   FSCTL_QUERY_USN_JOURNAL, and reads entries via FSCTL_READ_USN_JOURNAL
+ *   in a background thread. Falls back to GetFileAttributesExW polling
+ *   on non-NTFS volumes.
  *
- * rename-heavy and sync-heavy workflows.
+ * CLASSES:
+ *   FileIdentity    — Robust cache key based on volume/file/size/write-time.
+ *   USNCacheInvalidation — Main USN journal invalidation engine with file
+ *     tracking (FRN resolution), background monitoring, filtered change
+ *     callbacks, and fallback polling.
+ *
+ * INPUTS:
+ *   Initialize(volumeLetter) — open volume for USN journal access.
+ *   TrackFile(path) — start tracking file changes.
+ *   SetInvalidationCallback(fn) — receive (path, reason) notifications.
+ *
+ * OUTPUTS:
+ *   USNStats — entries processed, invalidations, reads/sec, fallback state.
+ *
+ * THREAD SAFETY:
+ *   All public methods are thread-safe via SRWLOCK.
  *****************************************************************************/
 
-#pragma once
-
-#include <Windows.h>
+#include <windows.h>
+#include <winioctl.h>
 #include <string>
 #include <vector>
-#include <queue>
 #include <unordered_map>
 #include <unordered_set>
-#include <mutex>
-#include <condition_variable>
 #include <thread>
+#include <mutex>
 #include <atomic>
-#include <chrono>
 #include <functional>
-#include <filesystem>
+#include <chrono>
 #include <cstdint>
 
 namespace ExplorerLens {
 namespace USNCache {
 
-//============================================================================
+// ============================================================================
 // File Identity — robust cache key tuple
-//============================================================================
+// ============================================================================
 
 struct FileIdentity {
-    uint64_t volume_id = 0; // Volume serial number
-    uint64_t file_id = 0; // NTFS file reference number (MFT index)
-    uint64_t file_size = 0; // Size in bytes
-    uint64_t last_write_time = 0; // FILETIME as uint64
+    uint64_t volume_id       = 0;
+    uint64_t file_id         = 0;
+    uint64_t file_size       = 0;
+    uint64_t last_write_time = 0;
 
-    // Composite cache key (collision-resistant)
     uint64_t ToCacheKey() const {
-        // FNV-1a hash of the identity tuple
-        uint64_t hash = 14695981039346656037ULL; // FNV offset basis
+        uint64_t hash = 14695981039346656037ULL;
         auto mix = [&hash](uint64_t val) {
             for (int i = 0; i < 8; ++i) {
                 hash ^= (val >> (i * 8)) & 0xFF;
-                hash *= 1099511628211ULL; // FNV prime
+                hash *= 1099511628211ULL;
             }
-            };
+        };
         mix(volume_id);
         mix(file_id);
         mix(file_size);
@@ -58,430 +72,391 @@ struct FileIdentity {
 
     bool operator==(const FileIdentity& other) const {
         return volume_id == other.volume_id &&
-            file_id == other.file_id &&
-            file_size == other.file_size &&
-            last_write_time == other.last_write_time;
+               file_id == other.file_id &&
+               file_size == other.file_size &&
+               last_write_time == other.last_write_time;
     }
 
-    bool operator!=(const FileIdentity& other) const {
-        return !(*this == other);
-    }
+    bool operator!=(const FileIdentity& other) const { return !(*this == other); }
 
-    // Check if file has been modified since this identity was captured
     bool IsStale(const FileIdentity& current) const {
         return file_size != current.file_size ||
-            last_write_time != current.last_write_time;
+               last_write_time != current.last_write_time;
     }
 };
 
-// Get FileIdentity from an open handle
 inline FileIdentity GetFileIdentity(HANDLE hFile) {
     FileIdentity id;
     BY_HANDLE_FILE_INFORMATION info = {};
-    if (GetFileInformationByHandle(hFile, &info)) {
+    if (::GetFileInformationByHandle(hFile, &info)) {
         id.volume_id = info.dwVolumeSerialNumber;
-        id.file_id = (static_cast<uint64_t>(info.nFileIndexHigh) << 32) |
-            info.nFileIndexLow;
-        id.file_size = (static_cast<uint64_t>(info.nFileSizeHigh) << 32) |
-            info.nFileSizeLow;
+        id.file_id   = (static_cast<uint64_t>(info.nFileIndexHigh) << 32) | info.nFileIndexLow;
+        id.file_size = (static_cast<uint64_t>(info.nFileSizeHigh) << 32) | info.nFileSizeLow;
         ULARGE_INTEGER wt;
-        wt.LowPart = info.ftLastWriteTime.dwLowDateTime;
+        wt.LowPart  = info.ftLastWriteTime.dwLowDateTime;
         wt.HighPart = info.ftLastWriteTime.dwHighDateTime;
         id.last_write_time = wt.QuadPart;
     }
     return id;
 }
 
-//============================================================================
-// USN Change Record
-//============================================================================
-
-enum class ChangeReason : uint32_t {
-    DataModified = 0x00000001, // USN_REASON_DATA_OVERWRITE | DATA_EXTEND | DATA_TRUNCATION
-    Renamed = 0x00002000, // USN_REASON_RENAME_NEW_NAME
-    Deleted = 0x00000200, // USN_REASON_FILE_DELETE
-    Created = 0x00000100, // USN_REASON_FILE_CREATE
-    SecurityChanged = 0x00000800, // USN_REASON_SECURITY_CHANGE
-    Unknown = 0xFFFFFFFF
-};
-
-struct USNChangeRecord {
-    uint64_t usn = 0; // USN journal sequence number
-    uint64_t file_reference = 0; // NTFS MFT reference
-    uint64_t parent_reference = 0; // Parent directory MFT reference
-    ChangeReason reason = ChangeReason::Unknown;
-    std::wstring filename;
-    std::chrono::system_clock::time_point timestamp;
-
-    bool IsRelevant() const {
-        return reason == ChangeReason::DataModified ||
-            reason == ChangeReason::Renamed ||
-            reason == ChangeReason::Deleted;
+inline FileIdentity GetFileIdentityFromPath(const std::wstring& path) {
+    FileIdentity id;
+    HANDLE hFile = ::CreateFileW(path.c_str(), FILE_READ_ATTRIBUTES,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+    if (hFile != INVALID_HANDLE_VALUE) {
+        id = GetFileIdentity(hFile);
+        ::CloseHandle(hFile);
     }
+    return id;
+}
+
+// ============================================================================
+// USN change reasons (bitmask constants from winioctl.h)
+// ============================================================================
+
+namespace USNReasons {
+    inline constexpr DWORD DataOverwrite   = 0x00000001;  // USN_REASON_DATA_OVERWRITE
+    inline constexpr DWORD DataExtend      = 0x00000002;  // USN_REASON_DATA_EXTEND
+    inline constexpr DWORD DataTruncation  = 0x00000004;  // USN_REASON_DATA_TRUNCATION
+    inline constexpr DWORD RenameNewName   = 0x00002000;  // USN_REASON_RENAME_NEW_NAME
+    inline constexpr DWORD FileDelete      = 0x00000200;  // USN_REASON_FILE_DELETE
+    inline constexpr DWORD RelevantMask    = DataOverwrite | DataExtend | DataTruncation
+                                           | RenameNewName | FileDelete;
+}
+
+// ============================================================================
+// USN Statistics
+// ============================================================================
+
+struct USNStats {
+    uint64_t entriesProcessed        = 0;
+    uint64_t invalidationsTriggered  = 0;
+    double   journalReadsPerSecond   = 0.0;
+    bool     fallbackActive          = false;
+    uint64_t fallbackPolls           = 0;
+    uint32_t trackedFiles            = 0;
 };
 
-//============================================================================
-// Invalidation Queue with Backpressure
-//============================================================================
+// ============================================================================
+// Tracked file entry
+// ============================================================================
 
-struct InvalidationItem {
-    uint64_t cache_key = 0; // Key to invalidate
-    std::wstring file_path; // For logging
-    ChangeReason reason = ChangeReason::Unknown;
-    std::chrono::steady_clock::time_point enqueued_at;
-    uint8_t priority = 1; // 0=low, 1=normal, 2=high (delete=high)
+struct TrackedFile {
+    std::wstring path;
+    uint64_t     fileReferenceNumber = 0;
+    FileIdentity identity;
 };
 
-class InvalidationQueue {
+// ============================================================================
+// USN Cache Invalidation
+// ============================================================================
+
+class USNCacheInvalidation {
 public:
-    struct Config {
-        uint32_t max_queue_size = 10000; // Backpressure limit
-        uint32_t worker_count = 2; // Bounded worker pool
-        uint32_t batch_size = 50; // Process N items per batch
-        std::chrono::milliseconds poll_interval{ 100 };
-    };
-
-    explicit InvalidationQueue(const Config& config = {})
-        : config_(config) {
+    USNCacheInvalidation() {
+        ::InitializeSRWLock(&m_srwLock);
     }
 
-    // Enqueue an invalidation (returns false if backpressure hit)
-    bool Enqueue(const InvalidationItem& item) {
-        std::lock_guard lock(mutex_);
-        if (queue_.size() >= config_.max_queue_size) {
-            backpressure_drops_++;
-            return false; // Backpressure: queue full
+    ~USNCacheInvalidation() {
+        StopMonitoring();
+        if (m_volumeHandle != INVALID_HANDLE_VALUE) {
+            ::CloseHandle(m_volumeHandle);
         }
-        queue_.push(item);
-        total_enqueued_++;
-        cv_.notify_one();
+    }
+
+    USNCacheInvalidation(const USNCacheInvalidation&) = delete;
+    USNCacheInvalidation& operator=(const USNCacheInvalidation&) = delete;
+
+    // ── Initialize volume access ────────────────────────────────────────────
+
+    bool Initialize(wchar_t volumeLetter = L'C') {
+        ::AcquireSRWLockExclusive(&m_srwLock);
+        m_volumeLetter = volumeLetter;
+
+        // Open volume handle for USN journal access
+        wchar_t volumePath[16] = {};
+        _snwprintf_s(volumePath, _countof(volumePath), _TRUNCATE, L"\\\\.\\%c:", volumeLetter);
+
+        m_volumeHandle = ::CreateFileW(
+            volumePath,
+            GENERIC_READ,
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            nullptr,
+            OPEN_EXISTING,
+            0,
+            nullptr
+        );
+
+        if (m_volumeHandle == INVALID_HANDLE_VALUE) {
+            // Fallback: no USN journal available (non-NTFS or insufficient privilege)
+            m_fallbackMode = true;
+            ::ReleaseSRWLockExclusive(&m_srwLock);
+            return true; // Succeed with fallback
+        }
+
+        // Query USN journal
+        USN_JOURNAL_DATA_V0 journalData{};
+        DWORD bytesReturned = 0;
+        BOOL ok = ::DeviceIoControl(
+            m_volumeHandle,
+            FSCTL_QUERY_USN_JOURNAL,
+            nullptr, 0,
+            &journalData, sizeof(journalData),
+            &bytesReturned, nullptr
+        );
+
+        if (!ok) {
+            // Journal not available — use fallback
+            ::CloseHandle(m_volumeHandle);
+            m_volumeHandle = INVALID_HANDLE_VALUE;
+            m_fallbackMode = true;
+            ::ReleaseSRWLockExclusive(&m_srwLock);
+            return true;
+        }
+
+        m_journalId = journalData.UsnJournalID;
+        m_nextUsn = journalData.NextUsn;
+        m_fallbackMode = false;
+        m_initialized = true;
+
+        ::ReleaseSRWLockExclusive(&m_srwLock);
         return true;
     }
 
-    // Dequeue a batch (blocks if empty, up to timeout)
-    std::vector<InvalidationItem> DequeueBatch(std::chrono::milliseconds timeout = std::chrono::milliseconds(500)) {
-        std::unique_lock lock(mutex_);
-        if (queue_.empty()) {
-            cv_.wait_for(lock, timeout, [this] { return !queue_.empty() || stopped_; });
+    // ── Monitoring ──────────────────────────────────────────────────────────
+
+    void StartMonitoring() {
+        if (m_monitorRunning.exchange(true)) return;
+
+        m_monitorThread = std::thread([this]() {
+            if (m_fallbackMode) {
+                FallbackPollingLoop();
+            } else {
+                USNJournalLoop();
+            }
+        });
+    }
+
+    void StopMonitoring() {
+        if (!m_monitorRunning.exchange(false)) return;
+        if (m_monitorThread.joinable()) {
+            m_monitorThread.join();
+        }
+    }
+
+    // ── Invalidation callback ───────────────────────────────────────────────
+
+    void SetInvalidationCallback(std::function<void(const std::wstring& path, uint32_t reason)> cb) {
+        ::AcquireSRWLockExclusive(&m_srwLock);
+        m_invalidationCallback = std::move(cb);
+        ::ReleaseSRWLockExclusive(&m_srwLock);
+    }
+
+    // ── File tracking ───────────────────────────────────────────────────────
+
+    void TrackFile(const std::wstring& path) {
+        ::AcquireSRWLockExclusive(&m_srwLock);
+
+        TrackedFile tf;
+        tf.path = path;
+        tf.identity = GetFileIdentityFromPath(path);
+        tf.fileReferenceNumber = tf.identity.file_id;
+
+        if (tf.fileReferenceNumber != 0) {
+            m_trackedByFRN[tf.fileReferenceNumber] = tf;
+        }
+        m_trackedByPath[path] = tf;
+
+        ::ReleaseSRWLockExclusive(&m_srwLock);
+    }
+
+    void UntrackFile(const std::wstring& path) {
+        ::AcquireSRWLockExclusive(&m_srwLock);
+
+        auto it = m_trackedByPath.find(path);
+        if (it != m_trackedByPath.end()) {
+            m_trackedByFRN.erase(it->second.fileReferenceNumber);
+            m_trackedByPath.erase(it);
         }
 
-        std::vector<InvalidationItem> batch;
-        uint32_t count = (std::min)(config_.batch_size, static_cast<uint32_t>(queue_.size()));
-        for (uint32_t i = 0; i < count; ++i) {
-            batch.push_back(queue_.front());
-            queue_.pop();
-        }
-        total_processed_ += static_cast<uint32_t>(batch.size());
-        return batch;
+        ::ReleaseSRWLockExclusive(&m_srwLock);
     }
 
-    uint32_t Size() const {
-        std::lock_guard lock(mutex_);
-        return static_cast<uint32_t>(queue_.size());
+    // ── Statistics ──────────────────────────────────────────────────────────
+
+    USNStats GetStats() const {
+        ::AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_srwLock));
+        USNStats stats;
+        stats.entriesProcessed       = m_entriesProcessed.load();
+        stats.invalidationsTriggered = m_invalidationsTriggered.load();
+        stats.fallbackActive         = m_fallbackMode;
+        stats.fallbackPolls          = m_fallbackPolls.load();
+        stats.trackedFiles           = static_cast<uint32_t>(m_trackedByPath.size());
+
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration<double>(now - m_startTime).count();
+        stats.journalReadsPerSecond = (elapsed > 0.0)
+            ? static_cast<double>(m_journalReads.load()) / elapsed : 0.0;
+
+        ::ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_srwLock));
+        return stats;
     }
 
-    bool IsBackpressured() const {
-        std::lock_guard lock(mutex_);
-        return queue_.size() >= config_.max_queue_size;
-    }
-
-    void Stop() {
-        stopped_ = true;
-        cv_.notify_all();
-    }
-
-    // Metrics
-    uint32_t TotalEnqueued() const { return total_enqueued_; }
-    uint32_t TotalProcessed() const { return total_processed_; }
-    uint32_t BackpressureDrops() const { return backpressure_drops_; }
-
-    const Config& GetConfig() const { return config_; }
+    bool IsInitialized() const { return m_initialized; }
+    bool IsFallbackMode() const { return m_fallbackMode; }
 
 private:
-    Config config_;
-    std::queue<InvalidationItem> queue_;
-    mutable std::mutex mutex_;
-    std::condition_variable cv_;
-    std::atomic<bool> stopped_{ false };
-    std::atomic<uint32_t> total_enqueued_{ 0 };
-    std::atomic<uint32_t> total_processed_{ 0 };
-    std::atomic<uint32_t> backpressure_drops_{ 0 };
-};
+    // ── USN Journal reading loop ────────────────────────────────────────────
 
-//============================================================================
-// USN Journal Watcher
-//============================================================================
+    void USNJournalLoop() {
+        m_startTime = std::chrono::steady_clock::now();
+        alignas(8) BYTE buffer[65536];
 
-class USNJournalWatcher {
-public:
-    struct Config {
-        wchar_t volume_letter = L'C';
-        uint32_t buffer_size = 64 * 1024; // 64KB read buffer
-        std::chrono::milliseconds poll_interval{ 250 }; // Poll every 250ms
-        std::vector<std::wstring> watched_extensions; // e.g. {".jpg", ".png", ".jxl"}
-        bool watch_all_extensions = false; // Override: watch everything
-    };
+        while (m_monitorRunning.load()) {
+            READ_USN_JOURNAL_DATA_V0 readData{};
+            readData.StartUsn          = m_nextUsn;
+            readData.ReasonMask        = USNReasons::RelevantMask;
+            readData.ReturnOnlyOnClose = 0;
+            readData.Timeout           = 0;
+            readData.BytesToWaitFor    = 0;
+            readData.UsnJournalID      = m_journalId;
 
-    explicit USNJournalWatcher(const Config& config = {})
-        : config_(config) {
-        if (config_.watched_extensions.empty()) {
-            // Default: watch common image/archive formats
-            config_.watched_extensions = {
-            L".jpg", L".jpeg", L".png", L".bmp", L".gif", L".tiff", L".tif",
-            L".webp", L".jxl", L".avif", L".heic", L".heif",
-            L".psd", L".dds", L".tga", L".ico", L".svg",
-            L".cr2", L".cr3", L".nef", L".arw", L".dng", L".orf", L".rw2",
-            L".cbz", L".cbr", L".cb7", L".cbt"
-            };
-        }
-    }
+            DWORD bytesReturned = 0;
+            BOOL ok = ::DeviceIoControl(
+                m_volumeHandle,
+                FSCTL_READ_USN_JOURNAL,
+                &readData, sizeof(readData),
+                buffer, sizeof(buffer),
+                &bytesReturned, nullptr
+            );
 
-    // Check if a filename has a watched extension
-    bool IsWatchedFile(const std::wstring& filename) const {
-        if (config_.watch_all_extensions) return true;
-        auto dot_pos = filename.find_last_of(L'.');
-        if (dot_pos == std::wstring::npos) return false;
-        std::wstring ext = filename.substr(dot_pos);
-        // Case-insensitive check
-        for (auto& watched : config_.watched_extensions) {
-            if (_wcsicmp(ext.c_str(), watched.c_str()) == 0) return true;
-        }
-        return false;
-    }
+            m_journalReads++;
 
-    // Start watching (spawns background thread)
-    void Start(std::function<void(const USNChangeRecord&)> callback) {
-        if (running_) return;
-        running_ = true;
-        callback_ = callback;
-        // In production: opens \\.\C: handle, reads USN journal
-        // Thread would call ReadDirectoryChangesW or DeviceIoControl FSCTL_READ_USN_JOURNAL
-    }
-
-    void Stop() {
-        running_ = false;
-    }
-
-    bool IsRunning() const { return running_; }
-
-    // Statistics
-    uint64_t EventsProcessed() const { return events_processed_; }
-    uint64_t EventsFiltered() const { return events_filtered_; }
-
-    const Config& GetConfig() const { return config_; }
-
-private:
-    Config config_;
-    std::atomic<bool> running_{ false };
-    std::function<void(const USNChangeRecord&)> callback_;
-    std::atomic<uint64_t> events_processed_{ 0 };
-    std::atomic<uint64_t> events_filtered_{ 0 };
-};
-
-//============================================================================
-// Stale-Hit Metrics
-//============================================================================
-
-struct StaleHitMetrics {
-    std::atomic<uint64_t> cache_hits{ 0 };
-    std::atomic<uint64_t> cache_misses{ 0 };
-    std::atomic<uint64_t> stale_hits{ 0 }; // Cache hit but data was stale
-    std::atomic<uint64_t> invalidations{ 0 }; // Proactive invalidations from USN
-    std::atomic<uint64_t> consistency_sweeps{ 0 };
-    std::atomic<uint64_t> usn_gap_recoveries{ 0 };
-
-    // Stale-hit ratio (lower is better)
-    double StaleHitRatio() const {
-        uint64_t total = cache_hits.load() + stale_hits.load();
-        return total > 0 ? static_cast<double>(stale_hits.load()) / total : 0.0;
-    }
-
-    // Cache effectiveness
-    double HitRate() const {
-        uint64_t total = cache_hits.load() + cache_misses.load();
-        return total > 0 ? static_cast<double>(cache_hits.load()) / total : 0.0;
-    }
-
-    // Invalidation latency (how fast we invalidate after change detected)
-    std::chrono::milliseconds avg_invalidation_latency{ 0 };
-    std::chrono::milliseconds p95_invalidation_latency{ 0 };
-
-    void Reset() {
-        cache_hits = 0;
-        cache_misses = 0;
-        stale_hits = 0;
-        invalidations = 0;
-        consistency_sweeps = 0;
-        usn_gap_recoveries = 0;
-        avg_invalidation_latency = std::chrono::milliseconds(0);
-        p95_invalidation_latency = std::chrono::milliseconds(0);
-    }
-};
-
-//============================================================================
-// Consistency Sweep (recovery when USN gaps detected)
-//============================================================================
-
-class ConsistencySweep {
-public:
-    struct Config {
-        std::chrono::hours sweep_interval{ 6 }; // Full sweep every 6 hours
-        uint32_t max_files_per_sweep = 50000; // Cap to avoid long stalls
-        bool enabled = true;
-    };
-
-    struct SweepResult {
-        uint32_t files_checked = 0;
-        uint32_t stale_entries_found = 0;
-        uint32_t entries_invalidated = 0;
-        std::chrono::milliseconds duration{ 0 };
-        bool completed = false; // False if hit max_files cap
-        bool triggered_by_usn_gap = false;
-    };
-
-    explicit ConsistencySweep(const Config& config = {})
-        : config_(config) {
-    }
-
-    // Perform sweep: compare cached identities against current file state
-    SweepResult Sweep(
-        const std::unordered_map<uint64_t, FileIdentity>& cache_entries,
-        std::function<FileIdentity(uint64_t)> get_current_identity,
-        std::function<void(uint64_t)> invalidate_callback) {
-
-        auto start = std::chrono::steady_clock::now();
-        SweepResult result;
-
-        for (auto& [key, cached_id] : cache_entries) {
-            if (result.files_checked >= config_.max_files_per_sweep) {
-                result.completed = false;
-                break;
+            if (!ok || bytesReturned <= sizeof(USN)) {
+                // No new entries or error — sleep and retry
+                ::Sleep(250);
+                continue;
             }
 
-            result.files_checked++;
-            auto current = get_current_identity(key);
+            // First 8 bytes is the next USN
+            USN nextUsn = *reinterpret_cast<USN*>(buffer);
+            m_nextUsn = nextUsn;
 
-            if (cached_id.IsStale(current)) {
-                result.stale_entries_found++;
-                invalidate_callback(key);
-                result.entries_invalidated++;
+            DWORD offset = sizeof(USN);
+            while (offset < bytesReturned) {
+                auto* record = reinterpret_cast<USN_RECORD*>(buffer + offset);
+                if (record->RecordLength == 0) break;
+
+                ProcessUSNRecord(record);
+                offset += record->RecordLength;
+                m_entriesProcessed++;
+            }
+
+            ::Sleep(100);
+        }
+    }
+
+    void ProcessUSNRecord(USN_RECORD* record) {
+        uint64_t frn = static_cast<uint64_t>(record->FileReferenceNumber);
+        DWORD reason = record->Reason;
+
+        if ((reason & USNReasons::RelevantMask) == 0) return;
+
+        ::AcquireSRWLockShared(&m_srwLock);
+        auto it = m_trackedByFRN.find(frn);
+        if (it != m_trackedByFRN.end()) {
+            std::wstring path = it->second.path;
+            auto cb = m_invalidationCallback;
+            ::ReleaseSRWLockShared(&m_srwLock);
+
+            if (cb) {
+                cb(path, reason);
+            }
+            m_invalidationsTriggered++;
+        } else {
+            ::ReleaseSRWLockShared(&m_srwLock);
+        }
+    }
+
+    // ── Fallback polling loop (non-NTFS) ────────────────────────────────────
+
+    void FallbackPollingLoop() {
+        m_startTime = std::chrono::steady_clock::now();
+
+        while (m_monitorRunning.load()) {
+            ::AcquireSRWLockShared(&m_srwLock);
+            auto snapshot = m_trackedByPath;
+            auto cb = m_invalidationCallback;
+            ::ReleaseSRWLockShared(&m_srwLock);
+
+            for (const auto& [path, tracked] : snapshot) {
+                WIN32_FILE_ATTRIBUTE_DATA attrs{};
+                if (::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &attrs)) {
+                    ULARGE_INTEGER wt;
+                    wt.LowPart  = attrs.ftLastWriteTime.dwLowDateTime;
+                    wt.HighPart = attrs.ftLastWriteTime.dwHighDateTime;
+                    uint64_t currentWriteTime = wt.QuadPart;
+                    uint64_t currentSize = (static_cast<uint64_t>(attrs.nFileSizeHigh) << 32) | attrs.nFileSizeLow;
+
+                    if (currentWriteTime != tracked.identity.last_write_time ||
+                        currentSize != tracked.identity.file_size) {
+                        if (cb) {
+                            cb(path, USNReasons::DataOverwrite);
+                        }
+                        m_invalidationsTriggered++;
+
+                        // Update tracked identity
+                        ::AcquireSRWLockExclusive(&m_srwLock);
+                        auto it2 = m_trackedByPath.find(path);
+                        if (it2 != m_trackedByPath.end()) {
+                            it2->second.identity.last_write_time = currentWriteTime;
+                            it2->second.identity.file_size = currentSize;
+                        }
+                        ::ReleaseSRWLockExclusive(&m_srwLock);
+                    }
+                } else {
+                    // File deleted or inaccessible
+                    if (cb) {
+                        cb(path, USNReasons::FileDelete);
+                    }
+                    m_invalidationsTriggered++;
+                }
+                m_fallbackPolls++;
+            }
+
+            // Poll every 2 seconds in fallback mode
+            for (uint32_t w = 0; w < 2000 && m_monitorRunning.load(); w += 100) {
+                ::Sleep(100);
             }
         }
-
-        auto end = std::chrono::steady_clock::now();
-        result.duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        if (result.files_checked < config_.max_files_per_sweep) {
-            result.completed = true;
-        }
-
-        total_sweeps_++;
-        return result;
     }
 
-    // Schedule a sweep due to USN gap detection
-    void TriggerUSNGapRecovery() {
-        usn_gap_pending_ = true;
-    }
+    // ── Members ─────────────────────────────────────────────────────────────
 
-    bool IsUSNGapPending() const { return usn_gap_pending_; }
-    void ClearUSNGap() { usn_gap_pending_ = false; }
+    SRWLOCK m_srwLock{};
+    HANDLE m_volumeHandle = INVALID_HANDLE_VALUE;
+    wchar_t m_volumeLetter = L'C';
+    bool m_initialized = false;
+    bool m_fallbackMode = false;
 
-    uint32_t TotalSweeps() const { return total_sweeps_; }
+    uint64_t m_journalId = 0;
+    USN m_nextUsn = 0;
 
-    const Config& GetConfig() const { return config_; }
+    std::unordered_map<uint64_t, TrackedFile> m_trackedByFRN;
+    std::unordered_map<std::wstring, TrackedFile> m_trackedByPath;
 
-private:
-    Config config_;
-    std::atomic<bool> usn_gap_pending_{ false };
-    std::atomic<uint32_t> total_sweeps_{ 0 };
-};
+    std::function<void(const std::wstring&, uint32_t)> m_invalidationCallback;
 
-//============================================================================
-// USN Cache Invalidation Manager (orchestrator)
-//============================================================================
+    std::atomic<bool> m_monitorRunning{ false };
+    std::thread m_monitorThread;
 
-class USNCacheManager {
-public:
-    struct Config {
-        USNJournalWatcher::Config watcher;
-        InvalidationQueue::Config queue;
-        ConsistencySweep::Config sweep;
-    };
-
-    explicit USNCacheManager(const Config& config = {})
-        : watcher_(config.watcher),
-        queue_(config.queue),
-        sweep_(config.sweep) {
-    }
-
-    // Start the USN-based cache invalidation system
-    void Start() {
-        watcher_.Start([this](const USNChangeRecord& record) {
-            OnUSNChange(record);
-            });
-    }
-
-    void Stop() {
-        watcher_.Stop();
-        queue_.Stop();
-    }
-
-    USNJournalWatcher& Watcher() { return watcher_; }
-    InvalidationQueue& Queue() { return queue_; }
-    ConsistencySweep& Sweep() { return sweep_; }
-    StaleHitMetrics& Metrics() { return metrics_; }
-
-    // Benchmark summary
-    struct BenchmarkSummary {
-        double stale_hit_ratio;
-        double cache_hit_rate;
-        uint64_t total_invalidations;
-        uint32_t usn_gap_recoveries;
-        uint32_t consistency_sweeps;
-        std::chrono::milliseconds avg_latency;
-
-        // Target: stale hits reduced ≥80%
-        bool MeetsTarget(double baseline_stale_ratio) const {
-            double reduction = 1.0 - (stale_hit_ratio / baseline_stale_ratio);
-            return reduction >= 0.80;
-        }
-    };
-
-    BenchmarkSummary GetBenchmark(double baseline_stale_ratio = 0.05) const {
-        BenchmarkSummary bs;
-        bs.stale_hit_ratio = metrics_.StaleHitRatio();
-        bs.cache_hit_rate = metrics_.HitRate();
-        bs.total_invalidations = metrics_.invalidations.load();
-        bs.usn_gap_recoveries = static_cast<uint32_t>(metrics_.usn_gap_recoveries.load());
-        bs.consistency_sweeps = static_cast<uint32_t>(metrics_.consistency_sweeps.load());
-        bs.avg_latency = metrics_.avg_invalidation_latency;
-        return bs;
-    }
-
-private:
-    USNJournalWatcher watcher_;
-    InvalidationQueue queue_;
-    ConsistencySweep sweep_;
-    StaleHitMetrics metrics_;
-
-    void OnUSNChange(const USNChangeRecord& record) {
-        if (!record.IsRelevant()) return;
-        if (!watcher_.IsWatchedFile(record.filename)) return;
-
-        InvalidationItem item;
-        item.cache_key = record.file_reference;
-        item.file_path = record.filename;
-        item.reason = record.reason;
-        item.enqueued_at = std::chrono::steady_clock::now();
-        item.priority = (record.reason == ChangeReason::Deleted) ? 2 : 1;
-
-        if (!queue_.Enqueue(item)) {
-            // Backpressure: trigger consistency sweep later
-            sweep_.TriggerUSNGapRecovery();
-        }
-
-        metrics_.invalidations++;
-    }
+    std::atomic<uint64_t> m_entriesProcessed{ 0 };
+    std::atomic<uint64_t> m_invalidationsTriggered{ 0 };
+    std::atomic<uint64_t> m_journalReads{ 0 };
+    std::atomic<uint64_t> m_fallbackPolls{ 0 };
+    std::chrono::steady_clock::time_point m_startTime = std::chrono::steady_clock::now();
 };
 
 } // namespace USNCache

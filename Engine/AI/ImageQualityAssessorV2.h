@@ -1,0 +1,333 @@
+//==============================================================================
+// ExplorerLens Engine — Image Quality Assessor V2 (Sprint 576)
+//
+// Purpose:
+//   No-reference image quality assessment inspired by BRISQUE, using natural
+//   scene statistics computed entirely on the CPU.  Provides per-axis quality
+//   sub-scores (sharpness, noise, contrast, colorfulness, exposure) and a
+//   weighted overall score.
+//
+// Classes:
+//   ImageQualityAssessorV2 — Thread-safe assessor that processes an RGBA
+//   buffer and returns a QualityScoreV2 struct with all sub-metrics.
+//
+// Inputs:
+//   - RGBA pixel buffer (uint8_t*), width, height
+//
+// Outputs:
+//   - QualityScoreV2   { overall, sharpness, noise, contrast, colorfulness, exposure }
+//   - QualityTierV2    enum (Excellent / Good / Fair / Poor / Bad)
+//   - AssessmentStatsV2 (count, avg score, distribution, avg time)
+//
+// Sub-metrics:
+//   1. Sharpness   — Laplacian variance
+//   2. Noise       — Median absolute deviation in 3x3 neighborhoods
+//   3. Contrast    — Michelson contrast in 16x16 blocks
+//   4. Colorfulness — Hasler & Süsstrunk (2003) metric
+//   5. Exposure    — Mean luminance distance from target midpoint
+//
+// Thread Safety:
+//   Assessment is stateless (pure input → output).  Aggregate statistics
+//   are protected by an SRWLOCK.
+//
+// Build:
+//   Header-only, C++20, MSVC /W4 clean, no external dependencies.
+//==============================================================================
+#pragma once
+
+#include <windows.h>
+#include <vector>
+#include <cstdint>
+#include <cmath>
+#include <algorithm>
+#include <string>
+#include <chrono>
+#include <array>
+#include <numeric>
+
+namespace ExplorerLens {
+namespace Engine {
+
+/// Quality tier derived from the overall quality score.
+enum class QualityTierV2 : uint8_t {
+    Excellent = 0,   // > 0.8
+    Good,            // > 0.6
+    Fair,            // > 0.4
+    Poor,            // > 0.2
+    Bad              // <= 0.2
+};
+
+/// Per-axis quality sub-scores; all values in [0, 1].
+struct QualityScoreV2 {
+    float overall      = 0.0f;
+    float sharpness    = 0.0f;
+    float noise        = 0.0f;   // 1.0 = low noise (good), 0.0 = very noisy
+    float contrast     = 0.0f;
+    float colorfulness = 0.0f;
+    float exposure     = 0.0f;
+};
+
+/// Cumulative assessment statistics.
+struct AssessmentStatsV2 {
+    uint64_t imagesAssessed     = 0;
+    double   totalScore         = 0.0;
+    double   totalAssessTimeMs  = 0.0;
+    std::array<uint64_t, 5> tierDistribution{}; // [Excellent..Bad]
+    double AvgScore()  const { return imagesAssessed ? totalScore / static_cast<double>(imagesAssessed) : 0.0; }
+    double AvgTimeMs() const { return imagesAssessed ? totalAssessTimeMs / static_cast<double>(imagesAssessed) : 0.0; }
+};
+
+/// No-reference image quality assessor (BRISQUE-inspired).
+class ImageQualityAssessorV2 {
+public:
+    ImageQualityAssessorV2() {
+        InitializeSRWLock(&m_statsLock);
+    }
+
+    /// Full assessment returning all sub-metrics.
+    inline QualityScoreV2 Assess(const uint8_t* rgbaData,
+                                 uint32_t width,
+                                 uint32_t height) {
+        using Clock = std::chrono::high_resolution_clock;
+        auto t0 = Clock::now();
+
+        QualityScoreV2 qs{};
+        if (!rgbaData || width < 3 || height < 3) return qs;
+
+        const uint32_t pixelCount = width * height;
+
+        // Convert to grayscale (luminance) buffer
+        std::vector<float> lum(pixelCount);
+        for (uint32_t i = 0; i < pixelCount; ++i) {
+            uint32_t off = i * 4;
+            lum[i] = (0.299f * rgbaData[off] + 0.587f * rgbaData[off + 1] + 0.114f * rgbaData[off + 2]) / 255.0f;
+        }
+
+        // 1. Sharpness — Laplacian variance
+        qs.sharpness = ComputeSharpness(lum, width, height);
+
+        // 2. Noise — median absolute deviation
+        qs.noise = ComputeNoiseScore(lum, width, height);
+
+        // 3. Contrast — Michelson contrast in 16×16 blocks
+        qs.contrast = ComputeContrast(lum, width, height);
+
+        // 4. Colorfulness — Hasler & Süsstrunk 2003
+        qs.colorfulness = ComputeColorfulness(rgbaData, pixelCount);
+
+        // 5. Exposure — deviation from target midpoint
+        qs.exposure = ComputeExposure(lum, pixelCount);
+
+        // Weighted overall
+        qs.overall = 0.35f * qs.sharpness
+                   + 0.20f * qs.noise
+                   + 0.20f * qs.contrast
+                   + 0.15f * qs.colorfulness
+                   + 0.10f * qs.exposure;
+        qs.overall = (std::max)(0.0f, (std::min)(qs.overall, 1.0f));
+
+        auto t1 = Clock::now();
+        double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+
+        QualityTierV2 tier = GetTier(qs.overall);
+
+        AcquireSRWLockExclusive(&m_statsLock);
+        m_stats.imagesAssessed++;
+        m_stats.totalScore += qs.overall;
+        m_stats.totalAssessTimeMs += ms;
+        m_stats.tierDistribution[static_cast<size_t>(tier)]++;
+        ReleaseSRWLockExclusive(&m_statsLock);
+
+        return qs;
+    }
+
+    /// Map a score to a quality tier.
+    static inline QualityTierV2 GetTier(float score) {
+        if (score > 0.8f) return QualityTierV2::Excellent;
+        if (score > 0.6f) return QualityTierV2::Good;
+        if (score > 0.4f) return QualityTierV2::Fair;
+        if (score > 0.2f) return QualityTierV2::Poor;
+        return QualityTierV2::Bad;
+    }
+
+    /// Human-readable tier name.
+    static inline const wchar_t* TierName(QualityTierV2 tier) {
+        switch (tier) {
+        case QualityTierV2::Excellent: return L"Excellent";
+        case QualityTierV2::Good:      return L"Good";
+        case QualityTierV2::Fair:      return L"Fair";
+        case QualityTierV2::Poor:      return L"Poor";
+        case QualityTierV2::Bad:       return L"Bad";
+        default:                       return L"Unknown";
+        }
+    }
+
+    /// Retrieve cumulative statistics (thread-safe).
+    inline AssessmentStatsV2 GetStats() const {
+        AcquireSRWLockShared(const_cast<PSRWLOCK>(&m_statsLock));
+        AssessmentStatsV2 copy = m_stats;
+        ReleaseSRWLockShared(const_cast<PSRWLOCK>(&m_statsLock));
+        return copy;
+    }
+
+private:
+    // ---- Sub-metric implementations ----------------------------------------
+
+    /// Sharpness via Laplacian variance. Returns [0, 1].
+    static inline float ComputeSharpness(const std::vector<float>& lum,
+                                          uint32_t w, uint32_t h) {
+        // Laplacian kernel: [0,-1,0; -1,4,-1; 0,-1,0]
+        double sum = 0.0, sumSq = 0.0;
+        uint32_t count = 0;
+        for (uint32_t y = 1; y + 1 < h; ++y) {
+            for (uint32_t x = 1; x + 1 < w; ++x) {
+                float lap = 4.0f * lum[y * w + x]
+                          - lum[(y - 1) * w + x]
+                          - lum[(y + 1) * w + x]
+                          - lum[y * w + (x - 1)]
+                          - lum[y * w + (x + 1)];
+                sum += lap;
+                sumSq += static_cast<double>(lap) * lap;
+                ++count;
+            }
+        }
+        if (count == 0) return 0.0f;
+        double mean = sum / count;
+        double variance = sumSq / count - mean * mean;
+        // Normalize: variance of ~0.02 on [0,1] luminance is sharp
+        float normalized = static_cast<float>(variance / 0.025);
+        return (std::max)(0.0f, (std::min)(normalized, 1.0f));
+    }
+
+    /// Noise estimation via median absolute deviation in 3x3 blocks.
+    /// Returns [0, 1] where 1.0 = minimal noise (good).
+    static inline float ComputeNoiseScore(const std::vector<float>& lum,
+                                           uint32_t w, uint32_t h) {
+        double madSum = 0.0;
+        uint32_t blockCount = 0;
+        std::array<float, 9> neighborhood{};
+
+        for (uint32_t y = 1; y + 1 < h; y += 3) {
+            for (uint32_t x = 1; x + 1 < w; x += 3) {
+                uint32_t idx = 0;
+                for (int ky = -1; ky <= 1; ++ky) {
+                    for (int kx = -1; kx <= 1; ++kx) {
+                        neighborhood[idx++] = lum[(y + ky) * w + (x + kx)];
+                    }
+                }
+                // Find median
+                std::sort(neighborhood.begin(), neighborhood.end());
+                float median = neighborhood[4];
+                // Average absolute deviation from median
+                float ad = 0.0f;
+                for (uint32_t i = 0; i < 9; ++i) {
+                    ad += std::abs(neighborhood[i] - median);
+                }
+                ad /= 9.0f;
+                madSum += ad;
+                ++blockCount;
+            }
+        }
+        if (blockCount == 0) return 1.0f;
+        float avgMAD = static_cast<float>(madSum / blockCount);
+        // Normalize: low MAD = low noise = score near 1.0
+        // MAD > 0.05 is quite noisy on [0,1] luminance
+        float noiseLevel = (std::min)(avgMAD / 0.06f, 1.0f);
+        return 1.0f - noiseLevel;
+    }
+
+    /// Michelson contrast in 16x16 blocks, averaged. Returns [0, 1].
+    static inline float ComputeContrast(const std::vector<float>& lum,
+                                         uint32_t w, uint32_t h) {
+        const uint32_t blockSize = 16;
+        double contrastSum = 0.0;
+        uint32_t blockCount = 0;
+
+        for (uint32_t by = 0; by + blockSize <= h; by += blockSize) {
+            for (uint32_t bx = 0; bx + blockSize <= w; bx += blockSize) {
+                float bmin = 1.0f, bmax = 0.0f;
+                for (uint32_t dy = 0; dy < blockSize; ++dy) {
+                    for (uint32_t dx = 0; dx < blockSize; ++dx) {
+                        float v = lum[(by + dy) * w + (bx + dx)];
+                        bmin = (std::min)(bmin, v);
+                        bmax = (std::max)(bmax, v);
+                    }
+                }
+                float denom = bmax + bmin;
+                float michelson = (denom > 1e-6f) ? (bmax - bmin) / denom : 0.0f;
+                contrastSum += michelson;
+                ++blockCount;
+            }
+        }
+        if (blockCount == 0) return 0.0f;
+        return static_cast<float>(contrastSum / blockCount);
+    }
+
+    /// Hasler & Süsstrunk 2003 colorfulness metric. Returns [0, 1].
+    static inline float ComputeColorfulness(const uint8_t* rgba,
+                                             uint32_t pixelCount) {
+        if (pixelCount == 0) return 0.0f;
+
+        double sumRG = 0.0, sumYB = 0.0;
+        double sumRG2 = 0.0, sumYB2 = 0.0;
+
+        for (uint32_t i = 0; i < pixelCount; ++i) {
+            uint32_t off = i * 4;
+            float r = rgba[off + 0] / 255.0f;
+            float g = rgba[off + 1] / 255.0f;
+            float b = rgba[off + 2] / 255.0f;
+            float rg = r - g;
+            float yb = 0.5f * (r + g) - b;
+            sumRG  += rg;
+            sumYB  += yb;
+            sumRG2 += static_cast<double>(rg) * rg;
+            sumYB2 += static_cast<double>(yb) * yb;
+        }
+
+        double n = static_cast<double>(pixelCount);
+        double meanRG = sumRG / n;
+        double meanYB = sumYB / n;
+        double varRG  = sumRG2 / n - meanRG * meanRG;
+        double varYB  = sumYB2 / n - meanYB * meanYB;
+        double sigmaRG = std::sqrt((std::max)(varRG, 0.0));
+        double sigmaYB = std::sqrt((std::max)(varYB, 0.0));
+
+        double colorfulness = std::sqrt(sigmaRG * sigmaRG + sigmaYB * sigmaYB)
+                            + 0.3 * std::sqrt(meanRG * meanRG + meanYB * meanYB);
+
+        // Typical colorfulness range: 0–0.8 for natural images
+        float normalized = static_cast<float>(colorfulness / 0.75);
+        return (std::max)(0.0f, (std::min)(normalized, 1.0f));
+    }
+
+    /// Exposure quality: penalize deviation from target 0.5 midpoint.
+    /// Also penalize very dark (<0.1) or very bright (>0.9) areas.
+    static inline float ComputeExposure(const std::vector<float>& lum,
+                                         uint32_t pixelCount) {
+        if (pixelCount == 0) return 0.0f;
+
+        float sum = 0.0f;
+        uint32_t extremeCount = 0;
+        for (uint32_t i = 0; i < pixelCount; ++i) {
+            sum += lum[i];
+            if (lum[i] < 0.1f || lum[i] > 0.9f) ++extremeCount;
+        }
+        float meanLum = sum / static_cast<float>(pixelCount);
+
+        // Distance from ideal mid-tone
+        float midDev = std::abs(meanLum - 0.5f);
+
+        // Fraction of extreme pixels
+        float extremeFrac = static_cast<float>(extremeCount) / static_cast<float>(pixelCount);
+
+        // Score: 1.0 when mean~0.5 and few extremes, 0.0 when far off
+        float exposureScore = (1.0f - midDev * 2.0f) * (1.0f - extremeFrac);
+        return (std::max)(0.0f, (std::min)(exposureScore, 1.0f));
+    }
+
+    mutable SRWLOCK       m_statsLock{};
+    AssessmentStatsV2     m_stats{};
+};
+
+} // namespace Engine
+} // namespace ExplorerLens

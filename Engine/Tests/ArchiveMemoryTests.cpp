@@ -1,115 +1,91 @@
-// Archive Memory Compactor — GTest
+// Archive Memory Compactor — Tests (Sprint 561)
 #include "../Memory/ArchiveMemoryCompactor.h"
 #include "GTestShim.h"
 
-using namespace ExplorerLens::Memory;
+using namespace ExplorerLens::Engine;
 
-TEST(ArchiveMemoryCompactor, DefaultEvictionConfig) {
- auto c = EvictionConfig::Default();
- EXPECT_EQ(c.policy, EvictionPolicy::LRU);
- EXPECT_GT(c.targetUsageBytes, 0u);
-}
-
-TEST(ArchiveMemoryCompactor, AggressiveConfigLowerTarget) {
- auto def = EvictionConfig::Default();
- auto agg = EvictionConfig::AggressiveLowRAM();
- EXPECT_LT(agg.targetUsageBytes, def.targetUsageBytes);
-}
-
-TEST(ArchiveMemoryCompactor, TrackSlabIncreasesTotal) {
+TEST(ArchiveMemoryCompactor, DefaultConstruction) {
  ArchiveMemoryCompactor c;
- MemorySlab s;
- s.sizeBytes = 1024;
- s.state = SlabState::Active;
- c.TrackSlab(s);
- EXPECT_GT(c.TotalActiveBytes(), 0u);
+ auto stats = c.GetStats();
+ EXPECT_EQ(stats.bufferCount, 0u);
+ EXPECT_EQ(stats.usedBytes, 0u);
 }
 
-TEST(ArchiveMemoryCompactor, FreeSlabNotCounted) {
+TEST(ArchiveMemoryCompactor, AllocateBuffer) {
  ArchiveMemoryCompactor c;
- MemorySlab s;
- s.sizeBytes = 1024;
- s.state = SlabState::Free;
- c.TrackSlab(s);
- EXPECT_EQ(c.TotalActiveBytes(), 0u);
+ auto* buf = c.AllocateBuffer(1, 0, 1024);
+ EXPECT_TRUE(buf != nullptr);
+ EXPECT_EQ(buf->archiveId, 1u);
+ EXPECT_EQ(buf->size, 1024u);
+ EXPECT_TRUE(buf->alive);
+ auto stats = c.GetStats();
+ EXPECT_EQ(stats.bufferCount, 1u);
 }
 
-TEST(ArchiveMemoryCompactor, CompactReducesBytes) {
- EvictionConfig cfg = EvictionConfig::Default();
- cfg.targetUsageBytes = 0; // force eviction of everything
- ArchiveMemoryCompactor c(cfg);
- MemorySlab s;
- s.sizeBytes = 1024 * 1024;
- s.state = SlabState::Evictable;
- c.TrackSlab(s);
- auto report = c.Compact();
- EXPECT_GE(report.bytesAfter, 0u);
-}
-
-TEST(ArchiveMemoryCompactor, CompactionReportBytesBefore) {
- EvictionConfig cfg;
- cfg.targetUsageBytes = 1024ULL * 1024 * 1024; // don't evict
- ArchiveMemoryCompactor c(cfg);
- MemorySlab s;
- s.sizeBytes = 65536;
- s.state = SlabState::Evictable;
- c.TrackSlab(s);
- auto report = c.Compact();
- EXPECT_GE(report.bytesBefore, 0u);
-}
-
-TEST(ArchiveMemoryCompactor, CompactionReportSlabsExamined) {
+TEST(ArchiveMemoryCompactor, FreeBuffer) {
  ArchiveMemoryCompactor c;
- MemorySlab s1, s2;
- s1.sizeBytes = 1024;
- s1.state = SlabState::Active;
- s2.sizeBytes = 2048;
- s2.state = SlabState::Evictable;
- c.TrackSlab(s1);
- c.TrackSlab(s2);
- auto report = c.Compact();
- EXPECT_GE(report.slabsExamined, 2u);
+ auto* buf = c.AllocateBuffer(1, 0, 2048);
+ EXPECT_TRUE(buf != nullptr);
+ c.FreeBuffer(buf);
+ EXPECT_FALSE(buf->alive);
 }
 
-TEST(ArchiveMemoryCompactor, SlabStateEvictableCanEvict) {
- MemorySlab s;
- s.state = SlabState::Evictable;
- EXPECT_TRUE(s.CanEvict());
-}
-
-TEST(ArchiveMemoryCompactor, SlabStateActiveNoEvict) {
- MemorySlab s;
- s.state = SlabState::Active;
- EXPECT_FALSE(s.CanEvict());
-}
-
-TEST(ArchiveMemoryCompactor, SlabStatePinnedNoEvict) {
- MemorySlab s;
- s.state = SlabState::Pinned;
- EXPECT_FALSE(s.CanEvict());
-}
-
-TEST(ArchiveMemoryCompactor, ReductionPercent) {
- CompactionReport r;
- r.bytesBefore = 1000;
- r.bytesAfter = 600;
- EXPECT_DOUBLE_EQ(r.ReductionPercent(), 40.0);
-}
-
-TEST(ArchiveMemoryCompactor, BytesReclaimed) {
- CompactionReport r;
- r.bytesBefore = 2048;
- r.bytesAfter = 1024;
- EXPECT_EQ(r.BytesReclaimed(), 1024u);
-}
-
-TEST(ArchiveMemoryCompactor, TouchSlabUpdatesAccess) {
+TEST(ArchiveMemoryCompactor, PinUnpinBuffer) {
  ArchiveMemoryCompactor c;
- MemorySlab s;
- s.slabId = 42;
- s.sizeBytes = 512;
- s.state = SlabState::Active;
- c.TrackSlab(s);
- // Touch should not throw
- EXPECT_NO_THROW(c.TouchSlab(42));
+ auto* buf = c.AllocateBuffer(1, 0, 4096);
+ EXPECT_TRUE(buf != nullptr);
+ EXPECT_FALSE(buf->pinned);
+ c.PinBuffer(buf);
+ EXPECT_TRUE(buf->pinned);
+ c.UnpinBuffer(buf);
+ EXPECT_FALSE(buf->pinned);
+}
+
+TEST(ArchiveMemoryCompactor, CompactResult) {
+ ArchiveMemoryCompactor c;
+ auto* b1 = c.AllocateBuffer(1, 0, 1024);
+ auto* b2 = c.AllocateBuffer(1, 1, 2048);
+ (void)b2;
+ c.FreeBuffer(b1);
+ auto result = c.Compact();
+ EXPECT_GE(result.buffersMoved, 0u);
+}
+
+TEST(ArchiveMemoryCompactor, GetStats) {
+ ArchiveMemoryCompactor c;
+ c.AllocateBuffer(1, 0, 512);
+ c.AllocateBuffer(1, 1, 1024);
+ auto stats = c.GetStats();
+ EXPECT_EQ(stats.bufferCount, 2u);
+ EXPECT_GE(stats.arenaReserved, 0u);
+}
+
+TEST(ArchiveMemoryCompactor, MultipleAllocations) {
+ ArchiveMemoryCompactor c;
+ for (uint32_t i = 0; i < 10; ++i) {
+  auto* buf = c.AllocateBuffer(1, i, 256);
+  EXPECT_TRUE(buf != nullptr);
+ }
+ auto stats = c.GetStats();
+ EXPECT_EQ(stats.bufferCount, 10u);
+}
+
+TEST(ArchiveMemoryCompactor, ExtractedBufferDefaults) {
+ ExtractedBuffer buf;
+ EXPECT_EQ(buf.archiveId, 0u);
+ EXPECT_EQ(buf.data, nullptr);
+ EXPECT_TRUE(buf.alive);
+ EXPECT_FALSE(buf.pinned);
+}
+
+TEST(ArchiveMemoryCompactor, CompactResultDefaults) {
+ CompactResult result;
+ EXPECT_EQ(result.buffersMoved, 0u);
+ EXPECT_EQ(result.bytesMoved, 0u);
+}
+
+TEST(ArchiveMemoryCompactor, CompactorStatsDefaults) {
+ CompactorStats stats;
+ EXPECT_EQ(stats.bufferCount, 0u);
+ EXPECT_EQ(stats.fragmentationRatio, 0.0);
 }
