@@ -258,20 +258,22 @@ external/
 - Keep meaningful file-level doc blocks; remove only tracking/versioning artifacts
 
 ### Header documentation standard
-- Every header should have a structured doc block immediately after `#pragma once`:
+- Every header starts with a Copyright doc-block BEFORE `#pragma once`:
 ```cpp
-#pragma once
-// ============================================================================
-// FileName.h — Brief one-line description
+// FileName.h — Brief Title
+// Copyright (c) 2026 ExplorerLens Project
 //
-// Purpose:   What this module provides and why it exists
-// Provides:  Key classes, enums, constants, free functions
-// Used by:   Consumer modules, pipelines, test harness
-// ============================================================================
+// Detailed description of what this header provides, what the main
+// classes/functions do, and how they fit in the architecture.
+//
+#pragma once
 ```
+- Do NOT use `=====` decorator lines or version numbers in banners
 - Prefer block-level comments over inline comments
 - Document inputs/outputs at function level for non-trivial public methods
 - Remove dead comments: "merged into X.h", "moved to Y.h", "Batch N" markers
+- Remove redundant single-line comments that just restate the type name
+  (e.g., `// Configuration` above a `struct Config` is noise)
 
 ### EngineTests.cpp include organization
 - Group includes by functional category with `// --- Category Name ---` section headers
@@ -615,3 +617,13 @@ ExplorerLens Engine v\d+\.\d+\.\d+ \(Sprint — full sprint header lines
 - Meaningful section separators (`// --- Category ---`)
 - Class/struct doc comments explaining purpose and usage
 - Copyright headers and license notices
+
+### Version banner cleanup (v15.0 Post-Release)
+- All 49 Engine headers had `// ExplorerLens Engine v15.0.0 "Zenith"` or `=====` decorator banners
+- Replaced all with standardized Copyright doc-block format (see Section 10)
+- EngineTests.cpp had `// ===== Batch N: Category =====` section headers →
+  replaced with `// --- Category ---` (domain names only, no batch numbers)
+- Inline comments that just restated the struct/enum name were removed (77 total)
+- Pattern: `// Configuration` before `struct Config` is noise → remove
+- Pattern: `/// Backends listed in preference order` is useful → keep
+- Useful comments describe *why* or *how*, not *what* the next line declares

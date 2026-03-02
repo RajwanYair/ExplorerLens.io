@@ -172,6 +172,24 @@ All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). One exception:
 - See `.github/standards/CODING_STANDARDS.md` for full guide
 - COM interfaces follow Windows SDK patterns (IUnknown, AddRef/Release)
 
+### Header Banner Format
+
+All headers use this standardized Copyright doc-block (banner BEFORE `#pragma once`):
+
+```cpp
+// FileName.h — Short Title
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Description of what this header provides and its role in the architecture.
+//
+#pragma once
+```
+
+- **No** `=====` decorator lines, version numbers, sprint/batch tags
+- Prefer block-level comments over inline comments
+- Remove inline comments that just restate the type name (`// Stats` above `struct Stats`)
+- Keep comments that explain *why* or *how*, not *what* the next line declares
+
 ## Key Types
 
 - `LENSArchive` — Main archive handler, routes formats to decoders
