@@ -1,13 +1,10 @@
-// ============================================================================
 // ExplorerColumnProvider.h — Custom Explorer Columns for Format Metadata
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Implements IColumnProvider and IPropertyStore to expose custom columns
 // in Explorer's Details view: image dimensions, codec name, color depth,
 // format version, thumbnail status. Provides rich metadata without opening files.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

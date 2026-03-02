@@ -1,14 +1,11 @@
-// ============================================================================
 // AnimatedImageDecoder.h — Animated Image Thumbnail Extractor
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Decodes animated image formats (WebP, GIF, APNG) and selects the best
 // representative frame for thumbnail generation. Supports frame analysis,
 // scene change detection, and intelligent keyframe selection to produce
 // visually meaningful thumbnails from animations.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

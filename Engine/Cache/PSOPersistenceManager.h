@@ -1,13 +1,10 @@
-// ============================================================================
 // PSOPersistenceManager.h — D3D12 Pipeline State Object Persistence
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Serializes compiled D3D12 Pipeline State Objects to disk and reloads them
 // on startup, eliminating shader compilation stalls. Reduces cold-start
 // time from ~200ms to <50ms for GPU-accelerated thumbnail generation.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

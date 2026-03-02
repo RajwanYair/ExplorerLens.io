@@ -1,14 +1,11 @@
-// ============================================================================
 // ProgressiveJPEGDecoder.h — Progressive JPEG Scan-Aware Decoder
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Handles progressive JPEG files by decoding scan-by-scan, enabling
 // thumbnail generation from partial data. Detects scan boundaries,
 // provides quality estimation per scan level, and supports early-exit
 // when thumbnail quality threshold is met (typically scan 2-3 of 10+).
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

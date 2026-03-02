@@ -1,14 +1,11 @@
-// ============================================================================
 // RemoteDesktopOptimizer.h — RDP/Citrix Rendering Optimization
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Detects remote desktop sessions (RDP, Citrix, VNC, VMware Horizon) and
 // optimizes thumbnail rendering for low-bandwidth scenarios. Reduces
 // color depth, simplifies GPU operations, increases JPEG compression,
 // and adjusts decode quality to maintain responsiveness over remote links.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

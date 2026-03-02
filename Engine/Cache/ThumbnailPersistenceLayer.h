@@ -1,14 +1,11 @@
-// ============================================================================
 // ThumbnailPersistenceLayer.h — Disk-Backed Thumbnail Cache
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides persistent on-disk thumbnail caching with a lightweight
 // index structure. Features file-identity-based keying (path + mtime +
 // size), LRU eviction, configurable size budgets, and atomic write
 // guarantees via temp-file-and-rename pattern.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

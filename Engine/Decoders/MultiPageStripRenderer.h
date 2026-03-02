@@ -1,13 +1,10 @@
-// ============================================================================
 // MultiPageStripRenderer.h — Multi-Page Document Strip Thumbnails
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Generates composite strip thumbnails for multi-page documents (PDF, TIFF,
 // DJVU, Office docs). Shows up to 4 pages side-by-side with page numbers,
 // giving users instant visual context about document content.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

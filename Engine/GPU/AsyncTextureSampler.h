@@ -1,14 +1,11 @@
-// ============================================================================
 // AsyncTextureSampler.h — Async GPU Texture Sampling with Mipmap LOD
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides asynchronous GPU texture sampling with automatic mipmap LOD
 // selection based on requested thumbnail size. Supports texture streaming,
 // anisotropic filtering configuration, and async readback for CPU access.
 // Optimizes GPU memory usage by selecting appropriate mip levels.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

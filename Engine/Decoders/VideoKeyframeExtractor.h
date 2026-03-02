@@ -1,14 +1,11 @@
-// ============================================================================
 // VideoKeyframeExtractor.h — Smart Video Keyframe Selection for Thumbnails
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Intelligently selects the most representative keyframe from video files
 // for thumbnail generation. Uses scene analysis heuristics (brightness,
 // entropy, face detection hints, motion scoring) to avoid black frames,
 // credits, and scene transitions.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

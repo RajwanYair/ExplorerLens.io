@@ -1,13 +1,10 @@
-// ============================================================================
 // SIMDDispatchRouter.h — Runtime SIMD Feature Detection & Dispatch
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Detects CPU SIMD capabilities at runtime (SSE4.2, AVX2, AVX-512, NEON)
 // and dispatches thumbnail scaling/transform kernels to the optimal path.
 // Achieves <12ms 4K→256x256 on AVX2 and <20ms on ARM64 NEON.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

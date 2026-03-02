@@ -1,12 +1,9 @@
-// ============================================================================
 // PluginLoaderV2.h — LoadLibrary + C ABI Plugin Bridge
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Dynamic plugin loading via LoadLibrary with C ABI function resolution.
 // Supports hot-reload, version negotiation, and sandbox boundary enforcement.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

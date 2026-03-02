@@ -1,36 +1,13 @@
-// ============================================================================
 // StreamingDecodeEngine.h — Progressive Streaming Decode
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
-// PURPOSE:
-//   Progressive streaming decoder that produces partial thumbnails as data
-//   arrives. Detects file format from magic bytes (JPEG FFD8, PNG 89504E47,
-//   WebP RIFF, BMP BM, GIF GIF8, TIFF). For JPEG, parses SOF markers to
-//   extract dimensions; for PNG, reads IHDR. Manages concurrent decode
-//   sessions with configurable max (default 8) and per-session timeout (60s).
+// Progressive streaming decoder that produces partial thumbnails as data
+// arrives. Detects file format from magic bytes (JPEG, PNG, WebP, BMP, GIF,
+// TIFF) and parses header markers to extract dimensions. Manages concurrent
+// decode sessions with configurable max (default 8) and per-session timeout.
+// Provides StreamingSession per-file state and StreamingDecodeEngine
+// session-based streaming API with BeginStream/FeedData/GetPartialResult.
 //
-// CLASSES:
-//   - StreamingSession: Per-file session state (phase, bytes received,
-//     partial RGBA result, estimated total bytes).
-//   - StreamingDecodeEngine: Session-based streaming API with BeginStream(),
-//     FeedData(), GetPartialResult(), IsComplete(), EndStream(), plus the
-//     full v14 progressive decode API (BeginDecode/FeedChunk/EndDecode).
-//
-// INPUTS:
-//   - File path and target dimensions via BeginStream()
-//   - Raw byte chunks via FeedData()
-//
-// OUTPUTS:
-//   - Partial RGBA pixel data via GetPartialResult()
-//   - Completion status via IsComplete()
-//   - StreamingDecodeStats via GetStats()
-//
-// THREAD SAFETY:
-//   All public methods are serialized by std::mutex. Multiple sessions
-//   can be active concurrently (up to maxSessions).
-// ============================================================================
-
 #pragma once
 
 #include <cstdint>

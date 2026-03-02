@@ -1,12 +1,9 @@
-// ============================================================================
 // JumpListIntegration.h — Windows Jump List for Recently Browsed Folders
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Manages Windows 10/11 Jump List entries for recently accessed archives
 // and folders. Integrates with ICustomDestinationList COM interface.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

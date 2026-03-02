@@ -1,13 +1,10 @@
-// ============================================================================
 // ZeroCopyActivation.h — Zero-Copy Pipeline Production Activation
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Activates the zero-copy data path from decoder output → GPU texture upload
 // → cache write, eliminating intermediate buffer copies. Reduces memory
 // bandwidth by up to 60% and improves batch throughput to 350+ img/sec.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

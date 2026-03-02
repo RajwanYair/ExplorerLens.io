@@ -1,13 +1,10 @@
-// ============================================================================
 // DragDropThumbnailPreview.h — Custom Drag-and-Drop Thumbnail Preview
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Renders rich drag-and-drop visuals when dragging files through Explorer.
 // Shows multi-file stacked previews with count badge, format icon overlay,
 // and progressive rendering during drag motion. Integrates with IDropTarget.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

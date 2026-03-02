@@ -1,12 +1,9 @@
-// ============================================================================
 // ShellProgressIndicator.h — Thumbnail Generation Progress Reporting
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Reports decode progress back to the Windows Shell for large-file thumbnails.
 // Uses IProgressDialog COM interface when available, with ETW event fallback.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

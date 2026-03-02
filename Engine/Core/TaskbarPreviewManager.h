@@ -1,14 +1,11 @@
-// ============================================================================
 // TaskbarPreviewManager.h — Windows Taskbar Thumbnail Preview Helper
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Manages taskbar thumbnail integration for the ExplorerLens Manager app.
 // Provides DWM thumbnail registration, custom drawing for the taskbar
 // preview, and live/static thumbnail switching based on app state.
 // Uses DwmSetIconicThumbnail and DwmSetIconicLivePreviewBitmap APIs.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

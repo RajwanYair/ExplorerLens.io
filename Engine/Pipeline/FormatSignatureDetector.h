@@ -1,14 +1,11 @@
-// ============================================================================
 // FormatSignatureDetector.h — Magic Byte Signature Detection Engine
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // High-performance file format detection via magic byte signatures with
 // confidence scoring. Supports multi-byte signatures at variable offsets,
 // secondary confirmation patterns, and content-based heuristics for
 // ambiguous formats. Processes files in under 1μs for cached signatures.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

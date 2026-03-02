@@ -1,20 +1,11 @@
-// PluginMarketplace.h - Plugin Marketplace & Distribution
-// ExplorerLens Engine v15.0.0
+// PluginMarketplace.h — Plugin Marketplace & Distribution
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Features:
-// - REST API client for marketplace catalog
-// - Plugin package format (.dtpkg) with metadata + signatures
-// - Authenticode & custom code signing verification
-// - Security scanning before installation
-// - Rating/review system integration
-// - In-app marketplace browser
-// - Auto-update and version management
+// Plugin marketplace client with REST API catalog access, .dtpkg package
+// format support, Authenticode and custom code signing verification,
+// security scanning before installation, rating/review system integration,
+// in-app marketplace browser, and auto-update version management.
 //
-// Architecture:
-// MarketplaceClient → PluginPackage → SecurityScanner → PluginInstaller
-// ↘ ReviewSystem
-
 #pragma once
 
 #include "../Core/Types.h"

@@ -1,14 +1,11 @@
-// ============================================================================
 // SearchFederatedProvider.h — Windows Federated Search Protocol Provider
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Implements a federated search provider that integrates ExplorerLens
 // thumbnail metadata into Windows Search results. Supports content-based
 // queries (find images by dimensions, format, color profile), property
 // enrichment, and relevance scoring based on visual similarity.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

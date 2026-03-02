@@ -1,12 +1,9 @@
-// ============================================================================
 // ShellSearchProtocolHandler.h — ISearchProtocolHandler Implementation
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Implements Windows Search protocol handler for indexed thumbnail search.
 // Enables type-ahead search of archive contents via Windows Desktop Search.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>

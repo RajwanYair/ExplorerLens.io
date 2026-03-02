@@ -1,14 +1,11 @@
-// ============================================================================
 // ThumbnailQualityValidator.h — Post-Decode Quality Validation
-// ExplorerLens Engine v15.0.0
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Validates generated thumbnails meet quality thresholds before caching.
 // Detects common decode artifacts: blank/solid images, extreme color casts,
 // corrupted pixels, undersized output, and excessive blur. Assigns a
 // confidence score to each thumbnail and rejects sub-threshold results.
-// ============================================================================
-
+//
 #pragma once
 
 #include <cstdint>
