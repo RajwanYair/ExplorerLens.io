@@ -145,7 +145,8 @@ struct EBookExtensions {
 
   static bool IsSupported(const std::string& ext) {
     std::string lower = ext;
-    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    std::transform(lower.begin(), lower.end(), lower.begin(),
+      [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
     for (auto& e : ALL) {
       if (lower == e)
         return true;
@@ -155,7 +156,8 @@ struct EBookExtensions {
 
   static bool IsNewFormat(const std::string& ext) {
     std::string lower = ext;
-    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    std::transform(lower.begin(), lower.end(), lower.begin(),
+      [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
     for (auto& e : NEW_FORMATS) {
       if (lower == e)
         return true;
@@ -165,7 +167,8 @@ struct EBookExtensions {
 
   static EBookFormat ClassifyExtension(const std::string& ext) {
     std::string lower = ext;
-    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    std::transform(lower.begin(), lower.end(), lower.begin(),
+      [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
     if (lower == ".epub")
       return EBookFormat::EPUB;
     if (lower == ".mobi")

@@ -129,7 +129,8 @@ struct JXRExtensions {
 
     static bool IsSupported(const std::string& ext) {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+            [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
         for (auto& e : ALL) {
             if (lower == e) return true;
         }
@@ -138,7 +139,8 @@ struct JXRExtensions {
 
     static JXRFormat ClassifyExtension(const std::string& ext) {
         std::string lower = ext;
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+            [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
         if (lower == ".wdp") return JXRFormat::WDP;
         if (lower == ".hdp") return JXRFormat::HDP;
         if (lower == ".jxr") return JXRFormat::JXR;

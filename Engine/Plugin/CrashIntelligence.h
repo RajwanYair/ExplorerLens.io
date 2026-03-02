@@ -254,8 +254,13 @@ private:
         // Use RtlGetVersion for accurate version on Win10+
         OSVERSIONINFOW ovi = {};
         ovi.dwOSVersionInfoSize = sizeof(ovi);
-        // Fallback: use GetVersionExW (deprecated but functional for display)
-        GetVersionExW(&ovi);
+        // Use RtlGetVersion (undeprecated) from ntdll — avoids C4996 on GetVersionExW
+        using RtlGetVersionFn = LONG(WINAPI*)(PRTL_OSVERSIONINFOW);
+        HMODULE hNtdll = GetModuleHandleW(L"ntdll.dll");
+        if (hNtdll) {
+            auto fn = reinterpret_cast<RtlGetVersionFn>(GetProcAddress(hNtdll, "RtlGetVersion"));
+            if (fn) fn(reinterpret_cast<PRTL_OSVERSIONINFOW>(&ovi));
+        }
         wchar_t buf[64] = {};
         swprintf_s(buf, L"%u.%u.%u", ovi.dwMajorVersion, ovi.dwMinorVersion, ovi.dwBuildNumber);
         return buf;

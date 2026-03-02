@@ -121,7 +121,7 @@ inline std::vector<std::string> ICCSupportedFormats() {
 class ICCProfileExtractor {
 public:
     // Extract ICC profile from file based on format
-    ICCExtractionResult Extract(const std::string& filePath, const std::string& format) const {
+    ICCExtractionResult Extract([[maybe_unused]] const std::string& filePath, const std::string& format) const {
         ICCExtractionResult result;
         result.sourceFormat = format;
 

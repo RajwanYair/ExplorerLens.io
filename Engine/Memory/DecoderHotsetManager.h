@@ -308,7 +308,7 @@ public:
 private:
     // ── Eviction (caller holds lock) ─────────────────────────────
 
-    bool EvictLRULocked(size_t spaceNeeded) {
+    bool EvictLRULocked([[maybe_unused]] size_t spaceNeeded) {
         // Find the pool entry with the oldest lastUsed that is NOT in hot set
         uint32_t bestType = UINT32_MAX;
         size_t   bestIdx = SIZE_MAX;

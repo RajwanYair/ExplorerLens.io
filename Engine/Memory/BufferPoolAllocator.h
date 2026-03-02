@@ -68,7 +68,7 @@ struct PooledBuffer {
     bool fromPool = false;
 
     bool IsValid() const { return data != nullptr && capacity > 0; }
-    void Clear() { if (data) std::fill(data, data + capacity, 0); }
+    void Clear() { if (data) std::fill(data, data + capacity, static_cast<uint8_t>(0)); }
 };
 
 // ─── Per-class slab pool ──────────────────────────────────────────

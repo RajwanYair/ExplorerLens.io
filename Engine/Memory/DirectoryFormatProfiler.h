@@ -183,7 +183,8 @@ private:
         auto pos = path.rfind('.');
         if (pos == std::string::npos || pos == path.length() - 1) return "";
         std::string ext = path.substr(pos);
-        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+        std::transform(ext.begin(), ext.end(), ext.begin(),
+            [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
         return ext;
     }
 
