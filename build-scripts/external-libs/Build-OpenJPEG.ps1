@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Downloads and builds OpenJPEG as a static library with /MD runtime.
-    ExplorerLens v15.0.0 "Zenith" — 
+    ExplorerLens v15.0.0 "Zenith"
 
 .PARAMETER Clean
     Remove existing build artifacts before building.
@@ -121,7 +121,7 @@ $zlibDir = Join-Path $rootDir "external" "compression-libs" "zlib-1.3.1"
 if (Test-Path (Join-Path $zlibDir "build" "Release" "zlibstatic.lib")) {
     $cmakeArgs += "-DZLIB_LIBRARY=$(Join-Path $zlibDir 'build' 'Release' 'zlibstatic.lib')"
     $cmakeArgs += "-DZLIB_INCLUDE_DIR=$zlibDir"
-    Write-BuildLog "Found zlib — enabling compressed JP2 streams" "Info"
+    Write-BuildLog "Found zlib - enabling compressed JP2 streams" "Info"
 }
 
 Write-BuildLog "Configuring OpenJPEG with CMake..." "Info"
@@ -161,7 +161,7 @@ if (-not $libFile) {
 }
 if ($libFile) {
     Copy-Item $libFile.FullName (Join-Path $outputDir "openjp2.lib") -Force
-    Write-BuildLog "Copied: openjp2.lib → $outputDir" "Success"
+    Write-BuildLog "Copied: openjp2.lib -> $outputDir" "Success"
 } else {
     Write-BuildLog "WARNING: openjp2.lib not found in build output" "Warning"
 }

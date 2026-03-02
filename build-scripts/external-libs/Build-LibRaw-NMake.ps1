@@ -20,7 +20,7 @@ param(
 # Import core build module
 . "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
-# Paths — use double Split-Path to get project root from external-libs/
+# Paths - use double Split-Path to get project root from external-libs/
 $rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $LibRawSource = Join-Path $rootDir "external\camera-libs\libraw"
 $OutputDir = Join-Path $rootDir "external\camera-libs\libraw-install"

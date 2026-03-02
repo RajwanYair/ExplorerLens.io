@@ -5,7 +5,7 @@
 .DESCRIPTION
     Downloads and builds a minimal FFmpeg configuration (libavformat + libavcodec + swscale)
     as shared DLLs for dynamic loading. LGPL-compatible build only.
-    ExplorerLens v15.0.0 "Zenith" — Sprints 367-368
+    ExplorerLens v15.0.0 "Zenith" - Sprints 367-368
 
 .PARAMETER Clean
     Remove existing build artifacts before building.
@@ -38,7 +38,7 @@ $installDir = Join-Path $externalDir "ffmpeg-install"
 $outputDir = Join-Path $rootDir "x64" "Release"
 
 Write-BuildHeader "FFmpeg $FFmpegVersion Build Script"
-Write-BuildLog "ExplorerLens v15.0.0 Zenith — Sprints 367-368" -Level Info
+Write-BuildLog "ExplorerLens v15.0.0 Zenith - Sprints 367-368" -Level Info
 Write-BuildLog "LGPL-compatible minimal build for video thumbnails" -Level Info
 
 # ============================================================================

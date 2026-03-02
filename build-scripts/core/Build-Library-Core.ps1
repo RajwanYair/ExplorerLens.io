@@ -349,7 +349,7 @@ function Invoke-CMakeBuild {
     # Add custom options (convert backslashes to forward slashes for CMake compatibility)
     foreach ($key in $CMakeOptions.Keys) {
         $value = [string]$CMakeOptions[$key]
-        # CMake treats backslashes as escape sequences — always use forward slashes in paths
+        # CMake treats backslashes as escape sequences - always use forward slashes in paths
         $value = $value.Replace('\', '/')
         if ($value -match '[\s"]') {
             $escapedValue = $value.Replace('"', '`"')

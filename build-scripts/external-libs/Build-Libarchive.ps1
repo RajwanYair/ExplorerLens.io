@@ -54,10 +54,10 @@ $lz4IncludeDir = Join-Path $rootDir "external\compression-libs\lz4-1.10.0\lib"
 
 try {
     $cmakeLists = Join-Path $libarchiveDir "CMakeLists.txt"
-    
+
     if (Test-Path $cmakeLists) {
         Write-BuildLog "Using CMake build (static library only)" -Level Info
-        
+
         $cmakeOptions = @{
             'CMAKE_BUILD_TYPE'  = 'Release'
             'BUILD_SHARED_LIBS' = 'OFF'
@@ -86,15 +86,15 @@ try {
             'ENABLE_ACL'        = 'OFF'
             'ENABLE_XATTR'      = 'OFF'
         }
-        
+
         # If zlib is available, enable it for better compression support
         if (Test-Path $zlibLibPath) {
-            Write-BuildLog "Found zlib at $zlibInstallDir — enabling zlib support" -Level Info
+            Write-BuildLog "Found zlib at $zlibInstallDir - enabling zlib support" -Level Info
             $cmakeOptions['ENABLE_ZLIB'] = 'ON'
             $cmakeOptions['ZLIB_LIBRARY'] = $zlibLibPath
             $cmakeOptions['ZLIB_INCLUDE_DIR'] = $zlibIncludePath
         }
-        
+
         Invoke-CMakeBuild `
             -LibraryName "libarchive" `
             -SourceDir $libarchiveDir `
@@ -103,8 +103,8 @@ try {
             -Configuration $Configuration `
             -CMakeOptions $cmakeOptions `
             -Clean:$Clean
-        
-        # Verify output — on Windows with BUILD_SHARED_LIBS=OFF, static lib is archive_static.lib
+
+        # Verify output - on Windows with BUILD_SHARED_LIBS=OFF, static lib is archive_static.lib
         $expectedLib = Join-Path $installDir "lib\archive_static.lib"
         if (-not (Test-Path $expectedLib)) {
             # Try alternate names
@@ -116,16 +116,16 @@ try {
         if (-not (Test-Path $expectedLib)) {
             $expectedLib = Join-Path $buildDir "libarchive\$Configuration\archive.lib"
         }
-        
+
         Test-BuildOutput -Files @($expectedLib) -ThrowOnMissing
     } else {
         throw "CMakeLists.txt not found in libarchive source directory"
     }
-    
+
     Write-BuildLog "libarchive 3.7.6 build completed successfully" -Level Success
     Write-BuildLog "Features: TAR, CPIO, ISO 9660, XAR, AR/DEB, CAB, compressed TAR (.gz/.bz2/.xz/.zst)" -Level Info
     Write-BuildLog "Output: $expectedLib" -Level Info
-    
+
 } catch {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1

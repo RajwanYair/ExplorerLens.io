@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# ExplorerLens v15.0 "Zenith" — Build MuPDF 1.24.11 Static Library
+# ExplorerLens v15.0 "Zenith" - Build MuPDF 1.24.11 Static Library
 #
 # Directory structure:
 #   Project root:       <repo>\
@@ -87,7 +87,7 @@ try {
         /p:PlatformToolset=v145 `
         /m /v:minimal 2>&1 | Out-Null
     
-    # Step 3: Build libmupdf (core library — what we link against)
+    # Step 3: Build libmupdf (core library - what we link against)
     Write-BuildLog "Building libmupdf core library..." -Level Info
     & $msbuild $solutionFile `
         /t:libmupdf `

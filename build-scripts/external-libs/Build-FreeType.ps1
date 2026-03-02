@@ -5,7 +5,7 @@
 .DESCRIPTION
     Downloads and builds FreeType as a static library with /MD runtime.
     Optionally builds HarfBuzz for advanced text shaping.
-    ExplorerLens v15.0.0 "Zenith" — 
+    ExplorerLens v15.0.0 "Zenith"
 
 .PARAMETER Clean
     Remove existing build artifacts before building.
@@ -82,7 +82,7 @@ if (-not (Test-Path $ftSourceDir)) {
             Remove-Item $tarFile -Force
         }
     } else {
-        Write-BuildLog "7z not found — trying tar..." "Warning"
+        Write-BuildLog "7z not found - trying tar..." "Warning"
         tar -xf $archivePath -C $externalDir
     }
     Remove-Item $archivePath -Force -ErrorAction SilentlyContinue
@@ -130,10 +130,10 @@ if (Test-Path (Join-Path $zlibDir "build" "Release" "zlibstatic.lib")) {
     $cmakeArgs += "-DFT_DISABLE_ZLIB=OFF"
     $cmakeArgs += "-DZLIB_LIBRARY=$(Join-Path $zlibDir 'build' 'Release' 'zlibstatic.lib')"
     $cmakeArgs += "-DZLIB_INCLUDE_DIR=$zlibDir"
-    Write-BuildLog "Found zlib — compressed font support enabled" "Info"
+    Write-BuildLog "Found zlib - compressed font support enabled" "Info"
 } else {
     $cmakeArgs += "-DFT_DISABLE_ZLIB=ON"
-    Write-BuildLog "zlib not found — building without compressed font support" "Warning"
+    Write-BuildLog "zlib not found - building without compressed font support" "Warning"
 }
 
 Write-BuildLog "Configuring FreeType with CMake..." "Info"
@@ -167,7 +167,7 @@ if (-not (Test-Path $outputDir)) {
 $libFile = Get-ChildItem $ftBuildDir -Recurse -Filter "freetype*.lib" | Select-Object -First 1
 if ($libFile) {
     Copy-Item $libFile.FullName (Join-Path $outputDir "freetype.lib") -Force
-    Write-BuildLog "Copied: freetype.lib → $outputDir" "Success"
+    Write-BuildLog "Copied: freetype.lib -> $outputDir" "Success"
 } else {
     Write-BuildLog "WARNING: freetype.lib not found in build output" "Warning"
 }

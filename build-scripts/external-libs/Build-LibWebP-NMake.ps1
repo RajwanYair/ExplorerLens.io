@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-# ExplorerLens v15.0 "Zenith" — Build libwebp 1.5.0 using native Makefile.vc
+# ExplorerLens v15.0 "Zenith" - Build libwebp 1.5.0 using native Makefile.vc
 # Refactored to use Build-Library-Core.ps1 module
 #
 # Directory structure (post-cleanup):
