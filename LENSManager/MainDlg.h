@@ -46,6 +46,8 @@ public:
 		COMMAND_ID_HANDLER(IDC_BTN_LOAD_CONFIG, OnLoadConfig)
 		COMMAND_ID_HANDLER(IDC_BTN_THEME, OnToggleTheme)
 		COMMAND_ID_HANDLER(IDC_BTN_EXPORT_DIAG, OnExportDiagnostics)
+		COMMAND_ID_HANDLER(IDC_BTN_BENCHMARK, OnBenchmark)
+		COMMAND_ID_HANDLER(IDC_BTN_ABOUT, OnAboutBtn)
 		COMMAND_ID_HANDLER(ExplorerLens::ID_TRAY_OPEN, OnTrayOpen)
 		COMMAND_ID_HANDLER(ExplorerLens::ID_TRAY_ABOUT, OnTrayAbout)
 		COMMAND_ID_HANDLER(ExplorerLens::ID_TRAY_EXIT, OnTrayExit)
@@ -119,6 +121,8 @@ public:
 	LRESULT OnExportConfig(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnToggleTheme(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnExportDiagnostics(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnBenchmark(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnAboutBtn(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnTrayMessage(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/);
 	LRESULT OnTrayOpen(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnTrayAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

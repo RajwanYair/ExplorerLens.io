@@ -79,3 +79,7 @@
 #define IDC_CB_EXT_ARCHIVE                      1075
 #define IDC_CB_EXT_DOCUMENT                     1076
 #define IDC_BTN_EXPORT_DIAG                     1077
+#define IDC_BTN_BENCHMARK                       1078
+#define IDC_BTN_ABOUT                           1079
+#define IDC_ABOUT_SYSINFO                       1080
+#define IDC_BTN_COPY_INFO                       1081

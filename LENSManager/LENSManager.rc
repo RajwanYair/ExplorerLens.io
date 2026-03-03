@@ -14,16 +14,18 @@
 //
 // Dialog resources
 //
-IDD_ABOUTBOX DIALOGEX 0, 0, 169, 60
-STYLE DS_SETFONT | WS_CAPTION | WS_POPUP | WS_SYSMENU
-CAPTION "About"
+IDD_ABOUTBOX DIALOGEX 0, 0, 310, 280
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_POPUP | WS_SYSMENU
+CAPTION "About ExplorerLens"
 FONT 8, "MS Shell Dlg 2", 400, 0, 1
 {
-  GROUPBOX        "", IDC_STATIC, 59, 51, 55, 18
-    CTEXT           "OK", IDC_STATIC, 76, 57, 23, 10, SS_CENTER, WS_EX_TRANSPARENT
-    CTEXT           "ExplorerLens Shell Manager\nversion 15.0.0\nExplorerLens.io © 2011-2026", IDC_STATIC, 10, 9, 152, 25, SS_CENTER
-    CTEXT           "200+ Formats • GPU Thumbnails • DirectX 11/12 • Vulkan • Caching", IDC_STATIC, 10, 37, 152, 10, SS_CENTER
-    ICON            IDR_MAINFRAME, IDC_STATIC, 13, 11, 11, 10, SS_ICON
+    ICON            IDR_MAINFRAME, IDC_STATIC, 12, 10, 20, 20, SS_ICON
+    CTEXT           "ExplorerLens Shell Manager\nversion 15.0.0 ""Zenith""\nExplorerLens.io (c) 2011-2026", IDC_STATIC, 40, 10, 258, 28, SS_CENTER
+    CTEXT           "200+ Formats  -  GPU Thumbnails  -  DirectX 11/12  -  Vulkan  -  Smart Cache", IDC_STATIC, 12, 42, 286, 10, SS_CENTER
+    LTEXT           "System Information:", IDC_STATIC, 12, 58, 286, 8
+    EDITTEXT        IDC_ABOUT_SYSINFO, 12, 68, 286, 174, ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL | WS_BORDER
+    PUSHBUTTON      "Copy Info", IDC_BTN_COPY_INFO, 12, 250, 60, 18
+    DEFPUSHBUTTON   "OK", IDOK, 240, 250, 60, 18
 }
 
 
@@ -124,6 +126,8 @@ FONT 8, "Ms Shell Dlg"
     CONTROL         "Export Config...", IDC_BTN_EXPORT_CONFIG, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 82, 410, 68, 14
     CONTROL         "Diagnostics...", IDC_BTN_EXPORT_DIAG, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 154, 410, 60, 14
     CONTROL         "Toggle Theme", IDC_BTN_THEME, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 218, 410, 56, 14
+    CONTROL         "Benchmark", IDC_BTN_BENCHMARK, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 278, 410, 48, 14
+    CONTROL         "About", IDC_BTN_ABOUT, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 330, 410, 30, 14
     CONTROL         "Reset Defaults", IDC_BTN_RESET_DEFAULTS, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 10, 428, 148, 14
     CONTROL         "Cancel", IDCANCEL, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 165, 428, 55, 14
     CONTROL         "Apply", IDC_APPLY, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 225, 428, 55, 14

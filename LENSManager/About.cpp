@@ -13,7 +13,7 @@
 #pragma comment(lib, "dxgi.lib")
 
 void CAboutDlg::PopulateAboutInfo() {
-	HWND hEdit = GetDlgItem(IDC_SORT_DESC);
+	HWND hEdit = GetDlgItem(IDC_ABOUT_SYSINFO);
 	if (!hEdit) {
 		return;
 	}

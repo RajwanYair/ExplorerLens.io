@@ -1877,3 +1877,100 @@ LRESULT CMainDlg::OnTrayExit(WORD /*wNotifyCode*/, WORD /*wID*/,
     CloseDialog(IDCANCEL);
     return 0;
 }
+
+LRESULT CMainDlg::OnAboutBtn(WORD /*wNotifyCode*/, WORD /*wID*/,
+    HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+    CAboutDlg dlg;
+    dlg.DoModal(m_hWnd);
+    return 0;
+}
+
+LRESULT CMainDlg::OnBenchmark(WORD /*wNotifyCode*/, WORD /*wID*/,
+    HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+    // Synthetic benchmark: measure raw pixel fill + simple decode simulation
+    const int WIDTH = 512;
+    const int HEIGHT = 512;
+    const int ITERATIONS = 100;
+
+    // Allocate a test BGRA buffer
+    std::vector<uint8_t> buffer(WIDTH * HEIGHT * 4);
+
+    LARGE_INTEGER freq, start, stop;
+    QueryPerformanceFrequency(&freq);
+
+    // --- Benchmark 1: Pixel fill (memset simulation) ---
+    QueryPerformanceCounter(&start);
+    for (int i = 0; i < ITERATIONS; ++i) {
+        for (int y = 0; y < HEIGHT; ++y) {
+            uint8_t* row = buffer.data() + y * WIDTH * 4;
+            for (int x = 0; x < WIDTH; ++x) {
+                row[x * 4 + 0] = static_cast<uint8_t>(x & 0xFF);       // B
+                row[x * 4 + 1] = static_cast<uint8_t>(y & 0xFF);       // G
+                row[x * 4 + 2] = static_cast<uint8_t>((x + y) & 0xFF); // R
+                row[x * 4 + 3] = 0xFF;                                  // A
+            }
+        }
+    }
+    QueryPerformanceCounter(&stop);
+    double fillMs = (double)(stop.QuadPart - start.QuadPart) * 1000.0 / (double)freq.QuadPart;
+    double fillPerImage = fillMs / ITERATIONS;
+
+    // --- Benchmark 2: BGRA->Grayscale conversion ---
+    std::vector<uint8_t> gray(WIDTH * HEIGHT);
+    QueryPerformanceCounter(&start);
+    for (int i = 0; i < ITERATIONS; ++i) {
+        for (int p = 0; p < WIDTH * HEIGHT; ++p) {
+            uint8_t b = buffer[p * 4 + 0];
+            uint8_t g = buffer[p * 4 + 1];
+            uint8_t r = buffer[p * 4 + 2];
+            gray[p] = static_cast<uint8_t>((r * 77 + g * 150 + b * 29) >> 8);
+        }
+    }
+    QueryPerformanceCounter(&stop);
+    double grayMs = (double)(stop.QuadPart - start.QuadPart) * 1000.0 / (double)freq.QuadPart;
+    double grayPerImage = grayMs / ITERATIONS;
+
+    // --- Benchmark 3: Bilinear downscale 512->256 ---
+    std::vector<uint8_t> downscaled(256 * 256 * 4);
+    QueryPerformanceCounter(&start);
+    for (int i = 0; i < ITERATIONS; ++i) {
+        for (int dy = 0; dy < 256; ++dy) {
+            for (int dx = 0; dx < 256; ++dx) {
+                int sx = dx * 2;
+                int sy = dy * 2;
+                uint8_t* dst = downscaled.data() + (dy * 256 + dx) * 4;
+                for (int c = 0; c < 4; ++c) {
+                    int v = (int)buffer[(sy * WIDTH + sx) * 4 + c]
+                          + (int)buffer[(sy * WIDTH + sx + 1) * 4 + c]
+                          + (int)buffer[((sy + 1) * WIDTH + sx) * 4 + c]
+                          + (int)buffer[((sy + 1) * WIDTH + sx + 1) * 4 + c];
+                    dst[c] = static_cast<uint8_t>(v / 4);
+                }
+            }
+        }
+    }
+    QueryPerformanceCounter(&stop);
+    double scaleMs = (double)(stop.QuadPart - start.QuadPart) * 1000.0 / (double)freq.QuadPart;
+    double scalePerImage = scaleMs / ITERATIONS;
+
+    double totalPerImage = fillPerImage + grayPerImage + scalePerImage;
+    double imagesPerSec = (totalPerImage > 0.0) ? (1000.0 / totalPerImage) : 0.0;
+
+    // Format results
+    wchar_t msg[1024];
+    swprintf_s(msg, 1024,
+        L"ExplorerLens Benchmark Results\n"
+        L"==============================\n"
+        L"Test: 512x512 BGRA, %d iterations each\n\n"
+        L"Pixel Fill:       %.2f ms/img\n"
+        L"BGRA->Gray:       %.2f ms/img\n"
+        L"Bilinear 2x Down: %.2f ms/img\n"
+        L"---\n"
+        L"Total Pipeline:   %.2f ms/img\n"
+        L"Throughput:       %.0f img/sec\n",
+        ITERATIONS, fillPerImage, grayPerImage, scalePerImage,
+        totalPerImage, imagesPerSec);
+
+    ::MessageBoxW(m_hWnd, msg, L"ExplorerLens Benchmark", MB_OK | MB_ICONINFORMATION);
+    return 0;
+}

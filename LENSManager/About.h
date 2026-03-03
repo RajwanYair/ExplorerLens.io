@@ -26,6 +26,7 @@ public:
         MESSAGE_HANDLER(WM_CTLCOLORBTN, OnDlgColor)
         COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
         COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
+        COMMAND_ID_HANDLER(IDC_BTN_COPY_INFO, OnCopyInfo)
     END_MSG_MAP()
 
     /*
@@ -57,6 +58,31 @@ public:
 
     LRESULT OnClick(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) { EndDialog(IDOK); return 0; }
     LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) { EndDialog(wID); return 0; }
+
+    LRESULT OnCopyInfo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+        HWND hEdit = GetDlgItem(IDC_ABOUT_SYSINFO);
+        if (!hEdit) return 0;
+        int len = ::GetWindowTextLengthW(hEdit);
+        if (len <= 0) return 0;
+        std::wstring text(len + 1, L'\0');
+        ::GetWindowTextW(hEdit, &text[0], len + 1);
+        text.resize(len);
+        if (OpenClipboard()) {
+            EmptyClipboard();
+            HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, (text.size() + 1) * sizeof(wchar_t));
+            if (hMem) {
+                wchar_t* pMem = static_cast<wchar_t*>(GlobalLock(hMem));
+                if (pMem) {
+                    wcscpy_s(pMem, text.size() + 1, text.c_str());
+                    GlobalUnlock(hMem);
+                    SetClipboardData(CF_UNICODETEXT, hMem);
+                }
+            }
+            CloseClipboard();
+            ::MessageBoxW(m_hWnd, L"System information copied to clipboard.", L"ExplorerLens", MB_OK | MB_ICONINFORMATION);
+        }
+        return 0;
+    }
 
 private:
     HBRUSH m_bgBrush = nullptr;
