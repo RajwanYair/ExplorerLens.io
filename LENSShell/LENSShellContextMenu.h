@@ -114,6 +114,7 @@ public:
     END_COM_MAP()
 
     DECLARE_NOT_AGGREGATABLE(CLENSShellContextMenu)
+    DECLARE_NO_REGISTRY()
 
     // IExplorerCommand
     IFACEMETHODIMP GetTitle(IShellItemArray* pItems, LPWSTR* ppszName) override;

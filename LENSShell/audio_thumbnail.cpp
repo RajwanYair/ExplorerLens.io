@@ -4,9 +4,9 @@
  * Extracts album art from audio files and generates waveform visualizations
  ******************************************************************************/
 
+#include "StdAfx.h"
 #include "audio_thumbnail.h"
 #include "GdiplusRAII.h"
-#include "StdAfx.h"
 #include <algorithm>
 #include <atlbase.h>
 #include <gdiplus.h>

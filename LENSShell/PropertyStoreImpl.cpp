@@ -25,8 +25,8 @@ HRESULT CLENSPropertyStore::InitializeProperties(const wchar_t* filePath,
   if (!filePath)
     return E_POINTER;
 
-  // PKEY_Software — Always set
-  AddStringProperty(PKEY_Software, L"ExplorerLens v15.0.0");
+  // PKEY_Software_ProductName — Always set
+  AddStringProperty(PKEY_Software_ProductName, L"ExplorerLens v15.0.0");
 
   // PKEY_ItemTypeText — Human-readable format name
   std::wstring typeText = GetItemTypeText(lensType);

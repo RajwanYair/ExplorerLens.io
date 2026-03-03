@@ -30,6 +30,9 @@
 #include "thumbnail_cache.h"
 #include "thumbnail_collage.h"
 
+// Global icon handle — defined in LENSShell.cpp, loaded in DllMain
+extern HICON zipIcon;
+
 // ============================================================================
 // Legacy Decoders — deprecated; all formats now handled by Engine pipeline
 // (ThumbnailPipeline → DecoderRegistry). Gated behind LENSShell_LEGACY_DECODERS
@@ -139,7 +142,7 @@ public:
     return (ZR_OK == zr);
   }
 
-  bool UnzipItemToMembuffer(int index, void *z, unsigned int len) {
+  bool UnzipItemToMembuffer(int index, void* z, unsigned int len) {
     zr = ::UnzipItem(hz, index, z, len);
     return (ZR_OK == zr);
   }
@@ -175,8 +178,8 @@ private:
 // Skips solid archives, multi-volume sets, and encrypted-header archives
 // since those require full sequential extraction or passwords.
 // ========================================================================
-typedef const RARHeaderDataEx *LPCRARHeaderDataEx;
-typedef const RAROpenArchiveDataEx *LPCRAROpenArchiveDataEx;
+typedef const RARHeaderDataEx* LPCRARHeaderDataEx;
+typedef const RAROpenArchiveDataEx* LPCRAROpenArchiveDataEx;
 
 class CUnRar {
 public:
@@ -191,8 +194,8 @@ public:
   }
 
 public:
-  BOOL Open(LPCTSTR rarfile, BOOL bListingOnly = TRUE, char *cmtBuf = NULL,
-            UINT cmtBufSize = 0, char *password = NULL) {
+  BOOL Open(LPCTSTR rarfile, BOOL bListingOnly = TRUE, char* cmtBuf = NULL,
+    UINT cmtBufSize = 0, char* password = NULL) {
     if (m_harc)
       return FALSE; // must close old first
 
@@ -224,7 +227,7 @@ public:
 
   inline LPCRAROpenArchiveDataEx GetArchiveInfo() { return &m_arcinfo; }
   inline LPCRARHeaderDataEx GetItemInfo() { return &m_iteminfo; }
-  inline void SetPassword(char *password) { RARSetPassword(m_harc, password); }
+  inline void SetPassword(char* password) { RARSetPassword(m_harc, password); }
   inline int GetLastError() { return m_ret; }
   inline BOOL IsArchiveVolume() { return (BOOL)(m_arcinfo.Flags & 0x0001); }
   inline BOOL IsArchiveComment() { return (BOOL)(m_arcinfo.Flags & 0x0002); }
@@ -304,7 +307,7 @@ public:
     return -1;
   }
 
-  void SetIStream(IStream *pIs) {
+  void SetIStream(IStream* pIs) {
     _ASSERTE(pIs);
     m_pIs = pIs;
   }
@@ -314,7 +317,7 @@ private:
   RARHeaderDataEx m_iteminfo;
   RAROpenArchiveDataEx m_arcinfo;
   int m_ret;
-  IStream *m_pIs;
+  IStream* m_pIs;
   void _init() {
     m_harc = NULL;
     m_pIs = NULL;
@@ -326,8 +329,8 @@ private:
   // Static callback trampoline for unrar DLL
 public:
   static int PASCAL __rarCallbackProc(UINT msg, LPARAM UserData, LPARAM P1,
-                                      LPARAM P2) {
-    CUnRar *_pc = (CUnRar *)UserData;
+    LPARAM P2) {
+    CUnRar* _pc = (CUnRar*)UserData;
     return _pc->CallbackProc(msg, UserData, P1, P2);
   }
 };
@@ -379,7 +382,7 @@ public:
   HRESULT OnLoad(LPCOLESTR wszFile) {
 #ifndef UNICODE
     USES_CONVERSION;
-    m_LENSFile = OLE2T((WCHAR *)wszFile);
+    m_LENSFile = OLE2T((WCHAR*)wszFile);
 #else
     m_LENSFile = wszFile;
 #endif
@@ -398,7 +401,7 @@ public:
   //         pdwFlags — extraction flags (modified: IEIFLAG_CACHE|REFRESH)
   // Output: NOERROR always
   // ----------------------------------------------------------------
-  HRESULT OnGetLocation(const SIZE *prgSize, DWORD *pdwFlags) {
+  HRESULT OnGetLocation(const SIZE* prgSize, DWORD* pdwFlags) {
     m_thumbSize.cx = prgSize->cx;
     m_thumbSize.cy = prgSize->cy;
     *pdwFlags |= (IEIFLAG_CACHE | IEIFLAG_REFRESH);
@@ -419,7 +422,7 @@ public:
   // Input:  pDateStamp — receives the FILETIME to write
   // Output: NOERROR on success, E_FAIL if the file cannot be read
   // ----------------------------------------------------------------
-  HRESULT OnGetDateStamp(FILETIME *pDateStamp) {
+  HRESULT OnGetDateStamp(FILETIME* pDateStamp) {
 
     // Modern C++17: Use filesystem for file time
     fs::path filePath(m_LENSFile.operator LPCTSTR());
@@ -434,7 +437,7 @@ public:
     FILETIME ftCreationTime, ftLastAccessTime, ftLastWriteTime;
     CAtlFile _f;
     if (S_OK !=
-        _f.Create(m_LENSFile, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, 0))
+      _f.Create(m_LENSFile, GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, 0))
       return E_FAIL;
     if (!GetFileTime(_f, &ftCreationTime, &ftLastAccessTime, &ftLastWriteTime))
       return E_FAIL;
@@ -447,8 +450,8 @@ public:
   //
   // Replaces all occurrences of 'search' with 'replace' in 'subject'.
   // ----------------------------------------------------------------
-  void ReplaceStringInPlace(std::string &subject, const std::string &search,
-                            const std::string &replace) {
+  void ReplaceStringInPlace(std::string& subject, const std::string& search,
+    const std::string& replace) {
     size_t pos = 0;
     while ((pos = subject.find(search, pos)) != std::string::npos) {
       subject.replace(pos, search.length(), replace);
@@ -486,7 +489,7 @@ public:
       if (!_z.GetItem(i))
         break;
       if (_z.ItemIsDirectory() ||
-          (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
+        (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
         continue;
 
       std::string name = T2A(_z.GetItemName());
@@ -495,7 +498,7 @@ public:
         // Extract container.xml and retrieve rootfile location
 
         HGLOBAL hGContainer = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-                                          (SIZE_T)_z.GetItemUnpackedSize());
+          (SIZE_T)_z.GetItemUnpackedSize());
         if (hGContainer) {
           bool b = false;
           LPVOID pBuf = ::GlobalLock(hGContainer);
@@ -504,7 +507,7 @@ public:
 
           if (::GlobalUnlock(hGContainer) == 0 && GetLastError() == NO_ERROR) {
             if (b) {
-              xmlContent = (char *)pBuf;
+              xmlContent = (char*)pBuf;
 
               posStart = xmlContent.find("rootfile ");
 
@@ -545,7 +548,7 @@ public:
   //         maxImages — maximum number of images to extract
   // Output: vector of HBITMAP handles (caller owns and must delete)
   // ----------------------------------------------------------------
-  std::vector<HBITMAP> ExtractMultipleImagesFromZIP(CUnzip &_z, int maxImages) {
+  std::vector<HBITMAP> ExtractMultipleImagesFromZIP(CUnzip& _z, int maxImages) {
     std::vector<HBITMAP> images;
     std::vector<int> imageIndices;
 
@@ -557,7 +560,7 @@ public:
       if (!_z.GetItem(i))
         break;
       if (_z.ItemIsDirectory() ||
-          (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
+        (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
         continue;
       if ((_z.GetItemPackedSize() == 0) || (_z.GetItemUnpackedSize() == 0))
         continue;
@@ -573,7 +576,8 @@ public:
             imageIndices.back() = i;
             prevname = _z.GetItemName();
           }
-        } else {
+        }
+        else {
           // No sort, just collect first N
           imageIndices.push_back(i);
         }
@@ -586,7 +590,7 @@ public:
         continue;
 
       HGLOBAL hG = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-                               (SIZE_T)_z.GetItemUnpackedSize());
+        (SIZE_T)_z.GetItemUnpackedSize());
       if (hG) {
         bool b = false;
         LPVOID pBuf = ::GlobalLock(hG);
@@ -595,8 +599,8 @@ public:
 
         if (::GlobalUnlock(hG) == 0 && GetLastError() == NO_ERROR) {
           if (b) {
-            IStream *pIs = NULL;
-            if (S_OK == CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM *)&pIs)) {
+            IStream* pIs = NULL;
+            if (S_OK == CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM*)&pIs)) {
               HBITMAP hBmp = ThumbnailFromIStream(pIs, &m_thumbSize);
               if (hBmp) {
                 images.push_back(hBmp);
@@ -633,7 +637,7 @@ public:
   // Input:  phBmpThumbnail — receives the generated HBITMAP
   // Output: S_OK on success (bitmap set), E_FAIL on decode failure
   // ================================================================
-  HRESULT OnExtract(HBITMAP *phBmpThumbnail) {
+  HRESULT OnExtract(HBITMAP* phBmpThumbnail) {
     *phBmpThumbnail = NULL;
 
     // Initialize the on-disk thumbnail cache (once per process)
@@ -647,7 +651,7 @@ public:
     __int64 fileSize = 0;
     GetFileSizeCrt(m_LENSFile, fileSize);
 
-    FILETIME lastModified = {0};
+    FILETIME lastModified = { 0 };
     OnGetDateStamp(&lastModified);
 
     std::wstring archivePath(m_LENSFile.operator LPCTSTR());
@@ -655,13 +659,13 @@ public:
     // hits
     WCHAR imageName[64];
     swprintf_s(imageName, L"thumb_%d_%dx%d", m_LENSTYPE, m_thumbSize.cx,
-               m_thumbSize.cy);
+      m_thumbSize.cy);
 
     // Check cache first (fast path)
     if (ExplorerLens::ThumbnailCache::IsCached(
-            archivePath, imageName, (ULONGLONG)fileSize, lastModified)) {
+      archivePath, imageName, (ULONGLONG)fileSize, lastModified)) {
       HBITMAP cachedBitmap = ExplorerLens::ThumbnailCache::LoadFromCache(
-          archivePath, imageName, (ULONGLONG)fileSize, lastModified);
+        archivePath, imageName, (ULONGLONG)fileSize, lastModified);
       if (cachedBitmap) {
         *phBmpThumbnail = cachedBitmap;
         return S_OK;
@@ -700,7 +704,7 @@ public:
             if (!_z.GetItem(i))
               break;
             if (_z.ItemIsDirectory() ||
-                (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
+              (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
               continue;
 
             std::string name;
@@ -709,23 +713,23 @@ public:
 
             if (name.compare(rootfile) == 0) {
               HGLOBAL hGContainer =
-                  GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-                              (SIZE_T)_z.GetItemUnpackedSize());
+                GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
+                  (SIZE_T)_z.GetItemUnpackedSize());
               if (hGContainer) {
                 bool b = false;
                 LPVOID pBuf = ::GlobalLock(hGContainer);
                 if (pBuf)
                   b = _z.UnzipItemToMembuffer(i, pBuf,
-                                              _z.GetItemUnpackedSize());
+                    _z.GetItemUnpackedSize());
 
                 if (::GlobalUnlock(hGContainer) == 0 &&
-                    GetLastError() == NO_ERROR) {
+                  GetLastError() == NO_ERROR) {
                   if (b) {
                     // Find meta tag for cover
 
                     std::string xmlContent, coverTag, coverId, itemTag;
 
-                    xmlContent = (char *)pBuf;
+                    xmlContent = (char*)pBuf;
 
                     posStart = xmlContent.find("name=\"cover\"");
 
@@ -737,7 +741,7 @@ public:
                     posEnd = xmlContent.find(">", posStart);
 
                     coverTag =
-                        xmlContent.substr(posStart, posEnd - posStart + 1);
+                      xmlContent.substr(posStart, posEnd - posStart + 1);
 
                     // Find cover item id
 
@@ -764,7 +768,7 @@ public:
                     posEnd = xmlContent.find(">", posStart);
 
                     itemTag =
-                        xmlContent.substr(posStart, posEnd - posStart + 1);
+                      xmlContent.substr(posStart, posEnd - posStart + 1);
 
                     // Find cover path in item tag
 
@@ -782,7 +786,7 @@ public:
                     }
 
                     coverfile =
-                        rootpath + itemTag.substr(posStart, posEnd - posStart);
+                      rootpath + itemTag.substr(posStart, posEnd - posStart);
                     ReplaceStringInPlace(coverfile, "%20", " ");
                     break;
                   }
@@ -798,10 +802,10 @@ public:
             if (!_z.GetItem(i))
               break;
             if (_z.ItemIsDirectory() ||
-                (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
+              (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
               continue;
             if ((_z.GetItemPackedSize() == 0) ||
-                (_z.GetItemUnpackedSize() == 0))
+              (_z.GetItemUnpackedSize() == 0))
               continue;
 
             if (IsImage(_z.GetItemName())) {
@@ -809,9 +813,11 @@ public:
 
               if (imgFilename.find("cover") != std::string::npos) {
                 coverfile = imgFilename;
-              } else if (imgFilename.find("COVER") != std::string::npos) {
+              }
+              else if (imgFilename.find("COVER") != std::string::npos) {
                 coverfile = imgFilename;
-              } else if (imgFilename.find("Cover") != std::string::npos) {
+              }
+              else if (imgFilename.find("Cover") != std::string::npos) {
                 coverfile = imgFilename;
               }
             }
@@ -824,14 +830,14 @@ public:
             if (!_z.GetItem(i))
               break;
             if (_z.ItemIsDirectory() ||
-                (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
+              (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
               continue;
             if ((_z.GetItemPackedSize() == 0) ||
-                (_z.GetItemUnpackedSize() == 0))
+              (_z.GetItemUnpackedSize() == 0))
               continue;
 
             if (_stricmp(T2A(_z.GetItemName()), coverfile.c_str()) == 0 &&
-                IsImage(_z.GetItemName())) {
+              IsImage(_z.GetItemName())) {
               if (thumbindex < 0)
                 thumbindex = i; // assign thumbindex if already sorted
 
@@ -856,18 +862,18 @@ public:
 
           // create thumb			//GHND
           HGLOBAL hG = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-                                   (SIZE_T)_z.GetItemUnpackedSize());
+            (SIZE_T)_z.GetItemUnpackedSize());
           if (hG) {
             bool b = false;
             LPVOID pBuf = ::GlobalLock(hG);
             if (pBuf)
               b = _z.UnzipItemToMembuffer(thumbindex, pBuf,
-                                          _z.GetItemUnpackedSize());
+                _z.GetItemUnpackedSize());
 
             if (::GlobalUnlock(hG) == 0 && GetLastError() == NO_ERROR) {
               if (b) {
-                IStream *pIs = NULL;
-                if (S_OK == CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM *)&pIs)) {
+                IStream* pIs = NULL;
+                if (S_OK == CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM*)&pIs)) {
                   *phBmpThumbnail = ThumbnailFromIStream(pIs, &m_thumbSize);
                   pIs->Release();
                   pIs = NULL;
@@ -899,19 +905,19 @@ public:
 
         // Check if collage mode is enabled via registry
         ExplorerLens::ThumbnailCollage::CollageMode collageMode =
-            ExplorerLens::ThumbnailCollage::GetCollageModeFromRegistry();
+          ExplorerLens::ThumbnailCollage::GetCollageModeFromRegistry();
 
         // Extract multiple images if collage mode is enabled
         if (collageMode != ExplorerLens::ThumbnailCollage::MODE_SINGLE) {
           int maxImages = static_cast<int>(
-              collageMode); // MODE_2X2=4, MODE_3X3=9, MODE_4X4=16
+            collageMode); // MODE_2X2=4, MODE_3X3=9, MODE_4X4=16
           std::vector<HBITMAP> images =
-              ExtractMultipleImagesFromZIP(_z, maxImages);
+            ExtractMultipleImagesFromZIP(_z, maxImages);
 
           if (!images.empty()) {
             // Create collage from multiple images
             *phBmpThumbnail = ExplorerLens::ThumbnailCollage::CreateCollage(
-                images, m_thumbSize.cx, m_thumbSize.cy, collageMode);
+              images, m_thumbSize.cx, m_thumbSize.cy, collageMode);
 
             // Clean up individual images
             for (HBITMAP hBmp : images) {
@@ -923,8 +929,8 @@ public:
             // Save to cache
             if (*phBmpThumbnail) {
               ExplorerLens::ThumbnailCache::SaveToCache(
-                  archivePath, imageName, (ULONGLONG)fileSize, lastModified,
-                  *phBmpThumbnail);
+                archivePath, imageName, (ULONGLONG)fileSize, lastModified,
+                *phBmpThumbnail);
             }
 
             return ((*phBmpThumbnail) ? S_OK : E_FAIL);
@@ -939,7 +945,7 @@ public:
           if (!_z.GetItem(i))
             break;
           if (_z.ItemIsDirectory() ||
-              (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
+            (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
             continue;
           if ((_z.GetItemPackedSize() == 0) || (_z.GetItemUnpackedSize() == 0))
             continue;
@@ -969,18 +975,18 @@ public:
 
         // create thumb			//GHND
         HGLOBAL hG = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-                                 (SIZE_T)_z.GetItemUnpackedSize());
+          (SIZE_T)_z.GetItemUnpackedSize());
         if (hG) {
           bool b = false;
           LPVOID pBuf = ::GlobalLock(hG);
           if (pBuf)
             b = _z.UnzipItemToMembuffer(thumbindex, pBuf,
-                                        _z.GetItemUnpackedSize());
+              _z.GetItemUnpackedSize());
 
           if (::GlobalUnlock(hG) == 0 && GetLastError() == NO_ERROR) {
             if (b) {
-              IStream *pIs = NULL;
-              if (S_OK == CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM *)&pIs)) {
+              IStream* pIs = NULL;
+              if (S_OK == CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM*)&pIs)) {
                 *phBmpThumbnail = ThumbnailFromIStream(pIs, &m_thumbSize);
                 pIs->Release();
                 pIs = NULL;
@@ -993,8 +999,8 @@ public:
       } break;
 
 #ifdef ENABLE_LIBARCHIVE_SUPPORT
-      // LibArchive formats: TAR, TAR.GZ, TAR.BZ2, TAR.XZ, TAR.ZST, CPIO, ISO,
-      // XAR, AR, DEB, CAB
+                       // LibArchive formats: TAR, TAR.GZ, TAR.BZ2, TAR.XZ, TAR.ZST, CPIO, ISO,
+                       // XAR, AR, DEB, CAB
       case LENSTYPE_TAR:
       case LENSTYPE_TAR_GZ:
       case LENSTYPE_TAR_BZ2:
@@ -1029,8 +1035,8 @@ public:
             continue;
           }
 
-          const char *entryName =
-              ExplorerLens::LibArchiveWrapper::GetEntryName();
+          const char* entryName =
+            ExplorerLens::LibArchiveWrapper::GetEntryName();
           if (!entryName) {
             currentIndex++;
             continue;
@@ -1042,7 +1048,7 @@ public:
 
           if (IsImage(wEntryName)) {
             imageEntries.push_back(
-                std::make_pair(std::string(entryName), currentIndex));
+              std::make_pair(std::string(entryName), currentIndex));
 
             if (!m_bSort) {
               thumbindex = currentIndex;
@@ -1083,19 +1089,19 @@ public:
 
             // Extract entry to memory
             HGLOBAL hG =
-                GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, (SIZE_T)entrySize);
+              GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, (SIZE_T)entrySize);
             if (hG) {
               LPVOID pBuf = GlobalLock(hG);
               if (pBuf) {
                 SSIZE_T bytesRead =
-                    ExplorerLens::LibArchiveWrapper::ExtractEntryToMemory(
-                        pBuf, (size_t)entrySize);
+                  ExplorerLens::LibArchiveWrapper::ExtractEntryToMemory(
+                    pBuf, (size_t)entrySize);
 
                 if (GlobalUnlock(hG) == 0 && GetLastError() == NO_ERROR) {
                   if (bytesRead > 0) {
-                    IStream *pIs = NULL;
+                    IStream* pIs = NULL;
                     if (S_OK ==
-                        CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM *)&pIs)) {
+                      CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM*)&pIs)) {
                       *phBmpThumbnail = ThumbnailFromIStream(pIs, &m_thumbSize);
                       pIs->Release();
                     }
@@ -1120,7 +1126,7 @@ public:
 
         // Extract frame at 10% into video (skip intros)
         HBITMAP hVideoFrame =
-            ExplorerLens::VideoThumbnail::ExtractFrame(videoPath, 0.1);
+          ExplorerLens::VideoThumbnail::ExtractFrame(videoPath, 0.1);
 
         if (hVideoFrame) {
           // Scale to thumbnail size
@@ -1134,8 +1140,8 @@ public:
           // Save to cache
           if (*phBmpThumbnail) {
             ExplorerLens::ThumbnailCache::SaveToCache(
-                archivePath, imageName, (ULONGLONG)fileSize, lastModified,
-                *phBmpThumbnail);
+              archivePath, imageName, (ULONGLONG)fileSize, lastModified,
+              *phBmpThumbnail);
           }
 
           return S_OK;
@@ -1151,7 +1157,7 @@ public:
 
         // Try to extract album art first
         HBITMAP hAlbumArt =
-            ExplorerLens::AudioThumbnail::ExtractAlbumArt(audioPath);
+          ExplorerLens::AudioThumbnail::ExtractAlbumArt(audioPath);
 
         if (hAlbumArt) {
           // Scale to thumbnail size
@@ -1165,8 +1171,8 @@ public:
           // Save to cache
           if (*phBmpThumbnail) {
             ExplorerLens::ThumbnailCache::SaveToCache(
-                archivePath, imageName, (ULONGLONG)fileSize, lastModified,
-                *phBmpThumbnail);
+              archivePath, imageName, (ULONGLONG)fileSize, lastModified,
+              *phBmpThumbnail);
           }
 
           return S_OK;
@@ -1174,15 +1180,15 @@ public:
 
         // No album art, generate waveform visualization
         HBITMAP hWaveform = ExplorerLens::AudioThumbnail::GenerateWaveform(
-            audioPath, m_thumbSize.cx, m_thumbSize.cy);
+          audioPath, m_thumbSize.cx, m_thumbSize.cy);
 
         if (hWaveform) {
           *phBmpThumbnail = hWaveform;
 
           // Save to cache
           ExplorerLens::ThumbnailCache::SaveToCache(
-              archivePath, imageName, (ULONGLONG)fileSize, lastModified,
-              *phBmpThumbnail);
+            archivePath, imageName, (ULONGLONG)fileSize, lastModified,
+            *phBmpThumbnail);
 
           return S_OK;
         }
@@ -1201,16 +1207,16 @@ public:
         std::wstring docPath(m_LENSFile.operator LPCTSTR());
 
         HBITMAP hDocThumbnail =
-            ExplorerLens::DocumentThumbnail::ExtractDocumentThumbnail(
-                docPath, m_thumbSize.cx, m_thumbSize.cy);
+          ExplorerLens::DocumentThumbnail::ExtractDocumentThumbnail(
+            docPath, m_thumbSize.cx, m_thumbSize.cy);
 
         if (hDocThumbnail) {
           *phBmpThumbnail = hDocThumbnail;
 
           // Save to cache
           ExplorerLens::ThumbnailCache::SaveToCache(
-              archivePath, imageName, (ULONGLONG)fileSize, lastModified,
-              *phBmpThumbnail);
+            archivePath, imageName, (ULONGLONG)fileSize, lastModified,
+            *phBmpThumbnail);
 
           return S_OK;
         }
@@ -1224,15 +1230,15 @@ public:
         std::wstring fontPath(m_LENSFile.operator LPCTSTR());
 
         HBITMAP hFontPreview = ExplorerLens::FontPreview::GenerateFontPreview(
-            fontPath, m_thumbSize.cx, m_thumbSize.cy);
+          fontPath, m_thumbSize.cx, m_thumbSize.cy);
 
         if (hFontPreview) {
           *phBmpThumbnail = hFontPreview;
 
           // Save to cache
           ExplorerLens::ThumbnailCache::SaveToCache(
-              archivePath, imageName, (ULONGLONG)fileSize, lastModified,
-              *phBmpThumbnail);
+            archivePath, imageName, (ULONGLONG)fileSize, lastModified,
+            *phBmpThumbnail);
 
           return S_OK;
         }
@@ -1240,28 +1246,28 @@ public:
         return E_FAIL;
       } break;
 
-      // Standalone image/document formats (WebP, JPEG XL, AVIF, HEIF, SVG, RAW,
-      // TIFF, PDF)
+                        // Standalone image/document formats (WebP, JPEG XL, AVIF, HEIF, SVG, RAW,
+                        // TIFF, PDF)
       default: {
         // Handle standalone files by loading them into a stream
         // ThumbnailFromIStream will detect and decode the format
 
         CAtlFile file;
         HRESULT hr = file.Create(m_LENSFile, GENERIC_READ, FILE_SHARE_READ,
-                                 OPEN_EXISTING, 0);
+          OPEN_EXISTING, 0);
         if (FAILED(hr))
           return E_FAIL;
 
         ULONGLONG fileSize64 = 0;
         hr = file.GetSize(fileSize64);
         if (FAILED(hr) || fileSize64 == 0 ||
-            fileSize64 > LENSMEM_MAXBUFFER_SIZE) {
+          fileSize64 > LENSMEM_MAXBUFFER_SIZE) {
           return E_FAIL;
         }
 
         // Read file into memory
         HGLOBAL hG =
-            GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, (SIZE_T)fileSize64);
+          GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, (SIZE_T)fileSize64);
         if (!hG)
           return E_FAIL;
 
@@ -1276,16 +1282,16 @@ public:
 
         if (GlobalUnlock(hG) == 0 && GetLastError() == NO_ERROR) {
           if (SUCCEEDED(hr) && bytesRead == fileSize64) {
-            IStream *pIs = NULL;
-            if (S_OK == CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM *)&pIs)) {
+            IStream* pIs = NULL;
+            if (S_OK == CreateStreamOnHGlobal(hG, TRUE, (LPSTREAM*)&pIs)) {
               *phBmpThumbnail = ThumbnailFromIStream(pIs, &m_thumbSize);
               pIs->Release();
 
               // Save to cache
               if (*phBmpThumbnail) {
                 ExplorerLens::ThumbnailCache::SaveToCache(
-                    archivePath, imageName, (ULONGLONG)fileSize64, lastModified,
-                    *phBmpThumbnail);
+                  archivePath, imageName, (ULONGLONG)fileSize64, lastModified,
+                  *phBmpThumbnail);
               }
 
               return ((*phBmpThumbnail) ? S_OK : E_FAIL);
@@ -1297,7 +1303,8 @@ public:
         return E_FAIL;
       } break;
       }
-    } catch (...) {
+    }
+    catch (...) {
       ATLTRACE("exception in IExtractImage::Extract\n");
       return S_FALSE;
     }
@@ -1305,8 +1312,8 @@ public:
     // Save generated thumbnail to cache
     if (*phBmpThumbnail) {
       ExplorerLens::ThumbnailCache::SaveToCache(archivePath, imageName,
-                                                (ULONGLONG)fileSize,
-                                                lastModified, *phBmpThumbnail);
+        (ULONGLONG)fileSize,
+        lastModified, *phBmpThumbnail);
     }
 
     return S_OK;
@@ -1343,7 +1350,7 @@ public:
       if (!_z.GetItem(i))
         break;
       if (_z.ItemIsDirectory() ||
-          (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
+        (_z.GetItemUnpackedSize() > LENSMEM_MAXBUFFER_SIZE))
         continue;
 
       std::string name;
@@ -1352,7 +1359,7 @@ public:
 
       if (name.compare(rootfile) == 0) {
         HGLOBAL hGContainer = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT,
-                                          (SIZE_T)_z.GetItemUnpackedSize());
+          (SIZE_T)_z.GetItemUnpackedSize());
         if (hGContainer) {
           bool b = false;
           LPVOID pBuf = ::GlobalLock(hGContainer);
@@ -1365,7 +1372,7 @@ public:
 
               std::string xmlContent, coverTag, coverId, itemTag;
 
-              xmlContent = (char *)pBuf;
+              xmlContent = (char*)pBuf;
 
               posStart = xmlContent.find("<dc:title>");
 
@@ -1399,7 +1406,7 @@ public:
   // Input:  ppwszTip — receives CoTaskMemAlloc'd wide string
   // Output: S_OK on success, E_FAIL on error
   // ----------------------------------------------------------------
-  HRESULT OnGetInfoTip(LPWSTR *ppwszTip) {
+  HRESULT OnGetInfoTip(LPWSTR* ppwszTip) {
     try {
       CString tip;
 
@@ -1416,10 +1423,10 @@ public:
         else {
           if (GetImageCountZIP(m_LENSFile, i, j))
             tip.Format(_T("ZIP Archive\n%d Images\n%d Files\nSize: %s"), i, j,
-                       StrFormatByteSize64(_fs, _tf, 16));
+              StrFormatByteSize64(_fs, _tf, 16));
           else
             tip.Format(_T("ZIP Archive\nSize: %s"),
-                       StrFormatByteSize64(_fs, _tf, 16));
+              StrFormatByteSize64(_fs, _tf, 16));
         }
         break;
       case LENSTYPE_CBZ:
@@ -1428,10 +1435,10 @@ public:
         else {
           if (GetImageCountZIP(m_LENSFile, i, j))
             tip.Format(_T("ZIP Image Archive\n%d Images\n%d Files\nSize: %s"),
-                       i, j, StrFormatByteSize64(_fs, _tf, 16));
+              i, j, StrFormatByteSize64(_fs, _tf, 16));
           else
             tip.Format(_T("ZIP Image Archive\nSize: %s"),
-                       StrFormatByteSize64(_fs, _tf, 16));
+              StrFormatByteSize64(_fs, _tf, 16));
         }
         break;
       case LENSTYPE_EPUB:
@@ -1443,59 +1450,59 @@ public:
 
           if (title.length() > 0)
             tip.Format(_T("EPUB File\n%s\nSize: %s"), titleW,
-                       StrFormatByteSize64(_fs, _tf, 16));
+              StrFormatByteSize64(_fs, _tf, 16));
           else
             tip.Format(_T("EPUB File\nSize: %s"),
-                       StrFormatByteSize64(_fs, _tf, 16));
+              StrFormatByteSize64(_fs, _tf, 16));
         }
         break;
       case LENSTYPE_7Z:
         tip.Format(_T("7-Zip Archive\nSize: %s"),
-                   StrFormatByteSize64(_fs, _tf, 16));
+          StrFormatByteSize64(_fs, _tf, 16));
         break;
       case LENSTYPE_CB7:
         if (GetImageCountZIP(m_LENSFile, i, j))
           tip.Format(_T("7-Zip Image Archive\n%d Images\n%d Files\nSize: %s"),
-                     i, j, StrFormatByteSize64(_fs, _tf, 16));
+            i, j, StrFormatByteSize64(_fs, _tf, 16));
         else
           tip.Format(_T("7-Zip Image Archive\nSize: %s"),
-                     StrFormatByteSize64(_fs, _tf, 16));
+            StrFormatByteSize64(_fs, _tf, 16));
         break;
       case LENSTYPE_TAR:
         tip.Format(_T("TAR Archive\nSize: %s"),
-                   StrFormatByteSize64(_fs, _tf, 16));
+          StrFormatByteSize64(_fs, _tf, 16));
         break;
       case LENSTYPE_CBT:
         if (GetImageCountZIP(m_LENSFile, i, j))
           tip.Format(_T("TAR Image Archive\n%d Images\n%d Files\nSize: %s"), i,
-                     j, StrFormatByteSize64(_fs, _tf, 16));
+            j, StrFormatByteSize64(_fs, _tf, 16));
         else
           tip.Format(_T("TAR Image Archive\nSize: %s"),
-                     StrFormatByteSize64(_fs, _tf, 16));
+            StrFormatByteSize64(_fs, _tf, 16));
         break;
       case LENSTYPE_MOBI:
         tip.Format(_T("MOBI E-Book\nSize: %s"),
-                   StrFormatByteSize64(_fs, _tf, 16));
+          StrFormatByteSize64(_fs, _tf, 16));
         break;
       case LENSTYPE_AZW:
         tip.Format(_T("Kindle (AZW) E-Book\nSize: %s"),
-                   StrFormatByteSize64(_fs, _tf, 16));
+          StrFormatByteSize64(_fs, _tf, 16));
         break;
       case LENSTYPE_AZW3:
         tip.Format(_T("Kindle (AZW3) E-Book\nSize: %s"),
-                   StrFormatByteSize64(_fs, _tf, 16));
+          StrFormatByteSize64(_fs, _tf, 16));
         break;
       case LENSTYPE_FB2:
         tip.Format(_T("FictionBook File\nSize: %s"),
-                   StrFormatByteSize64(_fs, _tf, 16));
+          StrFormatByteSize64(_fs, _tf, 16));
         break;
       case LENSTYPE_PHZ:
         if (GetImageCountZIP(m_LENSFile, i, j))
           tip.Format(_T("Photo Archive\n%d Images\n%d Files\nSize: %s"), i, j,
-                     StrFormatByteSize64(_fs, _tf, 16));
+            StrFormatByteSize64(_fs, _tf, 16));
         else
           tip.Format(_T("Photo Archive\nSize: %s"),
-                     StrFormatByteSize64(_fs, _tf, 16));
+            StrFormatByteSize64(_fs, _tf, 16));
         break;
 
       default:
@@ -1503,16 +1510,17 @@ public:
         return E_FAIL;
       }
 
-      *ppwszTip = (WCHAR *)::CoTaskMemAlloc(
-          (tip.GetLength() + 1) *
-          sizeof(WCHAR)); // caller must call CoTaskMemFree
+      *ppwszTip = (WCHAR*)::CoTaskMemAlloc(
+        (tip.GetLength() + 1) *
+        sizeof(WCHAR)); // caller must call CoTaskMemFree
       if (*ppwszTip == NULL)
         return E_FAIL;
       if (0 != ::wcscpy_s(*ppwszTip, tip.GetLength() + 1, tip))
         return E_FAIL;
 
       return S_OK;
-    } catch (...) {
+    }
+    catch (...) {
       ATLTRACE("exception in IQueryInfo::GetInfoTip\n");
       return S_FALSE;
     }
@@ -1525,7 +1533,7 @@ private:
   SIZE m_thumbSize;
   int i, j;
   LENSTYPE m_LENSTYPE;
-  IStream *m_pIs;
+  IStream* m_pIs;
   BOOL m_bSort;
   BOOL m_showIcon;
 
@@ -1536,7 +1544,7 @@ private:
   // Input:  pszFile — file path, fsize — receives file size in bytes
   // Output: TRUE on success, FALSE if stat fails
   // ----------------------------------------------------------------
-  inline BOOL GetFileSizeCrt(LPCTSTR pszFile, __int64 &fsize) {
+  inline BOOL GetFileSizeCrt(LPCTSTR pszFile, __int64& fsize) {
     struct _stat64 _s;
     _s.st_size = 0;
     if (0 != ::_tstat64(pszFile, &_s))
@@ -2270,7 +2278,7 @@ private:
     return LENSTYPE_NONE;
   }
 
-  BOOL GetImageCountZIP(LPCTSTR cbzFile, int &imagecount, int &filecount) {
+  BOOL GetImageCountZIP(LPCTSTR cbzFile, int& imagecount, int& filecount) {
     imagecount = 0;
     filecount = 0;
 
@@ -2296,7 +2304,7 @@ private:
   }
 
 #ifndef DISABLE_RAR_SUPPORT
-  BOOL GetImageCountRAR(LPCTSTR cbrFile, int &imagecount, int &filecount) {
+  BOOL GetImageCountRAR(LPCTSTR cbrFile, int& imagecount, int& filecount) {
     imagecount = 0;
     filecount = 0;
 
@@ -2323,10 +2331,10 @@ private:
 #endif // DISABLE_RAR_SUPPORT
 
   static inline BOOL
-  Draw(CImage ci, _In_ HDC hDestDC, _In_ int xDest, _In_ int yDest,
-       _In_ int nDestWidth, _In_ int nDestHeight, _In_ int xSrc, _In_ int ySrc,
-       _In_ int nSrcWidth, _In_ int nSrcHeight,
-       _In_ Gdiplus::InterpolationMode interpolationMode) throw() {
+    Draw(CImage ci, _In_ HDC hDestDC, _In_ int xDest, _In_ int yDest,
+      _In_ int nDestWidth, _In_ int nDestHeight, _In_ int xSrc, _In_ int ySrc,
+      _In_ int nSrcWidth, _In_ int nSrcHeight,
+      _In_ Gdiplus::InterpolationMode interpolationMode) throw() {
     Gdiplus::Bitmap bm((HBITMAP)ci, NULL);
     if (bm.GetLastStatus() != Gdiplus::Ok) {
       return FALSE;
@@ -2338,8 +2346,8 @@ private:
     Gdiplus::Rect destRec(xDest, yDest, nDestWidth, nDestHeight);
 
     Gdiplus::Status status =
-        dcDst.DrawImage(&bm, destRec, xSrc, ySrc, nSrcWidth, nSrcHeight,
-                        Gdiplus::Unit::UnitPixel);
+      dcDst.DrawImage(&bm, destRec, xSrc, ySrc, nSrcWidth, nSrcHeight,
+        Gdiplus::Unit::UnitPixel);
 
     return status == Gdiplus::Ok;
   }
@@ -2356,15 +2364,15 @@ private:
   //         pThumbSize — requested thumbnail dimensions
   // Output: HBITMAP scaled to pThumbSize, or NULL on failure
   // ================================================================
-  HBITMAP ThumbnailFromIStream(IStream *pIs, const LPSIZE pThumbSize) {
+  HBITMAP ThumbnailFromIStream(IStream* pIs, const LPSIZE pThumbSize) {
     ATLASSERT(pIs);
 
     // Windows 11 Optimization: Try modern image formats first (delay-loaded
     // DLLs) This provides better performance and smaller memory footprint
     HBITMAP hModernBitmap = NULL;
 
-// LEGACY: Modern formats tried inline. Now handled by Engine pipeline.
-// Only compiled when LENSShell_LEGACY_DECODERS is defined.
+    // LEGACY: Modern formats tried inline. Now handled by Engine pipeline.
+    // Only compiled when LENSShell_LEGACY_DECODERS is defined.
 #if defined(LENSShell_LEGACY_DECODERS) && defined(ENABLE_WEBP_SUPPORT)
     {
       // Read stream data for format detection
@@ -2380,15 +2388,15 @@ private:
 
           ULONG bytesRead = 0;
           if (SUCCEEDED(pIs->Read(buffer.data(), static_cast<ULONG>(streamSize),
-                                  &bytesRead)) &&
-              bytesRead == streamSize) {
+            &bytesRead)) &&
+            bytesRead == streamSize) {
             // Try modern formats in order of likelihood and efficiency
 
             // Try WebP decoder (delay-loaded)
             if (ExplorerLens::WebPDecoder::IsWebPFormat(buffer.data(),
-                                                        streamSize)) {
+              streamSize)) {
               if (SUCCEEDED(ExplorerLens::WebPDecoder::DecodeToHBITMAP(
-                      buffer.data(), streamSize, &hModernBitmap))) {
+                buffer.data(), streamSize, &hModernBitmap))) {
                 return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
               }
             }
@@ -2396,10 +2404,10 @@ private:
 #ifdef ENABLE_HEIF_SUPPORT
             // Try HEIF/HEIC decoder (Windows native via WIC)
             if (ExplorerLens::HEIFDecoderNative::IsHEIFFormat(buffer.data(),
-                                                              streamSize)) {
+              streamSize)) {
               bool isDarkMode = DarkMode::IsSystemDarkMode();
               if (SUCCEEDED(ExplorerLens::HEIFDecoderNative::DecodeToHBITMAP(
-                      buffer.data(), streamSize, &hModernBitmap, isDarkMode))) {
+                buffer.data(), streamSize, &hModernBitmap, isDarkMode))) {
                 return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
               }
             }
@@ -2408,9 +2416,9 @@ private:
 #ifdef ENABLE_AVIF_SUPPORT
             // Try AVIF decoder (WIC-based, Windows 10+ with AV1 extension)
             if (ExplorerLens::AVIFDecoder::IsAVIFFormat(buffer.data(),
-                                                        streamSize)) {
+              streamSize)) {
               if (SUCCEEDED(ExplorerLens::AVIFDecoder::DecodeToHBITMAP(
-                      buffer.data(), streamSize, &hModernBitmap))) {
+                buffer.data(), streamSize, &hModernBitmap))) {
                 return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
               }
             }
@@ -2419,9 +2427,9 @@ private:
 #ifdef ENABLE_JXL_SUPPORT
             // Try JPEG XL decoder (delay-loaded)
             if (ExplorerLens::JXLDecoder::IsJXLFormat(buffer.data(),
-                                                      streamSize)) {
+              streamSize)) {
               if (SUCCEEDED(ExplorerLens::JXLDecoder::DecodeToHBITMAP(
-                      buffer.data(), streamSize, &hModernBitmap))) {
+                buffer.data(), streamSize, &hModernBitmap))) {
                 return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
               }
             }
@@ -2430,12 +2438,12 @@ private:
 #ifdef ENABLE_PDF_SUPPORT
             // Try PDF decoder (Windows.Data.Pdf)
             if (ExplorerLens::PDFDecoder::IsPDFFormat(buffer.data(),
-                                                      streamSize)) {
+              streamSize)) {
               // Render first page as thumbnail
               if (SUCCEEDED(ExplorerLens::PDFDecoder::DecodeToHBITMAP(
-                      buffer.data(), streamSize, &hModernBitmap,
-                      pThumbSize ? pThumbSize->cx : 256,
-                      pThumbSize ? pThumbSize->cy : 256))) {
+                buffer.data(), streamSize, &hModernBitmap,
+                pThumbSize ? pThumbSize->cx : 256,
+                pThumbSize ? pThumbSize->cy : 256))) {
                 return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
               }
             }
@@ -2444,11 +2452,11 @@ private:
 #ifdef ENABLE_SVG_SUPPORT
             // Try SVG decoder (WIC-based)
             if (ExplorerLens::SVGDecoder::IsSVGFormat(buffer.data(),
-                                                      streamSize)) {
+              streamSize)) {
               if (SUCCEEDED(ExplorerLens::SVGDecoder::DecodeToHBITMAP(
-                      buffer.data(), streamSize, &hModernBitmap,
-                      pThumbSize ? pThumbSize->cx : 256,
-                      pThumbSize ? pThumbSize->cy : 256))) {
+                buffer.data(), streamSize, &hModernBitmap,
+                pThumbSize ? pThumbSize->cx : 256,
+                pThumbSize ? pThumbSize->cy : 256))) {
                 return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
               }
             }
@@ -2461,9 +2469,9 @@ private:
               // (ARW, SRF, SR2), Olympus (ORF), Panasonic (RW2), Pentax (PEF),
               // Fujifilm (RAF), DNG, etc.
               HRESULT hrRaw = ExplorerLens::RAWDecoder::DecodeToHBITMAP(
-                  buffer.data(), streamSize, &hModernBitmap,
-                  pThumbSize ? pThumbSize->cx : 512,
-                  pThumbSize ? pThumbSize->cy : 512);
+                buffer.data(), streamSize, &hModernBitmap,
+                pThumbSize ? pThumbSize->cx : 512,
+                pThumbSize ? pThumbSize->cy : 512);
               if (SUCCEEDED(hrRaw)) {
                 return ScaleBitmapToThumbnail(hModernBitmap, pThumbSize);
               }
@@ -2475,7 +2483,7 @@ private:
             // Note: Requires Windows Camera Codec Pack or manufacturer codecs
             if (RawDecoder::IsRAWFormat(nullptr, buffer.data(), streamSize)) {
               HBITMAP hRawBitmap = RawDecoder::DecodeToHBITMAP(
-                  pIs, pThumbSize ? pThumbSize->cx : 256);
+                pIs, pThumbSize ? pThumbSize->cx : 256);
               if (hRawBitmap) {
                 return ScaleBitmapToThumbnail(hRawBitmap, pThumbSize);
               }
@@ -2489,7 +2497,7 @@ private:
       }
     }
 #endif         // ENABLE_WEBP_SUPPORT		// Fallback to standard CImage (handles
-               // JPEG, PNG, BMP, GIF)
+    // JPEG, PNG, BMP, GIF)
     CImage ci; // uses gdi+ internally
     if (S_OK != ci.Load(pIs))
       return NULL;
@@ -2499,7 +2507,7 @@ private:
 
   // Helper: Scale HBITMAP to thumbnail size (for WebP/AVIF)
   HBITMAP ScaleBitmapToThumbnail(HBITMAP hSourceBitmap,
-                                 const LPSIZE pThumbSize) {
+    const LPSIZE pThumbSize) {
     if (!hSourceBitmap)
       return NULL;
 
@@ -2542,12 +2550,12 @@ private:
     // Use dark mode aware background
     COLORREF bgColor = DarkMode::GetThumbnailBackgroundColor();
     HBRUSH hBrush = CreateSolidBrush(bgColor);
-    RECT rc = {0, 0, tw, th};
+    RECT rc = { 0, 0, tw, th };
     FillRect(hdcDst, &rc, hBrush);
     DeleteObject(hBrush);
 
     StretchBlt(hdcDst, 0, 0, tw, th, hdcSrc, 0, 0, bm.bmWidth, bm.bmHeight,
-               SRCCOPY);
+      SRCCOPY);
 
     SelectObject(hdcSrc, hOldSrc);
     SelectObject(hdcDst, hOldDst);
@@ -2560,7 +2568,7 @@ private:
   }
 
   // Helper: Scale CImage to thumbnail size (refactored from original code)
-  HBITMAP ScaleCImageToThumbnail(CImage &ci, const LPSIZE pThumbSize) {
+  HBITMAP ScaleCImageToThumbnail(CImage& ci, const LPSIZE pThumbSize) {
     // check size
     int tw = ci.GetWidth();
     int th = ci.GetHeight();
@@ -2593,9 +2601,9 @@ private:
       hdcNew.FillSolidRect(0, 0, tw, th, bgColor);
 
       Draw(
-          ci, hdcNew, 0, 0, tw, th, 0, 0, ci.GetWidth(), ci.GetHeight(),
-          Gdiplus::InterpolationMode::
-              InterpolationModeHighQualityBicubic); // too late for error checks
+        ci, hdcNew, 0, 0, tw, th, 0, 0, ci.GetWidth(), ci.GetHeight(),
+        Gdiplus::InterpolationMode::
+        InterpolationModeHighQualityBicubic); // too late for error checks
       if (m_showIcon)
         DrawIcon(hdcNew, 0, 0, zipIcon);
 
@@ -2639,7 +2647,7 @@ private:
       return -1;
     // skip solid (long processing time), volumes or encrypted file headers
     if (_r.IsArchiveSolid() || _r.IsArchiveVolume() ||
-        _r.IsArchiveEncryptedHeaders())
+      _r.IsArchiveEncryptedHeaders())
       return -1;
 
     UINT64 _ps, _us; // my speed optimization?
@@ -2654,7 +2662,7 @@ private:
 
       // skip directory/emtpy file/bigger than 32mb
       if (_r.IsItemDirectory() || (_us > LENSMEM_MAXBUFFER_SIZE) ||
-          (_ps == 0) || (_us == 0)) {
+        (_ps == 0) || (_us == 0)) {
         _r.SkipItem();
         continue;
       }
@@ -2692,7 +2700,7 @@ public:
   }
 
   // Get current file path (for Engine integration)
-  const wchar_t *GetFilePath() const { return m_LENSFile; }
+  const wchar_t* GetFilePath() const { return m_LENSFile; }
 
   // Get detected file type (for PropertyStore)
   LENSTYPE GetFileType() const { return m_LENSTYPE; }

@@ -42,7 +42,7 @@ struct PropertyDescriptor {
 //   PKEY_FileDescription        "ZIP Archive (5 images)"
 //   PKEY_Kind                   "picture" / "document"
 //   PKEY_ItemTypeText           "JPEG XL Image"
-//   PKEY_Software               "ExplorerLens v15.0.0"
+//   PKEY_Software_ProductName    "ExplorerLens v15.0.0"
 //   PKEY_Document_PageCount     5 (for multi-page/archive)
 
 class CLENSPropertyStore {
@@ -53,14 +53,14 @@ public:
   // ========================================================================
   // Initialize properties from file metadata
   // ========================================================================
-  HRESULT InitializeProperties(const wchar_t *filePath, int lensType);
+  HRESULT InitializeProperties(const wchar_t* filePath, int lensType);
 
   // ========================================================================
   // IPropertyStore methods
   // ========================================================================
-  HRESULT PropertyStore_GetCount(DWORD *cProps);
-  HRESULT PropertyStore_GetAt(DWORD iProp, PROPERTYKEY *pkey);
-  HRESULT PropertyStore_GetValue(REFPROPERTYKEY key, PROPVARIANT *pv);
+  HRESULT PropertyStore_GetCount(DWORD* cProps);
+  HRESULT PropertyStore_GetAt(DWORD iProp, PROPERTYKEY* pkey);
+  HRESULT PropertyStore_GetValue(REFPROPERTYKEY key, PROPVARIANT* pv);
   HRESULT PropertyStore_SetValue(REFPROPERTYKEY key, REFPROPVARIANT propvar);
   HRESULT PropertyStore_Commit();
 
@@ -79,13 +79,13 @@ private:
     ~StoredProperty() { PropVariantClear(&value); }
 
     // Non-copyable, movable
-    StoredProperty(const StoredProperty &) = delete;
-    StoredProperty &operator=(const StoredProperty &) = delete;
-    StoredProperty(StoredProperty &&other) noexcept : key(other.key) {
+    StoredProperty(const StoredProperty&) = delete;
+    StoredProperty& operator=(const StoredProperty&) = delete;
+    StoredProperty(StoredProperty&& other) noexcept : key(other.key) {
       value = other.value;
       PropVariantInit(&other.value);
     }
-    StoredProperty &operator=(StoredProperty &&other) noexcept {
+    StoredProperty& operator=(StoredProperty&& other) noexcept {
       if (this != &other) {
         PropVariantClear(&value);
         key = other.key;
@@ -100,17 +100,17 @@ private:
   bool m_initialized = false;
 
   // Helpers
-  void AddStringProperty(REFPROPERTYKEY key, const wchar_t *value);
+  void AddStringProperty(REFPROPERTYKEY key, const wchar_t* value);
   void AddUInt32Property(REFPROPERTYKEY key, UINT32 value);
-  void AddStringVectorProperty(REFPROPERTYKEY key, const wchar_t *value);
+  void AddStringVectorProperty(REFPROPERTYKEY key, const wchar_t* value);
 
-  static std::wstring GetMimeTypeForExtension(const wchar_t *filePath);
+  static std::wstring GetMimeTypeForExtension(const wchar_t* filePath);
   static std::wstring GetItemTypeText(int lensType);
   static std::wstring GetKindString(int lensType);
   static bool IsImageType(int lensType);
   static bool IsArchiveType(int lensType);
 
-  const StoredProperty *FindProperty(REFPROPERTYKEY key) const;
+  const StoredProperty* FindProperty(REFPROPERTYKEY key) const;
 };
 
 } // namespace ExplorerLens

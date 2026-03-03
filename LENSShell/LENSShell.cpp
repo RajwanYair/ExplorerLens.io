@@ -1,7 +1,7 @@
 // LENSShell.cpp : Implementation of DLL Exports.
 
-#include "LENSShell.h"
 #include "StdAfx.h"
+#include "LENSShell.h"
 #include "resource.h"
 #include <initguid.h>
 
