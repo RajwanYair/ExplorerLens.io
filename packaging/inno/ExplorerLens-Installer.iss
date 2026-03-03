@@ -106,7 +106,7 @@ var
   ResultCode: Integer;
 begin
   Result := True;
-  
+
   // Check if running on 64-bit Windows
   if not Is64BitInstallMode then
   begin
@@ -114,11 +114,11 @@ begin
     Result := False;
     Exit;
   end;
-  
+
   // Check Windows version
   if not (GetWindowsVersion >= $0A000000) then
   begin
-    MsgBox('This application requires Windows 10 build 19041 or later.' + #13#10 + 
+    MsgBox('This application requires Windows 10 build 19041 or later.' + #13#10 +
            'Your version is not supported.', mbCritical, MB_OK);
     Result := False;
     Exit;
@@ -133,7 +133,7 @@ begin
     Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Sleep(1000);
   end;
-  
+
   if CurStep = ssPostInstall then
   begin
     // Restart Windows Explorer after installation
@@ -152,7 +152,7 @@ begin
     Exec('taskkill.exe', '/f /im explorer.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Sleep(1000);
   end;
-  
+
   if CurUninstallStep = usPostUninstall then
   begin
     // Restart Windows Explorer after uninstallation
@@ -165,12 +165,11 @@ var
   ResultCode: Integer;
 begin
   Result := '';
-  
+
   // Unregister old version if exists
   if FileExists(ExpandConstant('{sys}\LENSShell.dll')) then
   begin
-    Exec('regsvr32.exe', '/s /u "' + ExpandConstant('{sys}\LENSShell.dll') + '"', '', 
+    Exec('regsvr32.exe', '/s /u "' + ExpandConstant('{sys}\LENSShell.dll') + '"', '',
          SW_HIDE, ewWaitUntilTerminated, ResultCode);
   end;
 end;
-
