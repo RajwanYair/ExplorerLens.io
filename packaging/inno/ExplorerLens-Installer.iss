@@ -1,11 +1,11 @@
 ; ============================================================
-; ExplorerLens v7.0.0 - Inno Setup Installer Script
+; ExplorerLens v15.0.0 - Inno Setup Installer Script
 ; Download Inno Setup from: https://jrsoftware.org/isinfo.php
 ; Build command: iscc ExplorerLens-Installer.iss
 ; ============================================================
 
 #define MyAppName "ExplorerLens"
-#define MyAppVersion "7.0.0"
+#define MyAppVersion "15.0.0"
 #define MyAppPublisher "ExplorerLens Project"
 #define MyAppURL "https://github.com/yourusername/explorerlens"
 #define MyAppExeName "LENSManager.exe"
@@ -19,7 +19,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-AppCopyright=Copyright (C) 2025 {#MyAppPublisher}
+AppCopyright=Copyright (C) 2026 {#MyAppPublisher}
 
 ; Installation paths
 DefaultDirName={autopf64}\{#MyAppName}

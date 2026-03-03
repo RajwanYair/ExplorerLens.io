@@ -7,7 +7,7 @@
 ExplorerLens is a **Windows Shell Extension** (COM DLL) that generates GPU-accelerated thumbnails
 for 200+ file formats. The system is composed of three main deliverables:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Windows Explorer                          │
 │  (Host process: explorer.exe / prevhost.exe)                │
@@ -42,7 +42,7 @@ for 200+ file formats. The system is composed of three main deliverables:
 
 ## Data Flow: Thumbnail Generation
 
-```
+```text
               ┌──────────────┐
               │  Explorer     │
               │  requests     │
@@ -87,7 +87,7 @@ Central engine components including format detection, configuration, error recov
 telemetry, and version management. Key classes:
 
 | Class | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `EngineAPI` | Public C++ API surface for engine consumers |
 | `FormatRegistry` | Maps extensions → LENSTYPE → decoder |
 | `FormatStatusProvider` | Aggregates decoder health for UI display |
@@ -103,7 +103,7 @@ telemetry, and version management. Key classes:
 Request processing pipeline with zero-copy data paths:
 
 | Class | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `ThumbnailPipeline` | Main entry point (PImpl pattern) |
 | `FormatDetector` | Magic-byte based format identification |
 | `DecoderRegistry` | Maps formats to decoder instances |
@@ -119,7 +119,7 @@ Request processing pipeline with zero-copy data paths:
 25+ format-specific decoders, each implementing `IThumbnailDecoder`:
 
 | Decoder | Formats | Library |
-|---------|---------|---------|
+| --------- | --------- | --------- |
 | `ImageDecoder` | BMP, PNG, JPEG, GIF, TIFF | WIC (built-in) |
 | `WebPDecoder` | WebP | libwebp 1.5.0 |
 | `JXLDecoder` | JPEG XL | libjxl 0.11.1 |
@@ -140,12 +140,12 @@ Request processing pipeline with zero-copy data paths:
 ### Engine/GPU/
 Multi-backend GPU rendering with automatic fallback:
 
-```
+```text
 Priority: D3D11 → D3D12 → Vulkan → GDI (software)
 ```
 
 | Class | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `D3D11Renderer` | Primary GPU path (broadest compatibility) |
 | `D3D12ComputePipeline` | Compute shader path for batch decode |
 | `VulkanComputePipeline` | Cross-vendor compute (AMD/Intel/NVIDIA) |
@@ -163,7 +163,7 @@ HLSL Shaders (in `LENSShell/shaders/`):
 Multi-tier caching with sub-millisecond hot lookups:
 
 | Class | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `ThumbnailCache` | In-memory LRU cache |
 | `PersistentDiskCache` | Disk-backed cache with USN invalidation |
 | `SubMillisecondCacheEngine` | Robin-hood hash, XXH3, <0.5ms lookup |
@@ -177,7 +177,7 @@ Multi-tier caching with sub-millisecond hot lookups:
 Memory management for constrained shell extension environment:
 
 | Class | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `BitmapPool` | Pre-allocated HBITMAP pool (128/256/512) |
 | `MemoryPressureControllerV2` | 5-tier pressure ladder |
 | `ArchiveMemoryCompactor` | Archive buffer compaction |
@@ -188,7 +188,7 @@ Memory management for constrained shell extension environment:
 Plugin ecosystem with sandboxing and trust validation:
 
 | Class | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `PluginManager` | Discovery, loading, lifecycle |
 | `PluginDecoder` | Wraps plugin decoders as IThumbnailDecoder |
 | `PluginSandboxPolicy` | Job object isolation |
@@ -200,7 +200,7 @@ Plugin ecosystem with sandboxing and trust validation:
 ML-powered thumbnail intelligence:
 
 | Class | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `SmartCropV2` | Content-aware crop (saliency detection) |
 | `SceneUnderstandingEngine` | Scene classification |
 | `ImageQualityAssessorV2` | No-reference quality scoring |
@@ -210,7 +210,7 @@ ML-powered thumbnail intelligence:
 ## COM Registration
 
 | Property | Value |
-|----------|-------|
+| ---------- | ------- |
 | CLSID | `{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}` |
 | ProgID | `ExplorerLens.ThumbnailProvider.1` |
 | Threading Model | Apartment |
@@ -218,7 +218,7 @@ ML-powered thumbnail intelligence:
 
 ## Build Architecture
 
-```
+```text
 CMake 3.20+ → Ninja → MSVC v145 (cl.exe 19.50)
                           │
          ┌────────────────┼────────────────┐
@@ -236,7 +236,7 @@ CMake 3.20+ → Ninja → MSVC v145 (cl.exe 19.50)
 ### Feature Flags (CMake Options)
 
 | Flag | Default | Purpose |
-|------|---------|---------|
+| ------ | --------- | --------- |
 | `HAS_LIBJXL` | ON | JPEG XL decoder support |
 | `HAS_LIBHEIF` | ON | HEIF/HEIC decoder support |
 | `HAS_LIBRAW` | ON | RAW camera format support |
@@ -249,7 +249,7 @@ CMake 3.20+ → Ninja → MSVC v145 (cl.exe 19.50)
 ## Performance Targets
 
 | Metric | Target | Actual |
-|--------|--------|--------|
+| -------- | -------- | -------- |
 | Single thumbnail | < 17 ms | ~15 ms |
 | Batch throughput | > 235 img/sec | ~250 img/sec |
 | Cache hit latency | < 5 ms | < 0.5 ms |

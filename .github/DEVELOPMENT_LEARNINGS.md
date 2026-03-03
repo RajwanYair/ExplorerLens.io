@@ -106,7 +106,8 @@ When bumping versions, update ALL of these:
 7. Download archives go to `downloads/` — NOT into `external/<lib>/`
 
 ### External library directory structure
-```
+
+```text
 external/
  compression-libs/ — zlib, lz4, zstd, minizip-ng, lzma, unrar, bzip2, libarchive, xz
  image-libs/ — libwebp, libjxl, libavif, libheif, libde265, dav1d
@@ -142,13 +143,13 @@ external/
 ### CMakeLists.txt insertion points
 - Core headers: before `# Pipeline`
 - Core sources: before `# Pipeline implementations`
-- Utils headers: before `# `
+- Utils headers: before `#`
 - Utils sources: before closing `)`
 - Check these haven't moved — `grep_search` for nearby markers before inserting
 
 ### Test insertion points in EngineTests.cpp
 - New includes: after last feature include block
-- TEST() functions: before `//== ` section
+- TEST() functions: before `//==` section
 - RUN_TEST() calls: before `// Isolation & Stability Tests`
 
 ---
@@ -177,7 +178,7 @@ external/
 ## 7. Common Pitfalls
 
 | Pitfall | Impact | Prevention |
-|---------|--------|------------|
+| --------- | -------- | ------------ |
 | Forgetting vcvars64 before cmake | Clang selected, wrong ABI | Always use Build-MSVC.ps1 |
 | /MT vs /MD CRT mismatch | Linker errors or runtime crashes | Rebuild libs with /MD |
 | CLSID mismatch between WiX and DLL | COM registration fails silently | Verify GUIDs match |
@@ -259,6 +260,7 @@ external/
 
 ### Header documentation standard
 - Every header starts with a Copyright doc-block BEFORE `#pragma once`:
+
 ```cpp
 // FileName.h — Brief Title
 // Copyright (c) 2026 ExplorerLens Project
@@ -268,6 +270,7 @@ external/
 //
 #pragma once
 ```
+
 - Do NOT use `=====` decorator lines or version numbers in banners
 - Prefer block-level comments over inline comments
 - Document inputs/outputs at function level for non-trivial public methods
@@ -362,6 +365,7 @@ external/
 - Vendor-specific GPU decode SDKs (NVDEC, AMF, QuickSync)
 
 ### Pattern: LoadLibrary + GetProcAddress
+
 ```cpp
 // 1. Define function pointer types matching the target API
 typedef LONG (WINAPI* PFN_WinVerifyTrust)(HWND, GUID*, LPVOID);
@@ -383,6 +387,7 @@ FreeLibrary(hLib);
 ```
 
 ### Caching pattern for repeated probes
+
 ```cpp
 static bool IsAvailable() {
     static int cached = -1;  // -1=unchecked, 0=no, 1=yes
@@ -443,10 +448,12 @@ static bool IsAvailable() {
 ## 14. COM Integration Patterns
 
 ### JumpList implementation
-```
+
+```text
 ICustomDestinationList → BeginList → Create IShellLink items →
 Add to IObjectCollection → AppendCategory → CommitList
 ```
+
 - Use `CoCreateInstance(CLSID_DestinationList, ...)` (requires `shobjidl_core.h`)
 - Each task: `CoCreateInstance(CLSID_ShellLink, ...)` → `SetPath` + `SetArguments` + `SetDescription`
 - Set `PKEY_Title` via `IPropertyStore` on each `IShellLink`
@@ -485,6 +492,7 @@ Add to IObjectCollection → AppendCategory → CommitList
 - Wrap decoder calls in `__try / __except(EXCEPTION_EXECUTE_HANDLER)` to catch access violations
 - **MSVC C2712 constraint:** Functions using `__try` cannot contain objects with destructors
 - Workaround: Extract the `__try` block into a separate helper function with no local C++ objects
+
 ```cpp
 // Separate function — no C++ objects with destructors allowed here
 static DWORD InvokeDecoderSEH(DecoderFunc func, const uint8_t* data, size_t size) {
@@ -493,6 +501,7 @@ static DWORD InvokeDecoderSEH(DecoderFunc func, const uint8_t* data, size_t size
 }
 // Caller function can freely use std::string, std::vector, etc.
 ```
+
 - This pattern lets the fuzzing engine detect crashes without terminating the process
 
 ---
@@ -551,6 +560,7 @@ Each aggregate checkbox requires changes in **5 files, 15+ locations**:
 6. **`ChangeSummaryDlg.h`** — `ConfigSnapshot` struct: new `bool` field
 
 ### SetHandlers multi-extension block pattern
+
 ```cpp
 else if (LENSTYPE == LENS_GROUPNAME) {
     const LPCTSTR thKeys[] = {
@@ -568,6 +578,7 @@ else if (LENSTYPE == LENS_GROUPNAME) {
     return;
 }
 ```
+
 - All 4 arrays MUST have identical element counts
 - Use `_countof()` (not hardcoded length) for loop bounds
 - Always check `StrCmpI(currentGuid, LENS_GUID_KEY) == 0` before removing
@@ -594,7 +605,8 @@ else if (LENSTYPE == LENS_GROUPNAME) {
 - Cleanup removed ALL sprint/version references while preserving meaningful documentation
 
 ### Sprint comment patterns to search for
-```
+
+```text
 (Sprint \d+)           — inline sprint markers
 @sprint \d+            — doxygen sprint tags
 Sprint \d+ —           — sprint header lines

@@ -116,7 +116,7 @@ endif()
 
 Copy the DLL to the ExplorerLens plugins directory:
 
-```
+```text
 %LOCALAPPDATA%\ExplorerLens\Plugins\MyFormatPlugin.dll
 ```
 
@@ -127,7 +127,7 @@ Or register via LENSManager.exe → Plugins → Install From File.
 ### Required Exports
 
 | Function | Purpose |
-|----------|---------|
+| ---------- | --------- |
 | `plugin_get_info` | Return plugin metadata |
 | `plugin_get_supported_formats` | Register handled file extensions |
 | `plugin_generate_thumbnail` | Generate a thumbnail for a file |
@@ -137,7 +137,7 @@ Or register via LENSManager.exe → Plugins → Install From File.
 ### Optional Exports
 
 | Function | Purpose |
-|----------|---------|
+| ---------- | --------- |
 | `plugin_get_metadata` | Extract file properties |
 | `plugin_validate_file` | Quick format validation |
 | `plugin_get_capabilities` | Report feature flags |
@@ -187,7 +187,7 @@ typedef struct {
 ### Error Codes
 
 | Code | Name | Meaning |
-|------|------|---------|
+| ------ | ------ | --------- |
 | 0 | `PLUGIN_SUCCESS` | Operation succeeded |
 | 1 | `PLUGIN_ERROR_GENERIC` | Unspecified error |
 | 2 | `PLUGIN_ERROR_INVALID_PARAM` | Bad parameter |
@@ -221,7 +221,7 @@ Plugins run inside a sandboxed environment:
 ### Trust Levels
 
 | Level | Description | Capabilities |
-|-------|-------------|--------------|
+| ------- | ------------- | -------------- |
 | Untrusted | Unknown publisher | Sandbox only, no filesystem |
 | Signed | Valid code signature | Filesystem read (registered extensions) |
 | Trusted | ExplorerLens-verified | Full capabilities |

@@ -125,7 +125,7 @@ if (-not (Test-Path $outPath)) {
 }
 
 # Build OpenCppCoverage arguments
-$args = @(
+$occArgs = @(
     "--sources", (Join-Path $rootDir "Engine"),
     "--excluded_sources", (Join-Path $rootDir "Engine\Tests"),
     "--excluded_sources", (Join-Path $rootDir "external"),
@@ -139,23 +139,23 @@ if (-not $HtmlReport -and -not $CoberturaXml) {
 
 if ($HtmlReport) {
     $htmlPath = Join-Path $outPath "html"
-    $args += "--export_type", "html:$htmlPath"
+    $occArgs += "--export_type", "html:$htmlPath"
     Write-Host "HTML report → $htmlPath" -ForegroundColor Cyan
 }
 
 if ($CoberturaXml) {
     $xmlPath = Join-Path $outPath "coverage.xml"
-    $args += "--export_type", "cobertura:$xmlPath"
+    $occArgs += "--export_type", "cobertura:$xmlPath"
     Write-Host "Cobertura XML → $xmlPath" -ForegroundColor Cyan
 }
 
-$args += "--", $TestExe
+$occArgs += "--", $TestExe
 
 Write-Host "`nRunning coverage collection..." -ForegroundColor Yellow
-Write-Host "  $occExe $($args -join ' ')" -ForegroundColor DarkGray
+Write-Host "  $occExe $($occArgs -join ' ')" -ForegroundColor DarkGray
 
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
-& $occExe @args
+& $occExe @occArgs
 $exitCode = $LASTEXITCODE
 $sw.Stop()
 

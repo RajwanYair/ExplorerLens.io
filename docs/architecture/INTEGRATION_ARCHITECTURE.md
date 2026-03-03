@@ -1,7 +1,7 @@
 # ExplorerLens Integration Architecture
 
-**Document Version:** 1.0 
-**Date:** January 12, 2026 
+**Document Version:** 1.0
+**Date:** January 12, 2026
 **Status:** ✅ VALIDATED
 
 ---
@@ -14,7 +14,7 @@ This document describes the complete integration architecture between the COM-ba
 
 ## Architecture Diagram
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │ Windows Explorer │
 │ (or other Shell Host) │
@@ -118,9 +118,9 @@ This document describes the complete integration architecture between the COM-ba
 
 **Purpose:** Windows Shell Extension that implements thumbnail generation for Windows Explorer
 
-**Language:** C++/ATL/COM 
-**Build Target:** x64 DLL 
-**Size:** ~1.39 MB (Release) 
+**Language:** C++/ATL/COM
+**Build Target:** x64 DLL
+**Size:** ~1.39 MB (Release)
 **Dependencies:** ATL, Windows SDK, ExplorerLensEngine.lib
 
 **Key Classes:**
@@ -133,6 +133,7 @@ This document describes the complete integration architecture between the COM-ba
 - `IExtractImage2` - Legacy thumbnail API (Windows XP/Vista)
 
 **Member Variables:**
+
 ```cpp
 std::unique_ptr<ExplorerLens::EngineAdapter> m_engineAdapter;
 std::wstring m_filePath;
@@ -159,6 +160,7 @@ HRESULT hr = m_engineAdapter->GenerateThumbnail(
 ```
 
 **Initialization:**
+
 ```cpp
 CLENSShell::CLENSShell() {
  m_engineAdapter = std::make_unique<ExplorerLens::EngineAdapter>();
@@ -171,6 +173,7 @@ CLENSShell::CLENSShell() {
 ```
 
 **Statistics Collection:**
+
 ```cpp
 // Metrics are collected in CLENSShell and forwarded from Engine
 m_metrics.RecordSuccess(durationMs);
@@ -184,8 +187,8 @@ m_metrics.RecordFormat(formatType);
 
 **Purpose:** Bridge between COM HBITMAP interface and Engine's modern C++ API
 
-**Header:** [LENSShell/EngineAdapter.h](../LENSShell/EngineAdapter.h) 
-**Implementation:** [LENSShell/EngineAdapter.cpp](../LENSShell/EngineAdapter.cpp) 
+**Header:** [LENSShell/EngineAdapter.h](../LENSShell/EngineAdapter.h)
+**Implementation:** [LENSShell/EngineAdapter.cpp](../LENSShell/EngineAdapter.cpp)
 **Lines of Code:** ~205 lines
 
 **Class Definition:**
@@ -307,11 +310,11 @@ HRESULT EngineAdapter::GenerateThumbnail(
 
 **Key Responsibilities:**
 1. **Lifetime Management:** Creates and destroys ThumbnailPipeline
-2. **Configuration:** Sets up pipeline with COM-appropriate defaults
-3. **Decoder Registration:** Registers all available decoders on startup
-4. **Type Translation:** Converts COM HBITMAP ↔ Engine Result
-5. **Error Handling:** Translates Engine errors to HRESULTs
-6. **Statistics:** Forwards metrics to COM layer
+1. **Configuration:** Sets up pipeline with COM-appropriate defaults
+1. **Decoder Registration:** Registers all available decoders on startup
+1. **Type Translation:** Converts COM HBITMAP ↔ Engine Result
+1. **Error Handling:** Translates Engine errors to HRESULTs
+1. **Statistics:** Forwards metrics to COM layer
 
 ---
 
@@ -319,25 +322,25 @@ HRESULT EngineAdapter::GenerateThumbnail(
 
 **Purpose:** Standalone thumbnail generation engine with zero COM dependencies
 
-**Language:** Modern C++17 
-**Build System:** CMake + MSBuild 
-**Size:** 1.97 MB (Release x64) 
+**Language:** Modern C++17
+**Build System:** CMake + MSBuild
+**Size:** 1.97 MB (Release x64)
 **Dependencies:** Windows SDK, DirectX 11, image libraries (WIC, libwebp, libavif)
 
 **Key Components:**
 
 #### 3.1 ThumbnailPipeline
 
-**Header:** [Engine/Pipeline/ThumbnailPipeline.h](../Engine/Pipeline/ThumbnailPipeline.h) 
+**Header:** [Engine/Pipeline/ThumbnailPipeline.h](../Engine/Pipeline/ThumbnailPipeline.h)
 **Implementation:** [Engine/Pipeline/ThumbnailPipeline.cpp](../Engine/Pipeline/ThumbnailPipeline.cpp)
 
 **Responsibilities:**
 1. **Format Detection:** Uses FormatDetector to identify file types
-2. **Decoder Selection:** Queries DecoderRegistry for appropriate decoder
-3. **Cache Management:** Checks cache before generating
-4. **GPU Rendering:** Routes through IGPURenderer when requested
-5. **Error Handling:** Provides detailed error codes
-6. **Statistics:** Tracks performance metrics
+1. **Decoder Selection:** Queries DecoderRegistry for appropriate decoder
+1. **Cache Management:** Checks cache before generating
+1. **GPU Rendering:** Routes through IGPURenderer when requested
+1. **Error Handling:** Provides detailed error codes
+1. **Statistics:** Tracks performance metrics
 
 **Public API:**
 
@@ -366,7 +369,7 @@ public:
 
 **Pipeline Flow:**
 
-```
+```text
 GenerateThumbnail(request)
  │
  ├─► 1. Validate request (file exists, parameters valid)
@@ -392,7 +395,7 @@ GenerateThumbnail(request)
 
 #### 3.2 DecoderRegistry
 
-**Header:** [Engine/Pipeline/DecoderRegistry.h](../Engine/Pipeline/DecoderRegistry.h) 
+**Header:** [Engine/Pipeline/DecoderRegistry.h](../Engine/Pipeline/DecoderRegistry.h)
 **Implementation:** [Engine/Pipeline/DecoderRegistry.cpp](../Engine/Pipeline/DecoderRegistry.cpp)
 
 **Design Pattern:** Non-owning registry (stores pointers, doesn't manage lifetime)
@@ -453,7 +456,7 @@ public:
 **Implemented Decoders:**
 
 | Decoder | Status | Extensions | Test Coverage |
-|---------|--------|------------|---------------|
+| --------- | -------- | ------------ | --------------- |
 | **ImageDecoder** | ✅ Active | .jpg, .jpeg, .png, .bmp, .gif, .tiff, .tif | 8/8 tests |
 | **WebPDecoder** | ✅ Active | .webp | 5/5 tests |
 | **AVIFDecoder** | ✅ Active | .avif, .heif, .heic | 5/5 tests |
@@ -499,7 +502,7 @@ public:
 
 ### Request Flow (User clicks file → Thumbnail displayed)
 
-```
+```text
 1. User Action
  └─► Windows Explorer requests thumbnail
  └─► Calls IThumbnailProvider::GetThumbnail(cx, phbmp, alphaType)
@@ -557,7 +560,7 @@ public:
 
 ### Error Flow
 
-```
+```text
 Engine Error → Adapter Translation → COM HRESULT
 ```
 
@@ -593,7 +596,7 @@ if (SUCCEEDED(result.status)) {
 **Common HRESULT Mappings:**
 
 | Engine Error | HRESULT | Description |
-|--------------|---------|-------------|
+| -------------- | --------- | ------------- |
 | Success | S_OK (0x00000000) | Thumbnail generated |
 | FileNotFound | E_FILE_NOT_FOUND (0x80070002) | File doesn't exist |
 | FormatNotSupported | E_NOT_SUPPORTED (0x80004001) | No decoder available |
@@ -608,7 +611,7 @@ if (SUCCEEDED(result.status)) {
 ### Memory Usage
 
 | Component | Memory Footprint | Notes |
-|-----------|------------------|-------|
+| ----------- | ------------------ | ------- |
 | **LENSShell.dll** | ~1.39 MB | Loaded once per Explorer process |
 | **ExplorerLensEngine.lib** | ~1.97 MB | Static library, linked into DLL |
 | **Per-thumbnail** | ~4-16 MB | Temporary buffers, freed after |
@@ -618,7 +621,7 @@ if (SUCCEEDED(result.status)) {
 ### CPU Usage
 
 | Operation | CPU Time | Notes |
-|-----------|----------|-------|
+| ----------- | ---------- | ------- |
 | **Cache hit** | <1ms | Bitmap copy only |
 | **JPEG decode** | 5-15ms | WIC decoder |
 | **PNG decode** | 10-30ms | Depends on compression |
@@ -659,7 +662,7 @@ config.timeoutMs = 5000; // 5 second timeout
 **Configuration Options:**
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| -------- | ------ | --------- | ------------- |
 | `enableCache` | bool | true | Enable result caching |
 | `enableGPU` | bool | true | Use GPU for rendering |
 | `preserveAspectRatio` | bool | true | Maintain original aspect |
@@ -676,7 +679,7 @@ config.timeoutMs = 5000; // 5 second timeout
 
 **Engine Tests:** [Engine/Tests/EngineTests.cpp](../Engine/Tests/EngineTests.cpp)
 
-```
+```text
 ========================================
 TEST SUMMARY: 38/38 PASSED (100%)
 ========================================
@@ -710,32 +713,34 @@ cd x64\Release
 **Manual Test Procedure:**
 
 1. **Build LENSShell.dll:**
+
  ```powershell
  msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64
  ```
 
-2. **Register Shell Extension:**
+1. **Register Shell Extension:**
+
  ```powershell
  regsvr32 x64\Release\LENSShell.dll
  ```
 
-3. **Test with Explorer:**
- - Navigate to folder with test images
- - Enable thumbnail view
- - Verify thumbnails appear correctly
- - Check Performance Monitor for ExplorerLensEngine activity
+1. **Test with Explorer:**
+- Navigate to folder with test images
+- Enable thumbnail view
+- Verify thumbnails appear correctly
+- Check Performance Monitor for ExplorerLensEngine activity
 
-4. **Verify Formats:**
- - JPEG: ✅ Should work
- - PNG: ✅ Should work
- - WebP: ✅ Should work
- - AVIF: ✅ Should work
- - ZIP/CBZ: ✅ Should work
+1. **Verify Formats:**
+- JPEG: ✅ Should work
+- PNG: ✅ Should work
+- WebP: ✅ Should work
+- AVIF: ✅ Should work
+- ZIP/CBZ: ✅ Should work
 
 ### Integration Test Results (Expected)
 
 | Format | File | Expected Result |
-|--------|------|-----------------|
+| -------- | ------ | ----------------- |
 | JPEG | test.jpg | ✅ Thumbnail displayed |
 | PNG | test.png | ✅ Thumbnail displayed |
 | WebP | test.webp | ✅ Thumbnail displayed |
@@ -752,31 +757,31 @@ cd x64\Release
 ### Current Limitations
 
 1. **DLL Lock Issue** ⚠️
- - **Problem:** LENSShell.dll locked by Explorer during development
- - **Impact:** Cannot rebuild while shell extension is loaded
- - **Workaround:** Restart Explorer or unregister DLL before rebuild
- - **Fix:** Create test harness that doesn't require Explorer
+- **Problem:** LENSShell.dll locked by Explorer during development
+- **Impact:** Cannot rebuild while shell extension is loaded
+- **Workaround:** Restart Explorer or unregister DLL before rebuild
+- **Fix:** Create test harness that doesn't require Explorer
 
-2. **JXL/HEIF Decoders** ⏳
- - **Status:** Interface declarations complete, implementation pending
- - **Impact:** .jxl and .heif files not yet supported
- - **Timeline:** (after library integration)
+1. **JXL/HEIF Decoders** ⏳
+- **Status:** Interface declarations complete, implementation pending
+- **Impact:** .jxl and .heif files not yet supported
+- **Timeline:** (after library integration)
 
-3. **GPU Rendering** 🔄
- - **Status:** Interface exists, implementation pending validation
- - **Impact:** GPU acceleration not yet verified
- - **Timeline:** Near-term (Week 5-6)
+1. **GPU Rendering** 🔄
+- **Status:** Interface exists, implementation pending validation
+- **Impact:** GPU acceleration not yet verified
+- **Timeline:** Near-term (Week 5-6)
 
-4. **Cache Persistence** ⏳
- - **Status:** In-memory cache works, disk persistence not implemented
- - **Impact:** Cache cleared on restart
- - **Timeline:** 
+1. **Cache Persistence** ⏳
+- **Status:** In-memory cache works, disk persistence not implemented
+- **Impact:** Cache cleared on restart
+- **Timeline:**
 
 ### Performance Issues
 
 1. **First-time Decode:** Slower than subsequent decodes (no cache)
-2. **Archive Extraction:** Can take 50-100ms for large archives
-3. **GPU Overhead:** GPU rendering may be slower than CPU for small images
+1. **Archive Extraction:** Can take 50-100ms for large archives
+1. **GPU Overhead:** GPU rendering may be slower than CPU for small images
 
 ---
 
@@ -880,7 +885,7 @@ DT_LOG_DEBUG(LogCategory::ENGINE, "Initializing Engine adapter");
 
 **Debug Output:**
 
-```
+```text
 [DEBUG][ENGINE] Initializing Engine adapter
 [DEBUG][ENGINE] Registered ImageDecoder
 [DEBUG][ENGINE] Registered WebPDecoder
@@ -893,9 +898,9 @@ DT_LOG_DEBUG(LogCategory::ENGINE, "Initializing Engine adapter");
 **Visual Studio Debugger:**
 
 1. Set breakpoint in `EngineAdapter::GenerateThumbnail()`
-2. Attach to `explorer.exe` process
-3. Navigate to folder with test images
-4. Breakpoint should hit when thumbnail requested
+1. Attach to `explorer.exe` process
+1. Navigate to folder with test images
+1. Breakpoint should hit when thumbnail requested
 
 ---
 
@@ -907,6 +912,6 @@ DT_LOG_DEBUG(LogCategory::ENGINE, "Initializing Engine adapter");
 
 ---
 
-**Document Status:** ✅ COMPLETE 
-**Last Updated:** January 12, 2026 
+**Document Status:** ✅ COMPLETE
+**Last Updated:** January 12, 2026
 **Next Review:** Week 6 (after GPU abstraction implementation)

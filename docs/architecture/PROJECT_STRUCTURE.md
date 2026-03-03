@@ -1,7 +1,7 @@
 # ExplorerLens Project Structure
 
-**Last Updated:** July 2025 
-**Version:** 15.0.0 "Zenith" 
+**Last Updated:** July 2025
+**Version:** 15.0.0 "Zenith"
 **Organization Standard:** Industrial Open Source
 
 This document describes the complete directory structure and organization of the ExplorerLens project.
@@ -10,7 +10,7 @@ This document describes the complete directory structure and organization of the
 
 ## 📁 Root Directory Structure
 
-```
+```text
 ExplorerLens/
 ├── .git/ # Git repository data
 ├── .github/ # GitHub configuration and workflows
@@ -54,7 +54,7 @@ ExplorerLens/
 
 **Purpose:** GitHub-specific configuration, templates, and CI/CD workflows.
 
-```
+```text
 .github/
 ├── ISSUE_TEMPLATE/ # Issue templates (bug, feature, etc.)
 ├── workflows/ # GitHub Actions CI/CD
@@ -76,7 +76,7 @@ ExplorerLens/
 
 **Purpose:** PowerShell scripts for building ExplorerLens and external dependencies.
 
-```
+```text
 build-scripts/
 ├── external-libs/ # Individual library builders
 │ ├── Build-Dav1d.ps1
@@ -118,7 +118,7 @@ build-scripts/
 
 **Purpose:** GUI application for configuring ExplorerLens settings and file associations.
 
-```
+```text
 LENSManager/
 ├── MainDlg.cpp # Main dialog implementation
 ├── MainDlg.h # Main dialog header
@@ -139,7 +139,7 @@ LENSManager/
 
 **Purpose:** COM DLL shell extension that provides thumbnail generation for Windows Explorer.
 
-```
+```text
 LENSShell/
 ├── decoders/ # Format-specific decoders
 │ ├── archive_decoder.cpp
@@ -163,7 +163,7 @@ LENSShell/
 
 **Purpose:** Comprehensive project documentation organized by category.
 
-```
+```text
 docs/
 ├── architecture/ # Architecture documentation
 ├── build/ # Build guides
@@ -206,7 +206,7 @@ docs/
 
 **Purpose:** Downloaded source archives for external libraries (cached for builds).
 
-```
+```text
 downloads/
 ├── libarchive-3.7.6.tar.gz # Archive library
 ├── minizip-ng-4.0.10.zip # ZIP library
@@ -215,7 +215,7 @@ downloads/
 └── README.md # Downloads documentation
 ```
 
-**Note:** These files ARE tracked in git (exception to *.tar.gz, *.zip exclusion).
+**Note:** These files ARE tracked in git (exception to `*.tar.gz`, `*.zip` exclusion).
 
 **See Also:** [Downloads README](downloads/README.md)
 
@@ -225,7 +225,7 @@ downloads/
 
 **Purpose:** Core thumbnail generation engine (standalone C++20 library with unit tests).
 
-```
+```text
 Engine/
 ├── src/ # Engine source code
 │ ├── ThumbnailEngine.cpp
@@ -255,7 +255,7 @@ Engine/
 
 **Purpose:** External library source code, builds, and installations. Organized by library category for maintainability.
 
-```
+```text
 external/
 ├── compression-libs/ # Compression libraries
 │ ├── zlib-1.3.1/ # General-purpose compression
@@ -295,7 +295,7 @@ external/
 
 **Purpose:** Assets for Microsoft Store and other marketplaces.
 
-```
+```text
 marketplace/
 ├── screenshots/ # Store screenshots
 ├── icons/ # Application icons
@@ -309,7 +309,7 @@ marketplace/
 
 **Purpose:** Installers and package configurations.
 
-```
+```text
 packaging/
 ├── msix/ # MSIX package (Microsoft Store)
 └── ...
@@ -323,7 +323,7 @@ packaging/
 
 **Purpose:** Scripts for creating releases and publishing.
 
-```
+```text
 release-scripts/
 ├── create-release.ps1 # Create GitHub release
 ├── package-installer.ps1 # Package installer
@@ -336,7 +336,7 @@ release-scripts/
 
 **Purpose:** General-purpose utility scripts (non-build).
 
-```
+```text
 scripts/
 ├── reorganize-project.ps1 # Project structure reorganization
 ├── cleanup.ps1 # Clean build artifacts
@@ -349,7 +349,7 @@ scripts/
 
 **Purpose:** Plugin development kit for extending ExplorerLens.
 
-```
+```text
 SDK/
 ├── include/ # SDK headers
 │ └── plugin_api.h
@@ -367,7 +367,7 @@ SDK/
 
 **Purpose:** Integration tests and test resources.
 
-```
+```text
 tests/
 ├── integration/ # Integration tests
 ├── test-files/ # Test images/archives
@@ -383,7 +383,7 @@ tests/
 
 **Purpose:** Development utilities and helper tools.
 
-```
+```text
 tools/
 ├── RegisterCOM.ps1 # COM registration utility
 └── ...
@@ -435,7 +435,7 @@ See [.gitignore](.gitignore) for complete exclusion list.
 
 ### Build Outputs (x64/Release/)
 
-```
+```text
 x64/Release/
 ├── LENSShell.dll # Shell extension DLL
 ├── LENSManager.exe # Management GUI
@@ -445,7 +445,7 @@ x64/Release/
 
 ### Build Logs (build-logs/)
 
-```
+```text
 build-logs/
 ├── build-2026-02-11_14-30-25.log
 ├── build-progress.json
@@ -460,7 +460,7 @@ Logs include timestamps and are auto-cleaned after 30 days.
 
 ### NuGet Packages (packages/)
 
-```
+```text
 packages/
 └── wtl.10.0.10320/ # Windows Template Library
 ```
@@ -541,10 +541,10 @@ Every major directory should have a `README.md` explaining:
 
 ### Not Tracked
 
-- ❌ Build outputs (x64/, build/, *.obj, *.lib, *.dll, *.exe)
+- ❌ Build outputs (x64/, build/, `*.obj`, `*.lib`, `*.dll`, `*.exe`)
 - ❌ Build logs (build-logs/, *.log)
-- ❌ IDE files (.vs/, *.user, *.suo)
-- ❌ Temporary files (*.tmp, *~, *.bak)
+- ❌ IDE files (.vs/, `*.user`, `*.suo`)
+- ❌ Temporary files (`*.tmp`, `*~`, `*.bak`)
 - ❌ External lib builds (external/**/build*/, external/**/install/)
 
 ---
@@ -552,7 +552,7 @@ Every major directory should have a `README.md` explaining:
 ## 🎯 Directory Purpose Summary
 
 | Directory | Purpose | Tracked in Git |
-|-----------|---------|----------------|
+| ----------- | --------- | ---------------- |
 | `.github/` | GitHub config, workflows | ✅ Yes |
 | `build/` | CMake build outputs | ❌ No |
 | `build-logs/` | Build logs | ❌ No |
@@ -579,28 +579,28 @@ Every major directory should have a `README.md` explaining:
 ### Changes Made
 
 1. **Moved `.github/docs/` → `docs/development/`**
- - Consolidated GitHub-specific docs into main documentation
- - Better organization for developers
+- Consolidated GitHub-specific docs into main documentation
+- Better organization for developers
 
-2. **Archived development summaries**
- - Consolidated into docs/archive/
- - Cleaner root directory
+1. **Archived development summaries**
+- Consolidated into docs/archive/
+- Cleaner root directory
 
-3. **Organized `build-scripts/` by category:**
- - Created `external-libs/` subdirectory
- - Created `production/` subdirectory
- - Better script organization
+1. **Organized `build-scripts/` by category:**
+- Created `external-libs/` subdirectory
+- Created `production/` subdirectory
+- Better script organization
 
-4. **Removed obsolete files:**
- - Old `.bat` scripts
- - Deprecated pending-features scripts
- - Cleaned up `.github/docs/` after move
+1. **Removed obsolete files:**
+- Old `.bat` scripts
+- Deprecated pending-features scripts
+- Cleaned up `.github/docs/` after move
 
-5. **Added README files to key directories:**
- - `build-scripts/README.md`
- - `docs/development/README.md`
- - `downloads/README.md`
- - `external/README.md`
+1. **Added README files to key directories:**
+- `build-scripts/README.md`
+- `docs/development/README.md`
+- `downloads/README.md`
+- `external/README.md`
 
 ---
 
@@ -613,6 +613,6 @@ For questions about project structure:
 
 ---
 
-**Maintained by:** ExplorerLens Development Team 
-**Standard:** Industrial Open Source Project Organization 
+**Maintained by:** ExplorerLens Development Team
+**Standard:** Industrial Open Source Project Organization
 **Compliance:** GitHub best practices, Microsoft OSS guidelines
