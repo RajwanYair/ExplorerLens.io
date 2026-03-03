@@ -26,13 +26,13 @@ struct SearchIndexEntry {
     std::wstring displayName;         // User-visible name
     std::wstring archiveEntryPath;    // Path within archive (empty for raw files)
     std::wstring formatType;          // e.g., L"ZIP", L"RAR", L"7Z", L"RAW"
-    uint64_t     fileSize      = 0;   // Original file size in bytes
+    uint64_t     fileSize = 0;   // Original file size in bytes
     uint64_t     compressedSize = 0;  // Compressed size (for archives)
-    uint32_t     width         = 0;   // Image width (if known)
-    uint32_t     height        = 0;   // Image height (if known)
-    uint64_t     modifiedTime  = 0;   // FILETIME as uint64
-    uint32_t     entryCount    = 0;   // Number of items in archive
-    bool         hasThumbnail  = false;
+    uint32_t     width = 0;   // Image width (if known)
+    uint32_t     height = 0;   // Image height (if known)
+    uint64_t     modifiedTime = 0;   // FILETIME as uint64
+    uint32_t     entryCount = 0;   // Number of items in archive
+    bool         hasThumbnail = false;
 };
 
 // ============================================================================
@@ -43,7 +43,7 @@ struct SearchQuery {
     std::wstring queryText;           // User's search string
     std::wstring extensionFilter;     // e.g., L".zip" (empty = all)
     std::wstring formatFilter;        // e.g., L"RAW" (empty = all)
-    uint32_t     maxResults    = 50;  // Limit results
+    uint32_t     maxResults = 50;  // Limit results
     bool         includeArchiveContents = true;
     bool         caseSensitive = false;
 
@@ -72,7 +72,7 @@ struct SearchResultSet {
     std::vector<SearchResult> results;
     uint32_t totalMatches = 0;       // Total matches (may exceed results.size())
     double   searchTimeMs = 0.0;     // Query execution time
-    bool     truncated    = false;   // More results available
+    bool     truncated = false;   // More results available
 };
 
 // ============================================================================
@@ -173,7 +173,8 @@ public:
             if (it->filePath.find(pathPrefix) == 0) {
                 it = m_index.erase(it);
                 removed++;
-            } else {
+            }
+            else {
                 ++it;
             }
         }
@@ -227,7 +228,8 @@ public:
                     result.relevanceScore = score;
                     result.highlightedName = HighlightMatches(entry.displayName, query.queryText);
                     results.results.push_back(std::move(result));
-                } else {
+                }
+                else {
                     results.truncated = true;
                 }
             }
@@ -342,29 +344,28 @@ private:
     }
 
     static void SortResults(std::vector<SearchResult>& results,
-        SearchQuery::SortBy sortBy, bool descending)
-    {
+        SearchQuery::SortBy sortBy, bool descending) {
         auto cmp = [sortBy, descending](const SearchResult& a, const SearchResult& b) {
             int order = 0;
             switch (sortBy) {
-                case SearchQuery::SortBy::Relevance:
-                    order = (a.relevanceScore > b.relevanceScore) ? -1 : 1;
-                    break;
-                case SearchQuery::SortBy::FileName:
-                    order = a.entry.displayName.compare(b.entry.displayName);
-                    break;
-                case SearchQuery::SortBy::FileSize:
-                    order = (a.entry.fileSize < b.entry.fileSize) ? -1 : 1;
-                    break;
-                case SearchQuery::SortBy::ModifiedDate:
-                    order = (a.entry.modifiedTime < b.entry.modifiedTime) ? -1 : 1;
-                    break;
-                case SearchQuery::SortBy::Format:
-                    order = a.entry.formatType.compare(b.entry.formatType);
-                    break;
+            case SearchQuery::SortBy::Relevance:
+                order = (a.relevanceScore > b.relevanceScore) ? -1 : 1;
+                break;
+            case SearchQuery::SortBy::FileName:
+                order = a.entry.displayName.compare(b.entry.displayName);
+                break;
+            case SearchQuery::SortBy::FileSize:
+                order = (a.entry.fileSize < b.entry.fileSize) ? -1 : 1;
+                break;
+            case SearchQuery::SortBy::ModifiedDate:
+                order = (a.entry.modifiedTime < b.entry.modifiedTime) ? -1 : 1;
+                break;
+            case SearchQuery::SortBy::Format:
+                order = a.entry.formatType.compare(b.entry.formatType);
+                break;
             }
             return descending ? (order > 0) : (order < 0);
-        };
+            };
         std::sort(results.begin(), results.end(), cmp);
     }
 
@@ -374,7 +375,8 @@ private:
         while (it != m_index.end() && m_index.size() > MAX_INDEX_SIZE / 2) {
             if (!it->hasThumbnail) {
                 it = m_index.erase(it);
-            } else {
+            }
+            else {
                 ++it;
             }
         }
@@ -399,8 +401,8 @@ private:
     // State
     std::mutex m_mutex;
     SearchHandlerState m_state = SearchHandlerState::Uninitialized;
-    std::atomic<uint64_t> m_totalIndexed{0};
-    std::atomic<uint64_t> m_totalSearches{0};
+    std::atomic<uint64_t> m_totalIndexed{ 0 };
+    std::atomic<uint64_t> m_totalSearches{ 0 };
 };
 
 } // namespace Engine

@@ -84,8 +84,7 @@ function Install-OpenCppCoverage {
         Write-Host "  Running installer (silent)..." -ForegroundColor Cyan
         Start-Process -FilePath $installer -ArgumentList "/VERYSILENT", "/SP-" -Wait
         Remove-Item $installer -ErrorAction SilentlyContinue
-    }
-    catch {
+    } catch {
         Write-Host "  Direct download failed. Please install manually:" -ForegroundColor Red
         Write-Host "    https://github.com/OpenCppCoverage/OpenCppCoverage/releases" -ForegroundColor Yellow
         return $null

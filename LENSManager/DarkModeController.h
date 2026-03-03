@@ -77,7 +77,7 @@ public:
   void ToggleTheme(HWND hWnd) {
     m_isDarkMode = !m_isDarkMode;
     m_colors = m_isDarkMode ? DarkMode::GetDarkTheme()
-                            : DarkMode::GetLightTheme();
+      : DarkMode::GetLightTheme();
     m_accentColor = DarkMode::GetSystemAccentColor();
     DarkMode::SetAppDarkMode(m_isDarkMode);
 
@@ -88,7 +88,7 @@ public:
     }
     // Also apply to the calling window if not already tracked
     if (std::find(m_managedWindows.begin(), m_managedWindows.end(), hWnd) ==
-        m_managedWindows.end()) {
+      m_managedWindows.end()) {
       ApplyToWindow(hWnd);
     }
   }

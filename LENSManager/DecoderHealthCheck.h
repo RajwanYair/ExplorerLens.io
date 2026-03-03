@@ -93,7 +93,7 @@ public:
         summary += L"Decoder Health Check\r\n";
         summary += L"====================\r\n\r\n";
         summary += L"Active Decoders: " + std::to_wstring(available) +
-                   L" / " + std::to_wstring(total) + L"\r\n";
+            L" / " + std::to_wstring(total) + L"\r\n";
         summary += L"Total Extensions: " + std::to_wstring(totalExts) + L"\r\n\r\n";
 
         for (const auto& info : results) {
@@ -140,7 +140,8 @@ private:
             info.statusMessage = description + L" - Library found";
             info.version = L"detected";
             FreeLibrary(hMod);
-        } else {
+        }
+        else {
             info.isAvailable = false;
             info.statusMessage = description + L" - Library not found (" + dllName + L")";
             info.version = L"N/A";
