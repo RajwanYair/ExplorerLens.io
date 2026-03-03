@@ -1941,9 +1941,9 @@ LRESULT CMainDlg::OnBenchmark(WORD /*wNotifyCode*/, WORD /*wID*/,
                 uint8_t* dst = downscaled.data() + (dy * 256 + dx) * 4;
                 for (int c = 0; c < 4; ++c) {
                     int v = (int)buffer[(sy * WIDTH + sx) * 4 + c]
-                          + (int)buffer[(sy * WIDTH + sx + 1) * 4 + c]
-                          + (int)buffer[((sy + 1) * WIDTH + sx) * 4 + c]
-                          + (int)buffer[((sy + 1) * WIDTH + sx + 1) * 4 + c];
+                        + (int)buffer[(sy * WIDTH + sx + 1) * 4 + c]
+                        + (int)buffer[((sy + 1) * WIDTH + sx) * 4 + c]
+                        + (int)buffer[((sy + 1) * WIDTH + sx + 1) * 4 + c];
                     dst[c] = static_cast<uint8_t>(v / 4);
                 }
             }

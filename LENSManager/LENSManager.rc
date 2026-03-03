@@ -19,7 +19,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_POPUP | WS_SYSMENU
 CAPTION "About ExplorerLens"
 FONT 8, "MS Shell Dlg 2", 400, 0, 1
 {
-    ICON            IDR_MAINFRAME, IDC_STATIC, 12, 10, 20, 20, SS_ICON
+  ICON            IDR_MAINFRAME, IDC_STATIC, 12, 10, 20, 20, SS_ICON
     CTEXT           "ExplorerLens Shell Manager\nversion 15.0.0 ""Zenith""\nExplorerLens.io (c) 2011-2026", IDC_STATIC, 40, 10, 258, 28, SS_CENTER
     CTEXT           "200+ Formats  -  GPU Thumbnails  -  DirectX 11/12  -  Vulkan  -  Smart Cache", IDC_STATIC, 12, 42, 286, 10, SS_CENTER
     LTEXT           "System Information:", IDC_STATIC, 12, 58, 286, 8

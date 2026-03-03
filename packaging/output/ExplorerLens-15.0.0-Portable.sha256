@@ -1,0 +1,5 @@
+196167239FB3D374630100CFDCD4FADF98A886B6B6155BB477C94236CC85E149  ExplorerLens-15.0.0-Portable.zip
+
+# Verification:
+# PowerShell: (Get-FileHash -Path 'ExplorerLens-15.0.0-Portable.zip' -Algorithm SHA256).Hash
+# Linux/Mac: sha256sum 'ExplorerLens-15.0.0-Portable.zip'
