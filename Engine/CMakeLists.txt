@@ -349,6 +349,20 @@ set(ENGINE_HEADERS
     Core/InputSanitizer.h
     Core/PathTraversalGuard.h
 
+    # Production pipeline & performance infrastructure
+    Core/ContentAwareThumbnail.h
+    Core/RuntimeSIMDDispatcher.h
+    Core/DecoderPerformanceCounters.h
+    Core/ThumbnailQualityGate.h
+    Core/BatchThumbnailOrchestrator.h
+    Core/FileSignatureDetector.h
+    Core/GPUResourcePoolManager.h
+    Core/CacheCoherencyProtocol.h
+    Core/ThumbnailPipelineProfiler.h
+    Core/FormatNegotiator.h
+    Core/TelemetryAggregator.h
+    Core/DecoderRegistryV2.h
+
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
     Pipeline/BatchProcessor.h
@@ -376,6 +390,7 @@ set(ENGINE_HEADERS
     Pipeline/DecodeRetryPolicy.h
     Pipeline/ThumbnailRequestValidator.h
     Pipeline/DecoderOutputValidator.h
+    Pipeline/ProductionPipelineV2.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h

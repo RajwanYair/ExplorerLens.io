@@ -578,6 +578,19 @@
 #include "../Plugin/PluginResourceLimiter.h"
 #include "../Core/InputSanitizer.h"
 #include "../Core/PathTraversalGuard.h"
+#include "../Core/ContentAwareThumbnail.h"
+#include "../Core/RuntimeSIMDDispatcher.h"
+#include "../Core/DecoderPerformanceCounters.h"
+#include "../Core/ThumbnailQualityGate.h"
+#include "../Core/BatchThumbnailOrchestrator.h"
+#include "../Core/FileSignatureDetector.h"
+#include "../Core/GPUResourcePoolManager.h"
+#include "../Core/CacheCoherencyProtocol.h"
+#include "../Core/ThumbnailPipelineProfiler.h"
+#include "../Core/FormatNegotiator.h"
+#include "../Core/TelemetryAggregator.h"
+#include "../Core/DecoderRegistryV2.h"
+#include "../Pipeline/ProductionPipelineV2.h"
 #include "../Utils/ConfigDriftDetector.h"
 #include "../Utils/DeploymentPreflightCheck.h"
 #include "../Utils/OperationalReadinessChecker.h"
@@ -17105,6 +17118,365 @@ TEST(TestOperationalReadinessChecker_Check) {
     ASSERT(report.ready > 0);
 }
 
+// --- Content-Aware Thumbnail Tests ---
+
+TEST(TestContentAwareThumbnail_Analyze) {
+    ContentAwareThumbnail cat;
+    // Create a small 32x32 test image with gradient
+    const uint32_t w = 32, h = 32, stride = w * 4;
+    std::vector<uint8_t> pixels(stride * h);
+    for (uint32_t y = 0; y < h; y++) {
+        for (uint32_t x = 0; x < w; x++) {
+            uint8_t* p = pixels.data() + y * stride + x * 4;
+            p[0] = static_cast<uint8_t>(x * 8); // B
+            p[1] = static_cast<uint8_t>(y * 8); // G
+            p[2] = 128; // R
+            p[3] = 255; // A
+        }
+    }
+    auto result = cat.Analyze(pixels.data(), w, h, stride, ThumbnailCropMode::Center);
+    // Small images should get center crop with full confidence
+    ASSERT(result.strategy == ThumbnailCropMode::Center);
+    ASSERT(result.confidence == 1.0f);
+    ASSERT(result.region.w > 0.0f && result.region.h > 0.0f);
+}
+
+TEST(TestContentAwareThumbnail_NullInput) {
+    ContentAwareThumbnail cat;
+    auto result = cat.Analyze(nullptr, 0, 0, 0);
+    ASSERT(result.confidence == 0.0f);
+}
+
+// --- Runtime SIMD Dispatcher Tests ---
+
+TEST(TestRuntimeSIMDDispatcher_Init) {
+    auto& simd = RuntimeSIMDDispatcher::Instance();
+    simd.Initialize();
+    ASSERT(simd.IsInitialized());
+    auto tier = simd.GetTier();
+    // On any modern x86, at least SSE2 should be present
+    ASSERT(tier >= SIMDTier::SSE);
+    auto caps = simd.GetCapabilities();
+    ASSERT(caps.logicalCores >= 1);
+    ASSERT(!caps.brandString.empty());
+}
+
+TEST(TestRuntimeSIMDDispatcher_Describe) {
+    auto& simd = RuntimeSIMDDispatcher::Instance();
+    simd.Initialize();
+    auto desc = simd.Describe();
+    ASSERT(!desc.empty());
+    // Description should mention the CPU brand
+    ASSERT(desc.find("CPU:") != std::string::npos);
+}
+
+// --- Decoder Performance Counters Tests ---
+
+TEST(TestDecoderPerformanceCounters_Register) {
+    auto& counters = DecoderPerformanceCounters::Instance();
+    uint32_t id = counters.RegisterDecoder("TestJPEG");
+    ASSERT(id < MAX_TRACKED_DECODERS);
+    // Re-registering same name should return same ID
+    uint32_t id2 = counters.RegisterDecoder("TestJPEG");
+    ASSERT(id == id2);
+}
+
+TEST(TestDecoderPerformanceCounters_Record) {
+    auto& counters = DecoderPerformanceCounters::Instance();
+    uint32_t id = counters.RegisterDecoder("TestPNG_Perf");
+    counters.RecordSuccess(id, 1500, 4096);
+    counters.RecordSuccess(id, 2000, 8192);
+    counters.RecordFailure(id, 500);
+    auto metrics = counters.GetMetrics(id);
+    ASSERT(metrics.totalDecodes == 3);
+    ASSERT(metrics.successfulDecodes == 2);
+    ASSERT(metrics.failedDecodes == 1);
+    ASSERT(metrics.avgDecodeTimeMs > 0.0);
+}
+
+// --- Thumbnail Quality Gate Tests ---
+
+TEST(TestThumbnailQualityGate_PassValid) {
+    ThumbnailQualityGate gate;
+    // Create a 64x64 checkerboard (sharp edges, high Laplacian variance)
+    const uint32_t w = 64, h = 64, stride = w * 4;
+    std::vector<uint8_t> pixels(stride * h);
+    for (uint32_t y = 0; y < h; y++) {
+        for (uint32_t x = 0; x < w; x++) {
+            uint8_t* p = pixels.data() + y * stride + x * 4;
+            bool checker = ((x / 4) + (y / 4)) % 2 == 0;
+            p[0] = checker ? 200 : 40;
+            p[1] = checker ? 100 : 180;
+            p[2] = checker ? 50 : 220;
+            p[3] = 255;
+        }
+    }
+    auto report = gate.Validate(pixels.data(), w, h, stride);
+    ASSERT(report.verdict == QualityVerdict::Pass ||
+        report.verdict == QualityVerdict::Warn_LowContrast ||
+        report.verdict == QualityVerdict::Warn_Monochrome);
+    ASSERT(report.actualWidth == w);
+    ASSERT(report.actualHeight == h);
+}
+
+TEST(TestThumbnailQualityGate_FailNull) {
+    ThumbnailQualityGate gate;
+    auto report = gate.Validate(nullptr, 0, 0, 0);
+    ASSERT(report.verdict == QualityVerdict::Fail_Corrupt);
+}
+
+TEST(TestThumbnailQualityGate_FailBlank) {
+    ThumbnailQualityGate gate;
+    // Create a solid white image (should fail as blank)
+    const uint32_t w = 64, h = 64, stride = w * 4;
+    std::vector<uint8_t> pixels(stride * h, 255);
+    auto report = gate.Validate(pixels.data(), w, h, stride);
+    ASSERT(report.verdict == QualityVerdict::Fail_Blank);
+}
+
+TEST(TestThumbnailQualityGate_QuickCheck) {
+    ThumbnailQualityGate gate;
+    ASSERT(!gate.QuickCheck(nullptr, 0, 0, 0));
+}
+
+// --- Batch Thumbnail Orchestrator Tests ---
+
+TEST(TestBatchOrchestrator_Init) {
+    BatchThumbnailOrchestrator orchestrator;
+    BatchConfig config;
+    config.maxConcurrency = 2;
+    bool ok = orchestrator.Initialize(config);
+    ASSERT(ok);
+    auto stats = orchestrator.GetStatistics();
+    ASSERT(stats.totalSubmitted == 0);
+    ASSERT(stats.totalCompleted == 0);
+}
+
+// --- File Signature Detector Tests ---
+
+TEST(TestFileSignatureDetector_PNG) {
+    FileSignatureDetector detector;
+    // PNG magic bytes
+    const uint8_t pngHeader[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+    auto match = detector.Detect(pngHeader, sizeof(pngHeader));
+    ASSERT(match.formatName == "PNG");
+    ASSERT(match.category == SignatureCategory::Image);
+    ASSERT(match.confidence > 0.8f);
+    ASSERT(FileSignatureDetector::IsImageFormat(match));
+}
+
+TEST(TestFileSignatureDetector_JPEG) {
+    FileSignatureDetector detector;
+    // JPEG magic bytes: FF D8 FF E0
+    const uint8_t jpegHeader[] = { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46 };
+    auto match = detector.Detect(jpegHeader, sizeof(jpegHeader));
+    ASSERT(match.formatName == "JPEG");
+    ASSERT(match.category == SignatureCategory::Image);
+    ASSERT(match.confidence > 0.8f);
+}
+
+TEST(TestFileSignatureDetector_ZIP) {
+    FileSignatureDetector detector;
+    // ZIP magic bytes: PK\x03\x04
+    const uint8_t zipHeader[] = { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x00, 0x00 };
+    auto match = detector.Detect(zipHeader, sizeof(zipHeader));
+    ASSERT(match.formatName == "ZIP");
+    ASSERT(match.category == SignatureCategory::Archive);
+    ASSERT(FileSignatureDetector::IsArchiveFormat(match));
+}
+
+TEST(TestFileSignatureDetector_Unknown) {
+    FileSignatureDetector detector;
+    const uint8_t garbage[] = { 0x00, 0x01, 0x02, 0x03 };
+    auto match = detector.Detect(garbage, sizeof(garbage));
+    ASSERT(match.confidence == 0.0f);
+    ASSERT(match.category == SignatureCategory::Unknown);
+}
+
+TEST(TestFileSignatureDetector_Null) {
+    FileSignatureDetector detector;
+    auto match = detector.Detect(nullptr, 0);
+    ASSERT(match.confidence == 0.0f);
+}
+
+// --- GPU Resource Pool Manager Tests ---
+
+TEST(TestGPUResourcePoolManager_Config) {
+    GPUPoolConfig config;
+    ASSERT(config.maxTextures == 64);
+    ASSERT(config.maxMemoryBytes == 256 * 1024 * 1024);
+    ASSERT(config.enableTrimming);
+    GPUPoolStats stats;
+    ASSERT(stats.reuseRatio == 0.0f);
+    ASSERT(stats.allocCount == 0);
+}
+
+// --- Cache Coherency Protocol Tests ---
+
+TEST(TestCacheCoherencyProtocol_Config) {
+    CoherencyConfig config;
+    ASSERT(config.maxSharedEntries == 4096);
+    ASSERT(config.sharedMemorySizeMB == 64);
+    ASSERT(config.lockTimeoutMs == 100);
+    ASSERT(config.enableCompression);
+    SharedCacheHeader hdr{};
+    hdr.magic = 0x4C454E53;
+    hdr.version = 15;
+    ASSERT(hdr.magic == 0x4C454E53); // 'LENS'
+}
+
+TEST(TestCacheCoherencyProtocol_Init) {
+    CacheCoherencyProtocol cache;
+    CoherencyConfig config;
+    bool ok = cache.Initialize(config);
+    // May succeed or fail depending on OS permissions, but shouldn't crash
+    auto stats = cache.GetStats();
+    ASSERT(stats.hits == 0);
+    ASSERT(stats.misses == 0);
+}
+
+// --- Thumbnail Pipeline Profiler Tests ---
+
+TEST(TestThumbnailPipelineProfiler_Init) {
+    auto& profiler = ThumbnailPipelineProfiler::Instance();
+    profiler.Initialize();
+    ASSERT(profiler.IsEnabled());
+}
+
+TEST(TestThumbnailPipelineProfiler_Profile) {
+    auto& profiler = ThumbnailPipelineProfiler::Instance();
+    profiler.Initialize();
+    profiler.BeginProfile("test.jpg", 256);
+    auto startTick = profiler.RecordStageStart(ProfileStage::Decode, "JPEG");
+    Sleep(1); // Small delay for measurable timing
+    profiler.RecordStageEnd(ProfileStage::Decode, startTick);
+    auto profile = profiler.EndProfile();
+    ASSERT(profile.filePath == "test.jpg");
+    ASSERT(profile.thumbnailSize == 256);
+    ASSERT(profile.entries.size() >= 1);
+}
+
+TEST(TestThumbnailPipelineProfiler_Stats) {
+    auto& profiler = ThumbnailPipelineProfiler::Instance();
+    profiler.Initialize();
+    auto stats = profiler.GetAggregateStats();
+    // StageCount entries expected
+    ASSERT(stats.size() == static_cast<size_t>(ProfileStage::StageCount));
+}
+
+// --- Format Negotiator Tests ---
+
+TEST(TestFormatNegotiator_DefaultOutput) {
+    FormatNegotiator negotiator;
+    negotiator.SetShellContext(ShellContext::ExplorerView);
+    negotiator.SetRequestedSize(256);
+    auto output = negotiator.Negotiate(1920, 1080, false, false);
+    ASSERT(output.pixelFormat == OutputPixelFormat::BGRA32);
+    ASSERT(output.colorSpace == OutputColorSpace::sRGB);
+    ASSERT(output.width > 0);
+    ASSERT(output.height > 0);
+    ASSERT(output.stride > 0);
+}
+
+TEST(TestFormatNegotiator_AlphaChannel) {
+    FormatNegotiator negotiator;
+    negotiator.SetRequestedSize(128);
+    auto output = negotiator.Negotiate(512, 512, true, false);
+    ASSERT(output.needsAlpha);
+    ASSERT(output.pixelFormat == OutputPixelFormat::BGRA32);
+}
+
+TEST(TestFormatNegotiator_BytesPerPixel) {
+    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::BGRA32) == 4);
+    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::BGR24) == 3);
+    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::Gray8) == 1);
+    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::Gray16) == 2);
+    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::RGBAF16) == 8);
+}
+
+// --- Telemetry Aggregator Tests ---
+
+TEST(TestTelemetryAggregator_RecordEvent) {
+    auto& telem = TelemetryAggregator::Instance();
+    telem.RecordEvent("Cache", "hit", "Test cache hit", 1.0);
+    telem.RecordEvent("Decoder", "failure", "Test failure", 0.0, AggregatorSeverity::Error);
+    // Should not crash, events should be recorded
+    auto events = telem.GetRecentEvents(10);
+    ASSERT(events.size() >= 2);
+}
+
+TEST(TestTelemetryAggregator_Counters) {
+    auto& telem = TelemetryAggregator::Instance();
+    telem.IncrementCounter("test_thumbnails_gen");
+    telem.IncrementCounter("test_thumbnails_gen");
+    telem.IncrementCounter("test_thumbnails_gen", 3);
+    auto metric = telem.GetMetric("test_thumbnails_gen");
+    ASSERT(metric.count == 5);
+    ASSERT(metric.type == MetricType::Counter);
+}
+
+TEST(TestTelemetryAggregator_Timer) {
+    auto& telem = TelemetryAggregator::Instance();
+    telem.RecordTimer("test_decode_ms", 14.5);
+    telem.RecordTimer("test_decode_ms", 20.1);
+    auto metric = telem.GetMetric("test_decode_ms");
+    ASSERT(metric.count == 2);
+    ASSERT(metric.avg > 10.0);
+    ASSERT(metric.min <= 14.5);
+    ASSERT(metric.max >= 20.1);
+}
+
+TEST(TestTelemetryAggregator_HealthReport) {
+    auto& telem = TelemetryAggregator::Instance();
+    auto report = telem.GenerateHealthReport();
+    ASSERT(report.cpuCores >= 1);
+    ASSERT(!report.engineVersion.empty());
+}
+
+// --- Decoder Registry V2 Tests ---
+
+TEST(TestDecoderRegistryV2_Register) {
+    auto& registry = DecoderRegistryV2::Instance();
+    bool ok = registry.RegisterDecoder("TestDecoder_V2", DecoderCreator{}, { ".tst", ".test" }, 100);
+    ASSERT(ok);
+    // Duplicate should fail
+    bool ok2 = registry.RegisterDecoder("TestDecoder_V2", DecoderCreator{}, { ".tst" }, 100);
+    ASSERT(!ok2);
+}
+
+TEST(TestDecoderRegistryV2_GetInfo) {
+    auto& registry = DecoderRegistryV2::Instance();
+    auto infos = registry.GetAllDecoders();
+    ASSERT(infos.size() >= 1); // At least our test decoder
+}
+
+TEST(TestDecoderRegistryV2_Unregister) {
+    auto& registry = DecoderRegistryV2::Instance();
+    registry.RegisterDecoder("TempDecoder_V2", DecoderCreator{}, { ".tmp2" }, 50);
+    bool removed = registry.UnregisterDecoder("TempDecoder_V2");
+    ASSERT(removed);
+    bool removed2 = registry.UnregisterDecoder("TempDecoder_V2");
+    ASSERT(!removed2); // Already removed
+}
+
+// --- Production Pipeline V2 Tests ---
+
+TEST(TestProductionPipelineV2_Init) {
+    auto& pipeline = ProductionPipelineIntegration::Instance();
+    bool ok = pipeline.Initialize();
+    // May fail without GPU/cache but should not crash
+    auto stats = pipeline.GetStatistics();
+    ASSERT(stats.totalRequests == 0);
+}
+
+TEST(TestProductionPipelineV2_Stages) {
+    // Test PipelineStage bitflags
+    PipelineStage stages = PipelineStage::FileIO | PipelineStage::Decode;
+    ASSERT(HasStage(stages, PipelineStage::FileIO));
+    ASSERT(HasStage(stages, PipelineStage::Decode));
+    ASSERT(!HasStage(stages, PipelineStage::GPUUpload));
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -20770,6 +21142,71 @@ int main() {
     RUN_TEST(TestConfigDriftDetector_Drift);
     RUN_TEST(TestDeploymentPreflightCheck_Run);
     RUN_TEST(TestOperationalReadinessChecker_Check);
+
+    std::wcout << std::endl;
+
+    // V15 Zenith - Production Infrastructure Tests
+    std::wcout << L"\nV15 Zenith - Production Infrastructure Tests..." << std::endl;
+
+    // Content-Aware Thumbnail
+    RUN_TEST(TestContentAwareThumbnail_Analyze);
+    RUN_TEST(TestContentAwareThumbnail_NullInput);
+
+    // Runtime SIMD Dispatcher
+    RUN_TEST(TestRuntimeSIMDDispatcher_Init);
+    RUN_TEST(TestRuntimeSIMDDispatcher_Describe);
+
+    // Decoder Performance Counters
+    RUN_TEST(TestDecoderPerformanceCounters_Register);
+    RUN_TEST(TestDecoderPerformanceCounters_Record);
+
+    // Thumbnail Quality Gate
+    RUN_TEST(TestThumbnailQualityGate_PassValid);
+    RUN_TEST(TestThumbnailQualityGate_FailNull);
+    RUN_TEST(TestThumbnailQualityGate_FailBlank);
+    RUN_TEST(TestThumbnailQualityGate_QuickCheck);
+
+    // Batch Thumbnail Orchestrator
+    RUN_TEST(TestBatchOrchestrator_Init);
+
+    // File Signature Detector
+    RUN_TEST(TestFileSignatureDetector_PNG);
+    RUN_TEST(TestFileSignatureDetector_JPEG);
+    RUN_TEST(TestFileSignatureDetector_ZIP);
+    RUN_TEST(TestFileSignatureDetector_Unknown);
+    RUN_TEST(TestFileSignatureDetector_Null);
+
+    // GPU Resource Pool Manager
+    RUN_TEST(TestGPUResourcePoolManager_Config);
+
+    // Cache Coherency Protocol
+    RUN_TEST(TestCacheCoherencyProtocol_Config);
+    RUN_TEST(TestCacheCoherencyProtocol_Init);
+
+    // Thumbnail Pipeline Profiler
+    RUN_TEST(TestThumbnailPipelineProfiler_Init);
+    RUN_TEST(TestThumbnailPipelineProfiler_Profile);
+    RUN_TEST(TestThumbnailPipelineProfiler_Stats);
+
+    // Format Negotiator
+    RUN_TEST(TestFormatNegotiator_DefaultOutput);
+    RUN_TEST(TestFormatNegotiator_AlphaChannel);
+    RUN_TEST(TestFormatNegotiator_BytesPerPixel);
+
+    // Telemetry Aggregator
+    RUN_TEST(TestTelemetryAggregator_RecordEvent);
+    RUN_TEST(TestTelemetryAggregator_Counters);
+    RUN_TEST(TestTelemetryAggregator_Timer);
+    RUN_TEST(TestTelemetryAggregator_HealthReport);
+
+    // Decoder Registry V2
+    RUN_TEST(TestDecoderRegistryV2_Register);
+    RUN_TEST(TestDecoderRegistryV2_GetInfo);
+    RUN_TEST(TestDecoderRegistryV2_Unregister);
+
+    // Production Pipeline V2
+    RUN_TEST(TestProductionPipelineV2_Init);
+    RUN_TEST(TestProductionPipelineV2_Stages);
 
     std::wcout << std::endl;
 
