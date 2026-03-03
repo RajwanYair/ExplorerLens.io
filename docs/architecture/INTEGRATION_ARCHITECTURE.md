@@ -901,9 +901,7 @@ DT_LOG_DEBUG(LogCategory::ENGINE, "Initializing Engine adapter");
 
 ## References
 
-- **Platform Foundation Plan:** [SPRINT11_PLATFORM_FOUNDATION.md](SPRINT11_PLATFORM_FOUNDATION.md)
 - **Engine Test Results:** [ENGINE_TEST_RESULTS.md](ENGINE_TEST_RESULTS.md)
-- **Week 5 Summary:** [SPRINT11_WEEK5_SUMMARY.md](SPRINT11_WEEK5_SUMMARY.md)
 - **Engine API:** [Engine/Engine.h](../Engine/Engine.h)
 - **Decoder Interface:** [Engine/Core/IThumbnailDecoder.h](../Engine/Core/IThumbnailDecoder.h)
 

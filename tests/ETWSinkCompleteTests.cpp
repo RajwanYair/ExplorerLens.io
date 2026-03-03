@@ -7,7 +7,7 @@ using namespace ExplorerLens::ETW;
 
 // ── Schema Version ───────────────────────────────────────────────
 
-TEST(Sprint126_ETWSink, SchemaVersion_Current) {
+TEST(ETWSink, SchemaVersion_Current) {
     EXPECT_EQ(SchemaVersion::Major, 2);
     EXPECT_EQ(SchemaVersion::Minor, 0);
     EXPECT_STREQ(SchemaVersion::VersionString, "2.0");
@@ -15,7 +15,7 @@ TEST(Sprint126_ETWSink, SchemaVersion_Current) {
 
 // ── Retention Policy ─────────────────────────────────────────────
 
-TEST(Sprint126_ETWSink, RetentionPolicy_Production) {
+TEST(ETWSink, RetentionPolicy_Production) {
     auto p = RetentionPolicy::Production();
     EXPECT_EQ(p.maxLogFiles, 10);
     EXPECT_EQ(p.maxRetentionDays, 30);
@@ -23,14 +23,14 @@ TEST(Sprint126_ETWSink, RetentionPolicy_Production) {
     EXPECT_TRUE(p.compressRotated);
 }
 
-TEST(Sprint126_ETWSink, RetentionPolicy_Development) {
+TEST(ETWSink, RetentionPolicy_Development) {
     auto p = RetentionPolicy::Development();
     EXPECT_EQ(p.maxLogFiles, 5);
     EXPECT_EQ(p.maxRetentionDays, 7);
     EXPECT_FALSE(p.compressRotated);
 }
 
-TEST(Sprint126_ETWSink, RetentionPolicy_Enterprise) {
+TEST(ETWSink, RetentionPolicy_Enterprise) {
     auto p = RetentionPolicy::Enterprise();
     EXPECT_EQ(p.maxLogFiles, 50);
     EXPECT_EQ(p.maxRetentionDays, 90);
@@ -39,7 +39,7 @@ TEST(Sprint126_ETWSink, RetentionPolicy_Enterprise) {
 
 // ── ETW Event Structure ──────────────────────────────────────────
 
-TEST(Sprint126_ETWSink, ETWEvent_AddFields) {
+TEST(ETWSink, ETWEvent_AddFields) {
     ETWEvent e;
     e.eventId = EventIds::DecodeComplete;
     e.AddField("decoder", "WebPDecoder");
@@ -51,7 +51,7 @@ TEST(Sprint126_ETWSink, ETWEvent_AddFields) {
     EXPECT_EQ(e.eventId, EventIds::DecodeComplete);
 }
 
-TEST(Sprint126_ETWSink, EventIds_WellKnown) {
+TEST(ETWSink, EventIds_WellKnown) {
     EXPECT_EQ(EventIds::RequestStart, 100);
     EXPECT_EQ(EventIds::CacheHit, 200);
     EXPECT_EQ(EventIds::DecodeStart, 300);
@@ -62,7 +62,7 @@ TEST(Sprint126_ETWSink, EventIds_WellKnown) {
     EXPECT_EQ(EventIds::HealthCheck, 800);
 }
 
-TEST(Sprint126_ETWSink, Keywords_BitMasks) {
+TEST(ETWSink, Keywords_BitMasks) {
     EXPECT_EQ(Keywords::Pipeline, 0x0001u);
     EXPECT_EQ(Keywords::Cache, 0x0002u);
     EXPECT_EQ(Keywords::Decoder, 0x0004u);
@@ -72,7 +72,7 @@ TEST(Sprint126_ETWSink, Keywords_BitMasks) {
 
 // ── Sink Configuration ───────────────────────────────────────────
 
-TEST(Sprint126_ETWSink, ETWSinkConfig_Production) {
+TEST(ETWSink, ETWSinkConfig_Production) {
     auto c = ETWSinkConfig::Production();
     EXPECT_TRUE(c.enableETW);
     EXPECT_TRUE(c.enableFileLog);
@@ -80,13 +80,13 @@ TEST(Sprint126_ETWSink, ETWSinkConfig_Production) {
     EXPECT_EQ(c.minLevel, 4);
 }
 
-TEST(Sprint126_ETWSink, ETWSinkConfig_Development) {
+TEST(ETWSink, ETWSinkConfig_Development) {
     auto c = ETWSinkConfig::Development();
     EXPECT_TRUE(c.enableConsole);
     EXPECT_EQ(c.minLevel, 5);
 }
 
-TEST(Sprint126_ETWSink, ETWSinkConfig_Enterprise) {
+TEST(ETWSink, ETWSinkConfig_Enterprise) {
     auto c = ETWSinkConfig::Enterprise();
     EXPECT_EQ(c.retention.maxRetentionDays, 90);
     EXPECT_EQ(c.retention.maxLogFiles, 50);
@@ -94,14 +94,14 @@ TEST(Sprint126_ETWSink, ETWSinkConfig_Enterprise) {
 
 // ── Sink Manager ─────────────────────────────────────────────────
 
-TEST(Sprint126_ETWSink, SinkManager_Configure) {
+TEST(ETWSink, SinkManager_Configure) {
     auto& mgr = ETWSinkManager::Get();
     mgr.Configure(ETWSinkConfig::Production());
     EXPECT_TRUE(mgr.IsConfigured());
     EXPECT_EQ(mgr.Config().providerName, "ExplorerLens-Engine-Core");
 }
 
-TEST(Sprint126_ETWSink, SinkManager_EmitDecodeEvent) {
+TEST(ETWSink, SinkManager_EmitDecodeEvent) {
     auto& mgr = ETWSinkManager::Get();
     mgr.Configure(ETWSinkConfig::Development());
     mgr.ResetStats();
@@ -115,7 +115,7 @@ TEST(Sprint126_ETWSink, SinkManager_EmitDecodeEvent) {
     EXPECT_EQ(mgr.Stats().eventsEmitted.load(), 1u);
 }
 
-TEST(Sprint126_ETWSink, SinkManager_EmitCacheEvent) {
+TEST(ETWSink, SinkManager_EmitCacheEvent) {
     auto& mgr = ETWSinkManager::Get();
     mgr.Configure(ETWSinkConfig::Development());
     mgr.ResetStats();
@@ -130,7 +130,7 @@ TEST(Sprint126_ETWSink, SinkManager_EmitCacheEvent) {
     EXPECT_EQ(hits, 1);
 }
 
-TEST(Sprint126_ETWSink, SinkManager_DropRate) {
+TEST(ETWSink, SinkManager_DropRate) {
     SinkStatistics stats;
     stats.eventsEmitted = 90;
     stats.eventsDropped = 10;
@@ -139,7 +139,7 @@ TEST(Sprint126_ETWSink, SinkManager_DropRate) {
 
 // ── File Log Entry ───────────────────────────────────────────────
 
-TEST(Sprint126_ETWSink, FileLogEntry_ToJsonLine) {
+TEST(ETWSink, FileLogEntry_ToJsonLine) {
     FileLogEntry entry;
     entry.timestamp = "2026-02-18T12:00:00Z";
     entry.level = "Info";
@@ -154,7 +154,7 @@ TEST(Sprint126_ETWSink, FileLogEntry_ToJsonLine) {
 
 // ── Rotation Logic ───────────────────────────────────────────────
 
-TEST(Sprint126_ETWSink, ShouldRotate_SizeBased) {
+TEST(ETWSink, ShouldRotate_SizeBased) {
     auto& mgr = ETWSinkManager::Get();
     ETWSinkConfig c = ETWSinkConfig::Production();
     c.retention.strategy = RotationStrategy::SizeBased;
@@ -164,7 +164,7 @@ TEST(Sprint126_ETWSink, ShouldRotate_SizeBased) {
     EXPECT_FALSE(mgr.ShouldRotate(512));
 }
 
-TEST(Sprint126_ETWSink, ShouldRotate_Hybrid) {
+TEST(ETWSink, ShouldRotate_Hybrid) {
     auto& mgr = ETWSinkManager::Get();
     ETWSinkConfig c = ETWSinkConfig::Production();
     c.retention.strategy = RotationStrategy::Hybrid;
@@ -173,7 +173,7 @@ TEST(Sprint126_ETWSink, ShouldRotate_Hybrid) {
     EXPECT_TRUE(mgr.ShouldRotate(1500));
 }
 
-TEST(Sprint126_ETWSink, RetentionDays_Config) {
+TEST(ETWSink, RetentionDays_Config) {
     auto& mgr = ETWSinkManager::Get();
     mgr.Configure(ETWSinkConfig::Enterprise());
     EXPECT_EQ(mgr.RetentionDays(), 90);

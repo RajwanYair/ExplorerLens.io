@@ -1,4 +1,4 @@
-// tests/Sprint23_AIEnhancementTests.cpp
+// tests/AIEnhancementTests.cpp
 // Test suite for AI-assisted thumbnail enhancements 
 // Covers super-resolution, NSFW detection, content-aware cropping, face detection
 

@@ -11,14 +11,14 @@
 // ── Validate build info ──
 namespace {
 
-TEST(Sprint53_BuildValidation, VersionInfo) {
+TEST(BuildValidation, VersionInfo) {
     using namespace ExplorerLens::BuildValidation;
     // Intentionally referencing BuildValidation via ObservabilityIntegration's namespace
     // to prove compilation linkage
     EXPECT_GE(7, 1);  // Major version >= 7
 }
 
-TEST(Sprint53_BuildValidation, ObservabilityIntegrationSingleton) {
+TEST(BuildValidation, ObservabilityIntegrationSingleton) {
     auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     obs.SetEnabled(true);
     EXPECT_TRUE(obs.IsEnabled());
@@ -36,7 +36,7 @@ TEST(Sprint53_BuildValidation, ObservabilityIntegrationSingleton) {
     obs.ResetCounters();
 }
 
-TEST(Sprint53_BuildValidation, ObservabilityPrivacyModes) {
+TEST(BuildValidation, ObservabilityPrivacyModes) {
     auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     
     obs.SetPrivacyMode(ExplorerLens::PathPrivacy::Hashed);
@@ -52,7 +52,7 @@ TEST(Sprint53_BuildValidation, ObservabilityPrivacyModes) {
     obs.SetPrivacyMode(ExplorerLens::PathPrivacy::Hashed);
 }
 
-TEST(Sprint53_BuildValidation, ObservabilityLevels) {
+TEST(BuildValidation, ObservabilityLevels) {
     auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     
     obs.SetMinLevel(ExplorerLens::ObservabilityLevel::Warning);
@@ -68,7 +68,7 @@ TEST(Sprint53_BuildValidation, ObservabilityLevels) {
     obs.ResetCounters();
 }
 
-TEST(Sprint53_BuildValidation, ObservabilityDisabled) {
+TEST(BuildValidation, ObservabilityDisabled) {
     auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     obs.ResetCounters();
     obs.SetEnabled(false);
@@ -80,7 +80,7 @@ TEST(Sprint53_BuildValidation, ObservabilityDisabled) {
     obs.ResetCounters();
 }
 
-TEST(Sprint53_BuildValidation, PipelineEventStruct) {
+TEST(BuildValidation, PipelineEventStruct) {
     ExplorerLens::PipelineEvent evt;
     EXPECT_EQ(evt.requestId, 0u);
     EXPECT_EQ(evt.filePath, nullptr);
@@ -92,7 +92,7 @@ TEST(Sprint53_BuildValidation, PipelineEventStruct) {
     EXPECT_EQ(evt.outputBytes, 0u);
 }
 
-TEST(Sprint53_BuildValidation, MultipleRequestTracking) {
+TEST(BuildValidation, MultipleRequestTracking) {
     auto& obs = ExplorerLens::ObservabilityIntegration::Get();
     obs.ResetCounters();
     obs.SetEnabled(true);

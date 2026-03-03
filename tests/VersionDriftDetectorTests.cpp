@@ -8,7 +8,7 @@ using namespace ExplorerLens;
 
 // ── SemanticVersion Tests ──────────────────────────────────────────────────
 
-TEST(Sprint145_VersionDriftDetector, ParseBasicVersion) {
+TEST(VersionDriftDetector, ParseBasicVersion) {
     auto v = SemanticVersion::Parse("7.1.0");
     EXPECT_EQ(v.major, 7);
     EXPECT_EQ(v.minor, 1);
@@ -16,7 +16,7 @@ TEST(Sprint145_VersionDriftDetector, ParseBasicVersion) {
     EXPECT_TRUE(v.preRelease.empty());
 }
 
-TEST(Sprint145_VersionDriftDetector, ParseVersionWithPreRelease) {
+TEST(VersionDriftDetector, ParseVersionWithPreRelease) {
     auto v = SemanticVersion::Parse("8.0.0-beta.1");
     EXPECT_EQ(v.major, 8);
     EXPECT_EQ(v.minor, 0);
@@ -24,12 +24,12 @@ TEST(Sprint145_VersionDriftDetector, ParseVersionWithPreRelease) {
     EXPECT_EQ(v.preRelease, "beta.1");
 }
 
-TEST(Sprint145_VersionDriftDetector, ParseVersionWithMeta) {
+TEST(VersionDriftDetector, ParseVersionWithMeta) {
     auto v = SemanticVersion::Parse("7.1.0+20260218");
     EXPECT_EQ(v.buildMeta, "20260218");
 }
 
-TEST(Sprint145_VersionDriftDetector, VersionComparison) {
+TEST(VersionDriftDetector, VersionComparison) {
     auto v710 = SemanticVersion::Parse("7.1.0");
     auto v700 = SemanticVersion::Parse("7.0.0");
     auto v800 = SemanticVersion::Parse("8.0.0");
@@ -38,14 +38,14 @@ TEST(Sprint145_VersionDriftDetector, VersionComparison) {
     EXPECT_FALSE(v710 < v700);
 }
 
-TEST(Sprint145_VersionDriftDetector, VersionToString) {
+TEST(VersionDriftDetector, VersionToString) {
     SemanticVersion v{7, 1, 0, "rc.1", "build42"};
     EXPECT_EQ(v.ToString(), "7.1.0-rc.1+build42");
 }
 
 // ── DriftScanPolicy Tests ──────────────────────────────────────────────────
 
-TEST(Sprint145_VersionDriftDetector, DefaultPolicyCanonicalVersion) {
+TEST(VersionDriftDetector, DefaultPolicyCanonicalVersion) {
     auto policy = DefaultPolicy();
     EXPECT_EQ(policy.canonicalVersion.major, 7);
     EXPECT_EQ(policy.canonicalVersion.minor, 1);
@@ -54,19 +54,19 @@ TEST(Sprint145_VersionDriftDetector, DefaultPolicyCanonicalVersion) {
 
 // ── Content Scanning Tests ─────────────────────────────────────────────────
 
-TEST(Sprint145_VersionDriftDetector, ScanContentNoVersion) {
+TEST(VersionDriftDetector, ScanContentNoVersion) {
     VersionDriftDetector det;
     auto results = det.ScanContent("test.md", "This file has no version info.", ArtifactKind::Documentation);
     EXPECT_TRUE(results.empty());
 }
 
-TEST(Sprint145_VersionDriftDetector, ScanContentMatchingVersion) {
+TEST(VersionDriftDetector, ScanContentMatchingVersion) {
     VersionDriftDetector det;
     auto results = det.ScanContent("test.md", "Version: v7.1.0", ArtifactKind::Documentation);
     EXPECT_TRUE(results.empty());  // matches canonical — no drift
 }
 
-TEST(Sprint145_VersionDriftDetector, ScanContentStaleVersion) {
+TEST(VersionDriftDetector, ScanContentStaleVersion) {
     VersionDriftDetector det;
     auto results = det.ScanContent("old.md", "Version: v6.2.0\nSome text.", ArtifactKind::Documentation);
     ASSERT_EQ(results.size(), 1);
@@ -75,14 +75,14 @@ TEST(Sprint145_VersionDriftDetector, ScanContentStaleVersion) {
     EXPECT_EQ(results[0].severity, DriftSeverity::Error);
 }
 
-TEST(Sprint145_VersionDriftDetector, ScanContentCriticalMajorDrift) {
+TEST(VersionDriftDetector, ScanContentCriticalMajorDrift) {
     VersionDriftDetector det;
     auto results = det.ScanContent("ancient.md", "v5.0.0 legacy", ArtifactKind::Documentation);
     ASSERT_EQ(results.size(), 1);
     EXPECT_EQ(results[0].severity, DriftSeverity::Critical);
 }
 
-TEST(Sprint145_VersionDriftDetector, ScanContentPatchDriftWarning) {
+TEST(VersionDriftDetector, ScanContentPatchDriftWarning) {
     DriftScanPolicy pol;
     pol.canonicalVersion = SemanticVersion{7, 1, 2};
     pol.allowPatchDrift = true;
@@ -95,7 +95,7 @@ TEST(Sprint145_VersionDriftDetector, ScanContentPatchDriftWarning) {
 
 // ── Full Scan Tests ────────────────────────────────────────────────────────
 
-TEST(Sprint145_VersionDriftDetector, FullScanClean) {
+TEST(VersionDriftDetector, FullScanClean) {
     VersionDriftDetector det;
     det.AddArtifact("README.md", ArtifactKind::Documentation);
     det.AddArtifact("config.h", ArtifactKind::Header);
@@ -105,7 +105,7 @@ TEST(Sprint145_VersionDriftDetector, FullScanClean) {
     EXPECT_EQ(result.Score(), 100);
 }
 
-TEST(Sprint145_VersionDriftDetector, FullScanWithDrift) {
+TEST(VersionDriftDetector, FullScanWithDrift) {
     VersionDriftDetector det;
     det.AddArtifact("old.md", ArtifactKind::Documentation);
     auto result = det.Scan([](const std::string&) {
@@ -116,7 +116,7 @@ TEST(Sprint145_VersionDriftDetector, FullScanWithDrift) {
     EXPECT_GE(result.errorCount + result.criticalCount, 1);
 }
 
-TEST(Sprint145_VersionDriftDetector, ExcludePatternsSkipFiles) {
+TEST(VersionDriftDetector, ExcludePatternsSkipFiles) {
     DriftScanPolicy pol = DefaultPolicy();
     pol.excludePatterns = {"external/"};
     VersionDriftDetector det(pol);
@@ -127,7 +127,7 @@ TEST(Sprint145_VersionDriftDetector, ExcludePatternsSkipFiles) {
 
 // ── Report Formatting ──────────────────────────────────────────────────────
 
-TEST(Sprint145_VersionDriftDetector, FormatReportContainsStatus) {
+TEST(VersionDriftDetector, FormatReportContainsStatus) {
     DriftScanResult r;
     r.totalFilesScanned = 10;
     r.totalDriftEntries = 0;

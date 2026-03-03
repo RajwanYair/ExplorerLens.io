@@ -17,13 +17,12 @@ $testResults = @{
 
 function Write-TestResult {
     param([string]$TestName, [bool]$Success, [string]$Message = "")
-    
+
     if ($Success) {
         Write-Host "  ✅ $TestName" -ForegroundColor Green
         if ($Message) { Write-Host "     $Message" -ForegroundColor Gray }
         $script:testResults.Passed += $TestName
-    }
-    else {
+    } else {
         Write-Host "  ❌ $TestName" -ForegroundColor Red
         if ($Message) { Write-Host "     $Message" -ForegroundColor Yellow }
         $script:testResults.Failed += $TestName
@@ -50,8 +49,7 @@ if (Test-Path $dllPath) {
     $sizeOK = $dll.Length -gt 1MB
     Write-TestResult "LENSShell.dll exists" $true "Size: $([Math]::Round($dll.Length/1MB,2)) MB, Modified: $($dll.LastWriteTime)"
     Write-TestResult "LENSShell.dll size check" $sizeOK "Expected > 1 MB"
-}
-else {
+} else {
     Write-TestResult "LENSShell.dll exists" $false "File not found at $dllPath"
 }
 
@@ -61,8 +59,7 @@ if (Test-Path $exePath) {
     $sizeOK = $exe.Length -gt 100KB
     Write-TestResult "LENSManager.exe exists" $true "Size: $([Math]::Round($exe.Length/1KB,0)) KB, Modified: $($exe.LastWriteTime)"
     Write-TestResult "LENSManager.exe size check" $sizeOK "Expected > 100 KB"
-}
-else {
+} else {
     Write-TestResult "LENSManager.exe exists" $false "File not found at $exePath"
 }
 
@@ -74,25 +71,22 @@ $installDll = "install\x64\LENSShell.dll"
 if (Test-Path $installDll) {
     $dll = Get-Item $installDll
     Write-TestResult "install\x64\LENSShell.dll exists" $true "Ready for deployment"
-    
+
     # Verify it matches the build output
     $buildDll = Get-Item "x64\Release\LENSShell.dll" -ErrorAction SilentlyContinue
     if ($buildDll -and ($dll.Length -eq $buildDll.Length)) {
         Write-TestResult "DLL matches build output" $true "Sizes match"
-    }
-    else {
+    } else {
         Write-TestWarning "DLL size differs from build output - may need to copy again"
     }
-}
-else {
+} else {
     Write-TestResult "install\x64\LENSShell.dll exists" $false "File not found - run copy command"
 }
 
 $installExe = "install\x64\LENSManager.exe"
 if (Test-Path $installExe) {
     Write-TestResult "install\x64\LENSManager.exe exists" $true "Ready for deployment"
-}
-else {
+} else {
     Write-TestResult "install\x64\LENSManager.exe exists" $false "File not found"
 }
 
@@ -102,17 +96,15 @@ Write-Host "-----------------------------------" -ForegroundColor Gray
 
 if (Test-Path "explorerlens.ps1") {
     Write-TestResult "explorerlens.ps1 exists" $true "Installation script found"
-    
+
     # Check if it has install parameter support
     $scriptContent = Get-Content "explorerlens.ps1" -Raw
     if ($scriptContent -match "install") {
         Write-TestResult "Install parameter support" $true "Script supports -install"
-    }
-    else {
+    } else {
         Write-TestResult "Install parameter support" $false "Script may not support installation"
     }
-}
-else {
+} else {
     Write-TestResult "explorerlens.ps1 exists" $false "Installation script not found"
 }
 
@@ -124,8 +116,7 @@ try {
     # Try to load the DLL information (doesn't require admin)
     $dllInfo = [System.Reflection.AssemblyName]::GetAssemblyName("x64\Release\LENSShell.dll")
     Write-TestResult "DLL is valid .NET assembly" $true "Version: $($dllInfo.Version)"
-}
-catch {
+} catch {
     # Native DLL - expected for COM DLL
     Write-TestResult "DLL is native binary" $true "COM DLL (expected)"
 }
@@ -151,34 +142,31 @@ Write-Host "-------------------------------------" -ForegroundColor Gray
 if (Test-Path "tests\Test-Installation.ps1") {
     $testScript = Get-Item "tests\Test-Installation.ps1"
     Write-TestResult "Test-Installation.ps1 exists" $true "Size: $([Math]::Round($testScript.Length/1KB,1)) KB"
-    
+
     $content = Get-Content "tests\Test-Installation.ps1" -Raw
     if ($content -match "#Requires -RunAsAdministrator") {
         Write-TestResult "Admin requirement detected" $true "Test requires elevation"
     }
-}
-else {
+} else {
     Write-TestResult "Test-Installation.ps1 exists" $false "Test script not found"
 }
 
-# Test 6: Check Sprint documentation
+# Test 6: Check key documentation
 Write-Host "`nPhase 6: Documentation Check" -ForegroundColor Yellow
 Write-Host "----------------------------" -ForegroundColor Gray
 
-if (Test-Path "docs\SPRINT7_PLAN.md") {
-    $sprint7 = Get-Item "docs\SPRINT7_PLAN.md"
-    Write-TestResult "SPRINT7_PLAN.md exists" $true "Size: $([Math]::Round($sprint7.Length/1KB,1)) KB"
-}
-else {
-    Write-TestResult "SPRINT7_PLAN.md exists" $false "Documentation not found"
+if (Test-Path "CHANGELOG.md") {
+    $changelog = Get-Item "CHANGELOG.md"
+    Write-TestResult "CHANGELOG.md exists" $true "Size: $([Math]::Round($changelog.Length/1KB,1)) KB"
+} else {
+    Write-TestResult "CHANGELOG.md exists" $false "Documentation not found"
 }
 
-if (Test-Path "docs\SPRINT8_PLAN.md") {
-    $sprint8 = Get-Item "docs\SPRINT8_PLAN.md"
-    Write-TestResult "SPRINT8_PLAN.md exists" $true "Size: $([Math]::Round($sprint8.Length/1KB,1)) KB"
-}
-else {
-    Write-TestResult "SPRINT8_PLAN.md exists" $false "Documentation not found"
+if (Test-Path "README.md") {
+    $readme = Get-Item "README.md"
+    Write-TestResult "README.md exists" $true "Size: $([Math]::Round($readme.Length/1KB,1)) KB"
+} else {
+    Write-TestResult "README.md exists" $false "Documentation not found"
 }
 
 # Summary
@@ -202,11 +190,9 @@ if ($testResults.Failed.Count -eq 0) {
     Write-Host "3. Execute: .\tests\Test-Installation.ps1 -SkipUninstall" -ForegroundColor Yellow
     Write-Host "`nOr install directly:" -ForegroundColor Cyan
     Write-Host "   .\explorerlens.ps1 install" -ForegroundColor Yellow
-}
-else {
+} else {
     Write-Host "`n❌ PRE-INSTALLATION VERIFICATION FAILED!" -ForegroundColor Red
     Write-Host "Fix the failed tests before proceeding with installation." -ForegroundColor Yellow
 }
 
 Write-Host ""
-

@@ -186,8 +186,7 @@ docs/
 │ ├── PLUGIN_PACKAGE_FORMAT_V1.md
 │ └── PLUGIN_SANDBOX_MODEL_V1.md
 ├── release-notes/ # Release notes history
-├── sprints/ # Development summaries (archived)
-│ └── SPRINT_SUMMARY_2026-02-11.md
+├── archive/ # Archived development summaries
 ├── testing/ # Testing documentation
 │ ├── PRIORITY1_BASELINE_VERIFICATION.md
 │ ├── TESTING_GUIDE.md
@@ -583,8 +582,8 @@ Every major directory should have a `README.md` explaining:
  - Consolidated GitHub-specific docs into main documentation
  - Better organization for developers
 
-2. **Moved `SPRINT_SUMMARY.md` → `docs/sprints/`**
- - Archived development summaries with timestamps
+2. **Archived development summaries**
+ - Consolidated into docs/archive/
  - Cleaner root directory
 
 3. **Organized `build-scripts/` by category:**

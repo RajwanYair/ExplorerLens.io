@@ -6,10 +6,10 @@
 param(
     [Parameter()]
     [string]$TestArchive = "",
-    
+
     [Parameter()]
     [int]$Iterations = 10,
-    
+
     [Parameter()]
     [switch]$GenerateReport
 )
@@ -23,52 +23,52 @@ Write-Host ""
 # Check if test archive exists or create one
 if (-not $TestArchive) {
     $TestArchive = Join-Path $PSScriptRoot "..\test-archives\large-test.zip"
-    
+
     if (-not (Test-Path $TestArchive)) {
         Write-Host "Creating large test archive..." -ForegroundColor Yellow
-        
+
         # Create temp directory with images
         $tempDir = Join-Path $PSScriptRoot "..\temp-benchmark"
         New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-        
+
         # Copy test images multiple times to create large archive
         $sourceImages = Get-ChildItem -Path "$PSScriptRoot\test-images" -Filter *.jpg -Recurse -ErrorAction SilentlyContinue
-        
+
         if ($sourceImages.Count -eq 0) {
             Write-Host "ERROR: No test images found" -ForegroundColor Red
             exit 1
         }
-        
+
         # Replicate images to reach ~500MB
         $targetSize = 500MB
         $currentSize = 0
         $copyIndex = 0
-        
+
         while ($currentSize -lt $targetSize) {
             foreach ($img in $sourceImages) {
                 $destPath = Join-Path $tempDir "image_$($copyIndex).jpg"
                 Copy-Item -Path $img.FullName -Destination $destPath
                 $currentSize += $img.Length
                 $copyIndex++
-                
+
                 if ($currentSize -ge $targetSize) {
                     break
                 }
             }
         }
-        
+
         Write-Host "  Created $copyIndex images ($(([math]::Round($currentSize / 1MB, 2))) MB)" -ForegroundColor Gray
-        
+
         # Create ZIP archive
         Write-Host "  Compressing to ZIP..." -ForegroundColor Gray
         $archiveDir = Split-Path $TestArchive
         New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null
-        
+
         Compress-Archive -Path "$tempDir\*" -DestinationPath $TestArchive -CompressionLevel Fastest
-        
+
         # Cleanup
         Remove-Item -Path $tempDir -Recurse -Force
-        
+
         Write-Host "✓ Test archive created: $TestArchive" -ForegroundColor Green
     }
 }
@@ -91,11 +91,11 @@ function Measure-ThumbnailGeneration {
         [int]$Iterations,
         [bool]$UseOptimization
     )
-    
+
     $measurements = @()
-    
+
     Write-Host "Running $Iterations iterations..." -ForegroundColor Gray
-    
+
     for ($i = 1; $i -le $Iterations; $i++) {
         # Clear file system cache (requires admin)
         try {
@@ -103,16 +103,16 @@ function Measure-ThumbnailGeneration {
             [System.GC]::Collect()
             [System.GC]::WaitForPendingFinalizers()
             [System.GC]::Collect()
-            
+
             Start-Sleep -Milliseconds 100
         } catch {
             # Silently ignore if we can't clear cache
         }
-        
+
         # Measure thumbnail generation time
         # NOTE: This is a simulation - actual implementation would call the Engine
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
-        
+
         # Simulate archive processing
         # With optimization: memory-mapped I/O + central directory seek
         # Without optimization: standard file I/O + full scan
@@ -123,14 +123,14 @@ function Measure-ThumbnailGeneration {
             # Baseline: 2.5s average for 500MB
             Get-Random -Minimum 2300 -Maximum 2700
         }
-        
+
         Start-Sleep -Milliseconds $simulatedTime
         $sw.Stop()
-        
+
         $measurements += $sw.ElapsedMilliseconds
         Write-Host "  Iteration $i : $($sw.ElapsedMilliseconds) ms" -ForegroundColor Gray
     }
-    
+
     return $measurements
 }
 
@@ -186,41 +186,41 @@ Write-Host ""
 
 # Generate report if requested
 if ($GenerateReport) {
-    $reportPath = Join-Path $PSScriptRoot "..\build-logs\sprint14-benchmark-$(Get-Date -Format 'yyyyMMdd-HHmmss').json"
+    $reportPath = Join-Path $PSScriptRoot "..\build-logs\benchmark-$(Get-Date -Format 'yyyyMMdd-HHmmss').json"
     $reportDir = Split-Path $reportPath
     New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
-    
+
     $report = @{
-        timestamp = (Get-Date).ToString("o")
-        sprint = 14
-        archivePath = $TestArchive
+        timestamp     = (Get-Date).ToString("o")
+        version       = "15.0.0"
+        archivePath   = $TestArchive
         archiveSizeMB = [math]::Round($archiveSize / 1MB, 2)
-        iterations = $Iterations
-        baseline = @{
-            times = $baselineTimes
+        iterations    = $Iterations
+        baseline      = @{
+            times   = $baselineTimes
             average = $baselineAvg
-            p50 = $baselineP50
-            p95 = $baselineP95
+            p50     = $baselineP50
+            p95     = $baselineP95
         }
-        optimized = @{
-            times = $optimizedTimes
+        optimized     = @{
+            times   = $optimizedTimes
             average = $optimizedAvg
-            p50 = $optimizedP50
-            p95 = $optimizedP95
+            p50     = $optimizedP50
+            p95     = $optimizedP95
         }
-        improvement = @{
+        improvement   = @{
             averagePercent = $improvementPct
-            p95Percent = $p95ImprovementPct
-            averageMs = [math]::Round($baselineAvg - $optimizedAvg, 1)
-            p95Ms = $baselineP95 - $optimizedP95
+            p95Percent     = $p95ImprovementPct
+            averageMs      = [math]::Round($baselineAvg - $optimizedAvg, 1)
+            p95Ms          = $baselineP95 - $optimizedP95
         }
-        exitCriteria = @{
+        exitCriteria  = @{
             required = $exitCriteriaP95
             achieved = $p95ImprovementPct
-            met = ($p95ImprovementPct -ge $exitCriteriaP95)
+            met      = ($p95ImprovementPct -ge $exitCriteriaP95)
         }
     }
-    
+
     $report | ConvertTo-Json -Depth 5 | Set-Content -Path $reportPath -Encoding UTF8
     Write-Host "✓ Report saved: $reportPath" -ForegroundColor Green
 }
@@ -234,4 +234,3 @@ Write-Host "  • Central directory seek avoids full archive scan" -ForegroundCo
 Write-Host "  • Lazy file enumeration reduces overhead" -ForegroundColor Gray
 Write-Host ""
 Write-Host " Memory-Mapped I/O benchmark complete! ✓" -ForegroundColor Green
-

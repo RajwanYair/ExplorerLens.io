@@ -8,7 +8,7 @@ using namespace ExplorerLens;
 
 // ── Gate Category Names ────────────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, GateCategoryNamesAreDefined) {
+TEST(ReleaseReadiness, GateCategoryNamesAreDefined) {
     EXPECT_STREQ(GateCategoryName(GateCategory::Build), "Build");
     EXPECT_STREQ(GateCategoryName(GateCategory::Tests), "Tests");
     EXPECT_STREQ(GateCategoryName(GateCategory::Performance), "Performance");
@@ -17,26 +17,26 @@ TEST(Sprint148_ReleaseReadiness, GateCategoryNamesAreDefined) {
 
 // ── GateStatus Tests ───────────────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, GatePassRateCalculation) {
+TEST(ReleaseReadiness, GatePassRateCalculation) {
     GateStatus g;
     g.passedChecks = 95;
     g.totalChecks  = 100;
     EXPECT_NEAR(g.PassRate(), 95.0, 0.1);
 }
 
-TEST(Sprint148_ReleaseReadiness, GatePassRateZeroChecks) {
+TEST(ReleaseReadiness, GatePassRateZeroChecks) {
     GateStatus g;
     EXPECT_NEAR(g.PassRate(), 0.0, 0.1);
 }
 
 // ── Default Checklist ──────────────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, DefaultChecklistHasItems) {
+TEST(ReleaseReadiness, DefaultChecklistHasItems) {
     ReleaseReadinessDashboard dashboard;
     EXPECT_GE(dashboard.Checklist().size(), 8);
 }
 
-TEST(Sprint148_ReleaseReadiness, PendingItemsBeforeCompletion) {
+TEST(ReleaseReadiness, PendingItemsBeforeCompletion) {
     ReleaseReadinessDashboard dashboard;
     auto pending = dashboard.PendingItems();
     EXPECT_EQ(pending.size(), dashboard.Checklist().size());
@@ -44,7 +44,7 @@ TEST(Sprint148_ReleaseReadiness, PendingItemsBeforeCompletion) {
 
 // ── All Green Evaluation ───────────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, AllGreenWhenAllGatesPass) {
+TEST(ReleaseReadiness, AllGreenWhenAllGatesPass) {
     ReleaseReadinessDashboard dashboard;
     // Clear default checklist to avoid red from incomplete items
     // Submit all required gates
@@ -81,7 +81,7 @@ TEST(Sprint148_ReleaseReadiness, AllGreenWhenAllGatesPass) {
 
 // ── Red Gate Blocks Release ────────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, RedGateBlocksRelease) {
+TEST(ReleaseReadiness, RedGateBlocksRelease) {
     ReleaseReadinessDashboard dashboard;
     // Check all checklist items to isolate gate testing
     for (auto& item : dashboard.Checklist())
@@ -108,7 +108,7 @@ TEST(Sprint148_ReleaseReadiness, RedGateBlocksRelease) {
 
 // ── Yellow Gate Is Conditional ─────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, YellowGateIsConditional) {
+TEST(ReleaseReadiness, YellowGateIsConditional) {
     ReleaseReadinessDashboard dashboard;
     for (auto& item : dashboard.Checklist())
         dashboard.CheckItem(item.description, "done");
@@ -128,7 +128,7 @@ TEST(Sprint148_ReleaseReadiness, YellowGateIsConditional) {
 
 // ── Incomplete Checklist Causes Red ────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, IncompleteChecklistCausesRed) {
+TEST(ReleaseReadiness, IncompleteChecklistCausesRed) {
     ReleaseReadinessDashboard dashboard;
     // Don't check any items — required items are missing
     auto result = dashboard.Evaluate();
@@ -137,7 +137,7 @@ TEST(Sprint148_ReleaseReadiness, IncompleteChecklistCausesRed) {
 
 // ── Checklist Item Completion ──────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, CheckItemMarksCompleted) {
+TEST(ReleaseReadiness, CheckItemMarksCompleted) {
     ReleaseReadinessDashboard dashboard;
     dashboard.CheckItem("Zero build warnings in Release", "Build log clean");
     auto pending = dashboard.PendingItems();
@@ -147,7 +147,7 @@ TEST(Sprint148_ReleaseReadiness, CheckItemMarksCompleted) {
 
 // ── All Blockers Aggregation ───────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, AllBlockersAggregated) {
+TEST(ReleaseReadiness, AllBlockersAggregated) {
     ReleaseReadinessDashboard dashboard;
     for (auto& item : dashboard.Checklist())
         dashboard.CheckItem(item.description, "done");
@@ -171,7 +171,7 @@ TEST(Sprint148_ReleaseReadiness, AllBlockersAggregated) {
 
 // ── Report Formatting ──────────────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, FormatReportContainsCandidate) {
+TEST(ReleaseReadiness, FormatReportContainsCandidate) {
     DashboardResult r;
     r.candidate.version = "7.1.0";
     r.candidate.commitHash = "abc12345def";
@@ -185,7 +185,7 @@ TEST(Sprint148_ReleaseReadiness, FormatReportContainsCandidate) {
 
 // ── Custom Checklist Item ──────────────────────────────────────────────────
 
-TEST(Sprint148_ReleaseReadiness, AddCustomChecklistItem) {
+TEST(ReleaseReadiness, AddCustomChecklistItem) {
     ReleaseReadinessDashboard dashboard;
     ChecklistItem custom;
     custom.description = "Manual smoke test passed";

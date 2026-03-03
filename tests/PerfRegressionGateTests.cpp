@@ -8,7 +8,7 @@ using namespace ExplorerLens;
 
 // ── KPI Names ──────────────────────────────────────────────────────────────
 
-TEST(Sprint146_PerfRegressionGate, KpiNamesAreDefined) {
+TEST(PerfRegressionGate, KpiNamesAreDefined) {
     EXPECT_STREQ(KpiName(PerfKPI::SingleThumbnailMs), "SingleThumbnailMs");
     EXPECT_STREQ(KpiName(PerfKPI::BatchThroughputImgSec), "BatchThroughputImgSec");
     EXPECT_STREQ(KpiName(PerfKPI::CacheHitMs), "CacheHitMs");
@@ -16,7 +16,7 @@ TEST(Sprint146_PerfRegressionGate, KpiNamesAreDefined) {
 
 // ── Default Thresholds ─────────────────────────────────────────────────────
 
-TEST(Sprint146_PerfRegressionGate, DefaultThresholdsConfigured) {
+TEST(PerfRegressionGate, DefaultThresholdsConfigured) {
     PerfRegressionGate gate;
     auto& th = gate.Thresholds();
     EXPECT_NE(th.find(PerfKPI::SingleThumbnailMs), th.end());
@@ -24,7 +24,7 @@ TEST(Sprint146_PerfRegressionGate, DefaultThresholdsConfigured) {
     EXPECT_EQ(th.size(), 8);
 }
 
-TEST(Sprint146_PerfRegressionGate, SingleThumbnailThreshold) {
+TEST(PerfRegressionGate, SingleThumbnailThreshold) {
     PerfRegressionGate gate;
     auto& th = gate.Thresholds().at(PerfKPI::SingleThumbnailMs);
     EXPECT_EQ(th.warnThreshold, 15.0);
@@ -34,7 +34,7 @@ TEST(Sprint146_PerfRegressionGate, SingleThumbnailThreshold) {
 
 // ── Evaluation Tests ───────────────────────────────────────────────────────
 
-TEST(Sprint146_PerfRegressionGate, AllPassWhenWithinLimits) {
+TEST(PerfRegressionGate, AllPassWhenWithinLimits) {
     PerfRegressionGate gate;
     std::map<PerfKPI, double> current = {
         {PerfKPI::SingleThumbnailMs, 10.0},
@@ -47,7 +47,7 @@ TEST(Sprint146_PerfRegressionGate, AllPassWhenWithinLimits) {
     EXPECT_EQ(result.failCount, 0);
 }
 
-TEST(Sprint146_PerfRegressionGate, FailWhenOverThreshold) {
+TEST(PerfRegressionGate, FailWhenOverThreshold) {
     PerfRegressionGate gate;
     std::map<PerfKPI, double> current = {
         {PerfKPI::SingleThumbnailMs, 30.0}   // fail threshold = 25.0
@@ -57,7 +57,7 @@ TEST(Sprint146_PerfRegressionGate, FailWhenOverThreshold) {
     EXPECT_FALSE(result.Passed());
 }
 
-TEST(Sprint146_PerfRegressionGate, WarnWhenNearThreshold) {
+TEST(PerfRegressionGate, WarnWhenNearThreshold) {
     PerfRegressionGate gate;
     std::map<PerfKPI, double> current = {
         {PerfKPI::SingleThumbnailMs, 18.0}   // warn=15, fail=25
@@ -67,7 +67,7 @@ TEST(Sprint146_PerfRegressionGate, WarnWhenNearThreshold) {
     EXPECT_TRUE(result.Passed());  // warn still passes
 }
 
-TEST(Sprint146_PerfRegressionGate, ThroughputFailBelowMinimum) {
+TEST(PerfRegressionGate, ThroughputFailBelowMinimum) {
     PerfRegressionGate gate;
     std::map<PerfKPI, double> current = {
         {PerfKPI::BatchThroughputImgSec, 100.0}   // fail=150 (HigherIsBetter)
@@ -78,7 +78,7 @@ TEST(Sprint146_PerfRegressionGate, ThroughputFailBelowMinimum) {
 
 // ── Baseline Regression Tests ──────────────────────────────────────────────
 
-TEST(Sprint146_PerfRegressionGate, BaselineRegressionDetected) {
+TEST(PerfRegressionGate, BaselineRegressionDetected) {
     PerfRegressionGate gate;
     gate.SetBaseline(PerfKPI::SingleThumbnailMs, 10.0);
     std::map<PerfKPI, double> current = {
@@ -91,7 +91,7 @@ TEST(Sprint146_PerfRegressionGate, BaselineRegressionDetected) {
 
 // ── Trend Analysis ─────────────────────────────────────────────────────────
 
-TEST(Sprint146_PerfRegressionGate, TrendAnalysisComputation) {
+TEST(PerfRegressionGate, TrendAnalysisComputation) {
     PerfRegressionGate gate;
     for (int i = 0; i < 10; ++i) {
         gate.RecordSample({PerfKPI::SingleThumbnailMs, 10.0 + i * 0.5, "test", "abc123"});
@@ -104,13 +104,13 @@ TEST(Sprint146_PerfRegressionGate, TrendAnalysisComputation) {
     EXPECT_TRUE(trend.IsDegrading(ThresholdDirection::LowerIsBetter));
 }
 
-TEST(Sprint146_PerfRegressionGate, TrendEmptyHistory) {
+TEST(PerfRegressionGate, TrendEmptyHistory) {
     PerfRegressionGate gate;
     auto trend = gate.ComputeTrend(PerfKPI::ColdStartMs);
     EXPECT_EQ(trend.sampleCount, 0);
 }
 
-TEST(Sprint146_PerfRegressionGate, TrendImprovingDirection) {
+TEST(PerfRegressionGate, TrendImprovingDirection) {
     PerfRegressionGate gate;
     for (int i = 10; i > 0; --i) {
         gate.RecordSample({PerfKPI::SingleThumbnailMs, 10.0 + i * 0.5, "test", "abc123"});
@@ -122,7 +122,7 @@ TEST(Sprint146_PerfRegressionGate, TrendImprovingDirection) {
 
 // ── Report Formatting ──────────────────────────────────────────────────────
 
-TEST(Sprint146_PerfRegressionGate, FormatReportContainsVerdict) {
+TEST(PerfRegressionGate, FormatReportContainsVerdict) {
     GateResult r;
     r.overall = GateVerdict::Pass;
     r.passCount = 5;
@@ -131,7 +131,7 @@ TEST(Sprint146_PerfRegressionGate, FormatReportContainsVerdict) {
     EXPECT_NE(report.find("Pass: 5"), std::string::npos);
 }
 
-TEST(Sprint146_PerfRegressionGate, CustomThresholdOverride) {
+TEST(PerfRegressionGate, CustomThresholdOverride) {
     PerfRegressionGate gate;
     KpiThreshold custom;
     custom.kpi = PerfKPI::ColdStartMs;

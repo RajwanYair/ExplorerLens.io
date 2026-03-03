@@ -8,18 +8,18 @@ using namespace ExplorerLens;
 
 // ── BuildHash Tests ────────────────────────────────────────────────────────
 
-TEST(Sprint147_ReproducibleBuild, HashFromHexRoundTrip) {
+TEST(ReproducibleBuild, HashFromHexRoundTrip) {
     auto h = BuildHash::FromHex("abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789");
     EXPECT_FALSE(h.IsEmpty());
     EXPECT_EQ(h.hexString.size(), 64);
 }
 
-TEST(Sprint147_ReproducibleBuild, EmptyHashDetection) {
+TEST(ReproducibleBuild, EmptyHashDetection) {
     BuildHash h;
     EXPECT_TRUE(h.IsEmpty());
 }
 
-TEST(Sprint147_ReproducibleBuild, HashEquality) {
+TEST(ReproducibleBuild, HashEquality) {
     auto h1 = BuildHash::FromHex("aa");
     auto h2 = BuildHash::FromHex("aa");
     auto h3 = BuildHash::FromHex("bb");
@@ -29,7 +29,7 @@ TEST(Sprint147_ReproducibleBuild, HashEquality) {
 
 // ── ArtifactType Tests ─────────────────────────────────────────────────────
 
-TEST(Sprint147_ReproducibleBuild, ArtifactTypeNames) {
+TEST(ReproducibleBuild, ArtifactTypeNames) {
     EXPECT_STREQ(ArtifactTypeName(ArtifactType::DLL), "DLL");
     EXPECT_STREQ(ArtifactTypeName(ArtifactType::EXE), "EXE");
     EXPECT_STREQ(ArtifactTypeName(ArtifactType::LIB), "LIB");
@@ -38,14 +38,14 @@ TEST(Sprint147_ReproducibleBuild, ArtifactTypeNames) {
 
 // ── Policy Tests ───────────────────────────────────────────────────────────
 
-TEST(Sprint147_ReproducibleBuild, StrictPolicyDefaults) {
+TEST(ReproducibleBuild, StrictPolicyDefaults) {
     auto pol = StrictPolicy();
     EXPECT_TRUE(pol.stripTimestamps);
     EXPECT_TRUE(pol.stripPDBPaths);
     EXPECT_EQ(pol.maxSizeDriftPct, 0.1);
 }
 
-TEST(Sprint147_ReproducibleBuild, RelaxedPolicyDefaults) {
+TEST(ReproducibleBuild, RelaxedPolicyDefaults) {
     auto pol = RelaxedPolicy();
     EXPECT_TRUE(pol.stripBuildMetadata);
     EXPECT_EQ(pol.maxSizeDriftPct, 5.0);
@@ -53,7 +53,7 @@ TEST(Sprint147_ReproducibleBuild, RelaxedPolicyDefaults) {
 
 // ── Verification Tests ─────────────────────────────────────────────────────
 
-TEST(Sprint147_ReproducibleBuild, IdenticalBuildsAreReproducible) {
+TEST(ReproducibleBuild, IdenticalBuildsAreReproducible) {
     auto hash = BuildHash::FromHex("aabbccdd");
     BuildArtifact art;
     art.path = "LENSShell.dll";
@@ -72,7 +72,7 @@ TEST(Sprint147_ReproducibleBuild, IdenticalBuildsAreReproducible) {
     EXPECT_NEAR(result.ReproducibilityScore(), 100.0, 0.1);
 }
 
-TEST(Sprint147_ReproducibleBuild, DifferentHashesAreNonReproducible) {
+TEST(ReproducibleBuild, DifferentHashesAreNonReproducible) {
     BuildArtifact artA, artB;
     artA.path = artB.path = "LENSShell.dll";
     artA.sizeBytes = artB.sizeBytes = 2940 * 1024;
@@ -88,7 +88,7 @@ TEST(Sprint147_ReproducibleBuild, DifferentHashesAreNonReproducible) {
     EXPECT_EQ(result.nonReproducibleCount, 1);
 }
 
-TEST(Sprint147_ReproducibleBuild, TimestampDriftDetected) {
+TEST(ReproducibleBuild, TimestampDriftDetected) {
     auto stripped = BuildHash::FromHex("aa");
     BuildArtifact artA, artB;
     artA.path = artB.path = "LENSShell.dll";
@@ -107,7 +107,7 @@ TEST(Sprint147_ReproducibleBuild, TimestampDriftDetected) {
     EXPECT_TRUE(result.IsFullyReproducible());
 }
 
-TEST(Sprint147_ReproducibleBuild, MissingArtifactDetected) {
+TEST(ReproducibleBuild, MissingArtifactDetected) {
     BuildArtifact art;
     art.path = "LENSShell.dll";
     art.sizeBytes = 1000;
@@ -123,7 +123,7 @@ TEST(Sprint147_ReproducibleBuild, MissingArtifactDetected) {
     EXPECT_FALSE(result.IsFullyReproducible());
 }
 
-TEST(Sprint147_ReproducibleBuild, ExcludedPathsSkipped) {
+TEST(ReproducibleBuild, ExcludedPathsSkipped) {
     ReproducibilityPolicy pol = StrictPolicy();
     pol.excludePaths = {"debug/"};
     ReproducibleBuildVerifier verifier(pol);
@@ -142,7 +142,7 @@ TEST(Sprint147_ReproducibleBuild, ExcludedPathsSkipped) {
 
 // ── Report Formatting ──────────────────────────────────────────────────────
 
-TEST(Sprint147_ReproducibleBuild, FormatReportContainsStatus) {
+TEST(ReproducibleBuild, FormatReportContainsStatus) {
     VerificationResult r;
     r.totalArtifacts = 5;
     r.reproducibleCount = 5;
@@ -153,7 +153,7 @@ TEST(Sprint147_ReproducibleBuild, FormatReportContainsStatus) {
 
 // ── Manifest Tests ─────────────────────────────────────────────────────────
 
-TEST(Sprint147_ReproducibleBuild, ManifestFindArtifact) {
+TEST(ReproducibleBuild, ManifestFindArtifact) {
     BuildArtifact art;
     art.path = "LENSShell.dll";
     auto manifest = ReproducibleBuildVerifier::CreateManifest("abc", "main", "Release", {art});
