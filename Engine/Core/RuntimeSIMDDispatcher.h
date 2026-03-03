@@ -10,6 +10,7 @@
 #include <windows.h>
 #include <cstdint>
 #include <intrin.h>
+#include <immintrin.h>
 #include <string>
 #include <array>
 
@@ -89,7 +90,7 @@ public:
         default:
             return ResizeRow_Scalar;
         }
-    }
+        }
 
     BlendRowFn GetBlendRowFn() const {
         switch (m_tier) {
@@ -190,13 +191,55 @@ private:
     }
 
     static void ResizeRow_SSE2(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW) {
-        // SSE2-optimized nearest-neighbor row resize (processes 4 pixels at once)
-        ResizeRow_Scalar(src, dst, srcW, dstW); // TODO: SSE2 intrinsics
+        // SSE2-optimized nearest-neighbor row resize — processes 4 BGRA pixels per iteration
+        const uint32_t step = 4; // 4 pixels x 4 bytes = 16 bytes = one __m128i
+        const uint32_t aligned = dstW & ~(step - 1);
+        for (uint32_t x = 0; x < aligned; x += step) {
+            // Compute 4 source x-coordinates
+            alignas(16) uint32_t indices[4];
+            for (uint32_t i = 0; i < step; i++) {
+                indices[i] = (x + i) * srcW / dstW;
+            }
+            // Gather 4 source pixels into a single 128-bit register
+            alignas(16) uint8_t pixels[16];
+            memcpy(pixels + 0, src + indices[0] * 4, 4);
+            memcpy(pixels + 4, src + indices[1] * 4, 4);
+            memcpy(pixels + 8, src + indices[2] * 4, 4);
+            memcpy(pixels + 12, src + indices[3] * 4, 4);
+            __m128i px = _mm_load_si128(reinterpret_cast<const __m128i*>(pixels));
+            _mm_storeu_si128(reinterpret_cast<__m128i*>(dst + x * 4), px);
+        }
+        // Handle remaining pixels
+        for (uint32_t x = aligned; x < dstW; x++) {
+            uint32_t sx = x * srcW / dstW;
+            memcpy(dst + x * 4, src + sx * 4, 4);
+        }
     }
 
     static void ResizeRow_AVX2(const uint8_t* src, uint8_t* dst, uint32_t srcW, uint32_t dstW) {
-        // AVX2-optimized row resize (processes 8 pixels at once)
-        ResizeRow_Scalar(src, dst, srcW, dstW); // TODO: AVX2 intrinsics
+        // AVX2-optimized nearest-neighbor row resize — processes 8 BGRA pixels per iteration
+        const uint32_t step = 8; // 8 pixels x 4 bytes = 32 bytes = one __m256i
+        const uint32_t aligned = dstW & ~(step - 1);
+        for (uint32_t x = 0; x < aligned; x += step) {
+            // Compute 8 source indices and use VGATHERDD for true AVX2 gather
+            __m256i idx = _mm256_set_epi32(
+                static_cast<int>((x + 7) * srcW / dstW),
+                static_cast<int>((x + 6) * srcW / dstW),
+                static_cast<int>((x + 5) * srcW / dstW),
+                static_cast<int>((x + 4) * srcW / dstW),
+                static_cast<int>((x + 3) * srcW / dstW),
+                static_cast<int>((x + 2) * srcW / dstW),
+                static_cast<int>((x + 1) * srcW / dstW),
+                static_cast<int>((x + 0) * srcW / dstW));
+            __m256i px = _mm256_i32gather_epi32(
+                reinterpret_cast<const int*>(src), idx, 4);
+            _mm256_storeu_si256(reinterpret_cast<__m256i*>(dst + x * 4), px);
+        }
+        // Handle remaining pixels
+        for (uint32_t x = aligned; x < dstW; x++) {
+            uint32_t sx = x * srcW / dstW;
+            memcpy(dst + x * 4, src + sx * 4, 4);
+        }
     }
 
     static void BlendRow_Scalar(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha) {
@@ -209,13 +252,91 @@ private:
     }
 
     static void BlendRow_SSE2(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha) {
-        BlendRow_Scalar(src, dst, width, alpha);
+        // SSE2 alpha blend — processes 4 BGRA pixels (16 bytes) per iteration
+        // Formula per channel: out = (src * alpha + dst * (255 - alpha)) / 255
+        // Approximated as: out = (src * alpha + dst * invAlpha + 128) >> 8 using _mm_mulhi_epu16
+        const __m128i zero = _mm_setzero_si128();
+        const __m128i alphaVec = _mm_set1_epi16(static_cast<short>(alpha));
+        const __m128i invAlphaVec = _mm_set1_epi16(static_cast<short>(255 - alpha));
+        const __m128i half = _mm_set1_epi16(128);
+
+        const uint32_t step = 4;
+        const uint32_t aligned = width & ~(step - 1);
+        for (uint32_t x = 0; x < aligned; x += step) {
+            __m128i s = _mm_loadu_si128(reinterpret_cast<const __m128i*>(src + x * 4));
+            __m128i d = _mm_loadu_si128(reinterpret_cast<const __m128i*>(dst + x * 4));
+
+            // Unpack low 8 pixels (first 2 BGRA pixels) to 16-bit
+            __m128i sLo = _mm_unpacklo_epi8(s, zero);
+            __m128i dLo = _mm_unpacklo_epi8(d, zero);
+            // Unpack high 8 pixels (next 2 BGRA pixels) to 16-bit
+            __m128i sHi = _mm_unpackhi_epi8(s, zero);
+            __m128i dHi = _mm_unpackhi_epi8(d, zero);
+
+            // Blend: (src * alpha + dst * invAlpha + 128) >> 8
+            __m128i rLo = _mm_srli_epi16(
+                _mm_add_epi16(_mm_add_epi16(
+                    _mm_mullo_epi16(sLo, alphaVec),
+                    _mm_mullo_epi16(dLo, invAlphaVec)), half), 8);
+            __m128i rHi = _mm_srli_epi16(
+                _mm_add_epi16(_mm_add_epi16(
+                    _mm_mullo_epi16(sHi, alphaVec),
+                    _mm_mullo_epi16(dHi, invAlphaVec)), half), 8);
+
+            // Pack 16-bit results back to 8-bit with unsigned saturation
+            __m128i result = _mm_packus_epi16(rLo, rHi);
+            _mm_storeu_si128(reinterpret_cast<__m128i*>(dst + x * 4), result);
+        }
+        // Handle remaining pixels
+        for (uint32_t x = aligned; x < width; x++) {
+            for (int c = 0; c < 4; c++) {
+                dst[x * 4 + c] = static_cast<uint8_t>(
+                    (src[x * 4 + c] * alpha + dst[x * 4 + c] * (255 - alpha)) / 255);
+            }
+        }
     }
 
     static void BlendRow_AVX2(const uint8_t* src, uint8_t* dst, uint32_t width, uint8_t alpha) {
-        BlendRow_Scalar(src, dst, width, alpha);
+        // AVX2 alpha blend — processes 8 BGRA pixels (32 bytes) per iteration
+        const __m256i zero = _mm256_setzero_si256();
+        const __m256i alphaVec = _mm256_set1_epi16(static_cast<short>(alpha));
+        const __m256i invAlphaVec = _mm256_set1_epi16(static_cast<short>(255 - alpha));
+        const __m256i half = _mm256_set1_epi16(128);
+
+        const uint32_t step = 8;
+        const uint32_t aligned = width & ~(step - 1);
+        for (uint32_t x = 0; x < aligned; x += step) {
+            __m256i s = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(src + x * 4));
+            __m256i d = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(dst + x * 4));
+
+            // Unpack to 16-bit (AVX2 works in two 128-bit lanes)
+            __m256i sLo = _mm256_unpacklo_epi8(s, zero);
+            __m256i dLo = _mm256_unpacklo_epi8(d, zero);
+            __m256i sHi = _mm256_unpackhi_epi8(s, zero);
+            __m256i dHi = _mm256_unpackhi_epi8(d, zero);
+
+            // Blend: (src * alpha + dst * invAlpha + 128) >> 8
+            __m256i rLo = _mm256_srli_epi16(
+                _mm256_add_epi16(_mm256_add_epi16(
+                    _mm256_mullo_epi16(sLo, alphaVec),
+                    _mm256_mullo_epi16(dLo, invAlphaVec)), half), 8);
+            __m256i rHi = _mm256_srli_epi16(
+                _mm256_add_epi16(_mm256_add_epi16(
+                    _mm256_mullo_epi16(sHi, alphaVec),
+                    _mm256_mullo_epi16(dHi, invAlphaVec)), half), 8);
+
+            __m256i result = _mm256_packus_epi16(rLo, rHi);
+            _mm256_storeu_si256(reinterpret_cast<__m256i*>(dst + x * 4), result);
+        }
+        // Handle remaining pixels
+        for (uint32_t x = aligned; x < width; x++) {
+            for (int c = 0; c < 4; c++) {
+                dst[x * 4 + c] = static_cast<uint8_t>(
+                    (src[x * 4 + c] * alpha + dst[x * 4 + c] * (255 - alpha)) / 255);
+            }
+        }
     }
     };
 
-} // namespace Engine
+    } // namespace Engine
 } // namespace ExplorerLens

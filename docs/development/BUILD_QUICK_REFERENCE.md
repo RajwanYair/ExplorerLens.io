@@ -185,7 +185,7 @@ ExplorerLens/
 ├── scripts/ # Build & utility scripts
 │ └── Setup-DevEnvironment.ps1 # ⭐ Main setup script
 └── .github/ # Build documentation
- ├── TOOL_VERSIONS.md # Detailed tool info (this file)
+ ├── tool-versions.md # Detailed tool info (this file)
  └── BUILD_QUICK_REFERENCE.txt
 ```
 
@@ -256,7 +256,7 @@ Use `/m` flag for parallel builds to maximize CPU usage.
 
 ## 📚 Additional Resources
 
-- **Detailed Tool Docs:** `.github/TOOL_VERSIONS.md`
+- **Detailed Tool Docs:** `.github/standards/tool-versions.md`
 - **Environment Script:** `scripts/Setup-DevEnvironment.ps1`
 - **Build Scripts:** `build-scripts/`
 - ** Docs:** `docs/PluginSecurityGuide.md`

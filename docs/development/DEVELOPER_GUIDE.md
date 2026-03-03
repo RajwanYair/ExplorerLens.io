@@ -496,7 +496,7 @@ View logs with **DebugView** (Sysinternals):
 
 ## Additional Resources
 
-- **Build Instructions:** [BUILD_METHOD.md](.github/standards/BUILD_METHOD.md)
+- **Build Instructions:** [build-method.md](.github/standards/build-method.md)
 - **Library Inventory:** [external/LIBRARY_INVENTORY.md](external/LIBRARY_INVENTORY.md)
 - **User Guide:** [USER_GUIDE.md](USER_GUIDE.md)
 - **Plugin SDK:** [SDK/docs/PLUGIN_SDK.md](SDK/docs/PLUGIN_SDK.md)

@@ -139,11 +139,8 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m /v:minimal
 
 ## CRT Linkage
 
-All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). One exception:
-
-- **libwebp** was built with `/MT` (static CRT) — this requires `/NODEFAULTLIB:LIBCMT` workaround
-- **Proper fix:** Rebuild libwebp with `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL`
-- The linker flags in `Engine/CMakeLists.txt` handle this automatically for both MSVC and Clang
+All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). All external libraries including libwebp
+have been rebuilt with `/MD`. No `/NODEFAULTLIB:LIBCMT` workarounds are needed.
 
 ## External Libraries (Statically Linked)
 
@@ -160,7 +157,13 @@ All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). One exception:
 | libjxl | 0.11.1 | JPEG XL images |
 | libheif | 1.19.5 | HEIF/HEIC images |
 | libde265 | 1.0.15 | HEVC decoding for libheif |
+| dav1d | 1.5.1 | AV1 decoding for libavif |
 | LibRaw | 0.21.3 | RAW camera formats |
+| MuPDF | 1.24.11 | PDF rendering |
+| openjpeg | 2.5.3 | JPEG 2000 images |
+| bzip2 | 1.0.8 | BZIP2 compression |
+| xz/liblzma | 5.6.3 | XZ compression |
+| libarchive | 3.7.6 | Multiformat archive handling |
 
 ## Code Conventions
 
@@ -169,7 +172,7 @@ All targets use `/MD` (dynamic CRT — `MultiThreadedDLL`). One exception:
 - Private members: `m_` prefix, constants: `UPPER_CASE`
 - **Zero warnings policy** — build must produce 0 warnings
 - See `.clang-tidy` for static analysis config
-- See `.github/standards/CODING_STANDARDS.md` for full guide
+- See `.github/standards/coding-standards.md` for full guide
 - COM interfaces follow Windows SDK patterns (IUnknown, AddRef/Release)
 
 ### Header Banner Format
@@ -249,7 +252,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - **NEVER** include `<versionhelpers.h>` — use `RtlGetVersion()` from ntdll.dll instead
 - **NEVER** include headers that depend on types excluded by `WIN32_LEAN_AND_MEAN`
 - Always verify new Windows SDK includes compile under `WIN32_LEAN_AND_MEAN`
-- See `.github/standards/BUILD_TROUBLESHOOTING.md` for the full compatibility list
+- See `.github/standards/build-troubleshooting.md` for the full compatibility list
 
 ## Development Guidance (v15.0+)
 

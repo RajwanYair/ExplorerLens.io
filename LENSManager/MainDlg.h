@@ -92,6 +92,8 @@ public:
 		COMMAND_HANDLER(IDC_CB_EXT_DOCUMENT, BN_CLICKED, OnCheckboxClicked)
 		COMMAND_ID_HANDLER(IDC_BTN_RESET_DEFAULTS, OnResetDefaults)
 		COMMAND_ID_HANDLER(IDC_BTN_EXPORT_CONFIG, OnExportConfig)
+		COMMAND_ID_HANDLER(IDC_BTN_SELECT_ALL, OnSelectAllBtn)
+		COMMAND_ID_HANDLER(IDC_BTN_DESELECT_ALL, OnDeselectAllBtn)
 		CHAIN_MSG_MAP(CDialogDrag<CMainDlg>)
 		CHAIN_MSG_MAP(CSnapWindow<CMainDlg>)
 		CHAIN_MSG_MAP(CDialogHelp<CMainDlg>)
@@ -129,6 +131,8 @@ public:
 	LRESULT OnTrayExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	void OnSelectAll();
 	void OnDeselectAll();
+	LRESULT OnSelectAllBtn(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) { OnSelectAll(); return 0; }
+	LRESULT OnDeselectAllBtn(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) { OnDeselectAll(); return 0; }
 	void InitUI();
 	void OnApplyImpl();
 	LRESULT OnCancel(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

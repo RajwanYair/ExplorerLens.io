@@ -433,6 +433,24 @@ Engine/Debug/
 Engine/x64/
 Engine/build/
 
+# Engine subdirectory CMake-generated vcxproj files
+Engine/Tests/ALL_BUILD.vcxproj
+Engine/Tests/ALL_BUILD.vcxproj.filters
+Engine/Tests/INSTALL.vcxproj
+Engine/Tests/INSTALL.vcxproj.filters
+Engine/Tests/RUN_TESTS.vcxproj
+Engine/Tests/RUN_TESTS.vcxproj.filters
+Engine/Tests/ZERO_CHECK.vcxproj
+Engine/Tests/ZERO_CHECK.vcxproj.filters
+Engine/PluginHost/INSTALL.vcxproj
+Engine/PluginHost/INSTALL.vcxproj.filters
+Engine/PluginHost/RUN_TESTS.vcxproj
+Engine/PluginHost/RUN_TESTS.vcxproj.filters
+Engine/PluginHost/ZERO_CHECK.vcxproj
+Engine/PluginHost/ZERO_CHECK.vcxproj.filters
+Engine/PluginHost/ALL_BUILD.vcxproj
+Engine/PluginHost/ALL_BUILD.vcxproj.filters
+
 # Test output files
 test-output.txt
 test-results*.txt

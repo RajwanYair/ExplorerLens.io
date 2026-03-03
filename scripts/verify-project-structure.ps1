@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
     Verify ExplorerLens project organization compliance
-    
+
 .DESCRIPTION
     Validates that the ExplorerLens project structure conforms to industrial
     open-source standards. Checks directory structure, documentation, and
     file organization.
-    
+
 .NOTES
     Version: 1.0.0
     Date: February 11, 2026
@@ -29,10 +29,10 @@ $passed = 0
 
 function Test-DirectoryExists {
     param([string]$Path, [string]$Description)
-    
+
     $script:checks++
     $fullPath = Join-Path $WorkspaceRoot $Path
-    
+
     if (Test-Path $fullPath -PathType Container) {
         Write-Host "✓ $Description" -ForegroundColor Green
         $script:passed++
@@ -46,10 +46,10 @@ function Test-DirectoryExists {
 
 function Test-FileExists {
     param([string]$Path, [string]$Description)
-    
+
     $script:checks++
     $fullPath = Join-Path $WorkspaceRoot $Path
-    
+
     if (Test-Path $fullPath -PathType Leaf) {
         Write-Host "✓ $Description" -ForegroundColor Green
         $script:passed++
@@ -63,10 +63,10 @@ function Test-FileExists {
 
 function Test-FileNotExists {
     param([string]$Path, [string]$Description)
-    
+
     $script:checks++
     $fullPath = Join-Path $WorkspaceRoot $Path
-    
+
     if (-not (Test-Path $fullPath)) {
         Write-Host "✓ $Description" -ForegroundColor Green
         $script:passed++
@@ -111,7 +111,7 @@ Test-DirectoryExists ".github\standards" ".github\standards exists"
 Test-FileExists ".github\CONTRIBUTING.md" "CONTRIBUTING.md exists"
 Test-FileExists ".github\SECURITY.md" "SECURITY.md exists"
 Test-FileExists ".github\PULL_REQUEST_TEMPLATE.md" "PR template exists"
-Test-FileExists ".github\standards\CODING_STANDARDS.md" "Coding standards exist"
+Test-FileExists ".github\standards\coding-standards.md" "Coding standards exist"
 
 Test-FileExists ".github\workflows\build.yml" "Build workflow exists"
 
@@ -226,7 +226,7 @@ if ($issues.Count -gt 0) {
     foreach ($issue in $issues) {
         Write-Host "  • $issue" -ForegroundColor Yellow
     }
-    
+
     if ($FixIssues) {
         Write-Host "`nAttempting to fix issues..." -ForegroundColor Cyan
         # Add fix logic here if needed
@@ -237,12 +237,12 @@ if ($issues.Count -gt 0) {
 
 if ($Detailed) {
     Write-Host "`n=== Detailed Structure ===" -ForegroundColor Cyan
-    
+
     $structure = @{
         "Root Files"  = Get-ChildItem $WorkspaceRoot -File | Where-Object { $_.Name -match "\.md$|LICENSE|\.sln$" } | Select-Object -ExpandProperty Name
         "Directories" = Get-ChildItem $WorkspaceRoot -Directory | Where-Object { $_.Name -notlike ".*" -and $_.Name -notlike "x64" -and $_.Name -notlike "build" } | Select-Object -ExpandProperty Name
     }
-    
+
     foreach ($category in $structure.Keys) {
         Write-Host "`n$category`:" -ForegroundColor Cyan
         $structure[$category] | ForEach-Object { Write-Host "  • $_" -ForegroundColor Gray }
@@ -257,4 +257,3 @@ if ($checks -eq $passed) {
 } else {
     exit 1
 }
-

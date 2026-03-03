@@ -31,7 +31,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 
 - [Development Guide](docs/development/README.md) - Developer documentation
 - [Contributing](.github/CONTRIBUTING.md) - How to contribute
-- [Coding Standards](.github/standards/CODING_STANDARDS.md) - Code style and conventions
+- [Coding Standards](.github/standards/coding-standards.md) - Code style and conventions
 - [Build Scripts](build-scripts/README.md) - Build automation reference
 
 ---

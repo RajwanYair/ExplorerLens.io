@@ -1802,6 +1802,10 @@ private:
       return LENSTYPE_CB7;
     if (StrEqual(szExt, _T(".cbt")))
       return LENSTYPE_CBT;
+#ifndef DISABLE_RAR_SUPPORT
+    if (StrEqual(szExt, _T(".cbr")))
+      return LENSTYPE_CBR;
+#endif
 
     // Generic archives
     if (StrEqual(szExt, _T(".zip")))
@@ -1810,6 +1814,10 @@ private:
       return LENSTYPE_7Z;
     if (StrEqual(szExt, _T(".tar")))
       return LENSTYPE_TAR;
+#ifndef DISABLE_RAR_SUPPORT
+    if (StrEqual(szExt, _T(".rar")))
+      return LENSTYPE_RAR;
+#endif
 
     // LibArchive-backed compressed archives
 #ifdef ENABLE_LIBARCHIVE_SUPPORT
@@ -2274,6 +2282,14 @@ private:
       return LENSTYPE_SGI;
     if (StrEqual(szExt, _T(".xpm")))
       return LENSTYPE_XPM;
+
+    // JPEG XR / HD Photo formats
+    if (StrEqual(szExt, _T(".jxr")))
+      return LENSTYPE_JXR;
+    if (StrEqual(szExt, _T(".wdp")))
+      return LENSTYPE_JXR;
+    if (StrEqual(szExt, _T(".hdp")))
+      return LENSTYPE_JXR;
 
     return LENSTYPE_NONE;
   }

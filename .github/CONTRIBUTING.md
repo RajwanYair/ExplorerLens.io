@@ -48,7 +48,7 @@ regsvr32 /u /s x64\Release\LENSShell.dll
 - **DirectX 11 + DirectX 12** for GPU acceleration
 - **Zero warnings** policy — build must produce 0 warnings
 - Follow `.clang-tidy` rules (see project root)
-- See `.github/standards/CODING_STANDARDS.md` for naming conventions
+- See `.github/standards/coding-standards.md` for naming conventions
 - All headers must use `#pragma once`
 
 ## Submitting Changes

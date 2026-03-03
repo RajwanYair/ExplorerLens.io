@@ -193,7 +193,6 @@ set(ENGINE_HEADERS
     Core/DarkModeControls.h
     Core/DarkModeEngine.h
     Core/DarkModeRendererV2.h
-    Core/DeadCodeAnalysis.h
     Core/DeadCodeAudit.h
     Core/DeadCodeAuditor.h
     Core/DecoderHealthDashboard.h
@@ -254,10 +253,6 @@ set(ENGINE_HEADERS
     Core/SIMDAccelerationManager.h
     Core/SIMDAccelerator.h
     Core/Telemetry.h
-    Core/TelemetryDashboard.h
-    Core/TelemetryEngine.h
-    Core/TelemetryHooks.h
-    Core/TelemetryPipeline.h
     Core/ThemeEngine.h
     Core/ObservabilityIntegration.h
     Core/PerformanceActivation.h
@@ -740,7 +735,6 @@ set(ENGINE_HEADERS
     Core/QuantumReadyHashPipeline.h
     GPU/WebGPUThumbnailRenderer.h
     Core/WASMDecoderSandbox.h
-    Core/TelemetryPipelineV2.h
     Core/LivePreviewStreamingProtocol.h
     Core/DragDropThumbnailPreview.h
     Core/ExplorerColumnProvider.h

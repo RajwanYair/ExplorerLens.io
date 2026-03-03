@@ -83,3 +83,5 @@
 #define IDC_BTN_ABOUT                           1079
 #define IDC_ABOUT_SYSINFO                       1080
 #define IDC_BTN_COPY_INFO                       1081
+#define IDC_BTN_SELECT_ALL                      1082
+#define IDC_BTN_DESELECT_ALL                    1083

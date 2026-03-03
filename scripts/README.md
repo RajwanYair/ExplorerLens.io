@@ -185,7 +185,7 @@ Setup-ExplorerLensEnv -Force
 
 ## 📚 Additional Documentation
 
-- **Tool Versions:** `.github/TOOL_VERSIONS.md`
+- **Tool Versions:** `.github/standards/tool-versions.md`
 - **Quick Reference:** `.github/BUILD_QUICK_REFERENCE.md`
 - **AI Instructions:** `.github/AI_BUILD_INSTRUCTIONS.md`
 - **Project Roadmap:** `../CHANGELOG.md`

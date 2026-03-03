@@ -224,7 +224,6 @@ try {
 
     $workflows = @(
         ".github\workflows\build.yml"
-        ".github\workflows\build-v7.yml"
         ".github\workflows\build-and-test.yml"
         ".github\workflows\release.yml"
         ".github\workflows\code-quality.yml"

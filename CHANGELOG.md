@@ -76,16 +76,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Version alignment** — Bulk update across 17+ docs to v15.0.0
 - **VS references** — Updated to Visual Studio 18 2026 across 7 files
 - **Dead code** — Removed obsolete unzip.cpp stub (replaced by minizip-ng)
+- **RAR/CBR format routing** — Added LENSTYPE_RAR (3) and LENSTYPE_CBR (4) constants; `.rar`/`.cbr` routed through GetLENSTYPE()
+- **JPEG XR format routing** — Added LENSTYPE_JXR (94); `.jxr`/`.wdp`/`.hdp` extensions routed
+- **SIMD implementation** — RuntimeSIMDDispatcher SSE2/AVX2 resize and blend now use real intrinsics (`_mm_*`/`_mm256_*`) instead of scalar fallbacks
+- **GUI Select All/Deselect All** — Visible buttons added to LENSManager main dialog (previously keyboard-only)
+- **copilot-instructions.md** — Updated CRT linkage docs, expanded library table (12→18 entries)
+- **KNOWN_ISSUES.md** — Reorganized; moved 4 resolved items to Resolved section, added RAR/CBR/JXR fix
 
 ### Changed
 - **Version:** 14.0.0 "Apex" → 15.0.0 "Zenith"
-- **Total unit tests:** 2283+
+- **Total unit tests:** 2282
 - **Codename:** Apex → Zenith
 
 ### Removed
 - 6 obsolete documentation files
 - Dead unzip.cpp stub
 - Stale planning documents
+- Dead telemetry shim headers (TelemetryPipeline, TelemetryPipelineV2, TelemetryDashboard, TelemetryEngine, TelemetryHooks)
+- Dead code analysis shim (DeadCodeAnalysis.h — callers use DeadCodeAudit.h + DeadCodeAuditor.h directly)
+- Legacy CI workflow (`build-v7.yml`)
+- 5 tracked .gitignore'd CMake-generated vcxproj files from git index
+- `.github/standards/` files renamed from UPPERCASE to lowercase-hyphenated
 
 ---
 

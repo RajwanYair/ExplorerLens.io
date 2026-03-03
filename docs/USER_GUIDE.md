@@ -277,11 +277,10 @@ A: Thumbnail appearance is controlled by Windows Explorer. ExplorerLens only pro
 - **GitHub Repository:** https://github.com/yourusername/ExplorerLens
 - **Issue Tracker:** https://github.com/yourusername/ExplorerLens/issues
 - **Developer Guide:** [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
-- **Build Instructions:** [.github/standards/BUILD_METHOD.md](.github/standards/BUILD_METHOD.md)
+- **Build Instructions:** [.github/standards/build-method.md](.github/standards/build-method.md)
 
 **Support:** For issues, please open a GitHub issue with detailed information.
 
 ---
 
 **Enjoy seamless thumbnail previews for all your files! 🎨**
-

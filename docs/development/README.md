@@ -7,7 +7,7 @@ This directory contains comprehensive documentation for developers working on Ex
 ### Build & Environment
 
 - **[BUILD_QUICK_REFERENCE.md](BUILD_QUICK_REFERENCE.md)** - Quick reference for common build commands
-- **[TOOL_VERSIONS.md](../../.github/standards/TOOL_VERSIONS.md)** - Required and tested tool versions
+- **[tool-versions.md](../../.github/standards/tool-versions.md)** - Required and tested tool versions
 
 ### Project Organization
 

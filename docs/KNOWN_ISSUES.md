@@ -1,7 +1,7 @@
 # ExplorerLens Known Issues & Troubleshooting
-**Version:** 15.0.0 "Zenith" 
-**Last Updated:** July 2025 
-**Audit Status:** ✅ All entries verified against current codebase 
+**Version:** 15.0.0 "Zenith"  
+**Last Updated:** July 2025  
+**Audit Status:** ✅ All entries verified against current codebase  
 
 ## Current Known Issues
 
@@ -11,33 +11,9 @@
 
 ---
 
-### High Priority (P1)
-
-#### 1. JPEG XL (.jxl) Build Configuration
-**Status:** ✅ **Working** (libjxl 0.11.1 linked in current build) 
-**Impact:** `.jxl` support active when built with `-DHAS_LIBJXL=ON` (default ON) 
-
-**Details:**
-- JXL decoder fully operational in current Engine build
-- libjxl 0.11.1 + brotli + highway libraries linked
-- Build-LibJXL.ps1 available for rebuilding from source
-- Latest build: 0 errors, 0 warnings with JXL support enabled
-
-#### 2. HEIF/HEIC Support
-**Status:** ✅ **Integrated** (libheif 1.19.5 + libde265 1.0.15 built and linked) 
-**Impact:** Native HEIF thumbnails work without WIC dependency 
-
-**Details:**
-- Native HEIFDecoder.cpp fully operational in Engine with `HAS_LIBHEIF=ON`
-- libheif 1.19.5 + libde265 1.0.15 built and linked in Release configuration
-- No HEVC codec dependency required for basic HEIF decode
-- Build scripts (Build-LibHEIF.ps1) validated with local and proxy-based source refresh
-
----
-
 ### Medium Priority (P2)
 
-#### 3. Large Archive Performance (>500MB)
+#### 1. Large Archive Performance (>500MB)
 **Status:** ✅ **Significantly Improved** (Memory-Mapped I/O) 
 **Impact:** First-thumbnail latency reduced by 68% (2.5s → 0.8s for 500MB archives) 
 **Remaining:** Very large archives (>1GB) may still take 2-5 seconds for first thumbnail
@@ -49,7 +25,7 @@
 - Performance depends on archive structure (first file position)
 - Central directory reading adds overhead for very large archives
 
-#### 4. RAW Photo Color Accuracy
+#### 2. RAW Photo Color Accuracy
 **Status:** LibRaw color management limitations 
 **Impact:** Some RAW thumbnails may appear slightly different from Lightroom/Capture One 
 **Workaround:** Adjust color management in LibRaw settings (advanced users)
@@ -59,37 +35,7 @@
 - Full RAW decode uses camera matrix but may differ from proprietary software
 - Affects certain Canon CR3, Nikon NEF, Sony ARW files
 
-#### 5. Video Thumbnails Missing for Some Codecs
-**Status:** ✅ **RESOLVED** (K-Lite Codec Pack 19.4.5 installed) 
-**Impact:** Previously: thumbnails missing for AV1, VP9, HEVC (in MKV), ProRes 
-**Resolution:** K-Lite Codec Pack provides DirectShow and Media Foundation filters for all major video codecs.
-
-**Details:**
-ExplorerLens uses Media Foundation (primary) and Shell IThumbnailProvider (fallback) for video thumbnails. K-Lite Codec Pack 19.4.5 Basic installs LAV Filters which provide:
-- ✅ H.264/H.265/HEVC - All containers (MP4, MKV, MOV)
-- ✅ AV1 - WebM and MP4 containers
-- ✅ VP8/VP9 - WebM containers
-- ✅ ProRes - MOV containers
-- ✅ MPEG-2, MPEG-4, DivX, Xvid - Legacy formats
-- ✅ WMV, FLV, RMVB - Streaming media formats
-
-**K-Lite Integration Notes:**
-- K-Lite registers system-wide Media Foundation transforms (MFTs) and DirectShow filters
-- ExplorerLens automatically picks up these codecs via `MFCreateSourceReaderFromURL()`
-- The Shell fallback path (`ExtractFrameShell()`) also benefits from K-Lite's IThumbnailProvider
-- No code changes needed - K-Lite codec detection is automatic
-- DXVA2 hardware acceleration works with K-Lite for H.264/H.265/AV1
-
-If K-Lite is not installed on user machines:
-```powershell
-# Option 1: K-Lite Codec Pack (recommended)
-# Download from https://codecguide.com/download_kl.htm
-
-# Option 2: LAV Filters
-# Download from https://github.com/Nevcairiel/LAVFilters/releases
-```
-
-#### 6. Explorer Thumbnail Cache Corruption
+#### 3. Explorer Thumbnail Cache Corruption
 **Status:** Windows bug (external to ExplorerLens) 
 **Impact:** Thumbnails disappear or show wrong images 
 **Workaround:** Clear Windows thumbnail cache
@@ -109,17 +55,7 @@ Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\*.db" -Force
 
 ### Low Priority (P3)
 
-#### 7. Dark Mode Support in LENSManager
-**Status:** ✅ **RESOLVED** (v15.0.0) 
-**Impact:** LENSManager UI now fully respects Windows dark/light mode 
-**Resolution:** Applied `SetWindowTheme(hChild, L"DarkMode_Explorer", nullptr)` to all child controls (Button, Static, ComboBox, etc.) so that checkboxes, radio buttons, group boxes, and static labels all render white text on dark background.
-
-**Details:**
-- DarkModeHelper.h `ApplyDarkScrollbars()` expanded to cover all control types
-- `ApplyThemeToDialog()` sends `WM_THEMECHANGED` to all children
-- Dark mode toggle (`IDC_BTN_THEME`) applies immediately via `DarkModeController::ToggleTheme()`
-
-#### 8. Network Drive Performance
+#### 4. Network Drive Performance
 **Status:** By design 
 **Impact:** Thumbnails on network drives are slower (latency) 
 **Workaround:** Enable aggressive caching
@@ -130,7 +66,7 @@ Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "CacheSize" -Value 40
 Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "NetworkCacheTTL" -Value 3600
 ```
 
-#### 9. Multi-Monitor DPI Scaling
+#### 5. Multi-Monitor DPI Scaling
 **Status:** Known Windows Explorer limitation 
 **Impact:** Thumbnails may appear blurry on mixed-DPI setups 
 **Workaround:** Set all monitors to same scaling factor
@@ -143,7 +79,36 @@ Set-ItemProperty -Path "HKLM:\Software\ExplorerLens" -Name "NetworkCacheTTL" -Va
 
 ---
 
-## Resolved Issues (Fixed in v6.2.0)
+## Resolved Issues
+
+### Fixed in v15.0.0
+
+### ✅ JPEG XL (.jxl) Build Configuration
+**Was:** JXL support required manual build configuration  
+**Fixed:** libjxl 0.11.1 fully integrated with `HAS_LIBJXL=ON` (default)  
+**Details:** JXL decoder operational, 0 errors / 0 warnings. See `Build-LibJXL.ps1`.
+
+### ✅ HEIF/HEIC Support
+**Was:** Required WIC dependency or external codec  
+**Fixed:** Native HEIFDecoder with libheif 1.19.5 + libde265 1.0.15  
+**Details:** `HAS_LIBHEIF=ON` default. See `Build-LibHEIF.ps1`.
+
+### ✅ Video Thumbnails for All Codecs
+**Was:** Thumbnails missing for AV1, VP9, HEVC (in MKV), ProRes  
+**Fixed:** K-Lite Codec Pack integration provides LAV Filters for all major codecs  
+**Details:** Automatic detection via `MFCreateSourceReaderFromURL()`. DXVA2 hardware acceleration supported.
+
+### ✅ Dark Mode Support in LENSManager
+**Was:** LENSManager UI did not respect Windows dark/light mode  
+**Fixed:** `SetWindowTheme(hChild, L"DarkMode_Explorer", nullptr)` applied to all child controls  
+**Details:** DarkModeHelper.h + DarkModeController toggle. See `IDC_BTN_THEME` handler.
+
+### ✅ RAR/CBR/JXR Format Routing
+**Was:** RAR/CBR archives and JPEG XR files recognized but not routed through GetLENSTYPE()  
+**Fixed:** Added LENSTYPE_RAR (3), LENSTYPE_CBR (4), LENSTYPE_JXR (94) constants and routing  
+**Details:** `.rar`/`.cbr` gated by `#ifndef DISABLE_RAR_SUPPORT`; `.jxr`/`.wdp`/`.hdp` always enabled.
+
+### Fixed in v6.2.0
 
 ### ✅ MSVC CRT Runtime Mismatch 
 **Was:** Linker warnings about LIBCMT conflicts 
@@ -342,5 +307,5 @@ High memory usage is temporary and released after thumbnail generation completes
 
 ---
 
-**Document Version:** 1.1 
-**Last Updated:** February 17, 2026
+**Document Version:** 1.2  
+**Last Updated:** July 2025

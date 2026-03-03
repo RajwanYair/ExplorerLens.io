@@ -2,7 +2,7 @@
 //  Tests — Telemetry & Diagnostics Dashboard
 //==============================================================================
 #include <gtest/gtest.h>
-#include "../Engine/Core/TelemetryDashboard.h"
+#include "../Engine/Core/Telemetry.h"
 
 using namespace ExplorerLens::Engine::Core;
 
@@ -11,19 +11,19 @@ using namespace ExplorerLens::Engine::Core;
 // =============================================================================
 
 TEST(HealthLevelTest, Names) {
-    EXPECT_STREQ(HealthLevelName(HealthLevel::Healthy),   "Healthy");
-    EXPECT_STREQ(HealthLevelName(HealthLevel::Degraded),  "Degraded");
+    EXPECT_STREQ(HealthLevelName(HealthLevel::Healthy), "Healthy");
+    EXPECT_STREQ(HealthLevelName(HealthLevel::Degraded), "Degraded");
     EXPECT_STREQ(HealthLevelName(HealthLevel::Unhealthy), "Unhealthy");
-    EXPECT_STREQ(HealthLevelName(HealthLevel::Critical),  "Critical");
-    EXPECT_STREQ(HealthLevelName(HealthLevel::Unknown),   "Unknown");
+    EXPECT_STREQ(HealthLevelName(HealthLevel::Critical), "Critical");
+    EXPECT_STREQ(HealthLevelName(HealthLevel::Unknown), "Unknown");
 }
 
 TEST(HealthLevelTest, Scores) {
-    EXPECT_EQ(HealthScore(HealthLevel::Healthy),   100);
-    EXPECT_EQ(HealthScore(HealthLevel::Degraded),   70);
-    EXPECT_EQ(HealthScore(HealthLevel::Unhealthy),  30);
-    EXPECT_EQ(HealthScore(HealthLevel::Critical),    0);
-    EXPECT_EQ(HealthScore(HealthLevel::Unknown),    -1);
+    EXPECT_EQ(HealthScore(HealthLevel::Healthy), 100);
+    EXPECT_EQ(HealthScore(HealthLevel::Degraded), 70);
+    EXPECT_EQ(HealthScore(HealthLevel::Unhealthy), 30);
+    EXPECT_EQ(HealthScore(HealthLevel::Critical), 0);
+    EXPECT_EQ(HealthScore(HealthLevel::Unknown), -1);
 }
 
 // =============================================================================
@@ -31,10 +31,10 @@ TEST(HealthLevelTest, Scores) {
 // =============================================================================
 
 TEST(MetricTypeTest, Names) {
-    EXPECT_STREQ(MetricTypeName(MetricType::Counter),   "Counter");
-    EXPECT_STREQ(MetricTypeName(MetricType::Gauge),     "Gauge");
+    EXPECT_STREQ(MetricTypeName(MetricType::Counter), "Counter");
+    EXPECT_STREQ(MetricTypeName(MetricType::Gauge), "Gauge");
     EXPECT_STREQ(MetricTypeName(MetricType::Histogram), "Histogram");
-    EXPECT_STREQ(MetricTypeName(MetricType::Timer),     "Timer");
+    EXPECT_STREQ(MetricTypeName(MetricType::Timer), "Timer");
 }
 
 // =============================================================================
@@ -101,7 +101,7 @@ TEST(StatisticsTest, EmptyVector) {
 }
 
 TEST(StatisticsTest, SingleValue) {
-    auto stats = Statistics::Compute({5.0});
+    auto stats = Statistics::Compute({ 5.0 });
     EXPECT_FALSE(stats.IsEmpty());
     EXPECT_EQ(stats.count, 1u);
     EXPECT_DOUBLE_EQ(stats.min, 5.0);
@@ -110,7 +110,7 @@ TEST(StatisticsTest, SingleValue) {
 }
 
 TEST(StatisticsTest, MultipleValues) {
-    auto stats = Statistics::Compute({10.0, 20.0, 30.0, 40.0, 50.0});
+    auto stats = Statistics::Compute({ 10.0, 20.0, 30.0, 40.0, 50.0 });
     EXPECT_EQ(stats.count, 5u);
     EXPECT_DOUBLE_EQ(stats.min, 10.0);
     EXPECT_DOUBLE_EQ(stats.max, 50.0);
@@ -128,13 +128,13 @@ TEST(StatisticsTest, Percentiles) {
 }
 
 TEST(StatisticsTest, StandardDeviation) {
-    auto stats = Statistics::Compute({2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0});
+    auto stats = Statistics::Compute({ 2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0 });
     EXPECT_GT(stats.stddev, 0.0);
     EXPECT_LT(stats.stddev, 5.0);
 }
 
 TEST(StatisticsTest, Summary) {
-    auto stats = Statistics::Compute({1.0, 2.0, 3.0});
+    auto stats = Statistics::Compute({ 1.0, 2.0, 3.0 });
     auto summary = stats.Summary();
     EXPECT_NE(summary.find("n=3"), std::string::npos);
     EXPECT_NE(summary.find("min="), std::string::npos);
@@ -347,7 +347,7 @@ TEST(DashboardDataTest, HealthyDecoderCount) {
     unhealthy.totalDecodes = 100;
     unhealthy.successCount = 40;
     unhealthy.failureCount = 60;
-    d.decoders = {healthy, unhealthy, healthy};
+    d.decoders = { healthy, unhealthy, healthy };
     EXPECT_EQ(d.HealthyDecoderCount(), 2u);
 }
 
@@ -467,4 +467,3 @@ TEST(DiagnosticsConfigTest, Disabled) {
     auto cfg = DiagnosticsConfig::Disabled();
     EXPECT_FALSE(cfg.enabled);
 }
-

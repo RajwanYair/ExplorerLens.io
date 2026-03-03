@@ -81,7 +81,7 @@ UNICODE / _UNICODE — Unicode build
 > (e.g., `<mmsystem.h>`, `<winsock2.h>`).
 > Headers like `<versionhelpers.h>` that depend on types from excluded headers
 > will fail to compile.
-> See [BUILD_TROUBLESHOOTING.md](BUILD_TROUBLESHOOTING.md) Issue #4 for details.
+> See [build-troubleshooting.md](build-troubleshooting.md) Issue #4 for details.
 
 ---
 
@@ -555,4 +555,3 @@ Select-String -Path $log -Pattern "FAILED|error C|fatal error|warning C" -CaseSe
  Write-Host "$_ : $exists" -ForegroundColor $(if($exists){"Green"}else{"Red"})
 }
 ```
-

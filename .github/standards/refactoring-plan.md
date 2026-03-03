@@ -38,17 +38,17 @@ estimated effort, and concrete action items.
 
 | Item | Status | Description |
 |------|--------|-------------|
-| **TOOL_VERSIONS.md** | ✅ Done | Complete tool/library version matrix with upgrade procedures |
+| **tool-versions.md** | ✅ Done | Complete tool/library version matrix with upgrade procedures |
 | **Markdown lint fixes** | ✅ Done | Fixed README.md, CHANGELOG.md, docs/development/README.md, Engine/README.md |
-| **CODING_STANDARDS.md** | ✅ OK | Already comprehensive (684 lines) |
-| **BUILD_METHOD.md** | ✅ OK | Already comprehensive (559 lines) |
-| **BUILD_TROUBLESHOOTING.md** | ✅ OK | Already comprehensive |
+| **coding-standards.md** | ✅ OK | Already comprehensive (684 lines) |
+| **build-method.md** | ✅ OK | Already comprehensive (559 lines) |
+| **build-troubleshooting.md** | ✅ OK | Already comprehensive |
 | **copilot-instructions.md** | ✅ OK | Already comprehensive |
 
 ### Remaining Documentation Actions (P2)
 
-- [x] Create `.github/standards/ARCHITECTURE_DECISIONS.md` — ADR log for major design decisions ✅
-- [x] Create `.github/standards/PERFORMANCE_BENCHMARKS.md` — baseline performance targets ✅
+- [x] Create `.github/standards/architecture-decisions.md` — ADR log for major design decisions ✅
+- [x] Create `.github/standards/performance-benchmarks.md` — baseline performance targets ✅
 - [x] Update `DEVELOPMENT_LEARNINGS.md` with latest patterns discovered ✅ (Section 9 added — architecture patterns, build timing, singleton tests)
 - [x] Add Mermaid architecture diagrams to `docs/architecture/` ✅ (3 diagrams: system-overview, decode-pipeline, plugin-architecture)
 
@@ -307,7 +307,7 @@ PluginCompatibilityKitV2). Key areas:
 | 2 | Documentation standards | Low | ✅ Done |
 | 3 | Markdown lint fixes | Low | ✅ Done |
 | 4 | .editorconfig | Low | ✅ Done |
-| 5 | TOOL_VERSIONS.md | Low | ✅ Done |
+| 5 | tool-versions.md | Low | ✅ Done |
 
 ### Step 2 (Near-term — v16.0.0)
 

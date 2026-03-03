@@ -101,7 +101,7 @@ scoop update cmake ninja git nasm meson nuget 7zip
 
 1. Run VS Installer → Update VS 18 BuildTools
 2. Update `copilot-instructions.md` with new cl.exe version
-3. Update `BUILD_METHOD.md` tool paths
+3. Update `build-method.md` tool paths
 4. Update `c_cpp_properties.json` compiler path
 5. Clean build and verify zero warnings
 

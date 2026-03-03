@@ -31,6 +31,8 @@
 
 #define LENSTYPE_ZIP 1
 #define LENSTYPE_CBZ 2
+#define LENSTYPE_RAR 3   // .rar RAR archives
+#define LENSTYPE_CBR 4   // .cbr Comic book RAR archives
 #define LENSTYPE_EPUB 5
 #define LENSTYPE_7Z 6
 #define LENSTYPE_CB7 7
@@ -151,6 +153,7 @@
 #define LENSTYPE_XCF 91      // .xcf GIMP native image
 #define LENSTYPE_SGI 92      // .sgi/.rgb/.rgba/.bw SGI image
 #define LENSTYPE_XPM 93      // .xpm X PixMap image
+#define LENSTYPE_JXR 94      // .jxr/.wdp/.hdp JPEG XR / HD Photo
 
 // ============================================================================
 // Image format identifiers (for detection within archives)
