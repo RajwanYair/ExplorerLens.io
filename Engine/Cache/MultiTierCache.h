@@ -1,16 +1,14 @@
-// =============================================================================
-// ExplorerLens Engine — Advanced Multi-Tier Cache
-// Advanced Caching & Database Optimization
+// MultiTierCache.h — Advanced Multi-Tier Cache with Bloom Filter
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Adds Bloom filter negative-cache, WAL-mode SQLite, multi-tier hierarchy,
 // background maintenance, and a cache statistics dashboard feed.
-// =============================================================================
-
+//
 #pragma once
 
 #include <windows.h>
 #include <cstdint>
+#include <cmath>
 #include <string>
 #include <array>
 #include <vector>
@@ -61,6 +59,137 @@ private:
     void SetBit(uint32_t index);
     bool GetBit(uint32_t index) const;
 };
+
+// ============================================================================
+// BloomFilter — inline method implementations
+// ============================================================================
+
+inline BloomFilter::BloomFilter(uint32_t expectedElements, double falsePositiveRate)
+    : m_insertedCount(0) {
+    // Ensure sane bounds
+    if (expectedElements == 0) expectedElements = 1;
+    if (falsePositiveRate <= 0.0) falsePositiveRate = 0.001;
+    if (falsePositiveRate >= 1.0) falsePositiveRate = 0.5;
+
+    // Optimal number of bits: m = -(n * ln(p)) / (ln(2)^2)
+    double ln2 = std::log(2.0);
+    double ln2sq = ln2 * ln2;
+    double m = -(static_cast<double>(expectedElements) * std::log(falsePositiveRate)) / ln2sq;
+    m_bitCount = static_cast<uint32_t>((std::max)(m, 64.0));
+
+    // Optimal number of hash functions: k = (m/n) * ln(2)
+    double k = (static_cast<double>(m_bitCount) / expectedElements) * ln2;
+    m_hashCount = static_cast<uint32_t>((std::max)(k, 1.0));
+    if (m_hashCount > 20) m_hashCount = 20; // Cap at 20 hash functions
+
+    // Allocate bit array (ceil to bytes)
+    m_bits.resize((m_bitCount + 7) / 8, 0);
+}
+
+inline void BloomFilter::Insert(const std::wstring& key) {
+    for (uint32_t i = 0; i < m_hashCount; ++i) {
+        uint32_t h = Hash(key, i);
+        SetBit(h % m_bitCount);
+    }
+    ++m_insertedCount;
+}
+
+inline bool BloomFilter::MayContain(const std::wstring& key) const {
+    for (uint32_t i = 0; i < m_hashCount; ++i) {
+        uint32_t h = Hash(key, i);
+        if (!GetBit(h % m_bitCount))
+            return false;
+    }
+    return true;
+}
+
+inline void BloomFilter::Clear() {
+    std::fill(m_bits.begin(), m_bits.end(), static_cast<uint8_t>(0));
+    m_insertedCount = 0;
+}
+
+inline void BloomFilter::Serialize(std::vector<uint8_t>& outBuffer) const {
+    // Format: [bitCount(4)] [hashCount(4)] [insertedCount(4)] [bits...]
+    outBuffer.resize(12 + m_bits.size());
+    std::memcpy(outBuffer.data(), &m_bitCount, 4);
+    std::memcpy(outBuffer.data() + 4, &m_hashCount, 4);
+    std::memcpy(outBuffer.data() + 8, &m_insertedCount, 4);
+    if (!m_bits.empty()) {
+        std::memcpy(outBuffer.data() + 12, m_bits.data(), m_bits.size());
+    }
+}
+
+inline bool BloomFilter::Deserialize(const std::vector<uint8_t>& buffer) {
+    if (buffer.size() < 12) return false;
+    std::memcpy(&m_bitCount, buffer.data(), 4);
+    std::memcpy(&m_hashCount, buffer.data() + 4, 4);
+    std::memcpy(&m_insertedCount, buffer.data() + 8, 4);
+    size_t expectedBytes = (m_bitCount + 7) / 8;
+    if (buffer.size() < 12 + expectedBytes) return false;
+    m_bits.resize(expectedBytes);
+    std::memcpy(m_bits.data(), buffer.data() + 12, expectedBytes);
+    return true;
+}
+
+inline double BloomFilter::GetEstimatedFalsePositiveRate() const {
+    if (m_insertedCount == 0 || m_bitCount == 0) return 0.0;
+    // FPR ≈ (1 - e^(-k*n/m))^k
+    double exponent = -(static_cast<double>(m_hashCount) * m_insertedCount) / m_bitCount;
+    double base = 1.0 - std::exp(exponent);
+    return std::pow(base, static_cast<double>(m_hashCount));
+}
+
+inline uint32_t BloomFilter::Hash(const std::wstring& key, uint32_t seed) const {
+    // MurmurHash3-inspired 32-bit hash over wchar_t data
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(key.data());
+    uint32_t len = static_cast<uint32_t>(key.size() * sizeof(wchar_t));
+    uint32_t h = seed ^ len;
+    const uint32_t c1 = 0xcc9e2d51;
+    const uint32_t c2 = 0x1b873593;
+
+    const uint32_t* blocks = reinterpret_cast<const uint32_t*>(data);
+    uint32_t nblocks = len / 4;
+
+    for (uint32_t i = 0; i < nblocks; ++i) {
+        uint32_t k = blocks[i];
+        k *= c1;
+        k = (k << 15) | (k >> 17);
+        k *= c2;
+        h ^= k;
+        h = (h << 13) | (h >> 19);
+        h = h * 5 + 0xe6546b64;
+    }
+
+    // Tail
+    const uint8_t* tail = data + nblocks * 4;
+    uint32_t k1 = 0;
+    switch (len & 3) {
+    case 3: k1 ^= static_cast<uint32_t>(tail[2]) << 16; [[fallthrough]];
+    case 2: k1 ^= static_cast<uint32_t>(tail[1]) << 8; [[fallthrough]];
+    case 1: k1 ^= static_cast<uint32_t>(tail[0]);
+        k1 *= c1;
+        k1 = (k1 << 15) | (k1 >> 17);
+        k1 *= c2;
+        h ^= k1;
+    }
+
+    // Finalization mix
+    h ^= len;
+    h ^= h >> 16;
+    h *= 0x85ebca6b;
+    h ^= h >> 13;
+    h *= 0xc2b2ae35;
+    h ^= h >> 16;
+    return h;
+}
+
+inline void BloomFilter::SetBit(uint32_t index) {
+    m_bits[index / 8] |= static_cast<uint8_t>(1u << (index % 8));
+}
+
+inline bool BloomFilter::GetBit(uint32_t index) const {
+    return (m_bits[index / 8] & static_cast<uint8_t>(1u << (index % 8))) != 0;
+}
 
 // ============================================================================
 // Cache Tier abstraction

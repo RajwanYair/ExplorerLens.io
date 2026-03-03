@@ -15410,14 +15410,48 @@ TEST(Test_MTC_Tiers) {
 }
 TEST(Test_MTC_BloomFilter) {
     using namespace ExplorerLens::Cache;
-    // BloomFilter ctor/Insert/MayContain are declared but not yet implemented in header —
-    // validate type traits and inline accessor instead.
-    ASSERT(sizeof(BloomFilter) > 0);
-    ASSERT(std::is_class_v<BloomFilter>);
+    // Construct with small capacity for testing
+    BloomFilter bf(1000, 0.01);
+    ASSERT(bf.GetInsertedCount() == 0);
+    ASSERT(bf.GetEstimatedFalsePositiveRate() == 0.0);
+
+    // Insert some keys
+    bf.Insert(L"hello");
+    bf.Insert(L"world");
+    bf.Insert(L"explorer");
+    ASSERT(bf.GetInsertedCount() == 3);
+
+    // Inserted keys must be found (no false negatives)
+    ASSERT(bf.MayContain(L"hello"));
+    ASSERT(bf.MayContain(L"world"));
+    ASSERT(bf.MayContain(L"explorer"));
+
+    // FPR should be very low with only 3 elements in a 1000-element filter
+    ASSERT(bf.GetEstimatedFalsePositiveRate() < 0.1);
+
+    // Serialize + Deserialize round-trip
+    std::vector<uint8_t> buf;
+    bf.Serialize(buf);
+    ASSERT(buf.size() >= 12); // At least header
+
+    BloomFilter bf2(10, 0.5); // Different params
+    ASSERT(bf2.Deserialize(buf));
+    ASSERT(bf2.GetInsertedCount() == 3);
+    ASSERT(bf2.MayContain(L"hello"));
+    ASSERT(bf2.MayContain(L"world"));
+
+    // Clear should reset
+    bf.Clear();
+    ASSERT(bf.GetInsertedCount() == 0);
+    ASSERT(!bf.MayContain(L"hello"));
 }
 TEST(Test_MTC_Policy) {
     using namespace ExplorerLens::Cache;
-    ASSERT(sizeof(BloomFilter) > 0);
+    BloomFilter bf;
+    ASSERT(bf.GetInsertedCount() == 0);
+    // Default constructed — insert and verify
+    bf.Insert(L"policy_test");
+    ASSERT(bf.MayContain(L"policy_test"));
     ASSERT(static_cast<int>(StorageTier::Memory) >= 0);
 }
 
