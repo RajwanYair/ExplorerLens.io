@@ -145,24 +145,24 @@ inline bool SetDarkModeForTitleBar(HWND hWnd, bool enable) {
 
 // Apply theme colors to dialog
 inline void ApplyThemeToDialog(HWND hDlg, const ThemeColors& theme) {
-    // Set dialog background brush
-    SetClassLongPtr(hDlg, GCLP_HBRBACKGROUND,
-        reinterpret_cast<LONG_PTR>(CreateSolidBrush(theme.background)));
+    // Set dialog background brush (delete old brush to avoid GDI leak)
+    HBRUSH oldBrush = reinterpret_cast<HBRUSH>(
+        SetClassLongPtr(hDlg, GCLP_HBRBACKGROUND,
+            reinterpret_cast<LONG_PTR>(CreateSolidBrush(theme.background))));
+    if (oldBrush) DeleteObject(oldBrush);
 
-    // Apply theme to all child windows
-    EnumChildWindows(hDlg, [](HWND hChild, LPARAM lParam) -> BOOL
+    // Apply theme to all child windows — send WM_THEMECHANGED so
+    // controls pick up the new visual-style theme set by ApplyDarkScrollbars
+    EnumChildWindows(hDlg, [](HWND hChild, LPARAM /*lParam*/) -> BOOL
         {
-            TCHAR className[256];
-            GetClassName(hChild, className, 256);
-
-            // Update control colors
+            SendMessage(hChild, WM_THEMECHANGED, 0, 0);
             InvalidateRect(hChild, nullptr, TRUE);
             return TRUE;
         }, 0);
 
-    // Force redraw
-    InvalidateRect(hDlg, nullptr, TRUE);
-    UpdateWindow(hDlg);
+    // Force full dialog redraw
+    RedrawWindow(hDlg, nullptr, nullptr,
+        RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 }
 
 /*
@@ -214,19 +214,35 @@ inline void SetDarkScrollbar(HWND hWnd, bool darkMode) {
     }
 }
 
-// Apply dark scrollbars to all child scrollable controls
+// Apply dark theme to ALL child controls (scrollbars, buttons, statics, etc.)
+// Standard checkbox, radio-button and group-box controls ignore the HDC text
+// color set in WM_CTLCOLORSTATIC — they paint text with the visual style.
+// Applying "DarkMode_Explorer" tells the visual-style renderer to use white
+// text on a dark background.
 inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
+    // Apply theme to the dialog window itself
+    SetDarkScrollbar(hDlg, darkMode);
+
     EnumChildWindows(hDlg, [](HWND hChild, LPARAM lParam) -> BOOL
         {
             bool dark = (lParam != 0);
             TCHAR className[64];
             GetClassName(hChild, className, 64);
 
-            // Apply dark scrollbars to listboxes, treeviews, listviews, edit controls
-            if (_tcsicmp(className, _T("ListBox")) == 0 ||
+            // Apply dark theme to ALL control types — buttons (checkboxes,
+            // radio buttons, group boxes), static labels, edit controls,
+            // list controls, tree views, combo boxes, etc.
+            if (_tcsicmp(className, _T("Button")) == 0 ||
+                _tcsicmp(className, _T("Static")) == 0 ||
+                _tcsicmp(className, _T("ListBox")) == 0 ||
                 _tcsicmp(className, _T("SysListView32")) == 0 ||
                 _tcsicmp(className, _T("SysTreeView32")) == 0 ||
-                _tcsicmp(className, _T("Edit")) == 0) {
+                _tcsicmp(className, _T("Edit")) == 0 ||
+                _tcsicmp(className, _T("ComboBox")) == 0 ||
+                _tcsicmp(className, _T("SysTabControl32")) == 0 ||
+                _tcsicmp(className, _T("msctls_trackbar32")) == 0 ||
+                _tcsicmp(className, _T("msctls_progress32")) == 0 ||
+                _tcsicmp(className, _T("tooltips_class32")) == 0) {
                 SetDarkScrollbar(hChild, dark);
             }
 

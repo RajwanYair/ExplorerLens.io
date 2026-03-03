@@ -362,6 +362,31 @@ set(ENGINE_HEADERS
     Core/FormatNegotiator.h
     Core/TelemetryAggregator.h
     Core/DecoderRegistryV2.h
+    Core/AudioSpectrogramRenderer.h
+    Core/ArchiveHierarchyMapRenderer.h
+    Core/CodeSyntaxThumbnail.h
+    Core/PerceptualHashEngine.h
+    Core/DominantColorExtractor.h
+    Core/PhotoMosaicThumbnail.h
+    Core/FontGlyphGridRenderer.h
+    Core/SpreadsheetCellPreview.h
+    Core/PresentationSlideStrip.h
+    Core/ThumbnailBlurDetector.h
+    Core/ColorHistogramBadge.h
+    Core/GeoTagMapThumbnail.h
+    Core/FileAgeVisualizer.h
+    Core/ThumbnailLensEffect.h
+    Core/SmartGridLayoutEngine.h
+    Core/MetadataTooltipRenderer.h
+    Core/CompressedStreamAnalyzer.h
+    Core/AdaptiveContrastEnhancer.h
+    Core/DocumentDigestOverlay.h
+    Core/ThumbnailSignatureVerifier.h
+    Core/ArchivePasswordDetector.h
+    Core/ThumbnailStitcher.h
+    Core/CalendarHeatmapRenderer.h
+    Core/FileSizeProportionBadge.h
+    Core/IntelligentCachePruner.h
 
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h

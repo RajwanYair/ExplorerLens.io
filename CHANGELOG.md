@@ -79,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Version:** 14.0.0 "Apex" → 15.0.0 "Zenith"
-- **Total unit tests:** 2232+
+- **Total unit tests:** 2283+
 - **Codename:** Apex → Zenith
 
 ### Removed

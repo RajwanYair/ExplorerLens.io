@@ -81,7 +81,7 @@ struct ScannerConfig {
     std::vector<std::string> staleVersionPatterns = {
     "v5.0", "v5.1", "v5.2", "v5.3", "v5.4",
     "v6.0", "v6.1", "v6.2",
-    "5.0.0", "5.4.0", "6.0.0", "6.2.0"
+    "5.0.0", "5.4.0", "6.0.0", "6.2.0", "15.0.0"
     };
     std::vector<std::string> excludePatterns = {
     "CHANGELOG.md", // Changelog intentionally has old versions

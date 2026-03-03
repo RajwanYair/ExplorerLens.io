@@ -3,7 +3,7 @@
 
 param(
     [string]$Configuration = "Release",
-    [string]$Version = "7.0.0",
+    [string]$Version = "15.0.0",
     [string]$OutputDir = "",
     [switch]$IncludeDebugSymbols = $false,
     [switch]$IncludeSource = $false
@@ -39,15 +39,15 @@ try {
     # 1. Copy main binaries
     # =============================================================================
     Write-Host "`n[1/6] Copying main binaries..." -ForegroundColor Yellow
-    
+
     $BinariesDir = Join-Path $StagingDir "bin"
     New-Item -ItemType Directory -Path $BinariesDir -Force | Out-Null
-    
+
     $MainBinaries = @(
         "x64\$Configuration\LENSShell.dll",
         "x64\$Configuration\LENSManager.exe"
     )
-    
+
     foreach ($binary in $MainBinaries) {
         $sourcePath = Join-Path $RootDir $binary
         if (Test-Path $sourcePath) {
@@ -60,7 +60,7 @@ try {
             throw "Required binary not found: $binary"
         }
     }
-    
+
     # Copy debug symbols if requested
     if ($IncludeDebugSymbols) {
         Write-Host "`n[1b/6] Copying debug symbols..." -ForegroundColor Yellow
@@ -74,17 +74,17 @@ try {
             }
         }
     }
-    
+
     # =============================================================================
     # 2. Copy runtime dependencies
     # =============================================================================
     Write-Host "`n[2/6] Copying runtime dependencies..." -ForegroundColor Yellow
-    
+
     $RuntimeDeps = @(
         "x64\$Configuration\libde265.dll",
         "x64\$Configuration\zlib1.dll"
     )
-    
+
     foreach ($dep in $RuntimeDeps) {
         $sourcePath = Join-Path $RootDir $dep
         if (Test-Path $sourcePath) {
@@ -95,15 +95,15 @@ try {
             Write-Host "  ⚠ Optional dependency not found: $(Split-Path $dep -Leaf)" -ForegroundColor Yellow
         }
     }
-    
+
     # =============================================================================
     # 3. Copy documentation
     # =============================================================================
     Write-Host "`n[3/6] Copying documentation..." -ForegroundColor Yellow
-    
+
     $DocsDir = Join-Path $StagingDir "docs"
     New-Item -ItemType Directory -Path $DocsDir -Force | Out-Null
-    
+
     $DocFiles = @(
         "README.md",
         "USER_GUIDE.md",
@@ -111,7 +111,7 @@ try {
         "LICENSE",
         "KNOWN_ISSUES.md"
     )
-    
+
     foreach ($doc in $DocFiles) {
         $sourcePath = Join-Path $RootDir $doc
         if (Test-Path $sourcePath) {
@@ -122,19 +122,19 @@ try {
             Write-Host "  ⚠ Documentation not found: $doc" -ForegroundColor Yellow
         }
     }
-    
+
     # Copy release notes if available
     $releaseNotesPath = Join-Path $RootDir "docs\release-notes\RELEASE_NOTES_v$Version.md"
     if (Test-Path $releaseNotesPath) {
         Copy-Item $releaseNotesPath (Join-Path $DocsDir "RELEASE_NOTES.md") -Force
         Write-Host "  ✓ Copied RELEASE_NOTES_v$Version.md" -ForegroundColor Green
     }
-    
+
     # =============================================================================
     # 4. Create installation scripts
     # =============================================================================
     Write-Host "`n[4/6] Creating installation scripts..." -ForegroundColor Yellow
-    
+
     $InstallScript = @'
 # Install-ExplorerLens-Portable.ps1
 # Portable installation script for ExplorerLens
@@ -150,11 +150,11 @@ $BinDir = Join-Path $ScriptDir "bin"
 
 if ($Uninstall) {
     Write-Host "Unregistering ExplorerLens shell extension..." -ForegroundColor Yellow
-    
+
     # Unregister COM server
     $regsvr32 = Join-Path $env:SystemRoot "System32\regsvr32.exe"
     $lensShellPath = Join-Path $BinDir "LENSShell.dll"
-    
+
     if (Test-Path $lensShellPath) {
         & $regsvr32 /u /s $lensShellPath
         Write-Host "✓ Unregistered successfully" -ForegroundColor Green
@@ -163,14 +163,14 @@ if ($Uninstall) {
     }
 } else {
     Write-Host "Installing ExplorerLens shell extension..." -ForegroundColor Yellow
-    
+
     # Register COM server
     $regsvr32 = Join-Path $env:SystemRoot "System32\regsvr32.exe"
     $lensShellPath = Join-Path $BinDir "LENSShell.dll"
-    
+
     if (Test-Path $lensShellPath) {
         & $regsvr32 /s $lensShellPath
-        
+
         if ($LASTEXITCODE -eq 0) {
             Write-Host "✓ Registered successfully" -ForegroundColor Green
             Write-Host "`nExplorerLens is now installed!" -ForegroundColor Green
@@ -184,11 +184,11 @@ if ($Uninstall) {
     }
 }
 '@
-    
+
     $installScriptPath = Join-Path $StagingDir "Install-ExplorerLens-Portable.ps1"
     Set-Content -Path $installScriptPath -Value $InstallScript -Force
     Write-Host "  ✓ Created Install-ExplorerLens-Portable.ps1" -ForegroundColor Green
-    
+
     # Create README for portable version
     $PortableReadme = @"
 ExplorerLens v$Version - Portable Edition
@@ -219,20 +219,20 @@ Configuration Manager: bin\LENSManager.exe
 Build Date: $(Get-Date -Format 'yyyy-MM-dd')
 Version: $Version
 "@
-    
+
     $readmePath = Join-Path $StagingDir "README-PORTABLE.txt"
     Set-Content -Path $readmePath -Value $PortableReadme -Force
     Write-Host "  ✓ Created README-PORTABLE.txt" -ForegroundColor Green
-    
+
     # =============================================================================
     # 5. Optional: Include source code
     # =============================================================================
     if ($IncludeSource) {
         Write-Host "`n[5/6] Including source code..." -ForegroundColor Yellow
-        
+
         $SourceDir = Join-Path $StagingDir "src"
         New-Item -ItemType Directory -Path $SourceDir -Force | Out-Null
-        
+
         # Copy essential source directories (exclude build artifacts)
         $SourceDirs = @("LENSShell", "LENSManager", "Engine", "SDK", "tests")
         foreach ($dir in $SourceDirs) {
@@ -243,41 +243,41 @@ Version: $Version
                 Write-Host "  ✓ Copied $dir/" -ForegroundColor Green
             }
         }
-        
+
         # Copy solution file
         Copy-Item (Join-Path $RootDir "LENSShell.sln") (Join-Path $SourceDir "LENSShell.sln") -Force
         Write-Host "  ✓ Copied LENSShell.sln" -ForegroundColor Green
     }
-    
+
     # =============================================================================
     # 6. Create ZIP archive
     # =============================================================================
     Write-Host "`n[6/6] Creating ZIP archive..." -ForegroundColor Yellow
-    
+
     $ZipFileName = "ExplorerLens-$Version-Portable.zip"
     $ZipPath = Join-Path $OutputDir $ZipFileName
-    
+
     # Remove old ZIP if exists
     if (Test-Path $ZipPath) {
         Remove-Item $ZipPath -Force
         Write-Host "  Removed old ZIP" -ForegroundColor Gray
     }
-    
+
     # Create ZIP (requires PowerShell 5.0+)
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [System.IO.Compression.ZipFile]::CreateFromDirectory($StagingDir, $ZipPath, 'Optimal', $false)
-    
+
     $zipSize = [math]::Round((Get-Item $ZipPath).Length / 1MB, 2)
     Write-Host "  ✓ Created $ZipFileName ($zipSize MB)" -ForegroundColor Green
-    
+
     # =============================================================================
     # 7. Generate checksums
     # =============================================================================
     Write-Host "`n[7/6] Generating checksums..." -ForegroundColor Yellow
-    
+
     $sha256 = (Get-FileHash -Path $ZipPath -Algorithm SHA256).Hash
     $checksumFile = Join-Path $OutputDir "ExplorerLens-$Version-Portable.sha256"
-    
+
     $checksumContent = @"
 $sha256  $ZipFileName
 
@@ -285,11 +285,11 @@ $sha256  $ZipFileName
 # PowerShell: (Get-FileHash -Path '$ZipFileName' -Algorithm SHA256).Hash
 # Linux/Mac: sha256sum '$ZipFileName'
 "@
-    
+
     Set-Content -Path $checksumFile -Value $checksumContent -Force
     Write-Host "  ✓ SHA256: $sha256" -ForegroundColor Green
     Write-Host "  ✓ Saved to: $(Split-Path $checksumFile -Leaf)" -ForegroundColor Green
-    
+
     # =============================================================================
     # SUCCESS
     # =============================================================================
@@ -300,7 +300,7 @@ $sha256  $ZipFileName
     Write-Host "  Size:     $zipSize MB" -ForegroundColor Cyan
     Write-Host "  SHA256:   $checksumFile" -ForegroundColor Cyan
     Write-Host "============================================`n" -ForegroundColor Green
-    
+
 } finally {
     # Clean up staging directory
     if (Test-Path $StagingDir) {
@@ -308,4 +308,3 @@ $sha256  $ZipFileName
         Write-Host "[Cleaned] Temporary staging directory" -ForegroundColor Gray
     }
 }
-

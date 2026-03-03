@@ -110,11 +110,14 @@ Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\*.db" -Force
 ### Low Priority (P3)
 
 #### 7. Dark Mode Support in LENSManager
-**Status:** Partial implementation 
-**Impact:** LENSManager UI doesn't fully respect Windows dark mode 
-**Workaround:** None. Cosmetic issue only.
+**Status:** ✅ **RESOLVED** (v15.0.0) 
+**Impact:** LENSManager UI now fully respects Windows dark/light mode 
+**Resolution:** Applied `SetWindowTheme(hChild, L"DarkMode_Explorer", nullptr)` to all child controls (Button, Static, ComboBox, etc.) so that checkboxes, radio buttons, group boxes, and static labels all render white text on dark background.
 
-**Note:** DarkModeHelper.h implements dark mode for dialogs. Dark mode was re-enabled in with conditional OnCtlColor handlers. WinUI 3 manager (-19) provides a fully modern alternative.
+**Details:**
+- DarkModeHelper.h `ApplyDarkScrollbars()` expanded to cover all control types
+- `ApplyThemeToDialog()` sends `WM_THEMECHANGED` to all children
+- Dark mode toggle (`IDC_BTN_THEME`) applies immediately via `DarkModeController::ToggleTheme()`
 
 #### 8. Network Drive Performance
 **Status:** By design 
@@ -341,4 +344,3 @@ High memory usage is temporary and released after thumbnail generation completes
 
 **Document Version:** 1.1 
 **Last Updated:** February 17, 2026
-

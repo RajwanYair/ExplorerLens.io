@@ -3,7 +3,7 @@
 # Version: 1.0.0
 
 param(
-    [string]$Version = "7.0.0",
+    [string]$Version = "15.0.0",
     [switch]$DryRun,
     [switch]$SkipMSI,
     [switch]$SkipPortableZip,
@@ -271,4 +271,3 @@ try {
 } finally {
     Pop-Location
 }
-

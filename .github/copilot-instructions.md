@@ -202,7 +202,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~1187 unit tests, 5 benchmarks
+- **Test count:** ~2283 unit tests, 5 benchmarks
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 

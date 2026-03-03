@@ -146,7 +146,7 @@ public:
         bool include_heap = false; // MiniDumpWithFullMemory (large!)
         bool include_thread_info = true; // MiniDumpWithThreadInfo
         bool privacy_mode = true; // Strip PII from metadata
-        std::wstring product_version = L"7.0.0";
+        std::wstring product_version = L"15.0.0";
     };
 
     explicit MinidumpCapturer(const Config& config = {})

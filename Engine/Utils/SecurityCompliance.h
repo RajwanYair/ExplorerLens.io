@@ -425,7 +425,7 @@ public:
     struct Config {
         SBOMFormat format = SBOMFormat::SPDX_2_3;
         std::wstring product_name = L"ExplorerLens";
-        std::wstring product_version = L"7.0.0";
+        std::wstring product_version = L"15.0.0";
         std::wstring supplier = L"Organization: ExplorerLens Project";
         std::wstring namespace_uri = L"https://explorerlens.dev/spdx";
     };

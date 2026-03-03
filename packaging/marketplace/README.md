@@ -73,7 +73,7 @@ The ExplorerLens Plugin Marketplace provides a centralized registry for discover
  "manifest": "sha256:..."
  },
  "downloadUrl": "https://...",
- "minEngineVersion": "6.0.0",
+ "minEngineVersion": "15.0.0",
  "capabilities": ["READ_FILE", "DECODE"],
  "supportedExtensions": [".psd", ".psb"],
  "size": 524288,
@@ -385,5 +385,4 @@ Organizations can host private registries:
 
 **Registry Version:** 1.0.0 
 **Last Updated:** January 6, 2026 
-**Status:** Beta (v6.0.0 Launch)
-
+**Status:** Release (v15.0.0 Launch)

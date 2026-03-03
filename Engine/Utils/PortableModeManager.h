@@ -118,7 +118,7 @@ struct PortableConfig {
         cfg.loaded = true;
 
         auto& general = cfg.EnsureSection("General");
-        general.Set("Version", "7.0.0");
+        general.Set("Version", "15.0.0");
         general.Set("PortableMode", "true");
         general.Set("CacheDirectory", ".\\cache");
 
@@ -319,7 +319,7 @@ struct BadgeOverlayConfig {
 //------------------------------------------------------------------------------
 struct DeploymentInfo {
     DeploymentMode mode = DeploymentMode::Installed;
-    std::string version = "7.0.0";
+    std::string version = "15.0.0";
     std::string dllPath;
     std::string cacheLocation;
     std::string configSource; // "Registry" or "portable.ini"

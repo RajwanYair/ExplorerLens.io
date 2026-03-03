@@ -1,5 +1,5 @@
 // gpu_accelerator.h - DirectX 11 GPU-Accelerated Thumbnail Generation
-// ExplorerLens v5.2.0 - GPU Acceleration Support
+// ExplorerLens v15.0.0 - GPU Acceleration Support
 // Copyright (c) 2025 ExplorerLens Project
 //
 // Provides hardware-accelerated thumbnail generation using DirectX 11
@@ -52,12 +52,12 @@ enum class GPUCapability : UINT {
 
 inline GPUCapability operator|(GPUCapability a, GPUCapability b) {
   return static_cast<GPUCapability>(static_cast<UINT>(a) |
-                                    static_cast<UINT>(b));
+    static_cast<UINT>(b));
 }
 
 inline GPUCapability operator&(GPUCapability a, GPUCapability b) {
   return static_cast<GPUCapability>(static_cast<UINT>(a) &
-                                    static_cast<UINT>(b));
+    static_cast<UINT>(b));
 }
 
 inline bool HasCapability(GPUCapability caps, GPUCapability test) {
@@ -82,9 +82,9 @@ struct ThumbnailRequest {
   UINT targetWidth;        // Target thumbnail width
   UINT targetHeight;       // Target thumbnail height
   int priority;            // Request priority (higher = sooner)
-  std::function<void(IWICBitmap *)> callback; // Completion callback
+  std::function<void(IWICBitmap*)> callback; // Completion callback
 
-  bool operator<(const ThumbnailRequest &other) const {
+  bool operator<(const ThumbnailRequest& other) const {
     return priority < other.priority; // Reverse for priority_queue
   }
 };
@@ -93,7 +93,7 @@ struct ThumbnailRequest {
 class GPUAccelerator {
 public:
   // Get singleton instance
-  static GPUAccelerator &Instance();
+  static GPUAccelerator& Instance();
 
   // Initialization and cleanup
   HRESULT Initialize(bool allowWARP = true);
@@ -102,23 +102,23 @@ public:
   bool IsGPUAvailable() const { return m_gpuAvailable; }
 
   // Device information
-  const GPUDeviceInfo &GetDeviceInfo() const { return m_deviceInfo; }
+  const GPUDeviceInfo& GetDeviceInfo() const { return m_deviceInfo; }
   bool HasComputeShaders() const;
   bool IsHighPerformance() const;
 
   // Thumbnail generation (synchronous)
-  HRESULT CreateThumbnail(IWICBitmapSource *pSource, UINT targetWidth,
-                          UINT targetHeight, IWICBitmap **ppThumbnail);
+  HRESULT CreateThumbnail(IWICBitmapSource* pSource, UINT targetWidth,
+    UINT targetHeight, IWICBitmap** ppThumbnail);
 
   // Thumbnail generation from file (synchronous)
-  HRESULT CreateThumbnailFromFile(const std::wstring &filePath,
-                                  UINT targetWidth, UINT targetHeight,
-                                  IWICBitmap **ppThumbnail);
+  HRESULT CreateThumbnailFromFile(const std::wstring& filePath,
+    UINT targetWidth, UINT targetHeight,
+    IWICBitmap** ppThumbnail);
 
   // Async thumbnail queue
-  void QueueThumbnail(const std::wstring &filePath, UINT targetWidth,
-                      UINT targetHeight, int priority,
-                      std::function<void(IWICBitmap *)> callback);
+  void QueueThumbnail(const std::wstring& filePath, UINT targetWidth,
+    UINT targetHeight, int priority,
+    std::function<void(IWICBitmap*)> callback);
 
   void CancelPendingRequests();
   size_t GetQueueSize() const;
@@ -142,7 +142,7 @@ public:
     }
   };
 
-  const Stats &GetStats() const { return m_stats; }
+  const Stats& GetStats() const { return m_stats; }
   void ResetStats() { m_stats.Reset(); }
 
   // Device loss detection and recovery
@@ -154,8 +154,8 @@ private:
   ~GPUAccelerator();
 
   // Prevent copying
-  GPUAccelerator(const GPUAccelerator &) = delete;
-  GPUAccelerator &operator=(const GPUAccelerator &) = delete;
+  GPUAccelerator(const GPUAccelerator&) = delete;
+  GPUAccelerator& operator=(const GPUAccelerator&) = delete;
 
   // Initialization helpers
   HRESULT CreateDevice(bool allowWARP);
@@ -164,32 +164,32 @@ private:
   HRESULT DetectCapabilities();
 
   // Rendering helpers
-  HRESULT CreateTextureFromWIC(IWICBitmapSource *pSource,
-                               ID3D11Texture2D **ppTexture,
-                               ID3D11ShaderResourceView **ppSRV);
+  HRESULT CreateTextureFromWIC(IWICBitmapSource* pSource,
+    ID3D11Texture2D** ppTexture,
+    ID3D11ShaderResourceView** ppSRV);
 
-  HRESULT ResizeTexture(ID3D11ShaderResourceView *pSourceSRV, UINT sourceWidth,
-                        UINT sourceHeight, UINT targetWidth, UINT targetHeight,
-                        ID3D11Texture2D **ppOutput);
+  HRESULT ResizeTexture(ID3D11ShaderResourceView* pSourceSRV, UINT sourceWidth,
+    UINT sourceHeight, UINT targetWidth, UINT targetHeight,
+    ID3D11Texture2D** ppOutput);
 
-  HRESULT ResizeTextureComputeShader(ID3D11ShaderResourceView *pSourceSRV,
-                                     UINT sourceWidth, UINT sourceHeight,
-                                     UINT targetWidth, UINT targetHeight,
-                                     ID3D11Texture2D **ppOutput);
+  HRESULT ResizeTextureComputeShader(ID3D11ShaderResourceView* pSourceSRV,
+    UINT sourceWidth, UINT sourceHeight,
+    UINT targetWidth, UINT targetHeight,
+    ID3D11Texture2D** ppOutput);
 
-  HRESULT TextureToWICBitmap(ID3D11Texture2D *pTexture, IWICBitmap **ppBitmap);
+  HRESULT TextureToWICBitmap(ID3D11Texture2D* pTexture, IWICBitmap** ppBitmap);
 
   // CPU fallback
-  HRESULT CreateThumbnailCPU(IWICBitmapSource *pSource, UINT targetWidth,
-                             UINT targetHeight, IWICBitmap **ppThumbnail);
+  HRESULT CreateThumbnailCPU(IWICBitmapSource* pSource, UINT targetWidth,
+    UINT targetHeight, IWICBitmap** ppThumbnail);
 
   // Texture pool management
   HRESULT AcquireTexture(UINT width, UINT height, DXGI_FORMAT format,
-                         UINT bindFlags, ID3D11Texture2D **ppTexture,
-                         ID3D11ShaderResourceView **ppSRV = nullptr,
-                         ID3D11UnorderedAccessView **ppUAV = nullptr);
+    UINT bindFlags, ID3D11Texture2D** ppTexture,
+    ID3D11ShaderResourceView** ppSRV = nullptr,
+    ID3D11UnorderedAccessView** ppUAV = nullptr);
 
-  void ReleaseTexture(ID3D11Texture2D *pTexture);
+  void ReleaseTexture(ID3D11Texture2D* pTexture);
 
   void ClearTexturePool();
 
@@ -249,12 +249,12 @@ private:
 // Helper class for automatic GPU/CPU fallback
 class ThumbnailGenerator {
 public:
-  static HRESULT Generate(IWICBitmapSource *pSource, UINT targetWidth,
-                          UINT targetHeight, IWICBitmap **ppThumbnail);
+  static HRESULT Generate(IWICBitmapSource* pSource, UINT targetWidth,
+    UINT targetHeight, IWICBitmap** ppThumbnail);
 
-  static HRESULT GenerateFromFile(const std::wstring &filePath,
-                                  UINT targetWidth, UINT targetHeight,
-                                  IWICBitmap **ppThumbnail);
+  static HRESULT GenerateFromFile(const std::wstring& filePath,
+    UINT targetWidth, UINT targetHeight,
+    IWICBitmap** ppThumbnail);
 };
 
 // Utility functions
@@ -263,18 +263,17 @@ namespace GPUUtil {
 bool IsDirectX11Available();
 
 // Get optimal thumbnail size for GPU processing
-void GetOptimalSize(UINT srcWidth, UINT srcHeight, UINT maxSize, UINT &outWidth,
-                    UINT &outHeight);
+void GetOptimalSize(UINT srcWidth, UINT srcHeight, UINT maxSize, UINT& outWidth,
+  UINT& outHeight);
 
 // Calculate mipmap levels for better quality
 UINT CalculateMipLevels(UINT width, UINT height);
 
 // Convert DXGI format to WIC format
-HRESULT DXGIFormatToWIC(DXGI_FORMAT dxgiFormat, GUID *pWicFormat);
+HRESULT DXGIFormatToWIC(DXGI_FORMAT dxgiFormat, GUID* pWicFormat);
 
 // Convert WIC format to DXGI format
-HRESULT WICFormatToDXGI(const GUID &wicFormat, DXGI_FORMAT *pDxgiFormat);
+HRESULT WICFormatToDXGI(const GUID& wicFormat, DXGI_FORMAT* pDxgiFormat);
 } // namespace GPUUtil
 
 } // namespace ExplorerLens
-

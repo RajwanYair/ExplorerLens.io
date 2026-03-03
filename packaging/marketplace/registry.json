@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "registry": {
     "name": "ExplorerLens Plugin Marketplace Beta",
-    "description": "Official plugin registry for ExplorerLens v6.0.0+",
+    "description": "Official plugin registry for ExplorerLens v15.0.0+",
     "baseUrl": "https://marketplace.explorerlens.org/api/v1",
     "updateIntervalHours": 24
   },
@@ -59,8 +59,8 @@
       "homepage": "https://docs.explorerlens.org/plugins/psd",
       "repository": "https://github.com/explorerlens/plugin-psd",
       "license": "MIT",
-      "minEngineVersion": "6.0.0",
-      "maxEngineVersion": "6.999.999",
+      "minEngineVersion": "15.0.0",
+      "maxEngineVersion": "15.999.999",
       "capabilities": [
         "READ_FILE",
         "DECODE"
@@ -93,8 +93,8 @@
       "homepage": "https://docs.explorerlens.org/plugins/3dmodel",
       "repository": "https://github.com/explorerlens/plugin-3dmodel",
       "license": "MIT",
-      "minEngineVersion": "6.0.0",
-      "maxEngineVersion": "6.999.999",
+      "minEngineVersion": "15.0.0",
+      "maxEngineVersion": "15.999.999",
       "capabilities": [
         "READ_FILE",
         "DECODE",
@@ -129,8 +129,8 @@
       "homepage": "https://github.com/contributor/explorerlens-xcf",
       "repository": "https://github.com/contributor/explorerlens-xcf",
       "license": "MIT",
-      "minEngineVersion": "6.0.0",
-      "maxEngineVersion": "6.999.999",
+      "minEngineVersion": "15.0.0",
+      "maxEngineVersion": "15.999.999",
       "capabilities": [
         "READ_FILE",
         "DECODE"
@@ -162,4 +162,3 @@
     "verifiedPlugins": 2
   }
 }
-

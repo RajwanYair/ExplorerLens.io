@@ -1776,7 +1776,7 @@ struct GateV23Verdict {
     bool approved = false;
     uint32_t passed = 0;
     uint32_t failed = 0;
-    std::wstring version = L"14.0.0";
+    std::wstring version = L"15.0.0";
     std::wstring milestone = L"v14.0 P1 - GPU Pipeline V3";
 };
 
@@ -1868,7 +1868,7 @@ struct GateV24Verdict {
     bool approved = false;
     uint32_t passed = 0;
     uint32_t failed = 0;
-    std::wstring version = L"14.0.0";
+    std::wstring version = L"15.0.0";
     std::wstring milestone = L"v14.0 P2 - Format Intelligence";
     // Compatibility members (tests)
     uint32_t kpiPassCount = 0;
@@ -1979,7 +1979,7 @@ struct GateV25Verdict {
     bool approved = false;
     uint32_t passed = 0;
     uint32_t failed = 0;
-    std::wstring version = L"14.0.0";
+    std::wstring version = L"15.0.0";
     std::wstring milestone = L"v14.0 P3 - Developer Experience";
 };
 
@@ -2064,7 +2064,7 @@ struct GateV26Verdict {
     bool approved = false;
     uint32_t passed = 0;
     uint32_t failed = 0;
-    std::wstring version = L"14.0.0";
+    std::wstring version = L"15.0.0";
     std::wstring milestone = L"v14.0 P4 - Security Excellence";
 };
 class ReleaseGateV26 {
@@ -2148,7 +2148,7 @@ struct GateV27Verdict {
     bool approved = false;
     uint32_t passed = 0;
     uint32_t failed = 0;
-    std::wstring version = L"14.0.0";
+    std::wstring version = L"15.0.0";
     std::wstring milestone = L"v14.0 P5 - UX Excellence";
 };
 class ReleaseGateV27 {
@@ -2232,7 +2232,7 @@ struct GateV28Verdict {
     bool approved = false;
     uint32_t passed = 0;
     uint32_t failed = 0;
-    std::wstring version = L"14.0.0";
+    std::wstring version = L"15.0.0";
     std::wstring milestone = L"v14.0 P6 - AI & ML Expansion";
 };
 class ReleaseGateV28 {

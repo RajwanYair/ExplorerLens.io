@@ -10,13 +10,13 @@
 param(
     [Parameter(Mandatory = $false)]
     [switch]$Uninstall,
-    
+
     [Parameter(Mandatory = $false)]
     [switch]$Upgrade,
-    
+
     [Parameter(Mandatory = $false)]
     [string]$InstallPath = "$env:ProgramFiles\ExplorerLens",
-    
+
     [Parameter(Mandatory = $false)]
     [switch]$SkipBackup
 )
@@ -28,7 +28,7 @@ $ErrorActionPreference = "Stop"
 # ============================================================================
 
 $ScriptRoot = $PSScriptRoot
-$Version = "6.2.0"
+$Version = "15.0.0"
 $BuildConfig = "Release"
 $Platform = "x64"
 
@@ -94,11 +94,11 @@ function Start-ExplorerProcess {
 
 function Backup-Installation {
     param([string]$BackupPath)
-    
+
     if (Test-Path $InstallPath) {
         Write-Step "Creating backup of existing installation..."
         $BackupDir = "$BackupPath\ExplorerLens_Backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
-        
+
         try {
             Copy-Item -Path $InstallPath -Destination $BackupDir -Recurse -Force
             Write-Success "Backup created: $BackupDir"
@@ -115,7 +115,7 @@ function Backup-Installation {
 
 function Unregister-ShellExtension {
     Write-Step "Unregistering shell extension..."
-    
+
     try {
         # Unregister DLL using regsvr32
         $dllPath = Join-Path $InstallPath "LENSShell.dll"
@@ -129,7 +129,7 @@ function Unregister-ShellExtension {
         } else {
             Write-Warning "LENSShell.dll not found at: $dllPath"
         }
-        
+
         # Clean up registry keys
         foreach ($key in $RegistryKeys) {
             if (Test-Path $key) {
@@ -137,7 +137,7 @@ function Unregister-ShellExtension {
                 Write-Success "Removed registry key: $key"
             }
         }
-        
+
     } catch {
         Write-Warning "Unregistration error: $_"
     }
@@ -145,13 +145,13 @@ function Unregister-ShellExtension {
 
 function Register-ShellExtension {
     Write-Step "Registering shell extension..."
-    
+
     $dllPath = Join-Path $InstallPath "LENSShell.dll"
-    
+
     if (-not (Test-Path $dllPath)) {
         throw "LENSShell.dll not found at: $dllPath"
     }
-    
+
     try {
         $result = Start-Process regsvr32.exe -ArgumentList "/s `"$dllPath`"" -Wait -PassThru
         if ($result.ExitCode -eq 0) {
@@ -166,26 +166,26 @@ function Register-ShellExtension {
 
 function Copy-InstallationFiles {
     Write-Step "Copying installation files..."
-    
+
     # Create installation directory
     if (-not (Test-Path $InstallPath)) {
         New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
         Write-Success "Created installation directory: $InstallPath"
     }
-    
+
     # Copy files
     foreach ($file in $SourceFiles.Keys) {
         $sourcePath = Join-Path $ScriptRoot $SourceFiles[$file]
         $destPath = Join-Path $InstallPath $file
-        
+
         if (-not (Test-Path $sourcePath)) {
             throw "Source file not found: $sourcePath"
         }
-        
+
         Copy-Item -Path $sourcePath -Destination $destPath -Force
         Write-Success "Copied: $file"
     }
-    
+
     # Copy SDK if exists
     $sdkSource = Join-Path $ScriptRoot "SDK"
     if (Test-Path $sdkSource) {
@@ -193,7 +193,7 @@ function Copy-InstallationFiles {
         Copy-Item -Path $sdkSource -Destination $sdkDest -Recurse -Force
         Write-Success "Copied SDK"
     }
-    
+
     # Copy documentation
     $docsSource = Join-Path $ScriptRoot "docs"
     if (Test-Path $docsSource) {
@@ -205,35 +205,35 @@ function Copy-InstallationFiles {
 
 function Set-RegistryValues {
     Write-Step "Configuring registry settings..."
-    
+
     $rootKey = "HKLM:\Software\ExplorerLens"
-    
+
     if (-not (Test-Path $rootKey)) {
         New-Item -Path $rootKey -Force | Out-Null
     }
-    
+
     Set-ItemProperty -Path $rootKey -Name "InstallPath" -Value $InstallPath
     Set-ItemProperty -Path $rootKey -Name "Version" -Value $Version
     Set-ItemProperty -Path $rootKey -Name "InstallDate" -Value (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-    
+
     Write-Success "Registry configured"
 }
 
 function Clear-ThumbnailCache {
     Write-Step "Clearing thumbnail cache..."
-    
+
     try {
         # Clear Windows thumbnail cache
         $cachePaths = @(
             "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*.db",
             "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\iconcache_*.db"
         )
-        
+
         foreach ($pattern in $cachePaths) {
-            Get-ChildItem -Path (Split-Path $pattern) -Filter (Split-Path $pattern -Leaf) -ErrorAction SilentlyContinue | 
+            Get-ChildItem -Path (Split-Path $pattern) -Filter (Split-Path $pattern -Leaf) -ErrorAction SilentlyContinue |
             Remove-Item -Force -ErrorAction SilentlyContinue
         }
-        
+
         Write-Success "Thumbnail cache cleared"
     } catch {
         Write-Warning "Cache clear failed: $_"
@@ -242,9 +242,9 @@ function Clear-ThumbnailCache {
 
 function Test-Installation {
     Write-Step "Verifying installation..."
-    
+
     $allGood = $true
-    
+
     # Check files
     foreach ($file in $SourceFiles.Keys) {
         $path = Join-Path $InstallPath $file
@@ -255,7 +255,7 @@ function Test-Installation {
             $allGood = $false
         }
     }
-    
+
     # Check registry
     $rootKey = "HKLM:\Software\ExplorerLens"
     if (Test-Path $rootKey) {
@@ -270,7 +270,7 @@ function Test-Installation {
         Write-Error "Registry key missing"
         $allGood = $false
     }
-    
+
     return $allGood
 }
 
@@ -320,18 +320,18 @@ if ($Uninstall) {
     Write-Host ""
     Write-Host "UNINSTALLING ExplorerLens..." -ForegroundColor Yellow
     Write-Host ""
-    
+
     Stop-ExplorerProcess
-    
+
     try {
         Unregister-ShellExtension
         Clear-ThumbnailCache
-        
+
         if (Test-Path $InstallPath) {
             Remove-Item -Path $InstallPath -Recurse -Force
             Write-Success "Installation directory removed"
         }
-        
+
         Write-Host ""
         Write-Host "Uninstallation completed successfully!" -ForegroundColor Green
     } catch {
@@ -340,7 +340,7 @@ if ($Uninstall) {
     } finally {
         Start-ExplorerProcess
     }
-    
+
     exit 0
 }
 
@@ -367,19 +367,19 @@ try {
     if (Test-Path $InstallPath) {
         Unregister-ShellExtension
     }
-    
+
     # Copy files
     Copy-InstallationFiles
-    
+
     # Register new version
     Register-ShellExtension
-    
+
     # Configure registry
     Set-RegistryValues
-    
+
     # Clear cache
     Clear-ThumbnailCache
-    
+
     # Verify installation
     Write-Host ""
     if (Test-Installation) {
@@ -392,7 +392,7 @@ try {
         Write-Host "  $InstallPath" -ForegroundColor Gray
         Write-Host ""
         Write-Host "Run LENSManager.exe to configure settings." -ForegroundColor Cyan
-        
+
         if ($backupPath) {
             Write-Host ""
             Write-Host "Backup created at: $backupPath" -ForegroundColor Yellow
@@ -401,14 +401,14 @@ try {
         Write-Host ""
         Write-Host "Installation completed with warnings." -ForegroundColor Yellow
         Write-Host "Please check the output above for details." -ForegroundColor Yellow
-        
+
         if ($backupPath) {
             Write-Host ""
             Write-Host "To restore backup:" -ForegroundColor Yellow
             Write-Host "  Copy-Item '$backupPath' '$InstallPath' -Recurse -Force" -ForegroundColor Gray
         }
     }
-    
+
 } catch {
     Write-Host ""
     Write-Host "============================================" -ForegroundColor Red
@@ -416,12 +416,12 @@ try {
     Write-Host "============================================" -ForegroundColor Red
     Write-Host ""
     Write-Error "Error: $_"
-    
+
     if ($backupPath) {
         Write-Host ""
         Write-Host "Backup is available at: $backupPath" -ForegroundColor Yellow
     }
-    
+
     exit 1
 } finally {
     # Always restart Explorer
@@ -429,4 +429,3 @@ try {
 }
 
 Write-Host ""
-

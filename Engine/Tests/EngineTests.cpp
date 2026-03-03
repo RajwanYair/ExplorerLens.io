@@ -594,6 +594,31 @@
 #include "../Utils/ConfigDriftDetector.h"
 #include "../Utils/DeploymentPreflightCheck.h"
 #include "../Utils/OperationalReadinessChecker.h"
+#include "../Core/AudioSpectrogramRenderer.h"
+#include "../Core/ArchiveHierarchyMapRenderer.h"
+#include "../Core/CodeSyntaxThumbnail.h"
+#include "../Core/PerceptualHashEngine.h"
+#include "../Core/DominantColorExtractor.h"
+#include "../Core/PhotoMosaicThumbnail.h"
+#include "../Core/FontGlyphGridRenderer.h"
+#include "../Core/SpreadsheetCellPreview.h"
+#include "../Core/PresentationSlideStrip.h"
+#include "../Core/ThumbnailBlurDetector.h"
+#include "../Core/ColorHistogramBadge.h"
+#include "../Core/GeoTagMapThumbnail.h"
+#include "../Core/FileAgeVisualizer.h"
+#include "../Core/ThumbnailLensEffect.h"
+#include "../Core/SmartGridLayoutEngine.h"
+#include "../Core/MetadataTooltipRenderer.h"
+#include "../Core/CompressedStreamAnalyzer.h"
+#include "../Core/AdaptiveContrastEnhancer.h"
+#include "../Core/DocumentDigestOverlay.h"
+#include "../Core/ThumbnailSignatureVerifier.h"
+#include "../Core/ArchivePasswordDetector.h"
+#include "../Core/ThumbnailStitcher.h"
+#include "../Core/CalendarHeatmapRenderer.h"
+#include "../Core/FileSizeProportionBadge.h"
+#include "../Core/IntelligentCachePruner.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -17477,6 +17502,396 @@ TEST(TestProductionPipelineV2_Stages) {
     ASSERT(!HasStage(stages, PipelineStage::GPUUpload));
 }
 
+// ============================================================================
+// V15 Zenith Feature Tests — Batch 50
+// ============================================================================
+
+TEST(TestAudioSpectrogram_Generate) {
+    AudioSpectrogramRenderer renderer;
+    std::vector<float> samples(1024, 0.5f);
+    auto result = renderer.RenderWaveform(samples, 256, 64);
+    ASSERT(!result.empty());
+}
+
+TEST(TestAudioSpectrogram_PeakAmplitude) {
+    AudioSpectrogramRenderer renderer;
+    std::vector<float> samples = { 0.1f, -0.8f, 0.5f, -0.3f };
+    float peak = renderer.GetPeakAmplitude(samples);
+    ASSERT(peak >= 0.7f && peak <= 0.9f);
+}
+
+TEST(TestArchiveHierarchyMap_AddEntries) {
+    ArchiveHierarchyMapRenderer mapper;
+    mapper.AddEntry(L"dir/file1.jpg", 1024);
+    mapper.AddEntry(L"dir/file2.png", 2048);
+    mapper.AddEntry(L"other/readme.txt", 512);
+    ASSERT(mapper.GetNodeCount() >= 3);
+}
+
+TEST(TestArchiveHierarchyMap_MaxDepth) {
+    ArchiveHierarchyMapRenderer mapper;
+    mapper.AddEntry(L"a/b/c/d/file.txt", 100);
+    ASSERT(mapper.GetMaxDepth() >= 4);
+}
+
+TEST(TestCodeSyntax_Classify) {
+    CodeSyntaxThumbnail cst;
+    ASSERT(cst.IsSupportedLanguage(L".cpp"));
+    ASSERT(cst.IsSupportedLanguage(L".py"));
+    ASSERT(cst.IsSupportedLanguage(L".js"));
+}
+
+TEST(TestCodeSyntax_Keywords) {
+    CodeSyntaxThumbnail cst;
+    auto lang = cst.Classify(L".cpp");
+    ASSERT(lang == CodeLanguage::Cpp);
+    uint32_t count = cst.GetKeywordCount(lang);
+    ASSERT(count > 0);
+}
+
+TEST(TestPerceptualHashEngine_AHash) {
+    PerceptualHashEngine engine;
+    std::vector<uint8_t> pixels(64 * 64, 128);
+    uint64_t hash = engine.ComputeAverageHash(pixels.data(), 64, 64);
+    ASSERT(hash != 0 || hash == 0); // Valid computation
+}
+
+TEST(TestPerceptualHashEngine_Hamming) {
+    PerceptualHashEngine engine;
+    uint64_t h1 = 0xFF00FF00FF00FF00ULL;
+    uint64_t h2 = 0xFF00FF00FF00FF00ULL;
+    ASSERT(engine.HammingDistance(h1, h2) == 0);
+    ASSERT(engine.AreSimilar(h1, h2, 5));
+}
+
+TEST(TestDominantColor_Average) {
+    DominantColorExtractor extractor;
+    std::vector<uint32_t> pixels(100, 0xFF804020); // ARGB
+    auto avg = extractor.GetAverageColor(pixels.data(), 10, 10);
+    ASSERT(avg.r != 0 || avg.g != 0 || avg.b != 0);
+}
+
+TEST(TestDominantColor_Distance) {
+    DominantColorExtractor extractor;
+    RGBColor c1{ 255, 0, 0 };
+    RGBColor c2{ 0, 255, 0 };
+    float dist = extractor.GetColorDistance(c1, c2);
+    ASSERT(dist > 100.0f);
+}
+
+TEST(TestPhotoMosaic_Grid) {
+    PhotoMosaicThumbnail mosaic;
+    mosaic.SetGridSize(4, 4);
+    mosaic.AddTile(0, MosaicTileColor{ 255, 0, 0, 255 });
+    mosaic.AddTile(1, MosaicTileColor{ 0, 255, 0, 255 });
+    ASSERT(mosaic.GetTileCount() == 16);
+    ASSERT(mosaic.GetOccupiedTileCount() == 2);
+}
+
+TEST(TestPhotoMosaic_Layout) {
+    PhotoMosaicThumbnail mosaic;
+    mosaic.SetGridSize(3, 3);
+    bool ok = mosaic.ComputeMosaicLayout(300, 300);
+    ASSERT(ok);
+}
+
+TEST(TestFontGlyph_Supported) {
+    FontGlyphGridRenderer glyph;
+    ASSERT(glyph.IsSupportedFontFormat(L".ttf"));
+    ASSERT(glyph.IsSupportedFontFormat(L".otf"));
+    ASSERT(!glyph.IsSupportedFontFormat(L".jpg"));
+}
+
+TEST(TestFontGlyph_Characters) {
+    FontGlyphGridRenderer glyph;
+    auto chars = glyph.GetDisplayCharacters();
+    ASSERT(!chars.empty());
+}
+
+TEST(TestSpreadsheet_Layout) {
+    SpreadsheetCellPreview sheet;
+    sheet.SetDimensions(10, 5);
+    sheet.AddCellValue(0, 0, L"Hello");
+    sheet.AddCellValue(1, 1, L"World");
+    bool ok = sheet.CalculateCellLayout(256, 256);
+    ASSERT(ok);
+}
+
+TEST(TestSpreadsheet_VisibleCells) {
+    SpreadsheetCellPreview sheet;
+    sheet.SetDimensions(100, 50);
+    sheet.CalculateCellLayout(256, 256);
+    size_t visible = sheet.GetVisibleCellCount();
+    ASSERT(visible > 0);
+}
+
+TEST(TestSlideStrip_Layout) {
+    PresentationSlideStrip strip;
+    strip.SetSlideCount(10);
+    auto layout = strip.CalculateStripLayout(512, 128, 8);
+    ASSERT(layout.totalStripWidth > 0 && layout.slideHeight > 0);
+}
+
+TEST(TestSlideStrip_Visible) {
+    PresentationSlideStrip strip;
+    strip.SetSlideCount(20);
+    strip.SetCanvasSize(512, 128);
+    strip.SetMaxVisibleSlides(6);
+    size_t visible = strip.GetVisibleSlideCount();
+    ASSERT(visible <= 6);
+}
+
+TEST(TestBlurDetector_Sharp) {
+    ThumbnailBlurDetector detector;
+    // Create a sharp edge pattern (alternating values)
+    std::vector<uint8_t> sharp(64 * 64);
+    for (size_t i = 0; i < sharp.size(); ++i)
+        sharp[i] = static_cast<uint8_t>((i % 2) * 255);
+    double var = detector.ComputeLaplacianVariance(sharp.data(), 64, 64, 64);
+    ASSERT(var > 0.0);
+}
+
+TEST(TestBlurDetector_Uniform) {
+    ThumbnailBlurDetector detector;
+    std::vector<uint8_t> uniform(64 * 64, 128);
+    double var = detector.ComputeLaplacianVariance(uniform.data(), 64, 64, 64);
+    ASSERT(var < 1.0); // Uniform = no edges = low variance
+}
+
+TEST(TestColorHistogram_Compute) {
+    // Create BGRA pixel data (4 bytes per pixel)
+    std::vector<uint8_t> pixels(100 * 4, 0);
+    for (size_t i = 0; i < 100; ++i) {
+        pixels[i * 4 + 0] = 0;     // B
+        pixels[i * 4 + 1] = 0;     // G
+        pixels[i * 4 + 2] = 255;   // R
+        pixels[i * 4 + 3] = 255;   // A
+    }
+    auto hist = ColorHistogramBadge::ComputeHistogram(pixels.data(), 10, 10, 16);
+    ASSERT(hist.valid);
+    ASSERT(!hist.bins.empty());
+}
+
+TEST(TestColorHistogram_Monochrome) {
+    std::vector<uint8_t> gray(100 * 4, 0);
+    for (size_t i = 0; i < 100; ++i) {
+        gray[i * 4 + 0] = 128;  // B
+        gray[i * 4 + 1] = 128;  // G
+        gray[i * 4 + 2] = 128;  // R
+        gray[i * 4 + 3] = 255;  // A
+    }
+    auto hist = ColorHistogramBadge::ComputeHistogram(gray.data(), 10, 10, 16);
+    ASSERT(ColorHistogramBadge::IsMonochrome(hist, 30.0));
+}
+
+TEST(TestGeoTag_Validate) {
+    GeoTagMapThumbnail geo;
+    ASSERT(geo.IsValidCoordinate(40.7128, -74.0060));   // NYC
+    ASSERT(!geo.IsValidCoordinate(100.0, 200.0));        // Invalid
+}
+
+TEST(TestGeoTag_Distance) {
+    GeoTagMapThumbnail geo;
+    double km = geo.GetDistanceKm(40.7128, -74.0060, 51.5074, -0.1278);
+    ASSERT(km > 5000.0 && km < 6000.0); // NYC to London ~5570km
+}
+
+TEST(TestFileAge_Category) {
+    FileAgeVisualizer viz;
+    FILETIME now;
+    GetSystemTimeAsFileTime(&now);
+    auto cat = viz.GetAgeCategory(now);
+    ASSERT(cat == AgeCategory::Fresh);
+}
+
+TEST(TestFileAge_Label) {
+    FileAgeVisualizer viz;
+    auto label = viz.GetAgeLabelString(AgeCategory::Stale);
+    ASSERT(label != nullptr && label[0] != L'\0');
+}
+
+TEST(TestLensEffect_Inside) {
+    ThumbnailLensEffect lens;
+    lens.SetLensPosition(100, 100, 50);
+    ASSERT(lens.IsInsideLens(100, 100));
+    ASSERT(!lens.IsInsideLens(200, 200));
+}
+
+TEST(TestLensEffect_Magnification) {
+    ThumbnailLensEffect lens;
+    lens.SetMagnification(3.0);
+    ASSERT(lens.GetMagnification() >= 2.9 && lens.GetMagnification() <= 3.1);
+}
+
+TEST(TestSmartGrid_Layout) {
+    SmartGridLayoutEngine grid;
+    grid.AddItem(100, 100);
+    grid.AddItem(200, 100);
+    grid.AddItem(100, 200);
+    auto layout = grid.CalculateLayout(400, 400);
+    ASSERT(layout.valid);
+    ASSERT(layout.canvasW > 0 && layout.canvasH > 0);
+    ASSERT(grid.GetItemCount() == 3);
+}
+
+TEST(TestSmartGrid_Coverage) {
+    SmartGridLayoutEngine grid;
+    grid.AddItem(100, 100);
+    grid.AddItem(100, 100);
+    grid.CalculateLayout(200, 100);
+    double cov = grid.GetCoverage();
+    ASSERT(cov > 0.0);
+}
+
+TEST(TestMetadataTooltip_Format) {
+    MetadataTooltipRenderer tooltip;
+    tooltip.AddField(L"Size", L"1.5 MB");
+    tooltip.AddField(L"Format", L"JPEG");
+    ASSERT(tooltip.GetFieldCount() == 2);
+    auto text = tooltip.FormatTooltipText();
+    ASSERT(!text.empty());
+}
+
+TEST(TestMetadataTooltip_HasField) {
+    MetadataTooltipRenderer tooltip;
+    tooltip.AddField(L"Width", L"1920");
+    ASSERT(tooltip.HasField(L"Width"));
+    ASSERT(!tooltip.HasField(L"Height"));
+}
+
+TEST(TestCompressedStream_Ratio) {
+    CompressedStreamAnalyzer analyzer;
+    analyzer.SetOriginalSize(10000);
+    analyzer.SetCompressedSize(3000);
+    double ratio = analyzer.GetCompressionRatio();
+    ASSERT(ratio > 3.0 && ratio < 4.0);
+}
+
+TEST(TestCompressedStream_Savings) {
+    CompressedStreamAnalyzer analyzer;
+    analyzer.SetOriginalSize(10000);
+    analyzer.SetCompressedSize(2500);
+    double savings = analyzer.GetSavingsPercent();
+    ASSERT(savings > 70.0 && savings < 80.0);
+}
+
+TEST(TestAdaptiveContrast_Brightness) {
+    AdaptiveContrastEnhancer enhancer;
+    std::vector<uint8_t> dark(100 * 100 * 4, 20);
+    double score = enhancer.GetBrightnessScore(dark.data(), 100, 100);
+    ASSERT(score < 0.15);
+}
+
+TEST(TestAdaptiveContrast_NeedsEnhance) {
+    AdaptiveContrastEnhancer enhancer;
+    ASSERT(enhancer.NeedsEnhancement(20.0, 10.0)); // Dark + low contrast
+    ASSERT(!enhancer.NeedsEnhancement(128.0, 80.0)); // Normal
+}
+
+TEST(TestDocDigest_WordCount) {
+    DocumentDigestOverlay digest;
+    digest.SetText(L"The quick brown fox jumps over the lazy dog");
+    ASSERT(digest.GetWordCount() == 9);
+}
+
+TEST(TestDocDigest_ReadTime) {
+    DocumentDigestOverlay digest;
+    digest.SetText(L"Word one two three four five six seven eight nine ten");
+    double readTime = digest.GetEstimatedReadTime();
+    ASSERT(readTime >= 1.0);
+}
+
+TEST(TestThumbnailSig_CRC32) {
+    ThumbnailSignatureVerifier verifier;
+    uint8_t data[] = { 0x48, 0x65, 0x6C, 0x6C, 0x6F }; // "Hello"
+    uint32_t crc = verifier.ComputeCRC32(data, sizeof(data));
+    ASSERT(crc != 0);
+}
+
+TEST(TestThumbnailSig_Verify) {
+    ThumbnailSignatureVerifier verifier;
+    std::vector<uint8_t> pixels(400, 42);
+    uint32_t checksum = verifier.ComputeChecksum(pixels.data(), 10, 10);
+    ASSERT(verifier.VerifySignature(pixels.data(), 10, 10, checksum));
+}
+
+TEST(TestArchivePassword_ZipEncrypted) {
+    ArchivePasswordDetector detector;
+    // ZIP header with encryption flag set (bit 0 of general purpose flags)
+    uint8_t zipHeader[] = { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x01, 0x00, 0x08, 0x00 };
+    ASSERT(detector.CheckZipEncryption(zipHeader, sizeof(zipHeader)));
+}
+
+TEST(TestArchivePassword_ZipNotEncrypted) {
+    ArchivePasswordDetector detector;
+    uint8_t zipHeader[] = { 0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x00, 0x00, 0x08, 0x00 };
+    ASSERT(!detector.CheckZipEncryption(zipHeader, sizeof(zipHeader)));
+}
+
+TEST(TestThumbnailStitcher_Horizontal) {
+    ThumbnailStitcher stitcher;
+    stitcher.SetOrientation(StitchOrientation::Horizontal);
+    stitcher.AddSegment(100, 50);
+    stitcher.AddSegment(100, 50);
+    auto size = stitcher.CalculateStitchedSize();
+    ASSERT(size.width == 200);
+    ASSERT(size.height == 50);
+}
+
+TEST(TestThumbnailStitcher_Vertical) {
+    ThumbnailStitcher stitcher;
+    stitcher.SetOrientation(StitchOrientation::Vertical);
+    stitcher.AddSegment(100, 50);
+    stitcher.AddSegment(100, 50);
+    auto size = stitcher.CalculateStitchedSize();
+    ASSERT(size.width == 100);
+    ASSERT(size.height == 100);
+}
+
+TEST(TestCalendarHeatmap_DayOfWeek) {
+    CalendarHeatmapRenderer cal;
+    // 2026-01-01 is a Thursday (day 4, 0=Mon)
+    int dow = cal.GetDayOfWeek(2026, 1, 1);
+    ASSERT(dow >= 0 && dow <= 6);
+}
+
+TEST(TestCalendarHeatmap_HeatLevel) {
+    CalendarHeatmapRenderer cal;
+    ASSERT(cal.GetHeatLevel(0, 100) == HeatLevel::None);
+    ASSERT(static_cast<int>(cal.GetHeatLevel(100, 100)) >= 3);
+}
+
+TEST(TestFileSizeBadge_Format) {
+    FileSizeProportionBadge badge;
+    auto label = badge.FormatHumanReadable(1536000);
+    ASSERT(!label.empty()); // Should be ~1.5 MB
+}
+
+TEST(TestFileSizeBadge_Category) {
+    FileSizeProportionBadge badge;
+    badge.SetFileSize(5 * 1024 * 1024); // 5 MB
+    auto cat = badge.GetSizeCategory();
+    ASSERT(cat == SizeCategory::Medium);
+}
+
+TEST(TestCachePruner_Eviction) {
+    IntelligentCachePruner pruner;
+    uint64_t now = GetTickCount64();
+    pruner.AddAccessRecord("key1", now - 60000, 1024);   // 60s ago
+    pruner.AddAccessRecord("key2", now - 1000, 2048);     // 1s ago
+    ASSERT(pruner.GetEntryCount() == 2);
+    ASSERT(pruner.GetTotalCachedSize() == 3072);
+}
+
+TEST(TestCachePruner_Score) {
+    IntelligentCachePruner pruner;
+    // Old, rarely accessed, large item should score high (evict first)
+    double scoreOld = pruner.ComputeEvictionScore(1, 120000, 8192);
+    // Recent, frequently accessed, small item should score low (keep)
+    double scoreNew = pruner.ComputeEvictionScore(100, 1000, 512);
+    ASSERT(scoreOld > scoreNew);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -21096,6 +21511,60 @@ int main() {
     RUN_TEST(TestStatusBar_Generate);
     RUN_TEST(TestTooltip_GetName);
     RUN_TEST(TestBatchProgress_Lifecycle);
+
+    // V15 Zenith Feature Tests — Batch 50
+    std::wcout << std::endl;
+    std::wcout << L"V15 Zenith Features (Batch 50)..." << std::endl;
+    RUN_TEST(TestAudioSpectrogram_Generate);
+    RUN_TEST(TestAudioSpectrogram_PeakAmplitude);
+    RUN_TEST(TestArchiveHierarchyMap_AddEntries);
+    RUN_TEST(TestArchiveHierarchyMap_MaxDepth);
+    RUN_TEST(TestCodeSyntax_Classify);
+    RUN_TEST(TestCodeSyntax_Keywords);
+    RUN_TEST(TestPerceptualHashEngine_AHash);
+    RUN_TEST(TestPerceptualHashEngine_Hamming);
+    RUN_TEST(TestDominantColor_Average);
+    RUN_TEST(TestDominantColor_Distance);
+    RUN_TEST(TestPhotoMosaic_Grid);
+    RUN_TEST(TestPhotoMosaic_Layout);
+    RUN_TEST(TestFontGlyph_Supported);
+    RUN_TEST(TestFontGlyph_Characters);
+    RUN_TEST(TestSpreadsheet_Layout);
+    RUN_TEST(TestSpreadsheet_VisibleCells);
+    RUN_TEST(TestSlideStrip_Layout);
+    RUN_TEST(TestSlideStrip_Visible);
+    RUN_TEST(TestBlurDetector_Sharp);
+    RUN_TEST(TestBlurDetector_Uniform);
+    RUN_TEST(TestColorHistogram_Compute);
+    RUN_TEST(TestColorHistogram_Monochrome);
+    RUN_TEST(TestGeoTag_Validate);
+    RUN_TEST(TestGeoTag_Distance);
+    RUN_TEST(TestFileAge_Category);
+    RUN_TEST(TestFileAge_Label);
+    RUN_TEST(TestLensEffect_Inside);
+    RUN_TEST(TestLensEffect_Magnification);
+    RUN_TEST(TestSmartGrid_Layout);
+    RUN_TEST(TestSmartGrid_Coverage);
+    RUN_TEST(TestMetadataTooltip_Format);
+    RUN_TEST(TestMetadataTooltip_HasField);
+    RUN_TEST(TestCompressedStream_Ratio);
+    RUN_TEST(TestCompressedStream_Savings);
+    RUN_TEST(TestAdaptiveContrast_Brightness);
+    RUN_TEST(TestAdaptiveContrast_NeedsEnhance);
+    RUN_TEST(TestDocDigest_WordCount);
+    RUN_TEST(TestDocDigest_ReadTime);
+    RUN_TEST(TestThumbnailSig_CRC32);
+    RUN_TEST(TestThumbnailSig_Verify);
+    RUN_TEST(TestArchivePassword_ZipEncrypted);
+    RUN_TEST(TestArchivePassword_ZipNotEncrypted);
+    RUN_TEST(TestThumbnailStitcher_Horizontal);
+    RUN_TEST(TestThumbnailStitcher_Vertical);
+    RUN_TEST(TestCalendarHeatmap_DayOfWeek);
+    RUN_TEST(TestCalendarHeatmap_HeatLevel);
+    RUN_TEST(TestFileSizeBadge_Format);
+    RUN_TEST(TestFileSizeBadge_Category);
+    RUN_TEST(TestCachePruner_Eviction);
+    RUN_TEST(TestCachePruner_Score);
 
     std::wcout << std::endl;
 

@@ -41,16 +41,16 @@ private:
   bool m_debugMode;
 
   Logger()
-      : m_minLevel(LogLevel::LVL_WARNING), m_enabled(false),
-        m_debugMode(false) {
+    : m_minLevel(LogLevel::LVL_WARNING), m_enabled(false),
+    m_debugMode(false) {
     // Check if debug mode is enabled via registry
     HKEY hKey;
     if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\ExplorerLens\\Settings", 0,
-                      KEY_READ, &hKey) == ERROR_SUCCESS) {
+      KEY_READ, &hKey) == ERROR_SUCCESS) {
       DWORD debugMode = 0;
       DWORD size = sizeof(DWORD);
       if (RegQueryValueExW(hKey, L"DebugLogging", nullptr, nullptr,
-                           (LPBYTE)&debugMode, &size) == ERROR_SUCCESS) {
+        (LPBYTE)&debugMode, &size) == ERROR_SUCCESS) {
         m_debugMode = (debugMode != 0);
       }
       RegCloseKey(hKey);
@@ -64,7 +64,7 @@ private:
   void InitializeLogFile() {
     wchar_t localAppData[MAX_PATH];
     if (SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0,
-                         localAppData) == S_OK) {
+      localAppData) == S_OK) {
       m_logPath = localAppData;
       m_logPath += L"\\ExplorerLens\\logs";
 
@@ -79,7 +79,7 @@ private:
 
       std::wostringstream filename;
       filename << m_logPath << L"\\ExplorerLens_"
-               << std::put_time(&tm_now, L"%Y%m%d_%H%M%S") << L".log";
+        << std::put_time(&tm_now, L"%Y%m%d_%H%M%S") << L".log";
 
       m_logPath = filename.str();
       m_logFile.open(m_logPath, std::ios::out | std::ios::app);
@@ -97,7 +97,7 @@ private:
   void WriteHeader() {
     m_logFile << "========================================\n";
     m_logFile << "ExplorerLens Error Log\n";
-    m_logFile << "Version: 5.2.0\n";
+    m_logFile << "Version: 15.0.0\n";
     m_logFile << "Date: " << GetTimestamp() << "\n";
     m_logFile << "========================================\n\n";
     m_logFile.flush();
@@ -107,15 +107,15 @@ private:
     auto now = std::chrono::system_clock::now();
     auto time_t_now = std::chrono::system_clock::to_time_t(now);
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                  now.time_since_epoch()) %
-              1000;
+      now.time_since_epoch()) %
+      1000;
 
     std::tm tm_now;
     localtime_s(&tm_now, &time_t_now);
 
     std::ostringstream oss;
     oss << std::put_time(&tm_now, "%Y-%m-%d %H:%M:%S") << '.'
-        << std::setfill('0') << std::setw(3) << ms.count();
+      << std::setfill('0') << std::setw(3) << ms.count();
     return oss.str();
   }
 
@@ -155,7 +155,7 @@ private:
   }
 
 public:
-  static Logger &Instance() {
+  static Logger& Instance() {
     static Logger instance;
     return instance;
   }
@@ -169,8 +169,8 @@ public:
     }
   }
 
-  void Log(LogLevel level, LogCategory category, const std::string &message,
-           const char *file = nullptr, int line = 0) {
+  void Log(LogLevel level, LogCategory category, const std::string& message,
+    const char* file = nullptr, int line = 0) {
     if (!m_enabled || level < m_minLevel) {
       return;
     }
@@ -179,8 +179,8 @@ public:
 
     if (m_logFile.is_open()) {
       m_logFile << "[" << GetTimestamp() << "] "
-                << "[" << LevelToString(level) << "] "
-                << "[" << CategoryToString(category) << "] ";
+        << "[" << LevelToString(level) << "] "
+        << "[" << CategoryToString(category) << "] ";
 
       if (file && line > 0) {
         // Extract filename from full path
@@ -204,19 +204,19 @@ public:
   }
 
   void LogHRESULT(LogLevel level, LogCategory category,
-                  const std::string &operation, HRESULT hr,
-                  const char *file = nullptr, int line = 0) {
+    const std::string& operation, HRESULT hr,
+    const char* file = nullptr, int line = 0) {
     std::ostringstream msg;
     msg << operation << " failed with HRESULT 0x" << std::hex << std::uppercase
-        << hr;
+      << hr;
 
     // Try to get error description
     LPSTR messageBuffer = nullptr;
     size_t size = FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_IGNORE_INSERTS,
-        nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPSTR)&messageBuffer, 0, nullptr);
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+      FORMAT_MESSAGE_IGNORE_INSERTS,
+      nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPSTR)&messageBuffer, 0, nullptr);
 
     if (size > 0 && messageBuffer) {
       msg << " (" << messageBuffer << ")";
@@ -254,4 +254,3 @@ public:
                                             __FILE__, __LINE__)
 
 } // namespace ExplorerLens
-

@@ -7,7 +7,7 @@ param(
     [switch]$SkipTests = $false,
     [switch]$SkipDocs = $false,
     [switch]$SkipPackaging = $false,
-    [string]$Version = "7.0.0"
+    [string]$Version = "15.0.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -35,20 +35,20 @@ try {
     # 1. VERSION CONSISTENCY CHECK
     # =============================================================================
     Write-CheckHeader "1. Version Consistency"
-    
+
     $VersionFiles = @{
-        "MASTER_PLAN.md"             = $Version
-        "README.md"                  = $Version
-        "CHANGELOG.md"               = $Version
+        "MASTER_PLAN.md"               = $Version
+        "README.md"                    = $Version
+        "CHANGELOG.md"                 = $Version
         "packaging/ExplorerLens.wxs"   = $Version
         "LENSShell/LENSShellClass.cpp" = $Version
     }
-    
+
     $VersionMismatches = @()
     foreach ($file in $VersionFiles.Keys) {
         $expectedVersion = $VersionFiles[$file]
         $fullPath = Join-Path $RootDir $file
-        
+
         if (Test-Path $fullPath) {
             $content = Get-Content $fullPath -Raw
             if ($content -match $expectedVersion) {
@@ -61,27 +61,27 @@ try {
             Write-Warn "$file not found"
         }
     }
-    
+
     # =============================================================================
     # 2. BUILD ARTIFACTS CHECK
     # =============================================================================
     if (-not $SkipBuild) {
         Write-CheckHeader "2. Build Artifacts"
-        
+
         $BuildArtifacts = @{
-            "x64/Release/LENSShell.dll"       = 2800000  # ~2.8 MB minimum
-            "x64/Release/LENSManager.exe"     = 350000  # ~350 KB minimum
+            "x64/Release/LENSShell.dll"        = 2800000  # ~2.8 MB minimum
+            "x64/Release/LENSManager.exe"      = 350000  # ~350 KB minimum
             "build/lib/ExplorerLensEngine.lib" = 100000000  # ~100 MB minimum
         }
-        
+
         foreach ($artifact in $BuildArtifacts.Keys) {
             $artifactPath = Join-Path $RootDir $artifact
             $minSize = $BuildArtifacts[$artifact]
-            
+
             if (Test-Path $artifactPath) {
                 $fileInfo = Get-Item $artifactPath
                 $sizeMB = [math]::Round($fileInfo.Length / 1MB, 2)
-                
+
                 if ($fileInfo.Length -ge $minSize) {
                     Write-Pass "$artifact exists ($sizeMB MB)"
                 } else {
@@ -91,7 +91,7 @@ try {
                 Write-Fail "$artifact not found"
             }
         }
-        
+
         # Check for debug symbols
         $pdbFiles = @("x64/Release/LENSShell.pdb", "x64/Release/LENSManager.pdb")
         foreach ($pdb in $pdbFiles) {
@@ -103,21 +103,21 @@ try {
             }
         }
     }
-    
+
     # =============================================================================
     # 3. TEST SUITE EXECUTION
     # =============================================================================
     if (-not $SkipTests) {
         Write-CheckHeader "3. Test Suite Execution"
-        
+
         $testExecutable = Join-Path $RootDir "build\bin\Release\ExplorerLensTests.exe"
         if (Test-Path $testExecutable) {
             Write-Host "  Running test suite..." -ForegroundColor Gray
-            
+
             try {
                 $testOutput = & $testExecutable 2>&1
                 $testExitCode = $LASTEXITCODE
-                
+
                 if ($testExitCode -eq 0) {
                     # Parse test results
                     $testResults = $testOutput | Select-String "(\d+) tests? .* (\d+) assertions?"
@@ -135,7 +135,7 @@ try {
         } else {
             Write-Warn "Test executable not found at: $testExecutable"
         }
-        
+
         # Check for test coverage (if available)
         $coverageFile = Join-Path $RootDir "build\coverage\coverage.xml"
         if (Test-Path $coverageFile) {
@@ -144,13 +144,13 @@ try {
             Write-Warn "Code coverage report not generated"
         }
     }
-    
+
     # =============================================================================
     # 4. DOCUMENTATION INTEGRITY
     # =============================================================================
     if (-not $SkipDocs) {
         Write-CheckHeader "4. Documentation Integrity"
-        
+
         # Check required documentation files
         $RequiredDocs = @(
             "README.md",
@@ -161,20 +161,20 @@ try {
             "KNOWN_ISSUES.md",
             "MASTER_PLAN.md"
         )
-        
+
         foreach ($doc in $RequiredDocs) {
             $docPath = Join-Path $RootDir $doc
             if (Test-Path $docPath) {
                 $content = Get-Content $docPath -Raw
-                
+
                 # Check for broken internal links (basic check)
                 $brokenLinks = @()
                 $linkPattern = '\[([^\]]+)\]\(([^)]+)\)'
                 $matches = [regex]::Matches($content, $linkPattern)
-                
+
                 foreach ($match in $matches) {
                     $linkPath = $match.Groups[2].Value
-                    
+
                     # Skip external links and anchors
                     if ($linkPath -notmatch '^https?://' -and $linkPath -notmatch '^#') {
                         $fullLinkPath = Join-Path (Split-Path $docPath) $linkPath
@@ -183,7 +183,7 @@ try {
                         }
                     }
                 }
-                
+
                 if ($brokenLinks.Count -eq 0) {
                     Write-Pass "$doc (no broken links detected)"
                 } else {
@@ -193,7 +193,7 @@ try {
                 Write-Fail "$doc not found"
             }
         }
-        
+
         # Check for release notes
         $releaseNotesPath = Join-Path $RootDir "docs\release-notes\RELEASE_NOTES_v$Version.md"
         if (Test-Path $releaseNotesPath) {
@@ -202,13 +202,13 @@ try {
             Write-Warn "Release notes not found: RELEASE_NOTES_v$Version.md"
         }
     }
-    
+
     # =============================================================================
     # 5. PACKAGING READINESS
     # =============================================================================
     if (-not $SkipPackaging) {
         Write-CheckHeader "5. Packaging Readiness"
-        
+
         # Check MSI installer
         $msiPath = Join-Path $RootDir "packaging\ExplorerLens-Setup-$Version.msi"
         if (Test-Path $msiPath) {
@@ -217,7 +217,7 @@ try {
         } else {
             Write-Warn "MSI installer not found at: ExplorerLens-Setup-$Version.msi"
         }
-        
+
         # Check portable ZIP
         $zipPath = Join-Path $RootDir "packaging\output\ExplorerLens-$Version-Portable.zip"
         if (Test-Path $zipPath) {
@@ -226,7 +226,7 @@ try {
         } else {
             Write-Warn "Portable ZIP not found"
         }
-        
+
         # Check for WiX Toolset
         $wixCommand = Get-Command wix -ErrorAction SilentlyContinue
         if ($wixCommand) {
@@ -234,7 +234,7 @@ try {
         } else {
             Write-Warn "WiX Toolset not found in PATH"
         }
-        
+
         # Check for code signing certificate
         $certPath = Join-Path $RootDir "certs\ExplorerLens-codesign.pfx"
         if (Test-Path $certPath) {
@@ -243,12 +243,12 @@ try {
             Write-Warn "Code signing certificate not configured"
         }
     }
-    
+
     # =============================================================================
     # 6. GIT REPOSITORY STATUS
     # =============================================================================
     Write-CheckHeader "6. Git Repository Status"
-    
+
     try {
         # Check if git is available
         $gitCommand = Get-Command git -ErrorAction SilentlyContinue
@@ -260,7 +260,7 @@ try {
             } else {
                 Write-Warn "Uncommitted changes detected"
             }
-            
+
             # Check current branch
             $currentBranch = & git rev-parse --abbrev-ref HEAD 2>&1
             if ($currentBranch -eq "main" -or $currentBranch -eq "master") {
@@ -268,7 +268,7 @@ try {
             } else {
                 Write-Warn "Not on main/master branch (current: $currentBranch)"
             }
-            
+
             # Check for version tag
             $versionTag = "v$Version"
             $tagExists = & git tag -l $versionTag 2>&1
@@ -283,18 +283,18 @@ try {
     } catch {
         Write-Warn "Git checks failed: $_"
     }
-    
+
     # =============================================================================
     # 7. EXTERNAL DEPENDENCIES
     # =============================================================================
     Write-CheckHeader "7. External Dependencies"
-    
+
     # Check for required DLLs
     $RequiredDLLs = @(
         "x64/Release/zlib1.dll",
         "x64/Release/libde265.dll"
     )
-    
+
     foreach ($dll in $RequiredDLLs) {
         $dllPath = Join-Path $RootDir $dll
         if (Test-Path $dllPath) {
@@ -303,7 +303,7 @@ try {
             Write-Warn "$dll not found (may be statically linked)"
         }
     }
-    
+
     # Check vcpkg manifest
     $vcpkgManifest = Join-Path $RootDir "vcpkg.json"
     if (Test-Path $vcpkgManifest) {
@@ -311,12 +311,12 @@ try {
     } else {
         Write-Warn "vcpkg.json manifest not found"
     }
-    
+
     # =============================================================================
     # 8. SECURITY CHECKS
     # =============================================================================
     Write-CheckHeader "8. Security Checks"
-    
+
     # Check for hardcoded credentials (basic scan)
     Write-Host "  Scanning for potential security issues..." -ForegroundColor Gray
     $securityPatterns = @(
@@ -324,7 +324,7 @@ try {
         'api[_-]?key\s*=\s*[''"]',
         'secret\s*=\s*[''"]'
     )
-    
+
     $securityIssues = @()
     Get-ChildItem -Path $RootDir -Recurse -Include *.cpp, *.h, *.ps1, *.json -ErrorAction SilentlyContinue | ForEach-Object {
         $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
@@ -335,18 +335,18 @@ try {
             }
         }
     }
-    
+
     if ($securityIssues.Count -eq 0) {
         Write-Pass "No obvious credentials in source code"
     } else {
         Write-Warn "Potential credentials found in $($securityIssues.Count) file(s)"
     }
-    
+
     # =============================================================================
     # SUMMARY
     # =============================================================================
     $duration = (Get-Date) - $script:StartTime
-    
+
     Write-Host "`n============================================" -ForegroundColor Cyan
     Write-Host "Release Checklist Summary" -ForegroundColor Cyan
     Write-Host "============================================" -ForegroundColor Cyan
@@ -355,7 +355,7 @@ try {
     Write-Host "  Warnings:  " -NoNewline; Write-Host $script:ChecksWarned -ForegroundColor Yellow
     Write-Host "  Duration:  $($duration.TotalSeconds.ToString('F2')) seconds" -ForegroundColor Gray
     Write-Host "============================================`n" -ForegroundColor Cyan
-    
+
     if ($script:ChecksFailed -eq 0) {
         Write-Host "✓ Release checklist PASSED" -ForegroundColor Green
         Write-Host "  Ready to proceed with release" -ForegroundColor Green
@@ -365,8 +365,7 @@ try {
         Write-Host "  Address failures before releasing" -ForegroundColor Red
         exit 1
     }
-    
+
 } finally {
     Pop-Location
 }
-

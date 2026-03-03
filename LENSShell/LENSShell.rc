@@ -45,10 +45,10 @@ STRINGTABLE
 // Version Information resources
 //
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION     14,0,0,0
-    PRODUCTVERSION  14,0,0,0
-    FILEOS          VOS__WINDOWS32
-    FILETYPE        VFT_DLL
+FILEVERSION     15, 0, 0, 0
+PRODUCTVERSION  15, 0, 0, 0
+FILEOS          VOS__WINDOWS32
+FILETYPE        VFT_DLL
 {
     BLOCK "StringFileInfo"
     {
@@ -61,10 +61,10 @@ VS_VERSION_INFO VERSIONINFO
 #else
             VALUE "FileDescription", "ExplorerLens Universal File Preview Shell Extension 32-bit\0"
 #endif
-            VALUE "FileVersion", "14.0.0.0\0"
+            VALUE "FileVersion", "15.0.0.0\0"
             VALUE "LegalCopyright", "ExplorerLens.io (c) 2011-2026\0"
             VALUE "ProductName", "ExplorerLens\0"
-            VALUE "ProductVersion", "14.0.0.0\0"
+            VALUE "ProductVersion", "15.0.0.0\0"
         }
     }
     BLOCK "VarFileInfo"
@@ -72,4 +72,3 @@ VS_VERSION_INFO VERSIONINFO
         VALUE "Translation", 1033, 1200
     }
 }
-

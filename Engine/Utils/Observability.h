@@ -1210,7 +1210,7 @@ struct SystemInfo
     std::string gpuModel = "Unknown";
     uint64_t ramMB = 0;
     uint64_t vramMB = 0;
-    std::string explorerLensVersion = "7.0.0";
+    std::string explorerLensVersion = "15.0.0";
 
     std::string ToJSON() const {
         std::ostringstream ss;

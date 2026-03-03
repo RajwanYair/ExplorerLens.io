@@ -534,7 +534,7 @@ private:
 
 struct ReleaseManifest
 {
-    std::string version = "7.0.0";
+    std::string version = "15.0.0";
     std::string buildDate;
     std::string commitHash;
     std::string configuration = "Release";

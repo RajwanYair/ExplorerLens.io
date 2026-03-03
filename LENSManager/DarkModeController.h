@@ -51,8 +51,10 @@ public:
     DarkMode::EnableDarkModeForWindow(hWnd, m_isDarkMode);
 
     // Apply colors to dialog and children
-    DarkMode::ApplyThemeToDialog(hWnd, m_colors);
+    // Set visual-style theme on controls FIRST so they know about dark mode,
+    // THEN repaint everything with the correct colors.
     DarkMode::ApplyDarkScrollbars(hWnd, m_isDarkMode);
+    DarkMode::ApplyThemeToDialog(hWnd, m_colors);
 
     // Windows 11: Rounded corners
     DarkMode::SetRoundedCorners(hWnd, DarkMode::DWMWCP_ROUND);

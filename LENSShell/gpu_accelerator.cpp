@@ -1,5 +1,5 @@
 // gpu_accelerator.cpp - DirectX 11 GPU-Accelerated Thumbnail Generation
-// ExplorerLens v5.2.0 - Implementation
+// ExplorerLens v15.0.0 - Implementation
 // Copyright (c) 2025 ExplorerLens Project
 
 #include "StdAfx.h"
@@ -27,14 +27,14 @@ struct ResizeConstants {
 // GPUAccelerator - Singleton Implementation
 //=============================================================================
 
-GPUAccelerator &GPUAccelerator::Instance() {
+GPUAccelerator& GPUAccelerator::Instance() {
   static GPUAccelerator instance;
   return instance;
 }
 
 GPUAccelerator::GPUAccelerator()
-    : m_initialized(false), m_gpuAvailable(false), m_deviceLost(false),
-      m_queueRunning(false), m_poolFrameCounter(0) {
+  : m_initialized(false), m_gpuAvailable(false), m_deviceLost(false),
+  m_queueRunning(false), m_poolFrameCounter(0) {
   m_stats.Reset();
   ZeroMemory(&m_deviceInfo, sizeof(m_deviceInfo));
 }
@@ -58,17 +58,17 @@ HRESULT GPUAccelerator::Initialize(bool allowWARP) {
 
   // Create WIC factory first (needed for CPU fallback too)
   hr = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER,
-                        IID_PPV_ARGS(&m_wicFactory));
+    IID_PPV_ARGS(&m_wicFactory));
 
   if (FAILED(hr)) {
     DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU, "Create WIC factory",
-                   hr);
+      hr);
     OutputDebugString(L"[GPU] Failed to create WIC factory\n");
     return hr;
   }
 
   DT_LOG_DEBUG(ExplorerLens::LogCategory::GPU,
-               "WIC factory created successfully");
+    "WIC factory created successfully");
 
   // Try to create D3D11 device
   hr = CreateDevice(allowWARP);
@@ -87,45 +87,49 @@ HRESULT GPUAccelerator::Initialize(bool allowWARP) {
           m_workerThread = std::thread([this]() { ProcessQueue(); });
 
           DT_LOG_INFO(LogCategory::GPU,
-                      "GPU acceleration initialized successfully");
+            "GPU acceleration initialized successfully");
           std::ostringstream oss;
           oss << "Device: " << std::string(CW2A(m_deviceInfo.name.c_str()))
-              << ", VRAM: "
-              << (m_deviceInfo.dedicatedVideoMemory / (1024.0 * 1024.0))
-              << " MB"
-              << ", Feature Level: 0x" << std::hex << m_deviceInfo.featureLevel;
+            << ", VRAM: "
+            << (m_deviceInfo.dedicatedVideoMemory / (1024.0 * 1024.0))
+            << " MB"
+            << ", Feature Level: 0x" << std::hex << m_deviceInfo.featureLevel;
           DT_LOG_INFO(LogCategory::GPU, oss.str());
 
           OutputDebugStringW(
-              L"[GPU] GPU acceleration initialized successfully\n");
+            L"[GPU] GPU acceleration initialized successfully\n");
           OutputDebugStringW(
-              (L"[GPU] Device: " + m_deviceInfo.name + L"\n").c_str());
+            (L"[GPU] Device: " + m_deviceInfo.name + L"\n").c_str());
 
           wchar_t msg[256];
           swprintf_s(msg, L"[GPU] VRAM: %.1f MB, Feature Level: 0x%04X\n",
-                     m_deviceInfo.dedicatedVideoMemory / (1024.0 * 1024.0),
-                     m_deviceInfo.featureLevel);
+            m_deviceInfo.dedicatedVideoMemory / (1024.0 * 1024.0),
+            m_deviceInfo.featureLevel);
           OutputDebugStringW(msg);
-        } else {
-          DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU,
-                         "Detect capabilities", hr);
         }
-      } else {
-        DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU, "Compile shaders",
-                       hr);
+        else {
+          DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU,
+            "Detect capabilities", hr);
+        }
       }
-    } else {
-      DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU, "Create resources",
-                     hr);
+      else {
+        DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU, "Compile shaders",
+          hr);
+      }
     }
-  } else {
+    else {
+      DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU, "Create resources",
+        hr);
+    }
+  }
+  else {
     DT_LOG_HRESULT(LogLevel::LVL_WARNING, LogCategory::GPU,
-                   "Create D3D11 device", hr);
+      "Create D3D11 device", hr);
   }
 
   if (!m_gpuAvailable) {
     OutputDebugString(
-        L"[GPU] GPU acceleration not available, using CPU fallback\n");
+      L"[GPU] GPU acceleration not available, using CPU fallback\n");
     // Continue anyway - we'll use CPU fallback
     hr = S_OK;
   }
@@ -199,24 +203,25 @@ HRESULT GPUAccelerator::CreateDevice(bool allowWARP) {
   // Try hardware device first
   D3D_FEATURE_LEVEL featureLevel;
   hr = D3D11CreateDevice(nullptr, // Default adapter
-                         D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags,
-                         featureLevels, ARRAYSIZE(featureLevels),
-                         D3D11_SDK_VERSION, &m_device, &featureLevel,
-                         &m_context);
+    D3D_DRIVER_TYPE_HARDWARE, nullptr, createDeviceFlags,
+    featureLevels, ARRAYSIZE(featureLevels),
+    D3D11_SDK_VERSION, &m_device, &featureLevel,
+    &m_context);
 
   if (FAILED(hr) && allowWARP) {
     // Fall back to WARP (software) device
     OutputDebugString(L"[GPU] Hardware device failed, trying WARP...\n");
     hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_WARP, nullptr,
-                           createDeviceFlags, featureLevels,
-                           ARRAYSIZE(featureLevels), D3D11_SDK_VERSION,
-                           &m_device, &featureLevel, &m_context);
+      createDeviceFlags, featureLevels,
+      ARRAYSIZE(featureLevels), D3D11_SDK_VERSION,
+      &m_device, &featureLevel, &m_context);
 
     if (SUCCEEDED(hr)) {
       m_deviceInfo.isHardwareDevice = false;
       m_deviceInfo.name = L"Microsoft Basic Render Driver (WARP)";
     }
-  } else if (SUCCEEDED(hr)) {
+  }
+  else if (SUCCEEDED(hr)) {
     m_deviceInfo.isHardwareDevice = true;
 
     // Get adapter info
@@ -238,7 +243,7 @@ HRESULT GPUAccelerator::CreateDevice(bool allowWARP) {
             m_deviceInfo.vendorId = desc.VendorId;
 
             // Log vendor information
-            const wchar_t *vendorName = L"Unknown";
+            const wchar_t* vendorName = L"Unknown";
             if (desc.VendorId == 0x8086)
               vendorName = L"Intel";
             else if (desc.VendorId == 0x10DE)
@@ -250,7 +255,7 @@ HRESULT GPUAccelerator::CreateDevice(bool allowWARP) {
 
             wchar_t msg[256];
             swprintf_s(msg, L"[GPU] Vendor: %s (0x%04X)\n", vendorName,
-                       desc.VendorId);
+              desc.VendorId);
             OutputDebugStringW(msg);
 
             // Intel-specific detection and optimization flags
@@ -259,13 +264,15 @@ HRESULT GPUAccelerator::CreateDevice(bool allowWARP) {
 
               // Detect high-performance Intel GPUs
               if (gpuName.find(L"Iris") != std::wstring::npos ||
-                  gpuName.find(L"Arc") != std::wstring::npos ||
-                  gpuName.find(L"Xe") != std::wstring::npos) {
+                gpuName.find(L"Arc") != std::wstring::npos ||
+                gpuName.find(L"Xe") != std::wstring::npos) {
                 OutputDebugStringW(L"[GPU] Intel high-performance GPU detected "
-                                   L"(Iris/Xe/Arc)\n");
-              } else if (gpuName.find(L"HD Graphics") != std::wstring::npos) {
+                  L"(Iris/Xe/Arc)\n");
+              }
+              else if (gpuName.find(L"HD Graphics") != std::wstring::npos) {
                 OutputDebugStringW(L"[GPU] Intel HD Graphics detected\n");
-              } else if (gpuName.find(L"UHD Graphics") != std::wstring::npos) {
+              }
+              else if (gpuName.find(L"UHD Graphics") != std::wstring::npos) {
                 OutputDebugStringW(L"[GPU] Intel UHD Graphics detected\n");
               }
 
@@ -273,10 +280,10 @@ HRESULT GPUAccelerator::CreateDevice(bool allowWARP) {
               if (desc.SharedSystemMemory > (2ULL * 1024 * 1024 * 1024)) {
                 wchar_t memMsg[256];
                 swprintf_s(memMsg,
-                           L"[GPU] Intel GPU with %.1f GB shared memory - "
-                           L"optimizing for integrated graphics\n",
-                           desc.SharedSystemMemory /
-                               (1024.0 * 1024.0 * 1024.0));
+                  L"[GPU] Intel GPU with %.1f GB shared memory - "
+                  L"optimizing for integrated graphics\n",
+                  desc.SharedSystemMemory /
+                  (1024.0 * 1024.0 * 1024.0));
                 OutputDebugStringW(memMsg);
               }
             }
@@ -290,7 +297,7 @@ HRESULT GPUAccelerator::CreateDevice(bool allowWARP) {
     m_deviceInfo.featureLevel = featureLevel;
 
     // Log feature level
-    const wchar_t *featureLevelName = L"Unknown";
+    const wchar_t* featureLevelName = L"Unknown";
     if (featureLevel == D3D_FEATURE_LEVEL_11_1)
       featureLevelName = L"11.1";
     else if (featureLevel == D3D_FEATURE_LEVEL_11_0)
@@ -356,7 +363,7 @@ HRESULT GPUAccelerator::CompileShaders() {
   HRESULT hr = S_OK;
 
   // HLSL shader source embedded (compile at runtime)
-  const char *shaderSource = R"(
+  const char* shaderSource = R"(
         cbuffer ResizeConstants : register(b0) {
             uint sourceWidth;
             uint sourceHeight;
@@ -367,28 +374,28 @@ HRESULT GPUAccelerator::CompileShaders() {
             float scaleX;
             float scaleY;
         };
-        
+
         Texture2D<float4> sourceTexture : register(t0);
         RWTexture2D<float4> targetTexture : register(u0);
         SamplerState samplerLinear : register(s0);
-        
+
         static const float PI = 3.14159265359;
         static const float LANCZOS_SIZE = 3.0;
         static const float EPSILON = 0.0001;
-        
+
         float sinc(float x) {
             x = abs(x);
             if (x < EPSILON) return 1.0;
             float pix = PI * x;
             return sin(pix) / pix;
         }
-        
+
         float lanczos3(float x) {
             x = abs(x);
             if (x >= LANCZOS_SIZE) return 0.0;
             return sinc(x) * sinc(x / LANCZOS_SIZE);
         }
-        
+
         float3 srgbToLinear(float3 srgb) {
             float3 linear;
             [unroll]
@@ -397,7 +404,7 @@ HRESULT GPUAccelerator::CompileShaders() {
             }
             return linear;
         }
-        
+
         float3 linearToSrgb(float3 linear) {
             float3 srgb;
             [unroll]
@@ -406,18 +413,18 @@ HRESULT GPUAccelerator::CompileShaders() {
             }
             return srgb;
         }
-        
+
         [numthreads(8, 8, 1)]
         void CSResizeLanczos3(uint3 DTid : SV_DispatchThreadID) {
             if (DTid.x >= targetWidth || DTid.y >= targetHeight) return;
-            
+
             float srcX = (DTid.x + 0.5) / scaleX;
             float srcY = (DTid.y + 0.5) / scaleY;
-            
+
             int kernelRadius = 3;
             float4 sum = float4(0.0, 0.0, 0.0, 0.0);
             float weightSum = 0.0;
-            
+
             [unroll]
             for (int dy = -kernelRadius; dy < kernelRadius; dy++) {
                 [unroll]
@@ -426,18 +433,18 @@ HRESULT GPUAccelerator::CompileShaders() {
                     int sy = int(srcY) + dy;
                     sx = clamp(sx, 0, int(sourceWidth) - 1);
                     sy = clamp(sy, 0, int(sourceHeight) - 1);
-                    
+
                     float distX = srcX - (sx + 0.5);
                     float distY = srcY - (sy + 0.5);
                     float weight = lanczos3(distX) * lanczos3(distY);
-                    
+
                     float4 pixel = sourceTexture.Load(int3(sx, sy, 0));
                     pixel.rgb = srgbToLinear(pixel.rgb);
                     sum += pixel * weight;
                     weightSum += weight;
                 }
             }
-            
+
             if (weightSum > EPSILON) sum /= weightSum;
             sum.rgb = linearToSrgb(sum.rgb);
             sum = saturate(sum);
@@ -457,24 +464,24 @@ HRESULT GPUAccelerator::CompileShaders() {
 #endif
 
   hr = D3DCompile(shaderSource, strlen(shaderSource), "ThumbnailResize",
-                  nullptr, nullptr, "CSResizeLanczos3", "cs_5_0", compileFlags,
-                  0, &shaderBlob, &errorBlob);
+    nullptr, nullptr, "CSResizeLanczos3", "cs_5_0", compileFlags,
+    0, &shaderBlob, &errorBlob);
 
   if (FAILED(hr)) {
     if (errorBlob) {
       OutputDebugStringA("[GPU] Shader compilation error: ");
-      OutputDebugStringA(static_cast<char *>(errorBlob->GetBufferPointer()));
+      OutputDebugStringA(static_cast<char*>(errorBlob->GetBufferPointer()));
       OutputDebugStringA("\n");
     }
     OutputDebugString(
-        L"[GPU] Failed to compile compute shader, will use CPU fallback\n");
+      L"[GPU] Failed to compile compute shader, will use CPU fallback\n");
     return hr;
   }
 
   // Create compute shader
   hr = m_device->CreateComputeShader(shaderBlob->GetBufferPointer(),
-                                     shaderBlob->GetBufferSize(), nullptr,
-                                     &m_resizeCS);
+    shaderBlob->GetBufferSize(), nullptr,
+    &m_resizeCS);
 
   if (FAILED(hr)) {
     OutputDebugString(L"[GPU] Failed to create compute shader\n");
@@ -491,20 +498,20 @@ HRESULT GPUAccelerator::DetectCapabilities() {
   // Check for compute shader support (D3D11.0+)
   if (m_deviceInfo.featureLevel >= D3D_FEATURE_LEVEL_11_0) {
     m_deviceInfo.capabilities =
-        m_deviceInfo.capabilities | GPUCapability::ComputeShaders;
+      m_deviceInfo.capabilities | GPUCapability::ComputeShaders;
   }
 
   // Check for D3D11.1 features
   if (m_deviceInfo.featureLevel >= D3D_FEATURE_LEVEL_11_1) {
     m_deviceInfo.capabilities =
-        m_deviceInfo.capabilities | GPUCapability::FastSemantics;
+      m_deviceInfo.capabilities | GPUCapability::FastSemantics;
   }
 
   // Check for dedicated GPU
   if (m_deviceInfo.isHardwareDevice &&
-      m_deviceInfo.dedicatedVideoMemory > 256 * 1024 * 1024) {
+    m_deviceInfo.dedicatedVideoMemory > 256 * 1024 * 1024) {
     m_deviceInfo.capabilities =
-        m_deviceInfo.capabilities | GPUCapability::HighPerformance;
+      m_deviceInfo.capabilities | GPUCapability::HighPerformance;
   }
 
   return S_OK;
@@ -512,21 +519,21 @@ HRESULT GPUAccelerator::DetectCapabilities() {
 
 bool GPUAccelerator::HasComputeShaders() const {
   return HasCapability(m_deviceInfo.capabilities,
-                       GPUCapability::ComputeShaders);
+    GPUCapability::ComputeShaders);
 }
 
 bool GPUAccelerator::IsHighPerformance() const {
   return HasCapability(m_deviceInfo.capabilities,
-                       GPUCapability::HighPerformance);
+    GPUCapability::HighPerformance);
 }
 
 //=============================================================================
 // Thumbnail Generation (Synchronous)
 //=============================================================================
 
-HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
-                                        UINT targetWidth, UINT targetHeight,
-                                        IWICBitmap **ppThumbnail) {
+HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource* pSource,
+  UINT targetWidth, UINT targetHeight,
+  IWICBitmap** ppThumbnail) {
   PROFILE_SCOPE("GPU_CreateThumbnail");
 
   if (!pSource || !ppThumbnail) {
@@ -539,7 +546,7 @@ HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
   // Use CPU fallback if GPU not available
   if (!m_gpuAvailable || m_deviceLost) {
     DT_LOG_DEBUG(ExplorerLens::LogCategory::GPU,
-                 "Using CPU fallback (GPU unavailable or device lost)");
+      "Using CPU fallback (GPU unavailable or device lost)");
     return CreateThumbnailCPU(pSource, targetWidth, targetHeight, ppThumbnail);
   }
 
@@ -554,9 +561,9 @@ HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
   hr = CreateTextureFromWIC(pSource, &sourceTexture, &sourceSRV);
   if (FAILED(hr)) {
     DT_LOG_HRESULT(LogLevel::LVL_WARNING, LogCategory::GPU,
-                   "CreateTextureFromWIC", hr);
+      "CreateTextureFromWIC", hr);
     OutputDebugString(
-        L"[GPU] Failed to create texture from WIC, using CPU fallback\n");
+      L"[GPU] Failed to create texture from WIC, using CPU fallback\n");
     return CreateThumbnailCPU(pSource, targetWidth, targetHeight, ppThumbnail);
   }
 
@@ -565,17 +572,17 @@ HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
   sourceTexture->GetDesc(&srcDesc);
 
   std::string resizeInfo =
-      std::string("Resizing texture: ") + std::to_string(srcDesc.Width) + "x" +
-      std::to_string(srcDesc.Height) + " -> " + std::to_string(targetWidth) +
-      "x" + std::to_string(targetHeight);
+    std::string("Resizing texture: ") + std::to_string(srcDesc.Width) + "x" +
+    std::to_string(srcDesc.Height) + " -> " + std::to_string(targetWidth) +
+    "x" + std::to_string(targetHeight);
   DT_LOG_DEBUG(ExplorerLens::LogCategory::GPU, resizeInfo);
 
   // Resize texture using GPU
   hr = ResizeTexture(sourceSRV.Get(), srcDesc.Width, srcDesc.Height,
-                     targetWidth, targetHeight, &outputTexture);
+    targetWidth, targetHeight, &outputTexture);
   if (FAILED(hr)) {
     DT_LOG_HRESULT(LogLevel::LVL_WARNING, LogCategory::GPU, "ResizeTexture",
-                   hr);
+      hr);
     OutputDebugString(L"[GPU] Failed to resize texture, using CPU fallback\n");
     return CreateThumbnailCPU(pSource, targetWidth, targetHeight, ppThumbnail);
   }
@@ -589,19 +596,19 @@ HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
 
   if (FAILED(hr)) {
     DT_LOG_HRESULT(LogLevel::LVL_WARNING, LogCategory::GPU,
-                   "TextureToWICBitmap", hr);
+      "TextureToWICBitmap", hr);
     OutputDebugString(
-        L"[GPU] Failed to convert to WIC bitmap, using CPU fallback\n");
+      L"[GPU] Failed to convert to WIC bitmap, using CPU fallback\n");
     return CreateThumbnailCPU(pSource, targetWidth, targetHeight, ppThumbnail);
   }
 
   // Update statistics and periodic pool cleanup
   auto endTime = std::chrono::high_resolution_clock::now();
   double elapsedMs =
-      std::chrono::duration<double, std::milli>(endTime - startTime).count();
+    std::chrono::duration<double, std::milli>(endTime - startTime).count();
 
   std::string perfInfo = std::string("GPU thumbnail generated in ") +
-                         std::to_string(elapsedMs) + " ms";
+    std::to_string(elapsedMs) + " ms";
   DT_LOG_DEBUG(ExplorerLens::LogCategory::PERFORMANCE, perfInfo);
 
   {
@@ -609,8 +616,8 @@ HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
     m_stats.totalThumbnails++;
     m_stats.gpuThumbnails++;
     m_stats.avgGpuTimeMs =
-        (m_stats.avgGpuTimeMs * (m_stats.gpuThumbnails - 1) + elapsedMs) /
-        m_stats.gpuThumbnails;
+      (m_stats.avgGpuTimeMs * (m_stats.gpuThumbnails - 1) + elapsedMs) /
+      m_stats.gpuThumbnails;
   }
 
   // Periodic texture pool cleanup
@@ -628,8 +635,8 @@ HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
       while (it != m_texturePool.end()) {
         if (!it->inUse) {
           auto age = std::chrono::duration_cast<std::chrono::milliseconds>(
-                         now - it->lastUsed)
-                         .count();
+            now - it->lastUsed)
+            .count();
 
           if (age > POOL_TEXTURE_LIFETIME_MS) {
             it = m_texturePool.erase(it);
@@ -643,9 +650,9 @@ HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
       if (removedCount > 0) {
         wchar_t msg[128];
         swprintf_s(msg, 128,
-                   L"[GPU] Texture pool: Cleaned up %zu old textures (pool "
-                   L"size: %zu)\n",
-                   removedCount, m_texturePool.size());
+          L"[GPU] Texture pool: Cleaned up %zu old textures (pool "
+          L"size: %zu)\n",
+          removedCount, m_texturePool.size());
         OutputDebugString(msg);
       }
     }
@@ -654,18 +661,18 @@ HRESULT GPUAccelerator::CreateThumbnail(IWICBitmapSource *pSource,
   return S_OK;
 }
 
-HRESULT GPUAccelerator::CreateThumbnailFromFile(const std::wstring &filePath,
-                                                UINT targetWidth,
-                                                UINT targetHeight,
-                                                IWICBitmap **ppThumbnail) {
+HRESULT GPUAccelerator::CreateThumbnailFromFile(const std::wstring& filePath,
+  UINT targetWidth,
+  UINT targetHeight,
+  IWICBitmap** ppThumbnail) {
   if (!m_wicFactory) {
     return E_NOT_VALID_STATE;
   }
 
   ComPtr<IWICBitmapDecoder> decoder;
   HRESULT hr = m_wicFactory->CreateDecoderFromFilename(
-      filePath.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand,
-      &decoder);
+    filePath.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand,
+    &decoder);
 
   if (FAILED(hr)) {
     return hr;
@@ -684,9 +691,9 @@ HRESULT GPUAccelerator::CreateThumbnailFromFile(const std::wstring &filePath,
 // CPU Fallback Implementation
 //=============================================================================
 
-HRESULT GPUAccelerator::CreateThumbnailCPU(IWICBitmapSource *pSource,
-                                           UINT targetWidth, UINT targetHeight,
-                                           IWICBitmap **ppThumbnail) {
+HRESULT GPUAccelerator::CreateThumbnailCPU(IWICBitmapSource* pSource,
+  UINT targetWidth, UINT targetHeight,
+  IWICBitmap** ppThumbnail) {
   if (!m_wicFactory || !pSource || !ppThumbnail) {
     return E_POINTER;
   }
@@ -703,27 +710,27 @@ HRESULT GPUAccelerator::CreateThumbnailCPU(IWICBitmapSource *pSource,
 
   // Use high-quality Fant interpolation
   hr = scaler->Initialize(pSource, targetWidth, targetHeight,
-                          WICBitmapInterpolationModeFant);
+    WICBitmapInterpolationModeFant);
   if (FAILED(hr)) {
     return hr;
   }
 
   // Create output bitmap
   hr = m_wicFactory->CreateBitmapFromSource(
-      scaler.Get(), WICBitmapCacheOnDemand, ppThumbnail);
+    scaler.Get(), WICBitmapCacheOnDemand, ppThumbnail);
 
   // Update statistics
   auto endTime = std::chrono::high_resolution_clock::now();
   double elapsedMs =
-      std::chrono::duration<double, std::milli>(endTime - startTime).count();
+    std::chrono::duration<double, std::milli>(endTime - startTime).count();
 
   {
     std::lock_guard<std::mutex> lock(m_statsMutex);
     m_stats.totalThumbnails++;
     m_stats.cpuFallbacks++;
     m_stats.avgCpuTimeMs =
-        (m_stats.avgCpuTimeMs * (m_stats.cpuFallbacks - 1) + elapsedMs) /
-        m_stats.cpuFallbacks;
+      (m_stats.avgCpuTimeMs * (m_stats.cpuFallbacks - 1) + elapsedMs) /
+      m_stats.cpuFallbacks;
   }
 
   return hr;
@@ -733,9 +740,9 @@ HRESULT GPUAccelerator::CreateThumbnailCPU(IWICBitmapSource *pSource,
 // GPU Rendering Helpers - Full Implementation
 //=============================================================================
 
-HRESULT GPUAccelerator::CreateTextureFromWIC(IWICBitmapSource *pSource,
-                                             ID3D11Texture2D **ppTexture,
-                                             ID3D11ShaderResourceView **ppSRV) {
+HRESULT GPUAccelerator::CreateTextureFromWIC(IWICBitmapSource* pSource,
+  ID3D11Texture2D** ppTexture,
+  ID3D11ShaderResourceView** ppSRV) {
   if (!pSource || !ppTexture) {
     return E_POINTER;
   }
@@ -766,14 +773,15 @@ HRESULT GPUAccelerator::CreateTextureFromWIC(IWICBitmapSource *pSource,
     }
 
     hr = converter->Initialize(pSource, GUID_WICPixelFormat32bppBGRA,
-                               WICBitmapDitherTypeNone, nullptr, 0.0,
-                               WICBitmapPaletteTypeMedianCut);
+      WICBitmapDitherTypeNone, nullptr, 0.0,
+      WICBitmapPaletteTypeMedianCut);
     if (FAILED(hr)) {
       return hr;
     }
 
     convertedSource = converter;
-  } else {
+  }
+  else {
     convertedSource = pSource;
   }
 
@@ -791,7 +799,7 @@ HRESULT GPUAccelerator::CreateTextureFromWIC(IWICBitmapSource *pSource,
   // Acquire texture from pool (or create new one)
   ComPtr<ID3D11Texture2D> texture;
   hr = AcquireTexture(width, height, DXGI_FORMAT_B8G8R8A8_UNORM,
-                      D3D11_BIND_SHADER_RESOURCE, &texture, ppSRV, nullptr);
+    D3D11_BIND_SHADER_RESOURCE, &texture, ppSRV, nullptr);
 
   if (FAILED(hr)) {
     OutputDebugString(L"[GPU] Failed to acquire source texture from pool\n");
@@ -800,16 +808,16 @@ HRESULT GPUAccelerator::CreateTextureFromWIC(IWICBitmapSource *pSource,
 
   // Upload pixel data to texture
   m_context->UpdateSubresource(texture.Get(), 0, nullptr, pixels.data(), stride,
-                               0);
+    0);
 
   *ppTexture = texture.Detach();
   return S_OK;
 }
 
-HRESULT GPUAccelerator::ResizeTexture(ID3D11ShaderResourceView *pSourceSRV,
-                                      UINT sourceWidth, UINT sourceHeight,
-                                      UINT targetWidth, UINT targetHeight,
-                                      ID3D11Texture2D **ppOutput) {
+HRESULT GPUAccelerator::ResizeTexture(ID3D11ShaderResourceView* pSourceSRV,
+  UINT sourceWidth, UINT sourceHeight,
+  UINT targetWidth, UINT targetHeight,
+  ID3D11Texture2D** ppOutput) {
   if (!pSourceSRV || !ppOutput) {
     return E_POINTER;
   }
@@ -819,12 +827,12 @@ HRESULT GPUAccelerator::ResizeTexture(ID3D11ShaderResourceView *pSourceSRV,
   // Phase 2: Use compute shader if available
   if (m_resizeCS) {
     return ResizeTextureComputeShader(pSourceSRV, sourceWidth, sourceHeight,
-                                      targetWidth, targetHeight, ppOutput);
+      targetWidth, targetHeight, ppOutput);
   }
 
   // Fallback: Use WIC scaler (Phase 1 behavior)
   OutputDebugString(
-      L"[GPU] Compute shader not available, using WIC fallback\n");
+    L"[GPU] Compute shader not available, using WIC fallback\n");
 
   // Create output texture
   D3D11_TEXTURE2D_DESC texDesc = {};
@@ -882,9 +890,9 @@ HRESULT GPUAccelerator::ResizeTexture(ID3D11ShaderResourceView *pSourceSRV,
   // Create WIC bitmap from mapped data
   ComPtr<IWICBitmap> sourceBitmap;
   hr = m_wicFactory->CreateBitmapFromMemory(
-      sourceWidth, sourceHeight, GUID_WICPixelFormat32bppBGRA, mapped.RowPitch,
-      mapped.RowPitch * sourceHeight, static_cast<BYTE *>(mapped.pData),
-      &sourceBitmap);
+    sourceWidth, sourceHeight, GUID_WICPixelFormat32bppBGRA, mapped.RowPitch,
+    mapped.RowPitch * sourceHeight, static_cast<BYTE*>(mapped.pData),
+    &sourceBitmap);
 
   m_context->Unmap(stagingTexture.Get(), 0);
 
@@ -900,7 +908,7 @@ HRESULT GPUAccelerator::ResizeTexture(ID3D11ShaderResourceView *pSourceSRV,
   }
 
   hr = scaler->Initialize(sourceBitmap.Get(), targetWidth, targetHeight,
-                          WICBitmapInterpolationModeFant);
+    WICBitmapInterpolationModeFant);
   if (FAILED(hr)) {
     return hr;
   }
@@ -911,22 +919,22 @@ HRESULT GPUAccelerator::ResizeTexture(ID3D11ShaderResourceView *pSourceSRV,
   std::vector<BYTE> scaledPixels(scaledBufferSize);
 
   hr = scaler->CopyPixels(nullptr, scaledStride, scaledBufferSize,
-                          scaledPixels.data());
+    scaledPixels.data());
   if (FAILED(hr)) {
     return hr;
   }
 
   // Update output texture
   m_context->UpdateSubresource(outputTexture.Get(), 0, nullptr,
-                               scaledPixels.data(), scaledStride, 0);
+    scaledPixels.data(), scaledStride, 0);
 
   *ppOutput = outputTexture.Detach();
   return S_OK;
 }
 
 HRESULT GPUAccelerator::ResizeTextureComputeShader(
-    ID3D11ShaderResourceView *pSourceSRV, UINT sourceWidth, UINT sourceHeight,
-    UINT targetWidth, UINT targetHeight, ID3D11Texture2D **ppOutput) {
+  ID3D11ShaderResourceView* pSourceSRV, UINT sourceWidth, UINT sourceHeight,
+  UINT targetWidth, UINT targetHeight, ID3D11Texture2D** ppOutput) {
   HRESULT hr = S_OK;
 
   // Acquire output texture from pool with UAV binding
@@ -934,8 +942,8 @@ HRESULT GPUAccelerator::ResizeTextureComputeShader(
   ComPtr<ID3D11UnorderedAccessView> outputUAV;
 
   hr = AcquireTexture(targetWidth, targetHeight, DXGI_FORMAT_B8G8R8A8_UNORM,
-                      D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE,
-                      &outputTexture, nullptr, &outputUAV);
+    D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE,
+    &outputTexture, nullptr, &outputUAV);
 
   if (FAILED(hr)) {
     OutputDebugString(L"[GPU] Failed to acquire output texture from pool\n");
@@ -955,7 +963,7 @@ HRESULT GPUAccelerator::ResizeTextureComputeShader(
 
   D3D11_MAPPED_SUBRESOURCE mapped;
   hr = m_context->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0,
-                      &mapped);
+    &mapped);
   if (SUCCEEDED(hr)) {
     memcpy(mapped.pData, &constants, sizeof(ResizeConstants));
     m_context->Unmap(m_constantBuffer.Get(), 0);
@@ -974,8 +982,8 @@ HRESULT GPUAccelerator::ResizeTextureComputeShader(
   m_context->Dispatch(dispatchX, dispatchY, 1);
 
   // Unbind resources
-  ID3D11ShaderResourceView *nullSRV = nullptr;
-  ID3D11UnorderedAccessView *nullUAV = nullptr;
+  ID3D11ShaderResourceView* nullSRV = nullptr;
+  ID3D11UnorderedAccessView* nullUAV = nullptr;
   m_context->CSSetShaderResources(0, 1, &nullSRV);
   m_context->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
 
@@ -983,8 +991,8 @@ HRESULT GPUAccelerator::ResizeTextureComputeShader(
   return S_OK;
 }
 
-HRESULT GPUAccelerator::TextureToWICBitmap(ID3D11Texture2D *pTexture,
-                                           IWICBitmap **ppBitmap) {
+HRESULT GPUAccelerator::TextureToWICBitmap(ID3D11Texture2D* pTexture,
+  IWICBitmap** ppBitmap) {
   if (!pTexture || !ppBitmap) {
     return E_POINTER;
   }
@@ -1019,9 +1027,9 @@ HRESULT GPUAccelerator::TextureToWICBitmap(ID3D11Texture2D *pTexture,
 
   // Create WIC bitmap from mapped data
   hr = m_wicFactory->CreateBitmapFromMemory(
-      desc.Width, desc.Height, GUID_WICPixelFormat32bppBGRA, mapped.RowPitch,
-      mapped.RowPitch * desc.Height, static_cast<BYTE *>(mapped.pData),
-      ppBitmap);
+    desc.Width, desc.Height, GUID_WICPixelFormat32bppBGRA, mapped.RowPitch,
+    mapped.RowPitch * desc.Height, static_cast<BYTE*>(mapped.pData),
+    ppBitmap);
 
   m_context->Unmap(stagingTexture.Get(), 0);
 
@@ -1033,8 +1041,8 @@ HRESULT GPUAccelerator::TextureToWICBitmap(ID3D11Texture2D *pTexture,
 //=============================================================================
 
 void GPUAccelerator::QueueThumbnail(
-    const std::wstring &filePath, UINT targetWidth, UINT targetHeight,
-    int priority, std::function<void(IWICBitmap *)> callback) {
+  const std::wstring& filePath, UINT targetWidth, UINT targetHeight,
+  int priority, std::function<void(IWICBitmap*)> callback) {
   ThumbnailRequest request;
   request.sourcePath = filePath;
   request.targetWidth = targetWidth;
@@ -1058,7 +1066,7 @@ void GPUAccelerator::CancelPendingRequests() {
 }
 
 size_t GPUAccelerator::GetQueueSize() const {
-  std::lock_guard<std::mutex> lock(const_cast<std::mutex &>(m_queueMutex));
+  std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(m_queueMutex));
   return m_queue.size();
 }
 
@@ -1069,7 +1077,7 @@ void GPUAccelerator::ProcessQueue() {
     {
       std::unique_lock<std::mutex> lock(m_queueMutex);
       m_queueCV.wait(lock,
-                     [this] { return !m_queue.empty() || !m_queueRunning; });
+        [this] { return !m_queue.empty() || !m_queueRunning; });
 
       if (!m_queueRunning) {
         break;
@@ -1086,8 +1094,8 @@ void GPUAccelerator::ProcessQueue() {
     // Process request
     ComPtr<IWICBitmap> thumbnail;
     HRESULT hr =
-        CreateThumbnailFromFile(request.sourcePath, request.targetWidth,
-                                request.targetHeight, &thumbnail);
+      CreateThumbnailFromFile(request.sourcePath, request.targetWidth,
+        request.targetHeight, &thumbnail);
 
     if (request.callback) {
       request.callback(SUCCEEDED(hr) ? thumbnail.Get() : nullptr);
@@ -1148,10 +1156,10 @@ HRESULT GPUAccelerator::RecoverDevice() {
 //=============================================================================
 
 HRESULT GPUAccelerator::AcquireTexture(UINT width, UINT height,
-                                       DXGI_FORMAT format, UINT bindFlags,
-                                       ID3D11Texture2D **ppTexture,
-                                       ID3D11ShaderResourceView **ppSRV,
-                                       ID3D11UnorderedAccessView **ppUAV) {
+  DXGI_FORMAT format, UINT bindFlags,
+  ID3D11Texture2D** ppTexture,
+  ID3D11ShaderResourceView** ppSRV,
+  ID3D11UnorderedAccessView** ppUAV) {
   if (!ppTexture) {
     return E_POINTER;
   }
@@ -1168,9 +1176,9 @@ HRESULT GPUAccelerator::AcquireTexture(UINT width, UINT height,
   {
     std::lock_guard<std::mutex> lock(m_poolMutex);
 
-    for (auto &entry : m_texturePool) {
+    for (auto& entry : m_texturePool) {
       if (!entry.inUse && entry.width == width && entry.height == height &&
-          entry.format == format && entry.bindFlags == bindFlags) {
+        entry.format == format && entry.bindFlags == bindFlags) {
         // Found a matching texture, reuse it
         entry.inUse = true;
         entry.lastUsed = std::chrono::steady_clock::now();
@@ -1223,7 +1231,7 @@ HRESULT GPUAccelerator::AcquireTexture(UINT width, UINT height,
     srvDesc.Texture2D.MipLevels = 1;
 
     hr =
-        m_device->CreateShaderResourceView(newTexture.Get(), &srvDesc, &newSRV);
+      m_device->CreateShaderResourceView(newTexture.Get(), &srvDesc, &newSRV);
     if (FAILED(hr)) {
       OutputDebugString(L"[GPU] Failed to create SRV for pooled texture\n");
       return hr;
@@ -1239,7 +1247,7 @@ HRESULT GPUAccelerator::AcquireTexture(UINT width, UINT height,
     uavDesc.Texture2D.MipSlice = 0;
 
     hr = m_device->CreateUnorderedAccessView(newTexture.Get(), &uavDesc,
-                                             &newUAV);
+      &newUAV);
     if (FAILED(hr)) {
       OutputDebugString(L"[GPU] Failed to create UAV for pooled texture\n");
       return hr;
@@ -1266,11 +1274,12 @@ HRESULT GPUAccelerator::AcquireTexture(UINT width, UINT height,
 
       wchar_t msg[128];
       swprintf_s(
-          msg, 128,
-          L"[GPU] Texture pool: Added new texture (pool size: %zu/%zu)\n",
-          m_texturePool.size(), MAX_POOL_SIZE);
+        msg, 128,
+        L"[GPU] Texture pool: Added new texture (pool size: %zu/%zu)\n",
+        m_texturePool.size(), MAX_POOL_SIZE);
       OutputDebugString(msg);
-    } else {
+    }
+    else {
       OutputDebugString(L"[GPU] Texture pool full, texture not pooled\n");
     }
   }
@@ -1286,7 +1295,7 @@ HRESULT GPUAccelerator::AcquireTexture(UINT width, UINT height,
   return S_OK;
 }
 
-void GPUAccelerator::ReleaseTexture(ID3D11Texture2D *pTexture) {
+void GPUAccelerator::ReleaseTexture(ID3D11Texture2D* pTexture) {
   if (!pTexture) {
     return;
   }
@@ -1294,7 +1303,7 @@ void GPUAccelerator::ReleaseTexture(ID3D11Texture2D *pTexture) {
   std::lock_guard<std::mutex> lock(m_poolMutex);
 
   // Find the texture in the pool and mark as not in use
-  for (auto &entry : m_texturePool) {
+  for (auto& entry : m_texturePool) {
     if (entry.texture.Get() == pTexture) {
       entry.inUse = false;
       entry.lastUsed = std::chrono::steady_clock::now();
@@ -1318,19 +1327,19 @@ void GPUAccelerator::ClearTexturePool() {
 // ThumbnailGenerator Helper Class
 //=============================================================================
 
-HRESULT ThumbnailGenerator::Generate(IWICBitmapSource *pSource,
-                                     UINT targetWidth, UINT targetHeight,
-                                     IWICBitmap **ppThumbnail) {
+HRESULT ThumbnailGenerator::Generate(IWICBitmapSource* pSource,
+  UINT targetWidth, UINT targetHeight,
+  IWICBitmap** ppThumbnail) {
   return GPUAccelerator::Instance().CreateThumbnail(pSource, targetWidth,
-                                                    targetHeight, ppThumbnail);
+    targetHeight, ppThumbnail);
 }
 
-HRESULT ThumbnailGenerator::GenerateFromFile(const std::wstring &filePath,
-                                             UINT targetWidth,
-                                             UINT targetHeight,
-                                             IWICBitmap **ppThumbnail) {
+HRESULT ThumbnailGenerator::GenerateFromFile(const std::wstring& filePath,
+  UINT targetWidth,
+  UINT targetHeight,
+  IWICBitmap** ppThumbnail) {
   return GPUAccelerator::Instance().CreateThumbnailFromFile(
-      filePath, targetWidth, targetHeight, ppThumbnail);
+    filePath, targetWidth, targetHeight, ppThumbnail);
 }
 
 //=============================================================================
@@ -1344,14 +1353,14 @@ bool IsDirectX11Available() {
   D3D_FEATURE_LEVEL featureLevel;
 
   HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
-                                 nullptr, 0, D3D11_SDK_VERSION, &testDevice,
-                                 &featureLevel, nullptr);
+    nullptr, 0, D3D11_SDK_VERSION, &testDevice,
+    &featureLevel, nullptr);
 
   return SUCCEEDED(hr);
 }
 
-void GetOptimalSize(UINT srcWidth, UINT srcHeight, UINT maxSize, UINT &outWidth,
-                    UINT &outHeight) {
+void GetOptimalSize(UINT srcWidth, UINT srcHeight, UINT maxSize, UINT& outWidth,
+  UINT& outHeight) {
   if (srcWidth <= maxSize && srcHeight <= maxSize) {
     outWidth = srcWidth;
     outHeight = srcHeight;
@@ -1359,12 +1368,13 @@ void GetOptimalSize(UINT srcWidth, UINT srcHeight, UINT maxSize, UINT &outWidth,
   }
 
   float aspectRatio =
-      static_cast<float>(srcWidth) / static_cast<float>(srcHeight);
+    static_cast<float>(srcWidth) / static_cast<float>(srcHeight);
 
   if (srcWidth > srcHeight) {
     outWidth = maxSize;
     outHeight = static_cast<UINT>(maxSize / aspectRatio);
-  } else {
+  }
+  else {
     outHeight = maxSize;
     outWidth = static_cast<UINT>(maxSize * aspectRatio);
   }
@@ -1389,4 +1399,3 @@ UINT CalculateMipLevels(UINT width, UINT height) {
 } // namespace GPUUtil
 
 } // namespace ExplorerLens
-

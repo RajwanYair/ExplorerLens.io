@@ -1,11 +1,11 @@
 ; ============================================================
-; ExplorerLens v7.0.0 - NSIS Installer Script
+; ExplorerLens v15.0.0 - NSIS Installer Script
 ; Nullsoft Scriptable Install System
 ; Download NSIS from: https://nsis.sourceforge.io/
 ; ============================================================
 
 !define PRODUCT_NAME "ExplorerLens"
-!define PRODUCT_VERSION "7.0.0"
+!define PRODUCT_VERSION "15.0.0"
 !define PRODUCT_PUBLISHER "ExplorerLens Project"
 !define PRODUCT_WEB_SITE "https://github.com/yourusername/explorerlens"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -69,21 +69,21 @@ Section "MainSection" SEC01
         MessageBox MB_OK|MB_ICONSTOP "This application requires 64-bit Windows 10 or later."
         Abort
     ${EndIf}
-    
+
     ; Stop Windows Explorer
     DetailPrint "Stopping Windows Explorer..."
     nsExec::ExecToLog 'taskkill /f /im explorer.exe'
     Sleep 1000
-    
+
     ; Unregister old version if exists
     IfFileExists "$SYSDIR\LENSShell.dll" 0 +3
         DetailPrint "Unregistering previous version..."
         nsExec::ExecToLog 'regsvr32 /s /u "$SYSDIR\LENSShell.dll"'
-    
+
     ; Set output path to installation directory
     SetOutPath "$INSTDIR"
     SetOverwrite on
-    
+
     ; Copy main files
     DetailPrint "Installing main files..."
     File "bin\LENSManager.exe"
@@ -91,12 +91,12 @@ Section "MainSection" SEC01
     File "tools\GPUValidator.exe"
     File "LICENSE"
     File "README.md"
-    
+
     ; Copy DLL to System32
     DetailPrint "Installing COM component..."
     SetOutPath "$SYSDIR"
     File "bin\LENSShell.dll"
-    
+
     ; Register COM component from System32
     DetailPrint "Registering COM component..."
     nsExec::ExecToLog 'regsvr32 /s "$SYSDIR\LENSShell.dll"'
@@ -104,21 +104,21 @@ Section "MainSection" SEC01
     ${If} $0 != 0
         MessageBox MB_OK|MB_ICONEXCLAMATION "Warning: COM registration may have failed. Error code: $0"
     ${EndIf}
-    
+
     ; Create Start Menu shortcuts
     CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
     CreateShortcut "$SMPROGRAMS\${PRODUCT_NAME}\Configuration Manager.lnk" "$INSTDIR\LENSManager.exe"
     CreateShortcut "$SMPROGRAMS\${PRODUCT_NAME}\GPU Validator.lnk" "$INSTDIR\GPUValidator.exe"
     CreateShortcut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe"
-    
+
     ; Create Desktop shortcut (optional)
     CreateShortcut "$DESKTOP\ExplorerLens Config.lnk" "$INSTDIR\LENSManager.exe"
-    
+
     ; Restart Windows Explorer
     DetailPrint "Restarting Windows Explorer..."
     Exec '"$WINDIR\explorer.exe"'
     Sleep 1000
-    
+
 SectionEnd
 
 ; ============================================================
@@ -128,7 +128,7 @@ SectionEnd
 Section -Post
     ; Write uninstaller
     WriteUninstaller "$INSTDIR\uninstall.exe"
-    
+
     ; Write registry keys for uninstaller
     WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "${PRODUCT_NAME} ${PRODUCT_VERSION}"
     WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninstall.exe"
@@ -139,12 +139,12 @@ Section -Post
     WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "InstallLocation" "$INSTDIR"
     WriteRegDWORD ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "NoModify" 1
     WriteRegDWORD ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "NoRepair" 1
-    
+
     ; Calculate installed size
     ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
     IntFmt $0 "0x%08X" $0
     WriteRegDWORD ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "EstimatedSize" "$0"
-    
+
 SectionEnd
 
 ; ============================================================
@@ -156,14 +156,14 @@ Section Uninstall
     DetailPrint "Stopping Windows Explorer..."
     nsExec::ExecToLog 'taskkill /f /im explorer.exe'
     Sleep 1000
-    
+
     ; Unregister COM component
     DetailPrint "Unregistering COM component..."
     nsExec::ExecToLog 'regsvr32 /s /u "$SYSDIR\LENSShell.dll"'
-    
+
     ; Delete System32 DLL
     Delete "$SYSDIR\LENSShell.dll"
-    
+
     ; Delete installation files
     Delete "$INSTDIR\LENSManager.exe"
     Delete "$INSTDIR\UnRAR64.dll"
@@ -171,26 +171,26 @@ Section Uninstall
     Delete "$INSTDIR\LICENSE"
     Delete "$INSTDIR\README.md"
     Delete "$INSTDIR\uninstall.exe"
-    
+
     ; Remove Start Menu shortcuts
     Delete "$SMPROGRAMS\${PRODUCT_NAME}\Configuration Manager.lnk"
     Delete "$SMPROGRAMS\${PRODUCT_NAME}\GPU Validator.lnk"
     Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk"
     RMDir "$SMPROGRAMS\${PRODUCT_NAME}"
-    
+
     ; Remove Desktop shortcut
     Delete "$DESKTOP\ExplorerLens Config.lnk"
-    
+
     ; Remove installation directory
     RMDir "$INSTDIR"
-    
+
     ; Remove registry keys
     DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-    
+
     ; Restart Windows Explorer
     DetailPrint "Restarting Windows Explorer..."
     Exec '"$WINDIR\explorer.exe"'
-    
+
     SetAutoClose true
 SectionEnd
 
@@ -207,7 +207,7 @@ Function .onInit
         SetErrorLevel 740
         Quit
     ${EndIf}
-    
+
     ; Check Windows version (Windows 10 minimum)
     ${IfNot} ${AtLeastWin10}
         MessageBox MB_OK|MB_ICONSTOP "${PRODUCT_NAME} requires Windows 10 or later (64-bit)."
@@ -224,8 +224,7 @@ Function un.onInit
         SetErrorLevel 740
         Quit
     ${EndIf}
-    
+
     MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Are you sure you want to completely remove ${PRODUCT_NAME}?" IDYES +2
     Abort
 FunctionEnd
-
