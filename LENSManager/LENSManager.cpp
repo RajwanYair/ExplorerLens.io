@@ -3,6 +3,7 @@
 
 #include "tools.h"
 #include "MainDlg.h"
+#include "DarkModeHelper.h"
 
 CAppModule _Module;
 
@@ -10,6 +11,11 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 {
 	CMessageLoop theLoop;
 	_Module.AddMessageLoop(&theLoop);
+
+	// CRITICAL: Set dark mode preference BEFORE any window creation.
+	// Controls only pick up DarkMode_Explorer visual style when
+	// the process has already opted-in via SetPreferredAppMode.
+	DarkMode::SetAppDarkMode(DarkMode::IsSystemDarkMode());
 
 	CMainDlg dlgMain;
 

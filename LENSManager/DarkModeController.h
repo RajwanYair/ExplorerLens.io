@@ -54,7 +54,13 @@ public:
     // Set visual-style theme on controls FIRST so they know about dark mode,
     // THEN repaint everything with the correct colors.
     DarkMode::ApplyDarkScrollbars(hWnd, m_isDarkMode);
-    DarkMode::ApplyThemeToDialog(hWnd, m_colors);
+    DarkMode::ApplyThemeToDialog(hWnd, m_colors, m_isDarkMode);
+
+    // Explicitly theme the status bar (it ignores WM_CTLCOLOR messages)
+    HWND hStatus = FindWindowEx(hWnd, nullptr, _T("msctls_statusbar32"), nullptr);
+    if (hStatus) {
+      DarkMode::ApplyDarkStatusBar(hStatus, m_isDarkMode);
+    }
 
     // Windows 11: Rounded corners
     DarkMode::SetRoundedCorners(hWnd, DarkMode::DWMWCP_ROUND);

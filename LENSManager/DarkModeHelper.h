@@ -144,21 +144,26 @@ inline bool SetDarkModeForTitleBar(HWND hWnd, bool enable) {
 }
 
 // Apply theme colors to dialog
-inline void ApplyThemeToDialog(HWND hDlg, const ThemeColors& theme) {
+inline void ApplyThemeToDialog(HWND hDlg, const ThemeColors& theme, bool isDarkMode = false) {
     // Set dialog background brush (delete old brush to avoid GDI leak)
     HBRUSH oldBrush = reinterpret_cast<HBRUSH>(
         SetClassLongPtr(hDlg, GCLP_HBRBACKGROUND,
             reinterpret_cast<LONG_PTR>(CreateSolidBrush(theme.background))));
     if (oldBrush) DeleteObject(oldBrush);
 
-    // Apply theme to all child windows — send WM_THEMECHANGED so
-    // controls pick up the new visual-style theme set by ApplyDarkScrollbars
-    EnumChildWindows(hDlg, [](HWND hChild, LPARAM /*lParam*/) -> BOOL
+    // Apply theme to all child windows:
+    // 1. Enable undocumented per-window dark mode (AllowDarkModeForWindow)
+    // 2. Send WM_THEMECHANGED so controls pick up DarkMode_Explorer style
+    // These two steps together ensure checkboxes, buttons, and group boxes
+    // render text in white on dark backgrounds.
+    EnumChildWindows(hDlg, [](HWND hChild, LPARAM lParam) -> BOOL
         {
+            bool dark = (lParam != 0);
+            EnableDarkModeForWindow(hChild, dark);
             SendMessage(hChild, WM_THEMECHANGED, 0, 0);
             InvalidateRect(hChild, nullptr, TRUE);
             return TRUE;
-        }, 0);
+        }, (LPARAM)(isDarkMode ? 1 : 0));
 
     // Force full dialog redraw
     RedrawWindow(hDlg, nullptr, nullptr,
@@ -242,12 +247,31 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
                 _tcsicmp(className, _T("SysTabControl32")) == 0 ||
                 _tcsicmp(className, _T("msctls_trackbar32")) == 0 ||
                 _tcsicmp(className, _T("msctls_progress32")) == 0 ||
+                _tcsicmp(className, _T("msctls_statusbar32")) == 0 ||
                 _tcsicmp(className, _T("tooltips_class32")) == 0) {
                 SetDarkScrollbar(hChild, dark);
             }
 
+            // Status bar needs explicit color messages (SB_SETBKCOLOR)
+            if (_tcsicmp(className, _T("msctls_statusbar32")) == 0) {
+                ThemeColors t = dark ? GetDarkTheme() : GetLightTheme();
+                ::SendMessage(hChild, SB_SETBKCOLOR, 0, (LPARAM)t.background);
+                // Force status bar repaint with correct colors
+                InvalidateRect(hChild, nullptr, TRUE);
+            }
+
             return TRUE;
         }, (LPARAM)(darkMode ? 1 : 0));
+}
+
+// Set themed text/background on a status bar control
+inline void ApplyDarkStatusBar(HWND hStatusBar, bool darkMode) {
+    if (!hStatusBar || !IsWindow(hStatusBar))
+        return;
+    ThemeColors theme = darkMode ? GetDarkTheme() : GetLightTheme();
+    SetDarkScrollbar(hStatusBar, darkMode);
+    ::SendMessage(hStatusBar, SB_SETBKCOLOR, 0, (LPARAM)theme.background);
+    InvalidateRect(hStatusBar, nullptr, TRUE);
 }
 
 // Get Windows accent color from system settings
