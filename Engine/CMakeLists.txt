@@ -329,10 +329,6 @@ set(ENGINE_HEADERS
     Core/AccessTokenValidator.h
     Core/ExplorerPreviewPane.h
     Core/FormatFallbackEngine.h
-    Core/SmartFormatDetectorV2.h
-    Core/DecoderPriorityScheduler.h
-    Core/ExplorerWorkScheduler.h
-    Core/BatchProcessor.h
 
     # Sprint 589-590
     Core/IntegrationTestRunner.h
@@ -415,7 +411,6 @@ set(ENGINE_HEADERS
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
     Decoders/AnimatedFormatHandler.h
-    Decoders/AnimatedThumbnailDecoder.h
     Decoders/ArchiveDecoder.h
     Decoders/ArchiveGridPreview.h
     Decoders/AudioDecoder.h
@@ -477,7 +472,6 @@ set(ENGINE_HEADERS
     Decoders/VectorFormatDecoder.h
     Decoders/VTFDecoder.h
     Decoders/VideoDecoder.h
-    Decoders/VideoEnhancer.h
     Decoders/WebPDecoder.h
     Decoders/WMFDecoder.h
     Decoders/XCFDecoder.h
@@ -607,8 +601,6 @@ set(ENGINE_HEADERS
 
     # Shell integration
     Shell/COMApartmentAudit.h
-    Shell/ContextMenuHandler.h
-    Shell/PreviewPaneHandler.h
 
     # Utilities
     Utils/AccessibilityEngine.h
@@ -620,15 +612,12 @@ set(ENGINE_HEADERS
     Utils/FuzzingEngine.h
     Utils/InstallerManager.h
     Utils/MemorySafety.h
-    Utils/Observability.h
-    Utils/PerformanceTools.h
     Utils/QualityGates.h
     Utils/SecurityCompliance.h
     Utils/SecureAllocator.h
     Utils/InputValidator.h
     Utils/TestFramework.h
     Utils/WindowsCompat.h
-    Utils/WindowsUI.h
     # Individual utility headers
     Utils/AuditLogger.h
     Utils/AutoDocGenerator.h
@@ -638,14 +627,12 @@ set(ENGINE_HEADERS
     Utils/CommandLineInterface.h
     Utils/ConfigMigrationEngine.h
     Utils/DiagnosticDashboard.h
-    Utils/Enterprise.h
     Utils/EnterpriseDeployment.h
     Utils/EnterpriseDeploymentManager.h
     Utils/EXIFOrientation.h
     Utils/FileHashEngine.h
 
     Utils/HardwareCapabilities.h
-    Utils/Installer.h
     Utils/LocalizationEngine.h
     Utils/LogRotationEngine.h
     Utils/MalformedInputHandler.h
@@ -657,7 +644,6 @@ set(ENGINE_HEADERS
     Utils/PerformanceProfiler.h
     Utils/PortableModeManager.h
     Utils/PythonSDK.h
-    Utils/SecurityTesting.h
     Utils/SIMDScaler.h
     Utils/SmallObjectPool.h
     Utils/TestInfrastructure.h

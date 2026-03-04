@@ -20290,7 +20290,7 @@ TEST(Test_S37_CacheEncryption_RoundTrip) {
     cfg.algorithm = EncryptionAlgorithm::AES256;
     cfg.keyDerivation = KeyDerivation::Direct;
     layer.Configure(cfg);
-    std::vector<uint8_t> plaintext = {0x01, 0x02, 0x03, 0x04, 0x05};
+    std::vector<uint8_t> plaintext = { 0x01, 0x02, 0x03, 0x04, 0x05 };
     std::vector<uint8_t> ciphertext;
     layer.Encrypt(plaintext, ciphertext);
     ASSERT(!ciphertext.empty());
@@ -20307,7 +20307,7 @@ TEST(Test_S37_CacheEncryption_NoneMode) {
     EncryptionConfig cfg;
     cfg.algorithm = EncryptionAlgorithm::None;
     layer.Configure(cfg);
-    std::vector<uint8_t> data = {0x10, 0x20, 0x30};
+    std::vector<uint8_t> data = { 0x10, 0x20, 0x30 };
     std::vector<uint8_t> result;
     layer.Encrypt(data, result);
     ASSERT(result.size() == data.size());
@@ -20983,7 +20983,7 @@ TEST(Test_S37_HealthScore_ClassifyScore) {
     HealthScoreAggregator agg;
     ASSERT(agg.ClassifyScore(95.0) == AggregateHealthLevel::Healthy);
     ASSERT(agg.ClassifyScore(50.0) == AggregateHealthLevel::Degraded ||
-           agg.ClassifyScore(50.0) == AggregateHealthLevel::Warning);
+        agg.ClassifyScore(50.0) == AggregateHealthLevel::Warning);
     ASSERT(agg.ClassifyScore(10.0) == AggregateHealthLevel::Critical);
 }
 
@@ -21023,7 +21023,7 @@ TEST(Test_S37_FallbackEngine_FallbackChain) {
     uint32_t selected = engine.SelectDecoder(L".png", nullptr, 0);
     ASSERT(selected == 10);
     // Reorder fallback chain
-    engine.SetFallbackChain(L".png", {20, 10});
+    engine.SetFallbackChain(L".png", { 20, 10 });
     selected = engine.SelectDecoder(L".png", nullptr, 0);
     ASSERT(selected == 20);
 }
