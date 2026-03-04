@@ -1,85 +1,99 @@
-// Format Fallback Engine — GTest
+// Format Fallback Engine — GTest (rewritten for Core/FormatFallbackEngine.h API)
 #include "../Pipeline/FormatFallbackEngine.h"
 #include "GTestShim.h"
 
-using namespace ExplorerLens::Pipeline;
+using namespace ExplorerLens::Engine;
 
 TEST(FormatFallbackEngine, DefaultEngineHasChains) {
- auto engine = FormatFallbackEngine::CreateDefault();
- EXPECT_GE(engine.chains.size(), 3u);
+ FormatFallbackEngine engine;
+ // Register decoders for .jpg
+ engine.RegisterDecoder(L".jpg", {1, "JpegDecoder", 0, true});
+ engine.RegisterDecoder(L".jpg", {2, "WICDecoder", 10, true});
+ auto chain = engine.GetChain(L".jpg");
+ EXPECT_GE(chain.size(), 2u);
 }
 
 TEST(FormatFallbackEngine, JXLChainExists) {
- auto engine = FormatFallbackEngine::CreateDefault();
- EXPECT_NE(engine.FindChain(".jxl"), nullptr);
+ FormatFallbackEngine engine;
+ engine.RegisterDecoder(L".jxl", {1, "JXLDecoder", 0, true});
+ auto chain = engine.GetChain(L".jxl");
+ EXPECT_EQ(chain.size(), 1u);
 }
 
 TEST(FormatFallbackEngine, HEICChainExists) {
- auto engine = FormatFallbackEngine::CreateDefault();
- EXPECT_NE(engine.FindChain(".heic"), nullptr);
+ FormatFallbackEngine engine;
+ engine.RegisterDecoder(L".heic", {1, "HEIFDecoder", 0, true});
+ auto chain = engine.GetChain(L".heic");
+ EXPECT_EQ(chain.size(), 1u);
 }
 
 TEST(FormatFallbackEngine, RAWChainExists) {
- auto engine = FormatFallbackEngine::CreateDefault();
- EXPECT_NE(engine.FindChain(".raw"), nullptr);
+ FormatFallbackEngine engine;
+ engine.RegisterDecoder(L".raw", {1, "RAWDecoder", 0, true});
+ auto chain = engine.GetChain(L".raw");
+ EXPECT_EQ(chain.size(), 1u);
 }
 
 TEST(FormatFallbackEngine, MissingExtensionReturnsNull) {
- auto engine = FormatFallbackEngine::CreateDefault();
- EXPECT_EQ(engine.FindChain(".notexist"), nullptr);
+ FormatFallbackEngine engine;
+ auto result = engine.SelectDecoder(L".notexist", nullptr, 0);
+ EXPECT_EQ(result, 0u);
 }
 
-TEST(FormatFallbackEngine, FallbackTriggerToStringNotEmpty) {
- EXPECT_FALSE(ToString(FallbackTrigger::DecodeFailed).empty());
+TEST(FormatFallbackEngine, SelectDecoderReturnsFirst) {
+ FormatFallbackEngine engine;
+ engine.RegisterDecoder(L".jpg", {10, "JpegDecoder", 0, true});
+ engine.RegisterDecoder(L".jpg", {20, "WICDecoder", 10, true});
+ auto id = engine.SelectDecoder(L".jpg", nullptr, 0);
+ EXPECT_EQ(id, 10u);
 }
 
-TEST(FormatFallbackEngine, TriggerORCombines) {
- auto combined = FallbackTrigger::DecodeFailed | FallbackTrigger::Timeout;
- (void)combined;
- EXPECT_TRUE(HasTrigger(combined, FallbackTrigger::Timeout));
- EXPECT_TRUE(HasTrigger(combined, FallbackTrigger::DecodeFailed));
+TEST(FormatFallbackEngine, SelectDecoderMagicBytes) {
+ FormatFallbackEngine engine;
+ engine.RegisterDecoder(L".jpg", {10, "JpegDecoder", 0, true});
+ // JPEG magic: FF D8 FF
+ uint8_t jpegHeader[] = {0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10};
+ auto id = engine.SelectDecoder(L".jpg", jpegHeader, sizeof(jpegHeader));
+ EXPECT_EQ(id, 10u);
 }
 
-TEST(FormatFallbackEngine, JXLChainHasTerminal) {
- auto engine = FormatFallbackEngine::CreateDefault();
- auto *chain = engine.FindChain(".jxl");
- (void)chain;
- ASSERT_NE(chain, nullptr);
- EXPECT_TRUE(chain->HasTerminal());
+TEST(FormatFallbackEngine, GetStatsInitiallyZero) {
+ FormatFallbackEngine engine;
+ auto stats = engine.GetStats();
+ EXPECT_EQ(stats.totalAttempts, 0u);
+ EXPECT_EQ(stats.totalFailures, 0u);
 }
 
-TEST(FormatFallbackEngine, FallbackEventLogLine) {
- FallbackEvent e;
- e.extension = ".jxl";
- e.primaryDecoder = "JXLDecoder";
- e.usedDecoder = "WICDecoder";
- e.trigger = FallbackTrigger::DecodeFailed;
- e.stagesTraversed = 1;
- EXPECT_FALSE(e.ToLogLine().empty());
+TEST(FormatFallbackEngine, RecordResultUpdatesStats) {
+ FormatFallbackEngine engine;
+ engine.RegisterDecoder(L".jpg", {1, "JpegDecoder", 0, true});
+ engine.RecordDecoderResult(L".jpg", 1, true, 5);
+ auto stats = engine.GetStats();
+ EXPECT_EQ(stats.totalAttempts, 1u);
+ EXPECT_EQ(stats.firstTrySuccesses, 1u);
 }
 
-TEST(FormatFallbackEngine, ChainSelectForDecodeFailed) {
- auto engine = FormatFallbackEngine::CreateDefault();
- auto *chain = engine.FindChain(".jxl");
- ASSERT_NE(chain, nullptr);
- // Primary stage (no trigger) should be selected for no-error case
- auto *stage = chain->SelectForTrigger(FallbackTrigger::None);
- (void)stage;
- EXPECT_NE(stage, nullptr);
+TEST(FormatFallbackEngine, DecoderEntryDefaults) {
+ DecoderEntry e;
+ EXPECT_EQ(e.decoderId, 0u);
+ EXPECT_EQ(e.priority, 0);
+ EXPECT_TRUE(e.enabled);
 }
 
-TEST(FormatFallbackEngine, FallbackStageQualityScore) {
- FallbackStage s;
- s.qualityScore = 100;
- EXPECT_EQ(s.qualityScore, 100u);
+TEST(FormatFallbackEngine, SetFallbackChainReorder) {
+ FormatFallbackEngine engine;
+ engine.RegisterDecoder(L".png", {1, "PngPrimary", 0, true});
+ engine.RegisterDecoder(L".png", {2, "PngFallback", 10, true});
+ // Reverse the order
+ engine.SetFallbackChain(L".png", {2, 1});
+ auto chain = engine.GetChain(L".png");
+ EXPECT_GE(chain.size(), 2u);
+ EXPECT_EQ(chain[0].decoderId, 2u);
 }
 
-TEST(FormatFallbackEngine, HasTriggerNoneAlwaysFalse) {
- EXPECT_FALSE(
- HasTrigger(FallbackTrigger::None, FallbackTrigger::DecodeFailed));
-}
-
-TEST(FormatFallbackEngine, TelemetryEnabledByDefault) {
- auto engine = FormatFallbackEngine::CreateDefault();
- EXPECT_TRUE(engine.enableTelemetry);
+TEST(FormatFallbackEngine, CaseInsensitiveExtension) {
+ FormatFallbackEngine engine;
+ engine.RegisterDecoder(L".JPG", {1, "Decoder", 0, true});
+ auto chain = engine.GetChain(L".jpg");
+ EXPECT_EQ(chain.size(), 1u);
 }

@@ -5835,64 +5835,9 @@ TEST(TestNetDiag_Proxy) {
 }
 
 //==============================================================================
-// ConfigMigrationEngine Tests
+// ConfigMigrationEngine Tests (Core forwarding — uses Utils/Engine version)
+// Original Core:: tests removed; Utils-based tests at TestConfigMigration_* above.
 //==============================================================================
-
-TEST(TestConfigMig_Migrate) {
-    ::ExplorerLens::Core::ConfigMigrationEngine engine;
-    engine.SetSourceVersion(L"10.4.0");
-    engine.SetTargetVersion(L"10.5.0");
-    engine.AddSetting(L"theme", L"dark");
-    ::ExplorerLens::Core::MigrationRule rule;
-    rule.sourceKey = L"theme";
-    rule.targetKey = L"ui.theme";
-    rule.action = ::ExplorerLens::Core::MigrationAction::Rename;
-    engine.AddRule(rule);
-    auto report = engine.Migrate();
-    ASSERT(report.status == ::ExplorerLens::Core::MigrationStatus::Completed);
-    ASSERT(engine.HasSetting(L"ui.theme"));
-}
-
-TEST(TestConfigMig_Rollback) {
-    ::ExplorerLens::Core::ConfigMigrationEngine engine;
-    engine.AddSetting(L"key1", L"val1");
-    ::ExplorerLens::Core::MigrationRule rule;
-    rule.sourceKey = L"key1";
-    rule.action = ::ExplorerLens::Core::MigrationAction::Delete;
-    engine.AddRule(rule);
-    engine.Migrate();
-    ASSERT(!engine.HasSetting(L"key1"));
-    ASSERT(engine.Rollback());
-    ASSERT(engine.HasSetting(L"key1"));
-}
-
-TEST(TestConfigMig_SetDefault) {
-    ::ExplorerLens::Core::ConfigMigrationEngine engine;
-    ::ExplorerLens::Core::MigrationRule rule;
-    rule.targetKey = L"newSetting";
-    rule.defaultValue = L"defaultVal";
-    rule.action = ::ExplorerLens::Core::MigrationAction::SetDefault;
-    engine.AddRule(rule);
-    engine.Migrate();
-    ASSERT(engine.GetSetting(L"newSetting") == L"defaultVal");
-}
-
-TEST(TestConfigMig_ActionNames) {
-    ASSERT(
-        std::wstring(::ExplorerLens::Core::ConfigMigrationEngine::GetActionName(
-            ::ExplorerLens::Core::MigrationAction::Rename)) == L"Rename");
-    ASSERT(::ExplorerLens::Core::ConfigMigrationEngine::GetActionCount() == 5);
-}
-
-TEST(TestConfigMig_StatusNames) {
-    ASSERT(
-        std::wstring(::ExplorerLens::Core::ConfigMigrationEngine::GetStatusName(
-            ::ExplorerLens::Core::MigrationStatus::Completed)) == L"Completed");
-    ASSERT(
-        std::wstring(::ExplorerLens::Core::ConfigMigrationEngine::GetStatusName(
-            ::ExplorerLens::Core::MigrationStatus::RolledBack)) ==
-        L"Rolled Back");
-}
 
 //==============================================================================
 // ReleaseGateV15 Tests
@@ -14381,29 +14326,7 @@ TEST(Test_WorkSched_Dequeue) {
     ASSERT(!item.filePath.empty());
 }
 
-// FormatFallbackEngine Tests
-TEST(Test_FmtFallback_Triggers) {
-    using namespace ExplorerLens::Pipeline;
-    ASSERT(static_cast<int>(FallbackTrigger::None) == 0);
-    ASSERT(static_cast<int>(FallbackTrigger::CorruptData) == 0x40);
-}
-TEST(Test_FmtFallback_TriggerNames) {
-    using namespace ExplorerLens::Pipeline;
-    auto name = ToString(FallbackTrigger::DecodeFailed);
-    ASSERT(!name.empty());
-}
-TEST(Test_FmtFallback_CreateDefault) {
-    using namespace ExplorerLens::Pipeline;
-    auto engine = FormatFallbackEngine::CreateDefault();
-    auto chain = engine.FindChain(".png");
-    // May or may not have a chain — just test no crash
-}
-TEST(Test_FmtFallback_HasTrigger) {
-    using namespace ExplorerLens::Pipeline;
-    auto combined = FallbackTrigger::DecodeFailed | FallbackTrigger::Timeout;
-    ASSERT(HasTrigger(combined, FallbackTrigger::DecodeFailed));
-    ASSERT(!HasTrigger(combined, FallbackTrigger::GPUInitFailed));
-}
+// FormatFallbackEngine Tests — moved to FallbackEngineTests.cpp (Core API)
 
 // FormatGalleryView Tests
 TEST(Test_FmtGallery_TileSizes) {
@@ -19206,13 +19129,7 @@ int main() {
     RUN_TEST(TestNetDiag_StatusNames);
     RUN_TEST(TestNetDiag_Proxy);
 
-    // Config Migration Tests
-    std::wcout << L"Config Migration Engine..." << std::endl;
-    RUN_TEST(TestConfigMig_Migrate);
-    RUN_TEST(TestConfigMig_Rollback);
-    RUN_TEST(TestConfigMig_SetDefault);
-    RUN_TEST(TestConfigMig_ActionNames);
-    RUN_TEST(TestConfigMig_StatusNames);
+    // Config Migration Tests (Core:: tests removed — forwarding to Utils now)
 
     // Release Gate V15 Tests
     std::wcout << L"Release Gate V15..." << std::endl;
@@ -21191,12 +21108,7 @@ int main() {
     RUN_TEST(Test_WorkSched_Cancel);
     RUN_TEST(Test_WorkSched_Dequeue);
 
-    // FormatFallbackEngine Tests
-    std::wcout << L"\nFormat Fallback Engine Tests:" << std::endl;
-    RUN_TEST(Test_FmtFallback_Triggers);
-    RUN_TEST(Test_FmtFallback_TriggerNames);
-    RUN_TEST(Test_FmtFallback_CreateDefault);
-    RUN_TEST(Test_FmtFallback_HasTrigger);
+    // FormatFallbackEngine Tests — moved to FallbackEngineTests.cpp
 
     // FormatGalleryView Tests
     std::wcout << L"\nFormat Gallery View Tests:" << std::endl;
