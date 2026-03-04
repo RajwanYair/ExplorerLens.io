@@ -242,12 +242,151 @@ private:
         uint8_t*, uint32_t, uint32_t, uint32_t) {
     }
 
-    static void ColorConvert_Scalar(const uint8_t*, uint8_t*, uint32_t, uint32_t, uint32_t) {}
-    static void ColorConvert_SSE42(const uint8_t*, uint8_t*, uint32_t, uint32_t, uint32_t) {}
-    static void ColorConvert_AVX2(const uint8_t*, uint8_t*, uint32_t, uint32_t, uint32_t) {}
+    // ---- Color conversion: RGBA ↔ BGRA byte-swap ----
 
-    static void AlphaPremultiply_Scalar(uint8_t*, uint32_t) {}
-    static void AlphaPremultiply_AVX2(uint8_t*, uint32_t) {}
+    static void ColorConvert_Scalar(const uint8_t* src, uint8_t* dst,
+        uint32_t pixelCount,
+        uint32_t /*srcFormat*/, uint32_t /*dstFormat*/) {
+        for (uint32_t i = 0; i < pixelCount; ++i) {
+            const uint32_t off = i * 4;
+            dst[off + 0] = src[off + 2];  // B ← R
+            dst[off + 1] = src[off + 1];  // G ← G
+            dst[off + 2] = src[off + 0];  // R ← B
+            dst[off + 3] = src[off + 3];  // A ← A
+        }
+    }
+
+#if defined(_M_X64) || defined(_M_IX86)
+    static void ColorConvert_SSE42(const uint8_t* src, uint8_t* dst,
+        uint32_t pixelCount,
+        uint32_t /*srcFormat*/, uint32_t /*dstFormat*/) {
+        // SSSE3 shuffle to swap R and B in each 4-byte pixel (4 pixels per iteration)
+        const __m128i shufMask = _mm_setr_epi8(
+            2, 1, 0, 3, 6, 5, 4, 7, 10, 9, 8, 11, 14, 13, 12, 15);
+        uint32_t i = 0;
+        const uint32_t simdEnd = pixelCount & ~3u;
+        for (; i < simdEnd; i += 4) {
+            __m128i px = _mm_loadu_si128(reinterpret_cast<const __m128i*>(src + i * 4));
+            px = _mm_shuffle_epi8(px, shufMask);
+            _mm_storeu_si128(reinterpret_cast<__m128i*>(dst + i * 4), px);
+        }
+        for (; i < pixelCount; ++i) {
+            const uint32_t off = i * 4;
+            dst[off + 0] = src[off + 2];
+            dst[off + 1] = src[off + 1];
+            dst[off + 2] = src[off + 0];
+            dst[off + 3] = src[off + 3];
+        }
+    }
+
+    static void ColorConvert_AVX2(const uint8_t* src, uint8_t* dst,
+        uint32_t pixelCount,
+        uint32_t /*srcFormat*/, uint32_t /*dstFormat*/) {
+        // AVX2 shuffle — 8 pixels (32 bytes) per iteration
+        const __m256i shufMask = _mm256_setr_epi8(
+            2, 1, 0, 3, 6, 5, 4, 7, 10, 9, 8, 11, 14, 13, 12, 15,
+            2, 1, 0, 3, 6, 5, 4, 7, 10, 9, 8, 11, 14, 13, 12, 15);
+        const __m128i shufMask128 = _mm_setr_epi8(
+            2, 1, 0, 3, 6, 5, 4, 7, 10, 9, 8, 11, 14, 13, 12, 15);
+        uint32_t i = 0;
+        const uint32_t avxEnd = pixelCount & ~7u;
+        for (; i < avxEnd; i += 8) {
+            __m256i px = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(src + i * 4));
+            px = _mm256_shuffle_epi8(px, shufMask);
+            _mm256_storeu_si256(reinterpret_cast<__m256i*>(dst + i * 4), px);
+        }
+        // SSE tail for 4-pixel blocks
+        if (pixelCount - i >= 4) {
+            __m128i px = _mm_loadu_si128(reinterpret_cast<const __m128i*>(src + i * 4));
+            px = _mm_shuffle_epi8(px, shufMask128);
+            _mm_storeu_si128(reinterpret_cast<__m128i*>(dst + i * 4), px);
+            i += 4;
+        }
+        for (; i < pixelCount; ++i) {
+            const uint32_t off = i * 4;
+            dst[off + 0] = src[off + 2];
+            dst[off + 1] = src[off + 1];
+            dst[off + 2] = src[off + 0];
+            dst[off + 3] = src[off + 3];
+        }
+    }
+#else
+    // Non-x86 fallback — delegates to scalar path
+    static void ColorConvert_SSE42(const uint8_t* src, uint8_t* dst,
+        uint32_t pixelCount,
+        uint32_t srcFmt, uint32_t dstFmt) {
+        ColorConvert_Scalar(src, dst, pixelCount, srcFmt, dstFmt);
+    }
+    static void ColorConvert_AVX2(const uint8_t* src, uint8_t* dst,
+        uint32_t pixelCount,
+        uint32_t srcFmt, uint32_t dstFmt) {
+        ColorConvert_Scalar(src, dst, pixelCount, srcFmt, dstFmt);
+    }
+#endif
+
+    // ---- Alpha premultiplication: premultiply R,G,B by A/255 ----
+
+    static void AlphaPremultiply_Scalar(uint8_t* data, uint32_t pixelCount) {
+        for (uint32_t i = 0; i < pixelCount; ++i) {
+            const uint32_t off = i * 4;
+            const uint32_t a = data[off + 3];
+            data[off + 0] = static_cast<uint8_t>((static_cast<uint32_t>(data[off + 0]) * a + 128) / 255);
+            data[off + 1] = static_cast<uint8_t>((static_cast<uint32_t>(data[off + 1]) * a + 128) / 255);
+            data[off + 2] = static_cast<uint8_t>((static_cast<uint32_t>(data[off + 2]) * a + 128) / 255);
+        }
+    }
+
+#if defined(_M_X64) || defined(_M_IX86)
+    static void AlphaPremultiply_AVX2(uint8_t* data, uint32_t pixelCount) {
+        const __m256i zero = _mm256_setzero_si256();
+        const __m256i round = _mm256_set1_epi16(128);
+        // Blend mask: byte 3 of each pixel = 0xFF (high bit set) selects original alpha
+        const __m256i alphaMask = _mm256_set1_epi32(~0x00FFFFFF);
+        // After unpacklo/hi each 128-bit lane holds 2 pixels as 16-bit channels:
+        // [R,G,B,A, R,G,B,A] — alpha is at 16-bit indices 3 and 7 (bytes 6-7, 14-15)
+        const __m256i alphaShuf = _mm256_setr_epi8(
+            6, 7, 6, 7, 6, 7, 6, 7, 14, 15, 14, 15, 14, 15, 14, 15,
+            6, 7, 6, 7, 6, 7, 6, 7, 14, 15, 14, 15, 14, 15, 14, 15);
+
+        uint32_t i = 0;
+        const uint32_t simdEnd = pixelCount & ~7u;
+        for (; i < simdEnd; i += 8) {
+            __m256i px = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data + i * 4));
+
+            // Unpack bytes to 16-bit per channel (within each 128-bit lane)
+            __m256i lo16 = _mm256_unpacklo_epi8(px, zero);
+            __m256i hi16 = _mm256_unpackhi_epi8(px, zero);
+
+            // Broadcast alpha to all channels of each pixel
+            __m256i aLo = _mm256_shuffle_epi8(lo16, alphaShuf);
+            __m256i aHi = _mm256_shuffle_epi8(hi16, alphaShuf);
+
+            // Premultiply: (channel * alpha + 128 + ((channel * alpha + 128) >> 8)) >> 8
+            lo16 = _mm256_add_epi16(_mm256_mullo_epi16(lo16, aLo), round);
+            lo16 = _mm256_srli_epi16(_mm256_add_epi16(lo16, _mm256_srli_epi16(lo16, 8)), 8);
+            hi16 = _mm256_add_epi16(_mm256_mullo_epi16(hi16, aHi), round);
+            hi16 = _mm256_srli_epi16(_mm256_add_epi16(hi16, _mm256_srli_epi16(hi16, 8)), 8);
+
+            // Pack back to 8-bit and restore original alpha channel
+            __m256i result = _mm256_packus_epi16(lo16, hi16);
+            result = _mm256_blendv_epi8(result, px, alphaMask);
+
+            _mm256_storeu_si256(reinterpret_cast<__m256i*>(data + i * 4), result);
+        }
+        // Scalar tail
+        for (; i < pixelCount; ++i) {
+            const uint32_t off = i * 4;
+            const uint32_t a = data[off + 3];
+            data[off + 0] = static_cast<uint8_t>((static_cast<uint32_t>(data[off + 0]) * a + 128) / 255);
+            data[off + 1] = static_cast<uint8_t>((static_cast<uint32_t>(data[off + 1]) * a + 128) / 255);
+            data[off + 2] = static_cast<uint8_t>((static_cast<uint32_t>(data[off + 2]) * a + 128) / 255);
+        }
+    }
+#else
+    static void AlphaPremultiply_AVX2(uint8_t* data, uint32_t pixelCount) {
+        AlphaPremultiply_Scalar(data, pixelCount);
+    }
+#endif
 
     // ========================================================================
     // CPU detection

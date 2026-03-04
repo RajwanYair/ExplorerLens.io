@@ -325,7 +325,10 @@ private:
 
 #else // !_WIN32
 
-// Non-Windows stubs
+// Non-Windows stubs — lightweight implementations that track event counts
+#include <atomic>
+#include <cstdint>
+
 namespace ExplorerLens {
 namespace ETW {
 
@@ -335,20 +338,59 @@ public:
         static ETWTraceProvider s_instance;
         return s_instance;
     }
-    bool Initialize() { return false; }
-    void Shutdown() {}
-    bool IsRegistered() const { return false; }
-    bool IsEnabled(int = 0, uint64_t = 0) const { return false; }
-    void LogDecodeStart(const wchar_t*, const char*, uint32_t) {}
-    void LogDecodeComplete(const wchar_t*, const char*, double, bool, uint32_t, uint32_t) {}
-    void LogCacheAccess(const char*, bool, double) {}
-    void LogGPUOperation(const char*, double, uint64_t) {}
-    void LogMemoryEvent(const char*, uint64_t, uint64_t, uint8_t) {}
-    void LogPluginEvent(const char*, const char*, bool) {}
-    void LogError(const char*, const char*, long = 0) {}
-    void LogStartupPhase(const char*, double) {}
-    void LogHealthCheck(const char*, double, const char*) {}
-    uint64_t EventsEmitted() const { return 0; }
+    bool Initialize() {
+        m_initialized.store(true, std::memory_order_release);
+        return true;
+    }
+    void Shutdown() {
+        m_initialized.store(false, std::memory_order_release);
+    }
+    void Flush() {}
+    bool IsRegistered() const {
+        return m_initialized.load(std::memory_order_acquire);
+    }
+    bool IsEnabled(int = 0, uint64_t = 0) const {
+        return m_initialized.load(std::memory_order_acquire);
+    }
+    void LogDecodeStart(const wchar_t*, const char*, uint32_t) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    void LogDecodeComplete(const wchar_t*, const char*, double, bool, uint32_t, uint32_t) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    void LogCacheAccess(const char*, bool, double) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    void LogGPUOperation(const char*, double, uint64_t) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    void LogMemoryEvent(const char*, uint64_t, uint64_t, uint8_t) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    void LogPluginEvent(const char*, const char*, bool) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    void LogError(const char*, const char*, long = 0) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    void LogStartupPhase(const char*, double) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    void LogHealthCheck(const char*, double, const char*) {
+        m_eventsEmitted.fetch_add(1, std::memory_order_relaxed);
+    }
+    uint64_t EventsEmitted() const {
+        return m_eventsEmitted.load(std::memory_order_relaxed);
+    }
+
+private:
+    ETWTraceProvider() = default;
+    ~ETWTraceProvider() { Shutdown(); }
+    ETWTraceProvider(const ETWTraceProvider&) = delete;
+    ETWTraceProvider& operator=(const ETWTraceProvider&) = delete;
+
+    std::atomic<bool> m_initialized{ false };
+    std::atomic<uint64_t> m_eventsEmitted{ 0 };
 };
 
 class ETWScopedTimer {

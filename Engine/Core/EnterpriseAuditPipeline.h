@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <chrono>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -128,7 +129,12 @@ public:
     }
 
 private:
-    static uint64_t GetCurrentTimestamp() noexcept { return 0; }
+    static uint64_t GetCurrentTimestamp() noexcept {
+        auto now = std::chrono::system_clock::now();
+        return static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                now.time_since_epoch()).count());
+    }
 
     AuditDestination          m_destination = AuditDestination::ETW;
     std::vector<AuditEntry>   m_entries;
