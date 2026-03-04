@@ -225,6 +225,13 @@
 #include "../Cache/PipelineStateCacheV2.h"
 #include "../Cache/CacheWarmingService.h"
 
+// --- Sprint 41-42: Performance Tuning ---
+#include "../Core/AlignedBufferPool.h"
+#include "../Core/PrefetchHintEngine.h"
+#include "../Core/BranchPredictor.h"
+#include "../Pipeline/LoopTuner.h"
+#include "../Cache/CacheLinePadding.h"
+
 // --- Core Features ---
 #include "../Core/ThumbnailQualityAnalyzer.h"
 #include "../Core/AdaptiveDecoderRouter.h"
@@ -21028,6 +21035,211 @@ TEST(Test_S37_FallbackEngine_FallbackChain) {
     ASSERT(selected == 20);
 }
 
+// ============================================================================
+// Sprint 41-42: Performance Tuning Tests
+// ============================================================================
+
+// --- AlignedBufferPool Tests ---
+
+TEST(Test_S41_AlignedBufferPool_AcquireAligned) {
+    using namespace ExplorerLens::Engine;
+    auto& pool = AlignedBufferPool::Instance();
+    pool.ResetStats();
+    auto buf = pool.Acquire(1024);
+    ASSERT(buf.Valid());
+    ASSERT(buf.Capacity() >= 1024);
+    ASSERT(AlignedBufferPool::IsAligned(buf.Data()));
+}
+
+TEST(Test_S41_AlignedBufferPool_TierSelection) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(TierForSize(100) == BufferTier::Small);
+    ASSERT(TierForSize(65536) == BufferTier::Small);
+    ASSERT(TierForSize(65537) == BufferTier::Medium);
+    ASSERT(TierForSize(256 * 1024) == BufferTier::Medium);
+    ASSERT(TierForSize(1024 * 1024) == BufferTier::Large);
+    ASSERT(TierForSize(4 * 1024 * 1024) == BufferTier::Huge);
+}
+
+TEST(Test_S41_AlignedBufferPool_PoolReuse) {
+    using namespace ExplorerLens::Engine;
+    auto& pool = AlignedBufferPool::Instance();
+    pool.ResetStats();
+    void* firstAddr = nullptr;
+    {
+        auto buf = pool.Acquire(64 * 1024);
+        ASSERT(buf.Valid());
+        firstAddr = buf.Data();
+    } // buf returned to pool
+    auto buf2 = pool.Acquire(64 * 1024);
+    ASSERT(buf2.Valid());
+    // Should reuse the same buffer (pool hit)
+    ASSERT(buf2.Data() == firstAddr);
+    ASSERT(pool.GetStats().hits.load() >= 1);
+}
+
+TEST(Test_S41_AlignedBufferPool_PooledBufferRAII) {
+    using namespace ExplorerLens::Engine;
+    auto& pool = AlignedBufferPool::Instance();
+    pool.ResetStats();
+    {
+        auto buf = pool.Acquire(256 * 1024);
+        ASSERT(buf.Valid());
+        buf.SetSize(100);
+        ASSERT(buf.Size() == 100);
+        ASSERT(buf.Tier() == BufferTier::Medium);
+    } // RAII returns buffer
+    // activeBuffers should be decremented
+}
+
+// --- PrefetchHintEngine Tests ---
+
+TEST(Test_S41_PrefetchHint_FileHeader) {
+    using namespace ExplorerLens::Engine;
+    PrefetchHintEngine engine;
+    alignas(64) char buffer[4096] = {};
+    engine.PrefetchFileHeader(buffer, 4096);
+    ASSERT(engine.GetStats().hintCount > 0);
+    ASSERT(engine.GetStats().bytesTouched > 0);
+}
+
+TEST(Test_S41_PrefetchHint_NullSafety) {
+    using namespace ExplorerLens::Engine;
+    PrefetchHintEngine engine;
+    engine.PrefetchFileHeader(nullptr, 4096);
+    ASSERT(engine.GetStats().skippedNull == 1);
+    ASSERT(engine.GetStats().hintCount == 0);
+}
+
+TEST(Test_S41_PrefetchHint_StrategyNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(PrefetchHintEngine::StrategyName(PrefetchHintStrategy::None)) == "None");
+    ASSERT(std::string(PrefetchHintEngine::StrategyName(PrefetchHintStrategy::Sequential)) == "Sequential");
+    ASSERT(std::string(PrefetchHintEngine::StrategyName(PrefetchHintStrategy::Stride)) == "Stride");
+    ASSERT(std::string(PrefetchHintEngine::StrategyName(PrefetchHintStrategy::Adaptive)) == "Adaptive");
+}
+
+// --- BranchPredictor Tests ---
+
+TEST(Test_S41_BranchPredictor_SortedLookup) {
+    using namespace ExplorerLens::Engine;
+    SortedLookup<uint32_t, 32> lookup;
+    lookup.Insert(100, 1);
+    lookup.Insert(50, 2);
+    lookup.Insert(200, 3);
+    lookup.Sort();
+    ASSERT(lookup.IsSorted());
+    auto r1 = lookup.Find(100);
+    ASSERT(r1.found && r1.index == 1);
+    auto r2 = lookup.Find(50);
+    ASSERT(r2.found && r2.index == 2);
+    auto r3 = lookup.Find(999);
+    ASSERT(!r3.found);
+}
+
+TEST(Test_S41_BranchPredictor_BranchlessMinMax) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(BranchlessMin(10, 20) == 10);
+    ASSERT(BranchlessMin(20, 10) == 10);
+    ASSERT(BranchlessMax(10, 20) == 20);
+    ASSERT(BranchlessMax(20, 10) == 20);
+    ASSERT(BranchlessClamp(5, 10, 100) == 10);
+    ASSERT(BranchlessClamp(50, 10, 100) == 50);
+    ASSERT(BranchlessClamp(200, 10, 100) == 100);
+}
+
+TEST(Test_S41_BranchPredictor_HotPathCounter) {
+    using namespace ExplorerLens::Engine;
+    HotPathCounter counter;
+    counter.RecordHit(0);
+    counter.RecordHit(0);
+    counter.RecordHit(1);
+    counter.RecordHit(0);
+    ASSERT(counter.GetCount(0) == 3);
+    ASSERT(counter.GetCount(1) == 1);
+    ASSERT(counter.HottestPath() == 0);
+    ASSERT(counter.TotalHits() == 4);
+}
+
+// --- LoopTuner Tests ---
+
+TEST(Test_S41_LoopTuner_TileProcessor) {
+    using namespace ExplorerLens::Pipeline;
+    TileProcessor proc(TileConfig{32, 32, 64, 32768, 262144});
+    size_t tileCount = 0;
+    proc.ProcessImage(128, 128, [&](const TileRegion& tile) {
+        ASSERT(tile.width <= 32);
+        ASSERT(tile.height <= 32);
+        tileCount++;
+    });
+    ASSERT(tileCount == 16); // (128/32) * (128/32)
+    ASSERT(proc.GetStats().tilesProcessed == 16);
+}
+
+TEST(Test_S41_LoopTuner_OperationBatcher) {
+    using namespace ExplorerLens::Pipeline;
+    OperationBatcher<8> batcher;
+    ASSERT(batcher.Pending() == 0);
+    batcher.Enqueue(1, 0, 100);
+    batcher.Enqueue(2, 100, 200);
+    ASSERT(batcher.Pending() == 2);
+    size_t executed = 0;
+    batcher.Flush([&](const BatchOp& op) {
+        (void)op;
+        executed++;
+    });
+    ASSERT(executed == 2);
+    ASSERT(batcher.Pending() == 0);
+    ASSERT(batcher.TotalFlushed() == 2);
+}
+
+TEST(Test_S41_LoopTuner_RowBatches) {
+    using namespace ExplorerLens::Pipeline;
+    TileProcessor proc;
+    size_t batchCount = 0;
+    proc.ProcessRowBatches(256, 64, [&](size_t startRow, size_t rowCount) {
+        (void)startRow;
+        ASSERT(rowCount <= 64);
+        batchCount++;
+    });
+    ASSERT(batchCount == 4); // 256 / 64
+}
+
+// --- CacheLinePadding Tests ---
+
+TEST(Test_S41_CacheLinePadding_Alignment) {
+    using namespace ExplorerLens::Cache;
+    ASSERT(sizeof(CacheAligned<int>) >= CACHE_LINE_BYTES);
+    ASSERT(alignof(CacheAligned<int>) == CACHE_LINE_BYTES);
+    ASSERT(sizeof(PaddedAtomic<uint64_t>) >= CACHE_LINE_BYTES);
+    ASSERT(alignof(PaddedAtomic<uint64_t>) == CACHE_LINE_BYTES);
+}
+
+TEST(Test_S41_CacheLinePadding_PaddedAtomic) {
+    using namespace ExplorerLens::Cache;
+    PaddedAtomic<uint64_t> counter(0);
+    counter.FetchAdd(5);
+    ASSERT(counter.Load() == 5);
+    counter++;
+    ASSERT(counter.Load() == 6);
+    counter--;
+    ASSERT(counter.Load() == 5);
+}
+
+TEST(Test_S41_CacheLinePadding_CacheLineArray) {
+    using namespace ExplorerLens::Cache;
+    using ArrayType = CacheLineArray<uint64_t, 4>;
+    ArrayType arr(0);
+    arr[0] = 10;
+    arr[1] = 20;
+    arr[2] = 30;
+    arr[3] = 40;
+    ASSERT(arr[0] == 10);
+    ASSERT(arr[3] == 40);
+    ASSERT(ArrayType::Size() == 4);
+    ASSERT(ArrayType::BytesPerElement() >= CACHE_LINE_BYTES);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -25067,6 +25279,30 @@ int main() {
     // Production Pipeline V2
     RUN_TEST(TestProductionPipelineV2_Init);
     RUN_TEST(TestProductionPipelineV2_Stages);
+
+    // Sprint 41-42: Performance Tuning
+    std::wcout << L"\nSprint 41-42: Performance Tuning..." << std::endl;
+    // AlignedBufferPool
+    RUN_TEST(Test_S41_AlignedBufferPool_AcquireAligned);
+    RUN_TEST(Test_S41_AlignedBufferPool_TierSelection);
+    RUN_TEST(Test_S41_AlignedBufferPool_PoolReuse);
+    RUN_TEST(Test_S41_AlignedBufferPool_PooledBufferRAII);
+    // PrefetchHintEngine
+    RUN_TEST(Test_S41_PrefetchHint_FileHeader);
+    RUN_TEST(Test_S41_PrefetchHint_NullSafety);
+    RUN_TEST(Test_S41_PrefetchHint_StrategyNames);
+    // BranchPredictor
+    RUN_TEST(Test_S41_BranchPredictor_SortedLookup);
+    RUN_TEST(Test_S41_BranchPredictor_BranchlessMinMax);
+    RUN_TEST(Test_S41_BranchPredictor_HotPathCounter);
+    // LoopTuner
+    RUN_TEST(Test_S41_LoopTuner_TileProcessor);
+    RUN_TEST(Test_S41_LoopTuner_OperationBatcher);
+    RUN_TEST(Test_S41_LoopTuner_RowBatches);
+    // CacheLinePadding
+    RUN_TEST(Test_S41_CacheLinePadding_Alignment);
+    RUN_TEST(Test_S41_CacheLinePadding_PaddedAtomic);
+    RUN_TEST(Test_S41_CacheLinePadding_CacheLineArray);
 
     // Security Hardening Tests
     std::wcout << L"\nSecurity Hardening Tests..." << std::endl;

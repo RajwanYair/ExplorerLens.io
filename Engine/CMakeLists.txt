@@ -378,6 +378,9 @@ set(ENGINE_HEADERS
     Core/CalendarHeatmapRenderer.h
     Core/FileSizeProportionBadge.h
     Core/IntelligentCachePruner.h
+    Core/AlignedBufferPool.h
+    Core/PrefetchHintEngine.h
+    Core/BranchPredictor.h
 
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
@@ -407,6 +410,7 @@ set(ENGINE_HEADERS
     Pipeline/ThumbnailRequestValidator.h
     Pipeline/DecoderOutputValidator.h
     Pipeline/ProductionPipelineV2.h
+    Pipeline/LoopTuner.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -521,6 +525,7 @@ set(ENGINE_HEADERS
     Cache/CacheCoherencyManager.h
     Cache/CachePrewarmScheduler.h
     Cache/CacheDiagnostics.h
+    Cache/CacheLinePadding.h
 
     # Plugin system
     Plugin/CrashHandler.h
