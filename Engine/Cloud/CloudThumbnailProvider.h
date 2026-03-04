@@ -1,13 +1,10 @@
-// =============================================================================
-// ExplorerLens Engine — Cloud Thumbnail Provider
-// Cloud Integration & Sync
+// CloudThumbnailProvider.h — Cloud-Aware Thumbnail Resolution
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Provides cloud-aware thumbnail resolution for files stored in
 // OneDrive, Google Drive, and Dropbox via their respective APIs.
 // Falls back to local decode when cloud previews are unavailable.
-// =============================================================================
-
+//
 #pragma once
 
 #include <windows.h>
@@ -344,6 +341,299 @@ constexpr DWORD IO_REPARSE_TAG_CLOUD_2 = 0x9000201A;
 #ifndef IO_REPARSE_TAG_ONEDRIVE
 constexpr DWORD IO_REPARSE_TAG_ONEDRIVE = 0x9000301A;
 #endif
+
+} // namespace Cloud
+} // namespace ExplorerLens
+// ============================================================================
+// Cloud Provider — inline implementations
+// ============================================================================
+
+namespace ExplorerLens {
+namespace Cloud {
+
+// --- Free Functions ---
+
+inline bool IsCloudPlaceholder(const wchar_t* filePath) {
+    if (!filePath) return false;
+    DWORD attrs = GetFileAttributesW(filePath);
+    if (attrs == INVALID_FILE_ATTRIBUTES) return false;
+    // FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x00400000
+    return (attrs & 0x00400000) != 0;
+}
+
+inline bool IsCloudPinned(const wchar_t* filePath) {
+    if (!filePath) return false;
+    DWORD attrs = GetFileAttributesW(filePath);
+    if (attrs == INVALID_FILE_ATTRIBUTES) return false;
+    // FILE_ATTRIBUTE_PINNED = 0x00080000
+    return (attrs & 0x00080000) != 0;
+}
+
+inline DWORD GetCloudReparseTag(const wchar_t* filePath) {
+    if (!filePath) return 0;
+    WIN32_FIND_DATAW fd;
+    HANDLE hFind = FindFirstFileW(filePath, &fd);
+    if (hFind == INVALID_HANDLE_VALUE) return 0;
+    FindClose(hFind);
+    if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+        return fd.dwReserved0; // Reparse tag
+    return 0;
+}
+
+// --- OneDriveProvider ---
+
+inline OneDriveProvider::OneDriveProvider() {
+    DetectOneDriveRoot(m_oneDriveRoot);
+}
+
+inline OneDriveProvider::~OneDriveProvider() = default;
+
+inline bool OneDriveProvider::HandlesPath(const wchar_t* localPath) const {
+    if (!localPath || m_oneDriveRoot.empty()) return false;
+    std::wstring path(localPath);
+    // Case-insensitive prefix match
+    if (path.size() < m_oneDriveRoot.size()) return false;
+    for (size_t i = 0; i < m_oneDriveRoot.size(); ++i) {
+        if (towlower(path[i]) != towlower(m_oneDriveRoot[i])) return false;
+    }
+    return true;
+}
+
+inline AuthStatus OneDriveProvider::GetAuthStatus() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_token.IsValid()) return AuthStatus::Authenticated;
+    if (!m_token.accessToken.empty()) return AuthStatus::TokenExpired;
+    return AuthStatus::NotAuthenticated;
+}
+
+inline HRESULT OneDriveProvider::BeginAuthentication() { return E_NOTIMPL; }
+inline HRESULT OneDriveProvider::CompleteAuthentication(const wchar_t* /*authorizationCode*/) { return E_NOTIMPL; }
+inline HRESULT OneDriveProvider::RefreshToken() { return E_NOTIMPL; }
+inline HRESULT OneDriveProvider::SignOut() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_token = OAuthToken{};
+    return S_OK;
+}
+
+inline HRESULT OneDriveProvider::GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) {
+    if (!localPath) return E_INVALIDARG;
+    outInfo = {};
+    outInfo.provider = CloudProvider::OneDrive;
+    outInfo.remotePath = localPath;
+    outInfo.syncState = IsCloudPlaceholder(localPath) ? SyncState::CloudOnly : SyncState::Local;
+    return S_OK;
+}
+
+inline HRESULT OneDriveProvider::DownloadCloudThumbnail(const CloudFileInfo& /*fileInfo*/,
+    uint32_t /*desiredWidth*/, uint32_t /*desiredHeight*/,
+    std::vector<uint8_t>& /*outImageData*/) {
+    return E_NOTIMPL; // Requires Microsoft Graph API HTTP calls
+}
+
+inline HRESULT OneDriveProvider::HasBeenModified(const wchar_t* /*localPath*/,
+    uint64_t /*sinceUtcEpoch*/, bool& outModified) {
+    outModified = false;
+    return S_OK; // Conservative: assume not modified
+}
+
+inline bool OneDriveProvider::DetectOneDriveRoot(std::wstring& outRoot) {
+    wchar_t userProfile[MAX_PATH] = {};
+    if (GetEnvironmentVariableW(L"USERPROFILE", userProfile, MAX_PATH) > 0) {
+        std::wstring candidate = std::wstring(userProfile) + L"\\OneDrive";
+        DWORD attrs = GetFileAttributesW(candidate.c_str());
+        if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
+            outRoot = candidate;
+            return true;
+        }
+    }
+    outRoot.clear();
+    return false;
+}
+
+// --- GoogleDriveProvider ---
+
+inline GoogleDriveProvider::GoogleDriveProvider() {
+    // Google Drive for Desktop typically syncs to a virtual drive letter or user folder
+    wchar_t userProfile[MAX_PATH] = {};
+    if (GetEnvironmentVariableW(L"USERPROFILE", userProfile, MAX_PATH) > 0) {
+        m_driveRoot = std::wstring(userProfile) + L"\\Google Drive";
+    }
+}
+
+inline GoogleDriveProvider::~GoogleDriveProvider() = default;
+
+inline bool GoogleDriveProvider::HandlesPath(const wchar_t* localPath) const {
+    if (!localPath || m_driveRoot.empty()) return false;
+    std::wstring path(localPath);
+    if (path.size() < m_driveRoot.size()) return false;
+    for (size_t i = 0; i < m_driveRoot.size(); ++i) {
+        if (towlower(path[i]) != towlower(m_driveRoot[i])) return false;
+    }
+    return true;
+}
+
+inline AuthStatus GoogleDriveProvider::GetAuthStatus() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_token.IsValid()) return AuthStatus::Authenticated;
+    if (!m_token.accessToken.empty()) return AuthStatus::TokenExpired;
+    return AuthStatus::NotAuthenticated;
+}
+
+inline HRESULT GoogleDriveProvider::BeginAuthentication() { return E_NOTIMPL; }
+inline HRESULT GoogleDriveProvider::CompleteAuthentication(const wchar_t* /*authorizationCode*/) { return E_NOTIMPL; }
+inline HRESULT GoogleDriveProvider::RefreshToken() { return E_NOTIMPL; }
+inline HRESULT GoogleDriveProvider::SignOut() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_token = OAuthToken{};
+    return S_OK;
+}
+
+inline HRESULT GoogleDriveProvider::GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) {
+    if (!localPath) return E_INVALIDARG;
+    outInfo = {};
+    outInfo.provider = CloudProvider::GoogleDrive;
+    outInfo.remotePath = localPath;
+    outInfo.syncState = IsCloudPlaceholder(localPath) ? SyncState::CloudOnly : SyncState::Local;
+    return S_OK;
+}
+
+inline HRESULT GoogleDriveProvider::DownloadCloudThumbnail(const CloudFileInfo& /*fileInfo*/,
+    uint32_t /*desiredWidth*/, uint32_t /*desiredHeight*/,
+    std::vector<uint8_t>& /*outImageData*/) {
+    return E_NOTIMPL;
+}
+
+inline HRESULT GoogleDriveProvider::HasBeenModified(const wchar_t* /*localPath*/,
+    uint64_t /*sinceUtcEpoch*/, bool& outModified) {
+    outModified = false;
+    return S_OK;
+}
+
+// --- DropboxProvider ---
+
+inline DropboxProvider::DropboxProvider() {
+    wchar_t userProfile[MAX_PATH] = {};
+    if (GetEnvironmentVariableW(L"USERPROFILE", userProfile, MAX_PATH) > 0) {
+        m_dropboxRoot = std::wstring(userProfile) + L"\\Dropbox";
+    }
+}
+
+inline DropboxProvider::~DropboxProvider() = default;
+
+inline bool DropboxProvider::HandlesPath(const wchar_t* localPath) const {
+    if (!localPath || m_dropboxRoot.empty()) return false;
+    std::wstring path(localPath);
+    if (path.size() < m_dropboxRoot.size()) return false;
+    for (size_t i = 0; i < m_dropboxRoot.size(); ++i) {
+        if (towlower(path[i]) != towlower(m_dropboxRoot[i])) return false;
+    }
+    return true;
+}
+
+inline AuthStatus DropboxProvider::GetAuthStatus() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_token.IsValid()) return AuthStatus::Authenticated;
+    if (!m_token.accessToken.empty()) return AuthStatus::TokenExpired;
+    return AuthStatus::NotAuthenticated;
+}
+
+inline HRESULT DropboxProvider::BeginAuthentication() { return E_NOTIMPL; }
+inline HRESULT DropboxProvider::CompleteAuthentication(const wchar_t* /*authorizationCode*/) { return E_NOTIMPL; }
+inline HRESULT DropboxProvider::RefreshToken() { return E_NOTIMPL; }
+inline HRESULT DropboxProvider::SignOut() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_token = OAuthToken{};
+    return S_OK;
+}
+
+inline HRESULT DropboxProvider::GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) {
+    if (!localPath) return E_INVALIDARG;
+    outInfo = {};
+    outInfo.provider = CloudProvider::Dropbox;
+    outInfo.remotePath = localPath;
+    outInfo.syncState = IsCloudPlaceholder(localPath) ? SyncState::CloudOnly : SyncState::Local;
+    return S_OK;
+}
+
+inline HRESULT DropboxProvider::DownloadCloudThumbnail(const CloudFileInfo& /*fileInfo*/,
+    uint32_t /*desiredWidth*/, uint32_t /*desiredHeight*/,
+    std::vector<uint8_t>& /*outImageData*/) {
+    return E_NOTIMPL;
+}
+
+inline HRESULT DropboxProvider::HasBeenModified(const wchar_t* /*localPath*/,
+    uint64_t /*sinceUtcEpoch*/, bool& outModified) {
+    outModified = false;
+    return S_OK;
+}
+
+// --- CloudThumbnailResolver ---
+
+inline CloudThumbnailResolver::CloudThumbnailResolver() = default;
+inline CloudThumbnailResolver::~CloudThumbnailResolver() = default;
+
+inline void CloudThumbnailResolver::RegisterProvider(std::unique_ptr<ICloudProvider> provider) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_providers.push_back(std::move(provider));
+}
+
+inline ICloudProvider* CloudThumbnailResolver::FindProvider(const wchar_t* localPath) const {
+    for (const auto& p : m_providers) {
+        if (p->HandlesPath(localPath)) return p.get();
+    }
+    return nullptr;
+}
+
+inline HRESULT CloudThumbnailResolver::ResolveThumbnail(const wchar_t* localPath,
+    uint32_t width, uint32_t height,
+    std::vector<uint8_t>& outImageData,
+    CloudFileInfo& outFileInfo) {
+    if (!localPath) return E_INVALIDARG;
+    if (!m_cloudPreviewEnabled) {
+        ++m_stats.cloudMisses;
+        return S_FALSE;
+    }
+    ICloudProvider* provider = FindProvider(localPath);
+    if (!provider) {
+        ++m_stats.cloudMisses;
+        return S_FALSE;
+    }
+    HRESULT hr = provider->GetCloudFileInfo(localPath, outFileInfo);
+    if (FAILED(hr)) {
+        ++m_stats.networkErrors;
+        return hr;
+    }
+    hr = provider->DownloadCloudThumbnail(outFileInfo, width, height, outImageData);
+    if (hr == S_OK) {
+        ++m_stats.cloudHits;
+        return S_OK;
+    }
+    ++m_stats.cloudMisses;
+    return S_FALSE;
+}
+
+inline HRESULT CloudThumbnailResolver::CheckCloudModification(const wchar_t* localPath,
+    uint64_t cachedTimestamp, bool& outNeedsRefresh) {
+    ICloudProvider* provider = FindProvider(localPath);
+    if (!provider) {
+        outNeedsRefresh = false;
+        return S_FALSE;
+    }
+    return provider->HasBeenModified(localPath, cachedTimestamp, outNeedsRefresh);
+}
+
+inline SyncState CloudThumbnailResolver::GetSyncState(const wchar_t* localPath) const {
+    if (!localPath) return SyncState::Unknown;
+    if (IsCloudPlaceholder(localPath)) return SyncState::CloudOnly;
+    if (IsCloudPinned(localPath)) return SyncState::PinnedLocal;
+    // If a provider handles it, it's at least local-synced
+    if (FindProvider(localPath)) return SyncState::Local;
+    return SyncState::Unknown;
+}
+
+inline CloudThumbnailResolver::CloudStats CloudThumbnailResolver::GetStats() const {
+    return m_stats;
+}
 
 } // namespace Cloud
 } // namespace ExplorerLens

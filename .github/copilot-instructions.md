@@ -275,3 +275,15 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - **AI/ML modules:** Classes in `Engine/AI/` use `SceneMLBackend` / `EmbeddingModel` enum for backend selection (DirectML/ONNX/OpenVINO/CPU)
 - **GPU decode routing:** `GPUDecodeAccelerationV2` in `Engine/GPU/` routes by `GPUDecodeVendor` at runtime
 - **Enterprise pattern:** Policy source hierarchy: `EnterprisePolicyEngineV2` (GPO → Intune → ConfigMgr → Manual)
+
+## Shell & Build Integration Rules
+
+1. **Never send Ctrl-C/Break** to running build commands — builds take 60-120s
+2. **Use bat wrappers** for builds: `build-scripts\build-and-log.bat [logfile]`
+3. **Monitor via log files** — use `read_file` on `build-logs\*.log` instead of terminal output
+4. **If terminal is busy** — open a NEW terminal; don't kill the existing one
+5. **Kill only orphaned processes** — check `StartTime` before killing `ninja.exe` or `cl.exe`
+6. **Clean .obj locks** before retry: `Remove-Item build\**\*.obj -Force`
+7. **Build output is in** `build-logs/` — `build-latest.log`, `test-latest.log`
+8. **EngineTests.cpp compilation** takes ~90s (22K lines) — DO NOT assume it's hung
+9. **LTCG linking** can take 30s — this is normal for Release/GL builds

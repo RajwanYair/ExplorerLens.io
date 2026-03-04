@@ -175,6 +175,103 @@ private:
  ExplorerLens::Tracing::EventID::Decode_Stop, \
  decoderName)
 
+// ============================================================================
+// ETWTracer — inline implementations
+// ============================================================================
+
+inline bool ETWTracer::Initialize() {
+    if (m_registered) return true;
+    ULONG status = EventRegister(&EXPLORERLENS_PROVIDER_GUID, nullptr, nullptr, &m_providerHandle);
+    if (status == ERROR_SUCCESS) {
+        m_registered = true;
+        m_enabled = true;
+        return true;
+    }
+    return false;
+}
+
+inline void ETWTracer::Shutdown() {
+    if (m_registered) {
+        EventUnregister(m_providerHandle);
+        m_providerHandle = 0;
+        m_registered = false;
+        m_enabled = false;
+    }
+}
+
+inline ETWTracer::~ETWTracer() {
+    Shutdown();
+}
+
+inline void ETWTracer::WriteEvent(EventID eventId, EventLevel level,
+    const wchar_t* message) {
+    if (!m_enabled || !m_registered) return;
+    EVENT_DESCRIPTOR desc = {};
+    desc.Id = static_cast<USHORT>(eventId);
+    desc.Level = static_cast<UCHAR>(level);
+    desc.Opcode = 0;
+    desc.Channel = 0;
+    desc.Task = 0;
+    desc.Keyword = 0;
+    if (message && message[0] != L'\0') {
+        EVENT_DATA_DESCRIPTOR dataDesc;
+        EventDataDescCreate(&dataDesc, message,
+            static_cast<ULONG>((wcslen(message) + 1) * sizeof(wchar_t)));
+        EventWrite(m_providerHandle, &desc, 1, &dataDesc);
+    }
+    else {
+        EventWrite(m_providerHandle, &desc, 0, nullptr);
+    }
+}
+
+inline void ETWTracer::LogThumbnailStart(const wchar_t* filePath,
+    uint32_t /*width*/, uint32_t /*height*/) {
+    WriteEvent(EventID::ThumbnailGeneration_Start, EventLevel::Info, filePath);
+}
+
+inline void ETWTracer::LogThumbnailStop(const wchar_t* filePath,
+    HRESULT /*hr*/, uint32_t /*durationMs*/) {
+    WriteEvent(EventID::ThumbnailGeneration_Stop, EventLevel::Info, filePath);
+}
+
+inline void ETWTracer::LogDecodeStart(const wchar_t* decoderName,
+    const wchar_t* /*filePath*/) {
+    WriteEvent(EventID::Decode_Start, EventLevel::Info, decoderName);
+}
+
+inline void ETWTracer::LogDecodeStop(const wchar_t* decoderName,
+    HRESULT /*hr*/, uint32_t /*durationMs*/) {
+    WriteEvent(EventID::Decode_Stop, EventLevel::Info, decoderName);
+}
+
+inline void ETWTracer::LogGPURenderStart(uint32_t /*width*/, uint32_t /*height*/) {
+    WriteEvent(EventID::GPU_Render_Start, EventLevel::Info, L"GPU Render");
+}
+
+inline void ETWTracer::LogGPURenderStop(HRESULT /*hr*/, uint32_t /*durationMs*/) {
+    WriteEvent(EventID::GPU_Render_Stop, EventLevel::Info, L"GPU Render");
+}
+
+inline void ETWTracer::LogCacheHit(const wchar_t* filePath) {
+    WriteEvent(EventID::Cache_Hit, EventLevel::Verbose, filePath);
+}
+
+inline void ETWTracer::LogCacheMiss(const wchar_t* filePath) {
+    WriteEvent(EventID::Cache_Miss, EventLevel::Verbose, filePath);
+}
+
+inline void ETWTracer::LogError(const wchar_t* message) {
+    WriteEvent(EventID::Error, EventLevel::Error, message);
+}
+
+inline void ETWTracer::LogWarning(const wchar_t* message) {
+    WriteEvent(EventID::Warning, EventLevel::Warning, message);
+}
+
+inline void ETWTracer::LogInfo(const wchar_t* message) {
+    WriteEvent(EventID::Info, EventLevel::Info, message);
+}
+
 } // namespace Tracing
 } // namespace ExplorerLens
 

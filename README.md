@@ -1,6 +1,6 @@
 # ExplorerLens.io - GPU-Accelerated Thumbnail Generator
 
-**High-performance Windows Shell extension for 200+ file formats**
+## High-performance Windows Shell extension for 200+ file formats
 
 ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11/12 GPU acceleration** and **multi-threaded processing**. The project root directory is `ExplorerLens.io`, and this repository is the production codebase for the Explorer extension, engine, and manager UI.
 
@@ -217,6 +217,6 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-**Built with ❤️ using C++20 and DirectX 11/12**
+Built with ❤️ using C++20 and DirectX 11/12
 
-_Last Updated: July 2025 (v15.0.0 "Zenith")_
+Last Updated: March 2026 (v15.0.0 "Zenith")

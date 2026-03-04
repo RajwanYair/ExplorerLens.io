@@ -142,6 +142,10 @@
     "terminal.integrated.scrollback": 50000,
     "terminal.integrated.fastScrollSensitivity": 5,
     "terminal.integrated.commandsToSkipShell": [],
+    "terminal.integrated.confirmOnKill": "always",
+    "terminal.integrated.allowChords": true,
+    "terminal.integrated.detectLocale": "auto",
+    "terminal.integrated.gpuAcceleration": "auto",
     // ── Tasks & Build ────────────────────────────────────────────
     "task.slowProviderWarning": false,
     "task.autoDetect": "on",
@@ -156,7 +160,14 @@
         "MD013": false,
         "MD024": {
             "siblings_only": true
-        }
+        },
+        "MD036": false,
+        "MD005": false,
+        "MD007": false,
+        "MD029": {
+            "style": "ordered"
+        },
+        "MD040": false
     },
     // ── Spell Checker ────────────────────────────────────────────
     "cSpell.words": [
