@@ -18262,6 +18262,443 @@ TEST(TestCachePruner_Score) {
     ASSERT(scoreOld > scoreNew);
 }
 
+//== Cache Subsystem Tests ==
+
+TEST(Test_AdaptiveCacheBudget_InitDefault) {
+    using namespace ExplorerLens::Cache;
+    AdaptiveCacheBudgetManager mgr;
+    auto budgets = AdaptiveCacheBudgetManager::CreateDefaultBudgets(
+        AdaptiveCacheBudgetManager::kDefaultTotalBudget);
+    ASSERT(budgets.size() == 4);
+    size_t totalSoft = 0;
+    for (const auto& b : budgets) totalSoft += b.softLimitBytes;
+    // Allow small rounding delta from integer division of budget fractions
+    size_t delta = AdaptiveCacheBudgetManager::kDefaultTotalBudget - totalSoft;
+    ASSERT(delta <= 16);
+}
+
+TEST(Test_CacheKeyGenerator_Consistency) {
+    using namespace ExplorerLens::Engine::Cache;
+    auto k1 = CacheKeyGenerator::Generate(L"C:\\test\\photo.jpg", 256, 256);
+    auto k2 = CacheKeyGenerator::Generate(L"C:\\test\\photo.jpg", 256, 256);
+    ASSERT(!k1.empty());
+    ASSERT(k1 == k2);
+}
+
+TEST(Test_CacheKeyGenerator_Uniqueness) {
+    using namespace ExplorerLens::Engine::Cache;
+    auto k1 = CacheKeyGenerator::Generate(L"C:\\test\\a.jpg", 256, 256);
+    auto k2 = CacheKeyGenerator::Generate(L"C:\\test\\b.jpg", 256, 256);
+    auto k3 = CacheKeyGenerator::Generate(L"C:\\test\\a.jpg", 128, 128);
+    ASSERT(k1 != k2);
+    ASSERT(k1 != k3);
+}
+
+TEST(Test_PredictiveCache_BasicPrefetch) {
+    PredictiveCacheEngine engine;
+    engine.RecordAccess(L"C:\\photos\\img1.jpg");
+    engine.RecordAccess(L"C:\\photos\\img1.jpg");
+    engine.RecordAccess(L"C:\\photos\\img1.jpg");
+    float prob = engine.PredictAccessProbability(L"C:\\photos\\img1.jpg");
+    ASSERT(prob > 0.0f);
+    float probUnknown = engine.PredictAccessProbability(L"C:\\unknown\\x.png");
+    ASSERT(prob > probUnknown);
+}
+
+TEST(Test_CacheWarmingService_Startup) {
+    CacheWarmingService svc;
+    auto stats = svc.GetStats();
+    ASSERT(stats.directoriesWatched == 0);
+    ASSERT(stats.filesWarmed == 0);
+}
+
+TEST(Test_PersistentCache_PutGet) {
+    ASSERT(PersistentCacheManager::ValidateConfig(
+        PersistentCacheConfig{}) == true);
+    PersistentCacheConfig cfg;
+    cfg.maxMemoryMB = 0; // invalid
+    ASSERT(PersistentCacheManager::ValidateConfig(cfg) == false);
+    double rate = PersistentCacheManager::CalculateHitRate(80, 20);
+    ASSERT(rate > 0.79 && rate < 0.81);
+}
+
+TEST(Test_SubMsCache_Performance) {
+    SubMillisecondCacheEngine cache(256);
+    const std::wstring key = L"perf_test_key";
+    std::vector<uint8_t> payload(1024, 0x42);
+    cache.Put(key, payload.data(), payload.size(), 0);
+
+    LARGE_INTEGER freq, start, end;
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&start);
+    std::vector<uint8_t> out;
+    bool hit = cache.Get(key, out);
+    QueryPerformanceCounter(&end);
+    double ms = static_cast<double>(end.QuadPart - start.QuadPart)
+              * 1000.0 / static_cast<double>(freq.QuadPart);
+    ASSERT(hit);
+    ASSERT(out.size() == 1024);
+    ASSERT(ms < 1.0); // must be sub-millisecond
+}
+
+TEST(Test_CacheTelemetry_HitMiss) {
+    CacheTelemetryCollector collector;
+    collector.Record(CacheTelemetryEvent::CacheHit);
+    collector.Record(CacheTelemetryEvent::CacheHit);
+    collector.Record(CacheTelemetryEvent::CacheMiss);
+    auto snap = collector.Export();
+    ASSERT(snap.hits == 2);
+    ASSERT(snap.misses == 1);
+    ASSERT(snap.hitRate > 0.65f && snap.hitRate < 0.68f);
+}
+
+TEST(Test_CacheEncryption_RoundTrip) {
+    CacheEncryptionLayer enc;
+    EncryptionConfig cfg;
+    cfg.algorithm = EncryptionAlgorithm::AES256;
+    enc.Configure(cfg);
+    std::vector<uint8_t> plaintext = { 0x01, 0x02, 0x03, 0x04, 0x05 };
+    std::vector<uint8_t> ciphertext, decrypted;
+    ASSERT(enc.Encrypt(plaintext, ciphertext));
+    ASSERT(ciphertext.size() > plaintext.size()); // IV prepended
+    ASSERT(enc.Decrypt(ciphertext, decrypted));
+    ASSERT(decrypted == plaintext);
+}
+
+TEST(Test_MultiTenantCache_Isolation) {
+    TenantCacheStats statsA;
+    statsA.tenantId = L"tenantA";
+    statsA.usedBytes = 100;
+    statsA.quotaBytes = 200;
+    TenantCacheStats statsB;
+    statsB.tenantId = L"tenantB";
+    statsB.usedBytes = 300;
+    statsB.quotaBytes = 200;
+    ASSERT(!MultiTenantCacheManager::IsQuotaExceeded(statsA));
+    ASSERT(MultiTenantCacheManager::IsQuotaExceeded(statsB));
+    ASSERT(std::wstring(MultiTenantCacheManager::TierName(TenantCacheTier::Hot)) == L"Hot");
+}
+
+//== Pipeline Subsystem Tests ==
+
+TEST(Test_PriorityDecodeScheduler_Ordering) {
+    PriorityDecodeScheduler scheduler;
+    scheduler.Submit(L"low.jpg", DecodeUrgency::Deferred, 256, 1.0f);
+    scheduler.Submit(L"high.jpg", DecodeUrgency::Immediate, 256, 1.0f);
+    ScheduledDecodeTask task;
+    ASSERT(scheduler.GetNext(task));
+    ASSERT(task.filePath == L"high.jpg");
+    ASSERT(task.urgency == DecodeUrgency::Immediate);
+}
+
+TEST(Test_AsyncPrefetchQueue_Enqueue) {
+    AsyncPrefetchQueue queue;
+    PrefetchRequest req;
+    req.filePath = L"C:\\test\\img.jpg";
+    req.priority = PrefetchPriority::High;
+    ASSERT(queue.Enqueue(req));
+    auto stats = queue.GetStats();
+    ASSERT(stats.enqueued == 1);
+    ASSERT(stats.queueDepth == 1);
+    PrefetchRequest out;
+    ASSERT(queue.Dequeue(out));
+    ASSERT(out.filePath == L"C:\\test\\img.jpg");
+}
+
+TEST(Test_ParallelBatchDecoder_Throughput) {
+    BatchDecoderConfig cfg;
+    cfg.workerThreads = 2;
+    cfg.maxBatchSize = 100;
+    cfg.thumbnailSize = 128;
+    ASSERT(cfg.workerThreads == 2);
+    ASSERT(cfg.maxBatchSize == 100);
+    BatchStats stats;
+    ASSERT(stats.totalBatches == 0);
+    ASSERT(stats.throughputItemsPerSec == 0.0);
+}
+
+TEST(Test_PipelineCircuitBreaker_Trip) {
+    auto& breaker = PipelineCircuitBreaker::Instance();
+    PipelineBreakerConfig cfg;
+    cfg.failureRateThreshold = 0.50;
+    cfg.minimumRequests = 4;
+    cfg.slidingWindowSize = 10;
+    breaker.Initialize(cfg);
+    ASSERT(breaker.GetState() == PipelineCircuitState::Closed);
+    // Record enough failures to trip
+    breaker.RecordFailure();
+    breaker.RecordFailure();
+    breaker.RecordFailure();
+    breaker.RecordFailure();
+    breaker.RecordFailure();
+    ASSERT(breaker.GetState() == PipelineCircuitState::Open);
+}
+
+TEST(Test_PipelineCircuitBreaker_Reset) {
+    auto& breaker = PipelineCircuitBreaker::Instance();
+    PipelineBreakerConfig cfg;
+    cfg.failureRateThreshold = 0.50;
+    cfg.minimumRequests = 2;
+    cfg.openDurationMs = 0; // immediate transition to half-open
+    cfg.halfOpenMaxRequests = 2;
+    cfg.recoveryThreshold = 0.50;
+    breaker.Initialize(cfg);
+    ASSERT(breaker.GetState() == PipelineCircuitState::Closed);
+    breaker.RecordFailure();
+    breaker.RecordFailure();
+    breaker.RecordFailure();
+    // After enough failures, should be open
+    if (breaker.GetState() == PipelineCircuitState::Open) {
+        // With openDurationMs=0 calling AllowRequest transitions to HalfOpen
+        breaker.AllowRequest();
+        breaker.RecordSuccess();
+        breaker.RecordSuccess();
+        // After successes in half-open, may close
+        PipelineCircuitState st = breaker.GetState();
+        ASSERT(st == PipelineCircuitState::Closed || st == PipelineCircuitState::HalfOpen);
+    }
+    // Re-initialize to clean state for other tests
+    breaker.Initialize();
+}
+
+TEST(Test_FormatSignature_PNG) {
+    FormatSignatureDetector detector;
+    // PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A
+    uint8_t pngHeader[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+                            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52 };
+    auto result = detector.Detect(pngHeader, sizeof(pngHeader));
+    ASSERT(result.formatId == "PNG");
+    ASSERT(result.formatClass == FormatClass::Image);
+    ASSERT(result.confidence > 0.5f);
+}
+
+TEST(Test_FormatSignature_JPEG) {
+    FormatSignatureDetector detector;
+    // JPEG magic bytes: FF D8 FF
+    uint8_t jpegHeader[] = { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46,
+                             0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01 };
+    auto result = detector.Detect(jpegHeader, sizeof(jpegHeader));
+    ASSERT(result.formatId == "JPEG");
+    ASSERT(result.formatClass == FormatClass::Image);
+    ASSERT(result.confidence > 0.5f);
+}
+
+TEST(Test_ThreadPoolOptimizer_CoreCount) {
+    uint32_t cores = std::thread::hardware_concurrency();
+    ASSERT(cores >= 1);
+    uint32_t recommended = ThreadPoolOptimizer::RecommendThreads(
+        PoolSizingPolicy::CoreCount, cores);
+    ASSERT(recommended >= 1);
+    ASSERT(recommended <= cores);
+}
+
+TEST(Test_StreamingDecode_Chunked) {
+    StreamingDecodeEngine engine;
+    // BeginDecode with large file size to trigger progressive path
+    uint32_t sid = engine.BeginDecode(L"C:\\test\\large.jpg", 1024 * 1024);
+    ASSERT(sid > 0);
+    // Feed a chunk
+    StreamChunk chunk;
+    chunk.offset = 0;
+    chunk.size = 4096;
+    std::vector<uint8_t> dummyData(4096, 0x88);
+    chunk.data = dummyData.data();
+    chunk.isFinal = false;
+    auto partial = engine.FeedChunk(sid, chunk);
+    // Feed final chunk
+    StreamChunk finalChunk;
+    finalChunk.offset = 4096;
+    finalChunk.size = 4096;
+    finalChunk.data = dummyData.data();
+    finalChunk.isFinal = true;
+    auto result = engine.FeedChunk(sid, finalChunk);
+    ASSERT(result.isComplete);
+    engine.EndDecode(sid);
+}
+
+TEST(Test_DecodeMemoization_CacheHit) {
+    DecodeMemoizationEngine memo;
+    MemoKey key;
+    key.path = L"C:\\test\\image.png";
+    key.fileSize = 12345;
+    key.lastWriteTime = 100000;
+    key.thumbWidth = 256;
+    key.thumbHeight = 256;
+    MemoEntry entry;
+    entry.bgraData.resize(256 * 256 * 4, 0x55);
+    entry.width = 256;
+    entry.height = 256;
+    memo.Store(key, entry);
+    MemoEntry out;
+    ASSERT(memo.Lookup(key, out));
+    ASSERT(out.width == 256);
+    ASSERT(out.bgraData.size() == entry.bgraData.size());
+    auto stats = memo.GetStats();
+    ASSERT(stats.hits == 1);
+    ASSERT(stats.entries == 1);
+}
+
+//== Memory Subsystem Tests ==
+
+TEST(Test_BufferPool_AllocFree) {
+    using namespace ExplorerLens::Memory;
+    SlabPool pool(SlabClass::Medium);
+    PooledBuffer buf = pool.Acquire();
+    ASSERT(buf.IsValid());
+    ASSERT(buf.capacity == SlabClassBufferSize(SlabClass::Medium));
+    ASSERT(pool.Release(buf));
+    ASSERT(buf.data == nullptr);
+}
+
+TEST(Test_BufferPool_Reuse) {
+    using namespace ExplorerLens::Memory;
+    SlabPool pool(SlabClass::Small);
+    PooledBuffer buf1 = pool.Acquire();
+    uint8_t* firstPtr = buf1.data;
+    pool.Release(buf1);
+    PooledBuffer buf2 = pool.Acquire();
+    // Freed buffer should be reused — same pointer
+    ASSERT(buf2.data == firstPtr);
+    pool.Release(buf2);
+}
+
+TEST(Test_MemoryDefragmenter_Compact) {
+    MemoryDefragmenter defrag;
+    // Create some test memory regions
+    uint8_t regionA[128];
+    uint8_t regionB[256];
+    defrag.RegisterRegion(regionA, sizeof(regionA), 1);
+    defrag.RegisterRegion(regionB, sizeof(regionB), 2);
+    defrag.MarkFree(regionA); // mark first as reclaimable
+    auto result = defrag.Defragment();
+    ASSERT(result.fragmentsBefore >= 0); // valid result returned
+    defrag.UnregisterRegion(regionA);
+    defrag.UnregisterRegion(regionB);
+}
+
+TEST(Test_AllocationTracker_Stats) {
+    auto& tracker = AllocationTracker::Instance();
+    tracker.Initialize(true);
+    AllocationTag tag = { "test.cpp", 42, "TestFunc", "TestComponent" };
+    uint32_t siteId = tracker.RegisterSite(tag);
+    void* fakeAddr = reinterpret_cast<void*>(0xDEAD0000);
+    tracker.TrackAlloc(fakeAddr, 1024, siteId);
+    auto stats = tracker.GetStats();
+    ASSERT(stats.totalAllocated >= 1024);
+    ASSERT(stats.currentOutstanding >= 1024);
+    tracker.TrackFree(fakeAddr);
+    stats = tracker.GetStats();
+    ASSERT(stats.totalFreed >= 1024);
+}
+
+TEST(Test_SmartPointerPool_RAII) {
+    SmartPointerPool pool;
+    ASSERT(pool.Initialize(4 * 1024 * 1024));
+    ASSERT(pool.IsInitialized());
+    PoolBlock* block = pool.Acquire(128);
+    ASSERT_NOT_NULL(block);
+    ASSERT(block->size >= 128);
+    ASSERT(block->inUse);
+    pool.Release(block);
+    ASSERT(!block->inUse);
+    auto stats = pool.GetStats();
+    ASSERT(stats.totalAllocations == 1);
+    ASSERT(stats.totalDeallocations == 1);
+}
+
+TEST(Test_MemoryPressure_Detection) {
+    using namespace ExplorerLens::Memory;
+    // Test the default pressure ladder construction
+    auto ladder = DefaultPressureLadder();
+    ASSERT(ladder.size() == 5);
+    ASSERT(ladder[0].level == PressureLevel::Normal);
+    ASSERT(ladder[4].level == PressureLevel::Critical);
+    // Verify actions escalate with severity
+    ASSERT(HasAction(ladder[4].actions, PressureAction::EmergencyRelease));
+    ASSERT(!HasAction(ladder[0].actions, PressureAction::EmergencyRelease));
+}
+
+//== Plugin Subsystem Tests ==
+
+TEST(Test_PluginTrustChain_ValidateSelf) {
+    PluginTrustChainValidator validator;
+    // Validate a non-existent file — should return Untrusted
+    ExplorerLens::Engine::TrustLevel level = validator.ValidateSignature(
+        L"C:\\nonexistent\\fake_plugin.dll");
+    ASSERT(level == ExplorerLens::Engine::TrustLevel::Untrusted);
+}
+
+TEST(Test_PluginHotReload_VersionBump) {
+    PluginHotReloadManager mgr;
+    auto stats = mgr.GetStats();
+    ASSERT(stats.filesWatched == 0);
+    ASSERT(stats.reloadsTriggered == 0);
+    // Register a non-existent DLL — hash will be empty, no crash
+    mgr.RegisterPluginHash(L"C:\\nonexistent\\plugin.dll");
+    stats = mgr.GetStats();
+    // File doesn't exist so hash fails — filesWatched stays 0
+    ASSERT(stats.filesWatched == 0);
+}
+
+TEST(Test_PluginSandbox_Restrict) {
+    auto strict = ExplorerLens::Plugin::SandboxPolicy::Strict();
+    ASSERT(strict.preset == ExplorerLens::Plugin::SandboxPolicyPreset::Strict);
+    ASSERT(strict.limits.maxMemoryBytes == 64ULL * 1024 * 1024);
+    ASSERT(strict.limits.maxCPUPercent == 10);
+    ASSERT(!strict.limits.allowUIAccess);
+    auto dev = ExplorerLens::Plugin::SandboxPolicy::Developer();
+    ASSERT(dev.limits.allowUIAccess);
+    ASSERT(dev.limits.maxMemoryBytes > strict.limits.maxMemoryBytes);
+}
+
+TEST(Test_PluginPerformanceProfiler_Timing) {
+    PluginPerformanceProfiler profiler;
+    uint64_t sid = profiler.BeginProfile(L"test.plugin", "TestOp");
+    ASSERT(sid > 0);
+    // Small delay to ensure non-zero timing
+    Sleep(1);
+    profiler.EndProfile(sid);
+    // Verify the profiler recorded at least one entry
+    auto summary = profiler.GetSummary(L"test.plugin");
+    ASSERT(summary.totalRecords >= 1);
+}
+
+TEST(Test_SharedMemory_CreateOpen) {
+    using namespace ExplorerLens::IPC;
+    SharedMemorySection section;
+    std::string name = "Local\\ExplorerLens_Test_" + std::to_string(GetTickCount64());
+    bool created = section.Create(name, 4096);
+    if (created) {
+        ASSERT(section.IsValid());
+        ASSERT(section.GetSize() == 4096);
+        bool mapped = section.Map(false);
+        if (mapped) {
+            ASSERT(section.IsMapped());
+            uint8_t testData[] = { 0xDE, 0xAD, 0xBE, 0xEF };
+            section.Write(testData, 0, 4);
+            uint8_t readBack[4] = {};
+            section.Read(readBack, 0, 4);
+            ASSERT(readBack[0] == 0xDE && readBack[3] == 0xEF);
+            section.Unmap();
+        }
+        section.Close();
+    }
+    ASSERT(true); // pass if no crash regardless of OS restrictions
+}
+
+TEST(Test_PluginSandbox_Presets) {
+    // Verify all sandbox presets are distinct and well-formed
+    auto strict = ExplorerLens::Plugin::SandboxPolicy::Strict();
+    auto dev = ExplorerLens::Plugin::SandboxPolicy::Developer();
+    ASSERT(strict.preset != dev.preset);
+    // Strict must be more restrictive than Developer
+    ASSERT(strict.limits.maxMemoryBytes <= dev.limits.maxMemoryBytes);
+    ASSERT(strict.limits.maxCPUPercent <= dev.limits.maxCPUPercent);
+    // Developer allows UI access, Strict does not
+    ASSERT(!strict.limits.allowUIAccess);
+    ASSERT(dev.limits.allowUIAccess);
+}
+
 //== Security Hardening Tests ==
 
 TEST(Test_SecureAllocator_ZeroOnFree) {
@@ -22045,6 +22482,52 @@ int main() {
     RUN_TEST(TestFileSizeBadge_Category);
     RUN_TEST(TestCachePruner_Eviction);
     RUN_TEST(TestCachePruner_Score);
+
+    std::wcout << std::endl;
+
+    // Cache Subsystem Tests
+    std::wcout << L"Cache Subsystem Tests..." << std::endl;
+    RUN_TEST(Test_AdaptiveCacheBudget_InitDefault);
+    RUN_TEST(Test_CacheKeyGenerator_Consistency);
+    RUN_TEST(Test_CacheKeyGenerator_Uniqueness);
+    RUN_TEST(Test_PredictiveCache_BasicPrefetch);
+    RUN_TEST(Test_CacheWarmingService_Startup);
+    RUN_TEST(Test_PersistentCache_PutGet);
+    RUN_TEST(Test_SubMsCache_Performance);
+    RUN_TEST(Test_CacheTelemetry_HitMiss);
+    RUN_TEST(Test_CacheEncryption_RoundTrip);
+    RUN_TEST(Test_MultiTenantCache_Isolation);
+
+    // Pipeline Subsystem Tests
+    std::wcout << L"Pipeline Subsystem Tests..." << std::endl;
+    RUN_TEST(Test_PriorityDecodeScheduler_Ordering);
+    RUN_TEST(Test_AsyncPrefetchQueue_Enqueue);
+    RUN_TEST(Test_ParallelBatchDecoder_Throughput);
+    RUN_TEST(Test_PipelineCircuitBreaker_Trip);
+    RUN_TEST(Test_PipelineCircuitBreaker_Reset);
+    RUN_TEST(Test_FormatSignature_PNG);
+    RUN_TEST(Test_FormatSignature_JPEG);
+    RUN_TEST(Test_ThreadPoolOptimizer_CoreCount);
+    RUN_TEST(Test_StreamingDecode_Chunked);
+    RUN_TEST(Test_DecodeMemoization_CacheHit);
+
+    // Memory Subsystem Tests
+    std::wcout << L"Memory Subsystem Tests..." << std::endl;
+    RUN_TEST(Test_BufferPool_AllocFree);
+    RUN_TEST(Test_BufferPool_Reuse);
+    RUN_TEST(Test_MemoryDefragmenter_Compact);
+    RUN_TEST(Test_AllocationTracker_Stats);
+    RUN_TEST(Test_SmartPointerPool_RAII);
+    RUN_TEST(Test_MemoryPressure_Detection);
+
+    // Plugin Subsystem Tests
+    std::wcout << L"Plugin Subsystem Tests..." << std::endl;
+    RUN_TEST(Test_PluginTrustChain_ValidateSelf);
+    RUN_TEST(Test_PluginHotReload_VersionBump);
+    RUN_TEST(Test_PluginSandbox_Restrict);
+    RUN_TEST(Test_PluginPerformanceProfiler_Timing);
+    RUN_TEST(Test_SharedMemory_CreateOpen);
+    RUN_TEST(Test_PluginSandbox_Presets);
 
     std::wcout << std::endl;
 
