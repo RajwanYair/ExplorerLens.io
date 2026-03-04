@@ -41,7 +41,7 @@ PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
 
 ; Visual settings
-SetupIconFile=..\LENSManager\LENSManager.ico
+SetupIconFile=..\..\LENSManager\ExplorerLensIcon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 WizardImageFile=compiler:WizModernImage-IS.bmp
 WizardSmallImageFile=compiler:WizModernSmallImage-IS.bmp
