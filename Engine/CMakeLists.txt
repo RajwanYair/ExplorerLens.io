@@ -623,6 +623,8 @@ set(ENGINE_HEADERS
     Utils/PerformanceTools.h
     Utils/QualityGates.h
     Utils/SecurityCompliance.h
+    Utils/SecureAllocator.h
+    Utils/InputValidator.h
     Utils/TestFramework.h
     Utils/WindowsCompat.h
     Utils/WindowsUI.h

@@ -186,11 +186,50 @@ private:
 static MemoryLeakDetector g_memoryLeakDetector;
 
 #else
-// Release build - no-op stubs
+// Release build — lightweight leak detection using atomic counters
+#include <atomic>
+
 class MemoryLeakDetector {
 public:
-    void Snapshot() {}
-    bool CheckLeaksSinceSnapshot() { return false; }
+    /// Capture current allocation count as a snapshot
+    void Snapshot() {
+        m_snapshotCount = s_allocationCounter.load(std::memory_order_acquire);
+    }
+
+    /// Compare current allocation count vs snapshot; return true if leaked
+    bool CheckLeaksSinceSnapshot() {
+        uint64_t current = s_allocationCounter.load(std::memory_order_acquire);
+        return current > m_snapshotCount;
+    }
+
+    /// Increment the global allocation counter (call from allocators/new)
+    static void TrackAllocation() {
+        s_allocationCounter.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    /// Decrement the global allocation counter (call from deallocators/delete)
+    static void TrackDeallocation() {
+        // Saturating decrement — avoid underflow
+        uint64_t prev = s_allocationCounter.load(std::memory_order_relaxed);
+        while (prev > 0 &&
+               !s_allocationCounter.compare_exchange_weak(
+                   prev, prev - 1, std::memory_order_relaxed)) {
+        }
+    }
+
+    /// Current live allocation count
+    static uint64_t GetAllocationCount() {
+        return s_allocationCounter.load(std::memory_order_relaxed);
+    }
+
+    /// Reset counter (for testing)
+    static void ResetCounter() {
+        s_allocationCounter.store(0, std::memory_order_relaxed);
+    }
+
+private:
+    uint64_t m_snapshotCount = 0;
+    static inline std::atomic<uint64_t> s_allocationCounter{ 0 };
 };
 
 #endif // _DEBUG

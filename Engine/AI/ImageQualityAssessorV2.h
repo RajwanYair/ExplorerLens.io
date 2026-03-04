@@ -1,38 +1,8 @@
-//==============================================================================
-// ExplorerLens Engine — Image Quality Assessor V2
+// ImageQualityAssessorV2.h — Canonical Image Quality Assessor (V1 + V2 consolidated)
+// Copyright (c) 2026 ExplorerLens Project
 //
-// Purpose:
-//   No-reference image quality assessment inspired by BRISQUE, using natural
-//   scene statistics computed entirely on the CPU.  Provides per-axis quality
-//   sub-scores (sharpness, noise, contrast, colorfulness, exposure) and a
-//   weighted overall score.
+// Consolidated IQA: V1 metric-based assessor + V2 BRISQUE-inspired assessor.
 //
-// Classes:
-//   ImageQualityAssessorV2 — Thread-safe assessor that processes an RGBA
-//   buffer and returns a QualityScoreV2 struct with all sub-metrics.
-//
-// Inputs:
-//   - RGBA pixel buffer (uint8_t*), width, height
-//
-// Outputs:
-//   - QualityScoreV2   { overall, sharpness, noise, contrast, colorfulness, exposure }
-//   - QualityTierV2    enum (Excellent / Good / Fair / Poor / Bad)
-//   - AssessmentStatsV2 (count, avg score, distribution, avg time)
-//
-// Sub-metrics:
-//   1. Sharpness   — Laplacian variance
-//   2. Noise       — Median absolute deviation in 3x3 neighborhoods
-//   3. Contrast    — Michelson contrast in 16x16 blocks
-//   4. Colorfulness — Hasler & Süsstrunk (2003) metric
-//   5. Exposure    — Mean luminance distance from target midpoint
-//
-// Thread Safety:
-//   Assessment is stateless (pure input → output).  Aggregate statistics
-//   are protected by an SRWLOCK.
-//
-// Build:
-//   Header-only, C++20, MSVC /W4 clean, no external dependencies.
-//==============================================================================
 #pragma once
 
 #include <windows.h>
@@ -47,6 +17,188 @@
 
 namespace ExplorerLens {
 namespace Engine {
+
+// ── ImageQualityAssessor V1 types (consolidated from ImageQualityAssessor.h) ──
+
+enum class IQAMetric : uint8_t {
+    BRISQUE = 0,
+    NIQE,
+    CLIP_IQA,
+    SSIM_Reference,
+    PSNR = SSIM_Reference, // compat alias
+    COUNT = SSIM_Reference + 1
+};
+enum class IQADefect : uint8_t {
+    None = 0,
+    Blur,
+    Noise,
+    Overexposed,
+    Underexposed,
+    Compression,
+    COUNT
+};
+enum class IQAGrade : uint8_t {
+    Excellent = 0,
+    Good,
+    Fair,
+    Poor,
+    Unacceptable,
+    COUNT
+};
+
+struct IQAScore {
+    IQAMetric metric = IQAMetric::BRISQUE;
+    float value = 0.0f;
+    IQAGrade grade = IQAGrade::Fair;
+    IQADefect primaryDefect = IQADefect::None;
+};
+
+struct ImageQualityReport {
+    IQAScore overallScore;
+    float blurScore = 0.0f;
+    float noiseScore = 0.0f;
+    float exposureOk = 1.0f;
+    bool worthEnhancing = false;
+};
+
+class ImageQualityAssessor {
+public:
+    static const wchar_t* MetricName(IQAMetric m) {
+        switch (m) {
+        case IQAMetric::BRISQUE:
+            return L"BRISQUE";
+        case IQAMetric::NIQE:
+            return L"NIQE";
+        case IQAMetric::CLIP_IQA:
+            return L"CLIP-IQA";
+        case IQAMetric::SSIM_Reference:
+            return L"SSIM (Reference)";
+        default:
+            return L"Unknown";
+        }
+    }
+    static const wchar_t* DefectName(IQADefect d) {
+        switch (d) {
+        case IQADefect::None:
+            return L"None";
+        case IQADefect::Blur:
+            return L"Blur";
+        case IQADefect::Noise:
+            return L"Noise";
+        case IQADefect::Overexposed:
+            return L"Overexposed";
+        case IQADefect::Underexposed:
+            return L"Underexposed";
+        case IQADefect::Compression:
+            return L"Compression";
+        default:
+            return L"Unknown";
+        }
+    }
+    static const wchar_t* GradeName(IQAGrade g) {
+        switch (g) {
+        case IQAGrade::Excellent:
+            return L"Excellent";
+        case IQAGrade::Good:
+            return L"Good";
+        case IQAGrade::Fair:
+            return L"Fair";
+        case IQAGrade::Poor:
+            return L"Poor";
+        case IQAGrade::Unacceptable:
+            return L"Unacceptable";
+        default:
+            return L"Unknown";
+        }
+    }
+    static constexpr size_t MetricCount() {
+        return static_cast<size_t>(IQAMetric::COUNT);
+    }
+    static constexpr size_t DefectCount() {
+        return static_cast<size_t>(IQADefect::COUNT);
+    }
+    static constexpr size_t GradeCount() {
+        return static_cast<size_t>(IQAGrade::COUNT);
+    }
+
+    static double ComputeLaplacianVariance(const uint8_t* gray, uint32_t width,
+        uint32_t height, uint32_t stride) {
+        if (!gray || width < 3 || height < 3) return 0.0;
+        double sum = 0.0, sumSq = 0.0;
+        uint32_t count = 0;
+        for (uint32_t y = 1; y < height - 1; ++y) {
+            for (uint32_t x = 1; x < width - 1; ++x) {
+                int lap = 4 * gray[y * stride + x]
+                    - gray[(y - 1) * stride + x]
+                    - gray[(y + 1) * stride + x]
+                    - gray[y * stride + (x - 1)]
+                    - gray[y * stride + (x + 1)];
+                sum += lap;
+                sumSq += static_cast<double>(lap) * lap;
+                ++count;
+            }
+        }
+        if (count == 0) return 0.0;
+        double mean = sum / count;
+        return (sumSq / count) - (mean * mean);
+    }
+
+    static double ComputeMeanBrightness(const uint8_t* gray, uint32_t width,
+        uint32_t height, uint32_t stride) {
+        if (!gray || width == 0 || height == 0) return 0.0;
+        uint64_t sum = 0;
+        for (uint32_t y = 0; y < height; ++y)
+            for (uint32_t x = 0; x < width; ++x)
+                sum += gray[y * stride + x];
+        return static_cast<double>(sum) / (width * height);
+    }
+
+    static std::vector<IQADefect> DetectExposureDefects(const uint8_t* gray,
+        uint32_t width, uint32_t height, uint32_t stride) {
+        std::vector<IQADefect> defects;
+        if (!gray || width == 0 || height == 0) return defects;
+        uint32_t bright = 0, dark = 0;
+        uint32_t total = width * height;
+        for (uint32_t y = 0; y < height; ++y) {
+            for (uint32_t x = 0; x < width; ++x) {
+                uint8_t v = gray[y * stride + x];
+                if (v > 240) ++bright;
+                if (v < 15) ++dark;
+            }
+        }
+        if (bright > total * 3 / 10) defects.push_back(IQADefect::Overexposed);
+        if (dark > total * 3 / 10) defects.push_back(IQADefect::Underexposed);
+        return defects;
+    }
+
+    static IQAGrade GradeBySharpness(double laplacianVariance) {
+        if (laplacianVariance > 500.0) return IQAGrade::Excellent;
+        if (laplacianVariance > 200.0) return IQAGrade::Good;
+        if (laplacianVariance > 100.0) return IQAGrade::Fair;
+        if (laplacianVariance > 30.0) return IQAGrade::Poor;
+        return IQAGrade::Unacceptable;
+    }
+
+    static ImageQualityReport Assess(const uint8_t* gray, uint32_t width,
+        uint32_t height, uint32_t stride) {
+        ImageQualityReport report;
+        double lapVar = ComputeLaplacianVariance(gray, width, height, stride);
+        report.overallScore.metric = IQAMetric::BRISQUE;
+        report.overallScore.value = static_cast<float>(lapVar);
+        report.overallScore.grade = GradeBySharpness(lapVar);
+        report.blurScore = (lapVar > 500.0f) ? 0.0f :
+            (lapVar < 10.0f) ? 1.0f :
+            1.0f - static_cast<float>(lapVar / 500.0);
+        auto defects = DetectExposureDefects(gray, width, height, stride);
+        report.exposureOk = defects.empty() ? 1.0f : 0.0f;
+        if (lapVar < 100.0) report.overallScore.primaryDefect = IQADefect::Blur;
+        else if (!defects.empty()) report.overallScore.primaryDefect = defects[0];
+        report.worthEnhancing = (report.blurScore > 0.5f || report.exposureOk < 0.5f);
+        return report;
+    }
+};
+
+// ── ImageQualityAssessorV2 (BRISQUE-inspired, multi-axis) ──────────────────
 
 /// Quality tier derived from the overall quality score.
 enum class QualityTierV2 : uint8_t {

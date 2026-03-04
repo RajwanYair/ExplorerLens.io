@@ -164,6 +164,8 @@
 #include "../Utils/QualityGates.h"
 #include "../Utils/ReleaseGate.h"
 #include "../Utils/SecurityCompliance.h"
+#include "../Utils/SecureAllocator.h"
+#include "../Utils/InputValidator.h"
 #include "../Utils/TestFramework.h"
 #include "../Utils/TestInfrastructure.h"
 #include "../Utils/TestSuiteExpansion.h"
@@ -18260,6 +18262,126 @@ TEST(TestCachePruner_Score) {
     ASSERT(scoreOld > scoreNew);
 }
 
+//== Security Hardening Tests ==
+
+TEST(Test_SecureAllocator_ZeroOnFree) {
+    using namespace ExplorerLens::Engine;
+    // Allocate a small buffer via SecureAllocator
+    SecureAllocator<uint8_t> alloc;
+    constexpr size_t N = 64;
+    uint8_t* ptr = alloc.allocate(N);
+    ASSERT(ptr != nullptr);
+
+    // Fill with known pattern
+    for (size_t i = 0; i < N; ++i) ptr[i] = 0xAB;
+
+    // Deallocate — secure allocator zeros memory before freeing
+    // (We can't read after free, but we test the tracker counted it)
+    auto& tracker = SecureAllocationTracker::Instance();
+    uint64_t deallocsBefore = tracker.TotalDeallocations();
+    alloc.deallocate(ptr, N);
+    uint64_t deallocsAfter = tracker.TotalDeallocations();
+    ASSERT(deallocsAfter > deallocsBefore);
+}
+
+TEST(Test_SecureAllocator_SizeLimit) {
+    using namespace ExplorerLens::Engine;
+    SecureAllocator<uint8_t> alloc;
+    bool threwOnOversize = false;
+    try {
+        // Try to allocate > 256 MB — should throw std::bad_alloc
+        alloc.allocate(SECURE_ALLOC_MAX_BYTES + 1);
+    } catch (const std::bad_alloc&) {
+        threwOnOversize = true;
+    }
+    ASSERT(threwOnOversize);
+}
+
+TEST(Test_InputValidator_PathTraversal) {
+    using namespace ExplorerLens::Engine;
+    // Normal path should be valid
+    auto ok = InputValidator::ValidateFilePath(L"C:\\Users\\test\\file.jpg");
+    ASSERT(ok.valid);
+
+    // Traversal patterns should be rejected
+    auto bad1 = InputValidator::ValidateFilePath(L"C:\\Users\\..\\secret.txt");
+    ASSERT(!bad1.valid);
+
+    auto bad2 = InputValidator::ValidateFilePath(L"../../../etc/passwd");
+    ASSERT(!bad2.valid);
+
+    auto bad3 = InputValidator::ValidateFilePath(L"dir\\..\\..\\file");
+    ASSERT(!bad3.valid);
+}
+
+TEST(Test_InputValidator_NullBytes) {
+    using namespace ExplorerLens::Engine;
+    // Construct string with embedded null byte
+    std::wstring pathWithNull = L"C:\\test";
+    pathWithNull.push_back(L'\0');
+    pathWithNull += L".exe";
+    auto result = InputValidator::ValidateFilePath(pathWithNull);
+    ASSERT(!result.valid);
+}
+
+TEST(Test_InputValidator_FileSizeLimit) {
+    using namespace ExplorerLens::Engine;
+    // Valid sizes
+    ASSERT(InputValidator::ValidateFileSize(1024).valid);
+    ASSERT(InputValidator::ValidateFileSize(1ULL * 1024 * 1024 * 1024).valid); // 1 GB
+
+    // Zero should fail
+    ASSERT(!InputValidator::ValidateFileSize(0).valid);
+
+    // Over 4 GB should fail
+    ASSERT(!InputValidator::ValidateFileSize(5ULL * 1024 * 1024 * 1024).valid);
+}
+
+TEST(Test_InputValidator_ImageDimensions) {
+    using namespace ExplorerLens::Engine;
+    // Normal dimensions
+    ASSERT(InputValidator::ValidateImageDimensions(1920, 1080).valid);
+    ASSERT(InputValidator::ValidateImageDimensions(65536, 1).valid);
+
+    // Zero dimension
+    ASSERT(!InputValidator::ValidateImageDimensions(0, 100).valid);
+    ASSERT(!InputValidator::ValidateImageDimensions(100, 0).valid);
+
+    // Exceeding max
+    ASSERT(!InputValidator::ValidateImageDimensions(65537, 100).valid);
+    ASSERT(!InputValidator::ValidateImageDimensions(100, 65537).valid);
+}
+
+TEST(Test_InputValidator_ThumbnailSize) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(InputValidator::ValidateThumbnailSize(256).valid);
+    ASSERT(InputValidator::ValidateThumbnailSize(4096).valid);
+    ASSERT(!InputValidator::ValidateThumbnailSize(0).valid);
+    ASSERT(!InputValidator::ValidateThumbnailSize(4097).valid);
+}
+
+TEST(Test_MemorySafety_LeakDetection) {
+    // Test the release-build MemoryLeakDetector with atomic counters
+    MemoryLeakDetector detector;
+    MemoryLeakDetector::ResetCounter();
+
+    detector.Snapshot();
+    ASSERT(!detector.CheckLeaksSinceSnapshot()); // No change yet
+
+    // Simulate allocations
+    MemoryLeakDetector::TrackAllocation();
+    MemoryLeakDetector::TrackAllocation();
+    ASSERT(detector.CheckLeaksSinceSnapshot()); // Should detect leak
+
+    // Deallocate one — still leaked
+    MemoryLeakDetector::TrackDeallocation();
+    ASSERT(detector.CheckLeaksSinceSnapshot()); // 1 still outstanding
+
+    // Deallocate the other — back to snapshot level
+    MemoryLeakDetector::TrackDeallocation();
+    ASSERT(!detector.CheckLeaksSinceSnapshot()); // Back to zero
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -22034,6 +22156,17 @@ int main() {
     // Production Pipeline V2
     RUN_TEST(TestProductionPipelineV2_Init);
     RUN_TEST(TestProductionPipelineV2_Stages);
+
+    // Security Hardening Tests
+    std::wcout << L"\nSecurity Hardening Tests..." << std::endl;
+    RUN_TEST(Test_SecureAllocator_ZeroOnFree);
+    RUN_TEST(Test_SecureAllocator_SizeLimit);
+    RUN_TEST(Test_InputValidator_PathTraversal);
+    RUN_TEST(Test_InputValidator_NullBytes);
+    RUN_TEST(Test_InputValidator_FileSizeLimit);
+    RUN_TEST(Test_InputValidator_ImageDimensions);
+    RUN_TEST(Test_InputValidator_ThumbnailSize);
+    RUN_TEST(Test_MemorySafety_LeakDetection);
 
     std::wcout << std::endl;
 

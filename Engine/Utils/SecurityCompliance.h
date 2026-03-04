@@ -1127,5 +1127,137 @@ using SBOMGenerator = SBOMDocumentGenerator;
 } // namespace Engine
 } // namespace ExplorerLens
 
+//==============================================================================
+// Section 6 — Runtime Security Hardening
+// Input sanitization, file size enforcement, and rate limiting for decode
+// operations. Prevents DoS via rapid requests in explorer.exe.
+//==============================================================================
+
+#include <atomic>
+#include <mutex>
+
+namespace ExplorerLens {
+namespace Engine {
+
+/// File size limit enforcement for thumbnail decode operations.
+struct FileSizeLimits {
+    static constexpr uint64_t MAX_THUMBNAIL_FILE_SIZE = 4ULL * 1024 * 1024 * 1024; // 4 GB
+    static constexpr uint64_t MAX_ARCHIVE_FILE_SIZE   = 8ULL * 1024 * 1024 * 1024; // 8 GB
+    static constexpr uint32_t MAX_IMAGE_DIMENSION     = 65536;
+    static constexpr uint32_t MAX_THUMBNAIL_PX        = 4096;
+
+    static bool IsFileSizeValid(uint64_t bytes) {
+        return bytes > 0 && bytes <= MAX_THUMBNAIL_FILE_SIZE;
+    }
+
+    static bool IsImageDimensionValid(uint32_t w, uint32_t h) {
+        if (w == 0 || h == 0 || w > MAX_IMAGE_DIMENSION || h > MAX_IMAGE_DIMENSION)
+            return false;
+        // Overflow check for w * h * 4 (RGBA)
+        uint64_t total = static_cast<uint64_t>(w) * static_cast<uint64_t>(h);
+        return total <= (16ULL * 1024 * 1024 * 1024 / 4);
+    }
+};
+
+/// Rate limiter for decode operations.
+/// Prevents DoS by limiting requests per time window.
+class DecodeRateLimiter {
+public:
+    struct Config {
+        uint32_t maxRequestsPerSecond = 200;
+        uint32_t burstSize = 50;
+    };
+
+    static DecodeRateLimiter& Instance() {
+        static DecodeRateLimiter inst;
+        return inst;
+    }
+
+    void Configure(const Config& cfg) {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        m_config = cfg;
+    }
+
+    Config GetConfig() const {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        return m_config;
+    }
+
+    /// Try to acquire a decode permit. Returns true if allowed.
+    bool TryAcquire() {
+        auto now = std::chrono::steady_clock::now();
+        std::lock_guard<std::mutex> lk(m_mutex);
+
+        // Reset window if needed
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            now - m_windowStart).count();
+        if (elapsed >= 1000) {
+            m_windowStart = now;
+            m_requestsInWindow = 0;
+        }
+
+        if (m_requestsInWindow >= m_config.maxRequestsPerSecond) {
+            m_totalRejected++;
+            return false;
+        }
+
+        m_requestsInWindow++;
+        m_totalAccepted++;
+        return true;
+    }
+
+    uint64_t TotalAccepted() const { return m_totalAccepted.load(std::memory_order_relaxed); }
+    uint64_t TotalRejected() const { return m_totalRejected.load(std::memory_order_relaxed); }
+
+    void Reset() {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        m_requestsInWindow = 0;
+        m_totalAccepted.store(0, std::memory_order_relaxed);
+        m_totalRejected.store(0, std::memory_order_relaxed);
+        m_windowStart = std::chrono::steady_clock::now();
+    }
+
+private:
+    DecodeRateLimiter()
+        : m_windowStart(std::chrono::steady_clock::now()) {}
+
+    mutable std::mutex m_mutex;
+    Config m_config;
+    std::chrono::steady_clock::time_point m_windowStart;
+    uint32_t m_requestsInWindow = 0;
+    std::atomic<uint64_t> m_totalAccepted{ 0 };
+    std::atomic<uint64_t> m_totalRejected{ 0 };
+};
+
+/// Path validation for security compliance.
+/// Lightweight checks complementing InputSanitizer / PathTraversalGuard.
+class SecurityPathValidator {
+public:
+    static constexpr size_t MAX_PATH_LEN = 32767;
+
+    /// Reject paths with null bytes, traversal, or excessive length.
+    static bool IsPathSafe(const std::wstring& path) {
+        if (path.empty() || path.size() > MAX_PATH_LEN) return false;
+
+        for (size_t i = 0; i < path.size(); ++i) {
+            if (path[i] == L'\0') return false;
+        }
+
+        // Directory traversal
+        for (size_t i = 0; i + 1 < path.size(); ++i) {
+            if (path[i] == L'.' && path[i + 1] == L'.') {
+                if (i + 2 >= path.size()) return false;
+                wchar_t c = path[i + 2];
+                if (c == L'/' || c == L'\\') return false;
+            }
+        }
+
+        return true;
+    }
+};
+
+} // namespace Engine
+} // namespace ExplorerLens
+
 // Trailing include — AuditLogger has its own .cpp, kept separate
 #include "AuditLogger.h"
