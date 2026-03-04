@@ -3,6 +3,7 @@
 // Supports P1-P6 magic, PFM float format
 
 #include "PPMDecoder.h"
+#include "DecoderSecurityHardening.h"
 #include <fstream>
 #include <cstring>
 #include <cmath>
@@ -104,9 +105,13 @@ void PPMDecoder::SkipWhitespaceAndComments(const char*& p, const char* end) {
 int PPMDecoder::ReadASCIIInt(const char*& p, const char* end) {
     SkipWhitespaceAndComments(p, end);
     int val = 0;
+    int digits = 0;
     while (p < end && *p >= '0' && *p <= '9') {
+        // Security: Prevent integer overflow during parsing (max ~10 digits for int)
+        if (digits >= 10) return val;
         val = val * 10 + (*p - '0');
         p++;
+        digits++;
     }
     return val;
 }
@@ -121,12 +126,23 @@ HRESULT PPMDecoder::DecodePPM(const uint8_t* data, size_t size, HBITMAP* phBitma
     int height = ReadASCIIInt(p, end);
     int maxval = ReadASCIIInt(p, end);
 
-    if (width <= 0 || height <= 0 || width > 16384 || height > 16384 || maxval <= 0) return E_FAIL;
+    if (width <= 0 || height <= 0 || maxval <= 0) return E_FAIL;
+
+    // Security: Dimension and overflow validation
+    if (!Security::ValidateDimensions(static_cast<uint32_t>(width), static_cast<uint32_t>(height)))
+        return E_FAIL;
+
+    // Security: Validate maxval range
+    if (maxval > 65535) return E_FAIL;
 
     // Skip single whitespace after maxval
     if (p < end && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')) p++;
 
-    auto bgra = std::make_unique<uint8_t[]>(width * height * 4);
+    // Security: Safe pixel buffer allocation
+    size_t bgraSize = 0;
+    if (!Security::ValidatePixelAllocation(static_cast<uint32_t>(width),
+        static_cast<uint32_t>(height), 4, bgraSize)) return E_FAIL;
+    auto bgra = std::make_unique<uint8_t[]>(bgraSize);
 
     if (binary) {
         // P6: binary RGB
@@ -168,10 +184,20 @@ HRESULT PPMDecoder::DecodePGM(const uint8_t* data, size_t size, HBITMAP* phBitma
     int height = ReadASCIIInt(p, end);
     int maxval = ReadASCIIInt(p, end);
 
-    if (width <= 0 || height <= 0 || width > 16384 || height > 16384 || maxval <= 0) return E_FAIL;
+    if (width <= 0 || height <= 0 || maxval <= 0) return E_FAIL;
+
+    // Security: Dimension validation
+    if (!Security::ValidateDimensions(static_cast<uint32_t>(width), static_cast<uint32_t>(height)))
+        return E_FAIL;
+    if (maxval > 65535) return E_FAIL;
+
     if (p < end && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')) p++;
 
-    auto bgra = std::make_unique<uint8_t[]>(width * height * 4);
+    // Security: Safe pixel buffer allocation
+    size_t bgraSize = 0;
+    if (!Security::ValidatePixelAllocation(static_cast<uint32_t>(width),
+        static_cast<uint32_t>(height), 4, bgraSize)) return E_FAIL;
+    auto bgra = std::make_unique<uint8_t[]>(bgraSize);
 
     if (binary) {
         for (int i = 0; i < width * height; ++i) {
@@ -208,10 +234,20 @@ HRESULT PPMDecoder::DecodePBM(const uint8_t* data, size_t size, HBITMAP* phBitma
     int height = ReadASCIIInt(p, end);
     // PBM has no maxval
 
-    if (width <= 0 || height <= 0 || width > 16384 || height > 16384) return E_FAIL;
+    if (width <= 0 || height <= 0) return E_FAIL;
+
+    // Security: Dimension validation
+    if (!Security::ValidateDimensions(static_cast<uint32_t>(width), static_cast<uint32_t>(height)))
+        return E_FAIL;
+
+    // PBM has no maxval
     if (p < end && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')) p++;
 
-    auto bgra = std::make_unique<uint8_t[]>(width * height * 4);
+    // Security: Safe pixel buffer allocation
+    size_t bgraSize = 0;
+    if (!Security::ValidatePixelAllocation(static_cast<uint32_t>(width),
+        static_cast<uint32_t>(height), 4, bgraSize)) return E_FAIL;
+    auto bgra = std::make_unique<uint8_t[]>(bgraSize);
 
     if (binary) {
         int rowBytes = (width + 7) / 8;
@@ -274,7 +310,11 @@ HRESULT PPMDecoder::DecodePFM(const uint8_t* data, size_t size, HBITMAP* phBitma
 
     if (p < end && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')) p++;
 
-    if (width <= 0 || height <= 0 || width > 16384 || height > 16384) return E_FAIL;
+    if (width <= 0 || height <= 0) return E_FAIL;
+
+    // Security: Dimension validation
+    if (!Security::ValidateDimensions(static_cast<uint32_t>(width), static_cast<uint32_t>(height)))
+        return E_FAIL;
 
     int channels = color ? 3 : 1;
     const float* fp = reinterpret_cast<const float*>(p);
