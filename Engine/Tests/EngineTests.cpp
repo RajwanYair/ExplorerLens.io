@@ -15402,11 +15402,104 @@ TEST(Test_PlugSandbox_Validate) {
 
 TEST(Test_MTC_Create) {
     using namespace ExplorerLens::Cache;
+    // Verify StorageTier enum values
     ASSERT(static_cast<int>(StorageTier::Memory) == 0);
+    ASSERT(static_cast<int>(StorageTier::SQLite) == 1);
+    ASSERT(static_cast<int>(StorageTier::Disk) == 2);
+    ASSERT(static_cast<int>(StorageTier::Network) == 3);
+    // TierStatistics hitRate
+    TierStatistics ts{};
+    ts.tier = StorageTier::Memory;
+    ASSERT(ts.hitRate() == 0.0); // 0/0 = 0
+    ts.hitCount = 90;
+    ts.missCount = 10;
+    ASSERT(ts.hitRate() == 0.9);
 }
 TEST(Test_MTC_Tiers) {
     using namespace ExplorerLens::Cache;
-    ASSERT(static_cast<int>(StorageTier::Memory) != static_cast<int>(StorageTier::Disk));
+    // MemoryCacheTier: construct, put, get, exists, remove
+    MemoryCacheTier mem(100, 1024 * 1024);
+    ASSERT(mem.GetTier() == StorageTier::Memory);
+    ASSERT(mem.GetName() != nullptr);
+
+    std::vector<uint8_t> data = { 0x89, 0x50, 0x4E, 0x47 }; // PNG magic
+    ASSERT(mem.Put(L"key1", data) == S_OK);
+    ASSERT(mem.Exists(L"key1"));
+    ASSERT(!mem.Exists(L"key_missing"));
+
+    std::vector<uint8_t> out;
+    ASSERT(mem.Get(L"key1", out) == S_OK);
+    ASSERT(out.size() == 4);
+    ASSERT(out[0] == 0x89);
+
+    // Miss returns S_FALSE
+    std::vector<uint8_t> out2;
+    ASSERT(mem.Get(L"no_such_key", out2) == S_FALSE);
+
+    // Remove
+    ASSERT(mem.Remove(L"key1") == S_OK);
+    ASSERT(!mem.Exists(L"key1"));
+    ASSERT(mem.Remove(L"key1") == S_FALSE); // Already removed
+
+    // Stats
+    TierStatistics stats = mem.GetStats();
+    ASSERT(stats.tier == StorageTier::Memory);
+    ASSERT(stats.hitCount >= 1);
+    ASSERT(stats.missCount >= 1);
+    ASSERT(stats.insertCount >= 1);
+}
+TEST(Test_MTC_MemoryEviction) {
+    using namespace ExplorerLens::Cache;
+    // Tiny capacity: 3 entries max
+    MemoryCacheTier mem(3, 1024 * 1024);
+    std::vector<uint8_t> data = { 1, 2, 3, 4 };
+    mem.Put(L"a", data);
+    mem.Put(L"b", data);
+    mem.Put(L"c", data);
+    ASSERT(mem.Exists(L"a"));
+    ASSERT(mem.Exists(L"b"));
+    ASSERT(mem.Exists(L"c"));
+    // Adding a 4th entry should evict the oldest
+    mem.Put(L"d", data);
+    ASSERT(mem.Exists(L"d"));
+    // One of a/b/c should have been evicted
+    TierStatistics stats = mem.GetStats();
+    ASSERT(stats.evictionCount >= 1);
+    ASSERT(stats.entryCount <= 3);
+}
+TEST(Test_MTC_Manager) {
+    using namespace ExplorerLens::Cache;
+    MultiTierCacheManager mgr;
+    // Add only memory tier for testing (avoid disk I/O)
+    mgr.AddTier(std::make_unique<MemoryCacheTier>(100, 1024 * 1024));
+
+    std::vector<uint8_t> data = { 0xDE, 0xAD, 0xBE, 0xEF };
+    ASSERT(mgr.Put(L"test_key", data) == S_OK);
+    ASSERT(mgr.MayExist(L"test_key"));
+
+    std::vector<uint8_t> out;
+    ASSERT(mgr.Get(L"test_key", out) == S_OK);
+    ASSERT(out.size() == 4);
+    ASSERT(out[0] == 0xDE);
+
+    // Non-existent key — Bloom filter may or may not reject
+    std::vector<uint8_t> out2;
+    HRESULT hr = mgr.Get(L"nonexistent_key_xyz_12345", out2);
+    ASSERT(hr == S_FALSE);
+
+    // Dashboard
+    auto dash = mgr.GetDashboard();
+    ASSERT(dash.tierStats.size() == 1);
+    ASSERT(dash.bloomFilterChecks >= 1);
+    ASSERT(dash.totalEntriesAllTiers >= 1);
+
+    // Remove
+    ASSERT(mgr.Remove(L"test_key") == S_OK);
+
+    // ResetStats
+    mgr.ResetStats();
+    auto dash2 = mgr.GetDashboard();
+    ASSERT(dash2.bloomFilterChecks == 0);
 }
 TEST(Test_MTC_BloomFilter) {
     using namespace ExplorerLens::Cache;
@@ -21333,6 +21426,8 @@ int main() {
     std::wcout << L"\nMulti-Tier Cache Tests:" << std::endl;
     RUN_TEST(Test_MTC_Create);
     RUN_TEST(Test_MTC_Tiers);
+    RUN_TEST(Test_MTC_MemoryEviction);
+    RUN_TEST(Test_MTC_Manager);
     RUN_TEST(Test_MTC_BloomFilter);
     RUN_TEST(Test_MTC_Policy);
 
