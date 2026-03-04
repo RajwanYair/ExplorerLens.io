@@ -43,7 +43,7 @@ public:
     /// Current number of live allocations
     int64_t LiveAllocationCount() const noexcept {
         return static_cast<int64_t>(m_allocationCount.load(std::memory_order_relaxed)) -
-               static_cast<int64_t>(m_deallocationCount.load(std::memory_order_relaxed));
+            static_cast<int64_t>(m_deallocationCount.load(std::memory_order_relaxed));
     }
 
     /// Total number of allocations ever made
@@ -59,7 +59,7 @@ public:
     /// Total bytes currently live
     int64_t LiveBytes() const noexcept {
         return static_cast<int64_t>(m_totalAllocatedBytes.load(std::memory_order_relaxed)) -
-               static_cast<int64_t>(m_totalDeallocatedBytes.load(std::memory_order_relaxed));
+            static_cast<int64_t>(m_totalDeallocatedBytes.load(std::memory_order_relaxed));
     }
 
     /// Snapshot the current allocation count (for leak detection)

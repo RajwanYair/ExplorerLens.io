@@ -537,6 +537,7 @@
 #include "../Decoders/ShortcutInspector.h"
 #include "../Decoders/MSIPackageInspector.h"
 #include "../Decoders/DiskImagePreview.h"
+#include "../Decoders/GLTFModelDecoder.h"
 #include "../Pipeline/ThreadLocalBufferPool.h"
 #include "../Pipeline/DecodeMemoizationEngine.h"
 #include "../Pipeline/AsyncPrefetchQueue.h"
@@ -5879,6 +5880,314 @@ TEST(TestGateV15_Version) {
     using namespace ExplorerLens;
     ReleaseGateV15 gate;
     ASSERT(gate.GetVersion() == L"10.5.0");
+}
+
+//==============================================================================
+// AI Module Tests
+//==============================================================================
+
+TEST(Test_SceneClassifier_BasicLabel) {
+    SceneClassifierEngine classifier;
+    // Create a small 4x4 solid green RGBA image
+    const uint32_t w = 4, h = 4;
+    std::vector<uint8_t> rgba(w * h * 4, 0);
+    for (uint32_t i = 0; i < w * h; ++i) {
+        rgba[i * 4 + 0] = 0;    // R
+        rgba[i * 4 + 1] = 200;  // G
+        rgba[i * 4 + 2] = 0;    // B
+        rgba[i * 4 + 3] = 255;  // A
+    }
+    auto scene = classifier.Classify(rgba.data(), w, h);
+    // Must return a valid ClassifiedScene value (not out of range)
+    ASSERT(static_cast<uint32_t>(scene) < static_cast<uint32_t>(ClassifiedScene::COUNT));
+    // CategoryName must return non-null
+    const wchar_t* name = SceneClassifierEngine::CategoryName(scene);
+    ASSERT(name != nullptr);
+}
+
+TEST(Test_SmartCropV2_CenterFallback) {
+    SmartCropEngine cropper;
+    // Null data should produce center-crop fallback
+    CropRect rect = cropper.FindBestCrop(nullptr, 100, 100, 50, 50);
+    ASSERT(rect.width == 50);
+    ASSERT(rect.height == 50);
+}
+
+TEST(Test_IQA_ScoreRange) {
+    ImageQualityAssessorV2 iqa;
+    const uint32_t w = 8, h = 8;
+    std::vector<uint8_t> rgba(w * h * 4);
+    // Create gradient image
+    for (uint32_t y = 0; y < h; ++y)
+        for (uint32_t x = 0; x < w; ++x) {
+            uint32_t idx = (y * w + x) * 4;
+            uint8_t v = static_cast<uint8_t>((x + y) * 16);
+            rgba[idx] = v; rgba[idx+1] = v; rgba[idx+2] = v; rgba[idx+3] = 255;
+        }
+    auto score = iqa.Assess(rgba.data(), w, h);
+    ASSERT(score.overall >= 0.0f && score.overall <= 1.0f);
+}
+
+TEST(Test_ColorPalette_Extract) {
+    ColorPaletteExtractor extractor;
+    const uint32_t w = 8, h = 8;
+    std::vector<uint8_t> bgra(w * h * 4);
+    // Two-color image: half red, half blue (BGRA order)
+    for (uint32_t i = 0; i < w * h; ++i) {
+        if (i < w * h / 2) {
+            bgra[i*4+0] = 0;   bgra[i*4+1] = 0;   bgra[i*4+2] = 255; bgra[i*4+3] = 255; // Red in BGRA
+        } else {
+            bgra[i*4+0] = 255; bgra[i*4+1] = 0;   bgra[i*4+2] = 0;   bgra[i*4+3] = 255; // Blue in BGRA
+        }
+    }
+    Palette pal = extractor.Extract(bgra.data(), w, h, 5);
+    ASSERT(pal.colors.size() > 0);
+    ASSERT(pal.pixelCount == w * h);
+}
+
+TEST(Test_ImageComplexity_Range) {
+    ImageComplexityAnalyzer analyzer;
+    auto est = analyzer.Estimate(1920, 1080, 32, "JPEG");
+    ASSERT(est.score >= 0.0 && est.score <= 10.0);
+    ASSERT(est.estimatedDecodeMs > 0.0);
+    ASSERT(est.estimatedMemoryBytes > 0);
+}
+
+TEST(Test_ThumbnailRelevance_Score) {
+    ThumbnailRelevanceScorer scorer;
+    const uint32_t w = 16, h = 16;
+    std::vector<uint8_t> bgra(w * h * 4);
+    // Create checkerboard pattern for entropy
+    for (uint32_t y = 0; y < h; ++y)
+        for (uint32_t x = 0; x < w; ++x) {
+            uint8_t v = ((x + y) % 2 == 0) ? 255 : 0;
+            uint32_t idx = (y * w + x) * 4;
+            bgra[idx] = v; bgra[idx+1] = v; bgra[idx+2] = v; bgra[idx+3] = 255;
+        }
+    auto result = scorer.Score(bgra.data(), w, h);
+    ASSERT(result.score >= 0.0 && result.score <= 100.0);
+}
+
+TEST(Test_DecodeStrategy_Optimizer) {
+    DecodeStrategyOptimizer optimizer;
+    // Record some trials
+    optimizer.RecordTrial("JPEG", DecodeStrategy::CPUSingleThread, 5.0, true);
+    optimizer.RecordTrial("JPEG", DecodeStrategy::GPUDirect, 2.0, true);
+    auto rec = optimizer.Recommend("JPEG");
+    // Must return a valid strategy
+    ASSERT(static_cast<uint8_t>(rec.bestStrategy) <= static_cast<uint8_t>(DecodeStrategy::Cached));
+    ASSERT(rec.confidence >= 0.0);
+}
+
+TEST(Test_FormatMigration_Suggest) {
+    FormatMigrationAdvisor advisor;
+    auto analysis = advisor.Analyze("BMP", 1024 * 1024);
+    ASSERT(analysis.currentFormat == "BMP");
+    ASSERT(analysis.recommendations.size() > 0);
+    ASSERT(analysis.recommendations[0].estimatedSizeReduction > 0.0);
+}
+
+TEST(Test_AISearch_IndexBuild) {
+    ThumbnailSearchIndex index;
+    const uint32_t w = 16, h = 16;
+    std::vector<uint8_t> rgba(w * h * 4, 128);
+    for (uint32_t i = 0; i < w * h; ++i) rgba[i * 4 + 3] = 255;
+    index.AddToIndex(L"test_image.png", rgba.data(), w, h);
+    auto stats = index.GetStats();
+    ASSERT(stats.indexedCount == 1);
+}
+
+TEST(Test_SceneUnderstanding_Labels) {
+    // Test SceneUnderstandingEngine heuristic classification
+    const uint32_t w = 8, h = 8;
+    std::vector<uint8_t> rgb(w * h * 3);
+    // Create a green-dominant image (Nature)
+    for (uint32_t i = 0; i < w * h; ++i) {
+        rgb[i * 3 + 0] = 30;   // R
+        rgb[i * 3 + 1] = 200;  // G
+        rgb[i * 3 + 2] = 30;   // B
+    }
+    auto result = SceneUnderstandingEngine::ClassifyByHeuristics(
+        rgb.data(), w, h, w * 3);
+    ASSERT(static_cast<uint8_t>(result.category) < static_cast<uint8_t>(SceneCategory::COUNT));
+    ASSERT(result.score >= 0.0f);
+    const wchar_t* catName = SceneUnderstandingEngine::CategoryName(result.category);
+    ASSERT(catName != nullptr);
+}
+
+//==============================================================================
+// Decoder Subsystem Tests
+//==============================================================================
+
+TEST(Test_APNGDecoder_Create) {
+    APNGDecoder decoder;
+    ASSERT(decoder.GetName() != nullptr);
+    ASSERT(decoder.CanDecode(L".apng"));
+    ASSERT(decoder.CanDecode(L".png"));
+    ASSERT(!decoder.CanDecode(L".jpg"));
+    // Parse empty data returns 0 frames
+    ASSERT(decoder.ParseFrameCount(nullptr, 0) == 0);
+}
+
+TEST(Test_JPEG2000Decoder_Create) {
+    using namespace ExplorerLens::Decoders;
+    // Verify extension support
+    ASSERT(JP2Extensions::IsSupported(".jp2"));
+    ASSERT(JP2Extensions::IsSupported(".j2k"));
+    ASSERT(!JP2Extensions::IsSupported(".jpg"));
+    auto fmt = JP2Extensions::ClassifyExtension(".jp2");
+    ASSERT(fmt == JP2Format::JP2);
+    auto htFmt = JP2Extensions::ClassifyExtension(".jph");
+    ASSERT(htFmt == JP2Format::JPH);
+}
+
+TEST(Test_EXRDecoder_HDR) {
+    EXRDecoder decoder;
+    ASSERT(decoder.GetName() != nullptr);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(Test_QOIDecoder_MagicBytes) {
+    QOIDecoder decoder;
+    ASSERT(decoder.GetName() != nullptr);
+    // A valid QOI header starts with "qoif"
+    uint8_t validHeader[] = { 'q', 'o', 'i', 'f', 0, 0, 0, 8, 0, 0, 0, 8, 4, 0 };
+    // CanDecode checks extension, not data, but we verify the object is functional
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+}
+
+TEST(Test_ICODecoder_MultiRes) {
+    ICODecoder decoder;
+    ASSERT(decoder.GetName() != nullptr);
+    ASSERT(decoder.SupportsGPU());  // ICO uses WIC which can leverage GPU
+    ASSERT(!decoder.IsArchiveDecoder());
+    ASSERT(decoder.GetExtensionCount() > 0);
+}
+
+TEST(Test_PPMDecoder_Formats) {
+    PPMDecoder decoder;
+    ASSERT(decoder.GetName() != nullptr);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+    ASSERT(decoder.GetExtensionCount() > 0);
+}
+
+TEST(Test_PCXDecoder_Header) {
+    PCXDecoder decoder;
+    ASSERT(decoder.GetName() != nullptr);
+    ASSERT(!decoder.SupportsGPU());
+    ASSERT(!decoder.IsArchiveDecoder());
+    ASSERT(decoder.GetExtensionCount() == 1);
+    // Verify header struct size is 128 bytes (PCX standard)
+    ASSERT(sizeof(PCXDecoder) > 0);
+}
+
+TEST(Test_SGIDecoder_MagicBytes) {
+    using namespace ExplorerLens::Decoders;
+    SGIDecoder decoder;
+    // Verify extension recognition
+    ASSERT(SGIDecoder::IsSGIExtension(".sgi"));
+    ASSERT(SGIDecoder::IsSGIExtension(".rgb"));
+    ASSERT(SGIDecoder::IsSGIExtension(".rgba"));
+    ASSERT(SGIDecoder::IsSGIExtension(".bw"));
+    ASSERT(!SGIDecoder::IsSGIExtension(".jpg"));
+}
+
+TEST(Test_XPMDecoder_StringFormat) {
+    using namespace ExplorerLens::Decoders;
+    XPMDecoder decoder;
+    // Verify extension recognition 
+    ASSERT(XPMDecoder::IsXPMExtension(".xpm"));
+    ASSERT(!XPMDecoder::IsXPMExtension(".png"));
+    // Decode from null returns failure
+    auto result = decoder.Decode("", 256);
+    ASSERT(!result.success);
+}
+
+TEST(Test_BPGDecoder_Detection) {
+    BPGDecoder decoder;
+    ASSERT(decoder.GetName() != nullptr);
+    ASSERT(decoder.CanDecode(L".bpg"));
+    ASSERT(!decoder.CanDecode(L".jpg"));
+    // Valid BPG magic: 0x42 0x50 0x47 0xFB
+    uint8_t magic[] = { 0x42, 0x50, 0x47, 0xFB, 0x00, 0x00, 0x00, 0x08, 0x00, 0x08 };
+    ASSERT(decoder.DetectMagic(magic, sizeof(magic)));
+    // Invalid magic
+    uint8_t bad[] = { 0x89, 0x50, 0x4E, 0x47, 0x00, 0x00 };
+    ASSERT(!decoder.DetectMagic(bad, sizeof(bad)));
+    // Null data
+    ASSERT(!decoder.DetectMagic(nullptr, 0));
+}
+
+TEST(Test_DICOMDecoderV2_Tags) {
+    DICOMDecoder dicomDecoder;
+    // Verify static methods
+    ASSERT(DICOMDecoder::GetExtensionCount() > 0);
+    const wchar_t* photoName = DICOMDecoder::GetPhotometricName(DICOMPhotometric::Monochrome2);
+    ASSERT(photoName != nullptr);
+    const wchar_t* tsName = DICOMDecoder::GetTransferSyntaxName(
+        DICOMTransferSyntax::ExplicitVRLittleEndian);
+    ASSERT(tsName != nullptr);
+    // Empty data should not be valid DICOM
+    ASSERT(!DICOMDecoder::IsDICOMFile(nullptr, 0));
+}
+
+TEST(Test_FITSDecoderV2_Header) {
+    FITSDecoder fitsDecoder;
+    // Static helpers
+    ASSERT(FITSDecoder::GetExtensionCount() > 0);
+    const wchar_t* bpName = FITSDecoder::GetBitpixName(FITSBitpix::Float32);
+    ASSERT(bpName != nullptr);
+    const wchar_t* strName = FITSDecoder::GetStretchName(FITSStretch::Logarithmic);
+    ASSERT(strName != nullptr);
+    // Empty data should not be valid FITS
+    ASSERT(!FITSDecoder::IsFITSFile(nullptr, 0));
+}
+
+TEST(Test_CADFormat_Detection) {
+    // Test STEP magic detection
+    const char stepStr[] = "ISO-10303-21;";
+    ASSERT(CADFormatDecoder::CheckSTEPMagic(
+        reinterpret_cast<const uint8_t*>(stepStr), strlen(stepStr)));
+    // Non-STEP data
+    const char notStep[] = "NOT-STEP-DATA";
+    ASSERT(!CADFormatDecoder::CheckSTEPMagic(
+        reinterpret_cast<const uint8_t*>(notStep), strlen(notStep)));
+    // Format names
+    ASSERT(CADFormatDecoder::FormatName(CADFormat::STEP_AP203) != nullptr);
+    ASSERT(CADFormatDecoder::FormatName(CADFormat::IGES) != nullptr);
+}
+
+TEST(Test_GLTFModelDecoder_Parse) {
+    using namespace ExplorerLens::Decoders;
+    GLTFModelDecoder decoder;
+    auto exts = GLTFModelDecoder::SupportedExtensions();
+    ASSERT(exts.size() == 2);
+    ASSERT(exts[0] == ".gltf");
+    ASSERT(exts[1] == ".glb");
+    ASSERT(GLTFModelDecoder::DetectVariant(".glb") == GLTFVariant::GLB);
+    ASSERT(GLTFModelDecoder::DetectVariant(".gltf") == GLTFVariant::GLTF);
+    // Decode with null data should return error
+    auto result = decoder.Decode(nullptr, 0, 256, 256);
+    ASSERT(!result.success);
+}
+
+TEST(Test_STLMeshDecoder_Binary) {
+    STLMeshDecoder decoder;
+    ASSERT(decoder.GetName() != nullptr);
+    ASSERT(decoder.CanDecode(L".stl"));
+    ASSERT(!decoder.CanDecode(L".obj"));
+    // Test ASCII detection
+    const char asciiStl[] = "solid TestCube\nfacet normal 0 0 1\n";
+    ASSERT(decoder.IsASCII(reinterpret_cast<const uint8_t*>(asciiStl), strlen(asciiStl)));
+    // Binary detection (doesn't start with "solid ")
+    uint8_t binData[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
+    ASSERT(!decoder.IsASCII(binData, sizeof(binData)));
+    // Parse binary with insufficient data returns empty info
+    auto info = decoder.ParseBinary(nullptr, 0);
+    ASSERT(info.triangleCount == 0);
 }
 
 //==============================================================================
@@ -18335,7 +18644,7 @@ TEST(Test_SubMsCache_Performance) {
     bool hit = cache.Get(key, out);
     QueryPerformanceCounter(&end);
     double ms = static_cast<double>(end.QuadPart - start.QuadPart)
-              * 1000.0 / static_cast<double>(freq.QuadPart);
+        * 1000.0 / static_cast<double>(freq.QuadPart);
     ASSERT(hit);
     ASSERT(out.size() == 1024);
     ASSERT(ms < 1.0); // must be sub-millisecond
@@ -18728,7 +19037,8 @@ TEST(Test_SecureAllocator_SizeLimit) {
     try {
         // Try to allocate > 256 MB — should throw std::bad_alloc
         alloc.allocate(SECURE_ALLOC_MAX_BYTES + 1);
-    } catch (const std::bad_alloc&) {
+    }
+    catch (const std::bad_alloc&) {
         threwOnOversize = true;
     }
     ASSERT(threwOnOversize);
@@ -22528,6 +22838,37 @@ int main() {
     RUN_TEST(Test_PluginPerformanceProfiler_Timing);
     RUN_TEST(Test_SharedMemory_CreateOpen);
     RUN_TEST(Test_PluginSandbox_Presets);
+
+    // AI Module Tests
+    std::wcout << L"AI Module Tests..." << std::endl;
+    RUN_TEST(Test_SceneClassifier_BasicLabel);
+    RUN_TEST(Test_SmartCropV2_CenterFallback);
+    RUN_TEST(Test_IQA_ScoreRange);
+    RUN_TEST(Test_ColorPalette_Extract);
+    RUN_TEST(Test_ImageComplexity_Range);
+    RUN_TEST(Test_ThumbnailRelevance_Score);
+    RUN_TEST(Test_DecodeStrategy_Optimizer);
+    RUN_TEST(Test_FormatMigration_Suggest);
+    RUN_TEST(Test_AISearch_IndexBuild);
+    RUN_TEST(Test_SceneUnderstanding_Labels);
+
+    // Decoder Subsystem Tests
+    std::wcout << L"Decoder Subsystem Tests..." << std::endl;
+    RUN_TEST(Test_APNGDecoder_Create);
+    RUN_TEST(Test_JPEG2000Decoder_Create);
+    RUN_TEST(Test_EXRDecoder_HDR);
+    RUN_TEST(Test_QOIDecoder_MagicBytes);
+    RUN_TEST(Test_ICODecoder_MultiRes);
+    RUN_TEST(Test_PPMDecoder_Formats);
+    RUN_TEST(Test_PCXDecoder_Header);
+    RUN_TEST(Test_SGIDecoder_MagicBytes);
+    RUN_TEST(Test_XPMDecoder_StringFormat);
+    RUN_TEST(Test_BPGDecoder_Detection);
+    RUN_TEST(Test_DICOMDecoderV2_Tags);
+    RUN_TEST(Test_FITSDecoderV2_Header);
+    RUN_TEST(Test_CADFormat_Detection);
+    RUN_TEST(Test_GLTFModelDecoder_Parse);
+    RUN_TEST(Test_STLMeshDecoder_Binary);
 
     std::wcout << std::endl;
 

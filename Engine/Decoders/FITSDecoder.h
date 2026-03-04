@@ -5,4 +5,3 @@
 //
 #pragma once
 #include "FITSDecoderV2.h"
-

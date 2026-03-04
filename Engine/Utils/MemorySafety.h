@@ -212,8 +212,8 @@ public:
         // Saturating decrement — avoid underflow
         uint64_t prev = s_allocationCounter.load(std::memory_order_relaxed);
         while (prev > 0 &&
-               !s_allocationCounter.compare_exchange_weak(
-                   prev, prev - 1, std::memory_order_relaxed)) {
+            !s_allocationCounter.compare_exchange_weak(
+                prev, prev - 1, std::memory_order_relaxed)) {
         }
     }
 

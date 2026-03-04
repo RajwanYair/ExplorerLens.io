@@ -1142,9 +1142,9 @@ namespace Engine {
 /// File size limit enforcement for thumbnail decode operations.
 struct FileSizeLimits {
     static constexpr uint64_t MAX_THUMBNAIL_FILE_SIZE = 4ULL * 1024 * 1024 * 1024; // 4 GB
-    static constexpr uint64_t MAX_ARCHIVE_FILE_SIZE   = 8ULL * 1024 * 1024 * 1024; // 8 GB
-    static constexpr uint32_t MAX_IMAGE_DIMENSION     = 65536;
-    static constexpr uint32_t MAX_THUMBNAIL_PX        = 4096;
+    static constexpr uint64_t MAX_ARCHIVE_FILE_SIZE = 8ULL * 1024 * 1024 * 1024; // 8 GB
+    static constexpr uint32_t MAX_IMAGE_DIMENSION = 65536;
+    static constexpr uint32_t MAX_THUMBNAIL_PX = 4096;
 
     static bool IsFileSizeValid(uint64_t bytes) {
         return bytes > 0 && bytes <= MAX_THUMBNAIL_FILE_SIZE;
@@ -1219,7 +1219,8 @@ public:
 
 private:
     DecodeRateLimiter()
-        : m_windowStart(std::chrono::steady_clock::now()) {}
+        : m_windowStart(std::chrono::steady_clock::now()) {
+    }
 
     mutable std::mutex m_mutex;
     Config m_config;
