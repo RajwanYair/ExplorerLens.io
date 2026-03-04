@@ -1,0 +1,12 @@
+/* XPM */
+static char *fourcolor_xpm[] = {
+"4 4 4 1",
+"R c #FF0000",
+"G c #00FF00",
+"B c #0000FF",
+"Y c #FFFF00",
+"RGBY",
+"GBYG",
+"BYRB",
+"YRGB"
+};
