@@ -164,7 +164,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 **Current Version:** 15.0.0 "Zenith"
 **Build Status:** 0 errors / 0 warnings
-**Test Status:** 1,187 unit tests, 5 benchmarks (100% pass rate)
+**Test Status:** 2,408 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Zenith — GPU-accelerated thumbnails for 200+ formats across 25 decoders
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.

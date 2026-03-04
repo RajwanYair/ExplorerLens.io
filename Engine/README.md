@@ -188,7 +188,7 @@ cmake --build --preset default-release -j 8
 
 ## Testing
 
-~1,187 unit tests + 5 benchmark suites. 100% pass rate.
+~2,408 unit tests + 5 benchmark suites. 100% pass rate.
 
 ```powershell
 ctest --test-dir build -C Release --output-on-failure

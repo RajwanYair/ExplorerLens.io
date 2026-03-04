@@ -85,8 +85,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Version:** 14.0.0 "Apex" → 15.0.0 "Zenith"
-- **Total unit tests:** 2282
+- **Total unit tests:** 2282 → 2408
 - **Codename:** Apex → Zenith
+
+### Improvements (Sprint 17-34)
+
+#### Build & DevOps (Sprint 17)
+- Log-based build monitoring (`build-and-log.bat`, `test-and-log.bat`) — no more terminal kills
+- `.github/standards/shell-integration.md` — documented shell/build integration rules
+- VS Code settings hardened: terminal confirmOnKill, markdownlint suppressions
+
+#### Stub & Implementation Fixes (Sprint 18)
+- ETWTraceProvider — atomic counters for event emission
+- ProductionPipelineV2 — real system probing (CPU, GPU, memory, disk)
+- SIMDDispatchRouter — real SSE/AVX2 intrinsics (ColorConvert, AlphaPremultiply)
+- GetCurrentTimestamp — chrono-based implementations in 3 files
+
+#### Project Icons (Sprint 19-20)
+- Magnifying glass icon (6 resolutions: 16-256px, blue gradient lens, dark frame)
+- Updated LENSShell, LENSManager, NSIS, Inno Setup, and MSIX assets
+
+#### Codebase Consolidation (Sprint 21-22)
+- 3 duplicate headers converted to forwarding includes (-573 net lines)
+- Version proliferation confirmed clean — all V1/V2/V3 already forwarding
+
+#### Security Hardening (Sprint 23, 31-32)
+- `SecureAllocator.h` — STL-compatible allocator with zero-fill, 256MB limit, atomic tracking
+- `InputValidator.h` — centralized path/dimension/size validation
+- `DecoderSecurityHardening.h` — safe integer math, dimension limits, magic validation
+- Enhanced `SecurityCompliance.h` — DecodeRateLimiter, FileSizeLimits, PathValidator
+- Replaced `MemorySafety.h` stubs with real MemoryLeakDetector
+- Hardened 9 decoders: QOI, TGA, PPM, PSD, PCX, HDR, SGI, Farbfeld, VTF
+
+#### Test Coverage (Sprint 24-28, 33-34)
+- 32 cache/pipeline/memory/plugin tests (Sprint 24)
+- 25 AI + decoder tests (Sprint 25-26)
+- 22 GPU/cloud/enterprise/performance tests (Sprint 27-28)
+- 29 utility module tests (Sprint 33-34)
+- Total: 126 new tests added across all subsystems
+
+#### Test Corpus (Sprint 29-30)
+- 138 test fixture files across 91 directories (44.6 KB)
+- Formats: SVG, PPM/PGM/PBM, XPM, BMP, PNG, QOI, TGA, TIFF, GIF, ZIP, HTML
+- Valid samples + corner cases + invalid/corrupt variants
 
 ### Removed
 - 6 obsolete documentation files
