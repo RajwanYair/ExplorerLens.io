@@ -6,6 +6,7 @@
 // Throttle, Terminate. Memory exceeding quota by 20% triggers throttling,
 // 50% triggers termination. Each plugin can receive a custom quota or
 // inherit the default. Usage is tracked per-plugin for monitoring.
+// Supports ResourceBudget, ResourceCheckpoint, and violation callbacks.
 //
 // Thread-safe singleton.
 
@@ -15,9 +16,12 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <chrono>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -41,6 +45,7 @@ struct PluginResourceUsage {
     uint32_t     fileHandles = 0;
     uint32_t     threadCount = 0;
     uint64_t     diskIOBytes = 0;
+    uint32_t     allocationCount = 0;
     bool         overQuota = false;
     bool         terminated = false;
 };
@@ -59,6 +64,40 @@ struct PluginResourceLimiterStats {
     uint32_t pluginsOverQuota = 0;
 };
 
+// ResourceBudget — pre-allocated budget for a plugin session
+struct ResourceBudget {
+    std::wstring pluginId;
+    uint64_t memoryBudget = 128ULL * 1024 * 1024;  // 128 MB default
+    uint64_t cpuTimeBudgetMs = 15000;               // 15s
+    uint32_t fileHandleBudget = 32;
+    uint32_t threadBudget = 4;
+    uint64_t memoryUsed = 0;
+    uint64_t cpuTimeUsedMs = 0;
+    uint32_t fileHandlesUsed = 0;
+    uint32_t threadsUsed = 0;
+
+    double MemoryUtilization() const {
+        return (memoryBudget > 0) ? (static_cast<double>(memoryUsed) / static_cast<double>(memoryBudget)) * 100.0 : 0.0;
+    }
+
+    bool IsOverBudget() const {
+        return memoryUsed > memoryBudget || cpuTimeUsedMs > cpuTimeBudgetMs ||
+               fileHandlesUsed > fileHandleBudget || threadsUsed > threadBudget;
+    }
+};
+
+// ResourceCheckpoint — periodic enforcement snapshot
+struct ResourceCheckpoint {
+    std::chrono::steady_clock::time_point timestamp;
+    std::wstring pluginId;
+    PluginResourceUsage usage;
+    ResourceLimitAction actionTaken = ResourceLimitAction::None;
+    bool withinBudget = true;
+};
+
+// Violation callback type: receives plugin ID, action taken, usage at time of violation
+using ResourceViolationCallback = std::function<void(const std::wstring&, ResourceLimitAction, const PluginResourceUsage&)>;
+
 // ========================================================================
 // PluginResourceLimiter — Job Object based resource enforcement
 // ========================================================================
@@ -73,6 +112,9 @@ public:
         m_defaultQuota = defaultQuota;
         m_pluginUsage.clear();
         m_pluginQuotas.clear();
+        m_pluginBudgets.clear();
+        m_checkpoints.clear();
+        m_violationCallback = nullptr;
         m_stats = {};
         m_initialized = true;
     }
@@ -92,6 +134,23 @@ public:
         m_pluginQuotas[pluginId] = quota;
     }
 
+    // Set a resource budget for a plugin
+    void SetBudget(const std::wstring& pluginId, const ResourceBudget& budget) {
+        m_pluginBudgets[pluginId] = budget;
+        m_pluginBudgets[pluginId].pluginId = pluginId;
+    }
+
+    // Get the current budget for a plugin
+    ResourceBudget GetBudget(const std::wstring& pluginId) const {
+        auto it = m_pluginBudgets.find(pluginId);
+        return (it != m_pluginBudgets.end()) ? it->second : ResourceBudget{};
+    }
+
+    // Set violation callback
+    void SetViolationCallback(ResourceViolationCallback callback) {
+        m_violationCallback = std::move(callback);
+    }
+
     // Record resource usage
     ResourceLimitAction RecordMemoryUsage(const std::wstring& pluginId, uint64_t bytes) {
         auto it = m_pluginUsage.find(pluginId);
@@ -99,6 +158,13 @@ public:
 
         it->second.memoryBytes = bytes;
         if (bytes > it->second.peakMemoryBytes) it->second.peakMemoryBytes = bytes;
+        it->second.allocationCount++;
+
+        // Update budget if exists
+        auto budgetIt = m_pluginBudgets.find(pluginId);
+        if (budgetIt != m_pluginBudgets.end()) {
+            budgetIt->second.memoryUsed = bytes;
+        }
 
         return CheckQuota(pluginId, it->second);
     }
@@ -108,8 +174,63 @@ public:
         if (it == m_pluginUsage.end()) return ResourceLimitAction::None;
 
         it->second.cpuTimeMs = cpuMs;
+
+        // Update budget if exists
+        auto budgetIt = m_pluginBudgets.find(pluginId);
+        if (budgetIt != m_pluginBudgets.end()) {
+            budgetIt->second.cpuTimeUsedMs = cpuMs;
+        }
+
         return CheckQuota(pluginId, it->second);
     }
+
+    // Record file handle usage
+    ResourceLimitAction RecordFileHandles(const std::wstring& pluginId, uint32_t handles) {
+        auto it = m_pluginUsage.find(pluginId);
+        if (it == m_pluginUsage.end()) return ResourceLimitAction::None;
+
+        it->second.fileHandles = handles;
+
+        auto budgetIt = m_pluginBudgets.find(pluginId);
+        if (budgetIt != m_pluginBudgets.end()) {
+            budgetIt->second.fileHandlesUsed = handles;
+        }
+
+        return CheckQuota(pluginId, it->second);
+    }
+
+    // Record thread count
+    ResourceLimitAction RecordThreadCount(const std::wstring& pluginId, uint32_t threads) {
+        auto it = m_pluginUsage.find(pluginId);
+        if (it == m_pluginUsage.end()) return ResourceLimitAction::None;
+
+        it->second.threadCount = threads;
+
+        auto budgetIt = m_pluginBudgets.find(pluginId);
+        if (budgetIt != m_pluginBudgets.end()) {
+            budgetIt->second.threadsUsed = threads;
+        }
+
+        return CheckQuota(pluginId, it->second);
+    }
+
+    // Take a resource checkpoint (periodic enforcement)
+    ResourceCheckpoint TakeCheckpoint(const std::wstring& pluginId) {
+        ResourceCheckpoint cp;
+        cp.timestamp = std::chrono::steady_clock::now();
+        cp.pluginId = pluginId;
+        cp.usage = GetUsage(pluginId);
+        cp.actionTaken = CheckQuota(pluginId, m_pluginUsage[pluginId]);
+
+        auto budgetIt = m_pluginBudgets.find(pluginId);
+        cp.withinBudget = (budgetIt == m_pluginBudgets.end()) || !budgetIt->second.IsOverBudget();
+
+        m_checkpoints.push_back(cp);
+        return cp;
+    }
+
+    // Get all checkpoints
+    const std::vector<ResourceCheckpoint>& GetCheckpoints() const { return m_checkpoints; }
 
     // Get usage for a plugin
     PluginResourceUsage GetUsage(const std::wstring& pluginId) const {
@@ -180,8 +301,22 @@ private:
             usage.overQuota = true;
         }
 
+        // File handle check
+        if (quota.enableHandleLimit && usage.fileHandles > quota.maxFileHandles) {
+            if (static_cast<uint32_t>(ResourceLimitAction::Warning) > static_cast<uint32_t>(action)) {
+                action = ResourceLimitAction::Warning;
+                m_stats.totalWarnings++;
+            }
+            usage.overQuota = true;
+        }
+
         if (action == ResourceLimitAction::None) {
             usage.overQuota = false;
+        }
+
+        // Fire violation callback if action taken
+        if (action != ResourceLimitAction::None && m_violationCallback) {
+            m_violationCallback(pluginId, action, usage);
         }
 
         return action;
@@ -191,6 +326,9 @@ private:
     PluginResourceLimiterStats m_stats;
     std::unordered_map<std::wstring, PluginResourceQuota> m_pluginQuotas;
     std::unordered_map<std::wstring, PluginResourceUsage> m_pluginUsage;
+    std::unordered_map<std::wstring, ResourceBudget> m_pluginBudgets;
+    std::vector<ResourceCheckpoint> m_checkpoints;
+    ResourceViolationCallback m_violationCallback;
     bool m_initialized = false;
 };
 

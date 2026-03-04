@@ -565,6 +565,10 @@ set(ENGINE_HEADERS
     Plugin/PluginDependencyResolver.h
     Plugin/PluginCrashRecovery.h
     Plugin/PluginResourceLimiter.h
+    Plugin/PluginCapabilityGuard.h
+    Plugin/PluginVersionNegotiator.h
+    Plugin/PluginCrashIsolation.h
+    Plugin/PluginAuditLog.h
 
     # AI/ML modules
     AI/AISearchIntegration.h

@@ -225,6 +225,12 @@
 #include "../Cache/PipelineStateCacheV2.h"
 #include "../Cache/CacheWarmingService.h"
 
+// --- Sprint 43-44: Plugin SDK Hardening ---
+#include "../Plugin/PluginCapabilityGuard.h"
+#include "../Plugin/PluginVersionNegotiator.h"
+#include "../Plugin/PluginCrashIsolation.h"
+#include "../Plugin/PluginAuditLog.h"
+
 // --- Sprint 41-42: Performance Tuning ---
 #include "../Core/AlignedBufferPool.h"
 #include "../Core/PrefetchHintEngine.h"
@@ -21240,6 +21246,250 @@ TEST(Test_S41_CacheLinePadding_CacheLineArray) {
     ASSERT(ArrayType::BytesPerElement() >= CACHE_LINE_BYTES);
 }
 
+// ==========================================================================
+// Sprint 43-44: Plugin SDK Hardening Tests
+// ==========================================================================
+
+// --- PluginCapabilityGuard ---
+
+TEST(Test_S43_CapabilityGuard_GrantRevoke) {
+    CapabilitySet caps;
+    ASSERT(caps.IsEmpty());
+    caps.Grant(PluginCapability::ReadFile);
+    ASSERT(caps.Check(PluginCapability::ReadFile));
+    ASSERT(!caps.Check(PluginCapability::WriteFile));
+    caps.Grant(PluginCapability::WriteFile | PluginCapability::GPU);
+    ASSERT(caps.Check(PluginCapability::WriteFile));
+    ASSERT(caps.Check(PluginCapability::GPU));
+    ASSERT(caps.Count() == 3);
+    caps.Revoke(PluginCapability::GPU);
+    ASSERT(!caps.Check(PluginCapability::GPU));
+    ASSERT(caps.Count() == 2);
+}
+
+TEST(Test_S43_CapabilityGuard_RAIIValidation) {
+    CapabilitySet caps(PluginCapability::ReadFile | PluginCapability::Memory);
+    CapabilityGuard::AuditTrail().Clear();
+    {
+        CapabilityGuard guard(caps, PluginCapability::ReadFile, L"TestPlugin", L"open file");
+        ASSERT(guard.IsGranted());
+        ASSERT(static_cast<bool>(guard));
+    }
+    {
+        CapabilityGuard guard(caps, PluginCapability::Network, L"TestPlugin", L"http call");
+        ASSERT(!guard.IsGranted());
+    }
+    ASSERT(CapabilityGuard::AuditTrail().GetTotalChecks() == 2);
+    ASSERT(CapabilityGuard::AuditTrail().GetDeniedCount() == 1);
+}
+
+TEST(Test_S43_CapabilityGuard_AuditTrail) {
+    CapabilityGuard::AuditTrail().Clear();
+    CapabilitySet caps(PluginCapability::GPU);
+    CapabilityGuard g1(caps, PluginCapability::GPU, L"P1");
+    CapabilityGuard g2(caps, PluginCapability::Registry, L"P1");
+    CapabilityGuard g3(caps, PluginCapability::ProcessSpawn, L"P2");
+    auto records = CapabilityGuard::AuditTrail().GetRecords();
+    ASSERT(records.size() == 3);
+    ASSERT(records[0].granted == true);
+    ASSERT(records[1].granted == false);
+    auto denied = CapabilityGuard::AuditTrail().GetDeniedRecords();
+    ASSERT(denied.size() == 2);
+}
+
+TEST(Test_S43_CapabilityName_Strings) {
+    ASSERT(std::wstring(CapabilityName(PluginCapability::ReadFile)) == L"ReadFile");
+    ASSERT(std::wstring(CapabilityName(PluginCapability::Network)) == L"Network");
+    ASSERT(std::wstring(CapabilityName(PluginCapability::ProcessSpawn)) == L"ProcessSpawn");
+    ASSERT(std::wstring(CapabilityName(PluginCapability::None)) == L"None");
+}
+
+// --- PluginResourceLimiter (Enhanced) ---
+
+TEST(Test_S43_ResourceLimiter_Budget) {
+    auto& rl = PluginResourceLimiter::Instance();
+    rl.Initialize();
+    rl.RegisterPlugin(L"BudgetPlugin");
+    ResourceBudget budget;
+    budget.memoryBudget = 64ULL * 1024 * 1024;
+    budget.cpuTimeBudgetMs = 5000;
+    rl.SetBudget(L"BudgetPlugin", budget);
+    rl.RecordMemoryUsage(L"BudgetPlugin", 32ULL * 1024 * 1024);
+    auto b = rl.GetBudget(L"BudgetPlugin");
+    ASSERT(b.memoryUsed == 32ULL * 1024 * 1024);
+    ASSERT(!b.IsOverBudget());
+    ASSERT(b.MemoryUtilization() > 49.0 && b.MemoryUtilization() < 51.0);
+}
+
+TEST(Test_S43_ResourceLimiter_ViolationCallback) {
+    auto& rl = PluginResourceLimiter::Instance();
+    rl.Initialize();
+    rl.RegisterPlugin(L"ViolPlugin");
+    bool callbackFired = false;
+    rl.SetViolationCallback([&](const std::wstring& id, ResourceLimitAction action,
+                                const PluginResourceUsage& usage) {
+        callbackFired = true;
+        (void)id; (void)action; (void)usage;
+    });
+    // Exceed memory quota (default 256 MB) by recording 280 MB (ratio ~1.09, warning)
+    rl.RecordMemoryUsage(L"ViolPlugin", 280ULL * 1024 * 1024);
+    ASSERT(callbackFired);
+    ASSERT(rl.IsOverQuota(L"ViolPlugin"));
+}
+
+TEST(Test_S43_ResourceLimiter_Checkpoint) {
+    auto& rl = PluginResourceLimiter::Instance();
+    rl.Initialize();
+    rl.RegisterPlugin(L"CpPlugin");
+    rl.RecordMemoryUsage(L"CpPlugin", 1024);
+    auto cp = rl.TakeCheckpoint(L"CpPlugin");
+    ASSERT(cp.pluginId == L"CpPlugin");
+    ASSERT(cp.withinBudget);
+    ASSERT(cp.actionTaken == ResourceLimitAction::None);
+    ASSERT(rl.GetCheckpoints().size() >= 1);
+}
+
+// --- PluginVersionNegotiator ---
+
+TEST(Test_S43_VersionNegotiator_Compat) {
+    auto& vn = PluginVersionNegotiator::Instance();
+    vn.Initialize();
+    ASSERT(vn.IsInitialized());
+    auto sdkVer = vn.GetSDKVersion();
+    ASSERT(sdkVer.major == 15);
+    ASSERT(sdkVer.minor == 0);
+    ASSERT(vn.CheckCompatibility(SemanticVersion{15, 0, 0}) == CompatibilityResult::Compatible);
+    ASSERT(vn.CheckCompatibility(SemanticVersion{15, 1, 0}) == CompatibilityResult::MinorMismatch);
+    ASSERT(vn.CheckCompatibility(SemanticVersion{14, 0, 0}) == CompatibilityResult::MajorBreaking);
+    ASSERT(vn.CheckCompatibility(SemanticVersion{0, 0, 0}) == CompatibilityResult::Unknown);
+}
+
+TEST(Test_S43_VersionNegotiator_Parse) {
+    auto v = SemanticVersion::Parse(L"12.3.45");
+    ASSERT(v.major == 12);
+    ASSERT(v.minor == 3);
+    ASSERT(v.patch == 45);
+    ASSERT(v.ToString() == L"12.3.45");
+    auto v2 = SemanticVersion{1, 0, 0};
+    auto v3 = SemanticVersion{2, 0, 0};
+    ASSERT(v2 < v3);
+    ASSERT(v3 > v2);
+    ASSERT(v2 != v3);
+}
+
+TEST(Test_S43_VersionNegotiator_Migration) {
+    auto& vn = PluginVersionNegotiator::Instance();
+    vn.Initialize();
+    auto path = vn.GetMigrationPath(SemanticVersion{13, 0, 0}, SemanticVersion{15, 0, 0});
+    ASSERT(path.size() >= 2);
+    ASSERT(path[0].breaking);
+    auto suggestion = vn.GetUpgradeSuggestion(SemanticVersion{14, 0, 0});
+    ASSERT(suggestion.find(L"Major version mismatch") != std::wstring::npos);
+    auto compatSuggestion = vn.GetUpgradeSuggestion(SemanticVersion{15, 0, 0});
+    ASSERT(compatSuggestion.find(L"compatible") != std::wstring::npos);
+}
+
+// --- PluginCrashIsolation ---
+
+TEST(Test_S43_CrashIsolation_CircuitBreaker) {
+    auto& ci = PluginCrashIsolation::Instance();
+    ci.Initialize(3);
+    ci.RegisterPlugin(L"CrashyPlugin", 3);
+    ASSERT(!ci.IsDisabled(L"CrashyPlugin"));
+    ASSERT(ci.GetHealthScore(L"CrashyPlugin") == 100.0);
+    // Simulate 3 crashes → circuit should open
+    ci.RecordCrash(L"CrashyPlugin", 0xC0000005, 0x1234, L"test.dll", L"Access violation");
+    ASSERT(ci.GetHealthScore(L"CrashyPlugin") == 75.0);
+    ci.RecordCrash(L"CrashyPlugin", 0xC0000005, 0x1234, L"test.dll", L"Access violation");
+    ASSERT(ci.GetHealthScore(L"CrashyPlugin") == 50.0);
+    ci.RecordCrash(L"CrashyPlugin", 0xC0000005, 0x1234, L"test.dll", L"Access violation");
+    ASSERT(ci.IsDisabled(L"CrashyPlugin"));
+    ASSERT(ci.GetHealthScore(L"CrashyPlugin") == 25.0);
+    auto result = ci.ExecuteIsolated(L"CrashyPlugin", []() {});
+    ASSERT(result == IsolatedCallResult::CircuitOpen);
+}
+
+TEST(Test_S43_CrashIsolation_ExceptionCatch) {
+    auto& ci = PluginCrashIsolation::Instance();
+    ci.Initialize();
+    ci.RegisterPlugin(L"ThrowPlugin");
+    auto result = ci.ExecuteIsolated(L"ThrowPlugin", []() {
+        throw std::runtime_error("plugin error");
+    });
+    ASSERT(result == IsolatedCallResult::CppException);
+    ASSERT(ci.GetState(L"ThrowPlugin").crashCount == 1);
+    auto result2 = ci.ExecuteIsolated(L"ThrowPlugin", []() { /* success */ });
+    ASSERT(result2 == IsolatedCallResult::Success);
+}
+
+TEST(Test_S43_CrashIsolation_Reset) {
+    auto& ci = PluginCrashIsolation::Instance();
+    ci.Initialize(2);
+    ci.RegisterPlugin(L"ResetPlugin", 2);
+    ci.RecordCrash(L"ResetPlugin", 0xC0000005, 0, L"", L"crash1");
+    ci.RecordCrash(L"ResetPlugin", 0xC0000005, 0, L"", L"crash2");
+    ASSERT(ci.IsDisabled(L"ResetPlugin"));
+    ci.ResetPlugin(L"ResetPlugin");
+    ASSERT(!ci.IsDisabled(L"ResetPlugin"));
+    ASSERT(ci.GetHealthScore(L"ResetPlugin") == 100.0);
+}
+
+// --- PluginAuditLog ---
+
+TEST(Test_S43_AuditLog_AppendAndQuery) {
+    auto& log = PluginAuditLog::Instance();
+    log.Initialize(64);
+    ASSERT(log.IsInitialized());
+    ASSERT(log.GetCapacity() == 64);
+    log.Append(PluginAuditSeverity::Info, L"P1", L"Load", L"Success");
+    log.Append(PluginAuditSeverity::Warning, L"P2", L"Network", L"Blocked");
+    log.Append(PluginAuditSeverity::Violation, L"P1", L"WriteFile", L"Denied", L"No capability");
+    ASSERT(log.GetEntryCount() == 3);
+    auto p1Entries = log.QueryByPluginId(L"P1");
+    ASSERT(p1Entries.size() == 2);
+    auto violations = log.QueryBySeverity(PluginAuditSeverity::Violation);
+    ASSERT(violations.size() == 1);
+    ASSERT(violations[0].action == L"WriteFile");
+}
+
+TEST(Test_S43_AuditLog_RingBuffer) {
+    auto& log = PluginAuditLog::Instance();
+    log.Initialize(4);  // Very small ring buffer
+    for (int i = 0; i < 8; i++) {
+        log.Append(PluginAuditSeverity::Info, L"P1", L"Op" + std::to_wstring(i), L"OK");
+    }
+    ASSERT(log.GetEntryCount() == 4);
+    auto all = log.GetAllEntries();
+    ASSERT(all.size() == 4);
+    // Oldest entries should have been overwritten; newest should be Op4-Op7
+    ASSERT(all[0].action == L"Op4");
+    ASSERT(all[3].action == L"Op7");
+}
+
+TEST(Test_S43_AuditLog_JSONExport) {
+    auto& log = PluginAuditLog::Instance();
+    log.Initialize(32);
+    log.Append(PluginAuditSeverity::SecurityEvent, L"TestPlugin", L"CapCheck", L"Granted");
+    log.Append(PluginAuditSeverity::Critical, L"TestPlugin", L"Crash", L"Fatal");
+    auto json = log.ExportToJSON();
+    ASSERT(json.find(L"sequenceId") != std::wstring::npos);
+    ASSERT(json.find(L"SecurityEvent") != std::wstring::npos);
+    ASSERT(json.find(L"Critical") != std::wstring::npos);
+    ASSERT(json.find(L"TestPlugin") != std::wstring::npos);
+    ASSERT(json.front() == L'[');
+    ASSERT(json.back() == L']');
+}
+
+TEST(Test_S43_AuditLog_SeverityCount) {
+    auto& log = PluginAuditLog::Instance();
+    log.Initialize();
+    log.Append(PluginAuditSeverity::Info, L"P1", L"a", L"ok");
+    log.Append(PluginAuditSeverity::Warning, L"P1", L"b", L"ok");
+    log.Append(PluginAuditSeverity::Critical, L"P1", L"c", L"fail");
+    ASSERT(log.CountBySeverity(PluginAuditSeverity::Warning) == 2);  // Warning + Critical
+    ASSERT(log.CountBySeverity(PluginAuditSeverity::Critical) == 1);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -25303,6 +25553,31 @@ int main() {
     RUN_TEST(Test_S41_CacheLinePadding_Alignment);
     RUN_TEST(Test_S41_CacheLinePadding_PaddedAtomic);
     RUN_TEST(Test_S41_CacheLinePadding_CacheLineArray);
+
+    // Sprint 43-44: Plugin SDK Hardening
+    std::wcout << L"\nPlugin SDK Hardening Tests..." << std::endl;
+    // PluginCapabilityGuard
+    RUN_TEST(Test_S43_CapabilityGuard_GrantRevoke);
+    RUN_TEST(Test_S43_CapabilityGuard_RAIIValidation);
+    RUN_TEST(Test_S43_CapabilityGuard_AuditTrail);
+    RUN_TEST(Test_S43_CapabilityName_Strings);
+    // PluginResourceLimiter (Enhanced)
+    RUN_TEST(Test_S43_ResourceLimiter_Budget);
+    RUN_TEST(Test_S43_ResourceLimiter_ViolationCallback);
+    RUN_TEST(Test_S43_ResourceLimiter_Checkpoint);
+    // PluginVersionNegotiator
+    RUN_TEST(Test_S43_VersionNegotiator_Compat);
+    RUN_TEST(Test_S43_VersionNegotiator_Parse);
+    RUN_TEST(Test_S43_VersionNegotiator_Migration);
+    // PluginCrashIsolation
+    RUN_TEST(Test_S43_CrashIsolation_CircuitBreaker);
+    RUN_TEST(Test_S43_CrashIsolation_ExceptionCatch);
+    RUN_TEST(Test_S43_CrashIsolation_Reset);
+    // PluginAuditLog
+    RUN_TEST(Test_S43_AuditLog_AppendAndQuery);
+    RUN_TEST(Test_S43_AuditLog_RingBuffer);
+    RUN_TEST(Test_S43_AuditLog_JSONExport);
+    RUN_TEST(Test_S43_AuditLog_SeverityCount);
 
     // Security Hardening Tests
     std::wcout << L"\nSecurity Hardening Tests..." << std::endl;
