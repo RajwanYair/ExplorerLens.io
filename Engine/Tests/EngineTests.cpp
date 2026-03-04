@@ -25,8 +25,10 @@
 #include "../Core/ConfigMigrationEngine.h"
 #include "../Core/ContentIndexer.h"
 #include "../Core/D3D12PipelineActivation.h"
+#include "../Core/DiagnosticCollector.h"
 #include "../Core/EncoderExportEngine.h"
 #include "../Core/ErrorRecoveryEngine.h"
+#include "../Core/ErrorRecoveryEngineV2.h"
 #include "../Core/FormatConverterEngine.h"
 #include "../Core/FormatRegistry.h"
 #include "../Core/FormatTypes.h"
@@ -45,6 +47,7 @@
 #include "../Core/QuickLookIntegration.h"
 #include "../Core/RegistryManager.h"
 #include "../Core/ResourcePoolEngine.h"
+#include "../Core/ResultType.h"
 #include "../Core/RuntimeIntegrityVerifier.h"
 #include "../Core/SIMDAccelerationManager.h"
 #include "../Core/SIMDAccelerator.h"
@@ -55,6 +58,7 @@
 #include "../Core/ShellOverlayHandler.h"
 #include "../Core/ShellPreviewHandler.h"
 #include "../Core/ShellRegistrationManager.h"
+#include "../Core/StructuredErrorDomain.h"
 // TelemetryEngine.h shim removed — Telemetry.h included below
 #include "../Core/ThemeEngine.h"
 #include "../Core/ThumbnailAnimationEngineV2.h"
@@ -127,6 +131,7 @@
 #include "../Pipeline/FormatDetector.h"
 #include "../Pipeline/ParallelBatchDecoder.h"
 #include "../Pipeline/ParallelIOPipeline.h"
+#include "../Pipeline/PipelineErrorBoundary.h"
 #include "../Pipeline/SmartFormatDetectorV2.h"
 #include "../Plugin/PluginDebuggerIntegration.h"
 #include "../Plugin/PluginHotReload.h"
@@ -19464,6 +19469,265 @@ TEST(Test_PluginSandbox_Presets) {
     ASSERT(dev.limits.allowUIAccess);
 }
 
+//== Sprint 45-46: Error Handling Infrastructure Tests ==
+
+TEST(Test_S45_StructuredErrorDomain_CreateAndFormat) {
+    using namespace ExplorerLens::Engine;
+    StructuredError err(
+        StructuredErrorDomain::Decode,
+        ErrorSeverity::Error,
+        E_FAIL,
+        "JPEG header corrupt",
+        ELENS_SOURCE_LOCATION());
+    ASSERT(err.GetDomain() == StructuredErrorDomain::Decode);
+    ASSERT(err.GetSeverity() == ErrorSeverity::Error);
+    ASSERT(err.GetCode() == E_FAIL);
+    ASSERT(err.GetMessage() == "JPEG header corrupt");
+    ASSERT(err.IsCritical());
+    auto formatted = err.FormatError();
+    ASSERT(!formatted.empty());
+    ASSERT(formatted.find("Decode") != std::string::npos);
+    ASSERT(formatted.find("JPEG header corrupt") != std::string::npos);
+}
+
+TEST(Test_S45_StructuredErrorDomain_InnerErrorChain) {
+    using namespace ExplorerLens::Engine;
+    StructuredError inner(StructuredErrorDomain::IO, ErrorSeverity::Warning,
+        HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND), "File not found");
+    StructuredError outer = ErrorChain::Wrap(
+        inner, StructuredErrorDomain::Decode, ErrorSeverity::Error,
+        E_FAIL, "Decode failed: missing input");
+    ASSERT(outer.HasInnerError());
+    ASSERT(outer.GetChainDepth() == 1);
+    ASSERT(outer.GetInnerError()->GetDomain() == StructuredErrorDomain::IO);
+    auto formatted = outer.FormatError();
+    ASSERT(formatted.find("Caused by") != std::string::npos);
+}
+
+TEST(Test_S45_StructuredErrorDomain_SeverityNames) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ErrorSeverityName(ErrorSeverity::Trace)) == "Trace");
+    ASSERT(std::string(ErrorSeverityName(ErrorSeverity::Fatal)) == "Fatal");
+    ASSERT(std::string(StructuredErrorDomainName(StructuredErrorDomain::Security)) == "Security");
+    ASSERT(std::string(StructuredErrorDomainName(StructuredErrorDomain::Network)) == "Network");
+    ASSERT(static_cast<uint8_t>(StructuredErrorDomain::COUNT) == 10);
+}
+
+TEST(Test_S45_ResultType_OkAndErr) {
+    using namespace ExplorerLens::Engine;
+    auto okResult = Ok(42);
+    ASSERT(okResult.IsOk());
+    ASSERT(!okResult.IsErr());
+    ASSERT(okResult.Value() == 42);
+
+    auto errResult = MakeError<int>(
+        StructuredErrorDomain::Cache,
+        ErrorSeverity::Error,
+        E_OUTOFMEMORY,
+        "Cache OOM");
+    ASSERT(errResult.IsErr());
+    ASSERT(!errResult.IsOk());
+    ASSERT(errResult.Error().GetDomain() == StructuredErrorDomain::Cache);
+}
+
+TEST(Test_S45_ResultType_MapAndChain) {
+    using namespace ExplorerLens::Engine;
+    auto result = Ok(10);
+    auto mapped = result.Map([](int val) { return val * 2; });
+    ASSERT(mapped.IsOk());
+    ASSERT(mapped.Value() == 20);
+
+    auto chained = result.AndThen([](int val) -> Result<std::string> {
+        return Ok(std::string("value=" + std::to_string(val)));
+    });
+    ASSERT(chained.IsOk());
+    ASSERT(chained.Value() == "value=10");
+}
+
+TEST(Test_S45_ResultType_ValueOr) {
+    using namespace ExplorerLens::Engine;
+    auto errResult = MakeError<int>(
+        StructuredErrorDomain::Decode, ErrorSeverity::Error, E_FAIL, "fail");
+    int val = errResult.ValueOr(99);
+    ASSERT(val == 99);
+
+    auto okResult = Ok(42);
+    int val2 = okResult.ValueOr(99);
+    ASSERT(val2 == 42);
+}
+
+TEST(Test_S45_ErrorRecoveryEngineV2_RetryStrategy) {
+    using namespace ExplorerLens::Engine;
+    ErrorRecoveryEngineV2 engine;
+    RetryPolicy policy;
+    policy.maxAttempts = 3;
+    policy.baseDelayMs = 1; // Minimal delay for testing
+    engine.RegisterAction(
+        ErrorRecoveryAction::ForDomain(StructuredErrorDomain::IO,
+                                  RecoveryStrategyV2::Retry, policy));
+    ASSERT(engine.GetActionCount() == 1);
+
+    int attemptCount = 0;
+    auto result = engine.Execute<int>(
+        [&attemptCount]() -> Result<int> {
+            attemptCount++;
+            if (attemptCount < 3) {
+                return MakeError<int>(StructuredErrorDomain::IO,
+                    ErrorSeverity::Error, E_FAIL, "transient error");
+            }
+            return Ok(42);
+        });
+    ASSERT(attemptCount >= 3);
+    ASSERT(engine.GetStats().totalRetries > 0);
+}
+
+TEST(Test_S45_ErrorRecoveryEngineV2_FallbackStrategy) {
+    using namespace ExplorerLens::Engine;
+    ErrorRecoveryEngineV2 engine;
+    engine.RegisterAction(
+        ErrorRecoveryAction::ForDomain(StructuredErrorDomain::GPU,
+                                  RecoveryStrategyV2::Fallback));
+    auto result = engine.Execute<int>(
+        []() -> Result<int> {
+            return MakeError<int>(StructuredErrorDomain::GPU,
+                ErrorSeverity::Error, E_FAIL, "GPU error");
+        },
+        []() -> Result<int> {
+            return Ok(0); // CPU fallback
+        });
+    ASSERT(result.IsOk());
+    ASSERT(result.Value() == 0);
+    ASSERT(engine.GetStats().totalFallbacks == 1);
+}
+
+TEST(Test_S45_ErrorRecoveryEngineV2_BackoffDelay) {
+    using namespace ExplorerLens::Engine;
+    RetryPolicy policy;
+    policy.maxAttempts = 4;
+    policy.baseDelayMs = 100;
+    policy.backoffMultiplier = 2.0;
+    policy.jitterFraction = 0.0; // No jitter for deterministic test
+    ASSERT(policy.CalculateDelayMs(0) == 100);
+    ASSERT(policy.CalculateDelayMs(1) == 200);
+    ASSERT(policy.CalculateDelayMs(2) == 400);
+}
+
+TEST(Test_S45_DiagnosticCollector_RingBuffer) {
+    using namespace ExplorerLens::Engine;
+    DiagnosticCollector collector(4); // Small ring buffer
+    ASSERT(collector.GetCapacity() == 4);
+
+    collector.RecordError(StructuredErrorDomain::Decode, ErrorSeverity::Error, "err1");
+    collector.RecordError(StructuredErrorDomain::Cache, ErrorSeverity::Warning, "err2");
+    ASSERT(collector.GetErrorCount() == 2);
+
+    // Overflow the ring buffer
+    collector.RecordError(StructuredErrorDomain::GPU, ErrorSeverity::Error, "err3");
+    collector.RecordError(StructuredErrorDomain::IO, ErrorSeverity::Error, "err4");
+    collector.RecordError(StructuredErrorDomain::Memory, ErrorSeverity::Fatal, "err5");
+    // Should still be capped at capacity
+    ASSERT(collector.GetErrorCount() == 4);
+}
+
+TEST(Test_S45_DiagnosticCollector_SnapshotAndJson) {
+    using namespace ExplorerLens::Engine;
+    DiagnosticCollector collector(16);
+    collector.RecordError(StructuredErrorDomain::Decode, ErrorSeverity::Error, "decode fail");
+    collector.RecordDecoderOperation("JPEG", true, 5.0);
+    collector.RecordDecoderOperation("JPEG", true, 7.0);
+    collector.RecordDecoderOperation("JPEG", false, 15.0);
+    collector.RecordGPUFallbackEvent();
+    collector.RecordMemoryPressureEvent();
+
+    auto snapshot = collector.CaptureSnapshot();
+    ASSERT(snapshot.recentErrors.size() == 1);
+    ASSERT(snapshot.decoderStats.size() == 1);
+    ASSERT(snapshot.decoderStats[0].totalDecodes == 3);
+    ASSERT(snapshot.decoderStats[0].totalFailures == 1);
+    ASSERT(snapshot.gpuFallbackEvents == 1);
+    ASSERT(snapshot.memoryPressureEvents == 1);
+
+    auto json = snapshot.ToJson();
+    ASSERT(!json.empty());
+    ASSERT(json.find("recentErrors") != std::string::npos);
+    ASSERT(json.find("decoderStats") != std::string::npos);
+    ASSERT(json.find("JPEG") != std::string::npos);
+}
+
+TEST(Test_S45_DiagnosticCollector_Summary) {
+    using namespace ExplorerLens::Engine;
+    DiagnosticCollector collector(16);
+    // Record only a few errors — should be Pass overall
+    collector.RecordDecoderOperation("PNG", false, 1.0);
+    collector.RecordDecoderOperation("PNG", true, 2.0);
+    auto snapshot = collector.CaptureSnapshot();
+    // Decoder subsystem: 1 failure is below threshold
+    ASSERT(snapshot.summary.overallStatus == DiagnosticStatus::Pass);
+    ASSERT(snapshot.summary.subsystems.size() >= 3); // Decoders, Memory, GPU
+}
+
+TEST(Test_S45_PipelineErrorBoundary_SuccessPath) {
+    using namespace ExplorerLens::Engine;
+    ErrorBoundary<int> boundary("TestStage", -1);
+    auto result = boundary.Execute([]() -> Result<int> {
+        return Ok(42);
+    });
+    ASSERT(result.stageResult == PipelineStageResult::Success);
+    ASSERT(result.value == 42);
+    ASSERT(!result.fallbackUsed);
+    ASSERT(boundary.GetMetrics().successCount == 1);
+}
+
+TEST(Test_S45_PipelineErrorBoundary_FallbackOnError) {
+    using namespace ExplorerLens::Engine;
+    ErrorBoundary<int> boundary("TestStage", -1);
+    auto result = boundary.Execute([]() -> Result<int> {
+        return MakeError<int>(StructuredErrorDomain::Decode,
+            ErrorSeverity::Error, E_FAIL, "decode error");
+    });
+    ASSERT(result.stageResult == PipelineStageResult::NonFatalError);
+    ASSERT(result.value == -1); // Fallback value
+    ASSERT(result.fallbackUsed);
+    ASSERT(boundary.GetMetrics().fallbackUsed == 1);
+}
+
+TEST(Test_S45_PipelineErrorBoundary_FatalPromotion) {
+    using namespace ExplorerLens::Engine;
+    ErrorBoundaryConfig config;
+    config.consecutiveErrorThreshold = 3;
+    config.promoteFatalOnRepeat = true;
+    ErrorBoundary<int> boundary("TestStage", -1, config);
+
+    // Trigger consecutive errors up to threshold
+    for (uint32_t i = 0; i < 3; ++i) {
+        boundary.Execute([]() -> Result<int> {
+            return MakeError<int>(StructuredErrorDomain::Pipeline,
+                ErrorSeverity::Error, E_FAIL, "repeated error");
+        });
+    }
+    // After threshold, next error should be promoted to fatal
+    auto result = boundary.Execute([]() -> Result<int> {
+        return MakeError<int>(StructuredErrorDomain::Pipeline,
+            ErrorSeverity::Error, E_FAIL, "repeated error");
+    });
+    ASSERT(result.stageResult == PipelineStageResult::FatalError);
+    ASSERT(boundary.GetMetrics().fatalErrorCount >= 1);
+}
+
+TEST(Test_S45_PipelineErrorBoundaryManager_AggregateMetrics) {
+    using namespace ExplorerLens::Engine;
+    PipelineErrorBoundaryManager manager;
+    manager.RecordStageExecution("Decode", PipelineStageResult::Success);
+    manager.RecordStageExecution("Decode", PipelineStageResult::Success);
+    manager.RecordStageExecution("Render", PipelineStageResult::NonFatalError);
+    ASSERT(manager.GetStageCount() == 2);
+    auto decodeMetrics = manager.GetStageMetrics("Decode");
+    ASSERT(decodeMetrics.successCount == 2);
+    auto renderMetrics = manager.GetStageMetrics("Render");
+    ASSERT(renderMetrics.nonFatalErrorCount == 1);
+    ASSERT(!manager.HasFatalStage());
+}
+
 //== Security Hardening Tests ==
 
 TEST(Test_SecureAllocator_ZeroOnFree) {
@@ -25578,6 +25842,30 @@ int main() {
     RUN_TEST(Test_S43_AuditLog_RingBuffer);
     RUN_TEST(Test_S43_AuditLog_JSONExport);
     RUN_TEST(Test_S43_AuditLog_SeverityCount);
+
+    // Sprint 45-46: Error Handling Infrastructure
+    std::wcout << L"\nSprint 45-46: Error Handling Infrastructure..." << std::endl;
+    // StructuredErrorDomain
+    RUN_TEST(Test_S45_StructuredErrorDomain_CreateAndFormat);
+    RUN_TEST(Test_S45_StructuredErrorDomain_InnerErrorChain);
+    RUN_TEST(Test_S45_StructuredErrorDomain_SeverityNames);
+    // ResultType
+    RUN_TEST(Test_S45_ResultType_OkAndErr);
+    RUN_TEST(Test_S45_ResultType_MapAndChain);
+    RUN_TEST(Test_S45_ResultType_ValueOr);
+    // ErrorRecoveryEngineV2
+    RUN_TEST(Test_S45_ErrorRecoveryEngineV2_RetryStrategy);
+    RUN_TEST(Test_S45_ErrorRecoveryEngineV2_FallbackStrategy);
+    RUN_TEST(Test_S45_ErrorRecoveryEngineV2_BackoffDelay);
+    // DiagnosticCollector
+    RUN_TEST(Test_S45_DiagnosticCollector_RingBuffer);
+    RUN_TEST(Test_S45_DiagnosticCollector_SnapshotAndJson);
+    RUN_TEST(Test_S45_DiagnosticCollector_Summary);
+    // PipelineErrorBoundary
+    RUN_TEST(Test_S45_PipelineErrorBoundary_SuccessPath);
+    RUN_TEST(Test_S45_PipelineErrorBoundary_FallbackOnError);
+    RUN_TEST(Test_S45_PipelineErrorBoundary_FatalPromotion);
+    RUN_TEST(Test_S45_PipelineErrorBoundaryManager_AggregateMetrics);
 
     // Security Hardening Tests
     std::wcout << L"\nSecurity Hardening Tests..." << std::endl;

@@ -382,6 +382,12 @@ set(ENGINE_HEADERS
     Core/PrefetchHintEngine.h
     Core/BranchPredictor.h
 
+    # Sprint 45-46: Error handling infrastructure
+    Core/StructuredErrorDomain.h
+    Core/ResultType.h
+    Core/ErrorRecoveryEngineV2.h
+    Core/DiagnosticCollector.h
+
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
     Pipeline/BatchProcessor.h
@@ -411,6 +417,7 @@ set(ENGINE_HEADERS
     Pipeline/DecoderOutputValidator.h
     Pipeline/ProductionPipelineV2.h
     Pipeline/LoopTuner.h
+    Pipeline/PipelineErrorBoundary.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
