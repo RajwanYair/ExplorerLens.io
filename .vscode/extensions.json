@@ -1,30 +1,34 @@
 {
-  // ExplorerLens.io — Recommended VS Code Extensions
-  // These extensions provide the best development experience for this C++20/CMake/PowerShell project.
-  "recommendations": [
-    // ── C/C++ Development ──
-    "ms-vscode.cpptools", // C/C++ IntelliSense, debugging (cppvsdbg)
-    "ms-vscode.cpptools-extension-pack", // C++ extension pack (includes CMake Tools)
-    "ms-vscode.cmake-tools", // CMake configure/build/test integration
-    // ── Build & CI ──
-    "ms-vscode.powershell", // PowerShell language support + debugging
-    "twxs.cmake", // CMake syntax highlighting & snippets
-    // ── Code Quality ──
-    "streetsidesoftware.code-spell-checker", // Spell checker for code/docs
-    "DavidAnson.vscode-markdownlint", // Markdown lint (enforces standards)
-    "EditorConfig.EditorConfig", // .editorconfig support for consistent formatting
-    // ── Git & Collaboration ──
-    "eamodio.gitlens", // Git blame, history, file annotations
-    "mhutchie.git-graph", // Visual git branch graph
-    // ── Productivity ──
-    "ms-vscode.hexeditor", // Hex editor for binary file inspection
-    "yzhang.markdown-all-in-one", // Markdown preview, TOC generation, shortcuts
-    "redhat.vscode-yaml", // YAML support (GitHub Actions workflows)
-    "foxundermoon.shell-format", // Shell/PowerShell formatting
-    // ── Windows Development ──
-    "ms-vscode.windows-registry" // Windows Registry browsing (useful for COM debugging)
-  ],
-  "unwantedRecommendations": [
-    "ms-vscode.cpptools-themes" // Unnecessary — default themes are sufficient
-  ]
+    // ExplorerLens.io — Recommended VS Code Extensions
+    // These extensions provide the best development experience for this C++20/CMake/PowerShell project.
+    "recommendations": [
+        // ── C/C++ Development ──
+        "ms-vscode.cpptools", // C/C++ IntelliSense, debugging (cppvsdbg)
+        "ms-vscode.cpptools-extension-pack", // C++ extension pack (includes CMake Tools)
+        "ms-vscode.cmake-tools", // CMake configure/build/test integration
+        // ── Build & CI ──
+        "ms-vscode.powershell", // PowerShell language support + debugging
+        "twxs.cmake", // CMake syntax highlighting & snippets
+        // ── Code Quality ──
+        "streetsidesoftware.code-spell-checker", // Spell checker for code/docs
+        "DavidAnson.vscode-markdownlint", // Markdown lint (enforces standards)
+        "EditorConfig.EditorConfig", // .editorconfig support for consistent formatting
+        // ── Git & Collaboration ──
+        "eamodio.gitlens", // Git blame, history, file annotations
+        "mhutchie.git-graph", // Visual git branch graph
+        // ── Productivity ──
+        "ms-vscode.hexeditor", // Hex editor for binary file inspection
+        "yzhang.markdown-all-in-one", // Markdown preview, TOC generation, shortcuts
+        "redhat.vscode-yaml", // YAML support (GitHub Actions workflows)
+        "foxundermoon.shell-format", // Shell/PowerShell formatting
+        // ── Windows Development ──
+        "ms-vscode.windows-registry", // Windows Registry browsing (COM debugging)
+        // ── Debugging & Analysis ──
+        "vadimcn.vscode-lldb", // LLDB debugger (fallback for native debug)
+        "jeff-hykin.better-cpp-syntax", // Extended C++ syntax highlighting
+        "ms-vscode.test-adapter-converter" // Test explorer integration
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools-themes" // Unnecessary — default themes are sufficient
+    ]
 }

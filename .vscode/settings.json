@@ -26,7 +26,19 @@
     "C_Cpp.default.cStandard": "c17",
     "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
     "C_Cpp.default.compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/cl.exe",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.default.defines": [
+        "WIN32_LEAN_AND_MEAN",
+        "NOMINMAX",
+        "UNICODE",
+        "_UNICODE",
+        "_WIN64",
+        "_AMD64_",
+        "NDEBUG"
+    ],
     "C_Cpp.codeAnalysis.runAutomatically": true,
+    "C_Cpp.codeAnalysis.clangTidy.enabled": true,
     "C_Cpp.enhancedColorization": "enabled",
     "C_Cpp.formatting": "vcFormat",
     "C_Cpp.vcFormat.indent.braces": false,
@@ -87,7 +99,9 @@
         "**/build-vcpkg/**": true,
         "**/x64/**": true,
         "**/external/**/build*": true,
+        "**/external/**/src/**": true,
         "**/packages/**": true,
+        "**/gtest/**": true,
         "**/build-logs": false
     },
     // ── Search ───────────────────────────────────────────────────
@@ -96,14 +110,16 @@
         "**/build-vcpkg": true,
         "**/x64": true,
         "**/external/**/build*": true,
+        "**/external/**/src/**": true,
         "**/packages": true,
         "**/.vs": true,
-        "**/build-logs": false,
-        "**/*.lib": true,
+        "**/gtest": true,
         "**/*.obj": true,
         "**/*.pdb": true,
+        "**/*.lib": true,
         "**/*.exe": true,
-        "**/*.dll": true
+        "**/*.dll": true,
+        "**/build-logs": false
     },
     // ── Terminal ──────────────────────────────────────────────────
     "terminal.integrated.defaultProfile.windows": "PowerShell 7",
@@ -137,6 +153,15 @@
         }
     },
     "terminal.integrated.shellIntegration.enabled": true,
+    "terminal.integrated.shellIntegration.decorationsEnabled": "both",
+    "terminal.integrated.automationProfile.windows": {
+        "path": "pwsh.exe",
+        "args": [
+            "-NoProfile",
+            "-NoLogo"
+        ]
+    },
+    "terminal.integrated.tabs.enabled": true,
     "terminal.integrated.persistentSessionReviveProcess": "never",
     "terminal.integrated.enablePersistentSessions": false,
     "terminal.integrated.scrollback": 50000,
@@ -146,9 +171,10 @@
     "terminal.integrated.allowChords": true,
     "terminal.integrated.detectLocale": "auto",
     "terminal.integrated.gpuAcceleration": "auto",
+    "terminal.integrated.cwd": "${workspaceFolder}",
     // ── Tasks & Build ────────────────────────────────────────────
     "task.slowProviderWarning": false,
-    "task.autoDetect": "on",
+    "task.autoDetect": "off",
     // ── Git ──────────────────────────────────────────────────────
     "git.autorefresh": true,
     "git.autofetch": true,
@@ -222,7 +248,10 @@
     ],
     // ── PowerShell ───────────────────────────────────────────────
     "powershell.codeFormatting.preset": "OTBS",
+    "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationForFirstPipeline",
+    "powershell.scriptAnalysis.enable": true,
     "powershell.integratedConsole.showOnStartup": false,
+    "powershell.integratedConsole.focusConsoleOnExecute": false,
     // ── Copilot ──────────────────────────────────────────────────
     "chat.agent.maxRequests": 125,
     // ── Miscellaneous ────────────────────────────────────────────
