@@ -1024,6 +1024,18 @@ set(ENGINE_HEADERS
     Shell/TouchGestureHandler.h
     Decoders/JPEG2000DecoderV2.h
     Decoders/UniversalVideoDecoder.h
+
+    # Sprint 394: New Feature Headers
+    Core/ColdStartOptimizer.h
+    Pipeline/DecodeCancellationEngine.h
+    Pipeline/RequestDeduplicator.h
+    Cache/CacheBloomFilter.h
+    Cache/CacheFragmentationAnalyzer.h
+    GPU/GPUPowerStateManager.h
+    GPU/GPUWorkgroupOptimizer.h
+    Memory/CopyOnWriteBufferPool.h
+    Memory/MemoryMappedThumbnailAtlas.h
+    AI/ThumbnailAestheticScorer.h
 )
 
 set(ENGINE_SOURCES

@@ -49,6 +49,15 @@ inline COLORREF GetThumbnailBorderColor() {
 	}
 }
 
+// Check if high contrast mode is enabled
+inline bool IsHighContrastMode() {
+	HIGHCONTRAST hc = { sizeof(HIGHCONTRAST) };
+	if (SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0)) {
+		return (hc.dwFlags & HCF_HIGHCONTRASTON) != 0;
+	}
+	return false;
+}
+
 // Get appropriate text color based on system theme
 // Fixes: dark theme was rendering black text (default) on dark backgrounds
 inline COLORREF GetThumbnailTextColor() {
@@ -89,14 +98,5 @@ inline COLORREF GetThumbnailOverlayColor() {
 	else {
 		return RGB(240, 240, 240); // Light overlay
 	}
-}
-
-// Check if high contrast mode is enabled
-inline bool IsHighContrastMode() {
-	HIGHCONTRAST hc = { sizeof(HIGHCONTRAST) };
-	if (SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0)) {
-		return (hc.dwFlags & HCF_HIGHCONTRASTON) != 0;
-	}
-	return false;
 }
 }

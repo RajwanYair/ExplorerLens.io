@@ -61,6 +61,7 @@ public:
     /// Render all overlays onto a thumbnail bitmap
     OverlayRenderResult Render(uint32_t thumbWidth, uint32_t thumbHeight,
         bool isDarkBackground) const {
+        (void)thumbWidth; (void)thumbHeight; (void)isDarkBackground;
         OverlayRenderResult result;
         result.elements = static_cast<int>(m_elements.size());
         result.rendered = !m_elements.empty();

@@ -168,10 +168,10 @@ private:
         return false;
     }
 
-    bool DFSHasCycle(const std::string& nodeId,
+    bool DFSHasCycle(const std::string& /*nodeId*/,
         std::unordered_map<std::string, int>& /*not used*/) const {
-        // Use separate map for actual DFS
-        return false; // Overload disambiguation
+        // Overload disambiguation — real DFS uses the uint8_t color map.
+        return false;
     }
 
     bool DFSHasCycle(const std::string& nodeId,

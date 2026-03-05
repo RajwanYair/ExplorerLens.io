@@ -85,8 +85,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Version:** 14.0.0 "Apex" → 15.0.0 "Zenith"
-- **Total unit tests:** 2282 → 2408
+- **Total unit tests:** 2282 → 2820
 - **Codename:** Apex → Zenith
+
+### Improvements (Sprint 394)
+
+#### Dark Theme Fix
+- **LENSManager dark theme text** — Fixed checkbox, radio button, and groupbox controls rendering black text on dark backgrounds. Root cause: `DarkMode_Explorer` visual style overrides WM_CTLCOLORSTATIC text color. Fix: disable visual styles for non-push-button controls so GDI respects `SetTextColor(hdc, theme.text)`.
+- **LENSShell dark theme** — Fixed `IsHighContrastMode()` forward-declaration order in `LENSShell/DarkModeHelper.h`; moved function before first call site.
+
+#### Warning & Stub Fixes
+- Fixed 17 C4100/C4101 warnings across 16 header files (unused parameter/variable suppressions)
+- Replaced 4 stub implementations with real Windows API calls:
+  - `DarkModeTextFix.h` `IsSystemDarkTheme()` — real registry read from `HKCU\...\Themes\Personalize`
+  - `PluginMarketplace.h` `SignatureVerifier::Verify()` — real WinVerifyTrust Authenticode verification
+  - `BatchThumbnailOrchestrator.h` `ProcessItem()` — real `GetFileAttributesW` file validation
+  - `IntegrationTests.h` `RunCacheRoundTrip()` — real SubMillisecondCacheEngine round-trip test
+- Fixed `PluginMarketplace.h` Authenticode result: narrow string assignment (was `wchar_t`), removed nonexistent `trusted` field
+
+#### New Feature Headers (10 real implementations)
+- `Pipeline/DecodeCancellationEngine.h` — atomic cancellation tokens with `CancelReason` enum
+- `Cache/CacheBloomFilter.h` — FNV-1a + MurmurMix double-hashing Bloom filter
+- `GPU/GPUPowerStateManager.h` — DXGI adapter enumeration, power-aware iGPU/dGPU routing
+- `Memory/CopyOnWriteBufferPool.h` — COW buffer pool with shared_ptr reference counting
+- `Pipeline/RequestDeduplicator.h` — inflight request coalescing with future-based deduplication
+- `Cache/CacheFragmentationAnalyzer.h` — 5-tier fragmentation analysis with compaction estimation
+- `GPU/GPUWorkgroupOptimizer.h` — vendor-aware 2D/1D compute workgroup dispatch optimization
+- `Memory/MemoryMappedThumbnailAtlas.h` — zero-copy memory-mapped atlas with CreateFileMapping
+- `AI/ThumbnailAestheticScorer.h` — composition/sharpness/color/luminance aesthetic scoring
+- `Core/ColdStartOptimizer.h` — DLL preload manager for eliminating cold-start decode latency
+
+#### Tests
+- Added 28 new unit tests for Sprint 394 features (total: 2820, 0 failures)
 
 ### Improvements (Sprint 17-34)
 

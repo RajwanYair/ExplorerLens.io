@@ -109,6 +109,7 @@ public:
     }
 
     inline void RecordOutcome(const std::string& key, bool wasHit) {
+        (void)key;
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.totalPredictions++;
         if (wasHit) m_stats.correctPredictions++;

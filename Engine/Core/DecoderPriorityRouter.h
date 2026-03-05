@@ -43,6 +43,7 @@ public:
     size_t CandidateCount() const { return m_candidates.size(); }
 
     RouteDecision Route(const std::wstring& extension) const {
+        (void)extension;
         RouteDecision decision;
         if (m_candidates.empty()) return decision;
         auto best = std::max_element(m_candidates.begin(), m_candidates.end(),

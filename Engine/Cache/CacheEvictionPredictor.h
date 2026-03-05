@@ -55,6 +55,7 @@ public:
     }
 
     EvictionDecision SelectEviction(uint64_t targetBytes) const {
+        (void)targetBytes;
         EvictionDecision d;
         d.policy = m_policy;
         if (m_entries.empty()) return d;

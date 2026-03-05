@@ -45,8 +45,8 @@ public:
     MemoryArenaAllocator& operator=(const MemoryArenaAllocator&) = delete;
     MemoryArenaAllocator(MemoryArenaAllocator&& other) noexcept
         : m_blockSize(other.m_blockSize), m_policy(other.m_policy),
-          m_stats(other.m_stats), m_head(other.m_head),
-          m_current(other.m_current), m_offset(other.m_offset) {
+        m_stats(other.m_stats), m_head(other.m_head),
+        m_current(other.m_current), m_offset(other.m_offset) {
         other.m_head = nullptr;
         other.m_current = nullptr;
         other.m_offset = 0;

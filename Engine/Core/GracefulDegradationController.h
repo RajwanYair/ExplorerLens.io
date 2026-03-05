@@ -74,6 +74,7 @@ public:
     }
 
     void NotifyFailure(const std::wstring& subsystem) {
+        (void)subsystem;
         m_failureCount++;
         if (m_config.autoDegrade && m_failureCount >= 3) {
             auto next = static_cast<uint8_t>(m_status.current);

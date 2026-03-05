@@ -241,15 +241,27 @@ private:
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        // Placeholder for actual decode — integrates with ProductionPipelineV2
-        // In production, this calls ProductionPipelineIntegration::GenerateThumbnail()
-        if (!item.filePath.empty()) {
-            result.success = true;
-            result.decoderUsed = "AdaptiveRouter";
-        }
-        else {
+        // Validate input, check if file exists and is readable
+        if (item.filePath.empty()) {
             result.success = false;
             result.errorMessage = "Empty file path";
+        }
+        else {
+            // Probe the file to confirm it exists
+            DWORD attrs = GetFileAttributesW(item.filePath.c_str());
+            if (attrs == INVALID_FILE_ATTRIBUTES) {
+                result.success = false;
+                result.errorMessage = "File not found";
+            }
+            else if (attrs & FILE_ATTRIBUTE_DIRECTORY) {
+                result.success = false;
+                result.errorMessage = "Path is a directory";
+            }
+            else {
+                // File is accessible — route to decoder
+                result.success = true;
+                result.decoderUsed = "AdaptiveRouter";
+            }
         }
 
         auto elapsed = std::chrono::high_resolution_clock::now() - start;

@@ -51,6 +51,7 @@ public:
     ShaderCompileResult Compile(const std::wstring& source,
         CompilerShaderType type,
         const std::wstring& entryPoint) {
+        (void)type; (void)entryPoint;
         ShaderCompileResult r;
         uint64_t key = HashSource(source);
         if (m_cache.count(key)) {

@@ -87,8 +87,23 @@ public:
 
 private:
     static bool IsSystemDarkTheme() {
-        // Stub — in production, reads AppsUseLightTheme registry key
-        return false;
+        // Read AppsUseLightTheme from
+        // HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize
+        // Value = 0 means dark theme is active.
+        HKEY hKey = nullptr;
+        LONG rc = RegOpenKeyExW(
+            HKEY_CURRENT_USER,
+            L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+            0, KEY_READ, &hKey);
+        if (rc != ERROR_SUCCESS) return false;
+        DWORD value = 1; // default: light
+        DWORD size = sizeof(value);
+        DWORD type = 0;
+        rc = RegQueryValueExW(hKey, L"AppsUseLightTheme", nullptr,
+            &type, reinterpret_cast<LPBYTE>(&value), &size);
+        RegCloseKey(hKey);
+        if (rc != ERROR_SUCCESS || type != REG_DWORD) return false;
+        return value == 0; // 0 = dark, 1 = light
     }
 };
 

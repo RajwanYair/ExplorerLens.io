@@ -83,6 +83,7 @@ public:
         uint32_t imageWidth, uint32_t imageHeight,
         uint32_t targetWidth, uint32_t targetHeight,
         float paddingRatio = 0.3f) const {
+        (void)paddingRatio;
         FaceCropRegion crop;
         crop.width = targetWidth;
         crop.height = targetHeight;
@@ -153,6 +154,7 @@ private:
 
     inline float EvaluateCascade(const std::vector<int64_t>& integral, uint32_t imgW, uint32_t imgH,
         uint32_t x, uint32_t y, uint32_t size) const {
+        (void)imgH;
         uint32_t half = size / 2;
         uint32_t quarter = size / 4;
         float area = static_cast<float>(half * size);

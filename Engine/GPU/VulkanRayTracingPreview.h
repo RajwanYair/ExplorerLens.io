@@ -181,6 +181,7 @@ private:
     }
 
     inline Vec3 TraceRay(const RTScene& scene, Vec3 origin, Vec3 dir, uint32_t depth, bool shadows) const {
+        (void)depth;
         auto hitInfo = IntersectScene(scene, origin, dir);
         if (!hitInfo.hit) {
             float t = 0.5f * (dir[1] + 1.0f);

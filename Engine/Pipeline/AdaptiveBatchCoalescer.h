@@ -94,6 +94,7 @@ public:
     }
 
     inline SystemLoadLevel ClassifyLoad(double cpuUtil, double memUsageMB) const {
+        (void)memUsageMB;
         if (cpuUtil < 0.2) return SystemLoadLevel::Idle;
         if (cpuUtil < 0.4) return SystemLoadLevel::Light;
         if (cpuUtil < 0.65) return SystemLoadLevel::Moderate;

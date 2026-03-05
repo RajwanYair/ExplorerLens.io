@@ -101,7 +101,7 @@ private:
     static bool AcquireLargePagePrivilege() {
         HANDLE hToken = nullptr;
         if (!::OpenProcessToken(::GetCurrentProcess(),
-                TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+            TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
             return false;
 
         TOKEN_PRIVILEGES tp = {};

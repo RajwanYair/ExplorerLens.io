@@ -145,6 +145,7 @@ private:
     inline size_t DecompressBlock(const uint8_t* input, size_t inputLen,
         uint8_t* output, size_t outputCapacity,
         CompressionCodec codec) const {
+        (void)codec;
         size_t outLen = (std::min)(inputLen, outputCapacity);
         if (input && output && outLen > 0) {
             std::memcpy(output, input, outLen);

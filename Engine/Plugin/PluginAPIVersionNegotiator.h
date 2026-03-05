@@ -112,6 +112,7 @@ public:
     }
 
     bool IsCompatible(const std::string& pluginId, uint32_t major, uint32_t minor) const {
+        (void)pluginId;
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_hostRange.Contains(major, minor);
     }

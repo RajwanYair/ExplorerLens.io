@@ -8,7 +8,10 @@
 
 #include <windows.h>
 #include <winhttp.h>
+#include <wintrust.h>
+#include <softpub.h>
 #pragma comment(lib, "winhttp.lib")
+#pragma comment(lib, "wintrust.lib")
 
 namespace ExplorerLens {
 namespace Engine {
@@ -61,12 +64,61 @@ public:
 /// Verifies Authenticode digital signatures on plugin packages
 class SignatureVerifier {
 public:
-    /// Verify a package file's signature
-    SignatureStatus Verify(const std::wstring& /*packagePath*/,
+    /// Verify a package file's signature using WinVerifyTrust
+    SignatureStatus Verify(const std::wstring& packagePath,
         PluginCertificateInfo& certOut) const {
         certOut = {};
-        // Stub: real implementation would call WinVerifyTrust
-        return SignatureStatus::Valid;
+
+        // Check the file actually exists
+        DWORD attrs = GetFileAttributesW(packagePath.c_str());
+        if (attrs == INVALID_FILE_ATTRIBUTES || (attrs & FILE_ATTRIBUTE_DIRECTORY))
+            return SignatureStatus::Invalid;
+
+        // Use WinVerifyTrust (Authenticode) to validate digital signature
+        GUID actionId = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+        WINTRUST_FILE_INFO fileInfo{};
+        fileInfo.cbStruct = sizeof(fileInfo);
+        fileInfo.pcwszFilePath = packagePath.c_str();
+        fileInfo.hFile = nullptr;
+        fileInfo.pgKnownSubject = nullptr;
+
+        WINTRUST_DATA trustData{};
+        trustData.cbStruct = sizeof(trustData);
+        trustData.pPolicyCallbackData = nullptr;
+        trustData.pSIPClientData = nullptr;
+        trustData.dwUIChoice = WTD_UI_NONE;
+        trustData.fdwRevocationChecks = WTD_REVOKE_NONE;
+        trustData.dwUnionChoice = WTD_CHOICE_FILE;
+        trustData.pFile = &fileInfo;
+        trustData.dwStateAction = WTD_STATEACTION_VERIFY;
+        trustData.hWVTStateData = nullptr;
+        trustData.pwszURLReference = nullptr;
+        trustData.dwProvFlags = WTD_SAFER_FLAG;
+
+        LONG status = WinVerifyTrust(
+            static_cast<HWND>(INVALID_HANDLE_VALUE), &actionId, &trustData);
+
+        // Close the state handle
+        trustData.dwStateAction = WTD_STATEACTION_CLOSE;
+        WinVerifyTrust(static_cast<HWND>(INVALID_HANDLE_VALUE), &actionId, &trustData);
+
+        switch (status) {
+        case ERROR_SUCCESS:
+            certOut.subject = "Verified";
+            certOut.issuer = "Authenticode CA";
+            certOut.status = SignatureStatus::Valid;
+            return SignatureStatus::Valid;
+        case TRUST_E_NOSIGNATURE:
+            return SignatureStatus::Missing;
+        case TRUST_E_EXPLICIT_DISTRUST:
+        case TRUST_E_SUBJECT_NOT_TRUSTED:
+            return SignatureStatus::Untrusted;
+        case CERT_E_EXPIRED:
+        case CERT_E_VALIDITYPERIODNESTING:
+            return SignatureStatus::Expired;
+        default:
+            return SignatureStatus::Invalid;
+        }
     }
 
     /// Check whether the given signature status is acceptable for install

@@ -41,6 +41,7 @@ public:
     /// Apply color correction to a thumbnail buffer (simulated)
     ColorCorrectionResult Apply(uint8_t* pixels, uint32_t width,
         uint32_t height, uint32_t stride) const {
+        (void)stride;
         ColorCorrectionResult r;
         if (!pixels || width == 0 || height == 0) return r;
         r.applied = (m_profile != ColorCorrectionProfile::None);

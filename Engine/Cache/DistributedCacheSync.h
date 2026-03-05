@@ -130,6 +130,7 @@ public:
     }
 
     inline bool ResolveConflict(const std::string& key, uint32_t localVersion, uint32_t remoteVersion) {
+        (void)key;
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.conflictsResolved++;
         return remoteVersion > localVersion;

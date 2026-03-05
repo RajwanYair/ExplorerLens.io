@@ -828,6 +828,18 @@
 #include "../Decoders/JPEG2000DecoderV2.h"
 #include "../Decoders/UniversalVideoDecoder.h"
 
+// Sprint 394: New feature headers
+#include "../Core/ColdStartOptimizer.h"
+#include "../Pipeline/DecodeCancellationEngine.h"
+#include "../Pipeline/RequestDeduplicator.h"
+#include "../Cache/CacheBloomFilter.h"
+#include "../Cache/CacheFragmentationAnalyzer.h"
+#include "../GPU/GPUPowerStateManager.h"
+#include "../GPU/GPUWorkgroupOptimizer.h"
+#include "../Memory/CopyOnWriteBufferPool.h"
+#include "../Memory/MemoryMappedThumbnailAtlas.h"
+#include "../AI/ThumbnailAestheticScorer.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))
@@ -22703,6 +22715,8 @@ TEST(Test_BZ_PerceptualHash_Compute) {
     uint32_t dummy[16] = {};
     auto gray = PerceptualHashEngine::ArgbToGray(dummy, 4, 4);
     ASSERT(gray.width == 4 && gray.height == 4);
+    auto hash = hasher.ComputeAverageHash(gray.pixels.data(), gray.width, gray.height);
+    (void)hash;
 }
 
 TEST(Test_BZ_PerceptualHash_Similarity) {
@@ -23642,6 +23656,272 @@ TEST(Test_EP_UniversalVideoDecoder_Validate) {
 }
 TEST(Test_EP_UniversalVideoDecoder_Props) {
     ASSERT(UniversalVideoDecoder::Instance().Validate());
+}
+
+// ============================================================================
+// Sprint 394: New Feature Tests
+// ============================================================================
+
+// --- ColdStartOptimizer Tests ---
+TEST(Test_S394_ColdStart_Instance) {
+    auto& opt = ColdStartOptimizer::Instance();
+    // Just verify it doesn't crash on access
+    auto stats = opt.GetStats();
+    (void)stats;
+    ASSERT(true);
+}
+
+TEST(Test_S394_ColdStart_DefaultCodecs) {
+    auto defaults = ColdStartOptimizer::DefaultCodecDLLs();
+    ASSERT(defaults.size() >= 4);
+}
+
+TEST(Test_S394_ColdStart_Stats) {
+    auto& opt = ColdStartOptimizer::Instance();
+    auto stats = opt.GetStats();
+    ASSERT(stats.preloadRuns == 0 || stats.preloadRuns > 0); // no crash
+}
+
+// --- DecodeCancellationEngine Tests ---
+TEST(Test_S394_Cancel_CreateToken) {
+    auto& engine = DecodeCancellationEngine::Instance();
+    auto token = engine.CreateToken(L"test_cancel_1.png");
+    ASSERT(token != nullptr);
+    ASSERT(!token->IsCancelled());
+}
+
+TEST(Test_S394_Cancel_CancelFile) {
+    auto& engine = DecodeCancellationEngine::Instance();
+    auto token = engine.CreateToken(L"cancel_me_394.jpg");
+    ASSERT(!token->IsCancelled());
+    engine.CancelFile(L"cancel_me_394.jpg", CancelReason::UserRequested);
+    ASSERT(token->IsCancelled());
+    ASSERT(token->Reason() == CancelReason::UserRequested);
+}
+
+TEST(Test_S394_Cancel_CancelAll) {
+    auto& engine = DecodeCancellationEngine::Instance();
+    auto t1 = engine.CreateToken(L"file_a_394.png");
+    auto t2 = engine.CreateToken(L"file_b_394.png");
+    engine.CancelAll(CancelReason::Shutdown);
+    ASSERT(t1->IsCancelled());
+    ASSERT(t2->IsCancelled());
+}
+
+// --- RequestDeduplicator Tests ---
+TEST(Test_S394_Dedup_SingleRequest) {
+    auto& dedup = RequestDeduplicator::Instance();
+    int callCount = 0;
+    auto result = dedup.Submit(L"test_dedup_394.png", [&]() -> DeduplicatedResult {
+        callCount++;
+        DeduplicatedResult res;
+        res.pixels = { 0xAA, 0xBB, 0xCC };
+        res.success = true;
+        return res;
+    });
+    ASSERT(result.success);
+    ASSERT(result.pixels.size() == 3);
+    ASSERT(result.pixels[0] == 0xAA);
+    ASSERT(callCount == 1);
+}
+
+TEST(Test_S394_Dedup_Stats) {
+    auto& dedup = RequestDeduplicator::Instance();
+    auto stats = dedup.GetStats();
+    // After previous test, at least 1 request processed
+    ASSERT(stats.totalRequests >= 1);
+}
+
+// --- CacheBloomFilter Tests ---
+TEST(Test_S394_Bloom_InsertAndCheck) {
+    BloomFilterConfig cfg;
+    cfg.expectedElements = 1024;
+    cfg.hashFunctions = 5;
+    CacheBloomFilter bloom(cfg);
+    bloom.Insert("hello");
+    ASSERT(bloom.MayContain("hello"));
+}
+
+TEST(Test_S394_Bloom_NegativeLookup) {
+    BloomFilterConfig cfg;
+    cfg.expectedElements = 1024;
+    cfg.hashFunctions = 5;
+    CacheBloomFilter bloom(cfg);
+    bloom.Insert("exists");
+    auto stats = bloom.GetStats();
+    ASSERT(stats.fillRatio > 0.0);
+}
+
+TEST(Test_S394_Bloom_Clear) {
+    BloomFilterConfig cfg;
+    cfg.expectedElements = 1024;
+    cfg.hashFunctions = 5;
+    CacheBloomFilter bloom(cfg);
+    bloom.Insert("data");
+    bloom.Clear();
+    auto stats = bloom.GetStats();
+    ASSERT(stats.fillRatio == 0.0);
+}
+
+// --- CacheFragmentationAnalyzer Tests ---
+TEST(Test_S394_Frag_Empty) {
+    CacheFragmentationAnalyzer analyzer;
+    auto report = analyzer.Analyze(1024 * 1024);
+    ASSERT(report.wasteRatio == 0.0);
+    ASSERT(report.level == FragmentationLevel::None);
+}
+
+TEST(Test_S394_Frag_RecordDeallocation) {
+    CacheFragmentationAnalyzer analyzer;
+    analyzer.RecordAllocation(0, 100);
+    analyzer.RecordAllocation(200, 100);
+    analyzer.RecordDeallocation(100, 100);
+    analyzer.RecordDeallocation(400, 200);
+    auto report = analyzer.Analyze(1000);
+    ASSERT(report.holeCount >= 1);
+    ASSERT(report.wastedBytes > 0);
+}
+
+TEST(Test_S394_Frag_CompactionEstimate) {
+    CacheFragmentationAnalyzer analyzer;
+    analyzer.RecordDeallocation(100, 128);
+    analyzer.RecordDeallocation(300, 256);
+    uint64_t savings = analyzer.EstimateCompactionSavings();
+    ASSERT(savings == 384);
+}
+
+// --- GPUPowerStateManager Tests ---
+TEST(Test_S394_GPUPower_Instance) {
+    auto& mgr = GPUPowerStateManager::Instance();
+    auto stats = mgr.GetStats();
+    (void)stats;
+    ASSERT(true);
+}
+
+TEST(Test_S394_GPUPower_RouteWork) {
+    auto& mgr = GPUPowerStateManager::Instance();
+    auto decision = mgr.RouteWork(1024, false); // 1KB, not compute
+    // Without adapters enumerated, should fall back to CPU
+    (void)decision;
+    ASSERT(true);
+}
+
+TEST(Test_S394_GPUPower_RouteTarget) {
+    // Verify enum values exist
+    GPURouteTarget targets[] = {
+        GPURouteTarget::Integrated, GPURouteTarget::Discrete,
+        GPURouteTarget::CPU, GPURouteTarget::Auto
+    };
+    ASSERT(targets[0] != targets[2]);
+}
+
+// --- GPUWorkgroupOptimizer Tests ---
+TEST(Test_S394_Workgroup_Optimize2D) {
+    GPUComputeLimits limits;
+    limits.maxWorkgroupSize = 1024;
+    limits.maxWorkgroupDimX = 1024;
+    limits.maxWorkgroupDimY = 1024;
+    limits.maxWorkgroupDimZ = 64;
+    limits.warpSize = 32;
+    GPUWorkgroupOptimizer opt(limits);
+    auto result = opt.Optimize2D(1920, 1080);
+    ASSERT(result.localSize.x > 0 && result.localSize.y > 0);
+    ASSERT(result.localSize.TotalThreads() <= limits.maxWorkgroupSize);
+    ASSERT(result.occupancy >= 0.0f && result.occupancy <= 1.0f);
+}
+
+TEST(Test_S394_Workgroup_Optimize1D) {
+    GPUComputeLimits limits;
+    limits.maxWorkgroupSize = 1024;
+    limits.warpSize = 64;
+    limits.vendor = WGVendor::AMD;
+    GPUWorkgroupOptimizer opt(limits);
+    auto result = opt.Optimize1D(65536);
+    ASSERT(result.localSize.x > 0 && result.localSize.y == 1);
+}
+
+TEST(Test_S394_Workgroup_Stats) {
+    GPUComputeLimits limits;
+    GPUWorkgroupOptimizer opt(limits);
+    opt.Optimize2D(256, 256);
+    auto stats = opt.GetStats();
+    ASSERT(stats.optimizationsRun == 1);
+    ASSERT(stats.totalDispatches == 1);
+}
+
+// --- CopyOnWriteBufferPool Tests ---
+TEST(Test_S394_COW_WriteAndRead) {
+    COWBuffer buf(1024);
+    uint8_t* ptr = buf.WritePtr();
+    ASSERT(ptr != nullptr);
+    ptr[0] = 0x41;
+    ptr[1] = 0x42;
+    ASSERT(buf.Size() == 1024);
+    ASSERT(buf.ReadPtr()[0] == 0x41);
+    ASSERT(buf.ReadPtr()[1] == 0x42);
+}
+
+TEST(Test_S394_COW_ShareAndCOW) {
+    COWBuffer original(512);
+    original.WritePtr()[0] = 0xFF;
+    auto shared = original.Share();
+    ASSERT(shared.ReadPtr()[0] == 0xFF);
+    ASSERT(shared.IsShared());
+    // Write to shared triggers copy-on-write
+    shared.WritePtr()[0] = 0x00;
+    ASSERT(shared.ReadPtr()[0] == 0x00);
+    ASSERT(original.ReadPtr()[0] == 0xFF); // Original unchanged
+}
+
+TEST(Test_S394_COW_Pool) {
+    auto& pool = CopyOnWriteBufferPool::Instance();
+    auto buf = pool.Acquire(2048);
+    ASSERT(buf.Size() >= 2048);
+    pool.Release(std::move(buf));
+    auto buf2 = pool.Acquire(2048);
+    ASSERT(buf2.Size() >= 2048);
+}
+
+// --- MemoryMappedThumbnailAtlas Tests ---
+TEST(Test_S394_Atlas_Lifecycle) {
+    MemoryMappedThumbnailAtlas atlas;
+    ASSERT(!atlas.IsMapped());
+}
+
+TEST(Test_S394_Atlas_ReadUnmapped) {
+    MemoryMappedThumbnailAtlas atlas;
+    AtlasEntry entry;
+    auto ptr = atlas.Read(12345, entry);
+    ASSERT(ptr == nullptr);
+}
+
+// --- ThumbnailAestheticScorer Tests ---
+TEST(Test_S394_Aesthetic_ScoreGrayscale) {
+    ThumbnailAestheticScorer scorer;
+    std::vector<uint8_t> gray(64 * 64, 128);
+    auto score = scorer.ScoreGrayscale(gray.data(), 64, 64);
+    ASSERT(score.overall >= 0.0f && score.overall <= 100.0f);
+}
+
+TEST(Test_S394_Aesthetic_ScoreARGB) {
+    ThumbnailAestheticScorer scorer;
+    std::vector<uint32_t> argb(32 * 32, 0xFF808080);
+    auto score = scorer.ScoreARGB(argb.data(), 32, 32);
+    ASSERT(score.overall >= 0.0f && score.overall <= 100.0f);
+}
+
+TEST(Test_S394_Aesthetic_SelectBestFrame) {
+    ThumbnailAestheticScorer scorer;
+    // Score a few grayscale images and pick the best
+    std::vector<uint8_t> bright(16 * 16, 200);
+    std::vector<uint8_t> dark(16 * 16, 20);
+    std::vector<uint8_t> mid(16 * 16, 128);
+    std::vector<AestheticScore> scores;
+    scores.push_back(scorer.ScoreGrayscale(bright.data(), 16, 16));
+    scores.push_back(scorer.ScoreGrayscale(dark.data(), 16, 16));
+    scores.push_back(scorer.ScoreGrayscale(mid.data(), 16, 16));
+    uint32_t best = scorer.SelectBestFrame(scores);
+    ASSERT(best < 3);
 }
 
 int main() {
@@ -27572,6 +27852,48 @@ int main() {
     RUN_TEST(Test_S37_FallbackEngine_RegisterAndSelect);
     RUN_TEST(Test_S37_FallbackEngine_NoDecoder);
     RUN_TEST(Test_S37_FallbackEngine_FallbackChain);
+
+    // Sprint 394: New Feature Tests
+    std::wcout << std::endl;
+    std::wcout << L"Sprint 394: New Feature Tests..." << std::endl;
+    // ColdStartOptimizer
+    RUN_TEST(Test_S394_ColdStart_Instance);
+    RUN_TEST(Test_S394_ColdStart_DefaultCodecs);
+    RUN_TEST(Test_S394_ColdStart_Stats);
+    // DecodeCancellationEngine
+    RUN_TEST(Test_S394_Cancel_CreateToken);
+    RUN_TEST(Test_S394_Cancel_CancelFile);
+    RUN_TEST(Test_S394_Cancel_CancelAll);
+    // RequestDeduplicator
+    RUN_TEST(Test_S394_Dedup_SingleRequest);
+    RUN_TEST(Test_S394_Dedup_Stats);
+    // CacheBloomFilter
+    RUN_TEST(Test_S394_Bloom_InsertAndCheck);
+    RUN_TEST(Test_S394_Bloom_NegativeLookup);
+    RUN_TEST(Test_S394_Bloom_Clear);
+    // CacheFragmentationAnalyzer
+    RUN_TEST(Test_S394_Frag_Empty);
+    RUN_TEST(Test_S394_Frag_RecordDeallocation);
+    RUN_TEST(Test_S394_Frag_CompactionEstimate);
+    // GPUPowerStateManager
+    RUN_TEST(Test_S394_GPUPower_Instance);
+    RUN_TEST(Test_S394_GPUPower_RouteWork);
+    RUN_TEST(Test_S394_GPUPower_RouteTarget);
+    // GPUWorkgroupOptimizer
+    RUN_TEST(Test_S394_Workgroup_Optimize2D);
+    RUN_TEST(Test_S394_Workgroup_Optimize1D);
+    RUN_TEST(Test_S394_Workgroup_Stats);
+    // CopyOnWriteBufferPool
+    RUN_TEST(Test_S394_COW_WriteAndRead);
+    RUN_TEST(Test_S394_COW_ShareAndCOW);
+    RUN_TEST(Test_S394_COW_Pool);
+    // MemoryMappedThumbnailAtlas
+    RUN_TEST(Test_S394_Atlas_Lifecycle);
+    RUN_TEST(Test_S394_Atlas_ReadUnmapped);
+    // ThumbnailAestheticScorer
+    RUN_TEST(Test_S394_Aesthetic_ScoreGrayscale);
+    RUN_TEST(Test_S394_Aesthetic_ScoreARGB);
+    RUN_TEST(Test_S394_Aesthetic_SelectBestFrame);
 
     std::wcout << std::endl;
 

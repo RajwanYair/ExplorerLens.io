@@ -44,6 +44,7 @@ public:
 
     TimeoutDecision Calculate(uint64_t fileSize, const std::wstring& format,
         float systemLoad = 0.5f) const {
+        (void)format;
         TimeoutDecision d;
         switch (m_strategy) {
         case TimeoutStrategy::Fixed:

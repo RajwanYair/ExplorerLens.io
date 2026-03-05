@@ -247,17 +247,21 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
                 }
             }
             // ── Button controls (checkbox, radio, group box, push button) ──
-            // DarkMode_Explorer correctly renders white text for MOST Button
-            // sub-styles on Windows 10 1903+ / Windows 11.  However, group
-            // box captions (BS_GROUPBOX) are painted via WM_CTLCOLORSTATIC,
-            // and DarkMode_Explorer does NOT reliably override their text
-            // color on all Windows builds.  For group boxes we disable visual
-            // styles so the classic GDI renderer uses the white text color
-            // set in the WM_CTLCOLORSTATIC handler.
+            // DarkMode_Explorer does NOT reliably render white text for
+            // checkbox, radio-button, and group-box sub-styles across all
+            // Windows 10/11 builds.  Disable visual styles for every Button
+            // sub-type EXCEPT push buttons so the classic GDI renderer uses
+            // the white text color we set in WM_CTLCOLORSTATIC / WM_CTLCOLORBTN.
+            // Push buttons (BS_PUSHBUTTON / BS_DEFPUSHBUTTON) keep
+            // DarkMode_Explorer for proper dark button chrome.
             else if (_tcsicmp(className, _T("Button")) == 0) {
                 LONG style = GetWindowLong(hChild, GWL_STYLE);
                 LONG btnType = style & 0x0FL; // BS_TYPEMASK
-                if (btnType == BS_GROUPBOX) {
+                bool isPushButton = (btnType == BS_PUSHBUTTON ||
+                    btnType == BS_DEFPUSHBUTTON);
+                if (!isPushButton) {
+                    // Groupbox, checkbox, radio — disable visual styles.
+                    // GDI draws text using WM_CTLCOLORSTATIC colors (white).
                     if (dark) {
                         SetWindowTheme(hChild, L"", L"");
                     }
