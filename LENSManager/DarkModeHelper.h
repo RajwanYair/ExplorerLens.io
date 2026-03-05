@@ -147,30 +147,17 @@ inline bool SetDarkModeForTitleBar(HWND hWnd, bool enable) {
 }
 
 // Apply theme colors to dialog
+// NOTE: Per-child EnableDarkModeForWindow + SetWindowTheme is handled
+// by ApplyDarkScrollbars() in a single consistent pass. We avoid
+// sending WM_THEMECHANGED here to prevent controls painting with
+// stale visual-style state before ApplyDarkScrollbars applies the
+// correct dark/light theme.
 inline void ApplyThemeToDialog(HWND hDlg, const ThemeColors& theme, bool isDarkMode = false) {
     // Set dialog background brush (delete old brush to avoid GDI leak)
     HBRUSH oldBrush = reinterpret_cast<HBRUSH>(
         SetClassLongPtr(hDlg, GCLP_HBRBACKGROUND,
             reinterpret_cast<LONG_PTR>(CreateSolidBrush(theme.background))));
     if (oldBrush) DeleteObject(oldBrush);
-
-    // Apply theme to all child windows:
-    // 1. Enable undocumented per-window dark mode (AllowDarkModeForWindow)
-    // 2. Send WM_THEMECHANGED so controls pick up DarkMode_Explorer style
-    // These two steps together ensure checkboxes, buttons, and group boxes
-    // render text in white on dark backgrounds.
-    EnumChildWindows(hDlg, [](HWND hChild, LPARAM lParam) -> BOOL
-        {
-            bool dark = (lParam != 0);
-            EnableDarkModeForWindow(hChild, dark);
-            SendMessage(hChild, WM_THEMECHANGED, 0, 0);
-            InvalidateRect(hChild, nullptr, TRUE);
-            return TRUE;
-        }, (LPARAM)(isDarkMode ? 1 : 0));
-
-    // Force full dialog redraw
-    RedrawWindow(hDlg, nullptr, nullptr,
-        RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 }
 
 /*
@@ -223,12 +210,15 @@ inline void SetDarkScrollbar(HWND hWnd, bool darkMode) {
 }
 
 // Apply dark theme to ALL child controls (scrollbars, buttons, statics, etc.)
-// Standard checkbox, radio-button and group-box controls ignore the HDC text
-// color set in WM_CTLCOLORSTATIC — they paint text with the visual style.
-// Applying "DarkMode_Explorer" tells the visual-style renderer to use white
-// text on a dark background.
+//
+// KEY INSIGHT: "DarkMode_Explorer" tells the visual-style renderer to use
+// white text on dark backgrounds for Button-class controls (checkboxes,
+// radio buttons, group boxes, push buttons). However, Static-class controls
+// (LTEXT/CTEXT labels) do NOT respond to DarkMode_Explorer for text color.
+// For Static controls we DISABLE visual styles entirely, which forces the
+// GDI renderer to use the WM_CTLCOLORSTATIC text color (white in dark mode).
 inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
-    // Apply theme to the dialog window itself
+    // Apply DarkMode_Explorer to the dialog window itself
     SetDarkScrollbar(hDlg, darkMode);
 
     EnumChildWindows(hDlg, [](HWND hChild, LPARAM lParam) -> BOOL
@@ -243,12 +233,27 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
             // black text on the dark background.
             EnableDarkModeForWindow(hChild, dark);
 
-            // Apply dark theme to ALL control types — buttons (checkboxes,
-            // radio buttons, group boxes), static labels, edit controls,
-            // list controls, tree views, combo boxes, etc.
-            if (_tcsicmp(className, _T("Button")) == 0 ||
-                _tcsicmp(className, _T("Static")) == 0 ||
-                _tcsicmp(className, _T("ListBox")) == 0 ||
+            // ── Static controls (LTEXT, CTEXT, RTEXT, icons) ──
+            // DarkMode_Explorer does NOT change text color for the Static
+            // window class. Disabling visual styles (empty theme) forces
+            // the classic GDI renderer which respects SetTextColor() from
+            // our WM_CTLCOLORSTATIC handler (white in dark, black in light).
+            if (_tcsicmp(className, _T("Static")) == 0) {
+                if (dark) {
+                    SetWindowTheme(hChild, L"", L"");
+                }
+                else {
+                    SetWindowTheme(hChild, nullptr, nullptr);
+                }
+            }
+            // ── Button controls (checkbox, radio, group box, push button) ──
+            // DarkMode_Explorer correctly renders white text for all Button
+            // sub-styles on Windows 10 1903+ / Windows 11.
+            else if (_tcsicmp(className, _T("Button")) == 0) {
+                SetDarkScrollbar(hChild, dark);
+            }
+            // ── All other themed controls ──
+            else if (_tcsicmp(className, _T("ListBox")) == 0 ||
                 _tcsicmp(className, _T("SysListView32")) == 0 ||
                 _tcsicmp(className, _T("SysTreeView32")) == 0 ||
                 _tcsicmp(className, _T("Edit")) == 0 ||
@@ -264,17 +269,20 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
             // Send WM_THEMECHANGED after theme is applied so controls
             // pick up the new visual style colors immediately.
             SendMessage(hChild, WM_THEMECHANGED, 0, 0);
+            InvalidateRect(hChild, nullptr, TRUE);
 
             // Status bar needs explicit color messages (SB_SETBKCOLOR)
             if (_tcsicmp(className, _T("msctls_statusbar32")) == 0) {
                 ThemeColors t = dark ? GetDarkTheme() : GetLightTheme();
                 ::SendMessage(hChild, SB_SETBKCOLOR, 0, (LPARAM)t.background);
-                // Force status bar repaint with correct colors
-                InvalidateRect(hChild, nullptr, TRUE);
             }
 
             return TRUE;
         }, (LPARAM)(darkMode ? 1 : 0));
+
+    // Force a full dialog + children repaint after all theming is done
+    RedrawWindow(hDlg, nullptr, nullptr,
+        RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 }
 
 // Set themed text/background on a status bar control
