@@ -30,109 +30,118 @@ FONT 8, "MS Shell Dlg 2", 400, 0, 1
 
 
 
-IDD_MAINDLG DIALOG 0, 0, 360, 460
+IDD_MAINDLG DIALOG 0, 0, 360, 475
 STYLE DS_CONTEXTHELP | DS_SETFONT | WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_SYSMENU | WS_THICKFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX
 CAPTION "ExplorerLens Shell Manager - Thumbnail Configuration"
 FONT 8, "Ms Shell Dlg"
 {
-  CONTROL         "", IDC_STATUSBAR, "msctls_statusbar32", WS_CHILD | WS_VISIBLE, 0, 443, 360, 15
+  CONTROL         "", IDC_STATUSBAR, "msctls_statusbar32", WS_CHILD | WS_VISIBLE, 0, 458, 360, 15
 
     // ── Column 1 (left) ──────────────────────────────────────────────
 
-    // Comic Book Formats (10, 5, 165, 62)
-    CONTROL         "Comic Book Formats", IDC_COMIC_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 5, 165, 62
+    // Comic Book Formats — H=65 (+3 padding to prevent border overlap)
+    CONTROL         "Comic Book Formats", IDC_COMIC_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 5, 165, 65
+    CONTROL         "All", IDC_CB_ALL_COMIC, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 140, 5, 25, 10
     CONTROL         "CBZ (Comic Book ZIP)", IDC_CB_CBZ, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 18, 145, 10
     CONTROL         "CBR (Comic Book RAR)", IDC_CB_CBR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 31, 145, 10
     CONTROL         "CB7 (Comic Book 7-Zip)", IDC_CB_CB7, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 44, 145, 10
     CONTROL         "CBT (Comic Book TAR)", IDC_CB_CBT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 57, 145, 10
 
-    // Archive Formats (10, 72, 165, 62)
-    CONTROL         "Archive Formats", IDC_ARCHIVE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 72, 165, 62
-    CONTROL         "ZIP Archives", IDC_CB_ZIP, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 85, 145, 10
-    CONTROL         "RAR Archives", IDC_CB_RAR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 98, 145, 10
-    CONTROL         "7Z (7-Zip)", IDC_CB_7Z, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 111, 145, 10
-    CONTROL         "TAR Archives", IDC_CB_TAR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 124, 145, 10
+    // Archive Formats — shifted +3
+    CONTROL         "Archive Formats", IDC_ARCHIVE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 75, 165, 65
+    CONTROL         "All", IDC_CB_ALL_ARCHIVE, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 140, 75, 25, 10
+    CONTROL         "ZIP Archives", IDC_CB_ZIP, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 88, 145, 10
+    CONTROL         "RAR Archives", IDC_CB_RAR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 101, 145, 10
+    CONTROL         "7Z (7-Zip)", IDC_CB_7Z, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 114, 145, 10
+    CONTROL         "TAR Archives", IDC_CB_TAR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 127, 145, 10
 
-    // Modern Image Formats (10, 139, 165, 62)
-    CONTROL         "Modern Image Formats", IDC_IMAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 139, 165, 62
-    CONTROL         "WebP Images", IDC_CB_WEBP, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 152, 145, 10
-    CONTROL         "HEIF/HEIC Images", IDC_CB_HEIF, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 165, 145, 10
-    CONTROL         "AVIF Images (AV1)", IDC_CB_AVIF, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 178, 145, 10
-    CONTROL         "JPEG XL Images", IDC_CB_JXL, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 191, 145, 10
+    // Modern Image Formats — shifted +6
+    CONTROL         "Modern Image Formats", IDC_IMAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 145, 165, 65
+    CONTROL         "All", IDC_CB_ALL_IMAGE, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 140, 145, 25, 10
+    CONTROL         "WebP Images", IDC_CB_WEBP, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 158, 145, 10
+    CONTROL         "HEIF/HEIC Images", IDC_CB_HEIF, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 171, 145, 10
+    CONTROL         "AVIF Images (AV1)", IDC_CB_AVIF, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 184, 145, 10
+    CONTROL         "JPEG XL Images", IDC_CB_JXL, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 197, 145, 10
 
-    // Pro Image Formats (10, 206, 165, 62) — NEW
-    CONTROL         "Pro Image Formats", IDC_PRO_IMAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 206, 165, 62
-    CONTROL         "PSD (Photoshop)", IDC_CB_PSD, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 219, 145, 10
-    CONTROL         "DDS (DirectDraw Surface)", IDC_CB_DDS, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 232, 145, 10
-    CONTROL         "HDR (Radiance HDR)", IDC_CB_HDR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 245, 145, 10
-    CONTROL         "EXR (OpenEXR)", IDC_CB_EXR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 258, 145, 10
+    // Pro Image Formats — shifted +9
+    CONTROL         "Pro Image Formats", IDC_PRO_IMAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 215, 165, 65
+    CONTROL         "All", IDC_CB_ALL_PROIMAGE, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 140, 215, 25, 10
+    CONTROL         "PSD (Photoshop)", IDC_CB_PSD, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 228, 145, 10
+    CONTROL         "DDS (DirectDraw Surface)", IDC_CB_DDS, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 241, 145, 10
+    CONTROL         "HDR (Radiance HDR)", IDC_CB_HDR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 254, 145, 10
+    CONTROL         "EXR (OpenEXR)", IDC_CB_EXR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 267, 145, 10
 
-    // Collage Mode (10, 273, 165, 64)
-    CONTROL         "Collage Mode", IDC_COLLAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 273, 165, 64
-    CONTROL         "Single page (1x1)", IDC_RADIO_1X1, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 20, 286, 145, 10
-    CONTROL         "4-page grid (2x2)", IDC_RADIO_2X2, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 299, 145, 10
-    CONTROL         "9-page grid (3x3)", IDC_RADIO_3X3, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 312, 145, 10
-    CONTROL         "16-page grid (4x4)", IDC_RADIO_4X4, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 325, 145, 10
+    // Collage Mode — shifted +12
+    CONTROL         "Collage Mode", IDC_COLLAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 285, 165, 64
+    CONTROL         "Single page (1x1)", IDC_RADIO_1X1, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 20, 298, 145, 10
+    CONTROL         "4-page grid (2x2)", IDC_RADIO_2X2, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 311, 145, 10
+    CONTROL         "9-page grid (3x3)", IDC_RADIO_3X3, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 324, 145, 10
+    CONTROL         "16-page grid (4x4)", IDC_RADIO_4X4, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 337, 145, 10
 
-    // Extended Formats (10, 342, 165, 62) — Grouped additional formats
-    CONTROL         "Extended Formats", IDC_EXTENDED_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 342, 165, 62
-    CONTROL         "Extended Images (BMP, WMF, ...)", IDC_CB_EXT_IMAGE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 355, 145, 10
-    CONTROL         "Texture (KTX, VTF)", IDC_CB_TEXTURE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 368, 145, 10
-    CONTROL         "Extended Archives (ISO, CAB, ...)", IDC_CB_EXT_ARCHIVE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 381, 145, 10
-    CONTROL         "Extended Docs (DjVu, CHM, ...)", IDC_CB_EXT_DOCUMENT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 394, 145, 10
+    // Extended Formats — shifted +12
+    CONTROL         "Extended Formats", IDC_EXTENDED_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 354, 165, 65
+    CONTROL         "All", IDC_CB_ALL_EXTENDED, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 140, 354, 25, 10
+    CONTROL         "Extended Images (BMP, WMF, ...)", IDC_CB_EXT_IMAGE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 367, 145, 10
+    CONTROL         "Texture (KTX, VTF)", IDC_CB_TEXTURE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 380, 145, 10
+    CONTROL         "Extended Archives (ISO, CAB, ...)", IDC_CB_EXT_ARCHIVE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 393, 145, 10
+    CONTROL         "Extended Docs (DjVu, CHM, ...)", IDC_CB_EXT_DOCUMENT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 406, 145, 10
 
     // ── Column 2 (right) ─────────────────────────────────────────────
 
-    // E-Book Formats (185, 5, 165, 62)
-    CONTROL         "E-Book Formats", IDC_EBOOK_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 5, 165, 62
+    // E-Book Formats — H=65 (+3 padding)
+    CONTROL         "E-Book Formats", IDC_EBOOK_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 5, 165, 65
+    CONTROL         "All", IDC_CB_ALL_EBOOK, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 315, 5, 25, 10
     CONTROL         "EPUB (Electronic Publication)", IDC_CB_EPUB, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 18, 145, 10
     CONTROL         "MOBI (Mobipocket)", IDC_CB_MOBI, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 31, 145, 10
     CONTROL         "AZW (Kindle)", IDC_CB_AZW, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 44, 145, 10
     CONTROL         "AZW3 (Kindle Format 8)", IDC_CB_AZW3, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 57, 145, 10
 
-    // Photo & Other Formats (185, 72, 165, 40)
-    CONTROL         "Photo & Other Formats", IDC_PHOTO_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 72, 165, 40
-    CONTROL         "PHZ (Photo ZIP)", IDC_CB_PHZ, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 85, 145, 10
-    CONTROL         "FB2 (FictionBook)", IDC_CB_FB2, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 98, 145, 10
+    // Photo & Other Formats — shifted +3
+    CONTROL         "Photo & Other Formats", IDC_PHOTO_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 75, 165, 40
+    CONTROL         "All", IDC_CB_ALL_PHOTO, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 315, 75, 25, 10
+    CONTROL         "PHZ (Photo ZIP)", IDC_CB_PHZ, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 88, 145, 10
+    CONTROL         "FB2 (FictionBook)", IDC_CB_FB2, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 101, 145, 10
 
-    // Media & Documents (185, 117, 165, 88)
-    CONTROL         "Media & Documents", IDC_MEDIA_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 117, 165, 88
-    CONTROL         "Video Files (MP4, AVI, MKV)", IDC_CB_VIDEO, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 130, 145, 10
-    CONTROL         "PDF Documents", IDC_CB_PDF, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 143, 145, 10
-    CONTROL         "TIFF Images", IDC_CB_TIFF, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 156, 145, 10
-    CONTROL         "SVG Vector Graphics", IDC_CB_SVG, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 169, 145, 10
-    CONTROL         "RAW Photos (DNG, CR2, NEF)", IDC_CB_RAW, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 182, 145, 10
+    // Media & Documents — shifted +3
+    CONTROL         "Media & Documents", IDC_MEDIA_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 120, 165, 88
+    CONTROL         "All", IDC_CB_ALL_MEDIA, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 315, 120, 25, 10
+    CONTROL         "Video Files (MP4, AVI, MKV)", IDC_CB_VIDEO, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 133, 145, 10
+    CONTROL         "PDF Documents", IDC_CB_PDF, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 146, 145, 10
+    CONTROL         "TIFF Images", IDC_CB_TIFF, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 159, 145, 10
+    CONTROL         "SVG Vector Graphics", IDC_CB_SVG, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 172, 145, 10
+    CONTROL         "RAW Photos (DNG, CR2, NEF)", IDC_CB_RAW, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 185, 145, 10
 
-    // Specialized Formats (185, 210, 165, 127) — NEW
-    CONTROL         "Specialized Formats", IDC_SPECIALIZED_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 210, 165, 127
-    CONTROL         "PPM (Portable Pixmap)", IDC_CB_PPM, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 223, 145, 10
-    CONTROL         "ICO (Windows Icon)", IDC_CB_ICO, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 236, 145, 10
-    CONTROL         "QOI (Quite OK Image)", IDC_CB_QOI, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 249, 145, 10
-    CONTROL         "TGA (Targa Image)", IDC_CB_TGA, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 262, 145, 10
-    CONTROL         "Audio Cover Art (MP3, FLAC)", IDC_CB_AUDIO, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 275, 145, 10
-    CONTROL         "Documents (DOCX, XLSX)", IDC_CB_DOCUMENT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 288, 145, 10
-    CONTROL         "Fonts (TTF, OTF)", IDC_CB_FONT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 301, 145, 10
-    CONTROL         "3D Models (STL, OBJ)", IDC_CB_MODEL, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 314, 145, 10
+    // Specialized Formats — shifted +3
+    CONTROL         "Specialized Formats", IDC_SPECIALIZED_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 213, 165, 127
+    CONTROL         "All", IDC_CB_ALL_SPECIAL, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 315, 213, 25, 10
+    CONTROL         "PPM (Portable Pixmap)", IDC_CB_PPM, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 226, 145, 10
+    CONTROL         "ICO (Windows Icon)", IDC_CB_ICO, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 239, 145, 10
+    CONTROL         "QOI (Quite OK Image)", IDC_CB_QOI, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 252, 145, 10
+    CONTROL         "TGA (Targa Image)", IDC_CB_TGA, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 265, 145, 10
+    CONTROL         "Audio Cover Art (MP3, FLAC)", IDC_CB_AUDIO, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 278, 145, 10
+    CONTROL         "Documents (DOCX, XLSX)", IDC_CB_DOCUMENT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 291, 145, 10
+    CONTROL         "Fonts (TTF, OTF)", IDC_CB_FONT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 304, 145, 10
+    CONTROL         "3D Models (STL, OBJ)", IDC_CB_MODEL, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 317, 145, 10
 
-    // Advanced Options (185, 342, 165, 60)
-    CONTROL         "Advanced Options", IDC_SORT_ADVOPTGROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 342, 165, 60
-    CONTROL         "Sort images alphabetically", IDC_CB_SORT, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 355, 155, 10
-    LTEXT           "Uncheck for archive order.", IDC_SORT_DESC, 205, 368, 145, 8, SS_LEFT | WS_CHILD | WS_VISIBLE, WS_EX_TRANSPARENT
-    CONTROL         "Show archive indicator", IDC_CB_SHOWICON, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 381, 150, 10
-    LTEXT           "Display ZIP icon on thumbnails.", IDC_CB_SHOWICON_DESC, 205, 394, 145, 8, SS_LEFT | WS_CHILD | WS_VISIBLE, WS_EX_TRANSPARENT
+    // Advanced Options — shifted +3, H=63 (+3 padding)
+    CONTROL         "Advanced Options", IDC_SORT_ADVOPTGROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 345, 165, 63
+    CONTROL         "Sort images alphabetically", IDC_CB_SORT, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 358, 155, 10
+    LTEXT           "Uncheck for archive order.", IDC_SORT_DESC, 205, 371, 145, 8, SS_LEFT | WS_CHILD | WS_VISIBLE, WS_EX_TRANSPARENT
+    CONTROL         "Show archive indicator", IDC_CB_SHOWICON, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 384, 150, 10
+    LTEXT           "Display ZIP icon on thumbnails.", IDC_CB_SHOWICON_DESC, 205, 397, 145, 8, SS_LEFT | WS_CHILD | WS_VISIBLE, WS_EX_TRANSPARENT
 
-    // ── Bottom buttons (row 1: tools, row 2: actions) ──────────────
-    CONTROL         "Select All", IDC_BTN_SELECT_ALL, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 10, 410, 46, 14
-    CONTROL         "Deselect All", IDC_BTN_DESELECT_ALL, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 60, 410, 50, 14
-    CONTROL         "Load Config...", IDC_BTN_LOAD_CONFIG, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 114, 410, 52, 14
-    CONTROL         "Export Config...", IDC_BTN_EXPORT_CONFIG, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 170, 410, 54, 14
-    CONTROL         "Diagnostics...", IDC_BTN_EXPORT_DIAG, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 228, 410, 48, 14
-    CONTROL         "Theme", IDC_BTN_THEME, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 280, 410, 32, 14
-    CONTROL         "About", IDC_BTN_ABOUT, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 316, 410, 30, 14
-    CONTROL         "Reset Defaults", IDC_BTN_RESET_DEFAULTS, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 10, 428, 100, 14
-    CONTROL         "Cancel", IDCANCEL, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 165, 428, 55, 14
-    CONTROL         "Apply", IDC_APPLY, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 225, 428, 55, 14
-    CONTROL         "OK", IDOK, "Button", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 285, 428, 60, 14
+    // ── Bottom buttons (row 1: tools, row 2: actions) ── shifted +15
+    CONTROL         "Select All", IDC_BTN_SELECT_ALL, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 10, 425, 46, 14
+    CONTROL         "Deselect All", IDC_BTN_DESELECT_ALL, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 60, 425, 50, 14
+    CONTROL         "Load Config...", IDC_BTN_LOAD_CONFIG, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 114, 425, 52, 14
+    CONTROL         "Export Config...", IDC_BTN_EXPORT_CONFIG, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 170, 425, 54, 14
+    CONTROL         "Diagnostics...", IDC_BTN_EXPORT_DIAG, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 228, 425, 48, 14
+    CONTROL         "Theme", IDC_BTN_THEME, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 280, 425, 32, 14
+    CONTROL         "About", IDC_BTN_ABOUT, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 316, 425, 30, 14
+    CONTROL         "Reset Defaults", IDC_BTN_RESET_DEFAULTS, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 10, 443, 100, 14
+    CONTROL         "Cancel", IDCANCEL, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 165, 443, 55, 14
+    CONTROL         "Apply", IDC_APPLY, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 225, 443, 55, 14
+    CONTROL         "OK", IDOK, "Button", BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 285, 443, 60, 14
 }
 
 

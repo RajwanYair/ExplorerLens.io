@@ -85,3 +85,14 @@
 #define IDC_BTN_COPY_INFO                       1081
 #define IDC_BTN_SELECT_ALL                      1082
 #define IDC_BTN_DESELECT_ALL                    1083
+
+// Per-category "All" checkboxes (inline in groupbox title area)
+#define IDC_CB_ALL_COMIC                        1084
+#define IDC_CB_ALL_ARCHIVE                      1085
+#define IDC_CB_ALL_IMAGE                        1086
+#define IDC_CB_ALL_PROIMAGE                     1087
+#define IDC_CB_ALL_EXTENDED                     1088
+#define IDC_CB_ALL_EBOOK                        1089
+#define IDC_CB_ALL_PHOTO                        1090
+#define IDC_CB_ALL_MEDIA                        1091
+#define IDC_CB_ALL_SPECIAL                      1092

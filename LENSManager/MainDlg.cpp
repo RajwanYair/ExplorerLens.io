@@ -191,62 +191,17 @@ LRESULT CMainDlg::OnGetMinMaxInfo(UINT /*uMsg*/, WPARAM /*wParam*/,
     LPARAM lParam, BOOL& /*bHandled*/) {
     LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
     lpMMI->ptMinTrackSize.x = 360; // Minimum width
-    lpMMI->ptMinTrackSize.y = 460; // Minimum height
+    lpMMI->ptMinTrackSize.y = 475; // Minimum height
     return 0;
 }
 
 void CMainDlg::InitUI() {
-    // Button_GetCheck   BST_CHECKED : BST_UNCHECKED equals TRUE: FALSE
-    //  Comic Book Formats
-    Button_SetCheck(GetDlgItem(IDC_CB_CBZ), m_reg.HasTH(LENS_CBZ));
-    Button_SetCheck(GetDlgItem(IDC_CB_CBR), m_reg.HasTH(LENS_CBR));
-    Button_SetCheck(GetDlgItem(IDC_CB_CB7), m_reg.HasTH(LENS_CB7));
-    Button_SetCheck(GetDlgItem(IDC_CB_CBT), m_reg.HasTH(LENS_CBT));
-
-    // E-Book Formats
-    Button_SetCheck(GetDlgItem(IDC_CB_EPUB), m_reg.HasTH(LENS_EPUB));
-    Button_SetCheck(GetDlgItem(IDC_CB_MOBI), m_reg.HasTH(LENS_MOBI));
-    Button_SetCheck(GetDlgItem(IDC_CB_AZW), m_reg.HasTH(LENS_AZW));
-    Button_SetCheck(GetDlgItem(IDC_CB_AZW3), m_reg.HasTH(LENS_AZW3));
-
-    // Archive Formats
-    Button_SetCheck(GetDlgItem(IDC_CB_ZIP), m_reg.HasTH(LENS_ZIP));
-    Button_SetCheck(GetDlgItem(IDC_CB_RAR), m_reg.HasTH(LENS_RAR));
-    Button_SetCheck(GetDlgItem(IDC_CB_7Z), m_reg.HasTH(LENS_7Z));
-    Button_SetCheck(GetDlgItem(IDC_CB_TAR), m_reg.HasTH(LENS_TAR));
-
-    // Photo & Other Formats
-    Button_SetCheck(GetDlgItem(IDC_CB_PHZ), m_reg.HasTH(LENS_PHZ));
-    Button_SetCheck(GetDlgItem(IDC_CB_FB2), m_reg.HasTH(LENS_FB2));
-
-    // Modern Image Formats
-    Button_SetCheck(GetDlgItem(IDC_CB_WEBP), m_reg.HasTH(LENS_WEBP));
-    Button_SetCheck(GetDlgItem(IDC_CB_HEIF), m_reg.HasTH(LENS_HEIF));
-    Button_SetCheck(GetDlgItem(IDC_CB_AVIF), m_reg.HasTH(LENS_AVIF));
-    Button_SetCheck(GetDlgItem(IDC_CB_JXL), m_reg.HasTH(LENS_JXL));
-
-    // Media & Documents
-    Button_SetCheck(GetDlgItem(IDC_CB_VIDEO), m_reg.HasTH(LENS_VIDEO));
-    Button_SetCheck(GetDlgItem(IDC_CB_PDF), m_reg.HasTH(LENS_PDF));
-    Button_SetCheck(GetDlgItem(IDC_CB_TIFF), m_reg.HasTH(LENS_TIFF));
-    Button_SetCheck(GetDlgItem(IDC_CB_SVG), m_reg.HasTH(LENS_SVG));
-    Button_SetCheck(GetDlgItem(IDC_CB_RAW), m_reg.HasTH(LENS_RAW));
-    Button_SetCheck(GetDlgItem(IDC_CB_PSD), m_reg.HasTH(LENS_PSD));
-    Button_SetCheck(GetDlgItem(IDC_CB_DDS), m_reg.HasTH(LENS_DDS));
-    Button_SetCheck(GetDlgItem(IDC_CB_HDR), m_reg.HasTH(LENS_HDR));
-    Button_SetCheck(GetDlgItem(IDC_CB_EXR), m_reg.HasTH(LENS_EXR));
-    Button_SetCheck(GetDlgItem(IDC_CB_PPM), m_reg.HasTH(LENS_PPM));
-    Button_SetCheck(GetDlgItem(IDC_CB_ICO), m_reg.HasTH(LENS_ICO));
-    Button_SetCheck(GetDlgItem(IDC_CB_QOI), m_reg.HasTH(LENS_QOI));
-    Button_SetCheck(GetDlgItem(IDC_CB_TGA), m_reg.HasTH(LENS_TGA));
-    Button_SetCheck(GetDlgItem(IDC_CB_AUDIO), m_reg.HasTH(LENS_AUDIO));
-    Button_SetCheck(GetDlgItem(IDC_CB_DOCUMENT), m_reg.HasTH(LENS_DOCUMENT));
-    Button_SetCheck(GetDlgItem(IDC_CB_FONT), m_reg.HasTH(LENS_FONT));
-    Button_SetCheck(GetDlgItem(IDC_CB_MODEL), m_reg.HasTH(LENS_MODEL));
-    Button_SetCheck(GetDlgItem(IDC_CB_EXT_IMAGE), m_reg.HasTH(LENS_EXT_IMAGE));
-    Button_SetCheck(GetDlgItem(IDC_CB_TEXTURE), m_reg.HasTH(LENS_TEXTURE));
-    Button_SetCheck(GetDlgItem(IDC_CB_EXT_ARCHIVE), m_reg.HasTH(LENS_EXT_ARCHIVE));
-    Button_SetCheck(GetDlgItem(IDC_CB_EXT_DOCUMENT), m_reg.HasTH(LENS_EXT_DOCUMENT));
+    // ── System status detection ──
+    // Sets each format checkbox to reflect the LIVE registry state:
+    //   ✓ (BST_CHECKED)       — ExplorerLens is the active handler
+    //   − (BST_INDETERMINATE) — Another tool provides thumbnails
+    //   □ (BST_UNCHECKED)     — No handler registered
+    ApplySystemStatusToCheckboxes();
 
     // Collage Mode
     DWORD collageMode = m_reg.GetCollageMode();
@@ -981,7 +936,143 @@ void CMainDlg::InitStatusIcons() {
 // Handle checkbox clicks - BS_AUTO3STATE handles toggling automatically
 LRESULT CMainDlg::OnCheckboxClicked(WORD /*wNotifyCode*/, WORD wID,
     HWND hWndCtl, BOOL& /*bHandled*/) {
+    // After a format checkbox changes, update its category "All" checkbox state
+    UpdateAllCategoryCheckboxStates();
     return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Per-category "All" checkbox logic
+//////////////////////////////////////////////////////////////////////////
+
+// Category member arrays for each group
+static const int s_comicMembers[] = { IDC_CB_CBZ, IDC_CB_CBR, IDC_CB_CB7, IDC_CB_CBT };
+static const int s_archiveMembers[] = { IDC_CB_ZIP, IDC_CB_RAR, IDC_CB_7Z, IDC_CB_TAR };
+static const int s_imageMembers[] = { IDC_CB_WEBP, IDC_CB_HEIF, IDC_CB_AVIF, IDC_CB_JXL };
+static const int s_proImageMembers[] = { IDC_CB_PSD, IDC_CB_DDS, IDC_CB_HDR, IDC_CB_EXR };
+static const int s_extendedMembers[] = { IDC_CB_EXT_IMAGE, IDC_CB_TEXTURE, IDC_CB_EXT_ARCHIVE, IDC_CB_EXT_DOCUMENT };
+static const int s_ebookMembers[] = { IDC_CB_EPUB, IDC_CB_MOBI, IDC_CB_AZW, IDC_CB_AZW3 };
+static const int s_photoMembers[] = { IDC_CB_PHZ, IDC_CB_FB2 };
+static const int s_mediaMembers[] = { IDC_CB_VIDEO, IDC_CB_PDF, IDC_CB_TIFF, IDC_CB_SVG, IDC_CB_RAW };
+static const int s_specialMembers[] = { IDC_CB_PPM, IDC_CB_ICO, IDC_CB_QOI, IDC_CB_TGA,
+    IDC_CB_AUDIO, IDC_CB_DOCUMENT, IDC_CB_FONT, IDC_CB_MODEL };
+
+LRESULT CMainDlg::OnCategoryAllClicked(WORD /*wNotifyCode*/, WORD wID,
+    HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+
+    struct CategoryMap {
+        int allID;
+        const int* members;
+        int count;
+    };
+    static const CategoryMap cats[] = {
+        { IDC_CB_ALL_COMIC,    s_comicMembers,    _countof(s_comicMembers) },
+        { IDC_CB_ALL_ARCHIVE,  s_archiveMembers,  _countof(s_archiveMembers) },
+        { IDC_CB_ALL_IMAGE,    s_imageMembers,    _countof(s_imageMembers) },
+        { IDC_CB_ALL_PROIMAGE, s_proImageMembers, _countof(s_proImageMembers) },
+        { IDC_CB_ALL_EXTENDED, s_extendedMembers, _countof(s_extendedMembers) },
+        { IDC_CB_ALL_EBOOK,    s_ebookMembers,    _countof(s_ebookMembers) },
+        { IDC_CB_ALL_PHOTO,    s_photoMembers,    _countof(s_photoMembers) },
+        { IDC_CB_ALL_MEDIA,    s_mediaMembers,    _countof(s_mediaMembers) },
+        { IDC_CB_ALL_SPECIAL,  s_specialMembers,  _countof(s_specialMembers) },
+    };
+
+    for (const auto& cat : cats) {
+        if ((int)wID == cat.allID) {
+            ToggleCategoryAll(cat.allID, cat.members, cat.count);
+            break;
+        }
+    }
+    return 0;
+}
+
+void CMainDlg::ToggleCategoryAll(int allCheckboxID, const int* memberIDs, int count) {
+    // If "All" is now checked, check all members; otherwise uncheck all
+    BOOL allChecked = (BST_CHECKED == Button_GetCheck(GetDlgItem(allCheckboxID)));
+    int newState = allChecked ? BST_CHECKED : BST_UNCHECKED;
+    for (int i = 0; i < count; i++) {
+        Button_SetCheck(GetDlgItem(memberIDs[i]), newState);
+    }
+}
+
+void CMainDlg::UpdateCategoryAllState(int allCheckboxID, const int* memberIDs, int count) {
+    int checked = 0;
+    for (int i = 0; i < count; i++) {
+        if (BST_CHECKED == Button_GetCheck(GetDlgItem(memberIDs[i])))
+            checked++;
+    }
+    Button_SetCheck(GetDlgItem(allCheckboxID),
+        (checked == count) ? BST_CHECKED : BST_UNCHECKED);
+}
+
+void CMainDlg::UpdateAllCategoryCheckboxStates() {
+    UpdateCategoryAllState(IDC_CB_ALL_COMIC, s_comicMembers, _countof(s_comicMembers));
+    UpdateCategoryAllState(IDC_CB_ALL_ARCHIVE, s_archiveMembers, _countof(s_archiveMembers));
+    UpdateCategoryAllState(IDC_CB_ALL_IMAGE, s_imageMembers, _countof(s_imageMembers));
+    UpdateCategoryAllState(IDC_CB_ALL_PROIMAGE, s_proImageMembers, _countof(s_proImageMembers));
+    UpdateCategoryAllState(IDC_CB_ALL_EXTENDED, s_extendedMembers, _countof(s_extendedMembers));
+    UpdateCategoryAllState(IDC_CB_ALL_EBOOK, s_ebookMembers, _countof(s_ebookMembers));
+    UpdateCategoryAllState(IDC_CB_ALL_PHOTO, s_photoMembers, _countof(s_photoMembers));
+    UpdateCategoryAllState(IDC_CB_ALL_MEDIA, s_mediaMembers, _countof(s_mediaMembers));
+    UpdateCategoryAllState(IDC_CB_ALL_SPECIAL, s_specialMembers, _countof(s_specialMembers));
+}
+
+//////////////////////////////////////////////////////////////////////////
+// System status detection — set tri-state from registry on dialog init
+//////////////////////////////////////////////////////////////////////////
+
+void CMainDlg::ApplySystemStatusToCheckboxes() {
+    // Map each checkbox to its LENS type for registry status lookup
+    static const struct {
+        int ctrlId;
+        int lensType;
+    } statusMap[] = {
+        {IDC_CB_CBZ, LENS_CBZ},   {IDC_CB_CBR, LENS_CBR},
+        {IDC_CB_CB7, LENS_CB7},   {IDC_CB_CBT, LENS_CBT},
+        {IDC_CB_EPUB, LENS_EPUB}, {IDC_CB_MOBI, LENS_MOBI},
+        {IDC_CB_AZW, LENS_AZW},  {IDC_CB_AZW3, LENS_AZW3},
+        {IDC_CB_ZIP, LENS_ZIP},   {IDC_CB_RAR, LENS_RAR},
+        {IDC_CB_7Z, LENS_7Z},    {IDC_CB_TAR, LENS_TAR},
+        {IDC_CB_PHZ, LENS_PHZ},  {IDC_CB_FB2, LENS_FB2},
+        {IDC_CB_WEBP, LENS_WEBP},{IDC_CB_HEIF, LENS_HEIF},
+        {IDC_CB_AVIF, LENS_AVIF},{IDC_CB_JXL, LENS_JXL},
+        {IDC_CB_VIDEO, LENS_VIDEO},{IDC_CB_PDF, LENS_PDF},
+        {IDC_CB_TIFF, LENS_TIFF},{IDC_CB_SVG, LENS_SVG},
+        {IDC_CB_RAW, LENS_RAW},  {IDC_CB_PSD, LENS_PSD},
+        {IDC_CB_DDS, LENS_DDS},  {IDC_CB_HDR, LENS_HDR},
+        {IDC_CB_EXR, LENS_EXR},  {IDC_CB_PPM, LENS_PPM},
+        {IDC_CB_ICO, LENS_ICO},  {IDC_CB_QOI, LENS_QOI},
+        {IDC_CB_TGA, LENS_TGA},  {IDC_CB_AUDIO, LENS_AUDIO},
+        {IDC_CB_DOCUMENT, LENS_DOCUMENT},{IDC_CB_FONT, LENS_FONT},
+        {IDC_CB_MODEL, LENS_MODEL},
+        {IDC_CB_EXT_IMAGE, LENS_EXT_IMAGE},
+        {IDC_CB_TEXTURE, LENS_TEXTURE},
+        {IDC_CB_EXT_ARCHIVE, LENS_EXT_ARCHIVE},
+        {IDC_CB_EXT_DOCUMENT, LENS_EXT_DOCUMENT},
+    };
+
+    for (const auto& entry : statusMap) {
+        HandlerStatus hs = m_reg.GetHandlerStatus(
+            entry.lensType, m_reg.GetExtension(entry.lensType));
+
+        int checkState;
+        switch (hs) {
+        case HANDLER_ExplorerLens:
+            checkState = BST_CHECKED;       // ✓ ExplorerLens active
+            break;
+        case HANDLER_NATIVE:
+        case HANDLER_THIRD_PARTY:
+            checkState = BST_INDETERMINATE; // − Another tool provides thumbnails
+            break;
+        default:
+            checkState = BST_UNCHECKED;     // □ No handler registered
+            break;
+        }
+        Button_SetCheck(GetDlgItem(entry.ctrlId), checkState);
+    }
+
+    // Update per-category "All" checkboxes to reflect the combined state
+    UpdateAllCategoryCheckboxStates();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1137,6 +1228,7 @@ void CMainDlg::OnSelectAll() {
     for (int id : formatCheckboxes) {
         Button_SetCheck(GetDlgItem(id), BST_CHECKED);
     }
+    UpdateAllCategoryCheckboxStates();
 }
 
 void CMainDlg::OnDeselectAll() {
@@ -1154,6 +1246,7 @@ void CMainDlg::OnDeselectAll() {
     for (int id : formatCheckboxes) {
         Button_SetCheck(GetDlgItem(id), BST_UNCHECKED);
     }
+    UpdateAllCategoryCheckboxStates();
 }
 
 // Configuration Management Functions

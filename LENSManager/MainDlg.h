@@ -90,6 +90,15 @@ public:
 		COMMAND_HANDLER(IDC_CB_TEXTURE, BN_CLICKED, OnCheckboxClicked)
 		COMMAND_HANDLER(IDC_CB_EXT_ARCHIVE, BN_CLICKED, OnCheckboxClicked)
 		COMMAND_HANDLER(IDC_CB_EXT_DOCUMENT, BN_CLICKED, OnCheckboxClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_COMIC, BN_CLICKED, OnCategoryAllClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_ARCHIVE, BN_CLICKED, OnCategoryAllClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_IMAGE, BN_CLICKED, OnCategoryAllClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_PROIMAGE, BN_CLICKED, OnCategoryAllClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_EXTENDED, BN_CLICKED, OnCategoryAllClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_EBOOK, BN_CLICKED, OnCategoryAllClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_PHOTO, BN_CLICKED, OnCategoryAllClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_MEDIA, BN_CLICKED, OnCategoryAllClicked)
+		COMMAND_HANDLER(IDC_CB_ALL_SPECIAL, BN_CLICKED, OnCategoryAllClicked)
 		COMMAND_ID_HANDLER(IDC_BTN_RESET_DEFAULTS, OnResetDefaults)
 		COMMAND_ID_HANDLER(IDC_BTN_EXPORT_CONFIG, OnExportConfig)
 		COMMAND_ID_HANDLER(IDC_BTN_SELECT_ALL, OnSelectAllBtn)
@@ -118,6 +127,7 @@ public:
 	LRESULT OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnApply(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnCheckboxClicked(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnCategoryAllClicked(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnLoadConfig(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnResetDefaults(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnExportConfig(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -172,6 +182,14 @@ private:
 	int GetEnabledFormatCount();
 	void RecreateFont(int pointSize);
 	void RelayoutControls(int clientWidth, int clientHeight);
+
+	// Per-category Select All helpers
+	void ToggleCategoryAll(int allCheckboxID, const int* memberIDs, int count);
+	void UpdateCategoryAllState(int allCheckboxID, const int* memberIDs, int count);
+	void UpdateAllCategoryCheckboxStates();
+
+	// System status detection: set checkbox tri-state from registry
+	void ApplySystemStatusToCheckboxes();
 
 	// Configuration management
 	ConfigSnapshot CaptureCurrentConfig();
