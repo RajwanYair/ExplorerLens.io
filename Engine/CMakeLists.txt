@@ -889,6 +889,72 @@ set(ENGINE_HEADERS
     Core/ExifOrientationHandler.h
     Core/ThumbnailWatermarker.h
     Core/IconBadgeRenderer.h
+
+    # Sprint 69-88: Beyond Zenith — Next-Generation Features
+    Core/NeuralThumbnailUpscaler.h
+    Core/PerceptualHashEngine.h
+    Core/SemanticFileClassifier.h
+    Core/ContentAwareCompositor.h
+    Core/HDRDisplayMapper.h
+    Core/VolumetricPreviewEngine.h
+    Core/RealTimeCodecTranscoder.h
+    Core/DistributedRenderEngine.h
+    Core/QuantumSafeHasher.h
+    Core/AdaptiveLODEngine.h
+
+    # Beyond Zenith — Decoders
+    Decoders/OpenEXRDecoder.h
+    Decoders/VDBVolumeDecoder.h
+    Decoders/AlembicDecoder.h
+    Decoders/MaterialXDecoder.h
+    Decoders/PointCloudStreamDecoder.h
+    Decoders/GeospatialTileDecoder.h
+    Decoders/HDRIEnvironmentDecoder.h
+    Decoders/NeuralRadianceDecoder.h
+    Decoders/NotationDecoder.h
+    Decoders/PCBLayoutDecoder.h
+
+    # Beyond Zenith — GPU
+    GPU/GPUTensorAccelerator.h
+    GPU/VulkanRayTracingPreview.h
+    GPU/DirectStorageIntegration.h
+    GPU/GPUDecompressionEngine.h
+    GPU/ShaderModelValidator.h
+
+    # Beyond Zenith — Pipeline
+    Pipeline/StreamingMipChain.h
+    Pipeline/DeferredDecodeScheduler.h
+    Pipeline/PredictivePrefetchEngine.h
+    Pipeline/AdaptiveBatchCoalescer.h
+    Pipeline/ThumbnailMorphTransition.h
+
+    # Beyond Zenith — Cache
+    Cache/DistributedCacheSync.h
+    Cache/CompressionTierOptimizer.h
+    Cache/CacheHitPredictor.h
+    Cache/TemporalCacheAnalyzer.h
+    Cache/SemanticCacheIndex.h
+
+    # Beyond Zenith — Memory
+    Memory/TransparentHugePageAllocator.h
+    Memory/MemoryCompressionEngine.h
+    Memory/PooledScratchAllocator.h
+    Memory/ZeroCostAbstractionLayer.h
+    Memory/MemoryBandwidthProfiler.h
+
+    # Beyond Zenith — AI/ML
+    AI/FaceDetectionThumbnail.h
+    AI/ObjectSaliencyMapper.h
+    AI/StyleTransferPreview.h
+    AI/TextRecognitionThumb.h
+    AI/SceneDepthEstimator.h
+
+    # Beyond Zenith — Plugin Ecosystem
+    Plugin/PluginMarketplaceClient.h
+    Plugin/PluginDependencyResolver.h
+    Plugin/PluginVersionMigrator.h
+    Plugin/PluginTelemetryBridge.h
+    Plugin/PluginSecurityAuditor.h
 )
 
 set(ENGINE_SOURCES
