@@ -3,9 +3,14 @@
 //
 // Uses Windows Large Pages (2MB) for bitmap buffers to reduce TLB misses
 // during decode operations. Falls back to standard pages if SeLockMemory
-// privilege is not available.
+// privilege is not available. All allocations use VirtualAlloc/VirtualFree.
 //
 #pragma once
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
 
 #include <cstdint>
 #include <string>
@@ -32,24 +37,48 @@ struct LargePageStats {
 class LargePageAllocator {
 public:
     void Initialize() {
-        m_stats.minLargePageSize = 2 * 1024 * 1024; // GetLargePageMinimum()
-        m_stats.privilegeAvailable = CheckPrivilege();
+        m_stats.minLargePageSize = ::GetLargePageMinimum();
+        if (m_stats.minLargePageSize == 0)
+            m_stats.minLargePageSize = 2 * 1024 * 1024; // Default 2MB
+        m_stats.privilegeAvailable = AcquireLargePagePrivilege();
     }
 
     void* Allocate(size_t size) {
+        if (size == 0) return nullptr;
+
+        // Try large pages if privilege is available and size warrants it
         if (m_stats.privilegeAvailable && size >= m_stats.minLargePageSize) {
-            m_stats.largePageAllocs++;
-            m_stats.totalBytesLarge += size;
-            return nullptr; // Stub: VirtualAlloc with MEM_LARGE_PAGES
+            // Round up to large page boundary
+            size_t rounded = (size + m_stats.minLargePageSize - 1)
+                & ~(m_stats.minLargePageSize - 1);
+            void* ptr = ::VirtualAlloc(
+                nullptr, rounded,
+                MEM_COMMIT | MEM_RESERVE | MEM_LARGE_PAGES,
+                PAGE_READWRITE);
+            if (ptr) {
+                m_stats.largePageAllocs++;
+                m_stats.totalBytesLarge += rounded;
+                return ptr;
+            }
+            // Large page alloc failed — fall through to standard
         }
-        m_stats.standardFallbacks++;
-        m_stats.totalBytesStd += size;
-        return nullptr; // Stub: standard VirtualAlloc
+
+        // Standard allocation via VirtualAlloc (4K pages)
+        void* ptr = ::VirtualAlloc(
+            nullptr, size,
+            MEM_COMMIT | MEM_RESERVE,
+            PAGE_READWRITE);
+        if (ptr) {
+            m_stats.standardFallbacks++;
+            m_stats.totalBytesStd += size;
+        }
+        return ptr;
     }
 
-    void Free(void* ptr, size_t size) {
-        (void)ptr; (void)size;
-        // Stub: VirtualFree
+    void Free(void* ptr, size_t /*size*/) {
+        if (ptr) {
+            ::VirtualFree(ptr, 0, MEM_RELEASE);
+        }
     }
 
     const LargePageStats& Stats() const { return m_stats; }
@@ -68,10 +97,27 @@ public:
     static size_t PageSizeCount() { return static_cast<size_t>(PageSize::COUNT); }
 
 private:
-    bool CheckPrivilege() {
-        // Stub: check SeLockMemoryPrivilege
-        return false;
+    // Attempt to enable SeLockMemoryPrivilege for the current process token
+    static bool AcquireLargePagePrivilege() {
+        HANDLE hToken = nullptr;
+        if (!::OpenProcessToken(::GetCurrentProcess(),
+                TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+            return false;
+
+        TOKEN_PRIVILEGES tp = {};
+        if (!::LookupPrivilegeValueW(nullptr, L"SeLockMemoryPrivilege", &tp.Privileges[0].Luid)) {
+            ::CloseHandle(hToken);
+            return false;
+        }
+        tp.PrivilegeCount = 1;
+        tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+        BOOL ok = ::AdjustTokenPrivileges(hToken, FALSE, &tp, 0, nullptr, nullptr);
+        DWORD err = ::GetLastError();
+        ::CloseHandle(hToken);
+        // AdjustTokenPrivileges returns TRUE even if it couldn't assign all
+        return (ok && err == ERROR_SUCCESS);
     }
+
     LargePageStats m_stats;
 };
 
