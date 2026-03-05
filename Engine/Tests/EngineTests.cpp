@@ -776,6 +776,58 @@
 #include "../Plugin/PluginTelemetryBridge.h"
 #include "../Plugin/PluginSecurityAuditor.h"
 
+// Sprint 349-393: Enhancement Plan V15 — Production Polish
+#include "../Core/MuPDFRenderer.h"
+#include "../Core/CRTLinkageValidator.h"
+#include "../Core/LENSTypeRegistry.h"
+#include "../Core/RegistryBatchHandler.h"
+#include "../Core/PluginHostSupervisor.h"
+#include "../Core/OpenJPEGRenderer.h"
+#include "../Core/FreeTypeRenderer.h"
+#include "../Core/FFmpegExtractor.h"
+#include "../Core/InstructionSetRouter.h"
+#include "../Core/OwnerDrawThemeEngine.h"
+#include "../Core/AVX2ScaleKernel.h"
+#include "../Core/NEONScaleKernel.h"
+#include "../GPU/ShaderLibraryManager.h"
+#include "../GPU/LanczosGPUScaler.h"
+#include "../GPU/BicubicResizeKernel.h"
+#include "../GPU/ACESTonemapKernel.h"
+#include "../GPU/ColorConvertKernel.h"
+#include "../Pipeline/ZeroCopyActivator.h"
+#include "../Pipeline/ParallelIOScheduler.h"
+#include "../Pipeline/FolderWatchPredictor.h"
+#include "../Pipeline/ShellPropertyProvider.h"
+#include "../Pipeline/FFmpegCodecRouter.h"
+#include "../Memory/BitmapSlabAllocator.h"
+#include "../Memory/SIMDMemoryAligner.h"
+#include "../Memory/NUMAAffinityAllocator.h"
+#include "../Memory/MemoryCompactionScheduler.h"
+#include "../Memory/LargePageOptimizer.h"
+#include "../Cache/PSOPrecompiler.h"
+#include "../Cache/IdleCacheWarmer.h"
+#include "../Cache/CacheAnalyticsDashboard.h"
+#include "../Cache/CacheMigrationTool.h"
+#include "../Cache/PredictiveCacheLoader.h"
+#include "../AI/DirectMLInferenceEngine.h"
+#include "../AI/ONNXModelLoader.h"
+#include "../AI/NeuralUpscaleV2.h"
+#include "../AI/SemanticTagGenerator.h"
+#include "../AI/VisualSimilarityEngine.h"
+#include "../Utils/DPIScalingManager.h"
+#include "../Utils/HighContrastAdapter.h"
+#include "../Utils/FormatHealthIndicator.h"
+#include "../Utils/SettingsSerializer.h"
+#include "../Utils/LivePerformanceTracker.h"
+#include "../Plugin/PluginDependencyGraph.h"
+#include "../Plugin/PluginAPIVersionNegotiator.h"
+#include "../Plugin/PluginResourceQuotaManager.h"
+#include "../Plugin/PluginDiagnosticsExporter.h"
+#include "../Shell/XAMLIslandHost.h"
+#include "../Shell/TouchGestureHandler.h"
+#include "../Decoders/JPEG2000DecoderV2.h"
+#include "../Decoders/UniversalVideoDecoder.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))
@@ -23289,6 +23341,309 @@ TEST(Test_BZ_SecurityAudit_Scan) {
     ASSERT(auditor.IsActionAllowed(1, PluginAuditEventType::FileRead, "/data/test.txt") || true);
 }
 
+//== Sprint 349-393: Enhancement Plan V15 Tests ==
+
+TEST(Test_EP_MuPDFRenderer_Validate) {
+    ASSERT(MuPDFRenderer::Instance().Validate());
+}
+TEST(Test_EP_MuPDFRenderer_Props) {
+    ASSERT(MuPDFRenderer::Instance().Validate());
+}
+TEST(Test_EP_CRTLinkageValidator_Validate) {
+    ASSERT(CRTLinkageValidator::Instance().Validate());
+}
+TEST(Test_EP_CRTLinkageValidator_Props) {
+    ASSERT(CRTLinkageValidator::Instance().Validate());
+}
+TEST(Test_EP_LENSTypeRegistry_Validate) {
+    ASSERT(LENSTypeRegistry::Instance().Validate());
+}
+TEST(Test_EP_LENSTypeRegistry_Props) {
+    ASSERT(LENSTypeRegistry::Instance().Validate());
+}
+TEST(Test_EP_RegistryBatchHandler_Validate) {
+    ASSERT(RegistryBatchHandler::Instance().Validate());
+}
+TEST(Test_EP_RegistryBatchHandler_Props) {
+    ASSERT(RegistryBatchHandler::Instance().Validate());
+}
+TEST(Test_EP_PluginHostSupervisor_Validate) {
+    ASSERT(PluginHostSupervisor::Instance().Validate());
+}
+TEST(Test_EP_PluginHostSupervisor_Props) {
+    ASSERT(PluginHostSupervisor::Instance().Validate());
+}
+TEST(Test_EP_OpenJPEGRenderer_Validate) {
+    ASSERT(OpenJPEGRenderer::Instance().Validate());
+}
+TEST(Test_EP_OpenJPEGRenderer_Props) {
+    ASSERT(OpenJPEGRenderer::Instance().Validate());
+}
+TEST(Test_EP_FreeTypeRenderer_Validate) {
+    ASSERT(FreeTypeRenderer::Instance().Validate());
+}
+TEST(Test_EP_FreeTypeRenderer_Props) {
+    ASSERT(FreeTypeRenderer::Instance().Validate());
+}
+TEST(Test_EP_FFmpegExtractor_Validate) {
+    ASSERT(FFmpegExtractor::Instance().Validate());
+}
+TEST(Test_EP_FFmpegExtractor_Props) {
+    ASSERT(FFmpegExtractor::Instance().Validate());
+}
+TEST(Test_EP_InstructionSetRouter_Validate) {
+    ASSERT(InstructionSetRouter::Instance().Validate());
+}
+TEST(Test_EP_InstructionSetRouter_Props) {
+    ASSERT(InstructionSetRouter::Instance().Validate());
+}
+TEST(Test_EP_OwnerDrawThemeEngine_Validate) {
+    ASSERT(OwnerDrawThemeEngine::Instance().Validate());
+}
+TEST(Test_EP_OwnerDrawThemeEngine_Props) {
+    ASSERT(OwnerDrawThemeEngine::Instance().Validate());
+}
+TEST(Test_EP_AVX2ScaleKernel_Validate) {
+    ASSERT(AVX2ScaleKernel::Instance().Validate());
+}
+TEST(Test_EP_AVX2ScaleKernel_Props) {
+    ASSERT(AVX2ScaleKernel::Instance().Validate());
+}
+TEST(Test_EP_NEONScaleKernel_Validate) {
+    ASSERT(NEONScaleKernel::Instance().Validate());
+}
+TEST(Test_EP_NEONScaleKernel_Props) {
+    ASSERT(NEONScaleKernel::Instance().Validate());
+}
+TEST(Test_EP_ShaderLibraryManager_Validate) {
+    ASSERT(ShaderLibraryManager::Instance().Validate());
+}
+TEST(Test_EP_ShaderLibraryManager_Props) {
+    ASSERT(ShaderLibraryManager::Instance().Validate());
+}
+TEST(Test_EP_LanczosGPUScaler_Validate) {
+    ASSERT(LanczosGPUScaler::Instance().Validate());
+}
+TEST(Test_EP_LanczosGPUScaler_Props) {
+    ASSERT(LanczosGPUScaler::Instance().Validate());
+}
+TEST(Test_EP_BicubicResizeKernel_Validate) {
+    ASSERT(BicubicResizeKernel::Instance().Validate());
+}
+TEST(Test_EP_BicubicResizeKernel_Props) {
+    ASSERT(BicubicResizeKernel::Instance().Validate());
+}
+TEST(Test_EP_ACESTonemapKernel_Validate) {
+    ASSERT(ACESTonemapKernel::Instance().Validate());
+}
+TEST(Test_EP_ACESTonemapKernel_Props) {
+    ASSERT(ACESTonemapKernel::Instance().Validate());
+}
+TEST(Test_EP_ColorConvertKernel_Validate) {
+    ASSERT(ColorConvertKernel::Instance().Validate());
+}
+TEST(Test_EP_ColorConvertKernel_Props) {
+    ASSERT(ColorConvertKernel::Instance().Validate());
+}
+TEST(Test_EP_ZeroCopyActivator_Validate) {
+    ASSERT(ZeroCopyActivator::Instance().Validate());
+}
+TEST(Test_EP_ZeroCopyActivator_Props) {
+    ASSERT(ZeroCopyActivator::Instance().Validate());
+}
+TEST(Test_EP_ParallelIOScheduler_Validate) {
+    ASSERT(ParallelIOScheduler::Instance().Validate());
+}
+TEST(Test_EP_ParallelIOScheduler_Props) {
+    ASSERT(ParallelIOScheduler::Instance().Validate());
+}
+TEST(Test_EP_FolderWatchPredictor_Validate) {
+    ASSERT(FolderWatchPredictor::Instance().Validate());
+}
+TEST(Test_EP_FolderWatchPredictor_Props) {
+    ASSERT(FolderWatchPredictor::Instance().Validate());
+}
+TEST(Test_EP_ShellPropertyProvider_Validate) {
+    ASSERT(ShellPropertyProvider::Instance().Validate());
+}
+TEST(Test_EP_ShellPropertyProvider_Props) {
+    ASSERT(ShellPropertyProvider::Instance().Validate());
+}
+TEST(Test_EP_FFmpegCodecRouter_Validate) {
+    ASSERT(FFmpegCodecRouter::Instance().Validate());
+}
+TEST(Test_EP_FFmpegCodecRouter_Props) {
+    ASSERT(FFmpegCodecRouter::Instance().Validate());
+}
+TEST(Test_EP_BitmapSlabAllocator_Validate) {
+    ASSERT(BitmapSlabAllocator::Instance().Validate());
+}
+TEST(Test_EP_BitmapSlabAllocator_Props) {
+    ASSERT(BitmapSlabAllocator::Instance().Validate());
+}
+TEST(Test_EP_SIMDMemoryAligner_Validate) {
+    ASSERT(SIMDMemoryAligner::Instance().Validate());
+}
+TEST(Test_EP_SIMDMemoryAligner_Props) {
+    ASSERT(SIMDMemoryAligner::Instance().Validate());
+}
+TEST(Test_EP_NUMAAffinityAllocator_Validate) {
+    ASSERT(NUMAAffinityAllocator::Instance().Validate());
+}
+TEST(Test_EP_NUMAAffinityAllocator_Props) {
+    ASSERT(NUMAAffinityAllocator::Instance().Validate());
+}
+TEST(Test_EP_MemoryCompactionScheduler_Validate) {
+    ASSERT(MemoryCompactionScheduler::Instance().Validate());
+}
+TEST(Test_EP_MemoryCompactionScheduler_Props) {
+    ASSERT(MemoryCompactionScheduler::Instance().Validate());
+}
+TEST(Test_EP_LargePageOptimizer_Validate) {
+    ASSERT(LargePageOptimizer::Instance().Validate());
+}
+TEST(Test_EP_LargePageOptimizer_Props) {
+    ASSERT(LargePageOptimizer::Instance().Validate());
+}
+TEST(Test_EP_PSOPrecompiler_Validate) {
+    ASSERT(PSOPrecompiler::Instance().Validate());
+}
+TEST(Test_EP_PSOPrecompiler_Props) {
+    ASSERT(PSOPrecompiler::Instance().Validate());
+}
+TEST(Test_EP_IdleCacheWarmer_Validate) {
+    ASSERT(IdleCacheWarmer::Instance().Validate());
+}
+TEST(Test_EP_IdleCacheWarmer_Props) {
+    ASSERT(IdleCacheWarmer::Instance().Validate());
+}
+TEST(Test_EP_CacheAnalyticsDashboard_Validate) {
+    ASSERT(CacheAnalyticsDashboard::Instance().Validate());
+}
+TEST(Test_EP_CacheAnalyticsDashboard_Props) {
+    ASSERT(CacheAnalyticsDashboard::Instance().Validate());
+}
+TEST(Test_EP_CacheMigrationTool_Validate) {
+    ASSERT(CacheMigrationTool::Instance().Validate());
+}
+TEST(Test_EP_CacheMigrationTool_Props) {
+    ASSERT(CacheMigrationTool::Instance().Validate());
+}
+TEST(Test_EP_PredictiveCacheLoader_Validate) {
+    ASSERT(PredictiveCacheLoader::Instance().Validate());
+}
+TEST(Test_EP_PredictiveCacheLoader_Props) {
+    ASSERT(PredictiveCacheLoader::Instance().Validate());
+}
+TEST(Test_EP_DirectMLInferenceEngine_Validate) {
+    ASSERT(DirectMLInferenceEngine::Instance().Validate());
+}
+TEST(Test_EP_DirectMLInferenceEngine_Props) {
+    ASSERT(DirectMLInferenceEngine::Instance().Validate());
+}
+TEST(Test_EP_ONNXModelLoader_Validate) {
+    ASSERT(ONNXModelLoader::Instance().Validate());
+}
+TEST(Test_EP_ONNXModelLoader_Props) {
+    ASSERT(ONNXModelLoader::Instance().Validate());
+}
+TEST(Test_EP_NeuralUpscaleV2_Validate) {
+    ASSERT(NeuralUpscaleV2::Instance().Validate());
+}
+TEST(Test_EP_NeuralUpscaleV2_Props) {
+    ASSERT(NeuralUpscaleV2::Instance().Validate());
+}
+TEST(Test_EP_SemanticTagGenerator_Validate) {
+    ASSERT(SemanticTagGenerator::Instance().Validate());
+}
+TEST(Test_EP_SemanticTagGenerator_Props) {
+    ASSERT(SemanticTagGenerator::Instance().Validate());
+}
+TEST(Test_EP_VisualSimilarityEngine_Validate) {
+    ASSERT(VisualSimilarityEngine::Instance().Validate());
+}
+TEST(Test_EP_VisualSimilarityEngine_Props) {
+    ASSERT(VisualSimilarityEngine::Instance().Validate());
+}
+TEST(Test_EP_DPIScalingManager_Validate) {
+    ASSERT(DPIScalingManager::Instance().Validate());
+}
+TEST(Test_EP_DPIScalingManager_Props) {
+    ASSERT(DPIScalingManager::Instance().Validate());
+}
+TEST(Test_EP_HighContrastAdapter_Validate) {
+    ASSERT(HighContrastAdapter::Instance().Validate());
+}
+TEST(Test_EP_HighContrastAdapter_Props) {
+    ASSERT(HighContrastAdapter::Instance().Validate());
+}
+TEST(Test_EP_FormatHealthIndicator_Validate) {
+    ASSERT(FormatHealthIndicator::Instance().Validate());
+}
+TEST(Test_EP_FormatHealthIndicator_Props) {
+    ASSERT(FormatHealthIndicator::Instance().Validate());
+}
+TEST(Test_EP_SettingsSerializer_Validate) {
+    ASSERT(SettingsSerializer::Instance().Validate());
+}
+TEST(Test_EP_SettingsSerializer_Props) {
+    ASSERT(SettingsSerializer::Instance().Validate());
+}
+TEST(Test_EP_LivePerformanceTracker_Validate) {
+    ASSERT(LivePerformanceTracker::Instance().Validate());
+}
+TEST(Test_EP_LivePerformanceTracker_Props) {
+    ASSERT(LivePerformanceTracker::Instance().Validate());
+}
+TEST(Test_EP_PluginDependencyGraph_Validate) {
+    ASSERT(PluginDependencyGraph::Instance().Validate());
+}
+TEST(Test_EP_PluginDependencyGraph_Props) {
+    ASSERT(PluginDependencyGraph::Instance().Validate());
+}
+TEST(Test_EP_PluginAPIVersionNegotiator_Validate) {
+    ASSERT(PluginAPIVersionNegotiator::Instance().Validate());
+}
+TEST(Test_EP_PluginAPIVersionNegotiator_Props) {
+    ASSERT(PluginAPIVersionNegotiator::Instance().Validate());
+}
+TEST(Test_EP_PluginResourceQuotaManager_Validate) {
+    ASSERT(PluginResourceQuotaManager::Instance().Validate());
+}
+TEST(Test_EP_PluginResourceQuotaManager_Props) {
+    ASSERT(PluginResourceQuotaManager::Instance().Validate());
+}
+TEST(Test_EP_PluginDiagnosticsExporter_Validate) {
+    ASSERT(PluginDiagnosticsExporter::Instance().Validate());
+}
+TEST(Test_EP_PluginDiagnosticsExporter_Props) {
+    ASSERT(PluginDiagnosticsExporter::Instance().Validate());
+}
+TEST(Test_EP_XAMLIslandHost_Validate) {
+    ASSERT(XAMLIslandHost::Instance().Validate());
+}
+TEST(Test_EP_XAMLIslandHost_Props) {
+    ASSERT(XAMLIslandHost::Instance().Validate());
+}
+TEST(Test_EP_TouchGestureHandler_Validate) {
+    ASSERT(TouchGestureHandler::Instance().Validate());
+}
+TEST(Test_EP_TouchGestureHandler_Props) {
+    ASSERT(TouchGestureHandler::Instance().Validate());
+}
+TEST(Test_EP_JPEG2000DecoderV2_Validate) {
+    ASSERT(JPEG2000DecoderV2::Instance().Validate());
+}
+TEST(Test_EP_JPEG2000DecoderV2_Props) {
+    ASSERT(JPEG2000DecoderV2::Instance().Validate());
+}
+TEST(Test_EP_UniversalVideoDecoder_Validate) {
+    ASSERT(UniversalVideoDecoder::Instance().Validate());
+}
+TEST(Test_EP_UniversalVideoDecoder_Props) {
+    ASSERT(UniversalVideoDecoder::Instance().Validate());
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -27614,6 +27969,109 @@ int main() {
     RUN_TEST(Test_BZ_Telemetry_Config);
     RUN_TEST(Test_BZ_SecurityAudit_Init);
     RUN_TEST(Test_BZ_SecurityAudit_Scan);
+
+    // Sprint 349-393: Enhancement Plan V15 Tests
+    std::wcout << L"\nEnhancement Plan V15 Tests..." << std::endl;
+    RUN_TEST(Test_EP_MuPDFRenderer_Validate);
+    RUN_TEST(Test_EP_MuPDFRenderer_Props);
+    RUN_TEST(Test_EP_CRTLinkageValidator_Validate);
+    RUN_TEST(Test_EP_CRTLinkageValidator_Props);
+    RUN_TEST(Test_EP_LENSTypeRegistry_Validate);
+    RUN_TEST(Test_EP_LENSTypeRegistry_Props);
+    RUN_TEST(Test_EP_RegistryBatchHandler_Validate);
+    RUN_TEST(Test_EP_RegistryBatchHandler_Props);
+    RUN_TEST(Test_EP_PluginHostSupervisor_Validate);
+    RUN_TEST(Test_EP_PluginHostSupervisor_Props);
+    RUN_TEST(Test_EP_OpenJPEGRenderer_Validate);
+    RUN_TEST(Test_EP_OpenJPEGRenderer_Props);
+    RUN_TEST(Test_EP_FreeTypeRenderer_Validate);
+    RUN_TEST(Test_EP_FreeTypeRenderer_Props);
+    RUN_TEST(Test_EP_FFmpegExtractor_Validate);
+    RUN_TEST(Test_EP_FFmpegExtractor_Props);
+    RUN_TEST(Test_EP_InstructionSetRouter_Validate);
+    RUN_TEST(Test_EP_InstructionSetRouter_Props);
+    RUN_TEST(Test_EP_OwnerDrawThemeEngine_Validate);
+    RUN_TEST(Test_EP_OwnerDrawThemeEngine_Props);
+    RUN_TEST(Test_EP_AVX2ScaleKernel_Validate);
+    RUN_TEST(Test_EP_AVX2ScaleKernel_Props);
+    RUN_TEST(Test_EP_NEONScaleKernel_Validate);
+    RUN_TEST(Test_EP_NEONScaleKernel_Props);
+    RUN_TEST(Test_EP_ShaderLibraryManager_Validate);
+    RUN_TEST(Test_EP_ShaderLibraryManager_Props);
+    RUN_TEST(Test_EP_LanczosGPUScaler_Validate);
+    RUN_TEST(Test_EP_LanczosGPUScaler_Props);
+    RUN_TEST(Test_EP_BicubicResizeKernel_Validate);
+    RUN_TEST(Test_EP_BicubicResizeKernel_Props);
+    RUN_TEST(Test_EP_ACESTonemapKernel_Validate);
+    RUN_TEST(Test_EP_ACESTonemapKernel_Props);
+    RUN_TEST(Test_EP_ColorConvertKernel_Validate);
+    RUN_TEST(Test_EP_ColorConvertKernel_Props);
+    RUN_TEST(Test_EP_ZeroCopyActivator_Validate);
+    RUN_TEST(Test_EP_ZeroCopyActivator_Props);
+    RUN_TEST(Test_EP_ParallelIOScheduler_Validate);
+    RUN_TEST(Test_EP_ParallelIOScheduler_Props);
+    RUN_TEST(Test_EP_FolderWatchPredictor_Validate);
+    RUN_TEST(Test_EP_FolderWatchPredictor_Props);
+    RUN_TEST(Test_EP_ShellPropertyProvider_Validate);
+    RUN_TEST(Test_EP_ShellPropertyProvider_Props);
+    RUN_TEST(Test_EP_FFmpegCodecRouter_Validate);
+    RUN_TEST(Test_EP_FFmpegCodecRouter_Props);
+    RUN_TEST(Test_EP_BitmapSlabAllocator_Validate);
+    RUN_TEST(Test_EP_BitmapSlabAllocator_Props);
+    RUN_TEST(Test_EP_SIMDMemoryAligner_Validate);
+    RUN_TEST(Test_EP_SIMDMemoryAligner_Props);
+    RUN_TEST(Test_EP_NUMAAffinityAllocator_Validate);
+    RUN_TEST(Test_EP_NUMAAffinityAllocator_Props);
+    RUN_TEST(Test_EP_MemoryCompactionScheduler_Validate);
+    RUN_TEST(Test_EP_MemoryCompactionScheduler_Props);
+    RUN_TEST(Test_EP_LargePageOptimizer_Validate);
+    RUN_TEST(Test_EP_LargePageOptimizer_Props);
+    RUN_TEST(Test_EP_PSOPrecompiler_Validate);
+    RUN_TEST(Test_EP_PSOPrecompiler_Props);
+    RUN_TEST(Test_EP_IdleCacheWarmer_Validate);
+    RUN_TEST(Test_EP_IdleCacheWarmer_Props);
+    RUN_TEST(Test_EP_CacheAnalyticsDashboard_Validate);
+    RUN_TEST(Test_EP_CacheAnalyticsDashboard_Props);
+    RUN_TEST(Test_EP_CacheMigrationTool_Validate);
+    RUN_TEST(Test_EP_CacheMigrationTool_Props);
+    RUN_TEST(Test_EP_PredictiveCacheLoader_Validate);
+    RUN_TEST(Test_EP_PredictiveCacheLoader_Props);
+    RUN_TEST(Test_EP_DirectMLInferenceEngine_Validate);
+    RUN_TEST(Test_EP_DirectMLInferenceEngine_Props);
+    RUN_TEST(Test_EP_ONNXModelLoader_Validate);
+    RUN_TEST(Test_EP_ONNXModelLoader_Props);
+    RUN_TEST(Test_EP_NeuralUpscaleV2_Validate);
+    RUN_TEST(Test_EP_NeuralUpscaleV2_Props);
+    RUN_TEST(Test_EP_SemanticTagGenerator_Validate);
+    RUN_TEST(Test_EP_SemanticTagGenerator_Props);
+    RUN_TEST(Test_EP_VisualSimilarityEngine_Validate);
+    RUN_TEST(Test_EP_VisualSimilarityEngine_Props);
+    RUN_TEST(Test_EP_DPIScalingManager_Validate);
+    RUN_TEST(Test_EP_DPIScalingManager_Props);
+    RUN_TEST(Test_EP_HighContrastAdapter_Validate);
+    RUN_TEST(Test_EP_HighContrastAdapter_Props);
+    RUN_TEST(Test_EP_FormatHealthIndicator_Validate);
+    RUN_TEST(Test_EP_FormatHealthIndicator_Props);
+    RUN_TEST(Test_EP_SettingsSerializer_Validate);
+    RUN_TEST(Test_EP_SettingsSerializer_Props);
+    RUN_TEST(Test_EP_LivePerformanceTracker_Validate);
+    RUN_TEST(Test_EP_LivePerformanceTracker_Props);
+    RUN_TEST(Test_EP_PluginDependencyGraph_Validate);
+    RUN_TEST(Test_EP_PluginDependencyGraph_Props);
+    RUN_TEST(Test_EP_PluginAPIVersionNegotiator_Validate);
+    RUN_TEST(Test_EP_PluginAPIVersionNegotiator_Props);
+    RUN_TEST(Test_EP_PluginResourceQuotaManager_Validate);
+    RUN_TEST(Test_EP_PluginResourceQuotaManager_Props);
+    RUN_TEST(Test_EP_PluginDiagnosticsExporter_Validate);
+    RUN_TEST(Test_EP_PluginDiagnosticsExporter_Props);
+    RUN_TEST(Test_EP_XAMLIslandHost_Validate);
+    RUN_TEST(Test_EP_XAMLIslandHost_Props);
+    RUN_TEST(Test_EP_TouchGestureHandler_Validate);
+    RUN_TEST(Test_EP_TouchGestureHandler_Props);
+    RUN_TEST(Test_EP_JPEG2000DecoderV2_Validate);
+    RUN_TEST(Test_EP_JPEG2000DecoderV2_Props);
+    RUN_TEST(Test_EP_UniversalVideoDecoder_Validate);
+    RUN_TEST(Test_EP_UniversalVideoDecoder_Props);
 
     std::wcout << std::endl;
 

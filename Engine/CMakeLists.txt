@@ -955,6 +955,75 @@ set(ENGINE_HEADERS
     Plugin/PluginVersionMigrator.h
     Plugin/PluginTelemetryBridge.h
     Plugin/PluginSecurityAuditor.h
+
+    # Sprint 349-393: Enhancement Plan V15 — Production Polish
+    # Category A/B: Critical Fixes & Architecture (Core)
+    Core/MuPDFRenderer.h
+    Core/CRTLinkageValidator.h
+    Core/LENSTypeRegistry.h
+    Core/RegistryBatchHandler.h
+    Core/PluginHostSupervisor.h
+    Core/OpenJPEGRenderer.h
+    Core/FreeTypeRenderer.h
+    Core/FFmpegExtractor.h
+    Core/InstructionSetRouter.h
+    Core/OwnerDrawThemeEngine.h
+    Core/AVX2ScaleKernel.h
+    Core/NEONScaleKernel.h
+
+    # Category B/C: GPU Shader Library & Rendering
+    GPU/ShaderLibraryManager.h
+    GPU/LanczosGPUScaler.h
+    GPU/BicubicResizeKernel.h
+    GPU/ACESTonemapKernel.h
+    GPU/ColorConvertKernel.h
+
+    # Category B/F: Pipeline Activation & Integration
+    Pipeline/ZeroCopyActivator.h
+    Pipeline/ParallelIOScheduler.h
+    Pipeline/FolderWatchPredictor.h
+    Pipeline/ShellPropertyProvider.h
+    Pipeline/FFmpegCodecRouter.h
+
+    # Category B/F: Memory Optimization
+    Memory/BitmapSlabAllocator.h
+    Memory/SIMDMemoryAligner.h
+    Memory/NUMAAffinityAllocator.h
+    Memory/MemoryCompactionScheduler.h
+    Memory/LargePageOptimizer.h
+
+    # Category F: Cache Performance
+    Cache/PSOPrecompiler.h
+    Cache/IdleCacheWarmer.h
+    Cache/CacheAnalyticsDashboard.h
+    Cache/CacheMigrationTool.h
+    Cache/PredictiveCacheLoader.h
+
+    # Category E: AI/ML Production
+    AI/DirectMLInferenceEngine.h
+    AI/ONNXModelLoader.h
+    AI/NeuralUpscaleV2.h
+    AI/SemanticTagGenerator.h
+    AI/VisualSimilarityEngine.h
+
+    # Category D: GUI/UX Utilities
+    Utils/DPIScalingManager.h
+    Utils/HighContrastAdapter.h
+    Utils/FormatHealthIndicator.h
+    Utils/SettingsSerializer.h
+    Utils/LivePerformanceTracker.h
+
+    # Category B/D: Plugin Infrastructure
+    Plugin/PluginDependencyGraph.h
+    Plugin/PluginAPIVersionNegotiator.h
+    Plugin/PluginResourceQuotaManager.h
+    Plugin/PluginDiagnosticsExporter.h
+
+    # Category D: Shell & Decoder Enhancements
+    Shell/XAMLIslandHost.h
+    Shell/TouchGestureHandler.h
+    Decoders/JPEG2000DecoderV2.h
+    Decoders/UniversalVideoDecoder.h
 )
 
 set(ENGINE_SOURCES
