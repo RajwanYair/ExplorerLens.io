@@ -50,11 +50,13 @@ public:
     DarkMode::SetDarkModeForTitleBar(hWnd, m_isDarkMode);
     DarkMode::EnableDarkModeForWindow(hWnd, m_isDarkMode);
 
-    // Apply colors to dialog and children
-    // Set visual-style theme on controls FIRST so they know about dark mode,
-    // THEN repaint everything with the correct colors.
-    DarkMode::ApplyDarkScrollbars(hWnd, m_isDarkMode);
+    // Apply colors to dialog and children.
+    // ORDER IS CRITICAL — AllowDarkModeForWindow (inside ApplyThemeToDialog)
+    // MUST be called BEFORE SetWindowTheme("DarkMode_Explorer") (inside
+    // ApplyDarkScrollbars). Without this order, checkboxes, group boxes,
+    // and static labels render black text on the dark background.
     DarkMode::ApplyThemeToDialog(hWnd, m_colors, m_isDarkMode);
+    DarkMode::ApplyDarkScrollbars(hWnd, m_isDarkMode);
 
     // Explicitly theme the status bar (it ignores WM_CTLCOLOR messages)
     HWND hStatus = FindWindowEx(hWnd, nullptr, _T("msctls_statusbar32"), nullptr);

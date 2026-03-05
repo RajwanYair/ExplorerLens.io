@@ -120,7 +120,10 @@ inline bool SetAppDarkMode(bool enable) {
     }
 
     if (SetPreferredAppMode && RefreshImmersiveColorPolicyState) {
-        SetPreferredAppMode(enable ? AllowDark : Default);
+        // ForceDark ensures all common controls render white-on-dark text.
+        // AllowDark only permits it but does not guarantee it for every
+        // control class (group boxes, checkboxes sometimes fall through).
+        SetPreferredAppMode(enable ? ForceDark : ForceLight);
         RefreshImmersiveColorPolicyState();
         return true;
     }
@@ -234,6 +237,12 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
             TCHAR className[64];
             GetClassName(hChild, className, 64);
 
+            // CRITICAL: AllowDarkModeForWindow (ordinal 133) MUST be
+            // called BEFORE SetWindowTheme("DarkMode_Explorer") — otherwise
+            // the visual-style renderer ignores the dark theme and paints
+            // black text on the dark background.
+            EnableDarkModeForWindow(hChild, dark);
+
             // Apply dark theme to ALL control types — buttons (checkboxes,
             // radio buttons, group boxes), static labels, edit controls,
             // list controls, tree views, combo boxes, etc.
@@ -251,6 +260,10 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
                 _tcsicmp(className, _T("tooltips_class32")) == 0) {
                 SetDarkScrollbar(hChild, dark);
             }
+
+            // Send WM_THEMECHANGED after theme is applied so controls
+            // pick up the new visual style colors immediately.
+            SendMessage(hChild, WM_THEMECHANGED, 0, 0);
 
             // Status bar needs explicit color messages (SB_SETBKCOLOR)
             if (_tcsicmp(className, _T("msctls_statusbar32")) == 0) {
