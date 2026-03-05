@@ -681,6 +681,11 @@ set(ENGINE_HEADERS
     Utils/DeploymentPreflightCheck.h
     Utils/OperationalReadinessChecker.h
 
+    # Sprint 47-48: CI/CD Pipeline + Build Validation
+    Utils/BuildValidator.h
+    Utils/CITestReporter.h
+    Utils/EnvironmentProbe.h
+
     # Sprint 591-593
     Utils/InstallerLifecycleManager.h
     Utils/TelemetryEngine.h
@@ -824,6 +829,66 @@ set(ENGINE_HEADERS
     Core/ExplorerStatusBarProvider.h
     Core/FileSummaryTooltipGenerator.h
     Core/BatchProgressReporter.h
+    # Sprint 49-50: Dark Mode & Theme Rendering
+    Core/DarkModeTextFix.h
+    Core/ThemeAwareOverlay.h
+    Core/ContrastValidator.h
+    Core/SystemThemeMonitor.h
+    Core/ThumbnailColorCorrector.h
+    Core/AdaptiveIconRenderer.h
+    # Sprint 51-52: Decode Pipeline Enhancement
+    Core/DecoderPriorityRouter.h
+    Core/FormatFingerprinter.h
+    Core/StreamingDecodeEngine.h
+    Core/MultiPagePreview.h
+    # Sprint 53-54: Memory Management
+    Memory/MemoryArenaAllocator.h
+    Memory/NUMAMemoryRouter.h
+    Memory/LargePageAllocator.h
+    # Sprint 55-56: Pipeline Scheduling
+    Pipeline/WorkStealingScheduler.h
+    Pipeline/PipelineStageProfiler.h
+    Pipeline/AdaptiveTimeoutController.h
+    Pipeline/PipelineReplayRecorder.h
+    Pipeline/DecodePriorityQueue.h
+    # Sprint 57-58: Cache Intelligence
+    Cache/CacheEvictionPredictor.h
+    Cache/CacheCompressionEngine.h
+    Cache/CacheIntegrityVerifier.h
+    Cache/CachePreloader.h
+    # Sprint 59-60: GPU Enhancement
+    GPU/GPUShaderCompiler.h
+    GPU/GPUOccupancyOptimizer.h
+    GPU/GPUDebugLayer.h
+    GPU/GPUMemoryPoolManager.h
+    GPU/GPUAsyncCopyEngine.h
+    # Sprint 61-62: Enterprise & Deployment
+    Utils/EnterpriseTelemetryRouter.h
+    Utils/PolicyComplianceValidator.h
+    Utils/SilentUpdateOrchestrator.h
+    Utils/DiagnosticBundleExporter.h
+    Utils/DeploymentHealthChecker.h
+    # Sprint 63-64: Plugin Ecosystem
+    Plugin/PluginSandboxEnforcer.h
+    Plugin/PluginPerformanceMonitor.h
+    Plugin/PluginHotReloader.h
+    # Sprint 65-66: Quality & Observability
+    Core/StructuredDiagnosticLogger.h
+    Core/ResourceLeakTracker.h
+    Core/HealthCheckOrchestrator.h
+    # Sprint 67-68: Final Polish
+    Core/ShellIntegrationValidator.h
+    Core/GracefulDegradationController.h
+    Core/UserPreferenceEngine.h
+    Core/ThumbnailAnimator.h
+    Core/AccessibilityEnhancer.h
+    Core/StartupOptimizer.h
+    Core/CrashRecoveryEngine.h
+    Core/HDRToneMapper.h
+    Core/ColorSpaceConverter.h
+    Core/ExifOrientationHandler.h
+    Core/ThumbnailWatermarker.h
+    Core/IconBadgeRenderer.h
 )
 
 set(ENGINE_SOURCES

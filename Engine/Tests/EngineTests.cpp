@@ -178,6 +178,11 @@
 #include "../Utils/UsageTelemetryEngine.h"
 #include "../Utils/WindowsCompat.h"
 
+// Sprint 47-48: CI/CD Pipeline + Build Validation
+#include "../Utils/BuildValidator.h"
+#include "../Utils/CITestReporter.h"
+#include "../Utils/EnvironmentProbe.h"
+
 // ===== Feature Module Includes =====
 
 // --- Feature Module Integrations ---
@@ -648,6 +653,76 @@
 // --- Sprint 37-38: Test Coverage Expansion ---
 #include "../Core/VersionSynchronizer.h"
 #include "../Pipeline/AdaptiveQualityScaler.h"
+
+// --- Sprint 49-50: Dark Mode & Theme Rendering ---
+#include "../Core/DarkModeTextFix.h"
+#include "../Core/ThemeAwareOverlay.h"
+#include "../Core/ContrastValidator.h"
+#include "../Core/SystemThemeMonitor.h"
+#include "../Core/ThumbnailColorCorrector.h"
+#include "../Core/AdaptiveIconRenderer.h"
+
+// --- Sprint 51-52: Decode Pipeline Enhancement ---
+#include "../Core/DecoderPriorityRouter.h"
+#include "../Core/FormatFingerprinter.h"
+#include "../Core/StreamingDecodeEngine.h"
+#include "../Core/MultiPagePreview.h"
+
+// --- Sprint 53-54: Memory Management ---
+#include "../Memory/MemoryArenaAllocator.h"
+#include "../Memory/NUMAMemoryRouter.h"
+#include "../Memory/LargePageAllocator.h"
+
+// --- Sprint 55-56: Pipeline Scheduling ---
+#include "../Pipeline/WorkStealingScheduler.h"
+#include "../Pipeline/PipelineStageProfiler.h"
+#include "../Pipeline/AdaptiveTimeoutController.h"
+#include "../Pipeline/PipelineReplayRecorder.h"
+#include "../Pipeline/DecodePriorityQueue.h"
+
+// --- Sprint 57-58: Cache Intelligence ---
+#include "../Cache/CacheEvictionPredictor.h"
+#include "../Cache/CacheCompressionEngine.h"
+#include "../Cache/CacheIntegrityVerifier.h"
+#include "../Cache/CachePreloader.h"
+
+// --- Sprint 59-60: GPU Enhancement ---
+#include "../GPU/GPUShaderCompiler.h"
+#include "../GPU/GPUOccupancyOptimizer.h"
+#include "../GPU/GPUDebugLayer.h"
+#include "../GPU/GPUMemoryPoolManager.h"
+#include "../GPU/GPUAsyncCopyEngine.h"
+
+// --- Sprint 61-62: Enterprise & Deployment ---
+#include "../Utils/EnterpriseTelemetryRouter.h"
+#include "../Utils/PolicyComplianceValidator.h"
+#include "../Utils/SilentUpdateOrchestrator.h"
+#include "../Utils/DiagnosticBundleExporter.h"
+#include "../Utils/DeploymentHealthChecker.h"
+
+// --- Sprint 63-64: Plugin Ecosystem ---
+#include "../Plugin/PluginSandboxEnforcer.h"
+#include "../Plugin/PluginPerformanceMonitor.h"
+#include "../Plugin/PluginHotReloader.h"
+
+// --- Sprint 65-66: Quality & Observability ---
+#include "../Core/StructuredDiagnosticLogger.h"
+#include "../Core/ResourceLeakTracker.h"
+#include "../Core/HealthCheckOrchestrator.h"
+
+// --- Sprint 67-68: Final Polish ---
+#include "../Core/ShellIntegrationValidator.h"
+#include "../Core/GracefulDegradationController.h"
+#include "../Core/UserPreferenceEngine.h"
+#include "../Core/ThumbnailAnimator.h"
+#include "../Core/AccessibilityEnhancer.h"
+#include "../Core/StartupOptimizer.h"
+#include "../Core/CrashRecoveryEngine.h"
+#include "../Core/HDRToneMapper.h"
+#include "../Core/ColorSpaceConverter.h"
+#include "../Core/ExifOrientationHandler.h"
+#include "../Core/ThumbnailWatermarker.h"
+#include "../Core/IconBadgeRenderer.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -19539,7 +19614,7 @@ TEST(Test_S45_ResultType_MapAndChain) {
 
     auto chained = result.AndThen([](int val) -> Result<std::string> {
         return Ok(std::string("value=" + std::to_string(val)));
-    });
+        });
     ASSERT(chained.IsOk());
     ASSERT(chained.Value() == "value=10");
 }
@@ -19564,7 +19639,7 @@ TEST(Test_S45_ErrorRecoveryEngineV2_RetryStrategy) {
     policy.baseDelayMs = 1; // Minimal delay for testing
     engine.RegisterAction(
         ErrorRecoveryAction::ForDomain(StructuredErrorDomain::IO,
-                                  RecoveryStrategyV2::Retry, policy));
+            RecoveryStrategyV2::Retry, policy));
     ASSERT(engine.GetActionCount() == 1);
 
     int attemptCount = 0;
@@ -19586,7 +19661,7 @@ TEST(Test_S45_ErrorRecoveryEngineV2_FallbackStrategy) {
     ErrorRecoveryEngineV2 engine;
     engine.RegisterAction(
         ErrorRecoveryAction::ForDomain(StructuredErrorDomain::GPU,
-                                  RecoveryStrategyV2::Fallback));
+            RecoveryStrategyV2::Fallback));
     auto result = engine.Execute<int>(
         []() -> Result<int> {
             return MakeError<int>(StructuredErrorDomain::GPU,
@@ -19671,7 +19746,7 @@ TEST(Test_S45_PipelineErrorBoundary_SuccessPath) {
     ErrorBoundary<int> boundary("TestStage", -1);
     auto result = boundary.Execute([]() -> Result<int> {
         return Ok(42);
-    });
+        });
     ASSERT(result.stageResult == PipelineStageResult::Success);
     ASSERT(result.value == 42);
     ASSERT(!result.fallbackUsed);
@@ -19684,7 +19759,7 @@ TEST(Test_S45_PipelineErrorBoundary_FallbackOnError) {
     auto result = boundary.Execute([]() -> Result<int> {
         return MakeError<int>(StructuredErrorDomain::Decode,
             ErrorSeverity::Error, E_FAIL, "decode error");
-    });
+        });
     ASSERT(result.stageResult == PipelineStageResult::NonFatalError);
     ASSERT(result.value == -1); // Fallback value
     ASSERT(result.fallbackUsed);
@@ -19703,13 +19778,13 @@ TEST(Test_S45_PipelineErrorBoundary_FatalPromotion) {
         boundary.Execute([]() -> Result<int> {
             return MakeError<int>(StructuredErrorDomain::Pipeline,
                 ErrorSeverity::Error, E_FAIL, "repeated error");
-        });
+            });
     }
     // After threshold, next error should be promoted to fatal
     auto result = boundary.Execute([]() -> Result<int> {
         return MakeError<int>(StructuredErrorDomain::Pipeline,
             ErrorSeverity::Error, E_FAIL, "repeated error");
-    });
+        });
     ASSERT(result.stageResult == PipelineStageResult::FatalError);
     ASSERT(boundary.GetMetrics().fatalErrorCount >= 1);
 }
@@ -19726,6 +19801,752 @@ TEST(Test_S45_PipelineErrorBoundaryManager_AggregateMetrics) {
     auto renderMetrics = manager.GetStageMetrics("Render");
     ASSERT(renderMetrics.nonFatalErrorCount == 1);
     ASSERT(!manager.HasFatalStage());
+}
+
+//== Sprint 47-48: CI/CD Pipeline + Build Validation Tests ==
+
+// --- BuildValidator Tests ---
+
+TEST(Test_S47_BuildValidator_GetBuildInfo) {
+    using namespace ExplorerLens::Engine;
+    auto info = GetBuildInfo();
+    ASSERT(!info.compilerName.empty());
+    ASSERT(info.compilerVersionMajor >= 19);
+    ASSERT(!info.buildDate.empty());
+    ASSERT(!info.buildTime.empty());
+    ASSERT(info.targetArch == "x64" || info.targetArch == "ARM64");
+    ASSERT(info.hasCpp20);
+    ASSERT(info.crtLinkage == BuildCRTLinkage::Dynamic);  // /MD
+}
+
+TEST(Test_S47_BuildValidator_ValidateBuildEnvironment) {
+    using namespace ExplorerLens::Engine;
+    auto report = ValidateBuildEnvironment();
+    ASSERT(report.allPassed);
+    ASSERT(!report.results.empty());
+    // All checks should pass in our known-good build
+    for (const auto& r : report.results) {
+        ASSERT(r.passed);
+    }
+}
+
+TEST(Test_S47_BuildValidator_ValidateRuntimeEnvironment) {
+    using namespace ExplorerLens::Engine;
+    auto report = ValidateRuntimeEnvironment();
+    // OS version and RAM should pass on any modern dev machine
+    bool hasOSCheck = false;
+    bool hasRAMCheck = false;
+    for (const auto& r : report.results) {
+        if (r.checkName == "OSVersion") { hasOSCheck = true; ASSERT(r.passed); }
+        if (r.checkName == "AvailableRAM") { hasRAMCheck = true; ASSERT(r.passed); }
+    }
+    ASSERT(hasOSCheck);
+    ASSERT(hasRAMCheck);
+}
+
+TEST(Test_S47_BuildValidator_CRTConsistency) {
+    using namespace ExplorerLens::Engine;
+    auto result = ValidateCRTConsistency();
+    ASSERT(result.passed);
+    ASSERT(result.checkName == "CRTConsistency");
+    ASSERT(!result.message.empty());
+}
+
+// --- CITestReporter Tests ---
+
+TEST(Test_S47_CITestReporter_CollectResults) {
+    using namespace ExplorerLens::Engine;
+    CITestReporter reporter("UnitTests");
+    reporter.AddResult("Test_A", true, 1.5);
+    reporter.AddResult("Test_B", false, 2.3, "assertion failed", CIFailureCategory::Assertion);
+    reporter.AddResult("Test_C", true, 0.8);
+    reporter.Finish();
+
+    ASSERT(reporter.TotalTests() == 3);
+    ASSERT(reporter.PassedTests() == 2);
+    ASSERT(reporter.FailedTests() == 1);
+}
+
+TEST(Test_S47_CITestReporter_JUnitXMLExport) {
+    using namespace ExplorerLens::Engine;
+    CITestReporter reporter("XMLSuite");
+    reporter.AddResult("Test_Pass", true, 1.0);
+    reporter.AddResult("Test_Fail", false, 2.0, "boom", CIFailureCategory::Crash);
+    reporter.Finish();
+
+    std::string xml = reporter.ExportJUnitXML();
+    ASSERT(!xml.empty());
+    ASSERT(xml.find("<?xml") != std::string::npos);
+    ASSERT(xml.find("testsuites") != std::string::npos);
+    ASSERT(xml.find("Test_Pass") != std::string::npos);
+    ASSERT(xml.find("Test_Fail") != std::string::npos);
+    ASSERT(xml.find("Crash") != std::string::npos);
+}
+
+TEST(Test_S47_CITestReporter_JSONExport) {
+    using namespace ExplorerLens::Engine;
+    CITestReporter reporter("JSONSuite");
+    reporter.AddResult("Test_One", true, 0.5);
+    reporter.Finish();
+
+    std::string json = reporter.ExportJSON();
+    ASSERT(!json.empty());
+    ASSERT(json.find("\"suite\"") != std::string::npos);
+    ASSERT(json.find("\"totalTests\"") != std::string::npos);
+    ASSERT(json.find("\"passed\": 1") != std::string::npos);
+    ASSERT(json.find("\"failed\": 0") != std::string::npos);
+}
+
+TEST(Test_S47_CITestReporter_ConsoleSummary) {
+    using namespace ExplorerLens::Engine;
+    CITestReporter reporter("ConsoleSuite");
+    reporter.AddResult("Test_X", true, 1.0);
+    reporter.Finish();
+
+    std::string summary = reporter.ExportConsoleSummary();
+    ASSERT(!summary.empty());
+    ASSERT(summary.find("PASS") != std::string::npos);
+    ASSERT(summary.find("1 passed") != std::string::npos);
+}
+
+// --- EnvironmentProbe Tests ---
+
+TEST(Test_S47_EnvironmentProbe_DetectCIProvider) {
+    using namespace ExplorerLens::Engine;
+    // On local dev machine, should be None (unless CI env vars set)
+    auto provider = DetectCIProvider();
+    // Just verify it returns a valid enum value
+    ASSERT(static_cast<uint8_t>(provider) <= static_cast<uint8_t>(CIProvider::Other));
+}
+
+TEST(Test_S47_EnvironmentProbe_DetectSIMD) {
+    using namespace ExplorerLens::Engine;
+    auto caps = ProbeSIMDCapabilities();
+    ASSERT(caps.hasSSE2);
+    std::string desc = caps.ToString();
+    ASSERT(!desc.empty());
+    ASSERT(desc.find("SSE2") != std::string::npos);
+}
+
+TEST(Test_S47_EnvironmentProbe_DetectWindowsVersion) {
+    using namespace ExplorerLens::Engine;
+    auto ver = DetectWindowsVersion();
+    ASSERT(ver.detected);
+    ASSERT(ver.majorVersion >= 10);
+    ASSERT(ver.IsWindows10_1809OrLater());
+    std::string desc = ver.ToString();
+    ASSERT(desc.find("Windows") != std::string::npos);
+}
+
+TEST(Test_S47_EnvironmentProbe_ProbeEnvironment) {
+    using namespace ExplorerLens::Engine;
+    auto report = ProbeEnvironment();
+    ASSERT(report.windowsVersion.detected);
+    ASSERT(report.simdCaps.hasSSE2);
+    std::string summary = report.Summary();
+    ASSERT(!summary.empty());
+    ASSERT(summary.find("OS:") != std::string::npos);
+    ASSERT(summary.find("SIMD:") != std::string::npos);
+}
+
+TEST(Test_S47_EnvironmentProbe_DisplayDPI) {
+    using namespace ExplorerLens::Engine;
+    auto dpi = DetectDisplayDPI();
+    // DPI detection should work or gracefully report defaults
+    ASSERT(dpi.dpiX >= 72);
+    ASSERT(dpi.dpiY >= 72);
+    float scale = dpi.ScaleFactor();
+    ASSERT(scale >= 0.5f && scale <= 10.0f);
+}
+
+// ===== Sprint 49-50: Dark Mode & Theme Rendering Tests =====
+
+TEST(Test_S49_DarkModeTextFix_ThemeDetection) {
+    using namespace ExplorerLens::Engine;
+    auto colors = DarkModeTextFix::ResolveTextColors(TextRenderMode::Auto);
+    ASSERT(colors.primary != 0);
+    ASSERT(DarkModeTextFix::ModeCount() == 4);
+    ASSERT(DarkModeTextFix::ValidateContrast(0xFFFFFF, 0x000000));
+}
+
+TEST(Test_S49_ThemeAwareOverlay_ComputeColors) {
+    using namespace ExplorerLens::Engine;
+    ThemeAwareOverlay overlay;
+    auto textColor = ThemeAwareOverlay::TextColorForBackground(true);
+    ASSERT(textColor != 0);
+    ASSERT(ThemeAwareOverlay::PositionCount() > 0);
+    ASSERT(ThemeAwareOverlay::StyleCount() > 0);
+}
+
+TEST(Test_S49_ContrastValidator_CheckRatio) {
+    using namespace ExplorerLens::Engine;
+    float ratio = ContrastValidator::ContrastRatio(0xFFFFFF, 0x000000);
+    ASSERT(ratio >= 20.0f); // White on black should be ~21:1
+    auto result = ContrastValidator::Validate(0xFFFFFF, 0x000000);
+    ASSERT(result.passesAA);
+    ASSERT(ContrastValidator::LevelCount() == 4);
+}
+
+TEST(Test_S50_SystemThemeMonitor_Detect) {
+    using namespace ExplorerLens::Engine;
+    SystemThemeMonitor monitor;
+    (void)monitor.IsDarkMode();
+    ASSERT(SystemThemeMonitor::TransitionTypeCount() > 0);
+    ASSERT(monitor.CallbackCount() == 0);
+}
+
+TEST(Test_S50_ThumbnailColorCorrector_Apply) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailColorCorrector corrector;
+    corrector.SetProfile(ColorCorrectionProfile::sRGBNormalize);
+    uint8_t buf[4] = {128, 128, 128, 255};
+    auto result = corrector.Apply(buf, 1, 1, 4);
+    ASSERT(result.applied);
+    ASSERT(ThumbnailColorCorrector::ProfileCount() > 0);
+}
+
+TEST(Test_S50_AdaptiveIconRenderer_RenderSize) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveIconRenderer renderer;
+    renderer.SetDPIScale(1.0f);
+    auto size = renderer.ScaledSize(64);
+    ASSERT(size > 0 && size <= 255);
+    ASSERT(AdaptiveIconRenderer::BadgeTypeCount() > 0);
+}
+
+// ===== Sprint 51-52: Decode Pipeline Enhancement Tests =====
+
+TEST(Test_S51_DecoderPriorityRouter_Route) {
+    using namespace ExplorerLens::Engine;
+    DecoderPriorityRouter router;
+    auto decision = router.Route(L".jpg");
+    ASSERT(decision.confidence >= 0.0f);
+    ASSERT(DecoderPriorityRouter::BackendCount() > 0);
+}
+
+TEST(Test_S51_FormatFingerprinter_Detect) {
+    using namespace ExplorerLens::Engine;
+    FormatFingerprinter fp;
+    fp.LoadBuiltinSignatures();
+    uint8_t jpegHeader[] = { 0xFF, 0xD8, 0xFF, 0xE0 };
+    auto result = fp.Identify(jpegHeader, 4, L".jpg");
+    ASSERT(result.confidence >= 0.0f);
+    ASSERT(FormatFingerprinter::MethodCount() > 0);
+}
+
+TEST(Test_S51_StreamingDecodeEngine_Init) {
+    using namespace ExplorerLens::Engine;
+    StreamDecodeEngine engine;
+    engine.Begin(1024);
+    ASSERT(!engine.IsComplete());
+    ASSERT(StreamDecodeEngine::StateCount() > 0);
+}
+
+TEST(Test_S52_MultiPagePreview_Config) {
+    using namespace ExplorerLens::Engine;
+    MultiPagePreview preview;
+    preview.SetMaxPages(4);
+    ASSERT(preview.GetMaxPages() == 4);
+    ASSERT(MultiPagePreview::LayoutCount() > 0);
+    ASSERT(preview.PageCount() == 0);
+}
+
+// ===== Sprint 53-54: Memory Management Tests =====
+
+TEST(Test_S53_MemoryArenaAllocator_AllocFree) {
+    using namespace ExplorerLens::Engine;
+    MemoryArenaAllocator arena(64 * 1024);
+    ASSERT(arena.BlockSize() == 64 * 1024);
+    arena.Allocate(1024);
+    ASSERT(arena.GetStats().allocCalls == 1);
+    arena.Reset();
+    ASSERT(arena.GetStats().resetCount == 1);
+    ASSERT(MemoryArenaAllocator::PolicyCount() > 0);
+}
+
+TEST(Test_S53_NUMAMemoryRouter_Topology) {
+    using namespace ExplorerLens::Engine;
+    NUMAMemoryRouter router;
+    router.DetectTopology();
+    ASSERT(router.NodeCount() >= 1); // At least one NUMA node
+    ASSERT(NUMAMemoryRouter::StrategyCount() > 0);
+}
+
+TEST(Test_S53_LargePageAllocator_Query) {
+    using namespace ExplorerLens::Engine;
+    LargePageAllocator alloc;
+    alloc.Initialize();
+    auto pageSize = alloc.Stats().minLargePageSize;
+    // Large pages may not be available, but query should succeed
+    ASSERT(pageSize > 0);
+    ASSERT(LargePageAllocator::PageSizeCount() > 0);
+}
+
+// ===== Sprint 55-56: Pipeline Scheduling Tests =====
+
+TEST(Test_S55_WorkStealingScheduler_Submit) {
+    using namespace ExplorerLens::Engine;
+    WorkStealingScheduler scheduler;
+    scheduler.Initialize(4);
+    ASSERT(scheduler.WorkerCount() == 4);
+    bool called = false;
+    scheduler.Submit([&]() { called = true; });
+    ASSERT(called);
+    ASSERT(scheduler.Stats().totalTasks == 1);
+}
+
+TEST(Test_S55_PipelineStageProfiler_Record) {
+    using namespace ExplorerLens::Engine;
+    PipelineStageProfiler profiler;
+    profiler.BeginProfile();
+    profiler.BeginStage(PSProfileStage::Decode);
+    profiler.EndStage(1024, 512);
+    profiler.BeginStage(PSProfileStage::Resize);
+    profiler.EndStage(512, 256);
+    auto profile = profiler.EndProfile();
+    ASSERT(profile.stages.size() == 2);
+    ASSERT(PipelineStageProfiler::StageCount() > 0);
+}
+
+TEST(Test_S55_AdaptiveTimeoutController_Compute) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveTimeoutController controller;
+    TimeoutConfig cfg;
+    cfg.baseTimeoutMs = 100;
+    cfg.minTimeoutMs = 50;
+    controller.SetConfig(cfg);
+    auto decision = controller.Calculate(1024 * 1024, L"JPEG");
+    ASSERT(decision.timeoutMs >= cfg.minTimeoutMs);
+    ASSERT(decision.confidence > 0.0f);
+}
+
+TEST(Test_S55_PipelineReplayRecorder_RecordReplay) {
+    using namespace ExplorerLens::Engine;
+    PipelineReplayRecorder recorder;
+    recorder.BeginSession(L"test-session");
+    ASSERT(recorder.IsRecording());
+    recorder.RecordEvent(ReplayEventType::FileOpen, L"test.jpg", 1024);
+    recorder.RecordEvent(ReplayEventType::DecodeBegin);
+    ASSERT(recorder.EventCount() == 2);
+    auto session = recorder.EndSession();
+    ASSERT(!recorder.IsRecording());
+    ASSERT(session.fileCount == 1);
+}
+
+TEST(Test_S56_DecodePriorityQueue_PushPop) {
+    using namespace ExplorerLens::Engine;
+    DecodePriorityQueue queue;
+    QueuedDecodeRequest req1;
+    req1.filePath = L"a.jpg";
+    req1.priority = QueuePriority::High;
+    req1.requestId = 1;
+    QueuedDecodeRequest req2;
+    req2.filePath = L"b.png";
+    req2.priority = QueuePriority::Low;
+    req2.requestId = 2;
+    queue.Enqueue(req1);
+    queue.Enqueue(req2);
+    ASSERT(queue.Size() == 2);
+    auto top = queue.Dequeue();
+    ASSERT(top.priority == QueuePriority::High);
+}
+
+// ===== Sprint 57-58: Cache Intelligence Tests =====
+
+TEST(Test_S57_CacheEvictionPredictor_Predict) {
+    using namespace ExplorerLens::Engine;
+    CacheEvictionPredictor predictor;
+    predictor.RecordAccess(1001, 1024);
+    predictor.RecordAccess(1002, 2048);
+    ASSERT(predictor.EntryCount() == 2);
+    auto decision = predictor.SelectEviction(512);
+    ASSERT(decision.freedBytes > 0 || !decision.evicted);
+}
+
+TEST(Test_S57_CacheCompressionEngine_Ratio) {
+    using namespace ExplorerLens::Engine;
+    CacheCompressionEngine engine;
+    engine.SetAlgorithm(CacheCompression::LZ4Fast);
+    ASSERT(engine.GetAlgorithm() == CacheCompression::LZ4Fast);
+    ASSERT(engine.ShouldCompress(8192));
+    uint32_t estimated = engine.EstimateCompressedSize(10000);
+    ASSERT(estimated < 10000);
+}
+
+TEST(Test_S57_CacheIntegrityVerifier_Verify) {
+    using namespace ExplorerLens::Engine;
+    CacheIntegrityVerifier verifier;
+    verifier.SetAutoHeal(true);
+    ASSERT(verifier.AutoHealEnabled());
+    uint8_t data[] = { 0x01, 0x02, 0x03, 0x04 };
+    auto result = verifier.VerifyEntry(42, data, 4, 0);
+    ASSERT(result.entryKey == 42);
+    ASSERT(static_cast<size_t>(result.status) < CacheIntegrityVerifier::StatusCount());
+}
+
+TEST(Test_S58_CachePreloader_Prefetch) {
+    using namespace ExplorerLens::Engine;
+    CachePreloader preloader;
+    preloader.SetMaxPending(10);
+    ASSERT(preloader.MaxPending() == 10);
+    PreloadTask task;
+    task.filePath = L"C:\\Photos\\test.jpg";
+    task.thumbnailSize = 256;
+    preloader.QueuePreload(task);
+    ASSERT(preloader.PendingCount() == 1);
+}
+
+// ===== Sprint 59-60: GPU Enhancement Tests =====
+
+TEST(Test_S59_GPUShaderCompiler_Compile) {
+    using namespace ExplorerLens::Engine;
+    GPUShaderCompiler compiler;
+    compiler.SetOptLevel(CompilerOptLevel::Optimized);
+    auto result = compiler.Compile(L"float4 CSMain() : SV_Target { return 0; }",
+        CompilerShaderType::Compute, L"CSMain");
+    ASSERT(result.success);
+    ASSERT(result.bytecodeSize > 0);
+    ASSERT(compiler.CachedShaderCount() == 1);
+}
+
+TEST(Test_S59_GPUOccupancyOptimizer_Optimize) {
+    using namespace ExplorerLens::Engine;
+    GPUOccupancyOptimizer optimizer;
+    optimizer.SetArchitecture(GPUArchitecture::IntelArc);
+    auto result = optimizer.Optimize(1920, 1080);
+    ASSERT(result.dispatchX > 0);
+    ASSERT(result.dispatchY > 0);
+}
+
+TEST(Test_S59_GPUDebugLayer_RecordMessages) {
+    using namespace ExplorerLens::Engine;
+    GPUDebugLayer debugLayer;
+    debugLayer.Enable(true);
+    ASSERT(debugLayer.IsEnabled());
+    GPUDebugMessage msg;
+    msg.severity = GPUDebugSeverity::Warning;
+    msg.description = L"Test warning";
+    debugLayer.RecordMessage(msg);
+    ASSERT(debugLayer.GetStats().totalMessages == 1);
+    ASSERT(!debugLayer.HasErrors());
+}
+
+TEST(Test_S60_GPUMemoryPoolManager_AllocFree) {
+    using namespace ExplorerLens::Engine;
+    GPUMemoryPoolManager pool;
+    GPUMemPoolConfig cfg;
+    cfg.maxSizeMB = 64;
+    pool.Initialize(cfg);
+    ASSERT(pool.IsInitialized());
+    auto alloc = pool.Allocate(GPUPoolType::TextureDefault, 1024 * 1024);
+    ASSERT(alloc.valid);
+    pool.Free(alloc);
+    ASSERT(pool.GetStats().freeCount == 1);
+}
+
+TEST(Test_S60_GPUAsyncCopyEngine_SubmitComplete) {
+    using namespace ExplorerLens::Engine;
+    GPUAsyncCopyEngine engine;
+    engine.Initialize(4);
+    ASSERT(engine.IsInitialized());
+    CopyRequest req;
+    req.requestId = 1;
+    req.sizeBytes = 65536;
+    req.direction = CopyDirection::HostToDevice;
+    ASSERT(engine.Submit(req));
+    ASSERT(engine.PendingCount() == 1);
+    auto result = engine.Complete(1);
+    ASSERT(result.completed);
+}
+
+// ===== Sprint 61-62: Enterprise & Deployment Tests =====
+
+TEST(Test_S61_EnterpriseTelemetryRouter_Route) {
+    using namespace ExplorerLens::Engine;
+    EnterpriseTelemetryRouter router;
+    TelemetryRouteConfig route;
+    route.sink = TelemetrySink::ETW;
+    route.minLevel = ETRLevel::Warning;
+    router.AddRoute(route);
+    ASSERT(router.RouteCount() == 1);
+    ETREvent evt;
+    evt.level = ETRLevel::Error;
+    evt.eventName = L"TestError";
+    ASSERT(router.Route(evt));
+}
+
+TEST(Test_S61_PolicyComplianceValidator_Validate) {
+    using namespace ExplorerLens::Engine;
+    PolicyComplianceValidator validator;
+    PolicyRule rule;
+    rule.ruleName = L"GPUEnabled";
+    rule.expectedValue = L"true";
+    rule.actualValue = L"true";
+    rule.severity = PolicySeverity::Mandatory;
+    validator.AddRule(rule);
+    auto report = validator.ValidateAll();
+    ASSERT(report.overallCompliant);
+    ASSERT(report.compliantCount == 1);
+}
+
+TEST(Test_S62_SilentUpdateOrchestrator_CheckUpdates) {
+    using namespace ExplorerLens::Engine;
+    SilentUpdateOrchestrator orchestrator;
+    UpdateConfig cfg;
+    cfg.channel = SilentUpdateChannel::Stable;
+    orchestrator.Configure(cfg);
+    bool available = orchestrator.CheckForUpdates(L"15.0.0");
+    ASSERT(orchestrator.GetState() == UpdateState::Idle);
+    (void)available;
+}
+
+TEST(Test_S62_DiagnosticBundleExporter_Export) {
+    using namespace ExplorerLens::Engine;
+    DiagnosticBundleExporter exporter;
+    BundleConfig cfg;
+    cfg.redactPII = true;
+    exporter.Configure(cfg);
+    BundleDiagEntry entry;
+    entry.section = DiagnosticSection::SystemInfo;
+    entry.key = L"OS";
+    entry.value = L"Windows 11";
+    exporter.AddEntry(entry);
+    auto result = exporter.Export();
+    ASSERT(result.success);
+    ASSERT(result.sectionsIncluded >= 1);
+}
+
+TEST(Test_S62_DeploymentHealthChecker_RunAll) {
+    using namespace ExplorerLens::Engine;
+    DeploymentHealthChecker checker;
+    HealthCheck check;
+    check.type = HealthCheckType::DLLIntegrity;
+    check.name = L"DLL Check";
+    check.critical = true;
+    checker.AddCheck(check);
+    auto report = checker.RunAll();
+    ASSERT(report.overallHealthy);
+    ASSERT(report.passedChecks == 1);
+}
+
+// ===== Sprint 63-64: Plugin Ecosystem Tests =====
+
+TEST(Test_S63_PluginSandboxEnforcer_CheckAccess) {
+    using namespace ExplorerLens::Engine;
+    PluginSandboxEnforcer sandbox;
+    EnforcerSandboxPolicy policy;
+    policy.allowFileWrite = false;
+    policy.allowNetwork = false;
+    sandbox.SetPolicy(policy);
+    ASSERT(!sandbox.IsAllowed(SandboxRestriction::FileSystemWrite));
+    ASSERT(!sandbox.IsAllowed(SandboxRestriction::NetworkAccess));
+    ASSERT(sandbox.IsAllowed(SandboxRestriction::FileSystemRead));
+}
+
+TEST(Test_S63_PluginPerformanceMonitor_Grade) {
+    using namespace ExplorerLens::Engine;
+    PluginPerformanceMonitor monitor;
+    PluginPerfSnapshot snap;
+    snap.avgLatencyMs = 10.0;
+    snap.errorRate = 0.001f;
+    auto grade = monitor.Grade(snap);
+    ASSERT(grade == PluginPerfGrade::Excellent);
+}
+
+TEST(Test_S64_PluginHotReloader_Reload) {
+    using namespace ExplorerLens::Engine;
+    PluginHotReloader reloader;
+    ReloadConfig cfg;
+    cfg.enabled = true;
+    reloader.Configure(cfg);
+    auto evt = reloader.TriggerReload(L"TestPlugin.dll", ReloadTrigger::Manual);
+    ASSERT(evt.success);
+    ASSERT(reloader.GetStats().successfulReloads == 1);
+}
+
+// ===== Sprint 65-66: Quality & Observability Tests =====
+
+TEST(Test_S65_StructuredDiagnosticLogger_Log) {
+    using namespace ExplorerLens::Engine;
+    StructuredDiagnosticLogger logger;
+    LoggerConfig cfg;
+    cfg.minSeverity = LogSeverity::Info;
+    cfg.maxEntriesInMem = 100;
+    logger.Configure(cfg);
+    ASSERT(logger.LogMessage(LogSeverity::Error, LogCategory::Decoder, L"Test error"));
+    ASSERT(logger.EntryCount() == 1);
+    ASSERT(logger.GetStats().totalEntries == 1);
+}
+
+TEST(Test_S65_ResourceLeakTracker_DetectLeak) {
+    using namespace ExplorerLens::Engine;
+    ResourceLeakTracker tracker;
+    tracker.Enable(true);
+    tracker.RecordAlloc(TrackedResourceType::GDIObject, 0x1000, 64);
+    tracker.RecordAlloc(TrackedResourceType::HeapAlloc, 0x2000, 128);
+    tracker.RecordFree(TrackedResourceType::GDIObject, 0x1000);
+    ASSERT(tracker.HasLeaks()); // HeapAlloc 0x2000 not freed
+    auto report = tracker.GenerateReport();
+    ASSERT(report.leakedCount == 1);
+}
+
+TEST(Test_S66_HealthCheckOrchestrator_Summarize) {
+    using namespace ExplorerLens::Engine;
+    HealthCheckOrchestrator orchestrator;
+    orchestrator.RegisterSubsystem(SubsystemId::DecoderPipeline, L"Decoder");
+    orchestrator.RegisterSubsystem(SubsystemId::CacheEngine, L"Cache");
+    orchestrator.UpdateHealth(SubsystemId::DecoderPipeline, SubsystemHealth::Optimal);
+    orchestrator.UpdateHealth(SubsystemId::CacheEngine, SubsystemHealth::Degraded);
+    auto summary = orchestrator.Summarize();
+    ASSERT(summary.totalSubsystems == 2);
+    ASSERT(summary.degradedCount == 1);
+}
+
+// ===== Sprint 67-68: Final Polish Tests =====
+
+TEST(Test_S67_ShellIntegrationValidator_ValidateAll) {
+    using namespace ExplorerLens::Engine;
+    ShellIntegrationValidator validator;
+    auto report = validator.ValidateAll();
+    ASSERT(report.totalChecks == static_cast<uint32_t>(ShellCheckId::COUNT));
+}
+
+TEST(Test_S67_GracefulDegradationController_Degrade) {
+    using namespace ExplorerLens::Engine;
+    GracefulDegradationController controller;
+    DegradationConfig cfg;
+    cfg.autoDegrade = true;
+    controller.Configure(cfg);
+    ASSERT(controller.IsFeatureAllowed(FeatureTier::Essential));
+    ASSERT(controller.IsFeatureAllowed(FeatureTier::Optional));
+    controller.SetLevel(DegradationLevel::CoreOnly);
+    ASSERT(controller.IsFeatureAllowed(FeatureTier::Essential));
+    ASSERT(!controller.IsFeatureAllowed(FeatureTier::Optional));
+}
+
+TEST(Test_S67_UserPreferenceEngine_SetGet) {
+    using namespace ExplorerLens::Engine;
+    UserPreferenceEngine engine;
+    PreferenceValue pref;
+    pref.key = PreferenceKey::ThumbnailQuality;
+    pref.source = PreferenceSource::UserSetting;
+    pref.intValue = 90;
+    engine.SetPreference(pref);
+    ASSERT(engine.IsSet(PreferenceKey::ThumbnailQuality));
+    ASSERT(engine.GetInt(PreferenceKey::ThumbnailQuality) == 90);
+}
+
+TEST(Test_S67_ThumbnailAnimator_Analyze) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailAnimator animator;
+    AnimationConfig cfg;
+    cfg.maxFrames = 8;
+    animator.Configure(cfg);
+    auto result = animator.Analyze(AnimationFormat::GIF, 24, 2400);
+    ASSERT(result.animated);
+    ASSERT(result.extractedFrames == 8);
+}
+
+TEST(Test_S68_AccessibilityEnhancer_HighContrast) {
+    using namespace ExplorerLens::Engine;
+    AccessibilityEnhancer enhancer;
+    A11yEnhancerConfig cfg;
+    cfg.mode = AccessibilityMode::HighContrast;
+    enhancer.Configure(cfg);
+    ASSERT(enhancer.IsHighContrast());
+    auto result = enhancer.Apply();
+    ASSERT(result.highContrastActive);
+    ASSERT(result.effectiveContrast >= 2.0f);
+}
+
+TEST(Test_S68_StartupOptimizer_Metrics) {
+    using namespace ExplorerLens::Engine;
+    StartupOptimizer optimizer;
+    StartupConfig cfg;
+    cfg.deferThresholdMs = 50;
+    optimizer.Configure(cfg);
+    optimizer.RecordTask(L"COMInit", StartupPhase::COMInit, 5.0);
+    optimizer.RecordTask(L"GPUProbe", StartupPhase::GPUProbe, 80.0);
+    auto metrics = optimizer.ComputeMetrics();
+    ASSERT(metrics.tasksImmediate == 1); // COMInit < 50ms
+    ASSERT(metrics.tasksDeferred == 1);  // GPUProbe >= 50ms
+}
+
+TEST(Test_S68_CrashRecoveryEngine_Checkpoint) {
+    using namespace ExplorerLens::Engine;
+    CrashRecoveryEngine engine;
+    engine.SetCheckpoint(L"DecodeJPEG");
+    engine.SetCheckpoint(L"ResizeThumbnail");
+    ASSERT(engine.CheckpointCount() == 2);
+    auto* last = engine.GetLastCheckpoint();
+    ASSERT(last != nullptr);
+    ASSERT(last->operationName == L"ResizeThumbnail");
+    auto action = engine.Diagnose(CrashCause::GPUHang);
+    ASSERT(action == CrashRecoveryAction::DisableGPU);
+}
+
+TEST(Test_S68_HDRToneMapper_ACES) {
+    using namespace ExplorerLens::Engine;
+    HDRToneMapper mapper;
+    HDRMapperConfig cfg;
+    cfg.op = HDRToneMappingOp::ACES;
+    cfg.exposure = 1.0f;
+    mapper.Configure(cfg);
+    float result = mapper.ToneMap(1.0f);
+    ASSERT(result > 0.0f && result <= 1.0f);
+    float dark = mapper.ToneMap(0.0f);
+    ASSERT(dark >= 0.0f);
+}
+
+TEST(Test_S68_ColorSpaceConverter_Identity) {
+    using namespace ExplorerLens::Engine;
+    ColorSpaceConverter converter;
+    ConversionConfig cfg;
+    cfg.source = CSCColorSpace::sRGB;
+    cfg.destination = CSCColorSpace::sRGB;
+    converter.Configure(cfg);
+    ASSERT(converter.IsIdentityConversion());
+    ColorTriple input{ 0.5f, 0.3f, 0.8f };
+    auto output = converter.Convert(input);
+    ASSERT(output.r == input.r && output.g == input.g && output.b == input.b);
+}
+
+TEST(Test_S68_ExifOrientationHandler_Rotate90) {
+    using namespace ExplorerLens::Engine;
+    ExifOrientationHandler handler;
+    auto result = handler.Apply(ExifOrientTag::Rotate90CW, 1920, 1080);
+    ASSERT(result.correctionApplied);
+    ASSERT(result.dimensionsSwapped);
+    ASSERT(result.newWidth == 1080);
+    ASSERT(result.newHeight == 1920);
+}
+
+TEST(Test_S68_ThumbnailWatermarker_Placement) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailWatermarker watermarker;
+    ThumbWatermarkConfig cfg;
+    cfg.type = ThumbWatermarkType::FormatBadge;
+    cfg.position = ThumbWatermarkPosition::BottomRight;
+    cfg.text = L"PNG";
+    cfg.fontSize = 10;
+    watermarker.Configure(cfg);
+    ASSERT(watermarker.IsEnabled());
+    auto result = watermarker.ComputePlacement(256, 256);
+    ASSERT(result.rendered);
+    ASSERT(result.x > 0);
+}
+
+TEST(Test_S68_IconBadgeRenderer_ScaledPlacement) {
+    using namespace ExplorerLens::Engine;
+    IconBadgeRenderer renderer;
+    BadgeConfig cfg;
+    cfg.type = BadgeType::FormatIcon;
+    cfg.sizePx = 16;
+    cfg.dpiScale = 2.0f;
+    cfg.dpiAware = true;
+    auto placement = renderer.ComputePlacement(cfg, 256, 256);
+    ASSERT(placement.width == 32); // 16 * 2.0 DPI
+    ASSERT(placement.visible);
 }
 
 //== Security Hardening Tests ==
@@ -21435,13 +22256,13 @@ TEST(Test_S41_BranchPredictor_HotPathCounter) {
 
 TEST(Test_S41_LoopTuner_TileProcessor) {
     using namespace ExplorerLens::Pipeline;
-    TileProcessor proc(TileConfig{32, 32, 64, 32768, 262144});
+    TileProcessor proc(TileConfig{ 32, 32, 64, 32768, 262144 });
     size_t tileCount = 0;
     proc.ProcessImage(128, 128, [&](const TileRegion& tile) {
         ASSERT(tile.width <= 32);
         ASSERT(tile.height <= 32);
         tileCount++;
-    });
+        });
     ASSERT(tileCount == 16); // (128/32) * (128/32)
     ASSERT(proc.GetStats().tilesProcessed == 16);
 }
@@ -21457,7 +22278,7 @@ TEST(Test_S41_LoopTuner_OperationBatcher) {
     batcher.Flush([&](const BatchOp& op) {
         (void)op;
         executed++;
-    });
+        });
     ASSERT(executed == 2);
     ASSERT(batcher.Pending() == 0);
     ASSERT(batcher.TotalFlushed() == 2);
@@ -21471,7 +22292,7 @@ TEST(Test_S41_LoopTuner_RowBatches) {
         (void)startRow;
         ASSERT(rowCount <= 64);
         batchCount++;
-    });
+        });
     ASSERT(batchCount == 4); // 256 / 64
 }
 
@@ -21591,10 +22412,10 @@ TEST(Test_S43_ResourceLimiter_ViolationCallback) {
     rl.RegisterPlugin(L"ViolPlugin");
     bool callbackFired = false;
     rl.SetViolationCallback([&](const std::wstring& id, ResourceLimitAction action,
-                                const PluginResourceUsage& usage) {
-        callbackFired = true;
-        (void)id; (void)action; (void)usage;
-    });
+        const PluginResourceUsage& usage) {
+            callbackFired = true;
+            (void)id; (void)action; (void)usage;
+        });
     // Exceed memory quota (default 256 MB) by recording 280 MB (ratio ~1.09, warning)
     rl.RecordMemoryUsage(L"ViolPlugin", 280ULL * 1024 * 1024);
     ASSERT(callbackFired);
@@ -21622,10 +22443,10 @@ TEST(Test_S43_VersionNegotiator_Compat) {
     auto sdkVer = vn.GetSDKVersion();
     ASSERT(sdkVer.major == 15);
     ASSERT(sdkVer.minor == 0);
-    ASSERT(vn.CheckCompatibility(SemanticVersion{15, 0, 0}) == CompatibilityResult::Compatible);
-    ASSERT(vn.CheckCompatibility(SemanticVersion{15, 1, 0}) == CompatibilityResult::MinorMismatch);
-    ASSERT(vn.CheckCompatibility(SemanticVersion{14, 0, 0}) == CompatibilityResult::MajorBreaking);
-    ASSERT(vn.CheckCompatibility(SemanticVersion{0, 0, 0}) == CompatibilityResult::Unknown);
+    ASSERT(vn.CheckCompatibility(SemanticVersion{ 15, 0, 0 }) == CompatibilityResult::Compatible);
+    ASSERT(vn.CheckCompatibility(SemanticVersion{ 15, 1, 0 }) == CompatibilityResult::MinorMismatch);
+    ASSERT(vn.CheckCompatibility(SemanticVersion{ 14, 0, 0 }) == CompatibilityResult::MajorBreaking);
+    ASSERT(vn.CheckCompatibility(SemanticVersion{ 0, 0, 0 }) == CompatibilityResult::Unknown);
 }
 
 TEST(Test_S43_VersionNegotiator_Parse) {
@@ -21634,8 +22455,8 @@ TEST(Test_S43_VersionNegotiator_Parse) {
     ASSERT(v.minor == 3);
     ASSERT(v.patch == 45);
     ASSERT(v.ToString() == L"12.3.45");
-    auto v2 = SemanticVersion{1, 0, 0};
-    auto v3 = SemanticVersion{2, 0, 0};
+    auto v2 = SemanticVersion{ 1, 0, 0 };
+    auto v3 = SemanticVersion{ 2, 0, 0 };
     ASSERT(v2 < v3);
     ASSERT(v3 > v2);
     ASSERT(v2 != v3);
@@ -21644,12 +22465,12 @@ TEST(Test_S43_VersionNegotiator_Parse) {
 TEST(Test_S43_VersionNegotiator_Migration) {
     auto& vn = PluginVersionNegotiator::Instance();
     vn.Initialize();
-    auto path = vn.GetMigrationPath(SemanticVersion{13, 0, 0}, SemanticVersion{15, 0, 0});
+    auto path = vn.GetMigrationPath(SemanticVersion{ 13, 0, 0 }, SemanticVersion{ 15, 0, 0 });
     ASSERT(path.size() >= 2);
     ASSERT(path[0].breaking);
-    auto suggestion = vn.GetUpgradeSuggestion(SemanticVersion{14, 0, 0});
+    auto suggestion = vn.GetUpgradeSuggestion(SemanticVersion{ 14, 0, 0 });
     ASSERT(suggestion.find(L"Major version mismatch") != std::wstring::npos);
-    auto compatSuggestion = vn.GetUpgradeSuggestion(SemanticVersion{15, 0, 0});
+    auto compatSuggestion = vn.GetUpgradeSuggestion(SemanticVersion{ 15, 0, 0 });
     ASSERT(compatSuggestion.find(L"compatible") != std::wstring::npos);
 }
 
@@ -21679,7 +22500,7 @@ TEST(Test_S43_CrashIsolation_ExceptionCatch) {
     ci.RegisterPlugin(L"ThrowPlugin");
     auto result = ci.ExecuteIsolated(L"ThrowPlugin", []() {
         throw std::runtime_error("plugin error");
-    });
+        });
     ASSERT(result == IsolatedCallResult::CppException);
     ASSERT(ci.GetState(L"ThrowPlugin").crashCount == 1);
     auto result2 = ci.ExecuteIsolated(L"ThrowPlugin", []() { /* success */ });
@@ -25866,6 +26687,105 @@ int main() {
     RUN_TEST(Test_S45_PipelineErrorBoundary_FallbackOnError);
     RUN_TEST(Test_S45_PipelineErrorBoundary_FatalPromotion);
     RUN_TEST(Test_S45_PipelineErrorBoundaryManager_AggregateMetrics);
+
+    // Sprint 47-48: CI/CD Pipeline + Build Validation
+    std::wcout << L"\nSprint 47-48: CI/CD Pipeline + Build Validation..." << std::endl;
+    // BuildValidator
+    RUN_TEST(Test_S47_BuildValidator_GetBuildInfo);
+    RUN_TEST(Test_S47_BuildValidator_ValidateBuildEnvironment);
+    RUN_TEST(Test_S47_BuildValidator_ValidateRuntimeEnvironment);
+    RUN_TEST(Test_S47_BuildValidator_CRTConsistency);
+    // CITestReporter
+    RUN_TEST(Test_S47_CITestReporter_CollectResults);
+    RUN_TEST(Test_S47_CITestReporter_JUnitXMLExport);
+    RUN_TEST(Test_S47_CITestReporter_JSONExport);
+    RUN_TEST(Test_S47_CITestReporter_ConsoleSummary);
+    // EnvironmentProbe
+    RUN_TEST(Test_S47_EnvironmentProbe_DetectCIProvider);
+    RUN_TEST(Test_S47_EnvironmentProbe_DetectSIMD);
+    RUN_TEST(Test_S47_EnvironmentProbe_DetectWindowsVersion);
+    RUN_TEST(Test_S47_EnvironmentProbe_ProbeEnvironment);
+    RUN_TEST(Test_S47_EnvironmentProbe_DisplayDPI);
+
+    // Sprint 49-50: Dark Mode & Theme Rendering
+    std::wcout << L"\nSprint 49-50 Tests (Dark Mode & Theme)..." << std::endl;
+    RUN_TEST(Test_S49_DarkModeTextFix_ThemeDetection);
+    RUN_TEST(Test_S49_ThemeAwareOverlay_ComputeColors);
+    RUN_TEST(Test_S49_ContrastValidator_CheckRatio);
+    RUN_TEST(Test_S50_SystemThemeMonitor_Detect);
+    RUN_TEST(Test_S50_ThumbnailColorCorrector_Apply);
+    RUN_TEST(Test_S50_AdaptiveIconRenderer_RenderSize);
+
+    // Sprint 51-52: Decode Pipeline Enhancement
+    std::wcout << L"\nSprint 51-52 Tests (Decode Pipeline)..." << std::endl;
+    RUN_TEST(Test_S51_DecoderPriorityRouter_Route);
+    RUN_TEST(Test_S51_FormatFingerprinter_Detect);
+    RUN_TEST(Test_S51_StreamingDecodeEngine_Init);
+    RUN_TEST(Test_S52_MultiPagePreview_Config);
+
+    // Sprint 53-54: Memory Management
+    std::wcout << L"\nSprint 53-54 Tests (Memory Management)..." << std::endl;
+    RUN_TEST(Test_S53_MemoryArenaAllocator_AllocFree);
+    RUN_TEST(Test_S53_NUMAMemoryRouter_Topology);
+    RUN_TEST(Test_S53_LargePageAllocator_Query);
+
+    // Sprint 55-56: Pipeline Scheduling
+    std::wcout << L"\nSprint 55-56 Tests (Pipeline Scheduling)..." << std::endl;
+    RUN_TEST(Test_S55_WorkStealingScheduler_Submit);
+    RUN_TEST(Test_S55_PipelineStageProfiler_Record);
+    RUN_TEST(Test_S55_AdaptiveTimeoutController_Compute);
+    RUN_TEST(Test_S55_PipelineReplayRecorder_RecordReplay);
+    RUN_TEST(Test_S56_DecodePriorityQueue_PushPop);
+
+    // Sprint 57-58: Cache Intelligence
+    std::wcout << L"\nSprint 57-58 Tests (Cache Intelligence)..." << std::endl;
+    RUN_TEST(Test_S57_CacheEvictionPredictor_Predict);
+    RUN_TEST(Test_S57_CacheCompressionEngine_Ratio);
+    RUN_TEST(Test_S57_CacheIntegrityVerifier_Verify);
+    RUN_TEST(Test_S58_CachePreloader_Prefetch);
+
+    // Sprint 59-60: GPU Enhancement
+    std::wcout << L"\nSprint 59-60 Tests (GPU Enhancement)..." << std::endl;
+    RUN_TEST(Test_S59_GPUShaderCompiler_Compile);
+    RUN_TEST(Test_S59_GPUOccupancyOptimizer_Optimize);
+    RUN_TEST(Test_S59_GPUDebugLayer_RecordMessages);
+    RUN_TEST(Test_S60_GPUMemoryPoolManager_AllocFree);
+    RUN_TEST(Test_S60_GPUAsyncCopyEngine_SubmitComplete);
+
+    // Sprint 61-62: Enterprise & Deployment
+    std::wcout << L"\nSprint 61-62 Tests (Enterprise & Deployment)..." << std::endl;
+    RUN_TEST(Test_S61_EnterpriseTelemetryRouter_Route);
+    RUN_TEST(Test_S61_PolicyComplianceValidator_Validate);
+    RUN_TEST(Test_S62_SilentUpdateOrchestrator_CheckUpdates);
+    RUN_TEST(Test_S62_DiagnosticBundleExporter_Export);
+    RUN_TEST(Test_S62_DeploymentHealthChecker_RunAll);
+
+    // Sprint 63-64: Plugin Ecosystem
+    std::wcout << L"\nSprint 63-64 Tests (Plugin Ecosystem)..." << std::endl;
+    RUN_TEST(Test_S63_PluginSandboxEnforcer_CheckAccess);
+    RUN_TEST(Test_S63_PluginPerformanceMonitor_Grade);
+    RUN_TEST(Test_S64_PluginHotReloader_Reload);
+
+    // Sprint 65-66: Quality & Observability
+    std::wcout << L"\nSprint 65-66 Tests (Quality & Observability)..." << std::endl;
+    RUN_TEST(Test_S65_StructuredDiagnosticLogger_Log);
+    RUN_TEST(Test_S65_ResourceLeakTracker_DetectLeak);
+    RUN_TEST(Test_S66_HealthCheckOrchestrator_Summarize);
+
+    // Sprint 67-68: Final Polish
+    std::wcout << L"\nSprint 67-68 Tests (Final Polish)..." << std::endl;
+    RUN_TEST(Test_S67_ShellIntegrationValidator_ValidateAll);
+    RUN_TEST(Test_S67_GracefulDegradationController_Degrade);
+    RUN_TEST(Test_S67_UserPreferenceEngine_SetGet);
+    RUN_TEST(Test_S67_ThumbnailAnimator_Analyze);
+    RUN_TEST(Test_S68_AccessibilityEnhancer_HighContrast);
+    RUN_TEST(Test_S68_StartupOptimizer_Metrics);
+    RUN_TEST(Test_S68_CrashRecoveryEngine_Checkpoint);
+    RUN_TEST(Test_S68_HDRToneMapper_ACES);
+    RUN_TEST(Test_S68_ColorSpaceConverter_Identity);
+    RUN_TEST(Test_S68_ExifOrientationHandler_Rotate90);
+    RUN_TEST(Test_S68_ThumbnailWatermarker_Placement);
+    RUN_TEST(Test_S68_IconBadgeRenderer_ScaledPlacement);
 
     // Security Hardening Tests
     std::wcout << L"\nSecurity Hardening Tests..." << std::endl;
