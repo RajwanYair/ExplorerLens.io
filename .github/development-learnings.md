@@ -639,3 +639,131 @@ ExplorerLens Engine v\d+\.\d+\.\d+ \(Sprint — full sprint header lines
 - Pattern: `// Configuration` before `struct Config` is noise → remove
 - Pattern: `/// Backends listed in preference order` is useful → keep
 - Useful comments describe *why* or *how*, not *what* the next line declares
+
+---
+
+## 20. GUI Dialog Layout & Dark Theme (v15.0 Post-Release)
+
+### Groupbox spacing overlap pattern
+- WTL `.rc` dialog groupboxes with 4 checkboxes at y-spacing of 10 DLU need H=65 minimum
+- **Root cause:** H=62 gave exactly 0 DLU gap between the last checkbox and the groupbox border,
+  causing the checkbox text to overlap or clip the bottom border
+- **Fix:** H=62→H=65 (+3 DLU) for all 4-item groups; cascade all Y positions by +3 per fixed group
+- When changing groupbox heights, update: StatusBar Y, Apply/Cancel button Y, dialog height,
+  `OnGetMinMaxInfo` min track size, and Advanced Options groupbox if present
+
+### Dark theme and BS_GROUPBOX visual styles
+- `DarkMode_Explorer` visual style theme (applied via `SetWindowTheme(hChild, L"DarkMode_Explorer", NULL)`)
+  overrides GDI text color for groupbox controls with a hardcoded dark-on-dark color
+- **Fix:** In `ApplyDarkScrollbars`, detect `BS_GROUPBOX` via `(style & 0x0FL) == BS_GROUPBOX` and
+  call `SetWindowTheme(hChild, L"", L"")` to disable visual styles for that control only
+- This forces the groupbox to use GDI's `WM_CTLCOLORSTATIC` handler, which respects the white text
+  brush set by `OnCtlColorStatic`
+- Other button types (pushbutton, checkbox) still get `DarkMode_Explorer` theming as before
+
+### Per-category Select All/Deselect All pattern
+- 9 "All" checkboxes (one per format category) positioned in groupbox title area
+- Position: `x=140` for column 1, `x=315` for column 2 (right-aligned in groupbox)
+- Use `BS_AUTOCHECKBOX` for the "All" control (not BS_AUTO3STATE)
+- Category membership: static arrays of `int` IDC values in `MainDlg.cpp`
+- Toggle logic: `ToggleCategoryAll(int cbAll, const int* members, int count)` sets all members
+  to the same state as the "All" checkbox
+- Sync logic: `UpdateCategoryAllState(int cbAll, const int* members, int count)` checks all members
+  and sets "All" to checked/unchecked/unchecked (no indeterminate for simplicity)
+- Wire `OnSelectAll`/`OnDeselectAll` to also call `UpdateAllCategoryCheckboxStates()`
+
+### System status detection via tri-state checkboxes
+- `HasTH()` only returns `TRUE`/`FALSE` — insufficient for "who owns the handler?"
+- **Pattern:** Use `GetHandlerStatus()` which returns `HandlerStatus` enum:
+  - `HANDLER_NONE` (0) → `BST_UNCHECKED` (no handler registered)
+  - `HANDLER_ExplorerLens` (1) → `BST_CHECKED` (our extension active)
+  - `HANDLER_NATIVE` (2) → `BST_INDETERMINATE` (Windows native handler — shows −)
+  - `HANDLER_THIRD_PARTY` (3) → `BST_INDETERMINATE` (third-party tool — shows −)
+- Requires `BS_AUTO3STATE` checkbox style in `.rc` file (not `BS_AUTOCHECKBOX`)
+- Call `ApplySystemStatusToCheckboxes()` in `InitUI()` instead of
+  `Button_SetCheck(GetDlgItem(IDC), m_reg.HasTH(LENS_*))`
+
+---
+
+## 21. UNICODE Build Difference (Engine vs LENSManager)
+
+### Critical compile environment difference
+- **Engine** (CMake/Ninja): Defines `NOMINMAX`, `WINVER=0x0A00`, `_WIN32_WINNT=0x0A00`
+  but does **NOT** define `UNICODE` or `_UNICODE`
+- **LENSManager** (MSBuild): Defines `_UNICODE` and `UNICODE`
+- This means Windows SDK macros expand differently between the two projects:
+  - In Engine: `SE_LOCK_MEMORY_NAME` → `"SeLockMemoryPrivilege"` (ANSI char*)
+  - In LENSManager: `SE_LOCK_MEMORY_NAME` → `L"SeLockMemoryPrivilege"` (wide wchar_t*)
+
+### Impact on Windows API calls
+- Functions like `LookupPrivilegeValueW` expect `LPCWSTR` (wide string) parameters
+- Passing `SE_LOCK_MEMORY_NAME` in Engine code causes C2664 error because it expands to ANSI
+- **Fix:** Use explicit wide string literals: `L"SeLockMemoryPrivilege"` instead of the macro
+- Similarly, use `L"..."` for any string parameter passed to `*W` variants of Windows APIs
+- For Engine headers that call Windows APIs: always use explicit `W` function variants
+  and `L"..."` string literals — never rely on `TCHAR`/`_T()` macros
+
+### Safe Windows API patterns for Engine headers
+```cpp
+// GOOD — explicit wide, works regardless of UNICODE define
+::LookupPrivilegeValueW(nullptr, L"SeLockMemoryPrivilege", &luid);
+::CreateFileW(L"path", ...);
+
+// BAD — expands to ANSI in Engine build, causes type mismatch with W functions
+::LookupPrivilegeValueW(nullptr, SE_LOCK_MEMORY_NAME, &luid);  // C2664!
+```
+
+---
+
+## 22. Memory Allocator Implementation Patterns (v15.0 Post-Release)
+
+### Arena (bump) allocator — MemoryArenaAllocator.h
+- Linked-list of fixed-size blocks allocated via `std::malloc`
+- Bump pointer within current block; new block allocated on overflow
+- Alignment: `(offset + align - 1) & ~(align - 1)` — power-of-2 only
+- `Reset()` frees all blocks except the first; `FreeAllBlocks()` frees everything
+- Move-only semantics (deleted copy ctor/assignment)
+- No Windows API dependency — portable C++ with `<cstdlib>` and `<cstdint>`
+
+### Large page allocator — LargePageAllocator.h
+- Uses `VirtualAlloc(MEM_LARGE_PAGES | MEM_COMMIT | MEM_RESERVE)` for 2MB pages
+- Requires `SeLockMemoryPrivilege` — acquired at runtime via:
+  `OpenProcessToken` → `LookupPrivilegeValueW` → `AdjustTokenPrivileges`
+- Fallback: if privilege not available or VirtualAlloc fails, falls back to standard
+  `VirtualAlloc(MEM_COMMIT | MEM_RESERVE)` with 4KB pages
+- Deallocation: `VirtualFree(ptr, 0, MEM_RELEASE)`
+- Links against: `advapi32.lib` (for token/privilege APIs — already in default MSVC link set)
+
+### NUMA-aware allocator — NUMAMemoryRouter.h
+- Topology detection: `GetNumaHighestNodeNumber()` for node count
+- Local node: `GetCurrentProcessorNumberEx()` + `GetNumaProcessorNodeEx()`
+- Per-node memory query: `GetNumaAvailableMemoryNode()` (returns bytes available)
+- Per-node processor count: `GetNumaNodeProcessorMaskEx()` + `__popcnt64()` on mask
+- Allocation: `VirtualAllocExNuma(GetCurrentProcess(), NULL, size, MEM_COMMIT|MEM_RESERVE,
+  PAGE_READWRITE, preferredNode)` with fallback to standard `VirtualAlloc`
+- Interleaving: round-robin across nodes via `(m_nextNode++) % m_nodeCount`
+- Deallocation: `VirtualFree(ptr, 0, MEM_RELEASE)` — same as large page
+
+---
+
+## 23. VS Code / Copilot Build Workflow Lessons
+
+### File save gotcha
+- `replace_string_in_file` edits the VS Code buffer but may NOT auto-save to disk
+- **Always** run `workbench.action.files.saveAll` before building
+- Symptom: MSBuild LNK2001 "unresolved external symbol" for newly added functions
+- Diagnostic: `[System.IO.File]::ReadAllText(path).IndexOf("functionName")` returns -1 on disk
+
+### Terminal output buffering (VS Code integrated terminal)
+- The shared foreground PowerShell terminal accumulates old output across commands
+- Background terminals (`isBackground: true`) may return empty `get_terminal_output`
+- **Most reliable approach:** Write output to log files, then `read_file` the log
+- Use `Tee-Object` or `> logfile 2>&1` to capture output
+- Use `build-and-log.bat` which redirects all build output to a dated log file
+
+### Build timing expectations
+- `EngineTests.cpp` (~22K lines): ~60-90 seconds to compile
+- LTCG linking: ~30 seconds
+- Total incremental build after header change: ~90-120 seconds
+- "ninja: no work to do" means file timestamps haven't changed — touch files or check save state
+- Never send Ctrl+C/Break to a building terminal — builds are slow but normal
