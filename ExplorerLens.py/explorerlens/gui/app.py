@@ -35,6 +35,8 @@ class ExplorerLensApp:
         self._root: tk.Tk | None = None
         self._category_vars: dict[str, tk.BooleanVar] = {}
         self._dark_mode = self._detect_dark_mode()
+        self._engine = None
+        self._tray_icon = None
 
     def run(self) -> None:
         """Launch the GUI."""
@@ -46,6 +48,10 @@ class ExplorerLensApp:
         self._apply_theme()
         self._build_ui()
         self._root.protocol("WM_DELETE_WINDOW", self._on_close)
+
+        if self._config.show_tray_icon:
+            self._setup_tray_icon()
+
         self._root.mainloop()
 
     # ── Theme ────────────────────────────────────────────────────────
@@ -274,6 +280,16 @@ class ExplorerLensApp:
         ttk.Button(parent, text="Check Status",
                    command=self._check_registration).pack(padx=12, pady=4)
 
+        # Extra tools row
+        tools_frame = ttk.Frame(parent)
+        tools_frame.pack(fill=tk.X, padx=12, pady=4)
+        ttk.Button(tools_frame, text="Export Diagnostics",
+                   command=self._export_diagnostics).pack(side=tk.LEFT, padx=4)
+        ttk.Button(tools_frame, text="Detect Conflicts",
+                   command=self._detect_conflicts).pack(side=tk.LEFT, padx=4)
+        ttk.Button(tools_frame, text="Flush Explorer Cache",
+                   command=self._flush_cache).pack(side=tk.LEFT, padx=4)
+
     def _build_settings_tab(self, parent: ttk.Frame) -> None:
         """Build settings controls."""
         header = ttk.Label(parent, text="Settings",
@@ -375,11 +391,47 @@ class ExplorerLensApp:
         self._status_var.set("Settings saved")
 
     def _refresh_stats(self) -> None:
-        self._status_var.set("Stats refreshed (engine not loaded)")
+        def _do():
+            try:
+                if self._engine is None:
+                    from ..engine import ThumbnailEngine
+                    self._engine = ThumbnailEngine(self._config)
+                stats = self._engine.get_stats()
+                cache = self._engine._cache  # noqa: access private for stats
+                cache_stats = cache.stats if cache and hasattr(cache, "stats") else {}
+
+                def _update():
+                    self._perf_labels["total"].configure(text=str(stats.total))
+                    self._perf_labels["succeeded"].configure(text=str(stats.succeeded))
+                    self._perf_labels["failed"].configure(text=str(stats.failed))
+                    avg_ms = stats.total_ms / max(1, stats.total)
+                    self._perf_labels["avg_ms"].configure(text=f"{avg_ms:.1f} ms")
+                    ips = stats.succeeded / max(0.001, stats.total_ms / 1000)
+                    self._perf_labels["img_per_sec"].configure(text=f"{ips:.0f}")
+
+                    self._cache_labels["mem_items"].configure(
+                        text=str(cache_stats.get("l1_items", cache_stats.get("items", "—"))))
+                    self._cache_labels["mem_mb"].configure(
+                        text=f"{cache_stats.get('l1_memory_mb', cache_stats.get('memory_mb', 0)):.1f} MB")
+                    self._cache_labels["disk_items"].configure(
+                        text=str(cache_stats.get("l2_items", "—")))
+                    self._cache_labels["disk_mb"].configure(
+                        text=f"{cache_stats.get('l2_size_mb', cache_stats.get('size_mb', 0)):.1f} MB")
+                    hit_rate = cache_stats.get("hit_rate", 0)
+                    self._cache_labels["hit_rate"].configure(text=f"{hit_rate:.1f}%")
+                    self._status_var.set("Stats refreshed")
+
+                self._root.after(0, _update)
+            except Exception as exc:
+                self._root.after(0, lambda: self._status_var.set(f"Stats error: {exc}"))
+
+        threading.Thread(target=_do, daemon=True).start()
 
     def _clear_cache(self) -> None:
         if messagebox.askyesno("Clear Cache",
                                "Clear all cached thumbnails?"):
+            if self._engine and self._engine._cache:
+                self._engine._cache.clear()
             self._status_var.set("Cache cleared")
 
     def _register(self) -> None:
@@ -462,6 +514,43 @@ class ExplorerLensApp:
             self._config.export_json(path)
             self._status_var.set(f"Exported to {path}")
 
+    def _export_diagnostics(self) -> None:
+        path = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json")],
+            title="Export Diagnostics",
+            initialfile="explorerlens-diagnostics.json",
+        )
+        if path:
+            def _do():
+                from ..shell.diagnostics import export_diagnostics
+                out = export_diagnostics(Path(path))
+                self._root.after(0, lambda: self._status_var.set(
+                    f"Diagnostics exported to {out}"))
+            threading.Thread(target=_do, daemon=True).start()
+
+    def _detect_conflicts(self) -> None:
+        def _do():
+            from ..registry import detect_conflicts
+            conflicts = detect_conflicts()
+            if not conflicts:
+                text = "No conflicts detected — no other handlers found."
+            else:
+                lines = [f"  ! {ext} → {clsid}" for ext, clsid
+                         in sorted(conflicts.items())]
+                text = f"Found {len(conflicts)} conflicting handler(s):\n" + "\n".join(lines)
+            self._root.after(0, lambda: self._update_reg_text(text))
+        threading.Thread(target=_do, daemon=True).start()
+
+    def _flush_cache(self) -> None:
+        if messagebox.askyesno("Flush Explorer Cache",
+                               "Delete Windows thumbnail cache files?\n"
+                               "Explorer will regenerate thumbnails."):
+            from ..registry import flush_thumbnail_cache
+            ok = flush_thumbnail_cache()
+            self._status_var.set(
+                "Explorer cache flushed" if ok else "Flush failed")
+
     def _import_config(self) -> None:
         path = filedialog.askopenfilename(
             filetypes=[("JSON files", "*.json")],
@@ -489,6 +578,55 @@ class ExplorerLensApp:
         self._log_var.set(self._config.log_level)
 
     def _on_close(self) -> None:
-        """Save config and close."""
+        """Save config, stop tray icon, and close."""
         self._save_config()
+        if self._tray_icon is not None:
+            try:
+                self._tray_icon.stop()
+            except Exception:
+                pass
+        if self._engine is not None:
+            self._engine.shutdown()
         self._root.destroy()
+
+    def _setup_tray_icon(self) -> None:
+        """Create a system tray icon with context menu."""
+        try:
+            import pystray
+            from PIL import Image as PILImage
+
+            # Create a simple icon (blue square with "EL")
+            icon_img = PILImage.new("RGB", (64, 64), (14, 99, 156))
+            from PIL import ImageDraw, ImageFont
+            draw = ImageDraw.Draw(icon_img)
+            try:
+                font = ImageFont.truetype("segoeui.ttf", 28)
+            except Exception:
+                font = ImageFont.load_default()
+            draw.text((8, 14), "EL", fill=(255, 255, 255), font=font)
+
+            menu = pystray.Menu(
+                pystray.MenuItem("Show", self._tray_show),
+                pystray.MenuItem("Quit", self._tray_quit),
+            )
+            self._tray_icon = pystray.Icon(
+                "ExplorerLens.py", icon_img,
+                "ExplorerLens.py Manager", menu
+            )
+            threading.Thread(target=self._tray_icon.run, daemon=True).start()
+        except ImportError:
+            logger.debug("pystray not installed — tray icon disabled")
+        except Exception as exc:
+            logger.debug("Tray icon setup failed: %s", exc)
+
+    def _tray_show(self, icon=None, item=None) -> None:
+        """Show the main window from tray."""
+        if self._root:
+            self._root.after(0, self._root.deiconify)
+
+    def _tray_quit(self, icon=None, item=None) -> None:
+        """Quit from tray icon."""
+        if self._tray_icon:
+            self._tray_icon.stop()
+        if self._root:
+            self._root.after(0, self._on_close)
