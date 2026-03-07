@@ -68,6 +68,8 @@ class ThumbnailEngine:
         self._stats = EngineStats()
         self._cache: object | None = None
         self._init_decoders()
+        if self._config.cache.enabled:
+            self._init_cache()
 
     def _init_decoders(self) -> None:
         """Lazily import and register all decoder implementations."""
@@ -78,6 +80,16 @@ class ThumbnailEngine:
         logger.info("Initialized %d decoders covering %d extensions",
                      len(set(id(d) for d in self._decoders.values())),
                      len(self._decoders))
+
+    def _init_cache(self) -> None:
+        """Auto-create a TieredCache from config settings."""
+        from .cache import MemoryCache, DiskCache, TieredCache
+        memory = MemoryCache(
+            max_items=self._config.cache.max_items,
+            max_memory_mb=self._config.cache.memory_limit_mb,
+        )
+        disk = DiskCache(max_size_mb=self._config.cache.disk_limit_mb)
+        self._cache = TieredCache(memory=memory, disk=disk)
 
     def set_cache(self, cache: object) -> None:
         """Attach a cache backend (MemoryCache or DiskCache)."""
@@ -182,10 +194,12 @@ class ThumbnailEngine:
         return set(self._decoders.keys())
 
     def shutdown(self) -> None:
-        """Clean up thread pool."""
+        """Clean up thread pool and cache."""
         if self._pool is not None:
             self._pool.shutdown(wait=False)
             self._pool = None
+        if self._cache is not None and hasattr(self._cache, "close"):
+            self._cache.close()
 
     # ── Private helpers ──────────────────────────────────────────────
 

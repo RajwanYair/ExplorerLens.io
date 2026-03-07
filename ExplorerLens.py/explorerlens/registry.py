@@ -114,3 +114,65 @@ def restart_explorer() -> None:
         capture_output=True,
     )
     subprocess.Popen(["explorer.exe"])
+
+
+def detect_conflicts() -> dict[str, str]:
+    """
+    Detect other IThumbnailProvider handlers registered for our extensions.
+    Returns a dict of { extension: existing_clsid } for extensions that
+    already have a handler that isn't ours.
+    """
+    from .shell.com_server import COM_CLSID_PY
+    from .config import ALL_EXTENSIONS
+
+    conflicts: dict[str, str] = {}
+    for ext in sorted(ALL_EXTENSIONS):
+        handler_path = (
+            f"Software\\Classes\\{ext}\\ShellEx\\"
+            f"{{e357fccd-a995-4576-b01f-234630154e96}}"
+        )
+        try:
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, handler_path) as hk:
+                val, _ = winreg.QueryValueEx(hk, "")
+                if val.upper() != COM_CLSID_PY.upper():
+                    conflicts[ext] = val
+        except FileNotFoundError:
+            pass
+    return conflicts
+
+
+def backup_registrations(output_path: str) -> bool:
+    """Export current extension registration state to a JSON file."""
+    import json
+    status = get_registered_extensions()
+    data = {
+        "extensions": status,
+        "timestamp": __import__("datetime").datetime.now().isoformat(),
+    }
+    try:
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+        return True
+    except Exception as exc:
+        logger.error("Backup failed: %s", exc)
+        return False
+
+
+def restore_registrations(input_path: str) -> bool:
+    """Restore registrations from a backup JSON file."""
+    import json
+    if not is_admin():
+        logger.error("Restore requires admin privileges")
+        return False
+    try:
+        with open(input_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        extensions = set(data.get("extensions", {}).keys())
+        if not extensions:
+            logger.warning("No extensions found in backup")
+            return False
+        from .shell.com_server import register
+        return register(extensions)
+    except Exception as exc:
+        logger.error("Restore failed: %s", exc)
+        return False

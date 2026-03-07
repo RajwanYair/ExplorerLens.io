@@ -61,6 +61,9 @@ def main() -> None:
                         help="CLI mode only, don't launch GUI")
     parser.add_argument("--admin", action="store_true",
                         help="Force admin elevation")
+    parser.add_argument("--diagnostics", metavar="FILE", nargs="?",
+                        const="explorerlens-diagnostics.json",
+                        help="Export diagnostic report to FILE")
     parser.add_argument("--log-level", default="INFO",
                         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
                         help="Logging level (default: INFO)")
@@ -79,6 +82,12 @@ def main() -> None:
         if not is_admin():
             elevate_and_relaunch(sys.argv[1:])
             return
+
+    if args.diagnostics:
+        from explorerlens.shell.diagnostics import export_diagnostics
+        out = export_diagnostics(Path(args.diagnostics))
+        print(f"Diagnostics exported to {out}")
+        return
 
     if args.register:
         from explorerlens.shell.com_server import register
