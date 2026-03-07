@@ -255,7 +255,7 @@ class TestDecoders:
     def test_all_decoders_registered(self):
         from explorerlens.decoders import get_all_decoders
         decoders = get_all_decoders()
-        assert len(decoders) >= 6  # image, archive, video, audio, doc, font
+        assert len(decoders) >= 7  # image, archive, video, audio, doc, font, model
 
     def test_decoder_names(self):
         from explorerlens.decoders import get_all_decoders
@@ -266,6 +266,7 @@ class TestDecoders:
         assert "AudioDecoder" in names
         assert "DocumentDecoder" in names
         assert "FontDecoder" in names
+        assert "ModelDecoder" in names
 
     def test_image_decoder_png(self, tmp_path):
         from explorerlens.decoders.image_decoder import ImageDecoder
@@ -479,4 +480,178 @@ class TestIntegration:
 
         result = engine.generate(ThumbnailRequest(path=zip_path, size=128))
         assert result.status == DecodeStatus.Success
+        engine.shutdown()
+
+
+# ── TieredCache Tests ────────────────────────────────────────────────
+
+
+class TestTieredCache:
+    def test_tiered_cache_l1(self, tmp_path):
+        from explorerlens.cache import MemoryCache, DiskCache, TieredCache
+        mem = MemoryCache()
+        disk = DiskCache(db_path=tmp_path / "tc.db")
+        tc = TieredCache(memory=mem, disk=disk)
+
+        img = Image.new("RGB", (32, 32), (255, 0, 0))
+        tc.put("test.png", 32, img)
+
+        # Should hit L1
+        result = tc.get("test.png", 32)
+        assert result is not None
+        tc.close()
+
+    def test_tiered_cache_l2_promotion(self, tmp_path):
+        from explorerlens.cache import MemoryCache, DiskCache, TieredCache
+        mem = MemoryCache()
+        disk = DiskCache(db_path=tmp_path / "tc.db")
+        tc = TieredCache(memory=mem, disk=disk)
+
+        img = Image.new("RGB", (32, 32), (0, 255, 0))
+        # Write only to disk
+        disk.put("promote.png", 32, img)
+        # Get should promote to L1
+        result = tc.get("promote.png", 32)
+        assert result is not None
+        # Now should be in L1
+        assert mem.get("promote.png", 32) is not None
+        tc.close()
+
+    def test_tiered_cache_invalidate(self, tmp_path):
+        from explorerlens.cache import MemoryCache, DiskCache, TieredCache
+        mem = MemoryCache()
+        disk = DiskCache(db_path=tmp_path / "tc.db")
+        tc = TieredCache(memory=mem, disk=disk)
+
+        tc.put("rm.png", 64, Image.new("RGB", (10, 10)))
+        tc.invalidate("rm.png")
+        assert tc.get("rm.png", 64) is None
+        tc.close()
+
+    def test_tiered_cache_stats(self, tmp_path):
+        from explorerlens.cache import MemoryCache, DiskCache, TieredCache
+        mem = MemoryCache()
+        disk = DiskCache(db_path=tmp_path / "tc.db")
+        tc = TieredCache(memory=mem, disk=disk)
+
+        tc.put("s.png", 32, Image.new("RGB", (10, 10)))
+        tc.get("s.png", 32)
+        stats = tc.stats
+        assert "l1_items" in stats
+        assert "l2_items" in stats
+        assert "total_hits" in stats
+        tc.close()
+
+
+# ── Model Decoder Tests ──────────────────────────────────────────────
+
+
+class TestModelDecoder:
+    def test_supported_extensions(self):
+        from explorerlens.decoders.model_decoder import ModelDecoder
+        decoder = ModelDecoder()
+        exts = decoder.supported_extensions()
+        assert ".obj" in exts
+        assert ".stl" in exts
+        assert ".glb" in exts
+
+    def test_placeholder(self, tmp_path):
+        from explorerlens.decoders.model_decoder import ModelDecoder
+        decoder = ModelDecoder()
+        f = tmp_path / "model.stl"
+        f.write_bytes(b"\x00" * 10)
+        result = decoder.decode(f, 128)
+        assert result is not None
+        assert result.size == (128, 128)
+
+
+# ── Video Decoder Tests ──────────────────────────────────────────────
+
+
+class TestVideoDecoder:
+    def test_supported_extensions(self):
+        from explorerlens.decoders.video_decoder import VideoDecoder
+        decoder = VideoDecoder()
+        exts = decoder.supported_extensions()
+        assert ".mp4" in exts
+        assert ".avi" in exts
+        assert ".mkv" in exts
+        assert ".webm" in exts
+        assert ".264" in exts
+
+    def test_placeholder_generation(self, tmp_path):
+        from explorerlens.decoders.video_decoder import VideoDecoder
+        decoder = VideoDecoder()
+        # Create dummy file — ffmpeg will fail, should get placeholder
+        f = tmp_path / "test.avi"
+        f.write_bytes(b"\x00" * 10)
+        result = decoder.decode(f, 128)
+        # Result is either None (no ffmpeg) or a placeholder
+        # At minimum, the decoder shouldn't crash
+
+
+# ── Audio Decoder Tests ──────────────────────────────────────────────
+
+
+class TestAudioDecoder:
+    def test_supported_extensions(self):
+        from explorerlens.decoders.audio_decoder import AudioDecoder
+        decoder = AudioDecoder()
+        exts = decoder.supported_extensions()
+        assert ".mp3" in exts
+        assert ".wav" in exts
+        assert ".flac" in exts
+        assert ".opus" in exts
+        assert ".wma" in exts
+
+    def test_placeholder_always_generated(self, tmp_path):
+        from explorerlens.decoders.audio_decoder import AudioDecoder
+        decoder = AudioDecoder()
+        f = tmp_path / "test.opus"
+        f.write_bytes(b"\x00" * 50)
+        result = decoder.decode(f, 64)
+        assert result is not None  # Placeholder should always work
+
+
+# ── Diagnostics Tests ────────────────────────────────────────────────
+
+
+class TestDiagnostics:
+    def test_collect_diagnostics(self):
+        from explorerlens.shell.diagnostics import collect_diagnostics
+        info = collect_diagnostics()
+        assert "system" in info
+        assert "python" in info
+        assert "dependencies" in info
+        assert "timestamp" in info
+
+    def test_export_diagnostics(self, tmp_path):
+        from explorerlens.shell.diagnostics import export_diagnostics
+        out = export_diagnostics(tmp_path / "diag.json")
+        assert out.exists()
+        import json
+        data = json.loads(out.read_text())
+        assert "system" in data
+
+
+# ── Engine Auto-Cache Tests ──────────────────────────────────────────
+
+
+class TestEngineAutoCache:
+    def test_engine_auto_creates_cache(self):
+        from explorerlens.engine import ThumbnailEngine
+        from explorerlens.config import Config
+        cfg = Config()
+        cfg.cache.enabled = True
+        engine = ThumbnailEngine(cfg)
+        assert engine._cache is not None
+        engine.shutdown()
+
+    def test_engine_no_cache_when_disabled(self):
+        from explorerlens.engine import ThumbnailEngine
+        from explorerlens.config import Config
+        cfg = Config()
+        cfg.cache.enabled = False
+        engine = ThumbnailEngine(cfg)
+        assert engine._cache is None
         engine.shutdown()

@@ -68,6 +68,15 @@ python -m explorerlens --unregister
 
 # Generate thumbnail from CLI
 python -m explorerlens --thumbnail "C:\photo.jpg" --size 256 --output thumb.png
+
+# Run benchmark on a folder
+python -m explorerlens --benchmark "C:\Pictures"
+
+# Export diagnostics report
+python -m explorerlens --diagnostics report.json
+
+# Run tests
+python -m pytest tests/ -v
 ```
 
 ## Architecture
@@ -76,21 +85,32 @@ python -m explorerlens --thumbnail "C:\photo.jpg" --size 256 --output thumb.png
 ExplorerLens.py/
 ├── explorerlens/          # Main package
 │   ├── __init__.py
-│   ├── __main__.py        # CLI entry point
-│   ├── engine.py          # Core thumbnail engine
-│   ├── decoders/          # Format-specific decoders
+│   ├── __main__.py        # CLI entry point (--register/--thumbnail/--benchmark/--diagnostics)
+│   ├── engine.py          # Core thumbnail engine with TieredCache auto-init
+│   ├── config.py          # JSON-based configuration management
+│   ├── registry.py        # Windows registry manager (backup/restore/conflict detection)
+│   ├── decoders/          # Format-specific decoders (7 total)
+│   │   ├── image_decoder.py   # Raster/SVG/RAW/HDR/WebP/AVIF/HEIC/JXL
+│   │   ├── video_decoder.py   # 34+ video formats via ffmpeg
+│   │   ├── audio_decoder.py   # Album art + waveform + WMA support
+│   │   ├── archive_decoder.py # ZIP/RAR/7Z/TAR/EPUB/Comic collage
+│   │   ├── document_decoder.py# PDF/DJVU/DOCX/PPTX/XLSX
+│   │   ├── font_decoder.py    # TTF/OTF/WOFF preview rendering
+│   │   └── model_decoder.py   # OBJ/STL/PLY/GLTF/GLB/FBX via trimesh
 │   ├── cache/             # Multi-tier caching
-│   ├── gpu/               # GPU acceleration (optional)
+│   │   ├── memory_cache.py    # L1 LRU (OrderedDict, thread-safe)
+│   │   ├── disk_cache.py      # L2 SQLite WAL persistent cache
+│   │   └── tiered_cache.py    # L1+L2 wrapper with auto-promotion
 │   ├── shell/             # COM shell extension
+│   │   ├── com_server.py      # IThumbnailProvider registration
+│   │   └── diagnostics.py     # System/dependency/config diagnostic export
 │   ├── gui/               # Tkinter GUI manager
-│   ├── plugins/           # Plugin system
-│   ├── registry.py        # Windows registry manager
-│   ├── config.py          # Configuration management
-│   └── utils/             # Utilities
-├── plugins/               # User plugins directory
-├── tests/                 # Unit tests
-├── requirements.txt
-├── setup.py
+│   │   └── app.py             # 4-tab GUI + system tray icon
+│   ├── plugins/           # Plugin system (drop-in .py decoders)
+│   └── utils/             # Utilities (benchmark, elevation)
+├── tests/                 # pytest unit tests (~40 tests)
+├── requirements.txt       # Full dependency list
+├── setup.py               # Package setup with extras_require
 └── README.md
 ```
 

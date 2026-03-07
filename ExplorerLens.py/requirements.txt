@@ -25,6 +25,9 @@ pillow-avif-plugin>=1.4.0
 jxlpy>=0.10.0
 imageio>=2.34.0
 
+# 3D models
+trimesh>=4.4.0
+
 # GPU (optional)
 # cupy-cuda12x>=13.0.0
 # pillow-simd>=9.5.0
