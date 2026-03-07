@@ -1036,6 +1036,75 @@ set(ENGINE_HEADERS
     Memory/CopyOnWriteBufferPool.h
     Memory/MemoryMappedThumbnailAtlas.h
     AI/ThumbnailAestheticScorer.h
+
+    # Sprint 395+: Enhancement Plan V15 — 50 New Feature Headers
+    # Core enhancements
+    Core/GlobalShortcutManager.h
+    Core/FileChangeThrottler.h
+    Core/SmartThumbnailPrioritizer.h
+    Core/ThumbnailRequestCoalescer.h
+    Core/DecoderTimeoutPolicy.h
+    Core/ExplorerIntegrationMonitor.h
+    Core/ShellExtensionRecovery.h
+    Core/ThumbnailSizeNegotiator.h
+    Core/FileConcurrencyGuard.h
+    Core/ResourceThrottlePolicy.h
+
+    # Pipeline enhancements
+    Pipeline/LazyDecodeInitializer.h
+    Pipeline/ChunkedDecodeEngine.h
+    Pipeline/DecodeProfilingHarness.h
+    Pipeline/ThumbnailMergeEngine.h
+    Pipeline/ExplorerQueryOptimizer.h
+
+    # GPU enhancements
+    GPU/GPUDeviceSelector.h
+    GPU/GPUFeatureProbe.h
+    GPU/AdaptiveShaderSelection.h
+    GPU/GPUErrorRecovery.h
+    GPU/ComputeShaderProfiler.h
+
+    # Cache enhancements
+    Cache/CachePartitionManager.h
+    Cache/CacheStatisticsExporter.h
+    Cache/CacheGarbageCollector.h
+    Cache/CacheVersionMigrator.h
+    Cache/FileHashCache.h
+
+    # Memory enhancements
+    Memory/StackAllocator.h
+    Memory/MemoryWatermarkTracker.h
+    Memory/PoolAllocatorMetrics.h
+    Memory/ScopedMemoryBudget.h
+    Memory/ThreadLocalPoolAllocator.h
+
+    # AI/ML enhancements
+    AI/ThumbnailSaliencyMap.h
+    AI/AdaptiveCropEngine.h
+    AI/ColorPaletteGenerator.h
+    AI/ImageSimilarityMatcher.h
+    AI/FileTypePredictor.h
+
+    # Plugin enhancements
+    Plugin/PluginUpdateChecker.h
+    Plugin/PluginConfigMigrator.h
+    Plugin/PluginMetricsExporter.h
+
+    # Utils enhancements
+    Utils/CrashDumpAnalyzer.h
+    Utils/PerformanceReportGenerator.h
+    Utils/SystemInfoCollector.h
+    Utils/RegistryRepairTool.h
+    Utils/LogAnalyzer.h
+
+    # Decoder enhancements
+    Decoders/WICFallbackDecoder.h
+    Decoders/ArchivePeekDecoder.h
+    Decoders/ContainerInspector.h
+    Decoders/MetadataOnlyDecoder.h
+    Decoders/EfficientResizeDecoder.h
+    Decoders/MultiFormatBatchDecoder.h
+    Decoders/CacheFriendlyDecoder.h
 )
 
 set(ENGINE_SOURCES

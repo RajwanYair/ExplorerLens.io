@@ -7,8 +7,7 @@
 
 CAppModule _Module;
 
-int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
-{
+int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT) {
 	CMessageLoop theLoop;
 	_Module.AddMessageLoop(&theLoop);
 
@@ -19,8 +18,7 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 
 	CMainDlg dlgMain;
 
-	if(dlgMain.Create(NULL) == NULL)
-	{
+	if (dlgMain.Create(NULL) == NULL) {
 		ATLTRACE(_T("Main dialog creation failed!\n"));
 		return 0;
 	}
@@ -30,26 +28,24 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 	int nRet = theLoop.Run();
 
 	_Module.RemoveMessageLoop();
-return nRet;
+	return nRet;
 }
 
 
-int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
-{
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow) {
 	// one manager instance per user
 	CHandle mtx(CreateMutex(NULL, FALSE, LENS_MGRMUTEX));
-	if (GetLastError()==ERROR_ALREADY_EXISTS)
-	{
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
 		MessageBox(HWND_DESKTOP, _T("LENS Shell Manager is already running\n"), _T("Warning"),
-							MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
+			MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
 		return 0;
 	}
 
 
 	HRESULT hRes = ::CoInitialize(NULL);
-// If you are running on NT 4.0 or higher you can use the following call instead to 
-// make the EXE free threaded. This means that calls come in on a random RPC thread.
-//	HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	// If you are running on NT 4.0 or higher you can use the following call instead to
+	// make the EXE free threaded. This means that calls come in on a random RPC thread.
+	//	HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	ATLASSERT(SUCCEEDED(hRes));
 
 	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
@@ -65,6 +61,5 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	_Module.Term();
 	::CoUninitialize();
 
-return nRet;
+	return nRet;
 }
-

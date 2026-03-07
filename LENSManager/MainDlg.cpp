@@ -1841,7 +1841,9 @@ LRESULT CMainDlg::OnToggleTheme(WORD /*wNotifyCode*/, WORD /*wID*/,
     HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
     auto& darkCtrl = ExplorerLens::DarkModeController::Instance();
     darkCtrl.ToggleTheme(m_hWnd);
-    Invalidate();
+    // Force full repaint including all child controls to pick up new colors
+    RedrawWindow(m_hWnd, nullptr, nullptr,
+        RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
     return 0;
 }
 

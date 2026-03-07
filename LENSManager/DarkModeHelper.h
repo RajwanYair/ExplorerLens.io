@@ -233,6 +233,12 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
             // black text on the dark background.
             EnableDarkModeForWindow(hChild, dark);
 
+            // Track whether we disable visual styles for this control.
+            // Controls with disabled styles must NOT receive WM_THEMECHANGED
+            // because that message re-enables the visual style renderer,
+            // overriding the text color we set in WM_CTLCOLORSTATIC.
+            bool disabledVisualStyles = false;
+
             // ── Static controls (LTEXT, CTEXT, RTEXT, icons) ──
             // DarkMode_Explorer does NOT change text color for the Static
             // window class. Disabling visual styles (empty theme) forces
@@ -241,6 +247,7 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
             if (_tcsicmp(className, _T("Static")) == 0) {
                 if (dark) {
                     SetWindowTheme(hChild, L"", L"");
+                    disabledVisualStyles = true;
                 }
                 else {
                     SetWindowTheme(hChild, nullptr, nullptr);
@@ -264,6 +271,7 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
                     // GDI draws text using WM_CTLCOLORSTATIC colors (white).
                     if (dark) {
                         SetWindowTheme(hChild, L"", L"");
+                        disabledVisualStyles = true;
                     }
                     else {
                         SetWindowTheme(hChild, nullptr, nullptr);
@@ -287,9 +295,14 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
                 SetDarkScrollbar(hChild, dark);
             }
 
-            // Send WM_THEMECHANGED after theme is applied so controls
-            // pick up the new visual style colors immediately.
-            SendMessage(hChild, WM_THEMECHANGED, 0, 0);
+            // Only send WM_THEMECHANGED to controls that still use visual
+            // styles.  For controls where we disabled styles (Static labels,
+            // checkboxes, radio buttons, group boxes in dark mode),
+            // WM_THEMECHANGED would re-enable the visual style renderer and
+            // cause it to paint black text, overriding our SetTextColor().
+            if (!disabledVisualStyles) {
+                SendMessage(hChild, WM_THEMECHANGED, 0, 0);
+            }
             InvalidateRect(hChild, nullptr, TRUE);
 
             // Status bar needs explicit color messages (SB_SETBKCOLOR)

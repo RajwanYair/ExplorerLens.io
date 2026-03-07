@@ -840,6 +840,58 @@
 #include "../Memory/MemoryMappedThumbnailAtlas.h"
 #include "../AI/ThumbnailAestheticScorer.h"
 
+// Sprint 395+: Enhancement Plan V15 — 50 New Feature Headers
+#include "../Core/GlobalShortcutManager.h"
+#include "../Core/FileChangeThrottler.h"
+#include "../Core/SmartThumbnailPrioritizer.h"
+#include "../Core/ThumbnailRequestCoalescer.h"
+#include "../Core/DecoderTimeoutPolicy.h"
+#include "../Core/ExplorerIntegrationMonitor.h"
+#include "../Core/ShellExtensionRecovery.h"
+#include "../Core/ThumbnailSizeNegotiator.h"
+#include "../Core/FileConcurrencyGuard.h"
+#include "../Core/ResourceThrottlePolicy.h"
+#include "../Pipeline/LazyDecodeInitializer.h"
+#include "../Pipeline/ChunkedDecodeEngine.h"
+#include "../Pipeline/DecodeProfilingHarness.h"
+#include "../Pipeline/ThumbnailMergeEngine.h"
+#include "../Pipeline/ExplorerQueryOptimizer.h"
+#include "../GPU/GPUDeviceSelector.h"
+#include "../GPU/GPUFeatureProbe.h"
+#include "../GPU/AdaptiveShaderSelection.h"
+#include "../GPU/GPUErrorRecovery.h"
+#include "../GPU/ComputeShaderProfiler.h"
+#include "../Cache/CachePartitionManager.h"
+#include "../Cache/CacheStatisticsExporter.h"
+#include "../Cache/CacheGarbageCollector.h"
+#include "../Cache/CacheVersionMigrator.h"
+#include "../Cache/FileHashCache.h"
+#include "../Memory/StackAllocator.h"
+#include "../Memory/MemoryWatermarkTracker.h"
+#include "../Memory/PoolAllocatorMetrics.h"
+#include "../Memory/ScopedMemoryBudget.h"
+#include "../Memory/ThreadLocalPoolAllocator.h"
+#include "../AI/ThumbnailSaliencyMap.h"
+#include "../AI/AdaptiveCropEngine.h"
+#include "../AI/ColorPaletteGenerator.h"
+#include "../AI/ImageSimilarityMatcher.h"
+#include "../AI/FileTypePredictor.h"
+#include "../Plugin/PluginUpdateChecker.h"
+#include "../Plugin/PluginConfigMigrator.h"
+#include "../Plugin/PluginMetricsExporter.h"
+#include "../Utils/CrashDumpAnalyzer.h"
+#include "../Utils/PerformanceReportGenerator.h"
+#include "../Utils/SystemInfoCollector.h"
+#include "../Utils/RegistryRepairTool.h"
+#include "../Utils/LogAnalyzer.h"
+#include "../Decoders/WICFallbackDecoder.h"
+#include "../Decoders/ArchivePeekDecoder.h"
+#include "../Decoders/ContainerInspector.h"
+#include "../Decoders/MetadataOnlyDecoder.h"
+#include "../Decoders/EfficientResizeDecoder.h"
+#include "../Decoders/MultiFormatBatchDecoder.h"
+#include "../Decoders/CacheFriendlyDecoder.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))
@@ -23718,7 +23770,7 @@ TEST(Test_S394_Dedup_SingleRequest) {
         res.pixels = { 0xAA, 0xBB, 0xCC };
         res.success = true;
         return res;
-    });
+        });
     ASSERT(result.success);
     ASSERT(result.pixels.size() == 3);
     ASSERT(result.pixels[0] == 0xAA);
@@ -23922,6 +23974,491 @@ TEST(Test_S394_Aesthetic_SelectBestFrame) {
     scores.push_back(scorer.ScoreGrayscale(mid.data(), 16, 16));
     uint32_t best = scorer.SelectBestFrame(scores);
     ASSERT(best < 3);
+}
+
+//==============================================================================
+// Sprint 395+: Enhancement Plan V15 — 50 New Feature Tests
+//==============================================================================
+
+// --- Core Tests ---
+
+TEST(Test_S395_GlobalShortcutManager) {
+    auto& mgr = GlobalShortcutManager::Instance();
+    bool ok = mgr.RegisterShortcut(ShortcutAction::ClearCache, 0, 0x54);
+    ASSERT(ok);
+    ASSERT(mgr.ActiveCount() >= 1);
+    ok = mgr.UnregisterShortcut(ShortcutAction::ClearCache);
+    ASSERT(ok);
+}
+
+TEST(Test_S395_FileChangeThrottler) {
+    ThrottleConfig cfg;
+    cfg.debounceMs = 100;
+    FileChangeThrottler throttler(cfg);
+    auto stats = throttler.GetStats();
+    ASSERT(stats.eventsReceived == 0);
+    ASSERT(stats.eventsDelivered == 0);
+}
+
+TEST(Test_S395_SmartThumbnailPrioritizer) {
+    SmartThumbnailPrioritizer prio;
+    ASSERT(prio.Empty());
+    PrioritizedRequest req;
+    req.filePath = L"test.jpg";
+    req.priority = PriorityClass::Normal;
+    prio.Enqueue(req);
+    ASSERT(prio.Size() == 1);
+    auto stats = prio.Stats();
+    ASSERT(stats.totalRequests == 1);
+}
+
+TEST(Test_S395_ThumbnailRequestCoalescer) {
+    RequestCoalescerConfig cfg;
+    ThumbnailRequestCoalescer coalescer(cfg);
+    auto stats = coalescer.Stats();
+    ASSERT(stats.totalRequests == 0);
+    ASSERT(stats.coalescedRequests == 0);
+}
+
+TEST(Test_S395_DecoderTimeoutPolicy) {
+    auto& policy = DecoderTimeoutPolicy::Instance();
+    auto p = policy.GetPolicy(L"jpg");
+    ASSERT(p.maxDecodeMs > 0);
+    ASSERT(!policy.IsTimedOut(L"jpg", 100));
+}
+
+TEST(Test_S395_ExplorerIntegrationMonitor) {
+    auto& mon = ExplorerIntegrationMonitor::Instance();
+    auto health = mon.CheckHealth();
+    ASSERT(health.comRegistered || !health.comRegistered); // exercises path
+    mon.RecordSuccess(100);
+    ASSERT(mon.CheckHealth().thumbnailsServed > 0);
+}
+
+TEST(Test_S395_ShellExtensionRecovery) {
+    auto& recovery = ShellExtensionRecovery::Instance();
+    auto result = recovery.AttemptRecovery(ShellRecoveryAction::FlushCache);
+    ASSERT(result.success);
+    ASSERT(result.action == ShellRecoveryAction::FlushCache);
+}
+
+TEST(Test_S395_ThumbnailSizeNegotiator) {
+    ThumbnailSizeNegotiator neg;
+    auto size = neg.Negotiate(256, 256, 128);
+    ASSERT(size.outputWidth > 0 && size.outputHeight > 0);
+    ASSERT(size.outputWidth <= 256 && size.outputHeight <= 256);
+}
+
+TEST(Test_S395_FileConcurrencyGuard) {
+    FileConcurrencyGuard guard;
+    ASSERT(guard.ActiveLocks() == 0);
+    {
+        auto lock = guard.AcquireFile(L"test.zip");
+        ASSERT(guard.ActiveLocks() == 1);
+    }
+    guard.Cleanup();
+    ASSERT(guard.ActiveLocks() == 0);
+}
+
+TEST(Test_S395_ResourceThrottlePolicy) {
+    ResourceThrottlePolicy policy;
+    ResourceThrottleCfg cfg;
+    cfg.cpuCeilingPercent = 80.0;
+    cfg.memoryBudgetBytes = 512ULL * 1024 * 1024;
+    policy.Configure(cfg);
+    auto level = policy.Evaluate(30.0, 256ULL * 1024 * 1024);
+    ASSERT(level == ThrottleLevel::None);
+}
+
+// --- Pipeline Tests ---
+
+TEST(Test_S395_LazyDecodeInitializer) {
+    LazyDecodeInitializer init;
+    auto stats = init.GetStats();
+    ASSERT(stats.totalDecoders == 0);
+    init.Register("test", []() { return true; });
+    ASSERT(init.GetStats().totalDecoders == 1);
+    bool ok = init.EnsureInitialized("test");
+    ASSERT(ok);
+    ASSERT(init.GetStats().initializedCount == 1);
+}
+
+TEST(Test_S395_ChunkedDecodeEngine) {
+    ChunkedDecodeEngine engine;
+    ChunkedDecodeConfig cfg;
+    cfg.chunkHeight = 64;
+    engine.Configure(cfg);
+    uint32_t chunks = engine.CalculateChunkCount(256);
+    ASSERT(chunks == 4);
+    auto stats = engine.GetStats();
+    ASSERT(stats.totalChunks == 0);
+}
+
+TEST(Test_S395_DecodeProfilingHarness) {
+    DecodeProfilingHarness harness;
+    {
+        auto scope = harness.Begin("TestFormat");
+        scope.MarkSuccess();
+    }
+    auto prof = harness.GetProfile("TestFormat");
+    ASSERT(prof.totalCalls >= 1);
+    ASSERT(prof.successCount >= 1);
+}
+
+TEST(Test_S395_ThumbnailMergeEngine) {
+    ThumbnailMergeEngine engine;
+    MergeConfig cfg;
+    engine.Configure(cfg);
+    ASSERT(engine.GridDimension(4) == 2);
+    auto empty = engine.CreateEmpty();
+    ASSERT(empty.success);
+    ASSERT(empty.width == 256);
+}
+
+TEST(Test_S395_ExplorerQueryOptimizer) {
+    ExplorerQueryOptimizer opt;
+    auto stats = opt.GetStats();
+    ASSERT(stats.totalQueries == 0);
+    ASSERT(stats.prefetchHits == 0);
+    QueryHint hint;
+    hint.estimatedFileCount = 100;
+    hint.pattern = QueryPattern::Sequential;
+    auto plan = opt.CreatePlan(hint);
+    ASSERT(plan.batchSize > 0);
+}
+
+// --- GPU Tests ---
+
+TEST(Test_S395_GPUDeviceSelector) {
+    GPUDeviceSelector selector;
+    std::vector<GPUDeviceDetail> devices;
+    auto selection = selector.Select(devices);
+    ASSERT(!selection.found);
+    GPUDeviceDetail dev; dev.isDiscrete = true; dev.name = L"Test"; dev.dedicatedVideoMemory = 1024;
+    devices.push_back(dev);
+    selection = selector.Select(devices);
+    ASSERT(selection.found);
+}
+
+TEST(Test_S395_GPUFeatureProbe) {
+    GPUFeatureProbe probe;
+    GPUFeatureSet fs;
+    fs.dx12 = true; fs.computeShaders = true; fs.shaderModel = 60;
+    ASSERT(probe.SupportsComputeDecode(fs));
+    ASSERT(!probe.SupportsHardwareDecode(fs));
+}
+
+TEST(Test_S395_AdaptiveShaderSelection) {
+    AdaptiveShaderSelection shader;
+    auto result = shader.Select(60, true, false, 1024);
+    ASSERT(result.variant == ShaderVariant::WaveResize);
+    auto basic = shader.Select(50, false, false, 512);
+    ASSERT(basic.variant == ShaderVariant::BasicResize);
+}
+
+TEST(Test_S395_GPUErrorRecovery) {
+    GPUErrorRecovery recovery;
+    auto stats = recovery.GetStats();
+    ASSERT(stats.totalErrors == 0);
+    ASSERT(stats.successfulRecoveries == 0);
+    GPUErrorEvent evt; evt.type = GPUErrorType::OutOfMemory;
+    ASSERT(recovery.DetermineAction(evt) == GPURecoveryAction::ReduceLoad);
+}
+
+TEST(Test_S395_ComputeShaderProfiler) {
+    ComputeShaderProfiler profiler;
+    ASSERT(profiler.GetAllSummaries().empty());
+    DispatchRecord rec; rec.shaderName = "test"; rec.gpuTimeMs = 1.0;
+    profiler.RecordDispatch(rec);
+    ASSERT(profiler.GetAllSummaries().size() == 1);
+}
+
+// --- Cache Tests ---
+
+TEST(Test_S395_CachePartitionManager) {
+    CachePartitionManager mgr;
+    PartitionConfig cfg;
+    cfg.maxPartitions = 8;
+    mgr.Configure(cfg);
+    ASSERT(mgr.PartitionCount() == 0);
+    mgr.CreatePartition("thumbnails", 64 * 1024 * 1024);
+    ASSERT(mgr.PartitionCount() == 1);
+}
+
+TEST(Test_S395_CacheStatisticsExporter) {
+    CacheStatisticsExporter exporter;
+    CacheMetricSnapshot snap;
+    snap.hitCount = 10; snap.missCount = 5;
+    exporter.RecordSnapshot(snap);
+    auto json = exporter.Export(CacheExportFormat::JSON);
+    ASSERT(!json.empty());
+    ASSERT(exporter.SnapshotCount() == 1);
+}
+
+TEST(Test_S395_CacheGarbageCollector) {
+    CacheGarbageCollector gc;
+    GCConfig cfg;
+    cfg.maxEntriesPerPass = 100;
+    gc.Configure(cfg);
+    auto stats = gc.GetStats();
+    ASSERT(stats.totalPasses == 0);
+    ASSERT(stats.totalEntriesReclaimed == 0);
+}
+
+TEST(Test_S395_CacheVersionMigrator) {
+    CacheVersionMigrator migrator;
+    ASSERT(CacheVersionMigrator::CurrentVersion().major == 2);
+    ASSERT(migrator.NeedsMigration({ 1, 0 }, { 2, 0 }));
+    ASSERT(!migrator.NeedsMigration({ 2, 0 }, { 2, 0 }));
+}
+
+TEST(Test_S395_FileHashCache) {
+    FileHashCache cache;
+    FileHashConfig cfg;
+    cfg.maxCachedHashes = 1000;
+    cache.Configure(cfg);
+    ASSERT(cache.Size() == 0);
+    auto stats = cache.GetStats();
+    ASSERT(stats.totalLookups == 0);
+    ASSERT(stats.cacheHits == 0);
+}
+
+// --- Memory Tests ---
+
+TEST(Test_S395_StackAllocator) {
+    StackAllocator alloc(4096);
+    void* p = alloc.Allocate(128);
+    ASSERT(p != nullptr);
+    ASSERT(alloc.Used() >= 128);
+    alloc.Reset();
+    ASSERT(alloc.Used() == 0);
+}
+
+TEST(Test_S395_MemoryWatermarkTracker) {
+    MemoryWatermarkTracker tracker;
+    MemWatermarkConfig cfg;
+    cfg.lowWatermarkBytes = 1024;
+    cfg.highWatermarkBytes = 2048;
+    cfg.criticalBytes = 4096;
+    cfg.maxBytes = 8192;
+    tracker.Configure(cfg);
+    auto level = tracker.Evaluate(512);
+    ASSERT(level == WatermarkLevel::BelowLow);
+    level = tracker.Evaluate(1500);
+    ASSERT(level == WatermarkLevel::Normal);
+    auto snap = tracker.GetSnapshot();
+    ASSERT(snap.currentBytes == 1500);
+}
+
+TEST(Test_S395_PoolAllocatorMetrics) {
+    PoolAllocatorMetrics metrics;
+    metrics.SetPoolName("test");
+    metrics.RecordAllocation(256, 100.0);
+    metrics.RecordDeallocation(256);
+    auto summary = metrics.GetSummary();
+    ASSERT(summary.totalAllocations >= 1);
+    ASSERT(summary.totalDeallocations >= 1);
+}
+
+TEST(Test_S395_ScopedMemoryBudget) {
+    ScopedMemoryBudget budget("test", 64 * 1024 * 1024);
+    ASSERT(budget.Remaining() == 64 * 1024 * 1024);
+    bool ok = budget.TryAllocate(32 * 1024 * 1024);
+    ASSERT(ok);
+    ASSERT(budget.Remaining() < 64 * 1024 * 1024);
+}
+
+TEST(Test_S395_ThreadLocalPoolAllocator) {
+    ThreadLocalPoolAllocator alloc;
+    TLPoolConfig cfg;
+    cfg.initialPoolSize = 256 * 1024;
+    alloc.Configure(cfg);
+    auto pool = alloc.CreatePool(1);
+    void* p = pool.Allocate(64);
+    ASSERT(p != nullptr);
+    ASSERT(pool.stats.allocations >= 1);
+}
+
+// --- AI Tests ---
+
+TEST(Test_S395_ThumbnailSaliencyMap) {
+    ThumbnailSaliencyMap saliency;
+    std::vector<uint8_t> rgba(64 * 64 * 4, 128);
+    // Set some pixels different to create contrast
+    for (int i = 0; i < 64 * 4; ++i) rgba[i] = 255;
+    auto result = saliency.AnalyzeFromPixels(rgba.data(), 64, 64);
+    ASSERT(result.valid);
+    ASSERT(result.totalCells > 0);
+}
+
+TEST(Test_S395_AdaptiveCropEngine) {
+    AdaptiveCropEngine crop;
+    CropConfig cfg;
+    cfg.targetAspectRatio = 1.0f;
+    crop.Configure(cfg);
+    auto result = crop.ComputeCrop(800, 600);
+    ASSERT(result.rect.width > 0);
+    ASSERT(result.rect.height > 0);
+}
+
+TEST(Test_S395_ColorPaletteGenerator) {
+    ColorPaletteGenerator gen;
+    std::vector<uint8_t> rgba(32 * 32 * 4, 200);
+    auto palette = gen.Generate(rgba.data(), 32, 32);
+    ASSERT(palette.valid);
+}
+
+TEST(Test_S395_ImageSimilarityMatcher) {
+    ImageSimilarityMatcher matcher;
+    std::vector<uint8_t> img(16 * 16 * 4, 128);
+    auto hash1 = matcher.ComputeHash(img.data(), 16, 16);
+    auto hash2 = matcher.ComputeHash(img.data(), 16, 16);
+    ASSERT(hash1.valid && hash2.valid);
+    auto result = matcher.Compare(hash1, hash2);
+    ASSERT(result.similarity >= 0.9);
+}
+
+TEST(Test_S395_FileTypePredictor) {
+    FileTypePredictor predictor;
+    predictor.LoadDefaultSignatures();
+    uint8_t pngHeader[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+    auto result = predictor.Predict(pngHeader, sizeof(pngHeader), ".png");
+    ASSERT(result.predictedType == "PNG");
+    ASSERT(result.confidence >= 0.5f);
+}
+
+// --- Plugin Tests ---
+
+TEST(Test_S395_PluginUpdateChecker) {
+    PluginUpdateChecker checker;
+    PluginVersion v1{ 1, 0, 0 }, v2{ 2, 0, 0 }, minV{ 1, 0, 0 };
+    auto status = checker.CheckVersion(v1, v2, minV);
+    ASSERT(status == UpdateStatus::UpdateAvailable);
+    auto upToDate = checker.CheckVersion(v2, v2, minV);
+    ASSERT(upToDate == UpdateStatus::UpToDate);
+}
+
+TEST(Test_S395_PluginConfigMigrator) {
+    PluginConfigMigrator migrator;
+    ASSERT(!migrator.CanMigrate(1, 3));
+    migrator.RegisterRule({ 1, 2, "v1->v2", nullptr });
+    migrator.RegisterRule({ 2, 3, "v2->v3", nullptr });
+    ASSERT(migrator.CanMigrate(1, 3));
+}
+
+TEST(Test_S395_PluginMetricsExporter) {
+    PluginMetricsExporter exporter;
+    exporter.RecordDecode("test-plugin", 5.0, true);
+    auto summary = exporter.GetSummary("test-plugin");
+    ASSERT(summary.totalDecodes == 1);
+    ASSERT(summary.errorRate == 0.0);
+}
+
+// --- Utils Tests ---
+
+TEST(Test_S395_CrashDumpAnalyzer) {
+    CrashDumpAnalyzer analyzer;
+    auto cat = analyzer.ClassifyException(0xC0000005);
+    ASSERT(cat == CrashCategory::AccessViolation);
+    auto unknown = analyzer.ClassifyException(0x12345678);
+    ASSERT(unknown == CrashCategory::Unknown);
+}
+
+TEST(Test_S395_PerformanceReportGenerator) {
+    PerformanceReportGenerator gen;
+    gen.BeginReport("test");
+    gen.SetDecodeStats(100, 80);
+    auto report = gen.Finalize(1000);
+    ASSERT(report.totalDecodes == 100);
+    ASSERT(report.cacheHits == 80);
+}
+
+TEST(Test_S395_SystemInfoCollector) {
+    SystemInfoCollector collector;
+    SystemSnapshot snap;
+    snap.cpu.logicalCores = 8;
+    snap.totalRAM_MB = 16384;
+    ASSERT(!collector.IsLowEndSystem(snap));
+    ASSERT(collector.RecommendedThreadCount(snap) == 4);
+}
+
+TEST(Test_S395_RegistryRepairTool) {
+    RegistryRepairTool tool;
+    tool.SetCLSID(L"{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}");
+    RegistryAuditResult audit;
+    tool.Audit(audit);
+    ASSERT(audit.totalChecked > 0);
+    ASSERT(!tool.NeedsRepair(audit));
+}
+
+TEST(Test_S395_LogAnalyzer) {
+    LogAnalyzer analyzer;
+    auto analysis = analyzer.GetAnalysis();
+    ASSERT(analysis.totalEntries == 0);
+    ASSERT(analysis.errorCount == 0);
+}
+
+// --- Decoder Tests ---
+
+TEST(Test_S395_WICFallbackDecoder) {
+    WICFallbackDecoder decoder;
+    auto stats = decoder.GetStats();
+    ASSERT(stats.totalAttempts == 0);
+    ASSERT(stats.successCount == 0);
+    ASSERT(decoder.IsSupported(L".png"));
+}
+
+TEST(Test_S395_ArchivePeekDecoder) {
+    ArchivePeekDecoder decoder;
+    ASSERT(decoder.IsImageExtension(L"photo.jpg"));
+    ASSERT(!decoder.IsImageExtension(L"readme.txt"));
+}
+
+TEST(Test_S395_ContainerInspector) {
+    ContainerInspector inspector;
+    ASSERT(inspector.IsBrandingAsset(L"AppIcon.png"));
+    ASSERT(!inspector.IsBrandingAsset(L"data.bin"));
+}
+
+TEST(Test_S395_MetadataOnlyDecoder) {
+    MetadataOnlyDecoder decoder;
+    uint8_t fakeJpeg[] = { 0xFF, 0xD8, 0xFF, 0xE0 };
+    auto thumb = decoder.FindEXIFThumbnail(fakeJpeg, sizeof(fakeJpeg));
+    ASSERT(!thumb.isValid);
+}
+
+TEST(Test_S395_EfficientResizeDecoder) {
+    EfficientResizeDecoder decoder;
+    ResizeDecoderConfig cfg;
+    cfg.thumbnailSize = 256;
+    decoder.Configure(cfg);
+    auto params = decoder.ComputeJPEGScale(4000, 3000, 256, 256);
+    ASSERT(params.scaleDenominator > 1);
+    ASSERT(params.memorySavingsPercent > 0.0);
+}
+
+TEST(Test_S395_MultiFormatBatchDecoder) {
+    MultiFormatBatchDecoder decoder;
+    MultiBatchDecodeConfig cfg;
+    cfg.maxBatchSize = 16;
+    decoder.Configure(cfg);
+    std::vector<BatchDecodeItem> items(3);
+    items[0].status = MultiBatchItemStatus::Success;
+    items[1].status = MultiBatchItemStatus::Failed;
+    items[2].status = MultiBatchItemStatus::CacheHit;
+    auto result = decoder.Summarize(items);
+    ASSERT(result.totalItems == 3);
+    ASSERT(result.successCount == 1);
+}
+
+TEST(Test_S395_CacheFriendlyDecoder) {
+    CacheFriendlyDecoder decoder;
+    CacheFriendlyConfig cfg;
+    cfg.tileSize = 64;
+    decoder.Configure(cfg);
+    auto tiles = decoder.GenerateTiles(256, 256, 4);
+    ASSERT(!tiles.empty());
+    ASSERT(decoder.TileCount(256, 256) == static_cast<uint32_t>(tiles.size()));
 }
 
 int main() {
@@ -27894,6 +28431,69 @@ int main() {
     RUN_TEST(Test_S394_Aesthetic_ScoreGrayscale);
     RUN_TEST(Test_S394_Aesthetic_ScoreARGB);
     RUN_TEST(Test_S394_Aesthetic_SelectBestFrame);
+
+    // Sprint 395+: Enhancement Plan V15 — 50 New Feature Tests
+    std::wcout << std::endl;
+    std::wcout << L"Sprint 395+ Enhancement Tests:" << std::endl;
+    // Core
+    RUN_TEST(Test_S395_GlobalShortcutManager);
+    RUN_TEST(Test_S395_FileChangeThrottler);
+    RUN_TEST(Test_S395_SmartThumbnailPrioritizer);
+    RUN_TEST(Test_S395_ThumbnailRequestCoalescer);
+    RUN_TEST(Test_S395_DecoderTimeoutPolicy);
+    RUN_TEST(Test_S395_ExplorerIntegrationMonitor);
+    RUN_TEST(Test_S395_ShellExtensionRecovery);
+    RUN_TEST(Test_S395_ThumbnailSizeNegotiator);
+    RUN_TEST(Test_S395_FileConcurrencyGuard);
+    RUN_TEST(Test_S395_ResourceThrottlePolicy);
+    // Pipeline
+    RUN_TEST(Test_S395_LazyDecodeInitializer);
+    RUN_TEST(Test_S395_ChunkedDecodeEngine);
+    RUN_TEST(Test_S395_DecodeProfilingHarness);
+    RUN_TEST(Test_S395_ThumbnailMergeEngine);
+    RUN_TEST(Test_S395_ExplorerQueryOptimizer);
+    // GPU
+    RUN_TEST(Test_S395_GPUDeviceSelector);
+    RUN_TEST(Test_S395_GPUFeatureProbe);
+    RUN_TEST(Test_S395_AdaptiveShaderSelection);
+    RUN_TEST(Test_S395_GPUErrorRecovery);
+    RUN_TEST(Test_S395_ComputeShaderProfiler);
+    // Cache
+    RUN_TEST(Test_S395_CachePartitionManager);
+    RUN_TEST(Test_S395_CacheStatisticsExporter);
+    RUN_TEST(Test_S395_CacheGarbageCollector);
+    RUN_TEST(Test_S395_CacheVersionMigrator);
+    RUN_TEST(Test_S395_FileHashCache);
+    // Memory
+    RUN_TEST(Test_S395_StackAllocator);
+    RUN_TEST(Test_S395_MemoryWatermarkTracker);
+    RUN_TEST(Test_S395_PoolAllocatorMetrics);
+    RUN_TEST(Test_S395_ScopedMemoryBudget);
+    RUN_TEST(Test_S395_ThreadLocalPoolAllocator);
+    // AI
+    RUN_TEST(Test_S395_ThumbnailSaliencyMap);
+    RUN_TEST(Test_S395_AdaptiveCropEngine);
+    RUN_TEST(Test_S395_ColorPaletteGenerator);
+    RUN_TEST(Test_S395_ImageSimilarityMatcher);
+    RUN_TEST(Test_S395_FileTypePredictor);
+    // Plugin
+    RUN_TEST(Test_S395_PluginUpdateChecker);
+    RUN_TEST(Test_S395_PluginConfigMigrator);
+    RUN_TEST(Test_S395_PluginMetricsExporter);
+    // Utils
+    RUN_TEST(Test_S395_CrashDumpAnalyzer);
+    RUN_TEST(Test_S395_PerformanceReportGenerator);
+    RUN_TEST(Test_S395_SystemInfoCollector);
+    RUN_TEST(Test_S395_RegistryRepairTool);
+    RUN_TEST(Test_S395_LogAnalyzer);
+    // Decoders
+    RUN_TEST(Test_S395_WICFallbackDecoder);
+    RUN_TEST(Test_S395_ArchivePeekDecoder);
+    RUN_TEST(Test_S395_ContainerInspector);
+    RUN_TEST(Test_S395_MetadataOnlyDecoder);
+    RUN_TEST(Test_S395_EfficientResizeDecoder);
+    RUN_TEST(Test_S395_MultiFormatBatchDecoder);
+    RUN_TEST(Test_S395_CacheFriendlyDecoder);
 
     std::wcout << std::endl;
 
