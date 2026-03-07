@@ -65,7 +65,7 @@ public:
     }
 
     size_t AlignedSize(size_t bytes) const {
-        return (bytes + m_config.alignment - 1) & ~(m_config.alignment - 1);
+        return (bytes + m_config.alignment - 1) & ~static_cast<size_t>(m_config.alignment - 1);
     }
 
     uint32_t TileCount(uint32_t imageWidth, uint32_t imageHeight) const {

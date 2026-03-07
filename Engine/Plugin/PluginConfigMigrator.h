@@ -1,4 +1,4 @@
-or execution logs.// PluginConfigMigrator.h — Plugin Configuration Schema Migration
+// PluginConfigMigrator.h — Plugin Configuration Schema Migration
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Migrates plugin configuration files between schema versions when the

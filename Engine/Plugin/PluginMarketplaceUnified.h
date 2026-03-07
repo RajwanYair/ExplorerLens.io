@@ -134,30 +134,30 @@ enum class PluginCategory : uint8_t {
 };
 
 /// Plugin version (semver)
-struct PluginVersion {
+struct PluginSemVer {
     uint16_t major = 0;
     uint16_t minor = 0;
     uint16_t patch = 0;
     std::wstring prerelease;
 
-    bool operator>=(const PluginVersion& other) const {
+    bool operator>=(const PluginSemVer& other) const {
         if (major != other.major) return major > other.major;
         if (minor != other.minor) return minor > other.minor;
         return patch >= other.patch;
     }
-    bool operator==(const PluginVersion& other) const {
+    bool operator==(const PluginSemVer& other) const {
         return major == other.major && minor == other.minor && patch == other.patch;
     }
     std::wstring ToString() const {
         return std::to_wstring(major) + L"." + std::to_wstring(minor) + L"." + std::to_wstring(patch);
     }
-    static PluginVersion Parse(const std::wstring& str);
+    static PluginSemVer Parse(const std::wstring& str);
 };
 
 /// Plugin dependency
 struct PluginDependency {
     std::wstring pluginId;
-    PluginVersion minVersion;
+    PluginSemVer minVersion;
     bool optional = false;
 };
 
@@ -168,7 +168,7 @@ struct PluginListing {
     std::wstring description;
     std::wstring author;
     std::wstring authorUrl;
-    PluginVersion version;
+    PluginSemVer version;
     PluginCategory category = PluginCategory::Decoder;
     std::vector<std::wstring> extensions; ///< File extensions this plugin handles
     std::vector<PluginDependency> dependencies;
@@ -199,7 +199,7 @@ struct InstalledPlugin {
     PluginInstallState state = PluginInstallState::NotInstalled;
     std::wstring installPath;
     std::wstring installDate;
-    PluginVersion installedVersion;
+    PluginSemVer installedVersion;
     bool autoUpdate = true;
 };
 

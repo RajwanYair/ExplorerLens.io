@@ -8,7 +8,7 @@
 __version__ = "1.0.0"
 __codename__ = "Zenith-Py"
 
-from explorerlens.engine import ThumbnailEngine
 from explorerlens.config import Config
+from explorerlens.engine import ThumbnailEngine
 
 __all__ = ["ThumbnailEngine", "Config", "__version__", "__codename__"]

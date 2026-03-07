@@ -22,8 +22,19 @@ from .base import BaseDecoder
 logger = logging.getLogger("explorerlens.decoders.audio")
 
 _AUDIO_EXTS = [
-    ".mp3", ".wav", ".m4a", ".ape", ".flac", ".ogg", ".mka",
-    ".mpc", ".opus", ".tak", ".wv", ".wma", ".aac",
+    ".mp3",
+    ".wav",
+    ".m4a",
+    ".ape",
+    ".flac",
+    ".ogg",
+    ".mka",
+    ".mpc",
+    ".opus",
+    ".tak",
+    ".wv",
+    ".wma",
+    ".aac",
 ]
 
 
@@ -59,11 +70,11 @@ class AudioDecoder(BaseDecoder):
         """Try to extract embedded album art using mutagen."""
         try:
             import mutagen
-            from mutagen.mp3 import MP3
             from mutagen.flac import FLAC
+            from mutagen.mp3 import MP3
             from mutagen.mp4 import MP4
-            from mutagen.oggvorbis import OggVorbis
             from mutagen.oggopus import OggOpus
+            from mutagen.oggvorbis import OggVorbis
 
             ext = path.suffix.lower()
 
@@ -91,7 +102,9 @@ class AudioDecoder(BaseDecoder):
                 pics = audio.get("metadata_block_picture")
                 if pics:
                     import base64
+
                     from mutagen.flac import Picture
+
                     pic = Picture(base64.b64decode(pics[0]))
                     return Image.open(io.BytesIO(pic.data))
 
@@ -100,7 +113,9 @@ class AudioDecoder(BaseDecoder):
                 pics = audio.get("metadata_block_picture")
                 if pics:
                     import base64
+
                     from mutagen.flac import Picture
+
                     pic = Picture(base64.b64decode(pics[0]))
                     return Image.open(io.BytesIO(pic.data))
 
@@ -112,12 +127,10 @@ class AudioDecoder(BaseDecoder):
                         if "picture" in key.lower():
                             tag = audio.tags[key]
                             if hasattr(tag, "value"):
-                                for v in (tag if isinstance(tag, list)
-                                          else [tag]):
+                                for v in tag if isinstance(tag, list) else [tag]:
                                     if hasattr(v, "value"):
                                         try:
-                                            return Image.open(
-                                                io.BytesIO(v.value))
+                                            return Image.open(io.BytesIO(v.value))
                                         except Exception:
                                             continue
 
@@ -169,8 +182,7 @@ class AudioDecoder(BaseDecoder):
                         if len(fmt_data) >= 4:
                             channels = struct.unpack("<H", fmt_data[2:4])[0]
                         if len(fmt_data) >= 8:
-                            sample_width = struct.unpack(
-                                "<H", fmt_data[14:16])[0] // 8
+                            sample_width = struct.unpack("<H", fmt_data[14:16])[0] // 8
                     elif chunk_id == b"data":
                         # Read samples
                         max_bytes = min(chunk_size, 1024 * 1024)  # 1MB cap
@@ -203,8 +215,7 @@ class AudioDecoder(BaseDecoder):
                 peak = 0
                 for j in range(0, len(chunk), sample_width * channels):
                     if j + sample_width <= len(chunk):
-                        val = struct.unpack(
-                            fmt_char, chunk[j:j + sample_width])[0]
+                        val = struct.unpack(fmt_char, chunk[j : j + sample_width])[0]
                         peak = max(peak, abs(val))
                 amplitudes.append(peak / max_val)
 

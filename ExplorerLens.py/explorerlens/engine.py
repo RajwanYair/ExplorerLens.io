@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor, Future, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
 from pathlib import Path
@@ -17,13 +17,14 @@ from typing import Optional, Sequence
 
 from PIL import Image
 
-from .config import Config, FORMAT_CATEGORIES
+from .config import FORMAT_CATEGORIES, Config
 
 logger = logging.getLogger("explorerlens.engine")
 
 
 class DecodeStatus(IntEnum):
     """Result status for a thumbnail request."""
+
     Success = 0
     UnsupportedFormat = auto()
     FileNotFound = auto()
@@ -35,6 +36,7 @@ class DecodeStatus(IntEnum):
 @dataclass
 class ThumbnailRequest:
     """A single thumbnail generation request."""
+
     path: Path
     size: int = 256
     format: str = "PNG"
@@ -44,6 +46,7 @@ class ThumbnailRequest:
 @dataclass
 class ThumbnailResult:
     """Result of a thumbnail generation request."""
+
     request: ThumbnailRequest
     status: DecodeStatus = DecodeStatus.Success
     image: Optional[Image.Image] = None
@@ -74,16 +77,20 @@ class ThumbnailEngine:
     def _init_decoders(self) -> None:
         """Lazily import and register all decoder implementations."""
         from .decoders import get_all_decoders
+
         for decoder in get_all_decoders():
             for ext in decoder.supported_extensions():
                 self._decoders[ext.lower()] = decoder
-        logger.info("Initialized %d decoders covering %d extensions",
-                     len(set(id(d) for d in self._decoders.values())),
-                     len(self._decoders))
+        logger.info(
+            "Initialized %d decoders covering %d extensions",
+            len(set(id(d) for d in self._decoders.values())),
+            len(self._decoders),
+        )
 
     def _init_cache(self) -> None:
         """Auto-create a TieredCache from config settings."""
-        from .cache import MemoryCache, DiskCache, TieredCache
+        from .cache import DiskCache, MemoryCache, TieredCache
+
         memory = MemoryCache(
             max_items=self._config.cache.max_items,
             max_memory_mb=self._config.cache.memory_limit_mb,
@@ -232,6 +239,7 @@ class ThumbnailEngine:
 @dataclass
 class EngineStats:
     """Tracks engine performance metrics."""
+
     succeeded: int = 0
     failed: int = 0
     skipped: int = 0
@@ -249,5 +257,4 @@ class EngineStats:
 
     @property
     def images_per_sec(self) -> float:
-        return (self.succeeded / (self.total_ms / 1000)
-                if self.total_ms > 0 else 0.0)
+        return self.succeeded / (self.total_ms / 1000) if self.total_ms > 0 else 0.0

@@ -11,9 +11,9 @@ Usage:
 """
 
 import argparse
-import sys
-import os
 import logging
+import os
+import sys
 from pathlib import Path
 
 
@@ -21,6 +21,7 @@ def is_admin() -> bool:
     """Check if running with administrator privileges."""
     try:
         import ctypes
+
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
     except Exception:
         return False
@@ -29,14 +30,13 @@ def is_admin() -> bool:
 def elevate_and_relaunch(args: list[str] | None = None) -> None:
     """Re-launch the current script with admin privileges via UAC prompt."""
     import ctypes
+
     python = sys.executable
     script = os.path.abspath(sys.argv[0])
     params = f'"{script}"'
     if args:
         params += " " + " ".join(f'"{a}"' for a in args)
-    ctypes.windll.shell32.ShellExecuteW(
-        None, "runas", python, params, None, 1
-    )
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", python, params, None, 1)
     sys.exit(0)
 
 
@@ -45,28 +45,49 @@ def main() -> None:
         prog="explorerlens",
         description="ExplorerLens.py — Python Thumbnail Provider for Windows",
     )
-    parser.add_argument("--register", action="store_true",
-                        help="Register COM shell extension (requires admin)")
-    parser.add_argument("--unregister", action="store_true",
-                        help="Unregister COM shell extension (requires admin)")
-    parser.add_argument("--thumbnail", metavar="FILE",
-                        help="Generate thumbnail for a file")
-    parser.add_argument("--size", type=int, default=256,
-                        help="Thumbnail size in pixels (default: 256)")
-    parser.add_argument("--output", metavar="FILE",
-                        help="Output path for thumbnail (default: display)")
-    parser.add_argument("--benchmark", metavar="DIR", nargs="?", const=".",
-                        help="Run performance benchmark on directory")
-    parser.add_argument("--nogui", action="store_true",
-                        help="CLI mode only, don't launch GUI")
-    parser.add_argument("--admin", action="store_true",
-                        help="Force admin elevation")
-    parser.add_argument("--diagnostics", metavar="FILE", nargs="?",
-                        const="explorerlens-diagnostics.json",
-                        help="Export diagnostic report to FILE")
-    parser.add_argument("--log-level", default="INFO",
-                        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-                        help="Logging level (default: INFO)")
+    parser.add_argument(
+        "--register",
+        action="store_true",
+        help="Register COM shell extension (requires admin)",
+    )
+    parser.add_argument(
+        "--unregister",
+        action="store_true",
+        help="Unregister COM shell extension (requires admin)",
+    )
+    parser.add_argument(
+        "--thumbnail", metavar="FILE", help="Generate thumbnail for a file"
+    )
+    parser.add_argument(
+        "--size", type=int, default=256, help="Thumbnail size in pixels (default: 256)"
+    )
+    parser.add_argument(
+        "--output", metavar="FILE", help="Output path for thumbnail (default: display)"
+    )
+    parser.add_argument(
+        "--benchmark",
+        metavar="DIR",
+        nargs="?",
+        const=".",
+        help="Run performance benchmark on directory",
+    )
+    parser.add_argument(
+        "--nogui", action="store_true", help="CLI mode only, don't launch GUI"
+    )
+    parser.add_argument("--admin", action="store_true", help="Force admin elevation")
+    parser.add_argument(
+        "--diagnostics",
+        metavar="FILE",
+        nargs="?",
+        const="explorerlens-diagnostics.json",
+        help="Export diagnostic report to FILE",
+    )
+    parser.add_argument(
+        "--log-level",
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="Logging level (default: INFO)",
+    )
 
     args = parser.parse_args()
 
@@ -85,13 +106,15 @@ def main() -> None:
 
     if args.diagnostics:
         from explorerlens.shell.diagnostics import export_diagnostics
+
         out = export_diagnostics(Path(args.diagnostics))
         print(f"Diagnostics exported to {out}")
         return
 
     if args.register:
-        from explorerlens.shell.com_server import register
         from explorerlens.config import Config
+        from explorerlens.shell.com_server import register
+
         config = Config.load()
         ok = register(config.get_enabled_extensions())
         if ok:
@@ -103,6 +126,7 @@ def main() -> None:
 
     if args.unregister:
         from explorerlens.shell.com_server import unregister
+
         ok = unregister()
         if ok:
             print("COM shell extension unregistered successfully.")
@@ -112,8 +136,9 @@ def main() -> None:
         return
 
     if args.thumbnail:
-        from explorerlens.engine import ThumbnailEngine, ThumbnailRequest, DecodeStatus
         from explorerlens.config import Config
+        from explorerlens.engine import DecodeStatus, ThumbnailEngine, ThumbnailRequest
+
         config = Config.load()
         engine = ThumbnailEngine(config)
         req = ThumbnailRequest(path=Path(args.thumbnail), size=args.size)
@@ -125,15 +150,18 @@ def main() -> None:
             else:
                 result.image.show()
         else:
-            print(f"Failed to generate thumbnail for {args.thumbnail}: "
-                  f"{result.error}", file=sys.stderr)
+            print(
+                f"Failed to generate thumbnail for {args.thumbnail}: "
+                f"{result.error}",
+                file=sys.stderr,
+            )
             sys.exit(1)
         engine.shutdown()
         return
 
     if args.benchmark is not None:
-        from explorerlens.utils.benchmark import run_benchmark, print_benchmark_report
         from explorerlens.config import ALL_EXTENSIONS
+        from explorerlens.utils.benchmark import print_benchmark_report, run_benchmark
 
         target_dir = Path(args.benchmark)
         if not target_dir.is_dir():
@@ -141,7 +169,8 @@ def main() -> None:
             sys.exit(1)
 
         files = [
-            f for f in target_dir.rglob("*")
+            f
+            for f in target_dir.rglob("*")
             if f.is_file() and f.suffix.lower() in ALL_EXTENSIONS
         ]
         if not files:
@@ -155,8 +184,9 @@ def main() -> None:
 
     # Default: launch GUI
     if not args.nogui:
-        from explorerlens.gui.app import ExplorerLensApp
         from explorerlens.config import Config
+        from explorerlens.gui.app import ExplorerLensApp
+
         config = Config.load()
         app = ExplorerLensApp(config)
         app.run()

@@ -1052,8 +1052,9 @@ void CMainDlg::ApplySystemStatusToCheckboxes() {
     };
 
     for (const auto& entry : statusMap) {
-        HandlerStatus hs = m_reg.GetHandlerStatus(
-            entry.lensType, m_reg.GetExtension(entry.lensType));
+        // Use GetGroupHandlerStatus for multi-extension types (VIDEO, AUDIO)
+        // so we detect competitors registered on ANY sub-extension.
+        HandlerStatus hs = m_reg.GetGroupHandlerStatus(entry.lensType);
 
         int checkState;
         switch (hs) {

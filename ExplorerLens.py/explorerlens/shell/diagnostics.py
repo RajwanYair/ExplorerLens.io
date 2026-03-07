@@ -36,7 +36,9 @@ def export_diagnostics(output_path: Path | None = None) -> Path:
     """Export diagnostics to a JSON file."""
     info = collect_diagnostics()
     if output_path is None:
-        output_path = Path.cwd() / f"explorerlens-diag-{datetime.now():%Y%m%d-%H%M%S}.json"
+        output_path = (
+            Path.cwd() / f"explorerlens-diag-{datetime.now():%Y%m%d-%H%M%S}.json"
+        )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
@@ -68,7 +70,8 @@ def _python_info() -> dict:
 def _registration_info() -> dict:
     """Check COM registration status."""
     try:
-        from .com_server import get_registration_status, COM_CLSID_PY
+        from .com_server import COM_CLSID_PY, get_registration_status
+
         status = get_registration_status()
         registered_count = sum(1 for v in status.values() if v)
         return {
@@ -85,9 +88,22 @@ def _dependency_info() -> dict:
     """Check availability of key dependencies."""
     deps: dict[str, str | None] = {}
     for mod_name in [
-        "PIL", "rawpy", "fitz", "cairosvg", "mutagen", "py7zr",
-        "rarfile", "fonttools", "trimesh", "comtypes", "win32api",
-        "pystray", "darkdetect", "platformdirs", "watchdog", "psutil",
+        "PIL",
+        "rawpy",
+        "fitz",
+        "cairosvg",
+        "mutagen",
+        "py7zr",
+        "rarfile",
+        "fonttools",
+        "trimesh",
+        "comtypes",
+        "win32api",
+        "pystray",
+        "darkdetect",
+        "platformdirs",
+        "watchdog",
+        "psutil",
     ]:
         try:
             mod = __import__(mod_name)
@@ -102,6 +118,7 @@ def _config_info() -> dict:
     """Load current config summary."""
     try:
         from ..config import Config
+
         cfg = Config.load()
         enabled = cfg.get_enabled_extensions()
         return {

@@ -31,7 +31,7 @@ class COWBuffer {
 public:
     /// Create a buffer with the given size, zero-filled
     explicit COWBuffer(size_t size)
-        : m_data(std::make_shared<std::vector<uint8_t>>(size, static_cast<uint8_t>(0)))
+        : m_data(std::make_shared<std::vector<uint8_t>>(static_cast<std::vector<uint8_t>::size_type>(size), uint8_t{ 0 }))
         , m_size(size) {
     }
 

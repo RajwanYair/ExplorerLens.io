@@ -57,7 +57,7 @@ public:
     }
 
     bool HandleHotkey(uint32_t id) {
-        auto cb = m_callbacks.find(id);
+        auto cb = m_callbacks.find(static_cast<uint8_t>(id));
         if (cb != m_callbacks.end() && cb->second) {
             cb->second();
             return true;

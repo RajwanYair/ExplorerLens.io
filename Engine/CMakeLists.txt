@@ -1105,6 +1105,67 @@ set(ENGINE_HEADERS
     Decoders/EfficientResizeDecoder.h
     Decoders/MultiFormatBatchDecoder.h
     Decoders/CacheFriendlyDecoder.h
+
+    # Sprint 396: Enhancement Plan V15 — 50 New Feature Headers
+    # Core enhancements
+    Core/ShellOverlayRenderer.h
+    Core/ShellContextMenuProvider.h
+    Core/WindowsNotificationManager.h
+    Core/FileSystemJournalReader.h
+    Core/ProcessIsolationBroker.h
+    Core/ThumbnailBatchExporter.h
+    Core/IncrementalDecodeEngine.h
+    Core/ExplorerNavigationMonitor.h
+    Core/ShellThumbnailInterceptor.h
+    Core/DecoderPoolManager.h
+    Core/PowerAwareDecodeScheduler.h
+    Core/FileTypeAssociationBroker.h
+    # Pipeline enhancements
+    Pipeline/RateLimitedDecodeQueue.h
+    Pipeline/PipelineFusionOptimizer.h
+    Pipeline/ConcurrentDecodeBarrier.h
+    Pipeline/FormatSpecificPipeline.h
+    Pipeline/ThumbnailInvalidationTracker.h
+    Pipeline/PipelineTelemetrySink.h
+    Pipeline/DecodeWorkDistributor.h
+    Pipeline/SmartRetryScheduler.h
+    # GPU enhancements
+    GPU/GPUVendorCapabilityMap.h
+    GPU/GPUBatchSubmitter.h
+    GPU/GPUFenceOrchestrator.h
+    GPU/ShaderPermutationManager.h
+    GPU/GPUThermalMonitor.h
+    GPU/GPUResourceLeakDetector.h
+    # Cache enhancements
+    Cache/CacheResilienceManager.h
+    Cache/CacheAccessPatternAnalyzer.h
+    Cache/CacheSlabAllocator.h
+    Cache/CacheReplicationEngine.h
+    Cache/CacheContentHasher.h
+    # Memory enhancements
+    Memory/PageFaultOptimizer.h
+    Memory/MemoryCompactionEngine.h
+    Memory/AllocatorBenchmark.h
+    Memory/GuardPageProtector.h
+    Memory/WorkingSetOptimizer.h
+    # AI enhancements
+    AI/AutoWhiteBalanceCorrector.h
+    AI/DocumentLayoutClassifier.h
+    AI/ThumbnailComplexityRouter.h
+    AI/VisualQualityPredictor.h
+    AI/SmartThumbnailRanker.h
+    # Plugin enhancements
+    Plugin/PluginRateLimiter.h
+    Plugin/PluginStatePersistence.h
+    Plugin/PluginIsolationMonitor.h
+    # Decoder enhancements
+    Decoders/ClipboardImageDecoder.h
+    Decoders/ScreenshotAnalyzer.h
+    Decoders/StreamingVideoDecoder.h
+    Decoders/CompoundDocumentDecoder.h
+    # Utils enhancements
+    Utils/WindowsEventLogWriter.h
+    Utils/BuildArtifactValidator.h
 )
 
 set(ENGINE_SOURCES

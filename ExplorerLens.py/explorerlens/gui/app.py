@@ -18,11 +18,11 @@ import logging
 import sys
 import threading
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
 from pathlib import Path
+from tkinter import filedialog, messagebox, ttk
 from typing import Optional
 
-from ..config import Config, FORMAT_CATEGORIES, CONFIG_FILE
+from ..config import CONFIG_FILE, FORMAT_CATEGORIES, Config
 
 logger = logging.getLogger("explorerlens.gui")
 
@@ -47,6 +47,14 @@ class ExplorerLensApp:
 
         self._apply_theme()
         self._build_ui()
+
+        # Dark mode: style tkinter popup widgets that don't use ttk
+        if self._dark_mode:
+            self._root.option_add("*TCombobox*Listbox.background", "#2d2d30")
+            self._root.option_add("*TCombobox*Listbox.foreground", "#d4d4d4")
+            self._root.option_add("*TCombobox*Listbox.selectBackground", "#0e639c")
+            self._root.option_add("*TCombobox*Listbox.selectForeground", "#ffffff")
+
         self._root.protocol("WM_DELETE_WINDOW", self._on_close)
 
         if self._config.show_tray_icon:
@@ -65,6 +73,7 @@ class ExplorerLensApp:
         # Auto-detect from Windows registry
         try:
             import winreg
+
             key = winreg.OpenKey(
                 winreg.HKEY_CURRENT_USER,
                 r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
@@ -78,28 +87,112 @@ class ExplorerLensApp:
     def _apply_theme(self) -> None:
         """Apply dark or light theme."""
         style = ttk.Style()
+        style.theme_use("clam")
         if self._dark_mode:
-            self._root.configure(bg="#1e1e1e")
-            style.theme_use("clam")
-            style.configure(".", background="#1e1e1e", foreground="#d4d4d4",
-                            fieldbackground="#2d2d30", bordercolor="#3e3e42")
-            style.configure("TFrame", background="#1e1e1e")
-            style.configure("TLabel", background="#1e1e1e", foreground="#d4d4d4")
-            style.configure("TCheckbutton", background="#1e1e1e",
-                            foreground="#d4d4d4")
-            style.configure("TButton", background="#0e639c", foreground="white")
-            style.configure("TLabelframe", background="#1e1e1e",
-                            foreground="#569cd6")
-            style.configure("TLabelframe.Label", background="#1e1e1e",
-                            foreground="#569cd6")
-            style.configure("Header.TLabel", font=("Segoe UI", 14, "bold"),
-                            foreground="#569cd6", background="#1e1e1e")
-            style.configure("Status.TLabel", foreground="#608b4e",
-                            background="#1e1e1e")
+            bg = "#1e1e1e"
+            fg = "#d4d4d4"
+            field_bg = "#2d2d30"
+            border = "#3e3e42"
+            accent = "#0e639c"
+            tab_bg = "#2d2d30"
+            tab_sel = "#1e1e1e"
+
+            self._root.configure(bg=bg)
+            style.configure(
+                ".",
+                background=bg,
+                foreground=fg,
+                fieldbackground=field_bg,
+                bordercolor=border,
+                insertcolor=fg,
+                selectbackground=accent,
+                selectforeground="#ffffff",
+            )
+            style.configure("TFrame", background=bg)
+            style.configure("TLabel", background=bg, foreground=fg)
+            style.configure("TCheckbutton", background=bg, foreground=fg)
+            style.map(
+                "TCheckbutton",
+                background=[("active", "#2a2d2e"), ("disabled", bg)],
+                foreground=[("disabled", "#6a6a6a")],
+            )
+            style.configure("TButton", background=accent, foreground="#ffffff")
+            style.map(
+                "TButton",
+                background=[("active", "#1177bb"), ("disabled", "#3e3e42")],
+                foreground=[("disabled", "#6a6a6a")],
+            )
+            style.configure("TLabelframe", background=bg, foreground="#569cd6")
+            style.configure("TLabelframe.Label", background=bg, foreground="#569cd6")
+            # Notebook tabs — critical for dark mode text visibility
+            style.configure(
+                "TNotebook",
+                background=bg,
+                bordercolor=border,
+                tabmargins=[2, 5, 2, 0],
+            )
+            style.configure(
+                "TNotebook.Tab",
+                background=tab_bg,
+                foreground=fg,
+                padding=[10, 4],
+                bordercolor=border,
+            )
+            style.map(
+                "TNotebook.Tab",
+                background=[("selected", tab_sel), ("active", "#3e3e42")],
+                foreground=[("selected", "#ffffff"), ("active", "#ffffff")],
+            )
+            # Combobox / Spinbox
+            style.configure(
+                "TCombobox",
+                fieldbackground=field_bg,
+                background=field_bg,
+                foreground=fg,
+                arrowcolor=fg,
+                bordercolor=border,
+                selectbackground=accent,
+                selectforeground="#ffffff",
+            )
+            style.map(
+                "TCombobox",
+                fieldbackground=[("readonly", field_bg), ("disabled", bg)],
+                foreground=[("readonly", fg), ("disabled", "#6a6a6a")],
+            )
+            style.configure(
+                "TSpinbox",
+                fieldbackground=field_bg,
+                foreground=fg,
+                arrowcolor=fg,
+                bordercolor=border,
+            )
+            # Scrollbar
+            style.configure(
+                "TScrollbar",
+                background="#3e3e42",
+                troughcolor=bg,
+                arrowcolor=fg,
+                bordercolor=border,
+            )
+            # Entry
+            style.configure(
+                "TEntry",
+                fieldbackground=field_bg,
+                foreground=fg,
+                insertcolor=fg,
+                bordercolor=border,
+            )
+            style.configure(
+                "Header.TLabel",
+                font=("Segoe UI", 14, "bold"),
+                foreground="#569cd6",
+                background=bg,
+            )
+            style.configure("Status.TLabel", foreground="#608b4e", background=bg)
         else:
-            style.theme_use("clam")
-            style.configure("Header.TLabel", font=("Segoe UI", 14, "bold"),
-                            foreground="#0066b8")
+            style.configure(
+                "Header.TLabel", font=("Segoe UI", 14, "bold"), foreground="#0066b8"
+            )
             style.configure("Status.TLabel", foreground="#008000")
 
     # ── UI Construction ──────────────────────────────────────────────
@@ -131,24 +224,27 @@ class ExplorerLensApp:
 
         # Status bar
         self._status_var = tk.StringVar(value="Ready")
-        status_bar = ttk.Label(self._root, textvariable=self._status_var,
-                               style="Status.TLabel", anchor=tk.W)
+        status_bar = ttk.Label(
+            self._root,
+            textvariable=self._status_var,
+            style="Status.TLabel",
+            anchor=tk.W,
+        )
         status_bar.pack(fill=tk.X, padx=8, pady=(0, 4))
 
     def _build_formats_tab(self, parent: ttk.Frame) -> None:
         """Build format category checkboxes."""
-        header = ttk.Label(parent, text="Supported Format Categories",
-                           style="Header.TLabel")
+        header = ttk.Label(
+            parent, text="Supported Format Categories", style="Header.TLabel"
+        )
         header.pack(anchor=tk.W, padx=12, pady=(12, 8))
 
         canvas = tk.Canvas(parent, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(parent, orient=tk.VERTICAL,
-                                  command=canvas.yview)
+        scrollbar = ttk.Scrollbar(parent, orient=tk.VERTICAL, command=canvas.yview)
         scroll_frame = ttk.Frame(canvas)
 
         scroll_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
         )
         canvas.create_window((0, 0), window=scroll_frame, anchor=tk.NW)
         canvas.configure(yscrollcommand=scrollbar.set)
@@ -172,9 +268,13 @@ class ExplorerLensApp:
             cb.grid(row=row, column=0, sticky=tk.W, padx=12, pady=2)
 
             ext_text = ", ".join(sorted(extensions))
-            lbl = ttk.Label(scroll_frame, text=ext_text,
-                            wraplength=450, foreground="#888888",
-                            font=("Segoe UI", 8))
+            lbl = ttk.Label(
+                scroll_frame,
+                text=ext_text,
+                wraplength=450,
+                foreground="#888888",
+                font=("Segoe UI", 8),
+            )
             lbl.grid(row=row, column=1, sticky=tk.W, padx=(8, 12), pady=2)
             row += 1
 
@@ -184,32 +284,37 @@ class ExplorerLensApp:
         # Buttons
         btn_frame = ttk.Frame(parent)
         btn_frame.pack(fill=tk.X, padx=12, pady=8)
-        ttk.Button(btn_frame, text="Enable All",
-                   command=self._enable_all).pack(side=tk.LEFT, padx=4)
-        ttk.Button(btn_frame, text="Disable All",
-                   command=self._disable_all).pack(side=tk.LEFT, padx=4)
-        ttk.Button(btn_frame, text="Save",
-                   command=self._save_config).pack(side=tk.RIGHT, padx=4)
+        ttk.Button(btn_frame, text="Enable All", command=self._enable_all).pack(
+            side=tk.LEFT, padx=4
+        )
+        ttk.Button(btn_frame, text="Disable All", command=self._disable_all).pack(
+            side=tk.LEFT, padx=4
+        )
+        ttk.Button(btn_frame, text="Save", command=self._save_config).pack(
+            side=tk.RIGHT, padx=4
+        )
 
     def _build_performance_tab(self, parent: ttk.Frame) -> None:
         """Build performance dashboard."""
-        header = ttk.Label(parent, text="Performance Dashboard",
-                           style="Header.TLabel")
+        header = ttk.Label(parent, text="Performance Dashboard", style="Header.TLabel")
         header.pack(anchor=tk.W, padx=12, pady=(12, 8))
 
         frame = ttk.LabelFrame(parent, text="Cache Statistics")
         frame.pack(fill=tk.X, padx=12, pady=4)
 
         self._cache_labels: dict[str, ttk.Label] = {}
-        for i, (label, key) in enumerate([
-            ("Memory items:", "mem_items"),
-            ("Memory usage:", "mem_mb"),
-            ("Disk items:", "disk_items"),
-            ("Disk usage:", "disk_mb"),
-            ("Hit rate:", "hit_rate"),
-        ]):
-            ttk.Label(frame, text=label).grid(row=i, column=0,
-                                               sticky=tk.W, padx=8, pady=2)
+        for i, (label, key) in enumerate(
+            [
+                ("Memory items:", "mem_items"),
+                ("Memory usage:", "mem_mb"),
+                ("Disk items:", "disk_items"),
+                ("Disk usage:", "disk_mb"),
+                ("Hit rate:", "hit_rate"),
+            ]
+        ):
+            ttk.Label(frame, text=label).grid(
+                row=i, column=0, sticky=tk.W, padx=8, pady=2
+            )
             val_lbl = ttk.Label(frame, text="—")
             val_lbl.grid(row=i, column=1, sticky=tk.W, padx=8, pady=2)
             self._cache_labels[key] = val_lbl
@@ -218,36 +323,42 @@ class ExplorerLensApp:
         perf_frame.pack(fill=tk.X, padx=12, pady=4)
 
         self._perf_labels: dict[str, ttk.Label] = {}
-        for i, (label, key) in enumerate([
-            ("Total decoded:", "total"),
-            ("Success:", "succeeded"),
-            ("Failed:", "failed"),
-            ("Avg time:", "avg_ms"),
-            ("Throughput:", "img_per_sec"),
-        ]):
-            ttk.Label(perf_frame, text=label).grid(row=i, column=0,
-                                                     sticky=tk.W, padx=8, pady=2)
+        for i, (label, key) in enumerate(
+            [
+                ("Total decoded:", "total"),
+                ("Success:", "succeeded"),
+                ("Failed:", "failed"),
+                ("Avg time:", "avg_ms"),
+                ("Throughput:", "img_per_sec"),
+            ]
+        ):
+            ttk.Label(perf_frame, text=label).grid(
+                row=i, column=0, sticky=tk.W, padx=8, pady=2
+            )
             val_lbl = ttk.Label(perf_frame, text="—")
             val_lbl.grid(row=i, column=1, sticky=tk.W, padx=8, pady=2)
             self._perf_labels[key] = val_lbl
 
-        ttk.Button(parent, text="Refresh Stats",
-                   command=self._refresh_stats).pack(padx=12, pady=8)
+        ttk.Button(parent, text="Refresh Stats", command=self._refresh_stats).pack(
+            padx=12, pady=8
+        )
 
-        ttk.Button(parent, text="Clear Cache",
-                   command=self._clear_cache).pack(padx=12, pady=4)
+        ttk.Button(parent, text="Clear Cache", command=self._clear_cache).pack(
+            padx=12, pady=4
+        )
 
     def _build_registration_tab(self, parent: ttk.Frame) -> None:
         """Build registration controls."""
-        header = ttk.Label(parent, text="Shell Extension Registration",
-                           style="Header.TLabel")
+        header = ttk.Label(
+            parent, text="Shell Extension Registration", style="Header.TLabel"
+        )
         header.pack(anchor=tk.W, padx=12, pady=(12, 8))
 
         info = ttk.Label(
             parent,
             text="Register ExplorerLens.py as the Windows thumbnail "
-                 "provider for enabled formats.\n"
-                 "Requires administrator privileges.",
+            "provider for enabled formats.\n"
+            "Requires administrator privileges.",
             wraplength=600,
         )
         info.pack(anchor=tk.W, padx=12, pady=4)
@@ -259,41 +370,44 @@ class ExplorerLensApp:
         btn_frame = ttk.Frame(parent)
         btn_frame.pack(fill=tk.X, padx=12, pady=8)
 
-        ttk.Button(btn_frame, text="Register (requires Admin)",
-                   command=self._register).pack(side=tk.LEFT, padx=4)
-        ttk.Button(btn_frame, text="Unregister",
-                   command=self._unregister).pack(side=tk.LEFT, padx=4)
-        ttk.Button(btn_frame, text="Run as Admin",
-                   command=self._elevate).pack(side=tk.RIGHT, padx=4)
+        ttk.Button(
+            btn_frame, text="Register (requires Admin)", command=self._register
+        ).pack(side=tk.LEFT, padx=4)
+        ttk.Button(btn_frame, text="Unregister", command=self._unregister).pack(
+            side=tk.LEFT, padx=4
+        )
+        ttk.Button(btn_frame, text="Run as Admin", command=self._elevate).pack(
+            side=tk.RIGHT, padx=4
+        )
 
         # Status list
-        self._reg_status_text = tk.Text(parent, height=15, width=70,
-                                        state=tk.DISABLED)
+        self._reg_status_text = tk.Text(parent, height=15, width=70, state=tk.DISABLED)
         if self._dark_mode:
             self._reg_status_text.configure(
-                bg="#2d2d30", fg="#d4d4d4",
-                insertbackground="#d4d4d4"
+                bg="#2d2d30", fg="#d4d4d4", insertbackground="#d4d4d4"
             )
-        self._reg_status_text.pack(fill=tk.BOTH, expand=True,
-                                   padx=12, pady=4)
+        self._reg_status_text.pack(fill=tk.BOTH, expand=True, padx=12, pady=4)
 
-        ttk.Button(parent, text="Check Status",
-                   command=self._check_registration).pack(padx=12, pady=4)
+        ttk.Button(parent, text="Check Status", command=self._check_registration).pack(
+            padx=12, pady=4
+        )
 
         # Extra tools row
         tools_frame = ttk.Frame(parent)
         tools_frame.pack(fill=tk.X, padx=12, pady=4)
-        ttk.Button(tools_frame, text="Export Diagnostics",
-                   command=self._export_diagnostics).pack(side=tk.LEFT, padx=4)
-        ttk.Button(tools_frame, text="Detect Conflicts",
-                   command=self._detect_conflicts).pack(side=tk.LEFT, padx=4)
-        ttk.Button(tools_frame, text="Flush Explorer Cache",
-                   command=self._flush_cache).pack(side=tk.LEFT, padx=4)
+        ttk.Button(
+            tools_frame, text="Export Diagnostics", command=self._export_diagnostics
+        ).pack(side=tk.LEFT, padx=4)
+        ttk.Button(
+            tools_frame, text="Detect Conflicts", command=self._detect_conflicts
+        ).pack(side=tk.LEFT, padx=4)
+        ttk.Button(
+            tools_frame, text="Flush Explorer Cache", command=self._flush_cache
+        ).pack(side=tk.LEFT, padx=4)
 
     def _build_settings_tab(self, parent: ttk.Frame) -> None:
         """Build settings controls."""
-        header = ttk.Label(parent, text="Settings",
-                           style="Header.TLabel")
+        header = ttk.Label(parent, text="Settings", style="Header.TLabel")
         header.pack(anchor=tk.W, padx=12, pady=(12, 8))
 
         frame = ttk.LabelFrame(parent, text="General")
@@ -301,59 +415,70 @@ class ExplorerLensApp:
 
         # Thumbnail size
         ttk.Label(frame, text="Thumbnail size:").grid(
-            row=0, column=0, sticky=tk.W, padx=8, pady=4)
-        self._size_var = tk.StringVar(
-            value=str(self._config.thumbnail_size))
+            row=0, column=0, sticky=tk.W, padx=8, pady=4
+        )
+        self._size_var = tk.StringVar(value=str(self._config.thumbnail_size))
         size_combo = ttk.Combobox(
-            frame, textvariable=self._size_var,
+            frame,
+            textvariable=self._size_var,
             values=["64", "128", "256", "512", "1024"],
-            width=8)
+            width=8,
+        )
         size_combo.grid(row=0, column=1, sticky=tk.W, padx=8, pady=4)
 
         # Dark mode
         ttk.Label(frame, text="Theme:").grid(
-            row=1, column=0, sticky=tk.W, padx=8, pady=4)
+            row=1, column=0, sticky=tk.W, padx=8, pady=4
+        )
         self._theme_var = tk.StringVar(value=self._config.dark_mode)
         theme_combo = ttk.Combobox(
-            frame, textvariable=self._theme_var,
-            values=["auto", "dark", "light"], width=8)
+            frame,
+            textvariable=self._theme_var,
+            values=["auto", "dark", "light"],
+            width=8,
+        )
         theme_combo.grid(row=1, column=1, sticky=tk.W, padx=8, pady=4)
 
         # Max workers
         ttk.Label(frame, text="Worker threads:").grid(
-            row=2, column=0, sticky=tk.W, padx=8, pady=4)
+            row=2, column=0, sticky=tk.W, padx=8, pady=4
+        )
         self._workers_var = tk.StringVar(
-            value=str(self._config.performance.max_workers))
-        ttk.Spinbox(frame, from_=1, to=16,
-                     textvariable=self._workers_var,
-                     width=8).grid(
-            row=2, column=1, sticky=tk.W, padx=8, pady=4)
+            value=str(self._config.performance.max_workers)
+        )
+        ttk.Spinbox(
+            frame, from_=1, to=16, textvariable=self._workers_var, width=8
+        ).grid(row=2, column=1, sticky=tk.W, padx=8, pady=4)
 
         # Log level
         ttk.Label(frame, text="Log level:").grid(
-            row=3, column=0, sticky=tk.W, padx=8, pady=4)
+            row=3, column=0, sticky=tk.W, padx=8, pady=4
+        )
         self._log_var = tk.StringVar(value=self._config.log_level)
         ttk.Combobox(
-            frame, textvariable=self._log_var,
+            frame,
+            textvariable=self._log_var,
             values=["DEBUG", "INFO", "WARNING", "ERROR"],
-            width=8).grid(row=3, column=1, sticky=tk.W, padx=8, pady=4)
+            width=8,
+        ).grid(row=3, column=1, sticky=tk.W, padx=8, pady=4)
 
         # Config import / export
         io_frame = ttk.LabelFrame(parent, text="Configuration")
         io_frame.pack(fill=tk.X, padx=12, pady=8)
 
-        ttk.Button(io_frame, text="Export Config",
-                   command=self._export_config).pack(
-            side=tk.LEFT, padx=8, pady=8)
-        ttk.Button(io_frame, text="Import Config",
-                   command=self._import_config).pack(
-            side=tk.LEFT, padx=8, pady=8)
-        ttk.Button(io_frame, text="Reset Defaults",
-                   command=self._reset_defaults).pack(
-            side=tk.LEFT, padx=8, pady=8)
+        ttk.Button(io_frame, text="Export Config", command=self._export_config).pack(
+            side=tk.LEFT, padx=8, pady=8
+        )
+        ttk.Button(io_frame, text="Import Config", command=self._import_config).pack(
+            side=tk.LEFT, padx=8, pady=8
+        )
+        ttk.Button(io_frame, text="Reset Defaults", command=self._reset_defaults).pack(
+            side=tk.LEFT, padx=8, pady=8
+        )
 
-        ttk.Button(parent, text="Save Settings",
-                   command=self._save_settings).pack(padx=12, pady=8)
+        ttk.Button(parent, text="Save Settings", command=self._save_settings).pack(
+            padx=12, pady=8
+        )
 
     # ── Event handlers ───────────────────────────────────────────────
 
@@ -395,6 +520,7 @@ class ExplorerLensApp:
             try:
                 if self._engine is None:
                     from ..engine import ThumbnailEngine
+
                     self._engine = ThumbnailEngine(self._config)
                 stats = self._engine.get_stats()
                 cache = self._engine._cache  # noqa: access private for stats
@@ -410,13 +536,19 @@ class ExplorerLensApp:
                     self._perf_labels["img_per_sec"].configure(text=f"{ips:.0f}")
 
                     self._cache_labels["mem_items"].configure(
-                        text=str(cache_stats.get("l1_items", cache_stats.get("items", "—"))))
+                        text=str(
+                            cache_stats.get("l1_items", cache_stats.get("items", "—"))
+                        )
+                    )
                     self._cache_labels["mem_mb"].configure(
-                        text=f"{cache_stats.get('l1_memory_mb', cache_stats.get('memory_mb', 0)):.1f} MB")
+                        text=f"{cache_stats.get('l1_memory_mb', cache_stats.get('memory_mb', 0)):.1f} MB"
+                    )
                     self._cache_labels["disk_items"].configure(
-                        text=str(cache_stats.get("l2_items", "—")))
+                        text=str(cache_stats.get("l2_items", "—"))
+                    )
                     self._cache_labels["disk_mb"].configure(
-                        text=f"{cache_stats.get('l2_size_mb', cache_stats.get('size_mb', 0)):.1f} MB")
+                        text=f"{cache_stats.get('l2_size_mb', cache_stats.get('size_mb', 0)):.1f} MB"
+                    )
                     hit_rate = cache_stats.get("hit_rate", 0)
                     self._cache_labels["hit_rate"].configure(text=f"{hit_rate:.1f}%")
                     self._status_var.set("Stats refreshed")
@@ -428,19 +560,22 @@ class ExplorerLensApp:
         threading.Thread(target=_do, daemon=True).start()
 
     def _clear_cache(self) -> None:
-        if messagebox.askyesno("Clear Cache",
-                               "Clear all cached thumbnails?"):
+        if messagebox.askyesno("Clear Cache", "Clear all cached thumbnails?"):
             if self._engine and self._engine._cache:
                 self._engine._cache.clear()
             self._status_var.set("Cache cleared")
 
     def _register(self) -> None:
         def _do():
-            from ..shell.com_server import register, is_admin
+            from ..shell.com_server import is_admin, register
+
             if not is_admin():
-                self._root.after(0, lambda: messagebox.showwarning(
-                    "Admin Required",
-                    "Please run as administrator to register."))
+                self._root.after(
+                    0,
+                    lambda: messagebox.showwarning(
+                        "Admin Required", "Please run as administrator to register."
+                    ),
+                )
                 return
             ok = register(self._config.get_enabled_extensions())
             msg = "Registration successful" if ok else "Registration failed"
@@ -450,11 +585,15 @@ class ExplorerLensApp:
 
     def _unregister(self) -> None:
         def _do():
-            from ..shell.com_server import unregister, is_admin
+            from ..shell.com_server import is_admin, unregister
+
             if not is_admin():
-                self._root.after(0, lambda: messagebox.showwarning(
-                    "Admin Required",
-                    "Please run as administrator to unregister."))
+                self._root.after(
+                    0,
+                    lambda: messagebox.showwarning(
+                        "Admin Required", "Please run as administrator to unregister."
+                    ),
+                )
                 return
             ok = unregister()
             msg = "Unregistration complete" if ok else "Unregistration failed"
@@ -466,14 +605,15 @@ class ExplorerLensApp:
         """Re-launch self as admin."""
         try:
             ctypes.windll.shell32.ShellExecuteW(
-                None, "runas", sys.executable,
-                f'"{sys.argv[0]}"', None, 1)
+                None, "runas", sys.executable, f'"{sys.argv[0]}"', None, 1
+            )
         except Exception as exc:
             messagebox.showerror("Elevation Failed", str(exc))
 
     def _check_registration(self) -> None:
         def _do():
             from ..shell.com_server import get_registration_status
+
             status = get_registration_status()
             lines = []
             for ext, registered in sorted(status.items()):
@@ -497,12 +637,12 @@ class ExplorerLensApp:
             is_admin = False
         if is_admin:
             self._admin_label.configure(
-                text="✓ Running as Administrator",
-                foreground="#008000")
+                text="✓ Running as Administrator", foreground="#008000"
+            )
         else:
             self._admin_label.configure(
-                text="✗ Not running as Administrator",
-                foreground="#cc0000")
+                text="✗ Not running as Administrator", foreground="#cc0000"
+            )
 
     def _export_config(self) -> None:
         path = filedialog.asksaveasfilename(
@@ -522,34 +662,45 @@ class ExplorerLensApp:
             initialfile="explorerlens-diagnostics.json",
         )
         if path:
+
             def _do():
                 from ..shell.diagnostics import export_diagnostics
+
                 out = export_diagnostics(Path(path))
-                self._root.after(0, lambda: self._status_var.set(
-                    f"Diagnostics exported to {out}"))
+                self._root.after(
+                    0, lambda: self._status_var.set(f"Diagnostics exported to {out}")
+                )
+
             threading.Thread(target=_do, daemon=True).start()
 
     def _detect_conflicts(self) -> None:
         def _do():
             from ..registry import detect_conflicts
+
             conflicts = detect_conflicts()
             if not conflicts:
                 text = "No conflicts detected — no other handlers found."
             else:
-                lines = [f"  ! {ext} → {clsid}" for ext, clsid
-                         in sorted(conflicts.items())]
-                text = f"Found {len(conflicts)} conflicting handler(s):\n" + "\n".join(lines)
+                lines = [
+                    f"  ! {ext} → {clsid}" for ext, clsid in sorted(conflicts.items())
+                ]
+                text = f"Found {len(conflicts)} conflicting handler(s):\n" + "\n".join(
+                    lines
+                )
             self._root.after(0, lambda: self._update_reg_text(text))
+
         threading.Thread(target=_do, daemon=True).start()
 
     def _flush_cache(self) -> None:
-        if messagebox.askyesno("Flush Explorer Cache",
-                               "Delete Windows thumbnail cache files?\n"
-                               "Explorer will regenerate thumbnails."):
+        if messagebox.askyesno(
+            "Flush Explorer Cache",
+            "Delete Windows thumbnail cache files?\n"
+            "Explorer will regenerate thumbnails.",
+        ):
             from ..registry import flush_thumbnail_cache
+
             ok = flush_thumbnail_cache()
-            self._status_var.set(
-                "Explorer cache flushed" if ok else "Flush failed")
+            self._status_var.set("Explorer cache flushed" if ok else "Flush failed")
 
     def _import_config(self) -> None:
         path = filedialog.askopenfilename(
@@ -598,6 +749,7 @@ class ExplorerLensApp:
             # Create a simple icon (blue square with "EL")
             icon_img = PILImage.new("RGB", (64, 64), (14, 99, 156))
             from PIL import ImageDraw, ImageFont
+
             draw = ImageDraw.Draw(icon_img)
             try:
                 font = ImageFont.truetype("segoeui.ttf", 28)
@@ -610,8 +762,7 @@ class ExplorerLensApp:
                 pystray.MenuItem("Quit", self._tray_quit),
             )
             self._tray_icon = pystray.Icon(
-                "ExplorerLens.py", icon_img,
-                "ExplorerLens.py Manager", menu
+                "ExplorerLens.py", icon_img, "ExplorerLens.py Manager", menu
             )
             threading.Thread(target=self._tray_icon.run, daemon=True).start()
         except ImportError:

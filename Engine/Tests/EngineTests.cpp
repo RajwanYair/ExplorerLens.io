@@ -892,6 +892,67 @@
 #include "../Decoders/MultiFormatBatchDecoder.h"
 #include "../Decoders/CacheFriendlyDecoder.h"
 
+// Sprint 396 headers
+// Core
+#include "../Core/ShellOverlayRenderer.h"
+#include "../Core/ShellContextMenuProvider.h"
+#include "../Core/WindowsNotificationManager.h"
+#include "../Core/FileSystemJournalReader.h"
+#include "../Core/ProcessIsolationBroker.h"
+#include "../Core/ThumbnailBatchExporter.h"
+#include "../Core/IncrementalDecodeEngine.h"
+#include "../Core/ExplorerNavigationMonitor.h"
+#include "../Core/ShellThumbnailInterceptor.h"
+#include "../Core/DecoderPoolManager.h"
+#include "../Core/PowerAwareDecodeScheduler.h"
+#include "../Core/FileTypeAssociationBroker.h"
+// Pipeline
+#include "../Pipeline/RateLimitedDecodeQueue.h"
+#include "../Pipeline/PipelineFusionOptimizer.h"
+#include "../Pipeline/ConcurrentDecodeBarrier.h"
+#include "../Pipeline/FormatSpecificPipeline.h"
+#include "../Pipeline/ThumbnailInvalidationTracker.h"
+#include "../Pipeline/PipelineTelemetrySink.h"
+#include "../Pipeline/DecodeWorkDistributor.h"
+#include "../Pipeline/SmartRetryScheduler.h"
+// GPU
+#include "../GPU/GPUVendorCapabilityMap.h"
+#include "../GPU/GPUBatchSubmitter.h"
+#include "../GPU/GPUFenceOrchestrator.h"
+#include "../GPU/ShaderPermutationManager.h"
+#include "../GPU/GPUThermalMonitor.h"
+#include "../GPU/GPUResourceLeakDetector.h"
+// Cache
+#include "../Cache/CacheResilienceManager.h"
+#include "../Cache/CacheAccessPatternAnalyzer.h"
+#include "../Cache/CacheSlabAllocator.h"
+#include "../Cache/CacheReplicationEngine.h"
+#include "../Cache/CacheContentHasher.h"
+// Memory
+#include "../Memory/PageFaultOptimizer.h"
+#include "../Memory/MemoryCompactionEngine.h"
+#include "../Memory/AllocatorBenchmark.h"
+#include "../Memory/GuardPageProtector.h"
+#include "../Memory/WorkingSetOptimizer.h"
+// AI
+#include "../AI/AutoWhiteBalanceCorrector.h"
+#include "../AI/DocumentLayoutClassifier.h"
+#include "../AI/ThumbnailComplexityRouter.h"
+#include "../AI/VisualQualityPredictor.h"
+#include "../AI/SmartThumbnailRanker.h"
+// Plugin
+#include "../Plugin/PluginRateLimiter.h"
+#include "../Plugin/PluginStatePersistence.h"
+#include "../Plugin/PluginIsolationMonitor.h"
+// Decoders
+#include "../Decoders/ClipboardImageDecoder.h"
+#include "../Decoders/ScreenshotAnalyzer.h"
+#include "../Decoders/StreamingVideoDecoder.h"
+#include "../Decoders/CompoundDocumentDecoder.h"
+// Utils
+#include "../Utils/WindowsEventLogWriter.h"
+#include "../Utils/BuildArtifactValidator.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))
@@ -3928,9 +3989,9 @@ TEST(TestMarketplaceV2_Search) {
 
 TEST(TestMarketplaceV2_SemVer) {
     using namespace ExplorerLens::Engine;
-    PluginVersion v1 = { 1, 0, 0 };
-    PluginVersion v2 = { 1, 1, 0 };
-    PluginVersion v3 = { 2, 0, 0 };
+    PluginSemVer v1 = { 1, 0, 0 };
+    PluginSemVer v2 = { 1, 1, 0 };
+    PluginSemVer v3 = { 2, 0, 0 };
     // v2 >= v1 (newer), v3 >= v1 (much newer)
     ASSERT((v2 >= v1) == true);
     ASSERT((v1 >= v3) == false);
@@ -11392,7 +11453,7 @@ TEST(TestPluginMarketplaceUnified_V2Search) {
     listing.name = L"Test Plugin";
     listing.description = L"A test plugin";
     listing.author = L"Author";
-    listing.version = PluginVersion::Parse(L"1.0.0");
+    listing.version = PluginSemVer::Parse(L"1.0.0");
     listing.category = PluginCategory::Decoder;
     marketplace.AddToCatalog(listing);
     MarketplaceFilter filter;
@@ -24333,9 +24394,9 @@ TEST(Test_S395_PluginUpdateChecker) {
     PluginUpdateChecker checker;
     PluginVersion v1{ 1, 0, 0 }, v2{ 2, 0, 0 }, minV{ 1, 0, 0 };
     auto status = checker.CheckVersion(v1, v2, minV);
-    ASSERT(status == UpdateStatus::UpdateAvailable);
+    ASSERT(status == PluginUpdateStatus::UpdateAvailable);
     auto upToDate = checker.CheckVersion(v2, v2, minV);
-    ASSERT(upToDate == UpdateStatus::UpToDate);
+    ASSERT(upToDate == PluginUpdateStatus::UpToDate);
 }
 
 TEST(Test_S395_PluginConfigMigrator) {
@@ -24359,9 +24420,9 @@ TEST(Test_S395_PluginMetricsExporter) {
 TEST(Test_S395_CrashDumpAnalyzer) {
     CrashDumpAnalyzer analyzer;
     auto cat = analyzer.ClassifyException(0xC0000005);
-    ASSERT(cat == CrashCategory::AccessViolation);
+    ASSERT(cat == CrashDumpCategory::AccessViolation);
     auto unknown = analyzer.ClassifyException(0x12345678);
-    ASSERT(unknown == CrashCategory::Unknown);
+    ASSERT(unknown == CrashDumpCategory::Unknown);
 }
 
 TEST(Test_S395_PerformanceReportGenerator) {
@@ -24378,6 +24439,10 @@ TEST(Test_S395_SystemInfoCollector) {
     SystemSnapshot snap;
     snap.cpu.logicalCores = 8;
     snap.totalRAM_MB = 16384;
+    SystemGPUInfo testGpu;
+    testGpu.name = "Test GPU";
+    testGpu.dedicatedMemoryMB = 2048;
+    snap.gpus.push_back(testGpu);
     ASSERT(!collector.IsLowEndSystem(snap));
     ASSERT(collector.RecommendedThreadCount(snap) == 4);
 }
@@ -24459,6 +24524,693 @@ TEST(Test_S395_CacheFriendlyDecoder) {
     auto tiles = decoder.GenerateTiles(256, 256, 4);
     ASSERT(!tiles.empty());
     ASSERT(decoder.TileCount(256, 256) == static_cast<uint32_t>(tiles.size()));
+}
+
+//== Sprint 396 Tests ==
+
+TEST(Test_S396_ShellOverlayRenderer) {
+    ShellOverlayRenderer renderer;
+    ASSERT(!renderer.IsInitialized());
+    OverlayConfig cfg;
+    cfg.badgeSize = 24;
+    cfg.opacity = 0.8f;
+    ASSERT(renderer.Initialize(cfg));
+    ASSERT(renderer.IsInitialized());
+    ASSERT(renderer.GetBadgeSize() == 24);
+    ASSERT(renderer.GetBadgeForFile(L"") == OverlayBadge::None);
+    ASSERT(renderer.GetBadgeForFile(L"C:\\test.png") == OverlayBadge::Cached);
+}
+
+TEST(Test_S396_ShellContextMenuProvider) {
+    ShellContextMenuProvider provider;
+    auto items = provider.GetMenuItems(L"C:\\image.jpg");
+    ASSERT(items.size() == 3);
+    ASSERT(items[0].action == ContextMenuAction::Redecode);
+    ASSERT(items[1].action == ContextMenuAction::ExportThumbnail);
+    auto empty = provider.GetMenuItems(L"");
+    ASSERT(empty.empty());
+    ASSERT(provider.ExecuteAction(ContextMenuAction::Redecode, L"C:\\test.png"));
+}
+
+TEST(Test_S396_WindowsNotificationManager) {
+    WindowsNotificationManager mgr;
+    ASSERT(!mgr.IsInitialized());
+    ASSERT(!mgr.Initialize(L""));
+    ASSERT(mgr.Initialize(L"ExplorerLens.Test"));
+    ASSERT(mgr.IsInitialized());
+    NotificationPayload payload;
+    payload.title = L"Done";
+    payload.body = L"Batch complete";
+    ASSERT(mgr.SendNotification(payload));
+    ASSERT(mgr.GetStats().totalSent == 1);
+    ASSERT(!mgr.SendNotification({ L"", L"" }));
+}
+
+TEST(Test_S396_FileSystemJournalReader) {
+    FileSystemJournalReader reader;
+    ASSERT(!reader.IsOpen());
+    ASSERT(!reader.Open(L'0'));
+    ASSERT(reader.Open(L'C'));
+    ASSERT(reader.IsOpen());
+    auto changes = reader.ReadChanges(50);
+    ASSERT(changes.empty());
+    reader.Close();
+    ASSERT(!reader.IsOpen());
+}
+
+TEST(Test_S396_ProcessIsolationBroker) {
+    ProcessIsolationBroker broker;
+    ASSERT(!broker.IsRunning());
+    BrokerConfig cfg;
+    cfg.mode = ProcessIsolationMode::OutOfProcess;
+    cfg.maxWorkers = 2;
+    ASSERT(broker.Start(cfg));
+    ASSERT(broker.IsRunning());
+    ASSERT(broker.SubmitDecode(L"C:\\photo.jpg", 256, 256));
+    ASSERT(!broker.SubmitDecode(L"", 256, 256));
+    ASSERT(!broker.SubmitDecode(L"test.jpg", 0, 256));
+    ASSERT(broker.GetStats().requestsProcessed == 1);
+    broker.Stop();
+    ASSERT(!broker.IsRunning());
+}
+
+TEST(Test_S396_ThumbnailBatchExporter) {
+    ThumbnailBatchExporter exporter;
+    ASSERT(!exporter.IsCancelled());
+    BatchExportConfig cfg;
+    cfg.outputPath = L"C:\\exports";
+    cfg.format = BatchExportFormat::PNG;
+    std::vector<std::wstring> files = { L"a.jpg", L"b.png", L"c.bmp" };
+    auto result = exporter.Export(files, cfg);
+    ASSERT(result.totalFiles == 3);
+    ASSERT(result.exported == 3);
+    BatchExportConfig badCfg;
+    auto badResult = exporter.Export(files, badCfg);
+    ASSERT(badResult.failed == 3);
+    ASSERT(exporter.ExportSingle(L"test.jpg", cfg));
+    ASSERT(!exporter.ExportSingle(L"", cfg));
+}
+
+TEST(Test_S396_IncrementalDecodeEngine) {
+    IncrementalDecodeEngine engine;
+    ASSERT(!engine.StartDecode(L"", {}));
+    IncrementalConfig cfg;
+    cfg.targetWidth = 128;
+    cfg.targetHeight = 128;
+    cfg.maxRefinements = 3;
+    ASSERT(engine.StartDecode(L"C:\\test.tif", cfg));
+    auto step = engine.RefineNext();
+    ASSERT(step.width == 128);
+    ASSERT(step.height == 128);
+}
+
+TEST(Test_S396_ExplorerNavigationMonitor) {
+    ExplorerNavigationMonitor monitor;
+    ASSERT(monitor.GetTotalNavigations() == 0);
+    ASSERT(monitor.GetHistorySize() == 0);
+    FolderNavigationEvent evt;
+    evt.folderPath = L"C:\\Users\\Pictures";
+    evt.fileCount = 42;
+    monitor.RecordNavigation(evt);
+    ASSERT(monitor.GetTotalNavigations() == 1);
+    ASSERT(monitor.GetHistorySize() == 1);
+    auto suggestions = monitor.GetPrefetchSuggestions(3);
+    ASSERT(!suggestions.empty());
+    monitor.ClearHistory();
+    ASSERT(monitor.GetHistorySize() == 0);
+}
+
+TEST(Test_S396_ShellThumbnailInterceptor) {
+    ShellThumbnailInterceptor interceptor;
+    InterceptionRule rule;
+    rule.extensionPattern = L".jpg";
+    rule.mode = InterceptionMode::Enhance;
+    interceptor.AddRule(rule);
+    auto result = interceptor.ProcessRequest(L"photo.jpg", 256);
+    ASSERT(result.intercepted);
+    ASSERT(result.enhancedWidth == 256);
+    auto miss = interceptor.ProcessRequest(L"data.csv", 256);
+    ASSERT(!miss.intercepted);
+}
+
+TEST(Test_S396_DecoderPoolManager) {
+    DecoderPoolManager pool(4);
+    uint32_t id1 = pool.AcquireDecoder("jpeg");
+    ASSERT(id1 > 0);
+    uint32_t id2 = pool.AcquireDecoder("png");
+    ASSERT(id2 > 0);
+    ASSERT(id1 != id2);
+    auto metrics = pool.GetMetrics();
+    ASSERT(metrics.totalDecoders == 2);
+    ASSERT(metrics.totalAcquisitions == 2);
+    pool.ReleaseDecoder(id1);
+    uint32_t id3 = pool.AcquireDecoder("jpeg");
+    ASSERT(id3 == id1);
+}
+
+TEST(Test_S396_PowerAwareDecodeScheduler) {
+    PowerAwareDecodeScheduler scheduler;
+    auto policy = scheduler.GetCurrentPolicy();
+    ASSERT(policy.enableGPUDecode);
+    PowerStatus battLow;
+    battLow.state = PowerState::BatteryLow;
+    battLow.batteryPercent = 15;
+    scheduler.UpdatePowerStatus(battLow);
+    ASSERT(scheduler.ShouldThrottle());
+    PowerStatus ac;
+    ac.state = PowerState::ACPower;
+    ac.batteryPercent = 100;
+    scheduler.UpdatePowerStatus(ac);
+    ASSERT(!scheduler.ShouldThrottle());
+}
+
+TEST(Test_S396_FileTypeAssociationBroker) {
+    FileTypeAssociationBroker broker;
+    ASSERT(broker.GetState(L".jpg") == AssociationState::NotRegistered);
+    broker.RegisterExtension(L".jpg", L"ExplorerLens.JPEG");
+    ASSERT(broker.GetState(L".jpg") == AssociationState::Registered);
+    broker.RegisterExtension(L".png", L"ExplorerLens.PNG");
+    auto all = broker.GetAllAssociations();
+    ASSERT(all.size() == 2);
+}
+
+TEST(Test_S396_RateLimitedDecodeQueue) {
+    RateLimitedDecodeQueue queue(4, 100);
+    DecodeWorkItem item;
+    item.filePath = L"test.jpg";
+    item.priority = RateLimitPriority::Normal;
+    ASSERT(queue.Enqueue(item));
+    ASSERT(queue.Enqueue(item));
+    ASSERT(queue.Enqueue(item));
+    ASSERT(queue.Enqueue(item));
+    ASSERT(!queue.Enqueue(item));
+    auto stats = queue.GetStats();
+    ASSERT(stats.totalEnqueued == 4);
+    ASSERT(stats.totalDropped == 1);
+    ASSERT(stats.maxDepthReached == 4);
+    DecodeWorkItem out;
+    ASSERT(queue.Dequeue(out));
+    ASSERT(out.filePath == L"test.jpg");
+    ASSERT(queue.GetStats().totalDequeued == 1);
+}
+
+TEST(Test_S396_PipelineFusionOptimizer) {
+    PipelineFusionOptimizer optimizer;
+    optimizer.AddStage(PipelineStageType::Decode);
+    optimizer.AddStage(PipelineStageType::ColorConvert);
+    optimizer.AddStage(PipelineStageType::Resize);
+    ASSERT(optimizer.GetStageCount() == 3);
+    auto candidates = optimizer.AnalyzeFusionOpportunities();
+    ASSERT(candidates.size() == 2);
+    auto result = optimizer.ApplyFusions();
+    ASSERT(result.originalStageCount == 3);
+    ASSERT(result.fusedStageCount <= 3);
+    ASSERT(optimizer.GetTotalFusions() >= 0);
+}
+
+TEST(Test_S396_ConcurrentDecodeBarrier) {
+    ConcurrentDecodeBarrier barrier(2);
+    barrier.Arrive();
+    barrier.Arrive();
+    ASSERT(barrier.Wait(100));
+    barrier.Reset(1);
+    barrier.Arrive();
+    ASSERT(barrier.Wait(100));
+    auto metrics = barrier.GetMetrics();
+    ASSERT(metrics.totalWaitsCompleted >= 1);
+}
+
+TEST(Test_S396_FormatSpecificPipeline) {
+    FormatSpecificPipeline pipeline;
+    ASSERT(pipeline.GetRegisteredFormatCount() > 0);
+    ASSERT(pipeline.HasConfig(".jpg"));
+    auto jpgConfig = pipeline.GetConfig(".jpg");
+    ASSERT(jpgConfig.category == PipelineFormatCategory::RasterImage);
+    pipeline.RegisterConfig(".custom", {});
+    ASSERT(pipeline.HasConfig(".custom"));
+}
+
+TEST(Test_S396_ThumbnailInvalidationTracker) {
+    ThumbnailInvalidationTracker tracker;
+    tracker.Track(L"C:\\photo.jpg", 12345);
+    ASSERT(tracker.IsValid(L"C:\\photo.jpg", 12345));
+    ASSERT(!tracker.IsValid(L"C:\\photo.jpg", 99999));
+    ASSERT(!tracker.IsValid(L"C:\\missing.jpg", 0));
+    tracker.Invalidate(L"C:\\photo.jpg", InvalidationReason::FileModified);
+    ASSERT(!tracker.IsValid(L"C:\\photo.jpg", 12345));
+    tracker.Refresh(L"C:\\photo.jpg", 54321);
+    ASSERT(tracker.IsValid(L"C:\\photo.jpg", 54321));
+}
+
+TEST(Test_S396_PipelineTelemetrySink) {
+    PipelineTelemetrySink sink(SinkTelemetryLevel::Standard);
+    SinkTelemetryEvent evt;
+    evt.stageName = "decode";
+    evt.eventType = "complete";
+    evt.durationMs = 5.0;
+    evt.success = true;
+    sink.RecordEvent(evt);
+    evt.success = false;
+    evt.durationMs = 15.0;
+    sink.RecordEvent(evt);
+    auto summary = sink.GetSummary();
+    ASSERT(summary.totalEvents == 2);
+    ASSERT(summary.successCount == 1);
+    ASSERT(summary.failureCount == 1);
+    ASSERT(summary.maxDurationMs == 15.0);
+}
+
+TEST(Test_S396_DecodeWorkDistributor) {
+    DecodeWorkDistributor dist;
+    dist.SetGPUAvailable(false);
+    auto target = dist.SelectTarget(L"test.jpg", 1024);
+    ASSERT(target == ComputeTarget::CPUMulti);
+    dist.SetGPUAvailable(true);
+    dist.SetGPUThreshold(1000);
+    auto gpuTarget = dist.SelectTarget(L"big.raw", 5000);
+    ASSERT(gpuTarget == ComputeTarget::GPUDecode);
+    std::vector<WorkUnit> units(3);
+    units[0].target = ComputeTarget::CPUMulti;
+    units[1].target = ComputeTarget::GPUDecode;
+    units[2].target = ComputeTarget::Hybrid;
+    auto plan = dist.PlanDistribution(units);
+    ASSERT(plan.cpuWorkUnits == 1);
+    ASSERT(plan.gpuWorkUnits == 1);
+    ASSERT(plan.hybridWorkUnits == 1);
+}
+
+TEST(Test_S396_SmartRetryScheduler) {
+    SmartRetryScheduler scheduler;
+    ASSERT(scheduler.ShouldRetry(L"test.jpg", FailureCategory::Transient));
+    ASSERT(!scheduler.ShouldRetry(L"bad.bin", FailureCategory::Corrupt));
+    ASSERT(!scheduler.ShouldRetry(L"weird.xyz", FailureCategory::Unsupported));
+    auto stats = scheduler.GetStats();
+    ASSERT(stats.permanentFailures == 2);
+    ASSERT(stats.totalRetries >= 1);
+}
+
+TEST(Test_S396_GPUVendorCapabilityMap) {
+    GPUVendorCapabilityMap capMap;
+    ASSERT(!capMap.HasAnyGPU());
+    GPUDeviceProfile nv;
+    nv.vendor = GPUVendorId::NVIDIA;
+    nv.deviceName = "RTX 4090";
+    nv.capabilities = GPUCapability::HardwareDecode | GPUCapability::ComputeShader | GPUCapability::TensorOps;
+    capMap.RegisterDevice(nv);
+    ASSERT(capMap.HasAnyGPU());
+    ASSERT(capMap.GetDeviceCount() == 1);
+    ASSERT(capMap.HasCapability(GPUCapability::HardwareDecode));
+    ASSERT(capMap.HasCapability(GPUCapability::TensorOps));
+    ASSERT(!capMap.HasCapability(GPUCapability::RayTracing));
+    auto primary = capMap.GetPrimaryDevice();
+    ASSERT(primary.vendor == GPUVendorId::NVIDIA);
+    auto intelDevs = capMap.GetDevicesByVendor(GPUVendorId::Intel);
+    ASSERT(intelDevs.empty());
+}
+
+TEST(Test_S396_GPUBatchSubmitter) {
+    GPUBatchSubmitter submitter(3);
+    GPUCommand cmd;
+    cmd.type = GPUCommandType::Decode;
+    cmd.width = 256;
+    cmd.height = 256;
+    submitter.AddCommand(cmd);
+    submitter.AddCommand(cmd);
+    ASSERT(!submitter.ShouldFlush());
+    submitter.AddCommand(cmd);
+    ASSERT(submitter.ShouldFlush());
+    auto result = submitter.FlushBatch();
+    ASSERT(result.submitted);
+    ASSERT(result.commandCount == 3);
+    ASSERT(result.batchId == 1);
+    auto metrics = submitter.GetMetrics();
+    ASSERT(metrics.totalBatches == 1);
+    ASSERT(metrics.totalCommands == 3);
+}
+
+TEST(Test_S396_GPUFenceOrchestrator) {
+    GPUFenceOrchestrator orch;
+    uint64_t f1 = orch.CreateFence();
+    uint64_t f2 = orch.CreateFence();
+    ASSERT(f1 != f2);
+    ASSERT(orch.Signal(f1));
+    ASSERT(!orch.Signal(f1));
+    auto metrics = orch.GetMetrics();
+    ASSERT(metrics.totalFencesCreated == 2);
+    ASSERT(metrics.totalFencesSignaled == 1);
+    ASSERT(metrics.activeFences == 2);
+}
+
+TEST(Test_S396_ShaderPermutationManager) {
+    ShaderPermutationManager mgr;
+    ShaderPermutation perm;
+    perm.shaderName = "ThumbnailResize";
+    perm.requiredFeatures = ShaderPermFeature::HalfFloat;
+    perm.entryPoint = "main";
+    uint32_t id = mgr.RegisterPermutation(perm);
+    ASSERT(id > 0);
+    auto found = mgr.FindBestPermutation("ThumbnailResize",
+        ShaderPermFeature::HalfFloat | ShaderPermFeature::WaveOps);
+    ASSERT(found != nullptr);
+    ASSERT(found->shaderName == "ThumbnailResize");
+    auto miss = mgr.FindBestPermutation("NonExistent", ShaderPermFeature::None);
+    ASSERT(miss == nullptr);
+}
+
+TEST(Test_S396_GPUThermalMonitor) {
+    GPUThermalMonitor monitor;
+    ThermalReading cool;
+    cool.temperatureC = 45.0f;
+    auto zone = monitor.RecordReading(cool);
+    ASSERT(zone == ThermalZone::Cool);
+    ASSERT(!monitor.IsThrottling());
+    ThermalReading hot;
+    hot.temperatureC = 85.0f;
+    zone = monitor.RecordReading(hot);
+    ASSERT(zone >= ThermalZone::Hot);
+    ASSERT(monitor.IsThrottling());
+    auto metrics = monitor.GetMetrics();
+    ASSERT(metrics.readingsCount == 2);
+    ASSERT(metrics.peakTempC == 85.0f);
+}
+
+TEST(Test_S396_GPUResourceLeakDetector) {
+    GPUResourceLeakDetector detector;
+    uint64_t tex = detector.TrackAllocation(LeakDetectorResourceType::Texture2D, 1024 * 1024, "decoder");
+    uint64_t buf = detector.TrackAllocation(LeakDetectorResourceType::Buffer, 4096, "upload");
+    ASSERT(tex > 0 && buf > 0);
+    ASSERT(detector.TrackRelease(tex));
+    auto report = detector.GenerateReport();
+    ASSERT(report.totalAllocations == 2);
+    ASSERT(report.totalReleases == 1);
+    ASSERT(report.leakedResources == 1);
+    ASSERT(!report.leakedItems.empty());
+}
+
+TEST(Test_S396_CacheResilienceManager) {
+    CacheResilienceManager resilience;
+    auto report = resilience.RunHealthCheck();
+    ASSERT(report.status == CacheHealthStatus::Healthy);
+    ASSERT(resilience.RepairEntry(42));
+    auto report2 = resilience.RunHealthCheck();
+    ASSERT(report2.repairedEntries == 1);
+}
+
+TEST(Test_S396_CacheAccessPatternAnalyzer) {
+    CacheAccessPatternAnalyzer analyzer(100);
+    for (int i = 0; i < 20; i++) {
+        analyzer.RecordAccess(L"key_" + std::to_wstring(i), i % 3 == 0);
+    }
+    auto analysis = analyzer.Analyze();
+    ASSERT(analysis.totalAccesses == 20);
+    ASSERT(analysis.hitRate > 0.0f);
+    ASSERT(analysis.hitRate < 1.0f);
+}
+
+TEST(Test_S396_CacheSlabAllocator) {
+    CacheSlabAllocator alloc;
+    ASSERT(alloc.SelectSizeClass(32) == SlabSizeClass::Tiny);
+    ASSERT(alloc.SelectSizeClass(128) == SlabSizeClass::Small);
+    ASSERT(alloc.SelectSizeClass(1024) == SlabSizeClass::Medium);
+    ASSERT(alloc.SelectSizeClass(50000) == SlabSizeClass::Large);
+    ASSERT(alloc.Allocate(64));
+    ASSERT(alloc.Allocate(256));
+    auto metrics = alloc.GetMetrics();
+    ASSERT(metrics.totalAllocations == 2);
+    alloc.Deallocate(64);
+    auto metrics2 = alloc.GetMetrics();
+    ASSERT(metrics2.totalDeallocations == 1);
+}
+
+TEST(Test_S396_CacheReplicationEngine) {
+    CacheReplicationEngine repl(ReplicationPolicy::Asynchronous);
+    ASSERT(repl.Replicate(L"thumb_001", ReplicationTier::L1_Memory, ReplicationTier::L2_SSD, 4096));
+    ASSERT(repl.IsReplicated(L"thumb_001", ReplicationTier::L2_SSD));
+    ASSERT(!repl.IsReplicated(L"thumb_001", ReplicationTier::L3_HDD));
+    ASSERT(!repl.IsReplicated(L"missing", ReplicationTier::L2_SSD));
+    auto metrics = repl.GetMetrics();
+    ASSERT(metrics.totalReplications == 1);
+    ASSERT(metrics.successfulReplications == 1);
+    ASSERT(metrics.bytesReplicated == 4096);
+}
+
+TEST(Test_S396_CacheContentHasher) {
+    CacheContentHasher hasher(ContentHashAlgo::FNV1a);
+    std::vector<uint8_t> data = { 0x48, 0x65, 0x6C, 0x6C, 0x6F };
+    auto hash1 = hasher.ComputeHash(data);
+    auto hash2 = hasher.ComputeHash(data);
+    ASSERT(hash1 == hash2);
+    ASSERT(hash1.contentSize == 5);
+    std::vector<uint8_t> other = { 0x57, 0x6F, 0x72, 0x6C, 0x64 };
+    auto hash3 = hasher.ComputeHash(other);
+    ASSERT(hash1 != hash3);
+    ASSERT(hasher.VerifyHash(data.data(), data.size(), hash1));
+    auto strHash = hasher.ComputeStringHash("test");
+    ASSERT(strHash.contentSize == 4);
+}
+
+TEST(Test_S396_PageFaultOptimizer) {
+    PageFaultOptimizer optimizer(PageFaultStrategy::PreTouch);
+    PageFaultRecord soft;
+    soft.wasSoftFault = true;
+    soft.latencyUs = 1.5;
+    optimizer.RecordFault(soft);
+    PageFaultRecord hard;
+    hard.wasSoftFault = false;
+    hard.latencyUs = 50.0;
+    optimizer.RecordFault(hard);
+    uint64_t pages = optimizer.PreTouchRegion(0x10000, 16384);
+    ASSERT(pages == 4);
+    auto metrics = optimizer.GetMetrics();
+    ASSERT(metrics.softFaults == 1);
+    ASSERT(metrics.hardFaults == 1);
+    ASSERT(metrics.preTouchedPages == 4);
+}
+
+TEST(Test_S396_MemoryCompactionEngine) {
+    MemoryCompactionEngine compactor;
+    compactor.UpdateFragmentation(0.4f, 8);
+    auto info = compactor.GetFragmentationInfo();
+    ASSERT(info.fragmentationRatio > 0.0f);
+    auto result = compactor.RunCompaction(EngineCompactionTrigger::Manual);
+    ASSERT(result.blocksConsolidated > 0);
+    ASSERT(result.fragmentationAfter < result.fragmentationBefore);
+}
+
+TEST(Test_S396_AllocatorBenchmark) {
+    AllocatorBenchmark bench;
+    BenchmarkConfig cfg;
+    cfg.iterations = 100;
+    cfg.allocationSize = 64;
+    cfg.pattern = BenchmarkPattern::SingleSize;
+    auto result = bench.RunBenchmark(AllocatorType::SystemDefault, cfg);
+    ASSERT(result.operationsCompleted == 100);
+    ASSERT(result.opsPerSecond > 0.0);
+    ASSERT(result.totalTimeMs > 0.0);
+    ASSERT(result.peakMemoryBytes == 6400);
+    auto results = bench.GetAllResults();
+    ASSERT(results.size() == 1);
+}
+
+TEST(Test_S396_GuardPageProtector) {
+    GuardPageProtector protector(GuardPageMode::Both);
+    uint64_t id1 = protector.ProtectRegion(0x10000, 4096, "test_buffer");
+    uint64_t id2 = protector.ProtectRegion(0x20000, 8192, "decode_buf");
+    ASSERT(id1 > 0 && id2 > 0);
+    auto metrics = protector.GetMetrics();
+    ASSERT(metrics.totalProtectedRegions == 2);
+    ASSERT(metrics.activeProtectedRegions == 2);
+    ASSERT(metrics.guardPagesAllocated == 4);
+    ASSERT(protector.UnprotectRegion(id1));
+    ASSERT(!protector.UnprotectRegion(id1));
+    auto metrics2 = protector.GetMetrics();
+    ASSERT(metrics2.activeProtectedRegions == 1);
+}
+
+TEST(Test_S396_WorkingSetOptimizer) {
+    WorkingSetOptimizer wso;
+    WorkingSetSnapshot snap;
+    snap.currentSizeBytes = 100 * 1024 * 1024;
+    snap.peakSizeBytes = 150 * 1024 * 1024;
+    wso.RecordSnapshot(snap);
+    ASSERT(wso.ShouldTrim(200 * 1024 * 1024, 150 * 1024 * 1024));
+    ASSERT(!wso.ShouldTrim(100 * 1024 * 1024, 150 * 1024 * 1024));
+    uint64_t trimAmt = wso.CalculateTrimAmount(200 * 1024 * 1024, 150 * 1024 * 1024);
+    ASSERT(trimAmt == 50 * 1024 * 1024);
+    auto metrics = wso.GetMetrics();
+    ASSERT(metrics.snapshotCount == 1);
+    ASSERT(metrics.peakWorkingSetMB > 100.0);
+}
+
+TEST(Test_S396_AutoWhiteBalanceCorrector) {
+    AutoWhiteBalanceCorrector corrector(WhiteBalanceAlgorithm::GrayWorld);
+    ASSERT(corrector.GetAlgorithm() == WhiteBalanceAlgorithm::GrayWorld);
+    std::vector<uint8_t> rgb(12, 128);
+    auto result = corrector.Analyze(rgb.data(), 2, 2);
+    ASSERT(result.correctionApplied);
+    ASSERT(result.confidenceScore > 0.0f);
+    ASSERT(corrector.GetTotalCorrected() == 1);
+    auto noData = corrector.Analyze(nullptr, 0, 0);
+    ASSERT(!noData.correctionApplied);
+}
+
+TEST(Test_S396_DocumentLayoutClassifier) {
+    DocumentLayoutClassifier classifier;
+    std::vector<uint8_t> pixels(100 * 100, 200);
+    auto result = classifier.Classify(pixels.data(), 100, 100);
+    ASSERT(result.primaryLayout != DocumentLayout::Unknown);
+    auto null_result = classifier.Classify(nullptr, 0, 0);
+    ASSERT(null_result.primaryLayout == DocumentLayout::Unknown);
+}
+
+TEST(Test_S396_ThumbnailComplexityRouter) {
+    ThumbnailComplexityRouter router;
+    auto trivial = router.EstimateComplexity(1024, 100, 100, 8);
+    ASSERT(trivial.tier == ComplexityTier::Trivial);
+    auto complex = router.EstimateComplexity(50 * 1024 * 1024ULL, 20000, 15000, 16);
+    ASSERT(complex.tier >= ComplexityTier::Complex);
+    auto routing = router.Route(complex);
+    ASSERT(routing.selectedTier != DecodeTier::FastPath);
+}
+
+TEST(Test_S396_VisualQualityPredictor) {
+    VisualQualityPredictor predictor;
+    auto jpgPred = predictor.Predict(".jpg", 100000, 1920, 1080);
+    ASSERT(jpgPred.confidenceScore > 0.0f);
+    ASSERT(jpgPred.estimatedSSIM > 0.0f);
+    auto unknownPred = predictor.Predict(".xyz", 1024, 64, 64);
+    ASSERT(unknownPred.confidenceScore < jpgPred.confidenceScore);
+    auto hugePred = predictor.Predict(".tif", 500000000, 30000, 20000);
+    ASSERT(hugePred.suggestedThumbnailSize >= 256);
+}
+
+TEST(Test_S396_SmartThumbnailRanker) {
+    SmartThumbnailRanker ranker;
+    ThumbnailCandidate c1;
+    c1.sharpnessScore = 0.9f;
+    c1.colorfulnessScore = 0.7f;
+    c1.contrastScore = 0.8f;
+    c1.compositionScore = 0.6f;
+    ranker.AddCandidate(c1);
+    ThumbnailCandidate c2;
+    c2.sharpnessScore = 0.3f;
+    c2.colorfulnessScore = 0.2f;
+    c2.contrastScore = 0.4f;
+    c2.compositionScore = 0.1f;
+    ranker.AddCandidate(c2);
+    auto best = ranker.GetBestCandidate();
+    ASSERT(best != nullptr);
+    ASSERT(best->overallScore > c2.overallScore || best->sharpnessScore >= c2.sharpnessScore);
+    ASSERT(ranker.GetCandidateCount() == 2);
+}
+
+TEST(Test_S396_PluginRateLimiter) {
+    PluginRateLimiter limiter;
+    limiter.ConfigurePlugin("plugin_a", 10, 3);
+    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Allowed);
+    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Allowed);
+    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Allowed);
+    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Throttled);
+    limiter.RefillTokens("plugin_a");
+    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Allowed);
+    ASSERT(limiter.CheckLimit("unknown_plugin") == RateLimitResult::Allowed);
+}
+
+TEST(Test_S396_PluginStatePersistence) {
+    PluginStatePersistence persistence;
+    persistence.SetState("pluginA", "theme", "dark");
+    persistence.SetState("pluginA", "lang", "en");
+    ASSERT(persistence.GetState("pluginA", "theme") == "dark");
+    ASSERT(persistence.GetState("pluginA", "lang") == "en");
+    ASSERT(persistence.GetState("pluginA", "missing", "default") == "default");
+    ASSERT(persistence.GetState("noPlugin", "key", "none") == "none");
+}
+
+TEST(Test_S396_PluginIsolationMonitor) {
+    PluginIsolationMonitor monitor;
+    monitor.RegisterPlugin("decoder_plugin");
+    monitor.UpdateStatus("decoder_plugin", 50 * 1024 * 1024, 5.0f, 20);
+    auto status = monitor.GetStatus("decoder_plugin");
+    ASSERT(status.state == QuarantineState::Active);
+    ASSERT(status.memoryUsageBytes == 50 * 1024 * 1024);
+    monitor.UpdateStatus("decoder_plugin", 300 * 1024 * 1024, 30.0f, 500);
+    auto metrics = monitor.GetMetrics();
+    ASSERT(metrics.totalViolations > 0 || metrics.activePlugins == 1);
+}
+
+TEST(Test_S396_ClipboardImageDecoder) {
+    ClipboardImageDecoder decoder;
+    uint8_t bmpHeader[] = { 'B', 'M', 0,0,0,0, 0,0, 0,0, 54,0,0,0,
+                           40,0,0,0, 2,0,0,0, 2,0,0,0 };
+    auto info = decoder.Probe(bmpHeader, sizeof(bmpHeader));
+    ASSERT(info.format == ClipboardImageFormat::Dib);
+    ASSERT(info.width == 2);
+    ASSERT(info.height == 2);
+    auto nullInfo = decoder.Probe(nullptr, 0);
+    ASSERT(nullInfo.format == ClipboardImageFormat::Unknown);
+}
+
+TEST(Test_S396_ScreenshotAnalyzer) {
+    ScreenshotAnalyzer analyzer;
+    std::vector<uint8_t> pixels(200 * 200 * 3, 180);
+    auto analysis = analyzer.Analyze(pixels.data(), 200, 200);
+    ASSERT(analysis.uniformityScore >= 0.0f);
+    auto nullAnalysis = analyzer.Analyze(nullptr, 0, 0);
+    ASSERT(nullAnalysis.type == ScreenshotType::Unknown);
+}
+
+TEST(Test_S396_StreamingVideoDecoder) {
+    StreamingVideoDecoder decoder;
+    StreamInfo info;
+    info.url = L"C:\\video.mp4";
+    info.protocol = VideoStreamProtocol::Local;
+    info.bufferPercent = 100.0f;
+    info.totalBytes = 10000;
+    info.downloadedBytes = 10000;
+    decoder.SetStreamInfo(info);
+    ASSERT(decoder.HasSufficientBuffer());
+    StreamInfo lowBuf;
+    lowBuf.bufferPercent = 1.0f;
+    decoder.SetStreamInfo(lowBuf);
+    ASSERT(!decoder.HasSufficientBuffer());
+}
+
+TEST(Test_S396_CompoundDocumentDecoder) {
+    CompoundDocumentDecoder decoder;
+    uint8_t cfbfMagic[] = { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
+    std::vector<uint8_t> data(512, 0);
+    memcpy(data.data(), cfbfMagic, 8);
+    data[30] = 9;  // sectorSize = 512
+    data[32] = 6;  // miniSectorSize = 64
+    auto info = decoder.Probe(data.data(), data.size());
+    ASSERT(info.hasSummaryInfo);
+    ASSERT(info.fileSize == 512);
+    auto nullInfo = decoder.Probe(nullptr, 0);
+    ASSERT(!nullInfo.hasSummaryInfo);
+}
+
+TEST(Test_S396_WindowsEventLogWriter) {
+    WindowsEventLogWriter writer;
+    EventLogEntry entry;
+    entry.eventId = 1001;
+    entry.severity = EventSeverity::Error;
+    entry.message = L"Test error event";
+    ASSERT(writer.WriteEvent(entry));
+    EventLogEntry infoEvt;
+    infoEvt.severity = EventSeverity::Information;
+    infoEvt.message = L"Info event";
+    ASSERT(!writer.WriteEvent(infoEvt));
+    auto metrics = writer.GetMetrics();
+    ASSERT(metrics.totalEventsWritten == 1);
+    ASSERT(metrics.errorEvents == 1);
+}
+
+TEST(Test_S396_BuildArtifactValidator) {
+    BuildArtifactValidator validator(Architecture::x64);
+    validator.AddExpectedArtifact(L"build\\bin\\LENSShell.dll", BuildArtifactType::DLL);
+    validator.AddExpectedArtifact(L"build\\lib\\Engine.lib", BuildArtifactType::LIB);
+    auto result = validator.Validate();
+    ASSERT(result.totalArtifacts == 2);
 }
 
 int main() {
@@ -28494,6 +29246,69 @@ int main() {
     RUN_TEST(Test_S395_EfficientResizeDecoder);
     RUN_TEST(Test_S395_MultiFormatBatchDecoder);
     RUN_TEST(Test_S395_CacheFriendlyDecoder);
+
+    // Sprint 396 tests
+    std::wcout << std::endl;
+    std::wcout << L"Sprint 396 Tests..." << std::endl;
+    // Core
+    RUN_TEST(Test_S396_ShellOverlayRenderer);
+    RUN_TEST(Test_S396_ShellContextMenuProvider);
+    RUN_TEST(Test_S396_WindowsNotificationManager);
+    RUN_TEST(Test_S396_FileSystemJournalReader);
+    RUN_TEST(Test_S396_ProcessIsolationBroker);
+    RUN_TEST(Test_S396_ThumbnailBatchExporter);
+    RUN_TEST(Test_S396_IncrementalDecodeEngine);
+    RUN_TEST(Test_S396_ExplorerNavigationMonitor);
+    RUN_TEST(Test_S396_ShellThumbnailInterceptor);
+    RUN_TEST(Test_S396_DecoderPoolManager);
+    RUN_TEST(Test_S396_PowerAwareDecodeScheduler);
+    RUN_TEST(Test_S396_FileTypeAssociationBroker);
+    // Pipeline
+    RUN_TEST(Test_S396_RateLimitedDecodeQueue);
+    RUN_TEST(Test_S396_PipelineFusionOptimizer);
+    RUN_TEST(Test_S396_ConcurrentDecodeBarrier);
+    RUN_TEST(Test_S396_FormatSpecificPipeline);
+    RUN_TEST(Test_S396_ThumbnailInvalidationTracker);
+    RUN_TEST(Test_S396_PipelineTelemetrySink);
+    RUN_TEST(Test_S396_DecodeWorkDistributor);
+    RUN_TEST(Test_S396_SmartRetryScheduler);
+    // GPU
+    RUN_TEST(Test_S396_GPUVendorCapabilityMap);
+    RUN_TEST(Test_S396_GPUBatchSubmitter);
+    RUN_TEST(Test_S396_GPUFenceOrchestrator);
+    RUN_TEST(Test_S396_ShaderPermutationManager);
+    RUN_TEST(Test_S396_GPUThermalMonitor);
+    RUN_TEST(Test_S396_GPUResourceLeakDetector);
+    // Cache
+    RUN_TEST(Test_S396_CacheResilienceManager);
+    RUN_TEST(Test_S396_CacheAccessPatternAnalyzer);
+    RUN_TEST(Test_S396_CacheSlabAllocator);
+    RUN_TEST(Test_S396_CacheReplicationEngine);
+    RUN_TEST(Test_S396_CacheContentHasher);
+    // Memory
+    RUN_TEST(Test_S396_PageFaultOptimizer);
+    RUN_TEST(Test_S396_MemoryCompactionEngine);
+    RUN_TEST(Test_S396_AllocatorBenchmark);
+    RUN_TEST(Test_S396_GuardPageProtector);
+    RUN_TEST(Test_S396_WorkingSetOptimizer);
+    // AI
+    RUN_TEST(Test_S396_AutoWhiteBalanceCorrector);
+    RUN_TEST(Test_S396_DocumentLayoutClassifier);
+    RUN_TEST(Test_S396_ThumbnailComplexityRouter);
+    RUN_TEST(Test_S396_VisualQualityPredictor);
+    RUN_TEST(Test_S396_SmartThumbnailRanker);
+    // Plugin
+    RUN_TEST(Test_S396_PluginRateLimiter);
+    RUN_TEST(Test_S396_PluginStatePersistence);
+    RUN_TEST(Test_S396_PluginIsolationMonitor);
+    // Decoders
+    RUN_TEST(Test_S396_ClipboardImageDecoder);
+    RUN_TEST(Test_S396_ScreenshotAnalyzer);
+    RUN_TEST(Test_S396_StreamingVideoDecoder);
+    RUN_TEST(Test_S396_CompoundDocumentDecoder);
+    // Utils
+    RUN_TEST(Test_S396_WindowsEventLogWriter);
+    RUN_TEST(Test_S396_BuildArtifactValidator);
 
     std::wcout << std::endl;
 

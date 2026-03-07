@@ -527,6 +527,87 @@ public:
 	}
 
 	/////////////////////////
+	// Get handler status scanning ALL sub-extensions for multi-extension types.
+	// Returns HANDLER_ExplorerLens if we own the primary key, HANDLER_THIRD_PARTY
+	// or HANDLER_NATIVE if any sub-extension has a competitor, HANDLER_NONE otherwise.
+	HandlerStatus GetGroupHandlerStatus(int LENSTYPE) {
+		// Quick check: if ExplorerLens owns this type, report immediately
+		HandlerStatus primary = GetHandlerStatus(LENSTYPE, GetExtension(LENSTYPE));
+		if (primary == HANDLER_ExplorerLens)
+			return HANDLER_ExplorerLens;
+
+		// Extension lists for multi-extension types
+		static const LPCTSTR s_videoExts[] = {
+			_T(".MP4"), _T(".AVI"), _T(".MKV"), _T(".MOV"), _T(".WMV"),
+			_T(".FLV"), _T(".WEBM"), _T(".M4V"), _T(".MPG"), _T(".MPEG"),
+			_T(".ASF"), _T(".M1V"), _T(".M2V"), _T(".TS"), _T(".M2TS"),
+			_T(".MTS"), _T(".M2T"), _T(".MP4V"), _T(".3G2"), _T(".3GP"),
+			_T(".3GP2"), _T(".3GPP"), _T(".MK3D"), _T(".F4V"), _T(".OGM"),
+			_T(".OGV"), _T(".RM"), _T(".RMVB"), _T(".DV"), _T(".MXF"),
+			_T(".IVF"), _T(".EVO"), _T(".264"), _T(".VIDEO") };
+		static const LPCTSTR s_audioExts[] = {
+			_T(".MP3"), _T(".FLAC"), _T(".WAV"), _T(".OGG"), _T(".M4A"),
+			_T(".WMA"), _T(".AAC"), _T(".OPUS"), _T(".APE"), _T(".MKA"),
+			_T(".MPC"), _T(".TAK"), _T(".WV") };
+
+		const LPCTSTR* exts = nullptr;
+		int count = 0;
+		if (LENSTYPE == LENS_VIDEO) {
+			exts = s_videoExts; count = _countof(s_videoExts);
+		}
+		else if (LENSTYPE == LENS_AUDIO) {
+			exts = s_audioExts; count = _countof(s_audioExts);
+		}
+		else {
+			// Single-extension type — use the standard check
+			return primary;
+		}
+
+		HandlerStatus best = HANDLER_NONE;
+		for (int i = 0; i < count; ++i) {
+			HandlerStatus hs = CheckExtensionHandler(exts[i]);
+			if (hs == HANDLER_ExplorerLens)
+				return HANDLER_ExplorerLens;
+			if (hs == HANDLER_THIRD_PARTY)
+				return HANDLER_THIRD_PARTY; // Third-party wins immediately
+			if (hs == HANDLER_NATIVE && best == HANDLER_NONE)
+				best = HANDLER_NATIVE;
+		}
+		return best;
+	}
+
+	// Check HKCR for who registered a handler for a given file extension
+	HandlerStatus CheckExtensionHandler(LPCTSTR dotExt) {
+		CString regPath;
+		regPath.Format(_T("%s\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+			dotExt);
+
+		TCHAR guid[256] = { 0 };
+		ULONG len = 256;
+		CRegKey rk;
+		if (ERROR_SUCCESS == rk.Open(HKEY_CLASSES_ROOT, regPath, KEY_READ)) {
+			if (ERROR_SUCCESS == rk.QueryStringValue(NULL, guid, &len)) {
+				if (StrCmpI(guid, LENS_GUID_KEY) == 0) {
+					rk.Close();
+					return HANDLER_ExplorerLens;
+				}
+				// Known Windows native handlers
+				if (StrStrI(guid, _T("c5aec3ec-e812-4677-a9a7-4fee1f9aa000")) != NULL ||
+					StrStrI(guid, _T("DC6EFB56-9CFA-464D-8880-44885D7DC193")) != NULL ||
+					StrStrI(guid, _T("C7657C4A-9F70-11D0-A999-00C04FD655E1")) != NULL ||
+					StrStrI(guid, _T("7D2B9654-0AE1-4BBD-BD42-7A0C3A23E787")) != NULL) {
+					rk.Close();
+					return HANDLER_NATIVE;
+				}
+				rk.Close();
+				return HANDLER_THIRD_PARTY;
+			}
+			rk.Close();
+		}
+		return HANDLER_NONE;
+	}
+
+	/////////////////////////
 	// Registry Backup System
 	// Backup existing handler GUID before installation
 	BOOL BackupHandler(int LENSTYPE, LPCTSTR keyPath, LPCTSTR backupName) {
@@ -857,49 +938,97 @@ public:
 
 		// Special handling for multi-extension formats (VIDEO, HEIF, TIFF, RAW)
 		if (LENSTYPE == LENS_VIDEO) {
-			// Video formats: .mp4, .avi, .mkv, .mov, .wmv, .flv, .webm, .m4v, .mpg,
-			// .mpeg
-			const LPCTSTR videoExts[] = { LENS_MP4TH_KEY,
-										 LENS_AVITH_KEY,
-										 LENS_MKVTH_KEY,
-										 _T("SOFTWARE\\Classes\\.MOV\\shellex\\{")
-										 _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
-										 LENS_WMVTH_KEY,
-										 _T("SOFTWARE\\Classes\\.FLV\\shellex\\{")
-										 _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
-										 _T("SOFTWARE\\Classes\\.WEBM\\shellex\\{")
-										 _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
-										 _T("SOFTWARE\\Classes\\.M4V\\shellex\\{")
-										 _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
-										 _T("SOFTWARE\\Classes\\.MPG\\shellex\\{")
-										 _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
-										 _T("SOFTWARE\\Classes\\.MPEG\\shellex\\{")
-										 _T("BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+			// Video formats: 34 extensions covering all common video containers
+			const LPCTSTR videoExts[] = {
+				LENS_MP4TH_KEY,
+				LENS_AVITH_KEY,
+				LENS_MKVTH_KEY,
+				_T("SOFTWARE\\Classes\\.MOV\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				LENS_WMVTH_KEY,
+				_T("SOFTWARE\\Classes\\.FLV\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.WEBM\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.M4V\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.MPG\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.MPEG\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.ASF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.M1V\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.M2V\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.TS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.M2TS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.MTS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.M2T\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.MP4V\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.3G2\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.3GP\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.3GP2\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.3GPP\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.MK3D\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.F4V\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.OGM\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.OGV\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.RM\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.RMVB\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.DV\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.MXF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.IVF\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.EVO\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.264\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.VIDEO\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
 			const LPCTSTR videoInfoTips[] = {
 				LENS_MP4IH_KEY,
 				LENS_AVIIH_KEY,
 				LENS_MKVIH_KEY,
-				_T("SOFTWARE\\Classes\\.MOV\\shellex\\{00021500-0000-0000-C000-")
-				_T("000000000046}"),
+				_T("SOFTWARE\\Classes\\.MOV\\shellex\\{00021500-0000-0000-C000-000000000046}"),
 				LENS_WMVIH_KEY,
-				_T("SOFTWARE\\Classes\\.FLV\\shellex\\{00021500-0000-0000-C000-")
-				_T("000000000046}"),
-				_T("SOFTWARE\\Classes\\.WEBM\\shellex\\{00021500-0000-0000-C000-")
-				_T("000000000046}"),
-				_T("SOFTWARE\\Classes\\.M4V\\shellex\\{00021500-0000-0000-C000-")
-				_T("000000000046}"),
-				_T("SOFTWARE\\Classes\\.MPG\\shellex\\{00021500-0000-0000-C000-")
-				_T("000000000046}"),
-				_T("SOFTWARE\\Classes\\.MPEG\\shellex\\{00021500-0000-0000-C000-")
-				_T("000000000046}") };
-			const LPCTSTR backupNames[] = { _T("mp4_th"),  _T("avi_th"), _T("mkv_th"),
-										   _T("mov_th"),  _T("wmv_th"), _T("flv_th"),
-										   _T("webm_th"), _T("m4v_th"), _T("mpg_th"),
-										   _T("mpeg_th") };
+				_T("SOFTWARE\\Classes\\.FLV\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.WEBM\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.M4V\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.MPG\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.MPEG\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.ASF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.M1V\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.M2V\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.TS\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.M2TS\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.MTS\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.M2T\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.MP4V\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.3G2\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.3GP\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.3GP2\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.3GPP\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.MK3D\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.F4V\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.OGM\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.OGV\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.RM\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.RMVB\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.DV\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.MXF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.IVF\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.EVO\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.264\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.VIDEO\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = {
+				_T("mp4_th"),  _T("avi_th"),  _T("mkv_th"),  _T("mov_th"),
+				_T("wmv_th"),  _T("flv_th"),  _T("webm_th"), _T("m4v_th"),
+				_T("mpg_th"),  _T("mpeg_th"), _T("asf_th"),  _T("m1v_th"),
+				_T("m2v_th"),  _T("ts_th"),   _T("m2ts_th"), _T("mts_th"),
+				_T("m2t_th"),  _T("mp4v_th"), _T("3g2_th"),  _T("3gp_th"),
+				_T("3gp2_th"), _T("3gpp_th"), _T("mk3d_th"), _T("f4v_th"),
+				_T("ogm_th"),  _T("ogv_th"),  _T("rm_th"),   _T("rmvb_th"),
+				_T("dv_th"),   _T("mxf_th"),  _T("ivf_th"),  _T("evo_th"),
+				_T("264_th"),  _T("video_th") };
 			const LPCTSTR backupNamesInfo[] = {
-				_T("mp4_ih"), _T("avi_ih"), _T("mkv_ih"),  _T("mov_ih"),
-				_T("wmv_ih"), _T("flv_ih"), _T("webm_ih"), _T("m4v_ih"),
-				_T("mpg_ih"), _T("mpeg_ih") };
+				_T("mp4_ih"),  _T("avi_ih"),  _T("mkv_ih"),  _T("mov_ih"),
+				_T("wmv_ih"),  _T("flv_ih"),  _T("webm_ih"), _T("m4v_ih"),
+				_T("mpg_ih"),  _T("mpeg_ih"), _T("asf_ih"),  _T("m1v_ih"),
+				_T("m2v_ih"),  _T("ts_ih"),   _T("m2ts_ih"), _T("mts_ih"),
+				_T("m2t_ih"),  _T("mp4v_ih"), _T("3g2_ih"),  _T("3gp_ih"),
+				_T("3gp2_ih"), _T("3gpp_ih"), _T("mk3d_ih"), _T("f4v_ih"),
+				_T("ogm_ih"),  _T("ogv_ih"),  _T("rm_ih"),   _T("rmvb_ih"),
+				_T("dv_ih"),   _T("mxf_ih"),  _T("ivf_ih"),  _T("evo_ih"),
+				_T("264_ih"),  _T("video_ih") };
 
 			for (int i = 0; i < _countof(videoExts); i++) {
 				if (bSet) {
@@ -1204,7 +1333,7 @@ public:
 			return;
 		}
 		else if (LENSTYPE == LENS_AUDIO) {
-			// Audio formats: .mp3, .flac, .wav, .ogg, .m4a, .wma, .aac, .opus
+			// Audio formats: 13 extensions covering all common audio containers
 			const LPCTSTR audioExts[] = {
 				LENS_MP3TH_KEY,
 				_T("SOFTWARE\\Classes\\.FLAC\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
@@ -1213,7 +1342,12 @@ public:
 				_T("SOFTWARE\\Classes\\.M4A\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
 				_T("SOFTWARE\\Classes\\.WMA\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
 				_T("SOFTWARE\\Classes\\.AAC\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
-				_T("SOFTWARE\\Classes\\.OPUS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
+				_T("SOFTWARE\\Classes\\.OPUS\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.APE\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.MKA\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.MPC\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.TAK\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}"),
+				_T("SOFTWARE\\Classes\\.WV\\shellex\\{BB2E617C-0920-11d1-9A0B-00C04FC2D6C1}") };
 			const LPCTSTR audioInfoTips[] = {
 				LENS_MP3IH_KEY,
 				_T("SOFTWARE\\Classes\\.FLAC\\shellex\\{00021500-0000-0000-C000-000000000046}"),
@@ -1222,11 +1356,20 @@ public:
 				_T("SOFTWARE\\Classes\\.M4A\\shellex\\{00021500-0000-0000-C000-000000000046}"),
 				_T("SOFTWARE\\Classes\\.WMA\\shellex\\{00021500-0000-0000-C000-000000000046}"),
 				_T("SOFTWARE\\Classes\\.AAC\\shellex\\{00021500-0000-0000-C000-000000000046}"),
-				_T("SOFTWARE\\Classes\\.OPUS\\shellex\\{00021500-0000-0000-C000-000000000046}") };
-			const LPCTSTR backupNames[] = { _T("mp3_th"), _T("flac_th"), _T("wav_th"),
-				_T("ogg_th"), _T("m4a_th"), _T("wma_th"), _T("aac_th"), _T("opus_th") };
-			const LPCTSTR backupNamesInfo[] = { _T("mp3_ih"), _T("flac_ih"), _T("wav_ih"),
-				_T("ogg_ih"), _T("m4a_ih"), _T("wma_ih"), _T("aac_ih"), _T("opus_ih") };
+				_T("SOFTWARE\\Classes\\.OPUS\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.APE\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.MKA\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.MPC\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.TAK\\shellex\\{00021500-0000-0000-C000-000000000046}"),
+				_T("SOFTWARE\\Classes\\.WV\\shellex\\{00021500-0000-0000-C000-000000000046}") };
+			const LPCTSTR backupNames[] = {
+				_T("mp3_th"), _T("flac_th"), _T("wav_th"), _T("ogg_th"),
+				_T("m4a_th"), _T("wma_th"), _T("aac_th"), _T("opus_th"),
+				_T("ape_th"), _T("mka_th"), _T("mpc_th"), _T("tak_th"), _T("wv_th") };
+			const LPCTSTR backupNamesInfo[] = {
+				_T("mp3_ih"), _T("flac_ih"), _T("wav_ih"), _T("ogg_ih"),
+				_T("m4a_ih"), _T("wma_ih"), _T("aac_ih"), _T("opus_ih"),
+				_T("ape_ih"), _T("mka_ih"), _T("mpc_ih"), _T("tak_ih"), _T("wv_ih") };
 			for (int i = 0; i < _countof(audioExts); i++) {
 				if (bSet) {
 					BackupHandler(LENSTYPE, audioExts[i], backupNames[i]);

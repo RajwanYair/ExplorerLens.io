@@ -32,7 +32,7 @@ struct PluginVersion {
     }
 };
 
-enum class UpdateStatus : uint8_t {
+enum class PluginUpdateStatus : uint8_t {
     UpToDate = 0,
     UpdateAvailable = 1,
     Deprecated = 2,
@@ -45,20 +45,20 @@ struct PluginUpdateInfo {
     std::string pluginName;
     PluginVersion currentVersion;
     PluginVersion latestVersion;
-    UpdateStatus status = UpdateStatus::Unknown;
+    PluginUpdateStatus status = PluginUpdateStatus::Unknown;
     std::string releaseNotes;
     bool securityUpdate = false;
 };
 
 class PluginUpdateChecker {
 public:
-    UpdateStatus CheckVersion(const PluginVersion& current,
+    PluginUpdateStatus CheckVersion(const PluginVersion& current,
         const PluginVersion& latest,
         const PluginVersion& minSupported) const {
-        if (current < minSupported) return UpdateStatus::Incompatible;
-        if (latest < current) return UpdateStatus::Unknown; // Current is newer?
-        if (current == latest) return UpdateStatus::UpToDate;
-        return UpdateStatus::UpdateAvailable;
+        if (current < minSupported) return PluginUpdateStatus::Incompatible;
+        if (latest < current) return PluginUpdateStatus::Unknown; // Current is newer?
+        if (current == latest) return PluginUpdateStatus::UpToDate;
+        return PluginUpdateStatus::UpdateAvailable;
     }
 
     void RegisterPlugin(const PluginUpdateInfo& info) {
@@ -68,8 +68,8 @@ public:
     std::vector<PluginUpdateInfo> GetUpdatablePlugins() const {
         std::vector<PluginUpdateInfo> result;
         for (const auto& p : m_plugins) {
-            if (p.status == UpdateStatus::UpdateAvailable ||
-                p.status == UpdateStatus::Deprecated) {
+            if (p.status == PluginUpdateStatus::UpdateAvailable ||
+                p.status == PluginUpdateStatus::Deprecated) {
                 result.push_back(p);
             }
         }

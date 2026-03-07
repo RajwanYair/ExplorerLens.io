@@ -42,8 +42,8 @@ class ModelDecoder(BaseDecoder):
     def _decode_trimesh(path: Path, size: int) -> Optional[Image.Image]:
         """Render 3D model using trimesh's offscreen renderer."""
         try:
-            import trimesh
             import numpy as np
+            import trimesh
 
             mesh = trimesh.load(str(path), force="mesh")
             if mesh.is_empty:
@@ -54,6 +54,7 @@ class ModelDecoder(BaseDecoder):
             png_data = scene.save_image(resolution=(size, size))
             if png_data:
                 import io
+
                 return Image.open(io.BytesIO(png_data))
             return None
         except ImportError:
@@ -74,19 +75,31 @@ class ModelDecoder(BaseDecoder):
         s = size // 4
 
         # Front face
-        front = [(cx - s, cy - s // 2), (cx + s, cy - s // 2),
-                 (cx + s, cy + s), (cx - s, cy + s)]
+        front = [
+            (cx - s, cy - s // 2),
+            (cx + s, cy - s // 2),
+            (cx + s, cy + s),
+            (cx - s, cy + s),
+        ]
         draw.polygon(front, outline=(100, 180, 255), width=max(1, size // 128))
 
         # Top face
         offset = s // 2
-        top = [(cx - s, cy - s // 2), (cx - s + offset, cy - s),
-               (cx + s + offset, cy - s), (cx + s, cy - s // 2)]
+        top = [
+            (cx - s, cy - s // 2),
+            (cx - s + offset, cy - s),
+            (cx + s + offset, cy - s),
+            (cx + s, cy - s // 2),
+        ]
         draw.polygon(top, outline=(80, 150, 220), width=max(1, size // 128))
 
         # Right face
-        right = [(cx + s, cy - s // 2), (cx + s + offset, cy - s),
-                 (cx + s + offset, cy + s - offset), (cx + s, cy + s)]
+        right = [
+            (cx + s, cy - s // 2),
+            (cx + s + offset, cy - s),
+            (cx + s + offset, cy + s - offset),
+            (cx + s, cy + s),
+        ]
         draw.polygon(right, outline=(60, 120, 200), width=max(1, size // 128))
 
         # Extension label
@@ -97,7 +110,11 @@ class ModelDecoder(BaseDecoder):
             font = ImageFont.load_default()
         bbox = draw.textbbox((0, 0), ext_text, font=font)
         tw = bbox[2] - bbox[0]
-        draw.text(((size - tw) // 2, size - size // 5), ext_text,
-                  fill=(160, 180, 220), font=font)
+        draw.text(
+            ((size - tw) // 2, size - size // 5),
+            ext_text,
+            fill=(160, 180, 220),
+            font=font,
+        )
 
         return canvas

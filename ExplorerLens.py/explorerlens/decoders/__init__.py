@@ -12,13 +12,13 @@ if TYPE_CHECKING:
 
 def get_all_decoders() -> list[BaseDecoder]:
     """Instantiate and return all available decoders."""
-    from .image_decoder import ImageDecoder
     from .archive_decoder import ArchiveDecoder
-    from .video_decoder import VideoDecoder
     from .audio_decoder import AudioDecoder
     from .document_decoder import DocumentDecoder
     from .font_decoder import FontDecoder
+    from .image_decoder import ImageDecoder
     from .model_decoder import ModelDecoder
+    from .video_decoder import VideoDecoder
 
     return [
         ImageDecoder(),

@@ -14,8 +14,8 @@ from typing import Optional
 
 from PIL import Image
 
-from .memory_cache import MemoryCache
 from .disk_cache import DiskCache
+from .memory_cache import MemoryCache
 
 logger = logging.getLogger("explorerlens.cache.tiered")
 
@@ -28,8 +28,9 @@ class TieredCache:
     On put:  Write to both L1 and L2.
     """
 
-    def __init__(self, memory: MemoryCache | None = None,
-                 disk: DiskCache | None = None) -> None:
+    def __init__(
+        self, memory: MemoryCache | None = None, disk: DiskCache | None = None
+    ) -> None:
         self._l1 = memory or MemoryCache()
         self._l2 = disk or DiskCache()
 

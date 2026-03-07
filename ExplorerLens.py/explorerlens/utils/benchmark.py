@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Sequence
 
 from ..config import Config
-from ..engine import ThumbnailEngine, ThumbnailRequest, DecodeStatus
+from ..engine import DecodeStatus, ThumbnailEngine, ThumbnailRequest
 
 
 def run_benchmark(

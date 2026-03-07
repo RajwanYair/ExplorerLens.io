@@ -124,8 +124,9 @@ class ImageDecoder(BaseDecoder):
     @staticmethod
     def _decode_svg(path: Path, size: int) -> Optional[Image.Image]:
         try:
-            import cairosvg
             import io
+
+            import cairosvg
             png_data = cairosvg.svg2png(
                 url=str(path),
                 output_width=size,

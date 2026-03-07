@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Optional
 
 from PIL import Image
-
 from platformdirs import user_cache_dir
 
 logger = logging.getLogger("explorerlens.cache.disk")

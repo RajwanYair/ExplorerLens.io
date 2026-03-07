@@ -13,7 +13,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class CrashCategory : uint8_t {
+enum class CrashDumpCategory : uint8_t {
     Unknown = 0,
     AccessViolation = 1,
     StackOverflow = 2,
@@ -38,7 +38,7 @@ struct CrashDumpInfo {
     std::wstring dumpPath;
     uint32_t exceptionCode = 0;
     uint64_t exceptionAddress = 0;
-    CrashCategory category = CrashCategory::Unknown;
+    CrashDumpCategory category = CrashDumpCategory::Unknown;
     std::vector<CrashFrame> stackTrace;
     std::string faultingModule;
     uint64_t processUptimeMs = 0;
@@ -48,7 +48,7 @@ struct CrashDumpInfo {
 };
 
 struct CrashClassification {
-    CrashCategory category = CrashCategory::Unknown;
+    CrashDumpCategory category = CrashDumpCategory::Unknown;
     std::string summary;
     std::string suggestedAction;
     bool isKnownIssue = false;
@@ -57,14 +57,14 @@ struct CrashClassification {
 
 class CrashDumpAnalyzer {
 public:
-    CrashCategory ClassifyException(uint32_t exceptionCode) const {
+    CrashDumpCategory ClassifyException(uint32_t exceptionCode) const {
         switch (exceptionCode) {
-        case 0xC0000005: return CrashCategory::AccessViolation;
-        case 0xC00000FD: return CrashCategory::StackOverflow;
-        case 0xC0000374: return CrashCategory::HeapCorruption;
-        case 0xC0000094: return CrashCategory::DivideByZero;
-        case 0xC000001D: return CrashCategory::UnhandledException;
-        default: return CrashCategory::Unknown;
+        case 0xC0000005: return CrashDumpCategory::AccessViolation;
+        case 0xC00000FD: return CrashDumpCategory::StackOverflow;
+        case 0xC0000374: return CrashDumpCategory::HeapCorruption;
+        case 0xC0000094: return CrashDumpCategory::DivideByZero;
+        case 0xC000001D: return CrashDumpCategory::UnhandledException;
+        default: return CrashDumpCategory::Unknown;
         }
     }
 
@@ -78,15 +78,15 @@ public:
         }
 
         switch (result.category) {
-        case CrashCategory::AccessViolation:
+        case CrashDumpCategory::AccessViolation:
             result.suggestedAction = "Check null pointer / buffer overrun";
             result.confidence = 0.8f;
             break;
-        case CrashCategory::StackOverflow:
+        case CrashDumpCategory::StackOverflow:
             result.suggestedAction = "Check recursive calls / large stack allocations";
             result.confidence = 0.95f;
             break;
-        case CrashCategory::HeapCorruption:
+        case CrashDumpCategory::HeapCorruption:
             result.suggestedAction = "Enable page heap / check buffer writes";
             result.confidence = 0.7f;
             break;

@@ -287,12 +287,36 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
                 _tcsicmp(className, _T("SysTreeView32")) == 0 ||
                 _tcsicmp(className, _T("Edit")) == 0 ||
                 _tcsicmp(className, _T("ComboBox")) == 0 ||
-                _tcsicmp(className, _T("SysTabControl32")) == 0 ||
                 _tcsicmp(className, _T("msctls_trackbar32")) == 0 ||
                 _tcsicmp(className, _T("msctls_progress32")) == 0 ||
                 _tcsicmp(className, _T("msctls_statusbar32")) == 0 ||
                 _tcsicmp(className, _T("tooltips_class32")) == 0) {
                 SetDarkScrollbar(hChild, dark);
+            }
+            // ── Tab controls ──
+            // DarkMode_Explorer sometimes fails to change tab text color,
+            // leaving black text on dark backgrounds.  We disable visual
+            // styles so the classic renderer obeys the WM_CTLCOLOR* colors.
+            else if (_tcsicmp(className, _T("SysTabControl32")) == 0) {
+                if (dark) {
+                    SetWindowTheme(hChild, L"", L"");
+                    disabledVisualStyles = true;
+                }
+                else {
+                    SetWindowTheme(hChild, nullptr, nullptr);
+                }
+            }
+            // ── SysLink controls ──
+            // Hyperlink controls need explicit theme to show light-colored
+            // text in dark mode.
+            else if (_tcsicmp(className, _T("SysLink")) == 0) {
+                if (dark) {
+                    SetWindowTheme(hChild, L"", L"");
+                    disabledVisualStyles = true;
+                }
+                else {
+                    SetWindowTheme(hChild, nullptr, nullptr);
+                }
             }
 
             // Only send WM_THEMECHANGED to controls that still use visual
@@ -326,6 +350,7 @@ inline void ApplyDarkStatusBar(HWND hStatusBar, bool darkMode) {
     ThemeColors theme = darkMode ? GetDarkTheme() : GetLightTheme();
     SetDarkScrollbar(hStatusBar, darkMode);
     ::SendMessage(hStatusBar, SB_SETBKCOLOR, 0, (LPARAM)theme.background);
+    ::SendMessage(hStatusBar, SB_SETTEXTCOLOR, 0, (LPARAM)theme.text);
     InvalidateRect(hStatusBar, nullptr, TRUE);
 }
 

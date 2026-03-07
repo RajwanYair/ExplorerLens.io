@@ -40,7 +40,7 @@ struct GPUErrorEvent {
     uint32_t consecutiveCount = 0;
 };
 
-struct RecoveryResult {
+struct GPURecoveryResult {
     GPURecoveryAction action = GPURecoveryAction::Retry;
     bool recovered = false;
     std::string newApiName;

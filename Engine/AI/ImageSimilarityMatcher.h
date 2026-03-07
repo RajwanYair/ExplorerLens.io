@@ -22,7 +22,7 @@ enum class ImageHashAlgorithm : uint8_t {
 
 struct ImageHash {
     uint64_t value = 0;
-    HashAlgorithm algorithm = HashAlgorithm::DifferenceHash;
+    ImageHashAlgorithm algorithm = ImageHashAlgorithm::DifferenceHash;
     bool valid = false;
 };
 

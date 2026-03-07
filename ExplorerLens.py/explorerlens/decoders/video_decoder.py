@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import io
 import logging
-import subprocess
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -24,11 +24,40 @@ from .base import BaseDecoder
 logger = logging.getLogger("explorerlens.decoders.video")
 
 _VIDEO_EXTS = [
-    ".avi", ".wmv", ".asf", ".mpg", ".mpeg", ".m1v", ".m2v",
-    ".ts", ".m2ts", ".mts", ".m2t", ".mp4", ".m4v", ".mp4v",
-    ".mov", ".3g2", ".3gp", ".3gp2", ".3gpp", ".mkv", ".mk3d",
-    ".webm", ".flv", ".f4v", ".ogm", ".ogv", ".rm", ".rmvb",
-    ".dv", ".mxf", ".ivf", ".evo", ".264", ".video",
+    ".avi",
+    ".wmv",
+    ".asf",
+    ".mpg",
+    ".mpeg",
+    ".m1v",
+    ".m2v",
+    ".ts",
+    ".m2ts",
+    ".mts",
+    ".m2t",
+    ".mp4",
+    ".m4v",
+    ".mp4v",
+    ".mov",
+    ".3g2",
+    ".3gp",
+    ".3gp2",
+    ".3gpp",
+    ".mkv",
+    ".mk3d",
+    ".webm",
+    ".flv",
+    ".f4v",
+    ".ogm",
+    ".ogv",
+    ".rm",
+    ".rmvb",
+    ".dv",
+    ".mxf",
+    ".ivf",
+    ".evo",
+    ".264",
+    ".video",
 ]
 
 
@@ -48,8 +77,7 @@ class VideoDecoder(BaseDecoder):
     def decode(self, path: Path, size: int) -> Optional[Image.Image]:
         ffmpeg = self._find_ffmpeg()
         if ffmpeg is None:
-            logger.warning("ffmpeg not found in PATH — skipping video: %s",
-                           path)
+            logger.warning("ffmpeg not found in PATH — skipping video: %s", path)
             return self._generate_placeholder(path, size)
 
         # Try to grab a frame at 10% of duration for a representative thumb
@@ -92,10 +120,16 @@ class VideoDecoder(BaseDecoder):
             return None
         try:
             result = subprocess.run(
-                [ffprobe, "-v", "error", "-show_entries",
-                 "format=duration", "-of",
-                 "default=noprint_wrappers=1:nokey=1",
-                 str(path)],
+                [
+                    ffprobe,
+                    "-v",
+                    "error",
+                    "-show_entries",
+                    "format=duration",
+                    "-of",
+                    "default=noprint_wrappers=1:nokey=1",
+                    str(path),
+                ],
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -105,8 +139,9 @@ class VideoDecoder(BaseDecoder):
             return None
 
     @classmethod
-    def _extract_frame(cls, ffmpeg: str, path: Path, size: int,
-                       seek_pct: float) -> Optional[Image.Image]:
+    def _extract_frame(
+        cls, ffmpeg: str, path: Path, size: int, seek_pct: float
+    ) -> Optional[Image.Image]:
         """Extract a single frame as PNG via ffmpeg pipe."""
         cmd = [ffmpeg, "-v", "error"]
 
@@ -117,11 +152,16 @@ class VideoDecoder(BaseDecoder):
                 cmd += ["-ss", f"{seek_sec:.2f}"]
 
         cmd += [
-            "-i", str(path),
-            "-frames:v", "1",
-            "-vf", f"scale={size}:{size}:force_original_aspect_ratio=decrease",
-            "-f", "image2pipe",
-            "-vcodec", "png",
+            "-i",
+            str(path),
+            "-frames:v",
+            "1",
+            "-vf",
+            f"scale={size}:{size}:force_original_aspect_ratio=decrease",
+            "-f",
+            "image2pipe",
+            "-vcodec",
+            "png",
             "-",
         ]
 
@@ -138,22 +178,30 @@ class VideoDecoder(BaseDecoder):
             logger.debug("ffmpeg timeout for %s", path)
             return None
         except Exception as exc:
-            logger.debug("Video frame extraction failed for %s: %s",
-                         path, exc)
+            logger.debug("Video frame extraction failed for %s: %s", path, exc)
             return None
 
     @classmethod
-    def _extract_frame_at(cls, ffmpeg: str, path: Path, size: int,
-                          seek_sec: float) -> Optional[Image.Image]:
+    def _extract_frame_at(
+        cls, ffmpeg: str, path: Path, size: int, seek_sec: float
+    ) -> Optional[Image.Image]:
         """Extract a frame at an exact timestamp."""
         cmd = [
-            ffmpeg, "-v", "error",
-            "-ss", f"{seek_sec:.2f}",
-            "-i", str(path),
-            "-frames:v", "1",
-            "-vf", f"scale={size}:{size}:force_original_aspect_ratio=decrease",
-            "-f", "image2pipe",
-            "-vcodec", "png",
+            ffmpeg,
+            "-v",
+            "error",
+            "-ss",
+            f"{seek_sec:.2f}",
+            "-i",
+            str(path),
+            "-frames:v",
+            "1",
+            "-vf",
+            f"scale={size}:{size}:force_original_aspect_ratio=decrease",
+            "-f",
+            "image2pipe",
+            "-vcodec",
+            "png",
             "-",
         ]
         try:
@@ -190,7 +238,11 @@ class VideoDecoder(BaseDecoder):
             font = ImageFont.load_default()
         bbox = draw.textbbox((0, 0), ext_text, font=font)
         tw = bbox[2] - bbox[0]
-        draw.text(((size - tw) // 2, size - size // 5), ext_text,
-                  fill=(160, 170, 200), font=font)
+        draw.text(
+            ((size - tw) // 2, size - size // 5),
+            ext_text,
+            fill=(160, 170, 200),
+            font=font,
+        )
 
         return canvas

@@ -24,7 +24,7 @@ struct CPUInfo {
     std::string architecture; // "x64", "ARM64"
 };
 
-struct GPUInfo {
+struct SystemGPUInfo {
     std::string name;
     std::string driverVersion;
     uint64_t dedicatedMemoryMB = 0;
@@ -53,7 +53,7 @@ struct SystemSnapshot {
     uint64_t availableRAM_MB = 0;
 
     // GPU
-    std::vector<GPUInfo> gpus;
+    std::vector<SystemGPUInfo> gpus;
 
     // Displays
     std::vector<DisplayInfo> displays;

@@ -21,6 +21,7 @@ from PIL import Image
 class TestConfig:
     def test_default_config(self):
         from explorerlens.config import Config
+
         cfg = Config()
         assert cfg.thumbnail_size == 256
         assert cfg.dark_mode == "auto"
@@ -28,19 +29,22 @@ class TestConfig:
         assert cfg.performance.max_workers == 4
 
     def test_all_categories_enabled_by_default(self):
-        from explorerlens.config import Config, FORMAT_CATEGORIES
+        from explorerlens.config import FORMAT_CATEGORIES, Config
+
         cfg = Config()
         for cat in FORMAT_CATEGORIES:
             assert cfg.enabled_categories[cat] is True
 
     def test_get_enabled_extensions(self):
-        from explorerlens.config import Config, FORMAT_CATEGORIES
+        from explorerlens.config import FORMAT_CATEGORIES, Config
+
         cfg = Config()
         exts = cfg.get_enabled_extensions()
         assert len(exts) > 100  # Should have 200+ extensions
 
     def test_save_load_roundtrip(self, tmp_path):
         from explorerlens.config import Config
+
         cfg = Config()
         cfg.thumbnail_size = 512
         cfg.dark_mode = "dark"
@@ -57,6 +61,7 @@ class TestConfig:
 
     def test_reset_defaults(self):
         from explorerlens.config import Config
+
         cfg = Config()
         cfg.thumbnail_size = 999
         cfg.reset_defaults()
@@ -64,17 +69,57 @@ class TestConfig:
 
     def test_format_categories_complete(self):
         """Verify all 46 requested extensions are in FORMAT_CATEGORIES."""
-        from explorerlens.config import FORMAT_CATEGORIES, ALL_EXTENSIONS
+        from explorerlens.config import ALL_EXTENSIONS, FORMAT_CATEGORIES
 
         required = {
-            ".avi", ".wmv", ".asf", ".mpg", ".mpeg", ".m1v", ".m2v",
-            ".ts", ".m2ts", ".mts", ".m2t", ".mp4", ".m4v", ".mp4v",
-            ".mov", ".3g2", ".3gp", ".3gp2", ".3gpp", ".mkv", ".mk3d",
-            ".webm", ".flv", ".f4v", ".ogm", ".ogv", ".rm", ".rmvb",
-            ".dv", ".mxf", ".ivf", ".evo", ".264", ".video",
-            ".cbr", ".cbz", ".cb7",
-            ".mp3", ".wav", ".m4a", ".ape", ".flac", ".ogg", ".mka",
-            ".mpc", ".opus", ".tak", ".wv",
+            ".avi",
+            ".wmv",
+            ".asf",
+            ".mpg",
+            ".mpeg",
+            ".m1v",
+            ".m2v",
+            ".ts",
+            ".m2ts",
+            ".mts",
+            ".m2t",
+            ".mp4",
+            ".m4v",
+            ".mp4v",
+            ".mov",
+            ".3g2",
+            ".3gp",
+            ".3gp2",
+            ".3gpp",
+            ".mkv",
+            ".mk3d",
+            ".webm",
+            ".flv",
+            ".f4v",
+            ".ogm",
+            ".ogv",
+            ".rm",
+            ".rmvb",
+            ".dv",
+            ".mxf",
+            ".ivf",
+            ".evo",
+            ".264",
+            ".video",
+            ".cbr",
+            ".cbz",
+            ".cb7",
+            ".mp3",
+            ".wav",
+            ".m4a",
+            ".ape",
+            ".flac",
+            ".ogg",
+            ".mka",
+            ".mpc",
+            ".opus",
+            ".tak",
+            ".wv",
             ".webp",
         }
         for ext in required:
@@ -87,6 +132,7 @@ class TestConfig:
 class TestEngine:
     def test_engine_init(self):
         from explorerlens.engine import ThumbnailEngine
+
         engine = ThumbnailEngine()
         exts = engine.get_supported_extensions()
         assert len(exts) > 50
@@ -94,11 +140,13 @@ class TestEngine:
 
     def test_decode_status_enum(self):
         from explorerlens.engine import DecodeStatus
+
         assert DecodeStatus.Success == 0
         assert DecodeStatus.FileNotFound.name == "FileNotFound"
 
     def test_generate_missing_file(self):
-        from explorerlens.engine import ThumbnailEngine, ThumbnailRequest, DecodeStatus
+        from explorerlens.engine import DecodeStatus, ThumbnailEngine, ThumbnailRequest
+
         engine = ThumbnailEngine()
         req = ThumbnailRequest(path=Path("nonexistent.jpg"))
         result = engine.generate(req)
@@ -106,7 +154,8 @@ class TestEngine:
         engine.shutdown()
 
     def test_generate_png(self, tmp_path):
-        from explorerlens.engine import ThumbnailEngine, ThumbnailRequest, DecodeStatus
+        from explorerlens.engine import DecodeStatus, ThumbnailEngine, ThumbnailRequest
+
         # Create a test PNG
         img = Image.new("RGB", (100, 100), (255, 0, 0))
         test_file = tmp_path / "test.png"
@@ -122,6 +171,7 @@ class TestEngine:
 
     def test_generate_batch(self, tmp_path):
         from explorerlens.engine import ThumbnailEngine, ThumbnailRequest
+
         files = []
         for i in range(5):
             img = Image.new("RGB", (50, 50), (i * 50, 0, 0))
@@ -136,6 +186,7 @@ class TestEngine:
 
     def test_engine_stats(self, tmp_path):
         from explorerlens.engine import ThumbnailEngine, ThumbnailRequest
+
         img = Image.new("RGB", (10, 10))
         f = tmp_path / "stats_test.png"
         img.save(f)
@@ -147,8 +198,9 @@ class TestEngine:
         engine.shutdown()
 
     def test_unsupported_format(self, tmp_path):
-        from explorerlens.engine import ThumbnailEngine, ThumbnailRequest, DecodeStatus
         from explorerlens.config import Config
+        from explorerlens.engine import DecodeStatus, ThumbnailEngine, ThumbnailRequest
+
         cfg = Config()
         # Disable all categories
         for cat in cfg.enabled_categories:
@@ -169,6 +221,7 @@ class TestEngine:
 class TestMemoryCache:
     def test_put_get(self):
         from explorerlens.cache import MemoryCache
+
         cache = MemoryCache()
         img = Image.new("RGB", (64, 64), (255, 0, 0))
         cache.put("test.png", 64, img)
@@ -178,11 +231,13 @@ class TestMemoryCache:
 
     def test_cache_miss(self):
         from explorerlens.cache import MemoryCache
+
         cache = MemoryCache()
         assert cache.get("missing.png", 64) is None
 
     def test_different_sizes(self):
         from explorerlens.cache import MemoryCache
+
         cache = MemoryCache()
         img = Image.new("RGB", (64, 64))
         cache.put("test.png", 64, img)
@@ -193,6 +248,7 @@ class TestMemoryCache:
 
     def test_eviction(self):
         from explorerlens.cache import MemoryCache
+
         cache = MemoryCache(max_items=2)
         for i in range(5):
             cache.put(f"file{i}.png", 64, Image.new("RGB", (10, 10)))
@@ -200,6 +256,7 @@ class TestMemoryCache:
 
     def test_invalidate(self):
         from explorerlens.cache import MemoryCache
+
         cache = MemoryCache()
         cache.put("test.png", 64, Image.new("RGB", (10, 10)))
         cache.put("test.png", 128, Image.new("RGB", (10, 10)))
@@ -209,6 +266,7 @@ class TestMemoryCache:
 
     def test_stats(self):
         from explorerlens.cache import MemoryCache
+
         cache = MemoryCache()
         cache.put("test.png", 64, Image.new("RGB", (10, 10)))
         cache.get("test.png", 64)
@@ -222,6 +280,7 @@ class TestMemoryCache:
 class TestDiskCache:
     def test_put_get(self, tmp_path):
         from explorerlens.cache import DiskCache
+
         db = tmp_path / "test.db"
         cache = DiskCache(db_path=db)
         img = Image.new("RGB", (64, 64), (0, 255, 0))
@@ -232,6 +291,7 @@ class TestDiskCache:
 
     def test_cache_miss(self, tmp_path):
         from explorerlens.cache import DiskCache
+
         db = tmp_path / "test.db"
         cache = DiskCache(db_path=db)
         assert cache.get("missing.png", 64) is None
@@ -239,6 +299,7 @@ class TestDiskCache:
 
     def test_clear(self, tmp_path):
         from explorerlens.cache import DiskCache
+
         db = tmp_path / "test.db"
         cache = DiskCache(db_path=db)
         cache.put("a.png", 64, Image.new("RGB", (10, 10)))
@@ -254,11 +315,13 @@ class TestDiskCache:
 class TestDecoders:
     def test_all_decoders_registered(self):
         from explorerlens.decoders import get_all_decoders
+
         decoders = get_all_decoders()
         assert len(decoders) >= 7  # image, archive, video, audio, doc, font, model
 
     def test_decoder_names(self):
         from explorerlens.decoders import get_all_decoders
+
         names = {d.name for d in get_all_decoders()}
         assert "ImageDecoder" in names
         assert "ArchiveDecoder" in names
@@ -270,6 +333,7 @@ class TestDecoders:
 
     def test_image_decoder_png(self, tmp_path):
         from explorerlens.decoders.image_decoder import ImageDecoder
+
         decoder = ImageDecoder()
         img = Image.new("RGB", (200, 200), (0, 0, 255))
         f = tmp_path / "test.png"
@@ -279,6 +343,7 @@ class TestDecoders:
 
     def test_image_decoder_bmp(self, tmp_path):
         from explorerlens.decoders.image_decoder import ImageDecoder
+
         decoder = ImageDecoder()
         img = Image.new("RGB", (100, 100))
         f = tmp_path / "test.bmp"
@@ -288,6 +353,7 @@ class TestDecoders:
 
     def test_image_decoder_webp(self, tmp_path):
         from explorerlens.decoders.image_decoder import ImageDecoder
+
         decoder = ImageDecoder()
         img = Image.new("RGB", (100, 100), (128, 128, 0))
         f = tmp_path / "test.webp"
@@ -296,8 +362,10 @@ class TestDecoders:
         assert result is not None
 
     def test_archive_decoder_zip(self, tmp_path):
-        from explorerlens.decoders.archive_decoder import ArchiveDecoder
         import zipfile
+
+        from explorerlens.decoders.archive_decoder import ArchiveDecoder
+
         decoder = ArchiveDecoder()
 
         # Create a ZIP with an image
@@ -314,8 +382,10 @@ class TestDecoders:
         assert result is not None
 
     def test_archive_decoder_cbz(self, tmp_path):
-        from explorerlens.decoders.archive_decoder import ArchiveDecoder
         import zipfile
+
+        from explorerlens.decoders.archive_decoder import ArchiveDecoder
+
         decoder = ArchiveDecoder()
 
         img = Image.new("RGB", (100, 150), (0, 128, 255))
@@ -331,6 +401,7 @@ class TestDecoders:
 
     def test_audio_decoder_placeholder(self, tmp_path):
         from explorerlens.decoders.audio_decoder import AudioDecoder
+
         decoder = AudioDecoder()
 
         # Create a dummy audio file (no actual audio data)
@@ -343,6 +414,7 @@ class TestDecoders:
 
     def test_font_decoder_extensions(self):
         from explorerlens.decoders.font_decoder import FontDecoder
+
         decoder = FontDecoder()
         exts = decoder.supported_extensions()
         assert ".ttf" in exts
@@ -351,6 +423,7 @@ class TestDecoders:
 
     def test_document_decoder_extensions(self):
         from explorerlens.decoders.document_decoder import DocumentDecoder
+
         decoder = DocumentDecoder()
         exts = decoder.supported_extensions()
         assert ".pdf" in exts
@@ -364,12 +437,14 @@ class TestDecoders:
 class TestPluginLoader:
     def test_empty_dir(self, tmp_path):
         from explorerlens.plugins import PluginLoader
+
         loader = PluginLoader(tmp_path)
         decoders = loader.discover()
         assert len(decoders) == 0
 
     def test_missing_dir(self):
         from explorerlens.plugins import PluginLoader
+
         loader = PluginLoader(Path("nonexistent_plugin_dir"))
         decoders = loader.discover()
         assert len(decoders) == 0
@@ -378,7 +453,7 @@ class TestPluginLoader:
         from explorerlens.plugins import PluginLoader
 
         # Create a minimal plugin
-        plugin_code = '''
+        plugin_code = """
 from explorerlens.decoders.base import BaseDecoder
 from pathlib import Path
 from typing import Optional
@@ -392,7 +467,7 @@ class TestPlugin(BaseDecoder):
 
 def create_decoder():
     return TestPlugin()
-'''
+"""
         (tmp_path / "test_plugin.py").write_text(plugin_code)
 
         loader = PluginLoader(tmp_path)
@@ -407,6 +482,7 @@ def create_decoder():
 class TestElevation:
     def test_is_admin_returns_bool(self):
         from explorerlens.utils.elevation import is_admin
+
         result = is_admin()
         assert isinstance(result, bool)
 
@@ -417,9 +493,9 @@ class TestElevation:
 class TestIntegration:
     def test_full_pipeline_png(self, tmp_path):
         """End-to-end: config → engine → decode → cache → result."""
-        from explorerlens.config import Config
-        from explorerlens.engine import ThumbnailEngine, ThumbnailRequest, DecodeStatus
         from explorerlens.cache import MemoryCache
+        from explorerlens.config import Config
+        from explorerlens.engine import DecodeStatus, ThumbnailEngine, ThumbnailRequest
 
         cfg = Config()
         engine = ThumbnailEngine(cfg)
@@ -448,7 +524,7 @@ class TestIntegration:
     def test_full_pipeline_webp(self, tmp_path):
         """End-to-end for WebP format."""
         from explorerlens.config import Config
-        from explorerlens.engine import ThumbnailEngine, ThumbnailRequest, DecodeStatus
+        from explorerlens.engine import DecodeStatus, ThumbnailEngine, ThumbnailRequest
 
         cfg = Config()
         engine = ThumbnailEngine(cfg)
@@ -464,8 +540,9 @@ class TestIntegration:
     def test_full_pipeline_zip_archive(self, tmp_path):
         """End-to-end for ZIP archive with embedded images."""
         import zipfile
+
         from explorerlens.config import Config
-        from explorerlens.engine import ThumbnailEngine, ThumbnailRequest, DecodeStatus
+        from explorerlens.engine import DecodeStatus, ThumbnailEngine, ThumbnailRequest
 
         cfg = Config()
         engine = ThumbnailEngine(cfg)
@@ -488,7 +565,8 @@ class TestIntegration:
 
 class TestTieredCache:
     def test_tiered_cache_l1(self, tmp_path):
-        from explorerlens.cache import MemoryCache, DiskCache, TieredCache
+        from explorerlens.cache import DiskCache, MemoryCache, TieredCache
+
         mem = MemoryCache()
         disk = DiskCache(db_path=tmp_path / "tc.db")
         tc = TieredCache(memory=mem, disk=disk)
@@ -502,7 +580,8 @@ class TestTieredCache:
         tc.close()
 
     def test_tiered_cache_l2_promotion(self, tmp_path):
-        from explorerlens.cache import MemoryCache, DiskCache, TieredCache
+        from explorerlens.cache import DiskCache, MemoryCache, TieredCache
+
         mem = MemoryCache()
         disk = DiskCache(db_path=tmp_path / "tc.db")
         tc = TieredCache(memory=mem, disk=disk)
@@ -518,7 +597,8 @@ class TestTieredCache:
         tc.close()
 
     def test_tiered_cache_invalidate(self, tmp_path):
-        from explorerlens.cache import MemoryCache, DiskCache, TieredCache
+        from explorerlens.cache import DiskCache, MemoryCache, TieredCache
+
         mem = MemoryCache()
         disk = DiskCache(db_path=tmp_path / "tc.db")
         tc = TieredCache(memory=mem, disk=disk)
@@ -529,7 +609,8 @@ class TestTieredCache:
         tc.close()
 
     def test_tiered_cache_stats(self, tmp_path):
-        from explorerlens.cache import MemoryCache, DiskCache, TieredCache
+        from explorerlens.cache import DiskCache, MemoryCache, TieredCache
+
         mem = MemoryCache()
         disk = DiskCache(db_path=tmp_path / "tc.db")
         tc = TieredCache(memory=mem, disk=disk)
@@ -549,6 +630,7 @@ class TestTieredCache:
 class TestModelDecoder:
     def test_supported_extensions(self):
         from explorerlens.decoders.model_decoder import ModelDecoder
+
         decoder = ModelDecoder()
         exts = decoder.supported_extensions()
         assert ".obj" in exts
@@ -557,6 +639,7 @@ class TestModelDecoder:
 
     def test_placeholder(self, tmp_path):
         from explorerlens.decoders.model_decoder import ModelDecoder
+
         decoder = ModelDecoder()
         f = tmp_path / "model.stl"
         f.write_bytes(b"\x00" * 10)
@@ -571,6 +654,7 @@ class TestModelDecoder:
 class TestVideoDecoder:
     def test_supported_extensions(self):
         from explorerlens.decoders.video_decoder import VideoDecoder
+
         decoder = VideoDecoder()
         exts = decoder.supported_extensions()
         assert ".mp4" in exts
@@ -581,6 +665,7 @@ class TestVideoDecoder:
 
     def test_placeholder_generation(self, tmp_path):
         from explorerlens.decoders.video_decoder import VideoDecoder
+
         decoder = VideoDecoder()
         # Create dummy file — ffmpeg will fail, should get placeholder
         f = tmp_path / "test.avi"
@@ -596,6 +681,7 @@ class TestVideoDecoder:
 class TestAudioDecoder:
     def test_supported_extensions(self):
         from explorerlens.decoders.audio_decoder import AudioDecoder
+
         decoder = AudioDecoder()
         exts = decoder.supported_extensions()
         assert ".mp3" in exts
@@ -606,6 +692,7 @@ class TestAudioDecoder:
 
     def test_placeholder_always_generated(self, tmp_path):
         from explorerlens.decoders.audio_decoder import AudioDecoder
+
         decoder = AudioDecoder()
         f = tmp_path / "test.opus"
         f.write_bytes(b"\x00" * 50)
@@ -619,6 +706,7 @@ class TestAudioDecoder:
 class TestDiagnostics:
     def test_collect_diagnostics(self):
         from explorerlens.shell.diagnostics import collect_diagnostics
+
         info = collect_diagnostics()
         assert "system" in info
         assert "python" in info
@@ -627,9 +715,11 @@ class TestDiagnostics:
 
     def test_export_diagnostics(self, tmp_path):
         from explorerlens.shell.diagnostics import export_diagnostics
+
         out = export_diagnostics(tmp_path / "diag.json")
         assert out.exists()
         import json
+
         data = json.loads(out.read_text())
         assert "system" in data
 
@@ -639,8 +729,9 @@ class TestDiagnostics:
 
 class TestEngineAutoCache:
     def test_engine_auto_creates_cache(self):
-        from explorerlens.engine import ThumbnailEngine
         from explorerlens.config import Config
+        from explorerlens.engine import ThumbnailEngine
+
         cfg = Config()
         cfg.cache.enabled = True
         engine = ThumbnailEngine(cfg)
@@ -648,8 +739,9 @@ class TestEngineAutoCache:
         engine.shutdown()
 
     def test_engine_no_cache_when_disabled(self):
-        from explorerlens.engine import ThumbnailEngine
         from explorerlens.config import Config
+        from explorerlens.engine import ThumbnailEngine
+
         cfg = Config()
         cfg.cache.enabled = False
         engine = ThumbnailEngine(cfg)
