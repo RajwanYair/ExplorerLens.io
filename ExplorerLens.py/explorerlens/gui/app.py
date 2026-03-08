@@ -22,7 +22,9 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 from typing import Optional
 
-from ..config import CONFIG_FILE, FORMAT_CATEGORIES, Config
+from ..config import (
+    CONFIG_FILE, FORMAT_CATEGORIES, FORMAT_GROUPS, FORMAT_REGISTRY, Config,
+)
 
 logger = logging.getLogger("explorerlens.gui")
 
@@ -33,10 +35,13 @@ class ExplorerLensApp:
     def __init__(self, config: Config | None = None) -> None:
         self._config = config or Config.load()
         self._root: tk.Tk | None = None
-        self._category_vars: dict[str, tk.BooleanVar] = {}
+        self._format_vars: dict[str, tk.BooleanVar] = {}
+        self._group_all_vars: dict[str, tk.BooleanVar] = {}
+        self._category_vars: dict[str, tk.BooleanVar] = {}  # legacy compat
         self._dark_mode = self._detect_dark_mode()
         self._engine = None
         self._tray_icon = None
+        self._snapshot_before: dict[str, bool] | None = None
 
     def run(self) -> None:
         """Launch the GUI."""
@@ -222,6 +227,11 @@ class ExplorerLensApp:
         notebook.add(tab_settings, text="  Settings  ")
         self._build_settings_tab(tab_settings)
 
+        # Tab 5: About
+        tab_about = ttk.Frame(notebook)
+        notebook.add(tab_about, text="  About  ")
+        self._build_about_tab(tab_about)
+
         # Status bar
         self._status_var = tk.StringVar(value="Ready")
         status_bar = ttk.Label(
@@ -233,12 +243,26 @@ class ExplorerLensApp:
         status_bar.pack(fill=tk.X, padx=8, pady=(0, 4))
 
     def _build_formats_tab(self, parent: ttk.Frame) -> None:
-        """Build format category checkboxes."""
+        """Build per-format checkboxes grouped by category (mirrors LENSManager)."""
         header = ttk.Label(
-            parent, text="Supported Format Categories", style="Header.TLabel"
+            parent, text="Supported Format Handlers", style="Header.TLabel"
         )
-        header.pack(anchor=tk.W, padx=12, pady=(12, 8))
+        header.pack(anchor=tk.W, padx=12, pady=(12, 4))
 
+        # Toolbar: Select All / Deselect All / Save
+        toolbar = ttk.Frame(parent)
+        toolbar.pack(fill=tk.X, padx=12, pady=(0, 4))
+        ttk.Button(toolbar, text="Select All", command=self._enable_all).pack(
+            side=tk.LEFT, padx=4
+        )
+        ttk.Button(toolbar, text="Deselect All", command=self._disable_all).pack(
+            side=tk.LEFT, padx=4
+        )
+        ttk.Button(toolbar, text="Apply && Save", command=self._apply_formats).pack(
+            side=tk.RIGHT, padx=4
+        )
+
+        # Scrollable area
         canvas = tk.Canvas(parent, highlightthickness=0)
         scrollbar = ttk.Scrollbar(parent, orient=tk.VERTICAL, command=canvas.yview)
         scroll_frame = ttk.Frame(canvas)
@@ -252,47 +276,107 @@ class ExplorerLensApp:
         if self._dark_mode:
             canvas.configure(bg="#1e1e1e")
 
-        row = 0
-        for category, extensions in sorted(FORMAT_CATEGORIES.items()):
-            var = tk.BooleanVar(
-                value=self._config.enabled_categories.get(category, True)
-            )
-            self._category_vars[category] = var
+        # Build per-group LabelFrames with per-format checkboxes
+        group_row = 0
+        for group_key, group_label in FORMAT_GROUPS.items():
+            # Collect formats in this group
+            group_formats = [
+                (k, v) for k, v in FORMAT_REGISTRY.items() if v["group"] == group_key
+            ]
+            if not group_formats:
+                continue
 
-            cb = ttk.Checkbutton(
-                scroll_frame,
-                text=f"  {category.title()} ({len(extensions)} formats)",
-                variable=var,
-                command=self._on_category_toggle,
+            group_frame = ttk.LabelFrame(scroll_frame, text=group_label)
+            group_frame.grid(
+                row=group_row, column=0, sticky=tk.EW, padx=8, pady=4
             )
-            cb.grid(row=row, column=0, sticky=tk.W, padx=12, pady=2)
+            scroll_frame.columnconfigure(0, weight=1)
 
-            ext_text = ", ".join(sorted(extensions))
-            lbl = ttk.Label(
-                scroll_frame,
-                text=ext_text,
-                wraplength=450,
-                foreground="#888888",
-                font=("Segoe UI", 8),
+            # Per-category "All" checkbox (mirrors IDC_CB_ALL_* in EXE)
+            all_var = tk.BooleanVar(value=True)
+            self._group_all_vars[group_key] = all_var
+            all_cb = ttk.Checkbutton(
+                group_frame,
+                text="All",
+                variable=all_var,
+                command=lambda gk=group_key: self._on_group_all_toggle(gk),
             )
-            lbl.grid(row=row, column=1, sticky=tk.W, padx=(8, 12), pady=2)
-            row += 1
+            all_cb.grid(row=0, column=0, sticky=tk.W, padx=(8, 4), pady=2)
+
+            # Per-format checkboxes within the group
+            col = 1
+            row_in_group = 0
+            max_cols = 4
+            for fmt_key, fmt_info in group_formats:
+                var = tk.BooleanVar(
+                    value=self._config.enabled_formats.get(fmt_key, True)
+                )
+                self._format_vars[fmt_key] = var
+
+                ext_str = ", ".join(fmt_info["exts"][:3])
+                cb_text = f"{fmt_info['name']} ({ext_str})"
+                cb = ttk.Checkbutton(
+                    group_frame,
+                    text=cb_text,
+                    variable=var,
+                    command=lambda gk=group_key: self._on_format_toggle(gk),
+                )
+                cb.grid(
+                    row=row_in_group, column=col, sticky=tk.W, padx=4, pady=1
+                )
+                # Tooltip via binding
+                tip_text = fmt_info["tip"]
+                cb.bind("<Enter>", lambda e, t=tip_text: self._status_var.set(t))
+                cb.bind("<Leave>", lambda e: self._status_var.set("Ready"))
+
+                col += 1
+                if col > max_cols:
+                    col = 1
+                    row_in_group += 1
+
+            # Update the "All" checkbox initial state
+            self._update_group_all_state(group_key)
+            group_row += 1
+
+        # Options section (mirrors EXE's Sort + Show Icon)
+        opt_frame = ttk.LabelFrame(scroll_frame, text="Options")
+        opt_frame.grid(row=group_row, column=0, sticky=tk.EW, padx=8, pady=4)
+
+        self._sort_var = tk.BooleanVar(value=self._config.sort_thumbnails)
+        ttk.Checkbutton(opt_frame, text="Sort thumbnails alphabetically",
+                        variable=self._sort_var).grid(
+            row=0, column=0, sticky=tk.W, padx=8, pady=2
+        )
+
+        self._icon_var = tk.BooleanVar(value=self._config.show_archive_icon)
+        ttk.Checkbutton(opt_frame, text="Show archive icon overlay",
+                        variable=self._icon_var).grid(
+            row=0, column=1, sticky=tk.W, padx=8, pady=2
+        )
+        group_row += 1
+
+        # Collage Mode section (mirrors EXE's radio buttons)
+        collage_frame = ttk.LabelFrame(scroll_frame, text="Collage Mode")
+        collage_frame.grid(row=group_row, column=0, sticky=tk.EW, padx=8, pady=4)
+
+        self._collage_var = tk.IntVar(value=self._config.collage_mode)
+        for i, (val, label) in enumerate([
+            (1, "Single Page (1×1)"),
+            (4, "2×2 Grid"),
+            (9, "3×3 Grid"),
+            (16, "4×4 Grid"),
+        ]):
+            ttk.Radiobutton(
+                collage_frame, text=label, variable=self._collage_var, value=val
+            ).grid(row=0, column=i, sticky=tk.W, padx=8, pady=4)
 
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=4)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Buttons
-        btn_frame = ttk.Frame(parent)
-        btn_frame.pack(fill=tk.X, padx=12, pady=8)
-        ttk.Button(btn_frame, text="Enable All", command=self._enable_all).pack(
-            side=tk.LEFT, padx=4
-        )
-        ttk.Button(btn_frame, text="Disable All", command=self._disable_all).pack(
-            side=tk.LEFT, padx=4
-        )
-        ttk.Button(btn_frame, text="Save", command=self._save_config).pack(
-            side=tk.RIGHT, padx=4
-        )
+        # Enable mouse wheel scrolling
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
     def _build_performance_tab(self, parent: ttk.Frame) -> None:
         """Build performance dashboard."""
@@ -480,24 +564,147 @@ class ExplorerLensApp:
             padx=12, pady=8
         )
 
-    # ── Event handlers ───────────────────────────────────────────────
+    def _build_about_tab(self, parent: ttk.Frame) -> None:
+        """Build About tab (mirrors EXE's About dialog)."""
+        header = ttk.Label(parent, text="ExplorerLens.py", style="Header.TLabel")
+        header.pack(anchor=tk.W, padx=12, pady=(12, 4))
+
+        info_lines = [
+            "Python companion for ExplorerLens — Windows Shell Thumbnail Provider",
+            "",
+            "ExplorerLens.io  — C++/COM Shell Extension (LENSShell.dll)",
+            "ExplorerLens.py  — Python GUI Manager + Decode Engine",
+            "",
+            f"Supported formats: {len(FORMAT_REGISTRY)}",
+            f"Format groups: {len(FORMAT_GROUPS)}",
+            f"COM CLSID: {{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}}",
+            "",
+            "Copyright (c) 2026 ExplorerLens Project",
+        ]
+        for line in info_lines:
+            ttk.Label(parent, text=line, wraplength=600).pack(
+                anchor=tk.W, padx=16, pady=1
+            )
+
+        # System info (mirrors EXE's IDC_ABOUT_SYSINFO)
+        sys_frame = ttk.LabelFrame(parent, text="System Information")
+        sys_frame.pack(fill=tk.X, padx=12, pady=8)
+
+        import platform
+        sys_info = [
+            ("Python", platform.python_version()),
+            ("Platform", platform.platform()),
+            ("Architecture", platform.machine()),
+        ]
+        for i, (label, value) in enumerate(sys_info):
+            ttk.Label(sys_frame, text=f"{label}:").grid(
+                row=i, column=0, sticky=tk.W, padx=8, pady=2
+            )
+            ttk.Label(sys_frame, text=value).grid(
+                row=i, column=1, sticky=tk.W, padx=8, pady=2
+            )
+
+    # ── Format event handlers ──────────────────────────────────────
+
+    def _on_format_toggle(self, group_key: str) -> None:
+        """Called when any individual format checkbox changes."""
+        self._update_group_all_state(group_key)
+
+    def _on_group_all_toggle(self, group_key: str) -> None:
+        """Toggle all formats in a group (mirrors OnCategoryAllClicked in EXE)."""
+        target = self._group_all_vars[group_key].get()
+        for fmt_key, fmt_info in FORMAT_REGISTRY.items():
+            if fmt_info["group"] == group_key and fmt_key in self._format_vars:
+                self._format_vars[fmt_key].set(target)
+
+    def _update_group_all_state(self, group_key: str) -> None:
+        """Sync the group 'All' checkbox with individual format states."""
+        states = [
+            self._format_vars[k].get()
+            for k, v in FORMAT_REGISTRY.items()
+            if v["group"] == group_key and k in self._format_vars
+        ]
+        if all(states):
+            self._group_all_vars[group_key].set(True)
+        else:
+            self._group_all_vars[group_key].set(False)
 
     def _on_category_toggle(self) -> None:
         for cat, var in self._category_vars.items():
             self._config.enabled_categories[cat] = var.get()
 
     def _enable_all(self) -> None:
-        for var in self._category_vars.values():
+        for var in self._format_vars.values():
             var.set(True)
-        self._on_category_toggle()
+        for var in self._group_all_vars.values():
+            var.set(True)
 
     def _disable_all(self) -> None:
-        for var in self._category_vars.values():
+        for var in self._format_vars.values():
             var.set(False)
-        self._on_category_toggle()
+        for var in self._group_all_vars.values():
+            var.set(False)
+
+    def _capture_snapshot(self) -> dict[str, bool]:
+        """Capture current format state for change summary."""
+        return {k: v.get() for k, v in self._format_vars.items()}
+
+    def _apply_formats(self) -> None:
+        """Apply format changes with change summary (mirrors LENSManager's
+        CChangeSummaryDlg)."""
+        old_state = {k: self._config.enabled_formats.get(k, True)
+                     for k in FORMAT_REGISTRY}
+        new_state = {k: v.get() for k, v in self._format_vars.items()}
+
+        # Build change list
+        changes: list[str] = []
+        for k in FORMAT_REGISTRY:
+            old_v = old_state.get(k, True)
+            new_v = new_state.get(k, True)
+            if old_v != new_v:
+                name = FORMAT_REGISTRY[k]["name"]
+                action = "ENABLED" if new_v else "DISABLED"
+                changes.append(f"  {name}: {action}")
+
+        # Options changes
+        if self._sort_var.get() != self._config.sort_thumbnails:
+            changes.append(f"  Sort: {'ON' if self._sort_var.get() else 'OFF'}")
+        if self._icon_var.get() != self._config.show_archive_icon:
+            changes.append(f"  Icon overlay: {'ON' if self._icon_var.get() else 'OFF'}")
+        if self._collage_var.get() != self._config.collage_mode:
+            changes.append(f"  Collage mode: {self._collage_var.get()}")
+
+        if not changes:
+            self._status_var.set("No changes to apply")
+            return
+
+        summary = f"{len(changes)} change(s):\n" + "\n".join(changes)
+        if messagebox.askyesno("Apply Changes", f"Apply these changes?\n\n{summary}"):
+            self._config.enabled_formats = new_state
+            self._config.sort_thumbnails = self._sort_var.get()
+            self._config.show_archive_icon = self._icon_var.get()
+            self._config.collage_mode = self._collage_var.get()
+            self._config.save()
+            self._status_var.set(f"Applied {len(changes)} change(s)")
+        else:
+            # Revert UI to saved state
+            for k, v in old_state.items():
+                if k in self._format_vars:
+                    self._format_vars[k].set(v)
+            self._sort_var.set(self._config.sort_thumbnails)
+            self._icon_var.set(self._config.show_archive_icon)
+            self._collage_var.set(self._config.collage_mode)
+            self._status_var.set("Changes reverted")
 
     def _save_config(self) -> None:
-        self._on_category_toggle()
+        for fmt_key, var in self._format_vars.items():
+            self._config.enabled_formats[fmt_key] = var.get()
+        if hasattr(self, "_sort_var"):
+            self._config.sort_thumbnails = self._sort_var.get()
+        if hasattr(self, "_icon_var"):
+            self._config.show_archive_icon = self._icon_var.get()
+        if hasattr(self, "_collage_var"):
+            self._config.collage_mode = self._collage_var.get()
         self._config.save()
         self._status_var.set("Configuration saved")
 
@@ -721,12 +928,20 @@ class ExplorerLensApp:
 
     def _refresh_ui(self) -> None:
         """Refresh UI from current config."""
-        for cat, var in self._category_vars.items():
-            var.set(self._config.enabled_categories.get(cat, True))
+        for fmt_key, var in self._format_vars.items():
+            var.set(self._config.enabled_formats.get(fmt_key, True))
+        for group_key in self._group_all_vars:
+            self._update_group_all_state(group_key)
         self._size_var.set(str(self._config.thumbnail_size))
         self._theme_var.set(self._config.dark_mode)
         self._workers_var.set(str(self._config.performance.max_workers))
         self._log_var.set(self._config.log_level)
+        if hasattr(self, "_sort_var"):
+            self._sort_var.set(self._config.sort_thumbnails)
+        if hasattr(self, "_icon_var"):
+            self._icon_var.set(self._config.show_archive_icon)
+        if hasattr(self, "_collage_var"):
+            self._collage_var.set(self._config.collage_mode)
 
     def _on_close(self) -> None:
         """Save config, stop tray icon, and close."""
