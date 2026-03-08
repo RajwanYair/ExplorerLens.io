@@ -1,16 +1,18 @@
-# ExplorerLens.py — Python Thumbnail Provider for Windows
+# ExplorerLens.py — Cross-Platform Python Thumbnail Provider
 
-**Version:** 1.0.0
+**Version:** 15.0.0
 **Based on:** ExplorerLens.io v15.0.0 "Zenith"
 **Language:** Python 3.11+
+**Platforms:** Windows (COM IThumbnailProvider), Linux (freedesktop.org)
 
-A pure-Python Windows Shell Extension thumbnail provider supporting 200+ file formats.
+A pure-Python cross-platform thumbnail provider supporting 200+ file formats.
 Mirrors the full functionality of ExplorerLens.io with Python-native decoders.
 
 ## Features
 
 - **200+ file formats** across archives, comics, images, video, audio, documents, fonts, 3D models
 - **Windows Shell integration** via COM IThumbnailProvider (pythoncom)
+- **Linux integration** via freedesktop.org thumbnailer spec (XDG)
 - **Modern GUI manager** with dark mode, per-format toggles, performance dashboard
 - **Admin elevation** for COM registration/unregistration
 - **Multi-tier caching** — memory + disk with LRU eviction
@@ -101,9 +103,11 @@ ExplorerLens.py/
 │   │   ├── memory_cache.py    # L1 LRU (OrderedDict, thread-safe)
 │   │   ├── disk_cache.py      # L2 SQLite WAL persistent cache
 │   │   └── tiered_cache.py    # L1+L2 wrapper with auto-promotion
-│   ├── shell/             # COM shell extension
-│   │   ├── com_server.py      # IThumbnailProvider registration
-│   │   └── diagnostics.py     # System/dependency/config diagnostic export
+│   ├── shell/             # Platform shell integration
+│   │   ├── com_server.py          # Windows COM IThumbnailProvider
+│   │   ├── linux_thumbnailer.py   # Linux freedesktop.org thumbnailer
+│   │   ├── platform_provider.py   # Cross-platform abstraction layer
+│   │   └── diagnostics.py         # System/dependency/config diagnostics
 │   ├── gui/               # Tkinter GUI manager
 │   │   └── app.py             # 4-tab GUI + system tray icon
 │   ├── plugins/           # Plugin system (drop-in .py decoders)

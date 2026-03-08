@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Cross-Platform Thumbnail Support (Python)
+- **Linux freedesktop.org thumbnailer** — XDG-compliant thumbnail generation with MD5 URI hashing
+- **Cross-platform abstraction layer** — Auto-detects Windows/Linux/macOS, delegates to native provider
+- **Platform-neutral CLI** — `--register`/`--unregister` commands work across platforms
+
+#### Production Readiness
+- **Test stability fix** — SecureAlloc overhead test with warmup pass and realistic threshold
+- **Python linting pass** — Narrowed all broad exceptions, fixed type annotations, removed unused imports
+- **C++ empty catch blocks fixed** — PortableModeManager.h, FITSDecoder.cpp
+- **Version consistency** — Python setup.py and PROJECT_SPEC_PROMPT.md aligned to v15.0.0
+- **Linting configuration** — pyproject.toml, setup.cfg, markdownlint, VS Code Python analysis
+
+### Added
+
 #### Core Engine & Libraries
 - **libarchive 3.7.6** — Integrated as static library, replacing per-format archive handlers
 - **SVG Direct2D rendering** — Real ID2D1DeviceContext5 SVG rendering replacing gradient stub

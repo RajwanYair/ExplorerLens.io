@@ -271,7 +271,7 @@ set(ENGINE_HEADERS
     Core/WatchFolderEngine.h
     Core/WinRTAppSDKIntegrationV2.h
 
-    # Dead code audit — previously unregistered Core headers
+    # Core — Integration & Utilities
     Core/ArchiveRefactorEngine.h
     Core/BuildValidation.h
     Core/CIHardeningEngine.h
