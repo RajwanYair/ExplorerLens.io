@@ -37,9 +37,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
-build/
-build-vcpkg/
-build-logs/
+/build/
+/build-vcpkg/
+/build-logs/
 
 # Build output logs directory
 BuildLogs/

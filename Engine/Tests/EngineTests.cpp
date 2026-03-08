@@ -1011,6 +1011,65 @@
 // Plugin
 #include "../Plugin/PluginProcessWatchdog.h"
 #include "../Plugin/PluginHealthReporter.h"
+// Sprint 398 — EP V15 Phase 3
+// Core
+#include "../Core/ThumbnailRotationCorrector.h"
+#include "../Core/ShellOverlayDispatcher.h"
+#include "../Core/FileVersionTracker.h"
+#include "../Core/ContextMenuFormatter.h"
+#include "../Core/ProgressReportAggregator.h"
+#include "../Core/OutputColorSpaceMapper.h"
+#include "../Core/BatchAbortController.h"
+#include "../Core/ExtensionConflictDetector.h"
+#include "../Core/DecoderFallbackChain.h"
+#include "../Core/AsyncRegistrySnapshot.h"
+// Pipeline
+#include "../Pipeline/AdaptiveChunkSizer.h"
+#include "../Pipeline/StreamingMipGenerator.h"
+#include "../Pipeline/PipelineBackpressureValve.h"
+#include "../Pipeline/ExtractorPoolBalancer.h"
+#include "../Pipeline/DecodeQueueInspector.h"
+#include "../Pipeline/IOCompletionPortBridge.h"
+#include "../Pipeline/PipelineTelemetryEmitter.h"
+#include "../Pipeline/DecodeWatermarkStamper.h"
+// GPU
+#include "../GPU/ShaderVariantSelector.h"
+#include "../GPU/GPUMemoryDefragmenter.h"
+#include "../GPU/TextureSamplerCache.h"
+#include "../GPU/GPUBarrierOptimizer.h"
+#include "../GPU/ShaderCompileListener.h"
+#include "../GPU/GPUVendorQuirksTable.h"
+// Cache
+#include "../Cache/CachePrefetchOracle.h"
+#include "../Cache/CacheSerializationCodec.h"
+#include "../Cache/CacheSizeEstimator.h"
+#include "../Cache/CacheInvalidationBroadcaster.h"
+#include "../Cache/CacheHitRateAnalyzer.h"
+#include "../Cache/CacheReplicationStrategy.h"
+// Memory
+#include "../Memory/VirtualAllocTracker.h"
+#include "../Memory/MemoryPageFaultMonitor.h"
+#include "../Memory/HeapFragmentationProbe.h"
+#include "../Memory/MemoryBudgetNegotiator.h"
+#include "../Memory/MemoryTrimPolicy.h"
+// Decoders
+#include "../Decoders/ExifThumbnailExtractor.h"
+#include "../Decoders/ProgressiveDecodeStreamer.h"
+#include "../Decoders/DecoderCapabilityProbe.h"
+#include "../Decoders/MultiFrameDecodeRouter.h"
+#include "../Decoders/ColorProfileValidator.h"
+// Plugin
+#include "../Plugin/PluginEventBus.h"
+#include "../Plugin/PluginSchemaValidator.h"
+#include "../Plugin/PluginFeatureToggle.h"
+#include "../Plugin/PluginAuditTrail.h"
+#include "../Plugin/PluginSandboxMonitor.h"
+// Utils
+#include "../Utils/CrashReportBundler.h"
+#include "../Utils/StartupTimingProfiler.h"
+#include "../Utils/FeatureFlagRegistry.h"
+#include "../Utils/TelemetrySampler.h"
+#include "../Utils/DeploymentVerifier.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -25631,6 +25690,368 @@ TEST(Test_S397_PluginHealthReporter) {
     ASSERT(v.GetName() == "PluginHealthReporter");
 }
 
+// ============================================================================
+// Sprint 398 — EP V15 Phase 3 Tests
+// ============================================================================
+
+// Core
+TEST(Test_S398_ThumbnailRotationCorrector) {
+    ThumbnailRotationCorrector v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ThumbnailRotationCorrector");
+}
+
+TEST(Test_S398_ShellOverlayDispatcher) {
+    ShellOverlayDispatcher v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ShellOverlayDispatcher");
+}
+
+TEST(Test_S398_FileVersionTracker) {
+    FileVersionTracker v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "FileVersionTracker");
+}
+
+TEST(Test_S398_ContextMenuFormatter) {
+    ContextMenuFormatter v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ContextMenuFormatter");
+}
+
+TEST(Test_S398_ProgressReportAggregator) {
+    ProgressReportAggregator v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ProgressReportAggregator");
+}
+
+TEST(Test_S398_OutputColorSpaceMapper) {
+    OutputColorSpaceMapper v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "OutputColorSpaceMapper");
+}
+
+TEST(Test_S398_BatchAbortController) {
+    BatchAbortController v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "BatchAbortController");
+}
+
+TEST(Test_S398_ExtensionConflictDetector) {
+    ExtensionConflictDetector v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ExtensionConflictDetector");
+}
+
+TEST(Test_S398_DecoderFallbackChain) {
+    DecoderFallbackChain v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "DecoderFallbackChain");
+}
+
+TEST(Test_S398_AsyncRegistrySnapshot) {
+    AsyncRegistrySnapshot v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "AsyncRegistrySnapshot");
+}
+
+// Pipeline
+TEST(Test_S398_AdaptiveChunkSizer) {
+    AdaptiveChunkSizer v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "AdaptiveChunkSizer");
+}
+
+TEST(Test_S398_StreamingMipGenerator) {
+    StreamingMipGenerator v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "StreamingMipGenerator");
+}
+
+TEST(Test_S398_PipelineBackpressureValve) {
+    PipelineBackpressureValve v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "PipelineBackpressureValve");
+}
+
+TEST(Test_S398_ExtractorPoolBalancer) {
+    ExtractorPoolBalancer v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ExtractorPoolBalancer");
+}
+
+TEST(Test_S398_DecodeQueueInspector) {
+    DecodeQueueInspector v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "DecodeQueueInspector");
+}
+
+TEST(Test_S398_IOCompletionPortBridge) {
+    IOCompletionPortBridge v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "IOCompletionPortBridge");
+}
+
+TEST(Test_S398_PipelineTelemetryEmitter) {
+    PipelineTelemetryEmitter v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "PipelineTelemetryEmitter");
+}
+
+TEST(Test_S398_DecodeWatermarkStamper) {
+    DecodeWatermarkStamper v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "DecodeWatermarkStamper");
+}
+
+// GPU
+TEST(Test_S398_ShaderVariantSelector) {
+    ShaderVariantSelector v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ShaderVariantSelector");
+}
+
+TEST(Test_S398_GPUMemoryDefragmenter) {
+    GPUMemoryDefragmenter v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "GPUMemoryDefragmenter");
+}
+
+TEST(Test_S398_TextureSamplerCache) {
+    TextureSamplerCache v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "TextureSamplerCache");
+}
+
+TEST(Test_S398_GPUBarrierOptimizer) {
+    GPUBarrierOptimizer v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "GPUBarrierOptimizer");
+}
+
+TEST(Test_S398_ShaderCompileListener) {
+    ShaderCompileListener v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ShaderCompileListener");
+}
+
+TEST(Test_S398_GPUVendorQuirksTable) {
+    GPUVendorQuirksTable v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "GPUVendorQuirksTable");
+}
+
+// Cache
+TEST(Test_S398_CachePrefetchOracle) {
+    CachePrefetchOracle v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "CachePrefetchOracle");
+}
+
+TEST(Test_S398_CacheSerializationCodec) {
+    CacheSerializationCodec v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "CacheSerializationCodec");
+}
+
+TEST(Test_S398_CacheSizeEstimator) {
+    CacheSizeEstimator v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "CacheSizeEstimator");
+}
+
+TEST(Test_S398_CacheInvalidationBroadcaster) {
+    CacheInvalidationBroadcaster v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "CacheInvalidationBroadcaster");
+}
+
+TEST(Test_S398_CacheHitRateAnalyzer) {
+    CacheHitRateAnalyzer v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "CacheHitRateAnalyzer");
+}
+
+TEST(Test_S398_CacheReplicationStrategy) {
+    CacheReplicationStrategy v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "CacheReplicationStrategy");
+}
+
+// Memory
+TEST(Test_S398_VirtualAllocTracker) {
+    VirtualAllocTracker v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "VirtualAllocTracker");
+}
+
+TEST(Test_S398_MemoryPageFaultMonitor) {
+    MemoryPageFaultMonitor v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "MemoryPageFaultMonitor");
+}
+
+TEST(Test_S398_HeapFragmentationProbe) {
+    HeapFragmentationProbe v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "HeapFragmentationProbe");
+}
+
+TEST(Test_S398_MemoryBudgetNegotiator) {
+    MemoryBudgetNegotiator v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "MemoryBudgetNegotiator");
+}
+
+TEST(Test_S398_MemoryTrimPolicy) {
+    MemoryTrimPolicy v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "MemoryTrimPolicy");
+}
+
+// Decoders
+TEST(Test_S398_ExifThumbnailExtractor) {
+    ExifThumbnailExtractor v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ExifThumbnailExtractor");
+}
+
+TEST(Test_S398_ProgressiveDecodeStreamer) {
+    ProgressiveDecodeStreamer v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ProgressiveDecodeStreamer");
+}
+
+TEST(Test_S398_DecoderCapabilityProbe) {
+    DecoderCapabilityProbe v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "DecoderCapabilityProbe");
+}
+
+TEST(Test_S398_MultiFrameDecodeRouter) {
+    MultiFrameDecodeRouter v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "MultiFrameDecodeRouter");
+}
+
+TEST(Test_S398_ColorProfileValidator) {
+    ColorProfileValidator v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "ColorProfileValidator");
+}
+
+// Plugin
+TEST(Test_S398_PluginEventBus) {
+    PluginEventBus v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "PluginEventBus");
+}
+
+TEST(Test_S398_PluginSchemaValidator) {
+    PluginSchemaValidator v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "PluginSchemaValidator");
+}
+
+TEST(Test_S398_PluginFeatureToggle) {
+    PluginFeatureToggle v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "PluginFeatureToggle");
+}
+
+TEST(Test_S398_PluginAuditTrail) {
+    PluginAuditTrail v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "PluginAuditTrail");
+}
+
+TEST(Test_S398_PluginSandboxMonitor) {
+    PluginSandboxMonitor v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "PluginSandboxMonitor");
+}
+
+// Utils
+TEST(Test_S398_CrashReportBundler) {
+    CrashReportBundler v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "CrashReportBundler");
+}
+
+TEST(Test_S398_StartupTimingProfiler) {
+    StartupTimingProfiler v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "StartupTimingProfiler");
+}
+
+TEST(Test_S398_FeatureFlagRegistry) {
+    FeatureFlagRegistry v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "FeatureFlagRegistry");
+}
+
+TEST(Test_S398_TelemetrySampler) {
+    TelemetrySampler v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "TelemetrySampler");
+}
+
+TEST(Test_S398_DeploymentVerifier) {
+    DeploymentVerifier v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsInitialized());
+    ASSERT(v.GetName() == "DeploymentVerifier");
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -29789,6 +30210,65 @@ int main() {
     // Plugin
     RUN_TEST(Test_S397_PluginProcessWatchdog);
     RUN_TEST(Test_S397_PluginHealthReporter);
+    // Sprint 398 — EP V15 Phase 3
+    // Core
+    RUN_TEST(Test_S398_ThumbnailRotationCorrector);
+    RUN_TEST(Test_S398_ShellOverlayDispatcher);
+    RUN_TEST(Test_S398_FileVersionTracker);
+    RUN_TEST(Test_S398_ContextMenuFormatter);
+    RUN_TEST(Test_S398_ProgressReportAggregator);
+    RUN_TEST(Test_S398_OutputColorSpaceMapper);
+    RUN_TEST(Test_S398_BatchAbortController);
+    RUN_TEST(Test_S398_ExtensionConflictDetector);
+    RUN_TEST(Test_S398_DecoderFallbackChain);
+    RUN_TEST(Test_S398_AsyncRegistrySnapshot);
+    // Pipeline
+    RUN_TEST(Test_S398_AdaptiveChunkSizer);
+    RUN_TEST(Test_S398_StreamingMipGenerator);
+    RUN_TEST(Test_S398_PipelineBackpressureValve);
+    RUN_TEST(Test_S398_ExtractorPoolBalancer);
+    RUN_TEST(Test_S398_DecodeQueueInspector);
+    RUN_TEST(Test_S398_IOCompletionPortBridge);
+    RUN_TEST(Test_S398_PipelineTelemetryEmitter);
+    RUN_TEST(Test_S398_DecodeWatermarkStamper);
+    // GPU
+    RUN_TEST(Test_S398_ShaderVariantSelector);
+    RUN_TEST(Test_S398_GPUMemoryDefragmenter);
+    RUN_TEST(Test_S398_TextureSamplerCache);
+    RUN_TEST(Test_S398_GPUBarrierOptimizer);
+    RUN_TEST(Test_S398_ShaderCompileListener);
+    RUN_TEST(Test_S398_GPUVendorQuirksTable);
+    // Cache
+    RUN_TEST(Test_S398_CachePrefetchOracle);
+    RUN_TEST(Test_S398_CacheSerializationCodec);
+    RUN_TEST(Test_S398_CacheSizeEstimator);
+    RUN_TEST(Test_S398_CacheInvalidationBroadcaster);
+    RUN_TEST(Test_S398_CacheHitRateAnalyzer);
+    RUN_TEST(Test_S398_CacheReplicationStrategy);
+    // Memory
+    RUN_TEST(Test_S398_VirtualAllocTracker);
+    RUN_TEST(Test_S398_MemoryPageFaultMonitor);
+    RUN_TEST(Test_S398_HeapFragmentationProbe);
+    RUN_TEST(Test_S398_MemoryBudgetNegotiator);
+    RUN_TEST(Test_S398_MemoryTrimPolicy);
+    // Decoders
+    RUN_TEST(Test_S398_ExifThumbnailExtractor);
+    RUN_TEST(Test_S398_ProgressiveDecodeStreamer);
+    RUN_TEST(Test_S398_DecoderCapabilityProbe);
+    RUN_TEST(Test_S398_MultiFrameDecodeRouter);
+    RUN_TEST(Test_S398_ColorProfileValidator);
+    // Plugin
+    RUN_TEST(Test_S398_PluginEventBus);
+    RUN_TEST(Test_S398_PluginSchemaValidator);
+    RUN_TEST(Test_S398_PluginFeatureToggle);
+    RUN_TEST(Test_S398_PluginAuditTrail);
+    RUN_TEST(Test_S398_PluginSandboxMonitor);
+    // Utils
+    RUN_TEST(Test_S398_CrashReportBundler);
+    RUN_TEST(Test_S398_StartupTimingProfiler);
+    RUN_TEST(Test_S398_FeatureFlagRegistry);
+    RUN_TEST(Test_S398_TelemetrySampler);
+    RUN_TEST(Test_S398_DeploymentVerifier);
 
     std::wcout << std::endl;
 

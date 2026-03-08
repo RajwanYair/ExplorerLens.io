@@ -2,7 +2,7 @@
 
 **Project:** ExplorerLens 
 **Current Version:** v15.0.0 "Zenith" 
-**Last Updated:** July 2025
+**Last Updated:** March 2026
 
 ---
 
@@ -14,7 +14,6 @@
 | [CHANGELOG.md](../CHANGELOG.md) | Release history and change log |
 | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) | Current known issues and mitigations |
 | [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
-| [archive/ENHANCEMENT_PLAN_V15.md](archive/ENHANCEMENT_PLAN_V15.md) | v15.0 development roadmap (completed) |
 | [WINUI3_MIGRATION_PLAN.md](WINUI3_MIGRATION_PLAN.md) | WinUI 3 / XAML Islands migration plan |
 
 ## Development
@@ -47,7 +46,7 @@
 | [PERFORMANCE.md](PERFORMANCE.md) | Top-level performance guidance |
 | [gpu/GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing, benchmarking, and Intel GPU guide |
 | [gpu/PERFORMANCE_METRICS.md](gpu/PERFORMANCE_METRICS.md) | Metrics definitions |
-| [performance/BENCHMARK_GUIDE_V7.md](performance/BENCHMARK_GUIDE_V7.md) | Benchmarking guide with baseline results |
+
 
 ## Plugins
 
@@ -69,7 +68,6 @@
 
 | Document | Description |
 |----------|-------------|
-| [USER_MANUAL.md](USER_MANUAL.md) | End-user manual |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting scenarios |
 | [CODE_SIGNING.md](CODE_SIGNING.md) | Code-signing policy and workflow |
 | [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md) | Plugin development guide |
@@ -91,7 +89,7 @@
 | [../.github/CONTRIBUTING.md](../.github/CONTRIBUTING.md) | Contribution guidelines |
 | [../.github/SECURITY.md](../.github/SECURITY.md) | Security policy and vulnerability reporting |
 | [../.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | PR template with checklists |
-| [../.github/COMPLETE_PROJECT_SUMMARY.md](../.github/COMPLETE_PROJECT_SUMMARY.md) | Full project summary |
+
 
 ## Engine
 

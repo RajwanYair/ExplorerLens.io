@@ -1225,6 +1225,65 @@ set(ENGINE_HEADERS
     # Plugin enhancements
     Plugin/PluginProcessWatchdog.h
     Plugin/PluginHealthReporter.h
+    # Sprint 398 — EP V15 Phase 3
+    # Core enhancements
+    Core/ThumbnailRotationCorrector.h
+    Core/ShellOverlayDispatcher.h
+    Core/FileVersionTracker.h
+    Core/ContextMenuFormatter.h
+    Core/ProgressReportAggregator.h
+    Core/OutputColorSpaceMapper.h
+    Core/BatchAbortController.h
+    Core/ExtensionConflictDetector.h
+    Core/DecoderFallbackChain.h
+    Core/AsyncRegistrySnapshot.h
+    # Pipeline enhancements
+    Pipeline/AdaptiveChunkSizer.h
+    Pipeline/StreamingMipGenerator.h
+    Pipeline/PipelineBackpressureValve.h
+    Pipeline/ExtractorPoolBalancer.h
+    Pipeline/DecodeQueueInspector.h
+    Pipeline/IOCompletionPortBridge.h
+    Pipeline/PipelineTelemetryEmitter.h
+    Pipeline/DecodeWatermarkStamper.h
+    # GPU enhancements
+    GPU/ShaderVariantSelector.h
+    GPU/GPUMemoryDefragmenter.h
+    GPU/TextureSamplerCache.h
+    GPU/GPUBarrierOptimizer.h
+    GPU/ShaderCompileListener.h
+    GPU/GPUVendorQuirksTable.h
+    # Cache enhancements
+    Cache/CachePrefetchOracle.h
+    Cache/CacheSerializationCodec.h
+    Cache/CacheSizeEstimator.h
+    Cache/CacheInvalidationBroadcaster.h
+    Cache/CacheHitRateAnalyzer.h
+    Cache/CacheReplicationStrategy.h
+    # Memory enhancements
+    Memory/VirtualAllocTracker.h
+    Memory/MemoryPageFaultMonitor.h
+    Memory/HeapFragmentationProbe.h
+    Memory/MemoryBudgetNegotiator.h
+    Memory/MemoryTrimPolicy.h
+    # Decoder enhancements
+    Decoders/ExifThumbnailExtractor.h
+    Decoders/ProgressiveDecodeStreamer.h
+    Decoders/DecoderCapabilityProbe.h
+    Decoders/MultiFrameDecodeRouter.h
+    Decoders/ColorProfileValidator.h
+    # Plugin enhancements
+    Plugin/PluginEventBus.h
+    Plugin/PluginSchemaValidator.h
+    Plugin/PluginFeatureToggle.h
+    Plugin/PluginAuditTrail.h
+    Plugin/PluginSandboxMonitor.h
+    # Utils enhancements
+    Utils/CrashReportBundler.h
+    Utils/StartupTimingProfiler.h
+    Utils/FeatureFlagRegistry.h
+    Utils/TelemetrySampler.h
+    Utils/DeploymentVerifier.h
 )
 
 set(ENGINE_SOURCES
