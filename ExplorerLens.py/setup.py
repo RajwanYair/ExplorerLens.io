@@ -2,8 +2,8 @@ from setuptools import find_packages, setup
 
 setup(
     name="explorerlens",
-    version="1.0.0",
-    description="Python Windows Shell Extension thumbnail provider — 200+ formats",
+    version="15.0.0",
+    description=("Python Windows Shell Extension thumbnail provider" " — 200+ formats"),
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="ExplorerLens Project",

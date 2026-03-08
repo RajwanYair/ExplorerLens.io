@@ -69,7 +69,7 @@ struct INISection {
         auto it = values.find(key);
         if (it != values.end()) {
             try { return std::stoi(it->second); }
-            catch (...) {}
+            catch (const std::exception&) { return defaultVal; }
         }
         return defaultVal;
     }

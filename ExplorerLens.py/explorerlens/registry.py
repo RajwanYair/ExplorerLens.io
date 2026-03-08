@@ -10,7 +10,6 @@ from __future__ import annotations
 import ctypes
 import logging
 import winreg
-from typing import Optional
 
 logger = logging.getLogger("explorerlens.registry")
 
@@ -19,7 +18,7 @@ def is_admin() -> bool:
     """Check if running with admin privileges."""
     try:
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
-    except Exception:
+    except (OSError, AttributeError):
         return False
 
 
@@ -33,7 +32,9 @@ def get_registered_extensions() -> dict[str, str]:
     result: dict[str, str] = {}
 
     try:
-        classes_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "Software\\Classes")
+        classes_key = winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE, "Software\\Classes"
+        )
         idx = 0
         while True:
             try:
@@ -46,7 +47,10 @@ def get_registered_extensions() -> dict[str, str]:
                     f"{{e357fccd-a995-4576-b01f-234630154e96}}"
                 )
                 try:
-                    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, handler_path) as hk:
+                    with winreg.OpenKey(
+                        winreg.HKEY_LOCAL_MACHINE,
+                        handler_path,
+                    ) as hk:
                         val, _ = winreg.QueryValueEx(hk, "")
                         if val.upper() == COM_CLSID_PY.upper():
                             result[name] = val
@@ -55,7 +59,7 @@ def get_registered_extensions() -> dict[str, str]:
             except OSError:
                 break
         classes_key.Close()
-    except Exception as exc:
+    except OSError as exc:
         logger.debug("Registry scan error: %s", exc)
 
     return result
@@ -66,13 +70,20 @@ def set_thumbnail_cache_enabled(enabled: bool) -> bool:
     if not is_admin():
         return False
     try:
-        path = "Software\\Microsoft\\Windows\\CurrentVersion\\" "Explorer\\Advanced"
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_WRITE) as key:
+        path = (
+            "Software\\Microsoft\\Windows\\CurrentVersion\\"
+            "Explorer\\Advanced"
+        )
+        with winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_WRITE
+        ) as key:
+            val = 0 if enabled else 1
             winreg.SetValueEx(
-                key, "DisableThumbnailCache", 0, winreg.REG_DWORD, 0 if enabled else 1
+                key, "DisableThumbnailCache",
+                0, winreg.REG_DWORD, val,
             )
         return True
-    except Exception as exc:
+    except OSError as exc:
         logger.error("Failed to set thumbnail cache: %s", exc)
         return False
 
@@ -82,15 +93,18 @@ def flush_thumbnail_cache() -> bool:
     import glob
     import os
 
-    cache_dir = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Explorer")
+    cache_dir = os.path.expandvars(
+        r"%LOCALAPPDATA%\Microsoft\Windows\Explorer"
+    )
     try:
-        for f in glob.glob(os.path.join(cache_dir, "thumbcache_*.db")):
+        pattern = os.path.join(cache_dir, "thumbcache_*.db")
+        for f in glob.glob(pattern):
             try:
                 os.remove(f)
             except PermissionError:
                 pass  # In use by Explorer
         return True
-    except Exception as exc:
+    except OSError as exc:
         logger.error("Failed to flush thumbnail cache: %s", exc)
         return False
 
@@ -102,6 +116,7 @@ def restart_explorer() -> None:
     subprocess.run(
         ["taskkill", "/f", "/im", "explorer.exe"],
         capture_output=True,
+        check=False,
     )
     subprocess.Popen(["explorer.exe"])
 
@@ -144,7 +159,7 @@ def backup_registrations(output_path: str) -> bool:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
         return True
-    except Exception as exc:
+    except (OSError, ValueError) as exc:
         logger.error("Backup failed: %s", exc)
         return False
 
@@ -166,6 +181,6 @@ def restore_registrations(input_path: str) -> bool:
         from .shell.com_server import register
 
         return register(extensions)
-    except Exception as exc:
+    except (OSError, ValueError, KeyError) as exc:
         logger.error("Restore failed: %s", exc)
         return False

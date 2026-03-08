@@ -1,5 +1,9 @@
 {
   "default": true,
+  "MD009": {
+    "br_spaces": 2,
+    "strict": false
+  },
   "MD013": false,
   "MD022": {
     "lines_above": 0,
@@ -10,5 +14,9 @@
     "siblings_only": true
   },
   "MD032": false,
-  "MD034": false
+  "MD033": false,
+  "MD034": false,
+  "MD040": false,
+  "MD041": false,
+  "MD060": false
 }

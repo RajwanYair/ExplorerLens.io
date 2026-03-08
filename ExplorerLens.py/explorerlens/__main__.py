@@ -23,7 +23,7 @@ def is_admin() -> bool:
         import ctypes
 
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
-    except Exception:
+    except (AttributeError, OSError):
         return False
 
 
@@ -48,12 +48,12 @@ def main() -> None:
     parser.add_argument(
         "--register",
         action="store_true",
-        help="Register COM shell extension (requires admin)",
+        help="Register thumbnail provider (requires admin/root)",
     )
     parser.add_argument(
         "--unregister",
         action="store_true",
-        help="Unregister COM shell extension (requires admin)",
+        help="Unregister thumbnail provider",
     )
     parser.add_argument(
         "--thumbnail", metavar="FILE", help="Generate thumbnail for a file"
@@ -112,24 +112,22 @@ def main() -> None:
         return
 
     if args.register:
-        from explorerlens.config import Config
-        from explorerlens.shell.com_server import register
+        from explorerlens.shell import register_provider
 
-        config = Config.load()
-        ok = register(config.get_enabled_extensions())
+        ok = register_provider()
         if ok:
-            print("COM shell extension registered successfully.")
+            print("Thumbnail provider registered successfully.")
         else:
             print("Registration failed.", file=sys.stderr)
             sys.exit(1)
         return
 
     if args.unregister:
-        from explorerlens.shell.com_server import unregister
+        from explorerlens.shell import unregister_provider
 
-        ok = unregister()
+        ok = unregister_provider()
         if ok:
-            print("COM shell extension unregistered successfully.")
+            print("Thumbnail provider unregistered successfully.")
         else:
             print("Unregistration failed.", file=sys.stderr)
             sys.exit(1)

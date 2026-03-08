@@ -15,7 +15,7 @@ import logging
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from PIL import Image
 
@@ -77,7 +77,7 @@ class VideoDecoder(BaseDecoder):
     def decode(self, path: Path, size: int) -> Optional[Image.Image]:
         ffmpeg = self._find_ffmpeg()
         if ffmpeg is None:
-            logger.warning("ffmpeg not found in PATH — skipping video: %s", path)
+            logger.warning("ffmpeg not found in PATH \u2014 skipping video: %s", path)
             return self._generate_placeholder(path, size)
 
         # Try to grab a frame at 10% of duration for a representative thumb
@@ -133,9 +133,10 @@ class VideoDecoder(BaseDecoder):
                 capture_output=True,
                 text=True,
                 timeout=10,
+                check=False,
             )
             return float(result.stdout.strip())
-        except Exception:
+        except (subprocess.TimeoutExpired, ValueError, OSError):
             return None
 
     @classmethod
@@ -170,6 +171,7 @@ class VideoDecoder(BaseDecoder):
                 cmd,
                 capture_output=True,
                 timeout=15,
+                check=False,
             )
             if result.returncode != 0 or not result.stdout:
                 return None
@@ -177,7 +179,7 @@ class VideoDecoder(BaseDecoder):
         except subprocess.TimeoutExpired:
             logger.debug("ffmpeg timeout for %s", path)
             return None
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             logger.debug("Video frame extraction failed for %s: %s", path, exc)
             return None
 
@@ -205,11 +207,16 @@ class VideoDecoder(BaseDecoder):
             "-",
         ]
         try:
-            result = subprocess.run(cmd, capture_output=True, timeout=15)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                timeout=15,
+                check=False,
+            )
             if result.returncode != 0 or not result.stdout:
                 return None
             return Image.open(io.BytesIO(result.stdout))
-        except Exception:
+        except (subprocess.TimeoutExpired, OSError):
             return None
 
     @staticmethod
@@ -233,8 +240,8 @@ class VideoDecoder(BaseDecoder):
         # Extension label
         ext_text = path.suffix.upper().lstrip(".")
         try:
-            font = ImageFont.truetype("segoeui.ttf", size // 10)
-        except Exception:
+            font: Any = ImageFont.truetype("segoeui.ttf", size // 10)
+        except (OSError, ImportError):
             font = ImageFont.load_default()
         bbox = draw.textbbox((0, 0), ext_text, font=font)
         tw = bbox[2] - bbox[0]

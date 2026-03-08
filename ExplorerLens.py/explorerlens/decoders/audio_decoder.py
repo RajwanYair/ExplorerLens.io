@@ -13,7 +13,7 @@ import io
 import logging
 import struct
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -127,11 +127,12 @@ class AudioDecoder(BaseDecoder):
                         if "picture" in key.lower():
                             tag = audio.tags[key]
                             if hasattr(tag, "value"):
-                                for v in tag if isinstance(tag, list) else [tag]:
+                                items = tag if isinstance(tag, list) else [tag]
+                                for v in items:
                                     if hasattr(v, "value"):
                                         try:
                                             return Image.open(io.BytesIO(v.value))
-                                        except Exception:
+                                        except (OSError, ValueError):
                                             continue
 
             else:
@@ -144,7 +145,7 @@ class AudioDecoder(BaseDecoder):
 
         except ImportError:
             logger.warning("mutagen not installed — no album art extraction")
-        except Exception as exc:
+        except (OSError, ValueError, KeyError) as exc:
             logger.debug("Album art extraction failed for %s: %s", path, exc)
 
         return None
@@ -182,7 +183,8 @@ class AudioDecoder(BaseDecoder):
                         if len(fmt_data) >= 4:
                             channels = struct.unpack("<H", fmt_data[2:4])[0]
                         if len(fmt_data) >= 8:
-                            sample_width = struct.unpack("<H", fmt_data[14:16])[0] // 8
+                            raw_bits = struct.unpack("<H", fmt_data[14:16])[0]
+                            sample_width = raw_bits // 8
                     elif chunk_id == b"data":
                         # Read samples
                         max_bytes = min(chunk_size, 1024 * 1024)  # 1MB cap
@@ -215,7 +217,8 @@ class AudioDecoder(BaseDecoder):
                 peak = 0
                 for j in range(0, len(chunk), sample_width * channels):
                     if j + sample_width <= len(chunk):
-                        val = struct.unpack(fmt_char, chunk[j : j + sample_width])[0]
+                        sample = chunk[j : j + sample_width]
+                        val = struct.unpack(fmt_char, sample)[0]
                         peak = max(peak, abs(val))
                 amplitudes.append(peak / max_val)
 
@@ -243,7 +246,7 @@ class AudioDecoder(BaseDecoder):
 
             return canvas
 
-        except Exception as exc:
+        except (OSError, ValueError, struct.error) as exc:
             logger.debug("Waveform generation failed for %s: %s", path, exc)
             return None
 
@@ -274,8 +277,8 @@ class AudioDecoder(BaseDecoder):
         # Extension label
         ext_text = path.suffix.upper().lstrip(".")
         try:
-            font = ImageFont.truetype("segoeui.ttf", size // 10)
-        except Exception:
+            font: Any = ImageFont.truetype("segoeui.ttf", size // 10)
+        except (OSError, ImportError):
             font = ImageFont.load_default()
 
         bbox = draw.textbbox((0, 0), ext_text, font=font)

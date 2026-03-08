@@ -1,0 +1,22 @@
+[project]
+name = "explorerlens"
+version = "15.0.0"
+description = "Python Windows Shell Extension thumbnail provider — 200+ formats"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "B", "S", "T20", "UP"]
+ignore = ["S603", "S607"]
+
+[tool.flake8]
+max-line-length = 100
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.mypy]
+ignore_missing_imports = true

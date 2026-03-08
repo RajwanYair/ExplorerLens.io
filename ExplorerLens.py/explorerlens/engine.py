@@ -10,14 +10,15 @@ from __future__ import annotations
 import logging
 import time
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import IntEnum, auto
 from pathlib import Path
 from typing import Optional, Sequence
 
 from PIL import Image
 
-from .config import FORMAT_CATEGORIES, Config
+from .config import Config
+from .decoders.base import BaseDecoder
 
 logger = logging.getLogger("explorerlens.engine")
 
@@ -66,7 +67,7 @@ class ThumbnailEngine:
 
     def __init__(self, config: Config | None = None) -> None:
         self._config = config or Config()
-        self._decoders: dict[str, object] = {}
+        self._decoders: dict[str, BaseDecoder] = {}
         self._pool: ThreadPoolExecutor | None = None
         self._stats = EngineStats()
         self._cache: object | None = None
@@ -152,7 +153,7 @@ class ThumbnailEngine:
                 result.status = DecodeStatus.DecodeFailed
                 result.error = "Decoder returned None"
                 self._stats.failed += 1
-        except Exception as exc:
+        except (OSError, ValueError, RuntimeError) as exc:
             result.status = DecodeStatus.DecodeFailed
             result.error = str(exc)
             result.decoder_name = decoder.name
@@ -183,7 +184,7 @@ class ThumbnailEngine:
                 results[idx] = future.result(
                     timeout=self._config.performance.thumbnail_timeout_ms / 1000
                 )
-            except Exception as exc:
+            except (OSError, TimeoutError) as exc:
                 results[idx] = ThumbnailResult(
                     request=requests[idx],
                     status=DecodeStatus.Timeout,
@@ -224,15 +225,15 @@ class ThumbnailEngine:
     def _cache_get(self, req: ThumbnailRequest) -> Image.Image | None:
         """Try to retrieve from cache."""
         try:
-            return self._cache.get(str(req.path), req.size)  # type: ignore
-        except Exception:
+            return self._cache.get(str(req.path), req.size)  # type: ignore[union-attr]
+        except (OSError, KeyError, TypeError):
             return None
 
     def _cache_put(self, req: ThumbnailRequest, img: Image.Image) -> None:
         """Store in cache."""
         try:
-            self._cache.put(str(req.path), req.size, img)  # type: ignore
-        except Exception:
+            self._cache.put(str(req.path), req.size, img)  # type: ignore[union-attr]
+        except (OSError, TypeError):
             pass
 
 
@@ -257,4 +258,6 @@ class EngineStats:
 
     @property
     def images_per_sec(self) -> float:
-        return self.succeeded / (self.total_ms / 1000) if self.total_ms > 0 else 0.0
+        if self.total_ms > 0:
+            return self.succeeded / (self.total_ms / 1000)
+        return 0.0

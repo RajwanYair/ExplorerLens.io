@@ -7,7 +7,7 @@
     "cmake.sourceDirectory": "${workspaceFolder}",
     "cmake.useCMakePresets": "always",
     "cmake.generator": "Ninja",
-    "cmake.configureOnOpen": false,
+    "cmake.configureOnOpen": false,\n    "cmake.configureArgs": [],\n    "cmake.defaultConfigurePreset": "default-release",\n    "cmake.defaultBuildPreset": "default-release",\n    "cmake.defaultTestPreset": "default-release-test",
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "cmake.configureSettings": {
         "CMAKE_MAKE_PROGRAM": "C:/Users/ryair/scoop/shims/ninja.exe"
@@ -257,6 +257,15 @@
     "powershell.scriptAnalysis.enable": true,
     "powershell.integratedConsole.showOnStartup": false,
     "powershell.integratedConsole.focusConsoleOnExecute": false,
+    // ── Python ────────────────────────────────────────────────────
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingModuleSource": "none",
+        "reportMissingImports": "none",
+        "reportGeneralTypeIssues": "information",
+        "reportMissingTypeStubs": "none",
+        "reportUnusedImport": "information"
+    },
     // ── Copilot ──────────────────────────────────────────────────
     "chat.agent.maxRequests": 125,
     // ── Miscellaneous ────────────────────────────────────────────

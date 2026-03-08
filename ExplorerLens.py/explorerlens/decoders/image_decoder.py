@@ -20,9 +20,23 @@ logger = logging.getLogger("explorerlens.decoders.image")
 
 # Standard Pillow-supported extensions
 _PILLOW_EXTS = [
-    ".bmp", ".gif", ".jpg", ".jpeg", ".png", ".tiff", ".tif",
-    ".ico", ".tga", ".ppm", ".pgm", ".pbm", ".pcx", ".dds",
-    ".webp", ".xpm", ".sgi",
+    ".bmp",
+    ".gif",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".tiff",
+    ".tif",
+    ".ico",
+    ".tga",
+    ".ppm",
+    ".pgm",
+    ".pbm",
+    ".pcx",
+    ".dds",
+    ".webp",
+    ".xpm",
+    ".sgi",
 ]
 
 # Extensions requiring optional libraries
@@ -47,9 +61,26 @@ _OPTIONAL_EXTS = {
 }
 
 _RAW_EXTS = [
-    ".cr2", ".cr3", ".nef", ".arw", ".dng", ".orf", ".rw2",
-    ".pef", ".srw", ".raf", ".raw", ".3fr", ".dcr", ".kdc",
-    ".mrw", ".nrw", ".rwl", ".sr2", ".srf", ".x3f",
+    ".cr2",
+    ".cr3",
+    ".nef",
+    ".arw",
+    ".dng",
+    ".orf",
+    ".rw2",
+    ".pef",
+    ".srw",
+    ".raf",
+    ".raw",
+    ".3fr",
+    ".dcr",
+    ".kdc",
+    ".mrw",
+    ".nrw",
+    ".rwl",
+    ".sr2",
+    ".srf",
+    ".x3f",
 ]
 
 
@@ -92,14 +123,14 @@ class ImageDecoder(BaseDecoder):
     # ── Backend-specific decoders ────────────────────────────────────
 
     @staticmethod
-    def _decode_pillow(path: Path, size: int) -> Optional[Image.Image]:
+    def _decode_pillow(path: Path, _size: int) -> Optional[Image.Image]:
         try:
-            img = Image.open(path)
+            img: Image.Image = Image.open(path)
             img.load()
             if img.mode not in ("RGB", "RGBA"):
                 img = img.convert("RGBA" if img.mode == "PA" else "RGB")
             return img
-        except Exception as exc:
+        except (OSError, ValueError, SyntaxError) as exc:
             logger.debug("Pillow decode failed for %s: %s", path, exc)
             return None
 
@@ -107,6 +138,7 @@ class ImageDecoder(BaseDecoder):
     def _decode_raw(path: Path, size: int) -> Optional[Image.Image]:
         try:
             import rawpy
+
             with rawpy.imread(str(path)) as raw:
                 rgb = raw.postprocess(
                     use_camera_wb=True,
@@ -117,7 +149,7 @@ class ImageDecoder(BaseDecoder):
         except ImportError:
             logger.warning("rawpy not installed — skipping RAW: %s", path)
             return None
-        except Exception as exc:
+        except (OSError, ValueError, RuntimeError) as exc:
             logger.debug("RAW decode failed for %s: %s", path, exc)
             return None
 
@@ -127,6 +159,7 @@ class ImageDecoder(BaseDecoder):
             import io
 
             import cairosvg
+
             png_data = cairosvg.svg2png(
                 url=str(path),
                 output_width=size,
@@ -136,71 +169,76 @@ class ImageDecoder(BaseDecoder):
         except ImportError:
             logger.warning("cairosvg not installed — skipping SVG: %s", path)
             return None
-        except Exception as exc:
+        except (OSError, ValueError, RuntimeError) as exc:
             logger.debug("SVG decode failed for %s: %s", path, exc)
             return None
 
     @staticmethod
-    def _decode_psd(path: Path, size: int) -> Optional[Image.Image]:
+    def _decode_psd(path: Path, _size: int) -> Optional[Image.Image]:
         try:
             from psd_tools import PSDImage
+
             psd = PSDImage.open(path)
             return psd.composite()
         except ImportError:
             logger.warning("psd-tools not installed — skipping PSD: %s", path)
             return None
-        except Exception as exc:
+        except (OSError, ValueError, RuntimeError) as exc:
             logger.debug("PSD decode failed for %s: %s", path, exc)
             return None
 
     @staticmethod
-    def _decode_heif(path: Path, size: int) -> Optional[Image.Image]:
+    def _decode_heif(path: Path, _size: int) -> Optional[Image.Image]:
         try:
             from pillow_heif import register_heif_opener
+
             register_heif_opener()
             return Image.open(path)
         except ImportError:
-            logger.warning("pillow-heif not installed — skipping HEIF: %s",
-                           path)
+            logger.warning("pillow-heif not installed — skipping HEIF: %s", path)
             return None
-        except Exception as exc:
+        except (OSError, ValueError, RuntimeError) as exc:
             logger.debug("HEIF decode failed for %s: %s", path, exc)
             return None
 
     @staticmethod
-    def _decode_avif(path: Path, size: int) -> Optional[Image.Image]:
+    def _decode_avif(path: Path, _size: int) -> Optional[Image.Image]:
         try:
             from pillow_heif import register_avif_opener
+
             register_avif_opener()
             return Image.open(path)
         except ImportError:
             try:
-                import pillow_avif  # noqa: F401
+                import pillow_avif  # noqa: F401  # type: ignore[import-untyped]
+
                 return Image.open(path)
             except ImportError:
                 logger.warning("No AVIF decoder — skipping: %s", path)
                 return None
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             logger.debug("AVIF decode failed for %s: %s", path, exc)
             return None
 
     @staticmethod
-    def _decode_jxl(path: Path, size: int) -> Optional[Image.Image]:
+    def _decode_jxl(path: Path, _size: int) -> Optional[Image.Image]:
         try:
-            import jxlpy  # noqa: F401
+            import jxlpy  # noqa: F401  # type: ignore[import-untyped]
+
             return Image.open(path)
         except ImportError:
             logger.warning("jxlpy not installed — skipping JXL: %s", path)
             return None
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             logger.debug("JXL decode failed for %s: %s", path, exc)
             return None
 
     @staticmethod
-    def _decode_hdr(path: Path, size: int) -> Optional[Image.Image]:
+    def _decode_hdr(path: Path, _size: int) -> Optional[Image.Image]:
         try:
             import imageio.v3 as iio
             import numpy as np
+
             data = iio.imread(str(path))
             # Tone-map HDR to 8-bit LDR
             if data.dtype in (np.float32, np.float64):
@@ -209,19 +247,20 @@ class ImageDecoder(BaseDecoder):
         except ImportError:
             logger.warning("imageio not installed — skipping HDR: %s", path)
             return None
-        except Exception as exc:
+        except (OSError, ValueError, RuntimeError) as exc:
             logger.debug("HDR decode failed for %s: %s", path, exc)
             return None
 
     @staticmethod
-    def _decode_qoi(path: Path, size: int) -> Optional[Image.Image]:
+    def _decode_qoi(path: Path, _size: int) -> Optional[Image.Image]:
         try:
             import qoi
+
             img = qoi.read(str(path))
             return Image.fromarray(img)
         except ImportError:
             logger.warning("qoi not installed — skipping QOI: %s", path)
             return None
-        except Exception as exc:
+        except (OSError, ValueError, RuntimeError) as exc:
             logger.debug("QOI decode failed for %s: %s", path, exc)
             return None
