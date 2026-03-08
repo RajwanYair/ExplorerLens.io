@@ -262,23 +262,18 @@ inline void ApplyDarkScrollbars(HWND hDlg, bool darkMode) {
             // Push buttons (BS_PUSHBUTTON / BS_DEFPUSHBUTTON) keep
             // DarkMode_Explorer for proper dark button chrome.
             else if (_tcsicmp(className, _T("Button")) == 0) {
-                LONG style = GetWindowLong(hChild, GWL_STYLE);
-                LONG btnType = style & 0x0FL; // BS_TYPEMASK
-                bool isPushButton = (btnType == BS_PUSHBUTTON ||
-                    btnType == BS_DEFPUSHBUTTON);
-                if (!isPushButton) {
-                    // Groupbox, checkbox, radio — disable visual styles.
-                    // GDI draws text using WM_CTLCOLORSTATIC colors (white).
-                    if (dark) {
-                        SetWindowTheme(hChild, L"", L"");
-                        disabledVisualStyles = true;
-                    }
-                    else {
-                        SetWindowTheme(hChild, nullptr, nullptr);
-                    }
+                // ALL button sub-types (push, checkbox, radio, groupbox)
+                // must have visual styles disabled in dark mode.
+                // DarkMode_Explorer is unreliable for button text color
+                // across Windows 10/11 builds. Disabling visual styles
+                // forces the classic GDI renderer which always respects
+                // the text color set by WM_CTLCOLORSTATIC / WM_CTLCOLORBTN.
+                if (dark) {
+                    SetWindowTheme(hChild, L"", L"");
+                    disabledVisualStyles = true;
                 }
                 else {
-                    SetDarkScrollbar(hChild, dark);
+                    SetWindowTheme(hChild, nullptr, nullptr);
                 }
             }
             // ── All other themed controls ──

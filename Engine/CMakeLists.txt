@@ -1166,6 +1166,65 @@ set(ENGINE_HEADERS
     # Utils enhancements
     Utils/WindowsEventLogWriter.h
     Utils/BuildArtifactValidator.h
+    # Sprint 397: Enhancement Plan V15 — Phase 2 Headers
+    # Utils enhancements
+    Utils/VersionMatrixValidator.h
+    Utils/OrphanedFileScanner.h
+    Utils/LinkageAuditEngine.h
+    Utils/DependencyGraphValidator.h
+    Utils/CompilerWarningTracker.h
+    Utils/LibraryHashVerifier.h
+    Utils/LibraryCompatMatrix.h
+    Utils/TestCorpusIndexer.h
+    Utils/DocCoverageAnalyzer.h
+    Utils/LatencyBreakdownReporter.h
+    # Core enhancements
+    Core/ArchiveTypeExtractor.h
+    Core/ArchiveStreamFactory.h
+    Core/PropertyStoreCache.h
+    Core/RegistryWriteCoalescer.h
+    Core/CollapsibleSectionModel.h
+    Core/FormatHealthDashboard.h
+    Core/SettingsProfileManager.h
+    Core/PerformanceMetricAggregator.h
+    Core/OwnerDrawButtonRenderer.h
+    Core/SystemTrayContextProvider.h
+    Core/DPILayoutTransformer.h
+    Core/FormatIconAtlas.h
+    Core/WorkerPoolElasticScaler.h
+    Core/SIMDInstructionAuditor.h
+    # Pipeline enhancements
+    Pipeline/NamedPipeMessageBus.h
+    Pipeline/ZeroCopyBufferChain.h
+    Pipeline/ParallelDirectoryScanner.h
+    Pipeline/BatchDemuxOptimizer.h
+    Pipeline/IOReadaheadScheduler.h
+    Pipeline/AccessPatternRecorder.h
+    # GPU enhancements
+    GPU/ShaderWarmupEngine.h
+    GPU/LanczosKernelOptimizer.h
+    GPU/HDRMetadataParser.h
+    GPU/GPUCommandBundler.h
+    GPU/GPUTimestampProfiler.h
+    # Cache enhancements
+    Cache/PSOBlobSerializer.h
+    Cache/CacheWarmingScheduler.h
+    Cache/CachePartitionRebalancer.h
+    Cache/CacheTTLManager.h
+    Cache/CacheCompressionSelector.h
+    # Memory enhancements
+    Memory/BitmapPoolPartitioner.h
+    Memory/MemoryTagAllocator.h
+    Memory/AddressSpaceReserver.h
+    Memory/CommitChargeTracker.h
+    # Decoder enhancements
+    Decoders/FreeTypeLayoutEngine.h
+    Decoders/FFmpegDemuxerBridge.h
+    Decoders/OpenJPEGStreamDecoder.h
+    Decoders/MemoryMappedBitmapReader.h
+    # Plugin enhancements
+    Plugin/PluginProcessWatchdog.h
+    Plugin/PluginHealthReporter.h
 )
 
 set(ENGINE_SOURCES
