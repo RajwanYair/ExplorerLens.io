@@ -1284,6 +1284,66 @@ set(ENGINE_HEADERS
     Utils/FeatureFlagRegistry.h
     Utils/TelemetrySampler.h
     Utils/DeploymentVerifier.h
+    # Sprint 399 — EP V15 Phase 4
+    # Core
+    Core/ThumbnailStreamMultiplexer.h
+    Core/FileSystemWatchdog.h
+    Core/ShellBadgeRenderer.h
+    Core/DynamicFormatRouter.h
+    Core/ThumbnailCacheWarmer.h
+    Core/ContextualPreviewEngine.h
+    Core/FileSizeEstimator.h
+    Core/ConcurrentExtractScheduler.h
+    Core/ThumbnailPrefetchOracle.h
+    Core/ShellPropertyStoreRouter.h
+    # Pipeline
+    Pipeline/AdaptivePipelineScheduler.h
+    Pipeline/StreamingThumbnailEmitter.h
+    Pipeline/PipelineLoadShedder.h
+    Pipeline/FormatDetectionOracle.h
+    Pipeline/DecodeThroughputRegulator.h
+    Pipeline/MemoryMappedPipelineStage.h
+    Pipeline/BatchPriorityScheduler.h
+    Pipeline/PipelineLatencyTracker.h
+    # GPU
+    GPU/GPUTextureMipChain.h
+    GPU/ShaderHotReloader.h
+    GPU/GPUOccupancyCalculator.h
+    GPU/ComputeDispatchOptimizer.h
+    GPU/GPUFormatConverter.h
+    GPU/GPUThumbnailCompositor.h
+    # Cache
+    Cache/CachePredictiveLoader.h
+    Cache/CacheDeduplicationEngine.h
+    Cache/CacheMigrationManager.h
+    Cache/CacheVersionCoordinator.h
+    Cache/CacheDiagnosticReporter.h
+    Cache/CacheEvictionSimulator.h
+    # Memory
+    Memory/BitmapMemoryRecycler.h
+    Memory/MemoryPressureResponder.h
+    Memory/ZeroFragmentationHeap.h
+    Memory/MemoryAllocationTracer.h
+    Memory/NUMANodeAllocator.h
+    # Decoders
+    Decoders/AnimatedFormatDecoder.h
+    Decoders/EmbeddedThumbnailDecoder.h
+    Decoders/MultipageDocumentDecoder.h
+    Decoders/SidecarMetadataDecoder.h
+    Decoders/ContainerPreviewDecoder.h
+    # AI
+    AI/SmartCropPredictor.h
+    AI/ThumbnailQualityScorer.h
+    AI/ContentClassifier.h
+    AI/DuplicateImageDetector.h
+    AI/AutoOrientationCorrector.h
+    # Plugin
+    Plugin/PluginCapabilityNegotiator.h
+    Plugin/PluginStateCoordinator.h
+    Plugin/PluginCommunicationBridge.h
+    # Utils
+    Utils/DiagnosticBundleCollector.h
+    Utils/RegressionTestRunner.h
 )
 
 set(ENGINE_SOURCES

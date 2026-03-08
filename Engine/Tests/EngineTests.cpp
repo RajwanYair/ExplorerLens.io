@@ -1070,6 +1070,57 @@
 #include "../Utils/FeatureFlagRegistry.h"
 #include "../Utils/TelemetrySampler.h"
 #include "../Utils/DeploymentVerifier.h"
+// Sprint 399 — EP V15 Phase 4
+#include "../Core/ThumbnailStreamMultiplexer.h"
+#include "../Core/FileSystemWatchdog.h"
+#include "../Core/ShellBadgeRenderer.h"
+#include "../Core/DynamicFormatRouter.h"
+#include "../Core/ThumbnailCacheWarmer.h"
+#include "../Core/ContextualPreviewEngine.h"
+#include "../Core/FileSizeEstimator.h"
+#include "../Core/ConcurrentExtractScheduler.h"
+#include "../Core/ThumbnailPrefetchOracle.h"
+#include "../Core/ShellPropertyStoreRouter.h"
+#include "../Pipeline/AdaptivePipelineScheduler.h"
+#include "../Pipeline/StreamingThumbnailEmitter.h"
+#include "../Pipeline/PipelineLoadShedder.h"
+#include "../Pipeline/FormatDetectionOracle.h"
+#include "../Pipeline/DecodeThroughputRegulator.h"
+#include "../Pipeline/MemoryMappedPipelineStage.h"
+#include "../Pipeline/BatchPriorityScheduler.h"
+#include "../Pipeline/PipelineLatencyTracker.h"
+#include "../GPU/GPUTextureMipChain.h"
+#include "../GPU/ShaderHotReloader.h"
+#include "../GPU/GPUOccupancyCalculator.h"
+#include "../GPU/ComputeDispatchOptimizer.h"
+#include "../GPU/GPUFormatConverter.h"
+#include "../GPU/GPUThumbnailCompositor.h"
+#include "../Cache/CachePredictiveLoader.h"
+#include "../Cache/CacheDeduplicationEngine.h"
+#include "../Cache/CacheMigrationManager.h"
+#include "../Cache/CacheVersionCoordinator.h"
+#include "../Cache/CacheDiagnosticReporter.h"
+#include "../Cache/CacheEvictionSimulator.h"
+#include "../Memory/BitmapMemoryRecycler.h"
+#include "../Memory/MemoryPressureResponder.h"
+#include "../Memory/ZeroFragmentationHeap.h"
+#include "../Memory/MemoryAllocationTracer.h"
+#include "../Memory/NUMANodeAllocator.h"
+#include "../Decoders/AnimatedFormatDecoder.h"
+#include "../Decoders/EmbeddedThumbnailDecoder.h"
+#include "../Decoders/MultipageDocumentDecoder.h"
+#include "../Decoders/SidecarMetadataDecoder.h"
+#include "../Decoders/ContainerPreviewDecoder.h"
+#include "../AI/SmartCropPredictor.h"
+#include "../AI/ThumbnailQualityScorer.h"
+#include "../AI/ContentClassifier.h"
+#include "../AI/DuplicateImageDetector.h"
+#include "../AI/AutoOrientationCorrector.h"
+#include "../Plugin/PluginCapabilityNegotiator.h"
+#include "../Plugin/PluginStateCoordinator.h"
+#include "../Plugin/PluginCommunicationBridge.h"
+#include "../Utils/DiagnosticBundleCollector.h"
+#include "../Utils/RegressionTestRunner.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -26052,6 +26103,393 @@ TEST(Test_S398_DeploymentVerifier) {
     ASSERT(v.GetName() == "DeploymentVerifier");
 }
 
+// Sprint 399 — EP V15 Phase 4 Tests
+
+TEST(Test_S399_ThumbnailStreamMultiplexer) {
+    ThumbnailStreamMultiplexer t;
+    ASSERT(t.Initialize());
+    ASSERT(t.IsInitialized());
+    ASSERT(t.GetName() == "ThumbnailStreamMultiplexer");
+}
+
+TEST(Test_S399_FileSystemWatchdog) {
+    FileSystemWatchdog f;
+    ASSERT(f.Initialize());
+    ASSERT(f.IsInitialized());
+    ASSERT(f.GetName() == "FileSystemWatchdog");
+}
+
+TEST(Test_S399_ShellBadgeRenderer) {
+    ShellBadgeRenderer s;
+    ASSERT(s.Initialize());
+    ASSERT(s.IsInitialized());
+    ASSERT(s.GetName() == "ShellBadgeRenderer");
+}
+
+TEST(Test_S399_DynamicFormatRouter) {
+    DynamicFormatRouter d;
+    ASSERT(d.Initialize());
+    ASSERT(d.IsInitialized());
+    ASSERT(d.GetName() == "DynamicFormatRouter");
+}
+
+TEST(Test_S399_ThumbnailCacheWarmer) {
+    ThumbnailCacheWarmer t;
+    ASSERT(t.Initialize());
+    ASSERT(t.IsInitialized());
+    ASSERT(t.GetName() == "ThumbnailCacheWarmer");
+}
+
+TEST(Test_S399_ContextualPreviewEngine) {
+    ContextualPreviewEngine c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "ContextualPreviewEngine");
+}
+
+TEST(Test_S399_FileSizeEstimator) {
+    FileSizeEstimator f;
+    ASSERT(f.Initialize());
+    ASSERT(f.IsInitialized());
+    ASSERT(f.GetName() == "FileSizeEstimator");
+    ASSERT(f.GetConfig().maxHeaderRead == 4096);
+}
+
+TEST(Test_S399_ConcurrentExtractScheduler) {
+    ConcurrentExtractScheduler c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "ConcurrentExtractScheduler");
+}
+
+TEST(Test_S399_ThumbnailPrefetchOracle) {
+    ThumbnailPrefetchOracle t;
+    ASSERT(t.Initialize());
+    ASSERT(t.IsInitialized());
+    ASSERT(t.GetName() == "ThumbnailPrefetchOracle");
+}
+
+TEST(Test_S399_ShellPropertyStoreRouter) {
+    ShellPropertyStoreRouter s;
+    ASSERT(s.Initialize());
+    ASSERT(s.IsInitialized());
+    ASSERT(s.GetName() == "ShellPropertyStoreRouter");
+}
+
+TEST(Test_S399_AdaptivePipelineScheduler) {
+    AdaptivePipelineScheduler a;
+    ASSERT(a.Initialize());
+    ASSERT(a.IsInitialized());
+    ASSERT(a.GetName() == "AdaptivePipelineScheduler");
+}
+
+TEST(Test_S399_StreamingThumbnailEmitter) {
+    StreamingThumbnailEmitter s;
+    ASSERT(s.Initialize());
+    ASSERT(s.IsInitialized());
+    ASSERT(s.GetName() == "StreamingThumbnailEmitter");
+}
+
+TEST(Test_S399_PipelineLoadShedder) {
+    PipelineLoadShedder p;
+    ASSERT(p.Initialize());
+    ASSERT(p.IsInitialized());
+    ASSERT(p.GetName() == "PipelineLoadShedder");
+    ASSERT(p.Evaluate(10, 100) == PipelineLoadShedder::Decision::Accept);
+}
+
+TEST(Test_S399_FormatDetectionOracle) {
+    FormatDetectionOracle f;
+    ASSERT(f.Initialize());
+    ASSERT(f.IsInitialized());
+    ASSERT(f.GetName() == "FormatDetectionOracle");
+}
+
+TEST(Test_S399_DecodeThroughputRegulator) {
+    DecodeThroughputRegulator d;
+    ASSERT(d.Initialize());
+    ASSERT(d.IsInitialized());
+    ASSERT(d.GetName() == "DecodeThroughputRegulator");
+}
+
+TEST(Test_S399_MemoryMappedPipelineStage) {
+    MemoryMappedPipelineStage m;
+    ASSERT(m.Initialize());
+    ASSERT(m.IsInitialized());
+    ASSERT(m.GetName() == "MemoryMappedPipelineStage");
+}
+
+TEST(Test_S399_BatchPriorityScheduler) {
+    BatchPriorityScheduler b;
+    ASSERT(b.Initialize());
+    ASSERT(b.IsInitialized());
+    ASSERT(b.GetName() == "BatchPriorityScheduler");
+}
+
+TEST(Test_S399_PipelineLatencyTracker) {
+    PipelineLatencyTracker p;
+    ASSERT(p.Initialize());
+    ASSERT(p.IsInitialized());
+    ASSERT(p.GetName() == "PipelineLatencyTracker");
+}
+
+TEST(Test_S399_GPUTextureMipChain) {
+    GPUTextureMipChain g;
+    ASSERT(g.Initialize());
+    ASSERT(g.IsInitialized());
+    ASSERT(g.GetName() == "GPUTextureMipChain");
+    ASSERT(g.CalculateMipCount(1024, 1024) > 1);
+}
+
+TEST(Test_S399_ShaderHotReloader) {
+    ShaderHotReloader s;
+    ASSERT(s.Initialize());
+    ASSERT(s.IsInitialized());
+    ASSERT(s.GetName() == "ShaderHotReloader");
+}
+
+TEST(Test_S399_GPUOccupancyCalculator) {
+    GPUOccupancyCalculator g;
+    ASSERT(g.Initialize());
+    ASSERT(g.IsInitialized());
+    ASSERT(g.GetName() == "GPUOccupancyCalculator");
+    auto occ = g.Calculate(128, 32, 64);
+    ASSERT(occ.theoreticalOccupancy >= 0.0f && occ.theoreticalOccupancy <= 1.0f);
+}
+
+TEST(Test_S399_ComputeDispatchOptimizer) {
+    ComputeDispatchOptimizer c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "ComputeDispatchOptimizer");
+    auto d = c.CalculateOptimal(1920, 1080);
+    ASSERT(d.x > 0 && d.y > 0);
+}
+
+TEST(Test_S399_GPUFormatConverter) {
+    GPUFormatConverter g;
+    ASSERT(g.Initialize());
+    ASSERT(g.IsInitialized());
+    ASSERT(g.GetName() == "GPUFormatConverter");
+}
+
+TEST(Test_S399_GPUThumbnailCompositor) {
+    GPUThumbnailCompositor g;
+    ASSERT(g.Initialize());
+    ASSERT(g.IsInitialized());
+    ASSERT(g.GetName() == "GPUThumbnailCompositor");
+}
+
+TEST(Test_S399_CachePredictiveLoader) {
+    CachePredictiveLoader c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "CachePredictiveLoader");
+}
+
+TEST(Test_S399_CacheDeduplicationEngine) {
+    CacheDeduplicationEngine c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "CacheDeduplicationEngine");
+}
+
+TEST(Test_S399_CacheMigrationManager) {
+    CacheMigrationManager c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "CacheMigrationManager");
+}
+
+TEST(Test_S399_CacheVersionCoordinator) {
+    CacheVersionCoordinator c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "CacheVersionCoordinator");
+}
+
+TEST(Test_S399_CacheDiagnosticReporter) {
+    CacheDiagnosticReporter c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "CacheDiagnosticReporter");
+}
+
+TEST(Test_S399_CacheEvictionSimulator) {
+    CacheEvictionSimulator c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "CacheEvictionSimulator");
+    auto r = c.SimulateLRU({ 1, 2, 3, 1, 2, 4, 5 });
+    ASSERT(r.hits + r.misses == 7);
+}
+
+TEST(Test_S399_BitmapMemoryRecycler) {
+    BitmapMemoryRecycler b;
+    ASSERT(b.Initialize());
+    ASSERT(b.IsInitialized());
+    ASSERT(b.GetName() == "BitmapMemoryRecycler");
+}
+
+TEST(Test_S399_MemoryPressureResponder) {
+    MemoryPressureResponder m;
+    ASSERT(m.Initialize());
+    ASSERT(m.IsInitialized());
+    ASSERT(m.GetName() == "MemoryPressureResponder");
+}
+
+TEST(Test_S399_ZeroFragmentationHeap) {
+    ZeroFragmentationHeap z;
+    ASSERT(z.Initialize());
+    ASSERT(z.IsInitialized());
+    ASSERT(z.GetName() == "ZeroFragmentationHeap");
+}
+
+TEST(Test_S399_MemoryAllocationTracer) {
+    MemoryAllocationTracer m;
+    ASSERT(m.Initialize());
+    ASSERT(m.IsInitialized());
+    ASSERT(m.GetName() == "MemoryAllocationTracer");
+}
+
+TEST(Test_S399_NUMANodeAllocator) {
+    NUMANodeAllocator n;
+    ASSERT(n.Initialize());
+    ASSERT(n.IsInitialized());
+    ASSERT(n.GetName() == "NUMANodeAllocator");
+}
+
+TEST(Test_S399_AnimatedFormatDecoder) {
+    AnimatedFormatDecoder a;
+    ASSERT(a.Initialize());
+    ASSERT(a.IsInitialized());
+    ASSERT(a.GetName() == "AnimatedFormatDecoder");
+}
+
+TEST(Test_S399_EmbeddedThumbnailDecoder) {
+    EmbeddedThumbnailDecoder e;
+    ASSERT(e.Initialize());
+    ASSERT(e.IsInitialized());
+    ASSERT(e.GetName() == "EmbeddedThumbnailDecoder");
+}
+
+TEST(Test_S399_MultipageDocumentDecoder) {
+    MultipageDocumentDecoder m;
+    ASSERT(m.Initialize());
+    ASSERT(m.IsInitialized());
+    ASSERT(m.GetName() == "MultipageDocumentDecoder");
+}
+
+TEST(Test_S399_SidecarMetadataDecoder) {
+    SidecarMetadataDecoder s;
+    ASSERT(s.Initialize());
+    ASSERT(s.IsInitialized());
+    ASSERT(s.GetName() == "SidecarMetadataDecoder");
+}
+
+TEST(Test_S399_ContainerPreviewDecoder) {
+    ContainerPreviewDecoder c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "ContainerPreviewDecoder");
+}
+
+TEST(Test_S399_SmartCropPredictor) {
+    SmartCropPredictor s;
+    ASSERT(s.Initialize());
+    ASSERT(s.IsInitialized());
+    ASSERT(s.GetName() == "SmartCropPredictor");
+    auto crop = s.PredictCrop(1920, 1080, 256, 256);
+    ASSERT(crop.width > 0 && crop.height > 0);
+}
+
+TEST(Test_S399_ThumbnailQualityScorer) {
+    ThumbnailQualityScorer t;
+    ASSERT(t.Initialize());
+    ASSERT(t.IsInitialized());
+    ASSERT(t.GetName() == "ThumbnailQualityScorer");
+    auto score = t.Score(256, 256, 0.5f, 0.3f);
+    ASSERT(score.overall > 0.0f);
+    ASSERT(t.IsAcceptable(score));
+}
+
+TEST(Test_S399_ContentClassifier) {
+    ContentClassifier c;
+    ASSERT(c.Initialize());
+    ASSERT(c.IsInitialized());
+    ASSERT(c.GetName() == "ContentClassifier");
+    auto cat = c.Classify(1920, 1080, 0.5f, 0.1f);
+    ASSERT(cat == ContentClassifier::Category::Landscape);
+}
+
+TEST(Test_S399_DuplicateImageDetector) {
+    DuplicateImageDetector d;
+    ASSERT(d.Initialize());
+    ASSERT(d.IsInitialized());
+    ASSERT(d.GetName() == "DuplicateImageDetector");
+    ASSERT(d.IsExactMatch(0xDEADBEEF, 0xDEADBEEF));
+    ASSERT(!d.IsExactMatch(0xDEADBEEF, 0xCAFEBABE));
+    ASSERT(d.HammingDistance(0, 0) == 0);
+}
+
+TEST(Test_S399_AutoOrientationCorrector) {
+    AutoOrientationCorrector a;
+    ASSERT(a.Initialize());
+    ASSERT(a.IsInitialized());
+    ASSERT(a.GetName() == "AutoOrientationCorrector");
+}
+
+TEST(Test_S399_PluginCapabilityNegotiator) {
+    PluginCapabilityNegotiator p;
+    ASSERT(p.Initialize());
+    ASSERT(p.IsInitialized());
+    ASSERT(p.GetName() == "PluginCapabilityNegotiator");
+    ASSERT(p.IsAbiCompatible(2));
+    auto r = p.Negotiate(2, true, false);
+    ASSERT(r.compatible);
+    ASSERT(r.agreedAbiVersion == 2);
+}
+
+TEST(Test_S399_PluginStateCoordinator) {
+    PluginStateCoordinator p;
+    ASSERT(p.Initialize());
+    ASSERT(p.IsInitialized());
+    ASSERT(p.GetName() == "PluginStateCoordinator");
+    ASSERT(p.Activate("test-plugin"));
+    ASSERT(p.GetActiveCount() == 1);
+    ASSERT(p.Deactivate("test-plugin"));
+    ASSERT(p.GetActiveCount() == 0);
+}
+
+TEST(Test_S399_PluginCommunicationBridge) {
+    PluginCommunicationBridge p;
+    ASSERT(p.Initialize());
+    ASSERT(p.IsInitialized());
+    ASSERT(p.GetName() == "PluginCommunicationBridge");
+    ASSERT(p.Broadcast("sender", "topic", 42));
+    ASSERT(p.GetMessagesSent() == 1);
+}
+
+TEST(Test_S399_DiagnosticBundleCollector) {
+    DiagnosticBundleCollector d;
+    ASSERT(d.Initialize());
+    ASSERT(d.IsInitialized());
+    ASSERT(d.GetName() == "DiagnosticBundleCollector");
+    auto bundle = d.Collect();
+    ASSERT(d.IsComplete(bundle));
+    ASSERT(bundle.engineVersion == "15.0.0");
+}
+
+TEST(Test_S399_RegressionTestRunner) {
+    RegressionTestRunner r;
+    ASSERT(r.Initialize());
+    ASSERT(r.IsInitialized());
+    ASSERT(r.GetName() == "RegressionTestRunner");
+    auto suite = r.RunSuite({ "test1", "test2", "test3" });
+    ASSERT(suite.totalTests == 3);
+    ASSERT(suite.passRate == 100.0f);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30269,6 +30707,57 @@ int main() {
     RUN_TEST(Test_S398_FeatureFlagRegistry);
     RUN_TEST(Test_S398_TelemetrySampler);
     RUN_TEST(Test_S398_DeploymentVerifier);
+    // Sprint 399 — EP V15 Phase 4
+    RUN_TEST(Test_S399_ThumbnailStreamMultiplexer);
+    RUN_TEST(Test_S399_FileSystemWatchdog);
+    RUN_TEST(Test_S399_ShellBadgeRenderer);
+    RUN_TEST(Test_S399_DynamicFormatRouter);
+    RUN_TEST(Test_S399_ThumbnailCacheWarmer);
+    RUN_TEST(Test_S399_ContextualPreviewEngine);
+    RUN_TEST(Test_S399_FileSizeEstimator);
+    RUN_TEST(Test_S399_ConcurrentExtractScheduler);
+    RUN_TEST(Test_S399_ThumbnailPrefetchOracle);
+    RUN_TEST(Test_S399_ShellPropertyStoreRouter);
+    RUN_TEST(Test_S399_AdaptivePipelineScheduler);
+    RUN_TEST(Test_S399_StreamingThumbnailEmitter);
+    RUN_TEST(Test_S399_PipelineLoadShedder);
+    RUN_TEST(Test_S399_FormatDetectionOracle);
+    RUN_TEST(Test_S399_DecodeThroughputRegulator);
+    RUN_TEST(Test_S399_MemoryMappedPipelineStage);
+    RUN_TEST(Test_S399_BatchPriorityScheduler);
+    RUN_TEST(Test_S399_PipelineLatencyTracker);
+    RUN_TEST(Test_S399_GPUTextureMipChain);
+    RUN_TEST(Test_S399_ShaderHotReloader);
+    RUN_TEST(Test_S399_GPUOccupancyCalculator);
+    RUN_TEST(Test_S399_ComputeDispatchOptimizer);
+    RUN_TEST(Test_S399_GPUFormatConverter);
+    RUN_TEST(Test_S399_GPUThumbnailCompositor);
+    RUN_TEST(Test_S399_CachePredictiveLoader);
+    RUN_TEST(Test_S399_CacheDeduplicationEngine);
+    RUN_TEST(Test_S399_CacheMigrationManager);
+    RUN_TEST(Test_S399_CacheVersionCoordinator);
+    RUN_TEST(Test_S399_CacheDiagnosticReporter);
+    RUN_TEST(Test_S399_CacheEvictionSimulator);
+    RUN_TEST(Test_S399_BitmapMemoryRecycler);
+    RUN_TEST(Test_S399_MemoryPressureResponder);
+    RUN_TEST(Test_S399_ZeroFragmentationHeap);
+    RUN_TEST(Test_S399_MemoryAllocationTracer);
+    RUN_TEST(Test_S399_NUMANodeAllocator);
+    RUN_TEST(Test_S399_AnimatedFormatDecoder);
+    RUN_TEST(Test_S399_EmbeddedThumbnailDecoder);
+    RUN_TEST(Test_S399_MultipageDocumentDecoder);
+    RUN_TEST(Test_S399_SidecarMetadataDecoder);
+    RUN_TEST(Test_S399_ContainerPreviewDecoder);
+    RUN_TEST(Test_S399_SmartCropPredictor);
+    RUN_TEST(Test_S399_ThumbnailQualityScorer);
+    RUN_TEST(Test_S399_ContentClassifier);
+    RUN_TEST(Test_S399_DuplicateImageDetector);
+    RUN_TEST(Test_S399_AutoOrientationCorrector);
+    RUN_TEST(Test_S399_PluginCapabilityNegotiator);
+    RUN_TEST(Test_S399_PluginStateCoordinator);
+    RUN_TEST(Test_S399_PluginCommunicationBridge);
+    RUN_TEST(Test_S399_DiagnosticBundleCollector);
+    RUN_TEST(Test_S399_RegressionTestRunner);
 
     std::wcout << std::endl;
 
