@@ -5,6 +5,61 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [15.1.0] "Zenith-R" - 2026-03
+
+### Changed — Major Refactoring Sprint
+
+#### Architecture
+- **C++20 concepts** for decoder interfaces — compile-time type safety for all decoder registrations
+- **std::expected** error handling — replacing HRESULT with modern monadic error types
+- **Data-driven format registry** — declarative format definitions (inspired by RegiLattice pattern)
+- **Compile-time format validation** — constexpr checks for format table integrity
+
+#### Language Migration
+- **C# WinUI 3 Manager** — Modern Fluent Design replacement for legacy WTL dialog
+  - NavigationView shell with format registration, settings, diagnostics pages
+  - Native dark mode, Mica backdrop, responsive layout
+  - COM interop bridge for shell extension management
+- **Manager.WinUI project** migrated from WTL/ATL C++ to .NET 10 C# with WinUI 3
+
+#### New Decoders
+- QOI (Quite OK Image) — lossless, fast decode
+- JPEG-XS — low-latency professional format
+- PCX — legacy paintbrush format
+- TGA/Targa — enhanced with RLE support
+- ICO/CUR — Windows icon/cursor with size selection
+- FITS — astronomy format with stretch algorithms
+- PSD/PSB — Adobe Photoshop layer composite
+- XCF — GIMP native format
+
+#### Performance
+- SIMD pixel conversion (AVX2/SSE4.2) for color space transforms
+- Memory-mapped decode for large files (>100MB)
+- AI-assisted smart thumbnail cropping
+- GPU shader hot-reload for development
+- Cache analytics and telemetry
+
+#### Best-in-Class Features
+- Explorer preview handler (IPreviewHandler) for full-page previews
+- File property sheet provider for metadata in Details pane
+- Context menu integration for manual thumbnail regeneration
+- Batch thumbnail CLI tool for command-line automation
+- Plugin SDK v3 with Rust FFI support
+- Enterprise policy templates (GPO/Intune)
+- Localization framework with 12 languages
+- WCAG 2.1 AA accessibility compliance
+- Auto-update mechanism with delta downloads
+- Cloud thumbnail provider (OneDrive/GoogleDrive/Dropbox)
+
+#### DevOps
+- Cross-platform CI/CD test matrix (Windows x64, ARM64, Linux, macOS)
+- SBOM generation (CycloneDX)
+- WiX MSI installer with feature selection
+- Portable ZIP package for xcopy deployment
+- Security hardening audit (OWASP Top 10)
+
+---
+
 ## [15.0.0] "Zenith" - 2026-07
 
 ### Added
