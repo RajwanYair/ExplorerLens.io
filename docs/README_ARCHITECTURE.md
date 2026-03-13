@@ -1,6 +1,6 @@
 # ExplorerLens — Architecture Reference
 
-> **Version:** 15.0.0 "Zenith" | **Last Updated:** 2026-02-26
+> **Version:** 15.0.0 "Zenith" | **Last Updated:** 2026-03-10
 
 ## System Overview
 
@@ -108,9 +108,9 @@ Request processing pipeline with zero-copy data paths:
 | `FormatDetector` | Magic-byte based format identification |
 | `DecoderRegistry` | Maps formats to decoder instances |
 | `ZeroCopyPipeline` | Decoder → GPU without intermediate copies |
-| `ZeroCopyActivation` | Production activation wrapper |
+| `ZeroCopyActivation` | Production activation wrapper (GPU-direct uploads) |
 | `ParallelIOPipeline` | IOCP-based multi-file parallel reads |
-| `ParallelIOActivation` | Production parallel I/O activation |
+| `ParallelIOActivation` | Production parallel I/O activation (batch pre-read) |
 | `PipelineActivator` | Orchestrates all subsystem activation |
 | `AsyncThumbnailProvider` | Non-blocking thumbnail generation |
 | `ParallelBatchDecoder` | Multi-threaded batch decode |
@@ -255,7 +255,7 @@ CMake 3.20+ → Ninja → MSVC v145 (cl.exe 19.50)
 | Cache hit latency | < 5 ms | < 0.5 ms |
 | Memory footprint | < 50 MB idle | ~35 MB |
 | DLL size | < 3 MB | 2940 KB |
-| Test count | > 1000 | 2171 |
+| Test count | > 1000 | 2938 |
 | Warning count | 0 | 0 |
 
 ## Security Model
@@ -266,3 +266,16 @@ CMake 3.20+ → Ninja → MSVC v145 (cl.exe 19.50)
 - **Code Signing:** Authenticode for plugins via PluginTrustChain
 - **Memory Safety:** ASLR, DEP, CFG enabled; /GS buffer overrun detection
 - **Race Protection:** SRWLOCK throughout for thread safety
+
+## Cross-Platform Support (Python)
+
+The `ExplorerLens.py` package provides cross-platform thumbnail generation:
+
+| Platform | Backend | Module |
+| -------- | ------- | ------ |
+| Windows | COM IThumbnailProvider | `shell.com_server` |
+| Linux | Freedesktop.org .thumbnailer | `shell.linux_thumbnailer` |
+| macOS | Quick Look .qlgenerator | `shell.macos_quicklook` |
+
+All platforms share the same `platform_provider` abstraction for registration,
+unregistration, and status queries.

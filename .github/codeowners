@@ -1,0 +1,45 @@
+# CODEOWNERS
+# =============================================================================
+# Universal Project Enhancement Framework v12.0.0
+# =============================================================================
+#
+# Defines code owners for all projects in this workspace.
+# Owners are requested for review when a pull request changes files
+# matching the patterns below.
+#
+# Syntax: <pattern> <owner> [<owner> ...]
+# Owners can be GitHub usernames (@user), teams (@org/team), or email addresses.
+# =============================================================================
+
+# Default: all files
+* @aeger
+
+# =============================================================================
+# WORKSPACE-LEVEL CONFIGS
+# =============================================================================
+/.github/                   @aeger
+/pyproject.toml             @aeger
+/pyrightconfig.json         @aeger
+/.flake8                    @aeger
+/.gitignore                 @aeger
+/.gitattributes             @aeger
+/.markdownlint.json         @aeger
+/requirements.txt           @aeger
+/apt-packages.txt           @aeger
+/PROJECT_SPEC_PROMPT.md     @aeger
+
+# =============================================================================
+# PROJECTS
+# =============================================================================
+/RegiLattice/               @aeger
+/Scripts.DupDetector/       @aeger
+/Scripts.FileNameManipulator/ @aeger
+/Scripts.FileProcessor/     @aeger
+/Scripts.OptimizeBrowsers/  @aeger
+/ExplorerLens.io/           @aeger
+/Scripts.PPA/               @aeger
+/Scripts.SortComics/        @aeger
+/Scripts.UbuntuEnhancer/    @aeger
+/Scripts.VHDXCompress/      @aeger
+/Scripts.OptimizeWIN_n_WSL/ @aeger
+/Scripts.VSCode.RemoteSSH.Verifier/ @aeger

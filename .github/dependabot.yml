@@ -1,0 +1,62 @@
+# Dependabot Configuration
+# Automated dependency updates for all projects
+
+version: 2
+updates:
+  # ============================================================================
+  # PYTHON DEPENDENCIES
+  # ============================================================================
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    # Group updates to reduce PR noise
+    groups:
+      dev-dependencies:
+        patterns:
+          - "pytest*"
+          - "black"
+          - "flake8"
+          - "mypy"
+          - "coverage"
+          - "bandit"
+          - "isort"
+      web-frameworks:
+        patterns:
+          - "fastapi*"
+          - "uvicorn*"
+          - "flask*"
+          - "jinja2"
+      data-processing:
+        patterns:
+          - "pandas*"
+          - "numpy*"
+          - "pillow*"
+
+  # ============================================================================
+  # GITHUB ACTIONS
+  # ============================================================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"

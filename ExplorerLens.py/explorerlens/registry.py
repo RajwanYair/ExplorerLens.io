@@ -32,9 +32,7 @@ def get_registered_extensions() -> dict[str, str]:
     result: dict[str, str] = {}
 
     try:
-        classes_key = winreg.OpenKey(
-            winreg.HKEY_LOCAL_MACHINE, "Software\\Classes"
-        )
+        classes_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "Software\\Classes")
         idx = 0
         while True:
             try:
@@ -70,17 +68,15 @@ def set_thumbnail_cache_enabled(enabled: bool) -> bool:
     if not is_admin():
         return False
     try:
-        path = (
-            "Software\\Microsoft\\Windows\\CurrentVersion\\"
-            "Explorer\\Advanced"
-        )
-        with winreg.OpenKey(
-            winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_WRITE
-        ) as key:
+        path = "Software\\Microsoft\\Windows\\CurrentVersion\\" "Explorer\\Advanced"
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_WRITE) as key:
             val = 0 if enabled else 1
             winreg.SetValueEx(
-                key, "DisableThumbnailCache",
-                0, winreg.REG_DWORD, val,
+                key,
+                "DisableThumbnailCache",
+                0,
+                winreg.REG_DWORD,
+                val,
             )
         return True
     except OSError as exc:
@@ -93,9 +89,7 @@ def flush_thumbnail_cache() -> bool:
     import glob
     import os
 
-    cache_dir = os.path.expandvars(
-        r"%LOCALAPPDATA%\Microsoft\Windows\Explorer"
-    )
+    cache_dir = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Explorer")
     try:
         pattern = os.path.join(cache_dir, "thumbcache_*.db")
         for f in glob.glob(pattern):

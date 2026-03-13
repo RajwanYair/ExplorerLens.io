@@ -5,6 +5,7 @@ Cross-platform shell thumbnail integration.
 
 - Windows: COM IThumbnailProvider (com_server)
 - Linux:   Freedesktop.org thumbnailer (linux_thumbnailer)
+- macOS:   Quick Look generator (macos_quicklook)
 - Unified: platform_provider auto-detects the OS
 """
 

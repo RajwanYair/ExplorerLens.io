@@ -1,0 +1,94 @@
+# =============================================================================
+# FLAKE8 CONFIGURATION
+# Universal Project Enhancement Framework v12.0.0
+# =============================================================================
+#
+# Note: Ruff is the preferred linter (configured in pyproject.toml).
+# This .flake8 file is provided for compatibility with tools and CI pipelines
+# that invoke flake8 directly.
+#
+# Both are configured to the same standard so results are consistent.
+# =============================================================================
+
+[flake8]
+# -----------------------------------------------------------------------------
+# Line length — match ruff / black
+# -----------------------------------------------------------------------------
+max-line-length = 100
+max-doc-length = 120
+
+# -----------------------------------------------------------------------------
+# Error codes to ignore
+# -----------------------------------------------------------------------------
+extend-ignore =
+    # E501: line too long — handled by formatter
+    E501,
+    # W503: line break before binary operator — conflicts with black
+    W503,
+    # W504: line break after binary operator — conflicts with black
+    W504,
+    # E203: whitespace before ':' — conflicts with black slice notation
+    E203,
+    # E402: module level import not at top of file — lazy imports are fine
+    E402,
+    # E704: statement on same line as def — lambda-style short functions OK
+    E704,
+    # E711: comparison to None — 'is None' vs '== None' style handled by ruff
+    E711,
+    # E712: comparison to True/False — handled by ruff
+    E712,
+
+# -----------------------------------------------------------------------------
+# Directories to exclude
+# -----------------------------------------------------------------------------
+exclude =
+    .git,
+    __pycache__,
+    .mypy_cache,
+    .pytest_cache,
+    .venv,
+    venv,
+    env,
+    .eggs,
+    *.egg-info,
+    build,
+    dist,
+    docs,
+    external,
+    archive,
+    legacy,
+    node_modules,
+    htmlcov,
+    .tox,
+    .nox,
+
+# -----------------------------------------------------------------------------
+# Per-file ignores
+# -----------------------------------------------------------------------------
+per-file-ignores =
+    # Tests: allow asserts, unused imports for fixtures, print statements
+    tests/*.py: S101, F401, T201
+    tests/**/*.py: S101, F401, T201
+    conftest.py: F401, S101
+    # Entry points: allow print
+    */__main__.py: T201
+    */cli*.py: T201
+
+# -----------------------------------------------------------------------------
+# Complexity
+# -----------------------------------------------------------------------------
+max-complexity = 15
+
+# -----------------------------------------------------------------------------
+# Docstring conventions (requires flake8-docstrings plugin)
+# -----------------------------------------------------------------------------
+# docstring-convention = google
+
+# -----------------------------------------------------------------------------
+# Plugins (install as needed)
+# -----------------------------------------------------------------------------
+# flake8-bugbear: pip install flake8-bugbear
+# flake8-comprehensions: pip install flake8-comprehensions
+# flake8-docstrings: pip install flake8-docstrings
+# flake8-bandit: pip install flake8-bandit (security)
+# flake8-isort: pip install flake8-isort (import ordering)

@@ -71,11 +71,10 @@ def register_provider(
         return result is not None
 
     if platform == Platform.MACOS:
-        logger.warning(
-            "macOS Quick Look plugin not yet implemented. "
-            "Use the CLI: python -m explorerlens --thumbnail FILE"
-        )
-        return False
+        from .macos_quicklook import install_quicklook
+
+        result = install_quicklook(system_wide)
+        return result is not None
 
     logger.error("Unsupported platform: %s", sys.platform)
     return False
@@ -100,8 +99,9 @@ def unregister_provider(system_wide: bool = False) -> bool:
         return uninstall_thumbnailer(system_wide)
 
     if platform == Platform.MACOS:
-        logger.info("macOS Quick Look: no cleanup needed")
-        return True
+        from .macos_quicklook import uninstall_quicklook
+
+        return uninstall_quicklook(system_wide)
 
     return False
 
@@ -127,6 +127,11 @@ def get_provider_status() -> dict[str, object]:
         sys_file = _THUMBNAILER_DIR / "explorerlens.thumbnailer"
         info["user_thumbnailer"] = user_file.exists()
         info["system_thumbnailer"] = sys_file.exists()
+
+    elif platform == Platform.MACOS:
+        from .macos_quicklook import get_quicklook_status
+
+        info.update(get_quicklook_status())
 
     return info
 

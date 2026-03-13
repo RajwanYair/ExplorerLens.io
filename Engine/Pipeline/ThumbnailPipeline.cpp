@@ -5,6 +5,9 @@
 #include "../GPU/GDIRenderer.h"
 #include "../Cache/ThumbnailCache.h"
 #include "../Utils/PerformanceProfiler.h"
+#include "ZeroCopyActivation.h"
+#include "ParallelIOActivation.h"
+#include "../Cache/CacheWarmingActivation.h"
 #include "../Decoders/ImageDecoder.h"
 #include "../Decoders/WebPDecoder.h"
 #include "../Decoders/AVIFDecoder.h"
@@ -108,6 +111,12 @@ public:
  std::unordered_map<std::wstring, IThumbnailDecoder*> decoderLookupCache;
  std::mutex decoderLookupCacheMutex;
 
+ // Pipeline activations
+ ZeroCopyActivation zeroCopyActivation;
+ bool zeroCopyEnabled = false;
+ bool parallelIOEnabled = false;
+ bool cacheWarmingEnabled = false;
+
  // Statistics
  uint64_t totalRequests = 0;
  uint64_t cacheHits = 0;
@@ -157,6 +166,34 @@ public:
  auto cache = std::make_unique<ThumbnailCache>();
  if (SUCCEEDED(cache->Initialize())) {
  cacheProvider = std::move(cache);
+ }
+ }
+
+ // Activate zero-copy pipeline for GPU-direct uploads
+ if (config.enableGPU) {
+ zeroCopyEnabled = zeroCopyActivation.Activate(ZeroCopyMode::MappedUpload);
+ if (zeroCopyEnabled) {
+ OutputDebugStringW(L"[Pipeline] Zero-copy pipeline activated\n");
+ }
+ }
+
+ // Activate parallel I/O for batch operations
+ if (config.enableParallelDecode) {
+ auto& pio = ParallelIOActivation::Instance();
+ parallelIOEnabled = pio.Activate(ParallelIOConfig{});
+ if (parallelIOEnabled) {
+ OutputDebugStringW(L"[Pipeline] Parallel I/O pipeline activated\n");
+ }
+ }
+
+ // Activate cache warming for proactive thumbnail generation
+ if (config.enableCache) {
+ auto& warming = CacheWarmingActivation::Instance();
+ WarmActivationConfig warmCfg;
+ warmCfg.strategy = WarmActivationMode::Adaptive;
+ cacheWarmingEnabled = warming.Activate(warmCfg);
+ if (cacheWarmingEnabled) {
+ OutputDebugStringW(L"[Pipeline] Cache warming service activated\n");
  }
  }
 
@@ -304,6 +341,20 @@ public:
  return;
  }
 
+ // Deactivate pipeline subsystems
+ if (zeroCopyEnabled) {
+ zeroCopyActivation.Deactivate();
+ zeroCopyEnabled = false;
+ }
+ if (parallelIOEnabled) {
+ ParallelIOActivation::Instance().Deactivate();
+ parallelIOEnabled = false;
+ }
+ if (cacheWarmingEnabled) {
+ CacheWarmingActivation::Instance().Deactivate();
+ cacheWarmingEnabled = false;
+ }
+
  if (gpuRenderer) {
  gpuRenderer->Shutdown();
  }
@@ -444,6 +495,15 @@ public:
  ScopedTimer decoderTimer(GetDecoderProfileComponent(decoder));
  result.status = decoder->Decode(request, result);
  }
+
+ // Step 4b: Zero-copy GPU upload (if active and decode produced bitmap data)
+ if (SUCCEEDED(result.status) && zeroCopyEnabled && result.hBitmap) {
+ BITMAP bm{};
+ if (GetObject(result.hBitmap, sizeof(bm), &bm) && bm.bmBits) {
+ uint64_t dataSize = static_cast<uint64_t>(bm.bmWidthBytes) * bm.bmHeight;
+ zeroCopyActivation.TransferToGPU(bm.bmBits, dataSize, 0);
+ }
+ }
  
  // Log decode result
  wchar_t resultLog[256];
@@ -459,6 +519,17 @@ public:
  result.width, 
  result.height, 
  result.hBitmap);
+
+ // Step 5b: Trigger cache warming for the parent directory
+ if (cacheWarmingEnabled) {
+  std::wstring parentDir(request.filePath);
+  auto lastSlash = parentDir.find_last_of(L"\\/");
+  if (lastSlash != std::wstring::npos) {
+   parentDir.resize(lastSlash);
+   auto& warming = CacheWarmingActivation::Instance();
+   warming.AddWatchDirectory(parentDir);
+  }
+ }
  }
 
  // Update timing
@@ -625,6 +696,19 @@ std::vector<ThumbnailResult> ThumbnailPipeline::GenerateThumbnailsBatch(
  return results;
  }
  
+ // Pre-read files via parallel I/O if active
+ if (m_impl->parallelIOEnabled) {
+  std::vector<std::wstring> paths;
+  paths.reserve(requests.size());
+  for (const auto& req : requests) {
+   paths.push_back(req.filePath);
+  }
+  auto& pio = ParallelIOActivation::Instance();
+  // Pre-read populates OS file cache; results are not captured because
+  // decoders re-open files themselves, but pages are now resident.
+  (void)pio.ReadFiles(paths);
+ }
+
  // Parallel execution with bounded concurrency
  uint32_t maxConcurrent = m_impl->config.maxConcurrentDecodes;
  if (maxConcurrent == 0) maxConcurrent = 4;
