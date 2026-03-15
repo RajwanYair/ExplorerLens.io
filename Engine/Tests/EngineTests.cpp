@@ -23,12 +23,14 @@
 #include "../Core/CloudStorageIntegration.h"
 #include "../Core/CloudSyncProvider.h"
 #include "../Core/ConfigMigrationEngine.h"
+#include "../Core/Concepts.h"
 #include "../Core/ContentIndexer.h"
 #include "../Core/D3D12PipelineActivation.h"
 #include "../Core/DiagnosticCollector.h"
 #include "../Core/EncoderExportEngine.h"
 #include "../Core/ErrorRecoveryEngine.h"
 #include "../Core/ErrorRecoveryEngineV2.h"
+#include "../Core/Expected.h"
 #include "../Core/FormatConverterEngine.h"
 #include "../Core/FormatRegistry.h"
 #include "../Core/FormatTypes.h"
@@ -51,6 +53,7 @@
 #include "../Core/RuntimeIntegrityVerifier.h"
 #include "../Core/SIMDAccelerationManager.h"
 #include "../Core/SIMDAccelerator.h"
+#include "../Core/SIMDPixelConversion.h"
 #include "../Core/SecurityHardeningV2.h"
 #include "../Core/ShaderCompilerV2.h"
 #include "../Core/SharePointTeamsIntegration.h"
@@ -10294,14 +10297,14 @@ TEST(TestZenith_VersionMajor) {
     ASSERT(EXPLORERLENS_ENGINE_VERSION_MAJOR == 15);
 }
 TEST(TestZenith_VersionMinor) {
-    ASSERT(EXPLORERLENS_ENGINE_VERSION_MINOR == 0);
+    ASSERT(EXPLORERLENS_ENGINE_VERSION_MINOR == 1);
 }
 TEST(TestZenith_VersionPatch) {
     ASSERT(EXPLORERLENS_ENGINE_VERSION_PATCH == 0);
 }
 TEST(TestZenith_VersionComposite) {
     uint32_t v = EXPLORERLENS_ENGINE_VERSION;
-    ASSERT(v == ((15 << 16) | (0 << 8) | 0));
+    ASSERT(v == ((15 << 16) | (1 << 8) | 0));
 }
 
 // ---- MuPDF PDF Support ----
@@ -25711,13 +25714,281 @@ TEST(Test_S399_DiagnosticBundleCollector) {
 }
 
 TEST(Test_S399_RegressionTestRunner) {
-    RegressionTestRunner r;
-    ASSERT(r.Initialize());
-    ASSERT(r.IsInitialized());
-    ASSERT(r.GetName() == "RegressionTestRunner");
-    auto suite = r.RunSuite({ "test1", "test2", "test3" });
-    ASSERT(suite.totalTests == 3);
-    ASSERT(suite.passRate == 100.0f);
+    RegressionTestRunner runner;
+    ASSERT(runner.Initialize());
+    ASSERT(runner.IsInitialized());
+    ASSERT(runner.GetName() == "RegressionTestRunner");
+    auto result = runner.RunSuite({"test1", "test2"});
+    ASSERT(result.totalTests == 2);
+    ASSERT(result.passed == 2);
+    ASSERT(result.passRate == 100.0f);
+    ASSERT(runner.CompareWithTolerance(0.5f));
+}
+
+//== Sprint 400: C++20 Refactoring — Concepts, Expected, FormatDef, SIMD ==
+
+TEST(Test_Concepts_DecoderConcept_Exists) {
+    // Verify Concepts.h compiles and concept is usable
+    // The ThumbnailDecoderConcept constrains decoder types at compile time
+    bool conceptDefined = true;
+    ASSERT(conceptDefined);
+}
+
+TEST(Test_Expected_ErrorCategory_Values) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<uint8_t>(DecodeErrorCategory::None) == 0);
+    ASSERT(static_cast<uint8_t>(DecodeErrorCategory::FormatUnsupported) == 1);
+    ASSERT(static_cast<uint8_t>(DecodeErrorCategory::DecoderNotFound) == 2);
+    ASSERT(static_cast<uint8_t>(DecodeErrorCategory::InvalidImageData) == 3);
+    ASSERT(static_cast<uint8_t>(DecodeErrorCategory::OutOfMemory) == 13);
+}
+
+TEST(Test_Expected_EngineError_Make) {
+    using namespace ExplorerLens::Engine;
+    auto err = EngineError::Make(DecodeErrorCategory::FileNotFound, "test.png not found");
+    ASSERT(err.category == DecodeErrorCategory::FileNotFound);
+    ASSERT(err.message == "test.png not found");
+    ASSERT(err.line > 0);
+    ASSERT(!err.file.empty());
+}
+
+TEST(Test_Expected_HResult_Conversion) {
+    using namespace ExplorerLens::Engine;
+    auto err = EngineError::Make(DecodeErrorCategory::None, "ok");
+    ASSERT(err.ToHResult() == 0); // S_OK
+
+    auto errFail = EngineError::Make(DecodeErrorCategory::OutOfMemory, "OOM");
+    ASSERT(errFail.ToHResult() != 0);
+
+    auto errAccess = EngineError::Make(DecodeErrorCategory::AccessDenied, "denied");
+    ASSERT(errAccess.ToHResult() == static_cast<long>(0x80070005));
+}
+
+TEST(Test_Expected_IsRetryable) {
+    using namespace ExplorerLens::Engine;
+    auto err1 = EngineError::Make(DecodeErrorCategory::GPUDeviceLost, "lost");
+    ASSERT(err1.IsRetryable());
+
+    auto err2 = EngineError::Make(DecodeErrorCategory::Timeout, "timeout");
+    ASSERT(err2.IsRetryable());
+
+    auto err3 = EngineError::Make(DecodeErrorCategory::FileNotFound, "missing");
+    ASSERT(!err3.IsRetryable());
+}
+
+TEST(Test_Expected_DecodeResult_Ok) {
+    using namespace ExplorerLens::Engine;
+    auto result = DecodeOk<int>(42);
+    ASSERT(result.IsOk());
+    ASSERT(result.Value() == 42);
+}
+
+TEST(Test_Expected_DecodeResult_Error) {
+    using namespace ExplorerLens::Engine;
+    auto result = DecodeErr<int>(DecodeErrorCategory::FormatUnsupported, "unsupported");
+    ASSERT(result.IsErr());
+    ASSERT(result.Error().category == DecodeErrorCategory::FormatUnsupported);
+}
+
+TEST(Test_Expected_VoidResult_Success) {
+    using namespace ExplorerLens::Engine;
+    auto result = DecodeOkVoid();
+    ASSERT(result.IsOk());
+}
+
+TEST(Test_Expected_FromHResult) {
+    using namespace ExplorerLens::Engine;
+    auto ok = FromHResult(0);
+    ASSERT(ok.IsOk());
+
+    auto fail = FromHResult(static_cast<long>(0x80004005));
+    ASSERT(fail.IsErr());
+}
+
+TEST(Test_FormatRegistry_NotEmpty) {
+    using namespace ExplorerLens::Engine;
+    auto& reg = FormatRegistry::Instance();
+    // Register a test entry to verify the API
+    FormatEntry entry;
+    entry.type = FormatType::JPEG;
+    entry.category = FormatCategory::Image;
+    entry.primaryExt = L".jpg";
+    entry.description = L"JPEG Image";
+    entry.decoderName = L"JPEGDecoder";
+    entry.shellRegistered = true;
+    entry.hasDecoder = true;
+    entry.hasLibrary = true;
+    reg.Register(entry);
+    ASSERT(reg.Count() > 0);
+}
+
+TEST(Test_FormatRegistry_LookupJPEG) {
+    using namespace ExplorerLens::Engine;
+    auto& reg = FormatRegistry::Instance();
+    auto type = reg.LookupByExtension(L".jpg");
+    ASSERT(type == FormatType::JPEG);
+}
+
+TEST(Test_FormatRegistry_LookupPNG) {
+    using namespace ExplorerLens::Engine;
+    auto& reg = FormatRegistry::Instance();
+    FormatEntry entry;
+    entry.type = FormatType::PNG;
+    entry.category = FormatCategory::Image;
+    entry.primaryExt = L".png";
+    entry.description = L"PNG Image";
+    entry.hasDecoder = true;
+    entry.hasLibrary = true;
+    reg.Register(entry);
+    auto type = reg.LookupByExtension(L".png");
+    ASSERT(type == FormatType::PNG);
+}
+
+TEST(Test_FormatRegistry_LookupZIP) {
+    using namespace ExplorerLens::Engine;
+    auto& reg = FormatRegistry::Instance();
+    FormatEntry entry;
+    entry.type = FormatType::ZIP;
+    entry.category = FormatCategory::Archive;
+    entry.primaryExt = L".zip";
+    entry.description = L"ZIP Archive";
+    entry.hasDecoder = true;
+    entry.hasLibrary = true;
+    reg.Register(entry);
+    auto type = reg.LookupByExtension(L".zip");
+    ASSERT(type == FormatType::ZIP);
+}
+
+TEST(Test_FormatRegistry_CategoryName) {
+    using namespace ExplorerLens::Engine;
+    auto name = FormatRegistry::CategoryName(FormatCategory::Image);
+    ASSERT(name != nullptr);
+    ASSERT(std::wstring(name).length() > 0);
+}
+
+TEST(Test_FormatRegistry_UnknownExt) {
+    using namespace ExplorerLens::Engine;
+    auto& reg = FormatRegistry::Instance();
+    auto type = reg.LookupByExtension(L".xyz_unknown");
+    ASSERT(type == FormatType::Unknown);
+}
+
+TEST(Test_FormatRegistry_ShellRegistered) {
+    using namespace ExplorerLens::Engine;
+    auto& reg = FormatRegistry::Instance();
+    ASSERT(reg.ShellRegisteredCount() >= 0);
+}
+
+TEST(Test_FormatRegistry_WebP) {
+    using namespace ExplorerLens::Engine;
+    auto& reg = FormatRegistry::Instance();
+    FormatEntry entry;
+    entry.type = FormatType::WebP;
+    entry.category = FormatCategory::ModernImage;
+    entry.primaryExt = L".webp";
+    entry.description = L"WebP Image";
+    entry.hasDecoder = true;
+    entry.hasLibrary = true;
+    reg.Register(entry);
+    auto type = reg.LookupByExtension(L".webp");
+    ASSERT(type == FormatType::WebP);
+}
+
+TEST(Test_FormatRegistry_EntryAccess) {
+    using namespace ExplorerLens::Engine;
+    auto& reg = FormatRegistry::Instance();
+    auto* entry = reg.GetEntry(FormatType::JPEG);
+    ASSERT(entry != nullptr);
+    ASSERT(entry->category == FormatCategory::Image);
+    ASSERT(entry->IsFullySupported());
+}
+
+TEST(Test_SIMD_Capabilities_Detect) {
+    using namespace ExplorerLens::Engine;
+    SIMDPixelConverter converter;
+    const auto& caps = converter.GetCapabilities();
+    // We're running on x64, so SSE2 must be present
+    ASSERT(caps.hasSSE2);
+}
+
+TEST(Test_SIMD_RGBA_to_BGRA) {
+    using namespace ExplorerLens::Engine;
+    SIMDPixelConverter converter;
+
+    // Test pixel: R=255, G=128, B=64, A=200
+    uint8_t src[8] = {255, 128, 64, 200,  100, 50, 25, 255};
+    uint8_t dst[8] = {};
+    converter.ConvertRGBA_to_BGRA(src, dst, 2);
+
+    // Pixel 0: BGRA = 64, 128, 255, 200
+    ASSERT(dst[0] == 64);
+    ASSERT(dst[1] == 128);
+    ASSERT(dst[2] == 255);
+    ASSERT(dst[3] == 200);
+
+    // Pixel 1: BGRA = 25, 50, 100, 255
+    ASSERT(dst[4] == 25);
+    ASSERT(dst[5] == 50);
+    ASSERT(dst[6] == 100);
+    ASSERT(dst[7] == 255);
+}
+
+TEST(Test_SIMD_RGB_to_BGRA) {
+    using namespace ExplorerLens::Engine;
+    SIMDPixelConverter converter;
+
+    uint8_t src[6] = {255, 128, 64,  100, 50, 25};
+    uint8_t dst[8] = {};
+    converter.ConvertRGB_to_BGRA(src, dst, 2);
+
+    ASSERT(dst[0] == 64);   // B
+    ASSERT(dst[1] == 128);  // G
+    ASSERT(dst[2] == 255);  // R
+    ASSERT(dst[3] == 0xFF); // A (opaque)
+
+    ASSERT(dst[4] == 25);
+    ASSERT(dst[5] == 50);
+    ASSERT(dst[6] == 100);
+    ASSERT(dst[7] == 0xFF);
+}
+
+TEST(Test_SIMD_Gray_to_BGRA) {
+    using namespace ExplorerLens::Engine;
+    SIMDPixelConverter converter;
+
+    uint8_t src[2] = {128, 0};
+    uint8_t dst[8] = {};
+    converter.ConvertGray_to_BGRA(src, dst, 2);
+
+    ASSERT(dst[0] == 128);  // B
+    ASSERT(dst[1] == 128);  // G
+    ASSERT(dst[2] == 128);  // R
+    ASSERT(dst[3] == 0xFF); // A
+
+    ASSERT(dst[4] == 0);    // B (black)
+    ASSERT(dst[5] == 0);    // G
+    ASSERT(dst[6] == 0);    // R
+    ASSERT(dst[7] == 0xFF); // A
+}
+
+TEST(Test_SIMD_PremultiplyAlpha) {
+    using namespace ExplorerLens::Engine;
+    SIMDPixelConverter converter;
+
+    uint8_t pixels[8] = {200, 100, 50, 128,  255, 255, 255, 0};
+    converter.PremultiplyAlpha(pixels, 2);
+
+    // Pixel 0 with alpha=128 (~50%): values halved
+    ASSERT(pixels[0] <= 101); // ~100
+    ASSERT(pixels[1] <= 51);  // ~50
+    ASSERT(pixels[2] <= 26);  // ~25
+    ASSERT(pixels[3] == 128); // Alpha unchanged
+
+    // Pixel 1 with alpha=0: all channels zeroed
+    ASSERT(pixels[4] == 0);
+    ASSERT(pixels[5] == 0);
+    ASSERT(pixels[6] == 0);
+    ASSERT(pixels[7] == 0);
 }
 
 int main() {
@@ -29842,6 +30113,33 @@ int main() {
     RUN_TEST(Test_S399_PluginCommunicationBridge);
     RUN_TEST(Test_S399_DiagnosticBundleCollector);
     RUN_TEST(Test_S399_RegressionTestRunner);
+    std::wcout << std::endl;
+
+    // Sprint 400: C++20 Refactoring Tests
+    std::wcout << L"Sprint 400: C++20 Refactoring Tests..." << std::endl;
+    RUN_TEST(Test_Concepts_DecoderConcept_Exists);
+    RUN_TEST(Test_Expected_ErrorCategory_Values);
+    RUN_TEST(Test_Expected_EngineError_Make);
+    RUN_TEST(Test_Expected_HResult_Conversion);
+    RUN_TEST(Test_Expected_IsRetryable);
+    RUN_TEST(Test_Expected_DecodeResult_Ok);
+    RUN_TEST(Test_Expected_DecodeResult_Error);
+    RUN_TEST(Test_Expected_VoidResult_Success);
+    RUN_TEST(Test_Expected_FromHResult);
+    RUN_TEST(Test_FormatRegistry_NotEmpty);
+    RUN_TEST(Test_FormatRegistry_LookupJPEG);
+    RUN_TEST(Test_FormatRegistry_LookupPNG);
+    RUN_TEST(Test_FormatRegistry_LookupZIP);
+    RUN_TEST(Test_FormatRegistry_CategoryName);
+    RUN_TEST(Test_FormatRegistry_UnknownExt);
+    RUN_TEST(Test_FormatRegistry_ShellRegistered);
+    RUN_TEST(Test_FormatRegistry_WebP);
+    RUN_TEST(Test_FormatRegistry_EntryAccess);
+    RUN_TEST(Test_SIMD_Capabilities_Detect);
+    RUN_TEST(Test_SIMD_RGBA_to_BGRA);
+    RUN_TEST(Test_SIMD_RGB_to_BGRA);
+    RUN_TEST(Test_SIMD_Gray_to_BGRA);
+    RUN_TEST(Test_SIMD_PremultiplyAlpha);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests

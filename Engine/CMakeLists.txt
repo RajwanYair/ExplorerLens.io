@@ -185,6 +185,7 @@ set(ENGINE_HEADERS
     Core/CloudNativeSync.h
     Core/CloudStorageIntegration.h
     Core/CloudSyncProvider.h
+    Core/Concepts.h
     Core/Config.h
     Core/ConfigMigrationEngine.h
     Core/ContentIndexer.h
@@ -203,6 +204,7 @@ set(ENGINE_HEADERS
     Core/EngineAPI.h
     Core/ErrorContext.h
     Core/ErrorRecoveryEngine.h
+    Core/Expected.h
     Core/ETWSinkComplete.h
     Core/ETWTraceProvider.h
     Core/FormatConverterEngine.h
@@ -878,6 +880,7 @@ set(ENGINE_HEADERS
     Core/HealthCheckOrchestrator.h
     # Sprint 67-68: Final Polish
     Core/ShellIntegrationValidator.h
+    Core/SIMDPixelConversion.h
     Core/GracefulDegradationController.h
     Core/UserPreferenceEngine.h
     Core/ThumbnailAnimator.h
