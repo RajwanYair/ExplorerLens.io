@@ -1,6 +1,6 @@
 # ExplorerLens — Development Learnings & Best Practices
 
-**Last Updated:** v15.0.0 "Zenith" — June 2026
+**Last Updated:** v15.1.0 "Zenith-R" — March 24, 2026
 
 This file captures hard-won lessons from iterative development sessions to avoid repeating
 mistakes and to accelerate future work.
@@ -767,3 +767,290 @@ ExplorerLens Engine v\d+\.\d+\.\d+ \(Sprint — full sprint header lines
 - Total incremental build after header change: ~90-120 seconds
 - "ninja: no work to do" means file timestamps haven't changed — touch files or check save state
 - Never send Ctrl+C/Break to a building terminal — builds are slow but normal
+
+---
+
+## 24. Test Boilerplate Reduction (v15.1.0 Refactoring)
+
+### The over-testing anti-pattern
+- v15.0 delivery sprints created one `TEST()` function per new header: `InitPattern<T>()`
+  calls just `T t; (void)t;` — 150 such tests added for sprints 397–399
+- These tests verify only that constructor doesn't crash; they provide no meaningful coverage
+- **Impact:** EngineTests.cpp grew by 926 lines of near-identical boilerplate (3070→2938 tests net)
+- **Rule:** Never create a test that only calls a default constructor unless that constructor
+  does real initialization work worth verifying
+
+### Bulk consolidation pattern
+- Replace N identical `TEST(InitX)`, `TEST(InitY)`, ... with a single parameterized template:
+
+```cpp
+template <typename T>
+static bool AssertInitPattern() {
+    T instance{};
+    (void)instance;
+    return true;
+}
+
+TEST(BulkInitSprints397to399) {
+    ASSERT(AssertInitPattern<ThumbnailStreamMultiplexer>());
+    ASSERT(AssertInitPattern<FileSystemWatchdog>());
+    // ... all similar types
+    g_testsPassed++;
+}
+```
+
+- 150 boilerplate tests → 3 bulk tests + 15 domain-specific tests with real assertions
+- Net: 926 lines removed, quality unchanged, meaningful tests preserved
+
+### Test consolidation script
+- `build-scripts/Consolidate-Tests.ps1` documents the exact consolidation mapping
+- Run this script to reproduce the consolidation if tests are re-expanded during future sprints
+- Keep the script in source control as a record of which tests were merged
+
+---
+
+## 25. Python Project Parallel Structure (ExplorerLens.py)
+
+### Purpose and scope
+- `ExplorerLens.py/` is a Python companion — not a replacement for the C++ engine
+- Provides: Python-based thumbnail preview broker, CLI benchmark tool, GUI settings overlay,
+  cross-platform hooks (Linux freedesktop.org thumbnailer integration), diagnostics dashboard
+- Maintained in parallel with the C++ codebase — version numbers must stay in sync
+
+### Cross-platform thumbnail support (Linux)
+- `ExplorerLens.py/src/shell/linux_thumbnailer.py` — freedesktop.org spec implementation
+- Thumbnail URI: `file:///path/to/file`; URI hash (MD5 of URI) = cache filename
+- Cache location: `~/.cache/thumbnails/normal/` (128px) and `/large/` (256px)
+- Thumbnail metadata: `Thumb::URI` and `Thumb::MTime` PNG tEXt chunks
+- `platform_provider.py` abstracts Provider class — Windows (COM) or Linux (subprocess) backend
+
+### Python linting rules (production-ready)
+- Narrow broad exceptions: `except Exception as e:` only when truly catching all, log `e`
+- Remove unused imports — flake8 F401 is a blocker
+- Line length: 100 chars max (configured in `setup.cfg`, `pyproject.toml`)
+- Type annotations on all public functions: `def process(path: Path) -> Optional[str]:`
+- `subprocess.run()` must include `check=True` or explicit returncode check
+
+### Python version consistency locations
+- `ExplorerLens.py/setup.py` — `version=` string
+- `ExplorerLens.py/src/explorerlens/__init__.py` — `__version__`
+- `ExplorerLens.py/pyproject.toml` — `[project] version =`
+- `ExplorerLens.py/README.md` — version badge
+- `PROJECT_SPEC_PROMPT.md` — framework version
+
+---
+
+## 26. Dev Environment Bootstrap (.env.ps1)
+
+### What .env.ps1 provides
+- Must be sourced at terminal start to get a fully functional dev environment
+- Adds: scoop git to PATH, MSVC paths, CMake/Ninja/NASM paths, proxy env vars, build helpers
+- Defines `function global:git { & $_gitExe @args }` — critical because Scoop git isn't in system PATH
+- Sets `$env:HTTP_PROXY = $env:HTTPS_PROXY = 'http://proxy-dmz.intel.com:912'`
+
+### VS Code terminal profile integration
+- Default profile `"ExplorerLens Dev"` auto-sources `.env.ps1` via `-File` arg
+- This means every new terminal window in VS Code is fully configured
+- The `Developer PowerShell (vcvars64)` profile ADDITIONALLY sources vcvars64 for MSVC compiler tools
+- Use `"ExplorerLens Dev"` for daily work, `Developer PowerShell (vcvars64)` only when running cmake manually
+
+### Git not in PATH — prevention
+- **Root cause:** scoop installs git to `~\scoop\apps\git\current\bin\git.exe` — not added to system PATH
+- **Symptom:** `git : The term 'git' is not recognized...` in plain PowerShell
+- **Fix via .env.ps1:** After sourcing, `git` works in any terminal because of the global function
+- **Fix via VS Code:** The "ExplorerLens Dev" default profile auto-sources .env.ps1
+- **Permanent fallback:** Always use full path `C:\Users\ryair\scoop\apps\git\current\bin\git.exe` in scripts
+
+### Proxy configuration for corporate network
+- All external tool calls (git fetch, npm, cmake FetchContent) require proxy
+- `.env.ps1` sets: `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, `https_proxy` (both cases)
+- `.vscode/mcp.json` passes proxy env vars to all MCP server processes
+- `.vscode/settings.json` sets `"http.proxy:"` for VS Code's own network calls
+- Git global config: `http.proxy = http://proxy-dmz.intel.com:912` (set once, persists)
+
+---
+
+## 27. GitIgnore Pitfalls (Build Output Patterns)
+
+### The docs/build/ gitignore trap
+- `.gitignore` pattern `build/` matched `docs/build/` — silently ignored 8 doc files for months
+- **Fix:** Change `build/` to `/build/` (anchored at repo root) to only ignore the top-level build dir
+- Same applies to other output dirs: use `/build-vcpkg/`, `/build-logs/`, `/x64/` not bare `build-vcpkg/`
+
+### Anchoring gitignore patterns
+```gitignore
+# WRONG — ignores ANY directory named build/ anywhere in tree
+build/
+
+# CORRECT — ignores only the top-level build/ directory
+/build/
+/build-vcpkg/
+/build-logs/
+/x64/
+```
+
+### Common unintended matches to check
+- `logs/` can match `docs/logs/` or `build-logs/`
+- `Release/` can match `Engine/Release/` (use `/Release/` or `x64/Release`)
+- `*.log` can match log files in `docs/` if not careful
+- Always run `git check-ignore -v path/to/file` to verify a file's ignore status
+
+### Tracking generated files (use sparingly)
+- `compile_commands.json` at repo root — generated by CMake, but VS Code needs it for IntelliSense
+- Use `git add -f path` for files in gitignored dirs when they genuinely need tracking
+- Always add a comment in `.gitignore` explaining any intentional exceptions
+
+---
+
+## 28. Workspace Configuration Management
+
+### Cross-project consistency (RegiLattice → ExplorerLens migration)
+- Mirror settings between parallel projects to reduce cognitive overhead
+- Key settings to keep in sync: terminal profile, proxy, git, Copilot instruction files,
+  MSBUILDDISABLENODEREUSE, `http.proxy`, `http.proxyStrictSSL`
+- Use the same `.vscode/mcp.json` structure with project-specific paths adjusted
+- Keep `.editorconfig` synchronized: base rules (LF, UTF-8, indent=2/4) apply to all projects
+
+### MSBUILDDISABLENODEREUSE=1
+- Without this, MSBuild reuses build server nodes across terminal sessions
+- This causes stale environment issues when switching between Debug/Release or toolset versions
+- Set via `terminal.integrated.env.windows` in `settings.json` — applies to all terminal sessions
+- Also prevents "locked .obj file" issues after build failures
+
+### VS Code settings.json evolution pattern
+- Always keep commented section headers (`// ── CMake Tools ──`)
+- Group settings by tool/domain — do not mix cmake settings with editor settings
+- When adding settings from external reference (RegiLattice), adapt them — don't copy blindly
+  (e.g., `dotnet` tasks from C# don't belong in C++ workspace)
+
+---
+
+## 29. Production Cleanup Methodology
+
+### What makes a project "production-ready" (from cleanup iteration)
+1. No stale build logs — keep only `build-latest.log`, `test-latest.log`, `build-history.jsonl`
+2. No untracked binary artifacts at repo root (`.obj`, `.pdb`, `.lib` files)
+3. No superseded scripts — one primary script per operation (not V7 + V8 + current)
+4. No duplicate documentation — each topic has exactly one authoritative file
+5. All doc version numbers match the current codebase version
+6. All GitHub URLs point to actual repository (not placeholder `YourOrg/RepoName`)
+7. All `Last Updated` dates are accurate (not months in the past)
+
+### Consolidation checklist for future cleanup passes
+- Run: `grep_search "YourOrg\|placeholder\|TODO\|FIXME\|v[0-9]\.[0-9]\.[0-9]" docs/` to find stale references
+- Run: `Get-ChildItem build-logs -File | Where Count -gt 0` to identify log accumulation
+- Run: `git ls-files --others --exclude-standard *.obj *.lib *.pdb` to find untracked artifacts
+- Check: every file in `docs/` is linked from `docs/INDEX.md`
+- Check: scripts that duplicate each other — keep the most recent, delete the rest
+
+### Build log hygiene
+- `build-history.jsonl` is the permanent record — keep it (structured machine-readable data)
+- `build-latest.log`, `test-latest.log`, `msbuild-latest.log` — rolling files, keep
+- Everything else is transient — delete after the session that created it
+- Standard cleanup command: 
+
+```powershell
+$keep = @('build-latest.log','test-latest.log','build-history.jsonl','build-progress.json','msbuild-latest.log')
+Get-ChildItem build-logs -File | Where-Object { $_.Name -notin $keep } | Remove-Item -Force
+```
+
+---
+
+## 30. Build History Analysis (from build-history.jsonl)
+
+### Observed build time patterns (Feb–Mar 2026, ~60 builds)
+| Phase | Min | Typical | Max | Notes |
+|-------|-----|---------|-----|-------|
+| vcvars | 2s | 5–7s | 140s | High outliers = corporate proxy delay at bat startup |
+| configure | 1s | 2–5s | 12s | Clean builds: 5–12s; incremental: 1–3s |
+| build (incremental) | 0.3s | 90–120s | 200s | Header-only changes ~0.3s; `.cpp` changes ~90–120s |
+| build (clean) | 260s | 300s | 455s | Full LTCG: 260–454s; normal variation |
+
+### vcvars outliers (100–140s)
+- Happens when corporate proxy introduces HTTP latency for vcvars64.bat's environment setup
+- **Symptom:** Build appears hung for 2 minutes before compiler starts
+- **Mitigation:** Source vcvars once at terminal start (`.env.ps1` + `Developer PS` profile)
+- Do NOT run vcvars64.bat inside build scripts on already-configured terminals
+
+### Clean build frequency
+- 7 out of ~60 builds were clean (`"clean": true`) — all needed due to structural CMake changes
+- Do NOT clean unless: CMakeLists.txt structure changed, new library added, or persistent errors
+- Incremental builds are 3–5x faster — protect incremental build state
+
+### Build timing regressions to investigate
+- Builds taking >350s on unchanged code suggest LTCG cache invalidation
+- Check if `.cmake/api/` reply files were deleted (CMake file API regenerates all build rules)
+- `build-vcpkg/` directory changes can trigger full reconfigure
+
+---
+
+## 31. C++20 Concepts Usage (v15.1.0 Zenith-R)
+
+### New concepts added in Engine/Core/Concepts.h
+- `ThumbnailDecoderConcept<T>` — requires `Decode(path, size)`, `CanHandle(path)`, `GetName()`
+- `FormatDetectorConcept<T>` — requires `Detect(header_bytes)` returning `FormatInfo`
+- `CacheProviderConcept<T>` — requires `Get(key)`, `Put(key, value)`, `Invalidate(key)`
+- `RendererConcept<T>` — requires `Render(bitmap, rect)` and `GetCapabilities()`
+
+### MSVC v145 C++20 concept constraints
+- Concepts compile cleanly with `/std:c++20` in MSVC 19.50
+- Use `requires` clauses, NOT `std::enable_if` — clearer error messages
+- Concept-constrained templates provide better IntelliSense in VS Code with Pylance
+- Do NOT use concepts in `extern "C"` interfaces (plugin SDK must remain C ABI)
+
+### Decode error types (Engine/Core/Expected.h)
+- `DecodeErrorCategory` enum: `IOError`, `FormatError`, `MemoryError`, `CodecError`, `TimeoutError`
+- `DecodeResult<T>` is alias for `ResultType<T, EngineError>` from ResultType.h
+- Always propagate errors with `DecodeResult<T>` — never throw exceptions from decoders
+- Pattern: `return DecodeResult<Bitmap>::Error(DecodeErrorCategory::FormatError, "bad magic")`
+
+### SIMD pixel conversion (Engine/Core/SIMDPixelConversion.h)
+- AVX2 path: 32 pixels per iteration (256-bit registers); SSE4.2 path: 16 pixels; scalar fallback
+- HDR tone mapping built-in: Reinhard and ACES Filmic operators
+- Premultiplied alpha conversion: `rgb = rgb / alpha` for pre-mult → straight
+- Build flag: `HAS_AVX2` and `HAS_SSE42` detected at configure time via `check_cxx_source_compiles`
+
+---
+
+## 32. Workspace Hygiene Lessons (Day-to-Day)
+
+### Common Pitfalls Table (updated March 2026)
+
+| Pitfall | When it bites | Fast fix |
+|---------|---------------|----------|
+| `git` not found in terminal | After reboot or new shell | Source `.env.ps1` or use full path |
+| Build picks Clang instead of MSVC | cmake run without vcvars | Use `Build-MSVC.ps1` always |
+| vcvars takes 100+s | Proxy DNS resolution at terminal start | Source `.env.ps1` once; don't re-source per build |
+| `replace_string_in_file` fails | Whitespace mismatch after clang-format | Read file first with `read_file`, copy exact whitespace |
+| Docs have stale versions | Version bump missed docs/ | Use version update checklist in Section 3 |
+| Build logs accumulate (100+ files) | After 10+ dev sessions | Run cleanup command in Section 29 |
+| `.gitignore` hides tracked files | Adding `build/` instead of `/build/` | Use anchored patterns, check with `git check-ignore -v` |
+| Test count explodes with boilerplate | Bulk feature delivery sprints | Apply AssertInitPattern<T> consolidation (Section 24) |
+| Python version drifts from C++ version | Independent Python commits | Check all 4 Python version locations (Section 25) |
+| MCP server fails to start | Proxy not passed to npx | Verify `.vscode/mcp.json` env has proxy vars |
+
+### Daily workflow checklist
+1. Open VS Code → terminal auto-opens `ExplorerLens Dev` profile → `.env.ps1` sourced
+2. Run `git status --short` — verify clean working tree
+3. For C++ changes: use `Build-MSVC.ps1` (not manual cmake)
+4. After build: check `build-logs/build-latest.log` for warnings (zero warnings policy)
+5. After tests: confirm test count hasn't decreased unexpectedly
+6. Commit each logical unit separately — don't batch unrelated changes
+7. Before session end: run cleanup if >20 log files accumulate in `build-logs/`
+
+### One-liner environment health checks
+
+```powershell
+# Check git works and shows current branch
+git status
+
+# Check MSVC is accessible
+cl /? 2>&1 | Select-Object -First 1
+
+# Check cmake version
+cmake --version
+
+# Check build count for this session
+(Get-Content build-logs/build-history.jsonl | ConvertFrom-Json).Count
+```
+
