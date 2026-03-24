@@ -16,6 +16,27 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![Tests](https://img.shields.io/badge/Tests-2938%20passing-success)
 ![Warnings](https://img.shields.io/badge/Warnings-0-green)
 
+<!-- keywords: windows shell extension thumbnail provider ithumbnailprovider com dll directx11 directx12 vulkan gpu acceleration file preview windows explorer extension heic avif jpeg-xl webp raw photos pdf cbr cbz epub 3d gltf stl cpp20 msvc arm64 wic libraw libheif libjxl libavif mupdf libwebp thumbnail generator image decoder windows 11 shell namespace extension -->
+
+<details>
+<summary><b>🏷️ GitHub Topics</b> — set these on your repo for maximum discoverability</summary>
+
+```
+windows-shell-extension  thumbnail-provider  ithumbnailprovider  com-dll
+directx  directx11  directx12  vulkan  gpu-acceleration  hlsl
+file-preview  windows-explorer  windows-11  arm64  cpp20  msvc
+heic  avif  jpeg-xl  webp  raw-photos  libraw  libheif  libjxl  libavif
+pdf  cbr  cbz  epub  ebook  comic-book  archive  7zip
+image-decoder  thumbnail-generator  thumbnail-cache  lru-cache
+windows-extension  shell-extension  com-interop  atl  wtl
+directx-11  directx-12  media-foundation  wic  gdi-plus
+performance  zero-copy  simd  avx2  sse42
+```
+
+> **How to set:** GitHub repo → ⚙️ Settings gear next to **About** → Topics
+
+</details>
+
 ---
 
 ## 📚 Documentation
@@ -133,19 +154,128 @@ Run `LENSManager.exe` to enable/disable file format categories.
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ Architecture
+
+### System Components
 
 ```text
-ExplorerLens/
-├── LENSShell/ # Main COM shell extension
-├── LENSManager/ # Configuration GUI tool
-├── build-scripts/ # Build automation
-├── docs/ # Documentation
-├── external/ # Third-party libraries
-├── .github/ # GitHub workflows and templates
-├── LENSShell.sln # Visual Studio solution
-├── LICENSE # MIT License
-└── RUN-BUILD.bat # Quick build script
+┌─────────────────────────────────────────────────────────────┐
+│                    Windows Explorer                          │
+│  (Host process: explorer.exe / prevhost.exe)                │
+└────┬────────────────────────┬───────────────────────────────┘
+     │ IThumbnailProvider     │ IPropertyStore
+     │ IExtractImage2         │ IQueryInfo
+     ▼                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  LENSShell.dll  (2940 KB)  — COM Shell Extension            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ CLENSShell   │  │PropertyStore │  │ QueryInfo    │      │
+│  │ (COM Class)  │  │  Impl        │  │  Impl        │      │
+│  └──────┬───────┘  └──────────────┘  └──────────────┘      │
+│         │                                                    │
+│  ┌──────▼──────────────────────────────────────────────┐    │
+│  │  ExplorerLensEngine.lib  (311 MB static library)    │    │
+│  │  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │    │
+│  │  │ Pipeline │ │ Decoders │ │  GPU   │ │  Cache   │  │    │
+│  │  │ Manager  │ │ (25+)    │ │ Render │ │ Manager  │  │    │
+│  │  └─────────┘ └──────────┘ └────────┘ └──────────┘  │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  LENSManager.exe  (400 KB)  — WTL Admin GUI                │
+│  ┌────────────────┐  ┌──────────────┐  ┌───────────────┐   │
+│  │ Format Config  │  │ COM Register │  │ Settings I/O  │   │
+│  │ (formatHandlers)│  │ (Admin Elev) │  │ (JSON/Reg)    │   │
+│  └────────────────┘  └──────────────┘  └───────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Thumbnail Generation Data Flow
+
+```text
+         ┌──────────────┐
+         │   Explorer   │
+         │   requests   │
+         │   thumbnail  │
+         └──────┬───────┘
+                │ IStream
+                ▼
+         ┌──────────────┐
+         │    Format    │  FormatDetector + FormatSignatureDetector
+         │   Detection  │  (magic bytes, extension, heuristics)
+         └──────┬───────┘
+                │ LENSTYPE
+                ▼
+         ┌──────────────┐
+         │   Decoder    │  DecoderRegistry → IThumbnailDecoder
+         │   Dispatch   │  (25+ specialized decoders)
+         └──────┬───────┘
+                │ Raw pixels (BGRA)
+                ▼
+         ┌──────────────┐
+         │  GPU Resize  │  D3D11 → D3D12 → Vulkan → GDI fallback
+         │   Pipeline   │  Lanczos3 / Bicubic / HDR tone-map
+         └──────┬───────┘
+                │ HBITMAP (target size)
+                ▼
+         ┌──────────────┐
+         │    Cache     │  ThumbnailCache (memory) + PersistentDiskCache
+         │    Write     │  SubMillisecondCacheEngine (<0.5 ms hot lookup)
+         └──────┬───────┘
+                │
+                ▼
+         ┌──────────────┐
+         │  Return to   │
+         │   Explorer   │
+         └──────────────┘
+```
+
+### Build Pipeline
+
+```text
+CMake 3.25+ with Presets → Ninja → MSVC v145 (cl.exe 19.50)
+                                │
+           ┌────────────────────┼─────────────────┐
+           ▼                    ▼                  ▼
+  ExplorerLensEngine      EngineTests        EngineBenchmarks
+  (STATIC .lib 311 MB)    (2938 tests)       (5 benchmarks)
+           │
+           ▼
+  MSBuild → LENSShell.dll (2940 KB) + LENSManager.exe (400 KB)
+           │
+           ▼
+  WiX v6 → ExplorerLens-15.1.0-x64.msi
+```
+
+**GPU Render Priority:** `D3D11 → D3D12 → Vulkan Compute → GDI+ (software)`
+
+**COM interfaces implemented:** `IThumbnailProvider`, `IInitializeWithStream`, `IPropertyStore`,
+`IPropertyStoreCapabilities`, `IExtractImage2`, `IPersistFile`, `IQueryInfo`
+
+**CLSID:** `{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}`
+
+### Project Directory Layout
+
+```text
+ExplorerLens.io/
+├── LENSShell/          # COM shell extension DLL source
+├── LENSManager/        # WTL admin GUI (format enable/disable)
+├── Engine/             # Core decode + render library
+│   ├── Core/           # Pipeline, format detection, SIMD
+│   ├── Decoders/       # 25+ format decoders
+│   ├── GPU/            # D3D11/D3D12/Vulkan renderers + HLSL shaders
+│   ├── Cache/          # Multi-tier caching subsystem
+│   ├── Memory/         # BitmapPool, pressure controller
+│   ├── Plugin/         # Plugin ecosystem + sandbox
+│   ├── AI/             # Smart crop, IQA, scene understanding
+│   └── Tests/          # 2938 unit tests + 5 benchmarks
+├── build-scripts/      # PowerShell build automation
+├── external/           # Statically linked third-party libraries
+├── docs/               # Architecture, guides, API reference
+├── SDK/                # Plugin SDK (C ABI, plugin_api.h)
+├── packaging/          # MSI (WiX), MSIX, Inno Setup manifests
+└── LENSShell.sln       # Visual Studio 18 2026 solution
 ```
 
 ---
@@ -166,10 +296,10 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 15.0.0 "Zenith"
+**Current Version:** 15.1.0 "Zenith-R"
 **Build Status:** 0 errors / 0 warnings
-**Test Status:** 2,408 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Zenith — GPU-accelerated thumbnails for 200+ formats across 25 decoders
+**Test Status:** 2,938 unit tests, 5 benchmarks (100% pass rate)
+**Codename:** Zenith-R — C++20 refactoring milestone (Concepts, Expected.h, SIMD)
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 
@@ -221,6 +351,6 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
-Built with ❤️ using C++20 and DirectX 11/12
+Built with ❤️ using C++20, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
 
-Last Updated: March 2026 (v15.0.0 "Zenith")
+Last Updated: March 24, 2026 (v15.1.0 "Zenith-R")
