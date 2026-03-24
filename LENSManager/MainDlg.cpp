@@ -25,17 +25,31 @@ LRESULT CMainDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/,
     // center the dialog on the screen
     CenterWindow();
 
-    // set icons
+    // set icons — robust loading with fallback to process module handle
+    // _Module.GetResourceInstance() may return NULL in some ATL init sequences;
+    // GetModuleHandle(NULL) is always valid and resolves the PE containing the icon resource.
+    HMODULE hResMod = _Module.GetResourceInstance();
+    if (!hResMod) hResMod = ::GetModuleHandle(NULL);
+
     HICON hIcon = (HICON)::LoadImage(
-        _Module.GetResourceInstance(), MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
+        hResMod, MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
         ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON),
-        LR_DEFAULTCOLOR);
-    SetIcon(hIcon, TRUE);
+        LR_DEFAULTCOLOR | LR_SHARED);
+    if (!hIcon) {
+        // Secondary fallback: LoadIcon (always 32×32, but better than nothing)
+        hIcon = ::LoadIcon(hResMod, MAKEINTRESOURCE(IDR_MAINFRAME));
+    }
+    if (hIcon) SetIcon(hIcon, TRUE);
+
     HICON hIconSmall = (HICON)::LoadImage(
-        _Module.GetResourceInstance(), MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
+        hResMod, MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON,
         ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON),
-        LR_DEFAULTCOLOR);
-    SetIcon(hIconSmall, FALSE);
+        LR_DEFAULTCOLOR | LR_SHARED);
+    if (!hIconSmall && hIcon) {
+        // Use the large icon scaled down as last resort
+        hIconSmall = hIcon;
+    }
+    if (hIconSmall) SetIcon(hIconSmall, FALSE);
 
     // register object for message filtering and idle updates
     CMessageLoop* pLoop = _Module.GetMessageLoop();

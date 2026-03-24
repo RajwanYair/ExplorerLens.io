@@ -1,24 +1,32 @@
 @echo off
 REM Test-and-Log.bat — Runs EngineTests.exe and logs output
 REM Usage: test-and-log.bat [log-filename]
-REM Must be run from the project root directory (where build\ lives)
+REM Intermediate build files are in %TEMP%\ExplorerLens-build (temp-release preset)
 
 set "LOG=%~1"
-if "%LOG%"=="" set "LOG=build-logs\test-latest.log"
+if "%LOG%"=="" set "LOG=%TEMP%\ExplorerLens-test-latest.log"
+
+REM Ensure log directory exists
+for %%F in ("%LOG%") do if not exist "%%~dpF" mkdir "%%~dpF"
 
 set "ROOT=%CD%"
+set "BUILD_DIR=%TEMP%\ExplorerLens-build"
 
 echo [%date% %time%] Test run starting... > "%LOG%"
 echo ============================================ >> "%LOG%"
 
-if not exist "build\bin\EngineTests.exe" (
-    echo ERROR: build\bin\EngineTests.exe not found >> "%LOG%"
+REM Check TEMP build dir first, then fall back to local build/
+set "TESTS_EXE=%BUILD_DIR%\bin\EngineTests.exe"
+if not exist "%TESTS_EXE%" set "TESTS_EXE=%ROOT%\build\bin\EngineTests.exe"
+if not exist "%TESTS_EXE%" (
+    echo ERROR: EngineTests.exe not found in %BUILD_DIR%\bin or build\bin >> "%LOG%"
     echo TEST_FAILED - exe not found
     exit /b 1
 )
 
-pushd "build\bin"
-EngineTests.exe >> "%ROOT%\%LOG%" 2>&1
+for %%F in ("%TESTS_EXE%") do set "TESTS_DIR=%%~dpF"
+pushd "%TESTS_DIR%"
+EngineTests.exe >> "%LOG%" 2>&1
 set TEST_EXIT=%ERRORLEVEL%
 popd
 
@@ -26,6 +34,7 @@ echo ============================================ >> "%LOG%"
 echo [%date% %time%] TEST_EXIT: %TEST_EXIT% >> "%LOG%"
 if %TEST_EXIT%==0 (
     echo TEST_SUCCESS
+    echo Test log: %LOG%
 ) else (
     echo TEST_FAILED
 )

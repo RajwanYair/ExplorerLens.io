@@ -19,24 +19,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run clang-format check
+      - name: Install clang-format
+        shell: pwsh
+        run: choco install llvm --no-progress -y 2>$null; refreshenv
+
+      - name: Run clang-format check (blocking)
         shell: pwsh
         run: |
           $files = Get-ChildItem -Path LENSShell,LENSManager,Engine -Recurse -Include *.cpp,*.h -ErrorAction SilentlyContinue
           Write-Host "Found $($files.Count) C++ source files to check"
 
           $clangFormat = Get-Command clang-format -ErrorAction SilentlyContinue
-          if ($clangFormat) {
-            $errors = 0
-            foreach ($f in $files) {
-              $diff = & clang-format --dry-run --Werror $f.FullName 2>&1
-              if ($LASTEXITCODE -ne 0) { $errors++; Write-Host "  Format issue: $($f.Name)" -ForegroundColor Yellow }
-            }
-            if ($errors -gt 0) { Write-Host "$errors file(s) need formatting" -ForegroundColor Yellow }
-            else { Write-Host "All files pass formatting check" -ForegroundColor Green }
-          } else {
-            Write-Host "clang-format not available, skipping format check" -ForegroundColor Yellow
+          if (-not $clangFormat) {
+            Write-Host "::error::clang-format not available — install LLVM or add to PATH" -ForegroundColor Red
+            exit 1
           }
+
+          $errors = 0
+          $errorFiles = @()
+          foreach ($f in $files) {
+            & clang-format --dry-run --Werror $f.FullName 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) {
+              $errors++
+              $errorFiles += $f.FullName.Replace($PWD.Path + "\", "")
+              Write-Host "::error file=$($f.FullName)::Format issue: $($f.Name)"
+            }
+          }
+          if ($errors -gt 0) {
+            Write-Host "::error::$errors file(s) require formatting. Run: clang-format -i <file>" -ForegroundColor Red
+            exit 1
+          }
+          Write-Host "All $($files.Count) files pass formatting check" -ForegroundColor Green
 
   analyze:
     name: Static Analysis
@@ -49,20 +62,27 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Run MSVC Code Analysis
+      - name: Run MSVC Code Analysis (blocking on new warnings)
         shell: pwsh
         run: |
           Write-Host "Running MSVC static analysis..." -ForegroundColor Cyan
-          msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /p:EnableCppCoreCheck=true /p:RunCodeAnalysis=true /m /v:minimal 2>&1 | Tee-Object -Variable buildOutput
+          $output = msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 `
+            /p:EnableCppCoreCheck=true /p:RunCodeAnalysis=true /m /v:minimal 2>&1
 
-          $warnings = $buildOutput | Select-String "warning C\d+"
-          if ($warnings.Count -gt 0) {
-            Write-Host "$($warnings.Count) code analysis warnings found" -ForegroundColor Yellow
-            $warnings | Select-Object -First 20 | ForEach-Object { Write-Host $_.Line }
-          } else {
-            Write-Host "No code analysis warnings" -ForegroundColor Green
+          $warnings = $output | Select-String "warning C\d+"
+          $errors   = $output | Select-String "error C\d+"
+
+          if ($errors.Count -gt 0) {
+            Write-Host "::error::$($errors.Count) build error(s) found in static analysis" -ForegroundColor Red
+            $errors | ForEach-Object { Write-Host "::error::$($_.Line)" }
+            exit 1
           }
-        continue-on-error: true
+          if ($warnings.Count -gt 0) {
+            Write-Host "$($warnings.Count) code analysis warning(s) found:" -ForegroundColor Yellow
+            $warnings | Select-Object -First 30 | ForEach-Object { Write-Host "::warning::$($_.Line)" }
+          } else {
+            Write-Host "No code analysis issues" -ForegroundColor Green
+          }
 
   header-check:
     name: Header Guard Validation
@@ -72,7 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check header guards
+      - name: Check header guards (blocking)
         shell: pwsh
         run: |
           $headers = Get-ChildItem -Path Engine,LENSShell,LENSManager -Recurse -Include *.h -ErrorAction SilentlyContinue
@@ -84,9 +104,63 @@ jobs:
             }
           }
           if ($missing.Count -gt 0) {
-            Write-Host "Headers missing include guards:" -ForegroundColor Yellow
-            $missing | ForEach-Object { Write-Host "  $_" }
-          } else {
-            Write-Host "All $($headers.Count) headers have include guards" -ForegroundColor Green
+            Write-Host "::error::$($missing.Count) header(s) missing include guards:" -ForegroundColor Red
+            $missing | ForEach-Object { Write-Host "::error::  Missing guard: $_" }
+            exit 1
+          }
+          Write-Host "All $($headers.Count) headers have include guards" -ForegroundColor Green
+
+  version-consistency:
+    name: Version Consistency Check
+    runs-on: windows-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate version consistency across all files
+        shell: pwsh
+        run: |
+          $versionFile = Get-Content "VERSION" -Raw
+          $canonical = $versionFile.Trim()
+          Write-Host "Canonical version from VERSION file: $canonical"
+
+          $failures = @()
+
+          # Check root CMakeLists.txt
+          $cmake = Get-Content "CMakeLists.txt" -Raw
+          if ($cmake -notmatch "project\(ExplorerLens\s+VERSION\s+$([regex]::Escape($canonical))") {
+            $failures += "CMakeLists.txt: project VERSION does not match $canonical"
           }
 
+          # Check Engine/CMakeLists.txt
+          $ecmake = Get-Content "Engine/CMakeLists.txt" -Raw
+          if ($ecmake -notmatch "project\(ExplorerLensEngine\s+VERSION\s+$([regex]::Escape($canonical))") {
+            $failures += "Engine/CMakeLists.txt: project VERSION does not match $canonical"
+          }
+
+          # Check BuildValidation.h
+          $bv = Get-Content "Engine/Core/BuildValidation.h" -Raw
+          if ($bv -notmatch [regex]::Escape("VersionString = `"$canonical`"")) {
+            $failures += "Engine/Core/BuildValidation.h: VersionString does not match $canonical"
+          }
+
+          # Check CHANGELOG.md has an entry for this version
+          $changelog = Get-Content "CHANGELOG.md" -Raw
+          if ($changelog -notmatch [regex]::Escape("[$canonical]")) {
+            $failures += "CHANGELOG.md: no entry found for [$canonical]"
+          }
+
+          # Check LENSManager.rc VERSIONINFO
+          $ver = $canonical -replace '\.', ', '
+          $rc = Get-Content "LENSManager/LENSManager.rc" -Raw
+          if ($rc -notmatch [regex]::Escape("FILEVERSION     $ver, 0")) {
+            $failures += "LENSManager/LENSManager.rc: FILEVERSION does not match $canonical"
+          }
+
+          if ($failures.Count -gt 0) {
+            Write-Host "::error::Version consistency check FAILED:" -ForegroundColor Red
+            $failures | ForEach-Object { Write-Host "::error::  - $_" }
+            exit 1
+          }
+          Write-Host "Version consistency OK — all files report $canonical" -ForegroundColor Green

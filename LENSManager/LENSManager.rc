@@ -20,7 +20,7 @@ CAPTION "About ExplorerLens"
 FONT 8, "MS Shell Dlg 2", 400, 0, 1
 {
   ICON            IDR_MAINFRAME, IDC_STATIC, 12, 10, 20, 20, SS_ICON
-    CTEXT           "ExplorerLens Shell Manager\nversion 15.0.0 ""Zenith""\nExplorerLens.io (c) 2011-2026", IDC_STATIC, 40, 10, 258, 28, SS_CENTER
+    CTEXT           "ExplorerLens Shell Manager\nversion 15.2.0 ""Zenith-S""\nExplorerLens.io (c) 2011-2026", IDC_STATIC, 40, 10, 258, 28, SS_CENTER
     CTEXT           "200+ Formats  -  GPU Thumbnails  -  DirectX 11/12  -  Vulkan  -  Smart Cache", IDC_STATIC, 12, 42, 286, 10, SS_CENTER
     LTEXT           "System Information:", IDC_STATIC, 12, 58, 286, 8
     EDITTEXT        IDC_ABOUT_SYSINFO, 12, 68, 286, 174, ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL | WS_BORDER
@@ -179,8 +179,8 @@ IDR_MAINFRAME      ICON           "ExplorerLensIcon.ico"
 // Version Information resources
 //
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     15, 0, 0, 0
-PRODUCTVERSION  15, 0, 0, 0
+FILEVERSION     15, 2, 0, 0
+PRODUCTVERSION  15, 2, 0, 0
 FILEOS          VOS__WINDOWS32
 FILETYPE        VFT_APP
 FILESUBTYPE     VFT2_UNKNOWN
@@ -193,10 +193,10 @@ FILEFLAGS       0x00000000
     {
       VALUE "CompanyName", "ExplorerLens.io\0"
         VALUE "FileDescription", "ExplorerLens Shell Manager x64\0"
-        VALUE "FileVersion", "15.0.0.0\0"
+        VALUE "FileVersion", "15.2.0.0\0"
         VALUE "LegalCopyright", "ExplorerLens.io © 2011-2026\0"
         VALUE "ProductName", "ExplorerLens Shell Extension\0"
-        VALUE "ProductVersion", "15.0.0.0\0"
+        VALUE "ProductVersion", "15.2.0.0\0"
     }
   }
   BLOCK "VarFileInfo"

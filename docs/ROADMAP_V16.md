@@ -1,7 +1,7 @@
 # ExplorerLens v16.0 Development Roadmap — "Horizon"
 
 **Created:** 2026-03-24  
-**Current Version:** 15.1.0 "Zenith-R"  
+**Current Version:** 15.2.0 "Zenith-S"  
 **Target Version:** 16.0.0 "Horizon"  
 **Audience:** Engineering team, tech lead, product owner  
 **Estimated Duration:** 12 sprints (~24 weeks)

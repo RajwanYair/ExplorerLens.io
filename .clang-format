@@ -1,0 +1,132 @@
+# ExplorerLens — clang-format configuration
+# Standard: C++20 / MSVC v145 / coding-standards.md alignment
+# Apply: clang-format -i <file>  |  Check: clang-format --dry-run --Werror <file>
+
+Language: Cpp
+Standard: c++20
+BasedOnStyle: Microsoft
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+NamespaceIndentation: None
+IndentCaseLabels: true
+IndentPPDirectives: BeforeHash
+IndentExternBlock: NoIndent
+
+# Line length — 120 cols per coding-standards.md
+ColumnLimit: 120
+
+# Braces — K&R / Allman mixed per existing style
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+# Spaces
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInAngles: Never
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceAroundPointerQualifiers: Default
+
+# Pointer/reference alignment — left-aligned per MSVC convention
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Include sorting — 4 groups per coding-standards.md:
+#   1. Corresponding header  2. C system  3. C++ stdlib  4. Third-party  5. Project
+IncludeBlocks: Regroup
+SortIncludes: CaseSensitive
+IncludeCategories:
+  - Regex:    '^<windows\.h>'
+    Priority: 1
+    SortPriority: 0
+  - Regex:    '^<[a-z_]+\.h>'
+    Priority: 2
+    SortPriority: 1
+  - Regex:    '^<[A-Za-z0-9_/]+>'
+    Priority: 3
+    SortPriority: 2
+  - Regex:    '^"'
+    Priority: 4
+    SortPriority: 3
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments:
+  Enabled: false
+AlignConsecutiveDeclarations:
+  Enabled: false
+AlignEscapedNewlines: Left
+AlignOperands: Align
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 0
+
+# Breaking
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+BreakStringLiterals: false
+
+# Constructor initializers
+ConstructorInitializerIndentWidth: 4
+PackConstructorInitializers: CurrentLine
+
+# Template / concept
+AlwaysBreakTemplateDeclarations: Yes
+RequiresExpressionIndentation: OuterScope
+
+# Penalties (tune to prefer readability over saving lines)
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakString: 1000
+PenaltyExcessCharacter: 40
+PenaltyReturnTypeOnItsOwnLine: 200
+
+# COM / Win32 patterns — keep macro-heavy lines intact
+MacroBlockBegin: ''
+MacroBlockEnd: ''
+AttributeMacros:
+  - __declspec
+  - WINAPI
+  - STDMETHOD
+  - STDMETHODIMP
+
+# Trailing comma in multiline
+InsertTrailingCommas: None
+
+# Empty lines
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+# Comments
+ReflowComments: false
+SpacesBeforeTrailingComments: 2

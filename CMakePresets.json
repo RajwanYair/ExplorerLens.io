@@ -143,6 +143,26 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       }
+    },
+    {
+      "name": "temp-release",
+      "displayName": "Release (TEMP dir — OneDrive-safe)",
+      "description": "Release build using $TEMP binary dir to avoid OneDrive sync conflicts on .ninja_db",
+      "inherits": "msvc-v145",
+      "binaryDir": "$env{TEMP}/ExplorerLens-build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "temp-debug",
+      "displayName": "Debug (TEMP dir — OneDrive-safe)",
+      "description": "Debug build using $TEMP binary dir to avoid OneDrive sync conflicts on .ninja_db",
+      "inherits": "msvc-v145",
+      "binaryDir": "$env{TEMP}/ExplorerLens-build-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
     }
   ],
   "buildPresets": [
@@ -195,6 +215,22 @@
       "verbose": false
     },
     {
+      "name": "temp-release",
+      "displayName": "Build Release (TEMP — OneDrive-safe)",
+      "configurePreset": "temp-release",
+      "configuration": "Release",
+      "jobs": 8,
+      "verbose": false
+    },
+    {
+      "name": "temp-debug",
+      "displayName": "Build Debug (TEMP — OneDrive-safe)",
+      "configurePreset": "temp-debug",
+      "configuration": "Debug",
+      "jobs": 8,
+      "verbose": false
+    },
+    {
       "name": "vs2026-release",
       "displayName": "Build Release (VS 2026)",
       "configurePreset": "vs2026",
@@ -212,6 +248,18 @@
       "name": "default-release-test",
       "displayName": "Test Release (Default)",
       "configurePreset": "default-release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "temp-release-test",
+      "displayName": "Test Release (TEMP — OneDrive-safe)",
+      "configurePreset": "temp-release",
       "output": {
         "outputOnFailure": true
       },

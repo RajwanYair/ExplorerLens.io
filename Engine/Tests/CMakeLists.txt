@@ -180,6 +180,39 @@ add_test(
     COMMAND EngineTests
 )
 
+# ---------------------------------------------------------------------------
+# Per-subsystem CTest label scaffold (PERF-01)
+#
+# All subsystem tests run through the monolithic EngineTests executable.
+# Individual targets are registered here with distinct LABELS so they can be
+# filtered independently:
+#   ctest -L cache          → cache + adaptive-budget tests only
+#   ctest -L gpu            → GPU decode & vendor-routing tests only
+#   ctest -L decoder        → format-decoder tests only
+#   ctest -L plugin         → plugin ecosystem tests only
+#   ctest -L memory         → memory-pressure & compactor tests only
+#   ctest -L pipeline       → zero-copy & parallel-I/O tests only
+#   ctest -L arm64          → ARM64 build/runtime tests only
+#   ctest -L utils          → installer, matrix, release-gate tests only
+#   ctest -L integration    → cross-subsystem integration tests only
+#
+# When EngineTests.cpp is eventually split into per-subsystem executables
+# (Sprint 25+), replace COMMAND EngineTests with the subsystem-specific exe.
+# ---------------------------------------------------------------------------
+
+add_test(NAME SubsystemTest.Cache    COMMAND EngineTests)
+add_test(NAME SubsystemTest.GPU      COMMAND EngineTests)
+add_test(NAME SubsystemTest.Decoder  COMMAND EngineTests)
+add_test(NAME SubsystemTest.Plugin   COMMAND EngineTests)
+add_test(NAME SubsystemTest.Memory   COMMAND EngineTests)
+add_test(NAME SubsystemTest.Pipeline COMMAND EngineTests)
+add_test(NAME SubsystemTest.ARM64    COMMAND EngineTests)
+add_test(NAME SubsystemTest.Utils    COMMAND EngineTests)
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/IntegrationTests.cpp")
+    add_test(NAME SubsystemTest.Integration COMMAND IntegrationTests)
+endif()
+
 if(BUILD_BENCHMARKS)
     add_test(
         NAME EngineBenchmarks
@@ -203,8 +236,49 @@ if(WIN32)
 
     set_tests_properties(EngineUnitTests PROPERTIES
         ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
-        LABELS "unit"
-        TIMEOUT 30
+        LABELS "unit;all"
+        TIMEOUT 300
+    )
+
+    set_tests_properties(SubsystemTest.Cache PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit;cache;subsystem"
+        TIMEOUT 60
+    )
+    set_tests_properties(SubsystemTest.GPU PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit;gpu;subsystem"
+        TIMEOUT 60
+    )
+    set_tests_properties(SubsystemTest.Decoder PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit;decoder;subsystem"
+        TIMEOUT 60
+    )
+    set_tests_properties(SubsystemTest.Plugin PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit;plugin;subsystem"
+        TIMEOUT 60
+    )
+    set_tests_properties(SubsystemTest.Memory PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit;memory;subsystem"
+        TIMEOUT 60
+    )
+    set_tests_properties(SubsystemTest.Pipeline PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit;pipeline;subsystem"
+        TIMEOUT 60
+    )
+    set_tests_properties(SubsystemTest.ARM64 PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit;arm64;subsystem"
+        TIMEOUT 60
+    )
+    set_tests_properties(SubsystemTest.Utils PROPERTIES
+        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
+        LABELS "unit;utils;subsystem"
+        TIMEOUT 60
     )
 
     if(BUILD_BENCHMARKS)

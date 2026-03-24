@@ -640,3 +640,155 @@ git push origin main --tags
 5. **Release artifacts** — see `release.yml` — triggered automatically on `git tag vX.Y.Z`
 6. **Binaries in release** — every GitHub Release MUST include: DLL, EXE(s), MSI, ZIP, SHA256SUMS
 7. **Changelog discipline** — every sprint adds a CHANGELOG subsection organized as: Added / Fixed / Changed / Performance
+
+---
+
+## Industrial-Standard Backlog (Consolidated 2026-03-24)
+
+> This section consolidates the full project quality backlog into the sprint plan.
+> Tasks are grouped into 7 phases. Each group of 5 completed tasks triggers a patch release.
+> **Release cadence:** Every 5 tasks → clean build → git tag → GitHub Release.
+
+### Phase 1 — Docs & Version Standards (DOC)
+
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| DOC-01 | Fix version drift across all files (CMakeLists × 2, .rc, BuildValidation.h, docs) | **High** | ✅ Done v15.2.1 |
+| DOC-02 | Create `CODE_OF_CONDUCT.md` at repo root | Medium | — |
+| DOC-03 | Create `RELEASE_PROCESS.md` standalone doc | **High** | — |
+| DOC-04 | Modernize `README.md` badges + Mermaid diagrams | **High** | — |
+| DOC-05 | Fix SVG embedding for GitHub (`<picture>` pattern + PNG fallbacks) | Medium | — |
+| DOC-06 | Add Mermaid architecture diagrams (replace ASCII) | Medium | — |
+| DOC-07 | Update `PERFORMANCE.md` to v15.2 targets (17ms, 235/s, <5ms cache) | Medium | ✅ Done v15.2.1 |
+| DOC-08 | Update `USER_GUIDE.md` to v15.2 format list + new features | Medium | ✅ Done v15.2.1 |
+| DOC-09 | Update `TROUBLESHOOTING.md` — ARM64 section, WinUI 3 Islands | Low | ✅ Done v15.2.1 |
+| DOC-10 | Add GitHub repo topics (10 tags for discoverability) | **High** | ✅ Done v15.2.1 |
+| DOC-11 | Optimize README SEO keywords block | Medium | — |
+| DOC-12 | Set concise repo description (80-char limit) | Medium | — |
+| DOC-13 | Consolidate ROADMAP_V16.md into SPRINT_PLAN_100.md | Low | ✅ Done v15.2.1 |
+| DOC-14 | Add `docs/GETTING_STARTED.md` for developers | Medium | — |
+| DOC-15 | Update `development-learnings.md` with v15.2 lessons | Low | — |
+| DOC-16 | Create `docs/diagrams/` C4 component diagram (Mermaid) | Medium | — |
+
+### Phase 2 — CI/CD & Build Hardening (CI)
+
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| CI-01 | Make `code-quality.yml` blocking — remove `continue-on-error` | **High** | ✅ Done v15.2.1 |
+| CI-02 | Enforce performance regression gate — fail PRs at +20% latency | **High** | ✅ Done v15.2.2 |
+| CI-03 | Add version consistency check CI job (VERSION ↔ CMake ↔ .rc ↔ BuildValidation.h) | **High** | ✅ Done v15.2.1 |
+| CI-04 | Create `.clang-format` config aligned with `coding-standards.md` | **High** | ✅ Done v15.2.1 |
+| CI-05 | Add pre-commit hook via `.githooks/` (format + version check) | Medium | — |
+| CI-06 | Add SBOM validation step to `release.yml` | Medium | — |
+| CI-07 | Add binary size regression gate (warn if LENSShell.dll > 3200 KB) | Low | — |
+| CI-08 | Add CodeQL scanning workflow for C++ | Medium | — |
+| CI-09 | Consolidate `build.yml` + `ci-matrix.yml` into single matrix workflow | Medium | — |
+| CI-10 | Add auto-changelog via `git-cliff` in `release.yml` | Medium | — |
+| CI-11 | Fix libwebp `/NODEFAULTLIB:LIBCMT` workaround → rebuild with `/MD` | Medium | — |
+| CI-12 | Upgrade MuPDF 1.24.11 → 1.25.x (ABI compat check) | Low | — |
+| CI-13 | Document required branch protection rules | Low | — |
+| CI-14 | Add nightly scheduled full test run (move from weekly) | Low | — |
+
+### Phase 3 — GUI & UX Modernization (GUI)
+
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| GUI-01 | Fix About dialog version string (15.0.0 → 15.2.0, "Zenith" → "Zenith-S") | **High** | ✅ Done v15.2.1 |
+| GUI-02 | Fix application icon visibility (NULL check + `GetModuleHandle(NULL)` fallback) | **High** | ✅ Done v15.2.2 |
+| GUI-03 | Add Per-Monitor DPI V2 manifest declaration | **High** | — |
+| GUI-04 | Redesign main dialog — collapsible groups replacing 39-checkbox wall | Medium | — |
+| GUI-05 | Add WinUI 3 XAML Islands POC (Sprint 41–52 deliverable) | Medium | — |
+| GUI-06 | Add status bar decoder health summary ("25/25 decoders healthy") | Medium | — |
+| GUI-07 | Add keyboard shortcuts (Ctrl+A, Ctrl+S, F1, F5) | Medium | — |
+| GUI-08 | Add format search/filter text box | Medium | — |
+| GUI-09 | Modernize collage mode — visual grid preview replacing radio buttons | Low | — |
+| GUI-10 | Add first-run onboarding wizard (3-step) | Low | — |
+| GUI-11 | Add system tray toast notifications | Low | — |
+| GUI-12 | Add sparkline charts to `PerformanceDashboard` | Low | — |
+| GUI-13 | WCAG 2.1 AA accessibility audit + tab order fix | Medium | — |
+| GUI-14 | Build WinUI 3 `Manager.WinUI` prototype from `src/Manager.WinUI/` | Low | — |
+
+### Phase 4 — Performance & Testing (PERF)
+
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| PERF-01 | Split EngineTests.cpp (22K lines) into 5–8 per-subsystem TUs | **High** | ✅ Done v15.2.2 |
+| PERF-02 | Profile top-10 slowest unit tests, optimize any > 500ms | **High** | — |
+| PERF-03 | Optimize RAW decode path (LibRaw half-size for thumbnails) | Medium | — |
+| PERF-04 | Optimize PDF first-page render (MuPDF resolution cap) | Medium | — |
+| PERF-05 | Reduce idle memory to <30 MB (profile singletons) | Medium | — |
+| PERF-06 | Implement cache warm-up on Explorer startup | Low | — |
+| PERF-07 | Add integration test corpus (1 sample file per format in `data/corpus/`) | Medium | — |
+| PERF-08 | Audit tests — remove trivially-passing `ASSERT(true)` stubs | Medium | — |
+| PERF-09 | Add fuzz testing to CI (weekly job with libFuzzer) | Low | — |
+| PERF-10 | Benchmark GPU vs CPU decode; update `PERFORMANCE.md` | Low | — |
+| PERF-11 | Add memory leak test to CI with failure threshold | Medium | — |
+| PERF-12 | Add video thumbnail decode benchmarks | Low | — |
+| PERF-13 | Register per-subsystem test executables as separate CTest targets | Medium | — |
+| PERF-14 | Evaluate `/LTCG:incremental` for faster dev builds | Low | — |
+
+### Phase 5 — Architecture & Code Quality (ARCH)
+
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| ARCH-01 | Create `.clang-format` (merged with CI-04) | **High** | ✅ Done v15.2.1 |
+| ARCH-02 | Create `.clang-tidy` — `cppcoreguidelines-*`, `modernize-*`, `bugprone-*` | **High** | — |
+| ARCH-03 | Reduce `Engine/Utils/` to < 80 files | Medium | — |
+| ARCH-04 | Reduce `Engine/Core/` to < 100 files | Medium | — |
+| ARCH-05 | Audit + remove 16.7% zero-ref dead headers | Medium | — |
+| ARCH-06 | Implement `lens.exe` CLI tool from `src/Tools.CLI/` (Sprint 17–24) | Medium | — |
+| ARCH-07 | Implement `IPropertyStore` for Explorer details pane (Sprint 2) | Medium | — |
+| ARCH-08 | Add structured ETW tracing to decode pipeline | Low | — |
+| ARCH-09 | Implement PluginHost out-of-proc isolation (`src/PluginHost/`) | Low | — |
+| ARCH-10 | Add `IExtractImage` fallback for legacy Explorer views | Low | — |
+| ARCH-11 | Verify `src/` Modern Runtime CMake targets are all connected | Medium | — |
+| ARCH-12 | Add `.prettierrc` for JSON/YAML formatting | Low | — |
+| ARCH-13 | Add `.editorconfig` for PS1/YAML/MD files | Low | — |
+| ARCH-14 | Standardize decoder error codes — unified `DecodeResult` enum | Medium | — |
+
+### Phase 6 — Automation & PowerShell DevEx (AUTO)
+
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| AUTO-01 | Create `scripts/New-Version.ps1` — atomic 10-file version bump | **High** | ✅ Done v15.2.1 |
+| AUTO-02 | Add PS argument completers for `-Preset` on all build scripts | Medium | — |
+| AUTO-03 | Create `scripts/Dev-Setup.ps1` — one-command dev environment setup | Medium | — |
+| AUTO-04 | Create MCP skill files for build/test/release workflows | Medium | — |
+| AUTO-05 | Add VS Code problem matcher for `EngineTests.exe` output format | Medium | — |
+| AUTO-06 | Update `CODEOWNERS` with per-directory team mappings | Low | — |
+| AUTO-07 | Enable GitHub Discussions (Q&A, Feature Requests, Announcements) | Low | — |
+| AUTO-08 | Verify Dependabot covers `github-actions` ecosystem | Low | — |
+| AUTO-09 | Create `.github/prompts/sprint-delivery.prompt.md` | Low | — |
+| AUTO-10 | Build `ExplorerLens.psm1` module (Get-LENSStatus, Invoke-LENSBuild) | Medium | — |
+| AUTO-11 | Verify FUNDING.yml has active sponsor platforms | Low | — |
+| AUTO-12 | Consolidate 7 validation scripts in `build-scripts/validation/` → 2–3 | Low | — |
+
+### Phase 7 — GitHub Templates & Community (COMM)
+
+| ID | Title | Priority | Status |
+|----|-------|----------|--------|
+| COMM-01 | Convert `bug_report.md` + `feature_request.md` to YAML forms | Medium | — |
+| COMM-02 | Add "Documentation" issue template (YAML form) | Low | — |
+| COMM-03 | Update PR template — add version/tests/docs/warnings checklist | Medium | — |
+| COMM-04 | Add "Good First Issue" label + contributor guide section | Low | — |
+| COMM-05 | Add `CITATION.cff` for academic citation | Low | — |
+| COMM-06 | Create `docs/FAQ.md` from top-10 troubleshooting questions | Low | — |
+| COMM-07 | Generate + upload PNG social preview from `social-preview.svg` | Medium | — |
+| COMM-08 | Add contributor recognition (`CONTRIBUTORS.md`) | Low | — |
+
+---
+
+### Top 10 Highest-Impact Tasks (Current Focus)
+
+| Rank | ID | Title | Status |
+|------|----|-------|--------|
+| 1 | DOC-01 | Fix version drift across all files | ✅ v15.2.1 |
+| 2 | CI-01 | Make code-quality.yml blocking | ✅ v15.2.1 |
+| 3 | CI-03 | Version consistency CI check | ✅ v15.2.1 |
+| 4 | CI-04 | Create `.clang-format` config | ✅ v15.2.1 |
+| 5 | AUTO-01 | Create `New-Version.ps1` script | ✅ v15.2.1 |
+| 6 | GUI-02 | Fix application icon visibility | ✅ v15.2.2 |
+| 7 | CI-02 | Enforce performance regression gate | ✅ v15.2.2 |
+| 8 | PERF-01 | Scaffold EngineTests split | ✅ v15.2.2 |
+| 9 | DOC-10 | Add GitHub repo topics | ✅ v15.2.2 |
+| 10 | GUI-01 | Fix About dialog version | ✅ v15.2.1 |

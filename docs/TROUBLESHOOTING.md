@@ -589,7 +589,7 @@ $testFile = "C:\Photos\sample.webp"
 
 ## Current Known Issues
 
-**Version:** 15.1.0 "Zenith-R" — all P0 and P1 issues resolved
+**Version:** 15.2.0 "Zenith-S" — all P0 and P1 issues resolved
 
 | Priority | Issue | Status | Workaround |
 |----------|-------|--------|------------|

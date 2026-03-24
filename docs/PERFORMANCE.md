@@ -1,7 +1,6 @@
 # ExplorerLens Performance Tuning Guide
-**Version Normalization** 
-**Version:** 15.0.0 
-**Last Updated:** June 2025
+**Version:** 15.2.0 "Zenith-S"
+**Last Updated:** March 2026
 
 ---
 
@@ -592,7 +591,7 @@ cd "C:\Program Files\ExplorerLens"
 
 # Output:
 # ==================================================
-# ExplorerLens Benchmark Suite - Version 15.0.0
+# ExplorerLens Benchmark Suite - Version 15.2.0
 # ==================================================
 # System: Intel Core i7-10700K, 16 GB RAM
 # GPU: NVIDIA RTX 3060 (12 GB VRAM)
@@ -795,5 +794,5 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 15000
 
 ---
 
-**Last Updated:** June 2025 
-**Version:** 15.0.0
+**Last Updated:** March 2026 
+**Version:** 15.2.0

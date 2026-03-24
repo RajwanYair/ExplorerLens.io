@@ -12,7 +12,8 @@
     Delete build/ directory before configuring.
 
 .PARAMETER Preset
-    CMake configure preset name (default: "default-release").
+    CMake configure preset name (default: "temp-release" — uses TEMP dir to avoid OneDrive sync issues).
+    Use "default-release" to build into the source tree's build/ directory.
 
 .PARAMETER Jobs
     Parallel build jobs (default: 8).
@@ -23,14 +24,15 @@
 .PARAMETER Test
     Run CTest after a successful build.
 
-.EXAMPLE
-    .\build-scripts\Build-MSVC.ps1
-    .\build-scripts\Build-MSVC.ps1 -Clean
-    .\build-scripts\Build-MSVC.ps1 -Preset vcpkg-release -Test
+    .\.build-scripts\Build-MSVC.ps1
+    .\.build-scripts\Build-MSVC.ps1 -Clean
+    .\.build-scripts\Build-MSVC.ps1 -Preset temp-release -Test
+    .\.build-scripts\Build-MSVC.ps1 -Preset default-release
+    .\.build-scripts\Build-MSVC.ps1 -Preset vcpkg-release
 #>
 param(
     [switch]$Clean,
-    [string]$Preset = "default-release",
+    [string]$Preset = "temp-release",
     [int]$Jobs = 8,
     [string]$Target = "",
     [switch]$Configure,
@@ -145,10 +147,18 @@ if ($Clean) {
         "default-debug"   = "build-debug"
         "vcpkg-release"   = "build-vcpkg"
         "vcpkg-debug"     = "build-vcpkg-debug"
+        "temp-release"    = "$env:TEMP\ExplorerLens-build"
+        "temp-debug"      = "$env:TEMP\ExplorerLens-build-debug"
     }
     $binDir = $presetBinaryDirs[$Preset]
     if (-not $binDir) { $binDir = "build" }
-    $fullBinDir = Join-Path $PROJECT_ROOT $binDir
+
+    # Absolute path: TEMP presets are already absolute; relative ones are project-relative
+    if ([System.IO.Path]::IsPathRooted($binDir)) {
+        $fullBinDir = $binDir
+    } else {
+        $fullBinDir = Join-Path $PROJECT_ROOT $binDir
+    }
 
     if (Test-Path $fullBinDir) {
         Write-Host "`n[Clean] Removing $fullBinDir..." -ForegroundColor Magenta
@@ -193,10 +203,19 @@ try {
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "  Tests: ALL PASSED" -ForegroundColor Green
             } else {
-                # Fallback to ctest directly if test preset doesn't exist
+                # Fallback: resolve binary dir and run ctest directly
+                $presetBinaryDirs = @{
+                    "default-release" = "build"
+                    "default-debug"   = "build-debug"
+                    "vcpkg-release"   = "build-vcpkg"
+                    "vcpkg-debug"     = "build-vcpkg-debug"
+                    "temp-release"    = "$env:TEMP\ExplorerLens-build"
+                    "temp-debug"      = "$env:TEMP\ExplorerLens-build-debug"
+                }
                 $binDir = $presetBinaryDirs[$Preset]
                 if (-not $binDir) { $binDir = "build" }
-                & ctest --test-dir (Join-Path $PROJECT_ROOT $binDir) -C Release --output-on-failure
+                $fullBinDir = if ([System.IO.Path]::IsPathRooted($binDir)) { $binDir } else { Join-Path $PROJECT_ROOT $binDir }
+                & ctest --test-dir $fullBinDir -C Release --output-on-failure
             }
             $phaseTimings["test"] = $buildTimer.Elapsed.TotalSeconds - ($phaseTimings.Values | Measure-Object -Sum).Sum
         }

@@ -11,15 +11,22 @@ concurrency:
   group: perf-${{ github.ref }}
   cancel-in-progress: true
 
+# Regression thresholds (from .github/standards/performance-benchmarks.md):
+#   +20% median latency   → warning (non-blocking)
+#   -15% batch throughput → BLOCKS merge
+#   +30% memory peak      → warning (non-blocking)
+
 jobs:
   performance-regression-check:
     name: Check Performance Regressions
     runs-on: windows-latest
 
-    strategy:
-      matrix:
-        configuration: [Release]
-        platform: [x64]
+    env:
+      # Baselines from performance-benchmarks.md (i7-12700K / RTX 3080 baseline)
+      BASELINE_SINGLE_MS: '17'        # target median: <17ms
+      BASELINE_BATCH_IPS: '235'       # target batch: >235 img/sec
+      THRESHOLD_LATENCY_PCT: '20'     # block if +20% over baseline
+      THRESHOLD_THROUGHPUT_PCT: '15'  # block if -15% under baseline
 
     steps:
       - name: Checkout Code
@@ -28,46 +35,103 @@ jobs:
           fetch-depth: 0
 
       - name: Setup MSVC
-        uses: microsoft/setup-msbuild@v2
+        uses: ilammy/msvc-dev-cmd@v1
         with:
-          vs-version: latest
+          arch: x64
 
-      - name: Setup vcpkg
+      - name: Setup vcpkg + Google Benchmark
         shell: pwsh
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
-          .\vcpkg\vcpkg integrate install
+          Write-Host "Cloning vcpkg..." -ForegroundColor Cyan
+          git clone --depth 1 https://github.com/microsoft/vcpkg.git "$env:TEMP\vcpkg"
+          & "$env:TEMP\vcpkg\bootstrap-vcpkg.bat" -disableMetrics 2>&1 | Out-Null
+          & "$env:TEMP\vcpkg\vcpkg" install benchmark:x64-windows --recurse 2>&1 | Out-Null
+          Write-Host "Google Benchmark installed" -ForegroundColor Green
 
-      - name: Install Google Benchmark
+      - name: Configure CMake (ci-release preset)
         shell: pwsh
         run: |
-          .\vcpkg\vcpkg install benchmark:x64-windows
-
-      - name: Configure CMake
-        shell: pwsh
-        run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          cmake --preset ci-release `
+            -DCMAKE_TOOLCHAIN_FILE="$env:TEMP/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build Benchmark Target
         shell: pwsh
         run: |
-          cmake --build build --config Release --target EngineBenchmark -j 8
+          cmake --build --preset ci-release --target EngineBenchmark -j 8
 
       - name: Run Benchmarks
         shell: pwsh
         run: |
-          $benchmarkExe = "build\Engine\Tests\Release\EngineBenchmark.exe"
-          if (-not (Test-Path $benchmarkExe)) {
-            Write-Host "Benchmark executable not found: $benchmarkExe" -ForegroundColor Red
+          $paths = @(
+            "build\bin\Release\EngineBenchmark.exe",
+            "build\Engine\Tests\Release\EngineBenchmark.exe",
+            "build\bin\EngineBenchmark.exe"
+          )
+          $benchExe = $paths | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $benchExe) {
+            Write-Host "::error::EngineBenchmark.exe not found in any expected location"
             exit 1
           }
-          & $benchmarkExe --benchmark_format=json --benchmark_out=build-logs/perf-results.json
+          New-Item -ItemType Directory -Force "$env:TEMP\perf" | Out-Null
+          & $benchExe --benchmark_format=json --benchmark_out="$env:TEMP\perf\results.json"
+          Copy-Item "$env:TEMP\perf\results.json" "build-logs\perf-results.json" -Force -ErrorAction SilentlyContinue
+
+      - name: Enforce Regression Thresholds
+        shell: pwsh
+        run: |
+          $resultsPath = "$env:TEMP\perf\results.json"
+          if (-not (Test-Path $resultsPath)) {
+            Write-Host "::warning::Benchmark results not found — skipping threshold check"
+            exit 0
+          }
+
+          $results  = Get-Content $resultsPath -Raw | ConvertFrom-Json
+          $failures = @()
+          $warnings = @()
+
+          foreach ($bench in $results.benchmarks) {
+            $name = $bench.name
+
+            # Check single-decode latency benchmarks (name contains "Single" or "Decode")
+            if ($name -match 'Single|Decode' -and $bench.PSObject.Properties['real_time']) {
+              $latencyMs = [double]$bench.real_time / 1e6  # nanoseconds → ms
+              $maxAllowed = [double]$env:BASELINE_SINGLE_MS * (1 + [double]$env:THRESHOLD_LATENCY_PCT / 100)
+              if ($latencyMs -gt $maxAllowed) {
+                $failures += "LATENCY: $name = $([math]::Round($latencyMs,1))ms > threshold $([math]::Round($maxAllowed,1))ms (+$($env:THRESHOLD_LATENCY_PCT)%)"
+              } elseif ($latencyMs -gt [double]$env:BASELINE_SINGLE_MS) {
+                $warnings += "LATENCY WARNING: $name = $([math]::Round($latencyMs,1))ms (baseline: $($env:BASELINE_SINGLE_MS)ms)"
+              }
+            }
+
+            # Check batch throughput benchmarks (name contains "Batch" or "Throughput")
+            if ($name -match 'Batch|Throughput' -and $bench.PSObject.Properties['items_per_second']) {
+              $ips = [double]$bench.items_per_second
+              $minAllowed = [double]$env:BASELINE_BATCH_IPS * (1 - [double]$env:THRESHOLD_THROUGHPUT_PCT / 100)
+              if ($ips -lt $minAllowed) {
+                $failures += "THROUGHPUT: $name = $([math]::Round($ips,1)) img/s < threshold $([math]::Round($minAllowed,1)) img/s (-$($env:THRESHOLD_THROUGHPUT_PCT)%)"
+              }
+            }
+          }
+
+          # Emit warnings
+          foreach ($w in $warnings) { Write-Host "::warning::$w" }
+
+          # Emit failures (blocking)
+          if ($failures.Count -gt 0) {
+            Write-Host "::error::Performance regression detected — merge BLOCKED" -ForegroundColor Red
+            foreach ($f in $failures) { Write-Host "::error::$f" }
+            exit 1
+          }
+
+          Write-Host "Performance regression check PASSED" -ForegroundColor Green
+          Write-Host "  Single-decode threshold: <$([double]$env:BASELINE_SINGLE_MS * (1 + [double]$env:THRESHOLD_LATENCY_PCT/100))ms"
+          Write-Host "  Batch throughput threshold: >$([double]$env:BASELINE_BATCH_IPS * (1 - [double]$env:THRESHOLD_THROUGHPUT_PCT/100)) img/s"
 
       - name: Upload Benchmark Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: perf-results-${{ github.run_number }}
-          path: build-logs/perf-results.json
+          path: |
+            build-logs/perf-results.json
           retention-days: 30
