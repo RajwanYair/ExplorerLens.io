@@ -48,7 +48,7 @@ jobs:
       - name: Checkout (full history for changelog)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
           fetch-depth: 0
 
       # ── Resolve version from tag or input ──────────────────────────────────
@@ -379,4 +379,3 @@ jobs:
           append_body: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
