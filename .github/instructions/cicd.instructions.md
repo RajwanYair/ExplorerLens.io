@@ -103,3 +103,67 @@ Examples:
 - Use `${{ secrets.TOKEN }}` not hardcoded values
 - Set `permissions` explicitly on every job
 - Use `if: github.event_name == 'push'` to limit sensitive steps to main
+
+---
+
+## ExplorerLens Release-on-Tag Procedure (C++ / MSVC)
+
+### Trigger
+
+Every version bump **must** create a `git tag vX.Y.Z` which auto-triggers `release.yml`.
+
+```powershell
+# 1. Update version references in ALL of:
+#    - VERSION  (repo root — single source of truth)
+#    - CHANGELOG.md  (new [X.Y.Z] section at top)
+#    - Engine/Engine.h  (EXPLORERLENS_ENGINE_VERSION_MINOR / _PATCH)
+#    - .github/copilot-instructions.md  (version line near top)
+#    - docs/assets/social-preview.svg  (version chip + any stat updates)
+
+# 2. Build + verify locally (MSVC v145 — vcvars sourced automatically)
+.\build-scripts\Build-MSVC.ps1 -Test
+
+# 3. Stage, commit, tag, push
+$git = "$env:USERPROFILE\scoop\apps\git\current\bin\git.exe"
+& $git add -A
+& $git commit -m "chore: bump version to X.Y.Z (Codename)"
+& $git tag vX.Y.Z
+& $git push origin main --tags   # --tags fires release.yml
+```
+
+### What `release.yml` Publishes
+
+| Artifact | Notes |
+|----------|-------|
+| `LENSShell.dll` (x64) | COM shell extension — always |
+| `LENSManager.exe` | WTL config GUI — always |
+| `lens.exe` | CLI tool — Sprint 17+ |
+| `Manager.WinUI.exe` | WinUI 3 GUI — Sprint 52+ |
+| `ExplorerLens-X.Y.Z-x64.msi` | WiX installer — always |
+| `ExplorerLens-X.Y.Z-x64.zip` | Portable archive — always |
+| `SHA256SUMS.txt` | Checksums for all artifacts |
+| `ExplorerLens-X.Y.Z-SBOM.json` | CycloneDX SBOM |
+
+### Release Workflow Architecture
+
+```
+git tag vX.Y.Z → release.yml
+  └─ build job (windows-latest)
+       configure MSVC via vswhere
+       cmake --preset default-release + msbuild LENSShell.sln
+       discover binaries (multi-path search, warn on missing)
+       build MSI (WiX), create ZIP, generate SHA256SUMS, update SBOM
+       upload-artifact → passes to publish job
+  └─ publish job (ubuntu-latest)
+       download all artifacts
+       extract CHANGELOG section for this version → release body
+       create GitHub Release (draft) via softprops/action-gh-release@v2
+```
+
+### Rules
+
+- **Never skip the tag** — the tag is what fires the release pipeline
+- **Never change the COM CLSID** `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
+- **Always build with MSVC v145** — never Clang for production artifacts
+- **VERSION file is the fallback** — release.yml reads it when no tag info available
+- **Sprint plan is in** `docs/SPRINT_PLAN_100.md` — 100 sprints through v17.0.0 "Nova"
