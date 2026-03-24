@@ -11,7 +11,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
 ![Platform](https://img.shields.io/badge/Platform-x64%20|%20ARM64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-15.1.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-15.2.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Tests](https://img.shields.io/badge/Tests-2938%20passing-success)
 ![Warnings](https://img.shields.io/badge/Warnings-0-green)
@@ -296,10 +296,10 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 15.1.0 "Zenith-R"
+**Current Version:** 15.2.0 "Zenith-S"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 2,938 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Zenith-R — C++20 refactoring milestone (Concepts, Expected.h, SIMD)
+**Codename:** Zenith-S — Architecture Hardening (Sprint 1–8 of 100; roadmap → v17.0.0 "Nova")
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 
@@ -353,4 +353,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 Built with ❤️ using C++20, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
 
-Last Updated: March 24, 2026 (v15.1.0 "Zenith-R")
+Last Updated: March 24, 2026 (v15.2.0 "Zenith-S")

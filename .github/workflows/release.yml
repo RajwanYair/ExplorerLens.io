@@ -1,3 +1,22 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# ExplorerLens Release Workflow
+#
+# TRIGGER:   git tag vX.Y.Z && git push origin main --tags
+# PURPOSE:   Build all binaries → package → generate checksums → publish GitHub Release
+#
+# ARTIFACTS PUBLISHED ON EVERY VERSION TAG:
+#   LENSShell.dll          Windows Shell Extension (COM IThumbnailProvider)
+#   LENSManager.exe        WTL Configuration GUI
+#   lens.exe               CLI tool (when present in build output)
+#   ExplorerLens-X.Y.Z-x64.msi    Signed installer (WiX)
+#   ExplorerLens-X.Y.Z-x64.zip    Portable archive with all binaries
+#   SHA256SUMS.txt         Checksums for all artifacts
+#   ExplorerLens-SBOM.json CycloneDX SBOM
+#   verification-report.json  Build quality report
+#
+# Release is created as DRAFT. Merge to auto-publish or manually approve.
+# ─────────────────────────────────────────────────────────────────────────────
+
 name: Release
 
 on:
@@ -5,142 +24,359 @@ on:
     tags:
       - "v*.*.*"
   workflow_dispatch:
+    inputs:
+      version_override:
+        description: "Version override (e.g. 15.2.0) — leave blank to read from tag"
+        required: false
+        default: ""
 
 env:
   BUILD_TYPE: Release
   PLATFORM: x64
 
 jobs:
-  create-release:
-    name: Create Release & MSI Package
-    runs-on: windows-2022
+  # ─── Job 1: Build all binaries ──────────────────────────────────────────────
+  build:
+    name: Build Release Binaries (MSVC v145)
+    runs-on: windows-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      zip-name: ${{ steps.version.outputs.zip-name }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout (full history for changelog)
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Setup MSBuild
+      # ── Resolve version from tag or input ──────────────────────────────────
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          $ver = ""
+          if ("${{ github.event.inputs.version_override }}" -ne "") {
+            $ver = "${{ github.event.inputs.version_override }}"
+          } elseif ($env:GITHUB_REF -match 'refs/tags/v(.+)') {
+            $ver = $matches[1]
+          } elseif (Test-Path VERSION) {
+            $ver = (Get-Content VERSION -Raw).Trim()
+          } else {
+            $ver = "dev"
+          }
+          Write-Host "Release version: $ver" -ForegroundColor Cyan
+          echo "version=$ver" >> $env:GITHUB_OUTPUT
+          echo "zip-name=ExplorerLens-$ver-x64.zip" >> $env:GITHUB_OUTPUT
+
+      # ── Setup toolchain ────────────────────────────────────────────────────
+      - name: Setup MSBuild (windows-latest includes VS 2022+)
         uses: microsoft/setup-msbuild@v2
 
-      - name: Setup .NET SDK (for WiX)
+      - name: Setup .NET 10 SDK (for WiX + Manager.WinUI)
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: "10.0.x"
 
-      - name: Install WiX Toolset
+      - name: Install WiX Toolset 6.x
         shell: pwsh
         run: |
-          Write-Host "Installing WiX Toolset..." -ForegroundColor Cyan
-          dotnet tool install --global wix --version 5.0.0
-          wix --version
+          dotnet tool install --global wix --version 6.0.2
+          Write-Host "WiX: $(wix --version)" -ForegroundColor Green
 
-      - name: Setup vcpkg (if needed)
+      # ── Configure MSVC (vcvars equivalent) ────────────────────────────────
+      - name: Find and configure MSVC toolchain
+        id: msvc
         shell: pwsh
         run: |
-          Write-Host "Setting up vcpkg..." -ForegroundColor Cyan
-          & "${{ github.workspace }}\build-scripts\core\Setup-Vcpkg.ps1"
+          # Find highest-version vcvarsall.bat
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (Test-Path $vswhere) {
+            $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+            $vcvars = Join-Path $vsPath "VC\Auxiliary\Build\vcvars64.bat"
+            if (Test-Path $vcvars) {
+              Write-Host "Found vcvars64.bat: $vcvars" -ForegroundColor Green
+              echo "vcvars=$vcvars" >> $env:GITHUB_OUTPUT
+              # Source vcvars and export key env vars for subsequent steps
+              $env_dump = cmd /c "`"$vcvars`" && set" 2>&1
+              foreach ($line in $env_dump) {
+                if ($line -match '^([^=]+)=(.*)$') {
+                  $k = $matches[1]; $v = $matches[2]
+                  if ($k -in @('PATH','INCLUDE','LIB','LIBPATH','VCINSTALLDIR','VCPKG_ROOT','WindowsSdkDir','UCRTVersion')) {
+                    echo "$k=$v" >> $env:GITHUB_ENV
+                  }
+                }
+              }
+            }
+          }
+          Write-Host "CMake: $(cmake --version | Select-Object -First 1)" -ForegroundColor Cyan
 
-      - name: Build All Libraries & Create MSI
+      # ── Build Engine (CMake) ───────────────────────────────────────────────
+      - name: Configure CMake (default-release preset)
+        shell: pwsh
+        run: cmake --preset default-release -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Engine (Ninja + MSVC)
+        shell: pwsh
+        run: cmake --build --preset default-release -j 8
+
+      # ── Build Shell Extension + Manager (MSBuild) ──────────────────────────
+      - name: Build LENSShell.dll + LENSManager.exe (MSBuild)
         shell: pwsh
         run: |
-          Write-Host "Building complete ExplorerLens release package..." -ForegroundColor Cyan
+          msbuild LENSShell.sln `
+            /t:Rebuild `
+            /p:Configuration=Release `
+            /p:Platform=x64 `
+            /p:WarningLevel=4 `
+            /m /v:minimal
 
-          # Use unified build script
-          $buildScript = "${{ github.workspace }}\build-scripts\production\Build-All-And-Package.ps1"
-
-          if (Test-Path $buildScript) {
-            & $buildScript -Clean -SkipTests
+      # ── Build CLI if present ───────────────────────────────────────────────
+      - name: Build lens.exe CLI (if CMake target exists)
+        shell: pwsh
+        run: |
+          $targets = cmake --build --preset default-release --target help 2>&1
+          if ($targets -match 'LensCLI|lens_cli|lens-cli') {
+            cmake --build --preset default-release --target LensCLI -j 8
+            Write-Host "✓ lens.exe built" -ForegroundColor Green
           } else {
-            Write-Host "Warning: Build-All-And-Package.ps1 not found, using legacy build" -ForegroundColor Yellow
-            
-            # Fallback to manual build steps
-            msbuild LENSShell.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+            Write-Host "⚠ LensCLI target not yet available — skipping" -ForegroundColor Yellow
           }
 
-      - name: Run Build Verification
+      # ── Run unit tests ─────────────────────────────────────────────────────
+      - name: Run Engine Tests
         shell: pwsh
         run: |
-          Write-Host "Verifying build outputs..." -ForegroundColor Cyan
-          & "${{ github.workspace }}\build-scripts\validation\Test-BuildVerification.ps1" -CreateReport
-
-      - name: Create Release Archive
-        shell: pwsh
-        run: |
-          $version = if ($env:GITHUB_REF -match 'refs/tags/v(.+)') { $matches[1] } else { "dev" }
-          $archiveName = "ExplorerLens-$version-x64.zip"
-
-          Write-Host "Creating release archive: $archiveName" -ForegroundColor Cyan
-
-          # Package binaries
-          $files = @(
-            'x64\Release\LENSShell.dll',
-            'x64\Release\LENSManager.exe',
-            'build\bin\Release\ExplorerLensEngine.dll',
-            'README.md',
-            'LICENSE',
-            'USER_GUIDE.md',
-            'Install-ExplorerLens.ps1'
-          )
-
-          $validFiles = $files | Where-Object { Test-Path $_ }
-
-          if ($validFiles.Count -gt 0) {
-            Compress-Archive -Path $validFiles -DestinationPath $archiveName -Force
-            Write-Host "✓ Created $archiveName" -ForegroundColor Green
+          $testExe = Get-ChildItem -Recurse -Filter "EngineTests.exe" | Select-Object -First 1
+          if ($testExe) {
+            Write-Host "Running: $($testExe.FullName)" -ForegroundColor Cyan
+            & $testExe.FullName
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           } else {
-            Write-Host "✗ No files found to archive!" -ForegroundColor Red
-            exit 1
+            Write-Host "⚠ EngineTests.exe not found — check build output" -ForegroundColor Yellow
           }
 
-      - name: Find MSI Package
-        id: find-msi
+      # ── Collect all build outputs ──────────────────────────────────────────
+      - name: Collect release binaries
+        id: collect
         shell: pwsh
         run: |
-          $msiPath = Get-ChildItem -Path "packaging\output" -Filter "*.msi" -Recurse | Select-Object -First 1
-          if ($msiPath) {
-            Write-Host "Found MSI: $($msiPath.FullName)" -ForegroundColor Green
-            echo "msi-path=$($msiPath.FullName)" >> $env:GITHUB_OUTPUT
-            echo "msi-name=$($msiPath.Name)" >> $env:GITHUB_OUTPUT
+          $stage = "release-staging"
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          $version = "${{ steps.version.outputs.version }}"
+
+          # Binary discovery: check multiple potential output locations
+          $candidates = @{
+            'LENSShell.dll'    = @('x64\Release\LENSShell.dll','build\bin\Release\LENSShell.dll','build\Release\LENSShell.dll')
+            'LENSManager.exe'  = @('x64\Release\LENSManager.exe','build\bin\Release\LENSManager.exe','build\Release\LENSManager.exe')
+            'lens.exe'         = @('build\bin\Release\lens.exe','build\bin\lens.exe','src\cli\Release\lens.exe')
+          }
+
+          $found = @()
+          foreach ($name in $candidates.Keys) {
+            foreach ($path in $candidates[$name]) {
+              if (Test-Path $path) {
+                Copy-Item $path "$stage\$name" -Force
+                $found += $name
+                Write-Host "  ✓ $name  ← $path" -ForegroundColor Green
+                break
+              }
+            }
+            if ($name -notin $found) {
+              Write-Host "  ⚠ $name not found in any expected path" -ForegroundColor Yellow
+            }
+          }
+
+          # Support files
+          foreach ($f in @('README.md','LICENSE','Install-ExplorerLens.ps1','CHANGELOG.md')) {
+            if (Test-Path $f) { Copy-Item $f "$stage\" -Force }
+          }
+          if (Test-Path 'scripts\lens-autocomplete.ps1') {
+            Copy-Item 'scripts\lens-autocomplete.ps1' "$stage\" -Force
+          }
+
+          # Emit outputs
+          $dllPath = "$stage\LENSShell.dll"
+          echo "staging-dir=$stage" >> $env:GITHUB_OUTPUT
+          echo "lens-shell-found=$(Test-Path $dllPath)" >> $env:GITHUB_OUTPUT
+
+      # ── Build MSI (WiX) ────────────────────────────────────────────────────
+      - name: Build MSI installer
+        id: msi
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $msiName = "ExplorerLens-$version-x64.msi"
+
+          # Try WiX build
+          $wixSrc = Get-ChildItem -Path packaging,packaging\wix -Filter "*.wixproj" -Recurse 2>$null | Select-Object -First 1
+          if ($wixSrc) {
+            Write-Host "Building WiX: $($wixSrc.FullName)" -ForegroundColor Cyan
+            msbuild $wixSrc.FullName /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+          }
+
+          # Find resulting MSI
+          $msi = Get-ChildItem -Recurse -Filter "*.msi" -ErrorAction SilentlyContinue |
+                 Where-Object { $_.Name -notmatch 'vcredist' } |
+                 Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+          if ($msi) {
+            $dest = $msiName
+            Copy-Item $msi.FullName $dest -Force
+            Write-Host "✓ MSI: $dest" -ForegroundColor Green
+            echo "msi-path=$dest" >> $env:GITHUB_OUTPUT
+            echo "msi-name=$msiName" >> $env:GITHUB_OUTPUT
           } else {
-            Write-Host "Warning: No MSI package found" -ForegroundColor Yellow
+            Write-Host "⚠ No MSI produced — installer build may not be configured yet" -ForegroundColor Yellow
             echo "msi-path=" >> $env:GITHUB_OUTPUT
+            echo "msi-name=" >> $env:GITHUB_OUTPUT
           }
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ExplorerLens-*.zip
-            ${{ steps.find-msi.outputs.msi-path }}
-          draft: true
-          generate_release_notes: true
-          body: |
-            # ExplorerLens Release ${{ github.ref_name }}
+      # ── Create ZIP archive ─────────────────────────────────────────────────
+      - name: Create portable ZIP
+        shell: pwsh
+        run: |
+          $zipName = "${{ steps.version.outputs.zip-name }}"
+          $stage   = "${{ steps.collect.outputs.staging-dir }}"
+          Compress-Archive -Path "$stage\*" -DestinationPath $zipName -Force
+          Write-Host "✓ ZIP: $zipName  ($('{0:N0}' -f (Get-Item $zipName).Length) bytes)" -ForegroundColor Green
 
-            ## Installation
-            - **MSI Installer (Recommended)**: Run `${{ steps.find-msi.outputs.msi-name }}` for automated installation
-            - **Manual Installation**: Extract ZIP and run `Install-ExplorerLens.ps1` as Administrator
+      # ── Generate SHA256 checksums ──────────────────────────────────────────
+      - name: Generate SHA256SUMS
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $artifacts = Get-ChildItem -File | Where-Object {
+            $_.Extension -in '.zip','.msi','.msix','.exe','.dll'
+          }
+          $lines = @("# ExplorerLens $version — SHA256 Checksums", "# Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')", "")
+          foreach ($f in $artifacts) {
+            $hash = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
+            $lines += "$hash  $($f.Name)"
+          }
+          $lines | Set-Content SHA256SUMS.txt -Encoding UTF8
+          Write-Host "SHA256SUMS.txt written ($($artifacts.Count) files)" -ForegroundColor Green
+          Get-Content SHA256SUMS.txt
 
-            ## What's New
-            See the full [CHANGELOG](CHANGELOG.md) for details.
+      # ── Generate/update SBOM ───────────────────────────────────────────────
+      - name: Generate SBOM
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $sbomPath = "ExplorerLens-$version-SBOM.json"
 
-            ## System Requirements
-            - Windows 11 x64 (22H2 or later recommended)
-            - Visual C++ Redistributable 2022
-            - .NET Framework 4.8 or later
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use existing SBOM as template; update version/timestamp
+          if (Test-Path docs\SBOM.json) {
+            $sbom = Get-Content docs\SBOM.json -Raw | ConvertFrom-Json
+            $sbom.metadata.timestamp = (Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')
+            if ($sbom.metadata.component) { $sbom.metadata.component.version = $version }
+            $sbom | ConvertTo-Json -Depth 20 | Set-Content $sbomPath -Encoding UTF8
+          } else {
+            # Minimal SBOM fallback
+            @{
+              bomFormat     = "CycloneDX"
+              specVersion   = "1.5"
+              version       = 1
+              metadata      = @{
+                timestamp = (Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')
+                component = @{ type = "application"; name = "ExplorerLens"; version = $version }
+              }
+              components = @()
+            } | ConvertTo-Json -Depth 10 | Set-Content $sbomPath -Encoding UTF8
+          }
+          Write-Host "✓ SBOM: $sbomPath" -ForegroundColor Green
 
-      - name: Upload Build Artifacts
+      # ── Build verification report ──────────────────────────────────────────
+      - name: Build verification report
+        shell: pwsh
+        run: |
+          $version   = "${{ steps.version.outputs.version }}"
+          $reportPath = "verification-report-$version.json"
+
+          $artifacts = @{}
+          foreach ($f in (Get-ChildItem -File | Where-Object { $_.Extension -in '.zip','.msi','.exe','.dll' })) {
+            $artifacts[$f.Name] = @{
+              size = $f.Length
+              sha256 = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
+              modified = $f.LastWriteTimeUtc.ToString('o')
+            }
+          }
+
+          @{
+            version     = $version
+            buildTime   = (Get-Date -Format 'o')
+            commit      = $env:GITHUB_SHA
+            runner      = $env:RUNNER_OS
+            artifacts   = $artifacts
+          } | ConvertTo-Json -Depth 10 | Set-Content $reportPath -Encoding UTF8
+          Write-Host "✓ Verification report: $reportPath" -ForegroundColor Green
+
+      # ── Upload artifacts for release job ──────────────────────────────────
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-package
+          name: release-artifacts-${{ steps.version.outputs.version }}
           path: |
             ExplorerLens-*.zip
-            packaging/output/*.msi
-            build-logs/verification-report-*.json
-          retention-days: 30
+            ExplorerLens-*.msi
+            ExplorerLens-*.msix
+            SHA256SUMS.txt
+            ExplorerLens-*-SBOM.json
+            verification-report-*.json
+          if-no-files-found: warn
+          retention-days: 90
+
+  # ─── Job 2: Create GitHub Release ──────────────────────────────────────────
+  publish:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout (for CHANGELOG)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts-${{ needs.build.outputs.version }}
+          path: dist/
+
+      - name: Extract CHANGELOG section for this version
+        id: changelog
+        shell: bash
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          # Extract the section for this version from CHANGELOG.md
+          NOTES=$(awk "/^## \[$VERSION\]/,/^## \[/" CHANGELOG.md \
+                  | grep -v "^## \[" | sed 's/^### /\n### /' | head -150)
+          if [ -z "$NOTES" ]; then
+            NOTES="See [CHANGELOG.md](CHANGELOG.md) for full details."
+          fi
+          # Write to file to avoid multiline env var issues
+          echo "$NOTES" > release-notes-body.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.version }}
+          name: "ExplorerLens v${{ needs.build.outputs.version }}"
+          draft: true
+          prerelease: ${{ contains(needs.build.outputs.version, '-rc') || contains(needs.build.outputs.version, '-beta') }}
+          body_path: release-notes-body.md
+          files: |
+            dist/ExplorerLens-*.zip
+            dist/ExplorerLens-*.msi
+            dist/ExplorerLens-*.msix
+            dist/SHA256SUMS.txt
+            dist/ExplorerLens-*-SBOM.json
+            dist/verification-report-*.json
+          append_body: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

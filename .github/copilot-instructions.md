@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 15.0.0 (Codename: Zenith)
+- **Version:** 15.2.0 (Codename: Zenith-S)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -205,7 +205,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~2283 unit tests, 5 benchmarks
+- **Test count:** ~2938 unit tests, 5 benchmarks
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -254,15 +254,54 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 - Always verify new Windows SDK includes compile under `WIN32_LEAN_AND_MEAN`
 - See `.github/standards/build-troubleshooting.md` for the full compatibility list
 
-## Development Guidance (v15.0+)
+## Development Guidance (v15.2+)
 
-- **Current version:** v15.0.0 "Zenith" (complete)
+- **Current version:** v15.2.0 "Zenith-S"
 - **Source of truth:** `CHANGELOG.md`
+- **Sprint plan:** `docs/SPRINT_PLAN_100.md` — 100 sprints through v17.0.0 "Nova"
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas
 - **Deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
 - **Batch pattern:** Create 5 source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
 - **CMakeLists.txt insertion points:** Core headers before `# Pipeline`, Core sources before `# Pipeline implementations`, Utils headers before `# `, Utils sources before closing `)`
 - **EngineTests.cpp insertion points:** New includes after last feature include, TEST() functions before `//== ` section, RUN_TEST() calls before `// Isolation & Stability Tests`
+
+## Release Procedure (EVERY version bump)
+
+> **Critical:** Every version bump MUST trigger a GitHub Release with all binaries.
+
+```powershell
+# 1. Update all version references
+#    - VERSION file
+#    - CHANGELOG.md  (new [X.Y.Z] section)
+#    - Engine/Core/BuildValidation.h  (EXPLORERLENS_VERSION)
+#    - .github/copilot-instructions.md  (version line above)
+#    - docs/assets/social-preview.svg  (version chip + test count)
+
+# 2. Build and verify locally
+.\build-scripts\Build-MSVC.ps1 -Test
+
+# 3. Commit + tag  (tag fires release.yml automatically)
+git add -A
+git commit -m "chore: bump version to X.Y.Z (Codename)"
+git tag vX.Y.Z
+git push origin main --tags
+```
+
+> `release.yml` kicks off automatically on `git tag vX.Y.Z` and publishes:
+> `LENSShell.dll`, `LENSManager.exe`, `lens.exe`, **.msi**, **.zip**, `SHA256SUMS.txt`, `SBOM.json`
+
+## Release Artifact Checklist
+
+| Artifact | Condition | Notes |
+|----------|-----------|-------|
+| `LENSShell.dll` (x64) | Always | COM shell extension |
+| `LENSManager.exe` | Always | WTL config GUI |
+| `lens.exe` | Sprint 17+ | CLI tool |
+| `Manager.WinUI.exe` | Sprint 52+ | WinUI 3 modern GUI |
+| `ExplorerLens-X.Y.Z-x64.msi` | Always | WiX installer |
+| `ExplorerLens-X.Y.Z-x64.zip` | Always | Portable archive |
+| `SHA256SUMS.txt` | Always | Checksums for all artifacts |
+| `ExplorerLens-X.Y.Z-SBOM.json` | Always | CycloneDX SBOM |
 
 ## Key Architecture Patterns
 

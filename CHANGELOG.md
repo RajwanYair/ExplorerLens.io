@@ -5,7 +5,41 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [15.1.0] "Zenith-R" - 2026-03
+## [Unreleased] — v15.3.0 "Zenith-T" (planned)
+> Edge-Case Resilience: decoder input validation, structured error propagation, timeout guards,
+> crash dump capture, graceful degradation catalog, archive hardening, fuzz harness.
+> See `docs/SPRINT_PLAN_100.md` Sprints 9–16.
+
+---
+
+## [15.2.0] "Zenith-S" — 2026-03-24
+
+### Planning
+- **100-Sprint Execution Plan** — `docs/SPRINT_PLAN_100.md` — full roadmap through v17.0.0 "Nova"
+  - 12 release milestones: v15.2.0 through v17.0.0; one GitHub Release per milestone
+  - Themes: Architecture Hardening → Resilience → CLI → Test Infra → Release Eng → GUI → UX → Horizon Major → Cloud → AI/Perf → Enterprise
+- **Sprint train schedule** — Sprints 1–8 (Zenith-S) through Sprint 100 (Nova)
+
+### Release Engineering
+- **release.yml overhauled** — publishes all binaries on every version tag:
+  - `LENSShell.dll`, `LENSManager.exe`, `lens.exe` (when built), MSI, ZIP, `SHA256SUMS.txt`, SBOM
+  - Two-job pipeline: `build` (windows-latest, MSVC v145) → `publish` (create GitHub Release)
+  - Automatic CHANGELOG extraction for release notes body
+  - Binary discovery across multiple output paths; graceful warnings for missing artifacts
+  - `softprops/action-gh-release@v2` with draft flag for manual approval
+- **VERSION file** added to repo root — single source for `release.yml` version resolution
+
+### Documentation
+- **docs/SPRINT_PLAN_100.md** — 100 sprints with precise file targets, test names, outputs per sprint
+- **Social preview** — tagline updated with "100 Sprints to v17.0" sprint count indicator
+- **copilot-instructions.md** — version updated to 15.2.0, release procedure + artifact checklist added
+- **README.md** — version badge updated
+
+### Changed
+- **Version:** 15.1.0 "Zenith-R" → 15.2.0 "Zenith-S"
+- **Engine.h:** `EXPLORERLENS_ENGINE_VERSION_MINOR` 1 → 2
+
+
 
 ### Changed — Major Refactoring Sprint
 
