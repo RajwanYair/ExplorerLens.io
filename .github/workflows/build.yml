@@ -1,8 +1,9 @@
 # build.yml — GitHub Actions CI workflow for ExplorerLens Engine
 # Copyright (c) 2026 ExplorerLens Project
 #
-# Triggers on push to main and pull requests.
-# Builds x64 Release with MSVC, runs tests, uploads artifacts.
+# Canonical CI workflow: triggers on push to main and pull requests.
+# Builds x64 Release with MSVC (via ilammy/msvc-dev-cmd), runs CTest, uploads artifacts.
+# NOTE: build-and-test.yml was removed (superseded by this + ci-matrix.yml).
 
 name: Build ExplorerLens Engine
 
@@ -24,7 +25,7 @@ concurrency:
 jobs:
   build:
     name: Build x64 Release
-    runs-on: windows-2022
+    runs-on: windows-latest
     timeout-minutes: 90
 
     steps:
@@ -32,7 +33,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
           fetch-depth: 1
 
       # ── Cache external/ to speed up builds ────────────────────
@@ -58,23 +59,20 @@ jobs:
           cmake --version | Select-Object -First 1
           ninja --version
 
-      # ── CMake configure ──────────────────────────────────────
-      - name: Configure (CMake preset default-release)
+      # ── CMake configure + build (ci-release preset) ───────────
+      # ci-release: no hardcoded local paths, uses cl.exe from vcvars env
+      - name: Configure
         shell: pwsh
-        run: |
-          cmake --preset default-release
+        run: cmake --preset ci-release
 
-      # ── Build ────────────────────────────────────────────────
       - name: Build
         shell: pwsh
-        run: |
-          cmake --build --preset default-release -j $env:NUMBER_OF_PROCESSORS
+        run: cmake --build --preset ci-release -j $env:NUMBER_OF_PROCESSORS
 
       # ── Run tests ────────────────────────────────────────────
       - name: Run tests (CTest)
         shell: pwsh
-        run: |
-          ctest --test-dir build -C Release --output-on-failure -j 4
+        run: ctest --test-dir build -C Release --output-on-failure -j 4
 
       # ── Upload test results ──────────────────────────────────
       - name: Upload test results

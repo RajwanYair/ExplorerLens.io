@@ -123,6 +123,26 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       }
+    },
+    {
+      "name": "ci-debug",
+      "displayName": "CI Debug (GitHub Actions)",
+      "description": "Debug build for CI runners — no hardcoded local paths",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebugDLL",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "BUILD_SHARED_LIBS": "FALSE"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     }
   ],
   "buildPresets": [
@@ -147,6 +167,14 @@
       "displayName": "Build CI Release (GitHub Actions)",
       "configurePreset": "ci-release",
       "configuration": "Release",
+      "jobs": 8,
+      "verbose": false
+    },
+    {
+      "name": "ci-debug",
+      "displayName": "Build CI Debug (GitHub Actions)",
+      "configurePreset": "ci-debug",
+      "configuration": "Debug",
       "jobs": 8,
       "verbose": false
     },

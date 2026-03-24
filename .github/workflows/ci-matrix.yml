@@ -1,6 +1,7 @@
 # ci-matrix.yml — Enhanced CI Pipeline with Full Build Matrix
-# ExplorerLens v15.0.0 "Zenith" — Sprint 379
-# Builds x64 Debug/Release + ARM64 cross-compile, runs tests, coverage, static analysis
+# ExplorerLens v15.2.0 "Zenith-S"
+# Builds x64 Debug/Release, runs tests, coverage, static analysis
+# NOTE: build-and-test.yml was removed (superseded by build.yml + this workflow)
 
 name: CI Matrix Build
 
@@ -25,8 +26,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CMAKE_PRESET_RELEASE: default-release
-  CMAKE_PRESET_DEBUG: default-debug
+  CMAKE_PRESET_RELEASE: ci-release
+  CMAKE_PRESET_DEBUG: ci-debug
   SOLUTION_FILE: LENSShell.sln
 
 jobs:
@@ -43,26 +44,22 @@ jobs:
         config: [Release, Debug]
         include:
           - config: Release
-            preset: default-release
-            build_preset: default-release
+            preset: ci-release
+            build_preset: ci-release
           - config: Debug
-            preset: default-debug
-            build_preset: default-debug
+            preset: ci-debug
+            build_preset: ci-debug
 
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
           fetch-depth: 1
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          toolset: "14.40"
           arch: x64
-
-      - name: Install Ninja
-        run: choco install ninja -y
 
       - name: Configure Engine
         run: cmake --preset ${{ matrix.preset }}
@@ -96,12 +93,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          toolset: "14.40"
           arch: x64
 
       - name: Download Engine Artifact

@@ -1,7 +1,7 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens 
-**Current Version:** v15.1.0 "Zenith-R" 
+**Current Version:** v15.2.0 "Zenith-S" 
 **Last Updated:** March 24, 2026
 
 ---
@@ -15,6 +15,13 @@
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting guide + known issues & mitigations |
 | [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
 | [WINUI3_MIGRATION_PLAN.md](WINUI3_MIGRATION_PLAN.md) | WinUI 3 / XAML Islands migration plan |
+
+## Roadmap and Planning
+
+| Document | Description |
+|----------|-------------|
+| [SPRINT_PLAN_100.md](SPRINT_PLAN_100.md) | **Canonical 100-sprint plan** — v15.2.0 through v17.0.0 "Nova" |
+| [ROADMAP_V16.md](ROADMAP_V16.md) | v16.0.0 "Horizon" detailed roadmap |
 
 ## Development
 
