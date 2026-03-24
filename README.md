@@ -1,4 +1,8 @@
-# ExplorerLens.io - GPU-Accelerated Thumbnail Generator
+# ExplorerLens.io — GPU-Accelerated Thumbnail Generator
+
+<p align="center">
+  <img src="docs/assets/social-preview.svg" alt="ExplorerLens.io — GPU-Accelerated Windows Shell Extension" width="960"/>
+</p>
 
 ## High-performance Windows Shell extension for 200+ file formats
 
@@ -7,9 +11,9 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![Windows 11](https://img.shields.io/badge/Windows-11-blue)
 ![Platform](https://img.shields.io/badge/Platform-x64%20|%20ARM64-green)
 ![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-15.0.0-brightgreen)
+![Version](https://img.shields.io/badge/Version-15.1.0-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Tests](https://img.shields.io/badge/Tests-EngineUnitTests%20pass-success)
+![Tests](https://img.shields.io/badge/Tests-2938%20passing-success)
 ![Warnings](https://img.shields.io/badge/Warnings-0-green)
 
 ---
