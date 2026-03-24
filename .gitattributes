@@ -46,6 +46,10 @@
 *.pdb binary
 *.ilk binary
 *.exp binary
+*.msi binary
+*.msix binary
+*.nupkg binary
+*.wasm binary
 *.png binary
 *.jpg binary
 *.jpeg binary
@@ -55,3 +59,9 @@
 *.7z binary
 *.rar binary
 *.gz binary
+
+# C++ shader files
+*.hlsl text diff=cpp
+*.hlsli text diff=cpp
+*.glsl text diff=cpp
+*.fxh text diff=cpp

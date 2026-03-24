@@ -16,11 +16,14 @@
         // ── Git & Collaboration ──
         "eamodio.gitlens", // Git blame, history, file annotations
         "mhutchie.git-graph", // Visual git branch graph
+        "github.vscode-github-actions", // GitHub Actions workflow authoring + status
         // ── Productivity ──
         "ms-vscode.hexeditor", // Hex editor for binary file inspection
         "yzhang.markdown-all-in-one", // Markdown preview, TOC generation, shortcuts
         "redhat.vscode-yaml", // YAML support (GitHub Actions workflows)
         "foxundermoon.shell-format", // Shell/PowerShell formatting
+        "gruntfuggly.todo-tree", // TODO/FIXME/HACK comment tree view
+        "usernamehw.errorlens", // Inline error/warning annotations
         // ── Windows Development ──
         "ms-vscode.windows-registry", // Windows Registry browsing (COM debugging)
         // ── Debugging & Analysis ──

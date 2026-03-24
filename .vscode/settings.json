@@ -127,8 +127,19 @@
         "**/build-logs": false
     },
     // ── Terminal ──────────────────────────────────────────────────
-    "terminal.integrated.defaultProfile.windows": "PowerShell 7",
+    "terminal.integrated.defaultProfile.windows": "ExplorerLens Dev",
     "terminal.integrated.profiles.windows": {
+        "ExplorerLens Dev": {
+            "path": "pwsh.exe",
+            "icon": "tools",
+            "args": [
+                "-NoProfile",
+                "-NoLogo",
+                "-NoExit",
+                "-File",
+                "${env:USERPROFILE}\\OneDrive - Intel Corporation\\Documents\\MyScripts\\ExplorerLens.io\\.env.ps1"
+            ]
+        },
         "PowerShell 7": {
             "path": "pwsh.exe",
             "icon": "terminal-powershell",
@@ -139,7 +150,7 @@
         },
         "Developer PowerShell (vcvars64)": {
             "path": "pwsh.exe",
-            "icon": "tools",
+            "icon": "terminal-powershell",
             "args": [
                 "-NoProfile",
                 "-NoLogo",
@@ -156,6 +167,9 @@
                 "-NoLogo"
             ]
         }
+    },
+    "terminal.integrated.env.windows": {
+        "MSBUILDDISABLENODEREUSE": "1"
     },
     "terminal.integrated.shellIntegration.enabled": true,
     "terminal.integrated.shellIntegration.decorationsEnabled": "both",
@@ -266,7 +280,31 @@
         "reportMissingTypeStubs": "none",
         "reportUnusedImport": "information"
     },
+    // ── HTTP Proxy ───────────────────────────────────────────────
+    "http.proxySupport": "on",
+    "http.proxyStrictSSL": false,
+    "http.proxy": "http://proxy-dmz.intel.com:912",
     // ── Copilot ──────────────────────────────────────────────────
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": true,
+        "scminput": false
+    },
+    "github.copilot.chat.welcomeMessage": "never",
+    "github.copilot.chat.codeGeneration.instructions": [
+        { "file": ".github/copilot-instructions.md" },
+        { "file": ".github/instructions/workspace.instructions.md" }
+    ],
+    "github.copilot.chat.agent.terminal.allowList": {
+        "Remove-Item": true,
+        "cmake": true,
+        "ninja": true,
+        "ctest": true,
+        "msbuild": true,
+        "git": true,
+        "pwsh": true
+    },
     "chat.agent.maxRequests": 125,
     // ── Miscellaneous ────────────────────────────────────────────
     "[markdown]": {

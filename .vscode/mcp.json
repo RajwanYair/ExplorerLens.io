@@ -1,0 +1,52 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github-token",
+      "description": "GitHub Personal Access Token for MCP server",
+      "password": true
+    }
+  ],
+  "servers": {
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github-token}",
+        "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:USERPROFILE}\\scoop\\apps\\nvm\\current\\nodejs\\nodejs;${env:PROGRAMFILES}\\nodejs;${env:PATH}",
+        "HTTP_PROXY": "http://proxy-dmz.intel.com:912",
+        "HTTPS_PROXY": "http://proxy-dmz.intel.com:912",
+        "http_proxy": "http://proxy-dmz.intel.com:912",
+        "https_proxy": "http://proxy-dmz.intel.com:912",
+        "NO_PROXY": "localhost,127.0.0.1,::1",
+        "no_proxy": "localhost,127.0.0.1,::1"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}"
+      ],
+      "env": {
+        "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:USERPROFILE}\\scoop\\apps\\nvm\\current\\nodejs\\nodejs;${env:PROGRAMFILES}\\nodejs;${env:PATH}"
+      }
+    },
+    "project-docs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}\\.github",
+        "${workspaceFolder}\\docs"
+      ],
+      "env": {
+        "PATH": "${env:APPDATA}\\npm;${env:USERPROFILE}\\scoop\\shims;${env:USERPROFILE}\\scoop\\apps\\nvm\\current\\nodejs\\nodejs;${env:PROGRAMFILES}\\nodejs;${env:PATH}"
+      }
+    }
+  }
+}
