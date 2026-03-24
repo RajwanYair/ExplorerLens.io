@@ -1,7 +1,6 @@
 # ExplorerLens Plugin Development Guide
-**Documentation Completion (updated )** 
-**Version:** 7.1.0 
-**Last Updated:** February 18, 2026
+**Version:** 15.1.0 "Zenith-R" 
+**Last Updated:** March 24, 2026
 
 ---
 

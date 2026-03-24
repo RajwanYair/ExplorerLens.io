@@ -574,19 +574,49 @@ $testFile = "C:\Photos\sample.webp"
 4. ✅ Run diagnostic tests: `.\EngineTests.exe`
 
 ### **GitHub Issues:**
-- Repository: https://github.com/YourOrg/ExplorerLens/issues
+- Repository: https://github.com/RajwanYair/ExplorerLens.io/issues
 - Include:
- - Windows version (`winver`)
- - ExplorerLens version (`Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name Version`)
- - Log files (`C:\ProgramData\ExplorerLens\Logs\`)
- - Screenshot of issue
- - Steps to reproduce
+  - Windows version (`winver`)
+  - ExplorerLens version (`Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name Version`)
+  - Log files (`C:\ProgramData\ExplorerLens\Logs\`)
+  - Screenshot of issue
+  - Steps to reproduce
 
 ### **Community Support:**
-- Discussions: https://github.com/YourOrg/ExplorerLens/discussions
-- Discord: https://discord.gg/ExplorerLens
+- Discussions: https://github.com/RajwanYair/ExplorerLens.io/discussions
 
 ---
 
-**Last Updated:** February 15, 2026 
-**Version:** 6.2.0
+## Current Known Issues
+
+**Version:** 15.1.0 "Zenith-R" — all P0 and P1 issues resolved
+
+| Priority | Issue | Status | Workaround |
+|----------|-------|--------|------------|
+| P2 | Large archives >500MB first-thumbnail latency | Improved −68% (0.8s) | None for most; use `MaxFileSizeMB` registry key to skip very large files |
+| P2 | RAW color accuracy (CR3/NEF/ARW) | LibRaw limitation | Slight variation from Lightroom expected; use embedded JPEG for speed |
+| P2 | Explorer thumbnail cache corruption | Windows bug | `LENSManager.exe /ClearCache` — see [Thumbnails Not Showing](#thumbnails-not-showing) |
+| P3 | Network drive performance | By design — network latency | `Set-ItemProperty HKLM:\Software\ExplorerLens -Name NetworkCacheTTL -Value 3600` |
+| P3 | Multi-monitor mixed DPI scaling | Windows Explorer limitation | Set all monitors to same scaling factor |
+
+### Resolved in v15.0.0
+
+| Issue | Fix |
+|-------|-----|
+| JPEG XL build config | libjxl 0.11.1 integrated, `HAS_LIBJXL=ON` default |
+| HEIF/HEIC requires external codec | Native HEIFDecoder with libheif 1.19.5 + libde265 1.0.15 |
+| Video thumbnails missing (AV1/VP9/HEVC) | K-Lite Codec Pack + LAV Filters integration |
+| LENSManager dark mode | `SetWindowTheme` + DarkModeHelper.h |
+| RAR/CBR/JXR routing | LENSTYPE_RAR/CBR/JXR constants added |
+
+### Resolved in v6.2.0
+
+| Issue | Fix |
+|-------|-----|
+| MSVC CRT runtime mismatch | All external libs rebuilt with `/MD` |
+| Explorer crash on malformed archives | SEH wrapper in `LENSShellClass::GetThumbnail` |
+
+---
+
+**Last Updated:** March 24, 2026 
+**Version:** 15.1.0

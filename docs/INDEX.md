@@ -1,8 +1,8 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens 
-**Current Version:** v15.0.0 "Zenith" 
-**Last Updated:** March 2026
+**Current Version:** v15.1.0 "Zenith-R" 
+**Last Updated:** March 24, 2026
 
 ---
 
@@ -12,7 +12,7 @@
 |----------|-------------|
 | [README.md](../README.md) | Project overview and feature summary |
 | [CHANGELOG.md](../CHANGELOG.md) | Release history and change log |
-| [KNOWN_ISSUES.md](KNOWN_ISSUES.md) | Current known issues and mitigations |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting guide + known issues & mitigations |
 | [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
 | [WINUI3_MIGRATION_PLAN.md](WINUI3_MIGRATION_PLAN.md) | WinUI 3 / XAML Islands migration plan |
 
@@ -68,7 +68,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting scenarios |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting scenarios and known issues |
 | [CODE_SIGNING.md](CODE_SIGNING.md) | Code-signing policy and workflow |
 | [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md) | Plugin development guide |
 
