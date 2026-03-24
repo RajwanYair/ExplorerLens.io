@@ -90,36 +90,51 @@ jobs:
         id: msvc
         shell: pwsh
         run: |
-          # Find highest-version vcvarsall.bat
+          # Find highest-version vcvarsall.bat (VS 2022 or VS 2026)
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (-not (Test-Path $vswhere)) { $vswhere = "C:\ProgramData\Chocolatey\bin\vswhere.exe" }
           if (Test-Path $vswhere) {
             $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
             $vcvars = Join-Path $vsPath "VC\Auxiliary\Build\vcvars64.bat"
             if (Test-Path $vcvars) {
               Write-Host "Found vcvars64.bat: $vcvars" -ForegroundColor Green
               echo "vcvars=$vcvars" >> $env:GITHUB_OUTPUT
-              # Source vcvars and export key env vars for subsequent steps
+              # Source vcvars and export ALL env vars for subsequent steps
               $env_dump = cmd /c "`"$vcvars`" && set" 2>&1
+              $exported = @()
               foreach ($line in $env_dump) {
-                if ($line -match '^([^=]+)=(.*)$') {
+                if ($line -match '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
                   $k = $matches[1]; $v = $matches[2]
-                  if ($k -in @('PATH','INCLUDE','LIB','LIBPATH','VCINSTALLDIR','VCPKG_ROOT','WindowsSdkDir','UCRTVersion')) {
+                  # Export all MSVC/SDK/build-relevant variables
+                  if ($k -match '^(PATH|INCLUDE|LIB|LIBPATH|VC|VS|WindowsSDK|UCRTVersion|VSCMD|Platform|DevEnvDir|__VSCMD|EXTERNAL_INCLUDE|Framework|NETFXSDKDir)') {
                     echo "$k=$v" >> $env:GITHUB_ENV
+                    $exported += $k
                   }
                 }
               }
+              Write-Host "Exported $($exported.Count) env vars from vcvars64" -ForegroundColor Green
+              # Report toolset in use
+              $clPath = (Get-Command cl.exe -ErrorAction SilentlyContinue)?.Source
+              Write-Host "cl.exe: $clPath" -ForegroundColor Cyan
+            } else {
+              Write-Host "::warning::vcvars64.bat not found at $vcvars" -ForegroundColor Yellow
             }
+          } else {
+            Write-Host "::warning::vswhere.exe not found — MSVC may not be configured" -ForegroundColor Yellow
           }
           Write-Host "CMake: $(cmake --version | Select-Object -First 1)" -ForegroundColor Cyan
+          # Find ninja on runner
+          $ninja = Get-Command ninja.exe -ErrorAction SilentlyContinue
+          if ($ninja) { Write-Host "Ninja: $($ninja.Source)" -ForegroundColor Cyan }
 
       # ── Build Engine (CMake) ───────────────────────────────────────────────
-      - name: Configure CMake (default-release preset)
+      - name: Configure CMake (ci-release preset)
         shell: pwsh
-        run: cmake --preset default-release -DCMAKE_BUILD_TYPE=Release
+        run: cmake --preset ci-release
 
       - name: Build Engine (Ninja + MSVC)
         shell: pwsh
-        run: cmake --build --preset default-release -j 8
+        run: cmake --build --preset ci-release -j 8
 
       # ── Build Shell Extension + Manager (MSBuild) ──────────────────────────
       - name: Build LENSShell.dll + LENSManager.exe (MSBuild)
@@ -136,9 +151,9 @@ jobs:
       - name: Build lens.exe CLI (if CMake target exists)
         shell: pwsh
         run: |
-          $targets = cmake --build --preset default-release --target help 2>&1
+          $targets = cmake --build --preset ci-release --target help 2>&1
           if ($targets -match 'LensCLI|lens_cli|lens-cli') {
-            cmake --build --preset default-release --target LensCLI -j 8
+            cmake --build --preset ci-release --target LensCLI -j 8
             Write-Host "✓ lens.exe built" -ForegroundColor Green
           } else {
             Write-Host "⚠ LensCLI target not yet available — skipping" -ForegroundColor Yellow
