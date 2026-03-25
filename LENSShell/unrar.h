@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _UNRAR_DLL_
 #define _UNRAR_DLL_
 

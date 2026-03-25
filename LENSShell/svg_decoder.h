@@ -1,3 +1,4 @@
+#pragma once
 ///////////////////////////////////////////////
 // SVG Decoder using Windows Direct2D SVG
 // Renders SVG to HBITMAP via ID2D1DeviceContext5
