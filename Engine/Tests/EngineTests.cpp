@@ -26166,7 +26166,7 @@ TEST(COMTestRunnerGracefulSkip)
     }
 }
 
-
+int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
     std::wcout << L"========================================" << std::endl
@@ -30808,6 +30808,15 @@ TEST(COMTestRunnerGracefulSkip)
     RUN_TEST(TestCLIRegisterDetectsAdminState);
     RUN_TEST(TestCLIBenchmarkOutputFormat);
     RUN_TEST(TestCLIDoctorAllChecks);
+
+    // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
+    std::wcout << std::endl;
+    std::wcout << L"  [Integration + COM Tests]" << std::endl;
+    RUN_TEST(IntegrationRunnerSmoke);
+    RUN_TEST(IntegrationRunnerSingleFile);
+    RUN_TEST(IntegrationRunnerHtmlReport);
+    RUN_TEST(COMThumbnailProviderRoundTrip);
+    RUN_TEST(COMTestRunnerGracefulSkip);
 
     std::wcout << std::endl;
 
