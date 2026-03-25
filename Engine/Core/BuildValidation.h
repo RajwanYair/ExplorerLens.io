@@ -21,10 +21,10 @@ namespace BuildValidation {
 /// Build configuration snapshot for diagnostics
 struct BuildInfo {
     static constexpr int MajorVersion = 15;
-    static constexpr int MinorVersion = 2;
-    static constexpr int PatchVersion = 1;
-    static constexpr const char* VersionString = "15.2.1";
-    static constexpr const char* Codename = "Zenith-S";
+    static constexpr int MinorVersion = 3;
+    static constexpr int PatchVersion = 0;
+    static constexpr const char* VersionString = "15.3.0";
+    static constexpr const char* Codename = "Zenith-T";
     static constexpr const char* BuildDate = __DATE__;
     static constexpr const char* BuildTime = __TIME__;
 
@@ -49,7 +49,7 @@ struct BuildInfo {
     // Subsystem count
     static constexpr int DecoderCount = 25;
     static constexpr int SupportedExtensions = 200;
-    static constexpr int UnitTestCount = 1242;
+    static constexpr int UnitTestCount = 1255;
     static constexpr int BenchmarkSuites = 5;
 };
 

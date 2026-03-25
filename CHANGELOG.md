@@ -5,10 +5,48 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v15.3.0 "Zenith-T" (planned)
-> Edge-Case Resilience: decoder input validation, structured error propagation, timeout guards,
-> crash dump capture, graceful degradation catalog, archive hardening, fuzz harness.
-> See `docs/SPRINT_PLAN_100.md` Sprints 9–16.
+## [Unreleased] — v15.4.0 "Zenith-U" (planned)
+> CLI Tool (`lens.exe`): command routing, generate/info/cache/register/benchmark/doctor commands,
+> PowerShell autocomplete scaffold.
+> See `docs/SPRINT_PLAN_100.md` Sprints 17–24.
+
+---
+
+## [15.3.0] "Zenith-T" — 2026-03-25
+
+### Summary
+**Sprint 9–16 of 100 (Resilience & Hardening)** — Centralised input validation,
+structured error taxonomy, per-decoder timeout enforcement, crash dump capture,
+graceful degradation catalog, archive security hardening, and fuzz harness scaffold.
+
+- **Version:** 15.2.1 "Zenith-S" → 15.3.0 "Zenith-T"
+- **Test count:** 1,242 → 1,255 (2,938 → 2,951 total run)
+- **New files:** `Engine/Core/DecodeInputValidator.h`, `Engine/Core/DecodeErrorCategory.h`,
+  `Engine/Core/DecoderTimeoutGuard.h/.cpp`, `Engine/Core/GracefulDegradation.h`,
+  `Engine/Core/ArchiveSecurityValidator.h`, `LENSShell/CrashDumpCapture.h/.cpp`,
+  `Engine/Tests/FuzzTargets/Fuzz{Image,Archive,PDF}Decoder.cpp`
+
+### Added
+- **Sprint 9 — Decoder Input Validation Audit** (`DecodeInputValidator.h`): uniform
+  file-size, dimension, and bit-depth guards shared by all decoders.
+- **Sprint 10 — Structured Error Propagation** (`DecodeErrorCategory.h`): first-class
+  `DecodeErrorCategory` enum with 24 values, `IsSecurityError()`, `IsRecoverable()`.
+- **Sprint 11 — Decoder Timeout Enforcement** (`DecoderTimeoutGuard.h/.cpp`): 5-second
+  per-decoder watchdog via background thread; returns `TimeoutResult::TimedOut` on expiry.
+- **Sprint 12 — Crash Dump Capture** (`LENSShell/CrashDumpCapture.h/.cpp`): installs
+  `SetUnhandledExceptionFilter`; writes MiniDump to `%TEMP%\ExplorerLens\crashes\`.
+- **Sprint 13 — Graceful Degradation Catalog** (`GracefulDegradation.h`): six canonical
+  failure modes (`NullBitmap`, `PlaceholderIcon`, `CorruptFileOverlay`, `TimeoutFallback`,
+  `PasswordProtected`, `UnsupportedFormat`) with `InjectFault()` API for testing.
+- **Sprint 14 — Archive Decoder Hardening** (`ArchiveSecurityValidator.h`): ZIP-bomb
+  (100× expansion ratio), path-traversal (`..`), symlink, and entry-count checks.
+- **Sprint 15 — Fuzz Harness Scaffold** (`Engine/Tests/FuzzTargets/`): LibFuzzer-compatible
+  stubs for image, archive, and PDF decoder fuzz targets (build with clang `-fsanitize=fuzzer`).
+
+### Tests
+13 new unit tests: `Test_S9_DecodeInputValidator_*`, `Test_S10_DecodeErrorCategory_*`,
+`Test_S11_DecoderTimeoutGuard_*`, `Test_S13_GracefulDegradation_*`,
+`Test_S14_ArchiveSecurityValidator_*`.
 
 ---
 

@@ -1050,6 +1050,13 @@ set(ENGINE_HEADERS
     Core/FileConcurrencyGuard.h
     Core/ResourceThrottlePolicy.h
 
+    # Sprint 9-14 (v15.3.0 "Zenith-T") — Resilience & Hardening
+    Core/DecodeInputValidator.h
+    Core/DecodeErrorCategory.h
+    Core/DecoderTimeoutGuard.h
+    Core/GracefulDegradation.h
+    Core/ArchiveSecurityValidator.h
+
     # Pipeline enhancements
     Pipeline/LazyDecodeInitializer.h
     Pipeline/ChunkedDecodeEngine.h
@@ -1374,6 +1381,9 @@ set(ENGINE_SOURCES
     Core/ThemeEngine.cpp
     Core/UpdateEngine.cpp
     Core/WatchFolderEngine.cpp
+
+    # Sprint 9-14 (v15.3.0 "Zenith-T") — Resilience & Hardening
+    Core/DecoderTimeoutGuard.cpp
 
     # Pipeline implementations
     Pipeline/AsyncThumbnailProvider.cpp

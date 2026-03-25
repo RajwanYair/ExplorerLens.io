@@ -724,6 +724,13 @@
 #include "../Core/ThumbnailWatermarker.h"
 #include "../Core/IconBadgeRenderer.h"
 
+// Sprint 9-14 (v15.3.0 "Zenith-T") — Resilience & Hardening
+#include "../Core/DecodeInputValidator.h"
+#include "../Core/DecodeErrorCategory.h"
+#include "../Core/DecoderTimeoutGuard.h"
+#include "../Core/GracefulDegradation.h"
+#include "../Core/ArchiveSecurityValidator.h"
+
 // Sprint 69-88: Beyond Zenith
 #include "../Core/NeuralThumbnailUpscaler.h"
 #include "../Core/PerceptualHashEngine.h"
@@ -20761,6 +20768,120 @@ TEST(Test_S68_IconBadgeRenderer_ScaledPlacement) {
     ASSERT(placement.visible);
 }
 
+//== Sprint 9-14: Resilience & Hardening (v15.3.0 "Zenith-T") ==
+
+TEST(Test_S9_DecodeInputValidator_DimensionLimits) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(DecodeInputValidator::ValidateDimensions(1920, 1080) == InputValidationResult::Ok);
+    ASSERT(DecodeInputValidator::ValidateDimensions(0, 1080) == InputValidationResult::UnreadableHeader);
+    ASSERT(DecodeInputValidator::ValidateDimensions(65536, 65536) == InputValidationResult::DimensionsTooLarge);
+}
+
+TEST(Test_S9_DecodeInputValidator_FileSizeLimit) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(DecodeInputValidator::ValidateFileSize(1024) == InputValidationResult::Ok);
+    ASSERT(DecodeInputValidator::ValidateFileSize(0) == InputValidationResult::UnreadableHeader);
+    ASSERT(DecodeInputValidator::ValidateFileSize(600ull * 1024 * 1024) == InputValidationResult::FileTooLarge);
+}
+
+TEST(Test_S9_DecodeInputValidator_BitDepth) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(DecodeInputValidator::ValidateBitDepth(8) == InputValidationResult::Ok);
+    ASSERT(DecodeInputValidator::ValidateBitDepth(32) == InputValidationResult::Ok);
+    ASSERT(DecodeInputValidator::ValidateBitDepth(0) == InputValidationResult::BitDepthExceeded);
+    ASSERT(DecodeInputValidator::ValidateBitDepth(64) == InputValidationResult::BitDepthExceeded);
+}
+
+TEST(Test_S10_DecodeErrorCategory_Names) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(DecodeErrorCategoryString(DecodeErrorCategory::None) == "None");
+    ASSERT(DecodeErrorCategoryString(DecodeErrorCategory::ZipBombDetected) == "ZipBombDetected");
+    ASSERT(DecodeErrorCategoryString(DecodeErrorCategory::PathTraversalDetected) == "PathTraversalDetected");
+    ASSERT(DecodeErrorCategoryString(DecodeErrorCategory::SymlinkAttackDetected) == "SymlinkAttackDetected");
+}
+
+TEST(Test_S10_DecodeErrorCategory_SecurityFlags) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(IsSecurityError(DecodeErrorCategory::ZipBombDetected));
+    ASSERT(IsSecurityError(DecodeErrorCategory::PathTraversalDetected));
+    ASSERT(!IsSecurityError(DecodeErrorCategory::CorruptedData));
+    ASSERT(IsRecoverable(DecodeErrorCategory::Timeout));
+    ASSERT(!IsRecoverable(DecodeErrorCategory::ZipBombDetected));
+}
+
+TEST(Test_S11_DecoderTimeoutGuard_NotExpiredFresh) {
+    using namespace ExplorerLens::Engine;
+    DecoderTimeoutGuard guard(std::chrono::milliseconds(5000));
+    ASSERT(!guard.IsExpired());
+    ASSERT(guard.Remaining().count() > 0);
+}
+
+TEST(Test_S11_DecoderTimeoutGuard_DefaultTimeout) {
+    using namespace ExplorerLens::Engine;
+    DecoderTimeoutGuard guard;
+    ASSERT(guard.GetTimeout() == DecoderTimeoutGuard::DEFAULT_TIMEOUT);
+    ASSERT(!guard.IsExpired());
+}
+
+TEST(Test_S11_DecoderTimeoutGuard_CompletesInstantly) {
+    using namespace ExplorerLens::Engine;
+    DecoderTimeoutGuard guard(std::chrono::milliseconds(2000));
+    auto result = guard.RunWithTimeout([]() { /* instant */ });
+    ASSERT(result == TimeoutResult::Completed);
+}
+
+TEST(Test_S13_GracefulDegradation_AllModes) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(GracefulDegradation::MODE_COUNT == 6);
+    for (int i = 0; i < GracefulDegradation::MODE_COUNT; ++i)
+    {
+        auto mode = static_cast<DegradationMode>(i);
+        auto r = GracefulDegradation::Degrade(mode);
+        ASSERT(r.mode == mode);
+        ASSERT(r.occupied);
+    }
+}
+
+TEST(Test_S13_GracefulDegradation_FaultInjection) {
+    using namespace ExplorerLens::Engine;
+    auto r = GracefulDegradation::InjectFault(DegradationMode::CorruptFileOverlay);
+    ASSERT(r.mode == DegradationMode::CorruptFileOverlay);
+    ASSERT(GracefulDegradation::ModeName(DegradationMode::TimeoutFallback) == "TimeoutFallback");
+    ASSERT(GracefulDegradation::ModeName(DegradationMode::PasswordProtected) == "PasswordProtected");
+}
+
+TEST(Test_S14_ArchiveSecurityValidator_ZipBombRejection) {
+    using namespace ExplorerLens::Engine;
+    // 1 KB compressed → 200 KB uncompressed = ratio 200x → bomb
+    ASSERT(ArchiveSecurityValidator::CheckCompressionRatio(1024, 200 * 1024)
+        == DecodeErrorCategory::ZipBombDetected);
+    // Reasonable ratio OK
+    ASSERT(ArchiveSecurityValidator::CheckCompressionRatio(512 * 1024, 2 * 1024 * 1024)
+        == DecodeErrorCategory::None);
+}
+
+TEST(Test_S14_ArchiveSecurityValidator_PathTraversalBlocked) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(ArchiveSecurityValidator::CheckEntryPath("../../etc/passwd")
+        == DecodeErrorCategory::PathTraversalDetected);
+    ASSERT(ArchiveSecurityValidator::CheckEntryPath("/absolute/path")
+        == DecodeErrorCategory::PathTraversalDetected);
+    ASSERT(ArchiveSecurityValidator::CheckEntryPath("normal/subdir/file.txt")
+        == DecodeErrorCategory::None);
+}
+
+TEST(Test_S14_ArchiveSecurityValidator_SymlinkAttackPrevented) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(ArchiveSecurityValidator::CheckSymlink(true)
+        == DecodeErrorCategory::SymlinkAttackDetected);
+    ASSERT(ArchiveSecurityValidator::CheckSymlink(false)
+        == DecodeErrorCategory::None);
+    ASSERT(ArchiveSecurityValidator::CheckEntryCount(100)
+        == DecodeErrorCategory::None);
+    ASSERT(ArchiveSecurityValidator::CheckEntryCount(100000)
+        == DecodeErrorCategory::ZipBombDetected);
+}
+
 //== Security Hardening Tests ==
 
 TEST(Test_SecureAllocator_ZeroOnFree) {
@@ -30189,6 +30310,22 @@ int main() {
     RUN_TEST(Test_S68_ExifOrientationHandler_Rotate90);
     RUN_TEST(Test_S68_ThumbnailWatermarker_Placement);
     RUN_TEST(Test_S68_IconBadgeRenderer_ScaledPlacement);
+
+    // Sprint 9-14: Resilience & Hardening (v15.3.0 "Zenith-T")
+    std::wcout << L"\nSprint 9-14 Tests (Resilience & Hardening)..." << std::endl;
+    RUN_TEST(Test_S9_DecodeInputValidator_DimensionLimits);
+    RUN_TEST(Test_S9_DecodeInputValidator_FileSizeLimit);
+    RUN_TEST(Test_S9_DecodeInputValidator_BitDepth);
+    RUN_TEST(Test_S10_DecodeErrorCategory_Names);
+    RUN_TEST(Test_S10_DecodeErrorCategory_SecurityFlags);
+    RUN_TEST(Test_S11_DecoderTimeoutGuard_NotExpiredFresh);
+    RUN_TEST(Test_S11_DecoderTimeoutGuard_DefaultTimeout);
+    RUN_TEST(Test_S11_DecoderTimeoutGuard_CompletesInstantly);
+    RUN_TEST(Test_S13_GracefulDegradation_AllModes);
+    RUN_TEST(Test_S13_GracefulDegradation_FaultInjection);
+    RUN_TEST(Test_S14_ArchiveSecurityValidator_ZipBombRejection);
+    RUN_TEST(Test_S14_ArchiveSecurityValidator_PathTraversalBlocked);
+    RUN_TEST(Test_S14_ArchiveSecurityValidator_SymlinkAttackPrevented);
 
     // Security Hardening Tests
     std::wcout << L"\nSecurity Hardening Tests..." << std::endl;

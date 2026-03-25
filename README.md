@@ -300,10 +300,10 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 15.2.1 "Zenith-S"
+**Current Version:** 15.3.0 "Zenith-T"
 **Build Status:** 0 errors / 0 warnings
-**Test Status:** 2,938 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Zenith-S — Architecture Hardening (Sprint 1–8 of 100; roadmap → v17.0.0 "Nova")
+**Test Status:** 2,951 unit tests, 5 benchmarks (100% pass rate)
+**Codename:** Zenith-T — Resilience & Hardening (Sprint 9–16 of 100; roadmap → v17.0.0 "Nova")
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 
@@ -357,4 +357,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 Built with ❤️ using C++20, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
 
-Last Updated: March 25, 2026 (v15.2.1 "Zenith-S")
+Last Updated: March 25, 2026 (v15.3.0 "Zenith-T")

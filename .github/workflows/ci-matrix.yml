@@ -1,5 +1,5 @@
 # ci-matrix.yml — Enhanced CI Pipeline with Full Build Matrix
-# ExplorerLens v15.2.0 "Zenith-S"
+# ExplorerLens v15.3.0 "Zenith-T"
 # Builds x64 Debug/Release, runs tests, coverage, static analysis
 # NOTE: build-and-test.yml was removed (superseded by build.yml + this workflow)
 

@@ -1,5 +1,5 @@
 # ExplorerLens User Guide
-**Version:** 15.2.1 "Zenith-S"
+**Version:** 15.3.0 "Zenith-T"
 **Last Updated:** March 2026
 
 ## Table of Contents
