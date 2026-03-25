@@ -1,0 +1,177 @@
+<!-- architecture-build.svg — Build Pipeline
+     Copyright (c) 2026 ExplorerLens Project  |  v15.3.0 "Zenith-T"
+     Canvas: 960 × 385
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 385" width="960" height="385"
+     font-family="'Segoe UI',system-ui,-apple-system,sans-serif">
+<defs>
+  <marker id="a" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#2f81f7"/>
+  </marker>
+  <marker id="ao" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#f0883e"/>
+  </marker>
+  <marker id="ap" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#8957e5"/>
+  </marker>
+</defs>
+
+<!-- Background -->
+<rect width="960" height="385" fill="#0d1117"/>
+
+<!-- Title -->
+<text x="480" y="13" text-anchor="middle"
+      font-size="11" fill="#8b949e" letter-spacing="1">BUILD PIPELINE</text>
+
+<!-- ──────────────────────────────────────── -->
+<!-- ROW 1: Build Tool Chain                  -->
+<!-- ──────────────────────────────────────── -->
+
+<!-- CMakePresets.json badge -->
+<rect x="12" y="31" width="118" height="17" rx="3"
+      fill="#21262d" stroke="#3fb950" stroke-width="0.75"/>
+<text x="71" y="43" text-anchor="middle"
+      font-size="9" fill="#3fb950">CMakePresets.json</text>
+<line x1="130" y1="39" x2="138" y2="39"
+      stroke="#3fb950" stroke-width="0.75"/>
+
+<!-- CMake box -->
+<rect x="138" y="22" width="155" height="65" rx="7"
+      fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+<text x="215" y="48" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">CMake</text>
+<text x="215" y="65" text-anchor="middle"
+      font-size="10" fill="#3fb950">v4.3.0  ·  Presets</text>
+<text x="215" y="80" text-anchor="middle"
+      font-size="9" fill="#8b949e">configure</text>
+
+<!-- Arrow CMake → Ninja -->
+<line x1="293" y1="54" x2="330" y2="54"
+      stroke="#2f81f7" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- Ninja box -->
+<rect x="330" y="22" width="135" height="65" rx="7"
+      fill="#161b22" stroke="#f0883e" stroke-width="1.5"/>
+<text x="397" y="48" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">Ninja</text>
+<text x="397" y="65" text-anchor="middle"
+      font-size="10" fill="#f0883e">v1.13.2</text>
+<text x="397" y="80" text-anchor="middle"
+      font-size="9" fill="#8b949e">parallel build</text>
+
+<!-- Arrow Ninja → MSVC -->
+<line x1="465" y1="54" x2="500" y2="54"
+      stroke="#2f81f7" stroke-width="1.5" marker-end="url(#a)"/>
+
+<!-- MSVC v145 box -->
+<rect x="500" y="22" width="200" height="65" rx="7"
+      fill="#091828" stroke="#2f81f7" stroke-width="1.5"/>
+<text x="600" y="46" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">MSVC v145</text>
+<text x="600" y="62" text-anchor="middle"
+      font-size="10" fill="#58a6ff">cl.exe 19.50  ·  toolset 14.50.35717</text>
+<text x="600" y="78" text-anchor="middle"
+      font-size="9" fill="#8b949e">vcvars64.bat  · /MD  · /GL</text>
+
+<!-- vcpkg.json badge -->
+<rect x="710" y="31" width="90" height="17" rx="3"
+      fill="#21262d" stroke="#2f81f7" stroke-width="0.75"/>
+<text x="755" y="43" text-anchor="middle"
+      font-size="9" fill="#58a6ff">vcpkg.json</text>
+
+<!-- ── Fan: MSVC center down → three output boxes ── -->
+<!-- Stem from MSVC bottom-center -->
+<line x1="600" y1="87" x2="600" y2="107"
+      stroke="#2f81f7" stroke-width="1.2" opacity="0.7"/>
+<!-- Horizontal bar -->
+<line x1="162" y1="107" x2="800" y2="107"
+      stroke="#2f81f7" stroke-width="1.2" opacity="0.7"/>
+<!-- Verticals down to Row 2 tops -->
+<line x1="162" y1="107" x2="162" y2="117"
+      stroke="#2f81f7" stroke-width="1.2" opacity="0.7" marker-end="url(#a)"/>
+<line x1="487" y1="107" x2="487" y2="117"
+      stroke="#2f81f7" stroke-width="1.2" opacity="0.7" marker-end="url(#a)"/>
+<line x1="800" y1="107" x2="800" y2="117"
+      stroke="#2f81f7" stroke-width="1.2" opacity="0.7" marker-end="url(#a)"/>
+
+<!-- ──────────────────────────────────────── -->
+<!-- ROW 2: Build Outputs (three columns)    -->
+<!-- ──────────────────────────────────────── -->
+
+<!-- ExplorerLensEngine.lib  (c=162) -->
+<rect x="22" y="120" width="280" height="72" rx="7"
+      fill="#091828" stroke="#2f81f7" stroke-width="1.5"/>
+<text x="162" y="144" text-anchor="middle"
+      font-size="12" font-weight="700" fill="#e6edf3">ExplorerLensEngine.lib</text>
+<text x="162" y="160" text-anchor="middle"
+      font-size="10" fill="#8b949e">static library  ·  311 MB</text>
+<text x="162" y="176" text-anchor="middle"
+      font-size="10" fill="#58a6ff">MSVC v145 /MD  ·  25 decoders</text>
+<text x="162" y="188" text-anchor="middle"
+      font-size="9" fill="#8b949e">Engine.h  ·  200+ headers</text>
+
+<!-- EngineTests.exe  (c=487) -->
+<rect x="367" y="120" width="240" height="72" rx="7"
+      fill="#0a1f10" stroke="#3fb950" stroke-width="1.5"/>
+<text x="487" y="144" text-anchor="middle"
+      font-size="12" font-weight="700" fill="#e6edf3">EngineTests.exe</text>
+<text x="487" y="160" text-anchor="middle"
+      font-size="10" fill="#8b949e">CTest target</text>
+<text x="487" y="176" text-anchor="middle"
+      font-size="11" font-weight="600" fill="#3fb950">2,951 tests  ·  100% pass</text>
+<text x="487" y="188" text-anchor="middle"
+      font-size="9" fill="#8b949e">17ms avg  ·  235 img/s batch</text>
+
+<!-- EngineBenchmarks.exe  (c=800) -->
+<rect x="660" y="120" width="280" height="72" rx="7"
+      fill="#1a1028" stroke="#a371f7" stroke-width="1.5"/>
+<text x="800" y="144" text-anchor="middle"
+      font-size="12" font-weight="700" fill="#e6edf3">EngineBenchmarks</text>
+<text x="800" y="160" text-anchor="middle"
+      font-size="10" fill="#8b949e">Google Benchmark style</text>
+<text x="800" y="176" text-anchor="middle"
+      font-size="10" fill="#a371f7">5 benchmark suites</text>
+<text x="800" y="188" text-anchor="middle"
+      font-size="9" fill="#8b949e">&lt;5ms cache hit  ·  throughput</text>
+
+<!-- Arrow from ExplorerLensEngine.lib → Shell (MSBuild) -->
+<line x1="162" y1="192" x2="162" y2="226"
+      stroke="#f0883e" stroke-width="1.5" marker-end="url(#ao)"/>
+<!-- MSBuild badge -->
+<rect x="172" y="198" width="80" height="16" rx="3"
+      fill="#21262d" stroke="#f0883e" stroke-width="0.75"/>
+<text x="212" y="210" text-anchor="middle"
+      font-size="9" fill="#f0883e">MSBuild  /m</text>
+
+<!-- ──────────────────────────────────────── -->
+<!-- ROW 3: Shell Binaries                   -->
+<!-- ──────────────────────────────────────── -->
+<rect x="22" y="230" width="530" height="68" rx="7"
+      fill="#091828" stroke="#58a6ff" stroke-width="1.5"/>
+<text x="287" y="256" text-anchor="middle"
+      font-size="12" font-weight="700" fill="#e6edf3">LENSShell.dll  ·  LENSManager.exe</text>
+<text x="287" y="272" text-anchor="middle"
+      font-size="10" fill="#8b949e">2,940 KB COM Shell Extension  ·  400 KB WTL Admin GUI</text>
+<text x="287" y="288" text-anchor="middle"
+      font-size="10" fill="#58a6ff">CLSID: {9E6ECB90-5A61-42BD-B851-D3297D9C7F39}</text>
+
+<!-- Arrow from Shell binaries → Packages (WiX) -->
+<line x1="287" y1="298" x2="287" y2="326"
+      stroke="#8957e5" stroke-width="1.5" marker-end="url(#ap)"/>
+<!-- WiX badge -->
+<rect x="297" y="303" width="72" height="16" rx="3"
+      fill="#21262d" stroke="#8957e5" stroke-width="0.75"/>
+<text x="333" y="315" text-anchor="middle"
+      font-size="9" fill="#8957e5">WiX  v6.0.2</text>
+
+<!-- ──────────────────────────────────────── -->
+<!-- ROW 4: Release Packages                 -->
+<!-- ──────────────────────────────────────── -->
+<rect x="22" y="330" width="530" height="48" rx="7"
+      fill="#0e1428" stroke="#8957e5" stroke-width="1.5"/>
+<text x="287" y="352" text-anchor="middle"
+      font-size="11" font-weight="700" fill="#e6edf3">ExplorerLens-15.3.0-x64.msi  ·  .zip</text>
+<text x="287" y="368" text-anchor="middle"
+      font-size="10" fill="#8b949e">SHA256SUMS.txt  ·  SBOM.json  ·  verification-report.json</text>
+
+</svg>

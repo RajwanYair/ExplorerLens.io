@@ -1,0 +1,195 @@
+<!-- architecture-components.svg — ExplorerLens System Architecture
+     Copyright (c) 2026 ExplorerLens Project  |  v15.3.0 "Zenith-T"
+     Canvas: 960 × 528
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 528" width="960" height="528"
+     font-family="'Segoe UI',system-ui,-apple-system,sans-serif">
+<defs>
+  <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#2f81f7"/>
+  </marker>
+  <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%"  stop-color="#0d1117"/>
+    <stop offset="100%" stop-color="#0d1117"/>
+  </linearGradient>
+</defs>
+
+<!-- Background -->
+<rect width="960" height="528" fill="#0d1117"/>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- WINDOWS EXPLORER                                            -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<rect x="20" y="20" width="920" height="68" rx="8"
+      fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+<text x="480" y="44" text-anchor="middle"
+      font-size="14" font-weight="700" fill="#e6edf3">Windows Explorer</text>
+<text x="480" y="62" text-anchor="middle"
+      font-size="11" fill="#8b949e">Host process: explorer.exe / prevhost.exe</text>
+
+<!-- COM interface badges -->
+<rect x="100" y="80" width="270" height="18" rx="3"
+      fill="#21262d" stroke="#2f81f7" stroke-width="0.75"/>
+<text x="235" y="92" text-anchor="middle"
+      font-size="10" fill="#58a6ff">IThumbnailProvider · IExtractImage2</text>
+
+<rect x="600" y="80" width="230" height="18" rx="3"
+      fill="#21262d" stroke="#2f81f7" stroke-width="0.75"/>
+<text x="715" y="92" text-anchor="middle"
+      font-size="10" fill="#58a6ff">IPropertyStore · IQueryInfo</text>
+
+<!-- Arrows → LENSShell -->
+<line x1="235" y1="98" x2="235" y2="144"
+      stroke="#2f81f7" stroke-width="1.5" opacity="0.9" marker-end="url(#arr)"/>
+<line x1="715" y1="98" x2="715" y2="144"
+      stroke="#2f81f7" stroke-width="1.5" opacity="0.9" marker-end="url(#arr)"/>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- LENSSHELL.DLL                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<rect x="20" y="148" width="920" height="248" rx="8"
+      fill="#091828" stroke="#2f81f7" stroke-width="1.5"/>
+
+<!-- Title bar -->
+<text x="42" y="172" font-size="13" font-weight="700" fill="#e6edf3">LENSShell.dll</text>
+<text x="163" y="172" font-size="13" fill="#8b949e">  (2,940 KB)  —  COM Shell Extension</text>
+
+<!-- Badge: new in v15.3.0 -->
+<rect x="790" y="160" width="142" height="18" rx="3"
+      fill="#21262d" stroke="#f0883e" stroke-width="0.75"/>
+<text x="861" y="172" text-anchor="middle"
+      font-size="9" fill="#f0883e">CrashDumpCapture ← v15.3.0 new</text>
+
+<!-- ── COM layer: 3 boxes (w=280, gap=20) ── -->
+<!-- Box 1: CLENSShell -->
+<rect x="40" y="182" width="280" height="52" rx="6"
+      fill="#161b22" stroke="#2f81f7" stroke-width="0.75" opacity="0.9"/>
+<text x="180" y="205" text-anchor="middle"
+      font-size="11" font-weight="600" fill="#c9d1d9">CLENSShell (COM)</text>
+<text x="180" y="222" text-anchor="middle"
+      font-size="10" fill="#8b949e">IThumbnailProvider · IInitializeWithStream</text>
+
+<!-- Box 2: PropertyStore -->
+<rect x="340" y="182" width="280" height="52" rx="6"
+      fill="#161b22" stroke="#2f81f7" stroke-width="0.75" opacity="0.9"/>
+<text x="480" y="205" text-anchor="middle"
+      font-size="11" font-weight="600" fill="#c9d1d9">PropertyStore Impl</text>
+<text x="480" y="222" text-anchor="middle"
+      font-size="10" fill="#8b949e">IPropertyStore · IPropertyStoreCapabilities</text>
+
+<!-- Box 3: CrashDumpCapture -->
+<rect x="640" y="182" width="280" height="52" rx="6"
+      fill="#1a0d0d" stroke="#f0883e" stroke-width="0.75" opacity="0.9"/>
+<text x="780" y="205" text-anchor="middle"
+      font-size="11" font-weight="600" fill="#c9d1d9">CrashDumpCapture</text>
+<text x="780" y="222" text-anchor="middle"
+      font-size="10" fill="#f0883e">SetUnhandledExceptionFilter → MiniDump</text>
+
+<!-- ── ExplorerLensEngine.lib inner box ── -->
+<rect x="40" y="252" width="840" height="122" rx="6"
+      fill="#050e1c" stroke="#1a6ae0" stroke-width="1.5"/>
+<text x="62" y="272" font-size="11" font-weight="700" fill="#58a6ff">ExplorerLensEngine.lib</text>
+<text x="240" y="272" font-size="11" fill="#8b949e">— static library  ·  311 MB  ·  MSVC v145 /MD</text>
+
+<!-- Engine sub-boxes: 6×w=130 gap=8, starting x=52 -->
+
+<!-- Pipeline Manager -->
+<rect x="52" y="280" width="130" height="82" rx="5"
+      fill="#161b22" stroke="#2f81f740" stroke-width="1"/>
+<text x="117" y="299" text-anchor="middle"
+      font-size="10" font-weight="600" fill="#c9d1d9">Pipeline Mgr</text>
+<text x="117" y="314" text-anchor="middle" font-size="9" fill="#8b949e">FormatDetect</text>
+<text x="117" y="326" text-anchor="middle" font-size="9" fill="#8b949e">DecoderRegistry</text>
+<text x="117" y="338" text-anchor="middle" font-size="9" fill="#8b949e">BatchProcessor</text>
+<text x="117" y="356" text-anchor="middle" font-size="9" fill="#2f81f7">Core/</text>
+
+<!-- Decoders -->
+<rect x="190" y="280" width="130" height="82" rx="5"
+      fill="#161b22" stroke="#2f81f740" stroke-width="1"/>
+<text x="255" y="299" text-anchor="middle"
+      font-size="10" font-weight="600" fill="#c9d1d9">Decoders</text>
+<text x="255" y="314" text-anchor="middle" font-size="9" fill="#8b949e">25+ formats</text>
+<text x="255" y="326" text-anchor="middle" font-size="9" fill="#8b949e">RAW · PDF · Video</text>
+<text x="255" y="338" text-anchor="middle" font-size="9" fill="#8b949e">3D · Archives</text>
+<text x="255" y="356" text-anchor="middle" font-size="9" fill="#2f81f7">Decoders/</text>
+
+<!-- GPU Renderer -->
+<rect x="328" y="280" width="130" height="82" rx="5"
+      fill="#161b22" stroke="#2f81f740" stroke-width="1"/>
+<text x="393" y="299" text-anchor="middle"
+      font-size="10" font-weight="600" fill="#c9d1d9">GPU Renderer</text>
+<text x="393" y="314" text-anchor="middle" font-size="9" fill="#8b949e">DirectX 11/12</text>
+<text x="393" y="326" text-anchor="middle" font-size="9" fill="#8b949e">Vulkan Compute</text>
+<text x="393" y="338" text-anchor="middle" font-size="9" fill="#8b949e">GDI+ fallback</text>
+<text x="393" y="356" text-anchor="middle" font-size="9" fill="#2f81f7">GPU/</text>
+
+<!-- Cache Manager -->
+<rect x="466" y="280" width="130" height="82" rx="5"
+      fill="#161b22" stroke="#2f81f740" stroke-width="1"/>
+<text x="531" y="299" text-anchor="middle"
+      font-size="10" font-weight="600" fill="#c9d1d9">Cache Manager</text>
+<text x="531" y="314" text-anchor="middle" font-size="9" fill="#8b949e">SubMs Engine</text>
+<text x="531" y="326" text-anchor="middle" font-size="9" fill="#8b949e">Disk Persist</text>
+<text x="531" y="338" text-anchor="middle" font-size="9" fill="#8b949e">PSO Cache</text>
+<text x="531" y="356" text-anchor="middle" font-size="9" fill="#2f81f7">Cache/</text>
+
+<!-- Memory Manager -->
+<rect x="604" y="280" width="130" height="82" rx="5"
+      fill="#161b22" stroke="#2f81f740" stroke-width="1"/>
+<text x="669" y="299" text-anchor="middle"
+      font-size="10" font-weight="600" fill="#c9d1d9">Memory Mgr</text>
+<text x="669" y="314" text-anchor="middle" font-size="9" fill="#8b949e">BitmapPool</text>
+<text x="669" y="326" text-anchor="middle" font-size="9" fill="#8b949e">Pressure Ctrl</text>
+<text x="669" y="338" text-anchor="middle" font-size="9" fill="#8b949e">NUMA Alloc</text>
+<text x="669" y="356" text-anchor="middle" font-size="9" fill="#2f81f7">Memory/</text>
+
+<!-- Plugin · AI -->
+<rect x="742" y="280" width="130" height="82" rx="5"
+      fill="#161b22" stroke="#a371f740" stroke-width="1"/>
+<text x="807" y="299" text-anchor="middle"
+      font-size="10" font-weight="600" fill="#c9d1d9">Plugin  ·  AI</text>
+<text x="807" y="314" text-anchor="middle" font-size="9" fill="#8b949e">Sandbox  ·  Trust</text>
+<text x="807" y="326" text-anchor="middle" font-size="9" fill="#8b949e">Smart Crop</text>
+<text x="807" y="338" text-anchor="middle" font-size="9" fill="#8b949e">Scene Classify</text>
+<text x="807" y="356" text-anchor="middle" font-size="9" fill="#a371f7">Plugin/ · AI/</text>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- LENSMANAGER.EXE                                             -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<rect x="20" y="408" width="920" height="100" rx="8"
+      fill="#111a28" stroke="#58a6ff" stroke-width="1.2"/>
+<text x="42" y="428" font-size="13" font-weight="700" fill="#e6edf3">LENSManager.exe</text>
+<text x="200" y="428" font-size="13" fill="#8b949e">  (400 KB)  —  WTL Admin GUI</text>
+
+<!-- Manager sub-boxes: 3×w=280, gap=20 -->
+<!-- Format Config -->
+<rect x="40" y="436" width="280" height="62" rx="5"
+      fill="#161b22" stroke="#58a6ff" stroke-width="0.75" opacity="0.75"/>
+<text x="180" y="459" text-anchor="middle"
+      font-size="11" font-weight="600" fill="#c9d1d9">Format Config</text>
+<text x="180" y="475" text-anchor="middle"
+      font-size="10" fill="#8b949e">Enable / disable decoder groups</text>
+<text x="180" y="490" text-anchor="middle"
+      font-size="10" fill="#8b949e">Custom extension mapping</text>
+
+<!-- COM Registration -->
+<rect x="340" y="436" width="280" height="62" rx="5"
+      fill="#161b22" stroke="#58a6ff" stroke-width="0.75" opacity="0.75"/>
+<text x="480" y="459" text-anchor="middle"
+      font-size="11" font-weight="600" fill="#c9d1d9">COM Registration</text>
+<text x="480" y="475" text-anchor="middle"
+      font-size="10" fill="#8b949e">regsvr32 / Admin elevation</text>
+<text x="480" y="490" text-anchor="middle"
+      font-size="10" fill="#58a6ff">CLSID: {9E6ECB90…3D9C7F39}</text>
+
+<!-- Diagnostics & Settings -->
+<rect x="640" y="436" width="280" height="62" rx="5"
+      fill="#161b22" stroke="#3fb950" stroke-width="0.75" opacity="0.75"/>
+<text x="780" y="459" text-anchor="middle"
+      font-size="11" font-weight="600" fill="#c9d1d9">Diagnostics &amp; Settings</text>
+<text x="780" y="475" text-anchor="middle"
+      font-size="10" fill="#8b949e">Health check · ETW events</text>
+<text x="780" y="490" text-anchor="middle"
+      font-size="10" fill="#8b949e">JSON config import/export</text>
+
+</svg>

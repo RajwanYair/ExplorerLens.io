@@ -1,7 +1,7 @@
 # ExplorerLens.io — GPU-Accelerated Thumbnail Generator
 
 <p align="center">
-  <img src="docs/assets/social-preview.svg" alt="ExplorerLens.io — GPU-Accelerated Windows Shell Extension" width="960"/>
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg" alt="ExplorerLens.io — GPU-Accelerated Windows Shell Extension" width="960"/>
 </p>
 
 ## High-performance Windows Shell extension for 200+ file formats
@@ -17,7 +17,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
 ![Windows 11](https://img.shields.io/badge/Windows-10%2F11-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Tests](https://img.shields.io/badge/Tests-2938%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-2951%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 
 <!-- keywords: windows shell extension thumbnail provider ithumbnailprovider com dll directx11 directx12 vulkan gpu acceleration file preview windows explorer extension heic avif jpeg-xl webp raw photos pdf cbr cbz epub 3d gltf stl cpp20 msvc wic libraw libheif libjxl libavif mupdf libwebp thumbnail generator image decoder windows 11 shell namespace extension -->
@@ -162,95 +162,21 @@ Run `LENSManager.exe` to enable/disable file format categories.
 
 ### System Components
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                    Windows Explorer                          │
-│  (Host process: explorer.exe / prevhost.exe)                │
-└────┬────────────────────────┬───────────────────────────────┘
-     │ IThumbnailProvider     │ IPropertyStore
-     │ IExtractImage2         │ IQueryInfo
-     ▼                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│  LENSShell.dll  (2940 KB)  — COM Shell Extension            │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ CLENSShell   │  │PropertyStore │  │ QueryInfo    │      │
-│  │ (COM Class)  │  │  Impl        │  │  Impl        │      │
-│  └──────┬───────┘  └──────────────┘  └──────────────┘      │
-│         │                                                    │
-│  ┌──────▼──────────────────────────────────────────────┐    │
-│  │  ExplorerLensEngine.lib  (311 MB static library)    │    │
-│  │  ┌─────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐  │    │
-│  │  │ Pipeline │ │ Decoders │ │  GPU   │ │  Cache   │  │    │
-│  │  │ Manager  │ │ (25+)    │ │ Render │ │ Manager  │  │    │
-│  │  └─────────┘ └──────────┘ └────────┘ └──────────┘  │    │
-│  └─────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────┐
-│  LENSManager.exe  (400 KB)  — WTL Admin GUI                │
-│  ┌────────────────┐  ┌──────────────┐  ┌───────────────┐   │
-│  │ Format Config  │  │ COM Register │  │ Settings I/O  │   │
-│  │ (formatHandlers)│  │ (Admin Elev) │  │ (JSON/Reg)    │   │
-│  └────────────────┘  └──────────────┘  └───────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-components.svg" alt="ExplorerLens System Architecture" width="960"/>
+</p>
 
 ### Thumbnail Generation Data Flow
 
-```text
-         ┌──────────────┐
-         │   Explorer   │
-         │   requests   │
-         │   thumbnail  │
-         └──────┬───────┘
-                │ IStream
-                ▼
-         ┌──────────────┐
-         │    Format    │  FormatDetector + FormatSignatureDetector
-         │   Detection  │  (magic bytes, extension, heuristics)
-         └──────┬───────┘
-                │ LENSTYPE
-                ▼
-         ┌──────────────┐
-         │   Decoder    │  DecoderRegistry → IThumbnailDecoder
-         │   Dispatch   │  (25+ specialized decoders)
-         └──────┬───────┘
-                │ Raw pixels (BGRA)
-                ▼
-         ┌──────────────┐
-         │  GPU Resize  │  D3D11 → D3D12 → Vulkan → GDI fallback
-         │   Pipeline   │  Lanczos3 / Bicubic / HDR tone-map
-         └──────┬───────┘
-                │ HBITMAP (target size)
-                ▼
-         ┌──────────────┐
-         │    Cache     │  ThumbnailCache (memory) + PersistentDiskCache
-         │    Write     │  SubMillisecondCacheEngine (<0.5 ms hot lookup)
-         └──────┬───────┘
-                │
-                ▼
-         ┌──────────────┐
-         │  Return to   │
-         │   Explorer   │
-         └──────────────┘
-```
+<p align="center">
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-dataflow.svg" alt="Thumbnail Generation Data Flow" width="720"/>
+</p>
 
 ### Build Pipeline
 
-```text
-CMake 3.25+ with Presets → Ninja → MSVC v145 (cl.exe 19.50)
-                                │
-           ┌────────────────────┼─────────────────┐
-           ▼                    ▼                  ▼
-  ExplorerLensEngine      EngineTests        EngineBenchmarks
-  (STATIC .lib 311 MB)    (2938 tests)       (5 benchmarks)
-           │
-           ▼
-  MSBuild → LENSShell.dll (2940 KB) + LENSManager.exe (400 KB)
-           │
-           ▼
-  WiX v6 → ExplorerLens-15.1.0-x64.msi
-```
+<p align="center">
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/architecture-build.svg" alt="ExplorerLens Build Pipeline" width="960"/>
+</p>
 
 **GPU Render Priority:** `D3D11 → D3D12 → Vulkan Compute → GDI+ (software)`
 

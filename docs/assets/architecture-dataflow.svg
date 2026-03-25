@@ -1,0 +1,124 @@
+<!-- architecture-dataflow.svg — Thumbnail Generation Data Flow
+     Copyright (c) 2026 ExplorerLens Project  |  v15.3.0 "Zenith-T"
+     Canvas: 720 × 605
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 605" width="720" height="605"
+     font-family="'Segoe UI',system-ui,-apple-system,sans-serif">
+<defs>
+  <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#2f81f7"/>
+  </marker>
+  <marker id="arrg" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#3fb950"/>
+  </marker>
+  <marker id="arrp" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#8957e5"/>
+  </marker>
+</defs>
+
+<!-- Background -->
+<rect width="720" height="605" fill="#0d1117"/>
+
+<!-- Title -->
+<text x="360" y="13" text-anchor="middle"
+      font-size="11" fill="#8b949e" letter-spacing="1">THUMBNAIL GENERATION DATA FLOW</text>
+
+<!-- ════ Step 1: Windows Explorer ════ -->
+<rect x="180" y="22" width="360" height="65" rx="8"
+      fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+<text x="360" y="50" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">Windows Explorer</text>
+<text x="360" y="68" text-anchor="middle"
+      font-size="11" fill="#8b949e">requests thumbnail via IThumbnailProvider</text>
+
+<!-- Arrow 1 → 2 -->
+<line x1="360" y1="87" x2="360" y2="118"
+      stroke="#2f81f7" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="172" y="106" text-anchor="end"
+      font-size="10" font-style="italic" fill="#58a6ff">IStream</text>
+
+<!-- ════ Step 2: Format Detection ════ -->
+<rect x="180" y="122" width="360" height="65" rx="8"
+      fill="#0a1f10" stroke="#3fb950" stroke-width="1.5"/>
+<text x="360" y="150" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">Format Detection</text>
+<text x="360" y="168" text-anchor="middle"
+      font-size="11" fill="#8b949e">FormatDetector + FormatSignatureDetector</text>
+<!-- Right annotation -->
+<text x="552" y="136" font-size="9" fill="#3fb950" font-style="italic">magic bytes · extension</text>
+<text x="552" y="149" font-size="9" fill="#3fb950" font-style="italic">heuristics · deep scan</text>
+<text x="552" y="162" font-size="9" fill="#3fb950" font-style="italic">→ LENSTYPE enum</text>
+
+<!-- Arrow 2 → 3 -->
+<line x1="360" y1="187" x2="360" y2="218"
+      stroke="#2f81f7" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="172" y="206" text-anchor="end"
+      font-size="10" font-style="italic" fill="#58a6ff">LENSTYPE</text>
+
+<!-- ════ Step 3: Decoder Dispatch ════ -->
+<rect x="180" y="222" width="360" height="65" rx="8"
+      fill="#091828" stroke="#2f81f7" stroke-width="1.5"/>
+<text x="360" y="250" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">Decoder Dispatch</text>
+<text x="360" y="268" text-anchor="middle"
+      font-size="11" fill="#8b949e">DecoderRegistry → IThumbnailDecoder</text>
+<!-- Right annotation -->
+<text x="552" y="236" font-size="9" fill="#58a6ff" font-style="italic">25+ decoders</text>
+<text x="552" y="249" font-size="9" fill="#58a6ff" font-style="italic">Image · RAW · PDF</text>
+<text x="552" y="262" font-size="9" fill="#58a6ff" font-style="italic">Video · 3D · Archive</text>
+
+<!-- Arrow 3 → 4 -->
+<line x1="360" y1="287" x2="360" y2="318"
+      stroke="#8957e5" stroke-width="1.5" marker-end="url(#arrp)"/>
+<text x="172" y="306" text-anchor="end"
+      font-size="10" font-style="italic" fill="#8b949e">BGRA pixels</text>
+
+<!-- ════ Step 4: GPU Resize Pipeline ════ -->
+<rect x="180" y="322" width="360" height="65" rx="8"
+      fill="#1a0d28" stroke="#8957e5" stroke-width="1.5"/>
+<text x="360" y="350" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">GPU Resize Pipeline</text>
+<text x="360" y="368" text-anchor="middle"
+      font-size="11" fill="#8b949e">D3D11 → D3D12 → Vulkan → GDI+</text>
+<!-- Right annotation -->
+<text x="552" y="334" font-size="9" fill="#a371f7" font-style="italic">Lanczos3 / Bicubic</text>
+<text x="552" y="347" font-size="9" fill="#a371f7" font-style="italic">HDR tone-map</text>
+<text x="552" y="360" font-size="9" fill="#a371f7" font-style="italic">target-size HBITMAP</text>
+
+<!-- Arrow 4 → 5 -->
+<line x1="360" y1="387" x2="360" y2="418"
+      stroke="#2f81f7" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="172" y="406" text-anchor="end"
+      font-size="10" font-style="italic" fill="#58a6ff">HBITMAP</text>
+
+<!-- ════ Step 5: Cache Write ════ -->
+<rect x="180" y="422" width="360" height="65" rx="8"
+      fill="#0d1a2e" stroke="#2f81f7" stroke-width="1.5"/>
+<text x="360" y="450" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">Cache Write</text>
+<text x="360" y="468" text-anchor="middle"
+      font-size="11" fill="#8b949e">ThumbnailCache + PersistentDiskCache</text>
+<!-- Right annotation -->
+<text x="552" y="436" font-size="9" fill="#58a6ff" font-style="italic">SubMs cache</text>
+<text x="552" y="449" font-size="9" fill="#58a6ff" font-style="italic">&lt;0.5ms hot lookup</text>
+<text x="552" y="462" font-size="9" fill="#58a6ff" font-style="italic">disk persist</text>
+
+<!-- Arrow 5 → 6 -->
+<line x1="360" y1="487" x2="360" y2="518"
+      stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrg)"/>
+<text x="172" y="506" text-anchor="end"
+      font-size="10" font-style="italic" fill="#3fb950">cached</text>
+
+<!-- ════ Step 6: Return to Explorer ════ -->
+<rect x="180" y="522" width="360" height="65" rx="8"
+      fill="#0a1f10" stroke="#3fb950" stroke-width="1.5"/>
+<text x="360" y="550" text-anchor="middle"
+      font-size="13" font-weight="700" fill="#e6edf3">Return to Explorer</text>
+<text x="360" y="568" text-anchor="middle"
+      font-size="11" fill="#3fb950">✓  HBITMAP delivered  —  thumbnail cached</text>
+
+<!-- Performance indicator -->
+<text x="360" y="597" text-anchor="middle"
+      font-size="9" fill="#8b949e">⚡  17ms avg · 235 img/sec batch · &lt;5ms cache hit</text>
+
+</svg>

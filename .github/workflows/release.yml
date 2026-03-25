@@ -373,8 +373,14 @@ jobs:
           if [ -z "$NOTES" ]; then
             NOTES="See [CHANGELOG.md](CHANGELOG.md) for full details."
           fi
-          # Write to file to avoid multiline env var issues
-          echo "$NOTES" > release-notes-body.md
+          # Write to file with social preview image header
+          {
+            echo '<img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg" alt="ExplorerLens" width="900"/>'
+            echo ""
+            echo "---"
+            echo ""
+            printf '%s' "$NOTES"
+          } > release-notes-body.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
