@@ -1,4 +1,4 @@
-//==============================================================================
+﻿//==============================================================================
 // ExplorerLens Engine - Unit Tests
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
@@ -26098,7 +26098,7 @@ TEST(IntegrationRunnerHtmlReport)
     report.totalFiles = 3;
     report.passed     = 2;
     report.failed     = 1;
-    report.engineVersion = BuildValidation::VersionString;
+    report.engineVersion = ExplorerLens::BuildValidation::BuildInfo::VersionString;
     report.generatedAt   = "2026-03-25T00:00:00";
 
     CorpusTestRunner::TestResult r1;
