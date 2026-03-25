@@ -159,7 +159,7 @@ CorpusTestRunner::RunReport CorpusTestRunner::Run() const
 {
     RunReport report;
     report.generatedAt  = GetCurrentTimestampISO();
-    report.engineVersion = BuildValidation::VersionString;
+    report.engineVersion = BuildValidation::BuildInfo::VersionString;
 
     const auto& formatTable = GetFormatTable();
 

@@ -32,7 +32,7 @@ public:
     {
         std::wstring filePath;       // Absolute path to the test file
         std::wstring format;         // Detected format name (e.g. "JPEG", "ZIP")
-        std::wstring extension;      // File extension (lowercase, no dot)
+        std::string  extension;      // File extension (lowercase, no dot, narrow UTF-8)
         bool         passed{false};  // True if decode returned non-null / non-error
         std::wstring errorMessage;   // Empty on success; populated on failure
         double       durationMs{0.0};
