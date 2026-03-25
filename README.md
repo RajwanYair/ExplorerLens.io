@@ -20,24 +20,40 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![Tests](https://img.shields.io/badge/Tests-2951%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 
-<!-- keywords: windows shell extension thumbnail provider ithumbnailprovider com dll directx11 directx12 vulkan gpu acceleration file preview windows explorer extension heic avif jpeg-xl webp raw photos pdf cbr cbz epub 3d gltf stl cpp20 msvc wic libraw libheif libjxl libavif mupdf libwebp thumbnail generator image decoder windows 11 shell namespace extension -->
+| | |
+|---|---|
+| **Type** | Windows Shell Extension (`IThumbnailProvider` COM in-process DLL) |
+| **GPU** | DirectX 11, DirectX 12, Vulkan Compute — with CPU GDI+ fallback |
+| **Formats** | 200+ extensions — HEIC, AVIF, JXL, WebP, RAW, PDF, CBZ, CBR, EPUB, glTF, DDS, EXR, MP4, MP3, TTF … |
+| **Cameras** | 100+ RAW formats — Canon (CR2/CR3), Nikon (NEF), Sony (ARW), Fujifilm, Adobe DNG, Olympus, Hasselblad … |
+| **Language** | C++20 · MSVC v145 · Visual Studio 18 2026 BuildTools |
+| **Build** | CMake 4.3 · Ninja · vcpkg / local external libs |
+| **Tests** | 2,951 unit tests · 5 benchmarks · 100% pass rate |
+| **Install** | `regsvr32 LENSShell.dll` — no reboot required |
+
+<!--
+  GitHub Search Metadata
+  ======================
+  Project: ExplorerLens — IThumbnailProvider Windows Shell Extension
+  Language: C++20 | Build: CMake + Ninja + MSVC v145 | GPU: DirectX 11/12 + Vulkan
+  Platform: Windows 10 1809+ / Windows 11 x64
+  Formats: HEIC HEIF AVIF JXL JPEG-XL WebP RAW DNG CR2 NEF ARW PDF CBZ CBR EPUB MOBI
+           glTF GLB OBJ STL DDS EXR HDR QOI KTX TTF OTF MP4 MKV FLAC MP3
+  Libraries: libraw libheif libjxl libavif libwebp mupdf dav1d zlib zstd lz4 lzma minizip-ng unrar libarchive
+  Architecture: COM in-process DLL, IThumbnailProvider, IExtractImage2, IPropertyStore,
+                IPersistFile, IInitializeWithStream, Windows Property System, WIC
+  Search terms: windows shell extension thumbnail windows explorer thumbnail handler
+                iithumbnailprovider com server dll regsvr32 clsid file preview
+                image thumbnail generator windows 11 thumbnail provider c++ gpu
+-->
+<!-- SEO keywords: windows shell extension thumbnail provider ithumbnailprovider com dll directx11 directx12 vulkan gpu acceleration file preview windows explorer extension heic avif jpeg-xl webp raw photos pdf cbr cbz epub 3d gltf stl cpp20 msvc wic libraw libheif libjxl libavif mupdf libwebp thumbnail generator image decoder windows 11 shell namespace extension com server inprocess server regsvr32 clsid shell handler preview handler extract image iextractimage ipersistfile ipropertystore windows imaging component wic bitmap thumbnail lru cache thumbnail cache simd avx2 sse4 gpu decode nvdec quicksync amf d3d11 d3d12 vulkan compute hlsl shader gpu accelerated rendering windows registry hkcr progid file association photoshop psd svg openexr radiance hdr directx texture dds ktx ktx2 farbfeld qoi netpbm ppm tga targa jpeg2000 openjpeg comic book reader cbz cbr cb7 cbt manga reader ebook reader epub mobi kindle azw archive viewer zip rar 7zip tar xz bzip2 lzma zstd lz4 font preview ttf otf 3d model viewer gltf glb obj stl dicom medical image geospatial fits astronomical image video thumbnail mp4 mkv avi webm audio waveform mp3 flac camera raw cr2 nef arw dng sony canon nikon fujifilm olympus hasselblad phase one leica windows 10 windows 11 explorer thumbnail handler shell extension c++ 20 visual studio 2026 msvc v145 cmake ninja gpu render pipeline zero copy memory management -->
 
 <details>
-<summary><b>🏷️ GitHub Topics</b> — set these on your repo for maximum discoverability</summary>
+<summary><b>🏷️ GitHub Topics</b> (live on this repo)</summary>
 
-```
-windows-shell-extension  thumbnail-provider  ithumbnailprovider  com-dll
-directx  directx11  directx12  vulkan  gpu-acceleration  hlsl
-file-preview  windows-explorer  windows-11  cpp20  msvc
-heic  avif  jpeg-xl  webp  raw-photos  libraw  libheif  libjxl  libavif
-pdf  cbr  cbz  epub  ebook  comic-book  archive  7zip
-image-decoder  thumbnail-generator  thumbnail-cache  lru-cache
-windows-extension  shell-extension  com-interop  atl  wtl
-directx-11  directx-12  media-foundation  wic  gdi-plus
-performance  zero-copy  simd  avx2  sse42
-```
+`windows-shell-extension` &nbsp; `thumbnail-provider` &nbsp; `ithumbnailprovider` &nbsp; `windows-explorer-extension` &nbsp; `file-preview` &nbsp; `gpu-acceleration` &nbsp; `directx` &nbsp; `cpp20` &nbsp; `heic` &nbsp; `avif` &nbsp; `jpeg-xl` &nbsp; `raw-image` &nbsp; `webp` &nbsp; `windows-11` &nbsp; `comic-book` &nbsp; `image-decoder` &nbsp; `thumbnail-cache` &nbsp; `com-server` &nbsp; `pdf-viewer` &nbsp; `msvc`
 
-> **How to set:** GitHub repo → ⚙️ Settings gear next to **About** → Topics
+**More keyword tags for discoverability:** `ithumbnailprovider` · `iextractimage` · `com-dll` · `directx11` · `directx12` · `vulkan-compute` · `hlsl` · `libraw` · `libheif` · `libjxl` · `libavif` · `mupdf` · `libwebp` · `dav1d` · `cbz-reader` · `cbr-reader` · `manga-viewer` · `epub-reader` · `archive-viewer` · `3d-model-viewer` · `gltf` · `stl-viewer` · `dicom` · `openexr` · `hdr` · `font-preview` · `video-thumbnail` · `audio-waveform` · `wic` · `simd` · `avx2` · `zero-copy` · `lru-cache` · `windows-registry` · `regsvr32` · `shell-handler`
 
 </details>
 
