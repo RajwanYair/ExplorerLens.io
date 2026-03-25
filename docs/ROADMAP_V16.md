@@ -50,7 +50,7 @@ ExplorerLens v15.x is a mature, zero-warning Windows Shell Extension with 200+ f
 | **T3** | Architecture Hardening | Internal module gaps, plugin host, IPropertyStore | S2–S4 |
 | **T4** | Edge-Case Resilience & Error Handling | Decoder robustness, graceful degradation, fuzz testing | S4–S6 |
 | **T5** | Test Infrastructure & Coverage | Integration tests, corpus expansion, CI test gates | S5–S7 |
-| **T6** | Release Engineering & CI/CD | Signing, auto-update, release automation, ARM64 CI | S7–S10 |
+| **T6** | Release Engineering & CI/CD | Signing, auto-update, release automation | S7–S10 |
 | **T7** | User Experience Polish | Notifications, onboarding, accessibility, telemetry | S9–S12 |
 
 ---
@@ -207,7 +207,6 @@ The release workflow (`release.yml`) targets `windows-2022`, doesn't sign binari
 | T6.3 | **Automated changelog generation** | Script that extracts commit messages since last tag, groups by conventional commit type (feat/fix/perf/docs), generates CHANGELOG.md section. Runs in release workflow. | 1 day | — |
 | T6.4 | **Checksum & SBOM in release artifacts** | Auto-generate SHA256 checksums file and CycloneDX SBOM for every release. Attach to GitHub Release. | 1 day | — |
 | T6.5 | **Auto-update mechanism** | Client-side update checker in LENSManager (or system tray agent). Checks GitHub Releases API for newer version. Downloads delta MSP patch or full MSI. Silent install option. | 4 days | T6.2 |
-| T6.6 | **ARM64 CI pipeline activation** | Enable `arm64.yml` workflow on real ARM64 runner (or cross-compile). Validate decoder output on ARM64 Windows. | 2 days | T6.1 |
 | T6.7 | **MSIX packaging** | Complete `packaging/msix/` manifest. Build `.msix` bundle for Microsoft Store distribution. Side-by-side with MSI for existing users. | 2 days | T6.2 |
 | T6.8 | **Release-candidate workflow** | `pre-release.yml`: tags `vX.Y.Z-rc.N`, runs full test suite + perf benchmarks + signing, publishes as GitHub pre-release. Manual promotion to stable. | 2 days | T6.1, T6.2 |
 
@@ -387,16 +386,15 @@ Even with a modern GUI and CLI, the end-to-end user experience has friction: no 
 ---
 
 ### Sprint S10 (Weeks 19–20) — Platform & Packaging
-**Milestone:** ARM64 validated, MSIX package available
+**Milestone:** MSIX package available
 
 | Task | Theme | Priority |
 |------|-------|----------|
-| T6.6 | ARM64 CI pipeline | P1 |
 | T6.7 | MSIX packaging | P1 |
 | T7.3 | Toast notifications | P2 |
 | T7.7 | Portable mode completion | P2 |
 
-**Deliverables:** ARM64 builds pass CI. MSIX ready for Store submission. Toast notifications functional.
+**Deliverables:** MSIX ready for Store submission. Toast notifications functional.
 
 ---
 
@@ -461,7 +459,7 @@ T5.2 (corpus) ─→ T4.4 (fuzz testing)
 T5.3 (perf gate) ── T6.1 (CI runner)
 
 T6.1 (CI runner) ─→ T6.2 (signing) ─→ T6.5 (auto-update)
-                  ─→ T6.6 (ARM64)
+
 T6.2 ─→ T6.7 (MSIX)
 T6.2 ─→ T6.8 (RC workflow)
 
@@ -481,7 +479,6 @@ T4.2 (errors) + T3.2 (property store) ─→ T7.6 (error UX)
 | R4 | MSIX packaging has limitations for COM extensions | Medium | Medium | Validate sparse package approach in S10; keep MSI as primary |
 | R5 | Auto-update while DLL is loaded by explorer.exe | Medium | High | Use Windows Restart Manager API; install on next reboot fallback |
 | R6 | Performance regression gate too noisy on shared CI runners | Medium | Low | Use median of 3 runs; set threshold at 15% rather than 10% |
-| R7 | ARM64 cross-compile lacks real hardware validation | Low | Medium | Use ARM64 test machine or Windows DevKit 2025 |
 | R8 | .NET 10 runtime dependency for WinUI Manager | Low | Medium | Ship self-contained or detect and prompt for install |
 
 ---

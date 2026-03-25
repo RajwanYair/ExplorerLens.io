@@ -1,0 +1,81 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run weekly on Monday 03:00 UTC (off-peak, keeps analysis fresh)
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: CodeQL — C++ Security Analysis
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write   # Required to upload SARIF results
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: c-cpp
+          # Security-focused query suite — covers OWASP Top 10 patterns for C++
+          queries: security-extended,security-and-quality
+          config: |
+            query-filters:
+              - exclude:
+                  tags contain: experimental
+            paths-ignore:
+              - external/**
+              - packages/**
+              - gtest/**
+              - build/**
+              - build-vcpkg/**
+
+      - name: Setup MSVC Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure CMake (ci-release)
+        shell: pwsh
+        run: cmake --preset ci-release
+
+      - name: Build for CodeQL
+        shell: pwsh
+        run: |
+          # Build EngineTests only — not the full package — to keep analysis focused
+          # and stay within the 60-minute timeout
+          cmake --build --preset ci-release --target ExplorerLensEngine EngineTests -j 4
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: cpp-security
+          # Upload to GitHub Security tab (Code Scanning alerts)
+          upload: always
+          output: sarif-results
+
+      - name: Upload SARIF Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-sarif-${{ github.run_number }}
+          path: sarif-results/
+          retention-days: 30

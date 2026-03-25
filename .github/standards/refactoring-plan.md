@@ -249,7 +249,7 @@ PluginCompatibilityKitV2). Key areas:
 
 ### Current State
 
-- CMake 4.2.3 + Ninja for Engine
+- CMake 4.3.0 + Ninja for Engine
 - MSBuild for Shell/Manager
 - 30+ build scripts in `build-scripts/`
 

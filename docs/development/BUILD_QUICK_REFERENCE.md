@@ -77,12 +77,12 @@ ctest --output-on-failure
 
 ---
 
-## 📋 Installed Tools & Versions (Updated Feb 9, 2026)
+## 📋 Installed Tools & Versions (Updated Mar 25, 2026)
 
 - **Visual Studio:** 2026 Build Tools (v18)
-- **MSVC:** 14.44.35207
+- **MSVC:** 14.50.35717
 - **MSBuild:** 18.3.0
-- **CMake:** 4.2.3 ✅ Latest
+- **CMake:** 4.3.0 ✅ Latest
 - **Windows SDK:** 10.0.26100.0
 - **Git:** 2.53.0 ✅ Latest
 - **Ninja:** 1.13.2 (via Scoop)

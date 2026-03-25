@@ -18,11 +18,6 @@ add_executable(EngineTests
     PluginCompatKitTests.cpp
     PluginReferencePackTests.cpp
     PluginTrustChainTests.cpp
-    ARM64BuildConfigTests.cpp
-    ARM64LibraryMatrixTests.cpp
-    ARM64RuntimeValidatorTests.cpp
-    ARM64PerfBaselineTests.cpp
-    ARM64CIIntegrationTests.cpp
     JPEG2000DecoderTests.cpp
     CADFormatDecoderTests.cpp
     GLTFModelDecoderTests.cpp
@@ -206,7 +201,6 @@ add_test(NAME SubsystemTest.Decoder  COMMAND EngineTests)
 add_test(NAME SubsystemTest.Plugin   COMMAND EngineTests)
 add_test(NAME SubsystemTest.Memory   COMMAND EngineTests)
 add_test(NAME SubsystemTest.Pipeline COMMAND EngineTests)
-add_test(NAME SubsystemTest.ARM64    COMMAND EngineTests)
 add_test(NAME SubsystemTest.Utils    COMMAND EngineTests)
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/IntegrationTests.cpp")
@@ -268,11 +262,6 @@ if(WIN32)
     set_tests_properties(SubsystemTest.Pipeline PROPERTIES
         ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
         LABELS "unit;pipeline;subsystem"
-        TIMEOUT 60
-    )
-    set_tests_properties(SubsystemTest.ARM64 PROPERTIES
-        ENVIRONMENT "PATH=${EXPLORERLENS_TEST_RUNTIME_PATH}\\;$ENV{PATH}"
-        LABELS "unit;arm64;subsystem"
         TIMEOUT 60
     )
     set_tests_properties(SubsystemTest.Utils PROPERTIES

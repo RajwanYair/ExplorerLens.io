@@ -1,43 +1,76 @@
 ---
-# ExplorerLens.io v15.0.0 "Zenith" - Clang-Tidy Configuration
-# Updated Sprint 384: Added concurrency checks, stricter warnings-as-errors
+# ExplorerLens.io v15.2.0 "Zenith-S" — Clang-Tidy configuration
+# Aligned with .clang-format and .github/standards/coding-standards.md
+#
+# Run: clang-tidy --config-file=.clang-tidy <file> [-- <compiler flags>]
+# All suppressed checks are documented with rationale below.
 
 Checks: >
   -*,
   bugprone-*,
   -bugprone-easily-swappable-parameters,
   -bugprone-narrowing-conversions,
+  -bugprone-implicit-widening-of-multiplication-result,
   cert-*,
   -cert-err58-cpp,
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-magic-numbers,
-  -cppcoreguidelines-pro-type-reinterpret-cast,
-  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
-  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
-  -cppcoreguidelines-owning-memory,
-  -cppcoreguidelines-no-malloc,
-  -cppcoreguidelines-pro-type-union-access,
   -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-init-variables,
+  -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-no-malloc,
   -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-cstyle-cast,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-pro-type-vararg,
   modernize-*,
-  -modernize-use-trailing-return-type,
   -modernize-avoid-c-arrays,
   -modernize-concat-nested-namespaces,
+  -modernize-use-nodiscard,
+  -modernize-use-trailing-return-type,
   performance-*,
+  -performance-avoid-endl,
   readability-*,
-  -readability-magic-numbers,
-  -readability-identifier-length,
   -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversion,
+  -readability-magic-numbers,
   -readability-uppercase-literal-suffix,
   misc-*,
-  -misc-non-private-member-variables-in-classes,
   -misc-no-recursion,
+  -misc-non-private-member-variables-in-classes,
   concurrency-*,
   -concurrency-mt-unsafe
 
-WarningsAsErrors: "bugprone-use-after-move,bugprone-dangling-handle,cert-err34-c"
+# Suppression rationale:
+#   bugprone-easily-swappable-parameters — COM-style (HRESULT, UINT, SIZE*) signatures cause false positives
+#   bugprone-implicit-widening-of-multiplication-result — intentional in pixel math (cx * cy * 4)
+#   cppcoreguidelines-avoid-magic-numbers — WinAPI constants (IDR_MAINFRAME=128, SM_CXICON) are well-known
+#   cppcoreguidelines-avoid-c-arrays — WCHAR[MAX_PATH] is idiomatic Win32
+#   cppcoreguidelines-init-variables — ATL output-parameter pattern (HRESULT hr; ...; return hr;)
+#   cppcoreguidelines-macro-usage — WTL message maps are macro-based; no alternative
+#   cppcoreguidelines-no-malloc — libmupdf / LibRaw use malloc internally
+#   cppcoreguidelines-owning-memory — COM AddRef/Release ownership is not gsl::owner-compatible
+#   cppcoreguidelines-pro-bounds-array-to-pointer-decay — WCHAR[] to Win32 API is unavoidable
+#   cppcoreguidelines-pro-bounds-pointer-arithmetic — pixel buffer math (buf + stride*y)
+#   cppcoreguidelines-pro-type-cstyle-cast — MAKEINTRESOURCE, HIWORD/LOWORD expand to C casts
+#   cppcoreguidelines-pro-type-reinterpret-cast — HBITMAP <-> void* in COM thumbnail path
+#   cppcoreguidelines-pro-type-union-access — ULARGE_INTEGER.LowPart / HighPart
+#   cppcoreguidelines-pro-type-vararg — OutputDebugStringA / SHFormatMessage
+#   modernize-use-nodiscard — planned as a separate cleanup sprint
+#   modernize-use-trailing-return-type — team preference is leading return type
+#   performance-avoid-endl — std::endl is intentional flush in diagnostics
+#   readability-function-cognitive-complexity — format decoders with large switch tables are intentional
+#   readability-identifier-length — Win32 loop variables (i, n, hr) are idiomatic
+#   readability-implicit-bool-conversion — WTL BOOL(int) <-> bool is idiomatic
 
-HeaderFilterRegex: '(Engine|LENSShell|LENSManager)/.*\.h$'
+WarningsAsErrors: "bugprone-use-after-move,bugprone-dangling-handle,bugprone-unchecked-optional-access,cert-err34-c,cppcoreguidelines-slicing"
+
+HeaderFilterRegex: '^(?!.*(external|packages|gtest|build|build-vcpkg|_deps|x64)).*\.(h|hpp)$'
 
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
@@ -57,8 +90,14 @@ CheckOptions:
   - key: performance-unnecessary-value-param.AllowedTypes
     value: "ComPtr;CComPtr;wil::com_ptr"
   - key: bugprone-argument-comment.StrictMode
-    value: false
+    value: 'false'
   - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
-    value: true
+    value: 'true'
+  - key: cppcoreguidelines-special-member-functions.AllowMissingMoveFunctions
+    value: 'true'
   - key: misc-include-cleaner.IgnoreHeaders
-    value: "windows.h;shlobj.h;thumbcache.h"
+    value: "windows.h;shlobj.h;thumbcache.h;atlbase.h;atlwin.h;atldlgs.h"
+  - key: modernize-loop-convert.MinConfidence
+    value: 'reasonable'
+  - key: performance-for-range-copy.WarnOnAllAutoCopies
+    value: 'true'

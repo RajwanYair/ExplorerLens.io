@@ -51,10 +51,10 @@ If you prefer to load manually each session:
 
 After installation, these tools are immediately available:
 
-- **MSVC Compiler** (CL.exe 19.44.35207)
+- **MSVC Compiler** (CL.exe 19.50.35720)
 - **MSBuild** (18.3.0)
-- **NMake** (14.44.35207)
-- **CMake** (4.2.1)
+- **NMake** (14.50.35717)
+- **CMake** (4.3.0)
 - **Git** (via Scoop)
 - **Ninja** (via Scoop)
 - **Link, RC, other VC tools**
@@ -64,7 +64,7 @@ After installation, these tools are immediately available:
 ```powershell
 $Global:ExplorerLensConfig = @{
  VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools"
- MSVCVersion = "14.44.35207"
+ MSVCVersion = "14.50.35717"
  WindowsSDK = "10.0.26100.0"
  MSBuild = "...\MSBuild.exe"
  CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
@@ -113,12 +113,12 @@ Show-ExplorerLensInfo
 # 
 # Visual Studio:
 # Path: C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools
-# MSVC: 14.44.35207
+# MSVC: 14.50.35717
 # SDK: 10.0.26100.0
 # 
 # Build Tools:
 # MSBuild: 18.3.0
-# CMake: 4.2.1
+# CMake: 4.3.0
 # Git: 2.x.x
 ```
 
@@ -129,9 +129,9 @@ Test-BuildTools
 
 # Expected output:
 # ✅ MSBuild (18.3.0)
-# ✅ CMake (4.2.1)
+# ✅ CMake (4.3.0)
 # ✅ Git (2.x.x)
-# ✅ MSVC (CL) (19.44.x)
+# ✅ MSVC (CL) (19.50.x)
 # ✅ NMake
 # ✅ Link
 # ✅ RC

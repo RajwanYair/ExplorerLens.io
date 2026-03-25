@@ -244,8 +244,8 @@ Write-Host "    --------------------" -ForegroundColor DarkGray
 Write-Host "    Total         $totalFormatted s" -ForegroundColor Yellow
 Write-Host ""
 
-# Append to build history log (JSONL)
-$historyPath = Join-Path $PROJECT_ROOT "build-logs" "build-history.jsonl"
+# Append to build history log in TEMP (JSONL — keeps repo clean)
+$historyPath = Join-Path $env:TEMP "ExplorerLens-logs\build-history.jsonl"
 $historyDir = Split-Path $historyPath -Parent
 if (-not (Test-Path $historyDir)) { New-Item -ItemType Directory -Path $historyDir -Force | Out-Null }
 $entry = [ordered]@{

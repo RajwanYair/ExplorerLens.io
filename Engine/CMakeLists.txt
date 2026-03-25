@@ -622,8 +622,6 @@ set(ENGINE_HEADERS
 
     # Utilities
     Utils/AccessibilityEngine.h
-    Utils/ARM64HardwareValidator.h
-    Utils/ARM64Platform.h
     Utils/CIPipeline.h
     Utils/CodeCoverage.h
     Utils/DocGenerator.h
@@ -716,7 +714,6 @@ set(ENGINE_HEADERS
     GPU/GPUTextureAtlasManager.h
     Pipeline/PredictivePrefetchEngine.h
     Pipeline/ThreadPoolOptimizer.h
-    Core/ARM64NEONScaler.h
     Core/WindowsSearchProtocol.h
     Core/VirtualFilesystemAbstraction.h
     Core/RoleBasedFormatPolicy.h
@@ -1447,7 +1444,6 @@ set(ENGINE_SOURCES
 
     # Utility implementations
     Utils/AccessibilityEngine.cpp
-    Utils/ARM64HardwareValidator.cpp
     Utils/AuditLogger.cpp
     Utils/AutoDocGenerator.cpp
     Utils/CIValidator.cpp

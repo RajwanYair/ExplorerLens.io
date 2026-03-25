@@ -275,14 +275,9 @@
 - **Files:** `packaging/msix/ExplorerLens.msix`, update `release.yml` to build MSIX
 - **Output:** `.msix` bundle built in CI; validated with `makeappx.exe` and `certutil`
 
-#### Sprint 39 · ARM64 CI Pipeline Activation (T6.6)
-- **Goal:** Enable `arm64.yml` on cross-compile or ARM64 runner; validate decoder output
-- **Files:** `.github/workflows/arm64.yml` — add build + test steps
-- **Output:** ARM64 builds pass in CI; ARM64 `LENSShell.dll` uploaded to Releases
-
 #### Sprint 40 · **VERSION BUMP 15.6.0** + Release
-- Tag `v15.6.0` — first signed release, MSIX included, ARM64 artifact
-- **Release artifacts:** `LENSShell.dll` (x64+ARM64), `LENSManager.exe`, `lens.exe`, **signed MSI**, MSIX, SHA256SUMS, SBOM
+- Tag `v15.6.0` — first signed release, MSIX included
+- **Release artifacts:** `LENSShell.dll` (x64), `LENSManager.exe`, `lens.exe`, **signed MSI**, MSIX, SHA256SUMS, SBOM
 
 ---
 
@@ -461,13 +456,12 @@
 - Tag `v16.0.0` — full Horizon release
 - **CHANGELOG:** Comprehensive `[16.0.0] "Horizon"` block with all T1-T7 work
 - **Release artifacts:**
-  - `LENSShell.dll` (x64 + ARM64), signed
+  - `LENSShell.dll` (x64), signed
   - `LENSManager.exe`, signed
   - `Manager.WinUI.exe`, signed
   - `lens.exe`, signed
   - `LensTrayAgent.exe`, signed
   - `ExplorerLens-16.0.0-x64.msi` (signed)
-  - `ExplorerLens-16.0.0-ARM64.msi`
   - `ExplorerLens-16.0.0-x64.msix`
   - `ExplorerLens-16.0.0-x64.zip`
   - `SHA256SUMS.txt`
@@ -601,7 +595,7 @@
 - Tag `v17.0.0` — Nova
 - **CHANGELOG:** Full `[17.0.0] "Nova"` block covering all v16.x work
 - **Release artifacts:**
-  - Complete signed binary set (x64 + ARM64)
+  - Complete signed binary set (x64)
   - Microsoft Store link in release notes
   - Plugin SDK zip
   - Winget + Chocolatey packages updated

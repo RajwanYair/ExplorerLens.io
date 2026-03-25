@@ -44,7 +44,7 @@ $libraries = @(
     @{ name = "dav1d"; version = "1.5.1"; license = "BSD-2-Clause"; purl = "pkg:generic/dav1d@1.5.1" }
     @{ name = "OpenJPEG"; version = "2.5.3"; license = "BSD-2-Clause"; purl = "pkg:generic/openjpeg@2.5.3" }
     @{ name = "FreeType"; version = "2.13.3"; license = "FTL"; purl = "pkg:generic/freetype@2.13.3" }
-    @{ name = "MuPDF"; version = "1.25.4"; license = "AGPL-3.0"; purl = "pkg:generic/mupdf@1.25.4" }
+    @{ name = "MuPDF"; version = "1.24.11"; license = "AGPL-3.0"; purl = "pkg:generic/mupdf@1.24.11" }
     @{ name = "bzip2"; version = "1.0.8"; license = "BSD-4-Clause"; purl = "pkg:generic/bzip2@1.0.8" }
 )
 

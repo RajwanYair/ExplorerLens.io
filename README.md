@@ -8,15 +8,19 @@
 
 ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, fonts, archives, and more using **DirectX 11/12 GPU acceleration** and **multi-threaded processing**. The project root directory is `ExplorerLens.io`, and this repository is the production codebase for the Explorer extension, engine, and manager UI.
 
-![Windows 11](https://img.shields.io/badge/Windows-11-blue)
-![Platform](https://img.shields.io/badge/Platform-x64%20|%20ARM64-green)
-![C++20](https://img.shields.io/badge/C++-20-orange)
-![Version](https://img.shields.io/badge/Version-15.2.0-brightgreen)
+[![Build](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/build.yml)
+[![Code Quality](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/code-quality.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/code-quality.yml)
+[![CodeQL](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/RajwanYair/ExplorerLens.io/actions/workflows/codeql.yml)
+[![Latest Release](https://img.shields.io/github/v/release/RajwanYair/ExplorerLens.io?label=release&color=brightgreen)](https://github.com/RajwanYair/ExplorerLens.io/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/RajwanYair/ExplorerLens.io/total?color=blue)](https://github.com/RajwanYair/ExplorerLens.io/releases)
+![Platform](https://img.shields.io/badge/Platform-Windows%20x64%20Intel-blue)
+![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
+![Windows 11](https://img.shields.io/badge/Windows-10%2F11-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Tests](https://img.shields.io/badge/Tests-2938%20passing-success)
-![Warnings](https://img.shields.io/badge/Warnings-0-green)
+![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 
-<!-- keywords: windows shell extension thumbnail provider ithumbnailprovider com dll directx11 directx12 vulkan gpu acceleration file preview windows explorer extension heic avif jpeg-xl webp raw photos pdf cbr cbz epub 3d gltf stl cpp20 msvc arm64 wic libraw libheif libjxl libavif mupdf libwebp thumbnail generator image decoder windows 11 shell namespace extension -->
+<!-- keywords: windows shell extension thumbnail provider ithumbnailprovider com dll directx11 directx12 vulkan gpu acceleration file preview windows explorer extension heic avif jpeg-xl webp raw photos pdf cbr cbz epub 3d gltf stl cpp20 msvc wic libraw libheif libjxl libavif mupdf libwebp thumbnail generator image decoder windows 11 shell namespace extension -->
 
 <details>
 <summary><b>🏷️ GitHub Topics</b> — set these on your repo for maximum discoverability</summary>
@@ -24,7 +28,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ```
 windows-shell-extension  thumbnail-provider  ithumbnailprovider  com-dll
 directx  directx11  directx12  vulkan  gpu-acceleration  hlsl
-file-preview  windows-explorer  windows-11  arm64  cpp20  msvc
+file-preview  windows-explorer  windows-11  cpp20  msvc
 heic  avif  jpeg-xl  webp  raw-photos  libraw  libheif  libjxl  libavif
 pdf  cbr  cbz  epub  ebook  comic-book  archive  7zip
 image-decoder  thumbnail-generator  thumbnail-cache  lru-cache
@@ -296,7 +300,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 15.2.0 "Zenith-S"
+**Current Version:** 15.2.1 "Zenith-S"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 2,938 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Zenith-S — Architecture Hardening (Sprint 1–8 of 100; roadmap → v17.0.0 "Nova")
@@ -353,4 +357,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 Built with ❤️ using C++20, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
 
-Last Updated: March 24, 2026 (v15.2.0 "Zenith-S")
+Last Updated: March 25, 2026 (v15.2.1 "Zenith-S")

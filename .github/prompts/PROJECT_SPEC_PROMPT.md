@@ -804,8 +804,7 @@ All other files (docs, configs, scripts) should use lowercase-with-dashes.
 │   └── build-troubleshooting.md
 └── workflows/               # Lowercase — CI/CD
     ├── ci.yml
-    ├── release.yml
-    └── arm64.yml
+    └── release.yml
 ```
 
 ### `copilot-instructions.md` — The AI Config File

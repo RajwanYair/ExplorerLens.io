@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.2.1] "Zenith-S" — 2026-03-25
+
+### Maintenance
+- **Tool version updates** — cmake `4.2.3 → 4.3.0`, meson `1.10.0 → 1.10.2`, vcpkg `2025-11-19 → 2026-02-21`
+- **Scoop cache cleared** — removed 689 MB of stale post-update download archives
+- **Documentation sync** — all MD/config files updated to reflect current installed tool versions (`BUILD_QUICK_REFERENCE.md`, `LIBRARY_INVENTORY.md`, `build-method.md`, `refactoring-plan.md`, `scripts/README.md`, `tool-versions.md`, `copilot-instructions.md`)
+
+### Changed
+- **Version:** 15.2.0 "Zenith-S" → 15.2.1 "Zenith-S"
+
+---
+
 ## [15.2.0] "Zenith-S" — 2026-03-24
 
 ### Planning

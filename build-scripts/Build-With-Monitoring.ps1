@@ -24,17 +24,18 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$ScriptPath,
-    
+
     [switch]$Watch
 )
 
 $ErrorActionPreference = "Continue"
 $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
 $scriptName = [System.IO.Path]::GetFileNameWithoutExtension($ScriptPath)
-$logFile = "build-logs\$scriptName-$timestamp.log"
+$logDir = Join-Path $env:TEMP "ExplorerLens-logs"
+$logFile = Join-Path $logDir "$scriptName-$timestamp.log"
 
-# Ensure log directory exists
-New-Item -ItemType Directory -Path "build-logs" -Force -ErrorAction SilentlyContinue | Out-Null
+# Ensure log directory exists (always in TEMP — keeps the repo clean)
+New-Item -ItemType Directory -Path $logDir -Force -ErrorAction SilentlyContinue | Out-Null
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Building: $scriptName" -ForegroundColor Cyan
@@ -69,15 +70,15 @@ if ($Watch) {
     Write-Host "Monitoring log file (Ctrl+C to stop watching)..." -ForegroundColor Cyan
     Write-Host "Tip: Open $logFile in VS Code for better viewing" -ForegroundColor Gray
     Write-Host ""
-    
+
     # Monitor with timeout
     $timeout = 3600 # 1 hour
     $elapsed = 0
-    
+
     while ($job.State -eq 'Running' -and $elapsed -lt $timeout) {
         Start-Sleep -Seconds 10
         $elapsed += 10
-        
+
         if (Test-Path $logFile) {
             $lastLines = Get-Content $logFile -Tail 5 -ErrorAction SilentlyContinue
             if ($lastLines) {
@@ -89,7 +90,7 @@ if ($Watch) {
             }
         }
     }
-    
+
     if ($elapsed -ge $timeout) {
         Write-Host "WARNING: Build exceeded timeout of $timeout seconds" -ForegroundColor Yellow
         Write-Host "Check log file: $logFile" -ForegroundColor Yellow

@@ -131,39 +131,7 @@ jobs:
           retention-days: 14
 
   # ============================================================================
-  # Job 3: ARM64 Cross-Compile (Engine only)
-  # ============================================================================
-  arm64:
-    name: ARM64 Cross-Compile
-    runs-on: windows-latest
-    timeout-minutes: 30
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup MSVC ARM64
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          toolset: "14.40"
-          arch: amd64_arm64
-
-      - name: Install Ninja
-        run: choco install ninja -y
-
-      - name: Configure ARM64
-        run: >
-          cmake -G Ninja -B build-arm64
-          -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-windows-arm64.cmake
-          -DCMAKE_SYSTEM_PROCESSOR=ARM64
-
-      - name: Build ARM64
-        run: cmake --build build-arm64 -j 4 --target ExplorerLensEngine
-
-  # ============================================================================
-  # Job 4: Code Coverage (optional)
+  # Job 3: Code Coverage (optional)
   # ============================================================================
   coverage:
     name: Code Coverage
@@ -174,27 +142,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+          fetch-depth: 1
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          toolset: "14.40"
           arch: x64
 
       - name: Install Tools
-        run: |
-          choco install ninja opencppcoverage -y
+        run: choco install opencppcoverage -y
 
       - name: Build with Debug Info
         run: |
-          cmake --preset default-debug
-          cmake --build --preset default-debug -j 4
+          cmake --preset ci-debug
+          cmake --build --preset ci-debug -j ${{ runner.os == 'Windows' && '4' || '2' }}
 
       - name: Run Coverage
         shell: pwsh
         run: |
-          $testExe = "build/bin/EngineTests.exe"
+          $testExe = "build-debug/bin/EngineTests.exe"
           if (Test-Path $testExe) {
             OpenCppCoverage --sources "Engine\*" --excluded_sources "external\*" --excluded_sources "gtest\*" `
               --export_type=cobertura:coverage.xml -- $testExe
@@ -208,7 +175,7 @@ jobs:
           path: coverage.xml
 
   # ============================================================================
-  # Job 5: Static Analysis Gate (optional)
+  # Job 4: Static Analysis Gate (optional)
   # ============================================================================
   static-analysis:
     name: Static Analysis
@@ -219,19 +186,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+          fetch-depth: 1
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          toolset: "14.40"
           arch: x64
 
       - name: Install Tools
-        run: choco install ninja llvm -y
+        run: choco install llvm -y
 
       - name: Configure
-        run: cmake --preset default-release
+        run: cmake --preset ci-release
 
       - name: Run clang-tidy
         shell: pwsh

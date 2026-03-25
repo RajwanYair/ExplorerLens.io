@@ -36,7 +36,7 @@ $libraries = @(
     @{ Name = "libheif"; Version = "1.19.5"; License = "LGPL-3.0"; URL = "https://github.com/nickkraakman/libheif" }
     @{ Name = "libde265"; Version = "1.0.15"; License = "LGPL-3.0"; URL = "https://github.com/nickkraakman/libde265" }
     @{ Name = "libraw"; Version = "0.21.3"; License = "LGPL-2.1"; URL = "https://www.libraw.org" }
-    @{ Name = "mupdf"; Version = "1.25.5"; License = "AGPL-3.0"; URL = "https://mupdf.com" }
+    @{ Name = "mupdf"; Version = "1.24.11"; License = "AGPL-3.0"; URL = "https://mupdf.com" }
     @{ Name = "openjpeg"; Version = "2.5.3"; License = "BSD-2-Clause"; URL = "https://www.openjpeg.org" }
     @{ Name = "freetype"; Version = "2.13.3"; License = "FTL"; URL = "https://freetype.org" }
 )

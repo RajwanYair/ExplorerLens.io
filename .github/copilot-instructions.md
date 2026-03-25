@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 15.2.0 (Codename: Zenith-S)
+- **Version:** 15.2.1 (Codename: Zenith-S)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -34,18 +34,18 @@ ExplorerLensEngine.lib — Core decode + render pipeline
 | `Engine/Memory/` | Memory management (compactor, hot-mode, pressure controller, footprint optimizer) |
 | `Engine/Pipeline/` | Pipeline stages (fallback engine, zero-copy upload, parallel I/O) |
 | `Engine/Cache/` | Cache management (adaptive budget, PSO cache, sub-ms cache, multi-tenant) |
-| `Engine/Utils/` | Utilities (ARM64 support, matrix validation, installer lifecycle) |
+| `Engine/Utils/` | Utilities (matrix validation, installer lifecycle) |
 | `Engine/Tests/` | Unit tests + Google Benchmark |
 | `Engine/AI/` | AI/ML modules (scene understanding, smart crop, IQA, search) |
 | `Engine/GPU/` | GPU decode acceleration (NVDEC/QuickSync/AMF vendor routing) |
 | `build-scripts/` | PowerShell build automation |
 | `build-scripts/core/` | Build-Library-Core.ps1 — unified build module |
 | `build-scripts/external-libs/` | Per-library build scripts (zlib, LZ4, zstd, etc.) |
-| `cmake/` | CMake toolchain files (incl. toolchain-windows-arm64.cmake) |
+| `cmake/` | CMake toolchain files |
 | `packaging/` | MSI (WiX), Inno Setup, MSIX manifests |
 | `SDK/` | Plugin SDK (C ABI, plugin_api.h) |
 | `docs/` | All documentation |
-| `.github/workflows/` | CI/CD pipelines (incl. arm64.yml) |
+| `.github/workflows/` | CI/CD pipelines |
 
 ## Toolchain & Build Tools
 
@@ -60,18 +60,18 @@ All builds **must** use MSVC v145 toolset from Visual Studio 18 (2026) BuildTool
 | **lib.exe** | 14.50.35717 | Same MSVC bin dir |
 | **msbuild.exe** | 18.3 | `...\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe` |
 | **vcvars64.bat** | — | `...\BuildTools\VC\Auxiliary\Build\vcvars64.bat` |
-| **vcpkg** | 2025-11-19 | `...\BuildTools\VC\vcpkg\vcpkg.exe` (bundled) |
+| **vcpkg** | 2026-02-21 | `...\.BuildTools\VC\vcpkg\vcpkg.exe` (bundled) |
 | **Windows SDK** | 10.0.26100.0 | `C:\Program Files (x86)\Windows Kits\10` |
 
 ### Additional Tools (Scoop — preferred for latest versions)
 
 | Tool | Version | Path |
 | ----- | ------- | ------------------------- |
-| cmake | 4.2.3 | `~/scoop/shims/cmake.exe` |
+| cmake | 4.3.0 | `~/scoop/shims/cmake.exe` |
 | ninja | 1.13.2 | `~/scoop/shims/ninja.exe` |
 | git | 2.53.0 | `~/scoop/shims/git.exe` |
 | nasm | 3.01 | `~/scoop/shims/nasm.exe` |
-| meson | 1.10.0 | `~/scoop/shims/meson.exe` |
+| meson | 1.10.2 | `~/scoop/shims/meson.exe` |
 | nuget | 7.3.0 | `~/scoop/shims/nuget.exe` |
 | 7zip | 26.00 | `~/scoop/shims/7z.exe` |
 | WiX | 6.0.2 | `~/.dotnet/tools/wix.exe` |
@@ -256,7 +256,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Development Guidance (v15.2+)
 
-- **Current version:** v15.2.0 "Zenith-S"
+- **Current version:** v15.2.1 "Zenith-S"
 - **Source of truth:** `CHANGELOG.md`
 - **Sprint plan:** `docs/SPRINT_PLAN_100.md` — 100 sprints through v17.0.0 "Nova"
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas

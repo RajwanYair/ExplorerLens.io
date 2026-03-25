@@ -40,6 +40,11 @@ bld/
 /build/
 /build-vcpkg/
 /build-logs/
+/packages/
+
+# CMake in-source generator stubs (VS generator artifacts)
+Engine/RUN_TESTS.dir/
+Engine/ZERO_CHECK.dir/
 
 # Build output logs directory
 BuildLogs/

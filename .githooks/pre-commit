@@ -1,0 +1,96 @@
+#!/usr/bin/env pwsh
+# .githooks/pre-commit — ExplorerLens pre-commit hook
+#
+# Install:  git config core.hooksPath .githooks
+#           chmod +x .githooks/pre-commit
+#
+# Checks run before every commit:
+#   1. Version consistency  (VERSION ↔ CMakeLists.txt ↔ BuildValidation.h ↔ LENSManager.rc)
+#   2. clang-format diff    (staged .cpp/.h files only — fast, no full build needed)
+#   3. No debug artifacts   (no TODO/FIXME/HACK/XXX tagged with "debug" added in staged diff)
+#
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+$root  = git rev-parse --show-toplevel
+$fails = @()
+
+# ─────────────────────────────────────────────────────────────────
+# 1. Version consistency check
+# ─────────────────────────────────────────────────────────────────
+Write-Host "[pre-commit] Checking version consistency..." -ForegroundColor Cyan
+
+$version = (Get-Content "$root/VERSION" -Raw).Trim()
+
+$cmakeVer = (Select-String 'project\(ExplorerLens VERSION ([0-9.]+)' "$root/CMakeLists.txt" |
+    ForEach-Object { $_.Matches[0].Groups[1].Value } | Select-Object -First 1)
+
+$bvVer = & {
+    $maj = (Select-String 'MajorVersion\s*=\s*(\d+)' "$root/Engine/Core/BuildValidation.h" |
+        ForEach-Object { $_.Matches[0].Groups[1].Value })
+    $min = (Select-String 'MinorVersion\s*=\s*(\d+)' "$root/Engine/Core/BuildValidation.h" |
+        ForEach-Object { $_.Matches[0].Groups[1].Value })
+    $pat = (Select-String 'PatchVersion\s*=\s*(\d+)' "$root/Engine/Core/BuildValidation.h" |
+        ForEach-Object { $_.Matches[0].Groups[1].Value })
+    "$maj.$min.$pat"
+}
+
+$rcVer = (Select-String 'FileVersion.*"([0-9]+\.[0-9]+\.[0-9]+)' "$root/LENSManager/LENSManager.rc" |
+    ForEach-Object { $_.Matches[0].Groups[1].Value } | Select-Object -First 1)
+
+foreach ($pair in @(
+    @("CMakeLists.txt",      $cmakeVer),
+    @("BuildValidation.h",   $bvVer),
+    @("LENSManager.rc",      $rcVer)
+)) {
+    if ($pair[1] -ne $version) {
+        $fails += "[version] $($pair[0]) reports $($pair[1]) but VERSION=$version"
+    }
+}
+
+# ─────────────────────────────────────────────────────────────────
+# 2. clang-format check on staged C++ files
+# ─────────────────────────────────────────────────────────────────
+$clangFormat = Get-Command clang-format -ErrorAction SilentlyContinue
+if ($clangFormat) {
+    Write-Host "[pre-commit] Checking clang-format on staged files..." -ForegroundColor Cyan
+    $staged = git diff --cached --name-only --diff-filter=ACM |
+        Where-Object { $_ -match '\.(cpp|h|hpp|cc|cxx)$' } |
+        Where-Object { $_ -notmatch '^(external|packages|gtest|build)/' }
+
+    foreach ($file in $staged) {
+        $fullPath = Join-Path $root $file
+        if (-not (Test-Path $fullPath)) { continue }
+        $formatted = & clang-format --style=file $fullPath 2>$null
+        $original  = Get-Content $fullPath -Raw
+        if ($formatted -ne $original) {
+            $fails += "[format] $file is not formatted — run: clang-format -i $file"
+        }
+    }
+} else {
+    Write-Host "[pre-commit] clang-format not found — skipping format check" -ForegroundColor Yellow
+}
+
+# ─────────────────────────────────────────────────────────────────
+# 3. No debug-tagged markers in staged diff
+# ─────────────────────────────────────────────────────────────────
+Write-Host "[pre-commit] Checking for debug markers in staged diff..." -ForegroundColor Cyan
+$debugMarkers = git diff --cached | Select-String '^\+.*\b(TODO.*debug|FIXME.*debug|HACK.*debug|XXX.*debug|__debugbreak\(\))\b' -CaseSensitive:$false
+foreach ($m in $debugMarkers) {
+    $fails += "[debug-marker] Staged change contains debug marker: $($m.Line.Trim())"
+}
+
+# ─────────────────────────────────────────────────────────────────
+# Result
+# ─────────────────────────────────────────────────────────────────
+if ($fails.Count -gt 0) {
+    Write-Host ""
+    Write-Host "pre-commit hook FAILED:" -ForegroundColor Red
+    $fails | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+    Write-Host ""
+    Write-Host "Fix the above issues, then re-run: git add -A && git commit" -ForegroundColor Yellow
+    exit 1
+}
+
+Write-Host "[pre-commit] All checks passed." -ForegroundColor Green
+exit 0

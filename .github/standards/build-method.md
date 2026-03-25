@@ -27,7 +27,7 @@ $MSBuild = "$VSPath\MSBuild\Current\Bin\amd64\MSBuild.exe"
 $vcvars64 = "$VSPath\VC\Auxiliary\Build\vcvars64.bat" # Preferred over vcvarsall
 $cl = "$VSPath\VC\Tools\MSVC\14.50.35717\bin\Hostx64\x64\cl.exe" # v19.50.35720
 
-# CMake 4.2.3 (via Scoop)
+# CMake 4.3.0 (via Scoop)
 $CMake = "C:\Users\ryair\scoop\shims\cmake.exe"
 
 # Ninja 1.13.2 (via Scoop)

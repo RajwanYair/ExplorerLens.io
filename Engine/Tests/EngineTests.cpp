@@ -145,8 +145,6 @@
 #include "../Plugin/PluginPerformanceProfiler.h"
 #include "../Plugin/PluginSDKV2.h"
 #include "../Plugin/PluginSecurity.h"
-#include "../Utils/ARM64HardwareValidator.h"
-#include "../Utils/ARM64Platform.h"
 #include "../Utils/AccessibilityEngine.h"
 #include "../Utils/AutoDocGenerator.h"
 #include "../Utils/AutoUpdateEngine.h"
@@ -258,7 +256,6 @@
 #include "../Core/LivePreviewEngine.h"
 #include "../Core/CloudNativeSync.h"
 // #include "../Cache/CacheEfficiencyAnalyzer.h" // Removed: header no longer exists
-#include "../Core/ARM64NEONScaler.h"
 #include "../Core/AccessibilityNarratorBridge.h"
 #include "../Core/AdaptiveDPIScaler.h"
 #include "../Core/AnimatedFormatController.h"
@@ -3255,123 +3252,6 @@ TEST(TestDiskCache_Compact) {
 }
 
 //==============================================================================
-// ARM64 Hardware Validation Tests
-//==============================================================================
-
-TEST(TestARM64_PlatformDetection) {
-    using namespace ExplorerLens::Engine;
-    // On x64 build, these should return specific values
-    bool isARM64 = ARM64HardwareValidator::IsRunningOnARM64();
-    bool isEC = ARM64HardwareValidator::IsRunningAsARM64EC();
-    bool isEmulated = ARM64HardwareValidator::IsRunningUnderEmulation();
-    // On x64 builds, ARM64 detection should return false
-    ASSERT(!isARM64);
-    ASSERT(!isEC);
-    // Emulation state is deterministic per call
-    ASSERT(isEmulated == ARM64HardwareValidator::IsRunningUnderEmulation());
-}
-
-TEST(TestARM64_FeatureDetection) {
-    using namespace ExplorerLens::Engine;
-    auto features = ARM64HardwareValidator::DetectFeatures();
-    uint32_t count = ARM64HardwareValidator::CountFeatures(features);
-#if defined(_M_ARM64)
-    // NEON is mandatory on ARM64
-    ASSERT(HasFeature(features, ARM64Feature::NEON));
-    ASSERT(count >= 1);
-#else
-    ASSERT(count == 0); // No ARM64 features on x64
-#endif
-}
-
-TEST(TestARM64_FeatureNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(
-        ARM64Feature::NEON)) == L"NEON");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(
-        ARM64Feature::CRC32)) == L"CRC32");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(
-        ARM64Feature::AES)) == L"AES");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(
-        ARM64Feature::SVE)) == L"SVE");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetFeatureName(
-        ARM64Feature::SVE2)) == L"SVE2");
-}
-
-TEST(TestARM64_TargetNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(ARM64HardwareValidator::GetTargetName(
-        ARM64Target::Native)) == L"Native");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetTargetName(
-        ARM64Target::ARM64EC)) == L"ARM64EC");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetTargetName(
-        ARM64Target::ARM64X)) == L"ARM64X");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetTargetName(
-        ARM64Target::CrossCompile)) == L"CrossCompile");
-}
-
-TEST(TestARM64_PerfCategoryNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(
-        PerfCategory::SingleDecode)) == L"SingleDecode");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(
-        PerfCategory::BatchDecode)) == L"BatchDecode");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(
-        PerfCategory::GPUScaling)) == L"GPUScaling");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(
-        PerfCategory::CacheHit)) == L"CacheHit");
-    ASSERT(std::wstring(ARM64HardwareValidator::GetPerfCategoryName(
-        PerfCategory::ShellResponse)) == L"ShellResponse");
-}
-
-TEST(TestARM64_PerfBaselines) {
-    using namespace ExplorerLens::Engine;
-    ARM64HardwareValidator validator;
-    auto baselines = validator.GenerateBaselines();
-    ASSERT(baselines.size() == 7);
-    for (const auto& b : baselines) {
-        ASSERT(b.targetMs > 0);
-        ASSERT(b.x64ReferenceMs > 0);
-    }
-}
-
-TEST(TestARM64_X64ReferenceBaselines) {
-    using namespace ExplorerLens::Engine;
-    auto refs = ARM64HardwareValidator::GetX64ReferenceBaselines();
-    ASSERT(refs.size() >= 4);
-    ASSERT(refs[0].x64ReferenceMs == 17.0); // Single decode
-}
-
-TEST(TestARM64_RunValidation) {
-    using namespace ExplorerLens::Engine;
-    ARM64HardwareValidator validator;
-    auto result = validator.RunValidation();
-    ASSERT(result.coreCount > 0);
-    ASSERT(result.memoryMB > 0);
-    ASSERT(!result.perfResults.empty());
-}
-
-TEST(TestARM64_CIWorkflow) {
-    using namespace ExplorerLens::Engine;
-    ARM64CIConfig config;
-    config.runnerLabel = L"windows-arm64";
-    auto yaml = ARM64HardwareValidator::GenerateCIWorkflow(config);
-    ASSERT(!yaml.empty());
-    ASSERT(yaml.find(L"ARM64") != std::wstring::npos);
-    ASSERT(yaml.find(L"cmake") != std::wstring::npos);
-}
-
-TEST(TestARM64_FeatureBitmask) {
-    using namespace ExplorerLens::Engine;
-    auto combined = ARM64Feature::NEON | ARM64Feature::CRC32 | ARM64Feature::AES;
-    ASSERT(HasFeature(combined, ARM64Feature::NEON));
-    ASSERT(HasFeature(combined, ARM64Feature::CRC32));
-    ASSERT(HasFeature(combined, ARM64Feature::AES));
-    ASSERT(!HasFeature(combined, ARM64Feature::SVE));
-    ASSERT(ARM64HardwareValidator::CountFeatures(combined) == 3);
-}
-
-//==============================================================================
 // High-DPI Support Tests
 //==============================================================================
 
@@ -3808,7 +3688,6 @@ TEST(TestReleaseV3_DefaultThresholds) {
     ASSERT(t.minBatchThroughput == 200.0);
     ASSERT(t.maxBuildWarnings == 0);
     ASSERT(t.maxBuildErrors == 0);
-    ASSERT(t.requireARM64CI == true);
     ASSERT(t.requireMSIXPackage == true);
 }
 
@@ -8050,42 +7929,6 @@ TEST(TestGateV18_Version) {
 }
 
 //==============================================================================
-// ARM64 Validation Tests
-//==============================================================================
-
-TEST(TestARM64Validator_FeatureNames) {
-    ASSERT(std::wstring(ARM64PlatformValidator::FeatureName(
-        ARM64Feature::NEON)) == L"NEON");
-    ASSERT(std::wstring(ARM64PlatformValidator::FeatureName(ARM64Feature::SVE)) ==
-        L"SVE");
-}
-
-TEST(TestARM64_CategoryNames) {
-    ASSERT(std::wstring(ARM64PlatformValidator::CategoryName(
-        ARM64TestCategory::BasicBoot)) == L"Basic Boot");
-    ASSERT(std::wstring(ARM64PlatformValidator::CategoryName(
-        ARM64TestCategory::SIMDPaths)) == L"SIMD Paths");
-}
-
-TEST(TestARM64_Counts) {
-    ASSERT(ARM64PlatformValidator::FeatureCount() == 9);
-    ASSERT(ARM64PlatformValidator::CategoryCount() == 8);
-}
-
-TEST(TestARM64_IsARM64) {
-    // On x64, this should be false
-#if defined(_M_X64) || defined(__x86_64__)
-    ASSERT(!ARM64PlatformValidator::IsARM64());
-#endif
-}
-
-TEST(TestARM64_Config) {
-    ARM64ValidationConfig cfg;
-    ASSERT(!cfg.isEmulated);
-    ASSERT(!cfg.isNativeARM64);
-}
-
-//==============================================================================
 // MSIX Packaging Tests
 //==============================================================================
 
@@ -9949,27 +9792,6 @@ TEST(TestWin12_CompatModeCount) {
         static_cast<size_t>(Win12CompatMode::COUNT));
 }
 
-// ARM64PerformanceOptimizer
-TEST(TestARM64Opt_SIMDNames) {
-    ASSERT(ARM64PerformanceOptimizer::SIMDExtName(ARM64SIMDExt::NEON) != nullptr);
-}
-TEST(TestARM64Opt_CoreTypeNames) {
-    ASSERT(ARM64PerformanceOptimizer::CoreTypeName(ARM64CoreType::BigCore) !=
-        nullptr);
-}
-TEST(TestARM64Opt_ThermalNames) {
-    ASSERT(ARM64PerformanceOptimizer::ThermalHintName(
-        ARM64ThermalHint::Balanced) != nullptr);
-}
-TEST(TestARM64Opt_SIMDCount) {
-    ASSERT(ARM64PerformanceOptimizer::SIMDExtCount() ==
-        static_cast<size_t>(ARM64SIMDExt::COUNT));
-}
-TEST(TestARM64Opt_ThermalCount) {
-    ASSERT(ARM64PerformanceOptimizer::ThermalHintCount() ==
-        static_cast<size_t>(ARM64ThermalHint::COUNT));
-}
-
 // WinRTAppSDKIntegrationV2
 TEST(TestWinRTV2_ActivationNames) {
     ASSERT(WinRTAppSDKIntegrationV2::ActivationKindName(
@@ -11183,18 +11005,6 @@ TEST(TestZenith_ThreadPoolRecommend) {
     auto n = ThreadPoolOptimizer::RecommendThreads(PoolSizingPolicy::CoreCount, 8,
         PowerProfile::HighPerformance);
     ASSERT(n >= 1);
-}
-
-//== ARM64 NEON Scaler ==
-TEST(TestZenith_ARM64CapabilityCount) {
-    ASSERT(ARM64NEONScaler::CapabilityCount() == 6);
-}
-TEST(TestZenith_ARM64IsARM64) {
-#ifdef _M_ARM64
-    ASSERT(ARM64NEONScaler::IsARM64() == true);
-#else
-    ASSERT(ARM64NEONScaler::IsARM64() == false);
-#endif
 }
 
 //== Windows Search Protocol ==
@@ -13739,14 +13549,6 @@ TEST(TestSIMDScal_CalculateSize) {
     // Aspect ratio preservation: 4000/3000 = 4/3, so 256 * 3/4 = 192
     ASSERT(h == 192);
 }
-TEST(TestARM64_CapNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(ARM64NEONScaler::CapabilityName(ARM64Capability::NEON_Base)) == L"NEON Base");
-    ASSERT(std::wstring(ARM64NEONScaler::ImplName(ARM64ScalerImpl::NEONBicubic)) == L"NEON Bicubic");
-    ASSERT(ARM64NEONScaler::SelectImpl(ARM64Capability::NEON_Base) == ARM64ScalerImpl::NEONBicubic);
-    ASSERT(ARM64NEONScaler::SelectImpl(ARM64Capability::Scalar) == ARM64ScalerImpl::ScalarC);
-}
-
 // Pipeline State Cache V2
 TEST(TestPSOCacheV2_StateNamesV2) {
     using namespace ExplorerLens::Engine;
@@ -18478,27 +18280,27 @@ TEST(TestPipelineActivator_State) {
     auto& activator = PipelineActivator::Instance();
     // Before activation, subsystems should not be active
     bool ioActive = activator.IsSubsystemActive(PipelineSubsystem::ParallelIO);
-    // Either active or not — just verify the call succeeds
-    ASSERT(ioActive || !ioActive);
-    // Verify IsActivated() returns a valid bool
+    // Before explicit activation, parallel I/O subsystem should be inactive
+    ASSERT(!ioActive);
+    // Before explicit activation, the activator should report not-activated
     bool activated = activator.IsActivated();
-    ASSERT(activated || !activated);
+    ASSERT(!activated);
 }
 
 // ParallelIOActivation
 TEST(TestParallelIOActivation_Init) {
     auto& pio = ParallelIOActivation::Instance();
     auto stats = pio.GetStats();
-    ASSERT(stats.totalBytesRead == 0 || stats.totalBytesRead > 0);
-    ASSERT(stats.failedReads == 0 || stats.failedReads >= 0);
+    ASSERT(stats.totalBytesRead >= 0);
+    ASSERT(stats.failedReads >= 0);
 }
 
 // CacheWarmingActivation
 TEST(TestCacheWarmingActivation_Strategy) {
     auto& warmer = CacheWarmingActivation::Instance();
     auto stats = warmer.GetStats();
-    ASSERT(stats.totalFilesWarmed == 0 || stats.totalFilesWarmed > 0);
-    ASSERT(stats.activeWatchCount == 0 || stats.activeWatchCount > 0);
+    ASSERT(stats.totalFilesWarmed >= 0);
+    ASSERT(stats.activeWatchCount >= 0);
 }
 
 // CacheBudgetAutoTuner
@@ -23959,10 +23761,9 @@ TEST(Test_EP_UniversalVideoDecoder_Props) {
 // --- ColdStartOptimizer Tests ---
 TEST(Test_S394_ColdStart_Instance) {
     auto& opt = ColdStartOptimizer::Instance();
-    // Just verify it doesn't crash on access
+    // Verify Instance() is accessible and returns valid stats
     auto stats = opt.GetStats();
-    (void)stats;
-    ASSERT(true);
+    ASSERT(stats.preloadRuns >= 0);
 }
 
 TEST(Test_S394_ColdStart_DefaultCodecs) {
@@ -23973,7 +23774,7 @@ TEST(Test_S394_ColdStart_DefaultCodecs) {
 TEST(Test_S394_ColdStart_Stats) {
     auto& opt = ColdStartOptimizer::Instance();
     auto stats = opt.GetStats();
-    ASSERT(stats.preloadRuns == 0 || stats.preloadRuns > 0); // no crash
+    ASSERT(stats.preloadRuns >= 0); // preload counter is non-negative
 }
 
 // --- DecodeCancellationEngine Tests ---
@@ -24088,16 +23889,15 @@ TEST(Test_S394_Frag_CompactionEstimate) {
 TEST(Test_S394_GPUPower_Instance) {
     auto& mgr = GPUPowerStateManager::Instance();
     auto stats = mgr.GetStats();
-    (void)stats;
-    ASSERT(true);
+    // At startup, adapter count is non-negative (0 = no D3D12 adapters detected)
+    ASSERT(stats.adapterCount >= 0);
 }
 
 TEST(Test_S394_GPUPower_RouteWork) {
     auto& mgr = GPUPowerStateManager::Instance();
     auto decision = mgr.RouteWork(1024, false); // 1KB, not compute
-    // Without adapters enumerated, should fall back to CPU
-    (void)decision;
-    ASSERT(true);
+    // Without adapters enumerated, routing falls back to CPU
+    ASSERT(decision == GPURouteTarget::CPU);
 }
 
 TEST(Test_S394_GPUPower_RouteTarget) {
@@ -26349,19 +26149,6 @@ int main() {
     RUN_TEST(TestDiskCache_Stats);
     RUN_TEST(TestDiskCache_Compact);
 
-    // ARM64 Hardware Validation
-    std::wcout << L"ARM64 Hardware Validation..." << std::endl;
-    RUN_TEST(TestARM64_PlatformDetection);
-    RUN_TEST(TestARM64_FeatureDetection);
-    RUN_TEST(TestARM64_FeatureNames);
-    RUN_TEST(TestARM64_TargetNames);
-    RUN_TEST(TestARM64_PerfCategoryNames);
-    RUN_TEST(TestARM64_PerfBaselines);
-    RUN_TEST(TestARM64_X64ReferenceBaselines);
-    RUN_TEST(TestARM64_RunValidation);
-    RUN_TEST(TestARM64_CIWorkflow);
-    RUN_TEST(TestARM64_FeatureBitmask);
-
     // High-DPI Support
     std::wcout << L"High-DPI Support..." << std::endl;
     RUN_TEST(TestDPI_SystemDPI);
@@ -27016,14 +26803,6 @@ int main() {
     RUN_TEST(TestGateV18_Evaluate);
     RUN_TEST(TestGateV18_Version);
 
-    // ARM64 Validation Tests
-    std::wcout << L"ARM64 Validation..." << std::endl;
-    RUN_TEST(TestARM64Validator_FeatureNames);
-    RUN_TEST(TestARM64_CategoryNames);
-    RUN_TEST(TestARM64_Counts);
-    RUN_TEST(TestARM64_IsARM64);
-    RUN_TEST(TestARM64_Config);
-
     // MSIX Packaging Tests
     std::wcout << L"MSIX Packaging..." << std::endl;
     RUN_TEST(TestMSIX_TargetNames);
@@ -27514,13 +27293,6 @@ int main() {
     RUN_TEST(TestWin12_FeatureCount);
     RUN_TEST(TestWin12_CompatModeCount);
 
-    // ARM64 Performance Optimizer
-    RUN_TEST(TestARM64Opt_SIMDNames);
-    RUN_TEST(TestARM64Opt_CoreTypeNames);
-    RUN_TEST(TestARM64Opt_ThermalNames);
-    RUN_TEST(TestARM64Opt_SIMDCount);
-    RUN_TEST(TestARM64Opt_ThermalCount);
-
     // WinRT App SDK Integration V2
     RUN_TEST(TestWinRTV2_ActivationNames);
     RUN_TEST(TestWinRTV2_BootstrapNames);
@@ -27865,10 +27637,6 @@ int main() {
     // EngineTests.h — Thread Pool Optimizer
     RUN_TEST(TestZenith_PoolSizingPolicyCount);
     RUN_TEST(TestZenith_ThreadPoolRecommend);
-
-    // EngineTests.h — ARM64 NEON Scaler
-    RUN_TEST(TestZenith_ARM64CapabilityCount);
-    RUN_TEST(TestZenith_ARM64IsARM64);
 
     // EngineTests.h — Windows Search Protocol
     RUN_TEST(TestZenith_SearchFieldCount);
@@ -28375,11 +28143,10 @@ int main() {
     RUN_TEST(TestParallelIO_DefaultConfig);
 
     // SIMD Scaler + ARM64 Tests
-    std::wcout << L"\nSIMD Scaler + ARM64 Tests:" << std::endl;
+    std::wcout << L"\nSIMD Scaler Tests:" << std::endl;
     RUN_TEST(TestSIMDScal_PathNames);
     RUN_TEST(TestSIMDScal_ValidateDimensions);
     RUN_TEST(TestSIMDScal_CalculateSize);
-    RUN_TEST(TestARM64_CapNames);
 
     // PSO Cache V2 Tests
     std::wcout << L"\nPSO Cache V2 Tests:" << std::endl;

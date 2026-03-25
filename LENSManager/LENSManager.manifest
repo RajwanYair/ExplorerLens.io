@@ -3,10 +3,10 @@
   <assemblyIdentity
     type="win32"
     name="T800Productions.ExplorerLens.LENSManager"
-    version="1.7.0.0"
+    version="15.2.0.0"
     processorArchitecture="*"/>
   <description>ExplorerLens Manager Application</description>
-  
+
   <!-- Windows 11 compatibility -->
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
@@ -18,7 +18,7 @@
       <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}"/>
     </application>
   </compatibility>
-  
+
   <!-- High DPI support for Windows 11 -->
   <asmv3:application>
     <asmv3:windowsSettings>
@@ -33,7 +33,7 @@
       <heapType xmlns="http://schemas.microsoft.com/SMI/2020/WindowsSettings">SegmentHeap</heapType>
     </asmv3:windowsSettings>
   </asmv3:application>
-  
+
   <!-- Request administrator execution level for registry operations -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
@@ -42,7 +42,7 @@
       </requestedPrivileges>
     </security>
   </trustInfo>
-  
+
   <!-- Enable visual styles and common controls -->
   <dependency>
     <dependentAssembly>
@@ -56,4 +56,3 @@
     </dependentAssembly>
   </dependency>
 </assembly>
-

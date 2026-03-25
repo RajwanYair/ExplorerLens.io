@@ -1,0 +1,39 @@
+#!/usr/bin/env pwsh
+# .githooks/commit-msg — ExplorerLens commit-msg hook
+#
+# Enforces Conventional Commits format:
+#   <type>(<scope>): <subject>
+#
+# Valid types: feat fix docs style refactor test perf ci chore build revert
+# Max subject length: 72 characters
+#
+Set-StrictMode -Version Latest
+
+$msgFile = $args[0]
+$msg     = (Get-Content $msgFile -Raw).Trim() -replace "`r`n", "`n"
+
+# Strip comment lines before validating
+$firstLine = ($msg -split "`n" | Where-Object { -not $_.StartsWith('#') } | Select-Object -First 1).Trim()
+
+$validTypes   = 'feat|fix|docs|style|refactor|test|perf|ci|chore|build|revert'
+$ccPattern    = "^($validTypes)(\([a-z0-9/\-\.]+\))?(!)?:\s.{1,72}$"
+
+if (-not ($firstLine -match $ccPattern)) {
+    Write-Host ""
+    Write-Host "commit-msg hook FAILED: commit message does not follow Conventional Commits" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "  Expected: <type>(<scope>): <subject>  (max 72 chars)" -ForegroundColor Yellow
+    Write-Host "  Valid types: feat fix docs style refactor test perf ci chore build revert" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  Examples:" -ForegroundColor Yellow
+    Write-Host "    feat(decoder): add AVIF 10-bit support" -ForegroundColor Green
+    Write-Host "    fix(gui): correct icon loading null-check" -ForegroundColor Green
+    Write-Host "    chore(ci): update CodeQL action to v3" -ForegroundColor Green
+    Write-Host "    docs: add GETTING_STARTED.md" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "  Your message: $firstLine" -ForegroundColor Red
+    Write-Host ""
+    exit 1
+}
+
+exit 0

@@ -8,10 +8,10 @@
 param(
     [Parameter(Mandatory = $false)]
     [switch]$DryRun,
-    
+
     [Parameter(Mandatory = $false)]
     [switch]$SkipBuild,
-    
+
     [Parameter(Mandatory = $false)]
     [string[]]$OnlyLibraries
 )
@@ -25,9 +25,9 @@ $ErrorActionPreference = "Stop"
 $ScriptRoot = $PSScriptRoot
 $ExternalRoot = Join-Path $ScriptRoot "..\external"
 $SDKRoot = Join-Path $ScriptRoot "..\SDK"
-$BuildLogDir = Join-Path $ScriptRoot "..\build-logs"
+$BuildLogDir = Join-Path $env:TEMP "ExplorerLens-logs"
 
-# Ensure log directory exists
+# Ensure log directory exists (in TEMP to keep repo clean)
 New-Item -ItemType Directory -Path $BuildLogDir -Force | Out-Null
 
 # ============================================================================
@@ -230,15 +230,15 @@ function Build-CMakeLibrary {
         [string]$SourcePath,
         [string]$BuildPath
     )
-    
+
     Write-Step "Building $($Library.Name) $($Library.Version) with CMake..."
-    
+
     # Create build directory
     if (Test-Path $BuildPath) {
         Remove-Item -Path $BuildPath -Recurse -Force
     }
     New-Item -ItemType Directory -Path $BuildPath -Force | Out-Null
-    
+
     # Configure
     Write-Host "  Configuring..." -ForegroundColor Gray
     $cmakeArgs = @(
@@ -247,18 +247,18 @@ function Build-CMakeLibrary {
         "-G", "Ninja"
     )
     $cmakeArgs += $Library.CMakeOptions
-    
+
     if ($DryRun) {
         Write-Host "  [DRY RUN] cmake $($cmakeArgs -join ' ')" -ForegroundColor Yellow
     } else {
         $logFile = Join-Path $BuildLogDir "build_$($Library.Name)_configure.log"
         & cmake @cmakeArgs 2>&1 | Tee-Object -FilePath $logFile
-        
+
         if ($LASTEXITCODE -ne 0) {
             throw "CMake configuration failed for $($Library.Name)"
         }
     }
-    
+
     # Build
     Write-Host "  Building..." -ForegroundColor Gray
     if ($DryRun) {
@@ -266,12 +266,12 @@ function Build-CMakeLibrary {
     } else {
         $logFile = Join-Path $BuildLogDir "build_$($Library.Name)_build.log"
         & cmake --build $BuildPath --config Release 2>&1 | Tee-Object -FilePath $logFile
-        
+
         if ($LASTEXITCODE -ne 0) {
             throw "Build failed for $($Library.Name)"
         }
     }
-    
+
     Write-Success "$($Library.Name) built successfully"
 }
 
@@ -281,18 +281,18 @@ function Build-MesonLibrary {
         [string]$SourcePath,
         [string]$BuildPath
     )
-    
+
     Write-Step "Building $($Library.Name) $($Library.Version) with Meson..."
-    
+
     # Create build directory
     if (Test-Path $BuildPath) {
         Remove-Item -Path $BuildPath -Recurse -Force
     }
-    
+
     # Setup
     Write-Host "  Setting up..." -ForegroundColor Gray
     $mesonArgs = @($BuildPath) + $Library.MesonOptions
-    
+
     Push-Location $SourcePath
     try {
         if ($DryRun) {
@@ -300,12 +300,12 @@ function Build-MesonLibrary {
         } else {
             $logFile = Join-Path $BuildLogDir "build_$($Library.Name)_setup.log"
             & meson setup @mesonArgs 2>&1 | Tee-Object -FilePath $logFile
-            
+
             if ($LASTEXITCODE -ne 0) {
                 throw "Meson setup failed for $($Library.Name)"
             }
         }
-        
+
         # Compile
         Write-Host "  Compiling..." -ForegroundColor Gray
         if ($DryRun) {
@@ -313,7 +313,7 @@ function Build-MesonLibrary {
         } else {
             $logFile = Join-Path $BuildLogDir "build_$($Library.Name)_compile.log"
             & meson compile -C $BuildPath 2>&1 | Tee-Object -FilePath $logFile
-            
+
             if ($LASTEXITCODE -ne 0) {
                 throw "Meson compile failed for $($Library.Name)"
             }
@@ -321,7 +321,7 @@ function Build-MesonLibrary {
     } finally {
         Pop-Location
     }
-    
+
     Write-Success "$($Library.Name) built successfully"
 }
 
@@ -330,9 +330,9 @@ function Install-Library {
         [hashtable]$Library,
         [string]$BuildPath
     )
-    
+
     Write-Host "  Installing to SDK..." -ForegroundColor Gray
-    
+
     # Find library files
     $libFiles = @()
     foreach ($output in $Library.Outputs) {
@@ -343,15 +343,15 @@ function Install-Library {
             Write-Warning "Output file not found: $output"
         }
     }
-    
+
     if ($libFiles.Count -eq 0) {
         throw "No output files found for $($Library.Name)"
     }
-    
+
     # Copy to SDK
     $sdkLibDir = Join-Path $SDKRoot "lib"
     New-Item -ItemType Directory -Path $sdkLibDir -Force | Out-Null
-    
+
     foreach ($libFile in $libFiles) {
         if ($DryRun) {
             Write-Host "  [DRY RUN] Copy $($libFile.FullName) -> $sdkLibDir" -ForegroundColor Yellow
@@ -395,17 +395,17 @@ foreach ($lib in $Libraries) {
             Write-Warning "Skipping $($lib.Name) (Meson not available)"
             continue
         }
-        
+
         $sourcePath = Join-Path $ExternalRoot $lib.SourceDir
-        
+
         if (-not (Test-Path $sourcePath)) {
             Write-Warning "Source directory not found: $sourcePath"
             $failedLibraries += $lib.Name
             continue
         }
-        
+
         $buildPath = Join-Path $sourcePath $lib.BuildDir
-        
+
         # Build
         if ($lib.BuildSystem -eq "CMake") {
             Build-CMakeLibrary -Library $lib -SourcePath $sourcePath -BuildPath $buildPath
@@ -415,14 +415,14 @@ foreach ($lib in $Libraries) {
             Write-Warning "Unknown build system: $($lib.BuildSystem)"
             continue
         }
-        
+
         # Install
         if (-not $SkipBuild) {
             Install-Library -Library $lib -BuildPath $buildPath
         }
-        
+
         $successCount++
-        
+
     } catch {
         Write-Error "Failed: $($lib.Name) - $_"
         $failedLibraries += $lib.Name
@@ -460,4 +460,3 @@ if ($failedLibraries.Count -eq 0) {
     Write-Host "✗ Some libraries failed to build" -ForegroundColor Red
     exit 1
 }
-

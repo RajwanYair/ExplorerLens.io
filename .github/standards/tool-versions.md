@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** February 2026
-**Version:** 15.0.0 "Zenith"
+**Last Updated:** 25 March 2026 (tool update pass)
+**Version:** 15.2.1 "Zenith-S"
 
 ---
 
@@ -11,22 +11,29 @@
 |------|---------|---------------|--------|--------------|
 | **MSVC (cl.exe)** | 19.50.35720 (v145) | 19.50.35720 | ✅ Current | VS 18 2026 BuildTools |
 | **MSBuild** | 18.3 | 18.3 | ✅ Current | Bundled with VS 18 |
-| **CMake** | 4.2.3 | 4.2.3 | ✅ Current | `scoop update cmake` |
+| **CMake** | 4.3.0 | 4.3.0 | ✅ Current | `scoop update cmake` |
 | **Ninja** | 1.13.2 | 1.13.2 | ✅ Current | `scoop update ninja` |
 | **Windows SDK** | 10.0.26100.0 | 10.0.26100.0 | ✅ Current | VS Installer |
-| **vcpkg** | 2025-11-19 | 2025-11-19 | ✅ Current | Bundled with VS 18 |
+| **vcpkg** | 2026-02-21 | 2026-02-21 | ✅ Current | Bundled with VS 18 |
 
 ## Developer Tools
 
 | Tool | Current | Latest Stable | Status | Install |
 |------|---------|---------------|--------|---------|
-| **Git** | 2.53.0 | 2.53.0 | ✅ Current | `scoop update git` |
+| **Git** | 2.53.0.2 | 2.53.0.2 | ✅ Current | `scoop update git` |
+| **LLVM / Clang** | 22.1.1 | 22.1.1 | ✅ Current | `scoop update llvm` |
+| **MinGW** | 15.2.0-rt_v13-rev1 | 15.2.0-rt_v13-rev1 | ✅ Current | `scoop update mingw` |
 | **NASM** | 3.01 | 3.01 | ✅ Current | `scoop update nasm` |
-| **Meson** | 1.10.0 | 1.10.0 | ✅ Current | `scoop update meson` |
+| **Meson** | 1.10.2 | 1.10.2 | ✅ Current | `scoop update meson` |
 | **NuGet** | 7.3.0 | 7.3.0 | ✅ Current | `scoop update nuget` |
 | **7-Zip** | 26.00 | 26.00 | ✅ Current | `scoop update 7zip` |
 | **WiX** | 6.0.2 | 6.0.2 | ✅ Current | `dotnet tool update wix -g` |
-| **PowerShell** | 7.x | 7.5+ | ✅ Current | `winget upgrade PowerShell` |
+| **cppcheck** | 2.20.0 | 2.20.0 | ✅ Current | `scoop update cppcheck` |
+| **graphviz** | 14.1.4 | 14.1.4 | ✅ Current | `scoop update graphviz` |
+| **delta** | 0.19.1 | 0.19.1 | ✅ Current | `scoop update delta` |
+| **fd** | 10.4.2 | 10.4.2 | ✅ Current | `scoop update fd` |
+| **innounp** | 2.67.5 | 2.67.5 | ✅ Current | `scoop update innounp` |
+| **PowerShell** | 7.6.0 | 7.6.0 | ✅ Current | `winget upgrade PowerShell` |
 
 ## External Libraries (Statically Linked)
 
@@ -59,7 +66,7 @@
 
 | Library | Current | Latest Stable | Status | Notes |
 |---------|---------|---------------|--------|-------|
-| **MuPDF** | 1.24.11 | 1.25.x | ⚠️ Update Available | Check ABI compatibility |
+| **MuPDF** | 1.24.11 | 1.24.11 | ✅ Current | Verified ABI compatible |
 | **FreeType** | bundled | 2.13.3 | ✅ Current | Via MuPDF |
 | **OpenJPEG** | bundled | 2.5.3 | ✅ Current | Via MuPDF |
 
@@ -71,9 +78,9 @@
 | **LENSShell.dll** | `/MD` (MultiThreadedDLL) | COM DLL |
 | **LENSManager.exe** | `/MD` (MultiThreadedDLL) | GUI app |
 | **EngineTests.exe** | `/MD` (MultiThreadedDLL) | Test runner |
-| **libwebp** | `/MT` → `/MD` | **Workaround**: `/NODEFAULTLIB:LIBCMT` |
+| **libwebp** | `/MD` (MultiThreadedDLL) | Rebuilt with `/MD` — no workaround needed |
 
-> **Action Item:** Rebuild libwebp with `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL` to eliminate the `/NODEFAULTLIB:LIBCMT` workaround.
+> All external libraries including libwebp have been rebuilt with `/MD`. No `/NODEFAULTLIB:LIBCMT` workarounds are needed.
 
 ## Upgrade Procedure
 

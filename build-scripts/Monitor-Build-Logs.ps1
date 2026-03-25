@@ -27,10 +27,15 @@
 #>
 
 param(
-    [string]$LogPattern = "build-logs\*.log",
+    [string]$LogPattern = "",
     [int]$RefreshSeconds = 5,
     [int]$TailLines = 50
 )
+
+# Default log pattern: prefer TEMP logs, fall back to project build-logs
+if (-not $LogPattern) {
+    $LogPattern = Join-Path $env:TEMP "ExplorerLens-logs\*.log"
+}
 
 $ErrorActionPreference = "SilentlyContinue"
 
@@ -49,52 +54,52 @@ $lastLogFile = $null
 
 while ($true) {
     # Find most recent log file
-    $latestLog = Get-ChildItem $LogPattern -ErrorAction SilentlyContinue | 
-    Sort-Object LastWriteTime -Descending | 
+    $latestLog = Get-ChildItem $LogPattern -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
     Select-Object -First 1
-    
+
     if ($latestLog) {
         # Check if file changed or we're monitoring a new file
-        $fileChanged = ($latestLog.LastWriteTime -gt $lastCheck) -or 
+        $fileChanged = ($latestLog.LastWriteTime -gt $lastCheck) -or
         ($lastLogFile -ne $latestLog.FullName)
-        
+
         if ($fileChanged) {
             Clear-Host
-            
+
             Write-Host "========================================" -ForegroundColor Cyan
             Write-Host "  $($latestLog.Name)" -ForegroundColor Cyan
             Write-Host "========================================" -ForegroundColor Cyan
             Write-Host "Last Updated: $($latestLog.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss'))" -ForegroundColor Gray
             Write-Host "Size: $([math]::Round($latestLog.Length / 1KB, 1)) KB" -ForegroundColor Gray
             Write-Host ""
-            
+
             # Read and display with color coding
             $content = Get-Content $latestLog.FullName -Tail $TailLines -ErrorAction Continue
-            
+
             foreach ($line in $content) {
                 $color = 'White'
-                
+
                 # Color code based on content
-                if ($line -match '✅|SUCCESS|success|succeeded|Complete|completed|Built') { 
-                    $color = 'Green' 
-                } elseif ($line -match '❌|ERROR|error|FAILED|failed|Fatal|FATAL') { 
-                    $color = 'Red' 
-                } elseif ($line -match '⚠️|WARNING|warning|WARN') { 
-                    $color = 'Yellow' 
-                } elseif ($line -match '\[.*?\]|Building|Compiling') { 
-                    $color = 'Cyan' 
+                if ($line -match '✅|SUCCESS|success|succeeded|Complete|completed|Built') {
+                    $color = 'Green'
+                } elseif ($line -match '❌|ERROR|error|FAILED|failed|Fatal|FATAL') {
+                    $color = 'Red'
+                } elseif ($line -match '⚠️|WARNING|warning|WARN') {
+                    $color = 'Yellow'
+                } elseif ($line -match '\[.*?\]|Building|Compiling') {
+                    $color = 'Cyan'
                 } elseif ($line -match '^\s*$') {
                     # Skip empty lines
                     continue
                 }
-                
+
                 Write-Host $line -ForegroundColor $color
             }
-            
+
             Write-Host ""
             Write-Host "========================================" -ForegroundColor Cyan
             Write-Host "Monitoring... (Ctrl+C to stop)" -ForegroundColor Gray
-            
+
             $lastCheck = $latestLog.LastWriteTime
             $lastLogFile = $latestLog.FullName
         }
@@ -102,6 +107,6 @@ while ($true) {
         Write-Host "No log files found matching: $LogPattern" -ForegroundColor Yellow
         Write-Host "Waiting for logs..." -ForegroundColor Gray
     }
-    
+
     Start-Sleep -Seconds $RefreshSeconds
 }
