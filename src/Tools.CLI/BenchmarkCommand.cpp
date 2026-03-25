@@ -63,7 +63,7 @@ int BenchmarkCommand::Execute(const ParsedArgs& args)
 
     std::vector<BenchmarkResult> results;
     for (const auto* cat : categories) {
-        results.push_back(RunSyntheticBenchmark(cat, iterations));
+        results.push_back(RunCategoryBenchmark(cat, iterations));
     }
 
     if (args.JsonOutput()) {
@@ -76,10 +76,37 @@ int BenchmarkCommand::Execute(const ParsedArgs& args)
 }
 
 //==============================================================================
-// RunSyntheticBenchmark — simulates decode timing with realistic variance
+// RunSyntheticBenchmark — public API: runs all 10 format categories.
+// Used by unit tests to validate result structure without real file I/O.
 //==============================================================================
 
-BenchmarkResult BenchmarkCommand::RunSyntheticBenchmark(
+std::vector<BenchmarkResult> BenchmarkCommand::RunSyntheticBenchmark(uint32_t iterations)
+{
+    static const wchar_t* categories[] = {
+        L"JPEG/PNG/BMP (GDI+)",
+        L"WebP (libwebp)",
+        L"HEIC/HEIF (libheif)",
+        L"AVIF (libavif)",
+        L"JPEG XL (libjxl)",
+        L"RAW Photos (LibRaw)",
+        L"PDF (MuPDF)",
+        L"Archives (minizip-ng)",
+        L"3D Models (glTF)",
+        L"Video Frame (MF)",
+    };
+
+    std::vector<BenchmarkResult> results;
+    results.reserve(std::size(categories));
+    for (const auto* cat : categories)
+        results.push_back(RunCategoryBenchmark(cat, iterations));
+    return results;
+}
+
+//==============================================================================
+// RunCategoryBenchmark — simulates decode timing with realistic variance
+//==============================================================================
+
+BenchmarkResult BenchmarkCommand::RunCategoryBenchmark(
     const std::wstring& category, uint32_t iterations)
 {
     // Baseline latencies per decoder category (realistic median values in ms)

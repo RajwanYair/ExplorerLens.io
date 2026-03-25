@@ -13,13 +13,16 @@
 namespace ExplorerLens {
 namespace CLI {
 
-enum class CheckStatus { Pass, Warn, Fail };
+enum class DiagnosticStatus { Pass, Warn, Fail };
+// Alias kept for legacy compatibility
+using CheckStatus = DiagnosticStatus;
 
 struct DiagnosticCheck {
-    std::wstring  name;
-    CheckStatus   status    = CheckStatus::Pass;
-    std::wstring  detail;
-    std::wstring  fix;
+    std::wstring    name;
+    DiagnosticStatus status  = DiagnosticStatus::Pass;
+    std::wstring    message;  // human-readable description/result
+    std::wstring    detail;
+    std::wstring    fix;
 };
 
 class DoctorCommand final : public ISubCommand {
@@ -32,6 +35,9 @@ public:
     std::wstring_view Usage() const noexcept override {
         return L"lens doctor [--json] [--verbose]";
     }
+
+    // Runs all health checks and returns results — public for unit testing.
+    std::vector<DiagnosticCheck> RunAllChecks();
 
 private:
     std::vector<DiagnosticCheck> RunChecks();

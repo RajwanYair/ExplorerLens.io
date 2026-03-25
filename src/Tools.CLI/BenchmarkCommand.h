@@ -34,9 +34,14 @@ public:
         return L"lens benchmark [--corpus <dir>] [--iterations <n>] [--json]";
     }
 
+    // Runs the full synthetic benchmark over all format categories.
+    // iterations controls how many samples per category (min 1).
+    // Used by unit tests to verify result structure without real file I/O.
+    std::vector<BenchmarkResult> RunSyntheticBenchmark(uint32_t iterations = 10);
+
 private:
-    BenchmarkResult RunSyntheticBenchmark(const std::wstring& category,
-                                          uint32_t iterations);
+    BenchmarkResult RunCategoryBenchmark(const std::wstring& category,
+                                         uint32_t iterations);
     void PrintTextResults(const std::vector<BenchmarkResult>& results) const;
     void PrintJsonResults(const std::vector<BenchmarkResult>& results) const;
 };

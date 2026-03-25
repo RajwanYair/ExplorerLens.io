@@ -22,9 +22,11 @@ public:
         return L"lens register [--status] [--dll <path>] | lens unregister [--dll <path>]";
     }
 
-private:
+    // Public helpers used by unit tests and the --status flag.
     static bool IsAdminProcess() noexcept;
     static bool IsRegistered()  noexcept;
+
+private:
     static std::wstring FindDll(const std::wstring& explicitPath);
     int DoRegister  (const std::wstring& dllPath, bool verbose);
     int DoUnregister(const std::wstring& dllPath, bool verbose);

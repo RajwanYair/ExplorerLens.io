@@ -58,6 +58,58 @@ int InfoCommand::Execute(const ParsedArgs& args)
 }
 
 //==============================================================================
+// DetectFormat — lightweight extension-only format detection.
+// Public API: does NOT open the file or stat the filesystem.
+// Used by unit tests and the EngineTests CLI test suite.
+//==============================================================================
+
+FileInfo InfoCommand::DetectFormat(const std::wstring& path) const
+{
+    FileInfo info;
+    info.filePath = path;
+
+    fs::path p(path);
+    std::wstring ext = p.extension().wstring();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::towlower);
+
+    // Short-name extension table — returns concise formatName values.
+    struct Entry { std::wstring_view ext; std::wstring_view name; };
+    static const Entry table[] = {
+        { L".jpg",   L"JPEG"      }, { L".jpeg",  L"JPEG"      },
+        { L".png",   L"PNG"       }, { L".gif",   L"GIF"       },
+        { L".bmp",   L"BMP"       }, { L".webp",  L"WebP"      },
+        { L".jxl",   L"JPEG XL"   }, { L".avif",  L"AVIF"      },
+        { L".heic",  L"HEIC"      }, { L".heif",  L"HEIF"      },
+        { L".pdf",   L"PDF"       }, { L".zip",   L"ZIP"       },
+        { L".rar",   L"RAR"       }, { L".7z",    L"7-Zip"     },
+        { L".cbz",   L"CBZ"       }, { L".cbr",   L"CBR"       },
+        { L".epub",  L"EPUB"      }, { L".mp4",   L"MP4"       },
+        { L".mkv",   L"MKV"       }, { L".cr2",   L"CR2 RAW"   },
+        { L".cr3",   L"CR3 RAW"   }, { L".nef",   L"NEF RAW"   },
+        { L".arw",   L"ARW RAW"   }, { L".dng",   L"DNG"       },
+        { L".ttf",   L"TTF"       }, { L".otf",   L"OTF"       },
+        { L".gltf",  L"glTF"      }, { L".glb",   L"GLB"       },
+        { L".stl",   L"STL"       }, { L".exr",   L"OpenEXR"   },
+        { L".hdr",   L"HDR"       }, { L".psd",   L"PSD"       },
+        { L".dds",   L"DDS"       }, { L".tiff",  L"TIFF"      },
+        { L".tif",   L"TIFF"      }, { L".ico",   L"ICO"       },
+        { L".svg",   L"SVG"       },
+    };
+
+    for (const auto& e : table) {
+        if (ext == e.ext) {
+            info.formatName      = std::wstring(e.name);
+            info.detectedFormat  = info.formatName;
+            return info;
+        }
+    }
+
+    info.formatName     = L"Unknown";
+    info.detectedFormat = L"Unknown";
+    return info;
+}
+
+//==============================================================================
 // DetectFile — introspect a file's magic bytes to identify format/decoder
 //==============================================================================
 
@@ -201,6 +253,8 @@ FileInfo InfoCommand::DetectFile(const std::wstring& path)
         }
     }
 
+    // Keep formatName in sync with detectedFormat for unified API consumers.
+    info.formatName = info.detectedFormat;
     return info;
 }
 

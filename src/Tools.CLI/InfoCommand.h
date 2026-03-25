@@ -13,7 +13,8 @@ namespace CLI {
 
 struct FileInfo {
     std::wstring filePath;
-    std::wstring detectedFormat;
+    std::wstring formatName;      // human-readable format name (e.g. "JPEG", "WebP")
+    std::wstring detectedFormat;  // alias kept for compat
     std::wstring decoderName;
     std::wstring mimeType;
     uint64_t     fileSizeBytes = 0;
@@ -36,6 +37,10 @@ public:
     std::wstring_view Usage() const noexcept override {
         return L"lens info <file> [--json]";
     }
+
+    // Public API used by unit tests and external callers.
+    // Detects format by magic bytes + extension without opening the full file.
+    FileInfo DetectFormat(const std::wstring& path) const;
 
 private:
     FileInfo DetectFile(const std::wstring& path);

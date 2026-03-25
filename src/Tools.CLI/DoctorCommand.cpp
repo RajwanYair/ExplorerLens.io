@@ -62,6 +62,22 @@ int DoctorCommand::Execute(const ParsedArgs& args)
 }
 
 //==============================================================================
+// RunAllChecks — public API: runs all checks and returns results.
+// Used by unit tests to validate the health check pipeline.
+//==============================================================================
+
+std::vector<DiagnosticCheck> DoctorCommand::RunAllChecks()
+{
+    auto checks = RunChecks();
+    // Ensure 'message' is populated from 'detail' for unified API consumers.
+    for (auto& c : checks) {
+        if (c.message.empty())
+            c.message = c.detail.empty() ? c.name : c.detail;
+    }
+    return checks;
+}
+
+//==============================================================================
 // RunChecks
 //==============================================================================
 

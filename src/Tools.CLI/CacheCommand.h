@@ -23,6 +23,10 @@ public:
         return L"lens cache <clear|stats|warm [directory]> [--verbose]";
     }
 
+    // Returns the resolved thumbnail cache directory path.
+    // Used by unit tests to verify path resolution without performing I/O.
+    static std::wstring GetCachePath();
+
 private:
     int DoClear(bool verbose);
     int DoStats(bool jsonOutput);

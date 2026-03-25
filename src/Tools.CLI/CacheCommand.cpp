@@ -35,6 +35,14 @@ static fs::path GetCacheDir()
     return fs::path(buf) / L"ExplorerLens" / L"ThumbnailCache";
 }
 
+//------------------------------------------------------------------------------
+// CacheCommand::GetCachePath — public API for unit tests & external callers.
+//------------------------------------------------------------------------------
+std::wstring CacheCommand::GetCachePath()
+{
+    return GetCacheDir().wstring();
+}
+
 //==============================================================================
 // Execute
 //==============================================================================
