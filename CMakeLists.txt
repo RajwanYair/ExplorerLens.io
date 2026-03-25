@@ -169,6 +169,12 @@ add_subdirectory(Engine)
 
 if(BUILD_MODERN_RUNTIME)
     add_subdirectory(src)
+
+    # Cross-subdirectory link: allow EngineTests to unit-test the CLI layer.
+    # LensCLILib is defined in src/Tools.CLI after add_subdirectory(src) above,
+    # so adding it here (after both Engine + src are processed) is safe.
+    target_link_libraries(EngineTests PRIVATE LensCLILib)
+    target_include_directories(EngineTests PRIVATE ${CMAKE_SOURCE_DIR}/src/Tools.CLI)
 endif()
 
 if(NOT BUILD_ENGINE_ONLY)
