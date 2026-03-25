@@ -1,4 +1,4 @@
-// IntegrationTestRunner.h — Sprint 25 Integration Test Framework
+// CorpusTestRunner.h — Sprint 25 Integration Test Framework
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Standalone runner that decodes files from data/corpus/ and produces
@@ -19,10 +19,10 @@ namespace Engine {
 namespace Tests {
 
 //==============================================================================
-// IntegrationTestRunner
+// CorpusTestRunner
 //==============================================================================
 
-class IntegrationTestRunner
+class CorpusTestRunner
 {
 public:
     //--------------------------------------------------------------------------

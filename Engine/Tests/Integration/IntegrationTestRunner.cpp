@@ -1,10 +1,10 @@
-// IntegrationTestRunner.cpp — Sprint 25 Integration Test Framework
+// CorpusTestRunner.cpp — Sprint 25 Integration Test Framework
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Implements the IntegrationTestRunner: file enumeration, format detection
+// Implements the CorpusTestRunner: file enumeration, format detection
 // smoke decode, HTML/CSV report generation.
 //
-#include "IntegrationTestRunner.h"
+#include "CorpusTestRunner.h"
 #include "../../Core/BuildValidation.h"
 
 #include <windows.h>
@@ -130,23 +130,23 @@ std::wstring Utf8ToWString(const std::string& s)
 // Configuration
 //==============================================================================
 
-void IntegrationTestRunner::AddCorpusDirectory(const std::filesystem::path& dir)
+void CorpusTestRunner::AddCorpusDirectory(const std::filesystem::path& dir)
 {
     m_corpusDirs.push_back(dir);
 }
 
-void IntegrationTestRunner::SetMaxFiles(uint32_t max)
+void CorpusTestRunner::SetMaxFiles(uint32_t max)
 {
     m_maxFiles = max;
 }
 
-void IntegrationTestRunner::SetFileFilter(
+void CorpusTestRunner::SetFileFilter(
     std::function<bool(const std::filesystem::path&)> filter)
 {
     m_filter = std::move(filter);
 }
 
-void IntegrationTestRunner::SetMaxFileSizeBytes(uint64_t bytes)
+void CorpusTestRunner::SetMaxFileSizeBytes(uint64_t bytes)
 {
     m_maxFileSizeBytes = bytes;
 }
@@ -155,7 +155,7 @@ void IntegrationTestRunner::SetMaxFileSizeBytes(uint64_t bytes)
 // Run
 //==============================================================================
 
-IntegrationTestRunner::RunReport IntegrationTestRunner::Run() const
+CorpusTestRunner::RunReport CorpusTestRunner::Run() const
 {
     RunReport report;
     report.generatedAt  = GetCurrentTimestampISO();
@@ -247,7 +247,7 @@ IntegrationTestRunner::RunReport IntegrationTestRunner::Run() const
 // TryDecodeFile
 //==============================================================================
 
-bool IntegrationTestRunner::TryDecodeFile(const std::filesystem::path& path,
+bool CorpusTestRunner::TryDecodeFile(const std::filesystem::path& path,
                                            std::wstring& formatOut,
                                            std::wstring& errorOut)
 {
@@ -299,7 +299,7 @@ bool IntegrationTestRunner::TryDecodeFile(const std::filesystem::path& path,
 // Report writers
 //==============================================================================
 
-bool IntegrationTestRunner::WriteHtmlReport(const std::filesystem::path& outputPath,
+bool CorpusTestRunner::WriteHtmlReport(const std::filesystem::path& outputPath,
                                              const RunReport& report)
 {
     std::ofstream out(outputPath);
@@ -372,7 +372,7 @@ bool IntegrationTestRunner::WriteHtmlReport(const std::filesystem::path& outputP
     return out.good();
 }
 
-bool IntegrationTestRunner::WriteCsvReport(const std::filesystem::path& outputPath,
+bool CorpusTestRunner::WriteCsvReport(const std::filesystem::path& outputPath,
                                             const RunReport& report)
 {
     std::ofstream out(outputPath);
@@ -398,7 +398,7 @@ bool IntegrationTestRunner::WriteCsvReport(const std::filesystem::path& outputPa
     return out.good();
 }
 
-void IntegrationTestRunner::PrintSummary(const RunReport& report)
+void CorpusTestRunner::PrintSummary(const RunReport& report)
 {
     std::wcout << L"\n=== Integration Test Summary ===\n"
                << L"  Engine  : " << Utf8ToWString(report.engineVersion) << L"\n"

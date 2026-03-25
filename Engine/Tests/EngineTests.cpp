@@ -26028,16 +26028,16 @@ TEST(TestCLIDoctorAllChecks)
 // Integration Test Framework Tests (Sprint 25 / v15.5.0 "Zenith-V")
 //==============================================================================
 
-#include "Integration/IntegrationTestRunner.h"
+#include "Integration/CorpusTestRunner.h"
 #include "Integration/COMIntegrationTest.h"
 
 using namespace ExplorerLens::Engine::Tests;
 
 TEST(IntegrationRunnerSmoke)
 {
-    // Verify IntegrationTestRunner can be created and run with no corpus
+    // Verify CorpusTestRunner can be created and run with no corpus
     // directories without crashing. Empty run report must be consistent.
-    IntegrationTestRunner runner;
+    CorpusTestRunner runner;
     runner.SetMaxFiles(0);  // No limit — but no dirs added means no files scanned
     auto report = runner.Run();
     ASSERT(report.totalFiles == 0);
@@ -26072,7 +26072,7 @@ TEST(IntegrationRunnerSingleFile)
         f.write(reinterpret_cast<const char*>(kMinPNG), sizeof(kMinPNG));
     }
 
-    IntegrationTestRunner runner;
+    CorpusTestRunner runner;
     runner.AddCorpusDirectory(tmpPath.parent_path());
     runner.SetMaxFiles(1);
     // Only include our one file
@@ -26094,14 +26094,14 @@ TEST(IntegrationRunnerSingleFile)
 TEST(IntegrationRunnerHtmlReport)
 {
     // Verify HTML report can be written to a temp path without crashing.
-    IntegrationTestRunner::RunReport report;
+    CorpusTestRunner::RunReport report;
     report.totalFiles = 3;
     report.passed     = 2;
     report.failed     = 1;
     report.engineVersion = BuildValidation::VersionString;
     report.generatedAt   = "2026-03-25T00:00:00";
 
-    IntegrationTestRunner::TestResult r1;
+    CorpusTestRunner::TestResult r1;
     r1.filePath    = L"C:\\Corpus\\test.jpg";
     r1.format      = L"JPEG";
     r1.extension   = "jpg";
@@ -26109,7 +26109,7 @@ TEST(IntegrationRunnerHtmlReport)
     r1.durationMs  = 4.2;
     report.results.push_back(r1);
 
-    IntegrationTestRunner::TestResult r2;
+    CorpusTestRunner::TestResult r2;
     r2.filePath      = L"C:\\Corpus\\broken.png";
     r2.format        = L"PNG";
     r2.extension     = "png";
@@ -26119,7 +26119,7 @@ TEST(IntegrationRunnerHtmlReport)
     report.results.push_back(r2);
 
     auto outPath = std::filesystem::temp_directory_path() / "el_test_report.html";
-    bool ok = IntegrationTestRunner::WriteHtmlReport(outPath, report);
+    bool ok = CorpusTestRunner::WriteHtmlReport(outPath, report);
     ASSERT(ok);
     ASSERT(std::filesystem::exists(outPath));
     ASSERT(std::filesystem::file_size(outPath) > 100);
