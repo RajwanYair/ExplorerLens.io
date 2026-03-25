@@ -366,13 +366,13 @@ jobs:
           fetch-depth: 0
 
       - name: Download release artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-artifacts-${{ needs.build.outputs.version }}
           path: dist/
 
       - name: Download individual binaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: binaries-${{ needs.build.outputs.version }}
           path: dist/
