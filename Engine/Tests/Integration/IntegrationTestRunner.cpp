@@ -4,7 +4,7 @@
 // Implements the CorpusTestRunner: file enumeration, format detection
 // smoke decode, HTML/CSV report generation.
 //
-#include "CorpusTestRunner.h"
+#include "IntegrationTestRunner.h"
 #include "../../Core/BuildValidation.h"
 
 #include <windows.h>

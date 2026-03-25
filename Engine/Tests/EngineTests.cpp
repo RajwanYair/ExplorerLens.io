@@ -26028,7 +26028,7 @@ TEST(TestCLIDoctorAllChecks)
 // Integration Test Framework Tests (Sprint 25 / v15.5.0 "Zenith-V")
 //==============================================================================
 
-#include "Integration/CorpusTestRunner.h"
+#include "Integration/IntegrationTestRunner.h"
 #include "Integration/COMIntegrationTest.h"
 
 using namespace ExplorerLens::Engine::Tests;
