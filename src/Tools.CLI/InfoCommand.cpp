@@ -4,8 +4,6 @@
 // Detects the file format using the engine's FormatDetector and reports
 // structured metadata both as human-readable text and as JSON (-j/--json).
 //
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include "InfoCommand.h"
 #include <iostream>

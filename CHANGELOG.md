@@ -5,10 +5,45 @@ All notable changes to ExplorerLens will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v15.4.0 "Zenith-U" (planned)
-> CLI Tool (`lens.exe`): command routing, generate/info/cache/register/benchmark/doctor commands,
-> PowerShell autocomplete scaffold.
-> See `docs/SPRINT_PLAN_100.md` Sprints 17–24.
+## [Unreleased]
+
+---
+
+## [15.4.0] "Zenith-U" — 2026-04-16
+
+### Summary
+**Sprint 17–24 of 100 (CLI Tool `lens.exe`)** — A full-featured command-line
+interface for ExplorerLens, covering thumbnail generation, format inspection,
+cache management, COM registration, benchmarking, and system health diagnostics.
+
+- **Version:** 15.3.0 "Zenith-T" → 15.4.0 "Zenith-U"
+- **Test count:** 2,951 → 2,958 total (+7 CLI unit tests)
+- **New files:** `src/Tools.CLI/` (8 source pairs) + `scripts/lens-autocomplete.ps1`
+
+### Added
+- **Sprint 17 — CLI Scaffold** (`CommandRouter.h/cpp`): `ParsedArgs`, `ISubCommand`,
+  `CommandRouter`, `CreateLensCLI()` factory; dispatches to 7 subcommands.
+- **Sprint 18 — Generate Command** (`GenerateCommand.h/cpp`): `lens generate <file>`
+  with `--recursive`, `--output`, `--size`, `--quality`, `--dry-run` flags.
+  Checks for `LENSShell.dll` adjacency; walks directories with `fs::recursive_directory_iterator`.
+- **Sprint 19 — Info Command** (`InfoCommand.h/cpp`): `lens info <file> [--json]`.
+  Magic-byte + extension format detection for 40+ formats; JSON output for scripting.
+- **Sprint 20 — Cache Command** (`CacheCommand.h/cpp`): `lens cache clear|stats|warm`.
+  Resolves `%LOCALAPPDATA%\ExplorerLens\ThumbnailCache\`; reads `cache_stats.json`.
+- **Sprint 21 — Register Command** (`RegisterCommand.h/cpp`): `lens register|unregister`.
+  Admin detection via `CheckTokenMembership`; CLSID presence check via `HKCR`;
+  wraps `regsvr32 /s`; `--status` works without admin.
+- **Sprint 22 — Benchmark + Doctor** (`BenchmarkCommand.h/cpp`, `DoctorCommand.h/cpp`):
+  `lens benchmark` reports p50/p95/p99 latency + img/sec across 10 format categories.
+  `lens doctor` runs 6 health checks (Windows version, COM, DLL, GPU/DXGI, cache, thumbnail svc).
+- **Sprint 23 — Entry Point + Autocomplete** (`main.cpp`, `scripts/lens-autocomplete.ps1`):
+  `wmain()` with COM STA init, ANSI terminal mode, `SIGINT/SIGTERM` signal handling.
+  PowerShell `Register-ArgumentCompleter` for tab-completing all subcommands and options.
+- **Sprint 24 — CMake Integration + Tests** (`src/Tools.CLI/CMakeLists.txt`):
+  `LensCLI` executable target linking `ExplorerLensEngine + ExplorerLensModernRuntime`;
+  3 CTest smoke tests (`CLIHelp`, `CLIInfoMissingFile`, `CLIDoctor`);
+  7 `EngineTests.cpp` unit tests covering router dispatch, format detection, cache path,
+  admin detection, benchmark structure, and doctor check integrity.
 
 ---
 

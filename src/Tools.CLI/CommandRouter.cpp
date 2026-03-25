@@ -5,8 +5,6 @@
 // registered subcommand handlers. All subcommand objects are registered in
 // CreateLensCLI() using the factory pattern.
 //
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include "CommandRouter.h"
 #include "GenerateCommand.h"

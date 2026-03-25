@@ -4,8 +4,6 @@
 // Wraps regsvr32/regsvr32 /u for registration. Detects admin elevation status
 // without requiring admin. Reads HKCR CLSID to determine registration state.
 //
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include <shlwapi.h>
 #include "RegisterCommand.h"

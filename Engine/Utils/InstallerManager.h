@@ -254,7 +254,7 @@ struct InstalledVersion {
     uint32_t major{ 0 };
     uint32_t minor{ 0 };
     uint32_t patch{ 0 };
-    std::string buildTag; // e.g., "v15.3.0-Zenith-T"
+    std::string buildTag; // e.g., "v15.4.0-Zenith-U"
 
     std::string ToString() const {
         return std::to_string(major) + "." + std::to_string(minor) +

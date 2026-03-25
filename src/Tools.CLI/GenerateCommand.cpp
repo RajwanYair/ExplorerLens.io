@@ -5,8 +5,6 @@
 // to the output path. Uses LensEngine public API for format detection and decode.
 // Recursive mode scans a directory tree and generates thumbnails for all files.
 //
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include "GenerateCommand.h"
 #include <iostream>

@@ -5,8 +5,6 @@
 // reports latency percentiles (p50/p95/p99) and img/sec throughput.
 // Synthetic fallback used when no corpus directory is provided.
 //
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include "BenchmarkCommand.h"
 #include <iostream>

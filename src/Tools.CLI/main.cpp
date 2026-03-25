@@ -5,8 +5,6 @@
 // signal handling, initialises COM (STA), and dispatches to CommandRouter.
 // Prints usage and exits 127 for unknown subcommands; exits 0 on --help.
 //
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include <objbase.h>
 #include <signal.h>

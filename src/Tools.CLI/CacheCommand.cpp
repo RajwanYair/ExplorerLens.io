@@ -8,8 +8,6 @@
 // stats  — reads the cache statistics file written by the engine
 // warm   — calls GenerateCommand for each file in a directory
 //
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include "CacheCommand.h"
 #include <iostream>

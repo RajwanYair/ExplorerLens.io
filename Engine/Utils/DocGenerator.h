@@ -129,7 +129,7 @@ public:
         if (!fp) return false;
 
         fprintf(fp, "# ExplorerLens Engine API Reference\n\n");
-        fprintf(fp, "**Version:** 15.3.0 \"Zenith-T\"\n\n");
+        fprintf(fp, "**Version:** 15.4.0 \"Zenith-U\"\n\n");
         fprintf(fp, "## Public API\n\n");
         fprintf(fp, "| Class | Method | Since | Stability |\n");
         fprintf(fp, "|-------|--------|-------|----------|\n");
@@ -361,7 +361,7 @@ public:
         if (!fp) return;
 
         fprintf(fp, "# ExplorerLens Format Support Matrix\n\n");
-        fprintf(fp, "**Version:** 15.3.0 \"Zenith-T\" \n");
+        fprintf(fp, "**Version:** 15.4.0 \"Zenith-U\" \n");
         fprintf(fp, "**Total Formats:** 200+\n\n");
         fprintf(fp, "| Extension | Format | Decoder | Library | GPU | Notes |\n");
         fprintf(fp, "|-----------|--------|---------|---------|-----|-------|\n");
