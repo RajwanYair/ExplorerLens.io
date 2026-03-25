@@ -49,7 +49,13 @@ ExplorerLensEngine.lib — Core decode + render pipeline
 
 ## Toolchain & Build Tools
 
-### Required: VS 18 2026 BuildTools + MSVC v145
+> **Local vs CI Toolchain:** Always prefer the LATEST available toolchain on each environment.
+> - **Local dev:** VS 18 2026 BuildTools — MSVC **v145** (cl.exe 19.50) — hardcoded in `Build-MSVC.ps1`
+> - **GitHub CI:** `windows-latest` runner ships **VS 2022 (MSVC v143, cl.exe 19.43)**. Workflows use
+>   `ilammy/msvc-dev-cmd@v1` with **no toolset pin** so they auto-upgrade when GitHub provides VS 2026 runners.
+> - **Never pin** `toolset: "14.50"` or similar in CI workflows — it fails on GitHub-hosted runners.
+
+### Required: VS 18 2026 BuildTools + MSVC v145 (local)
 
 All builds **must** use MSVC v145 toolset from Visual Studio 18 (2026) BuildTools.
 

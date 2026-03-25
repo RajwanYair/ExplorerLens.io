@@ -80,8 +80,10 @@ jobs:
             external-libs-
 
       # ── Setup toolchain ────────────────────────────────────────────────────
-      - name: Setup MSBuild (windows-latest includes VS 2022+)
-        uses: microsoft/setup-msbuild@v2
+      # NOTE: ilammy/msvc-dev-cmd brings the full MSVC environment (cl, link,
+      # msbuild, rc, mt, lib). No separate setup-msbuild action needed.
+      # GitHub windows-latest runner ships VS 2022 (MSVC v143, cl.exe 19.43).
+      # When GitHub upgrades to VS 2026 runners, this auto-picks v145.
 
       - name: Setup .NET 10 SDK (for WiX + Manager.WinUI)
         uses: actions/setup-dotnet@v4
@@ -94,8 +96,10 @@ jobs:
           dotnet tool install --global wix --version 6.0.2
           Write-Host "WiX: $(wix --version)" -ForegroundColor Green
 
-      # ── Setup MSVC developer command prompt (proven approach, same as build.yml) ─
-      - name: Setup MSVC (ilammy/msvc-dev-cmd)
+      # ── Setup MSVC developer command prompt ────────────────────────────────
+      # Brings cl.exe, link.exe, msbuild.exe, lib.exe, rc.exe, mt.exe on PATH.
+      # No toolset pin: auto-selects latest VS installed on runner (currently v143).
+      - name: Setup MSVC (latest available on runner)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: amd64

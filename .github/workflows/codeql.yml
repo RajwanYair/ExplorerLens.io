@@ -48,7 +48,8 @@ jobs:
               - build/**
               - build-vcpkg/**
 
-      - name: Setup MSVC Environment
+      - name: Setup MSVC Environment (latest available on runner)
+        # No toolset pin: auto-picks newest VS on runner (v143 currently; v145 when GH provides VS2026)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64

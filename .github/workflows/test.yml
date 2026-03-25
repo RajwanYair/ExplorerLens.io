@@ -18,7 +18,7 @@ env:
 jobs:
   test:
     name: Full Test Suite
-    runs-on: windows-2022
+    runs-on: windows-latest   # Latest GitHub runner (VS 2022 v143); upgrades automatically
     timeout-minutes: 60
 
     steps:

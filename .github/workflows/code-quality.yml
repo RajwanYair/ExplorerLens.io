@@ -65,7 +65,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup MSVC (available toolset on runner)
+      - name: Setup MSVC (latest available on runner)
+        # No toolset pin: auto-selects latest VS. Currently v143/VS2022 on GH runners.
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64

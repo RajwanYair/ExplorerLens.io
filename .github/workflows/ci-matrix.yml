@@ -56,7 +56,8 @@ jobs:
           submodules: false
           fetch-depth: 1
 
-      - name: Setup MSVC
+      - name: Setup MSVC (latest available on runner)
+        # No toolset pin: auto-picks newest VS on runner (v143 now; v145 when GH provides VS2026)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
@@ -95,7 +96,8 @@ jobs:
         with:
           submodules: false
 
-      - name: Setup MSVC
+      - name: Setup MSVC (latest available on runner)
+        # No toolset pin: auto-picks newest VS on runner (v143 now; v145 when GH provides VS2026)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
@@ -145,7 +147,8 @@ jobs:
           submodules: false
           fetch-depth: 1
 
-      - name: Setup MSVC
+      - name: Setup MSVC (latest available on runner)
+        # No toolset pin: auto-picks newest VS on runner (v143 now; v145 when GH provides VS2026)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
@@ -189,7 +192,8 @@ jobs:
           submodules: false
           fetch-depth: 1
 
-      - name: Setup MSVC
+      - name: Setup MSVC (latest available on runner)
+        # No toolset pin: auto-picks newest VS on runner (v143 now; v145 when GH provides VS2026)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64

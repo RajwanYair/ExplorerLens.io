@@ -46,7 +46,9 @@ jobs:
             external-libs-
 
       # ── Setup MSVC developer command prompt ───────────────────
-      - name: Setup MSVC
+      # No toolset pin: auto-selects latest VS on runner (currently v143/VS2022).
+      # When GitHub provides VS 2026 runners, this auto-upgrades to v145.
+      - name: Setup MSVC (latest available)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64

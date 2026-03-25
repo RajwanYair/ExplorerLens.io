@@ -1,7 +1,12 @@
 {
     // ═══════════════════════════════════════════════════════════════
     //  ExplorerLens.io — VS Code Workspace Settings
-    //  Version: 15.0.0 "Zenith" | C++20 / MSVC v145 / CMake + Ninja
+    //  Version: 15.4.1 "Zenith-U" | C++20 / MSVC v145 / CMake + Ninja
+    //
+    //  LOCAL BUILD:  VS 18 2026 BuildTools — MSVC v145 (cl.exe 19.50)
+    //                C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools
+    //  CI BUILD:     GitHub windows-latest runner — latest available VS (v143/VS2022 now)
+    //                ilammy/msvc-dev-cmd@v1 auto-upgrades when GH provides VS 2026
     // ═══════════════════════════════════════════════════════════════
     // ── CMake Tools ──────────────────────────────────────────────
     "cmake.sourceDirectory": "${workspaceFolder}",

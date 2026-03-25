@@ -39,11 +39,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup MSVC (v145 toolset)
+      - name: Setup MSVC (latest available on runner)
+        # ilammy/msvc-dev-cmd with no vs-version/toolset: auto-picks the newest
+        # VS installed on the runner. GitHub windows-latest = VS 2022 (v143).
+        # When GitHub upgrades runners to VS 2026, this picks v145 automatically.
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
-          toolset: "14.50"
 
       - name: Install OpenCppCoverage
         shell: pwsh
@@ -64,15 +66,13 @@ jobs:
       - name: Configure CMake (Debug + instrumentation)
         shell: pwsh
         run: |
-          cmake --preset default-debug `
-            -DBUILD_TESTS=ON `
-            -DBUILD_MODERN_RUNTIME=ON `
-            -DCMAKE_CXX_FLAGS="/Zi /Od /MDd" 2>&1
+          # ci-debug: no hardcoded local paths, cl.exe from vcvars env
+          cmake --preset ci-debug -DBUILD_TESTS=ON -DBUILD_MODERN_RUNTIME=ON 2>&1
 
       - name: Build EngineTests (Debug)
         shell: pwsh
         run: |
-          cmake --build --preset default-debug --target EngineTests -j 8 2>&1
+          cmake --build --preset ci-debug --target EngineTests -j 4 2>&1
 
       - name: Run EngineTests under OpenCppCoverage
         shell: pwsh
