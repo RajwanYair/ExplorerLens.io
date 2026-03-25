@@ -1,6 +1,6 @@
 # ExplorerLens — Release Process
 
-**Version:** 15.2.0 "Zenith-S" · **Updated:** March 2026
+**Version:** 15.3.0 “Zenith-T” · **Updated:** March 2026
 
 This document is the authoritative reference for producing a ExplorerLens release.
 Every version bump — patch, minor, or major — **must** follow this process exactly.
@@ -98,21 +98,79 @@ git tag vX.Y.Z
 git push origin main --tags
 ```
 
-> `release.yml` runs automatically on `git tag vX.Y.Z` and produces all release artifacts.
+> **`release.yml` runs automatically** on `git tag vX.Y.Z` and:
+> 1. Compiles `ExplorerLensEngine.lib` (CMake + Ninja + MSVC via `ilammy/msvc-dev-cmd`)
+> 2. Compiles `LENSShell.dll` + `LENSManager.exe` (MSBuild, VS 2022+)
+> 3. Builds `ExplorerLens-X.Y.Z-x64.msi` (WiX v6.0.2)
+> 4. Creates `ExplorerLens-X.Y.Z-x64.zip` portable archive
+> 5. Generates SHA256 checksums and CycloneDX SBOM
+> 6. **Auto-publishes** the GitHub Release with all compiled artifacts attached
+
+### Re-triggering a Release Without Re-tagging
+
+If the release workflow fails (e.g. transient runner issue) or needs to be rerun:
+
+```bash
+# Option A: Re-run the failed workflow in the GitHub UI
+# Actions → Release workflow → ⋯ Re-run all jobs
+
+# Option B: Trigger manually with workflow_dispatch (gh CLI)
+gh workflow run release.yml \
+  --ref vX.Y.Z \
+  -f version_override=X.Y.Z
+
+# Option C: Delete and re-push the tag (also triggers release.yml)
+git push origin :refs/tags/vX.Y.Z   # delete remote tag
+git tag -d vX.Y.Z                    # delete local tag
+git tag vX.Y.Z HEAD
+git push origin --tags
+```
+
+> **Note:** If the GitHub Release draft already exists, delete it first before re-triggering or the workflow will fail on duplicate tag.
 
 ---
 
 ## 5. Release Artifacts (Produced by `release.yml`)
 
-| Artifact | Description |
-|----------|-------------|
-| `LENSShell.dll` (x64) | COM shell extension |
-| `LENSManager.exe` | WTL configuration GUI |
-| `lens.exe` | CLI tool (Sprint 17+) |
-| `ExplorerLens-X.Y.Z-x64.msi` | WiX installer |
-| `ExplorerLens-X.Y.Z-x64.zip` | Portable archive |
-| `SHA256SUMS.txt` | Checksums for all artifacts |
-| `ExplorerLens-X.Y.Z-SBOM.json` | CycloneDX bill of materials |
+Every GitHub Release includes these **compiled binaries** built from source on GitHub-hosted runners:
+
+| Artifact | Description | Condition |
+|----------|-------------|----------|
+| `LENSShell.dll` (x64) | COM shell extension (IThumbnailProvider) | Always |
+| `LENSManager.exe` | WTL configuration GUI | Always |
+| `lens.exe` | CLI tool | Sprint 17+ |
+| `ExplorerLens-X.Y.Z-x64.msi` | WiX installer (registers COM, sets up shortcuts) | Always |
+| `ExplorerLens-X.Y.Z-x64.zip` | Portable archive with all binaries | Always |
+| `SHA256SUMS.txt` | SHA256 checksums for all artifacts | Always |
+| `ExplorerLens-X.Y.Z-SBOM.json` | CycloneDX bill of materials | Always |
+| `verification-report-X.Y.Z.json` | Build quality / artifact manifest | Always |
+
+### How Binaries Are Compiled
+
+```
+GitHub Actions runner: windows-latest (Windows Server 2025, VS 2022)
+├── ilammy/msvc-dev-cmd@v1              ← sets up cl.exe, ninja, MSBuild in PATH
+├── cmake --preset ci-release           ← configures Engine with Ninja + MSVC
+├── cmake --build --preset ci-release   ← → ExplorerLensEngine.lib + EngineTests.exe
+├── msbuild LENSShell.sln               ← → LENSShell.dll + LENSManager.exe
+├── packaging/Build-Installer.ps1       ← → ExplorerLens-X.Y.Z-x64.msi (WiX v6)
+└── Compress-Archive                    ← → ExplorerLens-X.Y.Z-x64.zip
+```
+
+> **External decoder libraries** (libwebp, libavif, libheif, etc.) are cached between
+> CI runs via `actions/cache@v4` keyed on `build-scripts/external-libs/**`. On a cache
+> miss, advanced decoders are gracefully disabled but the core binary still compiles.
+> Run the library build scripts locally and push to populate the cache for full builds.
+
+### MSI Installer Details
+
+The MSI is built by `packaging/Build-Installer.ps1` which calls
+`wix build packaging/ExplorerLens.wxs`. It:
+- Installs `LENSShell.dll` to `%ProgramFiles%\ExplorerLens\bin\`
+- Registers the COM CLSID `{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}`
+- Installs `LENSManager.exe` configuration utility
+- Creates Start Menu shortcuts
+- Supports per-machine install, upgrade, and silent install (`/quiet`)
 
 ---
 
@@ -136,8 +194,41 @@ git push origin hotfix/X.Y.Z+1 --tags
 
 After a successful release:
 
-1. Verify GitHub Release page shows all 7 artifacts
+1. Verify the GitHub Release page shows **all artifacts** (DLL, EXE, MSI, ZIP, SHA256SUMS, SBOM)
 2. Test download + install of the MSI on a clean Windows 11 VM
-3. Run `.\scripts\Set-RepoTopics.ps1` if new topics are relevant
-4. Update `docs/SPRINT_PLAN_100.md` — mark completed tasks with `✅ Done vX.Y.Z`
-5. Announce in GitHub Discussions (Announcements category)
+3. Confirm `LENSShell.dll` self-registers via the MSI installer
+4. Run `.\.scripts\Set-RepoTopics.ps1` if new topics are relevant
+5. Update `docs/SPRINT_PLAN_100.md` — mark completed tasks with `✅ Done vX.Y.Z`
+6. Announce in GitHub Discussions (Announcements category)
+
+---
+
+## 8. CI Compilation Details
+
+### Tools Available on `windows-latest` Runner
+
+| Tool | Version | Source |
+|------|---------|--------|
+| MSVC (cl.exe) | 19.43.x (v143) | VS 2022 Enterprise, pre-installed |
+| MSBuild | 17.x | VS 2022, via `microsoft/setup-msbuild@v2` |
+| CMake | latest | pre-installed |
+| Ninja | latest | provided by `ilammy/msvc-dev-cmd` |
+| WiX | 6.0.2 | installed via `dotnet tool install wix` |
+| .NET SDK | 10.0.x | via `actions/setup-dotnet@v4` |
+
+> The GitHub runner uses MSVC v143 (VS 2022). The local build uses MSVC v145 (VS 2026
+> BuildTools). Both compilers are fully C++20-compliant. The CI build uses the `ci-release`
+> CMake preset which resolves all tool paths from the environment (no hardcoded paths).
+
+### Re-running the Release Build Locally
+
+To validate the release build locally before pushing a tag:
+
+```powershell
+# Uses the temp-release preset (avoids OneDrive sync conflicts)
+.\build-scripts\Build-MSVC.ps1 -Preset temp-release -Test
+
+# Build installer from result
+$env:BuildDir = $env:TEMP + "\ExplorerLens-build"
+.\packaging\Build-Installer.ps1 -Version (Get-Content VERSION -Raw).Trim() -Configuration Release
+```

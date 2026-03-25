@@ -70,6 +70,15 @@ jobs:
           echo "version=$ver" >> $env:GITHUB_OUTPUT
           echo "zip-name=ExplorerLens-$ver-x64.zip" >> $env:GITHUB_OUTPUT
 
+      # ── Cache external/ pre-built libs (same key as build.yml) ───────────
+      - name: Cache external libraries
+        uses: actions/cache@v4
+        with:
+          path: external/
+          key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
+          restore-keys: |
+            external-libs-
+
       # ── Setup toolchain ────────────────────────────────────────────────────
       - name: Setup MSBuild (windows-latest includes VS 2022+)
         uses: microsoft/setup-msbuild@v2
@@ -85,47 +94,19 @@ jobs:
           dotnet tool install --global wix --version 6.0.2
           Write-Host "WiX: $(wix --version)" -ForegroundColor Green
 
-      # ── Configure MSVC (vcvars equivalent) ────────────────────────────────
-      - name: Find and configure MSVC toolchain
-        id: msvc
+      # ── Setup MSVC developer command prompt (proven approach, same as build.yml) ─
+      - name: Setup MSVC (ilammy/msvc-dev-cmd)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Verify toolchain
         shell: pwsh
         run: |
-          # Find highest-version vcvarsall.bat (VS 2022 or VS 2026)
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          if (-not (Test-Path $vswhere)) { $vswhere = "C:\ProgramData\Chocolatey\bin\vswhere.exe" }
-          if (Test-Path $vswhere) {
-            $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-            $vcvars = Join-Path $vsPath "VC\Auxiliary\Build\vcvars64.bat"
-            if (Test-Path $vcvars) {
-              Write-Host "Found vcvars64.bat: $vcvars" -ForegroundColor Green
-              echo "vcvars=$vcvars" >> $env:GITHUB_OUTPUT
-              # Source vcvars and export ALL env vars for subsequent steps
-              $env_dump = cmd /c "`"$vcvars`" && set" 2>&1
-              $exported = @()
-              foreach ($line in $env_dump) {
-                if ($line -match '^([A-Za-z_][A-Za-z0-9_]*)=(.*)$') {
-                  $k = $matches[1]; $v = $matches[2]
-                  # Export all MSVC/SDK/build-relevant variables
-                  if ($k -match '^(PATH|INCLUDE|LIB|LIBPATH|VC|VS|WindowsSDK|UCRTVersion|VSCMD|Platform|DevEnvDir|__VSCMD|EXTERNAL_INCLUDE|Framework|NETFXSDKDir)') {
-                    echo "$k=$v" >> $env:GITHUB_ENV
-                    $exported += $k
-                  }
-                }
-              }
-              Write-Host "Exported $($exported.Count) env vars from vcvars64" -ForegroundColor Green
-              # Report toolset in use
-              $clPath = (Get-Command cl.exe -ErrorAction SilentlyContinue)?.Source
-              Write-Host "cl.exe: $clPath" -ForegroundColor Cyan
-            } else {
-              Write-Host "::warning::vcvars64.bat not found at $vcvars" -ForegroundColor Yellow
-            }
-          } else {
-            Write-Host "::warning::vswhere.exe not found — MSVC may not be configured" -ForegroundColor Yellow
-          }
+          cl.exe 2>&1 | Select-Object -First 2
           Write-Host "CMake: $(cmake --version | Select-Object -First 1)" -ForegroundColor Cyan
-          # Find ninja on runner
-          $ninja = Get-Command ninja.exe -ErrorAction SilentlyContinue
-          if ($ninja) { Write-Host "Ninja: $($ninja.Source)" -ForegroundColor Cyan }
+          Write-Host "Ninja: $(ninja --version)" -ForegroundColor Cyan
+          Write-Host "MSBuild: $(msbuild -version 2>&1 | Select-Object -First 1)" -ForegroundColor Cyan
 
       # ── Build Engine (CMake) ───────────────────────────────────────────────
       - name: Configure CMake (ci-release preset)
@@ -216,34 +197,46 @@ jobs:
           echo "staging-dir=$stage" >> $env:GITHUB_OUTPUT
           echo "lens-shell-found=$(Test-Path $dllPath)" >> $env:GITHUB_OUTPUT
 
-      # ── Build MSI (WiX) ────────────────────────────────────────────────────
+      # ── Build MSI (WiX via Build-Installer.ps1) ───────────────────────────
       - name: Build MSI installer
         id: msi
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
           $msiName = "ExplorerLens-$version-x64.msi"
+          $rootDir  = $PWD.Path
 
-          # Try WiX build
-          $wixSrc = Get-ChildItem -Path packaging,packaging\wix -Filter "*.wixproj" -Recurse 2>$null | Select-Object -First 1
-          if ($wixSrc) {
-            Write-Host "Building WiX: $($wixSrc.FullName)" -ForegroundColor Cyan
-            msbuild $wixSrc.FullName /p:Configuration=Release /p:Platform=x64 /m /v:minimal
+          # Use the packaging script — it sets -define BuildDir=. correctly
+          try {
+            & .\packaging\Build-Installer.ps1 -Version $version -Configuration Release
+            $msi = Get-ChildItem -Path packaging\output -Filter "*.msi" -ErrorAction SilentlyContinue |
+                   Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          } catch {
+            Write-Host "::warning::Build-Installer.ps1 failed: $($_.Exception.Message)" -ForegroundColor Yellow
           }
 
-          # Find resulting MSI
-          $msi = Get-ChildItem -Recurse -Filter "*.msi" -ErrorAction SilentlyContinue |
-                 Where-Object { $_.Name -notmatch 'vcredist' } |
-                 Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          # Fallback: wix build directly from the root if script failed
+          if (-not $msi) {
+            Write-Host "Attempting direct wix build as fallback..." -ForegroundColor Yellow
+            try {
+              wix build packaging\ExplorerLens.wxs `
+                -out "packaging\output\$msiName" `
+                -define "BuildDir=$rootDir" `
+                -define "Version=$version" `
+                -arch x64
+              $msi = Get-Item "packaging\output\$msiName" -ErrorAction SilentlyContinue
+            } catch {
+              Write-Host "::warning::Direct wix build also failed: $($_.Exception.Message)" -ForegroundColor Yellow
+            }
+          }
 
           if ($msi) {
-            $dest = $msiName
-            Copy-Item $msi.FullName $dest -Force
-            Write-Host "✓ MSI: $dest" -ForegroundColor Green
-            echo "msi-path=$dest" >> $env:GITHUB_OUTPUT
+            Copy-Item $msi.FullName $msiName -Force
+            Write-Host "✓ MSI: $msiName  ($('{0:N1}' -f ($msi.Length/1MB)) MB)" -ForegroundColor Green
+            echo "msi-path=$msiName" >> $env:GITHUB_OUTPUT
             echo "msi-name=$msiName" >> $env:GITHUB_OUTPUT
           } else {
-            Write-Host "⚠ No MSI produced — installer build may not be configured yet" -ForegroundColor Yellow
+            Write-Host "::warning::MSI not produced — ZIP portable archive is the primary artifact" -ForegroundColor Yellow
             echo "msi-path=" >> $env:GITHUB_OUTPUT
             echo "msi-name=" >> $env:GITHUB_OUTPUT
           }
@@ -342,6 +335,18 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
+      # ── Upload individual binaries as their own artifact ──────────────────
+      - name: Upload individual binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ steps.version.outputs.version }}
+          path: |
+            release-staging/LENSShell.dll
+            release-staging/LENSManager.exe
+            release-staging/lens.exe
+          if-no-files-found: warn
+          retention-days: 90
+
   # ─── Job 2: Create GitHub Release ──────────────────────────────────────────
   publish:
     name: Publish GitHub Release
@@ -356,11 +361,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download artifacts
+      - name: Download release artifacts
         uses: actions/download-artifact@v4
         with:
           name: release-artifacts-${{ needs.build.outputs.version }}
           path: dist/
+
+      - name: Download individual binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-${{ needs.build.outputs.version }}
+          path: dist/
+        continue-on-error: true
 
       - name: Extract CHANGELOG section for this version
         id: changelog
@@ -387,16 +399,20 @@ jobs:
         with:
           tag_name: v${{ needs.build.outputs.version }}
           name: "ExplorerLens v${{ needs.build.outputs.version }}"
-          draft: true
+          draft: false
           prerelease: ${{ contains(needs.build.outputs.version, '-rc') || contains(needs.build.outputs.version, '-beta') }}
           body_path: release-notes-body.md
           files: |
             dist/ExplorerLens-*.zip
             dist/ExplorerLens-*.msi
             dist/ExplorerLens-*.msix
+            dist/LENSShell.dll
+            dist/LENSManager.exe
+            dist/lens.exe
             dist/SHA256SUMS.txt
             dist/ExplorerLens-*-SBOM.json
             dist/verification-report-*.json
+          fail_on_unmatched_files: false
           append_body: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
