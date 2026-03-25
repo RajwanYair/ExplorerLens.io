@@ -114,8 +114,9 @@
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_CXX_COMPILER": "cl.exe",
         "CMAKE_C_COMPILER": "cl.exe",
-        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_SYSTEM_VERSION": "10.0",
         "BUILD_SHARED_LIBS": "FALSE"
       },
       "condition": {
@@ -136,6 +137,7 @@
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDebugDLL",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_SYSTEM_VERSION": "10.0",
         "BUILD_SHARED_LIBS": "FALSE"
       },
       "condition": {

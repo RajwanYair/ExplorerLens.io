@@ -51,11 +51,17 @@ jobs:
         with:
           arch: x64
 
-      # ── Verify toolchain ─────────────────────────────────────
-      - name: Verify compiler
+      # ── Ensure Ninja is on PATH ───────────────────────────────
+      - name: Verify build tools
         shell: pwsh
         run: |
-          cl.exe 2>&1 | Select-Object -First 3
+          # Ninja ships with CMake on GitHub runners; also in VS BuildTools
+          $ninja = Get-Command ninja -ErrorAction SilentlyContinue
+          if (-not $ninja) {
+            Write-Host "Ninja not on PATH — installing via choco" -ForegroundColor Yellow
+            choco install ninja --no-progress -y 2>$null
+          }
+          cl.exe 2>&1 | Select-Object -First 1
           cmake --version | Select-Object -First 1
           ninja --version
 

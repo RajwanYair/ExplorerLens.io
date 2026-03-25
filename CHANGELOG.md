@@ -9,6 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.4.1] "Zenith-U" — 2026-03-25
+
+### Summary
+**Patch release — CI/CD fix + Integration Test Framework (Sprints 25–29)**
+
+- **Version:** 15.4.0 "Zenith-U" → 15.4.1 "Zenith-U"
+- **Test count:** 2,958 → 2,963 total (+5 Integration/COM tests)
+- **Focus:** Fix all failing GitHub Actions workflows; add long-running integration
+  test runner, COM round-trip validation, CI coverage gate, and performance baseline.
+
+### Fixed
+- **CI `code-quality.yml`:** Replace MSBuild `LENSShell.sln` with CMake engine-only
+  static analysis — eliminates v145 toolset dependency on GitHub runners (v143).
+- **CI `code-quality.yml`:** Make clang-format check non-blocking (warnings, not errors)
+  so style deviations don't block merges.
+- **CI `version-consistency` job:** Sync `LENSManager.rc` `FILEVERSION` from `15.2.0`
+  to match canonical `VERSION` file (was stale from pre-15.3 era).
+- **CI `build.yml`:** Add explicit ninja availability check with fallback install.
+- **CI `CMakePresets.json`:** Add `CMAKE_SYSTEM_VERSION` and `CMAKE_MSVC_RUNTIME_LIBRARY`
+  to `ci-release` / `ci-debug` presets for reliable Windows SDK detection on runners.
+- **SVG files:** Fix illegal `--` in XML comments in `logo.svg` and `social-preview.svg`
+  (XML spec forbids `--` inside `<!-- -->` — caused files to fail as graphics).
+
+### Added
+- **Sprint 25 — Integration Test Runner** (`Engine/Tests/Integration/IntegrationTestRunner.h/.cpp`):
+  Corpus-driven decoder validation; walks `data/corpus/` and records pass/fail/skip
+  per format with HTML + CSV report output.
+- **Sprint 26 — Corpus Manifest** (`data/corpus/MANIFEST.json`):
+  Structured registry of all corpus test files with provenance, format, and expected results.
+- **Sprint 27 — Performance Regression Gate** (`Engine/Tests/benchmarks/baseline.json`,
+  `.github/workflows/performance-regression-gate.yml`): 10-benchmark baseline;
+  CI fails if measured throughput drops >15% or latency exceeds +20%.
+- **Sprint 28 — Code Coverage CI** (`.github/workflows/coverage.yml`):
+  OpenCppCoverage integration; enforces 60%+ coverage floor for Core + Decoders.
+- **Sprint 29 — COM Integration Test** (`Engine/Tests/Integration/COMIntegrationTest.h/.cpp`):
+  Validates `IThumbnailProvider` COM round-trip when `LENSShell.dll` is registered;
+  gracefully skips when DLL is absent (CI-safe).
+
+---
+
 ## [15.4.0] "Zenith-U" — 2026-04-16
 
 ### Summary

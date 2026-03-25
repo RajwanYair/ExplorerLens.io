@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLens
-    VERSION 15.4.0
+    VERSION 15.4.1
     DESCRIPTION "ExplorerLens.io - Universal File Preview Engine for Windows Explorer"
     LANGUAGES CXX
     HOMEPAGE_URL "https://github.com/ExplorerLens/ExplorerLens.io"
