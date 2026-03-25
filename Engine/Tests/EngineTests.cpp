@@ -26024,7 +26024,149 @@ TEST(TestCLIDoctorAllChecks)
     }
 }
 
-int main() {
+//==============================================================================
+// Integration Test Framework Tests (Sprint 25 / v15.5.0 "Zenith-V")
+//==============================================================================
+
+#include "Integration/IntegrationTestRunner.h"
+#include "Integration/COMIntegrationTest.h"
+
+using namespace ExplorerLens::Engine::Tests;
+
+TEST(IntegrationRunnerSmoke)
+{
+    // Verify IntegrationTestRunner can be created and run with no corpus
+    // directories without crashing. Empty run report must be consistent.
+    IntegrationTestRunner runner;
+    runner.SetMaxFiles(0);  // No limit — but no dirs added means no files scanned
+    auto report = runner.Run();
+    ASSERT(report.totalFiles == 0);
+    ASSERT(report.passed    == 0);
+    ASSERT(report.failed    == 0);
+    ASSERT(!report.engineVersion.empty());
+    ASSERT(!report.generatedAt.empty());
+}
+
+TEST(IntegrationRunnerSingleFile)
+{
+    // Create a minimal temp PNG file (1-byte valid enough for smoke test)
+    // and verify the runner processes it without crashing.
+    namespace fs = std::filesystem;
+
+    // Build a tiny 1x1 PNG in memory (valid PNG header + IHDR + IDAT + IEND)
+    static const uint8_t kMinPNG[] = {
+        0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A,  // PNG signature
+        0x00,0x00,0x00,0x0D,0x49,0x48,0x44,0x52,  // IHDR length + type
+        0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,  // width=1, height=1
+        0x08,0x02,0x00,0x00,0x00,0x90,0x77,0x53,  // 8-bit RGB, crc
+        0xDE,0x00,0x00,0x00,0x0C,0x49,0x44,0x41,  // IDAT
+        0x54,0x08,0xD7,0x63,0xF8,0xCF,0xC0,0x00,
+        0x00,0x00,0x02,0x00,0x01,0xE2,0x21,0xBC,  // crc
+        0x33,0x00,0x00,0x00,0x00,0x49,0x45,0x4E,  // IEND
+        0x44,0xAE,0x42,0x60,0x82                   // crc
+    };
+    auto tmpPath = fs::temp_directory_path() / "el_test_smoke.png";
+    {
+        std::ofstream f(tmpPath, std::ios::binary);
+        ASSERT(f.is_open());
+        f.write(reinterpret_cast<const char*>(kMinPNG), sizeof(kMinPNG));
+    }
+
+    IntegrationTestRunner runner;
+    runner.AddCorpusDirectory(tmpPath.parent_path());
+    runner.SetMaxFiles(1);
+    // Only include our one file
+    runner.SetFileFilter([&tmpPath](const fs::path& p) {
+        return p == tmpPath;
+    });
+
+    auto report = runner.Run();
+    ASSERT(report.totalFiles >= 1);
+    // Verify the file was attempted (either passed or failed is acceptable —
+    // we don't require the full PNG decoder to be available in test context)
+    ASSERT(report.passed + report.failed >= 1 || report.skipped >= 1);
+
+    // Cleanup
+    std::error_code ec;
+    fs::remove(tmpPath, ec);
+}
+
+TEST(IntegrationRunnerHtmlReport)
+{
+    // Verify HTML report can be written to a temp path without crashing.
+    IntegrationTestRunner::RunReport report;
+    report.totalFiles = 3;
+    report.passed     = 2;
+    report.failed     = 1;
+    report.engineVersion = BuildValidation::VersionString;
+    report.generatedAt   = "2026-03-25T00:00:00";
+
+    IntegrationTestRunner::TestResult r1;
+    r1.filePath    = L"C:\\Corpus\\test.jpg";
+    r1.format      = L"JPEG";
+    r1.extension   = "jpg";
+    r1.passed      = true;
+    r1.durationMs  = 4.2;
+    report.results.push_back(r1);
+
+    IntegrationTestRunner::TestResult r2;
+    r2.filePath      = L"C:\\Corpus\\broken.png";
+    r2.format        = L"PNG";
+    r2.extension     = "png";
+    r2.passed        = false;
+    r2.errorMessage  = L"File too small";
+    r2.durationMs    = 0.1;
+    report.results.push_back(r2);
+
+    auto outPath = std::filesystem::temp_directory_path() / "el_test_report.html";
+    bool ok = IntegrationTestRunner::WriteHtmlReport(outPath, report);
+    ASSERT(ok);
+    ASSERT(std::filesystem::exists(outPath));
+    ASSERT(std::filesystem::file_size(outPath) > 100);
+
+    std::error_code ec;
+    std::filesystem::remove(outPath, ec);
+}
+
+//==============================================================================
+// COM Integration Tests (Sprint 29 / v15.5.0 "Zenith-V")
+//==============================================================================
+
+TEST(COMThumbnailProviderRoundTrip)
+{
+    // Step 1: CLSID string must parse without error.
+    CLSID clsid{};
+    HRESULT hr = ::CLSIDFromString(COMIntegrationTest::EXPLORERLENS_CLSID_STR, &clsid);
+    ASSERT(SUCCEEDED(hr));
+
+    // Step 2: Registration check is non-fatal (DLL may not be installed in CI).
+    bool isRegistered = COMIntegrationTest::IsDllRegistered();
+    (void)isRegistered;
+
+    // Step 3: Full smoke (attempts CoCreateInstance if registered).
+    bool smokeOk = COMIntegrationTest::RunSmoke();
+    ASSERT(smokeOk);
+}
+
+TEST(COMTestRunnerGracefulSkip)
+{
+    // Verify RunRoundTrip gracefully skips when DLL is not registered,
+    // rather than throwing or crashing.
+    COMIntegrationTest runner;
+    std::vector<std::filesystem::path> fakeFiles = {
+        L"c:\\nonexistent\\file.jpg",
+        L"c:\\nonexistent\\file.png"
+    };
+    // This will either skip (DLL absent) or attempt COM — both are acceptable.
+    auto results = runner.RunRoundTrip(fakeFiles);
+    ASSERT(results.size() == fakeFiles.size());
+    // Each result must have a filePath set.
+    for (const auto& r : results) {
+        ASSERT(!r.filePath.empty());
+    }
+}
+
+
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
     std::wcout << L"========================================" << std::endl

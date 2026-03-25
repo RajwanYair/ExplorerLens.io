@@ -33,6 +33,9 @@ add_executable(EngineTests
     ReleaseGateTests.cpp
     DocumentationSyncTests.cpp
     ProgramClosureTests.cpp
+    # Sprint 25 + 29: Integration Test Framework + COM Integration (also in IntegrationTests)
+    Integration/IntegrationTestRunner.cpp
+    Integration/COMIntegrationTest.cpp
 )
 
 # Windows-specific defines (NOMINMAX prevents min/max macro conflicts)
@@ -53,6 +56,10 @@ add_executable(EngineBenchmark
 )
 add_executable(IntegrationTests
     IntegrationTests.cpp
+    # Sprint 25: Integration Test Framework
+    Integration/IntegrationTestRunner.cpp
+    # Sprint 29: COM Integration Test
+    Integration/COMIntegrationTest.cpp
 )
 
 # Link JXL libraries if enabled
@@ -77,6 +84,13 @@ target_link_libraries(EngineBenchmark
 )
 
 # Link IntegrationTests
+target_include_directories(IntegrationTests
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+        ${CMAKE_CURRENT_SOURCE_DIR}/Integration
+)
+
 target_link_libraries(IntegrationTests
     PRIVATE
         ExplorerLensEngine
@@ -134,6 +148,7 @@ target_include_directories(EngineTests
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/..
+        ${CMAKE_CURRENT_SOURCE_DIR}/Integration
 )
 
 # Windows-specific settings

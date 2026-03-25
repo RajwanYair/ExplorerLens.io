@@ -135,3 +135,58 @@ jobs:
           path: |
             build-logs/perf-results.json
           retention-days: 30
+
+      - name: Compare Against Baseline (Sprint 27)
+        shell: pwsh
+        run: |
+          $baselinePath = "Engine/Tests/benchmarks/baseline.json"
+          $resultsPath  = "build-logs/perf-results.json"
+          if (-not (Test-Path $baselinePath)) {
+            Write-Host "::warning::baseline.json not found — skipping baseline comparison"
+            exit 0
+          }
+          if (-not (Test-Path $resultsPath)) {
+            Write-Host "::warning::perf-results.json not found — skipping baseline comparison"
+            exit 0
+          }
+
+          $baseline = Get-Content $baselinePath -Raw | ConvertFrom-Json
+          $results  = Get-Content $resultsPath  -Raw | ConvertFrom-Json
+
+          $blockPct = [double]$baseline.thresholds.latency_block_pct
+          $warnPct  = [double]$baseline.thresholds.latency_warn_pct
+          $tputPct  = [double]$baseline.thresholds.throughput_block_pct
+
+          $failures = @()
+          $warnings = @()
+
+          foreach ($baseEntry in $baseline.benchmarks) {
+            $match = $results.benchmarks | Where-Object { $_.name -eq $baseEntry.name } | Select-Object -First 1
+            if (-not $match) { continue }
+
+            if ($baseEntry.category -eq "batch" -and $match.PSObject.Properties['items_per_second']) {
+              $measured = [double]$match.items_per_second
+              $floor    = [double]$baseEntry.throughput_ips * (1.0 - $tputPct / 100.0)
+              if ($measured -lt $floor) {
+                $failures += "THROUGHPUT REGRESSION: $($baseEntry.name) — $([math]::Round($measured,1)) img/s < baseline floor $([math]::Round($floor,1)) img/s"
+              }
+            }
+
+            if ($baseEntry.PSObject.Properties['p50_ms'] -and $match.PSObject.Properties['real_time']) {
+              $measured_ms = [double]$match.real_time / 1e6
+              $warn_limit  = [double]$baseEntry.p50_ms * (1.0 + $warnPct  / 100.0)
+              $block_limit = [double]$baseEntry.p50_ms * (1.0 + $blockPct / 100.0)
+              if ($measured_ms -gt $block_limit) {
+                $failures += "LATENCY REGRESSION: $($baseEntry.name) — $([math]::Round($measured_ms,2))ms > block limit $([math]::Round($block_limit,2))ms"
+              } elseif ($measured_ms -gt $warn_limit) {
+                $warnings += "LATENCY WARNING: $($baseEntry.name) — $([math]::Round($measured_ms,2))ms > warn limit $([math]::Round($warn_limit,2))ms"
+              }
+            }
+          }
+
+          foreach ($w in $warnings) { Write-Host "::warning::$w" }
+          if ($failures.Count -gt 0) {
+            foreach ($f in $failures) { Write-Host "::error::$f" }
+            exit 1
+          }
+          Write-Host "Baseline comparison PASSED — no regressions detected" -ForegroundColor Green

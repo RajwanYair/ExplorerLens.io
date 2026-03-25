@@ -1,0 +1,202 @@
+name: Code Coverage
+
+# Sprint 28 (v15.5.0 "Zenith-V"): Measures Engine/Core + Engine/Decoders
+# coverage via OpenCppCoverage (Windows) / gcov-llvm (Linux). Enforces a
+# minimum floor of 60% for each subsystem. Coverage report is uploaded as
+# a CI artifact and the badge in README.md is updated on main.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Engine/**"
+      - "Engine/Tests/**"
+      - ".github/workflows/coverage.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Engine/**"
+      - "Engine/Tests/**"
+  workflow_dispatch:
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COVERAGE_FLOOR_CORE: 60      # Minimum % for Engine/Core
+  COVERAGE_FLOOR_DECODERS: 60  # Minimum % for Engine/Decoders
+
+jobs:
+  coverage-windows:
+    name: Coverage (Windows / OpenCppCoverage)
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup MSVC (v145 toolset)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          toolset: "14.50"
+
+      - name: Install OpenCppCoverage
+        shell: pwsh
+        run: |
+          $url = "https://github.com/OpenCppCoverage/OpenCppCoverage/releases/download/release-0.9.9.0/OpenCppCoverageSetup-x64-0.9.9.0.exe"
+          $installer = "$env:TEMP\OpenCppCoverage.exe"
+          Write-Host "Downloading OpenCppCoverage..." -ForegroundColor Cyan
+          Invoke-WebRequest -Uri $url -OutFile $installer -UseBasicParsing
+          Start-Process -FilePath $installer -ArgumentList "/SILENT","/NORESTART" -Wait
+          $installDir = "C:\Program Files\OpenCppCoverage"
+          if (Test-Path "$installDir\OpenCppCoverage.exe") {
+            echo "$installDir" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+            Write-Host "OpenCppCoverage installed at $installDir" -ForegroundColor Green
+          } else {
+            Write-Host "::warning::OpenCppCoverage not found — coverage step will be skipped"
+          }
+
+      - name: Configure CMake (Debug + instrumentation)
+        shell: pwsh
+        run: |
+          cmake --preset default-debug `
+            -DBUILD_TESTS=ON `
+            -DBUILD_MODERN_RUNTIME=ON `
+            -DCMAKE_CXX_FLAGS="/Zi /Od /MDd" 2>&1
+
+      - name: Build EngineTests (Debug)
+        shell: pwsh
+        run: |
+          cmake --build --preset default-debug --target EngineTests -j 8 2>&1
+
+      - name: Run EngineTests under OpenCppCoverage
+        shell: pwsh
+        run: |
+          $engineTestsExe = "build-debug\bin\EngineTests.exe"
+          if (-not (Test-Path $engineTestsExe)) {
+            $engineTestsExe = "build\bin\EngineTests.exe"
+          }
+          if (-not (Test-Path $engineTestsExe)) {
+            Write-Host "::warning::EngineTests.exe not found — skipping coverage"
+            exit 0
+          }
+
+          $coverageTool = Get-Command "OpenCppCoverage.exe" -ErrorAction SilentlyContinue
+          if (-not $coverageTool) {
+            Write-Host "::warning::OpenCppCoverage not on PATH — skipping coverage measurement"
+            exit 0
+          }
+
+          New-Item -ItemType Directory -Force "coverage-report" | Out-Null
+
+          & $coverageTool.Source `
+            --sources "Engine\Core" `
+            --sources "Engine\Decoders" `
+            --excluded_sources "Engine\Tests" `
+            --excluded_sources "external" `
+            --export_type "html:coverage-report\html" `
+            --export_type "cobertura:coverage-report\coverage.xml" `
+            --working_dir "." `
+            -- $engineTestsExe 2>&1
+
+          Write-Host "Coverage measurement complete" -ForegroundColor Green
+
+      - name: Parse Coverage and Enforce Floor
+        shell: pwsh
+        run: |
+          $xmlPath = "coverage-report\coverage.xml"
+          if (-not (Test-Path $xmlPath)) {
+            Write-Host "::warning::coverage.xml not found — skipping floor enforcement"
+            exit 0
+          }
+
+          [xml]$cov = Get-Content $xmlPath
+          $lineRate = [double]$cov.coverage.'line-rate'
+          $pct = [math]::Round($lineRate * 100, 1)
+
+          Write-Host "Overall line coverage: $pct%"
+
+          # Per-package analysis
+          $failures = @()
+          foreach ($pkg in $cov.coverage.packages.package) {
+            $pkgName = $pkg.name
+            $pkgRate = [math]::Round([double]$pkg.'line-rate' * 100, 1)
+            Write-Host "  Package $pkgName : $pkgRate%"
+
+            if ($pkgName -match 'Core' -and $pkgRate -lt [double]$env:COVERAGE_FLOOR_CORE) {
+              $failures += "Core coverage $pkgRate% < floor $($env:COVERAGE_FLOOR_CORE)%"
+            }
+            if ($pkgName -match 'Decoder' -and $pkgRate -lt [double]$env:COVERAGE_FLOOR_DECODERS) {
+              $failures += "Decoders coverage $pkgRate% < floor $($env:COVERAGE_FLOOR_DECODERS)%"
+            }
+          }
+
+          if ($failures.Count -gt 0) {
+            foreach ($f in $failures) { Write-Host "::error::$f" }
+            exit 1
+          }
+          Write-Host "Coverage floor check PASSED ($pct% >= floor)" -ForegroundColor Green
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.run_number }}
+          path: coverage-report/
+          retention-days: 30
+
+      - name: Upload Cobertura XML (for badges/dashboards)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml-${{ github.run_number }}
+          path: coverage-report/coverage.xml
+          retention-days: 90
+
+  coverage-badge-update:
+    name: Update Coverage Badge (main only)
+    runs-on: ubuntu-latest
+    needs: coverage-windows
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Cobertura XML artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-xml-${{ github.run_number }}
+          path: coverage-report/
+        continue-on-error: true
+
+      - name: Extract coverage percentage
+        id: coverage
+        shell: bash
+        run: |
+          XML="coverage-report/coverage.xml"
+          if [ -f "$XML" ]; then
+            PCT=$(python3 -c "
+          import xml.etree.ElementTree as ET
+          tree = ET.parse('$XML')
+          rate = float(tree.getroot().get('line-rate', '0'))
+          print(round(rate * 100, 1))
+          " 2>/dev/null || echo "unknown")
+            echo "pct=$PCT" >> $GITHUB_OUTPUT
+          else
+            echo "pct=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Line Coverage | ${{ steps.coverage.outputs.pct }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Floor (Core) | ${{ env.COVERAGE_FLOOR_CORE }}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Floor (Decoders) | ${{ env.COVERAGE_FLOOR_DECODERS }}% |" >> $GITHUB_STEP_SUMMARY

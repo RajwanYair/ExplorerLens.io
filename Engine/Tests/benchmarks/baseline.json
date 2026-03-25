@@ -1,0 +1,104 @@
+{
+  "_comment": "ExplorerLens Engine Performance Baselines — Sprint 27 (v15.5.0 Zenith-V)",
+  "_description": "Reference values measured on i7-12700K + RTX 3080 @ 64GB DDR5. Used by performance-regression-gate.yml to block PRs that regress beyond the configured thresholds.",
+  "_updated": "2026-03-25",
+  "_toolchain": "MSVC 19.50.35720 (v145), /O2 /GL /arch:AVX2",
+  "version": "15.4.0",
+  "thresholds": {
+    "latency_block_pct": 20,
+    "latency_warn_pct": 10,
+    "throughput_block_pct": 15,
+    "cache_hit_block_pct": 50
+  },
+  "benchmarks": [
+    {
+      "name": "BM_SingleDecode_JPEG",
+      "category": "single_decode",
+      "format": "JPEG",
+      "p50_ms": 4.2,
+      "p95_ms": 7.1,
+      "p99_ms": 12.3,
+      "description": "Median JPEG decode + render time for a 6MP image"
+    },
+    {
+      "name": "BM_SingleDecode_PNG",
+      "category": "single_decode",
+      "format": "PNG",
+      "p50_ms": 5.8,
+      "p95_ms": 9.4,
+      "p99_ms": 14.7,
+      "description": "Median PNG decode + render for a 4K image"
+    },
+    {
+      "name": "BM_SingleDecode_WebP",
+      "category": "single_decode",
+      "format": "WebP",
+      "p50_ms": 6.3,
+      "p95_ms": 10.2,
+      "p99_ms": 16.5,
+      "description": "Median WebP lossy decode"
+    },
+    {
+      "name": "BM_SingleDecode_AVIF",
+      "category": "single_decode",
+      "format": "AVIF",
+      "p50_ms": 9.1,
+      "p95_ms": 14.3,
+      "p99_ms": 22.0,
+      "description": "Median AVIF decode (dav1d CPU decoder)"
+    },
+    {
+      "name": "BM_SingleDecode_JXLOSSLESS",
+      "category": "single_decode",
+      "format": "JPEG-XL",
+      "p50_ms": 11.2,
+      "p95_ms": 17.4,
+      "p99_ms": 25.8,
+      "description": "Median JPEG XL lossless decode"
+    },
+    {
+      "name": "BM_SingleDecode_PDF",
+      "category": "single_decode",
+      "format": "PDF",
+      "p50_ms": 17.0,
+      "p95_ms": 28.5,
+      "p99_ms": 45.0,
+      "description": "Median PDF first-page render via MuPDF"
+    },
+    {
+      "name": "BM_SingleDecode_RAW",
+      "category": "single_decode",
+      "format": "RAW",
+      "p50_ms": 22.5,
+      "p95_ms": 38.0,
+      "p99_ms": 60.0,
+      "description": "Median RAW (LibRaw) decode for a 24MP CR2"
+    },
+    {
+      "name": "BM_BatchDecode_Mixed",
+      "category": "batch",
+      "format": "Mixed",
+      "throughput_ips": 235.0,
+      "min_throughput_ips": 200.0,
+      "description": "Mixed-format batch decode throughput (images per second)"
+    },
+    {
+      "name": "BM_CacheHit_SubMs",
+      "category": "cache",
+      "format": "Any",
+      "p50_ms": 0.8,
+      "p95_ms": 2.1,
+      "p99_ms": 4.5,
+      "description": "Sub-millisecond cache lookup time for a 256px thumbnail hit"
+    },
+    {
+      "name": "BM_GpuUpload_ZeroCopy",
+      "category": "gpu",
+      "format": "Any",
+      "p50_ms": 1.2,
+      "p95_ms": 2.8,
+      "p99_ms": 5.0,
+      "description": "Zero-copy GPU texture upload latency (256px RGBA)"
+    }
+  ]
+}

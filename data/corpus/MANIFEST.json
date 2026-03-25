@@ -1,0 +1,24 @@
+{
+  "_comment": "ExplorerLens Test Corpus Manifest — Sprint 26 (v15.5.0 Zenith-V)",
+  "_description": "Registry of all test files in data/corpus/. All files are CC0/synthetic unless noted. Path is relative to data/corpus/.",
+  "_updated": "2026-03-25",
+  "_version": "1.0.0",
+  "corpus": {
+    "total_files": 0,
+    "categories": ["images", "archives", "documents", "3d", "raw", "video", "audio"],
+    "note": "Populate this directory with CC0 or synthetically-generated test files. See data/corpus/README.md for provenance requirements."
+  },
+  "files": [],
+  "synthetic_generators": [
+    {
+      "script": "tools/generate-test-corpus.py",
+      "description": "Generates synthetic JPEG, PNG, WebP, and archive files for integration testing",
+      "status": "planned"
+    }
+  ],
+  "provenance_requirements": {
+    "allowed_licenses": ["CC0-1.0", "Public Domain", "Synthetic/Generated"],
+    "forbidden": ["Copyrighted", "IPTC-protected", "DRM-encumbered"],
+    "verification": "Each file entry MUST include license, source_url, and sha256"
+  }
+}
