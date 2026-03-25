@@ -36,3 +36,5 @@ if(MSVC OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     endif()
 endif()
 
+# ── lens.exe CLI Tool (Sprint 24 / v15.4.0 "Zenith-U") ──────────────────────
+add_subdirectory(Tools.CLI)
