@@ -2713,7 +2713,7 @@ struct ReleaseGateV33Result {
     uint8_t kpiTotalCount = static_cast<uint8_t>(GateV33KPI::COUNT);
     float gateScore = 0.0f; ///< 0.0 - 1.0 confidence score
     bool v15ShipApproved = false; ///< True iff all critical KPIs pass
-    const wchar_t* codename = L"Zenith";
+    const wchar_t* codename = L"Zenith-T";
 };
 
 class ReleaseGateV33 {

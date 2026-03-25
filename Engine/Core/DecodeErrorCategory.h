@@ -1,58 +1,17 @@
 // DecodeErrorCategory.h — Structured Decode Error Classification
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Sprint 10 (v15.3.0 "Zenith-T"): Defines DecodeErrorCategory, a first-class
-// error taxonomy for the decode pipeline.  Every DecodeResult<T> must carry a
-// DecodeErrorCategory so upstream consumers can route errors to the correct
-// fallback handler without string matching.
+// Sprint 10 (v15.3.0 "Zenith-T"): Extends DecodeErrorCategory with a full
+// error taxonomy for the decode pipeline. The canonical enum definition lives
+// in Expected.h; this header provides utility helpers built on top of it.
 //
 #pragma once
 
-#include <cstdint>
+#include "Expected.h"
 #include <string_view>
 
 namespace ExplorerLens {
 namespace Engine {
-
-enum class DecodeErrorCategory : uint32_t
-{
-    None = 0,
-
-    // Input / format errors
-    InvalidFormat,
-    UnsupportedVersion,
-    CorruptedData,
-    TruncatedStream,
-    MissingRequiredChunk,
-
-    // Resource errors
-    OutOfMemory,
-    FileTooLarge,
-    DimensionsTooLarge,
-    Timeout,
-
-    // Security / policy errors
-    ZipBombDetected,
-    PathTraversalDetected,
-    SymlinkAttackDetected,
-    EncryptedAndLocked,
-    PolicyViolation,
-
-    // Decoder internal errors
-    DecoderInitFailed,
-    DecoderCrashed,
-    DecoderUnsupported,
-    LibraryError,
-
-    // System / IO
-    FileNotFound,
-    PermissionDenied,
-    IOError,
-    GPUResourceUnavailable,
-
-    // Unknown
-    Unknown = 0xFFFFFFFFu
-};
 
 inline std::string_view DecodeErrorCategoryString(DecodeErrorCategory cat) noexcept
 {

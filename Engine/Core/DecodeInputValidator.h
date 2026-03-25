@@ -21,7 +21,7 @@ struct DecodeInputConstraints
     uint32_t maxBitDepth     = 32u;
 };
 
-enum class InputValidationResult
+enum class DecodeValidationResult
 {
     Ok,
     FileTooLarge,
@@ -39,46 +39,46 @@ public:
         return {};
     }
 
-    static InputValidationResult ValidateFileSize(
+    static DecodeValidationResult ValidateFileSize(
         uint64_t fileSizeBytes,
         const DecodeInputConstraints& constraints = DefaultConstraints()) noexcept
     {
-        if (fileSizeBytes == 0) return InputValidationResult::UnreadableHeader;
-        if (fileSizeBytes > constraints.maxFileSizeBytes) return InputValidationResult::FileTooLarge;
-        return InputValidationResult::Ok;
+        if (fileSizeBytes == 0) return DecodeValidationResult::UnreadableHeader;
+        if (fileSizeBytes > constraints.maxFileSizeBytes) return DecodeValidationResult::FileTooLarge;
+        return DecodeValidationResult::Ok;
     }
 
-    static InputValidationResult ValidateDimensions(
+    static DecodeValidationResult ValidateDimensions(
         uint32_t width,
         uint32_t height,
         const DecodeInputConstraints& constraints = DefaultConstraints()) noexcept
     {
-        if (width == 0 || height == 0) return InputValidationResult::UnreadableHeader;
+        if (width == 0 || height == 0) return DecodeValidationResult::UnreadableHeader;
         if (width > constraints.maxWidthPx || height > constraints.maxHeightPx)
-            return InputValidationResult::DimensionsTooLarge;
-        return InputValidationResult::Ok;
+            return DecodeValidationResult::DimensionsTooLarge;
+        return DecodeValidationResult::Ok;
     }
 
-    static InputValidationResult ValidateBitDepth(
+    static DecodeValidationResult ValidateBitDepth(
         uint32_t bitDepth,
         const DecodeInputConstraints& constraints = DefaultConstraints()) noexcept
     {
         if (bitDepth == 0 || bitDepth > constraints.maxBitDepth)
-            return InputValidationResult::BitDepthExceeded;
-        return InputValidationResult::Ok;
+            return DecodeValidationResult::BitDepthExceeded;
+        return DecodeValidationResult::Ok;
     }
 
-    static std::string_view ResultString(InputValidationResult r) noexcept
+    static std::string_view ResultString(DecodeValidationResult r) noexcept
     {
         switch (r)
         {
-            case InputValidationResult::Ok:                 return "Ok";
-            case InputValidationResult::FileTooLarge:       return "FileTooLarge";
-            case InputValidationResult::DimensionsTooLarge: return "DimensionsTooLarge";
-            case InputValidationResult::BitDepthExceeded:   return "BitDepthExceeded";
-            case InputValidationResult::NullStream:         return "NullStream";
-            case InputValidationResult::UnreadableHeader:   return "UnreadableHeader";
-            default:                                        return "Unknown";
+            case DecodeValidationResult::Ok:                 return "Ok";
+            case DecodeValidationResult::FileTooLarge:       return "FileTooLarge";
+            case DecodeValidationResult::DimensionsTooLarge: return "DimensionsTooLarge";
+            case DecodeValidationResult::BitDepthExceeded:   return "BitDepthExceeded";
+            case DecodeValidationResult::NullStream:         return "NullStream";
+            case DecodeValidationResult::UnreadableHeader:   return "UnreadableHeader";
+            default:                                         return "Unknown";
         }
     }
 };

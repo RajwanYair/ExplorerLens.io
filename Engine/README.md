@@ -1,8 +1,8 @@
 # ExplorerLens Engine
 
-**Version:** 15.0.0 "Zenith"
+**Version:** 15.3.0 "Zenith-T"
 **Created:** January 7, 2026
-**Status:** v15.0.0 "Zenith" Complete — 1,476 tests, 412 headers, 0 warnings
+**Status:** v15.3.0 "Zenith-T" Complete — 2951 tests, 412 headers, 0 warnings
 
 ---
 

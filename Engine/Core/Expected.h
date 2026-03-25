@@ -19,8 +19,9 @@ namespace Engine {
 // Error Categories for the Decode Pipeline
 //==============================================================================
 
-enum class DecodeErrorCategory : uint8_t {
+enum class DecodeErrorCategory : uint32_t {
     None = 0,
+    // Original pipeline codes — ordinals are stable (tests check these values)
     FormatUnsupported,
     DecoderNotFound,
     InvalidImageData,
@@ -37,6 +38,25 @@ enum class DecodeErrorCategory : uint8_t {
     PluginError,
     PipelineAborted,
     InternalError,
+    // Extended taxonomy (v15.3.0 "Zenith-T" Sprint 10):
+    InvalidFormat,
+    UnsupportedVersion,
+    CorruptedData,
+    TruncatedStream,
+    MissingRequiredChunk,
+    DimensionsTooLarge,
+    ZipBombDetected,
+    PathTraversalDetected,
+    SymlinkAttackDetected,
+    EncryptedAndLocked,
+    PolicyViolation,
+    DecoderInitFailed,
+    DecoderUnsupported,
+    LibraryError,
+    PermissionDenied,
+    IOError,
+    GPUResourceUnavailable,
+    Unknown = 0xFFFFFFFFu,
 };
 
 //==============================================================================

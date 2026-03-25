@@ -1,7 +1,7 @@
 #==============================================================================
 # ExplorerLens - Root CMake Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 15.2.0 "Zenith-S"
+# Version: 15.3.0 "Zenith-T"
 #
 # vcpkg Integration (Optional):
 #   cmake -B build -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLens
-    VERSION 15.2.0
+    VERSION 15.3.0
     DESCRIPTION "ExplorerLens.io - Universal File Preview Engine for Windows Explorer"
     LANGUAGES CXX
     HOMEPAGE_URL "https://github.com/ExplorerLens/ExplorerLens.io"
@@ -248,6 +248,26 @@ install(FILES SDK/README.md
 
 if(BUILD_TESTS)
     enable_testing()
+
+    # Smoke-test: lens --help must exit with code 0
+    add_test(NAME CLIHelp
+        COMMAND lens --help
+        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set_tests_properties(CLIHelp PROPERTIES TIMEOUT 10)
+
+    # Smoke-test: lens info on a non-existent path must exit with non-zero (graceful error)
+    add_test(NAME CLIInfoMissingFile
+        COMMAND lens info nonexistent_file_for_test.xyz
+        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set_tests_properties(CLIInfoMissingFile PROPERTIES
+        TIMEOUT 10
+        WILL_FAIL TRUE)
+
+    # Smoke-test: lens doctor (no admin needed — just verifies system checks run)
+    add_test(NAME CLIDoctor
+        COMMAND lens doctor
+        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set_tests_properties(CLIDoctor PROPERTIES TIMEOUT 15)
 endif()
 
 #==============================================================================

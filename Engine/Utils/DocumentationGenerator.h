@@ -126,7 +126,7 @@ public:
 
         std::ostringstream os;
         os << "# ExplorerLens Plugin SDK — API Reference\n\n"
-            << "**Version:** 15.0.0 (Zenith)  \n"
+            << "**Version:** 15.3.0 (Zenith-T)  \n"
             << "**Generated:** " << GetTimestamp() << "\n\n";
 
         // Table of Contents
@@ -226,7 +226,7 @@ public:
         }
         os << "</nav>\n<main>\n"
             << "<h1>ExplorerLens Plugin SDK — API Reference</h1>\n"
-            << "<p><strong>Version:</strong> 15.0.0 (Zenith) | "
+            << "<p><strong>Version:</strong> 15.3.0 (Zenith-T) | "
             << "<strong>Generated:</strong> " << GetTimestamp() << "</p>\n";
 
         // Categories
