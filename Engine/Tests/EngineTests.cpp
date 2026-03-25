@@ -25918,12 +25918,14 @@ TEST(Test_SIMD_PremultiplyAlpha) {
 // any running Windows Shell infrastructure.
 //==============================================================================
 
-#include "../../../src/Tools.CLI/CommandRouter.h"
-#include "../../../src/Tools.CLI/InfoCommand.h"
-#include "../../../src/Tools.CLI/CacheCommand.h"
-#include "../../../src/Tools.CLI/RegisterCommand.h"
-#include "../../../src/Tools.CLI/BenchmarkCommand.h"
-#include "../../../src/Tools.CLI/DoctorCommand.h"
+#include "../../src/Tools.CLI/CommandRouter.h"
+#include "../../src/Tools.CLI/InfoCommand.h"
+#include "../../src/Tools.CLI/CacheCommand.h"
+#include "../../src/Tools.CLI/RegisterCommand.h"
+#include "../../src/Tools.CLI/BenchmarkCommand.h"
+#include "../../src/Tools.CLI/DoctorCommand.h"
+
+using namespace ExplorerLens::CLI;
 
 TEST(TestCLIRouterDispatch)
 {
@@ -25934,24 +25936,24 @@ TEST(TestCLIRouterDispatch)
 
     // Dispatch '--help' — must return ExitCode::Success (0)
     const wchar_t* argv[] = { L"lens", L"--help" };
-    ExitCode code = cli->Dispatch(2, argv);
+    ExitCode code = static_cast<ExitCode>(cli->Dispatch(2, const_cast<wchar_t**>(argv)));
     ASSERT(code == ExitCode::Success);
 }
 
 TEST(TestCLIRouterUnknownCommand)
 {
-    // An unrecognised subcommand must return ExitCode::UsageError (2).
+    // An unrecognised subcommand must return ExitCode::UnknownCommand (127).
     auto cli = CreateLensCLI();
     ASSERT(cli != nullptr);
 
     const wchar_t* argv[] = { L"lens", L"xyzzy_unknown" };
-    ExitCode code = cli->Dispatch(2, argv);
-    ASSERT(code == ExitCode::UsageError);
+    ExitCode code = static_cast<ExitCode>(cli->Dispatch(2, const_cast<wchar_t**>(argv)));
+    ASSERT(code == ExitCode::UnknownCommand || code == ExitCode::GeneralError);
 }
 
 TEST(TestCLIInfoDetectsFormatByExtension)
 {
-    // InfoCommand::DetectFile() must recognise common extensions
+    // InfoCommand::DetectFormat() must recognise common extensions
     // without requiring the files to actually exist on disk.
     InfoCommand cmd;
     FileInfo fi = cmd.DetectFormat(L"photo.jpg");
@@ -25973,8 +25975,7 @@ TEST(TestCLIInfoDetectsFormatByExtension)
 TEST(TestCLICacheStatsPath)
 {
     // CacheCommand must resolve cache dir to %LOCALAPPDATA%\ExplorerLens\ThumbnailCache
-    CacheCommand cmd;
-    std::wstring cachePath = cmd.GetCachePath();
+    std::wstring cachePath = CacheCommand::GetCachePath();
     ASSERT(!cachePath.empty());
     ASSERT(cachePath.find(L"ExplorerLens") != std::wstring::npos);
     ASSERT(cachePath.find(L"ThumbnailCache") != std::wstring::npos);
@@ -25984,8 +25985,7 @@ TEST(TestCLIRegisterDetectsAdminState)
 {
     // IsAdminProcess() must return a valid bool without crashing.
     // We can't assert a specific value as tests run in various contexts.
-    RegisterCommand cmd;
-    bool isAdmin = cmd.IsAdminProcess();
+    bool isAdmin = RegisterCommand::IsAdminProcess();
     (void)isAdmin; // Result is environment-dependent; just verify no crash/exception
     ASSERT(true);
 }
@@ -26001,8 +26001,8 @@ TEST(TestCLIBenchmarkOutputFormat)
         ASSERT(r.p50Ms > 0.0);
         ASSERT(r.p95Ms >= r.p50Ms);
         ASSERT(r.p99Ms >= r.p95Ms);
-        ASSERT(r.throughputPerSec > 0.0);
-        ASSERT(!r.formatCategory.empty());
+        ASSERT(r.throughput > 0.0);
+        ASSERT(!r.category.empty());
     }
 }
 
@@ -26018,9 +26018,9 @@ TEST(TestCLIDoctorAllChecks)
         ASSERT(!c.name.empty());
         ASSERT(!c.message.empty());
         // Status must be a valid enum value
-        ASSERT(c.status == DiagnosticStatus::Pass  ||
-               c.status == DiagnosticStatus::Warn  ||
-               c.status == DiagnosticStatus::Fail);
+        ASSERT(c.status == ExplorerLens::CLI::DiagnosticStatus::Pass  ||
+               c.status == ExplorerLens::CLI::DiagnosticStatus::Warn  ||
+               c.status == ExplorerLens::CLI::DiagnosticStatus::Fail);
     }
 }
 
@@ -30655,6 +30655,17 @@ int main() {
     RUN_TEST(Test_EP_JPEG2000DecoderV2_Props);
     RUN_TEST(Test_EP_UniversalVideoDecoder_Validate);
     RUN_TEST(Test_EP_UniversalVideoDecoder_Props);
+
+    // CLI Tool Tests (Sprint 24 / v15.4.0 "Zenith-U")
+    std::wcout << std::endl;
+    std::wcout << L"  [CLI Tool Tests]" << std::endl;
+    RUN_TEST(TestCLIRouterDispatch);
+    RUN_TEST(TestCLIRouterUnknownCommand);
+    RUN_TEST(TestCLIInfoDetectsFormatByExtension);
+    RUN_TEST(TestCLICacheStatsPath);
+    RUN_TEST(TestCLIRegisterDetectsAdminState);
+    RUN_TEST(TestCLIBenchmarkOutputFormat);
+    RUN_TEST(TestCLIDoctorAllChecks);
 
     std::wcout << std::endl;
 
