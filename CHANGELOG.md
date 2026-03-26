@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [20.4.0] "Quasar-U" - 2026-07-14
+### Summary
+CLI tool and SDK v2: Stable C ABI public API, thumbnail provider registration,
+lens.exe command-line driver, format plugin v2 contract with async decode,
+batch processing engine, ABI version guard, and plugin test harness.
+### Added
+- PublicAPI.h: Stable extern "C" ABI - LensEngineCreate/Destroy, LensGenerateThumbnail, cache management
+- ThumbnailProviderSDK.h: LENS_PROVIDER_DESC factory registration, LensRegisterThumbnailProvider
+- LensCLI.h: generate/batch/cache/info/formats subcommands with ANSI progress bar
+- CLICommandParser.h: long/short flags, key=value pairs, positional args, help generation
+- FormatPluginSDK.h: v2 vtable - DecodeFile, DecodeStream, BeginDecodeAsync, PollAsync, GetMetadataJSON
+- BatchCLI.h: directory scan, skip-existing, per-file results, BatchRunStats summary
+- SDKVersionGuard.h: major/minor ABI compat check, ValidateDLL, QueryDLLVersion
+- MockShellEnvironment.h: MockStream COM IStream, MockShellEnvironment test fixture
+- docs/SDK.md: v2 full reference guide, quick start, API table, versioning, CLI reference
+### Infrastructure
+- TestCount raised to 5000 (9 new CLI/SDK test suites)
+
+
 ## [20.3.0] "Quasar-T" - 2026-07-14
 ### Summary
 Security Hardening v2: Authenticode PE verification, Job Object sandbox isolation,
