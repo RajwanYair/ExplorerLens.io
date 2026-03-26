@@ -1,0 +1,100 @@
+// EnterprisePolicyEngineV2.h — Enterprise Policy Engine V2 (GPO/Intune/ConfigMgr)
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Hierarchical policy resolution engine for enterprise deployments.
+// Policy source priority (highest → lowest):
+//   1. Group Policy Objects (GPO) via HKLM\Software\Policies\ExplorerLens
+//   2. Microsoft Intune (MDM) via ./Vendor/MSFT/Policy CSP bridge
+//   3. Microsoft Configuration Manager (SCCM) via WMI root\ccm\policy namespace
+//   4. Manual/admin overrides via HKLM\Software\ExplorerLens\Admin
+//   5. Per-user preferences via HKCU\Software\ExplorerLens
+//
+// All policy values are strongly-typed via PolicyValue variant and validated
+// against a registry of valid settings before being applied.
+//
+#pragma once
+
+#include <string>
+#include <vector>
+#include <variant>
+#include <cstdint>
+#include <functional>
+
+namespace ExplorerLens { namespace Engine {
+
+// Policy source tier — used for audit logging and override precedence.
+enum class PolicySource : uint8_t {
+    GroupPolicy    = 0,  // HKLM\Software\Policies\ExplorerLens (highest)
+    Intune         = 1,  // MDM/CSP
+    ConfigMgr      = 2,  // SCCM WMI
+    AdminManual    = 3,  // HKLM\Software\ExplorerLens\Admin
+    UserPreference = 4,  // HKCU (lowest)
+    Default        = 5,  // Built-in default (no policy set)
+};
+
+// Typed policy value variant.
+using PolicyValue = std::variant<
+    bool,
+    int32_t,
+    uint32_t,
+    std::string,
+    std::vector<std::string>  // Allow-list / deny-list
+>;
+
+// A single resolved policy entry with provenance.
+struct PolicyEntry {
+    std::string  key;             // e.g. "GPU.AllowedBackend"
+    PolicyValue  value;
+    PolicySource source;
+    bool         enforced { false };  // True if GPO mandates this value
+};
+
+// Callback fired when a policy is applied or changed at runtime.
+using PolicyChangeCallback =
+    std::function<void(const PolicyEntry& newValue,
+                       const PolicyEntry& oldValue)>;
+
+// EnterprisePolicyEngineV2 — Hierarchical policy resolver.
+//
+// Call Load() at startup and whenever a WM_SETTINGCHANGE for policy is received.
+// All engine components query this singleton to check their allowed configuration.
+class EnterprisePolicyEngineV2 {
+public:
+    EnterprisePolicyEngineV2() noexcept;
+    ~EnterprisePolicyEngineV2() noexcept;
+
+    EnterprisePolicyEngineV2(const EnterprisePolicyEngineV2&)            = delete;
+    EnterprisePolicyEngineV2& operator=(const EnterprisePolicyEngineV2&) = delete;
+
+    // Load / refresh all policy sources.  Call at startup and on SETTINGCHANGE.
+    void Load() noexcept;
+
+    // Resolve a typed policy value.
+    // Returns Default-sourced default if no policy is set.
+    template<typename T>
+    T Get(const std::string& key, const T& defaultValue) const noexcept;
+
+    // Get raw PolicyEntry with provenance info (for diagnostics page).
+    bool TryGet(const std::string& key, PolicyEntry& out) const noexcept;
+
+    // Check if a feature is policy-disabled.
+    bool IsFeatureDisabled(const std::string& featureKey) const noexcept;
+
+    // Get all currently active policies (for audit export).
+    std::vector<PolicyEntry> GetAll() const noexcept;
+
+    // Subscribe to policy changes (fired on next Load() if value changed).
+    void OnPolicyChange(PolicyChangeCallback cb) noexcept;
+
+    // Export current policy set as JSON for support/audit.
+    std::string ExportJson() const noexcept;
+
+    // Singleton.
+    static EnterprisePolicyEngineV2& Instance() noexcept;
+
+private:
+    struct Impl;
+    Impl* m_impl { nullptr };
+};
+
+}} // namespace ExplorerLens::Engine
