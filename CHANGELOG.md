@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.5.0] "Zenith-V" — 2026-03-27
+
+### Summary
+**Minor release — Test Infrastructure Completion (Sprints 30–32)**
+
+- **Version:** 15.4.2 "Zenith-U" → 15.5.0 "Zenith-V"
+- **Test count:** 2,963 C++ tests + 48 new Python tests = 3,011 total
+- **Focus:** Complete the Test Infrastructure milestone (sprints 25–32). Harden
+  the Python test suite, add a CI-integrated HTML test dashboard, and platform
+  provider coverage.
+
+### Added
+- **`ExplorerLens.py/tests/test_platform_provider.py`:** 20+ tests for COM CLSID
+  validation, Windows registry key format, platform capability detection,
+  COM interop mocking with HRESULT logic, and file format routing with
+  parametrized extension checks. Enforces Python 3.9+ and 64-bit process.
+- **`ExplorerLens.py/tests/test_cli_args.py`:** 28+ tests for `--version` flag
+  and VERSION file format, path argument validation, output format selection
+  (json/text/csv), exit code contracts, boolean flag defaults, numeric size
+  range validation, and environment variable override handling.
+- **`Engine/Tests/dashboard/generate_report.py`:** Self-contained HTML test
+  dashboard generator. Parses `EngineTests.exe` stdout, CTest JUnit XML, and
+  Google Benchmark JSON. Renders pass/fail summary cards, benchmark delta table
+  (flags >15% regression), and timestamped build metadata. CI-integrated via
+  non-zero exit on test failures.
+
+---
+
 ## [15.4.2] "Zenith-U" — 2026-03-26
 
 ### Summary
