@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [17.3.0] "Nova-T" - 2026-03-26
+
+### Summary
+Accessibility and compliance milestone - v17.3.0 Nova-T
+
+### Added
+- ColorBlindFilter deuteranopia/protanopia/tritanopia/achromatopsia simulation (Sprint 121)
+- LocalizationValidator string length + RTL BiDi placeholder checker (Sprint 123)
+- strings_ja.rc Japanese locale (Sprint 125)
+- strings_zh.rc Simplified Chinese locale (Sprint 125)
+- strings_ar.rc Arabic RTL locale with Unicode escapes (Sprint 126)
+- ACCESSIBILITY.md WCAG 2.1 AA compliance report (Sprint 128)
+
+### Accessibility
+- All UI text passes 4.5:1 WCAG AA contrast under HC Black/White themes
+- Full keyboard navigation registered in KeyboardNavigationMap
+- Narrator/JAWS/NVDA tested across all 9 WinUI pages
+- ColorBlindFilter validates UI color pairs at QA build step
+
+
 ## [17.2.0] "Nova-S" - 2026-03-26
 
 ### Summary
