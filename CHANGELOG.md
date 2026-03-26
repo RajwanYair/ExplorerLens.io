@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.6.0] "Zenith-W" — 2026-03-27
+
+### Summary
+**Minor release — Release Engineering (Sprints 33–40)**
+
+- **Version:** 15.5.0 "Zenith-V" → 15.6.0 "Zenith-W"
+- **Focus:** Complete the Release Engineering milestone (Sprints 33–40). Introduces
+  CI toolchain verification, code signing pipeline, automated changelog generation,
+  MSIX packaging, pre-release RC workflow, and standardised release notes format.
+
+### Added
+- **`Generate-Changelog.ps1`:** Automated Keep-a-Changelog generation from `git log`.
+  Groups commits by conventional-commit prefix (feat/fix/chore/perf/docs/ci).
+  Supports direct insertion into `CHANGELOG.md` via `--Append` flag.
+- **`packaging/ExplorerLens.msixmanifest`:** Full MSIX/APPX manifest with COM server
+  registration for CLSID `{9E6ECB90...}`, IThumbnailProvider entries for 14 extensions
+  (WebP, AVIF, JXL, HEIC, PDF, ZIP, 7z, RAR, CR2, NEF, ARW, DNG), and
+  `runFullTrust` / `allowElevation` capabilities.
+- **`packaging/Build-MSIX.ps1`:** Builds MSIX via `MakeAppx.exe` from Windows SDK.
+  Auto-generates placeholder assets, supports optional signing, and reports artifact size.
+- **`docs/RELEASE_NOTES_TEMPLATE.md`:** Standardised release notes template with
+  supported-formats table, system requirements, SHA256 verification instructions.
+- **`.github/workflows/toolchain-verify.yml`:** CI workflow validating `cl.exe >= 19.29`,
+  `cmake >= 3.25`, and `ninja` availability. Writes toolchain summary to GitHub step summary.
+- **`.github/workflows/code-signing.yml`:** Reusable signing workflow supporting Azure
+  Trusted Signing (primary) and PFX certificate (fallback). Gracefully skips when no
+  credentials are configured.
+- **`.github/workflows/pre-release.yml`:** RC workflow triggering on `vX.Y.Z-rc.N` tags
+  or `workflow_dispatch`. Creates a GitHub pre-release with testing checklist.
+
+---
+
 ## [15.5.0] "Zenith-V" — 2026-03-27
 
 ### Summary
