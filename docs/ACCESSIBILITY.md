@@ -1,8 +1,6 @@
-# ExplorerLens Accessibility Compliance Report
+# ExplorerLens Accessibility Guide
 
-**Version:** 17.3.0 "Nova-T"  
-**Standard:** WCAG 2.1 Level AA  
-**Updated:** 2026-03-26
+> Version 20.0.0 "Quasar" | Sprint 209 | Standard: WCAG 2.1 Level AA
 
 ---
 
