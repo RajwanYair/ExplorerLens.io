@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [16.1.0] "Horizon-R" — 2026-03-26
+
+### Summary
+**Minor release — Cloud & Ecosystem (Sprints 73–80)**
+
+- **Version:** 16.0.0 "Horizon" → 16.1.0 "Horizon-R"
+- **Focus:** Cloud storage provider integration, OneDrive CF_API + Graph API bridge,
+  and incremental binary update engine.
+
+### Added
+- **Engine/Cloud/CloudProviderRegistry:** Central registry for cloud storage providers.
+  Discovers OneDrive, SharePoint, Teams, Box, Dropbox, Google Drive, S3-compatible buckets
+  via CloudFiles API namespace matching.  Supports custom enterprise providers.
+- **Engine/Cloud/OneDriveIntegration:** Thumbnail generation for OneDrive placeholder files.
+  Queries Microsoft Graph API thumbnail endpoint first (no hydration), falls back to
+  CfHydratePlaceholder + local decode for unsupported formats, with optional re-dehydration.
+- **Engine/Cloud/DeltaUpdateManager:** Incremental bsdiff binary updates with SHA-256
+  verification; Stable / Preview / Enterprise channels; WSUS-friendly quarterly batching;
+  elevation detection for system-component updates.
+
+
 ## [16.0.0] "Horizon" — 2026-03-26
 
 ### Summary
