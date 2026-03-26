@@ -1,0 +1,150 @@
+<Page
+    x:Class="ExplorerLens.Manager.Pages.DiagnosticsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="24,16" RowSpacing="16">
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="Diagnostics"
+                       Style="{StaticResource TitleTextBlockStyle}"/>
+            <TextBlock Text="Live engine telemetry, ETW trace capture, and log export for support and debugging."
+                       Style="{StaticResource BodyTextBlockStyle}"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,320" ColumnSpacing="16">
+
+            <!-- Log Viewer -->
+            <Border Grid.Column="0"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                    CornerRadius="8">
+                <Grid RowDefinitions="Auto,*" Padding="16">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,12">
+                        <TextBlock Text="Engine Log" Style="{StaticResource SubtitleTextBlockStyle}"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox x:Name="LogLevelCombo" Width="120" VerticalAlignment="Center">
+                            <ComboBoxItem Content="All" IsSelected="True"/>
+                            <ComboBoxItem Content="Info"/>
+                            <ComboBoxItem Content="Warning"/>
+                            <ComboBoxItem Content="Error"/>
+                        </ComboBox>
+                        <ToggleButton x:Name="AutoScrollBtn" Content="Auto-scroll" IsChecked="True"/>
+                        <Button Content="Clear" Click="ClearLog_Click"/>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1" x:Name="LogScrollViewer"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="LogTextBlock"
+                                   FontFamily="Consolas"
+                                   FontSize="11"
+                                   TextWrapping="NoWrap"
+                                   IsTextSelectionEnabled="True"
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Right Panel -->
+            <StackPanel Grid.Column="1" Spacing="12">
+
+                <!-- ETW Controls -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                        CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="ETW Trace" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <ToggleSwitch x:Name="EtwTraceToggle" Header="Enable ETW provider"
+                                      Toggled="EtwTrace_Toggled"/>
+                        <TextBlock Text="Provider: ExplorerLens-Engine&#10;GUID: {9E6ECB90-...}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <Button Content="Open PerfView…" HorizontalAlignment="Stretch"
+                                Click="OpenPerfView_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Performance Counters -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                        CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Live Counters" Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Thumbnails / sec" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TpsCounter" Grid.Column="1" Text="—"
+                                       FontWeight="SemiBold"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Decode latency (avg)" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="LatencyCounter" Grid.Column="1" Text="—"
+                                       FontWeight="SemiBold"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Thread pool active" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="ThreadCounter" Grid.Column="1" Text="—"
+                                       FontWeight="SemiBold"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="GPU memory used" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="GpuMemCounter" Grid.Column="1" Text="—"
+                                       FontWeight="SemiBold"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Cache pressure" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="PressureCounter" Grid.Column="1" Text="None"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Export -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                        CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Export &amp; Support" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <Button Content="Export diagnostic bundle…"
+                                HorizontalAlignment="Stretch"
+                                Click="ExportBundle_Click"
+                                Style="{StaticResource AccentButtonStyle}"/>
+                        <Button Content="Copy system info"
+                                HorizontalAlignment="Stretch"
+                                Click="CopySysInfo_Click"/>
+                        <Button Content="Open log folder"
+                                HorizontalAlignment="Stretch"
+                                Click="OpenLogFolder_Click"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0" Padding="16,8">
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <TextBlock x:Name="StatusText"
+                           Text="Ready — engine v15.7.0"
+                           Style="{StaticResource CaptionTextBlockStyle}"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="SessionText"
+                           Text="Session: 0h 0m"
+                           Style="{StaticResource CaptionTextBlockStyle}"
+                           VerticalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</Page>
