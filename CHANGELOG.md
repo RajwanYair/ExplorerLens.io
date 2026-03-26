@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.7.0] "Zenith-X" — 2026-03-26
+
+### Summary
+**Minor release — WinUI 3 Manager & Build Automation (Sprints 41–52)**
+
+- **Version:** 15.6.0 "Zenith-W" → 15.7.0 "Zenith-X"
+- **Focus:** Complete WinUI 3 modern manager GUI and sprint automation tooling.
+
+### Added
+- **LENSManager.WinUI (full 9-page app):** NavigationView shell, DashboardPage (status cards + throughput),
+  FormatsPage (searchable toggle table), GpuPage (vendor waterfall + NVDEC/QuickSync/AMF),
+  SettingsPage (GPU/cache/theme/quality), CachePage (budget slider + eviction), 
+  PluginsPage (trust-chain list), DiagnosticsPage (ETW + live counters + export), AboutPage.
+- **uild-scripts/Bump-Version.ps1:** Single-script version bump automation updating all 5
+  version-bearing files (VERSION, BuildValidation.h, copilot-instructions.md, social-preview.svg,
+  CHANGELOG.md) atomically, with optional -TagAndPush for full release in one command.
+
+
 ## [15.6.0] "Zenith-W" — 2026-03-27
 
 ### Summary
