@@ -1,3 +1,10 @@
+// PersistentDiskCache.h — SQLite-Backed Persistent Thumbnail Cache
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Stores thumbnail blobs in a SQLite database with LRU eviction and cache
+// warming. Sprint 226 upgrade: winsqlite3.dll dynamic loading, WAL mode,
+// schema migration v2, and integrity validation.
+//
 #pragma once
 //==============================================================================
 // PersistentDiskCache
