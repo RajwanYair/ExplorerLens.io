@@ -1,6 +1,6 @@
 # ExplorerLens Performance Tuning Guide
-**Version:** 15.2.0 "Zenith-S"
-**Last Updated:** March 2026
+**Version:** 17.1.0 "Nova-R"
+**Last Updated:** 2026-03-26
 
 ---
 
