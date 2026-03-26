@@ -1,0 +1,74 @@
+# .github/labeler.yml — PR auto-labeling by changed file paths
+# Used by actions/labeler@v5 in auto-label.yml
+
+"build":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - "Engine/CMakeLists.txt"
+      - "Engine/Tests/CMakeLists.txt"
+      - "external/**"
+      - "build-scripts/**"
+      - "cmake/**"
+
+"ci/cd":
+  - changed-files:
+    - any-glob-to-any-file:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+
+"documentation":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "docs/**"
+      - "*.md"
+      - ".github/**/*.md"
+
+"shell-extension":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "LENSShell/**"
+      - "LENSShell.sln"
+
+"installer":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "packaging/**"
+
+"plugin":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "Engine/Plugin/**"
+      - "Engine/PluginHost/**"
+      - "SDK/**"
+      - "Engine/Decoders/**"
+
+"gpu":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "Engine/GPU/**"
+      - "Engine/Core/GPURenderer*"
+
+"memory":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "Engine/Memory/**"
+
+"cache":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "Engine/Cache/**"
+
+"ai/ml":
+  - changed-files:
+    - any-glob-to-any-file:
+      - "Engine/AI/**"
+
+"security":
+  - changed-files:
+    - any-glob-to-any-file:
+      - ".github/security.md"
+      - "SECURITY.md"
+      - "Engine/Plugin/TrustChain*"
+      - "Engine/Plugin/Sandbox*"

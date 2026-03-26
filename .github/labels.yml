@@ -1,0 +1,148 @@
+# .github/labels.yml — Canonical label definitions for ExplorerLens
+# Applied automatically by the sync-labels workflow (see .github/workflows/sync-labels.yml).
+# To add a new label: add it here → merge to main → workflow applies it to the repo.
+
+# ── Type ──────────────────────────────────────────────────────────────────────
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: "enhancement"
+  color: "a2eeef"
+  description: "New feature or request"
+
+- name: "documentation"
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+
+- name: "question"
+  color: "d876e3"
+  description: "Further information is requested"
+
+- name: "invalid"
+  color: "e4e669"
+  description: "This doesn't seem right"
+
+- name: "wontfix"
+  color: "ffffff"
+  description: "This will not be worked on"
+
+- name: "duplicate"
+  color: "cfd3d7"
+  description: "This issue or pull request already exists"
+
+# ── Priority ──────────────────────────────────────────────────────────────────
+- name: "priority: critical"
+  color: "b60205"
+  description: "Blocks release or causes data loss"
+
+- name: "priority: high"
+  color: "e11d48"
+  description: "Important — target next sprint"
+
+- name: "priority: medium"
+  color: "f97316"
+  description: "Should be addressed soon"
+
+- name: "priority: low"
+  color: "fed7aa"
+  description: "Nice to have"
+
+# ── Status ─────────────────────────────────────────────────────────────────────
+- name: "needs-triage"
+  color: "ededed"
+  description: "Waiting for maintainer review"
+
+- name: "in-progress"
+  color: "0052cc"
+  description: "Currently being worked on"
+
+- name: "needs-info"
+  color: "fef3c7"
+  description: "Waiting for more information from reporter"
+
+- name: "ready-for-review"
+  color: "0e8a16"
+  description: "PR is ready for code review"
+
+- name: "blocked"
+  color: "5319e7"
+  description: "Blocked by another issue or external factor"
+
+- name: "stale"
+  color: "d3d3d3"
+  description: "No activity for 30+ days"
+
+# ── Domain ─────────────────────────────────────────────────────────────────────
+- name: "build"
+  color: "f9d0c4"
+  description: "Build system, CMake, MSBuild, external libs"
+
+- name: "ci/cd"
+  color: "c5def5"
+  description: "GitHub Actions workflows, release pipeline"
+
+- name: "performance"
+  color: "ffa500"
+  description: "Performance regression or improvement"
+
+- name: "security"
+  color: "ee0701"
+  description: "Security vulnerability or hardening"
+
+- name: "plugin"
+  color: "7057ff"
+  description: "Plugin ecosystem, SDK, format decoders"
+
+- name: "gpu"
+  color: "84b6fc"
+  description: "GPU acceleration (DX11/DX12/Vulkan)"
+
+- name: "memory"
+  color: "e6e6e6"
+  description: "Memory management, pressure, footprint"
+
+- name: "cache"
+  color: "bfd4f2"
+  description: "Cache subsystem"
+
+- name: "decoder"
+  color: "b4a7d6"
+  description: "Format decoders (images, archives, documents)"
+
+- name: "shell-extension"
+  color: "d4c5f9"
+  description: "LENSShell.dll / COM registration"
+
+- name: "installer"
+  color: "f0e6ff"
+  description: "MSI / WiX installer"
+
+- name: "ai/ml"
+  color: "9be9a8"
+  description: "AI/ML modules (smart crop, IQA, scene understanding)"
+
+# ── Meta ───────────────────────────────────────────────────────────────────────
+- name: "good first issue"
+  color: "7057ff"
+  description: "Good for newcomers"
+
+- name: "help wanted"
+  color: "008672"
+  description: "Extra attention is needed"
+
+- name: "dependencies"
+  color: "0366d6"
+  description: "Dependency update (Dependabot)"
+
+- name: "release-failure"
+  color: "b60205"
+  description: "Post-release verification failed"
+
+- name: "breaking-change"
+  color: "b60205"
+  description: "Introduces a breaking API or behavior change"
+
+- name: "sprint"
+  color: "c2e0c6"
+  description: "Associated with a sprint milestone"

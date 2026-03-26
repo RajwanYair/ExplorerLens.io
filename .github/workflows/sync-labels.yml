@@ -1,0 +1,32 @@
+# sync-labels.yml — Keep GitHub repo labels in sync with .github/labels.yml
+#
+# Runs automatically when labels.yml changes.
+# Also available via manual dispatch to force a full sync.
+
+name: Sync Labels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/labels.yml"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  sync:
+    name: Sync repo labels from labels.yml
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync labels
+        uses: EndBug/label-sync@v2
+        with:
+          config-file: .github/labels.yml
+          delete-other-labels: false   # keep any labels created manually
+          token: ${{ secrets.GITHUB_TOKEN }}

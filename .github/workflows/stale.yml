@@ -1,0 +1,66 @@
+# stale.yml — Close abandoned issues and pull requests automatically
+#
+# Issues:   stale after 30 days of inactivity → closed after 7 more days
+# PRs:      stale after 21 days of inactivity → closed after 7 more days
+# Runs daily at 01:00 UTC.
+
+name: Stale
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: Mark and close stale items
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Issues
+          days-before-issue-stale: 30
+          days-before-issue-close: 7
+          stale-issue-label: "stale"
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has had no activity
+            for **30 days**.
+
+            If this is still relevant, please:
+            - Add a comment with any updates
+            - Apply the `priority: high` label to prevent auto-close
+
+            It will be closed in **7 days** if no further activity occurs.
+          close-issue-message: |
+            This issue was automatically closed due to **37 days of inactivity**.
+            Reopen it if the problem persists — no information is lost.
+          close-issue-reason: not_planned
+
+          # Pull Requests
+          days-before-pr-stale: 21
+          days-before-pr-close: 7
+          stale-pr-label: "stale"
+          stale-pr-message: |
+            This PR has been automatically marked as stale because it has had no activity
+            for **21 days**.
+
+            Please rebase, resolve conflicts, or leave a comment to keep it open.
+            It will be closed in **7 days** if no further activity occurs.
+          close-pr-message: |
+            This PR was automatically closed due to **28 days of inactivity**.
+            The branch is preserved — reopen when ready.
+
+          # Never mark these labels as stale
+          exempt-issue-labels: "priority: critical,priority: high,in-progress,blocked,security"
+          exempt-pr-labels: "in-progress,blocked,ready-for-review,security"
+
+          # Only process 100 items per run (rate-limit friendly)
+          operations-per-run: 100

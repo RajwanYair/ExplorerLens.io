@@ -12,34 +12,42 @@
 # =============================================================================
 
 # Default: all files
-* @aeger
+* @RajwanYair
 
 # =============================================================================
-# WORKSPACE-LEVEL CONFIGS
+# REPO-LEVEL CONFIGS
 # =============================================================================
-/.github/                   @aeger
-/pyproject.toml             @aeger
-/pyrightconfig.json         @aeger
-/.flake8                    @aeger
-/.gitignore                 @aeger
-/.gitattributes             @aeger
-/.markdownlint.json         @aeger
-/requirements.txt           @aeger
-/apt-packages.txt           @aeger
-/PROJECT_SPEC_PROMPT.md     @aeger
+/.github/                   @RajwanYair
+/CMakeLists.txt             @RajwanYair
+/CMakePresets.json          @RajwanYair
+/.gitignore                 @RajwanYair
+/.gitattributes             @RajwanYair
+/vcpkg.json                 @RajwanYair
+/VERSION                    @RajwanYair
 
 # =============================================================================
-# PROJECTS
+# ENGINE (C++ core)
 # =============================================================================
-/RegiLattice/               @aeger
-/Scripts.DupDetector/       @aeger
-/Scripts.FileNameManipulator/ @aeger
-/Scripts.FileProcessor/     @aeger
-/Scripts.OptimizeBrowsers/  @aeger
-/ExplorerLens.io/           @aeger
-/Scripts.PPA/               @aeger
-/Scripts.SortComics/        @aeger
-/Scripts.UbuntuEnhancer/    @aeger
-/Scripts.VHDXCompress/      @aeger
-/Scripts.OptimizeWIN_n_WSL/ @aeger
-/Scripts.VSCode.RemoteSSH.Verifier/ @aeger
+/Engine/                    @RajwanYair
+/Engine/Core/               @RajwanYair
+/Engine/GPU/                @RajwanYair
+/Engine/AI/                 @RajwanYair
+
+# =============================================================================
+# SHELL EXTENSION & MANAGER
+# =============================================================================
+/LENSShell/                 @RajwanYair
+/LENSManager/               @RajwanYair
+
+# =============================================================================
+# BUILD & PACKAGING
+# =============================================================================
+/build-scripts/             @RajwanYair
+/packaging/                 @RajwanYair
+/external/                  @RajwanYair
+
+# =============================================================================
+# CI/CD
+# =============================================================================
+/.github/workflows/         @RajwanYair
+/.github/actions/           @RajwanYair

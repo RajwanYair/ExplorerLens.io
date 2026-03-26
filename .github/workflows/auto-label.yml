@@ -1,0 +1,45 @@
+# auto-label.yml — Automatically label PRs and issues based on content
+#
+# Labels applied by path (PRs) and keyword matching (issues).
+# Keyword → label mappings are defined inline below.
+
+name: Auto Label
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  issues:
+    types: [opened, reopened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  # ── Label PRs by changed file paths ─────────────────────────────────────────
+  label-pr:
+    name: Label PR by paths
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: false
+
+  # ── Label issues by keyword ──────────────────────────────────────────────────
+  label-issue:
+    name: Label issue by keywords
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues'
+    timeout-minutes: 5
+
+    steps:
+      - uses: github/issue-labeler@v3.4
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/issue-labeler.yml
+          enable-versioned-regex: 0

@@ -1,0 +1,32 @@
+# .github/issue-labeler.yml — Issue auto-labeling by keyword
+# Used by github/issue-labeler@v3.4 in auto-label.yml
+
+"bug":
+  - "(crash|hang|freeze|error|exception|fail(ed|ure)|broken|regression|not work(ing)?)"
+
+"performance":
+  - "(slow|performance|latency|memory|leak|fps|throughput|benchmark|ms\\b|millisecond)"
+
+"security":
+  - "(vulnerabilit|CVE|injection|overflow|bypass|privilege|exploit|attack|XSS|SQLi)"
+
+"build":
+  - "(build|compile|cmake|msbuild|linker|LNK[0-9]+|C[0-9]{4}|vcvars|nmake|ninja)"
+
+"plugin":
+  - "(plugin|decoder|format|extension|sdk|\.cbz|\.cbr|\.webp|\.heic|\.jxl|\.avif|\.raw)"
+
+"gpu":
+  - "(GPU|DirectX|DX11|DX12|Vulkan|NVDEC|QuickSync|AMF|shader|VRAM)"
+
+"installer":
+  - "(install(er)?|MSI|WiX|regsvr|uninstall|setup)"
+
+"documentation":
+  - "(doc(s|ument(ation)?)?|README|wiki|typo|spelling|example|tutorial)"
+
+"good first issue":
+  - "(good first issue|beginner|starter|easy|simple fix)"
+
+"breaking-change":
+  - "(breaking( change)?|break(s)? (api|interface|abi)|incompatible)"
