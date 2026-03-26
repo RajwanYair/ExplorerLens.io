@@ -1,6 +1,8 @@
-// BatchDecodeScheduler.h — Priority-Queue Batch Decode Coordinator
+// BatchDecodeScheduler.h — Work-Stealing Batch Thumbnail Decoder (Sprint 227)
 // Copyright (c) 2026 ExplorerLens Project
 //
+// Sprint 227 upgrade: work-stealing thread pool, per-worker deques,
+// back-pressure, throughput stats, and completion callbacks.
 // Accepts decode requests from multiple shell threads and drains them via
 // a priority heap (visible > adjacent > background), respecting per-format
 // latency budgets from LatencyBudgetManager.
