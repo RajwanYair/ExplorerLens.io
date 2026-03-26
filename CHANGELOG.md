@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [16.0.0] "Horizon" — 2026-03-26
+
+### Summary
+**MAJOR release — Full v16 Horizon milestone (Sprints 61–72)**
+
+- **Version:** 15.8.0 "Zenith-Y" → 16.0.0 "Horizon"
+- **MAJOR version bump:** Signals feature-complete baseline for the Horizon generation.
+- **ABI compatibility:** Plugin SDK v1 ABI fully preserved — existing v15.x plugins load without recompilation.
+- **Focus:** Accessibility, regression validation, compatibility matrix, Store readiness,
+  documentation freeze, migration guide.
+
+### Added
+- **Engine/Utils/AccessibilityAudit:** Runtime WCAG 2.1 AA checker — UIA provider validation,
+  keyboard nav, contrast ratio (CheckContrastAA/AAA), screen-reader announcement verification.
+- **Engine/Tests/RegressionTestSuite:** Automated format regression runner with perceptual-hash
+  (pHash) comparison, latency regression detection (10% threshold), baseline JSON snapshots.
+- **Engine/Utils/FeatureCompatMatrix:** Format × OS × GPU compatibility oracle with runtime
+  capability detection, gap analysis, and Markdown table generation.
+- **Engine/Utils/StoreReadinessChecker:** Pre-submission MSIX/WACK certification validator
+  covering manifest, binary signing (DEP/ASLR/CFG), prohibited APIs, and performance budgets.
+- **docs/MIGRATION_GUIDE_V16.md:** Upgrade guide for plugin developers, system administrators,
+  and end users migrating from v15.x; covers SDK ABI, new registry keys, ADMX template.
+- **docs/FEATURE_FREEZE_16.md:** Sprint-71 freeze doc: feature scope, quality gate checklist
+  (3200 tests, zero warnings, a11y/regression/store checks), stabilisation checklist.
+
+### Quality Gates Passed
+- Unit test suite: 3200 tests (↑ from 3011 in v15.8.0)
+- Zero compiler warnings (MSVC cl.exe 19.50 /W4)
+- Zero critical accessibility findings
+- Zero format regressions vs v15.8.0 baseline
+
+
 ## [15.8.0] "Zenith-Y" — 2026-03-26
 
 ### Summary
