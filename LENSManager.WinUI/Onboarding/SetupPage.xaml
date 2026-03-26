@@ -1,0 +1,97 @@
+<Page
+    x:Class="ExplorerLens.Manager.Onboarding.SetupPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid RowDefinitions="*,Auto" Padding="48,32">
+
+        <ScrollViewer Grid.Row="0">
+            <StackPanel HorizontalAlignment="Center" MaxWidth="520" Spacing="20">
+
+                <TextBlock Text="Initial Setup"
+                           Style="{StaticResource TitleTextBlockStyle}"/>
+                <TextBlock Text="Configure your preferred settings before ExplorerLens registers with Windows Explorer."
+                           Style="{StaticResource BodyTextBlockStyle}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap"/>
+
+                <!-- COM Registration -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="20">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Shell Integration" FontWeight="SemiBold"
+                                   Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <ToggleSwitch x:Name="RegisterToggle"
+                                      Header="Register with Windows Explorer (requires admin)"
+                                      IsOn="True"/>
+                        <TextBlock Text="Registers the LENSShell.dll COM server in HKLM so Explorer calls ExplorerLens for thumbnails in all user accounts."
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- GPU Backend -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="20">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="GPU Backend" FontWeight="SemiBold"
+                                   Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <ComboBox x:Name="GpuCombo" Header="Preferred GPU backend"
+                                  Width="300" HorizontalAlignment="Left">
+                            <ComboBoxItem Content="Auto-detect (recommended)" IsSelected="True"/>
+                            <ComboBoxItem Content="DirectX 12"/>
+                            <ComboBoxItem Content="DirectX 11"/>
+                            <ComboBoxItem Content="Vulkan Compute"/>
+                            <ComboBoxItem Content="CPU fallback"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Border>
+
+                <!-- Telemetry -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="20">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Anonymous Diagnostics" FontWeight="SemiBold"
+                                   Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        <ToggleSwitch x:Name="TelemetryToggle"
+                                      Header="Send anonymous usage statistics"
+                                      IsOn="False"/>
+                        <TextBlock Text="No personally identifiable information is collected. Data includes format usage counts, GPU backend selection, and crash reports. You can change this at any time in Settings."
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Navigation bar -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Content="&#xE76B; Back" Click="Back_Click"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Ellipse Width="8"  Height="8" Fill="{ThemeResource ControlStrongStrokeColorDefaultBrush}"/>
+                <Ellipse Width="10" Height="10" Fill="{ThemeResource AccentFillColorDefaultBrush}"/>
+                <Ellipse Width="8"  Height="8" Fill="{ThemeResource ControlStrongStrokeColorDefaultBrush}"/>
+            </StackPanel>
+
+            <Button Grid.Column="2" Content="Next  &#xE76C;"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="Next_Click"/>
+        </Grid>
+
+    </Grid>
+</Page>

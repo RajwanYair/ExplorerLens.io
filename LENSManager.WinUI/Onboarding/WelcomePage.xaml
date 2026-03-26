@@ -1,0 +1,87 @@
+<Page
+    x:Class="ExplorerLens.Manager.Onboarding.WelcomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid RowDefinitions="*,Auto" Padding="48,32">
+
+        <!-- Content area -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center"
+                    VerticalAlignment="Center" Spacing="24" MaxWidth="520">
+
+            <!-- Logo + name -->
+            <StackPanel HorizontalAlignment="Center" Spacing="8">
+                <FontIcon Glyph="&#xE8B9;" FontSize="72"
+                          Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                <TextBlock Text="ExplorerLens"
+                           Style="{StaticResource DisplayTextBlockStyle}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock x:Name="VersionChip" Text="v15.7.0 &quot;Zenith-X&quot;"
+                           Style="{StaticResource CaptionTextBlockStyle}"
+                           HorizontalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+            </StackPanel>
+
+            <TextBlock Text="GPU-accelerated thumbnails for 200+ file formats."
+                       Style="{StaticResource SubtitleTextBlockStyle}"
+                       HorizontalAlignment="Center" TextAlignment="Center"
+                       TextWrapping="Wrap"/>
+
+            <!-- Feature highlights -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <FontIcon Glyph="&#xE72E;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="DirectX 12 + Vulkan GPU acceleration" FontWeight="SemiBold"/>
+                            <TextBlock Text="Hardware-accelerated decode on NVIDIA, AMD, and Intel GPUs."
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <FontIcon Glyph="&#xE7C4;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="200+ formats · 25 decoders" FontWeight="SemiBold"/>
+                            <TextBlock Text="WebP, AVIF, JXL, HEIC, RAW, PDF, archives and more."
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <FontIcon Glyph="&#xE945;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="&lt;17ms thumbnail generation" FontWeight="SemiBold"/>
+                            <TextBlock Text="Sub-millisecond cache lookup, 235+ img/sec batch throughput."
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Navigation bar -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Step indicators -->
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Ellipse Width="10" Height="10" Fill="{ThemeResource AccentFillColorDefaultBrush}" x:Name="Dot1"/>
+                <Ellipse Width="8"  Height="8"  Fill="{ThemeResource ControlStrongStrokeColorDefaultBrush}" x:Name="Dot2"/>
+                <Ellipse Width="8"  Height="8"  Fill="{ThemeResource ControlStrongStrokeColorDefaultBrush}" x:Name="Dot3"/>
+            </StackPanel>
+
+            <Button Grid.Column="1" Content="Get Started  &#xE76C;"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="GetStarted_Click"/>
+        </Grid>
+
+    </Grid>
+</Page>
