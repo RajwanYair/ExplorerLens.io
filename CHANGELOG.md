@@ -9,6 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [19.2.0] "Pulsar-S" - 2026-03-26
+
+### Summary
+Final Polish & Certification — Sprint 200 / 200-sprint milestone release. ExplorerLens
+is now production-certified with a full WHQL-mapped test suite, GDPR-compliant telemetry
+consent management, WER-integrated crash reporting with triage minidumps, MSIX delta
+auto-update infrastructure, and an in-process diagnostics REPL for support engineers.
+
+### Added
+- EndToEndTestHarness: corpus-driven E2E runner with p50/p95/p99 latency reporting
+- CrashReporter: DbgHelp MiniDumpWriteDump with MiniDumpTriage default; CrashContext
+- TelemetryConsentManager: GDPR/CCPA ConsentGate; HKCU persistence; GP enforcement
+- AutoUpdateManager: MSIX delta package check; UpdateChannel GP; BITS-ready download
+- DiagnosticsConsole: named-pipe REPL (ExplorerLensDiag); version/status/flush/bundle
+- CertificationTestSuite: 18 WHQL-mapped assertions (Shell/Memory/Perf/Sec/Compat/L10n)
+- docs/RELEASE_NOTES_19.md: full v19.x Pulsar series release notes
+- docs/DEPLOYMENT_GUIDE.md: MSI, GPO, Intune, SCCM, SIEM, and troubleshooting guide
+- packaging/RELEASE_MANIFEST_19.2.0.md: artifact inventory and cert status
+
+### Certification
+- All 18 certification controls pass with 0 blocking failures
+- certReady = true
+
+### Milestone
+- Sprint 200 of 200 in the Pulsar road map series completed
+- Next series: v20.0.0 "Quasar" (Sprints 201-300)
+
+### Security
+- CrashReporter: MiniDumpFilterMemory default — no heap PII in triage dumps
+- TelemetryConsentManager: GP-forced-zero blocks ALL emission including anon counters
+- AutoUpdateManager: HTTPS-only update endpoint via WinHTTP/Schannel
+
+### Infrastructure
+- TestCount raised to 4500 (9 new Final Polish / certification test suites)
+
+
 ## [19.1.0] "Pulsar-R" - 2026-03-26
 
 ### Summary
