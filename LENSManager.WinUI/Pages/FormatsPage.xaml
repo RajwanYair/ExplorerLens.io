@@ -1,0 +1,89 @@
+<!-- FormatsPage.xaml — WinUI 3 Format Registry Editor
+     Sprint 43 (v15.7.0 Modern GUI) — Format registry editor with decoder routing info -->
+<Page
+    x:Class="LENSManager.Pages.FormatsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:LENSManager.Pages"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Margin="24,16,24,24" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Search + filter bar -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <AutoSuggestBox Grid.Column="0" PlaceholderText="Search formats (e.g. webp, pdf, raw…)"
+                            QueryIcon="Find" x:Name="FormatSearch"
+                            TextChanged="FormatSearch_TextChanged"/>
+            <ComboBox Grid.Column="1" x:Name="CategoryFilter" Margin="8,0,0,0"
+                      PlaceholderText="All categories"
+                      SelectionChanged="CategoryFilter_SelectionChanged">
+                <ComboBoxItem Content="All"/>
+                <ComboBoxItem Content="Images"/>
+                <ComboBoxItem Content="Archives"/>
+                <ComboBoxItem Content="Documents"/>
+                <ComboBoxItem Content="RAW Camera"/>
+                <ComboBoxItem Content="3D/CAD"/>
+                <ComboBoxItem Content="Scientific"/>
+            </ComboBox>
+            <ToggleButton Grid.Column="2" x:Name="ShowRegisteredOnly" Margin="8,0,0,0"
+                          Content="Registered only" IsChecked="False"
+                          Checked="ShowRegisteredOnly_Changed"
+                          Unchecked="ShowRegisteredOnly_Changed"/>
+        </Grid>
+
+        <!-- Format count summary -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16">
+            <TextBlock x:Name="FormatCountLabel" Opacity="0.6" FontSize="12"/>
+            <HyperlinkButton Content="Register all" Click="RegisterAll_Click" FontSize="12"/>
+            <HyperlinkButton Content="Unregister all" Click="UnregisterAll_Click" FontSize="12"/>
+        </StackPanel>
+
+        <!-- Format list -->
+        <ListView Grid.Row="2" x:Name="FormatList" SelectionMode="Single"
+                  SelectionChanged="FormatList_SelectionChanged">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="4,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="200"/>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- Extension badge -->
+                        <Border Grid.Column="0" Background="{StaticResource LensAccentBrush}"
+                                CornerRadius="4" Padding="4,2" HorizontalAlignment="Left">
+                            <TextBlock Text="{Binding Extension}" FontFamily="{StaticResource LensMonoFont}"
+                                       FontSize="11" Foreground="White" FontWeight="SemiBold"/>
+                        </Border>
+                        <TextBlock Grid.Column="1" Text="{Binding Description}" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="{Binding Decoder}" Opacity="0.7"
+                                   FontFamily="{StaticResource LensMonoFont}" FontSize="11"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="3" Text="{Binding MimeType}" Opacity="0.5"
+                                   FontSize="11" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="4" Text="{Binding GpuAccelerated}" Opacity="0.7"
+                                   VerticalAlignment="Center"/>
+                        <ToggleSwitch Grid.Column="5" x:Name="FormatEnabled"
+                                      IsOn="{Binding IsEnabled, Mode=TwoWay}"
+                                      OnContent="" OffContent=""
+                                      Toggled="FormatToggled"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+    </Grid>
+</Page>
