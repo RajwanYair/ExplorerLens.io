@@ -1,0 +1,112 @@
+# notify-failure.yml — Open a GitHub Issue whenever a key workflow fails
+#
+# Triggered by workflow_run completion events for the four core workflows.
+# Only fires on failure — passing runs are silently ignored.
+#
+# HOW TO DEBUG A FAILURE:
+#   1. Check the auto-opened issue (label: ci/cd + bug) for the run link
+#   2. Click the run link → expand the failed step → read the error
+#   3. For environment problems, use the "Debug CI Environment" workflow
+#      (Actions → Debug CI Environment → Run workflow)
+#   4. If the build compiled but tests failed, download EngineTests.exe from
+#      the build artifact and run it locally with:
+#        build\bin\EngineTests.exe  (exit code + stdout shows failing test)
+#   5. For linker errors: check external lib ages in the artifact cache —
+#      clear the cache key from Actions → Caches if libs are stale
+
+name: Notify on CI Failure
+
+on:
+  workflow_run:
+    workflows:
+      - "Build ExplorerLens Engine"
+      - "CI Matrix Build"
+      - "Release"
+      - "CodeQL Security Analysis"
+    types:
+      - completed
+
+permissions:
+  issues: write
+  actions: read
+
+jobs:
+  notify:
+    name: Open issue on failure
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure'
+    timeout-minutes: 5
+
+    steps:
+      - name: Open or update failure issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run       = context.payload.workflow_run;
+            const workflow  = run.name;
+            const runUrl    = run.html_url;
+            const branch    = run.head_branch ?? 'unknown';
+            const sha       = (run.head_sha ?? '').slice(0, 8);
+            const actor     = run.triggering_actor?.login ?? 'unknown';
+            const timestamp = new Date().toISOString();
+
+            const title = `CI failure: ${workflow} on ${branch}`;
+
+            const body = [
+              `## CI Failure: ${workflow}`,
+              '',
+              `| Field | Value |`,
+              `|-------|-------|`,
+              `| **Workflow** | ${workflow} |`,
+              `| **Branch** | \`${branch}\` |`,
+              `| **Commit** | \`${sha}\` |`,
+              `| **Triggered by** | @${actor} |`,
+              `| **Time** | ${timestamp} |`,
+              `| **Run** | [View full log](${runUrl}) |`,
+              '',
+              '## How to Debug',
+              '',
+              '1. **Click the run link above** → expand the red step → read the error',
+              '2. **Quick environment check** (no build):<br>',
+              '   Actions → **Debug CI Environment** → Run workflow → `run_build: false`',
+              '3. **Full repro build** (slow, ~15 min):<br>',
+              '   Actions → **Debug CI Environment** → Run workflow → `run_build: true`<br>',
+              '   Then download the `diagnostic-<run-id>` artifact for `configure.log` + `build.log`',
+              '4. **External lib cache stale?** → Actions → Caches → delete `external-libs-*` → re-run',
+              '5. **Linker error** `LNK1127`? → Lib was built with a different MSVC toolset.',
+              '   Delete the cache → the composite action will rebuild from source.',
+              '',
+              `*Auto-created by [notify-failure.yml](${context.payload.repository?.html_url}/.github/workflows/notify-failure.yml)*`,
+            ].join('\n');
+
+            // De-duplicate: update existing open issue for this workflow+branch
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              labels: 'ci/cd,bug',
+            });
+
+            const existing = issues.data.find(i =>
+              i.title.includes(workflow) && i.title.includes(branch)
+            );
+
+            if (existing) {
+              // Append a new failure event as a comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                issue_number: existing.number,
+                body: `### Re-triggered failure at ${timestamp}\n\n[View run](${runUrl}) — commit \`${sha}\` by @${actor}`,
+              });
+              console.log(`Updated existing issue #${existing.number}`);
+            } else {
+              const issue = await github.rest.issues.create({
+                owner:  context.repo.owner,
+                repo:   context.repo.repo,
+                title,
+                body,
+                labels: ['ci/cd', 'bug', 'needs-triage'],
+              });
+              console.log(`Created issue #${issue.data.number}: ${issue.data.html_url}`);
+            }

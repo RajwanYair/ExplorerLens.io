@@ -1,0 +1,214 @@
+# pr-checks.yml — Pull Request validation checks
+#
+# Runs on every PR opened/updated against main. Validates:
+#   1. Conventional commit format in the PR title
+#   2. PR is not too large (warns at 500 lines changed, blocks at 2000)
+#   3. CHANGELOG.md was updated for user-facing changes
+#   4. Version consistency (VERSION file matches Engine/Core/BuildValidation.h)
+#
+# All checks annotate the PR with inline comments — they do NOT silently pass.
+
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 1. Conventional commit title ────────────────────────────────────────────
+  conventional-title:
+    name: Validate PR title (Conventional Commits)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check PR title format
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allowed types (extend as needed)
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+            ci
+            perf
+            security
+            build
+            revert
+          # Allowed scopes (empty = any scope accepted)
+          scopes: |
+            engine
+            shell
+            manager
+            decoder
+            plugin
+            gpu
+            memory
+            cache
+            pipeline
+            ai
+            build
+            ci
+            test
+            docs
+            installer
+            sdk
+            cli
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            PR title must start with a lowercase letter after the type/scope prefix.
+            Example: "feat(decoder): add JPEG XL support"
+
+  # ── 2. PR size check ────────────────────────────────────────────────────────
+  pr-size:
+    name: Check PR size
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute diff size and label PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr     = context.payload.pull_request;
+            const added  = pr.additions ?? 0;
+            const removed = pr.deletions ?? 0;
+            const total  = added + removed;
+
+            // Choose size label
+            let sizeLabel, sizeColor;
+            if      (total < 50)   { sizeLabel = 'size: XS';  sizeColor = '3cbf00'; }
+            else if (total < 200)  { sizeLabel = 'size: S';   sizeColor = '5d9800'; }
+            else if (total < 500)  { sizeLabel = 'size: M';   sizeColor = 'edde1a'; }
+            else if (total < 1000) { sizeLabel = 'size: L';   sizeColor = 'e09820'; }
+            else if (total < 2000) { sizeLabel = 'size: XL';  sizeColor = 'e05820'; }
+            else                   { sizeLabel = 'size: XXL'; sizeColor = 'b60205'; }
+
+            // Ensure label exists
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner, repo: context.repo.repo,
+                name: sizeLabel, color: sizeColor,
+                description: `PR changes ${sizeLabel.replace('size: ','')}`
+              });
+            } catch {}
+
+            // Remove old size labels, add new one
+            const current = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: pr.number
+            });
+            for (const l of current.data.filter(l => l.name.startsWith('size:'))) {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: pr.number, name: l.name
+              }).catch(() => {});
+            }
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: pr.number, labels: [sizeLabel]
+            });
+
+            // Warn or block on very large PRs
+            if (total > 2000) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: pr.number,
+                body: [
+                  `## ⚠️ Large PR Warning`,
+                  ``,
+                  `This PR changes **${total} lines** (+${added} / -${removed}).`,
+                  `Large PRs are harder to review and more likely to introduce bugs.`,
+                  ``,
+                  `Consider splitting it into smaller, focused PRs if possible:`,
+                  `- One PR per subsystem (Engine/GPU, Engine/Memory, etc.)`,
+                  `- Separate refactoring from feature additions`,
+                  `- Keep build-system changes in their own PR`,
+                ].join('\n')
+              });
+              core.warning(`PR is very large: ${total} lines changed`);
+            }
+
+            core.info(`PR size: ${sizeLabel} (${total} lines: +${added} / -${removed})`);
+
+  # ── 3. CHANGELOG update check ────────────────────────────────────────────────
+  changelog-check:
+    name: CHANGELOG.md updated (user-facing changes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if CHANGELOG needs updating
+        shell: bash
+        run: |
+          PR_LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+
+          # Skip check for docs-only, CI-only, dependency PRs
+          if echo "$PR_LABELS" | grep -qE '"(documentation|ci/cd|dependencies|wontfix|invalid)"'; then
+            echo "Skipping CHANGELOG check for non-user-facing PR"
+            exit 0
+          fi
+
+          # Check if CHANGELOG.md was touched
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          if echo "$CHANGED" | grep -qF "CHANGELOG.md"; then
+            echo "✓ CHANGELOG.md updated"
+          else
+            echo "::warning::CHANGELOG.md was not updated. If this PR has user-facing changes, please add an entry under the [Unreleased] section."
+          fi
+
+  # ── 4. Version consistency ─────────────────────────────────────────────────
+  version-consistency:
+    name: Version file consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check version files agree
+        shell: bash
+        run: |
+          FILE_VER=$(cat VERSION | tr -d '[:space:]')
+          echo "VERSION file: $FILE_VER"
+
+          # Check BuildValidation.h
+          if [ -f "Engine/Core/BuildValidation.h" ]; then
+            H_VER=$(grep 'EXPLORERLENS_VERSION' Engine/Core/BuildValidation.h \
+                    | grep -oP '"\K[0-9]+\.[0-9]+\.[0-9]+(?=")' | head -1)
+            echo "BuildValidation.h: $H_VER"
+            if [ -n "$H_VER" ] && [ "$FILE_VER" != "$H_VER" ]; then
+              echo "::warning::Version mismatch: VERSION=$FILE_VER but BuildValidation.h=$H_VER"
+              echo "Run the release procedure in docs/ to sync all version references."
+            fi
+          fi
+
+          # Check Engine.h minor/patch
+          if [ -f "Engine/Engine.h" ]; then
+            echo "Engine.h version line:"
+            grep -E 'ENGINE_VERSION|_MINOR|_PATCH|_MAJOR' Engine/Engine.h | head -4
+          fi

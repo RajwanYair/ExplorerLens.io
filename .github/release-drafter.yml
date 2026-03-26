@@ -1,0 +1,98 @@
+# release-drafter.yml — Auto-generate release notes from merged PR titles
+# Used by the release-drafter workflow (.github/workflows/release-drafter.yml).
+# Merging a PR into main updates the draft release for the next version.
+
+name-template: "ExplorerLens v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+tag-prefix: "v"
+
+# Version bump resolution — reads the highest label on merged PRs since last release
+version-resolver:
+  major:
+    labels:
+      - "breaking-change"
+  minor:
+    labels:
+      - "enhancement"
+      - "plugin"
+      - "gpu"
+      - "ai/ml"
+  patch:
+    labels:
+      - "bug"
+      - "security"
+      - "performance"
+      - "build"
+      - "ci/cd"
+      - "documentation"
+  default: patch
+
+# Category sections in the release body — order matters (displayed top→bottom)
+categories:
+  - title: "⚠️ Breaking Changes"
+    labels:
+      - "breaking-change"
+
+  - title: "🚀 New Features & Decoders"
+    labels:
+      - "enhancement"
+      - "plugin"
+
+  - title: "🤖 AI / ML"
+    labels:
+      - "ai/ml"
+
+  - title: "⚡ GPU & Performance"
+    labels:
+      - "gpu"
+      - "performance"
+
+  - title: "🔒 Security"
+    labels:
+      - "security"
+
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "bug"
+
+  - title: "🧠 Memory & Cache"
+    labels:
+      - "memory"
+      - "cache"
+
+  - title: "🔨 Build & CI"
+    labels:
+      - "build"
+      - "ci/cd"
+
+  - title: "📚 Documentation"
+    labels:
+      - "documentation"
+
+  - title: "🏠 Maintenance"
+    labels:
+      - "dependencies"
+
+# PRs with none of the above labels go here
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-title-escapes: '\<*_&'
+
+# Label for PRs that should be excluded from release notes (e.g. drafts)
+exclude-labels:
+  - "wontfix"
+  - "invalid"
+  - "duplicate"
+
+# Release body template
+template: |
+  <img src="https://raw.githubusercontent.com/RajwanYair/ExplorerLens.io/main/docs/assets/social-preview.svg" alt="ExplorerLens" width="900"/>
+
+  ---
+
+  $CHANGES
+
+  ---
+
+  **Full Changelog**: https://github.com/RajwanYair/ExplorerLens.io/blob/main/CHANGELOG.md
+
+  > Built with MSVC v145 (cl.exe 19.50) · Windows SDK 10.0.26100.0 · COM CLSID `9E6ECB90-5A61-42BD-B851-D3297D9C7F39`
