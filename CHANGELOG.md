@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [17.2.0] "Nova-S" - 2026-03-26
+
+### Summary
+Security hardening milestone - v17.2.0 Nova-S
+
+### Added
+- SecureDecodeContext sandbox isolation via Job Objects / AppContainer (Sprint 111)
+- IntegrityVerifier 3-tier plugin trust chain: Authenticode + thumbprint + HMAC-SHA256 (Sprint 113)
+- AuditLogger security events to ETW + structured JSON logfile (Sprint 115)
+- CertificatePinner SPKI SHA-256 pinning for auto-update CDN (Sprint 116)
+- StackGuardPolicy CFG/DEP/ASLR/CET module compliance checker (Sprint 117)
+- SECURITY_HARDENING.md threat model and mitigation matrix (Sprint 118)
+
+### Security
+- High-risk formats (PDF, SVG, RAR, AI, EPS) now decoded in isolated child process
+- All plugins require valid Authenticode + marketplace manifest hash before load
+- CodeQL SAST runs on every PR via .github/workflows/codeql.yml
+
+
 ## [17.1.0] "Nova-R" - 2026-03-26
 
 ### Summary
