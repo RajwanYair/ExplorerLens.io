@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [20.0.0] "Quasar" - 2026-03-26
+### Summary
+MAJOR release: Accessibility & Internationalisation. Full Windows a11y stack (high contrast,
+screen reader, CVD simulation, keyboard navigation), 12-locale i18n engine, RTL layout
+mirroring, responsive DPI layout, and locale-aware date/number formatting.
+### Added
+- AccessibilityLayer: High contrast theme detection, screen reader notification via NotifyWinEvent, reduce-motion support
+- KeyboardNavigationHandler: Tab-order focus management, F6 pane cycling, RegisterHotKey shortcuts, DrawFocusRing
+- ColorBlindnessFilter: 8 CVD types via Vienot 1999 LMS matrix, ApplyToRow BGRA, AdaptColor COLORREF overlay
+- LocalizationEngine: 12-locale string table (en-US/de-DE/fr-FR/ja-JP/ar-SA fallback chain), FormatBytes/FormatNumber NLS
+- RTLTextAdapter: WS_EX_RTLREADING/LAYOUTRTL, MirrorRect, WrapBidi Unicode RLE/PDF, DrawText RTL flags
+- DateTimeLocalizer: GetDateFormatEx/GetTimeFormatEx, RelativeDate "X ago" strings, ISO8601, FormatDuration ms/s
+- NumberFormatAdapter: GetNumberFormatEx, K/M/G/T SI compact, FormatThroughput img/sec, FormatLatency, FormatVersion
+- ResponsiveLayoutManager: Compact/Normal/Wide/UltraWide breakpoints, dp-to-physical scaling, DPI-change callbacks
+- docs/ACCESSIBILITY.md: High contrast, CVD, keyboard nav, RTL, DPI, WCAG 2.1 AA compliance reference
+### Infrastructure
+- TestCount raised to 4600 (9 new Accessibility/i18n test suites)
+- Engine/i18n/ directory introduced for i18n subsystem
+
+
 ## [19.2.0] "Pulsar-S" - 2026-03-26
 
 ### Summary
