@@ -73,6 +73,7 @@ ExplorerLensSetup_x86/
 external/**/third_party/
 external/**/build*/
 external/**/install/
+external/camera-libs/libraw-install/lib/
 external/**/.git/
 external/**/.github/
 
@@ -349,6 +350,7 @@ paket-files/
 
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
+**/.mypy_cache/
 *.pyc
 
 # Cake - Uncomment if you are using it
