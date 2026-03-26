@@ -26,7 +26,7 @@
         Restricts which GPU rendering backend ExplorerLens may use.
         If Enabled, the selected backend is forced for all users on this machine.
         If Disabled or Not Configured, users may select any available backend.
-        
+
         Options:
           0 = Auto-detect (default)
           1 = DirectX 12 only
