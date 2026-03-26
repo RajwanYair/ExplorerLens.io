@@ -32,7 +32,9 @@
       ],
       "console": "integratedTerminal",
       "symbolSearchPath": "${workspaceFolder}\\build\\bin",
-      "sourceFileMap": {}
+      "sourceFileMap": {},
+      // Wires this config to the Testing pane's Debug button (▶ with bug icon)
+      "purpose": ["debug-test"]
     },
     {
       "name": "C++: Launch LENSManager",

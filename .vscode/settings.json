@@ -276,6 +276,25 @@
     "powershell.scriptAnalysis.enable": true,
     "powershell.integratedConsole.showOnStartup": false,
     "powershell.integratedConsole.focusConsoleOnExecute": false,
+    // ── Testing Pane (VS Code Test Explorer) ──────────────────────
+    // CTest: CMake Tools surfaces add_test() entries automatically.
+    // Each entry maps to a CTest label group (cache/gpu/decoder/etc.).
+    // Run a single test group: select it in the Testing pane → Run.
+    // Debug a test: Testing pane → Debug button → uses launch.json "debug-test".
+    "cmake.ctest.testExplorer.enabled": true,
+    // Python (ExplorerLens.py/)
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+        "tests/",
+        "-v",
+        "--tb=short"
+    ],
+    "python.testing.cwd": "${workspaceFolder}/ExplorerLens.py",
+    // UX: auto-open failure peek, gutter click runs test
+    "testing.automaticallyOpenPeekView": "failureAnywhere",
+    "testing.defaultGutterClickAction": "run",
+    "testing.showAllMessages": true,
     // ── Python ────────────────────────────────────────────────────
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticSeverityOverrides": {

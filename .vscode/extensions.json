@@ -31,7 +31,10 @@
         "jeff-hykin.better-cpp-syntax", // Extended C++ syntax highlighting
         "ms-vscode.test-adapter-converter", // Test explorer integration
         // ── Diagram Authoring ──
-        "bierner.markdown-mermaid" // Mermaid diagram preview in Markdown files
+        "bierner.markdown-mermaid", // Mermaid diagram preview in Markdown files
+        // ── Python Development ──
+        "ms-python.python",         // Python language support + pytest test runner
+        "ms-python.pylance"         // Fast Python type checking + IntelliSense
     ],
     "unwantedRecommendations": [
         "ms-vscode.cpptools-themes" // Unnecessary — default themes are sufficient
