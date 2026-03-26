@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [18.2.0] "Orion-S" - 2026-03-26
+
+### Summary
+Cloud Sync and Collaboration release. ExplorerLens now generates thumbnails for
+un-hydrated OneDrive/SharePoint cloud placeholders via server-side Graph API thumbnails
+and CfApi header hydration, with sync status and co-author overlay badges.
+
+### Added
+- CloudStorageAdapter: ICloudStorageAdapter interface for OneDrive/SharePoint/Azure/S3
+- OneDriveProviderBridge: CfApi PlaceholderState query and partial header hydration
+- CloudThumbnailFetcher: Microsoft Graph API /thumbnails fetch (bypasses local decode)
+- OfflineAvailabilityChecker: FullyLocal/PartialHydrate/CloudThumb/Skip decision engine
+- CollaborationMarker: sharing scope and live co-author count overlay badges
+- CloudSyncStatusBadge: 9-state sync status overlay (Synced/Conflict/CloudOnly/Pinned/...)
+- NetworkAwarePrefetcher: metered-network-aware rate-limited cloud prefetch
+- CloudFileStreamer: HTTPS range-request partial downloader (Azure SAS / S3 / OneDrive)
+- docs/CLOUD_SYNC.md: full cloud decode pipeline, provider matrix, badge reference
+
+### Security
+- No credentials stored; bearer tokens are transient (WAM/MSAL lifetime only)
+- HTTPS-only for range requests; HTTP rejected at request construction
+
+### Infrastructure
+- TestCount raised to 4100 (9 new cloud/collaboration test suites)
+
+
 ## [18.1.0] "Orion-R" - 2026-03-26
 
 ### Summary
