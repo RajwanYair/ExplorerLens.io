@@ -1,8 +1,66 @@
 # ExplorerLens Security Hardening Guide
 
-**Version:** 17.2.0 "Nova-S"  
+**Version:** 20.3.0 "Quasar-T"  
 **Classification:** Public  
-**Updated:** 2026-03-26
+**Updated:** 2026-07-14
+
+---
+
+## Security Hardening v2 — New in v20.3.0
+
+Sprint 231–238 added a second-generation security layer covering the full trust boundary:
+
+| Component | Header | Purpose |
+|-----------|--------|---------|
+| **CodeIntegrityChecker** | `Engine/Core/CodeIntegrityChecker.h` | Authenticode `WinVerifyTrust` + CryptAPI SHA-256 hash pinning for all loaded PE images |
+| **SandboxEscapeGuard** | `Engine/Core/SandboxEscapeGuard.h` | Windows Job Object: per-process memory/CPU/UI restrictions, KILL_ON_JOB_CLOSE |
+| **SecureStringPool** | `Engine/Core/SecureStringPool.h` | `VirtualAlloc`+`VirtualLock` locked pages, `CryptProtectMemory` same-process encryption at rest |
+| **AuditLogger v2** | `Engine/Core/AuditLogger.h` | HMAC-SHA256 chain-linked JSONL entries, 14 event types, `FILE_FLAG_WRITE_THROUGH` append-only |
+| **NetworkTrustManager** | `Engine/Core/NetworkTrustManager.h` | SPKI SHA-256 certificate pinning via `CryptEncodeObjectEx`, 3 default endpoints |
+| **InputValidator** | `Engine/Core/InputValidator.h` | Path traversal + device names + null bytes + registry/plugin/thumbnail-size boundary validation |
+| **PrivilegeElevationGuard** | `Engine/Core/PrivilegeElevationGuard.h` | COM minimal-privilege drop (`AdjustTokenPrivileges`), restricted token for decode workers, UAC elevation helper |
+| **ACLManager** | `Engine/Core/ACLManager.h` | `SetFileSecurity` / `BuildExplicitAccessWithName` — cache DB + audit log locked to current user; world-write denied |
+
+### Privilege Reduction Path (Render Worker)
+
+```
+explorer.exe → COM in-proc server
+  → PrivilegeElevationGuard::DropRenderWorkerPrivileges()
+       Drops: SeDebugPrivilege, SeBackupPrivilege, SeRestorePrivilege,
+              SeCreateSymbolicLinkPrivilege, SeTcbPrivilege,
+              SeAssignPrimaryTokenPrivilege, SeImpersonatePrivilege
+       Keeps: SeChangeNotifyPrivilege (COM/Shell required)
+  → SandboxEscapeGuard::Create(SandboxLevel::Standard)
+       JobObject: 512 MB private memory limit, 2 proc limit,
+                  UI handles/clipboard/desktop locked
+  → Decode runs — no OutboundNet, no write to system paths
+```
+
+### Certificate Pinning Endpoints
+
+| Endpoint | Scheme |
+|----------|--------|
+| `activate.explorerlens.io` | SPKI SHA-256 pin, HSTS required |
+| `feedback.explorerlens.io` | SPKI SHA-256 pin, HSTS required |
+| `telemetry.explorerlens.io` | SPKI SHA-256 pin, HSTS required |
+
+### Input Validation Matrix
+
+| Input | Validator | Checks |
+|-------|-----------|--------|
+| File path | `InputValidator::ValidatePath()` | Canonical form, `..` traversal, device names, null bytes |
+| Thumbnail dimension | `InputValidator::ValidateThumbnailSize()` | Range 16–2048 px |
+| Registry key | `InputValidator::ValidateRegistryKey()` | Length ≤ 255, no null/backslash |
+| Plugin ID | `InputValidator::ValidatePluginId()` | Alphanum + hyphen/underscore, 1–64 chars |
+
+### ACL Defaults
+
+| Target | Policy |
+|--------|--------|
+| `AuditLogger` JSONL | Full Control: current user only; all other ACEs removed |
+| `PersistentDiskCache` SQLite | World write/execute denied; owner retains full control |
+| Config YAML | World write denied |
+| Plugin directory | World write denied |
 
 ---
 
