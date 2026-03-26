@@ -29,7 +29,9 @@
         // ── Debugging & Analysis ──
         "vadimcn.vscode-lldb", // LLDB debugger (fallback for native debug)
         "jeff-hykin.better-cpp-syntax", // Extended C++ syntax highlighting
-        "ms-vscode.test-adapter-converter" // Test explorer integration
+        "ms-vscode.test-adapter-converter", // Test explorer integration
+        // ── Diagram Authoring ──
+        "bierner.markdown-mermaid" // Mermaid diagram preview in Markdown files
     ],
     "unwantedRecommendations": [
         "ms-vscode.cpptools-themes" // Unnecessary — default themes are sufficient

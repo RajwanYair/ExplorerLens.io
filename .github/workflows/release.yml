@@ -427,3 +427,181 @@ jobs:
           append_body: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─── Job 3: Post-Release Verification ──────────────────────────────────────
+  # Runs after the release is published. Validates artifacts, checksums, and
+  # GitHub Release accessibility. Opens a GitHub Issue automatically if anything
+  # fails so the team has an actionable ticket to work from.
+  verify:
+    name: Verify Release Health
+    runs-on: ubuntu-latest
+    needs: [build, publish]
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts-${{ needs.build.outputs.version }}
+          path: dist/
+        continue-on-error: true
+
+      - name: Verify release
+        id: verify
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          ERRORS=()
+          WARNINGS=()
+
+          # 1. Required artifact files must be present
+          for f in \
+              "ExplorerLens-${VERSION}-x64.zip" \
+              "SHA256SUMS.txt" \
+              "ExplorerLens-${VERSION}-SBOM.json" \
+              "verification-report-${VERSION}.json"; do
+            [[ ! -f "dist/$f" ]] && ERRORS+=("Missing required artifact: $f")
+          done
+
+          # 2. MSI is optional but warn when absent
+          [[ ! -f "dist/ExplorerLens-${VERSION}-x64.msi" ]] && \
+            WARNINGS+=("Optional artifact missing: ExplorerLens-${VERSION}-x64.msi")
+
+          # 3. ZIP must contain LENSShell.dll
+          if [[ -f "dist/ExplorerLens-${VERSION}-x64.zip" ]]; then
+            if ! unzip -l "dist/ExplorerLens-${VERSION}-x64.zip" | grep -q "LENSShell.dll"; then
+              ERRORS+=("ZIP does not contain LENSShell.dll")
+            fi
+          fi
+
+          # 4. Verify SHA256 checksums
+          if [[ -f "dist/SHA256SUMS.txt" ]]; then
+            cd dist
+            while read -r hash filename; do
+              [[ "$hash" =~ ^[0-9A-Fa-f]{64}$ ]] || continue
+              if [[ -f "$filename" ]]; then
+                actual=$(sha256sum "$filename" | awk '{print $1}')
+                [[ "${hash,,}" != "${actual,,}" ]] && ERRORS+=("Checksum mismatch: $filename")
+              fi
+            done < SHA256SUMS.txt
+            cd ..
+          fi
+
+          # 5. GitHub Release must be accessible with ≥3 assets
+          RELEASE_JSON=$(gh release view "v${VERSION}" --json tagName,assets 2>&1)
+          if [[ $? -ne 0 ]]; then
+            ERRORS+=("GitHub Release v${VERSION} not accessible: $RELEASE_JSON")
+          else
+            ASSET_COUNT=$(echo "$RELEASE_JSON" | python3 -c \
+              "import sys,json; print(len(json.load(sys.stdin).get('assets',[])))")
+            [[ "$ASSET_COUNT" -lt 3 ]] && \
+              WARNINGS+=("Release has only $ASSET_COUNT assets (expected ≥3)")
+          fi
+
+          # 6. Tag version must match VERSION file
+          FILE_VERSION=$(cat VERSION | tr -d '[:space:]')
+          [[ "$VERSION" != "$FILE_VERSION" ]] && \
+            WARNINGS+=("Tag version ($VERSION) differs from VERSION file ($FILE_VERSION)")
+
+          # Persist results for later steps
+          printf '%s\n' "${ERRORS[@]}"   > /tmp/verify-errors.txt   2>/dev/null || true
+          printf '%s\n' "${WARNINGS[@]}" > /tmp/verify-warnings.txt 2>/dev/null || true
+
+          if [[ ${#ERRORS[@]} -gt 0 ]]; then
+            for e in "${ERRORS[@]}"; do echo "::error::$e"; done
+            echo "status=failed" >> "$GITHUB_OUTPUT"
+          elif [[ ${#WARNINGS[@]} -gt 0 ]]; then
+            for w in "${WARNINGS[@]}"; do echo "::warning::$w"; done
+            echo "status=warning" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=passed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write job summary
+        if: always()
+        shell: bash
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          STATUS="${{ steps.verify.outputs.status }}"
+          echo "## Release v${VERSION} Verification — ${STATUS^^}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$STATUS" == "passed" ]]; then
+            echo "✅ All checks passed." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Errors"   >> "$GITHUB_STEP_SUMMARY"
+            cat /tmp/verify-errors.txt   >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(none)" >> "$GITHUB_STEP_SUMMARY"
+            echo ""              >> "$GITHUB_STEP_SUMMARY"
+            echo "### Warnings" >> "$GITHUB_STEP_SUMMARY"
+            cat /tmp/verify-warnings.txt >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(none)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Open issue on verification failure
+        if: steps.verify.outputs.status == 'failed'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs      = require('fs');
+            const version = '${{ needs.build.outputs.version }}';
+            const runUrl  = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            const sha     = (process.env.GITHUB_SHA ?? '').slice(0, 8) || '(unknown)';
+
+            let errors   = '';
+            let warnings = '';
+            try { errors   = fs.readFileSync('/tmp/verify-errors.txt',   'utf8').trim(); } catch {}
+            try { warnings = fs.readFileSync('/tmp/verify-warnings.txt', 'utf8').trim(); } catch {}
+
+            const body = [
+              `## Release v${version} Verification Failed`,
+              '',
+              `Post-release verification for **v${version}** (commit \`${sha}\`) detected failures.`,
+              `See the [workflow run](${runUrl}) for full details.`,
+              '',
+              '### Errors',
+              '```',
+              errors || '(see workflow logs)',
+              '```',
+              '',
+              warnings ? `### Warnings\n\`\`\`\n${warnings}\n\`\`\`\n` : '',
+              '### How to Fix',
+              '1. Review the errors above and the linked workflow run.',
+              '2. Fix the identified issue (missing binary, checksum mismatch, etc.).',
+              `3. Re-trigger: \`git tag -d v${version} && git tag v${version} && git push origin --tags --force\``,
+              '',
+              `*Auto-created by [release verification](${runUrl})*`,
+            ].join('\n');
+
+            // Avoid duplicate issues — update existing open issue if present
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              labels: 'release-failure',
+            });
+            const dup = existing.data.find(i => i.title.includes(`v${version}`));
+            if (dup) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                issue_number: dup.number,
+                body: `Re-run on ${new Date().toISOString()} still failing:\n\n${body}`,
+              });
+              console.log(`Updated existing issue #${dup.number}`);
+            } else {
+              const issue = await github.rest.issues.create({
+                owner:  context.repo.owner,
+                repo:   context.repo.repo,
+                title:  `Release v${version} verification failed`,
+                body,
+                labels: ['release-failure', 'bug'],
+              });
+              console.log(`Created issue #${issue.data.number}`);
+            }
+            core.setFailed('Release verification failed — see issue for details');

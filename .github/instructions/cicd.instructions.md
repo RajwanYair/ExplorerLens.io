@@ -167,3 +167,62 @@ git tag vX.Y.Z → release.yml
 - **Always build with MSVC v145** — never Clang for production artifacts
 - **VERSION file is the fallback** — release.yml reads it when no tag info available
 - **Sprint plan is in** `docs/SPRINT_PLAN_100.md` — 100 sprints through v17.0.0 "Nova"
+
+---
+
+## Post-Release Verification (Required)
+
+Every release workflow **must** include a `verify` job that runs after `publish` and
+confirms the release finished cleanly. If verification fails, a GitHub Issue is opened
+automatically so the team has an actionable ticket.
+
+### Architecture
+
+```
+git tag vX.Y.Z → release.yml
+  └─ build job   (windows-latest)  — compile, package, upload artifacts
+  └─ publish job (ubuntu-latest)   — create GitHub Release
+  └─ verify job  (ubuntu-latest)   — check health, open issue on failure
+```
+
+### What the `verify` Job Checks
+
+| Check | Pass Condition |
+|-------|---------------|
+| Required artifacts present | `ExplorerLens-X.Y.Z-x64.zip`, `SHA256SUMS.txt`, `SBOM.json`, `verification-report.json` all in `dist/` |
+| ZIP integrity | ZIP contains `LENSShell.dll` |
+| SHA256 checksums | Every hash in `SHA256SUMS.txt` matches the actual artifact |
+| GitHub Release accessible | `gh release view vX.Y.Z` returns HTTP 200 with ≥3 assets |
+| Version consistency | Tag version matches contents of `VERSION` file |
+| MSI present (warn only) | `ExplorerLens-X.Y.Z-x64.msi` in `dist/` |
+
+### Failure Handling
+
+- Errors → job fails, GitHub Issue created with label `release-failure` + `bug`
+- Duplicate prevention: if an open issue for the same version already exists, a comment is appended instead of opening a new issue
+- Warnings → job succeeds with annotations; no issue created
+
+### Re-triggering a Failed Release
+
+```powershell
+# After fixing the root cause:
+git tag -d vX.Y.Z
+git tag vX.Y.Z
+git push origin --tags --force   # fires release.yml again
+```
+
+### Required Job Permissions
+
+```yaml
+verify:
+  permissions:
+    contents: read   # download artifacts, read VERSION
+    issues: write    # create/comment on GitHub Issues
+```
+
+### Rule: Never Skip Verification
+
+- The `verify` job must always be the last job in `release.yml`
+- It must have `needs: [build, publish]` so it only runs after both succeed
+- It must use `actions/github-script@v7` (not `gh` CLI) for issue creation to
+  avoid shell-injection risks when constructing the issue body

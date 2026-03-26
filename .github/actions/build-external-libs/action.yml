@@ -71,19 +71,33 @@ runs:
         }
 
         # ── 2. zstd (no dependencies) ─────────────────────────────────────────
+        # zstd's cmake build system lives in build/cmake/ which is gitignored
+        # and absent in CI. Compile directly from the tracked lib/ C sources
+        # instead — no cmake required, works identically on any MSVC toolset.
         if ($missing -contains 'zstd') {
-          Write-Host "`n[2/5] Building zstd 1.5.7..." -ForegroundColor Yellow
-          Invoke-CMakeLib `
-            -Source 'external/compression-libs/zstd-1.5.7/build/cmake' `
-            -Build  'external/compression-libs/zstd-1.5.7/build-ci' `
-            -Flags  ($commonFlags + @(
-              '-DZSTD_BUILD_STATIC=ON',
-              '-DZSTD_BUILD_SHARED=OFF',
-              '-DZSTD_BUILD_PROGRAMS=OFF',
-              '-DZSTD_BUILD_TESTS=OFF'
-            )) `
-            -OutLib 'external/compression-libs/zstd-1.5.7/build-ci/lib/Release/zstd_static.lib' `
-            -DestLib $libs.zstd
+          Write-Host "`n[2/5] Building zstd 1.5.7 (direct cl.exe — cmake source is gitignored)..." -ForegroundColor Yellow
+          $zstdLib = 'external/compression-libs/zstd-1.5.7/lib'
+          $zstdObj = 'external/compression-libs/zstd-1.5.7/build-ci/obj'
+          New-Item -ItemType Directory -Force $zstdObj | Out-Null
+
+          # Compile all .c files from the four main subdirectories
+          # (skip legacy/ and deprecated/ — not referenced by Engine)
+          $srcs = @('common','compress','decompress','dictBuilder') | ForEach-Object {
+            Get-ChildItem "$zstdLib/$_" -Filter '*.c' -File
+          } | Select-Object -ExpandProperty FullName
+
+          Write-Host "  Compiling $($srcs.Count) source files..." -ForegroundColor Cyan
+          & cl.exe /c /MD /O2 /Oi /Ob2 /DNDEBUG /W0 `
+                   /I"$zstdLib" /I"$zstdLib/common" `
+                   $srcs /Fo"$zstdObj\"
+          if ($LASTEXITCODE -ne 0) { throw "cl.exe compilation failed for zstd" }
+
+          $objs = Get-ChildItem $zstdObj -Filter '*.obj' | Select-Object -ExpandProperty FullName
+          $destDir = Split-Path $libs.zstd -Parent
+          New-Item -ItemType Directory -Force $destDir | Out-Null
+          & lib.exe /OUT:"$($libs.zstd)" $objs
+          if ($LASTEXITCODE -ne 0) { throw "lib.exe archive failed for zstd" }
+          Write-Host "  Built: $($libs.zstd) ($([int]((Get-Item $libs.zstd).Length/1KB)) KB)" -ForegroundColor Green
         }
 
         # ── 3. minizip-ng (depends on zlib) ───────────────────────────────────
