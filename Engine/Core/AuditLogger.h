@@ -1,4 +1,8 @@
-// AuditLogger.h — Security Event Audit Log (ETW + Structured JSON)
+// AuditLogger.h — Tamper-Evident Append-Only Security Audit Log (Sprint 234)
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Sprint 234 upgrade: HMAC-SHA256 chain linking for tamper detection,
+// 14 audit event types, JSONL format, and integrity verification API. — Security Event Audit Log (ETW + Structured JSON)
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Records security-relevant events (plugin loads, sandbox escapes, decode
