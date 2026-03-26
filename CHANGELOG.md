@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [20.5.0] "Quasar-V" - 2026-03-26
+### Summary
+WinUI 3 modern Manager GUI: Windows App SDK bootstrap, NavigationView with back-stack,
+dark/light/high-contrast theme tracking, settings persistence, dashboard stats,
+plugin management, system tray, and auto-update checker.
+### Added
+- WinUIAppHost.h: Windows App SDK BootstrapInitialize, AppWindow, Mica material, DPI-aware
+- NavigationViewModel.h: back-stack, deep-link lens:// URI handler, breadcrumb trail
+- ThemeManager.h: dark/light/HighContrast detection, AccentColor, WM_WININICHANGE handler
+- SettingsViewModel.h: HKCU registry persistence, typed bool/int/string settings, PropertyChanged
+- DashboardViewModel.h: registration status, cache stats, DXGI GPU name, StatCard data model
+- PluginsPageViewModel.h: installed plugin list from HKCU, SDKVersionGuard compat check
+- TrayIconController.h: Shell_NotifyIcon, context menu quick-actions, balloon notifications
+- UpdateNotifier.h: WinHTTP update.explorerlens.io check, 24hr cooldown, async thread
+- docs/WINUI3_MIGRATION_PLAN.md: v20.5.0 WinUI3 architecture and component status
+### Infrastructure
+- TestCount raised to 5100 (9 new WinUI3 test suites)
+
+
 ## [20.4.0] "Quasar-U" - 2026-07-14
 ### Summary
 CLI tool and SDK v2: Stable C ABI public API, thumbnail provider registration,
