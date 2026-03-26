@@ -1,7 +1,9 @@
-# ExplorerLens v17.0.0 "Nova" — Store Certification Checklist
+# ExplorerLens v20.1.0 "Quasar-R" — Store Certification Checklist
+
+> Sprint 219 | Updated for v20.1.0 packaging pipeline
 
 **Target:** Windows 11 Microsoft Store submission  
-**Package:** `ExplorerLens-17.0.0-x64.msix`  
+**Package:** `ExplorerLens-20.1.0-x64.msixbundle` (x64 + ARM64)
 **WACK Version:** Windows App Certification Kit 10.0.26100
 
 ---
@@ -34,7 +36,7 @@ Run: `appcert.exe run -apptype desktop -setuppath ExplorerLens-17.0.0-x64.msix -
 
 - [ ] Display name: `ExplorerLens – Thumbnail Enhancer`
 - [ ] Publisher: must match Windows Dev Center account  
-- [ ] Version: `17.0.0.0` (4-component Store format)
+- [ ] Version: `20.1.0.0` (4-component Store format)
 - [ ] Description: max 10,000 characters, no keyword stuffing
 - [ ] Short description: max 270 characters
 - [ ] Screenshots: 4 × 1280×800 or 1366×768 (required); 1920×1080 (optional)
