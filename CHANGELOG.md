@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [18.1.0] "Orion-R" - 2026-03-26
+
+### Summary
+Multi-Monitor and HiDPI release. Thumbnails now render at the correct physical pixel density
+for every connected display, with automatic DPI-bucket cache partitioning and live
+invalidation on monitor connect/disconnect.
+
+### Added
+- MultiMonitorContext: HMONITOR tracker with DPI, HDR capability, and ICC profile paths
+- DPIScalingPolicy: DPI bucket snap, fractional DPI, and cache-key suffix generation
+- HiDPIScaler: Lanczos-3 / Mitchell-Netravali / Area-Average BGRA rescaler
+- DisplayColorProfileLoader: Windows ICM API ICC profile loader for gamut-accurate rendering
+- ThumbnailDensitySelector: logical→physical size mapping with @2x/@1.5x cache key emission
+- D3D11DPIAdapter: DPI-aware DX11 swap chain creation and BGRA blit
+- MonitorConfigWatcher: hidden HWND pump for WM_DPICHANGED / WM_DISPLAYCHANGE events
+- HiDPIThumbnailCache: per-DPI bucket cache with LRU eviction and live invalidation hooks
+- docs/HIDPI.md: full HiDPI pipeline, DPI bucket table, algorithm comparison, multi-monitor scenarios
+
+### Changed
+- Cache keys now include @Nx DPI suffix for per-density isolation
+
+### Infrastructure
+- TestCount raised to 4000 (9 new HiDPI/multi-monitor test suites)
+
+
 ## [18.0.0] "Orion" - 2026-03-26
 
 ### Summary
