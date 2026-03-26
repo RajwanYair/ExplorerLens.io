@@ -1,0 +1,64 @@
+<!-- MainWindow.xaml — WinUI 3 Main Window with NavigationView
+     Sprint 42 (v15.7.0 Modern GUI) — NavigationView + settings panels
+     Provides the shell for all ExplorerLens Manager pages. -->
+<Window
+    x:Class="LENSManager.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:LENSManager"
+    xmlns:pages="using:LENSManager.Pages"
+    Title="ExplorerLens Manager">
+
+    <Grid>
+        <NavigationView
+            x:Name="NavView"
+            OpenPaneLength="220"
+            CompactPaneLength="48"
+            IsBackButtonVisible="Collapsed"
+            SelectionChanged="NavView_SelectionChanged"
+            Loaded="NavView_Loaded">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem Tag="DashboardPage" Icon="Home"   Content="Dashboard"/>
+                <NavigationViewItem Tag="FormatsPage"   Icon="List"   Content="File Formats"/>
+                <NavigationViewItem Tag="GpuPage"       Icon="Video"  Content="GPU Pipeline"/>
+                <NavigationViewItem Tag="CachePage"     Icon="Sync"   Content="Cache"/>
+                <NavigationViewItem Tag="PluginsPage"   Icon="Add"    Content="Plugins"/>
+                <NavigationViewItemSeparator/>
+                <NavigationViewItem Tag="DiagnosticsPage" Icon="Repair" Content="Diagnostics"/>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Tag="SettingsPage" Icon="Setting" Content="Settings"/>
+                <NavigationViewItem Tag="AboutPage"    Icon="Help"    Content="About"/>
+            </NavigationView.FooterMenuItems>
+
+            <!-- Header area: version chip + status indicator -->
+            <NavigationView.Header>
+                <Grid Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="PageTitle" Grid.Column="0"
+                               Style="{StaticResource TitleTextBlockStyle}"
+                               VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                        <Border Background="{StaticResource LensAccentBrush}"
+                                CornerRadius="4" Padding="8,2">
+                            <TextBlock x:Name="VersionChip" FontSize="11"
+                                       Foreground="White" FontWeight="SemiBold"/>
+                        </Border>
+                        <Ellipse x:Name="StatusDot" Width="10" Height="10"
+                                 Fill="{StaticResource LensSuccessBrush}"
+                                 VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </NavigationView.Header>
+
+            <!-- Page content frame -->
+            <Frame x:Name="ContentFrame" Margin="0,0,0,0"/>
+
+        </NavigationView>
+    </Grid>
+</Window>

@@ -1,0 +1,137 @@
+<!-- SettingsPage.xaml — WinUI 3 Configuration Settings Page
+     Sprint 42 (v15.7.0 Modern GUI) — Application settings panels
+     Covers: thumbnail size, GPU selection, cache budget, theme, and advanced flags. -->
+<Page
+    x:Class="LENSManager.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:LENSManager.Pages"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <ScrollViewer Padding="24,16,24,24">
+        <StackPanel Spacing="8" MaxWidth="640">
+
+            <!-- Section: Thumbnail rendering -->
+            <TextBlock Text="Thumbnail Rendering" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4"/>
+
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="16">
+                <StackPanel Spacing="12">
+                    <!-- Thumbnail size -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Default Thumbnail Size" FontWeight="SemiBold"/>
+                            <TextBlock Text="Pixels. Used when Windows does not specify a size." Opacity="0.6" FontSize="12"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" x:Name="ThumbnailSizeBox" VerticalAlignment="Center">
+                            <ComboBoxItem Content="128 px"/>
+                            <ComboBoxItem Content="256 px" IsSelected="True"/>
+                            <ComboBoxItem Content="512 px"/>
+                            <ComboBoxItem Content="1024 px"/>
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- GPU backend -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="160"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="GPU Backend" FontWeight="SemiBold"/>
+                            <TextBlock Text="Preferred render pipeline. Falls back to CPU if unavailable." Opacity="0.6" FontSize="12"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" x:Name="GpuBackendBox" VerticalAlignment="Center">
+                            <ComboBoxItem Content="Auto (recommended)" IsSelected="True"/>
+                            <ComboBoxItem Content="DirectX 12"/>
+                            <ComboBoxItem Content="DirectX 11"/>
+                            <ComboBoxItem Content="Vulkan Compute"/>
+                            <ComboBoxItem Content="CPU only"/>
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- Quality vs speed tradeoff -->
+                    <StackPanel>
+                        <TextBlock Text="Quality Mode" FontWeight="SemiBold"/>
+                        <TextBlock Text="Balanced is recommended for explorer performance." Opacity="0.6" FontSize="12" Margin="0,0,0,4"/>
+                        <RadioButtons>
+                            <RadioButton Content="Speed (fastest, lower quality)"/>
+                            <RadioButton Content="Balanced (recommended)" IsChecked="True"/>
+                            <RadioButton Content="Quality (slower, best output)"/>
+                        </RadioButtons>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Section: Cache -->
+            <TextBlock Text="Cache" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,8,0,4"/>
+
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="16">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Cache Budget (MB)" FontWeight="SemiBold"/>
+                            <TextBlock Text="Maximum memory allocated to thumbnail cache." Opacity="0.6" FontSize="12"/>
+                        </StackPanel>
+                        <NumberBox Grid.Column="1" x:Name="CacheBudgetBox"
+                                   Minimum="64" Maximum="4096" Value="512"
+                                   SpinButtonPlacementMode="Inline"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Enable Hot-Mode Cache" FontWeight="SemiBold"/>
+                            <TextBlock Text="Keeps most-recently-used thumbnails pinned in memory." Opacity="0.6" FontSize="12"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" x:Name="HotModeEnabled" IsOn="True"
+                                      OnContent="" OffContent="" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Button Content="Clear Cache Now" Click="ClearCache_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Section: Appearance -->
+            <TextBlock Text="Appearance" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,8,0,4"/>
+
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="16">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="160"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="App Theme" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" x:Name="ThemeBox" VerticalAlignment="Center">
+                            <ComboBoxItem Content="System default" IsSelected="True"/>
+                            <ComboBoxItem Content="Dark"/>
+                            <ComboBoxItem Content="Light"/>
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Save button -->
+            <Button Style="{StaticResource AccentButtonStyle}" Content="Save Settings"
+                    Click="SaveSettings_Click" Margin="0,8,0,0" HorizontalAlignment="Right"/>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
