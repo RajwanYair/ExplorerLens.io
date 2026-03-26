@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [18.0.0] "Orion" - 2026-03-26
+
+### Summary
+Next-Gen Codec Platform — MAJOR release introducing a pluggable codec registry,
+animated format decoders (AVIF, JXL, WebP, HEIF burst, multi-page TIFF),
+and the SVG + Photoshop PSD decoders. Replaces per-format dispatch with
+priority-based capability negotiation in CodecPlatformV2.
+
+### Added
+- AVIFSequenceDecoder: animated AVIF multi-frame extractor via dav1d + HW accel
+- JXLAnimationDecoder: animated JPEG XL with BT.2390 HDR tonemap
+- WebPAnimationDecoder: animated WebP RIFF/ANIM frame splitter (libwebp demux)
+- HEIFBurstDecoder: Live Photo, burst, ProRAW, and MotionPhoto primary-still extraction
+- HEIFBurstDecoder: ISO 21496-1 HDR gain map application
+- TIFFMultiPageDecoder: SubIFD thumb > reduced-res > largest-page heuristic selector
+- TIFFMultiPageDecoder: BigTIFF (magic 43) + CMYK/LAB/bilevel colour conversion
+- SVGRasterizer: D2D ID2D1SvgDocument GPU rasterization with fallback parser
+- PSDLayerDecoder: Photoshop PSD/PSB merged composite extractor (PackBits + CMYK)
+- CodecPlatformV2: pluggable codec registry with CodecCapability bitmask flags
+
+### Changed
+- Decoder dispatch now routes through CodecPlatformV2 registry for all new formats
+- RegisterBuiltIns() seeds all 25+ decoders at startup (replaces chained if/else)
+
+### Infrastructure
+- All Sprint 131-139 headers registered in ENGINE_HEADERS (CMakeLists.txt)
+- TestCount raised to 3900 (8 new format test suites)
+
+
 ## [17.3.0] "Nova-T" - 2026-03-26
 
 ### Summary
