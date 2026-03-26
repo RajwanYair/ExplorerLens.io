@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [20.3.0] "Quasar-T" - 2026-07-14
+### Summary
+Security Hardening v2: Authenticode PE verification, Job Object sandbox isolation,
+locked-memory credential storage, HMAC-chained audit log, SPKI certificate pinning,
+boundary input validation, COM minimal-privilege, and ACL hardening.
+### Added
+- CodeIntegrityChecker: WinVerifyTrust Authenticode + CryptAPI SHA-256 hash pinning
+- SandboxEscapeGuard: Job Object process/memory/CPU/UI restrictions Win8+ CPU rate cap
+- SecureStringPool: VirtualAlloc+Lock CryptProtectMemory same-process SecureZeroMemory
+- AuditLogger v2: HMAC-SHA256 MAC chaining 14 event types append-only JSONL
+- NetworkTrustManager: SPKI SHA-256 cert pinning via CryptEncodeObjectEx 3 default endpoints
+- InputValidator: path traversal device names null bytes registry/plugin/size validation
+- PrivilegeElevationGuard: COM drop-privilege AdjustTokenPrivileges restricted token UAC
+- ACLManager: SetFileSecurity BuildExplicitAccessWithName cache/log ACL hardening
+- docs/SECURITY_HARDENING.md: v2 hardening guide all components
+### Infrastructure
+- TestCount raised to 4900 (9 new security test suites)
+
+
 ## [20.2.0] "Quasar-S" - 2026-03-26
 ### Summary
 Performance v2: 8 new subsystems delivering 14ms single-thumbnail decode, 270 img/sec batch
