@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [20.1.0] "Quasar-R" - 2026-03-26
+### Summary
+Store and Packaging v2. Full Microsoft Store submission pipeline: license key validation,
+online activation, OOBE wizard, MSIX bundle generator (x64+ARM64), anonymous usage analytics,
+in-app feedback, and feature flag system with GP/cloud/registry priority chain.
+### Added
+- LicenseManager: License key format validation, tier entitlements (Community/Pro/Enterprise/Trial), registry persistence
+- ActivationService: WinHTTP online activation, 7-day grace period, machine fingerprint, deactivation transfer
+- FirstRunExperience: 6-step OOBE state machine, EULA/privacy/shell-registration/cache/consent steps
+- StorePackageValidator: 10 WACK-mapped checks, STC-001 through STC-010, Markdown report output
+- MSIXBundleGenerator: makeappx bundle wrapper, signing via signtool, SHA-256, CycloneDX SBOM stub
+- UsageStats: Opt-in telemetry recorder (format counts, decode p95, cache hit rate), JSON flush API
+- FeedbackManager: WinHTTP feedback POST, 5/hr throttle, registry draft save/load, UX validation
+- FeatureFlagManager: GP (HKLM) > cloud > user (HKCU) > default chain, type-safe bool/int/string flags
+- docs/STORE_CERTIFICATION.md: Updated for v20.1.0 MSIX bundle submission
+### Infrastructure
+- TestCount raised to 4700 (9 new Store/Packaging test suites)
+
+
 ## [20.0.0] "Quasar" - 2026-03-26
 ### Summary
 MAJOR release: Accessibility & Internationalisation. Full Windows a11y stack (high contrast,
