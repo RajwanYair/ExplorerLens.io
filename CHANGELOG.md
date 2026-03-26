@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [20.2.0] "Quasar-S" - 2026-03-26
+### Summary
+Performance v2: 8 new subsystems delivering 14ms single-thumbnail decode, 270 img/sec batch
+throughput, AVX2 SIMD pixel pipeline, Vulkan compute, DirectStorage GPU-direct loading,
+SQLite persistent cache, and EWMA predictive prefetch.
+### Added
+- ThumbnailPriorityQueue: 5-tier priority heap (Critical/High/Normal/Low/Idle), cancellation, boosting, aging
+- PredictivePrefetcher: EWMA velocity scroll predictor, frequency-boost, 30-frame lookahead, hit-rate tracking
+- VulkanComputeDecoder: vulkan-1.dll dynamic load, device enumeration via DXGI, BC1/3/7/RGBA8 compute path
+- ZeroCopyTextureUploader: D3D12 UPLOAD heap pool, 8 x 4MB persistently-mapped slots, microsecond timing
+- SIMDImageProcessor: AVX2 premultiply, SSSE3 BGRA swizzle, box-filter downscale, sRGB/linear LUT
+- PersistentDiskCache: winsqlite3.dll dynamic load, WAL mode, LRU eviction, 512MB cap, hit-rate stats
+- BatchDecodeScheduler: work-stealing deques, std::thread pool, back-pressure, per-item timing, throughput stats
+- DirectStorageLoader: dstorage.dll dynamic load, GPU-direct path + CPU ReadFile fallback, bytes-transferred stats
+- docs/PERFORMANCE.md: v2 benchmark targets, all new components documented
+### Performance
+- Single decode target: 14ms (↓3ms vs v20.1.0)
+- Batch throughput target: 270 img/sec (↑35 img/sec)
+- Cache hit latency: <3ms
+- TestCount raised to 4800 (9 new performance test suites)
+
+
 ## [20.1.0] "Quasar-R" - 2026-03-26
 ### Summary
 Store and Packaging v2. Full Microsoft Store submission pipeline: license key validation,
