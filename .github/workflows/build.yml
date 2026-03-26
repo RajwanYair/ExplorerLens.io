@@ -53,6 +53,12 @@ jobs:
         with:
           arch: x64
 
+      # ── Build external libraries from source (cache miss path) ──────────────
+      # Never commit pre-built .lib files — they corrupt across MSVC versions.
+      # Source trees live in external/; this action builds only what's missing.
+      - name: Build external libraries
+        uses: ./.github/actions/build-external-libs
+
       # ── Ensure Ninja is on PATH ───────────────────────────────
       - name: Verify build tools
         shell: pwsh

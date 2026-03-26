@@ -44,6 +44,9 @@ jobs:
         with:
           arch: x64
 
+      - name: Build external libraries
+        uses: ./.github/actions/build-external-libs
+
       # ── Try to download latest build artifact ────────────────
       - name: Download build artifact
         id: download

@@ -47,6 +47,17 @@ jobs:
         with:
           arch: x64
 
+      - name: Cache external libraries
+        uses: actions/cache@v4
+        with:
+          path: external/
+          key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
+          restore-keys: |
+            external-libs-
+
+      - name: Build external libraries
+        uses: ./.github/actions/build-external-libs
+
       - name: Install OpenCppCoverage
         shell: pwsh
         run: |

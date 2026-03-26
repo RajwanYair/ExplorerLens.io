@@ -32,8 +32,11 @@ $Script:BuildConfig = @{
     RuntimeLibrary      = '/MD'  # MultiThreadedDLL for Release
     RuntimeLibraryDebug = '/MDd'  # MultiThreadedDebugDLL for Debug
     
-    # Optimization flags
-    OptimizationFlags   = @('/O2', '/Oi', '/Ot', '/Ob2', '/GL')
+    # Optimization flags — NOTE: /GL (LTCG) is intentionally excluded.
+    # /GL embeds compiler-version-specific IR into .lib files, making them
+    # incompatible across MSVC toolset versions (e.g. v145-built .lib fails
+    # to link with v143). LTCG is handled at the main Engine link stage instead.
+    OptimizationFlags   = @('/O2', '/Oi', '/Ot', '/Ob2')
     
     # Security flags
     SecurityFlags       = @('/GS', '/guard:cf', '/Qspectre')

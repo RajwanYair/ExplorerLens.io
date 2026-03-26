@@ -1,0 +1,185 @@
+name: 'Build External Libraries'
+description: >
+  Builds the required C++ static libraries from source code already present in
+  external/. Uses CMake with /MD runtime and no /GL (LTCG), making the output
+  compatible with any MSVC toolset version. Skips libs already present on disk
+  (cache-hit path).
+
+runs:
+  using: composite
+  steps:
+    - name: Build missing external libraries
+      shell: pwsh
+      run: |
+        # ── Expected output paths (must match Engine/CMakeLists.txt) ──────────
+        $libs = [ordered]@{
+          zlib    = 'external/compression-libs/zlib-1.3.1/install/lib/zlibstatic.lib'
+          zstd    = 'external/compression-libs/zstd-1.5.7/build-manual/zstd_static.lib'
+          minizip = 'external/compression-libs/minizip-ng-4.0.10/build-manual/minizip.lib'
+          libwebp = 'external/image-libs/libwebp-1.5.0-build/build-cmake/Release/libwebp.lib'
+          libraw  = 'external/camera-libs/libraw-install/lib/libraw_static.lib'
+        }
+
+        $missing = $libs.GetEnumerator() | Where-Object { -not (Test-Path $_.Value) } | ForEach-Object { $_.Key }
+
+        if ($missing.Count -eq 0) {
+          Write-Host "All external libs present (cache hit)" -ForegroundColor Green
+          exit 0
+        }
+
+        Write-Host "Building missing libs: $($missing -join ', ')" -ForegroundColor Yellow
+
+        # ── Shared CMake flags: /MD (no /GL — LTCG causes cross-toolset LNK1127)
+        $commonFlags = @(
+          '-DCMAKE_BUILD_TYPE=Release',
+          '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL',
+          '-DCMAKE_C_FLAGS_RELEASE=/O2 /Oi /Ob2',
+          '-DCMAKE_CXX_FLAGS_RELEASE=/O2 /Oi /Ob2'
+        )
+
+        function Invoke-CMakeLib {
+          param([string]$Source, [string]$Build, [string[]]$Flags, [string]$OutLib, [string]$DestLib)
+
+          Write-Host "  cmake -S $Source ..." -ForegroundColor Cyan
+          cmake -S $Source -B $Build $Flags
+          if ($LASTEXITCODE -ne 0) { throw "cmake configure failed for $Source" }
+
+          cmake --build $Build --config Release -j $env:NUMBER_OF_PROCESSORS
+          if ($LASTEXITCODE -ne 0) { throw "cmake build failed for $Source" }
+
+          if (-not (Test-Path $OutLib)) {
+            # Fallback: search build tree for the lib
+            $found = Get-ChildItem $Build -Recurse -Filter (Split-Path $OutLib -Leaf) | Select-Object -First 1
+            if ($found) { $OutLib = $found.FullName } else { throw "Output lib not found: $OutLib" }
+          }
+
+          $destDir = Split-Path $DestLib -Parent
+          New-Item -ItemType Directory -Force $destDir | Out-Null
+          Copy-Item $OutLib $DestLib -Force
+          Write-Host "  Built: $DestLib ($([int]((Get-Item $DestLib).Length/1KB)) KB)" -ForegroundColor Green
+        }
+
+        # ── 1. zlib (no dependencies) ─────────────────────────────────────────
+        if ($missing -contains 'zlib') {
+          Write-Host "`n[1/5] Building zlib 1.3.1..." -ForegroundColor Yellow
+          Invoke-CMakeLib `
+            -Source 'external/compression-libs/zlib-1.3.1' `
+            -Build  'external/compression-libs/zlib-1.3.1/build-ci' `
+            -Flags  ($commonFlags + @('-DBUILD_SHARED_LIBS=OFF')) `
+            -OutLib 'external/compression-libs/zlib-1.3.1/build-ci/Release/zlibstatic.lib' `
+            -DestLib $libs.zlib
+        }
+
+        # ── 2. zstd (no dependencies) ─────────────────────────────────────────
+        if ($missing -contains 'zstd') {
+          Write-Host "`n[2/5] Building zstd 1.5.7..." -ForegroundColor Yellow
+          Invoke-CMakeLib `
+            -Source 'external/compression-libs/zstd-1.5.7/build/cmake' `
+            -Build  'external/compression-libs/zstd-1.5.7/build-ci' `
+            -Flags  ($commonFlags + @(
+              '-DZSTD_BUILD_STATIC=ON',
+              '-DZSTD_BUILD_SHARED=OFF',
+              '-DZSTD_BUILD_PROGRAMS=OFF',
+              '-DZSTD_BUILD_TESTS=OFF'
+            )) `
+            -OutLib 'external/compression-libs/zstd-1.5.7/build-ci/lib/Release/zstd_static.lib' `
+            -DestLib $libs.zstd
+        }
+
+        # ── 3. minizip-ng (depends on zlib) ───────────────────────────────────
+        if ($missing -contains 'minizip') {
+          Write-Host "`n[3/5] Building minizip-ng 4.0.10..." -ForegroundColor Yellow
+          $zlibBuildDir = (Resolve-Path 'external/compression-libs/zlib-1.3.1/build-ci' -ErrorAction SilentlyContinue)?.Path
+          $zlibInstall  = (Resolve-Path 'external/compression-libs/zlib-1.3.1/install/lib' -ErrorAction SilentlyContinue)?.Path
+          $zlibRoot = if ($zlibBuildDir) { $zlibBuildDir } elseif ($zlibInstall) { Split-Path $zlibInstall } else { $null }
+
+          $minizipFlags = $commonFlags + @(
+            '-DBUILD_SHARED_LIBS=OFF',
+            '-DMZ_COMPAT=ON',
+            '-DMZ_ZLIB=ON',
+            '-DMZ_BZIP2=OFF',
+            '-DMZ_LZMA=OFF',
+            '-DMZ_ZSTD=OFF',
+            '-DMZ_OPENSSL=OFF',
+            '-DMZ_FETCH_LIBS=OFF'
+          )
+          if ($zlibRoot) { $minizipFlags += "-DZLIB_ROOT=$zlibRoot" }
+
+          Invoke-CMakeLib `
+            -Source 'external/compression-libs/minizip-ng-4.0.10' `
+            -Build  'external/compression-libs/minizip-ng-4.0.10/build-ci' `
+            -Flags  $minizipFlags `
+            -OutLib 'external/compression-libs/minizip-ng-4.0.10/build-ci/Release/minizip.lib' `
+            -DestLib $libs.minizip
+        }
+
+        # ── 4. libwebp (no dependencies) ──────────────────────────────────────
+        if ($missing -contains 'libwebp') {
+          Write-Host "`n[4/5] Building libwebp 1.5.0..." -ForegroundColor Yellow
+          $webpBuildDir = 'external/image-libs/libwebp-1.5.0-build/build-cmake'
+          cmake -S 'external/image-libs/libwebp-1.5.0-build' `
+                -B $webpBuildDir `
+                ($commonFlags + @(
+                  '-DBUILD_SHARED_LIBS=OFF',
+                  '-DWEBP_BUILD_CWEBP=OFF',
+                  '-DWEBP_BUILD_DWEBP=OFF',
+                  '-DWEBP_BUILD_GIF2WEBP=OFF',
+                  '-DWEBP_BUILD_IMG2WEBP=OFF',
+                  '-DWEBP_BUILD_VWEBP=OFF',
+                  '-DWEBP_BUILD_WEBPINFO=OFF',
+                  '-DWEBP_BUILD_WEBPMUX=OFF',
+                  '-DWEBP_BUILD_EXTRAS=OFF',
+                  '-DWEBP_BUILD_ANIM_UTILS=OFF'
+                ))
+          if ($LASTEXITCODE -ne 0) { throw "cmake configure failed for libwebp" }
+          cmake --build $webpBuildDir --config Release -j $env:NUMBER_OF_PROCESSORS
+          if ($LASTEXITCODE -ne 0) { throw "cmake build failed for libwebp" }
+
+          $releaseDir = "$webpBuildDir/Release"
+          New-Item -ItemType Directory -Force $releaseDir | Out-Null
+          # libwebp outputs to build-cmake/Release/ already — just verify
+          foreach ($lib in @('libwebp.lib','libsharpyuv.lib')) {
+            $src = Get-ChildItem $webpBuildDir -Recurse -Filter $lib | Select-Object -First 1
+            if ($src) {
+              Copy-Item $src.FullName "$releaseDir/$lib" -Force
+              Write-Host "  Built: $releaseDir/$lib ($([int]($src.Length/1KB)) KB)" -ForegroundColor Green
+            } else {
+              Write-Host "  ::warning::$lib not found in libwebp build output"
+            }
+          }
+        }
+
+        # ── 5. libraw (MSBuild — uses VS project files, no CMake) ─────────────
+        if ($missing -contains 'libraw') {
+          Write-Host "`n[5/5] Building LibRaw 0.21.3..." -ForegroundColor Yellow
+          $sln = 'external/camera-libs/libraw/LibRaw.sln'
+          if (Test-Path $sln) {
+            # Use whichever MSBuild is on PATH (set by ilammy/msvc-dev-cmd)
+            $msbuild = Get-Command msbuild -ErrorAction SilentlyContinue
+            if (-not $msbuild) { $msbuild = Get-Command MSBuild.exe -ErrorAction SilentlyContinue }
+            if (-not $msbuild) { Write-Host "  ::warning::MSBuild not found — LibRaw skipped (RAW camera thumbnails disabled)"; exit 0 }
+
+            & $msbuild $sln /t:libraw /p:Configuration=Release /p:Platform=x64 /m /v:minimal /nologo
+            if ($LASTEXITCODE -ne 0) { Write-Host "  ::warning::LibRaw build failed — RAW camera thumbnails disabled"; exit 0 }
+
+            # Copy output to install dir
+            $rawLib = Get-ChildItem 'external/camera-libs/libraw' -Recurse -Filter 'libraw_static.lib' | Select-Object -First 1
+            if ($rawLib) {
+              New-Item -ItemType Directory -Force 'external/camera-libs/libraw-install/lib'   | Out-Null
+              New-Item -ItemType Directory -Force 'external/camera-libs/libraw-install/include' | Out-Null
+              Copy-Item $rawLib.FullName 'external/camera-libs/libraw-install/lib/libraw_static.lib' -Force
+              # Copy headers
+              $headerSrc = 'external/camera-libs/libraw/libraw'
+              if (Test-Path $headerSrc) {
+                Copy-Item $headerSrc 'external/camera-libs/libraw-install/include/libraw' -Recurse -Force
+              }
+              Write-Host "  Built: libraw_static.lib ($([int]($rawLib.Length/1KB)) KB)" -ForegroundColor Green
+            } else {
+              Write-Host "  ::warning::libraw_static.lib not found after build — RAW camera thumbnails disabled"
+            }
+          } else {
+            Write-Host "  ::warning::LibRaw.sln not found — RAW camera thumbnails disabled"
+          }
+        }
+
+        Write-Host "`nExternal library build complete." -ForegroundColor Green

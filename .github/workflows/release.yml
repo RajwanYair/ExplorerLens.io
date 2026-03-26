@@ -104,6 +104,13 @@ jobs:
         with:
           arch: amd64
 
+      # ── Build external libraries from source ──────────────────────────────
+      # Pre-built .lib files are never committed to git — they corrupt across
+      # MSVC toolset versions. Source trees live in external/; built with
+      # /MD /O2 (no /GL) so output is compatible with any toolset version.
+      - name: Build external libraries
+        uses: ./.github/actions/build-external-libs
+
       - name: Verify toolchain
         shell: pwsh
         run: |
