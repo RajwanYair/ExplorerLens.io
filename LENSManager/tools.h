@@ -32,7 +32,7 @@ template <class T> class CDropFileTarget // implements dropfile target window
 {
 public:
 	BEGIN_MSG_MAP(CDropFileTarget<T>)
-		MESSAGE_HANDLER(WM_DROPFILES, OnDropFiles) 
+		MESSAGE_HANDLER(WM_DROPFILES, OnDropFiles)
 	END_MSG_MAP()
 
 	void RegisterDropTarget(BOOL bAccept = TRUE)
@@ -88,7 +88,7 @@ private:
 //    m_hMutex = CreateMutex(NULL, FALSE, strMutexName); //do early
 //    m_instantiated=(ERROR_ALREADY_EXISTS == GetLastError()); //save for use later...
 //  }
-//  virtual ~CSingleInstance() 
+//  virtual ~CSingleInstance()
 //  {
 //    if (m_hMutex)  //Do not forget to close handles.
 //    {
@@ -118,7 +118,7 @@ public:
 	END_MSG_MAP()
 #endif
 
-#ifdef __ATLBASE_H__                                                                 
+#ifdef __ATLBASE_H__
 	virtual LRESULT OnSnapEnterSizeMove(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 #else
 	virtual LRESULT OnSnapEnterSizeMove(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -131,7 +131,7 @@ public:
 						snap_rcWindow.right=0;
 						snap_rcWindow.top=0;
 
-					#ifdef __ATLBASE_H__ 
+					#ifdef __ATLBASE_H__
 						T* pT = static_cast<T*>(this);
 						GetWindowRect(pT->m_hWnd, &snap_rcWindow );
 					#else
@@ -144,7 +144,7 @@ public:
 					return 0;
 					}
 
-#ifdef __ATLBASE_H__ 
+#ifdef __ATLBASE_H__
 	virtual LRESULT OnSnapMoving(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 #else
 	virtual LRESULT OnSnapMoving(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -169,13 +169,13 @@ public:
 
 						if (isSnapClose( snap_prc->left, snap_wa.left ))
 							OffsetRect( snap_prc, snap_wa.left - snap_prc->left, 0);
-						else 
+						else
 							if (isSnapClose( snap_wa.right, snap_prc->right ))
 								OffsetRect( snap_prc, snap_wa.right - snap_prc->right, 0);
 
 						if (isSnapClose( snap_prc->top, snap_wa.top ))
 							OffsetRect( snap_prc, 0, snap_wa.top - snap_prc->top );
-						else 
+						else
 							if (isSnapClose( snap_wa.bottom, snap_prc->bottom ))
 								OffsetRect( snap_prc, 0, snap_wa.bottom - snap_prc->bottom );
 					return TRUE;

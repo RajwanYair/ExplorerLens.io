@@ -203,25 +203,47 @@ Run `LENSManager.exe` to enable/disable file format categories.
 
 ### Project Directory Layout
 
-```text
-ExplorerLens.io/
-├── LENSShell/          # COM shell extension DLL source
-├── LENSManager/        # WTL admin GUI (format enable/disable)
-├── Engine/             # Core decode + render library
-│   ├── Core/           # Pipeline, format detection, SIMD
-│   ├── Decoders/       # 25+ format decoders
-│   ├── GPU/            # D3D11/D3D12/Vulkan renderers + HLSL shaders
-│   ├── Cache/          # Multi-tier caching subsystem
-│   ├── Memory/         # BitmapPool, pressure controller
-│   ├── Plugin/         # Plugin ecosystem + sandbox
-│   ├── AI/             # Smart crop, IQA, scene understanding
-│   └── Tests/          # 2938 unit tests + 5 benchmarks
-├── build-scripts/      # PowerShell build automation
-├── external/           # Statically linked third-party libraries
-├── docs/               # Architecture, guides, API reference
-├── SDK/                # Plugin SDK (C ABI, plugin_api.h)
-├── packaging/          # MSI (WiX), MSIX, Inno Setup manifests
-└── LENSShell.sln       # Visual Studio 18 2026 solution
+```mermaid
+graph TD
+    ROOT["📁 <b>ExplorerLens.io</b>"]
+
+    ROOT --> SHELL["🔌 <b>LENSShell/</b><br/>COM Shell Extension DLL"]
+    ROOT --> MGR["🖥️ <b>LENSManager/</b><br/>WTL Admin GUI"]
+    ROOT --> ENG["⚙️ <b>Engine/</b><br/>Core Decode + Render Library"]
+    ROOT --> BS["🔨 <b>build-scripts/</b><br/>PowerShell Build Automation"]
+    ROOT --> EXT["📦 <b>external/</b><br/>Statically Linked Libraries"]
+    ROOT --> DOCS["📚 <b>docs/</b><br/>Architecture &amp; Guides"]
+    ROOT --> SDK["🧩 <b>SDK/</b><br/>Plugin SDK · C ABI"]
+    ROOT --> PKG["📋 <b>packaging/</b><br/>MSI · MSIX · Inno Setup"]
+    ROOT --> SLN["📄 <b>LENSShell.sln</b><br/>Visual Studio 18 2026 Solution"]
+
+    ENG --> CORE["🏗️ <b>Core/</b><br/>Pipeline · Detection · SIMD"]
+    ENG --> DEC["🖼️ <b>Decoders/</b><br/>25+ Format Decoders"]
+    ENG --> GPU["⚡ <b>GPU/</b><br/>D3D11 · D3D12 · Vulkan"]
+    ENG --> CACHE["💾 <b>Cache/</b><br/>Multi-tier Caching"]
+    ENG --> MEM["🧠 <b>Memory/</b><br/>BitmapPool · Pressure Ctrl"]
+    ENG --> PLUGIN["🔩 <b>Plugin/</b><br/>Plugin Ecosystem · Sandbox"]
+    ENG --> AI["🤖 <b>AI/</b><br/>Smart Crop · IQA · Scene"]
+    ENG --> TESTS["✅ <b>Tests/</b><br/>2 938 Unit Tests · 5 Benchmarks"]
+
+    style ROOT fill:#1e3a5f,color:#fff,stroke:#4a9eff,stroke-width:2px
+    style ENG  fill:#1b4332,color:#fff,stroke:#40916c,stroke-width:2px
+    style SHELL fill:#2d2d2d,color:#fff,stroke:#888
+    style MGR   fill:#2d2d2d,color:#fff,stroke:#888
+    style BS    fill:#2d2d2d,color:#fff,stroke:#888
+    style EXT   fill:#2d2d2d,color:#fff,stroke:#888
+    style DOCS  fill:#2d2d2d,color:#fff,stroke:#888
+    style SDK   fill:#2d2d2d,color:#fff,stroke:#888
+    style PKG   fill:#2d2d2d,color:#fff,stroke:#888
+    style SLN   fill:#2d2d2d,color:#fff,stroke:#888
+    style CORE   fill:#1a3d2b,color:#d8f3dc,stroke:#52b788
+    style DEC    fill:#1a3d2b,color:#d8f3dc,stroke:#52b788
+    style GPU    fill:#1a3d2b,color:#d8f3dc,stroke:#52b788
+    style CACHE  fill:#1a3d2b,color:#d8f3dc,stroke:#52b788
+    style MEM    fill:#1a3d2b,color:#d8f3dc,stroke:#52b788
+    style PLUGIN fill:#1a3d2b,color:#d8f3dc,stroke:#52b788
+    style AI     fill:#1a3d2b,color:#d8f3dc,stroke:#52b788
+    style TESTS  fill:#1a3d2b,color:#d8f3dc,stroke:#52b788
 ```
 
 ---

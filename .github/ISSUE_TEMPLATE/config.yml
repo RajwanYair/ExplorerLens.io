@@ -1,9 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security Vulnerability
-    url: https://github.com/user/ExplorerLens/security/advisories/new
+    url: https://github.com/RajwanYair/ExplorerLens.io/security/advisories/new
     about: Report security vulnerabilities privately. Do NOT use public issues for security bugs.
   - name: Documentation
-    url: https://github.com/user/ExplorerLens/tree/main/docs
+    url: https://github.com/RajwanYair/ExplorerLens.io/tree/main/docs
     about: Browse project documentation before opening an issue.
-
+  - name: Support & Questions
+    url: https://github.com/RajwanYair/ExplorerLens.io/blob/main/.github/SUPPORT.md
+    about: Read the support guide before opening an issue.

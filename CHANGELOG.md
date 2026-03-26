@@ -9,6 +9,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.4.2] "Zenith-U" — 2026-03-26
+
+### Summary
+**Patch release — Workflow fixes, Mermaid integration, .gitignore hardening**
+
+- **Version:** 15.4.1 "Zenith-U" → 15.4.2 "Zenith-U"
+- **Focus:** Fix CI workflow ordering bugs, fix incorrect repository URLs in docs,
+  harden `.gitignore` against generated artifacts, sync `BuildValidation.h`
+  version constants with canonical `VersionString`.
+
+### Fixed
+- **`BuildValidation.h`:** `MinorVersion`/`PatchVersion` constants were stale
+  (`3`, `0`); now correctly reflect `15.4.2` (`MinorVersion=4`, `PatchVersion=2`).
+- **`performance-regression-gate.yml`:** Cache restore step was placed *after*
+  the build step — cache never had a chance to skip redundant rebuilds. Swapped
+  to correct order: cache → build.
+- **`docs/mkdocs.yml`:** `repo_url` and `site_url` pointed to the wrong
+  `ExplorerLens/ExplorerLens` placeholder; updated to `RajwanYair/ExplorerLens.io`.
+- **`docs/mkdocs.yml`:** Nav referenced ~30 documentation pages that did not
+  exist on disk (would cause `mkdocs build` to fail). Nav now only references
+  files present in `docs/`.
+- **`docs/mkdocs.yml`:** Mermaid fence format changed from `fence_code_format`
+  to `fence_div_format` so that CDN mermaid.min.js auto-processes `<div class="mermaid">`
+  elements correctly.
+- **`.github/ISSUE_TEMPLATE/config.yml`:** Replaced placeholder repo slug with
+  correct `RajwanYair/ExplorerLens.io` URLs; added Support link.
+- **`.github/PULL_REQUEST_TEMPLATE.md`:** Improved closing-keywords guidance
+  with inline comment explaining GitHub auto-close syntax.
+
+### Added
+- **`.gitignore`:** Added missing ignore patterns for all generated artifacts
+  that could otherwise be accidentally committed:
+  `*.msi`, `*.wixpdb`, `*.msix`, `*.appxbundle`, `packaging/*.sha256`,
+  `packaging/output/`, `release-staging/`, `SHA256SUMS.txt`,
+  `verification-report-*.json`, `ExplorerLens-*-SBOM.json`,
+  `/build-debug/`, `/build-vs/`, `/build-vcpkg-debug/`,
+  `compile_commands.json`, `Engine/Version.h`.
+
+---
+
 ## [15.4.1] "Zenith-U" — 2026-03-25
 
 ### Summary

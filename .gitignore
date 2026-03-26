@@ -496,3 +496,28 @@ external/**/build-vs/
 external/**/build-manual/
 external/**/build-msvc/
 external/**/platform/win32/x64/
+
+# CMake alternate build directories (local dev presets)
+/build-debug/
+/build-vs/
+/build-vcpkg-debug/
+/build-vcpkg-release/
+
+# CMake-generated files that appear in source tree
+compile_commands.json
+Engine/Version.h
+
+# Installer / packaging artifacts generated at build time
+*.msi
+*.wixpdb
+*.msix
+*.appxbundle
+packaging/*.sha256
+packaging/output/
+
+# Release workflow generated artifacts (root-level, all regenerable)
+release-staging/
+SHA256SUMS.txt
+verification-report-*.json
+ExplorerLens-*-SBOM.json
+!docs/SBOM.json

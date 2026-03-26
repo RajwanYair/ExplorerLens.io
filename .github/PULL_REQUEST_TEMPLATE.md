@@ -47,7 +47,12 @@ Describe how you tested these changes:
 - [ ] CHANGELOG.md updated (if user-facing change)
 
 ## Related Issues
-Closes #(issue number)
+<!--
+  GitHub closing keywords — the linked issue will be closed automatically when this PR is merged:
+  Closes #NNN | Fixes #NNN | Resolves #NNN
+  For partial fixes: Relates to #NNN
+-->
+Closes #
 
 ## Additional Notes
 <!-- Any additional information that reviewers should know -->

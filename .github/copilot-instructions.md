@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 15.4.1 (Codename: Zenith-U)
+- **Version:** 15.4.2 (Codename: Zenith-U)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**

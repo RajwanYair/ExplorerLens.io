@@ -19,25 +19,25 @@ $Script:BuildConfig = @{
     # Default configurations
     Configurations      = @('Release', 'Debug')
     Platform            = 'x64'
-    
+
     # CMake defaults
     CMakeGenerator      = 'Visual Studio 18 2026'
     CMakeToolset        = 'v145'
-    
+
     # MSBuild defaults
     MSBuildPlatform     = 'x64'
     MSBuildToolsVersion = '18.0'
-    
+
     # Common flags
     RuntimeLibrary      = '/MD'  # MultiThreadedDLL for Release
     RuntimeLibraryDebug = '/MDd'  # MultiThreadedDebugDLL for Debug
-    
+
     # Optimization flags — NOTE: /GL (LTCG) is intentionally excluded.
     # /GL embeds compiler-version-specific IR into .lib files, making them
     # incompatible across MSVC toolset versions (e.g. v145-built .lib fails
     # to link with v143). LTCG is handled at the main Engine link stage instead.
     OptimizationFlags   = @('/O2', '/Oi', '/Ot', '/Ob2')
-    
+
     # Security flags
     SecurityFlags       = @('/GS', '/guard:cf', '/Qspectre')
 }
@@ -59,12 +59,12 @@ function Write-BuildLog {
     param(
         [Parameter(Mandatory)]
         [string]$Message,
-        
+
         [Parameter()]
         [ValidateSet('Info', 'Warning', 'Error', 'Success')]
         [string]$Level = 'Info'
     )
-    
+
     $timestamp = Get-Date -Format 'HH:mm:ss'
     $prefix = switch ($Level) {
         'Info' { "[$timestamp] INFO:" }
@@ -72,14 +72,14 @@ function Write-BuildLog {
         'Error' { "[$timestamp] ERROR:" }
         'Success' { "[$timestamp] ✓" }
     }
-    
+
     $color = switch ($Level) {
         'Info' { 'Cyan' }
         'Warning' { 'Yellow' }
         'Error' { 'Red' }
         'Success' { 'Green' }
     }
-    
+
     Write-Host "$prefix $Message" -ForegroundColor $color
 }
 
@@ -93,7 +93,7 @@ function Write-BuildHeader {
         [Parameter(Mandatory)]
         [string]$Title
     )
-    
+
     Write-Host ""
     Write-Host ("=" * 80) -ForegroundColor Magenta
     Write-Host "  $Title" -ForegroundColor Magenta
@@ -114,13 +114,13 @@ function Find-MSBuildPath {
     #>
     [CmdletBinding()]
     param()
-    
+
     # Try vswhere first (most reliable)
     $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
     if (Test-Path $vswhere) {
         $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild `
             -property installationPath -version '[17.0,19.0)'
-        
+
         if ($vsPath) {
             $vsCandidates = @(
                 (Join-Path $vsPath 'MSBuild\Current\Bin\amd64\MSBuild.exe'),
@@ -134,7 +134,7 @@ function Find-MSBuildPath {
             }
         }
     }
-    
+
     # Fallback: Check common paths
     $commonPaths = @(
         "${env:ProgramFiles(x86)}\Microsoft Visual Studio\18\BuildTools\MSBuild\Current\Bin\amd64\MSBuild.exe",
@@ -147,14 +147,14 @@ function Find-MSBuildPath {
         "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe",
         "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
     )
-    
+
     foreach ($path in $commonPaths) {
         if (Test-Path $path) {
             Write-BuildLog "Found MSBuild: $path" -Level Success
             return $path
         }
     }
-    
+
     Write-BuildLog "MSBuild not found. Install Visual Studio 2022 Build Tools" -Level Error
     return $null
 }
@@ -168,27 +168,27 @@ function Find-CMakePath {
     #>
     [CmdletBinding()]
     param()
-    
+
     # Check if cmake is in PATH
     $cmake = Get-Command cmake.exe -ErrorAction SilentlyContinue
     if ($cmake) {
         Write-BuildLog "Found CMake: $($cmake.Source)" -Level Success
         return $cmake.Source
     }
-    
+
     # Check common installation paths
     $commonPaths = @(
         "${env:ProgramFiles}\CMake\bin\cmake.exe",
         "${env:ProgramFiles(x86)}\CMake\bin\cmake.exe"
     )
-    
+
     foreach ($path in $commonPaths) {
         if (Test-Path $path) {
             Write-BuildLog "Found CMake: $path" -Level Success
             return $path
         }
     }
-    
+
     Write-BuildLog "CMake not found. Install CMake 3.20+" -Level Error
     return $null
 }
@@ -202,15 +202,15 @@ function Test-VisualStudioTools {
     #>
     [CmdletBinding()]
     param()
-    
+
     $msbuild = Find-MSBuildPath
     $cmake = Find-CMakePath
-    
+
     if (-not $msbuild -or -not $cmake) {
         Write-BuildLog "Required build tools not found" -Level Error
         return $false
     }
-    
+
     Write-BuildLog "All required build tools found" -Level Success
     return $true
 }
@@ -232,16 +232,16 @@ function New-CleanDirectory {
     param(
         [Parameter(Mandatory)]
         [string]$Path,
-        
+
         [Parameter()]
         [switch]$Clean
     )
-    
+
     if ($Clean -and (Test-Path $Path)) {
         Write-BuildLog "Cleaning directory: $Path" -Level Info
         Remove-Item -Path $Path -Recurse -Force -ErrorAction SilentlyContinue
     }
-    
+
     if (-not (Test-Path $Path)) {
         Write-BuildLog "Creating directory: $Path" -Level Info
         New-Item -Path $Path -ItemType Directory -Force | Out-Null
@@ -275,48 +275,48 @@ function Invoke-CMakeBuild {
     param(
         [Parameter(Mandatory)]
         [string]$LibraryName,
-        
+
         [Parameter(Mandatory)]
         [string]$SourceDir,
-        
+
         [Parameter(Mandatory)]
         [string]$BuildDir,
-        
+
         [Parameter()]
         [string]$InstallDir,
-        
+
         [Parameter()]
         [ValidateSet('Release', 'Debug')]
         [string]$Configuration = 'Release',
-        
+
         [Parameter()]
         [hashtable]$CMakeOptions = @{},
-        
+
         [Parameter()]
         [switch]$Clean
     )
-    
+
     Write-BuildHeader "Building $LibraryName with CMake ($Configuration)"
-    
+
     # Verify tools
     $cmake = Find-CMakePath
     if (-not $cmake) {
         throw "CMake not found"
     }
-    
+
     # Verify source directory
     if (-not (Test-Path $SourceDir)) {
         throw "Source directory not found: $SourceDir"
     }
-    
+
     $cmakeListsPath = Join-Path $SourceDir 'CMakeLists.txt'
     if (-not (Test-Path $cmakeListsPath)) {
         throw "CMakeLists.txt not found in: $SourceDir"
     }
-    
+
     # Create/clean build directory
     New-CleanDirectory -Path $BuildDir -Clean:$Clean
-    
+
     # Detect stale CMakeCache.txt (path mismatch from directory renames)
     $existingCache = Join-Path $BuildDir 'CMakeCache.txt'
     if (Test-Path $existingCache) {
@@ -328,7 +328,7 @@ function Invoke-CMakeBuild {
             New-CleanDirectory -Path $BuildDir
         }
     }
-    
+
     # Build CMake arguments (use forward slashes for CMake path compatibility)
     $sourceDirCMake = $SourceDir.Replace('\', '/')
     $buildDirCMake = $BuildDir.Replace('\', '/')
@@ -339,16 +339,16 @@ function Invoke-CMakeBuild {
         "-A", "x64",
         "-T", $Script:BuildConfig.CMakeToolset
     )
-    
+
     # Add install directory if specified
     if ($InstallDir) {
         $installDirCMake = $InstallDir.Replace('\', '/')
         $cmakeArgs += "-DCMAKE_INSTALL_PREFIX=`"$installDirCMake`""
     }
-    
+
     # Add common options
     $cmakeArgs += "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded`$<`$<CONFIG:Debug>:Debug>DLL"
-    
+
     # Add custom options (convert backslashes to forward slashes for CMake compatibility)
     foreach ($key in $CMakeOptions.Keys) {
         $value = [string]$CMakeOptions[$key]
@@ -361,11 +361,11 @@ function Invoke-CMakeBuild {
             $cmakeArgs += "-D${key}=$value"
         }
     }
-    
+
     # Configure
     Write-BuildLog "Configuring with CMake..." -Level Info
     Write-BuildLog "CMake command: $cmake $($cmakeArgs -join ' ')" -Level Info
-    
+
     $configureCmd = "& `"$cmake`" $($cmakeArgs -join ' ')"
     Invoke-Expression $configureCmd
 
@@ -383,42 +383,42 @@ function Invoke-CMakeBuild {
             throw "CMake configuration failed with exit code $LASTEXITCODE"
         }
     }
-    
+
     # Build
     Write-BuildLog "Building $Configuration configuration..." -Level Info
-    
+
     $buildArgs = @(
         "--build", "`"$BuildDir`"",
         "--config", $Configuration,
         "--parallel", [Environment]::ProcessorCount
     )
-    
+
     $buildCmd = "& `"$cmake`" $($buildArgs -join ' ')"
     Invoke-Expression $buildCmd
-    
+
     if ($LASTEXITCODE -ne 0) {
         Write-BuildLog "Build failed" -Level Error
         throw "Build failed with exit code $LASTEXITCODE"
     }
-    
+
     # Install (if install directory specified)
     if ($InstallDir) {
         Write-BuildLog "Installing to $InstallDir..." -Level Info
-        
+
         $installArgs = @(
             "--install", "`"$BuildDir`"",
             "--config", $Configuration
         )
-        
+
         $installCmd = "& `"$cmake`" $($installArgs -join ' ')"
         Invoke-Expression $installCmd
-        
+
         if ($LASTEXITCODE -ne 0) {
             Write-BuildLog "Install failed" -Level Error
             throw "Install failed with exit code $LASTEXITCODE"
         }
     }
-    
+
     Write-BuildLog "$LibraryName build completed successfully" -Level Success
 }
 
@@ -445,34 +445,34 @@ function Invoke-MSBuildLibrary {
     param(
         [Parameter(Mandatory)]
         [string]$LibraryName,
-        
+
         [Parameter(Mandatory)]
         [string]$ProjectFile,
-        
+
         [Parameter()]
         [ValidateSet('Release', 'Debug')]
         [string]$Configuration = 'Release',
-        
+
         [Parameter()]
         [string]$Platform = 'x64',
-        
+
         [Parameter()]
         [switch]$Clean
     )
-    
+
     Write-BuildHeader "Building $LibraryName with MSBuild ($Configuration)"
-    
+
     # Verify tools
     $msbuild = Find-MSBuildPath
     if (-not $msbuild) {
         throw "MSBuild not found"
     }
-    
+
     # Verify project file
     if (-not (Test-Path $ProjectFile)) {
         throw "Project file not found: $ProjectFile"
     }
-    
+
     # Build MSBuild arguments
     $msbuildArgs = @(
         "`"$ProjectFile`"",
@@ -481,25 +481,25 @@ function Invoke-MSBuildLibrary {
         "/m",  # Multi-processor build
         "/v:minimal"  # Minimal verbosity
     )
-    
+
     if ($Clean) {
         $msbuildArgs += "/t:Clean"
     }
-    
+
     $msbuildArgs += "/t:Build"
-    
+
     # Execute MSBuild
     Write-BuildLog "Building with MSBuild..." -Level Info
     Write-BuildLog "MSBuild command: $msbuild $($msbuildArgs -join ' ')" -Level Info
-    
+
     $buildCmd = "& `"$msbuild`" $($msbuildArgs -join ' ')"
     Invoke-Expression $buildCmd
-    
+
     if ($LASTEXITCODE -ne 0) {
         Write-BuildLog "MSBuild failed" -Level Error
         throw "MSBuild failed with exit code $LASTEXITCODE"
     }
-    
+
     Write-BuildLog "$LibraryName build completed successfully" -Level Success
 }
 
@@ -526,30 +526,30 @@ function Invoke-NMakeBuild {
     param(
         [Parameter(Mandatory)]
         [string]$LibraryName,
-        
+
         [Parameter(Mandatory)]
         [string]$SourceDir,
-        
+
         [Parameter()]
         [string]$Target = 'all',
-        
+
         [Parameter()]
         [string]$Makefile = '',
-        
+
         [Parameter()]
         [hashtable]$MakefileVars = @{},
-        
+
         [Parameter()]
         [switch]$Clean
     )
-    
+
     Write-BuildHeader "Building $LibraryName with NMake"
-    
+
     # Verify source directory
     if (-not (Test-Path $SourceDir)) {
         throw "Source directory not found: $SourceDir"
     }
-    
+
     # Find nmake in PATH (should be in VS Developer Command Prompt)
     $nmake = Get-Command nmake.exe -ErrorAction SilentlyContinue
     if (-not $nmake) {
@@ -558,7 +558,7 @@ function Invoke-NMakeBuild {
         if (Test-Path $vswhere) {
             $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
                 -property installationPath
-            
+
             if ($vsPath) {
                 $vcvarsPath = Join-Path $vsPath 'VC\Auxiliary\Build\vcvars64.bat'
                 if (Test-Path $vcvarsPath) {
@@ -571,31 +571,31 @@ function Invoke-NMakeBuild {
                 }
             }
         }
-        
+
         $nmake = Get-Command nmake.exe -ErrorAction SilentlyContinue
         if (-not $nmake) {
             throw "nmake.exe not found. Run from Visual Studio Developer Command Prompt"
         }
     }
-    
+
     # Build nmake arguments
     $nmakeArgs = @()
-    
+
     # Add /F <makefile> if specified
     if ($Makefile) {
         $nmakeArgs += "/F"
         $nmakeArgs += $Makefile
     }
-    
+
     # Add makefile variables
     foreach ($key in $MakefileVars.Keys) {
         $value = $MakefileVars[$key]
         $nmakeArgs += "${key}=$value"
     }
-    
+
     # Change to source directory
     Push-Location $SourceDir
-    
+
     try {
         # Clean if requested
         if ($Clean) {
@@ -603,18 +603,18 @@ function Invoke-NMakeBuild {
             $cleanArgs = if ($Makefile) { @('/F', $Makefile, 'clean') } else { @('clean') }
             & nmake @cleanArgs 2>&1 | Out-Null
         }
-        
+
         # Build
         Write-BuildLog "Building target: $Target" -Level Info
         $allArgs = $nmakeArgs + ($Target -split '\s+')
         Write-BuildLog "NMake command: nmake $($allArgs -join ' ')" -Level Info
         & nmake @allArgs
-        
+
         if ($LASTEXITCODE -ne 0) {
             Write-BuildLog "NMake build failed" -Level Error
             throw "NMake failed with exit code $LASTEXITCODE"
         }
-        
+
         Write-BuildLog "$LibraryName build completed successfully" -Level Success
     } finally {
         Pop-Location
@@ -638,15 +638,15 @@ function Test-BuildOutput {
     param(
         [Parameter(Mandatory)]
         [string[]]$Files,
-        
+
         [Parameter()]
         [switch]$ThrowOnMissing
     )
-    
+
     Write-BuildLog "Verifying build outputs..." -Level Info
-    
+
     $missingFiles = @()
-    
+
     foreach ($file in $Files) {
         if (Test-Path $file) {
             $fileInfo = Get-Item $file
@@ -657,7 +657,7 @@ function Test-BuildOutput {
             $missingFiles += $file
         }
     }
-    
+
     if ($missingFiles.Count -gt 0) {
         $message = "Missing $($missingFiles.Count) build output(s): $($missingFiles -join ', ')"
         if ($ThrowOnMissing) {
@@ -667,7 +667,7 @@ function Test-BuildOutput {
             return $false
         }
     }
-    
+
     Write-BuildLog "All build outputs verified" -Level Success
     return $true
 }
@@ -687,19 +687,19 @@ function Copy-LibraryArtifacts {
     param(
         [Parameter(Mandatory)]
         [string]$SourceDir,
-        
+
         [Parameter(Mandatory)]
         [string]$DestinationDir,
-        
+
         [Parameter()]
         [string[]]$Includes = @('*.lib', '*.dll', '*.pdb')
     )
-    
+
     Write-BuildLog "Copying artifacts from $SourceDir to $DestinationDir..." -Level Info
-    
+
     # Create destination directory
     New-CleanDirectory -Path $DestinationDir
-    
+
     # Copy files
     foreach ($pattern in $Includes) {
         $files = Get-ChildItem -Path $SourceDir -Filter $pattern -Recurse -File
@@ -708,7 +708,7 @@ function Copy-LibraryArtifacts {
             Write-BuildLog "  Copied: $($file.Name)" -Level Info
         }
     }
-    
+
     Write-BuildLog "Artifacts copied successfully" -Level Success
 }
 
@@ -718,4 +718,3 @@ function Copy-LibraryArtifacts {
 # ============================================================================
 
 Write-BuildLog "Build-Library-Core.ps1 loaded successfully (v7.0)" -Level Success
-
