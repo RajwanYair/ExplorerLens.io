@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [17.0.0] "Nova" — 
+
+### Summary
+**GRAND MILESTONE — 100-Sprint Roadmap Complete**
+
+- Version: 16.3.0 "Horizon-T" -> 17.0.0 "Nova"
+- MAJOR version bump: completion of the full 100-sprint roadmap
+- 3500 unit tests, 0 errors, 0 warnings
+
+### Added
+- Plugin SDK v2.0 C++ RAII wrapper (SDK/PluginSDKv2.h)
+- PublicSDKSurface.h API freeze document for ABI stability
+- Windows Store certification checklist (docs/STORE_CERTIFICATION.md)
+- EnterprisePolicyEngineV2 GPO/Intune/ConfigMgr hierarchy
+- FIPSComplianceMode FIPS 140-2/3 enforcement
+- ADMX/ADML Group Policy templates (7 policies)
+- AIUpscaler DLSS3/XeSS/ONNX super-resolution
+- FrameInterpolator RIFE-v4 animated frame interpolation
+- ThreadPoolV2 work-stealing adaptive thread pool
+- CloudProviderRegistry, OneDriveIntegration, DeltaUpdateManager
+- WinUI3 9-page LENSManager.WinUI app
+- TrayAgent Win32 shell notification icon
+- ToastNotifier WinRT bridge
+- AnonymousTelemetry opt-in framework
+- i18n scaffold EN/FR/DE
+- AccessibilityAudit WCAG 2.1 AA checker
+- RegressionTestSuite pHash baseline runner
+- FeatureCompatMatrix format x OS x GPU oracle
+- StoreReadinessChecker MSIX/WACK validator
+- Migration guide v15 -> v16 (docs/MIGRATION_GUIDE_V16.md)
+
+
 $date = Get-Date -Format "yyyy-MM-dd"
 
 
