@@ -1,6 +1,45 @@
 # WinUI 3 Migration Plan
 
-## ExplorerLens Manager v15.0.0 "Zenith"
+## ExplorerLens Manager v20.5.0 "Quasar-V" — Sprint 259 Status
+
+**Status:** Phase 2 Complete — WinUI 3 App Shell live in `LENSManager.WinUI/`
+
+### v20.5.0 Deliverables (Sprints 251-259)
+
+| Component | File | Status |
+|-----------|------|--------|
+| **WinUIAppHost** | `LENSManager.WinUI/WinUIAppHost.h` | ✅ Windows App SDK bootstrap, AppWindow, Mica |
+| **NavigationViewModel** | `LENSManager.WinUI/NavigationViewModel.h` | ✅ Back-stack, deep-link, breadcrumb |
+| **ThemeManager** | `LENSManager.WinUI/ThemeManager.h` | ✅ Dark/Light/HighContrast, AccentColor, WM_WININICHANGE |
+| **SettingsViewModel** | `LENSManager.WinUI/SettingsViewModel.h` | ✅ Registry-backed, typed bool/int/string settings |
+| **DashboardViewModel** | `LENSManager.WinUI/DashboardViewModel.h` | ✅ StatCards, registration check, DXGI GPU name |
+| **PluginsPageViewModel** | `LENSManager.WinUI/PluginsPageViewModel.h` | ✅ Installed plugins, SDKVersionGuard compat check |
+| **TrayIconController** | `LENSManager.WinUI/TrayIconController.h` | ✅ Shell_NotifyIcon, context menu, balloon toast |
+| **UpdateNotifier** | `LENSManager.WinUI/UpdateNotifier.h` | ✅ WinHTTP update check, 24-hr cooldown, async |
+
+### Architecture: WinUI 3 Manager Shell
+
+```
+Manager.WinUI.exe
+  ├── WinUIAppHost         — Windows App SDK bootstrap + AppWindow
+  ├── NavigationViewModel  — NavigationView back-stack + deep-link
+  ├── ThemeManager         — System dark/light/HC + AccentColor
+  │
+  ├── Pages/
+  │   ├── Dashboard       ← DashboardViewModel (StatCards, reg status)
+  │   ├── Formats         ← LensIsFormatSupported enumeration
+  │   ├── Performance     ← cache/GPU stats
+  │   ├── Cache           ← LensClearCache / LensGetCacheStats
+  │   ├── Plugins         ← PluginsPageViewModel + SDKVersionGuard
+  │   └── Settings        ← SettingsViewModel (HKCU registry)
+  │
+  ├── TrayIconController   — Shell_NotifyIcon + context menu
+  └── UpdateNotifier       — WinHTTP update.explorerlens.io check
+```
+
+---
+
+## Previous Status (v15.0.0 "Zenith")
 
 ### Executive Summary
 
