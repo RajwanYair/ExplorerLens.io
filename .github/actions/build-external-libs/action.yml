@@ -155,8 +155,12 @@ runs:
           foreach ($lib in @('libwebp.lib','libsharpyuv.lib')) {
             $src = Get-ChildItem $webpBuildDir -Recurse -Filter $lib | Select-Object -First 1
             if ($src) {
-              Copy-Item $src.FullName "$releaseDir/$lib" -Force
-              Write-Host "  Built: $releaseDir/$lib ($([int]($src.Length/1KB)) KB)" -ForegroundColor Green
+              $dest = Join-Path $releaseDir $lib
+              # Avoid "Cannot overwrite item with itself" when src is already in Release/
+              if ($src.FullName -ne (Resolve-Path $dest -ErrorAction SilentlyContinue).Path) {
+                Copy-Item $src.FullName $dest -Force
+              }
+              Write-Host "  Built: $dest ($([int]($src.Length/1KB)) KB)" -ForegroundColor Green
             } else {
               Write-Host "  ::warning::$lib not found in libwebp build output"
             }
