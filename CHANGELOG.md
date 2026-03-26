@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [16.3.0] "Horizon-T" — 2026-03-26
+
+### Summary
+**Minor release — Enterprise & Policy (Sprints 89–96)**
+
+- **Version:** 16.2.0 "Horizon-S" → 16.3.0 "Horizon-T"
+- **Focus:** Enterprise management, Group Policy, FIPS compliance, Intune/SCCM support.
+
+### Added
+- **Engine/Core/EnterprisePolicyEngineV2:** Hierarchical policy engine resolving
+  GPO → Intune (MDM/CSP) → ConfigMgr (SCCM/WMI) → AdminManual → UserPreference.
+  Typed PolicyValue variant, per-policy provenance, OnPolicyChange callback, JSON audit export.
+- **Engine/Core/FIPSComplianceMode:** FIPS 140-2/140-3 compliance detector.
+  Reads Windows FipsAlgorithmPolicy registry key; enforces BCrypt-only hashing (SHA-256+),
+  AES-256/CBC/GCM encryption, TLS 1.2 minimum, SHA-256 plugin signatures.
+- **packaging/ExplorerLens.admx:** Full ADMX Group Policy template with 7 policies:
+  AllowedGPUBackend, DisableTelemetry, MaxCacheBudgetMB, DisabledFormats,
+  PreventUserUnregister, ForceRegisterOnLogon, DisableAIUpscaling.
+- **packaging/ExplorerLens.adml:** en-US ADML display strings and presentation
+  definitions for all ADMX policies; deploy to PolicyDefinitions folder.
+
+### Enterprise Deployment Notes
+- ADMX template supports Windows Server 2019/2022 and Windows 10/11 domain controllers
+- FIPS mode automatically redirects cache checksums from XXH3 → SHA-256
+- Intune deployment supported via ADMX ingestion in Settings Catalog
+
+
 ## [16.2.0] "Horizon-S" — 2026-03-26
 
 ### Summary
