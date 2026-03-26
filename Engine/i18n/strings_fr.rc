@@ -1,0 +1,58 @@
+// strings_fr.rc — French (fr-FR) string resources
+// Copyright (c) 2026 ExplorerLens Project
+//
+// French localization of ExplorerLens UI strings.
+// Keep in sync with strings_en.rc (master).
+//
+#include "resource_ids.h"
+
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+
+STRINGTABLE BEGIN
+    // Application
+    IDS_APP_NAME            "ExplorerLens"
+    IDS_APP_TAGLINE         "Miniatures accélérées GPU pour plus de 200 formats"
+    IDS_APP_VERSION_FMT     "Version %s \"%s\""
+
+    // Status messages
+    IDS_STATUS_REGISTERED   "Extension enregistrée"
+    IDS_STATUS_UNREGISTERED "Extension non enregistrée"
+    IDS_STATUS_PROCESSING   "Génération des miniatures..."
+    IDS_STATUS_IDLE         "Inactif"
+    IDS_STATUS_ERROR        "Erreur : %s"
+
+    // Dashboard
+    IDS_DASH_HIT_RATE       "Taux de succès du cache"
+    IDS_DASH_THUMBNAILS     "Miniatures générées"
+    IDS_DASH_GPU_BACKEND    "Backend GPU"
+    IDS_DASH_THROUGHPUT     "Débit"
+
+    // Actions
+    IDS_ACTION_ENABLE       "Activer l'extension"
+    IDS_ACTION_DISABLE      "Désactiver l'extension"
+    IDS_ACTION_CLEAR_CACHE  "Vider le cache"
+    IDS_ACTION_OPEN_MGR     "Ouvrir LENSManager"
+    IDS_ACTION_REGISTER     "Enregistrer l'extension Shell"
+    IDS_ACTION_UNREGISTER   "Désenregistrer l'extension Shell"
+
+    // GPU backends
+    IDS_GPU_AUTO            "Détection automatique (recommandé)"
+    IDS_GPU_DX12            "DirectX 12"
+    IDS_GPU_DX11            "DirectX 11"
+    IDS_GPU_VULKAN          "Calcul Vulkan"
+    IDS_GPU_CPU             "Repli CPU"
+
+    // Settings
+    IDS_SETTING_QUALITY     "Qualité des miniatures"
+    IDS_SETTING_CACHE_SIZE  "Quota du cache (Mo)"
+    IDS_SETTING_MAX_ENTRIES "Entrées max du cache"
+    IDS_SETTING_THEME       "Thème"
+    IDS_SETTING_TELEMETRY   "Diagnostics anonymes"
+
+    // Errors
+    IDS_ERR_REG_ADMIN       "Les privilèges d'administrateur sont requis pour enregistrer l'extension."
+    IDS_ERR_DLL_NOT_FOUND   "LENSShell.dll introuvable.  Veuillez réinstaller ExplorerLens."
+    IDS_ERR_GPU_INIT        "Échec de l'initialisation GPU.  Repli sur le rendu CPU."
+    IDS_ERR_CACHE_CORRUPT   "L'index du cache est corrompu.  Reconstruction en cours..."
+    IDS_ERR_PLUGIN_TRUST    "Le plugin \"%s\" a échoué à la vérification de confiance et n'a pas été chargé."
+END

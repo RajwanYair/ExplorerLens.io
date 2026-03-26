@@ -1,0 +1,58 @@
+// strings_de.rc — German (de-DE) string resources
+// Copyright (c) 2026 ExplorerLens Project
+//
+// German localization of ExplorerLens UI strings.
+// Keep in sync with strings_en.rc (master).
+//
+#include "resource_ids.h"
+
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+
+STRINGTABLE BEGIN
+    // Application
+    IDS_APP_NAME            "ExplorerLens"
+    IDS_APP_TAGLINE         "GPU-beschleunigte Miniaturbilder für über 200 Dateiformate"
+    IDS_APP_VERSION_FMT     "Version %s \"%s\""
+
+    // Status messages
+    IDS_STATUS_REGISTERED   "Erweiterung registriert"
+    IDS_STATUS_UNREGISTERED "Erweiterung nicht registriert"
+    IDS_STATUS_PROCESSING   "Miniaturbilder werden erstellt..."
+    IDS_STATUS_IDLE         "Leerlauf"
+    IDS_STATUS_ERROR        "Fehler: %s"
+
+    // Dashboard
+    IDS_DASH_HIT_RATE       "Cache-Trefferquote"
+    IDS_DASH_THUMBNAILS     "Erstellte Miniaturbilder"
+    IDS_DASH_GPU_BACKEND    "GPU-Backend"
+    IDS_DASH_THROUGHPUT     "Durchsatz"
+
+    // Actions
+    IDS_ACTION_ENABLE       "Erweiterung aktivieren"
+    IDS_ACTION_DISABLE      "Erweiterung deaktivieren"
+    IDS_ACTION_CLEAR_CACHE  "Cache leeren"
+    IDS_ACTION_OPEN_MGR     "LENSManager öffnen"
+    IDS_ACTION_REGISTER     "Shell-Erweiterung registrieren"
+    IDS_ACTION_UNREGISTER   "Shell-Erweiterung entregistrieren"
+
+    // GPU backends
+    IDS_GPU_AUTO            "Automatische Erkennung (empfohlen)"
+    IDS_GPU_DX12            "DirectX 12"
+    IDS_GPU_DX11            "DirectX 11"
+    IDS_GPU_VULKAN          "Vulkan Compute"
+    IDS_GPU_CPU             "CPU-Fallback"
+
+    // Settings
+    IDS_SETTING_QUALITY     "Miniaturqualität"
+    IDS_SETTING_CACHE_SIZE  "Cache-Budget (MB)"
+    IDS_SETTING_MAX_ENTRIES "Max. Cache-Einträge"
+    IDS_SETTING_THEME       "Design"
+    IDS_SETTING_TELEMETRY   "Anonyme Diagnose"
+
+    // Errors
+    IDS_ERR_REG_ADMIN       "Zum Registrieren der Shell-Erweiterung sind Administratorrechte erforderlich."
+    IDS_ERR_DLL_NOT_FOUND   "LENSShell.dll nicht gefunden.  Bitte ExplorerLens neu installieren."
+    IDS_ERR_GPU_INIT        "GPU-Initialisierung fehlgeschlagen.  Rückfall auf CPU-Rendering."
+    IDS_ERR_CACHE_CORRUPT   "Cache-Index ist beschädigt.  Wird neu aufgebaut..."
+    IDS_ERR_PLUGIN_TRUST    "Plugin \"%s\" hat die Vertrauensverifizierung nicht bestanden und wurde nicht geladen."
+END

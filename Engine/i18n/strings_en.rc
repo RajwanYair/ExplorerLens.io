@@ -1,0 +1,58 @@
+// strings_en.rc — English (en-US) string resources
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Master string table for ExplorerLens UI localisation.
+// Add new strings to ALL language .rc files to maintain parity.
+//
+#include "resource_ids.h"
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+STRINGTABLE BEGIN
+    // Application
+    IDS_APP_NAME            "ExplorerLens"
+    IDS_APP_TAGLINE         "GPU-accelerated thumbnails for 200+ file formats"
+    IDS_APP_VERSION_FMT     "Version %s \"%s\""
+
+    // Status messages
+    IDS_STATUS_REGISTERED   "Extension registered"
+    IDS_STATUS_UNREGISTERED "Extension not registered"
+    IDS_STATUS_PROCESSING   "Processing thumbnails..."
+    IDS_STATUS_IDLE         "Idle"
+    IDS_STATUS_ERROR        "Error: %s"
+
+    // Dashboard
+    IDS_DASH_HIT_RATE       "Cache Hit Rate"
+    IDS_DASH_THUMBNAILS     "Thumbnails Generated"
+    IDS_DASH_GPU_BACKEND    "GPU Backend"
+    IDS_DASH_THROUGHPUT     "Throughput"
+
+    // Actions
+    IDS_ACTION_ENABLE       "Enable Extension"
+    IDS_ACTION_DISABLE      "Disable Extension"
+    IDS_ACTION_CLEAR_CACHE  "Clear Cache"
+    IDS_ACTION_OPEN_MGR     "Open LENSManager"
+    IDS_ACTION_REGISTER     "Register Shell Extension"
+    IDS_ACTION_UNREGISTER   "Unregister Shell Extension"
+
+    // GPU backends
+    IDS_GPU_AUTO            "Auto-detect (recommended)"
+    IDS_GPU_DX12            "DirectX 12"
+    IDS_GPU_DX11            "DirectX 11"
+    IDS_GPU_VULKAN          "Vulkan Compute"
+    IDS_GPU_CPU             "CPU Fallback"
+
+    // Settings
+    IDS_SETTING_QUALITY     "Thumbnail Quality"
+    IDS_SETTING_CACHE_SIZE  "Cache Budget (MB)"
+    IDS_SETTING_MAX_ENTRIES "Max Cache Entries"
+    IDS_SETTING_THEME       "Theme"
+    IDS_SETTING_TELEMETRY   "Anonymous Diagnostics"
+
+    // Errors
+    IDS_ERR_REG_ADMIN       "Administrator privileges are required to register the shell extension."
+    IDS_ERR_DLL_NOT_FOUND   "LENSShell.dll not found.  Please reinstall ExplorerLens."
+    IDS_ERR_GPU_INIT        "GPU initialisation failed.  Falling back to CPU rendering."
+    IDS_ERR_CACHE_CORRUPT   "Cache index is corrupt.  Rebuilding..."
+    IDS_ERR_PLUGIN_TRUST    "Plugin \"%s\" failed trust verification and was not loaded."
+END
