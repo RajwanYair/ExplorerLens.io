@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [19.1.0] "Pulsar-R" - 2026-03-26
+
+### Summary
+Enterprise Fleet Management release. ExplorerLens now ships a complete enterprise
+governance surface: Windows Group Policy + MDM (Intune) config bridge, centralized
+fleet policy manager, AD/LDAP user attribute resolver, per-tenant resource isolation,
+SOC 2/HIPAA/CIS compliance reporter, SIEM audit export (CEF/LEEF/JSON-L), Azure App
+Config remote delivery, Prometheus health dashboard, and SAML/OIDC/WAM SSO bridge.
+
+### Added
+- GroupPolicyBridge: HKLM/HKCU GP + MDM CSP reader with priority merge
+- FleetConfigManager: single authoritative FleetThumbnailPolicy for all subsystems
+- EnterpriseAuditExporter: CEF/LEEF/JSON-L SIEM records for decode, block, NSFW events
+- LDAPUserAttributeResolver: ADSI AD attribute + group membership policy context
+- TenantIsolationPolicy: cache/model/audit partitions per Azure AD tenant (BYOD)
+- ComplianceReporter: SOC 2, HIPAA, ISO 27001, CIS controls with Markdown + JSON output
+- RemoteConfigPusher: Azure App Configuration poll-and-apply with registry write-back
+- FleetHealthDashboard: Prometheus text + Azure Monitor JSON health export
+- SSOIntegrationBridge: WAM/OIDC-PKCE/SAML2 token acquisition for Manager console
+- docs/ENTERPRISE.md: full enterprise deployment, GP reference, SIEM, SSO, compliance guide
+
+### Security
+- All audit records contain metadata only — no file content transmitted
+- Plugin signatures re-validated on every load cycle
+- SSOIntegrationBridge validates JWT iss/aud/exp on inbound tokens
+
+### Infrastructure
+- TestCount raised to 4400 (9 new Enterprise module test suites)
+
+
 ## [19.0.0] "Pulsar" - 2026-03-26
 
 ### Summary
