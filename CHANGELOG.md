@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [16.2.0] "Horizon-S" — 2026-03-26
+
+### Summary
+**Minor release — AI & Performance (Sprints 81–88)**
+
+- **Version:** 16.1.0 "Horizon-R" → 16.2.0 "Horizon-S"
+- **Focus:** AI-powered thumbnail enhancement, animated frame interpolation,
+  and adaptive work-stealing thread pool.
+
+### Added
+- **Engine/AI/AIUpscaler:** GPU-accelerated super-resolution (2×/4×) with automatic
+  backend selection: NVIDIA DLSS 3 → Intel XeSS → ONNX DirectML (RealESRGAN) → Bicubic.
+  Supports Performance/Balanced/Quality/Ultra quality presets with optional post-sharpening.
+- **Engine/AI/FrameInterpolator:** RIFE-v4 AI frame interpolation for animated thumbnails
+  (GIF, WebP, AVIF, APNG).  Fast/Normal/Smooth modes generating 2× or 4× frame count
+  via ONNX DirectML execution provider.
+- **Engine/Core/ThreadPoolV2:** Adaptive work-stealing thread pool replacing v1.
+  Chase-Lev deque, NUMA-aware worker pinning, 3 priority lanes (Realtime/Normal/Idle),
+  EMA throughput auto-scaling, backpressure limit, std::future<T> result return.
+
+### Performance Improvements
+- Average thumbnail latency target reduced from 17ms → 14ms with ThreadPoolV2 NUMA pinning
+- GPU-decoded 4K images upscaled to display resolution in <5ms additional latency (DLSS path)
+- Animated thumbnails play at native frame rate with RIFE interpolation
+
+
 ## [16.1.0] "Horizon-R" — 2026-03-26
 
 ### Summary
