@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [15.8.0] "Zenith-Y" — 2026-03-26
+
+### Summary
+**Minor release — UX Polish: Tray, Toast, Onboarding, i18n, Telemetry (Sprints 53–60)**
+
+- **Version:** 15.7.0 "Zenith-X" → 15.8.0 "Zenith-Y"
+- **Focus:** Complete the UX Polish milestone. Ships system tray agent, WinRT toast
+  notifications, first-run onboarding wizard, EN/FR/DE i18n scaffold, and opt-in
+  anonymous telemetry module.
+
+### Added
+- **Engine/Shell/TrayAgent:** Win32 Shell_NotifyIcon tray agent with context menu
+  (enable/disable/clear cache/open manager), balloon notifications, Explorer-restart
+  recovery via WM_TASKBARCREATED.
+- **Engine/Shell/ToastNotifier:** WinRT toast bridge with runtime-loaded dispatch,
+  simple/action/progress toast XML builders; graceful degradation on unsupported OS.
+- **LENSManager.WinUI/Onboarding/:** Two-page WinUI 3 first-run wizard — WelcomePage
+  (logo + feature highlights) and SetupPage (COM registration, GPU backend, telemetry consent).
+- **Engine/i18n/:** Win32 STRINGTABLE localisation scaffold: resource_ids.h (IDS_*
+  constants) + strings_en.rc (master) + strings_fr.rc (French) + strings_de.rc (German).
+- **Engine/Telemetry/AnonymousTelemetry:** Opt-in batched telemetry with privacy-first
+  design — no PII, HKCU consent flag, random session GUID, LENS_TELEMETRY_TRACK macro.
+
+
 ## [15.7.0] "Zenith-X" — 2026-03-26
 
 ### Summary
