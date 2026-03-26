@@ -1,6 +1,9 @@
 # ExplorerLens Performance Tuning Guide
-**Version:** 17.1.0 "Nova-R"
-**Last Updated:** 2026-03-26
+
+> Sprint 229 | Version 20.2.0 "Quasar-S" | v2 Performance Architecture
+
+**Targets:** 14ms single thumbnail (↓18%), 270 img/sec batch (↑15%), <3ms cache hit  
+**New:** ThumbnailPriorityQueue, PredictivePrefetcher, VulkanComputeDecoder, ZeroCopyTextureUploader, SIMDImageProcessor (AVX2), PersistentDiskCache (SQLite WAL), BatchDecodeScheduler (work-stealing), DirectStorageLoader
 
 ---
 
