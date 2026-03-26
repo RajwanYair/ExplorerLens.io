@@ -1,0 +1,103 @@
+; ExplorerLens.adml — ADMX Administrative Template (Language: en-US)
+; Copyright (c) 2026 ExplorerLens Project
+;
+; Contains the display strings for ExplorerLens.admx policy settings.
+; Deploy alongside ExplorerLens.admx in %SystemRoot%\PolicyDefinitions\en-US\
+;
+
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions"
+                           revision="1.0" schemaVersion="1.0">
+  <displayName>ExplorerLens Administrative Template</displayName>
+  <description>Group Policy settings for ExplorerLens thumbnail provider.</description>
+
+  <resources>
+    <stringTable>
+
+      <!-- Category -->
+      <string id="ExplorerLens">ExplorerLens</string>
+      <string id="ExplorerLens_Help">Settings for the ExplorerLens Windows Shell Extension thumbnail provider (v16.3.0+).</string>
+
+      <!-- GPU Backend policy -->
+      <string id="AllowedGPUBackend">Restrict allowed GPU backend</string>
+      <string id="AllowedGPUBackend_Help">
+        Restricts which GPU rendering backend ExplorerLens may use.
+        If Enabled, the selected backend is forced for all users on this machine.
+        If Disabled or Not Configured, users may select any available backend.
+        
+        Options:
+          0 = Auto-detect (default)
+          1 = DirectX 12 only
+          2 = DirectX 11 only
+          3 = Vulkan Compute only
+          4 = CPU fallback only
+      </string>
+
+      <!-- Telemetry policy -->
+      <string id="DisableTelemetry">Disable anonymous telemetry</string>
+      <string id="DisableTelemetry_Help">
+        When Enabled, suppresses all anonymous telemetry data collection for all users
+        on this machine, regardless of per-user consent settings.
+        When Disabled or Not Configured, per-user consent is respected.
+      </string>
+
+      <!-- Cache budget policy -->
+      <string id="MaxCacheBudgetMB">Maximum cache budget (MB)</string>
+      <string id="MaxCacheBudgetMB_Help">
+        Sets a per-user upper limit on the thumbnail cache budget in megabytes.
+        Users cannot set a cache budget higher than this policy value.
+        Minimum: 64 MB. Maximum: 16384 MB. Default: 512 MB.
+        Set to 0 to allow unlimited cache (not recommended).
+      </string>
+
+      <!-- Format deny-list policy -->
+      <string id="DisabledFormats">Disabled format extensions</string>
+      <string id="DisabledFormats_Help">
+        Specifies a semicolon-delimited list of file extensions that ExplorerLens
+        will NOT process.  Explorer will use its default thumbnail handler instead.
+        Example: .exe;.dll;.sys
+        Leave blank to allow all supported formats.
+      </string>
+
+      <!-- Extension registration policy -->
+      <string id="PreventUserUnregister">Prevent users from unregistering the extension</string>
+      <string id="PreventUserUnregister_Help">
+        When Enabled, prevents non-administrator users from unregistering the
+        ExplorerLens shell extension via LENSManager.  Administrative unregistration
+        via elevated LENSManager or Group Policy remains possible.
+      </string>
+
+      <string id="ForceRegisterOnLogon">Force re-register extension on user logon</string>
+      <string id="ForceRegisterOnLogon_Help">
+        When Enabled, ExplorerLens verifies and re-registers the shell extension
+        COM entry on every user logon.  Useful in environments where third-party
+        tools may remove COM server registrations.  Requires admin token at logon.
+      </string>
+
+      <!-- Upscaling policy -->
+      <string id="DisableAIUpscaling">Disable AI thumbnail upscaling</string>
+      <string id="DisableAIUpscaling_Help">
+        When Enabled, disables the AI super-resolution upscaler (DLSS/XeSS/ONNX).
+        All thumbnails will be generated at native resolution using the GPU decoder only.
+        Reduces GPU memory usage on constrained endpoints.
+      </string>
+
+    </stringTable>
+
+    <presentationTable>
+      <presentation id="AllowedGPUBackend_Presentation">
+        <dropdownList refId="AllowedGPUBackend_Value" defaultItem="0">Allowed GPU backend:</dropdownList>
+      </presentation>
+      <presentation id="MaxCacheBudgetMB_Presentation">
+        <decimalTextBox refId="MaxCacheBudgetMB_Value" defaultValue="512">Maximum cache budget (MB):</decimalTextBox>
+      </presentation>
+      <presentation id="DisabledFormats_Presentation">
+        <textBox refId="DisabledFormats_Value">
+          <label>Disabled extensions (semicolon-separated):</label>
+        </textBox>
+      </presentation>
+    </presentationTable>
+  </resources>
+</policyDefinitionResources>

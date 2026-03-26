@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ExplorerLens.admx — ADMX Administrative Template
+  Copyright (c) 2026 ExplorerLens Project
+
+  Deploy to: %SystemRoot%\PolicyDefinitions\ExplorerLens.admx
+             %SystemRoot%\PolicyDefinitions\en-US\ExplorerLens.adml
+
+  Namespace: ExplorerLens.Policies (prefix: el)
+  Registry root: HKLM\Software\Policies\ExplorerLens
+-->
+<policyDefinitions xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions"
+                   revision="1.0" schemaVersion="1.0">
+
+  <policyNamespaces>
+    <target prefix="el" namespace="ExplorerLens.Policies"/>
+    <using prefix="windows" namespace="Microsoft.Policies.Windows"/>
+  </policyNamespaces>
+
+  <supersededAdm fileName=""/>
+  <supportedOn>
+    <definitions>
+      <definition name="SUPPORTED_WIN10_OR_HIGHER"
+                  displayName="$(string.SUPPORTED_WIN10_OR_HIGHER)"/>
+    </definitions>
+  </supportedOn>
+
+  <categories>
+    <category name="ExplorerLens" displayName="$(string.ExplorerLens)">
+      <parentCategory ref="windows:WindowsComponents"/>
+    </category>
+  </categories>
+
+  <policies>
+
+    <!-- GPU Backend restriction -->
+    <policy name="AllowedGPUBackend"
+            class="Machine"
+            displayName="$(string.AllowedGPUBackend)"
+            explainText="$(string.AllowedGPUBackend_Help)"
+            presentation="$(presentation.AllowedGPUBackend_Presentation)"
+            key="Software\Policies\ExplorerLens\GPU"
+            valueName="AllowedBackend">
+      <parentCategory ref="ExplorerLens"/>
+      <supportedOn ref="SUPPORTED_WIN10_OR_HIGHER"/>
+      <elements>
+        <enum id="AllowedGPUBackend_Value" valueName="AllowedBackend">
+          <item displayName="Auto-detect (default)">  <value><decimal value="0"/></value></item>
+          <item displayName="DirectX 12 only">        <value><decimal value="1"/></value></item>
+          <item displayName="DirectX 11 only">        <value><decimal value="2"/></value></item>
+          <item displayName="Vulkan Compute only">    <value><decimal value="3"/></value></item>
+          <item displayName="CPU fallback only">      <value><decimal value="4"/></value></item>
+        </enum>
+      </elements>
+    </policy>
+
+    <!-- Telemetry disable -->
+    <policy name="DisableTelemetry"
+            class="Machine"
+            displayName="$(string.DisableTelemetry)"
+            explainText="$(string.DisableTelemetry_Help)"
+            key="Software\Policies\ExplorerLens\Telemetry"
+            valueName="Disabled">
+      <parentCategory ref="ExplorerLens"/>
+      <supportedOn ref="SUPPORTED_WIN10_OR_HIGHER"/>
+      <enabledValue><decimal value="1"/></enabledValue>
+      <disabledValue><decimal value="0"/></disabledValue>
+    </policy>
+
+    <!-- Cache budget cap -->
+    <policy name="MaxCacheBudgetMB"
+            class="User"
+            displayName="$(string.MaxCacheBudgetMB)"
+            explainText="$(string.MaxCacheBudgetMB_Help)"
+            presentation="$(presentation.MaxCacheBudgetMB_Presentation)"
+            key="Software\Policies\ExplorerLens\Cache">
+      <parentCategory ref="ExplorerLens"/>
+      <supportedOn ref="SUPPORTED_WIN10_OR_HIGHER"/>
+      <elements>
+        <decimal id="MaxCacheBudgetMB_Value" valueName="MaxBudgetMB"
+                 minValue="64" maxValue="16384" storeAsText="false"/>
+      </elements>
+    </policy>
+
+    <!-- Disabled format extensions -->
+    <policy name="DisabledFormats"
+            class="Machine"
+            displayName="$(string.DisabledFormats)"
+            explainText="$(string.DisabledFormats_Help)"
+            presentation="$(presentation.DisabledFormats_Presentation)"
+            key="Software\Policies\ExplorerLens\Formats">
+      <parentCategory ref="ExplorerLens"/>
+      <supportedOn ref="SUPPORTED_WIN10_OR_HIGHER"/>
+      <elements>
+        <text id="DisabledFormats_Value" valueName="DisabledExtensions"/>
+      </elements>
+    </policy>
+
+    <!-- Prevent user unregister -->
+    <policy name="PreventUserUnregister"
+            class="Machine"
+            displayName="$(string.PreventUserUnregister)"
+            explainText="$(string.PreventUserUnregister_Help)"
+            key="Software\Policies\ExplorerLens\Registration"
+            valueName="PreventUserUnregister">
+      <parentCategory ref="ExplorerLens"/>
+      <supportedOn ref="SUPPORTED_WIN10_OR_HIGHER"/>
+      <enabledValue><decimal value="1"/></enabledValue>
+      <disabledValue><decimal value="0"/></disabledValue>
+    </policy>
+
+    <!-- Force re-register on logon -->
+    <policy name="ForceRegisterOnLogon"
+            class="Machine"
+            displayName="$(string.ForceRegisterOnLogon)"
+            explainText="$(string.ForceRegisterOnLogon_Help)"
+            key="Software\Policies\ExplorerLens\Registration"
+            valueName="ForceRegisterOnLogon">
+      <parentCategory ref="ExplorerLens"/>
+      <supportedOn ref="SUPPORTED_WIN10_OR_HIGHER"/>
+      <enabledValue><decimal value="1"/></enabledValue>
+      <disabledValue><decimal value="0"/></disabledValue>
+    </policy>
+
+    <!-- Disable AI upscaling -->
+    <policy name="DisableAIUpscaling"
+            class="Machine"
+            displayName="$(string.DisableAIUpscaling)"
+            explainText="$(string.DisableAIUpscaling_Help)"
+            key="Software\Policies\ExplorerLens\AI"
+            valueName="DisableUpscaling">
+      <parentCategory ref="ExplorerLens"/>
+      <supportedOn ref="SUPPORTED_WIN10_OR_HIGHER"/>
+      <enabledValue><decimal value="1"/></enabledValue>
+      <disabledValue><decimal value="0"/></disabledValue>
+    </policy>
+
+  </policies>
+</policyDefinitions>
