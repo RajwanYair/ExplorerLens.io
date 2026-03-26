@@ -9,6 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [19.0.0] "Pulsar" - 2026-03-26
+
+### Summary
+AI-First Architecture MAJOR release. Every thumbnail optionally passes through the AI
+post-processing pipeline: content classification, semantic color palette extraction,
+blur detection/deblur, NSFW safety guard, and synthesis fallback for undecoded files.
+
+### Added
+- NeuralThumbnailSynthesizer: diffusion-lite ONNX synthesis for corrupt/encrypted files
+- ContentCategoryClassifier: MobileNetV3-Small 13-class thumbnail content taxonomy
+- SemanticColorPalette: k-means++ dominant 6-color palette with CIE Lab distance
+- BlurDetectionFilter: Laplacian variance + RRDB-lite optional AI deblur
+- NSFWContentGuard: enterprise binary safety classifier (Blur/Replace/Block modes)
+- AIThumbnailPipeline: orchestration layer for all AI modules with diagnostics
+- AIModelRegistry: ONNX model lifecycle with hot-swap and VRAM tracking
+- AIPerformanceProfiler: per-module span profiling with RecommendDisable()
+- docs/AI_ARCHITECTURE.md: pipeline diagram, model table, performance budget reference
+
+### Breaking Changes
+- None — all AI stages are opt-in and disabled by default until models are present
+
+### Performance
+- AI budget per thumbnail: 5ms (within 17ms shell SLO)
+- If no model directory, all AI stages skip with zero overhead
+
+### Security
+- NSFWContentGuard requires enterprise license key — never active without opt-in
+- No user content or file data transmitted externally by any AI module
+
+### Infrastructure
+- TestCount raised to 4300 (9 new AI module test suites)
+
+
 ## [18.3.0] "Orion-T" - 2026-03-26
 
 ### Summary
