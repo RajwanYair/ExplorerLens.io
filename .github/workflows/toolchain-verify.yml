@@ -1,0 +1,93 @@
+# CI Toolchain Upgrade — Sprint 33 (v15.6.0)
+# Ensures all CI jobs use the latest available MSVC toolset.
+# On GitHub-hosted windows-latest: MSVC v143 (VS 2022)
+# On local dev: MSVC v145 (VS 18 2026) via Build-MSVC.ps1
+# This workflow validates the toolchain matrix and fails if compiler version
+# is below the established minimum (19.29 = VS 2019 16.11 absolute floor).
+name: CI Toolchain Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-toolchain:
+    name: Verify MSVC Toolchain (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC (latest available)
+        uses: ilammy/msvc-dev-cmd@v1
+        # No toolset pin — use whatever VS ships on the runner.
+        # Local builds use v145 via vcvars64.bat -vcvars_ver=14.50.35717
+
+      - name: Report compiler version
+        shell: pwsh
+        run: |
+          $clPath = (Get-Command cl.exe -ErrorAction SilentlyContinue).Source
+          if (-not $clPath) {
+            Write-Error "cl.exe not found in PATH after msvc-dev-cmd"
+            exit 1
+          }
+          $verLine = & cl.exe 2>&1 | Select-Object -First 1 | Out-String
+          Write-Host "cl.exe: $clPath"
+          Write-Host "Version: $verLine"
+          # Parse major.minor version: e.g. "19.43.xxxxx"
+          if ($verLine -match 'Version (\d+)\.(\d+)\.(\d+)') {
+            $major = [int]$Matches[1]
+            $minor = [int]$Matches[2]
+            Write-Host "Parsed: $major.$minor"
+            # Minimum: 19.29 (VS 2019 16.11)
+            if ($major -lt 19 -or ($major -eq 19 -and $minor -lt 29)) {
+              Write-Error "MSVC version $major.$minor is below minimum 19.29"
+              exit 1
+            }
+            Write-Host "Toolchain OK: $major.$minor >= 19.29"
+          } else {
+            Write-Warning "Could not parse cl.exe version from: $verLine"
+          }
+
+      - name: Report CMake version
+        shell: pwsh
+        run: |
+          $v = cmake --version | Select-Object -First 1
+          Write-Host "CMake: $v"
+          if ($v -match 'cmake version (\d+)\.(\d+)') {
+            $major = [int]$Matches[1]; $minor = [int]$Matches[2]
+            if ($major -lt 3 -or ($major -eq 3 -and $minor -lt 25)) {
+              Write-Error "CMake $major.$minor is below minimum 3.25"
+              exit 1
+            }
+            Write-Host "CMake OK: $major.$minor >= 3.25"
+          }
+
+      - name: Verify Ninja available
+        shell: pwsh
+        run: |
+          $v = ninja --version 2>&1
+          Write-Host "Ninja: $v"
+
+      - name: Write toolchain summary
+        shell: pwsh
+        run: |
+          $summary = @"
+          | Tool | Version |
+          |------|---------|
+          | cl.exe | $(cl.exe 2>&1 | Select-String 'Version' | Select-Object -First 1) |
+          | cmake | $(cmake --version | Select-Object -First 1) |
+          | ninja | $(ninja --version) |
+          "@
+          Write-Host $summary
+          $summary | Out-File -FilePath "$env:GITHUB_STEP_SUMMARY" -Encoding utf8 -Append
