@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [18.3.0] "Orion-T" - 2026-03-26
+
+### Summary
+Plugin Marketplace release. Introduces the full plugin lifecycle: signed .lenspkg packages,
+a public registry query client, SemVer dependency resolution, PKI signature verification,
+background auto-update with rollback, and per-plugin usage telemetry.
+
+### Added
+- MarketplaceClient: REST API client for plugins.explorerlens.io plugin registry
+- PluginPackageManifest: .lenspkg ZIP manifest schema with PluginCapabilityFlag bitmask
+- PluginInstaller: no-admin install/uninstall/update/rollback for .lenspkg packages
+- PluginVersionResolver: SemVer dependency graph resolution with conflict/cycle detection
+- PluginSignatureVerifier: RSA-PSS + ExplorerLens Plugin CA with OCSP revocation check
+- PluginUsageTracker: per-plugin decode stats, p50/p95/p99 latency, crash auto-disable
+- PluginUpdateScheduler: background 24-hr polling with AutoApply and rollback policies
+- PluginSearchIndex: inverted-index instant-search by name/extension/author/description
+- docs/PLUGIN_MARKETPLACE.md: .lenspkg format spec, signing guide, CLI reference, sandbox rules
+
+### Security
+- RequireValid is the default trust policy — unsigned packages are rejected
+- Plugin sandbox limits file I/O, registry access, and network per manifest declarations
+- No credentials stored; marketplace API key is optional for private registries
+
+### Infrastructure
+- TestCount raised to 4200 (9 new plugin marketplace test suites)
+
+
 ## [18.2.0] "Orion-S" - 2026-03-26
 
 ### Summary

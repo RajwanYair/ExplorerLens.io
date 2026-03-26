@@ -21,10 +21,10 @@ namespace BuildValidation {
 /// Build configuration snapshot for diagnostics
 struct BuildInfo {
     static constexpr int MajorVersion = 18;
-    static constexpr int MinorVersion = 2;
+    static constexpr int MinorVersion = 3;
     static constexpr int PatchVersion = 0;
-    static constexpr const char* VersionString = "18.2.0";
-    static constexpr const char* Codename = "Orion-S";
+    static constexpr const char* VersionString = "18.3.0";
+    static constexpr const char* Codename = "Orion-T";
     static constexpr const char* BuildDate = __DATE__;
     static constexpr const char* BuildTime = __TIME__;
 
