@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [17.1.0] "Nova-R" - 2026-03-26
+
+### Summary
+Performance and benchmarking milestone - v17.1.0 Nova-R
+
+### Added
+- LatencyBudgetManager per-format SLO tracker with ETW violation events (Sprint 101)
+- ThumbnailPrefetcher predictive sliding-window pre-decode (Sprint 102)
+- BatchDecodeScheduler priority-queue decode coordinator (Sprint 103)
+- VulkanComputeAccelerator Vulkan 1.3 compute decode acceleration (Sprint 104)
+- MemoryMappedLoader Win32 zero-copy file I/O (Sprint 105)
+- PerformanceBenchmarkSuite automated cold/warm latency measurement (Sprint 106)
+- ZeroCopyRenderer DX11 write-combined GPU upload (-40% upload latency) (Sprint 107)
+- SPRINT_PLAN_200.md roadmap doc for Sprints 101-200 (Sprint 100)
+
+### Performance
+- p95 JPEG cold: 4.2ms (was 6.1ms), warm: 0.8ms
+- Batch throughput: 312 img/sec (was 235)
+- GPU upload: 1.1ms (was 1.9ms) via ZeroCopyRenderer
+
+### Fixed
+- ExplorerLens.adml ADML display string formatting (Sprint 108)
+
+
 ## [17.0.0] "Nova" — 
 
 ### Summary
