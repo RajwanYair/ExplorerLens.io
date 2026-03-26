@@ -1,0 +1,134 @@
+# Pre-Release Candidate Workflow — Sprint 37 (v15.6.0)
+# Creates Release Candidate tags (vX.Y.Z-rc.N) and pre-release GitHub Releases.
+# RC releases are for validation before the final GA release.
+name: Pre-Release (RC)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*-rc.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'RC version (e.g. 15.6.0-rc.1)'
+        required: true
+        default: ''
+      base_ref:
+        description: 'Branch or SHA to tag'
+        required: false
+        default: 'main'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build-rc:
+    name: Build Release Candidate
+    runs-on: windows-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version metadata
+        id: meta
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $ver = "${{ github.event.inputs.version }}"
+          } else {
+            $ver = "${{ github.ref_name }}" -replace '^v', ''
+          }
+          Write-Host "RC Version: $ver"
+          "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Cache external libraries
+        uses: actions/cache@v4
+        with:
+          path: |
+            external/compression-libs/zlib/build-cmake/Release
+            external/compression-libs/zstd/build/Release
+            external/compression-libs/minizip-ng/build-cmake/Release
+            external/image-libs/libwebp/build-cmake/Release
+            external/camera-libs/libraw-install
+          key: ext-libs-${{ hashFiles('external/**/*.cmake', 'external/**/CMakeLists.txt') }}-v3
+          restore-keys: ext-libs-
+
+      - name: Build external libraries
+        uses: ./.github/actions/build-external-libs
+
+      - name: Configure (CMake)
+        shell: pwsh
+        run: cmake --preset ci-release -DEXPLORERLENS_VERSION="${{ steps.meta.outputs.version }}"
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config Release -j 4
+
+      - name: Run tests
+        shell: pwsh
+        run: ctest --test-dir build -C Release --output-on-failure -j 4
+
+      - name: Collect artifacts
+        shell: pwsh
+        run: |
+          $staging = "rc-staging"
+          New-Item -ItemType Directory -Path $staging -Force | Out-Null
+          $version = "${{ steps.meta.outputs.version }}"
+          $files = @(
+            "build/bin/LENSShell.dll",
+            "build/bin/LENSManager.exe"
+          )
+          foreach ($f in $files) {
+            if (Test-Path $f) { Copy-Item $f $staging }
+          }
+          # Generate checksums
+          $checksums = ""
+          Get-ChildItem $staging | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            $checksums += "$hash  $($_.Name)`n"
+          }
+          Set-Content -Path "$staging/SHA256SUMS.txt" -Value $checksums.Trim()
+          Write-Host "RC artifacts:"
+          Get-ChildItem $staging | ForEach-Object { Write-Host "  $($_.Name)" }
+
+      - name: Create Pre-Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.meta.outputs.version }}
+          name: ExplorerLens v${{ steps.meta.outputs.version }} (Release Candidate)
+          prerelease: true
+          generate_release_notes: false
+          body: |
+            ## Release Candidate — v${{ steps.meta.outputs.version }}
+
+            This is a **pre-release** build for validation purposes.
+            Do **not** use in production. Report issues before GA.
+
+            ### What's included
+            - `LENSShell.dll` — Windows Shell Extension (x64)
+            - `LENSManager.exe` — Configuration GUI
+            - `SHA256SUMS.txt` — Checksums
+
+            ### Testing checklist
+            - [ ] Install on clean Windows 10 22H2 machine
+            - [ ] Verify thumbnails appear for .webp, .avif, .jxl, .heic
+            - [ ] Verify thumbnails appear for .zip, .7z, .rar
+            - [ ] Verify thumbnails appear for .pdf
+            - [ ] Verify thumbnails appear for .cr2 / .nef RAW files
+            - [ ] Verify LENSManager.exe opens and shows registration status
+            - [ ] Uninstall and verify no registry residue
+
+            **Full release notes in [CHANGELOG.md](../blob/main/CHANGELOG.md)**
+          files: |
+            rc-staging/LENSShell.dll
+            rc-staging/LENSManager.exe
+            rc-staging/SHA256SUMS.txt
