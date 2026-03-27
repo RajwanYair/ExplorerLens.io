@@ -104,7 +104,7 @@ uint64_t AsyncThumbnailProvider::SubmitRequest(const std::wstring &filePath,
  uint64_t requestId = GenerateRequestId();
  m_totalRequests.fetch_add(1);
 
- DecodeRequest request;
+ AsyncProviderDecodeItem request;
  request.requestId = requestId;
  request.filePath = filePath;
  request.requestedSize = requestedSize;
@@ -303,7 +303,7 @@ const wchar_t *AsyncThumbnailProvider::GetStateName(RequestState state) {
 // Private Implementation
 //------------------------------------------------------------------------------
 
-void AsyncThumbnailProvider::WorkerCallback(DecodeRequest &request) {
+void AsyncThumbnailProvider::WorkerCallback(AsyncProviderDecodeItem &request) {
  m_activeWorkers.fetch_add(1);
  request.state = RequestState::InProgress;
  request.startTime = std::chrono::steady_clock::now();
