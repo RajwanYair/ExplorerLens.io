@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [22.1.0] Sirius-R — Performance Profiling v2
+
+### Added
+- Core/ResponsiveLayoutManager.h: DPI-aware responsive layout for Manager UI
+- Core/SecureDecodeContext.h: sandbox isolation for untrusted format decoders
+- Core/SecureStringPool.h: locked memory string storage with CryptProtectMemory
+- Core/StackGuardPolicy.h: CFG + shadow stack enforcement checker
+- Core/InputValidator.h: path traversal prevention and input sanitization
+- Core/CodecPlatformV2.h: pluggable codec registry with capability negotiation
+- Core/NetworkTrustManager.h: certificate pinning and HTTPS trust enforcement
+- Utils/AccessibilityAudit.h: UIA compliance and contrast ratio auditing
+- 6 new unit tests covering Performance Profiling v2 subsystem
+
+
 ## [22.0.0] Sirius — Cross-Platform Foundation (MAJOR)
 
 ### Added
