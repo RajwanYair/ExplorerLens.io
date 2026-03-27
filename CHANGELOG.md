@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [23.1.0] — Vega-R (2026-03-27)
+
+### Added — Sprints 411-420: GPU Acceleration v3
+- Engine/GPU/CUDATextureDecoder.h: CUDA-accelerated BC texture decode (stub, graceful CPU fallback)
+- Engine/GPU/HIPComputeBackend.h: AMD HIP compute backend for ROCm GPU decode
+- Engine/GPU/MultiGPULoadBalancerV3.h: Multi-GPU utilization-based load balancer v3
+- Engine/GPU/GPUTextureAtlasBuilder.h: GPU texture atlas bin-packing builder
+- Engine/GPU/GPUResourceAliasingManager.h: D3D12 resource aliasing and barrier manager
+- Engine/GPU/AsyncDMACopyEngine.h: Async DMA transfer engine with fence-based synchronization
+- Engine/GPU/GPUMemoryDefragmenterV2.h: GPU heap defragmentation planner v2
+- Engine/GPU/GPUThumbnailAtlasManager.h: GPU-resident thumbnail atlas with LRU eviction
+
+
 ## [23.0.0] — Vega (2026-03-27)
 
 ### Added — Sprints 401-410: Reactive Pipeline Architecture
