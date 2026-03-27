@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [23.2.0] — Vega-S (2026-03-27)
+
+### Added — Sprints 421-430: Plugin Ecosystem v3
+- Engine/Plugin/PluginDIContainer.h: IoC dependency injection container for plugins (Singleton/Transient/Scoped)
+- Engine/Plugin/PluginABTestFramework.h: A/B experiment framework with cohort assignment
+- Engine/Plugin/PluginFeatureFlagEngine.h: Runtime feature flags with percentage rollout
+- Engine/Plugin/PluginSLAMonitor.h: Per-plugin SLA budget monitor with violation alerts
+- Engine/Plugin/PluginCanaryController.h: Canary release controller with error-rate rollback
+- Engine/Plugin/PluginTelemetryAggregatorV3.h: Plugin telemetry aggregator v3 with percentiles
+- Engine/Plugin/PluginComplianceAuditorV2.h: Enterprise compliance audit v2 (signing, SBOM, capabilities)
+- Engine/Plugin/PluginHotConfigReceiver.h: Hot-reload config receiver with subscriber callbacks
+
+
 ## [23.1.0] — Vega-R (2026-03-27)
 
 ### Added — Sprints 411-420: GPU Acceleration v3
