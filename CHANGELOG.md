@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [23.3.0] — Vega-T (2026-03-27)
+
+### Added — Sprints 431-440: Memory Optimization v3
+- Engine/Memory/PageFileArenaAllocator.h: Page-file backed arena allocator for large decode workloads
+- Engine/Memory/HugeTLBPagePool.h: 2 MB / 1 GB huge page pool via AWE/VirtualAlloc MEM_LARGE_PAGES
+- Engine/Memory/MemoryMappedBTree.h: Memory-mapped B-tree persistent store with ACID shadow-paging
+- Engine/Memory/NVMeMemoryTier.h: NVMe storage-class memory tier extension (stub with graceful fallback)
+- Engine/Memory/ECCErrorDetector.h: ECC error detection and single-bit correction monitoring
+- Engine/Memory/PressureForecaster.h: Memory pressure forecaster with exponential smoothing
+- Engine/Memory/JemallocSlabAllocator.h: jemalloc-style slab allocator for size-class buckets
+- Engine/Memory/SharedMemoryRegionManager.h: Named shared memory region manager (IPC thumbnails)
+
+
 ## [23.2.0] — Vega-S (2026-03-27)
 
 ### Added — Sprints 421-430: Plugin Ecosystem v3
