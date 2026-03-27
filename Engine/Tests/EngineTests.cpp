@@ -1162,6 +1162,15 @@
 #include "../Core/ZeroCopyTextureUploader.h"
 #include "../Core/BatchDecodeScheduler.h"
 #include "../Core/SIMDImageProcessor.h"
+// Sprint 301-310 (v21.2.0 "Rigel-S") — Enterprise Policy v2
+#include "../Core/EnterprisePolicyEngineV2.h"
+#include "../Core/ACLManager.h"
+#include "../Core/AuditLogger.h"
+#include "../Core/FIPSComplianceMode.h"
+#include "../Core/IntegrityVerifier.h"
+#include "../Core/PrivilegeElevationGuard.h"
+#include "../Core/SandboxEscapeGuard.h"
+#include "../Core/CodeIntegrityChecker.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26425,6 +26434,52 @@ TEST(TestBatchDecodeScheduler_DefaultConstruct) {
     ASSERT(true);
 }
 
+// ---- Sprint 301-310 (v21.2.0 "Rigel-S") — Enterprise Policy v2 ----
+
+TEST(TestEnterprisePolicyEngineV2_InstanceAccessible) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = EnterprisePolicyEngineV2::Instance();
+    (void)eng;
+    ASSERT(true);
+}
+
+TEST(TestAuditLogger_InstanceAccessible) {
+    using namespace ExplorerLens::Engine;
+    auto& logger = AuditLogger::Instance();
+    (void)logger;
+    ASSERT(true);
+}
+
+TEST(TestFIPSComplianceMode_WindowsFIPSQuery) {
+    using namespace ExplorerLens::Engine;
+    // Static query — must not throw
+    bool fipsEnabled = FIPSComplianceMode::IsWindowsFIPSPolicyEnabled();
+    ASSERT(fipsEnabled == true || fipsEnabled == false);
+}
+
+TEST(TestFIPSComplianceMode_InstanceAccessible) {
+    using namespace ExplorerLens::Engine;
+    auto& fips = FIPSComplianceMode::Instance();
+    // Default level should be a valid FIPSLevel enum value
+    ASSERT(fips.GetLevel() == FIPSLevel::Disabled ||
+           fips.GetLevel() == FIPSLevel::Compliant ||
+           fips.GetLevel() == FIPSLevel::Strict);
+}
+
+TEST(TestPrivilegeElevationGuard_DefaultConstruct) {
+    using namespace ExplorerLens::Engine;
+    PrivilegeElevationGuard guard;
+    (void)guard;
+    ASSERT(true);
+}
+
+TEST(TestSandboxEscapeGuard_DefaultConstruct) {
+    using namespace ExplorerLens::Engine;
+    SandboxEscapeGuard guard;
+    (void)guard;
+    ASSERT(true);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30586,6 +30641,16 @@ int main() {
     RUN_TEST(TestThreadPoolV2_Configure);
     RUN_TEST(TestSIMDImageProcessor_DetectCPUFeatures);
     RUN_TEST(TestBatchDecodeScheduler_DefaultConstruct);
+    std::wcout << std::endl;
+
+    // Sprint 301-310 — Enterprise Policy v2 Tests
+    std::wcout << L"Enterprise Policy v2 Tests (Sprint 301-310):" << std::endl;
+    RUN_TEST(TestEnterprisePolicyEngineV2_InstanceAccessible);
+    RUN_TEST(TestAuditLogger_InstanceAccessible);
+    RUN_TEST(TestFIPSComplianceMode_WindowsFIPSQuery);
+    RUN_TEST(TestFIPSComplianceMode_InstanceAccessible);
+    RUN_TEST(TestPrivilegeElevationGuard_DefaultConstruct);
+    RUN_TEST(TestSandboxEscapeGuard_DefaultConstruct);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests

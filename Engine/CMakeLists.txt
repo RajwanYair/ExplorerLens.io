@@ -1384,6 +1384,15 @@ set(ENGINE_HEADERS
     Core/ZeroCopyTextureUploader.h
     Core/BatchDecodeScheduler.h
     Core/SIMDImageProcessor.h
+    # Sprint 301-310 (v21.2.0 "Rigel-S") — Enterprise Policy v2
+    Core/EnterprisePolicyEngineV2.h
+    Core/ACLManager.h
+    Core/AuditLogger.h
+    Core/FIPSComplianceMode.h
+    Core/IntegrityVerifier.h
+    Core/PrivilegeElevationGuard.h
+    Core/SandboxEscapeGuard.h
+    Core/CodeIntegrityChecker.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
