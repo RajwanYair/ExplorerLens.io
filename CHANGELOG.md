@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [23.5.0] — Vega-V (2026-03-27)
+
+### Added — Sprints 451-460: CLI & Automation v2
+- Engine/CLI/LensBatchProcessorV2.h: Parallel bulk thumbnail generator v2 with concurrency control
+- Engine/CLI/LensWatchDaemon.h: File-system watch daemon for continuous thumbnail generation
+- Engine/CLI/LensPerceptualDiff.h: Perceptual difference engine (SSIM/PSNR) for regression QA
+- Engine/CLI/LensFormatExporter.h: Multi-format thumbnail exporter (WebP, AVIF, JPEG, PNG profiles)
+- Engine/CLI/LensProfileCapture.h: Chrome-trace compatible profiler for CLI pipeline stages
+- Engine/CLI/LensCacheCLI.h: Cache inspection and management CLI (stats, warm, purge, resize)
+- Engine/CLI/LensPluginCLI.h: Plugin lifecycle CLI (install, remove, list, verify)
+- Engine/CLI/CICDWebhookReceiver.h: CI/CD webhook receiver (GitHub Actions, Jenkins) for cache invalidation
+
+
 ## [23.4.0] — Vega-U (2026-03-27)
 
 ### Added — Sprints 441-450: Smart Cache v4
