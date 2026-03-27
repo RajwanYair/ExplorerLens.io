@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [21.0.0] Rigel — Format Expansion III (MAJOR)
+
+### Added
+- Decoders/AVIFSequenceDecoder.h: animated AVIF multi-frame extractor
+- Decoders/HEIFBurstDecoder.h: HEIF live photo and burst capture handler
+- Decoders/JXLAnimationDecoder.h: JPEG XL animation frame decoder
+- Decoders/PSDLayerDecoder.h: Photoshop flat composite extractor
+- Decoders/SVGRasterizer.h: SVG to bitmap via Direct2D rasterization
+- Decoders/TIFFMultiPageDecoder.h: multi-page TIFF thumbnail selector
+- Decoders/WebPAnimationDecoder.h: WebP animation frame splitter
+- 7 new unit tests covering Format Expansion III decoder subsystem
+
+
 ## [20.7.0] Quasar-X — Observability v2
 
 ### Added
