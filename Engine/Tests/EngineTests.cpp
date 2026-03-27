@@ -1126,6 +1126,16 @@
 #include "../Plugin/PluginCapabilityNegotiator.h"
 #include "../Plugin/PluginStateCoordinator.h"
 #include "../Plugin/PluginCommunicationBridge.h"
+// Sprint 261-270 (v20.6.0 "Quasar-W") — Plugin Marketplace v2
+#include "../Plugin/MarketplaceClient.h"
+#include "../Plugin/PluginDiscoveryEngine.h"
+#include "../Plugin/PluginInstaller.h"
+#include "../Plugin/PluginPackageManifest.h"
+#include "../Plugin/PluginSearchIndex.h"
+#include "../Plugin/PluginSignatureVerifier.h"
+#include "../Plugin/PluginUpdateScheduler.h"
+#include "../Plugin/PluginUsageTracker.h"
+#include "../Plugin/PluginVersionResolver.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26182,6 +26192,65 @@ TEST(COMTestRunnerGracefulSkip)
     }
 }
 
+// ---- Sprint 261-270 (v20.6.0 "Quasar-W") — Plugin Marketplace v2 ----
+
+TEST(TestPluginDiscoveryEngine_InitialState) {
+    using namespace ExplorerLens::Engine;
+    PluginDiscoveryEngine eng;
+    ASSERT(!eng.IsInitialized());
+}
+
+TEST(TestPluginDiscoveryEngine_Initialize) {
+    using namespace ExplorerLens::Engine;
+    PluginDiscoveryEngine eng;
+    ASSERT(eng.Initialize());
+    ASSERT(eng.IsInitialized());
+    ASSERT(!eng.GetName().empty());
+}
+
+TEST(TestPluginDiscoveryEngine_SearchEmpty) {
+    using namespace ExplorerLens::Engine;
+    PluginDiscoveryEngine eng;
+    eng.Initialize();
+    auto results = eng.Search("");
+    ASSERT(results.empty());
+}
+
+TEST(TestPluginPackageManifest_DefaultCapabilities) {
+    using namespace ExplorerLens::Engine;
+    PluginPackageManifest manifest;
+    ASSERT(manifest.id.empty());
+    ASSERT(manifest.version.empty());
+}
+
+TEST(TestPluginSignatureVerifier_DefaultPolicy) {
+    using namespace ExplorerLens::Engine;
+    PluginSignatureVerifier verifier;
+    ASSERT(verifier.GetTrustPolicy() == SignatureTrustPolicy::RequireValid);
+}
+
+TEST(TestPluginUpdateScheduler_DefaultPolicy) {
+    using namespace ExplorerLens::Engine;
+    PluginUpdateScheduler scheduler;
+    ASSERT(!scheduler.IsRunning());
+}
+
+TEST(TestPluginUsageTracker_InitialCounters) {
+    using namespace ExplorerLens::Engine;
+    PluginUsageStats stats;
+    ASSERT(stats.totalInvocations == 0);
+    ASSERT(stats.successCount == 0);
+}
+
+TEST(TestPluginVersionResolver_SemVerParse) {
+    using namespace ExplorerLens::Engine;
+    SemVer v;
+    v.major = 1; v.minor = 2; v.patch = 3;
+    ASSERT(v.major == 1);
+    ASSERT(v.minor == 2);
+    ASSERT(v.patch == 3);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30298,6 +30367,18 @@ int main() {
     RUN_TEST(Test_SIMD_RGB_to_BGRA);
     RUN_TEST(Test_SIMD_Gray_to_BGRA);
     RUN_TEST(Test_SIMD_PremultiplyAlpha);
+    std::wcout << std::endl;
+
+    // Sprint 261-270 — Plugin Marketplace v2 Tests
+    std::wcout << L"Plugin Marketplace v2 Tests (Sprint 261-270):" << std::endl;
+    RUN_TEST(TestPluginDiscoveryEngine_InitialState);
+    RUN_TEST(TestPluginDiscoveryEngine_Initialize);
+    RUN_TEST(TestPluginDiscoveryEngine_SearchEmpty);
+    RUN_TEST(TestPluginPackageManifest_DefaultCapabilities);
+    RUN_TEST(TestPluginSignatureVerifier_DefaultPolicy);
+    RUN_TEST(TestPluginUpdateScheduler_DefaultPolicy);
+    RUN_TEST(TestPluginUsageTracker_InitialCounters);
+    RUN_TEST(TestPluginVersionResolver_SemVerParse);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests

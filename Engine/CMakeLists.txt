@@ -1348,6 +1348,16 @@ set(ENGINE_HEADERS
     Plugin/PluginCapabilityNegotiator.h
     Plugin/PluginStateCoordinator.h
     Plugin/PluginCommunicationBridge.h
+    # Sprint 261-270 (v20.6.0 "Quasar-W") — Plugin Marketplace v2
+    Plugin/MarketplaceClient.h
+    Plugin/PluginDiscoveryEngine.h
+    Plugin/PluginInstaller.h
+    Plugin/PluginPackageManifest.h
+    Plugin/PluginSearchIndex.h
+    Plugin/PluginSignatureVerifier.h
+    Plugin/PluginUpdateScheduler.h
+    Plugin/PluginUsageTracker.h
+    Plugin/PluginVersionResolver.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
