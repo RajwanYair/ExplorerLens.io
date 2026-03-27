@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [21.1.0] Rigel-R — Advanced GPU Compute v2
+
+### Added
+- GPU/D3D11DPIAdapter.h: D3D11 DPI-aware adapter for HiDPI rendering
+- GPU/DirectStorageLoader.h: DirectStorage GPU texture streaming loader
+- GPU/VulkanComputeAccelerator.h: Vulkan compute backend accelerator
+- GPU/VulkanComputeDecoder.h: Vulkan-accelerated image decoder
+- Core/ThreadPoolV2.h: adaptive work-stealing thread pool v2
+- Core/ZeroCopyTextureUploader.h: zero-copy GPU texture upload path
+- Core/BatchDecodeScheduler.h: batch decode job scheduler
+- Core/SIMDImageProcessor.h: AVX2/SSE4 SIMD pixel processing pipeline
+- 6 new unit tests covering Advanced GPU Compute v2 subsystem
+
+
 ## [21.0.0] Rigel — Format Expansion III (MAJOR)
 
 ### Added
