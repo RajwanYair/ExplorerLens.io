@@ -27,7 +27,7 @@ enum class NetworkCostCategory : uint8_t {
     Roaming       = 5,
 };
 
-struct NetworkStatus {
+struct NetworkConnectionInfo {
     NetworkCostCategory cost      = NetworkCostCategory::Unknown;
     bool                connected = false;
     uint32_t            latencyMs = 0;
@@ -66,8 +66,8 @@ public:
     void Stop();
 
     // Update network status — called by OS connectivity change notifications.
-    void UpdateNetworkStatus(const NetworkStatus& status);
-    NetworkStatus CurrentStatus() const;
+    void UpdateNetworkStatus(const NetworkConnectionInfo& status);
+    NetworkConnectionInfo CurrentStatus() const;
 
     // Per-policy settings.
     bool  PrefetchOnMetered() const      { return m_prefetchOnMetered; }

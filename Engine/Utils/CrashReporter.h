@@ -90,12 +90,20 @@ public:
 
     bool IsInstalled() const { return m_installed; }
 
+    // Static SEH wrapper — must be in a function without C++ object unwinding
+    // to satisfy MSVC C2712 ("/EHsc cannot mix __try with C++ objects").
+    static void InvokeCbSafe(
+        std::function<void(const CrashReport&)>& fn,
+        const CrashReport& rep) noexcept {
+        __try { fn(rep); } __except(EXCEPTION_EXECUTE_HANDLER) {}
+    }
+
 private:
     CrashReporter() {
         // Default dump dir: %LOCALAPPDATA%\ExplorerLens\crashes\
-        wchar_t la[MAX_PATH] = {};
-        ExpandEnvironmentStringsW(L"%LOCALAPPDATA%\\ExplorerLens\\crashes", la, MAX_PATH);
-        m_dumpDir    = la;
+        wchar_t appDataPath[MAX_PATH] = {};
+        ExpandEnvironmentStringsW(L"%LOCALAPPDATA%\\ExplorerLens\\crashes", appDataPath, MAX_PATH);
+        m_dumpDir    = appDataPath;
         m_dumpType   = static_cast<DWORD>(DumpType::Triage);
     }
 
@@ -152,7 +160,7 @@ private:
         // Notify callbacks (fire-and-forget; don't throw in crash handler)
         if (notifyCbs) {
             for (auto& fn : m_callbacks) {
-                __try { fn(report); } __except(EXCEPTION_EXECUTE_HANDLER) {}
+                InvokeCbSafe(fn, report);
             }
         }
 

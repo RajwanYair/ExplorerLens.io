@@ -41,7 +41,7 @@ enum class VulkanDecodeFormat {
     Unknown
 };
 
-struct VulkanDeviceInfo {
+struct VulkanDecoderDeviceInfo {
     std::wstring deviceName;
     uint32_t     apiVersion       = 0;
     uint32_t     driverVersion    = 0;
@@ -50,7 +50,7 @@ struct VulkanDeviceInfo {
     uint64_t     deviceLocalBytes = 0;
 };
 
-struct VulkanDecodeJob {
+struct VulkanDecoderJob {
     const uint8_t* inputData     = nullptr;
     size_t         inputBytes    = 0;
     uint8_t*       outputRGBA8   = nullptr; // Caller-allocated: width*height*4 bytes
@@ -87,7 +87,7 @@ public:
     }
 
     // Decode a single job on the GPU compute pipeline
-    bool Decode(VulkanDecodeJob& job) {
+    bool Decode(VulkanDecoderJob& job) {
         if (!m_initialized) return false;
         if (!SupportsFormat(job.format)) return false;
 
@@ -109,7 +109,7 @@ public:
     bool IsAvailable()  const { return m_initialized && !m_devices.empty(); }
     const std::wstring& LastError() const { return m_lastError; }
 
-    const std::vector<VulkanDeviceInfo>& Devices() const { return m_devices; }
+    const std::vector<VulkanDecoderDeviceInfo>& Devices() const { return m_devices; }
 
     // Check if a given format has a compute shader shader available
     bool SupportsFormat(VulkanDecodeFormat fmt) const {
@@ -153,7 +153,7 @@ private:
         }
 
         // Simple: add a generic entry; real impl iterates IDXGIAdapter
-        VulkanDeviceInfo dev{};
+        VulkanDecoderDeviceInfo dev{};
         dev.deviceName       = L"Primary Vulkan-Compatible GPU";
         dev.supportsCompute  = true;
         dev.maxWorkGroupSize = 256;
@@ -172,7 +172,7 @@ private:
         return m_initialized;
     }
 
-    bool DispatchCompute(VulkanDecodeJob& job) {
+    bool DispatchCompute(VulkanDecoderJob& job) {
         // In production: bind descriptor sets, dispatch, sync, copy output
         // CPU fallback for now: raw memcpy from input to output when GPU path stubbed
         if (!job.outputRGBA8 || !job.inputData) return false;
@@ -187,7 +187,7 @@ private:
     HMODULE m_vulkanDll  = nullptr;
     bool    m_initialized = false;
     std::wstring m_lastError;
-    std::vector<VulkanDeviceInfo> m_devices;
+    std::vector<VulkanDecoderDeviceInfo> m_devices;
     uint64_t m_framesDecoded = 0;
     double   m_totalGpuMs   = 0.0;
 };

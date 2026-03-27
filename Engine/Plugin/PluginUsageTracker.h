@@ -35,7 +35,7 @@ struct PluginUsageStats {
 
 // ---- Crash Record -----------------------------------------------------------
 
-struct PluginCrashRecord {
+struct PluginUsageCrashRecord {
     std::string pluginId;
     std::string version;
     std::string timestamp;
@@ -58,7 +58,7 @@ public:
     void RecordFailure(const std::string& pluginId, const std::string& error);
 
     // Record a plugin crash (structured exception intercepted by sandbox).
-    void RecordCrash(const PluginCrashRecord& crash);
+    void RecordCrash(const PluginUsageCrashRecord& crash);
 
     // Get stats for a single plugin.
     PluginUsageStats GetStats(const std::string& pluginId) const;
@@ -67,7 +67,7 @@ public:
     std::vector<PluginUsageStats> GetAllStats() const;
 
     // Get crash history (most recent first, up to maxRecords).
-    std::vector<PluginCrashRecord> GetCrashHistory(uint32_t maxRecords = 50) const;
+    std::vector<PluginUsageCrashRecord> GetCrashHistory(uint32_t maxRecords = 50) const;
 
     // Check if a plugin has been auto-disabled due to repeated crashes.
     bool IsAutoDisabled(const std::string& pluginId) const;

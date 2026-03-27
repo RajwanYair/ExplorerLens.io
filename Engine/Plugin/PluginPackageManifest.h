@@ -29,7 +29,7 @@ enum class PluginCapabilityFlag : uint32_t {
 
 // ---- Dependency Spec --------------------------------------------------------
 
-struct PluginDependency {
+struct ManifestPluginDependency {
     std::string id;             // Plugin ID or "engine" for engine version req
     std::string minVersion;
     std::string maxVersion;     // Empty = no upper bound
@@ -63,7 +63,7 @@ struct PluginPackageManifest {
     std::vector<std::string> mimeTypes;
 
     // Dependencies
-    std::vector<PluginDependency> dependencies;
+    std::vector<ManifestPluginDependency> dependencies;
 
     // Sandbox policy hints
     bool   requestsFileSystem = false;  // Needs disk I/O beyond the input file

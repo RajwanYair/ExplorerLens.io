@@ -19,7 +19,7 @@ namespace Engine {
 
 // ---- Install Record ---------------------------------------------------------
 
-struct InstalledPlugin {
+struct PluginInstallRecord {
     PluginPackageManifest manifest;
     std::string  installDir;        // Full path to extracted plugin directory
     std::string  installedDate;     // ISO 8601
@@ -44,7 +44,7 @@ enum class PluginInstallStatus {
 
 struct PluginInstallResult {
     PluginInstallStatus status = PluginInstallStatus::InternalError;
-    InstalledPlugin     plugin;
+    PluginInstallRecord     plugin;
     std::string         error;
 };
 
@@ -75,10 +75,10 @@ public:
     bool SetEnabled(const std::string& pluginId, bool enabled);
 
     // List all installed plugins.
-    std::vector<InstalledPlugin> ListInstalled() const;
+    std::vector<PluginInstallRecord> ListInstalled() const;
 
     // Look up by plugin ID.
-    bool FindInstalled(const std::string& pluginId, InstalledPlugin& out) const;
+    bool FindInstalled(const std::string& pluginId, PluginInstallRecord& out) const;
 
     // Rollback the last install/update (delete new, restore backup if present).
     bool Rollback(const std::string& pluginId, std::string& outError);

@@ -1,4 +1,4 @@
-// MarketplaceClient.h — Plugin Registry Query and Download Client
+// PluginRegistryClient.h — Plugin Registry Query and Download Client
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Queries the ExplorerLens Plugin Registry REST API to list, search, and
@@ -37,7 +37,7 @@ struct MarketplacePlugin {
 
 // ---- Query ------------------------------------------------------------------
 
-struct MarketplaceQuery {
+struct PluginRegistryQuery {
     std::string  searchText;
     std::string  format;          // Filter by file extension (e.g. ".xyz")
     uint32_t     pageIndex   = 0;
@@ -46,7 +46,7 @@ struct MarketplaceQuery {
     bool         sortByDownloads = false;
 };
 
-struct MarketplaceQueryResult {
+struct PluginRegistryQueryResult {
     bool   success      = false;
     uint32_t totalItems = 0;
     std::vector<MarketplacePlugin> plugins;
@@ -64,16 +64,16 @@ struct DownloadResult {
     bool    sha256Verified = false;
 };
 
-// ---- MarketplaceClient ------------------------------------------------------
+// ---- PluginRegistryClient ------------------------------------------------------
 
-class MarketplaceClient {
+class PluginRegistryClient {
 public:
-    explicit MarketplaceClient(
+    explicit PluginRegistryClient(
         std::string registryBaseUrl = "https://plugins.explorerlens.io/api/v1");
-    ~MarketplaceClient();
+    ~PluginRegistryClient();
 
     // List or search plugins from the registry.
-    MarketplaceQueryResult Query(const MarketplaceQuery& query) const;
+    MarketplaceQueryResult Query(const PluginRegistryQuery& query) const;
 
     // Fetch detailed info for a single plugin by ID.
     bool GetPluginInfo(const std::string& pluginId, MarketplacePlugin& outPlugin) const;

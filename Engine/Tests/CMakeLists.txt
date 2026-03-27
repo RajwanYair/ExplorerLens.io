@@ -42,6 +42,10 @@ add_executable(EngineTests
 if(WIN32)
     target_compile_definitions(EngineTests PRIVATE
         NOMINMAX
+        WIN32_LEAN_AND_MEAN
+        _WIN32_WINNT=0x0A00
+        NTDDI_VERSION=0x0A000006   # Windows 10 1909 — required for ID2D1DeviceContext5
+        WINVER=0x0A00
     )
 endif()
 
