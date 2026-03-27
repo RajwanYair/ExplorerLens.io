@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [23.4.0] — Vega-U (2026-03-27)
+
+### Added — Sprints 441-450: Smart Cache v4
+- Engine/Cache/AIEvictionPolicyEngine.h: ML-driven cache eviction with frequency/recency scoring
+- Engine/Cache/FederatedCacheInvalidator.h: Federated invalidation bus with local/cluster/global scopes
+- Engine/Cache/ContentAwareCacheKey.h: Content-hash cache keys with perceptual fingerprinting
+- Engine/Cache/DeltaSyncReplicator.h: Delta-sync cache replicator for multi-process consistency
+- Engine/Cache/ZeroCopyCacheReader.h: Zero-copy memory-mapped cache reader
+- Engine/Cache/CacheEncryptionLayer.h: AES-GCM cache encryption layer with key rotation
+- Engine/Cache/ShardedCachePartitionV2.h: Sharded cache v2 with consistent key distribution
+- Engine/Cache/ConsistentHashRing.h: Consistent-hash ring with virtual nodes for cache topology
+
+
 ## [23.3.0] — Vega-T (2026-03-27)
 
 ### Added — Sprints 431-440: Memory Optimization v3
