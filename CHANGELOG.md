@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [20.6.0] Quasar-W — Plugin Marketplace v2
+
+### Added
+- MarketplaceClient.h: plugin registry query and download client
+- PluginDiscoveryEngine.h: marketplace plugin discovery and search client
+- PluginInstaller.h: plugin package install/uninstall/update manager
+- PluginPackageManifest.h: .lenspkg package format manifest
+- PluginSearchIndex.h: local inverted search index for installed plugins
+- PluginSignatureVerifier.h: PKI signature verification for plugin packages
+- PluginUpdateScheduler.h: background auto-update with rollback support
+- PluginUsageTracker.h: per-plugin usage telemetry and crash reporting
+- PluginVersionResolver.h: SemVer resolution and conflict detection
+- 8 new unit tests covering Plugin Marketplace v2 subsystem
+
+
 ## [20.5.0] "Quasar-V" - 2026-03-26
 ### Summary
 WinUI 3 modern Manager GUI: Windows App SDK bootstrap, NavigationView with back-stack,
