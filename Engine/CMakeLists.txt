@@ -1375,6 +1375,15 @@ set(ENGINE_HEADERS
     Decoders/SVGRasterizer.h
     Decoders/TIFFMultiPageDecoder.h
     Decoders/WebPAnimationDecoder.h
+    # Sprint 291-300 (v21.1.0 "Rigel-R") — Advanced GPU Compute v2
+    GPU/D3D11DPIAdapter.h
+    GPU/DirectStorageLoader.h
+    GPU/VulkanComputeAccelerator.h
+    GPU/VulkanComputeDecoder.h
+    Core/ThreadPoolV2.h
+    Core/ZeroCopyTextureUploader.h
+    Core/BatchDecodeScheduler.h
+    Core/SIMDImageProcessor.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h

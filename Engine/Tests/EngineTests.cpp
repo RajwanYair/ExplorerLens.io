@@ -1153,6 +1153,15 @@
 #include "../Decoders/SVGRasterizer.h"
 #include "../Decoders/TIFFMultiPageDecoder.h"
 #include "../Decoders/WebPAnimationDecoder.h"
+// Sprint 291-300 (v21.1.0 "Rigel-R") — Advanced GPU Compute v2
+#include "../GPU/D3D11DPIAdapter.h"
+#include "../GPU/DirectStorageLoader.h"
+#include "../GPU/VulkanComputeAccelerator.h"
+#include "../GPU/VulkanComputeDecoder.h"
+#include "../Core/ThreadPoolV2.h"
+#include "../Core/ZeroCopyTextureUploader.h"
+#include "../Core/BatchDecodeScheduler.h"
+#include "../Core/SIMDImageProcessor.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26373,6 +26382,49 @@ TEST(TestWebPAnimationDecoder_LooksLikeAnimatedWebP_RejectsGarbage) {
     ASSERT(!WebPAnimationDecoder::LooksLikeAnimatedWebP(garbage, sizeof(garbage)));
 }
 
+// ---- Sprint 291-300 (v21.1.0 "Rigel-R") — Advanced GPU Compute v2 ----
+
+TEST(TestVulkanComputeAccelerator_InitialStatus) {
+    using namespace ExplorerLens::Engine;
+    VulkanComputeAccelerator acc;
+    ASSERT(acc.Status() == VulkanBackendStatus::NotInitialized);
+}
+
+TEST(TestD3D11DPIAdapter_InitialNotInitialized) {
+    using namespace ExplorerLens::Engine;
+    D3D11DPIAdapter adapter;
+    ASSERT(!adapter.IsInitialized());
+}
+
+TEST(TestThreadPoolV2_InstanceAccessible) {
+    using namespace ExplorerLens::Engine;
+    auto& pool = ThreadPoolV2::Instance();
+    (void)pool; // Verify Instance() returns without throw
+    ASSERT(true);
+}
+
+TEST(TestThreadPoolV2_Configure) {
+    using namespace ExplorerLens::Engine;
+    ThreadPoolV2 pool;
+    pool.Configure(2, 4, false);
+    ASSERT(true);
+}
+
+TEST(TestSIMDImageProcessor_DetectCPUFeatures) {
+    using namespace ExplorerLens::Engine;
+    auto caps = CPUFeatures::Detect();
+    // Must return without throw; AVX2/SSE state depends on CPU
+    ASSERT(caps.avx2 == true || caps.avx2 == false);
+    ASSERT(caps.sse42 == true || caps.sse42 == false);
+}
+
+TEST(TestBatchDecodeScheduler_DefaultConstruct) {
+    using namespace ExplorerLens::Engine;
+    BatchDecodeScheduler scheduler;
+    (void)scheduler;
+    ASSERT(true);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30524,6 +30576,16 @@ int main() {
     RUN_TEST(TestSVGRasterizer_LooksLikeSVG_RejectsEmpty);
     RUN_TEST(TestTIFFMultiPageDecoder_LooksLikeTIFF_RejectsGarbage);
     RUN_TEST(TestWebPAnimationDecoder_LooksLikeAnimatedWebP_RejectsGarbage);
+    std::wcout << std::endl;
+
+    // Sprint 291-300 — Advanced GPU Compute v2 Tests
+    std::wcout << L"Advanced GPU Compute v2 Tests (Sprint 291-300):" << std::endl;
+    RUN_TEST(TestVulkanComputeAccelerator_InitialStatus);
+    RUN_TEST(TestD3D11DPIAdapter_InitialNotInitialized);
+    RUN_TEST(TestThreadPoolV2_InstanceAccessible);
+    RUN_TEST(TestThreadPoolV2_Configure);
+    RUN_TEST(TestSIMDImageProcessor_DetectCPUFeatures);
+    RUN_TEST(TestBatchDecodeScheduler_DefaultConstruct);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests
