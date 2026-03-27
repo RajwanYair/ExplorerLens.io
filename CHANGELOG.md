@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [22.6.0] — Sirius-W (2026-03-27)
+
+### Added — Sprints 381-390: Windows Shell Integration v2
+- Engine/Core/NamespaceWalkEngine.h: Shell namespace walker with depth limits and cancellation
+- Engine/Core/ExplorerColumnProviderV2.h: Custom Explorer column provider v2 with sorting
+- Engine/Core/ShellContextMenuV2.h: Shell context menu extension v2 (regen, hash, export)
+- Engine/Core/SearchIndexBridge.h: Windows Search indexing bridge for thumbnail metadata
+- Engine/Core/ShellPropertyBagV2.h: Shell property bag v2 with persistent key/value store
+- Engine/Core/ThumbnailOverlayRenderer.h: Badge and emblem overlay compositor (cloud, lock, format)
+- Engine/Core/DragDropPreviewEngine.h: Live thumbnail preview for drag-and-drop operations
+- Engine/Core/ShellDataObjectExtractor.h: IDataObject thumbnail payload extractor
+
+
 ## [22.5.0] — Sirius-V (2026-03-27)
 
 ### Added — Sprints 371-380: Format Expansion IV
