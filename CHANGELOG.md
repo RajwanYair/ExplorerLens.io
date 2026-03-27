@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [22.0.0] Sirius — Cross-Platform Foundation (MAJOR)
+
+### Added
+- Core/AccessibilityLayer.h: high contrast + screen reader accessibility layer
+- Core/ColorBlindnessFilter.h: CVD simulation and correction (8 deficiency types)
+- Core/DisplayColorProfile.h: ICC profile loader for color-managed thumbnails
+- Core/DPIScalingPolicy.h: per-monitor DPI scaling policy
+- Core/FeedbackManager.h: in-app feedback submission with category and rating
+- Core/KeyboardNavigationHandler.h: WTL keyboard accessibility and tab order
+- Core/MonitorConfigWatcher.h: WM_DPICHANGED / WM_DISPLAYCHANGE event watcher
+- Core/MultiMonitorContext.h: multi-monitor DPI context tracker
+- 6 new unit tests covering Cross-Platform Foundation subsystem
+
+
 ## [21.3.0] Rigel-T — Storage & Caching v3
 
 ### Added
