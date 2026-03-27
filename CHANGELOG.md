@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [21.2.0] Rigel-S — Enterprise Policy v2
+
+### Added
+- Core/EnterprisePolicyEngineV2.h: enterprise policy engine v2 (GPO/MDM)
+- Core/ACLManager.h: Access Control List manager
+- Core/AuditLogger.h: tamper-evident append-only security audit log
+- Core/FIPSComplianceMode.h: FIPS 140-2/140-3 compliance mode
+- Core/IntegrityVerifier.h: Authenticode and binary integrity verifier
+- Core/PrivilegeElevationGuard.h: privilege scope elevation guard
+- Core/SandboxEscapeGuard.h: sandbox escape attempt detection guard
+- Core/CodeIntegrityChecker.h: PE signature and binary integrity verification
+- 6 new unit tests covering Enterprise Policy v2 subsystem
+
+
 ## [21.1.0] Rigel-R — Advanced GPU Compute v2
 
 ### Added
