@@ -1,6 +1,9 @@
 # ExplorerLens — Development Learnings & Best Practices
 
-**Last Updated:** v15.1.0 "Zenith-R" — March 24, 2026
+**Last Updated:** v23.5.0 "Vega-V" — March 27, 2026
+
+> **Note:** Core build rules and conventions have been promoted to `.github/copilot-instructions.md`.
+> This file captures additional detail and historical context not yet in the main instructions.
 
 This file captures hard-won lessons from iterative development sessions to avoid repeating
 mistakes and to accelerate future work.

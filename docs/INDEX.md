@@ -1,8 +1,8 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens 
-**Current Version:** v15.2.0 "Zenith-S" 
-**Last Updated:** March 24, 2026
+**Current Version:** v23.5.0 "Vega-V" 
+**Last Updated:** March 27, 2026
 
 ---
 
@@ -20,8 +20,11 @@
 
 | Document | Description |
 |----------|-------------|
-| [SPRINT_PLAN_100.md](SPRINT_PLAN_100.md) | **Canonical 100-sprint plan** — v15.2.0 through v17.0.0 "Nova" |
-| [ROADMAP_V16.md](ROADMAP_V16.md) | v16.0.0 "Horizon" detailed roadmap |
+| [SPRINT_PLAN_100.md](SPRINT_PLAN_100.md) | Sprints 1–100 — v15.2.0 through v17.0.0 "Nova" |
+| [SPRINT_PLAN_200.md](SPRINT_PLAN_200.md) | Sprints 101–200 — v17.1.0 through v19.0.0 |
+| [SPRINT_PLAN_300.md](SPRINT_PLAN_300.md) | Sprints 201–300 — v19.1.0 through v21.4.0 |
+| [SPRINT_PLAN_400.md](SPRINT_PLAN_400.md) | Sprints 301–460 — v22.0.0 through v23.5.0 "Vega-V" |
+| [SPRINT_PLAN_500.md](SPRINT_PLAN_500.md) | Sprints 461–560 — v23.6.0 through v24.7.0 "Altair-X" |
 
 ## Development
 

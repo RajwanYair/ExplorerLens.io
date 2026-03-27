@@ -7,6 +7,13 @@
 *.bak
 *~
 
+# Removed stale version-specific documentation (consolidated 2026-03-27)
+docs/ROADMAP_V16.md
+docs/FEATURE_FREEZE_16.md
+docs/MIGRATION_GUIDE_V16.md
+docs/RELEASE_NOTES_19.md
+packaging/RELEASE_MANIFEST_19.2.0.md
+
 # User-specific files
 *.rsuser
 *.suo
@@ -76,6 +83,12 @@ external/**/install/
 external/camera-libs/libraw-install/lib/
 external/**/.git/
 external/**/.github/
+
+# Removed duplicate source trees (consolidated 2026-03-27)
+# libwebp-1.5.0-original is byte-for-byte identical to libwebp-1.5.0-build
+external/image-libs/libwebp-1.5.0-original/
+# unrar/ (unversioned) is byte-for-byte identical to unrar-7.2.2/
+external/compression-libs/unrar/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

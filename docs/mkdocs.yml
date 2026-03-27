@@ -107,8 +107,11 @@ nav:
       - Performance: PERFORMANCE.md
 
   - Roadmap:
-      - Sprint Plan: SPRINT_PLAN_100.md
-      - Roadmap v16: ROADMAP_V16.md
+      - Sprint Plan 1-100: SPRINT_PLAN_100.md
+      - Sprint Plan 101-200: SPRINT_PLAN_200.md
+      - Sprint Plan 201-300: SPRINT_PLAN_300.md
+      - Sprint Plan 301-460: SPRINT_PLAN_400.md
+      - Sprint Plan 461-560: SPRINT_PLAN_500.md
       - WinUI3 Migration: WINUI3_MIGRATION_PLAN.md
       - Release Process: RELEASE_PROCESS.md
 
