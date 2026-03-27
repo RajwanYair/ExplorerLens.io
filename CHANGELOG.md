@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [22.3.0] Sirius-T — AI Inference Pipeline v2
+
+### Added
+- AI/AIModelRegistry.h: AI model lifecycle registry with role-based routing
+- AI/AIPerformanceProfiler.h: per-module latency and throughput profiling
+- AI/AIThumbnailPipeline.h: AI-enhanced thumbnail generation pipeline
+- AI/AIUpscaler.h: DLSS/XeSS/ONNX/bicubic neural upscaling
+- AI/ContentCategoryClassifier.h: 20-class content category classifier
+- AI/FrameInterpolator.h: RIFE-based animation frame interpolation
+- AI/NeuralThumbnailSynthesizer.h: generative thumbnail synthesis from metadata
+- AI/SemanticColorPalette.h: dominant color palette extraction with LAB distances
+- 6 new unit tests covering AI Inference Pipeline v2 subsystem
+
+
 ## [22.2.0] Sirius-S — Security & Audit v3
 
 ### Added
