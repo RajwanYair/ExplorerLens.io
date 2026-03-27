@@ -129,6 +129,10 @@ jobs:
         run: cmake --build --preset ci-release -j 8
 
       # ── Build Shell Extension + Manager (MSBuild) ──────────────────────────
+      - name: Restore NuGet packages (WTL + dependencies)
+        shell: pwsh
+        run: nuget restore LENSShell.sln
+
       - name: Build LENSShell.dll + LENSManager.exe (MSBuild)
         shell: pwsh
         run: |

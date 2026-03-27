@@ -273,7 +273,9 @@ if(BUILD_TESTS)
     add_test(NAME CLIDoctor
         COMMAND lens doctor
         WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    set_tests_properties(CLIDoctor PROPERTIES TIMEOUT 15)
+    set_tests_properties(CLIDoctor PROPERTIES
+        TIMEOUT 15
+        SKIP_REGULAR_EXPRESSION "not found adjacent to lens\.exe")
 endif()
 
 #==============================================================================

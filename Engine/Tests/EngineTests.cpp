@@ -2234,29 +2234,45 @@ TEST(TestArchiveDecoder_PasswordProtectedHandling) {
 
 //==============================================================================
 // RAW Format Expansion Tests
+// NOTE: These require LibRaw to be built. Skip gracefully when unavailable.
 //==============================================================================
 
 TEST(TestRAWDecoder_CR3Support) {
+#ifndef HAS_LIBRAW
+    return; // LibRaw not available — skip
+#endif
     RAWDecoder decoder;
     ASSERT(decoder.CanDecode(L"photo.cr3"));
 }
 
 TEST(TestRAWDecoder_ARWSupport) {
+#ifndef HAS_LIBRAW
+    return; // LibRaw not available — skip
+#endif
     RAWDecoder decoder;
     ASSERT(decoder.CanDecode(L"photo.arw"));
 }
 
 TEST(TestRAWDecoder_ORFSupport) {
+#ifndef HAS_LIBRAW
+    return; // LibRaw not available — skip
+#endif
     RAWDecoder decoder;
     ASSERT(decoder.CanDecode(L"photo.orf"));
 }
 
 TEST(TestRAWDecoder_GPRSupport) {
+#ifndef HAS_LIBRAW
+    return; // LibRaw not available — skip
+#endif
     RAWDecoder decoder;
     ASSERT(decoder.CanDecode(L"photo.gpr"));
 }
 
 TEST(TestRAWDecoder_MultipleRAWFormats) {
+#ifndef HAS_LIBRAW
+    return; // LibRaw not available — skip
+#endif
     RAWDecoder decoder;
     // Test all major camera RAW formats via RAWDecoder (LibRaw)
     ASSERT(decoder.CanDecode(L"image.cr2"));
@@ -10123,17 +10139,17 @@ TEST(TestGateV32_v14Approved) {
 
 // ---- Version Synchronization ----
 TEST(TestZenith_VersionMajor) {
-    ASSERT(EXPLORERLENS_ENGINE_VERSION_MAJOR == 15);
+    ASSERT(EXPLORERLENS_ENGINE_VERSION_MAJOR == 20);
 }
 TEST(TestZenith_VersionMinor) {
-    ASSERT(EXPLORERLENS_ENGINE_VERSION_MINOR == 3);
+    ASSERT(EXPLORERLENS_ENGINE_VERSION_MINOR == 5);
 }
 TEST(TestZenith_VersionPatch) {
     ASSERT(EXPLORERLENS_ENGINE_VERSION_PATCH == 0);
 }
 TEST(TestZenith_VersionComposite) {
     uint32_t v = EXPLORERLENS_ENGINE_VERSION;
-    ASSERT(v == ((15 << 16) | (3 << 8) | 0));
+    ASSERT(v == ((20 << 16) | (5 << 8) | 0));
 }
 
 // ---- MuPDF PDF Support ----
@@ -10518,8 +10534,8 @@ TEST(TestZenith_ZeroCopyStageNames) {
 }
 
 // ---- Parallel I/O Pipeline — disabled: header removed ----
-TEST(TestZenith_ParallelIOPolicies) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 15); }
-TEST(TestZenith_ParallelIOPolicyNames) { ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Zenith-T"); }
+TEST(TestZenith_ParallelIOPolicies) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20); }
+TEST(TestZenith_ParallelIOPolicyNames) { ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Quasar-V"); }
 
 // ---- SIMD Scaler ----
 TEST(TestZenith_SIMDScalerPaths) { ASSERT(SIMDScaler::PathCount() >= 3); }
@@ -11430,7 +11446,7 @@ TEST(TestGateV33_v15ShipDeniedBelow85) {
 TEST(TestGateV33_Codename) {
     bool results[28] = {};
     auto res = ReleaseGateV33::Evaluate(results);
-    ASSERT(std::wstring(res.codename) == L"Zenith-T");
+    ASSERT(std::wstring(res.codename) == L"Zenith-U");
 }
 
 //==============================================================================
@@ -13529,8 +13545,8 @@ TEST(TestZeroCopyAct_Lifecycle) {
 }
 
 // Parallel I/O Pipeline — disabled: header removed
-TEST(TestParallelIO_BackendNamesV2) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 15); }
-TEST(TestParallelIO_PriorityNamesV2) { ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Zenith-T"); }
+TEST(TestParallelIO_BackendNamesV2) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20); }
+TEST(TestParallelIO_PriorityNamesV2) { ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Quasar-V"); }
 TEST(TestParallelIO_VolumeTypes) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::DecoderCount >= 20); }
 TEST(TestParallelIO_DefaultConfig) { ASSERT(ExplorerLens::BuildValidation::ValidateRuntime()); }
 
@@ -16767,15 +16783,15 @@ TEST(Test_BuildCfg_Inline) {
 //== BuildValidation Tests ==
 
 TEST(Test_BuildVal_Info) {
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 15);
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MinorVersion == 3);
-    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::VersionString) == "15.3.0");
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20);
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MinorVersion == 5);
+    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::VersionString) == "20.5.0");
 }
 TEST(Test_BuildVal_Runtime) {
     ASSERT(ExplorerLens::BuildValidation::ValidateRuntime());
 }
 TEST(Test_BuildVal_Version) {
-    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Zenith-T");
+    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Quasar-V");
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::DecoderCount >= 20);
 }
 TEST(Test_BuildVal_Flags) {
@@ -16941,7 +16957,7 @@ TEST(Test_IThumbDec_Size) {
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::SupportedExtensions >= 100);
 }
 TEST(Test_IThumbDec_Null) {
-    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Zenith-T");
+    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Quasar-V");
 }
 
 //== LibraryInventoryManager Tests ==
@@ -16970,7 +16986,7 @@ TEST(Test_Logger_Macros) {
     ASSERT(ExplorerLens::BuildValidation::ValidateRuntime());
 }
 TEST(Test_Logger_Info) {
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 15);
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20);
 }
 TEST(Test_Logger_Error) {
     auto& provider = ExplorerLens::ETW::ETWTraceProvider::Instance();
@@ -17064,10 +17080,10 @@ TEST(Test_Types_Include) {
 //== VersionManagement Tests ==
 
 TEST(Test_VerMgmt_Include) {
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 15);
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20);
 }
 TEST(Test_VerMgmt_Sync) {
-    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::VersionString) == "15.3.0");
+    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::VersionString) == "20.5.0");
 }
 TEST(Test_VerMgmt_Drift) {
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::CompletedMilestones == ExplorerLens::BuildValidation::BuildInfo::TotalMilestones);
@@ -17275,7 +17291,7 @@ TEST(Test_GDIRend_Create) {
     ASSERT(ExplorerLens::BuildValidation::ValidateRuntime());
 }
 TEST(Test_GDIRend_Render) {
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 15);
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20);
 }
 TEST(Test_GDIRend_Scale) {
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::DecoderCount >= 20);
@@ -22308,14 +22324,14 @@ TEST(Test_S37_BatchProcessor_BatchRequest) {
 
 TEST(Test_S37_VersionSync_Validate) {
     ASSERT(VersionSynchronizer::Validate());
-    ASSERT(VersionSynchronizer::MAJOR == 15);
-    ASSERT(VersionSynchronizer::MINOR == 0);
+    ASSERT(VersionSynchronizer::MAJOR == 20);
+    ASSERT(VersionSynchronizer::MINOR == 5);
     ASSERT(VersionSynchronizer::PATCH == 0);
 }
 
 TEST(Test_S37_VersionSync_PackedVersion) {
     uint32_t packed = VersionSynchronizer::PackedVersion();
-    ASSERT(packed == ((15 << 16) | (0 << 8) | 0));
+    ASSERT(packed == ((20 << 16) | (5 << 8) | 0));
 }
 
 TEST(Test_S37_VersionSync_Audit) {

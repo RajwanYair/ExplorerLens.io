@@ -50,6 +50,11 @@ if(HAS_LIBJXL)
     target_compile_definitions(EngineTests PRIVATE JXL_STATIC_DEFINE)
 endif()
 
+# Propagate LibRaw availability so RAW decoder tests can skip gracefully
+if(HAS_LIBRAW)
+    target_compile_definitions(EngineTests PRIVATE HAS_LIBRAW)
+endif()
+
 # Benchmark executable
 add_executable(EngineBenchmark
     EngineBenchmark.cpp

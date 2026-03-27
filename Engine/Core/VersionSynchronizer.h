@@ -15,11 +15,11 @@ namespace Engine {
 /// Centralized version authority — single source of truth for all components.
 class VersionSynchronizer {
 public:
- static constexpr int MAJOR = 15;
- static constexpr int MINOR = 0;
+ static constexpr int MAJOR = 20;
+ static constexpr int MINOR = 5;
  static constexpr int PATCH = 0;
- static constexpr const wchar_t *CODENAME = L"Zenith";
- static constexpr const wchar_t *FULL_VERSION = L"15.0.0";
+ static constexpr const wchar_t *CODENAME = L"Quasar-V";
+ static constexpr const wchar_t *FULL_VERSION = L"20.5.0";
 
  enum class Component { Engine, Shell, Manager, PluginHost, Installer, COUNT };
 
