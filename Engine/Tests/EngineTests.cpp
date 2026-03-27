@@ -1180,6 +1180,15 @@
 #include "../Utils/MemoryMappedLoader.h"
 #include "../Utils/ActivationService.h"
 #include "../Utils/FeatureCompatMatrix.h"
+// Sprint 321-330 (v22.0.0 "Sirius" MAJOR) — Cross-Platform Foundation
+#include "../Core/AccessibilityLayer.h"
+#include "../Core/ColorBlindnessFilter.h"
+#include "../Core/DisplayColorProfile.h"
+#include "../Core/DPIScalingPolicy.h"
+#include "../Core/FeedbackManager.h"
+#include "../Core/KeyboardNavigationHandler.h"
+#include "../Core/MonitorConfigWatcher.h"
+#include "../Core/MultiMonitorContext.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26525,6 +26534,35 @@ TEST(TestThumbnailDensitySelector_BuildCacheKey_Different) {
     ASSERT(key1 != key2);
 }
 
+// ---- Sprint 321-330 (v22.0.0 "Sirius" MAJOR) — Cross-Platform Foundation ----
+TEST(TestAccessibilityState_DefaultTheme) {
+    Core::AccessibilityState state;
+    ASSERT(state.theme == Core::HighContrastTheme::None);
+}
+TEST(TestColorBlindnessFilter_BuildMatrix_None) {
+    auto mat = Core::ColorBlindnessFilter::BuildMatrix(Core::CVDType::None);
+    ASSERT(mat.size() == 9);
+}
+TEST(TestDPIScalingPolicy_DefaultMode) {
+    DPIScalingPolicy policy;
+    ASSERT(policy.mode == DPIScalingMode::Exact);
+}
+TEST(TestFeedbackItem_DefaultCategory) {
+    FeedbackItem item;
+    ASSERT(item.category == FeedbackCategory::GeneralComment);
+    ASSERT(item.rating == 0);
+}
+TEST(TestMonitorInfo_DefaultDPI) {
+    MonitorInfo info;
+    ASSERT(info.dpiX == 96);
+    ASSERT(info.dpiY == 96);
+}
+TEST(TestMonitorEventData_DefaultState) {
+    MonitorEventData data;
+    ASSERT(data.hmonitor == nullptr);
+    ASSERT(data.newDPI == 0);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30705,6 +30743,16 @@ int main() {
     RUN_TEST(TestFeatureCompatMatrix_InstanceAccessible);
     RUN_TEST(TestHiDPIThumbnailCache_DefaultConstruct);
     RUN_TEST(TestThumbnailDensitySelector_BuildCacheKey_Different);
+    std::wcout << std::endl;
+
+    // Sprint 321-330 — Cross-Platform Foundation Tests
+    std::wcout << L"Cross-Platform Foundation Tests (Sprint 321-330):" << std::endl;
+    RUN_TEST(TestAccessibilityState_DefaultTheme);
+    RUN_TEST(TestColorBlindnessFilter_BuildMatrix_None);
+    RUN_TEST(TestDPIScalingPolicy_DefaultMode);
+    RUN_TEST(TestFeedbackItem_DefaultCategory);
+    RUN_TEST(TestMonitorInfo_DefaultDPI);
+    RUN_TEST(TestMonitorEventData_DefaultState);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests

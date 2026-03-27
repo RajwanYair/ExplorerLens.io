@@ -1402,6 +1402,15 @@ set(ENGINE_HEADERS
     Utils/MemoryMappedLoader.h
     Utils/ActivationService.h
     Utils/FeatureCompatMatrix.h
+    # Sprint 321-330 (v22.0.0 "Sirius" MAJOR) — Cross-Platform Foundation
+    Core/AccessibilityLayer.h
+    Core/ColorBlindnessFilter.h
+    Core/DisplayColorProfile.h
+    Core/DPIScalingPolicy.h
+    Core/FeedbackManager.h
+    Core/KeyboardNavigationHandler.h
+    Core/MonitorConfigWatcher.h
+    Core/MultiMonitorContext.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
