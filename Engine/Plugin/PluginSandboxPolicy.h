@@ -43,13 +43,13 @@ inline std::string ToString(SandboxPolicyPreset p) {
  }
 }
 
-struct PluginSandboxPolicyConfig {
+struct SandboxPolicy {
  SandboxPolicyPreset preset { SandboxPolicyPreset::Standard };
  JobObjectLimits limits;
  bool enablePageFaultNotification { false };
 
- static PluginSandboxPolicyConfig Strict() {
- PluginSandboxPolicyConfig p;
+ static SandboxPolicy Strict() {
+ SandboxPolicy p;
  p.preset = SandboxPolicyPreset::Strict;
  p.limits.maxMemoryBytes = 64ULL * 1024 * 1024; // 64 MB
  p.limits.maxCPUPercent = 10;
@@ -59,10 +59,10 @@ struct PluginSandboxPolicyConfig {
  return p;
  }
 
- static PluginSandboxPolicyConfig Standard() { return {}; }
+ static SandboxPolicy Standard() { return {}; }
 
- static PluginSandboxPolicyConfig Developer() {
- PluginSandboxPolicyConfig p;
+ static SandboxPolicy Developer() {
+ SandboxPolicy p;
  p.preset = SandboxPolicyPreset::Developer;
  p.limits.maxMemoryBytes = 1024ULL * 1024 * 1024; // 1 GB
  p.limits.maxCPUPercent = 100;
@@ -152,7 +152,7 @@ struct PolicyViolation {
 
 class SandboxPolicyValidator {
 public:
- explicit SandboxPolicyValidator(const PluginSandboxPolicyConfig& policy) : m_policy(policy) {}
+ explicit SandboxPolicyValidator(const SandboxPolicy& policy) : m_policy(policy) {}
 
  std::vector<PolicyViolation> Validate() const {
  std::vector<PolicyViolation> violations;
@@ -185,7 +185,7 @@ public:
  }
 
 private:
- PluginSandboxPolicyConfig m_policy;
+ SandboxPolicy m_policy;
 };
 
 } // namespace ExplorerLens::Plugin

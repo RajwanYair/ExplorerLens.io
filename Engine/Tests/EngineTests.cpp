@@ -11163,10 +11163,10 @@ TEST(TestZenith_AuditCategoryCount) {
     ASSERT(AuditTrailLogger::CategoryCount() == 8);
 }
 TEST(TestZenith_AuditSeverityNames) {
-    ASSERT(std::wstring(AuditTrailLogger::SeverityName(AuditSeverity::Info)) ==
+    ASSERT(std::wstring(AuditTrailLogger::SeverityName(TrailSeverity::Info)) ==
         L"Info");
     ASSERT(std::wstring(AuditTrailLogger::SeverityName(
-        AuditSeverity::Critical)) == L"Critical");
+        TrailSeverity::Critical)) == L"Critical");
 }
 
 //== Content Inspection Gateway ==

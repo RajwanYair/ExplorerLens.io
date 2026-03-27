@@ -29,7 +29,7 @@ enum class SchedulerDecodePriority : uint8_t {
     Low         = 3,   // speculative
 };
 
-struct BatchDecodeItem {
+struct SchedulerDecodeItem {
     std::wstring    path;
     uint32_t        requestedWidth{256};
     uint32_t        requestedHeight{256};
@@ -38,7 +38,7 @@ struct BatchDecodeItem {
     uint64_t        enqueueTimeNs{0};
 };
 
-struct BatchDecodeResult {
+struct SchedulerDecodeResult {
     uint64_t             requestId{0};
     bool                 success{false};
     std::vector<uint8_t> bgraPixels;
@@ -48,7 +48,7 @@ struct BatchDecodeResult {
     double               decodeMs{0.0};
 };
 
-using BatchDecodeCompleteCallback = std::function<void(BatchDecodeResult)>;
+using BatchDecodeCompleteCallback = std::function<void(SchedulerDecodeResult)>;
 
 class BatchDecodeScheduler {
 public:
@@ -67,7 +67,7 @@ public:
     void SetCompleteCallback(BatchDecodeCompleteCallback cb) { m_callback = std::move(cb); }
 
     // Submit a decode request — non-blocking. Returns false if queue full.
-    bool Submit(BatchDecodeItem req);
+    bool Submit(SchedulerDecodeItem req);
 
     // Cancel all pending requests for a path.
     void Cancel(const std::wstring& path);
@@ -86,7 +86,7 @@ public:
 
 private:
     struct PrioritizedRequest {
-        BatchDecodeItem req;
+        SchedulerDecodeItem req;
         bool operator>(const PrioritizedRequest& o) const noexcept {
             if (req.priority != o.req.priority)
                 return static_cast<uint8_t>(req.priority) > static_cast<uint8_t>(o.req.priority);
@@ -95,7 +95,7 @@ private:
     };
 
     void WorkerLoop(uint32_t workerId);
-    BatchDecodeResult InvokeDecode(const BatchDecodeItem& req);
+    SchedulerDecodeResult InvokeDecode(const SchedulerDecodeItem& req);
 
     Config                      m_cfg;
     BatchDecodeCompleteCallback      m_callback;

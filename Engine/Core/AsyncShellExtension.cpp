@@ -58,7 +58,7 @@ void AsyncShellExtension::SetThreadCount(uint32_t count) {
  m_stats.totalThreads = m_threadCount;
 }
 
-ThreadPoolStats AsyncShellExtension::GetStats() const {
+ShellThreadPoolStats AsyncShellExtension::GetStats() const {
  std::lock_guard<std::mutex> lock(m_mutex);
  auto stats = m_stats;
  stats.totalThreads = m_threadCount;
