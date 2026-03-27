@@ -1367,6 +1367,14 @@ set(ENGINE_HEADERS
     Utils/UsageStats.h
     Utils/FeatureFlagManager.h
     Utils/AutoUpdateManager.h
+    # Sprint 281-290 (v21.0.0 "Rigel") — Format Expansion III
+    Decoders/AVIFSequenceDecoder.h
+    Decoders/HEIFBurstDecoder.h
+    Decoders/JXLAnimationDecoder.h
+    Decoders/PSDLayerDecoder.h
+    Decoders/SVGRasterizer.h
+    Decoders/TIFFMultiPageDecoder.h
+    Decoders/WebPAnimationDecoder.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h

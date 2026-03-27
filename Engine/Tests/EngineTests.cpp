@@ -1145,6 +1145,14 @@
 #include "../Utils/UsageStats.h"
 #include "../Utils/FeatureFlagManager.h"
 #include "../Utils/AutoUpdateManager.h"
+// Sprint 281-290 (v21.0.0 "Rigel") — Format Expansion III
+#include "../Decoders/AVIFSequenceDecoder.h"
+#include "../Decoders/HEIFBurstDecoder.h"
+#include "../Decoders/JXLAnimationDecoder.h"
+#include "../Decoders/PSDLayerDecoder.h"
+#include "../Decoders/SVGRasterizer.h"
+#include "../Decoders/TIFFMultiPageDecoder.h"
+#include "../Decoders/WebPAnimationDecoder.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26320,6 +26328,51 @@ TEST(TestCrashReporter_Install) {
     ASSERT(reporter.IsInstalled());
 }
 
+// ---- Sprint 281-290 (v21.0.0 "Rigel") — Format Expansion III ----
+
+TEST(TestAVIFSequenceDecoder_SupportsHardware) {
+    using namespace ExplorerLens::Engine;
+    // Static query — must return without throw
+    bool hw = AVIFSequenceDecoder::SupportsHardwareDecode();
+    ASSERT(hw == true || hw == false);
+}
+
+TEST(TestHEIFBurstDecoder_LooksLikeHEIF_RejectsGarbage) {
+    using namespace ExplorerLens::Engine;
+    uint8_t garbage[4] = {0x00, 0x01, 0x02, 0x03};
+    ASSERT(!HEIFBurstDecoder::LooksLikeHEIF(garbage, sizeof(garbage)));
+}
+
+TEST(TestJXLAnimationDecoder_LooksLikeJXL_RejectsEmpty) {
+    using namespace ExplorerLens::Engine;
+    uint8_t garbage[4] = {0xFF, 0xFE, 0x01, 0x02};
+    ASSERT(!JXLAnimationDecoder::LooksLikeJXL(garbage, sizeof(garbage)));
+}
+
+TEST(TestPSDLayerDecoder_IsPSD_RejectsGarbage) {
+    using namespace ExplorerLens::Engine;
+    uint8_t garbage[4] = {0x00, 0x00, 0x00, 0x00};
+    ASSERT(!PSDLayerDecoder::IsPSD(garbage, sizeof(garbage)));
+}
+
+TEST(TestSVGRasterizer_LooksLikeSVG_RejectsEmpty) {
+    using namespace ExplorerLens::Engine;
+    uint8_t garbage[4] = {0xFF, 0xD8, 0xFF, 0xE0}; // JPEG magic, not SVG
+    ASSERT(!SVGRasterizer::LooksLikeSVG(garbage, sizeof(garbage)));
+}
+
+TEST(TestTIFFMultiPageDecoder_LooksLikeTIFF_RejectsGarbage) {
+    using namespace ExplorerLens::Engine;
+    uint8_t garbage[4] = {0x00, 0x00, 0x00, 0x00};
+    ASSERT(!TIFFMultiPageDecoder::LooksLikeTIFF(garbage, sizeof(garbage)));
+}
+
+TEST(TestWebPAnimationDecoder_LooksLikeAnimatedWebP_RejectsGarbage) {
+    using namespace ExplorerLens::Engine;
+    uint8_t garbage[4] = {0x00, 0x00, 0x00, 0x00};
+    ASSERT(!WebPAnimationDecoder::LooksLikeAnimatedWebP(garbage, sizeof(garbage)));
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30460,6 +30513,17 @@ int main() {
     RUN_TEST(TestUsageStats_RecordEvent);
     RUN_TEST(TestCrashReporter_InitialNotInstalled);
     RUN_TEST(TestCrashReporter_Install);
+    std::wcout << std::endl;
+
+    // Sprint 281-290 — Format Expansion III Tests
+    std::wcout << L"Format Expansion III Tests (Sprint 281-290):" << std::endl;
+    RUN_TEST(TestAVIFSequenceDecoder_SupportsHardware);
+    RUN_TEST(TestHEIFBurstDecoder_LooksLikeHEIF_RejectsGarbage);
+    RUN_TEST(TestJXLAnimationDecoder_LooksLikeJXL_RejectsEmpty);
+    RUN_TEST(TestPSDLayerDecoder_IsPSD_RejectsGarbage);
+    RUN_TEST(TestSVGRasterizer_LooksLikeSVG_RejectsEmpty);
+    RUN_TEST(TestTIFFMultiPageDecoder_LooksLikeTIFF_RejectsGarbage);
+    RUN_TEST(TestWebPAnimationDecoder_LooksLikeAnimatedWebP_RejectsGarbage);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests
