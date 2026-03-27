@@ -73,7 +73,7 @@ public:
     ~PluginRegistryClient();
 
     // List or search plugins from the registry.
-    MarketplaceQueryResult Query(const PluginRegistryQuery& query) const;
+    PluginRegistryQueryResult Query(const PluginRegistryQuery& query) const;
 
     // Fetch detailed info for a single plugin by ID.
     bool GetPluginInfo(const std::string& pluginId, MarketplacePlugin& outPlugin) const;

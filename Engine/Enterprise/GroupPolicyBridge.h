@@ -19,7 +19,7 @@ namespace ExplorerLens { namespace Engine { namespace Enterprise {
 static constexpr wchar_t GP_POLICY_ROOT[]   = L"SOFTWARE\\Policies\\ExplorerLens";
 static constexpr wchar_t MDM_POLICY_ROOT[]  = L"SOFTWARE\\Microsoft\\PolicyManager\\current\\device\\ExplorerLens";
 
-enum class PolicySource : uint8_t {
+enum class BridgePolicySource : uint8_t {
     None       = 0,
     MachineGPO = 1,   // HKLM\SOFTWARE\Policies\...
     UserGPO    = 2,   // HKCU\SOFTWARE\Policies\...
@@ -33,7 +33,7 @@ struct PolicyValue {
     std::wstring    rawValue;
     DWORD           dwValue   = 0;
     bool            boolValue = false;
-    PolicySource    source    = PolicySource::None;
+    BridgePolicySource    source    = BridgePolicySource::None;
     bool            isSet     = false;
 };
 
@@ -47,9 +47,9 @@ public:
     // Refresh all cached policy values from registry
     void Refresh() {
         m_cache.clear();
-        LoadHive(HKEY_LOCAL_MACHINE, GP_POLICY_ROOT,  PolicySource::MachineGPO);
-        LoadHive(HKEY_CURRENT_USER,  GP_POLICY_ROOT,  PolicySource::UserGPO);
-        LoadHive(HKEY_LOCAL_MACHINE, MDM_POLICY_ROOT, PolicySource::MDMIntune);
+        LoadHive(HKEY_LOCAL_MACHINE, GP_POLICY_ROOT,  BridgePolicySource::MachineGPO);
+        LoadHive(HKEY_CURRENT_USER,  GP_POLICY_ROOT,  BridgePolicySource::UserGPO);
+        LoadHive(HKEY_LOCAL_MACHINE, MDM_POLICY_ROOT, BridgePolicySource::MDMIntune);
     }
 
     // Returns the effective policy string value, in source priority order
@@ -72,9 +72,9 @@ public:
         return dw.has_value() ? (dw.value() != 0) : defaultVal;
     }
 
-    PolicySource GetSource(const wchar_t* valueName) const {
+    BridgePolicySource GetSource(const wchar_t* valueName) const {
         auto it = m_cache.find(valueName);
-        return (it != m_cache.end()) ? it->second.source : PolicySource::None;
+        return (it != m_cache.end()) ? it->second.source : BridgePolicySource::None;
     }
 
     // Known policy keys
@@ -100,7 +100,7 @@ public:
 private:
     GroupPolicyBridge() { Refresh(); }
 
-    void LoadHive(HKEY root, const wchar_t* path, PolicySource src) {
+    void LoadHive(HKEY root, const wchar_t* path, BridgePolicySource src) {
         HKEY hk = nullptr;
         if (RegOpenKeyExW(root, path, 0, KEY_READ, &hk) != ERROR_SUCCESS) return;
 

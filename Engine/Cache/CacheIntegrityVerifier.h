@@ -14,7 +14,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class IntegrityStatus : uint8_t {
+enum class CacheVerifyStatus : uint8_t {
     Valid,          // Checksum matches
     Corrupted,     // Checksum mismatch
     Missing,       // Entry not found
@@ -24,7 +24,7 @@ enum class IntegrityStatus : uint8_t {
 };
 
 struct CacheIntegrityResult {
-    IntegrityStatus status = IntegrityStatus::Valid;
+    CacheVerifyStatus status = CacheVerifyStatus::Valid;
     uint64_t entryKey = 0;
     uint64_t storedHash = 0;
     uint64_t computedHash = 0;
@@ -58,7 +58,7 @@ public:
         r.storedHash = storedHash;
         r.entrySize = size;
         if (!data || size == 0) {
-            r.status = IntegrityStatus::Missing;
+            r.status = CacheVerifyStatus::Missing;
             return r;
         }
         // Compute XXH3 hash (simplified)
@@ -66,8 +66,8 @@ public:
         for (uint32_t i = 0; i < size && i < 256; i++)
             hash = hash * 31 + data[i];
         r.computedHash = hash;
-        r.status = (hash == storedHash) ? IntegrityStatus::Valid
-            : IntegrityStatus::Corrupted;
+        r.status = (hash == storedHash) ? CacheVerifyStatus::Valid
+            : CacheVerifyStatus::Corrupted;
         return r;
     }
 
@@ -82,17 +82,17 @@ public:
         return report;
     }
 
-    static const wchar_t* StatusName(IntegrityStatus s) {
+    static const wchar_t* StatusName(CacheVerifyStatus s) {
         switch (s) {
-        case IntegrityStatus::Valid:     return L"Valid";
-        case IntegrityStatus::Corrupted: return L"Corrupted";
-        case IntegrityStatus::Missing:   return L"Missing";
-        case IntegrityStatus::Truncated: return L"Truncated";
-        case IntegrityStatus::Expired:   return L"Expired";
+        case CacheVerifyStatus::Valid:     return L"Valid";
+        case CacheVerifyStatus::Corrupted: return L"Corrupted";
+        case CacheVerifyStatus::Missing:   return L"Missing";
+        case CacheVerifyStatus::Truncated: return L"Truncated";
+        case CacheVerifyStatus::Expired:   return L"Expired";
         default: return L"Unknown";
         }
     }
-    static size_t StatusCount() { return static_cast<size_t>(IntegrityStatus::COUNT); }
+    static size_t StatusCount() { return static_cast<size_t>(CacheVerifyStatus::COUNT); }
 
 private:
     bool m_autoHeal = true;

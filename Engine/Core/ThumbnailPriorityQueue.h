@@ -18,7 +18,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class DecodePriority : int {
+enum class ThumbnailPriority : int {
     Critical = 0,   // User-visible, blocking (shell requesting thumbnail synchronously)
     High     = 1,   // Viewport-visible items
     Normal   = 2,   // Near-viewport prefetch
@@ -28,10 +28,10 @@ enum class DecodePriority : int {
 
 using DecodeRequestId = uint64_t;
 
-struct DecodeRequest {
+struct ThumbnailDecodeItem {
     DecodeRequestId    id          = 0;
     std::wstring       filePath;
-    DecodePriority     priority    = DecodePriority::Normal;
+    ThumbnailPriority     priority    = ThumbnailPriority::Normal;
     uint32_t           thumbWidth  = 256;
     uint32_t           thumbHeight = 256;
     std::function<void(DecodeRequestId, bool /*success*/)> onComplete;
@@ -46,7 +46,7 @@ public:
     }
 
     // Submit a decode request; returns assigned ID
-    DecodeRequestId Submit(DecodeRequest req) {
+    DecodeRequestId Submit(ThumbnailDecodeItem req) {
         std::unique_lock<std::mutex> lk(m_mtx);
         req.id         = m_nextId++;
         req.submitTick = GetTickCount();
@@ -70,7 +70,7 @@ public:
     }
 
     // Boost priority of an existing request (e.g. user scrolled to it)
-    bool Boost(DecodeRequestId id, DecodePriority newPriority) {
+    bool Boost(DecodeRequestId id, ThumbnailPriority newPriority) {
         std::lock_guard<std::mutex> lk(m_mtx);
         for (auto& r : m_queue) {
             if (r.id == id && r.priority > newPriority) {
@@ -83,7 +83,7 @@ public:
     }
 
     // Dequeue highest-priority non-cancelled request (blocks if empty)
-    bool Dequeue(DecodeRequest& out, DWORD timeoutMs = INFINITE) {
+    bool Dequeue(ThumbnailDecodeItem& out, DWORD timeoutMs = INFINITE) {
         std::unique_lock<std::mutex> lk(m_mtx);
         auto deadline = std::chrono::milliseconds(timeoutMs);
         bool timedOut = !m_cv.wait_for(lk, deadline, [this] {
@@ -94,7 +94,7 @@ public:
         // Pop from heap, skip cancelled
         while (!m_queue.empty()) {
             std::pop_heap(m_queue.begin(), m_queue.end(), CompareRequests);
-            DecodeRequest req = std::move(m_queue.back());
+            ThumbnailDecodeItem req = std::move(m_queue.back());
             m_queue.pop_back();
             if (!req.cancelled) {
                 out = std::move(req);
@@ -120,9 +120,9 @@ public:
         DWORD now = GetTickCount();
         bool changed = false;
         for (auto& r : m_queue) {
-            if (!r.cancelled && r.priority > DecodePriority::High &&
+            if (!r.cancelled && r.priority > ThumbnailPriority::High &&
                 (now - r.submitTick) > agingMs) {
-                r.priority = static_cast<DecodePriority>(static_cast<int>(r.priority) - 1);
+                r.priority = static_cast<ThumbnailPriority>(static_cast<int>(r.priority) - 1);
                 changed = true;
             }
         }
@@ -130,7 +130,7 @@ public:
             std::make_heap(m_queue.begin(), m_queue.end(), CompareRequests);
     }
 
-    int PendingCount(DecodePriority p) const {
+    int PendingCount(ThumbnailPriority p) const {
         std::lock_guard<std::mutex> lk(m_mtx);
         int cnt = 0;
         for (const auto& r : m_queue)
@@ -139,7 +139,7 @@ public:
     }
 
 private:
-    static bool CompareRequests(const DecodeRequest& a, const DecodeRequest& b) {
+    static bool CompareRequests(const ThumbnailDecodeItem& a, const ThumbnailDecodeItem& b) {
         // Lower priority value = higher precedence; older (lower tick) breaks ties
         if (a.priority != b.priority)
             return static_cast<int>(a.priority) > static_cast<int>(b.priority);
@@ -154,7 +154,7 @@ private:
 
     mutable std::mutex              m_mtx;
     std::condition_variable         m_cv;
-    std::vector<DecodeRequest>      m_queue; // binary max-heap
+    std::vector<ThumbnailDecodeItem>      m_queue; // binary max-heap
     std::atomic<DecodeRequestId>    m_nextId { 1 };
     bool                            m_shutdown = false;
 };

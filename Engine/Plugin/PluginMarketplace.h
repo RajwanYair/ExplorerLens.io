@@ -573,9 +573,9 @@ struct MarketplaceStats {
 };
 
 /// Orchestrates plugin download, verification, scanning, and installation
-class PluginInstaller {
+class MarketplaceInstaller {
 public:
-    PluginInstaller()
+    MarketplaceInstaller()
         : m_scanner()
         , m_verifier()
         , m_client() {

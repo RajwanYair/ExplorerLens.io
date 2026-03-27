@@ -14,7 +14,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class PolicySource : uint8_t {
+enum class CompliancePolicySource : uint8_t {
     GroupPolicy, Intune, SCCM, LocalAdmin, Default, COUNT
 };
 
@@ -29,7 +29,7 @@ enum class ComplianceStatus : uint8_t {
 struct PolicyRule {
     std::wstring ruleName;
     std::wstring description;
-    PolicySource source = PolicySource::Default;
+    CompliancePolicySource source = CompliancePolicySource::Default;
     PolicySeverity severity = PolicySeverity::Informational;
     std::wstring expectedValue;
     std::wstring actualValue;
@@ -92,7 +92,7 @@ public:
     size_t RuleCount() const { return m_rules.size(); }
     void Clear() { m_rules.clear(); }
 
-    static size_t SourceCount() { return static_cast<size_t>(PolicySource::COUNT); }
+    static size_t SourceCount() { return static_cast<size_t>(CompliancePolicySource::COUNT); }
     static size_t SeverityLevelCount() { return static_cast<size_t>(PolicySeverity::COUNT); }
 
 private:

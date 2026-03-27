@@ -24,6 +24,7 @@
 // ============================================================================
 
 #include <Windows.h>
+#include <winternl.h>  // NTSTATUS, RTL_OSVERSIONINFOW, PRTL_OSVERSIONINFOW
 #include <ShellScalingApi.h>
 #include <d3d11.h>
 #include <dxgi1_6.h>

@@ -22,23 +22,23 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class DecodePriority : uint8_t {
+enum class SchedulerDecodePriority : uint8_t {
     Critical    = 0,   // visible on screen, decode immediately
     High        = 1,   // adjacent / hover
     Normal      = 2,   // background prefetch
     Low         = 3,   // speculative
 };
 
-struct DecodeRequest {
+struct BatchDecodeItem {
     std::wstring    path;
     uint32_t        requestedWidth{256};
     uint32_t        requestedHeight{256};
-    DecodePriority  priority{DecodePriority::Normal};
+    SchedulerDecodePriority  priority{SchedulerDecodePriority::Normal};
     uint64_t        requestId{0};
     uint64_t        enqueueTimeNs{0};
 };
 
-struct DecodeResult {
+struct BatchDecodeResult {
     uint64_t             requestId{0};
     bool                 success{false};
     std::vector<uint8_t> bgraPixels;
@@ -48,7 +48,7 @@ struct DecodeResult {
     double               decodeMs{0.0};
 };
 
-using DecodeCompleteCallback = std::function<void(DecodeResult)>;
+using BatchDecodeCompleteCallback = std::function<void(BatchDecodeResult)>;
 
 class BatchDecodeScheduler {
 public:
@@ -64,10 +64,10 @@ public:
     BatchDecodeScheduler(const BatchDecodeScheduler&) = delete;
     BatchDecodeScheduler& operator=(const BatchDecodeScheduler&) = delete;
 
-    void SetCompleteCallback(DecodeCompleteCallback cb) { m_callback = std::move(cb); }
+    void SetCompleteCallback(BatchDecodeCompleteCallback cb) { m_callback = std::move(cb); }
 
     // Submit a decode request — non-blocking. Returns false if queue full.
-    bool Submit(DecodeRequest req);
+    bool Submit(BatchDecodeItem req);
 
     // Cancel all pending requests for a path.
     void Cancel(const std::wstring& path);
@@ -86,7 +86,7 @@ public:
 
 private:
     struct PrioritizedRequest {
-        DecodeRequest req;
+        BatchDecodeItem req;
         bool operator>(const PrioritizedRequest& o) const noexcept {
             if (req.priority != o.req.priority)
                 return static_cast<uint8_t>(req.priority) > static_cast<uint8_t>(o.req.priority);
@@ -95,10 +95,10 @@ private:
     };
 
     void WorkerLoop(uint32_t workerId);
-    DecodeResult InvokeDecode(const DecodeRequest& req);
+    BatchDecodeResult InvokeDecode(const BatchDecodeItem& req);
 
     Config                      m_cfg;
-    DecodeCompleteCallback      m_callback;
+    BatchDecodeCompleteCallback      m_callback;
 
     mutable std::mutex          m_mutex;
     std::condition_variable     m_cv;

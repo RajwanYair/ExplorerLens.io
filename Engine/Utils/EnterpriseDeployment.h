@@ -500,7 +500,7 @@ private:
     std::map<std::string, ConfigValue> m_values;
 };
 
-// ─── EnterprisePolicyEngineV2 ─────────────────────────────────────────────────
+// ─── DeploymentPolicyEngineV2 ─────────────────────────────────────────────────
 // ADMX/GPO V2 with per-policy compliance scoring, policy drift detection,
 // Intune MDM integration, and centralized policy distribution endpoint.
 // ──────────────────────────────────────────────────────────────────────────────
@@ -525,7 +525,7 @@ struct EnterprisePolicyReport {
     bool driftDetected = false;
 };
 
-class EnterprisePolicyEngineV2 {
+class DeploymentPolicyEngineV2 {
 public:
     static const wchar_t* SourceName(EnterprisePolicySource s) {
         switch (s) {

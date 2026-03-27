@@ -8,7 +8,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Audit event severity
-enum class AuditSeverity : uint8_t {
+enum class TrailSeverity : uint8_t {
  Info = 0,
  Warning,
  Error,
@@ -30,9 +30,9 @@ enum class AuditEventCategory : uint8_t {
  COUNT
 };
 
-struct AuditEvent {
+struct TrailAuditEvent {
  uint64_t eventId = 0;
- AuditSeverity severity = AuditSeverity::Info;
+ TrailSeverity severity = TrailSeverity::Info;
  AuditEventCategory category = AuditEventCategory::FileAccess;
  const wchar_t *description = nullptr;
  const wchar_t *filePath = nullptr;
@@ -56,23 +56,23 @@ struct AuditConfig {
 class AuditTrailLogger {
 public:
  static constexpr size_t SeverityCount() {
- return static_cast<size_t>(AuditSeverity::COUNT);
+ return static_cast<size_t>(TrailSeverity::COUNT);
  }
  static constexpr size_t CategoryCount() {
  return static_cast<size_t>(AuditEventCategory::COUNT);
  }
 
- static const wchar_t *SeverityName(AuditSeverity s) {
+ static const wchar_t *SeverityName(TrailSeverity s) {
  switch (s) {
- case AuditSeverity::Info:
+ case TrailSeverity::Info:
  return L"Info";
- case AuditSeverity::Warning:
+ case TrailSeverity::Warning:
  return L"Warning";
- case AuditSeverity::Error:
+ case TrailSeverity::Error:
  return L"Error";
- case AuditSeverity::Critical:
+ case TrailSeverity::Critical:
  return L"Critical";
- case AuditSeverity::SecurityEvent:
+ case TrailSeverity::SecurityEvent:
  return L"Security Event";
  default:
  return L"Unknown";

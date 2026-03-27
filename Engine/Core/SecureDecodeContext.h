@@ -23,7 +23,7 @@ enum class SandboxLevel : uint8_t {
     AppContainer = 3, // AppContainer + restricted capabilities (untrusted plugins)
 };
 
-struct SandboxPolicy {
+struct SecureSandboxPolicy {
     SandboxLevel level{SandboxLevel::None};
     uint32_t     timeoutMs{5000};      // kill sandbox after this
     size_t       maxOutputBytes{16 * 1024 * 1024}; // 16 MB
@@ -45,7 +45,7 @@ struct SecureDecodeResult {
 
 class SecureDecodeContext {
 public:
-    explicit SecureDecodeContext(SandboxPolicy policy = {});
+    explicit SecureDecodeContext(SecureSandboxPolicy policy = {});
     ~SecureDecodeContext();
 
     SecureDecodeContext(const SecureDecodeContext&) = delete;
@@ -62,12 +62,12 @@ public:
     static SandboxLevel RecommendedLevel(const std::string& ext) noexcept;
 
     // Return the active policy.
-    [[nodiscard]] const SandboxPolicy& Policy() const noexcept { return m_policy; }
+    [[nodiscard]] const SecureSandboxPolicy& Policy() const noexcept { return m_policy; }
 
 private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
-    SandboxPolicy         m_policy;
+    SecureSandboxPolicy         m_policy;
 };
 
 // Extension → sandbox level mapping registry

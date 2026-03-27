@@ -34,7 +34,7 @@ struct EnforcerSandboxPolicy {
     std::wstring allowedPath;
 };
 
-struct SandboxStats {
+struct PluginEnforcerStats {
     uint32_t totalInvocations = 0;
     uint32_t violationCount = 0;
     uint32_t terminatedCount = 0;
@@ -78,7 +78,7 @@ public:
         }
     }
 
-    const SandboxStats& GetStats() const { return m_stats; }
+    const PluginEnforcerStats& GetStats() const { return m_stats; }
     void Reset() { m_stats = {}; }
 
     static size_t RestrictionCount() { return static_cast<size_t>(SandboxRestriction::COUNT); }
@@ -86,7 +86,7 @@ public:
 
 private:
     EnforcerSandboxPolicy m_policy;
-    SandboxStats m_stats;
+    PluginEnforcerStats m_stats;
 };
 
 } // namespace Engine

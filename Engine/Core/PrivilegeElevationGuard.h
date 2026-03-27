@@ -117,7 +117,7 @@ public:
     }
 
     // Create a restricted token for the COM decode worker
-    static HANDLE CreateRestrictedToken() {
+    static HANDLE CreateSandboxToken() {
         HANDLE hToken = nullptr, hRestricted = nullptr;
         OpenProcessToken(GetCurrentProcess(), TOKEN_DUPLICATE | TOKEN_QUERY, &hToken);
         if (!hToken) return nullptr;

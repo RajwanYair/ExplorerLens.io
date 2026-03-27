@@ -16,7 +16,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Thread pool statistics
-struct ThreadPoolStats {
+struct ShellThreadPoolStats {
  uint32_t activeThreads = 0;
  uint32_t totalThreads = 0;
  uint32_t queueDepth = 0;
@@ -42,7 +42,7 @@ public:
  // Thread pool
  void SetThreadCount(uint32_t count);
  uint32_t GetThreadCount() const { return m_threadCount; }
- ThreadPoolStats GetStats() const;
+ ShellThreadPoolStats GetStats() const;
 
  // Priority management
  void BoostPriority(uint64_t requestId, DecodePriority newPriority);
@@ -65,7 +65,7 @@ private:
  uint64_t m_nextRequestId = 1;
  mutable std::mutex m_mutex;
  std::vector<AsyncThumbnailRequest> m_queue;
- ThreadPoolStats m_stats;
+ ShellThreadPoolStats m_stats;
 };
 
 } // namespace Engine

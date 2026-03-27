@@ -22,7 +22,7 @@ enum class SandboxLevel {
     Strict      // + network block + restricted token
 };
 
-struct SandboxPolicy {
+struct SandboxEscapePolicy {
     SandboxLevel level         = SandboxLevel::Standard;
     uint64_t     maxMemoryBytes = 512ULL * 1024 * 1024; // 512 MB
     uint32_t     maxCpuRatePercent = 25; // Per-job CPU rate cap (requires Win8+)
@@ -32,7 +32,7 @@ struct SandboxPolicy {
     bool         killOnJobClose      = true;
 };
 
-struct SandboxStats {
+struct SandboxEscapeStats {
     uint64_t  peakMemoryBytes   = 0;
     uint64_t  totalCpuMs        = 0;
     uint32_t  terminationCount  = 0; // Jobs killed for exceeding limits
@@ -44,7 +44,7 @@ public:
     ~SandboxEscapeGuard() { Release(); }
 
     // Create a Job Object with the given policy
-    bool Create(const SandboxPolicy& policy = SandboxPolicy{}) {
+    bool Create(const SandboxEscapePolicy& policy = SandboxEscapePolicy{}) {
         m_policy = policy;
         if (policy.level == SandboxLevel::None) return true;
 
@@ -144,14 +144,14 @@ public:
         m_stats.activeJobObject = false;
     }
 
-    const SandboxStats&  Stats()  const { return m_stats; }
-    const SandboxPolicy& Policy() const { return m_policy; }
+    const SandboxEscapeStats&  Stats()  const { return m_stats; }
+    const SandboxEscapePolicy& Policy() const { return m_policy; }
     HANDLE               JobHandle() const { return m_hJob; }
 
 private:
     HANDLE        m_hJob   = nullptr;
-    SandboxPolicy m_policy;
-    SandboxStats  m_stats;
+    SandboxEscapePolicy m_policy;
+    SandboxEscapeStats  m_stats;
 };
 
 }} // namespace ExplorerLens::Engine

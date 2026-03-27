@@ -24,7 +24,7 @@ enum class AuditFormat : uint8_t {
     Syslog = 3    // RFC 5424 syslog with structured data
 };
 
-enum class AuditSeverity : uint8_t {
+enum class ExportAuditSeverity : uint8_t {
     Info     = 0,
     Low      = 1,
     Medium   = 2,
@@ -32,10 +32,10 @@ enum class AuditSeverity : uint8_t {
     Critical = 4
 };
 
-struct AuditEvent {
+struct ExportAuditEvent {
     std::string           eventId;        // e.g. "LENS-DECODE-001"
     std::string           eventName;      // Human-readable event name
-    AuditSeverity         severity        = AuditSeverity::Info;
+    ExportAuditSeverity         severity        = ExportAuditSeverity::Info;
     std::string           userName;       // Windows SID or UPN
     std::string           machineId;
     std::string           filePath;       // Decoded/requested file (sanitized)
@@ -68,7 +68,7 @@ public:
 
     void Configure(AuditExporterConfig cfg) { m_cfg = std::move(cfg); }
 
-    void Emit(const AuditEvent& ev) {
+    void Emit(const ExportAuditEvent& ev) {
         std::string record = FormatEvent(ev);
         if (!m_cfg.localFilePath.empty()) WriteToFile(record);
         m_buffer.push_back(record);
@@ -83,18 +83,18 @@ public:
 
     // Convenience helpers for common audit events
     void EmitDecodeBlocked(const std::string& filePath, const std::string& reason, const std::string& user) {
-        AuditEvent ev;
+        ExportAuditEvent ev;
         ev.eventId = "LENS-SEC-001"; ev.eventName = "DecodeBlocked";
-        ev.severity = AuditSeverity::High; ev.filePath = filePath;
+        ev.severity = ExportAuditSeverity::High; ev.filePath = filePath;
         ev.outcome = "blocked"; ev.policyViolation = reason; ev.userName = user;
         ev.timeStamp = std::chrono::system_clock::now();
         Emit(ev);
     }
 
     void EmitNSFWTriggered(const std::string& filePath, float confidence, const std::string& user) {
-        AuditEvent ev;
+        ExportAuditEvent ev;
         ev.eventId = "LENS-SEC-002"; ev.eventName = "NSFWGuardTriggered";
-        ev.severity = AuditSeverity::High; ev.filePath = filePath;
+        ev.severity = ExportAuditSeverity::High; ev.filePath = filePath;
         ev.outcome = "blocked"; ev.userName = user;
         ev.policyViolation = "NSFW confidence=" + std::to_string(confidence);
         ev.timeStamp = std::chrono::system_clock::now();
@@ -102,9 +102,9 @@ public:
     }
 
     void EmitPolicyViolation(const std::string& rule, const std::string& details) {
-        AuditEvent ev;
+        ExportAuditEvent ev;
         ev.eventId = "LENS-POL-001"; ev.eventName = "PolicyViolation";
-        ev.severity = AuditSeverity::Medium;
+        ev.severity = ExportAuditSeverity::Medium;
         ev.outcome = "blocked"; ev.policyViolation = rule + ": " + details;
         ev.timeStamp = std::chrono::system_clock::now();
         Emit(ev);
@@ -113,7 +113,7 @@ public:
 private:
     EnterpriseAuditExporter() = default;
 
-    std::string FormatEvent(const AuditEvent& ev) const {
+    std::string FormatEvent(const ExportAuditEvent& ev) const {
         switch (m_cfg.format) {
             case AuditFormat::CEF:   return FormatCEF(ev);
             case AuditFormat::LEEF:  return FormatLEEF(ev);
@@ -130,7 +130,7 @@ private:
         return buf;
     }
 
-    std::string FormatCEF(const AuditEvent& ev) const {
+    std::string FormatCEF(const ExportAuditEvent& ev) const {
         // CEF:Version|Device Vendor|Device Product|Device Version|SignatureID|Name|Severity|Extension
         int cefSev = static_cast<int>(ev.severity) * 2;
         std::ostringstream ss;
@@ -143,7 +143,7 @@ private:
         return ss.str();
     }
 
-    std::string FormatLEEF(const AuditEvent& ev) const {
+    std::string FormatLEEF(const ExportAuditEvent& ev) const {
         std::ostringstream ss;
         ss << "LEEF:2.0|" << m_cfg.vendorDevice << "|" << m_cfg.vendorProduct << "|"
            << m_cfg.vendorVersion << "|" << ev.eventId << "|"
@@ -156,7 +156,7 @@ private:
         return ss.str();
     }
 
-    std::string FormatJSONL(const AuditEvent& ev) const {
+    std::string FormatJSONL(const ExportAuditEvent& ev) const {
         std::ostringstream ss;
         ss << "{\"ts\":\"" << EpochStr(ev.timeStamp) << "\","
            << "\"id\":\"" << ev.eventId << "\","

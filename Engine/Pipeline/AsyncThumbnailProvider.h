@@ -88,7 +88,7 @@ struct ThumbnailProviderConfig {
 };
 
 /// Internal decode request
-struct DecodeRequest {
+struct AsyncProviderDecodeItem {
  uint64_t requestId = 0;
  std::wstring filePath;
  uint32_t requestedSize = 256;
@@ -156,7 +156,7 @@ public:
 
 private:
  /// Thread pool work callback
- void WorkerCallback(DecodeRequest &request);
+ void WorkerCallback(AsyncProviderDecodeItem &request);
 
  /// Check for timed-out requests
  void CheckTimeouts();
@@ -171,7 +171,7 @@ private:
  std::atomic<bool> m_running{false};
  std::atomic<uint64_t> m_nextRequestId{1};
  mutable std::mutex m_requestMutex;
- std::unordered_map<uint64_t, DecodeRequest> m_requests;
+ std::unordered_map<uint64_t, AsyncProviderDecodeItem> m_requests;
 
  // Statistics
  std::atomic<uint64_t> m_totalRequests{0};
