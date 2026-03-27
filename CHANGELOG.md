@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [22.2.0] Sirius-S — Security & Audit v3
+
+### Added
+- Utils/LicenseManager.h: license key validation and trial management
+- Utils/LocalizationValidator.h: string length and RTL/LTR layout verifier
+- Utils/StoreReadinessChecker.h: Windows Store / MSIX certification validator
+- Utils/CertificatePinner.h: update channel certificate pinning
+- Utils/ColorBlindFilter.h: deuteranopia/protanopia/tritanopia simulation
+- Utils/FirstRunExperience.h: OOBE wizard and onboarding flow
+- AI/NSFWContentGuard.h: NSFW content detection gate (enterprise feature)
+- AI/BlurDetectionFilter.h: blur detection and deblur sharpening filter
+- 6 new unit tests covering Security & Audit v3 subsystem
+
+
 ## [22.1.0] Sirius-R — Performance Profiling v2
 
 ### Added
