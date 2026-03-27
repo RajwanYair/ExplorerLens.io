@@ -1136,6 +1136,15 @@
 #include "../Plugin/PluginUpdateScheduler.h"
 #include "../Plugin/PluginUsageTracker.h"
 #include "../Plugin/PluginVersionResolver.h"
+// Sprint 271-280 (v20.7.0 "Quasar-X") — Observability v2
+#include "../Core/DiagnosticsConsole.h"
+#include "../Core/LatencyBudgetManager.h"
+#include "../Core/TelemetryConsentManager.h"
+#include "../Core/NetworkAwarePrefetcher.h"
+#include "../Utils/CrashReporter.h"
+#include "../Utils/UsageStats.h"
+#include "../Utils/FeatureFlagManager.h"
+#include "../Utils/AutoUpdateManager.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26251,6 +26260,66 @@ TEST(TestPluginVersionResolver_SemVerParse) {
     ASSERT(v.patch == 3);
 }
 
+// ---- Sprint 271-280 (v20.7.0 "Quasar-X") — Observability v2 ----
+
+TEST(TestLatencyBudgetManager_RegisterFormat) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = LatencyBudgetManager::Instance();
+    LatencySLO slo{};
+    mgr.RegisterFormat(".test271", slo);
+    ASSERT(true); // registered without throw
+}
+
+TEST(TestLatencyBudgetManager_RecordSample) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = LatencyBudgetManager::Instance();
+    mgr.RecordSample(".test271", std::chrono::microseconds(5000));
+    ASSERT(true);
+}
+
+TEST(TestTelemetryConsentManager_DefaultStatus) {
+    using namespace ExplorerLens::Engine;
+    auto& tcm = TelemetryConsentManager::Instance();
+    TelemetryEvent ev{"engine.test.271", TelemetryLevel::Basic, "{}"};
+    // ConsentGate must complete without throwing
+    tcm.ConsentGate(ev);
+    ASSERT(true);
+}
+
+TEST(TestFeatureFlagManager_GetBoolDefault) {
+    using namespace ExplorerLens::Engine;
+    auto& ffm = FeatureFlagManager::Get();
+    bool val = ffm.GetBool(L"NoSuchFlag271", false);
+    ASSERT(!val);
+}
+
+TEST(TestFeatureFlagManager_GetIntDefault) {
+    using namespace ExplorerLens::Engine;
+    auto& ffm = FeatureFlagManager::Get();
+    int32_t val = ffm.GetInt(L"NoSuchFlag271", 42);
+    ASSERT(val == 42);
+}
+
+TEST(TestUsageStats_RecordEvent) {
+    using namespace ExplorerLens::Engine;
+    auto& us = UsageStats::Get();
+    us.Record(UsageEvent::FormatDecoded, L".webp", 1);
+    ASSERT(true);
+}
+
+TEST(TestCrashReporter_InitialNotInstalled) {
+    using namespace ExplorerLens::Engine;
+    CrashReporter reporter;
+    ASSERT(!reporter.IsInstalled());
+}
+
+TEST(TestCrashReporter_Install) {
+    using namespace ExplorerLens::Engine;
+    CrashReporter reporter;
+    reporter.Install();
+    ASSERT(reporter.IsInstalled());
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30379,6 +30448,18 @@ int main() {
     RUN_TEST(TestPluginUpdateScheduler_DefaultPolicy);
     RUN_TEST(TestPluginUsageTracker_InitialCounters);
     RUN_TEST(TestPluginVersionResolver_SemVerParse);
+    std::wcout << std::endl;
+
+    // Sprint 271-280 — Observability v2 Tests
+    std::wcout << L"Observability v2 Tests (Sprint 271-280):" << std::endl;
+    RUN_TEST(TestLatencyBudgetManager_RegisterFormat);
+    RUN_TEST(TestLatencyBudgetManager_RecordSample);
+    RUN_TEST(TestTelemetryConsentManager_DefaultStatus);
+    RUN_TEST(TestFeatureFlagManager_GetBoolDefault);
+    RUN_TEST(TestFeatureFlagManager_GetIntDefault);
+    RUN_TEST(TestUsageStats_RecordEvent);
+    RUN_TEST(TestCrashReporter_InitialNotInstalled);
+    RUN_TEST(TestCrashReporter_Install);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests

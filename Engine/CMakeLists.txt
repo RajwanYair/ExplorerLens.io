@@ -1358,6 +1358,15 @@ set(ENGINE_HEADERS
     Plugin/PluginUpdateScheduler.h
     Plugin/PluginUsageTracker.h
     Plugin/PluginVersionResolver.h
+    # Sprint 271-280 (v20.7.0 "Quasar-X") — Observability v2
+    Core/DiagnosticsConsole.h
+    Core/LatencyBudgetManager.h
+    Core/TelemetryConsentManager.h
+    Core/NetworkAwarePrefetcher.h
+    Utils/CrashReporter.h
+    Utils/UsageStats.h
+    Utils/FeatureFlagManager.h
+    Utils/AutoUpdateManager.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
