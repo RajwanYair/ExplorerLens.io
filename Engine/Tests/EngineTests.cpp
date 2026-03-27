@@ -1198,6 +1198,15 @@
 #include "../Core/CodecPlatformV2.h"
 #include "../Core/NetworkTrustManager.h"
 #include "../Utils/AccessibilityAudit.h"
+// Sprint 341-350 (v22.2.0 "Sirius-S") — Security & Audit v3
+#include "../Utils/LicenseManager.h"
+#include "../Utils/LocalizationValidator.h"
+#include "../Utils/StoreReadinessChecker.h"
+#include "../Utils/CertificatePinner.h"
+#include "../Utils/ColorBlindFilter.h"
+#include "../Utils/FirstRunExperience.h"
+#include "../AI/NSFWContentGuard.h"
+#include "../AI/BlurDetectionFilter.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26597,6 +26606,28 @@ TEST(TestModuleSecurityFlags_DefaultConstruct) {
     ASSERT(!flags.shadowStackEnabled);
 }
 
+// ---- Sprint 341-350 (v22.2.0 "Sirius-S") — Security & Audit v3 ----
+TEST(TestLicenseInfo_DefaultTier) {
+    LicenseInfo info;
+    ASSERT(info.tier == LicenseTier::Community);
+    ASSERT(!info.valid);
+}
+TEST(TestLocaleDirection_LTRIsZero) {
+    ASSERT(static_cast<uint8_t>(LocaleDirection::LTR) == 0);
+}
+TEST(TestStoreCheckSeverity_InfoIsZero) {
+    ASSERT(static_cast<uint8_t>(StoreCheckSeverity::Info) == 0);
+}
+TEST(TestPinValidationResult_OkIsZero) {
+    ASSERT(static_cast<uint8_t>(PinValidationResult::OK) == 0);
+}
+TEST(TestColorBlindType_NoneIsZero) {
+    ASSERT(static_cast<uint8_t>(ColorBlindType::None) == 0);
+}
+TEST(TestNSFWGuardMode_DisabledIsZero) {
+    ASSERT(static_cast<uint8_t>(NSFWGuardMode::Disabled) == 0);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30797,6 +30828,16 @@ int main() {
     RUN_TEST(TestCodecCapability_NoneIsZero);
     RUN_TEST(TestA11ySeverity_InfoIsZero);
     RUN_TEST(TestModuleSecurityFlags_DefaultConstruct);
+    std::wcout << std::endl;
+
+    // Sprint 341-350 — Security & Audit v3 Tests
+    std::wcout << L"Security & Audit v3 Tests (Sprint 341-350):" << std::endl;
+    RUN_TEST(TestLicenseInfo_DefaultTier);
+    RUN_TEST(TestLocaleDirection_LTRIsZero);
+    RUN_TEST(TestStoreCheckSeverity_InfoIsZero);
+    RUN_TEST(TestPinValidationResult_OkIsZero);
+    RUN_TEST(TestColorBlindType_NoneIsZero);
+    RUN_TEST(TestNSFWGuardMode_DisabledIsZero);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests

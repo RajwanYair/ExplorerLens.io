@@ -1420,6 +1420,15 @@ set(ENGINE_HEADERS
     Core/CodecPlatformV2.h
     Core/NetworkTrustManager.h
     Utils/AccessibilityAudit.h
+    # Sprint 341-350 (v22.2.0 "Sirius-S") — Security & Audit v3
+    Utils/LicenseManager.h
+    Utils/LocalizationValidator.h
+    Utils/StoreReadinessChecker.h
+    Utils/CertificatePinner.h
+    Utils/ColorBlindFilter.h
+    Utils/FirstRunExperience.h
+    AI/NSFWContentGuard.h
+    AI/BlurDetectionFilter.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
