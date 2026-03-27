@@ -1438,6 +1438,96 @@ set(ENGINE_HEADERS
     AI/FrameInterpolator.h
     AI/NeuralThumbnailSynthesizer.h
     AI/SemanticColorPalette.h
+    # Sprint 361-370 — Advanced Scheduling & Concurrency v2 (v22.4.0 Sirius-U)
+    Core/LockFreeMPMCQueue.h
+    Core/WorkStealingSchedulerV2.h
+    Core/CPUAffinityRouter.h
+    Core/RealtimePriorityEngine.h
+    Memory/HazardPointerReclaimer.h
+    Pipeline/AdaptiveConcurrencyLimiter.h
+    Core/CooperativeTaskScheduler.h
+    Core/ThreadLocalContextPool.h
+    # Sprint 371-380 — Format Expansion IV (v22.5.0 Sirius-V)
+    Decoders/FLIFDecoder.h
+    Decoders/QOIRDecoder.h
+    Decoders/JNGDecoder.h
+    Decoders/JBIG2Decoder.h
+    Decoders/TIFFMultiFrameDecoderV2.h
+    Decoders/ILBMDecoder.h
+    Decoders/SunRasterDecoder.h
+    Decoders/JPEGXTDecoder.h
+    # Sprint 381-390 — Windows Shell Integration v2 (v22.6.0 Sirius-W)
+    Core/NamespaceWalkEngine.h
+    Core/ExplorerColumnProviderV2.h
+    Core/ShellContextMenuV2.h
+    Core/SearchIndexBridge.h
+    Core/ShellPropertyBagV2.h
+    Core/ThumbnailOverlayRenderer.h
+    Core/DragDropPreviewEngine.h
+    Core/ShellDataObjectExtractor.h
+    # Sprint 391-400 — DevOps & Quality Engineering v2 (v22.7.0 Sirius-X)
+    Utils/MutationTestingEngine.h
+    Utils/PropertyBaseTestEngine.h
+    Utils/ReproducibleBuildVerifierV2.h
+    Utils/RegressionFingerprintEngine.h
+    Utils/CycloneDXSBOMGenerator.h
+    Utils/BuildTimingAnalytics.h
+    Utils/ArtifactIntegrityMonitor.h
+    Utils/CIEnvironmentValidator.h
+    # Sprint 401-410 — Reactive Pipeline Architecture (v23.0.0 Vega)
+    Pipeline/ThumbnailEventStore.h
+    Pipeline/CQRSThumbnailPipeline.h
+    Pipeline/BackpressureScheduler.h
+    Pipeline/ReactiveStreamEngine.h
+    Pipeline/ThumbnailSagaOrchestrator.h
+    Pipeline/SnapshotStoreEngine.h
+    Pipeline/DomainEventBus.h
+    Pipeline/ReactiveAPIGateway.h
+    # Sprint 411-420 — GPU Acceleration v3 (v23.1.0 Vega-R)
+    GPU/CUDATextureDecoder.h
+    GPU/HIPComputeBackend.h
+    GPU/MultiGPULoadBalancerV3.h
+    GPU/GPUTextureAtlasBuilder.h
+    GPU/GPUResourceAliasingManager.h
+    GPU/AsyncDMACopyEngine.h
+    GPU/GPUMemoryDefragmenterV2.h
+    GPU/GPUThumbnailAtlasManager.h
+    # Sprint 421-430 — Plugin Ecosystem v3 (v23.2.0 Vega-S)
+    Plugin/PluginDIContainer.h
+    Plugin/PluginABTestFramework.h
+    Plugin/PluginFeatureFlagEngine.h
+    Plugin/PluginSLAMonitor.h
+    Plugin/PluginCanaryController.h
+    Plugin/PluginTelemetryAggregatorV3.h
+    Plugin/PluginComplianceAuditorV2.h
+    Plugin/PluginHotConfigReceiver.h
+    # Sprint 431-440 — Memory Optimization v3 (v23.3.0 Vega-T)
+    Memory/PageFileArenaAllocator.h
+    Memory/HugeTLBPagePool.h
+    Memory/MemoryMappedBTree.h
+    Memory/NVMeMemoryTier.h
+    Memory/ECCErrorDetector.h
+    Memory/PressureForecaster.h
+    Memory/JemallocSlabAllocator.h
+    Memory/SharedMemoryRegionManager.h
+    # Sprint 441-450 — Smart Cache v4 (v23.4.0 Vega-U)
+    Cache/AIEvictionPolicyEngine.h
+    Cache/FederatedCacheInvalidator.h
+    Cache/ContentAwareCacheKey.h
+    Cache/DeltaSyncReplicator.h
+    Cache/ZeroCopyCacheReader.h
+    Cache/CacheEncryptionLayer.h
+    Cache/ShardedCachePartitionV2.h
+    Cache/ConsistentHashRing.h
+    # Sprint 451-460 — CLI & Automation v2 (v23.5.0 Vega-V)
+    CLI/LensBatchProcessorV2.h
+    CLI/LensWatchDaemon.h
+    CLI/LensPerceptualDiff.h
+    CLI/LensFormatExporter.h
+    CLI/LensProfileCapture.h
+    CLI/LensCacheCLI.h
+    CLI/LensPluginCLI.h
+    CLI/CICDWebhookReceiver.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
