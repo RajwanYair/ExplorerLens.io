@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [22.4.0] — Sirius-U (2026-03-27)
+
+### Added — Sprints 361-370: Advanced Scheduling & Concurrency v2
+- Engine/Core/LockFreeMPMCQueue.h: Wait-free MPMC bounded ring buffer with double-width CAS
+- Engine/Core/WorkStealingSchedulerV2.h: Work-stealing scheduler v2 with NUMA pinning and steal threshold
+- Engine/Core/CPUAffinityRouter.h: CPU core affinity router with P/E-core and NUMA local policies
+- Engine/Core/RealtimePriorityEngine.h: Realtime-priority decode engine for latency-critical paths
+- Engine/Memory/HazardPointerReclaimer.h: Lock-free hazard pointer memory reclamation
+- Engine/Pipeline/AdaptiveConcurrencyLimiter.h: AIMD adaptive concurrency window limiter
+- Engine/Core/CooperativeTaskScheduler.h: Cooperative yield-based micro-task scheduler
+- Engine/Core/ThreadLocalContextPool.h: Per-thread decode context pool with zero cross-thread contention
+
+
 ## [22.3.0] Sirius-T — AI Inference Pipeline v2
 
 ### Added
