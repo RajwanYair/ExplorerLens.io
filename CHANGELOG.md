@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [20.7.0] Quasar-X — Observability v2
+
+### Added
+- Core/DiagnosticsConsole.h: in-process diagnostic console for support
+- Core/LatencyBudgetManager.h: per-format latency SLO tracker
+- Core/TelemetryConsentManager.h: GDPR telemetry consent and gating layer
+- Core/NetworkAwarePrefetcher.h: network-cost-aware prefetch scheduler
+- Utils/CrashReporter.h: Windows Error Reporting + minidump crash reporter
+- Utils/UsageStats.h: anonymous feature usage analytics collector
+- Utils/FeatureFlagManager.h: runtime feature flag system via registry and cloud
+- Utils/AutoUpdateManager.h: auto-update checker via Microsoft Store/WinGet
+- 8 new unit tests covering Observability v2 subsystem
+
+
 ## [20.6.0] Quasar-W — Plugin Marketplace v2
 
 ### Added
