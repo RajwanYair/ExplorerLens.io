@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [23.0.0] — Vega (2026-03-27)
+
+### Added — Sprints 401-410: Reactive Pipeline Architecture
+- Engine/Pipeline/ThumbnailEventStore.h: Append-only event log with replay and audit support
+- Engine/Pipeline/CQRSThumbnailPipeline.h: CQRS command/query pipeline separation
+- Engine/Pipeline/BackpressureScheduler.h: AIMD backpressure scheduler with drop policies
+- Engine/Pipeline/ReactiveStreamEngine.h: Rx-inspired composable observable streams
+- Engine/Pipeline/ThumbnailSagaOrchestrator.h: Saga pattern orchestrator for multi-step decode workflows
+- Engine/Pipeline/SnapshotStoreEngine.h: Snapshot/restore store for pipeline state recovery
+- Engine/Pipeline/DomainEventBus.h: Domain event publish/subscribe bus
+- Engine/Pipeline/ReactiveAPIGateway.h: Named-pipe and COM reactive API gateway with flow control
+
+
 ## [22.7.0] — Sirius-X (2026-03-27)
 
 ### Added — Sprints 391-400: DevOps & Quality Engineering v2
