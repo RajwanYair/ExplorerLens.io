@@ -1429,6 +1429,15 @@ set(ENGINE_HEADERS
     Utils/FirstRunExperience.h
     AI/NSFWContentGuard.h
     AI/BlurDetectionFilter.h
+    # Sprint 351-360 (v22.3.0 "Sirius-T") — AI Inference Pipeline v2
+    AI/AIModelRegistry.h
+    AI/AIPerformanceProfiler.h
+    AI/AIThumbnailPipeline.h
+    AI/AIUpscaler.h
+    AI/ContentCategoryClassifier.h
+    AI/FrameInterpolator.h
+    AI/NeuralThumbnailSynthesizer.h
+    AI/SemanticColorPalette.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h

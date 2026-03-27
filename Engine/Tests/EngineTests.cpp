@@ -1207,6 +1207,15 @@
 #include "../Utils/FirstRunExperience.h"
 #include "../AI/NSFWContentGuard.h"
 #include "../AI/BlurDetectionFilter.h"
+// Sprint 351-360 (v22.3.0 "Sirius-T") — AI Inference Pipeline v2
+#include "../AI/AIModelRegistry.h"
+#include "../AI/AIPerformanceProfiler.h"
+#include "../AI/AIThumbnailPipeline.h"
+#include "../AI/AIUpscaler.h"
+#include "../AI/ContentCategoryClassifier.h"
+#include "../AI/FrameInterpolator.h"
+#include "../AI/NeuralThumbnailSynthesizer.h"
+#include "../AI/SemanticColorPalette.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26628,6 +26637,27 @@ TEST(TestNSFWGuardMode_DisabledIsZero) {
     ASSERT(static_cast<uint8_t>(NSFWGuardMode::Disabled) == 0);
 }
 
+// ---- Sprint 351-360 (v22.3.0 "Sirius-T") — AI Inference Pipeline v2 ----
+TEST(TestAIModelRole_ContentClassifierIsZero) {
+    ASSERT(static_cast<uint8_t>(AIModelRole::ContentClassifier) == 0);
+}
+TEST(TestUpscaleBackend_AutoIsZero) {
+    ASSERT(static_cast<uint8_t>(UpscaleBackend::Auto) == 0);
+}
+TEST(TestContentCategory_UnknownIsZero) {
+    ASSERT(static_cast<uint8_t>(ContentCategory::Unknown) == 0);
+}
+TEST(TestInterpolationMode_FastIsZero) {
+    ASSERT(static_cast<uint8_t>(InterpolationMode::Fast) == 0);
+}
+TEST(TestSynthesisStatus_SuccessIsZero) {
+    ASSERT(static_cast<int>(SynthesisStatus::Success) == 0);
+}
+TEST(TestSemanticColorPalette_DecodeEmpty) {
+    auto pal = SemanticColorPalette::Decode("");
+    ASSERT(pal.empty());
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30838,6 +30868,16 @@ int main() {
     RUN_TEST(TestPinValidationResult_OkIsZero);
     RUN_TEST(TestColorBlindType_NoneIsZero);
     RUN_TEST(TestNSFWGuardMode_DisabledIsZero);
+    std::wcout << std::endl;
+
+    // Sprint 351-360 — AI Inference Pipeline v2 Tests
+    std::wcout << L"AI Inference Pipeline v2 Tests (Sprint 351-360):" << std::endl;
+    RUN_TEST(TestAIModelRole_ContentClassifierIsZero);
+    RUN_TEST(TestUpscaleBackend_AutoIsZero);
+    RUN_TEST(TestContentCategory_UnknownIsZero);
+    RUN_TEST(TestInterpolationMode_FastIsZero);
+    RUN_TEST(TestSynthesisStatus_SuccessIsZero);
+    RUN_TEST(TestSemanticColorPalette_DecodeEmpty);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests
