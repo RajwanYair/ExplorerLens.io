@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [21.3.0] Rigel-T — Storage & Caching v3
+
+### Added
+- Core/ThumbnailPrefetcher.h: proactive thumbnail prefetch engine
+- Core/ThumbnailPriorityQueue.h: priority-sorted decode request queue
+- Core/PredictivePrefetcher.h: ML-based scroll-direction thumbnail prefetch
+- Core/ThumbnailDensitySelector.h: DPI-aware thumbnail density selector
+- Cache/HiDPIThumbnailCache.h: HiDPI-aware thumbnail cache with DPI buckets
+- Utils/MemoryMappedLoader.h: file-backed memory-mapped I/O for large archives
+- Utils/ActivationService.h: license activation service
+- Utils/FeatureCompatMatrix.h: platform feature compatibility matrix
+- 5 new unit tests covering Storage & Caching v3 subsystem
+
+
 ## [21.2.0] Rigel-S — Enterprise Policy v2
 
 ### Added

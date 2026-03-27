@@ -2,7 +2,7 @@
      Upload to: GitHub → Settings → Social preview → Upload an image
      Convert to PNG first: open in browser, right-click → Save image as (use Edge/Chrome)
      Or: inkscape -export-type=png -export-width=1280 social-preview.svg
-     Last updated: v21.2.0 "Rigel-S" — 2026-03-27
+     Last updated: v21.3.0 "Rigel-T" — 2026-03-27
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
 <defs>
@@ -291,7 +291,7 @@
       fill="#14101f" stroke="#8957e5" stroke-width="1.5"/>
 <text x="922" y="511"
       font-family="'Segoe UI', Arial, sans-serif"
-      font-size="15" fill="#c9d1d9">v21.2.0  "Rigel-S"</text>
+      font-size="15" fill="#c9d1d9">v21.3.0  "Rigel-T"</text>
 
 <!-- GitHub URL (right-aligned) -->
 <text x="1248" y="511"
