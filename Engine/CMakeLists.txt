@@ -1411,6 +1411,15 @@ set(ENGINE_HEADERS
     Core/KeyboardNavigationHandler.h
     Core/MonitorConfigWatcher.h
     Core/MultiMonitorContext.h
+    # Sprint 331-340 (v22.1.0 "Sirius-R") — Performance Profiling v2
+    Core/ResponsiveLayoutManager.h
+    Core/SecureDecodeContext.h
+    Core/SecureStringPool.h
+    Core/StackGuardPolicy.h
+    Core/InputValidator.h
+    Core/CodecPlatformV2.h
+    Core/NetworkTrustManager.h
+    Utils/AccessibilityAudit.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h

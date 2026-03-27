@@ -1189,6 +1189,15 @@
 #include "../Core/KeyboardNavigationHandler.h"
 #include "../Core/MonitorConfigWatcher.h"
 #include "../Core/MultiMonitorContext.h"
+// Sprint 331-340 (v22.1.0 "Sirius-R") — Performance Profiling v2
+#include "../Core/ResponsiveLayoutManager.h"
+#include "../Core/SecureDecodeContext.h"
+#include "../Core/SecureStringPool.h"
+#include "../Core/StackGuardPolicy.h"
+#include "../Core/InputValidator.h"
+#include "../Core/CodecPlatformV2.h"
+#include "../Core/NetworkTrustManager.h"
+#include "../Utils/AccessibilityAudit.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26563,6 +26572,31 @@ TEST(TestMonitorEventData_DefaultState) {
     ASSERT(data.newDPI == 0);
 }
 
+// ---- Sprint 331-340 (v22.1.0 "Sirius-R") — Performance Profiling v2 ----
+TEST(TestLayoutMetrics_DefaultValues) {
+    Core::LayoutMetrics m;
+    ASSERT(m.dpi == 96);
+    ASSERT(m.breakpoint == Core::LayoutBreakpoint::Normal);
+}
+TEST(TestSandboxPolicy_DefaultLevel) {
+    SandboxPolicy policy;
+    ASSERT(policy.level == SandboxLevel::None);
+}
+TEST(TestValidationError_OkIsZero) {
+    ASSERT(static_cast<int>(ValidationError::Ok) == 0);
+}
+TEST(TestCodecCapability_NoneIsZero) {
+    ASSERT(static_cast<uint32_t>(CodecCapability::None) == 0);
+}
+TEST(TestA11ySeverity_InfoIsZero) {
+    ASSERT(static_cast<uint8_t>(A11ySeverity::Info) == 0);
+}
+TEST(TestModuleSecurityFlags_DefaultConstruct) {
+    ModuleSecurityFlags flags;
+    ASSERT(!flags.cfgEnabled);
+    ASSERT(!flags.shadowStackEnabled);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30753,6 +30787,16 @@ int main() {
     RUN_TEST(TestFeedbackItem_DefaultCategory);
     RUN_TEST(TestMonitorInfo_DefaultDPI);
     RUN_TEST(TestMonitorEventData_DefaultState);
+    std::wcout << std::endl;
+
+    // Sprint 331-340 — Performance Profiling v2 Tests
+    std::wcout << L"Performance Profiling v2 Tests (Sprint 331-340):" << std::endl;
+    RUN_TEST(TestLayoutMetrics_DefaultValues);
+    RUN_TEST(TestSandboxPolicy_DefaultLevel);
+    RUN_TEST(TestValidationError_OkIsZero);
+    RUN_TEST(TestCodecCapability_NoneIsZero);
+    RUN_TEST(TestA11ySeverity_InfoIsZero);
+    RUN_TEST(TestModuleSecurityFlags_DefaultConstruct);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests
