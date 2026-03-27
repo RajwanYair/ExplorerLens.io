@@ -71,7 +71,7 @@ $dateStr = Get-Date -Format "yyyy-MM-dd"
 $svg = $svg -replace 'Last updated: v[\d.]+ "[^"]+" — \d{4}-\d{2}-\d{2}', "Last updated: v$Version `"$Codename`" — $dateStr"
 $svg = $svg -replace 'font-size="15" fill="#c9d1d9">v[\d.]+ +"[^"]+"</text>', "font-size=`"15`" fill=`"#c9d1d9`">v$Version  `"$Codename`"</text>"
 if ($TestCount -gt 0) {
-    $svg = $svg -replace 'font-size="15" fill="#3fb950" font-weight="600">.[^\s]+ \d+ Tests</text>', "font-size=`"15`" fill=`"#3fb950`" font-weight=`"600`">&#x2713;  $TestCount Tests</text>"
+    $svg = $svg -replace 'font-size="15" fill="#3fb950" font-weight="600">[^<]+ Tests</text>', "font-size=`"15`" fill=`"#3fb950`" font-weight=`"600`">&#x2713;  $TestCount Tests</text>"
 }
 Set-Content $svgPath -Value $svg -NoNewline
 Write-Host "[bump] social-preview.svg updated"
