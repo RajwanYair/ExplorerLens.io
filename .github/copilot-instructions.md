@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 22.4.0 (Codename: Sirius-U)
+- **Version:** 22.5.0 (Codename: Sirius-V)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -262,7 +262,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Development Guidance (v15.2+)
 
-- **Current version:** v22.4.0 "Sirius-U"
+- **Current version:** v22.5.0 "Sirius-V"
 - **Source of truth:** `CHANGELOG.md`
 - **Sprint plan:** `docs/SPRINT_PLAN_100.md` — 100 sprints through v17.0.0 "Nova"
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas

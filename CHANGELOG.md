@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [22.5.0] — Sirius-V (2026-03-27)
+
+### Added — Sprints 371-380: Format Expansion IV
+- Engine/Decoders/FLIFDecoder.h: FLIF lossless format with animation support
+- Engine/Decoders/QOIRDecoder.h: QOIR ultra-fast RGBA decode with reversible spatial scaling
+- Engine/Decoders/JNGDecoder.h: JNG (JPEG Network Graphics) with alpha channel support
+- Engine/Decoders/JBIG2Decoder.h: JBIG2 bilevel compression (PDF/fax standard)
+- Engine/Decoders/TIFFMultiFrameDecoderV2.h: TIFF multi-frame v2 with BigTIFF and page navigation
+- Engine/Decoders/ILBMDecoder.h: IFF/ILBM Amiga bitmap format with HAM and EHB modes
+- Engine/Decoders/SunRasterDecoder.h: Sun Raster image format (SunOS legacy)
+- Engine/Decoders/JPEGXTDecoder.h: JPEG XT HDR residual layer extension
+
+
 ## [22.4.0] — Sirius-U (2026-03-27)
 
 ### Added — Sprints 361-370: Advanced Scheduling & Concurrency v2
