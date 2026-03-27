@@ -1171,6 +1171,15 @@
 #include "../Core/PrivilegeElevationGuard.h"
 #include "../Core/SandboxEscapeGuard.h"
 #include "../Core/CodeIntegrityChecker.h"
+// Sprint 311-320 (v21.3.0 "Rigel-T") — Storage & Caching v3
+#include "../Core/ThumbnailPrefetcher.h"
+#include "../Core/ThumbnailPriorityQueue.h"
+#include "../Core/PredictivePrefetcher.h"
+#include "../Core/ThumbnailDensitySelector.h"
+#include "../Cache/HiDPIThumbnailCache.h"
+#include "../Utils/MemoryMappedLoader.h"
+#include "../Utils/ActivationService.h"
+#include "../Utils/FeatureCompatMatrix.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -26480,6 +26489,42 @@ TEST(TestSandboxEscapeGuard_DefaultConstruct) {
     ASSERT(true);
 }
 
+// ---- Sprint 311-320 (v21.3.0 "Rigel-T") — Storage & Caching v3 ----
+
+TEST(TestThumbnailPriorityQueue_DefaultConstruct) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailPriorityQueue queue;
+    (void)queue;
+    ASSERT(true);
+}
+
+TEST(TestThumbnailDensitySelector_BuildCacheKey) {
+    using namespace ExplorerLens::Engine;
+    std::string key = ThumbnailDensitySelector::BuildCacheKey("C:/test/file.png", 256, DPIBucket::DPI_96);
+    ASSERT(!key.empty());
+}
+
+TEST(TestFeatureCompatMatrix_InstanceAccessible) {
+    using namespace ExplorerLens::Engine;
+    auto& mat = FeatureCompatMatrix::Instance();
+    (void)mat;
+    ASSERT(true);
+}
+
+TEST(TestHiDPIThumbnailCache_DefaultConstruct) {
+    using namespace ExplorerLens::Engine;
+    HiDPIThumbnailCache cache;
+    (void)cache;
+    ASSERT(true);
+}
+
+TEST(TestThumbnailDensitySelector_BuildCacheKey_Different) {
+    using namespace ExplorerLens::Engine;
+    std::string key1 = ThumbnailDensitySelector::BuildCacheKey("C:/test/file.png", 256, DPIBucket::DPI_96);
+    std::string key2 = ThumbnailDensitySelector::BuildCacheKey("C:/test/file.jpg", 256, DPIBucket::DPI_96);
+    ASSERT(key1 != key2);
+}
+
 int main() {
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
@@ -30651,6 +30696,15 @@ int main() {
     RUN_TEST(TestFIPSComplianceMode_InstanceAccessible);
     RUN_TEST(TestPrivilegeElevationGuard_DefaultConstruct);
     RUN_TEST(TestSandboxEscapeGuard_DefaultConstruct);
+    std::wcout << std::endl;
+
+    // Sprint 311-320 — Storage & Caching v3 Tests
+    std::wcout << L"Storage & Caching v3 Tests (Sprint 311-320):" << std::endl;
+    RUN_TEST(TestThumbnailPriorityQueue_DefaultConstruct);
+    RUN_TEST(TestThumbnailDensitySelector_BuildCacheKey);
+    RUN_TEST(TestFeatureCompatMatrix_InstanceAccessible);
+    RUN_TEST(TestHiDPIThumbnailCache_DefaultConstruct);
+    RUN_TEST(TestThumbnailDensitySelector_BuildCacheKey_Different);
     std::wcout << std::endl;
 
     // Isolation & Stability Tests

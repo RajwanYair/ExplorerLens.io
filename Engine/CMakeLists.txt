@@ -1393,6 +1393,15 @@ set(ENGINE_HEADERS
     Core/PrivilegeElevationGuard.h
     Core/SandboxEscapeGuard.h
     Core/CodeIntegrityChecker.h
+    # Sprint 311-320 (v21.3.0 "Rigel-T") — Storage & Caching v3
+    Core/ThumbnailPrefetcher.h
+    Core/ThumbnailPriorityQueue.h
+    Core/PredictivePrefetcher.h
+    Core/ThumbnailDensitySelector.h
+    Cache/HiDPIThumbnailCache.h
+    Utils/MemoryMappedLoader.h
+    Utils/ActivationService.h
+    Utils/FeatureCompatMatrix.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
