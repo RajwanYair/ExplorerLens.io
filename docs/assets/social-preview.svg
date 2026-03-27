@@ -277,7 +277,7 @@
       fill="#0c1e10" stroke="#2ea043" stroke-width="1.5"/>
 <text x="610" y="511"
       font-family="'Segoe UI', Arial, sans-serif"
-      font-size="15" fill="#3fb950" font-weight="600">✓  3011 Tests</text>
+      font-size="15" fill="#3fb950" font-weight="600">✓  2965 Tests</text>
 
 <!-- Zero warnings -->
 <rect x="746" y="487" width="144" height="36" rx="7"
