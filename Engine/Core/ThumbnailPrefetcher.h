@@ -24,7 +24,7 @@ struct PrefetchEntry {
     uint32_t     requestedSize; // thumbnail pixel width
 };
 
-struct PrefetchConfig {
+struct ThumbnailPrefetchConfig {
     uint32_t windowSize{8};          // number of adjacent files to prefetch
     uint32_t maxQueueDepth{32};      // max entries in prefetch queue
     uint32_t workerThreads{2};       // background decode threads
@@ -36,7 +36,7 @@ using PrefetchDecodeCallback = std::function<bool(const std::wstring& path, uint
 
 class ThumbnailPrefetcher {
 public:
-    explicit ThumbnailPrefetcher(PrefetchConfig cfg = {}) : m_cfg(cfg) {}
+    explicit ThumbnailPrefetcher(ThumbnailPrefetchConfig cfg = {}) : m_cfg(cfg) {}
 
     ~ThumbnailPrefetcher() { Stop(); }
 
@@ -131,7 +131,7 @@ private:
         }
     }
 
-    PrefetchConfig              m_cfg;
+    ThumbnailPrefetchConfig              m_cfg;
     PrefetchDecodeCallback      m_callback;
 
     mutable std::mutex          m_mutex;

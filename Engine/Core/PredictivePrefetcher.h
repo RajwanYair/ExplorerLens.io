@@ -18,7 +18,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class ScrollDirection { Unknown, Forward, Backward, Random };
+enum class PredictorScrollDirection { Unknown, Forward, Backward, Random };
 
 struct PrefetchCandidate {
     std::wstring filePath;
@@ -28,7 +28,7 @@ struct PrefetchCandidate {
 
 struct ViewportState {
     std::vector<std::wstring> visibleFiles;  // Files currently in view, top to bottom
-    ScrollDirection           direction = ScrollDirection::Unknown;
+    PredictorScrollDirection           direction = PredictorScrollDirection::Unknown;
     int                       viewportSize  = 10; // Visible row count estimate
 };
 
@@ -78,11 +78,11 @@ public:
         m_prevFirstIdx = firstIdx;
 
         // Update scroll direction
-        ScrollDirection dir = vs.direction;
-        if (dir == ScrollDirection::Unknown) {
-            if      (delta > 0) dir = ScrollDirection::Forward;
-            else if (delta < 0) dir = ScrollDirection::Backward;
-            else                dir = ScrollDirection::Random;
+        PredictorScrollDirection dir = vs.direction;
+        if (dir == PredictorScrollDirection::Unknown) {
+            if      (delta > 0) dir = PredictorScrollDirection::Forward;
+            else if (delta < 0) dir = PredictorScrollDirection::Backward;
+            else                dir = PredictorScrollDirection::Random;
         }
         m_velocity.Update(delta);
 
@@ -96,8 +96,8 @@ public:
         // Build candidates
         std::vector<PrefetchCandidate> candidates;
         int base    = firstIdx + static_cast<int>(vs.visibleFiles.size()); // past viewport
-        int step    = (dir == ScrollDirection::Backward) ? -1 : 1;
-        if (dir == ScrollDirection::Backward) base = firstIdx - 1;
+        int step    = (dir == PredictorScrollDirection::Backward) ? -1 : 1;
+        if (dir == PredictorScrollDirection::Backward) base = firstIdx - 1;
 
         for (int i = 0; i < lookahead; ++i) {
             int idx = base + step * i;
