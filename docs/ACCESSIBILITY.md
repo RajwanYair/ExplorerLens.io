@@ -1,6 +1,6 @@
 # ExplorerLens Accessibility Guide
 
-> Version 23.6.0 "Vega-W" | Standard: WCAG 2.2 Level AA
+> Version 24.1.0 "Altair-R" | Standard: WCAG 2.2 Level AA
 
 ---
 

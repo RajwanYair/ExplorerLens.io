@@ -1,6 +1,6 @@
 # ExplorerLens Enterprise Fleet Management
 
-> Version 23.6.0 "Vega-W" · [CHANGELOG](../CHANGELOG.md) · [Back to Docs Index](INDEX.md)
+> Version 24.1.0 "Altair-R" · [CHANGELOG](../CHANGELOG.md) · [Back to Docs Index](INDEX.md)
 
 ## Overview
 
@@ -305,7 +305,7 @@ Centrally push settings changes to all fleet machines without GPO:
 Deploy via the MSI package with transform:
 
 ```powershell
-msiexec /i ExplorerLens-23.6.0-x64.msi `
+msiexec /i ExplorerLens-24.1.0-x64.msi `
     FLEET_TIER=2 `
     MAX_CACHE_MB=256 `
     ALLOW_TELEMETRY=0 `

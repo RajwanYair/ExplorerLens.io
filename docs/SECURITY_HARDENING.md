@@ -1,6 +1,6 @@
 # ExplorerLens Security Hardening Guide
 
-**Version:** 23.6.0 "Vega-W"  
+**Version:** 24.1.0 "Altair-R"  
 **Classification:** Public  
 **Updated:** 2026-03-28
 

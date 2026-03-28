@@ -1,6 +1,6 @@
 # ExplorerLens Deployment Guide
 
-> Version 23.6.0 "Vega-W" · Enterprise Edition  
+> Version 24.1.0 "Altair-R" · Enterprise Edition  
 > [ENTERPRISE.md](ENTERPRISE.md) · [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ## Table of Contents
@@ -45,24 +45,24 @@
 
 ```powershell
 # Interactive install
-.\ExplorerLens-23.6.0-x64.msi
+.\ExplorerLens-24.1.0-x64.msi
 
 # Silent install (see §3 for full property list)
-msiexec /i ExplorerLens-23.6.0-x64.msi /quiet /log "%TEMP%\lens-install.log"
+msiexec /i ExplorerLens-24.1.0-x64.msi /quiet /log "%TEMP%\lens-install.log"
 ```
 
 ### Option 2 — WinGet (Consumer / Developer)
 
 ```powershell
-winget install ExplorerLens.ExplorerLens --version 23.6.0
+winget install ExplorerLens.ExplorerLens --version 24.1.0
 ```
 
 ### Option 3 — Portable ZIP
 
-Extract `ExplorerLens-23.6.0-x64.zip` and run `Install-ExplorerLens.ps1 -Register`:
+Extract `ExplorerLens-24.1.0-x64.zip` and run `Install-ExplorerLens.ps1 -Register`:
 
 ```powershell
-Expand-Archive ExplorerLens-23.6.0-x64.zip -DestinationPath "C:\Tools\ExplorerLens"
+Expand-Archive ExplorerLens-24.1.0-x64.zip -DestinationPath "C:\Tools\ExplorerLens"
 Set-Location C:\Tools\ExplorerLens
 .\Install-ExplorerLens.ps1 -Register
 ```
@@ -72,7 +72,7 @@ Set-Location C:\Tools\ExplorerLens
 Sideload via `Add-AppxPackage` or distribute via Microsoft Store for Business:
 
 ```powershell
-Add-AppxPackage .\ExplorerLens-23.6.0-x64.msix
+Add-AppxPackage .\ExplorerLens-24.1.0-x64.msix
 ```
 
 ---
@@ -80,7 +80,7 @@ Add-AppxPackage .\ExplorerLens-23.6.0-x64.msix
 ## Silent / Unattended Install
 
 ```powershell
-msiexec /i ExplorerLens-23.6.0-x64.msi `
+msiexec /i ExplorerLens-24.1.0-x64.msi `
     FLEET_TIER=2 `
     MAX_CACHE_MB=512 `
     ALLOW_TELEMETRY=1 `
@@ -178,10 +178,10 @@ Data type: Integer | Value: 1
 
 ### Win32 App Deployment (MSI)
 
-1. Wrap in IntuneWinAppUtil: `IntuneWinAppUtil.exe -c . -s ExplorerLens-23.6.0-x64.msi -o .`
+1. Wrap in IntuneWinAppUtil: `IntuneWinAppUtil.exe -c . -s ExplorerLens-24.1.0-x64.msi -o .`
 2. Upload `.intunewin` to Intune → Apps → Windows → Add
-3. Install command: `msiexec /i ExplorerLens-23.6.0-x64.msi /quiet FLEET_TIER=2`
-4. Detection rule: Registry key `HKLM\SOFTWARE\ExplorerLens` value `Version` = `23.6.0`
+3. Install command: `msiexec /i ExplorerLens-24.1.0-x64.msi /quiet FLEET_TIER=2`
+4. Detection rule: Registry key `HKLM\SOFTWARE\ExplorerLens` value `Version` = `24.1.0`
 
 ---
 
@@ -189,14 +189,14 @@ Data type: Integer | Value: 1
 
 ```powershell
 # Create Application
-New-CMApplication -Name "ExplorerLens 23.6.0" -Publisher "ExplorerLens Project" -SoftwareVersion "23.6.0"
+New-CMApplication -Name "ExplorerLens 24.1.0" -Publisher "ExplorerLens Project" -SoftwareVersion "24.1.0"
 
 # Add MSI Deployment Type
 Add-CMMsiDeploymentType `
-    -ApplicationName "ExplorerLens 23.6.0" `
-    -ContentLocation "\\\\sccm-share\\ExplorerLens\\23.6.0\\" `
+    -ApplicationName "ExplorerLens 24.1.0" `
+    -ContentLocation "\\\\sccm-share\\ExplorerLens\\24.1.0\\" `
     -DeploymentTypeName "ExplorerLens-MSI" `
-    -InstallCommand 'msiexec /i ExplorerLens-23.6.0-x64.msi /quiet FLEET_TIER=2' `
+    -InstallCommand 'msiexec /i ExplorerLens-24.1.0-x64.msi /quiet FLEET_TIER=2' `
     -UninstallCommand 'msiexec /x {LENS-PRODUCT-GUID} /quiet'
 ```
 
@@ -302,7 +302,7 @@ making them safe to forward even in classified or regulated environments.
 
 ```powershell
 # Silent uninstall via MSI
-msiexec /x ExplorerLens-23.6.0-x64.msi /quiet
+msiexec /x ExplorerLens-24.1.0-x64.msi /quiet
 
 # Remove registry settings (optional — leaves user cache)
 Remove-Item "HKLM:\SOFTWARE\ExplorerLens" -Recurse -Force -ErrorAction SilentlyContinue
@@ -339,4 +339,4 @@ $w.WriteLine("status"); $w.Flush(); $r.ReadLine()
 
 ---
 
-*ExplorerLens Deployment Guide · v23.6.0 "Vega-W" · Copyright (c) 2026 ExplorerLens Project*
+*ExplorerLens Deployment Guide · v24.1.0 "Altair-R" · Copyright (c) 2026 ExplorerLens Project*

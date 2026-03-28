@@ -2,7 +2,7 @@
 # This file documents the release notes format for ExplorerLens releases.
 # Used by the automated release workflow and manual release notes.
 # Copy this template when drafting release notes for a new version.
-# Current version: v23.7.0 "Vega-X" | Last updated: 2026-03-28
+# Current version: v24.1.0 "Altair-R" | Last updated: 2026-03-28
 
 ## ExplorerLens v{VERSION} "{CODENAME}" — {DATE}
 
@@ -12,7 +12,7 @@
 
 ExplorerLens v{VERSION} delivers [KEY_FEATURE_1], [KEY_FEATURE_2], and [KEY_FEATURE_3].
 GPU-accelerated thumbnail generation continues to support **200+ file formats** across
-25 specialized decoders with sub-17ms per-thumbnail performance and 3,125+ unit tests.
+25 specialized decoders with sub-17ms per-thumbnail performance and 3,269+ unit tests.
 
 ---
 

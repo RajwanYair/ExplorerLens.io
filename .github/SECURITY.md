@@ -2,14 +2,18 @@
 
 ## Supported Versions
 
-We provide security updates for the following versions:
+We provide security patches and updates for the following release lines:
 
 | Version | Supported |
-| ------- | ------------------ |
-| 15.0.x | :white_check_mark: Current |
-| 14.x.x | :white_check_mark: |
-| 13.x.x | :white_check_mark: Security fixes only |
-| < 13.0 | :x: |
+| ------- | --------- |
+| 24.1.x  | :white_check_mark: **Current** |
+| 24.0.x  | :white_check_mark: Security fixes |
+| 23.7.x  | :white_check_mark: Security fixes only |
+| 23.6.x  | :x: End of Life |
+| < 23.6  | :x: End of Life |
+
+> We strongly recommend running the latest release (v24.1.0 "Altair-R").
+> Patch releases are issued within 7 days for critical/high CVEs.
 
 ## Reporting a Vulnerability
 
@@ -17,47 +21,54 @@ We provide security updates for the following versions:
 
 ### How to Report
 
-1. **Email:** Send details to the project maintainers (check repository for contact info)
-2. **Include:**
- - Description of the vulnerability
- - Steps to reproduce
- - Potential impact
- - Suggested fix (if available)
+1. **GitHub Private Advisory:** Use [GitHub Security Advisories](https://github.com/RajwanYair/ExplorerLens.io/security/advisories/new) (preferred)
+2. **Email:** Contact the maintainer directly via profile contact information
+3. **Include:**
+   - Description of the vulnerability
+   - Steps to reproduce
+   - Affected version(s)
+   - Potential impact assessment
+   - Suggested fix (if available)
 
 ### What to Expect
 
-- **Initial Response:** Within 48 hours
-- **Status Updates:** Every 7 days until resolved
-- **Resolution Timeline:**
- - Critical vulnerabilities: 7 days
- - High severity: 30 days
- - Medium/Low severity: 90 days
+| Severity | Initial Response | Resolution Target |
+|----------|-----------------|-------------------|
+| Critical (CVSSv3 9.0+) | 24 hours | 7 days |
+| High (7.0–8.9) | 48 hours | 30 days |
+| Medium (4.0–6.9) | 5 days | 90 days |
+| Low (< 4.0) | 14 days | Next minor release |
 
 ### Responsible Disclosure
 
 - We will work with you to understand and resolve the issue
 - We will credit you in the security advisory (unless you prefer anonymity)
-- We request 90 days before public disclosure to allow time for fixes
+- We request a coordinated disclosure window (max 90 days) before public disclosure
+- Critical fixes are released as patch releases outside the normal sprint cycle
 
 ## Security Features
 
-### Plugin Security (v6.0+)
+For a detailed description of security architecture, see
+[docs/SECURITY_HARDENING.md](../docs/SECURITY_HARDENING.md).
 
-- **AppContainer Sandbox:** All plugins run in restricted containers
-- **Code Signing:** Only signed plugins can be loaded
-- **Trust Verification:** Publisher certificates validated
+### Plugin Security (v24.0+)
+
+- **AppContainer Sandbox:** All plugins run in restricted low-IL containers
+- **Code Signing:** Only Authenticode-signed plugins are loaded
+- **Trust Chain Verification:** Publisher certificates validated against trust store
 - **Process Isolation:** Plugins cannot access host process memory
-- **Capability Limits:** Restricted filesystem and no network access
+- **Capability Limits:** No network, restricted filesystem (read-only whitelisted paths)
+- **ZeroTrustPolicyEngine:** Per-plugin capability negotiation at load time
 
 ### Shell Extension Security
 
-- **Memory Safety:** RAII patterns prevent leaks
-- **Exception Handling:** Comprehensive error handling prevents crashes
-- **Input Validation:** All file paths and data validated
-- **Resource Limits:** CPU and memory quotas enforced
-- **Buffer Overflow Protection:** Stack canaries and ASLR enabled via `/GS /DYNAMICBASE`
-- **DEP/NX:** Data Execution Prevention enabled via `/NXCOMPAT`
-- **Control Flow Guard:** `/guard:cf` enabled in Release builds
+- **Memory Safety:** RAII + smart pointers throughout; no raw `new`/`delete` in decoders
+- **Input Validation:** All file paths validated; no shell-string construction from user input
+- **Compile-Time Hardening:** `/GS /DYNAMICBASE /NXCOMPAT /SAFESEH /guard:cf`
+- **Resource Limits:** Per-thumbnail CPU and memory quotas enforced by engine
+- **Buffer Overflow Protection:** Stack canaries, ASLR, and Control Flow Guard enabled
+- **DEP/NX:** Data Execution Prevention enforced on all binaries
+
 
 ### Archive Handling Security (v7.0+)
 

@@ -1,6 +1,6 @@
 # ExplorerLens Performance Tuning Guide
 
-> Version 23.6.0 "Vega-W" | v2 Performance Architecture
+> Version 24.1.0 "Altair-R" | v2 Performance Architecture
 
 **Targets:** 14ms single thumbnail (↓18%), 270 img/sec batch (↑15%), <3ms cache hit  
 **New:** ThumbnailPriorityQueue, PredictivePrefetcher, VulkanComputeDecoder, ZeroCopyTextureUploader, SIMDImageProcessor (AVX2), PersistentDiskCache (SQLite WAL), BatchDecodeScheduler (work-stealing), DirectStorageLoader
@@ -798,4 +798,4 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 15000
 ---
 
 **Last Updated:** March 28, 2026 
-**Version:** 23.6.0
+**Version:** 24.1.0

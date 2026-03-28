@@ -619,4 +619,4 @@ $testFile = "C:\Photos\sample.webp"
 ---
 
 **Last Updated:** March 28, 2026 
-**Version:** 23.6.0
+**Version:** 24.1.0
