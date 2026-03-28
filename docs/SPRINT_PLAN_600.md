@@ -256,12 +256,12 @@ Each Rigel/Canopus release must pass:
 | Item | Target Version | Action |
 |------|----------------|--------|
 | Stale `ROADMAP_V16.md` | v25.0.0 | Archive to `docs/archive/` |
-| `IPC::ThumbnailRequest` → `IPC::IPCThumbnailRequest` cascade | v25.0.0 | Complete fix14 type renames |
-| `EngineTests.cpp` type-rename cascade fixes | v25.0.0 | Complete fix14/fix15 scripts |
+| ~~`IPC::ThumbnailRequest` → `IPC::IPCThumbnailRequest` cascade~~ | ~~v25.0.0~~ | ✅ **Done in v24.1.0 cleanup** — fix13–fix16 scripts removed, type renames complete |
+| ~~`EngineTests.cpp` type-rename cascade fixes~~ | ~~v25.0.0~~ | ✅ **Done in v24.1.0 cleanup** — fix scripts deleted |
 | PERFORMANCE.md version references (v20.2.0) | v25.0.0 | Update to current version |
 | ENTERPRISE.md version references (v19.1.0) | v25.0.0 | Update to current version |
 | `FEATURE_FREEZE_16.md`, `MIGRATION_GUIDE_V16.md` | v25.0.0 | Archive to `docs/archive/` |
-| Duplicate `Find-MSBuild.ps1` in `build-scripts/` | v25.0.0 | Remove; delegate to `Build-Library-Core.ps1` |
+| ~~Duplicate `Find-MSBuild.ps1` in `build-scripts/`~~ | ~~v25.0.0~~ | ✅ **Done in v24.1.0 cleanup** — removed; all callers updated to `Find-MSBuildPath` |
 
 ---
 

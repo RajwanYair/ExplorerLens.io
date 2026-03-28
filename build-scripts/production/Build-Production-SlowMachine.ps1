@@ -40,6 +40,10 @@ param(
 $ErrorActionPreference = "Stop"
 $startTime = Get-Date
 
+# Import Build-Library-Core for shared utilities (Find-MSBuildPath, etc.)
+$coreScript = Join-Path $PSScriptRoot "..\core\Build-Library-Core.ps1"
+if (Test-Path $coreScript) { . $coreScript }
+
 # Setup logging
 if (-not (Test-Path "build-logs")) {
     New-Item -Path "build-logs" -ItemType Directory -Force | Out-Null
@@ -229,9 +233,8 @@ Write-Log ""
 Write-Log "Building LENSShell solution..." "Cyan"
 Write-Progress-File -Status "Building" -Current "LENSShell" -Step ($totalSteps - 1) -Total $totalSteps
 
-$msbuildScript = ".\build-scripts\Find-MSBuild.ps1"
-if (Test-Path $msbuildScript) {
-    $msbuild = & $msbuildScript
+$msbuild = Find-MSBuildPath
+if ($true) {
     if ($msbuild -and (Test-Path $msbuild)) {
         Write-Log "MSBuild: $msbuild" "Gray"
         
@@ -251,8 +254,6 @@ if (Test-Path $msbuildScript) {
     } else {
         Write-Log "❌ MSBuild not found" "Red"
     }
-} else {
-    Write-Log "❌ Find-MSBuild.ps1 not found" "Red"
 }
 
 # Final summary

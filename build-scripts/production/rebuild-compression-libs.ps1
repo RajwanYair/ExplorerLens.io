@@ -9,33 +9,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent $PSScriptRoot
-$compressionDir = Join-Path $rootDir "external\compression"
+$compressionDir = Join-Path $rootDir "external\compression-libs"
 $scriptsDir = Join-Path $rootDir "build-scripts"
 
-# Find MSBuild
-function Find-MSBuild {
-    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-    
-    if (Test-Path $vswhere) {
-        $vsPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
-        if ($vsPath) {
-            $msbuild = Join-Path $vsPath "MSBuild\Current\Bin\amd64\MSBuild.exe"
-            if (Test-Path $msbuild) {
-                return $msbuild
-            }
-        }
-    }
-    
-    # Fallback to PATH
-    $msbuild = Get-Command msbuild.exe -ErrorAction SilentlyContinue
-    if ($msbuild) {
-        return $msbuild.Source
-    }
-    
-    throw "MSBuild not found. Please install Visual Studio 2022 or later."
-}
+# Import Build-Library-Core for shared utilities (Find-MSBuildPath, etc.)
+$coreScript = Join-Path $PSScriptRoot "..\core\Build-Library-Core.ps1"
+if (Test-Path $coreScript) { . $coreScript } else { throw "Build-Library-Core.ps1 not found at: $coreScript" }
 
-$msbuild = Find-MSBuild
+$msbuild = Find-MSBuildPath
+if (-not $msbuild) { throw "MSBuild not found. Please install Visual Studio 2022/2026 Build Tools." }
 Write-Host "Using MSBuild: $msbuild`n" -ForegroundColor Cyan
 
 # Configure build flags (NO /GL to avoid LTCG issues)

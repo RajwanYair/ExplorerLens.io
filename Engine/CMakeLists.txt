@@ -214,13 +214,9 @@ set(ENGINE_HEADERS
     Core/GPUPipelineV3.h
     Core/HDRDisplayPipeline.h
     Core/HighDPIScaling.h
-    Core/ICacheProvider.h
-    Core/IFormatDetector.h
-    Core/IGPURenderer.h
-    Core/IThumbnailDecoder.h
     Core/JumpListIntegration.h
 
-    # Core interfaces (canonical location)
+    # Core interfaces (canonical location; forwarding stubs exist at Core/I*.h for decoder includes)
     Core/Interfaces/ICacheProvider.h
     Core/Interfaces/IFormatDetector.h
     Core/Interfaces/IGPURenderer.h

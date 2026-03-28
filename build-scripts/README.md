@@ -30,8 +30,6 @@ build-scripts/
 │
 ├── Build-All-And-Package.ps1 # 🆕 Complete build orchestrator (recommended)
 ├── Setup-Vcpkg.ps1 # 🆕 vcpkg package manager setup
-├── DEPRECATED.md # 🆕 List of deprecated scripts
-├── Find-MSBuild.ps1 # ⚠️ Deprecated - use Build-Library-Core
 ├── Test-Build-Environment.ps1 # Environment verification
 └── README.md # This file
 ```
@@ -158,7 +156,6 @@ See [build-scripts/core/](./core/) for full documentation.
 - 🆕 **Setup-Vcpkg.ps1** - Automated vcpkg setup and package installation
 - **scripts/build.ps1** - Main build orchestrator for ExplorerLens solution
 - **build-LENSShell-quick.ps1** - Quick incremental build
-- ⚠️ **Find-MSBuild.ps1** - DEPRECATED - Use `Find-MSBuildPath` from Build-Library-Core
 - **Test-Build-Environment.ps1** - Verify build prerequisites
 
 ### External Library Builders (`external-libs/`)
@@ -254,8 +251,8 @@ The build system respects these environment variables:
 
 **"MSBuild not found"**
 ```powershell
-.\Find-MSBuild.ps1 # Locate installation
-# Install Visual Studio 18 2026 if missing
+# MSBuild is auto-discovered via Find-MSBuildPath in Build-Library-Core.ps1
+# Install Visual Studio 18 2026 Build Tools if missing
 ```
 
 **"NASM not found"**
