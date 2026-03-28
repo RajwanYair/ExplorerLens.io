@@ -16,16 +16,16 @@ next-generation Windows shell integration.
 
 | Version  | Codename     | Sprints | Theme                                      | TestCount |
 |----------|--------------|---------|--------------------------------------------|-----------|
-| v25.0.0  | Rigel        | 561–570 | WebAssembly Plugin Sandbox (MAJOR)         | 3197      |
-| v25.1.0  | Rigel-R      | 571–580 | Neural Format Intelligence                 | 3205      |
-| v25.2.0  | Rigel-S      | 581–590 | NPU & Heterogeneous Compute                | 3213      |
-| v25.3.0  | Rigel-T      | 591–600 | Source Control & VCS Integration           | 3221      |
-| v25.4.0  | Rigel-U      | 601–610 | Self-Healing & Adaptive Recovery           | 3229      |
-| v25.5.0  | Rigel-V      | 611–620 | Multi-Instance & Virtual Desktop           | 3237      |
-| v25.6.0  | Rigel-W      | 621–630 | Collaborative Annotations & Sharing        | 3245      |
-| v25.7.0  | Rigel-X      | 631–640 | Protocol Surface & API Ecosystem           | 3253      |
-| v26.0.0  | Canopus      | 641–650 | Post-Quantum Security & Crypto (MAJOR)     | 3261      |
-| v26.1.0  | Canopus-R    | 651–660 | Windows Next-Gen Shell Integration         | 3269      |
+| v25.0.0  | Rigel        | 561–570 | WebAssembly Plugin Sandbox (MAJOR)         | 3269      |
+| v25.1.0  | Rigel-R      | 571–580 | Neural Format Intelligence                 | 3277      |
+| v25.2.0  | Rigel-S      | 581–590 | NPU & Heterogeneous Compute                | 3285      |
+| v25.3.0  | Rigel-T      | 591–600 | Source Control & VCS Integration           | 3293      |
+| v25.4.0  | Rigel-U      | 601–610 | Self-Healing & Adaptive Recovery           | 3301      |
+| v25.5.0  | Rigel-V      | 611–620 | Multi-Instance & Virtual Desktop           | 3309      |
+| v25.6.0  | Rigel-W      | 621–630 | Collaborative Annotations & Sharing        | 3317      |
+| v25.7.0  | Rigel-X      | 631–640 | Protocol Surface & API Ecosystem           | 3325      |
+| v26.0.0  | Canopus      | 641–650 | Post-Quantum Security & Crypto (MAJOR)     | 3333      |
+| v26.1.0  | Canopus-R    | 651–660 | Windows Next-Gen Shell Integration         | 3341      |
 
 ---
 

@@ -1,7 +1,7 @@
 # ExplorerLens — Engineering Learnings Log
 
 **Last Updated:** 2026-03-28
-**Covers:** v23.0.0 "Vega" through v24.0.0 "Altair" (last 10 iterations, Sprints 401–490)
+**Covers:** v23.0.0 "Vega" through v24.1.0 "Altair-R" (last 11 iterations, Sprints 401–500)
 
 This document captures accumulated engineering insights, patterns that worked, pitfalls encountered,
 and decisions made across the last 10 release cycles. Every future sprint team should read this
@@ -21,6 +21,10 @@ before starting work.
 8. [CI/CD & Release Pipeline](#8-cicd--release-pipeline)
 9. [External Library Management](#9-external-library-management)
 10. [AI/ML Header Design Patterns](#10-aiml-header-design-patterns)
+11. [GitHub CI/CD Pipeline Debugging](#11-github-cicd-pipeline-debugging)
+12. [Git Identity & Repository Hygiene](#12-git-identity--repository-hygiene)
+13. [Documentation Consolidation Patterns](#13-documentation-consolidation-patterns)
+14. [Common Pitfalls Quick Reference](#14-common-pitfalls-quick-reference)
 
 ---
 
@@ -395,7 +399,7 @@ After each release, update `docs/ROADMAP_V25.md`:
 - JPEG 2000 tiled decoding v2 must skip sub-resolution levels below the target thumbnail size
   to avoid decoding 8K JPX files fully just to produce a 256×256 thumbnail.
 
-### v24.0.0 "Altair" — AI-Native Thumbnailing v2 (Sprints 481–490) ← current
+### v24.0.0 "Altair" — AI-Native Thumbnailing v2 (Sprints 481–490)
 
 **Theme:** ESRGAN upscaler, content-aware resize, semantic hash, auto-tagging,
 quality restoration, monocular depth, style transfer, face/landmark detection.
@@ -426,6 +430,49 @@ quality restoration, monocular depth, style transfer, face/landmark detection.
 6. **LoadTaxonomy() returns bool:** Callers must check the return value. Auto-tagging Tag()
    now checks `m_taxonomyLoaded` and returns an error result if taxonomy was never loaded —
    this prevents silent empty-tag results that could look like a success.
+
+---
+
+### v24.1.0 "Altair-R" — Cross-Process Architecture (Sprints 491–500) ← current
+
+**Theme:** COM surrogate isolation, shared-memory cache bridges, process pools,
+named-pipe IPC, cross-process event buses, distributed state, remote render delegation.
+
+**Key learnings:**
+
+1. **Cross-process COM isolation design:** `OutOfProcThumbnailServer` must expose a
+   SwitchMode (InProcess/CrossProcess/Hybrid) so callers can opt into isolation per deployemnt
+   context. Never hard-wire the server to one mode — enterprise and home deployments differ.
+
+2. **Named pipe hub broadcasting:** Multi-client broadcast (hub/spoke) requires
+   per-client write buffers because a slow client must not block fast ones. Always
+   dequeue with a finite `SendTimeout`; remove timed-out clients from the active set.
+
+3. **Shared-memory zero-copy bridge:** `CrossProcessCacheProxy` must keep a named-pipe
+   fallback for clients that cannot map the shared section (elevated vs. low-IL process).
+   Always verify `MapViewOfFile` succeeds before treating the cache as shared.
+
+4. **Process pool autoscale:** `ProcessPoolManager` idle-kill timer must not fire
+   while a client has a pending request. Gate `TerminateIfIdle()` on
+   `m_activeRequests == 0`. Premature kill causes mid-decode crashes on slow files.
+
+5. **Isolation policy per format:** Archive decoders (ZIP/RAR/7z) are the highest-risk.
+   Default them to `IsolationLevel::High`.  Safe raster (PNG/JPEG/BMP) can run at
+   `IsolationLevel::Low` (in-process) with no measurable security regression.
+
+6. **Optimistic-lock distributed state:** `SharedStateCoordinator` versioned-entry
+   pattern (write-if-version-matches) works well for low-write workloads. Under
+   high contention (>4 concurrent writers), version collisions cause unnecessary retries.
+   Document the contention contract: expected < 4 concurrent writers.
+
+7. **Remote render proxy transport selection:** `RemoteRenderProxy` `TransportMode`
+   (SharedMemory/NamedPipe/Socket) should be auto-selected based on whether the render
+   server is on the same machine. Socket transport is never appropriate for localhost usage
+   (latency 10-100× named pipe). Assert same-machine = SharedMemory, cross-machine = Socket.
+
+8. **Event bus delivery guarantee:** `CrossProcEventBus` must document whether delivery
+   is at-most-once, at-least-once, or exactly-once per subscriber. We chose at-most-once
+   to avoid acknowledgment complexity. Subscribers must be idempotent.
 
 ---
 
@@ -568,7 +615,181 @@ git grep -rn "intel.com" -- "*.h" "*.cpp" "*.ps1" "*.yml"
 
 ---
 
-## 11. Common Pitfalls Quick Reference
+## 11. GitHub CI/CD Pipeline Debugging
+
+### 11.1 — Root Cause of Recurring CI Failures: Path Mismatches Between Action Output and CMake Linker
+
+**Iteration learned:** v24.1.0 post-release CI work (2026-03-28)
+
+`build-external-libs/action.yml` wrote zstd to `build-manual/zstd_static.lib`.
+`Engine/CMakeLists.txt` searched `install/lib/zstd_static.lib` via `target_link_directories`.
+Every CI run with a cold cache → LNK1181 (linker: cannot open input file zstd_static.lib).
+
+**Rule:** The composite action's output path for every library **MUST** exactly match the
+`target_link_directories` path in `Engine/CMakeLists.txt`. Verify this triplet for every library:
+```
+action.yml $libs.{name} → 
+  CMakeLists.txt target_link_directories → 
+    CMakeLists.txt external lib diagnostic path in debug-actions.yml
+```
+All three must agree. Discrepancies are invisible locally (local builds use pre-built libs)
+but fatal in CI where the cache is cold.
+
+### 11.2 — External Library Cache Key Must Cover Source Script Changes
+
+Cache key: `external-libs-${{ hashFiles('build-scripts/external-libs/**') }}`
+
+This is correct because build *scripts* changing means the built output may differ.
+Do NOT hash `external/` content — the tracked source trees are stable; only build scripts change.
+
+### 11.3 — Composite Action Must Handle zstd Differently (No CMake Source)
+
+zstd's `build/cmake/` directory is gitignored. CI cannot use CMake for zstd.
+The fix: compile all `.c` files from `lib/common/`, `lib/compress/`, `lib/decompress/`,
+`lib/dictBuilder/` directly with `cl.exe /c /MD` then `lib.exe /OUT:`. Skip `legacy/` and
+`deprecated/` sub-dirs — they are not referenced by the engine.
+
+### 11.4 — Dependabot Without Grouping Creates Issue Noise
+
+Without `groups: github-actions-all` in `dependabot.yml`, each GitHub Action version bump
+creates a separate PR. CI runs on each PR → `notify-failure.yml` creates a new issue per
+failure (even expected failures on dependency-update branches) → issue tracker fills with noise.
+
+**Fix:** Group all `github-actions` ecosystem packages in one weekly PR:
+```yaml
+groups:
+  github-actions-all:
+    patterns: ["*"]
+```
+
+### 11.5 — notify-failure.yml Must Skip Dependabot-Triggered Runs
+
+Add this `if` guard to the `notify` job:
+```yaml
+if: |
+  github.event.workflow_run.conclusion == 'failure' &&
+  github.event.workflow_run.actor.login != 'dependabot[bot]'
+```
+Without this, every Dependabot PR that fails CI opens a new GitHub issue.
+
+### 11.6 — Auto-Close Failure Issues on Workflow Pass
+
+Add a `close_on_success` job that runs on `conclusion == 'success'`, queries open issues
+with `ci/cd,bug` labels matching `workflow + branch`, and closes them. This keeps the
+issue tracker clean without manual intervention.
+
+### 11.7 — Ninja Not Always on PATH After ilammy/msvc-dev-cmd
+
+On some GitHub runners, `ninja` is not on `PATH` after `ilammy/msvc-dev-cmd@v1`.
+Add a defensive check in every workflow that runs CMake:
+```yaml
+- name: Verify Ninja
+  shell: pwsh
+  run: |
+    if (-not (Get-Command ninja -ErrorAction SilentlyContinue)) {
+      choco install ninja --no-progress -y 2>$null
+    }
+    Write-Host "Ninja: $(ninja --version)"
+```
+
+### 11.8 — pre-release.yml Cache Paths Must Match Canonical Key
+
+Pre-release.yml had a stale per-lib cache path list:
+```yaml
+path: external/compression-libs/zlib/build-cmake/Release  # WRONG — old path
+```
+Always use the canonical form from `ci-matrix.yml`:
+```yaml
+path: external/
+key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
+```
+
+---
+
+## 12. Git Identity & Repository Hygiene
+
+### 12.1 — Local Git Config Email Can Differ From GitHub Account
+
+`git config user.email` is a local config entry. After cloning with VS Code or GitHub Desktop,
+the email may default to an old account name. This is visible in `git log` and `git blame`.
+
+**Check:**
+```powershell
+git config user.name
+git config user.email
+```
+**Fix (once per machine / clone):**
+```powershell
+git config user.name  "GitHubUsername"
+git config user.email "GitHubUsername@users.noreply.github.com"
+```
+GitHub no-reply format: `{userId}+{username}@users.noreply.github.com` (with user ID) or
+`{username}@users.noreply.github.com` (without — still maps correctly for public repos).
+
+### 12.2 — `.git/logs/` Entries Are Immutable
+
+Reflog entries in `.git/logs/refs/` cannot be rewritten without `git reflog expire`.
+They are NOT tracked files and do not appear in the repo to external viewers.
+Do not attempt to rewrite them — the GitHub-visible identity is set via `user.email` for
+future commits only.
+
+### 12.3 — Corporate Proxy References Must Be Scrubbed Before Push
+
+See section 8.4. Specifically check port 928 references in shell scripts —
+this is a well-known Intel internal proxy port that must never appear in public repos.
+
+---
+
+## 13. Documentation Consolidation Patterns
+
+### 13.1 — Version Headers in All docs/*.md Must Be Kept in Sync
+
+After a version bump, these docs commonly drift behind (missed during release process):
+- `docs/DEPLOYMENT_GUIDE.md` — contains MSI filename strings (e.g., `ExplorerLens-23.6.0-x64.msi`)
+- `docs/ENTERPRISE.md` — version header and MSBuild install command
+- All other docs with `> Version X.Y.Z "Codename"` header blocks
+
+**Pattern:** After every release, run:
+```powershell
+Select-String -Path docs\*.md -Pattern "<old_version>"
+```
+Any match outside of `LEARNINGS.md` (which records history) and `ROADMAP*.md` is a stale reference.
+
+### 13.2 — Security Policy Is a High-Visibility File
+
+`.github/SECURITY.md` is displayed prominently on GitHub's Security tab. It MUST show the
+correct current supported versions. The generic GitHub template (claiming v15.0.x is current)
+misleads users and security researchers.
+
+**Required fields:**
+- Supported version table with actual current + N-1 versions
+- GitHub Private Advisory link (preferred over email)
+- CVSSv3-aligned severity response timeline
+- Reference to the detailed `docs/SECURITY_HARDENING.md` for architecture details
+
+### 13.3 — 95%-Duplicate Files Cost More Than They Save
+
+`SDK/PLUGIN_DEVELOPER_GUIDE.md` duplicated `docs/PLUGIN_DEVELOPMENT.md` at 95% overlap.
+The SDK version was 1 minor version behind and created two different authoritative answers
+for the same question.
+
+**Rule:** If file B contains content that is >70% derived from file A:
+- Delete B or replace with a 20-line forwarding pointer
+- Ensure B's unique content (e.g., install path quick-reference) is preserved inline
+- Document the consolidation in a commit message
+
+### 13.4 — Sprint Plan Baseline Test Counts Must Be Updated With Each Version
+
+`SPRINT_PLAN_600.md` planned test counts starting from 3197 (v24.0.0 baseline).
+After v24.1.0 shipped with 3269 tests (+72), all planned counts were 72 short.
+
+**Rule:** When the version baseline shifts, update ALL projected test counts in active sprint
+plan files. Each sprint adds 72 tests (8 headers × 9 tests); the cumulative offset must
+match the actual shipped count.
+
+---
+
+## 14. Common Pitfalls Quick Reference
 
 Absorbed from `.github/development-learnings.md` (consolidated 2026-05).
 
