@@ -3,7 +3,7 @@
 **Status:** Planning  
 **Current Version:** v23.7.0 "Vega-X"  
 **Next Major Version:** v25.0.0 "Rigel"  
-**Previous Roadmap:** [ROADMAP_V16.md](ROADMAP_V16.md) *(archived — covers v15.x/v16.x work now completed)*  
+**Previous Roadmap:** [ROADMAP_V16.md](archive/ROADMAP_V16.md) *(archived — covers v15.x/v16.x work now completed)*  
 **Sprint Detail:** [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) — Sprints 561–660
 
 ---
@@ -332,7 +332,7 @@ and use AppContainer isolation for the COM server upgrade path.
       PluginReferencePackTests.cpp, PluginHostServer.cpp all must compile clean
 - [ ] **Zero build warnings** — MSVC v145 Release, MSVC Debug, CI Clang
 - [ ] **100% test pass rate** — all 3197 unit tests must pass
-- [ ] **Archive stale docs** — ROADMAP_V16.md, FEATURE_FREEZE_16.md, MIGRATION_GUIDE_V16.md
+- [x] **Archive stale docs** — ROADMAP_V16.md, FEATURE_FREEZE_16.md, MIGRATION_GUIDE_V16.md
       moved to `docs/archive/`
 - [ ] **Update stale doc versions** — PERFORMANCE.md (v20.2→v25.x), ENTERPRISE.md (v19.1→v25.x)
 

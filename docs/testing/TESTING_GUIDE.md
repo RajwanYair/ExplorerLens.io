@@ -1,8 +1,8 @@
-# Testing Guide — ExplorerLens v15.0.0
+# Testing Guide — ExplorerLens v23.7.0
 
-**Version:** 15.0.0 "Zenith" 
+**Version:** 23.7.0 "Vega-X" 
 **Framework:** Custom C++ test harness (`TEST()`, `RUN_TEST()`, `ASSERT()` macros) 
-**Test Count:** ~1,187 unit tests + 5 benchmarks 
+**Test Count:** ~3,125 unit tests + 5 benchmarks 
 **Pass Rate:** 100%
 
 ---

@@ -111,13 +111,14 @@ nav:
       - Sprint Plan 761-860: SPRINT_PLAN_800.md
       - Sprint Plan 661-760: SPRINT_PLAN_700.md
       - Sprint Plan 561-660: SPRINT_PLAN_600.md
-      - Sprint Plan 461-560: SPRINT_PLAN_500.md
-      - Sprint Plan 301-460: SPRINT_PLAN_400.md
-      - Sprint Plan 201-300: SPRINT_PLAN_300.md
-      - Sprint Plan 101-200: SPRINT_PLAN_200.md
-      - Sprint Plan 1-100: SPRINT_PLAN_100.md
-      - WinUI3 Migration: WINUI3_MIGRATION_PLAN.md
       - Release Process: RELEASE_PROCESS.md
+      - Archive:
+          - Sprint Plan 461-560: archive/SPRINT_PLAN_500.md
+          - Sprint Plan 301-460: archive/SPRINT_PLAN_400.md
+          - Sprint Plan 201-300: archive/SPRINT_PLAN_300.md
+          - Sprint Plan 101-200: archive/SPRINT_PLAN_200.md
+          - Sprint Plan 1-100: archive/SPRINT_PLAN_100.md
+          - WinUI3 Migration: archive/WINUI3_MIGRATION_PLAN.md
 
 plugins:
   - search

@@ -1,7 +1,7 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens 
-**Current Version:** v23.6.0 "Vega-W" | **Next Major:** v25.0.0 "Rigel" (planned) 
+**Current Version:** v23.7.0 "Vega-X" | **Next Major:** v24.0.0 "Altair" (planned) 
 **Last Updated:** March 28, 2026
 
 ---
@@ -14,7 +14,7 @@
 | [CHANGELOG.md](../CHANGELOG.md) | Release history and change log |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting guide + known issues & mitigations |
 | [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
-| [WINUI3_MIGRATION_PLAN.md](WINUI3_MIGRATION_PLAN.md) | WinUI 3 / XAML Islands migration plan |
+| [archive/WINUI3_MIGRATION_PLAN.md](archive/WINUI3_MIGRATION_PLAN.md) | 📦 *Archive* — WinUI 3 / XAML Islands migration plan |
 
 ## Roadmap and Planning
 
@@ -24,11 +24,11 @@
 | [SPRINT_PLAN_800.md](SPRINT_PLAN_800.md) | Sprints 761–860 — v27.4.0 "Sirius-U" through v28.5.0 "Polaris-V" |
 | [SPRINT_PLAN_700.md](SPRINT_PLAN_700.md) | Sprints 661–760 — v26.2.0 "Canopus-S" through v27.3.0 "Sirius-T" |
 | [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) | Sprints 561–660 — v25.0.0 "Rigel" through v26.1.0 "Canopus-R" |
-| [SPRINT_PLAN_500.md](SPRINT_PLAN_500.md) | Sprints 461–560 — v23.6.0 through v24.7.0 "Altair-X" |
-| [SPRINT_PLAN_400.md](SPRINT_PLAN_400.md) | Sprints 301–460 — v22.0.0 through v23.5.0 "Vega-V" |
-| [SPRINT_PLAN_300.md](SPRINT_PLAN_300.md) | Sprints 201–300 — v19.1.0 through v21.4.0 |
-| [SPRINT_PLAN_200.md](SPRINT_PLAN_200.md) | Sprints 101–200 — v17.1.0 through v19.0.0 |
-| [SPRINT_PLAN_100.md](SPRINT_PLAN_100.md) | Sprints 1–100 — v15.2.0 through v17.0.0 "Nova" |
+| [archive/SPRINT_PLAN_500.md](archive/SPRINT_PLAN_500.md) | 📦 *Archive* — Sprints 461–560 — v23.6.0 through v24.7.0 "Altair-X" |
+| [archive/SPRINT_PLAN_400.md](archive/SPRINT_PLAN_400.md) | 📦 *Archive* — Sprints 301–460 — v22.0.0 through v23.5.0 "Vega-V" |
+| [archive/SPRINT_PLAN_300.md](archive/SPRINT_PLAN_300.md) | 📦 *Archive* — Sprints 201–300 — v19.1.0 through v21.4.0 |
+| [archive/SPRINT_PLAN_200.md](archive/SPRINT_PLAN_200.md) | 📦 *Archive* — Sprints 101–200 — v17.1.0 through v19.0.0 |
+| [archive/SPRINT_PLAN_100.md](archive/SPRINT_PLAN_100.md) | 📦 *Archive* — Sprints 1–100 — v15.2.0 through v17.0.0 "Nova" |
 
 ## Development
 

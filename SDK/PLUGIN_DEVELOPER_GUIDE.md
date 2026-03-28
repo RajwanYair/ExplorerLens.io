@@ -1,6 +1,6 @@
 # ExplorerLens Plugin Developer Guide
 
-> **SDK Version:** 1.0.0 | **Engine Version:** 15.0.0 "Zenith"
+> **SDK Version:** 2.0.0 | **Engine Version:** 23.7.0 "Vega-X"
 
 ## Overview
 
