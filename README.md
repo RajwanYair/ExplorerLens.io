@@ -17,7 +17,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
 ![Windows 11](https://img.shields.io/badge/Windows-10%2F11-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Tests](https://img.shields.io/badge/Tests-3269%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-3413%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 
 | | |
@@ -28,7 +28,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 | **Cameras** | 100+ RAW formats — Canon (CR2/CR3), Nikon (NEF), Sony (ARW), Fujifilm, Adobe DNG, Olympus, Hasselblad … |
 | **Language** | C++20 · MSVC v145 · Visual Studio 18 2026 BuildTools |
 | **Build** | CMake 4.3 · Ninja · vcpkg / local external libs |
-| **Tests** | 3,269 unit tests · 5 benchmarks · 100% pass rate |
+| **Tests** | 3,413 unit tests · 5 benchmarks · 100% pass rate |
 | **Install** | `regsvr32 LENSShell.dll` — no reboot required |
 
 <!--
@@ -224,7 +224,7 @@ graph TD
     ENG --> MEM["🧠 <b>Memory/</b><br/>BitmapPool · Pressure Ctrl"]
     ENG --> PLUGIN["🔩 <b>Plugin/</b><br/>Plugin Ecosystem · Sandbox"]
     ENG --> AI["🤖 <b>AI/</b><br/>Smart Crop · IQA · Scene"]
-    ENG --> TESTS["✅ <b>Tests/</b><br/>3,269 Unit Tests · 5 Benchmarks"]
+    ENG --> TESTS["✅ <b>Tests/</b><br/>3,413 Unit Tests · 5 Benchmarks"]
 
     style ROOT fill:#1e3a5f,color:#fff,stroke:#4a9eff,stroke-width:2px
     style ENG  fill:#1b4332,color:#fff,stroke:#40916c,stroke-width:2px

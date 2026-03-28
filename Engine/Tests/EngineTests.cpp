@@ -27487,7 +27487,1159 @@ TEST(TestCLIDoctorAllChecks)
 #include "Integration/IntegrationTestRunner.h"
 #include "Integration/COMIntegrationTest.h"
 
+// Sprint 561-570 — WASM Plugin Sandbox (v25.1.0 backfill)
+#include "Plugin/WASMRuntimeAdapter.h"
+#include "Plugin/WASMMemorySafetyModel.h"
+#include "Plugin/WASMPluginLoader.h"
+#include "Plugin/WITBindingGenerator.h"
+#include "Plugin/WASMHostController.h"
+#include "Plugin/WASMCapabilityNegotiator.h"
+#include "Plugin/WASMHotSwapEngine.h"
+#include "Plugin/WASMDebuggerBridge.h"
+
+// Sprint 571-580 — Neural Format Intelligence (v25.1.0 "Rigel-R")
+#include "AI/NeuralFormatFingerprinter.h"
+#include "AI/UnknownFormatHandler.h"
+#include "AI/LLMMIMEInferenceEngine.h"
+#include "Core/SelfExpandingFormatRegistry.h"
+#include "AI/FormatTransferLearner.h"
+#include "Core/FormatDetectionReport.h"
+#include "Core/SyntheticDecoderGenerator.h"
+#include "AI/FormatEvolutionTracker.h"
+
 using namespace ExplorerLens::Engine::Tests;
+
+//==============================================================================
+// WASM Plugin Sandbox Tests (Sprint 561-570 / v25.1.0 "Rigel-R" backfill)
+//==============================================================================
+
+TEST(Test_WASMRuntimeAdapter_Create)
+{
+    WASMRuntimeAdapter adapter;
+    ASSERT(!adapter.IsRunning());
+    ASSERT(!adapter.GetEngineVersion().empty());
+}
+TEST(Test_WASMRuntimeAdapter_Config)
+{
+    WASMRuntimeConfig cfg;
+    cfg.runtime          = WASMRuntime::WasmEdge;
+    cfg.sandboxLevel     = WASMSandboxLevel::Strict;
+    cfg.memoryLimitBytes = 32ULL * 1024 * 1024;
+    cfg.cpuQuotaPercent  = 10;
+    cfg.timeoutMs        = 3000;
+    WASMRuntimeAdapter adapter(cfg);
+    ASSERT(adapter.GetRuntime()      == WASMRuntime::WasmEdge);
+    ASSERT(adapter.GetSandboxLevel() == WASMSandboxLevel::Strict);
+    ASSERT(adapter.GetMemoryLimit()  == 32ULL * 1024 * 1024);
+    ASSERT(adapter.GetCpuQuota()     == 10);
+    ASSERT(adapter.GetTimeoutMs()    == 3000);
+}
+TEST(Test_WASMRuntimeAdapter_Initialize)
+{
+    WASMRuntimeAdapter adapter;
+    ASSERT(adapter.Initialize());
+    ASSERT(adapter.IsRunning());
+    adapter.Reset();
+    ASSERT(!adapter.IsRunning());
+}
+TEST(Test_WASMRuntimeAdapter_LoadModule)
+{
+    WASMRuntimeAdapter adapter;
+    adapter.Initialize();
+    const uint8_t dummyWasm[] = { 0x00, 0x61, 0x73, 0x6D, 0x01, 0x00, 0x00, 0x00 };
+    ASSERT(adapter.LoadModule(dummyWasm, sizeof(dummyWasm)));
+    ASSERT(!adapter.LoadModule(nullptr, 0));
+}
+TEST(Test_WASMRuntimeAdapter_Flags)
+{
+    WASMRuntimeConfig cfg;
+    cfg.enableSIMD    = true;
+    cfg.enableThreads = false;
+    WASMRuntimeAdapter a(cfg);
+    ASSERT(a.SIMDEnabled());
+    ASSERT(!a.ThreadsEnabled());
+}
+TEST(Test_WASMRuntimeAdapter_Unload)
+{
+    WASMRuntimeAdapter adapter;
+    ASSERT(adapter.UnloadModule());
+}
+TEST(Test_WASMRuntimeAdapter_SetConfig)
+{
+    WASMRuntimeAdapter adapter;
+    WASMRuntimeConfig cfg;
+    cfg.timeoutMs = 9999;
+    adapter.SetConfig(cfg);
+    ASSERT(adapter.GetConfig().timeoutMs == 9999);
+}
+TEST(Test_WASMRuntimeAdapter_Sandbox)
+{
+    WASMRuntimeConfig cfg;
+    cfg.sandboxLevel = WASMSandboxLevel::Paranoid;
+    WASMRuntimeAdapter a(cfg);
+    ASSERT(a.GetSandboxLevel() == WASMSandboxLevel::Paranoid);
+}
+TEST(Test_WASMRuntimeAdapter_Runtimes)
+{
+    ASSERT(WASMRuntime::WasmEdge != WASMRuntime::WABT);
+    ASSERT(WASMRuntime::Wasmer   != WASMRuntime::Native);
+    ASSERT(WASMSandboxLevel::Loose != WASMSandboxLevel::Paranoid);
+}
+
+TEST(Test_WASMMemorySafetyModel_Create)
+{
+    WASMMemorySafetyModel model;
+    ASSERT(model.Validate());
+}
+TEST(Test_WASMMemorySafetyModel_Capabilities)
+{
+    WASMMemoryDescriptor desc;
+    desc.capabilities = WASMCapabilityMask::ReadFiles;
+    WASMMemorySafetyModel model(desc);
+    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::ReadFiles));
+    ASSERT(!model.IsCapabilityGranted(WASMCapabilityMask::Network));
+}
+TEST(Test_WASMMemorySafetyModel_Grant)
+{
+    WASMMemorySafetyModel model;
+    model.GrantCapability(WASMCapabilityMask::Network);
+    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::Network));
+    model.RevokeCapability(WASMCapabilityMask::Network);
+    ASSERT(!model.IsCapabilityGranted(WASMCapabilityMask::Network));
+}
+TEST(Test_WASMMemorySafetyModel_Policy)
+{
+    WASMMemorySafetyModel model;
+    model.SetPolicy(WASMMemoryPolicy::Strict);
+    ASSERT(model.GetPolicy() == WASMMemoryPolicy::Strict);
+}
+TEST(Test_WASMMemorySafetyModel_Size)
+{
+    WASMMemorySafetyModel model;
+    model.SetSizeBytes(8ULL * 1024 * 1024);
+    ASSERT(model.GetSizeBytes() == 8ULL * 1024 * 1024);
+}
+TEST(Test_WASMMemorySafetyModel_Guard)
+{
+    WASMMemoryDescriptor desc;
+    desc.guardSizeBytes = 65536;
+    WASMMemorySafetyModel model(desc);
+    ASSERT(model.GetGuardSize() == 65536);
+}
+TEST(Test_WASMMemorySafetyModel_Reset)
+{
+    WASMMemorySafetyModel model;
+    model.GrantCapability(WASMCapabilityMask::All);
+    model.Reset();
+    ASSERT(model.Validate());
+}
+TEST(Test_WASMMemorySafetyModel_OrOperator)
+{
+    auto combined = WASMCapabilityMask::ReadFiles | WASMCapabilityMask::WriteFiles;
+    WASMMemoryDescriptor desc;
+    desc.capabilities = combined;
+    WASMMemorySafetyModel model(desc);
+    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::ReadFiles));
+    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::WriteFiles));
+}
+TEST(Test_WASMMemorySafetyModel_AllCaps)
+{
+    WASMMemoryDescriptor desc;
+    desc.capabilities = WASMCapabilityMask::All;
+    WASMMemorySafetyModel model(desc);
+    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::Network));
+    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::ClockAccess));
+}
+
+TEST(Test_WASMPluginLoader_Create)
+{
+    WASMPluginLoader loader;
+    ASSERT(!loader.IsLoaded());
+    ASSERT(loader.GetStatus() == WASMLoadStatus::NotLoaded);
+}
+TEST(Test_WASMPluginLoader_LoadValid)
+{
+    WASMPluginLoader loader;
+    const uint8_t wasm[] = { 0x00, 0x61, 0x73, 0x6D };
+    auto r = loader.Load(wasm, sizeof(wasm));
+    ASSERT(r.IsOk());
+    ASSERT(loader.IsLoaded());
+    ASSERT(loader.GetModuleSize() == sizeof(wasm));
+}
+TEST(Test_WASMPluginLoader_LoadEmpty)
+{
+    WASMPluginLoader loader;
+    auto r = loader.Load(nullptr, 0);
+    ASSERT(!r.IsOk());
+    ASSERT(r.status == WASMLoadStatus::ValidationError);
+    ASSERT(!r.errorMessage.empty());
+}
+TEST(Test_WASMPluginLoader_Unload)
+{
+    WASMPluginLoader loader;
+    const uint8_t d[4] = { 1, 2, 3, 4 };
+    loader.Load(d, 4);
+    ASSERT(loader.IsLoaded());
+    loader.Unload();
+    ASSERT(!loader.IsLoaded());
+    ASSERT(loader.GetModuleSize() == 0);
+}
+TEST(Test_WASMPluginLoader_Manifest)
+{
+    WASMPluginLoader loader;
+    WASMPluginManifest mf;
+    mf.pluginId   = "test-plugin";
+    mf.version    = "1.0.0";
+    mf.maxMemoryPages = 128;
+    const uint8_t d[4] = { 0xAA };
+    auto r = loader.Load(d, 4, mf);
+    ASSERT(r.IsOk());
+}
+TEST(Test_WASMPluginLoader_Validation)
+{
+    WASMPluginLoader loader;
+    loader.SetValidation(true);
+    ASSERT(loader.StrictValidation());
+    loader.SetValidation(false);
+    ASSERT(!loader.StrictValidation());
+}
+TEST(Test_WASMPluginLoader_LoadTime)
+{
+    WASMPluginLoader loader;
+    const uint8_t d[8] = { 0x00, 0x61, 0x73, 0x6D, 1, 0, 0, 0 };
+    auto r = loader.Load(d, sizeof(d));
+    ASSERT(r.loadTimeMs >= 0);
+}
+TEST(Test_WASMPluginLoader_SizeReported)
+{
+    WASMPluginLoader loader;
+    const uint8_t d[16] = {};
+    auto r = loader.Load(d, 16);
+    ASSERT(r.moduleSizeBytes == 16);
+}
+TEST(Test_WASMPluginLoader_StatusEnum)
+{
+    ASSERT(WASMLoadStatus::NotLoaded    != WASMLoadStatus::Loaded);
+    ASSERT(WASMLoadStatus::LinkError    != WASMLoadStatus::ValidationError);
+}
+
+TEST(Test_WITBindingGenerator_Create)
+{
+    WITBindingGenerator gen;
+    ASSERT(gen.GetOutputFormat() == WITOutputFormat::CppHeader);
+    ASSERT(!gen.GetNamespace().empty());
+}
+TEST(Test_WITBindingGenerator_Generate)
+{
+    WITBindingGenerator gen;
+    WITInterface iface;
+    iface.name        = "thumbnail-provider";
+    iface.version     = "1.0.0";
+    iface.packageName = "explorerLens:engine";
+    iface.methods     = { "generate", "get-metadata" };
+    auto r = gen.Generate(iface);
+    ASSERT(r.success);
+    ASSERT(r.methodsGenerated == 2);
+    ASSERT(!r.generatedCode.empty());
+}
+TEST(Test_WITBindingGenerator_EmptyInterface)
+{
+    WITBindingGenerator gen;
+    WITInterface iface;
+    auto r = gen.Generate(iface);
+    ASSERT(!r.success);
+    ASSERT(!r.errorMessage.empty());
+}
+TEST(Test_WITBindingGenerator_Options)
+{
+    WITBindingOptions opts;
+    opts.outputFormat  = WITOutputFormat::RustFFI;
+    opts.generateAsync = true;
+    WITBindingGenerator gen(opts);
+    ASSERT(gen.GetOutputFormat() == WITOutputFormat::RustFFI);
+    ASSERT(gen.AsyncEnabled());
+}
+TEST(Test_WITBindingGenerator_Namespace)
+{
+    WITBindingOptions opts;
+    opts.targetNamespace = "MyProject::API";
+    WITBindingGenerator gen(opts);
+    ASSERT(gen.GetNamespace() == "MyProject::API");
+}
+TEST(Test_WITBindingGenerator_Reset)
+{
+    WITBindingGenerator gen;
+    gen.Reset();
+    ASSERT(gen.GetOutputFormat() == WITOutputFormat::CppHeader);
+}
+TEST(Test_WITBindingGenerator_Formats)
+{
+    ASSERT(WITOutputFormat::CppHeader != WITOutputFormat::RustFFI);
+    ASSERT(WITOutputFormat::CBindings != WITOutputFormat::TypeScript);
+}
+TEST(Test_WITBindingGenerator_MultiMethod)
+{
+    WITBindingGenerator gen;
+    WITInterface iface;
+    iface.name    = "test";
+    iface.methods = { "a", "b", "c", "d", "e" };
+    auto r = gen.Generate(iface);
+    ASSERT(r.success);
+    ASSERT(r.methodsGenerated == 5);
+}
+TEST(Test_WITBindingGenerator_SetOptions)
+{
+    WITBindingGenerator gen;
+    WITBindingOptions opts;
+    opts.generateAsync = true;
+    gen.SetOptions(opts);
+    ASSERT(gen.AsyncEnabled());
+}
+
+TEST(Test_WASMHostController_Create)
+{
+    WASMHostController ctrl;
+    ASSERT(ctrl.GetState() == WASMHostState::Idle);
+    ASSERT(!ctrl.IsRunning());
+}
+TEST(Test_WASMHostController_Launch)
+{
+    WASMHostController ctrl;
+    ASSERT(ctrl.Launch());
+    ASSERT(ctrl.IsRunning());
+}
+TEST(Test_WASMHostController_Terminate)
+{
+    WASMHostController ctrl;
+    ctrl.Launch();
+    ctrl.Terminate();
+    ASSERT(ctrl.GetState() == WASMHostState::Killed);
+}
+TEST(Test_WASMHostController_Suspend)
+{
+    WASMHostController ctrl;
+    ctrl.Launch();
+    ctrl.Suspend();
+    ASSERT(ctrl.GetState() == WASMHostState::Throttled);
+    ctrl.Resume();
+    ASSERT(ctrl.IsRunning());
+}
+TEST(Test_WASMHostController_ResourceLimits)
+{
+    WASMResourceLimits lim;
+    lim.maxMemoryBytes  = 128ULL * 1024 * 1024;
+    lim.cpuSharePercent = 30;
+    WASMHostController ctrl(WASMIsolation::SeparateProcess, lim);
+    ASSERT(ctrl.GetLimits().maxMemoryBytes  == 128ULL * 1024 * 1024);
+    ASSERT(ctrl.GetLimits().cpuSharePercent == 30);
+}
+TEST(Test_WASMHostController_WithinLimits)
+{
+    WASMHostController ctrl;
+    ASSERT(ctrl.IsWithinLimits(1024));
+    ASSERT(!ctrl.IsWithinLimits(1024ULL * 1024 * 1024));
+}
+TEST(Test_WASMHostController_Isolation)
+{
+    WASMHostController inProc(WASMIsolation::InProcess);
+    ASSERT(inProc.GetIsolation() == WASMIsolation::InProcess);
+    WASMHostController proc(WASMIsolation::SeparateProcess);
+    ASSERT(proc.GetIsolation()   == WASMIsolation::SeparateProcess);
+}
+TEST(Test_WASMHostController_Metrics)
+{
+    WASMHostController ctrl;
+    WASMHostMetrics m;
+    m.cpuUsagePercent = 15;
+    ctrl.UpdateMetrics(m);
+    ASSERT(ctrl.GetMetrics().cpuUsagePercent == 15);
+}
+TEST(Test_WASMHostController_Reset)
+{
+    WASMHostController ctrl;
+    ctrl.Launch();
+    ctrl.Reset();
+    ASSERT(ctrl.GetState() == WASMHostState::Idle);
+}
+
+TEST(Test_WASMCapabilityNegotiator_Create)
+{
+    WASMCapabilityNegotiator neg;
+    ASSERT(neg.AllowedCount() == 0);
+    ASSERT(neg.DeniedCount()  == 0);
+}
+TEST(Test_WASMCapabilityNegotiator_AllowDeny)
+{
+    WASMCapabilityNegotiator neg;
+    neg.AllowCapability("file_read");
+    neg.DenyCapability("network");
+    ASSERT(neg.AllowedCount() == 1);
+    ASSERT(neg.DeniedCount()  == 1);
+}
+TEST(Test_WASMCapabilityNegotiator_Negotiate)
+{
+    WASMCapabilityNegotiator neg;
+    neg.AllowCapability("file_read");
+    CapabilityRequest req;
+    req.capabilityName = "file_read";
+    req.isRequired     = true;
+    auto result = neg.Negotiate({ req });
+    ASSERT(result.allRequiredGranted);
+    ASSERT(result.GrantedCount() == 1);
+}
+TEST(Test_WASMCapabilityNegotiator_Denied)
+{
+    WASMCapabilityNegotiator neg;
+    CapabilityRequest req;
+    req.capabilityName = "network";
+    req.isRequired     = true;
+    auto result = neg.Negotiate({ req });
+    ASSERT(!result.allRequiredGranted);
+    ASSERT(result.GrantedCount() == 0);
+}
+TEST(Test_WASMCapabilityNegotiator_Optional)
+{
+    WASMCapabilityNegotiator neg;
+    CapabilityRequest req;
+    req.capabilityName = "optional_feature";
+    req.isRequired     = false;
+    auto result = neg.Negotiate({ req });
+    ASSERT(result.allRequiredGranted);
+}
+TEST(Test_WASMCapabilityNegotiator_MultiRequest)
+{
+    WASMCapabilityNegotiator neg;
+    neg.AllowCapability("a");
+    neg.AllowCapability("b");
+    std::vector<CapabilityRequest> reqs = {{"a",{},false},{"b",{},false},{"c",{},false}};
+    auto r = neg.Negotiate(reqs);
+    ASSERT(r.GrantedCount() == 2);
+}
+TEST(Test_WASMCapabilityNegotiator_DenyOverride)
+{
+    WASMCapabilityNegotiator neg;
+    neg.AllowCapability("x");
+    neg.DenyCapability("x");
+    CapabilityRequest req{ "x", {}, false };
+    auto r = neg.Negotiate({ req });
+    ASSERT(r.GrantedCount() == 0);
+}
+TEST(Test_WASMCapabilityNegotiator_Reset)
+{
+    WASMCapabilityNegotiator neg;
+    neg.AllowCapability("file_read");
+    neg.Reset();
+    ASSERT(neg.AllowedCount() == 0);
+}
+TEST(Test_WASMCapabilityNegotiator_Grant)
+{
+    ASSERT(CapabilityDecision::Granted != CapabilityDecision::Denied);
+    ASSERT(CapabilityDecision::Deferred != CapabilityDecision::Granted);
+}
+
+TEST(Test_WASMHotSwapEngine_Create)
+{
+    WASMHotSwapEngine eng;
+    ASSERT(eng.GetState()  == HotSwapState::Idle);
+    ASSERT(!eng.IsActive());
+}
+TEST(Test_WASMHotSwapEngine_Swap)
+{
+    WASMHotSwapEngine eng;
+    const uint8_t d[] = { 0x00, 0x61, 0x73, 0x6D };
+    auto r = eng.Swap(d, sizeof(d));
+    ASSERT(r.success);
+    ASSERT(eng.IsActive());
+}
+TEST(Test_WASMHotSwapEngine_SwapEmpty)
+{
+    WASMHotSwapEngine eng;
+    auto r = eng.Swap(nullptr, 0);
+    ASSERT(!r.success);
+    ASSERT(!r.errorMessage.empty());
+}
+TEST(Test_WASMHotSwapEngine_Policy)
+{
+    WASMHotSwapEngine eng(HotSwapPolicy::Atomic);
+    ASSERT(eng.GetPolicy() == HotSwapPolicy::Atomic);
+}
+TEST(Test_WASMHotSwapEngine_Snapshot)
+{
+    WASMHotSwapEngine eng;
+    auto snap = eng.CaptureSnapshot("test-plugin");
+    ASSERT(snap.IsValid());
+    ASSERT(snap.pluginId == "test-plugin");
+}
+TEST(Test_WASMHotSwapEngine_SwapDuration)
+{
+    WASMHotSwapEngine eng;
+    const uint8_t d[4] = { 1, 2, 3, 4 };
+    auto r = eng.Swap(d, 4);
+    ASSERT(r.swapDurationMs >= 0);
+}
+TEST(Test_WASMHotSwapEngine_Reset)
+{
+    WASMHotSwapEngine eng;
+    const uint8_t d[4] = { 1, 2, 3, 4 };
+    eng.Swap(d, 4);
+    eng.Reset();
+    ASSERT(eng.GetState() == HotSwapState::Idle);
+}
+TEST(Test_WASMHotSwapEngine_Callback)
+{
+    WASMHotSwapEngine eng;
+    bool called = false;
+    eng.SetCallback([&](HotSwapState){ called = true; });
+    ASSERT(eng.SwapCount() == 0);
+}
+TEST(Test_WASMHotSwapEngine_States)
+{
+    ASSERT(HotSwapState::Idle    != HotSwapState::Active);
+    ASSERT(HotSwapPolicy::Atomic != HotSwapPolicy::Graceful);
+}
+
+TEST(Test_WASMDebuggerBridge_Create)
+{
+    WASMDebuggerBridge dbg;
+    ASSERT(dbg.GetState()       == DebuggerState::Disconnected);
+    ASSERT(!dbg.IsConnected());
+    ASSERT(dbg.BreakpointCount() == 0);
+}
+TEST(Test_WASMDebuggerBridge_Connect)
+{
+    WASMDebuggerBridge dbg;
+    ASSERT(dbg.Connect());
+    ASSERT(dbg.IsConnected());
+    dbg.Disconnect();
+    ASSERT(!dbg.IsConnected());
+}
+TEST(Test_WASMDebuggerBridge_Breakpoint)
+{
+    WASMDebuggerBridge dbg;
+    dbg.Connect();
+    WASMBreakpoint bp;
+    bp.kind     = BreakpointKind::Line;
+    bp.location = "plugin.wasm:42";
+    bp.enabled  = true;
+    uint32_t id = dbg.SetBreakpoint(bp);
+    ASSERT(id > 0);
+    ASSERT(dbg.BreakpointCount() == 1);
+}
+TEST(Test_WASMDebuggerBridge_RemoveBreakpoint)
+{
+    WASMDebuggerBridge dbg;
+    WASMBreakpoint bp;
+    bp.location = "test:1";
+    uint32_t id = dbg.SetBreakpoint(bp);
+    ASSERT(dbg.RemoveBreakpoint(id));
+    ASSERT(dbg.BreakpointCount() == 0);
+}
+TEST(Test_WASMDebuggerBridge_RemoveNonExistent)
+{
+    WASMDebuggerBridge dbg;
+    ASSERT(!dbg.RemoveBreakpoint(9999));
+}
+TEST(Test_WASMDebuggerBridge_Config)
+{
+    DebuggerConfig cfg;
+    cfg.listenPort   = 9999;
+    cfg.breakOnEntry = true;
+    WASMDebuggerBridge dbg(cfg);
+    ASSERT(dbg.GetConfig().listenPort   == 9999);
+    ASSERT(dbg.GetConfig().breakOnEntry == true);
+}
+TEST(Test_WASMDebuggerBridge_CallStack)
+{
+    WASMDebuggerBridge dbg;
+    dbg.Connect();
+    auto frames = dbg.GetCallStack();
+    ASSERT(frames.empty());
+}
+TEST(Test_WASMDebuggerBridge_Reset)
+{
+    WASMDebuggerBridge dbg;
+    dbg.Connect();
+    WASMBreakpoint bp; bp.location="x";
+    dbg.SetBreakpoint(bp);
+    dbg.Reset();
+    ASSERT(!dbg.IsConnected());
+    ASSERT(dbg.BreakpointCount() == 0);
+}
+TEST(Test_WASMDebuggerBridge_MultiBreakpoint)
+{
+    WASMDebuggerBridge dbg;
+    for (int i = 0; i < 5; ++i) {
+        WASMBreakpoint bp; bp.location = "loc";
+        dbg.SetBreakpoint(bp);
+    }
+    ASSERT(dbg.BreakpointCount() == 5);
+}
+
+//==============================================================================
+// Neural Format Intelligence Tests (Sprint 571-580 / v25.1.0 "Rigel-R")
+//==============================================================================
+
+TEST(Test_NeuralFormatFingerprinter_Create)
+{
+    NeuralFormatFingerprinter fp;
+    ASSERT(!fp.IsReady());
+    ASSERT(fp.GetTopK() > 0);
+}
+TEST(Test_NeuralFormatFingerprinter_Initialize)
+{
+    NeuralFormatFingerprinter fp;
+    ASSERT(fp.Initialize());
+    ASSERT(fp.IsReady());
+}
+TEST(Test_NeuralFormatFingerprinter_Config)
+{
+    FingerprintConfig cfg;
+    cfg.backend         = FingerprintBackend::ONNX;
+    cfg.headerBytesRead = 256;
+    cfg.minConfidence   = 0.75f;
+    cfg.topK            = 3;
+    NeuralFormatFingerprinter fp(cfg);
+    ASSERT(fp.GetBackend()         == FingerprintBackend::ONNX);
+    ASSERT(fp.GetHeaderBytesRead() == 256);
+    ASSERT(fp.GetTopK()            == 3);
+}
+TEST(Test_NeuralFormatFingerprinter_Classify)
+{
+    NeuralFormatFingerprinter fp;
+    fp.Initialize();
+    const uint8_t header[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+    auto r = fp.Classify(header, sizeof(header));
+    ASSERT(r.topScore > 0.0f);
+    ASSERT(!r.candidates.empty());
+}
+TEST(Test_NeuralFormatFingerprinter_NotReady)
+{
+    NeuralFormatFingerprinter fp;
+    const uint8_t h[4] = {};
+    auto r = fp.Classify(h, 4);
+    ASSERT(r.topScore == 0.0f);
+}
+TEST(Test_NeuralFormatFingerprinter_Confidence)
+{
+    NeuralFormatFingerprinter fp;
+    fp.Initialize();
+    const uint8_t h[8] = { 0xFF, 0xD8, 0xFF, 0xE0 };
+    auto r = fp.Classify(h, 4);
+    ASSERT(r.inferenceMs >= 0);
+}
+TEST(Test_NeuralFormatFingerprinter_SetConfig)
+{
+    NeuralFormatFingerprinter fp;
+    FingerprintConfig cfg;
+    cfg.topK = 10;
+    fp.SetConfig(cfg);
+    ASSERT(fp.GetTopK() == 10);
+}
+TEST(Test_NeuralFormatFingerprinter_Reset)
+{
+    NeuralFormatFingerprinter fp;
+    fp.Initialize();
+    fp.Reset();
+    ASSERT(!fp.IsReady());
+}
+TEST(Test_NeuralFormatFingerprinter_Backends)
+{
+    ASSERT(FingerprintBackend::CPU     != FingerprintBackend::DirectML);
+    ASSERT(FingerprintBackend::ONNX    != FingerprintBackend::OpenVINO);
+}
+
+TEST(Test_UnknownFormatHandler_Create)
+{
+    UnknownFormatHandler h;
+    ASSERT(h.HandledCount() == 0);
+    ASSERT(h.GetStrategy() == UnknownHandlerStrategy::ReturnPlaceholder);
+}
+TEST(Test_UnknownFormatHandler_Handle)
+{
+    UnknownFormatHandler h;
+    UnknownFormatRequest req;
+    req.fileExtension = "xyz";
+    req.confidence    = 0.3f;
+    auto r = h.Handle(req);
+    ASSERT(r.success);
+    ASSERT(!r.fallbackIcon.empty());
+    ASSERT(h.HandledCount() == 1);
+}
+TEST(Test_UnknownFormatHandler_Strategy)
+{
+    UnknownFormatHandler h(UnknownHandlerStrategy::Skip);
+    ASSERT(h.GetStrategy() == UnknownHandlerStrategy::Skip);
+    h.SetStrategy(UnknownHandlerStrategy::SynthesizeDecode);
+    ASSERT(h.GetStrategy() == UnknownHandlerStrategy::SynthesizeDecode);
+}
+TEST(Test_UnknownFormatHandler_Multiple)
+{
+    UnknownFormatHandler h;
+    for (int i = 0; i < 5; ++i) {
+        UnknownFormatRequest req; req.fileExtension = "x";
+        h.Handle(req);
+    }
+    ASSERT(h.HandledCount() == 5);
+}
+TEST(Test_UnknownFormatHandler_Reset)
+{
+    UnknownFormatHandler h;
+    UnknownFormatRequest req; req.fileExtension = "a";
+    h.Handle(req);
+    h.Reset();
+    ASSERT(h.HandledCount() == 0);
+}
+TEST(Test_UnknownFormatHandler_Callback)
+{
+    UnknownFormatHandler h(UnknownHandlerStrategy::RequestPlugin);
+    bool called = false;
+    h.SetPluginCallback([&](const std::string&){ called = true; return true; });
+    ASSERT(h.GetStrategy() == UnknownHandlerStrategy::RequestPlugin);
+}
+TEST(Test_UnknownFormatHandler_Diagnostic)
+{
+    UnknownFormatHandler h;
+    UnknownFormatRequest req; req.fileExtension = "abc";
+    auto r = h.Handle(req);
+    ASSERT(!r.diagnosticMessage.empty());
+}
+TEST(Test_UnknownFormatHandler_StrategyEnum)
+{
+    ASSERT(UnknownHandlerStrategy::Skip != UnknownHandlerStrategy::SynthesizeDecode);
+    ASSERT(UnknownHandlerStrategy::ReturnPlaceholder != UnknownHandlerStrategy::RequestPlugin);
+}
+TEST(Test_UnknownFormatHandler_Result)
+{
+    UnknownFormatHandler h;
+    UnknownFormatRequest req;
+    auto r = h.Handle(req);
+    ASSERT(r.strategyUsed == UnknownHandlerStrategy::ReturnPlaceholder);
+}
+
+TEST(Test_LLMMIMEInferenceEngine_Create)
+{
+    LLMMIMEInferenceEngine eng;
+    ASSERT(!eng.IsLoaded());
+}
+TEST(Test_LLMMIMEInferenceEngine_LoadModel)
+{
+    LLMMIMEInferenceEngine eng;
+    ASSERT(eng.LoadModel());
+    ASSERT(eng.IsLoaded());
+}
+TEST(Test_LLMMIMEInferenceEngine_Config)
+{
+    LLMMIMEConfig cfg;
+    cfg.preferredBackend    = LLMBackendKind::LocalGemma;
+    cfg.confidenceFloor     = 0.70f;
+    cfg.allowRemoteFallback = true;
+    LLMMIMEInferenceEngine eng(cfg);
+    ASSERT(eng.GetBackend() == LLMBackendKind::LocalGemma);
+    ASSERT(eng.GetFloor()   == 0.70f);
+}
+TEST(Test_LLMMIMEInferenceEngine_Infer)
+{
+    LLMMIMEInferenceEngine eng;
+    eng.LoadModel();
+    LLMInferenceRequest req;
+    req.knownExtension = "png";
+    auto r = eng.Infer(req);
+    ASSERT(!r.mimeType.empty());
+    ASSERT(r.inferenceMs >= 0);
+}
+TEST(Test_LLMMIMEInferenceEngine_NotLoaded)
+{
+    LLMMIMEInferenceEngine eng;
+    LLMInferenceRequest req;
+    auto r = eng.Infer(req);
+    ASSERT(r.backendUsed == LLMBackendKind::RulesFallback);
+}
+TEST(Test_LLMMIMEInferenceEngine_Reliable)
+{
+    LLMMIMEInferenceEngine eng;
+    eng.LoadModel();
+    LLMInferenceRequest req; req.knownExtension = "jpg";
+    auto r = eng.Infer(req);
+    ASSERT(r.confidence >= MIMEConfidence::Medium || !r.IsReliable());
+}
+TEST(Test_LLMMIMEInferenceEngine_SetConfig)
+{
+    LLMMIMEInferenceEngine eng;
+    LLMMIMEConfig c; c.confidenceFloor = 0.8f;
+    eng.SetConfig(c);
+    ASSERT(eng.GetConfig().confidenceFloor == 0.8f);
+}
+TEST(Test_LLMMIMEInferenceEngine_Reset)
+{
+    LLMMIMEInferenceEngine eng;
+    eng.LoadModel();
+    eng.Reset();
+    ASSERT(!eng.IsLoaded());
+}
+TEST(Test_LLMMIMEInferenceEngine_Backend)
+{
+    ASSERT(LLMBackendKind::LocalPhi3 != LLMBackendKind::LocalGemma);
+    ASSERT(MIMEConfidence::High      >  MIMEConfidence::Low);
+}
+
+TEST(Test_SelfExpandingFormatRegistry_Create)
+{
+    SelfExpandingFormatRegistry reg;
+    ASSERT(reg.EntryCount() == 0);
+}
+TEST(Test_SelfExpandingFormatRegistry_Register)
+{
+    SelfExpandingFormatRegistry reg;
+    LearnedFormatEntry entry;
+    entry.formatId  = "x-custom";
+    entry.mimeType  = "application/x-custom";
+    entry.confidence= 0.8f;
+    ASSERT(reg.RegisterFormat(entry));
+    ASSERT(reg.EntryCount() == 1);
+}
+TEST(Test_SelfExpandingFormatRegistry_Lookup)
+{
+    SelfExpandingFormatRegistry reg;
+    LearnedFormatEntry e; e.formatId = "myformat";
+    reg.RegisterFormat(e);
+    const auto* found = reg.Lookup("myformat");
+    ASSERT(found != nullptr);
+    ASSERT(found->formatId == "myformat");
+}
+TEST(Test_SelfExpandingFormatRegistry_NotFound)
+{
+    SelfExpandingFormatRegistry reg;
+    ASSERT(reg.Lookup("nonexistent") == nullptr);
+}
+TEST(Test_SelfExpandingFormatRegistry_Duplicate)
+{
+    SelfExpandingFormatRegistry reg;
+    LearnedFormatEntry e; e.formatId = "dup";
+    reg.RegisterFormat(e);
+    ASSERT(!reg.RegisterFormat(e));
+    ASSERT(reg.EntryCount() == 1);
+}
+TEST(Test_SelfExpandingFormatRegistry_Validate)
+{
+    SelfExpandingFormatRegistry reg;
+    LearnedFormatEntry e; e.formatId = "v";
+    reg.RegisterFormat(e);
+    reg.ValidateEntry("v");
+    auto stats = reg.GetStats();
+    ASSERT(stats.validatedEntries == 1);
+}
+TEST(Test_SelfExpandingFormatRegistry_Remove)
+{
+    SelfExpandingFormatRegistry reg;
+    LearnedFormatEntry e; e.formatId = "rem";
+    reg.RegisterFormat(e);
+    reg.RemoveEntry("rem");
+    ASSERT(reg.EntryCount() == 0);
+}
+TEST(Test_SelfExpandingFormatRegistry_Stats)
+{
+    SelfExpandingFormatRegistry reg;
+    for (int i = 0; i < 3; ++i) {
+        LearnedFormatEntry e;
+        e.formatId = "f" + std::to_string(i);
+        reg.RegisterFormat(e);
+    }
+    auto s = reg.GetStats();
+    ASSERT(s.totalEntries == 3);
+    ASSERT(s.pendingEntries == 3);
+}
+TEST(Test_SelfExpandingFormatRegistry_PersistLoad)
+{
+    SelfExpandingFormatRegistry reg;
+    ASSERT(reg.LoadFromFile("test.json"));
+    ASSERT(reg.SaveToFile("test.json"));
+}
+
+TEST(Test_FormatTransferLearner_Create)
+{
+    FormatTransferLearner learner;
+    ASSERT(learner.SampleCount() == 0);
+    ASSERT(learner.GetStatus() == TrainingStatus::Idle);
+}
+TEST(Test_FormatTransferLearner_Config)
+{
+    TransferLearnerConfig cfg;
+    cfg.strategy     = TransferStrategy::FullFineTune;
+    cfg.maxEpochs    = 20;
+    cfg.learningRate = 5e-5f;
+    FormatTransferLearner learner(cfg);
+    ASSERT(learner.GetStrategy() == TransferStrategy::FullFineTune);
+    ASSERT(learner.GetConfig().maxEpochs == 20);
+}
+TEST(Test_FormatTransferLearner_AddSample)
+{
+    FormatTransferLearner learner;
+    TrainingSample s;
+    s.trueFormatId  = "png";
+    s.sampleWeight  = 1.0f;
+    learner.AddSample(s);
+    ASSERT(learner.SampleCount() == 1);
+}
+TEST(Test_FormatTransferLearner_Train)
+{
+    FormatTransferLearner learner;
+    TrainingSample s; s.trueFormatId = "jpg";
+    learner.AddSample(s);
+    auto m = learner.Train();
+    ASSERT(m.accuracy > 0.0f);
+    ASSERT(learner.GetStatus() == TrainingStatus::Complete);
+}
+TEST(Test_FormatTransferLearner_TrainEmpty)
+{
+    FormatTransferLearner learner;
+    auto m = learner.Train();
+    ASSERT(m.epochsCompleted == 0);
+}
+TEST(Test_FormatTransferLearner_Metrics)
+{
+    FormatTransferLearner learner;
+    TrainingSample s; s.trueFormatId = "bmp";
+    learner.AddSample(s);
+    auto m = learner.Train();
+    ASSERT(m.trainLoss     >= 0.0f);
+    ASSERT(m.trainingMs    >= 0);
+}
+TEST(Test_FormatTransferLearner_ClearSamples)
+{
+    FormatTransferLearner learner;
+    TrainingSample s; s.trueFormatId = "x";
+    learner.AddSample(s);
+    learner.ClearSamples();
+    ASSERT(learner.SampleCount() == 0);
+}
+TEST(Test_FormatTransferLearner_Reset)
+{
+    FormatTransferLearner learner;
+    TrainingSample s; s.trueFormatId = "y";
+    learner.AddSample(s);
+    learner.Train();
+    learner.Reset();
+    ASSERT(learner.SampleCount() == 0);
+    ASSERT(learner.GetStatus()   == TrainingStatus::Idle);
+}
+TEST(Test_FormatTransferLearner_Strategies)
+{
+    ASSERT(TransferStrategy::FeatureExtract != TransferStrategy::FullFineTune);
+    ASSERT(TrainingStatus::Idle != TrainingStatus::Complete);
+}
+
+TEST(Test_FormatDetectionReport_Create)
+{
+    FormatDetectionReportBuilder b;
+    const auto& r = b.GetReport();
+    ASSERT(r.VoteCount()   == 0);
+    ASSERT(!r.IsResolved());
+}
+TEST(Test_FormatDetectionReport_AddVote)
+{
+    FormatDetectionReportBuilder b;
+    b.AddVote(DetectionSource::MagicBytes, "png", "image/png", 0.95f);
+    const auto& r = b.GetReport();
+    ASSERT(r.VoteCount() == 1);
+    ASSERT(r.consensusFormatId == "png");
+    ASSERT(r.verdict == DetectionVerdict::Confirmed);
+}
+TEST(Test_FormatDetectionReport_Consensus)
+{
+    FormatDetectionReportBuilder b;
+    b.AddVote(DetectionSource::MagicBytes,      "jpg", "image/jpeg", 0.6f);
+    b.AddVote(DetectionSource::Extension,       "jpg", "image/jpeg", 0.9f);
+    b.AddVote(DetectionSource::NeuralClassifier,"jpg", "image/jpeg", 0.85f);
+    const auto& r = b.GetReport();
+    ASSERT(r.consensusFormatId    == "jpg");
+    ASSERT(r.consensusConfidence  >= 0.85f);
+}
+TEST(Test_FormatDetectionReport_Uncertain)
+{
+    FormatDetectionReportBuilder b;
+    b.AddVote(DetectionSource::ContentHash, "x", "application/x", 0.45f);
+    const auto& r = b.GetReport();
+    ASSERT(r.verdict == DetectionVerdict::Conflicted);
+}
+TEST(Test_FormatDetectionReport_EvalTime)
+{
+    FormatDetectionReportBuilder b;
+    b.SetEvalTime(12);
+    ASSERT(b.GetReport().evaluationMs == 12);
+}
+TEST(Test_FormatDetectionReport_IsResolved)
+{
+    FormatDetectionReportBuilder b;
+    b.AddVote(DetectionSource::MagicBytes, "pdf", "application/pdf", 0.92f);
+    ASSERT(b.GetReport().IsResolved());
+}
+TEST(Test_FormatDetectionReport_Probable)
+{
+    FormatDetectionReportBuilder b;
+    b.AddVote(DetectionSource::Extension, "docx", "application/vnd.openxmlformats", 0.75f);
+    ASSERT(b.GetReport().verdict == DetectionVerdict::Probable);
+}
+TEST(Test_FormatDetectionReport_Reset)
+{
+    FormatDetectionReportBuilder b;
+    b.AddVote(DetectionSource::MagicBytes, "png", "image/png", 0.9f);
+    b.Reset();
+    ASSERT(b.GetReport().VoteCount() == 0);
+}
+TEST(Test_FormatDetectionReport_Sources)
+{
+    ASSERT(DetectionSource::MagicBytes != DetectionSource::Extension);
+    ASSERT(DetectionVerdict::Confirmed != DetectionVerdict::Conflicted);
+}
+
+TEST(Test_SyntheticDecoderGenerator_Create)
+{
+    SyntheticDecoderGenerator gen;
+    ASSERT(gen.GeneratedCount() == 0);
+}
+TEST(Test_SyntheticDecoderGenerator_Generate)
+{
+    SyntheticDecoderGenerator gen;
+    SyntheticDecoderSpec spec;
+    spec.formatId       = "x-test";
+    spec.family         = DecoderFamily::Image;
+    spec.anticipatedAccuracy = 0.7f;
+    auto r = gen.Generate(spec);
+    ASSERT(r.success);
+    ASSERT(!r.stubClassName.empty());
+    ASSERT(!r.generatedCode.empty());
+    ASSERT(gen.GeneratedCount() == 1);
+}
+TEST(Test_SyntheticDecoderGenerator_EmptyId)
+{
+    SyntheticDecoderGenerator gen;
+    SyntheticDecoderSpec spec;
+    auto r = gen.Generate(spec);
+    ASSERT(!r.success);
+    ASSERT(!r.errorMessage.empty());
+}
+TEST(Test_SyntheticDecoderGenerator_Quality)
+{
+    SyntheticDecoderGenerator gen;
+    SyntheticDecoderSpec spec;
+    spec.formatId = "unknown-x";
+    spec.family   = DecoderFamily::Unknown;
+    auto r = gen.Generate(spec);
+    ASSERT(r.quality == StubQuality::Placeholder);
+}
+TEST(Test_SyntheticDecoderGenerator_Partial)
+{
+    SyntheticDecoderGenerator gen;
+    SyntheticDecoderSpec spec;
+    spec.formatId = "near-png";
+    spec.family   = DecoderFamily::Image;
+    auto r = gen.Generate(spec);
+    ASSERT(r.quality == StubQuality::Partial);
+}
+TEST(Test_SyntheticDecoderGenerator_InferFamily)
+{
+    SyntheticDecoderGenerator gen;
+    ASSERT(gen.InferFamily("png") == DecoderFamily::Image);
+    ASSERT(gen.InferFamily("pdf") == DecoderFamily::Document);
+    ASSERT(gen.InferFamily("zip") == DecoderFamily::Archive);
+    ASSERT(gen.InferFamily("xyz") == DecoderFamily::Unknown);
+}
+TEST(Test_SyntheticDecoderGenerator_Fidelity)
+{
+    SyntheticDecoderGenerator gen;
+    SyntheticDecoderSpec spec;
+    spec.formatId          = "test";
+    spec.anticipatedAccuracy = 0.5f;
+    auto r = gen.Generate(spec);
+    ASSERT(r.estimatedFidelity > 0.0f);
+}
+TEST(Test_SyntheticDecoderGenerator_Reset)
+{
+    SyntheticDecoderGenerator gen;
+    SyntheticDecoderSpec s; s.formatId = "r";
+    gen.Generate(s);
+    gen.Reset();
+    ASSERT(gen.GeneratedCount() == 0);
+}
+TEST(Test_SyntheticDecoderGenerator_Families)
+{
+    ASSERT(DecoderFamily::Image    != DecoderFamily::Document);
+    ASSERT(StubQuality::Full       != StubQuality::Placeholder);
+}
+
+TEST(Test_FormatEvolutionTracker_Create)
+{
+    FormatEvolutionTracker tracker;
+    ASSERT(tracker.ObservationCount() == 0);
+    ASSERT(tracker.TrackedFormats().empty());
+}
+TEST(Test_FormatEvolutionTracker_Record)
+{
+    FormatEvolutionTracker tracker;
+    FormatSignatureVersion sig;
+    sig.formatId      = "png";
+    sig.schemaVersion = 1;
+    sig.driftScore    = 0.1f;
+    tracker.RecordObservation(sig);
+    ASSERT(tracker.ObservationCount() == 1);
+}
+TEST(Test_FormatEvolutionTracker_TrackedFormats)
+{
+    FormatEvolutionTracker tracker;
+    FormatSignatureVersion s; s.formatId = "jpg";
+    tracker.RecordObservation(s);
+    s.formatId = "png";
+    tracker.RecordObservation(s);
+    auto fmts = tracker.TrackedFormats();
+    ASSERT(fmts.size() == 2);
+}
+TEST(Test_FormatEvolutionTracker_NoDrift)
+{
+    FormatEvolutionTracker tracker;
+    FormatSignatureVersion s; s.formatId = "bmp"; s.driftScore = 0.1f;
+    tracker.RecordObservation(s);
+    auto evt = tracker.AnalyseDrift("bmp");
+    ASSERT(evt.severity == DriftSeverity::None);
+}
+TEST(Test_FormatEvolutionTracker_MinorDrift)
+{
+    FormatEvolutionTracker tracker;
+    FormatSignatureVersion s; s.formatId = "tiff"; s.schemaVersion = 1; s.driftScore = 0.1f;
+    tracker.RecordObservation(s);
+    s.schemaVersion = 2; s.driftScore = 0.2f;
+    tracker.RecordObservation(s);
+    auto evt = tracker.AnalyseDrift("tiff");
+    ASSERT(evt.severity == DriftSeverity::Minor);
+}
+TEST(Test_FormatEvolutionTracker_MajorDrift)
+{
+    FormatEvolutionTracker tracker;
+    FormatSignatureVersion s; s.formatId = "test"; s.driftScore = 0.0f;
+    tracker.RecordObservation(s);
+    s.driftScore = 0.8f;
+    tracker.RecordObservation(s);
+    auto evt = tracker.AnalyseDrift("test");
+    ASSERT(evt.severity == DriftSeverity::Breaking || evt.severity == DriftSeverity::Major);
+}
+TEST(Test_FormatEvolutionTracker_Unknown)
+{
+    FormatEvolutionTracker tracker;
+    auto evt = tracker.AnalyseDrift("nonexistent");
+    ASSERT(evt.severity == DriftSeverity::None);
+}
+TEST(Test_FormatEvolutionTracker_Clear)
+{
+    FormatEvolutionTracker tracker;
+    FormatSignatureVersion s; s.formatId = "x";
+    tracker.RecordObservation(s);
+    tracker.Clear();
+    ASSERT(tracker.ObservationCount() == 0);
+}
+TEST(Test_FormatEvolutionTracker_Severities)
+{
+    ASSERT(DriftSeverity::None    != DriftSeverity::Major);
+    ASSERT(DriftSeverity::Breaking!= DriftSeverity::Minor);
+}
 
 TEST(IntegrationRunnerSmoke)
 {

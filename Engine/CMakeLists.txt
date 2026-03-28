@@ -1555,6 +1555,26 @@ set(ENGINE_HEADERS
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
+
+    # Sprint 561-570 — WASM Plugin Sandbox (v25.0.0 "Rigel" — delivered v25.1.0)
+    Plugin/WASMRuntimeAdapter.h
+    Plugin/WASMMemorySafetyModel.h
+    Plugin/WASMPluginLoader.h
+    Plugin/WITBindingGenerator.h
+    Plugin/WASMHostController.h
+    Plugin/WASMCapabilityNegotiator.h
+    Plugin/WASMHotSwapEngine.h
+    Plugin/WASMDebuggerBridge.h
+
+    # Sprint 571-580 — Neural Format Intelligence (v25.1.0 "Rigel-R")
+    AI/NeuralFormatFingerprinter.h
+    AI/UnknownFormatHandler.h
+    AI/LLMMIMEInferenceEngine.h
+    Core/SelfExpandingFormatRegistry.h
+    AI/FormatTransferLearner.h
+    Core/FormatDetectionReport.h
+    Core/SyntheticDecoderGenerator.h
+    AI/FormatEvolutionTracker.h
 )
 
 set(ENGINE_SOURCES

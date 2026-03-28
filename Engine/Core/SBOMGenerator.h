@@ -97,11 +97,11 @@ public:
             << "  \"spdxVersion\": \"SPDX-2.3\",\n"
             << "  \"dataLicense\": \"CC0-1.0\",\n"
             << "  \"SPDXID\": \"SPDXRef-DOCUMENT\",\n"
-            << "  \"name\": \"ExplorerLens-25.0.0\",\n"
+            << "  \"name\": \"ExplorerLens-25.1.0\",\n"
             << "  \"documentNamespace\": \"https://explorerlensteam.github.io/spdx/" << uuid << "\",\n"
             << "  \"creationInfo\": {\n"
             << "    \"created\": \"" << ts << "\",\n"
-            << "    \"creators\": [\"Tool: ExplorerLens-SBOMGenerator-25.0.0\"]\n"
+            << "    \"creators\": [\"Tool: ExplorerLens-SBOMGenerator-25.1.0\"]\n"
             << "  },\n"
             << "  \"packages\": [\n";
 

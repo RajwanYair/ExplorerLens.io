@@ -21,10 +21,10 @@ namespace BuildValidation {
 /// Build configuration snapshot for diagnostics
 struct BuildInfo {
     static constexpr int MajorVersion = 25;
-    static constexpr int MinorVersion = 0;
+    static constexpr int MinorVersion = 1;
     static constexpr int PatchVersion = 0;
-    static constexpr const char* VersionString = "25.0.0";
-    static constexpr const char* Codename = "Rigel";
+    static constexpr const char* VersionString = "25.1.0";
+    static constexpr const char* Codename = "Rigel-R";
     static constexpr const char* BuildDate = __DATE__;
     static constexpr const char* BuildTime = __TIME__;
 
@@ -49,7 +49,7 @@ struct BuildInfo {
     // Subsystem count
     static constexpr int DecoderCount = 25;
     static constexpr int SupportedExtensions = 200;
-    static constexpr int UnitTestCount = 3269;
+    static constexpr int UnitTestCount = 3413;
     static constexpr int BenchmarkSuites = 5;
 };
 

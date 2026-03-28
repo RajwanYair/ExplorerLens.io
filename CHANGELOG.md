@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [25.1.0] — Rigel-R (2026-04-05)
+
+### Added — Sprint 561-570: WASM Plugin Sandbox (backfill)
+- `Engine/Plugin/WASMRuntimeAdapter.h`: WasmEdge/WABT host runtime adapter with sandbox levels, memory limits, CPU quotas, and SIMD/threads capability flags
+- `Engine/Plugin/WASMMemorySafetyModel.h`: Linear-memory safety model with capability mask (ReadFiles/WriteFiles/Network/etc.), guard-page policy, and revoke workflow
+- `Engine/Plugin/WASMPluginLoader.h`: Component Model load/link engine with manifest validation, strict mode, and load-result reporting
+- `Engine/Plugin/WITBindingGenerator.h`: WIT interface binding generator producing C++, C, Rust FFI, or TypeScript bindings from WITInterface descriptors
+- `Engine/Plugin/WASMHostController.h`: Cross-process WASM host with resource limits (memory/CPU/wall-clock/handles), OS job-object enforcement, and metrics
+- `Engine/Plugin/WASMCapabilityNegotiator.h`: Handshake protocol for granting/denying WASI capabilities per plugin at load time
+- `Engine/Plugin/WASMHotSwapEngine.h`: Zero-downtime live-reload engine with Atomic/Graceful/ForceKill policies and state snapshot capture
+- `Engine/Plugin/WASMDebuggerBridge.h`: CDP/DAP debugger bridge with breakpoints (Line/FunctionEntry/MemoryWatch/Exception), stack inspection, and CDP port config
+
+### Added — Sprint 571-580: Neural Format Intelligence (v25.1.0 "Rigel-R")
+- `Engine/AI/NeuralFormatFingerprinter.h`: Binary-pattern ML classifier mapping raw header bytes to 200+ format probabilities (CPU/DirectML/ONNX/OpenVINO backends)
+- `Engine/AI/UnknownFormatHandler.h`: Best-effort handler for unregistered formats — placeholder icon, synthesize-decode, plugin-request, or skip strategies
+- `Engine/AI/LLMMIMEInferenceEngine.h`: Local quantised LLM (Phi-3/Gemma-3B) MIME inference from file header bytes + path context
+- `Engine/Core/SelfExpandingFormatRegistry.h`: Persistent, ML-assisted registry for runtime-learned format entries with validate/remove/stats API
+- `Engine/AI/FormatTransferLearner.h`: Transfer-learning fine-tuner (FeatureExtract/FineTuneLastLayer/FullFineTune) for enterprise-specific format variants
+- `Engine/Core/FormatDetectionReport.h`: Multi-source detection vote aggregator with consensus scoring and Confirmed/Probable/Uncertain/Conflicted verdicts
+- `Engine/Core/SyntheticDecoderGenerator.h`: Format-family heuristic stub generator producing Full/Partial/Placeholder quality stubs for unknown formats
+- `Engine/AI/FormatEvolutionTracker.h`: Binary signature version-drift detector tracking drift severity (None/Minor/Moderate/Major/Breaking) across observations
+
+### Statistics
+- Test count: 3,413 unit tests (+144 from 72 WASM + 72 Neural Format AI tests)
+- Sprint coverage: Sprints 561–580
+- New headers: 16 (Engine/Plugin/×8, Engine/AI/×6, Engine/Core/×2 … Engine/Core/×4)
+
+---
+
 ## [25.0.0] — Rigel (2026-03-29)
 
 ### Changed — Production Cleanup & Major Version Bump
