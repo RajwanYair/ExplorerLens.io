@@ -37,7 +37,7 @@ enum class CIStage : uint8_t {
  StageCount
 };
 
-enum class ArtifactType : uint8_t {
+enum class ValidatorArtifactType : uint8_t {
  DLL = 0,
  EXE,
  LIB,
@@ -84,7 +84,7 @@ public:
  // Validation
  CIPipelineResult ValidatePipeline() const;
  CIPipelineResult ValidatePipeline(CIPlatform platform) const;
- bool ValidateArtifact(const std::wstring &path, ArtifactType type) const;
+ bool ValidateArtifact(const std::wstring &path, ValidatorArtifactType type) const;
  bool ValidateBuildOutput(const CIBuildResult &build) const;
 
  // Stage execution
@@ -94,7 +94,7 @@ public:
  // Static helpers
  static const wchar_t *GetPlatformName(CIPlatform platform);
  static const wchar_t *GetStageName(CIStage stage);
- static const wchar_t *GetArtifactTypeName(ArtifactType type);
+ static const wchar_t *GetArtifactTypeName(ValidatorArtifactType type);
  static uint32_t GetStageCount();
 
 private:

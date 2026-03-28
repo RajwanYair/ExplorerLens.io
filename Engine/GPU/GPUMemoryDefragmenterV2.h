@@ -15,10 +15,10 @@
 namespace ExplorerLens { namespace Engine {
 
 struct DefragPlan { size_t moves; size_t bytesMoved; double estimatedMs; bool safe; };
-struct DefragStats { uint64_t totalVRAM; uint64_t freeVRAM; float fragRatio; uint64_t largestFreeBlock; };
+struct GPUDefragStats { uint64_t totalVRAM; uint64_t freeVRAM; float fragRatio; uint64_t largestFreeBlock; };
 class GPUMemoryDefragmenterV2 {
 public:
-    DefragStats QueryStats() const  { return { 1u << 30, 256u * 1024 * 1024, 0.3f, 64u * 1024 * 1024 }; }
+    GPUDefragStats QueryStats() const  { return { 1u << 30, 256u * 1024 * 1024, 0.3f, 64u * 1024 * 1024 }; }
     DefragPlan  Plan()      const   { return { 4, 16 * 1024 * 1024, 2.5, true }; }
     bool        Execute(const DefragPlan& plan) { (void)plan; return true; }
     float       FragRatio() const   { return 0.3f; }

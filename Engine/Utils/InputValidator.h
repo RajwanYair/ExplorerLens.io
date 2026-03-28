@@ -1,4 +1,4 @@
-// InputValidator.h — Centralized Input Validation Utility
+// FileSafetyValidator.h — Centralized Input Validation Utility
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Security-critical input validation for a Windows Shell Extension (COM DLL)
@@ -22,7 +22,7 @@ struct InputValidationResult {
 };
 
 /// Centralized input validation — all static, no state, thread-safe.
-class InputValidator {
+class FileSafetyValidator {
 public:
     // ====================================================================
     // Path Validation

@@ -18,7 +18,7 @@ struct PropTestConfig { uint32_t iterations = 100; uint32_t seed = 42; bool shri
 struct PropTestResult { uint32_t passed; uint32_t failed; std::string counterexample; };
 class PropertyBaseTestEngine {
 public:
-    explicit PropertyBaseTestEngine(PropTestConfig cfg = {}) : m_cfg(cfg), m_rng(cfg.seed) {}
+    explicit PropertyBaseTestEngine(PropTestConfig cfg = {}) : m_cfg(cfg) {}
     PropTestResult Check(const std::string& name, std::function<bool(uint32_t)> prop) {
         (void)name;
         uint32_t p = 0, f = 0;

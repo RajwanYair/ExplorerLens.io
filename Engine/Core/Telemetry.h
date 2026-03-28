@@ -571,7 +571,7 @@ inline const char* MetricTypeName(MetricType t) {
 // Metric Sample — Single data point
 //------------------------------------------------------------------------------
 
-struct MetricSample {
+struct TelemetryMetricSample {
     std::string name;
     double value = 0.0;
     int64_t timestamp = 0; // Unix ms

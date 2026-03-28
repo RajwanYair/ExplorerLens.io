@@ -795,7 +795,7 @@ struct KeyboardNavigation {
 // Accessibility Config — Overall A11y settings
 //==============================================================================
 
-struct AccessibilityConfig {
+struct EngineA11yConfig {
     bool screenReaderEnabled = false;
     bool reduceMotion = false;
     bool largeFonts = false;
@@ -804,12 +804,12 @@ struct AccessibilityConfig {
     bool keyboardOnly = false;
     bool announceStatusChanges = true;
 
-    static AccessibilityConfig Default() {
+    static EngineA11yConfig Default() {
         return {};
     }
 
-    static AccessibilityConfig ScreenReaderOptimized() {
-        AccessibilityConfig c;
+    static EngineA11yConfig ScreenReaderOptimized() {
+        EngineA11yConfig c;
         c.screenReaderEnabled = true;
         c.announceStatusChanges = true;
         c.reduceMotion = true;
@@ -817,8 +817,8 @@ struct AccessibilityConfig {
         return c;
     }
 
-    static AccessibilityConfig LowVision() {
-        AccessibilityConfig c;
+    static EngineA11yConfig LowVision() {
+        EngineA11yConfig c;
         c.largeFonts = true;
         c.fontScale = 1.5f;
         c.contrast = ContrastConfig::HighContrast();
@@ -859,7 +859,7 @@ struct A11yStatus {
     uint32_t featuresEnabled = 0;
 };
 
-struct A11yAuditResult {
+struct EngineComplianceResult {
     bool compliant = false;
     uint32_t checksRun = 0;
     uint32_t checksPassed = 0;
@@ -872,7 +872,7 @@ public:
     AccessibilityEngine();
 
     A11yStatus DetectSettings() const;
-    A11yAuditResult RunComplianceAudit() const;
+    EngineComplianceResult RunComplianceAudit() const;
 
     bool IsFeatureEnabled(A11yFeature feature) const;
     void EnableFeature(A11yFeature feature);

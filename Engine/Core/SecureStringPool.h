@@ -55,7 +55,7 @@ public:
         // Encrypt with CryptProtectMemory (CRYPTPROTECTMEMORY_SAME_PROCESS scope)
         // Block size for CryptProtectMemory must be multiple of CRYPTPROTECTMEMORY_BLOCK_SIZE (16)
         DWORD blockSize = 16;
-        size_t encLen = (byteLen + blockSize - 1) & ~(blockSize - 1);
+        size_t encLen = (byteLen + blockSize - 1) & ~(static_cast<size_t>(blockSize) - 1);
         if (encLen <= pageSize) {
             if (CryptProtectMemory(slot.page, static_cast<DWORD>(encLen),
                     CRYPT_PROTECT_MEMORY_SAME_PROCESS))
@@ -79,7 +79,7 @@ public:
         // Temporarily decrypt
         if (slot.encrypted) {
             DWORD blockSize = 16;
-            size_t encLen = (slot.dataLen + blockSize - 1) & ~(blockSize - 1);
+            size_t encLen = (slot.dataLen + blockSize - 1) & ~(static_cast<size_t>(blockSize) - 1);
             CryptUnprotectMemory(slot.page, static_cast<DWORD>(encLen),
                     CRYPT_PROTECT_MEMORY_SAME_PROCESS);
         }
@@ -89,7 +89,7 @@ public:
         // Re-encrypt immediately
         if (slot.encrypted) {
             DWORD blockSize = 16;
-            size_t encLen = (slot.dataLen + blockSize - 1) & ~(blockSize - 1);
+            size_t encLen = (slot.dataLen + blockSize - 1) & ~(static_cast<size_t>(blockSize) - 1);
             CryptProtectMemory(slot.page, static_cast<DWORD>(encLen),
                     CRYPT_PROTECT_MEMORY_SAME_PROCESS);
         }

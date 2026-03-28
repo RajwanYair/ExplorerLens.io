@@ -184,7 +184,7 @@ private:
 // Plugin Discovery Helper
 //============================================================================
 
-class PluginDiscovery {
+class ManagerPluginDiscovery {
 public:
  // Find all plugin DLLs in a directory (recursive optional)
  static std::vector<std::filesystem::path> FindPlugins(

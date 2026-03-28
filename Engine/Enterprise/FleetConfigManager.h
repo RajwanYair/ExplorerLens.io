@@ -24,7 +24,7 @@ enum class FleetTier : uint8_t {
     Classified = 4    // Air-gapped, all external comms disabled
 };
 
-enum class UpdateChannel : uint8_t {
+enum class FleetUpdateChannel : uint8_t {
     Stable   = 0,
     Preview  = 1,
     Insider  = 2,
@@ -42,7 +42,7 @@ struct FleetThumbnailPolicy {
     uint32_t      maxFileSizeMBPerDecode = 256;
     uint32_t      thumbnailTimeoutMs    = 5000;
     FleetTier     tier                  = FleetTier::Standard;
-    UpdateChannel updateChannel         = UpdateChannel::Stable;
+    FleetUpdateChannel updateChannel         = FleetUpdateChannel::Stable;
     std::wstring  allowedPluginPattern;   // regex filter for plugin IDs
     std::wstring  logDestinationPath;     // empty = EventLog only
     bool          forceLocalCacheOnly    = false;

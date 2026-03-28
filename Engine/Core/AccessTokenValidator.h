@@ -16,7 +16,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Type of security token being validated
-enum class TokenType : uint8_t {
+enum class AccessTokenType : uint8_t {
     Process = 0,   // Primary process token
     Thread = 1,   // Thread-level token
     Impersonation = 2,   // Client impersonation token
@@ -24,19 +24,19 @@ enum class TokenType : uint8_t {
     Anonymous = 4    // Anonymous logon token
 };
 
-inline const char* TokenTypeName(TokenType t) noexcept {
+inline const char* TokenTypeName(AccessTokenType t) noexcept {
     switch (t) {
-    case TokenType::Process:       return "Process";
-    case TokenType::Thread:        return "Thread";
-    case TokenType::Impersonation: return "Impersonation";
-    case TokenType::Restricted:    return "Restricted";
-    case TokenType::Anonymous:     return "Anonymous";
+    case AccessTokenType::Process:       return "Process";
+    case AccessTokenType::Thread:        return "Thread";
+    case AccessTokenType::Impersonation: return "Impersonation";
+    case AccessTokenType::Restricted:    return "Restricted";
+    case AccessTokenType::Anonymous:     return "Anonymous";
     default:                       return "Unknown";
     }
 }
 
 /// Outcome of a token validation check
-enum class ValidationResult : uint8_t {
+enum class TokenValidationResult : uint8_t {
     Valid = 0,   // Token is valid and authorized
     Expired = 1,   // Token has expired
     Revoked = 2,   // Token was explicitly revoked
@@ -44,21 +44,21 @@ enum class ValidationResult : uint8_t {
     Malformed = 4    // Token structure is invalid
 };
 
-inline const char* ValidationResultName(ValidationResult r) noexcept {
+inline const char* TokenValidationResultName(TokenValidationResult r) noexcept {
     switch (r) {
-    case ValidationResult::Valid:            return "Valid";
-    case ValidationResult::Expired:          return "Expired";
-    case ValidationResult::Revoked:          return "Revoked";
-    case ValidationResult::InsufficientPriv: return "InsufficientPriv";
-    case ValidationResult::Malformed:        return "Malformed";
+    case TokenValidationResult::Valid:            return "Valid";
+    case TokenValidationResult::Expired:          return "Expired";
+    case TokenValidationResult::Revoked:          return "Revoked";
+    case TokenValidationResult::InsufficientPriv: return "InsufficientPriv";
+    case TokenValidationResult::Malformed:        return "Malformed";
     default:                                 return "Unknown";
     }
 }
 
 /// Information extracted from a validated access token
 struct AccessTokenInfo {
-    TokenType        type = TokenType::Process;
-    ValidationResult result = ValidationResult::Malformed;
+    AccessTokenType        type = AccessTokenType::Process;
+    TokenValidationResult result = TokenValidationResult::Malformed;
     std::string      userName;          // e.g. "DOMAIN\\user"
     uint32_t         elevationLevel = 0; // 0 = not elevated, 1+ = elevation tiers
     uint32_t         integrity = 0;  // Integrity level (SECURITY_MANDATORY_*)
@@ -78,25 +78,25 @@ public:
     AccessTokenValidator& operator=(AccessTokenValidator&&) noexcept = default;
 
     /// Validate the provided token and populate info
-    ValidationResult ValidateToken(uint64_t tokenHandle, AccessTokenInfo& outInfo) const {
+    TokenValidationResult ValidateToken(uint64_t tokenHandle, AccessTokenInfo& outInfo) const {
         if (tokenHandle == 0) {
-            outInfo.result = ValidationResult::Malformed;
-            return ValidationResult::Malformed;
+            outInfo.result = TokenValidationResult::Malformed;
+            return TokenValidationResult::Malformed;
         }
         // Simulated validation — production queries Win32 token APIs
-        outInfo.type = TokenType::Process;
-        outInfo.result = ValidationResult::Valid;
+        outInfo.type = AccessTokenType::Process;
+        outInfo.result = TokenValidationResult::Valid;
         outInfo.userName = "NT AUTHORITY\\SYSTEM";
         outInfo.elevationLevel = 0;
         outInfo.integrity = INTEGRITY_MEDIUM;
-        return ValidationResult::Valid;
+        return TokenValidationResult::Valid;
     }
 
     /// Get info about the current process token
     AccessTokenInfo GetCurrentToken() const {
         AccessTokenInfo info{};
-        info.type = TokenType::Process;
-        info.result = ValidationResult::Valid;
+        info.type = AccessTokenType::Process;
+        info.result = TokenValidationResult::Valid;
         info.userName = "CurrentUser";
         info.elevationLevel = 0;
         info.integrity = INTEGRITY_MEDIUM;

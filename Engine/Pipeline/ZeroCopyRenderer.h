@@ -27,7 +27,7 @@ struct UploadStats {
     uint32_t stagingBufferReuseCount{0};
 };
 
-struct ZeroCopyConfig {
+struct RendererZeroCopyConfig {
     uint32_t stagingPoolSize{8};          // number of pooled staging textures
     uint32_t maxTextureWidth{4096};
     uint32_t maxTextureHeight{4096};
@@ -37,7 +37,7 @@ struct ZeroCopyConfig {
 
 class ZeroCopyRenderer {
 public:
-    explicit ZeroCopyRenderer(ZeroCopyConfig cfg = {});
+    explicit ZeroCopyRenderer(RendererZeroCopyConfig cfg = {});
     ~ZeroCopyRenderer();
 
     ZeroCopyRenderer(const ZeroCopyRenderer&) = delete;
@@ -77,7 +77,7 @@ private:
     StagingEntry* AcquireStaging(uint32_t w, uint32_t h);
     void          ReleaseStaging(StagingEntry* entry);
 
-    ZeroCopyConfig             m_cfg;
+    RendererZeroCopyConfig             m_cfg;
     ID3D11Device*              m_device{nullptr};
     ID3D11DeviceContext*       m_ctx{nullptr};
     std::vector<StagingEntry>  m_stagingPool;

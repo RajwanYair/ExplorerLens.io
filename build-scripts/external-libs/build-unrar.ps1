@@ -19,7 +19,7 @@ param(
 . "$PSScriptRoot\..\core\Build-Library-Core.ps1"
 
 $rootDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$unrarDir = Join-Path $rootDir "external\compression-libs\unrar"
+$unrarDir = Join-Path $rootDir "external\compression-libs\unrar-7.2.2"
 $projectFile = Join-Path $unrarDir "UnRARDll.vcxproj"
 $outputDir = Join-Path $rootDir "x64\Release"
 
@@ -125,4 +125,3 @@ try {
     Write-BuildLog "Build failed: $($_.Exception.Message)" -Level Error
     exit 1
 }
-

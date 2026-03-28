@@ -20,15 +20,15 @@ void ReleaseGateV3::AddPlatform(const PlatformValidation &p) {
   m_platforms.push_back(p);
 }
 
-GateVerdict ReleaseGateV3::ComputeVerdict(uint32_t passed, uint32_t failed,
+ReleaseGateVerdict ReleaseGateV3::ComputeVerdict(uint32_t passed, uint32_t failed,
                                           bool hasBlockers) const {
   if (hasBlockers)
-    return GateVerdict::Blocked;
+    return ReleaseGateVerdict::Blocked;
   if (failed == 0)
-    return GateVerdict::Pass;
+    return ReleaseGateVerdict::Pass;
   if (passed > failed)
-    return GateVerdict::ConditionalPass;
-  return GateVerdict::Fail;
+    return ReleaseGateVerdict::ConditionalPass;
+  return ReleaseGateVerdict::Fail;
 }
 
 ReleaseGateResult ReleaseGateV3::Evaluate() const {
@@ -113,15 +113,15 @@ const wchar_t *ReleaseGateV3::GetDimensionName(ReleaseKPIDimension dim) {
   return L"Unknown";
 }
 
-const wchar_t *ReleaseGateV3::GetVerdictName(GateVerdict verdict) {
+const wchar_t *ReleaseGateV3::GetVerdictName(ReleaseGateVerdict verdict) {
   switch (verdict) {
-  case GateVerdict::Pass:
+  case ReleaseGateVerdict::Pass:
     return L"Pass";
-  case GateVerdict::ConditionalPass:
+  case ReleaseGateVerdict::ConditionalPass:
     return L"ConditionalPass";
-  case GateVerdict::Fail:
+  case ReleaseGateVerdict::Fail:
     return L"Fail";
-  case GateVerdict::Blocked:
+  case ReleaseGateVerdict::Blocked:
     return L"Blocked";
   }
   return L"Unknown";

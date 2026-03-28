@@ -10,7 +10,7 @@
 namespace ExplorerLens { namespace Engine {
 
 /// Cloud storage provider
-enum class CloudProvider : uint8_t {
+enum class StorageCloudProvider : uint8_t {
  OneDrive,
  OneDriveBusiness,
  GoogleDrive,
@@ -40,8 +40,8 @@ enum class HydrationStrategy : uint8_t {
 };
 
 /// Cloud file info
-struct CloudFileInfo {
- CloudProvider provider = CloudProvider::OneDrive;
+struct StorageCloudFileInfo {
+ StorageCloudProvider provider = StorageCloudProvider::OneDrive;
  CloudFileState state = CloudFileState::Available;
  uint64_t fileSize = 0;
  std::wstring cloudPath;
@@ -61,14 +61,14 @@ struct CloudIntegrationConfig {
 /// Cloud storage integration
 class CloudStorageIntegration {
 public:
- static const wchar_t* ProviderName(CloudProvider p) {
+ static const wchar_t* ProviderName(StorageCloudProvider p) {
  switch (p) {
- case CloudProvider::OneDrive: return L"OneDrive";
- case CloudProvider::OneDriveBusiness: return L"OneDrive for Business";
- case CloudProvider::GoogleDrive: return L"Google Drive";
- case CloudProvider::SharePoint: return L"SharePoint";
- case CloudProvider::Dropbox: return L"Dropbox";
- case CloudProvider::iCloudDrive: return L"iCloud Drive";
+ case StorageCloudProvider::OneDrive: return L"OneDrive";
+ case StorageCloudProvider::OneDriveBusiness: return L"OneDrive for Business";
+ case StorageCloudProvider::GoogleDrive: return L"Google Drive";
+ case StorageCloudProvider::SharePoint: return L"SharePoint";
+ case StorageCloudProvider::Dropbox: return L"Dropbox";
+ case StorageCloudProvider::iCloudDrive: return L"iCloud Drive";
  default: return L"Unknown";
  }
  }
@@ -94,11 +94,11 @@ public:
  }
  }
 
- static constexpr size_t ProviderCount() { return static_cast<size_t>(CloudProvider::COUNT); }
+ static constexpr size_t ProviderCount() { return static_cast<size_t>(StorageCloudProvider::COUNT); }
  static constexpr size_t FileStateCount() { return static_cast<size_t>(CloudFileState::COUNT); }
  static constexpr size_t HydrationCount() { return static_cast<size_t>(HydrationStrategy::COUNT); }
 
- static bool ShouldHydrate(const CloudFileInfo& info, const CloudIntegrationConfig& cfg) {
+ static bool ShouldHydrate(const StorageCloudFileInfo& info, const CloudIntegrationConfig& cfg) {
  if (info.state == CloudFileState::Available) return false; // Already local
  switch (cfg.strategy) {
  case HydrationStrategy::AlwaysHydrate: return true;

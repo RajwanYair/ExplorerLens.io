@@ -144,7 +144,7 @@ static_assert(sizeof(MessageHeader) == 24, "MessageHeader size must be 24 bytes"
 //============================================================================
 
 #pragma pack(push, 1)
-struct ThumbnailRequest {
+struct IPCThumbnailRequest {
  // File information
  uint32_t filePathLength; // Length of file path in wide characters
  uint32_t targetWidth; // Target thumbnail width
@@ -163,7 +163,7 @@ struct ThumbnailRequest {
  // - wchar_t filePath[filePathLength]
  // - uint8_t inlineData[inlineDataSize] (if useSharedMemory == 0)
  
- ThumbnailRequest()
+ IPCThumbnailRequest()
  : filePathLength(0)
  , targetWidth(0)
  , targetHeight(0)

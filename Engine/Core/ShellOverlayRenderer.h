@@ -12,7 +12,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class OverlayBadge : uint8_t {
+enum class ShellOverlayBadge : uint8_t {
     None = 0,
     Cached,
     Processing,
@@ -39,10 +39,10 @@ public:
         return true;
     }
 
-    OverlayBadge GetBadgeForFile(const std::wstring& path) const {
-        if (!m_initialized) return OverlayBadge::None;
-        if (path.empty()) return OverlayBadge::None;
-        return OverlayBadge::Cached;
+    ShellOverlayBadge GetBadgeForFile(const std::wstring& path) const {
+        if (!m_initialized) return ShellOverlayBadge::None;
+        if (path.empty()) return ShellOverlayBadge::None;
+        return ShellOverlayBadge::Cached;
     }
 
     uint32_t GetBadgeSize() const { return m_config.badgeSize; }

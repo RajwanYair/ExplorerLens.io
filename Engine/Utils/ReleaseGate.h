@@ -234,7 +234,7 @@ enum class ReleaseKPIDimension : uint8_t {
 };
 
 /// Gate verdict
-enum class GateVerdict : uint8_t {
+enum class ReleaseGateVerdict : uint8_t {
     Pass,
     ConditionalPass, ///< Minor issues, can ship with known issues
     Fail,
@@ -283,7 +283,7 @@ struct PlatformValidation {
 
 /// Release gate result
 struct ReleaseGateResult {
-    GateVerdict verdict = GateVerdict::Blocked;
+    ReleaseGateVerdict verdict = ReleaseGateVerdict::Blocked;
     std::wstring version;
     std::vector<KPIMeasurement> measurements;
     std::vector<PlatformValidation> platforms;
@@ -324,7 +324,7 @@ public:
 
     /// Static helpers
     static const wchar_t* GetDimensionName(ReleaseKPIDimension dim);
-    static const wchar_t* GetVerdictName(GateVerdict verdict);
+    static const wchar_t* GetVerdictName(ReleaseGateVerdict verdict);
 
     /// Create default v9.2 thresholds
     static ReleaseThresholdsV92 ForV92();
@@ -334,7 +334,7 @@ private:
     std::vector<KPIMeasurement> m_measurements;
     std::vector<PlatformValidation> m_platforms;
 
-    GateVerdict ComputeVerdict(uint32_t passed, uint32_t failed,
+    ReleaseGateVerdict ComputeVerdict(uint32_t passed, uint32_t failed,
         bool hasBlockers) const;
 };
 
@@ -942,7 +942,7 @@ public:
     }
 
     /// Evaluate all and compute overall verdict
-    struct GateVerdict {
+    struct ReleaseGateVerdict {
         bool approved = false;
         size_t passed = 0;
         size_t failed = 0;
@@ -950,8 +950,8 @@ public:
         std::wstring version = L"10.6.0";
     };
 
-    GateVerdict Evaluate(const std::vector<GateV16Result>& results) const {
-        GateVerdict v;
+    ReleaseGateVerdict Evaluate(const std::vector<GateV16Result>& results) const {
+        ReleaseGateVerdict v;
         v.total = results.size();
         for (auto& r : results) {
             if (r.passed)

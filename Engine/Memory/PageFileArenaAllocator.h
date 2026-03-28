@@ -1,4 +1,4 @@
-﻿// PageFileArenaAllocator.h — Page-File-Backed Arena Allocator
+// PageFileArenaAllocator.h — Page-File-Backed Arena Allocator
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Uses CreateFileMapping(INVALID_HANDLE_VALUE) to back large arenas in the Windows page file — allows beyond-RAM allocations.
@@ -14,7 +14,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-struct ArenaStats { size_t capacityBytes; size_t usedBytes; size_t allocations; bool pageBacked; };
+struct PageArenaStats { size_t capacityBytes; size_t usedBytes; size_t allocations; bool pageBacked; };
 class PageFileArenaAllocator {
 public:
     explicit PageFileArenaAllocator(size_t capacityBytes = 256 * 1024 * 1024)
@@ -27,7 +27,7 @@ public:
         return reinterpret_cast<void*>(aligned + 0x10000);
     }
     void   Reset()     { m_used = 0; m_allocs = 0; }
-    ArenaStats Stats() const { return { m_capacity, m_used, m_allocs, true }; }
+    PageArenaStats Stats() const { return { m_capacity, m_used, m_allocs, true }; }
 private:
     size_t m_capacity, m_used;
     size_t m_allocs = 0;

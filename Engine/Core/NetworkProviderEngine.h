@@ -11,7 +11,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class NetworkProtocol : uint8_t {
+enum class ProviderNetProtocol : uint8_t {
  UNC = 0,
  SMB = 1,
  WebDAV = 2,
@@ -34,7 +34,7 @@ struct NetworkPath {
  std::wstring server;
  std::wstring share;
  std::wstring relativePath;
- NetworkProtocol protocol = NetworkProtocol::UNC;
+ ProviderNetProtocol protocol = ProviderNetProtocol::UNC;
 };
 
 struct NetworkThumbnailResult {
@@ -60,10 +60,10 @@ public:
  uint32_t GetMaxRetries() const { return m_maxRetries; }
 
  static bool IsNetworkPath(const std::wstring& path);
- static NetworkProtocol DetectProtocol(const std::wstring& path);
- static const wchar_t* GetProtocolName(NetworkProtocol protocol);
+ static ProviderNetProtocol DetectProtocol(const std::wstring& path);
+ static const wchar_t* GetProtocolName(ProviderNetProtocol protocol);
  static const wchar_t* GetStatusName(NetworkStatus status);
- static uint32_t GetProtocolCount() { return static_cast<uint32_t>(NetworkProtocol::ProtocolCount); }
+ static uint32_t GetProtocolCount() { return static_cast<uint32_t>(ProviderNetProtocol::ProtocolCount); }
 
 private:
  uint32_t m_timeoutMs = 5000;

@@ -7,7 +7,7 @@
 namespace ExplorerLens { namespace Engine {
 
 /// Update channel
-enum class UpdateChannel : uint32_t {
+enum class EngineUpdateChannel : uint32_t {
  Stable = 0,
  Beta = 1,
  Nightly = 2,
@@ -34,7 +34,7 @@ struct UpdateInfo {
  std::wstring downloadUrl;
  uint64_t sizeBytes = 0;
  std::wstring sha256Hash;
- UpdateChannel channel = UpdateChannel::Stable;
+ EngineUpdateChannel channel = EngineUpdateChannel::Stable;
  UpdateStatus status = UpdateStatus::Unknown;
 };
 
@@ -43,17 +43,17 @@ class UpdateEngine {
 public:
  UpdateEngine();
 
- static const wchar_t* GetChannelName(UpdateChannel ch);
+ static const wchar_t* GetChannelName(EngineUpdateChannel ch);
  static const wchar_t* GetStatusName(UpdateStatus status);
- static uint32_t GetChannelCount() { return static_cast<uint32_t>(UpdateChannel::COUNT); }
+ static uint32_t GetChannelCount() { return static_cast<uint32_t>(EngineUpdateChannel::COUNT); }
 
  /// Set current version
  void SetCurrentVersion(const std::wstring& ver) { m_currentVersion = ver; }
  std::wstring GetCurrentVersion() const { return m_currentVersion; }
 
  /// Set update channel
- void SetChannel(UpdateChannel ch) { m_channel = ch; }
- UpdateChannel GetChannel() const { return m_channel; }
+ void SetChannel(EngineUpdateChannel ch) { m_channel = ch; }
+ EngineUpdateChannel GetChannel() const { return m_channel; }
 
  /// Simulate a check for update
  UpdateInfo CheckForUpdate(const std::wstring& latestVersion);
@@ -64,7 +64,7 @@ public:
 
 private:
  std::wstring m_currentVersion = L"0.0.0";
- UpdateChannel m_channel = UpdateChannel::Stable;
+ EngineUpdateChannel m_channel = EngineUpdateChannel::Stable;
 };
 
 }} // namespace ExplorerLens::Engine

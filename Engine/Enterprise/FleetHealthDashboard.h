@@ -18,16 +18,16 @@
 
 namespace ExplorerLens { namespace Engine { namespace Enterprise {
 
-enum class HealthLevel : uint8_t {
+enum class FleetHealthLevel : uint8_t {
     Healthy   = 0,
     Degraded  = 1,
     Critical  = 2,
     Unknown   = 3
 };
 
-struct SubsystemHealth {
+struct FleetSubsystemHealth {
     std::string  name;
-    HealthLevel  level         = HealthLevel::Healthy;
+    FleetHealthLevel  level         = FleetHealthLevel::Healthy;
     std::string  statusMessage;
     uint64_t     totalOps      = 0;
     uint64_t     errorCount    = 0;
@@ -39,7 +39,7 @@ struct SubsystemHealth {
 struct FleetHealthSnapshot {
     std::string   machineId;
     std::string   engineVersion;
-    HealthLevel   overall         = HealthLevel::Healthy;
+    FleetHealthLevel   overall         = FleetHealthLevel::Healthy;
     uint64_t      decodeTotal     = 0;
     uint64_t      decodeErrors    = 0;
     float         cacheHitRate    = 0.f;   // 0.0–1.0
@@ -48,7 +48,7 @@ struct FleetHealthSnapshot {
     uint8_t       memPressure     = 0;     // 0=None … 4=Critical
     bool          aiModelsLoaded  = false;
     bool          policyCompliant = true;
-    std::vector<SubsystemHealth>          subsystems;
+    std::vector<FleetSubsystemHealth>          subsystems;
     std::chrono::system_clock::time_point capturedAt;
 };
 
@@ -93,7 +93,7 @@ public:
         m_snapshot.policyCompliant = ok;
     }
 
-    void RegisterSubsystem(const SubsystemHealth& sh) {
+    void RegisterSubsystem(const FleetSubsystemHealth& sh) {
         std::lock_guard<std::mutex> lk(m_mutex);
         for (auto& s : m_snapshot.subsystems) {
             if (s.name == sh.name) { s = sh; return; }
@@ -161,14 +161,14 @@ private:
         m_snapshot.engineVersion = "19.0.0";
     }
 
-    HealthLevel ComputeOverall() const {
+    FleetHealthLevel ComputeOverall() const {
         if (!m_snapshot.policyCompliant || m_snapshot.memPressure >= 4)
-            return HealthLevel::Critical;
+            return FleetHealthLevel::Critical;
         if (m_snapshot.memPressure >= 2 || m_snapshot.cacheHitRate < 0.3f)
-            return HealthLevel::Degraded;
+            return FleetHealthLevel::Degraded;
         for (auto& s : m_snapshot.subsystems)
-            if (s.level == HealthLevel::Critical) return HealthLevel::Critical;
-        return HealthLevel::Healthy;
+            if (s.level == FleetHealthLevel::Critical) return FleetHealthLevel::Critical;
+        return FleetHealthLevel::Healthy;
     }
 
     void UpdateLatencyBucket(float ms) {

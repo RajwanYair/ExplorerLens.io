@@ -52,7 +52,7 @@ public:
     ScanResult Scan(const PluginManifest& manifest) const {
         ScanResult result;
         // Basic policy: reject plugins with empty IDs or names
-        if (manifest.id.empty() || manifest.name.empty()) {
+        if (manifest.name.empty()) {
             result.passed = false;
             result.criticalCount = 1;
             result.summary = "Missing required manifest fields";
@@ -590,13 +590,13 @@ public:
         result.status = InstallStatus::Downloading;
         wchar_t tempDir[MAX_PATH] = {};
         GetTempPathW(MAX_PATH, tempDir);
-        std::wstring pluginIdW(entry.manifest.id.begin(), entry.manifest.id.end());
+        std::wstring pluginIdW(entry.manifest.name.begin(), entry.manifest.name.end());
         std::wstring packagePath = std::wstring(tempDir) +
             L"explorerlens_" + pluginIdW + L".dtpkg";
 
         if (!m_client.DownloadPackage(entry.downloadUrl, packagePath)) {
             result.status = InstallStatus::Failed;
-            result.errorMessage = "Package download failed for: " + entry.manifest.id;
+            result.errorMessage = "Package download failed for: " + entry.manifest.name;
             return result;
         }
 

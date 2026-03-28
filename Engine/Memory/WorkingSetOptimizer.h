@@ -22,7 +22,7 @@ enum class WorkingSetAction : uint8_t {
     SetMinMax
 };
 
-struct WorkingSetSnapshot {
+struct OptimizerWSSnapshot {
     uint64_t currentSizeBytes = 0;
     uint64_t peakSizeBytes = 0;
     uint64_t minSizeBytes = 0;
@@ -44,7 +44,7 @@ class WorkingSetOptimizer {
 public:
     WorkingSetOptimizer() = default;
 
-    void RecordSnapshot(const WorkingSetSnapshot& snapshot) {
+    void RecordSnapshot(const OptimizerWSSnapshot& snapshot) {
         m_snapshots.push_back(snapshot);
         m_metrics.snapshotCount++;
         m_totalBytes += snapshot.currentSizeBytes;
@@ -73,8 +73,8 @@ public:
 
     WorkingSetMetrics GetMetrics() const { return m_metrics; }
 
-    WorkingSetSnapshot GetLatestSnapshot() const {
-        return m_snapshots.empty() ? WorkingSetSnapshot{} : m_snapshots.back();
+    OptimizerWSSnapshot GetLatestSnapshot() const {
+        return m_snapshots.empty() ? OptimizerWSSnapshot{} : m_snapshots.back();
     }
 
     bool IsGrowthTrending() const {
@@ -84,7 +84,7 @@ public:
     }
 
 private:
-    std::vector<WorkingSetSnapshot> m_snapshots;
+    std::vector<OptimizerWSSnapshot> m_snapshots;
     WorkingSetMetrics m_metrics;
     uint64_t m_totalBytes = 0;
 };

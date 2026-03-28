@@ -1,6 +1,6 @@
 # ExplorerLens Troubleshooting Guide
 **Documentation Completion** 
-**Date:** February 15, 2026
+**Date:** March 27, 2026
 
 ---
 
@@ -589,7 +589,7 @@ $testFile = "C:\Photos\sample.webp"
 
 ## Current Known Issues
 
-**Version:** 15.2.1 "Zenith-S" — all P0 and P1 issues resolved
+**Version:** 23.5.0 "Vega-V" — all P0 and P1 issues resolved
 
 | Priority | Issue | Status | Workaround |
 |----------|-------|--------|------------|
@@ -618,5 +618,5 @@ $testFile = "C:\Photos\sample.webp"
 
 ---
 
-**Last Updated:** March 24, 2026 
-**Version:** 15.1.0
+**Last Updated:** March 27, 2026 
+**Version:** 23.5.0

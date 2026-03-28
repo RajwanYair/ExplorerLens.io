@@ -19,7 +19,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Atlas entry metadata stored in the directory
-struct AtlasEntry {
+struct MappedAtlasEntry {
     uint64_t keyHash = 0;
     uint32_t offsetBytes = 0;    // Offset into atlas data region
     uint32_t sizeBytes = 0;    // Compressed size
@@ -143,7 +143,7 @@ public:
         // Write pixel data at current offset
         std::memcpy(m_basePtr + m_dataOffset, data, size);
 
-        AtlasEntry entry;
+        MappedAtlasEntry entry;
         entry.keyHash = keyHash;
         entry.offsetBytes = static_cast<uint32_t>(m_dataOffset);
         entry.sizeBytes = size;
@@ -165,7 +165,7 @@ public:
     }
 
     /// Read a thumbnail from the atlas (zero-copy — returns pointer into mapping)
-    const uint8_t* Read(uint64_t keyHash, AtlasEntry& entryOut) const {
+    const uint8_t* Read(uint64_t keyHash, MappedAtlasEntry& entryOut) const {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (!m_basePtr) return nullptr;
 
@@ -219,7 +219,7 @@ private:
     AtlasHeader      m_header;
     mutable std::mutex m_mutex;
     mutable MmapAtlasStats m_stats;
-    std::unordered_map<uint64_t, AtlasEntry> m_directory;
+    std::unordered_map<uint64_t, MappedAtlasEntry> m_directory;
 };
 
 } // namespace Engine

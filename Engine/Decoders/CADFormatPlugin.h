@@ -12,7 +12,7 @@ namespace ExplorerLens::Decoders {
 
 // ─── CAD extension types ──────────────────────────────────────────────────────
 
-enum class CADFormat : uint32_t {
+enum class PluginCADFormat : uint32_t {
  DWG = 0, // AutoCAD Drawing
  DXF = 1, // Drawing Exchange Format
  DWF = 2, // Design Web Format
@@ -23,28 +23,28 @@ enum class CADFormat : uint32_t {
  Unknown = 99,
 };
 
-inline std::string ToString(CADFormat f) {
+inline std::string ToString(PluginCADFormat f) {
  switch (f) {
- case CADFormat::DWG: return "DWG";
- case CADFormat::DXF: return "DXF";
- case CADFormat::DWF: return "DWF";
- case CADFormat::DWFx: return "DWFx";
- case CADFormat::DGN: return "DGN";
- case CADFormat::STEP: return "STEP";
- case CADFormat::IGES: return "IGES";
+ case PluginCADFormat::DWG: return "DWG";
+ case PluginCADFormat::DXF: return "DXF";
+ case PluginCADFormat::DWF: return "DWF";
+ case PluginCADFormat::DWFx: return "DWFx";
+ case PluginCADFormat::DGN: return "DGN";
+ case PluginCADFormat::STEP: return "STEP";
+ case PluginCADFormat::IGES: return "IGES";
  default: return "Unknown";
  }
 }
 
-static inline CADFormat DetectCADFormat(const std::string& ext) {
- if (ext == ".dwg") return CADFormat::DWG;
- if (ext == ".dxf") return CADFormat::DXF;
- if (ext == ".dwf") return CADFormat::DWF;
- if (ext == ".dwfx") return CADFormat::DWFx;
- if (ext == ".dgn") return CADFormat::DGN;
- if (ext == ".stp" || ext == ".step") return CADFormat::STEP;
- if (ext == ".igs" || ext == ".iges") return CADFormat::IGES;
- return CADFormat::Unknown;
+static inline PluginCADFormat DetectCADFormat(const std::string& ext) {
+ if (ext == ".dwg") return PluginCADFormat::DWG;
+ if (ext == ".dxf") return PluginCADFormat::DXF;
+ if (ext == ".dwf") return PluginCADFormat::DWF;
+ if (ext == ".dwfx") return PluginCADFormat::DWFx;
+ if (ext == ".dgn") return PluginCADFormat::DGN;
+ if (ext == ".stp" || ext == ".step") return PluginCADFormat::STEP;
+ if (ext == ".igs" || ext == ".iges") return PluginCADFormat::IGES;
+ return PluginCADFormat::Unknown;
 }
 
 // ─── CAD bounding box ────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ struct CADDecodeCapabilities {
 struct CADDecodeRequest {
  const uint8_t* data { nullptr };
  size_t size { 0 };
- CADFormat format { CADFormat::Unknown };
+ PluginCADFormat format { PluginCADFormat::Unknown };
  uint32_t targetW { 256 };
  uint32_t targetH { 256 };
  bool renderAll { true }; // false = visible layers only
@@ -103,7 +103,7 @@ class ICADDecoderPlugin {
 public:
  virtual ~ICADDecoderPlugin() = default;
  virtual CADDecodeCapabilities GetCapabilities() const = 0;
- virtual bool CanDecode(CADFormat format) const = 0;
+ virtual bool CanDecode(PluginCADFormat format) const = 0;
  virtual CADDecodeResult Decode(const CADDecodeRequest& req) = 0;
 };
 
@@ -115,7 +115,7 @@ struct CADBadgeThumbnail {
  uint8_t r { 48 }, g { 120 }, b { 200 }; // blue = CAD brand colour
  std::string label; // e.g., "DWG" / "DXF"
 
- static CADBadgeThumbnail ForFormat(CADFormat f) {
+ static CADBadgeThumbnail ForFormat(PluginCADFormat f) {
  CADBadgeThumbnail b;
  b.label = ToString(f);
  return b;

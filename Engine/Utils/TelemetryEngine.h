@@ -1,6 +1,6 @@
 #pragma once
 /**
- * @file TelemetryEngine.h
+ * @file TelEngineCore.h
  * @brief Privacy-respecting, local-only telemetry engine for anonymous usage analytics.
  * @version 15.0.0
  * @date 2026-03-02
@@ -33,7 +33,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// @brief Local-only telemetry engine — data never leaves the machine.
-class TelemetryEngine {
+class TelEngineCore {
 public:
     /// @brief Controls what data is collected.
     enum class TelemetryLevel : uint32_t {
@@ -44,8 +44,8 @@ public:
     };
 
     /// @brief Singleton access.
-    static inline TelemetryEngine& Instance() {
-        static TelemetryEngine s_instance;
+    static inline TelEngineCore& Instance() {
+        static TelEngineCore s_instance;
         return s_instance;
     }
 
@@ -220,7 +220,7 @@ public:
         FlushBuffer();
     }
 
-    ~TelemetryEngine() {
+    ~TelEngineCore() {
         m_stopFlush.store(true, std::memory_order_release);
         if (m_flushThread.joinable()) {
             m_flushThread.join();
@@ -229,7 +229,7 @@ public:
     }
 
 private:
-    TelemetryEngine() {
+    TelEngineCore() {
         InitializeSRWLock(&m_lock);
         m_sessionId = GenerateSessionId();
         m_telemetryDir = ResolveTelemetryDir();
@@ -248,8 +248,8 @@ private:
             });
     }
 
-    TelemetryEngine(const TelemetryEngine&) = delete;
-    TelemetryEngine& operator=(const TelemetryEngine&) = delete;
+    TelEngineCore(const TelEngineCore&) = delete;
+    TelEngineCore& operator=(const TelEngineCore&) = delete;
 
     // Members
     SRWLOCK          m_lock{};

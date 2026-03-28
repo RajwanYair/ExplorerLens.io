@@ -335,9 +335,10 @@
 				"-LibheifZipPath",
 				"",
 				"-GitProxyUrl",
-				"http://proxy-chain.intel.com:928",
+				"",
+				// Set -GitProxyUrl to your corporate proxy if needed (e.g. http://proxy.example.com:8080)
 				"-DisableGitSslVerifyForProxy",
-				"1"
+				"0"
 			],
 			"group": "build",
 			"problemMatcher": [],

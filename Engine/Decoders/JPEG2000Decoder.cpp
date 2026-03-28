@@ -119,10 +119,10 @@ static void opjMemFree(void* userData) {
 }
 
 /// Decode JPEG 2000 using OpenJPEG library
-static JP2DecodeResult DecodeWithOpenJPEG(const uint8_t* data, size_t dataSize,
+static J2KDecodeResult DecodeWithOpenJPEG(const uint8_t* data, size_t dataSize,
     JP2Format format,
     const JP2DecodeOptions& opts) {
-    JP2DecodeResult result;
+    J2KDecodeResult result;
 
     OPJ_CODEC_FORMAT codecFormat = OPJ_CODEC_JP2;
     if (format == JP2Format::J2K) codecFormat = OPJ_CODEC_J2K;
@@ -227,9 +227,9 @@ static JP2DecodeResult DecodeWithOpenJPEG(const uint8_t* data, size_t dataSize,
 //==============================================================================
 
 #ifndef HAS_OPENJPEG
-static JP2DecodeResult DecodeFallback(const uint8_t* data, size_t dataSize,
+static J2KDecodeResult DecodeFallback(const uint8_t* data, size_t dataSize,
     JP2Format format) {
-    JP2DecodeResult result;
+    J2KDecodeResult result;
 
     if (format == JP2Format::J2K && dataSize >= 10) {
         // Parse J2K SIZ marker for dimensions
@@ -321,7 +321,7 @@ HRESULT DecodeJPEG2000Thumbnail(const wchar_t* filePath, uint32_t requestedSize,
     }
 
     // Decode
-    JP2DecodeResult result;
+    J2KDecodeResult result;
 
 #ifdef HAS_OPENJPEG
     JP2DecodeOptions opts = JP2DecodeOptions::Thumbnail(requestedSize);

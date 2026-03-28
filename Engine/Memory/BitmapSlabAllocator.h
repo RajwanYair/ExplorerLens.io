@@ -28,7 +28,7 @@ struct SlabConfig {
     uint32_t  growIncrement = 4;
 };
 
-struct SlabStats {
+struct BitmapSlabStats {
     uint64_t totalAllocations = 0;
     uint64_t totalFrees = 0;
     uint64_t poolHits = 0;
@@ -124,7 +124,7 @@ public:
         return false;
     }
 
-    SlabStats GetStats() const { return m_stats; }
+    BitmapSlabStats GetStats() const { return m_stats; }
     bool IsInitialized() const { return m_initialized; }
 
     uint32_t GetBestSlabSize(uint32_t width, uint32_t height, uint32_t channels = 4) const {
@@ -176,7 +176,7 @@ private:
     }
 
     SlabConfig                              m_config{};
-    SlabStats                               m_stats{};
+    BitmapSlabStats                               m_stats{};
     std::vector<std::vector<uint8_t>>       m_pool128;
     std::vector<std::vector<uint8_t>>       m_pool256;
     std::vector<std::vector<uint8_t>>       m_pool512;

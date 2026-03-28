@@ -81,7 +81,7 @@ using PFN_GetBufferSize = uint32_t(*)(
 // Plugin load state
 // ============================================================================
 
-enum class PluginState : uint8_t {
+enum class LoaderPluginState : uint8_t {
     Unloaded,        // Not loaded
     Loading,         // LoadLibrary in progress
     Resolving,       // Resolving C ABI symbols
@@ -91,7 +91,7 @@ enum class PluginState : uint8_t {
     Unloading        // FreeLibrary in progress
 };
 
-inline const char* PluginStateToString(PluginState state) {
+inline const char* PluginStateToString(LoaderPluginState state) {
     static const char* names[] = {
         "Unloaded", "Loading", "Resolving", "Initializing",
         "Active", "Error", "Unloading"
@@ -103,13 +103,13 @@ inline const char* PluginStateToString(PluginState state) {
 // Plugin descriptor (populated after successful load)
 // ============================================================================
 
-struct PluginDescriptor {
+struct LoaderPluginDescriptor {
     std::string      name;
     std::string      version;
     std::wstring     dllPath;
     PluginABIVersion abiVersion = { 0, 0 };
     std::vector<std::string> supportedExtensions;  // e.g., { ".step", ".stp" }
-    PluginState      state = PluginState::Unloaded;
+    LoaderPluginState      state = LoaderPluginState::Unloaded;
     std::string      errorMessage;
 
     // Performance metrics
@@ -165,8 +165,8 @@ public:
     }
 
     bool IsLoaded() const { return m_hModule != nullptr; }
-    const PluginDescriptor& GetDescriptor() const { return m_descriptor; }
-    PluginDescriptor& GetDescriptor() { return m_descriptor; }
+    const LoaderPluginDescriptor& GetDescriptor() const { return m_descriptor; }
+    LoaderPluginDescriptor& GetDescriptor() { return m_descriptor; }
 
     /// Load a plugin DLL and resolve all C ABI symbols
     bool Load(const std::wstring& dllPath) {
@@ -174,25 +174,25 @@ public:
 
         // Store wide path for descriptor
         m_descriptor.dllPath = dllPath;
-        m_descriptor.state = PluginState::Loading;
+        m_descriptor.state = LoaderPluginState::Loading;
 
         // LoadLibrary with restricted search path (security)
         m_hModule = ::LoadLibraryExW(dllPath.c_str(), nullptr,
             LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
 
         if (!m_hModule) {
-            m_descriptor.state = PluginState::Error;
+            m_descriptor.state = LoaderPluginState::Error;
             m_descriptor.errorMessage = "LoadLibrary failed, error=" +
                 std::to_string(::GetLastError());
             return false;
         }
 
         // Resolve symbols
-        m_descriptor.state = PluginState::Resolving;
+        m_descriptor.state = LoaderPluginState::Resolving;
         if (!ResolveSymbols()) {
             ::FreeLibrary(m_hModule);
             m_hModule = nullptr;
-            m_descriptor.state = PluginState::Error;
+            m_descriptor.state = LoaderPluginState::Error;
             return false;
         }
 
@@ -203,7 +203,7 @@ public:
             m_descriptor.abiVersion = { maj, min };
 
             if (!m_descriptor.abiVersion.IsCompatibleWith(HOST_ABI_VERSION)) {
-                m_descriptor.state = PluginState::Error;
+                m_descriptor.state = LoaderPluginState::Error;
                 m_descriptor.errorMessage = "ABI version mismatch: plugin=" +
                     std::to_string(maj) + "." + std::to_string(min) +
                     " host=" + std::to_string(HOST_ABI_VERSION.major) + "." +
@@ -215,11 +215,11 @@ public:
         }
 
         // Initialize plugin
-        m_descriptor.state = PluginState::Initializing;
+        m_descriptor.state = LoaderPluginState::Initializing;
         if (m_pfnInit) {
             int32_t result = m_pfnInit();
             if (result != 0) {
-                m_descriptor.state = PluginState::Error;
+                m_descriptor.state = LoaderPluginState::Error;
                 m_descriptor.errorMessage = "PluginInit returned " + std::to_string(result);
                 if (m_pfnShutdown) m_pfnShutdown();
                 ::FreeLibrary(m_hModule);
@@ -238,20 +238,20 @@ public:
         auto elapsed = std::chrono::steady_clock::now() - start;
         m_descriptor.loadTimeUs = static_cast<uint64_t>(
             std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
-        m_descriptor.state = PluginState::Active;
+        m_descriptor.state = LoaderPluginState::Active;
         return true;
     }
 
     /// Unload the plugin DLL
     void Unload() {
         if (!m_hModule) return;
-        m_descriptor.state = PluginState::Unloading;
+        m_descriptor.state = LoaderPluginState::Unloading;
         if (m_pfnShutdown) {
             m_pfnShutdown();
         }
         ::FreeLibrary(m_hModule);
         m_hModule = nullptr;
-        m_descriptor.state = PluginState::Unloaded;
+        m_descriptor.state = LoaderPluginState::Unloaded;
     }
 
     /// Decode a thumbnail via the plugin's C ABI
@@ -260,7 +260,7 @@ public:
         uint32_t width, uint32_t height,
         uint8_t* buffer, uint32_t bufferSize,
         uint32_t* actualWidth, uint32_t* actualHeight) {
-        if (!m_pfnDecode || m_descriptor.state != PluginState::Active) return -1;
+        if (!m_pfnDecode || m_descriptor.state != LoaderPluginState::Active) return -1;
         m_descriptor.totalDecodes++;
         int32_t result = m_pfnDecode(filePath, width, height, buffer, bufferSize,
             actualWidth, actualHeight);
@@ -323,7 +323,7 @@ private:
     }
 
     HMODULE              m_hModule = nullptr;
-    PluginDescriptor     m_descriptor;
+    LoaderPluginDescriptor     m_descriptor;
 
     // C ABI function pointers
     PFN_PluginInit       m_pfnInit = nullptr;
@@ -448,9 +448,9 @@ public:
     }
 
     /// Get all loaded plugin descriptors
-    std::vector<PluginDescriptor> GetLoadedPlugins() const {
+    std::vector<LoaderPluginDescriptor> GetLoadedPlugins() const {
         std::lock_guard<std::mutex> lock(m_mutex);
-        std::vector<PluginDescriptor> result;
+        std::vector<LoaderPluginDescriptor> result;
         result.reserve(m_plugins.size());
         for (const auto& p : m_plugins) {
             result.push_back(p->GetDescriptor());

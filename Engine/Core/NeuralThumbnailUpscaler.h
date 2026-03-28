@@ -19,7 +19,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class UpscaleBackend : uint32_t {
+enum class NeuralUpscaleBackend : uint32_t {
     DirectML = 0,
     ONNXRuntime = 1,
     CPU_Bilinear = 2,  // Fallback
@@ -43,13 +43,13 @@ struct UpscaleRequest {
     bool preserveAlpha = true;
 };
 
-struct UpscaleResult {
+struct NeuralUpscaleResult {
     std::vector<uint8_t> outputPixels;
     uint32_t outputWidth = 0;
     uint32_t outputHeight = 0;
     uint32_t outputStride = 0;
     double inferenceTimeMs = 0.0;
-    UpscaleBackend backendUsed = UpscaleBackend::CPU_Bilinear;
+    NeuralUpscaleBackend backendUsed = NeuralUpscaleBackend::CPU_Bilinear;
     bool success = false;
 };
 
@@ -68,14 +68,14 @@ public:
         return s;
     }
 
-    void Initialize(UpscaleBackend preferred = UpscaleBackend::DirectML) {
+    void Initialize(NeuralUpscaleBackend preferred = NeuralUpscaleBackend::DirectML) {
         m_preferredBackend = preferred;
         m_initialized = true;
         DetectCapabilities();
     }
 
-    UpscaleResult Upscale(const UpscaleRequest& req) {
-        UpscaleResult result;
+    NeuralUpscaleResult Upscale(const UpscaleRequest& req) {
+        NeuralUpscaleResult result;
         if (!m_initialized || !req.inputPixels || req.inputWidth == 0 || req.inputHeight == 0) {
             return result;
         }
@@ -89,7 +89,7 @@ public:
 
         // Simulate upscale with bilinear interpolation (production uses DirectML)
         BilinearUpscale(req, result);
-        result.backendUsed = m_gpuAvailable ? UpscaleBackend::DirectML : UpscaleBackend::CPU_Bilinear;
+        result.backendUsed = m_gpuAvailable ? NeuralUpscaleBackend::DirectML : NeuralUpscaleBackend::CPU_Bilinear;
         result.inferenceTimeMs = 8.5;
         result.success = true;
 
@@ -101,7 +101,7 @@ public:
     }
 
     bool IsGPUAvailable() const { return m_gpuAvailable; }
-    UpscaleBackend PreferredBackend() const { return m_preferredBackend; }
+    NeuralUpscaleBackend PreferredBackend() const { return m_preferredBackend; }
     const UpscaleStats& Stats() const { return m_stats; }
 
     std::vector<UpscaleModel> SupportedModels() const {
@@ -117,7 +117,7 @@ private:
         m_gpuAvailable = true; // Assume available, runtime check in production
     }
 
-    void BilinearUpscale(const UpscaleRequest& req, UpscaleResult& res) {
+    void BilinearUpscale(const UpscaleRequest& req, NeuralUpscaleResult& res) {
         for (uint32_t y = 0; y < res.outputHeight; y++) {
             for (uint32_t x = 0; x < res.outputWidth; x++) {
                 uint32_t srcX = std::min(x / req.scaleFactor, req.inputWidth - 1);
@@ -137,7 +137,7 @@ private:
 
     bool m_initialized = false;
     bool m_gpuAvailable = false;
-    UpscaleBackend m_preferredBackend = UpscaleBackend::DirectML;
+    NeuralUpscaleBackend m_preferredBackend = NeuralUpscaleBackend::DirectML;
     UpscaleStats m_stats;
 };
 

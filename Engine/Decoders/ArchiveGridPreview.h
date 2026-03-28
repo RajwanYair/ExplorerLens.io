@@ -24,7 +24,7 @@ namespace Decoders {
 // Archive Format Classification
 //==============================================================================
 
-enum class ArchiveFormat
+enum class GridArchiveFormat
 {
     Unknown,
     ZIP, // Standard ZIP
@@ -37,43 +37,43 @@ enum class ArchiveFormat
     CBT // Comic Book TAR
 };
 
-inline const char* ArchiveFormatName(ArchiveFormat f) {
+inline const char* ArchiveFormatName(GridArchiveFormat f) {
     switch (f) {
-    case ArchiveFormat::Unknown: return "Unknown";
-    case ArchiveFormat::ZIP: return "ZIP";
-    case ArchiveFormat::RAR: return "RAR";
-    case ArchiveFormat::SevenZip: return "7z";
-    case ArchiveFormat::TAR: return "TAR";
-    case ArchiveFormat::CBZ: return "CBZ";
-    case ArchiveFormat::CBR: return "CBR";
-    case ArchiveFormat::CB7: return "CB7";
-    case ArchiveFormat::CBT: return "CBT";
+    case GridArchiveFormat::Unknown: return "Unknown";
+    case GridArchiveFormat::ZIP: return "ZIP";
+    case GridArchiveFormat::RAR: return "RAR";
+    case GridArchiveFormat::SevenZip: return "7z";
+    case GridArchiveFormat::TAR: return "TAR";
+    case GridArchiveFormat::CBZ: return "CBZ";
+    case GridArchiveFormat::CBR: return "CBR";
+    case GridArchiveFormat::CB7: return "CB7";
+    case GridArchiveFormat::CBT: return "CBT";
     }
     return "Unknown";
 }
 
-inline bool IsComicBookFormat(ArchiveFormat f) {
-    return f == ArchiveFormat::CBZ || f == ArchiveFormat::CBR ||
-        f == ArchiveFormat::CB7 || f == ArchiveFormat::CBT;
+inline bool IsComicBookFormat(GridArchiveFormat f) {
+    return f == GridArchiveFormat::CBZ || f == GridArchiveFormat::CBR ||
+        f == GridArchiveFormat::CB7 || f == GridArchiveFormat::CBT;
 }
 
 // Detect archive format from file extension
-inline ArchiveFormat DetectArchiveFormat(const std::string& ext) {
+inline GridArchiveFormat DetectArchiveFormat(const std::string& ext) {
     std::string lower = ext;
     std::transform(lower.begin(), lower.end(), lower.begin(),
         [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
 
-    if (lower == ".zip") return ArchiveFormat::ZIP;
-    if (lower == ".rar") return ArchiveFormat::RAR;
-    if (lower == ".7z") return ArchiveFormat::SevenZip;
+    if (lower == ".zip") return GridArchiveFormat::ZIP;
+    if (lower == ".rar") return GridArchiveFormat::RAR;
+    if (lower == ".7z") return GridArchiveFormat::SevenZip;
     if (lower == ".tar" || lower == ".tar.gz" || lower == ".tgz")
-        return ArchiveFormat::TAR;
-    if (lower == ".cbz") return ArchiveFormat::CBZ;
-    if (lower == ".cbr") return ArchiveFormat::CBR;
-    if (lower == ".cb7") return ArchiveFormat::CB7;
-    if (lower == ".cbt") return ArchiveFormat::CBT;
+        return GridArchiveFormat::TAR;
+    if (lower == ".cbz") return GridArchiveFormat::CBZ;
+    if (lower == ".cbr") return GridArchiveFormat::CBR;
+    if (lower == ".cb7") return GridArchiveFormat::CB7;
+    if (lower == ".cbt") return GridArchiveFormat::CBT;
 
-    return ArchiveFormat::Unknown;
+    return GridArchiveFormat::Unknown;
 }
 
 // All supported archive extensions
@@ -128,7 +128,7 @@ inline const char* GridLayoutModeName(GridLayoutMode m) {
 }
 
 // Auto-select layout mode based on format and image count
-inline GridLayoutMode RecommendedGridLayout(ArchiveFormat format, uint32_t imageCount) {
+inline GridLayoutMode RecommendedGridLayout(GridArchiveFormat format, uint32_t imageCount) {
     if (imageCount == 0)
         return GridLayoutMode::SingleCover;
     if (imageCount == 1)
@@ -237,7 +237,7 @@ struct ArchiveBadge
 {
     uint32_t imageCount = 0;
     uint32_t totalFiles = 0;
-    ArchiveFormat format = ArchiveFormat::Unknown;
+    GridArchiveFormat format = GridArchiveFormat::Unknown;
 
     std::string BadgeText() const {
         if (imageCount == 0) return "";
@@ -292,7 +292,7 @@ struct ArchiveGridConfig
 struct ArchiveGridResult
 {
     bool success = false;
-    ArchiveFormat format = ArchiveFormat::Unknown;
+    GridArchiveFormat format = GridArchiveFormat::Unknown;
     GridLayoutMode layoutMode = GridLayoutMode::Standard2x2;
     uint32_t imagesFound = 0;
     uint32_t imagesDecoded = 0;

@@ -15,7 +15,7 @@
 namespace ExplorerLens { namespace Engine {
 
 // Sandbox restriction level — higher levels are more restrictive
-enum class SandboxLevel {
+enum class JobObjectLevel {
     None,       // No restrictions (development only)
     Minimal,    // Memory cap + no child processes
     Standard,   // + UI restrictions + DLL injection guard
@@ -23,7 +23,7 @@ enum class SandboxLevel {
 };
 
 struct SandboxEscapePolicy {
-    SandboxLevel level         = SandboxLevel::Standard;
+    JobObjectLevel level         = JobObjectLevel::Standard;
     uint64_t     maxMemoryBytes = 512ULL * 1024 * 1024; // 512 MB
     uint32_t     maxCpuRatePercent = 25; // Per-job CPU rate cap (requires Win8+)
     bool         allowChildProcesses = false;
@@ -46,7 +46,7 @@ public:
     // Create a Job Object with the given policy
     bool Create(const SandboxEscapePolicy& policy = SandboxEscapePolicy{}) {
         m_policy = policy;
-        if (policy.level == SandboxLevel::None) return true;
+        if (policy.level == JobObjectLevel::None) return true;
 
         m_hJob = CreateJobObjectW(nullptr, nullptr);
         if (!m_hJob) return false;
@@ -74,7 +74,7 @@ public:
                 &jeli, sizeof(jeli));
 
         // --- UI restrictions ---
-        if (policy.level >= SandboxLevel::Standard) {
+        if (policy.level >= JobObjectLevel::Standard) {
             JOBOBJECT_BASIC_UI_RESTRICTIONS uiRestr = {};
             uiRestr.UIRestrictionsClass =
                 JOB_OBJECT_UILIMIT_HANDLES |

@@ -81,7 +81,7 @@ struct GPUUploadDescriptor {
 
 // ─── Zero-copy pipeline context ──────────────────────────────────────────────
 
-struct ZeroCopyStats {
+struct PipelineZeroCopyStats {
  uint64_t bytesCopied{0}; // should be 0 for true zero-copy
  uint64_t bytesHandedOff{0};
  uint32_t uploadCount{0};
@@ -140,7 +140,7 @@ public:
  }
 
  static bool UploadToGPU(const GPUUploadDescriptor &desc,
- ZeroCopyStats &stats) {
+ PipelineZeroCopyStats &stats) {
  if (!desc.IsReady())
  return false;
  uint64_t bytes = (uint64_t)desc.heightPx * desc.rowPitchBytes;

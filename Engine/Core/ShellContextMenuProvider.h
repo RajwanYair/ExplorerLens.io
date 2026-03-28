@@ -13,7 +13,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class ContextMenuAction : uint8_t {
+enum class ContextMenuProviderAction : uint8_t {
     Redecode = 0,
     ExportThumbnail,
     ClearCacheEntry,
@@ -24,7 +24,7 @@ enum class ContextMenuAction : uint8_t {
 
 struct ShellContextMenuItem {
     std::wstring label;
-    ContextMenuAction action = ContextMenuAction::Redecode;
+    ContextMenuProviderAction action = ContextMenuProviderAction::Redecode;
     bool enabled = true;
     uint32_t iconId = 0;
 };
@@ -36,14 +36,14 @@ public:
     std::vector<ShellContextMenuItem> GetMenuItems(const std::wstring& filePath) const {
         std::vector<ShellContextMenuItem> items;
         if (filePath.empty()) return items;
-        items.push_back(ShellContextMenuItem{ L"Re-decode Thumbnail", ContextMenuAction::Redecode, true, 1 });
-        items.push_back(ShellContextMenuItem{ L"Export Thumbnail...", ContextMenuAction::ExportThumbnail, true, 2 });
-        items.push_back(ShellContextMenuItem{ L"Clear Cache Entry", ContextMenuAction::ClearCacheEntry, true, 3 });
+        items.push_back(ShellContextMenuItem{ L"Re-decode Thumbnail", ContextMenuProviderAction::Redecode, true, 1 });
+        items.push_back(ShellContextMenuItem{ L"Export Thumbnail...", ContextMenuProviderAction::ExportThumbnail, true, 2 });
+        items.push_back(ShellContextMenuItem{ L"Clear Cache Entry", ContextMenuProviderAction::ClearCacheEntry, true, 3 });
         return items;
     }
 
-    bool ExecuteAction(ContextMenuAction action, const std::wstring& /*filePath*/) const {
-        return action != ContextMenuAction::OpenWithDecoder;
+    bool ExecuteAction(ContextMenuProviderAction action, const std::wstring& /*filePath*/) const {
+        return action != ContextMenuProviderAction::OpenWithDecoder;
     }
 
     uint32_t GetMenuItemCount() const { return 6; }

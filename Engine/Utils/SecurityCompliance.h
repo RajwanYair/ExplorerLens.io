@@ -564,7 +564,7 @@ private:
 // Reproducible Build Configuration
 //============================================================================
 
-struct ReproducibleBuildConfig {
+struct ComplianceBuildConfig {
     // Compiler determinism
     bool deterministic_output = true; // /Brepro (MSVC)
     bool disable_timestamps = true; // /d1nodatetime
@@ -706,15 +706,15 @@ public:
 // Signed Release Manifest (SHA256SUMS.sig)
 //============================================================================
 
-struct ReleaseArtifact {
+struct ComplianceArtifact {
     std::wstring filename;
     std::wstring sha256;
     uint64_t size_bytes = 0;
 };
 
-class ReleaseManifest {
+class ComplianceReleaseManifest {
 public:
-    void AddArtifact(const ReleaseArtifact& artifact) {
+    void AddArtifact(const ComplianceArtifact& artifact) {
         artifacts_.push_back(artifact);
     }
 
@@ -739,10 +739,10 @@ public:
 
     uint32_t ArtifactCount() const { return static_cast<uint32_t>(artifacts_.size()); }
 
-    const std::vector<ReleaseArtifact>& GetArtifacts() const { return artifacts_; }
+    const std::vector<ComplianceArtifact>& GetArtifacts() const { return artifacts_; }
 
 private:
-    std::vector<ReleaseArtifact> artifacts_;
+    std::vector<ComplianceArtifact> artifacts_;
 };
 
 } // namespace SupplyChain

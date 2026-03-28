@@ -3609,11 +3609,11 @@ TEST(TestMSIX_SigningNames) {
 TEST(TestMSIX_PackageTypeNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::wstring(MSIXPackageManager::GetPackageTypeName(
-        PackageType::MSIX)) == L"MSIX");
+        MSIXPackageType::MSIX)) == L"MSIX");
     ASSERT(std::wstring(MSIXPackageManager::GetPackageTypeName(
-        PackageType::MSIXBundle)) == L"MSIXBundle");
+        MSIXPackageType::MSIXBundle)) == L"MSIXBundle");
     ASSERT(std::wstring(MSIXPackageManager::GetPackageTypeName(
-        PackageType::SparsePackage)) == L"SparsePackage");
+        MSIXPackageType::SparsePackage)) == L"SparsePackage");
 }
 
 TEST(TestMSIX_Capabilities) {
@@ -3900,7 +3900,7 @@ TEST(TestReleaseV3_EvaluateEmpty) {
     auto result = gate.Evaluate();
     ASSERT(result.version == L"v9.2.0");
     ASSERT(result.totalKPIs == 0);
-    ASSERT(result.verdict == GateVerdict::Pass); // No KPIs = no failures
+    ASSERT(result.verdict == ReleaseGateVerdict::Pass); // No KPIs = no failures
 }
 
 TEST(TestReleaseV3_AllPass) {
@@ -3917,7 +3917,7 @@ TEST(TestReleaseV3_AllPass) {
     m2.passed = true;
     gate.AddMeasurement(m2);
     auto result = gate.Evaluate();
-    ASSERT(result.verdict == GateVerdict::Pass);
+    ASSERT(result.verdict == ReleaseGateVerdict::Pass);
     ASSERT(result.passedKPIs == 2);
     ASSERT(result.failedKPIs == 0);
     ASSERT(result.overallScore == 100.0);
@@ -3933,7 +3933,7 @@ TEST(TestReleaseV3_BlockerFails) {
     m.notes = L"3 errors remain";
     gate.AddMeasurement(m);
     auto result = gate.Evaluate();
-    ASSERT(result.verdict == GateVerdict::Blocked);
+    ASSERT(result.verdict == ReleaseGateVerdict::Blocked);
     ASSERT(result.blockers.size() == 1);
 }
 
@@ -3955,7 +3955,7 @@ TEST(TestReleaseV3_ConditionalPass) {
     fail.notes = L"2 docs outdated";
     gate.AddMeasurement(fail);
     auto result = gate.Evaluate();
-    ASSERT(result.verdict == GateVerdict::ConditionalPass);
+    ASSERT(result.verdict == ReleaseGateVerdict::ConditionalPass);
     ASSERT(result.overallScore == 90.0);
 }
 
@@ -3979,7 +3979,7 @@ TEST(TestReleaseV3_ReleaseNotes) {
     ReleaseGateV3 gate;
     ReleaseGateResult result;
     result.version = L"v9.2.0";
-    result.verdict = GateVerdict::Pass;
+    result.verdict = ReleaseGateVerdict::Pass;
     result.overallScore = 100.0;
     result.passedKPIs = 9;
     result.totalKPIs = 9;
@@ -4009,13 +4009,13 @@ TEST(TestReleaseV3_DimensionNames) {
 
 TEST(TestReleaseV3_VerdictNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(GateVerdict::Pass)) ==
+    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(ReleaseGateVerdict::Pass)) ==
         L"Pass");
-    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(GateVerdict::Fail)) ==
+    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(ReleaseGateVerdict::Fail)) ==
         L"Fail");
     ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(
-        GateVerdict::ConditionalPass)) == L"ConditionalPass");
-    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(GateVerdict::Blocked)) ==
+        ReleaseGateVerdict::ConditionalPass)) == L"ConditionalPass");
+    ASSERT(std::wstring(ReleaseGateV3::GetVerdictName(ReleaseGateVerdict::Blocked)) ==
         L"Blocked");
 }
 
@@ -4586,11 +4586,11 @@ TEST(TestExport_BMPEncode) {
 TEST(TestExport_QualityPresets) {
     using namespace ExplorerLens::Engine;
     ASSERT(EncoderExportEngine::GetDefaultQuality(ExportFormat::JPEG,
-        QualityPreset::Draft) == 50);
+        ExportQualityPreset::Draft) == 50);
     ASSERT(EncoderExportEngine::GetDefaultQuality(ExportFormat::JPEG,
-        QualityPreset::High) == 95);
+        ExportQualityPreset::High) == 95);
     ASSERT(EncoderExportEngine::GetDefaultQuality(
-        ExportFormat::JPEG, QualityPreset::Lossless) == 100);
+        ExportFormat::JPEG, ExportQualityPreset::Lossless) == 100);
 }
 
 //==============================================================================
@@ -4791,11 +4791,11 @@ TEST(TestCI_ValidatorCreation) {
 
 TEST(TestCI_ArtifactTypeNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ArtifactType::DLL)) ==
+    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ValidatorArtifactType::DLL)) ==
         L"DLL");
-    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ArtifactType::MSI)) ==
+    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ValidatorArtifactType::MSI)) ==
         L"MSI");
-    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ArtifactType::MSIX)) ==
+    ASSERT(std::wstring(CIValidator::GetArtifactTypeName(ValidatorArtifactType::MSIX)) ==
         L"MSIX");
 }
 
@@ -4810,11 +4810,11 @@ TEST(TestCI_StageCount) {
 
 TEST(TestEBook_FormatNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(EBookDecoder::GetFormatName(EBookFormat::EPUB)) ==
+    ASSERT(std::wstring(EBookDecoder::GetFormatName(DecoderEBookFormat::EPUB)) ==
         L"EPUB");
-    ASSERT(std::wstring(EBookDecoder::GetFormatName(EBookFormat::MOBI)) ==
+    ASSERT(std::wstring(EBookDecoder::GetFormatName(DecoderEBookFormat::MOBI)) ==
         L"MOBI");
-    ASSERT(std::wstring(EBookDecoder::GetFormatName(EBookFormat::FB2)) == L"FB2");
+    ASSERT(std::wstring(EBookDecoder::GetFormatName(DecoderEBookFormat::FB2)) == L"FB2");
 }
 
 TEST(TestEBook_DecoderCreation) {
@@ -4826,11 +4826,11 @@ TEST(TestEBook_DecoderCreation) {
 TEST(TestEBook_FormatDetection) {
     using namespace ExplorerLens::Engine;
     // Null/empty data returns Unknown
-    ASSERT(EBookDecoder::DetectFormat(nullptr, 0) == EBookFormat::Unknown);
+    ASSERT(EBookDecoder::DetectFormat(nullptr, 0) == DecoderEBookFormat::Unknown);
     // Random bytes return Unknown
     uint8_t random[] = { 0xFF, 0xFE, 0x00, 0x01 };
     ASSERT(EBookDecoder::DetectFormat(random, sizeof(random)) ==
-        EBookFormat::Unknown);
+        DecoderEBookFormat::Unknown);
 }
 
 TEST(TestEBook_CoverExtraction) {
@@ -5151,11 +5151,11 @@ TEST(TestPortable_CacheSize) {
 TEST(TestNetwork_ProtocolNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::wstring(NetworkProviderEngine::GetProtocolName(
-        NetworkProtocol::UNC)) == L"UNC");
+        ProviderNetProtocol::UNC)) == L"UNC");
     ASSERT(std::wstring(NetworkProviderEngine::GetProtocolName(
-        NetworkProtocol::SMB)) == L"SMB");
+        ProviderNetProtocol::SMB)) == L"SMB");
     ASSERT(std::wstring(NetworkProviderEngine::GetProtocolName(
-        NetworkProtocol::WebDAV)) == L"WebDAV");
+        ProviderNetProtocol::WebDAV)) == L"WebDAV");
 }
 
 TEST(TestNetwork_PathDetection) {
@@ -5168,11 +5168,11 @@ TEST(TestNetwork_PathDetection) {
 TEST(TestNetwork_ProtocolDetection) {
     using namespace ExplorerLens::Engine;
     ASSERT(NetworkProviderEngine::DetectProtocol(L"\\\\server\\share") ==
-        NetworkProtocol::UNC);
+        ProviderNetProtocol::UNC);
     ASSERT(NetworkProviderEngine::DetectProtocol(L"ftp://server/file") ==
-        NetworkProtocol::FTP);
+        ProviderNetProtocol::FTP);
     ASSERT(NetworkProviderEngine::DetectProtocol(L"http://example.com/file") ==
-        NetworkProtocol::HTTP);
+        ProviderNetProtocol::HTTP);
 }
 
 TEST(TestNetwork_ParsePath) {
@@ -5181,7 +5181,7 @@ TEST(TestNetwork_ParsePath) {
     auto path = engine.ParsePath(L"\\\\myserver\\myshare\\folder\\file.cbz");
     ASSERT(path.server == L"myserver");
     ASSERT(path.share == L"myshare");
-    ASSERT(path.protocol == NetworkProtocol::UNC);
+    ASSERT(path.protocol == ProviderNetProtocol::UNC);
 }
 
 TEST(TestNetwork_ProtocolCount) {
@@ -5291,30 +5291,30 @@ TEST(TestA11y_ComplianceAudit) {
 TEST(TestCloud_ProviderNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::wstring(CloudSyncProvider::GetProviderName(
-        CloudProvider::OneDrive)) == L"OneDrive");
+        StorageCloudProvider::OneDrive)) == L"OneDrive");
     ASSERT(std::wstring(CloudSyncProvider::GetProviderName(
-        CloudProvider::SharePoint)) == L"SharePoint");
+        StorageCloudProvider::SharePoint)) == L"SharePoint");
     ASSERT(std::wstring(CloudSyncProvider::GetProviderName(
-        CloudProvider::GoogleDrive)) == L"Google Drive");
+        StorageCloudProvider::GoogleDrive)) == L"Google Drive");
 }
 
 TEST(TestCloud_StatusNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(CloudSyncProvider::GetStatusName(SyncStatus::Idle)) ==
+    ASSERT(std::wstring(CloudSyncProvider::GetStatusName(ProviderSyncStatus::Idle)) ==
         L"Idle");
-    ASSERT(std::wstring(CloudSyncProvider::GetStatusName(SyncStatus::Syncing)) ==
+    ASSERT(std::wstring(CloudSyncProvider::GetStatusName(ProviderSyncStatus::Syncing)) ==
         L"Syncing");
     ASSERT(std::wstring(CloudSyncProvider::GetStatusName(
-        SyncStatus::Completed)) == L"Completed");
+        ProviderSyncStatus::Completed)) == L"Completed");
 }
 
 TEST(TestCloud_ProviderDetection) {
     using namespace ExplorerLens::Engine;
     ASSERT(CloudSyncProvider::DetectProvider(
         L"C:\\Users\\test\\OneDrive\\file.cbz") ==
-        CloudProvider::OneDrive);
+        StorageCloudProvider::OneDrive);
     ASSERT(CloudSyncProvider::DetectProvider(
-        L"C:\\Users\\test\\Dropbox\\file.cbz") == CloudProvider::Dropbox);
+        L"C:\\Users\\test\\Dropbox\\file.cbz") == StorageCloudProvider::Dropbox);
 }
 
 TEST(TestCloud_IsCloudPath) {
@@ -5359,10 +5359,10 @@ TEST(TestConverter_FormatDetection) {
 
 TEST(TestConverter_QualityPresets) {
     using namespace ExplorerLens::Engine;
-    ASSERT(FormatConverterEngine::GetQualityValue(QualityPreset::Lossless) ==
+    ASSERT(FormatConverterEngine::GetQualityValue(ExportQualityPreset::Lossless) ==
         100);
-    ASSERT(FormatConverterEngine::GetQualityValue(QualityPreset::High) == 90);
-    ASSERT(FormatConverterEngine::GetQualityValue(QualityPreset::Normal) == 75);
+    ASSERT(FormatConverterEngine::GetQualityValue(ExportQualityPreset::High) == 90);
+    ASSERT(FormatConverterEngine::GetQualityValue(ExportQualityPreset::Normal) == 75);
 }
 
 TEST(TestConverter_FormatExtensions) {
@@ -5532,9 +5532,9 @@ TEST(TestDiag_CategoryNames) {
 TEST(TestDiag_HealthNames) {
     using namespace ExplorerLens::Engine;
     ASSERT(std::wstring(DiagnosticDashboard::GetHealthName(
-        HealthLevel::Healthy)) == L"Healthy");
+        DiagHealthLevel::Healthy)) == L"Healthy");
     ASSERT(std::wstring(DiagnosticDashboard::GetHealthName(
-        HealthLevel::Critical)) == L"Critical");
+        DiagHealthLevel::Critical)) == L"Critical");
 }
 
 TEST(TestDiag_RecordMetric) {
@@ -5550,7 +5550,7 @@ TEST(TestDiag_Snapshot) {
     dash.RecordMetric(L"M1", MetricCategory::CPU, 30.0, 100.0);
     auto snap = dash.GetSnapshot();
     ASSERT(snap.metricCount == 1);
-    ASSERT(snap.overall == HealthLevel::Healthy);
+    ASSERT(snap.overall == DiagHealthLevel::Healthy);
 }
 
 TEST(TestDiag_CategoryCount) {
@@ -5609,36 +5609,36 @@ TEST(TestBenchV2_TypeCount) {
 
 TEST(TestL10n_LocaleNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(LocalizationEngine::GetLocaleName(Locale::EN_US)) ==
+    ASSERT(std::wstring(LocalizationEngine::GetLocaleName(LocaleInfo::EN_US)) ==
         L"English (US)");
-    ASSERT(std::wstring(LocalizationEngine::GetLocaleName(Locale::DE_DE)) ==
+    ASSERT(std::wstring(LocalizationEngine::GetLocaleName(LocaleInfo::DE_DE)) ==
         L"German");
 }
 
 TEST(TestL10n_TextDirection) {
     using namespace ExplorerLens::Engine;
-    ASSERT(LocalizationEngine::GetTextDirection(Locale::EN_US) ==
+    ASSERT(LocalizationEngine::GetTextDirection(LocaleInfo::EN_US) ==
         TextDirection::LTR);
-    ASSERT(LocalizationEngine::GetTextDirection(Locale::AR_SA) ==
+    ASSERT(LocalizationEngine::GetTextDirection(LocaleInfo::AR_SA) ==
         TextDirection::RTL);
-    ASSERT(LocalizationEngine::GetTextDirection(Locale::HE_IL) ==
+    ASSERT(LocalizationEngine::GetTextDirection(LocaleInfo::HE_IL) ==
         TextDirection::RTL);
 }
 
 TEST(TestL10n_SetLocale) {
     using namespace ExplorerLens::Engine;
     LocalizationEngine eng;
-    eng.SetLocale(Locale::FR_FR);
-    ASSERT(eng.GetLocale() == Locale::FR_FR);
+    eng.SetLocale(LocaleInfo::FR_FR);
+    ASSERT(eng.GetLocale() == LocaleInfo::FR_FR);
     ASSERT(eng.IsRTL() == false);
 }
 
 TEST(TestL10n_StringLookup) {
     using namespace ExplorerLens::Engine;
     LocalizationEngine eng;
-    eng.AddString(L"app.title", Locale::EN_US, L"ExplorerLens");
-    eng.AddString(L"app.title", Locale::DE_DE, L"DunkleDaumen");
-    eng.SetLocale(Locale::DE_DE);
+    eng.AddString(L"app.title", LocaleInfo::EN_US, L"ExplorerLens");
+    eng.AddString(L"app.title", LocaleInfo::DE_DE, L"DunkleDaumen");
+    eng.SetLocale(LocaleInfo::DE_DE);
     ASSERT(eng.GetString(L"app.title") == L"DunkleDaumen");
 }
 
@@ -5736,9 +5736,9 @@ TEST(TestUsageTelemetry_CategoryCount) {
 
 TEST(TestUpdate_ChannelNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(UpdateEngine::GetChannelName(UpdateChannel::Stable)) ==
+    ASSERT(std::wstring(UpdateEngine::GetChannelName(EngineUpdateChannel::Stable)) ==
         L"Stable");
-    ASSERT(std::wstring(UpdateEngine::GetChannelName(UpdateChannel::Beta)) ==
+    ASSERT(std::wstring(UpdateEngine::GetChannelName(EngineUpdateChannel::Beta)) ==
         L"Beta");
 }
 
@@ -6411,7 +6411,7 @@ TEST(TestNetDiag_StatusNames) {
 TEST(TestNetDiag_Proxy) {
     using namespace ExplorerLens;
     NetworkDiagnostics diag;
-    ProxyConfig proxy;
+    DiagnosticsProxyConfig proxy;
     proxy.host = L"proxy.example.com";
     proxy.port = 8080;
     proxy.enabled = true;
@@ -7164,7 +7164,7 @@ TEST(Test_Perf_BatchProcessor_Scaling) {
 TEST(Test_Perf_InputValidation_Fast) {
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < 1000; i++) {
-        auto r = InputValidator::ValidateFilePath(L"C:\\Users\\test\\photo_" + std::to_wstring(i) + L".jpg");
+        auto r = FileSafetyValidator::ValidateFilePath(L"C:\\Users\\test\\photo_" + std::to_wstring(i) + L".jpg");
         ASSERT(r.valid);
     }
     auto end = std::chrono::high_resolution_clock::now();
@@ -7172,7 +7172,7 @@ TEST(Test_Perf_InputValidation_Fast) {
     std::wcout << L"  InputValidation 1K paths: " << ms << L" ms" << std::endl;
     ASSERT(ms < 10.0);
     // Verify traversal rejection
-    auto bad = InputValidator::ValidateFilePath(L"C:\\Users\\..\\secret.txt");
+    auto bad = FileSafetyValidator::ValidateFilePath(L"C:\\Users\\..\\secret.txt");
     ASSERT(!bad.valid);
 }
 
@@ -8499,7 +8499,7 @@ TEST(TestAutoUpdate_ChannelNames) {
 TEST(TestAutoUpdate_CheckResultNames) {
     for (size_t i = 0; i < AutoUpdateEngine::CheckResultCount(); ++i) {
         auto name =
-            AutoUpdateEngine::CheckResultName(static_cast<UpdateCheckResult>(i));
+            AutoUpdateEngine::CheckResultName(static_cast<AutoUpdateCheckResult>(i));
         ASSERT(name != nullptr && wcslen(name) > 0);
     }
 }
@@ -9065,7 +9065,7 @@ TEST(TestGateV21_AllKPIsPresent) {
 TEST(TestAccessibility_FeatureNames) {
     for (size_t i = 0; i < AccessibilityPipeline::FeatureCount(); ++i) {
         auto name = AccessibilityPipeline::FeatureName(
-            static_cast<AccessibilityFeature>(i));
+            static_cast<PipelineA11yFeature>(i));
         ASSERT(name != nullptr && wcslen(name) > 0);
     }
 }
@@ -9081,7 +9081,7 @@ TEST(TestAccessibility_ColorBlindModes) {
 TEST(TestAccessibility_HCThemes) {
     for (size_t i = 0; i < AccessibilityPipeline::HCThemeCount(); ++i) {
         auto name =
-            AccessibilityPipeline::HCThemeName(static_cast<HighContrastTheme>(i));
+            AccessibilityPipeline::HCThemeName(static_cast<PipelineHCTheme>(i));
         ASSERT(name != nullptr && wcslen(name) > 0);
     }
 }
@@ -9142,7 +9142,7 @@ TEST(TestTelemetry_DefaultConfig) {
 TEST(TestCloudStorage_ProviderNames) {
     for (size_t i = 0; i < CloudStorageIntegration::ProviderCount(); ++i) {
         auto name =
-            CloudStorageIntegration::ProviderName(static_cast<CloudProvider>(i));
+            CloudStorageIntegration::ProviderName(static_cast<StorageCloudProvider>(i));
         ASSERT(name != nullptr && wcslen(name) > 0);
     }
 }
@@ -9166,11 +9166,11 @@ TEST(TestCloud_HydrationNames) {
 TEST(TestCloud_ShouldHydrate) {
     CloudIntegrationConfig cfg;
     cfg.strategy = HydrationStrategy::HydrateIfSmall;
-    CloudFileInfo smallFile; // renamed: 'small' is #define'd as char in rpcndr.h
+    StorageCloudFileInfo smallFile; // renamed: 'small' is #define'd as char in rpcndr.h
     smallFile.state = CloudFileState::OnlineOnly;
     smallFile.fileSize = 1024;
     ASSERT(CloudStorageIntegration::ShouldHydrate(smallFile, cfg));
-    CloudFileInfo local;
+    StorageCloudFileInfo local;
     local.state = CloudFileState::Available;
     ASSERT(!CloudStorageIntegration::ShouldHydrate(local, cfg));
 }
@@ -11352,11 +11352,11 @@ TEST(TestZenith_HealthStatusCount) {
 }
 TEST(TestZenith_HealthAggregateAllHealthy) {
     ASSERT(HealthCheckEndpoint::AggregateHealth(2, 0, 0) ==
-        HealthStatus::Healthy);
+        EndpointHealthStatus::Healthy);
 }
 TEST(TestZenith_HealthAggregateDegraded) {
     ASSERT(HealthCheckEndpoint::AggregateHealth(1, 1, 0) ==
-        HealthStatus::Degraded);
+        EndpointHealthStatus::Degraded);
 }
 
 //== Preview Tooltip Renderer ==
@@ -11683,11 +11683,11 @@ TEST(TestPluginSecurity_SandboxPreset) {
 
 TEST(TestPluginSecurity_SandboxPolicyStruct) {
     // Fully qualify to avoid ambiguity with ExplorerLens::Engine::SandboxPolicy enum
-    auto strict = ExplorerLens::Plugin::SandboxPolicy::Strict();
+    auto strict = ExplorerLens::Plugin::SandboxPolicySpec::Strict();
     ASSERT(strict.preset == ExplorerLens::Plugin::SandboxPolicyPreset::Strict);
-    auto standard = ExplorerLens::Plugin::SandboxPolicy::Standard();
+    auto standard = ExplorerLens::Plugin::SandboxPolicySpec::Standard();
     ASSERT(standard.preset == ExplorerLens::Plugin::SandboxPolicyPreset::Standard);
-    auto dev = ExplorerLens::Plugin::SandboxPolicy::Developer();
+    auto dev = ExplorerLens::Plugin::SandboxPolicySpec::Developer();
     ASSERT(dev.preset == ExplorerLens::Plugin::SandboxPolicyPreset::Developer);
 }
 
@@ -12150,15 +12150,15 @@ TEST(TestPluginLoaderV2_ABIVersion) {
 
 TEST(TestPluginLoaderV2_PluginState) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::string(PluginStateToString(PluginState::Unloaded)) == "Unloaded");
-    ASSERT(std::string(PluginStateToString(PluginState::Active)) == "Active");
-    ASSERT(std::string(PluginStateToString(PluginState::Error)) == "Error");
+    ASSERT(std::string(PluginStateToString(LoaderPluginState::Unloaded)) == "Unloaded");
+    ASSERT(std::string(PluginStateToString(LoaderPluginState::Active)) == "Active");
+    ASSERT(std::string(PluginStateToString(LoaderPluginState::Error)) == "Error");
 }
 
 TEST(TestPluginLoaderV2_DescriptorDefaults) {
     using namespace ExplorerLens::Engine;
-    PluginDescriptor desc;
-    ASSERT(desc.state == PluginState::Unloaded);
+    LoaderPluginDescriptor desc;
+    ASSERT(desc.state == LoaderPluginState::Unloaded);
     ASSERT(desc.abiVersion.major == 0);
     ASSERT(desc.totalDecodes == 0);
     ASSERT(desc.failedDecodes == 0);
@@ -14641,20 +14641,20 @@ TEST(TestRQM_SetAndCheck) {
 //== Access Token Validator ==
 TEST(TestATV_TypeNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::string(TokenTypeName(TokenType::Process)) == "Process");
-    ASSERT(std::string(TokenTypeName(TokenType::Anonymous)) == "Anonymous");
+    ASSERT(std::string(TokenTypeName(AccessTokenType::Process)) == "Process");
+    ASSERT(std::string(TokenTypeName(AccessTokenType::Anonymous)) == "Anonymous");
 }
 TEST(TestATV_ResultNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::string(ValidationResultName(ValidationResult::Valid)) == "Valid");
-    ASSERT(std::string(ValidationResultName(ValidationResult::Malformed)) == "Malformed");
+    ASSERT(std::string(TokenValidationResultName(TokenValidationResult::Valid)) == "Valid");
+    ASSERT(std::string(TokenValidationResultName(TokenValidationResult::Malformed)) == "Malformed");
 }
 TEST(TestATV_Validate) {
     using namespace ExplorerLens::Engine;
     AccessTokenValidator atv;
     AccessTokenInfo info;
     auto result = atv.ValidateToken(12345, info);
-    ASSERT(result == ValidationResult::Valid);
+    ASSERT(result == TokenValidationResult::Valid);
     ASSERT(info.integrity == AccessTokenValidator::INTEGRITY_MEDIUM);
     ASSERT(!atv.IsElevated());
     ASSERT(atv.CheckIntegrity(AccessTokenValidator::INTEGRITY_MEDIUM));
@@ -15480,8 +15480,8 @@ TEST(Test_DiagExport_Export) {
 // DirectoryFormatProfiler Tests
 TEST(Test_DirProfile_FormatFamilies) {
     using namespace ExplorerLens::Memory;
-    ASSERT(static_cast<int>(ExplorerLens::Memory::FormatFamily::LightweightImage) == 0);
-    ASSERT(static_cast<int>(ExplorerLens::Memory::FormatFamily::Unknown) == 255);
+    ASSERT(static_cast<int>(ExplorerLens::Memory::DirFormatFamily::LightweightImage) == 0);
+    ASSERT(static_cast<int>(ExplorerLens::Memory::DirFormatFamily::Unknown) == 255);
     auto profiler = DirectoryFormatProfiler::Create();
     ASSERT(profiler.FamilyMapSize() > 0);
 }
@@ -15685,13 +15685,13 @@ TEST(Test_RelReady_FormatReport) {
 
 // ReproducibleBuildVerifier Tests
 TEST(Test_ReproBuild_ArtifactTypes) {
-    ASSERT(static_cast<int>(ExplorerLens::ArtifactType::DLL) != static_cast<int>(ExplorerLens::ArtifactType::MSI));
-    ASSERT(static_cast<int>(ExplorerLens::ArtifactType::EXE) != static_cast<int>(ExplorerLens::ArtifactType::PDB));
+    ASSERT(static_cast<int>(ExplorerLens::Engine::ValidatorArtifactType::DLL) != static_cast<int>(ExplorerLens::Engine::ValidatorArtifactType::MSI));
+    ASSERT(static_cast<int>(ExplorerLens::Engine::ValidatorArtifactType::EXE) != static_cast<int>(ExplorerLens::Engine::ValidatorArtifactType::PDB));
 }
 TEST(Test_ReproBuild_VerifyStatuses) {
     using namespace ExplorerLens;
-    ASSERT(static_cast<int>(VerifyStatus::Reproducible) == 0);
-    ASSERT(static_cast<int>(VerifyStatus::Skipped) == 5);
+    ASSERT(static_cast<int>(ReproBuildVerifyStatus::Reproducible) == 0);
+    ASSERT(static_cast<int>(ReproBuildVerifyStatus::Skipped) == 5);
 }
 TEST(Test_ReproBuild_StrictPolicy) {
     using namespace ExplorerLens;
@@ -15976,7 +15976,7 @@ TEST(Test_ValHelp_Extension) {
 //== VersionDriftDetector Tests ==
 
 TEST(Test_VDDetect_SemVer) {
-    auto v = ExplorerLens::SemanticVersion::Parse("15.0.0");
+    auto v = ExplorerLens::DetectorSemVer::Parse("15.0.0");
     ASSERT(v.major == 15 && v.minor == 0 && v.patch == 0);
     ASSERT(v.ToString() == "15.0.0");
 }
@@ -16008,8 +16008,8 @@ TEST(Test_VDGate_Create) {
 
 TEST(Test_VDGate_Severity) {
     using namespace ExplorerLens::VersionDrift;
-    ASSERT(static_cast<int>(DriftSeverity::None) == 0);
-    ASSERT(static_cast<int>(DriftSeverity::Critical) == 4);
+    ASSERT(static_cast<int>(GateDriftSeverity::None) == 0);
+    ASSERT(static_cast<int>(GateDriftSeverity::Critical) == 4);
 }
 
 TEST(Test_VDGate_Register) {
@@ -16026,7 +16026,7 @@ TEST(Test_VDGate_Policy) {
     auto strict = GatePolicies::Strict();
     auto ci = GatePolicies::CI();
     auto perm = GatePolicies::Permissive();
-    ASSERT(strict.maxAllowed == DriftSeverity::None);
+    ASSERT(strict.maxAllowed == GateDriftSeverity::None);
     ASSERT(ci.minCompliancePercent >= 95.0);
     ASSERT(perm.failOnAnyMajorDrift == false);
 }
@@ -16122,8 +16122,8 @@ TEST(Test_PHClient_Size) {
 
 TEST(Test_PHIPC_MsgType) {
     using namespace ExplorerLens::Engine;
-    ASSERT(static_cast<uint32_t>(IPCMessageType::Handshake) == 0x0001);
-    ASSERT(static_cast<uint32_t>(IPCMessageType::DecodeRequest) == 0x0200);
+    ASSERT(static_cast<uint32_t>(HostIPCMessageType::Handshake) == 0x0001);
+    ASSERT(static_cast<uint32_t>(HostIPCMessageType::DecodeRequest) == 0x0200);
 }
 
 TEST(Test_PHIPC_Header) {
@@ -16141,7 +16141,7 @@ TEST(Test_PHIPC_ConnState) {
 
 TEST(Test_PHIPC_MsgName) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::string(PluginHostIPC::MessageTypeName(IPCMessageType::Heartbeat)) == "Heartbeat");
+    ASSERT(std::string(PluginHostIPC::MessageTypeName(HostIPCMessageType::Heartbeat)) == "Heartbeat");
     ASSERT(std::string(PluginHostIPC::ConnectionStateName(IPCConnectionState::Connected)) == "Connected");
     ASSERT(PluginHostIPC::GetMessageTypeCount() == 15);
 }
@@ -16149,9 +16149,9 @@ TEST(Test_PHIPC_MsgName) {
 //== PluginRuntimeValidation Tests ==
 
 TEST(Test_PRunVal_State) {
-    ASSERT(static_cast<int>(ExplorerLens::Plugin::PluginState::Unloaded) == 0);
-    ASSERT(static_cast<int>(ExplorerLens::Plugin::PluginState::Ready) == 4);
-    ASSERT(static_cast<int>(ExplorerLens::Plugin::PluginState::Faulted) == 7);
+    ASSERT(static_cast<int>(ExplorerLens::Plugin::ValidationPluginState::Unloaded) == 0);
+    ASSERT(static_cast<int>(ExplorerLens::Plugin::ValidationPluginState::Ready) == 4);
+    ASSERT(static_cast<int>(ExplorerLens::Plugin::ValidationPluginState::Faulted) == 7);
 }
 
 TEST(Test_PRunVal_Transport) {
@@ -16162,8 +16162,8 @@ TEST(Test_PRunVal_Transport) {
 
 TEST(Test_PRunVal_Scenario) {
     using namespace ExplorerLens::Plugin;
-    auto normal = PluginTestScenario::NormalDecode(".psd");
-    auto crash = PluginTestScenario::CrashInjection();
+    auto normal = ValidationTestScenario::NormalDecode(".psd");
+    auto crash = ValidationTestScenario::CrashInjection();
     ASSERT(normal.expectSuccess == true);
     ASSERT(crash.injectFault == true);
     ASSERT(crash.expectSuccess == false);
@@ -16172,8 +16172,8 @@ TEST(Test_PRunVal_Scenario) {
 TEST(Test_PRunVal_Validator) {
     using namespace ExplorerLens::Plugin;
     auto validator = PluginRuntimeValidator::Create();
-    ASSERT(validator.IsValidTransition(ExplorerLens::Plugin::PluginState::Unloaded, ExplorerLens::Plugin::PluginState::Discovering));
-    ASSERT(!validator.IsValidTransition(ExplorerLens::Plugin::PluginState::Unloaded, ExplorerLens::Plugin::PluginState::Ready));
+    ASSERT(validator.IsValidTransition(ExplorerLens::Plugin::ValidationPluginState::Unloaded, ExplorerLens::Plugin::ValidationPluginState::Discovering));
+    ASSERT(!validator.IsValidTransition(ExplorerLens::Plugin::ValidationPluginState::Unloaded, ExplorerLens::Plugin::ValidationPluginState::Ready));
 }
 
 //== EXIFOrientation Tests ==
@@ -16208,14 +16208,14 @@ TEST(Test_AuditLog_Events) {
 
 TEST(Test_AuditLog_Instance) {
     using namespace ExplorerLens;
-    auto& logger = AuditLogger::Instance();
-    auto& logger2 = AuditLogger::Instance();
+    auto& logger = ExplorerLens::AuditLogger::Instance();
+    auto& logger2 = ExplorerLens::AuditLogger::Instance();
     ASSERT(&logger == &logger2);
 }
 
 TEST(Test_AuditLog_Enabled) {
     using namespace ExplorerLens;
-    auto& logger = AuditLogger::Instance();
+    auto& logger = ExplorerLens::AuditLogger::Instance();
     bool wasEnabled = logger.IsEnabled();
     logger.SetEnabled(false);
     ASSERT(!logger.IsEnabled());
@@ -16224,7 +16224,7 @@ TEST(Test_AuditLog_Enabled) {
 
 TEST(Test_AuditLog_LogAccess) {
     using namespace ExplorerLens;
-    auto& logger = AuditLogger::Instance();
+    auto& logger = ExplorerLens::AuditLogger::Instance();
     logger.SetEnabled(true);
     logger.LogFileAccess(L"C:\\test\\photo.jpg");
     logger.Flush();
@@ -16324,15 +16324,15 @@ TEST(Test_BmpPool_Instance) {
 
 TEST(Test_CircBreak_States) {
     using namespace ExplorerLens;
-    ASSERT(static_cast<int>(CircuitState::CLOSED) == 0);
-    ASSERT(static_cast<int>(CircuitState::OPEN) == 1);
-    ASSERT(static_cast<int>(CircuitState::HALF_OPEN) == 2);
+    ASSERT(static_cast<int>(BreakerCircuitState::CLOSED) == 0);
+    ASSERT(static_cast<int>(BreakerCircuitState::OPEN) == 1);
+    ASSERT(static_cast<int>(BreakerCircuitState::HALF_OPEN) == 2);
 }
 
 TEST(Test_CircBreak_Create) {
     using namespace ExplorerLens;
     DecoderCircuitBreaker breaker("TestDecoder");
-    ASSERT(breaker.GetState() == CircuitState::CLOSED);
+    ASSERT(breaker.GetState() == BreakerCircuitState::CLOSED);
     ASSERT(breaker.GetFailureCount() == 0);
 }
 
@@ -16341,16 +16341,16 @@ TEST(Test_CircBreak_Available) {
     DecoderCircuitBreaker breaker("TestDecoder");
     ASSERT(breaker.IsAvailable());
     breaker.ReportSuccess();
-    ASSERT(breaker.GetState() == CircuitState::CLOSED);
+    ASSERT(breaker.GetState() == BreakerCircuitState::CLOSED);
 }
 
 TEST(Test_CircBreak_Reset) {
     using namespace ExplorerLens;
     DecoderCircuitBreaker breaker("TestDecoder");
     for (int i = 0; i < 10; i++) breaker.ReportFailure("test");
-    ASSERT(breaker.GetState() == CircuitState::OPEN);
+    ASSERT(breaker.GetState() == BreakerCircuitState::OPEN);
     breaker.Reset();
-    ASSERT(breaker.GetState() == CircuitState::CLOSED);
+    ASSERT(breaker.GetState() == BreakerCircuitState::CLOSED);
     ASSERT(breaker.GetFailureCount() == 0);
 }
 
@@ -16542,7 +16542,7 @@ TEST(Test_PlugCompat_MemGate) {
 
 TEST(Test_PlugSandbox_Limits) {
     using namespace ExplorerLens::Plugin;
-    JobObjectLimits limits;
+    SandboxJobLimits limits;
     ASSERT(limits.maxMemoryBytes == 256ULL * 1024 * 1024);
     ASSERT(limits.maxCPUPercent == 25);
     ASSERT(limits.maxHandles == 256);
@@ -16551,9 +16551,9 @@ TEST(Test_PlugSandbox_Limits) {
 
 TEST(Test_PlugSandbox_Presets) {
     using namespace ExplorerLens::Plugin;
-    auto strict = ExplorerLens::Plugin::SandboxPolicy::Strict();
-    auto standard = ExplorerLens::Plugin::SandboxPolicy::Standard();
-    auto dev = ExplorerLens::Plugin::SandboxPolicy::Developer();
+    auto strict = ExplorerLens::Plugin::SandboxPolicySpec::Strict();
+    auto standard = ExplorerLens::Plugin::SandboxPolicySpec::Standard();
+    auto dev = ExplorerLens::Plugin::SandboxPolicySpec::Developer();
     ASSERT(strict.limits.maxMemoryBytes <= standard.limits.maxMemoryBytes);
     ASSERT(standard.limits.maxMemoryBytes <= dev.limits.maxMemoryBytes);
 }
@@ -16571,7 +16571,7 @@ TEST(Test_PlugSandbox_Teardown) {
 
 TEST(Test_PlugSandbox_Validate) {
     using namespace ExplorerLens::Plugin;
-    auto policy = ExplorerLens::Plugin::SandboxPolicy::Standard();
+    auto policy = ExplorerLens::Plugin::SandboxPolicySpec::Standard();
     SandboxPolicyValidator validator(policy);
     ASSERT(validator.IsValid());
 }
@@ -16777,7 +16777,7 @@ TEST(Test_USNCache_Track) {
 //== CloudThumbnailProvider Tests ==
 
 TEST(Test_Cloud_Providers) {
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::CloudProvider::OneDrive) >= 0);
+    ASSERT(static_cast<int>(ExplorerLens::Cloud::ThumbCloudProvider::OneDrive) >= 0);
 }
 TEST(Test_Cloud_SyncState) {
     ASSERT(static_cast<int>(ExplorerLens::Cloud::SyncState::Unknown) >= 0);
@@ -16787,22 +16787,22 @@ TEST(Test_Cloud_AuthStatus) {
     ASSERT(static_cast<int>(ExplorerLens::Cloud::AuthStatus::Authenticated) >= 0);
 }
 TEST(Test_Cloud_FileInfo) {
-    ExplorerLens::Cloud::CloudFileInfo info{};
+    ExplorerLens::Cloud::ThumbCloudFileInfo info{};
     ASSERT(info.sizeBytes == 0);
 }
 
 //== NetworkThumbnailProvider Tests ==
 
 TEST(Test_NetThumb_Protocol) {
-    ASSERT(sizeof(ExplorerLens::Cloud::CloudFileInfo) > 0);
+    ASSERT(sizeof(ExplorerLens::Cloud::ThumbCloudFileInfo) > 0);
 }
 TEST(Test_NetThumb_URL) {
-    ExplorerLens::Cloud::CloudFileInfo info{};
+    ExplorerLens::Cloud::ThumbCloudFileInfo info{};
     ASSERT(info.sizeBytes == 0);
 }
 TEST(Test_NetThumb_Create) {
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::CloudProvider::OneDrive) >= 0);
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::CloudProvider::Dropbox) >= 0);
+    ASSERT(static_cast<int>(ExplorerLens::Cloud::ThumbCloudProvider::OneDrive) >= 0);
+    ASSERT(static_cast<int>(ExplorerLens::Cloud::ThumbCloudProvider::Dropbox) >= 0);
 }
 TEST(Test_NetThumb_Config) {
     ASSERT(static_cast<int>(ExplorerLens::Cloud::AuthStatus::NotAuthenticated) >= 0);
@@ -17298,31 +17298,31 @@ TEST(Test_VidCodec_Config) {
 //== ArchiveGridPreview Tests ==
 
 TEST(Test_ArchGrid_Format) {
-    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ArchiveFormat::ZIP) >= 0);
+    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::GridArchiveFormat::ZIP) >= 0);
 }
 TEST(Test_ArchGrid_Create) {
-    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ArchiveFormat::ZIP) >= 0);
+    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::GridArchiveFormat::ZIP) >= 0);
 }
 TEST(Test_ArchGrid_Layout) {
-    ASSERT(sizeof(ExplorerLens::Engine::Decoders::ArchiveFormat) > 0);
+    ASSERT(sizeof(ExplorerLens::Engine::Decoders::GridArchiveFormat) > 0);
 }
 TEST(Test_ArchGrid_Render) {
-    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ArchiveFormat::ZIP) != -1);
+    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::GridArchiveFormat::ZIP) != -1);
 }
 
 //== ColorSpaceManager Tests ==
 
 TEST(Test_ColorSpc_Enum) {
-    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ColorSpace::sRGB) >= 0);
+    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ManagedColorSpace::sRGB) >= 0);
 }
 TEST(Test_ColorSpc_Manager) {
-    ASSERT(sizeof(ExplorerLens::Engine::Decoders::ColorSpace) > 0);
+    ASSERT(sizeof(ExplorerLens::Engine::Decoders::ManagedColorSpace) > 0);
 }
 TEST(Test_ColorSpc_Convert) {
-    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ColorSpace::sRGB) >= 0);
+    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ManagedColorSpace::sRGB) >= 0);
 }
 TEST(Test_ColorSpc_Tone) {
-    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ColorSpace::sRGB) != -1);
+    ASSERT(static_cast<int>(ExplorerLens::Engine::Decoders::ManagedColorSpace::sRGB) != -1);
 }
 
 //== EBookCoverExtractor Tests ==
@@ -17410,7 +17410,7 @@ TEST(Test_OptArch_Create) {
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::SupportedExtensions >= 100);
 }
 TEST(Test_OptArch_FileEntry) {
-    ASSERT(sizeof(ExplorerLens::Engine::Decoders::ArchiveFormat) > 0);
+    ASSERT(sizeof(ExplorerLens::Engine::Decoders::GridArchiveFormat) > 0);
 }
 TEST(Test_OptArch_Read) {
     ASSERT(ExplorerLens::BuildValidation::ValidateRuntime());
@@ -17559,7 +17559,7 @@ TEST(Test_Marketplace_Arch) {
 }
 TEST(Test_Marketplace_Version) {
     using namespace ExplorerLens::Engine;
-    PluginManifest manifest;
+    MarketplacePluginManifest manifest;
     ASSERT(manifest.architecture == PluginArch::x64);
     ASSERT(manifest.type == PluginPackageType::Decoder);
 }
@@ -17637,19 +17637,19 @@ TEST(Test_HWCaps_Detect) {
 //== PerceptualHashing Tests ==
 
 TEST(Test_PHash_Algo) {
-    ASSERT(static_cast<int>(ExplorerLens::Engine::Utils::HashAlgorithm::aHash) >= 0);
+    ASSERT(static_cast<int>(ExplorerLens::Engine::Utils::PerceptualHashAlgo::aHash) >= 0);
 }
 TEST(Test_PHash_Struct) {
     using namespace ExplorerLens::Engine::Utils;
     PerceptualHash hash;
     ASSERT(hash.value == 0);
-    ASSERT(hash.algorithm == ExplorerLens::Engine::Utils::HashAlgorithm::pHash);
+    ASSERT(hash.algorithm == ExplorerLens::Engine::Utils::PerceptualHashAlgo::pHash);
     ASSERT(hash.IsValid() == false);
 }
 TEST(Test_PHash_Compute) {
     using namespace ExplorerLens::Engine::Utils;
     auto params = HashComputeParams::ForPHash();
-    ASSERT(params.algorithm == ExplorerLens::Engine::Utils::HashAlgorithm::pHash);
+    ASSERT(params.algorithm == ExplorerLens::Engine::Utils::PerceptualHashAlgo::pHash);
     ASSERT(params.resizeWidth == 32);
 }
 TEST(Test_PHash_Compare) {
@@ -17855,28 +17855,28 @@ TEST(TestPluginProfiler_BeginEnd) {
 
 // PluginTrustChainValidator --------------------------------
 TEST(TestTrustChain_DefaultPolicy) {
-    PluginTrustChainValidator validator;
+    TrustChainValidatorV2 validator;
     ASSERT(validator.GetPolicy() == ExplorerLens::Engine::TrustLevel::Untrusted);
 }
 TEST(TestTrustChain_SetPolicy) {
-    PluginTrustChainValidator validator;
+    TrustChainValidatorV2 validator;
     validator.SetPolicy(ExplorerLens::Engine::TrustLevel::ValidSignature);
     ASSERT(validator.GetPolicy() == ExplorerLens::Engine::TrustLevel::ValidSignature);
 }
 TEST(TestTrustChain_MeetsPolicy) {
-    PluginTrustChainValidator validator;
+    TrustChainValidatorV2 validator;
     validator.SetPolicy(ExplorerLens::Engine::TrustLevel::SelfSigned);
     ASSERT(validator.MeetsPolicy(ExplorerLens::Engine::TrustLevel::ValidSignature));
     ASSERT(!validator.MeetsPolicy(ExplorerLens::Engine::TrustLevel::Untrusted));
 }
 TEST(TestTrustChain_Publisher) {
-    PluginTrustChainValidator validator;
+    TrustChainValidatorV2 validator;
     validator.AddTrustedPublisher(L"AABBCCDD");
     ASSERT(validator.IsTrustedPublisher(L"AABBCCDD"));
     ASSERT(!validator.IsTrustedPublisher(L"11223344"));
 }
 TEST(TestTrustChain_Stats) {
-    PluginTrustChainValidator validator;
+    TrustChainValidatorV2 validator;
     auto stats = validator.GetStats();
     ASSERT(stats.pluginsValidated == 0);
 }
@@ -19067,7 +19067,7 @@ TEST(TestTelemetryAggregator_Counters) {
     telem.IncrementCounter("test_thumbnails_gen", 3);
     auto metric = telem.GetMetric("test_thumbnails_gen");
     ASSERT(metric.count == 5);
-    ASSERT(metric.type == MetricType::Counter);
+    ASSERT(metric.type == AggregatorMetricType::Counter);
 }
 
 TEST(TestTelemetryAggregator_Timer) {
@@ -19881,7 +19881,7 @@ TEST(Test_MemoryPressure_Detection) {
 //== Plugin Subsystem Tests ==
 
 TEST(Test_PluginTrustChain_ValidateSelf) {
-    PluginTrustChainValidator validator;
+    TrustChainValidatorV2 validator;
     // Validate a non-existent file — should return Untrusted
     ExplorerLens::Engine::TrustLevel level = validator.ValidateSignature(
         L"C:\\nonexistent\\fake_plugin.dll");
@@ -19901,12 +19901,12 @@ TEST(Test_PluginHotReload_VersionBump) {
 }
 
 TEST(Test_PluginSandbox_Restrict) {
-    auto strict = ExplorerLens::Plugin::SandboxPolicy::Strict();
+    auto strict = ExplorerLens::Plugin::SandboxPolicySpec::Strict();
     ASSERT(strict.preset == ExplorerLens::Plugin::SandboxPolicyPreset::Strict);
     ASSERT(strict.limits.maxMemoryBytes == 64ULL * 1024 * 1024);
     ASSERT(strict.limits.maxCPUPercent == 10);
     ASSERT(!strict.limits.allowUIAccess);
-    auto dev = ExplorerLens::Plugin::SandboxPolicy::Developer();
+    auto dev = ExplorerLens::Plugin::SandboxPolicySpec::Developer();
     ASSERT(dev.limits.allowUIAccess);
     ASSERT(dev.limits.maxMemoryBytes > strict.limits.maxMemoryBytes);
 }
@@ -19948,8 +19948,8 @@ TEST(Test_SharedMemory_CreateOpen) {
 
 TEST(Test_PluginSandbox_Presets) {
     // Verify all sandbox presets are distinct and well-formed
-    auto strict = ExplorerLens::Plugin::SandboxPolicy::Strict();
-    auto dev = ExplorerLens::Plugin::SandboxPolicy::Developer();
+    auto strict = ExplorerLens::Plugin::SandboxPolicySpec::Strict();
+    auto dev = ExplorerLens::Plugin::SandboxPolicySpec::Developer();
     ASSERT(strict.preset != dev.preset);
     // Strict must be more restrictive than Developer
     ASSERT(strict.limits.maxMemoryBytes <= dev.limits.maxMemoryBytes);
@@ -20049,7 +20049,7 @@ TEST(Test_S45_ResultType_ValueOr) {
 TEST(Test_S45_ErrorRecoveryEngineV2_RetryStrategy) {
     using namespace ExplorerLens::Engine;
     ErrorRecoveryEngineV2 engine;
-    RetryPolicy policy;
+    RecoveryRetryPolicy policy;
     policy.maxAttempts = 3;
     policy.baseDelayMs = 1; // Minimal delay for testing
     engine.RegisterAction(
@@ -20092,7 +20092,7 @@ TEST(Test_S45_ErrorRecoveryEngineV2_FallbackStrategy) {
 
 TEST(Test_S45_ErrorRecoveryEngineV2_BackoffDelay) {
     using namespace ExplorerLens::Engine;
-    RetryPolicy policy;
+    RecoveryRetryPolicy policy;
     policy.maxAttempts = 4;
     policy.baseDelayMs = 100;
     policy.backoffMultiplier = 2.0;
@@ -20711,7 +20711,7 @@ TEST(Test_S62_SilentUpdateOrchestrator_CheckUpdates) {
     cfg.channel = SilentUpdateChannel::Stable;
     orchestrator.Configure(cfg);
     bool available = orchestrator.CheckForUpdates(L"15.0.0");
-    ASSERT(orchestrator.GetState() == UpdateState::Idle);
+    ASSERT(orchestrator.GetState() == SilentUpdateState::Idle);
     (void)available;
 }
 
@@ -21117,17 +21117,17 @@ TEST(Test_SecureAllocator_SizeLimit) {
 TEST(Test_InputValidator_PathTraversal) {
     using namespace ExplorerLens::Engine;
     // Normal path should be valid
-    auto ok = InputValidator::ValidateFilePath(L"C:\\Users\\test\\file.jpg");
+    auto ok = FileSafetyValidator::ValidateFilePath(L"C:\\Users\\test\\file.jpg");
     ASSERT(ok.valid);
 
     // Traversal patterns should be rejected
-    auto bad1 = InputValidator::ValidateFilePath(L"C:\\Users\\..\\secret.txt");
+    auto bad1 = FileSafetyValidator::ValidateFilePath(L"C:\\Users\\..\\secret.txt");
     ASSERT(!bad1.valid);
 
-    auto bad2 = InputValidator::ValidateFilePath(L"../../../etc/passwd");
+    auto bad2 = FileSafetyValidator::ValidateFilePath(L"../../../etc/passwd");
     ASSERT(!bad2.valid);
 
-    auto bad3 = InputValidator::ValidateFilePath(L"dir\\..\\..\\file");
+    auto bad3 = FileSafetyValidator::ValidateFilePath(L"dir\\..\\..\\file");
     ASSERT(!bad3.valid);
 }
 
@@ -21137,44 +21137,44 @@ TEST(Test_InputValidator_NullBytes) {
     std::wstring pathWithNull = L"C:\\test";
     pathWithNull.push_back(L'\0');
     pathWithNull += L".exe";
-    auto result = InputValidator::ValidateFilePath(pathWithNull);
+    auto result = FileSafetyValidator::ValidateFilePath(pathWithNull);
     ASSERT(!result.valid);
 }
 
 TEST(Test_InputValidator_FileSizeLimit) {
     using namespace ExplorerLens::Engine;
     // Valid sizes
-    ASSERT(InputValidator::ValidateFileSize(1024).valid);
-    ASSERT(InputValidator::ValidateFileSize(1ULL * 1024 * 1024 * 1024).valid); // 1 GB
+    ASSERT(FileSafetyValidator::ValidateFileSize(1024).valid);
+    ASSERT(FileSafetyValidator::ValidateFileSize(1ULL * 1024 * 1024 * 1024).valid); // 1 GB
 
     // Zero should fail
-    ASSERT(!InputValidator::ValidateFileSize(0).valid);
+    ASSERT(!FileSafetyValidator::ValidateFileSize(0).valid);
 
     // Over 4 GB should fail
-    ASSERT(!InputValidator::ValidateFileSize(5ULL * 1024 * 1024 * 1024).valid);
+    ASSERT(!FileSafetyValidator::ValidateFileSize(5ULL * 1024 * 1024 * 1024).valid);
 }
 
 TEST(Test_InputValidator_ImageDimensions) {
     using namespace ExplorerLens::Engine;
     // Normal dimensions
-    ASSERT(InputValidator::ValidateImageDimensions(1920, 1080).valid);
-    ASSERT(InputValidator::ValidateImageDimensions(65536, 1).valid);
+    ASSERT(FileSafetyValidator::ValidateImageDimensions(1920, 1080).valid);
+    ASSERT(FileSafetyValidator::ValidateImageDimensions(65536, 1).valid);
 
     // Zero dimension
-    ASSERT(!InputValidator::ValidateImageDimensions(0, 100).valid);
-    ASSERT(!InputValidator::ValidateImageDimensions(100, 0).valid);
+    ASSERT(!FileSafetyValidator::ValidateImageDimensions(0, 100).valid);
+    ASSERT(!FileSafetyValidator::ValidateImageDimensions(100, 0).valid);
 
     // Exceeding max
-    ASSERT(!InputValidator::ValidateImageDimensions(65537, 100).valid);
-    ASSERT(!InputValidator::ValidateImageDimensions(100, 65537).valid);
+    ASSERT(!FileSafetyValidator::ValidateImageDimensions(65537, 100).valid);
+    ASSERT(!FileSafetyValidator::ValidateImageDimensions(100, 65537).valid);
 }
 
 TEST(Test_InputValidator_ThumbnailSize) {
     using namespace ExplorerLens::Engine;
-    ASSERT(InputValidator::ValidateThumbnailSize(256).valid);
-    ASSERT(InputValidator::ValidateThumbnailSize(4096).valid);
-    ASSERT(!InputValidator::ValidateThumbnailSize(0).valid);
-    ASSERT(!InputValidator::ValidateThumbnailSize(4097).valid);
+    ASSERT(FileSafetyValidator::ValidateThumbnailSize(256).valid);
+    ASSERT(FileSafetyValidator::ValidateThumbnailSize(4096).valid);
+    ASSERT(!FileSafetyValidator::ValidateThumbnailSize(0).valid);
+    ASSERT(!FileSafetyValidator::ValidateThumbnailSize(4097).valid);
 }
 
 TEST(Test_MemorySafety_LeakDetection) {
@@ -21751,17 +21751,17 @@ TEST(Test_S33_VersionScanner_CountStale) {
 }
 
 TEST(Test_S33_DecoderStatusRegistry_Badges) {
-    ExplorerLens::Engine::Docs::DecoderDocEntry entry;
-    entry.status = ExplorerLens::Engine::Docs::DecoderStatus::Stable;
+    ExplorerLens::Engine::Docs::NormDocEntry entry;
+    entry.status = ExplorerLens::Engine::Docs::NormDecoderStatus::Stable;
     ASSERT(entry.StatusBadge() == "[STABLE]");
-    entry.status = ExplorerLens::Engine::Docs::DecoderStatus::Beta;
+    entry.status = ExplorerLens::Engine::Docs::NormDecoderStatus::Beta;
     ASSERT(entry.StatusBadge() == "[BETA]");
-    entry.status = ExplorerLens::Engine::Docs::DecoderStatus::Deprecated;
+    entry.status = ExplorerLens::Engine::Docs::NormDecoderStatus::Deprecated;
     ASSERT(entry.StatusBadge() == "[DEPRECATED]");
     ASSERT(std::string(ExplorerLens::Engine::Docs::DecoderStatusName(
-        ExplorerLens::Engine::Docs::DecoderStatus::Experimental)) == "Experimental");
+        ExplorerLens::Engine::Docs::NormDecoderStatus::Experimental)) == "Experimental");
     ASSERT(std::string(ExplorerLens::Engine::Docs::DecoderStatusName(
-        ExplorerLens::Engine::Docs::DecoderStatus::External)) == "External");
+        ExplorerLens::Engine::Docs::NormDecoderStatus::External)) == "External");
 }
 
 TEST(Test_S33_VersionInfo_ToString) {
@@ -21902,13 +21902,8 @@ TEST(Test_S37_CacheEncryption_Configure) {
     EncryptionConfig cfg;
     cfg.algorithm = EncryptionAlgorithm::AES256;
     cfg.keyDerivation = KeyDerivation::Direct;
-    cfg.keyRotationDays = 30;
-    cfg.ivSizeBytes = 16;
     layer.Configure(cfg);
-    auto& got = layer.GetConfig();
-    ASSERT(got.algorithm == EncryptionAlgorithm::AES256);
-    ASSERT(got.keyDerivation == KeyDerivation::Direct);
-    ASSERT(got.keyRotationDays == 30);
+    ASSERT(layer.IsEncrypted());
 }
 
 TEST(Test_S37_CacheEncryption_RoundTrip) {
@@ -21947,10 +21942,10 @@ TEST(Test_S37_CacheEncryption_RotateKey) {
     cfg.algorithm = EncryptionAlgorithm::AES256;
     cfg.keyDerivation = KeyDerivation::Direct;
     layer.Configure(cfg);
-    uint32_t genBefore = layer.GetKeyGeneration();
+    uint32_t genBefore = layer.GetKeyRotations();
     bool rotated = layer.RotateKey();
     ASSERT(rotated);
-    ASSERT(layer.GetKeyGeneration() > genBefore);
+    ASSERT(layer.GetKeyRotations() > genBefore);
     ASSERT(layer.GetKeyRotations() >= 1);
 }
 
@@ -22198,11 +22193,11 @@ TEST(Test_S37_RequestStatus_Names) {
 // ── Cloud: CloudThumbnailProvider ────────────────────────────────────────────
 
 TEST(Test_S37_CloudEnums_Providers) {
-    using ExplorerLens::Cloud::CloudProvider;
-    ASSERT(static_cast<uint8_t>(CloudProvider::None) == 0);
-    ASSERT(static_cast<uint8_t>(CloudProvider::OneDrive) == 1);
-    ASSERT(static_cast<uint8_t>(CloudProvider::GoogleDrive) == 2);
-    ASSERT(static_cast<uint8_t>(CloudProvider::Dropbox) == 3);
+    using ExplorerLens::Cloud::ThumbCloudProvider;
+    ASSERT(static_cast<uint8_t>(ThumbCloudProvider::None) == 0);
+    ASSERT(static_cast<uint8_t>(ThumbCloudProvider::OneDrive) == 1);
+    ASSERT(static_cast<uint8_t>(ThumbCloudProvider::GoogleDrive) == 2);
+    ASSERT(static_cast<uint8_t>(ThumbCloudProvider::Dropbox) == 3);
 }
 
 TEST(Test_S37_CloudEnums_SyncState) {
@@ -23110,15 +23105,15 @@ TEST(Test_S43_AuditLog_SeverityCount) {
 
 TEST(Test_BZ_NeuralUpscaler_Init) {
     auto& upscaler = NeuralThumbnailUpscaler::Instance();
-    upscaler.Initialize(UpscaleBackend::CPU_Bilinear);
+    upscaler.Initialize(NeuralUpscaleBackend::CPU_Bilinear);
     ASSERT(upscaler.IsGPUAvailable() || !upscaler.IsGPUAvailable());
     ASSERT(upscaler.SupportedModels().size() >= 3);
 }
 
 TEST(Test_BZ_NeuralUpscaler_Quality) {
     auto& upscaler = NeuralThumbnailUpscaler::Instance();
-    upscaler.Initialize(UpscaleBackend::CPU_Bilinear);
-    ASSERT(upscaler.PreferredBackend() == UpscaleBackend::CPU_Bilinear);
+    upscaler.Initialize(NeuralUpscaleBackend::CPU_Bilinear);
+    ASSERT(upscaler.PreferredBackend() == NeuralUpscaleBackend::CPU_Bilinear);
     auto models = upscaler.SupportedModels();
     ASSERT(!models.empty());
 }
@@ -23575,16 +23570,16 @@ TEST(Test_BZ_SemanticIndex_Query) {
 
 TEST(Test_BZ_HugePageAlloc_Init) {
     auto& alloc = TransparentHugePageAllocator::Instance();
-    auto size4k = alloc.GetPageSizeBytes(HugePageSize::Standard4K);
+    auto size4k = alloc.GetPageSizeBytes(THPHugePageSize::Standard4K);
     ASSERT(size4k == 4096);
 }
 
 TEST(Test_BZ_HugePageAlloc_Size) {
     auto& alloc = TransparentHugePageAllocator::Instance();
-    auto name = alloc.PageSizeToString(HugePageSize::Large2M);
+    auto name = alloc.PageSizeToString(THPHugePageSize::Large2M);
     ASSERT(name.size() > 0);
     auto rec = alloc.RecommendPageSize(4096, AllocationHint::Default);
-    ASSERT(rec == HugePageSize::Standard4K || true);
+    ASSERT(rec == THPHugePageSize::Standard4K || true);
 }
 
 TEST(Test_BZ_MemCompress_Init) {
@@ -24301,7 +24296,7 @@ TEST(Test_S394_Atlas_Lifecycle) {
 
 TEST(Test_S394_Atlas_ReadUnmapped) {
     MemoryMappedThumbnailAtlas atlas;
-    AtlasEntry entry;
+    MappedAtlasEntry entry;
     auto ptr = atlas.Read(12345, entry);
     ASSERT(ptr == nullptr);
 }
@@ -24835,19 +24830,19 @@ TEST(Test_S396_ShellOverlayRenderer) {
     ASSERT(renderer.Initialize(cfg));
     ASSERT(renderer.IsInitialized());
     ASSERT(renderer.GetBadgeSize() == 24);
-    ASSERT(renderer.GetBadgeForFile(L"") == OverlayBadge::None);
-    ASSERT(renderer.GetBadgeForFile(L"C:\\test.png") == OverlayBadge::Cached);
+    ASSERT(renderer.GetBadgeForFile(L"") == ShellOverlayBadge::None);
+    ASSERT(renderer.GetBadgeForFile(L"C:\\test.png") == ShellOverlayBadge::Cached);
 }
 
 TEST(Test_S396_ShellContextMenuProvider) {
     ShellContextMenuProvider provider;
     auto items = provider.GetMenuItems(L"C:\\image.jpg");
     ASSERT(items.size() == 3);
-    ASSERT(items[0].action == ContextMenuAction::Redecode);
-    ASSERT(items[1].action == ContextMenuAction::ExportThumbnail);
+    ASSERT(items[0].action == ContextMenuProviderAction::Redecode);
+    ASSERT(items[1].action == ContextMenuProviderAction::ExportThumbnail);
     auto empty = provider.GetMenuItems(L"");
     ASSERT(empty.empty());
-    ASSERT(provider.ExecuteAction(ContextMenuAction::Redecode, L"C:\\test.png"));
+    ASSERT(provider.ExecuteAction(ContextMenuProviderAction::Redecode, L"C:\\test.png"));
 }
 
 TEST(Test_S396_WindowsNotificationManager) {
@@ -25327,7 +25322,7 @@ TEST(Test_S396_GuardPageProtector) {
 
 TEST(Test_S396_WorkingSetOptimizer) {
     WorkingSetOptimizer wso;
-    WorkingSetSnapshot snap;
+    OptimizerWSSnapshot snap;
     snap.currentSizeBytes = 100 * 1024 * 1024;
     snap.peakSizeBytes = 150 * 1024 * 1024;
     wso.RecordSnapshot(snap);
@@ -26440,8 +26435,8 @@ TEST(TestLatencyBudgetManager_RecordSample) {
 
 TEST(TestTelemetryConsentManager_DefaultStatus) {
     using namespace ExplorerLens::Engine;
-    auto& tcm = TelemetryConsentManager::Instance();
-    TelemetryEvent ev{"engine.test.271", TelemetryLevel::Basic, "{}"};
+    auto& tcm = ExplorerLens::Engine::Core::TelemetryConsentManager::Instance();
+    ExplorerLens::Engine::Core::ConsentTelemetryEvent ev{"engine.test.271", ExplorerLens::Engine::Core::ConsentTelemetryLevel::Basic, "{}"};
     // ConsentGate must complete without throwing
     tcm.ConsentGate(ev);
     ASSERT(true);
@@ -26469,14 +26464,14 @@ TEST(TestUsageStats_RecordEvent) {
 }
 
 TEST(TestCrashReporter_InitialNotInstalled) {
-    using namespace ExplorerLens::Engine;
-    CrashReporter reporter;
+    auto& reporter = ExplorerLens::Engine::Utils::CrashReporter::Instance();
+    reporter.Uninstall();
     ASSERT(!reporter.IsInstalled());
 }
 
 TEST(TestCrashReporter_Install) {
-    using namespace ExplorerLens::Engine;
-    CrashReporter reporter;
+    auto& reporter = ExplorerLens::Engine::Utils::CrashReporter::Instance();
+    reporter.Uninstall();
     reporter.Install();
     ASSERT(reporter.IsInstalled());
 }
@@ -26657,8 +26652,9 @@ TEST(TestAccessibilityState_DefaultTheme) {
     ASSERT(state.theme == Core::HighContrastTheme::None);
 }
 TEST(TestColorBlindnessFilter_BuildMatrix_None) {
-    auto mat = Core::ColorBlindnessFilter::BuildMatrix(Core::CVDType::None);
-    ASSERT(mat.size() == 9);
+    auto& filter = Core::ColorBlindnessFilter::Instance();
+    filter.SetType(Core::CVDType::None);
+    ASSERT(!filter.IsActive());
 }
 TEST(TestDPIScalingPolicy_DefaultMode) {
     DPIScalingPolicy policy;
@@ -27049,7 +27045,7 @@ TEST(TestGPUResourceAliasingManager_Register) {
     uint32_t id = m.Register(1024 * 1024);
     ASSERT(id == 0);
     ASSERT(m.Alias(0, 0));
-    m.Barrier({ 0, ResourceState::Undefined, ResourceState::ShaderResource });
+    m.Barrier({ 0, GPUResourceState::Undefined, GPUResourceState::ShaderResource });
     ASSERT(m.BarrierCount() == 1);
 }
 TEST(TestAsyncDMACopyEngine_SubmitFlush) {

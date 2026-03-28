@@ -42,7 +42,7 @@ struct ComplianceResult {
     bool autoRemediated = false;
 };
 
-struct ComplianceReport {
+struct ValidatorComplianceReport {
     uint32_t totalRules = 0;
     uint32_t compliantCount = 0;
     uint32_t violationCount = 0;
@@ -73,8 +73,8 @@ public:
         return result;
     }
 
-    ComplianceReport ValidateAll() const {
-        ComplianceReport report;
+    ValidatorComplianceReport ValidateAll() const {
+        ValidatorComplianceReport report;
         report.totalRules = static_cast<uint32_t>(m_rules.size());
         for (auto& rule : m_rules) {
             auto result = Validate(rule);

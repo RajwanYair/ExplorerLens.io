@@ -34,7 +34,7 @@ enum class IndexState : uint32_t {
 };
 
 /// A single indexed file entry
-struct IndexEntry {
+struct ContentIndexEntry {
  uint64_t id = 0;
  std::wstring filePath;
  std::wstring fileName;
@@ -49,7 +49,7 @@ struct IndexEntry {
 };
 
 /// Index statistics
-struct IndexStats {
+struct ContentIndexStats {
  uint32_t totalEntries = 0;
  uint32_t indexedCount = 0;
  uint32_t pendingCount = 0;
@@ -71,13 +71,13 @@ public:
  uint32_t IndexAll();
 
  // Search
- std::vector<IndexEntry> SearchByName(const std::wstring& pattern) const;
- std::vector<IndexEntry> SearchByType(ContentType type) const;
- std::vector<IndexEntry> SearchByExtension(const std::wstring& ext) const;
+ std::vector<ContentIndexEntry> SearchByName(const std::wstring& pattern) const;
+ std::vector<ContentIndexEntry> SearchByType(ContentType type) const;
+ std::vector<ContentIndexEntry> SearchByExtension(const std::wstring& ext) const;
 
  // Queries
- const IndexEntry* GetEntry(uint64_t id) const;
- IndexStats GetStats() const;
+ const ContentIndexEntry* GetEntry(uint64_t id) const;
+ ContentIndexStats GetStats() const;
  uint32_t GetTotalCount() const { return static_cast<uint32_t>(m_entries.size()); }
 
  // Maintenance
@@ -91,7 +91,7 @@ public:
  static constexpr uint32_t GetContentTypeCount() { return static_cast<uint32_t>(ContentType::Count); }
 
 private:
- std::vector<IndexEntry> m_entries;
+ std::vector<ContentIndexEntry> m_entries;
  uint64_t m_nextId = 1;
 
  std::wstring ExtractExtension(const std::wstring& path) const;

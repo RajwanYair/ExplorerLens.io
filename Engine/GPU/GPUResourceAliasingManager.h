@@ -14,8 +14,8 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class ResourceState { Undefined, ShaderResource, UnorderedAccess, RenderTarget, CopyDest };
-struct ResourceAlias { uint32_t resourceId; ResourceState before; ResourceState after; };
+enum class GPUResourceState { Undefined, ShaderResource, UnorderedAccess, RenderTarget, CopyDest };
+struct ResourceAlias { uint32_t resourceId; GPUResourceState before; GPUResourceState after; };
 class GPUResourceAliasingManager {
 public:
     uint32_t Register(uint64_t vramBytes) { m_regions.push_back(vramBytes); return static_cast<uint32_t>(m_regions.size() - 1); }

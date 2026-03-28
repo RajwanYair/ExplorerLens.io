@@ -16,7 +16,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class HugePageSize : uint8_t {
+enum class THPHugePageSize : uint8_t {
     Standard4K,
     Large2M,
     Huge1G
@@ -34,7 +34,7 @@ struct HugePageAllocation {
     uintptr_t address = 0;
     size_t size = 0;
     size_t alignedSize = 0;
-    HugePageSize HugePageSize = HugePageSize::Standard4K;
+    THPHugePageSize THPHugePageSize = THPHugePageSize::Standard4K;
     AllocationHint hint = AllocationHint::Default;
     uint64_t allocationId = 0;
     bool isActive = false;
@@ -60,41 +60,41 @@ public:
         return instance;
     }
 
-    inline size_t GetPageSizeBytes(HugePageSize ps) const {
+    inline size_t GetPageSizeBytes(THPHugePageSize ps) const {
         switch (ps) {
-        case HugePageSize::Standard4K: return 4096;
-        case HugePageSize::Large2M:    return 2 * 1024 * 1024;
-        case HugePageSize::Huge1G:     return 1024ULL * 1024 * 1024;
+        case THPHugePageSize::Standard4K: return 4096;
+        case THPHugePageSize::Large2M:    return 2 * 1024 * 1024;
+        case THPHugePageSize::Huge1G:     return 1024ULL * 1024 * 1024;
         default:                   return 4096;
         }
     }
 
-    inline HugePageSize RecommendPageSize(size_t allocationSize, AllocationHint hint) const {
-        if (hint == AllocationHint::TempScratch) return HugePageSize::Standard4K;
+    inline THPHugePageSize RecommendPageSize(size_t allocationSize, AllocationHint hint) const {
+        if (hint == AllocationHint::TempScratch) return THPHugePageSize::Standard4K;
 
-        if (allocationSize >= 256 * 1024 * 1024) return HugePageSize::Huge1G;
+        if (allocationSize >= 256 * 1024 * 1024) return THPHugePageSize::Huge1G;
         if (allocationSize >= 2 * 1024 * 1024 || hint == AllocationHint::HotPath ||
             hint == AllocationHint::DecodeBuffer) {
-            return HugePageSize::Large2M;
+            return THPHugePageSize::Large2M;
         }
-        return HugePageSize::Standard4K;
+        return THPHugePageSize::Standard4K;
     }
 
-    inline size_t AlignToPageSize(size_t size, HugePageSize ps) const {
-        size_t HugePageSize = GetPageSizeBytes(ps);
-        return (size + HugePageSize - 1) & ~(HugePageSize - 1);
+    inline size_t AlignToPageSize(size_t size, THPHugePageSize ps) const {
+        size_t THPHugePageSize = GetPageSizeBytes(ps);
+        return (size + THPHugePageSize - 1) & ~(THPHugePageSize - 1);
     }
 
     inline uint64_t RecordAllocation(size_t size, AllocationHint hint = AllocationHint::Default) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        HugePageSize ps = RecommendPageSize(size, hint);
+        THPHugePageSize ps = RecommendPageSize(size, hint);
         size_t alignedSize = AlignToPageSize(size, ps);
 
         HugePageAllocation record;
         record.allocationId = m_nextId++;
         record.size = size;
         record.alignedSize = alignedSize;
-        record.HugePageSize = ps;
+        record.THPHugePageSize = ps;
         record.hint = hint;
         record.isActive = true;
 
@@ -108,8 +108,8 @@ public:
             m_stats.peakUsageBytes = m_stats.currentUsageBytes;
         }
 
-        if (ps == HugePageSize::Large2M) m_stats.largePageAllocations++;
-        else if (ps == HugePageSize::Huge1G) m_stats.hugePageAllocations++;
+        if (ps == THPHugePageSize::Large2M) m_stats.largePageAllocations++;
+        else if (ps == THPHugePageSize::Huge1G) m_stats.hugePageAllocations++;
 
         return record.allocationId;
     }
@@ -145,11 +145,11 @@ public:
         return m_stats;
     }
 
-    inline std::string PageSizeToString(HugePageSize ps) const {
+    inline std::string PageSizeToString(THPHugePageSize ps) const {
         switch (ps) {
-        case HugePageSize::Standard4K: return "4 KB (Standard)";
-        case HugePageSize::Large2M:    return "2 MB (Large)";
-        case HugePageSize::Huge1G:     return "1 GB (Huge)";
+        case THPHugePageSize::Standard4K: return "4 KB (Standard)";
+        case THPHugePageSize::Large2M:    return "2 MB (Large)";
+        case THPHugePageSize::Huge1G:     return "1 GB (Huge)";
         default:                   return "Unknown";
         }
     }

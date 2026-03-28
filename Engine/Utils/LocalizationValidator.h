@@ -21,7 +21,7 @@ enum class LocaleDirection : uint8_t {
     RTL = 1,
 };
 
-struct LocaleInfo {
+struct LocaleProperties {
     std::string  lcid;       // e.g. "en-US", "ar-SA", "he-IL"
     LocaleDirection direction;
     uint32_t     maxStringLengthChars{256}; // UI hard cap
@@ -79,14 +79,14 @@ public:
     // Generate a validation summary JSON string.
     static std::string ToJson(const ValidationReport& report);
 
-    static LocaleInfo GetLocaleInfo(const std::string& lcid) noexcept;
+    static LocaleProperties GetLocaleInfo(const std::string& lcid) noexcept;
 
 private:
     Config m_cfg;
 };
 
 // Supported locales with RTL/LTR info
-inline const LocaleInfo g_supportedLocales[] = {
+inline const LocaleProperties g_supportedLocales[] = {
     { "en-US", LocaleDirection::LTR, 256, false },
     { "en-GB", LocaleDirection::LTR, 256, false },
     { "fr-FR", LocaleDirection::LTR, 280, false },

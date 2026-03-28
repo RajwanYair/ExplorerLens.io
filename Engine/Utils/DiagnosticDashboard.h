@@ -19,7 +19,7 @@ enum class MetricCategory : uint32_t {
 };
 
 /// Health status level
-enum class HealthLevel : uint32_t {
+enum class DiagHealthLevel : uint32_t {
  Healthy = 0,
  Warning = 1,
  Degraded = 2,
@@ -34,13 +34,13 @@ struct MetricPoint {
  MetricCategory category = MetricCategory::CPU;
  double value = 0.0;
  double threshold = 100.0;
- HealthLevel health = HealthLevel::Healthy;
+ DiagHealthLevel health = DiagHealthLevel::Healthy;
  uint64_t timestamp = 0;
 };
 
 /// Snapshot of overall system health
 struct HealthSnapshot {
- HealthLevel overall = HealthLevel::Healthy;
+ DiagHealthLevel overall = DiagHealthLevel::Healthy;
  uint32_t metricCount = 0;
  uint32_t warningCount = 0;
  uint32_t criticalCount = 0;
@@ -53,7 +53,7 @@ public:
  DiagnosticDashboard();
 
  static const wchar_t* GetCategoryName(MetricCategory cat);
- static const wchar_t* GetHealthName(HealthLevel level);
+ static const wchar_t* GetHealthName(DiagHealthLevel level);
  static uint32_t GetCategoryCount() { return static_cast<uint32_t>(MetricCategory::COUNT); }
 
  /// Record a metric data point
@@ -67,7 +67,7 @@ public:
 
 private:
  std::vector<MetricPoint> m_metrics;
- HealthLevel EvaluateHealth(double value, double threshold) const;
+ DiagHealthLevel EvaluateHealth(double value, double threshold) const;
 };
 
 }} // namespace ExplorerLens::Engine

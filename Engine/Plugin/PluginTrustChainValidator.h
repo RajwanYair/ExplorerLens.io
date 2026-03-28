@@ -108,20 +108,20 @@ struct TrustStats {
     uint64_t rejectedCount = 0;
 };
 
-class PluginTrustChainValidator {
+class TrustChainValidatorV2 {
 public:
-    PluginTrustChainValidator() {
+    TrustChainValidatorV2() {
         InitializeSRWLock(&m_lock);
         LoadApis();
     }
 
-    ~PluginTrustChainValidator() {
+    ~TrustChainValidatorV2() {
         if (m_wintrustModule) FreeLibrary(m_wintrustModule);
         // crypt32 is loaded via pragma comment(lib), no need to free
     }
 
-    PluginTrustChainValidator(const PluginTrustChainValidator&) = delete;
-    PluginTrustChainValidator& operator=(const PluginTrustChainValidator&) = delete;
+    TrustChainValidatorV2(const TrustChainValidatorV2&) = delete;
+    TrustChainValidatorV2& operator=(const TrustChainValidatorV2&) = delete;
 
     inline TrustLevel ValidateSignature(const std::wstring& dllPath) {
         AcquireSRWLockExclusive(&m_lock);

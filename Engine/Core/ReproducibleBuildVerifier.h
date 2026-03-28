@@ -44,7 +44,7 @@ struct BuildHash {
 
 // ── Artifact types ─────────────────────────────────────────────────────────
 
-enum class ArtifactType {
+enum class ReproArtifactType {
  DLL,
  EXE,
  LIB,
@@ -55,16 +55,16 @@ enum class ArtifactType {
  Resource
 };
 
-inline const char* ArtifactTypeName(ArtifactType t) {
+inline const char* ArtifactTypeName(ReproArtifactType t) {
  switch (t) {
- case ArtifactType::DLL: return "DLL";
- case ArtifactType::EXE: return "EXE";
- case ArtifactType::LIB: return "LIB";
- case ArtifactType::PDB: return "PDB";
- case ArtifactType::MSI: return "MSI";
- case ArtifactType::Config: return "Config";
- case ArtifactType::Header: return "Header";
- case ArtifactType::Resource: return "Resource";
+ case ReproArtifactType::DLL: return "DLL";
+ case ReproArtifactType::EXE: return "EXE";
+ case ReproArtifactType::LIB: return "LIB";
+ case ReproArtifactType::PDB: return "PDB";
+ case ReproArtifactType::MSI: return "MSI";
+ case ReproArtifactType::Config: return "Config";
+ case ReproArtifactType::Header: return "Header";
+ case ReproArtifactType::Resource: return "Resource";
  }
  return "Unknown";
 }
@@ -73,7 +73,7 @@ inline const char* ArtifactTypeName(ArtifactType t) {
 
 struct BuildArtifact {
  std::string path;
- ArtifactType type = ArtifactType::DLL;
+ ReproArtifactType type = ReproArtifactType::DLL;
  uint64_t sizeBytes = 0;
  BuildHash contentHash;
  BuildHash strippedHash; // hash with timestamps/PDB paths stripped
@@ -85,7 +85,7 @@ struct BuildArtifact {
 
 // ── Verification result ────────────────────────────────────────────────────
 
-enum class VerifyStatus {
+enum class ReproBuildVerifyStatus {
  Reproducible, // hashes match across builds
  NonReproducible, // hashes differ
  TimestampDrift, // only timestamp sections differ
@@ -96,7 +96,7 @@ enum class VerifyStatus {
 
 struct ArtifactVerification {
  std::string artifactPath;
- VerifyStatus status = VerifyStatus::Skipped;
+ ReproBuildVerifyStatus status = ReproBuildVerifyStatus::Skipped;
  BuildHash buildAHash;
  BuildHash buildBHash;
  int64_t sizeDeltaBytes = 0;
@@ -149,8 +149,8 @@ struct ReproducibilityPolicy {
  bool stripBuildMetadata = true; // ignore VERSIONINFO build fields
  bool requireSigning = false; // signed artifacts must match
  double maxSizeDriftPct = 1.0; // acceptable size variance %
- std::vector<ArtifactType> requiredTypes = {
- ArtifactType::DLL, ArtifactType::EXE, ArtifactType::LIB
+ std::vector<ReproArtifactType> requiredTypes = {
+ ReproArtifactType::DLL, ReproArtifactType::EXE, ReproArtifactType::LIB
  };
  std::vector<std::string> excludePaths;
 };
@@ -194,7 +194,7 @@ public:
  if (IsExcluded(path)) {
  ArtifactVerification av;
  av.artifactPath = path;
- av.status = VerifyStatus::Skipped;
+ av.status = ReproBuildVerifyStatus::Skipped;
  result.skippedCount++;
  result.verifications.push_back(av);
  continue;
@@ -203,12 +203,12 @@ public:
  result.totalArtifacts++;
  auto av = CompareArtifact(pair.first, pair.second, path);
  switch (av.status) {
- case VerifyStatus::Reproducible: result.reproducibleCount++; break;
- case VerifyStatus::NonReproducible: result.nonReproducibleCount++; break;
- case VerifyStatus::TimestampDrift: result.timestampDriftCount++; break;
- case VerifyStatus::MissingArtifact: result.missingCount++; break;
- case VerifyStatus::SizeMismatch: result.nonReproducibleCount++; break;
- case VerifyStatus::Skipped: result.skippedCount++; break;
+ case ReproBuildVerifyStatus::Reproducible: result.reproducibleCount++; break;
+ case ReproBuildVerifyStatus::NonReproducible: result.nonReproducibleCount++; break;
+ case ReproBuildVerifyStatus::TimestampDrift: result.timestampDriftCount++; break;
+ case ReproBuildVerifyStatus::MissingArtifact: result.missingCount++; break;
+ case ReproBuildVerifyStatus::SizeMismatch: result.nonReproducibleCount++; break;
+ case ReproBuildVerifyStatus::Skipped: result.skippedCount++; break;
  }
  result.verifications.push_back(av);
  }
@@ -249,7 +249,7 @@ public:
  if (!r.verifications.empty()) {
  rpt += "\n--- Details ---\n";
  for (auto& v : r.verifications) {
- if (v.status == VerifyStatus::Skipped) continue;
+ if (v.status == ReproBuildVerifyStatus::Skipped) continue;
  rpt += "[" + StatusLabel(v.status) + "] " + v.artifactPath;
  if (!v.detail.empty()) rpt += " — " + v.detail;
  rpt += "\n";
@@ -268,7 +268,7 @@ private:
  av.artifactPath = path;
 
  if (!a || !b) {
- av.status = VerifyStatus::MissingArtifact;
+ av.status = ReproBuildVerifyStatus::MissingArtifact;
  av.detail = !a ? "Missing in build A" : "Missing in build B";
  return av;
  }
@@ -281,7 +281,7 @@ private:
  if (a->sizeBytes > 0) {
  double pctDrift = std::abs(av.sizeDeltaBytes) * 100.0 / a->sizeBytes;
  if (pctDrift > m_policy.maxSizeDriftPct) {
- av.status = VerifyStatus::SizeMismatch;
+ av.status = ReproBuildVerifyStatus::SizeMismatch;
  char buf[64];
  snprintf(buf, sizeof(buf), "Size drift %.2f%% exceeds %.2f%% limit",
  pctDrift, m_policy.maxSizeDriftPct);
@@ -292,14 +292,14 @@ private:
 
  // Compare hashes
  if (av.buildAHash == av.buildBHash) {
- av.status = VerifyStatus::Reproducible;
+ av.status = ReproBuildVerifyStatus::Reproducible;
  av.detail = "Hashes match";
  } else if (a->contentHash != b->contentHash &&
  a->strippedHash == b->strippedHash) {
- av.status = VerifyStatus::TimestampDrift;
+ av.status = ReproBuildVerifyStatus::TimestampDrift;
  av.detail = "Content differs only in timestamps/metadata";
  } else {
- av.status = VerifyStatus::NonReproducible;
+ av.status = ReproBuildVerifyStatus::NonReproducible;
  av.detail = "Hash mismatch";
  }
  return av;
@@ -313,14 +313,14 @@ private:
  return false;
  }
 
- static std::string StatusLabel(VerifyStatus s) {
+ static std::string StatusLabel(ReproBuildVerifyStatus s) {
  switch (s) {
- case VerifyStatus::Reproducible: return "OK";
- case VerifyStatus::NonReproducible: return "DIFF";
- case VerifyStatus::TimestampDrift: return "TS";
- case VerifyStatus::MissingArtifact: return "MISS";
- case VerifyStatus::SizeMismatch: return "SIZE";
- case VerifyStatus::Skipped: return "SKIP";
+ case ReproBuildVerifyStatus::Reproducible: return "OK";
+ case ReproBuildVerifyStatus::NonReproducible: return "DIFF";
+ case ReproBuildVerifyStatus::TimestampDrift: return "TS";
+ case ReproBuildVerifyStatus::MissingArtifact: return "MISS";
+ case ReproBuildVerifyStatus::SizeMismatch: return "SIZE";
+ case ReproBuildVerifyStatus::Skipped: return "SKIP";
  }
  return "?";
  }

@@ -162,7 +162,7 @@ inline const char* JP2StatusName(JP2DecodeStatus s) {
     }
 }
 
-struct JP2DecodeResult {
+struct J2KDecodeResult {
     JP2DecodeStatus status = JP2DecodeStatus::InternalError;
     JP2ImageInfo info;
     std::vector<uint8_t> pixelData; // decoded BGRA/RGB pixels
@@ -353,9 +353,9 @@ public:
         return info;
     }
 
-    JP2DecodeResult DecodeThumbnail(const std::string& filePath,
+    J2KDecodeResult DecodeThumbnail(const std::string& filePath,
         uint32_t maxSize = 256) const {
-        JP2DecodeResult result;
+        J2KDecodeResult result;
 
         if (!IsAvailable()) {
             result.status = JP2DecodeStatus::LibraryNotAvailable;

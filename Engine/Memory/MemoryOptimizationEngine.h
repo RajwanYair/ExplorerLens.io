@@ -90,7 +90,7 @@ enum class MemorySubsystem : uint8_t
     DecoderCodec, ///< Modular codec DLLs (total)
     ThumbnailCache, ///< Cache database + bitmap cache
     FileIO, ///< File buffers and memory-mapped regions
-    BitmapPool, ///< Reusable HBITMAP pool
+    MemOptBitmapPool, ///< Reusable HBITMAP pool
     DecodeBuffers, ///< Reusable pixel buffer pool
     Metadata, ///< EXIF/XMP metadata
     GPU, ///< GPU-side resources
@@ -102,7 +102,7 @@ enum class MemorySubsystem : uint8_t
 inline const char* SubsystemName(MemorySubsystem s) {
     static const char* names[] = {
     "Core", "DecoderWIC", "DecoderCodec", "ThumbnailCache",
-    "FileIO", "BitmapPool", "DecodeBuffers", "Metadata", "GPU", "Other"
+    "FileIO", "MemOptBitmapPool", "DecodeBuffers", "Metadata", "GPU", "Other"
     };
     auto idx = static_cast<int>(s);
     return (idx < static_cast<int>(MemorySubsystem::COUNT)) ? names[idx] : "?";
@@ -146,17 +146,17 @@ struct PooledBitmap
     bool inUse = false;
 };
 
-class BitmapPool
+class MemOptBitmapPool
 {
 public:
-    explicit BitmapPool(uint32_t defaultWidth = 256, uint32_t defaultHeight = 256,
+    explicit MemOptBitmapPool(uint32_t defaultWidth = 256, uint32_t defaultHeight = 256,
         uint32_t poolSize = 32)
         : m_defaultWidth(defaultWidth)
         , m_defaultHeight(defaultHeight)
         , m_poolSize(poolSize) {
     }
 
-    ~BitmapPool() {
+    ~MemOptBitmapPool() {
         Clear();
     }
 
@@ -356,19 +356,19 @@ private:
 //==============================================================================
 // Memory-Mapped File Handle — RAII wrapper for MapViewOfFile
 //==============================================================================
-class MemoryMappedFile
+class MemOptMappedFile
 {
 public:
-    MemoryMappedFile() = default;
+    MemOptMappedFile() = default;
 
-    ~MemoryMappedFile() {
+    ~MemOptMappedFile() {
         Close();
     }
 
     // Non-copyable, movable
-    MemoryMappedFile(const MemoryMappedFile&) = delete;
-    MemoryMappedFile& operator=(const MemoryMappedFile&) = delete;
-    MemoryMappedFile(MemoryMappedFile&& other) noexcept {
+    MemOptMappedFile(const MemOptMappedFile&) = delete;
+    MemOptMappedFile& operator=(const MemOptMappedFile&) = delete;
+    MemOptMappedFile(MemOptMappedFile&& other) noexcept {
         m_view = other.m_view; other.m_view = nullptr;
         m_mapping = other.m_mapping; other.m_mapping = nullptr;
         m_file = other.m_file; other.m_file = INVALID_HANDLE_VALUE;
@@ -534,7 +534,7 @@ public:
         m_decodeBufferPool.Initialize();
 
         // Record pool memory in accounting
-        TrackAlloc(MemorySubsystem::BitmapPool,
+        TrackAlloc(MemorySubsystem::MemOptBitmapPool,
             static_cast<int64_t>(m_bitmapPool.GetPoolMemoryBytes()));
         TrackAlloc(MemorySubsystem::DecodeBuffers,
             static_cast<int64_t>(m_decodeBufferPool.GetPoolMemoryBytes()));
@@ -608,8 +608,8 @@ public:
     //--------------------------------------------------------------------------
 
     /// Open file as memory-mapped (returns empty if file too large or mmap disabled)
-    MemoryMappedFile OpenMapped(const wchar_t* filePath) {
-        MemoryMappedFile mmf;
+    MemOptMappedFile OpenMapped(const wchar_t* filePath) {
+        MemOptMappedFile mmf;
 
         if (!m_config.useMemoryMappedIO) return mmf;
 
@@ -713,7 +713,7 @@ public:
 
 private:
     MemoryBudgetConfig m_config;
-    BitmapPool m_bitmapPool;
+    MemOptBitmapPool m_bitmapPool;
     DecodeBufferPool m_decodeBufferPool;
     bool m_initialized = false;
 

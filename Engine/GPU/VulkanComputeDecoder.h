@@ -145,10 +145,10 @@ private:
         if (!fn) { FreeLibrary(dxgi); return; }
 
         void* factory = nullptr;
-        static const GUID IID_IDXGIFactory = {
+        static const GUID s_IID_DXGIFactory = {
             0x7b7166ec, 0x21c7, 0x44ae,
             {0xb2, 0x1a, 0xc9, 0xae, 0x32, 0x1a, 0xe3, 0x69}};
-        if (FAILED(fn(IID_IDXGIFactory, &factory)) || !factory) {
+        if (FAILED(fn(s_IID_DXGIFactory, &factory)) || !factory) {
             FreeLibrary(dxgi); return;
         }
 

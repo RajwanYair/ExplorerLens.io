@@ -16,7 +16,7 @@
 namespace ExplorerLens { namespace Plugin {
 
 /// Plugin lifecycle states
-enum class PluginState : uint8_t {
+enum class ValidationPluginState : uint8_t {
  Unloaded = 0,
  Discovering = 1,
  Loading = 2,
@@ -36,7 +36,7 @@ enum class IPCTransport : uint8_t {
 };
 
 /// Plugin capability descriptor
-struct PluginCapability {
+struct ValidationPluginCap {
  std::string pluginId;
  std::string pluginName;
  std::string version;
@@ -48,7 +48,7 @@ struct PluginCapability {
 };
 
 /// IPC message for plugin communication
-struct IPCMessage {
+struct ValidationIPCMessage {
  uint32_t messageId = 0;
  std::string command; // "DECODE", "QUERY", "HEALTH", "SHUTDOWN"
  std::string payload;
@@ -61,7 +61,7 @@ struct IPCMessage {
 };
 
 /// E2E test scenario for plugin runtime
-struct PluginTestScenario {
+struct ValidationTestScenario {
  std::string name;
  std::string pluginId;
  std::string inputExtension;
@@ -72,24 +72,24 @@ struct PluginTestScenario {
  bool injectTimeout = false; // Simulate plugin hang
  std::chrono::milliseconds timeout{10000};
 
- static PluginTestScenario NormalDecode(const std::string& ext) {
- PluginTestScenario s;
+ static ValidationTestScenario NormalDecode(const std::string& ext) {
+ ValidationTestScenario s;
  s.name = "NormalDecode_" + ext;
  s.inputExtension = ext;
  s.iterations = 100;
  s.expectSuccess = true;
  return s;
  }
- static PluginTestScenario CrashInjection() {
- PluginTestScenario s;
+ static ValidationTestScenario CrashInjection() {
+ ValidationTestScenario s;
  s.name = "CrashInjection";
  s.injectFault = true;
  s.expectSuccess = false;
  s.iterations = 10;
  return s;
  }
- static PluginTestScenario TimeoutInjection() {
- PluginTestScenario s;
+ static ValidationTestScenario TimeoutInjection() {
+ ValidationTestScenario s;
  s.name = "TimeoutInjection";
  s.injectTimeout = true;
  s.expectSuccess = false;
@@ -100,7 +100,7 @@ struct PluginTestScenario {
 };
 
 /// Soak test configuration
-struct SoakTestConfig {
+struct ValidationSoakConfig {
  int totalIterations = 5000;
  int maxConcurrent = 4;
  int maxCrashBudget = 0; // 0 = zero tolerance
@@ -109,15 +109,15 @@ struct SoakTestConfig {
  bool includeCorruptPayloads = true;
  bool recycleProcOnCrash = true;
 
- static SoakTestConfig Quick() {
- SoakTestConfig c;
+ static ValidationSoakConfig Quick() {
+ ValidationSoakConfig c;
  c.totalIterations = 500;
  c.duration = std::chrono::minutes(5);
  return c;
  }
- static SoakTestConfig Full() { return SoakTestConfig{}; }
- static SoakTestConfig Exhaustive() {
- SoakTestConfig c;
+ static ValidationSoakConfig Full() { return ValidationSoakConfig{}; }
+ static ValidationSoakConfig Exhaustive() {
+ ValidationSoakConfig c;
  c.totalIterations = 50000;
  c.duration = std::chrono::minutes(120);
  c.maxConcurrent = 8;
@@ -126,7 +126,7 @@ struct SoakTestConfig {
 };
 
 /// Soak test result
-struct SoakTestResult {
+struct ValidationSoakResult {
  int totalRequests = 0;
  int successCount = 0;
  int failureCount = 0;
@@ -148,8 +148,8 @@ struct SoakTestResult {
 
 /// Plugin lifecycle event for audit trail
 struct LifecycleEvent {
- PluginState fromState;
- PluginState toState;
+ ValidationPluginState fromState;
+ ValidationPluginState toState;
  std::string pluginId;
  std::chrono::system_clock::time_point timestamp;
  std::string reason;
@@ -166,25 +166,25 @@ public:
  }
 
  // ─── Test Matrix ─────────────────────────────────────────────
- std::vector<PluginTestScenario> GenerateTestMatrix() const {
+ std::vector<ValidationTestScenario> GenerateTestMatrix() const {
  return {
- PluginTestScenario::NormalDecode(".psd"),
- PluginTestScenario::NormalDecode(".webp"),
- PluginTestScenario::NormalDecode(".heif"),
- PluginTestScenario::CrashInjection(),
- PluginTestScenario::TimeoutInjection(),
+ ValidationTestScenario::NormalDecode(".psd"),
+ ValidationTestScenario::NormalDecode(".webp"),
+ ValidationTestScenario::NormalDecode(".heif"),
+ ValidationTestScenario::CrashInjection(),
+ ValidationTestScenario::TimeoutInjection(),
  };
  }
 
  // ─── Lifecycle Validation ────────────────────────────────────
- bool IsValidTransition(PluginState from, PluginState to) const {
+ bool IsValidTransition(ValidationPluginState from, ValidationPluginState to) const {
  auto it = m_validTransitions.find(from);
  if (it == m_validTransitions.end()) return false;
  return std::find(it->second.begin(), it->second.end(), to) != it->second.end();
  }
 
  LifecycleEvent RecordTransition(const std::string& pluginId,
- PluginState from, PluginState to,
+ ValidationPluginState from, ValidationPluginState to,
  const std::string& reason = "") {
  LifecycleEvent event;
  event.pluginId = pluginId;
@@ -206,8 +206,8 @@ public:
  }
 
  // ─── Soak Test Driver ────────────────────────────────────────
- SoakTestResult RunSoakTest(const SoakTestConfig& config) const {
- SoakTestResult result;
+ ValidationSoakResult RunSoakTest(const ValidationSoakConfig& config) const {
+ ValidationSoakResult result;
  result.totalRequests = config.totalIterations;
  // Simulated results for design validation
  result.successCount = config.totalIterations;
@@ -224,20 +224,20 @@ public:
  size_t EventCount() const { return m_events.size(); }
 
 private:
- std::map<PluginState, std::vector<PluginState>> m_validTransitions;
+ std::map<ValidationPluginState, std::vector<ValidationPluginState>> m_validTransitions;
  std::vector<LifecycleEvent> m_events;
 
  void InitializeTransitionRules() {
  m_validTransitions = {
- {PluginState::Unloaded, {PluginState::Discovering}},
- {PluginState::Discovering, {PluginState::Loading, PluginState::Unloaded}},
- {PluginState::Loading, {PluginState::Initializing, PluginState::Faulted}},
- {PluginState::Initializing, {PluginState::Ready, PluginState::Faulted}},
- {PluginState::Ready, {PluginState::Decoding, PluginState::Suspended, PluginState::Unloading}},
- {PluginState::Decoding, {PluginState::Ready, PluginState::Faulted}},
- {PluginState::Suspended, {PluginState::Ready, PluginState::Unloading}},
- {PluginState::Faulted, {PluginState::Unloading, PluginState::Loading}},
- {PluginState::Unloading, {PluginState::Unloaded}},
+ {ValidationPluginState::Unloaded, {ValidationPluginState::Discovering}},
+ {ValidationPluginState::Discovering, {ValidationPluginState::Loading, ValidationPluginState::Unloaded}},
+ {ValidationPluginState::Loading, {ValidationPluginState::Initializing, ValidationPluginState::Faulted}},
+ {ValidationPluginState::Initializing, {ValidationPluginState::Ready, ValidationPluginState::Faulted}},
+ {ValidationPluginState::Ready, {ValidationPluginState::Decoding, ValidationPluginState::Suspended, ValidationPluginState::Unloading}},
+ {ValidationPluginState::Decoding, {ValidationPluginState::Ready, ValidationPluginState::Faulted}},
+ {ValidationPluginState::Suspended, {ValidationPluginState::Ready, ValidationPluginState::Unloading}},
+ {ValidationPluginState::Faulted, {ValidationPluginState::Unloading, ValidationPluginState::Loading}},
+ {ValidationPluginState::Unloading, {ValidationPluginState::Unloaded}},
  };
  }
 };

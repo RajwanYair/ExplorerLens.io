@@ -17,7 +17,7 @@ namespace ExplorerLens::Engine::Decoders {
 //------------------------------------------------------------------------------
 // Color Space Identifiers
 //------------------------------------------------------------------------------
-enum class ColorSpace : uint8_t {
+enum class ManagedColorSpace : uint8_t {
     Unknown = 0,
     sRGB, // Standard web/display (IEC 61966-2-1)
     DisplayP3, // Apple wide gamut (DCI-P3 primaries, sRGB gamma)
@@ -33,36 +33,36 @@ enum class ColorSpace : uint8_t {
     Custom // Unknown ICC profile — use profile bytes directly
 };
 
-inline const char* ColorSpaceName(ColorSpace cs) {
+inline const char* ColorSpaceName(ManagedColorSpace cs) {
     switch (cs) {
-    case ColorSpace::sRGB: return "sRGB";
-    case ColorSpace::DisplayP3: return "Display P3";
-    case ColorSpace::AdobeRGB: return "Adobe RGB (1998)";
-    case ColorSpace::ProPhotoRGB: return "ProPhoto RGB";
-    case ColorSpace::Rec709: return "Rec.709";
-    case ColorSpace::Rec2020: return "Rec.2020";
-    case ColorSpace::ACES: return "ACES";
-    case ColorSpace::LinearRGB: return "Linear sRGB";
-    case ColorSpace::CMYK_Fogra39: return "CMYK (Fogra39)";
-    case ColorSpace::LAB_D50: return "CIE L*a*b*";
-    case ColorSpace::XYZ_D50: return "CIE XYZ";
-    case ColorSpace::Custom: return "Custom ICC Profile";
+    case ManagedColorSpace::sRGB: return "sRGB";
+    case ManagedColorSpace::DisplayP3: return "Display P3";
+    case ManagedColorSpace::AdobeRGB: return "Adobe RGB (1998)";
+    case ManagedColorSpace::ProPhotoRGB: return "ProPhoto RGB";
+    case ManagedColorSpace::Rec709: return "Rec.709";
+    case ManagedColorSpace::Rec2020: return "Rec.2020";
+    case ManagedColorSpace::ACES: return "ACES";
+    case ManagedColorSpace::LinearRGB: return "Linear sRGB";
+    case ManagedColorSpace::CMYK_Fogra39: return "CMYK (Fogra39)";
+    case ManagedColorSpace::LAB_D50: return "CIE L*a*b*";
+    case ManagedColorSpace::XYZ_D50: return "CIE XYZ";
+    case ManagedColorSpace::Custom: return "Custom ICC Profile";
     default: return "Unknown";
     }
 }
 
-inline bool IsWideGamut(ColorSpace cs) {
-    return cs == ColorSpace::DisplayP3 ||
-        cs == ColorSpace::AdobeRGB ||
-        cs == ColorSpace::ProPhotoRGB ||
-        cs == ColorSpace::Rec2020 ||
-        cs == ColorSpace::ACES;
+inline bool IsWideGamut(ManagedColorSpace cs) {
+    return cs == ManagedColorSpace::DisplayP3 ||
+        cs == ManagedColorSpace::AdobeRGB ||
+        cs == ManagedColorSpace::ProPhotoRGB ||
+        cs == ManagedColorSpace::Rec2020 ||
+        cs == ManagedColorSpace::ACES;
 }
 
-inline bool IsHDR(ColorSpace cs) {
-    return cs == ColorSpace::Rec2020 ||
-        cs == ColorSpace::ACES ||
-        cs == ColorSpace::LinearRGB;
+inline bool IsHDR(ManagedColorSpace cs) {
+    return cs == ManagedColorSpace::Rec2020 ||
+        cs == ManagedColorSpace::ACES ||
+        cs == ManagedColorSpace::LinearRGB;
 }
 
 //------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ inline bool IsHDR(ColorSpace cs) {
 //------------------------------------------------------------------------------
 struct ICCProfile {
     std::string description;
-    ColorSpace colorSpace = ColorSpace::Unknown;
+    ManagedColorSpace colorSpace = ManagedColorSpace::Unknown;
     std::vector<uint8_t> rawData; // Raw ICC profile bytes
     uint32_t version = 0; // ICC version (e.g., 0x04300000 = v4.3)
     std::string renderingIntent = "Perceptual"; // Perceptual, Relative, Saturation, Absolute
@@ -79,17 +79,17 @@ struct ICCProfile {
     uint32_t SizeBytes() const { return static_cast<uint32_t>(rawData.size()); }
 
     // Identify a known color space from ICC profile description
-    ColorSpace IdentifyColorSpace() const {
-        if (description.find("sRGB") != std::string::npos) return ColorSpace::sRGB;
-        if (description.find("Display P3") != std::string::npos) return ColorSpace::DisplayP3;
-        if (description.find("Adobe RGB") != std::string::npos) return ColorSpace::AdobeRGB;
-        if (description.find("ProPhoto") != std::string::npos) return ColorSpace::ProPhotoRGB;
+    ManagedColorSpace IdentifyColorSpace() const {
+        if (description.find("sRGB") != std::string::npos) return ManagedColorSpace::sRGB;
+        if (description.find("Display P3") != std::string::npos) return ManagedColorSpace::DisplayP3;
+        if (description.find("Adobe RGB") != std::string::npos) return ManagedColorSpace::AdobeRGB;
+        if (description.find("ProPhoto") != std::string::npos) return ManagedColorSpace::ProPhotoRGB;
         if (description.find("Rec. 2020") != std::string::npos ||
-            description.find("BT.2020") != std::string::npos) return ColorSpace::Rec2020;
+            description.find("BT.2020") != std::string::npos) return ManagedColorSpace::Rec2020;
         if (description.find("Rec. 709") != std::string::npos ||
-            description.find("BT.709") != std::string::npos) return ColorSpace::Rec709;
-        if (description.find("ACES") != std::string::npos) return ColorSpace::ACES;
-        return ColorSpace::Custom;
+            description.find("BT.709") != std::string::npos) return ManagedColorSpace::Rec709;
+        if (description.find("ACES") != std::string::npos) return ManagedColorSpace::ACES;
+        return ManagedColorSpace::Custom;
     }
 };
 
@@ -188,7 +188,7 @@ inline double HLGToLinear(double v) {
 //------------------------------------------------------------------------------
 
 // 3x3 matrix for color space conversion
-struct ColorMatrix3x3 {
+struct ManagedColorMatrix {
     double m[3][3] = {};
 
     std::array<double, 3> Transform(double r, double g, double b) const {
@@ -201,24 +201,24 @@ struct ColorMatrix3x3 {
 };
 
 // Standard gamut mapping matrices (verified against ICC specification)
-inline ColorMatrix3x3 DisplayP3ToSRGB() {
-    ColorMatrix3x3 result;
+inline ManagedColorMatrix DisplayP3ToSRGB() {
+    ManagedColorMatrix result;
     result.m[0][0] = 1.2249; result.m[0][1] = -0.2247; result.m[0][2] = 0.0;
     result.m[1][0] = -0.0420; result.m[1][1] = 1.0419; result.m[1][2] = 0.0;
     result.m[2][0] = -0.0197; result.m[2][1] = -0.0786; result.m[2][2] = 1.0984;
     return result;
 }
 
-inline ColorMatrix3x3 AdobeRGBToSRGB() {
-    ColorMatrix3x3 result;
+inline ManagedColorMatrix AdobeRGBToSRGB() {
+    ManagedColorMatrix result;
     result.m[0][0] = 1.3982; result.m[0][1] = -0.3982; result.m[0][2] = 0.0;
     result.m[1][0] = 0.0; result.m[1][1] = 1.0; result.m[1][2] = 0.0;
     result.m[2][0] = 0.0; result.m[2][1] = -0.0423; result.m[2][2] = 1.0423;
     return result;
 }
 
-inline ColorMatrix3x3 Rec2020ToSRGB() {
-    ColorMatrix3x3 result;
+inline ManagedColorMatrix Rec2020ToSRGB() {
+    ManagedColorMatrix result;
     result.m[0][0] = 1.6605; result.m[0][1] = -0.5877; result.m[0][2] = -0.0728;
     result.m[1][0] = -0.1246; result.m[1][1] = 1.1330; result.m[1][2] = -0.0084;
     result.m[2][0] = -0.0182; result.m[2][1] = -0.1006; result.m[2][2] = 1.1187;
@@ -244,21 +244,21 @@ inline const char* GamutMappingMethodName(GamutMappingMethod m) {
 
 class GamutMapper {
 public:
-    GamutMapper(ColorSpace source, ColorSpace target = ColorSpace::sRGB,
+    GamutMapper(ManagedColorSpace source, ManagedColorSpace target = ManagedColorSpace::sRGB,
         GamutMappingMethod method = GamutMappingMethod::Perceptual)
         : m_source(source), m_target(target), m_method(method) {
     }
 
     // Get the conversion matrix for source → target
-    ColorMatrix3x3 GetMatrix() const {
-        if (m_source == ColorSpace::DisplayP3 && m_target == ColorSpace::sRGB)
+    ManagedColorMatrix GetMatrix() const {
+        if (m_source == ManagedColorSpace::DisplayP3 && m_target == ManagedColorSpace::sRGB)
             return DisplayP3ToSRGB();
-        if (m_source == ColorSpace::AdobeRGB && m_target == ColorSpace::sRGB)
+        if (m_source == ManagedColorSpace::AdobeRGB && m_target == ManagedColorSpace::sRGB)
             return AdobeRGBToSRGB();
-        if (m_source == ColorSpace::Rec2020 && m_target == ColorSpace::sRGB)
+        if (m_source == ManagedColorSpace::Rec2020 && m_target == ManagedColorSpace::sRGB)
             return Rec2020ToSRGB();
         // Identity for same-space or unsupported conversions
-        ColorMatrix3x3 identity;
+        ManagedColorMatrix identity;
         identity.m[0][0] = 1.0; identity.m[0][1] = 0.0; identity.m[0][2] = 0.0;
         identity.m[1][0] = 0.0; identity.m[1][1] = 1.0; identity.m[1][2] = 0.0;
         identity.m[2][0] = 0.0; identity.m[2][1] = 0.0; identity.m[2][2] = 1.0;
@@ -279,13 +279,13 @@ public:
     }
 
     bool NeedsConversion() const { return m_source != m_target; }
-    ColorSpace Source() const { return m_source; }
-    ColorSpace Target() const { return m_target; }
+    ManagedColorSpace Source() const { return m_source; }
+    ManagedColorSpace Target() const { return m_target; }
     GamutMappingMethod Method() const { return m_method; }
 
 private:
-    ColorSpace m_source;
-    ColorSpace m_target;
+    ManagedColorSpace m_source;
+    ManagedColorSpace m_target;
     GamutMappingMethod m_method;
 };
 
@@ -318,7 +318,7 @@ struct HDRMetadata {
     double maxContentLightLevel = 1000.0; // MaxCLL (nits)
     double maxFrameAverage = 400.0; // MaxFALL (nits)
     double displayMaxBrightness = 80.0; // Target SDR display (nits)
-    ColorSpace sourceSpace = ColorSpace::Rec2020;
+    ManagedColorSpace sourceSpace = ManagedColorSpace::Rec2020;
     bool hasPQ = false; // SMPTE ST 2084 (HDR10)
     bool hasHLG = false; // Hybrid Log-Gamma (HLG)
 
@@ -448,7 +448,7 @@ struct ColorPipelineConfig {
     bool extractICCProfiles = true;
     bool applyGamutMapping = true;
     bool applyToneMapping = true;
-    ColorSpace outputSpace = ColorSpace::sRGB;
+    ManagedColorSpace outputSpace = ManagedColorSpace::sRGB;
     ToneMappingOperator toneMapper = ToneMappingOperator::ACES_Filmic;
     GamutMappingMethod gamutMethod = GamutMappingMethod::Perceptual;
     double hdrExposure = 1.0;
@@ -472,7 +472,7 @@ struct ColorPipelineConfig {
         ColorPipelineConfig c;
         c.toneMapper = ToneMappingOperator::ACES_Filmic;
         c.hdrExposure = 1.2;
-        c.outputSpace = ColorSpace::sRGB;
+        c.outputSpace = ManagedColorSpace::sRGB;
         return c;
     }
 
@@ -487,15 +487,15 @@ struct ColorPipelineConfig {
 //------------------------------------------------------------------------------
 // Per-Format Color Space Defaults
 //------------------------------------------------------------------------------
-inline ColorSpace DefaultColorSpaceForFormat(const std::string& format) {
-    if (format == "HEIF" || format == "HEIC") return ColorSpace::DisplayP3;
-    if (format == "EXR") return ColorSpace::LinearRGB;
-    if (format == "HDR") return ColorSpace::LinearRGB;
-    if (format == "DNG") return ColorSpace::ProPhotoRGB;
-    if (format == "PSD") return ColorSpace::AdobeRGB;
-    if (format == "AVIF") return ColorSpace::sRGB; // Can be P3 too
-    if (format == "JXL") return ColorSpace::sRGB;
-    return ColorSpace::sRGB;
+inline ManagedColorSpace DefaultColorSpaceForFormat(const std::string& format) {
+    if (format == "HEIF" || format == "HEIC") return ManagedColorSpace::DisplayP3;
+    if (format == "EXR") return ManagedColorSpace::LinearRGB;
+    if (format == "HDR") return ManagedColorSpace::LinearRGB;
+    if (format == "DNG") return ManagedColorSpace::ProPhotoRGB;
+    if (format == "PSD") return ManagedColorSpace::AdobeRGB;
+    if (format == "AVIF") return ManagedColorSpace::sRGB; // Can be P3 too
+    if (format == "JXL") return ManagedColorSpace::sRGB;
+    return ManagedColorSpace::sRGB;
 }
 
 } // namespace ExplorerLens::Engine::Decoders

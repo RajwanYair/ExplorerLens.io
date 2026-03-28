@@ -94,8 +94,9 @@ Add-PathEntry "$env:PROGRAMFILES\Microsoft VS Code"
 Add-PathEntry "$env:USERPROFILE\scoop\apps\inno-setup\current"
 
 # ── Proxy configuration for git and HTTPS tools ──────────────────────────────
-# Uses the machine-configured Intel proxy (proxy-dmz.intel.com:912)
-$_proxy = "http://proxy-dmz.intel.com:912"
+# Set $_proxy to your corporate proxy URL if needed (e.g. http://proxy.example.com:8080)
+# Leave empty string to disable proxy
+$_proxy = ""
 $env:HTTP_PROXY  = $_proxy
 $env:HTTPS_PROXY = $_proxy
 $env:http_proxy  = $_proxy

@@ -27,7 +27,7 @@ struct CacheAccessRecord {
     double      evictionScore = 0.0; // Higher = more likely to evict
 };
 
-struct EvictionCandidate {
+struct PrunerEvictionCandidate {
     std::string key;
     double      score = 0.0;
     uint64_t    sizeBytes = 0;
@@ -125,10 +125,10 @@ public:
     // Get sorted eviction candidates that, when removed, bring total
     // cached size down to the target budget
     // ---------------------------------------------------------------
-    std::vector<EvictionCandidate> GetEvictionCandidates(
+    std::vector<PrunerEvictionCandidate> GetEvictionCandidates(
         uint64_t budgetBytes) const {
         // Score all entries
-        std::vector<EvictionCandidate> scored;
+        std::vector<PrunerEvictionCandidate> scored;
         scored.reserve(m_entries.size());
 
         for (const auto& [key, rec] : m_entries) {
@@ -139,7 +139,7 @@ public:
 
         // Sort descending by score (highest = evict first)
         std::sort(scored.begin(), scored.end(),
-            [](const EvictionCandidate& a, const EvictionCandidate& b) {
+            [](const PrunerEvictionCandidate& a, const PrunerEvictionCandidate& b) {
                 return a.score > b.score;
             });
 
@@ -149,7 +149,7 @@ public:
         uint64_t bytesToFree = m_totalSize - budgetBytes;
         uint64_t freed = 0;
 
-        std::vector<EvictionCandidate> result;
+        std::vector<PrunerEvictionCandidate> result;
         for (const auto& c : scored) {
             if (freed >= bytesToFree) break;
             result.push_back(c);

@@ -223,18 +223,18 @@ void PluginHostServer::HandleRequestThumbnail(
         << L")\n";
 
     // Parse request
-    if (payload.size() < sizeof(IPC::ThumbnailRequest)) {
+    if (payload.size() < sizeof(IPC::IPCThumbnailRequest)) {
         SendErrorResponse(correlation_id, IPC::IPCErrorCode::MALFORMED_MESSAGE,
             "Thumbnail request too small");
         return;
     }
 
     const auto* request =
-        reinterpret_cast<const IPC::ThumbnailRequest*>(payload.data());
+        reinterpret_cast<const IPC::IPCThumbnailRequest*>(payload.data());
 
     // Extract file path
     const wchar_t* file_path_ptr = reinterpret_cast<const wchar_t*>(
-        payload.data() + sizeof(IPC::ThumbnailRequest));
+        payload.data() + sizeof(IPC::IPCThumbnailRequest));
     std::wstring file_path(file_path_ptr, request->filePathLength);
 
     std::wcout << L" File: " << file_path << L"\n";

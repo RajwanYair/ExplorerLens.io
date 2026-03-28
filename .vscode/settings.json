@@ -307,7 +307,8 @@
     // ── HTTP Proxy ───────────────────────────────────────────────
     "http.proxySupport": "on",
     "http.proxyStrictSSL": false,
-    "http.proxy": "http://proxy-dmz.intel.com:912",
+    // Set http.proxy to your corporate proxy URL if you are behind a firewall, e.g. "http://proxy.example.com:8080"
+    "http.proxy": "",
     // ── Copilot ──────────────────────────────────────────────────
     "github.copilot.enable": {
         "*": true,

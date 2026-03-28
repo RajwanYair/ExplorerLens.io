@@ -21,7 +21,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct PerfSample {
+struct LivePerfSample {
     uint64_t timestampMs = 0;
     double   frameTimeMs = 0.0;
     double   decodeTimeMs = 0.0;
@@ -69,9 +69,9 @@ public:
         return s;
     }
 
-    void RecordSample(const PerfSample& sample) {
+    void RecordSample(const LivePerfSample& sample) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        PerfSample s = sample;
+        LivePerfSample s = sample;
         s.timestampMs = GetTickCount64();
 
         m_samples.push_back(s);
@@ -125,9 +125,9 @@ public:
         return m_memorySeries.Latest();
     }
 
-    PerfSample GetLatestSample() const {
+    LivePerfSample GetLatestSample() const {
         std::lock_guard<std::mutex> lock(m_mutex);
-        return m_samples.empty() ? PerfSample{} : m_samples.back();
+        return m_samples.empty() ? LivePerfSample{} : m_samples.back();
     }
 
     uint64_t GetTotalSamples() const {
@@ -180,7 +180,7 @@ private:
     LivePerformanceTracker& operator=(const LivePerformanceTracker&) = delete;
 
     mutable std::mutex m_mutex;
-    std::deque<PerfSample> m_samples;
+    std::deque<LivePerfSample> m_samples;
     size_t m_maxSamples = 600;
     PerfTimeSeries m_fpsSeries;
     PerfTimeSeries m_decodeSeries;

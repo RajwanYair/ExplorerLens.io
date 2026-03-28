@@ -36,7 +36,7 @@ TEST(ZeroCopyPipeline, InvalidBufferCannotUpload) {
 
 TEST(ZeroCopyPipeline, UploadWithNullDescriptorFails) {
  GPUUploadDescriptor desc;
- ZeroCopyStats stats;
+ PipelineZeroCopyStats stats;
  EXPECT_FALSE(ZeroCopyPipeline::UploadToGPU(desc, stats));
 }
 
@@ -48,7 +48,7 @@ TEST(ZeroCopyPipeline, UploadPinnedCountsAsZeroCopy) {
  desc.widthPx = 8;
  desc.heightPx = 8;
  desc.rowPitchBytes = 32;
- ZeroCopyStats stats;
+ PipelineZeroCopyStats stats;
  ZeroCopyPipeline::UploadToGPU(desc, stats);
  EXPECT_GT(stats.bytesHandedOff + stats.bytesCopied, 0u);
 }
@@ -68,14 +68,14 @@ TEST(ZeroCopyPipeline, ScatterGatherInvalidOnMismatch) {
 }
 
 TEST(ZeroCopyPipeline, ZeroCopyStatsIsZeroCopy) {
- ZeroCopyStats stats;
+ PipelineZeroCopyStats stats;
  stats.bytesCopied = 0;
  stats.bytesHandedOff = 512;
  EXPECT_TRUE(stats.IsZeroCopy());
 }
 
 TEST(ZeroCopyPipeline, ZeroCopyStatsNotZeroCopyWhenCopied) {
- ZeroCopyStats stats;
+ PipelineZeroCopyStats stats;
  stats.bytesCopied = 512;
  stats.bytesHandedOff = 0;
  EXPECT_FALSE(stats.IsZeroCopy());

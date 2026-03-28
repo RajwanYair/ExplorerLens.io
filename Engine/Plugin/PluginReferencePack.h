@@ -13,7 +13,7 @@ namespace ExplorerLens::Plugin {
 
 // ─── Plugin capability flags ──────────────────────────────────────────────────
 
-enum class PluginCapability : uint32_t {
+enum class PackPluginCapability : uint32_t {
  None = 0x000,
  Decode = 0x001,
  MetadataOnly = 0x002,
@@ -23,12 +23,12 @@ enum class PluginCapability : uint32_t {
  GPUAccelerated = 0x020,
 };
 
-inline PluginCapability operator|(PluginCapability a, PluginCapability b) {
- return static_cast<PluginCapability>(
+inline PackPluginCapability operator|(PackPluginCapability a, PackPluginCapability b) {
+ return static_cast<PackPluginCapability>(
  static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
 
-inline bool HasCapability(PluginCapability set, PluginCapability flag) {
+inline bool HasCapability(PackPluginCapability set, PackPluginCapability flag) {
  return (static_cast<uint32_t>(set) & static_cast<uint32_t>(flag)) != 0;
 }
 
@@ -39,7 +39,7 @@ struct ReferencePluginDescriptor {
  std::string name;
  std::string description;
  std::string version; // semantic version
- PluginCapability capabilities;
+ PackPluginCapability capabilities;
  std::vector<std::string> supportedExtensions;
  std::string ipcEndpoint; // named pipe path template
  uint32_t maxDecodeMs { 100 };
@@ -61,7 +61,7 @@ inline ReferencePluginDescriptor MinimalImageGeneratorPlugin() {
  "Minimal Image Generator",
  "Generates a solid-color placeholder thumbnail for unknown file types",
  "1.0.0",
- PluginCapability::Decode,
+ PackPluginCapability::Decode,
  { ".*" }, // wildcard — handles any extension as fallback
  "\\\\.\\pipe\\ExplorerLens_Plugin_Minimal",
  50,
@@ -87,7 +87,7 @@ inline ReferencePluginDescriptor MetadataOnlyPlugin() {
  "Metadata Reader",
  "Reads EXIF/XMP/IPTC metadata without full pixel decode",
  "1.0.0",
- PluginCapability::MetadataOnly | PluginCapability::Decode,
+ PackPluginCapability::MetadataOnly | PackPluginCapability::Decode,
  { ".jpg", ".jpeg", ".tiff", ".tif", ".heic", ".heif", ".avif",
  ".png", ".webp", ".raw", ".cr2", ".cr3", ".nef", ".arw" },
  "\\\\.\\pipe\\ExplorerLens_Plugin_Metadata",
@@ -123,7 +123,7 @@ inline ReferencePluginDescriptor WatermarkPlugin() {
  "Watermark Overlay",
  "Applies configurable branding or copyright overlay to thumbnails",
  "1.0.0",
- PluginCapability::PostProcess | PluginCapability::Decode,
+ PackPluginCapability::PostProcess | PackPluginCapability::Decode,
  { ".jpg", ".jpeg", ".png", ".webp", ".tiff", ".bmp", ".heic",
  ".avif", ".jxl", ".gif", ".dng" },
  "\\\\.\\pipe\\ExplorerLens_Plugin_Watermark",
@@ -132,7 +132,7 @@ inline ReferencePluginDescriptor WatermarkPlugin() {
  };
 }
 
-struct WatermarkConfig {
+struct PackWatermarkConfig {
  std::string text { "© ExplorerLens" };
  uint8_t alpha { 128 }; // 0=transparent, 255=opaque
  uint8_t r { 255 }, g { 255 }, b { 255 }; // text colour
@@ -142,13 +142,13 @@ struct WatermarkConfig {
  uint32_t fontSizePt { 10 };
  bool scaleWithImage { true };
 
- static WatermarkConfig Subtle() {
- WatermarkConfig c;
+ static PackWatermarkConfig Subtle() {
+ PackWatermarkConfig c;
  c.alpha = 64;
  return c;
  }
- static WatermarkConfig Bold() {
- WatermarkConfig c;
+ static PackWatermarkConfig Bold() {
+ PackWatermarkConfig c;
  c.alpha = 200;
  c.fontSizePt = 16;
  return c;

@@ -49,7 +49,7 @@ enum class BuildConfiguration : uint8_t {
     Unknown
 };
 
-struct BuildInfo {
+struct ValidatorBuildInfo {
     uint32_t compilerVersionMajor = 0;
     uint32_t compilerVersionMinor = 0;
     uint32_t compilerVersionPatch = 0;
@@ -84,8 +84,8 @@ struct BuildValidationReport {
 
 // ── GetBuildInfo ───────────────────────────────────────────────
 
-inline BuildInfo GetBuildInfo() {
-    BuildInfo info;
+inline ValidatorBuildInfo GetBuildInfo() {
+    ValidatorBuildInfo info;
 
 #ifdef _MSC_VER
     info.compilerName = "MSVC";

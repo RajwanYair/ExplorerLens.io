@@ -1,7 +1,7 @@
 // ErrorRecoveryEngineV2.h — Automated error recovery with retry, backoff, fallback
 // Copyright (c) 2026 ExplorerLens Project
 //
-// Provides RecoveryStrategyV2 enum, RetryPolicy, RecoveryAction, and
+// Provides RecoveryStrategyV2 enum, RecoveryRetryPolicy, RecoveryAction, and
 // ErrorRecoveryEngineV2 that executes operations with automatic retry,
 // exponential backoff with jitter, and configurable fallback strategies.
 //
@@ -46,7 +46,7 @@ inline const char* RecoveryStrategyV2Name(RecoveryStrategyV2 s) noexcept {
 }
 
 /// Configurable retry policy for backoff strategies
-struct RetryPolicy {
+struct RecoveryRetryPolicy {
     uint32_t maxAttempts      = 3;       // Maximum number of retry attempts
     uint32_t baseDelayMs      = 100;     // Base delay in milliseconds
     double   backoffMultiplier = 2.0;    // Exponential backoff multiplier
@@ -80,12 +80,12 @@ struct ErrorRecoveryAction {
     std::string                                 name;       // Descriptive name for logging
     std::function<bool(const StructuredError&)> matcher;    // Returns true if this action applies
     RecoveryStrategyV2                          strategy = RecoveryStrategyV2::None;
-    RetryPolicy                                 retryPolicy; // Used if strategy involves retry
+    RecoveryRetryPolicy                                 retryPolicy; // Used if strategy involves retry
 
     /// Convenience: match by domain
     static ErrorRecoveryAction ForDomain(StructuredErrorDomain domain,
                                          RecoveryStrategyV2 strategy,
-                                         RetryPolicy policy = {}) {
+                                         RecoveryRetryPolicy policy = {}) {
         ErrorRecoveryAction action;
         action.name = std::string("Domain:") + StructuredErrorDomainName(domain);
         action.matcher = [domain](const StructuredError& err) {
@@ -99,7 +99,7 @@ struct ErrorRecoveryAction {
     /// Convenience: match by HRESULT code
     static ErrorRecoveryAction ForHResult(HRESULT code,
                                           RecoveryStrategyV2 strategy,
-                                          RetryPolicy policy = {}) {
+                                          RecoveryRetryPolicy policy = {}) {
         ErrorRecoveryAction action;
         action.name = "HRESULT:0x" + std::to_string(static_cast<uint32_t>(code));
         action.matcher = [code](const StructuredError& err) {
@@ -230,7 +230,7 @@ private:
     /// Execute with retry (optionally with backoff)
     template <typename T>
     Result<T> ExecuteRetry(std::function<Result<T>()>& operation,
-                           const RetryPolicy& policy,
+                           const RecoveryRetryPolicy& policy,
                            bool useBackoff) {
         for (uint32_t attempt = 0; attempt < policy.maxAttempts; ++attempt) {
             ++m_stats.totalRetries;

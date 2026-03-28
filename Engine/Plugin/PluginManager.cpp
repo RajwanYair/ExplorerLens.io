@@ -1,7 +1,7 @@
 /******************************************************************************
  * ExplorerLens Plugin Manager Implementation
  * Copyright (c) 2026 - ExplorerLens Project
- * 
+ *
  * Manages plugin discovery, loading, and lifecycle.
  *****************************************************************************/
 
@@ -53,7 +53,7 @@ PluginHandle::PluginHandle(PluginHandle&& other) noexcept
 PluginHandle& PluginHandle::operator=(PluginHandle&& other) noexcept {
  if (this != &other) {
  UnloadPlugin();
- 
+
  path_ = std::move(other.path_);
  module_ = other.module_;
  get_info_ = other.get_info_;
@@ -66,7 +66,7 @@ PluginHandle& PluginHandle::operator=(PluginHandle&& other) noexcept {
  get_thumbnail_ = other.get_thumbnail_;
  info_ = other.info_;
  initialized_ = other.initialized_;
- 
+
  other.module_ = nullptr;
  other.info_ = nullptr;
  other.initialized_ = false;
@@ -80,7 +80,7 @@ bool PluginHandle::LoadPlugin() {
  if (!module_) {
  return false;
  }
- 
+
  // Get required function pointers
  get_info_ = reinterpret_cast<decltype(get_info_)>(
  GetProcAddress(static_cast<HMODULE>(module_), "plugin_get_info"));
@@ -94,35 +94,35 @@ bool PluginHandle::LoadPlugin() {
  GetProcAddress(static_cast<HMODULE>(module_), "plugin_decode"));
  free_result_ = reinterpret_cast<decltype(free_result_)>(
  GetProcAddress(static_cast<HMODULE>(module_), "plugin_free_result"));
- 
+
  // Optional function pointers
  get_metadata_ = reinterpret_cast<decltype(get_metadata_)>(
  GetProcAddress(static_cast<HMODULE>(module_), "plugin_get_metadata"));
  get_thumbnail_ = reinterpret_cast<decltype(get_thumbnail_)>(
  GetProcAddress(static_cast<HMODULE>(module_), "plugin_get_thumbnail"));
- 
+
  // Validate required functions
  if (!ValidatePlugin()) {
  UnloadPlugin();
  return false;
  }
- 
+
  // Get plugin info
  info_ = get_info_();
  if (!info_) {
  UnloadPlugin();
  return false;
  }
- 
+
  // Check API version compatibility (major version must match)
  uint32_t plugin_major = (info_->api_version >> 16) & 0xFFFF;
  uint32_t host_major = (EXPLORERLENS_PLUGIN_API_VERSION >> 16) & 0xFFFF;
- 
+
  if (plugin_major != host_major) {
  UnloadPlugin();
  return false;
  }
- 
+
  return true;
 }
 
@@ -132,11 +132,11 @@ void PluginHandle::UnloadPlugin() {
  cleanup_();
  initialized_ = false;
  }
- 
+
  FreeLibrary(static_cast<HMODULE>(module_));
  module_ = nullptr;
  info_ = nullptr;
- 
+
  get_info_ = nullptr;
  init_ = nullptr;
  cleanup_ = nullptr;
@@ -156,7 +156,7 @@ bool PluginHandle::CanDecode(const std::filesystem::path& file_path) const {
  if (!module_ || !can_decode_) {
  return false;
  }
- 
+
  auto u8path = file_path.u8string();
  std::string path_utf8(u8path.begin(), u8path.end());
  return can_decode_(path_utf8.c_str(), nullptr, 0);
@@ -166,7 +166,7 @@ bool PluginHandle::CanDecode(const uint8_t* data, size_t size) const {
  if (!module_ || !can_decode_) {
  return false;
  }
- 
+
  return can_decode_(nullptr, data, size);
 }
 
@@ -176,11 +176,11 @@ PluginErrorCode PluginHandle::Decode(const DecodeRequest* request,
  if (!module_ || !decode_ || !request || !result) {
  return PLUGIN_ERROR_INVALID_PARAMETER;
  }
- 
+
  if (!initialized_) {
  return PLUGIN_ERROR_NOT_INITIALIZED;
  }
- 
+
  return decode_(request, result, progress);
 }
 
@@ -195,7 +195,7 @@ PluginErrorCode PluginHandle::GetMetadata(const std::filesystem::path& file_path
  if (!module_ || !get_metadata_ || !metadata) {
  return PLUGIN_ERROR_UNSUPPORTED_FORMAT;
  }
- 
+
  auto u8path = file_path.u8string();
  std::string path_utf8(u8path.begin(), u8path.end());
  return get_metadata_(path_utf8.c_str(), nullptr, 0, metadata);
@@ -206,7 +206,7 @@ PluginErrorCode PluginHandle::GetThumbnail(const std::filesystem::path& file_pat
  if (!module_ || !get_thumbnail_ || !result) {
  return PLUGIN_ERROR_UNSUPPORTED_FORMAT;
  }
- 
+
  auto u8path = file_path.u8string();
  std::string path_utf8(u8path.begin(), u8path.end());
  return get_thumbnail_(path_utf8.c_str(), nullptr, 0, result);
@@ -231,9 +231,9 @@ size_t PluginManager::ScanPluginDirectory(const std::filesystem::path& directory
  if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory)) {
  return 0;
  }
- 
+
  size_t loaded_count = 0;
- 
+
  try {
  for (const auto& entry : std::filesystem::directory_iterator(directory)) {
  if (entry.is_regular_file()) {
@@ -248,7 +248,7 @@ size_t PluginManager::ScanPluginDirectory(const std::filesystem::path& directory
  } catch (const std::filesystem::filesystem_error&) {
  // Ignore filesystem errors
  }
- 
+
  return loaded_count;
 }
 
@@ -258,14 +258,14 @@ bool PluginManager::LoadPlugin(const std::filesystem::path& plugin_path) {
  if (plugins_.find(plugin_name) != plugins_.end()) {
  return false;
  }
- 
+
  // Create plugin handle
  auto plugin = std::make_unique<PluginHandle>(plugin_path);
  if (!plugin->IsLoaded()) {
  stats_.plugins_failed++;
  return false;
  }
- 
+
  // Initialize plugin
  auto error = plugin->init_(&allocator_);
  if (error != PLUGIN_SUCCESS) {
@@ -273,19 +273,19 @@ bool PluginManager::LoadPlugin(const std::filesystem::path& plugin_path) {
  return false;
  }
  plugin->initialized_ = true;
- 
+
  // Update extension/MIME maps
  UpdateExtensionMap(plugin.get());
- 
+
  // Store plugin
  plugins_[plugin_name] = std::move(plugin);
  stats_.plugins_loaded++;
- 
+
  // Notify callback
  if (on_plugin_loaded_) {
  on_plugin_loaded_(plugin_name);
  }
- 
+
  return true;
 }
 
@@ -294,29 +294,29 @@ bool PluginManager::UnloadPlugin(const std::string& plugin_name) {
  if (it == plugins_.end()) {
  return false;
  }
- 
+
  // Remove from extension maps
  RemoveFromExtensionMap(plugin_name);
- 
+
  // Notify callback
  if (on_plugin_unloaded_) {
  on_plugin_unloaded_(plugin_name);
  }
- 
+
  // Remove plugin (destructor handles cleanup)
  plugins_.erase(it);
- 
+
  return true;
 }
 
 void PluginManager::UnloadAllPlugins() {
  std::vector<std::string> plugin_names;
  plugin_names.reserve(plugins_.size());
- 
+
  for (const auto& [name, _] : plugins_) {
  plugin_names.push_back(name);
  }
- 
+
  for (const auto& name : plugin_names) {
  UnloadPlugin(name);
  }
@@ -325,11 +325,11 @@ void PluginManager::UnloadAllPlugins() {
 std::vector<std::string> PluginManager::GetPluginNames() const {
  std::vector<std::string> names;
  names.reserve(plugins_.size());
- 
+
  for (const auto& [name, _] : plugins_) {
  names.push_back(name);
  }
- 
+
  return names;
 }
 
@@ -338,7 +338,7 @@ const PluginInfo* PluginManager::GetPluginInfo(const std::string& plugin_name) c
  if (it == plugins_.end()) {
  return nullptr;
  }
- 
+
  return it->second->GetInfo();
 }
 
@@ -347,42 +347,42 @@ PluginHandle* PluginManager::GetPluginHandle(const std::string& plugin_name) {
  if (it == plugins_.end()) {
  return nullptr;
  }
- 
+
  return it->second.get();
 }
 
 PluginHandle* PluginManager::FindPluginForFile(const std::filesystem::path& file_path) {
  // First try extension lookup (fast path)
  auto ext = file_path.extension().string();
- std::transform(ext.begin(), ext.end(), ext.begin(), 
+ std::transform(ext.begin(), ext.end(), ext.begin(),
  [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
- 
+
  auto it = extension_map_.find(ext);
  if (it != extension_map_.end()) {
  if (it->second->CanDecode(file_path)) {
  return it->second;
  }
  }
- 
+
  // Fallback: try all plugins
  for (auto& [name, plugin] : plugins_) {
  if (plugin->CanDecode(file_path)) {
  return plugin.get();
  }
  }
- 
+
  return nullptr;
 }
 
 PluginHandle* PluginManager::FindPluginForExtension(const std::string& extension) {
  std::string ext = extension;
- std::transform(ext.begin(), ext.end(), ext.begin(), 
+ std::transform(ext.begin(), ext.end(), ext.begin(),
  [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
- 
+
  if (ext.empty() || ext[0] != '.') {
  ext = "." + ext;
  }
- 
+
  auto it = extension_map_.find(ext);
  return (it != extension_map_.end()) ? it->second : nullptr;
 }
@@ -400,14 +400,14 @@ PluginErrorCode PluginManager::DecodeFile(const std::filesystem::path& file_path
  if (!result) {
  return PLUGIN_ERROR_INVALID_PARAMETER;
  }
- 
+
  // Find suitable plugin
  auto* plugin = FindPluginForFile(file_path);
  if (!plugin) {
  stats_.failed_decodes++;
  return PLUGIN_ERROR_UNSUPPORTED_FORMAT;
  }
- 
+
  // Prepare decode request
  DecodeRequest request = {};
  auto u8path = file_path.u8string();
@@ -422,16 +422,16 @@ PluginErrorCode PluginManager::DecodeFile(const std::filesystem::path& file_path
  request.high_quality = true;
  request.frame_index = 0;
  request.user_data = nullptr;
- 
+
  // Decode
  auto error = plugin->Decode(&request, result, progress);
- 
+
  if (error == PLUGIN_SUCCESS) {
  stats_.total_decodes++;
  } else {
  stats_.failed_decodes++;
  }
- 
+
  return error;
 }
 
@@ -443,13 +443,13 @@ std::unique_ptr<Engine::PluginDecoder> PluginManager::CreateDecoderForPlugin(
  if (!plugin_handle || !plugin_handle->IsLoaded()) {
  return nullptr;
  }
- 
+
  // Convert plugin name to wide string for plugin ID
  std::wstring plugin_id(plugin_name.begin(), plugin_name.end());
- 
+
  // Get plugin path
  std::filesystem::path plugin_path = plugin_handle->GetPath();
- 
+
  // Use PluginDecoderFactory to create decoder with automatic mode selection
  return Engine::PluginDecoderFactory::CreateDecoder(
  plugin_handle, plugin_id, plugin_path);
@@ -463,14 +463,14 @@ std::unique_ptr<Engine::PluginDecoder> PluginManager::CreateDecoderForFile(
  if (!plugin_handle || !plugin_handle->IsLoaded()) {
  return nullptr;
  }
- 
+
  // Get plugin name for ID
  for (const auto& [name, plugin] : plugins_) {
  if (plugin.get() == plugin_handle) {
  return CreateDecoderForPlugin(name);
  }
  }
- 
+
  return nullptr;
 }
 
@@ -487,7 +487,7 @@ void PluginManager::PluginFree(void* ptr, void* user_data) {
 void PluginManager::BuildExtensionMaps() {
  extension_map_.clear();
  mime_map_.clear();
- 
+
  for (auto& [name, plugin] : plugins_) {
  UpdateExtensionMap(plugin.get());
  }
@@ -497,19 +497,19 @@ void PluginManager::UpdateExtensionMap(PluginHandle* plugin) {
  if (!plugin || !plugin->GetInfo()) {
  return;
  }
- 
+
  const auto* info = plugin->GetInfo();
- 
+
  // Map extensions
  if (info->supported_extensions) {
  for (size_t i = 0; info->supported_extensions[i] != nullptr; ++i) {
  std::string ext = info->supported_extensions[i];
- std::transform(ext.begin(), ext.end(), ext.begin(), 
+ std::transform(ext.begin(), ext.end(), ext.begin(),
  [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
  extension_map_[ext] = plugin;
  }
  }
- 
+
  // Map MIME types
  if (info->mime_types) {
  for (size_t i = 0; info->mime_types[i] != nullptr; ++i) {
@@ -523,24 +523,24 @@ void PluginManager::RemoveFromExtensionMap(const std::string& plugin_name) {
  if (it == plugins_.end()) {
  return;
  }
- 
+
  PluginHandle* plugin = it->second.get();
  if (!plugin || !plugin->GetInfo()) {
  return;
  }
- 
+
  const auto* info = plugin->GetInfo();
- 
+
  // Remove extensions
  if (info->supported_extensions) {
  for (size_t i = 0; info->supported_extensions[i] != nullptr; ++i) {
  std::string ext = info->supported_extensions[i];
- std::transform(ext.begin(), ext.end(), ext.begin(), 
+ std::transform(ext.begin(), ext.end(), ext.begin(),
  [](char c) { return static_cast<char>(::tolower(static_cast<unsigned char>(c))); });
  extension_map_.erase(ext);
  }
  }
- 
+
  // Remove MIME types
  if (info->mime_types) {
  for (size_t i = 0; info->mime_types[i] != nullptr; ++i) {
@@ -550,19 +550,19 @@ void PluginManager::RemoveFromExtensionMap(const std::string& plugin_name) {
 }
 
 //============================================================================
-// PluginDiscovery Implementation
+// ManagerPluginDiscovery Implementation
 //============================================================================
 
-std::vector<std::filesystem::path> PluginDiscovery::FindPlugins(
+std::vector<std::filesystem::path> ManagerPluginDiscovery::FindPlugins(
  const std::filesystem::path& directory,
  bool recursive) {
- 
+
  std::vector<std::filesystem::path> plugins;
- 
+
  if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory)) {
  return plugins;
  }
- 
+
  try {
  if (recursive) {
  for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
@@ -580,48 +580,48 @@ std::vector<std::filesystem::path> PluginDiscovery::FindPlugins(
  } catch (const std::filesystem::filesystem_error&) {
  // Ignore errors
  }
- 
+
  return plugins;
 }
 
-bool PluginDiscovery::IsPluginFile(const std::filesystem::path& file_path) {
+bool ManagerPluginDiscovery::IsPluginFile(const std::filesystem::path& file_path) {
  auto ext = file_path.extension();
  return ext == L".dll" || ext == L".dtplugin";
 }
 
-std::vector<std::filesystem::path> PluginDiscovery::GetPluginSearchPaths() {
+std::vector<std::filesystem::path> ManagerPluginDiscovery::GetPluginSearchPaths() {
  std::vector<std::filesystem::path> paths;
- 
+
  // 1. User's local app data
  wchar_t local_appdata[MAX_PATH];
  if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, local_appdata))) {
  auto user_plugins = std::filesystem::path(local_appdata) / L"ExplorerLens" / L"Plugins";
  paths.push_back(user_plugins);
  }
- 
+
  // 2. Program Files installation
  wchar_t program_files[MAX_PATH];
  if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PROGRAM_FILES, nullptr, 0, program_files))) {
  auto system_plugins = std::filesystem::path(program_files) / L"ExplorerLens" / L"Plugins";
  paths.push_back(system_plugins);
  }
- 
+
  // 3. Current executable directory
  wchar_t exe_path[MAX_PATH];
  if (GetModuleFileNameW(nullptr, exe_path, MAX_PATH) > 0) {
  auto exe_dir = std::filesystem::path(exe_path).parent_path() / L"Plugins";
  paths.push_back(exe_dir);
  }
- 
+
  return paths;
 }
 
-std::filesystem::path PluginDiscovery::GetDefaultPluginDirectory() {
+std::filesystem::path ManagerPluginDiscovery::GetDefaultPluginDirectory() {
  wchar_t local_appdata[MAX_PATH];
  if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, local_appdata))) {
  return std::filesystem::path(local_appdata) / L"ExplorerLens" / L"Plugins";
  }
- 
+
  return std::filesystem::path();
 }
 
@@ -631,79 +631,79 @@ std::filesystem::path PluginDiscovery::GetDefaultPluginDirectory() {
 
 std::optional<PluginManifest> PluginManifest::LoadFromFile(
  const std::filesystem::path& manifest_path) {
- 
+
  if (!std::filesystem::exists(manifest_path)) {
  return std::nullopt;
  }
- 
+
  std::ifstream file(manifest_path);
  if (!file) {
  return std::nullopt;
  }
- 
+
  std::stringstream buffer;
  buffer << file.rdbuf();
- 
+
  return LoadFromJSON(buffer.str());
 }
 
 // Simple JSON parser (basic implementation - should use proper JSON library in production)
 std::optional<PluginManifest> PluginManifest::LoadFromJSON(const std::string& json_data) {
  PluginManifest manifest;
- 
+
  // This is a very basic parser - in production, use nlohmann/json or similar
  // For now, we'll implement a minimal parser for basic key-value pairs
- 
+
  auto extract_string = [](const std::string& json, const std::string& key) -> std::string {
  std::string search = "\"" + key + "\"";
  size_t pos = json.find(search);
  if (pos == std::string::npos) return "";
- 
+
  pos = json.find(":", pos);
  if (pos == std::string::npos) return "";
- 
+
  pos = json.find("\"", pos);
  if (pos == std::string::npos) return "";
  pos++;
- 
+
  size_t end = json.find("\"", pos);
  if (end == std::string::npos) return "";
- 
+
  return json.substr(pos, end - pos);
  };
- 
+
  auto extract_uint = [](const std::string& json, const std::string& key) -> uint32_t {
  std::string search = "\"" + key + "\"";
  size_t pos = json.find(search);
  if (pos == std::string::npos) return 0;
- 
+
  pos = json.find(":", pos);
  if (pos == std::string::npos) return 0;
  pos++;
- 
+
  // Skip whitespace
  while (pos < json.length() && std::isspace(json[pos])) pos++;
- 
+
  return static_cast<uint32_t>(std::atoi(&json[pos]));
  };
- 
+
  auto extract_bool = [](const std::string& json, const std::string& key) -> bool {
  std::string search = "\"" + key + "\"";
  size_t pos = json.find(search);
  if (pos == std::string::npos) return false;
- 
+
  pos = json.find(":", pos);
  if (pos == std::string::npos) return false;
- 
+
  size_t true_pos = json.find("true", pos);
  size_t false_pos = json.find("false", pos);
- 
+
  if (true_pos != std::string::npos && (false_pos == std::string::npos || true_pos < false_pos)) {
  return true;
  }
  return false;
  };
- 
+
  manifest.name = extract_string(json_data, "name");
  manifest.version = extract_string(json_data, "version");
  manifest.author = extract_string(json_data, "author");
@@ -711,13 +711,11 @@ std::optional<PluginManifest> PluginManifest::LoadFromJSON(const std::string& js
  manifest.license = extract_string(json_data, "license");
  manifest.api_version = extract_uint(json_data, "api_version");
  manifest.requires_gpu = extract_bool(json_data, "requires_gpu");
- 
+
  // Extract arrays (simplified - just look for comma-separated values)
  // In production, use a proper JSON library
- 
+
  return manifest;
 }
 
 } // namespace ExplorerLens
-
-

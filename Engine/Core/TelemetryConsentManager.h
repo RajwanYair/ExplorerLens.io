@@ -17,7 +17,7 @@
 
 namespace ExplorerLens { namespace Engine { namespace Core {
 
-enum class TelemetryLevel : uint8_t {
+enum class ConsentTelemetryLevel : uint8_t {
     None        = 0,   // No telemetry — crash + security reporting only
     Basic       = 1,   // Anonymized usage counts (no file data)
     Standard    = 2,   // Aggregated perf metrics + error codes
@@ -33,15 +33,15 @@ enum class ConsentStatus : uint8_t {
 
 struct TelemetryConsentRecord {
     ConsentStatus                         status         = ConsentStatus::Unknown;
-    TelemetryLevel                        level          = TelemetryLevel::Basic;
+    ConsentTelemetryLevel                        level          = ConsentTelemetryLevel::Basic;
     std::chrono::system_clock::time_point decidedAt;
     std::string                           clientVersion;
     bool                                  policyManaged  = false;
 };
 
-struct TelemetryEvent {
+struct ConsentTelemetryEvent {
     std::string  name;           // e.g. "Decode.Complete"
-    TelemetryLevel minLevel;     // Minimum consent level to emit
+    ConsentTelemetryLevel minLevel;     // Minimum consent level to emit
     std::string  payload;        // JSON key-value pairs (no PII)
 };
 
@@ -53,7 +53,7 @@ public:
     }
 
     // Returns true if the given event is allowed to be emitted
-    bool ConsentGate(const TelemetryEvent& ev) const {
+    bool ConsentGate(const ConsentTelemetryEvent& ev) const {
         if (m_record.policyManaged) {
             // MDM/GP forced-off overrides everything
             return m_record.status != ConsentStatus::Declined
@@ -64,13 +64,13 @@ public:
     }
 
     // Convenience: gate + emit in one call
-    void EmitIfAllowed(const TelemetryEvent& ev) {
+    void EmitIfAllowed(const ConsentTelemetryEvent& ev) {
         if (!ConsentGate(ev)) return;
         for (auto& fn : m_emitters) fn(ev);
     }
 
     // Record user consent decision (call from onboarding dialog)
-    void RecordConsent(TelemetryLevel level) {
+    void RecordConsent(ConsentTelemetryLevel level) {
         m_record.status    = ConsentStatus::Accepted;
         m_record.level     = level;
         m_record.decidedAt = std::chrono::system_clock::now();
@@ -80,7 +80,7 @@ public:
 
     void RecordDecline() {
         m_record.status    = ConsentStatus::Declined;
-        m_record.level     = TelemetryLevel::None;
+        m_record.level     = ConsentTelemetryLevel::None;
         m_record.decidedAt = std::chrono::system_clock::now();
         Persist();
         FireChangeCallbacks();
@@ -90,7 +90,7 @@ public:
     void WithdrawConsent() { RecordDecline(); }
 
     ConsentStatus        Status()  const { return m_record.status; }
-    TelemetryLevel       Level()   const { return m_record.level; }
+    ConsentTelemetryLevel       Level()   const { return m_record.level; }
     bool                 NeedsConsentDialog() const {
         return m_record.status == ConsentStatus::Unknown && !m_record.policyManaged;
     }
@@ -98,11 +98,11 @@ public:
     const TelemetryConsentRecord& Record() const { return m_record; }
 
     // Register a telemetry emitter (e.g. ETW provider, app insights SDK)
-    using EmitFn = std::function<void(const TelemetryEvent&)>;
+    using EmitFn = std::function<void(const ConsentTelemetryEvent&)>;
     void AddEmitter(EmitFn fn) { m_emitters.push_back(std::move(fn)); }
 
     // Subscribe to consent change events
-    using ChangeFn = std::function<void(ConsentStatus, TelemetryLevel)>;
+    using ChangeFn = std::function<void(ConsentStatus, ConsentTelemetryLevel)>;
     void OnConsentChange(ChangeFn fn) { m_changeCbs.push_back(std::move(fn)); }
 
     // Export consent record as JSON for compliance evidence
@@ -141,7 +141,7 @@ private:
                 reinterpret_cast<BYTE*>(&val), &sz) == ERROR_SUCCESS) {
                 m_record.policyManaged = true;
                 m_record.status = (val != 0) ? ConsentStatus::Accepted : ConsentStatus::Declined;
-                m_record.level  = static_cast<TelemetryLevel>(val <= 3 ? val : 2);
+                m_record.level  = static_cast<ConsentTelemetryLevel>(val <= 3 ? val : 2);
             }
             RegCloseKey(hkGP);
         }
@@ -154,9 +154,9 @@ private:
         if (RegQueryValueExW(hk, L"ConsentStatus", nullptr, nullptr,
             reinterpret_cast<BYTE*>(&dw), &sz) == ERROR_SUCCESS)
             m_record.status = static_cast<ConsentStatus>(dw);
-        if (RegQueryValueExW(hk, L"TelemetryLevel", nullptr, nullptr,
+        if (RegQueryValueExW(hk, L"ConsentTelemetryLevel", nullptr, nullptr,
             reinterpret_cast<BYTE*>(&dw), &sz) == ERROR_SUCCESS)
-            m_record.level = static_cast<TelemetryLevel>(dw);
+            m_record.level = static_cast<ConsentTelemetryLevel>(dw);
         RegCloseKey(hk);
     }
 
@@ -169,7 +169,7 @@ private:
         DWORD s = static_cast<DWORD>(m_record.status);
         DWORD l = static_cast<DWORD>(m_record.level);
         RegSetValueExW(hk, L"ConsentStatus",  0, REG_DWORD, reinterpret_cast<BYTE*>(&s), 4);
-        RegSetValueExW(hk, L"TelemetryLevel", 0, REG_DWORD, reinterpret_cast<BYTE*>(&l), 4);
+        RegSetValueExW(hk, L"ConsentTelemetryLevel", 0, REG_DWORD, reinterpret_cast<BYTE*>(&l), 4);
         RegCloseKey(hk);
     }
 

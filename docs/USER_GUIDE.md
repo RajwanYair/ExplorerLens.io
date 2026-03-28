@@ -1,6 +1,6 @@
 # ExplorerLens User Guide
-**Version:** 15.3.0 "Zenith-T"
-**Last Updated:** March 2026
+**Version:** 23.5.0 "Vega-V"
+**Last Updated:** March 27, 2026
 
 ## Table of Contents
 - [Installation](#installation)

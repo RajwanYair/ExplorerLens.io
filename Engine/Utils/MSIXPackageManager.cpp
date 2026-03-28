@@ -247,17 +247,17 @@ const wchar_t *MSIXPackageManager::GetSigningName(SigningMode mode) {
  }
 }
 
-const wchar_t *MSIXPackageManager::GetPackageTypeName(PackageType type) {
+const wchar_t *MSIXPackageManager::GetPackageTypeName(MSIXPackageType type) {
  switch (type) {
- case PackageType::MSIX:
+ case MSIXPackageType::MSIX:
  return L"MSIX";
- case PackageType::MSIXBundle:
+ case MSIXPackageType::MSIXBundle:
  return L"MSIXBundle";
- case PackageType::AppX:
+ case MSIXPackageType::AppX:
  return L"AppX";
- case PackageType::SparsePackage:
+ case MSIXPackageType::SparsePackage:
  return L"SparsePackage";
- case PackageType::MSIX_Appinstaller:
+ case MSIXPackageType::MSIX_Appinstaller:
  return L"Appinstaller";
  default:
  return L"Unknown";

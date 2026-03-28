@@ -1,4 +1,4 @@
-﻿// GPUTextureAtlasBuilder.h — GPU Texture Atlas Builder (Bin-Packing)
+// GPUTextureAtlasBuilder.h — GPU Texture Atlas Builder (Bin-Packing)
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Packs multiple thumbnails into a GPU texture atlas via guillotine bin-packing — reduces draw calls per frame.
@@ -15,7 +15,7 @@
 namespace ExplorerLens { namespace Engine {
 
 struct AtlasRect { uint32_t x, y, w, h; uint32_t thumbId; };
-struct AtlasStats { uint32_t atlasWidth; uint32_t atlasHeight; size_t thumbCount; float occupancy; };
+struct BuilderAtlasStats { uint32_t atlasWidth; uint32_t atlasHeight; size_t thumbCount; float occupancy; };
 class GPUTextureAtlasBuilder {
 public:
     explicit GPUTextureAtlasBuilder(uint32_t atlasW = 4096, uint32_t atlasH = 4096)
@@ -25,7 +25,7 @@ public:
         m_x += w;
         return m_x <= m_w;
     }
-    AtlasStats Stats() const {
+    BuilderAtlasStats Stats() const {
         return { m_w, m_h, m_packed, m_packed > 0 ? 0.5f : 0.0f };
     }
     void Reset() { m_x = 0; m_packed = 0; }

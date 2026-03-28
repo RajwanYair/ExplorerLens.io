@@ -57,7 +57,7 @@ enum class Win11Release {
 };
 
 /// GPU adapter information
-struct GPUInfo {
+struct CompatGPUInfo {
     std::wstring description;
     UINT vendorId;
     size_t dedicatedVideoMemoryMB;
@@ -77,7 +77,7 @@ struct CompatibilityReport {
     bool isPerMonitorV2 = false;
     int monitorCount = 0;
     std::vector<int> dpiScales; ///< Per-monitor DPI scale percentages
-    std::vector<GPUInfo> gpus;
+    std::vector<CompatGPUInfo> gpus;
     bool hasDiscreteGPU = false;
     bool hasIntegratedGPU = false;
 };
@@ -216,8 +216,8 @@ inline bool IsSystemDarkMode() {
 // ============================================================================
 
 /// Enumerate all GPU adapters with capability info
-inline std::vector<GPUInfo> EnumerateGPUs() {
-    std::vector<GPUInfo> gpus;
+inline std::vector<CompatGPUInfo> EnumerateGPUs() {
+    std::vector<CompatGPUInfo> gpus;
 
     IDXGIFactory1* pFactory = nullptr;
     if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&pFactory)))
@@ -228,7 +228,7 @@ inline std::vector<GPUInfo> EnumerateGPUs() {
         DXGI_ADAPTER_DESC1 desc;
         pAdapter->GetDesc1(&desc);
 
-        GPUInfo info;
+        CompatGPUInfo info;
         info.description = desc.Description;
         info.vendorId = desc.VendorId;
         info.dedicatedVideoMemoryMB = desc.DedicatedVideoMemory / (1024 * 1024);
@@ -456,7 +456,7 @@ struct Win11Build {
 //==============================================================================
 // Windows Version Info
 //==============================================================================
-struct WindowsVersionInfo {
+struct CompatWinVersionInfo {
     DWORD majorVersion = 0;
     DWORD minorVersion = 0;
     DWORD buildNumber = 0;
@@ -511,7 +511,7 @@ struct HDRDisplayInfo {
 //==============================================================================
 // GPU Adapter Information
 //==============================================================================
-struct GPUAdapterInfo {
+struct CompatGPUAdapterInfo {
     std::wstring description;
     uint32_t vendorId = 0;
     uint32_t deviceId = 0;
@@ -584,12 +584,12 @@ struct CompatTestResult {
 // Full Compatibility Matrix
 //==============================================================================
 struct CompatibilityMatrix {
-    WindowsVersionInfo osInfo;
+    CompatWinVersionInfo osInfo;
     DarkModeState darkMode = DarkModeState::Unavailable;
     HDRDisplayInfo hdrInfo;
     DPIScalingInfo dpiInfo;
     ARM64Features arm64Info;
-    std::vector<GPUAdapterInfo> gpuAdapters;
+    std::vector<CompatGPUAdapterInfo> gpuAdapters;
     std::vector<CompatTestResult> testResults;
 
     bool AllTestsPassed() const {
@@ -622,8 +622,8 @@ struct CompatibilityMatrix {
 //==============================================================================
 class WindowsVersionDetector {
 public:
-    static WindowsVersionInfo Detect() {
-        WindowsVersionInfo info{};
+    static CompatWinVersionInfo Detect() {
+        CompatWinVersionInfo info{};
 
         // Use RtlGetVersion for accurate version (avoids manifest issues)
         using RtlGetVersionFn = NTSTATUS(WINAPI*)(PRTL_OSVERSIONINFOW);
@@ -780,8 +780,8 @@ private:
 //==============================================================================
 class GPUEnumerator {
 public:
-    static std::vector<GPUAdapterInfo> EnumerateAll() {
-        std::vector<GPUAdapterInfo> adapters;
+    static std::vector<CompatGPUAdapterInfo> EnumerateAll() {
+        std::vector<CompatGPUAdapterInfo> adapters;
 
         IDXGIFactory1* factory = nullptr;
         if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1),
@@ -793,7 +793,7 @@ public:
         for (UINT i = 0; factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND; ++i) {
             DXGI_ADAPTER_DESC1 desc{};
             if (SUCCEEDED(adapter->GetDesc1(&desc))) {
-                GPUAdapterInfo info{};
+                CompatGPUAdapterInfo info{};
                 info.description = desc.Description;
                 info.vendorId = desc.VendorId;
                 info.deviceId = desc.DeviceId;
@@ -832,7 +832,7 @@ public:
         return adapters;
     }
 
-    static std::optional<GPUAdapterInfo> GetPrimaryAdapter() {
+    static std::optional<CompatGPUAdapterInfo> GetPrimaryAdapter() {
         auto all = EnumerateAll();
         for (auto& a : all) {
             if (a.isHardware) return a;
@@ -1153,7 +1153,7 @@ inline bool IsWindows11(WindowsBuild b) {
 }
 
 // --- GPU vendor ---
-enum class GPUVendor : uint8_t {
+enum class CompatGPUVendor : uint8_t {
     NVIDIA = 0,
     AMD = 1,
     Intel = 2,
@@ -1161,18 +1161,18 @@ enum class GPUVendor : uint8_t {
     Unknown = 255
 };
 
-inline const char* GPUVendorName(GPUVendor v) {
+inline const char* GPUVendorName(CompatGPUVendor v) {
     switch (v) {
-    case GPUVendor::NVIDIA: return "NVIDIA";
-    case GPUVendor::AMD: return "AMD";
-    case GPUVendor::Intel: return "Intel";
-    case GPUVendor::Software: return "Software (WARP)";
+    case CompatGPUVendor::NVIDIA: return "NVIDIA";
+    case CompatGPUVendor::AMD: return "AMD";
+    case CompatGPUVendor::Intel: return "Intel";
+    case CompatGPUVendor::Software: return "Software (WARP)";
     default: return "Unknown";
     }
 }
 
 // --- DPI scaling factors ---
-enum class DPIScale : uint8_t {
+enum class CompatDPIScale : uint8_t {
     Scale_100 = 100, // 96 DPI
     Scale_125 = 125, // 120 DPI
     Scale_150 = 150, // 144 DPI
@@ -1182,8 +1182,8 @@ enum class DPIScale : uint8_t {
     Scale_300 = 0 // 288 DPI (overflow in uint8_t, use 0 as sentinel)
 };
 
-inline uint32_t DPIFromScale(DPIScale s) {
-    if (s == DPIScale::Scale_300) return 288;
+inline uint32_t DPIFromScale(CompatDPIScale s) {
+    if (s == CompatDPIScale::Scale_300) return 288;
     return static_cast<uint32_t>(s) * 96 / 100;
 }
 
@@ -1191,8 +1191,8 @@ inline uint32_t DPIFromScale(DPIScale s) {
 struct CompatTestScenario {
     std::string name;
     WindowsBuild osBuild = WindowsBuild::Unknown;
-    GPUVendor gpu = GPUVendor::Unknown;
-    DPIScale dpi = DPIScale::Scale_100;
+    CompatGPUVendor gpu = CompatGPUVendor::Unknown;
+    CompatDPIScale dpi = CompatDPIScale::Scale_100;
     bool darkMode = false;
     bool multiMonitor = false;
 
@@ -1204,7 +1204,7 @@ struct CompatTestScenario {
 };
 
 // --- Test result ---
-enum class CompatResult : uint8_t {
+enum class CompatKitResult : uint8_t {
     Pass = 0,
     Fail = 1,
     Warning = 2, // Works but with visual artifacts
@@ -1212,13 +1212,13 @@ enum class CompatResult : uint8_t {
     NotTested = 4
 };
 
-inline const char* CompatResultName(CompatResult r) {
+inline const char* CompatResultName(CompatKitResult r) {
     switch (r) {
-    case CompatResult::Pass: return "PASS";
-    case CompatResult::Fail: return "FAIL";
-    case CompatResult::Warning: return "WARNING";
-    case CompatResult::Skipped: return "SKIPPED";
-    case CompatResult::NotTested: return "NOT TESTED";
+    case CompatKitResult::Pass: return "PASS";
+    case CompatKitResult::Fail: return "FAIL";
+    case CompatKitResult::Warning: return "WARNING";
+    case CompatKitResult::Skipped: return "SKIPPED";
+    case CompatKitResult::NotTested: return "NOT TESTED";
     default: return "Unknown";
     }
 }
@@ -1226,7 +1226,7 @@ inline const char* CompatResultName(CompatResult r) {
 // --- Test execution record ---
 struct CompatTestExecution {
     CompatTestScenario scenario;
-    CompatResult result = CompatResult::NotTested;
+    CompatKitResult result = CompatKitResult::NotTested;
     std::string notes;
     double durationMs = 0.0;
 
@@ -1239,7 +1239,7 @@ struct CompatTestExecution {
     bool shellIntegrationOk = false;
 
     bool IsFullPass() const {
-        return result == CompatResult::Pass &&
+        return result == CompatKitResult::Pass &&
             comRegistrationOk && thumbnailRenderOk &&
             dpiScalingOk && gpuAccelOk && shellIntegrationOk;
     }
@@ -1274,7 +1274,7 @@ public:
         m_executions.push_back(exec);
     }
 
-    void RecordResult(size_t index, CompatResult result) {
+    void RecordResult(size_t index, CompatKitResult result) {
         if (index < m_executions.size()) {
             m_executions[index].result = result;
         }
@@ -1289,11 +1289,11 @@ public:
         stats.totalScenarios = static_cast<uint32_t>(m_executions.size());
         for (auto& e : m_executions) {
             switch (e.result) {
-            case CompatResult::Pass: stats.passed++; break;
-            case CompatResult::Fail: stats.failed++; break;
-            case CompatResult::Warning: stats.warnings++; break;
-            case CompatResult::Skipped: stats.skipped++; break;
-            case CompatResult::NotTested: stats.notTested++; break;
+            case CompatKitResult::Pass: stats.passed++; break;
+            case CompatKitResult::Fail: stats.failed++; break;
+            case CompatKitResult::Warning: stats.warnings++; break;
+            case CompatKitResult::Skipped: stats.skipped++; break;
+            case CompatKitResult::NotTested: stats.notTested++; break;
             }
         }
         return stats;
@@ -1314,11 +1314,11 @@ private:
         WindowsBuild::Win11_23H2,
         WindowsBuild::Win11_24H2
         };
-        static const GPUVendor gpus[] = {
-        GPUVendor::NVIDIA, GPUVendor::AMD, GPUVendor::Intel
+        static const CompatGPUVendor gpus[] = {
+        CompatGPUVendor::NVIDIA, CompatGPUVendor::AMD, CompatGPUVendor::Intel
         };
-        static const DPIScale dpis[] = {
-        DPIScale::Scale_100, DPIScale::Scale_150, DPIScale::Scale_200
+        static const CompatDPIScale dpis[] = {
+        CompatDPIScale::Scale_100, CompatDPIScale::Scale_150, CompatDPIScale::Scale_200
         };
 
         int idx = 0;
@@ -1347,6 +1347,6 @@ private:
 // Tail — Related Windows platform headers (separate TUs for .cpp files)
 // ============================================================================
 #include "Win11Integration.h"
-// NOTE: WindowsUI.h excluded — DPIScale enum conflicts with this header's DPIScale.
+// NOTE: WindowsUI.h excluded — CompatDPIScale enum conflicts with this header's CompatDPIScale.
 #include "MSIXPackageManager.h"
 #include "PortableModeManager.h"

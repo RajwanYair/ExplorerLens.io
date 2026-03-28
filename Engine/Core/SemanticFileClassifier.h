@@ -35,7 +35,7 @@ enum class SemanticCategory : uint8_t {
     Encrypted
 };
 
-struct ClassificationResult {
+struct SemanticClassificationResult {
     SemanticCategory category = SemanticCategory::Unknown;
     double confidence = 0.0;
     std::string detectedFormat;
@@ -57,8 +57,8 @@ public:
         return instance;
     }
 
-    inline ClassificationResult Classify(const uint8_t* data, size_t size) const {
-        ClassificationResult result;
+    inline SemanticClassificationResult Classify(const uint8_t* data, size_t size) const {
+        SemanticClassificationResult result;
         if (!data || size == 0) return result;
 
         result.entropy = ComputeShannonEntropy(data, size);
@@ -131,8 +131,8 @@ public:
 private:
     SemanticFileClassifier() = default;
 
-    inline ClassificationResult MatchMagicBytes(const uint8_t* data, size_t size) const {
-        ClassificationResult result;
+    inline SemanticClassificationResult MatchMagicBytes(const uint8_t* data, size_t size) const {
+        SemanticClassificationResult result;
 
         struct MagicEntry {
             const uint8_t* sig;
@@ -196,7 +196,7 @@ private:
         return result;
     }
 
-    inline ClassificationResult ClassifyByEntropy(ClassificationResult partial) const {
+    inline SemanticClassificationResult ClassifyByEntropy(SemanticClassificationResult partial) const {
         if (partial.entropy > 7.5) {
             partial.category = SemanticCategory::Encrypted;
             partial.confidence = 0.6;

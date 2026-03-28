@@ -1,4 +1,4 @@
-// Plugin Reference Pack — GTestShim
+﻿// Plugin Reference Pack — GTestShim
 #include "GTestShim.h"
 #include "Plugin/PluginReferencePack.h"
 
@@ -13,14 +13,14 @@ TEST(PluginReferencePack, MinimalPluginCapabilityDecode) {
  auto p = MinimalImageGeneratorPlugin();
  uint32_t cap = static_cast<uint32_t>(p.capabilities);
  (void)cap;
- EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::Decode), 0u);
+ EXPECT_NE(cap & static_cast<uint32_t>(PackPluginCapability::Decode), 0u);
 }
 
 TEST(PluginReferencePack, MetadataPluginCapabilityMetadataOnly) {
  auto p = MetadataOnlyPlugin();
  uint32_t cap = static_cast<uint32_t>(p.capabilities);
  (void)cap;
- EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::MetadataOnly), 0u);
+ EXPECT_NE(cap & static_cast<uint32_t>(PackPluginCapability::MetadataOnly), 0u);
 }
 
 TEST(PluginReferencePack, MetadataPluginExtensionCount) {
@@ -32,17 +32,17 @@ TEST(PluginReferencePack, WatermarkPluginCapabilityPostProcess) {
  auto p = WatermarkPlugin();
  uint32_t cap = static_cast<uint32_t>(p.capabilities);
  (void)cap;
- EXPECT_NE(cap & static_cast<uint32_t>(PluginCapability::PostProcess), 0u);
+ EXPECT_NE(cap & static_cast<uint32_t>(PackPluginCapability::PostProcess), 0u);
 }
 
 TEST(PluginReferencePack, WatermarkConfigSubtlePreset) {
- auto cfg = WatermarkConfig::Subtle();
+ auto cfg = PackWatermarkConfig::Subtle();
  EXPECT_LT(cfg.alpha, (uint8_t)200u);
 }
 
 TEST(PluginReferencePack, WatermarkConfigBoldPreset) {
- auto subtle = WatermarkConfig::Subtle();
- auto bold = WatermarkConfig::Bold();
+ auto subtle = PackWatermarkConfig::Subtle();
+ auto bold = PackWatermarkConfig::Bold();
  EXPECT_GT(bold.alpha, subtle.alpha);
 }
 
@@ -68,7 +68,7 @@ TEST(PluginReferencePack, EmbeddedMetadataDefaultEmpty) {
 }
 
 TEST(PluginReferencePack, PluginCapabilityEnumFlagsCombine) {
- auto flags = PluginCapability::Decode | PluginCapability::MetadataOnly;
+ auto flags = PackPluginCapability::Decode | PackPluginCapability::MetadataOnly;
  uint32_t v = static_cast<uint32_t>(flags);
  (void)v;
  EXPECT_NE(v, 0u);

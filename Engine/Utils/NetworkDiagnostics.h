@@ -31,7 +31,7 @@ enum class NetTestStatus : uint32_t {
 };
 
 /// Proxy configuration
-struct ProxyConfig {
+struct DiagnosticsProxyConfig {
  std::wstring host;
  uint16_t port = 0;
  std::wstring username;
@@ -55,7 +55,7 @@ struct NetDiagReport {
  uint32_t failedCount = 0;
  double totalLatencyMs = 0.0;
  std::vector<NetTestResult> results;
- ProxyConfig proxyConfig;
+ DiagnosticsProxyConfig proxyConfig;
 };
 
 /// NetworkDiagnostics — tests network connectivity for update/cloud features
@@ -64,7 +64,7 @@ public:
  NetworkDiagnostics();
 
  // Configuration
- void SetProxy(const ProxyConfig& config);
+ void SetProxy(const DiagnosticsProxyConfig& config);
  void SetTimeout(uint32_t timeoutMs) { m_timeoutMs = timeoutMs; }
  void AddTarget(const std::wstring& target);
 
@@ -73,7 +73,7 @@ public:
  NetDiagReport RunAllTests();
 
  // Queries
- const ProxyConfig& GetProxy() const { return m_proxy; }
+ const DiagnosticsProxyConfig& GetProxy() const { return m_proxy; }
  uint32_t GetTargetCount() const { return static_cast<uint32_t>(m_targets.size()); }
  uint32_t GetTimeout() const { return m_timeoutMs; }
 
@@ -83,7 +83,7 @@ public:
  static constexpr uint32_t GetTestTypeCount() { return static_cast<uint32_t>(NetTestType::Count); }
 
 private:
- ProxyConfig m_proxy;
+ DiagnosticsProxyConfig m_proxy;
  std::vector<std::wstring> m_targets;
  uint32_t m_timeoutMs = 5000;
 };

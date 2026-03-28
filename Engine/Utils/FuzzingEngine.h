@@ -92,7 +92,7 @@ inline bool IsFailure(FuzzResult r) {
 }
 
 // ─── Corpus entry ────────────────────────────────────────────────
-struct CorpusEntry {
+struct FuzzCorpusEntry {
     std::string filePath;
     std::string format; // "zip", "rar", "webp", etc.
     size_t fileSize = 0;
@@ -288,7 +288,7 @@ public:
         : m_config(config), m_mutator(42) {
     }
 
-    void AddCorpusEntry(const CorpusEntry& entry) {
+    void AddCorpusEntry(const FuzzCorpusEntry& entry) {
         m_corpus.push_back(entry);
         m_stats.corpusSize = m_corpus.size();
     }
@@ -399,7 +399,7 @@ private:
     FuzzConfig m_config;
     FuzzStats m_stats;
     ByteMutator m_mutator;
-    std::vector<CorpusEntry> m_corpus;
+    std::vector<FuzzCorpusEntry> m_corpus;
     DecoderFn m_decoderFn;
     uint64_t m_nextId = 0;
 };

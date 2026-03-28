@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned — v23.7.0 "Vega-X" — Format Expansion V (Sprints 471–480)
+- Engine/Decoders/ICNSDecoder.h: Apple ICNS icon bundle decoder
+- Engine/Decoders/CURDecoder.h: Windows cursor (.cur / .ani) decoder
+- Engine/Decoders/ANIMDecoder.h: IFF ANIM animated image decoder
+- Engine/Decoders/MNGDecoder.h: MNG (Multiple-image Network Graphics) decoder
+- Engine/Decoders/HRZDecoder.h: HRZ / slow-scan TV format decoder
+- Engine/Decoders/PIXARDecoder.h: PIXAR .ptex / .tx texture decoder
+- Engine/Decoders/JPEG2000TileDecoderV2.h: JPEG 2000 tiled decode v2 (sub-resolution)
+- Engine/Decoders/FLIFDecoderV2.h: FLIF (Free Lossless Image Format) v2 decoder
+
+### Planned — v24.0.0 "Altair" — AI-Native Thumbnailing v2 (Sprints 481–490)
+- Engine/AI/NeuralUpscalerV2.h: ESRGAN 4× neural upscaler v2 (DirectML)
+- Engine/AI/ContentAwareResizer.h: Content-aware intelligent resize engine
+- Engine/AI/SemanticHashEngine.h: Semantic perceptual hash (CNN embeddings)
+- Engine/AI/AutoTaggingEngine.h: Zero-shot auto-tagging engine (CLIP-style)
+- Engine/AI/QualityRestorationEngine.h: AI quality restoration (deblur + denoise)
+- Engine/AI/SceneDepthEstimator.h: Monocular depth estimator for 3-D previews
+- Engine/AI/StyleTransferEngine.h: Fast neural style transfer for previews
+- Engine/AI/LandmarkDetectionEngine.h: Face/landmark detection for smart crop
+
+### Planned — v25.0.0 "Rigel" — WebAssembly Plugin Sandbox (Sprints 561–570)
+- Engine/Plugin/WASMRuntimeAdapter.h: WASM runtime adapter (WasmEdge / WABT host)
+- Engine/Plugin/WASMMemorySafetyModel.h: WASM plugin memory safety model
+- Engine/Plugin/WASMPluginLoader.h: WASM plugin load/link engine (component model)
+- Engine/Plugin/WITBindingGenerator.h: WIT interface binding generator for plugin API
+- Engine/Plugin/WASMHostController.h: Cross-process WASM host with resource limits
+- Engine/Plugin/WASMCapabilityNegotiator.h: WASM plugin capability negotiation protocol
+- Engine/Plugin/WASMHotSwapEngine.h: WASM plugin hot-swap engine (live reload)
+- Engine/Plugin/WASMDebuggerBridge.h: WASM plugin debugger bridge / inspector protocol
+
+### Planned — v27.0.0 "Sirius" — Federated AI Pipeline (Sprints 721–730)
+- Engine/AI/FederatedLearningCoordinator.h: Federated learning coordinator for on-device model fine-tuning
+- Engine/AI/PersonalizedRankingModel.h: Personalized thumbnail ranking model
+- Engine/AI/FederatedModelAggregator.h: Federated model aggregator (FedAvg + Differential Privacy)
+- Engine/AI/NeuralCompressionCodec.h: Neural compression codec for thumbnail transmission
+
+---
+
+## [23.6.0] — Vega-W (2026-03-28)
+
+### Added — Sprints 461–470: Security Hardening v2
+- Engine/Core/ZeroTrustPolicyEngine.h: Zero-trust COM/plugin access policy engine
+- Engine/Core/DecoderSandboxIsolation.h: Sandboxed decoder isolation via Job Objects
+- Engine/Core/RuntimeIntegrityVerifier.h: Runtime code-integrity / WDAC verifier
+- Engine/Utils/ExploitMitigationEngine.h: Exploit mitigation (CFG/CET/SEHOP)
+- Engine/Core/PrivilegeSeparationBroker.h: Privilege-separation broker (low ↔ high IL)
+- Engine/Core/SecureIPCChannel.h: Encrypted IPC channel (ECDH + AES-GCM)
+- Engine/Utils/AuditTrailEncryptor.h: AES-256-GCM audit-trail encryptor
+- Engine/Utils/AntiTamperDetector.h: Anti-tamper / anti-debugging detector
+
+### Statistics
+- Test count: 3,117 unit tests (+179 from v23.5.0)
+- Sprint coverage: 461–470 (10 sprints)
+- New headers: 8
+
 ---
 
 ## [23.5.0] — Vega-V (2026-03-27)

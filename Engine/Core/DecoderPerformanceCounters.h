@@ -20,7 +20,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Individual decoder metrics snapshot
-struct DecoderMetrics {
+struct PerfCounterMetrics {
     std::string     decoderName;
     uint64_t        totalDecodes = 0;
     uint64_t        successfulDecodes = 0;
@@ -118,8 +118,8 @@ public:
     }
 
     /// Get snapshot of metrics for a specific decoder
-    DecoderMetrics GetMetrics(uint32_t decoderId) const {
-        DecoderMetrics m;
+    PerfCounterMetrics GetMetrics(uint32_t decoderId) const {
+        PerfCounterMetrics m;
         if (decoderId >= MAX_TRACKED_DECODERS) return m;
         const auto& c = m_counters[decoderId];
         if (!c.active.load(std::memory_order_acquire)) return m;
@@ -164,8 +164,8 @@ public:
     }
 
     /// Get all active decoder metrics
-    std::vector<DecoderMetrics> GetAllMetrics() const {
-        std::vector<DecoderMetrics> all;
+    std::vector<PerfCounterMetrics> GetAllMetrics() const {
+        std::vector<PerfCounterMetrics> all;
         for (uint32_t i = 0; i < MAX_TRACKED_DECODERS; i++) {
             if (m_counters[i].active.load(std::memory_order_acquire)) {
                 all.push_back(GetMetrics(i));

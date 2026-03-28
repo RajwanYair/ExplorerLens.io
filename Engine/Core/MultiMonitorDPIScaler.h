@@ -55,7 +55,7 @@ inline const char* MonitorProfileName(MonitorProfile p) noexcept {
 }
 
 /// Information about a connected monitor
-struct MonitorInfo {
+struct DPIMonitorInfo {
     uint32_t       monitorIndex = 0;
     uint32_t       dpiX = 96;
     uint32_t       dpiY = 96;

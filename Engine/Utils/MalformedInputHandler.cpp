@@ -151,7 +151,7 @@ MalformedInputHandler::ValidateFile(const std::wstring &filePath) const {
  // Open file
  std::ifstream file(filePath, std::ios::binary | std::ios::ate);
  if (!file.is_open()) {
- ValidationIssue issue;
+ FileCorruptionIssue issue;
  issue.type = CorruptionType::TruncatedFile;
  issue.severity = ValidationSeverity::Error;
  issue.message = L"Cannot open file";
@@ -167,7 +167,7 @@ MalformedInputHandler::ValidateFile(const std::wstring &filePath) const {
 
  // Zero-byte check
  if (result.fileSize == 0) {
- ValidationIssue issue;
+ FileCorruptionIssue issue;
  issue.type = CorruptionType::ZeroByteFile;
  issue.severity = ValidationSeverity::Error;
  issue.message = L"File is empty (0 bytes)";
@@ -179,7 +179,7 @@ MalformedInputHandler::ValidateFile(const std::wstring &filePath) const {
 
  // Max file size check
  if (m_config.enableSizeChecks && result.fileSize > m_config.maxFileSize) {
- ValidationIssue issue;
+ FileCorruptionIssue issue;
  issue.type = CorruptionType::DecompressionBomb;
  issue.severity = ValidationSeverity::Critical;
  issue.message = L"File exceeds maximum allowed size";
@@ -197,7 +197,7 @@ MalformedInputHandler::ValidateFile(const std::wstring &filePath) const {
  file.read(reinterpret_cast<char *>(header), toRead);
 
  if (toRead < 2) {
- ValidationIssue issue;
+ FileCorruptionIssue issue;
  issue.type = CorruptionType::TruncatedFile;
  issue.severity = ValidationSeverity::Warning;
  issue.message = L"File too small for reliable format detection";

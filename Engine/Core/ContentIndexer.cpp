@@ -33,7 +33,7 @@ std::wstring ContentIndexer::ExtractFileName(const std::wstring& path) const {
 }
 
 uint64_t ContentIndexer::AddFile(const std::wstring& filePath) {
- IndexEntry entry;
+ ContentIndexEntry entry;
  entry.id = m_nextId++;
  entry.filePath = filePath;
  entry.fileName = ExtractFileName(filePath);
@@ -78,8 +78,8 @@ uint32_t ContentIndexer::IndexAll() {
  return indexed;
 }
 
-std::vector<IndexEntry> ContentIndexer::SearchByName(const std::wstring& pattern) const {
- std::vector<IndexEntry> results;
+std::vector<ContentIndexEntry> ContentIndexer::SearchByName(const std::wstring& pattern) const {
+ std::vector<ContentIndexEntry> results;
  for (const auto& e : m_entries) {
  if (e.state == IndexState::Indexed && e.fileName.find(pattern) != std::wstring::npos) {
  results.push_back(e);
@@ -88,8 +88,8 @@ std::vector<IndexEntry> ContentIndexer::SearchByName(const std::wstring& pattern
  return results;
 }
 
-std::vector<IndexEntry> ContentIndexer::SearchByType(ContentType type) const {
- std::vector<IndexEntry> results;
+std::vector<ContentIndexEntry> ContentIndexer::SearchByType(ContentType type) const {
+ std::vector<ContentIndexEntry> results;
  for (const auto& e : m_entries) {
  if (e.state == IndexState::Indexed && e.contentType == type) {
  results.push_back(e);
@@ -98,8 +98,8 @@ std::vector<IndexEntry> ContentIndexer::SearchByType(ContentType type) const {
  return results;
 }
 
-std::vector<IndexEntry> ContentIndexer::SearchByExtension(const std::wstring& ext) const {
- std::vector<IndexEntry> results;
+std::vector<ContentIndexEntry> ContentIndexer::SearchByExtension(const std::wstring& ext) const {
+ std::vector<ContentIndexEntry> results;
  std::wstring lowerExt = ext;
  std::transform(lowerExt.begin(), lowerExt.end(), lowerExt.begin(), ::towlower);
  for (const auto& e : m_entries) {
@@ -110,15 +110,15 @@ std::vector<IndexEntry> ContentIndexer::SearchByExtension(const std::wstring& ex
  return results;
 }
 
-const IndexEntry* ContentIndexer::GetEntry(uint64_t id) const {
+const ContentIndexEntry* ContentIndexer::GetEntry(uint64_t id) const {
  for (const auto& e : m_entries) {
  if (e.id == id) return &e;
  }
  return nullptr;
 }
 
-IndexStats ContentIndexer::GetStats() const {
- IndexStats stats;
+ContentIndexStats ContentIndexer::GetStats() const {
+ ContentIndexStats stats;
  stats.totalEntries = static_cast<uint32_t>(m_entries.size());
  for (const auto& e : m_entries) {
  switch (e.state) {
@@ -140,7 +140,7 @@ IndexStats ContentIndexer::GetStats() const {
 uint32_t ContentIndexer::PurgeRemoved() {
  uint32_t purged = 0;
  auto it = std::remove_if(m_entries.begin(), m_entries.end(),
- [&purged](const IndexEntry& e) {
+ [&purged](const ContentIndexEntry& e) {
  if (e.state == IndexState::Removed) { purged++; return true; }
  return false;
  });
@@ -207,4 +207,3 @@ const wchar_t* ContentIndexer::GetIndexStateName(IndexState state) {
 }
 
 } // namespace ExplorerLens
-

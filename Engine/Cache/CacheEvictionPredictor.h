@@ -33,7 +33,7 @@ struct CacheEntryMeta {
     bool pinned = false;
 };
 
-struct EvictionDecision {
+struct PredictorEvictionDecision {
     uint64_t evictKey = 0;
     EvictionPolicy policy = EvictionPolicy::LRU;
     float confidence = 0.0f;
@@ -54,9 +54,9 @@ public:
         meta.lastAccessMs = static_cast<double>(m_accessCounter++);
     }
 
-    EvictionDecision SelectEviction(uint64_t targetBytes) const {
+    PredictorEvictionDecision SelectEviction(uint64_t targetBytes) const {
         (void)targetBytes;
-        EvictionDecision d;
+        PredictorEvictionDecision d;
         d.policy = m_policy;
         if (m_entries.empty()) return d;
 

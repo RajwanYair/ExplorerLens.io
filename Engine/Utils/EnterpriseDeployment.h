@@ -505,19 +505,19 @@ private:
 // Intune MDM integration, and centralized policy distribution endpoint.
 // ──────────────────────────────────────────────────────────────────────────────
 
-enum class EnterprisePolicySource : uint8_t { GroupPolicy = 0, Intune, Workspace1, ManualJSON, COUNT };
-enum class PolicyComplianceStatus : uint8_t { Compliant = 0, NonCompliant, NotApplicable, Unknown, COUNT };
-enum class PolicyScope : uint8_t { Machine = 0, User, Both, COUNT };
+enum class DeploymentPolicySource : uint8_t { GroupPolicy = 0, Intune, Workspace1, ManualJSON, COUNT };
+enum class DeploymentComplianceStatus : uint8_t { Compliant = 0, NonCompliant, NotApplicable, Unknown, COUNT };
+enum class DeploymentPolicyScope : uint8_t { Machine = 0, User, Both, COUNT };
 
 struct EnterprisePolicyEntry {
     std::wstring policyKey;
     std::wstring value;
-    PolicyScope scope = PolicyScope::Machine;
-    PolicyComplianceStatus status = PolicyComplianceStatus::Unknown;
-    EnterprisePolicySource source = EnterprisePolicySource::GroupPolicy;
+    DeploymentPolicyScope scope = DeploymentPolicyScope::Machine;
+    DeploymentComplianceStatus status = DeploymentComplianceStatus::Unknown;
+    DeploymentPolicySource source = DeploymentPolicySource::GroupPolicy;
 };
 
-struct EnterprisePolicyReport {
+struct DeploymentPolicyReport {
     uint32_t totalPolicies = 0;
     uint32_t compliant = 0;
     uint32_t nonCompliant = 0;
@@ -527,36 +527,36 @@ struct EnterprisePolicyReport {
 
 class DeploymentPolicyEngineV2 {
 public:
-    static const wchar_t* SourceName(EnterprisePolicySource s) {
+    static const wchar_t* SourceName(DeploymentPolicySource s) {
         switch (s) {
-        case EnterprisePolicySource::GroupPolicy: return L"Group Policy";
-        case EnterprisePolicySource::Intune: return L"Microsoft Intune";
-        case EnterprisePolicySource::Workspace1: return L"Workspace ONE";
-        case EnterprisePolicySource::ManualJSON: return L"Manual JSON";
+        case DeploymentPolicySource::GroupPolicy: return L"Group Policy";
+        case DeploymentPolicySource::Intune: return L"Microsoft Intune";
+        case DeploymentPolicySource::Workspace1: return L"Workspace ONE";
+        case DeploymentPolicySource::ManualJSON: return L"Manual JSON";
         default: return L"Unknown";
         }
     }
-    static const wchar_t* ComplianceStatusName(PolicyComplianceStatus s) {
+    static const wchar_t* ComplianceStatusName(DeploymentComplianceStatus s) {
         switch (s) {
-        case PolicyComplianceStatus::Compliant: return L"Compliant";
-        case PolicyComplianceStatus::NonCompliant: return L"Non-Compliant";
-        case PolicyComplianceStatus::NotApplicable: return L"N/A";
-        case PolicyComplianceStatus::Unknown: return L"Unknown";
+        case DeploymentComplianceStatus::Compliant: return L"Compliant";
+        case DeploymentComplianceStatus::NonCompliant: return L"Non-Compliant";
+        case DeploymentComplianceStatus::NotApplicable: return L"N/A";
+        case DeploymentComplianceStatus::Unknown: return L"Unknown";
         default: return L"Unknown";
         }
     }
-    static const wchar_t* ScopeName(PolicyScope s) {
+    static const wchar_t* ScopeName(DeploymentPolicyScope s) {
         switch (s) {
-        case PolicyScope::Machine: return L"Machine";
-        case PolicyScope::User: return L"User";
-        case PolicyScope::Both: return L"Both";
+        case DeploymentPolicyScope::Machine: return L"Machine";
+        case DeploymentPolicyScope::User: return L"User";
+        case DeploymentPolicyScope::Both: return L"Both";
         default: return L"Unknown";
         }
     }
-    static constexpr size_t SourceCount() { return static_cast<size_t>(EnterprisePolicySource::COUNT); }
-    static constexpr size_t ComplianceStatusCount() { return static_cast<size_t>(PolicyComplianceStatus::COUNT); }
-    static constexpr size_t ScopeCount() { return static_cast<size_t>(PolicyScope::COUNT); }
-    static bool IsFullyCompliant(const EnterprisePolicyReport& r) {
+    static constexpr size_t SourceCount() { return static_cast<size_t>(DeploymentPolicySource::COUNT); }
+    static constexpr size_t ComplianceStatusCount() { return static_cast<size_t>(DeploymentComplianceStatus::COUNT); }
+    static constexpr size_t ScopeCount() { return static_cast<size_t>(DeploymentPolicyScope::COUNT); }
+    static bool IsFullyCompliant(const DeploymentPolicyReport& r) {
         return r.nonCompliant == 0 && r.complianceScore >= 95.0f;
     }
 };

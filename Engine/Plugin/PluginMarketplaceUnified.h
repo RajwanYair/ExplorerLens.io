@@ -50,7 +50,7 @@ struct VersionRange {
 };
 
 /// Metadata embedded in a .dtpkg package
-struct PluginManifest {
+struct MarketplacePluginManifest {
     std::string id;
     std::string name;
     std::string description;

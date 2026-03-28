@@ -20,19 +20,19 @@ namespace ExplorerLens::Engine::Utils {
 //------------------------------------------------------------------------------
 // Hash Types
 //------------------------------------------------------------------------------
-enum class HashAlgorithm : uint8_t {
+enum class PerceptualHashAlgo : uint8_t {
  pHash = 0, // Perceptual hash — DCT-based, rotation-tolerant
  dHash, // Difference hash — gradient-based, very fast
  aHash, // Average hash — simplest, brightness-based
  wHash // Wavelet hash — Haar wavelet, good compression tolerance
 };
 
-inline const char* HashAlgorithmName(HashAlgorithm algo) {
+inline const char* HashAlgorithmName(PerceptualHashAlgo algo) {
  switch (algo) {
- case HashAlgorithm::pHash: return "pHash (Perceptual)";
- case HashAlgorithm::dHash: return "dHash (Difference)";
- case HashAlgorithm::aHash: return "aHash (Average)";
- case HashAlgorithm::wHash: return "wHash (Wavelet)";
+ case PerceptualHashAlgo::pHash: return "pHash (Perceptual)";
+ case PerceptualHashAlgo::dHash: return "dHash (Difference)";
+ case PerceptualHashAlgo::aHash: return "aHash (Average)";
+ case PerceptualHashAlgo::wHash: return "wHash (Wavelet)";
  default: return "Unknown";
  }
 }
@@ -42,7 +42,7 @@ inline const char* HashAlgorithmName(HashAlgorithm algo) {
 //------------------------------------------------------------------------------
 struct PerceptualHash {
  uint64_t value = 0;
- HashAlgorithm algorithm = HashAlgorithm::pHash;
+ PerceptualHashAlgo algorithm = PerceptualHashAlgo::pHash;
  uint32_t imageWidth = 0;
  uint32_t imageHeight = 0;
 
@@ -85,26 +85,26 @@ struct PerceptualHash {
 // Hash Computation Parameters
 //------------------------------------------------------------------------------
 struct HashComputeParams {
- HashAlgorithm algorithm = HashAlgorithm::pHash;
+ PerceptualHashAlgo algorithm = PerceptualHashAlgo::pHash;
  uint32_t resizeWidth = 32; // pHash uses 32x32 for DCT
  uint32_t resizeHeight = 32;
  bool convertToGrayscale = true;
  bool normalizeIntensity = true;
 
  static HashComputeParams ForPHash() {
- return { HashAlgorithm::pHash, 32, 32, true, true };
+ return { PerceptualHashAlgo::pHash, 32, 32, true, true };
  }
 
  static HashComputeParams ForDHash() {
- return { HashAlgorithm::dHash, 9, 8, true, false }; // 9x8 → 8x8 differences
+ return { PerceptualHashAlgo::dHash, 9, 8, true, false }; // 9x8 → 8x8 differences
  }
 
  static HashComputeParams ForAHash() {
- return { HashAlgorithm::aHash, 8, 8, true, true };
+ return { PerceptualHashAlgo::aHash, 8, 8, true, true };
  }
 
  static HashComputeParams ForWHash() {
- return { HashAlgorithm::wHash, 8, 8, true, true };
+ return { PerceptualHashAlgo::wHash, 8, 8, true, true };
  }
 };
 
@@ -142,7 +142,7 @@ struct SimilarityMatch {
 //------------------------------------------------------------------------------
 // Duplicate Group — cluster of visually similar images
 //------------------------------------------------------------------------------
-struct DuplicateGroup {
+struct PerceptualDupGroup {
  uint32_t groupId = 0;
  std::vector<SimilarityMatch> members;
  PerceptualHash representativeHash; // Hash of the "best" member
@@ -202,14 +202,14 @@ public:
  }
 
  // Group all entries into duplicate clusters
- std::vector<DuplicateGroup> FindAllDuplicates(uint32_t threshold = 10) const {
- std::vector<DuplicateGroup> groups;
+ std::vector<PerceptualDupGroup> FindAllDuplicates(uint32_t threshold = 10) const {
+ std::vector<PerceptualDupGroup> groups;
  std::vector<bool> visited(m_entries.size(), false);
  uint32_t groupId = 1;
 
  for (size_t i = 0; i < m_entries.size(); ++i) {
  if (visited[i]) continue;
- DuplicateGroup group;
+ PerceptualDupGroup group;
  group.groupId = groupId++;
  group.representativeHash = m_entries[i].hash;
  group.members.push_back({
@@ -261,7 +261,7 @@ struct DuplicateScanResult {
  uint32_t totalDuplicates = 0; // Files that are duplicates (excluding originals)
  uint64_t wastedBytes = 0;
  double scanTimeMs = 0;
- HashAlgorithm algorithm = HashAlgorithm::pHash;
+ PerceptualHashAlgo algorithm = PerceptualHashAlgo::pHash;
  uint32_t threshold = 10;
 
  double DuplicateRate() const {
@@ -286,23 +286,23 @@ struct DuplicateScanResult {
 //------------------------------------------------------------------------------
 // Export Formats
 //------------------------------------------------------------------------------
-enum class ExportFormat : uint8_t {
+enum class HashExportFormat : uint8_t {
  CSV = 0,
  JSON,
  Text
 };
 
-inline const char* ExportFormatName(ExportFormat fmt) {
+inline const char* ExportFormatName(HashExportFormat fmt) {
  switch (fmt) {
- case ExportFormat::CSV: return "CSV";
- case ExportFormat::JSON: return "JSON";
- case ExportFormat::Text: return "Text";
+ case HashExportFormat::CSV: return "CSV";
+ case HashExportFormat::JSON: return "JSON";
+ case HashExportFormat::Text: return "Text";
  default: return "Unknown";
  }
 }
 
 // Generate CSV report from duplicate groups
-inline std::string ExportDuplicatesCSV(const std::vector<DuplicateGroup>& groups) {
+inline std::string ExportDuplicatesCSV(const std::vector<PerceptualDupGroup>& groups) {
  std::ostringstream csv;
  csv << "GroupID,FilePath,Hash,HammingDistance,Similarity%,FileSize\n";
  for (auto& g : groups) {
@@ -319,7 +319,7 @@ inline std::string ExportDuplicatesCSV(const std::vector<DuplicateGroup>& groups
 }
 
 // Generate JSON report
-inline std::string ExportDuplicatesJSON(const std::vector<DuplicateGroup>& groups) {
+inline std::string ExportDuplicatesJSON(const std::vector<PerceptualDupGroup>& groups) {
  std::ostringstream json;
  json << "{\n \"groups\": [\n";
  for (size_t gi = 0; gi < groups.size(); ++gi) {
@@ -348,7 +348,7 @@ inline std::string ExportDuplicatesJSON(const std::vector<DuplicateGroup>& group
 // Duplicate Detection Configuration
 //------------------------------------------------------------------------------
 struct DuplicateDetectionConfig {
- HashAlgorithm primaryAlgorithm = HashAlgorithm::pHash;
+ PerceptualHashAlgo primaryAlgorithm = PerceptualHashAlgo::pHash;
  bool computeDHash = true; // Also compute dHash for fast pre-filter
  uint32_t similarityThreshold = 10; // Max Hamming distance for "similar"
  uint32_t exactThreshold = 0; // Hamming distance for "exact" match
@@ -357,13 +357,13 @@ struct DuplicateDetectionConfig {
  bool skipLargeFiles = false;
  uint64_t maxFileSize = 0; // 0 = no limit
  uint32_t maxFilesPerScan = 100000;
- ExportFormat exportFormat = ExportFormat::CSV;
+ HashExportFormat exportFormat = HashExportFormat::CSV;
 
  static DuplicateDetectionConfig Default() { return {}; }
 
  static DuplicateDetectionConfig FastScan() {
  DuplicateDetectionConfig c;
- c.primaryAlgorithm = HashAlgorithm::dHash;
+ c.primaryAlgorithm = PerceptualHashAlgo::dHash;
  c.computeDHash = false;
  c.similarityThreshold = 5;
  return c;

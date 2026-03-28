@@ -1,8 +1,8 @@
 # ExplorerLens Security Hardening Guide
 
-**Version:** 20.3.0 "Quasar-T"  
+**Version:** 23.5.0 "Vega-V"  
 **Classification:** Public  
-**Updated:** 2026-07-14
+**Updated:** 2026-03-27
 
 ---
 

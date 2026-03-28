@@ -26,7 +26,7 @@ enum class ColorBlindType : uint8_t {
 };
 
 // 3×3 RGB transform matrix (row-major, float)
-using ColorMatrix3x3 = std::array<float, 9>;
+using SimMatrix = std::array<float, 9>;
 
 struct ColorBlindConfig {
     ColorBlindType type{ColorBlindType::Deuteranopia};
@@ -45,7 +45,7 @@ public:
         std::span<const uint8_t> bgra, uint32_t width, uint32_t height, uint32_t stride) const;
 
     // Get the simulation matrix for a given type.
-    static ColorMatrix3x3 GetMatrix(ColorBlindType type) noexcept;
+    static SimMatrix GetMatrix(ColorBlindType type) noexcept;
 
     // Compute a distinguishability score (0-1) between two BGRA colors under simulation.
     static float Distinguishability(uint32_t bgra1, uint32_t bgra2, ColorBlindType type) noexcept;
@@ -60,29 +60,29 @@ public:
 
 private:
     void TransformPixel(uint8_t& b, uint8_t& g, uint8_t& r,
-                        const ColorMatrix3x3& m, float severity) const noexcept;
+                        const SimMatrix& m, float severity) const noexcept;
 
     ColorBlindConfig m_cfg;
 };
 
 // Standard simulation matrices (Brettel 1997 / Viénot 1999)
 namespace ColorMatrices {
-    inline constexpr ColorMatrix3x3 Deuteranopia = {
+    inline constexpr SimMatrix Deuteranopia = {
         0.625f, 0.375f, 0.0f,
         0.700f, 0.300f, 0.0f,
         0.0f,   0.300f, 0.700f
     };
-    inline constexpr ColorMatrix3x3 Protanopia = {
+    inline constexpr SimMatrix Protanopia = {
         0.567f, 0.433f, 0.0f,
         0.558f, 0.442f, 0.0f,
         0.0f,   0.242f, 0.758f
     };
-    inline constexpr ColorMatrix3x3 Tritanopia = {
+    inline constexpr SimMatrix Tritanopia = {
         0.950f, 0.050f, 0.0f,
         0.0f,   0.433f, 0.567f,
         0.0f,   0.475f, 0.525f
     };
-    inline constexpr ColorMatrix3x3 Achromatopsia = {
+    inline constexpr SimMatrix Achromatopsia = {
         0.299f, 0.587f, 0.114f,
         0.299f, 0.587f, 0.114f,
         0.299f, 0.587f, 0.114f

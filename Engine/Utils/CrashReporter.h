@@ -34,7 +34,7 @@ struct CrashContext {
     std::string   customAnnotation;
 };
 
-struct CrashReport {
+struct ReporterCrashReport {
     std::wstring  dumpPath;
     std::string   exceptionCode;
     std::string   exceptionAddress;
@@ -79,11 +79,11 @@ public:
     }
 
     // Register a callback for post-crash notification
-    using CrashFn = std::function<void(const CrashReport&)>;
+    using CrashFn = std::function<void(const ReporterCrashReport&)>;
     void OnCrash(CrashFn fn) { m_callbacks.push_back(std::move(fn)); }
 
     // Manually generate a diagnostic dump (for support tickets)
-    CrashReport GenerateDiagnosticDump() {
+    ReporterCrashReport GenerateDiagnosticDump() {
         return WriteDump(GetCurrentProcess(), GetCurrentProcessId(),
                          nullptr, EXCEPTION_EXECUTE_HANDLER, false);
     }
@@ -93,14 +93,14 @@ public:
     // Static SEH wrapper — must be in a function without C++ object unwinding
     // to satisfy MSVC C2712 ("/EHsc cannot mix __try with C++ objects").
     static void InvokeCbSafe(
-        std::function<void(const CrashReport&)>& fn,
-        const CrashReport& rep) noexcept {
+        std::function<void(const ReporterCrashReport&)>& fn,
+        const ReporterCrashReport& rep) noexcept {
         __try { fn(rep); } __except(EXCEPTION_EXECUTE_HANDLER) {}
     }
 
 private:
     CrashReporter() {
-        // Default dump dir: %LOCALAPPDATA%\ExplorerLens\crashes\
+        // Default dump dir: %LOCALAPPDATA%\ExplorerLens\crashes
         wchar_t appDataPath[MAX_PATH] = {};
         ExpandEnvironmentStringsW(L"%LOCALAPPDATA%\\ExplorerLens\\crashes", appDataPath, MAX_PATH);
         m_dumpDir    = appDataPath;
@@ -115,7 +115,7 @@ private:
         return inst.m_prevFilter ? inst.m_prevFilter(ep) : EXCEPTION_CONTINUE_SEARCH;
     }
 
-    CrashReport WriteDump(HANDLE hProc, DWORD pid,
+    ReporterCrashReport WriteDump(HANDLE hProc, DWORD pid,
                           PEXCEPTION_POINTERS ep, DWORD unusedFlags, bool notifyCbs) {
         (void)unusedFlags;
 
@@ -129,7 +129,7 @@ private:
             m_dumpDir.c_str(), st.wYear, st.wMonth, st.wDay,
             st.wHour, st.wMinute, st.wSecond);
 
-        CrashReport report;
+        ReporterCrashReport report;
         report.dumpPath = fname;
         report.context  = m_context;
 

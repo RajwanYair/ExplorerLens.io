@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 25 March 2026 (tool update pass)
-**Version:** 15.3.0 "Zenith-T"
+**Last Updated:** 28 March 2026 (tool update pass)
+**Version:** 23.6.0 "Vega-W"
 
 ---
 

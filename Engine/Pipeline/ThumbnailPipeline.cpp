@@ -145,7 +145,7 @@ public:
 
  // NEW: Decoders are NOT created here anymore - lazy init on first use
  // This saves ~50-100ms startup time per COM object creation
- 
+
  // Create GPU renderer if enabled
  if (config.enableGPU && !gpuRenderer) {
  // Try hardware GPU first (D3D11)
@@ -205,133 +205,133 @@ public:
  if (decodersInitialized) {
  return;
  }
- 
+
  std::lock_guard<std::mutex> lock(decoderInitMutex);
  if (decodersInitialized) { // Double-check after lock
  return;
  }
- 
+
  OutputDebugStringW(L"[Pipeline] Lazy initializing decoders...\n");
- 
+
  // Register all available decoders
  // Priority: Archives first, then WIC (Windows native), then specialized decoders
- 
+
  // 1. Archive formats (ZIP, RAR, 7Z, etc.) — must be first
  auto archiveDecoder = std::make_unique<ArchiveDecoder>();
  decoderRegistry.RegisterDecoder(archiveDecoder.get());
  decoders.push_back(std::move(archiveDecoder));
- 
+
  // 2. WIC (Windows Imaging Component) — preferred for standard formats
  // Handles JPEG, PNG, BMP, GIF, TIFF natively via Windows codecs
  // WIC-first ensures best performance and compatibility for common formats
  auto imageDecoder = std::make_unique<ImageDecoder>();
  decoderRegistry.RegisterDecoder(imageDecoder.get());
  decoders.push_back(std::move(imageDecoder));
- 
+
  // 3. Modern image formats with specific decoders
  auto webpDecoder = std::make_unique<WebPDecoder>();
  decoderRegistry.RegisterDecoder(webpDecoder.get());
  decoders.push_back(std::move(webpDecoder));
- 
+
  auto avifDecoder = std::make_unique<AVIFDecoder>();
  decoderRegistry.RegisterDecoder(avifDecoder.get());
  decoders.push_back(std::move(avifDecoder));
- 
+
  // Camera RAW formats (Canon, Nikon, Sony, DNG, etc.)
  auto rawDecoder = std::make_unique<RAWDecoder>();
  decoderRegistry.RegisterDecoder(rawDecoder.get());
  decoders.push_back(std::move(rawDecoder));
- 
+
  // HEIF/HEIC formats (iPhone photos, AVIF variants)
  auto heifDecoder = std::make_unique<HEIFDecoder>();
  decoderRegistry.RegisterDecoder(heifDecoder.get());
  decoders.push_back(std::move(heifDecoder));
- 
+
  // JPEG XL (modern high-efficiency format)
  auto jxlDecoder = std::make_unique<JXLDecoder>();
  decoderRegistry.RegisterDecoder(jxlDecoder.get());
  decoders.push_back(std::move(jxlDecoder));
- 
+
  // Professional/specialty formats
  auto icoDecoder = std::make_unique<ICODecoder>();
  decoderRegistry.RegisterDecoder(icoDecoder.get());
  decoders.push_back(std::move(icoDecoder));
- 
+
  auto tgaDecoder = std::make_unique<TGADecoder>();
  decoderRegistry.RegisterDecoder(tgaDecoder.get());
  decoders.push_back(std::move(tgaDecoder));
- 
+
  auto qoiDecoder = std::make_unique<QOIDecoder>();
  decoderRegistry.RegisterDecoder(qoiDecoder.get());
  decoders.push_back(std::move(qoiDecoder));
- 
+
  // Adobe Photoshop PSD/PSB
  auto psdDecoder = std::make_unique<PSDDecoder>();
  decoderRegistry.RegisterDecoder(psdDecoder.get());
  decoders.push_back(std::move(psdDecoder));
- 
+
  // DirectDraw Surface (game textures)
  auto ddsDecoder = std::make_unique<DDSDecoder>();
  decoderRegistry.RegisterDecoder(ddsDecoder.get());
  decoders.push_back(std::move(ddsDecoder));
- 
+
  // Radiance HDR (RGBE)
  auto hdrDecoder = std::make_unique<HDRDecoder>();
  decoderRegistry.RegisterDecoder(hdrDecoder.get());
  decoders.push_back(std::move(hdrDecoder));
- 
+
  // Netpbm formats (PPM/PGM/PBM/PNM/PAM/PFM)
  auto ppmDecoder = std::make_unique<PPMDecoder>();
  decoderRegistry.RegisterDecoder(ppmDecoder.get());
  decoders.push_back(std::move(ppmDecoder));
- 
+
  // OpenEXR (via WIC codec)
  auto exrDecoder = std::make_unique<EXRDecoder>();
  decoderRegistry.RegisterDecoder(exrDecoder.get());
  decoders.push_back(std::move(exrDecoder));
- 
+
  // SVG/SVGZ vector images
  auto svgDecoder = std::make_unique<SVGDecoder>();
  decoderRegistry.RegisterDecoder(svgDecoder.get());
  decoders.push_back(std::move(svgDecoder));
- 
+
  // Video formats (Media Foundation)
  auto videoDecoder = std::make_unique<VideoDecoder>();
  decoderRegistry.RegisterDecoder(videoDecoder.get());
  decoders.push_back(std::move(videoDecoder));
- 
+
  // Audio formats (album art / waveform)
  auto audioDecoder = std::make_unique<AudioDecoder>();
  decoderRegistry.RegisterDecoder(audioDecoder.get());
  decoders.push_back(std::move(audioDecoder));
- 
+
  // PDF documents
  auto pdfDecoder = std::make_unique<PDFDecoder>();
  decoderRegistry.RegisterDecoder(pdfDecoder.get());
  decoders.push_back(std::move(pdfDecoder));
- 
+
  // Office/eBook/document formats
  auto documentDecoder = std::make_unique<DocumentDecoder>();
  decoderRegistry.RegisterDecoder(documentDecoder.get());
  decoders.push_back(std::move(documentDecoder));
- 
+
  // Font preview (TTF, OTF, etc.)
  auto fontDecoder = std::make_unique<FontDecoder>();
  decoderRegistry.RegisterDecoder(fontDecoder.get());
  decoders.push_back(std::move(fontDecoder));
- 
+
  // 3D models (.obj, .stl, .gltf, .glb)
  auto modelDecoder = std::make_unique<ModelDecoder>();
  decoderRegistry.RegisterDecoder(modelDecoder.get());
  decoders.push_back(std::move(modelDecoder));
- 
+
  // 4. Scan for and load third-party plugins (feature flag controlled)
  if (config.enablePlugins) {
  LoadPlugins();
  } else {
  OutputDebugStringW(L"[Pipeline] Plugin loading disabled by configuration\n");
  }
- 
+
  decodersInitialized = true;
  OutputDebugStringW(L"[Pipeline] Lazy decoder init complete\n");
  }
@@ -379,9 +379,9 @@ public:
 
  ThumbnailResult GenerateThumbnail(const ThumbnailRequest& request) {
  ScopedTimer pipelineTotalTimer(ProfileComponent::PIPELINE_TOTAL);
- 
+
  auto startTime = std::chrono::high_resolution_clock::now();
- 
+
  ThumbnailResult result;
  result.status = E_FAIL;
 
@@ -391,13 +391,13 @@ public:
  result.status = E_INVALIDARG;
  return result;
  }
- 
+
  if (request.width == 0 || request.height == 0) {
  OutputDebugStringW(L"[Pipeline] ERROR: Invalid dimensions (0x0)\n");
  result.status = E_INVALIDARG;
  return result;
  }
- 
+
  // Reasonable max resolution check (8K = 7680x4320)
  if (request.width > 8192 || request.height > 8192) {
  OutputDebugStringW(L"[Pipeline] ERROR: Dimensions exceed maximum (8192x8192)\n");
@@ -411,10 +411,10 @@ public:
  }
 
  totalRequests++;
- 
+
  // Log request
  wchar_t logBuf[512];
- swprintf_s(logBuf, L"[Pipeline] Request #%llu: %s (%ux%u)\n", 
+ swprintf_s(logBuf, L"[Pipeline] Request #%llu: %s (%ux%u)\n",
  totalRequests, request.filePath, request.width, request.height);
  OutputDebugStringW(logBuf);
 
@@ -422,9 +422,9 @@ public:
  if (config.enableCache && cacheProvider) {
  ScopedTimer cacheLookupTimer(ProfileComponent::CACHE_LOOKUP);
  HBITMAP cachedBitmap = nullptr;
- if (SUCCEEDED(cacheProvider->Get(request.filePath, 
- request.width, 
- request.height, 
+ if (SUCCEEDED(cacheProvider->Get(request.filePath,
+ request.width,
+ request.height,
  &cachedBitmap))) {
  // Cache hit!
  result.hBitmap = cachedBitmap;
@@ -432,14 +432,14 @@ public:
  result.height = request.height;
  result.fromCache = true;
  result.status = S_OK;
- 
+
  cacheHits++;
- 
+
  auto endTime = std::chrono::high_resolution_clock::now();
  result.generationTimeMs = static_cast<uint32_t>(
  std::chrono::duration_cast<std::chrono::milliseconds>(
  endTime - startTime).count());
- 
+
  return result;
  }
  }
@@ -484,7 +484,7 @@ public:
 
  return result;
  }
- 
+
  // Log decoder found
  wchar_t decoderLog[256];
  swprintf_s(decoderLog, L"[Pipeline] Using decoder: %s\n", decoder->GetName());
@@ -504,10 +504,10 @@ public:
  zeroCopyActivation.TransferToGPU(bm.bmBits, dataSize, 0);
  }
  }
- 
+
  // Log decode result
  wchar_t resultLog[256];
- swprintf_s(resultLog, L"[Pipeline] Decode result: HRESULT=0x%08X, HBITMAP=%p\n", 
+ swprintf_s(resultLog, L"[Pipeline] Decode result: HRESULT=0x%08X, HBITMAP=%p\n",
  result.status, result.hBitmap);
  OutputDebugStringW(resultLog);
 
@@ -515,9 +515,9 @@ public:
  if (SUCCEEDED(result.status) && config.enableCache && cacheProvider && result.hBitmap) {
  ScopedTimer cacheStoreTimer(ProfileComponent::CACHE_STORE);
  // Store in cache (fire and forget - don't fail thumbnail on cache error)
- cacheProvider->Put(request.filePath, 
- result.width, 
- result.height, 
+ cacheProvider->Put(request.filePath,
+ result.width,
+ result.height,
  result.hBitmap);
 
  // Step 5b: Trigger cache warming for the parent directory
@@ -559,12 +559,12 @@ public:
  uint64_t& outTotalRequests,
  uint64_t& outCacheHits,
  uint64_t& outCacheMisses,
- double& outAverageTimeMs) const 
+ double& outAverageTimeMs) const
  {
  outTotalRequests = totalRequests;
  outCacheHits = cacheHits;
  outCacheMisses = cacheMisses;
- 
+
  if (totalRequests > 0) {
  outAverageTimeMs = static_cast<double>(totalProcessingTimeMs) / totalRequests;
  } else {
@@ -583,35 +583,35 @@ private:
  /// Load and register third-party plugins
  void LoadPlugins() {
  OutputDebugStringW(L"[Pipeline] Scanning for plugins...\n");
- 
+
  // Get plugin manager singleton
  auto& pluginManager = PluginManager::Instance();
- 
+
  // Get plugin search paths
- auto searchPaths = PluginDiscovery::GetPluginSearchPaths();
- 
+ auto searchPaths = ManagerPluginDiscovery::GetPluginSearchPaths();
+
  size_t totalLoaded = 0;
- 
+
  // Scan each search path
  for (const auto& path : searchPaths) {
  if (!std::filesystem::exists(path)) {
  continue;
  }
- 
+
  wchar_t logBuf[512];
  swprintf_s(logBuf, L"[Pipeline] Scanning plugin directory: %s\n", path.c_str());
  OutputDebugStringW(logBuf);
- 
+
  size_t loaded = pluginManager.ScanPluginDirectory(path);
  totalLoaded += loaded;
- 
+
  if (loaded > 0) {
- swprintf_s(logBuf, L"[Pipeline] Loaded %zu plugin(s) from %s\n", 
+ swprintf_s(logBuf, L"[Pipeline] Loaded %zu plugin(s) from %s\n",
  loaded, path.c_str());
  OutputDebugStringW(logBuf);
  }
  }
- 
+
  // Create decoder wrappers for all loaded plugins
  auto pluginNames = pluginManager.GetPluginNames();
  for (const auto& name : pluginNames) {
@@ -620,31 +620,31 @@ private:
  if (!pluginHandle || !pluginHandle->IsLoaded()) {
  continue;
  }
- 
+
  // Get plugin info
  const PluginInfo* info = pluginHandle->GetInfo();
  if (!info) {
  continue;
  }
- 
+
  // Log plugin discovery
  wchar_t logBuf[512];
  if (info->plugin_name) {
- swprintf_s(logBuf, L"[Pipeline] Registering plugin decoder: %S (v%S)\n", 
- info->plugin_name, 
+ swprintf_s(logBuf, L"[Pipeline] Registering plugin decoder: %S (v%S)\n",
+ info->plugin_name,
  info->plugin_version ? info->plugin_version : "1.0");
  OutputDebugStringW(logBuf);
- 
+
  // List supported extensions
  if (info->supported_extensions) {
  for (size_t i = 0; info->supported_extensions[i] != nullptr; ++i) {
- swprintf_s(logBuf, L"[Pipeline] - Format: %S\n", 
+ swprintf_s(logBuf, L"[Pipeline] - Format: %S\n",
  info->supported_extensions[i]);
  OutputDebugStringW(logBuf);
  }
  }
  }
- 
+
  // Create PluginDecoder wrapper
  std::wstring name_wide(name.begin(), name.end());
  auto pluginDecoder = std::make_unique<PluginDecoder>(pluginHandle, name_wide);
@@ -652,7 +652,7 @@ private:
  decoderRegistry.RegisterDecoder(decoderPtr);
  decoders.push_back(std::move(pluginDecoder));
  }
- 
+
  wchar_t summary[256];
  swprintf_s(summary, L"[Pipeline] Plugin scan complete. Total plugins: %zu\n", totalLoaded);
  OutputDebugStringW(summary);
@@ -685,9 +685,9 @@ ThumbnailResult ThumbnailPipeline::GenerateThumbnail(const ThumbnailRequest& req
 std::vector<ThumbnailResult> ThumbnailPipeline::GenerateThumbnailsBatch(
  const std::vector<ThumbnailRequest>& requests) {
  std::vector<ThumbnailResult> results(requests.size());
- 
+
  if (!m_impl->initialized || requests.empty()) return results;
- 
+
  if (!m_impl->config.enableParallelDecode || requests.size() <= 1) {
  // Sequential fallback
  for (size_t i = 0; i < requests.size(); ++i) {
@@ -695,7 +695,7 @@ std::vector<ThumbnailResult> ThumbnailPipeline::GenerateThumbnailsBatch(
  }
  return results;
  }
- 
+
  // Pre-read files via parallel I/O if active
  if (m_impl->parallelIOEnabled) {
   std::vector<std::wstring> paths;
@@ -712,15 +712,15 @@ std::vector<ThumbnailResult> ThumbnailPipeline::GenerateThumbnailsBatch(
  // Parallel execution with bounded concurrency
  uint32_t maxConcurrent = m_impl->config.maxConcurrentDecodes;
  if (maxConcurrent == 0) maxConcurrent = 4;
- 
+
  size_t remaining = requests.size();
  size_t offset = 0;
- 
+
  while (remaining > 0) {
  size_t batchSize = (std::min)(static_cast<size_t>(maxConcurrent), remaining);
  std::vector<std::future<ThumbnailResult>> futures;
  futures.reserve(batchSize);
- 
+
  for (size_t i = 0; i < batchSize; ++i) {
  size_t idx = offset + i;
  futures.push_back(std::async(std::launch::async,
@@ -728,15 +728,15 @@ std::vector<ThumbnailResult> ThumbnailPipeline::GenerateThumbnailsBatch(
  return m_impl->GenerateThumbnail(requests[idx]);
  }));
  }
- 
+
  for (size_t i = 0; i < batchSize; ++i) {
  results[offset + i] = futures[i].get();
  }
- 
+
  offset += batchSize;
  remaining -= batchSize;
  }
- 
+
  return results;
 }
 
@@ -764,7 +764,7 @@ void ThumbnailPipeline::GetStatistics(
  uint64_t& totalRequests,
  uint64_t& cacheHits,
  uint64_t& cacheMisses,
- double& averageTimeMs) const 
+ double& averageTimeMs) const
 {
  m_impl->GetStatistics(totalRequests, cacheHits, cacheMisses, averageTimeMs);
 }
@@ -820,4 +820,3 @@ size_t ThumbnailPipeline::GetTotalExtensionCount() const {
 
 } // namespace Engine
 } // namespace ExplorerLens
-

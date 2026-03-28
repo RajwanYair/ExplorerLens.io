@@ -52,8 +52,8 @@ A11yStatus AccessibilityEngine::DetectSettings() const {
  return status;
 }
 
-A11yAuditResult AccessibilityEngine::RunComplianceAudit() const {
- A11yAuditResult result;
+EngineComplianceResult AccessibilityEngine::RunComplianceAudit() const {
+ EngineComplianceResult result;
  auto start = std::chrono::high_resolution_clock::now();
 
  // Check WCAG-style compliance items
@@ -128,4 +128,3 @@ const wchar_t* AccessibilityEngine::GetContrastModeName(ContrastMode mode) {
 }
 
 }} // namespace ExplorerLens::Engine
-

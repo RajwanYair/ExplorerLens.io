@@ -180,14 +180,14 @@ namespace Release {
 // Quality Gate — individual pass/fail check
 //==============================================================================
 
-enum class GateStatus { Pending, Passed, Failed, Skipped };
+enum class CIPipelineGateStatus { Pending, Passed, Failed, Skipped };
 
-inline const char* GateStatusName(GateStatus s) {
+inline const char* GateStatusName(CIPipelineGateStatus s) {
     switch (s) {
-    case GateStatus::Pending: return "Pending";
-    case GateStatus::Passed: return "Passed";
-    case GateStatus::Failed: return "Failed";
-    case GateStatus::Skipped: return "Skipped";
+    case CIPipelineGateStatus::Pending: return "Pending";
+    case CIPipelineGateStatus::Passed: return "Passed";
+    case CIPipelineGateStatus::Failed: return "Failed";
+    case CIPipelineGateStatus::Skipped: return "Skipped";
     }
     return "Unknown";
 }
@@ -196,12 +196,12 @@ struct QualityGate
 {
     std::string id;
     std::string description;
-    GateStatus status = GateStatus::Pending;
+    CIPipelineGateStatus status = CIPipelineGateStatus::Pending;
     std::string detail;
     double durationMs = 0.0;
 
-    bool IsPassed() const { return status == GateStatus::Passed; }
-    bool IsFailed() const { return status == GateStatus::Failed; }
+    bool IsPassed() const { return status == CIPipelineGateStatus::Passed; }
+    bool IsFailed() const { return status == CIPipelineGateStatus::Failed; }
 
     std::string Summary() const {
         std::ostringstream ss;
@@ -263,25 +263,25 @@ public:
     ReleaseChecklist() {
         // Core quality gates per spec
         gates_ = {
-        {"BUILD_SUCCESS", "Solution builds with 0 errors, 0 warnings", GateStatus::Pending, "", 0},
-        {"TEST_PASS", "All unit tests pass (100% pass rate)", GateStatus::Pending, "", 0},
-        {"BENCHMARK_PASS", "Performance benchmarks within threshold", GateStatus::Pending, "", 0},
-        {"VERSION_CONSIST", "Version consistent across all docs/code", GateStatus::Pending, "", 0},
-        {"DOCS_INTEGRITY", "No stale version references in docs", GateStatus::Pending, "", 0},
-        {"BINARY_SIGNED", "All release binaries code-signed", GateStatus::Pending, "", 0},
-        {"SYMBOLS_PRESENT", "PDB symbols generated for all binaries", GateStatus::Pending, "", 0},
-        {"MSI_INSTALL", "MSI installer builds and installs cleanly", GateStatus::Pending, "", 0},
-        {"MSI_UNINSTALL", "MSI uninstaller removes all components", GateStatus::Pending, "", 0},
-        {"PORTABLE_ZIP", "Portable ZIP package created with all files", GateStatus::Pending, "", 0},
-        {"CHECKSUM_GEN", "SHA-256 checksums generated for artifacts", GateStatus::Pending, "", 0},
-        {"CI_PIPELINE", "GitHub Actions CI passes on self-hosted", GateStatus::Pending, "", 0},
-        {"CHANGELOG_UPDATED","CHANGELOG.md updated with release notes", GateStatus::Pending, "", 0},
-        {"RELEASE_NOTES", "Release notes document exists and correct", GateStatus::Pending, "", 0},
+        {"BUILD_SUCCESS", "Solution builds with 0 errors, 0 warnings", CIPipelineGateStatus::Pending, "", 0},
+        {"TEST_PASS", "All unit tests pass (100% pass rate)", CIPipelineGateStatus::Pending, "", 0},
+        {"BENCHMARK_PASS", "Performance benchmarks within threshold", CIPipelineGateStatus::Pending, "", 0},
+        {"VERSION_CONSIST", "Version consistent across all docs/code", CIPipelineGateStatus::Pending, "", 0},
+        {"DOCS_INTEGRITY", "No stale version references in docs", CIPipelineGateStatus::Pending, "", 0},
+        {"BINARY_SIGNED", "All release binaries code-signed", CIPipelineGateStatus::Pending, "", 0},
+        {"SYMBOLS_PRESENT", "PDB symbols generated for all binaries", CIPipelineGateStatus::Pending, "", 0},
+        {"MSI_INSTALL", "MSI installer builds and installs cleanly", CIPipelineGateStatus::Pending, "", 0},
+        {"MSI_UNINSTALL", "MSI uninstaller removes all components", CIPipelineGateStatus::Pending, "", 0},
+        {"PORTABLE_ZIP", "Portable ZIP package created with all files", CIPipelineGateStatus::Pending, "", 0},
+        {"CHECKSUM_GEN", "SHA-256 checksums generated for artifacts", CIPipelineGateStatus::Pending, "", 0},
+        {"CI_PIPELINE", "GitHub Actions CI passes on self-hosted", CIPipelineGateStatus::Pending, "", 0},
+        {"CHANGELOG_UPDATED","CHANGELOG.md updated with release notes", CIPipelineGateStatus::Pending, "", 0},
+        {"RELEASE_NOTES", "Release notes document exists and correct", CIPipelineGateStatus::Pending, "", 0},
         };
     }
 
     // Record a gate result
-    void SetGate(const std::string& id, GateStatus status, const std::string& detail = "") {
+    void SetGate(const std::string& id, CIPipelineGateStatus status, const std::string& detail = "") {
         for (auto& g : gates_) {
             if (g.id == id) {
                 g.status = status;
@@ -293,14 +293,14 @@ public:
 
     // Query counts
     size_t TotalGates() const { return gates_.size(); }
-    size_t PassedGates() const { return CountStatus(GateStatus::Passed); }
-    size_t FailedGates() const { return CountStatus(GateStatus::Failed); }
-    size_t PendingGates() const { return CountStatus(GateStatus::Pending); }
-    size_t SkippedGates() const { return CountStatus(GateStatus::Skipped); }
+    size_t PassedGates() const { return CountStatus(CIPipelineGateStatus::Passed); }
+    size_t FailedGates() const { return CountStatus(CIPipelineGateStatus::Failed); }
+    size_t PendingGates() const { return CountStatus(CIPipelineGateStatus::Pending); }
+    size_t SkippedGates() const { return CountStatus(CIPipelineGateStatus::Skipped); }
 
     bool AllPassed() const {
         return std::all_of(gates_.begin(), gates_.end(), [](const auto& g) {
-            return g.status == GateStatus::Passed || g.status == GateStatus::Skipped;
+            return g.status == CIPipelineGateStatus::Passed || g.status == CIPipelineGateStatus::Skipped;
             });
     }
 
@@ -341,7 +341,7 @@ public:
 private:
     std::vector<QualityGate> gates_;
 
-    size_t CountStatus(GateStatus s) const {
+    size_t CountStatus(CIPipelineGateStatus s) const {
         return static_cast<size_t>(std::count_if(gates_.begin(), gates_.end(),
             [s](const auto& g) { return g.status == s; }));
     }

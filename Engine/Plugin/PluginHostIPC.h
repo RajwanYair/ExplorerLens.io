@@ -19,7 +19,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// IPC message types for plugin host protocol
-enum class IPCMessageType : uint32_t {
+enum class HostIPCMessageType : uint32_t {
  // Control messages
  Handshake = 0x0001, ///< Initial connection setup
  Heartbeat = 0x0002, ///< Keep-alive ping
@@ -47,7 +47,7 @@ enum class IPCMessageType : uint32_t {
 /// IPC message header (fixed 16 bytes, little‐endian)
 struct IPCMessageHeader {
  uint32_t magic = 0x4C454E53; ///< "LENS" in ASCII
- IPCMessageType type = IPCMessageType::Heartbeat;
+ HostIPCMessageType type = HostIPCMessageType::Heartbeat;
  uint32_t payloadSize = 0; ///< Size of payload following header
  uint32_t sequenceId = 0; ///< Request/response correlation ID
 };
@@ -125,7 +125,7 @@ public:
  }
 
  /// Send a message
- bool Send(IPCMessageType type, const void* payload = nullptr, uint32_t payloadSize = 0) {
+ bool Send(HostIPCMessageType type, const void* payload = nullptr, uint32_t payloadSize = 0) {
  if (m_state != IPCConnectionState::Connected) return false;
 
  IPCMessageHeader header;
@@ -175,23 +175,23 @@ public:
  DWORD GetLastError() const { return m_lastError; }
 
  /// Message type name lookup
- static const char* MessageTypeName(IPCMessageType t) {
+ static const char* MessageTypeName(HostIPCMessageType t) {
  switch (t) {
- case IPCMessageType::Handshake: return "Handshake";
- case IPCMessageType::Heartbeat: return "Heartbeat";
- case IPCMessageType::Shutdown: return "Shutdown";
- case IPCMessageType::Ack: return "Ack";
- case IPCMessageType::LoadPlugin: return "LoadPlugin";
- case IPCMessageType::UnloadPlugin: return "UnloadPlugin";
- case IPCMessageType::ListPlugins: return "ListPlugins";
- case IPCMessageType::PluginInfo: return "PluginInfo";
- case IPCMessageType::DecodeRequest: return "DecodeRequest";
- case IPCMessageType::DecodeResult: return "DecodeResult";
- case IPCMessageType::DecodeError: return "DecodeError";
- case IPCMessageType::DecodeCancel: return "DecodeCancel";
- case IPCMessageType::GetStats: return "GetStats";
- case IPCMessageType::StatsResponse: return "StatsResponse";
- case IPCMessageType::CrashReport: return "CrashReport";
+ case HostIPCMessageType::Handshake: return "Handshake";
+ case HostIPCMessageType::Heartbeat: return "Heartbeat";
+ case HostIPCMessageType::Shutdown: return "Shutdown";
+ case HostIPCMessageType::Ack: return "Ack";
+ case HostIPCMessageType::LoadPlugin: return "LoadPlugin";
+ case HostIPCMessageType::UnloadPlugin: return "UnloadPlugin";
+ case HostIPCMessageType::ListPlugins: return "ListPlugins";
+ case HostIPCMessageType::PluginInfo: return "PluginInfo";
+ case HostIPCMessageType::DecodeRequest: return "DecodeRequest";
+ case HostIPCMessageType::DecodeResult: return "DecodeResult";
+ case HostIPCMessageType::DecodeError: return "DecodeError";
+ case HostIPCMessageType::DecodeCancel: return "DecodeCancel";
+ case HostIPCMessageType::GetStats: return "GetStats";
+ case HostIPCMessageType::StatsResponse: return "StatsResponse";
+ case HostIPCMessageType::CrashReport: return "CrashReport";
  default: return "Unknown";
  }
  }

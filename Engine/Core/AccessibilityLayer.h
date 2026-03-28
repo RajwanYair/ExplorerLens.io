@@ -54,7 +54,7 @@ public:
 
     // Read current Windows accessibility state
     void Refresh() {
-        HIGHCONTRAST hc{ sizeof(HIGHCONTRAST) };
+        HIGHCONTRASTW hc{ sizeof(HIGHCONTRASTW) };
         SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0);
         if (hc.dwFlags & HCF_HIGHCONTRASTON) {
             m_state.features = m_state.features | AccessibilityFeature::HighContrast;

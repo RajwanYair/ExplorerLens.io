@@ -1812,7 +1812,7 @@ if(ENGINE_SOURCES)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libwebp-1.5.0-build/build-cmake/Release
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/minizip-ng-4.0.10/build-manual
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/zlib-1.3.1/install/lib
-                ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/zstd-1.5.7/build-manual
+                ${CMAKE_CURRENT_SOURCE_DIR}/../external/compression-libs/zstd-1.5.7/install/lib
                 # JXL libraries (actual install location)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../external/image-libs/libjxl-0.11.1/install/lib
                 # LibRaw libraries

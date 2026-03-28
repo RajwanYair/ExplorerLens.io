@@ -24,7 +24,7 @@ enum class LODLevel : uint8_t {
     Full = 5
 };
 
-struct DisplayProfile {
+struct DisplayMetrics {
     uint32_t screenWidthPx = 1920;
     uint32_t screenHeightPx = 1080;
     float dpi = 96.0f;
@@ -41,7 +41,7 @@ struct LODRequest {
     uint32_t sourceHeight = 0;
     uint32_t thumbnailWidth = 256;
     uint32_t thumbnailHeight = 256;
-    DisplayProfile display;
+    DisplayMetrics display;
 };
 
 struct LODResult {

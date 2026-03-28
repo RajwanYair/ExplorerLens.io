@@ -12,11 +12,11 @@ namespace ExplorerLens { namespace Engine {
 EncoderExportEngine::EncoderExportEngine() {}
 
 //------------------------------------------------------------------------------
-ExportResult EncoderExportEngine::ExportThumbnail(
+EncoderExportResult EncoderExportEngine::ExportThumbnail(
  const uint8_t* rgbaData, uint32_t width, uint32_t height,
  const ExportConfig& config, const std::wstring& outputPath)
 {
- ExportResult result;
+ EncoderExportResult result;
  result.format = config.format;
  result.outputPath = outputPath;
 
@@ -55,11 +55,11 @@ ExportResult EncoderExportEngine::ExportThumbnail(
  return result;
 }
 
-ExportResult EncoderExportEngine::ExportToMemory(
+EncoderExportResult EncoderExportEngine::ExportToMemory(
  const uint8_t* rgbaData, uint32_t width, uint32_t height,
  const ExportConfig& config, std::vector<uint8_t>& outputBuffer)
 {
- ExportResult result;
+ EncoderExportResult result;
  result.format = config.format;
 
  auto start = std::chrono::high_resolution_clock::now();
@@ -80,11 +80,11 @@ ExportResult EncoderExportEngine::ExportToMemory(
 }
 
 //------------------------------------------------------------------------------
-std::vector<ExportResult> EncoderExportEngine::BatchExport(
+std::vector<EncoderExportResult> EncoderExportEngine::BatchExport(
  const uint8_t* rgbaData, uint32_t width, uint32_t height,
  const std::vector<ExportConfig>& configs, const std::wstring& outputDir)
 {
- std::vector<ExportResult> results;
+ std::vector<EncoderExportResult> results;
  for (const auto& config : configs) {
  std::wstring path = outputDir + L"\\thumbnail" + GetFormatExtension(config.format);
  results.push_back(ExportThumbnail(rgbaData, width, height, config, path));
@@ -231,27 +231,27 @@ uint32_t EncoderExportEngine::GetFormatCount() {
 }
 
 //------------------------------------------------------------------------------
-uint8_t EncoderExportEngine::GetDefaultQuality(ExportFormat format, QualityPreset preset) {
+uint8_t EncoderExportEngine::GetDefaultQuality(ExportFormat format, ExportQualityPreset preset) {
  switch (preset) {
- case QualityPreset::Draft:
+ case ExportQualityPreset::Draft:
  return (format == ExportFormat::JPEG) ? 50 : 40;
- case QualityPreset::Normal:
+ case ExportQualityPreset::Normal:
  return (format == ExportFormat::JPEG) ? 85 : 80;
- case QualityPreset::High:
+ case ExportQualityPreset::High:
  return (format == ExportFormat::JPEG) ? 95 : 90;
- case QualityPreset::Lossless:
+ case ExportQualityPreset::Lossless:
  return 100;
  default:
  return 80;
  }
 }
 
-const wchar_t* EncoderExportEngine::GetPresetName(QualityPreset preset) {
+const wchar_t* EncoderExportEngine::GetPresetName(ExportQualityPreset preset) {
  switch (preset) {
- case QualityPreset::Draft: return L"Draft";
- case QualityPreset::Normal: return L"Normal";
- case QualityPreset::High: return L"High";
- case QualityPreset::Lossless: return L"Lossless";
+ case ExportQualityPreset::Draft: return L"Draft";
+ case ExportQualityPreset::Normal: return L"Normal";
+ case ExportQualityPreset::High: return L"High";
+ case ExportQualityPreset::Lossless: return L"Lossless";
  default: return L"Unknown";
  }
 }
@@ -267,4 +267,3 @@ const wchar_t* EncoderExportEngine::GetColorSpaceName(ExportColorSpace cs) {
 }
 
 }} // namespace ExplorerLens::Engine
-

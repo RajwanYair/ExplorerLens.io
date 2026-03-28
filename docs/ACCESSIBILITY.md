@@ -1,6 +1,6 @@
 # ExplorerLens Accessibility Guide
 
-> Version 20.0.0 "Quasar" | Sprint 209 | Standard: WCAG 2.1 Level AA
+> Version 23.5.0 "Vega-V" | Standard: WCAG 2.2 Level AA
 
 ---
 

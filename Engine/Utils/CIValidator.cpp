@@ -37,7 +37,7 @@ CIPipelineResult CIValidator::ValidatePipeline(CIPlatform platform) const {
 }
 
 bool CIValidator::ValidateArtifact(const std::wstring &path,
- ArtifactType /*type*/) const {
+ ValidatorArtifactType /*type*/) const {
  return !path.empty();
 }
 
@@ -97,23 +97,23 @@ const wchar_t *CIValidator::GetStageName(CIStage stage) {
  }
 }
 
-const wchar_t *CIValidator::GetArtifactTypeName(ArtifactType type) {
+const wchar_t *CIValidator::GetArtifactTypeName(ValidatorArtifactType type) {
  switch (type) {
- case ArtifactType::DLL:
+ case ValidatorArtifactType::DLL:
  return L"DLL";
- case ArtifactType::EXE:
+ case ValidatorArtifactType::EXE:
  return L"EXE";
- case ArtifactType::LIB:
+ case ValidatorArtifactType::LIB:
  return L"LIB";
- case ArtifactType::MSI:
+ case ValidatorArtifactType::MSI:
  return L"MSI";
- case ArtifactType::MSIX:
+ case ValidatorArtifactType::MSIX:
  return L"MSIX";
- case ArtifactType::PDB:
+ case ValidatorArtifactType::PDB:
  return L"PDB";
- case ArtifactType::NuGet:
+ case ValidatorArtifactType::NuGet:
  return L"NuGet";
- case ArtifactType::ZIP:
+ case ValidatorArtifactType::ZIP:
  return L"ZIP";
  default:
  return L"Unknown";

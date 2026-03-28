@@ -24,15 +24,15 @@
 namespace ExplorerLens { namespace VersionDrift {
 
 /// Semantic version with parse, compare, and format support
-struct SemanticVersion {
+struct GateSemVer {
  int major = 0;
  int minor = 0;
  int patch = 0;
  std::string preRelease; // e.g., "beta.1"
  std::string buildMeta; // e.g., "20260218"
 
- static SemanticVersion Parse(const std::string& versionStr) {
- SemanticVersion v;
+ static GateSemVer Parse(const std::string& versionStr) {
+ GateSemVer v;
  std::regex re(R"((\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.]+))?(?:\+([a-zA-Z0-9.]+))?)");
  std::smatch m;
  if (std::regex_match(versionStr, m, re)) {
@@ -52,11 +52,11 @@ struct SemanticVersion {
  return s;
  }
 
- bool operator==(const SemanticVersion& o) const {
+ bool operator==(const GateSemVer& o) const {
  return major == o.major && minor == o.minor && patch == o.patch && preRelease == o.preRelease;
  }
- bool operator!=(const SemanticVersion& o) const { return !(*this == o); }
- bool operator<(const SemanticVersion& o) const {
+ bool operator!=(const GateSemVer& o) const { return !(*this == o); }
+ bool operator<(const GateSemVer& o) const {
  if (major != o.major) return major < o.major;
  if (minor != o.minor) return minor < o.minor;
  if (patch != o.patch) return patch < o.patch;
@@ -65,16 +65,16 @@ struct SemanticVersion {
  if (!preRelease.empty() && o.preRelease.empty()) return true;
  return preRelease < o.preRelease;
  }
- bool operator>(const SemanticVersion& o) const { return o < *this; }
- bool operator<=(const SemanticVersion& o) const { return !(o < *this); }
- bool operator>=(const SemanticVersion& o) const { return !(*this < o); }
+ bool operator>(const GateSemVer& o) const { return o < *this; }
+ bool operator<=(const GateSemVer& o) const { return !(o < *this); }
+ bool operator>=(const GateSemVer& o) const { return !(*this < o); }
 
- bool IsNewerThan(const SemanticVersion& o) const { return *this > o; }
- bool IsOlderThan(const SemanticVersion& o) const { return *this < o; }
+ bool IsNewerThan(const GateSemVer& o) const { return *this > o; }
+ bool IsOlderThan(const GateSemVer& o) const { return *this < o; }
 };
 
 /// Drift severity classification
-enum class DriftSeverity : uint8_t {
+enum class GateDriftSeverity : uint8_t {
  None = 0, // Version matches canonical
  Minor = 1, // Patch version behind (e.g., 7.1.0 vs 7.1.1)
  Moderate = 2, // Minor version behind (e.g., 7.0.0 vs 7.1.0)
@@ -88,7 +88,7 @@ struct VersionReference {
  int lineNumber = 0;
  std::string foundVersion;
  std::string context; // Surrounding text for debugging
- DriftSeverity severity = DriftSeverity::None;
+ GateDriftSeverity severity = GateDriftSeverity::None;
 };
 
 /// Source file registration for drift checking
@@ -107,7 +107,7 @@ struct DriftReport {
  int driftingSources = 0;
  int totalReferences = 0;
  int staleReferences = 0;
- DriftSeverity worstSeverity = DriftSeverity::None;
+ GateDriftSeverity worstSeverity = GateDriftSeverity::None;
  std::vector<VersionReference> violations;
  std::chrono::system_clock::time_point timestamp;
 
@@ -120,11 +120,11 @@ struct DriftReport {
 
  std::string SeverityText() const {
  switch (worstSeverity) {
- case DriftSeverity::None: return "CLEAN";
- case DriftSeverity::Minor: return "MINOR_DRIFT";
- case DriftSeverity::Moderate: return "MODERATE_DRIFT";
- case DriftSeverity::Major: return "MAJOR_DRIFT";
- case DriftSeverity::Critical: return "CRITICAL_DRIFT";
+ case GateDriftSeverity::None: return "CLEAN";
+ case GateDriftSeverity::Minor: return "MINOR_DRIFT";
+ case GateDriftSeverity::Moderate: return "MODERATE_DRIFT";
+ case GateDriftSeverity::Major: return "MAJOR_DRIFT";
+ case GateDriftSeverity::Critical: return "CRITICAL_DRIFT";
  default: return "UNKNOWN";
  }
  }
@@ -134,12 +134,12 @@ struct DriftReport {
 struct StaleVersionPattern {
  std::string pattern; // Regex pattern
  std::string description; // Human-readable explanation
- DriftSeverity severity = DriftSeverity::Moderate;
+ GateDriftSeverity severity = GateDriftSeverity::Moderate;
 };
 
 /// Gate policy for CI enforcement
 struct GatePolicy {
- DriftSeverity maxAllowed = DriftSeverity::Minor;
+ GateDriftSeverity maxAllowed = GateDriftSeverity::Minor;
  double minCompliancePercent = 95.0;
  bool failOnAnyMajorDrift = true;
  bool failOnCanonicalMismatch = true;
@@ -151,7 +151,7 @@ struct GatePolicy {
 };
 
 /// Gate check result
-struct GateResult {
+struct DriftGateResult {
  bool passed = false;
  std::string reason;
  DriftReport report;
@@ -163,7 +163,7 @@ class VersionDriftGate {
 public:
  static VersionDriftGate Create(const std::string& canonicalVersion) {
  VersionDriftGate gate;
- gate.m_canonicalVersion = SemanticVersion::Parse(canonicalVersion);
+ gate.m_canonicalVersion = GateSemVer::Parse(canonicalVersion);
  gate.m_canonicalString = canonicalVersion;
  gate.InitializeStalePatterns();
  return gate;
@@ -199,13 +199,13 @@ public:
  report.totalSources = static_cast<int>(m_sources.size());
 
  for (const auto& [path, src] : m_sources) {
- auto declVer = SemanticVersion::Parse(src.declaredVersion);
+ auto declVer = GateSemVer::Parse(src.declaredVersion);
  bool sourceHasDrift = (declVer != m_canonicalVersion);
  if (sourceHasDrift) report.driftingSources++;
 
  for (const auto& ref : src.references) {
  report.totalReferences++;
- if (ref.severity > DriftSeverity::None) {
+ if (ref.severity > GateDriftSeverity::None) {
  report.staleReferences++;
  report.violations.push_back(ref);
  if (ref.severity > report.worstSeverity) {
@@ -217,8 +217,8 @@ public:
  return report;
  }
 
- GateResult CheckGate(const GatePolicy& policy) const {
- GateResult result;
+ DriftGateResult CheckGate(const GatePolicy& policy) const {
+ DriftGateResult result;
  result.report = Validate();
  result.policy = policy;
  result.passed = true;
@@ -234,7 +234,7 @@ public:
  result.reason = "Compliance " + std::to_string(result.report.CompliancePercent()) +
  "% below minimum " + std::to_string(policy.minCompliancePercent) + "%";
  }
- if (policy.failOnAnyMajorDrift && result.report.worstSeverity >= DriftSeverity::Major) {
+ if (policy.failOnAnyMajorDrift && result.report.worstSeverity >= GateDriftSeverity::Major) {
  result.passed = false;
  result.reason = "Major version drift detected — policy requires zero major drift";
  }
@@ -242,37 +242,37 @@ public:
  }
 
  // ─── Stale Pattern Matching ──────────────────────────────────
- DriftSeverity ClassifyDrift(const std::string& foundVersion) const {
- auto found = SemanticVersion::Parse(foundVersion);
- if (found == m_canonicalVersion) return DriftSeverity::None;
+ GateDriftSeverity ClassifyDrift(const std::string& foundVersion) const {
+ auto found = GateSemVer::Parse(foundVersion);
+ if (found == m_canonicalVersion) return GateDriftSeverity::None;
  if (found.major != m_canonicalVersion.major) {
  int delta = m_canonicalVersion.major - found.major;
- return (delta > 1) ? DriftSeverity::Critical : DriftSeverity::Major;
+ return (delta > 1) ? GateDriftSeverity::Critical : GateDriftSeverity::Major;
  }
- if (found.minor != m_canonicalVersion.minor) return DriftSeverity::Moderate;
- if (found.patch != m_canonicalVersion.patch) return DriftSeverity::Minor;
- return DriftSeverity::None;
+ if (found.minor != m_canonicalVersion.minor) return GateDriftSeverity::Moderate;
+ if (found.patch != m_canonicalVersion.patch) return GateDriftSeverity::Minor;
+ return GateDriftSeverity::None;
  }
 
  // ─── Accessors ───────────────────────────────────────────────
- const SemanticVersion& CanonicalVersion() const { return m_canonicalVersion; }
+ const GateSemVer& CanonicalVersion() const { return m_canonicalVersion; }
  const std::string& CanonicalString() const { return m_canonicalString; }
  size_t SourceCount() const { return m_sources.size(); }
  const std::vector<StaleVersionPattern>& StalePatterns() const { return m_stalePatterns; }
 
 private:
- SemanticVersion m_canonicalVersion;
+ GateSemVer m_canonicalVersion;
  std::string m_canonicalString;
  std::map<std::string, VersionSource> m_sources;
  std::vector<StaleVersionPattern> m_stalePatterns;
 
  void InitializeStalePatterns() {
  m_stalePatterns = {
- { R"(v5\.\d+\.\d+)", "v5.x reference (2+ major versions behind)", DriftSeverity::Critical },
- { R"(v6\.\d+\.\d+)", "v6.x reference (1 major version behind)", DriftSeverity::Major },
- { R"(v7\.0\.\d+)", "v7.0.x reference (minor version behind)", DriftSeverity::Moderate },
- { R"(Version:\s*6)", "Version header showing v6", DriftSeverity::Major },
- { R"(Version:\s*5)", "Version header showing v5", DriftSeverity::Critical },
+ { R"(v5\.\d+\.\d+)", "v5.x reference (2+ major versions behind)", GateDriftSeverity::Critical },
+ { R"(v6\.\d+\.\d+)", "v6.x reference (1 major version behind)", GateDriftSeverity::Major },
+ { R"(v7\.0\.\d+)", "v7.0.x reference (minor version behind)", GateDriftSeverity::Moderate },
+ { R"(Version:\s*6)", "Version header showing v6", GateDriftSeverity::Major },
+ { R"(Version:\s*5)", "Version header showing v5", GateDriftSeverity::Critical },
  };
  }
 };
@@ -281,7 +281,7 @@ private:
 struct GatePolicies {
  static GatePolicy Strict() {
  GatePolicy p;
- p.maxAllowed = DriftSeverity::None;
+ p.maxAllowed = GateDriftSeverity::None;
  p.minCompliancePercent = 100.0;
  p.failOnAnyMajorDrift = true;
  p.failOnCanonicalMismatch = true;
@@ -289,7 +289,7 @@ struct GatePolicies {
  }
  static GatePolicy CI() {
  GatePolicy p;
- p.maxAllowed = DriftSeverity::Minor;
+ p.maxAllowed = GateDriftSeverity::Minor;
  p.minCompliancePercent = 95.0;
  p.failOnAnyMajorDrift = true;
  p.failOnCanonicalMismatch = true;
@@ -297,7 +297,7 @@ struct GatePolicies {
  }
  static GatePolicy Permissive() {
  GatePolicy p;
- p.maxAllowed = DriftSeverity::Moderate;
+ p.maxAllowed = GateDriftSeverity::Moderate;
  p.minCompliancePercent = 80.0;
  p.failOnAnyMajorDrift = false;
  p.failOnCanonicalMismatch = false;

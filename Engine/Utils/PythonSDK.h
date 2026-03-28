@@ -66,7 +66,7 @@ struct BatchEntry {
 };
 
 /// Batch result
-struct BatchResult {
+struct PythonBatchResult {
  uint32_t total = 0;
  uint32_t succeeded = 0;
  uint32_t failed = 0;
@@ -116,7 +116,7 @@ public:
  bool IsFormatSupported(const std::wstring& extension) const;
 
  /// Batch process files
- BatchResult ProcessBatch(std::vector<BatchEntry>& entries,
+ PythonBatchResult ProcessBatch(std::vector<BatchEntry>& entries,
  ProgressCallback callback = nullptr);
 
  /// Get SDK version

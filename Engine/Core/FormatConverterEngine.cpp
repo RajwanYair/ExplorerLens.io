@@ -11,8 +11,8 @@ namespace Engine {
 
 FormatConverterEngine::FormatConverterEngine() {}
 
-ConversionResult FormatConverterEngine::Convert(const ConversionJob &job) {
- ConversionResult result;
+EngineConvResult FormatConverterEngine::Convert(const ConversionJob &job) {
+ EngineConvResult result;
  auto start = std::chrono::high_resolution_clock::now();
 
  result.inputPath = job.inputPath;
@@ -33,9 +33,9 @@ ConversionResult FormatConverterEngine::Convert(const ConversionJob &job) {
  return result;
 }
 
-BatchConversionResult
+EngineConversionResult
 FormatConverterEngine::ConvertBatch(const std::vector<ConversionJob> &jobs) {
- BatchConversionResult batch;
+ EngineConversionResult batch;
  auto start = std::chrono::high_resolution_clock::now();
 
  batch.totalJobs = static_cast<uint32_t>(jobs.size());
@@ -127,30 +127,30 @@ const wchar_t *FormatConverterEngine::GetFormatExtension(ConvertFormat format) {
  }
 }
 
-const wchar_t *FormatConverterEngine::GetPresetName(QualityPreset preset) {
+const wchar_t *FormatConverterEngine::GetPresetName(ExportQualityPreset preset) {
  switch (preset) {
- case QualityPreset::Draft:
+ case ExportQualityPreset::Draft:
  return L"Draft";
- case QualityPreset::Normal:
+ case ExportQualityPreset::Normal:
  return L"Normal";
- case QualityPreset::High:
+ case ExportQualityPreset::High:
  return L"High";
- case QualityPreset::Lossless:
+ case ExportQualityPreset::Lossless:
  return L"Lossless";
  default:
  return L"Unknown";
  }
 }
 
-uint32_t FormatConverterEngine::GetQualityValue(QualityPreset preset) {
+uint32_t FormatConverterEngine::GetQualityValue(ExportQualityPreset preset) {
  switch (preset) {
- case QualityPreset::Draft:
+ case ExportQualityPreset::Draft:
  return 50;
- case QualityPreset::Normal:
+ case ExportQualityPreset::Normal:
  return 75;
- case QualityPreset::High:
+ case ExportQualityPreset::High:
  return 90;
- case QualityPreset::Lossless:
+ case ExportQualityPreset::Lossless:
  return 100;
  default:
  return 75;

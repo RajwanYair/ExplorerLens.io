@@ -24,7 +24,7 @@ namespace Cloud {
 // Enums
 // ============================================================================
 
-enum class CloudProvider {
+enum class ThumbCloudProvider {
     None = 0,
     OneDrive,
     GoogleDrive,
@@ -53,7 +53,7 @@ enum class AuthStatus {
 // Cloud File Metadata — returned by cloud API queries
 // ============================================================================
 
-struct CloudFileInfo {
+struct ThumbCloudFileInfo {
     std::wstring fileId; // Provider-specific file ID
     std::wstring displayName;
     std::wstring remotePath;
@@ -64,7 +64,7 @@ struct CloudFileInfo {
     uint32_t thumbnailWidth = 0;
     uint32_t thumbnailHeight = 0;
     SyncState syncState = SyncState::Unknown;
-    CloudProvider provider = CloudProvider::None;
+    ThumbCloudProvider provider = ThumbCloudProvider::None;
     bool hasCloudPreview = false; // True if provider can serve a thumbnail
 };
 
@@ -99,7 +99,7 @@ public:
     virtual const wchar_t* GetName() const = 0;
 
     /// Provider enum
-    virtual CloudProvider GetType() const = 0;
+    virtual ThumbCloudProvider GetType() const = 0;
 
     /// Returns true if this provider handles the given local path
     /// (e.g., OneDrive detects paths under ~/OneDrive)
@@ -125,11 +125,11 @@ public:
     // --- Cloud File Operations ---
 
     /// Resolve local file path to cloud file info
-    virtual HRESULT GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) = 0;
+    virtual HRESULT GetCloudFileInfo(const wchar_t* localPath, ThumbCloudFileInfo& outInfo) = 0;
 
     /// Download provider-generated thumbnail for a cloud file
     /// Returns S_OK with bitmap data if provider has preview, S_FALSE otherwise
-    virtual HRESULT DownloadCloudThumbnail(const CloudFileInfo& fileInfo,
+    virtual HRESULT DownloadCloudThumbnail(const ThumbCloudFileInfo& fileInfo,
         uint32_t desiredWidth,
         uint32_t desiredHeight,
         std::vector<uint8_t>& outImageData) = 0;
@@ -150,7 +150,7 @@ public:
     ~OneDriveProvider() override;
 
     const wchar_t* GetName() const override { return L"OneDrive"; }
-    CloudProvider GetType() const override { return CloudProvider::OneDrive; }
+    ThumbCloudProvider GetType() const override { return ThumbCloudProvider::OneDrive; }
 
     bool HandlesPath(const wchar_t* localPath) const override;
 
@@ -160,8 +160,8 @@ public:
     HRESULT RefreshToken() override;
     HRESULT SignOut() override;
 
-    HRESULT GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) override;
-    HRESULT DownloadCloudThumbnail(const CloudFileInfo& fileInfo,
+    HRESULT GetCloudFileInfo(const wchar_t* localPath, ThumbCloudFileInfo& outInfo) override;
+    HRESULT DownloadCloudThumbnail(const ThumbCloudFileInfo& fileInfo,
         uint32_t desiredWidth, uint32_t desiredHeight,
         std::vector<uint8_t>& outImageData) override;
     HRESULT HasBeenModified(const wchar_t* localPath, uint64_t sinceUtcEpoch,
@@ -193,7 +193,7 @@ public:
     ~GoogleDriveProvider() override;
 
     const wchar_t* GetName() const override { return L"Google Drive"; }
-    CloudProvider GetType() const override { return CloudProvider::GoogleDrive; }
+    ThumbCloudProvider GetType() const override { return ThumbCloudProvider::GoogleDrive; }
 
     bool HandlesPath(const wchar_t* localPath) const override;
 
@@ -203,8 +203,8 @@ public:
     HRESULT RefreshToken() override;
     HRESULT SignOut() override;
 
-    HRESULT GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) override;
-    HRESULT DownloadCloudThumbnail(const CloudFileInfo& fileInfo,
+    HRESULT GetCloudFileInfo(const wchar_t* localPath, ThumbCloudFileInfo& outInfo) override;
+    HRESULT DownloadCloudThumbnail(const ThumbCloudFileInfo& fileInfo,
         uint32_t desiredWidth, uint32_t desiredHeight,
         std::vector<uint8_t>& outImageData) override;
     HRESULT HasBeenModified(const wchar_t* localPath, uint64_t sinceUtcEpoch,
@@ -230,7 +230,7 @@ public:
     ~DropboxProvider() override;
 
     const wchar_t* GetName() const override { return L"Dropbox"; }
-    CloudProvider GetType() const override { return CloudProvider::Dropbox; }
+    ThumbCloudProvider GetType() const override { return ThumbCloudProvider::Dropbox; }
 
     bool HandlesPath(const wchar_t* localPath) const override;
 
@@ -240,8 +240,8 @@ public:
     HRESULT RefreshToken() override;
     HRESULT SignOut() override;
 
-    HRESULT GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) override;
-    HRESULT DownloadCloudThumbnail(const CloudFileInfo& fileInfo,
+    HRESULT GetCloudFileInfo(const wchar_t* localPath, ThumbCloudFileInfo& outInfo) override;
+    HRESULT DownloadCloudThumbnail(const ThumbCloudFileInfo& fileInfo,
         uint32_t desiredWidth, uint32_t desiredHeight,
         std::vector<uint8_t>& outImageData) override;
     HRESULT HasBeenModified(const wchar_t* localPath, uint64_t sinceUtcEpoch,
@@ -275,7 +275,7 @@ public:
     HRESULT ResolveThumbnail(const wchar_t* localPath,
         uint32_t width, uint32_t height,
         std::vector<uint8_t>& outImageData,
-        CloudFileInfo& outFileInfo);
+        ThumbCloudFileInfo& outFileInfo);
 
     /// Check if local file has been modified on the cloud since last cache
     HRESULT CheckCloudModification(const wchar_t* localPath,
@@ -305,7 +305,7 @@ private:
 
     // File identity cache to avoid repeated cloud queries
     struct CachedCloudInfo {
-        CloudFileInfo info;
+        ThumbCloudFileInfo info;
         std::chrono::system_clock::time_point fetchTime;
     };
     std::unordered_map<std::wstring, CachedCloudInfo> m_cloudInfoCache;
@@ -415,16 +415,16 @@ inline HRESULT OneDriveProvider::SignOut() {
     return S_OK;
 }
 
-inline HRESULT OneDriveProvider::GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) {
+inline HRESULT OneDriveProvider::GetCloudFileInfo(const wchar_t* localPath, ThumbCloudFileInfo& outInfo) {
     if (!localPath) return E_INVALIDARG;
     outInfo = {};
-    outInfo.provider = CloudProvider::OneDrive;
+    outInfo.provider = ThumbCloudProvider::OneDrive;
     outInfo.remotePath = localPath;
     outInfo.syncState = IsCloudPlaceholder(localPath) ? SyncState::CloudOnly : SyncState::Local;
     return S_OK;
 }
 
-inline HRESULT OneDriveProvider::DownloadCloudThumbnail(const CloudFileInfo& /*fileInfo*/,
+inline HRESULT OneDriveProvider::DownloadCloudThumbnail(const ThumbCloudFileInfo& /*fileInfo*/,
     uint32_t /*desiredWidth*/, uint32_t /*desiredHeight*/,
     std::vector<uint8_t>& /*outImageData*/) {
     return E_NOTIMPL; // Requires Microsoft Graph API HTTP calls
@@ -488,16 +488,16 @@ inline HRESULT GoogleDriveProvider::SignOut() {
     return S_OK;
 }
 
-inline HRESULT GoogleDriveProvider::GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) {
+inline HRESULT GoogleDriveProvider::GetCloudFileInfo(const wchar_t* localPath, ThumbCloudFileInfo& outInfo) {
     if (!localPath) return E_INVALIDARG;
     outInfo = {};
-    outInfo.provider = CloudProvider::GoogleDrive;
+    outInfo.provider = ThumbCloudProvider::GoogleDrive;
     outInfo.remotePath = localPath;
     outInfo.syncState = IsCloudPlaceholder(localPath) ? SyncState::CloudOnly : SyncState::Local;
     return S_OK;
 }
 
-inline HRESULT GoogleDriveProvider::DownloadCloudThumbnail(const CloudFileInfo& /*fileInfo*/,
+inline HRESULT GoogleDriveProvider::DownloadCloudThumbnail(const ThumbCloudFileInfo& /*fileInfo*/,
     uint32_t /*desiredWidth*/, uint32_t /*desiredHeight*/,
     std::vector<uint8_t>& /*outImageData*/) {
     return E_NOTIMPL;
@@ -546,16 +546,16 @@ inline HRESULT DropboxProvider::SignOut() {
     return S_OK;
 }
 
-inline HRESULT DropboxProvider::GetCloudFileInfo(const wchar_t* localPath, CloudFileInfo& outInfo) {
+inline HRESULT DropboxProvider::GetCloudFileInfo(const wchar_t* localPath, ThumbCloudFileInfo& outInfo) {
     if (!localPath) return E_INVALIDARG;
     outInfo = {};
-    outInfo.provider = CloudProvider::Dropbox;
+    outInfo.provider = ThumbCloudProvider::Dropbox;
     outInfo.remotePath = localPath;
     outInfo.syncState = IsCloudPlaceholder(localPath) ? SyncState::CloudOnly : SyncState::Local;
     return S_OK;
 }
 
-inline HRESULT DropboxProvider::DownloadCloudThumbnail(const CloudFileInfo& /*fileInfo*/,
+inline HRESULT DropboxProvider::DownloadCloudThumbnail(const ThumbCloudFileInfo& /*fileInfo*/,
     uint32_t /*desiredWidth*/, uint32_t /*desiredHeight*/,
     std::vector<uint8_t>& /*outImageData*/) {
     return E_NOTIMPL;
@@ -587,7 +587,7 @@ inline ICloudProvider* CloudThumbnailResolver::FindProvider(const wchar_t* local
 inline HRESULT CloudThumbnailResolver::ResolveThumbnail(const wchar_t* localPath,
     uint32_t width, uint32_t height,
     std::vector<uint8_t>& outImageData,
-    CloudFileInfo& outFileInfo) {
+    ThumbCloudFileInfo& outFileInfo) {
     if (!localPath) return E_INVALIDARG;
     if (!m_cloudPreviewEnabled) {
         ++m_stats.cloudMisses;

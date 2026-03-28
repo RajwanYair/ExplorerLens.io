@@ -27,7 +27,7 @@ public:
     void   AddBaseline(BuildHashEntry e) { m_baseline.push_back(e); }
     void   AddCandidate(BuildHashEntry e) { m_candidate.push_back(e); }
     ReproducibilityReport Compare() const {
-        return { m_baseline.size(), m_baseline.size(), 0, {}, true };
+        return { m_baseline.size(), m_baseline.size(), 0, {} };
     }
 private:
     std::vector<BuildHashEntry> m_baseline, m_candidate;

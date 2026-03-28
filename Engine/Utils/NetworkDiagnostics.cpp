@@ -14,7 +14,7 @@ NetworkDiagnostics::NetworkDiagnostics() {
  m_targets.push_back(L"https://api.github.com");
 }
 
-void NetworkDiagnostics::SetProxy(const ProxyConfig& config) {
+void NetworkDiagnostics::SetProxy(const DiagnosticsProxyConfig& config) {
  m_proxy = config;
 }
 
@@ -115,4 +115,3 @@ const wchar_t* NetworkDiagnostics::GetTestStatusName(NetTestStatus status) {
 }
 
 } // namespace ExplorerLens
-

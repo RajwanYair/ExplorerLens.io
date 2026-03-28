@@ -13,7 +13,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class SyncStatus : uint8_t {
+enum class ProviderSyncStatus : uint8_t {
  Idle = 0,
  Syncing = 1,
  Completed = 2,
@@ -24,7 +24,7 @@ enum class SyncStatus : uint8_t {
 
 struct CloudSyncResult {
  bool success = false;
- SyncStatus status = SyncStatus::Idle;
+ ProviderSyncStatus status = ProviderSyncStatus::Idle;
  uint32_t filesProcessed = 0;
  uint32_t thumbnailsCached = 0;
  uint64_t bytesTransferred = 0;
@@ -36,9 +36,9 @@ class CloudSyncProvider {
 public:
  CloudSyncProvider();
 
- CloudSyncResult SyncThumbnails(CloudProvider provider,
+ CloudSyncResult SyncThumbnails(StorageCloudProvider provider,
  const std::wstring &path);
- CloudFileInfo GetFileInfo(const std::wstring &path) const;
+ StorageCloudFileInfo GetFileInfo(const std::wstring &path) const;
 
  bool IsCloudPath(const std::wstring &path) const;
  bool IsPlaceholderFile(const std::wstring &path) const;
@@ -46,11 +46,11 @@ public:
  void SetMaxCacheSize(uint64_t bytes) { m_maxCacheBytes = bytes; }
  uint64_t GetMaxCacheSize() const { return m_maxCacheBytes; }
 
- static CloudProvider DetectProvider(const std::wstring &path);
- static const wchar_t *GetProviderName(CloudProvider provider);
- static const wchar_t *GetStatusName(SyncStatus status);
+ static StorageCloudProvider DetectProvider(const std::wstring &path);
+ static const wchar_t *GetProviderName(StorageCloudProvider provider);
+ static const wchar_t *GetStatusName(ProviderSyncStatus status);
  static uint32_t GetProviderCount() {
- return static_cast<uint32_t>(CloudProvider::COUNT);
+ return static_cast<uint32_t>(StorageCloudProvider::COUNT);
  }
 
 private:

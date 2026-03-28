@@ -78,7 +78,7 @@ struct CloudSyncConfig {
 };
 
 /// Sync operation result
-struct SyncResult {
+struct NativeSyncResult {
  bool success = false;
  uint32_t thumbnailsSynced = 0;
  uint32_t thumbnailsSkipped = 0;

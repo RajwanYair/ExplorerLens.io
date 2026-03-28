@@ -5,12 +5,12 @@ namespace ExplorerLens { namespace Engine {
 
 UpdateEngine::UpdateEngine() = default;
 
-const wchar_t* UpdateEngine::GetChannelName(UpdateChannel ch) {
+const wchar_t* UpdateEngine::GetChannelName(EngineUpdateChannel ch) {
  switch (ch) {
- case UpdateChannel::Stable: return L"Stable";
- case UpdateChannel::Beta: return L"Beta";
- case UpdateChannel::Nightly: return L"Nightly";
- case UpdateChannel::Enterprise: return L"Enterprise";
+ case EngineUpdateChannel::Stable: return L"Stable";
+ case EngineUpdateChannel::Beta: return L"Beta";
+ case EngineUpdateChannel::Nightly: return L"Nightly";
+ case EngineUpdateChannel::Enterprise: return L"Enterprise";
  default: return L"Unknown";
  }
 }
@@ -67,4 +67,3 @@ bool UpdateEngine::VerifyHash(const std::wstring& expected, const std::wstring& 
 }
 
 }} // namespace ExplorerLens::Engine
-

@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 23.5.0 (Codename: Vega-V)
+- **Version:** 23.6.0 (Codename: Vega-W)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -211,7 +211,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~2938 unit tests, 5 benchmarks
+- **Test count:** ~3117 unit tests, 5 benchmarks
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -262,9 +262,9 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Development Guidance (v15.2+)
 
-- **Current version:** v23.5.0 "Vega-V"
+- **Current version:** v23.6.0 "Vega-W"
 - **Source of truth:** `CHANGELOG.md`
-- **Sprint plan:** `docs/SPRINT_PLAN_100.md` — 100 sprints through v17.0.0 "Nova"
+- **Sprint plans:** `docs/SPRINT_PLAN_500.md` (Sprints 461–560) · `docs/SPRINT_PLAN_600.md` (561–660) · `docs/SPRINT_PLAN_700.md` (661–760)
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas
 - **Deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit
 - **Batch pattern:** Create 5 source files → register in CMakeLists.txt (multi-replace) → add includes + TEST() + RUN_TEST() to EngineTests.cpp → git commit each individually
@@ -274,19 +274,32 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 ## Release Procedure (EVERY version bump)
 
 > **Critical:** Every version bump MUST trigger a GitHub Release with all binaries.
+> This applies to EVERY minor version (X.Y.0), not just major releases.
 
 ```powershell
-# 1. Update all version references
+# 1. Update all version references (ALL of these, every time)
 #    - VERSION file
-#    - CHANGELOG.md  (new [X.Y.Z] section)
-#    - Engine/Core/BuildValidation.h  (EXPLORERLENS_VERSION)
-#    - .github/copilot-instructions.md  (version line above)
-#    - docs/assets/social-preview.svg  (version chip + test count)
+#    - CHANGELOG.md  (new [X.Y.Z] section, move planned items to released)
+#    - Engine/Core/BuildValidation.h  (VersionString, Codename, MinorVersion, milestones, UnitTestCount)
+#    - Engine/Core/SBOMGenerator.h  (two hardcoded "ExplorerLens-X.Y.Z" strings)
+#    - .github/copilot-instructions.md  (version line at top + test count + current version line)
+#    - .github/standards/tool-versions.md  (date + version in header)
+#    - docs/assets/social-preview.svg  (version chip + test count chip)
+#    - docs/assets/architecture-build.svg  (MSI artifact filename chip)
+#    - README.md  (Tests badge + Tests row in feature table)
+#    - vcpkg.json  ("version" field)
+#    - docs/SBOM.json  (serialNumber + metadata.component.version + timestamp)
+#    - Engine/Tests/benchmarks/baseline.json  (_comment, _updated, version)
 
-# 2. Build and verify locally
+# 2. Scrub corporate artefacts from ALL tracked files before any public push
+#    git grep -rn "intel.com" -- "*.ps1" "*.yml" "*.yaml" "*.md" "*.json" "*.h" "*.cpp"
+#    git grep -rn "proxy" --  "*.ps1" "*.yml" "*.yaml" "*.md" "*.json"
+#    git grep -rn "928\b"    -- "*.ps1" "*.yml" "*.yaml"   # port 928 = Intel proxy
+
+# 3. Build and verify locally
 .\build-scripts\Build-MSVC.ps1 -Test
 
-# 3. Commit + tag  (tag fires release.yml automatically)
+# 4. Commit + tag  (tag fires release.yml automatically → publishes all binaries)
 git add -A
 git commit -m "chore: bump version to X.Y.Z (Codename)"
 git tag vX.Y.Z
@@ -295,6 +308,18 @@ git push origin main --tags
 
 > `release.yml` kicks off automatically on `git tag vX.Y.Z` and publishes:
 > `LENSShell.dll`, `LENSManager.exe`, `lens.exe`, **.msi**, **.zip**, `SHA256SUMS.txt`, `SBOM.json`
+
+### Per-revision GitHub Release checklist
+
+| Step | Action |
+|------|--------|
+| ✅ | CHANGELOG.md has new `[X.Y.Z]` section with all deliverables |
+| ✅ | All 12 version-bearing files updated (see list above) |
+| ✅ | Corporate proxy URLs scrubbed from tracked files |
+| ✅ | Local build passes with 0 errors, 0 warnings |
+| ✅ | `git tag vX.Y.Z` pushed to origin → `release.yml` triggered |
+| ✅ | GitHub Releases page shows new release with all artifacts |
+| ✅ | SHA256SUMS.txt and SBOM.json attached to release |
 
 ## Release Artifact Checklist
 

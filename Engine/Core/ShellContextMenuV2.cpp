@@ -4,4 +4,3 @@
 // All member function implementations are defined inline in ShellContextMenuV2.h.
 //
 #include "ShellContextMenuV2.h"
-

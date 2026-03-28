@@ -3,7 +3,7 @@
 //
 // Checks for ExplorerLens package updates via the Microsoft Store / WinGet
 // REST source, downloads the delta package, and schedules an in-place update
-// after COM server idle. Respects fleet UpdateChannel GP policy.
+// after COM server idle. Respects fleet AutoUpdateChannel GP policy.
 //
 #pragma once
 
@@ -19,7 +19,7 @@
 
 namespace ExplorerLens { namespace Engine { namespace Utils {
 
-enum class UpdateChannel : uint8_t {
+enum class AutoUpdateChannel : uint8_t {
     Stable   = 0,
     Preview  = 1,
     Insider  = 2,
@@ -51,7 +51,7 @@ struct PackageVersion {
     }
 };
 
-struct UpdateInfo {
+struct AutoUpdateInfo {
     PackageVersion latestVersion;
     PackageVersion currentVersion = { 19, 1, 0, 0 };
     std::string    downloadUrl;
@@ -69,14 +69,14 @@ public:
         return inst;
     }
 
-    void SetChannel(UpdateChannel ch) { m_channel = ch; }
-    UpdateChannel Channel() const { return m_channel; }
+    void SetChannel(AutoUpdateChannel ch) { m_channel = ch; }
+    AutoUpdateChannel Channel() const { return m_channel; }
     UpdateState   State()   const { return m_state; }
-    const std::optional<UpdateInfo>& AvailableUpdate() const { return m_pending; }
+    const std::optional<AutoUpdateInfo>& AvailableUpdate() const { return m_pending; }
 
     // Start background check loop (interval from GP or 24h default)
     void StartAutoCheck(uint32_t intervalHours = 24) {
-        if (m_running || m_channel == UpdateChannel::Disabled) return;
+        if (m_running || m_channel == AutoUpdateChannel::Disabled) return;
         m_running = true;
         m_checkThread = std::thread([this, intervalHours]() {
             while (m_running) {
@@ -96,7 +96,7 @@ public:
 
     // Synchronous check (blocks briefly for network query)
     bool CheckForUpdate() {
-        if (m_channel == UpdateChannel::Disabled) {
+        if (m_channel == AutoUpdateChannel::Disabled) {
             m_state = UpdateState::PolicyBlocked;
             return false;
         }
@@ -145,7 +145,7 @@ public:
     }
 
     // Subscribe to "update available" events
-    using UpdateFn = std::function<void(const UpdateInfo&)>;
+    using UpdateFn = std::function<void(const AutoUpdateInfo&)>;
     void OnUpdateAvailable(UpdateFn fn) { m_callbacks.push_back(std::move(fn)); }
 
     ~AutoUpdateManager() { StopAutoCheck(); }
@@ -157,27 +157,27 @@ private:
         if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\ExplorerLens",
             0, KEY_READ, &hk) == ERROR_SUCCESS) {
             DWORD val = 0, sz = sizeof(DWORD);
-            if (RegQueryValueExW(hk, L"UpdateChannel", nullptr, nullptr,
+            if (RegQueryValueExW(hk, L"AutoUpdateChannel", nullptr, nullptr,
                 reinterpret_cast<BYTE*>(&val), &sz) == ERROR_SUCCESS)
-                m_channel = static_cast<UpdateChannel>(val <= 3 ? val : 0);
+                m_channel = static_cast<AutoUpdateChannel>(val <= 3 ? val : 0);
             RegCloseKey(hk);
         }
     }
 
-    std::optional<UpdateInfo> QueryUpdateEndpoint() {
+    std::optional<AutoUpdateInfo> QueryUpdateEndpoint() {
         // Production: HTTPS GET https://update.explorerlens.io/v2/check?channel=stable
         // Returns JSON: { "version": "19.2.0", "url": "...", "sha256": "...", "size": ... }
         // Stub: return empty (no update available)
         return std::nullopt;
     }
 
-    void FireUpdateCallbacks(const UpdateInfo& info) {
+    void FireUpdateCallbacks(const AutoUpdateInfo& info) {
         for (auto& fn : m_callbacks) fn(info);
     }
 
-    UpdateChannel                    m_channel   = UpdateChannel::Stable;
+    AutoUpdateChannel                    m_channel   = AutoUpdateChannel::Stable;
     UpdateState                      m_state     = UpdateState::Idle;
-    std::optional<UpdateInfo>        m_pending;
+    std::optional<AutoUpdateInfo>        m_pending;
     std::vector<UpdateFn>            m_callbacks;
     std::thread                      m_checkThread;
     std::atomic<bool>                m_running { false };

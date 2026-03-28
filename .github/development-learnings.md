@@ -849,7 +849,7 @@ TEST(BulkInitSprints397to399) {
 - Must be sourced at terminal start to get a fully functional dev environment
 - Adds: scoop git to PATH, MSVC paths, CMake/Ninja/NASM paths, proxy env vars, build helpers
 - Defines `function global:git { & $_gitExe @args }` — critical because Scoop git isn't in system PATH
-- Sets `$env:HTTP_PROXY = $env:HTTPS_PROXY = 'http://proxy-dmz.intel.com:912'`
+- Sets `$env:HTTP_PROXY = $env:HTTPS_PROXY = 'http://proxy.example.com:8080'` (configure to your corporate proxy URL)
 
 ### VS Code terminal profile integration
 - Default profile `"ExplorerLens Dev"` auto-sources `.env.ps1` via `-File` arg
@@ -869,7 +869,7 @@ TEST(BulkInitSprints397to399) {
 - `.env.ps1` sets: `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, `https_proxy` (both cases)
 - `.vscode/mcp.json` passes proxy env vars to all MCP server processes
 - `.vscode/settings.json` sets `"http.proxy:"` for VS Code's own network calls
-- Git global config: `http.proxy = http://proxy-dmz.intel.com:912` (set once, persists)
+- Git global config: `http.proxy = http://proxy.example.com:8080` (set once, persists; configure to your corporate proxy)
 
 ---
 
@@ -1056,3 +1056,176 @@ cmake --version
 # Check build count for this session
 (Get-Content build-logs/build-history.jsonl | ConvertFrom-Json).Count
 ```
+
+---
+
+## 33. Type-Rename Cascade Fix Workflow
+
+### Pattern and trigger
+Batch rename of types in headers (e.g., `PackageType` → `MSIXPackageType`) leaves all
+`.cpp` and test files that use the old names broken. MSVC stops at 100 errors per TU
+(`C1003`), so a heavy rename often requires 3–5 fix iterations to reach a clean build.
+
+### Step-by-step cascade fix protocol
+1. Read the build log — identify the first failing TU and the first ~20 undeclared identifiers
+2. `grep_search` each old name across `Engine/` headers to find the new canonical name
+3. Create a dedicated fix script: `build-scripts/fix<N>-type-renames.ps1`
+   - Use `[System.IO.File]::ReadAllLines` + PowerShell `-replace` loop + `WriteAllLines` per file
+   - Never run a global multi-file regex in one pass — isolate per file for safety
+4. Run in a background terminal: `pwsh -NoProfile -File 'build-scripts/fixN-type-renames.ps1'`
+5. Check `build-logs/build-latest.log` for the next batch of errors; repeat
+
+### Prevention
+- When batch-renaming types in headers, **also** rename them in all `.cpp`/`.h` consumers in the same pass
+- Build immediately after every batch rename — do not let errors accumulate across renames
+- Use `\b` (word-boundary) regex to avoid partial replacements (e.g., `\bGateVerdict\b`)
+
+### Type rename mapping table (v23.5.0 context)
+
+| Old Name | New Name | Defining Header |
+|----------|----------|-----------------|
+| `PackageType` | `MSIXPackageType` | MSIXPackageBuilder.h |
+| `GateVerdict` | `ReleaseGateVerdict` | ReleaseGate.h |
+| `QualityPreset` | `ExportQualityPreset` | ThumbnailExportPipeline.h |
+| `ArtifactType` | `ValidatorArtifactType` | BuildArtifactValidator.h |
+| `SyncStatus` | `ProviderSyncStatus` | CloudSyncProvider.h |
+| `HealthLevel` | `DiagHealthLevel` | DiagnosticsExporter.h |
+| `Locale` | `LocaleInfo` | LocalizationManager.h |
+| `NetworkProtocol` | `ProviderNetProtocol` | network provider headers |
+| `CloudProvider` | `StorageCloudProvider` | CloudStorageManager.h |
+| `SandboxPolicy` | `SandboxPolicySpec` | PluginSandboxPolicy.h |
+| `JobObjectLimits` | `SandboxJobLimits` | PluginSandboxPolicy.h |
+| `WatermarkConfig` | `PackWatermarkConfig` | PluginReferencePack.h |
+| `PluginCapability` | `PackPluginCapability` | PluginReferencePack.h |
+| `ZeroCopyStats` | `PipelineZeroCopyStats` | ZeroCopyPipeline.h |
+| `IPC::ThumbnailRequest` | `IPC::IPCThumbnailRequest` | PluginHostIPC.h |
+
+> See also: `build-troubleshooting.md` Issue #7 for the full cascade fix procedure.
+
+---
+
+## 34. Roadmap/Sprint Plan Conventions
+
+### File naming scheme
+- `SPRINT_PLAN_100.md` = Sprints 1–100 (versions v1.0–v10.0)
+- `SPRINT_PLAN_200.md` = Sprints 101–200
+- `SPRINT_PLAN_600.md` = Sprints 561–660 (v25.0 Rigel → v26.1 Canopus-R)
+- Each file = exactly 10 version milestones × 10 sprints = 100 sprints
+- Sprint numbering is **cumulative** — never restart from 1 within a sprint plan file
+
+### Version naming convention
+- **Major release**: new star/constellation codename (Zenith, Pulsar, Quasar, Vega, Altair, Rigel, Canopus)
+- **Minor releases**: append letter suffix — R, S, T, U, V, W, X (7 minors per major)
+- After `-X`: increment to next major codename; e.g., Vega-X → Altair (no Vega-Y)
+- The codename `-V` variant (e.g., "Vega-V") represents the 5th minor — it is not "version V" of the product
+
+### ROADMAP_V\<N\>.md conventions
+- One roadmap file per major version landmark (e.g., `ROADMAP_V16.md`, `ROADMAP_V25.md`)
+- Each roadmap covers the full X.0 → X.7 minor run plus the bridge to the next major
+- When superseded: add a deprecation banner at the top (do not delete to preserve history)
+- Link every roadmap from `docs/INDEX.md` and `mkdocs.yml` under the "Roadmap" nav section
+- New roadmaps should include: codename table, architecture evolution diagram, performance targets, risk register
+
+---
+
+## 35. Documentation Version Audit Pattern
+
+### Finding stale version references
+```powershell
+# Stale version numbers in docs
+grep_search pattern: "v(15|16|17|18|19|20|21|22)\.\d" across docs/*.md
+
+# Stale artifact filename references
+grep_search: "ExplorerLens-(15|16|17|18|19|20)\.\d"
+
+# Future dates that are now in the past
+grep_search: "Updated:.*202[5-9]"
+```
+
+### Files requiring version updates on every version bump (beyond the standard checklist)
+In addition to the 5-file checklist in Section 3:
+- `vcpkg.json` — `"version"` field
+- `docs/SBOM.json` — `metadata.component.version` + `metadata.timestamp`
+- `Engine/Tests/benchmarks/baseline.json` — `"version"` and `"date"` fields
+- `Engine/Core/SBOMGenerator.h` — hardcoded `"ExplorerLens-X.Y.Z"` string
+- `docs/assets/architecture-build.svg` — MSI artifact filename chip
+- `docs/assets/social-preview.svg` — version chip + test count chip
+- `README.md` — version badge + test count in feature table
+- `.github/workflows/release.yml` and `pre-release.yml` — version examples in comments
+- All `docs/*.md` files with `## ExplorerLens vX.Y.Z` headings
+
+### Batching updates efficiently
+- Group replacements by file using `multi_replace_string_in_file` — handle up to 20 files per call
+- Always update the `Last Updated:` / `Updated:` date to the current date (patch future-dated entries too)
+- After the audit, run a final `grep_search "v(15|16|17|18|19)\.` to confirm zero remaining stale refs
+
+---
+
+## 36. std::atomic Declaration Rules (MSVC v145)
+
+### Two error patterns to avoid
+
+**1. Comma-separated atomic declarations** — copy-assignment is deleted, comma syntax triggers it:
+```cpp
+// BAD — MSVC C2280: attempting to reference a deleted function
+std::atomic<uint64_t> m_fence{0}, m_completed{0};
+
+// GOOD — separate declarations
+std::atomic<uint64_t> m_fence{0};
+std::atomic<uint64_t> m_completed{0};
+```
+
+**2. Direct assignment between atomics** — also invokes deleted copy-assignment:
+```cpp
+// BAD — C2280 or logic error (non-atomic read-modify)
+m_completed = m_fence;
+
+// GOOD — use .load() / .store() with explicit memory order
+m_completed.store(m_fence.load(std::memory_order_acquire),
+                  std::memory_order_release);
+```
+
+### Memory order guidelines for flush/sync operations
+- **acquire/release pair** for producer-consumer fences (most common)
+- **seq_cst** only when full global ordering is required (performance cost)
+- Never mix `.load()` without specifying memory order in concurrent code paths
+
+> See also: `build-troubleshooting.md` Issue #8 for the specific `AsyncDMACopyEngine.h` fix.
+
+---
+
+## 37. PowerShell Terminal Stability (PS2 Mode)
+
+### Symptom
+The shared foreground terminal enters PS2 (continuation) mode — the prompt changes from
+`PS>` to `>>`. All subsequent commands hang waiting for input that will never come.
+This happens when multi-line heredocs, unclosed braces, or incomplete expressions are pasted.
+
+### Root cause
+VS Code's integrated terminal shares a single PowerShell session across all non-background
+tool calls. Any incomplete statement leaves the session in a broken state that persists
+across the rest of the conversation.
+
+### Prevention rules
+1. **Never paste multi-line scripts** into the shared foreground terminal
+2. **Always use background terminals** (`isBackground: true`) for any script with `{}`, `@()`, or here-strings
+3. For build scripts: `pwsh -NoProfile -File 'build-scripts/MyScript.ps1'` in a background terminal
+4. For inline code: keep to a single logical line, escape with `;` chaining if needed
+
+### Recovery
+- The stuck terminal cannot be recovered from within the same session
+- Open a **new background terminal** and run the command there instead
+- Do not attempt to close/kill the stuck terminal — this causes cascading issues
+
+### Safe patterns for complex one-liners
+```powershell
+# SAFE — semicolon chain, single line
+$a = Get-Content file.txt; $b = $a -replace 'old','new'; Set-Content file.txt $b
+
+# UNSAFE — multi-line block in foreground terminal
+$a = Get-Content file.txt
+$b = $a -replace 'old','new'
+Set-Content file.txt $b
+```
+
+> See also: `build-troubleshooting.md` Issue #9 for the PS2 mode troubleshooting tree.

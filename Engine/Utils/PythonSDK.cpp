@@ -177,9 +177,9 @@ bool PythonSDK::IsFormatSupported(const std::wstring& extension) const {
 }
 
 //------------------------------------------------------------------------------
-BatchResult PythonSDK::ProcessBatch(std::vector<BatchEntry>& entries,
+PythonBatchResult PythonSDK::ProcessBatch(std::vector<BatchEntry>& entries,
     ProgressCallback callback) {
-    BatchResult result;
+    PythonBatchResult result;
     result.total = static_cast<uint32_t>(entries.size());
 
     for (uint32_t i = 0; i < entries.size(); ++i) {

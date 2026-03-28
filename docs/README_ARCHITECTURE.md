@@ -1,6 +1,6 @@
 # ExplorerLens — Architecture Reference
 
-> **Version:** 15.2.0 "Zenith-S" | **Last Updated:** 2026-03-24
+> **Version:** 23.5.0 "Vega-V" | **Last Updated:** 2026-03-27
 
 ## System Overview
 

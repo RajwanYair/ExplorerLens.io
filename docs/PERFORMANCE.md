@@ -1,6 +1,6 @@
 # ExplorerLens Performance Tuning Guide
 
-> Sprint 229 | Version 20.2.0 "Quasar-S" | v2 Performance Architecture
+> Version 23.5.0 "Vega-V" | v2 Performance Architecture
 
 **Targets:** 14ms single thumbnail (↓18%), 270 img/sec batch (↑15%), <3ms cache hit  
 **New:** ThumbnailPriorityQueue, PredictivePrefetcher, VulkanComputeDecoder, ZeroCopyTextureUploader, SIMDImageProcessor (AVX2), PersistentDiskCache (SQLite WAL), BatchDecodeScheduler (work-stealing), DirectStorageLoader
@@ -797,5 +797,5 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 15000
 
 ---
 
-**Last Updated:** March 2026 
-**Version:** 15.2.0
+**Last Updated:** March 27, 2026 
+**Version:** 23.5.0

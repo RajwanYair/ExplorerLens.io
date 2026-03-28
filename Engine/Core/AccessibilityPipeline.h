@@ -10,7 +10,7 @@
 namespace ExplorerLens { namespace Engine {
 
 /// Accessibility feature
-enum class AccessibilityFeature : uint8_t {
+enum class PipelineA11yFeature : uint8_t {
  ScreenReader, // MSAA/UIA alt-text for thumbnails
  HighContrast, // High-contrast border/overlay
  KeyboardNav, // Arrow key thumbnail navigation
@@ -31,7 +31,7 @@ enum class ColorBlindMode : uint8_t {
 };
 
 /// High contrast theme
-enum class HighContrastTheme : uint8_t {
+enum class PipelineHCTheme : uint8_t {
  SystemDefault,
  WhiteOnBlack,
  BlackOnWhite,
@@ -48,21 +48,21 @@ struct AccessibilityConfig {
  bool reducedMotion = false;
  bool largeText = false;
  ColorBlindMode cbMode = ColorBlindMode::None;
- HighContrastTheme hcTheme = HighContrastTheme::SystemDefault;
+ PipelineHCTheme hcTheme = PipelineHCTheme::SystemDefault;
  uint32_t borderWidth = 2;
 };
 
 /// Accessibility pipeline
 class AccessibilityPipeline {
 public:
- static const wchar_t* FeatureName(AccessibilityFeature f) {
+ static const wchar_t* FeatureName(PipelineA11yFeature f) {
  switch (f) {
- case AccessibilityFeature::ScreenReader: return L"Screen Reader";
- case AccessibilityFeature::HighContrast: return L"High Contrast";
- case AccessibilityFeature::KeyboardNav: return L"Keyboard Navigation";
- case AccessibilityFeature::ColorBlindMode: return L"Color Blind Mode";
- case AccessibilityFeature::ReducedMotion: return L"Reduced Motion";
- case AccessibilityFeature::LargeText: return L"Large Text";
+ case PipelineA11yFeature::ScreenReader: return L"Screen Reader";
+ case PipelineA11yFeature::HighContrast: return L"High Contrast";
+ case PipelineA11yFeature::KeyboardNav: return L"Keyboard Navigation";
+ case PipelineA11yFeature::ColorBlindMode: return L"Color Blind Mode";
+ case PipelineA11yFeature::ReducedMotion: return L"Reduced Motion";
+ case PipelineA11yFeature::LargeText: return L"Large Text";
  default: return L"Unknown";
  }
  }
@@ -78,20 +78,20 @@ public:
  }
  }
 
- static const wchar_t* HCThemeName(HighContrastTheme t) {
+ static const wchar_t* HCThemeName(PipelineHCTheme t) {
  switch (t) {
- case HighContrastTheme::SystemDefault: return L"System Default";
- case HighContrastTheme::WhiteOnBlack: return L"White on Black";
- case HighContrastTheme::BlackOnWhite: return L"Black on White";
- case HighContrastTheme::YellowOnBlack: return L"Yellow on Black";
- case HighContrastTheme::Custom: return L"Custom";
+ case PipelineHCTheme::SystemDefault: return L"System Default";
+ case PipelineHCTheme::WhiteOnBlack: return L"White on Black";
+ case PipelineHCTheme::BlackOnWhite: return L"Black on White";
+ case PipelineHCTheme::YellowOnBlack: return L"Yellow on Black";
+ case PipelineHCTheme::Custom: return L"Custom";
  default: return L"Unknown";
  }
  }
 
- static constexpr size_t FeatureCount() { return static_cast<size_t>(AccessibilityFeature::COUNT); }
+ static constexpr size_t FeatureCount() { return static_cast<size_t>(PipelineA11yFeature::COUNT); }
  static constexpr size_t ColorBlindModeCount() { return static_cast<size_t>(ColorBlindMode::COUNT); }
- static constexpr size_t HCThemeCount() { return static_cast<size_t>(HighContrastTheme::COUNT); }
+ static constexpr size_t HCThemeCount() { return static_cast<size_t>(PipelineHCTheme::COUNT); }
 };
 
 }} // namespace ExplorerLens::Engine

@@ -29,13 +29,13 @@ struct ConversionJob {
  std::wstring outputPath;
  ConvertFormat sourceFormat = ConvertFormat::PNG;
  ConvertFormat targetFormat = ConvertFormat::JPEG;
- QualityPreset quality = QualityPreset::High;
+ ExportQualityPreset quality = ExportQualityPreset::High;
  uint32_t maxWidth = 0;
  uint32_t maxHeight = 0;
  bool preserveMetadata = true;
 };
 
-struct ConversionResult {
+struct EngineConvResult {
  bool success = false;
  std::wstring inputPath;
  std::wstring outputPath;
@@ -45,22 +45,22 @@ struct ConversionResult {
  double compressionRatio = 0.0;
 };
 
-struct BatchConversionResult {
+struct EngineConversionResult {
  uint32_t totalJobs = 0;
  uint32_t succeeded = 0;
  uint32_t failed = 0;
  double totalTimeMs = 0.0;
  uint64_t totalInputBytes = 0;
  uint64_t totalOutputBytes = 0;
- std::vector<ConversionResult> results;
+ std::vector<EngineConvResult> results;
 };
 
 class FormatConverterEngine {
 public:
  FormatConverterEngine();
 
- ConversionResult Convert(const ConversionJob &job);
- BatchConversionResult ConvertBatch(const std::vector<ConversionJob> &jobs);
+ EngineConvResult Convert(const ConversionJob &job);
+ EngineConversionResult ConvertBatch(const std::vector<ConversionJob> &jobs);
 
  void SetThreadCount(uint32_t threads) { m_threadCount = threads; }
  uint32_t GetThreadCount() const { return m_threadCount; }
@@ -68,8 +68,8 @@ public:
  static ConvertFormat DetectFormat(const std::wstring &filePath);
  static const wchar_t *GetFormatName(ConvertFormat format);
  static const wchar_t *GetFormatExtension(ConvertFormat format);
- static const wchar_t *GetPresetName(QualityPreset preset);
- static uint32_t GetQualityValue(QualityPreset preset);
+ static const wchar_t *GetPresetName(ExportQualityPreset preset);
+ static uint32_t GetQualityValue(ExportQualityPreset preset);
  static uint32_t GetFormatCount() {
  return static_cast<uint32_t>(ConvertFormat::FormatCount);
  }

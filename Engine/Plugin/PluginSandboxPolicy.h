@@ -11,7 +11,7 @@ namespace ExplorerLens::Plugin {
 
 // ─── Resource limits ─────────────────────────────────────────────────────────
 
-struct JobObjectLimits {
+struct SandboxJobLimits {
  uint64_t maxMemoryBytes { 256ULL * 1024 * 1024 }; // 256 MB
  uint32_t maxCPUPercent { 25 }; // % of one core
  uint32_t maxHandles { 256 };
@@ -43,13 +43,13 @@ inline std::string ToString(SandboxPolicyPreset p) {
  }
 }
 
-struct SandboxPolicy {
+struct SandboxPolicySpec {
  SandboxPolicyPreset preset { SandboxPolicyPreset::Standard };
- JobObjectLimits limits;
+ SandboxJobLimits limits;
  bool enablePageFaultNotification { false };
 
- static SandboxPolicy Strict() {
- SandboxPolicy p;
+ static SandboxPolicySpec Strict() {
+ SandboxPolicySpec p;
  p.preset = SandboxPolicyPreset::Strict;
  p.limits.maxMemoryBytes = 64ULL * 1024 * 1024; // 64 MB
  p.limits.maxCPUPercent = 10;
@@ -59,10 +59,10 @@ struct SandboxPolicy {
  return p;
  }
 
- static SandboxPolicy Standard() { return {}; }
+ static SandboxPolicySpec Standard() { return {}; }
 
- static SandboxPolicy Developer() {
- SandboxPolicy p;
+ static SandboxPolicySpec Developer() {
+ SandboxPolicySpec p;
  p.preset = SandboxPolicyPreset::Developer;
  p.limits.maxMemoryBytes = 1024ULL * 1024 * 1024; // 1 GB
  p.limits.maxCPUPercent = 100;
@@ -152,7 +152,7 @@ struct PolicyViolation {
 
 class SandboxPolicyValidator {
 public:
- explicit SandboxPolicyValidator(const SandboxPolicy& policy) : m_policy(policy) {}
+ explicit SandboxPolicyValidator(const SandboxPolicySpec& policy) : m_policy(policy) {}
 
  std::vector<PolicyViolation> Validate() const {
  std::vector<PolicyViolation> violations;
@@ -185,7 +185,7 @@ public:
  }
 
 private:
- SandboxPolicy m_policy;
+ SandboxPolicySpec m_policy;
 };
 
 } // namespace ExplorerLens::Plugin

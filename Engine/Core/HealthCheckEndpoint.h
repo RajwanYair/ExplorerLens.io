@@ -8,7 +8,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 /// Health status
-enum class HealthStatus : uint8_t {
+enum class EndpointHealthStatus : uint8_t {
  Healthy = 0, // All systems nominal
  Degraded, // Partial functionality
  Unhealthy, // Critical component failures
@@ -32,14 +32,14 @@ enum class HealthComponent : uint8_t {
 
 struct ComponentHealth {
  HealthComponent component = HealthComponent::DecodePipeline;
- HealthStatus status = HealthStatus::Healthy;
+ EndpointHealthStatus status = EndpointHealthStatus::Healthy;
  const wchar_t *message = nullptr;
  double latencyMs = 0.0;
  uint64_t lastCheckTicks = 0;
 };
 
 struct OverallHealth {
- HealthStatus overallStatus = HealthStatus::Healthy;
+ EndpointHealthStatus overallStatus = EndpointHealthStatus::Healthy;
  uint32_t healthyComponents = 0;
  uint32_t degradedComponents = 0;
  uint32_t unhealthyComponents = 0;
@@ -50,23 +50,23 @@ struct OverallHealth {
 class HealthCheckEndpoint {
 public:
  static constexpr size_t StatusCount() {
- return static_cast<size_t>(HealthStatus::COUNT);
+ return static_cast<size_t>(EndpointHealthStatus::COUNT);
  }
  static constexpr size_t ComponentCount() {
  return static_cast<size_t>(HealthComponent::COUNT);
  }
 
- static const wchar_t *StatusName(HealthStatus s) {
+ static const wchar_t *StatusName(EndpointHealthStatus s) {
  switch (s) {
- case HealthStatus::Healthy:
+ case EndpointHealthStatus::Healthy:
  return L"Healthy";
- case HealthStatus::Degraded:
+ case EndpointHealthStatus::Degraded:
  return L"Degraded";
- case HealthStatus::Unhealthy:
+ case EndpointHealthStatus::Unhealthy:
  return L"Unhealthy";
- case HealthStatus::Starting:
+ case EndpointHealthStatus::Starting:
  return L"Starting";
- case HealthStatus::ShuttingDown:
+ case EndpointHealthStatus::ShuttingDown:
  return L"Shutting Down";
  default:
  return L"Unknown";
@@ -97,14 +97,14 @@ public:
  }
 
  /// Aggregate component statuses into overall health
- static HealthStatus AggregateHealth(uint32_t healthy, uint32_t degraded,
+ static EndpointHealthStatus AggregateHealth(uint32_t healthy, uint32_t degraded,
  uint32_t unhealthy) {
  (void)healthy; // Used implicitly as total context
  if (unhealthy > 0)
- return HealthStatus::Unhealthy;
+ return EndpointHealthStatus::Unhealthy;
  if (degraded > 0)
- return HealthStatus::Degraded;
- return HealthStatus::Healthy;
+ return EndpointHealthStatus::Degraded;
+ return EndpointHealthStatus::Healthy;
  }
 };
 

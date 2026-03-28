@@ -3,40 +3,40 @@
 namespace ExplorerLens { namespace Engine {
 
 LocalizationEngine::LocalizationEngine() {
- m_activeLocale = Locale::EN_US;
+ m_activeLocale = LocaleInfo::EN_US;
 }
 
-const wchar_t* LocalizationEngine::GetLocaleName(Locale locale) {
+const wchar_t* LocalizationEngine::GetLocaleName(LocaleInfo locale) {
  switch (locale) {
- case Locale::EN_US: return L"English (US)";
- case Locale::EN_GB: return L"English (UK)";
- case Locale::DE_DE: return L"German";
- case Locale::FR_FR: return L"French";
- case Locale::ES_ES: return L"Spanish";
- case Locale::JA_JP: return L"Japanese";
- case Locale::ZH_CN: return L"Chinese Simplified";
- case Locale::AR_SA: return L"Arabic";
- case Locale::HE_IL: return L"Hebrew";
- case Locale::KO_KR: return L"Korean";
+ case LocaleInfo::EN_US: return L"English (US)";
+ case LocaleInfo::EN_GB: return L"English (UK)";
+ case LocaleInfo::DE_DE: return L"German";
+ case LocaleInfo::FR_FR: return L"French";
+ case LocaleInfo::ES_ES: return L"Spanish";
+ case LocaleInfo::JA_JP: return L"Japanese";
+ case LocaleInfo::ZH_CN: return L"Chinese Simplified";
+ case LocaleInfo::AR_SA: return L"Arabic";
+ case LocaleInfo::HE_IL: return L"Hebrew";
+ case LocaleInfo::KO_KR: return L"Korean";
  default: return L"Unknown";
  }
 }
 
-TextDirection LocalizationEngine::GetTextDirection(Locale locale) {
+TextDirection LocalizationEngine::GetTextDirection(LocaleInfo locale) {
  switch (locale) {
- case Locale::AR_SA:
- case Locale::HE_IL:
+ case LocaleInfo::AR_SA:
+ case LocaleInfo::HE_IL:
  return TextDirection::RTL;
  default:
  return TextDirection::LTR;
  }
 }
 
-void LocalizationEngine::SetLocale(Locale locale) {
+void LocalizationEngine::SetLocale(LocaleInfo locale) {
  m_activeLocale = locale;
 }
 
-void LocalizationEngine::AddString(const std::wstring& key, Locale locale, const std::wstring& value) {
+void LocalizationEngine::AddString(const std::wstring& key, LocaleInfo locale, const std::wstring& value) {
  m_strings[key][static_cast<uint32_t>(locale)] = value;
 }
 
@@ -49,11 +49,10 @@ std::wstring LocalizationEngine::GetString(const std::wstring& key) const {
  if (locIt != it->second.end()) return locIt->second;
 
  // Fallback to EN_US
- auto enIt = it->second.find(static_cast<uint32_t>(Locale::EN_US));
+ auto enIt = it->second.find(static_cast<uint32_t>(LocaleInfo::EN_US));
  if (enIt != it->second.end()) return enIt->second;
 
  return key;
 }
 
 }} // namespace ExplorerLens::Engine
-

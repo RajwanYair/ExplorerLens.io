@@ -20,7 +20,7 @@ enum class AutoUpdateChannel : uint8_t {
 };
 
 /// Update check result
-enum class UpdateCheckResult : uint8_t {
+enum class AutoUpdateCheckResult : uint8_t {
  UpToDate,
  UpdateAvailable,
  MandatoryUpdate,
@@ -84,19 +84,19 @@ public:
  }
  }
 
- static const wchar_t *CheckResultName(UpdateCheckResult r) {
+ static const wchar_t *CheckResultName(AutoUpdateCheckResult r) {
  switch (r) {
- case UpdateCheckResult::UpToDate:
+ case AutoUpdateCheckResult::UpToDate:
  return L"Up to Date";
- case UpdateCheckResult::UpdateAvailable:
+ case AutoUpdateCheckResult::UpdateAvailable:
  return L"Update Available";
- case UpdateCheckResult::MandatoryUpdate:
+ case AutoUpdateCheckResult::MandatoryUpdate:
  return L"Mandatory Update";
- case UpdateCheckResult::CheckFailed:
+ case AutoUpdateCheckResult::CheckFailed:
  return L"Check Failed";
- case UpdateCheckResult::NetworkError:
+ case AutoUpdateCheckResult::NetworkError:
  return L"Network Error";
- case UpdateCheckResult::ServerUnavailable:
+ case AutoUpdateCheckResult::ServerUnavailable:
  return L"Server Unavailable";
  default:
  return L"Unknown";
@@ -128,7 +128,7 @@ public:
  return static_cast<size_t>(AutoUpdateChannel::COUNT);
  }
  static constexpr size_t CheckResultCount() {
- return static_cast<size_t>(UpdateCheckResult::COUNT);
+ return static_cast<size_t>(AutoUpdateCheckResult::COUNT);
  }
  static constexpr size_t DownloadStateCount() {
  return static_cast<size_t>(DownloadState::COUNT);

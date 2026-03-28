@@ -10,7 +10,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class EBookFormat : uint8_t {
+enum class DecoderEBookFormat : uint8_t {
  EPUB = 0,
  MOBI,
  FB2,
@@ -28,7 +28,7 @@ struct EBookMetadata {
  std::wstring language;
  std::wstring isbn;
  uint32_t pageCount = 0;
- EBookFormat format = EBookFormat::Unknown;
+ DecoderEBookFormat format = DecoderEBookFormat::Unknown;
  bool hasCoverImage = false;
  uint64_t fileSizeBytes = 0;
 };
@@ -50,7 +50,7 @@ public:
 
  // Format detection
  static bool IsEBookFile(const uint8_t* data, size_t size);
- static EBookFormat DetectFormat(const uint8_t* data, size_t size);
+ static DecoderEBookFormat DetectFormat(const uint8_t* data, size_t size);
  static uint32_t GetExtensionCount();
  static std::vector<std::wstring> GetExtensions();
 
@@ -65,9 +65,9 @@ public:
  static bool IsMOBI(const uint8_t* data, size_t size);
 
  // Static helpers
- static const wchar_t* GetFormatName(EBookFormat format);
- static const wchar_t* GetFormatExtension(EBookFormat format);
- static const wchar_t* GetFormatMimeType(EBookFormat format);
+ static const wchar_t* GetFormatName(DecoderEBookFormat format);
+ static const wchar_t* GetFormatExtension(DecoderEBookFormat format);
+ static const wchar_t* GetFormatMimeType(DecoderEBookFormat format);
 
 private:
  bool ExtractEPUBCover(const uint8_t* data, size_t size,

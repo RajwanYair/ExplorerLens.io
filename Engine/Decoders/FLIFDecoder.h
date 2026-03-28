@@ -23,6 +23,15 @@ struct FLIFDecodeResult {
 };
 class FLIFDecoder {
 public:
+    static const wchar_t* GetName() { return L"FLIFDecoder"; }
+
+    bool CanDecode(const wchar_t* ext) const {
+        if (!ext) return false;
+        std::wstring e(ext);
+        for (auto& c : e) c = towlower(c);
+        return e == L".flif";
+    }
+
     FLIFDecodeResult Decode(const uint8_t* data, size_t size) {
         if (!data || size < 4) return {};
         return { 1, 1, 1, false, { 0, 0, 0, 255 } };

@@ -20,7 +20,7 @@
 namespace ExplorerLens { namespace Engine {
 
 // Telemetry event categories.
-enum class TelemetryEventType : uint8_t {
+enum class AnonTelemetryEventType : uint8_t {
     FormatDecoded     = 1,  // A specific format was successfully decoded
     FormatFailed      = 2,  // Decode failed (no PII — format name only)
     GpuBackendUsed    = 3,  // Which GPU backend handled the request
@@ -34,8 +34,8 @@ enum class TelemetryEventType : uint8_t {
 };
 
 // A single anonymous telemetry event payload.
-struct TelemetryEvent {
-    TelemetryEventType type;
+struct AnonTelemetryEvent {
+    AnonTelemetryEventType type;
     std::string        key;    // e.g. format name, backend name, setting key
     std::string        value;  // numeric or enum string — never user content
     uint64_t           tsMs;   // millisecond timestamp since epoch
@@ -60,7 +60,7 @@ public:
     bool HasConsent() const noexcept { return m_consent; }
 
     // Queue an event.  No-ops if !HasConsent().
-    void Track(TelemetryEventType type,
+    void Track(AnonTelemetryEventType type,
                const std::string& key,
                const std::string& value = {}) noexcept;
 

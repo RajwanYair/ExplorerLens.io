@@ -25,7 +25,7 @@ enum class ExportFormat : uint8_t {
 };
 
 /// Quality preset
-enum class QualityPreset : uint8_t {
+enum class ExportQualityPreset : uint8_t {
  Draft = 0, // Fast, low quality
  Normal = 1, // Balanced
  High = 2, // High quality
@@ -43,7 +43,7 @@ enum class ExportColorSpace : uint8_t {
 /// Export configuration
 struct ExportConfig {
  ExportFormat format = ExportFormat::PNG;
- QualityPreset quality = QualityPreset::Normal;
+ ExportQualityPreset quality = ExportQualityPreset::Normal;
  ExportColorSpace colorSpace = ExportColorSpace::sRGB;
  uint32_t width = 256;
  uint32_t height = 256;
@@ -56,7 +56,7 @@ struct ExportConfig {
 };
 
 /// Export result
-struct ExportResult {
+struct EncoderExportResult {
  bool success = false;
  std::wstring outputPath;
  uint64_t fileSizeBytes = 0;
@@ -72,15 +72,15 @@ public:
  ~EncoderExportEngine() = default;
 
  // Export operations
- ExportResult ExportThumbnail(const uint8_t* rgbaData, uint32_t width,
+ EncoderExportResult ExportThumbnail(const uint8_t* rgbaData, uint32_t width,
  uint32_t height, const ExportConfig& config,
  const std::wstring& outputPath);
- ExportResult ExportToMemory(const uint8_t* rgbaData, uint32_t width,
+ EncoderExportResult ExportToMemory(const uint8_t* rgbaData, uint32_t width,
  uint32_t height, const ExportConfig& config,
  std::vector<uint8_t>& outputBuffer);
 
  // Batch export
- std::vector<ExportResult> BatchExport(const uint8_t* rgbaData, uint32_t width,
+ std::vector<EncoderExportResult> BatchExport(const uint8_t* rgbaData, uint32_t width,
  uint32_t height,
  const std::vector<ExportConfig>& configs,
  const std::wstring& outputDir);
@@ -94,8 +94,8 @@ public:
  static uint32_t GetFormatCount();
 
  // Quality helpers
- static uint8_t GetDefaultQuality(ExportFormat format, QualityPreset preset);
- static const wchar_t* GetPresetName(QualityPreset preset);
+ static uint8_t GetDefaultQuality(ExportFormat format, ExportQualityPreset preset);
+ static const wchar_t* GetPresetName(ExportQualityPreset preset);
  static const wchar_t* GetColorSpaceName(ExportColorSpace cs);
 
 private:

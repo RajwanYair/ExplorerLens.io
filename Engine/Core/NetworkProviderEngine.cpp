@@ -75,28 +75,28 @@ bool NetworkProviderEngine::IsNetworkPath(const std::wstring& path) {
  return false;
 }
 
-NetworkProtocol NetworkProviderEngine::DetectProtocol(const std::wstring& path) {
+ProviderNetProtocol NetworkProviderEngine::DetectProtocol(const std::wstring& path) {
  if (path.find(L"ftp://") == 0 || path.find(L"FTP://") == 0)
- return NetworkProtocol::FTP;
+ return ProviderNetProtocol::FTP;
  if (path.find(L"sftp://") == 0 || path.find(L"SFTP://") == 0)
- return NetworkProtocol::SFTP;
+ return ProviderNetProtocol::SFTP;
  if (path.find(L"http://") == 0 || path.find(L"https://") == 0)
- return NetworkProtocol::HTTP;
+ return ProviderNetProtocol::HTTP;
  if (path.find(L"webdav://") == 0 || path.find(L"dav://") == 0)
- return NetworkProtocol::WebDAV;
+ return ProviderNetProtocol::WebDAV;
  if (path.size() >= 2 && path[0] == L'\\' && path[1] == L'\\')
- return NetworkProtocol::UNC;
- return NetworkProtocol::SMB;
+ return ProviderNetProtocol::UNC;
+ return ProviderNetProtocol::SMB;
 }
 
-const wchar_t* NetworkProviderEngine::GetProtocolName(NetworkProtocol protocol) {
+const wchar_t* NetworkProviderEngine::GetProtocolName(ProviderNetProtocol protocol) {
  switch (protocol) {
- case NetworkProtocol::UNC: return L"UNC";
- case NetworkProtocol::SMB: return L"SMB";
- case NetworkProtocol::WebDAV: return L"WebDAV";
- case NetworkProtocol::FTP: return L"FTP";
- case NetworkProtocol::SFTP: return L"SFTP";
- case NetworkProtocol::HTTP: return L"HTTP";
+ case ProviderNetProtocol::UNC: return L"UNC";
+ case ProviderNetProtocol::SMB: return L"SMB";
+ case ProviderNetProtocol::WebDAV: return L"WebDAV";
+ case ProviderNetProtocol::FTP: return L"FTP";
+ case ProviderNetProtocol::SFTP: return L"SFTP";
+ case ProviderNetProtocol::HTTP: return L"HTTP";
  default: return L"Unknown";
  }
 }
@@ -113,4 +113,3 @@ const wchar_t* NetworkProviderEngine::GetStatusName(NetworkStatus status) {
 }
 
 }} // namespace ExplorerLens::Engine
-

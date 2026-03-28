@@ -1,32 +1,32 @@
-// Plugin Sandbox Policy — GTestShim
+﻿// Plugin Sandbox Policy — GTestShim
 #include "GTestShim.h"
 #include "Plugin/PluginSandboxPolicy.h"
 
 using namespace ExplorerLens::Plugin;
 
 TEST(PluginSandboxPolicy, StrictPresetLowMemory) {
- auto p = SandboxPolicy::Strict();
+ auto p = SandboxPolicySpec::Strict();
  EXPECT_LE(p.limits.maxMemoryBytes, 64ULL * 1024 * 1024);
 }
 
 TEST(PluginSandboxPolicy, StandardPresetMediumMemory) {
- auto p = SandboxPolicy::Standard();
+ auto p = SandboxPolicySpec::Standard();
  EXPECT_GT(p.limits.maxMemoryBytes, 64ULL * 1024 * 1024);
  EXPECT_LE(p.limits.maxMemoryBytes, 256ULL * 1024 * 1024);
 }
 
 TEST(PluginSandboxPolicy, DeveloperPresetHighMemory) {
- auto p = SandboxPolicy::Developer();
+ auto p = SandboxPolicySpec::Developer();
  EXPECT_GT(p.limits.maxMemoryBytes, 256ULL * 1024 * 1024);
 }
 
 TEST(PluginSandboxPolicy, StrictPresetNoUI) {
- auto p = SandboxPolicy::Strict();
+ auto p = SandboxPolicySpec::Strict();
  EXPECT_FALSE(p.limits.allowUIAccess);
 }
 
 TEST(PluginSandboxPolicy, DeveloperPresetAllowsUI) {
- auto p = SandboxPolicy::Developer();
+ auto p = SandboxPolicySpec::Developer();
  EXPECT_TRUE(p.limits.allowUIAccess);
 }
 
@@ -50,7 +50,7 @@ TEST(PluginSandboxPolicy, TeardownResultDefaultClean) {
 }
 
 TEST(PluginSandboxPolicy, ValidatorStrictPassesStrictPlugin) {
- auto policy = SandboxPolicy::Strict();
+ auto policy = SandboxPolicySpec::Strict();
  SandboxPolicyValidator v(policy);
  EXPECT_TRUE(v.IsValid());
 }
@@ -63,7 +63,7 @@ TEST(PluginSandboxPolicy, PolicyPresetEnumCoverage) {
 }
 
 TEST(PluginSandboxPolicy, JobObjectLimitsDefaults) {
- JobObjectLimits lim;
+ SandboxJobLimits lim;
  EXPECT_GT(lim.maxMemoryBytes, 0u);
 }
 

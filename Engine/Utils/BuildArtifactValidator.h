@@ -30,7 +30,7 @@ enum class Architecture : uint8_t {
     ARM
 };
 
-struct BuildArtifact {
+struct ValidatedBuildArtifact {
     std::wstring path;
     BuildArtifactType type = BuildArtifactType::DLL;
     Architecture arch = Architecture::x64;
@@ -57,7 +57,7 @@ public:
     }
 
     void AddExpectedArtifact(const std::wstring& path, BuildArtifactType type) {
-        BuildArtifact artifact;
+        ValidatedBuildArtifact artifact;
         artifact.path = path;
         artifact.type = type;
         artifact.arch = m_expectedArch;
@@ -106,7 +106,7 @@ public:
     void SetExpectedArchitecture(Architecture arch) { m_expectedArch = arch; }
 
 private:
-    std::vector<BuildArtifact> m_expectedArtifacts;
+    std::vector<ValidatedBuildArtifact> m_expectedArtifacts;
     Architecture m_expectedArch;
 };
 

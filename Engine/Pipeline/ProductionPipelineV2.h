@@ -61,7 +61,7 @@ struct PipelineResult {
 };
 
 /// Batch request for generating thumbnails for multiple files
-struct BatchRequest {
+struct ProdPipelineBatchReq {
     std::vector<std::wstring> filePaths;
     uint32_t    requestedSize = 256;
     bool        prioritizeCache = true;

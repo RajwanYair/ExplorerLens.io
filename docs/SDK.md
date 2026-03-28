@@ -1,8 +1,8 @@
 # ExplorerLens SDK — v2 Reference Guide
 
-**Version:** 20.4.0 "Quasar-U"  
+**Version:** 23.5.0 "Vega-V"  
 **Classification:** Public  
-**Updated:** 2026-07-14
+**Updated:** 2026-03-27
 
 ---
 

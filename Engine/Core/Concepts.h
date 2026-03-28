@@ -21,7 +21,7 @@ namespace ExplorerLens {
 namespace Engine {
 
 // Forward declarations
-struct ThumbnailRequest;
+struct ConceptsThumbnailReq;
 struct ThumbnailResult;
 struct DecoderInfo;
 
@@ -34,7 +34,7 @@ struct DecoderInfo;
 template <typename T>
 concept ThumbnailDecoderConcept = requires(T decoder,
                                            const wchar_t* path,
-                                           const ThumbnailRequest& req,
+                                           const ConceptsThumbnailReq& req,
                                            ThumbnailResult& res) {
     { decoder.CanDecode(path) } -> std::convertible_to<bool>;
     { decoder.Decode(req, res) } -> std::convertible_to<long>;

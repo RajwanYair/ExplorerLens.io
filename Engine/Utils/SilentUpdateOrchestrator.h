@@ -18,7 +18,7 @@ enum class SilentUpdateChannel : uint8_t {
     Stable, Beta, Canary, Enterprise, LTS, COUNT
 };
 
-enum class UpdateState : uint8_t {
+enum class SilentUpdateState : uint8_t {
     Idle, Checking, Downloading, Verifying, Staging, Applying, Complete, Failed, COUNT
 };
 
@@ -33,7 +33,7 @@ struct UpdatePackage {
 };
 
 struct UpdateProgress {
-    UpdateState state = UpdateState::Idle;
+    SilentUpdateState state = SilentUpdateState::Idle;
     float progressPercent = 0.0f;
     uint64_t bytesDownloaded = 0;
     uint64_t bytesTotal = 0;
@@ -56,33 +56,33 @@ public:
     const UpdateConfig& GetConfig() const { return m_config; }
 
     bool CheckForUpdates(const std::wstring& currentVersion) {
-        m_progress.state = UpdateState::Checking;
+        m_progress.state = SilentUpdateState::Checking;
         // Simulated check
-        m_progress.state = UpdateState::Idle;
+        m_progress.state = SilentUpdateState::Idle;
         m_lastCheckVersion = currentVersion;
         return false; // No update available in simulation
     }
 
     bool StartDownload(const UpdatePackage& pkg) {
-        if (m_progress.state != UpdateState::Idle) return false;
+        if (m_progress.state != SilentUpdateState::Idle) return false;
         m_package = pkg;
-        m_progress.state = UpdateState::Downloading;
+        m_progress.state = SilentUpdateState::Downloading;
         m_progress.bytesTotal = pkg.sizeBytes;
         return true;
     }
 
     bool Apply() {
-        if (m_progress.state != UpdateState::Downloading) return false;
-        m_progress.state = UpdateState::Verifying;
-        m_progress.state = UpdateState::Staging;
-        m_progress.state = UpdateState::Applying;
-        m_progress.state = UpdateState::Complete;
+        if (m_progress.state != SilentUpdateState::Downloading) return false;
+        m_progress.state = SilentUpdateState::Verifying;
+        m_progress.state = SilentUpdateState::Staging;
+        m_progress.state = SilentUpdateState::Applying;
+        m_progress.state = SilentUpdateState::Complete;
         m_progress.progressPercent = 100.0f;
         return true;
     }
 
     const UpdateProgress& GetProgress() const { return m_progress; }
-    UpdateState GetState() const { return m_progress.state; }
+    SilentUpdateState GetState() const { return m_progress.state; }
 
     void Reset() {
         m_progress = {};
@@ -90,7 +90,7 @@ public:
     }
 
     static size_t ChannelCount() { return static_cast<size_t>(SilentUpdateChannel::COUNT); }
-    static size_t StateCount() { return static_cast<size_t>(UpdateState::COUNT); }
+    static size_t StateCount() { return static_cast<size_t>(SilentUpdateState::COUNT); }
 
 private:
     UpdateConfig m_config;

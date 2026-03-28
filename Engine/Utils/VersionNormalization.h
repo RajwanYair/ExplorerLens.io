@@ -60,7 +60,7 @@ struct VersionInfo {
 //==============================================================================
 // Version Reference Found in Documentation
 //==============================================================================
-struct VersionReference {
+struct NormVersionRef {
     std::string filePath;
     uint32_t lineNumber = 0;
     std::string lineText;
@@ -106,9 +106,9 @@ public:
     }
 
     // Scan a single file content for stale references
-    std::vector<VersionReference> ScanContent(const std::string& filePath,
+    std::vector<NormVersionRef> ScanContent(const std::string& filePath,
         const std::string& content) const {
-        std::vector<VersionReference> refs;
+        std::vector<NormVersionRef> refs;
 
         // Check exclusions
         for (auto& excl : m_config.excludePatterns) {
@@ -123,7 +123,7 @@ public:
             lineNum++;
             for (auto& pattern : m_config.staleVersionPatterns) {
                 if (line.find(pattern) != std::string::npos) {
-                    VersionReference ref;
+                    NormVersionRef ref;
                     ref.filePath = filePath;
                     ref.lineNumber = lineNum;
                     ref.lineText = line;
@@ -171,7 +171,7 @@ private:
 //==============================================================================
 // Decoder Status for Documentation
 //==============================================================================
-enum class DecoderStatus : uint32_t {
+enum class NormDecoderStatus : uint32_t {
     Stable = 0, // Production ready
     Beta = 1, // Working but needs testing
     Experimental = 2, // Early stage
@@ -180,28 +180,28 @@ enum class DecoderStatus : uint32_t {
     External = 5 // Handled by external library
 };
 
-inline const char* DecoderStatusName(DecoderStatus s) {
+inline const char* DecoderStatusName(NormDecoderStatus s) {
     static const char* names[] = {
     "Stable", "Beta", "Experimental", "Planned", "Deprecated", "External"
     };
     return names[static_cast<uint32_t>(s) <= 5 ? static_cast<uint32_t>(s) : 5];
 }
 
-struct DecoderDocEntry {
+struct NormDocEntry {
     std::string name;
-    DecoderStatus status = DecoderStatus::Planned;
+    NormDecoderStatus status = NormDecoderStatus::Planned;
     std::string library; // e.g., "libwebp 1.5.0"
     std::vector<std::string> formats;
     std::string notes;
 
     std::string StatusBadge() const {
         switch (status) {
-        case DecoderStatus::Stable: return "[STABLE]";
-        case DecoderStatus::Beta: return "[BETA]";
-        case DecoderStatus::Experimental: return "[EXPERIMENTAL]";
-        case DecoderStatus::Planned: return "[PLANNED]";
-        case DecoderStatus::Deprecated: return "[DEPRECATED]";
-        case DecoderStatus::External: return "[EXTERNAL]";
+        case NormDecoderStatus::Stable: return "[STABLE]";
+        case NormDecoderStatus::Beta: return "[BETA]";
+        case NormDecoderStatus::Experimental: return "[EXPERIMENTAL]";
+        case NormDecoderStatus::Planned: return "[PLANNED]";
+        case NormDecoderStatus::Deprecated: return "[DEPRECATED]";
+        case NormDecoderStatus::External: return "[EXTERNAL]";
         default: return "[UNKNOWN]";
         }
     }
@@ -214,10 +214,10 @@ class DecoderStatusRegistry {
 public:
     DecoderStatusRegistry() { RegisterAllDecoders(); }
 
-    const std::vector<DecoderDocEntry>& AllDecoders() const { return m_decoders; }
+    const std::vector<NormDocEntry>& AllDecoders() const { return m_decoders; }
 
-    std::vector<DecoderDocEntry> GetByStatus(DecoderStatus status) const {
-        std::vector<DecoderDocEntry> result;
+    std::vector<NormDocEntry> GetByStatus(NormDecoderStatus status) const {
+        std::vector<NormDocEntry> result;
         for (auto& d : m_decoders) {
             if (d.status == status) result.push_back(d);
         }
@@ -228,7 +228,7 @@ public:
 
     size_t StableCount() const {
         return std::count_if(m_decoders.begin(), m_decoders.end(),
-            [](const DecoderDocEntry& d) { return d.status == DecoderStatus::Stable; });
+            [](const NormDocEntry& d) { return d.status == NormDecoderStatus::Stable; });
     }
 
     size_t FormatCount() const {
@@ -258,61 +258,61 @@ public:
 private:
     void RegisterAllDecoders() {
         m_decoders = {
-        {"JPEG/JFIF", DecoderStatus::Stable, "WIC (built-in)",
+        {"JPEG/JFIF", NormDecoderStatus::Stable, "WIC (built-in)",
         {".jpg", ".jpeg", ".jpe", ".jfif"}, "Windows Imaging Component"},
-        {"PNG", DecoderStatus::Stable, "WIC (built-in)",
+        {"PNG", NormDecoderStatus::Stable, "WIC (built-in)",
         {".png"}, ""},
-        {"BMP", DecoderStatus::Stable, "WIC (built-in)",
+        {"BMP", NormDecoderStatus::Stable, "WIC (built-in)",
         {".bmp", ".dib"}, ""},
-        {"GIF", DecoderStatus::Stable, "WIC (built-in)",
+        {"GIF", NormDecoderStatus::Stable, "WIC (built-in)",
         {".gif"}, "First frame only"},
-        {"TIFF", DecoderStatus::Stable, "WIC (built-in)",
+        {"TIFF", NormDecoderStatus::Stable, "WIC (built-in)",
         {".tif", ".tiff"}, "Multi-page via multi-frame"},
-        {"ICO/CUR", DecoderStatus::Stable, "Custom",
+        {"ICO/CUR", NormDecoderStatus::Stable, "Custom",
         {".ico", ".cur"}, "Best-size extraction"},
-        {"WebP", DecoderStatus::Stable, "libwebp 1.5.0",
+        {"WebP", NormDecoderStatus::Stable, "libwebp 1.5.0",
         {".webp"}, "Animated first frame"},
-        {"JPEG XL", DecoderStatus::Stable, "libjxl 0.11.1",
+        {"JPEG XL", NormDecoderStatus::Stable, "libjxl 0.11.1",
         {".jxl"}, "Animated first frame"},
-        {"HEIF/HEIC", DecoderStatus::Stable, "libheif 1.19.5",
+        {"HEIF/HEIC", NormDecoderStatus::Stable, "libheif 1.19.5",
         {".heif", ".heic", ".hif"}, "libde265 backend"},
-        {"AVIF", DecoderStatus::Stable, "libavif 1.3.0",
+        {"AVIF", NormDecoderStatus::Stable, "libavif 1.3.0",
         {".avif"}, "dav1d backend"},
-        {"RAW (Camera)", DecoderStatus::Stable, "LibRaw 0.21.3",
+        {"RAW (Camera)", NormDecoderStatus::Stable, "LibRaw 0.21.3",
         {".cr2", ".cr3", ".nef", ".arw", ".orf", ".rw2",
         ".raf", ".dng", ".srw", ".pef", ".gpr", ".raw"},
         "Embedded preview extraction"},
-        {"PSD", DecoderStatus::Stable, "Custom",
+        {"PSD", NormDecoderStatus::Stable, "Custom",
         {".psd", ".psb"}, "Composite preview"},
-        {"TGA", DecoderStatus::Stable, "Custom",
+        {"TGA", NormDecoderStatus::Stable, "Custom",
         {".tga", ".targa"}, "Truevision"},
-        {"DDS", DecoderStatus::Stable, "WIC + D3D11",
+        {"DDS", NormDecoderStatus::Stable, "WIC + D3D11",
         {".dds"}, "GPU-accelerated BC decompression"},
-        {"QOI", DecoderStatus::Stable, "Custom",
+        {"QOI", NormDecoderStatus::Stable, "Custom",
         {".qoi"}, "Quite OK Image format"},
-        {"SVG", DecoderStatus::Stable, "Direct2D",
+        {"SVG", NormDecoderStatus::Stable, "Direct2D",
         {".svg", ".svgz"}, "Vector rasterization"},
-        {"EXR", DecoderStatus::Stable, "Custom",
+        {"EXR", NormDecoderStatus::Stable, "Custom",
         {".exr"}, "OpenEXR HDR"},
-        {"HDR", DecoderStatus::Stable, "Custom",
+        {"HDR", NormDecoderStatus::Stable, "Custom",
         {".hdr"}, "Radiance HDR"},
-        {"PDF", DecoderStatus::Stable, "WIC/Shell",
+        {"PDF", NormDecoderStatus::Stable, "WIC/Shell",
         {".pdf"}, "First page thumbnail"},
-        {"ZIP Archives", DecoderStatus::Stable, "minizip-ng 4.0.10",
+        {"ZIP Archives", NormDecoderStatus::Stable, "minizip-ng 4.0.10",
         {".zip", ".cbz"}, "First image extraction"},
-        {"RAR Archives", DecoderStatus::Stable, "UnRAR 7.2.2",
+        {"RAR Archives", NormDecoderStatus::Stable, "UnRAR 7.2.2",
         {".rar", ".cbr"}, "First image extraction"},
-        {"7z Archives", DecoderStatus::Stable, "LZMA 26.00",
+        {"7z Archives", NormDecoderStatus::Stable, "LZMA 26.00",
         {".7z", ".cb7"}, "First image extraction"},
-        {"TAR Archives", DecoderStatus::Stable, "Custom",
+        {"TAR Archives", NormDecoderStatus::Stable, "Custom",
         {".tar", ".tar.gz", ".tar.bz2", ".tar.xz"}, "Streaming"},
-        {"Video", DecoderStatus::External, "Media Foundation",
+        {"Video", NormDecoderStatus::External, "Media Foundation",
         {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".webm"},
         "Scene frame selection"},
         };
     }
 
-    std::vector<DecoderDocEntry> m_decoders;
+    std::vector<NormDocEntry> m_decoders;
 };
 
 //==============================================================================
@@ -408,7 +408,7 @@ struct DocIntegrityReport {
     size_t staleReferences = 0;
     size_t staleDocs = 0; // Files with any stale ref
     size_t cleanDocs = 0;
-    std::vector<VersionReference> allReferences;
+    std::vector<NormVersionRef> allReferences;
 
     double IntegrityPercent() const {
         if (filesScanned == 0) return 100.0;

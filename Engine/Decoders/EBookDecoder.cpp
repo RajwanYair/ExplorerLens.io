@@ -15,19 +15,19 @@ bool EBookDecoder::IsEBookFile(const uint8_t* data, size_t size) {
  return IsEPUB(data, size) || IsMOBI(data, size);
 }
 
-EBookFormat EBookDecoder::DetectFormat(const uint8_t* data, size_t size) {
- if (!data || size < 4) return EBookFormat::Unknown;
- if (IsEPUB(data, size)) return EBookFormat::EPUB;
- if (IsMOBI(data, size)) return EBookFormat::MOBI;
+DecoderEBookFormat EBookDecoder::DetectFormat(const uint8_t* data, size_t size) {
+ if (!data || size < 4) return DecoderEBookFormat::Unknown;
+ if (IsEPUB(data, size)) return DecoderEBookFormat::EPUB;
+ if (IsMOBI(data, size)) return DecoderEBookFormat::MOBI;
  // FB2 is XML-based
  if (size >= 5 && memcmp(data, "<?xml", 5) == 0) {
  // Check for FictionBook root element
  std::string content(reinterpret_cast<const char*>(data),
  std::min(size, (size_t)1024));
  if (content.find("FictionBook") != std::string::npos)
- return EBookFormat::FB2;
+ return DecoderEBookFormat::FB2;
  }
- return EBookFormat::Unknown;
+ return DecoderEBookFormat::Unknown;
 }
 
 bool EBookDecoder::IsEPUB(const uint8_t* data, size_t size) {
@@ -55,7 +55,7 @@ EBookMetadata EBookDecoder::ReadMetadata(const uint8_t* data, size_t size) const
  EBookMetadata meta;
  meta.format = DetectFormat(data, size);
  meta.fileSizeBytes = size;
- if (meta.format == EBookFormat::EPUB) {
+ if (meta.format == DecoderEBookFormat::EPUB) {
  meta.hasCoverImage = true; // Most EPUBs have covers
  }
  return meta;
@@ -68,7 +68,7 @@ EBookCoverResult EBookDecoder::ExtractCover(const uint8_t* data, size_t size) co
  return result;
  }
  auto format = DetectFormat(data, size);
- if (format == EBookFormat::EPUB) {
+ if (format == DecoderEBookFormat::EPUB) {
  result.success = ExtractEPUBCover(data, size, result.coverData);
  }
  return result;
@@ -94,41 +94,40 @@ bool EBookDecoder::ParseOPFMetadata(const std::string& opfContent, EBookMetadata
  return true;
 }
 
-const wchar_t* EBookDecoder::GetFormatName(EBookFormat format) {
+const wchar_t* EBookDecoder::GetFormatName(DecoderEBookFormat format) {
  switch (format) {
- case EBookFormat::EPUB: return L"EPUB";
- case EBookFormat::MOBI: return L"MOBI";
- case EBookFormat::FB2: return L"FB2";
- case EBookFormat::AZW3: return L"AZW3";
- case EBookFormat::CBZ: return L"CBZ";
- case EBookFormat::DJVU: return L"DJVU";
- case EBookFormat::LIT: return L"LIT";
+ case DecoderEBookFormat::EPUB: return L"EPUB";
+ case DecoderEBookFormat::MOBI: return L"MOBI";
+ case DecoderEBookFormat::FB2: return L"FB2";
+ case DecoderEBookFormat::AZW3: return L"AZW3";
+ case DecoderEBookFormat::CBZ: return L"CBZ";
+ case DecoderEBookFormat::DJVU: return L"DJVU";
+ case DecoderEBookFormat::LIT: return L"LIT";
  default: return L"Unknown";
  }
 }
 
-const wchar_t* EBookDecoder::GetFormatExtension(EBookFormat format) {
+const wchar_t* EBookDecoder::GetFormatExtension(DecoderEBookFormat format) {
  switch (format) {
- case EBookFormat::EPUB: return L".epub";
- case EBookFormat::MOBI: return L".mobi";
- case EBookFormat::FB2: return L".fb2";
- case EBookFormat::AZW3: return L".azw3";
- case EBookFormat::CBZ: return L".cbz";
- case EBookFormat::DJVU: return L".djvu";
- case EBookFormat::LIT: return L".lit";
+ case DecoderEBookFormat::EPUB: return L".epub";
+ case DecoderEBookFormat::MOBI: return L".mobi";
+ case DecoderEBookFormat::FB2: return L".fb2";
+ case DecoderEBookFormat::AZW3: return L".azw3";
+ case DecoderEBookFormat::CBZ: return L".cbz";
+ case DecoderEBookFormat::DJVU: return L".djvu";
+ case DecoderEBookFormat::LIT: return L".lit";
  default: return L".bin";
  }
 }
 
-const wchar_t* EBookDecoder::GetFormatMimeType(EBookFormat format) {
+const wchar_t* EBookDecoder::GetFormatMimeType(DecoderEBookFormat format) {
  switch (format) {
- case EBookFormat::EPUB: return L"application/epub+zip";
- case EBookFormat::MOBI: return L"application/x-mobipocket-ebook";
- case EBookFormat::FB2: return L"application/x-fictionbook+xml";
- case EBookFormat::AZW3: return L"application/vnd.amazon.ebook";
+ case DecoderEBookFormat::EPUB: return L"application/epub+zip";
+ case DecoderEBookFormat::MOBI: return L"application/x-mobipocket-ebook";
+ case DecoderEBookFormat::FB2: return L"application/x-fictionbook+xml";
+ case DecoderEBookFormat::AZW3: return L"application/vnd.amazon.ebook";
  default: return L"application/octet-stream";
  }
 }
 
 }} // namespace ExplorerLens::Engine
-

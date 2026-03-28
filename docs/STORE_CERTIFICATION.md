@@ -1,16 +1,16 @@
-# ExplorerLens v20.1.0 "Quasar-R" — Store Certification Checklist
+# ExplorerLens v23.5.0 "Vega-V" — Store Certification Checklist
 
-> Sprint 219 | Updated for v20.1.0 packaging pipeline
+> Updated for v23.5.0 packaging pipeline
 
 **Target:** Windows 11 Microsoft Store submission  
-**Package:** `ExplorerLens-20.1.0-x64.msixbundle` (x64 + ARM64)
+**Package:** `ExplorerLens-23.5.0-x64.msixbundle` (x64 + ARM64)
 **WACK Version:** Windows App Certification Kit 10.0.26100
 
 ---
 
 ## Part 1 — WACK Automated Test Results
 
-Run: `appcert.exe run -apptype desktop -setuppath ExplorerLens-17.0.0-x64.msix -setuptype store`
+Run: `appcert.exe run -apptype desktop -setuppath ExplorerLens-23.5.0-x64.msix -setuptype store`
 
 | Test | Status | Notes |
 |------|--------|-------|
@@ -36,7 +36,7 @@ Run: `appcert.exe run -apptype desktop -setuppath ExplorerLens-17.0.0-x64.msix -
 
 - [ ] Display name: `ExplorerLens – Thumbnail Enhancer`
 - [ ] Publisher: must match Windows Dev Center account  
-- [ ] Version: `20.1.0.0` (4-component Store format)
+- [ ] Version: `23.5.0.0` (4-component Store format)
 - [ ] Description: max 10,000 characters, no keyword stuffing
 - [ ] Short description: max 270 characters
 - [ ] Screenshots: 4 × 1280×800 or 1366×768 (required); 1920×1080 (optional)

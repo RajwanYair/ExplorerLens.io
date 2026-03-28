@@ -11,7 +11,7 @@ namespace Engine {
 
 CloudSyncProvider::CloudSyncProvider() {}
 
-CloudSyncResult CloudSyncProvider::SyncThumbnails(CloudProvider provider,
+CloudSyncResult CloudSyncProvider::SyncThumbnails(StorageCloudProvider provider,
  const std::wstring &path) {
  (void)provider;
  CloudSyncResult result;
@@ -19,17 +19,17 @@ CloudSyncResult CloudSyncProvider::SyncThumbnails(CloudProvider provider,
 
  // Validate path
  if (path.empty()) {
- result.status = SyncStatus::Error;
+ result.status = ProviderSyncStatus::Error;
  result.errorMessage = L"Empty path";
  return result;
  }
 
- result.status = SyncStatus::Syncing;
+ result.status = ProviderSyncStatus::Syncing;
 
  // In production: enumerate cloud files and generate thumbnails
  result.filesProcessed = 0;
  result.thumbnailsCached = 0;
- result.status = SyncStatus::Completed;
+ result.status = ProviderSyncStatus::Completed;
  result.success = true;
 
  auto end = std::chrono::high_resolution_clock::now();
@@ -38,8 +38,8 @@ CloudSyncResult CloudSyncProvider::SyncThumbnails(CloudProvider provider,
  return result;
 }
 
-CloudFileInfo CloudSyncProvider::GetFileInfo(const std::wstring &path) const {
- CloudFileInfo info;
+StorageCloudFileInfo CloudSyncProvider::GetFileInfo(const std::wstring &path) const {
+ StorageCloudFileInfo info;
  info.cloudPath = path;
  info.provider = DetectProvider(path);
  return info;
@@ -62,58 +62,58 @@ bool CloudSyncProvider::IsPlaceholderFile(const std::wstring & /*path*/) const {
  return false;
 }
 
-CloudProvider CloudSyncProvider::DetectProvider(const std::wstring &path) {
+StorageCloudProvider CloudSyncProvider::DetectProvider(const std::wstring &path) {
  auto lower = path;
  for (auto &c : lower)
  c = towlower(c);
 
  if (lower.find(L"onedrive - ") != std::wstring::npos)
- return CloudProvider::OneDriveBusiness;
+ return StorageCloudProvider::OneDriveBusiness;
  if (lower.find(L"onedrive") != std::wstring::npos)
- return CloudProvider::OneDrive;
+ return StorageCloudProvider::OneDrive;
  if (lower.find(L"sharepoint") != std::wstring::npos)
- return CloudProvider::SharePoint;
+ return StorageCloudProvider::SharePoint;
  if (lower.find(L"google drive") != std::wstring::npos)
- return CloudProvider::GoogleDrive;
+ return StorageCloudProvider::GoogleDrive;
  if (lower.find(L"dropbox") != std::wstring::npos)
- return CloudProvider::Dropbox;
+ return StorageCloudProvider::Dropbox;
  if (lower.find(L"icloud") != std::wstring::npos)
- return CloudProvider::iCloudDrive;
- return CloudProvider::OneDrive;
+ return StorageCloudProvider::iCloudDrive;
+ return StorageCloudProvider::OneDrive;
 }
 
-const wchar_t *CloudSyncProvider::GetProviderName(CloudProvider provider) {
+const wchar_t *CloudSyncProvider::GetProviderName(StorageCloudProvider provider) {
  switch (provider) {
- case CloudProvider::OneDrive:
+ case StorageCloudProvider::OneDrive:
  return L"OneDrive";
- case CloudProvider::OneDriveBusiness:
+ case StorageCloudProvider::OneDriveBusiness:
  return L"OneDrive for Business";
- case CloudProvider::GoogleDrive:
+ case StorageCloudProvider::GoogleDrive:
  return L"Google Drive";
- case CloudProvider::SharePoint:
+ case StorageCloudProvider::SharePoint:
  return L"SharePoint";
- case CloudProvider::Dropbox:
+ case StorageCloudProvider::Dropbox:
  return L"Dropbox";
- case CloudProvider::iCloudDrive:
+ case StorageCloudProvider::iCloudDrive:
  return L"iCloud Drive";
  default:
  return L"Unknown";
  }
 }
 
-const wchar_t *CloudSyncProvider::GetStatusName(SyncStatus status) {
+const wchar_t *CloudSyncProvider::GetStatusName(ProviderSyncStatus status) {
  switch (status) {
- case SyncStatus::Idle:
+ case ProviderSyncStatus::Idle:
  return L"Idle";
- case SyncStatus::Syncing:
+ case ProviderSyncStatus::Syncing:
  return L"Syncing";
- case SyncStatus::Completed:
+ case ProviderSyncStatus::Completed:
  return L"Completed";
- case SyncStatus::Error:
+ case ProviderSyncStatus::Error:
  return L"Error";
- case SyncStatus::Conflict:
+ case ProviderSyncStatus::Conflict:
  return L"Conflict";
- case SyncStatus::Offline:
+ case ProviderSyncStatus::Offline:
  return L"Offline";
  default:
  return L"Unknown";

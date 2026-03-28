@@ -18,23 +18,23 @@ const wchar_t* DiagnosticDashboard::GetCategoryName(MetricCategory cat) {
  }
 }
 
-const wchar_t* DiagnosticDashboard::GetHealthName(HealthLevel level) {
+const wchar_t* DiagnosticDashboard::GetHealthName(DiagHealthLevel level) {
  switch (level) {
- case HealthLevel::Healthy: return L"Healthy";
- case HealthLevel::Warning: return L"Warning";
- case HealthLevel::Degraded: return L"Degraded";
- case HealthLevel::Critical: return L"Critical";
- case HealthLevel::Unknown: return L"Unknown";
+ case DiagHealthLevel::Healthy: return L"Healthy";
+ case DiagHealthLevel::Warning: return L"Warning";
+ case DiagHealthLevel::Degraded: return L"Degraded";
+ case DiagHealthLevel::Critical: return L"Critical";
+ case DiagHealthLevel::Unknown: return L"Unknown";
  default: return L"Unknown";
  }
 }
 
-HealthLevel DiagnosticDashboard::EvaluateHealth(double value, double threshold) const {
+DiagHealthLevel DiagnosticDashboard::EvaluateHealth(double value, double threshold) const {
  double ratio = (threshold > 0.0) ? (value / threshold) : 0.0;
- if (ratio < 0.6) return HealthLevel::Healthy;
- if (ratio < 0.8) return HealthLevel::Warning;
- if (ratio < 0.95) return HealthLevel::Degraded;
- return HealthLevel::Critical;
+ if (ratio < 0.6) return DiagHealthLevel::Healthy;
+ if (ratio < 0.8) return DiagHealthLevel::Warning;
+ if (ratio < 0.95) return DiagHealthLevel::Degraded;
+ return DiagHealthLevel::Critical;
 }
 
 void DiagnosticDashboard::RecordMetric(const std::wstring& name, MetricCategory cat,
@@ -54,10 +54,10 @@ void DiagnosticDashboard::RecordMetric(const std::wstring& name, MetricCategory 
 HealthSnapshot DiagnosticDashboard::GetSnapshot() const {
  HealthSnapshot snap;
  snap.metricCount = static_cast<uint32_t>(m_metrics.size());
- HealthLevel worst = HealthLevel::Healthy;
+ DiagHealthLevel worst = DiagHealthLevel::Healthy;
  for (const auto& m : m_metrics) {
- if (m.health == HealthLevel::Warning) snap.warningCount++;
- if (m.health == HealthLevel::Critical) snap.criticalCount++;
+ if (m.health == DiagHealthLevel::Warning) snap.warningCount++;
+ if (m.health == DiagHealthLevel::Critical) snap.criticalCount++;
  if (static_cast<uint32_t>(m.health) > static_cast<uint32_t>(worst))
  worst = m.health;
  }
@@ -70,4 +70,3 @@ void DiagnosticDashboard::Reset() {
 }
 
 }} // namespace ExplorerLens::Engine
-

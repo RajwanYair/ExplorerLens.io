@@ -1,6 +1,6 @@
 # ExplorerLens — Release Process
 
-**Version:** 15.3.0 “Zenith-T” · **Updated:** March 2026
+**Version:** 23.5.0 "Vega-V" · **Updated:** March 27, 2026
 
 This document is the authoritative reference for producing a ExplorerLens release.
 Every version bump — patch, minor, or major — **must** follow this process exactly.

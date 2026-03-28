@@ -68,7 +68,7 @@ struct ThumbnailWorkItem {
 };
 
 // ─── Viewport state ───────────────────────────────────────────────
-struct ViewportState {
+struct WorkSchedulerViewport {
  int32_t firstVisibleIndex = 0;
  int32_t lastVisibleIndex = 0;
  int32_t prefetchBefore = 10; // items to prefetch before viewport
@@ -94,7 +94,7 @@ struct ViewportState {
 };
 
 // ─── Scheduler statistics ──────────────────────────────────────────
-struct SchedulerStats {
+struct WorkSchedulerStats {
  uint64_t totalSubmitted = 0;
  uint64_t totalCompleted = 0;
  uint64_t totalCancelled = 0;
@@ -237,17 +237,17 @@ public:
  }
  }
 
- void UpdateViewport(const ViewportState& vs) {
+ void UpdateViewport(const WorkSchedulerViewport& vs) {
  std::lock_guard<std::mutex> lock(m_mutex);
  m_viewport = vs;
  }
 
- SchedulerStats GetStats() const {
+ WorkSchedulerStats GetStats() const {
  std::lock_guard<std::mutex> lock(m_mutex);
  return m_stats;
  }
 
- ViewportState GetViewport() const {
+ WorkSchedulerViewport GetViewport() const {
  std::lock_guard<std::mutex> lock(m_mutex);
  return m_viewport;
  }
@@ -292,8 +292,8 @@ private:
  }
 
  SchedulerConfig m_config;
- ViewportState m_viewport;
- SchedulerStats m_stats;
+ WorkSchedulerViewport m_viewport;
+ WorkSchedulerStats m_stats;
  std::priority_queue<ThumbnailWorkItem, std::vector<ThumbnailWorkItem>, WorkItemComparator> m_queue;
  std::vector<uint64_t> m_cancelledIds;
  uint64_t m_nextId = 0;

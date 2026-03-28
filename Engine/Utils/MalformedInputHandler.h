@@ -43,7 +43,7 @@ enum class ValidationSeverity : uint8_t {
 };
 
 /// Validation result for a single check
-struct ValidationIssue {
+struct FileCorruptionIssue {
  CorruptionType type = CorruptionType::None;
  ValidationSeverity severity = ValidationSeverity::Info;
  std::wstring message;
@@ -57,7 +57,7 @@ struct FileValidationResult {
  bool isSafeToDeccode = false;
  std::wstring filePath;
  uint64_t fileSize = 0;
- std::vector<ValidationIssue> issues;
+ std::vector<FileCorruptionIssue> issues;
  CorruptionType worstIssue = CorruptionType::None;
  ValidationSeverity worstSeverity = ValidationSeverity::Info;
 };

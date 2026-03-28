@@ -1,6 +1,6 @@
 # ExplorerLens Plugin Development Guide
-**Version:** 15.2.0 "Zenith-S" 
-**Last Updated:** March 24, 2026
+**Version:** 23.5.0 "Vega-V" 
+**Last Updated:** March 27, 2026
 
 ---
 

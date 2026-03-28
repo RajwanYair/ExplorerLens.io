@@ -18,7 +18,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct BufferPoolStats {
+struct ThreadLocalPoolStats {
     uint64_t allocations = 0;
     uint64_t recycledHits = 0;
     uint64_t totalBytesAllocated = 0;
@@ -105,8 +105,8 @@ public:
         ReleaseSRWLockExclusive(&m_lock);
     }
 
-    BufferPoolStats GetStats() const {
-        BufferPoolStats s = m_stats;
+    ThreadLocalPoolStats GetStats() const {
+        ThreadLocalPoolStats s = m_stats;
         if (s.allocations > 0)
             s.hitRatePercent = 100.0 * s.recycledHits / s.allocations;
         return s;
@@ -115,7 +115,7 @@ public:
 private:
     SRWLOCK m_lock{};
     std::array<std::vector<uint8_t*>, NUM_SIZE_CLASSES> m_pools;
-    mutable BufferPoolStats m_stats{};
+    mutable ThreadLocalPoolStats m_stats{};
 };
 
 } // namespace Engine

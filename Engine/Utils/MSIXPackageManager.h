@@ -37,7 +37,7 @@ enum class SigningMode : uint8_t {
 };
 
 /// Package type
-enum class PackageType : uint8_t {
+enum class MSIXPackageType : uint8_t {
  MSIX, ///< Single architecture
  MSIXBundle, ///< Multi-architecture bundle
  AppX, ///< Legacy UWP package
@@ -85,7 +85,7 @@ struct MSIXConfig {
  std::wstring description =
  L"GPU-accelerated thumbnail provider for 200+ formats";
  std::wstring logoPath = L"Assets\\Logo.png";
- PackageType type = PackageType::MSIX;
+ MSIXPackageType type = MSIXPackageType::MSIX;
  SigningMode signing = SigningMode::SelfSigned;
  PackageCapability capabilities = PackageCapability::RunFullTrust |
  PackageCapability::ShellExtension |
@@ -103,7 +103,7 @@ struct PackageBuildResult {
  uint64_t fileSizeBytes = 0;
  std::wstring errorMessage;
  std::wstring signatureInfo;
- PackageType type = PackageType::MSIX;
+ MSIXPackageType type = MSIXPackageType::MSIX;
 };
 
 //==============================================================================
@@ -142,7 +142,7 @@ public:
  /// Static name helpers
  static const wchar_t *GetChannelName(PackageChannel channel);
  static const wchar_t *GetSigningName(SigningMode mode);
- static const wchar_t *GetPackageTypeName(PackageType type);
+ static const wchar_t *GetPackageTypeName(MSIXPackageType type);
 
 private:
  MSIXConfig m_config;

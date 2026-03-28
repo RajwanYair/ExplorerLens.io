@@ -17,20 +17,20 @@ namespace ExplorerLens {
 
 // ── Version component ──────────────────────────────────────────────────────
 
-struct SemanticVersion {
+struct DetectorSemVer {
     int major = 0;
     int minor = 0;
     int patch = 0;
     std::string preRelease; // e.g. "beta.1"
     std::string buildMeta; // e.g. "20260218"
 
-    bool operator==(const SemanticVersion& o) const {
+    bool operator==(const DetectorSemVer& o) const {
         return major == o.major && minor == o.minor && patch == o.patch
             && preRelease == o.preRelease;
     }
-    bool operator!=(const SemanticVersion& o) const { return !(*this == o); }
+    bool operator!=(const DetectorSemVer& o) const { return !(*this == o); }
 
-    bool operator<(const SemanticVersion& o) const {
+    bool operator<(const DetectorSemVer& o) const {
         if (major != o.major) return major < o.major;
         if (minor != o.minor) return minor < o.minor;
         if (patch != o.patch) return patch < o.patch;
@@ -48,8 +48,8 @@ struct SemanticVersion {
         return s;
     }
 
-    static SemanticVersion Parse(const std::string& str) {
-        SemanticVersion v;
+    static DetectorSemVer Parse(const std::string& str) {
+        DetectorSemVer v;
         // Pattern: major.minor.patch[-pre][+meta]
         std::regex re(R"((\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.]+))?(?:\+([a-zA-Z0-9.]+))?)");
         std::smatch m;
@@ -96,7 +96,7 @@ struct DriftEntry {
 // ── Scan policy ────────────────────────────────────────────────────────────
 
 struct DriftScanPolicy {
-    SemanticVersion canonicalVersion; // the "truth" version
+    DetectorSemVer canonicalVersion; // the "truth" version
     bool allowPatchDrift = true; // patch mismatch → warning not error
     bool checkPreRelease = false; // compare pre-release tags
     bool checkBuildMeta = false; // compare build metadata
@@ -107,7 +107,7 @@ struct DriftScanPolicy {
 
 static DriftScanPolicy DefaultPolicy() {
     DriftScanPolicy p;
-    p.canonicalVersion = SemanticVersion{ 15, 0, 0 };
+    p.canonicalVersion = DetectorSemVer{ 15, 0, 0 };
     p.includePatterns = { "*.md", "*.h", "*.ps1", "*.cmake", "*.wxs" };
     p.excludePatterns = { "external/*", "build/*", "x64/*" };
     return p;
@@ -166,7 +166,7 @@ public:
             std::sregex_iterator it(line.begin(), line.end(), versionRe);
             std::sregex_iterator end;
             for (; it != end; ++it) {
-                auto found = SemanticVersion::Parse((*it)[1].str());
+                auto found = DetectorSemVer::Parse((*it)[1].str());
                 if (found.major == 0 && found.minor == 0 && found.patch == 0)
                     continue; // skip 0.0.0
                 if (found == m_policy.canonicalVersion)
@@ -241,7 +241,7 @@ public:
     const DriftScanPolicy& Policy() const { return m_policy; }
 
 private:
-    DriftSeverity ClassifySeverity(const SemanticVersion& found) const {
+    DriftSeverity ClassifySeverity(const DetectorSemVer& found) const {
         auto& canon = m_policy.canonicalVersion;
         if (found.major != canon.major)
             return DriftSeverity::Critical;

@@ -29,7 +29,7 @@ enum class AggregatorSeverity : uint8_t {
 };
 
 /// Telemetry metric types
-enum class MetricType : uint8_t {
+enum class AggregatorMetricType : uint8_t {
     Counter,        // Monotonically increasing count
     Gauge,          // Point-in-time value
     Histogram,      // Distribution of values
@@ -50,7 +50,7 @@ struct AggregatorEvent {
 /// Aggregated metric over a time window
 struct AggregatedMetric {
     std::string     name;
-    MetricType      type = MetricType::Counter;
+    AggregatorMetricType      type = AggregatorMetricType::Counter;
     double          sum = 0.0;
     double          min = 1e18;
     double          max = -1e18;
@@ -154,7 +154,7 @@ public:
         std::lock_guard<std::mutex> lock(m_metricMutex);
         auto& metric = m_metrics[name];
         metric.name = name;
-        metric.type = MetricType::Counter;
+        metric.type = AggregatorMetricType::Counter;
         metric.count += delta;
         metric.sum += static_cast<double>(delta);
         metric.lastValue = static_cast<double>(metric.count);
@@ -165,7 +165,7 @@ public:
         std::lock_guard<std::mutex> lock(m_metricMutex);
         auto& metric = m_metrics[name];
         metric.name = name;
-        metric.type = MetricType::Gauge;
+        metric.type = AggregatorMetricType::Gauge;
         metric.lastValue = value;
         metric.count++;
         metric.sum += value;
@@ -179,7 +179,7 @@ public:
         std::lock_guard<std::mutex> lock(m_metricMutex);
         auto& metric = m_metrics[name];
         metric.name = name;
-        metric.type = MetricType::Timer;
+        metric.type = AggregatorMetricType::Timer;
         metric.count++;
         metric.sum += ms;
         metric.lastValue = ms;

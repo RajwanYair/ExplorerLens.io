@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'RC version (e.g. 15.6.0-rc.1)'
+        description: 'RC version (e.g. 23.6.0-rc.1)'
         required: true
         default: ''
       base_ref:

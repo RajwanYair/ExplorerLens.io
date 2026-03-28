@@ -12,7 +12,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include "DPIScalingPolicy.h"
+#include "Core/DPIScalingPolicy.h"
 
 namespace ExplorerLens {
 namespace Engine {
