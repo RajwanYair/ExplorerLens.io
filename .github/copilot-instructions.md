@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 25.1.0 (Codename: Rigel-R)
+- **Version:** 25.2.0 (Codename: Rigel-S)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -211,7 +211,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~3413 unit tests, 5 benchmarks (v25.1.0 baseline)
+- **Test count:** ~3485 unit tests, 5 benchmarks (v25.2.0 baseline)
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -262,7 +262,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Development Guidance (v15.2+)
 
-- **Current version:** v25.1.0 "Rigel-R"
+- **Current version:** v25.2.0 "Rigel-S"
 - **Source of truth:** `CHANGELOG.md`
 - **Sprint plans:** `docs/SPRINT_PLAN_500.md` (Sprints 461–560) · `docs/SPRINT_PLAN_600.md` (561–660) · `docs/SPRINT_PLAN_700.md` (661–760) · `docs/SPRINT_PLAN_800.md` (761–860) · `docs/SPRINT_PLAN_900.md` (861–960)
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas

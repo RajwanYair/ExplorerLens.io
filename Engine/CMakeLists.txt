@@ -1575,6 +1575,16 @@ set(ENGINE_HEADERS
     Core/FormatDetectionReport.h
     Core/SyntheticDecoderGenerator.h
     AI/FormatEvolutionTracker.h
+
+    # Sprint 581-590 — NPU & Heterogeneous Compute (v25.2.0 "Rigel-S")
+    GPU/IntelNPUBackend.h
+    GPU/HexagonDSPBackend.h
+    GPU/ONNXEPRouter.h
+    GPU/HardwareCapabilityProfiler.h
+    Pipeline/PowerAwareScheduler.h
+    Memory/NPUMemoryPool.h
+    AI/NPUWarmupEngine.h
+    GPU/ARM64DecodeBackend.h
 )
 
 set(ENGINE_SOURCES

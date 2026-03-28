@@ -3,9 +3,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:ExplorerLens-v25.1.0-2026-04-05",
+  "serialNumber": "urn:uuid:ExplorerLens-v25.2.0-2026-04-12",
   "metadata": {
-    "timestamp": "2026-04-05T00:00:00Z",
+    "timestamp": "2026-04-12T00:00:00Z",
     "tools": [
       {
         "vendor": "ExplorerLens Project",

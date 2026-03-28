@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 5 April 2026 (v25.1.0 Rigel-R release)
-**Version:** 25.1.0 "Rigel-R"
+**Last Updated:** 12 April 2026 (v25.2.0 Rigel-S release)
+**Version:** 25.2.0 "Rigel-S"
 
 ---
 

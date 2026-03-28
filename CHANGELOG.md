@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [25.2.0] — Rigel-S (2026-04-12)
+
+### Added — Sprint 581-590: NPU & Heterogeneous Compute
+- `Engine/GPU/IntelNPUBackend.h`: Intel NPU OpenVINO EP backend — initialize/infer/metrics/shutdown with profiling and FP32/FP16/INT8/BF16 precision
+- `Engine/GPU/HexagonDSPBackend.h`: Qualcomm Hexagon DSP inference stub via ONNX QNN EP (HTP/HTA/CPU backends, HVX/HMX capability flags)
+- `Engine/GPU/ONNXEPRouter.h`: Runtime EP router selecting DirectML/CUDA/OpenVINO-NPU/QNN/CPU by availability and policy
+- `Engine/GPU/HardwareCapabilityProfiler.h`: TOPS-rated hardware fingerprinter enumerating all available AI accelerators with ranked profile
+- `Engine/Pipeline/PowerAwareScheduler.h`: Power-state-aware work-item dispatcher — NPU on AC, CPU-only on BatterySaver
+- `Engine/Memory/NPUMemoryPool.h`: Pre-allocated Pinned/DMACoherent memory pool with zero-copy tensor upload and block acquire/release
+- `Engine/AI/NPUWarmupEngine.h`: Model pre-warm engine with Eager/Lazy/Scheduled policies, callback notification, and dummy-run count
+- `Engine/GPU/ARM64DecodeBackend.h`: ARM64 NEON/SVE image decode paths for Windows on ARM (Snapdragon X Elite)
+
+### Statistics
+- Test count: 3,485 unit tests (+72 from baseline 3,413)
+- Sprint coverage: Sprints 581–590
+- New headers: 8 (Engine/GPU/×5, Engine/Pipeline/×1, Engine/Memory/×1, Engine/AI/×1)
+
+---
+
 ## [25.1.0] — Rigel-R (2026-04-05)
 
 ### Added — Sprint 561-570: WASM Plugin Sandbox (backfill)
