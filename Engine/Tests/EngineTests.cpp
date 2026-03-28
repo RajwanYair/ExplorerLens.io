@@ -140,6 +140,15 @@
 #include "../AI/SceneDepthEstimatorV2.h"
 #include "../AI/StyleTransferEngine.h"
 #include "../AI/LandmarkDetectionEngine.h"
+// Sprint 491-500 — Cross-Process Architecture (v24.1.0 "Altair-R")
+#include "../Core/OutOfProcThumbnailServer.h"
+#include "../Core/CrossProcessCacheProxy.h"
+#include "../Core/ProcessPoolManager.h"
+#include "../Core/NamedPipeHubServer.h"
+#include "../Core/ProcessIsolationPolicy.h"
+#include "../Core/CrossProcEventBus.h"
+#include "../Core/SharedStateCoordinator.h"
+#include "../Pipeline/RemoteRenderProxy.h"
 #include "../Engine.h"
 #include "../GPU/D3D12ComputePipeline.h"
 #include "../GPU/GPUDecodeAccelerationV2.h"
@@ -3519,8 +3528,611 @@ TEST(TestLandmarkDetectionEngine_DetectFileEmpty) {
 }
 
 //==============================================================================
-// Async Shell Extension Tests
+// Sprint 491-500 — Cross-Process Architecture (v24.1.0 "Altair-R")
 //==============================================================================
+
+// OutOfProcThumbnailServer — 9 tests
+TEST(TestOutOfProcServer_Defaults) {
+    using namespace ExplorerLens::Engine;
+    OutOfProcThumbnailServer srv;
+    ASSERT(srv.GetMode() == ServerMode::OutOfProc);
+    ASSERT(srv.GetState() == ServerState::Idle);
+    ASSERT(!srv.IsRunning());
+}
+
+TEST(TestOutOfProcServer_Constants) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(OutOfProcThumbnailServer::DEFAULT_MAX_CLIENTS   == 32);
+    ASSERT(OutOfProcThumbnailServer::CONNECTION_TIMEOUT_MS == 5000);
+    ASSERT(OutOfProcThumbnailServer::REQUEST_TIMEOUT_MS    == 30000);
+    ASSERT(OutOfProcThumbnailServer::MAX_RESTART_ATTEMPTS  == 3);
+}
+
+TEST(TestOutOfProcServer_GetModeName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(OutOfProcThumbnailServer::GetModeName(ServerMode::InProc))    == L"InProc");
+    ASSERT(std::wstring(OutOfProcThumbnailServer::GetModeName(ServerMode::OutOfProc)) == L"OutOfProc");
+    ASSERT(std::wstring(OutOfProcThumbnailServer::GetModeName(ServerMode::Hybrid))    == L"Hybrid");
+}
+
+TEST(TestOutOfProcServer_GetStateName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(OutOfProcThumbnailServer::GetStateName(ServerState::Idle))     == L"Idle");
+    ASSERT(std::wstring(OutOfProcThumbnailServer::GetStateName(ServerState::Starting)) == L"Starting");
+    ASSERT(std::wstring(OutOfProcThumbnailServer::GetStateName(ServerState::Running))  == L"Running");
+    ASSERT(std::wstring(OutOfProcThumbnailServer::GetStateName(ServerState::Stopping)) == L"Stopping");
+    ASSERT(std::wstring(OutOfProcThumbnailServer::GetStateName(ServerState::Error))    == L"Error");
+}
+
+TEST(TestOutOfProcServer_SetMode) {
+    using namespace ExplorerLens::Engine;
+    OutOfProcThumbnailServer srv;
+    srv.SetMode(ServerMode::InProc);
+    ASSERT(srv.GetMode() == ServerMode::InProc);
+}
+
+TEST(TestOutOfProcServer_StartStop) {
+    using namespace ExplorerLens::Engine;
+    OutOfProcThumbnailServer srv;
+    ASSERT(srv.Start());
+    ASSERT(srv.IsRunning());
+    ASSERT(srv.Stop());
+    ASSERT(!srv.IsRunning());
+}
+
+TEST(TestOutOfProcServer_ProcessRequestNull) {
+    using namespace ExplorerLens::Engine;
+    OutOfProcThumbnailServer srv;
+    srv.Start();
+    auto r = srv.ProcessRequest(nullptr, 0);
+    ASSERT(!r.success);
+    ASSERT(!r.error.empty());
+}
+
+TEST(TestOutOfProcServer_ProcessRequestValid) {
+    using namespace ExplorerLens::Engine;
+    OutOfProcThumbnailServer srv;
+    srv.Start();
+    uint8_t data[16] = {};
+    auto r = srv.ProcessRequest(data, sizeof(data));
+    ASSERT(r.success);
+    ASSERT(r.width  == 256);
+    ASSERT(r.height == 256);
+}
+
+TEST(TestOutOfProcServer_SetModeHybrid) {
+    using namespace ExplorerLens::Engine;
+    OutOfProcThumbnailServer srv;
+    srv.SetMode(ServerMode::Hybrid);
+    ASSERT(srv.GetMode() == ServerMode::Hybrid);
+}
+
+// CrossProcessCacheProxy — 9 tests
+TEST(TestCrossProcCacheProxy_Defaults) {
+    using namespace ExplorerLens::Engine;
+    CrossProcessCacheProxy proxy;
+    ASSERT(proxy.GetMode()  == CacheProxyMode::Auto);
+    ASSERT(proxy.GetState() == ProxyState::Disconnected);
+    ASSERT(!proxy.IsConnected());
+}
+
+TEST(TestCrossProcCacheProxy_Constants) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(CrossProcessCacheProxy::DEFAULT_SHMEM_KB   == 65536);
+    ASSERT(CrossProcessCacheProxy::CONNECT_TIMEOUT_MS == 2000);
+    ASSERT(CrossProcessCacheProxy::OP_TIMEOUT_MS      == 500);
+}
+
+TEST(TestCrossProcCacheProxy_GetModeName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CrossProcessCacheProxy::GetModeName(CacheProxyMode::SharedMemory)) == L"SharedMemory");
+    ASSERT(std::wstring(CrossProcessCacheProxy::GetModeName(CacheProxyMode::NamedPipe))    == L"NamedPipe");
+    ASSERT(std::wstring(CrossProcessCacheProxy::GetModeName(CacheProxyMode::COM))          == L"COM");
+    ASSERT(std::wstring(CrossProcessCacheProxy::GetModeName(CacheProxyMode::Auto))         == L"Auto");
+}
+
+TEST(TestCrossProcCacheProxy_GetStateName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CrossProcessCacheProxy::GetStateName(ProxyState::Disconnected)) == L"Disconnected");
+    ASSERT(std::wstring(CrossProcessCacheProxy::GetStateName(ProxyState::Connecting))   == L"Connecting");
+    ASSERT(std::wstring(CrossProcessCacheProxy::GetStateName(ProxyState::Connected))    == L"Connected");
+    ASSERT(std::wstring(CrossProcessCacheProxy::GetStateName(ProxyState::Error))        == L"Error");
+}
+
+TEST(TestCrossProcCacheProxy_ConnectDisconnect) {
+    using namespace ExplorerLens::Engine;
+    CrossProcessCacheProxy proxy;
+    ASSERT(proxy.Connect("TestServer"));
+    ASSERT(proxy.IsConnected());
+    ASSERT(proxy.Disconnect());
+    ASSERT(!proxy.IsConnected());
+}
+
+TEST(TestCrossProcCacheProxy_PutGetCycle) {
+    using namespace ExplorerLens::Engine;
+    CrossProcessCacheProxy proxy;
+    proxy.Connect();
+    uint8_t data[8] = { 1,2,3,4,5,6,7,8 };
+    ASSERT(proxy.Put("key1", data, sizeof(data)));
+    auto r = proxy.Get("key1");
+    ASSERT(r.success);
+    ASSERT(r.data.size() == sizeof(data));
+}
+
+TEST(TestCrossProcCacheProxy_PutNullFail) {
+    using namespace ExplorerLens::Engine;
+    CrossProcessCacheProxy proxy;
+    proxy.Connect();
+    ASSERT(!proxy.Put("key1", nullptr, 0));
+}
+
+TEST(TestCrossProcCacheProxy_InvalidateKey) {
+    using namespace ExplorerLens::Engine;
+    CrossProcessCacheProxy proxy;
+    proxy.Connect();
+    uint8_t data[4] = {};
+    proxy.Put("evict", data, sizeof(data));
+    ASSERT(proxy.Invalidate("evict"));
+    auto r = proxy.Get("evict");
+    ASSERT(!r.success);
+}
+
+TEST(TestCrossProcCacheProxy_PutWhileDisconnected) {
+    using namespace ExplorerLens::Engine;
+    CrossProcessCacheProxy proxy;
+    uint8_t data[4] = {};
+    ASSERT(!proxy.Put("key", data, sizeof(data)));
+}
+
+// ProcessPoolManager — 9 tests
+TEST(TestProcessPoolManager_Defaults) {
+    using namespace ExplorerLens::Engine;
+    ProcessPoolManager mgr;
+    ASSERT(!mgr.IsRunning());
+    ASSERT(mgr.GetWorkerCount() == 0);
+}
+
+TEST(TestProcessPoolManager_Constants) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(ProcessPoolManager::DEFAULT_MIN_WORKERS == 2);
+    ASSERT(ProcessPoolManager::DEFAULT_MAX_WORKERS == 8);
+    ASSERT(ProcessPoolManager::IDLE_TIMEOUT_MS     == 30000);
+    ASSERT(ProcessPoolManager::TASK_TIMEOUT_MS     == 15000);
+}
+
+TEST(TestProcessPoolManager_GetWorkerStateName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ProcessPoolManager::GetWorkerStateName(WorkerState::Idle))     == L"Idle");
+    ASSERT(std::wstring(ProcessPoolManager::GetWorkerStateName(WorkerState::Busy))     == L"Busy");
+    ASSERT(std::wstring(ProcessPoolManager::GetWorkerStateName(WorkerState::Starting)) == L"Starting");
+    ASSERT(std::wstring(ProcessPoolManager::GetWorkerStateName(WorkerState::Stopping)) == L"Stopping");
+    ASSERT(std::wstring(ProcessPoolManager::GetWorkerStateName(WorkerState::Crashed))  == L"Crashed");
+}
+
+TEST(TestProcessPoolManager_GetPriorityName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ProcessPoolManager::GetPriorityName(ProcessPriority::Low))         == L"Low");
+    ASSERT(std::wstring(ProcessPoolManager::GetPriorityName(ProcessPriority::BelowNormal)) == L"BelowNormal");
+    ASSERT(std::wstring(ProcessPoolManager::GetPriorityName(ProcessPriority::Normal))      == L"Normal");
+    ASSERT(std::wstring(ProcessPoolManager::GetPriorityName(ProcessPriority::AboveNormal)) == L"AboveNormal");
+    ASSERT(std::wstring(ProcessPoolManager::GetPriorityName(ProcessPriority::High))        == L"High");
+}
+
+TEST(TestProcessPoolManager_StartStop) {
+    using namespace ExplorerLens::Engine;
+    ProcessPoolManager mgr;
+    ASSERT(mgr.Start());
+    ASSERT(mgr.IsRunning());
+    ASSERT(mgr.Stop());
+    ASSERT(!mgr.IsRunning());
+}
+
+TEST(TestProcessPoolManager_Submit) {
+    using namespace ExplorerLens::Engine;
+    ProcessPoolManager mgr;
+    mgr.Start();
+    uint64_t id = mgr.Submit(L"test.png", 256);
+    ASSERT(id > 0);
+}
+
+TEST(TestProcessPoolManager_SubmitEmpty) {
+    using namespace ExplorerLens::Engine;
+    ProcessPoolManager mgr;
+    mgr.Start();
+    uint64_t id = mgr.Submit(L"", 256);
+    ASSERT(id == 0);
+}
+
+TEST(TestProcessPoolManager_Cancel) {
+    using namespace ExplorerLens::Engine;
+    ProcessPoolManager mgr;
+    mgr.Start();
+    uint64_t id = mgr.Submit(L"test.png", 256);
+    ASSERT(mgr.Cancel(id));
+}
+
+TEST(TestProcessPoolManager_SetPriority) {
+    using namespace ExplorerLens::Engine;
+    ProcessPoolManager mgr;
+    mgr.SetPriority(ProcessPriority::High);
+    ASSERT(mgr.GetStats().activeWorkers >= 0);
+}
+
+// NamedPipeHubServer — 9 tests
+TEST(TestNamedPipeHub_Defaults) {
+    using namespace ExplorerLens::Engine;
+    NamedPipeHubServer hub;
+    ASSERT(hub.GetState()       == HubState::Stopped);
+    ASSERT(hub.GetClientCount() == 0);
+    ASSERT(!hub.IsRunning());
+}
+
+TEST(TestNamedPipeHub_Constants) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(NamedPipeHubServer::DEFAULT_MAX_INSTANCES == 64);
+    ASSERT(NamedPipeHubServer::DEFAULT_BUFFER_KB     == 256);
+    ASSERT(NamedPipeHubServer::CONNECT_TIMEOUT_MS    == 5000);
+}
+
+TEST(TestNamedPipeHub_GetHubStateName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Stopped))  == L"Stopped");
+    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Starting)) == L"Starting");
+    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Running))  == L"Running");
+    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Draining)) == L"Draining");
+    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Error))    == L"Error");
+}
+
+TEST(TestNamedPipeHub_StartStop) {
+    using namespace ExplorerLens::Engine;
+    NamedPipeHubServer hub;
+    ASSERT(hub.Start());
+    ASSERT(hub.GetState() == HubState::Running);
+    ASSERT(hub.Stop());
+    ASSERT(hub.GetState() == HubState::Stopped);
+}
+
+TEST(TestNamedPipeHub_IsRunning) {
+    using namespace ExplorerLens::Engine;
+    NamedPipeHubServer hub;
+    ASSERT(!hub.IsRunning());
+    hub.Start();
+    ASSERT(hub.IsRunning());
+}
+
+TEST(TestNamedPipeHub_BroadcastNull) {
+    using namespace ExplorerLens::Engine;
+    NamedPipeHubServer hub;
+    hub.Start();
+    ASSERT(!hub.BroadcastMessage(nullptr, 0));
+}
+
+TEST(TestNamedPipeHub_SendToClientInvalid) {
+    using namespace ExplorerLens::Engine;
+    NamedPipeHubServer hub;
+    hub.Start();
+    uint8_t data[4] = {};
+    ASSERT(!hub.SendToClient(0, data, sizeof(data)));
+}
+
+TEST(TestNamedPipeHub_GetConnectedClients) {
+    using namespace ExplorerLens::Engine;
+    NamedPipeHubServer hub;
+    ASSERT(hub.GetConnectedClients().empty());
+    hub.Start();
+    ASSERT(hub.GetConnectedClients().empty());
+}
+
+TEST(TestNamedPipeHub_DisconnectClientInvalid) {
+    using namespace ExplorerLens::Engine;
+    NamedPipeHubServer hub;
+    hub.Start();
+    ASSERT(!hub.DisconnectClient(999));
+}
+
+// ProcessIsolationPolicy — 9 tests
+TEST(TestIsolationPolicy_DefaultLevel) {
+    using namespace ExplorerLens::Engine;
+    ProcessIsolationPolicy policy;
+    ASSERT(policy.GetDefaultLevel() == IsolationLevel::Medium);
+}
+
+TEST(TestIsolationPolicy_Constants) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(ProcessIsolationPolicy::DEFAULT_LEVEL == IsolationLevel::Medium);
+    ASSERT(ProcessIsolationPolicy::ARCHIVE_LEVEL == IsolationLevel::High);
+    ASSERT(ProcessIsolationPolicy::SAFE_LEVEL    == IsolationLevel::Low);
+}
+
+TEST(TestIsolationPolicy_GetLevelName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ProcessIsolationPolicy::GetLevelName(IsolationLevel::None))   == L"None");
+    ASSERT(std::wstring(ProcessIsolationPolicy::GetLevelName(IsolationLevel::Low))    == L"Low");
+    ASSERT(std::wstring(ProcessIsolationPolicy::GetLevelName(IsolationLevel::Medium)) == L"Medium");
+    ASSERT(std::wstring(ProcessIsolationPolicy::GetLevelName(IsolationLevel::High))   == L"High");
+    ASSERT(std::wstring(ProcessIsolationPolicy::GetLevelName(IsolationLevel::Strict)) == L"Strict");
+}
+
+TEST(TestIsolationPolicy_GetActionName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ProcessIsolationPolicy::GetActionName(IsolationAction::Allow))   == L"Allow");
+    ASSERT(std::wstring(ProcessIsolationPolicy::GetActionName(IsolationAction::Deny))    == L"Deny");
+    ASSERT(std::wstring(ProcessIsolationPolicy::GetActionName(IsolationAction::Sandbox)) == L"Sandbox");
+}
+
+TEST(TestIsolationPolicy_EvaluateSafe) {
+    using namespace ExplorerLens::Engine;
+    ProcessIsolationPolicy policy;
+    auto r = policy.Evaluate(L"image.jpg");
+    ASSERT(r.allowed);
+    ASSERT(r.effectiveLevel == IsolationLevel::Low);
+}
+
+TEST(TestIsolationPolicy_EvaluateArchive) {
+    using namespace ExplorerLens::Engine;
+    ProcessIsolationPolicy policy;
+    auto r = policy.Evaluate(L"archive.zip");
+    ASSERT(r.allowed);
+    ASSERT(r.effectiveLevel == IsolationLevel::High);
+    ASSERT(r.action == IsolationAction::Sandbox);
+}
+
+TEST(TestIsolationPolicy_SetDefaultLevel) {
+    using namespace ExplorerLens::Engine;
+    ProcessIsolationPolicy policy;
+    policy.SetDefaultLevel(IsolationLevel::Strict);
+    ASSERT(policy.GetDefaultLevel() == IsolationLevel::Strict);
+}
+
+TEST(TestIsolationPolicy_AddRule) {
+    using namespace ExplorerLens::Engine;
+    ProcessIsolationPolicy policy;
+    FormatIsolationRule rule;
+    rule.formatExt = L".xyz";
+    rule.level     = IsolationLevel::Strict;
+    rule.action    = IsolationAction::Deny;
+    policy.AddRule(rule);
+    auto r = policy.Evaluate(L"file.xyz");
+    ASSERT(!r.allowed);
+    ASSERT(r.effectiveLevel == IsolationLevel::Strict);
+}
+
+TEST(TestIsolationPolicy_ShouldSandbox) {
+    using namespace ExplorerLens::Engine;
+    ProcessIsolationPolicy policy;
+    ASSERT(policy.ShouldSandbox(L".zip"));
+    ASSERT(!policy.ShouldSandbox(L".jpg"));
+}
+
+// CrossProcEventBus — 9 tests
+TEST(TestCrossProcEventBus_Defaults) {
+    using namespace ExplorerLens::Engine;
+    CrossProcEventBus bus;
+    ASSERT(bus.GetMode() == EventBusMode::InProcess);
+    ASSERT(!bus.IsRunning());
+}
+
+TEST(TestCrossProcEventBus_Constants) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(CrossProcEventBus::MAX_SUBSCRIBERS == 256);
+    ASSERT(CrossProcEventBus::MAX_QUEUE_DEPTH == 4096);
+    ASSERT(CrossProcEventBus::DEFAULT_TIMEOUT_MS == 100);
+}
+
+TEST(TestCrossProcEventBus_GetModeName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CrossProcEventBus::GetModeName(EventBusMode::InProcess))    == L"InProcess");
+    ASSERT(std::wstring(CrossProcEventBus::GetModeName(EventBusMode::CrossProcess)) == L"CrossProcess");
+    ASSERT(std::wstring(CrossProcEventBus::GetModeName(EventBusMode::Hybrid))       == L"Hybrid");
+}
+
+TEST(TestCrossProcEventBus_GetPriorityName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(CrossProcEventBus::GetPriorityName(EventPriority::Low))      == L"Low");
+    ASSERT(std::wstring(CrossProcEventBus::GetPriorityName(EventPriority::Normal))   == L"Normal");
+    ASSERT(std::wstring(CrossProcEventBus::GetPriorityName(EventPriority::High))     == L"High");
+    ASSERT(std::wstring(CrossProcEventBus::GetPriorityName(EventPriority::Critical)) == L"Critical");
+}
+
+TEST(TestCrossProcEventBus_StartStop) {
+    using namespace ExplorerLens::Engine;
+    CrossProcEventBus bus;
+    ASSERT(bus.Start());
+    ASSERT(bus.IsRunning());
+    ASSERT(bus.Stop());
+    ASSERT(!bus.IsRunning());
+}
+
+TEST(TestCrossProcEventBus_SubscribeUnsubscribe) {
+    using namespace ExplorerLens::Engine;
+    CrossProcEventBus bus;
+    bus.Start();
+    auto h = bus.Subscribe(L"test.topic", [](const BusEvent&){});
+    ASSERT(h.IsValid());
+    ASSERT(h.id > 0);
+    ASSERT(bus.Unsubscribe(h));
+}
+
+TEST(TestCrossProcEventBus_Publish) {
+    using namespace ExplorerLens::Engine;
+    CrossProcEventBus bus;
+    bus.Start();
+    bool fired = false;
+    bus.Subscribe(L"my.topic", [&](const BusEvent& e){ fired = true; });
+    BusEvent ev;
+    ev.topic    = L"my.topic";
+    ev.payload  = "hello";
+    ev.priority = EventPriority::Normal;
+    ASSERT(bus.Publish(ev));
+    ASSERT(fired);
+}
+
+TEST(TestCrossProcEventBus_GetSubscriberCount) {
+    using namespace ExplorerLens::Engine;
+    CrossProcEventBus bus;
+    bus.Start();
+    ASSERT(bus.GetSubscriberCount() == 0);
+    bus.Subscribe(L"t", [](const BusEvent&){});
+    ASSERT(bus.GetSubscriberCount() == 1);
+}
+
+TEST(TestCrossProcEventBus_GetQueueDepth) {
+    using namespace ExplorerLens::Engine;
+    CrossProcEventBus bus;
+    bus.Start();
+    ASSERT(bus.GetQueueDepth() == 0);
+}
+
+// SharedStateCoordinator — 9 tests
+TEST(TestSharedState_DefaultStrategy) {
+    using namespace ExplorerLens::Engine;
+    SharedStateCoordinator coord;
+    ASSERT(coord.GetStrategy()   == SyncStrategy::Optimistic);
+    ASSERT(coord.GetEntryCount() == 0);
+    ASSERT(!coord.HasConflicts());
+}
+
+TEST(TestSharedState_Constants) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(SharedStateCoordinator::SYNC_INTERVAL_MS  == 500);
+    ASSERT(SharedStateCoordinator::MAX_STATE_ENTRIES == 1024);
+    ASSERT(SharedStateCoordinator::STATE_VERSION_BITS == 64);
+}
+
+TEST(TestSharedState_GetStrategyName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(SharedStateCoordinator::GetStrategyName(SyncStrategy::Optimistic))          == L"Optimistic");
+    ASSERT(std::wstring(SharedStateCoordinator::GetStrategyName(SyncStrategy::Pessimistic))         == L"Pessimistic");
+    ASSERT(std::wstring(SharedStateCoordinator::GetStrategyName(SyncStrategy::EventualConsistency)) == L"EventualConsistency");
+}
+
+TEST(TestSharedState_GetReasonName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(SharedStateCoordinator::GetReasonName(StateChangeReason::UserAction))   == L"UserAction");
+    ASSERT(std::wstring(SharedStateCoordinator::GetReasonName(StateChangeReason::ProcessEvent)) == L"ProcessEvent");
+    ASSERT(std::wstring(SharedStateCoordinator::GetReasonName(StateChangeReason::Timeout))      == L"Timeout");
+    ASSERT(std::wstring(SharedStateCoordinator::GetReasonName(StateChangeReason::Conflict))     == L"Conflict");
+}
+
+TEST(TestSharedState_SetGet) {
+    using namespace ExplorerLens::Engine;
+    SharedStateCoordinator coord;
+    ASSERT(coord.Set(L"key", "value"));
+    std::string out;
+    ASSERT(coord.Get(L"key", out));
+    ASSERT(out == "value");
+}
+
+TEST(TestSharedState_Remove) {
+    using namespace ExplorerLens::Engine;
+    SharedStateCoordinator coord;
+    coord.Set(L"k", "v");
+    ASSERT(coord.Remove(L"k"));
+    std::string out;
+    ASSERT(!coord.Get(L"k", out));
+}
+
+TEST(TestSharedState_GetVersion) {
+    using namespace ExplorerLens::Engine;
+    SharedStateCoordinator coord;
+    coord.Set(L"k", "v");
+    ASSERT(coord.GetVersion(L"k") > 0);
+    ASSERT(coord.GetVersion(L"missing") == 0);
+}
+
+TEST(TestSharedState_Synchronize) {
+    using namespace ExplorerLens::Engine;
+    SharedStateCoordinator coord;
+    auto r = coord.Synchronize();
+    ASSERT(r.success);
+    ASSERT(r.conflictsResolved == 0);
+}
+
+TEST(TestSharedState_EntryCount) {
+    using namespace ExplorerLens::Engine;
+    SharedStateCoordinator coord;
+    coord.Set(L"a", "1");
+    coord.Set(L"b", "2");
+    coord.Set(L"c", "3");
+    ASSERT(coord.GetEntryCount() == 3);
+}
+
+// RemoteRenderProxy — 9 tests
+TEST(TestRemoteRenderProxy_Defaults) {
+    using namespace ExplorerLens::Engine;
+    RemoteRenderProxy proxy;
+    ASSERT(proxy.GetTransport()    == ProxyTransport::NamedPipe);
+    ASSERT(!proxy.IsConnected());
+    ASSERT(proxy.GetLastState()    == RenderState::Idle);
+    ASSERT(proxy.GetPendingCount() == 0);
+}
+
+TEST(TestRemoteRenderProxy_Constants) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(RemoteRenderProxy::DEFAULT_TIMEOUT_MS     == 30000);
+    ASSERT(RemoteRenderProxy::MAX_CONCURRENT_RENDERS == 8);
+    ASSERT(RemoteRenderProxy::DEFAULT_SIZE           == 256);
+}
+
+TEST(TestRemoteRenderProxy_GetTransportName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(RemoteRenderProxy::GetTransportName(ProxyTransport::NamedPipe))  == L"NamedPipe");
+    ASSERT(std::wstring(RemoteRenderProxy::GetTransportName(ProxyTransport::SharedMem))  == L"SharedMem");
+    ASSERT(std::wstring(RemoteRenderProxy::GetTransportName(ProxyTransport::COM))        == L"COM");
+    ASSERT(std::wstring(RemoteRenderProxy::GetTransportName(ProxyTransport::DirectCall)) == L"DirectCall");
+}
+
+TEST(TestRemoteRenderProxy_GetRenderStateName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(RemoteRenderProxy::GetRenderStateName(RenderState::Idle))      == L"Idle");
+    ASSERT(std::wstring(RemoteRenderProxy::GetRenderStateName(RenderState::Rendering)) == L"Rendering");
+    ASSERT(std::wstring(RemoteRenderProxy::GetRenderStateName(RenderState::Completed)) == L"Completed");
+    ASSERT(std::wstring(RemoteRenderProxy::GetRenderStateName(RenderState::Failed))    == L"Failed");
+}
+
+TEST(TestRemoteRenderProxy_ConnectDisconnect) {
+    using namespace ExplorerLens::Engine;
+    RemoteRenderProxy proxy;
+    ASSERT(proxy.Connect());
+    ASSERT(proxy.IsConnected());
+    ASSERT(proxy.Disconnect());
+    ASSERT(!proxy.IsConnected());
+}
+
+TEST(TestRemoteRenderProxy_RenderFileEmpty) {
+    using namespace ExplorerLens::Engine;
+    RemoteRenderProxy proxy;
+    proxy.Connect();
+    auto r = proxy.RenderFile(L"");
+    ASSERT(!r.success);
+    ASSERT(!r.error.empty());
+}
+
+TEST(TestRemoteRenderProxy_RenderWhileDisconnected) {
+    using namespace ExplorerLens::Engine;
+    RemoteRenderProxy proxy;
+    auto r = proxy.RenderFile(L"test.png");
+    ASSERT(!r.success);
+    ASSERT(!r.error.empty());
+}
+
+TEST(TestRemoteRenderProxy_SetTransport) {
+    using namespace ExplorerLens::Engine;
+    RemoteRenderProxy proxy;
+    proxy.SetTransport(ProxyTransport::COM);
+    ASSERT(proxy.GetTransport() == ProxyTransport::COM);
+}
+
+TEST(TestRemoteRenderProxy_GetLastState) {
+    using namespace ExplorerLens::Engine;
+    RemoteRenderProxy proxy;
+    proxy.Connect();
+    ASSERT(proxy.GetLastState()    == RenderState::Idle);
+    ASSERT(proxy.GetPendingCount() == 0);
+    auto r = proxy.RenderFile(L"image.png", 128);
+    ASSERT(r.success);
+    ASSERT(proxy.GetLastState() == RenderState::Completed);
+}
 
 TEST(TestAsyncProvider_Create) {
     AsyncThumbnailProvider provider;
@@ -32342,28 +32954,157 @@ TEST(TestCICDWebhookReceiver_DispatchEvent) {
     // Sprint 481-490 — AI-Native Thumbnailing v2 (v24.0.0 "Altair")
     RUN_TEST(TestNeuralUpscalerV2_BackendDefault);
     RUN_TEST(TestNeuralUpscalerV2_Constants);
-    RUN_TEST(TestNeuralUpscalerV2_InvalidPixels);
+    RUN_TEST(TestNeuralUpscalerV2_NullPixelsFail);
+    RUN_TEST(TestNeuralUpscalerV2_SetBackendCPU);
+    RUN_TEST(TestNeuralUpscalerV2_SetBackendONNX);
+    RUN_TEST(TestNeuralUpscalerV2_SetFactorX2);
+    RUN_TEST(TestNeuralUpscalerV2_SetTileSize);
+    RUN_TEST(TestNeuralUpscalerV2_LoadModel);
+    RUN_TEST(TestNeuralUpscalerV2_UpscaleValidX4);
     RUN_TEST(TestContentAwareResizer_DefaultStrategy);
-    RUN_TEST(TestContentAwareResizer_SetStrategy);
-    RUN_TEST(TestContentAwareResizer_TooSmall);
+    RUN_TEST(TestContentAwareResizer_StrategySeamCarving);
+    RUN_TEST(TestContentAwareResizer_StrategyCropAndPad);
+    RUN_TEST(TestContentAwareResizer_StrategyLetterBox);
+    RUN_TEST(TestContentAwareResizer_PreserveFacesText);
+    RUN_TEST(TestContentAwareResizer_SetSaliencyThresh);
+    RUN_TEST(TestContentAwareResizer_SetSeamIterations);
+    RUN_TEST(TestContentAwareResizer_ResizeFileEmpty);
+    RUN_TEST(TestContentAwareResizer_ValidResize);
     RUN_TEST(TestSemanticHashEngine_DefaultAlgo);
+    RUN_TEST(TestSemanticHashEngine_SetAlgoEfficientNetB0);
+    RUN_TEST(TestSemanticHashEngine_SetAlgoCLIP);
     RUN_TEST(TestSemanticHashEngine_HammingIdentical);
-    RUN_TEST(TestSemanticHashEngine_HashBits);
+    RUN_TEST(TestSemanticHashEngine_HammingNonZero);
+    RUN_TEST(TestSemanticHashEngine_AreDuplicateFalse);
+    RUN_TEST(TestSemanticHashEngine_HashBitsConstant);
+    RUN_TEST(TestSemanticHashEngine_HashValidPixels);
+    RUN_TEST(TestSemanticHashEngine_HashFileEmpty);
     RUN_TEST(TestAutoTaggingEngine_TaxonomyInit);
-    RUN_TEST(TestAutoTaggingEngine_MaxTags);
+    RUN_TEST(TestAutoTaggingEngine_LoadTaxonomyEmpty);
+    RUN_TEST(TestAutoTaggingEngine_LoadTaxonomyPath);
+    RUN_TEST(TestAutoTaggingEngine_MaxSupportedTags);
+    RUN_TEST(TestAutoTaggingEngine_MinValidConfidence);
+    RUN_TEST(TestAutoTaggingEngine_SetMaxTags);
+    RUN_TEST(TestAutoTaggingEngine_SetMinConfidence);
     RUN_TEST(TestAutoTaggingEngine_TagNullPixels);
+    RUN_TEST(TestAutoTaggingEngine_TagNoTaxonomy);
     RUN_TEST(TestQualityRestorationEngine_DefaultMode);
-    RUN_TEST(TestQualityRestorationEngine_SetMode);
+    RUN_TEST(TestQualityRestorationEngine_SetModeDeblur);
+    RUN_TEST(TestQualityRestorationEngine_SetModeCombined);
+    RUN_TEST(TestQualityRestorationEngine_SetModeJPEGArtifact);
     RUN_TEST(TestQualityRestorationEngine_RestoreNull);
+    RUN_TEST(TestQualityRestorationEngine_RestoreValidPixels);
+    RUN_TEST(TestQualityRestorationEngine_EstimateNoiseLevelNull);
+    RUN_TEST(TestQualityRestorationEngine_EstimateBlurLevelNull);
+    RUN_TEST(TestQualityRestorationEngine_Constants);
     RUN_TEST(TestSceneDepthEstimatorV2_DefaultModel);
+    RUN_TEST(TestSceneDepthEstimatorV2_SetModelLarge);
+    RUN_TEST(TestSceneDepthEstimatorV2_SetModelDPT);
+    RUN_TEST(TestSceneDepthEstimatorV2_SetModelZoeDepth);
+    RUN_TEST(TestSceneDepthEstimatorV2_SetOutputTypeMetric);
     RUN_TEST(TestSceneDepthEstimatorV2_Constants);
     RUN_TEST(TestSceneDepthEstimatorV2_EstimateNull);
+    RUN_TEST(TestSceneDepthEstimatorV2_EstimateValid);
+    RUN_TEST(TestSceneDepthEstimatorV2_RenderDepthMapEmpty);
     RUN_TEST(TestStyleTransferEngine_DefaultStyle);
-    RUN_TEST(TestStyleTransferEngine_SetStrength);
+    RUN_TEST(TestStyleTransferEngine_SetStyleCandy);
+    RUN_TEST(TestStyleTransferEngine_SetStyleUdnie);
+    RUN_TEST(TestStyleTransferEngine_SetStyleRainPrincess);
+    RUN_TEST(TestStyleTransferEngine_SetStyleStarryNight);
+    RUN_TEST(TestStyleTransferEngine_Constants);
+    RUN_TEST(TestStyleTransferEngine_SetStrengthClamped);
     RUN_TEST(TestStyleTransferEngine_TransferNull);
-    RUN_TEST(TestLandmarkDetectionEngine_MaxFaces);
+    RUN_TEST(TestStyleTransferEngine_LoadCustomStyle);
+    RUN_TEST(TestLandmarkDetectionEngine_Defaults);
     RUN_TEST(TestLandmarkDetectionEngine_Constants);
+    RUN_TEST(TestLandmarkDetectionEngine_SetMaxFaces);
+    RUN_TEST(TestLandmarkDetectionEngine_SetMinFaceScore);
     RUN_TEST(TestLandmarkDetectionEngine_DetectNull);
+    RUN_TEST(TestLandmarkDetectionEngine_DetectValidPixels);
+    RUN_TEST(TestLandmarkDetectionEngine_GetOptimalCropBoxEmpty);
+    RUN_TEST(TestLandmarkDetectionEngine_GetOptimalCropBoxWithFace);
+    RUN_TEST(TestLandmarkDetectionEngine_DetectFileEmpty);
+
+    // Sprint 491-500 — Cross-Process Architecture (v24.1.0 "Altair-R")
+    RUN_TEST(TestOutOfProcServer_Defaults);
+    RUN_TEST(TestOutOfProcServer_Constants);
+    RUN_TEST(TestOutOfProcServer_GetModeName);
+    RUN_TEST(TestOutOfProcServer_GetStateName);
+    RUN_TEST(TestOutOfProcServer_SetMode);
+    RUN_TEST(TestOutOfProcServer_StartStop);
+    RUN_TEST(TestOutOfProcServer_ProcessRequestNull);
+    RUN_TEST(TestOutOfProcServer_ProcessRequestValid);
+    RUN_TEST(TestOutOfProcServer_SetModeHybrid);
+
+    RUN_TEST(TestCrossProcCacheProxy_Defaults);
+    RUN_TEST(TestCrossProcCacheProxy_Constants);
+    RUN_TEST(TestCrossProcCacheProxy_GetModeName);
+    RUN_TEST(TestCrossProcCacheProxy_GetStateName);
+    RUN_TEST(TestCrossProcCacheProxy_ConnectDisconnect);
+    RUN_TEST(TestCrossProcCacheProxy_PutGetCycle);
+    RUN_TEST(TestCrossProcCacheProxy_PutNullFail);
+    RUN_TEST(TestCrossProcCacheProxy_InvalidateKey);
+    RUN_TEST(TestCrossProcCacheProxy_PutWhileDisconnected);
+
+    RUN_TEST(TestProcessPoolManager_Defaults);
+    RUN_TEST(TestProcessPoolManager_Constants);
+    RUN_TEST(TestProcessPoolManager_GetWorkerStateName);
+    RUN_TEST(TestProcessPoolManager_GetPriorityName);
+    RUN_TEST(TestProcessPoolManager_StartStop);
+    RUN_TEST(TestProcessPoolManager_Submit);
+    RUN_TEST(TestProcessPoolManager_SubmitEmpty);
+    RUN_TEST(TestProcessPoolManager_Cancel);
+    RUN_TEST(TestProcessPoolManager_SetPriority);
+
+    RUN_TEST(TestNamedPipeHub_Defaults);
+    RUN_TEST(TestNamedPipeHub_Constants);
+    RUN_TEST(TestNamedPipeHub_GetHubStateName);
+    RUN_TEST(TestNamedPipeHub_StartStop);
+    RUN_TEST(TestNamedPipeHub_IsRunning);
+    RUN_TEST(TestNamedPipeHub_BroadcastNull);
+    RUN_TEST(TestNamedPipeHub_SendToClientInvalid);
+    RUN_TEST(TestNamedPipeHub_GetConnectedClients);
+    RUN_TEST(TestNamedPipeHub_DisconnectClientInvalid);
+
+    RUN_TEST(TestIsolationPolicy_DefaultLevel);
+    RUN_TEST(TestIsolationPolicy_Constants);
+    RUN_TEST(TestIsolationPolicy_GetLevelName);
+    RUN_TEST(TestIsolationPolicy_GetActionName);
+    RUN_TEST(TestIsolationPolicy_EvaluateSafe);
+    RUN_TEST(TestIsolationPolicy_EvaluateArchive);
+    RUN_TEST(TestIsolationPolicy_SetDefaultLevel);
+    RUN_TEST(TestIsolationPolicy_AddRule);
+    RUN_TEST(TestIsolationPolicy_ShouldSandbox);
+
+    RUN_TEST(TestCrossProcEventBus_Defaults);
+    RUN_TEST(TestCrossProcEventBus_Constants);
+    RUN_TEST(TestCrossProcEventBus_GetModeName);
+    RUN_TEST(TestCrossProcEventBus_GetPriorityName);
+    RUN_TEST(TestCrossProcEventBus_StartStop);
+    RUN_TEST(TestCrossProcEventBus_SubscribeUnsubscribe);
+    RUN_TEST(TestCrossProcEventBus_Publish);
+    RUN_TEST(TestCrossProcEventBus_GetSubscriberCount);
+    RUN_TEST(TestCrossProcEventBus_GetQueueDepth);
+
+    RUN_TEST(TestSharedState_DefaultStrategy);
+    RUN_TEST(TestSharedState_Constants);
+    RUN_TEST(TestSharedState_GetStrategyName);
+    RUN_TEST(TestSharedState_GetReasonName);
+    RUN_TEST(TestSharedState_SetGet);
+    RUN_TEST(TestSharedState_Remove);
+    RUN_TEST(TestSharedState_GetVersion);
+    RUN_TEST(TestSharedState_Synchronize);
+    RUN_TEST(TestSharedState_EntryCount);
+
+    RUN_TEST(TestRemoteRenderProxy_Defaults);
+    RUN_TEST(TestRemoteRenderProxy_Constants);
+    RUN_TEST(TestRemoteRenderProxy_GetTransportName);
+    RUN_TEST(TestRemoteRenderProxy_GetRenderStateName);
+    RUN_TEST(TestRemoteRenderProxy_ConnectDisconnect);
+    RUN_TEST(TestRemoteRenderProxy_RenderFileEmpty);
+    RUN_TEST(TestRemoteRenderProxy_RenderWhileDisconnected);
+    RUN_TEST(TestRemoteRenderProxy_SetTransport);
+    RUN_TEST(TestRemoteRenderProxy_GetLastState);
 
     std::wcout << std::endl;
 

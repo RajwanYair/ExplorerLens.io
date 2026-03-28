@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:ExplorerLens-v24.0.0-2026-03-28",
+  "serialNumber": "urn:uuid:ExplorerLens-v24.1.0-2026-03-28",
   "metadata": {
     "timestamp": "2026-03-28T00:00:00Z",
     "tools": [
@@ -17,7 +17,7 @@
       "type": "application",
       "bom-ref": "ExplorerLens-main",
       "name": "ExplorerLens",
-      "version": "24.0.0",
+      "version": "24.1.0",
       "description": "GPU-accelerated Windows Shell Extension thumbnail provider supporting 200+ file formats",
       "licenses": [
         {

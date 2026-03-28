@@ -17,7 +17,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
 ![Windows 11](https://img.shields.io/badge/Windows-10%2F11-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Tests](https://img.shields.io/badge/Tests-3197%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-3269%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 
 | | |
@@ -264,7 +264,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 24.0.0 "Altair"
+**Current Version:** 24.1.0 "Altair-R"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 3,125 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Altair — AI-Native Thumbnailing v2 (Sprints 481–490; roadmap → v24.1.0 "Altair-R")
@@ -321,4 +321,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 Built with ❤️ using C++20, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
 
-Last Updated: March 28, 2026 (v24.0.0 "Altair")
+Last Updated: March 28, 2026 (v24.1.0 "Altair-R")

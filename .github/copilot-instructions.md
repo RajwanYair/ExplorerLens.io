@@ -5,7 +5,7 @@
 ExplorerLens is a **Windows Shell Extension** (IThumbnailProvider COM DLL) that generates
 GPU-accelerated thumbnails for 200+ file formats across 25 specialized decoders.
 
-- **Version:** 24.0.0 (Codename: Altair)
+- **Version:** 24.1.0 (Codename: Altair-R)
 - **Language:** C++20 (MSVC v145 toolset, Visual Studio 18 2026)
 - **Build System:** CMake 3.25+ with presets (Engine) + MSBuild (Shell/Manager)
 - **Preferred Compiler:** MSVC cl.exe 19.50 (v145 toolset) — **never use Clang for production builds**
@@ -211,7 +211,7 @@ All headers use this standardized Copyright doc-block (banner BEFORE `#pragma on
 ## Testing
 
 - **Framework:** Custom macros `TEST(name)`, `RUN_TEST(name)`, `ASSERT(cond)` with counters — NOT GTest
-- **Test count:** ~3197 unit tests, 5 benchmarks
+- **Test count:** ~3269 unit tests, 5 benchmarks
 - **Pass rate:** 100%
 - **Performance targets:** 17ms single thumbnail, 235 img/sec batch, <5ms cache hit
 
@@ -262,7 +262,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 ## Development Guidance (v15.2+)
 
-- **Current version:** v24.0.0 "Altair"
+- **Current version:** v24.1.0 "Altair-R"
 - **Source of truth:** `CHANGELOG.md`
 - **Sprint plans:** `docs/SPRINT_PLAN_500.md` (Sprints 461–560) · `docs/SPRINT_PLAN_600.md` (561–660) · `docs/SPRINT_PLAN_700.md` (661–760) · `docs/SPRINT_PLAN_800.md` (761–860) · `docs/SPRINT_PLAN_900.md` (861–960)
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas

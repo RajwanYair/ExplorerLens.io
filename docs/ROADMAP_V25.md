@@ -1,7 +1,7 @@
 # ExplorerLens v25.x "Rigel" — Development Roadmap
 
 **Status:** Planning  
-**Current Version:** v24.0.0 "Altair"  
+**Current Version:** v24.1.0 "Altair-R"  
 **Next Major Version:** v25.0.0 "Rigel"  
 **Previous Roadmap:** [ROADMAP_V16.md](archive/ROADMAP_V16.md) *(archived — covers v15.x/v16.x work now completed)*  
 **Sprint Detail:** [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) — Sprints 561–660
@@ -37,10 +37,10 @@ v23.5.0  Vega-V    ── released
    │
    ├── v23.6.0  Vega-W     Security Hardening v2        (Sprint 461–470) ── released
    ├── v23.7.0  Vega-X     Format Expansion V            (Sprint 471–480) ✔ Released
-├── v24.0.0  Altair     AI-Native Thumbnailing v2 ★  (Sprint 481–490) ← NOW
+├── v24.0.0  Altair     AI-Native Thumbnailing v2 ★  (Sprint 481–490) ✔ Released
    │
-   ├── v24.0.0  Altair     AI-Native Thumbnailing v2 ★  (Sprint 481–490)
-   ├── v24.1.0  Altair-R   Cross-Process Architecture    (Sprint 491–500)
+   ├── v24.0.0  Altair     AI-Native Thumbnailing v2 ★  (Sprint 481–490) ✔ Released
+   ├── v24.1.0  Altair-R   Cross-Process Architecture    (Sprint 491–500) ← NOW
    ├── v24.2.0  Altair-S   Cloud Integration v2          (Sprint 501–510)
    ├── v24.3.0  Altair-T   Enterprise Policy v3          (Sprint 511–520)
    ├── v24.4.0  Altair-U   Performance Profiling v2      (Sprint 521–530)
@@ -80,8 +80,8 @@ The Altair series will complete these capabilities before Rigel begins:
 | CLI & Automation v2 (watch/diff/profile) | v23.5.0 Vega-V | ✅ Done |
 | Security hardening v2 (ZTP/CFG/AES-IPC) | v23.6.0 Vega-W | ✅ Done |
 | Format Expansion V (ICNS/CUR/FLIF) | v23.7.0 Vega-X | ✅ Done |
-| AI-native thumbnailing v2 (ESRGAN/CLIP) | v24.0.0 Altair | Planned |
-| Cross-process COM server + named-pipe hub | v24.1.0 Altair-R | Planned |
+| AI-native thumbnailing v2 (ESRGAN/CLIP) | v24.0.0 Altair | ✔ Released |
+| Cross-process COM server + named-pipe hub | v24.1.0 Altair-R | ✔ Released |
 | Cloud backend (Azure/S3/Redis/CosmosDB) | v24.2.0 Altair-S | Planned |
 | Enterprise policy v3 (FIPS/GDPR/SIEM) | v24.3.0 Altair-T | Planned |
 | Performance profiling v2 (PMU/flame graphs) | v24.4.0 Altair-U | Planned |

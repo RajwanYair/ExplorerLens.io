@@ -390,6 +390,15 @@ set(ENGINE_HEADERS
     Core/ErrorRecoveryEngineV2.h
     Core/DiagnosticCollector.h
 
+    # Sprint 491-500 — Cross-Process Architecture (v24.1.0 "Altair-R")
+    Core/OutOfProcThumbnailServer.h
+    Core/CrossProcessCacheProxy.h
+    Core/ProcessPoolManager.h
+    Core/NamedPipeHubServer.h
+    Core/ProcessIsolationPolicy.h
+    Core/CrossProcEventBus.h
+    Core/SharedStateCoordinator.h
+
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
     Pipeline/BatchProcessor.h
@@ -418,6 +427,7 @@ set(ENGINE_HEADERS
     Pipeline/ThumbnailRequestValidator.h
     Pipeline/DecoderOutputValidator.h
     Pipeline/ProductionPipelineV2.h
+    Pipeline/RemoteRenderProxy.h
     Pipeline/LoopTuner.h
     Pipeline/PipelineErrorBoundary.h
 

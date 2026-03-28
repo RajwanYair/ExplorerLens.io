@@ -7,7 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned — v24.1.0 "Altair-R" — Cross-Process Architecture (Sprints 491–500)
+---
+
+## [24.1.0] — Altair-R (2026-03-28)
+
+### Added — Sprints 491-500: Cross-Process Architecture
+- Engine/Core/OutOfProcThumbnailServer.h: COM surrogate server with crash isolation, mode switching, and per-client access control
+- Engine/Core/CrossProcessCacheProxy.h: Zero-copy shared-memory cache bridge with named-pipe fallback
+- Engine/Core/ProcessPoolManager.h: Pre-warmed worker process pool with autoscale, priority control, and crash restart
+- Engine/Core/NamedPipeHubServer.h: Multi-client named-pipe IPC hub with broadcast, unicast, and ordered delivery
+- Engine/Core/ProcessIsolationPolicy.h: Per-format isolation level rules (archives → High/Sandbox; safe raster → Low/Allow)
+- Engine/Core/CrossProcEventBus.h: Cross-process publish/subscribe event bus with InProcess/CrossProcess/Hybrid modes
+- Engine/Core/SharedStateCoordinator.h: Distributed optimistic-lock shared-state sync with versioned entries
+- Engine/Pipeline/RemoteRenderProxy.h: GPU-less process remote render delegation with configurable IPC transport
+
+### Statistics
+- Test count: 3,269 unit tests (+72 from v24.0.0, comprehensive 9-test coverage per header)
+- Sprint coverage: 491–500 (10 sprints)
+- New headers: 8 (7 in Engine/Core/, 1 in Engine/Pipeline/)
+- All enums, getters, setters, config options, and result structs fully tested
 
 ---
 

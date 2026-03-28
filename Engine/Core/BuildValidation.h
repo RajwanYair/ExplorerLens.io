@@ -21,10 +21,10 @@ namespace BuildValidation {
 /// Build configuration snapshot for diagnostics
 struct BuildInfo {
     static constexpr int MajorVersion = 24;
-    static constexpr int MinorVersion = 0;
+    static constexpr int MinorVersion = 1;
     static constexpr int PatchVersion = 0;
-    static constexpr const char* VersionString = "24.0.0";
-    static constexpr const char* Codename = "Altair";
+    static constexpr const char* VersionString = "24.1.0";
+    static constexpr const char* Codename = "Altair-R";
     static constexpr const char* BuildDate = __DATE__;
     static constexpr const char* BuildTime = __TIME__;
 
@@ -43,13 +43,13 @@ struct BuildInfo {
 #endif
 
     // Feature flags
-    static constexpr int TotalMilestones = 472;
-    static constexpr int CompletedMilestones = 472;
+    static constexpr int TotalMilestones = 482;
+    static constexpr int CompletedMilestones = 482;
 
     // Subsystem count
     static constexpr int DecoderCount = 25;
     static constexpr int SupportedExtensions = 200;
-    static constexpr int UnitTestCount = 3197;
+    static constexpr int UnitTestCount = 3269;
     static constexpr int BenchmarkSuites = 5;
 };
 
