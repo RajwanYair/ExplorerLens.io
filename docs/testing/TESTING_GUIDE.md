@@ -169,4 +169,3 @@ RUN_TEST(MyNewFeatureTest);
 ---
 
 *Consolidates TESTING_GUIDE.md, TEST_VALIDATION_CHECKLIST.md, and INTEGRATION_TEST_MATRIX.md.*
-

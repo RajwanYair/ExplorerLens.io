@@ -116,6 +116,12 @@ jobs:
         run: |
           cl.exe 2>&1 | Select-Object -First 2
           Write-Host "CMake: $(cmake --version | Select-Object -First 1)" -ForegroundColor Cyan
+          # Ensure Ninja is on PATH (bundled with VS; choco fallback for edge cases)
+          $ninja = Get-Command ninja -ErrorAction SilentlyContinue
+          if (-not $ninja) {
+            Write-Host "Ninja not on PATH — installing via choco" -ForegroundColor Yellow
+            choco install ninja --no-progress -y 2>$null
+          }
           Write-Host "Ninja: $(ninja --version)" -ForegroundColor Cyan
           Write-Host "MSBuild: $(msbuild -version 2>&1 | Select-Object -First 1)" -ForegroundColor Cyan
 
@@ -334,6 +340,20 @@ jobs:
             artifacts   = $artifacts
           } | ConvertTo-Json -Depth 10 | Set-Content $reportPath -Encoding UTF8
           Write-Host "✓ Verification report: $reportPath" -ForegroundColor Green
+
+      # ── Upload build diagnostics on failure (for debugging) ─────────────
+      - name: Upload build diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-diagnostics-failure-${{ steps.version.outputs.version }}
+          path: |
+            build/CMakeFiles/CMakeError.log
+            build/CMakeFiles/CMakeOutput.log
+            build-logs/
+            build/build.ninja
+          if-no-files-found: ignore
+          retention-days: 14
 
       # ── Upload artifacts for release job ──────────────────────────────────
       - name: Upload artifacts

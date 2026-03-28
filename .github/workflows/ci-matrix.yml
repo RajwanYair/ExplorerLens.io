@@ -65,6 +65,15 @@ jobs:
       - name: Build external libraries
         uses: ./.github/actions/build-external-libs
 
+      - name: Verify Ninja
+        shell: pwsh
+        run: |
+          # Ninja is bundled with VS via ilammy/msvc-dev-cmd; choco is a fallback
+          if (-not (Get-Command ninja -ErrorAction SilentlyContinue)) {
+            choco install ninja --no-progress -y 2>$null
+          }
+          Write-Host "Ninja: $(ninja --version)" -ForegroundColor Cyan
+
       - name: Configure Engine
         run: cmake --preset ${{ matrix.preset }}
 

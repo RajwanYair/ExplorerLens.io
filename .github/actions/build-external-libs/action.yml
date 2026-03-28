@@ -14,7 +14,7 @@ runs:
         # ── Expected output paths (must match Engine/CMakeLists.txt) ──────────
         $libs = [ordered]@{
           zlib    = 'external/compression-libs/zlib-1.3.1/install/lib/zlibstatic.lib'
-          zstd    = 'external/compression-libs/zstd-1.5.7/build-manual/zstd_static.lib'
+          zstd    = 'external/compression-libs/zstd-1.5.7/install/lib/zstd_static.lib'
           minizip = 'external/compression-libs/minizip-ng-4.0.10/build-manual/minizip.lib'
           libwebp = 'external/image-libs/libwebp-1.5.0-build/build-cmake/Release/libwebp.lib'
           libraw  = 'external/camera-libs/libraw-install/lib/libraw_static.lib'

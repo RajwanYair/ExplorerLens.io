@@ -60,3 +60,10 @@ updates:
     commit-message:
       prefix: "chore(ci)"
       include: "scope"
+    # Group ALL GitHub Actions updates into a single weekly PR to reduce CI noise.
+    # Without groups, Dependabot opens one PR per action, each of which triggers
+    # CI runs — generating 5-10 failure issues per batch.
+    groups:
+      github-actions-all:
+        patterns:
+          - "*"
