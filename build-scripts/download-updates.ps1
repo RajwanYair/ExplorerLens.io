@@ -3,7 +3,7 @@
 # Date: November 19, 2025
 
 param(
-    [string]$ProxyUrl = "http://proxy-chain.intel.com:911"
+    [string]$ProxyUrl = ""
 )
 
 $ErrorActionPreference = "Stop"

@@ -9,8 +9,8 @@
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
 
-# Intel Proxy (if needed)
-# [System.Net.Http.HttpClient]::DefaultProxy = New-Object System.Net.WebProxy('http://proxy-dmz.intel.com:912', $true)
+# Proxy (if needed — set via HTTP_PROXY environment variable)
+# [System.Net.Http.HttpClient]::DefaultProxy = New-Object System.Net.WebProxy($env:HTTP_PROXY, $true)
 
 # Simple prompt - just path
 function prompt {

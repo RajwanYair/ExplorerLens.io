@@ -17,8 +17,8 @@ param(
     [switch]$Clean,
     [string]$Libde265ZipPath = "C:\Users\ryair\Downloads\libde265-master.zip",
     [string]$LibheifZipPath = "",
-    [string]$GitProxyUrl = "http://proxy-chain.intel.com:928",
-    [bool]$DisableGitSslVerifyForProxy = $true
+    [string]$GitProxyUrl = "",
+    [bool]$DisableGitSslVerifyForProxy = $false
 )
 
 # Import core build module

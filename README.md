@@ -264,10 +264,10 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 24.1.0 "Altair-R"
+**Current Version:** 25.0.0 "Rigel"
 **Build Status:** 0 errors / 0 warnings
 **Test Status:** 3,269 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Altair — AI-Native Thumbnailing v2 (Sprints 481–490; roadmap → v24.1.0 "Altair-R")
+**Codename:** Rigel — WebAssembly Plugin Sandbox (Sprints 561–570)
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 
@@ -321,4 +321,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 Built with ❤️ using C++20, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
 
-Last Updated: March 28, 2026 (v24.1.0 "Altair-R")
+Last Updated: March 29, 2026 (v25.0.0 "Rigel")

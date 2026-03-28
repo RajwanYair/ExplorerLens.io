@@ -5,14 +5,14 @@
 
 param(
     [switch]$UseProxy,
-    [string]$ProxyUrl = "http://proxy-chain.intel.com:928"
+    [string]$ProxyUrl = ""
 )
 
 $ErrorActionPreference = "Stop"
 
 # Configure proxy if requested
-if ($UseProxy) {
-    Write-Host "Configuring Intel proxy: $ProxyUrl" -ForegroundColor Cyan
+if ($UseProxy -and $ProxyUrl) {
+    Write-Host "Configuring proxy: $ProxyUrl" -ForegroundColor Cyan
     $env:HTTP_PROXY = $ProxyUrl
     $env:HTTPS_PROXY = $ProxyUrl
     [System.Net.WebRequest]::DefaultWebProxy = New-Object System.Net.WebProxy($ProxyUrl)

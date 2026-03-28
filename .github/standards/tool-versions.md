@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 28 March 2026 (tool update pass)
-**Version:** 24.1.0 "Altair-R"
+**Last Updated:** 29 March 2026 (v25.0.0 Rigel release)
+**Version:** 25.0.0 "Rigel"
 
 ---
 

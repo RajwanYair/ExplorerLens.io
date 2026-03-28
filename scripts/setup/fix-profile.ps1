@@ -7,8 +7,8 @@ $minimalProfile = @'
 # ExplorerLens Development Environment - Minimal Profile
 # Version: 3.0 - 2025-11-25
 
-# Intel Proxy Configuration
-[System.Net.Http.HttpClient]::DefaultProxy = New-Object System.Net.WebProxy('http://proxy-dmz.intel.com:912', $true)
+# Proxy Configuration (set HTTP_PROXY environment variable if behind a corporate proxy)
+# [System.Net.Http.HttpClient]::DefaultProxy = New-Object System.Net.WebProxy($env:HTTP_PROXY, $true)
 
 Write-Host "Loading ExplorerLens environment..." -ForegroundColor Cyan
 

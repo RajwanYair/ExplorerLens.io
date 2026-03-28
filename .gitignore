@@ -21,8 +21,9 @@ packaging/RELEASE_MANIFEST_19.2.0.md
 *.userosscache
 *.sln.docstates
 
-# VS Code user-specific (machine-local IntelliSense)
+# VS Code user-specific (machine-local IntelliSense and secrets)
 .vscode/c_cpp_properties.json
+.vscode/mcp.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [25.0.0] — Rigel (2026-03-29)
+
+### Changed — Production Cleanup & Major Version Bump
+- Removed 18 dead one-off/fix scripts from `build-scripts/` (fix13–fix16 type-rename fixup scripts, version-specific release scripts, deprecated duplicate finders)
+- Removed deprecated `Find-MSBuild.ps1` (×2) — all callers now use `Find-MSBuildPath` from `Build-Library-Core.ps1`
+- Updated `build-scripts/production/Build-Production-SlowMachine.ps1` to import `Build-Library-Core.ps1` and call `Find-MSBuildPath`
+- Updated `build-scripts/production/rebuild-compression-libs.ps1` to import `Build-Library-Core.ps1`, call `Find-MSBuildPath`, fix stale `external\compression` → `external\compression-libs` path, remove inline `Find-MSBuild` function
+- Removed duplicate `Core/ICacheProvider.h`, `Core/IFormatDetector.h`, `Core/IGPURenderer.h`, `Core/IThumbnailDecoder.h` stub entries from `Engine/CMakeLists.txt` ENGINE_HEADERS (canonical `Core/Interfaces/I*.h` entries retained; forwarding stubs remain on disk for decoder includes)
+- Deleted 57 stale build log files from `build-logs/` and 1 root-level stale log
+- `docs/SPRINT_PLAN_600.md`: marked Find-MSBuild and fix13–fix16 debt items as completed
+- `build-scripts/README.md`: removed deprecated Find-MSBuild references and ghost DEPRECATED.md entry
+
+### Statistics
+- Test count: 3,269 unit tests (unchanged baseline — no new sprint work in this release)
+- Sprint coverage: Sprints 501–560 (cleanup & consolidation)
+- Files removed: 18 dead scripts + 57 build logs
+
+---
+
 ## [24.1.0] — Altair-R (2026-03-28)
 
 ### Added — Sprints 491-500: Cross-Process Architecture

@@ -1,8 +1,8 @@
 # ExplorerLens Engine
 
-**Version:** 24.1.0 "Altair-R"
+**Version:** 25.0.0 "Rigel"
 **Created:** January 7, 2026
-**Status:** v24.1.0 "Altair-R" Complete — 3269 tests, 0 warnings
+**Status:** v25.0.0 "Rigel" — 3269 tests, 0 warnings
 
 ---
 
