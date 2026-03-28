@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
 **Last Updated:** 28 March 2026 (tool update pass)
-**Version:** 23.7.0 "Vega-X"
+**Version:** 24.0.0 "Altair"
 
 ---
 

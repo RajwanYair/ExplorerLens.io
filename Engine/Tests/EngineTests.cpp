@@ -132,6 +132,14 @@
 #include "../Decoders/PIXARDecoder.h"
 #include "../Decoders/JPEG2000TileDecoderV2.h"
 #include "../Decoders/FLIFDecoderV2.h"
+#include "../AI/NeuralUpscalerV2.h"
+#include "../AI/ContentAwareResizer.h"
+#include "../AI/SemanticHashEngine.h"
+#include "../AI/AutoTaggingEngine.h"
+#include "../AI/QualityRestorationEngine.h"
+#include "../AI/SceneDepthEstimatorV2.h"
+#include "../AI/StyleTransferEngine.h"
+#include "../AI/LandmarkDetectionEngine.h"
 #include "../Engine.h"
 #include "../GPU/D3D12ComputePipeline.h"
 #include "../GPU/GPUDecodeAccelerationV2.h"
@@ -3031,6 +3039,483 @@ TEST(TestFLIFDecoderV2_InvalidFile) {
     FLIFDecoderV2 decoder;
     auto result = decoder.Decode("nonexistent.flif");
     ASSERT(!result.success);
+}
+
+// Sprint 481-490 — AI-Native Thumbnailing v2 (v24.0.0 "Altair")
+
+// NeuralUpscalerV2 — 9 tests
+TEST(TestNeuralUpscalerV2_BackendDefault) {
+    using namespace ExplorerLens::AI;
+    NeuralUpscalerV2 upscaler;
+    ASSERT(upscaler.GetBackend() == UpscaleBackend::DirectML);
+    ASSERT(upscaler.GetFactor()  == UpscaleFactor::X4);
+    ASSERT(!upscaler.IsModelLoaded());
+}
+TEST(TestNeuralUpscalerV2_Constants) {
+    ASSERT(ExplorerLens::AI::NeuralUpscalerV2::MIN_DIM == 8);
+    ASSERT(ExplorerLens::AI::NeuralUpscalerV2::MAX_DIM == 4096);
+    ASSERT(ExplorerLens::AI::NeuralUpscalerV2::TARGET_PSNR >= 30.0f);
+}
+TEST(TestNeuralUpscalerV2_NullPixelsFail) {
+    using namespace ExplorerLens::AI;
+    NeuralUpscalerV2 upscaler;
+    auto r = upscaler.Upscale(nullptr, 0, 0);
+    ASSERT(!r.success);
+    ASSERT(!r.error.empty());
+}
+TEST(TestNeuralUpscalerV2_SetBackendCPU) {
+    using namespace ExplorerLens::AI;
+    NeuralUpscalerV2 upscaler;
+    upscaler.SetBackend(UpscaleBackend::CPU);
+    ASSERT(upscaler.GetBackend() == UpscaleBackend::CPU);
+}
+TEST(TestNeuralUpscalerV2_SetBackendONNX) {
+    using namespace ExplorerLens::AI;
+    NeuralUpscalerV2 upscaler;
+    upscaler.SetBackend(UpscaleBackend::ONNX);
+    ASSERT(upscaler.GetBackend() == UpscaleBackend::ONNX);
+}
+TEST(TestNeuralUpscalerV2_SetFactorX2) {
+    using namespace ExplorerLens::AI;
+    NeuralUpscalerV2 upscaler;
+    upscaler.SetFactor(UpscaleFactor::X2);
+    ASSERT(upscaler.GetFactor() == UpscaleFactor::X2);
+    std::vector<uint8_t> src(8 * 8 * 4, 128u);
+    auto r = upscaler.Upscale(src.data(), 8, 8);
+    ASSERT(r.success);
+    ASSERT(r.width == 16 && r.height == 16);
+}
+TEST(TestNeuralUpscalerV2_SetTileSize) {
+    using namespace ExplorerLens::AI;
+    NeuralUpscalerV2 upscaler;
+    upscaler.SetTileSize(128);
+    ASSERT(upscaler.GetTileSize() == 128);
+}
+TEST(TestNeuralUpscalerV2_LoadModel) {
+    using namespace ExplorerLens::AI;
+    NeuralUpscalerV2 upscaler;
+    ASSERT(!upscaler.LoadModel(""));
+    ASSERT(!upscaler.IsModelLoaded());
+    ASSERT(upscaler.LoadModel("model.onnx"));
+    ASSERT(upscaler.IsModelLoaded());
+}
+TEST(TestNeuralUpscalerV2_UpscaleValidX4) {
+    using namespace ExplorerLens::AI;
+    NeuralUpscalerV2 upscaler;
+    std::vector<uint8_t> src(8 * 8 * 4, 0u);
+    auto r = upscaler.Upscale(src.data(), 8, 8);
+    ASSERT(r.success);
+    ASSERT(r.width == 32 && r.height == 32);
+    ASSERT(r.pixels.size() == static_cast<size_t>(32 * 32 * 4));
+}
+
+// ContentAwareResizer — 9 tests
+TEST(TestContentAwareResizer_DefaultStrategy) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    ASSERT(resizer.GetStrategy() == ResizeStrategy::SaliencyWeighted);
+    ASSERT(resizer.GetPreserveFaces());
+    ASSERT(resizer.GetSeamIterations() == 8);
+}
+TEST(TestContentAwareResizer_StrategySeamCarving) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    resizer.SetStrategy(ResizeStrategy::SeamCarving);
+    ASSERT(resizer.GetStrategy() == ResizeStrategy::SeamCarving);
+}
+TEST(TestContentAwareResizer_StrategyCropAndPad) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    resizer.SetStrategy(ResizeStrategy::CropAndPad);
+    ASSERT(resizer.GetStrategy() == ResizeStrategy::CropAndPad);
+}
+TEST(TestContentAwareResizer_StrategyLetterBox) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    resizer.SetStrategy(ResizeStrategy::LetterBox);
+    ASSERT(resizer.GetStrategy() == ResizeStrategy::LetterBox);
+}
+TEST(TestContentAwareResizer_PreserveFacesText) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    resizer.SetPreserveFaces(false);
+    ASSERT(!resizer.GetPreserveFaces());
+    resizer.SetPreserveText(true);
+}
+TEST(TestContentAwareResizer_SetSaliencyThresh) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    resizer.SetSaliencyThresh(0.9f);
+    ASSERT(resizer.GetSaliencyThresh() == 0.9f);
+}
+TEST(TestContentAwareResizer_SetSeamIterations) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    resizer.SetSeamIterations(16);
+    ASSERT(resizer.GetSeamIterations() == 16);
+}
+TEST(TestContentAwareResizer_ResizeFileEmpty) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    auto r = resizer.ResizeFile("", 64, 64);
+    ASSERT(!r.success);
+}
+TEST(TestContentAwareResizer_ValidResize) {
+    using namespace ExplorerLens::AI;
+    ContentAwareResizer resizer;
+    std::vector<uint8_t> src(32 * 32 * 4, 128u);
+    auto r = resizer.Resize(src.data(), 32, 32, 16, 16);
+    ASSERT(r.success);
+    ASSERT(r.dstWidth == 16 && r.dstHeight == 16);
+}
+
+// SemanticHashEngine — 9 tests
+TEST(TestSemanticHashEngine_DefaultAlgo) {
+    using namespace ExplorerLens::AI;
+    SemanticHashEngine engine;
+    ASSERT(engine.GetAlgorithm() == HashAlgorithm::CNN_MobileNetV3);
+    ASSERT(engine.GetL2Normalize());
+    ASSERT(engine.GetEmbeddingDim() == 512);
+}
+TEST(TestSemanticHashEngine_SetAlgoEfficientNetB0) {
+    using namespace ExplorerLens::AI;
+    SemanticHashEngine engine;
+    engine.SetAlgorithm(HashAlgorithm::CNN_EfficientNetB0);
+    ASSERT(engine.GetAlgorithm() == HashAlgorithm::CNN_EfficientNetB0);
+}
+TEST(TestSemanticHashEngine_SetAlgoCLIP) {
+    using namespace ExplorerLens::AI;
+    SemanticHashEngine engine;
+    engine.SetAlgorithm(HashAlgorithm::CLIP_ViT_B32);
+    ASSERT(engine.GetAlgorithm() == HashAlgorithm::CLIP_ViT_B32);
+}
+TEST(TestSemanticHashEngine_HammingIdentical) {
+    using namespace ExplorerLens::AI;
+    SemanticHash512 h = {};
+    ASSERT(SemanticHashEngine::HammingDistance(h, h) == 0.0f);
+    ASSERT(SemanticHashEngine::AreDuplicate(h, h));
+}
+TEST(TestSemanticHashEngine_HammingNonZero) {
+    using namespace ExplorerLens::AI;
+    SemanticHash512 a = {}, b = {};
+    b[0] = 0xFFFFFFFFFFFFFFFFull;
+    ASSERT(SemanticHashEngine::HammingDistance(a, b) == 64.0f);
+}
+TEST(TestSemanticHashEngine_AreDuplicateFalse) {
+    using namespace ExplorerLens::AI;
+    SemanticHash512 a = {}, b = {};
+    b[0] = 0xFFFFFFFFFFFFFFFFull;
+    ASSERT(!SemanticHashEngine::AreDuplicate(a, b));
+}
+TEST(TestSemanticHashEngine_HashBitsConstant) {
+    ASSERT(ExplorerLens::AI::SemanticHashEngine::HASH_BITS == 512);
+    ASSERT(ExplorerLens::AI::SemanticHashEngine::DUPLICATE_THRESH == 32.0f);
+}
+TEST(TestSemanticHashEngine_HashValidPixels) {
+    using namespace ExplorerLens::AI;
+    SemanticHashEngine engine;
+    std::vector<uint8_t> px(16 * 16 * 4, 200u);
+    auto r = engine.Hash(px.data(), 16, 16);
+    ASSERT(r.success);
+    ASSERT(r.confidence >= 0.0f);
+}
+TEST(TestSemanticHashEngine_HashFileEmpty) {
+    using namespace ExplorerLens::AI;
+    SemanticHashEngine engine;
+    auto r = engine.HashFile("");
+    ASSERT(!r.success);
+}
+
+// AutoTaggingEngine — 9 tests
+TEST(TestAutoTaggingEngine_TaxonomyInit) {
+    using namespace ExplorerLens::AI;
+    AutoTaggingEngine engine;
+    ASSERT(!engine.IsTaxonomyLoaded());
+    ASSERT(engine.GetTaxonomySize() == 0);
+    ASSERT(engine.GetMaxTags() == 10);
+    ASSERT(engine.GetMultiLabel());
+}
+TEST(TestAutoTaggingEngine_LoadTaxonomyEmpty) {
+    using namespace ExplorerLens::AI;
+    AutoTaggingEngine engine;
+    ASSERT(!engine.LoadTaxonomy(""));
+    ASSERT(!engine.IsTaxonomyLoaded());
+}
+TEST(TestAutoTaggingEngine_LoadTaxonomyPath) {
+    using namespace ExplorerLens::AI;
+    AutoTaggingEngine engine;
+    ASSERT(engine.LoadTaxonomy("imagenet1k.json"));
+    ASSERT(engine.IsTaxonomyLoaded());
+    ASSERT(engine.GetTaxonomySize() > 0);
+}
+TEST(TestAutoTaggingEngine_MaxSupportedTags) {
+    ASSERT(ExplorerLens::AI::AutoTaggingEngine::MAX_SUPPORTED_TAGS == 100);
+}
+TEST(TestAutoTaggingEngine_MinValidConfidence) {
+    ASSERT(ExplorerLens::AI::AutoTaggingEngine::MIN_VALID_CONFIDENCE == 0.10f);
+}
+TEST(TestAutoTaggingEngine_SetMaxTags) {
+    using namespace ExplorerLens::AI;
+    AutoTaggingEngine engine;
+    engine.SetMaxTags(5);
+    ASSERT(engine.GetMaxTags() == 5);
+}
+TEST(TestAutoTaggingEngine_SetMinConfidence) {
+    using namespace ExplorerLens::AI;
+    AutoTaggingEngine engine;
+    engine.SetMinConfidence(0.5f);
+    ASSERT(engine.GetMinConfidence() == 0.5f);
+}
+TEST(TestAutoTaggingEngine_TagNullPixels) {
+    using namespace ExplorerLens::AI;
+    AutoTaggingEngine engine;
+    auto r = engine.Tag(nullptr, 0, 0);
+    ASSERT(!r.success);
+}
+TEST(TestAutoTaggingEngine_TagNoTaxonomy) {
+    using namespace ExplorerLens::AI;
+    AutoTaggingEngine engine;
+    std::vector<uint8_t> px(16 * 16 * 4, 128u);
+    auto r = engine.Tag(px.data(), 16, 16);
+    ASSERT(!r.success);
+    ASSERT(!r.error.empty());
+}
+
+// QualityRestorationEngine — 9 tests
+TEST(TestQualityRestorationEngine_DefaultMode) {
+    using namespace ExplorerLens::AI;
+    QualityRestorationEngine engine;
+    ASSERT(engine.GetMode() == RestorationMode::Denoise);
+    ASSERT(engine.GetStrength() == 0.5f);
+    ASSERT(engine.GetPreserveEdges());
+    ASSERT(engine.GetIterations() == 1);
+}
+TEST(TestQualityRestorationEngine_SetModeDeblur) {
+    using namespace ExplorerLens::AI;
+    QualityRestorationEngine engine;
+    engine.SetMode(RestorationMode::Deblur);
+    ASSERT(engine.GetMode() == RestorationMode::Deblur);
+}
+TEST(TestQualityRestorationEngine_SetModeCombined) {
+    using namespace ExplorerLens::AI;
+    QualityRestorationEngine engine;
+    engine.SetMode(RestorationMode::Combined);
+    ASSERT(engine.GetMode() == RestorationMode::Combined);
+}
+TEST(TestQualityRestorationEngine_SetModeJPEGArtifact) {
+    using namespace ExplorerLens::AI;
+    QualityRestorationEngine engine;
+    engine.SetMode(RestorationMode::JPEG_Artifact);
+    ASSERT(engine.GetMode() == RestorationMode::JPEG_Artifact);
+}
+TEST(TestQualityRestorationEngine_RestoreNull) {
+    using namespace ExplorerLens::AI;
+    QualityRestorationEngine engine;
+    auto r = engine.Restore(nullptr, 0, 0);
+    ASSERT(!r.success);
+}
+TEST(TestQualityRestorationEngine_RestoreValidPixels) {
+    using namespace ExplorerLens::AI;
+    QualityRestorationEngine engine;
+    std::vector<uint8_t> px(8 * 8 * 4, 100u);
+    auto r = engine.Restore(px.data(), 8, 8);
+    ASSERT(r.success);
+    ASSERT(r.width == 8 && r.height == 8);
+    ASSERT(r.pixels.size() == static_cast<size_t>(8 * 8 * 4));
+}
+TEST(TestQualityRestorationEngine_EstimateNoiseLevelNull) {
+    ASSERT(ExplorerLens::AI::QualityRestorationEngine::EstimateNoiseLevel(nullptr, 0, 0) == 0.0f);
+}
+TEST(TestQualityRestorationEngine_EstimateBlurLevelNull) {
+    ASSERT(ExplorerLens::AI::QualityRestorationEngine::EstimateBlurLevel(nullptr, 0, 0) == 0.0f);
+}
+TEST(TestQualityRestorationEngine_Constants) {
+    ASSERT(ExplorerLens::AI::QualityRestorationEngine::MAX_NOISE_LEVEL == 1.0f);
+    ASSERT(ExplorerLens::AI::QualityRestorationEngine::MAX_ITERATIONS == 10);
+}
+
+// SceneDepthEstimatorV2 — 9 tests
+TEST(TestSceneDepthEstimatorV2_DefaultModel) {
+    using namespace ExplorerLens::AI;
+    SceneDepthEstimatorV2 est;
+    ASSERT(est.GetModel() == DepthModel::MiDaS_Small);
+    ASSERT(est.GetOutputType() == DepthOutputType::Relative);
+    ASSERT(est.GetInputSize() == 384);
+}
+TEST(TestSceneDepthEstimatorV2_SetModelLarge) {
+    using namespace ExplorerLens::AI;
+    SceneDepthEstimatorV2 est;
+    est.SetModel(DepthModel::MiDaS_Large);
+    ASSERT(est.GetModel() == DepthModel::MiDaS_Large);
+}
+TEST(TestSceneDepthEstimatorV2_SetModelDPT) {
+    using namespace ExplorerLens::AI;
+    SceneDepthEstimatorV2 est;
+    est.SetModel(DepthModel::DPT_Hybrid);
+    ASSERT(est.GetModel() == DepthModel::DPT_Hybrid);
+}
+TEST(TestSceneDepthEstimatorV2_SetModelZoeDepth) {
+    using namespace ExplorerLens::AI;
+    SceneDepthEstimatorV2 est;
+    est.SetModel(DepthModel::ZoeDepth);
+    ASSERT(est.GetModel() == DepthModel::ZoeDepth);
+}
+TEST(TestSceneDepthEstimatorV2_SetOutputTypeMetric) {
+    using namespace ExplorerLens::AI;
+    SceneDepthEstimatorV2 est;
+    est.SetOutputType(DepthOutputType::Metric);
+    ASSERT(est.GetOutputType() == DepthOutputType::Metric);
+}
+TEST(TestSceneDepthEstimatorV2_Constants) {
+    ASSERT(ExplorerLens::AI::SceneDepthEstimatorV2::DEFAULT_INPUT_SIZE == 384);
+    ASSERT(ExplorerLens::AI::SceneDepthEstimatorV2::DEPTH_SCALE == 1000.0f);
+}
+TEST(TestSceneDepthEstimatorV2_EstimateNull) {
+    using namespace ExplorerLens::AI;
+    SceneDepthEstimatorV2 est;
+    auto r = est.Estimate(nullptr, 0, 0);
+    ASSERT(!r.success);
+}
+TEST(TestSceneDepthEstimatorV2_EstimateValid) {
+    using namespace ExplorerLens::AI;
+    SceneDepthEstimatorV2 est;
+    std::vector<uint8_t> px(16 * 16 * 4, 128u);
+    auto r = est.Estimate(px.data(), 16, 16);
+    ASSERT(r.success);
+    ASSERT(r.map.width == 16 && r.map.height == 16);
+    ASSERT(!r.map.values.empty());
+}
+TEST(TestSceneDepthEstimatorV2_RenderDepthMapEmpty) {
+    using namespace ExplorerLens::AI;
+    SceneDepthEstimatorV2 est;
+    DepthMap empty;
+    auto rgba = est.RenderDepthMap(empty);
+    ASSERT(rgba.empty());
+}
+
+// StyleTransferEngine — 9 tests
+TEST(TestStyleTransferEngine_DefaultStyle) {
+    using namespace ExplorerLens::AI;
+    StyleTransferEngine engine;
+    ASSERT(engine.GetStyle() == BuiltinStyle::Mosaic);
+    ASSERT(engine.GetStrength() == 1.0f);
+    ASSERT(engine.GetMaxDim() == 1024);
+    ASSERT(engine.GetPreserveSize());
+    ASSERT(!engine.IsCustomLoaded());
+}
+TEST(TestStyleTransferEngine_SetStyleCandy) {
+    using namespace ExplorerLens::AI;
+    StyleTransferEngine engine;
+    engine.SetStyle(BuiltinStyle::Candy);
+    ASSERT(engine.GetStyle() == BuiltinStyle::Candy);
+}
+TEST(TestStyleTransferEngine_SetStyleUdnie) {
+    using namespace ExplorerLens::AI;
+    StyleTransferEngine engine;
+    engine.SetStyle(BuiltinStyle::Udnie);
+    ASSERT(engine.GetStyle() == BuiltinStyle::Udnie);
+}
+TEST(TestStyleTransferEngine_SetStyleRainPrincess) {
+    using namespace ExplorerLens::AI;
+    StyleTransferEngine engine;
+    engine.SetStyle(BuiltinStyle::RainPrincess);
+    ASSERT(engine.GetStyle() == BuiltinStyle::RainPrincess);
+}
+TEST(TestStyleTransferEngine_SetStyleStarryNight) {
+    using namespace ExplorerLens::AI;
+    StyleTransferEngine engine;
+    engine.SetStyle(BuiltinStyle::StarryNight);
+    ASSERT(engine.GetStyle() == BuiltinStyle::StarryNight);
+}
+TEST(TestStyleTransferEngine_Constants) {
+    ASSERT(ExplorerLens::AI::StyleTransferEngine::MAX_TRANSFER_DIM == 1024);
+}
+TEST(TestStyleTransferEngine_SetStrengthClamped) {
+    using namespace ExplorerLens::AI;
+    StyleTransferEngine engine;
+    engine.SetStrength(2.0f);
+    ASSERT(engine.GetStrength() == 1.0f);
+    engine.SetStrength(-1.0f);
+    ASSERT(engine.GetStrength() == 0.0f);
+}
+TEST(TestStyleTransferEngine_TransferNull) {
+    using namespace ExplorerLens::AI;
+    StyleTransferEngine engine;
+    auto r = engine.Transfer(nullptr, 0, 0);
+    ASSERT(!r.success);
+}
+TEST(TestStyleTransferEngine_LoadCustomStyle) {
+    using namespace ExplorerLens::AI;
+    StyleTransferEngine engine;
+    ASSERT(!engine.LoadCustomStyle(""));
+    ASSERT(!engine.IsCustomLoaded());
+    ASSERT(engine.LoadCustomStyle("my_style.onnx"));
+    ASSERT(engine.IsCustomLoaded());
+    ASSERT(engine.GetStyle() == BuiltinStyle::Custom);
+}
+
+// LandmarkDetectionEngine — 9 tests
+TEST(TestLandmarkDetectionEngine_Defaults) {
+    using namespace ExplorerLens::AI;
+    LandmarkDetectionEngine engine;
+    ASSERT(engine.GetMaxFaces() == 10);
+    ASSERT(engine.GetMinFaceScore() == 0.75f);
+    ASSERT(engine.GetDetectLandmarks());
+    ASSERT(!engine.GetEstimatePose());
+}
+TEST(TestLandmarkDetectionEngine_Constants) {
+    ASSERT(ExplorerLens::AI::LandmarkDetectionEngine::BLAZEFACE_INPUT == 128);
+    ASSERT(ExplorerLens::AI::LandmarkDetectionEngine::MIN_FACE_SIZE_FRAC == 0.04f);
+    ASSERT(ExplorerLens::AI::LandmarkDetectionEngine::MIN_FACE_SCORE == 0.75f);
+}
+TEST(TestLandmarkDetectionEngine_SetMaxFaces) {
+    using namespace ExplorerLens::AI;
+    LandmarkDetectionEngine engine;
+    engine.SetMaxFaces(1);
+    ASSERT(engine.GetMaxFaces() == 1);
+}
+TEST(TestLandmarkDetectionEngine_SetMinFaceScore) {
+    using namespace ExplorerLens::AI;
+    LandmarkDetectionEngine engine;
+    engine.SetMinFaceScore(0.5f);
+    ASSERT(engine.GetMinFaceScore() == 0.5f);
+}
+TEST(TestLandmarkDetectionEngine_DetectNull) {
+    using namespace ExplorerLens::AI;
+    LandmarkDetectionEngine engine;
+    auto r = engine.Detect(nullptr, 0, 0);
+    ASSERT(!r.success);
+}
+TEST(TestLandmarkDetectionEngine_DetectValidPixels) {
+    using namespace ExplorerLens::AI;
+    LandmarkDetectionEngine engine;
+    std::vector<uint8_t> px(64 * 64 * 4, 180u);
+    auto r = engine.Detect(px.data(), 64, 64);
+    ASSERT(r.success);
+    ASSERT(r.faces.empty());
+}
+TEST(TestLandmarkDetectionEngine_GetOptimalCropBoxEmpty) {
+    using namespace ExplorerLens::AI;
+    LandmarkDetectionEngine engine;
+    LandmarkDetectResult empty{ false, {}, {} };
+    auto box = engine.GetOptimalCropBox(empty, 640, 480);
+    ASSERT(box.width == 0 && box.height == 0);
+}
+TEST(TestLandmarkDetectionEngine_GetOptimalCropBoxWithFace) {
+    using namespace ExplorerLens::AI;
+    LandmarkDetectionEngine engine;
+    FaceLandmarks fl;
+    fl.bounds = { 100, 100, 200, 200, 0.9f };
+    LandmarkDetectResult res{ true, { fl }, {} };
+    auto box = engine.GetOptimalCropBox(res, 640, 480);
+    ASSERT(box.width > 0 && box.height > 0);
+    ASSERT(box.score == 0.9f);
+}
+TEST(TestLandmarkDetectionEngine_DetectFileEmpty) {
+    using namespace ExplorerLens::AI;
+    LandmarkDetectionEngine engine;
+    auto r = engine.DetectFile("");
+    ASSERT(!r.success);
 }
 
 //==============================================================================
@@ -31854,6 +32339,31 @@ TEST(TestCICDWebhookReceiver_DispatchEvent) {
     RUN_TEST(TestFLIFDecoderV2_Extensions);
     RUN_TEST(TestFLIFDecoderV2_Create);
     RUN_TEST(TestFLIFDecoderV2_InvalidFile);
+    // Sprint 481-490 — AI-Native Thumbnailing v2 (v24.0.0 "Altair")
+    RUN_TEST(TestNeuralUpscalerV2_BackendDefault);
+    RUN_TEST(TestNeuralUpscalerV2_Constants);
+    RUN_TEST(TestNeuralUpscalerV2_InvalidPixels);
+    RUN_TEST(TestContentAwareResizer_DefaultStrategy);
+    RUN_TEST(TestContentAwareResizer_SetStrategy);
+    RUN_TEST(TestContentAwareResizer_TooSmall);
+    RUN_TEST(TestSemanticHashEngine_DefaultAlgo);
+    RUN_TEST(TestSemanticHashEngine_HammingIdentical);
+    RUN_TEST(TestSemanticHashEngine_HashBits);
+    RUN_TEST(TestAutoTaggingEngine_TaxonomyInit);
+    RUN_TEST(TestAutoTaggingEngine_MaxTags);
+    RUN_TEST(TestAutoTaggingEngine_TagNullPixels);
+    RUN_TEST(TestQualityRestorationEngine_DefaultMode);
+    RUN_TEST(TestQualityRestorationEngine_SetMode);
+    RUN_TEST(TestQualityRestorationEngine_RestoreNull);
+    RUN_TEST(TestSceneDepthEstimatorV2_DefaultModel);
+    RUN_TEST(TestSceneDepthEstimatorV2_Constants);
+    RUN_TEST(TestSceneDepthEstimatorV2_EstimateNull);
+    RUN_TEST(TestStyleTransferEngine_DefaultStyle);
+    RUN_TEST(TestStyleTransferEngine_SetStrength);
+    RUN_TEST(TestStyleTransferEngine_TransferNull);
+    RUN_TEST(TestLandmarkDetectionEngine_MaxFaces);
+    RUN_TEST(TestLandmarkDetectionEngine_Constants);
+    RUN_TEST(TestLandmarkDetectionEngine_DetectNull);
 
     std::wcout << std::endl;
 

@@ -503,6 +503,16 @@ set(ENGINE_HEADERS
     Decoders/JPEG2000TileDecoderV2.h
     Decoders/FLIFDecoderV2.h
 
+    # Sprint 481-490 — AI-Native Thumbnailing v2 (v24.0.0 "Altair")
+    AI/NeuralUpscalerV2.h
+    AI/ContentAwareResizer.h
+    AI/SemanticHashEngine.h
+    AI/AutoTaggingEngine.h
+    AI/QualityRestorationEngine.h
+    AI/SceneDepthEstimatorV2.h
+    AI/StyleTransferEngine.h
+    AI/LandmarkDetectionEngine.h
+
     # GPU rendering and compute
     GPU/D3D11Renderer.h
     GPU/D3D12ComputePipeline.h

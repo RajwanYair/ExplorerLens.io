@@ -1,7 +1,7 @@
 # ExplorerLens v25.x "Rigel" — Development Roadmap
 
 **Status:** Planning  
-**Current Version:** v23.7.0 "Vega-X"  
+**Current Version:** v24.0.0 "Altair"  
 **Next Major Version:** v25.0.0 "Rigel"  
 **Previous Roadmap:** [ROADMAP_V16.md](archive/ROADMAP_V16.md) *(archived — covers v15.x/v16.x work now completed)*  
 **Sprint Detail:** [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) — Sprints 561–660
@@ -36,7 +36,8 @@ future-proofing plugin signing and IPC channels ahead of NIST FIPS 203/205 manda
 v23.5.0  Vega-V    ── released
    │
    ├── v23.6.0  Vega-W     Security Hardening v2        (Sprint 461–470) ── released
-   ├── v23.7.0  Vega-X     Format Expansion V            (Sprint 471–480) ── NOW
+   ├── v23.7.0  Vega-X     Format Expansion V            (Sprint 471–480) ✔ Released
+├── v24.0.0  Altair     AI-Native Thumbnailing v2 ★  (Sprint 481–490) ← NOW
    │
    ├── v24.0.0  Altair     AI-Native Thumbnailing v2 ★  (Sprint 481–490)
    ├── v24.1.0  Altair-R   Cross-Process Architecture    (Sprint 491–500)

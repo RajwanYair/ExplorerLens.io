@@ -7,15 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned — v24.0.0 "Altair" — AI-Native Thumbnailing v2 (Sprints 481–490)
-- Engine/AI/NeuralUpscalerV2.h: ESRGAN 4× neural upscaler v2 (DirectML)
-- Engine/AI/ContentAwareResizer.h: Content-aware intelligent resize engine
-- Engine/AI/SemanticHashEngine.h: Semantic perceptual hash (CNN embeddings)
-- Engine/AI/AutoTaggingEngine.h: Zero-shot auto-tagging engine (CLIP-style)
-- Engine/AI/QualityRestorationEngine.h: AI quality restoration (deblur + denoise)
-- Engine/AI/SceneDepthEstimator.h: Monocular depth estimator for 3-D previews
-- Engine/AI/StyleTransferEngine.h: Fast neural style transfer for previews
-- Engine/AI/LandmarkDetectionEngine.h: Face/landmark detection for smart crop
+### Planned — v24.1.0 "Altair-R" — Cross-Process Architecture (Sprints 491–500)
+
+---
+
+## [24.0.0] — Altair (2026-03-28)
+
+### Added — Sprints 481-490: AI-Native Thumbnailing v2
+- Engine/AI/NeuralUpscalerV2.h: ESRGAN 4× neural upscaler v2 (DirectML/ONNX/CPU backends, tile-based, X2/X4 factors)
+- Engine/AI/ContentAwareResizer.h: Content-aware intelligent resize engine (seam-carving, saliency-weighted, letterbox)
+- Engine/AI/SemanticHashEngine.h: 512-bit semantic perceptual hash (CNN-MobileNetV3/EfficientNetB0/CLIP)
+- Engine/AI/AutoTaggingEngine.h: Zero-shot auto-tagging via CLIP embeddings with configurable taxonomy
+- Engine/AI/QualityRestorationEngine.h: AI quality restoration (deblur, denoise, JPEG artifact removal, combined)
+- Engine/AI/SceneDepthEstimatorV2.h: Monocular depth estimation (MiDaS Small/Large, DPT-Hybrid, ZoeDepth)
+- Engine/AI/StyleTransferEngine.h: Fast neural style transfer — 6 builtin styles + custom ONNX model loading
+- Engine/AI/LandmarkDetectionEngine.h: BlazeFace face/landmark detection for smart-crop with GetOptimalCropBox
+
+### Statistics
+- Test count: 3,197 unit tests (+72 from v23.7.0, comprehensive 9-test coverage per header)
+- Sprint coverage: 481–490 (10 sprints)
+- New headers: 8 (all in Engine/AI/)
+- All enums, getters, setters, config options, and result structs fully tested
 
 ---
 

@@ -1,8 +1,8 @@
 # ExplorerLens Engine
 
-**Version:** 23.7.0 "Vega-X"
+**Version:** 24.0.0 "Altair"
 **Created:** January 7, 2026
-**Status:** v23.7.0 "Vega-X" Complete — 3125 tests, 0 warnings
+**Status:** v24.0.0 "Altair" Complete — 3197 tests, 0 warnings
 
 ---
 
