@@ -28,7 +28,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 | **Cameras** | 100+ RAW formats — Canon (CR2/CR3), Nikon (NEF), Sony (ARW), Fujifilm, Adobe DNG, Olympus, Hasselblad … |
 | **Language** | C++20 · MSVC v145 · Visual Studio 18 2026 BuildTools |
 | **Build** | CMake 4.3 · Ninja · vcpkg / local external libs |
-| **Tests** | 3,117 unit tests · 5 benchmarks · 100% pass rate |
+| **Tests** | 3,269 unit tests · 5 benchmarks · 100% pass rate |
 | **Install** | `regsvr32 LENSShell.dll` — no reboot required |
 
 <!--
@@ -64,7 +64,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 **Getting Started:**
 
 - [Build Quick Reference](docs/development/BUILD_QUICK_REFERENCE.md) - Complete build instructions
-- [Installation Guide](docs/getting-started/installation.md) - Installation and setup
+- [Installation Guide](docs/build/INSTALLATION_GUIDE.md) - Installation and setup
 - [Testing Guide](docs/testing/TESTING_GUIDE.md) - Validation and test procedures
 
 **Project Organization:**
@@ -224,7 +224,7 @@ graph TD
     ENG --> MEM["🧠 <b>Memory/</b><br/>BitmapPool · Pressure Ctrl"]
     ENG --> PLUGIN["🔩 <b>Plugin/</b><br/>Plugin Ecosystem · Sandbox"]
     ENG --> AI["🤖 <b>AI/</b><br/>Smart Crop · IQA · Scene"]
-    ENG --> TESTS["✅ <b>Tests/</b><br/>2 938 Unit Tests · 5 Benchmarks"]
+    ENG --> TESTS["✅ <b>Tests/</b><br/>3,269 Unit Tests · 5 Benchmarks"]
 
     style ROOT fill:#1e3a5f,color:#fff,stroke:#4a9eff,stroke-width:2px
     style ENG  fill:#1b4332,color:#fff,stroke:#40916c,stroke-width:2px
@@ -266,7 +266,7 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 **Current Version:** 24.1.0 "Altair-R"
 **Build Status:** 0 errors / 0 warnings
-**Test Status:** 3,125 unit tests, 5 benchmarks (100% pass rate)
+**Test Status:** 3,269 unit tests, 5 benchmarks (100% pass rate)
 **Codename:** Altair — AI-Native Thumbnailing v2 (Sprints 481–490; roadmap → v24.1.0 "Altair-R")
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.

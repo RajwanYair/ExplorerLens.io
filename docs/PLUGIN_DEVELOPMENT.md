@@ -849,10 +849,47 @@ static bool s_minimalRegistered = []() {
 
 **Next Steps:**
 - Study existing decoders in `Engine/decoders/`
-- Refer to [Architecture Documentation](ARCHITECTURE.md)
+- Refer to [Architecture Documentation](README_ARCHITECTURE.md)
 - Join developer discussions on GitHub
 
 ---
 
-**Last Updated:** February 18, 2026 
-**Version:** 7.1.0
+## HRESULT Reference
+
+Use standard Windows HRESULT codes in decoder implementations:
+
+| Code | Value | Meaning |
+|------|-------|---------|
+| `S_OK` | `0x00000000` | Success |
+| `E_FAIL` | `0x80004005` | Generic failure |
+| `E_INVALIDARG` | `0x80070057` | Invalid argument |
+| `E_OUTOFMEMORY` | `0x8007000E` | Memory allocation failed |
+| `E_NOTIMPL` | `0x80004001` | Not implemented |
+| `HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)` | `0x80070002` | File not found |
+| `HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED)` | `0x80070005` | Access denied |
+
+Use `OutputDebugStringW` for diagnostics (visible in VS Output Window / DebugView).
+
+---
+
+## COM Initialization
+
+**Decoders must NOT call `CoInitialize()` themselves.** The host application is responsible for COM lifecycle. Explorer initialises COM before loading shell extensions automatically. Standalone applications must call `CoInitializeEx(nullptr, COINIT_MULTITHREADED)` before using the engine.
+
+---
+
+## Performance Decoder Targets
+
+| Metric | Target |
+|--------|--------|
+| `CanDecode()` latency | < 1 ms (extension check only) |
+| Small images (< 1 MB) decode | < 50 ms |
+| Large images (> 5 MB) decode | < 200 ms |
+| Peak memory per thread | < 100 MB |
+
+**Optimisation tips:** decode only the required resolution; use progressive/subsampled decoding; employ SSE/AVX for pixel operations (RGBA↔BGRA conversions and scaling benefit most); set `SupportsGPU() = true` and fall back gracefully when GPU is unavailable.
+
+---
+
+**Last Updated:** March 28, 2026
+**Version:** 24.1.0 "Altair-R"

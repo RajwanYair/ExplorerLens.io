@@ -1,7 +1,8 @@
-# ci-matrix.yml — Enhanced CI Pipeline with Full Build Matrix
-# ExplorerLens v23.6.0 "Vega-W"
-# Builds x64 Debug/Release, runs tests, coverage, static analysis
-# NOTE: build-and-test.yml was removed (superseded by build.yml + this workflow)
+# ci-matrix.yml — Canonical CI Pipeline (push/PR) for ExplorerLens Engine
+# ExplorerLens v24.1.0 "Altair-R"
+# Builds x64 Debug/Release and LENSShell.dll; runs CTest.
+# Coverage → coverage.yml  |  Static analysis → code-quality.yml
+# NOTE: build.yml is for manual/scheduled builds only.
 
 name: CI Matrix Build
 
@@ -11,15 +12,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      run_coverage:
-        description: "Run code coverage"
-        type: boolean
-        default: false
-      run_static_analysis:
-        description: "Run clang-tidy"
-        type: boolean
-        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -142,93 +134,5 @@ jobs:
             x64/Release/LENSShell.dll
             x64/Release/LENSManager.exe
           retention-days: 14
-
-  # ============================================================================
-  # Job 3: Code Coverage (optional)
-  # ============================================================================
-  coverage:
-    name: Code Coverage
-    runs-on: windows-latest
-    timeout-minutes: 45
-    if: github.event.inputs.run_coverage == 'true' || github.ref == 'refs/heads/main'
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-          fetch-depth: 1
-
-      - name: Setup MSVC (latest available on runner)
-        # No toolset pin: auto-picks newest VS on runner (v143 now; v145 when GH provides VS2026)
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
-      - name: Install Tools
-        run: choco install opencppcoverage -y
-
-      - name: Build with Debug Info
-        run: |
-          cmake --preset ci-debug
-          cmake --build --preset ci-debug -j ${{ runner.os == 'Windows' && '4' || '2' }}
-
-      - name: Run Coverage
-        shell: pwsh
-        run: |
-          $testExe = "build-debug/bin/EngineTests.exe"
-          if (Test-Path $testExe) {
-            OpenCppCoverage --sources "Engine\*" --excluded_sources "external\*" --excluded_sources "gtest\*" `
-              --export_type=cobertura:coverage.xml -- $testExe
-          }
-
-      - name: Upload Coverage Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.xml
-
-  # ============================================================================
-  # Job 4: Static Analysis Gate (optional)
-  # ============================================================================
-  static-analysis:
-    name: Static Analysis
-    runs-on: windows-latest
-    timeout-minutes: 30
-    if: github.event.inputs.run_static_analysis == 'true' || github.event_name == 'pull_request'
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-          fetch-depth: 1
-
-      - name: Setup MSVC (latest available on runner)
-        # No toolset pin: auto-picks newest VS on runner (v143 now; v145 when GH provides VS2026)
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
-      - name: Install Tools
-        run: choco install llvm -y
-
-      - name: Configure
-        run: cmake --preset ci-release
-
-      - name: Run clang-tidy
-        shell: pwsh
-        run: |
-          $files = Get-ChildItem -Path "Engine" -Filter "*.cpp" -Recurse |
-            Where-Object { $_.FullName -notmatch "external|gtest|Tests" } |
-            Select-Object -First 50
-
-          $errors = 0
-          foreach ($f in $files) {
-            $result = clang-tidy $f.FullName -p build --warnings-as-errors="*" 2>&1
-            if ($LASTEXITCODE -ne 0) { $errors++ }
-          }
-
-          if ($errors -gt 0) {
-            Write-Error "$errors files have clang-tidy warnings"
-            exit 1
-          }
+  # NOTE: Code coverage is handled by coverage.yml; static analysis by code-quality.yml.
+  # Those dedicated workflows avoid duplication and run only when needed.

@@ -1,8 +1,8 @@
-# Testing Guide — ExplorerLens v23.7.0
+# Testing Guide — ExplorerLens v24.1.0
 
-**Version:** 23.7.0 "Vega-X" 
+**Version:** 24.1.0 "Altair-R" 
 **Framework:** Custom C++ test harness (`TEST()`, `RUN_TEST()`, `ASSERT()` macros) 
-**Test Count:** ~3,125 unit tests + 5 benchmarks 
+**Test Count:** 3,269 unit tests + 5 benchmarks 
 **Pass Rate:** 100%
 
 ---

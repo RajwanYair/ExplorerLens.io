@@ -1,5 +1,5 @@
 # ExplorerLens Developer Guide
-**Version:** 23.6.0 "Vega-W" 
+**Version:** 24.1.0 "Altair-R" 
 **Last Updated:** March 28, 2026 
 **Target Audience:** Contributors, Plugin Developers, Maintainers 
 **Build Status:** 0 errors, 0 warnings (Release x64)

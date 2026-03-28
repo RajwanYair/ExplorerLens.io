@@ -1,6 +1,6 @@
 # ExplorerLens — Architecture Reference
 
-> **Version:** 23.6.0 "Vega-W" | **Last Updated:** 2026-03-28
+> **Version:** 24.1.0 "Altair-R" | **Last Updated:** 2026-05-15
 
 ## System Overview
 
@@ -255,7 +255,7 @@ CMake 3.20+ → Ninja → MSVC v145 (cl.exe 19.50)
 | Cache hit latency | < 5 ms | < 0.5 ms |
 | Memory footprint | < 50 MB idle | ~35 MB |
 | DLL size | < 3 MB | 2940 KB |
-| Test count | > 1000 | 2938 |
+| Test count | > 1000 | 3,269 |
 | Warning count | 0 | 0 |
 
 ## Security Model

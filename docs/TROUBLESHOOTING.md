@@ -589,7 +589,7 @@ $testFile = "C:\Photos\sample.webp"
 
 ## Current Known Issues
 
-**Version:** 23.6.0 "Vega-W" — all P0 and P1 issues resolved
+**Version:** 24.1.0 "Altair-R" — all P0 and P1 issues resolved
 
 | Priority | Issue | Status | Workaround |
 |----------|-------|--------|------------|

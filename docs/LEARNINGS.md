@@ -565,3 +565,42 @@ git grep -rn "intel.com" -- "*.h" "*.cpp" "*.ps1" "*.yml"
 # 6. Build and test
 .\build-scripts\Build-MSVC.ps1 -Test
 ```
+
+---
+
+## 11. Common Pitfalls Quick Reference
+
+Absorbed from `.github/development-learnings.md` (consolidated 2026-05).
+
+| Pitfall | When it bites | Fast fix |
+|---------|---------------|----------|
+| Build picks Clang instead of MSVC | cmake run without vcvars | Use `Build-MSVC.ps1` always |
+| `/MT` vs `/MD` CRT mismatch | Newly integrated external lib | Rebuild lib with `/MD`; check `dumpbin /directives` |
+| CLSID mismatch between WiX and DLL | After SLN/WiX edits | Verify GUIDs match `9E6ECB90-5A61-42BD-B851-D3297D9C7F39` |
+| `replace_string_in_file` fails | Whitespace mismatch after clang-format | `read_file` first, copy exact whitespace |
+| New header not compiled | Added to dir but not CMakeLists.txt | Check both `ENGINE_HEADERS` and `ENGINE_SOURCES` |
+| Version numbers drift across docs | Missed a doc during version bump | Run `grep_search "v2[0-3]\.\d" docs/` after every bump |
+| `<versionhelpers.h>` include | `WIN32_LEAN_AND_MEAN` is global | Use `RtlGetVersion()` from ntdll.dll instead |
+| Stale `.cmake/api/` reply files | After `build-vcpkg/` changes | Delete `build/` and reconfigure |
+| `std::atomic<T>` comma declaration | C2280: deleted copy-assign triggered | Declare each atomic on its own line |
+| `SE_LOCK_MEMORY_NAME` macro | Engine is not UNICODE build | Use `L"SeLockMemoryPrivilege"` literal directly |
+| sprint comments accumulate | Batch sprint delivery | Strip with `'(?m)^// Sprint \d+[^\r\n]*\r?\n'` regex |
+| `.gitignore build/` too broad | Silently hides `docs/build/` files | Anchor patterns: `/build/` not `build/` |
+| boilerplate `TEST(Init*)` tests | Bulk feature delivery creates 150 trivial tests | Consolidate with `AssertInitPattern<T>()` template |
+
+### `.gitignore` pattern anchoring
+
+Use `/` prefix to anchor patterns to the repo root — otherwise `build/` matches `docs/build/`, `Engine/build/`, etc.
+
+```gitignore
+# WRONG — ignores ANY directory named build/ anywhere in tree
+build/
+
+# CORRECT — ignores only the top-level build/ directory
+/build/
+/build-vcpkg/
+/build-logs/
+/x64/
+```
+
+Always verify with `git check-ignore -v path/to/file` before assuming a file is tracked.

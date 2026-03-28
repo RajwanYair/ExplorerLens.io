@@ -1,18 +1,21 @@
-# build.yml — GitHub Actions CI workflow for ExplorerLens Engine
+# build.yml — Manual / scheduled verification build for ExplorerLens Engine
 # Copyright (c) 2026 ExplorerLens Project
 #
-# Canonical CI workflow: triggers on push to main and pull requests.
-# Builds x64 Release with MSVC (via ilammy/msvc-dev-cmd), runs CTest, uploads artifacts.
-# NOTE: build-and-test.yml was removed (superseded by this + ci-matrix.yml).
+# NOTE: ci-matrix.yml is the canonical PR/push CI for ExplorerLens.
+# This workflow is reserved for manual on-demand verification and weekly
+# scheduled health checks only. Do NOT add push/pull_request triggers here.
 
-name: Build ExplorerLens Engine
+name: Build ExplorerLens Engine (Manual)
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual build trigger'
+        required: false
+        default: 'Manual verification build'
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly Sunday 03:00 UTC
 
 env:
   BUILD_TYPE: Release

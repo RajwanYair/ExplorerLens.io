@@ -1,8 +1,8 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens 
-**Current Version:** v23.7.0 "Vega-X" | **Next Major:** v24.0.0 "Altair" (planned) 
-**Last Updated:** March 28, 2026
+**Current Version:** v24.1.0 "Altair-R" 
+**Last Updated:** May 2026
 
 ---
 
@@ -90,10 +90,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [release-notes/RELEASE_NOTES_v7.1.0.md](release-notes/RELEASE_NOTES_v7.1.0.md) | v7.1.0 release notes |
-| [release-notes/RELEASE_NOTES_v6.0.0.md](release-notes/RELEASE_NOTES_v6.0.0.md) | v6.0.0 release notes |
-| [release-notes/v5.3.0-RELEASE-NOTES.md](release-notes/v5.3.0-RELEASE-NOTES.md) | v5.3.0 release notes |
-| [audits/MD_AUDIT_2026-02-16.md](audits/MD_AUDIT_2026-02-16.md) | Markdown drift and duplication audit |
+| [CHANGELOG.md](../CHANGELOG.md) | Full release history (all versions) |
 
 ## GitHub Configuration
 

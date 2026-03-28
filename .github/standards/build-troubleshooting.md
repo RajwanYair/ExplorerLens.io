@@ -1,7 +1,7 @@
 # ExplorerLens Build Troubleshooting Guide
 
-**Last Updated:** March 28, 2026
-**Applies To:** v23.6.0 "Vega-W", VS 18 2026 Build Tools, MSVC v145 toolset
+**Last Updated:** May 2026
+**Applies To:** v24.1.0 "Altair-R", VS 18 2026 Build Tools, MSVC v145 toolset
 
 ---
 
