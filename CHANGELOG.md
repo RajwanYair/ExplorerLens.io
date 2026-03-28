@@ -7,16 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned — v23.7.0 "Vega-X" — Format Expansion V (Sprints 471–480)
-- Engine/Decoders/ICNSDecoder.h: Apple ICNS icon bundle decoder
-- Engine/Decoders/CURDecoder.h: Windows cursor (.cur / .ani) decoder
-- Engine/Decoders/ANIMDecoder.h: IFF ANIM animated image decoder
-- Engine/Decoders/MNGDecoder.h: MNG (Multiple-image Network Graphics) decoder
-- Engine/Decoders/HRZDecoder.h: HRZ / slow-scan TV format decoder
-- Engine/Decoders/PIXARDecoder.h: PIXAR .ptex / .tx texture decoder
-- Engine/Decoders/JPEG2000TileDecoderV2.h: JPEG 2000 tiled decode v2 (sub-resolution)
-- Engine/Decoders/FLIFDecoderV2.h: FLIF (Free Lossless Image Format) v2 decoder
-
 ### Planned — v24.0.0 "Altair" — AI-Native Thumbnailing v2 (Sprints 481–490)
 - Engine/AI/NeuralUpscalerV2.h: ESRGAN 4× neural upscaler v2 (DirectML)
 - Engine/AI/ContentAwareResizer.h: Content-aware intelligent resize engine
@@ -27,12 +17,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Engine/AI/StyleTransferEngine.h: Fast neural style transfer for previews
 - Engine/AI/LandmarkDetectionEngine.h: Face/landmark detection for smart crop
 
-### Planned — v25.0.0 "Rigel" — WebAssembly Plugin Sandbox (Sprints 561–570)
-- Engine/Plugin/WASMRuntimeAdapter.h: WASM runtime adapter (WasmEdge / WABT host)
-- Engine/Plugin/WASMMemorySafetyModel.h: WASM plugin memory safety model
-- Engine/Plugin/WASMPluginLoader.h: WASM plugin load/link engine (component model)
-- Engine/Plugin/WITBindingGenerator.h: WIT interface binding generator for plugin API
-- Engine/Plugin/WASMHostController.h: Cross-process WASM host with resource limits
+---
+
+## [23.7.0] — Vega-X (2026-03-28)
+
+### Added — Sprints 471-480: Format Expansion V
+- Engine/Decoders/ICNSDecoder.h: Apple ICNS icon bundle decoder (highest-resolution PNG variant)
+- Engine/Decoders/CURDecoder.h: Windows cursor (.cur / .ani) static and animated decoder
+- Engine/Decoders/ANIMDecoder.h: IFF ANIM animated image decoder (ANIM5/7/8 delta compression)
+- Engine/Decoders/MNGDecoder.h: MNG (Multiple-image Network Graphics) frame extractor
+- Engine/Decoders/HRZDecoder.h: HRZ / slow-scan TV (SSTV) format decoder (256×240 RGB24)
+- Engine/Decoders/PIXARDecoder.h: PIXAR .ptex / .tx per-face texture decoder
+- Engine/Decoders/JPEG2000TileDecoderV2.h: JPEG 2000 tiled decode v2 with sub-resolution hierarchy
+- Engine/Decoders/FLIFDecoderV2.h: FLIF (Free Lossless Image Format) v2 decoder with progressive exit
+
+### Statistics
+- Test count: 3,125 unit tests (+8 from v23.6.0)
+- Sprint coverage: 471–480 (10 sprints)
+- New headers: 8
+
+---
+
 - Engine/Plugin/WASMCapabilityNegotiator.h: WASM plugin capability negotiation protocol
 - Engine/Plugin/WASMHotSwapEngine.h: WASM plugin hot-swap engine (live reload)
 - Engine/Plugin/WASMDebuggerBridge.h: WASM plugin debugger bridge / inspector protocol

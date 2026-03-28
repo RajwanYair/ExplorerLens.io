@@ -1,4 +1,4 @@
-# Pre-Release Candidate Workflow — Sprint 37 (v15.6.0)
+# Pre-Release Candidate Workflow — v23.6.0 "Vega-W"
 # Creates Release Candidate tags (vX.Y.Z-rc.N) and pre-release GitHub Releases.
 # RC releases are for validation before the final GA release.
 name: Pre-Release (RC)

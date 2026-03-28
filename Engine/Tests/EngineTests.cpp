@@ -124,6 +124,14 @@
 #include "../Decoders/WebPDecoder.h"
 #include "../Decoders/XCFDecoder.h"
 #include "../Decoders/XPMDecoder.h"
+#include "../Decoders/ICNSDecoder.h"
+#include "../Decoders/CURDecoder.h"
+#include "../Decoders/ANIMDecoder.h"
+#include "../Decoders/MNGDecoder.h"
+#include "../Decoders/HRZDecoder.h"
+#include "../Decoders/PIXARDecoder.h"
+#include "../Decoders/JPEG2000TileDecoderV2.h"
+#include "../Decoders/FLIFDecoderV2.h"
 #include "../Engine.h"
 #include "../GPU/D3D12ComputePipeline.h"
 #include "../GPU/GPUDecodeAccelerationV2.h"
@@ -2863,6 +2871,166 @@ TEST(TestXPMDecoder_ReadInfoInvalid) {
     XPMDecoder decoder;
     auto info = decoder.ReadInfo("nonexistent.xpm");
     ASSERT(!info.IsValid());
+}
+
+//==============================================================================
+// Sprint 471-480 — Format Expansion V (v23.7.0 "Vega-X")
+//==============================================================================
+
+TEST(TestICNSDecoder_Extensions) {
+    using namespace ExplorerLens::Decoders;
+    ASSERT(ICNSDecoder::IsICNSExtension(".icns"));
+    ASSERT(ICNSDecoder::IsICNSExtension(".ICNS"));
+    ASSERT(!ICNSDecoder::IsICNSExtension(".png"));
+}
+TEST(TestICNSDecoder_Create) {
+    using namespace ExplorerLens::Decoders;
+    ICNSDecoder decoder;
+    (void)decoder;
+    ASSERT(ICNSDecoder::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(ICNSDecoder::EXTENSIONS[0]) == ".icns");
+}
+TEST(TestICNSDecoder_InvalidFile) {
+    using namespace ExplorerLens::Decoders;
+    ICNSDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.icns");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestCURDecoder_Extensions) {
+    using namespace ExplorerLens::Decoders;
+    ASSERT(CURDecoder::IsCursorExtension(".cur"));
+    ASSERT(CURDecoder::IsCursorExtension(".ani"));
+    ASSERT(!CURDecoder::IsCursorExtension(".ico"));
+}
+TEST(TestCURDecoder_Create) {
+    using namespace ExplorerLens::Decoders;
+    CURDecoder decoder;
+    (void)decoder;
+    ASSERT(CURDecoder::EXTENSIONS[0] != nullptr);
+}
+TEST(TestCURDecoder_InvalidFile) {
+    using namespace ExplorerLens::Decoders;
+    CURDecoder decoder;
+    auto result = decoder.Decode("nonexistent.cur");
+    ASSERT(!result.success);
+}
+
+TEST(TestANIMDecoder_Extensions) {
+    using namespace ExplorerLens::Decoders;
+    ASSERT(ANIMDecoder::IsANIMExtension(".anim"));
+    ASSERT(ANIMDecoder::IsANIMExtension(".iff"));
+    ASSERT(!ANIMDecoder::IsANIMExtension(".gif"));
+}
+TEST(TestANIMDecoder_Create) {
+    using namespace ExplorerLens::Decoders;
+    ANIMDecoder decoder;
+    (void)decoder;
+    ASSERT(ANIMDecoder::EXTENSIONS[0] != nullptr);
+}
+TEST(TestANIMDecoder_InvalidFile) {
+    using namespace ExplorerLens::Decoders;
+    ANIMDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.anim");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestMNGDecoder_Extensions) {
+    using namespace ExplorerLens::Decoders;
+    ASSERT(MNGDecoder::IsMNGExtension(".mng"));
+    ASSERT(MNGDecoder::IsMNGExtension(".jng"));
+    ASSERT(!MNGDecoder::IsMNGExtension(".png"));
+}
+TEST(TestMNGDecoder_Create) {
+    using namespace ExplorerLens::Decoders;
+    MNGDecoder decoder;
+    (void)decoder;
+    ASSERT(MNGDecoder::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(MNGDecoder::EXTENSIONS[0]) == ".mng");
+}
+TEST(TestMNGDecoder_InvalidFile) {
+    using namespace ExplorerLens::Decoders;
+    MNGDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.mng");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestHRZDecoder_Extensions) {
+    using namespace ExplorerLens::Decoders;
+    ASSERT(HRZDecoder::IsHRZExtension(".hrz"));
+    ASSERT(HRZDecoder::IsHRZExtension(".HRZ"));
+    ASSERT(!HRZDecoder::IsHRZExtension(".bmp"));
+}
+TEST(TestHRZDecoder_Dimensions) {
+    ASSERT(ExplorerLens::Decoders::HRZ_WIDTH  == 256);
+    ASSERT(ExplorerLens::Decoders::HRZ_HEIGHT == 240);
+    ASSERT(ExplorerLens::Decoders::HRZ_BYTES  == 256 * 240 * 3);
+}
+TEST(TestHRZDecoder_InvalidFile) {
+    using namespace ExplorerLens::Decoders;
+    HRZDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.hrz");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestPIXARDecoder_Extensions) {
+    using namespace ExplorerLens::Decoders;
+    ASSERT(PIXARDecoder::IsPIXARExtension(".ptex"));
+    ASSERT(PIXARDecoder::IsPIXARExtension(".tx"));
+    ASSERT(!PIXARDecoder::IsPIXARExtension(".png"));
+}
+TEST(TestPIXARDecoder_Create) {
+    using namespace ExplorerLens::Decoders;
+    PIXARDecoder decoder;
+    (void)decoder;
+    ASSERT(PIXARDecoder::EXTENSIONS[0] != nullptr);
+}
+TEST(TestPIXARDecoder_InvalidFile) {
+    using namespace ExplorerLens::Decoders;
+    PIXARDecoder decoder;
+    auto info = decoder.ReadInfo("nonexistent.ptex");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestJPEG2000TileV2_Extensions) {
+    using namespace ExplorerLens::Decoders;
+    ASSERT(JPEG2000TileDecoderV2::IsJ2KExtension(".jp2"));
+    ASSERT(JPEG2000TileDecoderV2::IsJ2KExtension(".j2k"));
+    ASSERT(JPEG2000TileDecoderV2::IsJ2KExtension(".jpx"));
+    ASSERT(!JPEG2000TileDecoderV2::IsJ2KExtension(".jpg"));
+}
+TEST(TestJPEG2000TileV2_Create) {
+    using namespace ExplorerLens::Decoders;
+    JPEG2000TileDecoderV2 decoder;
+    (void)decoder;
+    ASSERT(JPEG2000TileDecoderV2::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(JPEG2000TileDecoderV2::EXTENSIONS[0]) == ".jp2");
+}
+TEST(TestJPEG2000TileV2_InvalidFile) {
+    using namespace ExplorerLens::Decoders;
+    JPEG2000TileDecoderV2 decoder;
+    auto info = decoder.ReadInfo("nonexistent.jp2");
+    ASSERT(!info.IsValid());
+}
+
+TEST(TestFLIFDecoderV2_Extensions) {
+    using namespace ExplorerLens::Decoders;
+    ASSERT(FLIFDecoderV2::IsFLIFExtension(".flif"));
+    ASSERT(FLIFDecoderV2::IsFLIFExtension(".FLIF"));
+    ASSERT(!FLIFDecoderV2::IsFLIFExtension(".png"));
+}
+TEST(TestFLIFDecoderV2_Create) {
+    using namespace ExplorerLens::Decoders;
+    FLIFDecoderV2 decoder;
+    (void)decoder;
+    ASSERT(FLIFDecoderV2::EXTENSIONS[0] != nullptr);
+    ASSERT(std::string(FLIFDecoderV2::EXTENSIONS[0]) == ".flif");
+}
+TEST(TestFLIFDecoderV2_InvalidFile) {
+    using namespace ExplorerLens::Decoders;
+    FLIFDecoderV2 decoder;
+    auto result = decoder.Decode("nonexistent.flif");
+    ASSERT(!result.success);
 }
 
 //==============================================================================
@@ -31659,6 +31827,33 @@ TEST(TestCICDWebhookReceiver_DispatchEvent) {
     RUN_TEST(TestLensCacheCLI_SetMaxSize);
     RUN_TEST(TestLensPluginCLI_InstallList);
     RUN_TEST(TestCICDWebhookReceiver_DispatchEvent);
+
+    // Sprint 471-480 — Format Expansion V (v23.7.0 "Vega-X")
+    std::wcout << L"Format Expansion V (v23.7.0 Vega-X)..." << std::endl;
+    RUN_TEST(TestICNSDecoder_Extensions);
+    RUN_TEST(TestICNSDecoder_Create);
+    RUN_TEST(TestICNSDecoder_InvalidFile);
+    RUN_TEST(TestCURDecoder_Extensions);
+    RUN_TEST(TestCURDecoder_Create);
+    RUN_TEST(TestCURDecoder_InvalidFile);
+    RUN_TEST(TestANIMDecoder_Extensions);
+    RUN_TEST(TestANIMDecoder_Create);
+    RUN_TEST(TestANIMDecoder_InvalidFile);
+    RUN_TEST(TestMNGDecoder_Extensions);
+    RUN_TEST(TestMNGDecoder_Create);
+    RUN_TEST(TestMNGDecoder_InvalidFile);
+    RUN_TEST(TestHRZDecoder_Extensions);
+    RUN_TEST(TestHRZDecoder_Dimensions);
+    RUN_TEST(TestHRZDecoder_InvalidFile);
+    RUN_TEST(TestPIXARDecoder_Extensions);
+    RUN_TEST(TestPIXARDecoder_Create);
+    RUN_TEST(TestPIXARDecoder_InvalidFile);
+    RUN_TEST(TestJPEG2000TileV2_Extensions);
+    RUN_TEST(TestJPEG2000TileV2_Create);
+    RUN_TEST(TestJPEG2000TileV2_InvalidFile);
+    RUN_TEST(TestFLIFDecoderV2_Extensions);
+    RUN_TEST(TestFLIFDecoderV2_Create);
+    RUN_TEST(TestFLIFDecoderV2_InvalidFile);
 
     std::wcout << std::endl;
 

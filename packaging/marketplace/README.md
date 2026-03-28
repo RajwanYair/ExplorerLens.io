@@ -385,4 +385,4 @@ Organizations can host private registries:
 
 **Registry Version:** 1.0.0 
 **Last Updated:** January 6, 2026 
-**Status:** Release (v15.0.0 Launch)
+**Status:** Release (v23.6.0 "Vega-W")

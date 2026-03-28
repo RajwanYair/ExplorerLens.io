@@ -1,7 +1,7 @@
 # ExplorerLens.py — Cross-Platform Python Thumbnail Provider
 
-**Version:** 15.0.0
-**Based on:** ExplorerLens.io v15.0.0 "Zenith"
+**Version:** 23.6.0
+**Based on:** ExplorerLens.io v23.6.0 "Vega-W"
 **Language:** Python 3.11+
 **Platforms:** Windows (COM IThumbnailProvider), Linux (freedesktop.org)
 

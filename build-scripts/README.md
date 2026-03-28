@@ -1,9 +1,9 @@
-# Build Scripts - ExplorerLens v15.0.0
+# Build Scripts - ExplorerLens v23.6.0
 
 **Unified Build System for Windows 11** 
 Comprehensive build infrastructure for external dependencies, engine, and installer packaging.
 
-> **⚡ NEW in v15.0.0:** Unified build modules, 50% code reduction, vcpkg integration
+> **⚡ NEW in v23.6.0:** Unified build modules, 50% code reduction, vcpkg integration
 
 ---
 
@@ -81,7 +81,7 @@ msbuild LENSShell.sln /p:Configuration=Release /p:Platform=x64 /m
 
 ---
 
-## 📚 Core Module Reference (NEW in v15.0.0)
+## 📚 Core Module Reference (NEW in v23.6.0)
 
 ### Build-Library-Core.ps1
 

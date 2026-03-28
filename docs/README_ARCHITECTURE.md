@@ -1,6 +1,6 @@
 # ExplorerLens — Architecture Reference
 
-> **Version:** 23.5.0 "Vega-V" | **Last Updated:** 2026-03-27
+> **Version:** 23.6.0 "Vega-W" | **Last Updated:** 2026-03-28
 
 ## System Overview
 

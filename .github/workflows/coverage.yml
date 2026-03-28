@@ -1,6 +1,6 @@
 name: Code Coverage
 
-# Sprint 28 (v15.5.0 "Zenith-V"): Measures Engine/Core + Engine/Decoders
+# v23.6.0 "Vega-W": Measures Engine/Core + Engine/Decoders
 # coverage via OpenCppCoverage (Windows) / gcov-llvm (Linux). Enforces a
 # minimum floor of 60% for each subsystem. Coverage report is uploaded as
 # a CI artifact and the badge in README.md is updated on main.

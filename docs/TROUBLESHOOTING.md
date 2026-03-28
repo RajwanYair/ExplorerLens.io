@@ -1,6 +1,6 @@
 # ExplorerLens Troubleshooting Guide
 **Documentation Completion** 
-**Date:** March 27, 2026
+**Date:** March 28, 2026
 
 ---
 
@@ -589,7 +589,7 @@ $testFile = "C:\Photos\sample.webp"
 
 ## Current Known Issues
 
-**Version:** 23.5.0 "Vega-V" — all P0 and P1 issues resolved
+**Version:** 23.6.0 "Vega-W" — all P0 and P1 issues resolved
 
 | Priority | Issue | Status | Workaround |
 |----------|-------|--------|------------|
@@ -618,5 +618,5 @@ $testFile = "C:\Photos\sample.webp"
 
 ---
 
-**Last Updated:** March 27, 2026 
-**Version:** 23.5.0
+**Last Updated:** March 28, 2026 
+**Version:** 23.6.0

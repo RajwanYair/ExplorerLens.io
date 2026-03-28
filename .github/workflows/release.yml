@@ -26,7 +26,7 @@ on:
   workflow_dispatch:
     inputs:
       version_override:
-        description: "Version override (e.g. 23.5.0) — leave blank to read from tag"
+        description: "Version override (e.g. 23.6.0) — leave blank to read from tag"
         required: false
         default: ""
 

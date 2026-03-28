@@ -1,6 +1,6 @@
 # ExplorerLens — Development Learnings & Best Practices
 
-**Last Updated:** v23.5.0 "Vega-V" — March 27, 2026
+**Last Updated:** v23.6.0 "Vega-W" — March 28, 2026
 
 > **Note:** Core build rules and conventions have been promoted to `.github/copilot-instructions.md`.
 > This file captures additional detail and historical context not yet in the main instructions.
@@ -1080,7 +1080,7 @@ Batch rename of types in headers (e.g., `PackageType` → `MSIXPackageType`) lea
 - Build immediately after every batch rename — do not let errors accumulate across renames
 - Use `\b` (word-boundary) regex to avoid partial replacements (e.g., `\bGateVerdict\b`)
 
-### Type rename mapping table (v23.5.0 context)
+### Type rename mapping table (v23.6.0 context)
 
 | Old Name | New Name | Defining Header |
 |----------|----------|-----------------|

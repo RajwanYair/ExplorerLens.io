@@ -1,8 +1,8 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens 
-**Current Version:** v23.5.0 "Vega-V" | **Next Major:** v25.0.0 "Rigel" (planned) 
-**Last Updated:** March 27, 2026
+**Current Version:** v23.6.0 "Vega-W" | **Next Major:** v25.0.0 "Rigel" (planned) 
+**Last Updated:** March 28, 2026
 
 ---
 
@@ -21,6 +21,7 @@
 | Document | Description |
 |----------|-------------|
 | [ROADMAP_V25.md](ROADMAP_V25.md) | **Active Roadmap** — v25.x "Rigel" through v26.x "Canopus" |
+| [SPRINT_PLAN_800.md](SPRINT_PLAN_800.md) | Sprints 761–860 — v27.4.0 "Sirius-U" through v28.5.0 "Polaris-V" |
 | [SPRINT_PLAN_700.md](SPRINT_PLAN_700.md) | Sprints 661–760 — v26.2.0 "Canopus-S" through v27.3.0 "Sirius-T" |
 | [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) | Sprints 561–660 — v25.0.0 "Rigel" through v26.1.0 "Canopus-R" |
 | [SPRINT_PLAN_500.md](SPRINT_PLAN_500.md) | Sprints 461–560 — v23.6.0 through v24.7.0 "Altair-X" |

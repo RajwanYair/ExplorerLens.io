@@ -21,10 +21,10 @@ namespace BuildValidation {
 /// Build configuration snapshot for diagnostics
 struct BuildInfo {
     static constexpr int MajorVersion = 23;
-    static constexpr int MinorVersion = 6;
+    static constexpr int MinorVersion = 7;
     static constexpr int PatchVersion = 0;
-    static constexpr const char* VersionString = "23.6.0";
-    static constexpr const char* Codename = "Vega-W";
+    static constexpr const char* VersionString = "23.7.0";
+    static constexpr const char* Codename = "Vega-X";
     static constexpr const char* BuildDate = __DATE__;
     static constexpr const char* BuildTime = __TIME__;
 
@@ -43,13 +43,13 @@ struct BuildInfo {
 #endif
 
     // Feature flags
-    static constexpr int TotalMilestones = 456;
-    static constexpr int CompletedMilestones = 456;
+    static constexpr int TotalMilestones = 464;
+    static constexpr int CompletedMilestones = 464;
 
     // Subsystem count
     static constexpr int DecoderCount = 25;
     static constexpr int SupportedExtensions = 200;
-    static constexpr int UnitTestCount = 3117;
+    static constexpr int UnitTestCount = 3125;
     static constexpr int BenchmarkSuites = 5;
 };
 

@@ -17,7 +17,7 @@ ExplorerLens.io generates thumbnails for images, videos, documents, 3D models, f
 ![C++20](https://img.shields.io/badge/C%2B%2B-20-orange)
 ![Windows 11](https://img.shields.io/badge/Windows-10%2F11-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Tests](https://img.shields.io/badge/Tests-3117%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-3125%20passing-success)
 ![Warnings](https://img.shields.io/badge/Build-0%20warnings-brightgreen)
 
 | | |
@@ -264,10 +264,10 @@ We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for gui
 
 ## 📊 Status
 
-**Current Version:** 15.3.0 "Zenith-T"
+**Current Version:** 23.7.0 "Vega-X"
 **Build Status:** 0 errors / 0 warnings
-**Test Status:** 2,951 unit tests, 5 benchmarks (100% pass rate)
-**Codename:** Zenith-T — Resilience & Hardening (Sprint 9–16 of 100; roadmap → v17.0.0 "Nova")
+**Test Status:** 3,125 unit tests, 5 benchmarks (100% pass rate)
+**Codename:** Vega-X — Format Expansion V (Sprints 471–480; roadmap → v25.0.0 "Rigel")
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete development history.
 
@@ -321,4 +321,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 Built with ❤️ using C++20, DirectX 11/12, and Vulkan — Windows Shell Extension for 200+ formats
 
-Last Updated: March 25, 2026 (v15.3.0 "Zenith-T")
+Last Updated: March 28, 2026 (v23.7.0 "Vega-X")

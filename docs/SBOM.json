@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:ExplorerLens-v23.6.0-2026-03-28",
+  "serialNumber": "urn:uuid:ExplorerLens-v23.7.0-2026-03-28",
   "metadata": {
     "timestamp": "2026-03-28T00:00:00Z",
     "tools": [

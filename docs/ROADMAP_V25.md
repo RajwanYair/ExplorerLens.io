@@ -1,7 +1,7 @@
 # ExplorerLens v25.x "Rigel" — Development Roadmap
 
 **Status:** Planning  
-**Current Version:** v23.5.0 "Vega-V"  
+**Current Version:** v23.7.0 "Vega-X"  
 **Next Major Version:** v25.0.0 "Rigel"  
 **Previous Roadmap:** [ROADMAP_V16.md](ROADMAP_V16.md) *(archived — covers v15.x/v16.x work now completed)*  
 **Sprint Detail:** [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) — Sprints 561–660
@@ -33,10 +33,10 @@ future-proofing plugin signing and IPC channels ahead of NIST FIPS 203/205 manda
 ## Version Timeline
 
 ```
-v23.5.0  Vega-V    ── NOW (released)
+v23.5.0  Vega-V    ── released
    │
-   ├── v23.6.0  Vega-W     Security Hardening v2        (Sprint 461–470)
-   ├── v23.7.0  Vega-X     Format Expansion V            (Sprint 471–480)
+   ├── v23.6.0  Vega-W     Security Hardening v2        (Sprint 461–470) ── released
+   ├── v23.7.0  Vega-X     Format Expansion V            (Sprint 471–480) ── NOW
    │
    ├── v24.0.0  Altair     AI-Native Thumbnailing v2 ★  (Sprint 481–490)
    ├── v24.1.0  Altair-R   Cross-Process Architecture    (Sprint 491–500)
@@ -77,8 +77,8 @@ The Altair series will complete these capabilities before Rigel begins:
 | Memory optimization v3 (huge pages/NVMe) | v23.3.0 Vega-T | ✅ Done |
 | Smart Cache v4 (AI eviction/federated) | v23.4.0 Vega-U | ✅ Done |
 | CLI & Automation v2 (watch/diff/profile) | v23.5.0 Vega-V | ✅ Done |
-| Security hardening v2 (ZTP/CFG/AES-IPC) | v23.6.0 Vega-W | Planned |
-| Format Expansion V (ICNS/CUR/FLIF) | v23.7.0 Vega-X | Planned |
+| Security hardening v2 (ZTP/CFG/AES-IPC) | v23.6.0 Vega-W | ✅ Done |
+| Format Expansion V (ICNS/CUR/FLIF) | v23.7.0 Vega-X | ✅ Done |
 | AI-native thumbnailing v2 (ESRGAN/CLIP) | v24.0.0 Altair | Planned |
 | Cross-process COM server + named-pipe hub | v24.1.0 Altair-R | Planned |
 | Cloud backend (Azure/S3/Redis/CosmosDB) | v24.2.0 Altair-S | Planned |

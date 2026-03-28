@@ -1,6 +1,6 @@
 # ExplorerLens User Guide
-**Version:** 23.5.0 "Vega-V"
-**Last Updated:** March 27, 2026
+**Version:** 23.6.0 "Vega-W"
+**Last Updated:** March 28, 2026
 
 ## Table of Contents
 - [Installation](#installation)

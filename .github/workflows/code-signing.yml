@@ -1,4 +1,4 @@
-# Code Signing Pipeline — Sprint 34 (v15.6.0)
+# Code Signing Pipeline — v23.6.0 "Vega-W"
 # Signs release binaries using Azure Trusted Signing or self-signed cert.
 # Runs as part of the release workflow after binaries are built.
 #

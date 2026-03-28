@@ -494,6 +494,14 @@ set(ENGINE_HEADERS
     Decoders/AnimatedImageDecoder.h
     Decoders/ProgressiveJPEGDecoder.h
     Decoders/XPMDecoder.h
+    Decoders/ICNSDecoder.h
+    Decoders/CURDecoder.h
+    Decoders/ANIMDecoder.h
+    Decoders/MNGDecoder.h
+    Decoders/HRZDecoder.h
+    Decoders/PIXARDecoder.h
+    Decoders/JPEG2000TileDecoderV2.h
+    Decoders/FLIFDecoderV2.h
 
     # GPU rendering and compute
     GPU/D3D11Renderer.h

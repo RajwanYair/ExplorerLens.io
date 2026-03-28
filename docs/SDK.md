@@ -1,8 +1,8 @@
 # ExplorerLens SDK — v2 Reference Guide
 
-**Version:** 23.5.0 "Vega-V"  
+**Version:** 23.6.0 "Vega-W"  
 **Classification:** Public  
-**Updated:** 2026-03-27
+**Updated:** 2026-03-28
 
 ---
 
