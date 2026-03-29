@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [25.6.0] — Rigel-W (2026-03-29)
+
+### Added — Sprint 621-630: Collaborative Annotations & Sharing
+- Engine/Core/AnnotationStore.h: Persistent annotation store (singleton) with Tag/Star/Comment/Rating/Color types
+- Engine/Core/AnnotationOverlayRenderer.h: Annotation icon compositor over thumbnail pixels
+- Engine/Utils/CollabCloudSync.h: Cloud sync state machine (CollabSyncDirection Push/Pull/Both)
+- Engine/Utils/APIRateLimiter.h: Token-bucket rate limiter returning APIRateLimitResult
+- Engine/Utils/OAuthTokenValidator.h: JWT validator with configurable issuer/audience and clock injection
+- Engine/Core/ShareLinkGenerator.h: Secure share-link builder with signed expiring URLs
+- Engine/Core/ThumbnailExportPipeline.h: Multi-format thumbnail export (PNG/JPEG/WebP/AVIF) pipeline
+- Engine/Utils/CertificateMigrationTool.h: RSA→post-quantum cert migration planner (BuildPlan API)
+- Test coverage: 8 new TEST() blocks, 8 new RUN_TEST() calls (3588 total unit tests)
+
+
 ## [25.5.0] — Rigel-V (2026-03-29)
 
 ### Added — Sprint 611-620: Multi-Instance & Virtual Desktop
