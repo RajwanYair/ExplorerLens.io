@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v28.7.0 Polaris-X: Cross-Platform Preview (macOS+Linux) — Metal render bridge, Linux Vulkan preview, platform-neutral pixel buffer, GTK4 thumbnail widget, macOS Quick Look bridge, XDG thumbnail provider, Metal shader compiler, platform capability probe
+
+
 v28.6.0 Polaris-W: Post-Quantum Cryptography & Signatures — PQC signature verifier, hybrid trust chain v2, quantum-safe key exchange, Dilithium certificate store, PQC plugin manifest, signature audit logger, crypto agility broker, key rotation scheduler
 
 
