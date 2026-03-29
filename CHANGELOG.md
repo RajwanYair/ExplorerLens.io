@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v28.3.0 Polaris-T: Enterprise Console 2.0 — fleet dashboard v2, AI anomaly detection, compliance scoring (SOC2/ISO27001/NIST/GDPR), remediation playbooks, RBAC v2, executive reports, SLA monitoring, MSP multi-tenant portal
+
+
 v28.2.0 Polaris-S: Live AR Preview Engine — ARKit/ARCore/OpenXR bridge, spatial anchor persistence v2, plane surface detection, occlusion-aware rendering, QR thumbnail triggers, passthrough video compositing, shared AR spaces, spatial audio annotation
 
 
