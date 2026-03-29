@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [26.0.0] — Canopus (2026-03-29)
+
+### Added — Sprint 641-650: Post-Quantum Security (MAJOR v26)
+- Engine/Utils/MLKEMKeyEncapsulator.h: ML-KEM-768/1024 key encapsulation (NIST FIPS 203)
+- Engine/Utils/SLHDSASignatureVerifier.h: SLH-DSA stateless hash-based signature verifier (NIST FIPS 205)
+- Engine/Utils/PQAuditTrail.h: Post-quantum crypto audit trail with hash-chained entries and VerifyChain API
+- Engine/Utils/QuantumSafeKeyRotator.h: PQ key rotation engine with policy-driven scheduling
+- Engine/Utils/FIPS140CryptoBoundary.h: FIPS 140-3 algorithm approval boundary checker
+- Engine/Utils/HybridTLSIPCChannel.h: Hybrid classical+PQ TLS channel for inter-process communication
+### Changed
+- Major version bumped to 26 — post-quantum cryptographic baseline established
+- Test coverage: 8 new TEST() blocks (3604 total unit tests)
+
+
 ## [25.7.0] — Rigel-X (2026-03-29)
 
 ### Added — Sprint 631-640: Protocol Surface & API Ecosystem
