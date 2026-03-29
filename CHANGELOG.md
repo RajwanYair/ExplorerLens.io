@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [25.7.0] — Rigel-X (2026-03-29)
+
+### Added — Sprint 631-640: Protocol Surface & API Ecosystem
+- Engine/Core/RESTThumbnailServer.h: HTTP REST endpoint router returning HTTPResponse (Dispatch API)
+- Engine/Core/GraphQLQueryEngine.h: GraphQL query executor over thumbnail metadata (Execute/GraphQLRequest API)
+- Engine/Core/WebSocketPushChannel.h: WebSocket broadcast channel with SimulateClientConnect/Broadcast API
+- Engine/Core/OpenAPISpecGenerator.h: OpenAPI 3.0 YAML/JSON spec generator
+- Engine/Core/SDKBindingsGenerator.h: Multi-language SDK binding generator (C#/Python/TypeScript/Rust)
+- Engine/Core/WindowsSearchV3Bridge.h: Windows Search v3 indexing bridge with SearchIndexRequest API
+- Engine/Utils/ConflictResolutionMerger.h: 3-way merge engine returning CRMergeResult
+- Engine/Utils/AccessibilityNavigatorV3.h: UIA accessibility tree navigator with ANV3ControlType enum
+- Test coverage: 8 new TEST() blocks (3596 total unit tests)
+
+
 ## [25.6.0] — Rigel-W (2026-03-29)
 
 ### Added — Sprint 621-630: Collaborative Annotations & Sharing
