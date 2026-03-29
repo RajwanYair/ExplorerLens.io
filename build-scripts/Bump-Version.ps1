@@ -76,7 +76,35 @@ if ($TestCount -gt 0) {
 Set-Content $svgPath -Value $svg -NoNewline
 Write-Host "[bump] social-preview.svg updated"
 
-# 5. CHANGELOG.md — prepend new section
+# 5a. Root CMakeLists.txt — project VERSION
+$rootCmakePath = "$rootDir\CMakeLists.txt"
+$rootCmake = Get-Content $rootCmakePath -Raw
+$rootCmake = $rootCmake -replace '(# Version: )[\d.]+ "[^"]+"', "`${1}$Version `"$Codename`""
+$rootCmake = $rootCmake -replace '(?m)(project\(ExplorerLens\s+VERSION\s+)[\d.]+', "`${1}$Version"
+Set-Content $rootCmakePath -Value $rootCmake -NoNewline
+Write-Host "[bump] CMakeLists.txt updated"
+
+# 5b. Engine/CMakeLists.txt — project VERSION
+$engCmakePath = "$rootDir\Engine\CMakeLists.txt"
+$engCmake = Get-Content $engCmakePath -Raw
+$engCmake = $engCmake -replace '(# Version: )[\d.]+', "`${1}$Version"
+$engCmake = $engCmake -replace '(?m)(project\(ExplorerLensEngine\s+VERSION\s+)[\d.]+', "`${1}$Version"
+Set-Content $engCmakePath -Value $engCmake -NoNewline
+Write-Host "[bump] Engine/CMakeLists.txt updated"
+
+# 5c. LENSManager/LENSManager.rc — VERSIONINFO
+$rcPath = "$rootDir\LENSManager\LENSManager.rc"
+$rc = Get-Content $rcPath -Raw
+$rcVer = "$major, $minor, $patch, 0"
+$rcVerStr = "$Version.0"
+$rc = $rc -replace 'FILEVERSION\s+[\d, ]+', "FILEVERSION     $rcVer"
+$rc = $rc -replace 'PRODUCTVERSION\s+[\d, ]+', "PRODUCTVERSION  $rcVer"
+$rc = $rc -replace '(VALUE "FileVersion",\s*")[^"]*(")', "`${1}$rcVerStr\0`${2}"
+$rc = $rc -replace '(VALUE "ProductVersion",\s*")[^"]*(")', "`${1}$rcVerStr\0`${2}"
+Set-Content $rcPath -Value $rc -NoNewline
+Write-Host "[bump] LENSManager.rc updated"
+
+# 6. CHANGELOG.md — prepend new section
 $clPath = "$rootDir\CHANGELOG.md"
 $cl = Get-Content $clPath -Raw
 $marker = "## [Unreleased]"
@@ -93,7 +121,7 @@ if ($idx -ge 0) {
 
 # 6. Commit
 $commitMsg = "chore: bump version to $Version ($Codename)"
-$details = "Sprint version bump. VERSION, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg"
+$details = "Sprint version bump. VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg"
 $fullMsg = "$commitMsg`n`n$details"
 [IO.File]::WriteAllText("$rootDir\.git\BUMP_MSG.txt", $fullMsg)
 git add -A
