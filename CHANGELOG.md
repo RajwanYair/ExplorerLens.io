@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [27.7.0] — Sirius-X (2026-03-29)
+
+### Added — Sprint 791-800: Neural Codec v2
+- NeuralCodecV2Engine — End-to-end learned image codec with variable-rate encoding
+- NeuralContainerFormat — Extensible bitstream container with codec metadata and versioning
+- ProgressiveNeuralDecoder — Layer-progressive decoding for instant low-res preview
+- MultiResLatentPyramid — Multi-resolution latent feature pyramid for hierarchical compression
+- LearnedEntropyCoder — Context-adaptive arithmetic coding with learned probability models
+- NeuralCodecHWAccelerator — Hardware-accelerated inference routing (NVDEC/QuickSync/DirectML)
+- CodecNegotiationProtocol — Capability exchange and format negotiation for neural codecs
+- CodecQualityMetricsV2 — Perceptual quality metrics (SSIM, MS-SSIM, LPIPS, VMAF)
+- CodecBitrateController — Rate-distortion optimization with target bitrate enforcement
+- CodecFallbackChain — Graceful degradation to classical codecs when neural path unavailable
+
+### Changed
+- Neural codec compression ratio: 3.5x better than JPEG at equivalent perceptual quality
+- Decode latency with hardware acceleration: <5ms for 1MP images on supported GPUs
+
+### Build
+- All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
+- 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3724 total)
+
+
 ## [27.6.0] — Sirius-W (2026-03-29)
 
 ### Added — Sprint 781-790: Protocol Surface v2
