@@ -9,8 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-Sprint 601-610: Self-Healing & Adaptive Recovery — AdaptiveTimeoutTuner, HeapCorruptionSentinel, RetryPolicyEngine, PerMonitorDPISelectorV2, ForegroundPriorityInheritance, WatchdogRestartManager, GracefulDegradationEngine, MemorySnapshotDiffer, HotRestartCoordinator, ServiceHealthMonitor
+## [25.4.0] — Rigel-U (2026-03-29)
 
+### Added — Sprint 601-610: Self-Healing & Adaptive Recovery
+- `Engine/Core/AdaptiveTimeoutTuner.h`, `HeapCorruptionSentinel.h`, `PerMonitorDPISelectorV2.h`, `ConflictResolutionMerger.h`, `PowerBudgetController.h`, `WindowsSearchV3Bridge.h`, `AnnotationStore.h`, `BootIntegritySelfTest.h`
+- `Engine/Pipeline/RetryPolicyEngine.h`, `ForegroundPriorityInheritance.h`
+- `Engine/Utils/WatchdogRestartManager.h`, `GracefulDegradationEngine.h`, `MemorySnapshotDiffer.h`, `HotRestartCoordinator.h`, `ServiceHealthMonitor.h`
+- Test coverage: 8 new TEST() macro blocks, 8 new RUN_TEST() calls (3572 total unit tests)
 
 ## [25.3.0] — Rigel-T (2026-03-29)
 
