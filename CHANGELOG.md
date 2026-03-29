@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [27.5.0] — Sirius-V (2026-03-29)
+
+### Added — Sprint 771-780: Collaborative Annotation v2
+- CollabAnnotationEngineV2 — Real-time multi-user annotation with CRDT merge semantics
+- AnnotationConflictResolver — Last-write-wins + semantic merge for concurrent edits
+- AnnotationPresenceTracker — Live cursor/presence broadcast via WebSocket
+- AnnotationStorageAdapter — Pluggable backend (local file / SharePoint / S3 / OneDrive)
+- AnnotationExportPipeline — Export annotations to PDF, XFDF, SVG, and JSON formats
+- AnnotationSearchIndex — Full-text and tag-based search across annotation corpus
+- AnnotationPermissionModel — Role-based access control (owner/editor/viewer/reviewer)
+- AnnotationVersionHistory — Immutable append-only history with point-in-time restore
+- AnnotationNotificationService — Push notifications for comment mentions and replies
+- AnnotationReviewWorkflow — Approval workflows with status transitions and audit trail
+
+### Changed
+- Annotation sync latency target: <50ms for 10-user sessions (previously 200ms)
+- Annotations now survive thumbnail cache eviction via detached storage model
+
+### Build
+- All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
+- 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3708 total)
+
+
 ## [27.4.0] — Sirius-U (2026-03-29)
 
 ### Added — Sprint 761-770: Predictive Pre-Generation
