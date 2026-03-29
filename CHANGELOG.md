@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [26.3.0] — Canopus-T (2026-03-29)
+
+### Added — Sprint 671-680: Real-Time Collaboration
+- Engine/Core/CollabSessionManager.h: Multi-user session manager with role-based access and OT conflict resolution
+- Engine/Core/LiveCursorBroadcaster.h: Sub-100ms cursor position broadcast with delta-compression
+- Engine/Core/PresencePulseTracker.h: Heartbeat-based presence tracker (Online/Away/Offline states)
+- Engine/Core/SharedViewportSyncEngine.h: CRDT-based viewport state synchronization
+- Engine/Core/ConflictFreeAnnotationMerger.h: OT/CRDT annotation merge engine
+- Engine/Utils/CollabCloudSync.h: Multi-cloud sync adapter (OneDrive/SharePoint/GDrive/S3)
+- Engine/Utils/LiveEditOperationLog.h: Append-only operation log with vector-clock ordering
+- Engine/Utils/CollabPermissionGate.h: Fine-grained RBAC permission gate for collaboration
+- Test coverage: 8 new TEST() blocks (3628 total unit tests)
+
+
 ## [26.2.0] — Canopus-S (2026-03-29)
 
 ### Added — Sprint 661-670: Immersive 3D Preview Engine
