@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v29.1.0 Capella-R: Accessibility & Inclusive Design v2 — BLIP-2 on-device alt-text synthesis, ARIA thumbnail annotator, WCAG 2.2 audit engine, high-contrast theme adapter, caption quality scorer, screen reader bridge, keyboard navigation controller, a11y telemetry reporter
+
+
 v29.0.0 Capella (MAJOR): Gen-5 Platform WinUI 4 — async preview broker, universal file provider, WinUI 4 preview handler, shell property handler v2, preview pipeline v5, persistent L3 disk cache, live preview file watcher, shell extension health monitor v2
 
 
