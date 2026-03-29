@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [26.4.0] — Canopus-U (2026-03-29)
+
+### Added — Sprint 681-690: Adaptive Performance Governor v2
+- Engine/Memory/ThermalAwareMemoryScheduler.h: CPU/GPU thermal feedback memory throttle
+- Engine/Memory/SmartPrefetchEngine.h: ML-guided prefetch with usage pattern prediction
+- Engine/Memory/PowerBudgetController.h: Battery/DC power budget enforcer with DRAM/VRAM caps
+- Engine/Core/AdaptiveQualityGovernor.h: Frame-time driven quality scaler (Aggressive/Balanced/Conservative)
+- Engine/Core/FrameTimingPredictor.h: LSTM-based frame timing predictor (16/33/50ms targets)
+- Engine/Pipeline/BackpressureFlowController.h: Token-bucket backpressure with queue depth monitoring
+- Engine/Pipeline/LatencySpikeDetector.h: Wavelet-based anomaly detector for P99 tail latency
+- Engine/Pipeline/ThroughputOptimizer.h: Work-stealing pipeline throughput optimizer
+- Test coverage: 8 new TEST() blocks (3636 total unit tests)
+
+
 ## [26.3.0] — Canopus-T (2026-03-29)
 
 ### Added — Sprint 671-680: Real-Time Collaboration
