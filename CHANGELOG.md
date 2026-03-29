@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v28.6.0 Polaris-W: Post-Quantum Cryptography & Signatures — PQC signature verifier, hybrid trust chain v2, quantum-safe key exchange, Dilithium certificate store, PQC plugin manifest, signature audit logger, crypto agility broker, key rotation scheduler
+
+
 v28.5.0 Polaris-V: Quantum-Safe Key Management v2 — ML-KEM-768 key encapsulation, ML-DSA-65 signatures, Hybrid PQ+Classic KEM (X25519), TPM2 attestation v2, key rotation orchestrator, HSM PKCS#11 bridge, FIPS 205 SLH-DSA, post-quantum TLS adapter
 
 
