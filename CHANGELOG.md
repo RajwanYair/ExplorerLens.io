@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [26.5.0] — Canopus-V (2026-03-29)
+
+### Added — Sprint 691-700: Global I18n and Accessibility v3
+- Engine/Utils/I18nRuntimeEngine.h: RTL/LTR locale engine with ICU pluralization and BCP 47 tree
+- Engine/Utils/A11yColorContrastEngine.h: WCAG 2.1 AA/AAA contrast evaluator (ContrastDecision/APCA)
+- Engine/Core/LocaleFallbackResolver.h: BCP 47 chain resolver (zh-Hant-TW to zh-Hant to zh to en)
+- Engine/Core/ScreenReaderBridgeV2.h: NVDA/JAWS/Narrator bridge with ARIA live-region announce
+- Engine/Utils/AccessibilityNavigatorV3.h: UIA tree navigator with ANV3ControlType/ANV3Element
+- Engine/Utils/LocalizedDateTimeFormatter.h: ICU-backed locale-aware date/time formatter
+- Engine/Utils/BiDiTextProcessor.h: Unicode BiDi algorithm text processor (UBA, logical/visual reorder)
+- Engine/Core/TextScalabilityEngine.h: Dynamic text scaling engine (DPI-aware, 100-400%)
+- Test coverage: 8 new TEST() blocks (3644 total unit tests)
+
+
 ## [26.4.0] — Canopus-U (2026-03-29)
 
 ### Added — Sprint 681-690: Adaptive Performance Governor v2
