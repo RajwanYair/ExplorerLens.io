@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [26.7.0] — Canopus-X (2026-03-29)
+
+### Added — Sprint 711-720: Privacy Analytics
+- Engine/Core/DifferentialPrivacyEngine.h: (epsilon,delta)-DP engine with Laplace noise via exponential distribution
+- Engine/Core/LocalDataAggregator.h: On-device metric aggregator with configurable noise scale
+- Engine/Core/AnonymizationPipelineV2.h: PII scrubbing pipeline (path, email, username detection)
+- Engine/Core/PrivacyConsentManager.h: Consent category manager (Usage/Crash/PersonalizedAI) with audit trail
+- Engine/Core/SecureEnclaveAnalytics.h: VBS_HVCI/IntelTDX/SGX/Simulation enclave analytics
+- Engine/Utils/GDPRComplianceEngine.h: GDPR right-to-erasure/access/portability/rectification processor
+- Engine/Utils/TelemetryDataMinimizer.h: Telemetry PII field scrubber (email/username/name/ip)
+- Engine/Core/PrivacyAuditLogger.h: Immutable audit chain with std::hash verification
+- Test coverage: 8 new TEST() blocks (3660 total unit tests)
+
+
 ## [26.6.0] — Canopus-W (2026-03-29)
 
 ### Added — Sprint 701-710: XR Thumbnails
