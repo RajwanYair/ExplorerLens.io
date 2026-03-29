@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [27.1.0] — Sirius-R (2026-03-29)
+
+### Added — Sprint 731-740: Streaming and Live Media
+- Engine/Decoders/LiveStreamDecoder.h: HLS/DASH/RTSP/WebRTC/SRT live stream first-frame decoder
+- Engine/Decoders/WebRTCThumbnailCapture.h: WebRTC offer/answer thumbnail capture (VP8/H264/H265/AV1)
+- Engine/Core/StreamingBufferOrchestrator.h: Adaptive streaming buffer with backpressure control
+- Engine/Core/AdaptiveBitrateSelector.h: Token-bucket ABR selector (BandwidthBased/Hybrid)
+- Engine/Core/MediaTimelineRenderer.h: Filmstrip keyframe timeline renderer
+- Engine/Decoders/DASHStreamDecoder.h: MPEG-DASH manifest first-keyframe decoder
+- Engine/Core/LiveThumbnailPoller.h: Concurrent live source poller with configurable max-concurrent limit
+- Engine/GPU/VideoTextureStreamEngine.h: Zero-copy GPU texture upload via DMA
+- Test coverage: 8 new TEST() blocks (3676 total unit tests)
+
+
 ## [27.0.0] — Sirius (2026-03-29)
 
 ### Added — Sprint 721-730: Federated AI
