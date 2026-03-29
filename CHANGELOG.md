@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v28.2.0 Polaris-S: Live AR Preview Engine — ARKit/ARCore/OpenXR bridge, spatial anchor persistence v2, plane surface detection, occlusion-aware rendering, QR thumbnail triggers, passthrough video compositing, shared AR spaces, spatial audio annotation
+
+
 v28.1.0 Polaris-R: Generative AI Caption Synthesis — VLM/CLIP embedding, Florence-2 caption pipeline, on-device ONNX inferer, style transfer (formal/casual/a11y), WCAG AltText v2, batch+incremental caption updates, semantic search index
 
 
