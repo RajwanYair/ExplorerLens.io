@@ -15,7 +15,7 @@
   <!-- Package Information (WiX v6 syntax) -->
   <Package Name="ExplorerLens"
            Language="1033"
-           Version="15.0.0.0"
+           Version="$(var.Version).0"
            Manufacturer="ExplorerLens Project"
            UpgradeCode="A8394D0D-EE2B-4A00-9FAC-AB8D3B03F078"
            InstallerVersion="500"
@@ -40,7 +40,9 @@
 
       <!-- Core Components -->
       <ComponentGroupRef Id="CoreComponents" />
-      <ComponentGroupRef Id="ExternalLibraries" />
+      <?if $(var.HasLensCLI) = 1 ?>
+      <ComponentGroupRef Id="CLIComponents" />
+      <?endif ?>
       <ComponentGroupRef Id="RegistryEntries" />
       <ComponentGroupRef Id="StartMenuShortcuts" />
     </Feature>
@@ -95,16 +97,16 @@
       </Component>
     </ComponentGroup>
 
-    <!-- External Runtime Dependencies (required by LENSShell.dll) -->
-    <ComponentGroup Id="ExternalLibraries" Directory="BinFolder">
-      <Component Id="LibDe265DLL" Guid="D8394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
-        <File Source="$(var.BuildDir)\x64\Release\libde265.dll" />
-      </Component>
-
-      <Component Id="LibRawDLL" Guid="E8394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
-        <File Source="$(var.BuildDir)\build\bin\libraw.dll" />
+    <!-- CLI Tool (lens.exe) — all external libs are statically linked into LENSShell.dll -->
+    <?if $(var.HasLensCLI) = 1 ?>
+    <ComponentGroup Id="CLIComponents" Directory="BinFolder">
+      <Component Id="LensEXE" Guid="D8394D0D-EE2B-4A00-9FAC-AB8D3B03F079">
+        <File Id="LensEXE"
+              Source="$(var.BuildDir)\build\bin\lens.exe"
+              KeyPath="yes" />
       </Component>
     </ComponentGroup>
+    <?endif ?>
 
     <!-- Manager Application -->
     <ComponentGroup Id="ManagerComponents" Directory="BinFolder">
@@ -171,7 +173,7 @@
       <Component Id="ConfigurationRegistry" Guid="58394D0D-EE2B-4A00-9FAC-AB8D3B03F078">
         <RegistryKey Root="HKLM" Key="SOFTWARE\ExplorerLens">
           <RegistryValue Name="InstallPath" Value="[INSTALLFOLDER]" Type="string" />
-          <RegistryValue Name="Version" Value="15.0.0" Type="string" />
+          <RegistryValue Name="Version" Value="$(var.Version)" Type="string" />
           <RegistryValue Name="CacheMaxSizeMB" Value="500" Type="integer" />
           <RegistryValue Name="GPUEnabled" Value="1" Type="integer" />
         </RegistryKey>

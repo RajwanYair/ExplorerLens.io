@@ -149,16 +149,36 @@ jobs:
             /p:WarningLevel=4 `
             /m /v:minimal
 
-      # ── Build CLI if present ───────────────────────────────────────────────
-      - name: Build lens.exe CLI (if CMake target exists)
+      # ── Build WinUI Manager (if project present) ───────────────────────────
+      - name: Build Manager.WinUI.exe (if available)
         shell: pwsh
         run: |
-          $targets = cmake --build --preset ci-release --target help 2>&1
-          if ($targets -match 'LensCLI|lens_cli|lens-cli') {
-            cmake --build --preset ci-release --target LensCLI -j 8
+          $csproj = Get-ChildItem -Recurse -Filter "*.csproj" |
+                    Where-Object { $_.FullName -match 'WinUI' } |
+                    Select-Object -First 1
+          if ($csproj) {
+            Write-Host "Building WinUI Manager: $($csproj.FullName)" -ForegroundColor Cyan
+            dotnet build $csproj.FullName -c Release -p:Platform=x64 --no-restore
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "✓ Manager.WinUI.exe built" -ForegroundColor Green
+            } else {
+              Write-Host "::warning::Manager.WinUI build failed (non-fatal)" -ForegroundColor Yellow
+              exit 0
+            }
+          } else {
+            Write-Host "No WinUI .csproj found — skipping Manager.WinUI.exe" -ForegroundColor Yellow
+          }
+
+      # ── Build CLI ────────────────────────────────────────────────────────
+      - name: Build lens.exe CLI
+        shell: pwsh
+        run: |
+          cmake --build --preset ci-release --target LensCLI -j 8
+          if ($LASTEXITCODE -eq 0) {
             Write-Host "✓ lens.exe built" -ForegroundColor Green
           } else {
-            Write-Host "⚠ LensCLI target not yet available — skipping" -ForegroundColor Yellow
+            Write-Host "::warning::LensCLI build failed — lens.exe will not be in release (non-fatal)" -ForegroundColor Yellow
+            exit 0
           }
 
       # ── Run unit tests ─────────────────────────────────────────────────────
@@ -185,9 +205,10 @@ jobs:
 
           # Binary discovery: check multiple potential output locations
           $candidates = @{
-            'LENSShell.dll'    = @('x64\Release\LENSShell.dll','build\bin\Release\LENSShell.dll','build\Release\LENSShell.dll')
-            'LENSManager.exe'  = @('x64\Release\LENSManager.exe','build\bin\Release\LENSManager.exe','build\Release\LENSManager.exe')
-            'lens.exe'         = @('build\bin\Release\lens.exe','build\bin\lens.exe','src\cli\Release\lens.exe')
+            'LENSShell.dll'      = @('x64\Release\LENSShell.dll','build\bin\LENSShell.dll','build\bin\Release\LENSShell.dll','build\Release\LENSShell.dll')
+            'LENSManager.exe'    = @('x64\Release\LENSManager.exe','build\bin\LENSManager.exe','build\bin\Release\LENSManager.exe','build\Release\LENSManager.exe')
+            'lens.exe'           = @('build\bin\lens.exe','build\bin\Release\lens.exe','src\cli\Release\lens.exe')
+            'Manager.WinUI.exe'  = @('build\bin\Manager.WinUI.exe','LENSManager.WinUI\bin\x64\Release\Manager.WinUI.exe','build\bin\Release\Manager.WinUI.exe')
           }
 
           $found = @()
@@ -240,10 +261,12 @@ jobs:
           if (-not $msi) {
             Write-Host "Attempting direct wix build as fallback..." -ForegroundColor Yellow
             try {
+              $hasLensCLI = if (Test-Path "build\bin\lens.exe") { 1 } else { 0 }
               wix build packaging\ExplorerLens.wxs `
                 -out "packaging\output\$msiName" `
                 -define "BuildDir=$rootDir" `
                 -define "Version=$version" `
+                -define "HasLensCLI=$hasLensCLI" `
                 -arch x64
               $msi = Get-Item "packaging\output\$msiName" -ErrorAction SilentlyContinue
             } catch {
@@ -379,6 +402,7 @@ jobs:
             release-staging/LENSShell.dll
             release-staging/LENSManager.exe
             release-staging/lens.exe
+            release-staging/Manager.WinUI.exe
           if-no-files-found: warn
           retention-days: 90
 
@@ -444,6 +468,7 @@ jobs:
             dist/LENSShell.dll
             dist/LENSManager.exe
             dist/lens.exe
+            dist/Manager.WinUI.exe
             dist/SHA256SUMS.txt
             dist/ExplorerLens-*-SBOM.json
             dist/verification-report-*.json

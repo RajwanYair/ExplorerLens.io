@@ -77,12 +77,22 @@ $MsiFile = Join-Path $OutputDir "ExplorerLens-Setup-$Version.msi"
 Write-Host "  Source: $WxsFile" -ForegroundColor Gray
 Write-Host "  Target: $MsiFile" -ForegroundColor Gray
 
+# Detect optional CLI binary
+$LensExePath = Join-Path (Join-Path $RootDir "build") "bin\lens.exe"
+$HasLensCLI  = if (Test-Path $LensExePath) { 1 } else { 0 }
+if ($HasLensCLI -eq 1) {
+    Write-Host "  [OK] lens.exe found — will be included in MSI" -ForegroundColor Green
+} else {
+    Write-Host "  [INFO] lens.exe not found at $LensExePath — MSI built without CLI" -ForegroundColor Yellow
+}
+
 try {
     & wix build `
         "$WxsFile" `
         -out "$MsiFile" `
         -define "BuildDir=$RootDir" `
         -define "Version=$Version" `
+        -define "HasLensCLI=$HasLensCLI" `
         -arch x64
 
     if ($LASTEXITCODE -ne 0) {

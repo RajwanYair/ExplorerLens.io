@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/Win32 FS crawler, cloud-first cache, PWA offline manager, auto-update Squirrel/MSIX, Docker+K8s container runtimes, cross-platform UI IPC bridge
+
+
 ## [27.7.0] — Sirius-X (2026-03-29)
 
 ### Added — Sprint 791-800: Neural Codec v2

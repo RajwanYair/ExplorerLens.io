@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 27.7.0
+# Version: 28.0.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 27.7.0
+    VERSION 28.0.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1768,6 +1768,106 @@ set(ENGINE_HEADERS
     AI/LearnedEntropyCoder.h
     GPU/NeuralCodecHWAccelerator.h
     Core/CodecNegotiationProtocol.h
+
+    # Sprint 801-810 — Cross-Platform Electron Shell (v28.0.0 "Polaris")
+    Platform/ElectronShellAdapter.h
+    Platform/CrossPlatformFSCrawler.h
+    Platform/CloudFirstCacheBackend.h
+    Platform/OfflineFirstPWAManager.h
+    Platform/AutoUpdateOrchestrator.h
+    Platform/DockerContainerRuntime.h
+    Platform/KubernetesHelmAdapter.h
+    Platform/CrossPlatformUIBridge.h
+
+    # Sprint 811-820 — Generative AI Caption Synthesis (v28.1.0 "Polaris-R")
+    AI/VLMEmbeddingEngine.h
+    AI/CaptionGenerationPipeline.h
+    AI/OnDeviceCaptionInferer.h
+    AI/CaptionStyleTransferEngine.h
+    AI/AltTextGeneratorV2.h
+    AI/BatchCaptionPipeline.h
+    AI/IncrementalCaptionUpdater.h
+    AI/CaptionSearchIndexer.h
+
+    # Sprint 821-830 — Live AR Preview Engine (v28.2.0 "Polaris-S")
+    AR/ARPreviewBridgeEngine.h
+    AR/SpatialAnchorPersistenceV2.h
+    AR/PlaneSurfaceDetector.h
+    AR/OcclusionAwareRenderer.h
+    AR/QRThumbnailTrigger.h
+    AR/ARPassthroughVideoEngine.h
+    AR/SharedARSpaceManager.h
+    AR/SpatialAudioAnnotator.h
+
+    # Sprint 831-840 — Enterprise Console 2.0 (v28.3.0 "Polaris-T")
+    Enterprise/FleetDashboardV2.h
+    Enterprise/AIAnomalyDetectorV2.h
+    Enterprise/ComplianceScoreEngineV2.h
+    Enterprise/RemediationPlaybookEngine.h
+    Enterprise/RBACEngineV2.h
+    Enterprise/ExecutiveSummaryReporter.h
+    Enterprise/SLAMonitorEngine.h
+    Enterprise/MSPMultiTenantPortal.h
+
+    # Sprint 841-850 — Adaptive UX & Personalization (v28.4.0 "Polaris-U")
+    UX/UserPreferenceLearner.h
+    UX/AdaptiveGridDensityEngine.h
+    UX/EyeTrackingFocusOptimizer.h
+    UX/ThemeEngineV3.h
+    UX/ABExperimentFramework.h
+    UX/AccessibleThemeGenerator.h
+    UX/ThumbnailBadgeSystem.h
+    UX/UXTelemetryPrivacyDashboard.h
+
+    # Sprint 851-860 — Quantum-Safe Key Management v2 (v28.5.0 "Polaris-V")
+    Security/MLKEMKeyEncapsulation.h
+    Security/MLDSASignatureEngine.h
+    Security/HybridPQClassicKEM.h
+    Security/TPM2KeyAttestationV2.h
+    Security/KeyRotationOrchestrator.h
+    Security/HSMIntegrationBridge.h
+    Security/FIPS205ComplianceEngine.h
+    Security/PostQuantumTLSAdapter.h
+
+    # Sprint 861-870 — Post-Quantum Cryptography & Signatures (v28.6.0 "Polaris-W")
+    Core/PQCSignatureVerifier.h
+    Core/HybridTrustChainV2.h
+    Core/QuantumSafeKeyExchange.h
+    Utils/DilithiumCertificateStore.h
+    Plugin/PQCPluginManifest.h
+    Utils/SignatureAuditLogger.h
+    Core/CryptoAgilityBroker.h
+    Utils/KeyRotationScheduler.h
+
+    # Sprint 871-880 — Cross-Platform Preview macOS+Linux (v28.7.0 "Polaris-X")
+    GPU/MetalRenderBridge.h
+    GPU/LinuxVulkanPreview.h
+    Core/PlatformNeutralBuffer.h
+    Utils/GTK4ThumbnailWidget.h
+    Core/MacOSShellBridge.h
+    Core/XDGThumbnailProvider.h
+    GPU/MetalShaderCompiler.h
+    Utils/PlatformCapabilityProbe.h
+
+    # Sprint 881-890 — Gen-5 Platform WinUI 4 (v29.0.0 "Capella")
+    Core/AsyncPreviewBroker.h
+    Core/UniversalFileProvider.h
+    Core/WinUI4PreviewHandler.h
+    Core/ShellPropertyHandlerV2.h
+    Pipeline/PreviewPipelineV5.h
+    Cache/PersistentL3Cache.h
+    Core/LivePreviewUpdater.h
+    Utils/ShellExtensionHealthMonitor.h
+
+    # Sprint 891-900 — Accessibility & Inclusive Design v2 (v29.1.0 "Capella-R")
+    AI/AltTextSynthesizerBLIP2.h
+    Utils/ARIAThumbnailAnnotator.h
+    Core/AccessibilityAuditEngine.h
+    Utils/HighContrastThemeAdapter.h
+    AI/CaptionQualityScorer.h
+    Utils/ScreenReaderBridge.h
+    Core/KeyboardNavigationController.h
+    Utils/A11yTelemetryReporter.h
 )
 
 set(ENGINE_SOURCES
