@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [27.2.0] — Sirius-S (2026-03-29)
+
+### Added — Sprint 741-750: Distributed Rendering
+- Engine/Core/RenderClusterManager.h: Render node registry with idle-node job dispatch
+- Engine/Core/RenderJobScheduler.h: Priority-queue job scheduler with Complete/Fail lifecycle
+- Engine/Core/NodeHealthMonitor.h: Heartbeat-based node health monitor with missed-beat tracking
+- Engine/Core/DistributedCacheReplicator.h: LWW version-based distributed cache replicator
+- Engine/Core/RenderResultAggregator.h: Tile compositor for distributed render results
+- Engine/Core/ClusterAutoScaler.h: CPU/queue-depth-based cluster auto-scaler
+- Engine/Core/SecureClusterChannel.h: mTLS-simulated secure inter-node channel
+- Engine/Core/ClusterObservabilityBus.h: Distributed tracing span bus with snapshot support
+- Test coverage: 8 new TEST() blocks (3684 total unit tests)
+
+
 ## [27.1.0] — Sirius-R (2026-03-29)
 
 ### Added — Sprint 731-740: Streaming and Live Media
