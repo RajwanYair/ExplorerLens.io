@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v29.0.0 Capella (MAJOR): Gen-5 Platform WinUI 4 — async preview broker, universal file provider, WinUI 4 preview handler, shell property handler v2, preview pipeline v5, persistent L3 disk cache, live preview file watcher, shell extension health monitor v2
+
+
 v28.7.0 Polaris-X: Cross-Platform Preview (macOS+Linux) — Metal render bridge, Linux Vulkan preview, platform-neutral pixel buffer, GTK4 thumbnail widget, macOS Quick Look bridge, XDG thumbnail provider, Metal shader compiler, platform capability probe
 
 
