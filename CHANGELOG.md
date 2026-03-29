@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v28.4.0 Polaris-U: Adaptive UX & Personalization — user preference learner, adaptive grid density, eye-tracking focus optimizer, ThemeEngine v3 with WCAG design tokens, A/B experiment framework, accessible palette generator, thumbnail badge system, UX telemetry privacy dashboard
+
+
 v28.3.0 Polaris-T: Enterprise Console 2.0 — fleet dashboard v2, AI anomaly detection, compliance scoring (SOC2/ISO27001/NIST/GDPR), remediation playbooks, RBAC v2, executive reports, SLA monitoring, MSP multi-tenant portal
 
 
