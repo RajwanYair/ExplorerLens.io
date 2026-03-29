@@ -27604,6 +27604,86 @@ TEST(TestCLIDoctorAllChecks)
 #include "Utils/A11yColorContrastEngine.h"
 #include "Utils/KeyboardNavigationMapV2.h"
 #include "Utils/AccessibilityAuditPipeline.h"
+// Sprint 701-800 includes
+#include "Decoders/OpenXRAssetDecoder.h"
+#include "Decoders/USDADecoder.h"
+#include "Core/XRSpatialPreviewEngine.h"
+#include "Core/ARMarkerDetectionEngine.h"
+#include "GPU/StereoscopicRenderPipeline.h"
+#include "Core/PointCloudVisualizerV2.h"
+#include "Decoders/NerfDecoder.h"
+#include "Core/XRMetadataExtractor.h"
+#include "Core/DifferentialPrivacyEngine.h"
+#include "Core/LocalDataAggregator.h"
+#include "Core/AnonymizationPipelineV2.h"
+#include "Core/PrivacyConsentManager.h"
+#include "Core/SecureEnclaveAnalytics.h"
+#include "Utils/GDPRComplianceEngine.h"
+#include "Utils/TelemetryDataMinimizer.h"
+#include "Core/PrivacyAuditLogger.h"
+#include "AI/FederatedLearningCoordinator.h"
+#include "AI/PersonalizedRankingModel.h"
+#include "AI/FederatedModelAggregator.h"
+#include "AI/OnDeviceFineTuningEngine.h"
+#include "AI/NeuralCompressionCodec.h"
+#include "AI/EmbeddingFederationBus.h"
+#include "AI/ModelVersioningController.h"
+#include "AI/FederatedSearchEnhancer.h"
+#include "Decoders/LiveStreamDecoder.h"
+#include "Decoders/WebRTCThumbnailCapture.h"
+#include "Core/StreamingBufferOrchestrator.h"
+#include "Core/AdaptiveBitrateSelector.h"
+#include "Core/MediaTimelineRenderer.h"
+#include "Decoders/DASHStreamDecoder.h"
+#include "Core/LiveThumbnailPoller.h"
+#include "GPU/VideoTextureStreamEngine.h"
+#include "Core/RenderClusterManager.h"
+#include "Core/RenderJobScheduler.h"
+#include "Core/NodeHealthMonitor.h"
+#include "Core/DistributedCacheReplicator.h"
+#include "Core/RenderResultAggregator.h"
+#include "Core/ClusterAutoScaler.h"
+#include "Core/SecureClusterChannel.h"
+#include "Core/ClusterObservabilityBus.h"
+#include "Plugin/PluginCapabilityMatrixV3.h"
+#include "Plugin/PluginMarketplaceConnector.h"
+#include "Plugin/PluginSandboxV3.h"
+#include "Plugin/PluginLifecycleManagerV3.h"
+#include "Plugin/PluginTelemetryCollector.h"
+#include "Plugin/PluginCompatibilityShimV3.h"
+#include "Plugin/PluginNetworkProxy.h"
+#include "Core/PredictivePreGenEngine.h"
+#include "Core/FolderPredictionModel.h"
+#include "Core/ColdStartFolderBootstrapper.h"
+#include "Core/PredictionScanOrchestrator.h"
+#include "Core/EvictionAwareCachePrimer.h"
+#include "GPU/DMADirectPreloader.h"
+#include "Core/PerUserPredictionIsolator.h"
+#include "Core/PredictionAccuracyTracker.h"
+#include "Core/CollaborativeAnnotationEngineV2.h"
+#include "Core/AnnotationSignatureVerifier.h"
+#include "Core/AnnotationTimeline.h"
+#include "Core/PresenceIndicatorEngine.h"
+#include "Core/AnnotationTaxonomyV2.h"
+#include "AI/AIAnnotationAssistant.h"
+#include "Core/OfflineAnnotationSyncQueue.h"
+#include "Core/AnnotationExportPipelineV2.h"
+#include "Core/GRPCProtocolServerV2.h"
+#include "Core/RESTAPIServerV2.h"
+#include "Core/GraphQLSubscriptionServer.h"
+#include "Core/OAuth2PKCEMiddleware.h"
+#include "Core/JWTValidationEngine.h"
+#include "Core/RateLimitingMiddleware.h"
+#include "Core/OpenAPICodeGenerator.h"
+#include "Core/GraphQLSchemaIntrospector.h"
+#include "Core/NeuralCodecV2Engine.h"
+#include "AI/SSIMQualityController.h"
+#include "Core/ProgressiveNeuralDecoder.h"
+#include "Core/NeuralContainerFormat.h"
+#include "AI/MultiResLatentPyramid.h"
+#include "AI/LearnedEntropyCoder.h"
+#include "GPU/NeuralCodecHWAccelerator.h"
+#include "Core/CodecNegotiationProtocol.h"
 
 using namespace ExplorerLens::Engine::Tests;
 
@@ -32078,6 +32158,1696 @@ TEST(Test_AccessibilityAuditPipeline_PassRate)
     auto report = pipeline.Audit({good, bad});
     ASSERT(report.totalElements == 2);
     ASSERT(report.PassRate() >= 0.0 && report.PassRate() <= 100.0);
+}
+
+//== Sprint 701-800 Tests ==
+
+TEST(Test_OpenXRAssetDecoder_DetectFormat)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(OpenXRAssetDecoder::DetectFormat(L"model.xrb") == XRAssetFormat::XRB);
+    ASSERT(OpenXRAssetDecoder::DetectFormat(L"scene.gltf") == XRAssetFormat::GLTF_XR);
+    ASSERT(OpenXRAssetDecoder::DetectFormat(L"noext") == XRAssetFormat::Unknown);
+}
+TEST(Test_OpenXRAssetDecoder_Decode)
+{
+    using namespace ExplorerLens::Engine;
+    OpenXRAssetDecoder dec;
+    XRAssetDecodeRequest req; req.filePath = L"test.xrb"; req.outputWidth = 64; req.outputHeight = 64;
+    auto r = dec.Decode(req);
+    ASSERT(r.success);
+    ASSERT(r.width == 64 && r.height == 64);
+    ASSERT(!r.rgbaData.empty());
+}
+TEST(Test_OpenXRAssetDecoder_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    OpenXRAssetDecoder dec;
+    XRAssetDecodeRequest req;
+    auto r = dec.Decode(req);
+    ASSERT(!r.success);
+}
+TEST(Test_OpenXRAssetDecoder_IsSupported)
+{
+    using namespace ExplorerLens::Engine;
+    OpenXRAssetDecoder dec;
+    ASSERT(dec.IsSupported(XRAssetFormat::XRB));
+    ASSERT(!dec.IsSupported(XRAssetFormat::Unknown));
+}
+
+TEST(Test_USDADecoder_DetectLayerType)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(USDADecoder::DetectLayerType(L"stage.usda") == USDLayerType::USDA);
+    ASSERT(USDADecoder::DetectLayerType(L"cache.usdc") == USDLayerType::USDC);
+    ASSERT(USDADecoder::DetectLayerType(L"pkg.usdz")   == USDLayerType::USDZ);
+    ASSERT(USDADecoder::DetectLayerType(L"file.obj")   == USDLayerType::Unknown);
+}
+TEST(Test_USDADecoder_Decode)
+{
+    using namespace ExplorerLens::Engine;
+    USDADecoder dec;
+    USDDecodeRequest req; req.filePath = L"test.usda"; req.outputWidth = 128; req.outputHeight = 128;
+    auto r = dec.Decode(req);
+    ASSERT(r.success);
+    ASSERT(r.primCount > 0);
+}
+TEST(Test_USDADecoder_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    USDADecoder dec;
+    USDDecodeRequest req;
+    auto r = dec.Decode(req);
+    ASSERT(!r.success);
+}
+
+TEST(Test_XRSpatialPreviewEngine_Preview)
+{
+    using namespace ExplorerLens::Engine;
+    XRSpatialPreviewEngine eng;
+    XRSpatialPreviewRequest req; req.assetPath = L"scene.xrb"; req.width = 256; req.height = 256;
+    auto r = eng.Preview(req);
+    ASSERT(r.success);
+    ASSERT(!r.rgbaData.empty());
+    ASSERT(r.depthRange > 0.0f);
+}
+TEST(Test_XRSpatialPreviewEngine_TargetName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(XRSpatialPreviewEngine::TargetName(XRPreviewTarget::HoloLens2) == "HoloLens2");
+    ASSERT(XRSpatialPreviewEngine::TargetName(XRPreviewTarget::Standard2D) == "Standard2D");
+}
+TEST(Test_XRSpatialPreviewEngine_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    XRSpatialPreviewEngine eng;
+    XRSpatialPreviewRequest req;
+    auto r = eng.Preview(req);
+    ASSERT(!r.success);
+}
+
+TEST(Test_ARMarkerDetectionEngine_Detect)
+{
+    using namespace ExplorerLens::Engine;
+    ARMarkerDetectionEngine eng;
+    ARMarkerDetectRequest req;
+    req.rgbaData.assign(64*64*4, 0xFF);
+    req.width = 64; req.height = 64;
+    auto r = eng.Detect(req);
+    ASSERT(r.success);
+    ASSERT(!r.markers.empty());
+}
+TEST(Test_ARMarkerDetectionEngine_EmptyImage)
+{
+    using namespace ExplorerLens::Engine;
+    ARMarkerDetectionEngine eng;
+    ARMarkerDetectRequest req;
+    auto r = eng.Detect(req);
+    ASSERT(!r.success);
+}
+TEST(Test_ARMarkerDetectionEngine_TypeName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(ARMarkerDetectionEngine::MarkerTypeName(ARMarkerType::ArUco) == "ArUco");
+    ASSERT(ARMarkerDetectionEngine::MarkerTypeName(ARMarkerType::QRCode) == "QRCode");
+}
+
+TEST(Test_StereoscopicRenderPipeline_Render)
+{
+    using namespace ExplorerLens::Engine;
+    StereoscopicRenderPipeline pipe;
+    StereoRenderRequest req; req.assetPath = L"scene.xrb"; req.eyeWidth = 64; req.eyeHeight = 64;
+    auto r = pipe.Render(req);
+    ASSERT(r.success);
+    ASSERT(!r.leftRGBA.empty() && !r.rightRGBA.empty());
+    ASSERT(r.disparityMax > 0.0f);
+}
+TEST(Test_StereoscopicRenderPipeline_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    StereoscopicRenderPipeline pipe;
+    StereoRenderRequest req;
+    auto r = pipe.Render(req);
+    ASSERT(!r.success);
+}
+TEST(Test_StereoscopicRenderPipeline_LayoutName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(StereoscopicRenderPipeline::LayoutName(StereoLayout::SideBySide) == "SideBySide");
+    ASSERT(StereoscopicRenderPipeline::LayoutName(StereoLayout::Anaglyph) == "Anaglyph");
+}
+
+TEST(Test_PointCloudVisualizerV2_DetectFormat)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(PointCloudVisualizerV2::DetectFormat(L"scan.e57") == PointCloudFormat::E57);
+    ASSERT(PointCloudVisualizerV2::DetectFormat(L"cloud.las") == PointCloudFormat::LAS);
+    ASSERT(PointCloudVisualizerV2::DetectFormat(L"mesh.ply") == PointCloudFormat::PLY);
+}
+TEST(Test_PointCloudVisualizerV2_Render)
+{
+    using namespace ExplorerLens::Engine;
+    PointCloudVisualizerV2 vis;
+    PointCloudRenderRequest req;
+    req.filePath = L"scan.e57"; req.outputWidth = 64; req.outputHeight = 64;
+    auto r = vis.Render(req);
+    ASSERT(r.success);
+    ASSERT(!r.rgbaData.empty());
+    ASSERT(r.pointsRendered > 0);
+}
+TEST(Test_PointCloudVisualizerV2_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    PointCloudVisualizerV2 vis;
+    PointCloudRenderRequest req;
+    auto r = vis.Render(req);
+    ASSERT(!r.success);
+}
+
+TEST(Test_NerfDecoder_DetectFormat)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(NerfDecoder::DetectFormat(L"transforms.json") == NerfSceneFormat::NerfSynthetic);
+    ASSERT(NerfDecoder::DetectFormat(L"scene.msgpack")   == NerfSceneFormat::Instant_NGP);
+    ASSERT(NerfDecoder::DetectFormat(L"data.npz")        == NerfSceneFormat::TinyNeRF);
+}
+TEST(Test_NerfDecoder_Decode)
+{
+    using namespace ExplorerLens::Engine;
+    NerfDecoder dec;
+    NerfDecodeRequest req; req.scenePath = L"scene.json"; req.outputWidth = 64; req.outputHeight = 64;
+    auto r = dec.Decode(req);
+    ASSERT(r.success);
+    ASSERT(r.psnrEstimate > 0.0f);
+}
+
+TEST(Test_XRMetadataExtractor_Extract)
+{
+    using namespace ExplorerLens::Engine;
+    XRMetadataExtractor ext;
+    auto r = ext.Extract(L"scene.xrb");
+    ASSERT(r.success);
+    ASSERT(!r.metadata.anchors.empty());
+    ASSERT(r.metadata.targetFPS > 0.0f);
+}
+TEST(Test_XRMetadataExtractor_SupportsFormat)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(XRMetadataExtractor::SupportsFormat(L"xrb"));
+    ASSERT(XRMetadataExtractor::SupportsFormat(L"gltf"));
+    ASSERT(!XRMetadataExtractor::SupportsFormat(L"unknownfmt"));
+}
+
+TEST(Test_DifferentialPrivacyEngine_Query)
+{
+    using namespace ExplorerLens::Engine;
+    DPParameters params; params.epsilon = 1.0; params.sensitivity = 1.0;
+    DifferentialPrivacyEngine dp(params);
+    auto r = dp.Query(100.0);
+    ASSERT(!r.budgetExceeded);
+    ASSERT(r.privacyBudgetUsed > 0.0);
+}
+TEST(Test_DifferentialPrivacyEngine_BudgetExhausted)
+{
+    using namespace ExplorerLens::Engine;
+    DPParameters params; params.epsilon = 0.001;
+    DifferentialPrivacyEngine dp(params);
+    for (int i = 0; i < 20; ++i) dp.Query(1.0);
+    auto r = dp.Query(1.0);
+    ASSERT(r.budgetExceeded);
+}
+TEST(Test_DifferentialPrivacyEngine_ResetBudget)
+{
+    using namespace ExplorerLens::Engine;
+    DPParameters params; params.epsilon = 0.001;
+    DifferentialPrivacyEngine dp(params);
+    for (int i = 0; i < 20; ++i) dp.Query(1.0);
+    dp.ResetBudget();
+    ASSERT(dp.RemainingBudget() > 0.0);
+}
+
+TEST(Test_LocalDataAggregator_AddAndFlush)
+{
+    using namespace ExplorerLens::Engine;
+    LocalDataAggregator agg;
+    LDARecord rec; rec.metricName = "latency"; rec.value = 10.0;
+    agg.AddRecord(rec); agg.AddRecord(rec);
+    ASSERT(agg.PendingCount() == 2);
+    auto results = agg.Flush();
+    ASSERT(!results.empty());
+    ASSERT(results[0].readyForUpload);
+    ASSERT(agg.PendingCount() == 0);
+}
+TEST(Test_LocalDataAggregator_SetNoiseScale)
+{
+    using namespace ExplorerLens::Engine;
+    LocalDataAggregator agg;
+    agg.SetNoiseScale(0.0);
+    LDARecord rec; rec.metricName = "m"; rec.value = 5.0;
+    agg.AddRecord(rec); agg.AddRecord(rec);
+    auto results = agg.Flush();
+    ASSERT(!results.empty());
+    ASSERT(results[0].sampleCount == 2);
+}
+
+TEST(Test_AnonymizationPipelineV2_Anonymize)
+{
+    using namespace ExplorerLens::Engine;
+    AnonPipelineConfig cfg;
+    AnonymizationPipelineV2 pipe(cfg);
+    auto r = pipe.Anonymize("C:\\Users\\john\\Documents\\file.txt");
+    ASSERT(r.wasModified);
+    ASSERT(r.anonymizedPath.find("[USER]") != std::string::npos);
+}
+TEST(Test_AnonymizationPipelineV2_ContainsPII)
+{
+    using namespace ExplorerLens::Engine;
+    AnonPipelineConfig cfg;
+    AnonymizationPipelineV2 pipe(cfg);
+    ASSERT(pipe.ContainsPII("C:\\Users\\alice\\file.txt"));
+    ASSERT(!pipe.ContainsPII("C:\\Program Files\\app.exe"));
+}
+TEST(Test_AnonymizationPipelineV2_Batch)
+{
+    using namespace ExplorerLens::Engine;
+    AnonPipelineConfig cfg;
+    AnonymizationPipelineV2 pipe(cfg);
+    auto results = pipe.AnonymizeBatch({"C:\\Users\\bob\\a.txt", "C:\\Program Files\\b.exe"});
+    ASSERT(results.size() == 2);
+}
+
+TEST(Test_PrivacyConsentManager_SetGet)
+{
+    using namespace ExplorerLens::Engine;
+    PrivacyConsentManager mgr;
+    mgr.SetConsent(ConsentCategory::Usage, ConsentState::Granted);
+    ASSERT(mgr.GetConsent(ConsentCategory::Usage) == ConsentState::Granted);
+    ASSERT(mgr.IsAllowed(ConsentCategory::Usage));
+}
+TEST(Test_PrivacyConsentManager_DefaultPending)
+{
+    using namespace ExplorerLens::Engine;
+    PrivacyConsentManager mgr;
+    ASSERT(mgr.GetConsent(ConsentCategory::PersonalizedAI) == ConsentState::Pending);
+    ASSERT(!mgr.IsAllowed(ConsentCategory::PersonalizedAI));
+}
+TEST(Test_PrivacyConsentManager_AuditTrail)
+{
+    using namespace ExplorerLens::Engine;
+    PrivacyConsentManager mgr;
+    mgr.SetConsent(ConsentCategory::Crash, ConsentState::Denied);
+    mgr.SetConsent(ConsentCategory::Crash, ConsentState::Granted);
+    ASSERT(mgr.AuditTrail().size() == 2);
+}
+
+TEST(Test_SecureEnclaveAnalytics_Aggregate)
+{
+    using namespace ExplorerLens::Engine;
+    EnclaveAnalyticsConfig cfg;
+    SecureEnclaveAnalytics enc(cfg);
+    auto r = enc.Aggregate({10.0, 20.0, 30.0});
+    ASSERT(r.success);
+    ASSERT(r.aggregateValue == 20.0);
+    ASSERT(!r.attestationToken.empty());
+}
+TEST(Test_SecureEnclaveAnalytics_EmptyInput)
+{
+    using namespace ExplorerLens::Engine;
+    EnclaveAnalyticsConfig cfg;
+    SecureEnclaveAnalytics enc(cfg);
+    auto r = enc.Aggregate({});
+    ASSERT(!r.success);
+}
+TEST(Test_SecureEnclaveAnalytics_BackendName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(SecureEnclaveAnalytics::BackendName(EnclaveBackend::VBS_HVCI) == "VBS_HVCI");
+    ASSERT(SecureEnclaveAnalytics::BackendName(EnclaveBackend::Simulation) == "Simulation");
+}
+
+TEST(Test_GDPRComplianceEngine_Erasure)
+{
+    using namespace ExplorerLens::Engine;
+    GDPRComplianceEngine eng;
+    eng.AddRecord("user1"); eng.AddRecord("user1");
+    ASSERT(eng.RecordsForSubject("user1") == 2);
+    GDPRRequest req; req.right = GDPRRight::RightToErasure; req.subjectId = "user1";
+    auto r = eng.ProcessRequest(req);
+    ASSERT(r.fulfilled);
+    ASSERT(r.recordsAffected == 2);
+}
+TEST(Test_GDPRComplianceEngine_EmptySubject)
+{
+    using namespace ExplorerLens::Engine;
+    GDPRComplianceEngine eng;
+    GDPRRequest req; req.right = GDPRRight::RightToAccess;
+    auto r = eng.ProcessRequest(req);
+    ASSERT(!r.fulfilled);
+}
+
+TEST(Test_TelemetryDataMinimizer_Minimize)
+{
+    using namespace ExplorerLens::Engine;
+    TelemetryDataMinimizer min;
+    TelemetryPayload p;
+    p.eventName = "test";
+    p.fields = {"duration", "email"}; p.values = {"123", "user@example.com"};
+    auto r = min.Minimize(p);
+    ASSERT(r.fieldsRemoved == 1);
+    ASSERT(r.result == TDMScrubResult::PurgedPII);
+}
+TEST(Test_TelemetryDataMinimizer_Clean)
+{
+    using namespace ExplorerLens::Engine;
+    TelemetryDataMinimizer min;
+    TelemetryPayload p;
+    p.fields = {"duration", "size"}; p.values = {"42", "1024"};
+    auto r = min.Minimize(p);
+    ASSERT(r.result == TDMScrubResult::Clean);
+    ASSERT(r.fieldsRemoved == 0);
+}
+
+TEST(Test_PrivacyAuditLogger_RecordAndVerify)
+{
+    using namespace ExplorerLens::Engine;
+    PrivacyAuditLogger log;
+    log.Record(PALEventType::DataAccess, "user1", "viewed file");
+    log.Record(PALEventType::DataErasure, "user1", "deleted records");
+    auto r = log.VerifyChain();
+    ASSERT(r.valid);
+    ASSERT(r.entryCount == 2);
+}
+TEST(Test_PrivacyAuditLogger_EntriesForSubject)
+{
+    using namespace ExplorerLens::Engine;
+    PrivacyAuditLogger log;
+    log.Record(PALEventType::DataAccess, "user1", "op1");
+    log.Record(PALEventType::DataAccess, "user2", "op2");
+    auto entries = log.EntriesForSubject("user1");
+    ASSERT(entries.size() == 1);
+}
+
+TEST(Test_FederatedLearningCoordinator_RunRound)
+{
+    using namespace ExplorerLens::Engine;
+    FedRoundConfig cfg; cfg.minClients = 2;
+    FederatedLearningCoordinator coord(cfg);
+    std::vector<std::vector<float>> grads = {{0.1f, 0.2f}, {0.3f, 0.4f}};
+    auto r = coord.RunRound(grads);
+    ASSERT(r.success);
+    ASSERT(r.participantCount == 2);
+    ASSERT(r.globalLoss > 0.0f);
+}
+TEST(Test_FederatedLearningCoordinator_InsufficientClients)
+{
+    using namespace ExplorerLens::Engine;
+    FedRoundConfig cfg; cfg.minClients = 3;
+    FederatedLearningCoordinator coord(cfg);
+    auto r = coord.RunRound({{0.1f}});
+    ASSERT(!r.success);
+}
+
+TEST(Test_PersonalizedRankingModel_Rank)
+{
+    using namespace ExplorerLens::Engine;
+    PersonalizedRankingModel mdl;
+    PRMRankRequest req;
+    req.candidates = {"doc1", "doc2", "doc3"};
+    req.baseScores = {0.7f, 0.8f, 0.6f};
+    req.userProfile = "alice";
+    auto r = mdl.Rank(req);
+    ASSERT(r.success);
+    ASSERT(r.ranked.size() == 3);
+    ASSERT(!r.scores.empty());
+}
+TEST(Test_PersonalizedRankingModel_UpdateSignal)
+{
+    using namespace ExplorerLens::Engine;
+    PersonalizedRankingModel mdl;
+    mdl.UpdateUserSignal("alice", "doc1", 0.9f);
+    ASSERT(mdl.GetSignal("alice", "doc1") == 0.9f);
+    ASSERT(mdl.SignalCount() == 1);
+}
+
+TEST(Test_FederatedModelAggregator_Aggregate)
+{
+    using namespace ExplorerLens::Engine;
+    FedAggConfig cfg; cfg.minParticipants = 2;
+    FederatedModelAggregator agg(cfg);
+    auto r = agg.Aggregate({{1.0f, 2.0f}, {3.0f, 4.0f}});
+    ASSERT(r.success);
+    ASSERT(r.weights.size() == 2);
+    ASSERT(r.participants == 2);
+}
+TEST(Test_FederatedModelAggregator_InsufficientParticipants)
+{
+    using namespace ExplorerLens::Engine;
+    FedAggConfig cfg; cfg.minParticipants = 3;
+    FederatedModelAggregator agg(cfg);
+    auto r = agg.Aggregate({{1.0f}});
+    ASSERT(!r.success);
+}
+
+TEST(Test_OnDeviceFineTuningEngine_Train)
+{
+    using namespace ExplorerLens::Engine;
+    OFTETrainConfig cfg; cfg.epochs = 10; cfg.learningRate = 0.1f;
+    OnDeviceFineTuningEngine eng(cfg);
+    std::vector<std::vector<float>> samples = {{1.0f}, {2.0f}};
+    auto r = eng.Train(samples);
+    ASSERT(r.success);
+    ASSERT(r.epochsRun > 0);
+}
+TEST(Test_OnDeviceFineTuningEngine_WeightCount)
+{
+    using namespace ExplorerLens::Engine;
+    OFTETrainConfig cfg; cfg.loraRank = 4;
+    OnDeviceFineTuningEngine eng(cfg);
+    ASSERT(eng.WeightCount() > 0);
+}
+
+TEST(Test_NeuralCompressionCodec_Compress)
+{
+    using namespace ExplorerLens::Engine;
+    NeuralCompressionCodec codec;
+    NeuralCompressRequest req;
+    req.rgbaData.assign(256*256*4, 0xAA);
+    req.width = 256; req.height = 256;
+    auto r = codec.Compress(req);
+    ASSERT(r.success);
+    ASSERT(r.compressionRatio > 1.0f);
+    ASSERT(!r.compressed.empty());
+}
+TEST(Test_NeuralCompressionCodec_EmptyInput)
+{
+    using namespace ExplorerLens::Engine;
+    NeuralCompressionCodec codec;
+    NeuralCompressRequest req;
+    auto r = codec.Compress(req);
+    ASSERT(!r.success);
+}
+TEST(Test_NeuralCompressionCodec_ModeName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(NeuralCompressionCodec::ModeName(NeuralCodecMode::Fast) == "Fast");
+    ASSERT(NeuralCompressionCodec::ModeName(NeuralCodecMode::MaxQuality) == "MaxQuality");
+}
+
+TEST(Test_EmbeddingFederationBus_QueryMatch)
+{
+    using namespace ExplorerLens::Engine;
+    EmbeddingFederationBus bus;
+    bus.RegisterEmbedding("img1", {1.0f, 0.0f});
+    bus.RegisterEmbedding("img2", {0.0f, 1.0f});
+    EFBQueryRequest req;
+    req.queryEmbedding = {1.0f, 0.0f};
+    req.minSimilarity = 0.8f;
+    auto r = bus.Query(req);
+    ASSERT(r.success);
+    ASSERT(!r.matches.empty());
+    ASSERT(r.matches[0].id == "img1");
+}
+TEST(Test_EmbeddingFederationBus_EmbeddingCount)
+{
+    using namespace ExplorerLens::Engine;
+    EmbeddingFederationBus bus;
+    bus.RegisterEmbedding("a", {1.0f});
+    bus.RegisterEmbedding("b", {0.5f});
+    ASSERT(bus.EmbeddingCount() == 2);
+}
+
+TEST(Test_ModelVersioningController_ActivateRollback)
+{
+    using namespace ExplorerLens::Engine;
+    ModelVersioningController mvc;
+    mvc.RegisterVersion({"v1.0", 1, 0.85f, false});
+    mvc.RegisterVersion({"v2.0", 2, 0.90f, false});
+    ASSERT(mvc.ActivateVersion("v1.0"));
+    ASSERT(mvc.ActivateVersion("v2.0"));
+    auto r = mvc.Rollback();
+    ASSERT(r.success);
+    ASSERT(r.rolledBackTo == "v1.0");
+}
+TEST(Test_ModelVersioningController_RollbackEmpty)
+{
+    using namespace ExplorerLens::Engine;
+    ModelVersioningController mvc;
+    auto r = mvc.Rollback();
+    ASSERT(!r.success);
+}
+
+TEST(Test_FederatedSearchEnhancer_Search)
+{
+    using namespace ExplorerLens::Engine;
+    FederatedSearchEnhancer enh;
+    FSESearchRequest req; req.query = "cat"; req.localCandidates = {"cat.jpg", "dog.jpg", "cat2.jpg"}; req.topK = 2;
+    auto r = enh.Search(req);
+    ASSERT(r.success);
+    ASSERT(r.results.size() == 2);
+}
+TEST(Test_FederatedSearchEnhancer_IndexAndSize)
+{
+    using namespace ExplorerLens::Engine;
+    FederatedSearchEnhancer enh;
+    enh.IndexDocument("doc1", "hello world");
+    ASSERT(enh.IndexSize() == 1);
+}
+
+TEST(Test_LiveStreamDecoder_DecodeFirstFrame)
+{
+    using namespace ExplorerLens::Engine;
+    LiveStreamDecoder dec;
+    LiveStreamDecodeRequest req; req.url = "http://example.com/stream.m3u8";
+    req.outputWidth = 64; req.outputHeight = 64;
+    auto r = dec.DecodeFirstFrame(req);
+    ASSERT(r.success);
+    ASSERT(!r.rgbaData.empty());
+}
+TEST(Test_LiveStreamDecoder_EmptyUrl)
+{
+    using namespace ExplorerLens::Engine;
+    LiveStreamDecoder dec;
+    LiveStreamDecodeRequest req;
+    auto r = dec.DecodeFirstFrame(req);
+    ASSERT(!r.success);
+}
+TEST(Test_LiveStreamDecoder_ProtocolName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(LiveStreamDecoder::ProtocolName(LiveStreamProtocol::HLS) == "HLS");
+    ASSERT(LiveStreamDecoder::ProtocolName(LiveStreamProtocol::RTSP) == "RTSP");
+}
+
+TEST(Test_WebRTCThumbnailCapture_Capture)
+{
+    using namespace ExplorerLens::Engine;
+    WebRTCThumbnailCapture cap;
+    WebRTCCaptureRequest req; req.offerSDP = "v=0\r\n"; req.outputWidth = 64; req.outputHeight = 64;
+    auto r = cap.Capture(req);
+    ASSERT(r.success);
+    ASSERT(!r.rgbaData.empty());
+}
+TEST(Test_WebRTCThumbnailCapture_NoSDP)
+{
+    using namespace ExplorerLens::Engine;
+    WebRTCThumbnailCapture cap;
+    WebRTCCaptureRequest req;
+    auto r = cap.Capture(req);
+    ASSERT(!r.success);
+}
+TEST(Test_WebRTCThumbnailCapture_CodecSupport)
+{
+    using namespace ExplorerLens::Engine;
+    WebRTCThumbnailCapture cap;
+    ASSERT(cap.IsCodecSupported("VP8"));
+    ASSERT(cap.IsCodecSupported("H264"));
+    ASSERT(!cap.IsCodecSupported("MPEG2"));
+}
+
+TEST(Test_StreamingBufferOrchestrator_PushPop)
+{
+    using namespace ExplorerLens::Engine;
+    SBOConfig cfg; cfg.targetBufferMs = 2000;
+    StreamingBufferOrchestrator orch(cfg);
+    std::vector<uint8_t> chunk(1024, 0xAA);
+    ASSERT(orch.PushChunk(chunk));
+    auto popped = orch.PopChunk();
+    ASSERT(!popped.empty());
+}
+TEST(Test_StreamingBufferOrchestrator_Status)
+{
+    using namespace ExplorerLens::Engine;
+    SBOConfig cfg;
+    StreamingBufferOrchestrator orch(cfg);
+    auto s = orch.GetStatus();
+    ASSERT(s.state == SBOBufferState::Idle);
+}
+
+TEST(Test_AdaptiveBitrateSelector_Select)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptiveBitrateSelector sel(ABRStrategy::BandwidthBased);
+    sel.SetProfiles({{1000, 640, 480, "480p"}, {3000, 1280, 720, "720p"}});
+    auto r = sel.Select(4000.0f, 5000);
+    ASSERT(r.success);
+    ASSERT(r.selectedProfile.bitrateKbps > 0);
+}
+TEST(Test_AdaptiveBitrateSelector_NoBandwidth)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptiveBitrateSelector sel(ABRStrategy::Hybrid);
+    sel.SetProfiles({{5000, 1920, 1080, "1080p"}});
+    auto r = sel.Select(100.0f, 1000);
+    ASSERT(r.success);  // Falls back to first profile
+}
+
+TEST(Test_MediaTimelineRenderer_RenderStrip)
+{
+    using namespace ExplorerLens::Engine;
+    MediaTimelineRenderer rend;
+    MTRRenderRequest req; req.filePath = L"video.mp4"; req.framesTotal = 5;
+    auto r = rend.RenderStrip(req);
+    ASSERT(r.success);
+    ASSERT(r.keyframes.size() == 5);
+    ASSERT(r.totalDurationMs > 0);
+}
+TEST(Test_MediaTimelineRenderer_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    MediaTimelineRenderer rend;
+    MTRRenderRequest req;
+    auto r = rend.RenderStrip(req);
+    ASSERT(!r.success);
+}
+
+TEST(Test_DASHStreamDecoder_Decode)
+{
+    using namespace ExplorerLens::Engine;
+    DASHStreamDecoder dec;
+    DASHDecodeRequest req; req.mpdUrl = "http://example.com/stream.mpd";
+    auto r = dec.DecodeFirstKeyframe(req);
+    ASSERT(r.success);
+    ASSERT(r.selectedBitrateKbps > 0);
+}
+TEST(Test_DASHStreamDecoder_IsManifestUrl)
+{
+    using namespace ExplorerLens::Engine;
+    DASHStreamDecoder dec;
+    ASSERT(dec.IsManifestUrl("http://example.com/stream.mpd"));
+    ASSERT(!dec.IsManifestUrl("http://example.com/stream.ts"));
+}
+
+TEST(Test_LiveThumbnailPoller_AddRemove)
+{
+    using namespace ExplorerLens::Engine;
+    LTPConfig cfg;
+    LiveThumbnailPoller poller(cfg);
+    LTPSourceInfo info; info.sourceId = "s1"; info.url = "http://cam.example.com/feed";
+    ASSERT(poller.AddSource(info));
+    ASSERT(poller.RemoveSource("s1"));
+}
+TEST(Test_LiveThumbnailPoller_MaxConcurrent)
+{
+    using namespace ExplorerLens::Engine;
+    LTPConfig cfg; cfg.maxConcurrent = 2;
+    LiveThumbnailPoller poller(cfg);
+    for (int i = 0; i < 2; ++i) {
+        LTPSourceInfo info; info.sourceId = "s" + std::to_string(i); info.url = "u";
+        poller.AddSource(info);
+    }
+    LTPSourceInfo extra; extra.sourceId = "extra"; extra.url = "u";
+    ASSERT(!poller.AddSource(extra));  // Limit reached
+}
+
+TEST(Test_VideoTextureStreamEngine_Upload)
+{
+    using namespace ExplorerLens::Engine;
+    VideoTextureStreamEngine eng;
+    VTSEStreamRequest req;
+    req.yuvData.assign(64*64*3/2, 0x80); req.width = 64; req.height = 64;
+    auto r = eng.Upload(req);
+    ASSERT(r.success);
+    ASSERT(r.gpuTextureHandle != 0);
+}
+TEST(Test_VideoTextureStreamEngine_EmptyFrame)
+{
+    using namespace ExplorerLens::Engine;
+    VideoTextureStreamEngine eng;
+    VTSEStreamRequest req;
+    auto r = eng.Upload(req);
+    ASSERT(!r.success);
+}
+TEST(Test_VideoTextureStreamEngine_ZeroCopy)
+{
+    using namespace ExplorerLens::Engine;
+    VideoTextureStreamEngine eng;
+    ASSERT(eng.IsZeroCopySupported());
+    ASSERT(eng.PreferredMode() == VTSEUploadMode::ZeroCopy_DMA);
+}
+
+TEST(Test_RenderClusterManager_SubmitComplete)
+{
+    using namespace ExplorerLens::Engine;
+    RenderClusterManager mgr;
+    mgr.RegisterNode({"node1", "10.0.0.1", RCMNodeStatus::Idle, 4, 0.0f});
+    auto r = mgr.Submit("render job 1");
+    ASSERT(r.success);
+    ASSERT(r.assignedNodeId == "node1");
+    ASSERT(mgr.CompleteJob(r.jobId));
+}
+TEST(Test_RenderClusterManager_NoIdleNodes)
+{
+    using namespace ExplorerLens::Engine;
+    RenderClusterManager mgr;
+    auto r = mgr.Submit("job");
+    ASSERT(!r.success);
+}
+
+TEST(Test_RenderJobScheduler_EnqueueDequeue)
+{
+    using namespace ExplorerLens::Engine;
+    RenderJobScheduler sched;
+    uint32_t id1 = sched.Enqueue("job1", RJSPriority::High);
+    uint32_t id2 = sched.Enqueue("job2", RJSPriority::Low);
+    ASSERT(sched.PendingCount() == 2);
+    auto job = sched.Dequeue();
+    ASSERT(job.description == "job1");  // High priority first
+    ASSERT(sched.PendingCount() == 1);
+    ASSERT(sched.Complete(job.id));
+    ASSERT(sched.CompletedCount() == 1);
+    (void)id1; (void)id2;
+}
+TEST(Test_RenderJobScheduler_Fail)
+{
+    using namespace ExplorerLens::Engine;
+    RenderJobScheduler sched;
+    sched.Enqueue("job");
+    auto job = sched.Dequeue();
+    ASSERT(sched.Fail(job.id));
+}
+
+TEST(Test_NodeHealthMonitor_HeartbeatAndReport)
+{
+    using namespace ExplorerLens::Engine;
+    NodeHealthMonitor mon;
+    NHMHeartbeat hb; hb.nodeId = "n1"; hb.cpuPercent = 50.0f;
+    mon.RecordHeartbeat(hb);
+    auto r = mon.GetReport("n1");
+    ASSERT(r.state == NHMHealthState::Healthy);
+    ASSERT(r.missedBeats == 0);
+}
+TEST(Test_NodeHealthMonitor_Unresponsive)
+{
+    using namespace ExplorerLens::Engine;
+    NodeHealthMonitor mon;
+    auto r = mon.GetReport("unknown");
+    ASSERT(r.state == NHMHealthState::Unresponsive);
+}
+
+TEST(Test_DistributedCacheReplicator_PutGet)
+{
+    using namespace ExplorerLens::Engine;
+    DistributedCacheReplicator rep;
+    DCREntry e; e.key = "k1"; e.value = {1,2,3}; e.version = 1;
+    rep.Put(e);
+    DCREntry out;
+    ASSERT(rep.Get("k1", out));
+    ASSERT(out.key == "k1");
+    ASSERT(rep.EntryCount() == 1);
+}
+TEST(Test_DistributedCacheReplicator_Replicate)
+{
+    using namespace ExplorerLens::Engine;
+    DistributedCacheReplicator rep;
+    auto r = rep.ReplicateTo({"node1", "node2"});
+    ASSERT(r.success);
+    ASSERT(r.nodesReplicated == 2);
+}
+
+TEST(Test_RenderResultAggregator_Compose)
+{
+    using namespace ExplorerLens::Engine;
+    RenderResultAggregator agg;
+    RRATile t; t.tileX = 0; t.tileY = 0; t.width = 32; t.height = 32;
+    t.rgbaData.assign(32*32*4, 0xCC);
+    agg.AddTile(t);
+    auto r = agg.Compose(64, 64);
+    ASSERT(r.success);
+    ASSERT(r.tilesComposed == 1);
+    ASSERT(!r.rgbaData.empty());
+}
+TEST(Test_RenderResultAggregator_NoTiles)
+{
+    using namespace ExplorerLens::Engine;
+    RenderResultAggregator agg;
+    auto r = agg.Compose(64, 64);
+    ASSERT(!r.success);
+}
+
+TEST(Test_ClusterAutoScaler_ScaleUp)
+{
+    using namespace ExplorerLens::Engine;
+    ClusterAutoScaler scaler(1, 10);
+    CASMetrics m; m.queueDepth = 50; m.avgCpuPercent = 90.0f; m.activeNodes = 2;
+    auto d = scaler.Evaluate(m);
+    ASSERT(d.action == CASScaleAction::ScaleUp);
+    ASSERT(d.targetNodes > 2);
+}
+TEST(Test_ClusterAutoScaler_ScaleDown)
+{
+    using namespace ExplorerLens::Engine;
+    ClusterAutoScaler scaler(1, 10);
+    CASMetrics m; m.queueDepth = 0; m.avgCpuPercent = 5.0f; m.activeNodes = 5;
+    auto d = scaler.Evaluate(m);
+    ASSERT(d.action == CASScaleAction::ScaleDown);
+}
+
+TEST(Test_SecureClusterChannel_Handshake)
+{
+    using namespace ExplorerLens::Engine;
+    SCCConfig cfg; cfg.certThumbprint = "AA:BB:CC"; cfg.remoteNodeId = "node2";
+    SecureClusterChannel ch(cfg);
+    auto r = ch.Handshake();
+    ASSERT(r.success);
+    ASSERT(!r.sessionId.empty());
+    ASSERT(ch.IsConnected());
+}
+TEST(Test_SecureClusterChannel_Send)
+{
+    using namespace ExplorerLens::Engine;
+    SCCConfig cfg; cfg.certThumbprint = "AA:BB:CC"; cfg.remoteNodeId = "n2";
+    SecureClusterChannel ch(cfg);
+    ch.Handshake();
+    ASSERT(ch.Send({0x01, 0x02, 0x03}));
+    ASSERT(ch.BytesSent() == 3);
+}
+
+TEST(Test_ClusterObservabilityBus_RecordAndSnapshot)
+{
+    using namespace ExplorerLens::Engine;
+    ClusterObservabilityBus bus;
+    COBSpan s; s.spanId = "s1"; s.operationName = "op"; s.durationMs = 10; s.nodeId = "n1";
+    bus.RecordSpan(s);
+    auto snap = bus.Snapshot();
+    ASSERT(snap.totalSpans == 1);
+    ASSERT(snap.avgDurationMs == 10.0f);
+}
+TEST(Test_ClusterObservabilityBus_QueryByNode)
+{
+    using namespace ExplorerLens::Engine;
+    ClusterObservabilityBus bus;
+    COBSpan s1; s1.nodeId = "n1"; s1.spanId = "a"; bus.RecordSpan(s1);
+    COBSpan s2; s2.nodeId = "n2"; s2.spanId = "b"; bus.RecordSpan(s2);
+    auto spans = bus.QuerySpans("n1");
+    ASSERT(spans.size() == 1);
+}
+
+TEST(Test_PluginCapabilityMatrixV3_Evaluate)
+{
+    using namespace ExplorerLens::Engine;
+    PluginCapabilityMatrixV3 matrix;
+    PCMv3PluginProfile profile; profile.pluginId = "p1";
+    profile.capabilityMask = static_cast<uint32_t>(PCMv3Capability::Decode) |
+                             static_cast<uint32_t>(PCMv3Capability::GPU_Accelerate);
+    matrix.Register(profile);
+    auto r = matrix.Evaluate("p1", static_cast<uint32_t>(PCMv3Capability::Decode));
+    ASSERT(r.granted);
+    ASSERT(r.grantedMask == static_cast<uint32_t>(PCMv3Capability::Decode));
+}
+TEST(Test_PluginCapabilityMatrixV3_Denied)
+{
+    using namespace ExplorerLens::Engine;
+    PluginCapabilityMatrixV3 matrix;
+    PCMv3PluginProfile profile; profile.pluginId = "p1"; profile.capabilityMask = 0;
+    matrix.Register(profile);
+    auto r = matrix.Evaluate("p1", static_cast<uint32_t>(PCMv3Capability::Network));
+    ASSERT(!r.granted);
+    ASSERT(r.deniedMask == static_cast<uint32_t>(PCMv3Capability::Network));
+}
+
+TEST(Test_PluginMarketplaceConnector_Install)
+{
+    using namespace ExplorerLens::Engine;
+    PluginMarketplaceConnector conn;
+    conn.AddListing({"p1", "CoolPlugin", "1.0.0", "Author", 4.5f, 100});
+    auto r = conn.Install("p1");
+    ASSERT(r.success);
+    ASSERT(conn.IsInstalled("p1"));
+}
+TEST(Test_PluginMarketplaceConnector_Search)
+{
+    using namespace ExplorerLens::Engine;
+    PluginMarketplaceConnector conn;
+    conn.AddListing({"x1", "ImageDecoder", "1.0", "Dev", 3.0f, 50});
+    auto results = conn.Search("Image");
+    ASSERT(!results.empty());
+    ASSERT(results[0].id == "x1");
+}
+
+TEST(Test_PluginSandboxV3_Execute)
+{
+    using namespace ExplorerLens::Engine;
+    PSV3SandboxConfig cfg;
+    PluginSandboxV3 sandbox(cfg);
+    auto r = sandbox.Execute("plugin1", {0x01, 0x02});
+    ASSERT(r.success && r.exitCode == 0);
+}
+TEST(Test_PluginSandboxV3_MemoryLimit)
+{
+    using namespace ExplorerLens::Engine;
+    PSV3SandboxConfig cfg; cfg.memLimitBytes = 4;
+    PluginSandboxV3 sandbox(cfg);
+    auto r = sandbox.Execute("plugin1", {0x01, 0x02, 0x03});  // 3*2=6 > 4
+    ASSERT(!r.success);
+}
+
+TEST(Test_PluginLifecycleManagerV3_LoadActivate)
+{
+    using namespace ExplorerLens::Engine;
+    PluginLifecycleManagerV3 mgr;
+    ASSERT(mgr.Load("p1", "1.0.0"));
+    ASSERT(mgr.Activate("p1"));
+    ASSERT(mgr.GetState("p1") == PLMv3State::Active);
+}
+TEST(Test_PluginLifecycleManagerV3_HotSwap)
+{
+    using namespace ExplorerLens::Engine;
+    PluginLifecycleManagerV3 mgr;
+    mgr.Load("p1", "1.0.0");
+    auto r = mgr.HotSwap("p1", "2.0.0");
+    ASSERT(r.success);
+    ASSERT(r.oldVersion == "1.0.0");
+    ASSERT(r.newVersion == "2.0.0");
+}
+
+TEST(Test_PluginTelemetryCollector_RecordAndSummary)
+{
+    using namespace ExplorerLens::Engine;
+    PluginTelemetryCollector col;
+    col.Record({"p1", "decode", 5.0f, false});
+    col.Record({"p1", "decode", 10.0f, true});
+    auto s = col.GetSummary("p1");
+    ASSERT(s.totalEvents == 2);
+    ASSERT(s.errorCount == 1);
+    ASSERT(s.avgDuration == 7.5f);
+}
+TEST(Test_PluginTelemetryCollector_Flush)
+{
+    using namespace ExplorerLens::Engine;
+    PluginTelemetryCollector col;
+    col.Record({"p1", "ev", 1.0f, false});
+    col.FlushPlugin("p1");
+    ASSERT(col.TotalEventCount() == 0);
+}
+
+TEST(Test_PluginCompatibilityShimV3_Load)
+{
+    using namespace ExplorerLens::Engine;
+    PluginCompatibilityShimV3 shim;
+    auto r = shim.Load("C:\\plugins\\MyPluginv2.dll");
+    ASSERT(r.success);
+    ASSERT(r.detectedSDK == PCShimSourceSDK::SDKv2);
+    ASSERT(shim.IsLoaded(r.shimmedPluginId));
+}
+TEST(Test_PluginCompatibilityShimV3_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    PluginCompatibilityShimV3 shim;
+    auto r = shim.Load("");
+    ASSERT(!r.success);
+}
+
+TEST(Test_PluginNetworkProxy_AllowedRequest)
+{
+    using namespace ExplorerLens::Engine;
+    PNPConfig cfg; cfg.allowNetwork = true; cfg.allowList = {"marketplace.example.com"};
+    PluginNetworkProxy proxy(cfg);
+    auto r = proxy.Request("p1", "https://marketplace.example.com/api/list");
+    ASSERT(r.success);
+    ASSERT(r.statusCode == 200);
+}
+TEST(Test_PluginNetworkProxy_Blocked)
+{
+    using namespace ExplorerLens::Engine;
+    PNPConfig cfg; cfg.allowNetwork = false;
+    PluginNetworkProxy proxy(cfg);
+    auto r = proxy.Request("p1", "https://anything.com");
+    ASSERT(!r.success);
+}
+
+TEST(Test_PredictivePreGenEngine_Predict)
+{
+    using namespace ExplorerLens::Engine;
+    PPGEConfig cfg; cfg.minConfidence = 0.3f; cfg.lookAheadCount = 5;
+    PredictivePreGenEngine eng(cfg);
+    for (int i = 0; i < 5; ++i) eng.RecordAccess(L"C:\\Photos\\img1.jpg");
+    for (int i = 0; i < 3; ++i) eng.RecordAccess(L"C:\\Photos\\img2.jpg");
+    auto preds = eng.Predict();
+    ASSERT(!preds.empty());
+    ASSERT(preds[0].confidence >= 0.3f);
+}
+TEST(Test_PredictivePreGenEngine_TrackedCount)
+{
+    using namespace ExplorerLens::Engine;
+    PPGEConfig cfg;
+    PredictivePreGenEngine eng(cfg);
+    eng.RecordAccess(L"a.jpg"); eng.RecordAccess(L"b.jpg");
+    ASSERT(eng.TrackedPathCount() == 2);
+}
+
+TEST(Test_FolderPredictionModel_TopPredictions)
+{
+    using namespace ExplorerLens::Engine;
+    FolderPredictionModel mdl;
+    FPMAccessRecord r1; r1.folderPath = L"Photos";
+    FPMAccessRecord r2; r2.folderPath = L"Videos";
+    mdl.RecordAccess(r1); mdl.RecordAccess(r2); mdl.RecordAccess(r2);
+    auto preds = mdl.TopPredictions(3);
+    ASSERT(!preds.empty());
+    ASSERT(preds[0].folderPath == L"Videos");
+}
+TEST(Test_FolderPredictionModel_TotalAccesses)
+{
+    using namespace ExplorerLens::Engine;
+    FolderPredictionModel mdl;
+    FPMAccessRecord r; r.folderPath = L"Docs";
+    mdl.RecordAccess(r);
+    ASSERT(mdl.TotalAccesses() == 1);
+}
+
+TEST(Test_ColdStartFolderBootstrapper_Bootstrap)
+{
+    using namespace ExplorerLens::Engine;
+    CSFBConfig cfg; cfg.maxFilesPerFolder = 20;
+    cfg.seedFolders = {L"C:\\Photos", L"C:\\Downloads"};
+    ColdStartFolderBootstrapper boot(cfg);
+    auto r = boot.Bootstrap();
+    ASSERT(r.success);
+    ASSERT(r.foldersScanned == 2);
+    ASSERT(r.filesQueued > 0);
+    boot.MarkComplete();
+    ASSERT(boot.IsBootstrapComplete());
+}
+
+TEST(Test_PredictionScanOrchestrator_EnqueueDrain)
+{
+    using namespace ExplorerLens::Engine;
+    PredictionScanOrchestrator orch;
+    PSOTrigger t; t.folderPath = L"C:\\Photos"; t.priority = PSOScanPriority::High;
+    orch.EnqueueScan(t); orch.EnqueueScan(t);
+    ASSERT(orch.GetStatus().pendingScans == 2);
+    ASSERT(orch.DrainOne());
+    ASSERT(orch.GetStatus().completedTotal == 1);
+}
+TEST(Test_PredictionScanOrchestrator_Cancel)
+{
+    using namespace ExplorerLens::Engine;
+    PredictionScanOrchestrator orch;
+    PSOTrigger t; t.folderPath = L"x";
+    orch.EnqueueScan(t);
+    orch.Cancel();
+    ASSERT(orch.GetStatus().pendingScans == 0);
+}
+
+TEST(Test_EvictionAwareCachePrimer_Prime)
+{
+    using namespace ExplorerLens::Engine;
+    EACPConfig cfg; cfg.maxPrimeCount = 3; cfg.pressureThreshold = 0.9f;
+    EvictionAwareCachePrimer primer(cfg);
+    auto r = primer.Prime({L"a.jpg", L"b.jpg", L"c.jpg", L"d.jpg"}, 0.5f);
+    ASSERT(r.success);
+    ASSERT(r.primedCount == 3);
+    ASSERT(r.skippedCount == 1);
+}
+TEST(Test_EvictionAwareCachePrimer_HighPressureSkip)
+{
+    using namespace ExplorerLens::Engine;
+    EACPConfig cfg; cfg.pressureThreshold = 0.8f;
+    EvictionAwareCachePrimer primer(cfg);
+    auto r = primer.Prime({L"a.jpg"}, 0.95f);  // Above threshold
+    ASSERT(r.success);
+    ASSERT(r.primedCount == 0);
+    ASSERT(r.skippedCount == 1);
+}
+
+TEST(Test_DMADirectPreloader_Preload)
+{
+    using namespace ExplorerLens::Engine;
+    DMADirectPreloader pre;
+    DMAPreloadRequest req; req.filePath = L"C:\\Photo.jpg"; req.sizeBytes = 4096;
+    auto r = pre.Preload(req);
+    ASSERT(r.success);
+    ASSERT(r.gpuMemoryAddress != 0);
+    ASSERT(pre.IsPreloaded(L"C:\\Photo.jpg"));
+    ASSERT(pre.Evict(L"C:\\Photo.jpg"));
+    ASSERT(!pre.IsPreloaded(L"C:\\Photo.jpg"));
+}
+TEST(Test_DMADirectPreloader_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    DMADirectPreloader pre;
+    DMAPreloadRequest req;
+    auto r = pre.Preload(req);
+    ASSERT(!r.success);
+}
+
+TEST(Test_PerUserPredictionIsolator_RegisterTest)
+{
+    using namespace ExplorerLens::Engine;
+    PerUserPredictionIsolator iso;
+    iso.RegisterUser({"alice", true, 0});
+    iso.RegisterUser({"bob", true, 1});
+    ASSERT(iso.IsIsolated("alice"));
+    auto r = iso.TestIsolation();
+    ASSERT(!r.leaked);
+}
+TEST(Test_PerUserPredictionIsolator_SlotCollision)
+{
+    using namespace ExplorerLens::Engine;
+    PerUserPredictionIsolator iso;
+    iso.RegisterUser({"alice", true, 0});
+    iso.RegisterUser({"bob", true, 0});  // Same slot — collision
+    auto r = iso.TestIsolation();
+    ASSERT(r.leaked);
+}
+
+TEST(Test_PredictionAccuracyTracker_Compute)
+{
+    using namespace ExplorerLens::Engine;
+    PredictionAccuracyTracker tracker;
+    tracker.Record({L"img1.jpg", true, 0.8f});
+    tracker.Record({L"img2.jpg", false, 0.4f});
+    auto r = tracker.Compute();
+    ASSERT(r.totalPredictions == 2);
+    ASSERT(r.hits == 1);
+    ASSERT(r.hitRate == 0.5f);
+}
+TEST(Test_PredictionAccuracyTracker_Empty)
+{
+    using namespace ExplorerLens::Engine;
+    PredictionAccuracyTracker tracker;
+    auto r = tracker.Compute();
+    ASSERT(r.totalPredictions == 0);
+    ASSERT(r.hitRate == 0.0f);
+}
+
+TEST(Test_CollaborativeAnnotationEngineV2_ApplyAndMerge)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborativeAnnotationEngineV2 eng;
+    CAEv2Operation op; op.operationId = "op1"; op.authorId = "alice"; op.payload = "labelA"; op.logicalClock = 1;
+    eng.ApplyOp(op);
+    ASSERT(eng.OpCount() == 1);
+    CAEv2Operation op2; op2.operationId = "op2"; op2.authorId = "bob"; op2.payload = "labelB"; op2.logicalClock = 1;
+    auto r = eng.MergeFrom({op2});
+    ASSERT(r.success && r.opsApplied == 1);
+    ASSERT(eng.OpCount() == 2);
+}
+TEST(Test_CollaborativeAnnotationEngineV2_Clock)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborativeAnnotationEngineV2 eng;
+    CAEv2Operation op; op.operationId = "o1"; op.authorId = "alice"; op.logicalClock = 5;
+    eng.ApplyOp(op);
+    ASSERT(eng.CurrentClock("alice") >= 6);
+}
+
+TEST(Test_AnnotationSignatureVerifier_SignAndVerify)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationSignatureVerifier verifier;
+    std::string privKey = "mySecretKey";
+    std::string sig    = AnnotationSignatureVerifier::Sign("hello annotation", privKey);
+    verifier.RegisterPublicKey("alice", privKey);
+    ASVSignedAnnotation ann; ann.payload = "hello annotation"; ann.authorId = "alice"; ann.signature = sig;
+    auto r = verifier.Verify(ann);
+    ASSERT(r.valid);
+    ASSERT(r.authorId == "alice");
+}
+TEST(Test_AnnotationSignatureVerifier_UnknownAuthor)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationSignatureVerifier verifier;
+    ASVSignedAnnotation ann; ann.authorId = "ghost"; ann.payload = "hi"; ann.signature = "sig";
+    auto r = verifier.Verify(ann);
+    ASSERT(!r.valid);
+}
+
+TEST(Test_AnnotationTimeline_AddAndRevert)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationTimeline tl;
+    uint64_t v1 = tl.AddSnapshot("init", "hash1");
+    uint64_t v2 = tl.AddSnapshot("updated", "hash2");
+    ASSERT(tl.CurrentVersion() == v2);
+    ASSERT(tl.Revert(v1));
+    ASSERT(tl.CurrentVersion() == v1);
+}
+TEST(Test_AnnotationTimeline_GetDelta)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationTimeline tl;
+    tl.AddSnapshot("v1", "h1");
+    tl.AddSnapshot("v2", "h2");
+    auto d = tl.GetDelta(1, 2);
+    ASSERT(d.fromVersion == 1 && d.toVersion == 2);
+    ASSERT(!d.patch.empty());
+}
+
+TEST(Test_PresenceIndicatorEngine_UpdateAndQuery)
+{
+    using namespace ExplorerLens::Engine;
+    PresenceIndicatorEngine eng;
+    PIEUser u; u.userId = "alice"; u.state = PIEPresenceState::Active; u.displayName = "Alice";
+    eng.UpdatePresence(u);
+    ASSERT(eng.GetPresence("alice") == PIEPresenceState::Active);
+    auto active = eng.ActiveUsers();
+    ASSERT(active.size() == 1);
+}
+TEST(Test_PresenceIndicatorEngine_SetOffline)
+{
+    using namespace ExplorerLens::Engine;
+    PresenceIndicatorEngine eng;
+    PIEUser u; u.userId = "bob"; u.state = PIEPresenceState::Active;
+    eng.UpdatePresence(u);
+    eng.SetOffline("bob");
+    ASSERT(eng.GetPresence("bob") == PIEPresenceState::Offline);
+}
+
+TEST(Test_AnnotationTaxonomyV2_LookupAndChildren)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationTaxonomyV2 tax;
+    tax.AddLabel({"cat-animal", "Animal", "", "Any living creature"});
+    tax.AddLabel({"cat-dog", "Dog", "cat-animal", "Domestic dog"});
+    auto r = tax.Lookup("dog");
+    ASSERT(r.found && !r.matches.empty());
+    auto children = tax.Children("cat-animal");
+    ASSERT(children.size() == 1);
+    ASSERT(children[0].id == "cat-dog");
+}
+TEST(Test_AnnotationTaxonomyV2_LabelCount)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationTaxonomyV2 tax;
+    tax.AddLabel({"l1", "One", "", ""});
+    tax.AddLabel({"l2", "Two", "", ""});
+    ASSERT(tax.LabelCount() == 2);
+}
+
+TEST(Test_AIAnnotationAssistant_Suggest)
+{
+    using namespace ExplorerLens::Engine;
+    AIAnnotationAssistant asst;
+    AAASuggestionRequest req;
+    req.rgbaData.assign(64*64*4, 0x80); req.width = 64; req.height = 64; req.topK = 3;
+    auto r = asst.Suggest(req);
+    ASSERT(r.success);
+    ASSERT(r.suggestions.size() == 3);
+    ASSERT(r.suggestions[0].confidence > r.suggestions[2].confidence);
+}
+TEST(Test_AIAnnotationAssistant_NoImage)
+{
+    using namespace ExplorerLens::Engine;
+    AIAnnotationAssistant asst;
+    AAASuggestionRequest req;
+    auto r = asst.Suggest(req);
+    ASSERT(!r.success);
+}
+
+TEST(Test_OfflineAnnotationSyncQueue_EnqueueFlush)
+{
+    using namespace ExplorerLens::Engine;
+    OfflineAnnotationSyncQueue q;
+    OASQEntry e; e.operationId = "op1"; e.payload = "data"; e.retryCount = 0;
+    q.Enqueue(e); q.Enqueue(e);
+    ASSERT(q.QueueDepth() == 2);
+    auto r = q.FlushAll();
+    ASSERT(r.success);
+    ASSERT(r.syncedCount == 2);
+    ASSERT(q.QueueDepth() == 0);
+}
+TEST(Test_OfflineAnnotationSyncQueue_Clear)
+{
+    using namespace ExplorerLens::Engine;
+    OfflineAnnotationSyncQueue q;
+    q.Enqueue({"op1", "data"});
+    q.Clear();
+    ASSERT(q.QueueDepth() == 0);
+}
+
+TEST(Test_AnnotationExportPipelineV2_Export)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationExportPipelineV2 pipe;
+    AEPv2ExportRequest req;
+    req.outputPath = L"out.json";
+    req.annotations = {"ann1", "ann2", "ann3"};
+    req.format = AEPv2ExportFormat::JSON_LD;
+    auto r = pipe.Export(req);
+    ASSERT(r.success);
+    ASSERT(r.annotationCount == 3);
+    ASSERT(r.bytesWritten > 0);
+}
+TEST(Test_AnnotationExportPipelineV2_FormatName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(AnnotationExportPipelineV2::FormatName(AEPv2ExportFormat::CSV) == "CSV");
+    ASSERT(AnnotationExportPipelineV2::FormatName(AEPv2ExportFormat::COCO) == "COCO");
+}
+
+TEST(Test_GRPCProtocolServerV2_DispatchHandler)
+{
+    using namespace ExplorerLens::Engine;
+    GRPCv2Config cfg;
+    GRPCProtocolServerV2 srv(cfg);
+    srv.RegisterHandler("Thumbnail.Get", [](const GRPCv2Request&) -> GRPCv2Response { return {0, {0xAA}}; });
+    ASSERT(srv.Start());
+    GRPCv2Request req; req.method = "Thumbnail.Get";
+    auto r = srv.Dispatch(req);
+    ASSERT(r.statusCode == 0);
+    ASSERT(srv.IsRunning());
+    ASSERT(srv.Stop());
+}
+TEST(Test_GRPCProtocolServerV2_UnknownMethod)
+{
+    using namespace ExplorerLens::Engine;
+    GRPCv2Config cfg;
+    GRPCProtocolServerV2 srv(cfg);
+    GRPCv2Request req; req.method = "Unknown.Method";
+    auto r = srv.Dispatch(req);
+    ASSERT(r.statusCode == 404);
+}
+
+TEST(Test_RESTAPIServerV2_RouteAndDispatch)
+{
+    using namespace ExplorerLens::Engine;
+    RASSv2Config cfg;
+    RESTAPIServerV2 srv(cfg);
+    srv.Route("GET", "/thumbnail", [](const RASSv2Request&) -> RASSv2Response { return {200, "image/png", {0xFF}}; });
+    ASSERT(srv.Start());
+    RASSv2Request req; req.method = "GET"; req.path = "/thumbnail";
+    auto r = srv.Dispatch(req);
+    ASSERT(r.statusCode == 200);
+}
+TEST(Test_RESTAPIServerV2_NotFound)
+{
+    using namespace ExplorerLens::Engine;
+    RASSv2Config cfg;
+    RESTAPIServerV2 srv(cfg);
+    RASSv2Request req; req.method = "GET"; req.path = "/missing";
+    auto r = srv.Dispatch(req);
+    ASSERT(r.statusCode == 404);
+}
+
+TEST(Test_GraphQLSubscriptionServer_SubscribePublish)
+{
+    using namespace ExplorerLens::Engine;
+    GraphQLSubscriptionServer srv;
+    bool received = false;
+    std::string subId = srv.Subscribe("thumbnail.updated", [&](const GQLSubEvent& e) { received = true; (void)e; });
+    ASSERT(!subId.empty());
+    ASSERT(srv.SubscriberCount() == 1);
+    GQLSubEvent evt; evt.topic = "thumbnail.updated"; evt.payload = "{}";
+    srv.Publish(evt);
+    ASSERT(received);
+    ASSERT(srv.Unsubscribe(subId));
+}
+TEST(Test_GraphQLSubscriptionServer_UnsubscribeUnknown)
+{
+    using namespace ExplorerLens::Engine;
+    GraphQLSubscriptionServer srv;
+    ASSERT(!srv.Unsubscribe("nonexistent"));
+}
+
+TEST(Test_OAuth2PKCEMiddleware_Exchange)
+{
+    using namespace ExplorerLens::Engine;
+    OAuthPKCEConfig cfg; cfg.clientId = "lens-client"; cfg.redirectUri = "localhost";
+    OAuth2PKCEMiddleware mw(cfg);
+    mw.GenerateCodeVerifier();
+    auto r = mw.ExchangeCode("auth-code-123");
+    ASSERT(r.success);
+    ASSERT(!r.accessToken.empty());
+    ASSERT(r.expiresIn == 3600);
+}
+TEST(Test_OAuth2PKCEMiddleware_NoVerifier)
+{
+    using namespace ExplorerLens::Engine;
+    OAuthPKCEConfig cfg;
+    OAuth2PKCEMiddleware mw(cfg);
+    auto r = mw.ExchangeCode("code");
+    ASSERT(!r.success);
+}
+
+TEST(Test_JWTValidationEngine_ValidToken)
+{
+    using namespace ExplorerLens::Engine;
+    JWTValidationEngine eng;
+    eng.SetSecret("secret"); eng.SetIssuer("lens"); eng.SetAudience("api");
+    auto r = eng.Validate("header.payload.signature");
+    ASSERT(r.valid);
+    ASSERT(!r.subject.empty());
+}
+TEST(Test_JWTValidationEngine_MalformedToken)
+{
+    using namespace ExplorerLens::Engine;
+    JWTValidationEngine eng;
+    auto r = eng.Validate("noDotsHere");
+    ASSERT(!r.valid);
+}
+TEST(Test_JWTValidationEngine_AlgorithmSupport)
+{
+    using namespace ExplorerLens::Engine;
+    JWTValidationEngine eng;
+    ASSERT(eng.IsAlgorithmSupported(JWTAlgorithm::HS256));
+    ASSERT(eng.IsAlgorithmSupported(JWTAlgorithm::RS256));
+}
+
+TEST(Test_RateLimitingMiddleware_AllowAndExhaust)
+{
+    using namespace ExplorerLens::Engine;
+    RLMConfig cfg; cfg.maxRequests = 3; cfg.windowMs = 60000;
+    RateLimitingMiddleware mw(cfg);
+    for (int i = 0; i < 3; ++i) {
+        auto r = mw.Check("client1");
+        ASSERT(r.allowed);
+    }
+    auto r4 = mw.Check("client1");
+    ASSERT(!r4.allowed);
+    ASSERT(r4.remaining == 0);
+}
+TEST(Test_RateLimitingMiddleware_Reset)
+{
+    using namespace ExplorerLens::Engine;
+    RLMConfig cfg; cfg.maxRequests = 1;
+    RateLimitingMiddleware mw(cfg);
+    mw.Check("c1");
+    mw.Reset("c1");
+    auto r = mw.Check("c1");
+    ASSERT(r.allowed);
+}
+
+TEST(Test_OpenAPICodeGenerator_Generate)
+{
+    using namespace ExplorerLens::Engine;
+    OpenAPICodeGenerator gen;
+    OACGGenerateRequest req;
+    req.specJson = "{\"openapi\":\"3.1.0\"}";
+    req.language = OACGTargetLanguage::Cpp;
+    auto r = gen.Generate(req);
+    ASSERT(r.success);
+    ASSERT(!r.generatedFiles.empty());
+    ASSERT(r.endpointCount > 0);
+}
+TEST(Test_OpenAPICodeGenerator_EmptySpec)
+{
+    using namespace ExplorerLens::Engine;
+    OpenAPICodeGenerator gen;
+    OACGGenerateRequest req;
+    auto r = gen.Generate(req);
+    ASSERT(!r.success);
+}
+TEST(Test_OpenAPICodeGenerator_LanguageSuffix)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(OpenAPICodeGenerator::LanguageSuffix(OACGTargetLanguage::Python) == "py");
+    ASSERT(OpenAPICodeGenerator::LanguageSuffix(OACGTargetLanguage::TypeScript) == "ts");
+}
+
+TEST(Test_GraphQLSchemaIntrospector_IntrospectTypes)
+{
+    using namespace ExplorerLens::Engine;
+    GraphQLSchemaIntrospector intro;
+    intro.RegisterType({"Thumbnail", "OBJECT", {"id", "width", "height"}});
+    intro.RegisterType({"String", "SCALAR", {}});
+    auto r = intro.Introspect();
+    ASSERT(r.success);
+    ASSERT(r.types.size() == 2);
+    ASSERT(intro.TypeExists("Thumbnail"));
+}
+
+TEST(Test_NeuralCodecV2Engine_Encode)
+{
+    using namespace ExplorerLens::Engine;
+    NeuralCodecV2Engine eng;
+    NCV2EncodeRequest req;
+    req.rgbaData.assign(64*64*4, 0xAA);
+    req.width = 64; req.height = 64; req.backend = NCV2Backend::CPU;
+    auto r = eng.Encode(req);
+    ASSERT(r.success);
+    ASSERT(r.compressionRatio > 1.0f);
+    ASSERT(r.encodeMs > 0);
+}
+TEST(Test_NeuralCodecV2Engine_EmptyInput)
+{
+    using namespace ExplorerLens::Engine;
+    NeuralCodecV2Engine eng;
+    NCV2EncodeRequest req;
+    auto r = eng.Encode(req);
+    ASSERT(!r.success);
+}
+TEST(Test_NeuralCodecV2Engine_BackendAvailability)
+{
+    using namespace ExplorerLens::Engine;
+    NeuralCodecV2Engine eng;
+    ASSERT(eng.IsBackendAvailable(NCV2Backend::CPU));
+    ASSERT(NeuralCodecV2Engine::BackendName(NCV2Backend::DirectML) == "DirectML");
+}
+
+TEST(Test_SSIMQualityController_Measure)
+{
+    using namespace ExplorerLens::Engine;
+    SQCConfig cfg; cfg.minSSIM = 0.90f;
+    SSIMQualityController sqc(cfg);
+    std::vector<uint8_t> img(64, 128);
+    std::vector<uint8_t> compressed(64, 125);  // Slightly different
+    auto r = sqc.Measure(img, compressed);
+    ASSERT(r.success);
+    ASSERT(r.ssim >= 0.0f && r.ssim <= 1.0f);
+}
+TEST(Test_SSIMQualityController_SizeMismatch)
+{
+    using namespace ExplorerLens::Engine;
+    SQCConfig cfg;
+    SSIMQualityController sqc(cfg);
+    auto r = sqc.Measure({1, 2, 3}, {1, 2});
+    ASSERT(!r.success);
+}
+
+TEST(Test_ProgressiveNeuralDecoder_Steps)
+{
+    using namespace ExplorerLens::Engine;
+    ProgressiveNeuralDecoder dec;
+    dec.BeginDecode({0xAA, 0xBB}, 64, 64);
+    int steps = 0;
+    while (!dec.IsComplete()) {
+        auto step = dec.NextStep();
+        ASSERT(!step.rgbaData.empty());
+        ASSERT(step.qualityEstimate > 0.0f);
+        ++steps;
+    }
+    ASSERT(steps == 4);
+}
+TEST(Test_ProgressiveNeuralDecoder_Reset)
+{
+    using namespace ExplorerLens::Engine;
+    ProgressiveNeuralDecoder dec;
+    dec.BeginDecode({}, 64, 64);
+    dec.NextStep();
+    dec.Reset();
+    ASSERT(dec.Width() == 64);  // Width persists after reset until next BeginDecode
+}
+
+TEST(Test_NeuralContainerFormat_SerializeDeserialize)
+{
+    using namespace ExplorerLens::Engine;
+    NCFContainer c;
+    c.metadata.width = 256; c.metadata.height = 140;
+    c.payload = {0x01, 0x02, 0x03};
+    auto data = NeuralContainerFormat::Serialize(c);
+    ASSERT(data.size() > 4);
+    NCFContainer out;
+    ASSERT(NeuralContainerFormat::Deserialize(data, out));
+    ASSERT(out.metadata.width == 256);
+    ASSERT(out.metadata.height == 140);
+}
+TEST(Test_NeuralContainerFormat_IsNCFData)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(NeuralContainerFormat::IsNCFData({0,1,2,3,4}));
+    ASSERT(!NeuralContainerFormat::IsNCFData({0,1}));
+    ASSERT(NeuralContainerFormat::Extension() == ".ncf");
+}
+
+TEST(Test_MultiResLatentPyramid_Encode)
+{
+    using namespace ExplorerLens::Engine;
+    MultiResLatentPyramid pyramid;
+    std::vector<uint8_t> img(64*64*4, 0x80);
+    auto r = pyramid.Encode(img, 64, 64);
+    ASSERT(r.success);
+    ASSERT(r.pyramid.size() == 4);
+    ASSERT(r.pyramid[0].width >= r.pyramid[3].width);  // Coarser levels are smaller
+    ASSERT(r.bitsPerPixel > 0.0f);
+}
+TEST(Test_MultiResLatentPyramid_EmptyInput)
+{
+    using namespace ExplorerLens::Engine;
+    MultiResLatentPyramid pyramid;
+    auto r = pyramid.Encode({}, 0, 0);
+    ASSERT(!r.success);
+}
+
+TEST(Test_LearnedEntropyCoder_Encode)
+{
+    using namespace ExplorerLens::Engine;
+    LearnedEntropyCoder coder(LECContextModel::Adaptive);
+    std::vector<uint8_t> symbols(100, 0x40);
+    auto r = coder.Encode(symbols);
+    ASSERT(r.success);
+    ASSERT(!r.bitstream.empty());
+    ASSERT(r.bitsPerSymbol > 0.0f);
+}
+TEST(Test_LearnedEntropyCoder_Decode)
+{
+    using namespace ExplorerLens::Engine;
+    LearnedEntropyCoder coder(LECContextModel::Static);
+    auto dec = coder.Decode({0xFF, 0xEE}, 10);
+    ASSERT(dec.size() == 10);
+}
+TEST(Test_LearnedEntropyCoder_ModelName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(LearnedEntropyCoder::ModelName(LECContextModel::Hyperprior) == "Hyperprior");
+}
+
+TEST(Test_NeuralCodecHWAccelerator_Encode)
+{
+    using namespace ExplorerLens::Engine;
+    NeuralCodecHWAccelerator accel;
+    NCHWAEncodeRequest req2;
+    req2.rgbaData.assign(64, 0x80); req2.width = 8; req2.height = 2;
+    req2.backend = NCHWABackend::QuickSync;
+    auto r = accel.Encode(req2);
+    ASSERT(r.success);
+    ASSERT(!r.encoded.empty());
+}
+TEST(Test_NeuralCodecHWAccelerator_BackendNames)
+{
+    using namespace ExplorerLens::Engine;
+    NeuralCodecHWAccelerator accel;
+    ASSERT(NeuralCodecHWAccelerator::BackendName(NCHWABackend::NVDEC) == "NVDEC");
+    ASSERT(accel.IsAvailable(NCHWABackend::Software));
+    ASSERT(accel.PreferredBackend() == NCHWABackend::QuickSync);
+}
+
+TEST(Test_CodecNegotiationProtocol_Negotiate)
+{
+    using namespace ExplorerLens::Engine;
+    CodecNegotiationProtocol proto;
+    proto.SetPreferences({CNPCodec::NCF_v2, CNPCodec::AVIF, CNPCodec::WebP});
+    CNPOffer offer;
+    offer.supportedCodecs = {CNPCodec::AVIF, CNPCodec::JPEG};
+    offer.maxBitrateKbps  = 8000;
+    auto r = proto.Negotiate(offer);
+    ASSERT(r.success);
+    ASSERT(r.chosen == CNPCodec::AVIF);
+    ASSERT(r.negotiatedKbps > 0);
+}
+TEST(Test_CodecNegotiationProtocol_EmptyOffer)
+{
+    using namespace ExplorerLens::Engine;
+    CodecNegotiationProtocol proto;
+    CNPOffer offer;
+    auto r = proto.Negotiate(offer);
+    ASSERT(!r.success);
+}
+TEST(Test_CodecNegotiationProtocol_CodecName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(CodecNegotiationProtocol::CodecName(CNPCodec::NCF_v2) == "NCF_v2");
+    ASSERT(CodecNegotiationProtocol::CodecName(CNPCodec::WebP)   == "WebP");
 }
 
 TEST(IntegrationRunnerSmoke)
@@ -38804,6 +40574,184 @@ int main()
     RUN_TEST(Test_AccessibilityAuditPipeline_Noncompliant);
     RUN_TEST(Test_AccessibilityAuditPipeline_CriterionName);
     RUN_TEST(Test_AccessibilityAuditPipeline_PassRate);
+
+    // Sprint 701-800 Tests
+    RUN_TEST(Test_OpenXRAssetDecoder_DetectFormat);
+    RUN_TEST(Test_OpenXRAssetDecoder_Decode);
+    RUN_TEST(Test_OpenXRAssetDecoder_EmptyPath);
+    RUN_TEST(Test_OpenXRAssetDecoder_IsSupported);
+    RUN_TEST(Test_USDADecoder_DetectLayerType);
+    RUN_TEST(Test_USDADecoder_Decode);
+    RUN_TEST(Test_USDADecoder_EmptyPath);
+    RUN_TEST(Test_XRSpatialPreviewEngine_Preview);
+    RUN_TEST(Test_XRSpatialPreviewEngine_TargetName);
+    RUN_TEST(Test_XRSpatialPreviewEngine_EmptyPath);
+    RUN_TEST(Test_ARMarkerDetectionEngine_Detect);
+    RUN_TEST(Test_ARMarkerDetectionEngine_EmptyImage);
+    RUN_TEST(Test_ARMarkerDetectionEngine_TypeName);
+    RUN_TEST(Test_StereoscopicRenderPipeline_Render);
+    RUN_TEST(Test_StereoscopicRenderPipeline_EmptyPath);
+    RUN_TEST(Test_StereoscopicRenderPipeline_LayoutName);
+    RUN_TEST(Test_PointCloudVisualizerV2_DetectFormat);
+    RUN_TEST(Test_PointCloudVisualizerV2_Render);
+    RUN_TEST(Test_PointCloudVisualizerV2_EmptyPath);
+    RUN_TEST(Test_NerfDecoder_DetectFormat);
+    RUN_TEST(Test_NerfDecoder_Decode);
+    RUN_TEST(Test_XRMetadataExtractor_Extract);
+    RUN_TEST(Test_XRMetadataExtractor_SupportsFormat);
+    RUN_TEST(Test_DifferentialPrivacyEngine_Query);
+    RUN_TEST(Test_DifferentialPrivacyEngine_BudgetExhausted);
+    RUN_TEST(Test_DifferentialPrivacyEngine_ResetBudget);
+    RUN_TEST(Test_LocalDataAggregator_AddAndFlush);
+    RUN_TEST(Test_LocalDataAggregator_SetNoiseScale);
+    RUN_TEST(Test_AnonymizationPipelineV2_Anonymize);
+    RUN_TEST(Test_AnonymizationPipelineV2_ContainsPII);
+    RUN_TEST(Test_AnonymizationPipelineV2_Batch);
+    RUN_TEST(Test_PrivacyConsentManager_SetGet);
+    RUN_TEST(Test_PrivacyConsentManager_DefaultPending);
+    RUN_TEST(Test_PrivacyConsentManager_AuditTrail);
+    RUN_TEST(Test_SecureEnclaveAnalytics_Aggregate);
+    RUN_TEST(Test_SecureEnclaveAnalytics_EmptyInput);
+    RUN_TEST(Test_SecureEnclaveAnalytics_BackendName);
+    RUN_TEST(Test_GDPRComplianceEngine_Erasure);
+    RUN_TEST(Test_GDPRComplianceEngine_EmptySubject);
+    RUN_TEST(Test_TelemetryDataMinimizer_Minimize);
+    RUN_TEST(Test_TelemetryDataMinimizer_Clean);
+    RUN_TEST(Test_PrivacyAuditLogger_RecordAndVerify);
+    RUN_TEST(Test_PrivacyAuditLogger_EntriesForSubject);
+    RUN_TEST(Test_FederatedLearningCoordinator_RunRound);
+    RUN_TEST(Test_FederatedLearningCoordinator_InsufficientClients);
+    RUN_TEST(Test_PersonalizedRankingModel_Rank);
+    RUN_TEST(Test_PersonalizedRankingModel_UpdateSignal);
+    RUN_TEST(Test_FederatedModelAggregator_Aggregate);
+    RUN_TEST(Test_FederatedModelAggregator_InsufficientParticipants);
+    RUN_TEST(Test_OnDeviceFineTuningEngine_Train);
+    RUN_TEST(Test_OnDeviceFineTuningEngine_WeightCount);
+    RUN_TEST(Test_NeuralCompressionCodec_Compress);
+    RUN_TEST(Test_NeuralCompressionCodec_EmptyInput);
+    RUN_TEST(Test_NeuralCompressionCodec_ModeName);
+    RUN_TEST(Test_EmbeddingFederationBus_QueryMatch);
+    RUN_TEST(Test_EmbeddingFederationBus_EmbeddingCount);
+    RUN_TEST(Test_ModelVersioningController_ActivateRollback);
+    RUN_TEST(Test_ModelVersioningController_RollbackEmpty);
+    RUN_TEST(Test_FederatedSearchEnhancer_Search);
+    RUN_TEST(Test_FederatedSearchEnhancer_IndexAndSize);
+    RUN_TEST(Test_LiveStreamDecoder_DecodeFirstFrame);
+    RUN_TEST(Test_LiveStreamDecoder_EmptyUrl);
+    RUN_TEST(Test_LiveStreamDecoder_ProtocolName);
+    RUN_TEST(Test_WebRTCThumbnailCapture_Capture);
+    RUN_TEST(Test_WebRTCThumbnailCapture_NoSDP);
+    RUN_TEST(Test_WebRTCThumbnailCapture_CodecSupport);
+    RUN_TEST(Test_StreamingBufferOrchestrator_PushPop);
+    RUN_TEST(Test_StreamingBufferOrchestrator_Status);
+    RUN_TEST(Test_AdaptiveBitrateSelector_Select);
+    RUN_TEST(Test_AdaptiveBitrateSelector_NoBandwidth);
+    RUN_TEST(Test_MediaTimelineRenderer_RenderStrip);
+    RUN_TEST(Test_MediaTimelineRenderer_EmptyPath);
+    RUN_TEST(Test_DASHStreamDecoder_Decode);
+    RUN_TEST(Test_DASHStreamDecoder_IsManifestUrl);
+    RUN_TEST(Test_LiveThumbnailPoller_AddRemove);
+    RUN_TEST(Test_LiveThumbnailPoller_MaxConcurrent);
+    RUN_TEST(Test_VideoTextureStreamEngine_Upload);
+    RUN_TEST(Test_VideoTextureStreamEngine_EmptyFrame);
+    RUN_TEST(Test_VideoTextureStreamEngine_ZeroCopy);
+    RUN_TEST(Test_RenderClusterManager_SubmitComplete);
+    RUN_TEST(Test_RenderClusterManager_NoIdleNodes);
+    RUN_TEST(Test_RenderJobScheduler_EnqueueDequeue);
+    RUN_TEST(Test_RenderJobScheduler_Fail);
+    RUN_TEST(Test_NodeHealthMonitor_HeartbeatAndReport);
+    RUN_TEST(Test_NodeHealthMonitor_Unresponsive);
+    RUN_TEST(Test_DistributedCacheReplicator_PutGet);
+    RUN_TEST(Test_DistributedCacheReplicator_Replicate);
+    RUN_TEST(Test_RenderResultAggregator_Compose);
+    RUN_TEST(Test_RenderResultAggregator_NoTiles);
+    RUN_TEST(Test_ClusterAutoScaler_ScaleUp);
+    RUN_TEST(Test_ClusterAutoScaler_ScaleDown);
+    RUN_TEST(Test_SecureClusterChannel_Handshake);
+    RUN_TEST(Test_SecureClusterChannel_Send);
+    RUN_TEST(Test_ClusterObservabilityBus_RecordAndSnapshot);
+    RUN_TEST(Test_ClusterObservabilityBus_QueryByNode);
+    RUN_TEST(Test_PluginCapabilityMatrixV3_Evaluate);
+    RUN_TEST(Test_PluginCapabilityMatrixV3_Denied);
+    RUN_TEST(Test_PluginMarketplaceConnector_Install);
+    RUN_TEST(Test_PluginMarketplaceConnector_Search);
+    RUN_TEST(Test_PluginSandboxV3_Execute);
+    RUN_TEST(Test_PluginSandboxV3_MemoryLimit);
+    RUN_TEST(Test_PluginLifecycleManagerV3_LoadActivate);
+    RUN_TEST(Test_PluginLifecycleManagerV3_HotSwap);
+    RUN_TEST(Test_PluginTelemetryCollector_RecordAndSummary);
+    RUN_TEST(Test_PluginTelemetryCollector_Flush);
+    RUN_TEST(Test_PluginCompatibilityShimV3_Load);
+    RUN_TEST(Test_PluginCompatibilityShimV3_EmptyPath);
+    RUN_TEST(Test_PluginNetworkProxy_AllowedRequest);
+    RUN_TEST(Test_PluginNetworkProxy_Blocked);
+    RUN_TEST(Test_PredictivePreGenEngine_Predict);
+    RUN_TEST(Test_PredictivePreGenEngine_TrackedCount);
+    RUN_TEST(Test_FolderPredictionModel_TopPredictions);
+    RUN_TEST(Test_FolderPredictionModel_TotalAccesses);
+    RUN_TEST(Test_ColdStartFolderBootstrapper_Bootstrap);
+    RUN_TEST(Test_PredictionScanOrchestrator_EnqueueDrain);
+    RUN_TEST(Test_PredictionScanOrchestrator_Cancel);
+    RUN_TEST(Test_EvictionAwareCachePrimer_Prime);
+    RUN_TEST(Test_EvictionAwareCachePrimer_HighPressureSkip);
+    RUN_TEST(Test_DMADirectPreloader_Preload);
+    RUN_TEST(Test_DMADirectPreloader_EmptyPath);
+    RUN_TEST(Test_PerUserPredictionIsolator_RegisterTest);
+    RUN_TEST(Test_PerUserPredictionIsolator_SlotCollision);
+    RUN_TEST(Test_PredictionAccuracyTracker_Compute);
+    RUN_TEST(Test_PredictionAccuracyTracker_Empty);
+    RUN_TEST(Test_CollaborativeAnnotationEngineV2_ApplyAndMerge);
+    RUN_TEST(Test_CollaborativeAnnotationEngineV2_Clock);
+    RUN_TEST(Test_AnnotationSignatureVerifier_SignAndVerify);
+    RUN_TEST(Test_AnnotationSignatureVerifier_UnknownAuthor);
+    RUN_TEST(Test_AnnotationTimeline_AddAndRevert);
+    RUN_TEST(Test_AnnotationTimeline_GetDelta);
+    RUN_TEST(Test_PresenceIndicatorEngine_UpdateAndQuery);
+    RUN_TEST(Test_PresenceIndicatorEngine_SetOffline);
+    RUN_TEST(Test_AnnotationTaxonomyV2_LookupAndChildren);
+    RUN_TEST(Test_AnnotationTaxonomyV2_LabelCount);
+    RUN_TEST(Test_AIAnnotationAssistant_Suggest);
+    RUN_TEST(Test_AIAnnotationAssistant_NoImage);
+    RUN_TEST(Test_OfflineAnnotationSyncQueue_EnqueueFlush);
+    RUN_TEST(Test_OfflineAnnotationSyncQueue_Clear);
+    RUN_TEST(Test_AnnotationExportPipelineV2_Export);
+    RUN_TEST(Test_AnnotationExportPipelineV2_FormatName);
+    RUN_TEST(Test_GRPCProtocolServerV2_DispatchHandler);
+    RUN_TEST(Test_GRPCProtocolServerV2_UnknownMethod);
+    RUN_TEST(Test_RESTAPIServerV2_RouteAndDispatch);
+    RUN_TEST(Test_RESTAPIServerV2_NotFound);
+    RUN_TEST(Test_GraphQLSubscriptionServer_SubscribePublish);
+    RUN_TEST(Test_GraphQLSubscriptionServer_UnsubscribeUnknown);
+    RUN_TEST(Test_OAuth2PKCEMiddleware_Exchange);
+    RUN_TEST(Test_OAuth2PKCEMiddleware_NoVerifier);
+    RUN_TEST(Test_JWTValidationEngine_ValidToken);
+    RUN_TEST(Test_JWTValidationEngine_MalformedToken);
+    RUN_TEST(Test_JWTValidationEngine_AlgorithmSupport);
+    RUN_TEST(Test_RateLimitingMiddleware_AllowAndExhaust);
+    RUN_TEST(Test_RateLimitingMiddleware_Reset);
+    RUN_TEST(Test_OpenAPICodeGenerator_Generate);
+    RUN_TEST(Test_OpenAPICodeGenerator_EmptySpec);
+    RUN_TEST(Test_OpenAPICodeGenerator_LanguageSuffix);
+    RUN_TEST(Test_GraphQLSchemaIntrospector_IntrospectTypes);
+    RUN_TEST(Test_NeuralCodecV2Engine_Encode);
+    RUN_TEST(Test_NeuralCodecV2Engine_EmptyInput);
+    RUN_TEST(Test_NeuralCodecV2Engine_BackendAvailability);
+    RUN_TEST(Test_SSIMQualityController_Measure);
+    RUN_TEST(Test_SSIMQualityController_SizeMismatch);
+    RUN_TEST(Test_ProgressiveNeuralDecoder_Steps);
+    RUN_TEST(Test_ProgressiveNeuralDecoder_Reset);
+    RUN_TEST(Test_NeuralContainerFormat_SerializeDeserialize);
+    RUN_TEST(Test_NeuralContainerFormat_IsNCFData);
+    RUN_TEST(Test_MultiResLatentPyramid_Encode);
+    RUN_TEST(Test_MultiResLatentPyramid_EmptyInput);
+    RUN_TEST(Test_LearnedEntropyCoder_Encode);
+    RUN_TEST(Test_LearnedEntropyCoder_Decode);
+    RUN_TEST(Test_LearnedEntropyCoder_ModelName);
+    RUN_TEST(Test_NeuralCodecHWAccelerator_Encode);
+    RUN_TEST(Test_NeuralCodecHWAccelerator_BackendNames);
+    RUN_TEST(Test_CodecNegotiationProtocol_Negotiate);
+    RUN_TEST(Test_CodecNegotiationProtocol_EmptyOffer);
+    RUN_TEST(Test_CodecNegotiationProtocol_CodecName);
 
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;

@@ -1678,6 +1678,96 @@ set(ENGINE_HEADERS
     Utils/A11yColorContrastEngine.h
     Utils/KeyboardNavigationMapV2.h
     Utils/AccessibilityAuditPipeline.h
+
+    # Sprint 701-710 — Extended Reality (XR) Thumbnails (v26.6.0 "Canopus-W")
+    Decoders/OpenXRAssetDecoder.h
+    Decoders/USDADecoder.h
+    Core/XRSpatialPreviewEngine.h
+    Core/ARMarkerDetectionEngine.h
+    GPU/StereoscopicRenderPipeline.h
+    Core/PointCloudVisualizerV2.h
+    Decoders/NerfDecoder.h
+    Core/XRMetadataExtractor.h
+    # Sprint 711-720 — Privacy-Preserving Analytics (v26.7.0 "Canopus-X")
+    Core/DifferentialPrivacyEngine.h
+    Core/LocalDataAggregator.h
+    Core/AnonymizationPipelineV2.h
+    Core/PrivacyConsentManager.h
+    Core/SecureEnclaveAnalytics.h
+    Utils/GDPRComplianceEngine.h
+    Utils/TelemetryDataMinimizer.h
+    Core/PrivacyAuditLogger.h
+    # Sprint 721-730 — Federated AI Pipeline (v27.0.0 "Sirius" MAJOR)
+    AI/FederatedLearningCoordinator.h
+    AI/PersonalizedRankingModel.h
+    AI/FederatedModelAggregator.h
+    AI/OnDeviceFineTuningEngine.h
+    AI/NeuralCompressionCodec.h
+    AI/EmbeddingFederationBus.h
+    AI/ModelVersioningController.h
+    AI/FederatedSearchEnhancer.h
+    # Sprint 731-740 — Streaming & Live Media Preview (v27.1.0 "Sirius-R")
+    Decoders/LiveStreamDecoder.h
+    Decoders/WebRTCThumbnailCapture.h
+    Core/StreamingBufferOrchestrator.h
+    Core/AdaptiveBitrateSelector.h
+    Core/MediaTimelineRenderer.h
+    Decoders/DASHStreamDecoder.h
+    Core/LiveThumbnailPoller.h
+    GPU/VideoTextureStreamEngine.h
+    # Sprint 741-750 — Distributed Rendering Cluster (v27.2.0 "Sirius-S")
+    Core/RenderClusterManager.h
+    Core/RenderJobScheduler.h
+    Core/NodeHealthMonitor.h
+    Core/DistributedCacheReplicator.h
+    Core/RenderResultAggregator.h
+    Core/ClusterAutoScaler.h
+    Core/SecureClusterChannel.h
+    Core/ClusterObservabilityBus.h
+    # Sprint 751-760 — Universal Plugin SDK v3 (v27.3.0 "Sirius-T")
+    Plugin/PluginCapabilityMatrixV3.h
+    Plugin/PluginMarketplaceConnector.h
+    Plugin/PluginSandboxV3.h
+    Plugin/PluginLifecycleManagerV3.h
+    Plugin/PluginTelemetryCollector.h
+    Plugin/PluginCompatibilityShimV3.h
+    Plugin/PluginNetworkProxy.h
+    # Sprint 761-770 — Predictive Pre-Generation Engine (v27.4.0 "Sirius-U")
+    Core/PredictivePreGenEngine.h
+    Core/FolderPredictionModel.h
+    Core/ColdStartFolderBootstrapper.h
+    Core/PredictionScanOrchestrator.h
+    Core/EvictionAwareCachePrimer.h
+    GPU/DMADirectPreloader.h
+    Core/PerUserPredictionIsolator.h
+    Core/PredictionAccuracyTracker.h
+    # Sprint 771-780 — Collaborative Annotation v2 (v27.5.0 "Sirius-V")
+    Core/CollaborativeAnnotationEngineV2.h
+    Core/AnnotationSignatureVerifier.h
+    Core/AnnotationTimeline.h
+    Core/PresenceIndicatorEngine.h
+    Core/AnnotationTaxonomyV2.h
+    AI/AIAnnotationAssistant.h
+    Core/OfflineAnnotationSyncQueue.h
+    Core/AnnotationExportPipelineV2.h
+    # Sprint 781-790 — Protocol Surface v2 (v27.6.0 "Sirius-W")
+    Core/GRPCProtocolServerV2.h
+    Core/RESTAPIServerV2.h
+    Core/GraphQLSubscriptionServer.h
+    Core/OAuth2PKCEMiddleware.h
+    Core/JWTValidationEngine.h
+    Core/RateLimitingMiddleware.h
+    Core/OpenAPICodeGenerator.h
+    Core/GraphQLSchemaIntrospector.h
+    # Sprint 791-800 — Neural Codec v2 (v27.7.0 "Sirius-X")
+    Core/NeuralCodecV2Engine.h
+    AI/SSIMQualityController.h
+    Core/ProgressiveNeuralDecoder.h
+    Core/NeuralContainerFormat.h
+    AI/MultiResLatentPyramid.h
+    AI/LearnedEntropyCoder.h
+    GPU/NeuralCodecHWAccelerator.h
+    Core/CodecNegotiationProtocol.h
 )
 
 set(ENGINE_SOURCES

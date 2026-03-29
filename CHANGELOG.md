@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [26.6.0] — Canopus-W (2026-03-29)
+
+### Added — Sprint 701-710: XR Thumbnails
+- Engine/Decoders/OpenXRAssetDecoder.h: OpenXR binary asset decoder with XRAssetFormat detection
+- Engine/Decoders/USDADecoder.h: USD/USDA/USDC/USDZ scene decoder with layer type detection
+- Engine/Core/XRSpatialPreviewEngine.h: Spatial preview engine for HoloLens2/QuestPro/VisionPro targets
+- Engine/Core/ARMarkerDetectionEngine.h: AR marker detection (ArUco/QRCode/AprilTag/Custom)
+- Engine/GPU/StereoscopicRenderPipeline.h: Stereo rendering pipeline (SideBySide/TopBottom/Anaglyph/QuadBuffer)
+- Engine/Core/PointCloudVisualizerV2.h: E57/LAS/PLY point cloud visualizer v2
+- Engine/Decoders/NerfDecoder.h: NeRF scene decoder (NerfSynthetic/Instant-NGP/TinyNeRF/Mip-NeRF360)
+- Engine/Core/XRMetadataExtractor.h: XR metadata extraction (anchors, target FPS, bounds)
+- Test coverage: 23 new TEST() blocks (3652 total unit tests)
+
+
 ## [26.5.0] — Canopus-V (2026-03-29)
 
 ### Added — Sprint 691-700: Global I18n and Accessibility v3
