@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [26.2.0] — Canopus-S (2026-03-29)
+
+### Added — Sprint 661-670: Immersive 3D Preview Engine
+- Engine/Core/ImmersivePreviewRenderer.h: GPU-accelerated 3D model preview renderer (Draft/Quality/UltraRT quality)
+- Engine/Core/VolumetricThumbnailEngine.h: Volumetric data renderer (DICOM/NIfTI/OpenVDB/RAW, MaxIP/RayCasting modes)
+- Engine/GPU/RealtimeLightingSimulator.h: PBR realtime lighting simulator with HDRILight and environment map
+- Engine/Core/HolographicProjectionEngine.h: Stereo holographic projection (HoloLens2/QuestPro/Standard2D targets)
+- Engine/Core/MeshLODGeneratorV2.h: QuadricError/HalfEdgeCollapse LOD generator (GenerateLODs API)
+- Engine/Core/AnimationPreviewScrubber.h: Smart animation frame picker (SmartPose/MiddleFrame/MaxMotionFrame)
+- Engine/Core/MaterialPreviewEngine.h: MTL/MaterialX/MDL material preview renderer
+- Engine/GPU/GPUPathTracerPreview.h: DXR/Vulkan RT path tracer preview (Preview_1spp/Quality_4spp/Final_16spp)
+- Test coverage: 8 new TEST() blocks (3620 total unit tests)
+
+
 ## [26.1.0] — Canopus-R (2026-03-29)
 
 ### Added — Sprint 651-660: Windows Next-Gen Shell Integration
