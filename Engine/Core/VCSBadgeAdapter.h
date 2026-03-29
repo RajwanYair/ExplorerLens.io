@@ -7,6 +7,7 @@
 #pragma once
 #include <string>
 #include <cstdint>
+#include <filesystem>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -36,15 +37,30 @@ public:
     VCSBadgeDescriptor  Build(const std::string& path) const {
         VCSBadgeDescriptor d;
         if (path.empty()) return d;
-        d.provider  = m_cfg.preferredProvider;
+        d.provider  = m_cfg.autoDetect ? DetectProvider(path) : m_cfg.preferredProvider;
         d.badgeType = m_cfg.badgeType;
         d.label     = "M";
         d.valid     = true;
         return d;
     }
 
+    // Walks up the directory tree looking for VCS sentinel dirs/files.
+    // Returns first match: .git → Git, .svn → SVN, .hg → Mercurial, .p4config → Perforce.
     VCSProvider  DetectProvider(const std::string& path) const {
         if (path.empty()) return VCSProvider::Unknown;
+        namespace fs = std::filesystem;
+        fs::path dir = fs::path(path).is_absolute()
+            ? (fs::is_directory(path) ? fs::path(path) : fs::path(path).parent_path())
+            : fs::absolute(path).parent_path();
+        while (!dir.empty()) {
+            if (fs::exists(dir / ".git"))     return VCSProvider::Git;
+            if (fs::exists(dir / ".svn"))     return VCSProvider::SVN;
+            if (fs::exists(dir / ".hg"))      return VCSProvider::Mercurial;
+            if (fs::exists(dir / ".p4config"))return VCSProvider::Perforce;
+            fs::path parent = dir.parent_path();
+            if (parent == dir) break;
+            dir = parent;
+        }
         return m_cfg.preferredProvider;
     }
 

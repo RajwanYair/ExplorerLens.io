@@ -23,7 +23,7 @@ struct SyntheticDecoderSpec {
     float        anticipatedAccuracy = 0.0f;
 };
 
-struct SynthesisResult {
+struct GeneratorSynthesisResult {
     bool          success      = false;
     StubQuality   quality      = StubQuality::Failed;
     std::string   stubClassName;
@@ -36,8 +36,8 @@ class SyntheticDecoderGenerator {
 public:
     SyntheticDecoderGenerator() = default;
 
-    SynthesisResult Generate(const SyntheticDecoderSpec& spec) {
-        SynthesisResult r;
+    GeneratorSynthesisResult Generate(const SyntheticDecoderSpec& spec) {
+        GeneratorSynthesisResult r;
         if (spec.formatId.empty()) {
             r.errorMessage = "Format ID must not be empty";
             return r;

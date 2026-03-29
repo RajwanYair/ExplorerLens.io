@@ -71,7 +71,8 @@ public:
         EnrichItem(item);
 
         std::wstring json = BuildJson(item);
-        std::string  body(json.begin(), json.end());
+        std::string  body(json.size(), '\0');
+        for (std::size_t _i = 0; _i < json.size(); ++_i) body[_i] = static_cast<char>(json[_i]);
 
         HINTERNET hSess = WinHttpOpen(L"ExplorerLens/20.0 Feedback",
                 WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, nullptr, nullptr, 0);

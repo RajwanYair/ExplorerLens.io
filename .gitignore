@@ -46,7 +46,10 @@ bld/
 [Ll]og/
 [Ll]ogs/
 /build/
+/build-debug/
 /build-vcpkg/
+/build-vcpkg-debug/
+/build-vs/
 /build-logs/
 /packages/
 

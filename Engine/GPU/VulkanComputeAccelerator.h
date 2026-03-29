@@ -63,8 +63,9 @@ struct VulkanDecodeResult {
 
 class VulkanComputeAccelerator {
 public:
-    explicit VulkanComputeAccelerator(VulkanComputeConfig cfg = {});
-    ~VulkanComputeAccelerator();
+    explicit VulkanComputeAccelerator(VulkanComputeConfig cfg = {})
+        : m_cfg(cfg) {}
+    ~VulkanComputeAccelerator() {}
 
     VulkanComputeAccelerator(const VulkanComputeAccelerator&) = delete;
     VulkanComputeAccelerator& operator=(const VulkanComputeAccelerator&) = delete;
@@ -90,7 +91,7 @@ private:
     VulkanDeviceInfo     m_deviceInfo{};
 
     struct VkImpl;
-    std::unique_ptr<VkImpl> m_impl;
+    VkImpl* m_impl{nullptr};
 };
 
 } // namespace Engine

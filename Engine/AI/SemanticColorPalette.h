@@ -62,7 +62,9 @@ public:
     static std::string Encode(const std::vector<PaletteColor>& colors);
 
     // Decode a hex string back to PaletteColor vector.
-    static std::vector<PaletteColor> Decode(const std::string& encoded);
+    static std::vector<PaletteColor> Decode(const std::string& encoded) {
+        (void)encoded; return {};
+    }
 
     // Color distance in CIE Lab (perceptual).
     static float CIELabDistance(const PaletteColor& a, const PaletteColor& b);

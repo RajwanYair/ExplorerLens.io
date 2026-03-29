@@ -46,12 +46,14 @@ public:
     };
 
     /// Probe the ICNS file and return metadata about the best available icon.
-    IconInfo ReadInfo(const std::string& filePath) const;
+    IconInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
 
     /// Decode the highest-resolution icon variant to BGRA32.
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const;
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const { (void)filePath; (void)targetWidth; return {}; }
 
-    static bool IsICNSExtension(const std::string& ext);
+    static bool IsICNSExtension(const std::string& ext) {
+        return ext == ".icns" || ext == ".ICNS";
+    }
     static constexpr const char* EXTENSIONS[] = { ".icns", nullptr };
 
 private:

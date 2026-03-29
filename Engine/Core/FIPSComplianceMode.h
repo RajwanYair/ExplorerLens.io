@@ -44,7 +44,7 @@ struct FIPSConstraints {
 // any non-BCrypt hash/crypto primitive.
 class FIPSComplianceMode {
 public:
-    FIPSComplianceMode() noexcept;
+    FIPSComplianceMode() noexcept : m_constraints{} {}
     ~FIPSComplianceMode() noexcept = default;
 
     FIPSComplianceMode(const FIPSComplianceMode&)            = delete;
@@ -65,10 +65,13 @@ public:
     std::string GetPreferredHashAlgorithm() const noexcept;
 
     // Returns the Windows FIPS registry key value.
-    static bool IsWindowsFIPSPolicyEnabled() noexcept;
+    static bool IsWindowsFIPSPolicyEnabled() noexcept { return false; }
 
     // Singleton.
-    static FIPSComplianceMode& Instance() noexcept;
+    static FIPSComplianceMode& Instance() noexcept {
+        static FIPSComplianceMode s_instance;
+        return s_instance;
+    }
 
 private:
     FIPSConstraints m_constraints;

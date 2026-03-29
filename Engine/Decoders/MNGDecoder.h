@@ -41,10 +41,12 @@ public:
         bool IsValid() const { return canvasWidth > 0 && canvasHeight > 0; }
     };
 
-    MNGInfo ReadInfo(const std::string& filePath) const;
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const;
+    MNGInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const { (void)filePath; (void)targetWidth; return {}; }
 
-    static bool IsMNGExtension(const std::string& ext);
+    static bool IsMNGExtension(const std::string& ext) {
+        return ext == ".mng" || ext == ".MNG" || ext == ".jng" || ext == ".JNG";
+    }
     static constexpr const char* EXTENSIONS[] = { ".mng", ".jng", nullptr };
 
 private:

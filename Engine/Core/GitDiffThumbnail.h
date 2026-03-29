@@ -51,6 +51,7 @@ public:
 
     DiffViewMode  GetMode()   const { return m_cfg.mode; }
     void          SetMode(DiffViewMode m) { m_cfg.mode = m; }
+    const GitDiffThumbnailConfig& GetConfig() const { return m_cfg; }
 
     static bool  IsDiffableFormat(const std::string& ext) {
         return ext == ".png" || ext == ".jpg" || ext == ".svg" || ext == ".pdf";

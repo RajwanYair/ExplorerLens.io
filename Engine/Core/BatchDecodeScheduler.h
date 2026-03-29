@@ -58,8 +58,9 @@ public:
         uint32_t batchFlushIntervalMs{5};
     };
 
-    explicit BatchDecodeScheduler(Config cfg = {});
-    ~BatchDecodeScheduler();
+    explicit BatchDecodeScheduler(Config cfg = {})
+        : m_cfg(cfg) {}
+    ~BatchDecodeScheduler() {}
 
     BatchDecodeScheduler(const BatchDecodeScheduler&) = delete;
     BatchDecodeScheduler& operator=(const BatchDecodeScheduler&) = delete;

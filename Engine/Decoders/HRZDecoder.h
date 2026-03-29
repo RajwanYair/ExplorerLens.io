@@ -37,10 +37,12 @@ public:
         bool IsValid() const { return fileSize == HRZ_BYTES; }
     };
 
-    HRZInfo  ReadInfo(const std::string& filePath) const;
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const;
+    HRZInfo  ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const { (void)filePath; (void)targetWidth; return {}; }
 
-    static bool IsHRZExtension(const std::string& ext);
+    static bool IsHRZExtension(const std::string& ext) {
+        return ext == ".hrz" || ext == ".HRZ";
+    }
     static constexpr const char* EXTENSIONS[] = { ".hrz", nullptr };
 };
 

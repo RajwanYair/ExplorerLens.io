@@ -14,6 +14,8 @@
 
 namespace ExplorerLens { namespace Engine {
 
+#pragma warning(push)
+#pragma warning(disable: 4324)
 template<typename T, std::size_t Capacity = 1024>
 class LockFreeMPMCQueue {
 public:
@@ -45,6 +47,7 @@ private:
     alignas(64) std::atomic<uint64_t> m_writePos{0};
     alignas(64) std::atomic<uint64_t> m_readPos{0};
 };
+#pragma warning(pop)
 
 } // namespace Engine
 } // namespace ExplorerLens

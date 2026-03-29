@@ -13,11 +13,11 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class WASMRuntime     { WasmEdge, WABT, Wasmer, Native };
+enum class WASMAdapterEngine { WasmEdge, WABT, Wasmer, Native };
 enum class WASMSandboxLevel{ Loose, Standard, Strict, Paranoid };
 
 struct WASMRuntimeConfig {
-    WASMRuntime      runtime           = WASMRuntime::WasmEdge;
+    WASMAdapterEngine runtime           = WASMAdapterEngine::WasmEdge;
     WASMSandboxLevel sandboxLevel      = WASMSandboxLevel::Standard;
     uint64_t         memoryLimitBytes  = 64ULL * 1024 * 1024;
     uint32_t         cpuQuotaPercent   = 25;
@@ -38,7 +38,7 @@ public:
                                                         { (void)data; return size > 0; }
     bool             UnloadModule()                     { return true; }
 
-    WASMRuntime      GetRuntime()      const { return m_config.runtime; }
+    WASMAdapterEngine GetRuntime()      const { return m_config.runtime; }
     WASMSandboxLevel GetSandboxLevel() const { return m_config.sandboxLevel; }
     uint64_t         GetMemoryLimit()  const { return m_config.memoryLimitBytes; }
     uint32_t         GetCpuQuota()     const { return m_config.cpuQuotaPercent; }

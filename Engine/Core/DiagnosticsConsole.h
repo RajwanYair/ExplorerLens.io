@@ -86,7 +86,8 @@ public:
         if (parts.empty()) return "? empty command\n";
 
         std::string verb = parts[0];
-        std::transform(verb.begin(), verb.end(), verb.begin(), ::tolower);
+        std::transform(verb.begin(), verb.end(), verb.begin(),
+            [](unsigned char c) { return static_cast<char>(::tolower(c)); });
 
         if (verb == "help") return BuildHelp();
 

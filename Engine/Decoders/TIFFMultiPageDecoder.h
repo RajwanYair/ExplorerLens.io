@@ -100,8 +100,8 @@ struct TIFFDecodeResult {
 
 class TIFFMultiPageDecoder {
 public:
-    TIFFMultiPageDecoder();
-    ~TIFFMultiPageDecoder();
+    TIFFMultiPageDecoder() {}
+    ~TIFFMultiPageDecoder() = default;
 
     // Scan IFD chain and populate TIFFDocumentInfo without decoding pixels.
     bool ParseInfo(const uint8_t* data, size_t size, TIFFDocumentInfo& outInfo) const;
@@ -121,11 +121,19 @@ public:
 
     // Magic probe: "II" (0x4949) little-endian or "MM" (0x4D4D) big-endian
     // followed by 42 (Classic) or 43 (BigTIFF) magic word.
-    static bool LooksLikeTIFF(const uint8_t* data, size_t size);
+    static bool LooksLikeTIFF(const uint8_t* data, size_t size) {
+        if (!data || size < 4) return false;
+        bool le = data[0] == 0x49 && data[1] == 0x49;
+        bool be = data[0] == 0x4D && data[1] == 0x4D;
+        if (!le && !be) return false;
+        uint16_t magic = le ? static_cast<uint16_t>(data[2] | (data[3] << 8))
+                            : static_cast<uint16_t>((data[2] << 8) | data[3]);
+        return magic == 42 || magic == 43;
+    }
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
 
     // Heuristic: prefer SubIFD thumbnail → reduced-res IFD → page with smallest
     // dimension above 256px → fallback to IFD at index 0.

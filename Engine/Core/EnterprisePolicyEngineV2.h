@@ -92,8 +92,8 @@ using PolicyChangeCallback =
 // All engine components query this singleton to check their allowed configuration.
 class EnterprisePolicyEngineV2 {
 public:
-    EnterprisePolicyEngineV2() noexcept;
-    ~EnterprisePolicyEngineV2() noexcept;
+    EnterprisePolicyEngineV2() noexcept {}
+    ~EnterprisePolicyEngineV2() noexcept {}
 
     EnterprisePolicyEngineV2(const EnterprisePolicyEngineV2&)            = delete;
     EnterprisePolicyEngineV2& operator=(const EnterprisePolicyEngineV2&) = delete;
@@ -156,7 +156,10 @@ public:
     }
 
     // Singleton.
-    static EnterprisePolicyEngineV2& Instance() noexcept;
+    static EnterprisePolicyEngineV2& Instance() noexcept {
+        static EnterprisePolicyEngineV2 s_instance;
+        return s_instance;
+    }
 
 private:
     struct Impl;

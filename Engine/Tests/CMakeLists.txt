@@ -183,12 +183,18 @@ if(MSVC)
         /wd4189     # Same rationale as above
     )
 
-    # libwebp rebuilt with /MD — no NODEFAULTLIB:LIBCMT workaround needed
+    # libwebp rebuilt with /MD — suppress LIBCMT conflict from static runtime libs
     target_link_options(EngineTests PRIVATE
         /IGNORE:4099            # Ignore missing PDB warnings
+        /NODEFAULTLIB:LIBCMT    # Suppress LNK4098: LIBCMT conflict with /MD CRT
+    )
+    target_link_options(IntegrationTests PRIVATE
+        /IGNORE:4099            # Ignore missing PDB warnings
+        /NODEFAULTLIB:LIBCMT    # Suppress LIBCMT conflict with /MD CRT
     )
     target_link_options(EngineBenchmark PRIVATE
         /IGNORE:4099            # Ignore missing PDB warnings
+        /NODEFAULTLIB:LIBCMT    # Suppress LIBCMT conflict with /MD CRT
     )
 endif()
 

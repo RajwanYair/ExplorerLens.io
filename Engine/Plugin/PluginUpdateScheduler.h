@@ -50,12 +50,12 @@ using UpdateEventCallback = std::function<void(const PluginUpdateEvent&)>;
 
 class PluginUpdateScheduler {
 public:
-    explicit PluginUpdateScheduler(UpdateSchedule schedule = {});
-    ~PluginUpdateScheduler();
+    explicit PluginUpdateScheduler(UpdateSchedule schedule = {}) {  (void)schedule; }
+    ~PluginUpdateScheduler() {}
 
     void Start();
     void Stop();
-    bool IsRunning() const;
+    bool IsRunning() const { return false; }
 
     // Trigger an immediate check (runs asynchronously).
     void CheckNow();
@@ -78,7 +78,7 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
 };
 
 } // namespace Engine

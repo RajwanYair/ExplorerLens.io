@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+Sprint 601-610: Self-Healing & Adaptive Recovery — AdaptiveTimeoutTuner, HeapCorruptionSentinel, RetryPolicyEngine, PerMonitorDPISelectorV2, ForegroundPriorityInheritance, WatchdogRestartManager, GracefulDegradationEngine, MemorySnapshotDiffer, HotRestartCoordinator, ServiceHealthMonitor
+
+
 ## [25.3.0] — Rigel-T (2026-03-29)
 
 ### Added — Sprint 591-600: VCS Integration

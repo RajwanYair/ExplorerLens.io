@@ -42,13 +42,13 @@ struct D3D11DPISwapChain {
 
 class D3D11DPIAdapter {
 public:
-    D3D11DPIAdapter();
-    ~D3D11DPIAdapter();
+    D3D11DPIAdapter() {}
+    ~D3D11DPIAdapter() {}
 
     // Initialize with an existing D3D11 device.
     bool Initialize(ID3D11Device* device, ID3D11DeviceContext* ctx);
     void Shutdown();
-    bool IsInitialized() const;
+    bool IsInitialized() const { return false; }
 
     // Create a DPI-aware swap chain for the given HWND and DPI config.
     D3D11DPISwapChain CreateSwapChain(
@@ -73,7 +73,7 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
 };
 
 } // namespace Engine

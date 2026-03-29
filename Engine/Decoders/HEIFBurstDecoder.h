@@ -81,8 +81,8 @@ struct HEIFDecodeResult {
 
 class HEIFBurstDecoder {
 public:
-    HEIFBurstDecoder();
-    ~HEIFBurstDecoder();
+    HEIFBurstDecoder() {}
+    ~HEIFBurstDecoder() {}
 
     // Parse ISOBMFF box structure and populate HEIFBurstInfo.
     bool ParseInfo(const uint8_t* data, size_t size, HEIFBurstInfo& outInfo) const;
@@ -101,11 +101,13 @@ public:
         const HEIFDecodeOptions& opts = {}) const;
 
     // Probe: checks 'ftyp' brand for 'heic', 'heix', 'mif1', 'avif', 'hevc'.
-    static bool LooksLikeHEIF(const uint8_t* data, size_t size);
+    static bool LooksLikeHEIF(const uint8_t* data, size_t size) {
+        (void)data; (void)size; return false;
+    }
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
 
     HEIFDecodeResult DecodeInternal(
         const uint8_t*          data,

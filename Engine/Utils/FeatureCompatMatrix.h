@@ -59,7 +59,7 @@ struct RuntimeCapabilities {
 // Queryable at runtime for specific (format, OS, backend) combinations.
 class FeatureCompatMatrix {
 public:
-    FeatureCompatMatrix() noexcept;
+    FeatureCompatMatrix() noexcept {}
     ~FeatureCompatMatrix() noexcept = default;
 
     FeatureCompatMatrix(const FeatureCompatMatrix&)            = delete;
@@ -82,7 +82,10 @@ public:
     uint32_t ValidateAll(RuntimeCapabilities& caps) const noexcept;
 
     // Singleton access.
-    static FeatureCompatMatrix& Instance() noexcept;
+    static FeatureCompatMatrix& Instance() noexcept {
+        static FeatureCompatMatrix s_instance;
+        return s_instance;
+    }
 
 private:
     std::vector<CompatCell> m_cells;

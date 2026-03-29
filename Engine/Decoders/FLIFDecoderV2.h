@@ -49,14 +49,18 @@ public:
         bool IsAnimated() const { return frameCount > 1; }
     };
 
-    FLIFInfo ReadInfo(const std::string& filePath) const;
+    FLIFInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
 
     /// Decode with optional quality level (0=fastest thumbnail, 100=full).
     DecodeResult Decode(const std::string& filePath,
                         uint32_t targetWidth = 256,
-                        int      quality     = 50) const;
+                        int      quality     = 50) const {
+        (void)filePath; (void)targetWidth; (void)quality; return {};
+    }
 
-    static bool IsFLIFExtension(const std::string& ext);
+    static bool IsFLIFExtension(const std::string& ext) {
+        return ext == ".flif" || ext == ".FLIF";
+    }
     static constexpr const char* EXTENSIONS[] = { ".flif", nullptr };
 
 private:

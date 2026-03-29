@@ -53,7 +53,7 @@
         "vcpkg-base",
         "msvc-v145"
       ],
-      "binaryDir": "${sourceDir}/build-vcpkg",
+      "binaryDir": "$env{TEMP}/ExplorerLens-build-vcpkg",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -66,7 +66,7 @@
         "vcpkg-base",
         "msvc-v145"
       ],
-      "binaryDir": "${sourceDir}/build-vcpkg-debug",
+      "binaryDir": "$env{TEMP}/ExplorerLens-build-vcpkg-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -76,7 +76,7 @@
       "displayName": "Release (MSVC v145 + Ninja)",
       "description": "Standard Release build with Ninja — no vcpkg, local external libs",
       "inherits": "msvc-v145",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "$env{TEMP}/ExplorerLens-build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -86,7 +86,7 @@
       "displayName": "Debug (MSVC v145 + Ninja)",
       "description": "Standard Debug build with Ninja — no vcpkg, local external libs",
       "inherits": "msvc-v145",
-      "binaryDir": "${sourceDir}/build-debug",
+      "binaryDir": "$env{TEMP}/ExplorerLens-build-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -98,7 +98,7 @@
       "generator": "Visual Studio 18 2026",
       "toolset": "v145",
       "architecture": "x64",
-      "binaryDir": "${sourceDir}/build-vs",
+      "binaryDir": "$env{TEMP}/ExplorerLens-build-vs",
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
         "CMAKE_SYSTEM_VERSION": "10.0.26100.0"

@@ -45,6 +45,19 @@ public:
         if (fileContent.substr(0, 14) == "version https:") {
             p.isPointer = true;
             p.version   = "git-lfs/1.0";
+            // Extract oid
+            auto oidPos = fileContent.find("\noid ");
+            if (oidPos != std::string::npos) {
+                oidPos += 5; // skip "\noid "
+                auto end = fileContent.find('\n', oidPos);
+                p.oid = fileContent.substr(oidPos, end == std::string::npos ? end : end - oidPos);
+            }
+            // Extract size
+            auto sizePos = fileContent.find("\nsize ");
+            if (sizePos != std::string::npos) {
+                sizePos += 6;
+                p.size = static_cast<uint64_t>(std::stoull(fileContent.substr(sizePos)));
+            }
         }
         return p;
     }
@@ -61,6 +74,7 @@ public:
     }
 
     uint32_t  CacheCapacity() const { return m_cfg.cacheCapacity; }
+    const LFSResolveConfig& GetConfig() const { return m_cfg; }
 
 private:
     LFSResolveConfig m_cfg;

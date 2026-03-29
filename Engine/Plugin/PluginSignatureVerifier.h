@@ -51,8 +51,9 @@ struct SignatureVerifyResult {
 class PluginSignatureVerifier {
 public:
     explicit PluginSignatureVerifier(
-        SignatureTrustPolicy policy = SignatureTrustPolicy::RequireValid);
-    ~PluginSignatureVerifier();
+        SignatureTrustPolicy policy = SignatureTrustPolicy::RequireValid)
+        : m_policy(policy) {}
+    ~PluginSignatureVerifier() {}
 
     // Verify the .lenspkg file at the given path.
     SignatureVerifyResult Verify(const std::string& pkgPath) const;
@@ -69,12 +70,13 @@ public:
     // Check if OCSP validation is available (requires network).
     static bool OCSPAvailable();
 
-    void SetTrustPolicy(SignatureTrustPolicy policy);
-    SignatureTrustPolicy GetTrustPolicy() const;
+    void SetTrustPolicy(SignatureTrustPolicy policy) { m_policy = policy; }
+    SignatureTrustPolicy GetTrustPolicy() const { return m_policy; }
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
+    SignatureTrustPolicy m_policy{SignatureTrustPolicy::RequireValid};
 };
 
 } // namespace Engine

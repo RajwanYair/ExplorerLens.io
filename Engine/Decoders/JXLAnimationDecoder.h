@@ -76,8 +76,8 @@ struct JXLDecodeResult {
 
 class JXLAnimationDecoder {
 public:
-    JXLAnimationDecoder();
-    ~JXLAnimationDecoder();
+    JXLAnimationDecoder() {}
+    ~JXLAnimationDecoder() {}
 
     // Probe bitstream and extract metadata without decoding pixels.
     bool ParseInfo(const uint8_t* data, size_t size, JXLSequenceInfo& outInfo) const;
@@ -100,11 +100,19 @@ public:
 
     // Magic bytes probe: first 2 bytes are 0xFF 0x0A (naked codestream)
     // or 12-byte ISO BMFF container with "JXL " ftyp brand.
-    static bool LooksLikeJXL(const uint8_t* data, size_t size);
+    static bool LooksLikeJXL(const uint8_t* data, size_t size) {
+        if (!data || size < 2) return false;
+        // Naked JXL codestream
+        if (data[0] == 0xFF && data[1] == 0x0A) return true;
+        // ISO BMFF container: bytes 4-7 should be "JXL "
+        if (size >= 12 && data[4] == 0x4A && data[5] == 0x58 && data[6] == 0x4C && data[7] == 0x20)
+            return true;
+        return false;
+    }
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
 
     JXLDecodeResult DecodeInternal(
         const uint8_t*          data,

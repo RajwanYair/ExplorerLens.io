@@ -47,10 +47,12 @@ public:
         bool IsValid() const { return faceCount > 0 && channels > 0; }
     };
 
-    TextureInfo ReadInfo(const std::string& filePath) const;
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const;
+    TextureInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const { (void)filePath; (void)targetWidth; return {}; }
 
-    static bool IsPIXARExtension(const std::string& ext);
+    static bool IsPIXARExtension(const std::string& ext) {
+        return ext == ".ptex" || ext == ".PTEX" || ext == ".tx" || ext == ".TX";
+    }
     static constexpr const char* EXTENSIONS[] = { ".ptex", ".tx", nullptr };
 
 private:

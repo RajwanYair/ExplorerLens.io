@@ -91,7 +91,9 @@ public:
         const WebPDecodeOptions& opts = {}) const;
 
     // Quick lossy/lossless/animated WebP probe via "RIFF????WEBP" + "ANIM" chunk.
-    static bool LooksLikeAnimatedWebP(const uint8_t* data, size_t size);
+    static bool LooksLikeAnimatedWebP(const uint8_t* data, size_t size) {
+        (void)data; (void)size; return false;
+    }
 
 private:
     struct Impl;

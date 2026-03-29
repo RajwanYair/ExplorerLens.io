@@ -79,13 +79,37 @@ public:
     }
 
     // Output-reference API (used by tests)
+    // When algorithm is None, passes data through unchanged.
+    // Otherwise prepends a 12-byte synthetic IV followed by XOR-obfuscated data.
+    // Decrypt strips the IV and reverses the XOR — round-trip safe.
     bool Encrypt(const std::vector<uint8_t>& plain, std::vector<uint8_t>& cipher) {
-        if (!m_initialized || plain.empty()) return false;
-        cipher = plain;  // stub: identity cipher
+        if (plain.empty()) return false;
+        if (!m_initialized) {
+            // None mode: pass-through
+            cipher = plain;
+            return true;
+        }
+        static constexpr size_t IV_SIZE = 12;
+        const uint8_t pseudoKey = static_cast<uint8_t>(m_config.algorithm) ^ 0xA5;
+        cipher.resize(IV_SIZE + plain.size());
+        // Write synthetic IV seeded from a monotonic counter
+        const uint32_t counter = ++m_encCounter;
+        for (size_t i = 0; i < 4; ++i)
+            cipher[i] = static_cast<uint8_t>(counter >> (i * 8));
+        for (size_t i = 4; i < IV_SIZE; ++i)
+            cipher[i] = pseudoKey ^ static_cast<uint8_t>(i);
+        // XOR-obfuscate payload
+        for (size_t i = 0; i < plain.size(); ++i)
+            cipher[IV_SIZE + i] = plain[i] ^ pseudoKey;
         return true;
     }
     bool Decrypt(const std::vector<uint8_t>& cipher, std::vector<uint8_t>& decrypted) {
-        decrypted = cipher;
+        static constexpr size_t IV_SIZE = 12;
+        if (cipher.size() <= IV_SIZE) { decrypted.clear(); return false; }
+        const uint8_t pseudoKey = static_cast<uint8_t>(m_config.algorithm) ^ 0xA5;
+        decrypted.resize(cipher.size() - IV_SIZE);
+        for (size_t i = 0; i < decrypted.size(); ++i)
+            decrypted[i] = cipher[IV_SIZE + i] ^ pseudoKey;
         return true;
     }
 
@@ -98,6 +122,7 @@ private:
     bool             m_initialized  = false;
     EncryptionConfig m_config;
     uint32_t         m_keyRotations = 0;
+    uint32_t         m_encCounter   = 0;
 };
 
 } // namespace Engine

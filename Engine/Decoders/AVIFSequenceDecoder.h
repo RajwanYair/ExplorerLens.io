@@ -46,8 +46,8 @@ struct AVIFDecodeResult {
 
 class AVIFSequenceDecoder {
 public:
-    AVIFSequenceDecoder();
-    ~AVIFSequenceDecoder();
+    AVIFSequenceDecoder() {}
+    ~AVIFSequenceDecoder() {}
 
     AVIFSequenceDecoder(const AVIFSequenceDecoder&) = delete;
     AVIFSequenceDecoder& operator=(const AVIFSequenceDecoder&) = delete;
@@ -65,11 +65,11 @@ public:
     [[nodiscard]] std::optional<AVIFDecodeResult> DecodeCoverFrame(
         const void* data, size_t size, uint32_t maxDim = 256) const;
 
-    static bool SupportsHardwareDecode() noexcept;
+    static bool SupportsHardwareDecode() noexcept { return false; }
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
 };
 
 } // namespace Engine

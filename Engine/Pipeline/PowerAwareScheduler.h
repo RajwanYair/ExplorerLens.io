@@ -13,7 +13,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class PowerState      { AC, Battery, BatterySaver, CriticalBattery };
+enum class NPUPowerMode     { AC, Battery, BatterySaver, CriticalBattery };
 enum class SchedulerMode   { Aggressive, Balanced, Conservative, BatterySaver };
 
 struct WorkItem {
@@ -23,7 +23,7 @@ struct WorkItem {
     std::string formatHint;
 };
 
-struct ScheduleDecision {
+struct NPUScheduleDecision {
     uint32_t    workItemId   = 0;
     AcceleratorType assignedTo = AcceleratorType::CPU;
     bool        deferred     = false;
@@ -40,21 +40,21 @@ class PowerAwareScheduler {
 public:
     explicit PowerAwareScheduler(const PowerSchedulerConfig& cfg = {}) : m_cfg(cfg) {}
 
-    void  SetPowerState(PowerState ps) {
+    void  SetPowerState(NPUPowerMode ps) {
         m_powerState = ps;
         switch (ps) {
-            case PowerState::BatterySaver:
-            case PowerState::CriticalBattery:
+            case NPUPowerMode::BatterySaver:
+            case NPUPowerMode::CriticalBattery:
                 m_mode = SchedulerMode::BatterySaver; break;
-            case PowerState::Battery:
+            case NPUPowerMode::Battery:
                 m_mode = SchedulerMode::Conservative; break;
             default:
                 m_mode = m_cfg.defaultMode;
         }
     }
 
-    ScheduleDecision Schedule(const WorkItem& item) {
-        ScheduleDecision d;
+    NPUScheduleDecision Schedule(const WorkItem& item) {
+        NPUScheduleDecision d;
         d.workItemId = item.id;
         if (m_mode == SchedulerMode::BatterySaver) {
             d.assignedTo = AcceleratorType::CPU;
@@ -70,7 +70,7 @@ public:
         return d;
     }
 
-    PowerState   GetPowerState() const { return m_powerState; }
+    NPUPowerMode GetPowerState() const { return m_powerState; }
     SchedulerMode GetMode()      const { return m_mode; }
     void  SetNPUAvailable(bool v)      { m_npuAvailable = v; }
     uint32_t Scheduled()         const { return m_scheduled; }
@@ -79,7 +79,7 @@ public:
 
 private:
     PowerSchedulerConfig m_cfg;
-    PowerState           m_powerState  = PowerState::AC;
+    NPUPowerMode         m_powerState  = NPUPowerMode::AC;
     SchedulerMode        m_mode        = SchedulerMode::Balanced;
     bool                 m_npuAvailable= false;
     uint32_t             m_scheduled   = 0;

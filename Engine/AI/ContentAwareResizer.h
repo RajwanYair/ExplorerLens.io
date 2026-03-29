@@ -50,6 +50,7 @@ public:
     }
 
     ResizeResult ResizeFile(const std::string& path, int dstW, int dstH) const noexcept {
+        (void)dstW; (void)dstH;
         if (path.empty()) return { false, {}, 0, 0, 0.0f, "Empty path" };
         return { false, {}, 0, 0, 0.0f, "File not found: " + path };
     }

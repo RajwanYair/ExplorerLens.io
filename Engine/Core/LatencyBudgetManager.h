@@ -102,7 +102,9 @@ public:
 private:
     enum class ViolationLevel { Soft, Hard };
 
-    void EmitViolationEvent(std::string_view ext, std::chrono::microseconds elapsed, ViolationLevel level) noexcept;
+    void EmitViolationEvent(std::string_view ext, std::chrono::microseconds elapsed, ViolationLevel level) noexcept {
+        (void)ext; (void)elapsed; (void)level;
+    }
 
     std::unordered_map<std::string, LatencySLO>   m_slos;
     std::unordered_map<std::string, LatencyStats> m_stats;

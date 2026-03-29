@@ -54,8 +54,8 @@ struct ThreadPoolStats {
 //   pool.Stop();
 class ThreadPoolV2 {
 public:
-    ThreadPoolV2() noexcept;
-    ~ThreadPoolV2() noexcept;
+    ThreadPoolV2() noexcept {}
+    ~ThreadPoolV2() noexcept {}
 
     ThreadPoolV2(const ThreadPoolV2&)            = delete;
     ThreadPoolV2& operator=(const ThreadPoolV2&) = delete;
@@ -63,7 +63,9 @@ public:
     // Configure worker count bounds.  Must be called before Start().
     void Configure(uint32_t minWorkers = 2,
                    uint32_t maxWorkers = 0,  // 0 = hardware_concurrency
-                   bool     numaAware  = true) noexcept;
+                   bool     numaAware  = true) noexcept {
+        (void)minWorkers; (void)maxWorkers; (void)numaAware;
+    }
 
     // Start worker threads.
     void Start() noexcept;
@@ -95,11 +97,14 @@ public:
     void SetBackpressureLimit(uint32_t limit) noexcept;
 
     // Singleton accessor (default pool; apps may create additional pools).
-    static ThreadPoolV2& Instance() noexcept;
+    static ThreadPoolV2& Instance() noexcept {
+        static ThreadPoolV2 s_instance;
+        return s_instance;
+    }
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
 };
 
 }} // namespace ExplorerLens::Engine

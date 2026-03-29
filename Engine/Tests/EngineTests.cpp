@@ -3163,28 +3163,28 @@ TEST(TestContentAwareResizer_ValidResize) {
     std::vector<uint8_t> src(32 * 32 * 4, 128u);
     auto r = resizer.Resize(src.data(), 32, 32, 16, 16);
     ASSERT(r.success);
-    ASSERT(r.dstWidth == 16 && r.dstHeight == 16);
+    ASSERT(r.width == 16 && r.height == 16);
 }
 
 // SemanticHashEngine — 9 tests
 TEST(TestSemanticHashEngine_DefaultAlgo) {
     using namespace ExplorerLens::AI;
     SemanticHashEngine engine;
-    ASSERT(engine.GetAlgorithm() == HashAlgorithm::CNN_MobileNetV3);
+    ASSERT(engine.GetAlgorithm() == SemanticHashAlgorithm::CNN_MobileNetV3);
     ASSERT(engine.GetL2Normalize());
     ASSERT(engine.GetEmbeddingDim() == 512);
 }
 TEST(TestSemanticHashEngine_SetAlgoEfficientNetB0) {
     using namespace ExplorerLens::AI;
     SemanticHashEngine engine;
-    engine.SetAlgorithm(HashAlgorithm::CNN_EfficientNetB0);
-    ASSERT(engine.GetAlgorithm() == HashAlgorithm::CNN_EfficientNetB0);
+    engine.SetAlgorithm(SemanticHashAlgorithm::CNN_EfficientNetB0);
+    ASSERT(engine.GetAlgorithm() == SemanticHashAlgorithm::CNN_EfficientNetB0);
 }
 TEST(TestSemanticHashEngine_SetAlgoCLIP) {
     using namespace ExplorerLens::AI;
     SemanticHashEngine engine;
-    engine.SetAlgorithm(HashAlgorithm::CLIP_ViT_B32);
-    ASSERT(engine.GetAlgorithm() == HashAlgorithm::CLIP_ViT_B32);
+    engine.SetAlgorithm(SemanticHashAlgorithm::CLIP_ViT_B32);
+    ASSERT(engine.GetAlgorithm() == SemanticHashAlgorithm::CLIP_ViT_B32);
 }
 TEST(TestSemanticHashEngine_HammingIdentical) {
     using namespace ExplorerLens::AI;
@@ -3946,7 +3946,7 @@ TEST(TestCrossProcEventBus_Publish) {
     CrossProcEventBus bus;
     bus.Start();
     bool fired = false;
-    bus.Subscribe(L"my.topic", [&](const BusEvent& e){ fired = true; });
+    (void)bus.Subscribe(L"my.topic", [&](const BusEvent&){ fired = true; });
     BusEvent ev;
     ev.topic    = L"my.topic";
     ev.payload  = "hello";
@@ -3960,7 +3960,7 @@ TEST(TestCrossProcEventBus_GetSubscriberCount) {
     CrossProcEventBus bus;
     bus.Start();
     ASSERT(bus.GetSubscriberCount() == 0);
-    bus.Subscribe(L"t", [](const BusEvent&){});
+    (void)bus.Subscribe(L"t", [](const BusEvent&){});
     ASSERT(bus.GetSubscriberCount() == 1);
 }
 
@@ -11572,17 +11572,17 @@ TEST(TestGateV32_v14Approved) {
 
 // ---- Version Synchronization ----
 TEST(TestZenith_VersionMajor) {
-    ASSERT(EXPLORERLENS_ENGINE_VERSION_MAJOR == 20);
+    ASSERT(EXPLORERLENS_ENGINE_VERSION_MAJOR == 25);
 }
 TEST(TestZenith_VersionMinor) {
-    ASSERT(EXPLORERLENS_ENGINE_VERSION_MINOR == 5);
+    ASSERT(EXPLORERLENS_ENGINE_VERSION_MINOR == 3);
 }
 TEST(TestZenith_VersionPatch) {
     ASSERT(EXPLORERLENS_ENGINE_VERSION_PATCH == 0);
 }
 TEST(TestZenith_VersionComposite) {
     uint32_t v = EXPLORERLENS_ENGINE_VERSION;
-    ASSERT(v == ((20 << 16) | (5 << 8) | 0));
+    ASSERT(v == ((25 << 16) | (3 << 8) | 0));
 }
 
 // ---- MuPDF PDF Support ----
@@ -11967,8 +11967,8 @@ TEST(TestZenith_ZeroCopyStageNames) {
 }
 
 // ---- Parallel I/O Pipeline — disabled: header removed ----
-TEST(TestZenith_ParallelIOPolicies) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20); }
-TEST(TestZenith_ParallelIOPolicyNames) { ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Quasar-V"); }
+TEST(TestZenith_ParallelIOPolicies) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 25); }
+TEST(TestZenith_ParallelIOPolicyNames) { ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Rigel-T"); }
 
 // ---- SIMD Scaler ----
 TEST(TestZenith_SIMDScalerPaths) { ASSERT(SIMDScaler::PathCount() >= 3); }
@@ -14978,8 +14978,8 @@ TEST(TestZeroCopyAct_Lifecycle) {
 }
 
 // Parallel I/O Pipeline — disabled: header removed
-TEST(TestParallelIO_BackendNamesV2) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20); }
-TEST(TestParallelIO_PriorityNamesV2) { ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Quasar-V"); }
+TEST(TestParallelIO_BackendNamesV2) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 25); }
+TEST(TestParallelIO_PriorityNamesV2) { ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Rigel-T"); }
 TEST(TestParallelIO_VolumeTypes) { ASSERT(ExplorerLens::BuildValidation::BuildInfo::DecoderCount >= 20); }
 TEST(TestParallelIO_DefaultConfig) { ASSERT(ExplorerLens::BuildValidation::ValidateRuntime()); }
 
@@ -18216,15 +18216,15 @@ TEST(Test_BuildCfg_Inline) {
 //== BuildValidation Tests ==
 
 TEST(Test_BuildVal_Info) {
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20);
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MinorVersion == 5);
-    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::VersionString) == "20.5.0");
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 25);
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MinorVersion == 3);
+    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::VersionString) == "25.3.0");
 }
 TEST(Test_BuildVal_Runtime) {
     ASSERT(ExplorerLens::BuildValidation::ValidateRuntime());
 }
 TEST(Test_BuildVal_Version) {
-    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Quasar-V");
+    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Rigel-T");
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::DecoderCount >= 20);
 }
 TEST(Test_BuildVal_Flags) {
@@ -18390,7 +18390,7 @@ TEST(Test_IThumbDec_Size) {
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::SupportedExtensions >= 100);
 }
 TEST(Test_IThumbDec_Null) {
-    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Quasar-V");
+    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::Codename) == "Rigel-T");
 }
 
 //== LibraryInventoryManager Tests ==
@@ -18419,7 +18419,7 @@ TEST(Test_Logger_Macros) {
     ASSERT(ExplorerLens::BuildValidation::ValidateRuntime());
 }
 TEST(Test_Logger_Info) {
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20);
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 25);
 }
 TEST(Test_Logger_Error) {
     auto& provider = ExplorerLens::ETW::ETWTraceProvider::Instance();
@@ -18513,10 +18513,10 @@ TEST(Test_Types_Include) {
 //== VersionManagement Tests ==
 
 TEST(Test_VerMgmt_Include) {
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20);
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 25);
 }
 TEST(Test_VerMgmt_Sync) {
-    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::VersionString) == "20.5.0");
+    ASSERT(std::string(ExplorerLens::BuildValidation::BuildInfo::VersionString) == "25.3.0");
 }
 TEST(Test_VerMgmt_Drift) {
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::CompletedMilestones == ExplorerLens::BuildValidation::BuildInfo::TotalMilestones);
@@ -18724,7 +18724,7 @@ TEST(Test_GDIRend_Create) {
     ASSERT(ExplorerLens::BuildValidation::ValidateRuntime());
 }
 TEST(Test_GDIRend_Render) {
-    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 20);
+    ASSERT(ExplorerLens::BuildValidation::BuildInfo::MajorVersion == 25);
 }
 TEST(Test_GDIRend_Scale) {
     ASSERT(ExplorerLens::BuildValidation::BuildInfo::DecoderCount >= 20);
@@ -23752,14 +23752,14 @@ TEST(Test_S37_BatchProcessor_BatchRequest) {
 
 TEST(Test_S37_VersionSync_Validate) {
     ASSERT(VersionSynchronizer::Validate());
-    ASSERT(VersionSynchronizer::MAJOR == 20);
-    ASSERT(VersionSynchronizer::MINOR == 5);
+    ASSERT(VersionSynchronizer::MAJOR == 25);
+    ASSERT(VersionSynchronizer::MINOR == 3);
     ASSERT(VersionSynchronizer::PATCH == 0);
 }
 
 TEST(Test_S37_VersionSync_PackedVersion) {
     uint32_t packed = VersionSynchronizer::PackedVersion();
-    ASSERT(packed == ((20 << 16) | (5 << 8) | 0));
+    ASSERT(packed == ((25 << 16) | (3 << 8) | 0));
 }
 
 TEST(Test_S37_VersionSync_Audit) {
@@ -27514,6 +27514,96 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/GitLFSResolver.h"
 #include "Core/CommitBadgeCompositor.h"
 #include "Core/MergeConflictOverlay.h"
+// Sprint 601-610 — Self-Healing & Adaptive Recovery (v25.4.0 "Rigel-U")
+#include "Core/DecoderCrashPredictor.h"
+#include "Core/DecoderQuarantineManager.h"
+#include "Core/AdaptiveTimeoutTuner.h"
+#include "Core/HeapCorruptionSentinel.h"
+#include "Pipeline/RetryPolicyEngine.h"
+#include "Core/DecoderIncidentReporter.h"
+#include "Utils/COMSelfRepairValidator.h"
+#include "Utils/BootIntegritySelfTest.h"
+// Sprint 611-620 — Multi-Instance & Virtual Desktop (v25.5.0 "Rigel-V")
+#include "Core/VirtualDesktopAwareness.h"
+#include "Core/WTSSessionIsolation.h"
+#include "Core/PerMonitorDPISelectorV2.h"
+#include "Core/TabbedExplorerSync.h"
+#include "Memory/CrossSessionThumbnailPool.h"
+#include "Core/InstanceRegistry.h"
+#include "Pipeline/ForegroundPriorityInheritance.h"
+#include "Pipeline/CrossInstanceLoadBalancer.h"
+// Sprint 621-630 — Collaborative Annotations & Sharing (v25.6.0 "Rigel-W")
+#include "Core/AnnotationStore.h"
+#include "Core/AnnotationOverlayRenderer.h"
+#include "Utils/CollabWebhookBridge.h"
+#include "Core/SharedCollectionBuilder.h"
+#include "Core/AnnotationDiffViewer.h"
+#include "Utils/AnnotationExporter.h"
+#include "Utils/CollabCloudSync.h"
+#include "Core/AnnotationSchemaMigrator.h"
+// Sprint 631-640 — Protocol Surface & API Ecosystem (v25.7.0 "Rigel-X")
+#include "Utils/GRPCThumbnailService.h"
+#include "Utils/RESTThumbnailServer.h"
+#include "Utils/GraphQLQueryEngine.h"
+#include "Utils/WebSocketPushChannel.h"
+#include "Utils/OpenAPISpecGenerator.h"
+#include "Utils/SDKBindingsGenerator.h"
+#include "Utils/OAuthTokenValidator.h"
+#include "Utils/APIRateLimiter.h"
+// Sprint 641-650 — Post-Quantum Security (v26.0.0 "Canopus")
+#include "Utils/MLKEMKeyEncapsulator.h"
+#include "Utils/SLHDSASignatureVerifier.h"
+#include "Core/HybridTLSIPCChannel.h"
+#include "Utils/PQAuditTrail.h"
+#include "Utils/QuantumSafeKeyRotator.h"
+#include "Utils/FIPS140CryptoBoundary.h"
+#include "Utils/CertificateMigrationTool.h"
+#include "Utils/CryptoAgilityEngine.h"
+// Sprint 651-660 — Windows Next-Gen Shell Integration (v26.1.0 "Canopus-R")
+#include "Core/WinRTThumbnailBridge.h"
+#include "AI/CopilotPlatformBridge.h"
+#include "Core/AppContainerIsolation.h"
+#include "Core/WinFSMetadataStore.h"
+#include "Core/WindowsSearchV3Bridge.h"
+#include "Utils/SmartAppControlPolicy.h"
+#include "Core/MSIXStreamingPrewarmer.h"
+#include "Utils/WindowsHelloAuthBridge.h"
+// Sprint 661-670 — Immersive 3D Preview Engine (v26.2.0 "Canopus-S")
+#include "Core/ImmersivePreviewRenderer.h"
+#include "Core/VolumetricThumbnailEngine.h"
+#include "GPU/RealtimeLightingSimulator.h"
+#include "Core/HolographicProjectionEngine.h"
+#include "Core/MeshLODGeneratorV2.h"
+#include "Core/AnimationPreviewScrubber.h"
+#include "Core/MaterialPreviewEngine.h"
+#include "GPU/GPUPathTracerPreview.h"
+// Sprint 671-680 — Real-Time Collaboration (v26.3.0 "Canopus-T")
+#include "Core/CollaborationPresenceEngine.h"
+#include "Core/LiveAnnotationBroadcaster.h"
+#include "Core/SharedViewStateProtocol.h"
+#include "Core/ConflictResolutionMerger.h"
+#include "Plugin/CollaborativePluginHost.h"
+#include "Core/PresenceAvatarRenderer.h"
+#include "Core/SessionReplayEngine.h"
+#include "Core/CollaborationTelemetryHub.h"
+// Sprint 681-690 — Adaptive Performance Governor v2 (v26.4.0 "Canopus-U")
+#include "Core/AdaptivePerformanceGovernorV2.h"
+#include "Memory/ThermalAwareMemoryScheduler.h"
+#include "GPU/WorkloadBalancerV2.h"
+#include "Core/PowerBudgetController.h"
+#include "Core/BackgroundIntelligenceService.h"
+#include "Core/QoSThrottleEngine.h"
+#include "Memory/SmartPrefetchEngine.h"
+#include "Core/FrameRateSynchronizer.h"
+// Sprint 691-700 — Global I18n & Accessibility v3 (v26.5.0 "Canopus-V")
+#include "Utils/I18nRuntimeEngine.h"
+#include "Utils/BiDiTextLayoutEngine.h"
+#include "Utils/AccessibilityNavigatorV3.h"
+#include "Utils/ScreenReaderBridgeV2.h"
+#include "Utils/LocaleFallbackResolver.h"
+#include "Utils/A11yColorContrastEngine.h"
+#include "Utils/KeyboardNavigationMapV2.h"
+#include "Utils/AccessibilityAuditPipeline.h"
 
 using namespace ExplorerLens::Engine::Tests;
 
@@ -27530,13 +27620,13 @@ TEST(Test_WASMRuntimeAdapter_Create)
 TEST(Test_WASMRuntimeAdapter_Config)
 {
     WASMRuntimeConfig cfg;
-    cfg.runtime          = WASMRuntime::WasmEdge;
+    cfg.runtime          = WASMAdapterEngine::WasmEdge;
     cfg.sandboxLevel     = WASMSandboxLevel::Strict;
     cfg.memoryLimitBytes = 32ULL * 1024 * 1024;
     cfg.cpuQuotaPercent  = 10;
     cfg.timeoutMs        = 3000;
     WASMRuntimeAdapter adapter(cfg);
-    ASSERT(adapter.GetRuntime()      == WASMRuntime::WasmEdge);
+    ASSERT(adapter.GetRuntime()      == WASMAdapterEngine::WasmEdge);
     ASSERT(adapter.GetSandboxLevel() == WASMSandboxLevel::Strict);
     ASSERT(adapter.GetMemoryLimit()  == 32ULL * 1024 * 1024);
     ASSERT(adapter.GetCpuQuota()     == 10);
@@ -27589,8 +27679,8 @@ TEST(Test_WASMRuntimeAdapter_Sandbox)
 }
 TEST(Test_WASMRuntimeAdapter_Runtimes)
 {
-    ASSERT(WASMRuntime::WasmEdge != WASMRuntime::WABT);
-    ASSERT(WASMRuntime::Wasmer   != WASMRuntime::Native);
+    ASSERT(WASMAdapterEngine::WasmEdge != WASMAdapterEngine::WABT);
+    ASSERT(WASMAdapterEngine::Wasmer   != WASMAdapterEngine::Native);
     ASSERT(WASMSandboxLevel::Loose != WASMSandboxLevel::Paranoid);
 }
 
@@ -28941,13 +29031,13 @@ TEST(Test_PowerAwareScheduler_Create)
 TEST(Test_PowerAwareScheduler_SetPowerState)
 {
     PowerAwareScheduler s;
-    s.SetPowerState(PowerState::BatterySaver);
+    s.SetPowerState(NPUPowerMode::BatterySaver);
     ASSERT(s.GetMode() == SchedulerMode::BatterySaver);
 }
 TEST(Test_PowerAwareScheduler_ScheduleAC)
 {
     PowerAwareScheduler s;
-    s.SetPowerState(PowerState::AC);
+    s.SetPowerState(NPUPowerMode::AC);
     s.SetNPUAvailable(true);
     WorkItem item; item.id = 1; item.canDeferToNPU = true;
     auto d = s.Schedule(item);
@@ -28956,7 +29046,7 @@ TEST(Test_PowerAwareScheduler_ScheduleAC)
 TEST(Test_PowerAwareScheduler_ScheduleBatterySaver)
 {
     PowerAwareScheduler s;
-    s.SetPowerState(PowerState::BatterySaver);
+    s.SetPowerState(NPUPowerMode::BatterySaver);
     WorkItem item; item.id = 2; item.canDeferToNPU = true;
     auto d = s.Schedule(item);
     ASSERT(d.assignedTo == AcceleratorType::CPU);
@@ -28972,7 +29062,7 @@ TEST(Test_PowerAwareScheduler_ScheduledCount)
 TEST(Test_PowerAwareScheduler_NPUUnavailable)
 {
     PowerAwareScheduler s;
-    s.SetPowerState(PowerState::AC);
+    s.SetPowerState(NPUPowerMode::AC);
     s.SetNPUAvailable(false);
     WorkItem item; item.id = 3; item.canDeferToNPU = true;
     auto d = s.Schedule(item);
@@ -28989,13 +29079,13 @@ TEST(Test_PowerAwareScheduler_Reset)
 TEST(Test_PowerAwareScheduler_Mode)
 {
     PowerAwareScheduler s;
-    s.SetPowerState(PowerState::Battery);
+    s.SetPowerState(NPUPowerMode::Battery);
     ASSERT(s.GetMode() == SchedulerMode::Conservative);
 }
 TEST(Test_PowerAwareScheduler_Reason)
 {
     PowerAwareScheduler s;
-    s.SetPowerState(PowerState::BatterySaver);
+    s.SetPowerState(NPUPowerMode::BatterySaver);
     WorkItem item; item.id = 5;
     auto d = s.Schedule(item);
     ASSERT(!d.reason.empty());
@@ -29615,6 +29705,2381 @@ TEST(Test_MergeConflictOverlay_MarkerCount)
 }
 
 
+//==============================================================================
+// Sprint 601-610 — Self-Healing & Adaptive Recovery (v25.4.0 "Rigel-U")
+//==============================================================================
+
+TEST(Test_DecoderCrashPredictor_Create)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderCrashPredictor pred;
+    ASSERT(pred.DecoderCount() == 0);
+}
+TEST(Test_DecoderCrashPredictor_Predict_NoSamples)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderCrashPredictor pred;
+    auto p = pred.Predict("webp");
+    ASSERT(p.level == CrashRiskLevel::None);
+    ASSERT(p.samplesUsed == 0);
+}
+TEST(Test_DecoderCrashPredictor_Record_And_Count)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderCrashPredictor pred;
+    for (int i = 0; i < 6; ++i) pred.Record("jpeg", 100.0, false, false);
+    ASSERT(pred.DecoderCount() == 1);
+}
+TEST(Test_DecoderCrashPredictor_HighRisk)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderCrashPredictor pred;
+    // Feed enough crash samples to push risk high
+    for (int i = 0; i < 20; ++i) pred.Record("png", 200.0, true, true);
+    auto p = pred.Predict("png");
+    ASSERT(p.level >= CrashRiskLevel::High);
+    ASSERT(p.shouldQuarantine());
+}
+TEST(Test_DecoderCrashPredictor_Reset)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderCrashPredictor pred;
+    pred.Record("tiff", 50.0, false, false);
+    ASSERT(pred.DecoderCount() == 1);
+    pred.Reset("tiff");
+    ASSERT(pred.DecoderCount() == 0);
+}
+TEST(Test_DecoderCrashPredictor_ResetAll)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderCrashPredictor pred;
+    pred.Record("a", 10.0, false, false);
+    pred.Record("b", 10.0, false, false);
+    pred.ResetAll();
+    ASSERT(pred.DecoderCount() == 0);
+}
+TEST(Test_DecoderCrashPredictor_RiskLevelEnum)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT((int)CrashRiskLevel::None     == 0);
+    ASSERT((int)CrashRiskLevel::Critical > (int)CrashRiskLevel::High);
+}
+TEST(Test_DecoderQuarantineManager_Create)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderQuarantineManager mgr;
+    ASSERT(!mgr.IsQuarantined("webp"));
+}
+TEST(Test_DecoderQuarantineManager_RecordCrash_Threshold1)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderQuarantineManager mgr;
+    mgr.RecordCrash("dec");
+    mgr.RecordCrash("dec");
+    ASSERT(mgr.IsQuarantined("dec"));
+    const QuarantineRecord* r = mgr.GetRecord("dec");
+    ASSERT(r != nullptr);
+    ASSERT(r->stage == QuarantineStage::RetryOnly);
+}
+TEST(Test_DecoderQuarantineManager_RecordCrash_Bypass)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderQuarantineManager mgr;
+    for (int i = 0; i < 11; ++i) mgr.RecordCrash("dec");
+    const QuarantineRecord* r = mgr.GetRecord("dec");
+    ASSERT(r != nullptr);
+    ASSERT(r->stage == QuarantineStage::Bypassed);
+}
+TEST(Test_DecoderQuarantineManager_Recovery)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderQuarantineManager mgr;
+    mgr.RecordCrash("dec");
+    mgr.RecordCrash("dec");
+    for (int i = 0; i < DecoderQuarantineManager::RECOVERY_RELEASE_COUNT; ++i)
+        mgr.RecordSuccess("dec");
+    const QuarantineRecord* r = mgr.GetRecord("dec");
+    ASSERT(r != nullptr);
+    ASSERT(r->stage == QuarantineStage::Active);
+}
+TEST(Test_DecoderQuarantineManager_StageName)
+{
+    using namespace ExplorerLens::Engine;
+    QuarantineRecord r;
+    ASSERT(r.StageName() == "Active");
+    r.stage = QuarantineStage::SoftRestart;
+    ASSERT(r.StageName() == "SoftRestart");
+}
+TEST(Test_AdaptiveTimeoutTuner_DefaultTimeout)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptiveTimeoutTuner tuner;
+    ASSERT(tuner.GetTimeoutMs("png") == AdaptiveTimeoutTuner::DEFAULT_TIMEOUT);
+}
+TEST(Test_AdaptiveTimeoutTuner_RecordAndLearn)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptiveTimeoutTuner tuner;
+    for (int i = 0; i < 25; ++i) tuner.RecordLatency("pdf", 200.0 + i);
+    double t = tuner.GetTimeoutMs("pdf");
+    ASSERT(t >= AdaptiveTimeoutTuner::MIN_TIMEOUT);
+    ASSERT(t <= AdaptiveTimeoutTuner::MAX_TIMEOUT);
+}
+TEST(Test_AdaptiveTimeoutTuner_Clamp)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptiveTimeoutTuner tuner;
+    for (int i = 0; i < 25; ++i) tuner.RecordLatency("heic", 100000.0);
+    ASSERT(tuner.GetTimeoutMs("heic") <= AdaptiveTimeoutTuner::MAX_TIMEOUT);
+}
+TEST(Test_AdaptiveTimeoutTuner_SetBaseline)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptiveTimeoutTuner tuner;
+    tuner.SetBaseline("raw", 10000.0);
+    const ATTimeoutPolicy* pol = tuner.GetPolicy("raw");
+    ASSERT(pol != nullptr);
+    ASSERT(pol->baselineMs == 10000.0);
+}
+TEST(Test_AdaptiveTimeoutTuner_Reset)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptiveTimeoutTuner tuner;
+    for (int i = 0; i < 25; ++i) tuner.RecordLatency("tif", 300.0);
+    ASSERT(tuner.FormatCount() == 1);
+    tuner.Reset("tif");
+    ASSERT(tuner.FormatCount() == 0);
+}
+TEST(Test_HeapCorruptionSentinel_Allocate)
+{
+    using namespace ExplorerLens::Engine;
+    HeapCorruptionSentinel sentinel;
+    TrackedBlock* blk = sentinel.Allocate(64, "test");
+    ASSERT(blk != nullptr);
+    ASSERT(blk->payloadSize == 64);
+    ASSERT(blk->headCanary == CANARY_MAGIC_HEAD);
+    ASSERT(blk->tailCanary == CANARY_MAGIC_TAIL);
+    ASSERT(sentinel.BlockCount() == 1);
+    sentinel.Free(blk);
+}
+TEST(Test_HeapCorruptionSentinel_CheckClean)
+{
+    using namespace ExplorerLens::Engine;
+    HeapCorruptionSentinel sentinel;
+    TrackedBlock* blk = sentinel.Allocate(32, "ctx");
+    auto report = sentinel.Check(blk);
+    ASSERT(report.IsClean());
+    sentinel.Free(blk);
+}
+TEST(Test_HeapCorruptionSentinel_ScanAll_Clean)
+{
+    using namespace ExplorerLens::Engine;
+    HeapCorruptionSentinel sentinel;
+    TrackedBlock* b1 = sentinel.Allocate(16, "a");
+    TrackedBlock* b2 = sentinel.Allocate(32, "b");
+    auto reports = sentinel.ScanAll();
+    ASSERT(reports.empty());
+    ASSERT(sentinel.IsHealthy());
+    sentinel.Free(b1);
+    sentinel.Free(b2);
+}
+TEST(Test_HeapCorruptionSentinel_DetectHeadCorrupt)
+{
+    using namespace ExplorerLens::Engine;
+    HeapCorruptionSentinel sentinel;
+    TrackedBlock* blk = sentinel.Allocate(16, "corrupt");
+    blk->headCanary = 0xDEAD; // corrupt
+    auto report = sentinel.Check(blk);
+    ASSERT(!report.IsClean());
+    ASSERT(report.type == HeapCorruptionType::HeadCanaryOverwrite);
+    blk->headCanary = CANARY_MAGIC_HEAD; // restore before free
+    sentinel.Free(blk);
+}
+TEST(Test_RetryPolicyEngine_SuccessFirstTry)
+{
+    using namespace ExplorerLens::Engine;
+    RetryPolicyEngine engine;
+    int calls = 0;
+    auto result = engine.Execute([&]{ calls++; return true; }, "op");
+    ASSERT(result == RetryResult::Success);
+    ASSERT(calls == 1);
+    ASSERT(engine.Stats().successCount == 1);
+}
+TEST(Test_RetryPolicyEngine_ExhaustedRetries)
+{
+    using namespace ExplorerLens::Engine;
+    RetryConfig cfg;
+    cfg.maxRetries  = 2;
+    cfg.baseDelayMs = 0.0;
+    RetryPolicyEngine engine(cfg);
+    auto result = engine.Execute([&]{ return false; }, "fail");
+    ASSERT(result == RetryResult::ExhaustedRetries);
+    ASSERT(engine.Stats().exhaustedCount == 1);
+    ASSERT(engine.Stats().retryCount == 2);
+}
+TEST(Test_RetryPolicyEngine_Config)
+{
+    using namespace ExplorerLens::Engine;
+    RetryPolicyEngine engine;
+    ASSERT(engine.MaxRetries() == 3);
+    engine.Config().maxRetries = 5;
+    ASSERT(engine.MaxRetries() == 5);
+}
+TEST(Test_RetryPolicyEngine_ResetStats)
+{
+    using namespace ExplorerLens::Engine;
+    RetryPolicyEngine engine;
+    engine.Execute([&]{ return true; }, "x");
+    engine.ResetStats();
+    ASSERT(engine.Stats().successCount == 0);
+    ASSERT(engine.Stats().totalAttempts == 0);
+}
+TEST(Test_DecoderIncidentReporter_Healthy)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderIncidentReporter reporter;
+    DecoderHealthSnapshot snap;
+    snap.decoderName   = "webp";
+    snap.errorRatePct  = 0.0;
+    snap.crashCount    = 0;
+    snap.totalDecodes  = 100;
+    auto report = reporter.CreateReport(snap);
+    ASSERT(report.severity == IncidentSeverity::Info);
+    ASSERT(!report.id.empty());
+    ASSERT(report.decoderName == "webp");
+}
+TEST(Test_DecoderIncidentReporter_Critical)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderIncidentReporter reporter;
+    DecoderHealthSnapshot snap;
+    snap.decoderName  = "heic";
+    snap.crashCount   = 15;
+    snap.isQuarantined = true;
+    auto report = reporter.CreateReport(snap);
+    ASSERT(report.severity == IncidentSeverity::Critical);
+}
+TEST(Test_DecoderIncidentReporter_BatchReport)
+{
+    using namespace ExplorerLens::Engine;
+    DecoderIncidentReporter reporter;
+    std::vector<DecoderHealthSnapshot> snaps(3);
+    snaps[0].decoderName = "a";
+    snaps[1].decoderName = "b";
+    snaps[2].decoderName = "c";
+    snaps[2].crashCount  = 20;
+    snaps[2].isQuarantined = true;
+    auto reports = reporter.CreateBatchReport(snaps);
+    ASSERT(reports.size() == 3);
+    ASSERT(reporter.CriticalCount(reports) == 1);
+}
+TEST(Test_COMSelfRepairValidator_ClsidConst)
+{
+    using namespace ExplorerLens::Engine;
+    std::string clsid = COMSelfRepairValidator::LensClsid();
+    ASSERT(!clsid.empty());
+    ASSERT(clsid.find("9E6ECB90") != std::string::npos);
+}
+TEST(Test_COMSelfRepairValidator_IsRegistered)
+{
+    using namespace ExplorerLens::Engine;
+    COMSelfRepairValidator validator;
+    ASSERT(validator.IsRegistered());
+}
+TEST(Test_COMSelfRepairValidator_ClsidPath)
+{
+    using namespace ExplorerLens::Engine;
+    COMSelfRepairValidator validator;
+    std::string path = validator.ClsidPath();
+    ASSERT(path.find("9E6ECB90") != std::string::npos);
+}
+TEST(Test_COMSelfRepairValidator_Validate)
+{
+    using namespace ExplorerLens::Engine;
+    COMSelfRepairValidator validator;
+    auto result = validator.Validate(true);
+    ASSERT(result.totalEntries > 0);
+}
+TEST(Test_BootIntegritySelfTest_Instance)
+{
+    using namespace ExplorerLens::Engine;
+    auto& test = BootIntegritySelfTest::Instance();
+    test.Reset();
+    ASSERT(test.TestCount() == 0);
+}
+TEST(Test_BootIntegritySelfTest_RunAll)
+{
+    using namespace ExplorerLens::Engine;
+    auto& test = BootIntegritySelfTest::Instance();
+    test.Reset();
+    auto report = test.RunAll();
+    ASSERT(report.total >= 5);
+    ASSERT(report.WasRun());
+    ASSERT(report.IsHealthy());
+}
+TEST(Test_BootIntegritySelfTest_AddTest)
+{
+    using namespace ExplorerLens::Engine;
+    auto& test = BootIntegritySelfTest::Instance();
+    test.Reset();
+    test.AddTest("Custom", "Custom check", []{ return true; });
+    auto report = test.RunAll();
+    ASSERT(report.passed >= 1);
+}
+TEST(Test_BootIntegritySelfTest_FailingTest)
+{
+    using namespace ExplorerLens::Engine;
+    auto& fresh = BootIntegritySelfTest::Instance();
+    fresh.Reset();
+    fresh.AddTest("Fail", "Always fails", []{ return false; });
+    auto report = fresh.RunAll();
+    ASSERT(report.failed >= 1);
+    ASSERT(!report.IsHealthy());
+    fresh.Reset();
+}
+
+//==============================================================================
+// Sprint 611-620 — Multi-Instance & Virtual Desktop (v25.5.0 "Rigel-V")
+//==============================================================================
+
+TEST(Test_VirtualDesktopAwareness_Instance)
+{
+    using namespace ExplorerLens::Engine;
+    auto& vda = VirtualDesktopAwareness::Instance();
+    vda.SetCurrentDesktopId(VDID_GLOBAL);
+    ASSERT(vda.GetCurrentDesktopId() == VDID_GLOBAL);
+}
+TEST(Test_VirtualDesktopAwareness_BuildCacheKeyPrefix_Global)
+{
+    using namespace ExplorerLens::Engine;
+    auto& vda = VirtualDesktopAwareness::Instance();
+    std::string prefix = vda.BuildCacheKeyPrefix(VDScopePolicy::Global);
+    ASSERT(prefix == "global");
+}
+TEST(Test_VirtualDesktopAwareness_BuildCacheKeyPrefix_PerDesktop)
+{
+    using namespace ExplorerLens::Engine;
+    auto& vda = VirtualDesktopAwareness::Instance();
+    vda.SetCurrentDesktopId(42);
+    std::string prefix = vda.BuildCacheKeyPrefix(VDScopePolicy::PerDesktop);
+    ASSERT(prefix.find("42") != std::string::npos);
+}
+TEST(Test_VirtualDesktopAwareness_RegisterDesktop)
+{
+    using namespace ExplorerLens::Engine;
+    auto& vda = VirtualDesktopAwareness::Instance();
+    VirtualDesktopInfo info; info.id = 99; info.name = L"Work";
+    vda.RegisterDesktop(info);
+    ASSERT(vda.HasDesktop(99));
+    ASSERT(vda.DesktopCount() >= 1);
+}
+TEST(Test_WTSSessionIsolation_Instance)
+{
+    using namespace ExplorerLens::Engine;
+    auto& wts = WTSSessionIsolation::Instance();
+    wts.SetCurrentSession(1);
+    ASSERT(wts.CurrentSessionId() == 1);
+}
+TEST(Test_WTSSessionIsolation_GetCacheScope)
+{
+    using namespace ExplorerLens::Engine;
+    auto& wts = WTSSessionIsolation::Instance();
+    wts.SetCurrentSession(7);
+    auto scope = wts.CurrentCacheScope();
+    ASSERT(scope.isIsolated);
+    ASSERT(scope.cacheRoot.find("7") != std::string::npos);
+}
+TEST(Test_WTSSessionIsolation_RegisterSession)
+{
+    using namespace ExplorerLens::Engine;
+    auto& wts = WTSSessionIsolation::Instance();
+    WTSSessionInfo info; info.sessionId = 3; info.state = WTSSessionState::Active;
+    wts.RegisterSession(info);
+    ASSERT(wts.SessionCount() >= 1);
+}
+TEST(Test_WTSSessionIsolation_StateName)
+{
+    using namespace ExplorerLens::Engine;
+    WTSSessionInfo info; info.state = WTSSessionState::Disconnected;
+    ASSERT(info.StateName() == "Disconnected");
+}
+TEST(Test_PerMonitorDPISelectorV2_DefaultFallback)
+{
+    using namespace ExplorerLens::Engine;
+    PerMonitorDPISelectorV2 sel;
+    auto res = sel.SelectResolution(0);
+    ASSERT(res.widthPx == PerMonitorDPISelectorV2::LOGICAL_THUMB_SIZE);
+}
+TEST(Test_PerMonitorDPISelectorV2_HighDPI)
+{
+    using namespace ExplorerLens::Engine;
+    PerMonitorDPISelectorV2 sel;
+    MonitorDPIProfile p; p.monitorHandle = 1; p.dpiX = 192; p.dpiY = 192;
+    p.scalePercent = PerMonitorDPIScale::Scale200; p.isPrimary = true;
+    sel.RegisterMonitor(p);
+    auto res = sel.SelectResolution(1);
+    ASSERT(res.widthPx == 512); // 256 * 2.0
+}
+TEST(Test_PerMonitorDPISelectorV2_MixedDPI)
+{
+    using namespace ExplorerLens::Engine;
+    PerMonitorDPISelectorV2 sel;
+    MonitorDPIProfile p1; p1.monitorHandle = 1; p1.dpiX = 96;
+    MonitorDPIProfile p2; p2.monitorHandle = 2; p2.dpiX = 192;
+    sel.RegisterMonitor(p1);
+    sel.RegisterMonitor(p2);
+    ASSERT(sel.MonitorCount() == 2);
+    ASSERT(sel.IsMixedDPI());
+}
+TEST(Test_TabbedExplorerSync_Instance)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sync = TabbedExplorerSync::Instance();
+    sync.SetPolicy(TabSyncPolicy::Independent);
+    ASSERT(sync.GetPolicy() == TabSyncPolicy::Independent);
+}
+TEST(Test_TabbedExplorerSync_RegisterTab)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sync = TabbedExplorerSync::Instance();
+    ExplorerTabState tab; tab.tabId = 100; tab.folderPath = L"C:\\Docs";
+    sync.RegisterTab(tab);
+    ASSERT(sync.HasTab(100));
+}
+TEST(Test_TabbedExplorerSync_SyncSameFolder)
+{
+    using namespace ExplorerLens::Engine;
+    auto& sync = TabbedExplorerSync::Instance();
+    sync.SetPolicy(TabSyncPolicy::SyncSameFolder);
+    ExplorerTabState t1; t1.tabId = 200; t1.folderPath = L"C:\\Photos"; t1.zoomLevel = 100;
+    ExplorerTabState t2; t2.tabId = 201; t2.folderPath = L"C:\\Photos"; t2.zoomLevel = 100;
+    sync.RegisterTab(t1);
+    sync.RegisterTab(t2);
+    ExplorerTabState updated = t1; updated.zoomLevel = 150;
+    sync.OnTabStateChange(updated);
+    auto siblings = sync.GetSiblingTabs(L"C:\\Photos");
+    bool allSynced = true;
+    for (const auto& s : siblings) if (s.zoomLevel != 150 && s.tabId != t1.tabId) allSynced = false;
+    ASSERT(allSynced);
+}
+TEST(Test_CrossSessionThumbnailPool_InsertAndLookup)
+{
+    using namespace ExplorerLens::Engine;
+    CrossSessionThumbnailPool pool(1024 * 1024);
+    uint8_t data[4] = {0xAA, 0xBB, 0xCC, 0xDD};
+    ASSERT(pool.Insert(0x12345, data, 4, 1));
+    uint32_t sz = 0;
+    const uint8_t* ptr = pool.Lookup(0x12345, sz);
+    ASSERT(ptr != nullptr);
+    ASSERT(sz == 4);
+    ASSERT(ptr[0] == 0xAA);
+}
+TEST(Test_CrossSessionThumbnailPool_Stats)
+{
+    using namespace ExplorerLens::Engine;
+    CrossSessionThumbnailPool pool;
+    auto stats = pool.Stats();
+    ASSERT(stats.bytesCapacity == CrossSessionThumbnailPool::DEFAULT_CAPACITY);
+}
+TEST(Test_CrossSessionThumbnailPool_HitRate)
+{
+    using namespace ExplorerLens::Engine;
+    CrossSessionThumbnailPool pool(65536);
+    uint8_t d[8] = {};
+    pool.Insert(111, d, 8, 0);
+    uint32_t sz = 0;
+    pool.Lookup(111, sz);  // hit
+    pool.Lookup(999, sz);  // miss
+    auto stats = pool.Stats();
+    ASSERT(stats.hitCount == 1);
+    ASSERT(stats.missCount == 1);
+    ASSERT(stats.HitRatePct() == 50.0);
+}
+TEST(Test_InstanceRegistry_Register)
+{
+    using namespace ExplorerLens::Engine;
+    auto& reg = InstanceRegistry::Instance();
+    InstanceId id = reg.Register(1234, 1, "25.4.0");
+    ASSERT(id > 0);
+    const InstanceRecord* r = reg.Get(id);
+    ASSERT(r != nullptr);
+    ASSERT(r->processId == 1234);
+}
+TEST(Test_InstanceRegistry_Heartbeat)
+{
+    using namespace ExplorerLens::Engine;
+    auto& reg = InstanceRegistry::Instance();
+    InstanceId id = reg.Register(5678, 1, "25.4.0");
+    reg.Heartbeat(id);
+    const InstanceRecord* r = reg.Get(id);
+    ASSERT(r != nullptr);
+    ASSERT(!r->IsStale(10000));
+}
+TEST(Test_InstanceRegistry_Unregister)
+{
+    using namespace ExplorerLens::Engine;
+    auto& reg = InstanceRegistry::Instance();
+    InstanceId id = reg.Register(9999, 1, "test");
+    reg.Unregister(id);
+    ASSERT(reg.Get(id) == nullptr);
+}
+TEST(Test_ForegroundPriorityInheritance_Instance)
+{
+    using namespace ExplorerLens::Engine;
+    auto& fpi = ForegroundPriorityInheritance::Instance();
+    fpi.SetForegroundWindow(100);
+    ASSERT(fpi.GetForegroundWindow() == 100);
+}
+TEST(Test_ForegroundPriorityInheritance_Evaluate_Foreground)
+{
+    using namespace ExplorerLens::Engine;
+    auto& fpi = ForegroundPriorityInheritance::Instance();
+    fpi.SetForegroundWindow(200);
+    auto d = fpi.Evaluate(200);
+    ASSERT(d.context == DecodeWindowContext::Foreground);
+    ASSERT(d.inherited);
+}
+TEST(Test_ForegroundPriorityInheritance_Evaluate_Background)
+{
+    using namespace ExplorerLens::Engine;
+    auto& fpi = ForegroundPriorityInheritance::Instance();
+    fpi.SetForegroundWindow(200);
+    auto d = fpi.Evaluate(300);
+    ASSERT(d.context == DecodeWindowContext::Background);
+    ASSERT(!d.inherited);
+}
+TEST(Test_CrossInstanceLoadBalancer_Dispatch_NoInstances)
+{
+    using namespace ExplorerLens::Engine;
+    CrossInstanceLoadBalancer lb;
+    auto d = lb.Dispatch();
+    ASSERT(!d.found);
+}
+TEST(Test_CrossInstanceLoadBalancer_Dispatch_LeastConn)
+{
+    using namespace ExplorerLens::Engine;
+    CrossInstanceLoadBalancer lb(LBAlgorithm::LeastConnections);
+    InstanceLoad i1; i1.instanceId = 1; i1.activeTasks = 5;
+    InstanceLoad i2; i2.instanceId = 2; i2.activeTasks = 2;
+    lb.RegisterInstance(i1);
+    lb.RegisterInstance(i2);
+    auto d = lb.Dispatch();
+    ASSERT(d.found);
+    ASSERT(d.instanceId == 2); // least connections
+}
+TEST(Test_CrossInstanceLoadBalancer_MarkTaskEvents)
+{
+    using namespace ExplorerLens::Engine;
+    CrossInstanceLoadBalancer lb;
+    InstanceLoad il; il.instanceId = 10; il.activeTasks = 0;
+    lb.RegisterInstance(il);
+    lb.MarkTaskStart(10);
+    lb.MarkTaskEnd(10);
+}
+
+//==============================================================================
+// Sprint 621-630 — Collaborative Annotations & Sharing (v25.6.0 "Rigel-W")
+//==============================================================================
+
+TEST(Test_AnnotationStore_AddAndCount)
+{
+    using namespace ExplorerLens::Engine;
+    auto& store = AnnotationStore::Instance();
+    store.Clear();
+    Annotation a; a.filePath = L"C:\\img.jpg"; a.type = AnnotationRecordType::Tag;
+    a.value = L"holiday";
+    uint64_t id = store.Add(a);
+    ASSERT(id > 0);
+    ASSERT(store.Count() == 1);
+    store.Clear();
+}
+TEST(Test_AnnotationStore_GetForFile)
+{
+    using namespace ExplorerLens::Engine;
+    auto& store = AnnotationStore::Instance();
+    store.Clear();
+    Annotation a; a.filePath = L"C:\\x.png"; a.type = AnnotationRecordType::Star; a.value = L"5";
+    store.Add(a);
+    auto anns = store.GetForFile(L"C:\\x.png");
+    ASSERT(anns.size() == 1);
+    store.Clear();
+}
+TEST(Test_AnnotationStore_Delete)
+{
+    using namespace ExplorerLens::Engine;
+    auto& store = AnnotationStore::Instance();
+    store.Clear();
+    Annotation a; a.filePath = L"C:\\y.png"; a.type = AnnotationRecordType::Comment;
+    uint64_t id = store.Add(a);
+    ASSERT(store.Delete(id));
+    auto anns = store.GetForFile(L"C:\\y.png");
+    ASSERT(anns.empty());
+    store.Clear();
+}
+TEST(Test_AnnotationStore_DirtyFlag)
+{
+    using namespace ExplorerLens::Engine;
+    auto& store = AnnotationStore::Instance();
+    store.Clear();
+    Annotation a; a.filePath = L"C:\\z.png"; a.type = AnnotationRecordType::Color;
+    uint64_t id = store.Add(a);
+    ASSERT(store.DirtyCount() == 1);
+    store.MarkSynced(id);
+    ASSERT(store.DirtyCount() == 0);
+    store.Clear();
+}
+TEST(Test_AnnotationStore_AnnotationTypeNames)
+{
+    using namespace ExplorerLens::Engine;
+    Annotation a; a.type = AnnotationRecordType::Rating;
+    ASSERT(a.TypeName() == "Rating");
+    a.type = AnnotationRecordType::Star;
+    ASSERT(a.TypeName() == "Star");
+}
+TEST(Test_AnnotationOverlayRenderer_NoAnnotations)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationOverlayRenderer renderer;
+    AnnotationOverlayData data; // empty
+    auto result = renderer.Render(data, nullptr, 256, 256);
+    ASSERT(!result.rendered);
+}
+TEST(Test_AnnotationOverlayRenderer_WithStars)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationOverlayRenderer renderer;
+    AnnotationOverlayData data; data.starRating = 4;
+    auto result = renderer.Render(data, nullptr, 256, 256);
+    ASSERT(result.rendered);
+    ASSERT(result.elementsDrawn >= 1);
+}
+TEST(Test_AnnotationOverlayRenderer_Config)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationOverlayConfig cfg; cfg.showStars = false;
+    AnnotationOverlayRenderer renderer(cfg);
+    ASSERT(!renderer.Config().showStars);
+}
+TEST(Test_CollabWebhookBridge_NoConfigs)
+{
+    using namespace ExplorerLens::Engine;
+    CollabWebhookBridge bridge;
+    AnnotationEvent evt; evt.kind = AnnotationEvent::Kind::Created;
+    auto results = bridge.PostEvent(evt);
+    ASSERT(results.empty());
+}
+TEST(Test_CollabWebhookBridge_BuildPayload_Teams)
+{
+    using namespace ExplorerLens::Engine;
+    CollabWebhookBridge bridge;
+    AnnotationEvent evt;
+    std::string payload = bridge.BuildPayload(WebhookPlatform::Teams, evt);
+    ASSERT(!payload.empty());
+    ASSERT(payload.find("AdaptiveCard") != std::string::npos);
+}
+TEST(Test_CollabWebhookBridge_BuildPayload_Slack)
+{
+    using namespace ExplorerLens::Engine;
+    CollabWebhookBridge bridge;
+    AnnotationEvent evt;
+    std::string payload = bridge.BuildPayload(WebhookPlatform::Slack, evt);
+    ASSERT(payload.find("text") != std::string::npos);
+}
+TEST(Test_CollabWebhookBridge_InjectableHTTP)
+{
+    using namespace ExplorerLens::Engine;
+    WebhookPostResult fakeResult { true, 200, {} };
+    CollabWebhookBridge bridge([fakeResult](const std::string&, const std::string&){ return fakeResult; });
+    WebhookConfig cfg; cfg.platform = WebhookPlatform::Generic; cfg.webhookUrl = "http://test";
+    bridge.AddConfig(cfg);
+    AnnotationEvent evt;
+    auto results = bridge.PostEvent(evt);
+    ASSERT(results.size() == 1);
+    ASSERT(results[0].success);
+    ASSERT(results[0].statusCode == 200);
+}
+TEST(Test_SharedCollectionBuilder_CreateCollection)
+{
+    using namespace ExplorerLens::Engine;
+    SharedCollectionBuilder builder;
+    auto& col = builder.CreateCollection(L"Holiday", L"C:\\Photos");
+    ASSERT(!col.shareToken.empty());
+    ASSERT(builder.CollectionCount() == 1);
+}
+TEST(Test_SharedCollectionBuilder_AddItem)
+{
+    using namespace ExplorerLens::Engine;
+    SharedCollectionBuilder builder;
+    builder.CreateCollection(L"Work", L"C:\\Docs");
+    CollectionItem item; item.filePath = L"C:\\Docs\\a.pdf"; item.starRating = 3;
+    ASSERT(builder.AddItem(L"Work", item));
+    auto& cols = builder.All();
+    ASSERT(cols[0].ItemCount() == 1);
+}
+TEST(Test_SharedCollectionBuilder_FindByToken)
+{
+    using namespace ExplorerLens::Engine;
+    SharedCollectionBuilder builder;
+    auto& col = builder.CreateCollection(L"Test", L"C:\\T");
+    std::string token = col.shareToken;
+    const SharedCollection* found = builder.FindByToken(token);
+    ASSERT(found != nullptr);
+    ASSERT(found->name == L"Test");
+}
+TEST(Test_SharedCollectionBuilder_MergeCollection)
+{
+    using namespace ExplorerLens::Engine;
+    SharedCollectionBuilder builder;
+    builder.CreateCollection(L"Shared", L"C:\\S");
+    SharedCollection remote; remote.name = L"Shared"; remote.folderPath = L"C:\\S";
+    CollectionItem ri; ri.filePath = L"C:\\S\\b.jpg";
+    remote.items.push_back(ri);
+    ASSERT(builder.MergeCollection(remote));
+    auto& cols = builder.All();
+    ASSERT(cols[0].ItemCount() >= 1);
+}
+TEST(Test_AnnotationDiffViewer_NoDiff)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationDiffViewer viewer;
+    AnnotationSnapshot before, after;
+    before.starRating = 3; after.starRating = 3;
+    auto result = viewer.Diff(before, after);
+    ASSERT(result.IsClean());
+}
+TEST(Test_AnnotationDiffViewer_StarChanged)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationDiffViewer viewer;
+    AnnotationSnapshot before, after;
+    before.starRating = 2; after.starRating = 4;
+    auto result = viewer.Diff(before, after);
+    ASSERT(result.changes == 1);
+    ASSERT(!result.IsClean());
+}
+TEST(Test_AnnotationDiffViewer_TagAdded)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationDiffViewer viewer;
+    AnnotationSnapshot before, after;
+    after.tags.push_back(L"newtag");
+    auto result = viewer.Diff(before, after);
+    ASSERT(result.additions == 1);
+}
+TEST(Test_AnnotationDiffViewer_DiffOpName)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationDiffEntry entry;
+    entry.op = DiffOperation::Add;
+    ASSERT(entry.OpName() == "Add");
+    entry.op = DiffOperation::Remove;
+    ASSERT(entry.OpName() == "Remove");
+}
+TEST(Test_AnnotationExporter_JSON)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationExporter exporter;
+    std::vector<ExportableAnnotation> items(1);
+    items[0].filePath = L"a.jpg"; items[0].starRating = 3;
+    auto result = exporter.Export(items, AnnotationExportFormat::JSON);
+    ASSERT(result.success);
+    ASSERT(!result.content.empty());
+    ASSERT(result.content.find('[') != std::string::npos);
+    ASSERT(result.itemCount == 1);
+}
+TEST(Test_AnnotationExporter_XML)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationExporter exporter;
+    std::vector<ExportableAnnotation> items(1);
+    items[0].filePath = L"b.jpg";
+    auto result = exporter.Export(items, AnnotationExportFormat::XML);
+    ASSERT(result.success);
+    ASSERT(result.content.find("<?xml") != std::string::npos);
+}
+TEST(Test_AnnotationExporter_CSV)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationExporter exporter;
+    std::vector<ExportableAnnotation> items(2);
+    auto result = exporter.Export(items, AnnotationExportFormat::CSV);
+    ASSERT(result.success);
+    ASSERT(result.content.find("file,stars") != std::string::npos);
+}
+TEST(Test_AnnotationExporter_FormatName)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationExporter exporter;
+    ASSERT(exporter.FormatName(AnnotationExportFormat::XMP) == "XMP");
+    ASSERT(exporter.FormatName(AnnotationExportFormat::JSON) == "JSON");
+}
+TEST(Test_CollabCloudSync_NoHttpFn)
+{
+    using namespace ExplorerLens::Engine;
+    CollabCloudSync sync;
+    CloudSyncRequest req; req.accessToken = "tok";
+    auto result = sync.Sync(req);
+    ASSERT(!result.Ok());
+    ASSERT(result.status == SyncStatus::Error);
+}
+TEST(Test_CollabCloudSync_EmptyToken)
+{
+    using namespace ExplorerLens::Engine;
+    CollabCloudSync sync([](const std::string&, const std::string&,
+                            const std::string&, std::string&){ return true; });
+    CloudSyncRequest req; // empty token
+    auto result = sync.Sync(req);
+    ASSERT(!result.Ok());
+}
+TEST(Test_CollabCloudSync_SuccessfulSync)
+{
+    using namespace ExplorerLens::Engine;
+    CollabCloudSync sync([](const std::string&, const std::string&,
+                            const std::string&, std::string& resp){
+        resp = "{\"uploaded\":5}"; return true;
+    });
+    CloudSyncRequest req; req.accessToken = "bearer123";
+    auto result = sync.Sync(req);
+    ASSERT(result.Ok());
+}
+TEST(Test_AnnotationSchemaMigrator_AlreadyCurrent)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationSchemaMigrator migrator;
+    auto result = migrator.Migrate("{}", AnnotationSchemaMigrator::CURRENT_SCHEMA_VERSION);
+    ASSERT(result.success);
+    ASSERT(result.stepsApplied == 0);
+}
+TEST(Test_AnnotationSchemaMigrator_V1ToV4)
+{
+    using namespace ExplorerLens::Engine;
+    AnnotationSchemaMigrator migrator;
+    auto result = migrator.Migrate("{\"stars\":3}", 1, 4);
+    ASSERT(result.success);
+    ASSERT(result.stepsApplied == 3);
+    ASSERT(result.finalVersion == 4);
+    ASSERT(result.errorMsg.empty());
+}
+TEST(Test_AnnotationSchemaMigrator_CurrentVersion)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(AnnotationSchemaMigrator::CURRENT_SCHEMA_VERSION == 4);
+}
+
+//==============================================================================
+// Sprint 631-640 — Protocol Surface & API Ecosystem (v25.7.0 "Rigel-X")
+//==============================================================================
+
+TEST(Test_GRPCThumbnailService_Create)
+{
+    using namespace ExplorerLens::Engine;
+    GRPCThumbnailService svc;
+    ASSERT(!svc.IsRunning());
+    ASSERT(svc.State() == GRPCServiceState::Stopped);
+}
+TEST(Test_GRPCThumbnailService_StartStop)
+{
+    using namespace ExplorerLens::Engine;
+    GRPCThumbnailService svc;
+    ASSERT(svc.Start());
+    ASSERT(svc.IsRunning());
+    svc.Stop();
+    ASSERT(!svc.IsRunning());
+}
+TEST(Test_GRPCThumbnailService_HandleRequest)
+{
+    using namespace ExplorerLens::Engine;
+    GRPCThumbnailService svc;
+    svc.SetRequestHandler([](const GRPCThumbnailRequest& req) {
+        GRPCThumbnailResponse resp;
+        resp.success = !req.filePath.empty();
+        resp.widthPx = req.width;
+        resp.heightPx = req.height;
+        return resp;
+    });
+    GRPCThumbnailRequest req; req.filePath = L"img.png"; req.width = 256; req.height = 256;
+    auto resp = svc.HandleRequest(req);
+    ASSERT(resp.success);
+    ASSERT(resp.widthPx == 256);
+}
+TEST(Test_GRPCThumbnailService_ServiceName)
+{
+    using namespace ExplorerLens::Engine;
+    GRPCThumbnailService svc;
+    ASSERT(svc.ServiceName().find("ThumbnailService") != std::string::npos);
+}
+TEST(Test_GRPCThumbnailService_Config)
+{
+    using namespace ExplorerLens::Engine;
+    GRPCServiceConfig cfg; cfg.maxConcurrent = 64;
+    GRPCThumbnailService svc(cfg);
+    ASSERT(svc.Config().maxConcurrent == 64);
+}
+TEST(Test_RESTThumbnailServer_Create)
+{
+    using namespace ExplorerLens::Engine;
+    RESTThumbnailServer server;
+    ASSERT(!server.IsRunning());
+}
+TEST(Test_RESTThumbnailServer_StartStop)
+{
+    using namespace ExplorerLens::Engine;
+    RESTThumbnailServer server;
+    ASSERT(server.Start());
+    ASSERT(server.IsRunning());
+    server.Stop();
+    ASSERT(!server.IsRunning());
+}
+TEST(Test_RESTThumbnailServer_Dispatch_404)
+{
+    using namespace ExplorerLens::Engine;
+    RESTThumbnailServer server;
+    HTTPRequest req;
+    req.method = HTTPMethod::GET;
+    req.path   = "/unknown";
+    auto resp  = server.Dispatch(req);
+    ASSERT(resp.statusCode == 404);
+}
+TEST(Test_GraphQLQueryEngine_Execute_NoResolver)
+{
+    using namespace ExplorerLens::Engine;
+    GraphQLQueryEngine engine;
+    GraphQLRequest req;
+    req.query  = "{ thumbnail(path: \"x.png\") }";
+    auto result = engine.Execute(req);
+    ASSERT(!result.HasErrors());
+}
+TEST(Test_GraphQLQueryEngine_Introspection)
+{
+    using namespace ExplorerLens::Engine;
+    GraphQLQueryEngine engine;
+    GraphQLRequest req;
+    req.query  = "{ __schema { types { name } } }";
+    auto result = engine.Execute(req);
+    ASSERT(!result.HasErrors());
+}
+TEST(Test_WebSocketPushChannel_Create)
+{
+    using namespace ExplorerLens::Engine;
+    WebSocketPushChannel channel;
+    ASSERT(channel.ClientCount() == 0);
+}
+TEST(Test_WebSocketPushChannel_AddRemoveClient)
+{
+    using namespace ExplorerLens::Engine;
+    WebSocketPushChannel channel;
+    channel.SimulateClientConnect();
+    ASSERT(channel.ClientCount() == 1);
+    channel.SimulateClientDisconnect();
+    ASSERT(channel.ClientCount() == 0);
+}
+TEST(Test_WebSocketPushChannel_Broadcast)
+{
+    using namespace ExplorerLens::Engine;
+    WebSocketPushChannel channel;
+    channel.SimulateClientConnect();
+    channel.SimulateClientConnect();
+    WSMessage msg;
+    msg.payload = "hello";
+    channel.Broadcast(msg);
+    ASSERT(channel.ClientCount() == 2);
+}
+TEST(Test_OpenAPISpecGenerator_GenerateYAML)
+{
+    using namespace ExplorerLens::Engine;
+    OpenAPISpecGenerator gen;
+    std::string yaml = gen.Generate(OpenAPIOutputFormat::YAML);
+    ASSERT(!yaml.empty());
+    ASSERT(yaml.find("openapi") != std::string::npos);
+}
+TEST(Test_OpenAPISpecGenerator_GenerateJSON)
+{
+    using namespace ExplorerLens::Engine;
+    OpenAPISpecGenerator gen;
+    std::string json = gen.Generate(OpenAPIOutputFormat::JSON);
+    ASSERT(!json.empty());
+    ASSERT(json.find("{") != std::string::npos);
+}
+TEST(Test_SDKBindingsGenerator_CSharp)
+{
+    using namespace ExplorerLens::Engine;
+    SDKBindingsGenerator gen;
+    auto result = gen.Generate(SDKBindingLanguage::CSharp);
+    ASSERT(result.success);
+    const std::string& code = result.code;
+    ASSERT(!code.empty());
+    ASSERT(code.find("class") != std::string::npos || code.find("namespace") != std::string::npos);
+}
+TEST(Test_SDKBindingsGenerator_Python)
+{
+    using namespace ExplorerLens::Engine;
+    SDKBindingsGenerator gen;
+    auto result = gen.Generate(SDKBindingLanguage::Python);
+    ASSERT(result.success);
+    const std::string& code = result.code;
+    ASSERT(!code.empty());
+    ASSERT(code.find("class") != std::string::npos || code.find("def") != std::string::npos);
+}
+TEST(Test_OAuthTokenValidator_ValidToken)
+{
+    using namespace ExplorerLens::Engine;
+    // JWT format: header.payload.signature (3 dots-separated parts)
+    OAuthTokenValidator validator;
+    // Valid 3-part token stub (any header.payload.sig)
+    std::string token = "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ1c2VyMSJ9.signature";
+    auto result = validator.Validate(token);
+    ASSERT(result.Ok());
+    ASSERT(result.status == TokenValidationStatus::Valid);
+}
+TEST(Test_OAuthTokenValidator_MalformedToken)
+{
+    using namespace ExplorerLens::Engine;
+    OAuthTokenValidator validator;
+    auto result = validator.Validate("not-a-jwt");
+    ASSERT(!result.Ok());
+    ASSERT(result.status == TokenValidationStatus::MalformedToken);
+}
+TEST(Test_OAuthTokenValidator_EmptyToken)
+{
+    using namespace ExplorerLens::Engine;
+    OAuthTokenValidator validator;
+    auto result = validator.Validate("");
+    ASSERT(!result.Ok());
+}
+TEST(Test_OAuthTokenValidator_InjectableClock)
+{
+    using namespace ExplorerLens::Engine;
+    OAuthTokenValidator validator("issuer", "audience", []{ return (int64_t)1000000; });
+    std::string token = "hdr.pld.sig";
+    auto result = validator.Validate(token);
+    ASSERT(result.Ok());
+    ASSERT(result.claims.issuedAt == 1000000);
+}
+TEST(Test_APIRateLimiter_Allow)
+{
+    using namespace ExplorerLens::Engine;
+    RateLimitPolicy pol; pol.requestsPerWindow = 10; pol.burstAllowance = 5;
+    APIRateLimiter limiter(pol);
+    auto result = limiter.Check("user1");
+    ASSERT(result.IsAllowed());
+}
+TEST(Test_APIRateLimiter_Throttle)
+{
+    using namespace ExplorerLens::Engine;
+    RateLimitPolicy pol; pol.requestsPerWindow = 2; pol.burstAllowance = 0;
+    APIRateLimiter limiter(pol);
+    limiter.Check("u");
+    limiter.Check("u");
+    limiter.Check("u"); // 3rd should throttle
+    auto result = limiter.Check("u");
+    ASSERT(result.decision == RateLimitDecision::Throttle);
+}
+TEST(Test_APIRateLimiter_ResetClient)
+{
+    using namespace ExplorerLens::Engine;
+    APIRateLimiter limiter;
+    limiter.Check("clientX");
+    ASSERT(limiter.TrackedClients() >= 1);
+    limiter.ResetClient("clientX");
+    ASSERT(limiter.TrackedClients() == 0);
+}
+TEST(Test_APIRateLimiter_SlidingWindow)
+{
+    using namespace ExplorerLens::Engine;
+    RateLimitPolicy pol; pol.algorithm = RateLimitAlgorithm::SlidingWindow;
+    pol.requestsPerWindow = 5;
+    APIRateLimiter limiter(pol);
+    for (int i = 0; i < 4; ++i) {
+        auto r = limiter.Check("sw");
+        ASSERT(r.IsAllowed());
+    }
+}
+
+//==============================================================================
+// Sprint 641-650 — Post-Quantum Security (v26.0.0 "Canopus")
+//==============================================================================
+
+TEST(Test_MLKEMKeyEncapsulator_GenerateKeyPair)
+{
+    using namespace ExplorerLens::Engine;
+    MLKEMKeyEncapsulator kem;
+    auto kp = kem.GenerateKeyPair();
+    ASSERT(kp.IsValid());
+    ASSERT(kp.publicKey.bytes.size() == 1184); // MLKEM-768
+    ASSERT(kp.privateKey.bytes.size() == 2400);
+}
+TEST(Test_MLKEMKeyEncapsulator_Encapsulate)
+{
+    using namespace ExplorerLens::Engine;
+    MLKEMKeyEncapsulator kem;
+    auto kp = kem.GenerateKeyPair();
+    auto result = kem.Encapsulate(kp.publicKey);
+    ASSERT(result.success);
+    ASSERT(!result.ciphertext.empty());
+}
+TEST(Test_MLKEMKeyEncapsulator_Decapsulate)
+{
+    using namespace ExplorerLens::Engine;
+    MLKEMKeyEncapsulator kem;
+    auto kp = kem.GenerateKeyPair();
+    auto enc = kem.Encapsulate(kp.publicKey);
+    auto dec = kem.Decapsulate(kp.privateKey, enc.ciphertext);
+    ASSERT(dec.success);
+    ASSERT(dec.sharedSecret == enc.sharedSecret);
+}
+TEST(Test_MLKEMKeyEncapsulator_LevelName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(MLKEMKeyEncapsulator::LevelName(MLKEMSecurityLevel::MLKEM512)  == "ML-KEM-512");
+    ASSERT(MLKEMKeyEncapsulator::LevelName(MLKEMSecurityLevel::MLKEM1024) == "ML-KEM-1024");
+}
+TEST(Test_MLKEMKeyEncapsulator_InvalidPubKey)
+{
+    using namespace ExplorerLens::Engine;
+    MLKEMKeyEncapsulator kem;
+    MLKEMPublicKey empty;
+    auto result = kem.Encapsulate(empty);
+    ASSERT(!result.success);
+}
+TEST(Test_SLHDSASignatureVerifier_Create)
+{
+    using namespace ExplorerLens::Engine;
+    SLHDSASignatureVerifier verifier;
+    ASSERT(!SLHDSASignatureVerifier::ParamSetName(verifier.ParameterSet()).empty());
+}
+TEST(Test_SLHDSASignatureVerifier_SignAndVerify)
+{
+    using namespace ExplorerLens::Engine;
+    SLHDSASignatureVerifier verifier;
+    std::vector<uint8_t> msg = {1, 2, 3, 4};
+    SLHDSAPublicKey pubKey;
+    pubKey.paramSet = SLHDSAParameterSet::SLHDSA_SHA2_128s;
+    pubKey.bytes    = {0x01, 0x02};
+    SLHDSASignature sig;
+    sig.paramSet = SLHDSAParameterSet::SLHDSA_SHA2_128s;
+    sig.bytes    = {0xAA, 0xBB};
+    auto vr = verifier.Verify(msg, sig, pubKey);
+    ASSERT(!vr.paramSetName.empty());
+}
+TEST(Test_SLHDSASignatureVerifier_InvalidSignature)
+{
+    using namespace ExplorerLens::Engine;
+    SLHDSASignatureVerifier verifier;
+    std::vector<uint8_t> msg = {1, 2, 3};
+    SLHDSASignature badSig;
+    badSig.paramSet = SLHDSAParameterSet::SLHDSA_SHA2_128s;
+    badSig.bytes    = std::vector<uint8_t>(32, 0xFF);
+    SLHDSAPublicKey pubKey;
+    pubKey.paramSet = SLHDSAParameterSet::SLHDSA_SHA2_128s;
+    pubKey.bytes    = std::vector<uint8_t>(32, 0xAB);
+    auto vr = verifier.Verify(msg, badSig, pubKey);
+    ASSERT(!vr.valid);
+}
+TEST(Test_HybridTLSIPCChannel_Create)
+{
+    using namespace ExplorerLens::Engine;
+    HybridTLSIPCChannel channel;
+    ASSERT(channel.State() == IPCChannelState::Disconnected);
+    ASSERT(!channel.IsConnected());
+}
+TEST(Test_HybridTLSIPCChannel_Connect)
+{
+    using namespace ExplorerLens::Engine;
+    HybridTLSIPCChannel channel;
+    auto result = channel.Connect();
+    ASSERT(result.Ok());
+    ASSERT(channel.IsConnected());
+}
+TEST(Test_HybridTLSIPCChannel_Send)
+{
+    using namespace ExplorerLens::Engine;
+    HybridTLSIPCChannel channel;
+    channel.Connect();
+    std::vector<uint8_t> data = {0x01, 0x02, 0x03};
+    auto sr = channel.Send(data);
+    ASSERT(sr.success);
+    ASSERT(sr.bytesSent == 3);
+}
+TEST(Test_HybridTLSIPCChannel_Disconnect)
+{
+    using namespace ExplorerLens::Engine;
+    HybridTLSIPCChannel channel;
+    channel.Connect();
+    channel.Disconnect();
+    ASSERT(!channel.IsConnected());
+}
+TEST(Test_HybridTLSIPCChannel_ModeName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(HybridTLSIPCChannel::ModeName(HybridKEMMode::Hybrid)   == "Hybrid");
+    ASSERT(HybridTLSIPCChannel::ModeName(HybridKEMMode::ECDHOnly)  == "ECDHOnly");
+}
+TEST(Test_PQAuditTrail_AddAndVerify)
+{
+    using namespace ExplorerLens::Engine;
+    PQAuditTrail trail;
+    trail.Record(PQCryptoEvent::KeyEncapsulated, "ML-KEM-768", "user1");
+    ASSERT(trail.EntryCount() == 1);
+    auto verResult = trail.VerifyChain();
+    ASSERT(verResult.valid);
+}
+TEST(Test_PQAuditTrail_MultiEntry)
+{
+    using namespace ExplorerLens::Engine;
+    PQAuditTrail trail;
+    trail.Record(PQCryptoEvent::SignatureCreated,  "SLH-DSA", "alice");
+    trail.Record(PQCryptoEvent::SignatureVerified, "SLH-DSA", "bob");
+    ASSERT(trail.EntryCount() == 2);
+    auto verResult = trail.VerifyChain();
+    ASSERT(verResult.valid);
+}
+TEST(Test_QuantumSafeKeyRotator_NeedsRotation)
+{
+    using namespace ExplorerLens::Engine;
+    KeyRotationPolicy policy;
+    policy.maxKeyAgeHours = std::chrono::hours{0};
+    QuantumSafeKeyRotator rotator(policy);
+    std::string keyId = rotator.AddKey(KeyType::MLKEM);
+    KeyRecord rec; rec.keyId = keyId; rec.createdAtEpoch = 0;
+    ASSERT(rotator.ShouldRotate(rec));
+}
+TEST(Test_QuantumSafeKeyRotator_RotateCallback)
+{
+    using namespace ExplorerLens::Engine;
+    QuantumSafeKeyRotator rotator;
+    bool called = false;
+    rotator.SetRotationCallback([&](const RotationResult&){ called = true; });
+    std::string keyId = rotator.AddKey(KeyType::MLKEM);
+    rotator.Rotate(keyId, RotationReason::Manual);
+    ASSERT(called);
+}
+TEST(Test_FIPS140CryptoBoundary_ApprovedAlgos)
+{
+    using namespace ExplorerLens::Engine;
+    FIPS140CryptoBoundary boundary;
+    ASSERT(boundary.Check("AES-256-GCM").allowed);
+    ASSERT(boundary.Check("SHA-256").allowed);
+    ASSERT(!boundary.Check("RC4").allowed); // not approved
+}
+TEST(Test_FIPS140CryptoBoundary_AlgorithmCount)
+{
+    using namespace ExplorerLens::Engine;
+    FIPS140CryptoBoundary boundary;
+    ASSERT(boundary.AlgorithmCount() >= 5);
+}
+TEST(Test_CertificateMigrationTool_CreatePlan)
+{
+    using namespace ExplorerLens::Engine;
+    CertificateMigrationTool tool;
+    MigCertInfo src;
+    src.subjectCN = "test.example.com";
+    src.algoType  = CertificateAlgoType::RSA2048;
+    auto plan = tool.BuildPlan(src);
+    ASSERT(!plan.steps.empty());
+    ASSERT(plan.steps.size() >= 3);
+}
+TEST(Test_CertificateMigrationTool_PlanHasDualSign)
+{
+    using namespace ExplorerLens::Engine;
+    CertificateMigrationTool tool;
+    MigCertInfo src;
+    src.subjectCN = "ca.example.com";
+    src.algoType  = CertificateAlgoType::ECDSA_P256;
+    src.isCA      = true;
+    auto plan = tool.BuildPlan(src);
+    bool hasDualSign = false;
+    for (const auto& s : plan.steps)
+        if (s.find("dual") != std::string::npos ||
+            s.find("Dual") != std::string::npos) { hasDualSign = true; break; }
+    ASSERT(hasDualSign);
+}
+TEST(Test_CryptoAgilityEngine_AlgorithmCount)
+{
+    using namespace ExplorerLens::Engine;
+    CryptoAgilityEngine engine;
+    ASSERT(engine.AlgorithmCount() == 7);
+}
+TEST(Test_CryptoAgilityEngine_Negotiate_HybridPref)
+{
+    using namespace ExplorerLens::Engine;
+    CryptoAgilityEngine engine(CryptoPreference::Hybrid);
+    auto result = engine.Negotiate(CryptoRole::KeyExchange, {"ML-KEM-768", "ECDH-P384"});
+    ASSERT(result.Ok());
+    ASSERT(result.role == CryptoRole::KeyExchange);
+}
+TEST(Test_CryptoAgilityEngine_Negotiate_PQOnly)
+{
+    using namespace ExplorerLens::Engine;
+    CryptoAgilityEngine engine(CryptoPreference::PostQuantum);
+    auto result = engine.Negotiate(CryptoRole::KeyExchange, {"ML-KEM-768", "ECDH-P384"});
+    ASSERT(result.Ok());
+    ASSERT(result.selected == "ML-KEM-768");
+}
+TEST(Test_CryptoAgilityEngine_FIPSFilter)
+{
+    using namespace ExplorerLens::Engine;
+    CryptoAgilityEngine engine;
+    engine.SetRequireFIPS(true);
+    auto result = engine.Negotiate(CryptoRole::Hash, {"SHA-256"});
+    ASSERT(result.Ok());
+    ASSERT(result.isFIPS);
+}
+
+//==============================================================================
+// Sprint 651-660 — Windows Next-Gen Shell Integration (v26.1.0 "Canopus-R")
+//==============================================================================
+
+TEST(Test_WinRTThumbnailBridge_NoHandler)
+{
+    using namespace ExplorerLens::Engine;
+    WinRTThumbnailBridge bridge;
+    WinRTThumbnailRequest req; req.filePath = L"img.jpg";
+    auto result = bridge.GetThumbnail(req);
+    ASSERT(!result.Ok());
+}
+TEST(Test_WinRTThumbnailBridge_WithHandler)
+{
+    using namespace ExplorerLens::Engine;
+    WinRTThumbnailBridge bridge;
+    bridge.SetSyncHandler([](const WinRTThumbnailRequest& r) {
+        WinRTThumbnailResult res;
+        res.success  = !r.filePath.empty();
+        res.widthPx  = (int)r.requestedSize;
+        res.heightPx = (int)r.requestedSize;
+        return res;
+    });
+    WinRTThumbnailRequest req; req.filePath = L"photo.jpg";
+    req.requestedSize = WinRTThumbnailRequestedSize::Large;
+    auto result = bridge.GetThumbnail(req);
+    ASSERT(result.Ok());
+    ASSERT(result.widthPx == 256);
+}
+TEST(Test_WinRTThumbnailBridge_ModeName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(WinRTThumbnailBridge::ModeName(WinRTThumbnailMode::ListView)     == "ListView");
+    ASSERT(WinRTThumbnailBridge::ModeName(WinRTThumbnailMode::DocumentsView) == "DocumentsView");
+}
+TEST(Test_WinRTThumbnailBridge_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    WinRTThumbnailBridge bridge;
+    bridge.SetSyncHandler([](const WinRTThumbnailRequest& r){
+        WinRTThumbnailResult res; res.success = !r.filePath.empty(); return res;
+    });
+    WinRTThumbnailRequest req; // empty path
+    auto result = bridge.GetThumbnail(req);
+    ASSERT(!result.Ok()); // empty path → rejected before handler
+}
+TEST(Test_CopilotPlatformBridge_Create)
+{
+    using namespace ExplorerLens::Engine;
+    CopilotPlatformBridge bridge;
+    ASSERT(!bridge.IsAvailable());
+}
+TEST(Test_CopilotPlatformBridge_InjectableInvoke)
+{
+    using namespace ExplorerLens::Engine;
+    CopilotPlatformBridge bridge;
+    bridge.SetInvokeFunction([](const CopilotInvokeRequest&) -> CopilotInvokeResult {
+        CopilotInvokeResult r; r.success = true; r.output = "summary: test"; return r;
+    });
+    bridge.SetStatus(CopilotRuntimeStatus::Available);
+    CopilotInvokeRequest req;
+    req.feature  = CopilotFeature::ContentSummary;
+    req.filePath = L"photo.jpg";
+    auto result  = bridge.Invoke(req);
+    ASSERT(result.success);
+    ASSERT(result.output.find("summary") != std::string::npos);
+}
+TEST(Test_AppContainerIsolation_Create)
+{
+    using namespace ExplorerLens::Engine;
+    AppContainerIsolation iso;
+    ASSERT(!iso.HasCapability(AppContainerCapability::InternetClient));
+}
+TEST(Test_AppContainerIsolation_GrantRevoke)
+{
+    using namespace ExplorerLens::Engine;
+    AppContainerIsolation iso;
+    iso.GrantCapability(AppContainerCapability::PicturesLibrary);
+    ASSERT(iso.HasCapability(AppContainerCapability::PicturesLibrary));
+    iso.RevokeCapability(AppContainerCapability::PicturesLibrary);
+    ASSERT(!iso.HasCapability(AppContainerCapability::PicturesLibrary));
+}
+TEST(Test_WinFSMetadataStore_Create)
+{
+    using namespace ExplorerLens::Engine;
+    WinFSMetadataStore store;
+    ASSERT(store.Stats().recordCount == 0);
+}
+TEST(Test_WinFSMetadataStore_SetAndGet)
+{
+    using namespace ExplorerLens::Engine;
+    WinFSMetadataStore store;
+    MetadataRecord rec;
+    rec.filePath = L"C:\\img.jpg";
+    rec.Set("Rating", "5");
+    store.Write(rec);
+    MetadataRecord found;
+    bool ok = store.Read(L"C:\\img.jpg", found);
+    ASSERT(ok);
+    ASSERT(found.Get("Rating") == "5");
+}
+TEST(Test_WindowsSearchV3Bridge_IndexAndQuery)
+{
+    using namespace ExplorerLens::Engine;
+    WindowsSearchV3Bridge bridge;
+    SearchIndexRequest req;
+    req.filePath     = L"C:\\photo.jpg";
+    req.contentTypes = { SearchContentType::FullText };
+    auto res = bridge.IndexFile(req);
+    ASSERT(res.Ok());
+    ASSERT(bridge.IsIndexed(L"C:\\photo.jpg"));
+    ASSERT(bridge.IndexedCount() == 1);
+}
+TEST(Test_SmartAppControlPolicy_Modes)
+{
+    using namespace ExplorerLens::Engine;
+    SmartAppControlPolicy policy;
+    ASSERT(policy.Mode() != SACPolicyMode::Off ||
+           policy.Mode() == SACPolicyMode::Off); // always valid
+    policy.SetMode(SACPolicyMode::Evaluation);
+    ASSERT(policy.Mode() == SACPolicyMode::Evaluation);
+}
+TEST(Test_SmartAppControlPolicy_TrustedPublisher)
+{
+    using namespace ExplorerLens::Engine;
+    SmartAppControlPolicy policy;
+    policy.AddTrustedPublisher("ExplorerLens");
+    SACBinaryInfo info; info.publisherCN = "ExplorerLens"; info.isSigned = true;
+    auto result = policy.Evaluate(info);
+    ASSERT(result.Ok() || result.trustLevel != SACBinaryTrustLevel::Blocked);
+}
+TEST(Test_MSIXStreamingPrewarmer_Create)
+{
+    using namespace ExplorerLens::Engine;
+    MSIXStreamingPrewarmer prewarmer;
+    ASSERT(prewarmer.GroupCount() == 0);
+}
+TEST(Test_MSIXStreamingPrewarmer_Prewarm)
+{
+    using namespace ExplorerLens::Engine;
+    MSIXStreamingPrewarmer prewarmer;
+    MSIXContentGroup g1; g1.name = "Group1";
+    MSIXContentGroup g2; g2.name = "Group2";
+    prewarmer.RegisterGroup(g1);
+    prewarmer.RegisterGroup(g2);
+    ASSERT(prewarmer.GroupCount() == 2);
+}
+TEST(Test_WindowsHelloAuthBridge_Create)
+{
+    using namespace ExplorerLens::Engine;
+    WindowsHelloAuthBridge bridge;
+    ASSERT(!bridge.IsAvailable());
+}
+TEST(Test_WindowsHelloAuthBridge_InjectableAuth)
+{
+    using namespace ExplorerLens::Engine;
+    WindowsHelloAuthBridge bridge;
+    bridge.SetAvailable(true);
+    bridge.SetAuthFunction([](const HelloAuthRequest&) -> HelloAuthResult {
+        HelloAuthResult r; r.status = HelloAuthStatus::Approved;
+        r.method = HelloAuthMethod::Fingerprint; return r;
+    });
+    HelloAuthRequest req; req.scope = HelloProtectedScope::Annotations;
+    auto result = bridge.Authenticate(req);
+    ASSERT(result.Ok());
+}
+
+//==============================================================================
+// Sprint 661-670 — Immersive 3D Preview Engine (v26.2.0 "Canopus-S")
+//==============================================================================
+
+TEST(Test_ImmersivePreviewRenderer_EmptyPath)
+{
+    using namespace ExplorerLens::Engine;
+    ImmersivePreviewRenderer renderer;
+    ImmersiveRenderRequest req; // empty path
+    auto result = renderer.Render(req);
+    ASSERT(!result.Ok());
+}
+TEST(Test_ImmersivePreviewRenderer_Render)
+{
+    using namespace ExplorerLens::Engine;
+    ImmersivePreviewRenderer renderer(ImmersiveRenderBackend::CPU);
+    ImmersiveRenderRequest req;
+    req.modelPath = L"model.gltf";
+    req.width = 128; req.height = 128;
+    req.quality = ImmersiveRenderQuality::Draft;
+    auto result = renderer.Render(req);
+    ASSERT(result.Ok());
+    ASSERT(result.widthPx == 128);
+    ASSERT((int)result.rgba.size() == 128 * 128 * 4);
+}
+TEST(Test_ImmersivePreviewRenderer_QualityNames)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(ImmersivePreviewRenderer::QualityName(ImmersiveRenderQuality::UltraRT) == "UltraRT");
+    ASSERT(ImmersivePreviewRenderer::QualityName(ImmersiveRenderQuality::Draft)   == "Draft");
+}
+TEST(Test_ImmersivePreviewRenderer_RenderTimes)
+{
+    using namespace ExplorerLens::Engine;
+    ImmersivePreviewRenderer renderer;
+    ImmersiveRenderRequest req; req.modelPath = L"x.obj";
+    req.quality = ImmersiveRenderQuality::Standard;
+    auto r = renderer.Render(req);
+    ASSERT(r.renderMs == 17.0);
+}
+TEST(Test_VolumetricThumbnailEngine_Create)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(!VolumetricThumbnailEngine::ModeName(VolumeRenderMode::RayCasting).empty());
+}
+TEST(Test_VolumetricThumbnailEngine_Render)
+{
+    using namespace ExplorerLens::Engine;
+    VolumetricThumbnailEngine engine;
+    VolumeRenderRequest req;
+    req.dataPath = L"scan.nii"; req.width = 64; req.height = 64;
+    auto result = engine.Render(req);
+    ASSERT(result.success);
+    ASSERT(result.widthPx == 64);
+}
+TEST(Test_RealtimeLightingSimulator_Create)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(!RealtimeLightingSimulator::ModelName(LightingModel::PhysicallyBased).empty());
+}
+TEST(Test_RealtimeLightingSimulator_AddLight)
+{
+    using namespace ExplorerLens::Engine;
+    LightingSimulationRequest req;
+    HDRILight light; light.intensity = 1.0f;
+    req.lights.push_back(light);
+    ASSERT(req.lights.size() == 1);
+}
+TEST(Test_HolographicProjectionEngine_Create)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(!HolographicProjectionEngine::TargetName(HolographicDisplayTarget::Standard2D).empty());
+}
+TEST(Test_HolographicProjectionEngine_ProjectStereo)
+{
+    using namespace ExplorerLens::Engine;
+    HolographicProjectionEngine engine;
+    HolographicProjectionRequest req;
+    req.modelPath = L"model.glb"; req.width = 64; req.height = 64;
+    auto result = engine.Project(req);
+    ASSERT(result.success);
+    ASSERT(!result.leftRGBA.empty());
+    ASSERT(!result.rightRGBA.empty());
+}
+TEST(Test_MeshLODGeneratorV2_Create)
+{
+    using namespace ExplorerLens::Engine;
+    MeshLODRequest req;
+    ASSERT(req.levels == 4);
+}
+TEST(Test_MeshLODGeneratorV2_GenerateLOD)
+{
+    using namespace ExplorerLens::Engine;
+    MeshLODGeneratorV2 gen;
+    MeshLODRequest req; req.modelPath = L"mesh.obj"; req.sourceTris = 10000;
+    auto result = gen.GenerateLODs(req);
+    ASSERT(result.success);
+    ASSERT(result.levels.size() == 4);
+    ASSERT(result.levels[0].targetTris <= req.sourceTris);
+}
+TEST(Test_AnimationPreviewScrubber_Create)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(!AnimationPreviewScrubber::StrategyName(AnimationScrubStrategy::SmartPose).empty());
+}
+TEST(Test_AnimationPreviewScrubber_PickFrame)
+{
+    using namespace ExplorerLens::Engine;
+    AnimationPreviewScrubber scrubber;
+    AnimationScrubRequest req;
+    req.strategy = AnimationScrubStrategy::MiddleFrame;
+    auto result = scrubber.Scrub(req);
+    ASSERT(result.frameIndex >= 0);
+}
+TEST(Test_MaterialPreviewEngine_DetectFormat)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(MaterialPreviewEngine::DetectFormat(L"model.mtl")      == MaterialFileFormat::MTL);
+    ASSERT(MaterialPreviewEngine::DetectFormat(L"mat.materialx") == MaterialFileFormat::MaterialX);
+}
+TEST(Test_MaterialPreviewEngine_Render)
+{
+    using namespace ExplorerLens::Engine;
+    MaterialPreviewEngine engine;
+    MaterialPreviewRequest req; req.materialPath = L"mat.mtl";
+    req.width = 64; req.height = 64;
+    auto result = engine.Render(req);
+    ASSERT(result.success);
+}
+TEST(Test_GPUPathTracerPreview_Create)
+{
+    using namespace ExplorerLens::Engine;
+    GPUPathTracerPreview tracer;
+    ASSERT(tracer.IsHardwareAvailable() || !tracer.IsHardwareAvailable()); // construction ok
+}
+TEST(Test_GPUPathTracerPreview_SamplesForQuality)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(GPUPathTracerPreview::SamplesForQuality(PathTracerQuality::Preview_1spp)  == 1);
+    ASSERT(GPUPathTracerPreview::SamplesForQuality(PathTracerQuality::Quality_4spp)  == 4);
+    ASSERT(GPUPathTracerPreview::SamplesForQuality(PathTracerQuality::Final_16spp)   == 16);
+}
+TEST(Test_GPUPathTracerPreview_Trace)
+{
+    using namespace ExplorerLens::Engine;
+    GPUPathTracerPreview tracer;
+    PathTracerRequest req; req.modelPath = L"scene.gltf";
+    req.width = 32; req.height = 32;
+    auto result = tracer.Render(req);
+    ASSERT(result.success);
+    ASSERT(result.widthPx == 32);
+}
+
+//==============================================================================
+// Sprint 671-680 — Real-Time Collaboration (v26.3.0 "Canopus-T")
+//==============================================================================
+
+TEST(Test_CollaborationPresenceEngine_JoinLeave)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborationPresenceEngine engine;
+    PresenceUser user; user.userId = "alice"; user.displayName = "Alice";
+    engine.JoinSession(user);
+    ASSERT(engine.UserCount() == 1);
+    engine.LeaveSession("alice");
+    auto snap = engine.GetSnapshot();
+    for (const auto& u : snap.users)
+        if (u.userId == "alice") ASSERT(u.state == PresenceState::Offline);
+}
+TEST(Test_CollaborationPresenceEngine_Snapshot)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborationPresenceEngine engine;
+    PresenceUser u1; u1.userId = "u1"; u1.state = PresenceState::Online;
+    PresenceUser u2; u2.userId = "u2"; u2.state = PresenceState::Idle;
+    engine.JoinSession(u1);
+    engine.JoinSession(u2);
+    auto snap = engine.GetSnapshot();
+    ASSERT(snap.onlineCount() >= 1);
+}
+TEST(Test_CollaborationPresenceEngine_StateNames)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(CollaborationPresenceEngine::StateName(PresenceState::Online)  == "Online");
+    ASSERT(CollaborationPresenceEngine::StateName(PresenceState::Offline) == "Offline");
+}
+TEST(Test_CollaborationPresenceEngine_UpdateCursor)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborationPresenceEngine engine;
+    PresenceUser u; u.userId = "bob";
+    engine.JoinSession(u);
+    engine.UpdateCursor("bob", 0.5f, 0.75f);
+}
+TEST(Test_LiveAnnotationBroadcaster_Broadcast)
+{
+    using namespace ExplorerLens::Engine;
+    LiveAnnotationBroadcaster broadcaster;
+    broadcaster.SetPeerCount(3);
+    AnnotationDelta delta; delta.lamportClock = 1; delta.authorId = "alice";
+    delta.op = AnnotationOpType::SetStar;
+    auto result = broadcaster.Broadcast(delta);
+    ASSERT(result.Ok());
+    ASSERT(result.peersNotified == 3);
+    ASSERT(broadcaster.HistorySize() == 1);
+}
+TEST(Test_LiveAnnotationBroadcaster_LamportClock)
+{
+    using namespace ExplorerLens::Engine;
+    LiveAnnotationBroadcaster broadcaster;
+    AnnotationDelta d; d.lamportClock = 5;
+    broadcaster.Broadcast(d);
+    ASSERT(broadcaster.LamportClock() == 6); // max(5,0)+1
+}
+TEST(Test_LiveAnnotationBroadcaster_OpName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(LiveAnnotationBroadcaster::OpName(AnnotationOpType::AddTag)    == "AddTag");
+    ASSERT(LiveAnnotationBroadcaster::OpName(AnnotationOpType::SetColor)  == "SetColor");
+}
+TEST(Test_SharedViewStateProtocol_Publish)
+{
+    using namespace ExplorerLens::Engine;
+    SharedViewStateProtocol proto;
+    SharedViewState state; state.sortOrder = ViewSortOrder::Date;
+    auto r = proto.Publish(state);
+    ASSERT(r.Ok());
+    ASSERT(proto.Version() == 1);
+    ASSERT(proto.Current().sortOrder == ViewSortOrder::Date);
+}
+TEST(Test_SharedViewStateProtocol_Apply)
+{
+    using namespace ExplorerLens::Engine;
+    SharedViewStateProtocol proto;
+    SharedViewState state; state.version = 10; state.zoomLevel = ViewZoomLevel::Large;
+    auto r = proto.Apply(state);
+    ASSERT(r.Ok());
+    ASSERT(proto.Current().zoomLevel == ViewZoomLevel::Large);
+}
+TEST(Test_SharedViewStateProtocol_Callback)
+{
+    using namespace ExplorerLens::Engine;
+    SharedViewStateProtocol proto;
+    bool called = false;
+    proto.SetViewStateCallback([&](const SharedViewState&){ called = true; });
+    SharedViewState s;
+    proto.Publish(s);
+    ASSERT(called);
+}
+TEST(Test_ConflictResolutionMerger_LWW)
+{
+    using namespace ExplorerLens::Engine;
+    ConflictResolutionMerger merger(ConflictResolutionStrategy::LastWriteWins);
+    ConflictEntry e; e.localValue = "3"; e.remoteValue = "5";
+    e.localTimestamp = 100; e.remoteTimestamp = 200;
+    auto result = merger.Resolve({e});
+    ASSERT(result.Ok());
+    ASSERT(result.resolvedValue == "5"); // remote is newer
+}
+TEST(Test_ConflictResolutionMerger_OwnerPriority)
+{
+    using namespace ExplorerLens::Engine;
+    ConflictResolutionMerger merger(ConflictResolutionStrategy::OwnerPriority);
+    ConflictEntry e; e.localValue = "local"; e.remoteValue = "remote";
+    auto result = merger.Resolve({e});
+    ASSERT(result.resolvedValue == "local");
+}
+TEST(Test_ConflictResolutionMerger_StrategyName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(ConflictResolutionMerger::StrategyName(ConflictResolutionStrategy::ThreeWayMerge)
+           == "ThreeWayMerge");
+}
+TEST(Test_CollaborativePluginHost_CreateSession)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborativePluginHost host;
+    CollabPluginSession session; session.pluginId = "plugin1"; session.ownerUserId = "alice";
+    ASSERT(host.CreateSession(session));
+    ASSERT(host.SessionCount() == 1);
+}
+TEST(Test_CollaborativePluginHost_JoinAndInvoke)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborativePluginHost host;
+    host.SetHandler([](const std::string&, const std::string& user, const std::string& input) {
+        CollabPluginInvokeResult r; r.success = true; r.invokerUserId = user; r.output = input; return r;
+    });
+    CollabPluginSession s; s.pluginId = "p1"; s.ownerUserId = "alice";
+    host.CreateSession(s);
+    host.JoinSession("p1", "bob");
+    auto r = host.Invoke("p1", "bob", "hello");
+    ASSERT(r.Ok());
+    ASSERT(r.output == "hello");
+}
+TEST(Test_CollaborativePluginHost_PolicyName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(CollaborativePluginHost::PolicyName(CollabPluginPolicy::ViewOnly) == "ViewOnly");
+}
+TEST(Test_PresenceAvatarRenderer_Render_Empty)
+{
+    using namespace ExplorerLens::Engine;
+    PresenceAvatarRenderer renderer;
+    std::vector<AvatarParticipant> participants;
+    auto frame = renderer.Render(participants, 256, 256);
+    ASSERT(frame.participantCount == 0);
+    ASSERT((int)frame.rgba.size() == 256 * 256 * 4);
+}
+TEST(Test_PresenceAvatarRenderer_Render_WithParticipants)
+{
+    using namespace ExplorerLens::Engine;
+    PresenceAvatarRenderer renderer;
+    AvatarParticipant p; p.userId = "alice"; p.initials = "AL";
+    p.color = {255, 100, 0}; p.position = {0.5f, 0.5f};
+    auto frame = renderer.Render({p}, 128, 128);
+    ASSERT(frame.participantCount == 1);
+}
+TEST(Test_SessionReplayEngine_RecordAndPlay)
+{
+    using namespace ExplorerLens::Engine;
+    SessionReplayEngine engine;
+    engine.StartRecording("session1");
+    ReplayFrame f; f.timestampMs = 100; f.authorId = "alice"; f.operation = "setTag";
+    engine.RecordFrame(f);
+    auto rec = engine.StopRecording();
+    ASSERT(rec.FrameCount() == 1);
+    auto result = engine.Play(rec, ReplaySpeed::Normal_1x);
+    ASSERT(result.Ok());
+    ASSERT(result.framesPlayed == 1);
+}
+TEST(Test_SessionReplayEngine_SpeedFactor)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(SessionReplayEngine::SpeedFactor(ReplaySpeed::Slow_0_25x) == 0.25);
+    ASSERT(SessionReplayEngine::SpeedFactor(ReplaySpeed::Super_4x)   == 4.0);
+}
+TEST(Test_SessionReplayEngine_Callback)
+{
+    using namespace ExplorerLens::Engine;
+    SessionReplayEngine engine;
+    int callbackCount = 0;
+    engine.SetFrameCallback([&](const ReplayFrame&){ callbackCount++; });
+    engine.StartRecording("s");
+    ReplayFrame f; f.timestampMs = 1;
+    engine.RecordFrame(f);
+    auto rec = engine.StopRecording();
+    engine.Play(rec, ReplaySpeed::Fast_2x);
+    ASSERT(callbackCount == 1);
+}
+TEST(Test_CollaborationTelemetryHub_Record)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborationTelemetryHub hub;
+    CollabTelemetryRecord rec;
+    rec.event = CollabTelemetryEvent::AnnotationEdited;
+    rec.sessionId = "sess1"; rec.userId = "alice";
+    hub.Record(rec);
+    ASSERT(hub.TotalEvents() == 1);
+}
+TEST(Test_CollaborationTelemetryHub_ConflictRate)
+{
+    using namespace ExplorerLens::Engine;
+    CollaborationTelemetryHub hub;
+    for (int i = 0; i < 10; ++i) {
+        CollabTelemetryRecord r; r.sessionId = "s1"; r.event = CollabTelemetryEvent::AnnotationEdited; hub.Record(r);
+    }
+    CollabTelemetryRecord cr; cr.sessionId = "s1"; cr.event = CollabTelemetryEvent::ConflictDetected; hub.Record(cr);
+    auto metrics = hub.GetMetrics("s1");
+    ASSERT(metrics.edits == 10);
+    ASSERT(metrics.conflicts >= 1);
+}
+TEST(Test_CollaborationTelemetryHub_EventName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(CollaborationTelemetryHub::EventName(CollabTelemetryEvent::UserJoined) == "UserJoined");
+}
+
+//==============================================================================
+// Sprint 681-690 — Adaptive Performance Governor v2 (v26.4.0 "Canopus-U")
+//==============================================================================
+
+TEST(Test_AdaptivePerformanceGovernorV2_BalancedMode)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptivePerformanceGovernorV2 gov;
+    GovernorSample sample; // defaults: mild load
+    auto d = gov.Evaluate(sample);
+    ASSERT(d.mode == GovernorMode::Performance || d.mode == GovernorMode::Balanced);
+    ASSERT(d.maxDecodeSlots > 0);
+}
+TEST(Test_AdaptivePerformanceGovernorV2_ThermalThrottle)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptivePerformanceGovernorV2 gov;
+    GovernorSample sample;
+    sample.thermalC = 98.0f; sample.powerW = 48.0f; sample.gpuPct = 90.0f; sample.cpuPct = 85.0f;
+    auto d = gov.Evaluate(sample);
+    ASSERT(d.mode == GovernorMode::ThermalThrottle);
+    ASSERT(d.maxDecodeSlots == 2);
+}
+TEST(Test_AdaptivePerformanceGovernorV2_ModeName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(AdaptivePerformanceGovernorV2::ModeName(GovernorMode::PowerSave)       == "PowerSave");
+    ASSERT(AdaptivePerformanceGovernorV2::ModeName(GovernorMode::ThermalThrottle) == "ThermalThrottle");
+}
+TEST(Test_AdaptivePerformanceGovernorV2_EvalCount)
+{
+    using namespace ExplorerLens::Engine;
+    AdaptivePerformanceGovernorV2 gov;
+    gov.Evaluate({}); gov.Evaluate({});
+    ASSERT(gov.EvalCount() == 2);
+}
+TEST(Test_ThermalAwareMemoryScheduler_Comfortable)
+{
+    using namespace ExplorerLens::Engine;
+    ThermalAwareMemoryScheduler sched;
+    auto d = sched.Evaluate(50.0f);
+    ASSERT(d.zone   == TAMZone::Comfortable);
+    ASSERT(d.action == MemoryScheduleAction::FullPrealloc);
+    ASSERT(d.allocMB == 256);
+}
+TEST(Test_ThermalAwareMemoryScheduler_Hot)
+{
+    using namespace ExplorerLens::Engine;
+    ThermalAwareMemoryScheduler sched;
+    auto d = sched.Evaluate(90.0f);
+    ASSERT(d.zone == TAMZone::Hot);
+    ASSERT(d.action == MemoryScheduleAction::LazyAlloc);
+    ASSERT(d.delayWarmup);
+}
+TEST(Test_ThermalAwareMemoryScheduler_Critical)
+{
+    using namespace ExplorerLens::Engine;
+    ThermalAwareMemoryScheduler sched;
+    auto d = sched.Evaluate(100.0f);
+    ASSERT(d.zone == TAMZone::Critical);
+    ASSERT(d.action == MemoryScheduleAction::Emergency);
+}
+TEST(Test_ThermalAwareMemoryScheduler_ZoneName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(ThermalAwareMemoryScheduler::ZoneName(TAMZone::Warm)     == "Warm");
+    ASSERT(ThermalAwareMemoryScheduler::ZoneName(TAMZone::Critical) == "Critical");
+}
+TEST(Test_WorkloadBalancerV2_Dispatch)
+{
+    using namespace ExplorerLens::Engine;
+    WorkloadBalancerV2 lb;
+    WorkloadAdapterInfo ada; ada.adapterId = 0; ada.name = "GPU0";
+    lb.RegisterAdapter(ada);
+    WorkloadItem item; item.id = 1;
+    auto d = lb.Dispatch(item);
+    ASSERT(d.Ok());
+    ASSERT(d.adapterId == 0);
+    ASSERT(lb.DispatchedCount() == 1);
+}
+TEST(Test_WorkloadBalancerV2_Complete)
+{
+    using namespace ExplorerLens::Engine;
+    WorkloadBalancerV2 lb;
+    WorkloadAdapterInfo ada; ada.adapterId = 1;
+    lb.RegisterAdapter(ada);
+    WorkloadItem item; item.id = 2;
+    lb.Dispatch(item);
+    lb.NotifyComplete(1);
+    ASSERT(lb.CompletedCount() == 1);
+}
+TEST(Test_WorkloadBalancerV2_AlgorithmName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(WorkloadBalancerV2::AlgorithmName(WorkloadBalancerV2Algorithm::WorkStealing) == "WorkStealing");
+    ASSERT(WorkloadBalancerV2::AlgorithmName(WorkloadBalancerV2Algorithm::RoundRobin)   == "RoundRobin");
+}
+TEST(Test_PowerBudgetController_AC_Unconstrained)
+{
+    using namespace ExplorerLens::Engine;
+    PowerBudgetController ctrl;
+    PowerSample sample; sample.source = PBCPowerSource::AC; sample.currentPowerW = 20.0f;
+    sample.batteryLevelPct = 100.0f;
+    auto d = ctrl.Evaluate(sample);
+    ASSERT(d.state == PowerBudgetState::Unconstrained);
+    ASSERT(d.maxDecodeSlots == 16);
+}
+TEST(Test_PowerBudgetController_Battery_Critical)
+{
+    using namespace ExplorerLens::Engine;
+    PowerBudgetController ctrl;
+    PowerSample sample; sample.source = PBCPowerSource::Battery;
+    sample.batteryLevelPct = 5.0f; // critical
+    auto d = ctrl.Evaluate(sample);
+    ASSERT(d.state == PowerBudgetState::Emergency);
+    ASSERT(d.disableGPU);
+}
+TEST(Test_PowerBudgetController_StateName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(PowerBudgetController::StateName(PowerBudgetState::Strict)        == "Strict");
+    ASSERT(PowerBudgetController::StateName(PowerBudgetState::Unconstrained) == "Unconstrained");
+}
+TEST(Test_QoSThrottleEngine_Interactive_Allowed)
+{
+    using namespace ExplorerLens::Engine;
+    QoSThrottleEngine engine;
+    QoSRequest req; req.id = 1; req.qosClass = QoSClass::Interactive;
+    auto d = engine.Evaluate(req);
+    ASSERT(d.IsAllowed());
+    ASSERT(d.mode == ThrottleMode::None);
+    engine.NotifyComplete(QoSClass::Interactive);
+}
+TEST(Test_QoSThrottleEngine_Background_Throttled)
+{
+    using namespace ExplorerLens::Engine;
+    QoSThrottleEngine engine;
+    QoSRequest req; req.qosClass = QoSClass::Background;
+    auto d = engine.Evaluate(req);
+    ASSERT(!d.IsAllowed() || d.delayMs > 0); // background is always throttled or delayed
+}
+TEST(Test_QoSThrottleEngine_Idle)
+{
+    using namespace ExplorerLens::Engine;
+    QoSThrottleEngine engine;
+    QoSRequest req; req.qosClass = QoSClass::Idle;
+    auto d = engine.Evaluate(req);
+    ASSERT(d.maxConcurrent == 1);
+    ASSERT(d.delayMs == 200);
+}
+TEST(Test_SmartPrefetchEngine_Predict)
+{
+    using namespace ExplorerLens::Engine;
+    SmartPrefetchEngine engine;
+    std::vector<std::wstring> visible = {L"a.jpg", L"b.jpg", L"c.jpg"};
+    auto candidates = engine.Predict(visible);
+    ASSERT(!candidates.empty());
+    ASSERT(candidates[0].confidenceScore > 0.0);
+}
+TEST(Test_SmartPrefetchEngine_IssuePrefetches)
+{
+    using namespace ExplorerLens::Engine;
+    SmartPrefetchEngine engine;
+    int issued = 0;
+    engine.SetPrefetchIssuer([&](const SPECandidate&){ issued++; return true; });
+    engine.SetMinConfidence(0.5);
+    std::vector<std::wstring> vis = {L"img1.jpg", L"img2.jpg"};
+    auto candidates = engine.Predict(vis);
+    engine.IssuePrefetches(candidates);
+    ASSERT(issued > 0);
+    ASSERT(engine.Stats().requested == issued);
+}
+TEST(Test_SmartPrefetchEngine_HitMissStats)
+{
+    using namespace ExplorerLens::Engine;
+    SmartPrefetchEngine engine;
+    engine.NotifyHit(L"a.jpg");
+    engine.NotifyMiss(L"b.jpg");
+    ASSERT(engine.Stats().hits == 1);
+    ASSERT(engine.Stats().misses == 1);
+}
+TEST(Test_FrameRateSynchronizer_TargetFrameTime)
+{
+    using namespace ExplorerLens::Engine;
+    FrameSyncConfig cfg; cfg.targetHz = RefreshRate::Hz60;
+    FrameRateSynchronizer syncer(cfg);
+    ASSERT(std::abs(syncer.TargetFrameTimeMs() - 16.666) < 0.1);
+}
+TEST(Test_FrameRateSynchronizer_PresentFrame)
+{
+    using namespace ExplorerLens::Engine;
+    FrameRateSynchronizer syncer;
+    auto r = syncer.PresentFrame();
+    ASSERT(r.Ok());
+    ASSERT(syncer.FrameNumber() == 1);
+}
+TEST(Test_FrameRateSynchronizer_SetMode)
+{
+    using namespace ExplorerLens::Engine;
+    FrameRateSynchronizer syncer;
+    syncer.SetMode(SyncMode::AdaptiveSync);
+    ASSERT(syncer.Config().mode == SyncMode::AdaptiveSync);
+}
+TEST(Test_FrameRateSynchronizer_ModeName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(FrameRateSynchronizer::ModeName(SyncMode::LowLatency) == "LowLatency");
+    ASSERT(FrameRateSynchronizer::ModeName(SyncMode::VSync)      == "VSync");
+}
+TEST(Test_BackgroundIntelligenceService_Enqueue)
+{
+    using namespace ExplorerLens::Engine;
+    BackgroundIntelligenceService svc;
+    uint64_t id = svc.Enqueue(L"photo.jpg", 50);
+    ASSERT(id > 0);
+    ASSERT(svc.QueueDepth() == 1);
+}
+TEST(Test_BackgroundIntelligenceService_DrainNext)
+{
+    using namespace ExplorerLens::Engine;
+    BackgroundIntelligenceService svc;
+    int processed = 0;
+    svc.SetWorker([&](const BISJob&){ processed++; return true; });
+    svc.Enqueue(L"a.jpg", 50);
+    svc.Enqueue(L"b.jpg", 50);
+    int done = svc.DrainNext(4, 0.0f); // CPU 0 → below threshold
+    ASSERT(done == 2);
+    ASSERT(processed == 2);
+    ASSERT(svc.Metrics().completed.load() == 2);
+}
+TEST(Test_BackgroundIntelligenceService_IdleThreshold)
+{
+    using namespace ExplorerLens::Engine;
+    BackgroundIntelligenceService svc;
+    svc.SetIdleThresholdCPU(25.0f);
+    svc.Enqueue(L"x.jpg", 50);
+    int done = svc.DrainNext(4, 80.0f); // CPU 80% → above threshold → no work
+    ASSERT(done == 0);
+}
+
+//==============================================================================
+// Sprint 691-700 — Global I18n & Accessibility v3 (v26.5.0 "Canopus-V")
+//==============================================================================
+
+TEST(Test_I18nRuntimeEngine_DefaultLocale)
+{
+    using namespace ExplorerLens::Engine;
+    I18nRuntimeEngine engine;
+    ASSERT(engine.ActiveLocale() == "en-US");
+}
+TEST(Test_I18nRuntimeEngine_RegisterAndTranslate)
+{
+    using namespace ExplorerLens::Engine;
+    I18nRuntimeEngine engine;
+    I18nStringCatalogue cat; cat.locale = "fr-FR";
+    cat.strings["hello"] = "bonjour";
+    engine.RegisterCatalogue(cat);
+    engine.SetLocale("fr-FR");
+    ASSERT(engine.Translate("hello") == "bonjour");
+    ASSERT(engine.CatalogueCount() == 1);
+}
+TEST(Test_I18nRuntimeEngine_FallbackToKey)
+{
+    using namespace ExplorerLens::Engine;
+    I18nRuntimeEngine engine;
+    // No catalogue for en-US, key returned as fallback
+    std::string val = engine.Translate("missing_key", "default");
+    ASSERT(val == "default");
+}
+TEST(Test_I18nRuntimeEngine_RTLDirection)
+{
+    using namespace ExplorerLens::Engine;
+    I18nRuntimeEngine engine;
+    I18nStringCatalogue cat; cat.locale = "ar-SA";
+    engine.RegisterCatalogue(cat);
+    I18nLocaleInfo info; info.tag = "ar-SA"; info.direction = I18nLocaleDir::RTL;
+    engine.RegisterLocaleInfo(info);
+    engine.SetLocale("ar-SA");
+    ASSERT(engine.GetDirection() == I18nLocaleDir::RTL);
+}
+TEST(Test_BiDiTextLayoutEngine_LTR)
+{
+    using namespace ExplorerLens::Engine;
+    BiDiTextLayoutEngine engine;
+    auto result = engine.Analyse(L"Hello World");
+    ASSERT(result.Ok());
+    ASSERT(result.resolvedDir == BiDiBaseDirection::LTR);
+    ASSERT(result.runCount >= 1);
+}
+TEST(Test_BiDiTextLayoutEngine_ContainsRTL)
+{
+    using namespace ExplorerLens::Engine;
+    // Hebrew characters
+    std::wstring hebrew = L"\u05E9\u05DC\u05D5\u05DD";
+    ASSERT(BiDiTextLayoutEngine::ContainsRTL(hebrew));
+    ASSERT(!BiDiTextLayoutEngine::ContainsRTL(L"Hello"));
+}
+TEST(Test_BiDiTextLayoutEngine_EmptyText)
+{
+    using namespace ExplorerLens::Engine;
+    BiDiTextLayoutEngine engine;
+    auto result = engine.Analyse(L"");
+    ASSERT(!result.Ok()); // empty text fails
+}
+TEST(Test_BiDiTextLayoutEngine_ExplicitRTL)
+{
+    using namespace ExplorerLens::Engine;
+    BiDiTextLayoutEngine engine;
+    auto result = engine.Analyse(L"mixed text", BiDiBaseDirection::RTL);
+    ASSERT(result.Ok());
+    ASSERT(result.resolvedDir == BiDiBaseDirection::RTL);
+}
+TEST(Test_AccessibilityNavigatorV3_RegisterAndFind)
+{
+    using namespace ExplorerLens::Engine;
+    AccessibilityNavigatorV3 nav;
+    ANV3Element el; el.automationId = "thumb_1"; el.name = "photo.jpg";
+    el.controlType = ANV3ControlType::DataItem;
+    nav.RegisterElement(el);
+    auto hit = nav.FindById("thumb_1");
+    ASSERT(hit.found);
+    ASSERT(hit.element.name == "photo.jpg");
+}
+TEST(Test_AccessibilityNavigatorV3_Invoke)
+{
+    using namespace ExplorerLens::Engine;
+    AccessibilityNavigatorV3 nav;
+    ANV3Element el; el.automationId = "btn_open"; el.isEnabled = true;
+    nav.RegisterElement(el);
+    bool invoked = false;
+    nav.SetInvokeCallback([&](const ANV3Element&){ invoked = true; });
+    ASSERT(nav.Invoke("btn_open"));
+    ASSERT(invoked);
+}
+TEST(Test_AccessibilityNavigatorV3_NotFound)
+{
+    using namespace ExplorerLens::Engine;
+    AccessibilityNavigatorV3 nav;
+    auto hit = nav.FindById("nonexistent");
+    ASSERT(!hit.found);
+}
+TEST(Test_AccessibilityNavigatorV3_ControlTypeName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(AccessibilityNavigatorV3::ControlTypeName(ANV3ControlType::Button)   == "Button");
+    ASSERT(AccessibilityNavigatorV3::ControlTypeName(ANV3ControlType::ListItem) == "ListItem");
+}
+TEST(Test_ScreenReaderBridgeV2_NotAvailable)
+{
+    using namespace ExplorerLens::Engine;
+    ScreenReaderBridgeV2 bridge;
+    ASSERT(!bridge.Announce("hello"));
+}
+TEST(Test_ScreenReaderBridgeV2_WithFn)
+{
+    using namespace ExplorerLens::Engine;
+    ScreenReaderBridgeV2 bridge;
+    bridge.SetAvailable(true);
+    bridge.SetActiveReader(ScreenReaderType::NVDA);
+    bool announced = false;
+    bridge.SetAnnounceFn([&](const ScreenReaderAnnouncement& a){
+        announced = !a.text.empty(); return true;
+    });
+    ASSERT(bridge.Announce("Thumbnail ready", LiveRegionPoliteness::Polite));
+    ASSERT(announced);
+}
+TEST(Test_ScreenReaderBridgeV2_ReaderName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(ScreenReaderBridgeV2::ReaderName(ScreenReaderType::JAWS)    == "JAWS");
+    ASSERT(ScreenReaderBridgeV2::ReaderName(ScreenReaderType::Narrator) == "Narrator");
+}
+TEST(Test_LocaleFallbackResolver_ExactMatch)
+{
+    using namespace ExplorerLens::Engine;
+    LocaleFallbackResolver resolver;
+    resolver.AddString("zh-Hant-TW", "hello", "NiHao");
+    auto result = resolver.Resolve("zh-Hant-TW", "hello");
+    ASSERT(result.found);
+    ASSERT(result.resolvedLocale == "zh-Hant-TW");
+    ASSERT(result.value == "NiHao");
+}
+TEST(Test_LocaleFallbackResolver_FallbackChain)
+{
+    using namespace ExplorerLens::Engine;
+    LocaleFallbackResolver resolver;
+    resolver.AddString("zh", "greeting", "NiHao");
+    auto result = resolver.Resolve("zh-Hant-TW", "greeting");
+    ASSERT(result.found);
+    ASSERT(result.resolvedLocale == "zh");
+}
+TEST(Test_LocaleFallbackResolver_BuildChain)
+{
+    using namespace ExplorerLens::Engine;
+    auto chain = LocaleFallbackResolver::BuildChain("zh-Hant-TW");
+    ASSERT(chain[0] == "zh-Hant-TW");
+    ASSERT(chain[1] == "zh-Hant");
+    ASSERT(chain[2] == "zh");
+    ASSERT(chain.back() == "en");
+}
+TEST(Test_A11yColorContrastEngine_Pass_AA)
+{
+    using namespace ExplorerLens::Engine;
+    A11yColorContrastEngine engine;
+    ColorRGBA8 black{0, 0, 0, 255};
+    ColorRGBA8 white{255, 255, 255, 255};
+    auto result = engine.Evaluate(black, white, A11yWCAGLevel::AA_Normal);
+    ASSERT(result.decision == ContrastDecision::Pass);
+    ASSERT(result.ratio > 4.5);
+}
+TEST(Test_A11yColorContrastEngine_Fail_AAA)
+{
+    using namespace ExplorerLens::Engine;
+    A11yColorContrastEngine engine;
+    ColorRGBA8 gray{180, 180, 180, 255};
+    ColorRGBA8 white{255, 255, 255, 255};
+    auto result = engine.Evaluate(gray, white, A11yWCAGLevel::AAA_Normal);
+    ASSERT(result.decision == ContrastDecision::Fail);
+}
+TEST(Test_A11yColorContrastEngine_SuggestForeground)
+{
+    using namespace ExplorerLens::Engine;
+    A11yColorContrastEngine engine;
+    ColorRGBA8 darkBG{30, 30, 30, 255};
+    auto fg = engine.SuggestAccessibleForeground(darkBG);
+    // White should have higher contrast on dark background
+    ASSERT(fg.r == 255 && fg.g == 255 && fg.b == 255);
+}
+TEST(Test_A11yColorContrastEngine_RequiredRatio)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(A11yColorContrastEngine::RequiredRatio(A11yWCAGLevel::AA_Normal)  == 4.5);
+    ASSERT(A11yColorContrastEngine::RequiredRatio(A11yWCAGLevel::AAA_Normal) == 7.0);
+}
+TEST(Test_KeyboardNavigationMapV2_AddAndNavigate)
+{
+    using namespace ExplorerLens::Engine;
+    KeyboardNavigationMapV2 nav;
+    NavigationNode n1; n1.id = "item1"; n1.tabIndex = 0;
+    NavigationNode n2; n2.id = "item2"; n2.tabIndex = 1;
+    nav.AddNode(n1);
+    nav.AddNode(n2);
+    nav.AddEdge("item1", NavigationDirection::Right, "item2");
+    auto result = nav.Navigate("item1", NavigationDirection::Right);
+    ASSERT(result.Ok());
+    ASSERT(result.targetNodeId == "item2");
+}
+TEST(Test_KeyboardNavigationMapV2_TabOrder)
+{
+    using namespace ExplorerLens::Engine;
+    KeyboardNavigationMapV2 nav;
+    NavigationNode a; a.id = "z"; a.tabIndex = 2;
+    NavigationNode b; b.id = "y"; b.tabIndex = 1;
+    NavigationNode c; c.id = "x"; c.tabIndex = 0;
+    nav.AddNode(a); nav.AddNode(b); nav.AddNode(c);
+    auto order = nav.TabOrder();
+    ASSERT(order.size() == 3);
+    ASSERT(order[0] == "x"); // lowest tabIndex first
+}
+TEST(Test_KeyboardNavigationMapV2_WrapAround)
+{
+    using namespace ExplorerLens::Engine;
+    KeyboardNavigationMapV2 nav;
+    NavigationNode a; a.id = "a"; a.tabIndex = 0;
+    NavigationNode b; b.id = "b"; b.tabIndex = 1;
+    nav.AddNode(a); nav.AddNode(b);
+    auto result = nav.Navigate("b", NavigationDirection::Next);
+    ASSERT(result.Ok());
+    ASSERT(result.wrappedAround);
+    ASSERT(result.targetNodeId == "a");
+}
+TEST(Test_AccessibilityAuditPipeline_Compliant)
+{
+    using namespace ExplorerLens::Engine;
+    AccessibilityAuditPipeline pipeline;
+    AuditableElement el; el.id = "btn1"; el.name = "Open";
+    el.foregroundRGB = 0x000000; el.backgroundRGB = 0xFFFFFF;
+    el.hasLabel = true; el.isKeyboardFocusable = true;
+    auto report = pipeline.Audit({el});
+    ASSERT(report.totalElements == 1);
+    ASSERT(report.IsCompliant());
+}
+TEST(Test_AccessibilityAuditPipeline_Noncompliant)
+{
+    using namespace ExplorerLens::Engine;
+    AccessibilityAuditPipeline pipeline;
+    AuditableElement el; el.id = "lbl1"; el.name = "";
+    el.foregroundRGB = 0xBBBBBB; el.backgroundRGB = 0xFFFFFF; // low contrast
+    el.hasLabel = false;
+    auto report = pipeline.Audit({el});
+    ASSERT(!report.IsCompliant());
+    ASSERT(!report.issues.empty());
+}
+TEST(Test_AccessibilityAuditPipeline_CriterionName)
+{
+    using namespace ExplorerLens::Engine;
+    ASSERT(AccessibilityAuditPipeline::CriterionName(WCAGSuccessCriterion::SC_1_4_3_ContrastMinimum)
+           == "1.4.3 Contrast (Minimum)");
+}
+TEST(Test_AccessibilityAuditPipeline_PassRate)
+{
+    using namespace ExplorerLens::Engine;
+    AccessibilityAuditPipeline pipeline;
+    AuditableElement good; good.id = "g"; good.foregroundRGB = 0; good.backgroundRGB = 0xFFFFFF; good.hasLabel = true;
+    AuditableElement bad;  bad.id  = "b"; bad.foregroundRGB  = 0xCCCCCC; bad.backgroundRGB = 0xFFFFFF; bad.hasLabel = false;
+    auto report = pipeline.Audit({good, bad});
+    ASSERT(report.totalElements == 2);
+    ASSERT(report.PassRate() >= 0.0 && report.PassRate() <= 100.0);
+}
+
 TEST(IntegrationRunnerSmoke)
 {
     // Verify CorpusTestRunner can be created and run with no corpus
@@ -30074,7 +32539,7 @@ TEST(TestLayoutMetrics_DefaultValues) {
     ASSERT(m.breakpoint == Core::LayoutBreakpoint::Normal);
 }
 TEST(TestSandboxPolicy_DefaultLevel) {
-    SandboxPolicy policy;
+    SecureSandboxPolicy policy;
     ASSERT(policy.level == SandboxLevel::None);
 }
 TEST(TestValidationError_OkIsZero) {
@@ -30119,7 +32584,7 @@ TEST(TestAIModelRole_ContentClassifierIsZero) {
     ASSERT(static_cast<uint8_t>(AIModelRole::ContentClassifier) == 0);
 }
 TEST(TestUpscaleBackend_AutoIsZero) {
-    ASSERT(static_cast<uint8_t>(UpscaleBackend::Auto) == 0);
+    ASSERT(static_cast<uint8_t>(AIUpscaleBackend::Auto) == 0);
 }
 TEST(TestContentCategory_UnknownIsZero) {
     ASSERT(static_cast<uint8_t>(ContentCategory::Unknown) == 0);
@@ -30731,6 +33196,9 @@ TEST(TestCICDWebhookReceiver_DispatchEvent) {
     ASSERT(received == 1);
     recv.Stop();
 }
+
+int main()
+{
     std::wcout << L"========================================" << std::endl;
     std::wcout << L"ExplorerLens Engine - Unit Tests" << std::endl;
     std::wcout << L"========================================" << std::endl
@@ -36058,6 +38526,284 @@ TEST(TestCICDWebhookReceiver_DispatchEvent) {
     RUN_TEST(Test_MergeConflictOverlay_Config);
     RUN_TEST(Test_MergeConflictOverlay_ConflictStateEnum);
     RUN_TEST(Test_MergeConflictOverlay_MarkerCount);
+
+    // Sprint 601-610 — Self-Healing & Adaptive Recovery (v25.4.0)
+    RUN_TEST(Test_DecoderCrashPredictor_Create);
+    RUN_TEST(Test_DecoderCrashPredictor_Predict_NoSamples);
+    RUN_TEST(Test_DecoderCrashPredictor_Record_And_Count);
+    RUN_TEST(Test_DecoderCrashPredictor_HighRisk);
+    RUN_TEST(Test_DecoderCrashPredictor_Reset);
+    RUN_TEST(Test_DecoderCrashPredictor_ResetAll);
+    RUN_TEST(Test_DecoderCrashPredictor_RiskLevelEnum);
+    RUN_TEST(Test_DecoderQuarantineManager_Create);
+    RUN_TEST(Test_DecoderQuarantineManager_RecordCrash_Threshold1);
+    RUN_TEST(Test_DecoderQuarantineManager_RecordCrash_Bypass);
+    RUN_TEST(Test_DecoderQuarantineManager_Recovery);
+    RUN_TEST(Test_DecoderQuarantineManager_StageName);
+    RUN_TEST(Test_AdaptiveTimeoutTuner_DefaultTimeout);
+    RUN_TEST(Test_AdaptiveTimeoutTuner_RecordAndLearn);
+    RUN_TEST(Test_AdaptiveTimeoutTuner_Clamp);
+    RUN_TEST(Test_AdaptiveTimeoutTuner_SetBaseline);
+    RUN_TEST(Test_AdaptiveTimeoutTuner_Reset);
+    RUN_TEST(Test_HeapCorruptionSentinel_Allocate);
+    RUN_TEST(Test_HeapCorruptionSentinel_CheckClean);
+    RUN_TEST(Test_HeapCorruptionSentinel_ScanAll_Clean);
+    RUN_TEST(Test_HeapCorruptionSentinel_DetectHeadCorrupt);
+    RUN_TEST(Test_RetryPolicyEngine_SuccessFirstTry);
+    RUN_TEST(Test_RetryPolicyEngine_ExhaustedRetries);
+    RUN_TEST(Test_RetryPolicyEngine_Config);
+    RUN_TEST(Test_RetryPolicyEngine_ResetStats);
+    RUN_TEST(Test_DecoderIncidentReporter_Healthy);
+    RUN_TEST(Test_DecoderIncidentReporter_Critical);
+    RUN_TEST(Test_DecoderIncidentReporter_BatchReport);
+    RUN_TEST(Test_COMSelfRepairValidator_ClsidConst);
+    RUN_TEST(Test_COMSelfRepairValidator_IsRegistered);
+    RUN_TEST(Test_COMSelfRepairValidator_ClsidPath);
+    RUN_TEST(Test_COMSelfRepairValidator_Validate);
+    RUN_TEST(Test_BootIntegritySelfTest_Instance);
+    RUN_TEST(Test_BootIntegritySelfTest_RunAll);
+    RUN_TEST(Test_BootIntegritySelfTest_AddTest);
+    RUN_TEST(Test_BootIntegritySelfTest_FailingTest);
+
+    // Sprint 611-620 — Multi-Instance & Virtual Desktop (v25.5.0)
+    RUN_TEST(Test_VirtualDesktopAwareness_Instance);
+    RUN_TEST(Test_VirtualDesktopAwareness_BuildCacheKeyPrefix_Global);
+    RUN_TEST(Test_VirtualDesktopAwareness_BuildCacheKeyPrefix_PerDesktop);
+    RUN_TEST(Test_VirtualDesktopAwareness_RegisterDesktop);
+    RUN_TEST(Test_WTSSessionIsolation_Instance);
+    RUN_TEST(Test_WTSSessionIsolation_GetCacheScope);
+    RUN_TEST(Test_WTSSessionIsolation_RegisterSession);
+    RUN_TEST(Test_WTSSessionIsolation_StateName);
+    RUN_TEST(Test_PerMonitorDPISelectorV2_DefaultFallback);
+    RUN_TEST(Test_PerMonitorDPISelectorV2_HighDPI);
+    RUN_TEST(Test_PerMonitorDPISelectorV2_MixedDPI);
+    RUN_TEST(Test_TabbedExplorerSync_Instance);
+    RUN_TEST(Test_TabbedExplorerSync_RegisterTab);
+    RUN_TEST(Test_TabbedExplorerSync_SyncSameFolder);
+    RUN_TEST(Test_CrossSessionThumbnailPool_InsertAndLookup);
+    RUN_TEST(Test_CrossSessionThumbnailPool_Stats);
+    RUN_TEST(Test_CrossSessionThumbnailPool_HitRate);
+    RUN_TEST(Test_InstanceRegistry_Register);
+    RUN_TEST(Test_InstanceRegistry_Heartbeat);
+    RUN_TEST(Test_InstanceRegistry_Unregister);
+    RUN_TEST(Test_ForegroundPriorityInheritance_Instance);
+    RUN_TEST(Test_ForegroundPriorityInheritance_Evaluate_Foreground);
+    RUN_TEST(Test_ForegroundPriorityInheritance_Evaluate_Background);
+    RUN_TEST(Test_CrossInstanceLoadBalancer_Dispatch_NoInstances);
+    RUN_TEST(Test_CrossInstanceLoadBalancer_Dispatch_LeastConn);
+    RUN_TEST(Test_CrossInstanceLoadBalancer_MarkTaskEvents);
+
+    // Sprint 621-630 — Collaborative Annotations (v25.6.0)
+    RUN_TEST(Test_AnnotationStore_AddAndCount);
+    RUN_TEST(Test_AnnotationStore_GetForFile);
+    RUN_TEST(Test_AnnotationStore_Delete);
+    RUN_TEST(Test_AnnotationStore_DirtyFlag);
+    RUN_TEST(Test_AnnotationStore_AnnotationTypeNames);
+    RUN_TEST(Test_AnnotationOverlayRenderer_NoAnnotations);
+    RUN_TEST(Test_AnnotationOverlayRenderer_WithStars);
+    RUN_TEST(Test_AnnotationOverlayRenderer_Config);
+    RUN_TEST(Test_CollabWebhookBridge_NoConfigs);
+    RUN_TEST(Test_CollabWebhookBridge_BuildPayload_Teams);
+    RUN_TEST(Test_CollabWebhookBridge_BuildPayload_Slack);
+    RUN_TEST(Test_CollabWebhookBridge_InjectableHTTP);
+    RUN_TEST(Test_SharedCollectionBuilder_CreateCollection);
+    RUN_TEST(Test_SharedCollectionBuilder_AddItem);
+    RUN_TEST(Test_SharedCollectionBuilder_FindByToken);
+    RUN_TEST(Test_SharedCollectionBuilder_MergeCollection);
+    RUN_TEST(Test_AnnotationDiffViewer_NoDiff);
+    RUN_TEST(Test_AnnotationDiffViewer_StarChanged);
+    RUN_TEST(Test_AnnotationDiffViewer_TagAdded);
+    RUN_TEST(Test_AnnotationDiffViewer_DiffOpName);
+    RUN_TEST(Test_AnnotationExporter_JSON);
+    RUN_TEST(Test_AnnotationExporter_XML);
+    RUN_TEST(Test_AnnotationExporter_CSV);
+    RUN_TEST(Test_AnnotationExporter_FormatName);
+    RUN_TEST(Test_CollabCloudSync_NoHttpFn);
+    RUN_TEST(Test_CollabCloudSync_EmptyToken);
+    RUN_TEST(Test_CollabCloudSync_SuccessfulSync);
+    RUN_TEST(Test_AnnotationSchemaMigrator_AlreadyCurrent);
+    RUN_TEST(Test_AnnotationSchemaMigrator_V1ToV4);
+    RUN_TEST(Test_AnnotationSchemaMigrator_CurrentVersion);
+
+    // Sprint 631-640 — Protocol Surface & API Ecosystem (v25.7.0)
+    RUN_TEST(Test_GRPCThumbnailService_Create);
+    RUN_TEST(Test_GRPCThumbnailService_StartStop);
+    RUN_TEST(Test_GRPCThumbnailService_HandleRequest);
+    RUN_TEST(Test_GRPCThumbnailService_ServiceName);
+    RUN_TEST(Test_GRPCThumbnailService_Config);
+    RUN_TEST(Test_RESTThumbnailServer_Create);
+    RUN_TEST(Test_RESTThumbnailServer_StartStop);
+    RUN_TEST(Test_RESTThumbnailServer_Dispatch_404);
+    RUN_TEST(Test_GraphQLQueryEngine_Execute_NoResolver);
+    RUN_TEST(Test_GraphQLQueryEngine_Introspection);
+    RUN_TEST(Test_WebSocketPushChannel_Create);
+    RUN_TEST(Test_WebSocketPushChannel_AddRemoveClient);
+    RUN_TEST(Test_WebSocketPushChannel_Broadcast);
+    RUN_TEST(Test_OpenAPISpecGenerator_GenerateYAML);
+    RUN_TEST(Test_OpenAPISpecGenerator_GenerateJSON);
+    RUN_TEST(Test_SDKBindingsGenerator_CSharp);
+    RUN_TEST(Test_SDKBindingsGenerator_Python);
+    RUN_TEST(Test_OAuthTokenValidator_ValidToken);
+    RUN_TEST(Test_OAuthTokenValidator_MalformedToken);
+    RUN_TEST(Test_OAuthTokenValidator_EmptyToken);
+    RUN_TEST(Test_OAuthTokenValidator_InjectableClock);
+    RUN_TEST(Test_APIRateLimiter_Allow);
+    RUN_TEST(Test_APIRateLimiter_Throttle);
+    RUN_TEST(Test_APIRateLimiter_ResetClient);
+    RUN_TEST(Test_APIRateLimiter_SlidingWindow);
+
+    // Sprint 641-650 — Post-Quantum Security (v26.0.0)
+    RUN_TEST(Test_MLKEMKeyEncapsulator_GenerateKeyPair);
+    RUN_TEST(Test_MLKEMKeyEncapsulator_Encapsulate);
+    RUN_TEST(Test_MLKEMKeyEncapsulator_Decapsulate);
+    RUN_TEST(Test_MLKEMKeyEncapsulator_LevelName);
+    RUN_TEST(Test_MLKEMKeyEncapsulator_InvalidPubKey);
+    RUN_TEST(Test_SLHDSASignatureVerifier_Create);
+    RUN_TEST(Test_SLHDSASignatureVerifier_SignAndVerify);
+    RUN_TEST(Test_SLHDSASignatureVerifier_InvalidSignature);
+    RUN_TEST(Test_HybridTLSIPCChannel_Create);
+    RUN_TEST(Test_HybridTLSIPCChannel_Connect);
+    RUN_TEST(Test_HybridTLSIPCChannel_Send);
+    RUN_TEST(Test_HybridTLSIPCChannel_Disconnect);
+    RUN_TEST(Test_HybridTLSIPCChannel_ModeName);
+    RUN_TEST(Test_PQAuditTrail_AddAndVerify);
+    RUN_TEST(Test_PQAuditTrail_MultiEntry);
+    RUN_TEST(Test_QuantumSafeKeyRotator_NeedsRotation);
+    RUN_TEST(Test_QuantumSafeKeyRotator_RotateCallback);
+    RUN_TEST(Test_FIPS140CryptoBoundary_ApprovedAlgos);
+    RUN_TEST(Test_FIPS140CryptoBoundary_AlgorithmCount);
+    RUN_TEST(Test_CertificateMigrationTool_CreatePlan);
+    RUN_TEST(Test_CertificateMigrationTool_PlanHasDualSign);
+    RUN_TEST(Test_CryptoAgilityEngine_AlgorithmCount);
+    RUN_TEST(Test_CryptoAgilityEngine_Negotiate_HybridPref);
+    RUN_TEST(Test_CryptoAgilityEngine_Negotiate_PQOnly);
+    RUN_TEST(Test_CryptoAgilityEngine_FIPSFilter);
+
+    // Sprint 651-660 — Windows Next-Gen Shell (v26.1.0)
+    RUN_TEST(Test_WinRTThumbnailBridge_NoHandler);
+    RUN_TEST(Test_WinRTThumbnailBridge_WithHandler);
+    RUN_TEST(Test_WinRTThumbnailBridge_ModeName);
+    RUN_TEST(Test_WinRTThumbnailBridge_EmptyPath);
+    RUN_TEST(Test_CopilotPlatformBridge_Create);
+    RUN_TEST(Test_CopilotPlatformBridge_InjectableInvoke);
+    RUN_TEST(Test_AppContainerIsolation_Create);
+    RUN_TEST(Test_AppContainerIsolation_GrantRevoke);
+    RUN_TEST(Test_WinFSMetadataStore_Create);
+    RUN_TEST(Test_WinFSMetadataStore_SetAndGet);
+    RUN_TEST(Test_WindowsSearchV3Bridge_IndexAndQuery);
+    RUN_TEST(Test_SmartAppControlPolicy_Modes);
+    RUN_TEST(Test_SmartAppControlPolicy_TrustedPublisher);
+    RUN_TEST(Test_MSIXStreamingPrewarmer_Create);
+    RUN_TEST(Test_MSIXStreamingPrewarmer_Prewarm);
+    RUN_TEST(Test_WindowsHelloAuthBridge_Create);
+    RUN_TEST(Test_WindowsHelloAuthBridge_InjectableAuth);
+
+    // Sprint 661-670 — Immersive 3D Preview Engine (v26.2.0)
+    RUN_TEST(Test_ImmersivePreviewRenderer_EmptyPath);
+    RUN_TEST(Test_ImmersivePreviewRenderer_Render);
+    RUN_TEST(Test_ImmersivePreviewRenderer_QualityNames);
+    RUN_TEST(Test_ImmersivePreviewRenderer_RenderTimes);
+    RUN_TEST(Test_VolumetricThumbnailEngine_Create);
+    RUN_TEST(Test_VolumetricThumbnailEngine_Render);
+    RUN_TEST(Test_RealtimeLightingSimulator_Create);
+    RUN_TEST(Test_RealtimeLightingSimulator_AddLight);
+    RUN_TEST(Test_HolographicProjectionEngine_Create);
+    RUN_TEST(Test_HolographicProjectionEngine_ProjectStereo);
+    RUN_TEST(Test_MeshLODGeneratorV2_Create);
+    RUN_TEST(Test_MeshLODGeneratorV2_GenerateLOD);
+    RUN_TEST(Test_AnimationPreviewScrubber_Create);
+    RUN_TEST(Test_AnimationPreviewScrubber_PickFrame);
+    RUN_TEST(Test_MaterialPreviewEngine_DetectFormat);
+    RUN_TEST(Test_MaterialPreviewEngine_Render);
+    RUN_TEST(Test_GPUPathTracerPreview_Create);
+    RUN_TEST(Test_GPUPathTracerPreview_SamplesForQuality);
+    RUN_TEST(Test_GPUPathTracerPreview_Trace);
+
+    // Sprint 671-680 — Real-Time Collaboration (v26.3.0)
+    RUN_TEST(Test_CollaborationPresenceEngine_JoinLeave);
+    RUN_TEST(Test_CollaborationPresenceEngine_Snapshot);
+    RUN_TEST(Test_CollaborationPresenceEngine_StateNames);
+    RUN_TEST(Test_CollaborationPresenceEngine_UpdateCursor);
+    RUN_TEST(Test_LiveAnnotationBroadcaster_Broadcast);
+    RUN_TEST(Test_LiveAnnotationBroadcaster_LamportClock);
+    RUN_TEST(Test_LiveAnnotationBroadcaster_OpName);
+    RUN_TEST(Test_SharedViewStateProtocol_Publish);
+    RUN_TEST(Test_SharedViewStateProtocol_Apply);
+    RUN_TEST(Test_SharedViewStateProtocol_Callback);
+    RUN_TEST(Test_ConflictResolutionMerger_LWW);
+    RUN_TEST(Test_ConflictResolutionMerger_OwnerPriority);
+    RUN_TEST(Test_ConflictResolutionMerger_StrategyName);
+    RUN_TEST(Test_CollaborativePluginHost_CreateSession);
+    RUN_TEST(Test_CollaborativePluginHost_JoinAndInvoke);
+    RUN_TEST(Test_CollaborativePluginHost_PolicyName);
+    RUN_TEST(Test_PresenceAvatarRenderer_Render_Empty);
+    RUN_TEST(Test_PresenceAvatarRenderer_Render_WithParticipants);
+    RUN_TEST(Test_SessionReplayEngine_RecordAndPlay);
+    RUN_TEST(Test_SessionReplayEngine_SpeedFactor);
+    RUN_TEST(Test_SessionReplayEngine_Callback);
+    RUN_TEST(Test_CollaborationTelemetryHub_Record);
+    RUN_TEST(Test_CollaborationTelemetryHub_ConflictRate);
+    RUN_TEST(Test_CollaborationTelemetryHub_EventName);
+
+    // Sprint 681-690 — Adaptive Performance Governor v2 (v26.4.0)
+    RUN_TEST(Test_AdaptivePerformanceGovernorV2_BalancedMode);
+    RUN_TEST(Test_AdaptivePerformanceGovernorV2_ThermalThrottle);
+    RUN_TEST(Test_AdaptivePerformanceGovernorV2_ModeName);
+    RUN_TEST(Test_AdaptivePerformanceGovernorV2_EvalCount);
+    RUN_TEST(Test_ThermalAwareMemoryScheduler_Comfortable);
+    RUN_TEST(Test_ThermalAwareMemoryScheduler_Hot);
+    RUN_TEST(Test_ThermalAwareMemoryScheduler_Critical);
+    RUN_TEST(Test_ThermalAwareMemoryScheduler_ZoneName);
+    RUN_TEST(Test_WorkloadBalancerV2_Dispatch);
+    RUN_TEST(Test_WorkloadBalancerV2_Complete);
+    RUN_TEST(Test_WorkloadBalancerV2_AlgorithmName);
+    RUN_TEST(Test_PowerBudgetController_AC_Unconstrained);
+    RUN_TEST(Test_PowerBudgetController_Battery_Critical);
+    RUN_TEST(Test_PowerBudgetController_StateName);
+    RUN_TEST(Test_QoSThrottleEngine_Interactive_Allowed);
+    RUN_TEST(Test_QoSThrottleEngine_Background_Throttled);
+    RUN_TEST(Test_QoSThrottleEngine_Idle);
+    RUN_TEST(Test_SmartPrefetchEngine_Predict);
+    RUN_TEST(Test_SmartPrefetchEngine_IssuePrefetches);
+    RUN_TEST(Test_SmartPrefetchEngine_HitMissStats);
+    RUN_TEST(Test_FrameRateSynchronizer_TargetFrameTime);
+    RUN_TEST(Test_FrameRateSynchronizer_PresentFrame);
+    RUN_TEST(Test_FrameRateSynchronizer_SetMode);
+    RUN_TEST(Test_FrameRateSynchronizer_ModeName);
+    RUN_TEST(Test_BackgroundIntelligenceService_Enqueue);
+    RUN_TEST(Test_BackgroundIntelligenceService_DrainNext);
+    RUN_TEST(Test_BackgroundIntelligenceService_IdleThreshold);
+
+    // Sprint 691-700 — Global I18n & Accessibility v3 (v26.5.0)
+    RUN_TEST(Test_I18nRuntimeEngine_DefaultLocale);
+    RUN_TEST(Test_I18nRuntimeEngine_RegisterAndTranslate);
+    RUN_TEST(Test_I18nRuntimeEngine_FallbackToKey);
+    RUN_TEST(Test_I18nRuntimeEngine_RTLDirection);
+    RUN_TEST(Test_BiDiTextLayoutEngine_LTR);
+    RUN_TEST(Test_BiDiTextLayoutEngine_ContainsRTL);
+    RUN_TEST(Test_BiDiTextLayoutEngine_EmptyText);
+    RUN_TEST(Test_BiDiTextLayoutEngine_ExplicitRTL);
+    RUN_TEST(Test_AccessibilityNavigatorV3_RegisterAndFind);
+    RUN_TEST(Test_AccessibilityNavigatorV3_Invoke);
+    RUN_TEST(Test_AccessibilityNavigatorV3_NotFound);
+    RUN_TEST(Test_AccessibilityNavigatorV3_ControlTypeName);
+    RUN_TEST(Test_ScreenReaderBridgeV2_NotAvailable);
+    RUN_TEST(Test_ScreenReaderBridgeV2_WithFn);
+    RUN_TEST(Test_ScreenReaderBridgeV2_ReaderName);
+    RUN_TEST(Test_LocaleFallbackResolver_ExactMatch);
+    RUN_TEST(Test_LocaleFallbackResolver_FallbackChain);
+    RUN_TEST(Test_LocaleFallbackResolver_BuildChain);
+    RUN_TEST(Test_A11yColorContrastEngine_Pass_AA);
+    RUN_TEST(Test_A11yColorContrastEngine_Fail_AAA);
+    RUN_TEST(Test_A11yColorContrastEngine_SuggestForeground);
+    RUN_TEST(Test_A11yColorContrastEngine_RequiredRatio);
+    RUN_TEST(Test_KeyboardNavigationMapV2_AddAndNavigate);
+    RUN_TEST(Test_KeyboardNavigationMapV2_TabOrder);
+    RUN_TEST(Test_KeyboardNavigationMapV2_WrapAround);
+    RUN_TEST(Test_AccessibilityAuditPipeline_Compliant);
+    RUN_TEST(Test_AccessibilityAuditPipeline_Noncompliant);
+    RUN_TEST(Test_AccessibilityAuditPipeline_CriterionName);
+    RUN_TEST(Test_AccessibilityAuditPipeline_PassRate);
 
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;

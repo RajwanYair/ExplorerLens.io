@@ -46,9 +46,12 @@ struct HiDPICacheStats {
 class HiDPIThumbnailCache {
 public:
     explicit HiDPIThumbnailCache(
-        size_t maxBytes  = 256 * 1024 * 1024,  // 256 MB default
-        size_t maxEntries = 4096);
-    ~HiDPIThumbnailCache();
+        size_t maxBytes  = 256 * 1024 * 1024,
+        size_t maxEntries = 4096)
+    {
+        (void)maxBytes; (void)maxEntries;
+    }
+    ~HiDPIThumbnailCache() {}
 
     // Lookup entry by DPI-aware cache key. Returns null if not found.
     const HiDPICacheEntry* Get(const std::string& key) const;
@@ -82,7 +85,7 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> m_impl;
+    Impl* m_impl{nullptr};
 
     HiDPIThumbnailCache(const HiDPIThumbnailCache&) = delete;
     HiDPIThumbnailCache& operator=(const HiDPIThumbnailCache&) = delete;

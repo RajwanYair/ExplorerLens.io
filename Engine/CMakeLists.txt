@@ -1588,6 +1588,96 @@ set(ENGINE_HEADERS
     Core/GitLFSResolver.h
     Core/CommitBadgeCompositor.h
     Core/MergeConflictOverlay.h
+    # Sprint 601-610 — Self-Healing & Adaptive Recovery (v25.4.0 "Rigel-U")
+    Core/DecoderCrashPredictor.h
+    Core/DecoderQuarantineManager.h
+    Core/AdaptiveTimeoutTuner.h
+    Core/HeapCorruptionSentinel.h
+    Pipeline/RetryPolicyEngine.h
+    Core/DecoderIncidentReporter.h
+    Utils/COMSelfRepairValidator.h
+    Utils/BootIntegritySelfTest.h
+    # Sprint 611-620 — Multi-Instance & Virtual Desktop (v25.5.0 "Rigel-V")
+    Core/VirtualDesktopAwareness.h
+    Core/WTSSessionIsolation.h
+    Core/PerMonitorDPISelectorV2.h
+    Core/TabbedExplorerSync.h
+    Memory/CrossSessionThumbnailPool.h
+    Core/InstanceRegistry.h
+    Pipeline/ForegroundPriorityInheritance.h
+    Pipeline/CrossInstanceLoadBalancer.h
+    # Sprint 621-630 — Collaborative Annotations & Sharing (v25.6.0 "Rigel-W")
+    Core/AnnotationStore.h
+    Core/AnnotationOverlayRenderer.h
+    Utils/CollabWebhookBridge.h
+    Core/SharedCollectionBuilder.h
+    Core/AnnotationDiffViewer.h
+    Utils/AnnotationExporter.h
+    Utils/CollabCloudSync.h
+    Core/AnnotationSchemaMigrator.h
+    # Sprint 631-640 — Protocol Surface & API Ecosystem (v25.7.0 "Rigel-X")
+    Utils/GRPCThumbnailService.h
+    Utils/RESTThumbnailServer.h
+    Utils/GraphQLQueryEngine.h
+    Utils/WebSocketPushChannel.h
+    Utils/OpenAPISpecGenerator.h
+    Utils/SDKBindingsGenerator.h
+    Utils/OAuthTokenValidator.h
+    Utils/APIRateLimiter.h
+    # Sprint 641-650 — Post-Quantum Security (v26.0.0 "Canopus")
+    Utils/MLKEMKeyEncapsulator.h
+    Utils/SLHDSASignatureVerifier.h
+    Core/HybridTLSIPCChannel.h
+    Utils/PQAuditTrail.h
+    Utils/QuantumSafeKeyRotator.h
+    Utils/FIPS140CryptoBoundary.h
+    Utils/CertificateMigrationTool.h
+    Utils/CryptoAgilityEngine.h
+    # Sprint 651-660 — Windows Next-Gen Shell Integration (v26.1.0 "Canopus-R")
+    Core/WinRTThumbnailBridge.h
+    AI/CopilotPlatformBridge.h
+    Core/AppContainerIsolation.h
+    Core/WinFSMetadataStore.h
+    Core/WindowsSearchV3Bridge.h
+    Utils/SmartAppControlPolicy.h
+    Core/MSIXStreamingPrewarmer.h
+    Utils/WindowsHelloAuthBridge.h
+    # Sprint 661-670 — Immersive 3D Preview Engine (v26.2.0 "Canopus-S")
+    Core/ImmersivePreviewRenderer.h
+    Core/VolumetricThumbnailEngine.h
+    GPU/RealtimeLightingSimulator.h
+    Core/HolographicProjectionEngine.h
+    Core/MeshLODGeneratorV2.h
+    Core/AnimationPreviewScrubber.h
+    Core/MaterialPreviewEngine.h
+    GPU/GPUPathTracerPreview.h
+    # Sprint 671-680 — Real-Time Collaboration (v26.3.0 "Canopus-T")
+    Core/CollaborationPresenceEngine.h
+    Core/LiveAnnotationBroadcaster.h
+    Core/SharedViewStateProtocol.h
+    Core/ConflictResolutionMerger.h
+    Plugin/CollaborativePluginHost.h
+    Core/PresenceAvatarRenderer.h
+    Core/SessionReplayEngine.h
+    Core/CollaborationTelemetryHub.h
+    # Sprint 681-690 — Adaptive Performance Governor v2 (v26.4.0 "Canopus-U")
+    Core/AdaptivePerformanceGovernorV2.h
+    Memory/ThermalAwareMemoryScheduler.h
+    GPU/WorkloadBalancerV2.h
+    Core/PowerBudgetController.h
+    Core/BackgroundIntelligenceService.h
+    Core/QoSThrottleEngine.h
+    Memory/SmartPrefetchEngine.h
+    Core/FrameRateSynchronizer.h
+    # Sprint 691-700 — Global I18n & Accessibility v3 (v26.5.0 "Canopus-V")
+    Utils/I18nRuntimeEngine.h
+    Utils/BiDiTextLayoutEngine.h
+    Utils/AccessibilityNavigatorV3.h
+    Utils/ScreenReaderBridgeV2.h
+    Utils/LocaleFallbackResolver.h
+    Utils/A11yColorContrastEngine.h
+    Utils/KeyboardNavigationMapV2.h
+    Utils/AccessibilityAuditPipeline.h
 )
 
 set(ENGINE_SOURCES

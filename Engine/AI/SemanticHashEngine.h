@@ -13,7 +13,7 @@ namespace ExplorerLens { namespace AI {
 
 using SemanticHash512 = std::array<uint64_t, 8>;
 
-enum class HashAlgorithm : uint8_t {
+enum class SemanticHashAlgorithm : uint8_t {
     CNN_MobileNetV3  = 0,
     CNN_EfficientNetB0 = 1,
     CLIP_ViT_B32     = 2,
@@ -27,7 +27,7 @@ struct SemanticHashResult {
 };
 
 struct SemanticHashConfig {
-    HashAlgorithm algorithm     = HashAlgorithm::CNN_MobileNetV3;
+    SemanticHashAlgorithm algorithm     = SemanticHashAlgorithm::CNN_MobileNetV3;
     int           embeddingDim  = 512;
     bool          l2Normalize   = true;
     float         quantileThresh = 0.5f;
@@ -66,12 +66,12 @@ public:
         return HammingDistance(a, b) <= threshBits;
     }
 
-    HashAlgorithm GetAlgorithm()    const noexcept { return m_config.algorithm;     }
+    SemanticHashAlgorithm GetAlgorithm()    const noexcept { return m_config.algorithm;     }
     int           GetEmbeddingDim() const noexcept { return m_config.embeddingDim;  }
     bool          GetL2Normalize()  const noexcept { return m_config.l2Normalize;   }
     float         GetQuantileThresh() const noexcept { return m_config.quantileThresh; }
 
-    void SetAlgorithm(HashAlgorithm a)  noexcept { m_config.algorithm     = a; }
+    void SetAlgorithm(SemanticHashAlgorithm a)  noexcept { m_config.algorithm     = a; }
     void SetL2Normalize(bool v)         noexcept { m_config.l2Normalize   = v; }
     void SetQuantileThresh(float t)     noexcept { m_config.quantileThresh = t; }
 

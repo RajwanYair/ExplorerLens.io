@@ -19,7 +19,7 @@
 namespace ExplorerLens { namespace Engine {
 
 // Upscaling backend selection.
-enum class UpscaleBackend : uint8_t {
+enum class AIUpscaleBackend : uint8_t {
     Auto         = 0,  // Auto-select best available (DLSS > XeSS > ONNX > bicubic)
     OnnxDirectML = 1,  // ONNX Runtime with DirectML execution provider
     NvidiaDlss   = 2,  // NVIDIA DLSS 3 (requires RTX GPU + DLSS SDK)
@@ -37,7 +37,7 @@ enum class UpscaleQuality : uint8_t {
 
 // Per-request upscaling options.
 struct UpscaleOptions {
-    UpscaleBackend backend { UpscaleBackend::Auto };
+    AIUpscaleBackend backend { AIUpscaleBackend::Auto };
     UpscaleQuality quality { UpscaleQuality::Balanced };
     uint32_t       targetWidth  { 0 };  // 0 = infer from scale factor
     uint32_t       targetHeight { 0 };
@@ -50,7 +50,7 @@ struct UpscaleResult {
     std::vector<uint8_t> pixels;    // BGRA raw pixels
     uint32_t             width  { 0 };
     uint32_t             height { 0 };
-    UpscaleBackend       backendUsed;
+    AIUpscaleBackend       backendUsed;
     double               latencyMs { 0.0 };
     bool                 success   { false };
     std::string          errorMessage;
@@ -73,10 +73,10 @@ public:
     bool Initialize() noexcept;
 
     // Check if a specific backend is available.
-    bool IsBackendAvailable(UpscaleBackend backend) const noexcept;
+    bool IsBackendAvailable(AIUpscaleBackend backend) const noexcept;
 
     // Get the best automatically-selected backend.
-    UpscaleBackend GetBestBackend() const noexcept;
+    AIUpscaleBackend GetBestBackend() const noexcept;
 
     // Upscale a BGRA input buffer.
     UpscaleResult Upscale(const uint8_t* inputBgra,
@@ -93,7 +93,7 @@ public:
 
 private:
     bool          m_initialized { false };
-    UpscaleBackend m_bestBackend { UpscaleBackend::Bicubic };
+    AIUpscaleBackend m_bestBackend { AIUpscaleBackend::Bicubic };
 
     struct Impl;
     Impl* m_impl { nullptr };

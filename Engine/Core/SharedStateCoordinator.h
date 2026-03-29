@@ -36,7 +36,7 @@ struct SharedState {
     uint64_t     timestamp = 0;
 };
 
-struct SyncResult {
+struct StateSyncResult {
     bool        success          = false;
     int         conflictsResolved = 0;
     uint64_t    version          = 0;
@@ -102,8 +102,8 @@ public:
         return entry ? entry->version : 0;
     }
 
-    SyncResult Synchronize() noexcept {
-        SyncResult result;
+    StateSyncResult Synchronize() noexcept {
+        StateSyncResult result;
         result.success  = true;
         result.version  = m_globalVersion;
         m_hasConflicts  = false;

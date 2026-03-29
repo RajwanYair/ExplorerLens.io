@@ -55,7 +55,9 @@ public:
         const SVGRasterizeOptions& opts = {}) const;
 
     // Quick check: is this valid SVG data?
-    static bool LooksLikeSVG(const void* data, size_t size) noexcept;
+    static bool LooksLikeSVG(const void* data, size_t size) noexcept {
+        (void)data; (void)size; return false;
+    }
 
     [[nodiscard]] bool IsInitialized() const noexcept { return m_d2dFactory != nullptr; }
 

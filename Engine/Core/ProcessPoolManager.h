@@ -30,7 +30,7 @@ enum class ProcessPriority : uint8_t {
     High     = 4,
 };
 
-struct PoolConfig {
+struct ProcessPoolConfig {
     int  minWorkers      = 2;
     int  maxWorkers      = 8;
     int  idleTimeoutMs   = 30000;
@@ -73,18 +73,18 @@ public:
     static constexpr int TASK_TIMEOUT_MS     = 15000;
 
     explicit ProcessPoolManager() noexcept = default;
-    explicit ProcessPoolManager(const PoolConfig& cfg) noexcept
+    explicit ProcessPoolManager(const ProcessPoolConfig& cfg) noexcept
         : m_config(cfg) {}
 
     [[nodiscard]] bool          IsRunning()     const noexcept { return m_running; }
     [[nodiscard]] int           GetWorkerCount()const noexcept { return m_workerCount; }
     [[nodiscard]] int           GetIdleCount()  const noexcept { return m_idleCount; }
     [[nodiscard]] ProcessPriority GetPriority() const noexcept { return m_priority; }
-    [[nodiscard]] const PoolConfig& GetConfig() const noexcept { return m_config; }
+    [[nodiscard]] const ProcessPoolConfig& GetConfig() const noexcept { return m_config; }
 
     void SetPriority(ProcessPriority prio) noexcept { m_priority = prio; }
 
-    bool Start(const PoolConfig& cfg = {}) noexcept {
+    bool Start(const ProcessPoolConfig& cfg = {}) noexcept {
         if (m_running) return true;
         m_config      = cfg;
         m_running     = true;
@@ -102,6 +102,7 @@ public:
     }
 
     uint64_t Submit(const std::wstring& filePath, int targetSize = 256) noexcept {
+        (void)targetSize;
         if (!m_running || filePath.empty()) return 0;
         ++m_nextTaskId;
         ++m_stats.completedTasks;
@@ -144,7 +145,7 @@ public:
     }
 
 private:
-    PoolConfig      m_config       = {};
+    ProcessPoolConfig m_config       = {};
     bool            m_running      = false;
     int             m_workerCount  = 0;
     int             m_idleCount    = 0;

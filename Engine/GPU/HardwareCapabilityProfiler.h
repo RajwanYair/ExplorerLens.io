@@ -47,11 +47,14 @@ public:
     HardwareProfile  Profile() {
         HardwareProfile p;
         AcceleratorInfo cpu;
-        cpu.type     = AcceleratorType::CPU;
-        cpu.name     = "Generic CPU";
-        cpu.tops     = 1.5f;
-        cpu.available= true;
+        cpu.type      = AcceleratorType::CPU;
+        cpu.name      = "Generic CPU";
+        cpu.tops      = 1.5f;
+        cpu.available = true;
         p.accelerators.push_back(cpu);
+        // Include any registered mock accelerators (NPU, GPU, DSP, etc.)
+        for (const auto& mock : m_mocks)
+            p.accelerators.push_back(mock);
         p.Sort();
         m_lastProfile = p;
         return p;
@@ -59,13 +62,17 @@ public:
 
     void  AddMock(const AcceleratorInfo& info) { m_mocks.push_back(info); }
     const HardwareProfile& GetLastProfile() const { return m_lastProfile; }
-    bool  HasNPU()     const {
+    bool  HasNPU() const {
         for (const auto& a : m_lastProfile.accelerators)
+            if (a.type == AcceleratorType::NPU && a.available) return true;
+        // Also check mocks registered but not yet profiled
+        for (const auto& a : m_mocks)
             if (a.type == AcceleratorType::NPU && a.available) return true;
         return false;
     }
-    float PeakTOPS()   const { return m_lastProfile.peakTOPS; }
-    void  Reset()            { m_lastProfile = {}; m_mocks.clear(); }
+    float PeakTOPS()     const { return m_lastProfile.peakTOPS; }
+    void  ClearMocks()         { m_mocks.clear(); m_lastProfile = {}; }
+    void  Reset()              { m_lastProfile = {}; m_mocks.clear(); }
 
 private:
     HardwareProfile             m_lastProfile;

@@ -41,10 +41,12 @@ public:
         bool IsValid() const { return type != CursorFileType::Unknown && width > 0; }
     };
 
-    CursorInfo ReadInfo(const std::string& filePath) const;
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 64) const;
+    CursorInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 64) const { (void)filePath; (void)targetWidth; return {}; }
 
-    static bool IsCursorExtension(const std::string& ext);
+    static bool IsCursorExtension(const std::string& ext) {
+        return ext == ".cur" || ext == ".CUR" || ext == ".ani" || ext == ".ANI";
+    }
     static constexpr const char* EXTENSIONS[] = { ".cur", ".ani", nullptr };
 
 private:

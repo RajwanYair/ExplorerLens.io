@@ -16,7 +16,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-struct DepthMap {
+struct MonocularDepthMap {
     std::vector<float> depth;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -49,9 +49,9 @@ public:
         return instance;
     }
 
-    inline DepthMap EstimateDepth(const uint8_t* pixels, uint32_t width, uint32_t height,
+    inline MonocularDepthMap EstimateDepth(const uint8_t* pixels, uint32_t width, uint32_t height,
         uint32_t channels, const DepthConfig& config = {}) const {
-        DepthMap result;
+        MonocularDepthMap result;
         result.width = width;
         result.height = height;
         size_t count = static_cast<size_t>(width) * height;
@@ -91,7 +91,7 @@ public:
         return result;
     }
 
-    inline std::vector<uint8_t> RenderDepthVisualization(const DepthMap& depth) const {
+    inline std::vector<uint8_t> RenderDepthVisualization(const MonocularDepthMap& depth) const {
         std::vector<uint8_t> vis(static_cast<size_t>(depth.width) * depth.height * 3);
         for (size_t i = 0; i < depth.depth.size(); ++i) {
             float d = (std::max)(0.0f, (std::min)(1.0f, depth.depth[i]));
@@ -103,7 +103,7 @@ public:
         return vis;
     }
 
-    inline std::vector<uint8_t> GenerateParallaxFrame(const uint8_t* pixels, const DepthMap& depth,
+    inline std::vector<uint8_t> GenerateParallaxFrame(const uint8_t* pixels, const MonocularDepthMap& depth,
         uint32_t channels, float shiftX, float shiftY) const {
         uint32_t w = depth.width, h = depth.height;
         std::vector<uint8_t> output(static_cast<size_t>(w) * h * 3, 0);
@@ -211,7 +211,7 @@ private:
         return depth;
     }
 
-    inline void NormalizeDepth(DepthMap& dm) const {
+    inline void NormalizeDepth(MonocularDepthMap& dm) const {
         if (dm.depth.empty()) return;
         float minD = dm.depth[0], maxD = dm.depth[0];
         double sum = 0.0;

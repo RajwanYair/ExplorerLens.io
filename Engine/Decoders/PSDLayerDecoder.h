@@ -72,8 +72,14 @@ public:
         const void* data, size_t size,
         const PSDDecodeOptions& opts = {}) const;
 
-    static bool IsPSD(const void* data, size_t size) noexcept;
-    static bool IsPSB(const void* data, size_t size) noexcept;
+    static bool IsPSD(const void* data, size_t size) noexcept {
+        if (!data || size < 4) return false;
+        const auto* b = static_cast<const uint8_t*>(data);
+        return b[0] == 0x38 && b[1] == 0x42 && b[2] == 0x50 && b[3] == 0x53;
+    }
+    static bool IsPSB(const void* data, size_t size) noexcept {
+        (void)data; (void)size; return false;
+    }
 
 private:
     // Decompress RLE (PackBits) channel data from the merged image section.

@@ -143,15 +143,16 @@ if ($env:PATH -notlike "*$ninjaDir*") {
 if ($Clean) {
     # Determine binary dir from preset
     $presetBinaryDirs = @{
-        "default-release" = "build"
-        "default-debug"   = "build-debug"
-        "vcpkg-release"   = "build-vcpkg"
-        "vcpkg-debug"     = "build-vcpkg-debug"
+        "default-release" = "$env:TEMP\ExplorerLens-build"
+        "default-debug"   = "$env:TEMP\ExplorerLens-build-debug"
+        "vcpkg-release"   = "$env:TEMP\ExplorerLens-build-vcpkg"
+        "vcpkg-debug"     = "$env:TEMP\ExplorerLens-build-vcpkg-debug"
+        "vs2026"          = "$env:TEMP\ExplorerLens-build-vs"
         "temp-release"    = "$env:TEMP\ExplorerLens-build"
         "temp-debug"      = "$env:TEMP\ExplorerLens-build-debug"
     }
     $binDir = $presetBinaryDirs[$Preset]
-    if (-not $binDir) { $binDir = "build" }
+    if (-not $binDir) { $binDir = "$env:TEMP\ExplorerLens-build" }
 
     # Absolute path: TEMP presets are already absolute; relative ones are project-relative
     if ([System.IO.Path]::IsPathRooted($binDir)) {
@@ -205,15 +206,16 @@ try {
             } else {
                 # Fallback: resolve binary dir and run ctest directly
                 $presetBinaryDirs = @{
-                    "default-release" = "build"
-                    "default-debug"   = "build-debug"
-                    "vcpkg-release"   = "build-vcpkg"
-                    "vcpkg-debug"     = "build-vcpkg-debug"
+                    "default-release" = "$env:TEMP\ExplorerLens-build"
+                    "default-debug"   = "$env:TEMP\ExplorerLens-build-debug"
+                    "vcpkg-release"   = "$env:TEMP\ExplorerLens-build-vcpkg"
+                    "vcpkg-debug"     = "$env:TEMP\ExplorerLens-build-vcpkg-debug"
+                    "vs2026"          = "$env:TEMP\ExplorerLens-build-vs"
                     "temp-release"    = "$env:TEMP\ExplorerLens-build"
                     "temp-debug"      = "$env:TEMP\ExplorerLens-build-debug"
                 }
                 $binDir = $presetBinaryDirs[$Preset]
-                if (-not $binDir) { $binDir = "build" }
+                if (-not $binDir) { $binDir = "$env:TEMP\ExplorerLens-build" }
                 $fullBinDir = if ([System.IO.Path]::IsPathRooted($binDir)) { $binDir } else { Join-Path $PROJECT_ROOT $binDir }
                 & ctest --test-dir $fullBinDir -C Release --output-on-failure
             }

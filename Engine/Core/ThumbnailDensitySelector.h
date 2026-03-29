@@ -46,7 +46,10 @@ public:
     static std::string BuildCacheKey(
         const std::string& filePath,
         uint32_t           physicalSize,
-        DPIBucket          bucket);
+        DPIBucket          bucket) {
+        (void)bucket;
+        return filePath + "@" + std::to_string(physicalSize);
+    }
 
     // Check if an existing cached size can serve a new DPI request (±10% tolerance).
     static bool CanServeRequest(

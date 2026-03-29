@@ -42,10 +42,13 @@ public:
         bool IsValid() const { return width > 0 && height > 0 && frameCount > 0; }
     };
 
-    AnimInfo ReadInfo(const std::string& filePath) const;
-    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const;
+    AnimInfo ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
+    DecodeResult Decode(const std::string& filePath, uint32_t targetWidth = 256) const { (void)filePath; (void)targetWidth; return {}; }
 
-    static bool IsANIMExtension(const std::string& ext);
+    static bool IsANIMExtension(const std::string& ext) {
+        return ext == ".anim" || ext == ".ANIM" || ext == ".iff" || ext == ".IFF"
+            || ext == ".ilbm" || ext == ".ILBM";
+    }
     static constexpr const char* EXTENSIONS[] = { ".anim", ".iff", ".ilbm", nullptr };
 };
 

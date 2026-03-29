@@ -141,7 +141,8 @@ private:
                 nullptr, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
                 WINHTTP_FLAG_SECURE);
 
-        std::string bodyUtf8(body.begin(), body.end());
+        std::string bodyUtf8(body.size(), '\0');
+        for (std::size_t _i = 0; _i < body.size(); ++_i) bodyUtf8[_i] = static_cast<char>(body[_i]);
         BOOL sent = WinHttpSendRequest(hReq,
                 L"Content-Type: application/json\r\n", static_cast<DWORD>(-1L),
                 const_cast<char*>(bodyUtf8.c_str()),

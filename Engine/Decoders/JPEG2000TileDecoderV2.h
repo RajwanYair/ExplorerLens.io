@@ -51,14 +51,19 @@ public:
         uint32_t TotalTiles() const { return tilesX * tilesY; }
     };
 
-    TileInfo  ReadInfo(const std::string& filePath) const;
+    TileInfo  ReadInfo(const std::string& filePath) const { (void)filePath; return {}; }
 
     /// Decode at the smallest sub-resolution sufficient for targetWidth×targetHeight.
     DecodeResult DecodeThumbnail(const std::string& filePath,
                                   uint32_t targetWidth  = 256,
-                                  uint32_t targetHeight = 256) const;
+                                  uint32_t targetHeight = 256) const {
+        (void)filePath; (void)targetWidth; (void)targetHeight; return {};
+    }
 
-    static bool IsJ2KExtension(const std::string& ext);
+    static bool IsJ2KExtension(const std::string& ext) {
+        return ext == ".jp2" || ext == ".JP2" || ext == ".j2k" || ext == ".J2K"
+            || ext == ".jpx" || ext == ".JPX" || ext == ".jpc" || ext == ".JPC";
+    }
     static constexpr const char* EXTENSIONS[] = { ".jp2", ".j2k", ".jpx", ".jpc", nullptr };
 
 private:

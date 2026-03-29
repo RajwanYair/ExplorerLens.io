@@ -35,10 +35,24 @@ public:
 
     void  RegisterEP(const EPCapability& cap) { m_eps.push_back(cap); }
 
+    // Selects the best available EP according to the configured policy.
+    // HighestThroughput / LowestLatency: highest scorePoints wins.
+    // LowestPower: lowest scorePoints wins.
+    // Manual: first registered available EP.
     ONNXExecutionProvider Select() const {
-        for (const auto& ep : m_eps)
-            if (ep.available) return ep.ep;
-        return ONNXExecutionProvider::CPU;
+        const EPCapability* best = nullptr;
+        for (const auto& ep : m_eps) {
+            if (!ep.available) continue;
+            if (!best) { best = &ep; continue; }
+            if (m_cfg.policy == EPSelectionPolicy::LowestPower) {
+                if (ep.scorePoints < best->scorePoints) best = &ep;
+            } else if (m_cfg.policy != EPSelectionPolicy::Manual) {
+                if (ep.scorePoints > best->scorePoints) best = &ep;
+            }
+        }
+        if (best) return best->ep;
+        return m_cfg.allowCPUFallback ? ONNXExecutionProvider::CPU
+                                      : ONNXExecutionProvider::CPU;
     }
 
     EPCapability* FindEP(ONNXExecutionProvider ep) {
