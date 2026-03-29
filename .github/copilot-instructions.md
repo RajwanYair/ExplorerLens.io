@@ -300,15 +300,23 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 # 3. Build and verify locally
 .\build-scripts\Build-MSVC.ps1 -Test
 
-# 4. Commit + tag  (tag fires release.yml automatically → publishes all binaries)
-git add -A
-git commit -m "chore: bump version to X.Y.Z (Codename)"
-git tag vX.Y.Z
-git push origin main --tags
+# 4. Commit + tag using Bump-Version.ps1 (ALWAYS use -TagAndPush)
+#    This script updates all version files, commits, creates the tag, and pushes.
+#    The tag push fires release.yml → builds all binaries → publishes GitHub Release.
+#
+.\build-scripts\Bump-Version.ps1 -Version "X.Y.Z" -Codename "Codename" -TestCount NNNN `
+    -ChangelogEntry "Short release summary" -TagAndPush
+#
+# IMPORTANT: -TagAndPush is REQUIRED on every version bump.
+# Do NOT manually git tag / git push — always use Bump-Version.ps1 -TagAndPush.
 ```
 
-> `release.yml` kicks off automatically on `git tag vX.Y.Z` and publishes:
-> `LENSShell.dll`, `LENSManager.exe`, `lens.exe`, **.msi**, **.zip**, `SHA256SUMS.txt`, `SBOM.json`
+> `release.yml` kicks off automatically on every `vX.Y.Z` tag and publishes:
+> `LENSShell.dll`, `LENSManager.exe`, `lens.exe`, `Manager.WinUI.exe` (when available),
+> **.msi** (WiX), **.zip** (portable), `SHA256SUMS.txt`, `SBOM.json`, `verification-report.json`
+>
+> **Release artifacts built:** Engine lib → LENSShell.dll → LENSManager.exe → lens.exe CLI →
+> Manager.WinUI.exe (optional) → MSI (WiX, with `HasLensCLI` preprocessor) → ZIP → checksums
 
 ### Per-revision GitHub Release checklist
 
