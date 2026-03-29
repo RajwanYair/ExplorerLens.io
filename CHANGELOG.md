@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v28.1.0 Polaris-R: Generative AI Caption Synthesis — VLM/CLIP embedding, Florence-2 caption pipeline, on-device ONNX inferer, style transfer (formal/casual/a11y), WCAG AltText v2, batch+incremental caption updates, semantic search index
+
+
 v28.0.0 Polaris (MAJOR): Cross-Platform Electron Shell — N-API bridge, POSIX/Win32 FS crawler, cloud-first cache, PWA offline manager, auto-update Squirrel/MSIX, Docker+K8s container runtimes, cross-platform UI IPC bridge
 
 
