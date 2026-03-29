@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [27.0.0] — Sirius (2026-03-29)
+
+### Added — Sprint 721-730: Federated AI
+- Engine/AI/FederatedLearningCoordinator.h: FedAvg coordinator with gradient clipping and min-client enforcement
+- Engine/AI/PersonalizedRankingModel.h: Hash-based personalization ranking with user signal store
+- Engine/AI/FederatedModelAggregator.h: Gradient aggregation with configurable participant threshold
+- Engine/AI/OnDeviceFineTuningEngine.h: LoRA-style on-device fine-tuning with convergence detection
+- Engine/AI/NeuralCompressionCodec.h: Neural image compression (Fast/Balanced/MaxQuality modes)
+- Engine/AI/EmbeddingFederationBus.h: Cosine-similarity embedding federation with XXH3 hashing
+- Engine/AI/ModelVersioningController.h: Version registry with rollback and activation history
+- Engine/AI/FederatedSearchEnhancer.h: Federated document search with inverted index
+- Test coverage: 8 new TEST() blocks (3668 total unit tests)
+
+
 ## [26.7.0] — Canopus-X (2026-03-29)
 
 ### Added — Sprint 711-720: Privacy Analytics
