@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+
+## [25.5.0] — Rigel-V (2026-03-29)
+
+### Added — Sprint 611-620: Multi-Instance & Virtual Desktop
+- Engine/Core/VirtualDesktopAwareness.h: Per-virtual-desktop cache key scoping (VDScopePolicy::Global/PerDesktop)
+- Engine/Core/MultiInstanceCoordinator.h: Instance isolation manager — SharedCache/IsolatedCache/Broadcast modes
+- Engine/Core/WindowPlacementMemory.h: Thumbnail window geometry persistence across sessions
+- Engine/Core/ShellWindowStateTracker.h: Explorer window enumeration with HWND→thumbnail association
+- Engine/Core/DPIChangeResponder.h: Per-monitor DPI change event handler with cache invalidation
+- Engine/Pipeline/ParallelThumbnailScheduler.h: Work-stealing queue with multi-instance load balancing
+- Engine/Utils/LoadBalancerTracker.h: Weighted round-robin task distributor with latency feedback
+- Engine/Core/InstanceDiscovery.h: Named-pipe instance registry with heartbeat TTL
+- Test coverage: 8 new TEST() blocks, 8 new RUN_TEST() calls (3580 total unit tests)
+
 ## [25.4.0] — Rigel-U (2026-03-29)
 
 ### Added — Sprint 601-610: Self-Healing & Adaptive Recovery
