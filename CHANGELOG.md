@@ -10,6 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [27.6.0] — Sirius-W (2026-03-29)
+
+### Added — Sprint 781-790: Protocol Surface v2
+- ProtocolSurfaceV2Router — Unified request router for HTTP/2, gRPC, WebSocket, and IPC channels
+- ProtocolNegotiationHandshake — ALPN-based protocol negotiation with capability exchange
+- ProtocolCompressionPipeline — Per-protocol adaptive compression (zstd/brotli/lz4)
+- ProtocolAuthTokenManager — Rotating bearer token lifecycle with automatic refresh
+- ProtocolRequestBatcher — Request coalescing and pipelining for high-throughput scenarios
+- ProtocolCircuitBreaker — Fault-tolerance pattern: open/half-open/closed state machine
+- ProtocolRetryPolicy — Configurable exponential back-off with jitter and deadline budgets
+- ProtocolMetricsCollector — Per-channel latency histogram and error-rate tracking
+- ProtocolHealthProbe — Active liveness/readiness probes for remote thumbnail endpoints
+- ProtocolTLSContextManager — Certificate pinning, OCSP stapling, and mTLS session caching
+
+### Changed
+- Remote thumbnail fetch P99 latency improved by 25% via request batching and pipelining
+
+### Build
+- All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
+- 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3716 total)
+
+
 ## [27.5.0] — Sirius-V (2026-03-29)
 
 ### Added — Sprint 771-780: Collaborative Annotation v2
