@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [27.3.0] — Sirius-T (2026-03-29)
+
+### Added — Sprint 751-760: Universal Plugin SDK v3
+- PluginSDKv3Registry — Unified plugin registry with capability negotiation and hot-reload support
+- PluginInteropLayer — Cross-language interoperability bridge (C/C++/Rust/Python ABI)
+- PluginCapabilityMatrix — Runtime capability discovery and compatibility scoring
+- PluginSecurityEnclaveV3 — Sandboxed execution with W^X enforcement and memory isolation
+- PluginLifecycleOrchestrator — Supervision tree for crash isolation and automatic restart
+- PluginBundlePackager — Hermetic bundle format with embedded manifests and signed payloads
+- PluginTelemetryBridge — Cross-plugin metric aggregation and distributed trace propagation
+- PluginConfigSchemaV3 — JSON Schema-validated plugin configuration with live reload
+- PluginDependencyResolver — DAG-based dependency resolution with cycle detection
+- PluginMarketplaceConnector — Signed package download, verification, and install pipeline
+
+### Changed
+- Plugin SDK ABI version bumped to v3; v2 plugins remain compatible via shim layer
+- Plugin hot-reload latency target: <200ms per plugin (previously 500ms)
+
+### Build
+- All 10 new headers registered in Engine/CMakeLists.txt ENGINE_HEADERS
+- 10 new TEST() blocks + RUN_TEST() calls added to EngineTests.cpp (3692 total)
+
+
 ## [27.2.0] — Sirius-S (2026-03-29)
 
 ### Added — Sprint 741-750: Distributed Rendering
