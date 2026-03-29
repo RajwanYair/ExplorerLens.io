@@ -30,11 +30,11 @@ if (Test-Path $zstdDir) {
     try {
         Invoke-WebRequest -Uri $zstdUrl -OutFile $zstdFile -UseBasicParsing
         Write-Host "  Downloaded: $zstdFile" -ForegroundColor Green
-        
+
         Write-Host "  Extracting..." -ForegroundColor Cyan
         tar -xzf $zstdFile -C $compressionDir
         Write-Host "  Extracted to: $zstdDir" -ForegroundColor Green
-        
+
         Remove-Item $zstdFile -Force
     } catch {
         Write-Host "  ERROR: $($_.Exception.Message)" -ForegroundColor Red
@@ -53,16 +53,16 @@ if (Test-Path $unrarDir) {
     try {
         Invoke-WebRequest -Uri $unrarUrl -OutFile $unrarFile -UseBasicParsing
         Write-Host "  Downloaded: $unrarFile" -ForegroundColor Green
-        
+
         Write-Host "  Extracting..." -ForegroundColor Cyan
         tar -xzf $unrarFile -C $compressionDir
-        
+
         # Rename extracted directory
         $extractedDir = Join-Path $compressionDir "unrar"
         if (Test-Path $extractedDir) {
             Move-Item $extractedDir $unrarDir -Force
         }
-        
+
         Write-Host "  Extracted to: $unrarDir" -ForegroundColor Green
         Remove-Item $unrarFile -Force
     } catch {
@@ -72,4 +72,3 @@ if (Test-Path $unrarDir) {
 
 Write-Host "`n=== Download Complete ===" -ForegroundColor Green
 Write-Host "Next: Build the updated libraries" -ForegroundColor Cyan
-

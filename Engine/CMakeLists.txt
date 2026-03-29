@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 15.4.0
+# Version: 25.2.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 20.5.0
+    VERSION 25.2.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -756,7 +756,6 @@ set(ENGINE_HEADERS
     Core/PreviewTooltipRenderer.h
     Core/FormatGalleryCompositor.h
     Core/QuickActionsOverlay.h
-    Core/AccessibilityNarratorBridge.h
     Core/UsageAnalyticsDashboard.h
     Core/DecoderPerformanceProfiler.h
     Core/FormatPopularityTracker.h
@@ -916,7 +915,6 @@ set(ENGINE_HEADERS
 
     # Sprint 69-88: Beyond Zenith — Next-Generation Features
     Core/NeuralThumbnailUpscaler.h
-    Core/PerceptualHashEngine.h
     Core/SemanticFileClassifier.h
     Core/ContentAwareCompositor.h
     Core/HDRDisplayMapper.h
@@ -948,7 +946,6 @@ set(ENGINE_HEADERS
     # Beyond Zenith — Pipeline
     Pipeline/StreamingMipChain.h
     Pipeline/DeferredDecodeScheduler.h
-    Pipeline/PredictivePrefetchEngine.h
     Pipeline/AdaptiveBatchCoalescer.h
     Pipeline/ThumbnailMorphTransition.h
 
@@ -975,7 +972,6 @@ set(ENGINE_HEADERS
 
     # Beyond Zenith — Plugin Ecosystem
     Plugin/PluginMarketplaceClient.h
-    Plugin/PluginDependencyResolver.h
     Plugin/PluginVersionMigrator.h
     Plugin/PluginTelemetryBridge.h
     Plugin/PluginSecurityAuditor.h
@@ -1472,7 +1468,6 @@ set(ENGINE_HEADERS
     Core/CooperativeTaskScheduler.h
     Core/ThreadLocalContextPool.h
     # Sprint 371-380 — Format Expansion IV (v22.5.0 Sirius-V)
-    Decoders/FLIFDecoder.h
     Decoders/QOIRDecoder.h
     Decoders/JNGDecoder.h
     Decoders/JBIG2Decoder.h
@@ -1483,7 +1478,6 @@ set(ENGINE_HEADERS
     # Sprint 381-390 — Windows Shell Integration v2 (v22.6.0 Sirius-W)
     Core/NamespaceWalkEngine.h
     Core/ExplorerColumnProviderV2.h
-    Core/ShellContextMenuV2.h
     Core/SearchIndexBridge.h
     Core/ShellPropertyBagV2.h
     Core/ThumbnailOverlayRenderer.h
@@ -1540,7 +1534,6 @@ set(ENGINE_HEADERS
     Cache/ContentAwareCacheKey.h
     Cache/DeltaSyncReplicator.h
     Cache/ZeroCopyCacheReader.h
-    Cache/CacheEncryptionLayer.h
     Cache/ShardedCachePartitionV2.h
     Cache/ConsistentHashRing.h
     # Sprint 451-460 — CLI & Automation v2 (v23.5.0 Vega-V)
@@ -1585,6 +1578,16 @@ set(ENGINE_HEADERS
     Memory/NPUMemoryPool.h
     AI/NPUWarmupEngine.h
     GPU/ARM64DecodeBackend.h
+
+    # Sprint 591-600 — VCS Integration (v25.3.0 "Rigel-T")
+    Core/GitStatusOverlay.h
+    Core/GitBlameHeatmapOverlay.h
+    Core/VCSBadgeAdapter.h
+    Cache/BranchAwareCacheKey.h
+    Core/GitDiffThumbnail.h
+    Core/GitLFSResolver.h
+    Core/CommitBadgeCompositor.h
+    Core/MergeConflictOverlay.h
 )
 
 set(ENGINE_SOURCES

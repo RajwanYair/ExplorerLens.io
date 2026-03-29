@@ -9,6 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [25.3.0] — Rigel-T (2026-03-29)
+
+### Added — Sprint 591-600: VCS Integration
+- `Engine/Core/GitStatusOverlay.h`: Git file-status overlay renderer with `M/S/+/!` labels — integrates with IThumbnailProvider
+- `Engine/Core/GitBlameHeatmapOverlay.h`: Blame age heatmap (1.0=recent→0.0=old) rendered as colored overlay band
+- `Engine/Core/VCSBadgeAdapter.h`: Multi-VCS badge builder (Git/SVN/Mercurial/Perforce) producing status/branch/hash/tag descriptors
+- `Engine/Cache/BranchAwareCacheKey.h`: Branch-aware thumbnail cache key — invalidates on branch switch, uses XXH3 hash
+- `Engine/Core/GitDiffThumbnail.h`: Diff view mode selector (SideBySide/Unified/BeforeOnly/AfterOnly) for commit pair rendering
+- `Engine/Core/GitLFSResolver.h`: Git LFS pointer parser/resolver — detects `version https:` pointers, resolves via cache
+- `Engine/Core/CommitBadgeCompositor.h`: Commit badge builder with 7-char shortHash and relative age (now/Nd/Nw/Nm/Ny)
+- `Engine/Core/MergeConflictOverlay.h`: Merge conflict detector and overlay renderer (counts `<<<<<<<` markers in content)
+
+### Fixed — Test Coverage Backfill (Sprints 561-600)
+- Added 72 NPU/Heterogeneous Compute TEST blocks and RUN_TEST calls (Sprint 581-590)
+- Added 72 VCS Integration TEST blocks and RUN_TEST calls (Sprint 591-600)
+- Registered 288 missing RUN_TEST calls for WASM (Sprint 561-570) and Neural (Sprint 571-580) sprints
+- Corrected 7 duplicate header entries in `Engine/CMakeLists.txt`
+
+### Fixed — Planning & Documentation
+- Added `docs/SPRINT_PLAN_1000.md`: Sprints 961–1060 (v30.0.0–v31.1.0 Deneb/Achernar era, +720 tests)
+- Added `docs/ROADMAP_V30.md`: Gen-6 platform unification strategic roadmap
+- Added `docs/adr/`: 4 ADRs — WASM sandbox, NPU heterogeneous compute, CLIP semantic search, C++23 migration
+- Updated `docs/INDEX.md`, `docs/ROADMAP_V25.md` with current sprint status
+- Tightened CI performance gates: latency 20%→15%, throughput 15%→10%
+- Updated `.github/standards/performance-benchmarks.md` to v25.2.0 hardware targets + NPU column
+
+### Statistics
+- Test count: 3,564 unit tests (+288 newly registered sprint calls, +144 NPU/VCS TEST blocks)
+- Sprint coverage: Sprints 561–600
+- New headers: 8 (Engine/Core/×6, Engine/Cache/×1, previously Engine/GPU+AI+Pipeline+Memory/×8 in Rigel-S)
+
+---
+
 ## [25.2.0] — Rigel-S (2026-04-12)
 
 ### Added — Sprint 581-590: NPU & Heterogeneous Compute

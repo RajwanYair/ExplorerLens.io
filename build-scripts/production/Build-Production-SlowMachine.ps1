@@ -98,7 +98,7 @@ if ($MonitorInVSCode) {
 if ($Clean) {
     Write-Log "Cleaning build artifacts..." "Yellow"
     Write-Progress-File -Status "Cleaning" -Current "Removing build directories" -Step 1 -Total 10
-    
+
     $cleanDirs = @("build", "x64", "LENSShell\x64", "LENSManager\x64")
     foreach ($dir in $cleanDirs) {
         if (Test-Path $dir) {
@@ -116,7 +116,7 @@ if (-not $SkipLibraries) {
     Write-Log ""
     Write-Log "Building external libraries..." "Cyan"
     Write-Log "Using file-based monitoring (logs in build-logs/)" "Gray"
-    
+
     $libraries = @(
         @{ Script = "external-libs/Build-Zlib.ps1"; Name = "zlib"; Timeout = 300 },
         @{ Script = "external-libs/Build-LZ4.ps1"; Name = "LZ4"; Timeout = 600 },
@@ -125,33 +125,33 @@ if (-not $SkipLibraries) {
         @{ Script = "external-libs/Build-LibWebP-NMake.ps1"; Name = "LibWebP"; Timeout = 1200 },
         @{ Script = "external-libs/Build-MinizipNG.ps1"; Name = "Minizip-NG"; Timeout = 900 }
     )
-    
+
     $step = 2
     $totalSteps = $libraries.Count + 3
-    
+
     foreach ($lib in $libraries) {
         Write-Log ""
         Write-Log "[$step/$totalSteps] Building $($lib.Name)..." "Cyan"
         Write-Log "  Timeout: $($lib.Timeout) seconds ($([math]::Round($lib.Timeout/60, 1)) minutes)" "Gray"
         Write-Progress-File -Status "Building" -Current $lib.Name -Step $step -Total $totalSteps
-        
+
         $safeScriptName = $lib.Script.Replace('.ps1', '').Replace('/', '-').Replace('\\', '-')
         $libLogFile = "build-logs\$safeScriptName-$timestamp.log"
         $scriptPath = Join-Path "build-scripts" $lib.Script
-        
+
         if (-not (Test-Path $scriptPath)) {
             Write-Log "  ⚠️  Script not found: $scriptPath" "Yellow"
             $libraryResults[$lib.Name] = "Script not found"
             $step++
             continue
         }
-        
+
         # Run in background job with file output
         $job = Start-Job -ScriptBlock {
             param($script, $log, $workDir)
             Set-Location $workDir
             $ErrorActionPreference = "Continue"
-            
+
             # Execute script and capture all output
             try {
                 & $script *>&1 | ForEach-Object {
@@ -164,33 +164,33 @@ if (-not $SkipLibraries) {
                 exit 1
             }
         } -ArgumentList $scriptPath, $libLogFile, $PWD
-        
+
         Write-Log "  Job ID: $($job.Id)" "Gray"
         Write-Log "  Log: $libLogFile" "Gray"
-        
+
         if ($MonitorInVSCode) {
             Start-Process "code" -ArgumentList $libLogFile -NoNewWindow
         }
-        
+
         # Wait with timeout and periodic status updates
         $waited = 0
         $checkInterval = 30  # Check every 30 seconds
-        
+
         while ($job.State -eq 'Running' -and $waited -lt $lib.Timeout) {
             Start-Sleep -Seconds $checkInterval
             $waited += $checkInterval
-            
+
             # Show progress
             $pct = [math]::Round(($waited / $lib.Timeout) * 100, 1)
             Write-Log "  Progress: $waited / $($lib.Timeout) seconds ($pct%)" "DarkGray"
-            
+
             # Check if log file is growing
             if (Test-Path $libLogFile) {
                 $logSize = (Get-Item $libLogFile).Length
                 Write-Log "  Log size: $([math]::Round($logSize / 1KB, 1)) KB" "DarkGray"
             }
         }
-        
+
         # Check result
         if ($job.State -eq 'Running') {
             Write-Log "  ⏱️  Timeout exceeded ($($lib.Timeout)s)" "Yellow"
@@ -200,7 +200,7 @@ if (-not $SkipLibraries) {
         } else {
             Wait-Job $job -Timeout 10 | Out-Null
             $jobOutput = Receive-Job $job -ErrorAction SilentlyContinue
-            
+
             # Check exit code (stored in job if script exited properly)
             $success = $false
             if ($job.State -eq 'Completed') {
@@ -212,7 +212,7 @@ if (-not $SkipLibraries) {
                     }
                 }
             }
-            
+
             if ($success -or $job.State -eq 'Completed') {
                 Write-Log "  ✅ $($lib.Name) completed" "Green"
                 $libraryResults[$lib.Name] = "Success"
@@ -222,7 +222,7 @@ if (-not $SkipLibraries) {
                 $libraryResults[$lib.Name] = "Failed"
             }
         }
-        
+
         Remove-Job $job -Force -ErrorAction SilentlyContinue
         $step++
     }
@@ -237,14 +237,14 @@ $msbuild = Find-MSBuildPath
 if ($true) {
     if ($msbuild -and (Test-Path $msbuild)) {
         Write-Log "MSBuild: $msbuild" "Gray"
-        
+
         $msbuildLog = "build-logs\msbuild-LENSShell-$timestamp.log"
-        
+
         Write-Log "Building (output to $msbuildLog)..." "Gray"
-        
-        & $msbuild "LENSShell.sln" /p:Configuration=Release /p:Platform=x64 /m /v:minimal *>&1 | 
+
+        & $msbuild "LENSShell.sln" /p:Configuration=Release /p:Platform=x64 /m /v:minimal *>&1 |
         Tee-Object -FilePath $msbuildLog
-        
+
         if ($LASTEXITCODE -eq 0) {
             Write-Log "✅ LENSShell build succeeded" "Green"
         } else {
@@ -286,4 +286,3 @@ Write-Progress-File -Status "Complete" -Current "Build finished" -Step $totalSte
 # Return exit code based on results
 $failures = ($libraryResults.Values | Where-Object { $_ -eq "Failed" }).Count
 exit $failures
-

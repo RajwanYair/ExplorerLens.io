@@ -1,8 +1,8 @@
 # ExplorerLens Documentation Index
 
 **Project:** ExplorerLens 
-**Current Version:** v24.1.0 "Altair-R" 
-**Last Updated:** May 2026
+**Current Version:** v25.2.0 "Rigel-S" 
+**Last Updated:** March 2026
 
 ---
 
@@ -20,10 +20,13 @@
 
 | Document | Description |
 |----------|-------------|
-| [ROADMAP_V25.md](ROADMAP_V25.md) | **Active Roadmap** — v25.x "Rigel" through v26.x "Canopus" |
+| [ROADMAP_V30.md](ROADMAP_V30.md) | **Next-Gen Roadmap** — v30.x "Deneb" Gen-6 + v31.x "Achernar" Generative Era |
+| [ROADMAP_V25.md](ROADMAP_V25.md) | Active Roadmap — v25.x "Rigel" through v26.x "Canopus" |
+| [SPRINT_PLAN_1000.md](SPRINT_PLAN_1000.md) | Sprints 961–1060 — v30.0.0 "Deneb" through v31.1.0 "Achernar-R" (Gen-6) |
+| [SPRINT_PLAN_900.md](SPRINT_PLAN_900.md) | Sprints 861–960 — v28.6.0 "Polaris-W" through v29.7.0 "Capella-X" (LTS) |
 | [SPRINT_PLAN_800.md](SPRINT_PLAN_800.md) | Sprints 761–860 — v27.4.0 "Sirius-U" through v28.5.0 "Polaris-V" |
 | [SPRINT_PLAN_700.md](SPRINT_PLAN_700.md) | Sprints 661–760 — v26.2.0 "Canopus-S" through v27.3.0 "Sirius-T" |
-| [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) | Sprints 561–660 — v25.0.0 "Rigel" through v26.1.0 "Canopus-R" |
+| [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) | Sprints 561–660 — v25.0.0 "Rigel" through v26.1.0 "Canopus-R" (Active) |
 | [archive/SPRINT_PLAN_500.md](archive/SPRINT_PLAN_500.md) | 📦 *Archive* — Sprints 461–560 — v23.6.0 through v24.7.0 "Altair-X" |
 | [archive/SPRINT_PLAN_400.md](archive/SPRINT_PLAN_400.md) | 📦 *Archive* — Sprints 301–460 — v22.0.0 through v23.5.0 "Vega-V" |
 | [archive/SPRINT_PLAN_300.md](archive/SPRINT_PLAN_300.md) | 📦 *Archive* — Sprints 201–300 — v19.1.0 through v21.4.0 |
@@ -42,6 +45,11 @@
 
 | Document | Description |
 |----------|-------------|
+| [adr/README.md](adr/README.md) | Architecture Decision Records (ADRs) — key design rationale |
+| [adr/ADR-001-WASM-plugin-sandbox.md](adr/ADR-001-WASM-plugin-sandbox.md) | ADR-001: WASM Plugin Sandbox over Native DLL |
+| [adr/ADR-002-NPU-heterogeneous-compute.md](adr/ADR-002-NPU-heterogeneous-compute.md) | ADR-002: NPU & Heterogeneous Compute Routing |
+| [adr/ADR-003-CLIP-semantic-search.md](adr/ADR-003-CLIP-semantic-search.md) | ADR-003: CLIP Embeddings for Semantic Search (planned v30.2.0) |
+| [adr/ADR-008-c23-migration-strategy.md](adr/ADR-008-c23-migration-strategy.md) | ADR-008: C++23 Migration Strategy (planned v30.0.0+) |
 | [architecture/PROJECT_STRUCTURE.md](architecture/PROJECT_STRUCTURE.md) | Repository and component structure |
 | [architecture/INTEGRATION_ARCHITECTURE.md](architecture/INTEGRATION_ARCHITECTURE.md) | Integration architecture details |
 

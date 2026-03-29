@@ -53,8 +53,8 @@ function Build-Status {
     $logDir = "$global:ExplorerLensPath\build-logs"
     if (Test-Path $logDir) {
         Write-Host "Recent builds:" -ForegroundColor Cyan
-        Get-ChildItem $logDir -Filter "*.log" | 
-        Sort-Object LastWriteTime -Descending | 
+        Get-ChildItem $logDir -Filter "*.log" |
+        Sort-Object LastWriteTime -Descending |
         Select-Object -First 5 |
         ForEach-Object {
             $status = "?"
@@ -74,27 +74,27 @@ function Start-BuildMonitor {
         [string]$LogPattern = "production-build-*.log",
         [int]$RefreshSeconds = 10
     )
-    
+
     $logDir = "$global:ExplorerLensPath\build-logs"
     Write-Host "Starting file-based build monitor..." -ForegroundColor Cyan
     Write-Host "Log directory: $logDir" -ForegroundColor Gray
     Write-Host "Refresh interval: $RefreshSeconds seconds" -ForegroundColor Gray
     Write-Host "Press Ctrl+C to stop" -ForegroundColor Yellow
     Write-Host ""
-    
+
     $lastSize = 0
     $lastUpdateTime = Get-Date
-    
+
     while ($true) {
-        $logs = Get-ChildItem "$logDir\$LogPattern" -ErrorAction SilentlyContinue | 
-        Sort-Object LastWriteTime -Descending | 
+        $logs = Get-ChildItem "$logDir\$LogPattern" -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending |
         Select-Object -First 1
-        
+
         if ($logs) {
             $log = $logs[0]
             $currentSize = $log.Length
             $elapsed = (Get-Date) - $log.LastWriteTime
-            
+
             if ($currentSize -ne $lastSize) {
                 Clear-Host
                 Write-Host "=== Build Monitor ===" -ForegroundColor Cyan
@@ -114,7 +114,7 @@ function Start-BuildMonitor {
         } else {
             Write-Host "[$(Get-Date -Format 'HH:mm:ss')] Waiting for build log..." -ForegroundColor DarkGray
         }
-        
+
         Start-Sleep -Seconds $RefreshSeconds
     }
 }
@@ -122,4 +122,3 @@ function Start-BuildMonitor {
 # Display help on startup (optional - comment out for even faster startup)
 # Write-Host "ExplorerLens Barebone Profile Loaded" -ForegroundColor Green
 # Write-Host "Commands: dt, bs, src, Build-Quick, Build-Monitor, Build-Status, Start-BuildMonitor" -ForegroundColor Gray
-

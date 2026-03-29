@@ -49,7 +49,7 @@ struct BuildInfo {
     // Subsystem count
     static constexpr int DecoderCount = 25;
     static constexpr int SupportedExtensions = 200;
-    static constexpr int UnitTestCount = 3485;
+    static constexpr int UnitTestCount = 3564;
     static constexpr int BenchmarkSuites = 5;
 };
 

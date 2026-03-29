@@ -21,17 +21,17 @@ if ($UseProxy -and $ProxyUrl) {
 # Helper function to get latest GitHub release version
 function Get-LatestGitHubRelease {
     param([string]$Repo)
-    
+
     try {
         $apiUrl = "https://api.github.com/repos/$Repo/releases/latest"
         $headers = @{ "User-Agent" = "ExplorerLens-Updater" }
-        
+
         if ($UseProxy) {
             $response = Invoke-RestMethod -Uri $apiUrl -Headers $headers -Proxy $ProxyUrl -UseBasicParsing
         } else {
             $response = Invoke-RestMethod -Uri $apiUrl -Headers $headers -UseBasicParsing
         }
-        
+
         return $response.tag_name -replace '^v', ''
     } catch {
         Write-Host "  Warning: Could not fetch latest version for $Repo" -ForegroundColor Yellow
@@ -48,7 +48,7 @@ function Get-LatestLZMAVersion {
         } else {
             $content = Invoke-WebRequest -Uri $url -UseBasicParsing
         }
-        
+
         if ($content.Content -match 'lzma(\d{4})\.7z') {
             $version = $matches[1]
             return "$($version.Substring(0,2)).$($version.Substring(2,2))"
@@ -147,41 +147,41 @@ $libraries = @{
 foreach ($lib in $libraries.Keys) {
     $info = $libraries[$lib]
     $version = $info.Latest
-    
+
     if (-not $info.ContainsKey("Url")) {
         $repo = $info.Repo
-        
+
         # Build URL based on library patterns
         switch ($lib) {
-            "zlib" { 
+            "zlib" {
                 $info["Url"] = "https://github.com/$repo/releases/download/v$version/zlib-$version.tar.gz"
                 $info["Dir"] = Join-Path $compressionDir "zlib-$version"
             }
-            "zstd" { 
+            "zstd" {
                 $info["Url"] = "https://github.com/$repo/releases/download/v$version/zstd-$version.tar.gz"
                 $info["Dir"] = Join-Path $compressionDir "zstd-$version"
             }
-            "lz4" { 
+            "lz4" {
                 $info["Url"] = "https://github.com/$repo/releases/download/v$version/lz4-$version.tar.gz"
                 $info["Dir"] = Join-Path $compressionDir "lz4-$version"
             }
-            "minizip-ng" { 
+            "minizip-ng" {
                 $info["Url"] = "https://github.com/$repo/archive/refs/tags/$version.tar.gz"
                 $info["Dir"] = Join-Path $compressionDir "minizip-ng-$version"
             }
-            "libwebp" { 
+            "libwebp" {
                 $info["Url"] = "https://github.com/$repo/archive/refs/tags/v$version.tar.gz"
                 $info["Dir"] = Join-Path $imageLibsDir "libwebp-$version"
             }
-            "libavif" { 
+            "libavif" {
                 $info["Url"] = "https://github.com/$repo/archive/refs/tags/v$version.tar.gz"
                 $info["Dir"] = Join-Path $imageLibsDir "libavif-$version"
             }
-            "libjxl" { 
+            "libjxl" {
                 $info["Url"] = "https://github.com/$repo/archive/refs/tags/v$version.tar.gz"
                 $info["Dir"] = Join-Path $imageLibsDir "libjxl-$version"
             }
-            "dav1d" { 
+            "dav1d" {
                 $info["Url"] = "https://github.com/$repo/archive/refs/tags/$version.tar.gz"
                 $info["Dir"] = Join-Path $imageLibsDir "dav1d-$version"
             }
@@ -203,10 +203,10 @@ foreach ($lib in $libraries.Keys | Sort-Object) {
     $info = $libraries[$lib]
     $status = if ($info.Current -eq $info.Latest) { "OK" } else { "UPDATE!" }
     $color = if ($status -eq "OK") { "Green" } else { "Yellow" }
-    
+
     Write-Host ("{0,-20} {1,-12} {2,-12} {3,-10} {4}" -f `
             $lib, $info.Current, $info.Latest, $status, $info.Category) -ForegroundColor $color
-    
+
     if ($status -eq "UPDATE!") {
         $updateCount++
     }
@@ -238,21 +238,21 @@ function Download-And-Extract {
         [string]$Url,
         [string]$TargetDir
     )
-    
+
     $fileName = Split-Path $Url -Leaf
     $downloadPath = Join-Path $env:TEMP $fileName
-    
+
     try {
         Write-Host "  Downloading $Name..." -ForegroundColor Cyan
-        
+
         if ($UseProxy) {
             Invoke-WebRequest -Uri $Url -OutFile $downloadPath -Proxy $ProxyUrl -UseBasicParsing
         } else {
             Invoke-WebRequest -Uri $Url -OutFile $downloadPath -UseBasicParsing
         }
-        
+
         Write-Host "  Extracting to $TargetDir..." -ForegroundColor Cyan
-        
+
         # Determine extraction method
         if ($fileName -match '\.tar\.gz$') {
             # Use tar (available in Windows 10+)
@@ -270,7 +270,7 @@ function Download-And-Extract {
         } else {
             Expand-Archive -Path $downloadPath -DestinationPath (Split-Path $TargetDir -Parent) -Force
         }
-        
+
         Write-Host "  OK: $Name" -ForegroundColor Green
         Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
         return $true
@@ -283,10 +283,10 @@ function Download-And-Extract {
 # Process updates
 foreach ($lib in $libraries.Keys | Sort-Object) {
     $info = $libraries[$lib]
-    
+
     if ($info.Current -ne $info.Latest) {
         Write-Host "`nUpdating $lib ($($info.Current) -> $($info.Latest))..." -ForegroundColor Yellow
-        
+
         if (Download-And-Extract -Name $lib -Url $info.Url -TargetDir $info.Dir) {
             Write-Host "  Successfully updated $lib to $($info.Latest)" -ForegroundColor Green
         }
@@ -300,5 +300,3 @@ Write-Host "  2. Update build scripts if paths changed (e.g., zstd-1.5.7 vs zstd
 Write-Host "  3. Run .\scripts\build.ps1 to rebuild ExplorerLens with updated libraries" -ForegroundColor White
 Write-Host "  4. Test thoroughly before committing changes" -ForegroundColor White
 Write-Host "`nNote: Current version tracking in this script should be updated after successful build" -ForegroundColor Yellow
-
-

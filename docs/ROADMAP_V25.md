@@ -1,10 +1,11 @@
 # ExplorerLens v25.x "Rigel" — Development Roadmap
 
-**Status:** Planning  
-**Current Version:** v24.1.0 "Altair-R"  
-**Next Major Version:** v25.0.0 "Rigel"  
+**Status:** Active Execution  
+**Current Version:** v25.2.0 "Rigel-S"  
+**Next Major Version:** v26.0.0 "Canopus"  
 **Previous Roadmap:** [ROADMAP_V16.md](archive/ROADMAP_V16.md) *(archived — covers v15.x/v16.x work now completed)*  
-**Sprint Detail:** [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) — Sprints 561–660
+**Sprint Detail:** [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) — Sprints 561–660  
+**Gen-6 Roadmap:** [ROADMAP_V30.md](ROADMAP_V30.md) — v30.x "Deneb" through v31.x "Achernar"
 
 ---
 
@@ -48,10 +49,10 @@ v23.5.0  Vega-V    ── released
    ├── v24.6.0  Altair-W   Store & Distribution           (Sprint 541–550)
    ├── v24.7.0  Altair-X   Developer Experience v2       (Sprint 551–560)
    │
-   ├── v25.0.0  Rigel      WASM Plugin Sandbox ★★       (Sprint 561–570)  ◄ THIS ROADMAP
-   ├── v25.1.0  Rigel-R    Neural Format Intelligence    (Sprint 571–580)
-   ├── v25.2.0  Rigel-S    NPU & Heterogeneous Compute   (Sprint 581–590)
-   ├── v25.3.0  Rigel-T    VCS & Source Control          (Sprint 591–600)
+   ├── v25.0.0  Rigel      WASM Plugin Sandbox ★★       (Sprint 561–570)  ✔ Released
+   ├── v25.1.0  Rigel-R    Neural Format Intelligence    (Sprint 571–580)  ✔ Released
+   ├── v25.2.0  Rigel-S    NPU & Heterogeneous Compute   (Sprint 581–590)  ✔ Released  ◄ CURRENT
+   ├── v25.3.0  Rigel-T    VCS & Source Control          (Sprint 591–600)  ← IN PROGRESS
    ├── v25.4.0  Rigel-U    Self-Healing Recovery         (Sprint 601–610)
    ├── v25.5.0  Rigel-V    Multi-Instance & VDesktop     (Sprint 611–620)
    ├── v25.6.0  Rigel-W    Collaborative Annotations     (Sprint 621–630)

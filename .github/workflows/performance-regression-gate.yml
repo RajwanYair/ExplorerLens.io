@@ -22,11 +22,11 @@ jobs:
     runs-on: windows-latest
 
     env:
-      # Baselines from performance-benchmarks.md (i7-12700K / RTX 3080 baseline)
-      BASELINE_SINGLE_MS: '17'        # target median: <17ms
-      BASELINE_BATCH_IPS: '235'       # target batch: >235 img/sec
-      THRESHOLD_LATENCY_PCT: '20'     # block if +20% over baseline
-      THRESHOLD_THROUGHPUT_PCT: '15'  # block if -15% under baseline
+      # Baselines from performance-benchmarks.md (v25.2.0 — Core Ultra 9 / RTX 4090 baseline)
+      BASELINE_SINGLE_MS: '17'        # target median: <17ms (NPU-accelerated path)
+      BASELINE_BATCH_IPS: '235'       # target batch: >235 img/sec (CPU path, >350 with NPU)
+      THRESHOLD_LATENCY_PCT: '15'     # block if +15% over baseline (tightened from 20%)
+      THRESHOLD_THROUGHPUT_PCT: '10'  # block if -10% under baseline (tightened from 15%)
 
     steps:
       - name: Checkout Code

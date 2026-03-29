@@ -17,13 +17,13 @@ $VSPath = "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxil
 if (Test-Path $VSPath) {
     $tempFile = [System.IO.Path]::GetTempFileName()
     cmd /c "`"$VSPath`" x64 >nul 2>&1 && set" > $tempFile
-    
+
     Get-Content $tempFile | ForEach-Object {
         if ($_ -match '^([^=]+)=(.*)$') {
             Set-Item -Path "env:$($matches[1])" -Value $matches[2] -Force
         }
     }
-    
+
     Remove-Item $tempFile -Force
     Write-Host "[OK] MSVC environment loaded" -ForegroundColor Green
 } else {
@@ -50,7 +50,7 @@ function Build-ExplorerLens {
 
 function Check-ExplorerLensTools {
     Write-Host "Checking development tools..." -ForegroundColor Cyan
-    
+
     $tools = @('git', 'cmake', 'ninja', 'cl', 'msbuild', 'python', 'gcc')
     foreach ($tool in $tools) {
         if (Get-Command $tool -ErrorAction SilentlyContinue) {
@@ -76,4 +76,3 @@ Set-Content -Path $profilePath -Value $minimalProfile -Force -Encoding UTF8
 
 Write-Host "[OK] Profile fixed and saved to: $profilePath" -ForegroundColor Green
 Write-Host "Please restart PowerShell to test the new profile" -ForegroundColor Cyan
-

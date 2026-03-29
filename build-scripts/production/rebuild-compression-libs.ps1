@@ -42,23 +42,23 @@ Write-Host "Building zlib..." -ForegroundColor Yellow
 $zlibDir = Join-Path $compressionDir "zlib-1.3.1"
 if (Test-Path $zlibDir) {
     Push-Location $zlibDir
-    
+
     # Create build directory
     $buildDir = "build-vs"
     if ($Clean -and (Test-Path $buildDir)) {
         Remove-Item $buildDir -Recurse -Force
     }
     New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
-    
+
     Push-Location $buildDir
-    
+
     # Configure with CMake (no /GL) - Auto-detect VS version
     $vsGenerators = @(
         "Visual Studio 18 2026",
         "Visual Studio 17 2022",
         "Visual Studio 16 2019"
     )
-    
+
     $generator = $null
     foreach ($gen in $vsGenerators) {
         $testResult = cmake .. -G "$gen" -A x64 2>&1 | Out-String
@@ -67,30 +67,30 @@ if (Test-Path $zlibDir) {
             break
         }
     }
-    
+
     if (-not $generator) {
         Write-Host "  ERROR: No compatible Visual Studio generator found" -ForegroundColor Red
         Pop-Location
         Pop-Location
         return
     }
-    
+
     Write-Host "  Using generator: $generator" -ForegroundColor Cyan
-    
+
     cmake .. -G "$generator" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
         -DBUILD_SHARED_LIBS=ON `
         -DCMAKE_C_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_CXX_FLAGS_RELEASE="/MT /O2"
-    
+
     # Build
     cmake --build . --config Release --target zlibstatic
-    
+
     # Copy output
     $outputDir = Join-Path $zlibDir "x64\Release"
     New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
     Copy-Item "Release\zlibstatic.lib" $outputDir -Force
-    
+
     Pop-Location
     Pop-Location
     Write-Host "  zlib: OK`n" -ForegroundColor Green
@@ -103,21 +103,21 @@ Write-Host "Building bzip2..." -ForegroundColor Yellow
 $bzip2Dir = Join-Path $compressionDir "bzip2-1.0.8"
 if (Test-Path $bzip2Dir) {
     Push-Location $bzip2Dir
-    
+
     # Build with cl.exe directly (simple makefile project)
     $vcvars = "${env:ProgramFiles}\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
     if (-not (Test-Path $vcvars)) {
         $vcvars = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
     }
-    
+
     if (Test-Path $vcvars) {
         cmd /c "`"$vcvars`" && nmake /f makefile.msc clean && nmake /f makefile.msc lib CFLAGS=`"/MT /O2 /D_CRT_SECURE_NO_WARNINGS`""
-        
+
         $outputDir = Join-Path $bzip2Dir "x64\Release"
         New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
         Copy-Item "libbz2.lib" $outputDir\bzip2.lib -Force -ErrorAction SilentlyContinue
     }
-    
+
     Pop-Location
     Write-Host "  bzip2: OK`n" -ForegroundColor Green
 } else {
@@ -129,15 +129,15 @@ Write-Host "Building zstd..." -ForegroundColor Yellow
 $zstdDir = Get-ChildItem -Path $compressionDir -Filter "zstd-*" -Directory | Sort-Object Name -Descending | Select-Object -First 1
 if ($zstdDir) {
     Push-Location $zstdDir.FullName
-    
+
     $buildDir = "build-vs"
     if ($Clean -and (Test-Path $buildDir)) {
         Remove-Item $buildDir -Recurse -Force
     }
     New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
-    
+
     Push-Location $buildDir
-    
+
     # Configure with CMake
     cmake ..\build\cmake -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
@@ -145,15 +145,15 @@ if ($zstdDir) {
         -DZSTD_BUILD_STATIC=ON `
         -DCMAKE_C_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_CXX_FLAGS_RELEASE="/MT /O2"
-    
+
     # Build
     cmake --build . --config Release --target libzstd_static
-    
+
     # Copy output
     $outputDir = Join-Path $zstdDir.FullName "build\x64\Release"
     New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
     Copy-Item "lib\Release\zstd_static.lib" $outputDir -Force
-    
+
     Pop-Location
     Pop-Location
     Write-Host "  zstd ($($zstdDir.Name)): OK`n" -ForegroundColor Green
@@ -166,30 +166,30 @@ Write-Host "Building lz4..." -ForegroundColor Yellow
 $lz4Dir = Join-Path $compressionDir "lz4-1.10.0"
 if (Test-Path $lz4Dir) {
     Push-Location $lz4Dir
-    
+
     $buildDir = "build-vs"
     if ($Clean -and (Test-Path $buildDir)) {
         Remove-Item $buildDir -Recurse -Force
     }
     New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
-    
+
     Push-Location $buildDir
-    
+
     # Configure with CMake
     cmake ..\build\cmake -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
         -DBUILD_SHARED_LIBS=ON `
         -DCMAKE_C_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_CXX_FLAGS_RELEASE="/MT /O2"
-    
+
     # Build
     cmake --build . --config Release
-    
+
     # Copy output
     $outputDir = Join-Path $lz4Dir "build\x64\Release"
     New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
     Copy-Item "Release\lz4.lib" $outputDir -Force -ErrorAction SilentlyContinue
-    
+
     Pop-Location
     Pop-Location
     Write-Host "  lz4: OK`n" -ForegroundColor Green
@@ -202,15 +202,15 @@ Write-Host "Building minizip-ng (no LTCG)..." -ForegroundColor Yellow
 $minizipDir = Join-Path $compressionDir "minizip-ng-4.0.10"
 if (Test-Path $minizipDir) {
     Push-Location $minizipDir
-    
+
     $buildDir = "build-vs"
     if ($Clean -and (Test-Path $buildDir)) {
         Remove-Item $buildDir -Recurse -Force
     }
     New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
-    
+
     Push-Location $buildDir
-    
+
     # Configure with CMake - EXPLICITLY disable /GL
     cmake .. -G "Visual Studio 18 2026" -A x64 `
         -DCMAKE_BUILD_TYPE=Release `
@@ -221,15 +221,15 @@ if (Test-Path $minizipDir) {
         -DCMAKE_CXX_FLAGS_RELEASE="/MT /O2" `
         -DCMAKE_POLICY_DEFAULT_CMP0091=NEW `
         -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded"
-    
+
     # Build
     cmake --build . --config Release
-    
+
     # Copy output
     $outputDir = Join-Path $minizipDir "build\x64\Release"
     New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
     Copy-Item "Release\minizip.lib" $outputDir -Force
-    
+
     Pop-Location
     Pop-Location
     Write-Host "  minizip-ng: OK (LTCG disabled)`n" -ForegroundColor Green
@@ -242,11 +242,11 @@ Write-Host "Building LZMA SDK..." -ForegroundColor Yellow
 $lzmaDir = Get-ChildItem -Path $compressionDir -Filter "lzma-*" -Directory | Sort-Object Name -Descending | Select-Object -First 1
 if ($lzmaDir) {
     Push-Location $lzmaDir.FullName
-    
+
     # LZMA SDK uses custom build process
     # For now, assume it's already built or will be built separately
     Write-Host "  LZMA SDK: Skipping (manual build required)`n" -ForegroundColor Yellow
-    
+
     Pop-Location
 }
 
@@ -255,11 +255,11 @@ Write-Host "Building UnRAR..." -ForegroundColor Yellow
 $unrarDir = Get-ChildItem -Path $compressionDir -Filter "unrar-*" -Directory | Sort-Object Name -Descending | Select-Object -First 1
 if ($unrarDir) {
     Push-Location $unrarDir.FullName
-    
+
     # UnRAR uses custom makefile
     # For now, assume it's already built or will be built separately
     Write-Host "  UnRAR: Skipping (manual build required)`n" -ForegroundColor Yellow
-    
+
     Pop-Location
 }
 
@@ -271,4 +271,3 @@ Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "  1. Run: rebuild-all.cmd" -ForegroundColor White
 Write-Host "  2. Verify LENSShell.dll builds without LTCG errors" -ForegroundColor White
 Write-Host "  3. Test thumbnail generation" -ForegroundColor White
-

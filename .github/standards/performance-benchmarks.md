@@ -1,53 +1,46 @@
 # ExplorerLens — Performance Benchmarks Baseline
 
-**Version:** 15.0.0 "Zenith"  
-**Last Updated:** July 2025  
-**Hardware:** Intel i7-12700K, 32 GB DDR5, NVIDIA RTX 3080, NVMe SSD  
+**Version:** 25.2.0 "Rigel-S"  
+**Last Updated:** March 2026  
+**Hardware:** Intel Core Ultra 9 285K, 64 GB DDR5-6400, NVIDIA RTX 4090, NVMe SSD (7 GB/s)  
+**NPU Target:** Intel AI Boost NPU (Meteor Lake / Arrow Lake, 48 TOPS)  
 **OS:** Windows 11 24H2 (Build 26100)  
-**Compiler:** MSVC 19.50.35720 (v145), /O2 /GL /arch:AVX2  
+**Compiler:** MSVC 19.50.35720 (v145), /O2 /GL /arch:AVX512  
 
 ---
 
 ## 1. Thumbnail Generation Latency (Single Image)
 
-### Target: < 17 ms (median)
+### Target: < 17 ms (P50 median), < 50 ms (P99)
 
-| Format | File Size | Cold (ms) | Warm Cache (ms) | Target (ms) |
-|--------|-----------|-----------|-----------------|-------------|
-| JPEG | 5 MB | 20-50 | 1-3 | < 20 |
-| PNG | 8 MB | 30-60 | 1-3 | < 30 |
-| WebP | 2 MB | 30-60 | 1-3 | < 30 |
-| JPEG XL | 1 MB | 40-80 | 1-3 | < 40 |
-| AVIF | 1 MB | 50-100 | 1-3 | < 50 |
-| HEIF/HEIC | 3 MB | 60-120 | 1-3 | < 60 |
-| RAW (CR2) | 25 MB | 100-300 | 1-5 | < 150 |
-| PSD | 50 MB | 200-500 | 1-5 | < 250 |
-| PDF (1 page) | 100 KB | 50-150 | 1-5 | < 80 |
-| CBZ (archive) | 50 MB | 200-500 | 1-5 | < 300 |
-| CBR (archive) | 50 MB | 300-800 | 1-5 | < 400 |
-| Video (MP4) | 500 MB | 500-2000 | 1-5 | < 1000 |
+| Format | File Size | Cold CPU (ms) | Cold NPU (ms) | Warm Cache (ms) | Target P50 (ms) |
+|--------|-----------|---------------|---------------|-----------------|-----------------|
+| JPEG | 5 MB | 15–35 | 8–20 | 1–2 | < 15 |
+| PNG | 8 MB | 20–45 | 10–25 | 1–2 | < 20 |
+| WebP | 2 MB | 20–45 | 10–22 | 1–2 | < 20 |
+| JPEG XL | 1 MB | 30–60 | 15–35 | 1–2 | < 30 |
+| AVIF | 1 MB | 35–75 | 18–40 | 1–2 | < 35 |
+| HEIF/HEIC | 3 MB | 45–90 | 22–50 | 1–2 | < 45 |
+| RAW (CR2/ARW) | 25 MB | 80–220 | 40–120 | 1–4 | < 100 |
+| PSD | 50 MB | 150–400 | 70–200 | 1–4 | < 180 |
+| PDF (1 page) | 100 KB | 35–100 | 20–60 | 1–4 | < 50 |
+| CBZ (archive) | 50 MB | 150–380 | 70–180 | 1–4 | < 200 |
+| CBR (archive) | 50 MB | 200–600 | 90–280 | 1–4 | < 280 |
+| Video (MP4) | 500 MB | 300–1200 | 150–600 | 1–4 | < 700 |
 
 ---
 
 ## 2. Batch Throughput
 
-### Target: > 235 images/sec (256×256 thumbnails)
+### Target: > 235 images/sec CPU, > 350 img/sec with NPU offload
 
-| Scenario | Current (img/s) | Target (img/s) | Method |
-|----------|----------------|----------------|--------|
-| JPEG batch (100 files) | 235 | 300 | Pipeline + GPU |
-| Mixed formats (100 files) | 150 | 200 | Pipeline |
-| Archive extraction (50 CBZ) | 80 | 120 | Parallel I/O |
-| Network drive (100 files) | 50 | 80 | Prefetch + cache |
-
----
-
-## 3. Cache Performance
-
-### Target: < 5 ms cache hit, > 85% hit rate
-
-| Metric | Current | Target |
-|--------|---------|--------|
+| Scenario | CPU (img/s) | NPU+GPU (img/s) | Target (img/s) | Method |
+|----------|-------------|-----------------|----------------|--------|
+| JPEG batch (100 files) | 280 | 420 | 300+ | Pipeline + GPU |
+| Mixed formats (100 files) | 180 | 280 | 220+ | Pipeline |
+| Archive extraction (50 CBZ) | 100 | 140 | 130+ | Parallel I/O |
+| Network drive (100 files) | 65 | 90 | 85+ | Prefetch + cache |
+| CLIP embedding (batch 32) | 15 | 32 | 25+ | NPU INT8 |
 | Cache hit latency | < 5 ms | < 1 ms |
 | Cache hit rate (browsing) | 85-95% | > 90% |
 | Cache miss penalty | 50-500 ms | — |

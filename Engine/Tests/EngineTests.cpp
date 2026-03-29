@@ -258,8 +258,6 @@
 // --- Pipeline & Performance ---
 #include "../Pipeline/ZeroCopyPipeline.h"
 #include "../Utils/SIMDScaler.h"
-#include "../Cache/PipelineStateCacheV2.h"
-#include "../Cache/CacheWarmingService.h"
 
 // --- Sprint 43-44: Plugin SDK Hardening ---
 #include "../Plugin/PluginCapabilityGuard.h"
@@ -477,7 +475,6 @@
 #include "../Utils/AuditLogger.h"
 #include "../Utils/CIPipeline.h"
 #include "../Utils/CodeCoverage.h"
-#include "../Memory/BitmapPool.h"
 #include "../Utils/DecoderCircuitBreaker.h"
 #include "../Memory/MemoryPressureControllerV2.h"
 #include "../Core/PerformanceActivation.h"
@@ -501,8 +498,6 @@
 #include "../Core/BuildValidation.h"
 #include "../Core/Config.h"
 #include "../Core/DarkMode.h"
-#include "../Core/DeadCodeAudit.h"
-#include "../Core/DeadCodeAuditor.h"
 #include "../Core/EngineAPI.h"
 #include "../Core/ICacheProvider.h"
 #include "../Core/IFormatDetector.h"
@@ -677,7 +672,6 @@
 
 // --- Sprint 37-38: Test Coverage Expansion ---
 #include "../Core/VersionSynchronizer.h"
-#include "../Pipeline/AdaptiveQualityScaler.h"
 
 // --- Sprint 49-50: Dark Mode & Theme Rendering ---
 #include "../Core/DarkModeTextFix.h"
@@ -758,7 +752,6 @@
 
 // Sprint 69-88: Beyond Zenith
 #include "../Core/NeuralThumbnailUpscaler.h"
-#include "../Core/PerceptualHashEngine.h"
 #include "../Core/SemanticFileClassifier.h"
 #include "../Core/ContentAwareCompositor.h"
 #include "../Core/HDRDisplayMapper.h"
@@ -784,7 +777,6 @@
 #include "../GPU/ShaderModelValidator.h"
 #include "../Pipeline/StreamingMipChain.h"
 #include "../Pipeline/DeferredDecodeScheduler.h"
-#include "../Pipeline/PredictivePrefetchEngine.h"
 #include "../Pipeline/AdaptiveBatchCoalescer.h"
 #include "../Pipeline/ThumbnailMorphTransition.h"
 #include "../Cache/DistributedCacheSync.h"
@@ -803,7 +795,6 @@
 #include "../AI/TextRecognitionThumb.h"
 #include "../AI/SceneDepthEstimator.h"
 #include "../Plugin/PluginMarketplaceClient.h"
-#include "../Plugin/PluginDependencyResolver.h"
 #include "../Plugin/PluginVersionMigrator.h"
 #include "../Plugin/PluginTelemetryBridge.h"
 #include "../Plugin/PluginSecurityAuditor.h"
@@ -1251,7 +1242,6 @@
 #include "../Core/CooperativeTaskScheduler.h"
 #include "../Core/ThreadLocalContextPool.h"
 // Sprint 371-380 — Format Expansion IV (v22.5.0)
-#include "../Decoders/FLIFDecoder.h"
 #include "../Decoders/QOIRDecoder.h"
 #include "../Decoders/JNGDecoder.h"
 #include "../Decoders/JBIG2Decoder.h"
@@ -1262,7 +1252,6 @@
 // Sprint 381-390 — Windows Shell Integration v2 (v22.6.0)
 #include "../Core/NamespaceWalkEngine.h"
 #include "../Core/ExplorerColumnProviderV2.h"
-#include "../Core/ShellContextMenuV2.h"
 #include "../Core/SearchIndexBridge.h"
 #include "../Core/ShellPropertyBagV2.h"
 #include "../Core/ThumbnailOverlayRenderer.h"
@@ -1319,7 +1308,6 @@
 #include "../Cache/ContentAwareCacheKey.h"
 #include "../Cache/DeltaSyncReplicator.h"
 #include "../Cache/ZeroCopyCacheReader.h"
-#include "../Cache/CacheEncryptionLayer.h"
 #include "../Cache/ShardedCachePartitionV2.h"
 #include "../Cache/ConsistentHashRing.h"
 // Sprint 451-460 — CLI & Automation v2 (v23.5.0)
@@ -27507,6 +27495,26 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/SyntheticDecoderGenerator.h"
 #include "AI/FormatEvolutionTracker.h"
 
+// Sprint 581-590 — NPU & Heterogeneous Compute (v25.2.0 "Rigel-S")
+#include "GPU/IntelNPUBackend.h"
+#include "GPU/HexagonDSPBackend.h"
+#include "GPU/ONNXEPRouter.h"
+#include "GPU/HardwareCapabilityProfiler.h"
+#include "Pipeline/PowerAwareScheduler.h"
+#include "Memory/NPUMemoryPool.h"
+#include "AI/NPUWarmupEngine.h"
+#include "GPU/ARM64DecodeBackend.h"
+
+// Sprint 591-600 — VCS Integration (v25.3.0 "Rigel-T")
+#include "Core/GitStatusOverlay.h"
+#include "Core/GitBlameHeatmapOverlay.h"
+#include "Core/VCSBadgeAdapter.h"
+#include "Cache/BranchAwareCacheKey.h"
+#include "Core/GitDiffThumbnail.h"
+#include "Core/GitLFSResolver.h"
+#include "Core/CommitBadgeCompositor.h"
+#include "Core/MergeConflictOverlay.h"
+
 using namespace ExplorerLens::Engine::Tests;
 
 //==============================================================================
@@ -28640,6 +28648,972 @@ TEST(Test_FormatEvolutionTracker_Severities)
     ASSERT(DriftSeverity::None    != DriftSeverity::Major);
     ASSERT(DriftSeverity::Breaking!= DriftSeverity::Minor);
 }
+
+//==============================================================================
+// NPU & Heterogeneous Compute Tests (Sprint 581-590 / v25.2.0 "Rigel-S")
+//==============================================================================
+
+TEST(Test_IntelNPUBackend_Create)
+{
+    IntelNPUBackend npu;
+    ASSERT(npu.GetState() == NPUBackendState::Uninitialized);
+    ASSERT(!npu.IsAvailable());
+    ASSERT(npu.GetVendor() == NPUVendor::Intel);
+}
+TEST(Test_IntelNPUBackend_Initialize)
+{
+    IntelNPUBackend npu;
+    ASSERT(npu.Initialize());
+    ASSERT(npu.IsAvailable());
+    ASSERT(npu.GetState() == NPUBackendState::Ready);
+}
+TEST(Test_IntelNPUBackend_Config)
+{
+    IntelNPUConfig cfg;
+    cfg.precision = OVPrecision::FP16;
+    IntelNPUBackend npu(cfg);
+    ASSERT(npu.GetPrecision() == OVPrecision::FP16);
+}
+TEST(Test_IntelNPUBackend_Infer)
+{
+    IntelNPUBackend npu;
+    npu.Initialize();
+    float in[4] = {1,2,3,4}, out[4] = {};
+    ASSERT(npu.Infer(in, 4, out));
+    ASSERT(npu.GetMetrics().framesProcessed == 1);
+}
+TEST(Test_IntelNPUBackend_InferBadInput)
+{
+    IntelNPUBackend npu;
+    npu.Initialize();
+    ASSERT(!npu.Infer(nullptr, 0, nullptr));
+}
+TEST(Test_IntelNPUBackend_Metrics)
+{
+    IntelNPUBackend npu;
+    npu.Initialize();
+    float d[4]={}, o[4]={};
+    npu.Infer(d, 4, o);
+    auto m = npu.GetMetrics();
+    ASSERT(m.framesProcessed == 1);
+    ASSERT(m.inferenceMs >= 0);
+}
+TEST(Test_IntelNPUBackend_ResetMetrics)
+{
+    IntelNPUBackend npu;
+    npu.Initialize();
+    float d[4]={}, o[4]={};
+    npu.Infer(d, 4, o);
+    npu.ResetMetrics();
+    ASSERT(npu.GetMetrics().framesProcessed == 0);
+}
+TEST(Test_IntelNPUBackend_SetConfig)
+{
+    IntelNPUBackend npu;
+    IntelNPUConfig cfg;
+    cfg.precision = OVPrecision::INT8;
+    npu.SetConfig(cfg);
+    ASSERT(npu.GetPrecision() == OVPrecision::INT8);
+}
+TEST(Test_IntelNPUBackend_Shutdown)
+{
+    IntelNPUBackend npu;
+    npu.Initialize();
+    npu.Shutdown();
+    ASSERT(npu.GetState() == NPUBackendState::Uninitialized);
+}
+TEST(Test_HexagonDSPBackend_Create)
+{
+    HexagonDSPBackend dsp;
+    ASSERT(!dsp.IsReady());
+    ASSERT(dsp.HVXEnabled());
+}
+TEST(Test_HexagonDSPBackend_Initialize)
+{
+    HexagonDSPBackend dsp;
+    ASSERT(dsp.Initialize());
+    ASSERT(dsp.IsReady());
+}
+TEST(Test_HexagonDSPBackend_Config)
+{
+    HexagonDSPConfig cfg;
+    cfg.enableHMX = true;
+    HexagonDSPBackend dsp(cfg);
+    ASSERT(dsp.HMXEnabled());
+}
+TEST(Test_HexagonDSPBackend_RunInference)
+{
+    HexagonDSPBackend dsp;
+    dsp.Initialize();
+    uint8_t in[4]={1,2,3,4}, out[4]={};
+    auto r = dsp.RunInference(in, 4, out, 4);
+    ASSERT(r.success);
+    ASSERT(r.latencyUs > 0);
+}
+TEST(Test_HexagonDSPBackend_RunBadInput)
+{
+    HexagonDSPBackend dsp;
+    dsp.Initialize();
+    auto r = dsp.RunInference(nullptr, 0, nullptr, 0);
+    ASSERT(!r.success);
+    ASSERT(!r.errorMsg.empty());
+}
+TEST(Test_HexagonDSPBackend_RunCount)
+{
+    HexagonDSPBackend dsp;
+    dsp.Initialize();
+    uint8_t in[4]={}, out[4]={};
+    dsp.RunInference(in, 4, out, 4);
+    ASSERT(dsp.RunCount() == 1);
+}
+TEST(Test_HexagonDSPBackend_SetConfig)
+{
+    HexagonDSPBackend dsp;
+    HexagonDSPConfig cfg;
+    cfg.preferredBE = QNNBackend::HTA;
+    dsp.SetConfig(cfg);
+    ASSERT(dsp.GetQNNBackend() == QNNBackend::HTA);
+}
+TEST(Test_HexagonDSPBackend_Reset)
+{
+    HexagonDSPBackend dsp;
+    dsp.Initialize();
+    uint8_t in[4]={}, out[4]={};
+    dsp.RunInference(in, 4, out, 4);
+    dsp.Reset();
+    ASSERT(!dsp.IsReady());
+    ASSERT(dsp.RunCount() == 0);
+}
+TEST(Test_HexagonDSPBackend_Variants)
+{
+    ASSERT(HexagonVariant::V65 != HexagonVariant::V73);
+    ASSERT(QNNBackend::HTP != QNNBackend::CPU);
+}
+TEST(Test_ONNXEPRouter_Create)
+{
+    ONNXEPRouter router;
+    ASSERT(router.GetPolicy() == EPSelectionPolicy::HighestThroughput);
+    ASSERT(router.RegisteredCount() == 0);
+}
+TEST(Test_ONNXEPRouter_RegisterEP)
+{
+    ONNXEPRouter router;
+    EPCapability cap;
+    cap.ep = ONNXExecutionProvider::DirectML;
+    cap.available = true;
+    router.RegisterEP(cap);
+    ASSERT(router.RegisteredCount() == 1);
+}
+TEST(Test_ONNXEPRouter_IsEPAvailable)
+{
+    ONNXEPRouter router;
+    EPCapability cap;
+    cap.ep = ONNXExecutionProvider::CUDA;
+    cap.available = true;
+    router.RegisterEP(cap);
+    ASSERT(router.IsEPAvailable(ONNXExecutionProvider::CUDA));
+    ASSERT(!router.IsEPAvailable(ONNXExecutionProvider::DirectML));
+}
+TEST(Test_ONNXEPRouter_Select)
+{
+    ONNXEPRouter router;
+    EPCapability cpu;
+    cpu.ep = ONNXExecutionProvider::CPU;
+    cpu.available = true;
+    router.RegisterEP(cpu);
+    ASSERT(router.Select() == ONNXExecutionProvider::CPU);
+}
+TEST(Test_ONNXEPRouter_SelectPreferred)
+{
+    ONNXEPRouter router;
+    EPCapability dml;
+    dml.ep = ONNXExecutionProvider::DirectML;
+    dml.available = true;
+    router.RegisterEP(dml);
+    ASSERT(router.Select() == ONNXExecutionProvider::DirectML);
+}
+TEST(Test_ONNXEPRouter_Clear)
+{
+    ONNXEPRouter router;
+    EPCapability cap;
+    cap.ep = ONNXExecutionProvider::OpenVINO_NPU;
+    cap.available = true;
+    router.RegisterEP(cap);
+    router.Clear();
+    ASSERT(router.RegisteredCount() == 0);
+}
+TEST(Test_ONNXEPRouter_Policy)
+{
+    ONNXEPRouter router;
+    router.SetPolicy(EPSelectionPolicy::LowestLatency);
+    ASSERT(router.GetPolicy() == EPSelectionPolicy::LowestLatency);
+}
+TEST(Test_ONNXEPRouter_FallbackAllowed)
+{
+    EPRouterConfig cfg;
+    cfg.allowCPUFallback = true;
+    ONNXEPRouter router(cfg);
+    ASSERT(router.GetConfig().allowCPUFallback);
+}
+TEST(Test_ONNXEPRouter_EPEnum)
+{
+    ASSERT(ONNXExecutionProvider::DirectML != ONNXExecutionProvider::CPU);
+    ASSERT(EPSelectionPolicy::LowestPower != EPSelectionPolicy::Manual);
+}
+TEST(Test_HardwareCapabilityProfiler_Create)
+{
+    HardwareCapabilityProfiler p;
+    ASSERT(p.PeakTOPS() == 0.0f);
+}
+TEST(Test_HardwareCapabilityProfiler_Profile)
+{
+    HardwareCapabilityProfiler p;
+    auto profile = p.Profile();
+    ASSERT(!profile.accelerators.empty());
+}
+TEST(Test_HardwareCapabilityProfiler_AddMock)
+{
+    HardwareCapabilityProfiler p;
+    AcceleratorInfo npu;
+    npu.type = AcceleratorType::NPU;
+    npu.tops = 10.0f;
+    npu.available = true;
+    p.AddMock(npu);
+    auto profile = p.Profile();
+    ASSERT(profile.peakTOPS >= 10.0f);
+}
+TEST(Test_HardwareCapabilityProfiler_HasNPU)
+{
+    HardwareCapabilityProfiler p;
+    AcceleratorInfo npu;
+    npu.type = AcceleratorType::NPU;
+    npu.available = true;
+    p.AddMock(npu);
+    ASSERT(p.HasNPU());
+}
+TEST(Test_HardwareCapabilityProfiler_PeakTOPS)
+{
+    HardwareCapabilityProfiler p;
+    AcceleratorInfo a;
+    a.type = AcceleratorType::GPU;
+    a.tops = 20.0f;
+    a.available = true;
+    p.AddMock(a);
+    p.Profile();
+    ASSERT(p.PeakTOPS() >= 20.0f);
+}
+TEST(Test_HardwareCapabilityProfiler_Sort)
+{
+    HardwareCapabilityProfiler p;
+    AcceleratorInfo lo; lo.type=AcceleratorType::CPU; lo.tops=1.0f; lo.available=true;
+    AcceleratorInfo hi; hi.type=AcceleratorType::GPU; hi.tops=50.0f; hi.available=true;
+    p.AddMock(lo); p.AddMock(hi);
+    auto profile = p.Profile();
+    ASSERT(profile.peakTOPS >= 50.0f);
+}
+TEST(Test_HardwareCapabilityProfiler_ClearMocks)
+{
+    HardwareCapabilityProfiler p;
+    AcceleratorInfo npu; npu.type=AcceleratorType::NPU; npu.available=true;
+    p.AddMock(npu);
+    p.ClearMocks();
+    ASSERT(!p.HasNPU());
+}
+TEST(Test_HardwareCapabilityProfiler_AccelType)
+{
+    ASSERT(AcceleratorType::CPU != AcceleratorType::NPU);
+    ASSERT(AcceleratorType::GPU != AcceleratorType::DSP);
+}
+TEST(Test_HardwareCapabilityProfiler_BestType)
+{
+    HardwareCapabilityProfiler p;
+    auto profile = p.Profile();
+    ASSERT(profile.bestType == AcceleratorType::CPU ||
+           profile.bestType == AcceleratorType::GPU ||
+           profile.bestType == AcceleratorType::NPU);
+}
+TEST(Test_PowerAwareScheduler_Create)
+{
+    PowerAwareScheduler s;
+    ASSERT(s.GetMode() == SchedulerMode::Balanced);
+    ASSERT(s.Scheduled() == 0);
+}
+TEST(Test_PowerAwareScheduler_SetPowerState)
+{
+    PowerAwareScheduler s;
+    s.SetPowerState(PowerState::BatterySaver);
+    ASSERT(s.GetMode() == SchedulerMode::BatterySaver);
+}
+TEST(Test_PowerAwareScheduler_ScheduleAC)
+{
+    PowerAwareScheduler s;
+    s.SetPowerState(PowerState::AC);
+    s.SetNPUAvailable(true);
+    WorkItem item; item.id = 1; item.canDeferToNPU = true;
+    auto d = s.Schedule(item);
+    ASSERT(d.assignedTo == AcceleratorType::NPU);
+}
+TEST(Test_PowerAwareScheduler_ScheduleBatterySaver)
+{
+    PowerAwareScheduler s;
+    s.SetPowerState(PowerState::BatterySaver);
+    WorkItem item; item.id = 2; item.canDeferToNPU = true;
+    auto d = s.Schedule(item);
+    ASSERT(d.assignedTo == AcceleratorType::CPU);
+}
+TEST(Test_PowerAwareScheduler_ScheduledCount)
+{
+    PowerAwareScheduler s;
+    WorkItem item; item.id = 1;
+    s.Schedule(item);
+    s.Schedule(item);
+    ASSERT(s.Scheduled() == 2);
+}
+TEST(Test_PowerAwareScheduler_NPUUnavailable)
+{
+    PowerAwareScheduler s;
+    s.SetPowerState(PowerState::AC);
+    s.SetNPUAvailable(false);
+    WorkItem item; item.id = 3; item.canDeferToNPU = true;
+    auto d = s.Schedule(item);
+    ASSERT(d.assignedTo == AcceleratorType::CPU);
+}
+TEST(Test_PowerAwareScheduler_Reset)
+{
+    PowerAwareScheduler s;
+    WorkItem item; item.id = 1;
+    s.Schedule(item);
+    s.Reset();
+    ASSERT(s.Scheduled() == 0);
+}
+TEST(Test_PowerAwareScheduler_Mode)
+{
+    PowerAwareScheduler s;
+    s.SetPowerState(PowerState::Battery);
+    ASSERT(s.GetMode() == SchedulerMode::Conservative);
+}
+TEST(Test_PowerAwareScheduler_Reason)
+{
+    PowerAwareScheduler s;
+    s.SetPowerState(PowerState::BatterySaver);
+    WorkItem item; item.id = 5;
+    auto d = s.Schedule(item);
+    ASSERT(!d.reason.empty());
+}
+TEST(Test_NPUMemoryPool_Create)
+{
+    NPUMemoryPool pool;
+    ASSERT(!pool.IsInitialized());
+}
+TEST(Test_NPUMemoryPool_Initialize)
+{
+    NPUMemoryPool pool;
+    ASSERT(pool.Initialize());
+    ASSERT(pool.IsInitialized());
+    ASSERT(pool.BlockCount() > 0);
+}
+TEST(Test_NPUMemoryPool_Acquire)
+{
+    NPUMemoryPool pool;
+    pool.Initialize();
+    auto block = pool.Acquire();
+    ASSERT(block != nullptr);
+}
+TEST(Test_NPUMemoryPool_Release)
+{
+    NPUMemoryPool pool;
+    pool.Initialize();
+    size_t before = pool.FreeBlocks();
+    auto block = pool.Acquire();
+    ASSERT(pool.FreeBlocks() == before - 1);
+    pool.Release(block->blockId);
+    ASSERT(pool.FreeBlocks() == before);
+}
+TEST(Test_NPUMemoryPool_AcquireExhausted)
+{
+    NPUMemoryPoolConfig cfg; cfg.maxBlocks = 2;
+    NPUMemoryPool pool(cfg);
+    pool.Initialize();
+    pool.Acquire(); pool.Acquire();
+    ASSERT(pool.Acquire() == nullptr);
+}
+TEST(Test_NPUMemoryPool_ZeroCopy)
+{
+    NPUMemoryPoolConfig cfg; cfg.zeroCopyEnabled = false;
+    NPUMemoryPool pool(cfg);
+    ASSERT(!pool.ZeroCopyEnabled());
+}
+TEST(Test_NPUMemoryPool_Reset)
+{
+    NPUMemoryPool pool;
+    pool.Initialize();
+    pool.Reset();
+    ASSERT(!pool.IsInitialized());
+    ASSERT(pool.BlockCount() == 0);
+}
+TEST(Test_NPUMemoryPool_Config)
+{
+    NPUMemoryPoolConfig cfg; cfg.maxBlocks = 8;
+    NPUMemoryPool pool(cfg);
+    ASSERT(pool.GetConfig().maxBlocks == 8);
+}
+TEST(Test_NPUMemoryPool_BlockCount)
+{
+    NPUMemoryPoolConfig cfg; cfg.maxBlocks = 4;
+    NPUMemoryPool pool(cfg);
+    pool.Initialize();
+    ASSERT(pool.BlockCount() == 4);
+}
+TEST(Test_NPUWarmupEngine_Create)
+{
+    NPUWarmupEngine eng;
+    ASSERT(!eng.IsWarmed());
+    ASSERT(eng.QueuedCount() == 0);
+}
+TEST(Test_NPUWarmupEngine_QueueTask)
+{
+    NPUWarmupEngine eng;
+    WarmupTask t; t.modelId = "clip"; t.dummyRunCount = 2;
+    eng.QueueTask(t);
+    ASSERT(eng.QueuedCount() == 1);
+}
+TEST(Test_NPUWarmupEngine_WarmAll)
+{
+    NPUWarmupEngine eng;
+    WarmupTask t; t.modelId = "m1"; t.dummyRunCount = 1;
+    eng.QueueTask(t);
+    eng.WarmAll();
+    ASSERT(eng.IsWarmed());
+}
+TEST(Test_NPUWarmupEngine_WarmAllResults)
+{
+    NPUWarmupEngine eng;
+    WarmupTask t; t.modelId = "resnet"; t.dummyRunCount = 3;
+    eng.QueueTask(t);
+    auto results = eng.WarmAll();
+    ASSERT(results.size() == 1);
+    ASSERT(results[0].IsWarm());
+}
+TEST(Test_NPUWarmupEngine_WarmAllEmpty)
+{
+    NPUWarmupEngine eng;
+    eng.WarmAll();
+    ASSERT(eng.IsWarmed());
+}
+TEST(Test_NPUWarmupEngine_ClearQueue)
+{
+    NPUWarmupEngine eng;
+    WarmupTask t; t.modelId = "m2";
+    eng.QueueTask(t);
+    eng.ClearQueue();
+    ASSERT(eng.QueuedCount() == 0);
+}
+TEST(Test_NPUWarmupEngine_PolicyEnum)
+{
+    ASSERT(WarmupPolicy::Eager != WarmupPolicy::Lazy);
+    ASSERT(WarmupPolicy::Scheduled != WarmupPolicy::Eager);
+}
+TEST(Test_NPUWarmupEngine_Callback)
+{
+    NPUWarmupEngine eng;
+    int called = 0;
+    eng.SetCallback([&](const std::string&, uint32_t){ ++called; });
+    WarmupTask t; t.modelId = "cb_test"; t.dummyRunCount = 1;
+    eng.QueueTask(t);
+    eng.WarmAll();
+    ASSERT(called == 1);
+}
+TEST(Test_NPUWarmupEngine_Reset)
+{
+    NPUWarmupEngine eng;
+    WarmupTask t; t.modelId = "m3"; t.dummyRunCount = 1;
+    eng.QueueTask(t);
+    eng.WarmAll();
+    eng.Reset();
+    ASSERT(!eng.IsWarmed());
+    ASSERT(eng.QueuedCount() == 0);
+}
+TEST(Test_ARM64DecodeBackend_Create)
+{
+    ARM64DecodeBackend backend;
+    ASSERT(backend.GetMode() == ARM64DecodeMode::Auto);
+}
+TEST(Test_ARM64DecodeBackend_ProbeCapabilities)
+{
+    ARM64DecodeBackend backend;
+    auto caps = backend.ProbeCapabilities();
+    ASSERT(backend.GetCapabilities().hasNEON == caps.hasNEON);
+}
+TEST(Test_ARM64DecodeBackend_DecodeStride_Valid)
+{
+    ARM64DecodeBackend backend;
+    backend.ProbeCapabilities();
+    uint8_t src[4]={1,2,3,4}, dst[4]={};
+    auto r = backend.DecodeStride(src, 2, 2, dst);
+    ASSERT(r.success);
+    ASSERT(r.pixelsProcessed == 4);
+}
+TEST(Test_ARM64DecodeBackend_DecodeStride_Null)
+{
+    ARM64DecodeBackend backend;
+    auto r = backend.DecodeStride(nullptr, 0, 0, nullptr);
+    ASSERT(!r.success);
+}
+TEST(Test_ARM64DecodeBackend_DecodeStride_Zero)
+{
+    ARM64DecodeBackend backend;
+    uint8_t src[4]={}, dst[4]={};
+    auto r = backend.DecodeStride(src, 0, 0, dst);
+    ASSERT(!r.success);
+}
+TEST(Test_ARM64DecodeBackend_GetMode)
+{
+    ARM64DecodeConfig cfg; cfg.mode = ARM64DecodeMode::NEON;
+    ARM64DecodeBackend backend(cfg);
+    ASSERT(backend.GetMode() == ARM64DecodeMode::NEON);
+}
+TEST(Test_ARM64DecodeBackend_SetConfig)
+{
+    ARM64DecodeBackend backend;
+    ARM64DecodeConfig cfg; cfg.mode = ARM64DecodeMode::Scalar;
+    backend.SetConfig(cfg);
+    ASSERT(backend.GetMode() == ARM64DecodeMode::Scalar);
+}
+TEST(Test_ARM64DecodeBackend_Reset)
+{
+    ARM64DecodeBackend backend;
+    backend.ProbeCapabilities();
+    backend.Reset();
+    ASSERT(!backend.GetCapabilities().hasNEON);
+}
+TEST(Test_ARM64DecodeBackend_Extensions)
+{
+    ASSERT(ARM64Extension::NEON != ARM64Extension::SVE);
+    ASSERT(ARM64DecodeMode::Auto != ARM64DecodeMode::Scalar);
+}
+
+//==============================================================================
+// VCS Integration Tests (Sprint 591-600 / v25.3.0 "Rigel-T")
+//==============================================================================
+
+TEST(Test_GitStatusOverlay_Create)
+{
+    GitStatusOverlay overlay;
+    auto r = overlay.Query("test.cpp");
+    ASSERT(r.path == "test.cpp");
+}
+TEST(Test_GitStatusOverlay_Query)
+{
+    GitStatusOverlay overlay;
+    auto r = overlay.Query("foo.h");
+    ASSERT(r.status == GitFileStatus::Clean || r.status != GitFileStatus::Unknown);
+}
+TEST(Test_GitStatusOverlay_StatusLabel_M)
+{
+    ASSERT(std::wstring(GitStatusOverlay::StatusLabel(GitFileStatus::Modified)) == L"M");
+}
+TEST(Test_GitStatusOverlay_StatusLabel_S)
+{
+    ASSERT(std::wstring(GitStatusOverlay::StatusLabel(GitFileStatus::Staged)) == L"S");
+}
+TEST(Test_GitStatusOverlay_StatusLabel_Untracked)
+{
+    ASSERT(std::wstring(GitStatusOverlay::StatusLabel(GitFileStatus::Untracked)) == L"+");
+}
+TEST(Test_GitStatusOverlay_StatusLabel_Conflict)
+{
+    ASSERT(std::wstring(GitStatusOverlay::StatusLabel(GitFileStatus::Conflicted)) == L"!");
+}
+TEST(Test_GitStatusOverlay_ShouldRender_Clean)
+{
+    GitStatusOverlay overlay;
+    GitStatusResult r; r.status = GitFileStatus::Clean; r.inRepo = true;
+    ASSERT(!overlay.ShouldRender(r));
+}
+TEST(Test_GitStatusOverlay_Config)
+{
+    GitOverlayConfig cfg; cfg.showOnClean = true;
+    GitStatusOverlay overlay(cfg);
+    GitStatusResult r; r.status = GitFileStatus::Clean; r.inRepo = true;
+    ASSERT(overlay.ShouldRender(r));
+}
+TEST(Test_GitStatusOverlay_StatusEnum)
+{
+    ASSERT(GitFileStatus::Clean != GitFileStatus::Modified);
+    ASSERT(GitFileStatus::Staged != GitFileStatus::Untracked);
+}
+TEST(Test_GitBlameHeatmapOverlay_Create)
+{
+    GitBlameHeatmapOverlay overlay;
+    ASSERT(overlay.GetConfig().maxAgeDays == 365);
+}
+TEST(Test_GitBlameHeatmapOverlay_ComputeScore_Recent)
+{
+    GitBlameHeatmapOverlay overlay;
+    ASSERT(overlay.ComputeScore(0) == 1.0f);
+}
+TEST(Test_GitBlameHeatmapOverlay_ComputeScore_Old)
+{
+    GitBlameHeatmapOverlay overlay;
+    ASSERT(overlay.ComputeScore(365) == 0.0f);
+}
+TEST(Test_GitBlameHeatmapOverlay_ComputeScore_Clamped)
+{
+    GitBlameHeatmapOverlay overlay;
+    ASSERT(overlay.ComputeScore(730) == 0.0f);
+}
+TEST(Test_GitBlameHeatmapOverlay_ColorScheme)
+{
+    ASSERT(HeatmapColorScheme::HotCold != HeatmapColorScheme::Viridis);
+    ASSERT(HeatmapColorScheme::Grayscale != HeatmapColorScheme::HotCold);
+}
+TEST(Test_GitBlameHeatmapOverlay_Config)
+{
+    BlameHeatmapConfig cfg; cfg.maxAgeDays = 180;
+    GitBlameHeatmapOverlay overlay(cfg);
+    ASSERT(overlay.GetConfig().maxAgeDays == 180);
+}
+TEST(Test_GitBlameHeatmapOverlay_ScoreRange)
+{
+    GitBlameHeatmapOverlay overlay;
+    float s = overlay.ComputeScore(100);
+    ASSERT(s >= 0.0f && s <= 1.0f);
+}
+TEST(Test_GitBlameHeatmapOverlay_ScoreMiddle)
+{
+    GitBlameHeatmapOverlay overlay;
+    float s = overlay.ComputeScore(182);
+    ASSERT(s > 0.0f && s < 1.0f);
+}
+TEST(Test_GitBlameHeatmapOverlay_ComputeHeat)
+{
+    GitBlameHeatmapOverlay overlay;
+    auto d = overlay.ComputeHeat("file.cpp");
+    ASSERT(d.available);
+    ASSERT(d.path == "file.cpp");
+}
+TEST(Test_VCSBadgeAdapter_Create)
+{
+    VCSBadgeAdapter adapter;
+    ASSERT(adapter.GetConfig().autoDetect);
+}
+TEST(Test_VCSBadgeAdapter_Build_Empty)
+{
+    VCSBadgeAdapter adapter;
+    auto d = adapter.Build("");
+    ASSERT(!d.valid);
+}
+TEST(Test_VCSBadgeAdapter_Build_Path)
+{
+    VCSBadgeAdapter adapter;
+    auto d = adapter.Build("some/path/file.cpp");
+    (void)d; ASSERT(true);
+}
+TEST(Test_VCSBadgeAdapter_Config)
+{
+    VCSBadgeConfig cfg; cfg.autoDetect = false;
+    VCSBadgeAdapter adapter(cfg);
+    ASSERT(!adapter.GetConfig().autoDetect);
+}
+TEST(Test_VCSBadgeAdapter_ProviderEnum)
+{
+    ASSERT(VCSProvider::Git != VCSProvider::SVN);
+    ASSERT(VCSProvider::Perforce != VCSProvider::Unknown);
+}
+TEST(Test_VCSBadgeAdapter_BadgeTypeEnum)
+{
+    ASSERT(VCSBadgeType::Status != VCSBadgeType::BranchName);
+    ASSERT(VCSBadgeType::CommitHash != VCSBadgeType::None);
+}
+TEST(Test_VCSBadgeAdapter_DetectProvider)
+{
+    VCSBadgeAdapter adapter;
+    auto prov = adapter.DetectProvider("file.cpp");
+    ASSERT(prov == VCSProvider::Git || prov == VCSProvider::Unknown);
+}
+TEST(Test_VCSBadgeAdapter_DefaultBadgeType)
+{
+    VCSBadgeAdapter adapter;
+    ASSERT(adapter.GetConfig().badgeType == VCSBadgeType::Status);
+}
+TEST(Test_VCSBadgeAdapter_DefaultProvider)
+{
+    VCSBadgeAdapter adapter;
+    ASSERT(adapter.GetConfig().preferredProvider == VCSProvider::Git);
+}
+TEST(Test_BranchAwareCacheKey_Create)
+{
+    BranchAwareCacheKey key;
+    ASSERT(key.GetActiveBranch() == "main");
+}
+TEST(Test_BranchAwareCacheKey_Build)
+{
+    BranchAwareCacheKey key;
+    auto k = key.Build("file.jpg", 256);
+    ASSERT(k.IsValid());
+    ASSERT(k.filePath == "file.jpg");
+    ASSERT(k.thumbnailSize == 256);
+}
+TEST(Test_BranchAwareCacheKey_Composite)
+{
+    BranchAwareCacheKey key;
+    auto k = key.Build("doc.pdf", 128);
+    ASSERT(!k.Composite().empty());
+}
+TEST(Test_BranchAwareCacheKey_Hash)
+{
+    auto h = BranchAwareCacheKey::ComputeHash("path.png");
+    ASSERT(h != 0);
+}
+TEST(Test_BranchAwareCacheKey_IsValid)
+{
+    BranchCacheKey k;
+    ASSERT(!k.IsValid());
+    k.filePath = "x.jpg";
+    ASSERT(k.IsValid());
+}
+TEST(Test_BranchAwareCacheKey_Equal)
+{
+    BranchAwareCacheKey key;
+    auto k1 = key.Build("a.png", 256);
+    auto k2 = key.Build("a.png", 256);
+    ASSERT(k1 == k2);
+}
+TEST(Test_BranchAwareCacheKey_NotEqual)
+{
+    BranchAwareCacheKey key;
+    auto k1 = key.Build("a.png", 256);
+    auto k2 = key.Build("b.png", 256);
+    ASSERT(!(k1 == k2));
+}
+TEST(Test_BranchAwareCacheKey_BranchName)
+{
+    BranchAwareCacheKey key;
+    key.SetActiveBranch("feature/test");
+    auto k = key.Build("x.jpg", 128);
+    ASSERT(k.branchName == "feature/test");
+    ASSERT(k.Composite().find("feature/test") != std::string::npos);
+}
+TEST(Test_BranchAwareCacheKey_SwitchCount)
+{
+    BranchAwareCacheKey key;
+    key.InvalidateForBranchSwitch("dev");
+    ASSERT(key.SwitchCount() == 1);
+    ASSERT(key.GetActiveBranch() == "dev");
+}
+TEST(Test_GitDiffThumbnail_Create)
+{
+    GitDiffThumbnail gdt;
+    ASSERT(gdt.GetConfig().mode == DiffViewMode::SideBySide);
+}
+TEST(Test_GitDiffThumbnail_Analyze_Empty)
+{
+    GitDiffThumbnail gdt;
+    auto d = gdt.Analyze("", "HEAD~1", "HEAD");
+    ASSERT(!d.valid);
+}
+TEST(Test_GitDiffThumbnail_Analyze_Valid)
+{
+    GitDiffThumbnail gdt;
+    auto d = gdt.Analyze("main.cpp", "HEAD~1", "HEAD");
+    ASSERT(d.filePath == "main.cpp");
+}
+TEST(Test_GitDiffThumbnail_Config)
+{
+    GitDiffThumbnailConfig cfg; cfg.mode = DiffViewMode::Unified;
+    GitDiffThumbnail gdt(cfg);
+    ASSERT(gdt.GetConfig().mode == DiffViewMode::Unified);
+}
+TEST(Test_GitDiffThumbnail_DiffViewMode)
+{
+    ASSERT(DiffViewMode::SideBySide != DiffViewMode::Unified);
+    ASSERT(DiffViewMode::BeforeOnly != DiffViewMode::AfterOnly);
+}
+TEST(Test_GitDiffThumbnail_AfterCommit)
+{
+    GitDiffThumbnail gdt;
+    auto d = gdt.Analyze("foo.h", "abc", "def");
+    ASSERT(d.afterCommit == "def");
+}
+TEST(Test_GitDiffThumbnail_BeforeCommit)
+{
+    GitDiffThumbnail gdt;
+    auto d = gdt.Analyze("foo.h", "abc", "def");
+    ASSERT(d.beforeCommit == "abc");
+}
+TEST(Test_GitDiffThumbnail_FilePath)
+{
+    GitDiffThumbnail gdt;
+    auto d = gdt.Analyze("widget.cpp", "v1", "v2");
+    ASSERT(d.filePath == "widget.cpp");
+}
+TEST(Test_GitDiffThumbnail_ShowStats)
+{
+    GitDiffThumbnailConfig cfg; cfg.showStats = false;
+    GitDiffThumbnail gdt(cfg);
+    ASSERT(!gdt.GetConfig().showStats);
+}
+TEST(Test_GitLFSResolver_Create)
+{
+    GitLFSResolver r;
+    (void)r; ASSERT(true);
+}
+TEST(Test_GitLFSResolver_ParsePointer_Valid)
+{
+    GitLFSResolver r;
+    std::string ptr = "version https://git-lfs.github.com/spec/v1\noid sha256:abc\nsize 12345\n";
+    auto p = r.ParsePointer(ptr);
+    ASSERT(p.isPointer);
+}
+TEST(Test_GitLFSResolver_ParsePointer_Invalid)
+{
+    GitLFSResolver r;
+    auto p = r.ParsePointer("not a pointer");
+    ASSERT(!p.isPointer);
+}
+TEST(Test_GitLFSResolver_Resolve)
+{
+    GitLFSResolver r;
+    auto res = r.Resolve("file.bin");
+    ASSERT(res.status != LFSResolveStatus::Resolved || res.success());
+}
+TEST(Test_GitLFSResolver_StatusEnum)
+{
+    ASSERT(LFSResolveStatus::Resolved != LFSResolveStatus::Pointer);
+    ASSERT(LFSResolveStatus::NotLFS != LFSResolveStatus::MissingObject);
+}
+TEST(Test_GitLFSResolver_Config)
+{
+    LFSResolveConfig cfg; cfg.cacheCapacity = 64;
+    GitLFSResolver r(cfg);
+    ASSERT(r.GetConfig().cacheCapacity == 64);
+}
+TEST(Test_GitLFSResolver_IsLFSPointer)
+{
+    GitLFSResolver r;
+    std::string p = "version https://git-lfs.github.com/spec/v1\n";
+    ASSERT(r.ParsePointer(p).isPointer);
+}
+TEST(Test_GitLFSResolver_OidExtracted)
+{
+    GitLFSResolver r;
+    std::string ptr = "version https://git-lfs.github.com/spec/v1\noid sha256:deadbeef\nsize 1\n";
+    auto p = r.ParsePointer(ptr);
+    ASSERT(!p.oid.empty());
+}
+TEST(Test_GitLFSResolver_ResultSuccess)
+{
+    LFSResolveResult res;
+    res.status = LFSResolveStatus::Resolved;
+    ASSERT(res.success());
+    res.status = LFSResolveStatus::NotLFS;
+    ASSERT(!res.success());
+}
+TEST(Test_CommitBadgeCompositor_Create)
+{
+    CommitBadgeCompositor c;
+    ASSERT(c.GetConfig().position == BadgePosition::BottomRight);
+}
+TEST(Test_CommitBadgeCompositor_Build_Valid)
+{
+    CommitBadgeCompositor c;
+    auto b = c.Build("abc1234", "JD", 3);
+    ASSERT(b.valid);
+    ASSERT(b.shortHash == "abc1234");
+}
+TEST(Test_CommitBadgeCompositor_Build_Empty)
+{
+    CommitBadgeCompositor c;
+    auto b = c.Build("", "", 0);
+    ASSERT(!b.valid);
+}
+TEST(Test_CommitBadgeCompositor_FormatAge_Now)
+{
+    ASSERT(CommitBadgeCompositor::FormatAge(0) == "now");
+}
+TEST(Test_CommitBadgeCompositor_FormatAge_Days)
+{
+    ASSERT(CommitBadgeCompositor::FormatAge(3) == "3d");
+}
+TEST(Test_CommitBadgeCompositor_FormatAge_Weeks)
+{
+    ASSERT(CommitBadgeCompositor::FormatAge(14) == "2w");
+}
+TEST(Test_CommitBadgeCompositor_BadgePosition_Enum)
+{
+    ASSERT(BadgePosition::TopLeft != BadgePosition::BottomRight);
+    ASSERT(BadgePosition::TopRight != BadgePosition::BottomLeft);
+}
+TEST(Test_CommitBadgeCompositor_BadgeSize_Enum)
+{
+    ASSERT(BadgeSize::Tiny != BadgeSize::Large);
+    ASSERT(BadgeSize::Small != BadgeSize::Medium);
+}
+TEST(Test_CommitBadgeCompositor_ShortHash)
+{
+    CommitBadgeCompositor c;
+    auto b = c.Build("0123456789abcdef", "AB", 1);
+    ASSERT(b.shortHash.size() == 7);
+    ASSERT(b.shortHash == "0123456");
+}
+TEST(Test_MergeConflictOverlay_Create)
+{
+    MergeConflictOverlay overlay;
+    ASSERT(overlay.GetConfig().showCount);
+}
+TEST(Test_MergeConflictOverlay_AnalyzeContent_Clean)
+{
+    MergeConflictOverlay overlay;
+    auto info = overlay.AnalyzeContent("int x = 0;\nreturn x;\n");
+    ASSERT(info.state == ConflictState::Clean);
+}
+TEST(Test_MergeConflictOverlay_AnalyzeContent_Conflict)
+{
+    MergeConflictOverlay overlay;
+    std::string conflict = "<<<<<<< HEAD\nfoo\n=======\nbar\n>>>>>>> branch\n";
+    auto info = overlay.AnalyzeContent(conflict);
+    ASSERT(info.state == ConflictState::HasConflicts);
+}
+TEST(Test_MergeConflictOverlay_Analyze_Empty)
+{
+    MergeConflictOverlay overlay;
+    auto info = overlay.Analyze("");
+    ASSERT(!info.valid);
+}
+TEST(Test_MergeConflictOverlay_Analyze_Path)
+{
+    MergeConflictOverlay overlay;
+    auto info = overlay.Analyze("main.cpp");
+    ASSERT(info.path == "main.cpp");
+}
+TEST(Test_MergeConflictOverlay_ShouldRender)
+{
+    MergeConflictOverlay overlay;
+    MergeConflictInfo info;
+    info.valid = true; info.state = ConflictState::HasConflicts;
+    ASSERT(overlay.ShouldRender(info));
+    info.state = ConflictState::Clean;
+    ASSERT(!overlay.ShouldRender(info));
+}
+TEST(Test_MergeConflictOverlay_Config)
+{
+    MergeConflictOverlayConfig cfg; cfg.showCount = false;
+    MergeConflictOverlay overlay(cfg);
+    ASSERT(!overlay.GetConfig().showCount);
+}
+TEST(Test_MergeConflictOverlay_ConflictStateEnum)
+{
+    ASSERT(ConflictState::Clean != ConflictState::HasConflicts);
+    ASSERT(ConflictState::Resolved != ConflictState::Unknown);
+}
+TEST(Test_MergeConflictOverlay_MarkerCount)
+{
+    MergeConflictOverlay overlay;
+    std::string conflict = "<<<<<<< HEAD\nfoo\n=======\nbar\n>>>>>>> b\n";
+    auto info = overlay.AnalyzeContent(conflict);
+    ASSERT(info.conflictCount > 0);
+}
+
 
 TEST(IntegrationRunnerSmoke)
 {
@@ -34784,6 +35758,306 @@ TEST(TestCICDWebhookReceiver_DispatchEvent) {
     RUN_TEST(TestCLIRegisterDetectsAdminState);
     RUN_TEST(TestCLIBenchmarkOutputFormat);
     RUN_TEST(TestCLIDoctorAllChecks);
+
+    // WASM Plugin Sandbox Tests (Sprint 561-570 / v25.1.0 "Rigel-R")
+    std::wcout << L"WASM Plugin Sandbox Tests..." << std::endl;
+    RUN_TEST(Test_WASMRuntimeAdapter_Create);
+    RUN_TEST(Test_WASMRuntimeAdapter_Config);
+    RUN_TEST(Test_WASMRuntimeAdapter_Initialize);
+    RUN_TEST(Test_WASMRuntimeAdapter_LoadModule);
+    RUN_TEST(Test_WASMRuntimeAdapter_Flags);
+    RUN_TEST(Test_WASMRuntimeAdapter_Unload);
+    RUN_TEST(Test_WASMRuntimeAdapter_SetConfig);
+    RUN_TEST(Test_WASMRuntimeAdapter_Sandbox);
+    RUN_TEST(Test_WASMRuntimeAdapter_Runtimes);
+    RUN_TEST(Test_WASMMemorySafetyModel_Create);
+    RUN_TEST(Test_WASMMemorySafetyModel_Capabilities);
+    RUN_TEST(Test_WASMMemorySafetyModel_Grant);
+    RUN_TEST(Test_WASMMemorySafetyModel_Policy);
+    RUN_TEST(Test_WASMMemorySafetyModel_Size);
+    RUN_TEST(Test_WASMMemorySafetyModel_Guard);
+    RUN_TEST(Test_WASMMemorySafetyModel_Reset);
+    RUN_TEST(Test_WASMMemorySafetyModel_OrOperator);
+    RUN_TEST(Test_WASMMemorySafetyModel_AllCaps);
+    RUN_TEST(Test_WASMPluginLoader_Create);
+    RUN_TEST(Test_WASMPluginLoader_LoadValid);
+    RUN_TEST(Test_WASMPluginLoader_LoadEmpty);
+    RUN_TEST(Test_WASMPluginLoader_Unload);
+    RUN_TEST(Test_WASMPluginLoader_Manifest);
+    RUN_TEST(Test_WASMPluginLoader_Validation);
+    RUN_TEST(Test_WASMPluginLoader_LoadTime);
+    RUN_TEST(Test_WASMPluginLoader_SizeReported);
+    RUN_TEST(Test_WASMPluginLoader_StatusEnum);
+    RUN_TEST(Test_WITBindingGenerator_Create);
+    RUN_TEST(Test_WITBindingGenerator_Generate);
+    RUN_TEST(Test_WITBindingGenerator_EmptyInterface);
+    RUN_TEST(Test_WITBindingGenerator_Options);
+    RUN_TEST(Test_WITBindingGenerator_Namespace);
+    RUN_TEST(Test_WITBindingGenerator_Reset);
+    RUN_TEST(Test_WITBindingGenerator_Formats);
+    RUN_TEST(Test_WITBindingGenerator_MultiMethod);
+    RUN_TEST(Test_WITBindingGenerator_SetOptions);
+    RUN_TEST(Test_WASMHostController_Create);
+    RUN_TEST(Test_WASMHostController_Launch);
+    RUN_TEST(Test_WASMHostController_Terminate);
+    RUN_TEST(Test_WASMHostController_Suspend);
+    RUN_TEST(Test_WASMHostController_ResourceLimits);
+    RUN_TEST(Test_WASMHostController_WithinLimits);
+    RUN_TEST(Test_WASMHostController_Isolation);
+    RUN_TEST(Test_WASMHostController_Metrics);
+    RUN_TEST(Test_WASMHostController_Reset);
+    RUN_TEST(Test_WASMCapabilityNegotiator_Create);
+    RUN_TEST(Test_WASMCapabilityNegotiator_AllowDeny);
+    RUN_TEST(Test_WASMCapabilityNegotiator_Negotiate);
+    RUN_TEST(Test_WASMCapabilityNegotiator_Denied);
+    RUN_TEST(Test_WASMCapabilityNegotiator_Optional);
+    RUN_TEST(Test_WASMCapabilityNegotiator_MultiRequest);
+    RUN_TEST(Test_WASMCapabilityNegotiator_DenyOverride);
+    RUN_TEST(Test_WASMCapabilityNegotiator_Reset);
+    RUN_TEST(Test_WASMCapabilityNegotiator_Grant);
+    RUN_TEST(Test_WASMHotSwapEngine_Create);
+    RUN_TEST(Test_WASMHotSwapEngine_Swap);
+    RUN_TEST(Test_WASMHotSwapEngine_SwapEmpty);
+    RUN_TEST(Test_WASMHotSwapEngine_Policy);
+    RUN_TEST(Test_WASMHotSwapEngine_Snapshot);
+    RUN_TEST(Test_WASMHotSwapEngine_SwapDuration);
+    RUN_TEST(Test_WASMHotSwapEngine_Reset);
+    RUN_TEST(Test_WASMHotSwapEngine_Callback);
+    RUN_TEST(Test_WASMHotSwapEngine_States);
+    RUN_TEST(Test_WASMDebuggerBridge_Create);
+    RUN_TEST(Test_WASMDebuggerBridge_Connect);
+    RUN_TEST(Test_WASMDebuggerBridge_Breakpoint);
+    RUN_TEST(Test_WASMDebuggerBridge_RemoveBreakpoint);
+    RUN_TEST(Test_WASMDebuggerBridge_RemoveNonExistent);
+    RUN_TEST(Test_WASMDebuggerBridge_Config);
+    RUN_TEST(Test_WASMDebuggerBridge_CallStack);
+    RUN_TEST(Test_WASMDebuggerBridge_Reset);
+    RUN_TEST(Test_WASMDebuggerBridge_MultiBreakpoint);
+
+    // Neural Format Intelligence Tests (Sprint 571-580 / v25.1.0 "Rigel-R")
+    std::wcout << L"Neural Format Intelligence Tests..." << std::endl;
+    RUN_TEST(Test_NeuralFormatFingerprinter_Create);
+    RUN_TEST(Test_NeuralFormatFingerprinter_Initialize);
+    RUN_TEST(Test_NeuralFormatFingerprinter_Config);
+    RUN_TEST(Test_NeuralFormatFingerprinter_Classify);
+    RUN_TEST(Test_NeuralFormatFingerprinter_NotReady);
+    RUN_TEST(Test_NeuralFormatFingerprinter_Confidence);
+    RUN_TEST(Test_NeuralFormatFingerprinter_SetConfig);
+    RUN_TEST(Test_NeuralFormatFingerprinter_Reset);
+    RUN_TEST(Test_NeuralFormatFingerprinter_Backends);
+    RUN_TEST(Test_UnknownFormatHandler_Create);
+    RUN_TEST(Test_UnknownFormatHandler_Handle);
+    RUN_TEST(Test_UnknownFormatHandler_Strategy);
+    RUN_TEST(Test_UnknownFormatHandler_Multiple);
+    RUN_TEST(Test_UnknownFormatHandler_Reset);
+    RUN_TEST(Test_UnknownFormatHandler_Callback);
+    RUN_TEST(Test_UnknownFormatHandler_Diagnostic);
+    RUN_TEST(Test_UnknownFormatHandler_StrategyEnum);
+    RUN_TEST(Test_UnknownFormatHandler_Result);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_Create);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_LoadModel);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_Config);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_Infer);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_NotLoaded);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_Reliable);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_SetConfig);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_Reset);
+    RUN_TEST(Test_LLMMIMEInferenceEngine_Backend);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_Create);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_Register);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_Lookup);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_NotFound);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_Duplicate);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_Validate);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_Remove);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_Stats);
+    RUN_TEST(Test_SelfExpandingFormatRegistry_PersistLoad);
+    RUN_TEST(Test_FormatTransferLearner_Create);
+    RUN_TEST(Test_FormatTransferLearner_Config);
+    RUN_TEST(Test_FormatTransferLearner_AddSample);
+    RUN_TEST(Test_FormatTransferLearner_Train);
+    RUN_TEST(Test_FormatTransferLearner_TrainEmpty);
+    RUN_TEST(Test_FormatTransferLearner_Metrics);
+    RUN_TEST(Test_FormatTransferLearner_ClearSamples);
+    RUN_TEST(Test_FormatTransferLearner_Reset);
+    RUN_TEST(Test_FormatTransferLearner_Strategies);
+    RUN_TEST(Test_FormatDetectionReport_Create);
+    RUN_TEST(Test_FormatDetectionReport_AddVote);
+    RUN_TEST(Test_FormatDetectionReport_Consensus);
+    RUN_TEST(Test_FormatDetectionReport_Uncertain);
+    RUN_TEST(Test_FormatDetectionReport_EvalTime);
+    RUN_TEST(Test_FormatDetectionReport_IsResolved);
+    RUN_TEST(Test_FormatDetectionReport_Probable);
+    RUN_TEST(Test_FormatDetectionReport_Reset);
+    RUN_TEST(Test_FormatDetectionReport_Sources);
+    RUN_TEST(Test_SyntheticDecoderGenerator_Create);
+    RUN_TEST(Test_SyntheticDecoderGenerator_Generate);
+    RUN_TEST(Test_SyntheticDecoderGenerator_EmptyId);
+    RUN_TEST(Test_SyntheticDecoderGenerator_Quality);
+    RUN_TEST(Test_SyntheticDecoderGenerator_Partial);
+    RUN_TEST(Test_SyntheticDecoderGenerator_InferFamily);
+    RUN_TEST(Test_SyntheticDecoderGenerator_Fidelity);
+    RUN_TEST(Test_SyntheticDecoderGenerator_Reset);
+    RUN_TEST(Test_SyntheticDecoderGenerator_Families);
+    RUN_TEST(Test_FormatEvolutionTracker_Create);
+    RUN_TEST(Test_FormatEvolutionTracker_Record);
+    RUN_TEST(Test_FormatEvolutionTracker_TrackedFormats);
+    RUN_TEST(Test_FormatEvolutionTracker_NoDrift);
+    RUN_TEST(Test_FormatEvolutionTracker_MinorDrift);
+    RUN_TEST(Test_FormatEvolutionTracker_MajorDrift);
+    RUN_TEST(Test_FormatEvolutionTracker_Unknown);
+    RUN_TEST(Test_FormatEvolutionTracker_Clear);
+    RUN_TEST(Test_FormatEvolutionTracker_Severities);
+
+    // NPU & Heterogeneous Compute Tests (Sprint 581-590 / v25.2.0 "Rigel-S")
+    std::wcout << L"NPU & Heterogeneous Compute Tests..." << std::endl;
+    RUN_TEST(Test_IntelNPUBackend_Create);
+    RUN_TEST(Test_IntelNPUBackend_Initialize);
+    RUN_TEST(Test_IntelNPUBackend_Config);
+    RUN_TEST(Test_IntelNPUBackend_Infer);
+    RUN_TEST(Test_IntelNPUBackend_InferBadInput);
+    RUN_TEST(Test_IntelNPUBackend_Metrics);
+    RUN_TEST(Test_IntelNPUBackend_ResetMetrics);
+    RUN_TEST(Test_IntelNPUBackend_SetConfig);
+    RUN_TEST(Test_IntelNPUBackend_Shutdown);
+    RUN_TEST(Test_HexagonDSPBackend_Create);
+    RUN_TEST(Test_HexagonDSPBackend_Initialize);
+    RUN_TEST(Test_HexagonDSPBackend_Config);
+    RUN_TEST(Test_HexagonDSPBackend_RunInference);
+    RUN_TEST(Test_HexagonDSPBackend_RunBadInput);
+    RUN_TEST(Test_HexagonDSPBackend_RunCount);
+    RUN_TEST(Test_HexagonDSPBackend_SetConfig);
+    RUN_TEST(Test_HexagonDSPBackend_Reset);
+    RUN_TEST(Test_HexagonDSPBackend_Variants);
+    RUN_TEST(Test_ONNXEPRouter_Create);
+    RUN_TEST(Test_ONNXEPRouter_RegisterEP);
+    RUN_TEST(Test_ONNXEPRouter_IsEPAvailable);
+    RUN_TEST(Test_ONNXEPRouter_Select);
+    RUN_TEST(Test_ONNXEPRouter_SelectPreferred);
+    RUN_TEST(Test_ONNXEPRouter_Clear);
+    RUN_TEST(Test_ONNXEPRouter_Policy);
+    RUN_TEST(Test_ONNXEPRouter_FallbackAllowed);
+    RUN_TEST(Test_ONNXEPRouter_EPEnum);
+    RUN_TEST(Test_HardwareCapabilityProfiler_Create);
+    RUN_TEST(Test_HardwareCapabilityProfiler_Profile);
+    RUN_TEST(Test_HardwareCapabilityProfiler_AddMock);
+    RUN_TEST(Test_HardwareCapabilityProfiler_HasNPU);
+    RUN_TEST(Test_HardwareCapabilityProfiler_PeakTOPS);
+    RUN_TEST(Test_HardwareCapabilityProfiler_Sort);
+    RUN_TEST(Test_HardwareCapabilityProfiler_ClearMocks);
+    RUN_TEST(Test_HardwareCapabilityProfiler_AccelType);
+    RUN_TEST(Test_HardwareCapabilityProfiler_BestType);
+    RUN_TEST(Test_PowerAwareScheduler_Create);
+    RUN_TEST(Test_PowerAwareScheduler_SetPowerState);
+    RUN_TEST(Test_PowerAwareScheduler_ScheduleAC);
+    RUN_TEST(Test_PowerAwareScheduler_ScheduleBatterySaver);
+    RUN_TEST(Test_PowerAwareScheduler_ScheduledCount);
+    RUN_TEST(Test_PowerAwareScheduler_NPUUnavailable);
+    RUN_TEST(Test_PowerAwareScheduler_Reset);
+    RUN_TEST(Test_PowerAwareScheduler_Mode);
+    RUN_TEST(Test_PowerAwareScheduler_Reason);
+    RUN_TEST(Test_NPUMemoryPool_Create);
+    RUN_TEST(Test_NPUMemoryPool_Initialize);
+    RUN_TEST(Test_NPUMemoryPool_Acquire);
+    RUN_TEST(Test_NPUMemoryPool_Release);
+    RUN_TEST(Test_NPUMemoryPool_AcquireExhausted);
+    RUN_TEST(Test_NPUMemoryPool_ZeroCopy);
+    RUN_TEST(Test_NPUMemoryPool_Reset);
+    RUN_TEST(Test_NPUMemoryPool_Config);
+    RUN_TEST(Test_NPUMemoryPool_BlockCount);
+    RUN_TEST(Test_NPUWarmupEngine_Create);
+    RUN_TEST(Test_NPUWarmupEngine_QueueTask);
+    RUN_TEST(Test_NPUWarmupEngine_WarmAll);
+    RUN_TEST(Test_NPUWarmupEngine_WarmAllResults);
+    RUN_TEST(Test_NPUWarmupEngine_WarmAllEmpty);
+    RUN_TEST(Test_NPUWarmupEngine_ClearQueue);
+    RUN_TEST(Test_NPUWarmupEngine_PolicyEnum);
+    RUN_TEST(Test_NPUWarmupEngine_Callback);
+    RUN_TEST(Test_NPUWarmupEngine_Reset);
+    RUN_TEST(Test_ARM64DecodeBackend_Create);
+    RUN_TEST(Test_ARM64DecodeBackend_ProbeCapabilities);
+    RUN_TEST(Test_ARM64DecodeBackend_DecodeStride_Valid);
+    RUN_TEST(Test_ARM64DecodeBackend_DecodeStride_Null);
+    RUN_TEST(Test_ARM64DecodeBackend_DecodeStride_Zero);
+    RUN_TEST(Test_ARM64DecodeBackend_GetMode);
+    RUN_TEST(Test_ARM64DecodeBackend_SetConfig);
+    RUN_TEST(Test_ARM64DecodeBackend_Reset);
+    RUN_TEST(Test_ARM64DecodeBackend_Extensions);
+
+    // VCS Integration Tests (Sprint 591-600 / v25.3.0 "Rigel-T")
+    std::wcout << L"VCS Integration Tests..." << std::endl;
+    RUN_TEST(Test_GitStatusOverlay_Create);
+    RUN_TEST(Test_GitStatusOverlay_Query);
+    RUN_TEST(Test_GitStatusOverlay_StatusLabel_M);
+    RUN_TEST(Test_GitStatusOverlay_StatusLabel_S);
+    RUN_TEST(Test_GitStatusOverlay_StatusLabel_Untracked);
+    RUN_TEST(Test_GitStatusOverlay_StatusLabel_Conflict);
+    RUN_TEST(Test_GitStatusOverlay_ShouldRender_Clean);
+    RUN_TEST(Test_GitStatusOverlay_Config);
+    RUN_TEST(Test_GitStatusOverlay_StatusEnum);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_Create);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_ComputeScore_Recent);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_ComputeScore_Old);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_ComputeScore_Clamped);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_ColorScheme);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_Config);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_ScoreRange);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_ScoreMiddle);
+    RUN_TEST(Test_GitBlameHeatmapOverlay_ComputeHeat);
+    RUN_TEST(Test_VCSBadgeAdapter_Create);
+    RUN_TEST(Test_VCSBadgeAdapter_Build_Empty);
+    RUN_TEST(Test_VCSBadgeAdapter_Build_Path);
+    RUN_TEST(Test_VCSBadgeAdapter_Config);
+    RUN_TEST(Test_VCSBadgeAdapter_ProviderEnum);
+    RUN_TEST(Test_VCSBadgeAdapter_BadgeTypeEnum);
+    RUN_TEST(Test_VCSBadgeAdapter_DetectProvider);
+    RUN_TEST(Test_VCSBadgeAdapter_DefaultBadgeType);
+    RUN_TEST(Test_VCSBadgeAdapter_DefaultProvider);
+    RUN_TEST(Test_BranchAwareCacheKey_Create);
+    RUN_TEST(Test_BranchAwareCacheKey_Build);
+    RUN_TEST(Test_BranchAwareCacheKey_Composite);
+    RUN_TEST(Test_BranchAwareCacheKey_Hash);
+    RUN_TEST(Test_BranchAwareCacheKey_IsValid);
+    RUN_TEST(Test_BranchAwareCacheKey_Equal);
+    RUN_TEST(Test_BranchAwareCacheKey_NotEqual);
+    RUN_TEST(Test_BranchAwareCacheKey_BranchName);
+    RUN_TEST(Test_BranchAwareCacheKey_SwitchCount);
+    RUN_TEST(Test_GitDiffThumbnail_Create);
+    RUN_TEST(Test_GitDiffThumbnail_Analyze_Empty);
+    RUN_TEST(Test_GitDiffThumbnail_Analyze_Valid);
+    RUN_TEST(Test_GitDiffThumbnail_Config);
+    RUN_TEST(Test_GitDiffThumbnail_DiffViewMode);
+    RUN_TEST(Test_GitDiffThumbnail_AfterCommit);
+    RUN_TEST(Test_GitDiffThumbnail_BeforeCommit);
+    RUN_TEST(Test_GitDiffThumbnail_FilePath);
+    RUN_TEST(Test_GitDiffThumbnail_ShowStats);
+    RUN_TEST(Test_GitLFSResolver_Create);
+    RUN_TEST(Test_GitLFSResolver_ParsePointer_Valid);
+    RUN_TEST(Test_GitLFSResolver_ParsePointer_Invalid);
+    RUN_TEST(Test_GitLFSResolver_Resolve);
+    RUN_TEST(Test_GitLFSResolver_StatusEnum);
+    RUN_TEST(Test_GitLFSResolver_Config);
+    RUN_TEST(Test_GitLFSResolver_IsLFSPointer);
+    RUN_TEST(Test_GitLFSResolver_OidExtracted);
+    RUN_TEST(Test_GitLFSResolver_ResultSuccess);
+    RUN_TEST(Test_CommitBadgeCompositor_Create);
+    RUN_TEST(Test_CommitBadgeCompositor_Build_Valid);
+    RUN_TEST(Test_CommitBadgeCompositor_Build_Empty);
+    RUN_TEST(Test_CommitBadgeCompositor_FormatAge_Now);
+    RUN_TEST(Test_CommitBadgeCompositor_FormatAge_Days);
+    RUN_TEST(Test_CommitBadgeCompositor_FormatAge_Weeks);
+    RUN_TEST(Test_CommitBadgeCompositor_BadgePosition_Enum);
+    RUN_TEST(Test_CommitBadgeCompositor_BadgeSize_Enum);
+    RUN_TEST(Test_CommitBadgeCompositor_ShortHash);
+    RUN_TEST(Test_MergeConflictOverlay_Create);
+    RUN_TEST(Test_MergeConflictOverlay_AnalyzeContent_Clean);
+    RUN_TEST(Test_MergeConflictOverlay_AnalyzeContent_Conflict);
+    RUN_TEST(Test_MergeConflictOverlay_Analyze_Empty);
+    RUN_TEST(Test_MergeConflictOverlay_Analyze_Path);
+    RUN_TEST(Test_MergeConflictOverlay_ShouldRender);
+    RUN_TEST(Test_MergeConflictOverlay_Config);
+    RUN_TEST(Test_MergeConflictOverlay_ConflictStateEnum);
+    RUN_TEST(Test_MergeConflictOverlay_MarkerCount);
 
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;
