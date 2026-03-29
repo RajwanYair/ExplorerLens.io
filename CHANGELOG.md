@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [26.1.0] — Canopus-R (2026-03-29)
+
+### Added — Sprint 651-660: Windows Next-Gen Shell Integration
+- Engine/Utils/CopilotPlatformBridge.h: Copilot AI feature bridge (SemanticSearch/ContentSummary) with injectable invoke function
+- Engine/Core/AppContainerIsolation.h: AppContainer capability manager (PicturesLibrary/DocumentsLibrary/etc enum)
+- Engine/Core/WinFSMetadataStore.h: Windows file metadata store (NTFS ADS/PropertySystem/InMemory backends)
+- Engine/Utils/SmartAppControlPolicy.h: Smart App Control policy evaluator (SACPolicyMode/SACBinaryTrustLevel)
+- Engine/Utils/MSIXStreamingPrewarmer.h: MSIX streaming content group pre-warmer with RegisterGroup/NotifyGroupReady API
+- Engine/Utils/WindowsHelloAuthBridge.h: Windows Hello biometric auth bridge with injectable auth function
+- Engine/Core/ThumbnailPropertyHandler.h: IPropertyStore-based thumbnail property handler
+- Engine/Core/Win32PropertyStoreAdapter.h: Win32 property store COM adapter
+- Test coverage: 8 new TEST() blocks (3612 total unit tests)
+
+
 ## [26.0.0] — Canopus (2026-03-29)
 
 ### Added — Sprint 641-650: Post-Quantum Security (MAJOR v26)
