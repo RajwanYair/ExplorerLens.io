@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v31.0.0 Achernar: Generative AI Thumbnails.
+
+
 v30.7.0 Deneb-X: Enterprise Console v3. 8 headers for admin console, fleet deployment, compliance reports, metrics dashboard, policy version control, remote decoder control, anomaly detection, and SIEM audit export. +72 tests (4228 total).
 
 
