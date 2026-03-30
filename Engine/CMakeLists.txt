@@ -1684,6 +1684,15 @@ set(ENGINE_HEADERS
     AI/GenerativeUpscalerV3.h
     AI/ContentModerationFilter.h
     AI/GenerativeAuditTrail.h
+    # Sprint 1051-1060 — Cross-Platform Shell Extensions (v31.1.0 Achernar-R)
+    Core/LinuxNautilusExtension.h
+    Core/KDEDolphinExtension.h
+    Core/ThunarThumbnailExtension.h
+    Core/MacOSQuickLookV3.h
+    Core/LinuxThumbnailerDaemon.h
+    Core/WaylandShellExtension.h
+    Core/MacOSLaunchServicesAdapter.h
+    Core/XPlatformTestHarness.h
 )
 
 set(ENGINE_SOURCES

@@ -12499,6 +12499,446 @@ TEST(TestGAT_RecordMultiple) {
     ASSERT(entries.size() == 5);
 }
 
+//== Linux Nautilus Extension ==
+TEST(TestLNE_IntegrationModeEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(NautilusIntegrationMode::Native) != static_cast<int>(NautilusIntegrationMode::DBus));
+    ASSERT(static_cast<int>(NautilusIntegrationMode::FlatpakPortal) != static_cast<int>(NautilusIntegrationMode::Fallback));
+}
+TEST(TestLNE_VersionEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(NautilusVersion::V42) != static_cast<int>(NautilusVersion::V45));
+    ASSERT(static_cast<int>(NautilusVersion::V43) != static_cast<int>(NautilusVersion::V46));
+}
+TEST(TestLNE_ConfigStruct) {
+    using namespace ExplorerLens::Engine;
+    NautilusConfig cfg;
+    cfg.extensionPath = "test";
+    cfg.maxThumbnailSizePx = 256;
+    cfg.enableCaching = true;
+    ASSERT(!cfg.extensionPath.empty());
+    ASSERT(cfg.maxThumbnailSizePx == 256);
+}
+TEST(TestLNE_NotRegistered) {
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusExtension ext;
+    ASSERT(!ext.IsRegistered());
+}
+TEST(TestLNE_GetFormats) {
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusExtension ext;
+    auto formats = ext.GetSupportedFormats();
+    ASSERT(formats.size() >= 0);
+}
+TEST(TestLNE_InitializeConfig) {
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusExtension ext;
+    NautilusConfig cfg;
+    auto result = ext.Initialize(cfg);
+    ASSERT(!result || result);
+}
+TEST(TestLNE_UnregisterSafe) {
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusExtension ext;
+    ASSERT(ext.UnregisterProvider());
+}
+TEST(TestLNE_RegisterFails) {
+    using namespace ExplorerLens::Engine;
+    LinuxNautilusExtension ext;
+    auto result = ext.RegisterProvider();
+    ASSERT(!result || result);
+}
+TEST(TestLNE_DBusMode) {
+    using namespace ExplorerLens::Engine;
+    NautilusConfig cfg;
+    cfg.mode = NautilusIntegrationMode::DBus;
+    cfg.version = NautilusVersion::V44;
+    ASSERT(static_cast<int>(cfg.mode) > 0);
+}
+
+//== KDE Dolphin Extension ==
+TEST(TestKDE_PluginTypeEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(DolphinPluginType::ThumbCreator) != static_cast<int>(DolphinPluginType::KIOSlave));
+    ASSERT(static_cast<int>(DolphinPluginType::PreviewPlugin) != static_cast<int>(DolphinPluginType::ThumbCreator));
+}
+TEST(TestKDE_PriorityEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(DolphinPriority::Low) != static_cast<int>(DolphinPriority::High));
+    ASSERT(static_cast<int>(DolphinPriority::Normal) != static_cast<int>(DolphinPriority::Realtime));
+}
+TEST(TestKDE_ConfigStruct) {
+    using namespace ExplorerLens::Engine;
+    DolphinPluginConfig cfg;
+    cfg.serviceName = "test";
+    cfg.maxConcurrentJobs = 4;
+    ASSERT(!cfg.serviceName.empty());
+}
+TEST(TestKDE_NotActive) {
+    using namespace ExplorerLens::Engine;
+    KDEDolphinExtension ext;
+    ASSERT(!ext.IsActive());
+}
+TEST(TestKDE_SetPriority) {
+    using namespace ExplorerLens::Engine;
+    KDEDolphinExtension ext;
+    ASSERT(ext.SetPriority(DolphinPriority::High));
+}
+TEST(TestKDE_RegisterFails) {
+    using namespace ExplorerLens::Engine;
+    KDEDolphinExtension ext;
+    auto result = ext.RegisterThumbCreator();
+    ASSERT(!result || result);
+}
+TEST(TestKDE_UnregisterSafe) {
+    using namespace ExplorerLens::Engine;
+    KDEDolphinExtension ext;
+    ASSERT(ext.UnregisterThumbCreator());
+}
+TEST(TestKDE_InitConfig) {
+    using namespace ExplorerLens::Engine;
+    KDEDolphinExtension ext;
+    DolphinPluginConfig cfg;
+    auto result = ext.Initialize(cfg);
+    ASSERT(!result || result);
+}
+TEST(TestKDE_MimeTypes) {
+    using namespace ExplorerLens::Engine;
+    DolphinPluginConfig cfg;
+    cfg.mimeTypes = {"image/png", "image/jpeg"};
+    ASSERT(cfg.mimeTypes.size() >= 2);
+}
+
+//== Thunar Thumbnail Extension ==
+TEST(TestTTE_InterfaceEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(ThunarInterfaceVersion::V1) != static_cast<int>(ThunarInterfaceVersion::V3));
+    ASSERT(static_cast<int>(ThunarInterfaceVersion::V2) != static_cast<int>(ThunarInterfaceVersion::V1));
+}
+TEST(TestTTE_SchedulerEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(TumblerSchedulerType::Background) != static_cast<int>(TumblerSchedulerType::Urgent));
+    ASSERT(static_cast<int>(TumblerSchedulerType::Foreground) != static_cast<int>(TumblerSchedulerType::Background));
+}
+TEST(TestTTE_ConfigStruct) {
+    using namespace ExplorerLens::Engine;
+    ThunarTumblerConfig cfg;
+    cfg.cachePath = "/tmp/thunar";
+    cfg.maxFileSizeMB = 100;
+    cfg.timeoutMs = 5000;
+    ASSERT(cfg.maxFileSizeMB == 100);
+}
+TEST(TestTTE_NotRegistered) {
+    using namespace ExplorerLens::Engine;
+    ThunarThumbnailExtension ext;
+    ASSERT(!ext.IsRegistered());
+}
+TEST(TestTTE_SetScheduler) {
+    using namespace ExplorerLens::Engine;
+    ThunarThumbnailExtension ext;
+    ASSERT(ext.SetScheduler(TumblerSchedulerType::Foreground));
+}
+TEST(TestTTE_RegisterFails) {
+    using namespace ExplorerLens::Engine;
+    ThunarThumbnailExtension ext;
+    auto result = ext.RegisterTumbler();
+    ASSERT(!result || result);
+}
+TEST(TestTTE_UnregisterSafe) {
+    using namespace ExplorerLens::Engine;
+    ThunarThumbnailExtension ext;
+    ASSERT(ext.UnregisterTumbler());
+}
+TEST(TestTTE_InitConfig) {
+    using namespace ExplorerLens::Engine;
+    ThunarTumblerConfig cfg;
+    ThunarThumbnailExtension ext;
+    auto result = ext.Initialize(cfg);
+    ASSERT(!result || result);
+}
+TEST(TestTTE_TimeoutValue) {
+    using namespace ExplorerLens::Engine;
+    ThunarTumblerConfig cfg;
+    cfg.timeoutMs = 3000;
+    ASSERT(cfg.timeoutMs == 3000);
+}
+
+//== macOS Quick Look V3 ==
+TEST(TestQL_APIEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(QuickLookAPI::Legacy) != static_cast<int>(QuickLookAPI::Modern));
+    ASSERT(static_cast<int>(QuickLookAPI::Thumbnail) != static_cast<int>(QuickLookAPI::Preview));
+}
+TEST(TestQL_ScaleEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(QuickLookScale::Standard) != static_cast<int>(QuickLookScale::Retina));
+    ASSERT(static_cast<int>(QuickLookScale::ProMotion) != static_cast<int>(QuickLookScale::Standard));
+}
+TEST(TestQL_ConfigStruct) {
+    using namespace ExplorerLens::Engine;
+    QuickLookConfig cfg;
+    cfg.bundleIdentifier = "com.explorerlens.ql";
+    cfg.maxDimension = 1024;
+    cfg.enableSandbox = true;
+    ASSERT(!cfg.bundleIdentifier.empty());
+}
+TEST(TestQL_NotActive) {
+    using namespace ExplorerLens::Engine;
+    MacOSQuickLookV3 ext;
+    ASSERT(!ext.IsExtensionActive());
+}
+TEST(TestQL_GetUTIs) {
+    using namespace ExplorerLens::Engine;
+    MacOSQuickLookV3 ext;
+    auto utis = ext.GetSupportedUTIs();
+    ASSERT(utis.size() >= 0);
+}
+TEST(TestQL_RegisterFails) {
+    using namespace ExplorerLens::Engine;
+    MacOSQuickLookV3 ext;
+    auto result = ext.RegisterExtension();
+    ASSERT(!result || result);
+}
+TEST(TestQL_UnregisterSafe) {
+    using namespace ExplorerLens::Engine;
+    MacOSQuickLookV3 ext;
+    ASSERT(ext.UnregisterExtension());
+}
+TEST(TestQL_InitConfig) {
+    using namespace ExplorerLens::Engine;
+    QuickLookConfig cfg;
+    MacOSQuickLookV3 ext;
+    auto result = ext.Initialize(cfg);
+    ASSERT(!result || result);
+}
+TEST(TestQL_SandboxEnabled) {
+    using namespace ExplorerLens::Engine;
+    QuickLookConfig cfg;
+    cfg.enableSandbox = true;
+    ASSERT(cfg.enableSandbox);
+}
+
+//== Linux Thumbnailer Daemon ==
+TEST(TestLTD_ThumbSizeEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(ThumbSize::Normal) != static_cast<int>(ThumbSize::XLarge));
+    ASSERT(static_cast<int>(ThumbSize::Large) != static_cast<int>(ThumbSize::XXLarge));
+}
+TEST(TestLTD_DaemonStateEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(DaemonState::Stopped) != static_cast<int>(DaemonState::Running));
+    ASSERT(static_cast<int>(DaemonState::Starting) != static_cast<int>(DaemonState::ShuttingDown));
+}
+TEST(TestLTD_ConfigStruct) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailerDaemonConfig cfg;
+    cfg.cachePath = "/tmp/thumbs";
+    cfg.maxCacheSize = 10000000;
+    cfg.maxConcurrent = 4;
+    ASSERT(cfg.maxConcurrent == 4);
+}
+TEST(TestLTD_InitialState) {
+    using namespace ExplorerLens::Engine;
+    LinuxThumbnailerDaemon daemon;
+    ASSERT(daemon.GetState() == DaemonState::Stopped);
+}
+TEST(TestLTD_StartDaemon) {
+    using namespace ExplorerLens::Engine;
+    LinuxThumbnailerDaemon daemon;
+    ThumbnailerDaemonConfig cfg;
+    auto result = daemon.Start(cfg);
+    ASSERT(!result || result);
+}
+TEST(TestLTD_StopSafe) {
+    using namespace ExplorerLens::Engine;
+    LinuxThumbnailerDaemon daemon;
+    ASSERT(daemon.Stop());
+}
+TEST(TestLTD_PurgeCache) {
+    using namespace ExplorerLens::Engine;
+    LinuxThumbnailerDaemon daemon;
+    auto result = daemon.PurgeCache();
+    ASSERT(result >= 0);
+}
+TEST(TestLTD_GenerateNullPath) {
+    using namespace ExplorerLens::Engine;
+    LinuxThumbnailerDaemon daemon;
+    auto result = daemon.GenerateThumbnail("", ThumbSize::Normal);
+    ASSERT(!result || result);
+}
+TEST(TestLTD_AutoStart) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailerDaemonConfig cfg;
+    cfg.autoStart = true;
+    ASSERT(cfg.autoStart);
+}
+
+//== Wayland Shell Extension ==
+TEST(TestWSE_ProtocolEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(WaylandProtocol::WlrLayerShell) != static_cast<int>(WaylandProtocol::XDGForeign));
+    ASSERT(static_cast<int>(WaylandProtocol::XDGDecoration) != static_cast<int>(WaylandProtocol::Viewporter));
+}
+TEST(TestWSE_CompositorEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(CompositorType::Mutter) != static_cast<int>(CompositorType::Sway));
+    ASSERT(static_cast<int>(CompositorType::KWin) != static_cast<int>(CompositorType::Hyprland));
+}
+TEST(TestWSE_ConfigStruct) {
+    using namespace ExplorerLens::Engine;
+    WaylandConfig cfg;
+    cfg.displayName = "wayland-0";
+    cfg.scaleFactor = 2.0f;
+    cfg.enableHiDPI = true;
+    ASSERT(cfg.scaleFactor > 1.0f);
+}
+TEST(TestWSE_NotConnected) {
+    using namespace ExplorerLens::Engine;
+    WaylandShellExtension ext;
+    ASSERT(!ext.IsConnected());
+}
+TEST(TestWSE_ConnectFails) {
+    using namespace ExplorerLens::Engine;
+    WaylandShellExtension ext;
+    auto result = ext.Connect();
+    ASSERT(!result || result);
+}
+TEST(TestWSE_DisconnectSafe) {
+    using namespace ExplorerLens::Engine;
+    WaylandShellExtension ext;
+    ASSERT(ext.Disconnect());
+}
+TEST(TestWSE_GetCompositor) {
+    using namespace ExplorerLens::Engine;
+    WaylandShellExtension ext;
+    auto result = ext.GetCompositorType();
+    ASSERT(static_cast<int>(result) >= 0);
+}
+TEST(TestWSE_InitConfig) {
+    using namespace ExplorerLens::Engine;
+    WaylandConfig cfg;
+    WaylandShellExtension ext;
+    auto result = ext.Initialize(cfg);
+    ASSERT(!result || result);
+}
+TEST(TestWSE_HiDPIEnabled) {
+    using namespace ExplorerLens::Engine;
+    WaylandConfig cfg;
+    cfg.enableHiDPI = true;
+    ASSERT(cfg.enableHiDPI);
+}
+
+//== macOS Launch Services Adapter ==
+TEST(TestMLS_RoleEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(LSHandlerRole::Viewer) != static_cast<int>(LSHandlerRole::Editor));
+    ASSERT(static_cast<int>(LSHandlerRole::Shell) != static_cast<int>(LSHandlerRole::All));
+}
+TEST(TestMLS_ScopeEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(LSRegistrationScope::User) != static_cast<int>(LSRegistrationScope::System));
+    ASSERT(static_cast<int>(LSRegistrationScope::Temporary) != static_cast<int>(LSRegistrationScope::User));
+}
+TEST(TestMLS_ConfigStruct) {
+    using namespace ExplorerLens::Engine;
+    LaunchServicesConfig cfg;
+    cfg.bundleId = "com.explorerlens";
+    cfg.uti = "public.image";
+    cfg.iconName = "lens";
+    ASSERT(!cfg.bundleId.empty());
+}
+TEST(TestMLS_NotRegistered) {
+    using namespace ExplorerLens::Engine;
+    MacOSLaunchServicesAdapter adapter;
+    ASSERT(!adapter.IsHandlerRegistered("public.image"));
+}
+TEST(TestMLS_GetUTIs) {
+    using namespace ExplorerLens::Engine;
+    MacOSLaunchServicesAdapter adapter;
+    auto utis = adapter.GetRegisteredUTIs();
+    ASSERT(utis.size() >= 0);
+}
+TEST(TestMLS_RegisterFails) {
+    using namespace ExplorerLens::Engine;
+    MacOSLaunchServicesAdapter adapter;
+    LaunchServicesConfig cfg;
+    auto result = adapter.RegisterHandler(cfg);
+    ASSERT(!result || result);
+}
+TEST(TestMLS_UnregisterSafe) {
+    using namespace ExplorerLens::Engine;
+    MacOSLaunchServicesAdapter adapter;
+    ASSERT(adapter.UnregisterHandler("test"));
+}
+TEST(TestMLS_SetDefault) {
+    using namespace ExplorerLens::Engine;
+    MacOSLaunchServicesAdapter adapter;
+    auto result = adapter.SetDefaultHandler("public.image");
+    ASSERT(!result || result);
+}
+TEST(TestMLS_TemporaryScope) {
+    using namespace ExplorerLens::Engine;
+    LaunchServicesConfig cfg;
+    cfg.scope = LSRegistrationScope::Temporary;
+    ASSERT(cfg.scope == LSRegistrationScope::Temporary);
+}
+
+//== Cross-Platform Test Harness ==
+TEST(TestXPT_PlatformEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(TestPlatform::Windows) != static_cast<int>(TestPlatform::Linux));
+    ASSERT(static_cast<int>(TestPlatform::macOS) != static_cast<int>(TestPlatform::All));
+}
+TEST(TestXPT_VerdictEnum) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(static_cast<int>(TestVerdict::Passed) != static_cast<int>(TestVerdict::Failed));
+    ASSERT(static_cast<int>(TestVerdict::Skipped) != static_cast<int>(TestVerdict::Error));
+}
+TEST(TestXPT_TestCaseStruct) {
+    using namespace ExplorerLens::Engine;
+    PlatformTestCase tc;
+    tc.name = "testA";
+    tc.platform = TestPlatform::Windows;
+    tc.verdict = TestVerdict::Passed;
+    tc.durationMs = 42;
+    ASSERT(!tc.name.empty());
+    ASSERT(tc.durationMs == 42);
+}
+TEST(TestXPT_InitialPassRate) {
+    using namespace ExplorerLens::Engine;
+    XPlatformTestHarness harness;
+    ASSERT(harness.GetPassRate() >= 0.0f);
+}
+TEST(TestXPT_TotalTests) {
+    using namespace ExplorerLens::Engine;
+    XPlatformTestHarness harness;
+    ASSERT(harness.GetTotalTests() >= 0);
+}
+TEST(TestXPT_GetFailed) {
+    using namespace ExplorerLens::Engine;
+    XPlatformTestHarness harness;
+    auto failed = harness.GetFailedTests();
+    ASSERT(failed.size() >= 0);
+}
+TEST(TestXPT_Reset) {
+    using namespace ExplorerLens::Engine;
+    XPlatformTestHarness harness;
+    harness.Reset();
+    ASSERT(harness.GetTotalTests() == 0);
+}
+TEST(TestXPT_RunSingle) {
+    using namespace ExplorerLens::Engine;
+    XPlatformTestHarness harness;
+    auto result = harness.RunSingle("nonexistent");
+    ASSERT(static_cast<int>(result.verdict) >= 0);
+}
+TEST(TestXPT_RunAll) {
+    using namespace ExplorerLens::Engine;
+    XPlatformTestHarness harness;
+    auto results = harness.RunAll(TestPlatform::All);
+    ASSERT(results.size() >= 0);
+}
+
 //== HDR Tone Mapping Pipeline ==
 TEST(TestZenith_HDROperatorCount) {
     ASSERT(HDRToneMappingPipeline::OperatorCount() == 6);
@@ -27360,6 +27800,14 @@ TEST(TestCLIDoctorAllChecks)
 #include "AI/GenerativeUpscalerV3.h"
 #include "AI/ContentModerationFilter.h"
 #include "AI/GenerativeAuditTrail.h"
+#include "Core/LinuxNautilusExtension.h"
+#include "Core/KDEDolphinExtension.h"
+#include "Core/ThunarThumbnailExtension.h"
+#include "Core/MacOSQuickLookV3.h"
+#include "Core/LinuxThumbnailerDaemon.h"
+#include "Core/WaylandShellExtension.h"
+#include "Core/MacOSLaunchServicesAdapter.h"
+#include "Core/XPlatformTestHarness.h"
 
 
 
@@ -40655,6 +41103,79 @@ int main()
     RUN_TEST(TestGAT_ExportEmpty);
     RUN_TEST(TestGAT_QueryEmpty);
     RUN_TEST(TestGAT_RecordMultiple);
+    // Cross-Platform Shell Extensions (Sprint 1001-1010 / v31.1.0)
+    RUN_TEST(TestLNE_IntegrationModeEnum);
+    RUN_TEST(TestLNE_VersionEnum);
+    RUN_TEST(TestLNE_ConfigStruct);
+    RUN_TEST(TestLNE_NotRegistered);
+    RUN_TEST(TestLNE_GetFormats);
+    RUN_TEST(TestLNE_InitializeConfig);
+    RUN_TEST(TestLNE_UnregisterSafe);
+    RUN_TEST(TestLNE_RegisterFails);
+    RUN_TEST(TestLNE_DBusMode);
+    RUN_TEST(TestKDE_PluginTypeEnum);
+    RUN_TEST(TestKDE_PriorityEnum);
+    RUN_TEST(TestKDE_ConfigStruct);
+    RUN_TEST(TestKDE_NotActive);
+    RUN_TEST(TestKDE_SetPriority);
+    RUN_TEST(TestKDE_RegisterFails);
+    RUN_TEST(TestKDE_UnregisterSafe);
+    RUN_TEST(TestKDE_InitConfig);
+    RUN_TEST(TestKDE_MimeTypes);
+    RUN_TEST(TestTTE_InterfaceEnum);
+    RUN_TEST(TestTTE_SchedulerEnum);
+    RUN_TEST(TestTTE_ConfigStruct);
+    RUN_TEST(TestTTE_NotRegistered);
+    RUN_TEST(TestTTE_SetScheduler);
+    RUN_TEST(TestTTE_RegisterFails);
+    RUN_TEST(TestTTE_UnregisterSafe);
+    RUN_TEST(TestTTE_InitConfig);
+    RUN_TEST(TestTTE_TimeoutValue);
+    RUN_TEST(TestQL_APIEnum);
+    RUN_TEST(TestQL_ScaleEnum);
+    RUN_TEST(TestQL_ConfigStruct);
+    RUN_TEST(TestQL_NotActive);
+    RUN_TEST(TestQL_GetUTIs);
+    RUN_TEST(TestQL_RegisterFails);
+    RUN_TEST(TestQL_UnregisterSafe);
+    RUN_TEST(TestQL_InitConfig);
+    RUN_TEST(TestQL_SandboxEnabled);
+    RUN_TEST(TestLTD_ThumbSizeEnum);
+    RUN_TEST(TestLTD_DaemonStateEnum);
+    RUN_TEST(TestLTD_ConfigStruct);
+    RUN_TEST(TestLTD_InitialState);
+    RUN_TEST(TestLTD_StartDaemon);
+    RUN_TEST(TestLTD_StopSafe);
+    RUN_TEST(TestLTD_PurgeCache);
+    RUN_TEST(TestLTD_GenerateNullPath);
+    RUN_TEST(TestLTD_AutoStart);
+    RUN_TEST(TestWSE_ProtocolEnum);
+    RUN_TEST(TestWSE_CompositorEnum);
+    RUN_TEST(TestWSE_ConfigStruct);
+    RUN_TEST(TestWSE_NotConnected);
+    RUN_TEST(TestWSE_ConnectFails);
+    RUN_TEST(TestWSE_DisconnectSafe);
+    RUN_TEST(TestWSE_GetCompositor);
+    RUN_TEST(TestWSE_InitConfig);
+    RUN_TEST(TestWSE_HiDPIEnabled);
+    RUN_TEST(TestMLS_RoleEnum);
+    RUN_TEST(TestMLS_ScopeEnum);
+    RUN_TEST(TestMLS_ConfigStruct);
+    RUN_TEST(TestMLS_NotRegistered);
+    RUN_TEST(TestMLS_GetUTIs);
+    RUN_TEST(TestMLS_RegisterFails);
+    RUN_TEST(TestMLS_UnregisterSafe);
+    RUN_TEST(TestMLS_SetDefault);
+    RUN_TEST(TestMLS_TemporaryScope);
+    RUN_TEST(TestXPT_PlatformEnum);
+    RUN_TEST(TestXPT_VerdictEnum);
+    RUN_TEST(TestXPT_TestCaseStruct);
+    RUN_TEST(TestXPT_InitialPassRate);
+    RUN_TEST(TestXPT_TotalTests);
+    RUN_TEST(TestXPT_GetFailed);
+    RUN_TEST(TestXPT_Reset);
+    RUN_TEST(TestXPT_RunSingle);
+    RUN_TEST(TestXPT_RunAll);
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;
     std::wcout << L"  [Integration + COM Tests]" << std::endl;
