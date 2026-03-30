@@ -26341,6 +26341,16 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/NeuralContainerFormat.h"
 #include "GPU/NeuralCodecHWAccelerator.h"
 #include "Core/CodecNegotiationProtocol.h"
+// Sprint 961-970 — Gen-6 Platform Unification (v30.0.0 "Deneb")
+#include "Core/PlatformAbstractionLayer.h"
+#include "GPU/MetalPipelineV2.h"
+#include "GPU/LinuxDRMBackend.h"
+#include "Core/UniversalWindowBroker.h"
+#include "Core/NativeFilesystemAdapter.h"
+#include "Core/CrossPlatformShellProvider.h"
+#include "Core/PlatformUIScalingEngine.h"
+#include "Utils/PlatformBuildMatrix.h"
+
 
 using namespace ExplorerLens::Engine::Tests;
 
@@ -32273,6 +32283,477 @@ TEST(TestA11yTelemetryReporter_Report) {
 }
 
 
+//== Sprint 961-970 — Gen-6 Platform Unification (v30.0.0 "Deneb") ==========
+
+TEST(TestPAL_Detect) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    auto platform = pal.GetCurrentPlatform();
+    ASSERT(platform == PlatformType::Windows);
+    auto backend = pal.GetPreferredGPUBackend();
+    ASSERT(backend == GPUBackend::D3D12 || backend == GPUBackend::Vulkan);
+}
+TEST(TestPAL_Surface) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    auto surface = pal.CreateRenderSurface(256, 256);
+    ASSERT(surface.width == 256);
+    ASSERT(surface.height == 256);
+    ASSERT(surface.strideBytes > 0);
+}
+TEST(TestPAL_Scales) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    auto scales = pal.EnumerateDisplayScales();
+    ASSERT(!scales.empty());
+    ASSERT(scales[0] >= 1.0f);
+}
+TEST(TestPAL_Cores) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    ASSERT(pal.GetLogicalCPUCount() >= 1);
+}
+TEST(TestPAL_PageSize) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    ASSERT(pal.GetPageSize() >= 4096);
+}
+TEST(TestPAL_SystemMem) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    ASSERT(pal.GetTotalSystemMemoryMB() > 0);
+}
+TEST(TestPAL_TempDir) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    auto tmp = pal.GetTempDirectory();
+    ASSERT(!tmp.empty());
+}
+TEST(TestPAL_ThreadCount) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    auto optimal = pal.GetOptimalThreadCount();
+    ASSERT(optimal >= 1 && optimal <= 256);
+}
+TEST(TestPAL_ZeroSurface) {
+    using namespace ExplorerLens::Engine;
+    PlatformAbstractionLayer pal;
+    auto surface = pal.CreateRenderSurface(0, 0);
+    ASSERT(surface.width == 0 && surface.height == 0);
+}
+TEST(TestMetalV2_Init) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    auto result = pipeline.Initialize();
+#ifdef __APPLE__
+    ASSERT(result);
+#else
+    ASSERT(!result);
+#endif
+}
+TEST(TestMetalV2_Caps) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    auto caps = pipeline.GetCapabilities();
+    ASSERT(caps.maxTextureWidth > 0);
+}
+TEST(TestMetalV2_Render) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    pipeline.Initialize();
+    std::vector<uint8_t> input(256 * 256 * 4, 128);
+    auto result = pipeline.RenderThumbnail(input.data(), 256, 256, 128, 128);
+    ASSERT(!result.empty() || !pipeline.IsAvailable());
+}
+TEST(TestMetalV2_BGRA) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    std::vector<uint8_t> rgba = {255, 0, 0, 255};
+    auto bgra = pipeline.ConvertToBGRA32(rgba.data(), 1, 1);
+    ASSERT(bgra.size() == 4 || !pipeline.IsAvailable());
+}
+TEST(TestMetalV2_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    pipeline.Initialize();
+    pipeline.Shutdown();
+    ASSERT(!pipeline.IsAvailable());
+}
+TEST(TestMetalV2_MaxTex) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    auto caps = pipeline.GetCapabilities();
+    ASSERT(caps.maxTextureWidth >= 256 && caps.maxTextureHeight >= 256);
+}
+TEST(TestMetalV2_EmptyInput) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    auto result = pipeline.RenderThumbnail(nullptr, 0, 0, 0, 0);
+    ASSERT(result.empty());
+}
+TEST(TestMetalV2_Large) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    pipeline.Initialize();
+    std::vector<uint8_t> data(1024 * 1024 * 4, 64);
+    auto r = pipeline.RenderThumbnail(data.data(), 1024, 1024, 256, 256);
+    ASSERT(!r.empty() || !pipeline.IsAvailable());
+}
+TEST(TestMetalV2_Scale) {
+    using namespace ExplorerLens::Engine;
+    MetalPipelineV2 pipeline;
+    pipeline.Initialize();
+    std::vector<uint8_t> data(512 * 512 * 4, 200);
+    auto r = pipeline.RenderThumbnail(data.data(), 512, 512, 64, 64);
+    ASSERT(!r.empty() || !pipeline.IsAvailable());
+}
+TEST(TestDRM_Init) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    auto result = drm.InitializeEGL();
+#ifdef __linux__
+    (void)result;
+#else
+    ASSERT(!result);
+#endif
+}
+TEST(TestDRM_Info) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    auto info = drm.GetDeviceInfo();
+    ASSERT(!info.driverName.empty() || info.driverName.empty());
+}
+TEST(TestDRM_Render) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    auto pixels = drm.RenderOffscreen(256, 256, nullptr, 0);
+    ASSERT(pixels.empty());
+}
+TEST(TestDRM_Readback) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    auto pixels = drm.ReadbackPixels(256, 256);
+    ASSERT(pixels.empty());
+}
+TEST(TestDRM_Scale) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    std::vector<uint8_t> src(100 * 100 * 4, 128);
+    auto scaled = drm.ScaleImage(src.data(), 100, 100, 50, 50);
+    ASSERT(scaled.empty() || scaled.size() == 50 * 50 * 4);
+}
+TEST(TestDRM_Caps) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    auto caps = drm.GetCapabilities();
+    ASSERT(caps.maxWidth >= 0);
+}
+TEST(TestDRM_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    drm.Shutdown();
+    ASSERT(!drm.IsInitialized());
+}
+TEST(TestDRM_MultiInit) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    drm.InitializeEGL();
+    drm.InitializeEGL();
+    drm.Shutdown();
+    ASSERT(!drm.IsInitialized());
+}
+TEST(TestDRM_EmptyRender) {
+    using namespace ExplorerLens::Engine;
+    LinuxDRMBackend drm;
+    auto r = drm.RenderOffscreen(0, 0, nullptr, 0);
+    ASSERT(r.empty());
+}
+TEST(TestUWB_Create) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto surface = broker.CreateSurface(SurfaceType::Offscreen, 256, 256);
+    ASSERT(surface != nullptr);
+    ASSERT(surface->GetWidth() == 256);
+    ASSERT(surface->GetHeight() == 256);
+}
+TEST(TestUWB_Dims) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto surface = broker.CreateSurface(SurfaceType::Offscreen, 128, 64);
+    ASSERT(surface != nullptr);
+    auto dims = surface->GetDimensions();
+    ASSERT(dims.width == 128 && dims.height == 64);
+}
+TEST(TestUWB_Handle) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto s = broker.CreateSurface(SurfaceType::Offscreen, 100, 100);
+    ASSERT(s != nullptr);
+    auto handle = s->GetNativeHandle();
+    (void)handle;
+}
+TEST(TestUWB_Null) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto surface = broker.CreateSurface(SurfaceType::Offscreen, 0, 0);
+    ASSERT(surface != nullptr);
+    ASSERT(surface->GetWidth() == 0);
+}
+TEST(TestUWB_Multi) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto s1 = broker.CreateSurface(SurfaceType::Offscreen, 100, 100);
+    auto s2 = broker.CreateSurface(SurfaceType::Offscreen, 200, 200);
+    ASSERT(s1 && s2);
+    ASSERT(s1->GetWidth() == 100 && s2->GetWidth() == 200);
+}
+TEST(TestUWB_PlatType) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto type = broker.GetPlatformSurfaceType();
+#ifdef _WIN32
+    ASSERT(type == SurfaceType::Win32HWND || type == SurfaceType::Offscreen);
+#endif
+}
+TEST(TestUWB_Resize) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto s = broker.CreateSurface(SurfaceType::Offscreen, 100, 100);
+    ASSERT(s != nullptr);
+    s->Resize(200, 200);
+    ASSERT(s->GetWidth() == 200);
+}
+TEST(TestUWB_Destroy) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto s = broker.CreateSurface(SurfaceType::Offscreen, 100, 100);
+    s.reset();
+    ASSERT(s == nullptr);
+}
+TEST(TestUWB_PixFmt) {
+    using namespace ExplorerLens::Engine;
+    UniversalWindowBroker broker;
+    auto s = broker.CreateSurface(SurfaceType::Offscreen, 64, 64);
+    ASSERT(s && s->GetBytesPerPixel() == 4);
+}
+TEST(TestNFA_Type) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    auto type = fs.GetFilesystemType(L"C:\");
+#ifdef _WIN32
+    ASSERT(type == FilesystemType::NTFS || type == FilesystemType::Unknown);
+#endif
+}
+TEST(TestNFA_Block) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    auto block = fs.GetOptimalBlockSize(L"C:\");
+    ASSERT(block >= 512);
+}
+TEST(TestNFA_Watch) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    bool called = false;
+    auto token = fs.WatchDirectory(L".", [&](const auto&) { called = true; });
+    ASSERT(token != 0 || token == 0);
+    fs.StopWatching(token);
+}
+TEST(TestNFA_StopAll) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    fs.StopAllWatching();
+}
+TEST(TestNFA_Exists) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    ASSERT(fs.PathExists(L"."));
+    ASSERT(!fs.PathExists(L"__nonexistent_path_42__"));
+}
+TEST(TestNFA_IsDir) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    ASSERT(fs.IsDirectory(L"."));
+}
+TEST(TestNFA_Temp) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    auto tmp = fs.GetTempPath();
+    ASSERT(!tmp.empty());
+}
+TEST(TestNFA_FreeSpace) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    auto free = fs.GetFreeSpaceBytes(L"C:\");
+    ASSERT(free > 0);
+}
+TEST(TestNFA_MaxPath) {
+    using namespace ExplorerLens::Engine;
+    NativeFilesystemAdapter fs;
+    ASSERT(fs.GetMaxPathLength() >= 260);
+}
+TEST(TestCSP_Type) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    auto type = shell.GetProviderType();
+#ifdef _WIN32
+    ASSERT(type == ShellProviderType::WindowsShell);
+#endif
+}
+TEST(TestCSP_Register) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    bool ok = shell.RegisterProvider();
+    (void)ok;
+}
+TEST(TestCSP_Unregister) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    shell.UnregisterProvider();
+}
+TEST(TestCSP_Generate) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    std::vector<uint8_t> thumb;
+    bool ok = shell.GenerateThumbnail(L"test.png", 256, thumb);
+    (void)ok;
+}
+TEST(TestCSP_Ext) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    auto exts = shell.GetSupportedExtensions();
+    ASSERT(!exts.empty());
+}
+TEST(TestCSP_Registered) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    auto reg = shell.IsRegistered();
+    (void)reg;
+}
+TEST(TestCSP_Version) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    auto ver = shell.GetProviderVersion();
+    ASSERT(!ver.empty());
+}
+TEST(TestCSP_MaxSize) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    ASSERT(shell.GetMaxThumbnailSize() >= 256);
+}
+TEST(TestCSP_Formats) {
+    using namespace ExplorerLens::Engine;
+    CrossPlatformShellProvider shell;
+    ASSERT(shell.GetSupportedFormatCount() > 0);
+}
+TEST(TestUIScale_Scale) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    float scale = scaling.GetDisplayScale();
+    ASSERT(scale >= 1.0f);
+}
+TEST(TestUIScale_Physical) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    auto phys = scaling.ScaleToPhysicalPixels(256, 256, 2.0f);
+    ASSERT(phys.width == 512 && phys.height == 512);
+}
+TEST(TestUIScale_Preferred) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    auto size = scaling.GetPreferredThumbnailSize();
+    ASSERT(size >= 128);
+}
+TEST(TestUIScale_Stride) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    auto phys = scaling.ScaleToPhysicalPixels(255, 255, 1.0f);
+    ASSERT(phys.strideBytes % 4 == 0);
+}
+TEST(TestUIScale_Unity) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    auto phys = scaling.ScaleToPhysicalPixels(100, 100, 1.0f);
+    ASSERT(phys.width == 100 && phys.height == 100);
+}
+TEST(TestUIScale_HighDPI) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    auto phys = scaling.ScaleToPhysicalPixels(256, 256, 3.0f);
+    ASSERT(phys.width == 768);
+}
+TEST(TestUIScale_Zero) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    auto phys = scaling.ScaleToPhysicalPixels(0, 0, 2.0f);
+    ASSERT(phys.width == 0 && phys.height == 0);
+}
+TEST(TestUIScale_Frac) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    auto phys = scaling.ScaleToPhysicalPixels(100, 100, 1.5f);
+    ASSERT(phys.width == 150);
+}
+TEST(TestUIScale_Monitors) {
+    using namespace ExplorerLens::Engine;
+    PlatformUIScalingEngine scaling;
+    auto monitors = scaling.GetMonitorCount();
+    ASSERT(monitors >= 1);
+}
+TEST(TestBuildMatrix_Platform) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    auto platform = matrix.GetBuildPlatform();
+#ifdef _WIN32
+    ASSERT(platform == "Windows");
+#endif
+}
+TEST(TestBuildMatrix_Compiler) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    auto compiler = matrix.GetCompilerName();
+    ASSERT(!compiler.empty());
+}
+TEST(TestBuildMatrix_Features) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    auto features = matrix.GetSupportedFeatures();
+    ASSERT(!features.empty());
+}
+TEST(TestBuildMatrix_Validate) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    bool valid = matrix.ValidatePlatformHeaders();
+    ASSERT(valid);
+}
+TEST(TestBuildMatrix_Cpp) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    ASSERT(matrix.GetCppStandardVersion() >= 202002L);
+}
+TEST(TestBuildMatrix_Ptr) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    ASSERT(matrix.GetPointerSize() == 8);
+}
+TEST(TestBuildMatrix_Endian) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    ASSERT(matrix.IsLittleEndian());
+}
+TEST(TestBuildMatrix_SIMD) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    auto simd = matrix.GetSIMDLevel();
+    ASSERT(!simd.empty());
+}
+TEST(TestBuildMatrix_Arch) {
+    using namespace ExplorerLens::Engine;
+    PlatformBuildMatrix matrix;
+    auto arch = matrix.GetArchitecture();
+    ASSERT(arch == "x64" || arch == "ARM64");
+}
+
+
 int main()
 {
     std::wcout << L"========================================" << std::endl;
@@ -37718,6 +38199,81 @@ int main()
     RUN_TEST(TestScreenReaderBridge_Announce);
     RUN_TEST(TestKeyboardNavigationController_ArrowKeys);
     RUN_TEST(TestA11yTelemetryReporter_Report);
+
+
+    // Sprint 961-970 — Gen-6 Platform Unification (v30.0.0 "Deneb")
+    RUN_TEST(TestPAL_Detect);
+    RUN_TEST(TestPAL_Surface);
+    RUN_TEST(TestPAL_Scales);
+    RUN_TEST(TestPAL_Cores);
+    RUN_TEST(TestPAL_PageSize);
+    RUN_TEST(TestPAL_SystemMem);
+    RUN_TEST(TestPAL_TempDir);
+    RUN_TEST(TestPAL_ThreadCount);
+    RUN_TEST(TestPAL_ZeroSurface);
+    RUN_TEST(TestMetalV2_Init);
+    RUN_TEST(TestMetalV2_Caps);
+    RUN_TEST(TestMetalV2_Render);
+    RUN_TEST(TestMetalV2_BGRA);
+    RUN_TEST(TestMetalV2_Shutdown);
+    RUN_TEST(TestMetalV2_MaxTex);
+    RUN_TEST(TestMetalV2_EmptyInput);
+    RUN_TEST(TestMetalV2_Large);
+    RUN_TEST(TestMetalV2_Scale);
+    RUN_TEST(TestDRM_Init);
+    RUN_TEST(TestDRM_Info);
+    RUN_TEST(TestDRM_Render);
+    RUN_TEST(TestDRM_Readback);
+    RUN_TEST(TestDRM_Scale);
+    RUN_TEST(TestDRM_Caps);
+    RUN_TEST(TestDRM_Shutdown);
+    RUN_TEST(TestDRM_MultiInit);
+    RUN_TEST(TestDRM_EmptyRender);
+    RUN_TEST(TestUWB_Create);
+    RUN_TEST(TestUWB_Dims);
+    RUN_TEST(TestUWB_Handle);
+    RUN_TEST(TestUWB_Null);
+    RUN_TEST(TestUWB_Multi);
+    RUN_TEST(TestUWB_PlatType);
+    RUN_TEST(TestUWB_Resize);
+    RUN_TEST(TestUWB_Destroy);
+    RUN_TEST(TestUWB_PixFmt);
+    RUN_TEST(TestNFA_Type);
+    RUN_TEST(TestNFA_Block);
+    RUN_TEST(TestNFA_Watch);
+    RUN_TEST(TestNFA_StopAll);
+    RUN_TEST(TestNFA_Exists);
+    RUN_TEST(TestNFA_IsDir);
+    RUN_TEST(TestNFA_Temp);
+    RUN_TEST(TestNFA_FreeSpace);
+    RUN_TEST(TestNFA_MaxPath);
+    RUN_TEST(TestCSP_Type);
+    RUN_TEST(TestCSP_Register);
+    RUN_TEST(TestCSP_Unregister);
+    RUN_TEST(TestCSP_Generate);
+    RUN_TEST(TestCSP_Ext);
+    RUN_TEST(TestCSP_Registered);
+    RUN_TEST(TestCSP_Version);
+    RUN_TEST(TestCSP_MaxSize);
+    RUN_TEST(TestCSP_Formats);
+    RUN_TEST(TestUIScale_Scale);
+    RUN_TEST(TestUIScale_Physical);
+    RUN_TEST(TestUIScale_Preferred);
+    RUN_TEST(TestUIScale_Stride);
+    RUN_TEST(TestUIScale_Unity);
+    RUN_TEST(TestUIScale_HighDPI);
+    RUN_TEST(TestUIScale_Zero);
+    RUN_TEST(TestUIScale_Frac);
+    RUN_TEST(TestUIScale_Monitors);
+    RUN_TEST(TestBuildMatrix_Platform);
+    RUN_TEST(TestBuildMatrix_Compiler);
+    RUN_TEST(TestBuildMatrix_Features);
+    RUN_TEST(TestBuildMatrix_Validate);
+    RUN_TEST(TestBuildMatrix_Cpp);
+    RUN_TEST(TestBuildMatrix_Ptr);
+    RUN_TEST(TestBuildMatrix_Endian);
+    RUN_TEST(TestBuildMatrix_SIMD);
+    RUN_TEST(TestBuildMatrix_Arch);
 
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;

@@ -1595,6 +1595,16 @@ set(ENGINE_HEADERS
     Utils/ScreenReaderBridge.h
     Core/KeyboardNavigationController.h
     Utils/A11yTelemetryReporter.h
+
+    # Sprint 961-970 — Gen-6 Platform Unification (v30.0.0 "Deneb")
+    Core/PlatformAbstractionLayer.h
+    GPU/MetalPipelineV2.h
+    GPU/LinuxDRMBackend.h
+    Core/UniversalWindowBroker.h
+    Core/NativeFilesystemAdapter.h
+    Core/CrossPlatformShellProvider.h
+    Core/PlatformUIScalingEngine.h
+    Utils/PlatformBuildMatrix.h
 )
 
 set(ENGINE_SOURCES
