@@ -1655,6 +1655,16 @@ set(ENGINE_HEADERS
     Core/FormatSchemaValidator.h
     Core/DecoderCompatLayer.h
     Core/UniversalLibraryManifest.h
+
+    # Sprint 1021-1030 — Plugin Marketplace v4 & Commerce (v30.6.0 "Deneb-W")
+    Plugin/MarketplaceClientV4.h
+    Plugin/PluginRatingEngine.h
+    Plugin/PluginDependencyGraph.h
+    Plugin/PluginBundleInstaller.h
+    Plugin/SubscriptionLicenseManagerV4.h
+    Plugin/PluginReputationScorer.h
+    Plugin/AutoUpdatePolicyV4.h
+    Plugin/PrePublishReviewGateway.h
 )
 
 set(ENGINE_SOURCES

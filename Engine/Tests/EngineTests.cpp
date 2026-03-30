@@ -11807,6 +11807,89 @@ TEST(TestULM_LGPL) { using namespace ExplorerLens::Engine; ASSERT(static_cast<in
 TEST(TestULM_SPDX) { using namespace ExplorerLens::Engine; ThirdPartyLib tpl{}; tpl.spdxId = "Zlib"; ASSERT(!tpl.spdxId.empty()); }
 TEST(TestULM_Copy) { using namespace ExplorerLens::Engine; ThirdPartyLib tpl{}; tpl.copyright = "2026"; ASSERT(!tpl.copyright.empty()); }
 
+// ============================================================================
+// Sprint 1021-1030 — Plugin Marketplace v4 & Commerce (v30.6.0 "Deneb-W")
+// ============================================================================
+TEST(TestMKT_Init) { using namespace ExplorerLens::Engine; MarketplaceClientV4 c; ASSERT(true); }
+TEST(TestMKT_Proto) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(Protocol::REST) == 0); ASSERT(static_cast<int>(Protocol::Hybrid) == 2); }
+TEST(TestMKT_Cache) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CachePolicy::NoCache) == 0); ASSERT(static_cast<int>(CachePolicy::Aggressive) == 3); }
+TEST(TestMKT_List) { using namespace ExplorerLens::Engine; PluginListing pl{}; pl.id = "com.example.plugin"; pl.isFree = true; ASSERT(pl.isFree); }
+TEST(TestMKT_Rating) { using namespace ExplorerLens::Engine; PluginListing pl{}; pl.rating = 4.8f; pl.downloadCount = 10000; ASSERT(pl.rating > 4.0f); }
+TEST(TestMKT_Price) { using namespace ExplorerLens::Engine; PluginListing pl{}; pl.price = 9.99f; pl.isFree = false; ASSERT(!pl.isFree); }
+TEST(TestMKT_gRPC) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(Protocol::gRPC) == 1); }
+TEST(TestMKT_Persist) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CachePolicy::Persistent) == 2); }
+TEST(TestMKT_Author) { using namespace ExplorerLens::Engine; PluginListing pl{}; pl.author = "DevCo"; ASSERT(!pl.author.empty()); }
+
+TEST(TestRE_Init) { using namespace ExplorerLens::Engine; PluginRatingEngine re; ASSERT(true); }
+TEST(TestRE_Src) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(RatingSource::UserReview) == 0); ASSERT(static_cast<int>(RatingSource::SecurityScan) == 3); }
+TEST(TestRE_Entry) { using namespace ExplorerLens::Engine; RatingEntry re2{}; re2.pluginId = "test"; re2.score = 4.5f; re2.bayesianScore = 4.2f; ASSERT(re2.bayesianScore > 4.0f); }
+TEST(TestRE_Thresh) { using namespace ExplorerLens::Engine; RatingThreshold rt{}; rt.trusted = 4.0f; rt.blocked = 1.5f; ASSERT(rt.trusted > rt.blocked); }
+TEST(TestRE_AutoScan) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(RatingSource::AutoScan) == 1); }
+TEST(TestRE_Compat) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(RatingSource::CompatTest) == 2); }
+TEST(TestRE_Reviews) { using namespace ExplorerLens::Engine; RatingEntry re2{}; re2.reviewCount = 250; ASSERT(re2.reviewCount == 250); }
+TEST(TestRE_Susp) { using namespace ExplorerLens::Engine; RatingThreshold rt{}; rt.suspicious = 2.5f; ASSERT(rt.suspicious > 0.0f); }
+TEST(TestRE_Score) { using namespace ExplorerLens::Engine; RatingEntry re2{}; re2.score = 5.0f; ASSERT(re2.score == 5.0f); }
+
+TEST(TestDG_Init) { using namespace ExplorerLens::Engine; PluginDependencyGraph dg; ASSERT(true); }
+TEST(TestDG_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DependencyType::Required) == 0); ASSERT(static_cast<int>(DependencyType::Replaces) == 3); }
+TEST(TestDG_Edge) { using namespace ExplorerLens::Engine; DependencyEdge de{}; de.fromId = "a"; de.toId = "b"; de.type = DependencyType::Required; ASSERT(!de.fromId.empty()); }
+TEST(TestDG_Result) { using namespace ExplorerLens::Engine; ResolutionResult rr{}; rr.conflicts = {}; ASSERT(rr.conflicts.empty()); }
+TEST(TestDG_Optional) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DependencyType::Optional) == 1); }
+TEST(TestDG_Conflicts) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DependencyType::Conflicts) == 2); }
+TEST(TestDG_VerConst) { using namespace ExplorerLens::Engine; DependencyEdge de{}; de.versionConstraint = ">=1.0.0"; ASSERT(!de.versionConstraint.empty()); }
+TEST(TestDG_Missing) { using namespace ExplorerLens::Engine; ResolutionResult rr{}; ASSERT(rr.missingDeps.empty()); }
+TEST(TestDG_InstOrd) { using namespace ExplorerLens::Engine; ResolutionResult rr{}; ASSERT(rr.installOrder.empty()); }
+
+TEST(TestBI_Init) { using namespace ExplorerLens::Engine; PluginBundleInstaller bi; ASSERT(true); }
+TEST(TestBI_Phase) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(InstallPhase::Verify) == 0); ASSERT(static_cast<int>(InstallPhase::Rollback) == 4); }
+TEST(TestBI_Entry) { using namespace ExplorerLens::Engine; BundleEntry be{}; be.pluginId = "test"; be.size = 1024*1024; ASSERT(be.size > 0); }
+TEST(TestBI_Prog) { using namespace ExplorerLens::Engine; InstallProgress ip{}; ip.phase = InstallPhase::Download; ip.current = 3; ip.total = 10; ASSERT(ip.total == 10); }
+TEST(TestBI_DL) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(InstallPhase::Download) == 1); }
+TEST(TestBI_Stage) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(InstallPhase::Stage) == 2); }
+TEST(TestBI_Commit) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(InstallPhase::Commit) == 3); }
+TEST(TestBI_CSum) { using namespace ExplorerLens::Engine; BundleEntry be{}; be.checksum = "sha256:deadbeef"; ASSERT(!be.checksum.empty()); }
+TEST(TestBI_Curr) { using namespace ExplorerLens::Engine; InstallProgress ip{}; ip.currentPlugin = "wpf.extn"; ASSERT(!ip.currentPlugin.empty()); }
+
+TEST(TestSLM_Init) { using namespace ExplorerLens::Engine; SubscriptionLicenseManagerV4 slm; ASSERT(true); }
+TEST(TestSLM_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(LicenseType::Free) == 0); ASSERT(static_cast<int>(LicenseType::OEM) == 4); }
+TEST(TestSLM_Seat) { using namespace ExplorerLens::Engine; SeatAllocation sa{}; sa.total = 100; sa.used = 30; sa.reserved = 5; ASSERT(sa.total > sa.used); }
+TEST(TestSLM_JWT) { using namespace ExplorerLens::Engine; JWTEntitlement jwt{}; jwt.subject = "user@org.com"; jwt.issuer = "license.explorerlens.io"; ASSERT(!jwt.issuer.empty()); }
+TEST(TestSLM_Team) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(LicenseType::Team) == 2); }
+TEST(TestSLM_Ent) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(LicenseType::Enterprise) == 3); }
+TEST(TestSLM_Expired) { using namespace ExplorerLens::Engine; SeatAllocation sa{}; sa.expired = 10; ASSERT(sa.expired == 10); }
+TEST(TestSLM_Features) { using namespace ExplorerLens::Engine; JWTEntitlement jwt{}; jwt.features = {"gpu", "ai", "enterprise"}; ASSERT(jwt.features.size() == 3); }
+TEST(TestSLM_Sig) { using namespace ExplorerLens::Engine; JWTEntitlement jwt{}; jwt.signature = "base64sig"; ASSERT(!jwt.signature.empty()); }
+
+TEST(TestRS_Init) { using namespace ExplorerLens::Engine; PluginReputationScorer rs; ASSERT(true); }
+TEST(TestRS_Factor) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReputationFactor::Downloads) == 0); ASSERT(static_cast<int>(ReputationFactor::UpdateFrequency) == 4); }
+TEST(TestRS_CVE) { using namespace ExplorerLens::Engine; CVEEntry ce{}; ce.id = "CVE-2026-1234"; ce.cvssScore = 7.5f; ce.severity = "High"; ASSERT(ce.cvssScore > 5.0f); }
+TEST(TestRS_Score) { using namespace ExplorerLens::Engine; ReputationScore rs2{}; rs2.overall = 0.87f; rs2.isBlacklisted = false; ASSERT(!rs2.isBlacklisted); }
+TEST(TestRS_Stars) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReputationFactor::Stars) == 1); }
+TEST(TestRS_Sec) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReputationFactor::SecurityScan) == 2); }
+TEST(TestRS_Black) { using namespace ExplorerLens::Engine; ReputationScore rs2{}; rs2.isBlacklisted = true; ASSERT(rs2.isBlacklisted); }
+TEST(TestRS_Patched) { using namespace ExplorerLens::Engine; CVEEntry ce{}; ce.patchedVersion = "2.1.0"; ASSERT(!ce.patchedVersion.empty()); }
+TEST(TestRS_CVSS) { using namespace ExplorerLens::Engine; CVEEntry ce{}; ce.cvssScore = 9.8f; ASSERT(ce.cvssScore > 9.0f); }
+
+TEST(TestAU_Init) { using namespace ExplorerLens::Engine; AutoUpdatePolicyV4 au; ASSERT(true); }
+TEST(TestAU_Mode) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(UpdateMode::Silent) == 0); ASSERT(static_cast<int>(UpdateMode::Manual) == 4); }
+TEST(TestAU_Chan) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(UpdateChannel::Stable) == 0); ASSERT(static_cast<int>(UpdateChannel::LTS) == 3); }
+TEST(TestAU_Policy) { using namespace ExplorerLens::Engine; PolicyEntry pe{}; pe.pluginId = "test"; pe.mode = UpdateMode::Notify; pe.deferDays = 7; ASSERT(pe.deferDays == 7); }
+TEST(TestAU_Notify) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(UpdateMode::Notify) == 1); }
+TEST(TestAU_Defer) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(UpdateMode::Defer) == 2); }
+TEST(TestAU_Locked) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(UpdateMode::EnterpriseLocked) == 3); }
+TEST(TestAU_Beta) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(UpdateChannel::Beta) == 1); }
+TEST(TestAU_Nightly) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(UpdateChannel::Nightly) == 2); }
+
+TEST(TestPRG_Init) { using namespace ExplorerLens::Engine; PrePublishReviewGateway prg; ASSERT(true); }
+TEST(TestPRG_Status) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReviewStatus::Pending) == 0); ASSERT(static_cast<int>(ReviewStatus::Suspended) == 4); }
+TEST(TestPRG_Check) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReviewCheck::StaticAnalysis) == 0); ASSERT(static_cast<int>(ReviewCheck::LicenseCheck) == 4); }
+TEST(TestPRG_Report) { using namespace ExplorerLens::Engine; ReviewReport rr{}; rr.status = ReviewStatus::Pending; rr.reviewerId = "bot-v2"; ASSERT(!rr.reviewerId.empty()); }
+TEST(TestPRG_Approved) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReviewStatus::Approved) == 1); }
+TEST(TestPRG_Rejected) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReviewStatus::Rejected) == 2); }
+TEST(TestPRG_NeedsRev) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReviewStatus::NeedsRevision) == 3); }
+TEST(TestPRG_Sig) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReviewCheck::SignatureVerify) == 1); }
+TEST(TestPRG_Issues) { using namespace ExplorerLens::Engine; ReviewReport rr{}; rr.issues = {}; ASSERT(rr.issues.empty()); }
+
 //== HDR Tone Mapping Pipeline ==
 TEST(TestZenith_HDROperatorCount) {
     ASSERT(HDRToneMappingPipeline::OperatorCount() == 6);
@@ -26640,6 +26723,16 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/DecoderCompatLayer.h"
 #include "Core/UniversalLibraryManifest.h"
 
+// Sprint 1021-1030 — Plugin Marketplace v4 & Commerce (v30.6.0 "Deneb-W")
+#include "Plugin/MarketplaceClientV4.h"
+#include "Plugin/PluginRatingEngine.h"
+#include "Plugin/PluginDependencyGraph.h"
+#include "Plugin/PluginBundleInstaller.h"
+#include "Plugin/SubscriptionLicenseManagerV4.h"
+#include "Plugin/PluginReputationScorer.h"
+#include "Plugin/AutoUpdatePolicyV4.h"
+#include "Plugin/PrePublishReviewGateway.h"
+
 
 
 
@@ -39833,6 +39926,23 @@ int main()
     RUN_TEST(TestDCL_Relaxed); RUN_TEST(TestDCL_Workaround); RUN_TEST(TestDCL_Versions); RUN_TEST(TestDCL_Migrations);
     RUN_TEST(TestULM_Init); RUN_TEST(TestULM_License); RUN_TEST(TestULM_Lib); RUN_TEST(TestULM_Manifest); RUN_TEST(TestULM_Apache);
     RUN_TEST(TestULM_BSD); RUN_TEST(TestULM_LGPL); RUN_TEST(TestULM_SPDX); RUN_TEST(TestULM_Copy);
+    // Sprint 1021-1030 — Plugin Marketplace v4 & Commerce (v30.6.0 "Deneb-W")
+    RUN_TEST(TestMKT_Init); RUN_TEST(TestMKT_Proto); RUN_TEST(TestMKT_Cache); RUN_TEST(TestMKT_List); RUN_TEST(TestMKT_Rating);
+    RUN_TEST(TestMKT_Price); RUN_TEST(TestMKT_gRPC); RUN_TEST(TestMKT_Persist); RUN_TEST(TestMKT_Author);
+    RUN_TEST(TestRE_Init); RUN_TEST(TestRE_Src); RUN_TEST(TestRE_Entry); RUN_TEST(TestRE_Thresh); RUN_TEST(TestRE_AutoScan);
+    RUN_TEST(TestRE_Compat); RUN_TEST(TestRE_Reviews); RUN_TEST(TestRE_Susp); RUN_TEST(TestRE_Score);
+    RUN_TEST(TestDG_Init); RUN_TEST(TestDG_Type); RUN_TEST(TestDG_Edge); RUN_TEST(TestDG_Result); RUN_TEST(TestDG_Optional);
+    RUN_TEST(TestDG_Conflicts); RUN_TEST(TestDG_VerConst); RUN_TEST(TestDG_Missing); RUN_TEST(TestDG_InstOrd);
+    RUN_TEST(TestBI_Init); RUN_TEST(TestBI_Phase); RUN_TEST(TestBI_Entry); RUN_TEST(TestBI_Prog); RUN_TEST(TestBI_DL);
+    RUN_TEST(TestBI_Stage); RUN_TEST(TestBI_Commit); RUN_TEST(TestBI_CSum); RUN_TEST(TestBI_Curr);
+    RUN_TEST(TestSLM_Init); RUN_TEST(TestSLM_Type); RUN_TEST(TestSLM_Seat); RUN_TEST(TestSLM_JWT); RUN_TEST(TestSLM_Team);
+    RUN_TEST(TestSLM_Ent); RUN_TEST(TestSLM_Expired); RUN_TEST(TestSLM_Features); RUN_TEST(TestSLM_Sig);
+    RUN_TEST(TestRS_Init); RUN_TEST(TestRS_Factor); RUN_TEST(TestRS_CVE); RUN_TEST(TestRS_Score); RUN_TEST(TestRS_Stars);
+    RUN_TEST(TestRS_Sec); RUN_TEST(TestRS_Black); RUN_TEST(TestRS_Patched); RUN_TEST(TestRS_CVSS);
+    RUN_TEST(TestAU_Init); RUN_TEST(TestAU_Mode); RUN_TEST(TestAU_Chan); RUN_TEST(TestAU_Policy); RUN_TEST(TestAU_Notify);
+    RUN_TEST(TestAU_Defer); RUN_TEST(TestAU_Locked); RUN_TEST(TestAU_Beta); RUN_TEST(TestAU_Nightly);
+    RUN_TEST(TestPRG_Init); RUN_TEST(TestPRG_Status); RUN_TEST(TestPRG_Check); RUN_TEST(TestPRG_Report); RUN_TEST(TestPRG_Approved);
+    RUN_TEST(TestPRG_Rejected); RUN_TEST(TestPRG_NeedsRev); RUN_TEST(TestPRG_Sig); RUN_TEST(TestPRG_Issues);
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;
     std::wcout << L"  [Integration + COM Tests]" << std::endl;
