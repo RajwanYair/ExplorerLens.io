@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v30.2.0 Deneb-S: CLIP Semantic Search and Discovery. 8 AI headers: CLIP embedding engine, HNSW search index, NL query parser, visual similarity graph, embedding cache, multi-modal ranker, deduplicator, incremental updater. +72 tests (3677 total).
+
+
 v30.1.0 Deneb-R: DirectStorage and GPU Decompression. 8 headers: DS engine, GPU decompress scheduler, NV GDeflate + AMD backends, DS cache tier, async stream broker, staging buffer pool. +72 tests (3605 total).
 
 
