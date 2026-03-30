@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v30.7.0 Deneb-X: Enterprise Console v3. 8 headers for admin console, fleet deployment, compliance reports, metrics dashboard, policy version control, remote decoder control, anomaly detection, and SIEM audit export. +72 tests (4228 total).
+
+
 v30.6.0 Deneb-W: Plugin Marketplace v4. 8 Plugin headers for marketplace REST+gRPC client, Bayesian rating engine, dependency resolver, bundle installer, JWT license manager v4, reputation scorer, auto-update policy v4, pre-publish review gateway. +72 tests (3965 total).
 
 
