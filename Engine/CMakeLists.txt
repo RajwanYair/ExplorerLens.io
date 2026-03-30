@@ -1675,6 +1675,15 @@ set(ENGINE_HEADERS
     Enterprise/RemoteDecoderControl.h
     Enterprise/UsageAnomalyDetector.h
     Enterprise/EnterpriseAuditExporter.h
+    # Sprint 1041-1050 — Generative AI Thumbnails (v31.0.0 Achernar)
+    AI/GenerativeThumbnailEngine.h
+    AI/ContentAwareInpainter.h
+    AI/StyleTransferRenderer.h
+    AI/ImageDescriptionSynthesizer.h
+    AI/ThumbnailPersonalisationEngine.h
+    AI/GenerativeUpscalerV3.h
+    AI/ContentModerationFilter.h
+    AI/GenerativeAuditTrail.h
 )
 
 set(ENGINE_SOURCES
