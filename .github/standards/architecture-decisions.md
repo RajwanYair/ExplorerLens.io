@@ -1,7 +1,7 @@
 # ExplorerLens — Architecture Decision Records (ADRs)
 
-**Version:** 15.0.0 "Zenith"
-**Last Updated:** July 2025
+**Version:** 31.1.0 "Achernar-R"
+**Last Updated:** March 2026
 
 ---
 
@@ -316,5 +316,79 @@ Exception: libwebp was built with `/MT` — uses `/NODEFAULTLIB:LIBCMT` workarou
 
 ---
 
-**Document Version:** 1.0  
-**Total ADRs:** 12
+## ADR-013: Sprint Consolidation Pattern
+
+**Date:** 2026-01  
+**Status:** Accepted  
+
+### Context
+
+By v29.x, hundreds of small header files with overlapping concerns accumulated across
+Engine subdirectories. Maintenance burden became unsustainable.
+
+### Decision
+
+Adopt a "consolidate, consolidate, consolidate" policy: merge overlapping headers,
+archive old sprint plans, and enforce one-header-per-concern. Versions v29.2.0–v29.7.0
+consolidated the entire Engine/ tree.
+
+### Consequences
+
+- **Pro:** Dramatically reduced header count and redundancy
+- **Pro:** Clearer ownership per header file
+- **Con:** One-time effort to reorganize and retest
+
+---
+
+## ADR-014: Gen-6 Header Organization
+
+**Date:** 2026-02  
+**Status:** Accepted  
+
+### Context
+
+Gen-6 (v30.x "Deneb" / v31.x "Achernar") adds 60+ new feature headers across
+AI/, Cache/, Enterprise/, GPU/, Memory/, Pipeline/, Plugin/, Core/ subdirectories.
+
+### Decision
+
+Batch features in 10-sprint groups (8 headers per batch). Each batch is registered
+in `Engine/CMakeLists.txt` under a `# Sprint XXXX-YYYY` comment, committed as one
+feature commit, then version-bumped with `Bump-Version.ps1 -TagAndPush`.
+
+### Consequences
+
+- **Pro:** Predictable release cadence and traceable git history
+- **Pro:** Each version maps cleanly to a sprint range
+- **Con:** Large EngineTests.cpp (40K+ lines) due to monolithic test file
+
+---
+
+## ADR-015: Python Test Injection Pattern
+
+**Date:** 2026-02  
+**Status:** Accepted  
+
+### Context
+
+PowerShell regex replacements fail on the 40K-line EngineTests.cpp due to encoding
+and buffer-size issues. Manual editing is error-prone at this scale.
+
+### Decision
+
+Use a disposable `_add_tests.py` script for each batch: it reads EngineTests.cpp,
+injects `#include`, `TEST()`, and `RUN_TEST()` blocks at well-known anchors
+(`//== ` for TEST sections, `// Integration Test Framework + COM Tests` for RUN_TEST),
+then the script is deleted. Never committed.
+
+### Consequences
+
+- **Pro:** Reliable injection into 40K-line file
+- **Pro:** Python handles multi-MB text manipulation without issues
+- **Con:** Requires Python on the build machine
+- **Con:** Must delete `_add_tests.py` before `git add -A` to avoid accidental commit
+
+---
+
+**Document Version:** 2.0  
+**Total ADRs:** 15

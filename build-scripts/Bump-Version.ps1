@@ -180,6 +180,15 @@ if (Test-Path $archSvgPath) {
     Write-Host "[bump] architecture-build.svg updated"
 }
 
+# 12c. build-method.md — version line
+$bmPath = "$rootDir\.github\standards\build-method.md"
+if (Test-Path $bmPath) {
+    $bm = Get-Content $bmPath -Raw
+    $bm = $bm -replace '\*\*Version:\*\* [\d.]+ \(Codename: [^)]+\)', "**Version:** $Version (Codename: $Codename)"
+    Set-Content $bmPath -Value $bm -NoNewline
+    Write-Host "[bump] build-method.md updated"
+}
+
 # 12b. copilot-instructions.md — test count line
 if ($TestCount -gt 0) {
     $ci2 = Get-Content $ciPath -Raw
@@ -206,7 +215,7 @@ if ($idx -ge 0) {
 
 # 6. Commit
 $commitMsg = "chore: bump version to $Version ($Codename)"
-$details = "Sprint version bump. All 12 version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg"
+$details = "Sprint version bump. All version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg, build-method.md"
 $fullMsg = "$commitMsg`n`n$details"
 [IO.File]::WriteAllText("$rootDir\.git\BUMP_MSG.txt", $fullMsg)
 git add -A

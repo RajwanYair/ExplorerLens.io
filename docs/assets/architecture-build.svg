@@ -118,7 +118,7 @@
 <text x="487" y="160" text-anchor="middle"
       font-size="10" fill="#8b949e">CTest target</text>
 <text x="487" y="176" text-anchor="middle"
-      font-size="11" font-weight="600" fill="#3fb950">2,951 tests  ·  100% pass</text>
+      font-size="11" font-weight="600" fill="#3fb950">4,367 tests  ·  100% pass</text>
 <text x="487" y="188" text-anchor="middle"
       font-size="9" fill="#8b949e">17ms avg  ·  235 img/s batch</text>
 

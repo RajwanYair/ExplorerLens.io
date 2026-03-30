@@ -1,7 +1,7 @@
 # ExplorerLens Build Method - Standard Operating Procedure
 
 **Last Updated:** March 2026
-**Version:** 24.1.0 (Codename: Altair-R)
+**Version:** 31.1.0 (Codename: Achernar-R)
 **Policy:** 64-bit only, warnings-as-errors in Release, VS Code monitoring, zero-warnings enforcement
 
 ---
@@ -16,7 +16,7 @@
 - **Build Systems**:
  - **CMake + Ninja** for Engine library + tests + benchmarks + ModernRuntime (preferred)
  - MSBuild for shell extension (LENSShell.sln)
-- **Compilation Units**: 147 total (Engine lib ~108 + tests/benchmarks ~39)
+- **Compilation Units**: 190+ total (Engine lib ~150 + tests/benchmarks ~40)
 
 ### Tool Paths (Auto-detected on this machine)
 

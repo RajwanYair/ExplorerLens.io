@@ -50,12 +50,12 @@ constexpr int kDefaultSize = 256;
 namespace ExplorerLens { }
 namespace ExplorerLens::decoders { }
 
-// Enums: PascalCase for type, UPPER_CASE for values
+// Enums: PascalCase for type, PascalCase for values (Gen-6 standard)
 enum class ImageFormat {
- UNKNOWN,
- JPEG,
- PNG,
- WEBP
+ Unknown,
+ Jpeg,
+ Png,
+ Webp
 };
 
 // Type aliases: PascalCase with _t suffix
@@ -680,4 +680,3 @@ For questions about coding standards:
 **Last Updated:** July 2025 
 **Version:** v15.0.0 "Zenith" 
 **Maintained by:** ExplorerLens Development Team
-
