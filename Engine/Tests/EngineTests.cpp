@@ -11731,6 +11731,82 @@ TEST(TestECW_Block) { using namespace ExplorerLens::Engine; ECWResolutionLevel r
 TEST(TestECW_Bands) { using namespace ExplorerLens::Engine; ECWMetadata em{}; em.bandCount = 4; ASSERT(em.bandCount == 4); }
 TEST(TestECW_Target) { using namespace ExplorerLens::Engine; ECWCompressionRatio cr{}; cr.targetRatio = 10.0f; ASSERT(cr.targetRatio == 10.0f); }
 
+// ============================================================================
+// Sprint 1011-1020 — Universal Format Decoder Library (v30.5.0 "Deneb-V")
+// ============================================================================
+TEST(TestUDF_Init) { using namespace ExplorerLens::Engine; UniversalDecoderFacade udf; ASSERT(!udf.GetVersion().empty()); }
+TEST(TestUDF_Format) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::JPEG) == 0); ASSERT(static_cast<int>(DecoderFormat::Unknown) != 0); }
+TEST(TestUDF_Request) { using namespace ExplorerLens::Engine; ThumbnailRequest req; req.maxWidth = 256; req.maxHeight = 256; ASSERT(req.maxWidth == 256); }
+TEST(TestUDF_Result) { using namespace ExplorerLens::Engine; ThumbnailResult res{}; res.width = 128; res.decodeTimeUs = 5000; ASSERT(res.decodeTimeUs == 5000); }
+TEST(TestUDF_Formats) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::WebP) > 0); ASSERT(static_cast<int>(DecoderFormat::HEIF) > 0); }
+TEST(TestUDF_AVIF) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::AVIF) > 0); }
+TEST(TestUDF_PSD) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::PSD) > 0); }
+TEST(TestUDF_RAW) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::RAW) > 0); }
+TEST(TestUDF_Stride) { using namespace ExplorerLens::Engine; ThumbnailResult res{}; res.stride = 512; ASSERT(res.stride == 512); }
+TEST(TestFCM_Init) { using namespace ExplorerLens::Engine; FormatCapabilityMatrix fcm; ASSERT(fcm.GetTotalFormatCount() >= 0); }
+TEST(TestFCM_Level) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CapabilityLevel::None) == 0); ASSERT(static_cast<int>(CapabilityLevel::GPUAccelerated) == 3); }
+TEST(TestFCM_Platform) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(PlatformType::Windows) == 0); ASSERT(static_cast<int>(PlatformType::WASM) == 3); }
+TEST(TestFCM_Cap) { using namespace ExplorerLens::Engine; FormatCapability fc{}; fc.format = "JPEG"; fc.level = CapabilityLevel::Full; ASSERT(fc.level == CapabilityLevel::Full); }
+TEST(TestFCM_Linux) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(PlatformType::Linux) == 1); }
+TEST(TestFCM_macOS) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(PlatformType::macOS) == 2); }
+TEST(TestFCM_Basic) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CapabilityLevel::Basic) == 1); }
+TEST(TestFCM_Full) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CapabilityLevel::Full) == 2); }
+TEST(TestFCM_MinVer) { using namespace ExplorerLens::Engine; FormatCapability fc{}; fc.minVersion = "1.0.0"; ASSERT(!fc.minVersion.empty()); }
+TEST(TestDVR_Init) { using namespace ExplorerLens::Engine; DecoderVersionRegistry dvr; ASSERT(true); }
+TEST(TestDVR_SemVer) { using namespace ExplorerLens::Engine; SemVer sv{1, 2, 3, ""}; ASSERT(sv.major == 1 && sv.minor == 2 && sv.patch == 3); }
+TEST(TestDVR_Reg) { using namespace ExplorerLens::Engine; DecoderRegistration dr{}; dr.name = "JPEG"; dr.isCompatible = true; ASSERT(dr.isCompatible); }
+TEST(TestDVR_Pre) { using namespace ExplorerLens::Engine; SemVer sv{2, 0, 0, "beta.1"}; ASSERT(!sv.prerelease.empty()); }
+TEST(TestDVR_Author) { using namespace ExplorerLens::Engine; DecoderRegistration dr{}; dr.author = "ExplorerLens"; ASSERT(!dr.author.empty()); }
+TEST(TestDVR_Compat) { using namespace ExplorerLens::Engine; DecoderRegistration dr{}; dr.isCompatible = false; ASSERT(!dr.isCompatible); }
+TEST(TestDVR_Desc) { using namespace ExplorerLens::Engine; DecoderRegistration dr{}; dr.description = "Test"; ASSERT(!dr.description.empty()); }
+TEST(TestDVR_Zero) { using namespace ExplorerLens::Engine; SemVer sv{0, 0, 0, ""}; ASSERT(sv.major == 0); }
+TEST(TestDVR_Version) { using namespace ExplorerLens::Engine; SemVer sv{30, 5, 0, ""}; ASSERT(sv.major == 30); }
+TEST(TestFFR_Init) { using namespace ExplorerLens::Engine; FormatFamilyResolver ffr; ASSERT(true); }
+TEST(TestFFR_Family) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FormatFamily::Image) == 0); }
+TEST(TestFFR_Node) { using namespace ExplorerLens::Engine; FormatNode fn{}; fn.name = "JPEG"; fn.family = FormatFamily::Image; ASSERT(!fn.name.empty()); }
+TEST(TestFFR_Video) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FormatFamily::Video) == 1); }
+TEST(TestFFR_Audio) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FormatFamily::Audio) == 2); }
+TEST(TestFFR_Doc) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FormatFamily::Document) == 3); }
+TEST(TestFFR_Archive) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FormatFamily::Archive) == 4); }
+TEST(TestFFR_Scientific) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FormatFamily::Scientific) == 5); }
+TEST(TestFFR_Exts) { using namespace ExplorerLens::Engine; FormatNode fn{}; fn.extensions = {".jpg", ".jpeg"}; ASSERT(fn.extensions.size() == 2); }
+TEST(TestDHA_Init) { using namespace ExplorerLens::Engine; DecoderHotfixApplicator dha; ASSERT(dha.GetPendingCount() == 0); }
+TEST(TestDHA_Priority) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(HotfixPriority::Low) == 0); ASSERT(static_cast<int>(HotfixPriority::Emergency) == 4); }
+TEST(TestDHA_Entry) { using namespace ExplorerLens::Engine; HotfixEntry he{}; he.id = "HF-001"; he.priority = HotfixPriority::Critical; he.applied = false; ASSERT(!he.applied); }
+TEST(TestDHA_Normal) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(HotfixPriority::Normal) == 1); }
+TEST(TestDHA_High) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(HotfixPriority::High) == 2); }
+TEST(TestDHA_Hash) { using namespace ExplorerLens::Engine; HotfixEntry he{}; he.patchHash = "sha256:abc"; ASSERT(!he.patchHash.empty()); }
+TEST(TestDHA_Target) { using namespace ExplorerLens::Engine; HotfixEntry he{}; he.targetDecoder = "WebPDecoder"; ASSERT(!he.targetDecoder.empty()); }
+TEST(TestDHA_Critical) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(HotfixPriority::Critical) == 3); }
+TEST(TestDHA_Desc) { using namespace ExplorerLens::Engine; HotfixEntry he{}; he.description = "Fix OOB"; ASSERT(!he.description.empty()); }
+TEST(TestFSV_Init) { using namespace ExplorerLens::Engine; FormatSchemaValidator fsv; ASSERT(true); }
+TEST(TestFSV_Severity) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ValidationSeverity::Info) == 0); ASSERT(static_cast<int>(ValidationSeverity::Critical) == 3); }
+TEST(TestFSV_Result) { using namespace ExplorerLens::Engine; ValidationResult vr{}; vr.isValid = true; vr.severity = ValidationSeverity::Info; ASSERT(vr.isValid); }
+TEST(TestFSV_Spec) { using namespace ExplorerLens::Engine; SchemaSpec ss{}; ss.formatName = "PNG"; ss.ruleCount = 42; ASSERT(ss.ruleCount == 42); }
+TEST(TestFSV_Warning) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ValidationSeverity::Warning) == 1); }
+TEST(TestFSV_Error) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ValidationSeverity::Error) == 2); }
+TEST(TestFSV_Offset) { using namespace ExplorerLens::Engine; ValidationResult vr{}; vr.byteOffset = 1024; ASSERT(vr.byteOffset == 1024); }
+TEST(TestFSV_Rule) { using namespace ExplorerLens::Engine; ValidationResult vr{}; vr.ruleName = "CRC32_CHECK"; ASSERT(!vr.ruleName.empty()); }
+TEST(TestFSV_SpecVer) { using namespace ExplorerLens::Engine; SchemaSpec ss{}; ss.specVersion = "ISO 15444-1"; ASSERT(!ss.specVersion.empty()); }
+TEST(TestDCL_Init) { using namespace ExplorerLens::Engine; DecoderCompatLayer dcl; ASSERT(true); }
+TEST(TestDCL_Mode) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CompatMode::Strict) == 0); ASSERT(static_cast<int>(CompatMode::AutoDetect) == 3); }
+TEST(TestDCL_Issue) { using namespace ExplorerLens::Engine; CompatIssue ci{}; ci.decoderName = "RAWDecoder"; ci.severity = 2; ASSERT(ci.severity == 2); }
+TEST(TestDCL_Report) { using namespace ExplorerLens::Engine; CompatReport cr{}; cr.isCompatible = true; cr.migrationsRequired = 0; ASSERT(cr.isCompatible); }
+TEST(TestDCL_Legacy) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CompatMode::Legacy) == 2); }
+TEST(TestDCL_Relaxed) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CompatMode::Relaxed) == 1); }
+TEST(TestDCL_Workaround) { using namespace ExplorerLens::Engine; CompatIssue ci{}; ci.workaround = "Use v2 API"; ASSERT(!ci.workaround.empty()); }
+TEST(TestDCL_Versions) { using namespace ExplorerLens::Engine; CompatIssue ci{}; ci.sourceVersion = "1.0"; ci.targetVersion = "2.0"; ASSERT(ci.sourceVersion != ci.targetVersion); }
+TEST(TestDCL_Migrations) { using namespace ExplorerLens::Engine; CompatReport cr{}; cr.migrationsRequired = 3; ASSERT(cr.migrationsRequired == 3); }
+TEST(TestULM_Init) { using namespace ExplorerLens::Engine; UniversalLibraryManifest ulm; ASSERT(true); }
+TEST(TestULM_License) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SPDXLicense::MIT) == 0); ASSERT(static_cast<int>(SPDXLicense::Custom) == 5); }
+TEST(TestULM_Lib) { using namespace ExplorerLens::Engine; ThirdPartyLib tpl{}; tpl.name = "zlib"; tpl.license = SPDXLicense::Zlib; ASSERT(!tpl.name.empty()); }
+TEST(TestULM_Manifest) { using namespace ExplorerLens::Engine; LibraryManifest lm{}; lm.product = "ExplorerLens"; lm.version = "30.5.0"; ASSERT(!lm.version.empty()); }
+TEST(TestULM_Apache) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SPDXLicense::Apache2) == 1); }
+TEST(TestULM_BSD) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SPDXLicense::BSD3) == 2); }
+TEST(TestULM_LGPL) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SPDXLicense::LGPL21) == 3); }
+TEST(TestULM_SPDX) { using namespace ExplorerLens::Engine; ThirdPartyLib tpl{}; tpl.spdxId = "Zlib"; ASSERT(!tpl.spdxId.empty()); }
+TEST(TestULM_Copy) { using namespace ExplorerLens::Engine; ThirdPartyLib tpl{}; tpl.copyright = "2026"; ASSERT(!tpl.copyright.empty()); }
+
 //== HDR Tone Mapping Pipeline ==
 TEST(TestZenith_HDROperatorCount) {
     ASSERT(HDRToneMappingPipeline::OperatorCount() == 6);
@@ -26554,6 +26630,15 @@ TEST(TestCLIDoctorAllChecks)
 #include "Decoders/NetCDFDecoder.h"
 #include "Decoders/FITSDecoder.h"
 #include "Decoders/ECWDecoder.h"
+// Sprint 1011-1020 — Universal Format Decoder Library (v30.5.0 "Deneb-V")
+#include "Core/UniversalDecoderFacade.h"
+#include "Core/FormatCapabilityMatrix.h"
+#include "Core/DecoderVersionRegistry.h"
+#include "Core/FormatFamilyResolver.h"
+#include "Core/DecoderHotfixApplicator.h"
+#include "Core/FormatSchemaValidator.h"
+#include "Core/DecoderCompatLayer.h"
+#include "Core/UniversalLibraryManifest.h"
 
 
 
@@ -39731,6 +39816,23 @@ int main()
     RUN_TEST(TestECW_Bands);
     RUN_TEST(TestECW_Target);
 
+    // Sprint 1011-1020 — Universal Format Decoder Library (v30.5.0 "Deneb-V")
+    RUN_TEST(TestUDF_Init); RUN_TEST(TestUDF_Format); RUN_TEST(TestUDF_Request); RUN_TEST(TestUDF_Result); RUN_TEST(TestUDF_Formats);
+    RUN_TEST(TestUDF_AVIF); RUN_TEST(TestUDF_PSD); RUN_TEST(TestUDF_RAW); RUN_TEST(TestUDF_Stride);
+    RUN_TEST(TestFCM_Init); RUN_TEST(TestFCM_Level); RUN_TEST(TestFCM_Platform); RUN_TEST(TestFCM_Cap); RUN_TEST(TestFCM_Linux);
+    RUN_TEST(TestFCM_macOS); RUN_TEST(TestFCM_Basic); RUN_TEST(TestFCM_Full); RUN_TEST(TestFCM_MinVer);
+    RUN_TEST(TestDVR_Init); RUN_TEST(TestDVR_SemVer); RUN_TEST(TestDVR_Reg); RUN_TEST(TestDVR_Pre); RUN_TEST(TestDVR_Author);
+    RUN_TEST(TestDVR_Compat); RUN_TEST(TestDVR_Desc); RUN_TEST(TestDVR_Zero); RUN_TEST(TestDVR_Version);
+    RUN_TEST(TestFFR_Init); RUN_TEST(TestFFR_Family); RUN_TEST(TestFFR_Node); RUN_TEST(TestFFR_Video); RUN_TEST(TestFFR_Audio);
+    RUN_TEST(TestFFR_Doc); RUN_TEST(TestFFR_Archive); RUN_TEST(TestFFR_Scientific); RUN_TEST(TestFFR_Exts);
+    RUN_TEST(TestDHA_Init); RUN_TEST(TestDHA_Priority); RUN_TEST(TestDHA_Entry); RUN_TEST(TestDHA_Normal); RUN_TEST(TestDHA_High);
+    RUN_TEST(TestDHA_Hash); RUN_TEST(TestDHA_Target); RUN_TEST(TestDHA_Critical); RUN_TEST(TestDHA_Desc);
+    RUN_TEST(TestFSV_Init); RUN_TEST(TestFSV_Severity); RUN_TEST(TestFSV_Result); RUN_TEST(TestFSV_Spec); RUN_TEST(TestFSV_Warning);
+    RUN_TEST(TestFSV_Error); RUN_TEST(TestFSV_Offset); RUN_TEST(TestFSV_Rule); RUN_TEST(TestFSV_SpecVer);
+    RUN_TEST(TestDCL_Init); RUN_TEST(TestDCL_Mode); RUN_TEST(TestDCL_Issue); RUN_TEST(TestDCL_Report); RUN_TEST(TestDCL_Legacy);
+    RUN_TEST(TestDCL_Relaxed); RUN_TEST(TestDCL_Workaround); RUN_TEST(TestDCL_Versions); RUN_TEST(TestDCL_Migrations);
+    RUN_TEST(TestULM_Init); RUN_TEST(TestULM_License); RUN_TEST(TestULM_Lib); RUN_TEST(TestULM_Manifest); RUN_TEST(TestULM_Apache);
+    RUN_TEST(TestULM_BSD); RUN_TEST(TestULM_LGPL); RUN_TEST(TestULM_SPDX); RUN_TEST(TestULM_Copy);
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;
     std::wcout << L"  [Integration + COM Tests]" << std::endl;

@@ -1645,6 +1645,16 @@ set(ENGINE_HEADERS
     Decoders/NetCDFDecoder.h
     Decoders/FITSDecoder.h
     Decoders/ECWDecoder.h
+
+    # Sprint 1011-1020 — Universal Format Decoder Library (v30.5.0 "Deneb-V")
+    Core/UniversalDecoderFacade.h
+    Core/FormatCapabilityMatrix.h
+    Core/DecoderVersionRegistry.h
+    Core/FormatFamilyResolver.h
+    Core/DecoderHotfixApplicator.h
+    Core/FormatSchemaValidator.h
+    Core/DecoderCompatLayer.h
+    Core/UniversalLibraryManifest.h
 )
 
 set(ENGINE_SOURCES
