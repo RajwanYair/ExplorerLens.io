@@ -1,7 +1,7 @@
 #==============================================================================
 # ExplorerLens - Root CMake Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 29.5.0 "Capella-V"
+# Version: 29.6.0 "Capella-W"
 #
 # vcpkg Integration (Optional):
 #   cmake -B build -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLens
-    VERSION 29.5.0
+    VERSION 29.6.0
     DESCRIPTION "ExplorerLens.io - Universal File Preview Engine for Windows Explorer"
     LANGUAGES CXX
     HOMEPAGE_URL "https://github.com/ExplorerLens/ExplorerLens.io"

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v29.6.0 Capella-W: Project Consolidation Phase 5 — Scope creep extraction. Removed 10 non-core directories (85 files): Enterprise, Platform, AR, Security, UX, Cloud, i18n, Telemetry, Shell, SDK. 568 build/test lines consolidated
+
+
 v29.5.0 Capella-V: Project Consolidation Phase 4 — Scheduler consolidation (14 schedulers→5), router consolidation (7→2). 14 duplicate headers removed, 131 build/test lines consolidated
 
 
