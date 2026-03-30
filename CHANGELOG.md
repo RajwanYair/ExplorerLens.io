@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v30.1.0 Deneb-R: DirectStorage and GPU Decompression. 8 headers: DS engine, GPU decompress scheduler, NV GDeflate + AMD backends, DS cache tier, async stream broker, staging buffer pool. +72 tests (3605 total).
+
+
 v30.0.0 Deneb: Gen-6 Platform Unification MAJOR release. Cross-platform abstraction layer (8 headers): PAL, Metal pipeline, Linux DRM, window broker, filesystem adapter, shell provider, UI scaling, build matrix. +72 tests (3533 total). First post-consolidation feature release.
 
 
