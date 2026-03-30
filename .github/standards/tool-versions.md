@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 30 March 2026 (v30.3.0 Deneb-T release)
-**Version:** 30.3.0 "Deneb-T"
+**Last Updated:** 30 March 2026 (v30.4.0 Deneb-U release)
+**Version:** 30.4.0 "Deneb-U"
 
 ---
 

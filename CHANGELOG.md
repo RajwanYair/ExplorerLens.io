@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v30.4.0 Deneb-U: Geospatial, Medical and Scientific Formats. 8 Decoder headers: GeoTIFF multi-band, NITF national imagery, DICOM Advanced 3D/4D, NRRD medical, HDF5 scientific, NetCDF climate, FITS astronomy, ECW wavelet. +72 tests (3821 total).
+
+
 v30.3.0 Deneb-T: Live Preview Scrubber and Rich Media. 8 Core headers: live preview scrubber, video keyframe extractor, animated frame scrubber, audio waveform renderer, document page previewer, shader syntax highlighter, font glyph sampler, spreadsheet chart renderer. +72 tests (3749 total).
 
 
