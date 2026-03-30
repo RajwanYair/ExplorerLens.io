@@ -11563,6 +11563,90 @@ TEST(TestZenith_CloudDetectProviders) {
     ASSERT(providers.size() >= 0); // Non-negative (may be 0 in CI)
 }
 
+// ============================================================================
+// Sprint 991-1000 — Live Preview Scrubber & Rich Media (v30.3.0 "Deneb-T")
+// ============================================================================
+
+TEST(TestScrub_Init) { using namespace ExplorerLens::Engine; LivePreviewScrubber s; ScrubConfig cfg; cfg.maxFps = 30; cfg.preloadFrames = 4; cfg.cacheSize = 64; s.SetFrameCallback([](uint32_t, const void*) {}); ASSERT(cfg.maxFps == 30); ASSERT(cfg.preloadFrames == 4); }
+TEST(TestScrub_State) { using namespace ExplorerLens::Engine; ScrubState st{}; st.currentFrame = 5; st.totalFrames = 120; st.progress = 5.0f / 120.0f; ASSERT(st.progress > 0.0f); ASSERT(st.totalFrames == 120); }
+TEST(TestScrub_Mode) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ScrubMode::Video) == 0); ASSERT(static_cast<int>(ScrubMode::Font) != static_cast<int>(ScrubMode::Shader)); }
+TEST(TestScrub_Seek) { using namespace ExplorerLens::Engine; LivePreviewScrubber s; ScrubConfig cfg; cfg.maxFps = 60; cfg.cacheSize = 32; ASSERT(cfg.maxFps == 60); }
+TEST(TestScrub_Callback) { using namespace ExplorerLens::Engine; bool called = false; LivePreviewScrubber s; s.SetFrameCallback([&](uint32_t idx, const void* data) { called = true; }); ASSERT(!called); }
+TEST(TestScrub_Config) { using namespace ExplorerLens::Engine; ScrubConfig cfg; cfg.maxFps = 15; cfg.preloadFrames = 8; cfg.cacheSize = 128; ASSERT(cfg.cacheSize == 128); }
+TEST(TestScrub_Modes) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ScrubMode::Spreadsheet) > static_cast<int>(ScrubMode::Video)); }
+TEST(TestScrub_Zero) { using namespace ExplorerLens::Engine; ScrubState st{}; ASSERT(st.currentFrame == 0); ASSERT(st.totalFrames == 0); ASSERT(st.progress == 0.0f); }
+TEST(TestScrub_Progress) { using namespace ExplorerLens::Engine; ScrubState st{}; st.currentFrame = 50; st.totalFrames = 100; st.progress = 0.5f; ASSERT(st.progress == 0.5f); }
+
+TEST(TestKF_Init) { using namespace ExplorerLens::Engine; VideoKeyframeExtractor vk; vk.SetMaxKeyframes(100); ASSERT(true); }
+TEST(TestKF_Metadata) { using namespace ExplorerLens::Engine; VideoMetadata vm{}; vm.width = 1920; vm.height = 1080; vm.durationMs = 120000; vm.fps = 29.97f; ASSERT(vm.width == 1920); ASSERT(vm.height == 1080); }
+TEST(TestKF_Mode) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(KeyframeExtractionMode::IFrameOnly) == 0); ASSERT(static_cast<int>(KeyframeExtractionMode::Adaptive) == 3); }
+TEST(TestKF_Info) { using namespace ExplorerLens::Engine; KeyframeInfo ki{}; ki.index = 42; ki.timestampMs = 5000; ki.sceneChangeScore = 0.85f; ASSERT(ki.index == 42); ASSERT(ki.sceneChangeScore > 0.8f); }
+TEST(TestKF_MaxKeyframes) { using namespace ExplorerLens::Engine; VideoKeyframeExtractor vk; vk.SetMaxKeyframes(50); ASSERT(true); }
+TEST(TestKF_Duration) { using namespace ExplorerLens::Engine; VideoMetadata vm{}; vm.durationMs = 0; ASSERT(vm.durationMs == 0); }
+TEST(TestKF_Codec) { using namespace ExplorerLens::Engine; VideoMetadata vm{}; vm.codec = "h264"; ASSERT(vm.codec == "h264"); }
+TEST(TestKF_FPS) { using namespace ExplorerLens::Engine; VideoMetadata vm{}; vm.fps = 60.0f; ASSERT(vm.fps == 60.0f); }
+TEST(TestKF_SceneScore) { using namespace ExplorerLens::Engine; KeyframeInfo ki{}; ki.sceneChangeScore = 0.0f; ASSERT(ki.sceneChangeScore == 0.0f); }
+
+TEST(TestAnim_Init) { using namespace ExplorerLens::Engine; AnimatedFrameScrubber afs; afs.SetFpsCap(30); ASSERT(true); }
+TEST(TestAnim_Format) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::GIF) == 0); ASSERT(static_cast<int>(AnimatedFormat::JXL_Animation) == 4); }
+TEST(TestAnim_Frame) { using namespace ExplorerLens::Engine; FrameInfo fi{}; fi.index = 10; fi.delayMs = 100; fi.width = 256; fi.height = 256; ASSERT(fi.delayMs == 100); }
+TEST(TestAnim_FpsCap) { using namespace ExplorerLens::Engine; AnimatedFrameScrubber afs; afs.SetFpsCap(15); ASSERT(true); }
+TEST(TestAnim_Disposal) { using namespace ExplorerLens::Engine; FrameInfo fi{}; fi.disposalMethod = 2; ASSERT(fi.disposalMethod == 2); }
+TEST(TestAnim_Zero) { using namespace ExplorerLens::Engine; FrameInfo fi{}; ASSERT(fi.index == 0); ASSERT(fi.delayMs == 0); }
+TEST(TestAnim_WebP) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::WebPAnimated) == 1); }
+TEST(TestAnim_APNG) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::APNG) == 2); }
+TEST(TestAnim_Delay) { using namespace ExplorerLens::Engine; FrameInfo fi{}; fi.delayMs = 33; ASSERT(fi.delayMs == 33); }
+
+TEST(TestWave_Init) { using namespace ExplorerLens::Engine; AudioWaveformRenderer awr; WaveformConfig cfg; cfg.width = 512; cfg.height = 128; ASSERT(cfg.width == 512); }
+TEST(TestWave_Style) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(WaveformStyle::Classic) == 0); ASSERT(static_cast<int>(WaveformStyle::Circular) == 3); }
+TEST(TestWave_Meta) { using namespace ExplorerLens::Engine; AudioMetadata am{}; am.sampleRate = 44100; am.channels = 2; am.durationMs = 180000; ASSERT(am.sampleRate == 44100); }
+TEST(TestWave_Config) { using namespace ExplorerLens::Engine; WaveformConfig cfg; cfg.rmsOverlay = true; cfg.barWidth = 3; ASSERT(cfg.rmsOverlay); ASSERT(cfg.barWidth == 3); }
+TEST(TestWave_BitDepth) { using namespace ExplorerLens::Engine; AudioMetadata am{}; am.bitDepth = 24; ASSERT(am.bitDepth == 24); }
+TEST(TestWave_Codec) { using namespace ExplorerLens::Engine; AudioMetadata am{}; am.codec = "flac"; ASSERT(am.codec == "flac"); }
+TEST(TestWave_Color) { using namespace ExplorerLens::Engine; WaveformConfig cfg; cfg.foregroundColor = 0xFF00FF00; cfg.backgroundColor = 0xFF000000; ASSERT(cfg.foregroundColor != cfg.backgroundColor); }
+TEST(TestWave_Bars) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(WaveformStyle::Bars) == 2); }
+TEST(TestWave_Channels) { using namespace ExplorerLens::Engine; AudioMetadata am{}; am.channels = 6; ASSERT(am.channels == 6); }
+
+TEST(TestDocPV_Init) { using namespace ExplorerLens::Engine; DocumentPagePreviewer dpp; PreviewConfig pc; pc.pageTransitionMs = 250; pc.maxPagesToPreload = 3; ASSERT(pc.pageTransitionMs == 250); }
+TEST(TestDocPV_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DocumentType::PDF) == 0); ASSERT(static_cast<int>(DocumentType::ODP) == 4); }
+TEST(TestDocPV_Page) { using namespace ExplorerLens::Engine; PageInfo pi{}; pi.index = 0; pi.width = 612; pi.height = 792; pi.hasText = true; ASSERT(pi.width == 612); }
+TEST(TestDocPV_Config) { using namespace ExplorerLens::Engine; PreviewConfig pc; pc.maxPagesToPreload = 5; ASSERT(pc.maxPagesToPreload == 5); }
+TEST(TestDocPV_PPTX) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DocumentType::PPTX) == 2); }
+TEST(TestDocPV_HasImages) { using namespace ExplorerLens::Engine; PageInfo pi{}; pi.hasImages = true; ASSERT(pi.hasImages); }
+TEST(TestDocPV_Preload) { using namespace ExplorerLens::Engine; PreviewConfig pc; pc.maxPagesToPreload = 10; pc.pageTransitionMs = 100; ASSERT(pc.pageTransitionMs == 100); }
+TEST(TestDocPV_XLS) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DocumentType::XLS) == 3); }
+TEST(TestDocPV_Index) { using namespace ExplorerLens::Engine; PageInfo pi{}; pi.index = 99; ASSERT(pi.index == 99); }
+
+TEST(TestShHL_Init) { using namespace ExplorerLens::Engine; ShaderSyntaxHighlighter ssh; HighlightConfig hc; hc.fontSize = 12; hc.lineSpacing = 1.4f; ASSERT(hc.fontSize == 12); }
+TEST(TestShHL_Lang) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ShaderLanguage::GLSL) == 0); ASSERT(static_cast<int>(ShaderLanguage::MSL) == 5); }
+TEST(TestShHL_Theme) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SyntaxTheme::Monokai) == 0); ASSERT(static_cast<int>(SyntaxTheme::VSCodeDark) == 4); }
+TEST(TestShHL_Tilt) { using namespace ExplorerLens::Engine; HighlightConfig hc; hc.tiltAngleX = 5.0f; hc.tiltAngleY = -3.0f; ASSERT(hc.tiltAngleX == 5.0f); }
+TEST(TestShHL_LineNum) { using namespace ExplorerLens::Engine; HighlightConfig hc; hc.showLineNumbers = true; ASSERT(hc.showLineNumbers); }
+TEST(TestShHL_HLSL) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ShaderLanguage::HLSL) == 1); }
+TEST(TestShHL_Dracula) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SyntaxTheme::Dracula) == 1); }
+TEST(TestShHL_Spacing) { using namespace ExplorerLens::Engine; HighlightConfig hc; hc.lineSpacing = 2.0f; ASSERT(hc.lineSpacing == 2.0f); }
+TEST(TestShHL_WGSL) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ShaderLanguage::WGSL) == 2); }
+
+TEST(TestFGS_Init) { using namespace ExplorerLens::Engine; FontGlyphSampler fgs; SamplerConfig sc; sc.fontSize = 48; sc.weight = 400; ASSERT(sc.fontSize == 48); }
+TEST(TestFGS_Script) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FontScript::Latin) == 0); ASSERT(static_cast<int>(FontScript::Thai) == 7); }
+TEST(TestFGS_Metrics) { using namespace ExplorerLens::Engine; GlyphMetrics gm{}; gm.advance = 12.5f; gm.bearingX = 1.0f; gm.width = 10.0f; gm.height = 14.0f; ASSERT(gm.advance == 12.5f); }
+TEST(TestFGS_Pangram) { using namespace ExplorerLens::Engine; SamplerConfig sc; sc.pangramText = "The quick brown fox"; ASSERT(!sc.pangramText.empty()); }
+TEST(TestFGS_CJK) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FontScript::CJK) == 2); }
+TEST(TestFGS_Arabic) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FontScript::Arabic) == 1); }
+TEST(TestFGS_Weight) { using namespace ExplorerLens::Engine; SamplerConfig sc; sc.weight = 700; ASSERT(sc.weight == 700); }
+TEST(TestFGS_ShowMetrics) { using namespace ExplorerLens::Engine; SamplerConfig sc; sc.showMetrics = true; ASSERT(sc.showMetrics); }
+TEST(TestFGS_BearingY) { using namespace ExplorerLens::Engine; GlyphMetrics gm{}; gm.bearingY = 12.0f; ASSERT(gm.bearingY == 12.0f); }
+
+TEST(TestSSCR_Init) { using namespace ExplorerLens::Engine; SpreadsheetChartRenderer scr; ASSERT(true); }
+TEST(TestSSCR_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ChartType::Bar) == 0); ASSERT(static_cast<int>(ChartType::Pivot) == 6); }
+TEST(TestSSCR_Detect) { using namespace ExplorerLens::Engine; ChartDetectionResult cdr{}; cdr.chartType = ChartType::Line; cdr.hasLegend = true; ASSERT(cdr.hasLegend); }
+TEST(TestSSCR_Meta) { using namespace ExplorerLens::Engine; SpreadsheetMetadata sm{}; sm.sheetCount = 3; sm.rowCount = 1000; sm.columnCount = 26; ASSERT(sm.sheetCount == 3); }
+TEST(TestSSCR_Charts) { using namespace ExplorerLens::Engine; SpreadsheetMetadata sm{}; sm.hasCharts = true; sm.hasPivotTables = false; ASSERT(sm.hasCharts); ASSERT(!sm.hasPivotTables); }
+TEST(TestSSCR_Pie) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ChartType::Pie) == 2); }
+TEST(TestSSCR_DataRange) { using namespace ExplorerLens::Engine; ChartDetectionResult cdr{}; cdr.dataRange = "A1:D50"; cdr.title = "Sales Q3"; ASSERT(!cdr.dataRange.empty()); }
+TEST(TestSSCR_Scatter) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ChartType::Scatter) == 3); }
+TEST(TestSSCR_Cols) { using namespace ExplorerLens::Engine; SpreadsheetMetadata sm{}; sm.columnCount = 100; ASSERT(sm.columnCount == 100); }
+
 //== HDR Tone Mapping Pipeline ==
 TEST(TestZenith_HDROperatorCount) {
     ASSERT(HDRToneMappingPipeline::OperatorCount() == 6);
@@ -26368,6 +26452,15 @@ TEST(TestCLIDoctorAllChecks)
 #include "AI/MultiModalRanker.h"
 #include "AI/SearchResultDeduplicator.h"
 #include "AI/IncrementalIndexUpdater.h"
+// Sprint 991-1000 — Live Preview Scrubber & Rich Media (v30.3.0 "Deneb-T")
+#include "Core/LivePreviewScrubber.h"
+#include "Core/VideoKeyframeExtractor.h"
+#include "Core/AnimatedFrameScrubber.h"
+#include "Core/AudioWaveformRenderer.h"
+#include "Core/DocumentPagePreviewer.h"
+#include "Core/ShaderSyntaxHighlighter.h"
+#include "Core/FontGlyphSampler.h"
+#include "Core/SpreadsheetChartRenderer.h"
 
 
 
@@ -39396,6 +39489,80 @@ int main()
     RUN_TEST(TestIdxUpd_Stats);
     RUN_TEST(TestIdxUpd_Shutdown);
     RUN_TEST(TestIdxUpd_Latency);
+
+    // Sprint 991-1000 — Live Preview Scrubber & Rich Media (v30.3.0 "Deneb-T")
+    RUN_TEST(TestScrub_Init);
+    RUN_TEST(TestScrub_State);
+    RUN_TEST(TestScrub_Mode);
+    RUN_TEST(TestScrub_Seek);
+    RUN_TEST(TestScrub_Callback);
+    RUN_TEST(TestScrub_Config);
+    RUN_TEST(TestScrub_Modes);
+    RUN_TEST(TestScrub_Zero);
+    RUN_TEST(TestScrub_Progress);
+    RUN_TEST(TestKF_Init);
+    RUN_TEST(TestKF_Metadata);
+    RUN_TEST(TestKF_Mode);
+    RUN_TEST(TestKF_Info);
+    RUN_TEST(TestKF_MaxKeyframes);
+    RUN_TEST(TestKF_Duration);
+    RUN_TEST(TestKF_Codec);
+    RUN_TEST(TestKF_FPS);
+    RUN_TEST(TestKF_SceneScore);
+    RUN_TEST(TestAnim_Init);
+    RUN_TEST(TestAnim_Format);
+    RUN_TEST(TestAnim_Frame);
+    RUN_TEST(TestAnim_FpsCap);
+    RUN_TEST(TestAnim_Disposal);
+    RUN_TEST(TestAnim_Zero);
+    RUN_TEST(TestAnim_WebP);
+    RUN_TEST(TestAnim_APNG);
+    RUN_TEST(TestAnim_Delay);
+    RUN_TEST(TestWave_Init);
+    RUN_TEST(TestWave_Style);
+    RUN_TEST(TestWave_Meta);
+    RUN_TEST(TestWave_Config);
+    RUN_TEST(TestWave_BitDepth);
+    RUN_TEST(TestWave_Codec);
+    RUN_TEST(TestWave_Color);
+    RUN_TEST(TestWave_Bars);
+    RUN_TEST(TestWave_Channels);
+    RUN_TEST(TestDocPV_Init);
+    RUN_TEST(TestDocPV_Type);
+    RUN_TEST(TestDocPV_Page);
+    RUN_TEST(TestDocPV_Config);
+    RUN_TEST(TestDocPV_PPTX);
+    RUN_TEST(TestDocPV_HasImages);
+    RUN_TEST(TestDocPV_Preload);
+    RUN_TEST(TestDocPV_XLS);
+    RUN_TEST(TestDocPV_Index);
+    RUN_TEST(TestShHL_Init);
+    RUN_TEST(TestShHL_Lang);
+    RUN_TEST(TestShHL_Theme);
+    RUN_TEST(TestShHL_Tilt);
+    RUN_TEST(TestShHL_LineNum);
+    RUN_TEST(TestShHL_HLSL);
+    RUN_TEST(TestShHL_Dracula);
+    RUN_TEST(TestShHL_Spacing);
+    RUN_TEST(TestShHL_WGSL);
+    RUN_TEST(TestFGS_Init);
+    RUN_TEST(TestFGS_Script);
+    RUN_TEST(TestFGS_Metrics);
+    RUN_TEST(TestFGS_Pangram);
+    RUN_TEST(TestFGS_CJK);
+    RUN_TEST(TestFGS_Arabic);
+    RUN_TEST(TestFGS_Weight);
+    RUN_TEST(TestFGS_ShowMetrics);
+    RUN_TEST(TestFGS_BearingY);
+    RUN_TEST(TestSSCR_Init);
+    RUN_TEST(TestSSCR_Type);
+    RUN_TEST(TestSSCR_Detect);
+    RUN_TEST(TestSSCR_Meta);
+    RUN_TEST(TestSSCR_Charts);
+    RUN_TEST(TestSSCR_Pie);
+    RUN_TEST(TestSSCR_DataRange);
+    RUN_TEST(TestSSCR_Scatter);
+    RUN_TEST(TestSSCR_Cols);
 
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;

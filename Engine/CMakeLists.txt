@@ -1625,6 +1625,16 @@ set(ENGINE_HEADERS
     AI/MultiModalRanker.h
     AI/SearchResultDeduplicator.h
     AI/IncrementalIndexUpdater.h
+
+    # Sprint 991-1000 — Live Preview Scrubber & Rich Media (v30.3.0 "Deneb-T")
+    Core/LivePreviewScrubber.h
+    Core/VideoKeyframeExtractor.h
+    Core/AnimatedFrameScrubber.h
+    Core/AudioWaveformRenderer.h
+    Core/DocumentPagePreviewer.h
+    Core/ShaderSyntaxHighlighter.h
+    Core/FontGlyphSampler.h
+    Core/SpreadsheetChartRenderer.h
 )
 
 set(ENGINE_SOURCES
