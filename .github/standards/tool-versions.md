@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 29 March 2026 (v25.3.0 Rigel-T release)
-**Version:** 25.3.0 "Rigel-T"
+**Last Updated:** 30 March 2026 (v29.2.0 Capella-S release)
+**Version:** 29.2.0 "Capella-S"
 
 ---
 

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v29.2.0 Capella-S: Project Consolidation Phase 1 — Archived obsolete docs (SPRINT_PLAN_600/700/800, ROADMAP_V25), enhanced Bump-Version.ps1 to handle all 12 version-bearing files (SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg), synced all stale v25.3.0 references to current version, rewrote sprint plan 901-960 with consolidation themes
+
+
 v29.1.0 Capella-R: Accessibility & Inclusive Design v2 — BLIP-2 on-device alt-text synthesis, ARIA thumbnail annotator, WCAG 2.2 audit engine, high-contrast theme adapter, caption quality scorer, screen reader bridge, keyboard navigation controller, a11y telemetry reporter
 
 
