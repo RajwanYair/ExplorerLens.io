@@ -504,14 +504,6 @@ set(ENGINE_HEADERS
     Decoders/FLIFDecoderV2.h
 
     # Sprint 481-490 — AI-Native Thumbnailing v2 (v24.0.0 "Altair")
-    AI/NeuralUpscalerV2.h
-    AI/ContentAwareResizer.h
-    AI/SemanticHashEngine.h
-    AI/AutoTaggingEngine.h
-    AI/QualityRestorationEngine.h
-    AI/SceneDepthEstimatorV2.h
-    AI/StyleTransferEngine.h
-    AI/LandmarkDetectionEngine.h
 
     # GPU rendering and compute
     GPU/D3D11Renderer.h
@@ -556,33 +548,17 @@ set(ENGINE_HEADERS
     Plugin/IPC/SharedMemoryManager.h
     Plugin/IsolationModeSelector.h
     Plugin/PluginActivation.h
-    Plugin/PluginCompatibilityKitV2.h
-    Plugin/PluginDebuggerIntegration.h
     Plugin/PluginDecoder.h
     Plugin/PluginHostBridge.h
     Plugin/PluginHostClient.h
-    Plugin/PluginHostIPC.h
-    Plugin/PluginHotReload.h
     Plugin/PluginLifecycle.h
     Plugin/PluginLoaderV2.h
     Plugin/PluginManager.h
-    Plugin/PluginMarketplace.h
-    Plugin/PluginMarketplaceUnified.h
-    Plugin/PluginMarketplaceV2.h
-    Plugin/PluginMarketplaceV3.h
     Plugin/PluginPerformanceProfiler.h
     Plugin/PluginReferencePack.h
-    Plugin/PluginRuntimeTestMatrix.h
-    Plugin/PluginRuntimeValidation.h
-    Plugin/PluginSandboxPolicy.h
     Plugin/PluginSDKV2.h
     Plugin/PluginSecurity.h
     Plugin/PluginNamedPipeBridge.h
-    Plugin/PluginTrustChain.h
-    Plugin/CrashIntelligenceEngine.h
-    Plugin/PluginHotReloadManager.h
-    Plugin/PluginCompatibilityKit.h
-    Plugin/PluginTrustChainValidator.h
     Plugin/Security/JobObjectManager.h
     Plugin/PluginDependencyResolver.h
     Plugin/PluginCrashRecovery.h
@@ -592,15 +568,9 @@ set(ENGINE_HEADERS
     Plugin/PluginAuditLog.h
 
     # AI/ML modules
-    AI/AISearchIntegration.h
     AI/AIThumbnailEnhancer.h
-    AI/ImageQualityAssessor.h
-    AI/ImageQualityAssessorV2.h
-    AI/SceneClassifierEngine.h
     AI/SceneUnderstandingEngine.h
-    AI/SmartCropEngine.h
     AI/SmartCropV2.h
-    AI/ThumbnailSearchIndex.h
 
     # Codec modules
     Codec/CodecLoader.h
@@ -818,10 +788,7 @@ set(ENGINE_HEADERS
     Core/PerformanceRegressionDetector.h
     Core/ResourceUsageProfiler.h
     # Batch 9: Smart Features (634-638)
-    AI/ThumbnailRelevanceScorer.h
-    AI/ColorPaletteExtractor.h
     AI/ImageComplexityAnalyzer.h
-    AI/FormatMigrationAdvisor.h
     AI/DecodeStrategyOptimizer.h
     # Batch 10: Platform & Integration (639-643)
     Core/ClipboardMonitorIntegration.h
@@ -865,9 +832,6 @@ set(ENGINE_HEADERS
     Utils/DiagnosticBundleExporter.h
     Utils/DeploymentHealthChecker.h
     # Sprint 63-64: Plugin Ecosystem
-    Plugin/PluginSandboxEnforcer.h
-    Plugin/PluginPerformanceMonitor.h
-    Plugin/PluginHotReloader.h
     # Sprint 65-66: Quality & Observability
     Core/StructuredDiagnosticLogger.h
     Core/ResourceLeakTracker.h
@@ -935,15 +899,9 @@ set(ENGINE_HEADERS
     # Beyond Zenith — AI/ML
     AI/FaceDetectionThumbnail.h
     AI/ObjectSaliencyMapper.h
-    AI/StyleTransferPreview.h
-    AI/TextRecognitionThumb.h
-    AI/SceneDepthEstimator.h
 
     # Beyond Zenith — Plugin Ecosystem
-    Plugin/PluginMarketplaceClient.h
-    Plugin/PluginVersionMigrator.h
     Plugin/PluginTelemetryBridge.h
-    Plugin/PluginSecurityAuditor.h
 
     # Sprint 349-393: Enhancement Plan V15 — Production Polish
     # Category A/B: Critical Fixes & Architecture (Core)
@@ -986,9 +944,6 @@ set(ENGINE_HEADERS
     # Category E: AI/ML Production
     AI/DirectMLInferenceEngine.h
     AI/ONNXModelLoader.h
-    AI/NeuralUpscaleV2.h
-    AI/SemanticTagGenerator.h
-    AI/VisualSimilarityEngine.h
 
     # Category D: GUI/UX Utilities
     Utils/DPIScalingManager.h
@@ -998,10 +953,6 @@ set(ENGINE_HEADERS
     Utils/LivePerformanceTracker.h
 
     # Category B/D: Plugin Infrastructure
-    Plugin/PluginDependencyGraph.h
-    Plugin/PluginAPIVersionNegotiator.h
-    Plugin/PluginResourceQuotaManager.h
-    Plugin/PluginDiagnosticsExporter.h
 
     # Category D: Shell & Decoder Enhancements
     Decoders/JPEG2000DecoderV2.h
@@ -1015,7 +966,6 @@ set(ENGINE_HEADERS
     GPU/GPUWorkgroupOptimizer.h
     Memory/CopyOnWriteBufferPool.h
     Memory/MemoryMappedThumbnailAtlas.h
-    AI/ThumbnailAestheticScorer.h
 
     # Sprint 395+: Enhancement Plan V15 — 50 New Feature Headers
     # Core enhancements
@@ -1062,16 +1012,10 @@ set(ENGINE_HEADERS
     Memory/ThreadLocalPoolAllocator.h
 
     # AI/ML enhancements
-    AI/ThumbnailSaliencyMap.h
     AI/AdaptiveCropEngine.h
-    AI/ColorPaletteGenerator.h
-    AI/ImageSimilarityMatcher.h
     AI/FileTypePredictor.h
 
     # Plugin enhancements
-    Plugin/PluginUpdateChecker.h
-    Plugin/PluginConfigMigrator.h
-    Plugin/PluginMetricsExporter.h
 
     # Utils enhancements
     Utils/PerformanceReportGenerator.h
@@ -1125,15 +1069,8 @@ set(ENGINE_HEADERS
     Memory/GuardPageProtector.h
     Memory/WorkingSetOptimizer.h
     # AI enhancements
-    AI/AutoWhiteBalanceCorrector.h
-    AI/DocumentLayoutClassifier.h
-    AI/ThumbnailComplexityRouter.h
-    AI/VisualQualityPredictor.h
-    AI/SmartThumbnailRanker.h
     # Plugin enhancements
-    Plugin/PluginRateLimiter.h
     Plugin/PluginStatePersistence.h
-    Plugin/PluginIsolationMonitor.h
     # Decoder enhancements
     Decoders/ClipboardImageDecoder.h
     Decoders/ScreenshotAnalyzer.h
@@ -1193,7 +1130,6 @@ set(ENGINE_HEADERS
     Decoders/OpenJPEGStreamDecoder.h
     Decoders/MemoryMappedBitmapReader.h
     # Plugin enhancements
-    Plugin/PluginProcessWatchdog.h
     Plugin/PluginHealthReporter.h
     # Sprint 398 — EP V15 Phase 3
     # Core enhancements
@@ -1241,7 +1177,6 @@ set(ENGINE_HEADERS
     Plugin/PluginEventBus.h
     Plugin/PluginSchemaValidator.h
     Plugin/PluginFeatureToggle.h
-    Plugin/PluginSandboxMonitor.h
     # Utils enhancements
     Utils/StartupTimingProfiler.h
     Utils/FeatureFlagRegistry.h
@@ -1285,25 +1220,11 @@ set(ENGINE_HEADERS
     Decoders/SidecarMetadataDecoder.h
     Decoders/ContainerPreviewDecoder.h
     # AI
-    AI/SmartCropPredictor.h
-    AI/ThumbnailQualityScorer.h
-    AI/ContentClassifier.h
-    AI/DuplicateImageDetector.h
-    AI/AutoOrientationCorrector.h
     # Plugin
-    Plugin/PluginCapabilityNegotiator.h
-    Plugin/PluginStateCoordinator.h
-    Plugin/PluginCommunicationBridge.h
     # Sprint 261-270 (v20.6.0 "Quasar-W") — Plugin Marketplace v2
-    Plugin/MarketplaceClient.h
-    Plugin/PluginDiscoveryEngine.h
     Plugin/PluginInstaller.h
     Plugin/PluginPackageManifest.h
     Plugin/PluginSearchIndex.h
-    Plugin/PluginSignatureVerifier.h
-    Plugin/PluginUpdateScheduler.h
-    Plugin/PluginUsageTracker.h
-    Plugin/PluginVersionResolver.h
     # Sprint 271-280 (v20.7.0 "Quasar-X") — Observability v2
     Core/DiagnosticsConsole.h
     Core/LatencyBudgetManager.h
@@ -1371,17 +1292,12 @@ set(ENGINE_HEADERS
     Utils/CertificatePinner.h
     Utils/ColorBlindFilter.h
     Utils/FirstRunExperience.h
-    AI/NSFWContentGuard.h
     AI/BlurDetectionFilter.h
     # Sprint 351-360 (v22.3.0 "Sirius-T") — AI Inference Pipeline v2
     AI/AIModelRegistry.h
     AI/AIPerformanceProfiler.h
     AI/AIThumbnailPipeline.h
     AI/AIUpscaler.h
-    AI/ContentCategoryClassifier.h
-    AI/FrameInterpolator.h
-    AI/NeuralThumbnailSynthesizer.h
-    AI/SemanticColorPalette.h
     # Sprint 361-370 — Advanced Scheduling & Concurrency v2 (v22.4.0 Sirius-U)
     Core/LockFreeMPMCQueue.h
     Core/CPUAffinityRouter.h
@@ -1433,14 +1349,6 @@ set(ENGINE_HEADERS
     GPU/GPUMemoryDefragmenterV2.h
     GPU/GPUThumbnailAtlasManager.h
     # Sprint 421-430 — Plugin Ecosystem v3 (v23.2.0 Vega-S)
-    Plugin/PluginDIContainer.h
-    Plugin/PluginABTestFramework.h
-    Plugin/PluginFeatureFlagEngine.h
-    Plugin/PluginSLAMonitor.h
-    Plugin/PluginCanaryController.h
-    Plugin/PluginTelemetryAggregatorV3.h
-    Plugin/PluginComplianceAuditorV2.h
-    Plugin/PluginHotConfigReceiver.h
     # Sprint 431-440 — Memory Optimization v3 (v23.3.0 Vega-T)
     Memory/PageFileArenaAllocator.h
     Memory/HugeTLBPagePool.h
@@ -1453,37 +1361,16 @@ set(ENGINE_HEADERS
     # Sprint 441-450 — Smart Cache v4 (v23.4.0 Vega-U)
     Cache/AIEvictionPolicyEngine.h
     # Sprint 451-460 — CLI & Automation v2 (v23.5.0 Vega-V)
-    CLI/LensBatchProcessorV2.h
-    CLI/LensWatchDaemon.h
-    CLI/LensPerceptualDiff.h
-    CLI/LensFormatExporter.h
-    CLI/LensProfileCapture.h
-    CLI/LensCacheCLI.h
-    CLI/LensPluginCLI.h
-    CLI/CICDWebhookReceiver.h
     # Utils
     Utils/DiagnosticBundleCollector.h
     Utils/RegressionTestRunner.h
 
     # Sprint 561-570 — WASM Plugin Sandbox (v25.0.0 "Rigel" — delivered v25.1.0)
-    Plugin/WASMRuntimeAdapter.h
-    Plugin/WASMMemorySafetyModel.h
-    Plugin/WASMPluginLoader.h
-    Plugin/WITBindingGenerator.h
-    Plugin/WASMHostController.h
-    Plugin/WASMCapabilityNegotiator.h
-    Plugin/WASMHotSwapEngine.h
-    Plugin/WASMDebuggerBridge.h
 
     # Sprint 571-580 — Neural Format Intelligence (v25.1.0 "Rigel-R")
-    AI/NeuralFormatFingerprinter.h
-    AI/UnknownFormatHandler.h
-    AI/LLMMIMEInferenceEngine.h
     Core/SelfExpandingFormatRegistry.h
-    AI/FormatTransferLearner.h
     Core/FormatDetectionReport.h
     Core/SyntheticDecoderGenerator.h
-    AI/FormatEvolutionTracker.h
 
     # Sprint 581-590 — NPU & Heterogeneous Compute (v25.2.0 "Rigel-S")
     GPU/IntelNPUBackend.h
@@ -1492,7 +1379,6 @@ set(ENGINE_HEADERS
     GPU/HardwareCapabilityProfiler.h
     Pipeline/PowerAwareScheduler.h
     Memory/NPUMemoryPool.h
-    AI/NPUWarmupEngine.h
     GPU/ARM64DecodeBackend.h
 
     # Sprint 591-600 — VCS Integration (v25.3.0 "Rigel-T")
@@ -1550,7 +1436,6 @@ set(ENGINE_HEADERS
     Utils/CryptoAgilityEngine.h
     # Sprint 651-660 — Windows Next-Gen Shell Integration (v26.1.0 "Canopus-R")
     Core/WinRTThumbnailBridge.h
-    AI/CopilotPlatformBridge.h
     Core/AppContainerIsolation.h
     Core/WinFSMetadataStore.h
     Core/WindowsSearchV3Bridge.h
@@ -1571,7 +1456,6 @@ set(ENGINE_HEADERS
     Core/LiveAnnotationBroadcaster.h
     Core/SharedViewStateProtocol.h
     Core/ConflictResolutionMerger.h
-    Plugin/CollaborativePluginHost.h
     Core/PresenceAvatarRenderer.h
     Core/SessionReplayEngine.h
     Core/CollaborationTelemetryHub.h
@@ -1612,14 +1496,6 @@ set(ENGINE_HEADERS
     Utils/GDPRComplianceEngine.h
     Core/PrivacyAuditLogger.h
     # Sprint 721-730 — Federated AI Pipeline (v27.0.0 "Sirius" MAJOR)
-    AI/FederatedLearningCoordinator.h
-    AI/PersonalizedRankingModel.h
-    AI/FederatedModelAggregator.h
-    AI/OnDeviceFineTuningEngine.h
-    AI/NeuralCompressionCodec.h
-    AI/EmbeddingFederationBus.h
-    AI/ModelVersioningController.h
-    AI/FederatedSearchEnhancer.h
     # Sprint 731-740 — Streaming & Live Media Preview (v27.1.0 "Sirius-R")
     Decoders/LiveStreamDecoder.h
     Decoders/WebRTCThumbnailCapture.h
@@ -1638,13 +1514,8 @@ set(ENGINE_HEADERS
     Core/SecureClusterChannel.h
     Core/ClusterObservabilityBus.h
     # Sprint 751-760 — Universal Plugin SDK v3 (v27.3.0 "Sirius-T")
-    Plugin/PluginCapabilityMatrixV3.h
-    Plugin/PluginMarketplaceConnector.h
     Plugin/PluginSandboxV3.h
-    Plugin/PluginLifecycleManagerV3.h
-    Plugin/PluginTelemetryCollector.h
     Plugin/PluginCompatibilityShimV3.h
-    Plugin/PluginNetworkProxy.h
     # Sprint 761-770 — Predictive Pre-Generation Engine (v27.4.0 "Sirius-U")
     Core/FolderPredictionModel.h
     Core/ColdStartFolderBootstrapper.h
@@ -1658,7 +1529,6 @@ set(ENGINE_HEADERS
     Core/AnnotationTimeline.h
     Core/PresenceIndicatorEngine.h
     Core/AnnotationTaxonomyV2.h
-    AI/AIAnnotationAssistant.h
     Core/OfflineAnnotationSyncQueue.h
     Core/AnnotationExportPipelineV2.h
     # Sprint 781-790 — Protocol Surface v2 (v27.6.0 "Sirius-W")
@@ -1672,25 +1542,14 @@ set(ENGINE_HEADERS
     Core/GraphQLSchemaIntrospector.h
     # Sprint 791-800 — Neural Codec v2 (v27.7.0 "Sirius-X")
     Core/NeuralCodecV2Engine.h
-    AI/SSIMQualityController.h
     Core/ProgressiveNeuralDecoder.h
     Core/NeuralContainerFormat.h
-    AI/MultiResLatentPyramid.h
-    AI/LearnedEntropyCoder.h
     GPU/NeuralCodecHWAccelerator.h
     Core/CodecNegotiationProtocol.h
 
     # Sprint 801-810 — Cross-Platform Electron Shell (v28.0.0 "Polaris")
 
     # Sprint 811-820 — Generative AI Caption Synthesis (v28.1.0 "Polaris-R")
-    AI/VLMEmbeddingEngine.h
-    AI/CaptionGenerationPipeline.h
-    AI/OnDeviceCaptionInferer.h
-    AI/CaptionStyleTransferEngine.h
-    AI/AltTextGeneratorV2.h
-    AI/BatchCaptionPipeline.h
-    AI/IncrementalCaptionUpdater.h
-    AI/CaptionSearchIndexer.h
 
     # Sprint 821-830 — Live AR Preview Engine (v28.2.0 "Polaris-S")
 
@@ -1705,7 +1564,6 @@ set(ENGINE_HEADERS
     Core/HybridTrustChainV2.h
     Core/QuantumSafeKeyExchange.h
     Utils/DilithiumCertificateStore.h
-    Plugin/PQCPluginManifest.h
     Utils/SignatureAuditLogger.h
     Core/CryptoAgilityBroker.h
     Utils/KeyRotationScheduler.h
@@ -1731,11 +1589,9 @@ set(ENGINE_HEADERS
     Utils/ShellExtensionHealthMonitor.h
 
     # Sprint 891-900 — Accessibility & Inclusive Design v2 (v29.1.0 "Capella-R")
-    AI/AltTextSynthesizerBLIP2.h
     Utils/ARIAThumbnailAnnotator.h
     Core/AccessibilityAuditEngine.h
     Utils/HighContrastThemeAdapter.h
-    AI/CaptionQualityScorer.h
     Utils/ScreenReaderBridge.h
     Core/KeyboardNavigationController.h
     Utils/A11yTelemetryReporter.h
@@ -1837,7 +1693,6 @@ set(ENGINE_SOURCES
     Plugin/PluginDecoder.cpp
     Plugin/PluginHostClient.cpp
     Plugin/PluginManager.cpp
-    Plugin/PluginMarketplaceV2.cpp
     Plugin/Security/JobObjectManager.cpp
 
     # Utility implementations

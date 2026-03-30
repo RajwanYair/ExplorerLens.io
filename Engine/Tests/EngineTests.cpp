@@ -3,8 +3,6 @@
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
 
-#include "../AI/AISearchIntegration.h"
-#include "../AI/ImageQualityAssessor.h"
 #include "../AI/SceneUnderstandingEngine.h"
 #include "../AI/SmartCropV2.h"
 #include "../Cache/CacheWarmingService.h"
@@ -129,14 +127,6 @@
 #include "../Decoders/PIXARDecoder.h"
 #include "../Decoders/JPEG2000TileDecoderV2.h"
 #include "../Decoders/FLIFDecoderV2.h"
-#include "../AI/NeuralUpscalerV2.h"
-#include "../AI/ContentAwareResizer.h"
-#include "../AI/SemanticHashEngine.h"
-#include "../AI/AutoTaggingEngine.h"
-#include "../AI/QualityRestorationEngine.h"
-#include "../AI/SceneDepthEstimatorV2.h"
-#include "../AI/StyleTransferEngine.h"
-#include "../AI/LandmarkDetectionEngine.h"
 // Sprint 491-500 — Cross-Process Architecture (v24.1.0 "Altair-R")
 #include "../Core/OutOfProcThumbnailServer.h"
 #include "../Core/CrossProcessCacheProxy.h"
@@ -158,12 +148,8 @@
 #include "../Pipeline/ParallelIOPipeline.h"
 #include "../Pipeline/PipelineErrorBoundary.h"
 #include "../Pipeline/SmartFormatDetectorV2.h"
-#include "../Plugin/PluginDebuggerIntegration.h"
-#include "../Plugin/PluginHotReload.h"
 #include "../Plugin/PluginLifecycle.h"
 #include "../Plugin/PluginMarketplaceUnified.h"
-#include "../Plugin/PluginMarketplaceV2.h"
-#include "../Plugin/PluginMarketplaceV3.h"
 #include "../Plugin/PluginPerformanceProfiler.h"
 #include "../Plugin/PluginSDKV2.h"
 #include "../Plugin/PluginSecurity.h"
@@ -455,8 +441,6 @@
 #include "../Plugin/PluginActivation.h"
 #include "../Plugin/PluginHostBridge.h"
 #include "../Plugin/PluginHostClient.h"
-#include "../Plugin/PluginHostIPC.h"
-#include "../Plugin/PluginRuntimeValidation.h"
 #include "../Utils/EXIFOrientation.h"
 #include "../Utils/AuditLogger.h"
 #include "../Utils/CIPipeline.h"
@@ -467,7 +451,6 @@
 #include "../Utils/PerformanceProfiler.h"
 #include "../Core/PerfRegressionGate.h"
 #include "../Plugin/PluginCompatibilityKitV2.h"
-#include "../Plugin/PluginSandboxPolicy.h"
 
 #include "../Cache/MultiTierCache.h"
 #include "../Cache/ThumbnailCache.h"
@@ -510,19 +493,13 @@
 #include "../GPU/GDIRenderer.h"
 #include "../Pipeline/ThumbnailPipeline.h"
 #include "../Plugin/PluginManager.h"
-#include "../Plugin/PluginMarketplace.h"
-#include "../Plugin/PluginTrustChain.h"
 #include "../Utils/HardwareCapabilities.h"
 #include "../Utils/PerceptualHashing.h"
 
 // Additional module headers
-#include "../AI/SceneClassifierEngine.h"
-#include "../AI/SmartCropEngine.h"
 #include "../AI/ImageQualityAssessorV2.h"
-#include "../AI/ThumbnailSearchIndex.h"
 #include "../Plugin/PluginNamedPipeBridge.h"
 #include "../Plugin/PluginHotReloadManager.h"
-#include "../Plugin/PluginCompatibilityKit.h"
 #include "../Plugin/PluginTrustChainValidator.h"
 #include "../Core/ThumbnailPreviewEngine.h"
 #include "../Core/DiagnosticsCollector.h"
@@ -572,10 +549,7 @@
 #include "../Core/HealthScoreAggregator.h"
 #include "../Core/PerformanceRegressionDetector.h"
 #include "../Core/ResourceUsageProfiler.h"
-#include "../AI/ThumbnailRelevanceScorer.h"
-#include "../AI/ColorPaletteExtractor.h"
 #include "../AI/ImageComplexityAnalyzer.h"
-#include "../AI/FormatMigrationAdvisor.h"
 #include "../AI/DecodeStrategyOptimizer.h"
 #include "../Core/ClipboardMonitorIntegration.h"
 #include "../Core/ShellNotificationProvider.h"
@@ -693,9 +667,6 @@
 #include "../Utils/DeploymentHealthChecker.h"
 
 // --- Sprint 63-64: Plugin Ecosystem ---
-#include "../Plugin/PluginSandboxEnforcer.h"
-#include "../Plugin/PluginPerformanceMonitor.h"
-#include "../Plugin/PluginHotReloader.h"
 
 // --- Sprint 65-66: Quality & Observability ---
 #include "../Core/StructuredDiagnosticLogger.h"
@@ -759,13 +730,7 @@
 #include "../Memory/MemoryBandwidthProfiler.h"
 #include "../AI/FaceDetectionThumbnail.h"
 #include "../AI/ObjectSaliencyMapper.h"
-#include "../AI/StyleTransferPreview.h"
-#include "../AI/TextRecognitionThumb.h"
-#include "../AI/SceneDepthEstimator.h"
-#include "../Plugin/PluginMarketplaceClient.h"
-#include "../Plugin/PluginVersionMigrator.h"
 #include "../Plugin/PluginTelemetryBridge.h"
-#include "../Plugin/PluginSecurityAuditor.h"
 
 // Sprint 349-393: Enhancement Plan V15 — Production Polish
 #include "../Core/MuPDFRenderer.h"
@@ -797,18 +762,11 @@
 #include "../Memory/LargePageOptimizer.h"
 #include "../AI/DirectMLInferenceEngine.h"
 #include "../AI/ONNXModelLoader.h"
-#include "../AI/NeuralUpscaleV2.h"
-#include "../AI/SemanticTagGenerator.h"
-#include "../AI/VisualSimilarityEngine.h"
 #include "../Utils/DPIScalingManager.h"
 #include "../Utils/HighContrastAdapter.h"
 #include "../Utils/FormatHealthIndicator.h"
 #include "../Utils/SettingsSerializer.h"
 #include "../Utils/LivePerformanceTracker.h"
-#include "../Plugin/PluginDependencyGraph.h"
-#include "../Plugin/PluginAPIVersionNegotiator.h"
-#include "../Plugin/PluginResourceQuotaManager.h"
-#include "../Plugin/PluginDiagnosticsExporter.h"
 #include "../Decoders/JPEG2000DecoderV2.h"
 #include "../Decoders/UniversalVideoDecoder.h"
 
@@ -820,7 +778,6 @@
 #include "../GPU/GPUWorkgroupOptimizer.h"
 #include "../Memory/CopyOnWriteBufferPool.h"
 #include "../Memory/MemoryMappedThumbnailAtlas.h"
-#include "../AI/ThumbnailAestheticScorer.h"
 
 // Sprint 395+: Enhancement Plan V15 — 50 New Feature Headers
 #include "../Core/GlobalShortcutManager.h"
@@ -849,14 +806,8 @@
 #include "../Memory/PoolAllocatorMetrics.h"
 #include "../Memory/ScopedMemoryBudget.h"
 #include "../Memory/ThreadLocalPoolAllocator.h"
-#include "../AI/ThumbnailSaliencyMap.h"
 #include "../AI/AdaptiveCropEngine.h"
-#include "../AI/ColorPaletteGenerator.h"
-#include "../AI/ImageSimilarityMatcher.h"
 #include "../AI/FileTypePredictor.h"
-#include "../Plugin/PluginUpdateChecker.h"
-#include "../Plugin/PluginConfigMigrator.h"
-#include "../Plugin/PluginMetricsExporter.h"
 #include "../Utils/PerformanceReportGenerator.h"
 #include "../Utils/SystemInfoCollector.h"
 #include "../Utils/RegistryRepairTool.h"
@@ -906,15 +857,8 @@
 #include "../Memory/GuardPageProtector.h"
 #include "../Memory/WorkingSetOptimizer.h"
 // AI
-#include "../AI/AutoWhiteBalanceCorrector.h"
-#include "../AI/DocumentLayoutClassifier.h"
-#include "../AI/ThumbnailComplexityRouter.h"
-#include "../AI/VisualQualityPredictor.h"
-#include "../AI/SmartThumbnailRanker.h"
 // Plugin
-#include "../Plugin/PluginRateLimiter.h"
 #include "../Plugin/PluginStatePersistence.h"
-#include "../Plugin/PluginIsolationMonitor.h"
 // Decoders
 #include "../Decoders/ClipboardImageDecoder.h"
 #include "../Decoders/ScreenshotAnalyzer.h"
@@ -974,7 +918,6 @@
 #include "../Decoders/OpenJPEGStreamDecoder.h"
 #include "../Decoders/MemoryMappedBitmapReader.h"
 // Plugin
-#include "../Plugin/PluginProcessWatchdog.h"
 #include "../Plugin/PluginHealthReporter.h"
 // Sprint 398 — EP V15 Phase 3
 // Core
@@ -1022,7 +965,6 @@
 #include "../Plugin/PluginEventBus.h"
 #include "../Plugin/PluginSchemaValidator.h"
 #include "../Plugin/PluginFeatureToggle.h"
-#include "../Plugin/PluginSandboxMonitor.h"
 // Utils
 #include "../Utils/StartupTimingProfiler.h"
 #include "../Utils/FeatureFlagRegistry.h"
@@ -1059,24 +1001,10 @@
 #include "../Decoders/MultipageDocumentDecoder.h"
 #include "../Decoders/SidecarMetadataDecoder.h"
 #include "../Decoders/ContainerPreviewDecoder.h"
-#include "../AI/SmartCropPredictor.h"
-#include "../AI/ThumbnailQualityScorer.h"
-#include "../AI/ContentClassifier.h"
-#include "../AI/DuplicateImageDetector.h"
-#include "../AI/AutoOrientationCorrector.h"
-#include "../Plugin/PluginCapabilityNegotiator.h"
-#include "../Plugin/PluginStateCoordinator.h"
-#include "../Plugin/PluginCommunicationBridge.h"
 // Sprint 261-270 (v20.6.0 "Quasar-W") — Plugin Marketplace v2
-#include "../Plugin/MarketplaceClient.h"
-#include "../Plugin/PluginDiscoveryEngine.h"
 #include "../Plugin/PluginInstaller.h"
 #include "../Plugin/PluginPackageManifest.h"
 #include "../Plugin/PluginSearchIndex.h"
-#include "../Plugin/PluginSignatureVerifier.h"
-#include "../Plugin/PluginUpdateScheduler.h"
-#include "../Plugin/PluginUsageTracker.h"
-#include "../Plugin/PluginVersionResolver.h"
 // Sprint 271-280 (v20.7.0 "Quasar-X") — Observability v2
 #include "../Core/DiagnosticsConsole.h"
 #include "../Core/LatencyBudgetManager.h"
@@ -1144,17 +1072,12 @@
 #include "../Utils/CertificatePinner.h"
 #include "../Utils/ColorBlindFilter.h"
 #include "../Utils/FirstRunExperience.h"
-#include "../AI/NSFWContentGuard.h"
 #include "../AI/BlurDetectionFilter.h"
 // Sprint 351-360 (v22.3.0 "Sirius-T") — AI Inference Pipeline v2
 #include "../AI/AIModelRegistry.h"
 #include "../AI/AIPerformanceProfiler.h"
 #include "../AI/AIThumbnailPipeline.h"
 #include "../AI/AIUpscaler.h"
-#include "../AI/ContentCategoryClassifier.h"
-#include "../AI/FrameInterpolator.h"
-#include "../AI/NeuralThumbnailSynthesizer.h"
-#include "../AI/SemanticColorPalette.h"
 // Sprint 361-370 — Advanced Scheduling & Concurrency v2 (v22.4.0)
 #include "../Core/LockFreeMPMCQueue.h"
 #include "../Core/WorkStealingSchedulerV2.h"
@@ -1207,13 +1130,6 @@
 #include "../GPU/GPUMemoryDefragmenterV2.h"
 #include "../GPU/GPUThumbnailAtlasManager.h"
 // Sprint 421-430 — Plugin Ecosystem v3 (v23.2.0)
-#include "../Plugin/PluginDIContainer.h"
-#include "../Plugin/PluginABTestFramework.h"
-#include "../Plugin/PluginFeatureFlagEngine.h"
-#include "../Plugin/PluginSLAMonitor.h"
-#include "../Plugin/PluginCanaryController.h"
-#include "../Plugin/PluginComplianceAuditorV2.h"
-#include "../Plugin/PluginHotConfigReceiver.h"
 // Sprint 431-440 — Memory Optimization v3 (v23.3.0)
 #include "../Memory/PageFileArenaAllocator.h"
 #include "../Memory/HugeTLBPagePool.h"
@@ -1226,14 +1142,6 @@
 // Sprint 441-450 — Smart Cache v4 (v23.4.0)
 #include "../Cache/AIEvictionPolicyEngine.h"
 // Sprint 451-460 — CLI & Automation v2 (v23.5.0)
-#include "../CLI/LensBatchProcessorV2.h"
-#include "../CLI/LensWatchDaemon.h"
-#include "../CLI/LensPerceptualDiff.h"
-#include "../CLI/LensFormatExporter.h"
-#include "../CLI/LensProfileCapture.h"
-#include "../CLI/LensCacheCLI.h"
-#include "../CLI/LensPluginCLI.h"
-#include "../CLI/CICDWebhookReceiver.h"
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
 
@@ -2956,479 +2864,20 @@ TEST(TestFLIFDecoderV2_InvalidFile) {
 // Sprint 481-490 — AI-Native Thumbnailing v2 (v24.0.0 "Altair")
 
 // NeuralUpscalerV2 — 9 tests
-TEST(TestNeuralUpscalerV2_BackendDefault) {
-    using namespace ExplorerLens::AI;
-    NeuralUpscalerV2 upscaler;
-    ASSERT(upscaler.GetBackend() == UpscaleBackend::DirectML);
-    ASSERT(upscaler.GetFactor()  == UpscaleFactor::X4);
-    ASSERT(!upscaler.IsModelLoaded());
-}
-TEST(TestNeuralUpscalerV2_Constants) {
-    ASSERT(ExplorerLens::AI::NeuralUpscalerV2::MIN_DIM == 8);
-    ASSERT(ExplorerLens::AI::NeuralUpscalerV2::MAX_DIM == 4096);
-    ASSERT(ExplorerLens::AI::NeuralUpscalerV2::TARGET_PSNR >= 30.0f);
-}
-TEST(TestNeuralUpscalerV2_NullPixelsFail) {
-    using namespace ExplorerLens::AI;
-    NeuralUpscalerV2 upscaler;
-    auto r = upscaler.Upscale(nullptr, 0, 0);
-    ASSERT(!r.success);
-    ASSERT(!r.error.empty());
-}
-TEST(TestNeuralUpscalerV2_SetBackendCPU) {
-    using namespace ExplorerLens::AI;
-    NeuralUpscalerV2 upscaler;
-    upscaler.SetBackend(UpscaleBackend::CPU);
-    ASSERT(upscaler.GetBackend() == UpscaleBackend::CPU);
-}
-TEST(TestNeuralUpscalerV2_SetBackendONNX) {
-    using namespace ExplorerLens::AI;
-    NeuralUpscalerV2 upscaler;
-    upscaler.SetBackend(UpscaleBackend::ONNX);
-    ASSERT(upscaler.GetBackend() == UpscaleBackend::ONNX);
-}
-TEST(TestNeuralUpscalerV2_SetFactorX2) {
-    using namespace ExplorerLens::AI;
-    NeuralUpscalerV2 upscaler;
-    upscaler.SetFactor(UpscaleFactor::X2);
-    ASSERT(upscaler.GetFactor() == UpscaleFactor::X2);
-    std::vector<uint8_t> src(8 * 8 * 4, 128u);
-    auto r = upscaler.Upscale(src.data(), 8, 8);
-    ASSERT(r.success);
-    ASSERT(r.width == 16 && r.height == 16);
-}
-TEST(TestNeuralUpscalerV2_SetTileSize) {
-    using namespace ExplorerLens::AI;
-    NeuralUpscalerV2 upscaler;
-    upscaler.SetTileSize(128);
-    ASSERT(upscaler.GetTileSize() == 128);
-}
-TEST(TestNeuralUpscalerV2_LoadModel) {
-    using namespace ExplorerLens::AI;
-    NeuralUpscalerV2 upscaler;
-    ASSERT(!upscaler.LoadModel(""));
-    ASSERT(!upscaler.IsModelLoaded());
-    ASSERT(upscaler.LoadModel("model.onnx"));
-    ASSERT(upscaler.IsModelLoaded());
-}
-TEST(TestNeuralUpscalerV2_UpscaleValidX4) {
-    using namespace ExplorerLens::AI;
-    NeuralUpscalerV2 upscaler;
-    std::vector<uint8_t> src(8 * 8 * 4, 0u);
-    auto r = upscaler.Upscale(src.data(), 8, 8);
-    ASSERT(r.success);
-    ASSERT(r.width == 32 && r.height == 32);
-    ASSERT(r.pixels.size() == static_cast<size_t>(32 * 32 * 4));
-}
 
 // ContentAwareResizer — 9 tests
-TEST(TestContentAwareResizer_DefaultStrategy) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    ASSERT(resizer.GetStrategy() == ResizeStrategy::SaliencyWeighted);
-    ASSERT(resizer.GetPreserveFaces());
-    ASSERT(resizer.GetSeamIterations() == 8);
-}
-TEST(TestContentAwareResizer_StrategySeamCarving) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    resizer.SetStrategy(ResizeStrategy::SeamCarving);
-    ASSERT(resizer.GetStrategy() == ResizeStrategy::SeamCarving);
-}
-TEST(TestContentAwareResizer_StrategyCropAndPad) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    resizer.SetStrategy(ResizeStrategy::CropAndPad);
-    ASSERT(resizer.GetStrategy() == ResizeStrategy::CropAndPad);
-}
-TEST(TestContentAwareResizer_StrategyLetterBox) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    resizer.SetStrategy(ResizeStrategy::LetterBox);
-    ASSERT(resizer.GetStrategy() == ResizeStrategy::LetterBox);
-}
-TEST(TestContentAwareResizer_PreserveFacesText) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    resizer.SetPreserveFaces(false);
-    ASSERT(!resizer.GetPreserveFaces());
-    resizer.SetPreserveText(true);
-}
-TEST(TestContentAwareResizer_SetSaliencyThresh) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    resizer.SetSaliencyThresh(0.9f);
-    ASSERT(resizer.GetSaliencyThresh() == 0.9f);
-}
-TEST(TestContentAwareResizer_SetSeamIterations) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    resizer.SetSeamIterations(16);
-    ASSERT(resizer.GetSeamIterations() == 16);
-}
-TEST(TestContentAwareResizer_ResizeFileEmpty) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    auto r = resizer.ResizeFile("", 64, 64);
-    ASSERT(!r.success);
-}
-TEST(TestContentAwareResizer_ValidResize) {
-    using namespace ExplorerLens::AI;
-    ContentAwareResizer resizer;
-    std::vector<uint8_t> src(32 * 32 * 4, 128u);
-    auto r = resizer.Resize(src.data(), 32, 32, 16, 16);
-    ASSERT(r.success);
-    ASSERT(r.width == 16 && r.height == 16);
-}
 
 // SemanticHashEngine — 9 tests
-TEST(TestSemanticHashEngine_DefaultAlgo) {
-    using namespace ExplorerLens::AI;
-    SemanticHashEngine engine;
-    ASSERT(engine.GetAlgorithm() == SemanticHashAlgorithm::CNN_MobileNetV3);
-    ASSERT(engine.GetL2Normalize());
-    ASSERT(engine.GetEmbeddingDim() == 512);
-}
-TEST(TestSemanticHashEngine_SetAlgoEfficientNetB0) {
-    using namespace ExplorerLens::AI;
-    SemanticHashEngine engine;
-    engine.SetAlgorithm(SemanticHashAlgorithm::CNN_EfficientNetB0);
-    ASSERT(engine.GetAlgorithm() == SemanticHashAlgorithm::CNN_EfficientNetB0);
-}
-TEST(TestSemanticHashEngine_SetAlgoCLIP) {
-    using namespace ExplorerLens::AI;
-    SemanticHashEngine engine;
-    engine.SetAlgorithm(SemanticHashAlgorithm::CLIP_ViT_B32);
-    ASSERT(engine.GetAlgorithm() == SemanticHashAlgorithm::CLIP_ViT_B32);
-}
-TEST(TestSemanticHashEngine_HammingIdentical) {
-    using namespace ExplorerLens::AI;
-    SemanticHash512 h = {};
-    ASSERT(SemanticHashEngine::HammingDistance(h, h) == 0.0f);
-    ASSERT(SemanticHashEngine::AreDuplicate(h, h));
-}
-TEST(TestSemanticHashEngine_HammingNonZero) {
-    using namespace ExplorerLens::AI;
-    SemanticHash512 a = {}, b = {};
-    b[0] = 0xFFFFFFFFFFFFFFFFull;
-    ASSERT(SemanticHashEngine::HammingDistance(a, b) == 64.0f);
-}
-TEST(TestSemanticHashEngine_AreDuplicateFalse) {
-    using namespace ExplorerLens::AI;
-    SemanticHash512 a = {}, b = {};
-    b[0] = 0xFFFFFFFFFFFFFFFFull;
-    ASSERT(!SemanticHashEngine::AreDuplicate(a, b));
-}
-TEST(TestSemanticHashEngine_HashBitsConstant) {
-    ASSERT(ExplorerLens::AI::SemanticHashEngine::HASH_BITS == 512);
-    ASSERT(ExplorerLens::AI::SemanticHashEngine::DUPLICATE_THRESH == 32.0f);
-}
-TEST(TestSemanticHashEngine_HashValidPixels) {
-    using namespace ExplorerLens::AI;
-    SemanticHashEngine engine;
-    std::vector<uint8_t> px(16 * 16 * 4, 200u);
-    auto r = engine.Hash(px.data(), 16, 16);
-    ASSERT(r.success);
-    ASSERT(r.confidence >= 0.0f);
-}
-TEST(TestSemanticHashEngine_HashFileEmpty) {
-    using namespace ExplorerLens::AI;
-    SemanticHashEngine engine;
-    auto r = engine.HashFile("");
-    ASSERT(!r.success);
-}
 
 // AutoTaggingEngine — 9 tests
-TEST(TestAutoTaggingEngine_TaxonomyInit) {
-    using namespace ExplorerLens::AI;
-    AutoTaggingEngine engine;
-    ASSERT(!engine.IsTaxonomyLoaded());
-    ASSERT(engine.GetTaxonomySize() == 0);
-    ASSERT(engine.GetMaxTags() == 10);
-    ASSERT(engine.GetMultiLabel());
-}
-TEST(TestAutoTaggingEngine_LoadTaxonomyEmpty) {
-    using namespace ExplorerLens::AI;
-    AutoTaggingEngine engine;
-    ASSERT(!engine.LoadTaxonomy(""));
-    ASSERT(!engine.IsTaxonomyLoaded());
-}
-TEST(TestAutoTaggingEngine_LoadTaxonomyPath) {
-    using namespace ExplorerLens::AI;
-    AutoTaggingEngine engine;
-    ASSERT(engine.LoadTaxonomy("imagenet1k.json"));
-    ASSERT(engine.IsTaxonomyLoaded());
-    ASSERT(engine.GetTaxonomySize() > 0);
-}
-TEST(TestAutoTaggingEngine_MaxSupportedTags) {
-    ASSERT(ExplorerLens::AI::AutoTaggingEngine::MAX_SUPPORTED_TAGS == 100);
-}
-TEST(TestAutoTaggingEngine_MinValidConfidence) {
-    ASSERT(ExplorerLens::AI::AutoTaggingEngine::MIN_VALID_CONFIDENCE == 0.10f);
-}
-TEST(TestAutoTaggingEngine_SetMaxTags) {
-    using namespace ExplorerLens::AI;
-    AutoTaggingEngine engine;
-    engine.SetMaxTags(5);
-    ASSERT(engine.GetMaxTags() == 5);
-}
-TEST(TestAutoTaggingEngine_SetMinConfidence) {
-    using namespace ExplorerLens::AI;
-    AutoTaggingEngine engine;
-    engine.SetMinConfidence(0.5f);
-    ASSERT(engine.GetMinConfidence() == 0.5f);
-}
-TEST(TestAutoTaggingEngine_TagNullPixels) {
-    using namespace ExplorerLens::AI;
-    AutoTaggingEngine engine;
-    auto r = engine.Tag(nullptr, 0, 0);
-    ASSERT(!r.success);
-}
-TEST(TestAutoTaggingEngine_TagNoTaxonomy) {
-    using namespace ExplorerLens::AI;
-    AutoTaggingEngine engine;
-    std::vector<uint8_t> px(16 * 16 * 4, 128u);
-    auto r = engine.Tag(px.data(), 16, 16);
-    ASSERT(!r.success);
-    ASSERT(!r.error.empty());
-}
 
 // QualityRestorationEngine — 9 tests
-TEST(TestQualityRestorationEngine_DefaultMode) {
-    using namespace ExplorerLens::AI;
-    QualityRestorationEngine engine;
-    ASSERT(engine.GetMode() == RestorationMode::Denoise);
-    ASSERT(engine.GetStrength() == 0.5f);
-    ASSERT(engine.GetPreserveEdges());
-    ASSERT(engine.GetIterations() == 1);
-}
-TEST(TestQualityRestorationEngine_SetModeDeblur) {
-    using namespace ExplorerLens::AI;
-    QualityRestorationEngine engine;
-    engine.SetMode(RestorationMode::Deblur);
-    ASSERT(engine.GetMode() == RestorationMode::Deblur);
-}
-TEST(TestQualityRestorationEngine_SetModeCombined) {
-    using namespace ExplorerLens::AI;
-    QualityRestorationEngine engine;
-    engine.SetMode(RestorationMode::Combined);
-    ASSERT(engine.GetMode() == RestorationMode::Combined);
-}
-TEST(TestQualityRestorationEngine_SetModeJPEGArtifact) {
-    using namespace ExplorerLens::AI;
-    QualityRestorationEngine engine;
-    engine.SetMode(RestorationMode::JPEG_Artifact);
-    ASSERT(engine.GetMode() == RestorationMode::JPEG_Artifact);
-}
-TEST(TestQualityRestorationEngine_RestoreNull) {
-    using namespace ExplorerLens::AI;
-    QualityRestorationEngine engine;
-    auto r = engine.Restore(nullptr, 0, 0);
-    ASSERT(!r.success);
-}
-TEST(TestQualityRestorationEngine_RestoreValidPixels) {
-    using namespace ExplorerLens::AI;
-    QualityRestorationEngine engine;
-    std::vector<uint8_t> px(8 * 8 * 4, 100u);
-    auto r = engine.Restore(px.data(), 8, 8);
-    ASSERT(r.success);
-    ASSERT(r.width == 8 && r.height == 8);
-    ASSERT(r.pixels.size() == static_cast<size_t>(8 * 8 * 4));
-}
-TEST(TestQualityRestorationEngine_EstimateNoiseLevelNull) {
-    ASSERT(ExplorerLens::AI::QualityRestorationEngine::EstimateNoiseLevel(nullptr, 0, 0) == 0.0f);
-}
-TEST(TestQualityRestorationEngine_EstimateBlurLevelNull) {
-    ASSERT(ExplorerLens::AI::QualityRestorationEngine::EstimateBlurLevel(nullptr, 0, 0) == 0.0f);
-}
-TEST(TestQualityRestorationEngine_Constants) {
-    ASSERT(ExplorerLens::AI::QualityRestorationEngine::MAX_NOISE_LEVEL == 1.0f);
-    ASSERT(ExplorerLens::AI::QualityRestorationEngine::MAX_ITERATIONS == 10);
-}
 
 // SceneDepthEstimatorV2 — 9 tests
-TEST(TestSceneDepthEstimatorV2_DefaultModel) {
-    using namespace ExplorerLens::AI;
-    SceneDepthEstimatorV2 est;
-    ASSERT(est.GetModel() == DepthModel::MiDaS_Small);
-    ASSERT(est.GetOutputType() == DepthOutputType::Relative);
-    ASSERT(est.GetInputSize() == 384);
-}
-TEST(TestSceneDepthEstimatorV2_SetModelLarge) {
-    using namespace ExplorerLens::AI;
-    SceneDepthEstimatorV2 est;
-    est.SetModel(DepthModel::MiDaS_Large);
-    ASSERT(est.GetModel() == DepthModel::MiDaS_Large);
-}
-TEST(TestSceneDepthEstimatorV2_SetModelDPT) {
-    using namespace ExplorerLens::AI;
-    SceneDepthEstimatorV2 est;
-    est.SetModel(DepthModel::DPT_Hybrid);
-    ASSERT(est.GetModel() == DepthModel::DPT_Hybrid);
-}
-TEST(TestSceneDepthEstimatorV2_SetModelZoeDepth) {
-    using namespace ExplorerLens::AI;
-    SceneDepthEstimatorV2 est;
-    est.SetModel(DepthModel::ZoeDepth);
-    ASSERT(est.GetModel() == DepthModel::ZoeDepth);
-}
-TEST(TestSceneDepthEstimatorV2_SetOutputTypeMetric) {
-    using namespace ExplorerLens::AI;
-    SceneDepthEstimatorV2 est;
-    est.SetOutputType(DepthOutputType::Metric);
-    ASSERT(est.GetOutputType() == DepthOutputType::Metric);
-}
-TEST(TestSceneDepthEstimatorV2_Constants) {
-    ASSERT(ExplorerLens::AI::SceneDepthEstimatorV2::DEFAULT_INPUT_SIZE == 384);
-    ASSERT(ExplorerLens::AI::SceneDepthEstimatorV2::DEPTH_SCALE == 1000.0f);
-}
-TEST(TestSceneDepthEstimatorV2_EstimateNull) {
-    using namespace ExplorerLens::AI;
-    SceneDepthEstimatorV2 est;
-    auto r = est.Estimate(nullptr, 0, 0);
-    ASSERT(!r.success);
-}
-TEST(TestSceneDepthEstimatorV2_EstimateValid) {
-    using namespace ExplorerLens::AI;
-    SceneDepthEstimatorV2 est;
-    std::vector<uint8_t> px(16 * 16 * 4, 128u);
-    auto r = est.Estimate(px.data(), 16, 16);
-    ASSERT(r.success);
-    ASSERT(r.map.width == 16 && r.map.height == 16);
-    ASSERT(!r.map.values.empty());
-}
-TEST(TestSceneDepthEstimatorV2_RenderDepthMapEmpty) {
-    using namespace ExplorerLens::AI;
-    SceneDepthEstimatorV2 est;
-    DepthMap empty;
-    auto rgba = est.RenderDepthMap(empty);
-    ASSERT(rgba.empty());
-}
 
 // StyleTransferEngine — 9 tests
-TEST(TestStyleTransferEngine_DefaultStyle) {
-    using namespace ExplorerLens::AI;
-    StyleTransferEngine engine;
-    ASSERT(engine.GetStyle() == BuiltinStyle::Mosaic);
-    ASSERT(engine.GetStrength() == 1.0f);
-    ASSERT(engine.GetMaxDim() == 1024);
-    ASSERT(engine.GetPreserveSize());
-    ASSERT(!engine.IsCustomLoaded());
-}
-TEST(TestStyleTransferEngine_SetStyleCandy) {
-    using namespace ExplorerLens::AI;
-    StyleTransferEngine engine;
-    engine.SetStyle(BuiltinStyle::Candy);
-    ASSERT(engine.GetStyle() == BuiltinStyle::Candy);
-}
-TEST(TestStyleTransferEngine_SetStyleUdnie) {
-    using namespace ExplorerLens::AI;
-    StyleTransferEngine engine;
-    engine.SetStyle(BuiltinStyle::Udnie);
-    ASSERT(engine.GetStyle() == BuiltinStyle::Udnie);
-}
-TEST(TestStyleTransferEngine_SetStyleRainPrincess) {
-    using namespace ExplorerLens::AI;
-    StyleTransferEngine engine;
-    engine.SetStyle(BuiltinStyle::RainPrincess);
-    ASSERT(engine.GetStyle() == BuiltinStyle::RainPrincess);
-}
-TEST(TestStyleTransferEngine_SetStyleStarryNight) {
-    using namespace ExplorerLens::AI;
-    StyleTransferEngine engine;
-    engine.SetStyle(BuiltinStyle::StarryNight);
-    ASSERT(engine.GetStyle() == BuiltinStyle::StarryNight);
-}
-TEST(TestStyleTransferEngine_Constants) {
-    ASSERT(ExplorerLens::AI::StyleTransferEngine::MAX_TRANSFER_DIM == 1024);
-}
-TEST(TestStyleTransferEngine_SetStrengthClamped) {
-    using namespace ExplorerLens::AI;
-    StyleTransferEngine engine;
-    engine.SetStrength(2.0f);
-    ASSERT(engine.GetStrength() == 1.0f);
-    engine.SetStrength(-1.0f);
-    ASSERT(engine.GetStrength() == 0.0f);
-}
-TEST(TestStyleTransferEngine_TransferNull) {
-    using namespace ExplorerLens::AI;
-    StyleTransferEngine engine;
-    auto r = engine.Transfer(nullptr, 0, 0);
-    ASSERT(!r.success);
-}
-TEST(TestStyleTransferEngine_LoadCustomStyle) {
-    using namespace ExplorerLens::AI;
-    StyleTransferEngine engine;
-    ASSERT(!engine.LoadCustomStyle(""));
-    ASSERT(!engine.IsCustomLoaded());
-    ASSERT(engine.LoadCustomStyle("my_style.onnx"));
-    ASSERT(engine.IsCustomLoaded());
-    ASSERT(engine.GetStyle() == BuiltinStyle::Custom);
-}
 
 // LandmarkDetectionEngine — 9 tests
-TEST(TestLandmarkDetectionEngine_Defaults) {
-    using namespace ExplorerLens::AI;
-    LandmarkDetectionEngine engine;
-    ASSERT(engine.GetMaxFaces() == 10);
-    ASSERT(engine.GetMinFaceScore() == 0.75f);
-    ASSERT(engine.GetDetectLandmarks());
-    ASSERT(!engine.GetEstimatePose());
-}
-TEST(TestLandmarkDetectionEngine_Constants) {
-    ASSERT(ExplorerLens::AI::LandmarkDetectionEngine::BLAZEFACE_INPUT == 128);
-    ASSERT(ExplorerLens::AI::LandmarkDetectionEngine::MIN_FACE_SIZE_FRAC == 0.04f);
-    ASSERT(ExplorerLens::AI::LandmarkDetectionEngine::MIN_FACE_SCORE == 0.75f);
-}
-TEST(TestLandmarkDetectionEngine_SetMaxFaces) {
-    using namespace ExplorerLens::AI;
-    LandmarkDetectionEngine engine;
-    engine.SetMaxFaces(1);
-    ASSERT(engine.GetMaxFaces() == 1);
-}
-TEST(TestLandmarkDetectionEngine_SetMinFaceScore) {
-    using namespace ExplorerLens::AI;
-    LandmarkDetectionEngine engine;
-    engine.SetMinFaceScore(0.5f);
-    ASSERT(engine.GetMinFaceScore() == 0.5f);
-}
-TEST(TestLandmarkDetectionEngine_DetectNull) {
-    using namespace ExplorerLens::AI;
-    LandmarkDetectionEngine engine;
-    auto r = engine.Detect(nullptr, 0, 0);
-    ASSERT(!r.success);
-}
-TEST(TestLandmarkDetectionEngine_DetectValidPixels) {
-    using namespace ExplorerLens::AI;
-    LandmarkDetectionEngine engine;
-    std::vector<uint8_t> px(64 * 64 * 4, 180u);
-    auto r = engine.Detect(px.data(), 64, 64);
-    ASSERT(r.success);
-    ASSERT(r.faces.empty());
-}
-TEST(TestLandmarkDetectionEngine_GetOptimalCropBoxEmpty) {
-    using namespace ExplorerLens::AI;
-    LandmarkDetectionEngine engine;
-    LandmarkDetectResult empty{ false, {}, {} };
-    auto box = engine.GetOptimalCropBox(empty, 640, 480);
-    ASSERT(box.width == 0 && box.height == 0);
-}
-TEST(TestLandmarkDetectionEngine_GetOptimalCropBoxWithFace) {
-    using namespace ExplorerLens::AI;
-    LandmarkDetectionEngine engine;
-    FaceLandmarks fl;
-    fl.bounds = { 100, 100, 200, 200, 0.9f };
-    LandmarkDetectResult res{ true, { fl }, {} };
-    auto box = engine.GetOptimalCropBox(res, 640, 480);
-    ASSERT(box.width > 0 && box.height > 0);
-    ASSERT(box.score == 0.9f);
-}
-TEST(TestLandmarkDetectionEngine_DetectFileEmpty) {
-    using namespace ExplorerLens::AI;
-    LandmarkDetectionEngine engine;
-    auto r = engine.DetectFile("");
-    ASSERT(!r.success);
-}
 
 //==============================================================================
 // Sprint 491-500 — Cross-Process Architecture (v24.1.0 "Altair-R")
@@ -12778,37 +12227,8 @@ TEST(TestGateV33_Codename) {
 // Plugin Consolidation Tests
 //==============================================================================
 
-TEST(TestPluginMarketplaceUnified_VersionEnum) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(RecommendedMarketplaceVersion() == MarketplaceVersion::V2);
-    ASSERT(ActiveMarketplaceVersionCount() == 2);
-    ASSERT(static_cast<uint32_t>(MarketplaceVersion::V2) == 2);
-    ASSERT(static_cast<uint32_t>(MarketplaceVersion::V3) == 3);
-}
 
-TEST(TestPluginMarketplaceUnified_V2Search) {
-    using namespace ExplorerLens::Engine;
-    PluginMarketplaceV2 marketplace;
-    PluginListing listing;
-    listing.id = L"test-plugin";
-    listing.name = L"Test Plugin";
-    listing.description = L"A test plugin";
-    listing.author = L"Author";
-    listing.version = PluginSemVer::Parse(L"1.0.0");
-    listing.category = PluginCategory::Decoder;
-    marketplace.AddToCatalog(listing);
-    MarketplaceFilter filter;
-    filter.query = L"test";
-    auto results = marketplace.Search(filter);
-    ASSERT(results.totalCount > 0);
-}
 
-TEST(TestPluginMarketplaceUnified_V3Categories) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(PluginMarketplaceV3::CategoryCount() == static_cast<uint32_t>(PluginCategoryV3::COUNT));
-    auto name = PluginMarketplaceV3::CategoryName(PluginCategoryV3::ImageDecoder);
-    ASSERT(name != nullptr && wcslen(name) > 0);
-}
 
 TEST(TestPluginSecurity_LevelEnum) {
     using namespace ExplorerLens::Plugin;
@@ -20943,25 +20363,7 @@ TEST(Test_MemoryPressure_Detection) {
 
 //== Plugin Subsystem Tests ==
 
-TEST(Test_PluginTrustChain_ValidateSelf) {
-    TrustChainValidatorV2 validator;
-    // Validate a non-existent file — should return Untrusted
-    ExplorerLens::Engine::TrustLevel level = validator.ValidateSignature(
-        L"C:\\nonexistent\\fake_plugin.dll");
-    ASSERT(level == ExplorerLens::Engine::TrustLevel::Untrusted);
-}
 
-TEST(Test_PluginHotReload_VersionBump) {
-    PluginHotReloadManager mgr;
-    auto stats = mgr.GetStats();
-    ASSERT(stats.filesWatched == 0);
-    ASSERT(stats.reloadsTriggered == 0);
-    // Register a non-existent DLL — hash will be empty, no crash
-    mgr.RegisterPluginHash(L"C:\\nonexistent\\plugin.dll");
-    stats = mgr.GetStats();
-    // File doesn't exist so hash fails — filesWatched stays 0
-    ASSERT(stats.filesWatched == 0);
-}
 
 TEST(Test_PluginSandbox_Restrict) {
     auto strict = ExplorerLens::Plugin::SandboxPolicySpec::Strict();
@@ -21712,38 +21114,8 @@ TEST(Test_S62_DeploymentHealthChecker_RunAll) {
 
 // ===== Sprint 63-64: Plugin Ecosystem Tests =====
 
-TEST(Test_S63_PluginSandboxEnforcer_CheckAccess) {
-    using namespace ExplorerLens::Engine;
-    PluginSandboxEnforcer sandbox;
-    EnforcerSandboxPolicy policy;
-    policy.allowFileWrite = false;
-    policy.allowNetwork = false;
-    sandbox.SetPolicy(policy);
-    ASSERT(!sandbox.IsAllowed(SandboxRestriction::FileSystemWrite));
-    ASSERT(!sandbox.IsAllowed(SandboxRestriction::NetworkAccess));
-    ASSERT(sandbox.IsAllowed(SandboxRestriction::FileSystemRead));
-}
 
-TEST(Test_S63_PluginPerformanceMonitor_Grade) {
-    using namespace ExplorerLens::Engine;
-    PluginPerformanceMonitor monitor;
-    PluginPerfSnapshot snap;
-    snap.avgLatencyMs = 10.0;
-    snap.errorRate = 0.001f;
-    auto grade = monitor.Grade(snap);
-    ASSERT(grade == PluginPerfGrade::Excellent);
-}
 
-TEST(Test_S64_PluginHotReloader_Reload) {
-    using namespace ExplorerLens::Engine;
-    PluginHotReloader reloader;
-    ReloadConfig cfg;
-    cfg.enabled = true;
-    reloader.Configure(cfg);
-    auto evt = reloader.TriggerReload(L"TestPlugin.dll", ReloadTrigger::Manual);
-    ASSERT(evt.success);
-    ASSERT(reloader.GetStats().successfulReloads == 1);
-}
 
 // ===== Sprint 65-66: Quality & Observability Tests =====
 
@@ -24905,24 +24277,6 @@ TEST(Test_EP_ONNXModelLoader_Validate) {
 TEST(Test_EP_ONNXModelLoader_Props) {
     ASSERT(ONNXModelLoader::Instance().Validate());
 }
-TEST(Test_EP_NeuralUpscaleV2_Validate) {
-    ASSERT(NeuralUpscaleV2::Instance().Validate());
-}
-TEST(Test_EP_NeuralUpscaleV2_Props) {
-    ASSERT(NeuralUpscaleV2::Instance().Validate());
-}
-TEST(Test_EP_SemanticTagGenerator_Validate) {
-    ASSERT(SemanticTagGenerator::Instance().Validate());
-}
-TEST(Test_EP_SemanticTagGenerator_Props) {
-    ASSERT(SemanticTagGenerator::Instance().Validate());
-}
-TEST(Test_EP_VisualSimilarityEngine_Validate) {
-    ASSERT(VisualSimilarityEngine::Instance().Validate());
-}
-TEST(Test_EP_VisualSimilarityEngine_Props) {
-    ASSERT(VisualSimilarityEngine::Instance().Validate());
-}
 TEST(Test_EP_DPIScalingManager_Validate) {
     ASSERT(DPIScalingManager::Instance().Validate());
 }
@@ -24952,30 +24306,6 @@ TEST(Test_EP_LivePerformanceTracker_Validate) {
 }
 TEST(Test_EP_LivePerformanceTracker_Props) {
     ASSERT(LivePerformanceTracker::Instance().Validate());
-}
-TEST(Test_EP_PluginDependencyGraph_Validate) {
-    ASSERT(PluginDependencyGraph::Instance().Validate());
-}
-TEST(Test_EP_PluginDependencyGraph_Props) {
-    ASSERT(PluginDependencyGraph::Instance().Validate());
-}
-TEST(Test_EP_PluginAPIVersionNegotiator_Validate) {
-    ASSERT(PluginAPIVersionNegotiator::Instance().Validate());
-}
-TEST(Test_EP_PluginAPIVersionNegotiator_Props) {
-    ASSERT(PluginAPIVersionNegotiator::Instance().Validate());
-}
-TEST(Test_EP_PluginResourceQuotaManager_Validate) {
-    ASSERT(PluginResourceQuotaManager::Instance().Validate());
-}
-TEST(Test_EP_PluginResourceQuotaManager_Props) {
-    ASSERT(PluginResourceQuotaManager::Instance().Validate());
-}
-TEST(Test_EP_PluginDiagnosticsExporter_Validate) {
-    ASSERT(PluginDiagnosticsExporter::Instance().Validate());
-}
-TEST(Test_EP_PluginDiagnosticsExporter_Props) {
-    ASSERT(PluginDiagnosticsExporter::Instance().Validate());
 }
 TEST(Test_EP_JPEG2000DecoderV2_Validate) {
     ASSERT(JPEG2000DecoderV2::Instance().Validate());
@@ -25517,15 +24847,6 @@ TEST(Test_S395_ThreadLocalPoolAllocator) {
 
 // --- AI Tests ---
 
-TEST(Test_S395_ThumbnailSaliencyMap) {
-    ThumbnailSaliencyMap saliency;
-    std::vector<uint8_t> rgba(64 * 64 * 4, 128);
-    // Set some pixels different to create contrast
-    for (int i = 0; i < 64 * 4; ++i) rgba[i] = 255;
-    auto result = saliency.AnalyzeFromPixels(rgba.data(), 64, 64);
-    ASSERT(result.valid);
-    ASSERT(result.totalCells > 0);
-}
 
 TEST(Test_S395_AdaptiveCropEngine) {
     AdaptiveCropEngine crop;
@@ -25537,22 +24858,7 @@ TEST(Test_S395_AdaptiveCropEngine) {
     ASSERT(result.rect.height > 0);
 }
 
-TEST(Test_S395_ColorPaletteGenerator) {
-    ColorPaletteGenerator gen;
-    std::vector<uint8_t> rgba(32 * 32 * 4, 200);
-    auto palette = gen.Generate(rgba.data(), 32, 32);
-    ASSERT(palette.valid);
-}
 
-TEST(Test_S395_ImageSimilarityMatcher) {
-    ImageSimilarityMatcher matcher;
-    std::vector<uint8_t> img(16 * 16 * 4, 128);
-    auto hash1 = matcher.ComputeHash(img.data(), 16, 16);
-    auto hash2 = matcher.ComputeHash(img.data(), 16, 16);
-    ASSERT(hash1.valid && hash2.valid);
-    auto result = matcher.Compare(hash1, hash2);
-    ASSERT(result.similarity >= 0.9);
-}
 
 TEST(Test_S395_FileTypePredictor) {
     FileTypePredictor predictor;
@@ -25565,30 +24871,8 @@ TEST(Test_S395_FileTypePredictor) {
 
 // --- Plugin Tests ---
 
-TEST(Test_S395_PluginUpdateChecker) {
-    PluginUpdateChecker checker;
-    PluginVersion v1{ 1, 0, 0 }, v2{ 2, 0, 0 }, minV{ 1, 0, 0 };
-    auto status = checker.CheckVersion(v1, v2, minV);
-    ASSERT(status == PluginUpdateStatus::UpdateAvailable);
-    auto upToDate = checker.CheckVersion(v2, v2, minV);
-    ASSERT(upToDate == PluginUpdateStatus::UpToDate);
-}
 
-TEST(Test_S395_PluginConfigMigrator) {
-    PluginConfigMigrator migrator;
-    ASSERT(!migrator.CanMigrate(1, 3));
-    migrator.RegisterRule({ 1, 2, "v1->v2", nullptr });
-    migrator.RegisterRule({ 2, 3, "v2->v3", nullptr });
-    ASSERT(migrator.CanMigrate(1, 3));
-}
 
-TEST(Test_S395_PluginMetricsExporter) {
-    PluginMetricsExporter exporter;
-    exporter.RecordDecode("test-plugin", 5.0, true);
-    auto summary = exporter.GetSummary("test-plugin");
-    ASSERT(summary.totalDecodes == 1);
-    ASSERT(summary.errorRate == 0.0);
-}
 
 // --- Utils Tests ---
 
@@ -26135,79 +25419,11 @@ TEST(Test_S396_WorkingSetOptimizer) {
     ASSERT(metrics.peakWorkingSetMB > 100.0);
 }
 
-TEST(Test_S396_AutoWhiteBalanceCorrector) {
-    AutoWhiteBalanceCorrector corrector(WhiteBalanceAlgorithm::GrayWorld);
-    ASSERT(corrector.GetAlgorithm() == WhiteBalanceAlgorithm::GrayWorld);
-    std::vector<uint8_t> rgb(12, 128);
-    auto result = corrector.Analyze(rgb.data(), 2, 2);
-    ASSERT(result.correctionApplied);
-    ASSERT(result.confidenceScore > 0.0f);
-    ASSERT(corrector.GetTotalCorrected() == 1);
-    auto noData = corrector.Analyze(nullptr, 0, 0);
-    ASSERT(!noData.correctionApplied);
-}
 
-TEST(Test_S396_DocumentLayoutClassifier) {
-    DocumentLayoutClassifier classifier;
-    std::vector<uint8_t> pixels(100 * 100, 200);
-    auto result = classifier.Classify(pixels.data(), 100, 100);
-    ASSERT(result.primaryLayout != DocumentLayout::Unknown);
-    auto null_result = classifier.Classify(nullptr, 0, 0);
-    ASSERT(null_result.primaryLayout == DocumentLayout::Unknown);
-}
 
-TEST(Test_S396_ThumbnailComplexityRouter) {
-    ThumbnailComplexityRouter router;
-    auto trivial = router.EstimateComplexity(1024, 100, 100, 8);
-    ASSERT(trivial.tier == ComplexityTier::Trivial);
-    auto complex = router.EstimateComplexity(50 * 1024 * 1024ULL, 20000, 15000, 16);
-    ASSERT(complex.tier >= ComplexityTier::Complex);
-    auto routing = router.Route(complex);
-    ASSERT(routing.selectedTier != DecodeTier::FastPath);
-}
 
-TEST(Test_S396_VisualQualityPredictor) {
-    VisualQualityPredictor predictor;
-    auto jpgPred = predictor.Predict(".jpg", 100000, 1920, 1080);
-    ASSERT(jpgPred.confidenceScore > 0.0f);
-    ASSERT(jpgPred.estimatedSSIM > 0.0f);
-    auto unknownPred = predictor.Predict(".xyz", 1024, 64, 64);
-    ASSERT(unknownPred.confidenceScore < jpgPred.confidenceScore);
-    auto hugePred = predictor.Predict(".tif", 500000000, 30000, 20000);
-    ASSERT(hugePred.suggestedThumbnailSize >= 256);
-}
 
-TEST(Test_S396_SmartThumbnailRanker) {
-    SmartThumbnailRanker ranker;
-    ThumbnailCandidate c1;
-    c1.sharpnessScore = 0.9f;
-    c1.colorfulnessScore = 0.7f;
-    c1.contrastScore = 0.8f;
-    c1.compositionScore = 0.6f;
-    ranker.AddCandidate(c1);
-    ThumbnailCandidate c2;
-    c2.sharpnessScore = 0.3f;
-    c2.colorfulnessScore = 0.2f;
-    c2.contrastScore = 0.4f;
-    c2.compositionScore = 0.1f;
-    ranker.AddCandidate(c2);
-    auto best = ranker.GetBestCandidate();
-    ASSERT(best != nullptr);
-    ASSERT(best->overallScore > c2.overallScore || best->sharpnessScore >= c2.sharpnessScore);
-    ASSERT(ranker.GetCandidateCount() == 2);
-}
 
-TEST(Test_S396_PluginRateLimiter) {
-    PluginRateLimiter limiter;
-    limiter.ConfigurePlugin("plugin_a", 10, 3);
-    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Allowed);
-    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Allowed);
-    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Allowed);
-    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Throttled);
-    limiter.RefillTokens("plugin_a");
-    ASSERT(limiter.CheckLimit("plugin_a") == RateLimitResult::Allowed);
-    ASSERT(limiter.CheckLimit("unknown_plugin") == RateLimitResult::Allowed);
-}
 
 TEST(Test_S396_PluginStatePersistence) {
     PluginStatePersistence persistence;
@@ -26219,17 +25435,6 @@ TEST(Test_S396_PluginStatePersistence) {
     ASSERT(persistence.GetState("noPlugin", "key", "none") == "none");
 }
 
-TEST(Test_S396_PluginIsolationMonitor) {
-    PluginIsolationMonitor monitor;
-    monitor.RegisterPlugin("decoder_plugin");
-    monitor.UpdateStatus("decoder_plugin", 50 * 1024 * 1024, 5.0f, 20);
-    auto status = monitor.GetStatus("decoder_plugin");
-    ASSERT(status.state == QuarantineState::Active);
-    ASSERT(status.memoryUsageBytes == 50 * 1024 * 1024);
-    monitor.UpdateStatus("decoder_plugin", 300 * 1024 * 1024, 30.0f, 500);
-    auto metrics = monitor.GetMetrics();
-    ASSERT(metrics.totalViolations > 0 || metrics.activePlugins == 1);
-}
 
 TEST(Test_S396_ClipboardImageDecoder) {
     ClipboardImageDecoder decoder;
@@ -26372,7 +25577,6 @@ TEST(Test_S397_BulkInitialization) {
     AssertInitPattern<OpenJPEGStreamDecoder>("OpenJPEGStreamDecoder");
     AssertInitPattern<MemoryMappedBitmapReader>("MemoryMappedBitmapReader");
     // Plugin
-    AssertInitPattern<PluginProcessWatchdog>("PluginProcessWatchdog");
     AssertInitPattern<PluginHealthReporter>("PluginHealthReporter");
 }
 
@@ -26423,7 +25627,6 @@ TEST(Test_S398_BulkInitialization) {
     AssertInitPattern<PluginEventBus>("PluginEventBus");
     AssertInitPattern<PluginSchemaValidator>("PluginSchemaValidator");
     AssertInitPattern<PluginFeatureToggle>("PluginFeatureToggle");
-    AssertInitPattern<PluginSandboxMonitor>("PluginSandboxMonitor");
     // Utils
     AssertInitPattern<StartupTimingProfiler>("StartupTimingProfiler");
     AssertInitPattern<FeatureFlagRegistry>("FeatureFlagRegistry");
@@ -26465,7 +25668,6 @@ TEST(Test_S399_BulkInitialization) {
     AssertInitPattern<SidecarMetadataDecoder>("SidecarMetadataDecoder");
     AssertInitPattern<ContainerPreviewDecoder>("ContainerPreviewDecoder");
     // AI
-    AssertInitPattern<AutoOrientationCorrector>("AutoOrientationCorrector");
 }
 
 // ============================================================================
@@ -26515,74 +25717,12 @@ TEST(Test_S399_ComputeDispatchOptimizer) {
     ASSERT(d.x > 0 && d.y > 0);
 }
 
-TEST(Test_S399_SmartCropPredictor) {
-    SmartCropPredictor s;
-    ASSERT(s.Initialize());
-    ASSERT(s.IsInitialized());
-    ASSERT(s.GetName() == "SmartCropPredictor");
-    auto crop = s.PredictCrop(1920, 1080, 256, 256);
-    ASSERT(crop.width > 0 && crop.height > 0);
-}
 
-TEST(Test_S399_ThumbnailQualityScorer) {
-    ThumbnailQualityScorer t;
-    ASSERT(t.Initialize());
-    ASSERT(t.IsInitialized());
-    ASSERT(t.GetName() == "ThumbnailQualityScorer");
-    auto score = t.Score(256, 256, 0.5f, 0.3f);
-    ASSERT(score.overall > 0.0f);
-    ASSERT(t.IsAcceptable(score));
-}
 
-TEST(Test_S399_ContentClassifier) {
-    ContentClassifier c;
-    ASSERT(c.Initialize());
-    ASSERT(c.IsInitialized());
-    ASSERT(c.GetName() == "ContentClassifier");
-    auto cat = c.Classify(1920, 1080, 0.5f, 0.1f);
-    ASSERT(cat == ContentClassifier::Category::Landscape);
-}
 
-TEST(Test_S399_DuplicateImageDetector) {
-    DuplicateImageDetector d;
-    ASSERT(d.Initialize());
-    ASSERT(d.IsInitialized());
-    ASSERT(d.GetName() == "DuplicateImageDetector");
-    ASSERT(d.IsExactMatch(0xDEADBEEF, 0xDEADBEEF));
-    ASSERT(!d.IsExactMatch(0xDEADBEEF, 0xCAFEBABE));
-    ASSERT(d.HammingDistance(0, 0) == 0);
-}
 
-TEST(Test_S399_PluginCapabilityNegotiator) {
-    PluginCapabilityNegotiator p;
-    ASSERT(p.Initialize());
-    ASSERT(p.IsInitialized());
-    ASSERT(p.GetName() == "PluginCapabilityNegotiator");
-    ASSERT(p.IsAbiCompatible(2));
-    auto r = p.Negotiate(2, true, false);
-    ASSERT(r.compatible);
-    ASSERT(r.agreedAbiVersion == 2);
-}
 
-TEST(Test_S399_PluginStateCoordinator) {
-    PluginStateCoordinator p;
-    ASSERT(p.Initialize());
-    ASSERT(p.IsInitialized());
-    ASSERT(p.GetName() == "PluginStateCoordinator");
-    ASSERT(p.Activate("test-plugin"));
-    ASSERT(p.GetActiveCount() == 1);
-    ASSERT(p.Deactivate("test-plugin"));
-    ASSERT(p.GetActiveCount() == 0);
-}
 
-TEST(Test_S399_PluginCommunicationBridge) {
-    PluginCommunicationBridge p;
-    ASSERT(p.Initialize());
-    ASSERT(p.IsInitialized());
-    ASSERT(p.GetName() == "PluginCommunicationBridge");
-    ASSERT(p.Broadcast("sender", "topic", 42));
-    ASSERT(p.GetMessagesSent() == 1);
-}
 
 TEST(Test_S399_DiagnosticBundleCollector) {
     DiagnosticBundleCollector d;
@@ -26886,14 +26026,6 @@ TEST(Test_SIMD_PremultiplyAlpha) {
 #include "../../src/Tools.CLI/DoctorCommand.h"
 // Sprint 801-810 — Platform
 // Sprint 811-820 — AI Captions
-#include "../AI/VLMEmbeddingEngine.h"
-#include "../AI/CaptionGenerationPipeline.h"
-#include "../AI/OnDeviceCaptionInferer.h"
-#include "../AI/CaptionStyleTransferEngine.h"
-#include "../AI/AltTextGeneratorV2.h"
-#include "../AI/BatchCaptionPipeline.h"
-#include "../AI/IncrementalCaptionUpdater.h"
-#include "../AI/CaptionSearchIndexer.h"
 // Sprint 821-830 — AR
 // Sprint 831-840 — Enterprise
 // Sprint 841-850 — UX
@@ -26903,7 +26035,6 @@ TEST(Test_SIMD_PremultiplyAlpha) {
 #include "../Core/HybridTrustChainV2.h"
 #include "../Core/QuantumSafeKeyExchange.h"
 #include "../Utils/DilithiumCertificateStore.h"
-#include "../Plugin/PQCPluginManifest.h"
 #include "../Utils/SignatureAuditLogger.h"
 #include "../Core/CryptoAgilityBroker.h"
 #include "../Utils/KeyRotationScheduler.h"
@@ -26926,11 +26057,9 @@ TEST(Test_SIMD_PremultiplyAlpha) {
 #include "../Core/LivePreviewUpdater.h"
 #include "../Utils/ShellExtensionHealthMonitor.h"
 // Sprint 891-900 — Accessibility v2
-#include "../AI/AltTextSynthesizerBLIP2.h"
 #include "../Utils/ARIAThumbnailAnnotator.h"
 #include "../Core/AccessibilityAuditEngine.h"
 #include "../Utils/HighContrastThemeAdapter.h"
-#include "../AI/CaptionQualityScorer.h"
 #include "../Utils/ScreenReaderBridge.h"
 #include "../Core/KeyboardNavigationController.h"
 #include "../Utils/A11yTelemetryReporter.h"
@@ -27042,24 +26171,11 @@ TEST(TestCLIDoctorAllChecks)
 #include "Integration/COMIntegrationTest.h"
 
 // Sprint 561-570 — WASM Plugin Sandbox (v25.1.0 backfill)
-#include "Plugin/WASMRuntimeAdapter.h"
-#include "Plugin/WASMMemorySafetyModel.h"
-#include "Plugin/WASMPluginLoader.h"
-#include "Plugin/WITBindingGenerator.h"
-#include "Plugin/WASMHostController.h"
-#include "Plugin/WASMCapabilityNegotiator.h"
-#include "Plugin/WASMHotSwapEngine.h"
-#include "Plugin/WASMDebuggerBridge.h"
 
 // Sprint 571-580 — Neural Format Intelligence (v25.1.0 "Rigel-R")
-#include "AI/NeuralFormatFingerprinter.h"
-#include "AI/UnknownFormatHandler.h"
-#include "AI/LLMMIMEInferenceEngine.h"
 #include "Core/SelfExpandingFormatRegistry.h"
-#include "AI/FormatTransferLearner.h"
 #include "Core/FormatDetectionReport.h"
 #include "Core/SyntheticDecoderGenerator.h"
-#include "AI/FormatEvolutionTracker.h"
 
 // Sprint 581-590 — NPU & Heterogeneous Compute (v25.2.0 "Rigel-S")
 #include "GPU/IntelNPUBackend.h"
@@ -27068,7 +26184,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "GPU/HardwareCapabilityProfiler.h"
 #include "Pipeline/PowerAwareScheduler.h"
 #include "Memory/NPUMemoryPool.h"
-#include "AI/NPUWarmupEngine.h"
 #include "GPU/ARM64DecodeBackend.h"
 
 // Sprint 591-600 — VCS Integration (v25.3.0 "Rigel-T")
@@ -27126,7 +26241,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "Utils/CryptoAgilityEngine.h"
 // Sprint 651-660 — Windows Next-Gen Shell Integration (v26.1.0 "Canopus-R")
 #include "Core/WinRTThumbnailBridge.h"
-#include "AI/CopilotPlatformBridge.h"
 #include "Core/AppContainerIsolation.h"
 #include "Core/WinFSMetadataStore.h"
 #include "Core/WindowsSearchV3Bridge.h"
@@ -27147,7 +26261,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/LiveAnnotationBroadcaster.h"
 #include "Core/SharedViewStateProtocol.h"
 #include "Core/ConflictResolutionMerger.h"
-#include "Plugin/CollaborativePluginHost.h"
 #include "Core/PresenceAvatarRenderer.h"
 #include "Core/SessionReplayEngine.h"
 #include "Core/CollaborationTelemetryHub.h"
@@ -27185,14 +26298,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/SecureEnclaveAnalytics.h"
 #include "Utils/GDPRComplianceEngine.h"
 #include "Core/PrivacyAuditLogger.h"
-#include "AI/FederatedLearningCoordinator.h"
-#include "AI/PersonalizedRankingModel.h"
-#include "AI/FederatedModelAggregator.h"
-#include "AI/OnDeviceFineTuningEngine.h"
-#include "AI/NeuralCompressionCodec.h"
-#include "AI/EmbeddingFederationBus.h"
-#include "AI/ModelVersioningController.h"
-#include "AI/FederatedSearchEnhancer.h"
 #include "Decoders/LiveStreamDecoder.h"
 #include "Decoders/WebRTCThumbnailCapture.h"
 #include "Core/StreamingBufferOrchestrator.h"
@@ -27208,13 +26313,8 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/ClusterAutoScaler.h"
 #include "Core/SecureClusterChannel.h"
 #include "Core/ClusterObservabilityBus.h"
-#include "Plugin/PluginCapabilityMatrixV3.h"
-#include "Plugin/PluginMarketplaceConnector.h"
 #include "Plugin/PluginSandboxV3.h"
-#include "Plugin/PluginLifecycleManagerV3.h"
-#include "Plugin/PluginTelemetryCollector.h"
 #include "Plugin/PluginCompatibilityShimV3.h"
-#include "Plugin/PluginNetworkProxy.h"
 #include "Core/FolderPredictionModel.h"
 #include "Core/ColdStartFolderBootstrapper.h"
 #include "Core/PredictionScanOrchestrator.h"
@@ -27226,7 +26326,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/AnnotationTimeline.h"
 #include "Core/PresenceIndicatorEngine.h"
 #include "Core/AnnotationTaxonomyV2.h"
-#include "AI/AIAnnotationAssistant.h"
 #include "Core/OfflineAnnotationSyncQueue.h"
 #include "Core/AnnotationExportPipelineV2.h"
 #include "Core/GRPCProtocolServerV2.h"
@@ -27238,11 +26337,8 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/OpenAPICodeGenerator.h"
 #include "Core/GraphQLSchemaIntrospector.h"
 #include "Core/NeuralCodecV2Engine.h"
-#include "AI/SSIMQualityController.h"
 #include "Core/ProgressiveNeuralDecoder.h"
 #include "Core/NeuralContainerFormat.h"
-#include "AI/MultiResLatentPyramid.h"
-#include "AI/LearnedEntropyCoder.h"
 #include "GPU/NeuralCodecHWAccelerator.h"
 #include "Core/CodecNegotiationProtocol.h"
 
@@ -27252,565 +26348,13 @@ using namespace ExplorerLens::Engine::Tests;
 // WASM Plugin Sandbox Tests (Sprint 561-570 / v25.1.0 "Rigel-R" backfill)
 //==============================================================================
 
-TEST(Test_WASMRuntimeAdapter_Create)
-{
-    WASMRuntimeAdapter adapter;
-    ASSERT(!adapter.IsRunning());
-    ASSERT(!adapter.GetEngineVersion().empty());
-}
-TEST(Test_WASMRuntimeAdapter_Config)
-{
-    WASMRuntimeConfig cfg;
-    cfg.runtime          = WASMAdapterEngine::WasmEdge;
-    cfg.sandboxLevel     = WASMSandboxLevel::Strict;
-    cfg.memoryLimitBytes = 32ULL * 1024 * 1024;
-    cfg.cpuQuotaPercent  = 10;
-    cfg.timeoutMs        = 3000;
-    WASMRuntimeAdapter adapter(cfg);
-    ASSERT(adapter.GetRuntime()      == WASMAdapterEngine::WasmEdge);
-    ASSERT(adapter.GetSandboxLevel() == WASMSandboxLevel::Strict);
-    ASSERT(adapter.GetMemoryLimit()  == 32ULL * 1024 * 1024);
-    ASSERT(adapter.GetCpuQuota()     == 10);
-    ASSERT(adapter.GetTimeoutMs()    == 3000);
-}
-TEST(Test_WASMRuntimeAdapter_Initialize)
-{
-    WASMRuntimeAdapter adapter;
-    ASSERT(adapter.Initialize());
-    ASSERT(adapter.IsRunning());
-    adapter.Reset();
-    ASSERT(!adapter.IsRunning());
-}
-TEST(Test_WASMRuntimeAdapter_LoadModule)
-{
-    WASMRuntimeAdapter adapter;
-    adapter.Initialize();
-    const uint8_t dummyWasm[] = { 0x00, 0x61, 0x73, 0x6D, 0x01, 0x00, 0x00, 0x00 };
-    ASSERT(adapter.LoadModule(dummyWasm, sizeof(dummyWasm)));
-    ASSERT(!adapter.LoadModule(nullptr, 0));
-}
-TEST(Test_WASMRuntimeAdapter_Flags)
-{
-    WASMRuntimeConfig cfg;
-    cfg.enableSIMD    = true;
-    cfg.enableThreads = false;
-    WASMRuntimeAdapter a(cfg);
-    ASSERT(a.SIMDEnabled());
-    ASSERT(!a.ThreadsEnabled());
-}
-TEST(Test_WASMRuntimeAdapter_Unload)
-{
-    WASMRuntimeAdapter adapter;
-    ASSERT(adapter.UnloadModule());
-}
-TEST(Test_WASMRuntimeAdapter_SetConfig)
-{
-    WASMRuntimeAdapter adapter;
-    WASMRuntimeConfig cfg;
-    cfg.timeoutMs = 9999;
-    adapter.SetConfig(cfg);
-    ASSERT(adapter.GetConfig().timeoutMs == 9999);
-}
-TEST(Test_WASMRuntimeAdapter_Sandbox)
-{
-    WASMRuntimeConfig cfg;
-    cfg.sandboxLevel = WASMSandboxLevel::Paranoid;
-    WASMRuntimeAdapter a(cfg);
-    ASSERT(a.GetSandboxLevel() == WASMSandboxLevel::Paranoid);
-}
-TEST(Test_WASMRuntimeAdapter_Runtimes)
-{
-    ASSERT(WASMAdapterEngine::WasmEdge != WASMAdapterEngine::WABT);
-    ASSERT(WASMAdapterEngine::Wasmer   != WASMAdapterEngine::Native);
-    ASSERT(WASMSandboxLevel::Loose != WASMSandboxLevel::Paranoid);
-}
 
-TEST(Test_WASMMemorySafetyModel_Create)
-{
-    WASMMemorySafetyModel model;
-    ASSERT(model.Validate());
-}
-TEST(Test_WASMMemorySafetyModel_Capabilities)
-{
-    WASMMemoryDescriptor desc;
-    desc.capabilities = WASMCapabilityMask::ReadFiles;
-    WASMMemorySafetyModel model(desc);
-    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::ReadFiles));
-    ASSERT(!model.IsCapabilityGranted(WASMCapabilityMask::Network));
-}
-TEST(Test_WASMMemorySafetyModel_Grant)
-{
-    WASMMemorySafetyModel model;
-    model.GrantCapability(WASMCapabilityMask::Network);
-    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::Network));
-    model.RevokeCapability(WASMCapabilityMask::Network);
-    ASSERT(!model.IsCapabilityGranted(WASMCapabilityMask::Network));
-}
-TEST(Test_WASMMemorySafetyModel_Policy)
-{
-    WASMMemorySafetyModel model;
-    model.SetPolicy(WASMMemoryPolicy::Strict);
-    ASSERT(model.GetPolicy() == WASMMemoryPolicy::Strict);
-}
-TEST(Test_WASMMemorySafetyModel_Size)
-{
-    WASMMemorySafetyModel model;
-    model.SetSizeBytes(8ULL * 1024 * 1024);
-    ASSERT(model.GetSizeBytes() == 8ULL * 1024 * 1024);
-}
-TEST(Test_WASMMemorySafetyModel_Guard)
-{
-    WASMMemoryDescriptor desc;
-    desc.guardSizeBytes = 65536;
-    WASMMemorySafetyModel model(desc);
-    ASSERT(model.GetGuardSize() == 65536);
-}
-TEST(Test_WASMMemorySafetyModel_Reset)
-{
-    WASMMemorySafetyModel model;
-    model.GrantCapability(WASMCapabilityMask::All);
-    model.Reset();
-    ASSERT(model.Validate());
-}
-TEST(Test_WASMMemorySafetyModel_OrOperator)
-{
-    auto combined = WASMCapabilityMask::ReadFiles | WASMCapabilityMask::WriteFiles;
-    WASMMemoryDescriptor desc;
-    desc.capabilities = combined;
-    WASMMemorySafetyModel model(desc);
-    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::ReadFiles));
-    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::WriteFiles));
-}
-TEST(Test_WASMMemorySafetyModel_AllCaps)
-{
-    WASMMemoryDescriptor desc;
-    desc.capabilities = WASMCapabilityMask::All;
-    WASMMemorySafetyModel model(desc);
-    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::Network));
-    ASSERT(model.IsCapabilityGranted(WASMCapabilityMask::ClockAccess));
-}
 
-TEST(Test_WASMPluginLoader_Create)
-{
-    WASMPluginLoader loader;
-    ASSERT(!loader.IsLoaded());
-    ASSERT(loader.GetStatus() == WASMLoadStatus::NotLoaded);
-}
-TEST(Test_WASMPluginLoader_LoadValid)
-{
-    WASMPluginLoader loader;
-    const uint8_t wasm[] = { 0x00, 0x61, 0x73, 0x6D };
-    auto r = loader.Load(wasm, sizeof(wasm));
-    ASSERT(r.IsOk());
-    ASSERT(loader.IsLoaded());
-    ASSERT(loader.GetModuleSize() == sizeof(wasm));
-}
-TEST(Test_WASMPluginLoader_LoadEmpty)
-{
-    WASMPluginLoader loader;
-    auto r = loader.Load(nullptr, 0);
-    ASSERT(!r.IsOk());
-    ASSERT(r.status == WASMLoadStatus::ValidationError);
-    ASSERT(!r.errorMessage.empty());
-}
-TEST(Test_WASMPluginLoader_Unload)
-{
-    WASMPluginLoader loader;
-    const uint8_t d[4] = { 1, 2, 3, 4 };
-    loader.Load(d, 4);
-    ASSERT(loader.IsLoaded());
-    loader.Unload();
-    ASSERT(!loader.IsLoaded());
-    ASSERT(loader.GetModuleSize() == 0);
-}
-TEST(Test_WASMPluginLoader_Manifest)
-{
-    WASMPluginLoader loader;
-    WASMPluginManifest mf;
-    mf.pluginId   = "test-plugin";
-    mf.version    = "1.0.0";
-    mf.maxMemoryPages = 128;
-    const uint8_t d[4] = { 0xAA };
-    auto r = loader.Load(d, 4, mf);
-    ASSERT(r.IsOk());
-}
-TEST(Test_WASMPluginLoader_Validation)
-{
-    WASMPluginLoader loader;
-    loader.SetValidation(true);
-    ASSERT(loader.StrictValidation());
-    loader.SetValidation(false);
-    ASSERT(!loader.StrictValidation());
-}
-TEST(Test_WASMPluginLoader_LoadTime)
-{
-    WASMPluginLoader loader;
-    const uint8_t d[8] = { 0x00, 0x61, 0x73, 0x6D, 1, 0, 0, 0 };
-    auto r = loader.Load(d, sizeof(d));
-    ASSERT(r.loadTimeMs >= 0);
-}
-TEST(Test_WASMPluginLoader_SizeReported)
-{
-    WASMPluginLoader loader;
-    const uint8_t d[16] = {};
-    auto r = loader.Load(d, 16);
-    ASSERT(r.moduleSizeBytes == 16);
-}
-TEST(Test_WASMPluginLoader_StatusEnum)
-{
-    ASSERT(WASMLoadStatus::NotLoaded    != WASMLoadStatus::Loaded);
-    ASSERT(WASMLoadStatus::LinkError    != WASMLoadStatus::ValidationError);
-}
 
-TEST(Test_WITBindingGenerator_Create)
-{
-    WITBindingGenerator gen;
-    ASSERT(gen.GetOutputFormat() == WITOutputFormat::CppHeader);
-    ASSERT(!gen.GetNamespace().empty());
-}
-TEST(Test_WITBindingGenerator_Generate)
-{
-    WITBindingGenerator gen;
-    WITInterface iface;
-    iface.name        = "thumbnail-provider";
-    iface.version     = "1.0.0";
-    iface.packageName = "explorerLens:engine";
-    iface.methods     = { "generate", "get-metadata" };
-    auto r = gen.Generate(iface);
-    ASSERT(r.success);
-    ASSERT(r.methodsGenerated == 2);
-    ASSERT(!r.generatedCode.empty());
-}
-TEST(Test_WITBindingGenerator_EmptyInterface)
-{
-    WITBindingGenerator gen;
-    WITInterface iface;
-    auto r = gen.Generate(iface);
-    ASSERT(!r.success);
-    ASSERT(!r.errorMessage.empty());
-}
-TEST(Test_WITBindingGenerator_Options)
-{
-    WITBindingOptions opts;
-    opts.outputFormat  = WITOutputFormat::RustFFI;
-    opts.generateAsync = true;
-    WITBindingGenerator gen(opts);
-    ASSERT(gen.GetOutputFormat() == WITOutputFormat::RustFFI);
-    ASSERT(gen.AsyncEnabled());
-}
-TEST(Test_WITBindingGenerator_Namespace)
-{
-    WITBindingOptions opts;
-    opts.targetNamespace = "MyProject::API";
-    WITBindingGenerator gen(opts);
-    ASSERT(gen.GetNamespace() == "MyProject::API");
-}
-TEST(Test_WITBindingGenerator_Reset)
-{
-    WITBindingGenerator gen;
-    gen.Reset();
-    ASSERT(gen.GetOutputFormat() == WITOutputFormat::CppHeader);
-}
-TEST(Test_WITBindingGenerator_Formats)
-{
-    ASSERT(WITOutputFormat::CppHeader != WITOutputFormat::RustFFI);
-    ASSERT(WITOutputFormat::CBindings != WITOutputFormat::TypeScript);
-}
-TEST(Test_WITBindingGenerator_MultiMethod)
-{
-    WITBindingGenerator gen;
-    WITInterface iface;
-    iface.name    = "test";
-    iface.methods = { "a", "b", "c", "d", "e" };
-    auto r = gen.Generate(iface);
-    ASSERT(r.success);
-    ASSERT(r.methodsGenerated == 5);
-}
-TEST(Test_WITBindingGenerator_SetOptions)
-{
-    WITBindingGenerator gen;
-    WITBindingOptions opts;
-    opts.generateAsync = true;
-    gen.SetOptions(opts);
-    ASSERT(gen.AsyncEnabled());
-}
 
-TEST(Test_WASMHostController_Create)
-{
-    WASMHostController ctrl;
-    ASSERT(ctrl.GetState() == WASMHostState::Idle);
-    ASSERT(!ctrl.IsRunning());
-}
-TEST(Test_WASMHostController_Launch)
-{
-    WASMHostController ctrl;
-    ASSERT(ctrl.Launch());
-    ASSERT(ctrl.IsRunning());
-}
-TEST(Test_WASMHostController_Terminate)
-{
-    WASMHostController ctrl;
-    ctrl.Launch();
-    ctrl.Terminate();
-    ASSERT(ctrl.GetState() == WASMHostState::Killed);
-}
-TEST(Test_WASMHostController_Suspend)
-{
-    WASMHostController ctrl;
-    ctrl.Launch();
-    ctrl.Suspend();
-    ASSERT(ctrl.GetState() == WASMHostState::Throttled);
-    ctrl.Resume();
-    ASSERT(ctrl.IsRunning());
-}
-TEST(Test_WASMHostController_ResourceLimits)
-{
-    WASMResourceLimits lim;
-    lim.maxMemoryBytes  = 128ULL * 1024 * 1024;
-    lim.cpuSharePercent = 30;
-    WASMHostController ctrl(WASMIsolation::SeparateProcess, lim);
-    ASSERT(ctrl.GetLimits().maxMemoryBytes  == 128ULL * 1024 * 1024);
-    ASSERT(ctrl.GetLimits().cpuSharePercent == 30);
-}
-TEST(Test_WASMHostController_WithinLimits)
-{
-    WASMHostController ctrl;
-    ASSERT(ctrl.IsWithinLimits(1024));
-    ASSERT(!ctrl.IsWithinLimits(1024ULL * 1024 * 1024));
-}
-TEST(Test_WASMHostController_Isolation)
-{
-    WASMHostController inProc(WASMIsolation::InProcess);
-    ASSERT(inProc.GetIsolation() == WASMIsolation::InProcess);
-    WASMHostController proc(WASMIsolation::SeparateProcess);
-    ASSERT(proc.GetIsolation()   == WASMIsolation::SeparateProcess);
-}
-TEST(Test_WASMHostController_Metrics)
-{
-    WASMHostController ctrl;
-    WASMHostMetrics m;
-    m.cpuUsagePercent = 15;
-    ctrl.UpdateMetrics(m);
-    ASSERT(ctrl.GetMetrics().cpuUsagePercent == 15);
-}
-TEST(Test_WASMHostController_Reset)
-{
-    WASMHostController ctrl;
-    ctrl.Launch();
-    ctrl.Reset();
-    ASSERT(ctrl.GetState() == WASMHostState::Idle);
-}
 
-TEST(Test_WASMCapabilityNegotiator_Create)
-{
-    WASMCapabilityNegotiator neg;
-    ASSERT(neg.AllowedCount() == 0);
-    ASSERT(neg.DeniedCount()  == 0);
-}
-TEST(Test_WASMCapabilityNegotiator_AllowDeny)
-{
-    WASMCapabilityNegotiator neg;
-    neg.AllowCapability("file_read");
-    neg.DenyCapability("network");
-    ASSERT(neg.AllowedCount() == 1);
-    ASSERT(neg.DeniedCount()  == 1);
-}
-TEST(Test_WASMCapabilityNegotiator_Negotiate)
-{
-    WASMCapabilityNegotiator neg;
-    neg.AllowCapability("file_read");
-    CapabilityRequest req;
-    req.capabilityName = "file_read";
-    req.isRequired     = true;
-    auto result = neg.Negotiate({ req });
-    ASSERT(result.allRequiredGranted);
-    ASSERT(result.GrantedCount() == 1);
-}
-TEST(Test_WASMCapabilityNegotiator_Denied)
-{
-    WASMCapabilityNegotiator neg;
-    CapabilityRequest req;
-    req.capabilityName = "network";
-    req.isRequired     = true;
-    auto result = neg.Negotiate({ req });
-    ASSERT(!result.allRequiredGranted);
-    ASSERT(result.GrantedCount() == 0);
-}
-TEST(Test_WASMCapabilityNegotiator_Optional)
-{
-    WASMCapabilityNegotiator neg;
-    CapabilityRequest req;
-    req.capabilityName = "optional_feature";
-    req.isRequired     = false;
-    auto result = neg.Negotiate({ req });
-    ASSERT(result.allRequiredGranted);
-}
-TEST(Test_WASMCapabilityNegotiator_MultiRequest)
-{
-    WASMCapabilityNegotiator neg;
-    neg.AllowCapability("a");
-    neg.AllowCapability("b");
-    std::vector<CapabilityRequest> reqs = {{"a",{},false},{"b",{},false},{"c",{},false}};
-    auto r = neg.Negotiate(reqs);
-    ASSERT(r.GrantedCount() == 2);
-}
-TEST(Test_WASMCapabilityNegotiator_DenyOverride)
-{
-    WASMCapabilityNegotiator neg;
-    neg.AllowCapability("x");
-    neg.DenyCapability("x");
-    CapabilityRequest req{ "x", {}, false };
-    auto r = neg.Negotiate({ req });
-    ASSERT(r.GrantedCount() == 0);
-}
-TEST(Test_WASMCapabilityNegotiator_Reset)
-{
-    WASMCapabilityNegotiator neg;
-    neg.AllowCapability("file_read");
-    neg.Reset();
-    ASSERT(neg.AllowedCount() == 0);
-}
-TEST(Test_WASMCapabilityNegotiator_Grant)
-{
-    ASSERT(CapabilityDecision::Granted != CapabilityDecision::Denied);
-    ASSERT(CapabilityDecision::Deferred != CapabilityDecision::Granted);
-}
 
-TEST(Test_WASMHotSwapEngine_Create)
-{
-    WASMHotSwapEngine eng;
-    ASSERT(eng.GetState()  == HotSwapState::Idle);
-    ASSERT(!eng.IsActive());
-}
-TEST(Test_WASMHotSwapEngine_Swap)
-{
-    WASMHotSwapEngine eng;
-    const uint8_t d[] = { 0x00, 0x61, 0x73, 0x6D };
-    auto r = eng.Swap(d, sizeof(d));
-    ASSERT(r.success);
-    ASSERT(eng.IsActive());
-}
-TEST(Test_WASMHotSwapEngine_SwapEmpty)
-{
-    WASMHotSwapEngine eng;
-    auto r = eng.Swap(nullptr, 0);
-    ASSERT(!r.success);
-    ASSERT(!r.errorMessage.empty());
-}
-TEST(Test_WASMHotSwapEngine_Policy)
-{
-    WASMHotSwapEngine eng(HotSwapPolicy::Atomic);
-    ASSERT(eng.GetPolicy() == HotSwapPolicy::Atomic);
-}
-TEST(Test_WASMHotSwapEngine_Snapshot)
-{
-    WASMHotSwapEngine eng;
-    auto snap = eng.CaptureSnapshot("test-plugin");
-    ASSERT(snap.IsValid());
-    ASSERT(snap.pluginId == "test-plugin");
-}
-TEST(Test_WASMHotSwapEngine_SwapDuration)
-{
-    WASMHotSwapEngine eng;
-    const uint8_t d[4] = { 1, 2, 3, 4 };
-    auto r = eng.Swap(d, 4);
-    ASSERT(r.swapDurationMs >= 0);
-}
-TEST(Test_WASMHotSwapEngine_Reset)
-{
-    WASMHotSwapEngine eng;
-    const uint8_t d[4] = { 1, 2, 3, 4 };
-    eng.Swap(d, 4);
-    eng.Reset();
-    ASSERT(eng.GetState() == HotSwapState::Idle);
-}
-TEST(Test_WASMHotSwapEngine_Callback)
-{
-    WASMHotSwapEngine eng;
-    bool called = false;
-    eng.SetCallback([&](HotSwapState){ called = true; });
-    ASSERT(eng.SwapCount() == 0);
-}
-TEST(Test_WASMHotSwapEngine_States)
-{
-    ASSERT(HotSwapState::Idle    != HotSwapState::Active);
-    ASSERT(HotSwapPolicy::Atomic != HotSwapPolicy::Graceful);
-}
 
-TEST(Test_WASMDebuggerBridge_Create)
-{
-    WASMDebuggerBridge dbg;
-    ASSERT(dbg.GetState()       == DebuggerState::Disconnected);
-    ASSERT(!dbg.IsConnected());
-    ASSERT(dbg.BreakpointCount() == 0);
-}
-TEST(Test_WASMDebuggerBridge_Connect)
-{
-    WASMDebuggerBridge dbg;
-    ASSERT(dbg.Connect());
-    ASSERT(dbg.IsConnected());
-    dbg.Disconnect();
-    ASSERT(!dbg.IsConnected());
-}
-TEST(Test_WASMDebuggerBridge_Breakpoint)
-{
-    WASMDebuggerBridge dbg;
-    dbg.Connect();
-    WASMBreakpoint bp;
-    bp.kind     = BreakpointKind::Line;
-    bp.location = "plugin.wasm:42";
-    bp.enabled  = true;
-    uint32_t id = dbg.SetBreakpoint(bp);
-    ASSERT(id > 0);
-    ASSERT(dbg.BreakpointCount() == 1);
-}
-TEST(Test_WASMDebuggerBridge_RemoveBreakpoint)
-{
-    WASMDebuggerBridge dbg;
-    WASMBreakpoint bp;
-    bp.location = "test:1";
-    uint32_t id = dbg.SetBreakpoint(bp);
-    ASSERT(dbg.RemoveBreakpoint(id));
-    ASSERT(dbg.BreakpointCount() == 0);
-}
-TEST(Test_WASMDebuggerBridge_RemoveNonExistent)
-{
-    WASMDebuggerBridge dbg;
-    ASSERT(!dbg.RemoveBreakpoint(9999));
-}
-TEST(Test_WASMDebuggerBridge_Config)
-{
-    DebuggerConfig cfg;
-    cfg.listenPort   = 9999;
-    cfg.breakOnEntry = true;
-    WASMDebuggerBridge dbg(cfg);
-    ASSERT(dbg.GetConfig().listenPort   == 9999);
-    ASSERT(dbg.GetConfig().breakOnEntry == true);
-}
-TEST(Test_WASMDebuggerBridge_CallStack)
-{
-    WASMDebuggerBridge dbg;
-    dbg.Connect();
-    auto frames = dbg.GetCallStack();
-    ASSERT(frames.empty());
-}
-TEST(Test_WASMDebuggerBridge_Reset)
-{
-    WASMDebuggerBridge dbg;
-    dbg.Connect();
-    WASMBreakpoint bp; bp.location="x";
-    dbg.SetBreakpoint(bp);
-    dbg.Reset();
-    ASSERT(!dbg.IsConnected());
-    ASSERT(dbg.BreakpointCount() == 0);
-}
-TEST(Test_WASMDebuggerBridge_MultiBreakpoint)
-{
-    WASMDebuggerBridge dbg;
-    for (int i = 0; i < 5; ++i) {
-        WASMBreakpoint bp; bp.location = "loc";
-        dbg.SetBreakpoint(bp);
-    }
     ASSERT(dbg.BreakpointCount() == 5);
 }
 
@@ -27818,208 +26362,10 @@ TEST(Test_WASMDebuggerBridge_MultiBreakpoint)
 // Neural Format Intelligence Tests (Sprint 571-580 / v25.1.0 "Rigel-R")
 //==============================================================================
 
-TEST(Test_NeuralFormatFingerprinter_Create)
-{
-    NeuralFormatFingerprinter fp;
-    ASSERT(!fp.IsReady());
-    ASSERT(fp.GetTopK() > 0);
-}
-TEST(Test_NeuralFormatFingerprinter_Initialize)
-{
-    NeuralFormatFingerprinter fp;
-    ASSERT(fp.Initialize());
-    ASSERT(fp.IsReady());
-}
-TEST(Test_NeuralFormatFingerprinter_Config)
-{
-    FingerprintConfig cfg;
-    cfg.backend         = FingerprintBackend::ONNX;
-    cfg.headerBytesRead = 256;
-    cfg.minConfidence   = 0.75f;
-    cfg.topK            = 3;
-    NeuralFormatFingerprinter fp(cfg);
-    ASSERT(fp.GetBackend()         == FingerprintBackend::ONNX);
-    ASSERT(fp.GetHeaderBytesRead() == 256);
-    ASSERT(fp.GetTopK()            == 3);
-}
-TEST(Test_NeuralFormatFingerprinter_Classify)
-{
-    NeuralFormatFingerprinter fp;
-    fp.Initialize();
-    const uint8_t header[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
-    auto r = fp.Classify(header, sizeof(header));
-    ASSERT(r.topScore > 0.0f);
-    ASSERT(!r.candidates.empty());
-}
-TEST(Test_NeuralFormatFingerprinter_NotReady)
-{
-    NeuralFormatFingerprinter fp;
-    const uint8_t h[4] = {};
-    auto r = fp.Classify(h, 4);
-    ASSERT(r.topScore == 0.0f);
-}
-TEST(Test_NeuralFormatFingerprinter_Confidence)
-{
-    NeuralFormatFingerprinter fp;
-    fp.Initialize();
-    const uint8_t h[8] = { 0xFF, 0xD8, 0xFF, 0xE0 };
-    auto r = fp.Classify(h, 4);
-    ASSERT(r.inferenceMs >= 0);
-}
-TEST(Test_NeuralFormatFingerprinter_SetConfig)
-{
-    NeuralFormatFingerprinter fp;
-    FingerprintConfig cfg;
-    cfg.topK = 10;
-    fp.SetConfig(cfg);
-    ASSERT(fp.GetTopK() == 10);
-}
-TEST(Test_NeuralFormatFingerprinter_Reset)
-{
-    NeuralFormatFingerprinter fp;
-    fp.Initialize();
-    fp.Reset();
-    ASSERT(!fp.IsReady());
-}
-TEST(Test_NeuralFormatFingerprinter_Backends)
-{
-    ASSERT(FingerprintBackend::CPU     != FingerprintBackend::DirectML);
-    ASSERT(FingerprintBackend::ONNX    != FingerprintBackend::OpenVINO);
-}
 
-TEST(Test_UnknownFormatHandler_Create)
-{
-    UnknownFormatHandler h;
-    ASSERT(h.HandledCount() == 0);
-    ASSERT(h.GetStrategy() == UnknownHandlerStrategy::ReturnPlaceholder);
-}
-TEST(Test_UnknownFormatHandler_Handle)
-{
-    UnknownFormatHandler h;
-    UnknownFormatRequest req;
-    req.fileExtension = "xyz";
-    req.confidence    = 0.3f;
-    auto r = h.Handle(req);
-    ASSERT(r.success);
-    ASSERT(!r.fallbackIcon.empty());
-    ASSERT(h.HandledCount() == 1);
-}
-TEST(Test_UnknownFormatHandler_Strategy)
-{
-    UnknownFormatHandler h(UnknownHandlerStrategy::Skip);
-    ASSERT(h.GetStrategy() == UnknownHandlerStrategy::Skip);
-    h.SetStrategy(UnknownHandlerStrategy::SynthesizeDecode);
-    ASSERT(h.GetStrategy() == UnknownHandlerStrategy::SynthesizeDecode);
-}
-TEST(Test_UnknownFormatHandler_Multiple)
-{
-    UnknownFormatHandler h;
-    for (int i = 0; i < 5; ++i) {
-        UnknownFormatRequest req; req.fileExtension = "x";
-        h.Handle(req);
-    }
     ASSERT(h.HandledCount() == 5);
 }
-TEST(Test_UnknownFormatHandler_Reset)
-{
-    UnknownFormatHandler h;
-    UnknownFormatRequest req; req.fileExtension = "a";
-    h.Handle(req);
-    h.Reset();
-    ASSERT(h.HandledCount() == 0);
-}
-TEST(Test_UnknownFormatHandler_Callback)
-{
-    UnknownFormatHandler h(UnknownHandlerStrategy::RequestPlugin);
-    bool called = false;
-    h.SetPluginCallback([&](const std::string&){ called = true; return true; });
-    ASSERT(h.GetStrategy() == UnknownHandlerStrategy::RequestPlugin);
-}
-TEST(Test_UnknownFormatHandler_Diagnostic)
-{
-    UnknownFormatHandler h;
-    UnknownFormatRequest req; req.fileExtension = "abc";
-    auto r = h.Handle(req);
-    ASSERT(!r.diagnosticMessage.empty());
-}
-TEST(Test_UnknownFormatHandler_StrategyEnum)
-{
-    ASSERT(UnknownHandlerStrategy::Skip != UnknownHandlerStrategy::SynthesizeDecode);
-    ASSERT(UnknownHandlerStrategy::ReturnPlaceholder != UnknownHandlerStrategy::RequestPlugin);
-}
-TEST(Test_UnknownFormatHandler_Result)
-{
-    UnknownFormatHandler h;
-    UnknownFormatRequest req;
-    auto r = h.Handle(req);
-    ASSERT(r.strategyUsed == UnknownHandlerStrategy::ReturnPlaceholder);
-}
 
-TEST(Test_LLMMIMEInferenceEngine_Create)
-{
-    LLMMIMEInferenceEngine eng;
-    ASSERT(!eng.IsLoaded());
-}
-TEST(Test_LLMMIMEInferenceEngine_LoadModel)
-{
-    LLMMIMEInferenceEngine eng;
-    ASSERT(eng.LoadModel());
-    ASSERT(eng.IsLoaded());
-}
-TEST(Test_LLMMIMEInferenceEngine_Config)
-{
-    LLMMIMEConfig cfg;
-    cfg.preferredBackend    = LLMBackendKind::LocalGemma;
-    cfg.confidenceFloor     = 0.70f;
-    cfg.allowRemoteFallback = true;
-    LLMMIMEInferenceEngine eng(cfg);
-    ASSERT(eng.GetBackend() == LLMBackendKind::LocalGemma);
-    ASSERT(eng.GetFloor()   == 0.70f);
-}
-TEST(Test_LLMMIMEInferenceEngine_Infer)
-{
-    LLMMIMEInferenceEngine eng;
-    eng.LoadModel();
-    LLMInferenceRequest req;
-    req.knownExtension = "png";
-    auto r = eng.Infer(req);
-    ASSERT(!r.mimeType.empty());
-    ASSERT(r.inferenceMs >= 0);
-}
-TEST(Test_LLMMIMEInferenceEngine_NotLoaded)
-{
-    LLMMIMEInferenceEngine eng;
-    LLMInferenceRequest req;
-    auto r = eng.Infer(req);
-    ASSERT(r.backendUsed == LLMBackendKind::RulesFallback);
-}
-TEST(Test_LLMMIMEInferenceEngine_Reliable)
-{
-    LLMMIMEInferenceEngine eng;
-    eng.LoadModel();
-    LLMInferenceRequest req; req.knownExtension = "jpg";
-    auto r = eng.Infer(req);
-    ASSERT(r.confidence >= MIMEConfidence::Medium || !r.IsReliable());
-}
-TEST(Test_LLMMIMEInferenceEngine_SetConfig)
-{
-    LLMMIMEInferenceEngine eng;
-    LLMMIMEConfig c; c.confidenceFloor = 0.8f;
-    eng.SetConfig(c);
-    ASSERT(eng.GetConfig().confidenceFloor == 0.8f);
-}
-TEST(Test_LLMMIMEInferenceEngine_Reset)
-{
-    LLMMIMEInferenceEngine eng;
-    eng.LoadModel();
-    eng.Reset();
-    ASSERT(!eng.IsLoaded());
-}
-TEST(Test_LLMMIMEInferenceEngine_Backend)
-{
-    ASSERT(LLMBackendKind::LocalPhi3 != LLMBackendKind::LocalGemma);
-    ASSERT(MIMEConfidence::High      >  MIMEConfidence::Low);
-}
 
 TEST(Test_SelfExpandingFormatRegistry_Create)
 {
@@ -28094,78 +26440,6 @@ TEST(Test_SelfExpandingFormatRegistry_PersistLoad)
     ASSERT(reg.SaveToFile("test.json"));
 }
 
-TEST(Test_FormatTransferLearner_Create)
-{
-    FormatTransferLearner learner;
-    ASSERT(learner.SampleCount() == 0);
-    ASSERT(learner.GetStatus() == TrainingStatus::Idle);
-}
-TEST(Test_FormatTransferLearner_Config)
-{
-    TransferLearnerConfig cfg;
-    cfg.strategy     = TransferStrategy::FullFineTune;
-    cfg.maxEpochs    = 20;
-    cfg.learningRate = 5e-5f;
-    FormatTransferLearner learner(cfg);
-    ASSERT(learner.GetStrategy() == TransferStrategy::FullFineTune);
-    ASSERT(learner.GetConfig().maxEpochs == 20);
-}
-TEST(Test_FormatTransferLearner_AddSample)
-{
-    FormatTransferLearner learner;
-    TrainingSample s;
-    s.trueFormatId  = "png";
-    s.sampleWeight  = 1.0f;
-    learner.AddSample(s);
-    ASSERT(learner.SampleCount() == 1);
-}
-TEST(Test_FormatTransferLearner_Train)
-{
-    FormatTransferLearner learner;
-    TrainingSample s; s.trueFormatId = "jpg";
-    learner.AddSample(s);
-    auto m = learner.Train();
-    ASSERT(m.accuracy > 0.0f);
-    ASSERT(learner.GetStatus() == TrainingStatus::Complete);
-}
-TEST(Test_FormatTransferLearner_TrainEmpty)
-{
-    FormatTransferLearner learner;
-    auto m = learner.Train();
-    ASSERT(m.epochsCompleted == 0);
-}
-TEST(Test_FormatTransferLearner_Metrics)
-{
-    FormatTransferLearner learner;
-    TrainingSample s; s.trueFormatId = "bmp";
-    learner.AddSample(s);
-    auto m = learner.Train();
-    ASSERT(m.trainLoss     >= 0.0f);
-    ASSERT(m.trainingMs    >= 0);
-}
-TEST(Test_FormatTransferLearner_ClearSamples)
-{
-    FormatTransferLearner learner;
-    TrainingSample s; s.trueFormatId = "x";
-    learner.AddSample(s);
-    learner.ClearSamples();
-    ASSERT(learner.SampleCount() == 0);
-}
-TEST(Test_FormatTransferLearner_Reset)
-{
-    FormatTransferLearner learner;
-    TrainingSample s; s.trueFormatId = "y";
-    learner.AddSample(s);
-    learner.Train();
-    learner.Reset();
-    ASSERT(learner.SampleCount() == 0);
-    ASSERT(learner.GetStatus()   == TrainingStatus::Idle);
-}
-TEST(Test_FormatTransferLearner_Strategies)
-{
-    ASSERT(TransferStrategy::FeatureExtract != TransferStrategy::FullFineTune);
-    ASSERT(TrainingStatus::Idle != TrainingStatus::Complete);
-}
 
 TEST(Test_FormatDetectionReport_Create)
 {
@@ -28306,79 +26580,6 @@ TEST(Test_SyntheticDecoderGenerator_Families)
     ASSERT(StubQuality::Full       != StubQuality::Placeholder);
 }
 
-TEST(Test_FormatEvolutionTracker_Create)
-{
-    FormatEvolutionTracker tracker;
-    ASSERT(tracker.ObservationCount() == 0);
-    ASSERT(tracker.TrackedFormats().empty());
-}
-TEST(Test_FormatEvolutionTracker_Record)
-{
-    FormatEvolutionTracker tracker;
-    FormatSignatureVersion sig;
-    sig.formatId      = "png";
-    sig.schemaVersion = 1;
-    sig.driftScore    = 0.1f;
-    tracker.RecordObservation(sig);
-    ASSERT(tracker.ObservationCount() == 1);
-}
-TEST(Test_FormatEvolutionTracker_TrackedFormats)
-{
-    FormatEvolutionTracker tracker;
-    FormatSignatureVersion s; s.formatId = "jpg";
-    tracker.RecordObservation(s);
-    s.formatId = "png";
-    tracker.RecordObservation(s);
-    auto fmts = tracker.TrackedFormats();
-    ASSERT(fmts.size() == 2);
-}
-TEST(Test_FormatEvolutionTracker_NoDrift)
-{
-    FormatEvolutionTracker tracker;
-    FormatSignatureVersion s; s.formatId = "bmp"; s.driftScore = 0.1f;
-    tracker.RecordObservation(s);
-    auto evt = tracker.AnalyseDrift("bmp");
-    ASSERT(evt.severity == DriftSeverity::None);
-}
-TEST(Test_FormatEvolutionTracker_MinorDrift)
-{
-    FormatEvolutionTracker tracker;
-    FormatSignatureVersion s; s.formatId = "tiff"; s.schemaVersion = 1; s.driftScore = 0.1f;
-    tracker.RecordObservation(s);
-    s.schemaVersion = 2; s.driftScore = 0.2f;
-    tracker.RecordObservation(s);
-    auto evt = tracker.AnalyseDrift("tiff");
-    ASSERT(evt.severity == DriftSeverity::Minor);
-}
-TEST(Test_FormatEvolutionTracker_MajorDrift)
-{
-    FormatEvolutionTracker tracker;
-    FormatSignatureVersion s; s.formatId = "test"; s.driftScore = 0.0f;
-    tracker.RecordObservation(s);
-    s.driftScore = 0.8f;
-    tracker.RecordObservation(s);
-    auto evt = tracker.AnalyseDrift("test");
-    ASSERT(evt.severity == DriftSeverity::Breaking || evt.severity == DriftSeverity::Major);
-}
-TEST(Test_FormatEvolutionTracker_Unknown)
-{
-    FormatEvolutionTracker tracker;
-    auto evt = tracker.AnalyseDrift("nonexistent");
-    ASSERT(evt.severity == DriftSeverity::None);
-}
-TEST(Test_FormatEvolutionTracker_Clear)
-{
-    FormatEvolutionTracker tracker;
-    FormatSignatureVersion s; s.formatId = "x";
-    tracker.RecordObservation(s);
-    tracker.Clear();
-    ASSERT(tracker.ObservationCount() == 0);
-}
-TEST(Test_FormatEvolutionTracker_Severities)
-{
-    ASSERT(DriftSeverity::None    != DriftSeverity::Major);
-    ASSERT(DriftSeverity::Breaking!= DriftSeverity::Minor);
-}
 
 //==============================================================================
 // NPU & Heterogeneous Compute Tests (Sprint 581-590 / v25.2.0 "Rigel-S")
@@ -28794,75 +26995,6 @@ TEST(Test_NPUMemoryPool_BlockCount)
     NPUMemoryPool pool(cfg);
     pool.Initialize();
     ASSERT(pool.BlockCount() == 4);
-}
-TEST(Test_NPUWarmupEngine_Create)
-{
-    NPUWarmupEngine eng;
-    ASSERT(!eng.IsWarmed());
-    ASSERT(eng.QueuedCount() == 0);
-}
-TEST(Test_NPUWarmupEngine_QueueTask)
-{
-    NPUWarmupEngine eng;
-    WarmupTask t; t.modelId = "clip"; t.dummyRunCount = 2;
-    eng.QueueTask(t);
-    ASSERT(eng.QueuedCount() == 1);
-}
-TEST(Test_NPUWarmupEngine_WarmAll)
-{
-    NPUWarmupEngine eng;
-    WarmupTask t; t.modelId = "m1"; t.dummyRunCount = 1;
-    eng.QueueTask(t);
-    eng.WarmAll();
-    ASSERT(eng.IsWarmed());
-}
-TEST(Test_NPUWarmupEngine_WarmAllResults)
-{
-    NPUWarmupEngine eng;
-    WarmupTask t; t.modelId = "resnet"; t.dummyRunCount = 3;
-    eng.QueueTask(t);
-    auto results = eng.WarmAll();
-    ASSERT(results.size() == 1);
-    ASSERT(results[0].IsWarm());
-}
-TEST(Test_NPUWarmupEngine_WarmAllEmpty)
-{
-    NPUWarmupEngine eng;
-    eng.WarmAll();
-    ASSERT(eng.IsWarmed());
-}
-TEST(Test_NPUWarmupEngine_ClearQueue)
-{
-    NPUWarmupEngine eng;
-    WarmupTask t; t.modelId = "m2";
-    eng.QueueTask(t);
-    eng.ClearQueue();
-    ASSERT(eng.QueuedCount() == 0);
-}
-TEST(Test_NPUWarmupEngine_PolicyEnum)
-{
-    ASSERT(WarmupPolicy::Eager != WarmupPolicy::Lazy);
-    ASSERT(WarmupPolicy::Scheduled != WarmupPolicy::Eager);
-}
-TEST(Test_NPUWarmupEngine_Callback)
-{
-    NPUWarmupEngine eng;
-    int called = 0;
-    eng.SetCallback([&](const std::string&, uint32_t){ ++called; });
-    WarmupTask t; t.modelId = "cb_test"; t.dummyRunCount = 1;
-    eng.QueueTask(t);
-    eng.WarmAll();
-    ASSERT(called == 1);
-}
-TEST(Test_NPUWarmupEngine_Reset)
-{
-    NPUWarmupEngine eng;
-    WarmupTask t; t.modelId = "m3"; t.dummyRunCount = 1;
-    eng.QueueTask(t);
-    eng.WarmAll();
-    eng.Reset();
-    ASSERT(!eng.IsWarmed());
-    ASSERT(eng.QueuedCount() == 0);
 }
 TEST(Test_ARM64DecodeBackend_Create)
 {
@@ -30652,27 +28784,6 @@ TEST(Test_WinRTThumbnailBridge_EmptyPath)
     auto result = bridge.GetThumbnail(req);
     ASSERT(!result.Ok()); // empty path → rejected before handler
 }
-TEST(Test_CopilotPlatformBridge_Create)
-{
-    using namespace ExplorerLens::Engine;
-    CopilotPlatformBridge bridge;
-    ASSERT(!bridge.IsAvailable());
-}
-TEST(Test_CopilotPlatformBridge_InjectableInvoke)
-{
-    using namespace ExplorerLens::Engine;
-    CopilotPlatformBridge bridge;
-    bridge.SetInvokeFunction([](const CopilotInvokeRequest&) -> CopilotInvokeResult {
-        CopilotInvokeResult r; r.success = true; r.output = "summary: test"; return r;
-    });
-    bridge.SetStatus(CopilotRuntimeStatus::Available);
-    CopilotInvokeRequest req;
-    req.feature  = CopilotFeature::ContentSummary;
-    req.filePath = L"photo.jpg";
-    auto result  = bridge.Invoke(req);
-    ASSERT(result.success);
-    ASSERT(result.output.find("summary") != std::string::npos);
-}
 TEST(Test_AppContainerIsolation_Create)
 {
     using namespace ExplorerLens::Engine;
@@ -31045,33 +29156,6 @@ TEST(Test_ConflictResolutionMerger_StrategyName)
     using namespace ExplorerLens::Engine;
     ASSERT(ConflictResolutionMerger::StrategyName(ConflictResolutionStrategy::ThreeWayMerge)
            == "ThreeWayMerge");
-}
-TEST(Test_CollaborativePluginHost_CreateSession)
-{
-    using namespace ExplorerLens::Engine;
-    CollaborativePluginHost host;
-    CollabPluginSession session; session.pluginId = "plugin1"; session.ownerUserId = "alice";
-    ASSERT(host.CreateSession(session));
-    ASSERT(host.SessionCount() == 1);
-}
-TEST(Test_CollaborativePluginHost_JoinAndInvoke)
-{
-    using namespace ExplorerLens::Engine;
-    CollaborativePluginHost host;
-    host.SetHandler([](const std::string&, const std::string& user, const std::string& input) {
-        CollabPluginInvokeResult r; r.success = true; r.invokerUserId = user; r.output = input; return r;
-    });
-    CollabPluginSession s; s.pluginId = "p1"; s.ownerUserId = "alice";
-    host.CreateSession(s);
-    host.JoinSession("p1", "bob");
-    auto r = host.Invoke("p1", "bob", "hello");
-    ASSERT(r.Ok());
-    ASSERT(r.output == "hello");
-}
-TEST(Test_CollaborativePluginHost_PolicyName)
-{
-    using namespace ExplorerLens::Engine;
-    ASSERT(CollaborativePluginHost::PolicyName(CollabPluginPolicy::ViewOnly) == "ViewOnly");
 }
 TEST(Test_PresenceAvatarRenderer_Render_Empty)
 {
@@ -32026,171 +30110,13 @@ TEST(Test_PrivacyAuditLogger_EntriesForSubject)
     ASSERT(entries.size() == 1);
 }
 
-TEST(Test_FederatedLearningCoordinator_RunRound)
-{
-    using namespace ExplorerLens::Engine;
-    FedRoundConfig cfg; cfg.minClients = 2;
-    FederatedLearningCoordinator coord(cfg);
-    std::vector<std::vector<float>> grads = {{0.1f, 0.2f}, {0.3f, 0.4f}};
-    auto r = coord.RunRound(grads);
-    ASSERT(r.success);
-    ASSERT(r.participantCount == 2);
-    ASSERT(r.globalLoss > 0.0f);
-}
-TEST(Test_FederatedLearningCoordinator_InsufficientClients)
-{
-    using namespace ExplorerLens::Engine;
-    FedRoundConfig cfg; cfg.minClients = 3;
-    FederatedLearningCoordinator coord(cfg);
-    auto r = coord.RunRound({{0.1f}});
-    ASSERT(!r.success);
-}
 
-TEST(Test_PersonalizedRankingModel_Rank)
-{
-    using namespace ExplorerLens::Engine;
-    PersonalizedRankingModel mdl;
-    PRMRankRequest req;
-    req.candidates = {"doc1", "doc2", "doc3"};
-    req.baseScores = {0.7f, 0.8f, 0.6f};
-    req.userProfile = "alice";
-    auto r = mdl.Rank(req);
-    ASSERT(r.success);
-    ASSERT(r.ranked.size() == 3);
-    ASSERT(!r.scores.empty());
-}
-TEST(Test_PersonalizedRankingModel_UpdateSignal)
-{
-    using namespace ExplorerLens::Engine;
-    PersonalizedRankingModel mdl;
-    mdl.UpdateUserSignal("alice", "doc1", 0.9f);
-    ASSERT(mdl.GetSignal("alice", "doc1") == 0.9f);
-    ASSERT(mdl.SignalCount() == 1);
-}
 
-TEST(Test_FederatedModelAggregator_Aggregate)
-{
-    using namespace ExplorerLens::Engine;
-    FedAggConfig cfg; cfg.minParticipants = 2;
-    FederatedModelAggregator agg(cfg);
-    auto r = agg.Aggregate({{1.0f, 2.0f}, {3.0f, 4.0f}});
-    ASSERT(r.success);
-    ASSERT(r.weights.size() == 2);
-    ASSERT(r.participants == 2);
-}
-TEST(Test_FederatedModelAggregator_InsufficientParticipants)
-{
-    using namespace ExplorerLens::Engine;
-    FedAggConfig cfg; cfg.minParticipants = 3;
-    FederatedModelAggregator agg(cfg);
-    auto r = agg.Aggregate({{1.0f}});
-    ASSERT(!r.success);
-}
 
-TEST(Test_OnDeviceFineTuningEngine_Train)
-{
-    using namespace ExplorerLens::Engine;
-    OFTETrainConfig cfg; cfg.epochs = 10; cfg.learningRate = 0.1f;
-    OnDeviceFineTuningEngine eng(cfg);
-    std::vector<std::vector<float>> samples = {{1.0f}, {2.0f}};
-    auto r = eng.Train(samples);
-    ASSERT(r.success);
-    ASSERT(r.epochsRun > 0);
-}
-TEST(Test_OnDeviceFineTuningEngine_WeightCount)
-{
-    using namespace ExplorerLens::Engine;
-    OFTETrainConfig cfg; cfg.loraRank = 4;
-    OnDeviceFineTuningEngine eng(cfg);
-    ASSERT(eng.WeightCount() > 0);
-}
 
-TEST(Test_NeuralCompressionCodec_Compress)
-{
-    using namespace ExplorerLens::Engine;
-    NeuralCompressionCodec codec;
-    NeuralCompressRequest req;
-    req.rgbaData.assign(256*256*4, 0xAA);
-    req.width = 256; req.height = 256;
-    auto r = codec.Compress(req);
-    ASSERT(r.success);
-    ASSERT(r.compressionRatio > 1.0f);
-    ASSERT(!r.compressed.empty());
-}
-TEST(Test_NeuralCompressionCodec_EmptyInput)
-{
-    using namespace ExplorerLens::Engine;
-    NeuralCompressionCodec codec;
-    NeuralCompressRequest req;
-    auto r = codec.Compress(req);
-    ASSERT(!r.success);
-}
-TEST(Test_NeuralCompressionCodec_ModeName)
-{
-    using namespace ExplorerLens::Engine;
-    ASSERT(NeuralCompressionCodec::ModeName(NeuralCodecMode::Fast) == "Fast");
-    ASSERT(NeuralCompressionCodec::ModeName(NeuralCodecMode::MaxQuality) == "MaxQuality");
-}
 
-TEST(Test_EmbeddingFederationBus_QueryMatch)
-{
-    using namespace ExplorerLens::Engine;
-    EmbeddingFederationBus bus;
-    bus.RegisterEmbedding("img1", {1.0f, 0.0f});
-    bus.RegisterEmbedding("img2", {0.0f, 1.0f});
-    EFBQueryRequest req;
-    req.queryEmbedding = {1.0f, 0.0f};
-    req.minSimilarity = 0.8f;
-    auto r = bus.Query(req);
-    ASSERT(r.success);
-    ASSERT(!r.matches.empty());
-    ASSERT(r.matches[0].id == "img1");
-}
-TEST(Test_EmbeddingFederationBus_EmbeddingCount)
-{
-    using namespace ExplorerLens::Engine;
-    EmbeddingFederationBus bus;
-    bus.RegisterEmbedding("a", {1.0f});
-    bus.RegisterEmbedding("b", {0.5f});
-    ASSERT(bus.EmbeddingCount() == 2);
-}
 
-TEST(Test_ModelVersioningController_ActivateRollback)
-{
-    using namespace ExplorerLens::Engine;
-    ModelVersioningController mvc;
-    mvc.RegisterVersion({"v1.0", 1, 0.85f, false});
-    mvc.RegisterVersion({"v2.0", 2, 0.90f, false});
-    ASSERT(mvc.ActivateVersion("v1.0"));
-    ASSERT(mvc.ActivateVersion("v2.0"));
-    auto r = mvc.Rollback();
-    ASSERT(r.success);
-    ASSERT(r.rolledBackTo == "v1.0");
-}
-TEST(Test_ModelVersioningController_RollbackEmpty)
-{
-    using namespace ExplorerLens::Engine;
-    ModelVersioningController mvc;
-    auto r = mvc.Rollback();
-    ASSERT(!r.success);
-}
 
-TEST(Test_FederatedSearchEnhancer_Search)
-{
-    using namespace ExplorerLens::Engine;
-    FederatedSearchEnhancer enh;
-    FSESearchRequest req; req.query = "cat"; req.localCandidates = {"cat.jpg", "dog.jpg", "cat2.jpg"}; req.topK = 2;
-    auto r = enh.Search(req);
-    ASSERT(r.success);
-    ASSERT(r.results.size() == 2);
-}
-TEST(Test_FederatedSearchEnhancer_IndexAndSize)
-{
-    using namespace ExplorerLens::Engine;
-    FederatedSearchEnhancer enh;
-    enh.IndexDocument("doc1", "hello world");
-    ASSERT(enh.IndexSize() == 1);
-}
 
 TEST(Test_LiveStreamDecoder_DecodeFirstFrame)
 {
@@ -32501,47 +30427,7 @@ TEST(Test_ClusterObservabilityBus_QueryByNode)
     ASSERT(spans.size() == 1);
 }
 
-TEST(Test_PluginCapabilityMatrixV3_Evaluate)
-{
-    using namespace ExplorerLens::Engine;
-    PluginCapabilityMatrixV3 matrix;
-    PCMv3PluginProfile profile; profile.pluginId = "p1";
-    profile.capabilityMask = static_cast<uint32_t>(PCMv3Capability::Decode) |
-                             static_cast<uint32_t>(PCMv3Capability::GPU_Accelerate);
-    matrix.Register(profile);
-    auto r = matrix.Evaluate("p1", static_cast<uint32_t>(PCMv3Capability::Decode));
-    ASSERT(r.granted);
-    ASSERT(r.grantedMask == static_cast<uint32_t>(PCMv3Capability::Decode));
-}
-TEST(Test_PluginCapabilityMatrixV3_Denied)
-{
-    using namespace ExplorerLens::Engine;
-    PluginCapabilityMatrixV3 matrix;
-    PCMv3PluginProfile profile; profile.pluginId = "p1"; profile.capabilityMask = 0;
-    matrix.Register(profile);
-    auto r = matrix.Evaluate("p1", static_cast<uint32_t>(PCMv3Capability::Network));
-    ASSERT(!r.granted);
-    ASSERT(r.deniedMask == static_cast<uint32_t>(PCMv3Capability::Network));
-}
 
-TEST(Test_PluginMarketplaceConnector_Install)
-{
-    using namespace ExplorerLens::Engine;
-    PluginMarketplaceConnector conn;
-    conn.AddListing({"p1", "CoolPlugin", "1.0.0", "Author", 4.5f, 100});
-    auto r = conn.Install("p1");
-    ASSERT(r.success);
-    ASSERT(conn.IsInstalled("p1"));
-}
-TEST(Test_PluginMarketplaceConnector_Search)
-{
-    using namespace ExplorerLens::Engine;
-    PluginMarketplaceConnector conn;
-    conn.AddListing({"x1", "ImageDecoder", "1.0", "Dev", 3.0f, 50});
-    auto results = conn.Search("Image");
-    ASSERT(!results.empty());
-    ASSERT(results[0].id == "x1");
-}
 
 TEST(Test_PluginSandboxV3_Execute)
 {
@@ -32560,44 +30446,7 @@ TEST(Test_PluginSandboxV3_MemoryLimit)
     ASSERT(!r.success);
 }
 
-TEST(Test_PluginLifecycleManagerV3_LoadActivate)
-{
-    using namespace ExplorerLens::Engine;
-    PluginLifecycleManagerV3 mgr;
-    ASSERT(mgr.Load("p1", "1.0.0"));
-    ASSERT(mgr.Activate("p1"));
-    ASSERT(mgr.GetState("p1") == PLMv3State::Active);
-}
-TEST(Test_PluginLifecycleManagerV3_HotSwap)
-{
-    using namespace ExplorerLens::Engine;
-    PluginLifecycleManagerV3 mgr;
-    mgr.Load("p1", "1.0.0");
-    auto r = mgr.HotSwap("p1", "2.0.0");
-    ASSERT(r.success);
-    ASSERT(r.oldVersion == "1.0.0");
-    ASSERT(r.newVersion == "2.0.0");
-}
 
-TEST(Test_PluginTelemetryCollector_RecordAndSummary)
-{
-    using namespace ExplorerLens::Engine;
-    PluginTelemetryCollector col;
-    col.Record({"p1", "decode", 5.0f, false});
-    col.Record({"p1", "decode", 10.0f, true});
-    auto s = col.GetSummary("p1");
-    ASSERT(s.totalEvents == 2);
-    ASSERT(s.errorCount == 1);
-    ASSERT(s.avgDuration == 7.5f);
-}
-TEST(Test_PluginTelemetryCollector_Flush)
-{
-    using namespace ExplorerLens::Engine;
-    PluginTelemetryCollector col;
-    col.Record({"p1", "ev", 1.0f, false});
-    col.FlushPlugin("p1");
-    ASSERT(col.TotalEventCount() == 0);
-}
 
 TEST(Test_PluginCompatibilityShimV3_Load)
 {
@@ -32616,23 +30465,6 @@ TEST(Test_PluginCompatibilityShimV3_EmptyPath)
     ASSERT(!r.success);
 }
 
-TEST(Test_PluginNetworkProxy_AllowedRequest)
-{
-    using namespace ExplorerLens::Engine;
-    PNPConfig cfg; cfg.allowNetwork = true; cfg.allowList = {"marketplace.example.com"};
-    PluginNetworkProxy proxy(cfg);
-    auto r = proxy.Request("p1", "https://marketplace.example.com/api/list");
-    ASSERT(r.success);
-    ASSERT(r.statusCode == 200);
-}
-TEST(Test_PluginNetworkProxy_Blocked)
-{
-    using namespace ExplorerLens::Engine;
-    PNPConfig cfg; cfg.allowNetwork = false;
-    PluginNetworkProxy proxy(cfg);
-    auto r = proxy.Request("p1", "https://anything.com");
-    ASSERT(!r.success);
-}
 
 TEST(Test_FolderPredictionModel_TopPredictions)
 {
@@ -32853,25 +30685,6 @@ TEST(Test_AnnotationTaxonomyV2_LabelCount)
     ASSERT(tax.LabelCount() == 2);
 }
 
-TEST(Test_AIAnnotationAssistant_Suggest)
-{
-    using namespace ExplorerLens::Engine;
-    AIAnnotationAssistant asst;
-    AAASuggestionRequest req;
-    req.rgbaData.assign(64*64*4, 0x80); req.width = 64; req.height = 64; req.topK = 3;
-    auto r = asst.Suggest(req);
-    ASSERT(r.success);
-    ASSERT(r.suggestions.size() == 3);
-    ASSERT(r.suggestions[0].confidence > r.suggestions[2].confidence);
-}
-TEST(Test_AIAnnotationAssistant_NoImage)
-{
-    using namespace ExplorerLens::Engine;
-    AIAnnotationAssistant asst;
-    AAASuggestionRequest req;
-    auto r = asst.Suggest(req);
-    ASSERT(!r.success);
-}
 
 TEST(Test_OfflineAnnotationSyncQueue_EnqueueFlush)
 {
@@ -33113,25 +30926,6 @@ TEST(Test_NeuralCodecV2Engine_BackendAvailability)
     ASSERT(NeuralCodecV2Engine::BackendName(NCV2Backend::DirectML) == "DirectML");
 }
 
-TEST(Test_SSIMQualityController_Measure)
-{
-    using namespace ExplorerLens::Engine;
-    SQCConfig cfg; cfg.minSSIM = 0.90f;
-    SSIMQualityController sqc(cfg);
-    std::vector<uint8_t> img(64, 128);
-    std::vector<uint8_t> compressed(64, 125);  // Slightly different
-    auto r = sqc.Measure(img, compressed);
-    ASSERT(r.success);
-    ASSERT(r.ssim >= 0.0f && r.ssim <= 1.0f);
-}
-TEST(Test_SSIMQualityController_SizeMismatch)
-{
-    using namespace ExplorerLens::Engine;
-    SQCConfig cfg;
-    SSIMQualityController sqc(cfg);
-    auto r = sqc.Measure({1, 2, 3}, {1, 2});
-    ASSERT(!r.success);
-}
 
 TEST(Test_ProgressiveNeuralDecoder_Steps)
 {
@@ -33178,47 +30972,7 @@ TEST(Test_NeuralContainerFormat_IsNCFData)
     ASSERT(NeuralContainerFormat::Extension() == ".ncf");
 }
 
-TEST(Test_MultiResLatentPyramid_Encode)
-{
-    using namespace ExplorerLens::Engine;
-    MultiResLatentPyramid pyramid;
-    std::vector<uint8_t> img(64*64*4, 0x80);
-    auto r = pyramid.Encode(img, 64, 64);
-    ASSERT(r.success);
-    ASSERT(r.pyramid.size() == 4);
-    ASSERT(r.pyramid[0].width >= r.pyramid[3].width);  // Coarser levels are smaller
-    ASSERT(r.bitsPerPixel > 0.0f);
-}
-TEST(Test_MultiResLatentPyramid_EmptyInput)
-{
-    using namespace ExplorerLens::Engine;
-    MultiResLatentPyramid pyramid;
-    auto r = pyramid.Encode({}, 0, 0);
-    ASSERT(!r.success);
-}
 
-TEST(Test_LearnedEntropyCoder_Encode)
-{
-    using namespace ExplorerLens::Engine;
-    LearnedEntropyCoder coder(LECContextModel::Adaptive);
-    std::vector<uint8_t> symbols(100, 0x40);
-    auto r = coder.Encode(symbols);
-    ASSERT(r.success);
-    ASSERT(!r.bitstream.empty());
-    ASSERT(r.bitsPerSymbol > 0.0f);
-}
-TEST(Test_LearnedEntropyCoder_Decode)
-{
-    using namespace ExplorerLens::Engine;
-    LearnedEntropyCoder coder(LECContextModel::Static);
-    auto dec = coder.Decode({0xFF, 0xEE}, 10);
-    ASSERT(dec.size() == 10);
-}
-TEST(Test_LearnedEntropyCoder_ModelName)
-{
-    using namespace ExplorerLens::Engine;
-    ASSERT(LearnedEntropyCoder::ModelName(LECContextModel::Hyperprior) == "Hyperprior");
-}
 
 TEST(Test_NeuralCodecHWAccelerator_Encode)
 {
@@ -33403,27 +31157,8 @@ TEST(COMTestRunnerGracefulSkip)
 
 // ---- Sprint 261-270 (v20.6.0 "Quasar-W") — Plugin Marketplace v2 ----
 
-TEST(TestPluginDiscoveryEngine_InitialState) {
-    using namespace ExplorerLens::Engine;
-    PluginDiscoveryEngine eng;
-    ASSERT(!eng.IsInitialized());
-}
 
-TEST(TestPluginDiscoveryEngine_Initialize) {
-    using namespace ExplorerLens::Engine;
-    PluginDiscoveryEngine eng;
-    ASSERT(eng.Initialize());
-    ASSERT(eng.IsInitialized());
-    ASSERT(!eng.GetName().empty());
-}
 
-TEST(TestPluginDiscoveryEngine_SearchEmpty) {
-    using namespace ExplorerLens::Engine;
-    PluginDiscoveryEngine eng;
-    eng.Initialize();
-    auto results = eng.Search("");
-    ASSERT(results.empty());
-}
 
 TEST(TestPluginPackageManifest_DefaultCapabilities) {
     using namespace ExplorerLens::Engine;
@@ -33432,33 +31167,9 @@ TEST(TestPluginPackageManifest_DefaultCapabilities) {
     ASSERT(manifest.version.empty());
 }
 
-TEST(TestPluginSignatureVerifier_DefaultPolicy) {
-    using namespace ExplorerLens::Engine;
-    PluginSignatureVerifier verifier;
-    ASSERT(verifier.GetTrustPolicy() == SignatureTrustPolicy::RequireValid);
-}
 
-TEST(TestPluginUpdateScheduler_DefaultPolicy) {
-    using namespace ExplorerLens::Engine;
-    PluginUpdateScheduler scheduler;
-    ASSERT(!scheduler.IsRunning());
-}
 
-TEST(TestPluginUsageTracker_InitialCounters) {
-    using namespace ExplorerLens::Engine;
-    PluginUsageStats stats;
-    ASSERT(stats.totalInvocations == 0);
-    ASSERT(stats.successCount == 0);
-}
 
-TEST(TestPluginVersionResolver_SemVerParse) {
-    using namespace ExplorerLens::Engine;
-    SemVer v;
-    v.major = 1; v.minor = 2; v.patch = 3;
-    ASSERT(v.major == 1);
-    ASSERT(v.minor == 2);
-    ASSERT(v.patch == 3);
-}
 
 // ---- Sprint 271-280 (v20.7.0 "Quasar-X") — Observability v2 ----
 
@@ -33752,9 +31463,6 @@ TEST(TestNSFWGuardMode_DisabledIsZero) {
 }
 
 // ---- Sprint 351-360 (v22.3.0 "Sirius-T") — AI Inference Pipeline v2 ----
-TEST(TestAIModelRole_ContentClassifierIsZero) {
-    ASSERT(static_cast<uint8_t>(AIModelRole::ContentClassifier) == 0);
-}
 TEST(TestUpscaleBackend_AutoIsZero) {
     ASSERT(static_cast<uint8_t>(AIUpscaleBackend::Auto) == 0);
 }
@@ -33766,10 +31474,6 @@ TEST(TestInterpolationMode_FastIsZero) {
 }
 TEST(TestSynthesisStatus_SuccessIsZero) {
     ASSERT(static_cast<int>(SynthesisStatus::Success) == 0);
-}
-TEST(TestSemanticColorPalette_DecodeEmpty) {
-    auto pal = SemanticColorPalette::Decode("");
-    ASSERT(pal.empty());
 }
 
 //== Sprint 361-370: Advanced Scheduling & Concurrency v2 (v22.4.0 Sirius-U) ==
@@ -34090,60 +31794,6 @@ TEST(TestGPUThumbnailAtlasManager_InsertLookup) {
 }
 
 //== Sprint 421-430: Plugin Ecosystem v3 (v23.2.0 Vega-S) ==
-TEST(TestPluginDIContainer_RegisterQuery) {
-    PluginDIContainer c;
-    c.Register("IDecoder", Lifetime::Singleton, []() -> void* { return nullptr; });
-    ASSERT(c.IsRegistered("IDecoder"));
-    ASSERT(!c.IsRegistered("IFoo"));
-    ASSERT(!c.HasCircularDependency());
-}
-TEST(TestPluginABTestFramework_AssignCohort) {
-    PluginABTestFramework fw;
-    fw.RegisterExperiment({ "exp1", 0.33, 0.33, 0.34 });
-    ASSERT(fw.IsExperimentActive("exp1"));
-    auto c0 = fw.AssignCohort("exp1", 0);
-    auto c1 = fw.AssignCohort("exp1", 1);
-    auto c2 = fw.AssignCohort("exp1", 2);
-    ASSERT(c0 != c1 || c1 != c2 || c0 == c2);  // just verify no crash
-}
-TEST(TestPluginFeatureFlagEngine_IsEnabled) {
-    PluginFeatureFlagEngine e;
-    e.SetFlag({ "dark_mode", true, 1.0, "v2" });
-    e.SetFlag({ "beta_ui",   false, 0.5, "a" });
-    ASSERT(e.IsEnabled("dark_mode", 0));
-    ASSERT(!e.IsEnabled("beta_ui", 0));
-    ASSERT(e.Variant("dark_mode") == "v2");
-}
-TEST(TestPluginSLAMonitor_NotViolating) {
-    PluginSLAMonitor m;
-    m.RegisterBudget({ "decoder_v2", 20.0, 3 });
-    for (int i = 0; i < 20; i++) m.RecordLatency("decoder_v2", 5.0);
-    ASSERT(!m.IsViolating("decoder_v2"));
-    ASSERT(m.ViolationCount() == 0);
-}
-TEST(TestPluginCanaryController_StartRollout) {
-    PluginCanaryController c;
-    c.StartCanary("pdf_decoder", "2.0.0", 0.1);
-    ASSERT(c.ActiveCanaries() == 1);
-    ASSERT(!c.IsRollingBack("pdf_decoder"));
-    c.RecordError("pdf_decoder");
-}
-TEST(TestPluginComplianceAuditorV2_Audit) {
-    PluginComplianceAuditorV2 a;
-    auto r = a.Audit("lens_decoder_v3");
-    ASSERT(r.passed);
-    ASSERT(r.failures.empty());
-    ASSERT(a.IsCheckEnabled(ComplianceCheckV2::Signature));
-}
-TEST(TestPluginHotConfigReceiver_PushCallback) {
-    PluginHotConfigReceiver r;
-    int called = 0;
-    r.Subscribe("max_threads", [&](const HotConfigPayload& p) { called++; (void)p; });
-    r.Push({ "pdf_decoder", "max_threads", "8", 1 });
-    ASSERT(called == 1);
-    ASSERT(r.LastRevision() == 1);
-    ASSERT(r.ListenerCount("max_threads") == 1);
-}
 
 //== Sprint 431-440: Memory Optimization v3 (v23.3.0 Vega-T) ==
 TEST(TestPageFileArenaAllocator_AllocReset) {
@@ -34234,151 +31884,12 @@ TEST(TestCacheEncryptionLayer_EncryptDecrypt) {
     ASSERT(!r.tag.empty());
 }
 //== Sprint 451-460: CLI & Automation v2 (v23.5.0 Vega-V) ==
-TEST(TestLensBatchProcessorV2_RunEmpty) {
-    LensBatchProcessorV2 p;
-    auto r = p.Run({ {}, L"out", 256, 256, 4 });
-    ASSERT(!p.IsCancelled());
-    ASSERT(r.processed == 0);
-}
-TEST(TestLensWatchDaemon_StartStop) {
-    LensWatchDaemon d;
-    ASSERT(d.Start({ L"C:\\", true, 200 }));
-    ASSERT(d.IsRunning());
-    d.Stop();
-    ASSERT(!d.IsRunning());
-    ASSERT(d.DrainEvents().empty());
-}
-TEST(TestLensPerceptualDiff_Identical) {
-    LensPerceptualDiff diff;
-    std::vector<uint8_t> a(64 * 64 * 4, 128);
-    auto r = diff.Compare(a, a, 64, 64);
-    ASSERT(r.identical);
-    ASSERT(r.ssim == 1.0);
-    ASSERT(diff.AreIdentical(a, a));
-}
-TEST(TestLensFormatExporter_SupportsFormats) {
-    LensFormatExporter e;
-    ASSERT(e.SupportsFormat("webp"));
-    ASSERT(e.SupportsFormat("avif"));
-    ASSERT(e.SupportsFormat("jpeg"));
-    ASSERT(!e.SupportsFormat("xyz123"));
-}
-TEST(TestLensProfileCapture_BeginEnd) {
-    LensProfileCapture cap;
-    cap.Begin("decode");
-    cap.End("decode");
-    ASSERT(cap.EventCount() == 2);
-    auto json = cap.ExportJSON();
-    ASSERT(!json.empty());
-    cap.Reset();
-    ASSERT(cap.EventCount() == 0);
-}
-TEST(TestLensCacheCLI_SetMaxSize) {
-    LensCacheCLI cli;
-    ASSERT(cli.SetMaxSize(512 * 1024 * 1024));
-    ASSERT(cli.MaxSize() == 512 * 1024 * 1024);
-    auto st = cli.Inspect();
-    ASSERT(st.entryCount == 0);
-}
-TEST(TestLensPluginCLI_InstallList) {
-    LensPluginCLI cli;
-    ASSERT(cli.Install(L"plugin.lpkg"));
-    ASSERT(cli.InstalledCount() == 0);  // stub Install returns true but doesn't add
-}
-TEST(TestCICDWebhookReceiver_DispatchEvent) {
-    CICDWebhookReceiver recv;
-    int received = 0;
-    recv.OnEvent(WebhookEvent::BuildComplete, [&](const WebhookPayload& p) {
-        received++; (void)p;
-    });
-    ASSERT(recv.Start(8080));
-    ASSERT(recv.Port() == 8080);
-    recv.Dispatch({ WebhookEvent::BuildComplete, "refs/heads/main", "abc123", "ci" });
-    ASSERT(received == 1);
-    recv.Stop();
-}
 // ============================================================
 // Sprint 801-810 — Platform Tests (v28.0.0 Polaris)
 // ============================================================
 // ============================================================
 // Sprint 811-820 — AI Captions (v28.1.0 Polaris-R)
 // ============================================================
-TEST(TestVLMEmbeddingEngine_Embed) {
-    using namespace ExplorerLens::Engine;
-    VLMEmbeddingEngine vlm;
-    ASSERT(vlm.Initialize(VLMBackend::CLIP));
-    std::vector<uint8_t> img(256*256*4, 0x80);
-    auto emb = vlm.EmbedImage(img, 256, 256);
-    ASSERT(!emb.empty());
-    vlm.Shutdown();
-}
-TEST(TestCaptionGenerationPipeline_Generate) {
-    using namespace ExplorerLens::Engine;
-    CaptionGenerationPipeline pipe;
-    ASSERT(pipe.Initialize());
-    CaptionRequest req; req.filePath = "test.jpg";
-    auto res = pipe.Generate(req);
-    ASSERT(res.success);
-    ASSERT(!res.caption.empty());
-    pipe.Shutdown();
-}
-TEST(TestOnDeviceCaptionInferer_Infer) {
-    using namespace ExplorerLens::Engine;
-    OnDeviceCaptionInferer inferer;
-    ASSERT(inferer.Initialize(OnDeviceBackend::CPU));
-    ASSERT(inferer.IsCloudFree());
-    std::vector<uint8_t> img(64*64*4, 0xCC);
-    auto res = inferer.Infer(img, 64, 64);
-    ASSERT(res.success);
-    inferer.Shutdown();
-}
-TEST(TestCaptionStyleTransferEngine_Transfer) {
-    using namespace ExplorerLens::Engine;
-    CaptionStyleTransferEngine ste;
-    ASSERT(ste.Initialize());
-    auto res = ste.Transfer("A bright colorful image.", CaptionRegister::Accessibility);
-    ASSERT(res.success);
-    ASSERT(!res.styledCaption.empty());
-    ste.Shutdown();
-}
-TEST(TestAltTextGeneratorV2_WCAG) {
-    using namespace ExplorerLens::Engine;
-    AltTextGeneratorV2 gen;
-    ASSERT(gen.Initialize());
-    AltTextRequest req; req.filePath = "photo.jpg";
-    req.width = 256; req.height = 256;
-    auto res = gen.Generate(req);
-    ASSERT(res.success);
-    ASSERT(res.PassesWCAG());
-    gen.Shutdown();
-}
-TEST(TestBatchCaptionPipeline_ProcessQueue) {
-    using namespace ExplorerLens::Engine;
-    BatchCaptionPipeline bp;
-    ASSERT(bp.Initialize(4));
-    bp.Enqueue({"a.jpg"}, CaptionPriority::Normal);
-    bp.Enqueue({"b.jpg"}, CaptionPriority::High);
-    auto progress = bp.ProcessAll();
-    ASSERT(progress.total == 2);
-    bp.Shutdown();
-}
-TEST(TestIncrementalCaptionUpdater_ComputeDelta) {
-    using namespace ExplorerLens::Engine;
-    IncrementalCaptionUpdater upd;
-    ASSERT(upd.Initialize());
-    auto delta = upd.ComputeDelta("key1", "old caption", "new caption");
-    ASSERT(delta.similarity >= 0.0f && delta.similarity <= 1.0f);
-    upd.Shutdown();
-}
-TEST(TestCaptionSearchIndexer_Search) {
-    using namespace ExplorerLens::Engine;
-    CaptionSearchIndexer idx;
-    ASSERT(idx.Initialize());
-    idx.AddEntry({"img1.jpg", "sunset over the ocean"});
-    auto results = idx.SearchKeyword("ocean", 5);
-    ASSERT(!results.empty());
-    idx.Shutdown();
-}
 // ============================================================
 // Sprint 821-830 — AR Tests (v28.2.0 Polaris-S)
 // ============================================================
@@ -34447,21 +31958,6 @@ TEST(TestDilithiumCertificateStore_ImportGet) {
     ASSERT(out.subjectDN == "CN=Test");
     ASSERT(store.Count() == 1);
     store.Shutdown();
-}
-TEST(TestPQCPluginManifestVerifier_Verify) {
-    using namespace ExplorerLens::Engine;
-    PQCPluginManifestVerifier ver;
-    ASSERT(ver.Initialize());
-    PQCPluginManifest manifest;
-    manifest.pluginId = "p1";
-    manifest.classicPublicKey = {0xAA};
-    manifest.classicSignature  = {0xBB};
-    manifest.mldsaPublicKey    = {0xCC};
-    manifest.mldsaSignature    = {0xDD};
-    manifest.requiresHybridVerify = true;
-    auto res = ver.Verify(manifest);
-    ASSERT(res.bothOk);
-    ver.Shutdown();
 }
 TEST(TestSignatureAuditLogger_LogExport) {
     using namespace ExplorerLens::Engine;
@@ -34700,19 +32196,6 @@ TEST(TestShellExtHealthMonitorV2_Latency) {
 // ============================================================
 // Sprint 891-900 — Accessibility v2 Tests (v29.1.0 Capella-R)
 // ============================================================
-TEST(TestAltTextSynthesizerBLIP2_Synthesize) {
-    using namespace ExplorerLens::Engine;
-    AltTextSynthesizerBLIP2 synth;
-    ASSERT(synth.Initialize(BLIP2Backend::CPU));
-    ASSERT(synth.IsCloudFree());
-    BLIP2AltTextRequest req;
-    req.rgbaPixels.assign(64*64*4, 0x80);
-    req.width = 64; req.height = 64;
-    auto res = synth.Synthesize(req);
-    ASSERT(res.success);
-    ASSERT(!res.altText.empty());
-    synth.Shutdown();
-}
 TEST(TestARIAThumbnailAnnotator_RenderAttr) {
     using namespace ExplorerLens::Engine;
     ARIAThumbnailAnnotator ann;
@@ -34747,17 +32230,6 @@ TEST(TestHighContrastThemeAdapter_Adapt) {
     auto hc = adapter.AdaptPalette(HighContrastMode::Black);
     ASSERT(hc.thumbBackground != off.thumbBackground);
     adapter.Shutdown();
-}
-TEST(TestCaptionQualityScorer_Score) {
-    using namespace ExplorerLens::Engine;
-    CaptionQualityScorer scorer;
-    ASSERT(scorer.Initialize());
-    auto metrics = scorer.Score("A bright sunny photo.");
-    ASSERT(metrics.overallScore > 0.0f);
-    ASSERT(metrics.passesAccessibility);
-    auto bad = scorer.Score("");
-    ASSERT(bad.overallScore == 0.0f);
-    scorer.Shutdown();
 }
 TEST(TestScreenReaderBridge_Announce) {
     using namespace ExplorerLens::Engine;
@@ -36795,9 +34267,6 @@ int main()
     RUN_TEST(TestETW_EventLevels);
 
     // Plugin Consolidation
-    RUN_TEST(TestPluginMarketplaceUnified_VersionEnum);
-    RUN_TEST(TestPluginMarketplaceUnified_V2Search);
-    RUN_TEST(TestPluginMarketplaceUnified_V3Categories);
     RUN_TEST(TestPluginSecurity_LevelEnum);
     RUN_TEST(TestPluginSecurity_SandboxPreset);
     RUN_TEST(TestPluginSecurity_SandboxPolicyStruct);
@@ -38471,8 +35940,6 @@ int main()
 
     // Plugin Subsystem Tests
     std::wcout << L"Plugin Subsystem Tests..." << std::endl;
-    RUN_TEST(Test_PluginTrustChain_ValidateSelf);
-    RUN_TEST(Test_PluginHotReload_VersionBump);
     RUN_TEST(Test_PluginSandbox_Restrict);
     RUN_TEST(Test_PluginPerformanceProfiler_Timing);
     RUN_TEST(Test_SharedMemory_CreateOpen);
@@ -38769,15 +36236,9 @@ int main()
     RUN_TEST(Test_S395_ScopedMemoryBudget);
     RUN_TEST(Test_S395_ThreadLocalPoolAllocator);
     // AI
-    RUN_TEST(Test_S395_ThumbnailSaliencyMap);
     RUN_TEST(Test_S395_AdaptiveCropEngine);
-    RUN_TEST(Test_S395_ColorPaletteGenerator);
-    RUN_TEST(Test_S395_ImageSimilarityMatcher);
     RUN_TEST(Test_S395_FileTypePredictor);
     // Plugin
-    RUN_TEST(Test_S395_PluginUpdateChecker);
-    RUN_TEST(Test_S395_PluginConfigMigrator);
-    RUN_TEST(Test_S395_PluginMetricsExporter);
     // Utils
     RUN_TEST(Test_S395_PerformanceReportGenerator);
     RUN_TEST(Test_S395_SystemInfoCollector);
@@ -38831,15 +36292,8 @@ int main()
     RUN_TEST(Test_S396_GuardPageProtector);
     RUN_TEST(Test_S396_WorkingSetOptimizer);
     // AI
-    RUN_TEST(Test_S396_AutoWhiteBalanceCorrector);
-    RUN_TEST(Test_S396_DocumentLayoutClassifier);
-    RUN_TEST(Test_S396_ThumbnailComplexityRouter);
-    RUN_TEST(Test_S396_VisualQualityPredictor);
-    RUN_TEST(Test_S396_SmartThumbnailRanker);
     // Plugin
-    RUN_TEST(Test_S396_PluginRateLimiter);
     RUN_TEST(Test_S396_PluginStatePersistence);
-    RUN_TEST(Test_S396_PluginIsolationMonitor);
     // Decoders
     RUN_TEST(Test_S396_ClipboardImageDecoder);
     RUN_TEST(Test_S396_ScreenshotAnalyzer);
@@ -38864,13 +36318,6 @@ int main()
     RUN_TEST(Test_S399_GPUTextureMipChain);
     RUN_TEST(Test_S399_GPUOccupancyCalculator);
     RUN_TEST(Test_S399_ComputeDispatchOptimizer);
-    RUN_TEST(Test_S399_SmartCropPredictor);
-    RUN_TEST(Test_S399_ThumbnailQualityScorer);
-    RUN_TEST(Test_S399_ContentClassifier);
-    RUN_TEST(Test_S399_DuplicateImageDetector);
-    RUN_TEST(Test_S399_PluginCapabilityNegotiator);
-    RUN_TEST(Test_S399_PluginStateCoordinator);
-    RUN_TEST(Test_S399_PluginCommunicationBridge);
     RUN_TEST(Test_S399_DiagnosticBundleCollector);
     RUN_TEST(Test_S399_RegressionTestRunner);
     std::wcout << std::endl;
@@ -38904,14 +36351,7 @@ int main()
 
     // Sprint 261-270 — Plugin Marketplace v2 Tests
     std::wcout << L"Plugin Marketplace v2 Tests (Sprint 261-270):" << std::endl;
-    RUN_TEST(TestPluginDiscoveryEngine_InitialState);
-    RUN_TEST(TestPluginDiscoveryEngine_Initialize);
-    RUN_TEST(TestPluginDiscoveryEngine_SearchEmpty);
     RUN_TEST(TestPluginPackageManifest_DefaultCapabilities);
-    RUN_TEST(TestPluginSignatureVerifier_DefaultPolicy);
-    RUN_TEST(TestPluginUpdateScheduler_DefaultPolicy);
-    RUN_TEST(TestPluginUsageTracker_InitialCounters);
-    RUN_TEST(TestPluginVersionResolver_SemVerParse);
     std::wcout << std::endl;
 
     // Sprint 271-280 — Observability v2 Tests
@@ -38996,12 +36436,10 @@ int main()
 
     // Sprint 351-360 — AI Inference Pipeline v2 Tests
     std::wcout << L"AI Inference Pipeline v2 Tests (Sprint 351-360):" << std::endl;
-    RUN_TEST(TestAIModelRole_ContentClassifierIsZero);
     RUN_TEST(TestUpscaleBackend_AutoIsZero);
     RUN_TEST(TestContentCategory_UnknownIsZero);
     RUN_TEST(TestInterpolationMode_FastIsZero);
     RUN_TEST(TestSynthesisStatus_SuccessIsZero);
-    RUN_TEST(TestSemanticColorPalette_DecodeEmpty);
 
     // Sprint 361-370: Advanced Scheduling & Concurrency v2 (v22.4.0 Sirius-U)
     RUN_TEST(TestLockFreeMPMCQueue_PushPop);
@@ -39062,13 +36500,6 @@ int main()
     RUN_TEST(TestGPUThumbnailAtlasManager_InsertLookup);
 
     // Sprint 421-430: Plugin Ecosystem v3 (v23.2.0 Vega-S)
-    RUN_TEST(TestPluginDIContainer_RegisterQuery);
-    RUN_TEST(TestPluginABTestFramework_AssignCohort);
-    RUN_TEST(TestPluginFeatureFlagEngine_IsEnabled);
-    RUN_TEST(TestPluginSLAMonitor_NotViolating);
-    RUN_TEST(TestPluginCanaryController_StartRollout);
-    RUN_TEST(TestPluginComplianceAuditorV2_Audit);
-    RUN_TEST(TestPluginHotConfigReceiver_PushCallback);
 
     // Sprint 431-440: Memory Optimization v3 (v23.3.0 Vega-T)
     RUN_TEST(TestPageFileArenaAllocator_AllocReset);
@@ -39085,14 +36516,6 @@ int main()
     RUN_TEST(TestCacheEncryptionLayer_EncryptDecrypt);
 
     // Sprint 451-460: CLI & Automation v2 (v23.5.0 Vega-V)
-    RUN_TEST(TestLensBatchProcessorV2_RunEmpty);
-    RUN_TEST(TestLensWatchDaemon_StartStop);
-    RUN_TEST(TestLensPerceptualDiff_Identical);
-    RUN_TEST(TestLensFormatExporter_SupportsFormats);
-    RUN_TEST(TestLensProfileCapture_BeginEnd);
-    RUN_TEST(TestLensCacheCLI_SetMaxSize);
-    RUN_TEST(TestLensPluginCLI_InstallList);
-    RUN_TEST(TestCICDWebhookReceiver_DispatchEvent);
 
     // Sprint 471-480 — Format Expansion V (v23.7.0 "Vega-X")
     std::wcout << L"Format Expansion V (v23.7.0 Vega-X)..." << std::endl;
@@ -39121,78 +36544,6 @@ int main()
     RUN_TEST(TestFLIFDecoderV2_Create);
     RUN_TEST(TestFLIFDecoderV2_InvalidFile);
     // Sprint 481-490 — AI-Native Thumbnailing v2 (v24.0.0 "Altair")
-    RUN_TEST(TestNeuralUpscalerV2_BackendDefault);
-    RUN_TEST(TestNeuralUpscalerV2_Constants);
-    RUN_TEST(TestNeuralUpscalerV2_NullPixelsFail);
-    RUN_TEST(TestNeuralUpscalerV2_SetBackendCPU);
-    RUN_TEST(TestNeuralUpscalerV2_SetBackendONNX);
-    RUN_TEST(TestNeuralUpscalerV2_SetFactorX2);
-    RUN_TEST(TestNeuralUpscalerV2_SetTileSize);
-    RUN_TEST(TestNeuralUpscalerV2_LoadModel);
-    RUN_TEST(TestNeuralUpscalerV2_UpscaleValidX4);
-    RUN_TEST(TestContentAwareResizer_DefaultStrategy);
-    RUN_TEST(TestContentAwareResizer_StrategySeamCarving);
-    RUN_TEST(TestContentAwareResizer_StrategyCropAndPad);
-    RUN_TEST(TestContentAwareResizer_StrategyLetterBox);
-    RUN_TEST(TestContentAwareResizer_PreserveFacesText);
-    RUN_TEST(TestContentAwareResizer_SetSaliencyThresh);
-    RUN_TEST(TestContentAwareResizer_SetSeamIterations);
-    RUN_TEST(TestContentAwareResizer_ResizeFileEmpty);
-    RUN_TEST(TestContentAwareResizer_ValidResize);
-    RUN_TEST(TestSemanticHashEngine_DefaultAlgo);
-    RUN_TEST(TestSemanticHashEngine_SetAlgoEfficientNetB0);
-    RUN_TEST(TestSemanticHashEngine_SetAlgoCLIP);
-    RUN_TEST(TestSemanticHashEngine_HammingIdentical);
-    RUN_TEST(TestSemanticHashEngine_HammingNonZero);
-    RUN_TEST(TestSemanticHashEngine_AreDuplicateFalse);
-    RUN_TEST(TestSemanticHashEngine_HashBitsConstant);
-    RUN_TEST(TestSemanticHashEngine_HashValidPixels);
-    RUN_TEST(TestSemanticHashEngine_HashFileEmpty);
-    RUN_TEST(TestAutoTaggingEngine_TaxonomyInit);
-    RUN_TEST(TestAutoTaggingEngine_LoadTaxonomyEmpty);
-    RUN_TEST(TestAutoTaggingEngine_LoadTaxonomyPath);
-    RUN_TEST(TestAutoTaggingEngine_MaxSupportedTags);
-    RUN_TEST(TestAutoTaggingEngine_MinValidConfidence);
-    RUN_TEST(TestAutoTaggingEngine_SetMaxTags);
-    RUN_TEST(TestAutoTaggingEngine_SetMinConfidence);
-    RUN_TEST(TestAutoTaggingEngine_TagNullPixels);
-    RUN_TEST(TestAutoTaggingEngine_TagNoTaxonomy);
-    RUN_TEST(TestQualityRestorationEngine_DefaultMode);
-    RUN_TEST(TestQualityRestorationEngine_SetModeDeblur);
-    RUN_TEST(TestQualityRestorationEngine_SetModeCombined);
-    RUN_TEST(TestQualityRestorationEngine_SetModeJPEGArtifact);
-    RUN_TEST(TestQualityRestorationEngine_RestoreNull);
-    RUN_TEST(TestQualityRestorationEngine_RestoreValidPixels);
-    RUN_TEST(TestQualityRestorationEngine_EstimateNoiseLevelNull);
-    RUN_TEST(TestQualityRestorationEngine_EstimateBlurLevelNull);
-    RUN_TEST(TestQualityRestorationEngine_Constants);
-    RUN_TEST(TestSceneDepthEstimatorV2_DefaultModel);
-    RUN_TEST(TestSceneDepthEstimatorV2_SetModelLarge);
-    RUN_TEST(TestSceneDepthEstimatorV2_SetModelDPT);
-    RUN_TEST(TestSceneDepthEstimatorV2_SetModelZoeDepth);
-    RUN_TEST(TestSceneDepthEstimatorV2_SetOutputTypeMetric);
-    RUN_TEST(TestSceneDepthEstimatorV2_Constants);
-    RUN_TEST(TestSceneDepthEstimatorV2_EstimateNull);
-    RUN_TEST(TestSceneDepthEstimatorV2_EstimateValid);
-    RUN_TEST(TestSceneDepthEstimatorV2_RenderDepthMapEmpty);
-    RUN_TEST(TestStyleTransferEngine_DefaultStyle);
-    RUN_TEST(TestStyleTransferEngine_SetStyleCandy);
-    RUN_TEST(TestStyleTransferEngine_SetStyleUdnie);
-    RUN_TEST(TestStyleTransferEngine_SetStyleRainPrincess);
-    RUN_TEST(TestStyleTransferEngine_SetStyleStarryNight);
-    RUN_TEST(TestStyleTransferEngine_Constants);
-    RUN_TEST(TestStyleTransferEngine_SetStrengthClamped);
-    RUN_TEST(TestStyleTransferEngine_TransferNull);
-    RUN_TEST(TestStyleTransferEngine_LoadCustomStyle);
-    RUN_TEST(TestLandmarkDetectionEngine_Defaults);
-    RUN_TEST(TestLandmarkDetectionEngine_Constants);
-    RUN_TEST(TestLandmarkDetectionEngine_SetMaxFaces);
-    RUN_TEST(TestLandmarkDetectionEngine_SetMinFaceScore);
-    RUN_TEST(TestLandmarkDetectionEngine_DetectNull);
-    RUN_TEST(TestLandmarkDetectionEngine_DetectValidPixels);
-    RUN_TEST(TestLandmarkDetectionEngine_GetOptimalCropBoxEmpty);
-    RUN_TEST(TestLandmarkDetectionEngine_GetOptimalCropBoxWithFace);
-    RUN_TEST(TestLandmarkDetectionEngine_DetectFileEmpty);
 
     // Sprint 491-500 — Cross-Process Architecture (v24.1.0 "Altair-R")
     RUN_TEST(TestOutOfProcServer_Defaults);
@@ -39518,9 +36869,6 @@ int main()
 
     // Sprint 63-64: Plugin Ecosystem
     std::wcout << L"\nSprint 63-64 Tests (Plugin Ecosystem)..." << std::endl;
-    RUN_TEST(Test_S63_PluginSandboxEnforcer_CheckAccess);
-    RUN_TEST(Test_S63_PluginPerformanceMonitor_Grade);
-    RUN_TEST(Test_S64_PluginHotReloader_Reload);
 
     // Sprint 65-66: Quality & Observability
     std::wcout << L"\nSprint 65-66 Tests (Quality & Observability)..." << std::endl;
@@ -39733,12 +37081,6 @@ int main()
     RUN_TEST(Test_EP_DirectMLInferenceEngine_Props);
     RUN_TEST(Test_EP_ONNXModelLoader_Validate);
     RUN_TEST(Test_EP_ONNXModelLoader_Props);
-    RUN_TEST(Test_EP_NeuralUpscaleV2_Validate);
-    RUN_TEST(Test_EP_NeuralUpscaleV2_Props);
-    RUN_TEST(Test_EP_SemanticTagGenerator_Validate);
-    RUN_TEST(Test_EP_SemanticTagGenerator_Props);
-    RUN_TEST(Test_EP_VisualSimilarityEngine_Validate);
-    RUN_TEST(Test_EP_VisualSimilarityEngine_Props);
     RUN_TEST(Test_EP_DPIScalingManager_Validate);
     RUN_TEST(Test_EP_DPIScalingManager_Props);
     RUN_TEST(Test_EP_HighContrastAdapter_Validate);
@@ -39749,14 +37091,6 @@ int main()
     RUN_TEST(Test_EP_SettingsSerializer_Props);
     RUN_TEST(Test_EP_LivePerformanceTracker_Validate);
     RUN_TEST(Test_EP_LivePerformanceTracker_Props);
-    RUN_TEST(Test_EP_PluginDependencyGraph_Validate);
-    RUN_TEST(Test_EP_PluginDependencyGraph_Props);
-    RUN_TEST(Test_EP_PluginAPIVersionNegotiator_Validate);
-    RUN_TEST(Test_EP_PluginAPIVersionNegotiator_Props);
-    RUN_TEST(Test_EP_PluginResourceQuotaManager_Validate);
-    RUN_TEST(Test_EP_PluginResourceQuotaManager_Props);
-    RUN_TEST(Test_EP_PluginDiagnosticsExporter_Validate);
-    RUN_TEST(Test_EP_PluginDiagnosticsExporter_Props);
     RUN_TEST(Test_EP_JPEG2000DecoderV2_Validate);
     RUN_TEST(Test_EP_JPEG2000DecoderV2_Props);
     RUN_TEST(Test_EP_UniversalVideoDecoder_Validate);
@@ -39775,108 +37109,9 @@ int main()
 
     // WASM Plugin Sandbox Tests (Sprint 561-570 / v25.1.0 "Rigel-R")
     std::wcout << L"WASM Plugin Sandbox Tests..." << std::endl;
-    RUN_TEST(Test_WASMRuntimeAdapter_Create);
-    RUN_TEST(Test_WASMRuntimeAdapter_Config);
-    RUN_TEST(Test_WASMRuntimeAdapter_Initialize);
-    RUN_TEST(Test_WASMRuntimeAdapter_LoadModule);
-    RUN_TEST(Test_WASMRuntimeAdapter_Flags);
-    RUN_TEST(Test_WASMRuntimeAdapter_Unload);
-    RUN_TEST(Test_WASMRuntimeAdapter_SetConfig);
-    RUN_TEST(Test_WASMRuntimeAdapter_Sandbox);
-    RUN_TEST(Test_WASMRuntimeAdapter_Runtimes);
-    RUN_TEST(Test_WASMMemorySafetyModel_Create);
-    RUN_TEST(Test_WASMMemorySafetyModel_Capabilities);
-    RUN_TEST(Test_WASMMemorySafetyModel_Grant);
-    RUN_TEST(Test_WASMMemorySafetyModel_Policy);
-    RUN_TEST(Test_WASMMemorySafetyModel_Size);
-    RUN_TEST(Test_WASMMemorySafetyModel_Guard);
-    RUN_TEST(Test_WASMMemorySafetyModel_Reset);
-    RUN_TEST(Test_WASMMemorySafetyModel_OrOperator);
-    RUN_TEST(Test_WASMMemorySafetyModel_AllCaps);
-    RUN_TEST(Test_WASMPluginLoader_Create);
-    RUN_TEST(Test_WASMPluginLoader_LoadValid);
-    RUN_TEST(Test_WASMPluginLoader_LoadEmpty);
-    RUN_TEST(Test_WASMPluginLoader_Unload);
-    RUN_TEST(Test_WASMPluginLoader_Manifest);
-    RUN_TEST(Test_WASMPluginLoader_Validation);
-    RUN_TEST(Test_WASMPluginLoader_LoadTime);
-    RUN_TEST(Test_WASMPluginLoader_SizeReported);
-    RUN_TEST(Test_WASMPluginLoader_StatusEnum);
-    RUN_TEST(Test_WITBindingGenerator_Create);
-    RUN_TEST(Test_WITBindingGenerator_Generate);
-    RUN_TEST(Test_WITBindingGenerator_EmptyInterface);
-    RUN_TEST(Test_WITBindingGenerator_Options);
-    RUN_TEST(Test_WITBindingGenerator_Namespace);
-    RUN_TEST(Test_WITBindingGenerator_Reset);
-    RUN_TEST(Test_WITBindingGenerator_Formats);
-    RUN_TEST(Test_WITBindingGenerator_MultiMethod);
-    RUN_TEST(Test_WITBindingGenerator_SetOptions);
-    RUN_TEST(Test_WASMHostController_Create);
-    RUN_TEST(Test_WASMHostController_Launch);
-    RUN_TEST(Test_WASMHostController_Terminate);
-    RUN_TEST(Test_WASMHostController_Suspend);
-    RUN_TEST(Test_WASMHostController_ResourceLimits);
-    RUN_TEST(Test_WASMHostController_WithinLimits);
-    RUN_TEST(Test_WASMHostController_Isolation);
-    RUN_TEST(Test_WASMHostController_Metrics);
-    RUN_TEST(Test_WASMHostController_Reset);
-    RUN_TEST(Test_WASMCapabilityNegotiator_Create);
-    RUN_TEST(Test_WASMCapabilityNegotiator_AllowDeny);
-    RUN_TEST(Test_WASMCapabilityNegotiator_Negotiate);
-    RUN_TEST(Test_WASMCapabilityNegotiator_Denied);
-    RUN_TEST(Test_WASMCapabilityNegotiator_Optional);
-    RUN_TEST(Test_WASMCapabilityNegotiator_MultiRequest);
-    RUN_TEST(Test_WASMCapabilityNegotiator_DenyOverride);
-    RUN_TEST(Test_WASMCapabilityNegotiator_Reset);
-    RUN_TEST(Test_WASMCapabilityNegotiator_Grant);
-    RUN_TEST(Test_WASMHotSwapEngine_Create);
-    RUN_TEST(Test_WASMHotSwapEngine_Swap);
-    RUN_TEST(Test_WASMHotSwapEngine_SwapEmpty);
-    RUN_TEST(Test_WASMHotSwapEngine_Policy);
-    RUN_TEST(Test_WASMHotSwapEngine_Snapshot);
-    RUN_TEST(Test_WASMHotSwapEngine_SwapDuration);
-    RUN_TEST(Test_WASMHotSwapEngine_Reset);
-    RUN_TEST(Test_WASMHotSwapEngine_Callback);
-    RUN_TEST(Test_WASMHotSwapEngine_States);
-    RUN_TEST(Test_WASMDebuggerBridge_Create);
-    RUN_TEST(Test_WASMDebuggerBridge_Connect);
-    RUN_TEST(Test_WASMDebuggerBridge_Breakpoint);
-    RUN_TEST(Test_WASMDebuggerBridge_RemoveBreakpoint);
-    RUN_TEST(Test_WASMDebuggerBridge_RemoveNonExistent);
-    RUN_TEST(Test_WASMDebuggerBridge_Config);
-    RUN_TEST(Test_WASMDebuggerBridge_CallStack);
-    RUN_TEST(Test_WASMDebuggerBridge_Reset);
-    RUN_TEST(Test_WASMDebuggerBridge_MultiBreakpoint);
 
     // Neural Format Intelligence Tests (Sprint 571-580 / v25.1.0 "Rigel-R")
     std::wcout << L"Neural Format Intelligence Tests..." << std::endl;
-    RUN_TEST(Test_NeuralFormatFingerprinter_Create);
-    RUN_TEST(Test_NeuralFormatFingerprinter_Initialize);
-    RUN_TEST(Test_NeuralFormatFingerprinter_Config);
-    RUN_TEST(Test_NeuralFormatFingerprinter_Classify);
-    RUN_TEST(Test_NeuralFormatFingerprinter_NotReady);
-    RUN_TEST(Test_NeuralFormatFingerprinter_Confidence);
-    RUN_TEST(Test_NeuralFormatFingerprinter_SetConfig);
-    RUN_TEST(Test_NeuralFormatFingerprinter_Reset);
-    RUN_TEST(Test_NeuralFormatFingerprinter_Backends);
-    RUN_TEST(Test_UnknownFormatHandler_Create);
-    RUN_TEST(Test_UnknownFormatHandler_Handle);
-    RUN_TEST(Test_UnknownFormatHandler_Strategy);
-    RUN_TEST(Test_UnknownFormatHandler_Multiple);
-    RUN_TEST(Test_UnknownFormatHandler_Reset);
-    RUN_TEST(Test_UnknownFormatHandler_Callback);
-    RUN_TEST(Test_UnknownFormatHandler_Diagnostic);
-    RUN_TEST(Test_UnknownFormatHandler_StrategyEnum);
-    RUN_TEST(Test_UnknownFormatHandler_Result);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_Create);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_LoadModel);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_Config);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_Infer);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_NotLoaded);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_Reliable);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_SetConfig);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_Reset);
-    RUN_TEST(Test_LLMMIMEInferenceEngine_Backend);
     RUN_TEST(Test_SelfExpandingFormatRegistry_Create);
     RUN_TEST(Test_SelfExpandingFormatRegistry_Register);
     RUN_TEST(Test_SelfExpandingFormatRegistry_Lookup);
@@ -39886,15 +37121,6 @@ int main()
     RUN_TEST(Test_SelfExpandingFormatRegistry_Remove);
     RUN_TEST(Test_SelfExpandingFormatRegistry_Stats);
     RUN_TEST(Test_SelfExpandingFormatRegistry_PersistLoad);
-    RUN_TEST(Test_FormatTransferLearner_Create);
-    RUN_TEST(Test_FormatTransferLearner_Config);
-    RUN_TEST(Test_FormatTransferLearner_AddSample);
-    RUN_TEST(Test_FormatTransferLearner_Train);
-    RUN_TEST(Test_FormatTransferLearner_TrainEmpty);
-    RUN_TEST(Test_FormatTransferLearner_Metrics);
-    RUN_TEST(Test_FormatTransferLearner_ClearSamples);
-    RUN_TEST(Test_FormatTransferLearner_Reset);
-    RUN_TEST(Test_FormatTransferLearner_Strategies);
     RUN_TEST(Test_FormatDetectionReport_Create);
     RUN_TEST(Test_FormatDetectionReport_AddVote);
     RUN_TEST(Test_FormatDetectionReport_Consensus);
@@ -39913,15 +37139,6 @@ int main()
     RUN_TEST(Test_SyntheticDecoderGenerator_Fidelity);
     RUN_TEST(Test_SyntheticDecoderGenerator_Reset);
     RUN_TEST(Test_SyntheticDecoderGenerator_Families);
-    RUN_TEST(Test_FormatEvolutionTracker_Create);
-    RUN_TEST(Test_FormatEvolutionTracker_Record);
-    RUN_TEST(Test_FormatEvolutionTracker_TrackedFormats);
-    RUN_TEST(Test_FormatEvolutionTracker_NoDrift);
-    RUN_TEST(Test_FormatEvolutionTracker_MinorDrift);
-    RUN_TEST(Test_FormatEvolutionTracker_MajorDrift);
-    RUN_TEST(Test_FormatEvolutionTracker_Unknown);
-    RUN_TEST(Test_FormatEvolutionTracker_Clear);
-    RUN_TEST(Test_FormatEvolutionTracker_Severities);
 
     // NPU & Heterogeneous Compute Tests (Sprint 581-590 / v25.2.0 "Rigel-S")
     std::wcout << L"NPU & Heterogeneous Compute Tests..." << std::endl;
@@ -39979,15 +37196,6 @@ int main()
     RUN_TEST(Test_NPUMemoryPool_Reset);
     RUN_TEST(Test_NPUMemoryPool_Config);
     RUN_TEST(Test_NPUMemoryPool_BlockCount);
-    RUN_TEST(Test_NPUWarmupEngine_Create);
-    RUN_TEST(Test_NPUWarmupEngine_QueueTask);
-    RUN_TEST(Test_NPUWarmupEngine_WarmAll);
-    RUN_TEST(Test_NPUWarmupEngine_WarmAllResults);
-    RUN_TEST(Test_NPUWarmupEngine_WarmAllEmpty);
-    RUN_TEST(Test_NPUWarmupEngine_ClearQueue);
-    RUN_TEST(Test_NPUWarmupEngine_PolicyEnum);
-    RUN_TEST(Test_NPUWarmupEngine_Callback);
-    RUN_TEST(Test_NPUWarmupEngine_Reset);
     RUN_TEST(Test_ARM64DecodeBackend_Create);
     RUN_TEST(Test_ARM64DecodeBackend_ProbeCapabilities);
     RUN_TEST(Test_ARM64DecodeBackend_DecodeStride_Valid);
@@ -40221,8 +37429,6 @@ int main()
     RUN_TEST(Test_WinRTThumbnailBridge_WithHandler);
     RUN_TEST(Test_WinRTThumbnailBridge_ModeName);
     RUN_TEST(Test_WinRTThumbnailBridge_EmptyPath);
-    RUN_TEST(Test_CopilotPlatformBridge_Create);
-    RUN_TEST(Test_CopilotPlatformBridge_InjectableInvoke);
     RUN_TEST(Test_AppContainerIsolation_Create);
     RUN_TEST(Test_AppContainerIsolation_GrantRevoke);
     RUN_TEST(Test_WinFSMetadataStore_Create);
@@ -40270,9 +37476,6 @@ int main()
     RUN_TEST(Test_ConflictResolutionMerger_LWW);
     RUN_TEST(Test_ConflictResolutionMerger_OwnerPriority);
     RUN_TEST(Test_ConflictResolutionMerger_StrategyName);
-    RUN_TEST(Test_CollaborativePluginHost_CreateSession);
-    RUN_TEST(Test_CollaborativePluginHost_JoinAndInvoke);
-    RUN_TEST(Test_CollaborativePluginHost_PolicyName);
     RUN_TEST(Test_PresenceAvatarRenderer_Render_Empty);
     RUN_TEST(Test_PresenceAvatarRenderer_Render_WithParticipants);
     RUN_TEST(Test_SessionReplayEngine_RecordAndPlay);
@@ -40384,23 +37587,6 @@ int main()
     RUN_TEST(Test_GDPRComplianceEngine_EmptySubject);
     RUN_TEST(Test_PrivacyAuditLogger_RecordAndVerify);
     RUN_TEST(Test_PrivacyAuditLogger_EntriesForSubject);
-    RUN_TEST(Test_FederatedLearningCoordinator_RunRound);
-    RUN_TEST(Test_FederatedLearningCoordinator_InsufficientClients);
-    RUN_TEST(Test_PersonalizedRankingModel_Rank);
-    RUN_TEST(Test_PersonalizedRankingModel_UpdateSignal);
-    RUN_TEST(Test_FederatedModelAggregator_Aggregate);
-    RUN_TEST(Test_FederatedModelAggregator_InsufficientParticipants);
-    RUN_TEST(Test_OnDeviceFineTuningEngine_Train);
-    RUN_TEST(Test_OnDeviceFineTuningEngine_WeightCount);
-    RUN_TEST(Test_NeuralCompressionCodec_Compress);
-    RUN_TEST(Test_NeuralCompressionCodec_EmptyInput);
-    RUN_TEST(Test_NeuralCompressionCodec_ModeName);
-    RUN_TEST(Test_EmbeddingFederationBus_QueryMatch);
-    RUN_TEST(Test_EmbeddingFederationBus_EmbeddingCount);
-    RUN_TEST(Test_ModelVersioningController_ActivateRollback);
-    RUN_TEST(Test_ModelVersioningController_RollbackEmpty);
-    RUN_TEST(Test_FederatedSearchEnhancer_Search);
-    RUN_TEST(Test_FederatedSearchEnhancer_IndexAndSize);
     RUN_TEST(Test_LiveStreamDecoder_DecodeFirstFrame);
     RUN_TEST(Test_LiveStreamDecoder_EmptyUrl);
     RUN_TEST(Test_LiveStreamDecoder_ProtocolName);
@@ -40434,20 +37620,10 @@ int main()
     RUN_TEST(Test_SecureClusterChannel_Send);
     RUN_TEST(Test_ClusterObservabilityBus_RecordAndSnapshot);
     RUN_TEST(Test_ClusterObservabilityBus_QueryByNode);
-    RUN_TEST(Test_PluginCapabilityMatrixV3_Evaluate);
-    RUN_TEST(Test_PluginCapabilityMatrixV3_Denied);
-    RUN_TEST(Test_PluginMarketplaceConnector_Install);
-    RUN_TEST(Test_PluginMarketplaceConnector_Search);
     RUN_TEST(Test_PluginSandboxV3_Execute);
     RUN_TEST(Test_PluginSandboxV3_MemoryLimit);
-    RUN_TEST(Test_PluginLifecycleManagerV3_LoadActivate);
-    RUN_TEST(Test_PluginLifecycleManagerV3_HotSwap);
-    RUN_TEST(Test_PluginTelemetryCollector_RecordAndSummary);
-    RUN_TEST(Test_PluginTelemetryCollector_Flush);
     RUN_TEST(Test_PluginCompatibilityShimV3_Load);
     RUN_TEST(Test_PluginCompatibilityShimV3_EmptyPath);
-    RUN_TEST(Test_PluginNetworkProxy_AllowedRequest);
-    RUN_TEST(Test_PluginNetworkProxy_Blocked);
     RUN_TEST(Test_FolderPredictionModel_TopPredictions);
     RUN_TEST(Test_FolderPredictionModel_TotalAccesses);
     RUN_TEST(Test_ColdStartFolderBootstrapper_Bootstrap);
@@ -40469,8 +37645,6 @@ int main()
     RUN_TEST(Test_PresenceIndicatorEngine_SetOffline);
     RUN_TEST(Test_AnnotationTaxonomyV2_LookupAndChildren);
     RUN_TEST(Test_AnnotationTaxonomyV2_LabelCount);
-    RUN_TEST(Test_AIAnnotationAssistant_Suggest);
-    RUN_TEST(Test_AIAnnotationAssistant_NoImage);
     RUN_TEST(Test_OfflineAnnotationSyncQueue_EnqueueFlush);
     RUN_TEST(Test_OfflineAnnotationSyncQueue_Clear);
     RUN_TEST(Test_AnnotationExportPipelineV2_Export);
@@ -40495,17 +37669,10 @@ int main()
     RUN_TEST(Test_NeuralCodecV2Engine_Encode);
     RUN_TEST(Test_NeuralCodecV2Engine_EmptyInput);
     RUN_TEST(Test_NeuralCodecV2Engine_BackendAvailability);
-    RUN_TEST(Test_SSIMQualityController_Measure);
-    RUN_TEST(Test_SSIMQualityController_SizeMismatch);
     RUN_TEST(Test_ProgressiveNeuralDecoder_Steps);
     RUN_TEST(Test_ProgressiveNeuralDecoder_Reset);
     RUN_TEST(Test_NeuralContainerFormat_SerializeDeserialize);
     RUN_TEST(Test_NeuralContainerFormat_IsNCFData);
-    RUN_TEST(Test_MultiResLatentPyramid_Encode);
-    RUN_TEST(Test_MultiResLatentPyramid_EmptyInput);
-    RUN_TEST(Test_LearnedEntropyCoder_Encode);
-    RUN_TEST(Test_LearnedEntropyCoder_Decode);
-    RUN_TEST(Test_LearnedEntropyCoder_ModelName);
     RUN_TEST(Test_NeuralCodecHWAccelerator_Encode);
     RUN_TEST(Test_NeuralCodecHWAccelerator_BackendNames);
     RUN_TEST(Test_CodecNegotiationProtocol_Negotiate);
@@ -40514,14 +37681,6 @@ int main()
 
     // Sprint 801-810 — Platform (v28.0.0 Polaris)
     // Sprint 811-820 — AI Captions (v28.1.0 Polaris-R)
-    RUN_TEST(TestVLMEmbeddingEngine_Embed);
-    RUN_TEST(TestCaptionGenerationPipeline_Generate);
-    RUN_TEST(TestOnDeviceCaptionInferer_Infer);
-    RUN_TEST(TestCaptionStyleTransferEngine_Transfer);
-    RUN_TEST(TestAltTextGeneratorV2_WCAG);
-    RUN_TEST(TestBatchCaptionPipeline_ProcessQueue);
-    RUN_TEST(TestIncrementalCaptionUpdater_ComputeDelta);
-    RUN_TEST(TestCaptionSearchIndexer_Search);
     // Sprint 821-830 — AR (v28.2.0 Polaris-S)
     // Sprint 831-840 — Enterprise (v28.3.0 Polaris-T)
     // Sprint 841-850 — UX (v28.4.0 Polaris-U)
@@ -40531,7 +37690,6 @@ int main()
     RUN_TEST(TestHybridTrustChainV2_Validate);
     RUN_TEST(TestQuantumSafeKeyExchange_Handshake);
     RUN_TEST(TestDilithiumCertificateStore_ImportGet);
-    RUN_TEST(TestPQCPluginManifestVerifier_Verify);
     RUN_TEST(TestSignatureAuditLogger_LogExport);
     RUN_TEST(TestCryptoAgilityBroker_Preferred);
     RUN_TEST(TestKeyRotationScheduler_TickFire);
@@ -40554,11 +37712,9 @@ int main()
     RUN_TEST(TestLivePreviewUpdater_WatchFire);
     RUN_TEST(TestShellExtHealthMonitorV2_Latency);
     // Sprint 891-900 — Accessibility v2 (v29.1.0 Capella-R)
-    RUN_TEST(TestAltTextSynthesizerBLIP2_Synthesize);
     RUN_TEST(TestARIAThumbnailAnnotator_RenderAttr);
     RUN_TEST(TestAccessibilityAuditEngine_Audit);
     RUN_TEST(TestHighContrastThemeAdapter_Adapt);
-    RUN_TEST(TestCaptionQualityScorer_Score);
     RUN_TEST(TestScreenReaderBridge_Announce);
     RUN_TEST(TestKeyboardNavigationController_ArrowKeys);
     RUN_TEST(TestA11yTelemetryReporter_Report);
