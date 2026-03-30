@@ -1,14 +1,18 @@
 # ExplorerLens Sprint Plan — 1000 Series (Sprints 961–1060)
 # Versions v30.0.0 "Deneb" through v31.1.0 "Achernar-R"
 
-**Baseline Tests at Sprint 960:** 3,509  
-**Projected Tests at Sprint 1060:** 4,229 (+720)  
-**Codename Theme:** Deneb (v30.x — Gen-6 Unification) → Achernar (v31.x — Generative Era)  
+**Baseline Tests at Sprint 960:** 3,461  
+**Projected Tests at Sprint 1060:** 4,181 (+720)  
+**Codename Theme:** Deneb (v30.x — Gen-6 Post-Consolidation) → Achernar (v31.x — Generative Era)  
 **Previous Plan:** [SPRINT_PLAN_900.md](SPRINT_PLAN_900.md) (Sprints 861–960, v28.6.0–v29.7.0)
 
 ---
 
-## Overview: The Gen-6 Era
+## Overview: The Gen-6 Era (Post-Consolidation)
+
+The v29.2.0–v29.7.0 **Consolidation Era** (Sprints 901–960) reduced the Engine from ~1,316
+headers to ~1,116 by eliminating duplication, extracting scope creep, and unifying competing
+implementations. The engine is now lean, focused, and ready for Gen-6.
 
 The **Deneb** major series (v30.x) represents the Gen-6 architectural leap for ExplorerLens:
 **Platform Unification** across Windows / macOS / Linux, **DirectStorage GPU Decompression**
@@ -35,10 +39,10 @@ Every architectural decision in this plan is evaluated against three invariants:
 
 | Version  | Codename    | Sprints   | Theme                                         | Tests  |
 |----------|-------------|-----------|-----------------------------------------------|--------|
-| v30.0.0  | Deneb       | 961–970   | Gen-6 Platform Unification (MAJOR)            | 3,581  |
-| v30.1.0  | Deneb-R     | 971–980   | DirectStorage & GPU Decompression             | 3,653  |
-| v30.2.0  | Deneb-S     | 981–990   | CLIP Semantic Search & Discovery              | 3,725  |
-| v30.3.0  | Deneb-T     | 991–1000  | Live Preview Scrubber & Rich Media            | 3,797  |
+| v30.0.0  | Deneb       | 961–970   | Gen-6 Platform Unification (MAJOR)            | 3,533  |
+| v30.1.0  | Deneb-R     | 971–980   | DirectStorage & GPU Decompression             | 3,605  |
+| v30.2.0  | Deneb-S     | 981–990   | CLIP Semantic Search & Discovery              | 3,677  |
+| v30.3.0  | Deneb-T     | 991–1000  | Live Preview Scrubber & Rich Media            | 3,749  |
 | v30.4.0  | Deneb-U     | 1001–1010 | Geospatial, Medical & Scientific Formats      | 3,869  |
 | v30.5.0  | Deneb-V     | 1011–1020 | Universal Format Decoder Library              | 3,941  |
 | v30.6.0  | Deneb-W     | 1021–1030 | Plugin Marketplace v4 & Commerce              | 4,013  |
@@ -73,7 +77,7 @@ cross-platform API, ending the Windows-only architectural constraint.
 | 7 | `Engine/Core/PlatformUIScalingEngine.h` | DPI-aware thumbnail scaling for all three platforms (Win HiDPI / Retina / Wayland HiDPI) |
 | 8 | `Engine/Utils/PlatformBuildMatrix.h` | Compile-time and runtime platform build matrix validator (CI gate for all three platforms) |
 
-**Test additions:** +72 tests (3,509 → 3,581)
+**Test additions:** +72 tests (3,461 → 3,533)
 
 **Acceptance Criteria:**
 - All eight headers compile cleanly with MSVC v145 (Windows), AppleClang 16 (macOS), GCC 14 (Linux)
@@ -113,7 +117,7 @@ to achieve near-flash-speed thumbnail generation for large RAW and HDR files.
 | 7 | `Engine/Core/AsyncFileStreamBroker.h` | Async file streaming broker (overlapped I/O ↔ DirectStorage unified API) |
 | 8 | `Engine/GPU/StagingBufferPoolV2.h` | Pooled staging buffers v2 for DirectStorage upload (configurable tier count) |
 
-**Test additions:** +72 tests (3,581 → 3,653)
+**Test additions:** +72 tests (3,533 → 3,605)
 
 **Acceptance Criteria:**
 - `DirectStorageEngine` loads a 50 MB ZSTD-compressed blob in < 80 ms on NVMe (CI: disk-speed-neutral mock)

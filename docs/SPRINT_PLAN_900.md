@@ -92,170 +92,184 @@ for the Manager GUI, high-contrast theme support, and AI-generated alt-text auth
 ---
 
 ## Sprint 901–910 — v29.2.0 "Capella-S"
-**Theme: Edge AI & Continuous On-Device Learning**
+**Theme: Project Consolidation Phase 1 — Version Sync & Documentation**
 
-Enable progressive model adaptation using on-device few-shot learning. Users' corrections
-(e.g. "this crop is bad") feed a lightweight LoRA adapter that personalises thumbnail
-ranking and smart-crop selection over time — fully private, no data leaves the device.
+Project-wide consolidation sprint. Fix all stale version references (SBOMGenerator.h,
+vcpkg.json, baseline.json stuck at v25.3.0). Archive obsolete docs (SPRINT_PLAN_600/700/800,
+ROADMAP_V25). Merge 4 overlapping architecture docs into unified index. Merge 6 overlapping
+build/release docs. Enhance Bump-Version.ps1 to handle all 12 version-bearing files.
 
 **Deliverables:**
-- `Engine/AI/OnDeviceFewShotAdapter.h`: LoRA-based few-shot adaptation layer (ONNX runtime)
-- `Engine/AI/UserFeedbackIngestor.h`: User feedback collector for implicit preference signals
-- `Engine/AI/PersonalisationModelStore.h`: Per-user personalisation model store (encrypted)
-- `Engine/AI/AdaptiveCropSelectionV2.h`: Adaptive crop selection v2 with user preference signals
-- `Engine/AI/EdgeModelCompressionEngine.h`: Quantisation-aware model compression for edge targets
-- `Engine/AI/ContinualLearningScheduler.h`: Continual learning scheduler (replay buffer + EWC)
-- `Engine/AI/ModelVersioningManager.h`: On-device model versioning with rollback support
-- `Engine/AI/PrivacyPreservingTrainer.h`: Differential-privacy training wrapper (ε-δ accountant)
+- Enhanced `build-scripts/Bump-Version.ps1`: Handles all 12 version files (SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg)
+- `docs/archive/SPRINT_PLAN_600.md`: Archived (moved from docs/)
+- `docs/archive/SPRINT_PLAN_700.md`: Archived (moved from docs/)
+- `docs/archive/SPRINT_PLAN_800.md`: Archived (moved from docs/)
+- `docs/archive/ROADMAP_V25.md`: Archived (moved from docs/)
+- Merged architecture docs into unified `docs/architecture/` index
+- Merged build/release docs into unified `docs/development/` guide
+- All 12 version-bearing files synced to v29.2.0
 
-**Test Count:** 3,461 + 8 = **3,469**
+**Test Count:** 3,461 (no new tests — consolidation sprint)
 
 ---
 
 ## Sprint 911–920 — v29.3.0 "Capella-T"
-**Theme: Spatial Computing & Immersive Previews**
+**Theme: Project Consolidation Phase 2 — Cache Subsystem Deduplication**
 
-Adds stereoscopic and lightfield preview rendering for MR/AR headsets. Extends the GPU
-pipeline with depth-aware composition, OpenXR layer submission, and a WebXR preview
-bridge for browser-based holographic viewers.
+Consolidate 77 cache headers into ~15 unified headers. Merge 3 cache migration engines
+into single `CacheMigrationEngine`. Merge 4 cache warming strategies into single
+`CacheWarmingService`. Merge 3 replication engines into single `CacheReplicator`.
+Merge 2 partition managers. Remove deprecated cache schedulers. Consolidate cache
+telemetry into main telemetry pipeline.
 
-**Deliverables:**
-- `Engine/GPU/StereoPreviewRenderer.h`: Side-by-side stereo thumbnail renderer
-- `Engine/GPU/LightfieldPreviewEncoder.h`: Lightfield / plenoptic preview encoder
-- `Engine/GPU/OpenXRLayerSubmitter.h`: OpenXR composition layer submission for MR headsets
-- `Engine/Core/DepthCompositor.h`: Depth-buffer-aware thumbnail compositor
-- `Engine/GPU/WebXRPreviewBridge.h`: WebXR / WebGPU bridge for browser holographic previews
-- `Engine/Core/SpatialAudioAnnotator.h`: Spatial audio metadata extractor for video thumbnails
-- `Engine/GPU/VariableRateShadingController.h`: VRS controller for adaptive-quality preview tiles
-- `Engine/Utils/OpenXRCapabilityProbe.h`: OpenXR runtime capability probe (runtime / extension discovery)
+**Consolidation Actions:**
+- Merge `CacheMigrationEngine` + `CacheMigrationManager` + `CacheMigrationTool` → unified `Engine/Cache/CacheMigrationEngine.h`
+- Merge `CacheWarmingService` + `IdleCacheWarmer` + `EvictionAwareCachePrimer` + `PredictivePreGenEngine` → unified `Engine/Cache/CacheWarmingService.h`
+- Merge `DistributedCacheSync` + `DeltaSyncReplicator` + `DistributedCacheReplicator` → unified `Engine/Cache/CacheReplicator.h`
+- Merge `CachePartitionManager` + `ShardedCachePartitionV2` → unified `Engine/Cache/CachePartitionManager.h`
+- Merge `CachePrewarmScheduler` + `CacheWarmingScheduler` → unified `Engine/Cache/CacheScheduler.h`
+- Remove ~55 superseded cache headers from ENGINE_HEADERS
+- Update all cache #include paths across Engine/
+- Consolidate cache tests in EngineTests.cpp
 
-**Test Count:** 3,469 + 8 = **3,477**
+**Headers Removed:** ~62 | **Headers Added:** 0 | **Net:** -62
+
+**Test Count:** 3,461 (tests consolidated, not added)
 
 ---
 
 ## Sprint 921–930 — v29.4.0 "Capella-U"
-**Theme: Telemetry & Observability v3 (OpenTelemetry + OTLP)**
+**Theme: Project Consolidation Phase 3 — Recovery & Telemetry Unification**
 
-Migrate from ETW-only observability to a fully OpenTelemetry-compatible stack. Introduces
-OTLP exporter, distributed trace context propagation across COM boundaries, live metrics
-streaming, and a Prometheus scrape endpoint for enterprise monitoring.
+Unify 6 competing recovery engines into single `RecoveryEngine` with pluggable strategy
+pattern. Unify 7+ telemetry engines into single `TelemetryPipeline` with domain-specific
+emitters. Merge duplicate `AuditLogger` / `AuditTrailLogger` into one.
 
-**Deliverables:**
-- `Engine/Core/OTLPExporter.h`: OpenTelemetry OTLP/gRPC exporter for traces + metrics
-- `Engine/Core/DistributedTraceContext.h`: W3C TraceContext propagation across COM boundaries
-- `Engine/Core/PrometheusMetricsEndpoint.h`: Prometheus scrape endpoint (HTTP/1.1 pull model)
-- `Engine/Core/LiveMetricsStreamer.h`: Sub-second live metrics streaming to dashboard
-- `Engine/Core/SamplingPolicyEngine.h`: Adaptive trace sampling policy engine (head/tail sampling)
-- `Engine/Utils/StructuredLogSinkV3.h`: Structured log sink v3 with OTLP log bridge
-- `Engine/Core/SpanAttributeEnricher.h`: COM span attribute enricher (user agent, session, build)
-- `Engine/Utils/HealthCheckHttpHandler.h`: HTTP health-check endpoint (/healthz, /readyz, /livez)
+**Consolidation Actions:**
+- Merge `ErrorRecoveryEngine` + `ErrorRecoveryEngineV2` + `CrashRecoveryEngine` + `GPUErrorRecovery` + `PluginCrashRecovery` + `ShellExtensionRecovery` + `CacheResilienceManager` → unified `Engine/Core/RecoveryEngine.h` with `IRecoveryStrategy` interface
+- Merge `TelemetryEngine` + `UsageTelemetryEngine` + `TelemetrySampler` + `TelemetryDataMinimizer` + `CacheTelemetryCollector` + `CollaborationTelemetryHub` + `PipelineTelemetryEmitter` → unified `Engine/Core/TelemetryPipeline.h` with `ITelemetryEmitter` interface
+- Merge `AuditLogger` + `AuditTrailLogger` → unified `Engine/Core/AuditLogger.h`
+- Remove ~12 superseded recovery/telemetry headers from ENGINE_HEADERS
+- Update all recovery/telemetry #include paths across Engine/
 
-**Test Count:** 3,477 + 8 = **3,485**
+**Headers Removed:** ~12 | **Headers Added:** 0 | **Net:** -12
+
+**Test Count:** 3,461 (tests consolidated, not added)
 
 ---
 
 ## Sprint 931–940 — v29.5.0 "Capella-V"
-**Theme: Plugin Marketplace Commerce & Monetisation**
+**Theme: Project Consolidation Phase 4 — Scheduler & Format Router Consolidation**
 
-Build the full plugin marketplace backend: app-store signing, in-app purchase receipts,
-subscription management, usage-based billing, and a developer revenue dashboard SDK.
+Unify 10+ scheduler implementations behind `IScheduler` interface with 3 specializations
+(decode, cache, power). Unify 6 format routing/detection classes into single
+`DecoderRouter` with fallback chain. Remove deprecated routing oracles.
 
-**Deliverables:**
-- `Engine/Plugin/MarketplaceReceiptVerifier.h`: App-store receipt verifier (WinStore + sideload)
-- `Engine/Plugin/SubscriptionLicenseManager.h`: Subscription + seat-based license manager
-- `Engine/Plugin/UsageBillingMeter.h`: Usage-based billing meter (API calls + decode events)
-- `Engine/Plugin/DeveloperRevenueSDK.h`: Developer revenue reporting SDK (webhook push)
-- `Engine/Plugin/PluginTrialManager.h`: Trial period enforcement with grace-period logic
-- `Engine/Plugin/MarketplaceSearchIndex.h`: Local plugin search index (BM25 + semantic)
-- `Engine/Plugin/LicenceHostingProxy.h`: Offline licence hosting proxy for air-gapped envs
-- `Engine/Plugin/PluginReviewGateway.h`: Pre-publish review gateway (static analysis + signing)
+**Consolidation Actions:**
+- Create `Engine/Core/IScheduler.h`: Common scheduler interface (priority, throttle, cancel)
+- Merge `BatchDecodeScheduler` + `PriorityDecodeScheduler` + `DecoderPriorityScheduler` + `DeferredDecodeScheduler` + `AdaptivePipelineScheduler` → unified `Engine/Pipeline/DecodeScheduler.h`
+- Merge `CacheWarmingScheduler` + `CachePrewarmScheduler` → already done in v29.3.0
+- Merge `PowerAwareScheduler` + `ThermalAwareMemoryScheduler` + `PowerBudgetController` → unified `Engine/Core/PowerScheduler.h`
+- Merge `AdaptiveDecoderRouter` + `DecoderPriorityRouter` + `DynamicFormatRouter` + `FormatDetectionOracle` + `FormatFallbackEngine` + `FormatNegotiator` → unified `Engine/Core/DecoderRouter.h` with fallback chain
+- Remove ~13 superseded scheduler/router headers from ENGINE_HEADERS
 
-**Test Count:** 3,485 + 8 = **3,493**
+**Headers Removed:** ~13 | **Headers Added:** 2 | **Net:** -11
+
+**Test Count:** 3,461 (tests consolidated, not added)
 
 ---
 
 ## Sprint 941–950 — v29.6.0 "Capella-W"
-**Theme: Enterprise SSO & Compliance v2 (SAML 2.0 + SOC-2 Type II)**
+**Theme: Project Consolidation Phase 5 — Scope Creep Extraction**
 
-Complete enterprise identity integration: SAML 2.0 SP-initiated SSO, OAuth 2.1 + PKCE,
-automated SOC-2 Type II evidence collection, and a SCIM 2.0 provisioning adapter for
-Entra ID / Okta.
+Extract out-of-scope modules from core Engine into optional components. Enterprise fleet
+management, Docker/K8s/Electron platform adapters, AR/spatial rendering, post-quantum
+crypto, UX A/B testing, and Cloud/SharePoint integration are moved to LENSManager or
+optional plugin directories. Core engine DLL shrinks significantly.
 
-**Deliverables:**
-- `Engine/Core/SAML2SPBridge.h`: SAML 2.0 service-provider bridge (AssertionConsumer endpoint)
-- `Engine/Core/OAuth21PKCEEngine.h`: OAuth 2.1 + PKCE authorisation code flow engine
-- `Engine/Core/SCIM2ProvisioningAdapter.h`: SCIM 2.0 user/group provisioning adapter
-- `Engine/Utils/SOC2EvidenceCollector.h`: Automated SOC-2 Type II evidence collection engine
-- `Engine/Core/EntraIDGroupPolicySync.h`: Microsoft Entra ID group-policy synchroniser
-- `Engine/Core/OktaWorkforceIdentityBridge.h`: Okta Workforce Identity integration bridge
-- `Engine/Utils/AuditTrailExporter.h`: Immutable audit trail exporter (CEF / JSON-LD)
-- `Engine/Core/ComplianceDashboardAPI.h`: REST compliance dashboard API (SOC-2 / ISO 27001)
+**Consolidation Actions:**
+- Move `Engine/Enterprise/` (17 headers) → `LENSManager/Enterprise/` (optional module)
+- Move `Engine/Platform/` (8 headers: Docker, K8s, Electron, PWA) → `tools/platform-adapters/` (deployment tools)
+- Move `Engine/AR/` (8 headers) → `Engine/Plugin/optional/AR/` (optional plugin)
+- Move `Engine/Security/` PQC headers (9 headers) → `Engine/Plugin/optional/Security/` (optional plugin)
+- Move `Engine/UX/` (8 headers: A/B testing, eye tracking) → `LENSManager/UX/` (manager feature)
+- Move `Engine/Cloud/` (12 headers: SharePoint/Teams) → `Engine/Plugin/optional/Cloud/` (optional plugin)
+- Remove all 62 moved headers from Engine/CMakeLists.txt ENGINE_HEADERS
+- Update #include paths for any remaining cross-references
 
-**Test Count:** 3,493 + 8 = **3,501**
+**Headers Removed from Engine:** 62 | **Net Engine reduction:** -62
+
+**Test Count:** 3,461 (tests move with their modules)
 
 ---
 
-## Sprint 951–960 — v29.7.0 "Capella-X"  *(LTS Candidate)*
-**Theme: Long-Term Support Hardening & Stability**
+## Sprint 951–960 — v29.7.0 "Capella-X"  *(Consolidation LTS)*
+**Theme: Project Consolidation Phase 6 — Plugin, AI & Build Cleanup**
 
-Finalises the v29.x LTS branch. Focus: hardened memory allocator, fuzzing-driven
-crash elimination, deterministic build reproducibility, and a regression safety net
-that gates releases on 99.99% test-pass rate.
+Final consolidation sprint. Merge 4 plugin marketplace versions into one. Extract
+AI scope creep (LLM, federated learning) to optional modules. Consolidate 11 CLI tools
+into unified `lens.exe` framework. Simplify build scripts. Full regression test pass
+on the consolidated codebase.
 
-**Deliverables:**
-- `Engine/Core/HardenedAllocator.h`: Hardened slab allocator with guard pages + canaries
-- `Engine/Core/DeterministicBuildValidator.h`: Deterministic build hash validator (reproducible output)
-- `Engine/Core/FuzzCorpusManager.h`: Fuzz corpus manager (LibFuzzer seed corpus + coverage goals)
-- `Engine/Core/RegressionSafetyNet.h`: Automated regression gate (bisect + blame attribution)
-- `Engine/Utils/MemoryCanaryEngine.h`: Runtime memory canary engine (stack + heap sentinels)
-- `Engine/Core/LTSCompatibilityMatrix.h`: LTS backward-compatibility matrix validator
-- `Engine/Utils/CrashSignatureDeduplicator.h`: Crash signature deduplication (minidump clustering)
-- `Engine/Core/StabilityScorecard.h`: Automated stability scorecard (MTBF + crash-free sessions)
+**Consolidation Actions:**
+- Merge `PluginMarketplace` + `V2` + `V3` → keep only `PluginMarketplaceUnified` in `Engine/Plugin/PluginMarketplace.h`
+- Move AI scope creep (`LLMMIMEInferenceEngine`, `OnDeviceFineTuningEngine`, `FederatedLearningCoordinator`, `StyleTransferEngine` + 30 more) → `Engine/Plugin/optional/AI/` (optional plugin)
+- Consolidate `Engine/CLI/` 11 separate tools → unified `Engine/CLI/LensCLI.h` command router
+- Simplify `build-scripts/` — merge `Test-Builds.ps1` + `Verify-Complete-Build.ps1`, inline `.bat` wrappers
+- Archive `docs/SPRINT_PLAN_600.md`, `700.md`, `800.md` to `docs/archive/`
+- Full regression test verification on consolidated engine
+- Update architecture documentation for new slimmed-down structure
 
-**Test Count:** 3,501 + 8 = **3,509**
+**Headers Removed from Engine:** ~40 (AI) + 3 (Plugin) + 10 (CLI) = ~53 | **Net:** -53
+
+**Test Count:** 3,461 (tests move with modules, consolidated engine verified)
 
 ---
 
 ## Cumulative Progress Tracker
 
-| Sprint Range | Version                        | Theme                             | Test Δ |
-|-------------|-------------------------------|-----------------------------------|--------|
-| 861–870     | v28.6.0 Polaris-W             | Post-Quantum Cryptography          | +8     |
-| 871–880     | v28.7.0 Polaris-X             | Cross-Platform Preview (macOS/Linux) | +8   |
-| 881–890     | v29.0.0 Capella (MAJOR)       | Gen-5 Platform + WinUI 4           | +8     |
-| 891–900     | v29.1.0 Capella-R             | Accessibility v2                   | +8     |
-| 901–910     | v29.2.0 Capella-S             | Edge AI & On-Device Learning       | +8     |
-| 911–920     | v29.3.0 Capella-T             | Spatial Computing & AR/VR          | +8     |
-| 921–930     | v29.4.0 Capella-U             | Telemetry & Observability v3       | +8     |
-| 931–940     | v29.5.0 Capella-V             | Plugin Marketplace Commerce        | +8     |
-| 941–950     | v29.6.0 Capella-W             | Enterprise SSO & Compliance v2     | +8     |
-| 951–960     | v29.7.0 Capella-X (LTS)       | Long-Term Support Hardening        | +8     |
-| **861–960** | **Polaris-W through Capella-X** | **Gen-5 Platform**               | **+80** |
+| Sprint Range | Version                        | Theme                             | Test Δ | Headers Δ |
+|-------------|-------------------------------|-----------------------------------|--------|-----------|
+| 861–870     | v28.6.0 Polaris-W             | Post-Quantum Cryptography          | +8     | +8        |
+| 871–880     | v28.7.0 Polaris-X             | Cross-Platform Preview (macOS/Linux) | +8   | +8        |
+| 881–890     | v29.0.0 Capella (MAJOR)       | Gen-5 Platform + WinUI 4           | +8     | +8        |
+| 891–900     | v29.1.0 Capella-R             | Accessibility v2                   | +8     | +8        |
+| 901–910     | v29.2.0 Capella-S             | **Consolidation: Docs & Version Sync** | 0  | 0         |
+| 911–920     | v29.3.0 Capella-T             | **Consolidation: Cache Dedup**     | 0      | **-62**   |
+| 921–930     | v29.4.0 Capella-U             | **Consolidation: Recovery & Telemetry** | 0 | **-12**   |
+| 931–940     | v29.5.0 Capella-V             | **Consolidation: Schedulers & Routers** | 0 | **-11**   |
+| 941–950     | v29.6.0 Capella-W             | **Consolidation: Scope Creep Extraction** | 0 | **-62** |
+| 951–960     | v29.7.0 Capella-X (LTS)       | **Consolidation: Plugin, AI & Build** | 0  | **-53**   |
+| **861–960** | **Polaris-W through Capella-X** | **Gen-5 Platform + Consolidation** | **+32** | **-200** |
 
-**Total at end of Sprint 960:** 3,429 + 80 = **3,509 unit tests**
-
----
-
-## Metrics & Performance Targets (Sprint 860 → 960)
-
-| Metric | v28.5.0 Baseline | v29.7.0 Target |
-|--------|-----------------|----------------|
-| Single thumbnail latency (P50) | 12 ms | 8 ms |
-| Batch throughput | 320 img/s | 450 img/s |
-| Cache hit latency | < 3 ms | < 1 ms |
-| Memory footprint (idle) | 35 MB | 28 MB |
-| Alt-text generation latency | < 500 ms | < 200 ms |
-| Supported platforms | Windows + macOS | Win + macOS + Linux |
-| Plugin ecosystem size | 60+ | 120+ |
-| Cross-platform format parity | 85% | 100% |
-| Crash-free session rate | 99.9% | 99.99% |
+**Total at end of Sprint 960:** 3,429 + 32 = **3,461 unit tests** (consolidated)
+**Engine headers at end of Sprint 960:** ~1,316 - 200 = **~1,116 headers** (17% reduction)
 
 ---
 
-## Architecture Pillars for Gen-5 (v29.x)
+## Consolidation Metrics (Sprint 900 → 960)
 
-1. **Out-of-Process Broker** — COM activation → async preview broker (`AsyncPreviewBroker.h`)
-2. **Cross-Platform GPU** — D3D12 / Metal / Vulkan via `PlatformNeutralBuffer.h`
-3. **OpenTelemetry-Native** — All spans, logs, metrics exported via OTLP
-4. **Edge AI by Default** — LoRA personalisation, quantised models, privacy-preserving learning
-5. **Compliance-Ready** — SOC-2 Type II, PQC signatures, SCIM 2.0 provisioning out of box
+| Metric | v29.1.0 Before | v29.7.0 Target | Change |
+|--------|---------------|----------------|--------|
+| Engine header files | 1,316 | ~1,116 | -200 (-15%) |
+| Cache headers | 77 | ~15 | -62 (-80%) |
+| Recovery engines | 6 | 1 | -5 (-83%) |
+| Telemetry engines | 7+ | 2 | -5 (-71%) |
+| Scheduler implementations | 10+ | 3 | -7 (-70%) |
+| Format routers | 6 | 1 | -5 (-83%) |
+| Plugin marketplace versions | 4 | 1 | -3 (-75%) |
+| Out-of-scope modules in Engine | 6 dirs (62 .h) | 0 (moved) | -100% |
+| Active docs (docs/) | 57 | ~30 | -27 (-47%) |
+| Stale version files | 6 files at v25.3.0 | 0 | -100% |
+| Memory footprint (idle) | 35 MB | 22 MB | -37% |
+| Build time (full) | 120 s | 75 s | -38% |
+
+---
+
+## Architecture Pillars for v29.x Consolidation Era
+
+1. **Lean Core Engine** — Only thumbnail-critical code in ExplorerLensEngine.lib
+2. **Optional Plugins** — Enterprise, AR, Cloud, PQC Security as loadable plugins
+3. **Unified Abstractions** — Single recovery, telemetry, scheduler, and router per concern
+4. **Cache Simplification** — 5 core cache classes instead of 77
+5. **Documentation Hygiene** — Single source of truth per topic, archived superseded plans

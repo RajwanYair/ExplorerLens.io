@@ -104,7 +104,92 @@ $rc = $rc -replace '(VALUE "ProductVersion",\s*")[^"]*(")', "`${1}$rcVerStr\0`${
 Set-Content $rcPath -Value $rc -NoNewline
 Write-Host "[bump] LENSManager.rc updated"
 
-# 6. CHANGELOG.md — prepend new section
+# 6. SBOMGenerator.h — two hardcoded version strings
+$sbomGenPath = "$rootDir\Engine\Core\SBOMGenerator.h"
+if (Test-Path $sbomGenPath) {
+    $sbomGen = Get-Content $sbomGenPath -Raw
+    $sbomGen = $sbomGen -replace 'ExplorerLens-[\d.]+', "ExplorerLens-$Version"
+    $sbomGen = $sbomGen -replace 'ExplorerLens-SBOMGenerator-[\d.]+', "ExplorerLens-SBOMGenerator-$Version"
+    Set-Content $sbomGenPath -Value $sbomGen -NoNewline
+    Write-Host "[bump] SBOMGenerator.h updated"
+}
+
+# 7. vcpkg.json — "version" field
+$vcpkgPath = "$rootDir\vcpkg.json"
+if (Test-Path $vcpkgPath) {
+    $vcpkg = Get-Content $vcpkgPath -Raw
+    $vcpkg = $vcpkg -replace '("version":\s*")[\d.]+(")', "`${1}$Version`${2}"
+    Set-Content $vcpkgPath -Value $vcpkg -NoNewline
+    Write-Host "[bump] vcpkg.json updated"
+}
+
+# 8. baseline.json — _comment, version, _updated
+$baselinePath = "$rootDir\Engine\Tests\benchmarks\baseline.json"
+if (Test-Path $baselinePath) {
+    $baseline = Get-Content $baselinePath -Raw
+    $dateStr = Get-Date -Format "yyyy-MM-dd"
+    $baseline = $baseline -replace '("_comment":\s*"ExplorerLens Engine Performance Baselines — v)[\d.]+ [^"]+(")', "`${1}$Version $Codename`${2}"
+    $baseline = $baseline -replace '("version":\s*")[\d.]+(")', "`${1}$Version`${2}"
+    $baseline = $baseline -replace '("_updated":\s*")[\d-]+(")', "`${1}$dateStr`${2}"
+    Set-Content $baselinePath -Value $baseline -NoNewline
+    Write-Host "[bump] baseline.json updated"
+}
+
+# 9. README.md — Tests badge + feature table row
+$readmePath = "$rootDir\README.md"
+if (Test-Path $readmePath) {
+    $readme = Get-Content $readmePath -Raw
+    if ($TestCount -gt 0) {
+        $readme = $readme -replace 'Tests-\d+%20passing', "Tests-$TestCount%20passing"
+        $readme = $readme -replace '(\| \*\*Tests\*\*\s*\| )[\d,]+ unit tests', "`${1}$("{0:N0}" -f $TestCount) unit tests"
+    }
+    Set-Content $readmePath -Value $readme -NoNewline
+    Write-Host "[bump] README.md updated"
+}
+
+# 10. tool-versions.md — date + version in header
+$tvPath = "$rootDir\.github\standards\tool-versions.md"
+if (Test-Path $tvPath) {
+    $dateStr = Get-Date -Format "d MMMM yyyy"
+    $tv = Get-Content $tvPath -Raw
+    $tv = $tv -replace '\*\*Last Updated:\*\* .+', "**Last Updated:** $dateStr (v$Version $Codename release)"
+    $tv = $tv -replace '\*\*Version:\*\* [\d.]+ "[^"]+"', "**Version:** $Version `"$Codename`""
+    Set-Content $tvPath -Value $tv -NoNewline
+    Write-Host "[bump] tool-versions.md updated"
+}
+
+# 11. SBOM.json — serialNumber + metadata.component.version + timestamp
+$sbomJsonPath = "$rootDir\docs\SBOM.json"
+if (Test-Path $sbomJsonPath) {
+    $dateStr = Get-Date -Format "yyyy-MM-dd"
+    $sbomJson = Get-Content $sbomJsonPath -Raw
+    $sbomJson = $sbomJson -replace '("serialNumber":\s*"urn:uuid:ExplorerLens-v)[\d.]+-[\d-]+(")', "`${1}$Version-$dateStr`${2}"
+    $sbomJson = $sbomJson -replace '("timestamp":\s*")[\d-]+T[\d:]+Z(")', "`${1}${dateStr}T00:00:00Z`${2}"
+    $sbomJson = $sbomJson -replace '("version":\s*")[\d.]+(",\s*\n\s*"description")', "`${1}$Version`${2}"
+    Set-Content $sbomJsonPath -Value $sbomJson -NoNewline
+    Write-Host "[bump] SBOM.json updated"
+}
+
+# 12. architecture-build.svg — MSI artifact filename chip
+$archSvgPath = "$rootDir\docs\assets\architecture-build.svg"
+if (Test-Path $archSvgPath) {
+    $archSvg = Get-Content $archSvgPath -Raw
+    $archSvg = $archSvg -replace 'ExplorerLens-[\d.]+-x64\.msi', "ExplorerLens-$Version-x64.msi"
+    $archSvg = $archSvg -replace '(v)[\d.]+ "[^"]+"', "`${1}$Version `"$Codename`""
+    Set-Content $archSvgPath -Value $archSvg -NoNewline
+    Write-Host "[bump] architecture-build.svg updated"
+}
+
+# 12b. copilot-instructions.md — test count line
+if ($TestCount -gt 0) {
+    $ci2 = Get-Content $ciPath -Raw
+    $ci2 = $ci2 -replace '~\d+ unit tests', "~$TestCount unit tests"
+    $ci2 = $ci2 -replace '\(v[\d.]+ baseline\)', "(v$Version baseline)"
+    Set-Content $ciPath -Value $ci2 -NoNewline
+    Write-Host "[bump] copilot-instructions.md test count updated"
+}
+
+# 13. CHANGELOG.md — prepend new section
 $clPath = "$rootDir\CHANGELOG.md"
 $cl = Get-Content $clPath -Raw
 $marker = "## [Unreleased]"
@@ -121,7 +206,7 @@ if ($idx -ge 0) {
 
 # 6. Commit
 $commitMsg = "chore: bump version to $Version ($Codename)"
-$details = "Sprint version bump. VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg"
+$details = "Sprint version bump. All 12 version-bearing files: VERSION, CMakeLists.txt, Engine/CMakeLists.txt, LENSManager.rc, BuildValidation.h, CHANGELOG.md, copilot-instructions.md, social-preview.svg, SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg"
 $fullMsg = "$commitMsg`n`n$details"
 [IO.File]::WriteAllText("$rootDir\.git\BUMP_MSG.txt", $fullMsg)
 git add -A
