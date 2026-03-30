@@ -1635,6 +1635,16 @@ set(ENGINE_HEADERS
     Core/ShaderSyntaxHighlighter.h
     Core/FontGlyphSampler.h
     Core/SpreadsheetChartRenderer.h
+
+    # Sprint 1001-1010 — Geospatial, Medical & Scientific Formats (v30.4.0 "Deneb-U")
+    Decoders/GeoTIFFDecoder.h
+    Decoders/NITFDecoder.h
+    Decoders/DICOMAdvancedDecoder.h
+    Decoders/NRRDDecoder.h
+    Decoders/HDF5ThumbnailDecoder.h
+    Decoders/NetCDFDecoder.h
+    Decoders/FITSDecoder.h
+    Decoders/ECWDecoder.h
 )
 
 set(ENGINE_SOURCES
