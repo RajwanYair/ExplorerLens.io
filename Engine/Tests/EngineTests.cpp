@@ -181,7 +181,6 @@
 #include "../Utils/FileHashEngine.h"
 #include "../Utils/FuzzingEngine.h"
 #include "../Utils/InstallerManager.h"
-#include "../Utils/LocalizationEngine.h"
 #include "../Utils/LogRotationEngine.h"
 #include "../Utils/MalformedInputHandler.h"
 #include "../Utils/MemorySafety.h"
@@ -420,7 +419,6 @@
 #include "../Core/ThumbnailHistogram.h"
 #include "../Core/FileAssociationManager.h"
 #include "../GPU/DX12FenceManager.h"
-#include "../Core/LocalizationEngine.h"
 #include "../Core/ThumbnailSpriteSheet.h"
 #include "../Core/WindowsSearchIntegration.h"
 #include "../Cache/AdaptiveCacheBudgetManager.h"
@@ -474,8 +472,6 @@
 #include "../Cache/MultiTierCache.h"
 #include "../Cache/ThumbnailCache.h"
 #include "../Cache/USNCacheInvalidation.h"
-#include "../Cloud/CloudThumbnailProvider.h"
-#include "../Cloud/NetworkThumbnailProvider.h"
 #include "../Codec/CodecLoader.h"
 #include "../Codec/CodecModuleSpecs.h"
 #include "../Codec/FormatConverter.h"
@@ -516,7 +512,6 @@
 #include "../Plugin/PluginManager.h"
 #include "../Plugin/PluginMarketplace.h"
 #include "../Plugin/PluginTrustChain.h"
-#include "../Shell/COMApartmentAudit.h"
 #include "../Utils/HardwareCapabilities.h"
 #include "../Utils/PerceptualHashing.h"
 
@@ -814,8 +809,6 @@
 #include "../Plugin/PluginAPIVersionNegotiator.h"
 #include "../Plugin/PluginResourceQuotaManager.h"
 #include "../Plugin/PluginDiagnosticsExporter.h"
-#include "../Shell/XAMLIslandHost.h"
-#include "../Shell/TouchGestureHandler.h"
 #include "../Decoders/JPEG2000DecoderV2.h"
 #include "../Decoders/UniversalVideoDecoder.h"
 
@@ -8229,29 +8222,6 @@ TEST(Test_ErrorReporting_Severity) {
     ASSERT(std::string(ErrorDomainName(ErrorDomain::COM)) == "COM");
 }
 
-TEST(Test_COMApartmentAudit_Check) {
-    using namespace ExplorerLens::COM;
-    // Verify enum values and names
-    ASSERT(FenceStateName(ExplorerLens::Engine::FenceState::Unsignaled) != nullptr);
-    // Test InterfaceAuditEntry compliance
-    InterfaceAuditEntry entry;
-    entry.interfaceName = "IThumbnailProvider";
-    entry.clsid = "9E6ECB90-5A61-42BD-B851-D3297D9C7F39";
-    entry.declaredModel = ApartmentType::STA;
-    entry.actualModel = ApartmentType::STA;
-    entry.usesGlobalState = false;
-    entry.hasReentrancyGuard = true;
-    ASSERT(entry.IsCompliant());
-    entry.actualModel = ApartmentType::MTA;
-    ASSERT(!entry.IsCompliant());  // Declared STA but actual MTA → non-compliant
-    // Verify ThreadSafetyValidator
-    ThreadSafetyValidator validator;
-    validator.RecordAccess(1, "IThumbnailProvider");
-    validator.RecordAccess(1, "IThumbnailProvider");
-    ASSERT(!validator.HasCrossThreadAccess("IThumbnailProvider"));
-    validator.RecordAccess(2, "IThumbnailProvider");
-    ASSERT(validator.HasCrossThreadAccess("IThumbnailProvider"));
-}
 
 //==============================================================================
 // Performance Benchmark Tests (Sprint 27)
@@ -25007,18 +24977,6 @@ TEST(Test_EP_PluginDiagnosticsExporter_Validate) {
 TEST(Test_EP_PluginDiagnosticsExporter_Props) {
     ASSERT(PluginDiagnosticsExporter::Instance().Validate());
 }
-TEST(Test_EP_XAMLIslandHost_Validate) {
-    ASSERT(XAMLIslandHost::Instance().Validate());
-}
-TEST(Test_EP_XAMLIslandHost_Props) {
-    ASSERT(XAMLIslandHost::Instance().Validate());
-}
-TEST(Test_EP_TouchGestureHandler_Validate) {
-    ASSERT(TouchGestureHandler::Instance().Validate());
-}
-TEST(Test_EP_TouchGestureHandler_Props) {
-    ASSERT(TouchGestureHandler::Instance().Validate());
-}
 TEST(Test_EP_JPEG2000DecoderV2_Validate) {
     ASSERT(JPEG2000DecoderV2::Instance().Validate());
 }
@@ -26927,14 +26885,6 @@ TEST(Test_SIMD_PremultiplyAlpha) {
 #include "../../src/Tools.CLI/BenchmarkCommand.h"
 #include "../../src/Tools.CLI/DoctorCommand.h"
 // Sprint 801-810 — Platform
-#include "../Platform/ElectronShellAdapter.h"
-#include "../Platform/CrossPlatformFSCrawler.h"
-#include "../Platform/CloudFirstCacheBackend.h"
-#include "../Platform/OfflineFirstPWAManager.h"
-#include "../Platform/AutoUpdateOrchestrator.h"
-#include "../Platform/DockerContainerRuntime.h"
-#include "../Platform/KubernetesHelmAdapter.h"
-#include "../Platform/CrossPlatformUIBridge.h"
 // Sprint 811-820 — AI Captions
 #include "../AI/VLMEmbeddingEngine.h"
 #include "../AI/CaptionGenerationPipeline.h"
@@ -26945,41 +26895,9 @@ TEST(Test_SIMD_PremultiplyAlpha) {
 #include "../AI/IncrementalCaptionUpdater.h"
 #include "../AI/CaptionSearchIndexer.h"
 // Sprint 821-830 — AR
-#include "../AR/ARPreviewBridgeEngine.h"
-#include "../AR/SpatialAnchorPersistenceV2.h"
-#include "../AR/PlaneSurfaceDetector.h"
-#include "../AR/OcclusionAwareRenderer.h"
-#include "../AR/QRThumbnailTrigger.h"
-#include "../AR/ARPassthroughVideoEngine.h"
-#include "../AR/SharedARSpaceManager.h"
-#include "../AR/SpatialAudioAnnotator.h"
 // Sprint 831-840 — Enterprise
-#include "../Enterprise/FleetDashboardV2.h"
-#include "../Enterprise/AIAnomalyDetectorV2.h"
-#include "../Enterprise/ComplianceScoreEngineV2.h"
-#include "../Enterprise/RemediationPlaybookEngine.h"
-#include "../Enterprise/RBACEngineV2.h"
-#include "../Enterprise/ExecutiveSummaryReporter.h"
-#include "../Enterprise/SLAMonitorEngine.h"
-#include "../Enterprise/MSPMultiTenantPortal.h"
 // Sprint 841-850 — UX
-#include "../UX/UserPreferenceLearner.h"
-#include "../UX/AdaptiveGridDensityEngine.h"
-#include "../UX/EyeTrackingFocusOptimizer.h"
-#include "../UX/ThemeEngineV3.h"
-#include "../UX/ABExperimentFramework.h"
-#include "../UX/AccessibleThemeGenerator.h"
-#include "../UX/ThumbnailBadgeSystem.h"
-#include "../UX/UXTelemetryPrivacyDashboard.h"
 // Sprint 851-860 — Security
-#include "../Security/MLKEMKeyEncapsulation.h"
-#include "../Security/MLDSASignatureEngine.h"
-#include "../Security/HybridPQClassicKEM.h"
-#include "../Security/TPM2KeyAttestationV2.h"
-#include "../Security/KeyRotationOrchestrator.h"
-#include "../Security/HSMIntegrationBridge.h"
-#include "../Security/FIPS205ComplianceEngine.h"
-#include "../Security/PostQuantumTLSAdapter.h"
 // Sprint 861-870 — PQC Core/Utils/Plugin
 #include "../Core/PQCSignatureVerifier.h"
 #include "../Core/HybridTrustChainV2.h"
@@ -34382,75 +34300,6 @@ TEST(TestCICDWebhookReceiver_DispatchEvent) {
 // ============================================================
 // Sprint 801-810 — Platform Tests (v28.0.0 Polaris)
 // ============================================================
-TEST(TestElectronShellAdapter_Initialize) {
-    using namespace ExplorerLens::Engine;
-    ElectronShellAdapter adapter;
-    ASSERT(adapter.Initialize("1.0.0-napi"));
-    ASSERT(adapter.IsReady());
-    adapter.Shutdown();
-}
-TEST(TestCrossPlatformFSCrawler_Crawl) {
-    using namespace ExplorerLens::Engine;
-    CrossPlatformFSCrawler crawler;
-    ASSERT(crawler.Initialize());
-    std::vector<std::string> found;
-    crawler.Crawl(".", [&](const std::string& p){ found.push_back(p); });
-    ASSERT(found.size() == 0 || found.size() >= 0); // stub returns empty
-    crawler.Shutdown();
-}
-TEST(TestCloudFirstCacheBackend_PutGet) {
-    using namespace ExplorerLens::Engine;
-    CloudFirstCacheBackend cache;
-    ASSERT(cache.Initialize(CloudCacheProvider::Local));
-    ASSERT(cache.Put("k1", {0x01, 0x02}));
-    std::vector<uint8_t> out;
-    ASSERT(cache.Get("k1", out));
-    ASSERT(!out.empty());
-    cache.Shutdown();
-}
-TEST(TestOfflineFirstPWAManager_PreCache) {
-    using namespace ExplorerLens::Engine;
-    OfflineFirstPWAManager mgr;
-    ASSERT(mgr.Initialize());
-    std::vector<std::string> paths = {"a.jpg","b.png"};
-    auto res = mgr.PreCacheThumbnails(paths);
-    ASSERT(res.inserted == 2);
-    mgr.Shutdown();
-}
-TEST(TestAutoUpdateOrchestrator_CheckForUpdates) {
-    using namespace ExplorerLens::Engine;
-    AutoUpdateOrchestrator upd;
-    ASSERT(upd.Initialize(UpdateChannel::Stable, "1.0.0"));
-    UpdateInfo info;
-    ASSERT(upd.CheckForUpdates(info) == UpdateCheckResult::UpToDate ||
-           upd.CheckForUpdates(info) == UpdateCheckResult::UpdateAvailable);
-    upd.Shutdown();
-}
-TEST(TestDockerContainerRuntime_HealthCheck) {
-    using namespace ExplorerLens::Engine;
-    DockerContainerRuntime rt;
-    ASSERT(rt.Initialize());
-    ASSERT(rt.HandleReadyz()) ;
-    ASSERT(rt.HandleLivez());
-    rt.Shutdown();
-}
-TEST(TestKubernetesHelmAdapter_GenerateYAML) {
-    using namespace ExplorerLens::Engine;
-    KubernetesHelmAdapter helm;
-    ASSERT(helm.Initialize("explorerlens", "1.0.0"));
-    std::string yaml = helm.GenerateDeploymentYAML();
-    ASSERT(!yaml.empty());
-    helm.Shutdown();
-}
-TEST(TestCrossPlatformUIBridge_SendMessage) {
-    using namespace ExplorerLens::Engine;
-    CrossPlatformUIBridge bridge;
-    ASSERT(bridge.Initialize());
-    ASSERT(bridge.Open("test-channel"));
-    ASSERT(bridge.Send("test-channel", "hello"));
-    bridge.Close("test-channel");
-    bridge.Shutdown();
-}
 // ============================================================
 // Sprint 811-820 — AI Captions (v28.1.0 Polaris-R)
 // ============================================================
@@ -34533,339 +34382,15 @@ TEST(TestCaptionSearchIndexer_Search) {
 // ============================================================
 // Sprint 821-830 — AR Tests (v28.2.0 Polaris-S)
 // ============================================================
-TEST(TestARPreviewBridgeEngine_Attach) {
-    using namespace ExplorerLens::Engine;
-    ARPreviewBridgeEngine bridge;
-    ASSERT(bridge.Initialize(ARBackend::Sim));
-    ASSERT(bridge.StartSession());
-    ASSERT(bridge.AttachThumbnail("anchor1", "photo.jpg", 0.3f));
-    auto pose = bridge.GetDevicePose();
-    ASSERT(pose.size() == 16);
-    bridge.Shutdown();
-}
-TEST(TestSpatialAnchorPersistenceV2_CRUD) {
-    using namespace ExplorerLens::Engine;
-    SpatialAnchorPersistenceV2 store;
-    ASSERT(store.Initialize());
-    SpatialAnchor a; a.id = "a1"; a.driftMm = 1.5f;
-    ASSERT(store.CreateAnchor(a));
-    SpatialAnchor out;
-    ASSERT(store.GetAnchor("a1", out));
-    ASSERT(out.driftMm < 5.0f);
-    store.Shutdown();
-}
-TEST(TestPlaneSurfaceDetector_Detect) {
-    using namespace ExplorerLens::Engine;
-    PlaneSurfaceDetector det;
-    ASSERT(det.Initialize());
-    std::vector<float> depth(320*240, 1.5f);
-    auto planes = det.Detect(depth.data(), 320, 240);
-    ASSERT(planes.size() >= 0);
-    det.Shutdown();
-}
-TEST(TestOcclusionAwareRenderer_Composite) {
-    using namespace ExplorerLens::Engine;
-    OcclusionAwareRenderer rend;
-    ASSERT(rend.Initialize());
-    std::vector<uint8_t> cam(128*128*4, 0x80);
-    std::vector<float>   dep(128*128, 0.5f);
-    std::vector<uint8_t> thumb(128*128*4, 0xFF);
-    auto res = rend.Composite(cam.data(), dep.data(), thumb.data(), 128, 128, 0.4f);
-    ASSERT(res.success);
-    rend.Shutdown();
-}
-TEST(TestQRThumbnailTrigger_Detect) {
-    using namespace ExplorerLens::Engine;
-    QRThumbnailTrigger trig;
-    ASSERT(trig.Initialize());
-    std::vector<uint8_t> rgb(320*240*3, 0);
-    auto detections = trig.Detect(rgb.data(), 320, 240);
-    ASSERT(detections.size() >= 0);
-    trig.Shutdown();
-}
-TEST(TestARPassthroughVideoEngine_Composite) {
-    using namespace ExplorerLens::Engine;
-    ARPassthroughVideoEngine veng;
-    ASSERT(veng.Initialize());
-    ASSERT(veng.Start(640, 480, 30));
-    OverlayDescriptor ov; ov.id = "ov1";
-    veng.AddOverlay(ov);
-    std::vector<uint8_t> cam(640*480*4, 0x40);
-    auto out = veng.CompositeFrame(cam.data(), 640, 480);
-    ASSERT(out.success);
-    veng.Shutdown();
-}
-TEST(TestSharedARSpaceManager_CreateJoin) {
-    using namespace ExplorerLens::Engine;
-    SharedARSpaceManager mgr;
-    ASSERT(mgr.Initialize());
-    ASSERT(mgr.CreateSpace("space1", "user1"));
-    ASSERT(mgr.JoinSpace("space1", "user2"));
-    ASSERT(mgr.IsActive("space1"));
-    mgr.Shutdown();
-}
-TEST(TestSpatialAudioAnnotator_AddGet) {
-    using namespace ExplorerLens::Engine;
-    SpatialAudioAnnotator ann;
-    ASSERT(ann.Initialize());
-    AudioAnnotation a; a.fileKey = "k1"; a.transcription = "test";
-    ASSERT(ann.AddAnnotation(a));
-    auto anns = ann.GetAnnotations("k1");
-    ASSERT(!anns.empty());
-    ann.Shutdown();
-}
 // ============================================================
 // Sprint 831-840 — Enterprise Tests (v28.3.0 Polaris-T)
 // ============================================================
-TEST(TestFleetDashboardV2_Summary) {
-    using namespace ExplorerLens::Engine;
-    FleetDashboardV2 dash;
-    ASSERT(dash.Initialize());
-    FleetNode node; node.nodeId = "n1"; node.cpuPercent = 25.0f;
-    ASSERT(dash.RegisterNode(node));
-    auto summary = dash.GetSummary();
-    ASSERT(summary.totalNodes == 1);
-    dash.Shutdown();
-}
-TEST(TestAIAnomalyDetectorV2_Analyze) {
-    using namespace ExplorerLens::Engine;
-    AIAnomalyDetectorV2 det;
-    ASSERT(det.Initialize());
-    auto res = det.Analyze("n1", 95.0f, 80.0f, 5);
-    ASSERT(res.severity != AnomalySeverity::None || res.severity == AnomalySeverity::None);
-    det.Shutdown();
-}
-TEST(TestComplianceScoreEngineV2_Compute) {
-    using namespace ExplorerLens::Engine;
-    ComplianceScoreEngineV2 eng;
-    ASSERT(eng.Initialize());
-    eng.AddControl({"ctrl1", 1.0f, true});
-    auto res = eng.Compute(ComplianceFramework::SOC2);
-    ASSERT(res.score >= 0.0f && res.score <= 100.0f);
-    eng.Shutdown();
-}
-TEST(TestRemediationPlaybookEngine_Execute) {
-    using namespace ExplorerLens::Engine;
-    RemediationPlaybookEngine pb;
-    ASSERT(pb.Initialize());
-    std::vector<PlaybookStep> steps;
-    PlaybookStep s; s.name = "step1"; s.dryRunSafe = true;
-    steps.push_back(s);
-    auto res = pb.Execute(steps, true);
-    ASSERT(res.success);
-    pb.Shutdown();
-}
-TEST(TestRBACEngineV2_Authorize) {
-    using namespace ExplorerLens::Engine;
-    RBACEngineV2 rbac;
-    ASSERT(rbac.Initialize());
-    ASSERT(rbac.IsAuthorized("admin1", "thumbnail:read", PrincipalRole::Admin));
-    ASSERT(!rbac.IsAuthorized("viewer1", "config:write", PrincipalRole::Viewer));
-    rbac.Shutdown();
-}
-TEST(TestExecutiveSummaryReporter_Generate) {
-    using namespace ExplorerLens::Engine;
-    ExecutiveSummaryReporter rep;
-    ASSERT(rep.Initialize());
-    auto rpt = rep.Generate("2026-Q1", ReportOutputFormat::JSON);
-    ASSERT(rpt.success);
-    ASSERT(!rpt.content.empty());
-    rep.Shutdown();
-}
-TEST(TestSLAMonitorEngine_BreachDetect) {
-    using namespace ExplorerLens::Engine;
-    SLAMonitorEngine mon;
-    ASSERT(mon.Initialize());
-    ASSERT(mon.AddSLATarget({"thumb-p99", SLAMetric::P99LatencyMs, 50.0f}));
-    mon.RecordSample("thumb-p99", 120.0f);
-    ASSERT(mon.GetActiveBreachCount() >= 0);
-    mon.Shutdown();
-}
-TEST(TestMSPMultiTenantPortal_Isolation) {
-    using namespace ExplorerLens::Engine;
-    MSPMultiTenantPortal portal;
-    ASSERT(portal.Initialize());
-    ASSERT(portal.CreateTenant("tenantA"));
-    ASSERT(portal.CreateTenant("tenantB"));
-    ASSERT(portal.IsIsolated("tenantA", "tenantB"));
-    portal.Shutdown();
-}
 // ============================================================
 // Sprint 841-850 — UX Tests (v28.4.0 Polaris-U)
 // ============================================================
-TEST(TestUserPreferenceLearner_Infer) {
-    using namespace ExplorerLens::Engine;
-    UserPreferenceLearner learner;
-    ASSERT(learner.Initialize());
-    learner.RecordEvent({"user1", PreferenceEventType::Dwell, "img.jpg"});
-    auto prefs = learner.GetPreferences("user1");
-    ASSERT(prefs.preferredGridSize >= 64);
-    learner.Shutdown();
-}
-TEST(TestAdaptiveGridDensityEngine_Compute) {
-    using namespace ExplorerLens::Engine;
-    AdaptiveGridDensityEngine eng;
-    GridDensityParams p; p.viewportWidth = 1920; p.fileCount = 100;
-    auto layout = eng.Compute(p);
-    ASSERT(eng.IsValidLayout(layout));
-    ASSERT(layout.colCount > 0);
-}
-TEST(TestEyeTrackingFocusOptimizer_PriorityRegion) {
-    using namespace ExplorerLens::Engine;
-    EyeTrackingFocusOptimizer opt;
-    ASSERT(opt.Initialize(1920, 1080));
-    opt.SetGazePoint({0.5f, 0.5f, 0.9f});
-    auto region = opt.GetPriorityRegion();
-    ASSERT(region.priority > 0.0f);
-    opt.Shutdown();
-}
-TEST(TestThemeEngineV3_DarkMode) {
-    using namespace ExplorerLens::Engine;
-    ThemeEngineV3 theme;
-    ASSERT(theme.Initialize());
-    theme.SetMode(ThemeMode::Dark);
-    ASSERT(theme.GetMode() == ThemeMode::Dark);
-    auto bg = theme.GetToken("--bg-primary");
-    ASSERT(bg.a == 255);
-    theme.Shutdown();
-}
-TEST(TestABExperimentFramework_Assign) {
-    using namespace ExplorerLens::Engine;
-    ABExperimentFramework ab;
-    ASSERT(ab.Initialize("exp1", 42));
-    Cohort c = ab.AssignCohort("user1");
-    ASSERT(c == Cohort::Control || c == Cohort::VariantA || c == Cohort::VariantB);
-    ab.Shutdown();
-}
-TEST(TestAccessibleThemeGenerator_WCAG) {
-    using namespace ExplorerLens::Engine;
-    AccessibleThemeGenerator gen;
-    ASSERT(gen.Initialize());
-    auto palette = gen.GenerateCompliantPalette(0xFF89B4FA, WCAGLevel::AA);
-    ASSERT(palette.passesAA || !palette.passesAA); // result depends on colors
-    gen.Shutdown();
-}
-TEST(TestThumbnailBadgeSystem_Composite) {
-    using namespace ExplorerLens::Engine;
-    ThumbnailBadgeSystem badges;
-    ASSERT(badges.Initialize());
-    BadgeDescriptor b; b.type = BadgeType::Status; b.color = 0xFF4CAF50;
-    badges.AddBadge("badge1", b);
-    std::vector<uint8_t> pixels(128*128*4, 0x80);
-    auto res = badges.CompositeAll(pixels.data(), 128, 128);
-    ASSERT(res.success);
-    ASSERT(res.badgeCount == 1);
-    badges.Shutdown();
-}
-TEST(TestUXTelemetryPrivacyDashboard_Export) {
-    using namespace ExplorerLens::Engine;
-    UXTelemetryPrivacyDashboard dash;
-    ASSERT(dash.Initialize());
-    dash.SetConsentGranted(true);
-    TelemetryEvent evt; evt.category = "nav"; evt.action = "click";
-    ASSERT(dash.RecordEvent(evt));
-    ASSERT(dash.GetEventCount() == 1);
-    auto exp = dash.ExportData("json");
-    ASSERT(!exp.payload.empty());
-    dash.PurgeData();
-    ASSERT(dash.GetEventCount() == 0);
-    dash.Shutdown();
-}
 // ============================================================
 // Sprint 851-860 — Security Tests (v28.5.0 Polaris-V)
 // ============================================================
-TEST(TestMLKEMKeyEncapsulation_GenerateEncapDecap) {
-    using namespace ExplorerLens::Engine;
-    MLKEMKeyEncapsulation kem;
-    ASSERT(kem.Initialize(MLKEMVariant::MLKEM768));
-    auto kp = kem.Generate();
-    ASSERT(!kp.publicKey.empty());
-    auto ct = kem.Encapsulate(kp.publicKey);
-    ASSERT(!ct.sharedSecret.empty());
-    auto ss = kem.Decapsulate(kp, ct);
-    ASSERT(!ss.empty());
-    kem.Shutdown();
-}
-TEST(TestMLDSASignatureEngine_SignVerify) {
-    using namespace ExplorerLens::Engine;
-    MLDSASignatureEngine dsa;
-    ASSERT(dsa.Initialize(MLDSALevel::MLDSA65));
-    auto kp = dsa.GenerateKeyPair();
-    std::vector<uint8_t> msg = {0x01, 0x02, 0x03};
-    auto sig = dsa.Sign(kp, msg);
-    ASSERT(!sig.bytes.empty());
-    ASSERT(dsa.Verify(kp, msg, sig));
-    dsa.Shutdown();
-}
-TEST(TestHybridPQClassicKEM_EncapDecap) {
-    using namespace ExplorerLens::Engine;
-    HybridPQClassicKEM kem;
-    ASSERT(kem.Initialize(HybridKEMScheme::MLKEM768_X25519));
-    auto kp = kem.GenerateKeyPair();
-    auto [ct, ss] = kem.Encapsulate(kp);
-    ASSERT(!ss.combined.empty());
-    auto ss2 = kem.Decapsulate(kp, ct);
-    ASSERT(!ss2.combined.empty());
-    kem.Shutdown();
-}
-TEST(TestTPM2KeyAttestationV2_Attest) {
-    using namespace ExplorerLens::Engine;
-    TPM2KeyAttestationV2 tpm;
-    ASSERT(tpm.Initialize());
-    auto key = tpm.CreateAttestationKey("ECC_P256");
-    ASSERT(key.IsValid());
-    auto res = tpm.Attest(key, "nonce123");
-    ASSERT(res.success || !res.errorCode.empty());
-    tpm.Shutdown();
-}
-TEST(TestKeyRotationOrchestrator_Rotate) {
-    using namespace ExplorerLens::Engine;
-    KeyRotationOrchestrator orch;
-    ASSERT(orch.Initialize(90));
-    std::string id = orch.RegisterKey("ML-KEM-768", 0);
-    ASSERT(!id.empty());
-    auto res = orch.RotateKey(id, 86400000LL * 91);
-    ASSERT(res.success);
-    ASSERT(res.newKeyId != id);
-    orch.Shutdown();
-}
-TEST(TestHSMIntegrationBridge_SignVerify) {
-    using namespace ExplorerLens::Engine;
-    HSMIntegrationBridge hsm;
-    ASSERT(hsm.Initialize(HSMProvider::MockSoftware));
-    auto session = hsm.OpenSession("slot0");
-    ASSERT(session.open);
-    std::vector<uint8_t> msg = {0x01, 0x02};
-    auto sigRes = hsm.Sign(session, "key1", msg);
-    ASSERT(sigRes.success);
-    auto verRes = hsm.Verify(session, "key1", msg, sigRes.data);
-    ASSERT(verRes.success);
-    hsm.CloseSession(session);
-    hsm.Shutdown();
-}
-TEST(TestFIPS205ComplianceEngine_SignVerify) {
-    using namespace ExplorerLens::Engine;
-    FIPS205ComplianceEngine fips;
-    ASSERT(fips.Initialize(SLHDSAParameterSet::SLHDSA_SHA2_128s, true));
-    auto kp = fips.GenerateKeyPair();
-    std::vector<uint8_t> msg = {0xDE, 0xAD, 0xBE, 0xEF};
-    auto sig = fips.Sign(kp, msg);
-    ASSERT(sig.fipsValidated);
-    ASSERT(fips.Verify(kp, msg, sig));
-    auto status = fips.GetComplianceStatus();
-    ASSERT(status.compliant);
-    fips.Shutdown();
-}
-TEST(TestPostQuantumTLSAdapter_Connect) {
-    using namespace ExplorerLens::Engine;
-    PostQuantumTLSAdapter tls;
-    PQTLSConfig cfg; cfg.preferredGroup = PQTLSGroup::X25519MLKEM768;
-    ASSERT(tls.Initialize(cfg));
-    auto res = tls.Connect("example.com", 443);
-    ASSERT(res.success);
-    ASSERT(res.pqUsed);
-    tls.Shutdown();
-}
 // ============================================================
 // Sprint 861-870 — PQC Signature Tests (v28.6.0 Polaris-W)
 // ============================================================
@@ -39009,7 +38534,6 @@ int main()
     RUN_TEST(Test_EnterprisePolicyEngine_GPODefault);
     RUN_TEST(Test_EnterpriseAudit_EventRecord);
     RUN_TEST(Test_ErrorReporting_Severity);
-    RUN_TEST(Test_COMApartmentAudit_Check);
 
     // Performance Benchmark Tests (Sprint 27)
     std::wcout << L"Performance Benchmark Tests..." << std::endl;
@@ -40233,10 +39757,6 @@ int main()
     RUN_TEST(Test_EP_PluginResourceQuotaManager_Props);
     RUN_TEST(Test_EP_PluginDiagnosticsExporter_Validate);
     RUN_TEST(Test_EP_PluginDiagnosticsExporter_Props);
-    RUN_TEST(Test_EP_XAMLIslandHost_Validate);
-    RUN_TEST(Test_EP_XAMLIslandHost_Props);
-    RUN_TEST(Test_EP_TouchGestureHandler_Validate);
-    RUN_TEST(Test_EP_TouchGestureHandler_Props);
     RUN_TEST(Test_EP_JPEG2000DecoderV2_Validate);
     RUN_TEST(Test_EP_JPEG2000DecoderV2_Props);
     RUN_TEST(Test_EP_UniversalVideoDecoder_Validate);
@@ -40993,14 +40513,6 @@ int main()
     RUN_TEST(Test_CodecNegotiationProtocol_CodecName);
 
     // Sprint 801-810 — Platform (v28.0.0 Polaris)
-    RUN_TEST(TestElectronShellAdapter_Initialize);
-    RUN_TEST(TestCrossPlatformFSCrawler_Crawl);
-    RUN_TEST(TestCloudFirstCacheBackend_PutGet);
-    RUN_TEST(TestOfflineFirstPWAManager_PreCache);
-    RUN_TEST(TestAutoUpdateOrchestrator_CheckForUpdates);
-    RUN_TEST(TestDockerContainerRuntime_HealthCheck);
-    RUN_TEST(TestKubernetesHelmAdapter_GenerateYAML);
-    RUN_TEST(TestCrossPlatformUIBridge_SendMessage);
     // Sprint 811-820 — AI Captions (v28.1.0 Polaris-R)
     RUN_TEST(TestVLMEmbeddingEngine_Embed);
     RUN_TEST(TestCaptionGenerationPipeline_Generate);
@@ -41011,41 +40523,9 @@ int main()
     RUN_TEST(TestIncrementalCaptionUpdater_ComputeDelta);
     RUN_TEST(TestCaptionSearchIndexer_Search);
     // Sprint 821-830 — AR (v28.2.0 Polaris-S)
-    RUN_TEST(TestARPreviewBridgeEngine_Attach);
-    RUN_TEST(TestSpatialAnchorPersistenceV2_CRUD);
-    RUN_TEST(TestPlaneSurfaceDetector_Detect);
-    RUN_TEST(TestOcclusionAwareRenderer_Composite);
-    RUN_TEST(TestQRThumbnailTrigger_Detect);
-    RUN_TEST(TestARPassthroughVideoEngine_Composite);
-    RUN_TEST(TestSharedARSpaceManager_CreateJoin);
-    RUN_TEST(TestSpatialAudioAnnotator_AddGet);
     // Sprint 831-840 — Enterprise (v28.3.0 Polaris-T)
-    RUN_TEST(TestFleetDashboardV2_Summary);
-    RUN_TEST(TestAIAnomalyDetectorV2_Analyze);
-    RUN_TEST(TestComplianceScoreEngineV2_Compute);
-    RUN_TEST(TestRemediationPlaybookEngine_Execute);
-    RUN_TEST(TestRBACEngineV2_Authorize);
-    RUN_TEST(TestExecutiveSummaryReporter_Generate);
-    RUN_TEST(TestSLAMonitorEngine_BreachDetect);
-    RUN_TEST(TestMSPMultiTenantPortal_Isolation);
     // Sprint 841-850 — UX (v28.4.0 Polaris-U)
-    RUN_TEST(TestUserPreferenceLearner_Infer);
-    RUN_TEST(TestAdaptiveGridDensityEngine_Compute);
-    RUN_TEST(TestEyeTrackingFocusOptimizer_PriorityRegion);
-    RUN_TEST(TestThemeEngineV3_DarkMode);
-    RUN_TEST(TestABExperimentFramework_Assign);
-    RUN_TEST(TestAccessibleThemeGenerator_WCAG);
-    RUN_TEST(TestThumbnailBadgeSystem_Composite);
-    RUN_TEST(TestUXTelemetryPrivacyDashboard_Export);
     // Sprint 851-860 — Security (v28.5.0 Polaris-V)
-    RUN_TEST(TestMLKEMKeyEncapsulation_GenerateEncapDecap);
-    RUN_TEST(TestMLDSASignatureEngine_SignVerify);
-    RUN_TEST(TestHybridPQClassicKEM_EncapDecap);
-    RUN_TEST(TestTPM2KeyAttestationV2_Attest);
-    RUN_TEST(TestKeyRotationOrchestrator_Rotate);
-    RUN_TEST(TestHSMIntegrationBridge_SignVerify);
-    RUN_TEST(TestFIPS205ComplianceEngine_SignVerify);
-    RUN_TEST(TestPostQuantumTLSAdapter_Connect);
     // Sprint 861-870 — PQC Signatures (v28.6.0 Polaris-W)
     RUN_TEST(TestPQCSignatureVerifier_Verify);
     RUN_TEST(TestHybridTrustChainV2_Validate);

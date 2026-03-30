@@ -610,8 +610,6 @@ set(ENGINE_HEADERS
     Codec/LazyCodecManager.h
 
     # Cloud integration
-    Cloud/CloudThumbnailProvider.h
-    Cloud/NetworkThumbnailProvider.h
 
     # Memory management
     Memory/ArchiveMemoryCompactor.h
@@ -630,7 +628,6 @@ set(ENGINE_HEADERS
     Memory/AllocationTracker.h
 
     # Shell integration
-    Shell/COMApartmentAudit.h
 
     # Utilities
     Utils/AccessibilityEngine.h
@@ -661,7 +658,6 @@ set(ENGINE_HEADERS
     Utils/FileHashEngine.h
 
     Utils/HardwareCapabilities.h
-    Utils/LocalizationEngine.h
     Utils/LogRotationEngine.h
     Utils/MalformedInputHandler.h
     Utils/MemoryMappedFile.h
@@ -770,7 +766,6 @@ set(ENGINE_HEADERS
     Core/ThumbnailHistogram.h
     Core/FileAssociationManager.h
     GPU/DX12FenceManager.h
-    Core/LocalizationEngine.h
     Core/ThumbnailSpriteSheet.h
     Core/WindowsSearchIntegration.h
 
@@ -1009,8 +1004,6 @@ set(ENGINE_HEADERS
     Plugin/PluginDiagnosticsExporter.h
 
     # Category D: Shell & Decoder Enhancements
-    Shell/XAMLIslandHost.h
-    Shell/TouchGestureHandler.h
     Decoders/JPEG2000DecoderV2.h
     Decoders/UniversalVideoDecoder.h
 
@@ -1688,14 +1681,6 @@ set(ENGINE_HEADERS
     Core/CodecNegotiationProtocol.h
 
     # Sprint 801-810 — Cross-Platform Electron Shell (v28.0.0 "Polaris")
-    Platform/ElectronShellAdapter.h
-    Platform/CrossPlatformFSCrawler.h
-    Platform/CloudFirstCacheBackend.h
-    Platform/OfflineFirstPWAManager.h
-    Platform/AutoUpdateOrchestrator.h
-    Platform/DockerContainerRuntime.h
-    Platform/KubernetesHelmAdapter.h
-    Platform/CrossPlatformUIBridge.h
 
     # Sprint 811-820 — Generative AI Caption Synthesis (v28.1.0 "Polaris-R")
     AI/VLMEmbeddingEngine.h
@@ -1708,44 +1693,12 @@ set(ENGINE_HEADERS
     AI/CaptionSearchIndexer.h
 
     # Sprint 821-830 — Live AR Preview Engine (v28.2.0 "Polaris-S")
-    AR/ARPreviewBridgeEngine.h
-    AR/SpatialAnchorPersistenceV2.h
-    AR/PlaneSurfaceDetector.h
-    AR/OcclusionAwareRenderer.h
-    AR/QRThumbnailTrigger.h
-    AR/ARPassthroughVideoEngine.h
-    AR/SharedARSpaceManager.h
-    AR/SpatialAudioAnnotator.h
 
     # Sprint 831-840 — Enterprise Console 2.0 (v28.3.0 "Polaris-T")
-    Enterprise/FleetDashboardV2.h
-    Enterprise/AIAnomalyDetectorV2.h
-    Enterprise/ComplianceScoreEngineV2.h
-    Enterprise/RemediationPlaybookEngine.h
-    Enterprise/RBACEngineV2.h
-    Enterprise/ExecutiveSummaryReporter.h
-    Enterprise/SLAMonitorEngine.h
-    Enterprise/MSPMultiTenantPortal.h
 
     # Sprint 841-850 — Adaptive UX & Personalization (v28.4.0 "Polaris-U")
-    UX/UserPreferenceLearner.h
-    UX/AdaptiveGridDensityEngine.h
-    UX/EyeTrackingFocusOptimizer.h
-    UX/ThemeEngineV3.h
-    UX/ABExperimentFramework.h
-    UX/AccessibleThemeGenerator.h
-    UX/ThumbnailBadgeSystem.h
-    UX/UXTelemetryPrivacyDashboard.h
 
     # Sprint 851-860 — Quantum-Safe Key Management v2 (v28.5.0 "Polaris-V")
-    Security/MLKEMKeyEncapsulation.h
-    Security/MLDSASignatureEngine.h
-    Security/HybridPQClassicKEM.h
-    Security/TPM2KeyAttestationV2.h
-    Security/KeyRotationOrchestrator.h
-    Security/HSMIntegrationBridge.h
-    Security/FIPS205ComplianceEngine.h
-    Security/PostQuantumTLSAdapter.h
 
     # Sprint 861-870 — Post-Quantum Cryptography & Signatures (v28.6.0 "Polaris-W")
     Core/PQCSignatureVerifier.h
@@ -1900,7 +1853,6 @@ set(ENGINE_SOURCES
     Utils/EXIFOrientation.cpp
     Utils/FileHashEngine.cpp
     Utils/HardwareCapabilities.cpp
-    Utils/LocalizationEngine.cpp
     Utils/LogRotationEngine.cpp
     Utils/MalformedInputHandler.cpp
     Utils/MemorySafetyIntegration.cpp
