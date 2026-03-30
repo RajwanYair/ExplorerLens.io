@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v29.3.0 Capella-T: Project Consolidation Phase 2 — Cache subsystem dedup (77→26 headers), removed 51 duplicate cache headers (3 migration→1, 8 warming→1, 5 replication→1, 3 partition→1, 6 analytics→1, 4 prediction→1, 2 compression→1, 2 eviction→1), cleaned CMakeLists.txt and EngineTests.cpp, 5600 lines removed
+
+
 v29.2.0 Capella-S: Project Consolidation Phase 1 — Archived obsolete docs (SPRINT_PLAN_600/700/800, ROADMAP_V25), enhanced Bump-Version.ps1 to handle all 12 version-bearing files (SBOMGenerator.h, vcpkg.json, baseline.json, README.md, tool-versions.md, SBOM.json, architecture-build.svg), synced all stale v25.3.0 references to current version, rewrote sprint plan 901-960 with consolidation themes
 
 
