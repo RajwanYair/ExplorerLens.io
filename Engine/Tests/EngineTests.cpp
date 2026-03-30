@@ -1,4 +1,4 @@
-﻿//==============================================================================
+//==============================================================================
 // ExplorerLens Engine - Unit Tests
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
@@ -9,7 +9,6 @@
 #include "../AI/SmartCropV2.h"
 #include "../Cache/CacheWarmingService.h"
 #include "../Cache/MultiTenantCacheManager.h"
-#include "../Cache/PersistentCacheManager.h"
 #include "../Cache/PersistentDiskCache.h"
 #include "../Cache/PipelineStateCacheV2.h"
 #include "../Cache/SubMillisecondCacheEngine.h"
@@ -374,7 +373,6 @@
 // --- Format Detection & Storage ---
 #include "../Pipeline/FormatSignatureDetector.h"
 #include "../Memory/SmartPointerPool.h"
-#include "../Cache/ThumbnailPersistenceLayer.h"
 
 // --- File Integrity & Monitoring ---
 #include "../Core/FileIntegrityMonitor.h"
@@ -431,7 +429,6 @@
 #include "../GPU/DX12FenceManager.h"
 #include "../Core/LocalizationEngine.h"
 #include "../Core/ThumbnailSpriteSheet.h"
-#include "../Cache/CacheTelemetryCollector.h"
 #include "../Core/WindowsSearchIntegration.h"
 #include "../Cache/AdaptiveCacheBudgetManager.h"
 #include "../Memory/ArchiveMemoryCompactor.h"
@@ -605,7 +602,6 @@
 #include "../Cache/PSOCachePersistence.h"
 #include "../Pipeline/PipelineActivator.h"
 #include "../Pipeline/ParallelIOActivation.h"
-#include "../Cache/CacheWarmingActivation.h"
 #include "../Cache/CacheBudgetAutoTuner.h"
 #include "../Core/FormatStatusProvider.h"
 #include "../Core/SIMDCapabilityDetector.h"
@@ -700,10 +696,8 @@
 #include "../Pipeline/DecodePriorityQueue.h"
 
 // --- Sprint 57-58: Cache Intelligence ---
-#include "../Cache/CacheEvictionPredictor.h"
 #include "../Cache/CacheCompressionEngine.h"
 #include "../Cache/CacheIntegrityVerifier.h"
-#include "../Cache/CachePreloader.h"
 
 // --- Sprint 59-60: GPU Enhancement ---
 #include "../GPU/GPUShaderCompiler.h"
@@ -779,10 +773,6 @@
 #include "../Pipeline/DeferredDecodeScheduler.h"
 #include "../Pipeline/AdaptiveBatchCoalescer.h"
 #include "../Pipeline/ThumbnailMorphTransition.h"
-#include "../Cache/DistributedCacheSync.h"
-#include "../Cache/CompressionTierOptimizer.h"
-#include "../Cache/CacheHitPredictor.h"
-#include "../Cache/TemporalCacheAnalyzer.h"
 #include "../Cache/SemanticCacheIndex.h"
 #include "../Memory/TransparentHugePageAllocator.h"
 #include "../Memory/MemoryCompressionEngine.h"
@@ -827,11 +817,6 @@
 #include "../Memory/NUMAAffinityAllocator.h"
 #include "../Memory/MemoryCompactionScheduler.h"
 #include "../Memory/LargePageOptimizer.h"
-#include "../Cache/PSOPrecompiler.h"
-#include "../Cache/IdleCacheWarmer.h"
-#include "../Cache/CacheAnalyticsDashboard.h"
-#include "../Cache/CacheMigrationTool.h"
-#include "../Cache/PredictiveCacheLoader.h"
 #include "../AI/DirectMLInferenceEngine.h"
 #include "../AI/ONNXModelLoader.h"
 #include "../AI/NeuralUpscaleV2.h"
@@ -855,8 +840,6 @@
 #include "../Core/ColdStartOptimizer.h"
 #include "../Pipeline/DecodeCancellationEngine.h"
 #include "../Pipeline/RequestDeduplicator.h"
-#include "../Cache/CacheBloomFilter.h"
-#include "../Cache/CacheFragmentationAnalyzer.h"
 #include "../GPU/GPUPowerStateManager.h"
 #include "../GPU/GPUWorkgroupOptimizer.h"
 #include "../Memory/CopyOnWriteBufferPool.h"
@@ -885,10 +868,7 @@
 #include "../GPU/GPUErrorRecovery.h"
 #include "../GPU/ComputeShaderProfiler.h"
 #include "../Cache/CachePartitionManager.h"
-#include "../Cache/CacheStatisticsExporter.h"
 #include "../Cache/CacheGarbageCollector.h"
-#include "../Cache/CacheVersionMigrator.h"
-#include "../Cache/FileHashCache.h"
 #include "../Memory/StackAllocator.h"
 #include "../Memory/MemoryWatermarkTracker.h"
 #include "../Memory/PoolAllocatorMetrics.h"
@@ -946,11 +926,7 @@
 #include "../GPU/GPUThermalMonitor.h"
 #include "../GPU/GPUResourceLeakDetector.h"
 // Cache
-#include "../Cache/CacheResilienceManager.h"
-#include "../Cache/CacheAccessPatternAnalyzer.h"
-#include "../Cache/CacheSlabAllocator.h"
 #include "../Cache/CacheReplicationEngine.h"
-#include "../Cache/CacheContentHasher.h"
 // Memory
 #include "../Memory/PageFaultOptimizer.h"
 #include "../Memory/MemoryCompactionEngine.h"
@@ -1016,11 +992,6 @@
 #include "../GPU/GPUCommandBundler.h"
 #include "../GPU/GPUTimestampProfiler.h"
 // Cache
-#include "../Cache/PSOBlobSerializer.h"
-#include "../Cache/CacheWarmingScheduler.h"
-#include "../Cache/CachePartitionRebalancer.h"
-#include "../Cache/CacheTTLManager.h"
-#include "../Cache/CacheCompressionSelector.h"
 // Memory
 #include "../Memory/BitmapPoolPartitioner.h"
 #include "../Memory/MemoryTagAllocator.h"
@@ -1063,12 +1034,7 @@
 #include "../GPU/ShaderCompileListener.h"
 #include "../GPU/GPUVendorQuirksTable.h"
 // Cache
-#include "../Cache/CachePrefetchOracle.h"
 #include "../Cache/CacheSerializationCodec.h"
-#include "../Cache/CacheSizeEstimator.h"
-#include "../Cache/CacheInvalidationBroadcaster.h"
-#include "../Cache/CacheHitRateAnalyzer.h"
-#include "../Cache/CacheReplicationStrategy.h"
 // Memory
 #include "../Memory/VirtualAllocTracker.h"
 #include "../Memory/MemoryPageFaultMonitor.h"
@@ -1118,12 +1084,6 @@
 #include "../GPU/ComputeDispatchOptimizer.h"
 #include "../GPU/GPUFormatConverter.h"
 #include "../GPU/GPUThumbnailCompositor.h"
-#include "../Cache/CachePredictiveLoader.h"
-#include "../Cache/CacheDeduplicationEngine.h"
-#include "../Cache/CacheMigrationManager.h"
-#include "../Cache/CacheVersionCoordinator.h"
-#include "../Cache/CacheDiagnosticReporter.h"
-#include "../Cache/CacheEvictionSimulator.h"
 #include "../Memory/BitmapMemoryRecycler.h"
 #include "../Memory/MemoryPressureResponder.h"
 #include "../Memory/ZeroFragmentationHeap.h"
@@ -1192,7 +1152,6 @@
 #include "../Core/ThumbnailPriorityQueue.h"
 #include "../Core/PredictivePrefetcher.h"
 #include "../Core/ThumbnailDensitySelector.h"
-#include "../Cache/HiDPIThumbnailCache.h"
 #include "../Utils/MemoryMappedLoader.h"
 #include "../Utils/ActivationService.h"
 #include "../Utils/FeatureCompatMatrix.h"
@@ -1304,12 +1263,6 @@
 #include "../Memory/SharedMemoryRegionManager.h"
 // Sprint 441-450 — Smart Cache v4 (v23.4.0)
 #include "../Cache/AIEvictionPolicyEngine.h"
-#include "../Cache/FederatedCacheInvalidator.h"
-#include "../Cache/ContentAwareCacheKey.h"
-#include "../Cache/DeltaSyncReplicator.h"
-#include "../Cache/ZeroCopyCacheReader.h"
-#include "../Cache/ShardedCachePartitionV2.h"
-#include "../Cache/ConsistentHashRing.h"
 // Sprint 451-460 — CLI & Automation v2 (v23.5.0)
 #include "../CLI/LensBatchProcessorV2.h"
 #include "../CLI/LensWatchDaemon.h"
@@ -19751,15 +19704,6 @@ TEST(TestParallelIOActivation_Init) {
     ASSERT(stats.failedReads >= 0);
 }
 
-// CacheWarmingActivation
-TEST(TestCacheWarmingActivation_Strategy) {
-    auto& warmer = CacheWarmingActivation::Instance();
-    auto stats = warmer.GetStats();
-    ASSERT(stats.totalFilesWarmed >= 0);
-    ASSERT(stats.activeWatchCount >= 0);
-}
-
-// CacheBudgetAutoTuner
 TEST(TestCacheBudgetAutoTuner_Tier) {
     auto& tuner = CacheBudgetAutoTuner::Instance();
     tuner.Initialize();
@@ -21821,16 +21765,6 @@ TEST(Test_S56_DecodePriorityQueue_PushPop) {
 
 // ===== Sprint 57-58: Cache Intelligence Tests =====
 
-TEST(Test_S57_CacheEvictionPredictor_Predict) {
-    using namespace ExplorerLens::Engine;
-    CacheEvictionPredictor predictor;
-    predictor.RecordAccess(1001, 1024);
-    predictor.RecordAccess(1002, 2048);
-    ASSERT(predictor.EntryCount() == 2);
-    auto decision = predictor.SelectEviction(512);
-    ASSERT(decision.freedBytes > 0 || !decision.evicted);
-}
-
 TEST(Test_S57_CacheCompressionEngine_Ratio) {
     using namespace ExplorerLens::Engine;
     CacheCompressionEngine engine;
@@ -21851,20 +21785,6 @@ TEST(Test_S57_CacheIntegrityVerifier_Verify) {
     ASSERT(result.entryKey == 42);
     ASSERT(static_cast<size_t>(result.status) < CacheIntegrityVerifier::StatusCount());
 }
-
-TEST(Test_S58_CachePreloader_Prefetch) {
-    using namespace ExplorerLens::Engine;
-    CachePreloader preloader;
-    preloader.SetMaxPending(10);
-    ASSERT(preloader.MaxPending() == 10);
-    PreloadTask task;
-    task.filePath = L"C:\\Photos\\test.jpg";
-    task.thumbnailSize = 256;
-    preloader.QueuePreload(task);
-    ASSERT(preloader.PendingCount() == 1);
-}
-
-// ===== Sprint 59-60: GPU Enhancement Tests =====
 
 TEST(Test_S59_GPUShaderCompiler_Compile) {
     using namespace ExplorerLens::Engine;
@@ -25180,36 +25100,6 @@ TEST(Test_EP_LargePageOptimizer_Validate) {
 TEST(Test_EP_LargePageOptimizer_Props) {
     ASSERT(LargePageOptimizer::Instance().Validate());
 }
-TEST(Test_EP_PSOPrecompiler_Validate) {
-    ASSERT(PSOPrecompiler::Instance().Validate());
-}
-TEST(Test_EP_PSOPrecompiler_Props) {
-    ASSERT(PSOPrecompiler::Instance().Validate());
-}
-TEST(Test_EP_IdleCacheWarmer_Validate) {
-    ASSERT(IdleCacheWarmer::Instance().Validate());
-}
-TEST(Test_EP_IdleCacheWarmer_Props) {
-    ASSERT(IdleCacheWarmer::Instance().Validate());
-}
-TEST(Test_EP_CacheAnalyticsDashboard_Validate) {
-    ASSERT(CacheAnalyticsDashboard::Instance().Validate());
-}
-TEST(Test_EP_CacheAnalyticsDashboard_Props) {
-    ASSERT(CacheAnalyticsDashboard::Instance().Validate());
-}
-TEST(Test_EP_CacheMigrationTool_Validate) {
-    ASSERT(CacheMigrationTool::Instance().Validate());
-}
-TEST(Test_EP_CacheMigrationTool_Props) {
-    ASSERT(CacheMigrationTool::Instance().Validate());
-}
-TEST(Test_EP_PredictiveCacheLoader_Validate) {
-    ASSERT(PredictiveCacheLoader::Instance().Validate());
-}
-TEST(Test_EP_PredictiveCacheLoader_Props) {
-    ASSERT(PredictiveCacheLoader::Instance().Validate());
-}
 TEST(Test_EP_DirectMLInferenceEngine_Validate) {
     ASSERT(DirectMLInferenceEngine::Instance().Validate());
 }
@@ -25392,12 +25282,10 @@ TEST(Test_S394_Dedup_Stats) {
     ASSERT(stats.totalRequests >= 1);
 }
 
-// --- CacheBloomFilter Tests ---
 TEST(Test_S394_Bloom_InsertAndCheck) {
     BloomFilterConfig cfg;
     cfg.expectedElements = 1024;
     cfg.hashFunctions = 5;
-    CacheBloomFilter bloom(cfg);
     bloom.Insert("hello");
     ASSERT(bloom.MayContain("hello"));
 }
@@ -25406,7 +25294,6 @@ TEST(Test_S394_Bloom_NegativeLookup) {
     BloomFilterConfig cfg;
     cfg.expectedElements = 1024;
     cfg.hashFunctions = 5;
-    CacheBloomFilter bloom(cfg);
     bloom.Insert("exists");
     auto stats = bloom.GetStats();
     ASSERT(stats.fillRatio > 0.0);
@@ -25416,14 +25303,12 @@ TEST(Test_S394_Bloom_Clear) {
     BloomFilterConfig cfg;
     cfg.expectedElements = 1024;
     cfg.hashFunctions = 5;
-    CacheBloomFilter bloom(cfg);
     bloom.Insert("data");
     bloom.Clear();
     auto stats = bloom.GetStats();
     ASSERT(stats.fillRatio == 0.0);
 }
 
-// --- CacheFragmentationAnalyzer Tests ---
 TEST(Test_S394_Frag_Empty) {
     CacheFragmentationAnalyzer analyzer;
     auto report = analyzer.Analyze(1024 * 1024);
@@ -25792,16 +25677,6 @@ TEST(Test_S395_CachePartitionManager) {
     ASSERT(mgr.PartitionCount() == 1);
 }
 
-TEST(Test_S395_CacheStatisticsExporter) {
-    CacheStatisticsExporter exporter;
-    CacheMetricSnapshot snap;
-    snap.hitCount = 10; snap.missCount = 5;
-    exporter.RecordSnapshot(snap);
-    auto json = exporter.Export(CacheExportFormat::JSON);
-    ASSERT(!json.empty());
-    ASSERT(exporter.SnapshotCount() == 1);
-}
-
 TEST(Test_S395_CacheGarbageCollector) {
     CacheGarbageCollector gc;
     GCConfig cfg;
@@ -25811,26 +25686,6 @@ TEST(Test_S395_CacheGarbageCollector) {
     ASSERT(stats.totalPasses == 0);
     ASSERT(stats.totalEntriesReclaimed == 0);
 }
-
-TEST(Test_S395_CacheVersionMigrator) {
-    CacheVersionMigrator migrator;
-    ASSERT(CacheVersionMigrator::CurrentVersion().major == 2);
-    ASSERT(migrator.NeedsMigration({ 1, 0 }, { 2, 0 }));
-    ASSERT(!migrator.NeedsMigration({ 2, 0 }, { 2, 0 }));
-}
-
-TEST(Test_S395_FileHashCache) {
-    FileHashCache cache;
-    FileHashConfig cfg;
-    cfg.maxCachedHashes = 1000;
-    cache.Configure(cfg);
-    ASSERT(cache.Size() == 0);
-    auto stats = cache.GetStats();
-    ASSERT(stats.totalLookups == 0);
-    ASSERT(stats.cacheHits == 0);
-}
-
-// --- Memory Tests ---
 
 TEST(Test_S395_StackAllocator) {
     StackAllocator alloc(4096);
@@ -26453,41 +26308,6 @@ TEST(Test_S396_GPUResourceLeakDetector) {
     ASSERT(!report.leakedItems.empty());
 }
 
-TEST(Test_S396_CacheResilienceManager) {
-    CacheResilienceManager resilience;
-    auto report = resilience.RunHealthCheck();
-    ASSERT(report.status == CacheHealthStatus::Healthy);
-    ASSERT(resilience.RepairEntry(42));
-    auto report2 = resilience.RunHealthCheck();
-    ASSERT(report2.repairedEntries == 1);
-}
-
-TEST(Test_S396_CacheAccessPatternAnalyzer) {
-    CacheAccessPatternAnalyzer analyzer(100);
-    for (int i = 0; i < 20; i++) {
-        analyzer.RecordAccess(L"key_" + std::to_wstring(i), i % 3 == 0);
-    }
-    auto analysis = analyzer.Analyze();
-    ASSERT(analysis.totalAccesses == 20);
-    ASSERT(analysis.hitRate > 0.0f);
-    ASSERT(analysis.hitRate < 1.0f);
-}
-
-TEST(Test_S396_CacheSlabAllocator) {
-    CacheSlabAllocator alloc;
-    ASSERT(alloc.SelectSizeClass(32) == SlabSizeClass::Tiny);
-    ASSERT(alloc.SelectSizeClass(128) == SlabSizeClass::Small);
-    ASSERT(alloc.SelectSizeClass(1024) == SlabSizeClass::Medium);
-    ASSERT(alloc.SelectSizeClass(50000) == SlabSizeClass::Large);
-    ASSERT(alloc.Allocate(64));
-    ASSERT(alloc.Allocate(256));
-    auto metrics = alloc.GetMetrics();
-    ASSERT(metrics.totalAllocations == 2);
-    alloc.Deallocate(64);
-    auto metrics2 = alloc.GetMetrics();
-    ASSERT(metrics2.totalDeallocations == 1);
-}
-
 TEST(Test_S396_CacheReplicationEngine) {
     CacheReplicationEngine repl(ReplicationPolicy::Asynchronous);
     ASSERT(repl.Replicate(L"thumb_001", ReplicationTier::L1_Memory, ReplicationTier::L2_SSD, 4096));
@@ -26498,21 +26318,6 @@ TEST(Test_S396_CacheReplicationEngine) {
     ASSERT(metrics.totalReplications == 1);
     ASSERT(metrics.successfulReplications == 1);
     ASSERT(metrics.bytesReplicated == 4096);
-}
-
-TEST(Test_S396_CacheContentHasher) {
-    CacheContentHasher hasher(ContentHashAlgo::FNV1a);
-    std::vector<uint8_t> data = { 0x48, 0x65, 0x6C, 0x6C, 0x6F };
-    auto hash1 = hasher.ComputeHash(data);
-    auto hash2 = hasher.ComputeHash(data);
-    ASSERT(hash1 == hash2);
-    ASSERT(hash1.contentSize == 5);
-    std::vector<uint8_t> other = { 0x57, 0x6F, 0x72, 0x6C, 0x64 };
-    auto hash3 = hasher.ComputeHash(other);
-    ASSERT(hash1 != hash3);
-    ASSERT(hasher.VerifyHash(data.data(), data.size(), hash1));
-    auto strHash = hasher.ComputeStringHash("test");
-    ASSERT(strHash.contentSize == 4);
 }
 
 TEST(Test_S396_PageFaultOptimizer) {
@@ -26815,11 +26620,6 @@ TEST(Test_S397_BulkInitialization) {
     AssertInitPattern<GPUCommandBundler>("GPUCommandBundler");
     AssertInitPattern<GPUTimestampProfiler>("GPUTimestampProfiler");
     // Cache
-    AssertInitPattern<PSOBlobSerializer>("PSOBlobSerializer");
-    AssertInitPattern<CacheWarmingScheduler>("CacheWarmingScheduler");
-    AssertInitPattern<CachePartitionRebalancer>("CachePartitionRebalancer");
-    AssertInitPattern<CacheTTLManager>("CacheTTLManager");
-    AssertInitPattern<CacheCompressionSelector>("CacheCompressionSelector");
     // Memory
     AssertInitPattern<BitmapPoolPartitioner>("BitmapPoolPartitioner");
     AssertInitPattern<MemoryTagAllocator>("MemoryTagAllocator");
@@ -26865,12 +26665,7 @@ TEST(Test_S398_BulkInitialization) {
     AssertInitPattern<ShaderCompileListener>("ShaderCompileListener");
     AssertInitPattern<GPUVendorQuirksTable>("GPUVendorQuirksTable");
     // Cache
-    AssertInitPattern<CachePrefetchOracle>("CachePrefetchOracle");
     AssertInitPattern<CacheSerializationCodec>("CacheSerializationCodec");
-    AssertInitPattern<CacheSizeEstimator>("CacheSizeEstimator");
-    AssertInitPattern<CacheInvalidationBroadcaster>("CacheInvalidationBroadcaster");
-    AssertInitPattern<CacheHitRateAnalyzer>("CacheHitRateAnalyzer");
-    AssertInitPattern<CacheReplicationStrategy>("CacheReplicationStrategy");
     // Memory
     AssertInitPattern<VirtualAllocTracker>("VirtualAllocTracker");
     AssertInitPattern<MemoryPageFaultMonitor>("MemoryPageFaultMonitor");
@@ -26922,11 +26717,6 @@ TEST(Test_S399_BulkInitialization) {
     AssertInitPattern<GPUFormatConverter>("GPUFormatConverter");
     AssertInitPattern<GPUThumbnailCompositor>("GPUThumbnailCompositor");
     // Cache
-    AssertInitPattern<CachePredictiveLoader>("CachePredictiveLoader");
-    AssertInitPattern<CacheDeduplicationEngine>("CacheDeduplicationEngine");
-    AssertInitPattern<CacheMigrationManager>("CacheMigrationManager");
-    AssertInitPattern<CacheVersionCoordinator>("CacheVersionCoordinator");
-    AssertInitPattern<CacheDiagnosticReporter>("CacheDiagnosticReporter");
     // Memory
     AssertInitPattern<BitmapMemoryRecycler>("BitmapMemoryRecycler");
     AssertInitPattern<MemoryPressureResponder>("MemoryPressureResponder");
@@ -26988,15 +26778,6 @@ TEST(Test_S399_ComputeDispatchOptimizer) {
     ASSERT(c.GetName() == "ComputeDispatchOptimizer");
     auto d = c.CalculateOptimal(1920, 1080);
     ASSERT(d.x > 0 && d.y > 0);
-}
-
-TEST(Test_S399_CacheEvictionSimulator) {
-    CacheEvictionSimulator c;
-    ASSERT(c.Initialize());
-    ASSERT(c.IsInitialized());
-    ASSERT(c.GetName() == "CacheEvictionSimulator");
-    auto r = c.SimulateLRU({ 1, 2, 3, 1, 2, 4, 5 });
-    ASSERT(r.hits + r.misses == 7);
 }
 
 TEST(Test_S399_SmartCropPredictor) {
@@ -27599,7 +27380,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/GitStatusOverlay.h"
 #include "Core/GitBlameHeatmapOverlay.h"
 #include "Core/VCSBadgeAdapter.h"
-#include "Cache/BranchAwareCacheKey.h"
 #include "Core/GitDiffThumbnail.h"
 #include "Core/GitLFSResolver.h"
 #include "Core/CommitBadgeCompositor.h"
@@ -27730,7 +27510,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/RenderClusterManager.h"
 #include "Core/RenderJobScheduler.h"
 #include "Core/NodeHealthMonitor.h"
-#include "Core/DistributedCacheReplicator.h"
 #include "Core/RenderResultAggregator.h"
 #include "Core/ClusterAutoScaler.h"
 #include "Core/SecureClusterChannel.h"
@@ -27742,11 +27521,9 @@ TEST(TestCLIDoctorAllChecks)
 #include "Plugin/PluginTelemetryCollector.h"
 #include "Plugin/PluginCompatibilityShimV3.h"
 #include "Plugin/PluginNetworkProxy.h"
-#include "Core/PredictivePreGenEngine.h"
 #include "Core/FolderPredictionModel.h"
 #include "Core/ColdStartFolderBootstrapper.h"
 #include "Core/PredictionScanOrchestrator.h"
-#include "Core/EvictionAwareCachePrimer.h"
 #include "GPU/DMADirectPreloader.h"
 #include "Core/PerUserPredictionIsolator.h"
 #include "Core/PredictionAccuracyTracker.h"
@@ -29600,66 +29377,6 @@ TEST(Test_VCSBadgeAdapter_DefaultProvider)
 {
     VCSBadgeAdapter adapter;
     ASSERT(adapter.GetConfig().preferredProvider == VCSProvider::Git);
-}
-TEST(Test_BranchAwareCacheKey_Create)
-{
-    BranchAwareCacheKey key;
-    ASSERT(key.GetActiveBranch() == "main");
-}
-TEST(Test_BranchAwareCacheKey_Build)
-{
-    BranchAwareCacheKey key;
-    auto k = key.Build("file.jpg", 256);
-    ASSERT(k.IsValid());
-    ASSERT(k.filePath == "file.jpg");
-    ASSERT(k.thumbnailSize == 256);
-}
-TEST(Test_BranchAwareCacheKey_Composite)
-{
-    BranchAwareCacheKey key;
-    auto k = key.Build("doc.pdf", 128);
-    ASSERT(!k.Composite().empty());
-}
-TEST(Test_BranchAwareCacheKey_Hash)
-{
-    auto h = BranchAwareCacheKey::ComputeHash("path.png");
-    ASSERT(h != 0);
-}
-TEST(Test_BranchAwareCacheKey_IsValid)
-{
-    BranchCacheKey k;
-    ASSERT(!k.IsValid());
-    k.filePath = "x.jpg";
-    ASSERT(k.IsValid());
-}
-TEST(Test_BranchAwareCacheKey_Equal)
-{
-    BranchAwareCacheKey key;
-    auto k1 = key.Build("a.png", 256);
-    auto k2 = key.Build("a.png", 256);
-    ASSERT(k1 == k2);
-}
-TEST(Test_BranchAwareCacheKey_NotEqual)
-{
-    BranchAwareCacheKey key;
-    auto k1 = key.Build("a.png", 256);
-    auto k2 = key.Build("b.png", 256);
-    ASSERT(!(k1 == k2));
-}
-TEST(Test_BranchAwareCacheKey_BranchName)
-{
-    BranchAwareCacheKey key;
-    key.SetActiveBranch("feature/test");
-    auto k = key.Build("x.jpg", 128);
-    ASSERT(k.branchName == "feature/test");
-    ASSERT(k.Composite().find("feature/test") != std::string::npos);
-}
-TEST(Test_BranchAwareCacheKey_SwitchCount)
-{
-    BranchAwareCacheKey key;
-    key.InvalidateForBranchSwitch("dev");
-    ASSERT(key.SwitchCount() == 1);
-    ASSERT(key.GetActiveBranch() == "dev");
 }
 TEST(Test_GitDiffThumbnail_Create)
 {
@@ -33034,26 +32751,6 @@ TEST(Test_NodeHealthMonitor_Unresponsive)
     ASSERT(r.state == NHMHealthState::Unresponsive);
 }
 
-TEST(Test_DistributedCacheReplicator_PutGet)
-{
-    using namespace ExplorerLens::Engine;
-    DistributedCacheReplicator rep;
-    DCREntry e; e.key = "k1"; e.value = {1,2,3}; e.version = 1;
-    rep.Put(e);
-    DCREntry out;
-    ASSERT(rep.Get("k1", out));
-    ASSERT(out.key == "k1");
-    ASSERT(rep.EntryCount() == 1);
-}
-TEST(Test_DistributedCacheReplicator_Replicate)
-{
-    using namespace ExplorerLens::Engine;
-    DistributedCacheReplicator rep;
-    auto r = rep.ReplicateTo({"node1", "node2"});
-    ASSERT(r.success);
-    ASSERT(r.nodesReplicated == 2);
-}
-
 TEST(Test_RenderResultAggregator_Compose)
 {
     using namespace ExplorerLens::Engine;
@@ -33265,26 +32962,6 @@ TEST(Test_PluginNetworkProxy_Blocked)
     ASSERT(!r.success);
 }
 
-TEST(Test_PredictivePreGenEngine_Predict)
-{
-    using namespace ExplorerLens::Engine;
-    PPGEConfig cfg; cfg.minConfidence = 0.3f; cfg.lookAheadCount = 5;
-    PredictivePreGenEngine eng(cfg);
-    for (int i = 0; i < 5; ++i) eng.RecordAccess(L"C:\\Photos\\img1.jpg");
-    for (int i = 0; i < 3; ++i) eng.RecordAccess(L"C:\\Photos\\img2.jpg");
-    auto preds = eng.Predict();
-    ASSERT(!preds.empty());
-    ASSERT(preds[0].confidence >= 0.3f);
-}
-TEST(Test_PredictivePreGenEngine_TrackedCount)
-{
-    using namespace ExplorerLens::Engine;
-    PPGEConfig cfg;
-    PredictivePreGenEngine eng(cfg);
-    eng.RecordAccess(L"a.jpg"); eng.RecordAccess(L"b.jpg");
-    ASSERT(eng.TrackedPathCount() == 2);
-}
-
 TEST(Test_FolderPredictionModel_TopPredictions)
 {
     using namespace ExplorerLens::Engine;
@@ -33337,27 +33014,6 @@ TEST(Test_PredictionScanOrchestrator_Cancel)
     orch.EnqueueScan(t);
     orch.Cancel();
     ASSERT(orch.GetStatus().pendingScans == 0);
-}
-
-TEST(Test_EvictionAwareCachePrimer_Prime)
-{
-    using namespace ExplorerLens::Engine;
-    EACPConfig cfg; cfg.maxPrimeCount = 3; cfg.pressureThreshold = 0.9f;
-    EvictionAwareCachePrimer primer(cfg);
-    auto r = primer.Prime({L"a.jpg", L"b.jpg", L"c.jpg", L"d.jpg"}, 0.5f);
-    ASSERT(r.success);
-    ASSERT(r.primedCount == 3);
-    ASSERT(r.skippedCount == 1);
-}
-TEST(Test_EvictionAwareCachePrimer_HighPressureSkip)
-{
-    using namespace ExplorerLens::Engine;
-    EACPConfig cfg; cfg.pressureThreshold = 0.8f;
-    EvictionAwareCachePrimer primer(cfg);
-    auto r = primer.Prime({L"a.jpg"}, 0.95f);  // Above threshold
-    ASSERT(r.success);
-    ASSERT(r.primedCount == 0);
-    ASSERT(r.skippedCount == 1);
 }
 
 TEST(Test_DMADirectPreloader_Preload)
@@ -34348,13 +34004,6 @@ TEST(TestFeatureCompatMatrix_InstanceAccessible) {
     ASSERT(true);
 }
 
-TEST(TestHiDPIThumbnailCache_DefaultConstruct) {
-    using namespace ExplorerLens::Engine;
-    HiDPIThumbnailCache cache;
-    (void)cache;
-    ASSERT(true);
-}
-
 TEST(TestThumbnailDensitySelector_BuildCacheKey_Different) {
     using namespace ExplorerLens::Engine;
     std::string key1 = ThumbnailDensitySelector::BuildCacheKey("C:/test/file.png", 256, DPIBucket::DPI_96);
@@ -34932,37 +34581,6 @@ TEST(TestAIEvictionPolicyEngine_Score) {
     auto d2 = e.Score({ L"hot.png", 100.0, 1, 65536 });
     ASSERT(!d2.evict);
 }
-TEST(TestFederatedCacheInvalidator_Broadcast) {
-    FederatedCacheInvalidator inv;
-    auto v1 = inv.Broadcast({ L"thumb:a.png", InvalidationScope::Local, 0 });
-    ASSERT(v1 >= 1);
-    ASSERT(inv.IsKeyInvalidated(L"thumb:a.png"));
-    ASSERT(inv.InvalidationCount() == 1);
-}
-TEST(TestContentAwareCacheKey_Generate) {
-    ContentAwareCacheKey gen;
-    auto k1 = gen.Generate(L"photo.jpg", 256, 256);
-    auto k2 = gen.Generate(L"photo.jpg", 256, 256);
-    ASSERT(gen.KeysMatch(k1, k2));
-    ASSERT(!k1.key.empty());
-}
-TEST(TestDeltaSyncReplicator_ApplyDelta) {
-    DeltaSyncReplicator r;
-    std::vector<CacheDelta> deltas = { { L"k1", { 1,2,3 }, 1, false } };
-    auto res = r.Apply(deltas);
-    ASSERT(res.applied == 1);
-    ASSERT(res.conflicts == 0);
-    ASSERT(r.EntryCount() == 1);
-}
-TEST(TestZeroCopyCacheReader_OpenClose) {
-    ZeroCopyCacheReader r;
-    ASSERT(r.Open(L"thumb.cache"));
-    ASSERT(r.IsOpen());
-    auto v = r.Read(L"key");
-    ASSERT(!v.valid);
-    r.Close();
-    ASSERT(!r.IsOpen());
-}
 TEST(TestCacheEncryptionLayer_EncryptDecrypt) {
     CacheEncryptionLayer enc;
     std::vector<uint8_t> key(32, 0xAB);
@@ -34973,25 +34591,6 @@ TEST(TestCacheEncryptionLayer_EncryptDecrypt) {
     ASSERT(r.success);
     ASSERT(!r.tag.empty());
 }
-TEST(TestShardedCachePartitionV2_PutGet) {
-    ShardedCachePartitionV2 cache(8);
-    ASSERT(cache.ShardCount() == 8);
-    ASSERT(cache.Put(L"thumb:a.png", { 1,2,3,4 }));
-    std::vector<uint8_t> out;
-    ASSERT(cache.Get(L"thumb:a.png", out));
-    ASSERT(out.size() == 4);
-}
-TEST(TestConsistentHashRing_LookupNode) {
-    ConsistentHashRing ring;
-    ring.AddNode({ "node0", 10 });
-    ring.AddNode({ "node1", 10 });
-    auto n = ring.Lookup(L"some_key");
-    ASSERT(!n.empty());
-    ring.RemoveNode("node0");
-    auto n2 = ring.Lookup(L"some_key");
-    ASSERT(n2 == "node1");
-}
-
 //== Sprint 451-460: CLI & Automation v2 (v23.5.0 Vega-V) ==
 TEST(TestLensBatchProcessorV2_RunEmpty) {
     LensBatchProcessorV2 p;
@@ -39765,7 +39364,6 @@ int main()
     RUN_TEST(Test_S37_CacheMigration_CanMigrate);
     RUN_TEST(Test_S37_CacheMigration_StartAndProgress);
     RUN_TEST(Test_S37_CacheMigration_Reset);
-    // Cache: CacheTelemetryCollector
     RUN_TEST(Test_S37_CacheTelemetry_Record);
     RUN_TEST(Test_S37_CacheTelemetry_Export);
     RUN_TEST(Test_S37_CacheTelemetry_Reset);
@@ -39778,7 +39376,6 @@ int main()
     RUN_TEST(Test_S37_FileIdentity_CacheKey);
     RUN_TEST(Test_S37_FileIdentity_Equality);
     RUN_TEST(Test_S37_FileIdentity_Stale);
-    // Cache: ThumbnailPersistenceLayer
     RUN_TEST(Test_S37_Persistence_Initialize);
     RUN_TEST(Test_S37_Persistence_StoreAndLookup);
     RUN_TEST(Test_S37_Persistence_Invalidate);
@@ -39864,11 +39461,9 @@ int main()
     // RequestDeduplicator
     RUN_TEST(Test_S394_Dedup_SingleRequest);
     RUN_TEST(Test_S394_Dedup_Stats);
-    // CacheBloomFilter
     RUN_TEST(Test_S394_Bloom_InsertAndCheck);
     RUN_TEST(Test_S394_Bloom_NegativeLookup);
     RUN_TEST(Test_S394_Bloom_Clear);
-    // CacheFragmentationAnalyzer
     RUN_TEST(Test_S394_Frag_Empty);
     RUN_TEST(Test_S394_Frag_RecordDeallocation);
     RUN_TEST(Test_S394_Frag_CompactionEstimate);
@@ -39920,10 +39515,7 @@ int main()
     RUN_TEST(Test_S395_ComputeShaderProfiler);
     // Cache
     RUN_TEST(Test_S395_CachePartitionManager);
-    RUN_TEST(Test_S395_CacheStatisticsExporter);
     RUN_TEST(Test_S395_CacheGarbageCollector);
-    RUN_TEST(Test_S395_CacheVersionMigrator);
-    RUN_TEST(Test_S395_FileHashCache);
     // Memory
     RUN_TEST(Test_S395_StackAllocator);
     RUN_TEST(Test_S395_MemoryWatermarkTracker);
@@ -39988,11 +39580,7 @@ int main()
     RUN_TEST(Test_S396_GPUThermalMonitor);
     RUN_TEST(Test_S396_GPUResourceLeakDetector);
     // Cache
-    RUN_TEST(Test_S396_CacheResilienceManager);
-    RUN_TEST(Test_S396_CacheAccessPatternAnalyzer);
-    RUN_TEST(Test_S396_CacheSlabAllocator);
     RUN_TEST(Test_S396_CacheReplicationEngine);
-    RUN_TEST(Test_S396_CacheContentHasher);
     // Memory
     RUN_TEST(Test_S396_PageFaultOptimizer);
     RUN_TEST(Test_S396_MemoryCompactionEngine);
@@ -40033,7 +39621,6 @@ int main()
     RUN_TEST(Test_S399_GPUTextureMipChain);
     RUN_TEST(Test_S399_GPUOccupancyCalculator);
     RUN_TEST(Test_S399_ComputeDispatchOptimizer);
-    RUN_TEST(Test_S399_CacheEvictionSimulator);
     RUN_TEST(Test_S399_SmartCropPredictor);
     RUN_TEST(Test_S399_ThumbnailQualityScorer);
     RUN_TEST(Test_S399_ContentClassifier);
@@ -40132,7 +39719,6 @@ int main()
     RUN_TEST(TestThumbnailPriorityQueue_DefaultConstruct);
     RUN_TEST(TestThumbnailDensitySelector_BuildCacheKey);
     RUN_TEST(TestFeatureCompatMatrix_InstanceAccessible);
-    RUN_TEST(TestHiDPIThumbnailCache_DefaultConstruct);
     RUN_TEST(TestThumbnailDensitySelector_BuildCacheKey_Different);
     std::wcout << std::endl;
 
@@ -40257,13 +39843,7 @@ int main()
 
     // Sprint 441-450: Smart Cache v4 (v23.4.0 Vega-U)
     RUN_TEST(TestAIEvictionPolicyEngine_Score);
-    RUN_TEST(TestFederatedCacheInvalidator_Broadcast);
-    RUN_TEST(TestContentAwareCacheKey_Generate);
-    RUN_TEST(TestDeltaSyncReplicator_ApplyDelta);
-    RUN_TEST(TestZeroCopyCacheReader_OpenClose);
     RUN_TEST(TestCacheEncryptionLayer_EncryptDecrypt);
-    RUN_TEST(TestShardedCachePartitionV2_PutGet);
-    RUN_TEST(TestConsistentHashRing_LookupNode);
 
     // Sprint 451-460: CLI & Automation v2 (v23.5.0 Vega-V)
     RUN_TEST(TestLensBatchProcessorV2_RunEmpty);
@@ -40474,7 +40054,6 @@ int main()
     RUN_TEST(TestPSOCachePersistence_Lifecycle);
     RUN_TEST(TestPipelineActivator_State);
     RUN_TEST(TestParallelIOActivation_Init);
-    RUN_TEST(TestCacheWarmingActivation_Strategy);
     RUN_TEST(TestCacheBudgetAutoTuner_Tier);
     RUN_TEST(TestFormatStatusProvider_Formats);
     RUN_TEST(TestSIMDCapabilityDetector_Detect);
@@ -40691,10 +40270,8 @@ int main()
 
     // Sprint 57-58: Cache Intelligence
     std::wcout << L"\nSprint 57-58 Tests (Cache Intelligence)..." << std::endl;
-    RUN_TEST(Test_S57_CacheEvictionPredictor_Predict);
     RUN_TEST(Test_S57_CacheCompressionEngine_Ratio);
     RUN_TEST(Test_S57_CacheIntegrityVerifier_Verify);
-    RUN_TEST(Test_S58_CachePreloader_Prefetch);
 
     // Sprint 59-60: GPU Enhancement
     std::wcout << L"\nSprint 59-60 Tests (GPU Enhancement)..." << std::endl;
@@ -40925,16 +40502,6 @@ int main()
     RUN_TEST(Test_EP_MemoryCompactionScheduler_Props);
     RUN_TEST(Test_EP_LargePageOptimizer_Validate);
     RUN_TEST(Test_EP_LargePageOptimizer_Props);
-    RUN_TEST(Test_EP_PSOPrecompiler_Validate);
-    RUN_TEST(Test_EP_PSOPrecompiler_Props);
-    RUN_TEST(Test_EP_IdleCacheWarmer_Validate);
-    RUN_TEST(Test_EP_IdleCacheWarmer_Props);
-    RUN_TEST(Test_EP_CacheAnalyticsDashboard_Validate);
-    RUN_TEST(Test_EP_CacheAnalyticsDashboard_Props);
-    RUN_TEST(Test_EP_CacheMigrationTool_Validate);
-    RUN_TEST(Test_EP_CacheMigrationTool_Props);
-    RUN_TEST(Test_EP_PredictiveCacheLoader_Validate);
-    RUN_TEST(Test_EP_PredictiveCacheLoader_Props);
     RUN_TEST(Test_EP_DirectMLInferenceEngine_Validate);
     RUN_TEST(Test_EP_DirectMLInferenceEngine_Props);
     RUN_TEST(Test_EP_ONNXModelLoader_Validate);
@@ -41237,15 +40804,6 @@ int main()
     RUN_TEST(Test_VCSBadgeAdapter_DetectProvider);
     RUN_TEST(Test_VCSBadgeAdapter_DefaultBadgeType);
     RUN_TEST(Test_VCSBadgeAdapter_DefaultProvider);
-    RUN_TEST(Test_BranchAwareCacheKey_Create);
-    RUN_TEST(Test_BranchAwareCacheKey_Build);
-    RUN_TEST(Test_BranchAwareCacheKey_Composite);
-    RUN_TEST(Test_BranchAwareCacheKey_Hash);
-    RUN_TEST(Test_BranchAwareCacheKey_IsValid);
-    RUN_TEST(Test_BranchAwareCacheKey_Equal);
-    RUN_TEST(Test_BranchAwareCacheKey_NotEqual);
-    RUN_TEST(Test_BranchAwareCacheKey_BranchName);
-    RUN_TEST(Test_BranchAwareCacheKey_SwitchCount);
     RUN_TEST(Test_GitDiffThumbnail_Create);
     RUN_TEST(Test_GitDiffThumbnail_Analyze_Empty);
     RUN_TEST(Test_GitDiffThumbnail_Analyze_Valid);
@@ -41647,8 +41205,6 @@ int main()
     RUN_TEST(Test_RenderJobScheduler_Fail);
     RUN_TEST(Test_NodeHealthMonitor_HeartbeatAndReport);
     RUN_TEST(Test_NodeHealthMonitor_Unresponsive);
-    RUN_TEST(Test_DistributedCacheReplicator_PutGet);
-    RUN_TEST(Test_DistributedCacheReplicator_Replicate);
     RUN_TEST(Test_RenderResultAggregator_Compose);
     RUN_TEST(Test_RenderResultAggregator_NoTiles);
     RUN_TEST(Test_ClusterAutoScaler_ScaleUp);
@@ -41671,15 +41227,11 @@ int main()
     RUN_TEST(Test_PluginCompatibilityShimV3_EmptyPath);
     RUN_TEST(Test_PluginNetworkProxy_AllowedRequest);
     RUN_TEST(Test_PluginNetworkProxy_Blocked);
-    RUN_TEST(Test_PredictivePreGenEngine_Predict);
-    RUN_TEST(Test_PredictivePreGenEngine_TrackedCount);
     RUN_TEST(Test_FolderPredictionModel_TopPredictions);
     RUN_TEST(Test_FolderPredictionModel_TotalAccesses);
     RUN_TEST(Test_ColdStartFolderBootstrapper_Bootstrap);
     RUN_TEST(Test_PredictionScanOrchestrator_EnqueueDrain);
     RUN_TEST(Test_PredictionScanOrchestrator_Cancel);
-    RUN_TEST(Test_EvictionAwareCachePrimer_Prime);
-    RUN_TEST(Test_EvictionAwareCachePrimer_HighPressureSkip);
     RUN_TEST(Test_DMADirectPreloader_Preload);
     RUN_TEST(Test_DMADirectPreloader_EmptyPath);
     RUN_TEST(Test_PerUserPredictionIsolator_RegisterTest);

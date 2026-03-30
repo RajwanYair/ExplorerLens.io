@@ -540,20 +540,17 @@ set(ENGINE_HEADERS
     Cache/CacheWarmingService.h
     Cache/MultiTenantCacheManager.h
     Cache/MultiTierCache.h
-    Cache/PersistentCacheManager.h
     Cache/PersistentDiskCache.h
     Cache/PipelineStateCacheV2.h
     Cache/ThumbnailCache.h
     Cache/CacheKeyGenerator.h
     Cache/PredictiveCacheEngine.h
     Cache/PSOPersistenceManager.h
-    Cache/ThumbnailPersistenceLayer.h
     Cache/USNCacheInvalidation.h
     Cache/CacheMigrationEngine.h
     Cache/CacheEncryptionLayer.h
     Cache/SubMillisecondCacheEngine.h
     Cache/PSOCachePersistence.h
-    Cache/CacheWarmingActivation.h
     Cache/CacheBudgetAutoTuner.h
     Cache/CacheCoherencyManager.h
     Cache/CachePrewarmScheduler.h
@@ -787,7 +784,6 @@ set(ENGINE_HEADERS
     GPU/DX12FenceManager.h
     Core/LocalizationEngine.h
     Core/ThumbnailSpriteSheet.h
-    Cache/CacheTelemetryCollector.h
     Core/WindowsSearchIntegration.h
 
     # Sprints 594-643 — New Decoders, Pipeline, Core, AI features
@@ -874,10 +870,8 @@ set(ENGINE_HEADERS
     Pipeline/PipelineReplayRecorder.h
     Pipeline/DecodePriorityQueue.h
     # Sprint 57-58: Cache Intelligence
-    Cache/CacheEvictionPredictor.h
     Cache/CacheCompressionEngine.h
     Cache/CacheIntegrityVerifier.h
-    Cache/CachePreloader.h
     # Sprint 59-60: GPU Enhancement
     GPU/GPUShaderCompiler.h
     GPU/GPUOccupancyOptimizer.h
@@ -950,10 +944,6 @@ set(ENGINE_HEADERS
     Pipeline/ThumbnailMorphTransition.h
 
     # Beyond Zenith — Cache
-    Cache/DistributedCacheSync.h
-    Cache/CompressionTierOptimizer.h
-    Cache/CacheHitPredictor.h
-    Cache/TemporalCacheAnalyzer.h
     Cache/SemanticCacheIndex.h
 
     # Beyond Zenith — Memory
@@ -1013,11 +1003,6 @@ set(ENGINE_HEADERS
     Memory/LargePageOptimizer.h
 
     # Category F: Cache Performance
-    Cache/PSOPrecompiler.h
-    Cache/IdleCacheWarmer.h
-    Cache/CacheAnalyticsDashboard.h
-    Cache/CacheMigrationTool.h
-    Cache/PredictiveCacheLoader.h
 
     # Category E: AI/ML Production
     AI/DirectMLInferenceEngine.h
@@ -1049,8 +1034,6 @@ set(ENGINE_HEADERS
     Core/ColdStartOptimizer.h
     Pipeline/DecodeCancellationEngine.h
     Pipeline/RequestDeduplicator.h
-    Cache/CacheBloomFilter.h
-    Cache/CacheFragmentationAnalyzer.h
     GPU/GPUPowerStateManager.h
     GPU/GPUWorkgroupOptimizer.h
     Memory/CopyOnWriteBufferPool.h
@@ -1093,10 +1076,7 @@ set(ENGINE_HEADERS
 
     # Cache enhancements
     Cache/CachePartitionManager.h
-    Cache/CacheStatisticsExporter.h
     Cache/CacheGarbageCollector.h
-    Cache/CacheVersionMigrator.h
-    Cache/FileHashCache.h
 
     # Memory enhancements
     Memory/StackAllocator.h
@@ -1164,11 +1144,7 @@ set(ENGINE_HEADERS
     GPU/GPUThermalMonitor.h
     GPU/GPUResourceLeakDetector.h
     # Cache enhancements
-    Cache/CacheResilienceManager.h
-    Cache/CacheAccessPatternAnalyzer.h
-    Cache/CacheSlabAllocator.h
     Cache/CacheReplicationEngine.h
-    Cache/CacheContentHasher.h
     # Memory enhancements
     Memory/PageFaultOptimizer.h
     Memory/MemoryCompactionEngine.h
@@ -1234,11 +1210,6 @@ set(ENGINE_HEADERS
     GPU/GPUCommandBundler.h
     GPU/GPUTimestampProfiler.h
     # Cache enhancements
-    Cache/PSOBlobSerializer.h
-    Cache/CacheWarmingScheduler.h
-    Cache/CachePartitionRebalancer.h
-    Cache/CacheTTLManager.h
-    Cache/CacheCompressionSelector.h
     # Memory enhancements
     Memory/BitmapPoolPartitioner.h
     Memory/MemoryTagAllocator.h
@@ -1281,12 +1252,7 @@ set(ENGINE_HEADERS
     GPU/ShaderCompileListener.h
     GPU/GPUVendorQuirksTable.h
     # Cache enhancements
-    Cache/CachePrefetchOracle.h
     Cache/CacheSerializationCodec.h
-    Cache/CacheSizeEstimator.h
-    Cache/CacheInvalidationBroadcaster.h
-    Cache/CacheHitRateAnalyzer.h
-    Cache/CacheReplicationStrategy.h
     # Memory enhancements
     Memory/VirtualAllocTracker.h
     Memory/MemoryPageFaultMonitor.h
@@ -1340,12 +1306,6 @@ set(ENGINE_HEADERS
     GPU/GPUFormatConverter.h
     GPU/GPUThumbnailCompositor.h
     # Cache
-    Cache/CachePredictiveLoader.h
-    Cache/CacheDeduplicationEngine.h
-    Cache/CacheMigrationManager.h
-    Cache/CacheVersionCoordinator.h
-    Cache/CacheDiagnosticReporter.h
-    Cache/CacheEvictionSimulator.h
     # Memory
     Memory/BitmapMemoryRecycler.h
     Memory/MemoryPressureResponder.h
@@ -1418,7 +1378,6 @@ set(ENGINE_HEADERS
     Core/ThumbnailPriorityQueue.h
     Core/PredictivePrefetcher.h
     Core/ThumbnailDensitySelector.h
-    Cache/HiDPIThumbnailCache.h
     Utils/MemoryMappedLoader.h
     Utils/ActivationService.h
     Utils/FeatureCompatMatrix.h
@@ -1530,12 +1489,6 @@ set(ENGINE_HEADERS
     Memory/SharedMemoryRegionManager.h
     # Sprint 441-450 — Smart Cache v4 (v23.4.0 Vega-U)
     Cache/AIEvictionPolicyEngine.h
-    Cache/FederatedCacheInvalidator.h
-    Cache/ContentAwareCacheKey.h
-    Cache/DeltaSyncReplicator.h
-    Cache/ZeroCopyCacheReader.h
-    Cache/ShardedCachePartitionV2.h
-    Cache/ConsistentHashRing.h
     # Sprint 451-460 — CLI & Automation v2 (v23.5.0 Vega-V)
     CLI/LensBatchProcessorV2.h
     CLI/LensWatchDaemon.h
@@ -1583,7 +1536,6 @@ set(ENGINE_HEADERS
     Core/GitStatusOverlay.h
     Core/GitBlameHeatmapOverlay.h
     Core/VCSBadgeAdapter.h
-    Cache/BranchAwareCacheKey.h
     Core/GitDiffThumbnail.h
     Core/GitLFSResolver.h
     Core/CommitBadgeCompositor.h
@@ -1719,7 +1671,6 @@ set(ENGINE_HEADERS
     Core/RenderClusterManager.h
     Core/RenderJobScheduler.h
     Core/NodeHealthMonitor.h
-    Core/DistributedCacheReplicator.h
     Core/RenderResultAggregator.h
     Core/ClusterAutoScaler.h
     Core/SecureClusterChannel.h
@@ -1733,11 +1684,9 @@ set(ENGINE_HEADERS
     Plugin/PluginCompatibilityShimV3.h
     Plugin/PluginNetworkProxy.h
     # Sprint 761-770 — Predictive Pre-Generation Engine (v27.4.0 "Sirius-U")
-    Core/PredictivePreGenEngine.h
     Core/FolderPredictionModel.h
     Core/ColdStartFolderBootstrapper.h
     Core/PredictionScanOrchestrator.h
-    Core/EvictionAwareCachePrimer.h
     GPU/DMADirectPreloader.h
     Core/PerUserPredictionIsolator.h
     Core/PredictionAccuracyTracker.h
