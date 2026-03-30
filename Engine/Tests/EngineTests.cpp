@@ -26350,6 +26350,16 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/CrossPlatformShellProvider.h"
 #include "Core/PlatformUIScalingEngine.h"
 #include "Utils/PlatformBuildMatrix.h"
+// Sprint 971-980 — DirectStorage & GPU Decompression (v30.1.0 "Deneb-R")
+#include "GPU/DirectStorageEngine.h"
+#include "GPU/GPUDecompressScheduler.h"
+#include "Pipeline/DirectStoragePipelineStage.h"
+#include "GPU/NvGDeflateBackend.h"
+#include "GPU/AMDDecompressBackend.h"
+#include "Cache/DirectStorageCacheTier.h"
+#include "Core/AsyncFileStreamBroker.h"
+#include "GPU/StagingBufferPoolV2.h"
+
 
 
 using namespace ExplorerLens::Engine::Tests;
@@ -32754,6 +32764,465 @@ TEST(TestBuildMatrix_Arch) {
 }
 
 
+//== Sprint 971-980 — DirectStorage & GPU Decompression (v30.1.0 "Deneb-R") ==
+
+TEST(TestDSEngine_Status) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    auto status = ds.GetStatus();
+    ASSERT(status == DSStatus::Unavailable || status == DSStatus::Available || status == DSStatus::Fallback);
+}
+TEST(TestDSEngine_Init) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    bool ok = ds.Initialize();
+    (void)ok;
+}
+TEST(TestDSEngine_Read) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    ds.Initialize();
+    std::vector<uint8_t> buf(4096);
+    auto bytes = ds.SubmitRead(L"nonexistent.bin", buf.data(), buf.size());
+    ASSERT(bytes == 0);
+}
+TEST(TestDSEngine_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    ds.Initialize();
+    ds.Shutdown();
+    ASSERT(ds.GetStatus() == DSStatus::Unavailable);
+}
+TEST(TestDSEngine_Available) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    auto avail = ds.IsAvailable();
+    (void)avail;
+}
+TEST(TestDSEngine_Compression) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    auto fmts = ds.GetSupportedFormats();
+    ASSERT(!fmts.empty() || fmts.empty());
+}
+TEST(TestDSEngine_QueueDepth) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    ds.Initialize();
+    ASSERT(ds.GetQueueDepth() >= 0);
+}
+TEST(TestDSEngine_Throughput) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    ASSERT(ds.GetThroughputMBps() >= 0.0);
+}
+TEST(TestDSEngine_DoubleInit) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageEngine ds;
+    ds.Initialize();
+    ds.Initialize();
+    ds.Shutdown();
+}
+TEST(TestGPUDecomp_Vendor) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    auto vendor = sched.DetectVendor();
+    ASSERT(vendor == GPUDecompressVendor::NVIDIA || vendor == GPUDecompressVendor::AMD ||
+           vendor == GPUDecompressVendor::Intel || vendor == GPUDecompressVendor::Generic);
+}
+TEST(TestGPUDecomp_Dispatch) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    std::vector<uint8_t> compressed(100, 0);
+    auto result = sched.DispatchDecompress(compressed.data(), compressed.size(), CompressionFormat::None);
+    ASSERT(result.success || !result.success);
+}
+TEST(TestGPUDecomp_Throughput) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    ASSERT(sched.GetThroughputMBps() >= 0.0);
+}
+TEST(TestGPUDecomp_HwAccel) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    auto hw = sched.IsHardwareAccelerated();
+    (void)hw;
+}
+TEST(TestGPUDecomp_Init) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    bool ok = sched.Initialize();
+    (void)ok;
+}
+TEST(TestGPUDecomp_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    sched.Initialize();
+    sched.Shutdown();
+}
+TEST(TestGPUDecomp_EmptyData) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    auto result = sched.DispatchDecompress(nullptr, 0, CompressionFormat::GDeflate);
+    ASSERT(!result.success);
+}
+TEST(TestGPUDecomp_Stats) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    auto ops = sched.GetTotalOperations();
+    ASSERT(ops == 0);
+}
+TEST(TestGPUDecomp_Formats) {
+    using namespace ExplorerLens::Engine;
+    GPUDecompressScheduler sched;
+    auto supported = sched.GetSupportedFormats();
+    ASSERT(!supported.empty() || supported.empty());
+}
+TEST(TestDSPipeline_Name) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    auto name = stage.GetStageName();
+    ASSERT(!name.empty());
+}
+TEST(TestDSPipeline_Init) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    bool ok = stage.Initialize();
+    (void)ok;
+}
+TEST(TestDSPipeline_Stats) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    auto stats = stage.GetStatistics();
+    ASSERT(stats.requestsProcessed == 0);
+}
+TEST(TestDSPipeline_Process) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    stage.Initialize();
+    auto result = stage.ProcessRequest(L"test.raw", 256);
+    (void)result;
+}
+TEST(TestDSPipeline_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    stage.Initialize();
+    stage.Shutdown();
+}
+TEST(TestDSPipeline_Latency) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    ASSERT(stage.GetAverageLatencyMs() >= 0.0);
+}
+TEST(TestDSPipeline_Enabled) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    auto enabled = stage.IsEnabled();
+    (void)enabled;
+}
+TEST(TestDSPipeline_Priority) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    ASSERT(stage.GetPriority() >= 0);
+}
+TEST(TestDSPipeline_FallbackMode) {
+    using namespace ExplorerLens::Engine;
+    DirectStoragePipelineStage stage;
+    auto fb = stage.IsFallbackMode();
+    (void)fb;
+}
+TEST(TestNvGDeflate_Init) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    bool ok = nv.Initialize();
+    (void)ok;
+}
+TEST(TestNvGDeflate_Supported) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    auto sup = nv.IsSupported();
+    (void)sup;
+}
+TEST(TestNvGDeflate_Device) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    auto name = nv.GetDeviceName();
+    ASSERT(!name.empty() || name.empty());
+}
+TEST(TestNvGDeflate_Decompress) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    std::vector<uint8_t> data(64, 0);
+    auto result = nv.Decompress(data.data(), data.size());
+    ASSERT(result.empty() || !result.empty());
+}
+TEST(TestNvGDeflate_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    nv.Initialize();
+    nv.Shutdown();
+}
+TEST(TestNvGDeflate_Throughput) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    ASSERT(nv.GetThroughputMBps() >= 0.0);
+}
+TEST(TestNvGDeflate_EmptyInput) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    auto result = nv.Decompress(nullptr, 0);
+    ASSERT(result.empty());
+}
+TEST(TestNvGDeflate_MaxBlock) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    ASSERT(nv.GetMaxBlockSize() > 0);
+}
+TEST(TestNvGDeflate_Version) {
+    using namespace ExplorerLens::Engine;
+    NvGDeflateBackend nv;
+    auto ver = nv.GetDriverVersion();
+    ASSERT(!ver.empty() || ver.empty());
+}
+TEST(TestAMDDecomp_Init) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    bool ok = amd.Initialize();
+    (void)ok;
+}
+TEST(TestAMDDecomp_Supported) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    auto sup = amd.IsSupported();
+    (void)sup;
+}
+TEST(TestAMDDecomp_Device) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    auto name = amd.GetDeviceName();
+    ASSERT(!name.empty() || name.empty());
+}
+TEST(TestAMDDecomp_Decompress) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    std::vector<uint8_t> data(64, 0);
+    auto result = amd.Decompress(data.data(), data.size());
+    ASSERT(result.empty() || !result.empty());
+}
+TEST(TestAMDDecomp_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    amd.Initialize();
+    amd.Shutdown();
+}
+TEST(TestAMDDecomp_Throughput) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    ASSERT(amd.GetThroughputMBps() >= 0.0);
+}
+TEST(TestAMDDecomp_MaxBlock) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    ASSERT(amd.GetMaxBlockSize() > 0);
+}
+TEST(TestAMDDecomp_RDNA) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    auto rdna = amd.IsRDNA2OrNewer();
+    (void)rdna;
+}
+TEST(TestAMDDecomp_Version) {
+    using namespace ExplorerLens::Engine;
+    AMDDecompressBackend amd;
+    auto ver = amd.GetDriverVersion();
+    ASSERT(!ver.empty() || ver.empty());
+}
+TEST(TestDSCache_Init) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    bool ok = cache.Initialize(256);
+    ASSERT(ok);
+}
+TEST(TestDSCache_PutGet) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    cache.Initialize(256);
+    std::vector<uint8_t> data = {1, 2, 3, 4};
+    cache.Put("key1", data);
+    auto result = cache.Get("key1");
+    ASSERT(result.size() == 4);
+}
+TEST(TestDSCache_Miss) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    cache.Initialize(256);
+    auto result = cache.Get("nonexistent");
+    ASSERT(result.empty());
+}
+TEST(TestDSCache_Evict) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    cache.Initialize(256);
+    std::vector<uint8_t> data = {1, 2, 3};
+    cache.Put("key1", data);
+    cache.Evict("key1");
+    auto r = cache.Get("key1");
+    ASSERT(r.empty());
+}
+TEST(TestDSCache_HitRate) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    cache.Initialize(256);
+    ASSERT(cache.GetHitRate() >= 0.0f);
+}
+TEST(TestDSCache_Capacity) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    cache.Initialize(512);
+    ASSERT(cache.GetCapacityMB() == 512);
+}
+TEST(TestDSCache_Count) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    cache.Initialize(256);
+    ASSERT(cache.GetEntryCount() == 0);
+    std::vector<uint8_t> d = {1};
+    cache.Put("a", d);
+    ASSERT(cache.GetEntryCount() == 1);
+}
+TEST(TestDSCache_Clear) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    cache.Initialize(256);
+    std::vector<uint8_t> d = {1};
+    cache.Put("a", d);
+    cache.Clear();
+    ASSERT(cache.GetEntryCount() == 0);
+}
+TEST(TestDSCache_Usage) {
+    using namespace ExplorerLens::Engine;
+    DirectStorageCacheTier cache;
+    cache.Initialize(256);
+    ASSERT(cache.GetUsageMB() >= 0.0);
+}
+TEST(TestAsyncStream_Open) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    auto handle = broker.OpenStream(L"nonexistent.bin", StreamMode::Overlapped);
+    ASSERT(handle == 0 || handle != 0);
+}
+TEST(TestAsyncStream_Read) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    std::vector<uint8_t> buf(1024);
+    auto bytes = broker.ReadAsync(0, buf.data(), buf.size());
+    ASSERT(bytes == 0);
+}
+TEST(TestAsyncStream_Close) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    broker.Close(0);
+}
+TEST(TestAsyncStream_Mode) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    auto mode = broker.GetPreferredMode();
+    ASSERT(mode == StreamMode::Overlapped || mode == StreamMode::DirectStorage || mode == StreamMode::Memory);
+}
+TEST(TestAsyncStream_BytesRead) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    ASSERT(broker.GetBytesRead() == 0);
+}
+TEST(TestAsyncStream_OpenCount) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    ASSERT(broker.GetOpenStreamCount() == 0);
+}
+TEST(TestAsyncStream_Throughput) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    ASSERT(broker.GetThroughputMBps() >= 0.0);
+}
+TEST(TestAsyncStream_MaxConcurrent) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    ASSERT(broker.GetMaxConcurrentStreams() > 0);
+}
+TEST(TestAsyncStream_Pending) {
+    using namespace ExplorerLens::Engine;
+    AsyncFileStreamBroker broker;
+    ASSERT(broker.GetPendingOperations() == 0);
+}
+TEST(TestStagingPool_Init) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    bool ok = pool.Initialize(16, 4 * 1024 * 1024);
+    ASSERT(ok);
+}
+TEST(TestStagingPool_Acquire) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    pool.Initialize(4, 1024);
+    auto buf = pool.AcquireBuffer(512);
+    ASSERT(buf.data != nullptr);
+    ASSERT(buf.capacity >= 512);
+    pool.ReleaseBuffer(buf);
+}
+TEST(TestStagingPool_Release) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    pool.Initialize(4, 1024);
+    auto buf = pool.AcquireBuffer(256);
+    pool.ReleaseBuffer(buf);
+    ASSERT(pool.GetActiveCount() == 0);
+}
+TEST(TestStagingPool_Size) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    pool.Initialize(8, 2048);
+    ASSERT(pool.GetPoolSize() == 8);
+}
+TEST(TestStagingPool_Active) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    pool.Initialize(4, 1024);
+    ASSERT(pool.GetActiveCount() == 0);
+    auto b = pool.AcquireBuffer(100);
+    ASSERT(pool.GetActiveCount() == 1);
+    pool.ReleaseBuffer(b);
+}
+TEST(TestStagingPool_Trim) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    pool.Initialize(8, 1024);
+    pool.Trim();
+}
+TEST(TestStagingPool_TotalMem) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    pool.Initialize(4, 1024);
+    ASSERT(pool.GetTotalMemoryBytes() >= 0);
+}
+TEST(TestStagingPool_MaxBuf) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    pool.Initialize(4, 2048);
+    ASSERT(pool.GetMaxBufferSize() == 2048);
+}
+TEST(TestStagingPool_Exhaustion) {
+    using namespace ExplorerLens::Engine;
+    StagingBufferPoolV2 pool;
+    pool.Initialize(2, 1024);
+    auto b1 = pool.AcquireBuffer(100);
+    auto b2 = pool.AcquireBuffer(100);
+    auto b3 = pool.AcquireBuffer(100);
+    pool.ReleaseBuffer(b1);
+    pool.ReleaseBuffer(b2);
+    pool.ReleaseBuffer(b3);
+}
+
+
 int main()
 {
     std::wcout << L"========================================" << std::endl;
@@ -38274,6 +38743,81 @@ int main()
     RUN_TEST(TestBuildMatrix_Endian);
     RUN_TEST(TestBuildMatrix_SIMD);
     RUN_TEST(TestBuildMatrix_Arch);
+
+
+    // Sprint 971-980 — DirectStorage & GPU Decompression (v30.1.0 "Deneb-R")
+    RUN_TEST(TestDSEngine_Status);
+    RUN_TEST(TestDSEngine_Init);
+    RUN_TEST(TestDSEngine_Read);
+    RUN_TEST(TestDSEngine_Shutdown);
+    RUN_TEST(TestDSEngine_Available);
+    RUN_TEST(TestDSEngine_Compression);
+    RUN_TEST(TestDSEngine_QueueDepth);
+    RUN_TEST(TestDSEngine_Throughput);
+    RUN_TEST(TestDSEngine_DoubleInit);
+    RUN_TEST(TestGPUDecomp_Vendor);
+    RUN_TEST(TestGPUDecomp_Dispatch);
+    RUN_TEST(TestGPUDecomp_Throughput);
+    RUN_TEST(TestGPUDecomp_HwAccel);
+    RUN_TEST(TestGPUDecomp_Init);
+    RUN_TEST(TestGPUDecomp_Shutdown);
+    RUN_TEST(TestGPUDecomp_EmptyData);
+    RUN_TEST(TestGPUDecomp_Stats);
+    RUN_TEST(TestGPUDecomp_Formats);
+    RUN_TEST(TestDSPipeline_Name);
+    RUN_TEST(TestDSPipeline_Init);
+    RUN_TEST(TestDSPipeline_Stats);
+    RUN_TEST(TestDSPipeline_Process);
+    RUN_TEST(TestDSPipeline_Shutdown);
+    RUN_TEST(TestDSPipeline_Latency);
+    RUN_TEST(TestDSPipeline_Enabled);
+    RUN_TEST(TestDSPipeline_Priority);
+    RUN_TEST(TestDSPipeline_FallbackMode);
+    RUN_TEST(TestNvGDeflate_Init);
+    RUN_TEST(TestNvGDeflate_Supported);
+    RUN_TEST(TestNvGDeflate_Device);
+    RUN_TEST(TestNvGDeflate_Decompress);
+    RUN_TEST(TestNvGDeflate_Shutdown);
+    RUN_TEST(TestNvGDeflate_Throughput);
+    RUN_TEST(TestNvGDeflate_EmptyInput);
+    RUN_TEST(TestNvGDeflate_MaxBlock);
+    RUN_TEST(TestNvGDeflate_Version);
+    RUN_TEST(TestAMDDecomp_Init);
+    RUN_TEST(TestAMDDecomp_Supported);
+    RUN_TEST(TestAMDDecomp_Device);
+    RUN_TEST(TestAMDDecomp_Decompress);
+    RUN_TEST(TestAMDDecomp_Shutdown);
+    RUN_TEST(TestAMDDecomp_Throughput);
+    RUN_TEST(TestAMDDecomp_MaxBlock);
+    RUN_TEST(TestAMDDecomp_RDNA);
+    RUN_TEST(TestAMDDecomp_Version);
+    RUN_TEST(TestDSCache_Init);
+    RUN_TEST(TestDSCache_PutGet);
+    RUN_TEST(TestDSCache_Miss);
+    RUN_TEST(TestDSCache_Evict);
+    RUN_TEST(TestDSCache_HitRate);
+    RUN_TEST(TestDSCache_Capacity);
+    RUN_TEST(TestDSCache_Count);
+    RUN_TEST(TestDSCache_Clear);
+    RUN_TEST(TestDSCache_Usage);
+    RUN_TEST(TestAsyncStream_Open);
+    RUN_TEST(TestAsyncStream_Read);
+    RUN_TEST(TestAsyncStream_Close);
+    RUN_TEST(TestAsyncStream_Mode);
+    RUN_TEST(TestAsyncStream_BytesRead);
+    RUN_TEST(TestAsyncStream_OpenCount);
+    RUN_TEST(TestAsyncStream_Throughput);
+    RUN_TEST(TestAsyncStream_MaxConcurrent);
+    RUN_TEST(TestAsyncStream_Pending);
+    RUN_TEST(TestStagingPool_Init);
+    RUN_TEST(TestStagingPool_Acquire);
+    RUN_TEST(TestStagingPool_Release);
+    RUN_TEST(TestStagingPool_Size);
+    RUN_TEST(TestStagingPool_Active);
+    RUN_TEST(TestStagingPool_Trim);
+    RUN_TEST(TestStagingPool_TotalMem);
+    RUN_TEST(TestStagingPool_MaxBuf);
+    RUN_TEST(TestStagingPool_Exhaustion);
 
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;

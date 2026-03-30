@@ -1605,6 +1605,16 @@ set(ENGINE_HEADERS
     Core/CrossPlatformShellProvider.h
     Core/PlatformUIScalingEngine.h
     Utils/PlatformBuildMatrix.h
+
+    # Sprint 971-980 — DirectStorage & GPU Decompression (v30.1.0 "Deneb-R")
+    GPU/DirectStorageEngine.h
+    GPU/GPUDecompressScheduler.h
+    Pipeline/DirectStoragePipelineStage.h
+    GPU/NvGDeflateBackend.h
+    GPU/AMDDecompressBackend.h
+    Cache/DirectStorageCacheTier.h
+    Core/AsyncFileStreamBroker.h
+    GPU/StagingBufferPoolV2.h
 )
 
 set(ENGINE_SOURCES
