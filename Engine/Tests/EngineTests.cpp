@@ -27,8 +27,6 @@
 #include "../Core/D3D12PipelineActivation.h"
 #include "../Core/DiagnosticCollector.h"
 #include "../Core/EncoderExportEngine.h"
-#include "../Core/ErrorRecoveryEngine.h"
-#include "../Core/ErrorRecoveryEngineV2.h"
 #include "../Core/Expected.h"
 #include "../Core/FormatConverterEngine.h"
 #include "../Core/FormatRegistry.h"
@@ -200,7 +198,6 @@
 #include "../Utils/TestFramework.h"
 #include "../Utils/TestInfrastructure.h"
 #include "../Utils/TestSuiteExpansion.h"
-#include "../Utils/UsageTelemetryEngine.h"
 #include "../Utils/WindowsCompat.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
@@ -261,7 +258,6 @@
 // --- Sprint 43-44: Plugin SDK Hardening ---
 #include "../Plugin/PluginCapabilityGuard.h"
 #include "../Plugin/PluginVersionNegotiator.h"
-#include "../Plugin/PluginCrashIsolation.h"
 #include "../Plugin/PluginAuditLog.h"
 
 // --- Sprint 41-42: Performance Tuning ---
@@ -281,12 +277,10 @@
 #include "../Core/AccessibilityNarratorBridge.h"
 #include "../Core/AdaptiveDPIScaler.h"
 #include "../Core/AnimatedFormatController.h"
-#include "../Core/AuditTrailLogger.h"
 #include "../Core/CertificateTrustValidator.h"
 #include "../Core/ColorSpaceEngine.h"
 #include "../Core/ContentAwareThumbnailSelector.h"
 #include "../Core/ContentInspectionGateway.h"
-#include "../Core/CrashAnalyticsCollector.h"
 #include "../Core/DecoderPerformanceProfiler.h"
 #include "../Core/DiagnosticReportGeneratorV2.h"
 #include "../Core/DirectStorage12Integration.h"
@@ -457,7 +451,6 @@
 #include "../Memory/HotModeDirectoryEngine.h"
 #include "../Memory/MemoryOptimizationEngine.h"
 #include "../Memory/MemorySoakValidator.h"
-#include "../Plugin/CrashIntelligence.h"
 #include "../Plugin/IsolationModeSelector.h"
 #include "../Utils/SmallObjectPool.h"
 #include "../Utils/ValidationHelpers.h"
@@ -522,7 +515,6 @@
 #include "../GPU/D3D11Renderer.h"
 #include "../GPU/GDIRenderer.h"
 #include "../Pipeline/ThumbnailPipeline.h"
-#include "../Plugin/CrashHandler.h"
 #include "../Plugin/PluginManager.h"
 #include "../Plugin/PluginMarketplace.h"
 #include "../Plugin/PluginTrustChain.h"
@@ -536,7 +528,6 @@
 #include "../AI/ImageQualityAssessorV2.h"
 #include "../AI/ThumbnailSearchIndex.h"
 #include "../Plugin/PluginNamedPipeBridge.h"
-#include "../Plugin/CrashIntelligenceEngine.h"
 #include "../Plugin/PluginHotReloadManager.h"
 #include "../Plugin/PluginCompatibilityKit.h"
 #include "../Plugin/PluginTrustChainValidator.h"
@@ -632,7 +623,6 @@
 #include "../Core/CacheCoherencyProtocol.h"
 #include "../Core/ThumbnailPipelineProfiler.h"
 #include "../Core/FormatNegotiator.h"
-#include "../Core/TelemetryAggregator.h"
 #include "../Core/DecoderRegistryV2.h"
 #include "../Pipeline/ProductionPipelineV2.h"
 #include "../Utils/ConfigDriftDetector.h"
@@ -853,7 +843,6 @@
 #include "../Core/ThumbnailRequestCoalescer.h"
 #include "../Core/DecoderTimeoutPolicy.h"
 #include "../Core/ExplorerIntegrationMonitor.h"
-#include "../Core/ShellExtensionRecovery.h"
 #include "../Core/ThumbnailSizeNegotiator.h"
 #include "../Core/FileConcurrencyGuard.h"
 #include "../Core/ResourceThrottlePolicy.h"
@@ -882,7 +871,6 @@
 #include "../Plugin/PluginUpdateChecker.h"
 #include "../Plugin/PluginConfigMigrator.h"
 #include "../Plugin/PluginMetricsExporter.h"
-#include "../Utils/CrashDumpAnalyzer.h"
 #include "../Utils/PerformanceReportGenerator.h"
 #include "../Utils/SystemInfoCollector.h"
 #include "../Utils/RegistryRepairTool.h"
@@ -1051,13 +1039,10 @@
 #include "../Plugin/PluginEventBus.h"
 #include "../Plugin/PluginSchemaValidator.h"
 #include "../Plugin/PluginFeatureToggle.h"
-#include "../Plugin/PluginAuditTrail.h"
 #include "../Plugin/PluginSandboxMonitor.h"
 // Utils
-#include "../Utils/CrashReportBundler.h"
 #include "../Utils/StartupTimingProfiler.h"
 #include "../Utils/FeatureFlagRegistry.h"
-#include "../Utils/TelemetrySampler.h"
 #include "../Utils/DeploymentVerifier.h"
 // Sprint 399 — EP V15 Phase 4
 #include "../Core/ThumbnailStreamMultiplexer.h"
@@ -1115,7 +1100,6 @@
 // Sprint 271-280 (v20.7.0 "Quasar-X") — Observability v2
 #include "../Core/DiagnosticsConsole.h"
 #include "../Core/LatencyBudgetManager.h"
-#include "../Core/TelemetryConsentManager.h"
 #include "../Core/NetworkAwarePrefetcher.h"
 #include "../Utils/CrashReporter.h"
 #include "../Utils/UsageStats.h"
@@ -1249,7 +1233,6 @@
 #include "../Plugin/PluginFeatureFlagEngine.h"
 #include "../Plugin/PluginSLAMonitor.h"
 #include "../Plugin/PluginCanaryController.h"
-#include "../Plugin/PluginTelemetryAggregatorV3.h"
 #include "../Plugin/PluginComplianceAuditorV2.h"
 #include "../Plugin/PluginHotConfigReceiver.h"
 // Sprint 431-440 — Memory Optimization v3 (v23.3.0)
@@ -20248,45 +20231,6 @@ TEST(TestFormatNegotiator_BytesPerPixel) {
 
 // --- Telemetry Aggregator Tests ---
 
-TEST(TestTelemetryAggregator_RecordEvent) {
-    auto& telem = TelemetryAggregator::Instance();
-    telem.RecordEvent("Cache", "hit", "Test cache hit", 1.0);
-    telem.RecordEvent("Decoder", "failure", "Test failure", 0.0, AggregatorSeverity::Error);
-    // Should not crash, events should be recorded
-    auto events = telem.GetRecentEvents(10);
-    ASSERT(events.size() >= 2);
-}
-
-TEST(TestTelemetryAggregator_Counters) {
-    auto& telem = TelemetryAggregator::Instance();
-    telem.IncrementCounter("test_thumbnails_gen");
-    telem.IncrementCounter("test_thumbnails_gen");
-    telem.IncrementCounter("test_thumbnails_gen", 3);
-    auto metric = telem.GetMetric("test_thumbnails_gen");
-    ASSERT(metric.count == 5);
-    ASSERT(metric.type == AggregatorMetricType::Counter);
-}
-
-TEST(TestTelemetryAggregator_Timer) {
-    auto& telem = TelemetryAggregator::Instance();
-    telem.RecordTimer("test_decode_ms", 14.5);
-    telem.RecordTimer("test_decode_ms", 20.1);
-    auto metric = telem.GetMetric("test_decode_ms");
-    ASSERT(metric.count == 2);
-    ASSERT(metric.avg > 10.0);
-    ASSERT(metric.min <= 14.5);
-    ASSERT(metric.max >= 20.1);
-}
-
-TEST(TestTelemetryAggregator_HealthReport) {
-    auto& telem = TelemetryAggregator::Instance();
-    auto report = telem.GenerateHealthReport();
-    ASSERT(report.cpuCores >= 1);
-    ASSERT(!report.engineVersion.empty());
-}
-
-// --- Decoder Registry V2 Tests ---
-
 TEST(TestDecoderRegistryV2_Register) {
     auto& registry = DecoderRegistryV2::Instance();
     bool ok = registry.RegisterDecoder("TestDecoder_V2", DecoderCreator{}, { ".tst", ".test" }, 100);
@@ -21241,62 +21185,6 @@ TEST(Test_S45_ResultType_ValueOr) {
     auto okResult = Ok(42);
     int val2 = okResult.ValueOr(99);
     ASSERT(val2 == 42);
-}
-
-TEST(Test_S45_ErrorRecoveryEngineV2_RetryStrategy) {
-    using namespace ExplorerLens::Engine;
-    ErrorRecoveryEngineV2 engine;
-    RecoveryRetryPolicy policy;
-    policy.maxAttempts = 3;
-    policy.baseDelayMs = 1; // Minimal delay for testing
-    engine.RegisterAction(
-        ErrorRecoveryAction::ForDomain(StructuredErrorDomain::IO,
-            RecoveryStrategyV2::Retry, policy));
-    ASSERT(engine.GetActionCount() == 1);
-
-    int attemptCount = 0;
-    auto result = engine.Execute<int>(
-        [&attemptCount]() -> Result<int> {
-            attemptCount++;
-            if (attemptCount < 3) {
-                return MakeError<int>(StructuredErrorDomain::IO,
-                    ErrorSeverity::Error, E_FAIL, "transient error");
-            }
-            return Ok(42);
-        });
-    ASSERT(attemptCount >= 3);
-    ASSERT(engine.GetStats().totalRetries > 0);
-}
-
-TEST(Test_S45_ErrorRecoveryEngineV2_FallbackStrategy) {
-    using namespace ExplorerLens::Engine;
-    ErrorRecoveryEngineV2 engine;
-    engine.RegisterAction(
-        ErrorRecoveryAction::ForDomain(StructuredErrorDomain::GPU,
-            RecoveryStrategyV2::Fallback));
-    auto result = engine.Execute<int>(
-        []() -> Result<int> {
-            return MakeError<int>(StructuredErrorDomain::GPU,
-                ErrorSeverity::Error, E_FAIL, "GPU error");
-        },
-        []() -> Result<int> {
-            return Ok(0); // CPU fallback
-        });
-    ASSERT(result.IsOk());
-    ASSERT(result.Value() == 0);
-    ASSERT(engine.GetStats().totalFallbacks == 1);
-}
-
-TEST(Test_S45_ErrorRecoveryEngineV2_BackoffDelay) {
-    using namespace ExplorerLens::Engine;
-    RecoveryRetryPolicy policy;
-    policy.maxAttempts = 4;
-    policy.baseDelayMs = 100;
-    policy.backoffMultiplier = 2.0;
-    policy.jitterFraction = 0.0; // No jitter for deterministic test
-    ASSERT(policy.CalculateDelayMs(0) == 100);
-    ASSERT(policy.CalculateDelayMs(1) == 200);
-    ASSERT(policy.CalculateDelayMs(2) == 400);
 }
 
 TEST(Test_S45_DiagnosticCollector_RingBuffer) {
@@ -25527,13 +25415,6 @@ TEST(Test_S395_ExplorerIntegrationMonitor) {
     ASSERT(mon.CheckHealth().thumbnailsServed > 0);
 }
 
-TEST(Test_S395_ShellExtensionRecovery) {
-    auto& recovery = ShellExtensionRecovery::Instance();
-    auto result = recovery.AttemptRecovery(ShellRecoveryAction::FlushCache);
-    ASSERT(result.success);
-    ASSERT(result.action == ShellRecoveryAction::FlushCache);
-}
-
 TEST(Test_S395_ThumbnailSizeNegotiator) {
     ThumbnailSizeNegotiator neg;
     auto size = neg.Negotiate(256, 256, 128);
@@ -25817,14 +25698,6 @@ TEST(Test_S395_PluginMetricsExporter) {
 }
 
 // --- Utils Tests ---
-
-TEST(Test_S395_CrashDumpAnalyzer) {
-    CrashDumpAnalyzer analyzer;
-    auto cat = analyzer.ClassifyException(0xC0000005);
-    ASSERT(cat == CrashDumpCategory::AccessViolation);
-    auto unknown = analyzer.ClassifyException(0x12345678);
-    ASSERT(unknown == CrashDumpCategory::Unknown);
-}
 
 TEST(Test_S395_PerformanceReportGenerator) {
     PerformanceReportGenerator gen;
@@ -26682,13 +26555,10 @@ TEST(Test_S398_BulkInitialization) {
     AssertInitPattern<PluginEventBus>("PluginEventBus");
     AssertInitPattern<PluginSchemaValidator>("PluginSchemaValidator");
     AssertInitPattern<PluginFeatureToggle>("PluginFeatureToggle");
-    AssertInitPattern<PluginAuditTrail>("PluginAuditTrail");
     AssertInitPattern<PluginSandboxMonitor>("PluginSandboxMonitor");
     // Utils
-    AssertInitPattern<CrashReportBundler>("CrashReportBundler");
     AssertInitPattern<StartupTimingProfiler>("StartupTimingProfiler");
     AssertInitPattern<FeatureFlagRegistry>("FeatureFlagRegistry");
-    AssertInitPattern<TelemetrySampler>("TelemetrySampler");
     AssertInitPattern<DeploymentVerifier>("DeploymentVerifier");
 }
 
@@ -27489,7 +27359,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/PrivacyConsentManager.h"
 #include "Core/SecureEnclaveAnalytics.h"
 #include "Utils/GDPRComplianceEngine.h"
-#include "Utils/TelemetryDataMinimizer.h"
 #include "Core/PrivacyAuditLogger.h"
 #include "AI/FederatedLearningCoordinator.h"
 #include "AI/PersonalizedRankingModel.h"
@@ -32312,28 +32181,6 @@ TEST(Test_GDPRComplianceEngine_EmptySubject)
     ASSERT(!r.fulfilled);
 }
 
-TEST(Test_TelemetryDataMinimizer_Minimize)
-{
-    using namespace ExplorerLens::Engine;
-    TelemetryDataMinimizer min;
-    TelemetryPayload p;
-    p.eventName = "test";
-    p.fields = {"duration", "email"}; p.values = {"123", "user@example.com"};
-    auto r = min.Minimize(p);
-    ASSERT(r.fieldsRemoved == 1);
-    ASSERT(r.result == TDMScrubResult::PurgedPII);
-}
-TEST(Test_TelemetryDataMinimizer_Clean)
-{
-    using namespace ExplorerLens::Engine;
-    TelemetryDataMinimizer min;
-    TelemetryPayload p;
-    p.fields = {"duration", "size"}; p.values = {"42", "1024"};
-    auto r = min.Minimize(p);
-    ASSERT(r.result == TDMScrubResult::Clean);
-    ASSERT(r.fieldsRemoved == 0);
-}
-
 TEST(Test_PrivacyAuditLogger_RecordAndVerify)
 {
     using namespace ExplorerLens::Engine;
@@ -33805,15 +33652,6 @@ TEST(TestLatencyBudgetManager_RecordSample) {
     ASSERT(true);
 }
 
-TEST(TestTelemetryConsentManager_DefaultStatus) {
-    using namespace ExplorerLens::Engine;
-    auto& tcm = ExplorerLens::Engine::Core::TelemetryConsentManager::Instance();
-    ExplorerLens::Engine::Core::ConsentTelemetryEvent ev{"engine.test.271", ExplorerLens::Engine::Core::ConsentTelemetryLevel::Basic, "{}"};
-    // ConsentGate must complete without throwing
-    tcm.ConsentGate(ev);
-    ASSERT(true);
-}
-
 TEST(TestFeatureFlagManager_GetBoolDefault) {
     using namespace ExplorerLens::Engine;
     auto& ffm = FeatureFlagManager::Get();
@@ -34476,15 +34314,6 @@ TEST(TestPluginCanaryController_StartRollout) {
     ASSERT(c.ActiveCanaries() == 1);
     ASSERT(!c.IsRollingBack("pdf_decoder"));
     c.RecordError("pdf_decoder");
-}
-TEST(TestPluginTelemetryAggregatorV3_Record) {
-    PluginTelemetryAggregatorV3 agg;
-    agg.Record("raw_decoder", 12.5, false);
-    agg.Record("raw_decoder", 15.0, false);
-    auto t = agg.Get("raw_decoder");
-    ASSERT(t.decodes == 2);
-    ASSERT(t.errors == 0);
-    ASSERT(t.avgLatencyMs > 0.0);
 }
 TEST(TestPluginComplianceAuditorV2_Audit) {
     PluginComplianceAuditorV2 a;
@@ -39497,7 +39326,6 @@ int main()
     RUN_TEST(Test_S395_ThumbnailRequestCoalescer);
     RUN_TEST(Test_S395_DecoderTimeoutPolicy);
     RUN_TEST(Test_S395_ExplorerIntegrationMonitor);
-    RUN_TEST(Test_S395_ShellExtensionRecovery);
     RUN_TEST(Test_S395_ThumbnailSizeNegotiator);
     RUN_TEST(Test_S395_FileConcurrencyGuard);
     RUN_TEST(Test_S395_ResourceThrottlePolicy);
@@ -39533,7 +39361,6 @@ int main()
     RUN_TEST(Test_S395_PluginConfigMigrator);
     RUN_TEST(Test_S395_PluginMetricsExporter);
     // Utils
-    RUN_TEST(Test_S395_CrashDumpAnalyzer);
     RUN_TEST(Test_S395_PerformanceReportGenerator);
     RUN_TEST(Test_S395_SystemInfoCollector);
     RUN_TEST(Test_S395_RegistryRepairTool);
@@ -39675,7 +39502,6 @@ int main()
     std::wcout << L"Observability v2 Tests (Sprint 271-280):" << std::endl;
     RUN_TEST(TestLatencyBudgetManager_RegisterFormat);
     RUN_TEST(TestLatencyBudgetManager_RecordSample);
-    RUN_TEST(TestTelemetryConsentManager_DefaultStatus);
     RUN_TEST(TestFeatureFlagManager_GetBoolDefault);
     RUN_TEST(TestFeatureFlagManager_GetIntDefault);
     RUN_TEST(TestUsageStats_RecordEvent);
@@ -39827,7 +39653,6 @@ int main()
     RUN_TEST(TestPluginFeatureFlagEngine_IsEnabled);
     RUN_TEST(TestPluginSLAMonitor_NotViolating);
     RUN_TEST(TestPluginCanaryController_StartRollout);
-    RUN_TEST(TestPluginTelemetryAggregatorV3_Record);
     RUN_TEST(TestPluginComplianceAuditorV2_Audit);
     RUN_TEST(TestPluginHotConfigReceiver_PushCallback);
 
@@ -40132,10 +39957,6 @@ int main()
     RUN_TEST(TestFormatNegotiator_BytesPerPixel);
 
     // Telemetry Aggregator
-    RUN_TEST(TestTelemetryAggregator_RecordEvent);
-    RUN_TEST(TestTelemetryAggregator_Counters);
-    RUN_TEST(TestTelemetryAggregator_Timer);
-    RUN_TEST(TestTelemetryAggregator_HealthReport);
 
     // Decoder Registry V2
     RUN_TEST(TestDecoderRegistryV2_Register);
@@ -40206,9 +40027,6 @@ int main()
     RUN_TEST(Test_S45_ResultType_MapAndChain);
     RUN_TEST(Test_S45_ResultType_ValueOr);
     // ErrorRecoveryEngineV2
-    RUN_TEST(Test_S45_ErrorRecoveryEngineV2_RetryStrategy);
-    RUN_TEST(Test_S45_ErrorRecoveryEngineV2_FallbackStrategy);
-    RUN_TEST(Test_S45_ErrorRecoveryEngineV2_BackoffDelay);
     // DiagnosticCollector
     RUN_TEST(Test_S45_DiagnosticCollector_RingBuffer);
     RUN_TEST(Test_S45_DiagnosticCollector_SnapshotAndJson);
@@ -41159,8 +40977,6 @@ int main()
     RUN_TEST(Test_SecureEnclaveAnalytics_BackendName);
     RUN_TEST(Test_GDPRComplianceEngine_Erasure);
     RUN_TEST(Test_GDPRComplianceEngine_EmptySubject);
-    RUN_TEST(Test_TelemetryDataMinimizer_Minimize);
-    RUN_TEST(Test_TelemetryDataMinimizer_Clean);
     RUN_TEST(Test_PrivacyAuditLogger_RecordAndVerify);
     RUN_TEST(Test_PrivacyAuditLogger_EntriesForSubject);
     RUN_TEST(Test_FederatedLearningCoordinator_RunRound);

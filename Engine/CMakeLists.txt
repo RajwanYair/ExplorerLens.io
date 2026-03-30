@@ -203,7 +203,6 @@ set(ENGINE_HEADERS
     Core/EncoderExportEngine.h
     Core/EngineAPI.h
     Core/ErrorContext.h
-    Core/ErrorRecoveryEngine.h
     Core/Expected.h
     Core/ETWSinkComplete.h
     Core/ETWTraceProvider.h
@@ -349,7 +348,6 @@ set(ENGINE_HEADERS
     Core/CacheCoherencyProtocol.h
     Core/ThumbnailPipelineProfiler.h
     Core/FormatNegotiator.h
-    Core/TelemetryAggregator.h
     Core/DecoderRegistryV2.h
     Core/AudioSpectrogramRenderer.h
     Core/ArchiveHierarchyMapRenderer.h
@@ -558,8 +556,6 @@ set(ENGINE_HEADERS
     Cache/CacheLinePadding.h
 
     # Plugin system
-    Plugin/CrashHandler.h
-    Plugin/CrashIntelligence.h
     Plugin/IPC/PluginIPCProtocol.h
     Plugin/IPC/SharedMemoryManager.h
     Plugin/IsolationModeSelector.h
@@ -597,7 +593,6 @@ set(ENGINE_HEADERS
     Plugin/PluginResourceLimiter.h
     Plugin/PluginCapabilityGuard.h
     Plugin/PluginVersionNegotiator.h
-    Plugin/PluginCrashIsolation.h
     Plugin/PluginAuditLog.h
 
     # AI/ML modules
@@ -685,7 +680,6 @@ set(ENGINE_HEADERS
     Utils/SmallObjectPool.h
     Utils/TestInfrastructure.h
     Utils/TestSuiteExpansion.h
-    Utils/UsageTelemetryEngine.h
     Utils/ValidationHelpers.h
     Utils/VersionNormalization.h
     Utils/DecoderCircuitBreaker.h
@@ -738,12 +732,10 @@ set(ENGINE_HEADERS
     Core/WindowsSearchProtocol.h
     Core/VirtualFilesystemAbstraction.h
     Core/RoleBasedFormatPolicy.h
-    Core/AuditTrailLogger.h
     Core/ContentInspectionGateway.h
     Core/CertificateTrustValidator.h
     Core/EncryptedFormatHandler.h
     Core/SelfHealingDecoder.h
-    Core/CrashAnalyticsCollector.h
     Core/PerformanceAnomalyDetector.h
     Core/PerformanceDashboard.h
     Core/ThumbnailPreviewEngine.h
@@ -1048,7 +1040,6 @@ set(ENGINE_HEADERS
     Core/ThumbnailRequestCoalescer.h
     Core/DecoderTimeoutPolicy.h
     Core/ExplorerIntegrationMonitor.h
-    Core/ShellExtensionRecovery.h
     Core/ThumbnailSizeNegotiator.h
     Core/FileConcurrencyGuard.h
     Core/ResourceThrottlePolicy.h
@@ -1098,7 +1089,6 @@ set(ENGINE_HEADERS
     Plugin/PluginMetricsExporter.h
 
     # Utils enhancements
-    Utils/CrashDumpAnalyzer.h
     Utils/PerformanceReportGenerator.h
     Utils/SystemInfoCollector.h
     Utils/RegistryRepairTool.h
@@ -1269,13 +1259,10 @@ set(ENGINE_HEADERS
     Plugin/PluginEventBus.h
     Plugin/PluginSchemaValidator.h
     Plugin/PluginFeatureToggle.h
-    Plugin/PluginAuditTrail.h
     Plugin/PluginSandboxMonitor.h
     # Utils enhancements
-    Utils/CrashReportBundler.h
     Utils/StartupTimingProfiler.h
     Utils/FeatureFlagRegistry.h
-    Utils/TelemetrySampler.h
     Utils/DeploymentVerifier.h
     # Sprint 399 — EP V15 Phase 4
     # Core
@@ -1341,7 +1328,6 @@ set(ENGINE_HEADERS
     # Sprint 271-280 (v20.7.0 "Quasar-X") — Observability v2
     Core/DiagnosticsConsole.h
     Core/LatencyBudgetManager.h
-    Core/TelemetryConsentManager.h
     Core/NetworkAwarePrefetcher.h
     Utils/CrashReporter.h
     Utils/UsageStats.h
@@ -1647,7 +1633,6 @@ set(ENGINE_HEADERS
     Core/PrivacyConsentManager.h
     Core/SecureEnclaveAnalytics.h
     Utils/GDPRComplianceEngine.h
-    Utils/TelemetryDataMinimizer.h
     Core/PrivacyAuditLogger.h
     # Sprint 721-730 — Federated AI Pipeline (v27.0.0 "Sirius" MAJOR)
     AI/FederatedLearningCoordinator.h
