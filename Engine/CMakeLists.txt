@@ -325,7 +325,6 @@ set(ENGINE_HEADERS
     Core/ResourceQuotaManager.h
     Core/AccessTokenValidator.h
     Core/ExplorerPreviewPane.h
-    Core/FormatFallbackEngine.h
 
     # Sprint 589-590
     Core/IntegrationTestRunner.h
@@ -347,7 +346,6 @@ set(ENGINE_HEADERS
     Core/GPUResourcePoolManager.h
     Core/CacheCoherencyProtocol.h
     Core/ThumbnailPipelineProfiler.h
-    Core/FormatNegotiator.h
     Core/DecoderRegistryV2.h
     Core/AudioSpectrogramRenderer.h
     Core/ArchiveHierarchyMapRenderer.h
@@ -399,7 +397,6 @@ set(ENGINE_HEADERS
     Pipeline/DecoderRegistry.h
     Pipeline/ExplorerWorkScheduler.h
     Pipeline/FormatDetector.h
-    Pipeline/FormatFallbackEngine.h
     Pipeline/ParallelBatchDecoder.h
     Pipeline/SmartFormatDetectorV2.h
     Pipeline/ShellProgressIndicator.h
@@ -410,7 +407,6 @@ set(ENGINE_HEADERS
     Pipeline/ZeroCopyPipeline.h
     Pipeline/FormatSignatureDetector.h
     Pipeline/AdaptiveQualityScaler.h
-    Pipeline/DecoderPriorityScheduler.h
     Pipeline/FilesystemWatchdog.h
     Pipeline/ParallelIOPipeline.h
     Pipeline/PipelineActivator.h
@@ -819,7 +815,6 @@ set(ENGINE_HEADERS
     Pipeline/ThreadLocalBufferPool.h
     Pipeline/DecodeMemoizationEngine.h
     Pipeline/AsyncPrefetchQueue.h
-    Pipeline/PriorityDecodeScheduler.h
     Pipeline/MemoryMappedDecodePath.h
     # Batch 8: Quality & Observability (629-633)
     Core/DecodeLatencyHistogram.h
@@ -847,7 +842,6 @@ set(ENGINE_HEADERS
     Core/ThumbnailColorCorrector.h
     Core/AdaptiveIconRenderer.h
     # Sprint 51-52: Decode Pipeline Enhancement
-    Core/DecoderPriorityRouter.h
     Core/FormatFingerprinter.h
     Core/StreamingDecodeEngine.h
     Core/MultiPagePreview.h
@@ -856,7 +850,6 @@ set(ENGINE_HEADERS
     Memory/NUMAMemoryRouter.h
     Memory/LargePageAllocator.h
     # Sprint 55-56: Pipeline Scheduling
-    Pipeline/WorkStealingScheduler.h
     Pipeline/PipelineStageProfiler.h
     Pipeline/AdaptiveTimeoutController.h
     Pipeline/PipelineReplayRecorder.h
@@ -931,7 +924,6 @@ set(ENGINE_HEADERS
 
     # Beyond Zenith — Pipeline
     Pipeline/StreamingMipChain.h
-    Pipeline/DeferredDecodeScheduler.h
     Pipeline/AdaptiveBatchCoalescer.h
     Pipeline/ThumbnailMorphTransition.h
 
@@ -1115,7 +1107,6 @@ set(ENGINE_HEADERS
     Core/ExplorerNavigationMonitor.h
     Core/ShellThumbnailInterceptor.h
     Core/DecoderPoolManager.h
-    Core/PowerAwareDecodeScheduler.h
     Core/FileTypeAssociationBroker.h
     # Pipeline enhancements
     Pipeline/RateLimitedDecodeQueue.h
@@ -1125,7 +1116,6 @@ set(ENGINE_HEADERS
     Pipeline/ThumbnailInvalidationTracker.h
     Pipeline/PipelineTelemetrySink.h
     Pipeline/DecodeWorkDistributor.h
-    Pipeline/SmartRetryScheduler.h
     # GPU enhancements
     GPU/GPUVendorCapabilityMap.h
     GPU/GPUBatchSubmitter.h
@@ -1191,7 +1181,6 @@ set(ENGINE_HEADERS
     Pipeline/ZeroCopyBufferChain.h
     Pipeline/ParallelDirectoryScanner.h
     Pipeline/BatchDemuxOptimizer.h
-    Pipeline/IOReadaheadScheduler.h
     Pipeline/AccessPatternRecorder.h
     # GPU enhancements
     GPU/ShaderWarmupEngine.h
@@ -1269,7 +1258,6 @@ set(ENGINE_HEADERS
     Core/ThumbnailStreamMultiplexer.h
     Core/FileSystemWatchdog.h
     Core/ShellBadgeRenderer.h
-    Core/DynamicFormatRouter.h
     Core/ThumbnailCacheWarmer.h
     Core/ContextualPreviewEngine.h
     Core/FileSizeEstimator.h
@@ -1280,10 +1268,8 @@ set(ENGINE_HEADERS
     Pipeline/AdaptivePipelineScheduler.h
     Pipeline/StreamingThumbnailEmitter.h
     Pipeline/PipelineLoadShedder.h
-    Pipeline/FormatDetectionOracle.h
     Pipeline/DecodeThroughputRegulator.h
     Pipeline/MemoryMappedPipelineStage.h
-    Pipeline/BatchPriorityScheduler.h
     Pipeline/PipelineLatencyTracker.h
     # GPU
     GPU/GPUTextureMipChain.h
@@ -1405,7 +1391,6 @@ set(ENGINE_HEADERS
     AI/SemanticColorPalette.h
     # Sprint 361-370 — Advanced Scheduling & Concurrency v2 (v22.4.0 Sirius-U)
     Core/LockFreeMPMCQueue.h
-    Core/WorkStealingSchedulerV2.h
     Core/CPUAffinityRouter.h
     Core/RealtimePriorityEngine.h
     Memory/HazardPointerReclaimer.h
@@ -1440,7 +1425,6 @@ set(ENGINE_HEADERS
     # Sprint 401-410 — Reactive Pipeline Architecture (v23.0.0 Vega)
     Pipeline/ThumbnailEventStore.h
     Pipeline/CQRSThumbnailPipeline.h
-    Pipeline/BackpressureScheduler.h
     Pipeline/ReactiveStreamEngine.h
     Pipeline/ThumbnailSagaOrchestrator.h
     Pipeline/SnapshotStoreEngine.h

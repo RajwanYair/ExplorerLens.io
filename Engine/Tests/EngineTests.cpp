@@ -402,7 +402,6 @@
 #include "../Core/ClipboardThumbnailManager.h"
 #include "../Core/FormatConversionPipeline.h"
 #include "../GPU/VulkanMemoryAllocator.h"
-#include "../Pipeline/DecoderPriorityScheduler.h"
 #include "../Core/ErrorReportingPipeline.h"
 #include "../Core/EnterpriseAuditPipeline.h"
 #include "../Core/ResourceQuotaManager.h"
@@ -441,7 +440,6 @@
 #include "../Core/ErrorContext.h"
 #include "../Core/ETWSinkComplete.h"
 #include "../Pipeline/ExplorerWorkScheduler.h"
-#include "../Pipeline/FormatFallbackEngine.h"
 #include "../Core/FormatGalleryView.h"
 #include "../Core/FormatGroupManager.h"
 #include "../Core/ProgramClosureV83.h"
@@ -573,7 +571,6 @@
 #include "../Pipeline/ThreadLocalBufferPool.h"
 #include "../Pipeline/DecodeMemoizationEngine.h"
 #include "../Pipeline/AsyncPrefetchQueue.h"
-#include "../Pipeline/PriorityDecodeScheduler.h"
 #include "../Pipeline/MemoryMappedDecodePath.h"
 #include "../Core/DecodeLatencyHistogram.h"
 #include "../Core/ErrorCategorizationEngine.h"
@@ -622,7 +619,6 @@
 #include "../Core/GPUResourcePoolManager.h"
 #include "../Core/CacheCoherencyProtocol.h"
 #include "../Core/ThumbnailPipelineProfiler.h"
-#include "../Core/FormatNegotiator.h"
 #include "../Core/DecoderRegistryV2.h"
 #include "../Pipeline/ProductionPipelineV2.h"
 #include "../Utils/ConfigDriftDetector.h"
@@ -668,7 +664,6 @@
 #include "../Core/AdaptiveIconRenderer.h"
 
 // --- Sprint 51-52: Decode Pipeline Enhancement ---
-#include "../Core/DecoderPriorityRouter.h"
 #include "../Core/FormatFingerprinter.h"
 #include "../Core/StreamingDecodeEngine.h"
 #include "../Core/MultiPagePreview.h"
@@ -679,7 +674,6 @@
 #include "../Memory/LargePageAllocator.h"
 
 // --- Sprint 55-56: Pipeline Scheduling ---
-#include "../Pipeline/WorkStealingScheduler.h"
 #include "../Pipeline/PipelineStageProfiler.h"
 #include "../Pipeline/AdaptiveTimeoutController.h"
 #include "../Pipeline/PipelineReplayRecorder.h"
@@ -760,7 +754,6 @@
 #include "../GPU/GPUDecompressionEngine.h"
 #include "../GPU/ShaderModelValidator.h"
 #include "../Pipeline/StreamingMipChain.h"
-#include "../Pipeline/DeferredDecodeScheduler.h"
 #include "../Pipeline/AdaptiveBatchCoalescer.h"
 #include "../Pipeline/ThumbnailMorphTransition.h"
 #include "../Cache/SemanticCacheIndex.h"
@@ -895,7 +888,6 @@
 #include "../Core/ExplorerNavigationMonitor.h"
 #include "../Core/ShellThumbnailInterceptor.h"
 #include "../Core/DecoderPoolManager.h"
-#include "../Core/PowerAwareDecodeScheduler.h"
 #include "../Core/FileTypeAssociationBroker.h"
 // Pipeline
 #include "../Pipeline/RateLimitedDecodeQueue.h"
@@ -905,7 +897,6 @@
 #include "../Pipeline/ThumbnailInvalidationTracker.h"
 #include "../Pipeline/PipelineTelemetrySink.h"
 #include "../Pipeline/DecodeWorkDistributor.h"
-#include "../Pipeline/SmartRetryScheduler.h"
 // GPU
 #include "../GPU/GPUVendorCapabilityMap.h"
 #include "../GPU/GPUBatchSubmitter.h"
@@ -971,7 +962,6 @@
 #include "../Pipeline/ZeroCopyBufferChain.h"
 #include "../Pipeline/ParallelDirectoryScanner.h"
 #include "../Pipeline/BatchDemuxOptimizer.h"
-#include "../Pipeline/IOReadaheadScheduler.h"
 #include "../Pipeline/AccessPatternRecorder.h"
 // GPU
 #include "../GPU/ShaderWarmupEngine.h"
@@ -1048,7 +1038,6 @@
 #include "../Core/ThumbnailStreamMultiplexer.h"
 #include "../Core/FileSystemWatchdog.h"
 #include "../Core/ShellBadgeRenderer.h"
-#include "../Core/DynamicFormatRouter.h"
 #include "../Core/ThumbnailCacheWarmer.h"
 #include "../Core/ContextualPreviewEngine.h"
 #include "../Core/FileSizeEstimator.h"
@@ -1058,10 +1047,8 @@
 #include "../Pipeline/AdaptivePipelineScheduler.h"
 #include "../Pipeline/StreamingThumbnailEmitter.h"
 #include "../Pipeline/PipelineLoadShedder.h"
-#include "../Pipeline/FormatDetectionOracle.h"
 #include "../Pipeline/DecodeThroughputRegulator.h"
 #include "../Pipeline/MemoryMappedPipelineStage.h"
-#include "../Pipeline/BatchPriorityScheduler.h"
 #include "../Pipeline/PipelineLatencyTracker.h"
 #include "../GPU/GPUTextureMipChain.h"
 #include "../GPU/ShaderHotReloader.h"
@@ -1212,7 +1199,6 @@
 // Sprint 401-410 — Reactive Pipeline Architecture (v23.0.0)
 #include "../Pipeline/ThumbnailEventStore.h"
 #include "../Pipeline/CQRSThumbnailPipeline.h"
-#include "../Pipeline/BackpressureScheduler.h"
 #include "../Pipeline/ReactiveStreamEngine.h"
 #include "../Pipeline/ThumbnailSagaOrchestrator.h"
 #include "../Pipeline/SnapshotStoreEngine.h"
@@ -20201,33 +20187,8 @@ TEST(TestThumbnailPipelineProfiler_Stats) {
 
 // --- Format Negotiator Tests ---
 
-TEST(TestFormatNegotiator_DefaultOutput) {
-    FormatNegotiator negotiator;
-    negotiator.SetShellContext(ShellContext::ExplorerView);
-    negotiator.SetRequestedSize(256);
-    auto output = negotiator.Negotiate(1920, 1080, false, false);
-    ASSERT(output.pixelFormat == OutputPixelFormat::BGRA32);
-    ASSERT(output.colorSpace == OutputColorSpace::sRGB);
-    ASSERT(output.width > 0);
-    ASSERT(output.height > 0);
-    ASSERT(output.stride > 0);
-}
 
-TEST(TestFormatNegotiator_AlphaChannel) {
-    FormatNegotiator negotiator;
-    negotiator.SetRequestedSize(128);
-    auto output = negotiator.Negotiate(512, 512, true, false);
-    ASSERT(output.needsAlpha);
-    ASSERT(output.pixelFormat == OutputPixelFormat::BGRA32);
-}
 
-TEST(TestFormatNegotiator_BytesPerPixel) {
-    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::BGRA32) == 4);
-    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::BGR24) == 3);
-    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::Gray8) == 1);
-    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::Gray16) == 2);
-    ASSERT(FormatNegotiator::GetBytesPerPixel(OutputPixelFormat::RGBAF16) == 8);
-}
 
 // --- Telemetry Aggregator Tests ---
 
@@ -20782,15 +20743,6 @@ TEST(Test_MultiTenantCache_Isolation) {
 
 //== Pipeline Subsystem Tests ==
 
-TEST(Test_PriorityDecodeScheduler_Ordering) {
-    PriorityDecodeScheduler scheduler;
-    scheduler.Submit(L"low.jpg", DecodeUrgency::Deferred, 256, 1.0f);
-    scheduler.Submit(L"high.jpg", DecodeUrgency::Immediate, 256, 1.0f);
-    ScheduledDecodeTask task;
-    ASSERT(scheduler.GetNext(task));
-    ASSERT(task.filePath == L"high.jpg");
-    ASSERT(task.urgency == DecodeUrgency::Immediate);
-}
 
 TEST(Test_AsyncPrefetchQueue_Enqueue) {
     AsyncPrefetchQueue queue;
@@ -21516,13 +21468,6 @@ TEST(Test_S50_AdaptiveIconRenderer_RenderSize) {
 
 // ===== Sprint 51-52: Decode Pipeline Enhancement Tests =====
 
-TEST(Test_S51_DecoderPriorityRouter_Route) {
-    using namespace ExplorerLens::Engine;
-    DecoderPriorityRouter router;
-    auto decision = router.Route(L".jpg");
-    ASSERT(decision.confidence >= 0.0f);
-    ASSERT(DecoderPriorityRouter::BackendCount() > 0);
-}
 
 TEST(Test_S51_FormatFingerprinter_Detect) {
     using namespace ExplorerLens::Engine;
@@ -21584,16 +21529,6 @@ TEST(Test_S53_LargePageAllocator_Query) {
 
 // ===== Sprint 55-56: Pipeline Scheduling Tests =====
 
-TEST(Test_S55_WorkStealingScheduler_Submit) {
-    using namespace ExplorerLens::Engine;
-    WorkStealingScheduler scheduler;
-    scheduler.Initialize(4);
-    ASSERT(scheduler.WorkerCount() == 4);
-    bool called = false;
-    scheduler.Submit([&]() { called = true; });
-    ASSERT(called);
-    ASSERT(scheduler.Stats().totalTasks == 1);
-}
 
 TEST(Test_S55_PipelineStageProfiler_Record) {
     using namespace ExplorerLens::Engine;
@@ -25942,21 +25877,6 @@ TEST(Test_S396_DecoderPoolManager) {
     ASSERT(id3 == id1);
 }
 
-TEST(Test_S396_PowerAwareDecodeScheduler) {
-    PowerAwareDecodeScheduler scheduler;
-    auto policy = scheduler.GetCurrentPolicy();
-    ASSERT(policy.enableGPUDecode);
-    PowerStatus battLow;
-    battLow.state = PowerState::BatteryLow;
-    battLow.batteryPercent = 15;
-    scheduler.UpdatePowerStatus(battLow);
-    ASSERT(scheduler.ShouldThrottle());
-    PowerStatus ac;
-    ac.state = PowerState::ACPower;
-    ac.batteryPercent = 100;
-    scheduler.UpdatePowerStatus(ac);
-    ASSERT(!scheduler.ShouldThrottle());
-}
 
 TEST(Test_S396_FileTypeAssociationBroker) {
     FileTypeAssociationBroker broker;
@@ -26073,15 +25993,6 @@ TEST(Test_S396_DecodeWorkDistributor) {
     ASSERT(plan.hybridWorkUnits == 1);
 }
 
-TEST(Test_S396_SmartRetryScheduler) {
-    SmartRetryScheduler scheduler;
-    ASSERT(scheduler.ShouldRetry(L"test.jpg", FailureCategory::Transient));
-    ASSERT(!scheduler.ShouldRetry(L"bad.bin", FailureCategory::Corrupt));
-    ASSERT(!scheduler.ShouldRetry(L"weird.xyz", FailureCategory::Unsupported));
-    auto stats = scheduler.GetStats();
-    ASSERT(stats.permanentFailures == 2);
-    ASSERT(stats.totalRetries >= 1);
-}
 
 TEST(Test_S396_GPUVendorCapabilityMap) {
     GPUVendorCapabilityMap capMap;
@@ -26484,7 +26395,6 @@ TEST(Test_S397_BulkInitialization) {
     AssertInitPattern<ZeroCopyBufferChain>("ZeroCopyBufferChain");
     AssertInitPattern<ParallelDirectoryScanner>("ParallelDirectoryScanner");
     AssertInitPattern<BatchDemuxOptimizer>("BatchDemuxOptimizer");
-    AssertInitPattern<IOReadaheadScheduler>("IOReadaheadScheduler");
     AssertInitPattern<AccessPatternRecorder>("AccessPatternRecorder");
     // GPU
     AssertInitPattern<ShaderWarmupEngine>("ShaderWarmupEngine");
@@ -26568,7 +26478,6 @@ TEST(Test_S399_BulkInitialization) {
     AssertInitPattern<ThumbnailStreamMultiplexer>("ThumbnailStreamMultiplexer");
     AssertInitPattern<FileSystemWatchdog>("FileSystemWatchdog");
     AssertInitPattern<ShellBadgeRenderer>("ShellBadgeRenderer");
-    AssertInitPattern<DynamicFormatRouter>("DynamicFormatRouter");
     AssertInitPattern<ThumbnailCacheWarmer>("ThumbnailCacheWarmer");
     AssertInitPattern<ContextualPreviewEngine>("ContextualPreviewEngine");
     AssertInitPattern<ConcurrentExtractScheduler>("ConcurrentExtractScheduler");
@@ -26577,10 +26486,8 @@ TEST(Test_S399_BulkInitialization) {
     // Pipeline
     AssertInitPattern<AdaptivePipelineScheduler>("AdaptivePipelineScheduler");
     AssertInitPattern<StreamingThumbnailEmitter>("StreamingThumbnailEmitter");
-    AssertInitPattern<FormatDetectionOracle>("FormatDetectionOracle");
     AssertInitPattern<DecodeThroughputRegulator>("DecodeThroughputRegulator");
     AssertInitPattern<MemoryMappedPipelineStage>("MemoryMappedPipelineStage");
-    AssertInitPattern<BatchPriorityScheduler>("BatchPriorityScheduler");
     AssertInitPattern<PipelineLatencyTracker>("PipelineLatencyTracker");
     // GPU
     AssertInitPattern<ShaderHotReloader>("ShaderHotReloader");
@@ -33953,10 +33860,6 @@ TEST(TestLockFreeMPMCQueue_PushPop) {
     ASSERT(q.Push(42));
     int v = 0; ASSERT(q.Pop(v)); ASSERT(v == 42);
 }
-TEST(TestWorkStealingSchedulerV2_ActiveWorkers) {
-    WorkStealingSchedulerV2 s({ 4, 4, true, false });
-    ASSERT(s.ActiveWorkers() == 4);
-}
 TEST(TestCPUAffinityRouter_PolicyAuto) {
     CPUAffinityRouter r;
     ASSERT(r.GetPolicy() == AffinityPolicy::Auto);
@@ -34167,14 +34070,6 @@ TEST(TestCQRSThumbnailPipeline_DispatchQuery) {
     ASSERT(seq == 1);
     auto r = p.Query(L"test.png");
     ASSERT(!r.found);
-}
-TEST(TestBackpressureScheduler_DropLowPriority) {
-    BackpressureScheduler s;
-    s.SetHWM(2);
-    // Normal submission
-    ASSERT(s.Submit([](){}, 255));
-    auto m = s.Metrics();
-    ASSERT(m.enqueued >= 1);
 }
 TEST(TestReactiveStreamEngine_EmitSubscribe) {
     ReactiveStream<int> stream;
@@ -39030,7 +38925,6 @@ int main()
 
     // Pipeline Subsystem Tests
     std::wcout << L"Pipeline Subsystem Tests..." << std::endl;
-    RUN_TEST(Test_PriorityDecodeScheduler_Ordering);
     RUN_TEST(Test_AsyncPrefetchQueue_Enqueue);
     RUN_TEST(Test_ParallelBatchDecoder_Throughput);
     RUN_TEST(Test_PipelineCircuitBreaker_Trip);
@@ -39388,7 +39282,6 @@ int main()
     RUN_TEST(Test_S396_ExplorerNavigationMonitor);
     RUN_TEST(Test_S396_ShellThumbnailInterceptor);
     RUN_TEST(Test_S396_DecoderPoolManager);
-    RUN_TEST(Test_S396_PowerAwareDecodeScheduler);
     RUN_TEST(Test_S396_FileTypeAssociationBroker);
     // Pipeline
     RUN_TEST(Test_S396_RateLimitedDecodeQueue);
@@ -39398,7 +39291,6 @@ int main()
     RUN_TEST(Test_S396_ThumbnailInvalidationTracker);
     RUN_TEST(Test_S396_PipelineTelemetrySink);
     RUN_TEST(Test_S396_DecodeWorkDistributor);
-    RUN_TEST(Test_S396_SmartRetryScheduler);
     // GPU
     RUN_TEST(Test_S396_GPUVendorCapabilityMap);
     RUN_TEST(Test_S396_GPUBatchSubmitter);
@@ -39589,7 +39481,6 @@ int main()
 
     // Sprint 361-370: Advanced Scheduling & Concurrency v2 (v22.4.0 Sirius-U)
     RUN_TEST(TestLockFreeMPMCQueue_PushPop);
-    RUN_TEST(TestWorkStealingSchedulerV2_ActiveWorkers);
     RUN_TEST(TestCPUAffinityRouter_PolicyAuto);
     RUN_TEST(TestRealtimePriorityEngine_EnqueueDequeue);
     RUN_TEST(TestHazardPointerReclaimer_AcquireRelease);
@@ -39630,7 +39521,6 @@ int main()
     // Sprint 401-410: Reactive Pipeline Architecture (v23.0.0 Vega)
     RUN_TEST(TestThumbnailEventStore_AppendReplay);
     RUN_TEST(TestCQRSThumbnailPipeline_DispatchQuery);
-    RUN_TEST(TestBackpressureScheduler_DropLowPriority);
     RUN_TEST(TestReactiveStreamEngine_EmitSubscribe);
     RUN_TEST(TestThumbnailSagaOrchestrator_StartQuery);
     RUN_TEST(TestSnapshotStoreEngine_SaveLoad);
@@ -39952,9 +39842,6 @@ int main()
     RUN_TEST(TestThumbnailPipelineProfiler_Stats);
 
     // Format Negotiator
-    RUN_TEST(TestFormatNegotiator_DefaultOutput);
-    RUN_TEST(TestFormatNegotiator_AlphaChannel);
-    RUN_TEST(TestFormatNegotiator_BytesPerPixel);
 
     // Telemetry Aggregator
 
@@ -40067,7 +39954,6 @@ int main()
 
     // Sprint 51-52: Decode Pipeline Enhancement
     std::wcout << L"\nSprint 51-52 Tests (Decode Pipeline)..." << std::endl;
-    RUN_TEST(Test_S51_DecoderPriorityRouter_Route);
     RUN_TEST(Test_S51_FormatFingerprinter_Detect);
     RUN_TEST(Test_S51_StreamingDecodeEngine_Init);
     RUN_TEST(Test_S52_MultiPagePreview_Config);
@@ -40080,7 +39966,6 @@ int main()
 
     // Sprint 55-56: Pipeline Scheduling
     std::wcout << L"\nSprint 55-56 Tests (Pipeline Scheduling)..." << std::endl;
-    RUN_TEST(Test_S55_WorkStealingScheduler_Submit);
     RUN_TEST(Test_S55_PipelineStageProfiler_Record);
     RUN_TEST(Test_S55_AdaptiveTimeoutController_Compute);
     RUN_TEST(Test_S55_PipelineReplayRecorder_RecordReplay);
