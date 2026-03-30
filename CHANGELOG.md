@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v30.3.0 Deneb-T: Live Preview Scrubber and Rich Media. 8 Core headers: live preview scrubber, video keyframe extractor, animated frame scrubber, audio waveform renderer, document page previewer, shader syntax highlighter, font glyph sampler, spreadsheet chart renderer. +72 tests (3749 total).
+
+
 v30.2.0 Deneb-S: CLIP Semantic Search and Discovery. 8 AI headers: CLIP embedding engine, HNSW search index, NL query parser, visual similarity graph, embedding cache, multi-modal ranker, deduplicator, incremental updater. +72 tests (3677 total).
 
 

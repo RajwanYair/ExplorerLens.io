@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 30.2.0
+# Version: 30.3.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 30.2.0
+    VERSION 30.3.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
