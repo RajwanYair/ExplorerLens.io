@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v29.4.0 Capella-U: Project Consolidation Phase 3 — Recovery unification (6 engines→2), telemetry unification (7 engines→2), audit logger dedup. 15 duplicate headers removed, 184 test lines consolidated
+
+
 v29.3.0 Capella-T: Project Consolidation Phase 2 — Cache subsystem dedup (77→26 headers), removed 51 duplicate cache headers (3 migration→1, 8 warming→1, 5 replication→1, 3 partition→1, 6 analytics→1, 4 prediction→1, 2 compression→1, 2 eviction→1), cleaned CMakeLists.txt and EngineTests.cpp, 5600 lines removed
 
 
