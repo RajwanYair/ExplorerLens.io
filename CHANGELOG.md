@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v29.5.0 Capella-V: Project Consolidation Phase 4 — Scheduler consolidation (14 schedulers→5), router consolidation (7→2). 14 duplicate headers removed, 131 build/test lines consolidated
+
+
 v29.4.0 Capella-U: Project Consolidation Phase 3 — Recovery unification (6 engines→2), telemetry unification (7 engines→2), audit logger dedup. 15 duplicate headers removed, 184 test lines consolidated
 
 

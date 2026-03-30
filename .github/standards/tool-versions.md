@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 30 March 2026 (v29.4.0 Capella-U release)
-**Version:** 29.4.0 "Capella-U"
+**Last Updated:** 30 March 2026 (v29.5.0 Capella-V release)
+**Version:** 29.5.0 "Capella-V"
 
 ---
 
