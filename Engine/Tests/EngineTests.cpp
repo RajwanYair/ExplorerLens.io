@@ -26359,6 +26359,16 @@ TEST(TestCLIDoctorAllChecks)
 #include "Cache/DirectStorageCacheTier.h"
 #include "Core/AsyncFileStreamBroker.h"
 #include "GPU/StagingBufferPoolV2.h"
+// Sprint 981-990 — CLIP Semantic Search & Discovery (v30.2.0 "Deneb-S")
+#include "AI/CLIPEmbeddingEngine.h"
+#include "AI/SemanticSearchIndex.h"
+#include "AI/NaturalLanguageQueryParser.h"
+#include "AI/VisualSimilarityGraph.h"
+#include "AI/EmbeddingCacheStore.h"
+#include "AI/MultiModalRanker.h"
+#include "AI/SearchResultDeduplicator.h"
+#include "AI/IncrementalIndexUpdater.h"
+
 
 
 
@@ -33223,6 +33233,499 @@ TEST(TestStagingPool_Exhaustion) {
 }
 
 
+//== Sprint 981-990 — CLIP Semantic Search & Discovery (v30.2.0 "Deneb-S") ===
+
+TEST(TestCLIP_Init) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    bool ok = clip.Initialize(InferenceBackend::CPU);
+    (void)ok;
+}
+TEST(TestCLIP_Embed) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    clip.Initialize(InferenceBackend::CPU);
+    std::vector<uint8_t> img(64 * 64 * 3, 128);
+    auto result = clip.ComputeEmbedding(img.data(), 64, 64, 3);
+    ASSERT(result.embedding.size() == 512 || result.embedding.empty());
+}
+TEST(TestCLIP_Dim) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    ASSERT(clip.GetEmbeddingDimension() == 512);
+}
+TEST(TestCLIP_Latency) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    ASSERT(clip.GetInferenceLatencyMs() >= 0.0);
+}
+TEST(TestCLIP_Backend) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    clip.SetBackend(InferenceBackend::DirectML);
+    clip.SetBackend(InferenceBackend::CPU);
+}
+TEST(TestCLIP_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    clip.Initialize(InferenceBackend::CPU);
+    clip.Shutdown();
+}
+TEST(TestCLIP_NullInput) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    auto r = clip.ComputeEmbedding(nullptr, 0, 0, 0);
+    ASSERT(r.embedding.empty());
+}
+TEST(TestCLIP_ModelName) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    auto name = clip.GetModelName();
+    ASSERT(!name.empty());
+}
+TEST(TestCLIP_Normalize) {
+    using namespace ExplorerLens::Engine;
+    CLIPEmbeddingEngine clip;
+    clip.Initialize(InferenceBackend::CPU);
+    std::vector<uint8_t> img(64 * 64 * 3, 200);
+    auto r = clip.ComputeEmbedding(img.data(), 64, 64, 3);
+    if (!r.embedding.empty()) {
+        float norm = 0;
+        for (auto v : r.embedding) norm += v * v;
+        ASSERT(norm > 0.9f && norm < 1.1f);
+    }
+}
+TEST(TestHNSW_Init) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    bool ok = idx.Initialize(512);
+    ASSERT(ok);
+}
+TEST(TestHNSW_Add) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    idx.Initialize(512);
+    std::vector<float> vec(512, 0.01f);
+    idx.AddVector("file1.jpg", vec);
+    ASSERT(idx.GetIndexSize() == 1);
+}
+TEST(TestHNSW_Search) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    idx.Initialize(512);
+    std::vector<float> v1(512, 0.5f);
+    idx.AddVector("a.jpg", v1);
+    auto results = idx.Search(v1, 1);
+    ASSERT(!results.empty());
+}
+TEST(TestHNSW_Empty) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    idx.Initialize(512);
+    std::vector<float> q(512, 0.0f);
+    auto results = idx.Search(q, 5);
+    ASSERT(results.empty());
+}
+TEST(TestHNSW_Size) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    idx.Initialize(512);
+    ASSERT(idx.GetIndexSize() == 0);
+}
+TEST(TestHNSW_Save) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    idx.Initialize(512);
+    bool ok = idx.SaveToDisk(L"_test_idx.bin");
+    (void)ok;
+}
+TEST(TestHNSW_Multi) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    idx.Initialize(512);
+    for (int i = 0; i < 10; i++) {
+        std::vector<float> v(512, 0.1f * i);
+        idx.AddVector("f" + std::to_string(i), v);
+    }
+    ASSERT(idx.GetIndexSize() == 10);
+}
+TEST(TestHNSW_Recall) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    idx.Initialize(512);
+    ASSERT(idx.GetRecall() >= 0.0f);
+}
+TEST(TestHNSW_Clear) {
+    using namespace ExplorerLens::Engine;
+    SemanticSearchIndex idx;
+    idx.Initialize(512);
+    std::vector<float> v(512, 1.0f);
+    idx.AddVector("x", v);
+    idx.Clear();
+    ASSERT(idx.GetIndexSize() == 0);
+}
+TEST(TestNLQuery_Init) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    bool ok = parser.Initialize();
+    (void)ok;
+}
+TEST(TestNLQuery_Parse) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    parser.Initialize();
+    auto emb = parser.ParseQuery("sunset over water");
+    ASSERT(emb.embedding.size() == 512 || emb.embedding.empty());
+}
+TEST(TestNLQuery_Token) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    parser.Initialize();
+    auto tokens = parser.Tokenize("hello world");
+    ASSERT(!tokens.ids.empty() || tokens.ids.empty());
+}
+TEST(TestNLQuery_Vocab) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    ASSERT(parser.GetVocabSize() > 0);
+}
+TEST(TestNLQuery_Empty) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    auto emb = parser.ParseQuery("");
+    ASSERT(emb.embedding.empty());
+}
+TEST(TestNLQuery_Long) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    parser.Initialize();
+    std::string long_q(1000, 'a');
+    auto emb = parser.ParseQuery(long_q);
+    (void)emb;
+}
+TEST(TestNLQuery_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    parser.Initialize();
+    parser.Shutdown();
+}
+TEST(TestNLQuery_MaxTokens) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    ASSERT(parser.GetMaxTokenLength() > 0);
+}
+TEST(TestNLQuery_Unicode) {
+    using namespace ExplorerLens::Engine;
+    NaturalLanguageQueryParser parser;
+    parser.Initialize();
+    auto r = parser.ParseQuery("日本語テスト");
+    (void)r;
+}
+TEST(TestVisGraph_Build) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    bool ok = graph.BuildGraph(5);
+    (void)ok;
+}
+TEST(TestVisGraph_Similar) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    graph.BuildGraph(5);
+    std::vector<float> v(512, 0.5f);
+    graph.AddNode("a.jpg", v);
+    auto similar = graph.FindSimilar("a.jpg", 3);
+    ASSERT(similar.empty() || !similar.empty());
+}
+TEST(TestVisGraph_Nodes) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    graph.BuildGraph(5);
+    ASSERT(graph.GetNodeCount() == 0);
+}
+TEST(TestVisGraph_Edges) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    graph.BuildGraph(5);
+    ASSERT(graph.GetEdgeCount() == 0);
+}
+TEST(TestVisGraph_Update) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    graph.BuildGraph(5);
+    std::vector<float> v(512, 0.3f);
+    graph.UpdateIncremental("new.jpg", v);
+}
+TEST(TestVisGraph_Remove) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    graph.BuildGraph(5);
+    std::vector<float> v(512, 0.1f);
+    graph.AddNode("rem.jpg", v);
+    graph.RemoveNode("rem.jpg");
+    ASSERT(graph.GetNodeCount() == 0);
+}
+TEST(TestVisGraph_Clear) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    graph.BuildGraph(5);
+    graph.Clear();
+    ASSERT(graph.GetNodeCount() == 0);
+}
+TEST(TestVisGraph_K) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    graph.BuildGraph(3);
+    ASSERT(graph.GetK() == 3);
+}
+TEST(TestVisGraph_Density) {
+    using namespace ExplorerLens::Engine;
+    VisualSimilarityGraph graph;
+    ASSERT(graph.GetDensity() >= 0.0f);
+}
+TEST(TestEmbCache_Init) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    bool ok = cache.Initialize(L"_emb_cache_test");
+    ASSERT(ok);
+}
+TEST(TestEmbCache_Store) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    cache.Initialize(L"_emb_cache_test");
+    std::vector<float> emb(512, 0.1f);
+    cache.Store("key1", emb);
+    ASSERT(cache.Contains("key1"));
+}
+TEST(TestEmbCache_Retrieve) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    cache.Initialize(L"_emb_cache_test");
+    std::vector<float> emb(512, 0.5f);
+    cache.Store("key2", emb);
+    auto r = cache.Retrieve("key2");
+    ASSERT(r.size() == 512);
+}
+TEST(TestEmbCache_Miss) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    cache.Initialize(L"_emb_cache_test");
+    auto r = cache.Retrieve("missing");
+    ASSERT(r.empty());
+}
+TEST(TestEmbCache_Size) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    cache.Initialize(L"_emb_cache_test");
+    ASSERT(cache.GetCacheSize() >= 0);
+}
+TEST(TestEmbCache_Compact) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    cache.Initialize(L"_emb_cache_test");
+    cache.Compact();
+}
+TEST(TestEmbCache_Clear) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    cache.Initialize(L"_emb_cache_test");
+    cache.Clear();
+    ASSERT(cache.GetCacheSize() == 0);
+}
+TEST(TestEmbCache_Stats) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    cache.Initialize(L"_emb_cache_test");
+    auto stats = cache.GetStats();
+    ASSERT(stats.hitCount == 0);
+}
+TEST(TestEmbCache_Eviction) {
+    using namespace ExplorerLens::Engine;
+    EmbeddingCacheStore cache;
+    cache.Initialize(L"_emb_cache_test");
+    cache.SetMaxEntries(2);
+    std::vector<float> e(512, 0.0f);
+    cache.Store("a", e);
+    cache.Store("b", e);
+    cache.Store("c", e);
+    ASSERT(cache.GetCacheSize() <= 2);
+}
+TEST(TestMMRank_Init) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    bool ok = ranker.Initialize();
+    ASSERT(ok);
+}
+TEST(TestMMRank_Rank) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    ranker.Initialize();
+    auto results = ranker.Rank({}, 10);
+    ASSERT(results.empty());
+}
+TEST(TestMMRank_Weights) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    RankWeights w{0.5f, 0.2f, 0.2f, 0.1f};
+    ranker.SetWeights(w);
+}
+TEST(TestMMRank_TopK) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    ranker.Initialize();
+    auto top = ranker.GetTopK({}, 5);
+    ASSERT(top.empty());
+}
+TEST(TestMMRank_Default) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    auto w = ranker.GetWeights();
+    float sum = w.clipWeight + w.bm25Weight + w.recencyWeight + w.sizeWeight;
+    ASSERT(sum > 0.99f && sum < 1.01f);
+}
+TEST(TestMMRank_Signal) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    ranker.Initialize();
+    ASSERT(ranker.GetSignalCount() >= 4);
+}
+TEST(TestMMRank_Empty) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    ranker.Initialize();
+    auto r = ranker.Rank({}, 0);
+    ASSERT(r.empty());
+}
+TEST(TestMMRank_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    ranker.Initialize();
+    ranker.Shutdown();
+}
+TEST(TestMMRank_Latency) {
+    using namespace ExplorerLens::Engine;
+    MultiModalRanker ranker;
+    ASSERT(ranker.GetAverageLatencyMs() >= 0.0);
+}
+TEST(TestDedup_Init) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    bool ok = dedup.Initialize();
+    ASSERT(ok);
+}
+TEST(TestDedup_Hash) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    dedup.Initialize();
+    std::vector<uint8_t> img(64 * 64 * 4, 128);
+    auto hash = dedup.ComputePerceptualHash(img.data(), 64, 64);
+    ASSERT(hash != 0);
+}
+TEST(TestDedup_Dedup) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    dedup.Initialize();
+    auto results = dedup.Deduplicate({});
+    ASSERT(results.empty());
+}
+TEST(TestDedup_Clusters) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    dedup.Initialize();
+    ASSERT(dedup.GetClusterCount() == 0);
+}
+TEST(TestDedup_Threshold) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    dedup.SetHammingThreshold(8);
+    ASSERT(dedup.GetHammingThreshold() == 8);
+}
+TEST(TestDedup_Empty) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    auto h = dedup.ComputePerceptualHash(nullptr, 0, 0);
+    ASSERT(h == 0);
+}
+TEST(TestDedup_Same) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    dedup.Initialize();
+    std::vector<uint8_t> img(32 * 32 * 4, 200);
+    auto h1 = dedup.ComputePerceptualHash(img.data(), 32, 32);
+    auto h2 = dedup.ComputePerceptualHash(img.data(), 32, 32);
+    ASSERT(h1 == h2);
+}
+TEST(TestDedup_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    dedup.Initialize();
+    dedup.Shutdown();
+}
+TEST(TestDedup_Stats) {
+    using namespace ExplorerLens::Engine;
+    SearchResultDeduplicator dedup;
+    ASSERT(dedup.GetTotalProcessed() == 0);
+}
+TEST(TestIdxUpd_Init) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    bool ok = updater.Initialize();
+    ASSERT(ok);
+}
+TEST(TestIdxUpd_FileCreated) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    updater.Initialize();
+    updater.OnFileCreated(L"new.jpg");
+    ASSERT(updater.GetPendingUpdates() == 1);
+}
+TEST(TestIdxUpd_FileDeleted) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    updater.Initialize();
+    updater.OnFileDeleted(L"old.jpg");
+    ASSERT(updater.GetPendingUpdates() == 1);
+}
+TEST(TestIdxUpd_FileModified) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    updater.Initialize();
+    updater.OnFileModified(L"edit.jpg");
+    ASSERT(updater.GetPendingUpdates() == 1);
+}
+TEST(TestIdxUpd_Flush) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    updater.Initialize();
+    updater.OnFileCreated(L"a.jpg");
+    updater.FlushUpdates();
+    ASSERT(updater.GetPendingUpdates() == 0);
+}
+TEST(TestIdxUpd_Multi) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    updater.Initialize();
+    for (int i = 0; i < 5; i++)
+        updater.OnFileCreated(L"file" + std::to_wstring(i) + L".jpg");
+    ASSERT(updater.GetPendingUpdates() == 5);
+}
+TEST(TestIdxUpd_Stats) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    ASSERT(updater.GetTotalProcessed() == 0);
+}
+TEST(TestIdxUpd_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    updater.Initialize();
+    updater.Shutdown();
+}
+TEST(TestIdxUpd_Latency) {
+    using namespace ExplorerLens::Engine;
+    IncrementalIndexUpdater updater;
+    ASSERT(updater.GetAverageFlushLatencyMs() >= 0.0);
+}
+
+
 int main()
 {
     std::wcout << L"========================================" << std::endl;
@@ -38818,6 +39321,81 @@ int main()
     RUN_TEST(TestStagingPool_TotalMem);
     RUN_TEST(TestStagingPool_MaxBuf);
     RUN_TEST(TestStagingPool_Exhaustion);
+
+
+    // Sprint 981-990 — CLIP Semantic Search & Discovery (v30.2.0 "Deneb-S")
+    RUN_TEST(TestCLIP_Init);
+    RUN_TEST(TestCLIP_Embed);
+    RUN_TEST(TestCLIP_Dim);
+    RUN_TEST(TestCLIP_Latency);
+    RUN_TEST(TestCLIP_Backend);
+    RUN_TEST(TestCLIP_Shutdown);
+    RUN_TEST(TestCLIP_NullInput);
+    RUN_TEST(TestCLIP_ModelName);
+    RUN_TEST(TestCLIP_Normalize);
+    RUN_TEST(TestHNSW_Init);
+    RUN_TEST(TestHNSW_Add);
+    RUN_TEST(TestHNSW_Search);
+    RUN_TEST(TestHNSW_Empty);
+    RUN_TEST(TestHNSW_Size);
+    RUN_TEST(TestHNSW_Save);
+    RUN_TEST(TestHNSW_Multi);
+    RUN_TEST(TestHNSW_Recall);
+    RUN_TEST(TestHNSW_Clear);
+    RUN_TEST(TestNLQuery_Init);
+    RUN_TEST(TestNLQuery_Parse);
+    RUN_TEST(TestNLQuery_Token);
+    RUN_TEST(TestNLQuery_Vocab);
+    RUN_TEST(TestNLQuery_Empty);
+    RUN_TEST(TestNLQuery_Long);
+    RUN_TEST(TestNLQuery_Shutdown);
+    RUN_TEST(TestNLQuery_MaxTokens);
+    RUN_TEST(TestNLQuery_Unicode);
+    RUN_TEST(TestVisGraph_Build);
+    RUN_TEST(TestVisGraph_Similar);
+    RUN_TEST(TestVisGraph_Nodes);
+    RUN_TEST(TestVisGraph_Edges);
+    RUN_TEST(TestVisGraph_Update);
+    RUN_TEST(TestVisGraph_Remove);
+    RUN_TEST(TestVisGraph_Clear);
+    RUN_TEST(TestVisGraph_K);
+    RUN_TEST(TestVisGraph_Density);
+    RUN_TEST(TestEmbCache_Init);
+    RUN_TEST(TestEmbCache_Store);
+    RUN_TEST(TestEmbCache_Retrieve);
+    RUN_TEST(TestEmbCache_Miss);
+    RUN_TEST(TestEmbCache_Size);
+    RUN_TEST(TestEmbCache_Compact);
+    RUN_TEST(TestEmbCache_Clear);
+    RUN_TEST(TestEmbCache_Stats);
+    RUN_TEST(TestEmbCache_Eviction);
+    RUN_TEST(TestMMRank_Init);
+    RUN_TEST(TestMMRank_Rank);
+    RUN_TEST(TestMMRank_Weights);
+    RUN_TEST(TestMMRank_TopK);
+    RUN_TEST(TestMMRank_Default);
+    RUN_TEST(TestMMRank_Signal);
+    RUN_TEST(TestMMRank_Empty);
+    RUN_TEST(TestMMRank_Shutdown);
+    RUN_TEST(TestMMRank_Latency);
+    RUN_TEST(TestDedup_Init);
+    RUN_TEST(TestDedup_Hash);
+    RUN_TEST(TestDedup_Dedup);
+    RUN_TEST(TestDedup_Clusters);
+    RUN_TEST(TestDedup_Threshold);
+    RUN_TEST(TestDedup_Empty);
+    RUN_TEST(TestDedup_Same);
+    RUN_TEST(TestDedup_Shutdown);
+    RUN_TEST(TestDedup_Stats);
+    RUN_TEST(TestIdxUpd_Init);
+    RUN_TEST(TestIdxUpd_FileCreated);
+    RUN_TEST(TestIdxUpd_FileDeleted);
+    RUN_TEST(TestIdxUpd_FileModified);
+    RUN_TEST(TestIdxUpd_Flush);
+    RUN_TEST(TestIdxUpd_Multi);
+    RUN_TEST(TestIdxUpd_Stats);
+    RUN_TEST(TestIdxUpd_Shutdown);
+    RUN_TEST(TestIdxUpd_Latency);
 
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;

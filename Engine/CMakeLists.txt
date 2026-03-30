@@ -1615,6 +1615,16 @@ set(ENGINE_HEADERS
     Cache/DirectStorageCacheTier.h
     Core/AsyncFileStreamBroker.h
     GPU/StagingBufferPoolV2.h
+
+    # Sprint 981-990 — CLIP Semantic Search & Discovery (v30.2.0 "Deneb-S")
+    AI/CLIPEmbeddingEngine.h
+    AI/SemanticSearchIndex.h
+    AI/NaturalLanguageQueryParser.h
+    AI/VisualSimilarityGraph.h
+    AI/EmbeddingCacheStore.h
+    AI/MultiModalRanker.h
+    AI/SearchResultDeduplicator.h
+    AI/IncrementalIndexUpdater.h
 )
 
 set(ENGINE_SOURCES
