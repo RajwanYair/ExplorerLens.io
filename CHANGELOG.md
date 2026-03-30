@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v30.6.0 Deneb-W: Plugin Marketplace v4. 8 Plugin headers for marketplace REST+gRPC client, Bayesian rating engine, dependency resolver, bundle installer, JWT license manager v4, reputation scorer, auto-update policy v4, pre-publish review gateway. +72 tests (3965 total).
+
+
 v30.5.0 Deneb-V: Universal Format Decoder Library. 8 Core headers for UFDL public API facade, capability matrix, SemVer registry, family resolver, hotfix applicator, schema validator, compat layer, SPDX manifest. +72 tests (3893 total).
 
 
