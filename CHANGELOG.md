@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v31.1.0 Achernar-R: Cross-Platform Shell Extensions.
+
+
 v31.0.0 Achernar: Generative AI Thumbnails.
 
 
