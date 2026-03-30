@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v30.0.0 Deneb: Gen-6 Platform Unification MAJOR release. Cross-platform abstraction layer (8 headers): PAL, Metal pipeline, Linux DRM, window broker, filesystem adapter, shell provider, UI scaling, build matrix. +72 tests (3533 total). First post-consolidation feature release.
+
+
 v29.7.0 Capella-X: Project Consolidation Phase 6 — Plugin cleanup (98->37 headers), AI scope reduction (88->17 headers), CLI consolidation (11->2 headers). 140 duplicate/scope-creep headers removed, 2989 build/test lines consolidated. Consolidation era complete.
 
 

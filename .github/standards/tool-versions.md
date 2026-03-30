@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 30 March 2026 (v29.7.0 Capella-X release)
-**Version:** 29.7.0 "Capella-X"
+**Last Updated:** 30 March 2026 (v30.0.0 Deneb release)
+**Version:** 30.0.0 "Deneb"
 
 ---
 
