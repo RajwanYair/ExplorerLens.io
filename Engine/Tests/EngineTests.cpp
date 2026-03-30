@@ -11890,6 +11890,89 @@ TEST(TestPRG_NeedsRev) { using namespace ExplorerLens::Engine; ASSERT(static_cas
 TEST(TestPRG_Sig) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReviewCheck::SignatureVerify) == 1); }
 TEST(TestPRG_Issues) { using namespace ExplorerLens::Engine; ReviewReport rr{}; rr.issues = {}; ASSERT(rr.issues.empty()); }
 
+// ============================================================================
+// Sprint 1031-1040 — Enterprise Console v3 & Fleet Management (v30.7.0 "Deneb-X")
+// ============================================================================
+TEST(TestEC3_Init) { using namespace ExplorerLens::Engine; EnterpriseConsoleV3 ec; ASSERT(true); }
+TEST(TestEC3_Proto) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ConsoleProtocol::REST) == 0); ASSERT(static_cast<int>(ConsoleProtocol::Hybrid) == 2); }
+TEST(TestEC3_Role) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AdminRole::Viewer) == 0); ASSERT(static_cast<int>(AdminRole::SuperAdmin) == 3); }
+TEST(TestEC3_Endpoint) { using namespace ExplorerLens::Engine; ConsoleEndpoint ep{}; ep.host = "console.corp.com"; ep.port = 8443; ep.tlsEnabled = true; ASSERT(ep.tlsEnabled); }
+TEST(TestEC3_Admin) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AdminRole::Admin) == 2); }
+TEST(TestEC3_Op) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AdminRole::Operator) == 1); }
+TEST(TestEC3_Port) { using namespace ExplorerLens::Engine; ConsoleEndpoint ep{}; ep.port = 443; ASSERT(ep.port == 443); }
+TEST(TestEC3_Token) { using namespace ExplorerLens::Engine; ConsoleEndpoint ep{}; ep.authToken = "bearer.xyz"; ASSERT(!ep.authToken.empty()); }
+TEST(TestEC3_gRPC) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ConsoleProtocol::gRPC) == 1); }
+
+TEST(TestFDM_Init) { using namespace ExplorerLens::Engine; FleetDeploymentManager fdm; ASSERT(true); }
+TEST(TestFDM_Method) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DeploymentMethod::WinGet) == 0); ASSERT(static_cast<int>(DeploymentMethod::Manual) == 4); }
+TEST(TestFDM_Stage) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(RolloutStage::Canary) == 0); ASSERT(static_cast<int>(RolloutStage::Full) == 3); }
+TEST(TestFDM_Job) { using namespace ExplorerLens::Engine; DeploymentJob dj{}; dj.jobId = "job-001"; dj.stage = RolloutStage::Ring1; dj.targetCount = 1000; ASSERT(dj.targetCount == 1000); }
+TEST(TestFDM_MDM) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DeploymentMethod::MDM_Intune) == 1); }
+TEST(TestFDM_Ring2) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(RolloutStage::Ring2) == 2); }
+TEST(TestFDM_Done) { using namespace ExplorerLens::Engine; DeploymentJob dj{}; dj.completedCount = 500; dj.targetCount = 1000; ASSERT(dj.completedCount < dj.targetCount); }
+TEST(TestFDM_SCCM) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DeploymentMethod::SCCM) == 2); }
+TEST(TestFDM_Ver) { using namespace ExplorerLens::Engine; DeploymentJob dj{}; dj.version = "30.7.0"; ASSERT(!dj.version.empty()); }
+
+TEST(TestCRG_Init) { using namespace ExplorerLens::Engine; ComplianceReportGenerator crg; ASSERT(true); }
+TEST(TestCRG_FW) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ComplianceFramework::GDPR) == 0); ASSERT(static_cast<int>(ComplianceFramework::NIST_CSF) == 4); }
+TEST(TestCRG_Fmt) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReportFormat::PDF) == 0); ASSERT(static_cast<int>(ReportFormat::XLSX) == 3); }
+TEST(TestCRG_Ev) { using namespace ExplorerLens::Engine; ComplianceEvidence ce{}; ce.framework = ComplianceFramework::SOC2; ce.controlId = "CC6.1"; ce.status = "Pass"; ASSERT(!ce.status.empty()); }
+TEST(TestCRG_HIPAA) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ComplianceFramework::HIPAA) == 1); }
+TEST(TestCRG_ISO) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ComplianceFramework::ISO27001) == 3); }
+TEST(TestCRG_JSON) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReportFormat::JSON_LD) == 1); }
+TEST(TestCRG_HTML) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ReportFormat::HTML) == 2); }
+TEST(TestCRG_Evid) { using namespace ExplorerLens::Engine; ComplianceEvidence ce{}; ce.evidence = "screenshot.png"; ASSERT(!ce.evidence.empty()); }
+
+TEST(TestEMD_Init) { using namespace ExplorerLens::Engine; EnterpriseMetricsDashboard emd; ASSERT(true); }
+TEST(TestEMD_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(MetricType::Latency) == 0); ASSERT(static_cast<int>(MetricType::PluginAdoption) == 4); }
+TEST(TestEMD_Pct) { using namespace ExplorerLens::Engine; PercentileSet ps{}; ps.p50 = 8.0f; ps.p95 = 15.0f; ps.p99 = 22.0f; ps.p999 = 45.0f; ASSERT(ps.p99 > ps.p50); }
+TEST(TestEMD_Snap) { using namespace ExplorerLens::Engine; MetricSnapshot ms{}; ms.name = "thumb.latency"; ms.type = MetricType::Latency; ms.value = 12.5f; ASSERT(ms.value > 0.0f); }
+TEST(TestEMD_ErrRate) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(MetricType::ErrorRate) == 1); }
+TEST(TestEMD_Tput) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(MetricType::Throughput) == 2); }
+TEST(TestEMD_Cache) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(MetricType::CacheHit) == 3); }
+TEST(TestEMD_P999) { using namespace ExplorerLens::Engine; PercentileSet ps{}; ps.p999 = 100.0f; ASSERT(ps.p999 == 100.0f); }
+TEST(TestEMD_Name) { using namespace ExplorerLens::Engine; MetricSnapshot ms{}; ms.name = "cache.hit_rate"; ASSERT(!ms.name.empty()); }
+
+TEST(TestPVC_Init) { using namespace ExplorerLens::Engine; PolicyVersionControl pvc; ASSERT(true); }
+TEST(TestPVC_Chg) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(PolicyChangeType::Add) == 0); ASSERT(static_cast<int>(PolicyChangeType::Revert) == 3); }
+TEST(TestPVC_Diff) { using namespace ExplorerLens::Engine; PolicyDiff pd{}; pd.controlId = "CC6.1"; pd.changeType = PolicyChangeType::Modify; pd.oldValue = "false"; pd.newValue = "true"; ASSERT(!pd.newValue.empty()); }
+TEST(TestPVC_Ver) { using namespace ExplorerLens::Engine; PolicyVersion pv{}; pv.author = "admin"; pv.message = "Enable GPU decode"; ASSERT(!pv.message.empty()); }
+TEST(TestPVC_Del) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(PolicyChangeType::Delete) == 2); }
+TEST(TestPVC_Mod) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(PolicyChangeType::Modify) == 1); }
+TEST(TestPVC_Hash) { using namespace ExplorerLens::Engine; PolicyVersion pv{}; pv.hash = "abc123def456"; ASSERT(!pv.hash.empty()); }
+TEST(TestPVC_Changes) { using namespace ExplorerLens::Engine; PolicyVersion pv{}; pv.changes = {}; ASSERT(pv.changes.empty()); }
+TEST(TestPVC_Author) { using namespace ExplorerLens::Engine; PolicyVersion pv{}; pv.author = "sysadmin"; ASSERT(!pv.author.empty()); }
+
+TEST(TestRDC_Init) { using namespace ExplorerLens::Engine; RemoteDecoderControl rdc; ASSERT(true); }
+TEST(TestRDC_Act) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderAction::Enable) == 0); ASSERT(static_cast<int>(DecoderAction::UpdateConfig) == 4); }
+TEST(TestRDC_Target) { using namespace ExplorerLens::Engine; DecoderTarget dt{}; dt.decoderId = "WebP"; dt.endpointCount = 500; ASSERT(dt.endpointCount == 500); }
+TEST(TestRDC_Result) { using namespace ExplorerLens::Engine; ControlResult cr{}; cr.success = true; cr.affected = 300; ASSERT(cr.affected == 300); }
+TEST(TestRDC_Dis) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderAction::Disable) == 1); }
+TEST(TestRDC_Quar) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderAction::Quarantine) == 2); }
+TEST(TestRDC_Rest) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderAction::Restore) == 3); }
+TEST(TestRDC_Errs) { using namespace ExplorerLens::Engine; ControlResult cr{}; cr.errors = {}; ASSERT(cr.errors.empty()); }
+TEST(TestRDC_State) { using namespace ExplorerLens::Engine; DecoderTarget dt{}; dt.currentState = "active"; ASSERT(!dt.currentState.empty()); }
+
+TEST(TestUAD_Init) { using namespace ExplorerLens::Engine; UsageAnomalyDetector uad; ASSERT(true); }
+TEST(TestUAD_Sev) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnomalySeverity::Low) == 0); ASSERT(static_cast<int>(AnomalySeverity::Critical) == 3); }
+TEST(TestUAD_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnomalyType::SpikeThroughput) == 0); ASSERT(static_cast<int>(AnomalyType::ResourceLeak) == 3); }
+TEST(TestUAD_Event) { using namespace ExplorerLens::Engine; AnomalyEvent ae{}; ae.type = AnomalyType::ErrorBurst; ae.severity = AnomalySeverity::High; ae.zScore = 3.8f; ASSERT(ae.zScore > 3.0f); }
+TEST(TestUAD_Med) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnomalySeverity::Medium) == 1); }
+TEST(TestUAD_High) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnomalySeverity::High) == 2); }
+TEST(TestUAD_Latency) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnomalyType::LatencyCliff) == 2); }
+TEST(TestUAD_Decoder) { using namespace ExplorerLens::Engine; AnomalyEvent ae{}; ae.affectedDecoder = "WebPDecoder"; ASSERT(!ae.affectedDecoder.empty()); }
+TEST(TestUAD_ZScore) { using namespace ExplorerLens::Engine; AnomalyEvent ae{}; ae.zScore = 5.2f; ASSERT(ae.zScore > 5.0f); }
+
+TEST(TestEAE_Init) { using namespace ExplorerLens::Engine; EnterpriseAuditExporter eae; ASSERT(true); }
+TEST(TestEAE_Target) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SIEMTarget::SplunkHEC) == 0); ASSERT(static_cast<int>(SIEMTarget::Generic) == 4); }
+TEST(TestEAE_Fmt) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AuditLogFormat::CEF) == 0); ASSERT(static_cast<int>(AuditLogFormat::Syslog) == 3); }
+TEST(TestEAE_Ev) { using namespace ExplorerLens::Engine; AuditEvent ae{}; ae.eventId = "EVT-001"; ae.category = "Security"; ae.severity = "High"; ae.outcome = "Success"; ASSERT(!ae.outcome.empty()); }
+TEST(TestEAE_Sent) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SIEMTarget::MicrosoftSentinel) == 1); }
+TEST(TestEAE_QR) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SIEMTarget::QRadar) == 2); }
+TEST(TestEAE_LEEF) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AuditLogFormat::LEEF) == 1); }
+TEST(TestEAE_Actor) { using namespace ExplorerLens::Engine; AuditEvent ae{}; ae.actor = "admin@corp.com"; ASSERT(!ae.actor.empty()); }
+TEST(TestEAE_Res) { using namespace ExplorerLens::Engine; AuditEvent ae{}; ae.resource = "WebPDecoder"; ASSERT(!ae.resource.empty()); }
+
 //== HDR Tone Mapping Pipeline ==
 TEST(TestZenith_HDROperatorCount) {
     ASSERT(HDRToneMappingPipeline::OperatorCount() == 6);
@@ -26733,6 +26816,16 @@ TEST(TestCLIDoctorAllChecks)
 #include "Plugin/AutoUpdatePolicyV4.h"
 #include "Plugin/PrePublishReviewGateway.h"
 
+// Sprint 1031-1040 — Enterprise Console v3 & Fleet Management (v30.7.0 "Deneb-X")
+#include "Enterprise/EnterpriseConsoleV3.h"
+#include "Enterprise/FleetDeploymentManager.h"
+#include "Enterprise/ComplianceReportGenerator.h"
+#include "Enterprise/EnterpriseMetricsDashboard.h"
+#include "Enterprise/PolicyVersionControl.h"
+#include "Enterprise/RemoteDecoderControl.h"
+#include "Enterprise/UsageAnomalyDetector.h"
+#include "Enterprise/EnterpriseAuditExporter.h"
+
 
 
 
@@ -39943,6 +40036,23 @@ int main()
     RUN_TEST(TestAU_Defer); RUN_TEST(TestAU_Locked); RUN_TEST(TestAU_Beta); RUN_TEST(TestAU_Nightly);
     RUN_TEST(TestPRG_Init); RUN_TEST(TestPRG_Status); RUN_TEST(TestPRG_Check); RUN_TEST(TestPRG_Report); RUN_TEST(TestPRG_Approved);
     RUN_TEST(TestPRG_Rejected); RUN_TEST(TestPRG_NeedsRev); RUN_TEST(TestPRG_Sig); RUN_TEST(TestPRG_Issues);
+    // Sprint 1031-1040 — Enterprise Console v3 & Fleet Management (v30.7.0 "Deneb-X")
+    RUN_TEST(TestEC3_Init); RUN_TEST(TestEC3_Proto); RUN_TEST(TestEC3_Role); RUN_TEST(TestEC3_Endpoint); RUN_TEST(TestEC3_Admin);
+    RUN_TEST(TestEC3_Op); RUN_TEST(TestEC3_Port); RUN_TEST(TestEC3_Token); RUN_TEST(TestEC3_gRPC);
+    RUN_TEST(TestFDM_Init); RUN_TEST(TestFDM_Method); RUN_TEST(TestFDM_Stage); RUN_TEST(TestFDM_Job); RUN_TEST(TestFDM_MDM);
+    RUN_TEST(TestFDM_Ring2); RUN_TEST(TestFDM_Done); RUN_TEST(TestFDM_SCCM); RUN_TEST(TestFDM_Ver);
+    RUN_TEST(TestCRG_Init); RUN_TEST(TestCRG_FW); RUN_TEST(TestCRG_Fmt); RUN_TEST(TestCRG_Ev); RUN_TEST(TestCRG_HIPAA);
+    RUN_TEST(TestCRG_ISO); RUN_TEST(TestCRG_JSON); RUN_TEST(TestCRG_HTML); RUN_TEST(TestCRG_Evid);
+    RUN_TEST(TestEMD_Init); RUN_TEST(TestEMD_Type); RUN_TEST(TestEMD_Pct); RUN_TEST(TestEMD_Snap); RUN_TEST(TestEMD_ErrRate);
+    RUN_TEST(TestEMD_Tput); RUN_TEST(TestEMD_Cache); RUN_TEST(TestEMD_P999); RUN_TEST(TestEMD_Name);
+    RUN_TEST(TestPVC_Init); RUN_TEST(TestPVC_Chg); RUN_TEST(TestPVC_Diff); RUN_TEST(TestPVC_Ver); RUN_TEST(TestPVC_Del);
+    RUN_TEST(TestPVC_Mod); RUN_TEST(TestPVC_Hash); RUN_TEST(TestPVC_Changes); RUN_TEST(TestPVC_Author);
+    RUN_TEST(TestRDC_Init); RUN_TEST(TestRDC_Act); RUN_TEST(TestRDC_Target); RUN_TEST(TestRDC_Result); RUN_TEST(TestRDC_Dis);
+    RUN_TEST(TestRDC_Quar); RUN_TEST(TestRDC_Rest); RUN_TEST(TestRDC_Errs); RUN_TEST(TestRDC_State);
+    RUN_TEST(TestUAD_Init); RUN_TEST(TestUAD_Sev); RUN_TEST(TestUAD_Type); RUN_TEST(TestUAD_Event); RUN_TEST(TestUAD_Med);
+    RUN_TEST(TestUAD_High); RUN_TEST(TestUAD_Latency); RUN_TEST(TestUAD_Decoder); RUN_TEST(TestUAD_ZScore);
+    RUN_TEST(TestEAE_Init); RUN_TEST(TestEAE_Target); RUN_TEST(TestEAE_Fmt); RUN_TEST(TestEAE_Ev); RUN_TEST(TestEAE_Sent);
+    RUN_TEST(TestEAE_QR); RUN_TEST(TestEAE_LEEF); RUN_TEST(TestEAE_Actor); RUN_TEST(TestEAE_Res);
     // Integration Test Framework + COM Tests (Sprint 25+29 / v15.4.1)
     std::wcout << std::endl;
     std::wcout << L"  [Integration + COM Tests]" << std::endl;

@@ -1665,6 +1665,16 @@ set(ENGINE_HEADERS
     Plugin/PluginReputationScorer.h
     Plugin/AutoUpdatePolicyV4.h
     Plugin/PrePublishReviewGateway.h
+
+    # Sprint 1031-1040 — Enterprise Console v3 & Fleet Management (v30.7.0 "Deneb-X")
+    Enterprise/EnterpriseConsoleV3.h
+    Enterprise/FleetDeploymentManager.h
+    Enterprise/ComplianceReportGenerator.h
+    Enterprise/EnterpriseMetricsDashboard.h
+    Enterprise/PolicyVersionControl.h
+    Enterprise/RemoteDecoderControl.h
+    Enterprise/UsageAnomalyDetector.h
+    Enterprise/EnterpriseAuditExporter.h
 )
 
 set(ENGINE_SOURCES
