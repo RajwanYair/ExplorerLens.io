@@ -34,6 +34,9 @@ struct QuickLookConfig {
  QuickLookMetadataOverlay overlay = QuickLookMetadataOverlay::Minimal;
  uint32_t slideshowIntervalSec = 3;
  bool loopSlideshow = true;
+ std::string bundleIdentifier;
+ uint32_t maxDimension = 512;
+ bool enableSandbox = false;
 };
 
 struct QuickLookSession {

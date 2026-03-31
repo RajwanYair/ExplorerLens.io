@@ -33,7 +33,7 @@ struct PluginDependencyDecl {
     bool         optional = false;  // If true, missing dep doesn't block
 };
 
-struct PluginNode {
+struct ResolverPluginNode {
     std::wstring pluginId;
     uint32_t     versionMajor = 1;
     uint32_t     versionMinor = 0;
@@ -77,7 +77,7 @@ public:
 
     // Register a plugin
     void RegisterPlugin(const std::wstring& pluginId, uint32_t versionMajor = 1, uint32_t versionMinor = 0) {
-        PluginNode node;
+        ResolverPluginNode node;
         node.pluginId = pluginId;
         node.versionMajor = versionMajor;
         node.versionMinor = versionMinor;
@@ -199,7 +199,7 @@ public:
 private:
     PluginDependencyResolver() = default;
 
-    std::unordered_map<std::wstring, PluginNode> m_nodes;
+    std::unordered_map<std::wstring, ResolverPluginNode> m_nodes;
     bool m_initialized = false;
 };
 

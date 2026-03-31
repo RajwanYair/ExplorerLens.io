@@ -21,11 +21,16 @@ enum class MonitoredResource : uint8_t {
 
 /// Throttle level
 enum class ThrottleLevel : uint8_t {
- None = 0, // Full speed
- Light, // Reduce parallelism slightly
- Moderate, // Half throughput
- Heavy, // Minimal background work
- Paused, // Stop all non-essential work
+ // No throttling — full decode throughput
+ None = 0,
+ // Reduce thread parallelism slightly
+ Light,
+ // Approximately half throughput
+ Moderate,
+ // Allow only minimal background work
+ Heavy,
+ // Suspend all non-essential decode work
+ Paused,
  COUNT
 };
 
@@ -107,6 +112,16 @@ public:
  return ThrottleLevel::Heavy;
  return ThrottleLevel::Paused;
  }
+};
+
+class AccessibilityNarratorBridge {
+public:
+    static int FeatureCount() { return 6; }
+    static const wchar_t* GenerateNarratorText(
+        const wchar_t* filename, int /*w*/, int /*h*/, const wchar_t* /*fmt*/) {
+        return filename ? filename : L"Image file";
+    }
+    AccessibilityNarratorBridge() = delete;
 };
 
 } // namespace Engine

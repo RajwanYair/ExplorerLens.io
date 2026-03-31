@@ -73,6 +73,7 @@ struct ConflictReport {
     uint32_t resolved = 0;
     std::vector<std::wstring> conflictingExtensions;
 };
+using AssociationReport = ConflictReport;
 
 /// Manages file type associations for ExplorerLens thumbnail
 /// handlers, supporting user/machine scope, conflict resolution,

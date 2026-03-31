@@ -17,14 +17,6 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class AnimatedFormat : uint8_t {
-    GIF,
-    WebPAnimated,
-    APNG,
-    AVIF_Sequence,
-    JXL_Animation
-};
-
 enum class DisposalMethod : uint8_t {
     None,
     Background,

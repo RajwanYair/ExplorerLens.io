@@ -1,5 +1,5 @@
 // Format Fallback Engine — GTest (rewritten for Core/FormatFallbackEngine.h API)
-#include "../Pipeline/FormatFallbackEngine.h"
+#include "../Core/FormatFallbackEngine.h"
 #include "GTestShim.h"
 
 using namespace ExplorerLens::Engine;

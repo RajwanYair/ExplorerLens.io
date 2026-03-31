@@ -1,6 +1,6 @@
 ﻿// Plugin Sandbox Policy — GTestShim
 #include "GTestShim.h"
-#include "Plugin/PluginSandboxPolicy.h"
+#include "../Plugin/PluginSandboxV3.h"
 
 using namespace ExplorerLens::Plugin;
 

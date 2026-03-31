@@ -9,30 +9,24 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include <mutex>
 
 namespace ExplorerLens {
 namespace Engine {
 
-struct CacheEntry {
-    uint64_t    offset = 0;
-    uint64_t    size = 0;
-    uint64_t    lastAccess = 0;
-    uint32_t    hitCount = 0;
-};
-
-struct CacheTierStats {
-    uint64_t hits = 0;
-    uint64_t misses = 0;
-    uint64_t evictions = 0;
-    uint64_t totalBytes = 0;
-    uint64_t capacityMB = 0;
+// DSCacheEntry has a distinct name from MultiTierCache.h's CacheEntry
+struct DSCacheEntry {
+    uint64_t offset     = 0;
+    uint64_t size       = 0;
+    uint64_t lastAccess = 0;
+    uint32_t hitCount   = 0;
 };
 
 class DirectStorageCacheTier {
 public:
     static constexpr uint64_t DEFAULT_CAPACITY_MB = 512;
-    static constexpr uint64_t MAX_CAPACITY_MB = 4096;
+    static constexpr uint64_t MAX_CAPACITY_MB     = 4096;
 
     DirectStorageCacheTier() = default;
     ~DirectStorageCacheTier() { Shutdown(); }
@@ -40,86 +34,74 @@ public:
     DirectStorageCacheTier(const DirectStorageCacheTier&) = delete;
     DirectStorageCacheTier& operator=(const DirectStorageCacheTier&) = delete;
 
-    inline bool Initialize(uint64_t capacityMB = DEFAULT_CAPACITY_MB) {
+    bool Initialize(uint64_t capacityMB = DEFAULT_CAPACITY_MB) {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (m_initialized) return true;
-        m_stats.capacityMB = (capacityMB > 0 && capacityMB <= MAX_CAPACITY_MB)
-                             ? capacityMB : DEFAULT_CAPACITY_MB;
+        m_capacityMB  = (capacityMB > 0 && capacityMB <= MAX_CAPACITY_MB) ? capacityMB : DEFAULT_CAPACITY_MB;
         m_initialized = true;
         return true;
     }
 
-    inline bool Get(uint64_t key, void* dst, uint64_t dstCapacity) {
+    void Put(const std::string& key, const std::vector<uint8_t>& data) {
+        if (key.empty() || data.empty()) return;
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_initialized) return false;
-        auto it = m_entries.find(key);
-        if (it == m_entries.end()) {
-            m_stats.misses++;
-            return false;
-        }
-        it->second.hitCount++;
-        it->second.lastAccess = m_accessCounter++;
-        m_stats.hits++;
-        return true;
+        m_store[key] = data;
+        ++m_puts;
     }
 
-    inline bool Put(uint64_t key, const void* data, uint64_t size) {
+    std::vector<uint8_t> Get(const std::string& key) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_initialized || !data || size == 0) return false;
-        uint64_t capacityBytes = m_stats.capacityMB * 1024ULL * 1024ULL;
-        if (m_stats.totalBytes + size > capacityBytes) {
-            EvictLRU();
-        }
-        CacheEntry entry;
-        entry.size = size;
-        entry.lastAccess = m_accessCounter++;
-        m_entries[key] = entry;
-        m_stats.totalBytes += size;
-        return true;
+        auto it = m_store.find(key);
+        if (it == m_store.end()) { ++m_misses; return {}; }
+        ++m_hits;
+        return it->second;
     }
 
-    inline bool Evict(uint64_t key) {
+    void Evict(const std::string& key) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        auto it = m_entries.find(key);
-        if (it == m_entries.end()) return false;
-        m_stats.totalBytes -= it->second.size;
-        m_entries.erase(it);
-        m_stats.evictions++;
-        return true;
+        m_store.erase(key);
     }
 
-    inline double GetHitRate() const {
-        uint64_t total = m_stats.hits + m_stats.misses;
-        return (total > 0) ? static_cast<double>(m_stats.hits) / static_cast<double>(total) : 0.0;
+    void Clear() {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_store.clear();
+        m_hits = m_misses = 0;
     }
 
-    inline uint64_t GetCapacityMB() const { return m_stats.capacityMB; }
-    inline const CacheTierStats& GetStats() const { return m_stats; }
-
-    inline void Shutdown() {
+    float GetHitRate() const {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_entries.clear();
-        m_stats = CacheTierStats{};
+        uint64_t total = m_hits + m_misses;
+        return (total > 0) ? static_cast<float>(m_hits) / static_cast<float>(total) : 0.0f;
+    }
+
+    uint64_t GetCapacityMB() const { return m_capacityMB; }
+
+    size_t GetEntryCount() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_store.size();
+    }
+
+    double GetUsageMB() const {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        uint64_t bytes = 0;
+        for (auto const& kv : m_store) bytes += kv.second.size();
+        return static_cast<double>(bytes) / (1024.0 * 1024.0);
+    }
+
+    void Shutdown() {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_store.clear();
         m_initialized = false;
     }
 
 private:
-    inline void EvictLRU() {
-        if (m_entries.empty()) return;
-        auto oldest = m_entries.begin();
-        for (auto it = m_entries.begin(); it != m_entries.end(); ++it) {
-            if (it->second.lastAccess < oldest->second.lastAccess) oldest = it;
-        }
-        m_stats.totalBytes -= oldest->second.size;
-        m_entries.erase(oldest);
-        m_stats.evictions++;
-    }
-
-    bool                                     m_initialized = false;
-    uint64_t                                 m_accessCounter = 0;
-    CacheTierStats                           m_stats{};
-    std::unordered_map<uint64_t, CacheEntry> m_entries;
-    std::mutex                               m_mutex;
+    bool     m_initialized = false;
+    uint64_t m_capacityMB  = DEFAULT_CAPACITY_MB;
+    uint64_t m_hits        = 0;
+    uint64_t m_misses      = 0;
+    uint64_t m_puts        = 0;
+    mutable std::mutex m_mutex;
+    std::unordered_map<std::string, std::vector<uint8_t>> m_store;
 };
 
 } // namespace Engine

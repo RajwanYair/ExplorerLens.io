@@ -154,5 +154,26 @@ private:
     uint64_t m_totalRecords = 0;
 };
 
+enum class PopularityTier : uint8_t {
+    Dominant = 0,
+    Popular  = 1,
+    Common   = 2,
+    Niche    = 3,
+    Rare     = 4
+};
+
+class FormatPopularityTracker {
+public:
+    static int TierCount() { return 5; }
+    static PopularityTier Classify(float percentage) {
+        if (percentage >= 20.0f) return PopularityTier::Dominant;
+        if (percentage >= 5.0f)  return PopularityTier::Popular;
+        if (percentage >= 1.0f)  return PopularityTier::Common;
+        if (percentage >= 0.1f)  return PopularityTier::Niche;
+        return PopularityTier::Rare;
+    }
+    FormatPopularityTracker() = delete;
+};
+
 } // namespace Engine
 } // namespace ExplorerLens

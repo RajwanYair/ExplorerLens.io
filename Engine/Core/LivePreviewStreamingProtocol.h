@@ -39,7 +39,7 @@ struct StreamingStats {
  bool isComplete = false;
 };
 
-struct LivePreviewConfig {
+struct StreamingPreviewConfig {
  bool enabled = true;
  StreamProtocol preferredProto = StreamProtocol::HTTP_Range;
  StreamQuality initialQuality = StreamQuality::Thumbnail_128;

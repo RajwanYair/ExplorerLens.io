@@ -31,7 +31,7 @@ enum class DecompressTarget : uint8_t {
     StagingBuffer
 };
 
-struct DecompressRequest {
+struct GPUDecompRequest {
     const uint8_t* compressedData = nullptr;
     size_t compressedSize = 0;
     size_t uncompressedSize = 0;
@@ -40,7 +40,7 @@ struct DecompressRequest {
     uint32_t blockSize = 65536;
 };
 
-struct DecompressResult {
+struct GPUDecompResult {
     std::vector<uint8_t> data;
     size_t originalSize = 0;
     size_t decompressedSize = 0;
@@ -66,8 +66,8 @@ public:
         return instance;
     }
 
-    inline DecompressResult Decompress(const DecompressRequest& request) const {
-        DecompressResult result;
+    inline GPUDecompResult Decompress(const GPUDecompRequest& request) const {
+        GPUDecompResult result;
         if (!request.compressedData || request.compressedSize == 0) {
             result.errorMessage = "Invalid input";
             return result;

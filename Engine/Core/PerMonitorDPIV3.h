@@ -1,13 +1,21 @@
 //==============================================================================
 // ExplorerLens Engine — Per-Monitor DPI V3
 // Per-monitor DPI awareness V3 with mixed-DPI multi-monitor support.
-// Types (DPIScale, DPIAwareness) are defined in HighDPIScaling.h
+// Types (DPIScale, DPIAwareness) defined inline after consolidation.
 //==============================================================================
 #pragma once
-#include "HighDPIScaling.h"
+#include <cstdint>
 
 namespace ExplorerLens {
 namespace Engine {
+
+enum class DPIScale : uint8_t {
+ Scale100 = 0, Scale125, Scale150, Scale175, Scale200, Scale250, Scale300, Scale350, Scale400, Custom
+};
+
+enum class DPIAwareness : uint8_t {
+ Unaware = 0, SystemAware, PerMonitorV1, PerMonitorV2, GDIScaled
+};
 
 /// Monitor info for DPI
 struct MonitorDPIInfo {

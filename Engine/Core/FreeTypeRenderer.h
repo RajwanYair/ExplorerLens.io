@@ -43,7 +43,7 @@ struct FontPreviewConfig {
     std::string       customText;
 };
 
-struct GlyphMetrics {
+struct FTGlyphMetrics {
     int32_t  bearingX = 0;
     int32_t  bearingY = 0;
     uint32_t advanceX = 0;
@@ -68,7 +68,7 @@ struct GlyphBitmap {
     uint32_t              height = 0;
     uint32_t              pitch = 0;
     std::vector<uint8_t>  pixels;
-    GlyphMetrics          metrics;
+    FTGlyphMetrics          metrics;
 };
 
 class FreeTypeRenderer {

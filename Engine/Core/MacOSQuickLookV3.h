@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include "QuickLookIntegration.h"
 
 namespace ExplorerLens { namespace Engine {
 
@@ -23,14 +24,6 @@ enum class QuickLookScale : uint8_t {
     Standard,
     Retina,
     ProMotion
-};
-
-struct QuickLookConfig {
-    QuickLookAPI api = QuickLookAPI::Modern;
-    QuickLookScale scale = QuickLookScale::Retina;
-    std::string bundleIdentifier;
-    uint32_t maxDimension = 1024;
-    bool enableSandbox = true;
 };
 
 class MacOSQuickLookV3 {
@@ -55,8 +48,9 @@ public:
         return true;
     }
 
-    void UnregisterExtension() {
+    bool UnregisterExtension() {
         m_extensionActive = false;
+        return true;
     }
 
     [[nodiscard]] bool IsExtensionActive() const {

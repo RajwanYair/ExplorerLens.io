@@ -184,16 +184,57 @@ try {
 
         # Map configure preset to build preset
         $buildPreset = $Preset  # They share names in our presets
-        if ([string]::IsNullOrWhiteSpace($Target)) {
-            & $cmakeExe --build --preset $buildPreset -j $Jobs
-        } else {
+        # Capture all build output to a dedicated log for post-build analysis
+        $logDir = Join-Path $env:TEMP "ExplorerLens-logs"
+        if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
+        $buildLogPath = Join-Path $logDir "build-latest.log"
+
+        $buildArgs = @("--build", "--preset", $buildPreset, "-j", $Jobs, "--",
+                       "-k", "0")   # -k 0: Ninja continues past errors (no limit on failed jobs)
+        if (-not [string]::IsNullOrWhiteSpace($Target)) {
             Write-Host "  Target: $Target" -ForegroundColor Cyan
-            & $cmakeExe --build --preset $buildPreset --target $Target -j $Jobs
+            $buildArgs = @("--build", "--preset", $buildPreset, "--target", $Target,
+                           "-j", $Jobs, "--", "-k", "0")
         }
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "Build failed (exit code $LASTEXITCODE)"
+
+        # Stream output live to terminal AND capture in $buildOutput for analysis.
+        # Using -Variable avoids opening a file during streaming (prevents lock conflicts
+        # when callers also redirect output). Log is written to disk after build completes.
+        $buildOutput = & $cmakeExe @buildArgs 2>&1 | Tee-Object -Variable cmakeLiveCapture
+        $buildExitCode = $LASTEXITCODE
+
+        # Persist log to disk now that build is complete
+        $buildOutput | Out-File -FilePath $buildLogPath -Encoding UTF8
+
+        # --- Post-Build Error/Warning Summary ---
+        $errors   = $buildOutput | Where-Object { $_ -match '\berror\s*C\d{4}\b|\s+error:' }
+        $warnings = $buildOutput | Where-Object { $_ -match '\bwarning\s*C\d{4}\b|\s+warning:' }
+        $notes    = $buildOutput | Where-Object { $_ -match '\bnote:' }
+
+        Write-Host "`n========================================" -ForegroundColor Cyan
+        Write-Host " Build Analysis" -ForegroundColor Cyan
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host "  Errors   : $($errors.Count)"   -ForegroundColor $(if ($errors.Count   -gt 0) {'Red'}    else {'Green'})
+        Write-Host "  Warnings : $($warnings.Count)" -ForegroundColor $(if ($warnings.Count -gt 0) {'Yellow'} else {'Green'})
+        Write-Host "  Notes    : $($notes.Count)"    -ForegroundColor $(if ($notes.Count    -gt 0) {'Cyan'}   else {'Gray'})
+        Write-Host "  Log      : $buildLogPath"      -ForegroundColor DarkGray
+
+        if ($errors.Count -gt 0) {
+            Write-Host "`n--- Errors ---" -ForegroundColor Red
+            $errors | Select-Object -First 50 | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+            if ($errors.Count -gt 50) { Write-Host "  ... and $($errors.Count - 50) more (see log)" -ForegroundColor DarkRed }
         }
-        Write-Host "`n  Build: OK" -ForegroundColor Green
+        if ($warnings.Count -gt 0) {
+            Write-Host "`n--- Warnings ---" -ForegroundColor Yellow
+            $warnings | Select-Object -First 30 | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+            if ($warnings.Count -gt 30) { Write-Host "  ... and $($warnings.Count - 30) more (see log)" -ForegroundColor DarkYellow }
+        }
+
+        if ($buildExitCode -ne 0) {
+            Write-Error "Build failed (exit code $buildExitCode) — $($errors.Count) errors, $($warnings.Count) warnings. Full log: $buildLogPath"
+        } else {
+            Write-Host "`n  Build: OK" -ForegroundColor Green
+        }
         $phaseTimings["build"] = $buildTimer.Elapsed.TotalSeconds - ($phaseTimings.Values | Measure-Object -Sum).Sum
 
         # 7. Test (if requested)

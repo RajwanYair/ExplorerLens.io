@@ -52,11 +52,12 @@ public:
         return true;
     }
 
-    void UnregisterHandler(std::string const& uti) {
+    bool UnregisterHandler(std::string const& uti) {
         auto it = std::find(m_registeredUTIs.begin(), m_registeredUTIs.end(), uti);
         if (it != m_registeredUTIs.end()) {
             m_registeredUTIs.erase(it);
         }
+        return true;
     }
 
     [[nodiscard]] bool IsHandlerRegistered(std::string const& uti) const {

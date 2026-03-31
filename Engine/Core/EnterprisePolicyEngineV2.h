@@ -74,7 +74,7 @@ using PolicyValue = std::variant<
 >;
 
 // A single resolved policy entry with provenance.
-struct PolicyEntry {
+struct EnterprisePolicyEntry {
     std::string  key;             // e.g. "GPU.AllowedBackend"
     PolicyValue  value;
     PolicySource source;
@@ -83,8 +83,8 @@ struct PolicyEntry {
 
 // Callback fired when a policy is applied or changed at runtime.
 using PolicyChangeCallback =
-    std::function<void(const PolicyEntry& newValue,
-                       const PolicyEntry& oldValue)>;
+    std::function<void(const EnterprisePolicyEntry& newValue,
+                       const EnterprisePolicyEntry& oldValue)>;
 
 // EnterprisePolicyEngineV2 — Hierarchical policy resolver.
 //
@@ -106,14 +106,14 @@ public:
     template<typename T>
     T Get(const std::string& key, const T& defaultValue) const noexcept;
 
-    // Get raw PolicyEntry with provenance info (for diagnostics page).
-    bool TryGet(const std::string& key, PolicyEntry& out) const noexcept;
+    // Get raw EnterprisePolicyEntry with provenance info (for diagnostics page).
+    bool TryGet(const std::string& key, EnterprisePolicyEntry& out) const noexcept;
 
     // Check if a feature is policy-disabled.
     bool IsFeatureDisabled(const std::string& featureKey) const noexcept;
 
     // Get all currently active policies (for audit export).
-    std::vector<PolicyEntry> GetAll() const noexcept;
+    std::vector<EnterprisePolicyEntry> GetAll() const noexcept;
 
     // Subscribe to policy changes (fired on next Load() if value changed).
     void OnPolicyChange(PolicyChangeCallback cb) noexcept;

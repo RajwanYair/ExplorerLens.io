@@ -9,125 +9,131 @@
 #include <cstdint>
 #include <vector>
 #include <mutex>
+#include <algorithm>
+#include <cstring>
 
 namespace ExplorerLens {
 namespace Engine {
 
 struct StagingBuffer {
-    uint64_t id = 0;
-    void*    data = nullptr;
-    uint64_t size = 0;
-    bool     inUse = false;
+    void*    data     = nullptr;
+    uint64_t capacity = 0;  // usable bytes
 };
 
-struct PoolStats {
-    uint32_t totalBuffers = 0;
-    uint32_t activeBuffers = 0;
-    uint32_t peakActive = 0;
+// StagingPoolStats has a distinct name from ProcessPoolManager.h's PoolStats
+struct StagingPoolStats {
+    uint32_t totalBuffers      = 0;
+    uint32_t activeBuffers     = 0;
     uint64_t totalAllocatedBytes = 0;
-    uint64_t totalAcquires = 0;
-    uint64_t totalReleases = 0;
 };
 
 class StagingBufferPoolV2 {
 public:
-    static constexpr uint32_t DEFAULT_POOL_SIZE = 16;
+    static constexpr uint32_t DEFAULT_POOL_SIZE   = 16;
     static constexpr uint64_t DEFAULT_BUFFER_SIZE = 4ULL * 1024 * 1024;
-    static constexpr uint32_t MAX_POOL_SIZE = 256;
+    static constexpr uint32_t MAX_POOL_SIZE       = 256;
 
     StagingBufferPoolV2() = default;
 
     ~StagingBufferPoolV2() {
         std::lock_guard<std::mutex> lock(m_mutex);
-        for (auto& buf : m_pool) {
-            delete[] static_cast<uint8_t*>(buf.data);
-            buf.data = nullptr;
-        }
+        for (auto& s : m_pool) delete[] static_cast<uint8_t*>(s.raw);
         m_pool.clear();
     }
 
     StagingBufferPoolV2(const StagingBufferPoolV2&) = delete;
     StagingBufferPoolV2& operator=(const StagingBufferPoolV2&) = delete;
 
-    inline bool Initialize(uint32_t poolSize = DEFAULT_POOL_SIZE,
-                           uint64_t bufferSize = DEFAULT_BUFFER_SIZE) {
+    bool Initialize(uint32_t poolSize = DEFAULT_POOL_SIZE,
+                    uint64_t bufferSize = DEFAULT_BUFFER_SIZE) {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (m_initialized) return true;
-        uint32_t count = (poolSize > 0 && poolSize <= MAX_POOL_SIZE) ? poolSize : DEFAULT_POOL_SIZE;
-        m_bufferSize = (bufferSize > 0) ? bufferSize : DEFAULT_BUFFER_SIZE;
+        uint32_t count  = std::min(poolSize > 0 ? poolSize : DEFAULT_POOL_SIZE, MAX_POOL_SIZE);
+        m_bufferSize    = (bufferSize > 0) ? bufferSize : DEFAULT_BUFFER_SIZE;
         m_pool.reserve(count);
         for (uint32_t i = 0; i < count; ++i) {
-            StagingBuffer buf;
-            buf.id = m_nextId++;
-            buf.data = new uint8_t[m_bufferSize];
-            buf.size = m_bufferSize;
-            buf.inUse = false;
-            m_pool.push_back(buf);
-            m_stats.totalAllocatedBytes += m_bufferSize;
+            Slot s;
+            s.raw   = new uint8_t[m_bufferSize];
+            s.inUse = false;
+            m_pool.push_back(s);
         }
-        m_stats.totalBuffers = count;
+        m_stats.totalBuffers       = count;
+        m_stats.totalAllocatedBytes = static_cast<uint64_t>(count) * m_bufferSize;
         m_initialized = true;
         return true;
     }
 
-    inline StagingBuffer* AcquireBuffer() {
+    StagingBuffer AcquireBuffer(uint64_t /*sizeHint*/ = 0) {
         std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_initialized) return nullptr;
-        for (auto& buf : m_pool) {
-            if (!buf.inUse) {
-                buf.inUse = true;
-                m_stats.activeBuffers++;
-                m_stats.totalAcquires++;
-                if (m_stats.activeBuffers > m_stats.peakActive)
-                    m_stats.peakActive = m_stats.activeBuffers;
-                return &buf;
+        if (!m_initialized) return {};
+        for (auto& s : m_pool) {
+            if (!s.inUse) {
+                s.inUse = true;
+                ++m_stats.activeBuffers;
+                StagingBuffer b{};
+                b.data     = s.raw;
+                b.capacity = m_bufferSize;
+                return b;
             }
         }
-        return nullptr;
+        // Pool exhausted — allocate extra
+        Slot s;
+        s.raw   = new uint8_t[m_bufferSize];
+        s.inUse = true;
+        m_pool.push_back(s);
+        ++m_stats.totalBuffers;
+        m_stats.totalAllocatedBytes += m_bufferSize;
+        ++m_stats.activeBuffers;
+        StagingBuffer b{};
+        b.data     = s.raw;
+        b.capacity = m_bufferSize;
+        return b;
     }
 
-    inline bool ReleaseBuffer(uint64_t bufferId) {
+    void ReleaseBuffer(StagingBuffer& buf) {
+        if (!buf.data) return;
         std::lock_guard<std::mutex> lock(m_mutex);
-        for (auto& buf : m_pool) {
-            if (buf.id == bufferId && buf.inUse) {
-                buf.inUse = false;
-                m_stats.activeBuffers--;
-                m_stats.totalReleases++;
-                return true;
+        for (auto& s : m_pool) {
+            if (s.raw == buf.data && s.inUse) {
+                s.inUse = false;
+                if (m_stats.activeBuffers > 0) --m_stats.activeBuffers;
+                break;
             }
         }
-        return false;
+        buf.data     = nullptr;
+        buf.capacity = 0;
     }
 
-    inline uint32_t GetPoolSize() const { return m_stats.totalBuffers; }
-    inline uint32_t GetActiveCount() const { return m_stats.activeBuffers; }
-    inline const PoolStats& GetStats() const { return m_stats; }
-
-    inline uint32_t Trim() {
+    void Trim() {
         std::lock_guard<std::mutex> lock(m_mutex);
-        uint32_t trimmed = 0;
         auto it = m_pool.begin();
-        while (it != m_pool.end()) {
-            if (!it->inUse && m_stats.totalBuffers > 4) {
-                delete[] static_cast<uint8_t*>(it->data);
-                m_stats.totalAllocatedBytes -= it->size;
-                m_stats.totalBuffers--;
+        while (it != m_pool.end() && m_pool.size() > 4) {
+            if (!it->inUse) {
+                m_stats.totalAllocatedBytes -= m_bufferSize;
+                if (m_stats.totalBuffers > 0) --m_stats.totalBuffers;
+                delete[] static_cast<uint8_t*>(it->raw);
                 it = m_pool.erase(it);
-                trimmed++;
             } else {
                 ++it;
             }
         }
-        return trimmed;
     }
 
+    uint32_t GetPoolSize()        const { return m_stats.totalBuffers; }
+    uint32_t GetActiveCount()     const { return m_stats.activeBuffers; }
+    uint64_t GetTotalMemoryBytes() const { return m_stats.totalAllocatedBytes; }
+    uint64_t GetMaxBufferSize()    const { return m_bufferSize; }
+
+    StagingPoolStats GetStats() const { return m_stats; }
+
 private:
-    bool                        m_initialized = false;
-    uint64_t                    m_bufferSize = DEFAULT_BUFFER_SIZE;
-    uint64_t                    m_nextId = 1;
-    PoolStats                   m_stats{};
-    std::vector<StagingBuffer>  m_pool;
-    std::mutex                  m_mutex;
+    struct Slot { void* raw = nullptr; bool inUse = false; };
+
+    bool                     m_initialized = false;
+    uint64_t                 m_bufferSize  = DEFAULT_BUFFER_SIZE;
+    StagingPoolStats         m_stats{};
+    std::vector<Slot>        m_pool;
+    mutable std::mutex       m_mutex;
 };
 
 } // namespace Engine

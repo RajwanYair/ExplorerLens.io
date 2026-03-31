@@ -33,7 +33,7 @@ enum class DecoderState : uint8_t {
 struct DecoderTarget {
     std::string  decoderId;
     uint32_t     endpointCount{0};
-    DecoderState currentState{DecoderState::Unknown};
+    std::string  currentState;
     std::string  version;
     std::chrono::system_clock::time_point lastContactAt;
 };

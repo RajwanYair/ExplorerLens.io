@@ -5,12 +5,15 @@
 // live region announcements, and colour-blind simulation palette V2.
 //==============================================================================
 #pragma once
-#include "AccessibilityPipeline.h" // provides ColorBlindMode, AccessibilityConfig
 #include <cstdint>
 #include <string>
 
 namespace ExplorerLens {
 namespace Engine {
+
+enum class ColorBlindMode : uint8_t {
+ None = 0, Deuteranopia, Protanopia, Tritanopia, Achromatopsia, COUNT
+};
 
 enum class WCAGLevel : uint8_t { A = 0, AA, AAA, COUNT };
 enum class UIAControlType : uint8_t {

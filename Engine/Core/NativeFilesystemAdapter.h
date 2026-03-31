@@ -9,8 +9,10 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <memory>
 #include <functional>
+#include <unordered_map>
+#include <mutex>
+#include <atomic>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -30,43 +32,27 @@ enum class FilesystemType : uint8_t {
     Unknown = 255
 };
 
-enum class FileChangeType : uint8_t {
-    Created  = 0,
-    Modified = 1,
-    Deleted  = 2,
-    Renamed  = 3
-};
-
-struct FileChangeEvent {
-    std::string    path;
-    std::string    oldPath;
-    FileChangeType type    = FileChangeType::Modified;
-    uint64_t       sizeBytes = 0;
-};
-
-struct FilesystemInfo {
-    FilesystemType type           = FilesystemType::Unknown;
-    uint64_t       totalBytes     = 0;
-    uint64_t       freeBytes      = 0;
-    uint32_t       blockSize      = 4096;
-    bool           supportsLinks  = false;
-    bool           caseSensitive  = false;
-};
-
-using FileChangeCallback = std::function<void(const FileChangeEvent&)>;
+// NativeFilesystemAdapter does not redefine FileChangeType/FileChangeEvent;
+// those are provided by LivePreviewUpdater.h in the same namespace.
+using NativeWatchCallback = std::function<void(const std::wstring& changedPath)>;
 
 class NativeFilesystemAdapter {
 public:
+    NativeFilesystemAdapter() = default;
+    ~NativeFilesystemAdapter() { StopAllWatching(); }
+
+    NativeFilesystemAdapter(const NativeFilesystemAdapter&) = delete;
+    NativeFilesystemAdapter& operator=(const NativeFilesystemAdapter&) = delete;
+
     static NativeFilesystemAdapter& Instance() {
         static NativeFilesystemAdapter s_instance;
         return s_instance;
     }
 
-    FilesystemType GetFilesystemType([[maybe_unused]] const std::string& path) const {
+    FilesystemType GetFilesystemType([[maybe_unused]] const std::wstring& path) const {
 #ifdef _WIN32
         wchar_t fsName[64] = {};
-        std::wstring wpath(path.begin(), path.end());
-        std::wstring root = wpath.substr(0, 3);
+        std::wstring root = (path.size() >= 3) ? path.substr(0, 3) : L"C:\\";
         if (GetVolumeInformationW(root.c_str(), nullptr, 0, nullptr, nullptr, nullptr, fsName, 64)) {
             if (wcscmp(fsName, L"NTFS") == 0)  return FilesystemType::NTFS;
             if (wcscmp(fsName, L"FAT32") == 0) return FilesystemType::FAT32;
@@ -82,57 +68,91 @@ public:
 #endif
     }
 
-    uint32_t GetOptimalBlockSize([[maybe_unused]] const std::string& path) const {
+    uint32_t GetOptimalBlockSize([[maybe_unused]] const std::wstring& path) const {
 #ifdef _WIN32
-        DWORD sectorsPerCluster, bytesPerSector, freeClusters, totalClusters;
-        std::wstring wpath(path.begin(), path.end());
-        std::wstring root = wpath.substr(0, 3);
-        if (GetDiskFreeSpaceW(root.c_str(), &sectorsPerCluster, &bytesPerSector,
-                              &freeClusters, &totalClusters)) {
+        DWORD sectorsPerCluster = 0, bytesPerSector = 0, freeClusters = 0, totalClusters = 0;
+        std::wstring root = (path.size() >= 3) ? path.substr(0, 3) : L"C:\\";
+        if (GetDiskFreeSpaceW(root.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
             return sectorsPerCluster * bytesPerSector;
-        }
         return DEFAULT_BLOCK_SIZE;
 #else
         return DEFAULT_BLOCK_SIZE;
 #endif
     }
 
-    FilesystemInfo GetFilesystemInfo(const std::string& path) const {
-        FilesystemInfo info;
-        info.type      = GetFilesystemType(path);
-        info.blockSize = GetOptimalBlockSize(path);
-        info.supportsLinks = (info.type == FilesystemType::NTFS ||
-                              info.type == FilesystemType::ext4 ||
-                              info.type == FilesystemType::btrfs ||
-                              info.type == FilesystemType::APFS);
-        info.caseSensitive = (info.type == FilesystemType::ext4 ||
-                              info.type == FilesystemType::btrfs ||
-                              info.type == FilesystemType::xfs);
-        return info;
+    uint64_t WatchDirectory(const std::wstring& path, NativeWatchCallback callback) {
+        if (path.empty() || !callback) return 0;
+        std::lock_guard<std::mutex> lock(m_mutex);
+        uint64_t token = ++m_nextToken;
+        m_watchers[token] = { path, std::move(callback) };
+        return token;
     }
 
-    bool WatchDirectory([[maybe_unused]] const std::string& path,
-                        [[maybe_unused]] FileChangeCallback callback) {
-        if (path.empty() || !callback) return false;
+    void StopWatching(uint64_t token) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_watchers.erase(token);
+    }
+
+    void StopAllWatching() {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_watchers.clear();
+    }
+
+    bool PathExists(const std::wstring& path) const {
 #ifdef _WIN32
-        m_watchPath = path;
-        m_callback  = std::move(callback);
-        m_watching  = true;
-        return true;
+        return GetFileAttributesW(path.c_str()) != INVALID_FILE_ATTRIBUTES;
 #else
         return false;
 #endif
     }
 
-    void StopWatching() { m_watching = false; }
-    bool IsWatching() const { return m_watching; }
+    bool IsDirectory(const std::wstring& path) const {
+#ifdef _WIN32
+        DWORD attr = GetFileAttributesW(path.c_str());
+        return (attr != INVALID_FILE_ATTRIBUTES) && (attr & FILE_ATTRIBUTE_DIRECTORY);
+#else
+        return false;
+#endif
+    }
+
+    std::wstring GetTempPath() const {
+#ifdef _WIN32
+        wchar_t buf[MAX_PATH] = {};
+        DWORD len = GetTempPathW(MAX_PATH, buf);
+        return (len > 0) ? std::wstring(buf, len) : L"C:\\Temp";
+#else
+        return L"/tmp";
+#endif
+    }
+
+    uint64_t GetFreeSpaceBytes(const std::wstring& path) const {
+#ifdef _WIN32
+        ULARGE_INTEGER freeBytes{};
+        if (GetDiskFreeSpaceExW(path.c_str(), &freeBytes, nullptr, nullptr))
+            return freeBytes.QuadPart;
+        return 0;
+#else
+        return 0;
+#endif
+    }
+
+    uint32_t GetMaxPathLength() const {
+#ifdef _WIN32
+        return MAX_PATH;
+#else
+        return 4096;
+#endif
+    }
 
 private:
-    NativeFilesystemAdapter() = default;
+    struct WatchEntry {
+        std::wstring       path;
+        NativeWatchCallback callback;
+    };
 
-    std::string        m_watchPath;
-    FileChangeCallback m_callback;
-    bool               m_watching = false;
+    std::unordered_map<uint64_t, WatchEntry> m_watchers;
+    mutable std::mutex m_mutex;
+    std::atomic<uint64_t> m_nextToken{0};
 
     static constexpr uint32_t DEFAULT_BLOCK_SIZE = 4096;
 };

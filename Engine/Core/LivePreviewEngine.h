@@ -39,7 +39,7 @@ struct PreviewFrame {
 };
 
 /// Preview generation configuration
-struct PreviewConfig {
+struct LivePreviewConfig {
  LivePreviewMode mode = LivePreviewMode::Static;
  uint32_t maxFrames = 12; ///< Max frames to extract
  uint32_t targetWidth = 256;

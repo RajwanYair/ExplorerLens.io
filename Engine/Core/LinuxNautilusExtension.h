@@ -57,8 +57,9 @@ public:
         return true;
     }
 
-    void UnregisterProvider() {
+    bool UnregisterProvider() {
         m_registered = false;
+        return true;
     }
 
     [[nodiscard]] bool IsRegistered() const {

@@ -54,10 +54,6 @@ struct SyntaxToken {
     uint32_t line = 0;
 };
 
-struct ThemeColor {
-    uint8_t r = 0, g = 0, b = 0, a = 255;
-};
-
 struct HighlightConfig {
     float fontSize = 10.0f;
     float lineSpacing = 1.4f;

@@ -53,16 +53,18 @@ public:
         return true;
     }
 
-    void UnregisterTumbler() {
+    bool UnregisterTumbler() {
         m_registered = false;
+        return true;
     }
 
     [[nodiscard]] bool IsRegistered() const {
         return m_registered;
     }
 
-    void SetScheduler(TumblerSchedulerType schedulerType) {
+    bool SetScheduler(TumblerSchedulerType schedulerType) {
         m_config.schedulerType = schedulerType;
+        return true;
     }
 
     [[nodiscard]] ThunarTumblerConfig const& GetConfig() const {

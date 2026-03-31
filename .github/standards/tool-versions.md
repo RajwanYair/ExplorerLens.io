@@ -11,7 +11,7 @@
 |------|---------|---------------|--------|--------------|
 | **MSVC (cl.exe)** | 19.50.35720 (v145) | 19.50.35720 | ✅ Current | VS 18 2026 BuildTools |
 | **MSBuild** | 18.3 | 18.3 | ✅ Current | Bundled with VS 18 |
-| **CMake** | 4.3.0 | 4.3.0 | ✅ Current | `scoop update cmake` |
+| **CMake** | 4.3.1 | 4.3.1 | ✅ Current | `scoop update cmake` |
 | **Ninja** | 1.13.2 | 1.13.2 | ✅ Current | `scoop update ninja` |
 | **Windows SDK** | 10.0.26100.0 | 10.0.26100.0 | ✅ Current | VS Installer |
 | **vcpkg** | 2026-02-21 | 2026-02-21 | ✅ Current | Bundled with VS 18 |
@@ -30,9 +30,9 @@
 | **WiX** | 6.0.2 | 6.0.2 | ✅ Current | `dotnet tool update wix -g` |
 | **cppcheck** | 2.20.0 | 2.20.0 | ✅ Current | `scoop update cppcheck` |
 | **graphviz** | 14.1.4 | 14.1.4 | ✅ Current | `scoop update graphviz` |
-| **delta** | 0.19.1 | 0.19.1 | ✅ Current | `scoop update delta` |
+| **delta** | 0.19.2 | 0.19.2 | ✅ Current | `scoop update delta` |
 | **fd** | 10.4.2 | 10.4.2 | ✅ Current | `scoop update fd` |
-| **innounp** | 2.67.5 | 2.67.5 | ✅ Current | `scoop update innounp` |
+| **innounp** | 2.67.6 | 2.67.6 | ✅ Current | `scoop update innounp` |
 | **PowerShell** | 7.6.0 | 7.6.0 | ✅ Current | `winget upgrade PowerShell` |
 
 ## External Libraries (Statically Linked)

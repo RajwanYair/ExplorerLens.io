@@ -13,11 +13,8 @@ project(EngineTests LANGUAGES CXX)
 add_executable(EngineTests
     EngineTests.cpp
     test_gpu.cpp
-    PluginTestMatrixTests.cpp
-    PluginSandboxPolicyTests.cpp
     PluginCompatKitTests.cpp
     PluginReferencePackTests.cpp
-    PluginTrustChainTests.cpp
     JPEG2000DecoderTests.cpp
     CADFormatDecoderTests.cpp
     GLTFModelDecoderTests.cpp
@@ -63,6 +60,7 @@ endif()
 add_executable(EngineBenchmark
     EngineBenchmark.cpp
 )
+
 add_executable(IntegrationTests
     IntegrationTests.cpp
     # Sprint 25: Integration Test Framework

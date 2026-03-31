@@ -104,5 +104,69 @@ private:
  std::unordered_set<std::wstring> m_registeredSet;
 };
 
-}} // namespace ExplorerLens::Engine
+// -- Shell notification engine ------------------------------------------------
 
+enum class ShellNotifyType : uint8_t {
+    FileChanged, FileAdded, Delete, DirectoryCreated, DirectoryRemoved,
+    AssocChanged, ThumbnailReady, UpdateDir
+};
+
+inline const char* ShellNotifyTypeName(ShellNotifyType t) noexcept {
+    switch (t) {
+    case ShellNotifyType::FileChanged:       return "FileChanged";
+    case ShellNotifyType::FileAdded:         return "FileAdded";
+    case ShellNotifyType::Delete:            return "Delete";
+    case ShellNotifyType::DirectoryCreated:  return "DirectoryCreated";
+    case ShellNotifyType::DirectoryRemoved:  return "DirectoryRemoved";
+    case ShellNotifyType::AssocChanged:      return "AssocChanged";
+    case ShellNotifyType::ThumbnailReady:    return "ThumbnailReady";
+    case ShellNotifyType::UpdateDir:         return "UpdateDir";
+    default: return "Unknown";
+    }
+}
+
+enum class ShellNotifyPriority : uint8_t { Immediate, Normal, Batched, Deferred };
+
+inline const char* ShellNotifyPriorityName(ShellNotifyPriority p) noexcept {
+    switch (p) {
+    case ShellNotifyPriority::Immediate: return "Immediate";
+    case ShellNotifyPriority::Normal:    return "Normal";
+    case ShellNotifyPriority::Batched:   return "Batched";
+    case ShellNotifyPriority::Deferred:  return "Deferred";
+    default: return "Unknown";
+    }
+}
+
+struct ShellNotification {
+    ShellNotifyType     type      = ShellNotifyType::FileChanged;
+    ShellNotifyPriority priority  = ShellNotifyPriority::Normal;
+    std::string         itemPath;
+    uint64_t            timestamp = 0;
+};
+
+class ShellNotificationEngine {
+public:
+    bool SendNotification(const ShellNotification& n) {
+        if (n.priority == ShellNotifyPriority::Immediate) {
+            ++m_totalSent;
+            return true;
+        }
+        ++m_pendingCount;
+        return true;
+    }
+    uint32_t GetPendingCount() const noexcept { return m_pendingCount; }
+    uint32_t BatchFlush() noexcept {
+        uint32_t flushed = m_pendingCount;
+        m_totalSent    += flushed;
+        m_pendingCount  = 0;
+        return flushed;
+    }
+    uint32_t GetTotalSent() const noexcept { return m_totalSent; }
+private:
+    uint32_t m_pendingCount = 0;
+    uint32_t m_totalSent    = 0;
+};
+
+// -- File preview router -------------------------------------------------------
+
+}} // namespace ExplorerLens::Engine

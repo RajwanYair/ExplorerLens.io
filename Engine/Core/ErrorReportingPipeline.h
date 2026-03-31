@@ -1,145 +1,114 @@
-#pragma once
-// ============================================================================
-// ErrorReportingPipeline.h — Structured error collection and reporting
+// ErrorReportingPipeline.h — Structured error aggregation pipeline
+// Copyright (c) 2026 ExplorerLens Project
 //
-// Purpose:   Structured error collection and reporting
-// Provides:  ErrorSeverity, ErrorCategory enums, ErrorReport struct,
-//            ErrorReportingPipeline class
-// Used by:   All engine modules for centralized error handling
-// ============================================================================
-
+// Provides ErrorDomain, ErrorAggregation enums and ErrorReportingPipeline for
+// collecting, deduplicating, and querying runtime errors by domain and aggregation.
+//
+#pragma once
 #include <cstdint>
+#include <cstring>
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 #include <algorithm>
-#include <chrono>
 
 namespace ExplorerLens {
 namespace Engine {
 
-/// Domain from which an error originated
 enum class ErrorDomain : uint8_t {
-    Decoder = 0,   // Image/archive decoder failure
-    Cache = 1,   // Cache read/write/eviction error
-    GPU = 2,   // GPU pipeline or shader error
-    Pipeline = 3,   // General pipeline orchestration error
-    COM = 4    // COM interface or registration error
+    GPU       = 0,
+    Decoder   = 1,
+    COM       = 2,
+    Cache     = 3,
+    IO        = 4,
+    Network   = 5,
+    Plugin    = 6,
+    Memory    = 7,
+    COUNT
+};
+
+enum class ErrorAggregation : uint8_t {
+    Total   = 0,
+    PerFile = 1,
+    PerSession = 2,
+    COUNT
 };
 
 inline const char* ErrorDomainName(ErrorDomain d) noexcept {
     switch (d) {
-    case ErrorDomain::Decoder:  return "Decoder";
-    case ErrorDomain::Cache:    return "Cache";
-    case ErrorDomain::GPU:      return "GPU";
-    case ErrorDomain::Pipeline: return "Pipeline";
-    case ErrorDomain::COM:      return "COM";
-    default:                    return "Unknown";
+    case ErrorDomain::GPU:     return "GPU";
+    case ErrorDomain::Decoder: return "Decoder";
+    case ErrorDomain::COM:     return "COM";
+    case ErrorDomain::Cache:   return "Cache";
+    case ErrorDomain::IO:      return "IO";
+    case ErrorDomain::Network: return "Network";
+    case ErrorDomain::Plugin:  return "Plugin";
+    case ErrorDomain::Memory:  return "Memory";
+    default:                   return "Unknown";
     }
 }
 
-/// How errors are grouped for reporting
-enum class ErrorAggregation : uint8_t {
-    PerFile = 0,   // One bucket per distinct file path
-    PerFormat = 1,   // Grouped by file format / extension
-    PerSession = 2,   // Aggregated over the entire session
-    PerHour = 3,   // Rolling one-hour windows
-    Total = 4    // Global cumulative counter
-};
-
 inline const char* ErrorAggregationName(ErrorAggregation a) noexcept {
     switch (a) {
-    case ErrorAggregation::PerFile:    return "PerFile";
-    case ErrorAggregation::PerFormat:  return "PerFormat";
-    case ErrorAggregation::PerSession: return "PerSession";
-    case ErrorAggregation::PerHour:    return "PerHour";
     case ErrorAggregation::Total:      return "Total";
+    case ErrorAggregation::PerFile:    return "PerFile";
+    case ErrorAggregation::PerSession: return "PerSession";
     default:                           return "Unknown";
     }
 }
 
-/// A single aggregated error report
 struct ErrorReport {
-    ErrorDomain      domain = ErrorDomain::Pipeline;
+    ErrorDomain     domain      = ErrorDomain::GPU;
     ErrorAggregation aggregation = ErrorAggregation::Total;
-    uint64_t         count = 0;   // Occurrences in this bucket
-    uint64_t         firstOccurrence = 0;   // Epoch ms of first hit
-    uint64_t         lastOccurrence = 0;   // Epoch ms of most recent hit
-    std::string      message;               // Human-readable description
+    uint32_t        count       = 0;
+    std::string     message;
 };
 
-/// Centralized error reporting pipeline that collects, aggregates, and
-/// exposes structured error data for diagnostics and telemetry.
 class ErrorReportingPipeline {
 public:
-    ErrorReportingPipeline() = default;
-    ~ErrorReportingPipeline() = default;
-
-    ErrorReportingPipeline(const ErrorReportingPipeline&) = delete;
-    ErrorReportingPipeline& operator=(const ErrorReportingPipeline&) = delete;
-    ErrorReportingPipeline(ErrorReportingPipeline&&) noexcept = default;
-    ErrorReportingPipeline& operator=(ErrorReportingPipeline&&) noexcept = default;
-
-    /// Report a new error occurrence
-    void Report(ErrorDomain domain, ErrorAggregation aggregation,
-        const std::string& message) {
-        // Try to merge into existing bucket
-        for (auto& r : m_reports) {
-            if (r.domain == domain && r.aggregation == aggregation &&
-                r.message == message) {
-                r.count++;
-                r.lastOccurrence = GetCurrentTimestamp();
-                return;
-            }
+    void Report(ErrorDomain domain, ErrorAggregation agg, const char* msg) {
+        auto key = std::make_pair(domain, agg);
+        auto& rep   = m_buckets[key];
+        rep.domain      = domain;
+        rep.aggregation = agg;
+        rep.count++;
+        if (rep.message.empty() && msg) {
+            rep.message = msg;
         }
-        // New bucket
-        ErrorReport rpt{};
-        rpt.domain = domain;
-        rpt.aggregation = aggregation;
-        rpt.count = 1;
-        rpt.firstOccurrence = GetCurrentTimestamp();
-        rpt.lastOccurrence = rpt.firstOccurrence;
-        rpt.message = message;
-        m_reports.push_back(rpt);
     }
 
-    /// Get all current reports
-    const std::vector<ErrorReport>& GetReports() const noexcept {
-        return m_reports;
+    std::vector<ErrorReport> GetReports() const {
+        std::vector<ErrorReport> result;
+        result.reserve(m_buckets.size());
+        for (auto& [k, v] : m_buckets) {
+            result.push_back(v);
+        }
+        return result;
     }
 
-    /// Return the top-N most frequent errors
-    std::vector<ErrorReport> GetTopErrors(uint32_t topN) const {
-        auto sorted = m_reports;
-        std::sort(sorted.begin(), sorted.end(),
-            [](const ErrorReport& a, const ErrorReport& b) {
-                return a.count > b.count;
-            });
-        if (sorted.size() > topN) sorted.resize(topN);
-        return sorted;
-    }
+    size_t GetBucketCount() const noexcept { return m_buckets.size(); }
 
-    /// Clear all accumulated error reports
-    void ClearReports() noexcept { m_reports.clear(); }
-
-    /// Total number of distinct error buckets
-    size_t GetBucketCount() const noexcept { return m_reports.size(); }
-
-    /// Sum of all error counts across buckets
-    uint64_t GetTotalErrorCount() const noexcept {
-        uint64_t total = 0;
-        for (const auto& r : m_reports) total += r.count;
+    size_t GetTotalErrorCount() const noexcept {
+        size_t total = 0;
+        for (auto& [k, v] : m_buckets) { total += v.count; }
         return total;
     }
 
-private:
-    static uint64_t GetCurrentTimestamp() noexcept {
-        auto now = std::chrono::system_clock::now();
-        return static_cast<uint64_t>(
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                now.time_since_epoch()).count());
+    std::vector<ErrorReport> GetTopErrors(size_t n) const {
+        auto result = GetReports();
+        std::sort(result.begin(), result.end(),
+            [](const ErrorReport& a, const ErrorReport& b) {
+                return a.count > b.count;
+            });
+        if (result.size() > n) { result.resize(n); }
+        return result;
     }
 
-    std::vector<ErrorReport> m_reports;
+    void Clear() noexcept { m_buckets.clear(); }
+
+private:
+    std::map<std::pair<ErrorDomain, ErrorAggregation>, ErrorReport> m_buckets;
 };
 
 } // namespace Engine

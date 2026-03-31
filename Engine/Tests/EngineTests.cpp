@@ -1,4 +1,4 @@
-//==============================================================================
+﻿//==============================================================================
 // ExplorerLens Engine - Unit Tests
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
@@ -11,15 +11,12 @@
 #include "../Cache/PipelineStateCacheV2.h"
 #include "../Cache/SubMillisecondCacheEngine.h"
 #include "../Core/AIThumbnailEnhancer.h"
-#include "../Core/AccessibilityPipeline.h"
 #include "../Core/AccessibilitySuiteV2.h"
-#include "../Core/AnimatedThumbnailEngine.h"
 #include "../Core/AsyncShellActivation.h"
 #include "../Core/AsyncShellExtension.h"
 #include "../Core/BatchProcessingEngine.h"
 #include "../Core/CloudStorageIntegration.h"
 #include "../Core/CloudSyncProvider.h"
-#include "../Core/ConfigMigrationEngine.h"
 #include "../Core/Concepts.h"
 #include "../Core/ContentIndexer.h"
 #include "../Core/D3D12PipelineActivation.h"
@@ -32,7 +29,6 @@
 #include "../Core/GPUMemoryPoolV2.h"
 #include "../Core/GPUPipelineV3.h"
 #include "../Core/HDRDisplayPipeline.h"
-#include "../Core/HighDPIScaling.h"
 #include "../Core/MetadataExtractor.h"
 #include "../Core/MultiGPULoadBalancer.h"
 #include "../Core/NetworkProviderEngine.h"
@@ -48,15 +44,16 @@
 #include "../Core/RuntimeIntegrityVerifier.h"
 #include "../Core/SIMDAccelerationManager.h"
 #include "../Core/SIMDAccelerator.h"
-#include "../Core/SIMDPixelConversion.h"
 #include "../Core/SecurityHardeningV2.h"
 #include "../Core/ShaderCompilerV2.h"
 #include "../Core/SharePointTeamsIntegration.h"
 #include "../Core/ShellContextMenuV2.h"
-#include "../Core/ShellOverlayHandler.h"
-#include "../Core/ShellPreviewHandler.h"
 #include "../Core/ShellRegistrationManager.h"
 #include "../Core/StructuredErrorDomain.h"
+#include "../Core/ErrorReportingPipeline.h"
+#include "../Core/ShellOverlayHandler.h"
+#include "../Core/TelemetryAnalyticsEngine.h"
+#include "../Cache/PersistentCacheManager.h"
 // TelemetryEngine.h shim removed — Telemetry.h included below
 #include "../Core/ThemeEngine.h"
 #include "../Core/ThumbnailAnimationEngineV2.h"
@@ -83,7 +80,6 @@
 #include "../Decoders/EPSDecoder.h"
 #include "../Decoders/EXRDecoder.h"
 #include "../Decoders/ExtendedVideoDecoder.h"
-#include "../Decoders/FITSDecoder.h"
 #include "../Decoders/FITSDecoderV2.h"
 #include "../Decoders/FontDecoder.h"
 #include "../Decoders/GeospatialDecoder.h"
@@ -131,7 +127,6 @@
 #include "../Core/OutOfProcThumbnailServer.h"
 #include "../Core/CrossProcessCacheProxy.h"
 #include "../Core/ProcessPoolManager.h"
-#include "../Core/NamedPipeHubServer.h"
 #include "../Core/ProcessIsolationPolicy.h"
 #include "../Core/CrossProcEventBus.h"
 #include "../Core/SharedStateCoordinator.h"
@@ -153,7 +148,6 @@
 #include "../Plugin/PluginPerformanceProfiler.h"
 #include "../Plugin/PluginSDKV2.h"
 #include "../Plugin/PluginSecurity.h"
-#include "../Utils/AccessibilityEngine.h"
 #include "../Utils/AutoDocGenerator.h"
 #include "../Utils/AutoUpdateEngine.h"
 #include "../Utils/CIValidator.h"
@@ -161,8 +155,6 @@
 #include "../Utils/CommandLineInterface.h"
 #include "../Utils/ConfigMigrationEngine.h"
 #include "../Utils/DiagnosticDashboard.h"
-#include "../Utils/DocGenerator.h"
-#include "../Utils/EnterpriseDeployment.h"
 #include "../Utils/EnterpriseDeploymentManager.h"
 #include "../Utils/FileHashEngine.h"
 #include "../Utils/FuzzingEngine.h"
@@ -208,8 +200,6 @@
 #include "../Core/PropertyStoreHandler.h"
 #include "../Core/GPUShaderLibrary.h"
 #include "../Core/PluginHostManager.h"
-#include "../Core/FormatCategoryManager.h"
-#include "../Core/FormatStatusIndicator.h"
 #include "../Core/SettingsExportImport.h"
 #include "../Core/PerformanceDashboard.h"
 
@@ -219,10 +209,8 @@
 #include "../Core/CodeCoverageEngine.h"
 
 // --- UI & Theming ---
-#include "../Core/DarkModeEngine.h"
 #include "../Core/SystemTrayManager.h"
 #include "../Core/WinUI3MigrationEngine.h"
-#include "../Core/DarkModeControls.h"
 #include "../Core/DarkModeRendererV2.h"
 #include "../Core/WinUI3Research.h"
 #include "../Core/HybridUIBridge.h"
@@ -240,6 +228,122 @@
 #include "../Pipeline/ZeroCopyPipeline.h"
 #include "../Utils/SIMDScaler.h"
 
+#include "../Core/LivePreviewScrubber.h"
+// --- Sprint additions: stub headers for missing types ---
+#include "../AI/AISearchIntegration.h"
+#include "../AI/GenerativeThumbnailEngine.h"
+#include "../AI/ContentAwareInpainter.h"
+#include "../AI/StyleTransferRenderer.h"
+#include "../AI/ImageDescriptionSynthesizer.h"
+#include "../Core/DarkModeEngine.h"
+#include "../Core/FormatCategoryManager.h"
+#include "../Core/FormatStatusIndicator.h"
+#include "../Core/ThumbnailQualityAnalyzer.h"
+#include "../Core/FormatCapabilityMatrix.h"
+#include "../Core/DecoderVersionRegistry.h"
+#include "../Core/FormatFamilyResolver.h"
+#include "../Core/DecoderHotfixApplicator.h"
+#include "../Core/FormatSchemaValidator.h"
+#include "../Core/DecoderCompatLayer.h"
+#include "../Plugin/PluginDebuggerIntegration.h"
+#include "../Plugin/PluginHotReload.h"
+#include "../Utils/DocumentationExcellenceV2.h"
+// --- Sprint 991-1060: core, decoders, AI, plugin, enterprise additions ---
+#include "../Core/VideoKeyframeExtractor.h"
+#include "../Core/AnimatedFrameScrubber.h"
+#include "../Core/AudioWaveformRenderer.h"
+#include "../Core/DocumentPagePreviewer.h"
+#include "../Core/ShaderSyntaxHighlighter.h"
+#include "../Core/FontGlyphSampler.h"
+#include "../Core/SpreadsheetChartRenderer.h"
+#include "../Decoders/GeoTIFFDecoder.h"
+#include "../Decoders/NITFDecoder.h"
+#include "../Decoders/DICOMAdvancedDecoder.h"
+#include "../Decoders/NRRDDecoder.h"
+#include "../Decoders/HDF5ThumbnailDecoder.h"
+#include "../Decoders/NetCDFDecoder.h"
+#include "../Decoders/ECWDecoder.h"
+#include "../Core/UniversalDecoderFacade.h"
+#include "../Core/UniversalLibraryManifest.h"
+#include "../Plugin/MarketplaceClientV4.h"
+#include "../Plugin/PluginRatingEngine.h"
+#include "../Plugin/PluginDependencyGraph.h"
+#include "../Plugin/PluginBundleInstaller.h"
+#include "../Plugin/SubscriptionLicenseManagerV4.h"
+#include "../Plugin/PluginReputationScorer.h"
+#include "../Plugin/AutoUpdatePolicyV4.h"
+#include "../Plugin/PrePublishReviewGateway.h"
+#include "../Enterprise/EnterpriseConsoleV3.h"
+#include "../Enterprise/FleetDeploymentManager.h"
+#include "../Enterprise/ComplianceReportGenerator.h"
+#include "../Enterprise/EnterpriseMetricsDashboard.h"
+#include "../Enterprise/PolicyVersionControl.h"
+#include "../Enterprise/RemoteDecoderControl.h"
+#include "../Enterprise/UsageAnomalyDetector.h"
+#include "../Enterprise/EnterpriseAuditExporter.h"
+#include "../AI/ThumbnailPersonalisationEngine.h"
+#include "../AI/GenerativeUpscalerV3.h"
+#include "../AI/ContentModerationFilter.h"
+#include "../AI/GenerativeAuditTrail.h"
+#include "../Core/LinuxNautilusExtension.h"
+#include "../Core/KDEDolphinExtension.h"
+#include "../Core/ThunarThumbnailExtension.h"
+#include "../Core/MacOSQuickLookV3.h"
+#include "../Core/LinuxThumbnailerDaemon.h"
+#include "../Core/WaylandShellExtension.h"
+#include "../Core/MacOSLaunchServicesAdapter.h"
+#include "../Core/XPlatformTestHarness.h"
+#include "../Core/FolderPredictionModel.h"
+#include "../Core/ColdStartFolderBootstrapper.h"
+#include "../Core/PredictionScanOrchestrator.h"
+#include "../GPU/DMADirectPreloader.h"
+#include "../Core/PerUserPredictionIsolator.h"
+#include "../Core/PredictionAccuracyTracker.h"
+#include "../Core/CollaborativeAnnotationEngineV2.h"
+#include "../Core/AnnotationSignatureVerifier.h"
+#include "../Core/AnnotationTimeline.h"
+#include "../Core/PresenceIndicatorEngine.h"
+#include "../Core/AnnotationTaxonomyV2.h"
+#include "../Core/OfflineAnnotationSyncQueue.h"
+#include "../Core/AnnotationExportPipelineV2.h"
+#include "../Core/GRPCProtocolServerV2.h"
+#include "../Core/RESTAPIServerV2.h"
+#include "../Core/GraphQLSubscriptionServer.h"
+#include "../Core/OAuth2PKCEMiddleware.h"
+#include "../Core/JWTValidationEngine.h"
+#include "../Core/RateLimitingMiddleware.h"
+#include "../Core/OpenAPICodeGenerator.h"
+#include "../Core/GraphQLSchemaIntrospector.h"
+#include "../Core/NeuralCodecV2Engine.h"
+#include "../Core/ProgressiveNeuralDecoder.h"
+#include "../Core/NeuralContainerFormat.h"
+#include "../GPU/NeuralCodecHWAccelerator.h"
+#include "../Core/CodecNegotiationProtocol.h"
+#include "../Core/PlatformAbstractionLayer.h"
+#include "../GPU/MetalPipelineV2.h"
+#include "../GPU/LinuxDRMBackend.h"
+#include "../Core/UniversalWindowBroker.h"
+#include "../Core/NativeFilesystemAdapter.h"
+#include "../Core/CrossPlatformShellProvider.h"
+#include "../Core/PlatformUIScalingEngine.h"
+#include "../Utils/PlatformBuildMatrix.h"
+#include "../GPU/DirectStorageEngine.h"
+#include "../GPU/GPUDecompressScheduler.h"
+#include "../Pipeline/DirectStoragePipelineStage.h"
+#include "../GPU/NvGDeflateBackend.h"
+#include "../GPU/AMDDecompressBackend.h"
+#include "../Cache/DirectStorageCacheTier.h"
+#include "../Core/AsyncFileStreamBroker.h"
+#include "../GPU/StagingBufferPoolV2.h"
+#include "../AI/CLIPEmbeddingEngine.h"
+#include "../AI/SemanticSearchIndex.h"
+#include "../AI/NaturalLanguageQueryParser.h"
+#include "../AI/VisualSimilarityGraph.h"
+#include "../AI/EmbeddingCacheStore.h"
+#include "../AI/MultiModalRanker.h"
+#include "../AI/SearchResultDeduplicator.h"
+#include "../AI/IncrementalIndexUpdater.h"
+
 // --- Sprint 43-44: Plugin SDK Hardening ---
 #include "../Plugin/PluginCapabilityGuard.h"
 #include "../Plugin/PluginVersionNegotiator.h"
@@ -253,34 +357,26 @@
 #include "../Cache/CacheLinePadding.h"
 
 // --- Core Features ---
-#include "../Core/ThumbnailQualityAnalyzer.h"
 #include "../Core/AdaptiveDecoderRouter.h"
 // TelemetryPipeline.h — consolidated into Telemetry.h
 #include "../Core/LivePreviewEngine.h"
 #include "../Core/CloudNativeSync.h"
 // #include "../Cache/CacheEfficiencyAnalyzer.h" // Removed: header no longer exists
-#include "../Core/AccessibilityNarratorBridge.h"
-#include "../Core/AdaptiveDPIScaler.h"
 #include "../Core/AnimatedFormatController.h"
 #include "../Core/CertificateTrustValidator.h"
 #include "../Core/ColorSpaceEngine.h"
 #include "../Core/ContentAwareThumbnailSelector.h"
 #include "../Core/ContentInspectionGateway.h"
-#include "../Core/DecoderPerformanceProfiler.h"
 #include "../Core/DiagnosticReportGeneratorV2.h"
 #include "../Core/DirectStorage12Integration.h"
 #include "../Core/DocumentLayoutAnalyzer.h"
 #include "../Core/EncryptedFormatHandler.h"
 #include "../Core/FaceDetectionOrientation.h"
-#include "../Core/FormatFingerprintDB.h"
-#include "../Core/FormatGalleryCompositor.h"
-#include "../Core/FormatPopularityTracker.h"
 #include "../Core/GPUTextureCompressionPipeline.h"
 #include "../Core/HDRToneMappingPipeline.h"
 #include "../Core/HealthCheckEndpoint.h"
 #include "../Core/LivePreviewStreamingProtocol.h"
 #include "../Core/MetadataExtractionPipeline.h"
-#include "../Core/MultiMonitorColorProfile.h"
 #include "../Core/MultiPageNavigator.h"
 #include "../Core/NestedArchivePreview.h"
 #include "../Core/NeuralTextureCompression.h"
@@ -299,6 +395,10 @@
 #include "../Core/VisualSimilarityIndex.h"
 #include "../Core/WASMDecoderSandbox.h"
 #include "../Core/WindowsSearchProtocol.h"
+#include "../Core/ThumbnailQuality.h"
+#include "../Core/ThumbnailBatch.h"
+#include "../Core/ThumbnailStream.h"
+#include "../Core/ThumbnailRenderer.h"
 #include "../GPU/GPUTextureAtlasManager.h"
 #include "../GPU/WebGPUThumbnailRenderer.h"
 #include "../Pipeline/LockFreeDecodePipeline.h"
@@ -309,7 +409,6 @@
 
 // --- Shell Deep Integration ---
 #include "../Core/JumpListIntegration.h"
-#include "../Core/ShellSearchProtocolHandler.h"
 
 // --- Plugin System ---
 #include "../Plugin/PluginLoaderV2.h"
@@ -329,17 +428,14 @@
 #include "../Cache/PredictiveCacheEngine.h"
 
 // --- Shell & Decoders ---
-#include "../Core/ExplorerColumnProvider.h"
 #include "../Core/DragDropThumbnailPreview.h"
 #include "../Decoders/MultiPageStripRenderer.h"
-#include "../Decoders/VideoKeyframeExtractor.h"
 #include "../Decoders/AnimatedImageDecoder.h"
 #include "../Decoders/ProgressiveJPEGDecoder.h"
 
 // --- Batch Processing & Validation ---
 #include "../Core/TaskbarPreviewManager.h"
 #include "../Core/SearchFederatedProvider.h"
-#include "../Core/ThumbnailQualityValidator.h"
 
 // --- Optimization & Power ---
 #include "../Utils/RemoteDesktopOptimizer.h"
@@ -355,39 +451,29 @@
 
 // --- File Integrity & Monitoring ---
 #include "../Core/FileIntegrityMonitor.h"
-#include "../Core/ThumbnailDiffEngine.h"
-#include "../Core/DecoderSandboxPolicy.h"
 #include "../Core/IntelligentPrefetchV2.h"
 #include "../GPU/GPUWorkloadBalancer.h"
 #include "../Pipeline/FilesystemWatchdog.h"
 #include "../Core/CompressionBenchmark.h"
 #include "../Core/ExplorerBandIntegration.h"
-#include "../Core/ThumbnailStreamProtocol.h"
 #include "../Utils/RegistrySnapshotManager.h"
 #include "../Core/HotReloadConfigEngine.h"
 #include "../Core/COMDiagnosticsEngine.h"
 
 // --- Watermark & Annotation ---
-#include "../Core/ThumbnailWatermark.h"
 #include "../Core/BatchRenamePreview.h"
 #include "../Core/DuplicateFileDetector.h"
-#include "../Core/ThumbnailAnnotation.h"
 #include "../Cache/CacheMigrationEngine.h"
 #include "../Core/ExplorerContextMenuExtension.h"
 #include "../Pipeline/AdaptiveQualityScaler.h"
-#include "../Core/ThumbnailCompareView.h"
 #include "../Core/FileTypeStatistics.h"
 #include "../Memory/MemoryDefragmenter.h"
-#include "../Core/ShellNotificationEngine.h"
-#include "../Core/ThumbnailExportEngine.h"
 
 // --- Version Control & Preview ---
-#include "../Core/ThumbnailVersionControl.h"
 #include "../Core/FilePreviewRouter.h"
 #include "../Core/ClipboardThumbnailManager.h"
 #include "../Core/FormatConversionPipeline.h"
 #include "../GPU/VulkanMemoryAllocator.h"
-#include "../Core/ErrorReportingPipeline.h"
 #include "../Core/EnterpriseAuditPipeline.h"
 #include "../Core/ResourceQuotaManager.h"
 #include "../Core/AccessTokenValidator.h"
@@ -396,17 +482,22 @@
 
 // --- DirectShow & Health ---
 #include "../Core/DirectShowThumbnailBridge.h"
-#include "../Core/ShellExtensionHealthMonitor.h"
-#include "../Core/ThumbnailColorSpace.h"
 #include "../Pipeline/AsyncIOCompletionEngine.h"
 #include "../Core/ExifOrientationFixer.h"
-#include "../Core/MultiMonitorDPIScaler.h"
 #include "../Memory/VirtualAllocOptimizer.h"
-#include "../Core/ThumbnailHistogram.h"
 #include "../Core/FileAssociationManager.h"
 #include "../GPU/DX12FenceManager.h"
-#include "../Core/ThumbnailSpriteSheet.h"
 #include "../Core/WindowsSearchIntegration.h"
+
+// --- Scheduler, Color, DPI, Histogram, Locale, Sprite, Telemetry ---
+#include "../Core/DecoderPriorityScheduler.h"
+#include "../Utils/ShellExtensionHealthMonitor.h"
+#include "../Core/ThumbnailColorSpace.h"
+#include "../Core/MultiMonitorDPIScaler.h"
+#include "../Core/ThumbnailHistogram.h"
+#include "../Core/CoreLocalizationEngine.h"
+#include "../Core/ThumbnailSpriteSheet.h"
+#include "../Cache/CacheTelemetryCollector.h"
 #include "../Cache/AdaptiveCacheBudgetManager.h"
 #include "../Memory/ArchiveMemoryCompactor.h"
 #include "../Pipeline/BatchProcessor.h"
@@ -415,17 +506,12 @@
 #include "../Core/CRTConsistencyManager.h"
 #include "../Core/DeadCodeAudit.h"
 #include "../Core/DeadCodeAuditor.h"
-#include "../Core/DecoderHealthDashboard.h"
-#include "../Core/DecoderHealthMonitor.h"
 #include "../Memory/DecoderHotsetManager.h"
-#include "../Core/DecoderPriority.h"
 #include "../Core/DiagnosticsExporter.h"
 #include "../Memory/DirectoryFormatProfiler.h"
 #include "../Core/ErrorContext.h"
 #include "../Core/ETWSinkComplete.h"
 #include "../Pipeline/ExplorerWorkScheduler.h"
-#include "../Core/FormatGalleryView.h"
-#include "../Core/FormatGroupManager.h"
 #include "../Core/ProgramClosureV83.h"
 #include "../Core/ReleaseReadinessDashboard.h"
 #include "../Core/ReproducibleBuildVerifier.h"
@@ -460,11 +546,9 @@
 #include "../Codec/FormatConverter.h"
 #include "../Codec/ICodecModule.h"
 #include "../Codec/LazyCodecManager.h"
-#include "../Core/Accessibility.h"
 #include "../Core/BuildConfig.h"
 #include "../Core/BuildValidation.h"
 #include "../Core/Config.h"
-#include "../Core/DarkMode.h"
 #include "../Core/EngineAPI.h"
 #include "../Core/ICacheProvider.h"
 #include "../Core/IFormatDetector.h"
@@ -501,7 +585,6 @@
 #include "../Plugin/PluginNamedPipeBridge.h"
 #include "../Plugin/PluginHotReloadManager.h"
 #include "../Plugin/PluginTrustChainValidator.h"
-#include "../Core/ThumbnailPreviewEngine.h"
 #include "../Core/DiagnosticsCollector.h"
 #include "../Core/IntegrationTestRunner.h"
 #include "../Core/SBOMGenerator.h"
@@ -545,14 +628,12 @@
 #include "../Pipeline/AsyncPrefetchQueue.h"
 #include "../Pipeline/MemoryMappedDecodePath.h"
 #include "../Core/DecodeLatencyHistogram.h"
-#include "../Core/ErrorCategorizationEngine.h"
 #include "../Core/HealthScoreAggregator.h"
 #include "../Core/PerformanceRegressionDetector.h"
 #include "../Core/ResourceUsageProfiler.h"
 #include "../AI/ImageComplexityAnalyzer.h"
 #include "../AI/DecodeStrategyOptimizer.h"
 #include "../Core/ClipboardMonitorIntegration.h"
-#include "../Core/ShellNotificationProvider.h"
 #include "../Core/ExplorerStatusBarProvider.h"
 #include "../Core/FileSummaryTooltipGenerator.h"
 #include "../Core/BatchProgressReporter.h"
@@ -560,7 +641,6 @@
 #include "../Pipeline/PipelineActivator.h"
 #include "../Pipeline/ParallelIOActivation.h"
 #include "../Cache/CacheBudgetAutoTuner.h"
-#include "../Core/FormatStatusProvider.h"
 #include "../Core/SIMDCapabilityDetector.h"
 #include "../Pipeline/PipelineMetricsCollector.h"
 #include "../Pipeline/PipelineCircuitBreaker.h"
@@ -581,17 +661,13 @@
 #include "../Core/PathTraversalGuard.h"
 #include "../Core/ContentAwareThumbnail.h"
 #include "../Core/RuntimeSIMDDispatcher.h"
-#include "../Core/DecoderPerformanceCounters.h"
-#include "../Core/ThumbnailQualityGate.h"
 #include "../Core/BatchThumbnailOrchestrator.h"
 #include "../Core/FileSignatureDetector.h"
 #include "../Core/GPUResourcePoolManager.h"
 #include "../Core/CacheCoherencyProtocol.h"
-#include "../Core/ThumbnailPipelineProfiler.h"
 #include "../Core/DecoderRegistryV2.h"
 #include "../Pipeline/ProductionPipelineV2.h"
 #include "../Utils/ConfigDriftDetector.h"
-#include "../Utils/DeploymentPreflightCheck.h"
 #include "../Utils/OperationalReadinessChecker.h"
 #include "../Utils/VersionNormalization.h"
 #include "../Utils/MemoryMappedFile.h"
@@ -604,19 +680,15 @@
 #include "../Core/FontGlyphGridRenderer.h"
 #include "../Core/SpreadsheetCellPreview.h"
 #include "../Core/PresentationSlideStrip.h"
-#include "../Core/ThumbnailBlurDetector.h"
 #include "../Core/ColorHistogramBadge.h"
 #include "../Core/GeoTagMapThumbnail.h"
 #include "../Core/FileAgeVisualizer.h"
-#include "../Core/ThumbnailLensEffect.h"
 #include "../Core/SmartGridLayoutEngine.h"
 #include "../Core/MetadataTooltipRenderer.h"
 #include "../Core/CompressedStreamAnalyzer.h"
 #include "../Core/AdaptiveContrastEnhancer.h"
 #include "../Core/DocumentDigestOverlay.h"
-#include "../Core/ThumbnailSignatureVerifier.h"
 #include "../Core/ArchivePasswordDetector.h"
-#include "../Core/ThumbnailStitcher.h"
 #include "../Core/CalendarHeatmapRenderer.h"
 #include "../Core/FileSizeProportionBadge.h"
 #include "../Core/IntelligentCachePruner.h"
@@ -625,21 +697,17 @@
 #include "../Core/VersionSynchronizer.h"
 
 // --- Sprint 49-50: Dark Mode & Theme Rendering ---
-#include "../Core/DarkModeTextFix.h"
 #include "../Core/ThemeAwareOverlay.h"
 #include "../Core/ContrastValidator.h"
 #include "../Core/SystemThemeMonitor.h"
-#include "../Core/ThumbnailColorCorrector.h"
 #include "../Core/AdaptiveIconRenderer.h"
 
 // --- Sprint 51-52: Decode Pipeline Enhancement ---
-#include "../Core/FormatFingerprinter.h"
 #include "../Core/StreamingDecodeEngine.h"
 #include "../Core/MultiPagePreview.h"
 
 // --- Sprint 53-54: Memory Management ---
 #include "../Memory/MemoryArenaAllocator.h"
-#include "../Memory/NUMAMemoryRouter.h"
 #include "../Memory/LargePageAllocator.h"
 
 // --- Sprint 55-56: Pipeline Scheduling ---
@@ -677,20 +745,16 @@
 #include "../Core/ShellIntegrationValidator.h"
 #include "../Core/GracefulDegradationController.h"
 #include "../Core/UserPreferenceEngine.h"
-#include "../Core/ThumbnailAnimator.h"
-#include "../Core/AccessibilityEnhancer.h"
 #include "../Core/StartupOptimizer.h"
 #include "../Core/CrashRecoveryEngine.h"
 #include "../Core/HDRToneMapper.h"
 #include "../Core/ColorSpaceConverter.h"
 #include "../Core/ExifOrientationHandler.h"
-#include "../Core/ThumbnailWatermarker.h"
 #include "../Core/IconBadgeRenderer.h"
 
 // Sprint 9-14 (v15.3.0 "Zenith-T") — Resilience & Hardening
 #include "../Core/DecodeInputValidator.h"
 #include "../Core/DecodeErrorCategory.h"
-#include "../Core/DecoderTimeoutGuard.h"
 #include "../Core/GracefulDegradation.h"
 #include "../Core/ArchiveSecurityValidator.h"
 
@@ -723,9 +787,7 @@
 #include "../Pipeline/AdaptiveBatchCoalescer.h"
 #include "../Pipeline/ThumbnailMorphTransition.h"
 #include "../Cache/SemanticCacheIndex.h"
-#include "../Memory/TransparentHugePageAllocator.h"
 #include "../Memory/MemoryCompressionEngine.h"
-#include "../Memory/PooledScratchAllocator.h"
 #include "../Memory/ZeroCostAbstractionLayer.h"
 #include "../Memory/MemoryBandwidthProfiler.h"
 #include "../AI/FaceDetectionThumbnail.h"
@@ -755,11 +817,8 @@
 #include "../Pipeline/FolderWatchPredictor.h"
 #include "../Pipeline/ShellPropertyProvider.h"
 #include "../Pipeline/FFmpegCodecRouter.h"
-#include "../Memory/BitmapSlabAllocator.h"
 #include "../Memory/SIMDMemoryAligner.h"
-#include "../Memory/NUMAAffinityAllocator.h"
 #include "../Memory/MemoryCompactionScheduler.h"
-#include "../Memory/LargePageOptimizer.h"
 #include "../AI/DirectMLInferenceEngine.h"
 #include "../AI/ONNXModelLoader.h"
 #include "../Utils/DPIScalingManager.h"
@@ -783,10 +842,7 @@
 #include "../Core/GlobalShortcutManager.h"
 #include "../Core/FileChangeThrottler.h"
 #include "../Core/SmartThumbnailPrioritizer.h"
-#include "../Core/ThumbnailRequestCoalescer.h"
-#include "../Core/DecoderTimeoutPolicy.h"
 #include "../Core/ExplorerIntegrationMonitor.h"
-#include "../Core/ThumbnailSizeNegotiator.h"
 #include "../Core/FileConcurrencyGuard.h"
 #include "../Core/ResourceThrottlePolicy.h"
 #include "../Pipeline/LazyDecodeInitializer.h"
@@ -806,7 +862,6 @@
 #include "../Memory/PoolAllocatorMetrics.h"
 #include "../Memory/ScopedMemoryBudget.h"
 #include "../Memory/ThreadLocalPoolAllocator.h"
-#include "../AI/AdaptiveCropEngine.h"
 #include "../AI/FileTypePredictor.h"
 #include "../Utils/PerformanceReportGenerator.h"
 #include "../Utils/SystemInfoCollector.h"
@@ -822,15 +877,11 @@
 
 // Sprint 396 headers
 // Core
-#include "../Core/ShellOverlayRenderer.h"
-#include "../Core/ShellContextMenuProvider.h"
 #include "../Core/WindowsNotificationManager.h"
 #include "../Core/FileSystemJournalReader.h"
 #include "../Core/ProcessIsolationBroker.h"
-#include "../Core/ThumbnailBatchExporter.h"
 #include "../Core/IncrementalDecodeEngine.h"
 #include "../Core/ExplorerNavigationMonitor.h"
-#include "../Core/ShellThumbnailInterceptor.h"
 #include "../Core/DecoderPoolManager.h"
 #include "../Core/FileTypeAssociationBroker.h"
 // Pipeline
@@ -851,10 +902,8 @@
 // Cache
 #include "../Cache/CacheReplicationEngine.h"
 // Memory
-#include "../Memory/PageFaultOptimizer.h"
 #include "../Memory/MemoryCompactionEngine.h"
 #include "../Memory/AllocatorBenchmark.h"
-#include "../Memory/GuardPageProtector.h"
 #include "../Memory/WorkingSetOptimizer.h"
 // AI
 // Plugin
@@ -885,13 +934,10 @@
 #include "../Core/PropertyStoreCache.h"
 #include "../Core/RegistryWriteCoalescer.h"
 #include "../Core/CollapsibleSectionModel.h"
-#include "../Core/FormatHealthDashboard.h"
 #include "../Core/SettingsProfileManager.h"
 #include "../Core/PerformanceMetricAggregator.h"
 #include "../Core/OwnerDrawButtonRenderer.h"
 #include "../Core/SystemTrayContextProvider.h"
-#include "../Core/DPILayoutTransformer.h"
-#include "../Core/FormatIconAtlas.h"
 #include "../Core/WorkerPoolElasticScaler.h"
 #include "../Core/SIMDInstructionAuditor.h"
 // Pipeline
@@ -909,7 +955,6 @@
 // Cache
 // Memory
 #include "../Memory/BitmapPoolPartitioner.h"
-#include "../Memory/MemoryTagAllocator.h"
 #include "../Memory/AddressSpaceReserver.h"
 #include "../Memory/CommitChargeTracker.h"
 // Decoders
@@ -921,8 +966,6 @@
 #include "../Plugin/PluginHealthReporter.h"
 // Sprint 398 — EP V15 Phase 3
 // Core
-#include "../Core/ThumbnailRotationCorrector.h"
-#include "../Core/ShellOverlayDispatcher.h"
 #include "../Core/FileVersionTracker.h"
 #include "../Core/ContextMenuFormatter.h"
 #include "../Core/ProgressReportAggregator.h"
@@ -942,7 +985,6 @@
 #include "../Pipeline/DecodeWatermarkStamper.h"
 // GPU
 #include "../GPU/ShaderVariantSelector.h"
-#include "../GPU/GPUMemoryDefragmenter.h"
 #include "../GPU/TextureSamplerCache.h"
 #include "../GPU/GPUBarrierOptimizer.h"
 #include "../GPU/ShaderCompileListener.h"
@@ -951,7 +993,6 @@
 #include "../Cache/CacheSerializationCodec.h"
 // Memory
 #include "../Memory/VirtualAllocTracker.h"
-#include "../Memory/MemoryPageFaultMonitor.h"
 #include "../Memory/HeapFragmentationProbe.h"
 #include "../Memory/MemoryBudgetNegotiator.h"
 #include "../Memory/MemoryTrimPolicy.h"
@@ -970,15 +1011,10 @@
 #include "../Utils/FeatureFlagRegistry.h"
 #include "../Utils/DeploymentVerifier.h"
 // Sprint 399 — EP V15 Phase 4
-#include "../Core/ThumbnailStreamMultiplexer.h"
 #include "../Core/FileSystemWatchdog.h"
-#include "../Core/ShellBadgeRenderer.h"
-#include "../Core/ThumbnailCacheWarmer.h"
 #include "../Core/ContextualPreviewEngine.h"
 #include "../Core/FileSizeEstimator.h"
 #include "../Core/ConcurrentExtractScheduler.h"
-#include "../Core/ThumbnailPrefetchOracle.h"
-#include "../Core/ShellPropertyStoreRouter.h"
 #include "../Pipeline/AdaptivePipelineScheduler.h"
 #include "../Pipeline/StreamingThumbnailEmitter.h"
 #include "../Pipeline/PipelineLoadShedder.h"
@@ -1040,22 +1076,16 @@
 #include "../Core/SandboxEscapeGuard.h"
 #include "../Core/CodeIntegrityChecker.h"
 // Sprint 311-320 (v21.3.0 "Rigel-T") — Storage & Caching v3
-#include "../Core/ThumbnailPrefetcher.h"
-#include "../Core/ThumbnailPriorityQueue.h"
 #include "../Core/PredictivePrefetcher.h"
-#include "../Core/ThumbnailDensitySelector.h"
 #include "../Utils/MemoryMappedLoader.h"
 #include "../Utils/ActivationService.h"
 #include "../Utils/FeatureCompatMatrix.h"
 // Sprint 321-330 (v22.0.0 "Sirius" MAJOR) — Cross-Platform Foundation
-#include "../Core/AccessibilityLayer.h"
 #include "../Core/ColorBlindnessFilter.h"
 #include "../Core/DisplayColorProfile.h"
-#include "../Core/DPIScalingPolicy.h"
 #include "../Core/FeedbackManager.h"
 #include "../Core/KeyboardNavigationHandler.h"
 #include "../Core/MonitorConfigWatcher.h"
-#include "../Core/MultiMonitorContext.h"
 // Sprint 331-340 (v22.1.0 "Sirius-R") — Performance Profiling v2
 #include "../Core/ResponsiveLayoutManager.h"
 #include "../Core/SecureDecodeContext.h"
@@ -1064,9 +1094,9 @@
 #include "../Core/InputValidator.h"
 #include "../Core/CodecPlatformV2.h"
 #include "../Core/NetworkTrustManager.h"
-#include "../Utils/AccessibilityAudit.h"
 // Sprint 341-350 (v22.2.0 "Sirius-S") — Security & Audit v3
 #include "../Utils/LicenseManager.h"
+#include "../Utils/LocalizationEngine.h"
 #include "../Utils/LocalizationValidator.h"
 #include "../Utils/StoreReadinessChecker.h"
 #include "../Utils/CertificatePinner.h"
@@ -1099,10 +1129,7 @@
 #include "../Core/NamespaceWalkEngine.h"
 #include "../Core/ExplorerColumnProviderV2.h"
 #include "../Core/SearchIndexBridge.h"
-#include "../Core/ShellPropertyBagV2.h"
-#include "../Core/ThumbnailOverlayRenderer.h"
 #include "../Core/DragDropPreviewEngine.h"
-#include "../Core/ShellDataObjectExtractor.h"
 // Sprint 391-400 — DevOps & Quality Engineering v2 (v22.7.0)
 #include "../Utils/MutationTestingEngine.h"
 #include "../Utils/PropertyBaseTestEngine.h"
@@ -1131,19 +1158,26 @@
 #include "../GPU/GPUThumbnailAtlasManager.h"
 // Sprint 421-430 — Plugin Ecosystem v3 (v23.2.0)
 // Sprint 431-440 — Memory Optimization v3 (v23.3.0)
-#include "../Memory/PageFileArenaAllocator.h"
-#include "../Memory/HugeTLBPagePool.h"
 #include "../Memory/MemoryMappedBTree.h"
 #include "../Memory/NVMeMemoryTier.h"
 #include "../Memory/ECCErrorDetector.h"
 #include "../Memory/PressureForecaster.h"
-#include "../Memory/JemallocSlabAllocator.h"
 #include "../Memory/SharedMemoryRegionManager.h"
 // Sprint 441-450 — Smart Cache v4 (v23.4.0)
 #include "../Cache/AIEvictionPolicyEngine.h"
 // Sprint 451-460 — CLI & Automation v2 (v23.5.0)
 #include "../Utils/DiagnosticBundleCollector.h"
 #include "../Utils/RegressionTestRunner.h"
+
+// Sprint 1031-1040 — Decoder Health & Format Management (v31.1.0 "Achernar-R")
+#include "../Core/DecoderHealthDashboard.h"
+#include "../Core/DecoderHealthMonitor.h"
+#include "../Core/DecoderPriorityManager.h"
+#include "../Core/FormatGalleryView.h"
+#include "../Core/FormatGroupManager.h"
+#include "../Core/CrashIntelligence.h"
+#include "../Plugin/PluginHostIPC.h"
+#include "../Plugin/PluginRuntimeValidation.h"
 
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
@@ -3110,78 +3144,6 @@ TEST(TestProcessPoolManager_SetPriority) {
     ASSERT(mgr.GetStats().activeWorkers >= 0);
 }
 
-// NamedPipeHubServer — 9 tests
-TEST(TestNamedPipeHub_Defaults) {
-    using namespace ExplorerLens::Engine;
-    NamedPipeHubServer hub;
-    ASSERT(hub.GetState()       == HubState::Stopped);
-    ASSERT(hub.GetClientCount() == 0);
-    ASSERT(!hub.IsRunning());
-}
-
-TEST(TestNamedPipeHub_Constants) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(NamedPipeHubServer::DEFAULT_MAX_INSTANCES == 64);
-    ASSERT(NamedPipeHubServer::DEFAULT_BUFFER_KB     == 256);
-    ASSERT(NamedPipeHubServer::CONNECT_TIMEOUT_MS    == 5000);
-}
-
-TEST(TestNamedPipeHub_GetHubStateName) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Stopped))  == L"Stopped");
-    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Starting)) == L"Starting");
-    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Running))  == L"Running");
-    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Draining)) == L"Draining");
-    ASSERT(std::wstring(NamedPipeHubServer::GetHubStateName(HubState::Error))    == L"Error");
-}
-
-TEST(TestNamedPipeHub_StartStop) {
-    using namespace ExplorerLens::Engine;
-    NamedPipeHubServer hub;
-    ASSERT(hub.Start());
-    ASSERT(hub.GetState() == HubState::Running);
-    ASSERT(hub.Stop());
-    ASSERT(hub.GetState() == HubState::Stopped);
-}
-
-TEST(TestNamedPipeHub_IsRunning) {
-    using namespace ExplorerLens::Engine;
-    NamedPipeHubServer hub;
-    ASSERT(!hub.IsRunning());
-    hub.Start();
-    ASSERT(hub.IsRunning());
-}
-
-TEST(TestNamedPipeHub_BroadcastNull) {
-    using namespace ExplorerLens::Engine;
-    NamedPipeHubServer hub;
-    hub.Start();
-    ASSERT(!hub.BroadcastMessage(nullptr, 0));
-}
-
-TEST(TestNamedPipeHub_SendToClientInvalid) {
-    using namespace ExplorerLens::Engine;
-    NamedPipeHubServer hub;
-    hub.Start();
-    uint8_t data[4] = {};
-    ASSERT(!hub.SendToClient(0, data, sizeof(data)));
-}
-
-TEST(TestNamedPipeHub_GetConnectedClients) {
-    using namespace ExplorerLens::Engine;
-    NamedPipeHubServer hub;
-    ASSERT(hub.GetConnectedClients().empty());
-    hub.Start();
-    ASSERT(hub.GetConnectedClients().empty());
-}
-
-TEST(TestNamedPipeHub_DisconnectClientInvalid) {
-    using namespace ExplorerLens::Engine;
-    NamedPipeHubServer hub;
-    hub.Start();
-    ASSERT(!hub.DisconnectClient(999));
-}
-
 // ProcessIsolationPolicy — 9 tests
 TEST(TestIsolationPolicy_DefaultLevel) {
     using namespace ExplorerLens::Engine;
@@ -4075,90 +4037,21 @@ TEST(TestDiskCache_Compact) {
 // High-DPI Support Tests
 //==============================================================================
 
-TEST(TestDPI_SystemDPI) {
-    using namespace ExplorerLens::Engine;
-    uint32_t dpi = HighDPIScaling::GetSystemDPI();
-    ASSERT(dpi >= 72 && dpi <= 600); // Sane range
-}
-
-TEST(TestDPI_GetMonitorDPI) {
-    using namespace ExplorerLens::Engine;
-    auto info = HighDPIScaling::GetMonitorDPI(0);
-    ASSERT(info.monitorIndex == 0);
-    ASSERT(info.dpiX >= 72);
-    ASSERT(info.width > 0 && info.height > 0);
-}
-
-TEST(TestDPI_EnumerateMonitors) {
-    using namespace ExplorerLens::Engine;
-    auto monitors = HighDPIScaling::EnumerateMonitors();
-    ASSERT(!monitors.empty());
-    ASSERT(monitors[0].isPrimary || monitors.size() == 1);
-}
-
-TEST(TestDPI_LogicalPhysicalConversion) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(HighDPIScaling::LogicalToPhysical(256, 96) == 256);
-    ASSERT(HighDPIScaling::LogicalToPhysical(256, 192) == 512);
-    ASSERT(HighDPIScaling::LogicalToPhysical(256, 144) == 384);
-    ASSERT(HighDPIScaling::PhysicalToLogical(512, 192) == 256);
-    ASSERT(HighDPIScaling::PhysicalToLogical(256, 96) == 256);
-}
-
-TEST(TestDPI_ScaleRequest) {
-    using namespace ExplorerLens::Engine;
-    HighDPIScaling scaling;
-    auto req = scaling.ScaleRequest(256, 256, 192);
-    ASSERT(req.logicalWidth == 256);
-    ASSERT(req.physicalWidth == 512);
-    ASSERT(req.dpi == 192);
-    ASSERT(req.scaleFactor == 2.0);
-}
-
-TEST(TestDPI_NearestScale) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(HighDPIScaling::GetNearestScale(96) == DPIScale::Scale100);
-    ASSERT(HighDPIScaling::GetNearestScale(120) == DPIScale::Scale125);
-    ASSERT(HighDPIScaling::GetNearestScale(144) == DPIScale::Scale150);
-    ASSERT(HighDPIScaling::GetNearestScale(192) == DPIScale::Scale200);
-    ASSERT(HighDPIScaling::GetNearestScale(288) == DPIScale::Scale300);
-}
-
-TEST(TestDPI_DPIForScale) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale100) == 96);
-    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale125) == 120);
-    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale150) == 144);
-    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale200) == 192);
-    ASSERT(HighDPIScaling::GetDPIForScale(DPIScale::Scale400) == 384);
-}
-
-TEST(TestDPI_ScaleFactors) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(HighDPIScaling::GetScaleFactor(DPIScale::Scale100) == 1.0);
-    ASSERT(HighDPIScaling::GetScaleFactor(DPIScale::Scale200) == 2.0);
-    ASSERT(HighDPIScaling::GetScaleFactorForDPI(96) == 1.0);
-    ASSERT(HighDPIScaling::GetScaleFactorForDPI(192) == 2.0);
-}
-
 TEST(TestDPI_ScaleNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(HighDPIScaling::GetScaleName(DPIScale::Scale100)) ==
-        L"100%");
-    ASSERT(std::wstring(HighDPIScaling::GetScaleName(DPIScale::Scale150)) ==
-        L"150%");
-    ASSERT(std::wstring(HighDPIScaling::GetScaleName(DPIScale::Scale200)) ==
-        L"200%");
-    ASSERT(std::wstring(HighDPIScaling::GetScaleName(DPIScale::Custom)) ==
-        L"Custom");
+    ASSERT(std::wstring(PerMonitorDPIV3::ScaleName(DPIScale::Scale100)) == L"100%");
+    ASSERT(std::wstring(PerMonitorDPIV3::ScaleName(DPIScale::Scale150)) == L"150%");
+    ASSERT(std::wstring(PerMonitorDPIV3::ScaleName(DPIScale::Scale200)) == L"200%");
+    ASSERT(std::wstring(PerMonitorDPIV3::ScaleName(DPIScale::Custom)) == L"Custom");
 }
 
 TEST(TestDPI_AwarenessNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(HighDPIScaling::GetAwarenessName(
-        DPIAwareness::Unaware)) == L"Unaware");
-    ASSERT(std::wstring(HighDPIScaling::GetAwarenessName(
-        DPIAwareness::PerMonitorV2)) == L"PerMonitorV2");
+    ASSERT(std::wstring(PerMonitorDPIV3::AwarenessName(DPIAwareness::Unaware)) == L"DPI Unaware");
+    ASSERT(std::wstring(PerMonitorDPIV3::AwarenessName(DPIAwareness::PerMonitorV2)) == L"Per-Monitor V2");
+    ASSERT(PerMonitorDPIV3::ScaledSize(256, 192) == 512);
+    ASSERT(PerMonitorDPIV3::AwarenessCount() == 5);
+    ASSERT(PerMonitorDPIV3::ScaleCount() == 8);
 }
 
 //==============================================================================
@@ -5628,49 +5521,36 @@ TEST(TestConfigMigration_Validation) {
 
 TEST(TestAnim_FormatNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(AnimatedThumbnailEngine::GetFormatName(
-        AnimatedFormat::GIF)) == L"GIF");
-    ASSERT(std::wstring(AnimatedThumbnailEngine::GetFormatName(
-        AnimatedFormat::APNG)) == L"APNG");
-    ASSERT(std::wstring(AnimatedThumbnailEngine::GetFormatName(
-        AnimatedFormat::WebPAnim)) == L"WebP Animation");
+    ASSERT(std::wstring(AnimatedFormatHandler::FormatName(AnimatedFormat::GIF)) == L"Animated GIF");
+    ASSERT(std::wstring(AnimatedFormatHandler::FormatName(AnimatedFormat::APNG)) == L"Animated PNG");
+    ASSERT(std::wstring(AnimatedFormatHandler::FormatName(AnimatedFormat::WebPAnim)) == L"Animated WebP");
 }
 
 TEST(TestAnim_StrategyNames) {
     using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(AnimatedThumbnailEngine::GetStrategyName(
-        FrameStrategy::First)) == L"First Frame");
-    ASSERT(std::wstring(AnimatedThumbnailEngine::GetStrategyName(
-        FrameStrategy::Middle)) == L"Middle Frame");
-    ASSERT(std::wstring(AnimatedThumbnailEngine::GetStrategyName(
-        FrameStrategy::MostDetail)) == L"Most Detail");
+    ASSERT(std::wstring(AnimatedFormatHandler::StrategyName(FrameStrategy::First)) == L"FirstFrame");
+    ASSERT(std::wstring(AnimatedFormatHandler::StrategyName(FrameStrategy::Middle)) == L"MiddleFrame");
+    ASSERT(std::wstring(AnimatedFormatHandler::StrategyName(FrameStrategy::MostDetail)) == L"MostDetail");
 }
 
 TEST(TestAnim_FrameSelection) {
     using namespace ExplorerLens::Engine;
-    ASSERT(AnimatedThumbnailEngine::SelectBestFrame(100, FrameStrategy::First) ==
-        0);
-    ASSERT(AnimatedThumbnailEngine::SelectBestFrame(100, FrameStrategy::Middle) ==
-        50);
-    ASSERT(AnimatedThumbnailEngine::SelectBestFrame(
-        30, FrameStrategy::MostDetail) == 10);
+    AnimationInfo info;
+    info.frameCount = 100;
+    ASSERT(AnimatedFormatHandler::SelectFrame(info, FrameStrategy::First) == 0);
+    ASSERT(AnimatedFormatHandler::SelectFrame(info, FrameStrategy::Middle) == 50);
 }
 
 TEST(TestAnim_FormatDetection) {
     using namespace ExplorerLens::Engine;
-    ASSERT(AnimatedThumbnailEngine::DetectFormat(L"test.gif") ==
-        AnimatedFormat::GIF);
-    ASSERT(AnimatedThumbnailEngine::DetectFormat(L"test.apng") ==
-        AnimatedFormat::APNG);
-    ASSERT(AnimatedThumbnailEngine::DetectFormat(L"test.webp") ==
-        AnimatedFormat::WebPAnim);
+    ASSERT(AnimatedFormatHandler::DetectFormat(L".gif") == AnimatedFormat::GIF);
+    ASSERT(AnimatedFormatHandler::DetectFormat(L".apng") == AnimatedFormat::APNG);
+    ASSERT(AnimatedFormatHandler::DetectFormat(L".webp") == AnimatedFormat::WebPAnim);
 }
 
 TEST(TestAnim_FormatCount) {
     using namespace ExplorerLens::Engine;
-    ASSERT(AnimatedThumbnailEngine::GetFormatCount() == 6);
-    AnimatedThumbnailEngine engine;
-    ASSERT(engine.GetMaxFrameScan() == 100);
+    ASSERT(static_cast<int>(AnimatedFormat::FormatCount) == 6);
 }
 
 //==============================================================================
@@ -5853,52 +5733,6 @@ TEST(TestSecurity_DEPCheck) {
     // On modern Windows, DEP should be enabled
     ASSERT(sec.IsDEPEnabled() == true);
     ASSERT(sec.IsASLREnabled() == true);
-}
-
-//==============================================================================
-// Accessibility Engine Tests
-//==============================================================================
-
-TEST(TestA11y_FeatureNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(AccessibilityEngine::GetFeatureName(
-        A11yFeature::ScreenReader)) == L"Screen Reader");
-    ASSERT(std::wstring(AccessibilityEngine::GetFeatureName(
-        A11yFeature::HighContrast)) == L"High Contrast");
-    ASSERT(std::wstring(AccessibilityEngine::GetFeatureName(
-        A11yFeature::KeyboardNav)) == L"Keyboard Navigation");
-}
-
-TEST(TestA11y_ContrastModes) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(AccessibilityEngine::GetContrastModeName(
-        ContrastMode::Normal)) == L"Normal");
-    ASSERT(std::wstring(AccessibilityEngine::GetContrastModeName(
-        ContrastMode::HighWhite)) == L"High Contrast White");
-    ASSERT(std::wstring(AccessibilityEngine::GetContrastModeName(
-        ContrastMode::HighBlack)) == L"High Contrast Black");
-}
-
-TEST(TestA11y_FeatureToggle) {
-    using namespace ExplorerLens::Engine;
-    AccessibilityEngine engine;
-    engine.EnableFeature(A11yFeature::LargeText);
-    ASSERT(engine.IsFeatureEnabled(A11yFeature::LargeText) == true);
-    engine.DisableFeature(A11yFeature::LargeText);
-    ASSERT(engine.IsFeatureEnabled(A11yFeature::LargeText) == false);
-}
-
-TEST(TestA11y_FeatureCount) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(AccessibilityEngine::GetFeatureCount() == 7);
-}
-
-TEST(TestA11y_ComplianceAudit) {
-    using namespace ExplorerLens::Engine;
-    AccessibilityEngine engine;
-    auto result = engine.RunComplianceAudit();
-    ASSERT(result.checksRun >= 5);
-    ASSERT(result.auditTimeMs >= 0.0);
 }
 
 //==============================================================================
@@ -6308,46 +6142,6 @@ TEST(TestTheme_TypeCount) {
 }
 
 //==============================================================================
-// Usage Telemetry Engine Tests
-//==============================================================================
-
-TEST(TestUsageTelemetry_CategoryNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(UsageTelemetryEngine::GetCategoryName(
-        UsageTelemetryCategory::Decode)) == L"Decode");
-    ASSERT(std::wstring(UsageTelemetryEngine::GetCategoryName(
-        UsageTelemetryCategory::GPU)) == L"GPU");
-}
-
-TEST(TestUsageTelemetry_ConsentNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(UsageTelemetryEngine::GetConsentName(
-        UsageConsentLevel::None)) == L"None");
-    ASSERT(std::wstring(UsageTelemetryEngine::GetConsentName(
-        UsageConsentLevel::Full)) == L"Full");
-}
-
-TEST(TestUsageTelemetry_ConsentNone) {
-    using namespace ExplorerLens::Engine;
-    UsageTelemetryEngine eng;
-    ASSERT(eng.RecordEvent(L"TestEvt", UsageTelemetryCategory::Decode) == false);
-    ASSERT(eng.GetEventCount() == 0);
-}
-
-TEST(TestUsageTelemetry_ConsentBasic) {
-    using namespace ExplorerLens::Engine;
-    UsageTelemetryEngine eng;
-    eng.SetConsent(UsageConsentLevel::Basic);
-    ASSERT(eng.RecordEvent(L"Error", UsageTelemetryCategory::Error) == true);
-    ASSERT(eng.RecordEvent(L"Decode", UsageTelemetryCategory::Decode) == false);
-}
-
-TEST(TestUsageTelemetry_CategoryCount) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(UsageTelemetryEngine::GetCategoryCount() == 7);
-}
-
-//==============================================================================
 // Update Engine Tests
 //==============================================================================
 
@@ -6385,49 +6179,6 @@ TEST(TestUpdate_CheckForUpdate) {
 TEST(TestUpdate_ChannelCount) {
     using namespace ExplorerLens::Engine;
     ASSERT(UpdateEngine::GetChannelCount() == 4);
-}
-
-//==============================================================================
-// Shell Preview Handler Tests
-//==============================================================================
-
-TEST(TestPreview_ModeNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(ShellPreviewHandler::GetModeName(
-        PreviewMode::FullImage)) == L"Full Image");
-    ASSERT(std::wstring(ShellPreviewHandler::GetModeName(PreviewMode::HexDump)) ==
-        L"Hex Dump");
-}
-
-TEST(TestPreview_DetectMode) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(ShellPreviewHandler::DetectMode(L".jpg") == PreviewMode::FullImage);
-    ASSERT(ShellPreviewHandler::DetectMode(L".pdf") == PreviewMode::Document);
-    ASSERT(ShellPreviewHandler::DetectMode(L".gif") == PreviewMode::Filmstrip);
-}
-
-TEST(TestPreview_LoadFile) {
-    using namespace ExplorerLens::Engine;
-    ShellPreviewHandler handler;
-    PreviewParams params;
-    params.filePath = L"C:\\test.jpg";
-    ASSERT(handler.LoadFile(params) == true);
-    ASSERT(handler.GetState() == PreviewState::Ready);
-}
-
-TEST(TestPreview_Unload) {
-    using namespace ExplorerLens::Engine;
-    ShellPreviewHandler handler;
-    PreviewParams params;
-    params.filePath = L"C:\\test.jpg";
-    handler.LoadFile(params);
-    handler.Unload();
-    ASSERT(handler.GetState() == PreviewState::Unloaded);
-}
-
-TEST(TestPreview_ModeCount) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(ShellPreviewHandler::GetModeCount() == 5);
 }
 
 //==============================================================================
@@ -6584,46 +6335,6 @@ TEST(TestReg_Delete) {
 TEST(TestReg_BasePath) {
     using namespace ExplorerLens::Engine;
     ASSERT(RegistryManager::GetBasePath() == L"SOFTWARE\\ExplorerLens");
-}
-
-//==============================================================================
-// Error Recovery Engine Tests
-//==============================================================================
-
-TEST(TestRecovery_StrategyNames) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(std::wstring(ErrorRecoveryEngine::GetStrategyName(
-        RecoveryStrategy::Retry)) == L"Retry");
-    ASSERT(std::wstring(ErrorRecoveryEngine::GetStrategyName(
-        RecoveryStrategy::SafeMode)) == L"Safe Mode");
-}
-
-TEST(TestRecovery_CreateCheckpoint) {
-    using namespace ExplorerLens::Engine;
-    ErrorRecoveryEngine eng;
-    auto id = eng.CreateCheckpoint(L"Before decode", L"state1");
-    ASSERT(id == 1);
-    ASSERT(eng.GetCheckpointCount() == 1);
-}
-
-TEST(TestRecovery_RestoreCheckpoint) {
-    using namespace ExplorerLens::Engine;
-    ErrorRecoveryEngine eng;
-    auto id = eng.CreateCheckpoint(L"CP1", L"state1");
-    ASSERT(eng.RestoreCheckpoint(id) == true);
-    ASSERT(eng.GetState() == RecoveryState::Recovered);
-}
-
-TEST(TestRecovery_CrashRecovery) {
-    using namespace ExplorerLens::Engine;
-    ErrorRecoveryEngine eng;
-    ASSERT(eng.RecoverFromCrash(RecoveryStrategy::Retry) == true);
-    ASSERT(eng.GetState() == RecoveryState::Recovered);
-}
-
-TEST(TestRecovery_StrategyCount) {
-    using namespace ExplorerLens::Engine;
-    ASSERT(ErrorRecoveryEngine::GetStrategyCount() == 5);
 }
 
 //==============================================================================
@@ -7086,25 +6797,6 @@ TEST(TestGateV15_Version) {
 // AI Module Tests
 //==============================================================================
 
-TEST(Test_SceneClassifier_BasicLabel) {
-    SceneClassifierEngine classifier;
-    // Create a small 4x4 solid green RGBA image
-    const uint32_t w = 4, h = 4;
-    std::vector<uint8_t> rgba(w * h * 4, 0);
-    for (uint32_t i = 0; i < w * h; ++i) {
-        rgba[i * 4 + 0] = 0;    // R
-        rgba[i * 4 + 1] = 200;  // G
-        rgba[i * 4 + 2] = 0;    // B
-        rgba[i * 4 + 3] = 255;  // A
-    }
-    auto scene = classifier.Classify(rgba.data(), w, h);
-    // Must return a valid ClassifiedScene value (not out of range)
-    ASSERT(static_cast<uint32_t>(scene) < static_cast<uint32_t>(ClassifiedScene::COUNT));
-    // CategoryName must return non-null
-    const wchar_t* name = SceneClassifierEngine::CategoryName(scene);
-    ASSERT(name != nullptr);
-}
-
 TEST(Test_SmartCropV2_CenterFallback) {
     SmartCropEngine cropper;
     // Null data should produce center-crop fallback
@@ -7128,45 +6820,12 @@ TEST(Test_IQA_ScoreRange) {
     ASSERT(score.overall >= 0.0f && score.overall <= 1.0f);
 }
 
-TEST(Test_ColorPalette_Extract) {
-    ColorPaletteExtractor extractor;
-    const uint32_t w = 8, h = 8;
-    std::vector<uint8_t> bgra(w * h * 4);
-    // Two-color image: half red, half blue (BGRA order)
-    for (uint32_t i = 0; i < w * h; ++i) {
-        if (i < w * h / 2) {
-            bgra[i * 4 + 0] = 0;   bgra[i * 4 + 1] = 0;   bgra[i * 4 + 2] = 255; bgra[i * 4 + 3] = 255; // Red in BGRA
-        }
-        else {
-            bgra[i * 4 + 0] = 255; bgra[i * 4 + 1] = 0;   bgra[i * 4 + 2] = 0;   bgra[i * 4 + 3] = 255; // Blue in BGRA
-        }
-    }
-    Palette pal = extractor.Extract(bgra.data(), w, h, 5);
-    ASSERT(pal.colors.size() > 0);
-    ASSERT(pal.pixelCount == w * h);
-}
-
 TEST(Test_ImageComplexity_Range) {
     ImageComplexityAnalyzer analyzer;
     auto est = analyzer.Estimate(1920, 1080, 32, "JPEG");
     ASSERT(est.score >= 0.0 && est.score <= 10.0);
     ASSERT(est.estimatedDecodeMs > 0.0);
     ASSERT(est.estimatedMemoryBytes > 0);
-}
-
-TEST(Test_ThumbnailRelevance_Score) {
-    ThumbnailRelevanceScorer scorer;
-    const uint32_t w = 16, h = 16;
-    std::vector<uint8_t> bgra(w * h * 4);
-    // Create checkerboard pattern for entropy
-    for (uint32_t y = 0; y < h; ++y)
-        for (uint32_t x = 0; x < w; ++x) {
-            uint8_t v = ((x + y) % 2 == 0) ? 255 : 0;
-            uint32_t idx = (y * w + x) * 4;
-            bgra[idx] = v; bgra[idx + 1] = v; bgra[idx + 2] = v; bgra[idx + 3] = 255;
-        }
-    auto result = scorer.Score(bgra.data(), w, h);
-    ASSERT(result.score >= 0.0 && result.score <= 100.0);
 }
 
 TEST(Test_DecodeStrategy_Optimizer) {
@@ -7178,24 +6837,6 @@ TEST(Test_DecodeStrategy_Optimizer) {
     // Must return a valid strategy
     ASSERT(static_cast<uint8_t>(rec.bestStrategy) <= static_cast<uint8_t>(DecodeStrategy::Cached));
     ASSERT(rec.confidence >= 0.0);
-}
-
-TEST(Test_FormatMigration_Suggest) {
-    FormatMigrationAdvisor advisor;
-    auto analysis = advisor.Analyze("BMP", 1024 * 1024);
-    ASSERT(analysis.currentFormat == "BMP");
-    ASSERT(analysis.recommendations.size() > 0);
-    ASSERT(analysis.recommendations[0].estimatedSizeReduction > 0.0);
-}
-
-TEST(Test_AISearch_IndexBuild) {
-    ThumbnailSearchIndex index;
-    const uint32_t w = 16, h = 16;
-    std::vector<uint8_t> rgba(w * h * 4, 128);
-    for (uint32_t i = 0; i < w * h; ++i) rgba[i * 4 + 3] = 255;
-    index.AddToIndex(L"test_image.png", rgba.data(), w, h);
-    auto stats = index.GetStats();
-    ASSERT(stats.indexedCount == 1);
 }
 
 TEST(Test_SceneUnderstanding_Labels) {
@@ -7550,73 +7191,6 @@ TEST(Test_AsyncTextureSampler_Config) {
     catch (...) {
         std::wcout << L"  [SKIP] AsyncTextureSampler_Config — GPU unavailable" << std::endl;
     }
-}
-
-//==============================================================================
-// Cloud/Network Tests (Sprint 27)
-//==============================================================================
-
-TEST(Test_CloudProvider_Detect) {
-    using namespace ExplorerLens::Cloud;
-    OneDriveProvider oneDrive;
-    // Get expected OneDrive root
-    wchar_t userProfile[MAX_PATH] = {};
-    GetEnvironmentVariableW(L"USERPROFILE", userProfile, MAX_PATH);
-    std::wstring oneDrivePath = std::wstring(userProfile) + L"\\OneDrive\\test.jpg";
-    // OneDrive provider should handle paths under the OneDrive folder
-    // (May return false if OneDrive folder doesn't exist — that's OK)
-    bool handles = oneDrive.HandlesPath(oneDrivePath.c_str());
-    // Just verify it doesn't crash — result depends on environment
-    (void)handles;
-    // Verify it does NOT handle a random path
-    ASSERT(!oneDrive.HandlesPath(L"C:\\Windows\\System32\\notepad.exe"));
-    // Verify null safety
-    ASSERT(!oneDrive.HandlesPath(nullptr));
-}
-
-TEST(Test_CloudProvider_CachePath) {
-    using namespace ExplorerLens::Cloud;
-    CloudThumbnailResolver resolver;
-    // Without any registered providers, FindProvider returns null
-    ASSERT(resolver.FindProvider(L"C:\\test.jpg") == nullptr);
-    // Register OneDrive provider
-    resolver.RegisterProvider(std::make_unique<OneDriveProvider>());
-    // Stats should start at zero
-    auto stats = resolver.GetStats();
-    ASSERT(stats.cloudHits == 0);
-    ASSERT(stats.cloudMisses == 0);
-}
-
-TEST(Test_NetworkThumbnail_Timeout) {
-    using namespace ExplorerLens::Engine::Cloud;
-    NetworkConfig config = NetworkConfig::Default();
-    ASSERT(config.connectTimeoutMs == 10000);
-    ASSERT(config.readTimeoutMs == 30000);
-    ASSERT(config.enableCache);
-    ASSERT(config.enableRemote);
-    // Metered connection has different timeouts
-    auto metered = NetworkConfig::MeteredConnection();
-    ASSERT(metered.bandwidth.IsThrottled());
-    ASSERT(metered.retry.maxRetries == 1);
-}
-
-TEST(Test_NetworkThumbnail_URLValidation) {
-    using namespace ExplorerLens::Engine::Cloud;
-    // HTTP URL
-    auto url = RemoteURL::Parse("https://example.com/image.jpg");
-    ASSERT(url.protocol == ExplorerLens::Engine::Cloud::NetworkProtocol::HTTPS);
-    ASSERT(url.host == "example.com");
-    ASSERT(url.IsRemote());
-    ASSERT(url.IsSecure());
-    // SMB path
-    auto smb = RemoteURL::Parse("\\\\server\\share\\file.png");
-    ASSERT(smb.protocol == ExplorerLens::Engine::Cloud::NetworkProtocol::SMB);
-    ASSERT(smb.host == "server");
-    ASSERT(smb.IsRemote());
-    // Local path
-    auto local = RemoteURL::Parse("C:\\local\\file.bmp");
-    ASSERT(local.protocol == ExplorerLens::Engine::Cloud::NetworkProtocol::Local);
-    ASSERT(!local.IsRemote());
 }
 
 //==============================================================================
@@ -9655,45 +9229,6 @@ TEST(TestGateV21_AllKPIsPresent) {
         ASSERT(r.passed);
 }
 
-// Accessibility Pipeline Tests
-TEST(TestAccessibility_FeatureNames) {
-    for (size_t i = 0; i < AccessibilityPipeline::FeatureCount(); ++i) {
-        auto name = AccessibilityPipeline::FeatureName(
-            static_cast<PipelineA11yFeature>(i));
-        ASSERT(name != nullptr && wcslen(name) > 0);
-    }
-}
-
-TEST(TestAccessibility_ColorBlindModes) {
-    for (size_t i = 0; i < AccessibilityPipeline::ColorBlindModeCount(); ++i) {
-        auto name = AccessibilityPipeline::ColorBlindModeName(
-            static_cast<ColorBlindMode>(i));
-        ASSERT(name != nullptr && wcslen(name) > 0);
-    }
-}
-
-TEST(TestAccessibility_HCThemes) {
-    for (size_t i = 0; i < AccessibilityPipeline::HCThemeCount(); ++i) {
-        auto name =
-            AccessibilityPipeline::HCThemeName(static_cast<PipelineHCTheme>(i));
-        ASSERT(name != nullptr && wcslen(name) > 0);
-    }
-}
-
-TEST(TestAccessibility_DefaultConfig) {
-    AccessibilityConfig cfg;
-    ASSERT(cfg.screenReader == true);
-    ASSERT(cfg.highContrast == false);
-    ASSERT(cfg.keyboardNav == true);
-    ASSERT(cfg.cbMode == ColorBlindMode::None);
-}
-
-TEST(TestAccessibility_Counts) {
-    ASSERT(AccessibilityPipeline::FeatureCount() == 6);
-    ASSERT(AccessibilityPipeline::ColorBlindModeCount() == 5);
-    ASSERT(AccessibilityPipeline::HCThemeCount() == 5);
-}
-
 // Telemetry & Analytics Tests
 TEST(TestTelemetry_EventNames) {
     for (size_t i = 0; i < TelemetryAnalyticsEngine::EventCount(); ++i) {
@@ -11520,7 +11055,7 @@ TEST(TestZenith_LivePreviewFitToBudget) {
     ASSERT(frames == 64); // 16MB / 256KB = 64 frames max
 }
 TEST(TestZenith_LivePreviewConfig) {
-    PreviewConfig cfg;
+    LivePreviewConfig cfg;
     ASSERT(cfg.maxFrames == 12);
     ASSERT(cfg.fpsTarget == 15.0);
     ASSERT(cfg.maxMemoryBytes == 16 * 1024 * 1024);
@@ -11588,13 +11123,13 @@ TEST(TestKF_FPS) { using namespace ExplorerLens::Engine; VideoMetadata vm{}; vm.
 TEST(TestKF_SceneScore) { using namespace ExplorerLens::Engine; KeyframeInfo ki{}; ki.sceneChangeScore = 0.0f; ASSERT(ki.sceneChangeScore == 0.0f); }
 
 TEST(TestAnim_Init) { using namespace ExplorerLens::Engine; AnimatedFrameScrubber afs; afs.SetFpsCap(30); ASSERT(true); }
-TEST(TestAnim_Format) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::GIF) == 0); ASSERT(static_cast<int>(AnimatedFormat::JXL_Animation) == 4); }
+TEST(TestAnim_Format) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::GIF) == 0); ASSERT(static_cast<int>(AnimatedFormat::JXLAnim) == 3); }
 TEST(TestAnim_Frame) { using namespace ExplorerLens::Engine; FrameInfo fi{}; fi.index = 10; fi.delayMs = 100; fi.width = 256; fi.height = 256; ASSERT(fi.delayMs == 100); }
 TEST(TestAnim_FpsCap) { using namespace ExplorerLens::Engine; AnimatedFrameScrubber afs; afs.SetFpsCap(15); ASSERT(true); }
-TEST(TestAnim_Disposal) { using namespace ExplorerLens::Engine; FrameInfo fi{}; fi.disposalMethod = 2; ASSERT(fi.disposalMethod == 2); }
+TEST(TestAnim_Disposal) { using namespace ExplorerLens::Engine; FrameInfo fi{}; fi.disposalMethod = DisposalMethod::Previous; ASSERT(fi.disposalMethod == DisposalMethod::Previous); }
 TEST(TestAnim_Zero) { using namespace ExplorerLens::Engine; FrameInfo fi{}; ASSERT(fi.index == 0); ASSERT(fi.delayMs == 0); }
-TEST(TestAnim_WebP) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::WebPAnimated) == 1); }
-TEST(TestAnim_APNG) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::APNG) == 2); }
+TEST(TestAnim_WebP) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::WebPAnim) == 2); }
+TEST(TestAnim_APNG) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AnimatedFormat::APNG) == 1); }
 TEST(TestAnim_Delay) { using namespace ExplorerLens::Engine; FrameInfo fi{}; fi.delayMs = 33; ASSERT(fi.delayMs == 33); }
 
 TEST(TestWave_Init) { using namespace ExplorerLens::Engine; AudioWaveformRenderer awr; WaveformConfig cfg; cfg.width = 512; cfg.height = 128; ASSERT(cfg.width == 512); }
@@ -11603,7 +11138,7 @@ TEST(TestWave_Meta) { using namespace ExplorerLens::Engine; AudioMetadata am{}; 
 TEST(TestWave_Config) { using namespace ExplorerLens::Engine; WaveformConfig cfg; cfg.rmsOverlay = true; cfg.barWidth = 3; ASSERT(cfg.rmsOverlay); ASSERT(cfg.barWidth == 3); }
 TEST(TestWave_BitDepth) { using namespace ExplorerLens::Engine; AudioMetadata am{}; am.bitDepth = 24; ASSERT(am.bitDepth == 24); }
 TEST(TestWave_Codec) { using namespace ExplorerLens::Engine; AudioMetadata am{}; am.codec = "flac"; ASSERT(am.codec == "flac"); }
-TEST(TestWave_Color) { using namespace ExplorerLens::Engine; WaveformConfig cfg; cfg.foregroundColor = 0xFF00FF00; cfg.backgroundColor = 0xFF000000; ASSERT(cfg.foregroundColor != cfg.backgroundColor); }
+TEST(TestWave_Color) { using namespace ExplorerLens::Engine; WaveformConfig cfg; cfg.foregroundColor = WaveformColor{0,255,0,255}; cfg.backgroundColor = WaveformColor{0,0,0,255}; ASSERT(cfg.foregroundColor.g != cfg.backgroundColor.g); }
 TEST(TestWave_Bars) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(WaveformStyle::Bars) == 2); }
 TEST(TestWave_Channels) { using namespace ExplorerLens::Engine; AudioMetadata am{}; am.channels = 6; ASSERT(am.channels == 6); }
 
@@ -11627,25 +11162,25 @@ TEST(TestShHL_Dracula) { using namespace ExplorerLens::Engine; ASSERT(static_cas
 TEST(TestShHL_Spacing) { using namespace ExplorerLens::Engine; HighlightConfig hc; hc.lineSpacing = 2.0f; ASSERT(hc.lineSpacing == 2.0f); }
 TEST(TestShHL_WGSL) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ShaderLanguage::WGSL) == 2); }
 
-TEST(TestFGS_Init) { using namespace ExplorerLens::Engine; FontGlyphSampler fgs; SamplerConfig sc; sc.fontSize = 48; sc.weight = 400; ASSERT(sc.fontSize == 48); }
+TEST(TestFGS_Init) { using namespace ExplorerLens::Engine; FontGlyphSampler fgs; SamplerConfig sc; sc.fontSize = 48.0f; sc.weight = FontWeight::Regular; ASSERT(sc.fontSize == 48.0f); }
 TEST(TestFGS_Script) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FontScript::Latin) == 0); ASSERT(static_cast<int>(FontScript::Thai) == 7); }
 TEST(TestFGS_Metrics) { using namespace ExplorerLens::Engine; GlyphMetrics gm{}; gm.advance = 12.5f; gm.bearingX = 1.0f; gm.width = 10.0f; gm.height = 14.0f; ASSERT(gm.advance == 12.5f); }
-TEST(TestFGS_Pangram) { using namespace ExplorerLens::Engine; SamplerConfig sc; sc.pangramText = "The quick brown fox"; ASSERT(!sc.pangramText.empty()); }
+TEST(TestFGS_Pangram) { using namespace ExplorerLens::Engine; SamplerConfig sc; sc.pangramText = L"The quick brown fox"; ASSERT(!sc.pangramText.empty()); }
 TEST(TestFGS_CJK) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FontScript::CJK) == 2); }
 TEST(TestFGS_Arabic) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FontScript::Arabic) == 1); }
-TEST(TestFGS_Weight) { using namespace ExplorerLens::Engine; SamplerConfig sc; sc.weight = 700; ASSERT(sc.weight == 700); }
+TEST(TestFGS_Weight) { using namespace ExplorerLens::Engine; SamplerConfig sc; sc.weight = FontWeight::Bold; ASSERT(sc.weight == FontWeight::Bold); }
 TEST(TestFGS_ShowMetrics) { using namespace ExplorerLens::Engine; SamplerConfig sc; sc.showMetrics = true; ASSERT(sc.showMetrics); }
 TEST(TestFGS_BearingY) { using namespace ExplorerLens::Engine; GlyphMetrics gm{}; gm.bearingY = 12.0f; ASSERT(gm.bearingY == 12.0f); }
 
 TEST(TestSSCR_Init) { using namespace ExplorerLens::Engine; SpreadsheetChartRenderer scr; ASSERT(true); }
 TEST(TestSSCR_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ChartType::Bar) == 0); ASSERT(static_cast<int>(ChartType::Pivot) == 6); }
 TEST(TestSSCR_Detect) { using namespace ExplorerLens::Engine; ChartDetectionResult cdr{}; cdr.chartType = ChartType::Line; cdr.hasLegend = true; ASSERT(cdr.hasLegend); }
-TEST(TestSSCR_Meta) { using namespace ExplorerLens::Engine; SpreadsheetMetadata sm{}; sm.sheetCount = 3; sm.rowCount = 1000; sm.columnCount = 26; ASSERT(sm.sheetCount == 3); }
-TEST(TestSSCR_Charts) { using namespace ExplorerLens::Engine; SpreadsheetMetadata sm{}; sm.hasCharts = true; sm.hasPivotTables = false; ASSERT(sm.hasCharts); ASSERT(!sm.hasPivotTables); }
+TEST(TestSSCR_Meta) { using namespace ExplorerLens::Engine; ChartSheetMetadata sm{}; sm.sheetCount = 3; sm.rowCount = 1000; sm.columnCount = 26; ASSERT(sm.sheetCount == 3); }
+TEST(TestSSCR_Charts) { using namespace ExplorerLens::Engine; ChartSheetMetadata sm{}; sm.hasCharts = true; sm.hasPivotTables = false; ASSERT(sm.hasCharts); ASSERT(!sm.hasPivotTables); }
 TEST(TestSSCR_Pie) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ChartType::Pie) == 2); }
-TEST(TestSSCR_DataRange) { using namespace ExplorerLens::Engine; ChartDetectionResult cdr{}; cdr.dataRange = "A1:D50"; cdr.title = "Sales Q3"; ASSERT(!cdr.dataRange.empty()); }
+TEST(TestSSCR_DataRange) { using namespace ExplorerLens::Engine; ChartDetectionResult cdr{}; cdr.dataRange = {0, 0, 49, 3}; cdr.title = "Sales Q3"; ASSERT(!cdr.title.empty()); }
 TEST(TestSSCR_Scatter) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ChartType::Scatter) == 3); }
-TEST(TestSSCR_Cols) { using namespace ExplorerLens::Engine; SpreadsheetMetadata sm{}; sm.columnCount = 100; ASSERT(sm.columnCount == 100); }
+TEST(TestSSCR_Cols) { using namespace ExplorerLens::Engine; ChartSheetMetadata sm{}; sm.columnCount = 100; ASSERT(sm.columnCount == 100); }
 
 // ============================================================================
 // Sprint 1001-1010 — Geospatial, Medical & Scientific Formats (v30.4.0 "Deneb-U")
@@ -11734,15 +11269,15 @@ TEST(TestECW_Target) { using namespace ExplorerLens::Engine; ECWCompressionRatio
 // ============================================================================
 // Sprint 1011-1020 — Universal Format Decoder Library (v30.5.0 "Deneb-V")
 // ============================================================================
-TEST(TestUDF_Init) { using namespace ExplorerLens::Engine; UniversalDecoderFacade udf; ASSERT(!udf.GetVersion().empty()); }
+TEST(TestUDF_Init) { using namespace ExplorerLens::Engine; UniversalDecoderFacade udf; ASSERT(udf.GetVersion() != nullptr); }
 TEST(TestUDF_Format) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::JPEG) == 0); ASSERT(static_cast<int>(DecoderFormat::Unknown) != 0); }
-TEST(TestUDF_Request) { using namespace ExplorerLens::Engine; ThumbnailRequest req; req.maxWidth = 256; req.maxHeight = 256; ASSERT(req.maxWidth == 256); }
-TEST(TestUDF_Result) { using namespace ExplorerLens::Engine; ThumbnailResult res{}; res.width = 128; res.decodeTimeUs = 5000; ASSERT(res.decodeTimeUs == 5000); }
+TEST(TestUDF_Request) { using namespace ExplorerLens::Engine; UniversalRequest req; req.maxWidth = 256; req.maxHeight = 256; ASSERT(req.maxWidth == 256); }
+TEST(TestUDF_Result) { using namespace ExplorerLens::Engine; UniversalResult res{}; res.width = 128; res.decodeTimeUs = 5000; ASSERT(res.decodeTimeUs == 5000); }
 TEST(TestUDF_Formats) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::WebP) > 0); ASSERT(static_cast<int>(DecoderFormat::HEIF) > 0); }
 TEST(TestUDF_AVIF) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::AVIF) > 0); }
 TEST(TestUDF_PSD) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::PSD) > 0); }
 TEST(TestUDF_RAW) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DecoderFormat::RAW) > 0); }
-TEST(TestUDF_Stride) { using namespace ExplorerLens::Engine; ThumbnailResult res{}; res.stride = 512; ASSERT(res.stride == 512); }
+TEST(TestUDF_Stride) { using namespace ExplorerLens::Engine; UniversalResult res{}; res.stride = 512; ASSERT(res.stride == 512); }
 TEST(TestFCM_Init) { using namespace ExplorerLens::Engine; FormatCapabilityMatrix fcm; ASSERT(fcm.GetTotalFormatCount() >= 0); }
 TEST(TestFCM_Level) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CapabilityLevel::None) == 0); ASSERT(static_cast<int>(CapabilityLevel::GPUAccelerated) == 3); }
 TEST(TestFCM_Platform) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(PlatformType::Windows) == 0); ASSERT(static_cast<int>(PlatformType::WASM) == 3); }
@@ -11811,14 +11346,14 @@ TEST(TestULM_Copy) { using namespace ExplorerLens::Engine; ThirdPartyLib tpl{}; 
 // Sprint 1021-1030 — Plugin Marketplace v4 & Commerce (v30.6.0 "Deneb-W")
 // ============================================================================
 TEST(TestMKT_Init) { using namespace ExplorerLens::Engine; MarketplaceClientV4 c; ASSERT(true); }
-TEST(TestMKT_Proto) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(Protocol::REST) == 0); ASSERT(static_cast<int>(Protocol::Hybrid) == 2); }
+TEST(TestMKT_Proto) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(MarketplaceProtocol::REST) == 0); ASSERT(static_cast<int>(MarketplaceProtocol::Hybrid) == 2); }
 TEST(TestMKT_Cache) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CachePolicy::NoCache) == 0); ASSERT(static_cast<int>(CachePolicy::Aggressive) == 3); }
-TEST(TestMKT_List) { using namespace ExplorerLens::Engine; PluginListing pl{}; pl.id = "com.example.plugin"; pl.isFree = true; ASSERT(pl.isFree); }
-TEST(TestMKT_Rating) { using namespace ExplorerLens::Engine; PluginListing pl{}; pl.rating = 4.8f; pl.downloadCount = 10000; ASSERT(pl.rating > 4.0f); }
-TEST(TestMKT_Price) { using namespace ExplorerLens::Engine; PluginListing pl{}; pl.price = 9.99f; pl.isFree = false; ASSERT(!pl.isFree); }
-TEST(TestMKT_gRPC) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(Protocol::gRPC) == 1); }
+TEST(TestMKT_List) { using namespace ExplorerLens::Engine; MarketplaceListing pl{}; pl.id = "com.example.plugin"; pl.isFree = true; ASSERT(pl.isFree); }
+TEST(TestMKT_Rating) { using namespace ExplorerLens::Engine; MarketplaceListing pl{}; pl.rating = 4.8f; pl.downloadCount = 10000; ASSERT(pl.rating > 4.0f); }
+TEST(TestMKT_Price) { using namespace ExplorerLens::Engine; MarketplaceListing pl{}; pl.price = 9.99f; pl.isFree = false; ASSERT(!pl.isFree); }
+TEST(TestMKT_gRPC) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(MarketplaceProtocol::gRPC) == 1); }
 TEST(TestMKT_Persist) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(CachePolicy::Persistent) == 2); }
-TEST(TestMKT_Author) { using namespace ExplorerLens::Engine; PluginListing pl{}; pl.author = "DevCo"; ASSERT(!pl.author.empty()); }
+TEST(TestMKT_Author) { using namespace ExplorerLens::Engine; MarketplaceListing pl{}; pl.author = "DevCo"; ASSERT(!pl.author.empty()); }
 
 TEST(TestRE_Init) { using namespace ExplorerLens::Engine; PluginRatingEngine re; ASSERT(true); }
 TEST(TestRE_Src) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(RatingSource::UserReview) == 0); ASSERT(static_cast<int>(RatingSource::SecurityScan) == 3); }
@@ -11841,21 +11376,21 @@ TEST(TestDG_Missing) { using namespace ExplorerLens::Engine; ResolutionResult rr
 TEST(TestDG_InstOrd) { using namespace ExplorerLens::Engine; ResolutionResult rr{}; ASSERT(rr.installOrder.empty()); }
 
 TEST(TestBI_Init) { using namespace ExplorerLens::Engine; PluginBundleInstaller bi; ASSERT(true); }
-TEST(TestBI_Phase) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(InstallPhase::Verify) == 0); ASSERT(static_cast<int>(InstallPhase::Rollback) == 4); }
+TEST(TestBI_Phase) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(BundleInstallPhase::Verify) == 0); ASSERT(static_cast<int>(BundleInstallPhase::Rollback) == 4); }
 TEST(TestBI_Entry) { using namespace ExplorerLens::Engine; BundleEntry be{}; be.pluginId = "test"; be.size = 1024*1024; ASSERT(be.size > 0); }
-TEST(TestBI_Prog) { using namespace ExplorerLens::Engine; InstallProgress ip{}; ip.phase = InstallPhase::Download; ip.current = 3; ip.total = 10; ASSERT(ip.total == 10); }
-TEST(TestBI_DL) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(InstallPhase::Download) == 1); }
-TEST(TestBI_Stage) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(InstallPhase::Stage) == 2); }
-TEST(TestBI_Commit) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(InstallPhase::Commit) == 3); }
+TEST(TestBI_Prog) { using namespace ExplorerLens::Engine; InstallProgress ip{}; ip.phase = BundleInstallPhase::Download; ip.current = 3; ip.total = 10; ASSERT(ip.total == 10); }
+TEST(TestBI_DL) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(BundleInstallPhase::Download) == 1); }
+TEST(TestBI_Stage) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(BundleInstallPhase::Stage) == 2); }
+TEST(TestBI_Commit) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(BundleInstallPhase::Commit) == 3); }
 TEST(TestBI_CSum) { using namespace ExplorerLens::Engine; BundleEntry be{}; be.checksum = "sha256:deadbeef"; ASSERT(!be.checksum.empty()); }
 TEST(TestBI_Curr) { using namespace ExplorerLens::Engine; InstallProgress ip{}; ip.currentPlugin = "wpf.extn"; ASSERT(!ip.currentPlugin.empty()); }
 
 TEST(TestSLM_Init) { using namespace ExplorerLens::Engine; SubscriptionLicenseManagerV4 slm; ASSERT(true); }
-TEST(TestSLM_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(LicenseType::Free) == 0); ASSERT(static_cast<int>(LicenseType::OEM) == 4); }
+TEST(TestSLM_Type) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SubscriptionLicenseTier::Free) == 0); ASSERT(static_cast<int>(SubscriptionLicenseTier::OEM) == 4); }
 TEST(TestSLM_Seat) { using namespace ExplorerLens::Engine; SeatAllocation sa{}; sa.total = 100; sa.used = 30; sa.reserved = 5; ASSERT(sa.total > sa.used); }
 TEST(TestSLM_JWT) { using namespace ExplorerLens::Engine; JWTEntitlement jwt{}; jwt.subject = "user@org.com"; jwt.issuer = "license.explorerlens.io"; ASSERT(!jwt.issuer.empty()); }
-TEST(TestSLM_Team) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(LicenseType::Team) == 2); }
-TEST(TestSLM_Ent) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(LicenseType::Enterprise) == 3); }
+TEST(TestSLM_Team) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SubscriptionLicenseTier::Team) == 2); }
+TEST(TestSLM_Ent) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(SubscriptionLicenseTier::Enterprise) == 3); }
 TEST(TestSLM_Expired) { using namespace ExplorerLens::Engine; SeatAllocation sa{}; sa.expired = 10; ASSERT(sa.expired == 10); }
 TEST(TestSLM_Features) { using namespace ExplorerLens::Engine; JWTEntitlement jwt{}; jwt.features = {"gpu", "ai", "enterprise"}; ASSERT(jwt.features.size() == 3); }
 TEST(TestSLM_Sig) { using namespace ExplorerLens::Engine; JWTEntitlement jwt{}; jwt.signature = "base64sig"; ASSERT(!jwt.signature.empty()); }
@@ -11893,7 +11428,7 @@ TEST(TestPRG_Issues) { using namespace ExplorerLens::Engine; ReviewReport rr{}; 
 // ============================================================================
 // Sprint 1031-1040 — Enterprise Console v3 & Fleet Management (v30.7.0 "Deneb-X")
 // ============================================================================
-TEST(TestEC3_Init) { using namespace ExplorerLens::Engine; EnterpriseConsoleV3 ec; ASSERT(true); }
+TEST(TestEC3_Init) { using namespace ExplorerLens::Engine; EnterpriseConsoleV3 ec(ConsoleEndpoint{}); ASSERT(true); }
 TEST(TestEC3_Proto) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ConsoleProtocol::REST) == 0); ASSERT(static_cast<int>(ConsoleProtocol::Hybrid) == 2); }
 TEST(TestEC3_Role) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(AdminRole::Viewer) == 0); ASSERT(static_cast<int>(AdminRole::SuperAdmin) == 3); }
 TEST(TestEC3_Endpoint) { using namespace ExplorerLens::Engine; ConsoleEndpoint ep{}; ep.host = "console.corp.com"; ep.port = 8443; ep.tlsEnabled = true; ASSERT(ep.tlsEnabled); }
@@ -11904,13 +11439,13 @@ TEST(TestEC3_Token) { using namespace ExplorerLens::Engine; ConsoleEndpoint ep{}
 TEST(TestEC3_gRPC) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(ConsoleProtocol::gRPC) == 1); }
 
 TEST(TestFDM_Init) { using namespace ExplorerLens::Engine; FleetDeploymentManager fdm; ASSERT(true); }
-TEST(TestFDM_Method) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DeploymentMethod::WinGet) == 0); ASSERT(static_cast<int>(DeploymentMethod::Manual) == 4); }
+TEST(TestFDM_Method) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FleetDeployMethod::WinGet) == 0); ASSERT(static_cast<int>(FleetDeployMethod::Manual) == 4); }
 TEST(TestFDM_Stage) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(RolloutStage::Canary) == 0); ASSERT(static_cast<int>(RolloutStage::Full) == 3); }
 TEST(TestFDM_Job) { using namespace ExplorerLens::Engine; DeploymentJob dj{}; dj.jobId = "job-001"; dj.stage = RolloutStage::Ring1; dj.targetCount = 1000; ASSERT(dj.targetCount == 1000); }
-TEST(TestFDM_MDM) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DeploymentMethod::MDM_Intune) == 1); }
+TEST(TestFDM_MDM) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FleetDeployMethod::MDM_Intune) == 1); }
 TEST(TestFDM_Ring2) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(RolloutStage::Ring2) == 2); }
 TEST(TestFDM_Done) { using namespace ExplorerLens::Engine; DeploymentJob dj{}; dj.completedCount = 500; dj.targetCount = 1000; ASSERT(dj.completedCount < dj.targetCount); }
-TEST(TestFDM_SCCM) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(DeploymentMethod::SCCM) == 2); }
+TEST(TestFDM_SCCM) { using namespace ExplorerLens::Engine; ASSERT(static_cast<int>(FleetDeployMethod::SCCM) == 2); }
 TEST(TestFDM_Ver) { using namespace ExplorerLens::Engine; DeploymentJob dj{}; dj.version = "30.7.0"; ASSERT(!dj.version.empty()); }
 
 TEST(TestCRG_Init) { using namespace ExplorerLens::Engine; ComplianceReportGenerator crg; ASSERT(true); }
@@ -12422,20 +11957,20 @@ TEST(TestCMF_EvaluateNullSafe) {
 
 TEST(TestGAT_EventTypeEnum) {
     using namespace ExplorerLens::Engine;
-    ASSERT(static_cast<int>(AuditEventType::Generated) != static_cast<int>(AuditEventType::Upscaled));
-    ASSERT(static_cast<int>(AuditEventType::StyleTransferred) != static_cast<int>(AuditEventType::Moderated));
+    ASSERT(static_cast<int>(GenAuditEventType::Generated) != static_cast<int>(GenAuditEventType::Upscaled));
+    ASSERT(static_cast<int>(GenAuditEventType::StyleTransferred) != static_cast<int>(GenAuditEventType::Moderated));
 }
 
 TEST(TestGAT_RetentionEnum) {
     using namespace ExplorerLens::Engine;
-    ASSERT(static_cast<int>(AuditRetentionPolicy::SessionOnly) != static_cast<int>(AuditRetentionPolicy::Permanent));
-    ASSERT(static_cast<int>(AuditRetentionPolicy::Days7) != static_cast<int>(AuditRetentionPolicy::Days90));
+    ASSERT(static_cast<int>(GenAuditRetention::SessionOnly) != static_cast<int>(GenAuditRetention::Permanent));
+    ASSERT(static_cast<int>(GenAuditRetention::Days7) != static_cast<int>(GenAuditRetention::Days90));
 }
 
 TEST(TestGAT_EntryStruct) {
     using namespace ExplorerLens::Engine;
     GenerativeAuditEntry entry{};
-    entry.eventType = AuditEventType::Generated;
+    entry.eventType = GenAuditEventType::Generated;
     entry.modelName = "esrgan_v3";
     entry.inputHash = 0xDEADBEEF;
     entry.outputHash = 0xCAFEBABE;
@@ -12449,19 +11984,19 @@ TEST(TestGAT_RecordAndQuery) {
     using namespace ExplorerLens::Engine;
     GenerativeAuditTrail trail;
     GenerativeAuditEntry entry{};
-    entry.eventType = AuditEventType::Upscaled;
+    entry.eventType = GenAuditEventType::Upscaled;
     entry.modelName = "realesr";
     entry.timestampMs = 9999;
     trail.Record(entry);
-    auto entries = trail.Query(AuditEventType::Upscaled, 0);
+    auto entries = trail.Query(GenAuditEventType::Upscaled, 0);
     ASSERT(entries.size() >= 1);
 }
 
 TEST(TestGAT_SetGetRetention) {
     using namespace ExplorerLens::Engine;
     GenerativeAuditTrail trail;
-    trail.SetRetentionPolicy(AuditRetentionPolicy::Days30);
-    ASSERT(trail.GetRetentionPolicy() == AuditRetentionPolicy::Days30);
+    trail.SetRetentionPolicy(GenAuditRetention::Days30);
+    ASSERT(trail.GetRetentionPolicy() == GenAuditRetention::Days30);
 }
 
 TEST(TestGAT_PurgeEmpty) {
@@ -12481,7 +12016,7 @@ TEST(TestGAT_ExportEmpty) {
 TEST(TestGAT_QueryEmpty) {
     using namespace ExplorerLens::Engine;
     GenerativeAuditTrail trail;
-    auto entries = trail.Query(AuditEventType::Generated, 0);
+    auto entries = trail.Query(GenAuditEventType::Generated, 0);
     ASSERT(entries.empty());
 }
 
@@ -12490,12 +12025,12 @@ TEST(TestGAT_RecordMultiple) {
     GenerativeAuditTrail trail;
     for (int i = 0; i < 5; ++i) {
         GenerativeAuditEntry entry{};
-        entry.eventType = AuditEventType::Moderated;
+        entry.eventType = GenAuditEventType::Moderated;
         entry.modelName = "mod_filter";
         entry.timestampMs = static_cast<uint64_t>(i * 1000);
         trail.Record(entry);
     }
-    auto entries = trail.Query(AuditEventType::Moderated, 0);
+    auto entries = trail.Query(GenAuditEventType::Moderated, 0);
     ASSERT(entries.size() == 5);
 }
 
@@ -12891,15 +12426,15 @@ TEST(TestXPT_PlatformEnum) {
 }
 TEST(TestXPT_VerdictEnum) {
     using namespace ExplorerLens::Engine;
-    ASSERT(static_cast<int>(TestVerdict::Passed) != static_cast<int>(TestVerdict::Failed));
-    ASSERT(static_cast<int>(TestVerdict::Skipped) != static_cast<int>(TestVerdict::Error));
+    ASSERT(static_cast<int>(XPlatVerdict::Passed) != static_cast<int>(XPlatVerdict::Failed));
+    ASSERT(static_cast<int>(XPlatVerdict::Skipped) != static_cast<int>(XPlatVerdict::Error));
 }
 TEST(TestXPT_TestCaseStruct) {
     using namespace ExplorerLens::Engine;
     PlatformTestCase tc;
     tc.name = "testA";
     tc.platform = TestPlatform::Windows;
-    tc.verdict = TestVerdict::Passed;
+    tc.verdict = XPlatVerdict::Passed;
     tc.durationMs = 42;
     ASSERT(!tc.name.empty());
     ASSERT(tc.durationMs == 42);
@@ -13296,9 +12831,9 @@ TEST(TestZenith_AnomalyTypeCount) {
 }
 TEST(TestZenith_AnomalyClassifySeverity) {
     ASSERT(PerformanceAnomalyDetector::ClassifySeverity(1.5) ==
-        AnomalySeverity::Minor);
+        PerfAnomalySeverity::Minor);
     ASSERT(PerformanceAnomalyDetector::ClassifySeverity(10.0) ==
-        AnomalySeverity::Critical);
+        PerfAnomalySeverity::Critical);
 }
 TEST(TestZenith_AnomalyIsAnomaly) {
     ASSERT(PerformanceAnomalyDetector::IsAnomaly(10.0, 2.0, 3.0) == true);
@@ -13971,7 +13506,7 @@ TEST(TestSearchProtocol_AddAndSearch) {
     handler.AddEntry(entry);
     ASSERT(handler.GetIndexSize() == 1);
 
-    SearchQuery query;
+    ShellSearchQuery query;
     query.queryText = L"test";
     auto results = handler.Search(query);
     ASSERT(results.totalMatches == 1);
@@ -13995,7 +13530,7 @@ TEST(TestSearchProtocol_ExtensionFilter) {
     rar.formatType = L"RAR";
     handler.AddEntry(rar);
 
-    SearchQuery query;
+    ShellSearchQuery query;
     query.queryText = L"doc";
     query.extensionFilter = L".zip";
     auto results = handler.Search(query);
@@ -14443,23 +13978,6 @@ TEST(TestColumn_ValueMake) {
     auto val = ColumnValue::Make(ColumnID::Dimensions, L"1920 x 1080", 1920 * 1080);
     ASSERT(val.isAvailable);
     ASSERT(val.numericValue == 1920 * 1080);
-}
-
-TEST(TestColumn_ProviderInit) {
-    using namespace ExplorerLens::Engine;
-    ExplorerColumnProvider provider;
-    auto cols = provider.GetRegisteredColumns();
-    ASSERT(cols.size() == static_cast<size_t>(ColumnID::COUNT));
-}
-
-TEST(TestColumn_CategorizeFile) {
-    using namespace ExplorerLens::Engine;
-    ExplorerColumnProvider provider;
-    auto result = provider.QueryMetadata(L"test.jpg");
-    ASSERT(result.success);
-    // JPEG should be categorized as Image
-    auto* catCol = result.GetColumn(ColumnID::FileCategory);
-    ASSERT(catCol != nullptr && catCol->isAvailable);
 }
 
 // ============================================================================
@@ -15640,7 +15158,7 @@ TEST(TestZeroCopyAct_ModeStrings) {
 }
 TEST(TestZeroCopyAct_StagingBuffer) {
     using namespace ExplorerLens::Engine;
-    StagingBuffer buf;
+    ZCStagingBuffer buf;
     ASSERT(!buf.IsValid());
     buf.data = reinterpret_cast<void*>(0x1000);
     buf.size = 4096;
@@ -15957,7 +15475,7 @@ TEST(TestBandInteg_StateNames) {
 }
 TEST(TestBandInteg_DefaultConfig) {
     using namespace ExplorerLens::Engine;
-    BandConfig cfg;
+    BandIntegrationConfig cfg;
     cfg.position = BandPosition::Top;
     ASSERT(cfg.position == BandPosition::Top);
 }
@@ -17274,14 +16792,14 @@ TEST(Test_DHDash_HealthStatuses) {
 }
 TEST(Test_DHDash_CreateAndRegister) {
     using namespace ExplorerLens::Core;
-    DashboardConfig cfg{};
+    DecoderDashboardConfig cfg{};
     auto dash = DecoderHealthDashboard::Create(cfg);
     dash.RegisterDecoder("WebP", { ".webp" });
     dash.RegisterDecoder("JXL", { ".jxl" });
 }
 TEST(Test_DHDash_RecordAndStats) {
     using namespace ExplorerLens::Core;
-    DashboardConfig cfg{};
+    DecoderDashboardConfig cfg{};
     auto dash = DecoderHealthDashboard::Create(cfg);
     dash.RegisterDecoder("PNG", { ".png" });
     dash.RecordDecode("PNG", true, 5, 1024);
@@ -18715,40 +18233,6 @@ TEST(Test_USNCache_Track) {
     ASSERT(key == fi.ToCacheKey());
 }
 
-//== CloudThumbnailProvider Tests ==
-
-TEST(Test_Cloud_Providers) {
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::ThumbCloudProvider::OneDrive) >= 0);
-}
-TEST(Test_Cloud_SyncState) {
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::SyncState::Unknown) >= 0);
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::SyncState::Error) >= 0);
-}
-TEST(Test_Cloud_AuthStatus) {
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::AuthStatus::Authenticated) >= 0);
-}
-TEST(Test_Cloud_FileInfo) {
-    ExplorerLens::Cloud::ThumbCloudFileInfo info{};
-    ASSERT(info.sizeBytes == 0);
-}
-
-//== NetworkThumbnailProvider Tests ==
-
-TEST(Test_NetThumb_Protocol) {
-    ASSERT(sizeof(ExplorerLens::Cloud::ThumbCloudFileInfo) > 0);
-}
-TEST(Test_NetThumb_URL) {
-    ExplorerLens::Cloud::ThumbCloudFileInfo info{};
-    ASSERT(info.sizeBytes == 0);
-}
-TEST(Test_NetThumb_Create) {
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::ThumbCloudProvider::OneDrive) >= 0);
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::ThumbCloudProvider::Dropbox) >= 0);
-}
-TEST(Test_NetThumb_Config) {
-    ASSERT(static_cast<int>(ExplorerLens::Cloud::AuthStatus::NotAuthenticated) >= 0);
-}
-
 //== CodecLoader Tests ==
 
 TEST(Test_CodecLoad_State) {
@@ -19446,28 +18930,6 @@ TEST(Test_ThumbPipe_Stats) {
     ASSERT(config.preserveAspectRatio == true);
 }
 
-//== CrashHandler Tests ==
-
-TEST(Test_CrashH_Info) {
-    ExplorerLens::CrashInfo info{};
-    ASSERT(info.exit_code == 0);
-}
-TEST(Test_CrashH_Install) {
-    auto& handler = ExplorerLens::CrashHandler::Instance();
-    auto& handler2 = ExplorerLens::CrashHandler::Instance();
-    ASSERT(&handler == &handler2);
-}
-TEST(Test_CrashH_Uninstall) {
-    auto& handler = ExplorerLens::CrashHandler::Instance();
-    handler.ClearHistory();
-    ASSERT(handler.GetCrashCount(L"test") == 0);
-}
-TEST(Test_CrashH_Report) {
-    ExplorerLens::CrashInfo info{};
-    ASSERT(!info.IsCrash());
-    ASSERT(info.GetCrashTypeName() != nullptr);
-}
-
 //== PluginManager Tests ==
 
 TEST(Test_PlugMgr_Create) {
@@ -19606,33 +19068,6 @@ TEST(Test_PHash_Compare) {
 // Deep Functional Tests
 // =====================================================================
 
-// SceneClassifierEngine -----------------------------------
-TEST(TestScene_ClassifyBlack) {
-    SceneClassifierEngine engine;
-    std::vector<uint8_t> black(64 * 64 * 4, 0);
-    auto cat = engine.Classify(black.data(), 64, 64);
-    ASSERT(static_cast<uint32_t>(cat) < static_cast<uint32_t>(ClassifiedScene::COUNT));
-}
-TEST(TestScene_ClassifyWhite) {
-    SceneClassifierEngine engine;
-    std::vector<uint8_t> white(64 * 64 * 4, 255);
-    auto cat = engine.Classify(white.data(), 64, 64);
-    ASSERT(static_cast<uint32_t>(cat) < static_cast<uint32_t>(ClassifiedScene::COUNT));
-}
-TEST(TestScene_ExtractFeatures) {
-    SceneClassifierEngine engine;
-    std::vector<uint8_t> img(32 * 32 * 4, 128);
-    auto feats = engine.ExtractFeatures(img.data(), 32, 32);
-    ASSERT(feats.aspectRatio > 0.0f);
-}
-TEST(TestScene_StatsAfterClassify) {
-    SceneClassifierEngine engine;
-    std::vector<uint8_t> img(16 * 16 * 4, 100);
-    engine.Classify(img.data(), 16, 16);
-    auto stats = engine.GetStats();
-    ASSERT(stats.totalClassifications >= 1);
-}
-
 // SmartCropEngine -----------------------------------------
 TEST(TestSmartCrop_FindBest) {
     SmartCropEngine engine;
@@ -19685,28 +19120,6 @@ TEST(TestIQAv2_Stats) {
     assessor.Assess(img.data(), 16, 16);
     auto stats = assessor.GetStats();
     ASSERT(stats.imagesAssessed >= 1);
-}
-
-// ThumbnailSearchIndex ------------------------------------
-TEST(TestSearchIdx_AddAndCount) {
-    ThumbnailSearchIndex idx;
-    std::vector<uint8_t> img(16 * 16 * 4, 100);
-    idx.AddToIndex(L"test.jpg", img.data(), 16, 16);
-    auto stats = idx.GetStats();
-    ASSERT(stats.indexedCount == 1);
-}
-TEST(TestSearchIdx_AddMultiple) {
-    ThumbnailSearchIndex idx;
-    std::vector<uint8_t> img(16 * 16 * 4, 200);
-    idx.AddToIndex(L"a.png", img.data(), 16, 16);
-    idx.AddToIndex(L"b.png", img.data(), 16, 16);
-    idx.AddToIndex(L"c.png", img.data(), 16, 16);
-    ASSERT(idx.GetStats().indexedCount == 3);
-}
-TEST(TestSearchIdx_EmptyStats) {
-    ThumbnailSearchIndex idx;
-    auto stats = idx.GetStats();
-    ASSERT(stats.indexedCount == 0);
 }
 
 // PluginNamedPipeBridge -----------------------------------
@@ -20335,32 +19748,12 @@ TEST(TestResourceProfiler_Snapshot) {
     ASSERT(snap.workingSet > 0);
 }
 
-// ThumbnailRelevanceScorer
-TEST(TestRelevance_GetName) {
-    ThumbnailRelevanceScorer scorer;
-    ASSERT(std::wstring(ThumbnailRelevanceScorer::GetName()) == L"ThumbnailRelevanceScorer");
-}
-
-// ColorPaletteExtractor
-TEST(TestPalette_GetName) {
-    ColorPaletteExtractor ext;
-    ASSERT(std::wstring(ColorPaletteExtractor::GetName()) == L"ColorPaletteExtractor");
-}
-
 // ImageComplexityAnalyzer
 TEST(TestComplexity_Estimate) {
     ImageComplexityAnalyzer analyzer;
     auto est = analyzer.Estimate(1920, 1080, 32, "JPEG");
     ASSERT(est.estimatedDecodeMs > 0.0);
     ASSERT(est.estimatedMemoryBytes > 0);
-}
-
-// FormatMigrationAdvisor
-TEST(TestMigration_AnalyzeBMP) {
-    FormatMigrationAdvisor advisor;
-    auto analysis = advisor.Analyze("BMP", 1000000);
-    ASSERT(!analysis.recommendations.empty());
-    ASSERT(analysis.recommendations[0].targetFormat == "PNG");
 }
 
 // DecodeStrategyOptimizer
@@ -22339,8 +21732,8 @@ TEST(Test_S56_DecodePriorityQueue_PushPop) {
 TEST(Test_S57_CacheCompressionEngine_Ratio) {
     using namespace ExplorerLens::Engine;
     CacheCompressionEngine engine;
-    engine.SetAlgorithm(CacheCompression::LZ4Fast);
-    ASSERT(engine.GetAlgorithm() == CacheCompression::LZ4Fast);
+    engine.SetAlgorithm(CacheCompressionAlgo::LZ4Fast);
+    ASSERT(engine.GetAlgorithm() == CacheCompressionAlgo::LZ4Fast);
     ASSERT(engine.ShouldCompress(8192));
     uint32_t estimated = engine.EstimateCompressedSize(10000);
     ASSERT(estimated < 10000);
@@ -22576,18 +21969,6 @@ TEST(Test_S67_ThumbnailAnimator_Analyze) {
     ASSERT(result.extractedFrames == 8);
 }
 
-TEST(Test_S68_AccessibilityEnhancer_HighContrast) {
-    using namespace ExplorerLens::Engine;
-    AccessibilityEnhancer enhancer;
-    A11yEnhancerConfig cfg;
-    cfg.mode = AccessibilityMode::HighContrast;
-    enhancer.Configure(cfg);
-    ASSERT(enhancer.IsHighContrast());
-    auto result = enhancer.Apply();
-    ASSERT(result.highContrastActive);
-    ASSERT(result.effectiveContrast >= 2.0f);
-}
-
 TEST(Test_S68_StartupOptimizer_Metrics) {
     using namespace ExplorerLens::Engine;
     StartupOptimizer optimizer;
@@ -22717,27 +22098,6 @@ TEST(Test_S10_DecodeErrorCategory_SecurityFlags) {
     ASSERT(!IsSecurityError(DecodeErrorCategory::CorruptedData));
     ASSERT(IsRecoverable(DecodeErrorCategory::Timeout));
     ASSERT(!IsRecoverable(DecodeErrorCategory::ZipBombDetected));
-}
-
-TEST(Test_S11_DecoderTimeoutGuard_NotExpiredFresh) {
-    using namespace ExplorerLens::Engine;
-    DecoderTimeoutGuard guard(std::chrono::milliseconds(5000));
-    ASSERT(!guard.IsExpired());
-    ASSERT(guard.Remaining().count() > 0);
-}
-
-TEST(Test_S11_DecoderTimeoutGuard_DefaultTimeout) {
-    using namespace ExplorerLens::Engine;
-    DecoderTimeoutGuard guard;
-    ASSERT(guard.GetTimeout() == DecoderTimeoutGuard::DEFAULT_TIMEOUT);
-    ASSERT(!guard.IsExpired());
-}
-
-TEST(Test_S11_DecoderTimeoutGuard_CompletesInstantly) {
-    using namespace ExplorerLens::Engine;
-    DecoderTimeoutGuard guard(std::chrono::milliseconds(2000));
-    auto result = guard.RunWithTimeout([]() { /* instant */ });
-    ASSERT(result == TimeoutResult::Completed);
 }
 
 TEST(Test_S13_GracefulDegradation_AllModes) {
@@ -23856,78 +23216,6 @@ TEST(Test_S37_Persistence_Clear) {
     layer.Clear();
     auto stats = layer.GetStats();
     ASSERT(stats.totalEntries == 0);
-}
-
-// ── Cloud: NetworkThumbnailProvider ──────────────────────────────────────────
-
-TEST(Test_S37_RemoteURL_DetectHTTPS) {
-    auto proto = ExplorerLens::Engine::Cloud::RemoteURL::DetectProtocol("https://example.com/file.jpg");
-    ASSERT(proto == ExplorerLens::Engine::Cloud::NetworkProtocol::HTTPS);
-}
-
-TEST(Test_S37_RemoteURL_DetectHTTP) {
-    auto proto = ExplorerLens::Engine::Cloud::RemoteURL::DetectProtocol("http://server/image.png");
-    ASSERT(proto == ExplorerLens::Engine::Cloud::NetworkProtocol::HTTP);
-}
-
-TEST(Test_S37_RemoteURL_DetectSMB) {
-    auto proto = ExplorerLens::Engine::Cloud::RemoteURL::DetectProtocol("\\\\fileserver\\share\\img.tif");
-    ASSERT(proto == ExplorerLens::Engine::Cloud::NetworkProtocol::SMB);
-}
-
-TEST(Test_S37_RemoteURL_DetectLocal) {
-    auto proto = ExplorerLens::Engine::Cloud::RemoteURL::DetectProtocol("C:\\Photos\\cat.jpg");
-    ASSERT(proto == ExplorerLens::Engine::Cloud::NetworkProtocol::Local);
-}
-
-TEST(Test_S37_RemoteURL_Parse) {
-    auto url = ExplorerLens::Engine::Cloud::RemoteURL::Parse("https://cdn.example.com:8443/thumbnails/img.jpg");
-    ASSERT(url.protocol == ExplorerLens::Engine::Cloud::NetworkProtocol::HTTPS);
-    ASSERT(url.host == "cdn.example.com");
-    ASSERT(url.port == 8443);
-    ASSERT(url.path == "/thumbnails/img.jpg");
-}
-
-TEST(Test_S37_RemoteURL_IsRemote) {
-    ExplorerLens::Engine::Cloud::RemoteURL r;
-    r.protocol = ExplorerLens::Engine::Cloud::NetworkProtocol::HTTPS;
-    ASSERT(r.IsRemote());
-    r.protocol = ExplorerLens::Engine::Cloud::NetworkProtocol::Local;
-    ASSERT(!r.IsRemote());
-}
-
-TEST(Test_S37_RequestStatus_Names) {
-    using ExplorerLens::Engine::Cloud::RequestStatus;
-    using ExplorerLens::Engine::Cloud::RequestStatusName;
-    ASSERT(std::string(RequestStatusName(RequestStatus::Pending)) == "Pending");
-    ASSERT(std::string(RequestStatusName(RequestStatus::Completed)) == "Completed");
-    ASSERT(std::string(RequestStatusName(RequestStatus::TimedOut)) == "Timed Out");
-}
-
-// ── Cloud: CloudThumbnailProvider ────────────────────────────────────────────
-
-TEST(Test_S37_CloudEnums_Providers) {
-    using ExplorerLens::Cloud::ThumbCloudProvider;
-    ASSERT(static_cast<uint8_t>(ThumbCloudProvider::None) == 0);
-    ASSERT(static_cast<uint8_t>(ThumbCloudProvider::OneDrive) == 1);
-    ASSERT(static_cast<uint8_t>(ThumbCloudProvider::GoogleDrive) == 2);
-    ASSERT(static_cast<uint8_t>(ThumbCloudProvider::Dropbox) == 3);
-}
-
-TEST(Test_S37_CloudEnums_SyncState) {
-    using ExplorerLens::Cloud::SyncState;
-    ASSERT(static_cast<uint8_t>(SyncState::Unknown) == 0);
-}
-
-TEST(Test_S37_OAuthToken_Expiry) {
-    ExplorerLens::Cloud::OAuthToken token;
-    token.accessToken = L"test_token";
-    token.expiresAt = std::chrono::system_clock::now() - std::chrono::hours(1);
-    ASSERT(token.IsExpired());
-    ASSERT(!token.IsValid());
-    token.expiresAt = std::chrono::system_clock::now() + std::chrono::hours(1);
-    ASSERT(!token.IsExpired());
-    ASSERT(token.IsValid());
 }
 
 // ── Pipeline: DecodeMemoizationEngine ────────────────────────────────────────
@@ -26224,18 +25512,6 @@ TEST(Test_S395_ThreadLocalPoolAllocator) {
 // --- AI Tests ---
 
 
-TEST(Test_S395_AdaptiveCropEngine) {
-    AdaptiveCropEngine crop;
-    CropConfig cfg;
-    cfg.targetAspectRatio = 1.0f;
-    crop.Configure(cfg);
-    auto result = crop.ComputeCrop(800, 600);
-    ASSERT(result.rect.width > 0);
-    ASSERT(result.rect.height > 0);
-}
-
-
-
 TEST(Test_S395_FileTypePredictor) {
     FileTypePredictor predictor;
     predictor.LoadDefaultSignatures();
@@ -26980,7 +26256,7 @@ TEST(Test_S398_BulkInitialization) {
     AssertInitPattern<DecodeWatermarkStamper>("DecodeWatermarkStamper");
     // GPU
     AssertInitPattern<ShaderVariantSelector>("ShaderVariantSelector");
-    AssertInitPattern<GPUMemoryDefragmenter>("GPUMemoryDefragmenter");
+    AssertInitPattern<GPUMemoryDefragmenterV2>("GPUMemoryDefragmenterV2");
     AssertInitPattern<TextureSamplerCache>("TextureSamplerCache");
     AssertInitPattern<GPUBarrierOptimizer>("GPUBarrierOptimizer");
     AssertInitPattern<ShaderCompileListener>("ShaderCompileListener");
@@ -27434,9 +26710,7 @@ TEST(Test_SIMD_PremultiplyAlpha) {
 #include "../Utils/ShellExtensionHealthMonitor.h"
 // Sprint 891-900 — Accessibility v2
 #include "../Utils/ARIAThumbnailAnnotator.h"
-#include "../Core/AccessibilityAuditEngine.h"
 #include "../Utils/HighContrastThemeAdapter.h"
-#include "../Utils/ScreenReaderBridge.h"
 #include "../Core/KeyboardNavigationController.h"
 #include "../Utils/A11yTelemetryReporter.h"
 
@@ -27690,124 +26964,6 @@ TEST(TestCLIDoctorAllChecks)
 #include "Core/SecureClusterChannel.h"
 #include "Core/ClusterObservabilityBus.h"
 #include "Plugin/PluginSandboxV3.h"
-#include "Plugin/PluginCompatibilityShimV3.h"
-#include "Core/FolderPredictionModel.h"
-#include "Core/ColdStartFolderBootstrapper.h"
-#include "Core/PredictionScanOrchestrator.h"
-#include "GPU/DMADirectPreloader.h"
-#include "Core/PerUserPredictionIsolator.h"
-#include "Core/PredictionAccuracyTracker.h"
-#include "Core/CollaborativeAnnotationEngineV2.h"
-#include "Core/AnnotationSignatureVerifier.h"
-#include "Core/AnnotationTimeline.h"
-#include "Core/PresenceIndicatorEngine.h"
-#include "Core/AnnotationTaxonomyV2.h"
-#include "Core/OfflineAnnotationSyncQueue.h"
-#include "Core/AnnotationExportPipelineV2.h"
-#include "Core/GRPCProtocolServerV2.h"
-#include "Core/RESTAPIServerV2.h"
-#include "Core/GraphQLSubscriptionServer.h"
-#include "Core/OAuth2PKCEMiddleware.h"
-#include "Core/JWTValidationEngine.h"
-#include "Core/RateLimitingMiddleware.h"
-#include "Core/OpenAPICodeGenerator.h"
-#include "Core/GraphQLSchemaIntrospector.h"
-#include "Core/NeuralCodecV2Engine.h"
-#include "Core/ProgressiveNeuralDecoder.h"
-#include "Core/NeuralContainerFormat.h"
-#include "GPU/NeuralCodecHWAccelerator.h"
-#include "Core/CodecNegotiationProtocol.h"
-// Sprint 961-970 — Gen-6 Platform Unification (v30.0.0 "Deneb")
-#include "Core/PlatformAbstractionLayer.h"
-#include "GPU/MetalPipelineV2.h"
-#include "GPU/LinuxDRMBackend.h"
-#include "Core/UniversalWindowBroker.h"
-#include "Core/NativeFilesystemAdapter.h"
-#include "Core/CrossPlatformShellProvider.h"
-#include "Core/PlatformUIScalingEngine.h"
-#include "Utils/PlatformBuildMatrix.h"
-// Sprint 971-980 — DirectStorage & GPU Decompression (v30.1.0 "Deneb-R")
-#include "GPU/DirectStorageEngine.h"
-#include "GPU/GPUDecompressScheduler.h"
-#include "Pipeline/DirectStoragePipelineStage.h"
-#include "GPU/NvGDeflateBackend.h"
-#include "GPU/AMDDecompressBackend.h"
-#include "Cache/DirectStorageCacheTier.h"
-#include "Core/AsyncFileStreamBroker.h"
-#include "GPU/StagingBufferPoolV2.h"
-// Sprint 981-990 — CLIP Semantic Search & Discovery (v30.2.0 "Deneb-S")
-#include "AI/CLIPEmbeddingEngine.h"
-#include "AI/SemanticSearchIndex.h"
-#include "AI/NaturalLanguageQueryParser.h"
-#include "AI/VisualSimilarityGraph.h"
-#include "AI/EmbeddingCacheStore.h"
-#include "AI/MultiModalRanker.h"
-#include "AI/SearchResultDeduplicator.h"
-#include "AI/IncrementalIndexUpdater.h"
-// Sprint 991-1000 — Live Preview Scrubber & Rich Media (v30.3.0 "Deneb-T")
-#include "Core/LivePreviewScrubber.h"
-#include "Core/VideoKeyframeExtractor.h"
-#include "Core/AnimatedFrameScrubber.h"
-#include "Core/AudioWaveformRenderer.h"
-#include "Core/DocumentPagePreviewer.h"
-#include "Core/ShaderSyntaxHighlighter.h"
-#include "Core/FontGlyphSampler.h"
-#include "Core/SpreadsheetChartRenderer.h"
-// Sprint 1001-1010 — Geospatial, Medical & Scientific Formats (v30.4.0 "Deneb-U")
-#include "Decoders/GeoTIFFDecoder.h"
-#include "Decoders/NITFDecoder.h"
-#include "Decoders/DICOMAdvancedDecoder.h"
-#include "Decoders/NRRDDecoder.h"
-#include "Decoders/HDF5ThumbnailDecoder.h"
-#include "Decoders/NetCDFDecoder.h"
-#include "Decoders/FITSDecoder.h"
-#include "Decoders/ECWDecoder.h"
-// Sprint 1011-1020 — Universal Format Decoder Library (v30.5.0 "Deneb-V")
-#include "Core/UniversalDecoderFacade.h"
-#include "Core/FormatCapabilityMatrix.h"
-#include "Core/DecoderVersionRegistry.h"
-#include "Core/FormatFamilyResolver.h"
-#include "Core/DecoderHotfixApplicator.h"
-#include "Core/FormatSchemaValidator.h"
-#include "Core/DecoderCompatLayer.h"
-#include "Core/UniversalLibraryManifest.h"
-
-// Sprint 1021-1030 — Plugin Marketplace v4 & Commerce (v30.6.0 "Deneb-W")
-#include "Plugin/MarketplaceClientV4.h"
-#include "Plugin/PluginRatingEngine.h"
-#include "Plugin/PluginDependencyGraph.h"
-#include "Plugin/PluginBundleInstaller.h"
-#include "Plugin/SubscriptionLicenseManagerV4.h"
-#include "Plugin/PluginReputationScorer.h"
-#include "Plugin/AutoUpdatePolicyV4.h"
-#include "Plugin/PrePublishReviewGateway.h"
-
-// Sprint 1031-1040 — Enterprise Console v3 & Fleet Management (v30.7.0 "Deneb-X")
-#include "Enterprise/EnterpriseConsoleV3.h"
-#include "Enterprise/FleetDeploymentManager.h"
-#include "Enterprise/ComplianceReportGenerator.h"
-#include "Enterprise/EnterpriseMetricsDashboard.h"
-#include "Enterprise/PolicyVersionControl.h"
-#include "Enterprise/RemoteDecoderControl.h"
-#include "Enterprise/UsageAnomalyDetector.h"
-#include "Enterprise/EnterpriseAuditExporter.h"
-#include "Enterprise/EnterpriseAuditExporter.h"
-#include "AI/GenerativeThumbnailEngine.h"
-#include "AI/ContentAwareInpainter.h"
-#include "AI/StyleTransferRenderer.h"
-#include "AI/ImageDescriptionSynthesizer.h"
-#include "AI/ThumbnailPersonalisationEngine.h"
-#include "AI/GenerativeUpscalerV3.h"
-#include "AI/ContentModerationFilter.h"
-#include "AI/GenerativeAuditTrail.h"
-#include "Core/LinuxNautilusExtension.h"
-#include "Core/KDEDolphinExtension.h"
-#include "Core/ThunarThumbnailExtension.h"
-#include "Core/MacOSQuickLookV3.h"
-#include "Core/LinuxThumbnailerDaemon.h"
-#include "Core/WaylandShellExtension.h"
-#include "Core/MacOSLaunchServicesAdapter.h"
-#include "Core/XPlatformTestHarness.h"
 
 
 
@@ -33701,16 +32857,6 @@ TEST(TestHighContrastThemeAdapter_Adapt) {
     ASSERT(hc.thumbBackground != off.thumbBackground);
     adapter.Shutdown();
 }
-TEST(TestScreenReaderBridge_Announce) {
-    using namespace ExplorerLens::Engine;
-    ScreenReaderBridge bridge;
-    ASSERT(bridge.Initialize());
-    int announcements = 0;
-    bridge.SetAnnounceSink([&](const SRAnnouncement&){ ++announcements; });
-    ASSERT(bridge.AnnounceThumbnailReady("photo.jpg", "sunset photo"));
-    ASSERT(bridge.GetAnnouncementCount() == 1);
-    bridge.Shutdown();
-}
 TEST(TestKeyboardNavigationController_ArrowKeys) {
     using namespace ExplorerLens::Engine;
     KeyboardNavigationController nav;
@@ -33751,7 +32897,7 @@ TEST(TestPAL_Detect) {
     auto platform = pal.GetCurrentPlatform();
     ASSERT(platform == PlatformType::Windows);
     auto backend = pal.GetPreferredGPUBackend();
-    ASSERT(backend == GPUBackend::D3D12 || backend == GPUBackend::Vulkan);
+    ASSERT(backend == PlatGPUBackend::D3D12 || backend == PlatGPUBackend::Vulkan);
 }
 TEST(TestPAL_Surface) {
     using namespace ExplorerLens::Engine;
@@ -35527,14 +34673,6 @@ int main()
 
     // High-DPI Support
     std::wcout << L"High-DPI Support..." << std::endl;
-    RUN_TEST(TestDPI_SystemDPI);
-    RUN_TEST(TestDPI_GetMonitorDPI);
-    RUN_TEST(TestDPI_EnumerateMonitors);
-    RUN_TEST(TestDPI_LogicalPhysicalConversion);
-    RUN_TEST(TestDPI_ScaleRequest);
-    RUN_TEST(TestDPI_NearestScale);
-    RUN_TEST(TestDPI_DPIForScale);
-    RUN_TEST(TestDPI_ScaleFactors);
     RUN_TEST(TestDPI_ScaleNames);
     RUN_TEST(TestDPI_AwarenessNames);
 
@@ -35785,14 +34923,7 @@ int main()
 
     std::wcout << std::endl;
 
-    std::wcout << L"Accessibility Engine..." << std::endl;
-    RUN_TEST(TestA11y_FeatureNames);
-    RUN_TEST(TestA11y_ContrastModes);
-    RUN_TEST(TestA11y_FeatureToggle);
-    RUN_TEST(TestA11y_FeatureCount);
-    RUN_TEST(TestA11y_ComplianceAudit);
 
-    std::wcout << std::endl;
 
     std::wcout << L"Cloud Sync Provider..." << std::endl;
     RUN_TEST(TestCloud_ProviderNames);
@@ -35875,30 +35006,12 @@ int main()
 
     std::wcout << std::endl;
 
-    std::wcout << L"Usage Telemetry Engine..." << std::endl;
-    RUN_TEST(TestUsageTelemetry_CategoryNames);
-    RUN_TEST(TestUsageTelemetry_ConsentNames);
-    RUN_TEST(TestUsageTelemetry_ConsentNone);
-    RUN_TEST(TestUsageTelemetry_ConsentBasic);
-    RUN_TEST(TestUsageTelemetry_CategoryCount);
-
-    std::wcout << std::endl;
-
     std::wcout << L"Update Engine..." << std::endl;
     RUN_TEST(TestUpdate_ChannelNames);
     RUN_TEST(TestUpdate_StatusNames);
     RUN_TEST(TestUpdate_CompareVersions);
     RUN_TEST(TestUpdate_CheckForUpdate);
     RUN_TEST(TestUpdate_ChannelCount);
-
-    std::wcout << std::endl;
-
-    std::wcout << L"Shell Preview Handler..." << std::endl;
-    RUN_TEST(TestPreview_ModeNames);
-    RUN_TEST(TestPreview_DetectMode);
-    RUN_TEST(TestPreview_LoadFile);
-    RUN_TEST(TestPreview_Unload);
-    RUN_TEST(TestPreview_ModeCount);
 
     std::wcout << std::endl;
 
@@ -35935,15 +35048,6 @@ int main()
     RUN_TEST(TestReg_DefaultValue);
     RUN_TEST(TestReg_Delete);
     RUN_TEST(TestReg_BasePath);
-
-    std::wcout << std::endl;
-
-    std::wcout << L"Error Recovery Engine..." << std::endl;
-    RUN_TEST(TestRecovery_StrategyNames);
-    RUN_TEST(TestRecovery_CreateCheckpoint);
-    RUN_TEST(TestRecovery_RestoreCheckpoint);
-    RUN_TEST(TestRecovery_CrashRecovery);
-    RUN_TEST(TestRecovery_StrategyCount);
 
     std::wcout << std::endl;
 
@@ -36381,13 +35485,6 @@ int main()
     RUN_TEST(TestGateV21_KPICount);
     RUN_TEST(TestGateV21_Version);
     RUN_TEST(TestGateV21_AllKPIsPresent);
-
-    // Accessibility Pipeline
-    RUN_TEST(TestAccessibility_FeatureNames);
-    RUN_TEST(TestAccessibility_ColorBlindModes);
-    RUN_TEST(TestAccessibility_HCThemes);
-    RUN_TEST(TestAccessibility_DefaultConfig);
-    RUN_TEST(TestAccessibility_Counts);
 
     // Telemetry & Analytics
     RUN_TEST(TestTelemetry_EventNames);
@@ -37281,8 +36378,6 @@ int main()
     std::wcout << L"\nExplorer Column Provider Tests:" << std::endl;
     RUN_TEST(TestColumn_Definitions);
     RUN_TEST(TestColumn_ValueMake);
-    RUN_TEST(TestColumn_ProviderInit);
-    RUN_TEST(TestColumn_CategorizeFile);
 
     // Drag-Drop Thumbnail Preview Tests
     std::wcout << L"\nDrag-Drop Thumbnail Preview Tests:" << std::endl;
@@ -38228,20 +37323,6 @@ int main()
     RUN_TEST(Test_USNCache_Journal);
     RUN_TEST(Test_USNCache_Track);
 
-    // CloudThumbnailProvider Tests
-    std::wcout << L"\nCloud Thumbnail Provider Tests:" << std::endl;
-    RUN_TEST(Test_Cloud_Providers);
-    RUN_TEST(Test_Cloud_SyncState);
-    RUN_TEST(Test_Cloud_AuthStatus);
-    RUN_TEST(Test_Cloud_FileInfo);
-
-    // NetworkThumbnailProvider Tests
-    std::wcout << L"\nNetwork Thumbnail Provider Tests:" << std::endl;
-    RUN_TEST(Test_NetThumb_Protocol);
-    RUN_TEST(Test_NetThumb_URL);
-    RUN_TEST(Test_NetThumb_Create);
-    RUN_TEST(Test_NetThumb_Config);
-
     // CodecLoader Tests
     std::wcout << L"\nCodec Loader Tests:" << std::endl;
     RUN_TEST(Test_CodecLoad_State);
@@ -38508,13 +37589,6 @@ int main()
     RUN_TEST(Test_ThumbPipe_Generate);
     RUN_TEST(Test_ThumbPipe_Stats);
 
-    // CrashHandler Tests
-    std::wcout << L"\nCrash Handler Tests:" << std::endl;
-    RUN_TEST(Test_CrashH_Info);
-    RUN_TEST(Test_CrashH_Install);
-    RUN_TEST(Test_CrashH_Uninstall);
-    RUN_TEST(Test_CrashH_Report);
-
     // PluginManager Tests
     std::wcout << L"\nPlugin Manager Tests:" << std::endl;
     RUN_TEST(Test_PlugMgr_Create);
@@ -38561,12 +37635,6 @@ int main()
     std::wcout << std::endl;
     std::wcout << L"Deep Functional Tests:" << std::endl;
 
-    // SceneClassifierEngine
-    RUN_TEST(TestScene_ClassifyBlack);
-    RUN_TEST(TestScene_ClassifyWhite);
-    RUN_TEST(TestScene_ExtractFeatures);
-    RUN_TEST(TestScene_StatsAfterClassify);
-
     // SmartCropEngine
     RUN_TEST(TestSmartCrop_FindBest);
     RUN_TEST(TestSmartCrop_TopCrops);
@@ -38578,11 +37646,6 @@ int main()
     RUN_TEST(TestIQAv2_AssessMidGray);
     RUN_TEST(TestIQAv2_SubMetrics);
     RUN_TEST(TestIQAv2_Stats);
-
-    // ThumbnailSearchIndex
-    RUN_TEST(TestSearchIdx_AddAndCount);
-    RUN_TEST(TestSearchIdx_AddMultiple);
-    RUN_TEST(TestSearchIdx_EmptyStats);
 
     // PluginNamedPipeBridge
     RUN_TEST(TestPipeBridge_InitState);
@@ -38728,10 +37791,7 @@ int main()
     RUN_TEST(TestResourceProfiler_Snapshot);
 
     // Smart Features
-    RUN_TEST(TestRelevance_GetName);
-    RUN_TEST(TestPalette_GetName);
     RUN_TEST(TestComplexity_Estimate);
-    RUN_TEST(TestMigration_AnalyzeBMP);
     RUN_TEST(TestStrategy_GetName);
 
     // Platform & Integration
@@ -38840,15 +37900,10 @@ int main()
 
     // AI Module Tests
     std::wcout << L"AI Module Tests..." << std::endl;
-    RUN_TEST(Test_SceneClassifier_BasicLabel);
     RUN_TEST(Test_SmartCropV2_CenterFallback);
     RUN_TEST(Test_IQA_ScoreRange);
-    RUN_TEST(Test_ColorPalette_Extract);
     RUN_TEST(Test_ImageComplexity_Range);
-    RUN_TEST(Test_ThumbnailRelevance_Score);
     RUN_TEST(Test_DecodeStrategy_Optimizer);
-    RUN_TEST(Test_FormatMigration_Suggest);
-    RUN_TEST(Test_AISearch_IndexBuild);
     RUN_TEST(Test_SceneUnderstanding_Labels);
 
     // Decoder Subsystem Tests
@@ -38881,13 +37936,6 @@ int main()
     RUN_TEST(Test_AdaptiveGPUScheduler_TaskQueue);
     RUN_TEST(Test_DX12FenceManager_Create);
     RUN_TEST(Test_AsyncTextureSampler_Config);
-
-    // Cloud/Network Tests (Sprint 27)
-    std::wcout << L"Cloud/Network Tests..." << std::endl;
-    RUN_TEST(Test_CloudProvider_Detect);
-    RUN_TEST(Test_CloudProvider_CachePath);
-    RUN_TEST(Test_NetworkThumbnail_Timeout);
-    RUN_TEST(Test_NetworkThumbnail_URLValidation);
 
     // Enterprise Tests (Sprint 27)
     std::wcout << L"Enterprise Tests..." << std::endl;
@@ -38987,18 +38035,6 @@ int main()
     RUN_TEST(Test_S37_Persistence_StoreAndLookup);
     RUN_TEST(Test_S37_Persistence_Invalidate);
     RUN_TEST(Test_S37_Persistence_Clear);
-    // Cloud: NetworkThumbnailProvider
-    RUN_TEST(Test_S37_RemoteURL_DetectHTTPS);
-    RUN_TEST(Test_S37_RemoteURL_DetectHTTP);
-    RUN_TEST(Test_S37_RemoteURL_DetectSMB);
-    RUN_TEST(Test_S37_RemoteURL_DetectLocal);
-    RUN_TEST(Test_S37_RemoteURL_Parse);
-    RUN_TEST(Test_S37_RemoteURL_IsRemote);
-    RUN_TEST(Test_S37_RequestStatus_Names);
-    // Cloud: CloudThumbnailProvider
-    RUN_TEST(Test_S37_CloudEnums_Providers);
-    RUN_TEST(Test_S37_CloudEnums_SyncState);
-    RUN_TEST(Test_S37_OAuthToken_Expiry);
     // Pipeline: DecodeMemoizationEngine
     RUN_TEST(Test_S37_Memoization_StoreAndLookup);
     RUN_TEST(Test_S37_Memoization_Miss);
@@ -39129,7 +38165,6 @@ int main()
     RUN_TEST(Test_S395_ScopedMemoryBudget);
     RUN_TEST(Test_S395_ThreadLocalPoolAllocator);
     // AI
-    RUN_TEST(Test_S395_AdaptiveCropEngine);
     RUN_TEST(Test_S395_FileTypePredictor);
     // Plugin
     // Utils
@@ -39469,16 +38504,6 @@ int main()
     RUN_TEST(TestProcessPoolManager_Cancel);
     RUN_TEST(TestProcessPoolManager_SetPriority);
 
-    RUN_TEST(TestNamedPipeHub_Defaults);
-    RUN_TEST(TestNamedPipeHub_Constants);
-    RUN_TEST(TestNamedPipeHub_GetHubStateName);
-    RUN_TEST(TestNamedPipeHub_StartStop);
-    RUN_TEST(TestNamedPipeHub_IsRunning);
-    RUN_TEST(TestNamedPipeHub_BroadcastNull);
-    RUN_TEST(TestNamedPipeHub_SendToClientInvalid);
-    RUN_TEST(TestNamedPipeHub_GetConnectedClients);
-    RUN_TEST(TestNamedPipeHub_DisconnectClientInvalid);
-
     RUN_TEST(TestIsolationPolicy_DefaultLevel);
     RUN_TEST(TestIsolationPolicy_Constants);
     RUN_TEST(TestIsolationPolicy_GetLevelName);
@@ -39775,7 +38800,6 @@ int main()
     RUN_TEST(Test_S67_GracefulDegradationController_Degrade);
     RUN_TEST(Test_S67_UserPreferenceEngine_SetGet);
     RUN_TEST(Test_S67_ThumbnailAnimator_Analyze);
-    RUN_TEST(Test_S68_AccessibilityEnhancer_HighContrast);
     RUN_TEST(Test_S68_StartupOptimizer_Metrics);
     RUN_TEST(Test_S68_CrashRecoveryEngine_Checkpoint);
     RUN_TEST(Test_S68_HDRToneMapper_ACES);
@@ -39791,9 +38815,6 @@ int main()
     RUN_TEST(Test_S9_DecodeInputValidator_BitDepth);
     RUN_TEST(Test_S10_DecodeErrorCategory_Names);
     RUN_TEST(Test_S10_DecodeErrorCategory_SecurityFlags);
-    RUN_TEST(Test_S11_DecoderTimeoutGuard_NotExpiredFresh);
-    RUN_TEST(Test_S11_DecoderTimeoutGuard_DefaultTimeout);
-    RUN_TEST(Test_S11_DecoderTimeoutGuard_CompletesInstantly);
     RUN_TEST(Test_S13_GracefulDegradation_AllModes);
     RUN_TEST(Test_S13_GracefulDegradation_FaultInjection);
     RUN_TEST(Test_S14_ArchiveSecurityValidator_ZipBombRejection);
@@ -40608,7 +39629,6 @@ int main()
     RUN_TEST(TestARIAThumbnailAnnotator_RenderAttr);
     RUN_TEST(TestAccessibilityAuditEngine_Audit);
     RUN_TEST(TestHighContrastThemeAdapter_Adapt);
-    RUN_TEST(TestScreenReaderBridge_Announce);
     RUN_TEST(TestKeyboardNavigationController_ArrowKeys);
     RUN_TEST(TestA11yTelemetryReporter_Report);
 

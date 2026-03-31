@@ -1,4 +1,4 @@
-// MarketplaceClientV4.h — Plugin Marketplace Client v4
+﻿// MarketplaceClientV4.h — Plugin Marketplace Client v4
 // Copyright (c) 2026 ExplorerLens Project
 //
 // REST + gRPC dual-protocol marketplace client with offline cache support.
@@ -28,7 +28,7 @@ enum class CachePolicy : uint8_t {
     Aggressive  = 3,
 };
 
-struct PluginListing {
+struct MarketplaceListing {
     std::string id;
     std::string name;
     std::string version;
@@ -63,10 +63,10 @@ public:
     MarketplaceClientV4& operator=(MarketplaceClientV4&&)      = default;
 
     // Search the marketplace catalog.
-    [[nodiscard]] std::vector<PluginListing> Search(const SearchQuery& query) const;
+    [[nodiscard]] std::vector<MarketplaceListing> Search(const SearchQuery& query) const;
 
     // Retrieve full metadata for a single plugin.
-    [[nodiscard]] std::optional<PluginListing> GetListing(const std::string& pluginId) const;
+    [[nodiscard]] std::optional<MarketplaceListing> GetListing(const std::string& pluginId) const;
 
     // Download plugin archive; returns local file path on success.
     [[nodiscard]] std::string Download(
@@ -99,8 +99,8 @@ private:
     struct Impl;
     std::unique_ptr<Impl>            m_impl;
 
-    [[nodiscard]] std::vector<PluginListing> FetchFromCache(const SearchQuery& query) const;
-    bool StoreToCache(const std::string& key, const std::vector<PluginListing>& results) const;
+    [[nodiscard]] std::vector<MarketplaceListing> FetchFromCache(const SearchQuery& query) const;
+    bool StoreToCache(const std::string& key, const std::vector<MarketplaceListing>& results) const;
 };
 
 } // namespace ExplorerLens::Engine

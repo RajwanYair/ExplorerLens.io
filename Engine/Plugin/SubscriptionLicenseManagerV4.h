@@ -15,7 +15,7 @@
 
 namespace ExplorerLens::Engine {
 
-enum class LicenseType : uint8_t {
+enum class SubscriptionLicenseTier : uint8_t {
     Free       = 0,
     Individual = 1,
     Team       = 2,
@@ -58,7 +58,7 @@ struct SeatLease {
 
 class SubscriptionLicenseManagerV4 {
 public:
-    explicit SubscriptionLicenseManagerV4(LicenseType type = LicenseType::Individual);
+    explicit SubscriptionLicenseManagerV4(SubscriptionLicenseTier type = SubscriptionLicenseTier::Individual);
     ~SubscriptionLicenseManagerV4() noexcept;
 
     SubscriptionLicenseManagerV4(const SubscriptionLicenseManagerV4&)            = delete;
@@ -84,14 +84,14 @@ public:
     [[nodiscard]] std::string RefreshToken(const std::string& currentToken) const;
 
     [[nodiscard]] SeatAllocation     GetSeatAllocation(const std::string& pluginId) const;
-    [[nodiscard]] LicenseType        GetLicenseType() const noexcept { return m_type; }
+    [[nodiscard]] SubscriptionLicenseTier GetLicenseType() const noexcept { return m_type; }
     [[nodiscard]] std::vector<SeatLease> GetActiveLeases() const;
 
     void SetLicenseEndpoint(const std::string& url);
     void SetHmacSecret(std::array<uint8_t, 32> secret) noexcept;
 
 private:
-    LicenseType                  m_type;
+    SubscriptionLicenseTier              m_type;
     std::string                  m_licenseEndpoint = "https://license.explorerlens.io/v4";
     std::array<uint8_t, 32>      m_hmacSecret{};
 

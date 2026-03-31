@@ -31,7 +31,7 @@ enum class MultiPageFormat : uint8_t {
  COUNT
 };
 
-struct PageInfo {
+struct NavPageInfo {
  uint32_t index = 0;
  uint32_t widthPx = 0;
  uint32_t heightPx = 0;

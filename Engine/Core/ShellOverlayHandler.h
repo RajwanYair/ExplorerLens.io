@@ -1,75 +1,81 @@
-//==============================================================================
-// ExplorerLens Engine — Shell Overlay Icon Handler
-// IShellIconOverlayIdentifier for status overlay icons on thumbnails.
-//==============================================================================
+// ShellOverlayHandler.h — Shell extension icon overlay management
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Provides overlay icon types, positions, and validation for Windows Shell
+// Icon Overlay Handlers (IShellIconOverlayIdentifier).
+//
 #pragma once
-#include <string>
-#include <vector>
 #include <cstdint>
+#include <cstddef>
+#include <cwchar>
+#include <cstring>
 
-namespace ExplorerLens { namespace Engine {
+namespace ExplorerLens {
+namespace Engine {
 
-/// Overlay icon type
 enum class OverlayIconType : uint8_t {
- Cached, // Thumbnail is cached
- Processing, // Currently generating
- Error, // Decode error
- Unsupported, // Format not supported
- Encrypted, // Password-protected archive
- Corrupted, // File appears corrupted
- Large, // File exceeds size limit
- COUNT
+    Cached          = 0,
+    NotCached       = 1,
+    Processing      = 2,
+    Error           = 3,
+    Warning         = 4,
+    Protected       = 5,
+    CloudSynced     = 6,
+    COUNT
 };
 
-/// Overlay position
 enum class OverlayPosition : uint8_t {
- TopLeft,
- TopRight,
- BottomLeft,
- BottomRight,
- COUNT
+    BottomRight = 0,
+    BottomLeft  = 1,
+    TopRight    = 2,
+    TopLeft     = 3,
+    COUNT
 };
 
-/// Overlay icon config
 struct OverlayIconConfig {
- OverlayPosition position = OverlayPosition::BottomRight;
- uint32_t iconSize = 16;
- float opacity = 0.85f;
- bool enabled = true;
- bool showOnHover = false;
+    OverlayPosition position  = OverlayPosition::BottomRight;
+    uint32_t        iconSize  = 16;
+    bool            enabled   = true;
+    bool            useHiDPI  = true;
 };
 
-/// Shell overlay icon handler
 class ShellOverlayHandler {
 public:
- static const wchar_t* OverlayName(OverlayIconType t) {
- switch (t) {
- case OverlayIconType::Cached: return L"Cached";
- case OverlayIconType::Processing: return L"Processing";
- case OverlayIconType::Error: return L"Error";
- case OverlayIconType::Unsupported: return L"Unsupported";
- case OverlayIconType::Encrypted: return L"Encrypted";
- case OverlayIconType::Corrupted: return L"Corrupted";
- case OverlayIconType::Large: return L"Large File";
- default: return L"Unknown";
- }
- }
+    static const wchar_t* OverlayName(OverlayIconType t) noexcept {
+        switch (t) {
+        case OverlayIconType::Cached:      return L"Cached";
+        case OverlayIconType::NotCached:   return L"Not Cached";
+        case OverlayIconType::Processing:  return L"Processing";
+        case OverlayIconType::Error:       return L"Error";
+        case OverlayIconType::Warning:     return L"Warning";
+        case OverlayIconType::Protected:   return L"Protected";
+        case OverlayIconType::CloudSynced: return L"Cloud Synced";
+        default:                           return L"Unknown";
+        }
+    }
 
- static const wchar_t* PositionName(OverlayPosition p) {
- switch (p) {
- case OverlayPosition::TopLeft: return L"Top Left";
- case OverlayPosition::TopRight: return L"Top Right";
- case OverlayPosition::BottomLeft: return L"Bottom Left";
- case OverlayPosition::BottomRight: return L"Bottom Right";
- default: return L"Unknown";
- }
- }
+    static const wchar_t* PositionName(OverlayPosition p) noexcept {
+        switch (p) {
+        case OverlayPosition::BottomRight: return L"Bottom Right";
+        case OverlayPosition::BottomLeft:  return L"Bottom Left";
+        case OverlayPosition::TopRight:    return L"Top Right";
+        case OverlayPosition::TopLeft:     return L"Top Left";
+        default:                           return L"Unknown";
+        }
+    }
 
- static constexpr size_t OverlayCount() { return static_cast<size_t>(OverlayIconType::COUNT); }
- static constexpr size_t PositionCount() { return static_cast<size_t>(OverlayPosition::COUNT); }
+    static bool ValidateOpacity(float opacity) noexcept {
+        return opacity >= 0.0f && opacity <= 1.0f;
+    }
 
- static bool ValidateOpacity(float o) { return o >= 0.0f && o <= 1.0f; }
+    static constexpr size_t OverlayCount() noexcept {
+        return static_cast<size_t>(OverlayIconType::COUNT);
+    }
+
+    static constexpr size_t PositionCount() noexcept {
+        return static_cast<size_t>(OverlayPosition::COUNT);
+    }
 };
 
-}} // namespace ExplorerLens::Engine
-
+} // namespace Engine
+} // namespace ExplorerLens

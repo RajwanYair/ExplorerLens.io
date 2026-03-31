@@ -1,6 +1,6 @@
 // Plugin Trust Chain — GTestShim
 #include "GTestShim.h"
-#include "Plugin/PluginTrustChain.h"
+#include "../Plugin/PluginTrustChainValidator.h"
 
 using namespace ExplorerLens::Plugin;
 

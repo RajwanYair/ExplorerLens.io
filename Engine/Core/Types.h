@@ -185,6 +185,9 @@ struct DecoderInfo {
  /// Decoder version (e.g., "1.0.0")
  const wchar_t *version;
 
+ /// Human-readable description of the decoder's purpose and supported formats
+ const wchar_t *description;
+
  /// Supported file extensions (null-terminated array)
  const wchar_t **supportedExtensions;
 

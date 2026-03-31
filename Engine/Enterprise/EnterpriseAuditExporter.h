@@ -40,7 +40,7 @@ enum class AuditSeverity : uint8_t {
 struct AuditEvent {
     std::string   eventId;
     std::string   category;
-    AuditSeverity severity{AuditSeverity::Info};
+    std::string   severity;
     std::string   actor;
     std::string   resource;
     std::string   outcome;
@@ -67,6 +67,7 @@ struct ExportStats {
 
 class EnterpriseAuditExporter {
 public:
+    EnterpriseAuditExporter() = default;
     explicit EnterpriseAuditExporter(SIEMConfig config);
     ~EnterpriseAuditExporter();
 

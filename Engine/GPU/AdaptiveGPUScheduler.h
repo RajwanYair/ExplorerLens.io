@@ -21,7 +21,7 @@
 //   SetPreferCPUOnBattery()— reduce GPU usage on battery power
 //   SubmitGPUWork(fn, pri) — enqueue work; dispatched by ProcessQueue()
 //   ProcessQueue()         — drain the queue honouring current policy
-//   GetStats()             — SchedulerStats
+//   GetStats()             — AdaptiveSchedulerStats
 //
 // THREAD SAFETY
 //   All public methods guarded by SRWLOCK.
@@ -84,9 +84,9 @@ inline const char* ScheduleDecisionName(ScheduleDecision d) {
 }
 
 // -----------------------------------------------------------------------
-// SchedulerStats
+// AdaptiveSchedulerStats
 // -----------------------------------------------------------------------
-struct SchedulerStats {
+struct AdaptiveSchedulerStats {
     uint64_t gpuDecisions = 0;
     uint64_t cpuDecisions = 0;
     uint64_t deferredItems = 0;
@@ -258,9 +258,9 @@ public:
     // ================================================================
     // GetStats
     // ================================================================
-    inline SchedulerStats GetStats() {
+    inline AdaptiveSchedulerStats GetStats() {
         AcquireShared();
-        SchedulerStats copy = m_stats;
+        AdaptiveSchedulerStats copy = m_stats;
         ReleaseShared();
         return copy;
     }
@@ -289,7 +289,7 @@ private:
     size_t          m_gpuMemReserve = 64 * 1024 * 1024;  // 64 MB default reserve
     HMODULE         m_hDXGI = nullptr;
     IDXGIAdapter3* m_adapter = nullptr;
-    SchedulerStats  m_stats{};
+    AdaptiveSchedulerStats  m_stats{};
     std::priority_queue<WorkItem> m_workQueue;
 
     // ---- internal GPU load query (no lock) ----

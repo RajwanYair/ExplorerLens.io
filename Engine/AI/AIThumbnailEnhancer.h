@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../Core/Prerequisites.h"
+#include <cstdint>
 #include <DirectML.h>
 #include <d3d12.h>
 #include <wrl/client.h>
@@ -152,7 +152,7 @@ private:
  // Helper methods
  HRESULT CreateDirectMLDevice();
  HRESULT CreateCommandResources();
- 
+
  std::vector<float> TextureToTensor(ID3D12Resource* pTexture);
  ComPtr<ID3D12Resource> TensorToTexture(
  const std::vector<float>& tensor,
@@ -160,7 +160,7 @@ private:
  uint32_t height);
 
  HRESULT ExecuteDirectMLOperator(IDMLOperator* pOperator);
- 
+
  void PreprocessImageForONNX(
  const std::vector<float>& input,
  std::vector<float>& output,
@@ -199,4 +199,3 @@ private:
 };
 
 } // namespace ExplorerLens::AI
-

@@ -7,31 +7,40 @@
 namespace ExplorerLens {
 namespace Engine {
 
-/// Anomaly type
-enum class AnomalyType : uint8_t {
+/// Anomaly type (prefixed Perf to avoid collision with UsageAnomalyDetector.h)
+enum class PerfAnomalyType : uint8_t {
  None = 0,
- DecodeTimeSpike, // Single decode >> P99 latency
- ThroughputDrop, // Batch throughput drops below threshold
- MemoryLeak, // Monotonic memory growth over time
- GPUStall, // GPU pipeline stall > threshold
- CacheEvictionStorm, // Mass eviction event
- DiskIOBottleneck, // I/O wait time spike
- ThreadContention, // Lock contention detected
+ // Single decode latency greatly exceeds P99 baseline
+ DecodeTimeSpike,
+ // Batch throughput drops below configured threshold
+ ThroughputDrop,
+ // Monotonic memory growth detected over sliding window
+ MemoryLeak,
+ // GPU pipeline stall exceeds threshold
+ GPUStall,
+ // Mass cache eviction event
+ CacheEvictionStorm,
+ // I/O wait time spike detected
+ DiskIOBottleneck,
+ // Lock contention detected on decode threads
+ ThreadContention,
  COUNT
 };
 
-/// Anomaly severity
-enum class AnomalySeverity : uint8_t {
- Minor = 0, // < 2x baseline
- Moderate, // 2-5x baseline
- Major, // 5-10x baseline
- Critical, // > 10x baseline
+/// Anomaly severity (prefixed Perf to avoid collision with UsageAnomalyDetector.h)
+enum class PerfAnomalySeverity : uint8_t {
+ Minor = 0,
+ // Deviation 2–5× baseline
+ Moderate,
+ // Deviation 5–10× baseline
+ Major,
+ Critical,
  COUNT
 };
 
-struct AnomalyEvent {
- AnomalyType type = AnomalyType::None;
- AnomalySeverity severity = AnomalySeverity::Minor;
+struct PerfAnomalyEvent {
+ PerfAnomalyType type = PerfAnomalyType::None;
+ PerfAnomalySeverity severity = PerfAnomalySeverity::Minor;
  double baselineValue = 0.0;
  double observedValue = 0.0;
  double deviationFactor = 1.0;
@@ -44,51 +53,52 @@ struct AnomalyDetectorConfig {
  double spikeThresholdMultiplier = 3.0;
  double leakThresholdMB = 50.0;
  double gpuStallThresholdMs = 100.0;
- uint32_t windowSamples = 100; // sliding window size
+ // Sliding window size in samples for anomaly detection
+ uint32_t windowSamples = 100;
  bool reportToETW = true;
 };
 
 class PerformanceAnomalyDetector {
 public:
  static constexpr size_t TypeCount() {
- return static_cast<size_t>(AnomalyType::COUNT);
+ return static_cast<size_t>(PerfAnomalyType::COUNT);
  }
  static constexpr size_t SeverityCount() {
- return static_cast<size_t>(AnomalySeverity::COUNT);
+ return static_cast<size_t>(PerfAnomalySeverity::COUNT);
  }
 
- static const wchar_t *TypeName(AnomalyType t) {
+ static const wchar_t *TypeName(PerfAnomalyType t) {
  switch (t) {
- case AnomalyType::None:
+ case PerfAnomalyType::None:
  return L"None";
- case AnomalyType::DecodeTimeSpike:
+ case PerfAnomalyType::DecodeTimeSpike:
  return L"Decode Time Spike";
- case AnomalyType::ThroughputDrop:
+ case PerfAnomalyType::ThroughputDrop:
  return L"Throughput Drop";
- case AnomalyType::MemoryLeak:
+ case PerfAnomalyType::MemoryLeak:
  return L"Memory Leak";
- case AnomalyType::GPUStall:
+ case PerfAnomalyType::GPUStall:
  return L"GPU Stall";
- case AnomalyType::CacheEvictionStorm:
+ case PerfAnomalyType::CacheEvictionStorm:
  return L"Cache Eviction Storm";
- case AnomalyType::DiskIOBottleneck:
+ case PerfAnomalyType::DiskIOBottleneck:
  return L"Disk I/O Bottleneck";
- case AnomalyType::ThreadContention:
+ case PerfAnomalyType::ThreadContention:
  return L"Thread Contention";
  default:
  return L"Unknown";
  }
  }
 
- static const wchar_t *SeverityName(AnomalySeverity s) {
+ static const wchar_t *SeverityName(PerfAnomalySeverity s) {
  switch (s) {
- case AnomalySeverity::Minor:
+ case PerfAnomalySeverity::Minor:
  return L"Minor";
- case AnomalySeverity::Moderate:
+ case PerfAnomalySeverity::Moderate:
  return L"Moderate";
- case AnomalySeverity::Major:
+ case PerfAnomalySeverity::Major:
  return L"Major";
- case AnomalySeverity::Critical:
+ case PerfAnomalySeverity::Critical:
  return L"Critical";
  default:
  return L"Unknown";
@@ -96,14 +106,14 @@ public:
  }
 
  /// Classify severity based on deviation factor
- static AnomalySeverity ClassifySeverity(double deviationFactor) {
+ static PerfAnomalySeverity ClassifySeverity(double deviationFactor) {
  if (deviationFactor < 2.0)
- return AnomalySeverity::Minor;
+ return PerfAnomalySeverity::Minor;
  if (deviationFactor < 5.0)
- return AnomalySeverity::Moderate;
+ return PerfAnomalySeverity::Moderate;
  if (deviationFactor < 10.0)
- return AnomalySeverity::Major;
- return AnomalySeverity::Critical;
+ return PerfAnomalySeverity::Major;
+ return PerfAnomalySeverity::Critical;
  }
 
  /// Check if a value is anomalous compared to baseline
@@ -112,6 +122,15 @@ public:
  return false;
  return (observed / baseline) > threshold;
  }
+};
+
+class DecoderPerformanceProfiler {
+public:
+    static int GranularityCount() { return 4; }
+    static bool IsRegression(double current, double baseline, double threshold) {
+        return baseline > 0.0 && ((current - baseline) / baseline) > threshold;
+    }
+    DecoderPerformanceProfiler() = delete;
 };
 
 } // namespace Engine

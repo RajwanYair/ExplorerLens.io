@@ -102,6 +102,12 @@ public:
     const ScrubState& GetState() const { return m_state; }
     ScrubMode GetMode() const { return m_mode; }
     void SetFrameCallback(FrameCallback cb) { m_frameCallback = std::move(cb); }
+    // Simple 2-param overload for tests: (frameIndex, rawPixels)
+    void SetFrameCallback(std::function<void(uint32_t, const void*)> cb) {
+        m_frameCallback = [cb](uint32_t idx, const uint8_t* p, uint32_t, uint32_t) {
+            if (cb) cb(idx, p);
+        };
+    }
     void SetEventCallback(ScrubEventCallback cb) { m_eventCallback = std::move(cb); }
 
     void SetTotalFrames(uint32_t count) { m_state.totalFrames = count; }

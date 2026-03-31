@@ -19,7 +19,7 @@
 #include "PluginActivation.h"
 
 // Hot-reload: triggers, states, policies
-#include "PluginHotReload.h"
+#include "PluginHotReloadManager.h"
 
 namespace ExplorerLens {
 namespace Engine {

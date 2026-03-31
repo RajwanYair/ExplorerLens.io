@@ -19,7 +19,7 @@ enum class TestPlatform : uint8_t {
     All
 };
 
-enum class TestVerdict : uint8_t {
+enum class XPlatVerdict : uint8_t {
     Passed,
     Failed,
     Skipped,
@@ -29,7 +29,7 @@ enum class TestVerdict : uint8_t {
 struct PlatformTestCase {
     std::string name;
     TestPlatform platform = TestPlatform::All;
-    TestVerdict verdict = TestVerdict::Skipped;
+    XPlatVerdict verdict = XPlatVerdict::Skipped;
     uint32_t durationMs = 0;
     std::string errorMessage;
 };
@@ -54,7 +54,7 @@ public:
         PlatformTestCase result;
         result.name = testName;
         result.platform = m_currentPlatform;
-        result.verdict = TestVerdict::Passed;
+        result.verdict = XPlatVerdict::Passed;
         m_results.push_back(result);
         return result;
     }
@@ -64,7 +64,7 @@ public:
             return 0.0f;
         uint32_t passed = 0;
         for (auto const& r : m_results) {
-            if (r.verdict == TestVerdict::Passed)
+            if (r.verdict == XPlatVerdict::Passed)
                 ++passed;
         }
         return static_cast<float>(passed) / static_cast<float>(m_results.size());
@@ -77,7 +77,7 @@ public:
     [[nodiscard]] std::vector<PlatformTestCase> GetFailedTests() const {
         std::vector<PlatformTestCase> failed;
         for (auto const& r : m_results) {
-            if (r.verdict == TestVerdict::Failed || r.verdict == TestVerdict::Error)
+            if (r.verdict == XPlatVerdict::Failed || r.verdict == XPlatVerdict::Error)
                 failed.push_back(r);
         }
         return failed;

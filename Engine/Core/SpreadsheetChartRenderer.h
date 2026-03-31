@@ -53,7 +53,7 @@ struct ChartDetectionResult {
     uint32_t seriesCount = 0;
 };
 
-struct SpreadsheetMetadata {
+struct ChartSheetMetadata {
     uint32_t sheetCount = 0;
     uint32_t rowCount = 0;
     uint32_t columnCount = 0;
@@ -119,8 +119,8 @@ public:
 
     void SetChartStyle(ChartStyle style) { m_config.style = style; }
     void SetRenderedCallback(ChartRenderedCallback cb) { m_renderedCallback = std::move(cb); }
-    const SpreadsheetMetadata& GetMetadata() const { return m_metadata; }
-    void SetMetadata(const SpreadsheetMetadata& meta) { m_metadata = meta; }
+    const ChartSheetMetadata& GetMetadata() const { return m_metadata; }
+    void SetMetadata(const ChartSheetMetadata& meta) { m_metadata = meta; }
     void AddChart(const ChartDetectionResult& chart) { m_charts.push_back(chart); }
     uint32_t GetChartCount() const { return static_cast<uint32_t>(m_charts.size()); }
     bool IsAnalyzed() const { return m_isAnalyzed; }
@@ -136,7 +136,7 @@ private:
     }
 
     ChartRenderConfig m_config;
-    SpreadsheetMetadata m_metadata;
+    ChartSheetMetadata m_metadata;
     std::vector<ChartDetectionResult> m_charts;
     std::wstring m_filePath;
     ChartRenderedCallback m_renderedCallback;

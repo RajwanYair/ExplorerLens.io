@@ -194,5 +194,84 @@ private:
  double m_totalMissTimeMs = 0.0;
 };
 
-}} // namespace ExplorerLens::Engine
+// Composite key for thumbnail lookup in the persistence layer
+struct ThumbnailCacheKey {
+    std::wstring filePath;
+    uint64_t     fileSize          = 0;
+    uint64_t     lastModifiedTime  = 0;
+    uint32_t     requestedWidth    = 0;
+    uint32_t     requestedHeight   = 0;
+};
 
+// A retrieved persistent cache entry
+struct PersistentCacheEntry {
+    std::vector<uint8_t> data;
+    uint32_t             dataSize   = 0;
+    uint64_t             storedAtMs = 0;
+    bool                 isValid    = false;
+};
+
+// Eviction policy for the persistence layer
+enum class PersistenceEvictionPolicy : uint8_t { LRU = 0, SizeBased, TimeBased, AccessCount };
+
+inline const char* PersistenceEvictionPolicyToString(PersistenceEvictionPolicy p) noexcept {
+    switch (p) {
+    case PersistenceEvictionPolicy::LRU:         return "LRU";
+    case PersistenceEvictionPolicy::SizeBased:   return "SizeBased";
+    case PersistenceEvictionPolicy::TimeBased:   return "TimeBased";
+    case PersistenceEvictionPolicy::AccessCount: return "AccessCount";
+    default: return "Unknown";
+    }
+}
+
+// Aggregated cache statistics
+struct CacheStats {
+    uint64_t cacheHits   = 0;
+    uint64_t cacheMisses = 0;
+    double GetHitRate() const noexcept {
+        uint64_t total = cacheHits + cacheMisses;
+        return total > 0 ? (100.0 * static_cast<double>(cacheHits)) / static_cast<double>(total) : 0.0;
+    }
+};
+
+// File-backed thumbnail persistence layer with hit/miss tracking
+class ThumbnailPersistenceLayer {
+public:
+    bool Initialize(const wchar_t* cachePath) {
+        if (!cachePath) return false;
+        m_path = cachePath;
+        m_initialized = true;
+        return true;
+    }
+    bool IsInitialized() const noexcept { return m_initialized; }
+
+    bool Store(const ThumbnailCacheKey& key, const uint8_t* data, size_t dataSize) {
+        if (!m_initialized || !data || dataSize == 0) return false;
+        m_store[key.filePath].assign(data, data + dataSize);
+        return true;
+    }
+
+    bool Lookup(const ThumbnailCacheKey& key, PersistentCacheEntry& out) const {
+        if (!m_initialized) return false;
+        auto it = m_store.find(key.filePath);
+        if (it == m_store.end()) { ++m_missCount; return false; }
+        out.data     = it->second;
+        out.dataSize = static_cast<uint32_t>(it->second.size());
+        out.isValid  = true;
+        ++m_hitCount;
+        return true;
+    }
+
+    CacheStats GetStats() const noexcept {
+        return { m_hitCount, m_missCount };
+    }
+
+private:
+    std::wstring m_path;
+    bool m_initialized = false;
+    mutable uint64_t m_hitCount  = 0;
+    mutable uint64_t m_missCount = 0;
+    std::unordered_map<std::wstring, std::vector<uint8_t>> m_store;
+};
+
+}} // namespace ExplorerLens::Engine

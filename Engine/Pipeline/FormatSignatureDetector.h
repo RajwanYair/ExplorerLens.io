@@ -9,6 +9,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <array>
@@ -256,6 +257,22 @@ private:
 
     std::vector<FormatSignature> m_signatures;
     SignatureDetectorStats m_stats{};
+};
+
+class FormatFingerprintDB {
+public:
+    static int FamilyCount() { return 15; }
+
+    static bool MatchesPNG(const uint8_t* data, size_t len) {
+        static const uint8_t sig[] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+        return len >= 8 && std::memcmp(data, sig, 8) == 0;
+    }
+
+    static bool MatchesJPEG(const uint8_t* data, size_t len) {
+        return len >= 3 && data[0] == 0xFF && data[1] == 0xD8 && data[2] == 0xFF;
+    }
+
+    FormatFingerprintDB()  = delete;
 };
 
 } // namespace Engine

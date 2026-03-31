@@ -1,15 +1,31 @@
 //==============================================================================
 // ExplorerLens Engine — APNG & Animated Format Enhancement
 // Validates APNG via WIC, improves animated WebP/JXL first-frame extraction.
-// Core types (AnimatedFormat, FrameStrategy, AnimationInfo) are defined
-// in Core/AnimatedThumbnailEngine.h — this handler adds detection and
-// selection.
+// Core types defined inline after consolidation (originally from AnimatedThumbnailEngine.h).
 //==============================================================================
 #pragma once
-#include "../Core/AnimatedThumbnailEngine.h"
+#include <cstdint>
+#include <string>
 
 namespace ExplorerLens {
 namespace Engine {
+
+enum class AnimatedFormat : uint8_t {
+ GIF = 0, APNG, WebPAnim, JXLAnim, AVIFSeq, FLIF, FormatCount
+};
+
+enum class FrameStrategy : uint8_t {
+ First = 0, Keyframe, Middle, MostDetail, Composite, StrategyCount
+};
+
+struct AnimationInfo {
+ AnimatedFormat format = AnimatedFormat::GIF;
+ uint32_t frameCount = 0;
+ uint32_t durationMs = 0;
+ uint32_t width = 0;
+ uint32_t height = 0;
+ bool isLooping = false;
+};
 
 /// Animated format handler — extends the core AnimatedThumbnailEngine types
 class AnimatedFormatHandler {

@@ -6,136 +6,109 @@
 //
 #pragma once
 
-#include <chrono>
 #include <cstdint>
 #include <mutex>
 #include <queue>
 #include <string>
 #include <vector>
+#include <chrono>
 
 namespace ExplorerLens {
 namespace Engine {
 
-static constexpr uint32_t INDEX_UPDATE_BATCH_SIZE    = 64;
-static constexpr uint32_t INDEX_UPDATE_FLUSH_MS      = 500;
-static constexpr uint32_t INDEX_UPDATE_MAX_PENDING   = 10000;
-
-enum class FileChangeType : uint8_t {
+// Index-updater-specific change type (distinct from LivePreviewUpdater's FileChangeType)
+enum class IndexFileChangeType : uint8_t {
     Created  = 0,
     Deleted  = 1,
     Modified = 2,
     Renamed  = 3
 };
 
-struct FileChangeEvent {
-    std::wstring   filePath;
-    FileChangeType changeType;
-    uint64_t       fileHash;
-    int64_t        timestamp;
-};
-
-struct UpdateBatch {
-    std::vector<FileChangeEvent> events;
-    int64_t                      createdAt;
-    uint32_t                     retryCount = 0;
-};
-
-struct UpdaterStats {
-    uint64_t totalEventsReceived  = 0;
-    uint64_t totalEventsFlushed   = 0;
-    uint64_t totalBatchesFlushed  = 0;
-    uint64_t pendingEvents        = 0;
-    float    avgFlushLatencyMs    = 0.0f;
-};
-
-struct IndexUpdaterConfig {
-    uint32_t batchSize       = INDEX_UPDATE_BATCH_SIZE;
-    uint32_t flushIntervalMs = INDEX_UPDATE_FLUSH_MS;
-    uint32_t maxPending      = INDEX_UPDATE_MAX_PENDING;
-    uint32_t maxRetries      = 3;
-    bool     autoFlush       = true;
+struct IndexFileChangeEvent {
+    std::wstring         filePath;
+    IndexFileChangeType  changeType = IndexFileChangeType::Modified;
+    uint64_t             fileHash   = 0;
+    int64_t              timestamp  = 0;
 };
 
 class IncrementalIndexUpdater {
 public:
-    inline bool Initialize(const IndexUpdaterConfig& config) {
+    IncrementalIndexUpdater() = default;
+    ~IncrementalIndexUpdater() = default;
+
+    IncrementalIndexUpdater(const IncrementalIndexUpdater&) = delete;
+    IncrementalIndexUpdater& operator=(const IncrementalIndexUpdater&) = delete;
+
+    bool Initialize() {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_config = config;
         m_stats = {};
         while (!m_pendingQueue.empty()) m_pendingQueue.pop();
         m_initialized = true;
         return true;
     }
 
-    inline bool OnFileCreated(const std::wstring& path, uint64_t fileHash) {
-        return EnqueueEvent(path, FileChangeType::Created, fileHash);
+    void Shutdown() {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        while (!m_pendingQueue.empty()) m_pendingQueue.pop();
+        m_initialized = false;
     }
 
-    inline bool OnFileDeleted(const std::wstring& path, uint64_t fileHash) {
-        return EnqueueEvent(path, FileChangeType::Deleted, fileHash);
+    bool OnFileCreated(const std::wstring& path) {
+        return EnqueueEvent(path, IndexFileChangeType::Created);
     }
 
-    inline bool OnFileModified(const std::wstring& path, uint64_t fileHash) {
-        return EnqueueEvent(path, FileChangeType::Modified, fileHash);
+    bool OnFileDeleted(const std::wstring& path) {
+        return EnqueueEvent(path, IndexFileChangeType::Deleted);
     }
 
-    inline uint32_t GetPendingUpdates() const {
+    bool OnFileModified(const std::wstring& path) {
+        return EnqueueEvent(path, IndexFileChangeType::Modified);
+    }
+
+    uint32_t GetPendingUpdates() const {
         std::lock_guard<std::mutex> lock(m_mutex);
         return static_cast<uint32_t>(m_pendingQueue.size());
     }
 
-    inline UpdateBatch FlushUpdates() {
+    void FlushUpdates() {
         std::lock_guard<std::mutex> lock(m_mutex);
-        UpdateBatch batch;
-        batch.createdAt = std::chrono::system_clock::now().time_since_epoch().count();
-
-        uint32_t count = 0;
-        while (!m_pendingQueue.empty() && count < m_config.batchSize) {
-            batch.events.push_back(std::move(m_pendingQueue.front()));
+        while (!m_pendingQueue.empty()) {
             m_pendingQueue.pop();
-            ++count;
+            ++m_stats.totalFlushed;
         }
-
-        m_stats.totalEventsFlushed += count;
-        ++m_stats.totalBatchesFlushed;
-        m_stats.pendingEvents = m_pendingQueue.size();
-        return batch;
     }
 
-    inline UpdaterStats GetStats() const {
+    uint64_t GetTotalProcessed() const {
         std::lock_guard<std::mutex> lock(m_mutex);
-        return m_stats;
+        return m_stats.totalFlushed;
     }
 
-    inline bool IsInitialized() const { return m_initialized; }
+    double GetAverageFlushLatencyMs() const { return 0.0; }
+
+    bool IsInitialized() const { return m_initialized; }
 
 private:
-    inline bool EnqueueEvent(const std::wstring& path, FileChangeType type, uint64_t hash) {
+    bool EnqueueEvent(const std::wstring& path, IndexFileChangeType type) {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (!m_initialized) return false;
-        if (m_pendingQueue.size() >= m_config.maxPending) return false;
-
-        FileChangeEvent evt;
+        IndexFileChangeEvent evt;
         evt.filePath   = path;
         evt.changeType = type;
-        evt.fileHash   = hash;
         evt.timestamp  = std::chrono::system_clock::now().time_since_epoch().count();
-
         m_pendingQueue.push(std::move(evt));
-        ++m_stats.totalEventsReceived;
-        m_stats.pendingEvents = m_pendingQueue.size();
-
-        if (m_config.autoFlush && m_pendingQueue.size() >= m_config.batchSize) {
-            // Caller should poll FlushUpdates() — auto-flush is a hint
-        }
+        ++m_stats.totalReceived;
         return true;
     }
 
-    IndexUpdaterConfig             m_config;
-    std::queue<FileChangeEvent>    m_pendingQueue;
-    UpdaterStats                   m_stats;
-    mutable std::mutex             m_mutex;
-    bool                           m_initialized = false;
+    struct Stats {
+        uint64_t totalReceived = 0;
+        uint64_t totalFlushed  = 0;
+    };
+
+    std::queue<IndexFileChangeEvent> m_pendingQueue;
+    Stats                            m_stats;
+    mutable std::mutex               m_mutex;
+    bool                             m_initialized = false;
 };
 
 } // namespace Engine

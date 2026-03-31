@@ -1,6 +1,6 @@
 // Plugin Runtime Test Matrix — GTestShim
 #include "GTestShim.h"
-#include "Plugin/PluginRuntimeTestMatrix.h"
+#include "../Plugin/PluginSecurity.h"
 
 using namespace ExplorerLens::Plugin;
 

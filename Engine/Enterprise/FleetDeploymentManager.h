@@ -15,7 +15,7 @@
 
 namespace ExplorerLens::Engine {
 
-enum class DeploymentMethod : uint8_t {
+enum class FleetDeployMethod : uint8_t {
     WinGet     = 0,
     MDM_Intune = 1,
     SCCM       = 2,
@@ -40,7 +40,7 @@ enum class JobState : uint8_t {
 
 struct DeploymentJob {
     std::string      jobId;
-    DeploymentMethod method{DeploymentMethod::WinGet};
+    FleetDeployMethod method{FleetDeployMethod::WinGet};
     std::string      version;
     RolloutStage     stage{RolloutStage::Canary};
     uint32_t         targetCount{0};
@@ -67,7 +67,7 @@ public:
 
     // Job scheduling
     std::string ScheduleDeployment(const std::string& version,
-                                   DeploymentMethod   method,
+                                   FleetDeployMethod  method,
                                    RolloutStage       initialStage = RolloutStage::Canary);
     bool        AdvanceStage(const std::string& jobId);
     bool        CancelJob(const std::string& jobId);
@@ -83,7 +83,7 @@ public:
     bool                        RefreshInventory();
 
     // Method availability check
-    bool IsMethodAvailable(DeploymentMethod method) const;
+    bool IsMethodAvailable(FleetDeployMethod method) const;
 
     // Progress callback
     using ProgressCallback = std::function<void(const DeploymentJob&)>;

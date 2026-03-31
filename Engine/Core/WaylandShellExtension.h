@@ -56,8 +56,9 @@ public:
         return true;
     }
 
-    void Disconnect() {
+    bool Disconnect() {
         m_connected = false;
+        return true;
     }
 
     [[nodiscard]] bool IsConnected() const {

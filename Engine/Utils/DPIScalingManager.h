@@ -167,5 +167,31 @@ private:
     DPIAwarenessLevel m_awarenessLevel = DPIAwarenessLevel::PerMonitorV2;
 };
 
+enum class DPITier : uint8_t {
+    Low      = 0,
+    Standard = 1,
+    High     = 2,
+    VeryHigh = 3,
+    Ultra    = 4
+};
+
+class AdaptiveDPIScaler {
+public:
+    static int StrategyCount() { return 5; }
+
+    static DPITier ClassifyDPI(int dpi) {
+        if (dpi <= 96)  return DPITier::Standard;
+        if (dpi <= 120) return DPITier::High;
+        if (dpi <= 192) return DPITier::VeryHigh;
+        return DPITier::Ultra;
+    }
+
+    static int ScaledSize(int baseSize, float dpiRatio) {
+        return static_cast<int>(baseSize * dpiRatio);
+    }
+
+    AdaptiveDPIScaler()  = delete;
+};
+
 }
 } // namespace ExplorerLens::Engine

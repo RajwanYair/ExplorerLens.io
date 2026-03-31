@@ -14,6 +14,32 @@ namespace ExplorerLens { namespace Engine {
 
 enum class ShellHealthStatus { Healthy, Degraded, Unavailable, Crashed };
 
+inline const char* ShellHealthStatusName(ShellHealthStatus s) noexcept {
+    switch (s) {
+    case ShellHealthStatus::Healthy:     return "Healthy";
+    case ShellHealthStatus::Degraded:    return "Degraded";
+    case ShellHealthStatus::Unavailable: return "Unavailable";
+    case ShellHealthStatus::Crashed:     return "Crashed";
+    default:                             return "Unknown";
+    }
+}
+
+enum class RecoveryAction : uint8_t { Restart = 0, Reload = 1, Escalate = 2, Ignore = 3 };
+
+inline const char* RecoveryActionName(RecoveryAction a) noexcept {
+    switch (a) {
+    case RecoveryAction::Restart:  return "Restart";
+    case RecoveryAction::Reload:   return "Reload";
+    case RecoveryAction::Escalate: return "Escalate";
+    case RecoveryAction::Ignore:   return "Ignore";
+    default:                       return "Unknown";
+    }
+}
+
+struct ShellHealthCheckResult {
+    ShellHealthStatus status = ShellHealthStatus::Healthy;
+};
+
 struct ShellHealthSnapshot {
     ShellHealthStatus status         = ShellHealthStatus::Healthy;
     float             avgLatencyMs   = 0.0f;
@@ -29,7 +55,7 @@ using HealthAlertCallback = std::function<void(const ShellHealthSnapshot&)>;
 
 class ShellExtHealthMonitorV2 {
 public:
-    ShellExtensionHealthMonitor() = default;
+    ShellExtHealthMonitorV2() = default;
 
     bool Initialize(const std::string& dllVersion = "") {
         m_version = dllVersion;
@@ -102,6 +128,30 @@ private:
         if (m_alertCb) m_alertCb(GetSnapshot());
         m_errorCount = 0;
     }
+};
+
+class ShellExtensionHealthMonitor {
+public:
+    ShellHealthCheckResult CheckHealth() {
+        ++m_checkCount;
+        ShellHealthCheckResult result;
+        result.status = m_status;
+        return result;
+    }
+
+    void SimulateFailure(ShellHealthStatus status) noexcept { m_status = status; }
+
+    bool AutoRecover() {
+        m_status = ShellHealthStatus::Healthy;
+        return true;
+    }
+
+    ShellHealthStatus GetStatus() const noexcept { return m_status; }
+    uint32_t GetCheckCount() const noexcept { return m_checkCount; }
+
+private:
+    ShellHealthStatus m_status     = ShellHealthStatus::Healthy;
+    uint32_t          m_checkCount = 0;
 };
 
 }} // namespace ExplorerLens::Engine

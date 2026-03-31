@@ -222,5 +222,45 @@ struct SafeRLEReader {
 };
 
 } // namespace Security
+
+// -- Decoder sandbox policy types (used by tests via 'using namespace Engine') --
+
+enum class DecoderSandboxLevel : uint8_t { None, Standard, Strict, Paranoid };
+
+inline const char* DecoderSandboxLevelName(DecoderSandboxLevel l) noexcept {
+    switch (l) {
+    case DecoderSandboxLevel::None:     return "None";
+    case DecoderSandboxLevel::Standard: return "Standard";
+    case DecoderSandboxLevel::Strict:   return "Strict";
+    case DecoderSandboxLevel::Paranoid: return "Paranoid";
+    default: return "Unknown";
+    }
+}
+
+enum class SandboxResourceLimit : uint8_t { Memory, CPU, Disk, NetworkBandwidth };
+
+inline const char* SandboxResourceLimitName(SandboxResourceLimit r) noexcept {
+    switch (r) {
+    case SandboxResourceLimit::Memory:           return "Memory";
+    case SandboxResourceLimit::CPU:              return "CPU";
+    case SandboxResourceLimit::Disk:             return "Disk";
+    case SandboxResourceLimit::NetworkBandwidth: return "NetworkBandwidth";
+    default: return "Unknown";
+    }
+}
+
+struct DecoderSandboxRule {
+    DecoderSandboxLevel level = DecoderSandboxLevel::Standard;
+};
+
+struct DecoderSandboxViolation {
+    SandboxResourceLimit resource = SandboxResourceLimit::Memory;
+};
+
+class DecoderSandboxPolicy {
+public:
+    static constexpr uint32_t MAX_MEMORY_MB = 512;
+};
+
 } // namespace Engine
 } // namespace ExplorerLens

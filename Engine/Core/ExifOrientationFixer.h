@@ -69,6 +69,7 @@ struct OrientationReadResult {
     bool            needsFix = false;
     uint32_t        exifOffset = 0;
 };
+using ExifReadResult = OrientationReadResult;
 
 /// Result of a batch fix operation
 struct BatchFixResult {

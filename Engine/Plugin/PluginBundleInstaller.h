@@ -14,19 +14,22 @@
 
 namespace ExplorerLens::Engine {
 
-enum class InstallPhase : uint8_t {
+enum class BundleInstallPhase : uint8_t {
     Verify   = 0,
     Download = 1,
     Stage    = 2,
     Commit   = 3,
-    Rollback = 4,
+    Rollback = 4
 };
+
 
 struct BundleEntry {
     std::string pluginId;
     std::string version;
-    std::string checksum;  // SHA-256 hex string
-    uint64_t    size = 0;  // bytes
+    // SHA-256 hex string for integrity verification
+    std::string checksum;
+    // Total payload size in bytes
+    uint64_t    size = 0;
 
     [[nodiscard]] bool IsValid() const noexcept {
         return !pluginId.empty() && !version.empty()
@@ -35,7 +38,7 @@ struct BundleEntry {
 };
 
 struct InstallProgress {
-    InstallPhase phase         = InstallPhase::Verify;
+    BundleInstallPhase phase         = BundleInstallPhase::Verify;
     uint32_t     current       = 0;
     uint32_t     total         = 0;
     std::string  currentPlugin;
@@ -45,7 +48,7 @@ struct InstallProgress {
     }
 };
 
-using ProgressCallback = std::function<void(const InstallProgress&)>;
+using BundleProgressCallback = std::function<void(const InstallProgress&)>;
 
 struct BundleManifest {
     std::string              bundleId;
@@ -67,7 +70,7 @@ public:
     // Install all entries in the manifest atomically.
     // Returns true on full success; any failure triggers automatic rollback.
     bool InstallBundle(const BundleManifest& manifest,
-                       ProgressCallback      callback = nullptr);
+                       BundleProgressCallback callback = nullptr);
 
     // Explicitly roll back the most recently staged bundle.
     bool RollbackBundle(const std::string& bundleId);
@@ -95,7 +98,7 @@ private:
     bool RunDownloadPhase(const BundleManifest& manifest, ProgressCallback& cb);
     bool RunStagePhase(const BundleManifest& manifest);
     bool RunCommitPhase(const BundleManifest& manifest);
-    void SetProgress(InstallPhase phase, uint32_t current, uint32_t total,
+    void SetProgress(BundleInstallPhase phase, uint32_t current, uint32_t total,
                      const std::string& plugin) noexcept;
 };
 

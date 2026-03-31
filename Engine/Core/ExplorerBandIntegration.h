@@ -3,7 +3,7 @@
 // ExplorerBandIntegration.h — Windows Explorer band COM integration
 //
 // Purpose:   Windows Explorer band (toolbar/info band) COM integration
-// Provides:  BandPosition, BandState enums, BandConfig,
+// Provides:  BandPosition, BandState enums, BandIntegrationConfig,
 //            BandRegistrationInfo structs, and ExplorerBandIntegration class
 // Used by:   Shell extension registration
 // ============================================================================
@@ -57,7 +57,7 @@ inline const char* BandStateName(BandState value) {
     }
 }
 
-struct BandConfig {
+struct BandIntegrationConfig {
     BandPosition position = BandPosition::Top;
     uint32_t     width = 300;
     uint32_t     height = 80;
@@ -94,7 +94,7 @@ public:
     ExplorerBandIntegration(const ExplorerBandIntegration&) = delete;
     ExplorerBandIntegration& operator=(const ExplorerBandIntegration&) = delete;
 
-    bool Register(const BandConfig& config) {
+    bool Register(const BandIntegrationConfig& config) {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         if (!config.IsValid()) {
@@ -145,7 +145,7 @@ public:
         return true;
     }
 
-    const BandConfig& GetConfig() const {
+    const BandIntegrationConfig& GetConfig() const {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_config;
     }
@@ -155,7 +155,7 @@ public:
         return m_registration.isRegistered;
     }
 
-    bool UpdateConfig(const BandConfig& config) {
+    bool UpdateConfig(const BandIntegrationConfig& config) {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (!m_registration.isRegistered || !config.IsValid()) {
             return false;
@@ -172,7 +172,7 @@ private:
     }
 
     mutable std::mutex       m_mutex;
-    BandConfig               m_config;
+    BandIntegrationConfig               m_config;
     BandRegistrationInfo     m_registration;
     BandState                m_state = BandState::Hidden;
 };

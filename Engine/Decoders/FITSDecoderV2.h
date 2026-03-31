@@ -50,6 +50,38 @@ enum class FITSStretch : uint8_t {
     Asinh
 };
 
+/// FITS stretch mode (extended, for Sprint 1001-1010 decoders)
+enum class FITSStretchMode : uint8_t {
+    Linear,
+    Logarithmic,
+    Sqrt,
+    Asinh,
+    HistogramEqualization
+};
+
+/// FITS false-color lookup table
+enum class FITSColorLUT : uint8_t {
+    Grayscale,
+    Heat,
+    Cool,
+    Rainbow,
+    STScIDefault
+};
+
+/// FITS header metadata (extended)
+struct FITSHeaderInfo {
+    int32_t     bitpix = 16;
+    uint32_t    naxis = 2;
+    uint32_t    naxis1 = 0;
+    uint32_t    naxis2 = 0;
+    double      bzero = 0.0;
+    double      bscale = 1.0;
+    std::string objectName;
+    std::string telescopeName;
+    std::string dateObs;
+    double      expTime = 0.0;
+};
+
 /// FITS decoder (V1)
 class FITSDecoder {
 public:

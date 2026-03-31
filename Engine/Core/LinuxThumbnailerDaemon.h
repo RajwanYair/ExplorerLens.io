@@ -53,9 +53,10 @@ public:
         return true;
     }
 
-    void Stop() {
+    bool Stop() {
         m_state = DaemonState::ShuttingDown;
         m_state = DaemonState::Stopped;
+        return true;
     }
 
     [[nodiscard]] DaemonState GetState() const {

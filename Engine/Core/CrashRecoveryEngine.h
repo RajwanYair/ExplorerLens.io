@@ -76,7 +76,8 @@ public:
     RecoveryResult Recover(CrashRecoveryAction action) {
         RecoveryResult result;
         result.action = action;
-        result.recoveryMs = 50.0; // Simulated
+        // Simulated recovery time; replaced with real measurement in production
+        result.recoveryMs = 50.0;
         result.success = true;
         result.stateRestored = m_checkpointCount;
         m_recoveryCount++;
@@ -99,6 +100,27 @@ private:
     CrashCheckpoint m_checkpoints[MAX_CHECKPOINTS] = {};
     uint32_t m_checkpointCount = 0;
     uint32_t m_recoveryCount = 0;
+};
+
+enum class CrashDumpType : uint8_t {
+    MiniDump  = 0,
+    FullDump  = 1,
+    HeapDump  = 2,
+    CustomDump = 3
+};
+
+class CrashAnalyticsCollector {
+public:
+    static int CategoryCount() { return 8; }
+    static uint64_t EstimateDumpSize(CrashDumpType type) {
+        switch (type) {
+        case CrashDumpType::MiniDump:  return 500ULL * 1024;
+        case CrashDumpType::FullDump:  return 256ULL * 1024 * 1024;
+        case CrashDumpType::HeapDump:  return 128ULL * 1024 * 1024;
+        default:                       return 1ULL * 1024 * 1024;
+        }
+    }
+    CrashAnalyticsCollector() = delete;
 };
 
 } // namespace Engine

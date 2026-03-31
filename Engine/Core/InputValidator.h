@@ -29,7 +29,7 @@ enum class ValidationError {
     EmptyInput
 };
 
-struct ValidationResult {
+struct PathValidationResult {
     ValidationError error    = ValidationError::Ok;
     std::wstring    canonical; // Normalised path on success
     bool            ok() const { return error == ValidationError::Ok; }
@@ -54,8 +54,8 @@ struct ValidationResult {
 class InputValidator {
 public:
     // Validate a filesystem path supplied by Explorer shell or plugin
-    ValidationResult ValidatePath(const std::wstring& path) const {
-        ValidationResult res;
+    PathValidationResult ValidatePath(const std::wstring& path) const {
+        PathValidationResult res;
 
         if (path.empty()) { res.error = ValidationError::EmptyInput; return res; }
 
@@ -127,8 +127,8 @@ public:
     }
 
     // Validate thumbnail size request (16 – 2048 pixels)
-    ValidationResult ValidateThumbnailSize(uint32_t width, uint32_t height) const {
-        ValidationResult res;
+    PathValidationResult ValidateThumbnailSize(uint32_t width, uint32_t height) const {
+        PathValidationResult res;
         if (width  < 16 || width  > 2048 ||
             height < 16 || height > 2048) {
             res.error = ValidationError::ThumbnailSizeRange;
@@ -137,8 +137,8 @@ public:
     }
 
     // Validate a registry key name segment (no null bytes, no path separators)
-    ValidationResult ValidateRegistryKey(const std::wstring& key) const {
-        ValidationResult res;
+    PathValidationResult ValidateRegistryKey(const std::wstring& key) const {
+        PathValidationResult res;
         if (key.empty()) { res.error = ValidationError::EmptyInput; return res; }
         if (key.size() > 255) { res.error = ValidationError::ExcessiveLength; return res; }
         for (wchar_t c : key) {
@@ -151,8 +151,8 @@ public:
     }
 
     // Validate a plugin identifier (alphanumeric + hyphen/underscore, 1-64 chars)
-    ValidationResult ValidatePluginId(const std::wstring& id) const {
-        ValidationResult res;
+    PathValidationResult ValidatePluginId(const std::wstring& id) const {
+        PathValidationResult res;
         if (id.empty() || id.size() > 64) {
             res.error = id.empty() ? ValidationError::EmptyInput
                                    : ValidationError::ExcessiveLength;

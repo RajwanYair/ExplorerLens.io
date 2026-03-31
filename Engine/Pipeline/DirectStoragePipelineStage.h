@@ -13,32 +13,25 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class PipelineStageResult : uint8_t {
-    Success   = 0,
-    Skipped   = 1,
-    Failed    = 2,
-    NotReady  = 3
+// DSStageResult avoids collision with PipelineErrorBoundary.h's PipelineStageResult
+enum class DSStageResult : uint8_t {
+    Success  = 0,
+    Skipped  = 1,
+    Failed   = 2,
+    NotReady = 3
 };
 
-struct PipelineRequest {
-    const wchar_t* sourcePath = nullptr;
-    uint64_t       offset = 0;
-    uint64_t       size = 0;
-    void*          gpuTarget = nullptr;
-    uint32_t       priority = 0;
-};
-
-struct StageStatistics {
-    uint64_t requestsProcessed = 0;
-    uint64_t requestsFailed = 0;
-    uint64_t bytesTransferred = 0;
-    double   averageLatencyMs = 0.0;
-    double   peakThroughputMBps = 0.0;
+struct DSStageStatistics {
+    uint64_t requestsProcessed   = 0;
+    uint64_t requestsFailed      = 0;
+    uint64_t bytesTransferred    = 0;
+    double   averageLatencyMs    = 0.0;
+    double   peakThroughputMBps  = 0.0;
 };
 
 class DirectStoragePipelineStage {
 public:
-    static constexpr const char* STAGE_NAME = "DirectStoragePipeline";
+    static constexpr const char* STAGE_NAME   = "DirectStoragePipeline";
     static constexpr uint32_t    MAX_QUEUE_DEPTH = 64;
 
     DirectStoragePipelineStage() = default;
@@ -47,44 +40,49 @@ public:
     DirectStoragePipelineStage(const DirectStoragePipelineStage&) = delete;
     DirectStoragePipelineStage& operator=(const DirectStoragePipelineStage&) = delete;
 
-    inline bool Initialize(uint32_t queueDepth = MAX_QUEUE_DEPTH) {
+    bool Initialize(uint32_t queueDepth = MAX_QUEUE_DEPTH) {
         if (m_initialized) return true;
-        m_queueDepth = (queueDepth > 0 && queueDepth <= MAX_QUEUE_DEPTH) ? queueDepth : MAX_QUEUE_DEPTH;
-        m_pendingRequests.reserve(m_queueDepth);
+        m_queueDepth  = (queueDepth > 0 && queueDepth <= MAX_QUEUE_DEPTH) ? queueDepth : MAX_QUEUE_DEPTH;
         m_initialized = true;
         return true;
     }
 
-    inline PipelineStageResult ProcessRequest(const PipelineRequest& request) {
-        if (!m_initialized) return PipelineStageResult::NotReady;
-        if (!request.sourcePath || request.size == 0) return PipelineStageResult::Failed;
-        if (m_pendingRequests.size() >= m_queueDepth) return PipelineStageResult::Failed;
-
-        m_pendingRequests.push_back(request);
-        m_stats.requestsProcessed++;
-        m_stats.bytesTransferred += request.size;
-        return PipelineStageResult::Success;
+    DSStageResult ProcessRequest(const wchar_t* sourcePath, uint64_t size) {
+        if (!m_initialized)      return DSStageResult::NotReady;
+        if (!sourcePath || size == 0) return DSStageResult::Failed;
+        if (m_pending >= m_queueDepth)  return DSStageResult::Failed;
+        ++m_pending;
+        ++m_stats.requestsProcessed;
+        m_stats.bytesTransferred += size;
+        return DSStageResult::Success;
     }
 
-    inline const char* GetStageName() const { return STAGE_NAME; }
-
-    inline const StageStatistics& GetStatistics() const { return m_stats; }
-
-    inline uint32_t GetPendingCount() const {
-        return static_cast<uint32_t>(m_pendingRequests.size());
-    }
-
-    inline void Shutdown() {
+    void Shutdown() {
         if (!m_initialized) return;
-        m_pendingRequests.clear();
+        m_pending     = 0;
         m_initialized = false;
     }
 
+    const char* GetStageName() const { return STAGE_NAME; }
+
+    const DSStageStatistics& GetStatistics() const { return m_stats; }
+
+    uint32_t GetPendingCount() const { return m_pending; }
+
+    double GetAverageLatencyMs() const { return m_stats.averageLatencyMs; }
+
+    bool IsEnabled() const { return m_initialized; }
+
+    int GetPriority() const { return m_priority; }
+
+    bool IsFallbackMode() const { return !m_initialized; }
+
 private:
-    bool                        m_initialized = false;
-    uint32_t                    m_queueDepth = MAX_QUEUE_DEPTH;
-    StageStatistics             m_stats{};
-    std::vector<PipelineRequest> m_pendingRequests;
+    bool              m_initialized = false;
+    uint32_t          m_queueDepth  = MAX_QUEUE_DEPTH;
+    uint32_t          m_pending     = 0;
+    int               m_priority    = 0;
+    DSStageStatistics m_stats{};
 };
 
 } // namespace Engine

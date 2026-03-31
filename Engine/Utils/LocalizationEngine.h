@@ -1,5 +1,13 @@
+// LocalizationEngine.h — i18n/l10n string tables, RTL support, locale detection
+// Copyright (c) 2026 ExplorerLens Project
+//
+// Canonical localization header. Provides:
+//   - LocalizationEngine  (wstring-based, RTL support, 10 locales)
+//   - CoreLocalizationEngine (string-based, 5 locales, inline, no .cpp needed)
+//   - LocaleId, StringCategory enums (narrow-string locale helpers)
+// Consolidated from Core/LocalizationEngine.h + Utils/LocalizationEngine.h.
+//
 #pragma once
-// Localization Engine — i18n/l10n string tables, RTL support, locale detection
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -66,5 +74,92 @@ private:
  std::unordered_map<std::wstring, std::unordered_map<uint32_t, std::wstring>> m_strings;
 };
 
-}} // namespace ExplorerLens::Engine
+// ---------------------------------------------------------------------------
+// CoreLocalizationEngine — narrow-string (std::string) localization helper.
+// Simple inline class for error messages and status text that doesn't need
+// full wstring/RTL support. Consolidated here from Core/LocalizationEngine.h.
+// ---------------------------------------------------------------------------
 
+/// Supported locale identifiers (narrow-string subset)
+enum class LocaleId : uint8_t {
+    EnUS = 0,  // English (United States)
+    DeDE = 1,  // German (Germany)
+    FrFR = 2,  // French (France)
+    JaJP = 3,  // Japanese (Japan)
+    ZhCN = 4   // Chinese (Simplified, China)
+};
+
+inline const char* LocaleIdName(LocaleId id) noexcept {
+    switch (id) {
+    case LocaleId::EnUS: return "en-US";
+    case LocaleId::DeDE: return "de-DE";
+    case LocaleId::FrFR: return "fr-FR";
+    case LocaleId::JaJP: return "ja-JP";
+    case LocaleId::ZhCN: return "zh-CN";
+    default:             return "Unknown";
+    }
+}
+
+/// Category of localizable strings
+enum class StringCategory : uint8_t {
+    UI = 0,
+    Error = 1,
+    Status = 2,
+    Tooltip = 3,
+    Accessibility = 4
+};
+
+inline const char* StringCategoryName(StringCategory c) noexcept {
+    switch (c) {
+    case StringCategory::UI:            return "UI";
+    case StringCategory::Error:         return "Error";
+    case StringCategory::Status:        return "Status";
+    case StringCategory::Tooltip:       return "Tooltip";
+    case StringCategory::Accessibility: return "Accessibility";
+    default:                            return "Unknown";
+    }
+}
+
+struct LocalizationConfig {
+    LocaleId defaultLocale  = LocaleId::EnUS;
+    LocaleId fallbackLocale = LocaleId::EnUS;
+    bool     useFallback    = true;
+};
+
+class CoreLocalizationEngine {
+public:
+    CoreLocalizationEngine() = default;
+
+    std::string GetString(const std::string& key) const {
+        auto it = m_strings.find(key);
+        if (it != m_strings.end()) return it->second;
+        if (m_config.useFallback) return "[" + key + "]";
+        return "";
+    }
+
+    void SetLocale(LocaleId locale) noexcept {
+        m_currentLocale = locale;
+        m_localeChangeCount++;
+    }
+
+    LocaleId GetCurrentLocale() const noexcept { return m_currentLocale; }
+
+    std::vector<LocaleId> GetSupportedLocales() const {
+        return { LocaleId::EnUS, LocaleId::DeDE, LocaleId::FrFR,
+                 LocaleId::JaJP, LocaleId::ZhCN };
+    }
+
+    void AddString(const std::string& key, const std::string& value) {
+        m_strings[key] = value;
+    }
+
+    uint32_t GetLocaleChangeCount() const noexcept { return m_localeChangeCount; }
+
+private:
+    LocaleId   m_currentLocale     = LocaleId::EnUS;
+    LocalizationConfig m_config;
+    uint32_t   m_localeChangeCount = 0;
+    std::unordered_map<std::string, std::string> m_strings;
+};
+
+}} // namespace ExplorerLens::Engine

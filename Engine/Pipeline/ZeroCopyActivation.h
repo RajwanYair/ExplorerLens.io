@@ -70,7 +70,7 @@ struct ZeroCopyStats {
 // Staging buffer descriptor for zero-copy uploads
 // ============================================================================
 
-struct StagingBuffer {
+struct ZCStagingBuffer {
     void* data = nullptr;
     uint64_t size = 0;
     uint64_t gpuVA = 0;      // GPU virtual address (if mapped)
@@ -142,7 +142,7 @@ public:
     // ========================================================================
 
     /// Acquire a staging buffer for zero-copy upload
-    StagingBuffer AcquireStaging(uint64_t requiredSize) {
+    ZCStagingBuffer AcquireStaging(uint64_t requiredSize) {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (!m_active || requiredSize > MAX_STAGING_BUFFER) {
             return {};
@@ -162,7 +162,7 @@ public:
     }
 
     /// Release a staging buffer after GPU upload
-    void ReleaseStaging(const StagingBuffer& buffer) {
+    void ReleaseStaging(const ZCStagingBuffer& buffer) {
         std::lock_guard<std::mutex> lock(m_mutex);
         for (auto& slot : m_stagingPool) {
             if (slot.buffer.data == buffer.data) {
@@ -185,7 +185,7 @@ public:
 
         auto start = std::chrono::steady_clock::now();
 
-        StagingBuffer staging = AcquireStaging(size);
+        ZCStagingBuffer staging = AcquireStaging(size);
         if (!staging.IsValid()) {
             // Fallback to traditional copy
             m_stats.fallbackTransfers++;
@@ -266,7 +266,7 @@ private:
     // ========================================================================
 
     struct StagingSlot {
-        StagingBuffer buffer;
+        ZCStagingBuffer buffer;
         bool inUse = false;
     };
 

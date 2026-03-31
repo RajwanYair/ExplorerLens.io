@@ -63,6 +63,8 @@ struct CommitStats {
     double   commitRatio = 0.0;   // committed / reserved
     uint64_t guardPageFaultsHandled = 0;
 };
+using VAllocRegion = VirtualRegion;
+using VAllocStats  = CommitStats;
 
 // ── Main class ───────────────────────────────────────────────────────────────
 

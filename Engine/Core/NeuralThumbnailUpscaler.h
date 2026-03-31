@@ -26,7 +26,7 @@ enum class NeuralUpscaleBackend : uint32_t {
     CPU_Lanczos = 3    // High-quality CPU fallback
 };
 
-enum class UpscaleModel : uint32_t {
+enum class NTUpscaleModel : uint32_t {
     RealESRGAN_x2 = 0,   // Real-ESRGAN 2x (fastest)
     ESPCN_x4 = 1,    // ESPCN 4x (lightweight)
     FSRCNN_x2 = 2,    // FSRCNN 2x (fast)
@@ -39,7 +39,7 @@ struct UpscaleRequest {
     uint32_t inputHeight = 0;
     uint32_t inputStride = 0;
     uint32_t scaleFactor = 2;
-    UpscaleModel model = UpscaleModel::FSRCNN_x2;
+    NTUpscaleModel model = NTUpscaleModel::FSRCNN_x2;
     bool preserveAlpha = true;
 };
 
@@ -104,9 +104,9 @@ public:
     NeuralUpscaleBackend PreferredBackend() const { return m_preferredBackend; }
     const UpscaleStats& Stats() const { return m_stats; }
 
-    std::vector<UpscaleModel> SupportedModels() const {
-        return { UpscaleModel::RealESRGAN_x2, UpscaleModel::ESPCN_x4,
-                 UpscaleModel::FSRCNN_x2 };
+    std::vector<NTUpscaleModel> SupportedModels() const {
+        return { NTUpscaleModel::RealESRGAN_x2, NTUpscaleModel::ESPCN_x4,
+                 NTUpscaleModel::FSRCNN_x2 };
     }
 
 private:

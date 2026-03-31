@@ -3,6 +3,8 @@
 // IFilter + ISearchProtocol implementation for Windows Desktop Search
 // integration, enabling thumbnail metadata to appear in Windows Search results.
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace ExplorerLens {
 namespace Engine {
@@ -92,6 +94,97 @@ public:
  return L"Unknown";
  }
  }
+};
+
+// Shell search protocol handler state
+enum class SearchHandlerState : uint8_t {
+    Uninitialized = 0,
+    Ready,
+    Error,
+    COUNT
+};
+
+// An entry in the shell search index
+struct SearchIndexEntry {
+    std::wstring filePath;
+    std::wstring displayName;
+    std::wstring formatType;
+    uint64_t     fileSize    = 0;
+    bool         hasThumbnail = false;
+};
+
+// A shell search result with file entry and relevance score
+struct ShellSearchHit {
+    SearchIndexEntry entry;
+    float            relevanceScore = 0.0f;
+};
+
+// Aggregated search results from ShellSearchProtocolHandler::Search
+struct ShellSearchResults {
+    uint32_t                  totalMatches = 0;
+    std::vector<ShellSearchHit> results;
+};
+
+// Query parameters for ShellSearchProtocolHandler::Search
+struct ShellSearchQuery {
+    std::wstring queryText;
+    std::wstring extensionFilter;
+};
+
+// Alias for backward compat — results-only alias avoids conflict with MarketplaceClientV4::SearchQuery
+using SearchResults = ShellSearchResults;
+
+// Full-text and filtered search handler over the dynamic thumbnail index
+class ShellSearchProtocolHandler {
+public:
+    ShellSearchProtocolHandler() = default;
+
+    SearchHandlerState GetState() const noexcept { return m_state; }
+
+    bool Initialize() noexcept {
+        m_state = SearchHandlerState::Ready;
+        return true;
+    }
+
+    void Shutdown() noexcept {
+        m_state = SearchHandlerState::Uninitialized;
+        m_entries.clear();
+    }
+
+    uint32_t GetIndexSize() const noexcept {
+        return static_cast<uint32_t>(m_entries.size());
+    }
+
+    void AddEntry(SearchIndexEntry const& entry) {
+        m_entries.push_back(entry);
+    }
+
+    void ClearIndex() noexcept { m_entries.clear(); }
+
+    SearchResults Search(ShellSearchQuery const& query) const {
+        SearchResults out;
+        for (auto const& e : m_entries) {
+            bool matches = e.displayName.find(query.queryText) != std::wstring::npos;
+            if (matches && !query.extensionFilter.empty()) {
+                auto dot = e.displayName.rfind(L'.');
+                std::wstring ext = (dot != std::wstring::npos)
+                    ? e.displayName.substr(dot) : std::wstring{};
+                matches = (ext == query.extensionFilter);
+            }
+            if (matches) {
+                ShellSearchHit r;
+                r.entry          = e;
+                r.relevanceScore = 1.0f;
+                out.results.push_back(std::move(r));
+                ++out.totalMatches;
+            }
+        }
+        return out;
+    }
+
+private:
+    SearchHandlerState           m_state = SearchHandlerState::Uninitialized;
+    std::vector<SearchIndexEntry> m_entries;
 };
 
 } // namespace Engine

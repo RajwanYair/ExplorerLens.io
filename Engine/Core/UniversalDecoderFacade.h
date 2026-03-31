@@ -21,7 +21,7 @@ enum class DecoderFormat : uint16_t {
     TGA, EXR, DDS, KTX2, JPEG2000, PCX, PBM, Unknown = 0xFFFF
 };
 
-struct ThumbnailRequest {
+struct UniversalRequest {
     std::string filePath;
     uint32_t maxWidth = 256;
     uint32_t maxHeight = 256;
@@ -36,7 +36,7 @@ struct ThumbnailRequest {
     static constexpr uint32_t FLAG_SRGB_OUTPUT  = 0x08;
 };
 
-struct ThumbnailResult {
+struct UniversalResult {
     std::vector<uint8_t> pixels;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -51,7 +51,7 @@ struct ThumbnailResult {
     size_t GetByteSize() const { return static_cast<size_t>(stride) * height; }
 };
 
-using ProgressCallback = std::function<void(float percent, const std::string& stage)>;
+using UniversalProgressCb = std::function<void(float percent, const std::string& stage)>;
 
 class UniversalDecoderFacade {
 public:
@@ -62,8 +62,8 @@ public:
 
     ~UniversalDecoderFacade() { Shutdown(); }
 
-    ThumbnailResult GenerateThumbnail(const ThumbnailRequest& request) {
-        ThumbnailResult result;
+    UniversalResult GenerateThumbnail(const UniversalRequest& request) {
+        UniversalResult result;
         auto start = std::chrono::high_resolution_clock::now();
         DecoderFormat fmt = (request.format == DecoderFormat::Unknown)
             ? IdentifyFormat(request.filePath) : request.format;

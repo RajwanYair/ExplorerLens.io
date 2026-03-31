@@ -43,10 +43,10 @@ struct EmbeddingCacheConfig {
     bool               persistOnClose = true;
 };
 
-struct CacheStats {
+struct EmbeddingCacheStats {
     uint64_t totalEntries  = 0;
     uint64_t bytesUsed     = 0;
-    uint64_t hits          = 0;
+    uint64_t hitCount      = 0;
     uint64_t misses        = 0;
     float    hitRate       = 0.0f;
 };
@@ -89,7 +89,7 @@ public:
             UpdateHitRate();
             return false;
         }
-        ++m_stats.hits;
+        ++m_stats.hitCount;
         UpdateHitRate();
         out = it->second.embedding;
         return true;
@@ -105,9 +105,39 @@ public:
         return m_cache.size();
     }
 
-    inline CacheStats GetStats() const {
+    inline EmbeddingCacheStats GetStats() const {
         std::lock_guard<std::mutex> lock(m_mutex);
         return m_stats;
+    }
+
+    // String-keyed convenience API (hashes key internally)
+    inline bool Initialize(const std::wstring& cachePath) {
+        EmbeddingCacheConfig cfg;
+        cfg.cachePath = cachePath;
+        return Initialize(cfg);
+    }
+    inline bool Store(const std::string& key, const std::vector<float>& embedding) {
+        return Store(std::hash<std::string>{}(key), embedding, embedding.size() * sizeof(float));
+    }
+    inline std::vector<float> Retrieve(const std::string& key) {
+        std::vector<float> out;
+        Retrieve(std::hash<std::string>{}(key), out);
+        return out;
+    }
+    inline bool Contains(const std::string& key) const {
+        return Contains(std::hash<std::string>{}(key));
+    }
+    inline void Clear() {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_cache.clear();
+        m_stats = {};
+    }
+    inline void SetMaxEntries(size_t maxEntries) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_maxEntries = maxEntries;
+        while (m_cache.size() > m_maxEntries && !m_cache.empty())
+            m_cache.erase(m_cache.begin());
+        m_stats.totalEntries = m_cache.size();
     }
 
     inline void Compact() {
@@ -133,15 +163,16 @@ public:
 
 private:
     inline void UpdateHitRate() {
-        uint64_t total = m_stats.hits + m_stats.misses;
-        m_stats.hitRate = total > 0 ? static_cast<float>(m_stats.hits) / static_cast<float>(total) : 0.0f;
+        uint64_t total = m_stats.hitCount + m_stats.misses;
+        m_stats.hitRate = total > 0 ? static_cast<float>(m_stats.hitCount) / static_cast<float>(total) : 0.0f;
     }
 
     EmbeddingCacheConfig                               m_config;
     std::unordered_map<uint64_t, CachedEmbedding>      m_cache;
-    CacheStats                                         m_stats;
+    EmbeddingCacheStats                                m_stats;
     mutable std::mutex                                 m_mutex;
     bool                                               m_initialized = false;
+    size_t                                             m_maxEntries  = SIZE_MAX;
 };
 
 } // namespace Engine

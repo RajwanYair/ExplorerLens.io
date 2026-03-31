@@ -72,6 +72,7 @@ struct DSGrabbedFrame {
     uint64_t             timestampMs = 0;
     std::vector<uint8_t> pixelData;          // BGRA32 pixel buffer
 };
+using DSFrame = DSGrabbedFrame;
 
 /// Bridges DirectShow filter graphs into the ExplorerLens thumbnail
 /// pipeline, allowing video formats to produce thumbnails via the

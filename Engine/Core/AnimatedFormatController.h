@@ -11,28 +11,37 @@ namespace Engine {
 
 /// Frame selection mode for animated thumbnails
 enum class FrameSelectionMode : uint8_t {
- FirstFrame = 0, // Always frame 0
- KeyFrame, // Most visually distinct frame
- MiddleFrame, // Middle of animation
- MostColorful, // Highest color information
- Filmstrip, // 4-up composite grid
- AnimatedPreview, // Generate short loop
+ FirstFrame = 0,
+ // Most visually distinct frame in the animation
+ KeyFrame,
+ MiddleFrame,
+ // Selects frame with highest color information density
+ MostColorful,
+ // Generates a 4-up composite grid
+ Filmstrip,
+ // Generates a short preview loop
+ AnimatedPreview,
  COUNT
 };
 
 /// Animation format capability
 enum class AnimCapability : uint8_t {
  None = 0,
- LoopOnly, // Simple loop (GIF)
- BlendModes, // Alpha blending (APNG)
- FullVideo, // Full video decode (WebP anim)
- HDRAnimation, // HDR frames (AVIF seq)
+ // Simple frame loop (GIF-style)
+ LoopOnly,
+ // Per-frame alpha blending (APNG-style)
+ BlendModes,
+ // Full video decode pipeline (WebP anim)
+ FullVideo,
+ // HDR frame sequences (AVIF seq)
+ HDRAnimation,
  COUNT
 };
 
 struct AnimFormatInfo {
  uint32_t frameCount = 0;
- uint32_t loopCount = 0; // 0 = infinite
+ // 0 = infinite loop; any positive value limits playback count
+ uint32_t loopCount = 0;
  double totalDurationMs = 0.0;
  double avgFrameTimeMs = 0.0;
  uint32_t width = 0;
@@ -102,8 +111,19 @@ public:
 
  /// Calculate filmstrip grid cell size for 4-up composite
  static uint32_t FilmstripCellSize(uint32_t thumbnailSize) {
- return thumbnailSize / 2; // 2x2 grid
+ // Divide by 2 for a 2x2 grid cell layout
+ return thumbnailSize / 2;
  }
+};
+
+class FormatGalleryCompositor {
+public:
+    static int LayoutCount() { return 6; }
+    static int GridCellSize(int containerWidth, int columns, float scaleFactor) {
+        if (columns <= 0) return 0;
+        return static_cast<int>(containerWidth / columns * scaleFactor);
+    }
+    FormatGalleryCompositor() = delete;
 };
 
 } // namespace Engine

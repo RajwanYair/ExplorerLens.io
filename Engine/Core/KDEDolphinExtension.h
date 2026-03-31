@@ -55,16 +55,18 @@ public:
         return true;
     }
 
-    void UnregisterThumbCreator() {
+    bool UnregisterThumbCreator() {
         m_active = false;
+        return true;
     }
 
     [[nodiscard]] bool IsActive() const {
         return m_active;
     }
 
-    void SetPriority(DolphinPriority priority) {
+    bool SetPriority(DolphinPriority priority) {
         m_config.priority = priority;
+        return true;
     }
 
     [[nodiscard]] DolphinPluginConfig const& GetConfig() const {

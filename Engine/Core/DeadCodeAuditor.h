@@ -24,12 +24,12 @@ public:
  COUNT
  };
 
- enum class AuditSeverity { Info, Warning, Error, COUNT };
+ enum class DeadCodeAuditSeverity { Info, Warning, Error, COUNT };
 
  struct AuditFinding {
  std::wstring file;
  AuditCategory category;
- AuditSeverity severity;
+ DeadCodeAuditSeverity severity;
  std::wstring description;
  bool resolved;
  };
@@ -51,13 +51,13 @@ public:
  }
  }
 
- static const wchar_t *SeverityName(AuditSeverity s) {
+ static const wchar_t *SeverityName(DeadCodeAuditSeverity s) {
  switch (s) {
- case AuditSeverity::Info:
+ case DeadCodeAuditSeverity::Info:
  return L"Info";
- case AuditSeverity::Warning:
+ case DeadCodeAuditSeverity::Warning:
  return L"Warning";
- case AuditSeverity::Error:
+ case DeadCodeAuditSeverity::Error:
  return L"Error";
  default:
  return L"Unknown";
@@ -68,15 +68,15 @@ public:
  return static_cast<size_t>(AuditCategory::COUNT);
  }
  static size_t SeverityCount() {
- return static_cast<size_t>(AuditSeverity::COUNT);
+ return static_cast<size_t>(DeadCodeAuditSeverity::COUNT);
  }
 
  static std::vector<AuditFinding> RunAudit() {
  return {
- {L"WMFDecoder_old.cpp", AuditCategory::DeadFile, AuditSeverity::Warning,
+ {L"WMFDecoder_old.cpp", AuditCategory::DeadFile, DeadCodeAuditSeverity::Warning,
  L"Superseded by WMFDecoder.cpp", true},
  {L"LENSArchive.h CBuffer", AuditCategory::CommentedCode,
- AuditSeverity::Info, L"Commented-out template class", true},
+ DeadCodeAuditSeverity::Info, L"Commented-out template class", true},
  };
  }
 

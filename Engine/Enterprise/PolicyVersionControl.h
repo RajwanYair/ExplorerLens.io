@@ -47,6 +47,7 @@ struct CommitOptions {
 
 class PolicyVersionControl {
 public:
+    PolicyVersionControl() = default;
     explicit PolicyVersionControl(const std::string& repoPath);
     ~PolicyVersionControl() = default;
 

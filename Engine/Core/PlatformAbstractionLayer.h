@@ -10,7 +10,6 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
-#include <array>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -18,14 +17,9 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class PlatformType : uint8_t {
-    Windows = 0,
-    macOS   = 1,
-    Linux   = 2,
-    Unknown = 255
-};
-
-enum class GPUBackend : uint8_t {
+// GPU backend enum scoped to this abstraction layer to avoid conflicts with
+// per-API backend enums (D3D12PipelineActivation, VulkanComputePipeline, etc.)
+enum class PlatGPUBackend : uint8_t {
     D3D12  = 0,
     Metal  = 1,
     Vulkan = 2,
@@ -33,30 +27,21 @@ enum class GPUBackend : uint8_t {
     CPU    = 4
 };
 
-struct DisplayInfo {
-    uint32_t widthPx  = 0;
-    uint32_t heightPx = 0;
-    float    scaleFactor = 1.0f;
-    bool     isPrimary   = false;
-};
-
-struct RenderSurfaceDesc {
-    uint32_t   width      = 256;
-    uint32_t   height     = 256;
-    GPUBackend backend    = GPUBackend::CPU;
-    bool       offscreen  = true;
-};
-
-struct RenderSurface {
-    void*    nativeHandle = nullptr;
-    uint32_t width        = 0;
-    uint32_t height       = 0;
-    GPUBackend backend    = GPUBackend::CPU;
-    bool     valid        = false;
+struct PlatRenderSurface {
+    uint32_t width       = 0;
+    uint32_t height      = 0;
+    uint32_t strideBytes = 0;
+    bool     valid       = false;
 };
 
 class PlatformAbstractionLayer {
 public:
+    PlatformAbstractionLayer() = default;
+    ~PlatformAbstractionLayer() = default;
+
+    PlatformAbstractionLayer(const PlatformAbstractionLayer&) = delete;
+    PlatformAbstractionLayer& operator=(const PlatformAbstractionLayer&) = delete;
+
     static PlatformAbstractionLayer& Instance() {
         static PlatformAbstractionLayer s_instance;
         return s_instance;
@@ -70,56 +55,58 @@ public:
 #elif defined(__linux__)
         return PlatformType::Linux;
 #else
-        return PlatformType::Unknown;
+        return PlatformType::WASM;
 #endif
     }
 
-    GPUBackend GetPreferredGPUBackend() const {
+    PlatGPUBackend GetPreferredGPUBackend() const {
         switch (GetCurrentPlatform()) {
-            case PlatformType::Windows: return GPUBackend::D3D12;
-            case PlatformType::macOS:   return GPUBackend::Metal;
-            case PlatformType::Linux:   return GPUBackend::Vulkan;
-            default:                    return GPUBackend::CPU;
+            case PlatformType::Windows: return PlatGPUBackend::D3D12;
+            case PlatformType::macOS:   return PlatGPUBackend::Metal;
+            case PlatformType::Linux:   return PlatGPUBackend::Vulkan;
+            default:                    return PlatGPUBackend::CPU;
         }
     }
 
-    std::vector<GPUBackend> GetSupportedBackends() const {
+    std::vector<PlatGPUBackend> GetSupportedBackends() const {
         switch (GetCurrentPlatform()) {
-            case PlatformType::Windows: return { GPUBackend::D3D12, GPUBackend::Vulkan, GPUBackend::OpenGL, GPUBackend::CPU };
-            case PlatformType::macOS:   return { GPUBackend::Metal, GPUBackend::OpenGL, GPUBackend::CPU };
-            case PlatformType::Linux:   return { GPUBackend::Vulkan, GPUBackend::OpenGL, GPUBackend::CPU };
-            default:                    return { GPUBackend::CPU };
+            case PlatformType::Windows: return { PlatGPUBackend::D3D12, PlatGPUBackend::Vulkan, PlatGPUBackend::OpenGL, PlatGPUBackend::CPU };
+            case PlatformType::macOS:   return { PlatGPUBackend::Metal, PlatGPUBackend::OpenGL, PlatGPUBackend::CPU };
+            case PlatformType::Linux:   return { PlatGPUBackend::Vulkan, PlatGPUBackend::OpenGL, PlatGPUBackend::CPU };
+            default:                    return { PlatGPUBackend::CPU };
         }
     }
 
-    RenderSurface CreateRenderSurface(const RenderSurfaceDesc& desc) const {
-        RenderSurface surface;
-        surface.width   = desc.width;
-        surface.height  = desc.height;
-        surface.backend = desc.backend;
-        surface.valid   = (desc.width > 0 && desc.height > 0 && desc.width <= MAX_SURFACE_DIM && desc.height <= MAX_SURFACE_DIM);
+    PlatRenderSurface CreateRenderSurface(uint32_t width, uint32_t height) const {
+        PlatRenderSurface surface;
+        surface.width       = width;
+        surface.height      = height;
+        surface.strideBytes = (width > 0) ? width * 4u : 0u; // BGRA8
+        surface.valid       = (width > 0 && height > 0 && width <= MAX_SURFACE_DIM && height <= MAX_SURFACE_DIM);
         return surface;
     }
 
-    std::vector<DisplayInfo> EnumerateDisplayScales() const {
-        std::vector<DisplayInfo> displays;
+    std::vector<float> EnumerateDisplayScales() const {
+        std::vector<float> scales;
 #ifdef _WIN32
-        displays.push_back({ GetSystemMetrics(SM_CXSCREEN),
-                             GetSystemMetrics(SM_CYSCREEN),
-                             GetWindowsDpiScale(), true });
+        float dpi = GetWindowsDpiScale();
+        scales.push_back(dpi > 0.0f ? dpi : 1.0f);
 #else
-        displays.push_back({ 1920, 1080, 1.0f, true });
+        scales.push_back(1.0f);
 #endif
-        return displays;
+        return scales;
     }
 
     const char* PlatformName() const {
-        constexpr const char* NAMES[] = { "Windows", "macOS", "Linux" };
-        auto idx = static_cast<uint8_t>(GetCurrentPlatform());
-        return (idx < 3) ? NAMES[idx] : "Unknown";
+        switch (GetCurrentPlatform()) {
+            case PlatformType::Windows: return "Windows";
+            case PlatformType::macOS:   return "macOS";
+            case PlatformType::Linux:   return "Linux";
+            default:                    return "Unknown";
+        }
     }
 
-    uint32_t GetLogicalProcessorCount() const {
+    uint32_t GetLogicalCPUCount() const {
 #ifdef _WIN32
         SYSTEM_INFO si{};
         GetSystemInfo(&si);
@@ -129,9 +116,44 @@ public:
 #endif
     }
 
-private:
-    PlatformAbstractionLayer() = default;
+    uint32_t GetOptimalThreadCount() const {
+        uint32_t cpus = GetLogicalCPUCount();
+        return (cpus > 1) ? cpus : 1u;
+    }
 
+    uint32_t GetPageSize() const {
+#ifdef _WIN32
+        SYSTEM_INFO si{};
+        GetSystemInfo(&si);
+        return si.dwPageSize;
+#else
+        return 4096;
+#endif
+    }
+
+    uint64_t GetTotalSystemMemoryMB() const {
+#ifdef _WIN32
+        MEMORYSTATUSEX ms{};
+        ms.dwLength = sizeof(ms);
+        if (GlobalMemoryStatusEx(&ms))
+            return static_cast<uint64_t>(ms.ullTotalPhys / (1024ULL * 1024ULL));
+        return 4096;
+#else
+        return 4096;
+#endif
+    }
+
+    std::wstring GetTempDirectory() const {
+#ifdef _WIN32
+        wchar_t buf[MAX_PATH] = {};
+        DWORD len = GetTempPathW(MAX_PATH, buf);
+        return (len > 0) ? std::wstring(buf, len) : L"C:\\Temp";
+#else
+        return L"/tmp";
+#endif
+    }
+
+private:
     static constexpr uint32_t MAX_SURFACE_DIM = 16384;
 
 #ifdef _WIN32

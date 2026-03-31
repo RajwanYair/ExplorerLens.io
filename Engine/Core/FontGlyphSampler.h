@@ -62,19 +62,6 @@ struct GlyphMetrics {
     bool isPresent = false;
 };
 
-struct FontInfo {
-    std::wstring familyName;
-    std::wstring styleName;
-    FontWeight weight = FontWeight::Regular;
-    bool isItalic = false;
-    bool isMonospace = false;
-    uint32_t glyphCount = 0;
-    uint32_t unitsPerEm = 0;
-    float ascender = 0.0f;
-    float descender = 0.0f;
-    float lineGap = 0.0f;
-};
-
 class FontGlyphSampler {
 public:
     explicit FontGlyphSampler(SamplerConfig config = {})

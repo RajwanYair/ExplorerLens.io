@@ -73,7 +73,7 @@ All builds **must** use MSVC v145 toolset from Visual Studio 18 (2026) BuildTool
 
 | Tool | Version | Path |
 | ----- | ------- | ------------------------- |
-| cmake | 4.3.0 | `~/scoop/shims/cmake.exe` |
+| cmake | 4.3.1 | `~/scoop/shims/cmake.exe` |
 | ninja | 1.13.2 | `~/scoop/shims/ninja.exe` |
 | git | 2.53.0 | `~/scoop/shims/git.exe` |
 | nasm | 3.01 | `~/scoop/shims/nasm.exe` |

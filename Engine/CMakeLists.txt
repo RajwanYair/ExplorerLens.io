@@ -171,13 +171,9 @@ set(ENGINE_HEADERS
     Engine.h
 
     # Core engine components
-    Core/Accessibility.h
-    Core/AccessibilityNarratorBridge.h
-    Core/AccessibilityPipeline.h
     Core/AccessibilitySuiteV2.h
     Core/AdaptiveDecoderRouter.h
     Core/AIThumbnailEnhancer.h
-    Core/AnimatedThumbnailEngine.h
     Core/AsyncShellActivation.h
     Core/AsyncShellExtension.h
     Core/BatchProcessingEngine.h
@@ -187,17 +183,11 @@ set(ENGINE_HEADERS
     Core/CloudSyncProvider.h
     Core/Concepts.h
     Core/Config.h
-    Core/ConfigMigrationEngine.h
     Core/ContentIndexer.h
     Core/D3D12PipelineActivation.h
-    Core/DarkMode.h
-    Core/DarkModeControls.h
-    Core/DarkModeEngine.h
     Core/DarkModeRendererV2.h
     Core/DeadCodeAudit.h
     Core/DeadCodeAuditor.h
-    Core/DecoderHealthDashboard.h
-    Core/DecoderHealthMonitor.h
     Core/DiagnosticsExporter.h
     Core/DocumentationSyncAudit.h
     Core/EncoderExportEngine.h
@@ -212,7 +202,6 @@ set(ENGINE_HEADERS
     Core/GPUMemoryPoolV2.h
     Core/GPUPipelineV3.h
     Core/HDRDisplayPipeline.h
-    Core/HighDPIScaling.h
     Core/JumpListIntegration.h
 
     # Core interfaces (canonical location; forwarding stubs exist at Core/I*.h for decoder includes)
@@ -243,18 +232,19 @@ set(ENGINE_HEADERS
     Core/ShaderCompilerV2.h
     Core/SharePointTeamsIntegration.h
     Core/ShellContextMenuV2.h
-    Core/ShellOverlayHandler.h
-    Core/ShellPreviewHandler.h
     Core/ShellRegistrationManager.h
-    Core/ShellSearchProtocolHandler.h
     Core/SIMDAccelerationManager.h
     Core/SIMDAccelerator.h
     Core/Telemetry.h
     Core/ThemeEngine.h
     Core/ObservabilityIntegration.h
     Core/PerformanceActivation.h
-    Core/ThumbnailQualityAnalyzer.h
     Core/ThumbnailAnimationEngineV2.h
+    Core/ThumbnailQuality.h
+    Core/ThumbnailBatch.h
+    Core/ThumbnailRenderer.h
+    Core/ThumbnailStream.h
+    Core/ThumbnailMetrics.h
     Core/Types.h
     Core/UpdateEngine.h
     Core/LibraryInventoryManager.h
@@ -274,12 +264,7 @@ set(ENGINE_HEADERS
     Core/CIHardeningEngine.h
     Core/CodeCoverageEngine.h
     Core/CRTConsistencyManager.h
-    Core/DecoderPriority.h
     Core/FFmpegIntegration.h
-    Core/FormatCategoryManager.h
-    Core/FormatGalleryView.h
-    Core/FormatGroupManager.h
-    Core/FormatStatusIndicator.h
     Core/FreeTypeIntegration.h
     Core/GPUShaderLibrary.h
     Core/HybridUIBridge.h
@@ -298,29 +283,19 @@ set(ENGINE_HEADERS
 
     # Batch 5 — Sprints 394-405
     Core/FileIntegrityMonitor.h
-    Core/ThumbnailDiffEngine.h
-    Core/DecoderSandboxPolicy.h
     Core/IntelligentPrefetchV2.h
     Core/CompressionBenchmark.h
     Core/ExplorerBandIntegration.h
-    Core/ThumbnailStreamProtocol.h
     Core/HotReloadConfigEngine.h
     Core/COMDiagnosticsEngine.h
 
-    Core/ThumbnailWatermark.h
     Core/BatchRenamePreview.h
     Core/DuplicateFileDetector.h
-    Core/ThumbnailAnnotation.h
     Core/ExplorerContextMenuExtension.h
-    Core/ThumbnailCompareView.h
     Core/FileTypeStatistics.h
-    Core/ShellNotificationEngine.h
-    Core/ThumbnailExportEngine.h
-    Core/ThumbnailVersionControl.h
     Core/FilePreviewRouter.h
     Core/ClipboardThumbnailManager.h
     Core/FormatConversionPipeline.h
-    Core/ErrorReportingPipeline.h
     Core/EnterpriseAuditPipeline.h
     Core/ResourceQuotaManager.h
     Core/AccessTokenValidator.h
@@ -331,7 +306,6 @@ set(ENGINE_HEADERS
     Core/SBOMGenerator.h
 
     # Sprint 644 — PIpeline activation, status, SIMD detection
-    Core/FormatStatusProvider.h
     Core/SIMDCapabilityDetector.h
     Core/InputSanitizer.h
     Core/PathTraversalGuard.h
@@ -339,13 +313,10 @@ set(ENGINE_HEADERS
     # Production pipeline & performance infrastructure
     Core/ContentAwareThumbnail.h
     Core/RuntimeSIMDDispatcher.h
-    Core/DecoderPerformanceCounters.h
-    Core/ThumbnailQualityGate.h
     Core/BatchThumbnailOrchestrator.h
     Core/FileSignatureDetector.h
     Core/GPUResourcePoolManager.h
     Core/CacheCoherencyProtocol.h
-    Core/ThumbnailPipelineProfiler.h
     Core/DecoderRegistryV2.h
     Core/AudioSpectrogramRenderer.h
     Core/ArchiveHierarchyMapRenderer.h
@@ -356,19 +327,15 @@ set(ENGINE_HEADERS
     Core/FontGlyphGridRenderer.h
     Core/SpreadsheetCellPreview.h
     Core/PresentationSlideStrip.h
-    Core/ThumbnailBlurDetector.h
     Core/ColorHistogramBadge.h
     Core/GeoTagMapThumbnail.h
     Core/FileAgeVisualizer.h
-    Core/ThumbnailLensEffect.h
     Core/SmartGridLayoutEngine.h
     Core/MetadataTooltipRenderer.h
     Core/CompressedStreamAnalyzer.h
     Core/AdaptiveContrastEnhancer.h
     Core/DocumentDigestOverlay.h
-    Core/ThumbnailSignatureVerifier.h
     Core/ArchivePasswordDetector.h
-    Core/ThumbnailStitcher.h
     Core/CalendarHeatmapRenderer.h
     Core/FileSizeProportionBadge.h
     Core/IntelligentCachePruner.h
@@ -386,10 +353,23 @@ set(ENGINE_HEADERS
     Core/OutOfProcThumbnailServer.h
     Core/CrossProcessCacheProxy.h
     Core/ProcessPoolManager.h
-    Core/NamedPipeHubServer.h
     Core/ProcessIsolationPolicy.h
     Core/CrossProcEventBus.h
     Core/SharedStateCoordinator.h
+
+    # Sprint 1051-1060 — Cross-Platform Shell (v31.1.0 Achernar-R)
+    Core/DecoderPriorityScheduler.h
+    Core/ThumbnailColorSpace.h
+    Core/MultiMonitorDPIScaler.h
+    Core/ThumbnailHistogram.h
+    Core/CoreLocalizationEngine.h
+    Core/ThumbnailSpriteSheet.h
+    Core/DecoderHealthDashboard.h
+    Core/DecoderHealthMonitor.h
+    Core/DecoderPriorityManager.h
+    Core/FormatGalleryView.h
+    Core/FormatGroupManager.h
+    Core/CrashIntelligence.h
 
     # Pipeline stages and scheduling
     Pipeline/AsyncThumbnailProvider.h
@@ -446,7 +426,6 @@ set(ENGINE_HEADERS
     Decoders/ExtendedVideoDecoder.h
     Decoders/EXRDecoder.h
     Decoders/FarbfeldDecoder.h
-    Decoders/FITSDecoder.h
     Decoders/FITSDecoderV2.h
     Decoders/FontDecoder.h
     Decoders/GeospatialDecoder.h
@@ -523,6 +502,7 @@ set(ENGINE_HEADERS
 
     # Cache management
     Cache/AdaptiveCacheBudgetManager.h
+    Cache/CacheWarmingActivation.h
     Cache/CacheWarmingService.h
     Cache/MultiTenantCacheManager.h
     Cache/MultiTierCache.h
@@ -535,6 +515,7 @@ set(ENGINE_HEADERS
     Cache/USNCacheInvalidation.h
     Cache/CacheMigrationEngine.h
     Cache/CacheEncryptionLayer.h
+    Cache/CacheTelemetryCollector.h
     Cache/SubMillisecondCacheEngine.h
     Cache/PSOCachePersistence.h
     Cache/CacheBudgetAutoTuner.h
@@ -600,10 +581,8 @@ set(ENGINE_HEADERS
     # Shell integration
 
     # Utilities
-    Utils/AccessibilityEngine.h
     Utils/CIPipeline.h
     Utils/CodeCoverage.h
-    Utils/DocGenerator.h
     Utils/FuzzingEngine.h
     Utils/InstallerManager.h
     Utils/MemorySafety.h
@@ -622,7 +601,6 @@ set(ENGINE_HEADERS
     Utils/CommandLineInterface.h
     Utils/ConfigMigrationEngine.h
     Utils/DiagnosticDashboard.h
-    Utils/EnterpriseDeployment.h
     Utils/EnterpriseDeploymentManager.h
     Utils/EXIFOrientation.h
     Utils/FileHashEngine.h
@@ -655,7 +633,6 @@ set(ENGINE_HEADERS
     Utils/Win11Integration.h
     Utils/RegistrySnapshotManager.h
     Utils/ConfigDriftDetector.h
-    Utils/DeploymentPreflightCheck.h
     Utils/OperationalReadinessChecker.h
 
     # Sprint 47-48: CI/CD Pipeline + Build Validation
@@ -665,7 +642,6 @@ set(ENGINE_HEADERS
 
     # Sprint 591-593
     Utils/InstallerLifecycleManager.h
-    Utils/TelemetryEngine.h
     Utils/DocumentationGenerator.h
 
     # Release gate (unified)
@@ -675,8 +651,6 @@ set(ENGINE_HEADERS
     Core/HDRToneMappingPipeline.h
     Core/ColorSpaceEngine.h
     Core/GPUTextureCompressionPipeline.h
-    Core/AdaptiveDPIScaler.h
-    Core/FormatFingerprintDB.h
     Core/NestedArchivePreview.h
     Core/MultiPageNavigator.h
     Core/AnimatedFormatController.h
@@ -700,18 +674,13 @@ set(ENGINE_HEADERS
     Core/SelfHealingDecoder.h
     Core/PerformanceAnomalyDetector.h
     Core/PerformanceDashboard.h
-    Core/ThumbnailPreviewEngine.h
     Core/DiagnosticsCollector.h
     Core/DiagnosticReportGeneratorV2.h
     Core/HealthCheckEndpoint.h
     Core/PreviewTooltipRenderer.h
-    Core/FormatGalleryCompositor.h
     Core/QuickActionsOverlay.h
     Core/UsageAnalyticsDashboard.h
-    Core/DecoderPerformanceProfiler.h
-    Core/FormatPopularityTracker.h
     Core/SystemResourceMonitor.h
-    Core/MultiMonitorColorProfile.h
     Core/RustFFIBridge.h
     Core/DirectStorage12Integration.h
     Core/NeuralTextureCompression.h
@@ -720,23 +689,16 @@ set(ENGINE_HEADERS
     Core/WASMDecoderSandbox.h
     Core/LivePreviewStreamingProtocol.h
     Core/DragDropThumbnailPreview.h
-    Core/ExplorerColumnProvider.h
     Core/TaskbarPreviewManager.h
     Core/SearchFederatedProvider.h
-    Core/ThumbnailQualityValidator.h
 
     # Batch 8 (Sprints 430-443)
     Core/DirectShowThumbnailBridge.h
-    Core/ShellExtensionHealthMonitor.h
-    Core/ThumbnailColorSpace.h
     Pipeline/AsyncIOCompletionEngine.h
     Core/ExifOrientationFixer.h
-    Core/MultiMonitorDPIScaler.h
     Memory/VirtualAllocOptimizer.h
-    Core/ThumbnailHistogram.h
     Core/FileAssociationManager.h
     GPU/DX12FenceManager.h
-    Core/ThumbnailSpriteSheet.h
     Core/WindowsSearchIntegration.h
 
     # Sprints 594-643 — New Decoders, Pipeline, Core, AI features
@@ -783,33 +745,26 @@ set(ENGINE_HEADERS
     Pipeline/MemoryMappedDecodePath.h
     # Batch 8: Quality & Observability (629-633)
     Core/DecodeLatencyHistogram.h
-    Core/ErrorCategorizationEngine.h
     Core/HealthScoreAggregator.h
     Core/PerformanceRegressionDetector.h
-    Core/ResourceUsageProfiler.h
     # Batch 9: Smart Features (634-638)
     AI/ImageComplexityAnalyzer.h
     AI/DecodeStrategyOptimizer.h
     # Batch 10: Platform & Integration (639-643)
     Core/ClipboardMonitorIntegration.h
-    Core/ShellNotificationProvider.h
     Core/ExplorerStatusBarProvider.h
     Core/FileSummaryTooltipGenerator.h
     Core/BatchProgressReporter.h
     # Sprint 49-50: Dark Mode & Theme Rendering
-    Core/DarkModeTextFix.h
     Core/ThemeAwareOverlay.h
     Core/ContrastValidator.h
     Core/SystemThemeMonitor.h
-    Core/ThumbnailColorCorrector.h
     Core/AdaptiveIconRenderer.h
     # Sprint 51-52: Decode Pipeline Enhancement
-    Core/FormatFingerprinter.h
     Core/StreamingDecodeEngine.h
     Core/MultiPagePreview.h
     # Sprint 53-54: Memory Management
     Memory/MemoryArenaAllocator.h
-    Memory/NUMAMemoryRouter.h
     Memory/LargePageAllocator.h
     # Sprint 55-56: Pipeline Scheduling
     Pipeline/PipelineStageProfiler.h
@@ -838,17 +793,13 @@ set(ENGINE_HEADERS
     Core/HealthCheckOrchestrator.h
     # Sprint 67-68: Final Polish
     Core/ShellIntegrationValidator.h
-    Core/SIMDPixelConversion.h
     Core/GracefulDegradationController.h
     Core/UserPreferenceEngine.h
-    Core/ThumbnailAnimator.h
-    Core/AccessibilityEnhancer.h
     Core/StartupOptimizer.h
     Core/CrashRecoveryEngine.h
     Core/HDRToneMapper.h
     Core/ColorSpaceConverter.h
     Core/ExifOrientationHandler.h
-    Core/ThumbnailWatermarker.h
     Core/IconBadgeRenderer.h
 
     # Sprint 69-88: Beyond Zenith — Next-Generation Features
@@ -890,9 +841,7 @@ set(ENGINE_HEADERS
     Cache/SemanticCacheIndex.h
 
     # Beyond Zenith — Memory
-    Memory/TransparentHugePageAllocator.h
     Memory/MemoryCompressionEngine.h
-    Memory/PooledScratchAllocator.h
     Memory/ZeroCostAbstractionLayer.h
     Memory/MemoryBandwidthProfiler.h
 
@@ -902,6 +851,8 @@ set(ENGINE_HEADERS
 
     # Beyond Zenith — Plugin Ecosystem
     Plugin/PluginTelemetryBridge.h
+    Plugin/PluginHostIPC.h
+    Plugin/PluginRuntimeValidation.h
 
     # Sprint 349-393: Enhancement Plan V15 — Production Polish
     # Category A/B: Critical Fixes & Architecture (Core)
@@ -933,11 +884,8 @@ set(ENGINE_HEADERS
     Pipeline/FFmpegCodecRouter.h
 
     # Category B/F: Memory Optimization
-    Memory/BitmapSlabAllocator.h
     Memory/SIMDMemoryAligner.h
-    Memory/NUMAAffinityAllocator.h
     Memory/MemoryCompactionScheduler.h
-    Memory/LargePageOptimizer.h
 
     # Category F: Cache Performance
 
@@ -972,17 +920,13 @@ set(ENGINE_HEADERS
     Core/GlobalShortcutManager.h
     Core/FileChangeThrottler.h
     Core/SmartThumbnailPrioritizer.h
-    Core/ThumbnailRequestCoalescer.h
-    Core/DecoderTimeoutPolicy.h
     Core/ExplorerIntegrationMonitor.h
-    Core/ThumbnailSizeNegotiator.h
     Core/FileConcurrencyGuard.h
     Core/ResourceThrottlePolicy.h
 
     # Sprint 9-14 (v15.3.0 "Zenith-T") — Resilience & Hardening
     Core/DecodeInputValidator.h
     Core/DecodeErrorCategory.h
-    Core/DecoderTimeoutGuard.h
     Core/GracefulDegradation.h
     Core/ArchiveSecurityValidator.h
 
@@ -1012,7 +956,6 @@ set(ENGINE_HEADERS
     Memory/ThreadLocalPoolAllocator.h
 
     # AI/ML enhancements
-    AI/AdaptiveCropEngine.h
     AI/FileTypePredictor.h
 
     # Plugin enhancements
@@ -1034,15 +977,11 @@ set(ENGINE_HEADERS
 
     # Sprint 396: Enhancement Plan V15 — 50 New Feature Headers
     # Core enhancements
-    Core/ShellOverlayRenderer.h
-    Core/ShellContextMenuProvider.h
     Core/WindowsNotificationManager.h
     Core/FileSystemJournalReader.h
     Core/ProcessIsolationBroker.h
-    Core/ThumbnailBatchExporter.h
     Core/IncrementalDecodeEngine.h
     Core/ExplorerNavigationMonitor.h
-    Core/ShellThumbnailInterceptor.h
     Core/DecoderPoolManager.h
     Core/FileTypeAssociationBroker.h
     # Pipeline enhancements
@@ -1063,10 +1002,8 @@ set(ENGINE_HEADERS
     # Cache enhancements
     Cache/CacheReplicationEngine.h
     # Memory enhancements
-    Memory/PageFaultOptimizer.h
     Memory/MemoryCompactionEngine.h
     Memory/AllocatorBenchmark.h
-    Memory/GuardPageProtector.h
     Memory/WorkingSetOptimizer.h
     # AI enhancements
     # Plugin enhancements
@@ -1097,13 +1034,10 @@ set(ENGINE_HEADERS
     Core/PropertyStoreCache.h
     Core/RegistryWriteCoalescer.h
     Core/CollapsibleSectionModel.h
-    Core/FormatHealthDashboard.h
     Core/SettingsProfileManager.h
     Core/PerformanceMetricAggregator.h
     Core/OwnerDrawButtonRenderer.h
     Core/SystemTrayContextProvider.h
-    Core/DPILayoutTransformer.h
-    Core/FormatIconAtlas.h
     Core/WorkerPoolElasticScaler.h
     Core/SIMDInstructionAuditor.h
     # Pipeline enhancements
@@ -1121,7 +1055,6 @@ set(ENGINE_HEADERS
     # Cache enhancements
     # Memory enhancements
     Memory/BitmapPoolPartitioner.h
-    Memory/MemoryTagAllocator.h
     Memory/AddressSpaceReserver.h
     Memory/CommitChargeTracker.h
     # Decoder enhancements
@@ -1133,8 +1066,6 @@ set(ENGINE_HEADERS
     Plugin/PluginHealthReporter.h
     # Sprint 398 — EP V15 Phase 3
     # Core enhancements
-    Core/ThumbnailRotationCorrector.h
-    Core/ShellOverlayDispatcher.h
     Core/FileVersionTracker.h
     Core/ContextMenuFormatter.h
     Core/ProgressReportAggregator.h
@@ -1154,7 +1085,6 @@ set(ENGINE_HEADERS
     Pipeline/DecodeWatermarkStamper.h
     # GPU enhancements
     GPU/ShaderVariantSelector.h
-    GPU/GPUMemoryDefragmenter.h
     GPU/TextureSamplerCache.h
     GPU/GPUBarrierOptimizer.h
     GPU/ShaderCompileListener.h
@@ -1163,7 +1093,6 @@ set(ENGINE_HEADERS
     Cache/CacheSerializationCodec.h
     # Memory enhancements
     Memory/VirtualAllocTracker.h
-    Memory/MemoryPageFaultMonitor.h
     Memory/HeapFragmentationProbe.h
     Memory/MemoryBudgetNegotiator.h
     Memory/MemoryTrimPolicy.h
@@ -1183,15 +1112,10 @@ set(ENGINE_HEADERS
     Utils/DeploymentVerifier.h
     # Sprint 399 — EP V15 Phase 4
     # Core
-    Core/ThumbnailStreamMultiplexer.h
     Core/FileSystemWatchdog.h
-    Core/ShellBadgeRenderer.h
-    Core/ThumbnailCacheWarmer.h
     Core/ContextualPreviewEngine.h
     Core/FileSizeEstimator.h
     Core/ConcurrentExtractScheduler.h
-    Core/ThumbnailPrefetchOracle.h
-    Core/ShellPropertyStoreRouter.h
     # Pipeline
     Pipeline/AdaptivePipelineScheduler.h
     Pipeline/StreamingThumbnailEmitter.h
@@ -1260,22 +1184,16 @@ set(ENGINE_HEADERS
     Core/SandboxEscapeGuard.h
     Core/CodeIntegrityChecker.h
     # Sprint 311-320 (v21.3.0 "Rigel-T") — Storage & Caching v3
-    Core/ThumbnailPrefetcher.h
-    Core/ThumbnailPriorityQueue.h
     Core/PredictivePrefetcher.h
-    Core/ThumbnailDensitySelector.h
     Utils/MemoryMappedLoader.h
     Utils/ActivationService.h
     Utils/FeatureCompatMatrix.h
     # Sprint 321-330 (v22.0.0 "Sirius" MAJOR) — Cross-Platform Foundation
-    Core/AccessibilityLayer.h
     Core/ColorBlindnessFilter.h
     Core/DisplayColorProfile.h
-    Core/DPIScalingPolicy.h
     Core/FeedbackManager.h
     Core/KeyboardNavigationHandler.h
     Core/MonitorConfigWatcher.h
-    Core/MultiMonitorContext.h
     # Sprint 331-340 (v22.1.0 "Sirius-R") — Performance Profiling v2
     Core/ResponsiveLayoutManager.h
     Core/SecureDecodeContext.h
@@ -1284,7 +1202,6 @@ set(ENGINE_HEADERS
     Core/InputValidator.h
     Core/CodecPlatformV2.h
     Core/NetworkTrustManager.h
-    Utils/AccessibilityAudit.h
     # Sprint 341-350 (v22.2.0 "Sirius-S") — Security & Audit v3
     Utils/LicenseManager.h
     Utils/LocalizationValidator.h
@@ -1318,10 +1235,7 @@ set(ENGINE_HEADERS
     Core/NamespaceWalkEngine.h
     Core/ExplorerColumnProviderV2.h
     Core/SearchIndexBridge.h
-    Core/ShellPropertyBagV2.h
-    Core/ThumbnailOverlayRenderer.h
     Core/DragDropPreviewEngine.h
-    Core/ShellDataObjectExtractor.h
     # Sprint 391-400 — DevOps & Quality Engineering v2 (v22.7.0 Sirius-X)
     Utils/MutationTestingEngine.h
     Utils/PropertyBaseTestEngine.h
@@ -1350,13 +1264,10 @@ set(ENGINE_HEADERS
     GPU/GPUThumbnailAtlasManager.h
     # Sprint 421-430 — Plugin Ecosystem v3 (v23.2.0 Vega-S)
     # Sprint 431-440 — Memory Optimization v3 (v23.3.0 Vega-T)
-    Memory/PageFileArenaAllocator.h
-    Memory/HugeTLBPagePool.h
     Memory/MemoryMappedBTree.h
     Memory/NVMeMemoryTier.h
     Memory/ECCErrorDetector.h
     Memory/PressureForecaster.h
-    Memory/JemallocSlabAllocator.h
     Memory/SharedMemoryRegionManager.h
     # Sprint 441-450 — Smart Cache v4 (v23.4.0 Vega-U)
     Cache/AIEvictionPolicyEngine.h
@@ -1369,7 +1280,6 @@ set(ENGINE_HEADERS
 
     # Sprint 571-580 — Neural Format Intelligence (v25.1.0 "Rigel-R")
     Core/SelfExpandingFormatRegistry.h
-    Core/FormatDetectionReport.h
     Core/SyntheticDecoderGenerator.h
 
     # Sprint 581-590 — NPU & Heterogeneous Compute (v25.2.0 "Rigel-S")
@@ -1390,18 +1300,14 @@ set(ENGINE_HEADERS
     Core/CommitBadgeCompositor.h
     Core/MergeConflictOverlay.h
     # Sprint 601-610 — Self-Healing & Adaptive Recovery (v25.4.0 "Rigel-U")
-    Core/DecoderCrashPredictor.h
-    Core/DecoderQuarantineManager.h
     Core/AdaptiveTimeoutTuner.h
     Core/HeapCorruptionSentinel.h
     Pipeline/RetryPolicyEngine.h
-    Core/DecoderIncidentReporter.h
     Utils/COMSelfRepairValidator.h
     Utils/BootIntegritySelfTest.h
     # Sprint 611-620 — Multi-Instance & Virtual Desktop (v25.5.0 "Rigel-V")
     Core/VirtualDesktopAwareness.h
     Core/WTSSessionIsolation.h
-    Core/PerMonitorDPISelectorV2.h
     Core/TabbedExplorerSync.h
     Memory/CrossSessionThumbnailPool.h
     Core/InstanceRegistry.h
@@ -1476,7 +1382,6 @@ set(ENGINE_HEADERS
     Utils/LocaleFallbackResolver.h
     Utils/A11yColorContrastEngine.h
     Utils/KeyboardNavigationMapV2.h
-    Utils/AccessibilityAuditPipeline.h
 
     # Sprint 701-710 — Extended Reality (XR) Thumbnails (v26.6.0 "Canopus-W")
     Decoders/OpenXRAssetDecoder.h
@@ -1590,9 +1495,7 @@ set(ENGINE_HEADERS
 
     # Sprint 891-900 — Accessibility & Inclusive Design v2 (v29.1.0 "Capella-R")
     Utils/ARIAThumbnailAnnotator.h
-    Core/AccessibilityAuditEngine.h
     Utils/HighContrastThemeAdapter.h
-    Utils/ScreenReaderBridge.h
     Core/KeyboardNavigationController.h
     Utils/A11yTelemetryReporter.h
 
@@ -1643,17 +1546,10 @@ set(ENGINE_HEADERS
     Decoders/NRRDDecoder.h
     Decoders/HDF5ThumbnailDecoder.h
     Decoders/NetCDFDecoder.h
-    Decoders/FITSDecoder.h
     Decoders/ECWDecoder.h
 
     # Sprint 1011-1020 — Universal Format Decoder Library (v30.5.0 "Deneb-V")
     Core/UniversalDecoderFacade.h
-    Core/FormatCapabilityMatrix.h
-    Core/DecoderVersionRegistry.h
-    Core/FormatFamilyResolver.h
-    Core/DecoderHotfixApplicator.h
-    Core/FormatSchemaValidator.h
-    Core/DecoderCompatLayer.h
     Core/UniversalLibraryManifest.h
 
     # Sprint 1021-1030 — Plugin Marketplace v4 & Commerce (v30.6.0 "Deneb-W")
@@ -1693,22 +1589,54 @@ set(ENGINE_HEADERS
     Core/WaylandShellExtension.h
     Core/MacOSLaunchServicesAdapter.h
     Core/XPlatformTestHarness.h
+
+    # Consolidated — previously unregistered headers
+    AI/ImageQualityAssessorV2.h
+    CLI/CLICommandParser.h
+    CLI/LensCLI.h
+    Core/FormatFallbackEngine.h
+    Core/LocalizationEngine.h
+    Core/ResourceUsageProfiler.h
+    Core/WorkStealingSchedulerV2.h
+    Decoders/FITSDecoder.h
+    Pipeline/HiDPIScaler.h
+    Pipeline/ZeroCopyRenderer.h
+    Plugin/PluginCompatibilityKitV2.h
+    Plugin/PluginHotReloadManager.h
+    Plugin/PluginMarketplaceUnified.h
+    Plugin/PluginTrustChainValidator.h
+    Utils/LocalizationEngine.h
+    # Sprint additions — new feature headers
+    Cache/PersistentCacheManager.h
+    Core/ErrorReportingPipeline.h
+    Core/ShellOverlayHandler.h
+    Core/TelemetryAnalyticsEngine.h
+    AI/AISearchIntegration.h
+    Core/DarkModeEngine.h
+    Core/DecoderCompatLayer.h
+    Core/DecoderHotfixApplicator.h
+    Core/DecoderVersionRegistry.h
+    Core/FormatCapabilityMatrix.h
+    Core/FormatCategoryManager.h
+    Core/FormatFamilyResolver.h
+    Core/FormatSchemaValidator.h
+    Core/FormatStatusIndicator.h
+    Core/ThumbnailQualityAnalyzer.h
+    Plugin/PluginDebuggerIntegration.h
+    Plugin/PluginHotReload.h
+    Utils/DocumentationExcellenceV2.h
 )
 
 set(ENGINE_SOURCES
     # Core implementations
-    Core/AnimatedThumbnailEngine.cpp
     Core/AsyncShellExtension.cpp
     Core/BatchProcessingEngine.cpp
     Core/CloudSyncProvider.cpp
     Core/Config.cpp
-    Core/ConfigMigrationEngine.cpp
     Core/ContentIndexer.cpp
     Core/EncoderExportEngine.cpp
     Core/EngineAPI.cpp
-    Core/ErrorRecoveryEngine.cpp
     Core/FormatConverterEngine.cpp
-    Core/HighDPIScaling.cpp
     Core/MetadataExtractor.cpp
     Core/NetworkProviderEngine.cpp
     Core/PerformanceBenchmarkV2.cpp
@@ -1716,16 +1644,12 @@ set(ENGINE_SOURCES
     Core/ResourcePoolEngine.cpp
     Core/SecurityHardeningV2.cpp
     Core/ShellContextMenuV2.cpp
-    Core/ShellPreviewHandler.cpp
     Core/SIMDAccelerator.cpp
     Core/TelemetryEngine.cpp
     Core/ETWTraceProvider.cpp
     Core/ThemeEngine.cpp
     Core/UpdateEngine.cpp
     Core/WatchFolderEngine.cpp
-
-    # Sprint 9-14 (v15.3.0 "Zenith-T") — Resilience & Hardening
-    Core/DecoderTimeoutGuard.cpp
 
     # Pipeline implementations
     Pipeline/AsyncThumbnailProvider.cpp
@@ -1746,7 +1670,6 @@ set(ENGINE_SOURCES
     Decoders/EPSDecoder.cpp
     Decoders/EXRDecoder.cpp
     Decoders/FarbfeldDecoder.cpp
-    Decoders/FITSDecoder.cpp
     Decoders/FontDecoder.cpp
     Decoders/GeospatialDecoder.cpp
     Decoders/HDRDecoder.cpp
@@ -1771,6 +1694,7 @@ set(ENGINE_SOURCES
     Decoders/VideoDecoder.cpp
     Decoders/WebPDecoder.cpp
     Decoders/WMFDecoder.cpp
+    Decoders/ExampleDecoder.cpp
     Decoders/XCFDecoder.cpp
     Decoders/XPMDecoder.cpp
 
@@ -1785,7 +1709,6 @@ set(ENGINE_SOURCES
     Cache/ThumbnailCache.cpp
 
     # Plugin system implementations
-    Plugin/CrashHandler.cpp
     Plugin/IPC/SharedMemoryManager.cpp
     Plugin/IsolationModeSelector.cpp
     Plugin/PluginDecoder.cpp
@@ -1794,7 +1717,6 @@ set(ENGINE_SOURCES
     Plugin/Security/JobObjectManager.cpp
 
     # Utility implementations
-    Utils/AccessibilityEngine.cpp
     Utils/AuditLogger.cpp
     Utils/AutoDocGenerator.cpp
     Utils/CIValidator.cpp
@@ -1820,8 +1742,8 @@ set(ENGINE_SOURCES
     Memory/BitmapPool.cpp
 
     Utils/SIMDScaler.cpp
+    Utils/LocalizationEngine.cpp
     Utils/TestSuiteExpansion.cpp
-    Utils/UsageTelemetryEngine.cpp
     Utils/Win11Integration.cpp
 
     # Release gate implementation
@@ -2046,10 +1968,11 @@ if(ENGINE_SOURCES)
     # Compiler warnings & flags (MSVC v145 preferred)
     if(MSVC)
         target_compile_options(ExplorerLensEngine PRIVATE
-            /W4           # Warning level 4
-            /WX-          # Warnings NOT as errors during consolidation
-            /permissive-  # Standards conformance
-            /arch:AVX2    # Enable AVX2 instructions for SIMD operations
+            /W4               # Warning level 4
+            /WX-              # Warnings NOT as errors during consolidation
+            /permissive-      # Standards conformance
+            /arch:AVX2        # Enable AVX2 instructions for SIMD operations
+            /diagnostics:caret  # Rich diagnostics with source caret (better error context)
         )
         # MSVC linker flags
         target_link_options(ExplorerLensEngine PRIVATE

@@ -28,7 +28,7 @@ struct SemanticFingerprint {
     float edgeDensity = 0.0f;
 };
 
-struct SimilarityResult {
+struct SemanticSimilarityResult {
     std::string matchKey;
     double similarity = 0.0;
     bool isDuplicate = false;
@@ -100,12 +100,12 @@ public:
         m_stats.totalEntries = m_index.size();
     }
 
-    inline SimilarityResult FindMostSimilar(const SemanticFingerprint& query,
+    inline SemanticSimilarityResult FindMostSimilar(const SemanticFingerprint& query,
         double threshold = 0.95) const {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_stats.lookupCount++;
 
-        SimilarityResult best;
+        SemanticSimilarityResult best;
         best.similarity = 0.0;
 
         for (const auto& [key, fp] : m_index) {

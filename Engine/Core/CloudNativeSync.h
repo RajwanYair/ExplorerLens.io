@@ -150,17 +150,18 @@ public:
  /// Detect available cloud providers on this system
  static std::vector<NativeCloudProvider> DetectProviders() {
  std::vector<NativeCloudProvider> providers;
-#pragma warning(push)
-#pragma warning(disable : 4996) // _wgetenv deprecation
- // Check for OneDrive
- const wchar_t *onedrive = _wgetenv(L"OneDrive");
- if (onedrive && onedrive[0] != L'\0')
+ // Check for OneDrive (use secure _wdupenv_s instead of deprecated _wgetenv)
+ wchar_t *onedrive = nullptr;
+ size_t onedriveLen = 0;
+ if (_wdupenv_s(&onedrive, &onedriveLen, L"OneDrive") == 0 && onedrive && onedrive[0] != L'\0')
  providers.push_back(NativeCloudProvider::OneDrive);
+ free(onedrive);
  // Check for OneDrive for Business
- const wchar_t *onedriveBiz = _wgetenv(L"OneDriveCommercial");
- if (onedriveBiz && onedriveBiz[0] != L'\0')
+ wchar_t *onedriveBiz = nullptr;
+ size_t onedriveBizLen = 0;
+ if (_wdupenv_s(&onedriveBiz, &onedriveBizLen, L"OneDriveCommercial") == 0 && onedriveBiz && onedriveBiz[0] != L'\0')
  providers.push_back(NativeCloudProvider::OneDriveBusiness);
-#pragma warning(pop)
+ free(onedriveBiz);
  return providers;
  }
 };

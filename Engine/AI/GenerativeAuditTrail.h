@@ -13,7 +13,7 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class AuditEventType : uint8_t
+enum class GenAuditEventType : uint8_t
 {
     Generated,
     Upscaled,
@@ -23,7 +23,7 @@ enum class AuditEventType : uint8_t
     PersonalisationApplied
 };
 
-enum class AuditRetentionPolicy : uint8_t
+enum class GenAuditRetention : uint8_t
 {
     SessionOnly,
     Days7,
@@ -34,7 +34,7 @@ enum class AuditRetentionPolicy : uint8_t
 
 struct GenerativeAuditEntry
 {
-    AuditEventType eventType    = AuditEventType::Generated;
+    GenAuditEventType eventType    = GenAuditEventType::Generated;
     std::string    modelName;
     uint64_t       inputHash    = 0;
     uint64_t       outputHash   = 0;
@@ -56,20 +56,20 @@ public:
 
     void Record(GenerativeAuditEntry const& entry);
 
-    void SetRetentionPolicy(AuditRetentionPolicy policy);
+    void SetRetentionPolicy(GenAuditRetention policy);
 
     bool ExportToJson(std::string const& filePath) const;
 
     uint32_t Purge(uint64_t olderThanMs);
 
     [[nodiscard]] std::vector<GenerativeAuditEntry>
-        Query(AuditEventType type, uint64_t sinceMs) const;
+        Query(GenAuditEventType type, uint64_t sinceMs) const;
 
-    [[nodiscard]] AuditRetentionPolicy GetRetentionPolicy() const;
+    [[nodiscard]] GenAuditRetention GetRetentionPolicy() const;
 
 private:
     std::vector<GenerativeAuditEntry> m_entries;
-    AuditRetentionPolicy              m_policy     = AuditRetentionPolicy::Days30;
+    GenAuditRetention                 m_policy     = GenAuditRetention::Days30;
     uint32_t                          m_maxEntries = 100000;
 };
 

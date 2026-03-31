@@ -88,6 +88,9 @@ enum class TrustLevel : uint32_t {
     MicrosoftSigned = 4
 };
 
+// Alias used by tests and external consumers
+using PluginTrustLevel = TrustLevel;
+
 struct TrustChainCertificateInfo {
     std::wstring subject;
     std::wstring issuer;
@@ -402,4 +405,10 @@ private:
 };
 
 } // namespace Engine
+
+// Bridge alias so ExplorerLens::Plugin::PluginTrustLevel resolves
+namespace Plugin {
+    using PluginTrustLevel = ExplorerLens::Engine::TrustLevel;
+} // namespace Plugin
+
 } // namespace ExplorerLens

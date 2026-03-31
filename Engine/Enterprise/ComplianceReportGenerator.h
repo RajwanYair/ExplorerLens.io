@@ -41,7 +41,7 @@ enum class ControlStatus : uint8_t {
 struct ComplianceEvidence {
     ComplianceFramework framework{ComplianceFramework::SOC2};
     std::string         controlId;
-    ControlStatus       status{ControlStatus::InReview};
+    std::string         status;
     std::string         evidence;
     std::string         collectedBy;
     std::chrono::system_clock::time_point timestamp;
