@@ -257,6 +257,9 @@ set(ENGINE_HEADERS
     Core/VulkanComputeActivation.h
     Core/WatchFolderEngine.h
     Core/WinRTAppSDKIntegrationV2.h
+    Core/SmartBatchProcessor.h
+    Core/WorkflowAutomationEngine.h
+    Core/UserBehaviorAnalytics.h
 
     # Core — Integration & Utilities
     Core/ArchiveRefactorEngine.h
@@ -400,6 +403,8 @@ set(ENGINE_HEADERS
     Pipeline/RemoteRenderProxy.h
     Pipeline/LoopTuner.h
     Pipeline/PipelineErrorBoundary.h
+    Pipeline/AdaptivePipelineOptimizer.h
+    Pipeline/IntelligentPrefetchScheduler.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -552,6 +557,11 @@ set(ENGINE_HEADERS
     AI/AIThumbnailEnhancer.h
     AI/SceneUnderstandingEngine.h
     AI/SmartCropV2.h
+
+    # Sprint 1061-1070 — Intelligent Workflow Automation (v31.3.0 "Achernar-T")
+    AI/PredictivePregenEngine.h
+    AI/ContentCategorizationEngine.h
+    AI/ThumbnailQualityPredictor.h
 
     # Codec modules
     Codec/CodecLoader.h

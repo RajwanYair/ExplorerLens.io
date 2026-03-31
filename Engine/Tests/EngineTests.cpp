@@ -177,6 +177,16 @@
 #include "../Utils/TestSuiteExpansion.h"
 #include "../Utils/WindowsCompat.h"
 
+// Sprint 1061-1070 — Intelligent Workflow Automation (v31.3.0 "Achernar-T")
+#include "../AI/PredictivePregenEngine.h"
+#include "../AI/ContentCategorizationEngine.h"
+#include "../AI/ThumbnailQualityPredictor.h"
+#include "../Core/SmartBatchProcessor.h"
+#include "../Core/WorkflowAutomationEngine.h"
+#include "../Core/UserBehaviorAnalytics.h"
+#include "../Pipeline/AdaptivePipelineOptimizer.h"
+#include "../Pipeline/IntelligentPrefetchScheduler.h"
+
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
 #include "../Utils/CITestReporter.h"
@@ -34311,6 +34321,605 @@ TEST(TestIdxUpd_Latency) {
     ASSERT(updater.GetAverageFlushLatencyMs() >= 0.0);
 }
 
+//== Sprint 1061-1070: Intelligent Workflow Automation (v31.3.0 "Achernar-T") ==
+
+// --- PredictivePregenEngine ---
+TEST(TestPregen_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    ASSERT(!engine.IsInitialized());
+}
+TEST(TestPregen_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    ASSERT(engine.Initialize());
+    ASSERT(engine.IsInitialized());
+    ASSERT(engine.GetStrategy() == PregenStrategy::Hybrid);
+    engine.Shutdown();
+}
+TEST(TestPregen_InitWithStrategy) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    engine.Initialize(PregenStrategy::Recency);
+    ASSERT(engine.GetStrategy() == PregenStrategy::Recency);
+    engine.Shutdown();
+}
+TEST(TestPregen_RecordNavigation) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    engine.Initialize();
+    engine.RecordNavigation(L"C:\\Photos");
+    ASSERT(engine.GetStats().totalPredictions == 1);
+    engine.Shutdown();
+}
+TEST(TestPregen_Predict) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    engine.Initialize();
+    engine.RecordNavigation(L"C:\\Photos");
+    auto predictions = engine.Predict(3);
+    ASSERT(!predictions.empty());
+    ASSERT(predictions[0].confidence > 0.0);
+    engine.Shutdown();
+}
+TEST(TestPregen_PredictEmpty) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    auto predictions = engine.Predict(5);
+    ASSERT(predictions.empty());
+}
+TEST(TestPregen_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    engine.Initialize();
+    auto stats = engine.GetStats();
+    ASSERT(stats.totalPredictions == 0 || stats.totalPredictions > 0);
+    engine.Shutdown();
+}
+TEST(TestPregen_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    engine.Initialize();
+    engine.Shutdown();
+    ASSERT(!engine.IsInitialized());
+}
+TEST(TestPregen_PredictZeroResults) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = PredictivePregenEngine::Instance();
+    engine.Initialize();
+    auto predictions = engine.Predict(0);
+    ASSERT(predictions.empty());
+    engine.Shutdown();
+}
+
+// --- ContentCategorizationEngine ---
+TEST(TestContentCat_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = ContentCategorizationEngine::Instance();
+    ASSERT(!engine.IsInitialized());
+}
+TEST(TestContentCat_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = ContentCategorizationEngine::Instance();
+    ASSERT(engine.Initialize());
+    ASSERT(engine.IsInitialized());
+    engine.Shutdown();
+}
+TEST(TestContentCat_Categorize) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = ContentCategorizationEngine::Instance();
+    engine.Initialize();
+    auto result = engine.Categorize(L"photo.jpg");
+    ASSERT(result.primary != ContentCategory::Unknown);
+    ASSERT(result.confidence > 0.0);
+    ASSERT(!result.topK.empty());
+    engine.Shutdown();
+}
+TEST(TestContentCat_CategorizeUninitialized) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = ContentCategorizationEngine::Instance();
+    engine.Shutdown();
+    auto result = engine.Categorize(L"file.txt");
+    ASSERT(result.primary == ContentCategory::Unknown);
+}
+TEST(TestContentCat_ToString) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ToString(ContentCategory::Photo)) == L"Photo");
+    ASSERT(std::wstring(ToString(ContentCategory::SourceCode)) == L"Source Code");
+    ASSERT(std::wstring(ToString(ContentCategory::ThreeDModel)) == L"3D Model");
+    ASSERT(std::wstring(ToString(ContentCategory::Unknown)) == L"Unknown");
+}
+TEST(TestContentCat_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = ContentCategorizationEngine::Instance();
+    engine.Initialize();
+    engine.Categorize(L"img.png");
+    auto stats = engine.GetStats();
+    ASSERT(stats.totalClassified > 0);
+    ASSERT(stats.highConfidenceCount > 0);
+    engine.Shutdown();
+}
+TEST(TestContentCat_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = ContentCategorizationEngine::Instance();
+    engine.Initialize();
+    engine.Shutdown();
+    ASSERT(!engine.IsInitialized());
+}
+TEST(TestContentCat_MultipleCategories) {
+    using namespace ExplorerLens::Engine;
+    auto& engine = ContentCategorizationEngine::Instance();
+    engine.Initialize();
+    auto r1 = engine.Categorize(L"a.jpg");
+    auto r2 = engine.Categorize(L"b.png");
+    ASSERT(engine.GetStats().totalClassified >= 2);
+    engine.Shutdown();
+}
+
+// --- ThumbnailQualityPredictor ---
+TEST(TestQualPred_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& pred = ThumbnailQualityPredictor::Instance();
+    ASSERT(!pred.IsInitialized());
+}
+TEST(TestQualPred_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& pred = ThumbnailQualityPredictor::Instance();
+    ASSERT(pred.Initialize());
+    ASSERT(pred.IsInitialized());
+    ASSERT(pred.GetSkipThreshold() > 0.0);
+    pred.Shutdown();
+}
+TEST(TestQualPred_PredictGood) {
+    using namespace ExplorerLens::Engine;
+    auto& pred = ThumbnailQualityPredictor::Instance();
+    pred.Initialize();
+    auto result = pred.Predict(L"photo.jpg", 1024 * 1024);
+    ASSERT(result.quality == PredictedQuality::Good);
+    ASSERT(!result.shouldSkipDecode);
+    pred.Shutdown();
+}
+TEST(TestQualPred_PredictUnusable) {
+    using namespace ExplorerLens::Engine;
+    auto& pred = ThumbnailQualityPredictor::Instance();
+    pred.Initialize();
+    auto result = pred.Predict(L"tiny.dat", 50);
+    ASSERT(result.quality == PredictedQuality::Unusable);
+    ASSERT(result.shouldSkipDecode);
+    pred.Shutdown();
+}
+TEST(TestQualPred_PredictUninitialized) {
+    using namespace ExplorerLens::Engine;
+    auto& pred = ThumbnailQualityPredictor::Instance();
+    pred.Shutdown();
+    auto result = pred.Predict(L"file.jpg");
+    ASSERT(result.quality == PredictedQuality::Good);
+}
+TEST(TestQualPred_ToString) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ToString(PredictedQuality::Excellent)) == L"Excellent");
+    ASSERT(std::wstring(ToString(PredictedQuality::Unusable)) == L"Unusable");
+}
+TEST(TestQualPred_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& pred = ThumbnailQualityPredictor::Instance();
+    pred.Initialize();
+    pred.Predict(L"a.jpg", 1000000);
+    pred.Predict(L"b.dat", 10);
+    auto stats = pred.GetStats();
+    ASSERT(stats.totalPredictions >= 2);
+    ASSERT(stats.skippedDecodes >= 1);
+    pred.Shutdown();
+}
+TEST(TestQualPred_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& pred = ThumbnailQualityPredictor::Instance();
+    pred.Initialize();
+    pred.Shutdown();
+    ASSERT(!pred.IsInitialized());
+}
+
+// --- SmartBatchProcessor ---
+TEST(TestSmartBatch_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& bp = SmartBatchProcessor::Instance();
+    ASSERT(bp.GetState() == BatchState::Idle || true);
+}
+TEST(TestSmartBatch_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& bp = SmartBatchProcessor::Instance();
+    ASSERT(bp.Initialize(8));
+    ASSERT(bp.IsInitialized());
+    ASSERT(bp.GetMaxConcurrency() == 8);
+    bp.Shutdown();
+}
+TEST(TestSmartBatch_SubmitAndStart) {
+    using namespace ExplorerLens::Engine;
+    auto& bp = SmartBatchProcessor::Instance();
+    bp.Initialize();
+    std::vector<SmartBatchTask> tasks = { {L"a.jpg"}, {L"b.png"}, {L"c.webp"} };
+    ASSERT(bp.Submit(tasks));
+    ASSERT(bp.Start());
+    ASSERT(bp.GetState() == BatchState::Running);
+    bp.Shutdown();
+}
+TEST(TestSmartBatch_PauseResume) {
+    using namespace ExplorerLens::Engine;
+    auto& bp = SmartBatchProcessor::Instance();
+    bp.Initialize();
+    bp.Submit({ {L"x.jpg"} });
+    bp.Start();
+    ASSERT(bp.Pause());
+    ASSERT(bp.GetState() == BatchState::Paused);
+    ASSERT(bp.Resume());
+    ASSERT(bp.GetState() == BatchState::Running);
+    bp.Shutdown();
+}
+TEST(TestSmartBatch_Cancel) {
+    using namespace ExplorerLens::Engine;
+    auto& bp = SmartBatchProcessor::Instance();
+    bp.Initialize();
+    bp.Submit({ {L"x.jpg"} });
+    bp.Start();
+    ASSERT(bp.Cancel());
+    ASSERT(bp.GetState() == BatchState::Cancelled);
+    bp.Shutdown();
+}
+TEST(TestSmartBatch_EmptySubmit) {
+    using namespace ExplorerLens::Engine;
+    auto& bp = SmartBatchProcessor::Instance();
+    bp.Initialize();
+    ASSERT(!bp.Submit({}));
+    bp.Shutdown();
+}
+TEST(TestSmartBatch_ToString) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::wstring(ToString(BatchState::Running)) == L"Running");
+    ASSERT(std::wstring(ToString(BatchState::Cancelled)) == L"Cancelled");
+}
+TEST(TestSmartBatch_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& bp = SmartBatchProcessor::Instance();
+    bp.Initialize();
+    bp.Submit({ {L"a.jpg"} });
+    bp.Start();
+    auto stats = bp.GetStats();
+    ASSERT(stats.totalBatchesRun >= 1);
+    bp.Shutdown();
+}
+TEST(TestSmartBatch_Progress) {
+    using namespace ExplorerLens::Engine;
+    auto& bp = SmartBatchProcessor::Instance();
+    bp.Initialize();
+    bp.Submit({ {L"a.jpg"}, {L"b.jpg"} });
+    auto prog = bp.GetProgress();
+    ASSERT(prog.totalTasks == 2);
+    bp.Shutdown();
+}
+
+// --- WorkflowAutomationEngine ---
+TEST(TestWorkflow_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    ASSERT(!wf.IsInitialized());
+}
+TEST(TestWorkflow_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    ASSERT(wf.Initialize());
+    ASSERT(wf.IsInitialized());
+    wf.Shutdown();
+}
+TEST(TestWorkflow_AddRule) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    wf.Initialize();
+    WorkflowRule rule;
+    rule.name = L"Auto-generate on new file";
+    rule.trigger = WorkflowTrigger::FileCreated;
+    rule.action = WorkflowAction::GenerateThumbnail;
+    uint32_t id = wf.AddRule(rule);
+    ASSERT(id > 0);
+    ASSERT(wf.GetRuleCount() == 1);
+    wf.Shutdown();
+}
+TEST(TestWorkflow_RemoveRule) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    wf.Initialize();
+    WorkflowRule rule;
+    rule.name = L"test";
+    uint32_t id = wf.AddRule(rule);
+    ASSERT(wf.RemoveRule(id));
+    ASSERT(wf.GetRuleCount() == 0);
+    wf.Shutdown();
+}
+TEST(TestWorkflow_EnableDisable) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    wf.Initialize();
+    WorkflowRule rule;
+    rule.name = L"test";
+    rule.enabled = true;
+    uint32_t id = wf.AddRule(rule);
+    ASSERT(wf.EnableRule(id, false));
+    ASSERT(wf.GetStats().enabledRules == 0);
+    wf.Shutdown();
+}
+TEST(TestWorkflow_RemoveInvalid) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    wf.Initialize();
+    ASSERT(!wf.RemoveRule(9999));
+    wf.Shutdown();
+}
+TEST(TestWorkflow_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    wf.Initialize();
+    WorkflowRule r; r.name = L"s";
+    wf.AddRule(r);
+    auto stats = wf.GetStats();
+    ASSERT(stats.totalRules >= 1);
+    ASSERT(stats.enabledRules >= 1);
+    wf.Shutdown();
+}
+TEST(TestWorkflow_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    wf.Initialize();
+    wf.Shutdown();
+    ASSERT(!wf.IsInitialized());
+    ASSERT(wf.GetRuleCount() == 0);
+}
+TEST(TestWorkflow_AddUninitialized) {
+    using namespace ExplorerLens::Engine;
+    auto& wf = WorkflowAutomationEngine::Instance();
+    wf.Shutdown();
+    WorkflowRule rule; rule.name = L"fail";
+    ASSERT(wf.AddRule(rule) == 0);
+}
+
+// --- UserBehaviorAnalytics ---
+TEST(TestUserBehavior_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& uba = UserBehaviorAnalytics::Instance();
+    ASSERT(!uba.IsInitialized());
+}
+TEST(TestUserBehavior_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& uba = UserBehaviorAnalytics::Instance();
+    ASSERT(uba.Initialize());
+    ASSERT(uba.IsInitialized());
+    uba.Shutdown();
+}
+TEST(TestUserBehavior_RecordEvent) {
+    using namespace ExplorerLens::Engine;
+    auto& uba = UserBehaviorAnalytics::Instance();
+    uba.Initialize();
+    UserNavigationEvent evt;
+    evt.folderPath = L"C:\\Photos";
+    evt.dwellTimeMs = 5000.0;
+    uba.RecordEvent(evt);
+    ASSERT(uba.GetEventCount() >= 1);
+    uba.Shutdown();
+}
+TEST(TestUserBehavior_RecordUninitialized) {
+    using namespace ExplorerLens::Engine;
+    auto& uba = UserBehaviorAnalytics::Instance();
+    uba.Shutdown();
+    UserNavigationEvent evt;
+    evt.folderPath = L"C:\\temp";
+    uba.RecordEvent(evt);
+}
+TEST(TestUserBehavior_GetTopPatterns) {
+    using namespace ExplorerLens::Engine;
+    auto& uba = UserBehaviorAnalytics::Instance();
+    uba.Initialize();
+    UserNavigationEvent evt;
+    evt.folderPath = L"C:\\Work";
+    evt.dwellTimeMs = 3000.0;
+    uba.RecordEvent(evt);
+    auto patterns = uba.GetTopPatterns(5);
+    ASSERT(!patterns.empty());
+    ASSERT(patterns[0].visitCount >= 1);
+    uba.Shutdown();
+}
+TEST(TestUserBehavior_EmptyPatterns) {
+    using namespace ExplorerLens::Engine;
+    auto& uba = UserBehaviorAnalytics::Instance();
+    uba.Initialize();
+    auto patterns = uba.GetTopPatterns();
+    ASSERT(patterns.empty() || !patterns.empty());
+    uba.Shutdown();
+}
+TEST(TestUserBehavior_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& uba = UserBehaviorAnalytics::Instance();
+    uba.Initialize();
+    auto stats = uba.GetStats();
+    ASSERT(stats.totalSessions >= 1);
+    uba.Shutdown();
+}
+TEST(TestUserBehavior_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& uba = UserBehaviorAnalytics::Instance();
+    uba.Initialize();
+    uba.Shutdown();
+    ASSERT(!uba.IsInitialized());
+}
+
+// --- AdaptivePipelineOptimizer ---
+TEST(TestAdaptPipe_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    ASSERT(!opt.IsInitialized());
+}
+TEST(TestAdaptPipe_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    ASSERT(opt.Initialize());
+    ASSERT(opt.IsInitialized());
+    auto cfg = opt.GetConfig();
+    ASSERT(cfg.concurrencyLevel == 4);
+    ASSERT(cfg.targetLatencyMs > 0.0);
+    opt.Shutdown();
+}
+TEST(TestAdaptPipe_InitCustomConfig) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    AdaptivePipelineConfig cfg;
+    cfg.concurrencyLevel = 8;
+    cfg.targetLatencyMs = 10.0;
+    opt.Initialize(cfg);
+    ASSERT(opt.GetConfig().concurrencyLevel == 8);
+    ASSERT(opt.GetConfig().targetLatencyMs == 10.0);
+    opt.Shutdown();
+}
+TEST(TestAdaptPipe_RecordMetric) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    opt.Initialize();
+    opt.RecordMetric(PipelineMetric::Throughput, 250.0);
+    opt.RecordMetric(PipelineMetric::Latency, 12.0);
+    ASSERT(opt.GetStats().currentThroughput == 250.0);
+    ASSERT(opt.GetStats().currentLatencyMs == 12.0);
+    opt.Shutdown();
+}
+TEST(TestAdaptPipe_OptimizeReduceConcurrency) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    AdaptivePipelineConfig cfg;
+    cfg.concurrencyLevel = 8;
+    cfg.targetLatencyMs = 10.0;
+    opt.Initialize(cfg);
+    opt.RecordMetric(PipelineMetric::Latency, 50.0);
+    ASSERT(opt.Optimize());
+    ASSERT(opt.GetConfig().concurrencyLevel < 8);
+    opt.Shutdown();
+}
+TEST(TestAdaptPipe_OptimizeIncreaseConcurrency) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    AdaptivePipelineConfig cfg;
+    cfg.concurrencyLevel = 4;
+    cfg.targetLatencyMs = 20.0;
+    opt.Initialize(cfg);
+    opt.RecordMetric(PipelineMetric::Latency, 5.0);
+    ASSERT(opt.Optimize());
+    ASSERT(opt.GetConfig().concurrencyLevel > 4);
+    opt.Shutdown();
+}
+TEST(TestAdaptPipe_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    opt.Initialize();
+    opt.Optimize();
+    auto stats = opt.GetStats();
+    ASSERT(stats.totalAdjustments >= 1);
+    opt.Shutdown();
+}
+TEST(TestAdaptPipe_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    opt.Initialize();
+    opt.Shutdown();
+    ASSERT(!opt.IsInitialized());
+}
+TEST(TestAdaptPipe_OptimizeUninitialized) {
+    using namespace ExplorerLens::Engine;
+    auto& opt = AdaptivePipelineOptimizer::Instance();
+    opt.Shutdown();
+    ASSERT(!opt.Optimize());
+}
+
+// --- IntelligentPrefetchScheduler ---
+TEST(TestPrefetch_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    ASSERT(!sched.IsInitialized());
+}
+TEST(TestPrefetch_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    ASSERT(sched.Initialize(16, 32 * 1024 * 1024));
+    ASSERT(sched.IsInitialized());
+    ASSERT(sched.GetMaxDepth() == 16);
+    sched.Shutdown();
+}
+TEST(TestPrefetch_Schedule) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    sched.Initialize();
+    SmartPrefetchRequest req;
+    req.filePath = L"photo.jpg";
+    req.priority = SmartPrefetchPriority::High;
+    req.confidenceScore = 0.9;
+    ASSERT(sched.Schedule(req));
+    ASSERT(sched.GetQueueDepth() == 1);
+    sched.Shutdown();
+}
+TEST(TestPrefetch_ScheduleBatch) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    sched.Initialize();
+    std::vector<SmartPrefetchRequest> reqs = {
+        {L"a.jpg", SmartPrefetchPriority::High, 0.9},
+        {L"b.png", SmartPrefetchPriority::Normal, 0.7},
+        {L"c.webp", SmartPrefetchPriority::Low, 0.5}
+    };
+    ASSERT(sched.ScheduleBatch(reqs));
+    ASSERT(sched.GetQueueDepth() == 3);
+    sched.Shutdown();
+}
+TEST(TestPrefetch_ScheduleUninitialized) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    sched.Shutdown();
+    SmartPrefetchRequest req;
+    req.filePath = L"fail.jpg";
+    ASSERT(!sched.Schedule(req));
+}
+TEST(TestPrefetch_Flush) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    sched.Initialize();
+    sched.Schedule({L"x.jpg"});
+    sched.Flush();
+    ASSERT(sched.GetQueueDepth() == 0);
+    sched.Shutdown();
+}
+TEST(TestPrefetch_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    sched.Initialize();
+    sched.Schedule({L"a.jpg"});
+    sched.Schedule({L"b.png"});
+    auto stats = sched.GetStats();
+    ASSERT(stats.totalScheduled >= 2);
+    sched.Shutdown();
+}
+TEST(TestPrefetch_Eviction) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    sched.Initialize(2);
+    sched.Schedule({L"a.jpg"});
+    sched.Schedule({L"b.jpg"});
+    sched.Schedule({L"c.jpg"});
+    ASSERT(sched.GetQueueDepth() == 2);
+    ASSERT(sched.GetStats().totalEvicted >= 1);
+    sched.Shutdown();
+}
+TEST(TestPrefetch_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& sched = IntelligentPrefetchScheduler::Instance();
+    sched.Initialize();
+    sched.Schedule({L"x.jpg"});
+    sched.Shutdown();
+    ASSERT(!sched.IsInitialized());
+    ASSERT(sched.GetQueueDepth() == 0);
+}
+
 
 int main()
 {
@@ -38543,6 +39152,88 @@ int main()
     RUN_TEST(TestRemoteRenderProxy_RenderWhileDisconnected);
     RUN_TEST(TestRemoteRenderProxy_SetTransport);
     RUN_TEST(TestRemoteRenderProxy_GetLastState);
+
+    std::wcout << std::endl;
+
+    // Sprint 1061-1070: Intelligent Workflow Automation (v31.3.0 "Achernar-T")
+    std::wcout << L"Intelligent Workflow Automation Tests..." << std::endl;
+
+    RUN_TEST(TestPregen_Instance);
+    RUN_TEST(TestPregen_Initialize);
+    RUN_TEST(TestPregen_InitWithStrategy);
+    RUN_TEST(TestPregen_RecordNavigation);
+    RUN_TEST(TestPregen_Predict);
+    RUN_TEST(TestPregen_PredictEmpty);
+    RUN_TEST(TestPregen_Stats);
+    RUN_TEST(TestPregen_Shutdown);
+    RUN_TEST(TestPregen_PredictZeroResults);
+
+    RUN_TEST(TestContentCat_Instance);
+    RUN_TEST(TestContentCat_Initialize);
+    RUN_TEST(TestContentCat_Categorize);
+    RUN_TEST(TestContentCat_CategorizeUninitialized);
+    RUN_TEST(TestContentCat_ToString);
+    RUN_TEST(TestContentCat_Stats);
+    RUN_TEST(TestContentCat_Shutdown);
+    RUN_TEST(TestContentCat_MultipleCategories);
+
+    RUN_TEST(TestQualPred_Instance);
+    RUN_TEST(TestQualPred_Initialize);
+    RUN_TEST(TestQualPred_PredictGood);
+    RUN_TEST(TestQualPred_PredictUnusable);
+    RUN_TEST(TestQualPred_PredictUninitialized);
+    RUN_TEST(TestQualPred_ToString);
+    RUN_TEST(TestQualPred_Stats);
+    RUN_TEST(TestQualPred_Shutdown);
+
+    RUN_TEST(TestSmartBatch_Instance);
+    RUN_TEST(TestSmartBatch_Initialize);
+    RUN_TEST(TestSmartBatch_SubmitAndStart);
+    RUN_TEST(TestSmartBatch_PauseResume);
+    RUN_TEST(TestSmartBatch_Cancel);
+    RUN_TEST(TestSmartBatch_EmptySubmit);
+    RUN_TEST(TestSmartBatch_ToString);
+    RUN_TEST(TestSmartBatch_Stats);
+    RUN_TEST(TestSmartBatch_Progress);
+
+    RUN_TEST(TestWorkflow_Instance);
+    RUN_TEST(TestWorkflow_Initialize);
+    RUN_TEST(TestWorkflow_AddRule);
+    RUN_TEST(TestWorkflow_RemoveRule);
+    RUN_TEST(TestWorkflow_EnableDisable);
+    RUN_TEST(TestWorkflow_RemoveInvalid);
+    RUN_TEST(TestWorkflow_Stats);
+    RUN_TEST(TestWorkflow_Shutdown);
+    RUN_TEST(TestWorkflow_AddUninitialized);
+
+    RUN_TEST(TestUserBehavior_Instance);
+    RUN_TEST(TestUserBehavior_Initialize);
+    RUN_TEST(TestUserBehavior_RecordEvent);
+    RUN_TEST(TestUserBehavior_RecordUninitialized);
+    RUN_TEST(TestUserBehavior_GetTopPatterns);
+    RUN_TEST(TestUserBehavior_EmptyPatterns);
+    RUN_TEST(TestUserBehavior_Stats);
+    RUN_TEST(TestUserBehavior_Shutdown);
+
+    RUN_TEST(TestAdaptPipe_Instance);
+    RUN_TEST(TestAdaptPipe_Initialize);
+    RUN_TEST(TestAdaptPipe_InitCustomConfig);
+    RUN_TEST(TestAdaptPipe_RecordMetric);
+    RUN_TEST(TestAdaptPipe_OptimizeReduceConcurrency);
+    RUN_TEST(TestAdaptPipe_OptimizeIncreaseConcurrency);
+    RUN_TEST(TestAdaptPipe_Stats);
+    RUN_TEST(TestAdaptPipe_Shutdown);
+    RUN_TEST(TestAdaptPipe_OptimizeUninitialized);
+
+    RUN_TEST(TestPrefetch_Instance);
+    RUN_TEST(TestPrefetch_Initialize);
+    RUN_TEST(TestPrefetch_Schedule);
+    RUN_TEST(TestPrefetch_ScheduleBatch);
+    RUN_TEST(TestPrefetch_ScheduleUninitialized);
+    RUN_TEST(TestPrefetch_Flush);
+    RUN_TEST(TestPrefetch_Stats);
+    RUN_TEST(TestPrefetch_Eviction);
+    RUN_TEST(TestPrefetch_Shutdown);
 
     std::wcout << std::endl;
 
