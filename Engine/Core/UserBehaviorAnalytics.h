@@ -61,7 +61,7 @@ public:
         }
     }
 
-    std::vector<BehaviorPattern> GetTopPatterns(uint32_t maxResults = 10) const {
+    std::vector<BehaviorPattern> GetTopPatterns(uint32_t /*maxResults*/ = 10) const {
         if (!m_initialized || m_recentEvents.empty()) return {};
         BehaviorPattern p;
         p.folderPath = m_recentEvents.back().folderPath;

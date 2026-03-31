@@ -1189,6 +1189,16 @@
 #include "../Plugin/PluginHostIPC.h"
 #include "../Plugin/PluginRuntimeValidation.h"
 
+// Sprint 1071-1080 — Contextual Intelligence & Self-Healing (v31.4.0 "Achernar-U")
+#include "../AI/ContextualRenderingEngine.h"
+#include "../AI/SmartThumbnailCompositor.h"
+#include "../AI/FormatComplexityAnalyzer.h"
+#include "../Core/FaultTolerantDecodeOrchestrator.h"
+#include "../Core/DiagnosticTelemetryCollector.h"
+#include "../Core/DecoderFaultIsolator.h"
+#include "../Pipeline/SmartRetryOrchestrator.h"
+#include "../Pipeline/PipelineHealthMonitor.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))
@@ -34920,6 +34930,668 @@ TEST(TestPrefetch_Shutdown) {
     ASSERT(sched.GetQueueDepth() == 0);
 }
 
+//== Sprint 1071-1080 — Contextual Intelligence & Self-Healing Tests (v31.4.0) ==
+
+// ContextualRenderingEngine tests
+TEST(TestCtxRender_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize(RenderQualityTier::High);
+    ASSERT(eng.IsInitialized());
+    ASSERT(eng.GetStats().totalEvaluations == 0);
+    eng.Shutdown();
+}
+TEST(TestCtxRender_EvaluateDefault) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize();
+    RenderContextSignals sig;
+    sig.displayDPI = 96.0f;
+    sig.availableGPUMemoryBytes = 1024ULL * 1024 * 1024;
+    auto params = eng.Evaluate(sig);
+    ASSERT(params.contextType == RenderContextType::UserBrowsing);
+    ASSERT(params.qualityTier == RenderQualityTier::Medium);
+    eng.Shutdown();
+}
+TEST(TestCtxRender_HighDPI) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize();
+    RenderContextSignals sig;
+    sig.displayDPI = 192.0f;
+    sig.availableGPUMemoryBytes = 1024ULL * 1024 * 1024;
+    auto params = eng.Evaluate(sig);
+    ASSERT(params.contextType == RenderContextType::HighDPI);
+    ASSERT(params.qualityTier == RenderQualityTier::High);
+    eng.Shutdown();
+}
+TEST(TestCtxRender_BatterySaver) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize();
+    RenderContextSignals sig;
+    sig.onBattery = true;
+    sig.availableGPUMemoryBytes = 1024ULL * 1024 * 1024;
+    auto params = eng.Evaluate(sig);
+    ASSERT(params.contextType == RenderContextType::BatterySaver);
+    ASSERT(!params.useGPU);
+    eng.Shutdown();
+}
+TEST(TestCtxRender_LowMemory) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize();
+    RenderContextSignals sig;
+    sig.availableGPUMemoryBytes = 64 * 1024 * 1024;
+    auto params = eng.Evaluate(sig);
+    ASSERT(params.contextType == RenderContextType::LowMemory);
+    ASSERT(!params.useGPU);
+    eng.Shutdown();
+}
+TEST(TestCtxRender_ContextSwitch) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize();
+    RenderContextSignals sig1;
+    sig1.availableGPUMemoryBytes = 1024ULL * 1024 * 1024;
+    eng.Evaluate(sig1);
+    RenderContextSignals sig2;
+    sig2.onBattery = true;
+    sig2.availableGPUMemoryBytes = 1024ULL * 1024 * 1024;
+    eng.Evaluate(sig2);
+    ASSERT(eng.GetStats().contextSwitches >= 1);
+    eng.Shutdown();
+}
+TEST(TestCtxRender_DPIScale) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize();
+    RenderContextSignals sig;
+    sig.displayDPI = 192.0f;
+    sig.availableGPUMemoryBytes = 1024ULL * 1024 * 1024;
+    auto params = eng.Evaluate(sig);
+    ASSERT(params.dpiScale >= 1.9f);
+    ASSERT(params.targetWidthPx >= 480);
+    eng.Shutdown();
+}
+TEST(TestCtxRender_Background) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize();
+    RenderContextSignals sig;
+    sig.isBackgroundProcess = true;
+    sig.availableGPUMemoryBytes = 1024ULL * 1024 * 1024;
+    auto params = eng.Evaluate(sig);
+    ASSERT(params.contextType == RenderContextType::BackgroundTask);
+    eng.Shutdown();
+}
+TEST(TestCtxRender_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& eng = ContextualRenderingEngine::Instance();
+    eng.Initialize();
+    eng.Shutdown();
+    ASSERT(!eng.IsInitialized());
+}
+
+// SmartThumbnailCompositor tests
+TEST(TestCompositor_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& comp = SmartThumbnailCompositor::Instance();
+    comp.Initialize(4);
+    ASSERT(comp.IsInitialized());
+    ASSERT(comp.GetStats().totalComposites == 0);
+    comp.Shutdown();
+}
+TEST(TestCompositor_SinglePage) {
+    using namespace ExplorerLens::Engine;
+    auto& comp = SmartThumbnailCompositor::Instance();
+    comp.Initialize();
+    CompositeRequest req;
+    req.totalPages = 1;
+    auto result = comp.Composite(req);
+    ASSERT(result.success);
+    ASSERT(result.appliedLayout == CompositeLayout::Single);
+    ASSERT(result.layersUsed == 1);
+    comp.Shutdown();
+}
+TEST(TestCompositor_MultiPage) {
+    using namespace ExplorerLens::Engine;
+    auto& comp = SmartThumbnailCompositor::Instance();
+    comp.Initialize();
+    CompositeRequest req;
+    req.totalPages = 8;
+    req.strategy = LayerSelectionStrategy::EvenlySpaced;
+    auto result = comp.Composite(req);
+    ASSERT(result.success);
+    ASSERT(result.layersUsed >= 2);
+    comp.Shutdown();
+}
+TEST(TestCompositor_GridLayout) {
+    using namespace ExplorerLens::Engine;
+    auto& comp = SmartThumbnailCompositor::Instance();
+    comp.Initialize();
+    CompositeRequest req;
+    req.totalPages = 4;
+    req.maxLayersToComposite = 4;
+    auto result = comp.Composite(req);
+    ASSERT(result.success);
+    ASSERT(result.appliedLayout == CompositeLayout::Grid2x2);
+    comp.Shutdown();
+}
+TEST(TestCompositor_LargeGrid) {
+    using namespace ExplorerLens::Engine;
+    auto& comp = SmartThumbnailCompositor::Instance();
+    comp.Initialize(9);
+    CompositeRequest req;
+    req.totalPages = 20;
+    req.maxLayersToComposite = 9;
+    auto result = comp.Composite(req);
+    ASSERT(result.success);
+    ASSERT(result.appliedLayout == CompositeLayout::Grid3x3);
+    comp.Shutdown();
+}
+TEST(TestCompositor_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& comp = SmartThumbnailCompositor::Instance();
+    comp.Initialize();
+    CompositeRequest req1;
+    req1.totalPages = 1;
+    comp.Composite(req1);
+    CompositeRequest req2;
+    req2.totalPages = 4;
+    comp.Composite(req2);
+    auto stats = comp.GetStats();
+    ASSERT(stats.totalComposites == 2);
+    ASSERT(stats.singlePageResults == 1);
+    ASSERT(stats.multiLayerResults == 1);
+    comp.Shutdown();
+}
+TEST(TestCompositor_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& comp = SmartThumbnailCompositor::Instance();
+    comp.Initialize();
+    comp.Shutdown();
+    ASSERT(!comp.IsInitialized());
+}
+
+// FormatComplexityAnalyzer tests
+TEST(TestFmtComplexity_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& fca = FormatComplexityAnalyzer::Instance();
+    fca.Initialize();
+    ASSERT(fca.IsInitialized());
+    ASSERT(fca.GetStats().totalAnalyses == 0);
+    fca.Shutdown();
+}
+TEST(TestFmtComplexity_Trivial) {
+    using namespace ExplorerLens::Engine;
+    auto& fca = FormatComplexityAnalyzer::Instance();
+    fca.Initialize();
+    auto r = fca.Analyze(L"tiny.jpg", 32 * 1024);
+    ASSERT(r.level == FormatComplexityLevel::Trivial);
+    ASSERT(r.estimatedDecodeMs < 5.0f);
+    fca.Shutdown();
+}
+TEST(TestFmtComplexity_Extreme) {
+    using namespace ExplorerLens::Engine;
+    auto& fca = FormatComplexityAnalyzer::Instance();
+    fca.Initialize();
+    auto r = fca.Analyze(L"huge.tiff", 256ULL * 1024 * 1024);
+    ASSERT(r.level == FormatComplexityLevel::Extreme);
+    ASSERT(r.requiresGPU);
+    fca.Shutdown();
+}
+TEST(TestFmtComplexity_Moderate) {
+    using namespace ExplorerLens::Engine;
+    auto& fca = FormatComplexityAnalyzer::Instance();
+    fca.Initialize();
+    auto r = fca.Analyze(L"photo.jpg", 4 * 1024 * 1024);
+    ASSERT(r.level == FormatComplexityLevel::Moderate);
+    fca.Shutdown();
+}
+TEST(TestFmtComplexity_Complex) {
+    using namespace ExplorerLens::Engine;
+    auto& fca = FormatComplexityAnalyzer::Instance();
+    fca.Initialize();
+    auto r = fca.Analyze(L"raw.cr3", 64 * 1024 * 1024);
+    ASSERT(r.level == FormatComplexityLevel::Complex);
+    ASSERT(r.requiresGPU);
+    fca.Shutdown();
+}
+TEST(TestFmtComplexity_StatsAverage) {
+    using namespace ExplorerLens::Engine;
+    auto& fca = FormatComplexityAnalyzer::Instance();
+    fca.Initialize();
+    fca.Analyze(L"a.jpg", 1024);
+    fca.Analyze(L"b.jpg", 1024);
+    ASSERT(fca.GetStats().totalAnalyses == 2);
+    ASSERT(fca.GetStats().averageEstimatedMs > 0.0f);
+    fca.Shutdown();
+}
+TEST(TestFmtComplexity_Simple) {
+    using namespace ExplorerLens::Engine;
+    auto& fca = FormatComplexityAnalyzer::Instance();
+    fca.Initialize();
+    auto r = fca.Analyze(L"icon.ico", 512 * 1024);
+    ASSERT(r.level == FormatComplexityLevel::Simple);
+    fca.Shutdown();
+}
+TEST(TestFmtComplexity_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& fca = FormatComplexityAnalyzer::Instance();
+    fca.Initialize();
+    fca.Shutdown();
+    ASSERT(!fca.IsInitialized());
+}
+
+// FaultTolerantDecodeOrchestrator tests
+TEST(TestFaultTolerant_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& fto = FaultTolerantDecodeOrchestrator::Instance();
+    fto.Initialize(3);
+    ASSERT(fto.IsInitialized());
+    ASSERT(fto.GetStats().totalDecodes == 0);
+    fto.Shutdown();
+}
+TEST(TestFaultTolerant_RecordSuccess) {
+    using namespace ExplorerLens::Engine;
+    auto& fto = FaultTolerantDecodeOrchestrator::Instance();
+    fto.Initialize();
+    auto rec = fto.RecordAttempt(L"WebPDecoder", DecodeOutcome::Success, 5.0f);
+    ASSERT(rec.outcome == DecodeOutcome::Success);
+    ASSERT(fto.GetStats().successfulDecodes == 1);
+    fto.Shutdown();
+}
+TEST(TestFaultTolerant_RecordFallback) {
+    using namespace ExplorerLens::Engine;
+    auto& fto = FaultTolerantDecodeOrchestrator::Instance();
+    fto.Initialize();
+    fto.RecordAttempt(L"JXLDecoder", DecodeOutcome::RecoveredViaFallback, 50.0f);
+    ASSERT(fto.GetStats().fallbackRecoveries == 1);
+    fto.Shutdown();
+}
+TEST(TestFaultTolerant_Reliability) {
+    using namespace ExplorerLens::Engine;
+    auto& fto = FaultTolerantDecodeOrchestrator::Instance();
+    fto.Initialize();
+    fto.RecordAttempt(L"PDFDecoder", DecodeOutcome::Success, 10.0f);
+    fto.RecordAttempt(L"PDFDecoder", DecodeOutcome::PermanentFailure, 0.0f);
+    auto rel = fto.GetDecoderReliability(L"PDFDecoder");
+    ASSERT(rel.totalAttempts == 2);
+    ASSERT(rel.reliabilityScore >= 0.4f);
+    ASSERT(rel.reliabilityScore <= 0.6f);
+    fto.Shutdown();
+}
+TEST(TestFaultTolerant_FallbackRecommendation) {
+    using namespace ExplorerLens::Engine;
+    auto& fto = FaultTolerantDecodeOrchestrator::Instance();
+    fto.Initialize();
+    for (int i = 0; i < 10; ++i)
+        fto.RecordAttempt(L"BadDecoder", DecodeOutcome::PermanentFailure, 0.0f);
+    auto fb = fto.GetRecommendedFallback(L"BadDecoder");
+    ASSERT(fb == FallbackStrategy::SkipFile);
+    fto.Shutdown();
+}
+TEST(TestFaultTolerant_OverallReliability) {
+    using namespace ExplorerLens::Engine;
+    auto& fto = FaultTolerantDecodeOrchestrator::Instance();
+    fto.Initialize();
+    fto.RecordAttempt(L"Dec1", DecodeOutcome::Success, 5.0f);
+    fto.RecordAttempt(L"Dec2", DecodeOutcome::Success, 5.0f);
+    ASSERT(fto.GetStats().overallReliability >= 0.9f);
+    fto.Shutdown();
+}
+TEST(TestFaultTolerant_PermanentFailure) {
+    using namespace ExplorerLens::Engine;
+    auto& fto = FaultTolerantDecodeOrchestrator::Instance();
+    fto.Initialize();
+    fto.RecordAttempt(L"CrashDecoder", DecodeOutcome::PermanentFailure, 0.0f);
+    ASSERT(fto.GetStats().permanentFailures == 1);
+    fto.Shutdown();
+}
+TEST(TestFaultTolerant_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& fto = FaultTolerantDecodeOrchestrator::Instance();
+    fto.Initialize();
+    fto.Shutdown();
+    ASSERT(!fto.IsInitialized());
+}
+
+// DiagnosticTelemetryCollector tests
+TEST(TestDiagTelemetry_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& dtc = DiagnosticTelemetryCollector::Instance();
+    dtc.Initialize(100);
+    ASSERT(dtc.IsInitialized());
+    ASSERT(dtc.GetRecordCount() == 0);
+    dtc.Shutdown();
+}
+TEST(TestDiagTelemetry_Record) {
+    using namespace ExplorerLens::Engine;
+    auto& dtc = DiagnosticTelemetryCollector::Instance();
+    dtc.Initialize();
+    dtc.Record(DiagnosticCategory::Decode, DiagnosticSeverity::Info, L"WebP", L"decoded ok", 5.0f);
+    ASSERT(dtc.GetRecordCount() == 1);
+    ASSERT(dtc.GetStats().totalRecorded == 1);
+    dtc.Shutdown();
+}
+TEST(TestDiagTelemetry_FilterByCategory) {
+    using namespace ExplorerLens::Engine;
+    auto& dtc = DiagnosticTelemetryCollector::Instance();
+    dtc.Initialize();
+    dtc.Record(DiagnosticCategory::Decode, DiagnosticSeverity::Info, L"A", L"m1");
+    dtc.Record(DiagnosticCategory::Cache, DiagnosticSeverity::Info, L"B", L"m2");
+    dtc.Record(DiagnosticCategory::Decode, DiagnosticSeverity::Info, L"C", L"m3");
+    auto decodes = dtc.GetRecords(DiagnosticCategory::Decode);
+    ASSERT(decodes.size() == 2);
+    dtc.Shutdown();
+}
+TEST(TestDiagTelemetry_ErrorTracking) {
+    using namespace ExplorerLens::Engine;
+    auto& dtc = DiagnosticTelemetryCollector::Instance();
+    dtc.Initialize();
+    dtc.Record(DiagnosticCategory::Error, DiagnosticSeverity::Error, L"GPU", L"OOM");
+    dtc.Record(DiagnosticCategory::Error, DiagnosticSeverity::Critical, L"GPU", L"crash");
+    ASSERT(dtc.GetStats().errorCount == 1);
+    ASSERT(dtc.GetStats().criticalCount == 1);
+    dtc.Shutdown();
+}
+TEST(TestDiagTelemetry_RecentErrors) {
+    using namespace ExplorerLens::Engine;
+    auto& dtc = DiagnosticTelemetryCollector::Instance();
+    dtc.Initialize();
+    dtc.Record(DiagnosticCategory::Decode, DiagnosticSeverity::Info, L"ok", L"ok");
+    dtc.Record(DiagnosticCategory::Error, DiagnosticSeverity::Error, L"err", L"fail");
+    auto errs = dtc.GetRecentErrors(10);
+    ASSERT(errs.size() == 1);
+    dtc.Shutdown();
+}
+TEST(TestDiagTelemetry_RingBufferEviction) {
+    using namespace ExplorerLens::Engine;
+    auto& dtc = DiagnosticTelemetryCollector::Instance();
+    dtc.Initialize(5);
+    for (int i = 0; i < 10; ++i)
+        dtc.Record(DiagnosticCategory::Decode, DiagnosticSeverity::Info, L"src", L"msg");
+    ASSERT(dtc.GetRecordCount() == 5);
+    ASSERT(dtc.GetStats().totalDropped >= 5);
+    dtc.Shutdown();
+}
+TEST(TestDiagTelemetry_SequenceIds) {
+    using namespace ExplorerLens::Engine;
+    auto& dtc = DiagnosticTelemetryCollector::Instance();
+    dtc.Initialize();
+    dtc.Record(DiagnosticCategory::GPU, DiagnosticSeverity::Info, L"gpu", L"m1");
+    dtc.Record(DiagnosticCategory::GPU, DiagnosticSeverity::Info, L"gpu", L"m2");
+    auto recs = dtc.GetRecords(DiagnosticCategory::GPU);
+    ASSERT(recs.size() == 2);
+    ASSERT(recs[1].sequenceId > recs[0].sequenceId);
+    dtc.Shutdown();
+}
+TEST(TestDiagTelemetry_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& dtc = DiagnosticTelemetryCollector::Instance();
+    dtc.Initialize();
+    dtc.Record(DiagnosticCategory::Decode, DiagnosticSeverity::Info, L"x", L"y");
+    dtc.Shutdown();
+    ASSERT(!dtc.IsInitialized());
+    ASSERT(dtc.GetRecordCount() == 0);
+}
+
+// DecoderFaultIsolator tests
+TEST(TestFaultIsolator_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& dfi = DecoderFaultIsolator::Instance();
+    dfi.Initialize(5, 3);
+    ASSERT(dfi.IsInitialized());
+    ASSERT(dfi.GetStats().totalFaults == 0);
+    dfi.Shutdown();
+}
+TEST(TestFaultIsolator_RecordFault) {
+    using namespace ExplorerLens::Engine;
+    auto& dfi = DecoderFaultIsolator::Instance();
+    dfi.Initialize();
+    dfi.RecordFault(L"WebPDecoder", FaultSeverity::Minor);
+    ASSERT(dfi.GetStats().totalFaults == 1);
+    ASSERT(!dfi.IsQuarantined(L"WebPDecoder"));
+    dfi.Shutdown();
+}
+TEST(TestFaultIsolator_Quarantine) {
+    using namespace ExplorerLens::Engine;
+    auto& dfi = DecoderFaultIsolator::Instance();
+    dfi.Initialize(3, 3);
+    for (int i = 0; i < 3; ++i)
+        dfi.RecordFault(L"BadDec", FaultSeverity::Major);
+    ASSERT(dfi.IsQuarantined(L"BadDec"));
+    ASSERT(dfi.GetStats().quarantineEvents >= 1);
+    dfi.Shutdown();
+}
+TEST(TestFaultIsolator_FatalImmediate) {
+    using namespace ExplorerLens::Engine;
+    auto& dfi = DecoderFaultIsolator::Instance();
+    dfi.Initialize();
+    dfi.RecordFault(L"CrashDec", FaultSeverity::Fatal);
+    ASSERT(dfi.IsQuarantined(L"CrashDec"));
+    dfi.Shutdown();
+}
+TEST(TestFaultIsolator_ReleaseFromQuarantine) {
+    using namespace ExplorerLens::Engine;
+    auto& dfi = DecoderFaultIsolator::Instance();
+    dfi.Initialize(2, 5);
+    dfi.RecordFault(L"Dec1", FaultSeverity::Major);
+    dfi.RecordFault(L"Dec1", FaultSeverity::Major);
+    ASSERT(dfi.IsQuarantined(L"Dec1"));
+    dfi.ReleaseFromQuarantine(L"Dec1");
+    ASSERT(!dfi.IsQuarantined(L"Dec1"));
+    dfi.Shutdown();
+}
+TEST(TestFaultIsolator_PermanentDisable) {
+    using namespace ExplorerLens::Engine;
+    auto& dfi = DecoderFaultIsolator::Instance();
+    dfi.Initialize(1, 1);
+    dfi.RecordFault(L"Dec2", FaultSeverity::Major);
+    dfi.ReleaseFromQuarantine(L"Dec2");
+    dfi.RecordFault(L"Dec2", FaultSeverity::Major);
+    auto state = dfi.GetDecoderState(L"Dec2");
+    ASSERT(state.status == QuarantineStatus::PermanentlyDisabled);
+    dfi.Shutdown();
+}
+TEST(TestFaultIsolator_SuccessResetsConsecutive) {
+    using namespace ExplorerLens::Engine;
+    auto& dfi = DecoderFaultIsolator::Instance();
+    dfi.Initialize(5, 3);
+    dfi.RecordFault(L"Dec3", FaultSeverity::Minor);
+    dfi.RecordFault(L"Dec3", FaultSeverity::Minor);
+    dfi.RecordSuccess(L"Dec3");
+    auto state = dfi.GetDecoderState(L"Dec3");
+    ASSERT(state.consecutiveFaults == 0);
+    dfi.Shutdown();
+}
+TEST(TestFaultIsolator_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& dfi = DecoderFaultIsolator::Instance();
+    dfi.Initialize();
+    dfi.Shutdown();
+    ASSERT(!dfi.IsInitialized());
+}
+
+// SmartRetryOrchestrator tests
+TEST(TestSmartRetry_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    sro.Initialize();
+    ASSERT(sro.IsInitialized());
+    ASSERT(sro.GetStats().totalRetryRequests == 0);
+    sro.Shutdown();
+}
+TEST(TestSmartRetry_BasicRetry) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    sro.Initialize();
+    auto att = sro.EvaluateRetry(L"WebP", SmartRetryReason::Timeout);
+    ASSERT(att.decision == SmartRetryDecision::Retry);
+    ASSERT(att.attemptNumber == 1);
+    ASSERT(att.delayMs >= 40.0f);
+    sro.Shutdown();
+}
+TEST(TestSmartRetry_ExponentialBackoff) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    SmartRetryConfig cfg;
+    cfg.maxRetries = 5;
+    cfg.baseDelayMs = 100.0f;
+    cfg.backoffMultiplier = 2.0f;
+    sro.Initialize(cfg);
+    auto a1 = sro.EvaluateRetry(L"Dec", SmartRetryReason::Timeout);
+    auto a2 = sro.EvaluateRetry(L"Dec", SmartRetryReason::Timeout);
+    ASSERT(a2.delayMs > a1.delayMs);
+    sro.Shutdown();
+}
+TEST(TestSmartRetry_CorruptNotRetryable) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    sro.Initialize();
+    auto att = sro.EvaluateRetry(L"Dec", SmartRetryReason::CorruptData);
+    ASSERT(att.decision == SmartRetryDecision::NotRetryable);
+    sro.Shutdown();
+}
+TEST(TestSmartRetry_GPUFallback) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    sro.Initialize();
+    auto att = sro.EvaluateRetry(L"GPUDec", SmartRetryReason::GPUError);
+    ASSERT(att.decision == SmartRetryDecision::RetryWithFallback);
+    sro.Shutdown();
+}
+TEST(TestSmartRetry_Exhausted) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    SmartRetryConfig cfg;
+    cfg.maxRetries = 2;
+    sro.Initialize(cfg);
+    sro.EvaluateRetry(L"Dec", SmartRetryReason::Timeout);
+    sro.EvaluateRetry(L"Dec", SmartRetryReason::Timeout);
+    auto a3 = sro.EvaluateRetry(L"Dec", SmartRetryReason::Timeout);
+    ASSERT(a3.decision == SmartRetryDecision::Exhausted);
+    sro.Shutdown();
+}
+TEST(TestSmartRetry_CircuitBreaker) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    SmartRetryConfig cfg;
+    cfg.maxRetries = 100;
+    cfg.circuitBreakerThreshold = 5;
+    sro.Initialize(cfg);
+    for (int i = 0; i < 6; ++i)
+        sro.EvaluateRetry(L"Flaky", SmartRetryReason::TransientFailure);
+    ASSERT(sro.GetStats().circuitBreakerTrips >= 1);
+    sro.Shutdown();
+}
+TEST(TestSmartRetry_ResetDecoder) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    sro.Initialize();
+    sro.EvaluateRetry(L"Dec", SmartRetryReason::Timeout);
+    sro.ResetDecoder(L"Dec");
+    auto att = sro.EvaluateRetry(L"Dec", SmartRetryReason::Timeout);
+    ASSERT(att.attemptNumber == 1);
+    sro.Shutdown();
+}
+TEST(TestSmartRetry_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& sro = SmartRetryOrchestrator::Instance();
+    sro.Initialize();
+    sro.Shutdown();
+    ASSERT(!sro.IsInitialized());
+}
+
+// PipelineHealthMonitor tests
+TEST(TestPipeHealth_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& phm = PipelineHealthMonitor::Instance();
+    phm.Initialize();
+    ASSERT(phm.IsInitialized());
+    ASSERT(phm.GetStats().totalSamples == 0);
+    phm.Shutdown();
+}
+TEST(TestPipeHealth_RecordSample) {
+    using namespace ExplorerLens::Engine;
+    auto& phm = PipelineHealthMonitor::Instance();
+    phm.Initialize();
+    phm.RecordSample(10.0f, true);
+    phm.RecordSample(20.0f, true);
+    ASSERT(phm.GetStats().totalSamples == 2);
+    phm.Shutdown();
+}
+TEST(TestPipeHealth_HealthySnapshot) {
+    using namespace ExplorerLens::Engine;
+    auto& phm = PipelineHealthMonitor::Instance();
+    phm.Initialize();
+    for (int i = 0; i < 100; ++i)
+        phm.RecordSample(10.0f, true);
+    auto snap = phm.GetSnapshot();
+    ASSERT(snap.overallHealth == PipelineAlertLevel::Normal);
+    ASSERT(snap.currentErrorRate < 0.01f);
+    phm.Shutdown();
+}
+TEST(TestPipeHealth_HighErrorRate) {
+    using namespace ExplorerLens::Engine;
+    auto& phm = PipelineHealthMonitor::Instance();
+    PipelineHealthThresholds thresholds;
+    thresholds.maxErrorRate = 0.1f;
+    phm.Initialize(thresholds);
+    for (int i = 0; i < 5; ++i) phm.RecordSample(10.0f, true);
+    for (int i = 0; i < 5; ++i) phm.RecordSample(10.0f, false);
+    auto snap = phm.GetSnapshot();
+    ASSERT(snap.currentErrorRate >= 0.4f);
+    ASSERT(snap.overallHealth >= PipelineAlertLevel::Degraded);
+    phm.Shutdown();
+}
+TEST(TestPipeHealth_HighLatencyAlert) {
+    using namespace ExplorerLens::Engine;
+    auto& phm = PipelineHealthMonitor::Instance();
+    PipelineHealthThresholds thresholds;
+    thresholds.maxP95LatencyMs = 50.0f;
+    thresholds.maxP99LatencyMs = 200.0f;
+    phm.Initialize(thresholds);
+    for (int i = 0; i < 100; ++i)
+        phm.RecordSample(static_cast<float>(i * 3), true);
+    auto snap = phm.GetSnapshot();
+    ASSERT(snap.p95LatencyMs > 50.0f);
+    ASSERT(snap.activeAlertCount >= 1);
+    phm.Shutdown();
+}
+TEST(TestPipeHealth_Alerts) {
+    using namespace ExplorerLens::Engine;
+    auto& phm = PipelineHealthMonitor::Instance();
+    PipelineHealthThresholds thresholds;
+    thresholds.maxP99LatencyMs = 10.0f;
+    phm.Initialize(thresholds);
+    for (int i = 0; i < 100; ++i)
+        phm.RecordSample(static_cast<float>(i * 10), true);
+    auto alerts = phm.GetActiveAlerts();
+    ASSERT(!alerts.empty());
+    phm.Shutdown();
+}
+TEST(TestPipeHealth_PeakAlertLevel) {
+    using namespace ExplorerLens::Engine;
+    auto& phm = PipelineHealthMonitor::Instance();
+    PipelineHealthThresholds thresholds;
+    thresholds.maxP99LatencyMs = 5.0f;
+    phm.Initialize(thresholds);
+    for (int i = 0; i < 100; ++i)
+        phm.RecordSample(100.0f, true);
+    ASSERT(phm.GetStats().peakAlertLevel >= PipelineAlertLevel::Critical);
+    phm.Shutdown();
+}
+TEST(TestPipeHealth_Shutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& phm = PipelineHealthMonitor::Instance();
+    phm.Initialize();
+    phm.RecordSample(10.0f, true);
+    phm.Shutdown();
+    ASSERT(!phm.IsInitialized());
+}
+
 
 int main()
 {
@@ -39234,6 +39906,74 @@ int main()
     RUN_TEST(TestPrefetch_Stats);
     RUN_TEST(TestPrefetch_Eviction);
     RUN_TEST(TestPrefetch_Shutdown);
+
+    // Sprint 1071-1080 — Contextual Intelligence & Self-Healing Tests (v31.4.0)
+    std::wcout << L"\nContextual Intelligence & Self-Healing Tests..." << std::endl;
+    RUN_TEST(TestCtxRender_Initialize);
+    RUN_TEST(TestCtxRender_EvaluateDefault);
+    RUN_TEST(TestCtxRender_HighDPI);
+    RUN_TEST(TestCtxRender_BatterySaver);
+    RUN_TEST(TestCtxRender_LowMemory);
+    RUN_TEST(TestCtxRender_ContextSwitch);
+    RUN_TEST(TestCtxRender_DPIScale);
+    RUN_TEST(TestCtxRender_Background);
+    RUN_TEST(TestCtxRender_Shutdown);
+    RUN_TEST(TestCompositor_Initialize);
+    RUN_TEST(TestCompositor_SinglePage);
+    RUN_TEST(TestCompositor_MultiPage);
+    RUN_TEST(TestCompositor_GridLayout);
+    RUN_TEST(TestCompositor_LargeGrid);
+    RUN_TEST(TestCompositor_Stats);
+    RUN_TEST(TestCompositor_Shutdown);
+    RUN_TEST(TestFmtComplexity_Initialize);
+    RUN_TEST(TestFmtComplexity_Trivial);
+    RUN_TEST(TestFmtComplexity_Extreme);
+    RUN_TEST(TestFmtComplexity_Moderate);
+    RUN_TEST(TestFmtComplexity_Complex);
+    RUN_TEST(TestFmtComplexity_StatsAverage);
+    RUN_TEST(TestFmtComplexity_Simple);
+    RUN_TEST(TestFmtComplexity_Shutdown);
+    RUN_TEST(TestFaultTolerant_Initialize);
+    RUN_TEST(TestFaultTolerant_RecordSuccess);
+    RUN_TEST(TestFaultTolerant_RecordFallback);
+    RUN_TEST(TestFaultTolerant_Reliability);
+    RUN_TEST(TestFaultTolerant_FallbackRecommendation);
+    RUN_TEST(TestFaultTolerant_OverallReliability);
+    RUN_TEST(TestFaultTolerant_PermanentFailure);
+    RUN_TEST(TestFaultTolerant_Shutdown);
+    RUN_TEST(TestDiagTelemetry_Initialize);
+    RUN_TEST(TestDiagTelemetry_Record);
+    RUN_TEST(TestDiagTelemetry_FilterByCategory);
+    RUN_TEST(TestDiagTelemetry_ErrorTracking);
+    RUN_TEST(TestDiagTelemetry_RecentErrors);
+    RUN_TEST(TestDiagTelemetry_RingBufferEviction);
+    RUN_TEST(TestDiagTelemetry_SequenceIds);
+    RUN_TEST(TestDiagTelemetry_Shutdown);
+    RUN_TEST(TestFaultIsolator_Initialize);
+    RUN_TEST(TestFaultIsolator_RecordFault);
+    RUN_TEST(TestFaultIsolator_Quarantine);
+    RUN_TEST(TestFaultIsolator_FatalImmediate);
+    RUN_TEST(TestFaultIsolator_ReleaseFromQuarantine);
+    RUN_TEST(TestFaultIsolator_PermanentDisable);
+    RUN_TEST(TestFaultIsolator_SuccessResetsConsecutive);
+    RUN_TEST(TestFaultIsolator_Shutdown);
+    RUN_TEST(TestSmartRetry_Initialize);
+    RUN_TEST(TestSmartRetry_BasicRetry);
+    RUN_TEST(TestSmartRetry_ExponentialBackoff);
+    RUN_TEST(TestSmartRetry_CorruptNotRetryable);
+    RUN_TEST(TestSmartRetry_GPUFallback);
+    RUN_TEST(TestSmartRetry_Exhausted);
+    RUN_TEST(TestSmartRetry_CircuitBreaker);
+    RUN_TEST(TestSmartRetry_ResetDecoder);
+    RUN_TEST(TestSmartRetry_Shutdown);
+    RUN_TEST(TestPipeHealth_Initialize);
+    RUN_TEST(TestPipeHealth_RecordSample);
+    RUN_TEST(TestPipeHealth_HealthySnapshot);
+    RUN_TEST(TestPipeHealth_HighErrorRate);
+    RUN_TEST(TestPipeHealth_HighLatencyAlert);
+    RUN_TEST(TestPipeHealth_Alerts);
+    RUN_TEST(TestPipeHealth_PeakAlertLevel);
+    RUN_TEST(TestPipeHealth_Shutdown);
 
     std::wcout << std::endl;
 

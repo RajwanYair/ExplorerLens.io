@@ -260,6 +260,9 @@ set(ENGINE_HEADERS
     Core/SmartBatchProcessor.h
     Core/WorkflowAutomationEngine.h
     Core/UserBehaviorAnalytics.h
+    Core/FaultTolerantDecodeOrchestrator.h
+    Core/DiagnosticTelemetryCollector.h
+    Core/DecoderFaultIsolator.h
 
     # Core — Integration & Utilities
     Core/ArchiveRefactorEngine.h
@@ -405,6 +408,8 @@ set(ENGINE_HEADERS
     Pipeline/PipelineErrorBoundary.h
     Pipeline/AdaptivePipelineOptimizer.h
     Pipeline/IntelligentPrefetchScheduler.h
+    Pipeline/SmartRetryOrchestrator.h
+    Pipeline/PipelineHealthMonitor.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -562,6 +567,11 @@ set(ENGINE_HEADERS
     AI/PredictivePregenEngine.h
     AI/ContentCategorizationEngine.h
     AI/ThumbnailQualityPredictor.h
+
+    # Sprint 1071-1080 — Contextual Intelligence & Self-Healing (v31.4.0 "Achernar-U")
+    AI/ContextualRenderingEngine.h
+    AI/SmartThumbnailCompositor.h
+    AI/FormatComplexityAnalyzer.h
 
     # Codec modules
     Codec/CodecLoader.h
