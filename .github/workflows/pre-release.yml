@@ -51,7 +51,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Cache external libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: external/
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}

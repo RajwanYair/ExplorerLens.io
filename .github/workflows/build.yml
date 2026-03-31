@@ -41,7 +41,7 @@ jobs:
 
       # ── Cache external/ to speed up builds ────────────────────
       - name: Cache external libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: external/
           key: external-libs-${{ hashFiles('build-scripts/external-libs/**') }}
