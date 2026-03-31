@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+Contextual Intelligence & Self-Healing Diagnostics: ContextualRenderingEngine, SmartThumbnailCompositor, FormatComplexityAnalyzer, FaultTolerantDecodeOrchestrator, DiagnosticTelemetryCollector, DecoderFaultIsolator, SmartRetryOrchestrator, PipelineHealthMonitor. +67 tests.
+
+
 Intelligent Workflow Automation: PredictivePregenEngine, ContentCategorizationEngine, ThumbnailQualityPredictor, SmartBatchProcessor, WorkflowAutomationEngine, UserBehaviorAnalytics, AdaptivePipelineOptimizer, IntelligentPrefetchScheduler. +79 tests.
 
 

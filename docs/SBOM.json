@@ -3,7 +3,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
   "version": 1,
-  "serialNumber": "urn:uuid:ExplorerLens-v31.3.0-2026-03-31",
+  "serialNumber": "urn:uuid:ExplorerLens-v31.4.0-2026-03-31",
   "metadata": {
     "timestamp": "2026-03-31T00:00:00Z",
     "tools": [
@@ -17,7 +17,7 @@
       "type": "application",
       "bom-ref": "ExplorerLens-main",
       "name": "ExplorerLens",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "GPU-accelerated Windows Shell Extension thumbnail provider supporting 200+ file formats",
       "licenses": [
         {
@@ -35,7 +35,7 @@
       "type": "library",
       "bom-ref": "zlib-1.3.1",
       "name": "zlib",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "DEFLATE compression library",
       "licenses": [
         {
@@ -51,7 +51,7 @@
       "type": "library",
       "bom-ref": "zstd-1.5.7",
       "name": "Zstandard",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "Fast real-time compression algorithm",
       "licenses": [
         {
@@ -67,7 +67,7 @@
       "type": "library",
       "bom-ref": "lz4-1.10.0",
       "name": "LZ4",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "Extremely fast compression algorithm",
       "licenses": [
         {
@@ -83,7 +83,7 @@
       "type": "library",
       "bom-ref": "liblzma-24.08",
       "name": "XZ Utils (liblzma)",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "LZMA/XZ compression library",
       "licenses": [
         {
@@ -98,7 +98,7 @@
       "type": "library",
       "bom-ref": "minizip-ng-4.0.7",
       "name": "minizip-ng",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "Modern fork of minizip for ZIP archive handling",
       "licenses": [
         {
@@ -113,7 +113,7 @@
       "type": "library",
       "bom-ref": "libwebp-1.5.0",
       "name": "libwebp",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "WebP image format library",
       "licenses": [
         {
@@ -128,7 +128,7 @@
       "type": "library",
       "bom-ref": "libavif-1.1.1",
       "name": "libavif",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "AVIF image format library",
       "licenses": [
         {
@@ -143,7 +143,7 @@
       "type": "library",
       "bom-ref": "dav1d-1.5.0",
       "name": "dav1d",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "Fast AV1 decoder",
       "licenses": [
         {
@@ -158,7 +158,7 @@
       "type": "library",
       "bom-ref": "libjxl-0.11.1",
       "name": "libjxl",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "JPEG XL image format library",
       "licenses": [
         {
@@ -173,7 +173,7 @@
       "type": "library",
       "bom-ref": "wtl-10.0.10320",
       "name": "Windows Template Library",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "C++ library for developing Windows applications and UI components",
       "licenses": [
         {
@@ -189,7 +189,7 @@
       "type": "framework",
       "bom-ref": "atl-msvc",
       "name": "Active Template Library (ATL)",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "Microsoft ATL for COM development",
       "licenses": [
         {
@@ -206,7 +206,7 @@
       "type": "framework",
       "bom-ref": "windows-sdk",
       "name": "Windows SDK",
-      "version": "31.3.0",
+      "version": "31.4.0",
       "description": "Windows Software Development Kit",
       "licenses": [
         {
