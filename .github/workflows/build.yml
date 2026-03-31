@@ -94,7 +94,7 @@ jobs:
       # ── Upload test results ──────────────────────────────────
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-x64-release
           path: |
@@ -105,7 +105,7 @@ jobs:
       # ── Upload build artifacts ───────────────────────────────
       - name: Upload build artifacts
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-x64-release
           path: |

@@ -404,7 +404,7 @@ jobs:
       # ── Upload build diagnostics on failure (for debugging) ─────────────
       - name: Upload build diagnostics on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-diagnostics-failure-${{ steps.version.outputs.version }}
           path: |
@@ -417,7 +417,7 @@ jobs:
 
       # ── Upload artifacts for release job ──────────────────────────────────
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-artifacts-${{ steps.version.outputs.version }}
           path: |
@@ -432,7 +432,7 @@ jobs:
 
       # ── Upload individual binaries as their own artifact ──────────────────
       - name: Upload individual binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: binaries-${{ steps.version.outputs.version }}
           path: |
