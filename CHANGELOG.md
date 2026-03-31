@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+Intelligent Format Routing & Enhanced Accessibility — 7 headers, 49 tests (AdaptiveColorProfileManager, ThumbnailAccessibilityEngine, SmartFileTypeRouter, DecoderVersionManager, CrossFormatMetadataEngine, StreamingDecodeCoordinator, RenderPipelineProfiler)
+
+
 Contextual Intelligence & Self-Healing Diagnostics: ContextualRenderingEngine, SmartThumbnailCompositor, FormatComplexityAnalyzer, FaultTolerantDecodeOrchestrator, DiagnosticTelemetryCollector, DecoderFaultIsolator, SmartRetryOrchestrator, PipelineHealthMonitor. +67 tests.
 
 
