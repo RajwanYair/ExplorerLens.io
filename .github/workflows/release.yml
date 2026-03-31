@@ -86,7 +86,7 @@ jobs:
       # When GitHub upgrades to VS 2026 runners, this auto-picks v145.
 
       - name: Setup .NET 10 SDK (for WiX + Manager.WinUI)
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
 
