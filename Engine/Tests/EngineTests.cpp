@@ -1199,6 +1199,15 @@
 #include "../Pipeline/SmartRetryOrchestrator.h"
 #include "../Pipeline/PipelineHealthMonitor.h"
 
+// Sprint 1081-1090 — Format Routing & Enhanced Accessibility (v31.5.0 "Achernar-V")
+#include "../AI/AdaptiveColorProfileManager.h"
+#include "../AI/ThumbnailAccessibilityEngine.h"
+#include "../Core/SmartFileTypeRouter.h"
+#include "../Core/DecoderVersionManager.h"
+#include "../Core/CrossFormatMetadataEngine.h"
+#include "../Pipeline/StreamingDecodeCoordinator.h"
+#include "../Pipeline/RenderPipelineProfiler.h"
+
 #include <chrono>
 // Compatibility macro for ASSERT_EQUAL(expected, actual) → ASSERT((a) == (b))
 #define ASSERT_EQUAL(a, b) ASSERT((a) == (b))

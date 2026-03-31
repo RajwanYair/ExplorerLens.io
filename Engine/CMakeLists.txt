@@ -263,6 +263,9 @@ set(ENGINE_HEADERS
     Core/FaultTolerantDecodeOrchestrator.h
     Core/DiagnosticTelemetryCollector.h
     Core/DecoderFaultIsolator.h
+    Core/SmartFileTypeRouter.h
+    Core/DecoderVersionManager.h
+    Core/CrossFormatMetadataEngine.h
 
     # Core — Integration & Utilities
     Core/ArchiveRefactorEngine.h
@@ -410,6 +413,8 @@ set(ENGINE_HEADERS
     Pipeline/IntelligentPrefetchScheduler.h
     Pipeline/SmartRetryOrchestrator.h
     Pipeline/PipelineHealthMonitor.h
+    Pipeline/StreamingDecodeCoordinator.h
+    Pipeline/RenderPipelineProfiler.h
 
     # Format decoders
     Decoders/Advanced3DFormatDecoder.h
@@ -572,6 +577,10 @@ set(ENGINE_HEADERS
     AI/ContextualRenderingEngine.h
     AI/SmartThumbnailCompositor.h
     AI/FormatComplexityAnalyzer.h
+
+    # Sprint 1081-1090 — Format Routing & Enhanced Accessibility (v31.5.0 "Achernar-V")
+    AI/AdaptiveColorProfileManager.h
+    AI/ThumbnailAccessibilityEngine.h
 
     # Codec modules
     Codec/CodecLoader.h
