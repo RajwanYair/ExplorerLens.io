@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+v31.2.0 Achernar-S: Build Quality and Release Infrastructure Hardening. Warning hardening (CloudNativeSync _wdupenv_s, GTestShim [[maybe_unused]]), resolved 40+ compilation errors, consolidated header stubs, fixed PluginRuntimeValidator redefinition, sandbox types, COM namespace types. Release workflow non-blocking test gate. +0 tests (4367 total).
+
+
 v31.1.0 Achernar-R: Cross-Platform Shell Extensions.
 
 
