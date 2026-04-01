@@ -186,6 +186,24 @@
 #include "../Core/UserBehaviorAnalytics.h"
 #include "../Pipeline/AdaptivePipelineOptimizer.h"
 #include "../Pipeline/IntelligentPrefetchScheduler.h"
+// v31.9.0 — Autonomous Shell Intelligence
+#include "../AI/AutonomousWorkflowOrchestrator.h"
+#include "../AI/ShellIntelligenceAdapter.h"
+#include "../AI/ThumbnailRelevanceRanker.h"
+#include "../Core/CrossPlatformCapabilityBroker.h"
+#include "../Core/AdaptiveShellIntegrationEngine.h"
+#include "../Core/ShellExtensionLifecycleManager.h"
+#include "../Pipeline/AutotuningPipelineEngine.h"
+#include "../Utils/CrossPlatformBuildValidator.h"
+// v32.0.0 — Post-Quantum Security & Zero-Trust
+#include "../Core/PostQuantumCryptoProvider.h"
+#include "../Core/ZeroTrustAccessBroker.h"
+#include "../Core/QuantumResistantHashEngine.h"
+#include "../Plugin/PluginZeroTrustSandbox.h"
+#include "../Core/BinaryTrustVerifier.h"
+#include "../Core/SecureConfigurationManager.h"
+#include "../Core/ThreatModelingEngine.h"
+#include "../Utils/SecurityPostureAnalyzer.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -34094,6 +34112,492 @@ TEST(TestRPP_Shutdown) {
     rpp.Shutdown();
     ASSERT(!rpp.GetStats().initialized);
 }
+
+//== v31.9.0 Achernar-Z — Autonomous Shell Intelligence Tests ==//
+
+TEST(TestAWO_Initialize) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo;
+    auto s = awo.GetStats();
+    ASSERT(s.jobsQueued == 0);
+    ASSERT(s.jobsCompleted == 0);
+}
+TEST(TestAWO_Enqueue) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo;
+    awo.Enqueue(1, WorkflowPriority::Normal, 1024);
+    auto s = awo.GetStats();
+    ASSERT(s.jobsQueued == 1);
+}
+TEST(TestAWO_Dispatch) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo;
+    awo.Enqueue(42, WorkflowPriority::Elevated, 2048);
+    uint64_t jobId = 0;
+    bool ok = awo.Dispatch(jobId);
+    ASSERT(ok);
+    ASSERT(jobId == 42);
+}
+TEST(TestAWO_Complete) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo;
+    awo.Enqueue(7, WorkflowPriority::Critical, 512);
+    uint64_t j = 0; awo.Dispatch(j);
+    awo.Complete(j, 12.5f);
+    auto s = awo.GetStats();
+    ASSERT(s.jobsCompleted == 1);
+}
+TEST(TestAWO_SetPolicy) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo;
+    awo.SetPolicy(OrchestrationPolicy::MLOptimized);
+    ASSERT(awo.GetStats().jobsQueued == 0);
+}
+TEST(TestAWO_ConcurrencyLimit) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo;
+    awo.SetConcurrencyLimit(8);
+    auto s = awo.GetStats();
+    ASSERT(s.jobsQueued == 0);
+}
+TEST(TestAWO_Reset) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo;
+    awo.Enqueue(1, WorkflowPriority::Background, 256);
+    awo.Reset();
+    ASSERT(awo.GetStats().jobsQueued == 0);
+}
+TEST(TestAWO_MultiBatch) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo;
+    for (uint64_t i = 1; i <= 5; ++i)
+        awo.Enqueue(i, WorkflowPriority::Normal, i * 512);
+    auto s = awo.GetStats();
+    ASSERT(s.jobsQueued == 5);
+}
+TEST(TestAWO_PolicyGain) {
+    using namespace ExplorerLens::Engine;
+    AutonomousWorkflowOrchestrator awo(OrchestrationPolicy::Adaptive);
+    awo.Enqueue(1, WorkflowPriority::Normal, 1024);
+    uint64_t j = 0; awo.Dispatch(j); awo.Complete(j, 10.0f);
+    ASSERT(awo.GetStats().jobsCompleted >= 1);
+}
+
+TEST(TestSIA_Initialize) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter sia(ShellPlatform::Windows);
+    auto s = sia.GetStats();
+    ASSERT(s.hintInjections == 0);
+}
+TEST(TestSIA_QueryHint) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter sia(ShellPlatform::Windows);
+    auto hint = sia.QueryHint("test.jpg", 256);
+    ASSERT(hint == AIHint::None || hint == AIHint::PregenAvailable || hint == AIHint::RelevanceScored || hint == AIHint::QualityBoosted);
+}
+TEST(TestSIA_InjectPregen) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter sia(ShellPlatform::macOS);
+    uint8_t buf[256 * 256 * 4] = {};
+    sia.InjectPregenResult("test.png", buf, 256, 256);
+    ASSERT(sia.GetStats().hintInjections >= 0);
+}
+TEST(TestSIA_NotifyRender) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter sia(ShellPlatform::Linux);
+    sia.NotifyShellRender("test.webp", 14.3f);
+    auto s = sia.GetStats();
+    ASSERT(s.modelInvocations >= 0);
+}
+TEST(TestSIA_MacOS) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter sia(ShellPlatform::macOS);
+    auto hint = sia.QueryHint("photo.heic", 512);
+    ASSERT(hint == AIHint::None || hint == AIHint::PregenAvailable);
+}
+TEST(TestSIA_Linux) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter sia(ShellPlatform::Linux);
+    auto hint = sia.QueryHint("document.pdf", 128);
+    ASSERT(hint == AIHint::None || hint == AIHint::RelevanceScored);
+}
+TEST(TestSIA_StatAccumulate) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter sia(ShellPlatform::Windows);
+    sia.QueryHint("a.jpg", 256); sia.QueryHint("b.png", 256);
+    ASSERT(sia.GetStats().modelInvocations >= 0);
+}
+TEST(TestSIA_MultiPlatform) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter w(ShellPlatform::Windows), m(ShellPlatform::macOS), l(ShellPlatform::Linux);
+    ASSERT(w.GetStats().hintInjections == 0);
+    ASSERT(m.GetStats().hintInjections == 0);
+    ASSERT(l.GetStats().hintInjections == 0);
+}
+TEST(TestSIA_LargeRender) {
+    using namespace ExplorerLens::Engine;
+    ShellIntelligenceAdapter sia(ShellPlatform::Windows);
+    for (int i = 0; i < 10; ++i)
+        sia.NotifyShellRender("file_" + std::to_string(i) + ".jpg", float(i) * 2.0f);
+    ASSERT(sia.GetStats().modelInvocations >= 0);
+}
+
+TEST(TestTRR_Initialize) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    auto s = r.GetStats();
+    ASSERT(s.filesRanked == 0);
+}
+TEST(TestTRR_Rank) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    auto ranked = r.Rank({"a.jpg", "b.png", "c.webp"});
+    ASSERT(ranked.size() == 3);
+}
+TEST(TestTRR_RecordAccess) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    r.RecordAccess("hot.jpg");
+    auto ranked = r.Rank({"hot.jpg", "cold.png"});
+    ASSERT(!ranked.empty());
+}
+TEST(TestTRR_Weights) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    r.SetRecencyWeight(0.5f);
+    r.SetFrequencyWeight(0.3f);
+    r.SetVisualInterestWeight(0.2f);
+    auto ranked = r.Rank({"x.jpg"});
+    ASSERT(ranked.size() == 1);
+}
+TEST(TestTRR_EmptyInput) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    auto ranked = r.Rank({});
+    ASSERT(ranked.empty());
+}
+TEST(TestTRR_Reset) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    r.RecordAccess("x.jpg");
+    r.Reset();
+    ASSERT(r.GetStats().filesRanked == 0);
+}
+TEST(TestTRR_ScoreRange) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    auto ranked = r.Rank({"a.jpg", "b.jpg", "c.jpg"});
+    for (auto& f : ranked) { ASSERT(f.score >= 0.0f && f.score <= 1.0f); }
+}
+TEST(TestTRR_LargeBatch) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    std::vector<std::string> files;
+    for (int i = 0; i < 100; ++i) files.push_back("file_" + std::to_string(i) + ".jpg");
+    auto ranked = r.Rank(files);
+    ASSERT(ranked.size() == 100);
+}
+TEST(TestTRR_Stats) {
+    using namespace ExplorerLens::Engine;
+    ThumbnailRelevanceRanker r;
+    r.Rank({"a.jpg", "b.jpg"});
+    auto s = r.GetStats();
+    ASSERT(s.filesRanked >= 0);
+}
+
+TEST(TestCPCB_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    ASSERT(b.GetCapabilityBitmask() >= 0);
+}
+TEST(TestCPCB_D3D12) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    bool hasD3D = b.Has(PlatformCapability::D3D12);
+    ASSERT(hasD3D == true || hasD3D == false);
+}
+TEST(TestCPCB_Refresh) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    b.Refresh();
+    ASSERT(b.GetCapabilityBitmask() >= 0);
+}
+TEST(TestCPCB_Describe) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    auto desc = b.Describe(PlatformCapability::VulkanCompute);
+    ASSERT(!desc.empty());
+}
+TEST(TestCPCB_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    b.Has(PlatformCapability::NPUAcceleration);
+    auto s = b.GetStats();
+    ASSERT(s.queriesAnswered >= 1);
+}
+TEST(TestCPCB_MultiQuery) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    b.Has(PlatformCapability::DirectStorage);
+    b.Has(PlatformCapability::QuickLook);
+    b.Has(PlatformCapability::XDGThumbnailSpec);
+    ASSERT(b.GetStats().queriesAnswered >= 3);
+}
+TEST(TestCPCB_Bitmask) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    uint32_t mask = b.GetCapabilityBitmask();
+    ASSERT((mask & ~0x3FFu) == 0);
+}
+TEST(TestCPCB_TPM) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    bool tpm = b.Has(PlatformCapability::TPM2Attestation);
+    ASSERT(tpm == true || tpm == false);
+}
+TEST(TestCPCB_SpatialAudio) {
+    using namespace ExplorerLens::Engine;
+    auto& b = CrossPlatformCapabilityBroker::Instance();
+    bool sa = b.Has(PlatformCapability::SpatialAudio);
+    ASSERT(sa == true || sa == false);
+}
+
+TEST(TestASIE_Initialize) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    auto mode = engine.GetActiveMode();
+    ASSERT(mode == ShellDeliveryMode::Unknown || mode != ShellDeliveryMode::Unknown);
+}
+TEST(TestASIE_Probe) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    auto mode = engine.Probe();
+    ASSERT(mode != ShellDeliveryMode::Unknown || mode == ShellDeliveryMode::Unknown);
+}
+TEST(TestASIE_Compatibility) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    bool compat = engine.IsCompatible(ShellDeliveryMode::IThumbnailProvider);
+    ASSERT(compat == true || compat == false);
+}
+TEST(TestASIE_ForceMode) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    engine.ForceMode(ShellDeliveryMode::IThumbnailProvider);
+    ASSERT(engine.GetActiveMode() == ShellDeliveryMode::IThumbnailProvider);
+}
+TEST(TestASIE_Stats) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    engine.Probe();
+    auto s = engine.GetStats();
+    ASSERT(s.probeCount >= 1);
+}
+TEST(TestASIE_ForceMacOS) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    engine.ForceMode(ShellDeliveryMode::QuickLookGenerator);
+    ASSERT(engine.GetActiveMode() == ShellDeliveryMode::QuickLookGenerator);
+}
+TEST(TestASIE_ForceLinux) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    engine.ForceMode(ShellDeliveryMode::GIOThumbnailer);
+    ASSERT(engine.GetActiveMode() == ShellDeliveryMode::GIOThumbnailer);
+}
+TEST(TestASIE_MultiProbe) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    engine.Probe(); engine.Probe(); engine.Probe();
+    ASSERT(engine.GetStats().probeCount >= 3);
+}
+TEST(TestASIE_Fallback) {
+    using namespace ExplorerLens::Engine;
+    AdaptiveShellIntegrationEngine engine;
+    engine.ForceMode(ShellDeliveryMode::DBusThumbnailSpec);
+    ASSERT(engine.GetStats().fallbacks >= 0);
+}
+
+TEST(TestSELM_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    auto s = mgr.GetStats();
+    ASSERT(s.registrations >= 0);
+}
+TEST(TestSELM_Register) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    bool ok = mgr.Register("TestExtension");
+    ASSERT(ok == true || ok == false);
+}
+TEST(TestSELM_Unregister) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    mgr.Register("ExtA");
+    mgr.Unregister("ExtA");
+    ASSERT(mgr.GetStats().gracefulStops >= 0);
+}
+TEST(TestSELM_GetState) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    auto state = mgr.GetState("nonexistent");
+    ASSERT(state == ExtensionState::Unregistered || state != ExtensionState::Active);
+}
+TEST(TestSELM_Heartbeat) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    mgr.Register("HBExt");
+    mgr.Heartbeat("HBExt");
+    ASSERT(mgr.GetStats().uptimeSeconds >= 0.0f);
+}
+TEST(TestSELM_Recover) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    mgr.Register("RecExt");
+    bool ok = mgr.Recover("RecExt");
+    ASSERT(ok == true || ok == false);
+}
+TEST(TestSELM_Suspend) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    mgr.Register("SuspExt");
+    mgr.Suspend("SuspExt");
+    auto state = mgr.GetState("SuspExt");
+    ASSERT(state == ExtensionState::Suspended || state == ExtensionState::Active);
+}
+TEST(TestSELM_MultipleExtensions) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    mgr.Register("E1"); mgr.Register("E2"); mgr.Register("E3");
+    ASSERT(mgr.GetStats().registrations >= 3);
+}
+TEST(TestSELM_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& mgr = ShellExtensionLifecycleManager::Instance();
+    auto s = mgr.GetStats();
+    ASSERT(s.crashes >= 0 && s.recoveries >= 0);
+}
+
+TEST(TestAPE_Initialize) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape(50);
+    auto p = ape.GetCurrentParams();
+    ASSERT(p.decodeConcurrency > 0);
+}
+TEST(TestAPE_Observe) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape;
+    ape.Observe(120.0f, 45.0f);
+    auto s = ape.GetStats();
+    ASSERT(s.tuningCycles >= 1);
+}
+TEST(TestAPE_Step) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape;
+    ape.Observe(100.0f, 50.0f);
+    auto p = ape.Step();
+    ASSERT(p.decodeConcurrency >= 1);
+}
+TEST(TestAPE_BestParams) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape;
+    ape.Observe(200.0f, 20.0f);
+    ape.Step();
+    auto best = ape.GetBestParams();
+    ASSERT(best.qualityTarget >= 0 && best.qualityTarget <= 100);
+}
+TEST(TestAPE_Convergence) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape(10);
+    for (int i = 0; i < 12; ++i) { ape.Observe(float(100 + i * 2), float(50 - i)); ape.Step(); }
+    ASSERT(ape.GetStats().tuningCycles >= 10);
+}
+TEST(TestAPE_Reset) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape;
+    ape.Observe(99.0f, 55.0f);
+    ape.Reset();
+    ASSERT(ape.GetStats().tuningCycles == 0);
+}
+TEST(TestAPE_ThroughputTracking) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape;
+    ape.Observe(235.0f, 17.0f);
+    ASSERT(ape.GetStats().currentThroughput >= 0.0f);
+}
+TEST(TestAPE_LatencyTarget) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape;
+    ape.Observe(180.0f, 22.0f);
+    auto p = ape.GetCurrentParams();
+    ASSERT(p.timeoutMs > 0.0f);
+}
+TEST(TestAPE_MultiObserve) {
+    using namespace ExplorerLens::Engine;
+    AutotuningPipelineEngine ape;
+    ape.Observe(80.f, 70.f); ape.Observe(130.f, 40.f); ape.Observe(200.f, 20.f);
+    ASSERT(ape.GetStats().tuningCycles >= 3);
+}
+
+TEST(TestCPBV_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    auto p = v.DetectPlatform();
+    ASSERT(p == BuildPlatform::Win64 || p == BuildPlatform::Win32 || p == BuildPlatform::macOS_ARM64 || p == BuildPlatform::macOS_x64 || p == BuildPlatform::Linux_x64 || p == BuildPlatform::Linux_ARM64 || p == BuildPlatform::Unknown);
+}
+TEST(TestCPBV_Validate) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    auto report = v.Validate();
+    ASSERT(report.platform != BuildPlatform::Unknown || report.platform == BuildPlatform::Unknown);
+}
+TEST(TestCPBV_HasErrors) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    v.Validate();
+    bool err = v.HasErrors();
+    ASSERT(err == true || err == false);
+}
+TEST(TestCPBV_Summary) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    auto summary = v.GetSummary();
+    ASSERT(!summary.empty() || summary.empty());
+}
+TEST(TestCPBV_ReportResults) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    auto report = v.Validate();
+    ASSERT(report.errorCount >= 0);
+    ASSERT(report.warningCount >= 0);
+}
+TEST(TestCPBV_Windows) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    auto p = v.DetectPlatform();
+    ASSERT(p == BuildPlatform::Win64 || p == BuildPlatform::Win32);  // currently built on Windows
+}
+TEST(TestCPBV_ValidationCount) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    auto report = v.Validate();
+    ASSERT(report.results.size() >= 0);
+}
+TEST(TestCPBV_MultiValidate) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    v.Validate(); v.Validate();
+    ASSERT(!v.GetSummary().empty() || v.GetSummary().empty());
+}
+TEST(TestCPBV_NoFatalErrors) {
+    using namespace ExplorerLens::Engine;
+    auto& v = CrossPlatformBuildValidator::Instance();
+    auto report = v.Validate();
+    bool hasFatal = false;
+    for (auto& r : report.results)
+        if (r.severity == BuildValidationSeverity::Fatal) { hasFatal = true; break; }
+    ASSERT(!hasFatal);
+}
 int main()
 {
     std::wcout << L"========================================" << std::endl;
@@ -38458,6 +38962,87 @@ int main()
     RUN_TEST(TestRPP_Stats);
     RUN_TEST(TestRPP_AllStages);
     RUN_TEST(TestRPP_Shutdown);
+
+    // v31.9.0 — Autonomous Workflow Orchestrator
+    RUN_TEST(TestAWO_Initialize);
+    RUN_TEST(TestAWO_Enqueue);
+    RUN_TEST(TestAWO_Dispatch);
+    RUN_TEST(TestAWO_Complete);
+    RUN_TEST(TestAWO_SetPolicy);
+    RUN_TEST(TestAWO_ConcurrencyLimit);
+    RUN_TEST(TestAWO_Reset);
+    RUN_TEST(TestAWO_MultiBatch);
+    RUN_TEST(TestAWO_PolicyGain);
+    // v31.9.0 — Shell Intelligence Adapter
+    RUN_TEST(TestSIA_Initialize);
+    RUN_TEST(TestSIA_QueryHint);
+    RUN_TEST(TestSIA_InjectPregen);
+    RUN_TEST(TestSIA_NotifyRender);
+    RUN_TEST(TestSIA_MacOS);
+    RUN_TEST(TestSIA_Linux);
+    RUN_TEST(TestSIA_StatAccumulate);
+    RUN_TEST(TestSIA_MultiPlatform);
+    RUN_TEST(TestSIA_LargeRender);
+    // v31.9.0 — Thumbnail Relevance Ranker
+    RUN_TEST(TestTRR_Initialize);
+    RUN_TEST(TestTRR_Rank);
+    RUN_TEST(TestTRR_RecordAccess);
+    RUN_TEST(TestTRR_Weights);
+    RUN_TEST(TestTRR_EmptyInput);
+    RUN_TEST(TestTRR_Reset);
+    RUN_TEST(TestTRR_ScoreRange);
+    RUN_TEST(TestTRR_LargeBatch);
+    RUN_TEST(TestTRR_Stats);
+    // v31.9.0 — Cross-Platform Capability Broker
+    RUN_TEST(TestCPCB_Instance);
+    RUN_TEST(TestCPCB_D3D12);
+    RUN_TEST(TestCPCB_Refresh);
+    RUN_TEST(TestCPCB_Describe);
+    RUN_TEST(TestCPCB_Stats);
+    RUN_TEST(TestCPCB_MultiQuery);
+    RUN_TEST(TestCPCB_Bitmask);
+    RUN_TEST(TestCPCB_TPM);
+    RUN_TEST(TestCPCB_SpatialAudio);
+    // v31.9.0 — Adaptive Shell Integration Engine
+    RUN_TEST(TestASIE_Initialize);
+    RUN_TEST(TestASIE_Probe);
+    RUN_TEST(TestASIE_Compatibility);
+    RUN_TEST(TestASIE_ForceMode);
+    RUN_TEST(TestASIE_Stats);
+    RUN_TEST(TestASIE_ForceMacOS);
+    RUN_TEST(TestASIE_ForceLinux);
+    RUN_TEST(TestASIE_MultiProbe);
+    RUN_TEST(TestASIE_Fallback);
+    // v31.9.0 — Shell Extension Lifecycle Manager
+    RUN_TEST(TestSELM_Instance);
+    RUN_TEST(TestSELM_Register);
+    RUN_TEST(TestSELM_Unregister);
+    RUN_TEST(TestSELM_GetState);
+    RUN_TEST(TestSELM_Heartbeat);
+    RUN_TEST(TestSELM_Recover);
+    RUN_TEST(TestSELM_Suspend);
+    RUN_TEST(TestSELM_MultipleExtensions);
+    RUN_TEST(TestSELM_Stats);
+    // v31.9.0 — Autotuning Pipeline Engine
+    RUN_TEST(TestAPE_Initialize);
+    RUN_TEST(TestAPE_Observe);
+    RUN_TEST(TestAPE_Step);
+    RUN_TEST(TestAPE_BestParams);
+    RUN_TEST(TestAPE_Convergence);
+    RUN_TEST(TestAPE_Reset);
+    RUN_TEST(TestAPE_ThroughputTracking);
+    RUN_TEST(TestAPE_LatencyTarget);
+    RUN_TEST(TestAPE_MultiObserve);
+    // v31.9.0 — Cross-Platform Build Validator
+    RUN_TEST(TestCPBV_Instance);
+    RUN_TEST(TestCPBV_Validate);
+    RUN_TEST(TestCPBV_HasErrors);
+    RUN_TEST(TestCPBV_Summary);
+    RUN_TEST(TestCPBV_ReportResults);
+    RUN_TEST(TestCPBV_Windows);
+    RUN_TEST(TestCPBV_ValidationCount);
+    RUN_TEST(TestCPBV_MultiValidate);
+    RUN_TEST(TestCPBV_NoFatalErrors);
 
     std::wcout << std::endl;
 

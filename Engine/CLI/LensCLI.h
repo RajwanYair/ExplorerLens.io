@@ -2,8 +2,7 @@
 // Copyright (c) 2026 ExplorerLens Project
 //
 // Core driver for lens.exe: routes CLI subcommands (generate, batch, cache,
-// info, formats) to the appropriate engine operations. Consumes PublicAPI.h
-// and renders results to stdout with optional Rich-like ANSI coloring.
+// info, formats) to the appropriate engine operations.
 //
 #pragma once
 #include <windows.h>
@@ -11,7 +10,11 @@
 #include <vector>
 #include <functional>
 #include <cstdint>
-#include "../SDK/PublicAPI.h"
+
+// Opaque SDK handle types for the lens.exe C API.
+// Full definitions live in SDK/plugin_api.h at runtime.
+using LENS_ENGINE_HANDLE    = void*;
+using LENS_THUMBNAIL_HANDLE = void*;
 
 namespace ExplorerLens { namespace Engine {
 

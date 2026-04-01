@@ -11,7 +11,9 @@
 #include <vector>
 #include <functional>
 #include <cstdint>
-#include "../Engine/SDK/PublicAPI.h"
+
+// Opaque SDK handle types for the lens.exe C API.
+using LENS_ENGINE_HANDLE    = void*;
 
 namespace ExplorerLens { namespace Engine { namespace WinUI {
 

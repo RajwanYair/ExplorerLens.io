@@ -1,7 +1,7 @@
 #==============================================================================
 # ExplorerLens - Root CMake Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 31.8.0 "Achernar-Y"
+# Version: 31.9.0 "Achernar-Z"
 #
 # vcpkg Integration (Optional):
 #   cmake -B build -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLens
-    VERSION 31.8.0
+    VERSION 31.9.0
     DESCRIPTION "ExplorerLens.io - Universal File Preview Engine for Windows Explorer"
     LANGUAGES CXX
     HOMEPAGE_URL "https://github.com/ExplorerLens/ExplorerLens.io"

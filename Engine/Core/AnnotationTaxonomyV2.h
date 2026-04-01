@@ -32,9 +32,11 @@ public:
         ATaxV2LookupResult r;
         for (const auto& [id, label] : m_labels) {
             std::string lname = label.name;
-            std::transform(lname.begin(), lname.end(), lname.begin(), ::tolower);
+            std::transform(lname.begin(), lname.end(), lname.begin(),
+                           [](unsigned char c) { return static_cast<char>(::tolower(c)); });
             std::string q = query;
-            std::transform(q.begin(), q.end(), q.begin(), ::tolower);
+            std::transform(q.begin(), q.end(), q.begin(),
+                           [](unsigned char c) { return static_cast<char>(::tolower(c)); });
             if (lname.find(q) != std::string::npos) { r.matches.push_back(label); r.found = true; }
         }
         return r;

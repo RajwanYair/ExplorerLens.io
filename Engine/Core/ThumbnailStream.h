@@ -205,7 +205,10 @@ public:
         e.action    = VersionAction::Create;
         e.crc32     = crc32;
         e.sizeBytes = sizeBytes;
-        e.label     = std::string(label.begin(), label.end());
+        // Narrow wchar_t label to char (ASCII-safe version labels only).
+        e.label.reserve(label.size());
+        e.label.clear();
+        for (wchar_t c : label) e.label.push_back(static_cast<char>(c));
         e.timestamp = ++m_counter;
         m_history.push_back(e);
         return true;

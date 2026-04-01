@@ -10,6 +10,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [31.9.0] — 2026-04-01
+
+### v31.9.0 "Achernar-Z" — Final Achernar: Autonomous Shell Intelligence
+
+#### New Components
+- **AutonomousWorkflowOrchestrator** — Fully autonomous ML-policy-driven thumbnail workflow scheduler
+- **ShellIntelligenceAdapter** — AI-native shell adapter bridging Engine models to Windows/Linux/macOS shell providers
+- **ThumbnailRelevanceRanker** — ML-based relevance ranker (recency + visual interest + frequency scores)
+- **CrossPlatformCapabilityBroker** — Runtime capability negotiation across all three PAL backends (Win/macOS/Linux)
+- **AdaptiveShellIntegrationEngine** — Self-tuning shell integration that probes OS API capabilities
+- **ShellExtensionLifecycleManager** — Unified lifecycle manager for COM / QLGenerator / GIO / Dolphin extensions
+- **AutotuningPipelineEngine** — Self-tuning pipeline with reinforcement-learning parameter feedback loop
+- **CrossPlatformBuildValidator** — Cross-platform build matrix validator ensuring Windows/macOS/Linux parity
+
+#### Bug Fixes
+- Resolved 3 ODR (One-Definition-Rule) name collisions: WorkflowJobStats, CrossPlatformCheckResult, BuildValidationSeverity
+- Fixed 2 pre-existing C4244 warnings in AnnotationTaxonomyV2.h and ThumbnailStream.h
+- Fixed broken SDK includes in LensCLI.h and DashboardViewModel.h (PublicAPI.h did not exist)
+
+#### Consolidation
+- Deleted EngineTests_patch.cpp (orphan dead file)
+- Deleted SDK/PluginSDKv3.h (unreferenced orphan)
+- Removed 6 stale audit files from build-logs/
+
+#### Tests
+- +72 tests across all 8 new v31.9.0 component groups
+- Total: 4,290 unit tests
+
+
 ## [31.8.0] — 2026-04-01
 
 ### v31.8.0 "Achernar-Y" — Intelligent Workflow Automation

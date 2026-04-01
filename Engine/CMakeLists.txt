@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 31.8.0
+# Version: 31.9.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 31.8.0
+    VERSION 31.9.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1661,6 +1661,15 @@ set(ENGINE_HEADERS
     Plugin/PluginDebuggerIntegration.h
     Plugin/PluginHotReload.h
     Utils/DocumentationExcellenceV2.h
+    # Sprint 1071-1080 — Post-Quantum Security & Zero-Trust (v32.0.0 "Fomalhaut")
+    Core/PostQuantumCryptoProvider.h
+    Core/ZeroTrustAccessBroker.h
+    Core/QuantumResistantHashEngine.h
+    Plugin/PluginZeroTrustSandbox.h
+    Core/BinaryTrustVerifier.h
+    Core/SecureConfigurationManager.h
+    Core/ThreatModelingEngine.h
+    Utils/SecurityPostureAnalyzer.h
 )
 
 set(ENGINE_SOURCES
@@ -1697,6 +1706,8 @@ set(ENGINE_SOURCES
     # v31.8.0 — Adaptive optimization & prefetch
     Pipeline/AdaptivePipelineOptimizer.cpp
     Pipeline/IntelligentPrefetchScheduler.cpp
+    # v31.9.0 — Autotuning pipeline
+    Pipeline/AutotuningPipelineEngine.cpp
     Pipeline/AsyncThumbnailProvider.cpp
     Pipeline/DecoderRegistry.cpp
     Pipeline/FormatDetector.cpp
@@ -1764,12 +1775,21 @@ set(ENGINE_SOURCES
     AI/PredictivePregenEngine.cpp
     AI/ContentCategorizationEngine.cpp
     AI/ThumbnailQualityPredictor.cpp
+    # v31.9.0 — Autonomous workflow & shell intelligence
+    AI/AutonomousWorkflowOrchestrator.cpp
+    AI/ShellIntelligenceAdapter.cpp
+    AI/ThumbnailRelevanceRanker.cpp
 
     # Enterprise implementations
     Enterprise/EnterpriseAuditExporter.cpp
     Enterprise/EnterpriseConsoleV3.cpp
     Enterprise/EnterpriseMetricsDashboard.cpp
     Enterprise/UsageAnomalyDetector.cpp
+    # v31.9.0 backlog — v30.7.0 Deneb-X enterprise TUs
+    Enterprise/FleetDeploymentManager.cpp
+    Enterprise/ComplianceReportGenerator.cpp
+    Enterprise/PolicyVersionControl.cpp
+    Enterprise/RemoteDecoderControl.cpp
     # v31.6.0 — Core routing implementations
     Core/SmartFileTypeRouter.cpp
     Core/DecoderVersionManager.cpp
@@ -1782,6 +1802,18 @@ set(ENGINE_SOURCES
     Core/SmartBatchProcessor.cpp
     Core/WorkflowAutomationEngine.cpp
     Core/UserBehaviorAnalytics.cpp
+    # v31.9.0 — Cross-platform shell integration & backlog TUs
+    Core/CrossPlatformCapabilityBroker.cpp
+    Core/AdaptiveShellIntegrationEngine.cpp
+    Core/ShellExtensionLifecycleManager.cpp
+    Core/LinuxNautilusExtension.cpp
+    Core/KDEDolphinExtension.cpp
+    Core/ThunarThumbnailExtension.cpp
+    Core/macOSQuickLookV3.cpp
+    Core/LinuxThumbnailerDaemon.cpp
+    Core/WaylandShellExtension.cpp
+    Core/XPlatformTestHarness.cpp
+    Core/macOSLaunchServicesAdapter.cpp
 
     # GPU rendering implementations
     GPU/D3D11Renderer.cpp
@@ -1839,6 +1871,17 @@ set(ENGINE_SOURCES
 
     # Release gate implementation
     Utils/ReleaseGateUnified.cpp
+    # v31.9.0 — Cross-platform build validator
+    Utils/CrossPlatformBuildValidator.cpp
+    # Sprint 1071-1080 — Post-Quantum Security & Zero-Trust (v32.0.0 "Fomalhaut")
+    Core/PostQuantumCryptoProvider.cpp
+    Core/ZeroTrustAccessBroker.cpp
+    Core/QuantumResistantHashEngine.cpp
+    Plugin/PluginZeroTrustSandbox.cpp
+    Core/BinaryTrustVerifier.cpp
+    Core/SecureConfigurationManager.cpp
+    Core/ThreatModelingEngine.cpp
+    Utils/SecurityPostureAnalyzer.cpp
 )
 
 #==============================================================================
