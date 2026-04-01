@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [31.8.0] — 2026-04-01
+
+### v31.8.0 "Achernar-Y" — Intelligent Workflow Automation
+
+#### New Components
+- **PredictivePregenEngine** — ML-driven thumbnail pre-generation with access-pattern prediction
+- **ContentCategorizationEngine** — Visual content categorization using multi-label classifier
+- **ThumbnailQualityPredictor** — Perceptual quality predictor for adaptive render budget allocation
+- **SmartBatchProcessor** — Priority-aware batch processor with dynamic work-stealing scheduler
+- **WorkflowAutomationEngine** — Rule-based automation engine for thumbnail generation workflows
+- **UserBehaviorAnalytics** — Anonymized usage-pattern analytics for prefetch hint generation
+- **AdaptivePipelineOptimizer** — Runtime pipeline topology optimizer based on observed throughput
+- **IntelligentPrefetchScheduler** — Predictive prefetch scheduler with LRU-eviction and heat maps
+
+#### Translation Units
+- Added .cpp stub TUs for all 8 v31.8.0 headers (AI, Core, Pipeline directories)
+- CMakeLists.txt ENGINE_SOURCES updated with all new entries
+
+#### Tests
+- 79 test coverage additions across all 8 new component groups
+- Total: 4218 unit tests
+
+
 ## [31.7.0] — 2026-04-01
 
 ### v31.7.0 "Achernar-X" — Contextual Intelligence & Self-Healing Diagnostics
