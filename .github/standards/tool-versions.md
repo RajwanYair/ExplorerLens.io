@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 1 April 2026 (v31.6.0 Achernar-W release)
-**Version:** 31.6.0 "Achernar-W"
+**Last Updated:** 1 April 2026 (v31.7.0 Achernar-X release)
+**Version:** 31.7.0 "Achernar-X"
 
 ---
 

@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [31.7.0] — 2026-04-01
+
+### v31.7.0 "Achernar-X" — Contextual Intelligence & Self-Healing Diagnostics
+
+#### New Components
+- **ContextualRenderingEngine** — Context-aware render quality adaptation (scene/lighting/motion)
+- **SmartThumbnailCompositor** — Multi-layer thumbnail compositing with blend mode support
+- **FormatComplexityAnalyzer** — Format complexity scoring for adaptive decode strategy selection
+- **FaultTolerantDecodeOrchestrator** — Fault-isolation orchestrator with automatic fallback chains
+- **DiagnosticTelemetryCollector** — Structured diagnostic event collector with ETW integration
+- **DecoderFaultIsolator** — Per-decoder fault isolation using exception boundary containment
+- **SmartRetryOrchestrator** — Exponential backoff retry coordinator for transient decode failures
+- **PipelineHealthMonitor** — Real-time health scoring and alerting for pipeline stages
+
+#### Translation Units
+- Added .cpp stub TUs for all 8 v31.7.0 headers (AI and Core directories)
+- CMakeLists.txt ENGINE_SOURCES updated with all new entries
+
+#### Tests
+- 67 test coverage additions across all 8 new component groups
+- Total: 4218 unit tests
+
+
 ## [31.6.0] — 2026-04-01
 
 ### v31.6.0 "Achernar-W" — Format Routing & Enhanced Accessibility
