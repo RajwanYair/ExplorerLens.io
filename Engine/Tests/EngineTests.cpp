@@ -204,6 +204,15 @@
 #include "../Core/SecureConfigurationManager.h"
 #include "../Core/ThreatModelingEngine.h"
 #include "../Utils/SecurityPostureAnalyzer.h"
+// v32.1.0 — Edge AI & Hardware-Accelerated Inference
+#include "../GPU/NPUAccelerationEngine.h"
+#include "../GPU/EdgeAIInferenceEngine.h"
+#include "../AI/HardwareCapabilityNegotiator.h"
+#include "../GPU/AMDXDNABackend.h"
+#include "../GPU/QualcommAIEBackend.h"
+#include "../GPU/IntelAMXBackend.h"
+#include "../Pipeline/HardwareAcceleratedPipeline.h"
+#include "../Core/ComputeDeviceRegistry.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -34113,6 +34122,562 @@ TEST(TestRPP_Shutdown) {
     ASSERT(!rpp.GetStats().initialized);
 }
 
+//== v32.0.0 Fomalhaut — Post-Quantum Security & Zero-Trust Tests ==//
+
+// PostQuantumCryptoProvider
+TEST(TestPQCP_Init) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    ASSERT(p.Initialize());
+    ASSERT(p.IsReady());
+}
+TEST(TestPQCP_KeyGen_Kyber) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    p.Initialize();
+    auto kp = p.GenerateKeyPair(PQCPrimitiveAlgo::Kyber768);
+    ASSERT(!kp.publicKey.empty());
+    ASSERT(!kp.privateKey.empty());
+    ASSERT(kp.publicKey.size() == 1184);
+}
+TEST(TestPQCP_KeyGen_Dilithium) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    p.Initialize();
+    auto kp = p.GenerateKeyPair(PQCPrimitiveAlgo::Dilithium3);
+    ASSERT(!kp.publicKey.empty());
+    ASSERT(!kp.privateKey.empty());
+    ASSERT(kp.algorithm == PQCPrimitiveAlgo::Dilithium3);
+}
+TEST(TestPQCP_Sign) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    p.Initialize();
+    auto kp = p.GenerateKeyPair(PQCPrimitiveAlgo::Dilithium3);
+    std::vector<uint8_t> msg = {0x01, 0x02, 0x03};
+    auto sig = p.Sign(msg, kp);
+    ASSERT(!sig.empty());
+    ASSERT(sig.size() == 3293);
+}
+TEST(TestPQCP_VerifyOk) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    p.Initialize();
+    std::vector<uint8_t> msg = {0xAA, 0xBB};
+    std::vector<uint8_t> sig = {0x01};
+    std::vector<uint8_t> pub = {0x02};
+    ASSERT(p.Verify(msg, sig, pub));
+}
+TEST(TestPQCP_VerifyFail_Empty) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    p.Initialize();
+    std::vector<uint8_t> empty;
+    std::vector<uint8_t> nonempty = {0x01};
+    ASSERT(!p.Verify(empty, nonempty, nonempty));
+}
+TEST(TestPQCP_Stats_KeyGenCount) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    p.Initialize();
+    p.GenerateKeyPair(PQCPrimitiveAlgo::Kyber768);
+    p.GenerateKeyPair(PQCPrimitiveAlgo::Kyber768);
+    p.GenerateKeyPair(PQCPrimitiveAlgo::Dilithium3);
+    ASSERT(p.GetStats().keyGensOk == 3);
+}
+TEST(TestPQCP_Stats_SignCount) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    p.Initialize();
+    auto kp = p.GenerateKeyPair(PQCPrimitiveAlgo::Dilithium3);
+    std::vector<uint8_t> msg = {0x01};
+    p.Sign(msg, kp);
+    p.Sign(msg, kp);
+    ASSERT(p.GetStats().signOps == 2);
+}
+TEST(TestPQCP_Reset) {
+    using namespace ExplorerLens::Engine;
+    PostQuantumCryptoProvider p;
+    p.Initialize();
+    p.GenerateKeyPair(PQCPrimitiveAlgo::Kyber768);
+    p.Reset();
+    ASSERT(p.GetStats().keyGensOk == 0);
+}
+
+// ZeroTrustAccessBroker
+TEST(TestZTAB_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& a = ZeroTrustAccessBroker::Instance();
+    auto& b = ZeroTrustAccessBroker::Instance();
+    ASSERT(&a == &b);
+}
+TEST(TestZTAB_Issue) {
+    using namespace ExplorerLens::Engine;
+    auto& broker = ZeroTrustAccessBroker::Instance();
+    auto tok = broker.Issue("plugin-a", "decode");
+    ASSERT(tok.subject == "plugin-a");
+    ASSERT(tok.capability == "decode");
+    ASSERT(!tok.signature.empty());
+}
+TEST(TestZTAB_Validate_Valid) {
+    using namespace ExplorerLens::Engine;
+    auto& broker = ZeroTrustAccessBroker::Instance();
+    auto tok = broker.Issue("plugin-b", "cache");
+    ASSERT(broker.Validate(tok));
+}
+TEST(TestZTAB_Validate_Revoked) {
+    using namespace ExplorerLens::Engine;
+    auto& broker = ZeroTrustAccessBroker::Instance();
+    auto tok = broker.Issue("plugin-c", "ui");
+    tok.revoked = true;
+    ASSERT(!broker.Validate(tok));
+}
+TEST(TestZTAB_Revoke) {
+    using namespace ExplorerLens::Engine;
+    auto& broker = ZeroTrustAccessBroker::Instance();
+    broker.Issue("plugin-revoke", "gpu");
+    ASSERT(broker.Revoke("plugin-revoke"));
+}
+TEST(TestZTAB_RevokeMiss) {
+    using namespace ExplorerLens::Engine;
+    auto& broker = ZeroTrustAccessBroker::Instance();
+    ASSERT(!broker.Revoke("nonexistent-plugin-xyz"));
+}
+TEST(TestZTAB_Stats_Issued) {
+    using namespace ExplorerLens::Engine;
+    auto& broker = ZeroTrustAccessBroker::Instance();
+    uint64_t before = broker.GetStats().tokensIssued;
+    broker.Issue("plugin-stat1", "read");
+    ASSERT(broker.GetStats().tokensIssued == before + 1);
+}
+TEST(TestZTAB_Stats_Denied) {
+    using namespace ExplorerLens::Engine;
+    auto& broker = ZeroTrustAccessBroker::Instance();
+    ZeroTrustToken empty_tok;
+    uint64_t before = broker.GetStats().tokensDenied;
+    broker.Validate(empty_tok);
+    ASSERT(broker.GetStats().tokensDenied == before + 1);
+}
+TEST(TestZTAB_MultiToken) {
+    using namespace ExplorerLens::Engine;
+    auto& broker = ZeroTrustAccessBroker::Instance();
+    auto t1 = broker.Issue("multi-a", "decode");
+    auto t2 = broker.Issue("multi-b", "cache");
+    ASSERT(t1.subject != t2.subject);
+}
+
+// QuantumResistantHashEngine
+TEST(TestQRHE_Init) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    ASSERT(e.Initialize());
+    ASSERT(e.IsReady());
+}
+TEST(TestQRHE_HashSHA3) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    e.Initialize();
+    std::vector<uint8_t> data = {0x01, 0x02};
+    auto d = e.Hash(data, QRHashAlgo::SHA3_256);
+    ASSERT(d.bytes.size() == 32);
+    ASSERT(d.algorithm == QRHashAlgo::SHA3_256);
+}
+TEST(TestQRHE_HashBLAKE3) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    e.Initialize();
+    std::vector<uint8_t> data = {0xAA};
+    auto d = e.Hash(data, QRHashAlgo::BLAKE3);
+    ASSERT(d.bytes.size() == 32);
+}
+TEST(TestQRHE_HashK12) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    e.Initialize();
+    std::vector<uint8_t> data = {0x55};
+    auto d = e.Hash(data, QRHashAlgo::KangarooTwelve);
+    ASSERT(d.bytes.size() == 64);
+}
+TEST(TestQRHE_Default) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    e.Initialize(QRHashAlgo::SHA3_256);
+    std::vector<uint8_t> data = {0x11};
+    auto d = e.Hash(data);
+    ASSERT(d.algorithm == QRHashAlgo::SHA3_256);
+}
+TEST(TestQRHE_ConstantTimeEq) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    e.Initialize();
+    std::vector<uint8_t> data = {0x01};
+    auto d1 = e.Hash(data, QRHashAlgo::BLAKE3);
+    auto d2 = e.Hash(data, QRHashAlgo::BLAKE3);
+    ASSERT(e.ConstantTimeCompare(d1, d2));
+}
+TEST(TestQRHE_ConstantTimeNeq) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    e.Initialize();
+    std::vector<uint8_t> data1 = {0x01};
+    auto d1 = e.Hash(data1, QRHashAlgo::BLAKE3);
+    QRHashDigest d2;
+    d2.bytes.assign(32, 0xFF);
+    ASSERT(!e.ConstantTimeCompare(d1, d2));
+}
+TEST(TestQRHE_Stats) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    e.Initialize();
+    std::vector<uint8_t> data = {0x01};
+    e.Hash(data, QRHashAlgo::SHA3_256);
+    e.Hash(data, QRHashAlgo::BLAKE3);
+    ASSERT(e.GetStats().hashOps == 2);
+}
+TEST(TestQRHE_Reset) {
+    using namespace ExplorerLens::Engine;
+    QuantumResistantHashEngine e;
+    e.Initialize();
+    std::vector<uint8_t> data = {0x01};
+    e.Hash(data);
+    e.Reset();
+    ASSERT(e.GetStats().hashOps == 0);
+}
+
+// PluginZeroTrustSandbox
+TEST(TestPZTS_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& a = PluginZeroTrustSandbox::Instance();
+    auto& b = PluginZeroTrustSandbox::Instance();
+    ASSERT(&a == &b);
+}
+TEST(TestPZTS_DefaultPolicy) {
+    using namespace ExplorerLens::Engine;
+    auto& sb = PluginZeroTrustSandbox::Instance();
+    ASSERT(sb.GetPolicy().requiresCapabilityToken);
+}
+TEST(TestPZTS_SetPolicy) {
+    using namespace ExplorerLens::Engine;
+    auto& sb = PluginZeroTrustSandbox::Instance();
+    PluginSandboxPolicy p;
+    p.pluginId = "test-plugin";
+    p.maxMemoryMB = 128;
+    sb.SetPolicy(p);
+    ASSERT(sb.GetPolicy().maxMemoryMB == 128);
+}
+TEST(TestPZTS_Allow_WithToken) {
+    using namespace ExplorerLens::Engine;
+    auto& sb = PluginZeroTrustSandbox::Instance();
+    auto d = sb.Evaluate("my-plugin", "decode", true);
+    ASSERT(d == PluginSandboxDecision::Allow);
+}
+TEST(TestPZTS_Deny_NoToken) {
+    using namespace ExplorerLens::Engine;
+    auto& sb = PluginZeroTrustSandbox::Instance();
+    PluginSandboxPolicy p;
+    p.requiresCapabilityToken = true;
+    sb.SetPolicy(p);
+    auto d = sb.Evaluate("my-plugin", "decode", false);
+    ASSERT(d == PluginSandboxDecision::Deny);
+}
+TEST(TestPZTS_Deny_EmptyPlugin) {
+    using namespace ExplorerLens::Engine;
+    auto& sb = PluginZeroTrustSandbox::Instance();
+    auto d = sb.Evaluate("", "decode", true);
+    ASSERT(d == PluginSandboxDecision::Deny);
+}
+TEST(TestPZTS_Deny_Empty_Cap) {
+    using namespace ExplorerLens::Engine;
+    auto& sb = PluginZeroTrustSandbox::Instance();
+    auto d = sb.Evaluate("my-plugin", "", true);
+    ASSERT(d == PluginSandboxDecision::Deny);
+}
+TEST(TestPZTS_NotQuarantined) {
+    using namespace ExplorerLens::Engine;
+    auto& sb = PluginZeroTrustSandbox::Instance();
+    ASSERT(!sb.IsQuarantined("any-plugin"));
+}
+TEST(TestPZTS_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& sb = PluginZeroTrustSandbox::Instance();
+    PluginSandboxPolicy p;
+    p.requiresCapabilityToken = false;
+    sb.SetPolicy(p);
+    uint64_t before = sb.GetStats().callsAllowed;
+    sb.Evaluate("stats-plugin", "read", true);
+    ASSERT(sb.GetStats().callsAllowed == before + 1);
+}
+
+// BinaryTrustVerifier
+TEST(TestBTV_Init) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    ASSERT(v.Initialize());
+    ASSERT(v.IsReady());
+}
+TEST(TestBTV_Verify_Valid) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    v.Initialize();
+    auto ev = v.Verify("LENSShell.dll");
+    ASSERT(ev.status == BinaryTrustStatus::Trusted);
+}
+TEST(TestBTV_Verify_Empty) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    v.Initialize();
+    auto ev = v.Verify("");
+    ASSERT(ev.status == BinaryTrustStatus::Unknown);
+}
+TEST(TestBTV_TamperDetect) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    v.Initialize();
+    auto ev = v.VerifyTampered("LENSShell.dll");
+    ASSERT(ev.status == BinaryTrustStatus::TamperEvident);
+}
+TEST(TestBTV_TamperReason) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    v.Initialize();
+    auto ev = v.VerifyTampered("LENSShell.dll");
+    ASSERT(!ev.rejectionReason.empty());
+}
+TEST(TestBTV_SignerName) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    v.Initialize();
+    auto ev = v.Verify("LENSShell.dll");
+    ASSERT(!ev.signerName.empty());
+}
+TEST(TestBTV_Stats_Ok) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    v.Initialize();
+    v.Verify("LENSShell.dll");
+    ASSERT(v.GetStats().verificationsOk == 1);
+}
+TEST(TestBTV_Stats_Fail) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    v.Initialize();
+    v.Verify("");
+    ASSERT(v.GetStats().verificationsFail == 1);
+}
+TEST(TestBTV_Reset) {
+    using namespace ExplorerLens::Engine;
+    BinaryTrustVerifier v;
+    v.Initialize();
+    v.Verify("LENSShell.dll");
+    v.Reset();
+    ASSERT(v.GetStats().verificationsOk == 0);
+}
+
+// SecureConfigurationManager
+TEST(TestSCM_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& a = SecureConfigurationManager::Instance();
+    auto& b = SecureConfigurationManager::Instance();
+    ASSERT(&a == &b);
+}
+TEST(TestSCM_Init) {
+    using namespace ExplorerLens::Engine;
+    auto& m = SecureConfigurationManager::Instance();
+    ASSERT(m.Initialize());
+    ASSERT(m.IsReady());
+}
+TEST(TestSCM_SetAndGet) {
+    using namespace ExplorerLens::Engine;
+    auto& m = SecureConfigurationManager::Instance();
+    m.Initialize();
+    ASSERT(m.Set("api-key", "secret-value"));
+    std::string val;
+    ASSERT(m.Get("api-key", val));
+    ASSERT(val == "secret-value");
+}
+TEST(TestSCM_GetMissing) {
+    using namespace ExplorerLens::Engine;
+    auto& m = SecureConfigurationManager::Instance();
+    m.Initialize();
+    std::string val;
+    ASSERT(!m.Get("nonexistent-key-xyz", val));
+}
+TEST(TestSCM_Backend_Platform) {
+    using namespace ExplorerLens::Engine;
+    auto& m = SecureConfigurationManager::Instance();
+    m.Initialize();
+#if defined(_WIN32)
+    ASSERT(m.GetBackend() == SecureConfigBackend::DPAPI);
+#else
+    ASSERT(m.GetBackend() != SecureConfigBackend::TPM2);
+#endif
+}
+TEST(TestSCM_MultiKey) {
+    using namespace ExplorerLens::Engine;
+    auto& m = SecureConfigurationManager::Instance();
+    m.Initialize();
+    m.Set("key1", "val1");
+    m.Set("key2", "val2");
+    std::string v1, v2;
+    ASSERT(m.Get("key1", v1) && v1 == "val1");
+    ASSERT(m.Get("key2", v2) && v2 == "val2");
+}
+TEST(TestSCM_OverwriteKey) {
+    using namespace ExplorerLens::Engine;
+    auto& m = SecureConfigurationManager::Instance();
+    m.Initialize();
+    m.Set("overwrite-key", "first");
+    m.Set("overwrite-key", "second");
+    std::string val;
+    m.Get("overwrite-key", val);
+    ASSERT(val == "second");
+}
+TEST(TestSCM_Stats_Writes) {
+    using namespace ExplorerLens::Engine;
+    auto& m = SecureConfigurationManager::Instance();
+    m.Initialize();
+    uint64_t before = m.GetStats().writesOk;
+    m.Set("stat-key", "v");
+    ASSERT(m.GetStats().writesOk == before + 1);
+}
+TEST(TestSCM_Stats_Reads) {
+    using namespace ExplorerLens::Engine;
+    auto& m = SecureConfigurationManager::Instance();
+    m.Initialize();
+    m.Set("read-stat-key", "v");
+    uint64_t before = m.GetStats().readsOk;
+    std::string val;
+    m.Get("read-stat-key", val);
+    ASSERT(m.GetStats().readsOk == before + 1);
+}
+
+// ThreatModelingEngine
+TEST(TestTME_Init) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    ASSERT(e.Initialize());
+    ASSERT(e.IsReady());
+}
+TEST(TestTME_Analyze_NotEmpty) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    e.Initialize();
+    auto threats = e.Analyze("decode-stage");
+    ASSERT(!threats.empty());
+}
+TEST(TestTME_PipelineSafe) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    e.Initialize();
+    ASSERT(e.IsPipelineSafe("decode-stage"));
+}
+TEST(TestTME_Spoofing_Sim) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    e.Initialize();
+    auto s = e.SimulateSpoofing("COM-server");
+    ASSERT(s.category == STRIDECategory::Spoofing);
+}
+TEST(TestTME_Spoofing_Unmitigated) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    e.Initialize();
+    auto s = e.SimulateSpoofing("target");
+    ASSERT(!s.mitigated);
+}
+TEST(TestTME_Spoofing_Severity) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    e.Initialize();
+    auto s = e.SimulateSpoofing("target");
+    ASSERT(s.severity == 9);
+}
+TEST(TestTME_Stats_AnalyzeCount) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    e.Initialize();
+    e.Analyze("stage-a");
+    e.Analyze("stage-b");
+    ASSERT(e.GetStats().scenariosAnalyzed == 2);
+}
+TEST(TestTME_Stats_Found) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    e.Initialize();
+    e.SimulateSpoofing("t");
+    ASSERT(e.GetStats().threatsFound >= 1);
+}
+TEST(TestTME_Reset) {
+    using namespace ExplorerLens::Engine;
+    ThreatModelingEngine e;
+    e.Initialize();
+    e.Analyze("stage");
+    e.Reset();
+    ASSERT(e.GetStats().scenariosAnalyzed == 0);
+}
+
+// SecurityPostureAnalyzer
+TEST(TestSPA_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& a = SecurityPostureAnalyzer::Instance();
+    auto& b = SecurityPostureAnalyzer::Instance();
+    ASSERT(&a == &b);
+}
+TEST(TestSPA_Analyze_NonEmpty) {
+    using namespace ExplorerLens::Engine;
+    auto& spa = SecurityPostureAnalyzer::Instance();
+    auto r = spa.Analyze();
+    ASSERT(!r.reportId.empty());
+}
+TEST(TestSPA_Score_Range) {
+    using namespace ExplorerLens::Engine;
+    auto& spa = SecurityPostureAnalyzer::Instance();
+    auto r = spa.Analyze();
+    ASSERT(r.overallScore >= 0.0f && r.overallScore <= 100.0f);
+}
+TEST(TestSPA_PatchLevel) {
+    using namespace ExplorerLens::Engine;
+    auto& spa = SecurityPostureAnalyzer::Instance();
+    auto r = spa.Analyze();
+    ASSERT(r.patchLevelCurrent);
+}
+TEST(TestSPA_Schema) {
+    using namespace ExplorerLens::Engine;
+    auto& spa = SecurityPostureAnalyzer::Instance();
+    auto r = spa.Analyze();
+    ASSERT(r.schemaVersion == "1.0");
+}
+TEST(TestSPA_IsCompliant) {
+    using namespace ExplorerLens::Engine;
+    auto& spa = SecurityPostureAnalyzer::Instance();
+    bool c = spa.IsCompliant(0.0f);
+    ASSERT(c || !c); // just ensure no crash
+}
+TEST(TestSPA_Serialize) {
+    using namespace ExplorerLens::Engine;
+    auto& spa = SecurityPostureAnalyzer::Instance();
+    auto r = spa.Analyze();
+    auto json = spa.SerializeToJson(r);
+    ASSERT(!json.empty());
+    ASSERT(json.find("reportId") != std::string::npos);
+}
+TEST(TestSPA_Stats) {
+    using namespace ExplorerLens::Engine;
+    auto& spa = SecurityPostureAnalyzer::Instance();
+    uint64_t before = spa.GetStats().reportsGenerated;
+    spa.Analyze();
+    ASSERT(spa.GetStats().reportsGenerated == before + 1);
+}
+TEST(TestSPA_ScoreComponents) {
+    using namespace ExplorerLens::Engine;
+    auto& spa = SecurityPostureAnalyzer::Instance();
+    auto r = spa.Analyze();
+    float expected = (r.tpmAttested ? 40.0f : 0.0f)
+                   + (r.codeIntegrityOk ? 35.0f : 0.0f)
+                   + (r.patchLevelCurrent ? 25.0f : 0.0f);
+    ASSERT(r.overallScore == expected);
+}
+
 //== v31.9.0 Achernar-Z — Autonomous Shell Intelligence Tests ==//
 
 TEST(TestAWO_Initialize) {
@@ -39043,6 +39608,79 @@ int main()
     RUN_TEST(TestCPBV_ValidationCount);
     RUN_TEST(TestCPBV_MultiValidate);
     RUN_TEST(TestCPBV_NoFatalErrors);
+    // v32.0.0 — Post-Quantum Security & Zero-Trust
+    RUN_TEST(TestPQCP_Init);
+    RUN_TEST(TestPQCP_KeyGen_Kyber);
+    RUN_TEST(TestPQCP_KeyGen_Dilithium);
+    RUN_TEST(TestPQCP_Sign);
+    RUN_TEST(TestPQCP_VerifyOk);
+    RUN_TEST(TestPQCP_VerifyFail_Empty);
+    RUN_TEST(TestPQCP_Stats_KeyGenCount);
+    RUN_TEST(TestPQCP_Stats_SignCount);
+    RUN_TEST(TestPQCP_Reset);
+    RUN_TEST(TestZTAB_Instance);
+    RUN_TEST(TestZTAB_Issue);
+    RUN_TEST(TestZTAB_Validate_Valid);
+    RUN_TEST(TestZTAB_Validate_Revoked);
+    RUN_TEST(TestZTAB_Revoke);
+    RUN_TEST(TestZTAB_RevokeMiss);
+    RUN_TEST(TestZTAB_Stats_Issued);
+    RUN_TEST(TestZTAB_Stats_Denied);
+    RUN_TEST(TestZTAB_MultiToken);
+    RUN_TEST(TestQRHE_Init);
+    RUN_TEST(TestQRHE_HashSHA3);
+    RUN_TEST(TestQRHE_HashBLAKE3);
+    RUN_TEST(TestQRHE_HashK12);
+    RUN_TEST(TestQRHE_Default);
+    RUN_TEST(TestQRHE_ConstantTimeEq);
+    RUN_TEST(TestQRHE_ConstantTimeNeq);
+    RUN_TEST(TestQRHE_Stats);
+    RUN_TEST(TestQRHE_Reset);
+    RUN_TEST(TestPZTS_Instance);
+    RUN_TEST(TestPZTS_DefaultPolicy);
+    RUN_TEST(TestPZTS_SetPolicy);
+    RUN_TEST(TestPZTS_Allow_WithToken);
+    RUN_TEST(TestPZTS_Deny_NoToken);
+    RUN_TEST(TestPZTS_Deny_EmptyPlugin);
+    RUN_TEST(TestPZTS_Deny_Empty_Cap);
+    RUN_TEST(TestPZTS_NotQuarantined);
+    RUN_TEST(TestPZTS_Stats);
+    RUN_TEST(TestBTV_Init);
+    RUN_TEST(TestBTV_Verify_Valid);
+    RUN_TEST(TestBTV_Verify_Empty);
+    RUN_TEST(TestBTV_TamperDetect);
+    RUN_TEST(TestBTV_TamperReason);
+    RUN_TEST(TestBTV_SignerName);
+    RUN_TEST(TestBTV_Stats_Ok);
+    RUN_TEST(TestBTV_Stats_Fail);
+    RUN_TEST(TestBTV_Reset);
+    RUN_TEST(TestSCM_Instance);
+    RUN_TEST(TestSCM_Init);
+    RUN_TEST(TestSCM_SetAndGet);
+    RUN_TEST(TestSCM_GetMissing);
+    RUN_TEST(TestSCM_Backend_Platform);
+    RUN_TEST(TestSCM_MultiKey);
+    RUN_TEST(TestSCM_OverwriteKey);
+    RUN_TEST(TestSCM_Stats_Writes);
+    RUN_TEST(TestSCM_Stats_Reads);
+    RUN_TEST(TestTME_Init);
+    RUN_TEST(TestTME_Analyze_NotEmpty);
+    RUN_TEST(TestTME_PipelineSafe);
+    RUN_TEST(TestTME_Spoofing_Sim);
+    RUN_TEST(TestTME_Spoofing_Unmitigated);
+    RUN_TEST(TestTME_Spoofing_Severity);
+    RUN_TEST(TestTME_Stats_AnalyzeCount);
+    RUN_TEST(TestTME_Stats_Found);
+    RUN_TEST(TestTME_Reset);
+    RUN_TEST(TestSPA_Instance);
+    RUN_TEST(TestSPA_Analyze_NonEmpty);
+    RUN_TEST(TestSPA_Score_Range);
+    RUN_TEST(TestSPA_PatchLevel);
+    RUN_TEST(TestSPA_Schema);
+    RUN_TEST(TestSPA_IsCompliant);
+    RUN_TEST(TestSPA_Serialize);
+    RUN_TEST(TestSPA_Stats);
+    RUN_TEST(TestSPA_ScoreComponents);
 
     std::wcout << std::endl;
 

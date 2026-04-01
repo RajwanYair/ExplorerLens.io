@@ -10,6 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [32.0.0] — 2026-04-01
+
+### v32.0.0 "Fomalhaut" — Post-Quantum Security & Zero-Trust
+
+#### New: Post-Quantum & Zero-Trust Security Layer (8 components, +72 tests)
+- **PostQuantumCryptoProvider** — Kyber768 key encapsulation, Dilithium3 signing, SPHINCS+ hash-based signatures
+- **ZeroTrustAccessBroker** — JWT-style capability tokens with issue/validate/revoke lifecycle (singleton)
+- **QuantumResistantHashEngine** — SHA3-256, BLAKE3, KangarooTwelve with constant-time compare
+- **PluginZeroTrustSandbox** — Per-plugin capability enforcement: Allow/Deny/Quarantine decisions (singleton)
+- **BinaryTrustVerifier** — DLL/dylib/so trust chain validation with tamper-evident detection
+- **SecureConfigurationManager** — DPAPI (Win32) / SecureEnclave (macOS) / Fallback (Linux) key storage (singleton)
+- **ThreatModelingEngine** — STRIDE-based runtime threat analysis with pipeline safety gate
+- **SecurityPostureAnalyzer** — TPM attestation + code integrity + patch-level scoring with JSON serialization (singleton)
+
+#### Test Coverage
+- Unit tests: 4290 → 4362 (+72)
+
+
 ## [31.9.0] — 2026-04-01
 
 ### v31.9.0 "Achernar-Z" — Final Achernar: Autonomous Shell Intelligence

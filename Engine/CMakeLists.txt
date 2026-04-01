@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 31.9.0
+# Version: 32.0.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 31.9.0
+    VERSION 32.0.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1670,6 +1670,15 @@ set(ENGINE_HEADERS
     Core/SecureConfigurationManager.h
     Core/ThreatModelingEngine.h
     Utils/SecurityPostureAnalyzer.h
+    # Sprint 1081-1090 — Edge AI & Hardware-Accelerated Inference (v32.1.0 "Fomalhaut-R")
+    GPU/NPUAccelerationEngine.h
+    GPU/EdgeAIInferenceEngine.h
+    AI/HardwareCapabilityNegotiator.h
+    GPU/AMDXDNABackend.h
+    GPU/QualcommAIEBackend.h
+    GPU/IntelAMXBackend.h
+    Pipeline/HardwareAcceleratedPipeline.h
+    Core/ComputeDeviceRegistry.h
 )
 
 set(ENGINE_SOURCES
@@ -1882,6 +1891,15 @@ set(ENGINE_SOURCES
     Core/SecureConfigurationManager.cpp
     Core/ThreatModelingEngine.cpp
     Utils/SecurityPostureAnalyzer.cpp
+    # Sprint 1081-1090 — Edge AI & Hardware-Accelerated Inference (v32.1.0 "Fomalhaut-R")
+    GPU/NPUAccelerationEngine.cpp
+    GPU/EdgeAIInferenceEngine.cpp
+    AI/HardwareCapabilityNegotiator.cpp
+    GPU/AMDXDNABackend.cpp
+    GPU/QualcommAIEBackend.cpp
+    GPU/IntelAMXBackend.cpp
+    Pipeline/HardwareAcceleratedPipeline.cpp
+    Core/ComputeDeviceRegistry.cpp
 )
 
 #==============================================================================

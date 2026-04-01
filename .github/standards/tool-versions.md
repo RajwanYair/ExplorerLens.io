@@ -1,7 +1,7 @@
 # Tool Versions & Upgrade Matrix
 
-**Last Updated:** 1 April 2026 (v31.9.0 Achernar-Z release)
-**Version:** 31.9.0 "Achernar-Z"
+**Last Updated:** 1 April 2026 (v32.0.0 Fomalhaut release)
+**Version:** 32.0.0 "Fomalhaut"
 
 ---
 
