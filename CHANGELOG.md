@@ -10,6 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [31.6.0] — 2026-04-01
+
+### v31.6.0 "Achernar-W" — Format Routing & Enhanced Accessibility
+
+#### New Components
+- **SmartFileTypeRouter** — Intelligent format-to-decoder routing with multi-signal scoring
+- **DecoderVersionManager** — Decoder version registry with compatibility negotiation
+- **CrossFormatMetadataEngine** — Unified metadata extraction across EXIF/XMP/ID3/PNG sources
+- **StreamingDecodeCoordinator** — Chunk-based streaming pipeline with progress tracking
+- **RenderPipelineProfiler** — Stage-level latency profiler for render pipelines
+- **AdaptiveColorProfileManager** — ICC/sRGB/Display-P3 color profile management
+- **ThumbnailAccessibilityEngine** — WCAG 2.1 compliant high-contrast thumbnail generator
+
+#### Translation Units
+- Added .cpp stub TUs for all 7 v31.6.0 headers (Core, Pipeline, AI directories)
+- CMakeLists.txt ENGINE_SOURCES updated with all new entries
+
+#### Tests
+- 17 new RUN_TEST entries: CrossMeta extensions, StreamingDecodeCoordinator (7), RenderPipelineProfiler (7)
+- Total: 4218 unit tests
+
+
 Intelligent Format Routing & Enhanced Accessibility — 7 headers, 49 tests (AdaptiveColorProfileManager, ThumbnailAccessibilityEngine, SmartFileTypeRouter, DecoderVersionManager, CrossFormatMetadataEngine, StreamingDecodeCoordinator, RenderPipelineProfiler)
 
 

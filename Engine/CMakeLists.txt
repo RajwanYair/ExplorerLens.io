@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 31.5.0
+# Version: 31.6.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 31.5.0
+    VERSION 31.6.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1293,6 +1293,7 @@ set(ENGINE_HEADERS
     GPU/GPUThumbnailAtlasManager.h
     # Sprint 421-430 — Plugin Ecosystem v3 (v23.2.0 Vega-S)
     # Sprint 431-440 — Memory Optimization v3 (v23.3.0 Vega-T)
+    Memory/MemoryOptimizationV3.h
     Memory/MemoryMappedBTree.h
     Memory/NVMeMemoryTier.h
     Memory/ECCErrorDetector.h
@@ -1309,6 +1310,7 @@ set(ENGINE_HEADERS
 
     # Sprint 571-580 — Neural Format Intelligence (v25.1.0 "Rigel-R")
     Core/SelfExpandingFormatRegistry.h
+    Core/FormatDetectionReport.h
     Core/SyntheticDecoderGenerator.h
 
     # Sprint 581-590 — NPU & Heterogeneous Compute (v25.2.0 "Rigel-S")
@@ -1329,12 +1331,16 @@ set(ENGINE_HEADERS
     Core/CommitBadgeCompositor.h
     Core/MergeConflictOverlay.h
     # Sprint 601-610 — Self-Healing & Adaptive Recovery (v25.4.0 "Rigel-U")
+    Core/DecoderCrashPredictor.h
+    Core/DecoderQuarantineManager.h
+    Core/DecoderIncidentReporter.h
     Core/AdaptiveTimeoutTuner.h
     Core/HeapCorruptionSentinel.h
     Pipeline/RetryPolicyEngine.h
     Utils/COMSelfRepairValidator.h
     Utils/BootIntegritySelfTest.h
     # Sprint 611-620 — Multi-Instance & Virtual Desktop (v25.5.0 "Rigel-V")
+    Core/PerMonitorDPISelectorV2.h
     Core/VirtualDesktopAwareness.h
     Core/WTSSessionIsolation.h
     Core/TabbedExplorerSync.h
@@ -1407,6 +1413,7 @@ set(ENGINE_HEADERS
     Utils/I18nRuntimeEngine.h
     Utils/BiDiTextLayoutEngine.h
     Utils/AccessibilityNavigatorV3.h
+    Utils/AccessibilityAuditPipeline.h
     Utils/ScreenReaderBridgeV2.h
     Utils/LocaleFallbackResolver.h
     Utils/A11yColorContrastEngine.h
@@ -1681,6 +1688,15 @@ set(ENGINE_SOURCES
     Core/WatchFolderEngine.cpp
 
     # Pipeline implementations
+    # v31.6.0 — Streaming decode & profiling
+    Pipeline/StreamingDecodeCoordinator.cpp
+    Pipeline/RenderPipelineProfiler.cpp
+    # v31.7.0 — Retry & health monitoring
+    Pipeline/SmartRetryOrchestrator.cpp
+    Pipeline/PipelineHealthMonitor.cpp
+    # v31.8.0 — Adaptive optimization & prefetch
+    Pipeline/AdaptivePipelineOptimizer.cpp
+    Pipeline/IntelligentPrefetchScheduler.cpp
     Pipeline/AsyncThumbnailProvider.cpp
     Pipeline/DecoderRegistry.cpp
     Pipeline/FormatDetector.cpp
@@ -1699,6 +1715,7 @@ set(ENGINE_SOURCES
     Decoders/EPSDecoder.cpp
     Decoders/EXRDecoder.cpp
     Decoders/FarbfeldDecoder.cpp
+    Decoders/FITSDecoder.cpp
     Decoders/FontDecoder.cpp
     Decoders/GeospatialDecoder.cpp
     Decoders/HDRDecoder.cpp
@@ -1727,6 +1744,45 @@ set(ENGINE_SOURCES
     Decoders/XCFDecoder.cpp
     Decoders/XPMDecoder.cpp
 
+    # AI implementations
+    AI/ContentAwareInpainter.cpp
+    AI/ContentModerationFilter.cpp
+    AI/GenerativeAuditTrail.cpp
+    AI/GenerativeThumbnailEngine.cpp
+    AI/GenerativeUpscalerV3.cpp
+    AI/ImageDescriptionSynthesizer.cpp
+    AI/StyleTransferRenderer.cpp
+    AI/ThumbnailPersonalisationEngine.cpp
+    # v31.6.0 — Format Routing & Enhanced Accessibility
+    AI/AdaptiveColorProfileManager.cpp
+    AI/ThumbnailAccessibilityEngine.cpp
+    # v31.7.0 — Contextual Intelligence & Self-Healing
+    AI/ContextualRenderingEngine.cpp
+    AI/SmartThumbnailCompositor.cpp
+    AI/FormatComplexityAnalyzer.cpp
+    # v31.8.0 — Intelligent Workflow Automation
+    AI/PredictivePregenEngine.cpp
+    AI/ContentCategorizationEngine.cpp
+    AI/ThumbnailQualityPredictor.cpp
+
+    # Enterprise implementations
+    Enterprise/EnterpriseAuditExporter.cpp
+    Enterprise/EnterpriseConsoleV3.cpp
+    Enterprise/EnterpriseMetricsDashboard.cpp
+    Enterprise/UsageAnomalyDetector.cpp
+    # v31.6.0 — Core routing implementations
+    Core/SmartFileTypeRouter.cpp
+    Core/DecoderVersionManager.cpp
+    Core/CrossFormatMetadataEngine.cpp
+    # v31.7.0 — Fault tolerance & diagnostics
+    Core/FaultTolerantDecodeOrchestrator.cpp
+    Core/DiagnosticTelemetryCollector.cpp
+    Core/DecoderFaultIsolator.cpp
+    # v31.8.0 — Workflow automation
+    Core/SmartBatchProcessor.cpp
+    Core/WorkflowAutomationEngine.cpp
+    Core/UserBehaviorAnalytics.cpp
+
     # GPU rendering implementations
     GPU/D3D11Renderer.cpp
     GPU/D3D12ComputePipeline.cpp
@@ -1743,6 +1799,12 @@ set(ENGINE_SOURCES
     Plugin/PluginDecoder.cpp
     Plugin/PluginHostClient.cpp
     Plugin/PluginManager.cpp
+    Plugin/MarketplaceClientV4.cpp
+    Plugin/PluginBundleInstaller.cpp
+    Plugin/PluginMarketplaceV2.cpp
+    Plugin/PluginRatingEngine.cpp
+    Plugin/PluginReputationScorer.cpp
+    Plugin/SubscriptionLicenseManagerV4.cpp
     Plugin/Security/JobObjectManager.cpp
 
     # Utility implementations

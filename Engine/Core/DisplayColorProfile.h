@@ -69,7 +69,7 @@ public:
     void RefreshAll(std::vector<DisplayProfile>& outProfiles) const;
 
 private:
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 };
 

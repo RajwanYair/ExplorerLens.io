@@ -114,7 +114,7 @@ private:
     std::string m_reviewerEndpoint = "https://review.explorerlens.io/v4";
     uint32_t    m_enabledCheckMask = 0xFF;
 
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 
     [[nodiscard]] CheckResult RunStaticAnalysis(const SubmissionPackage& pkg) const;

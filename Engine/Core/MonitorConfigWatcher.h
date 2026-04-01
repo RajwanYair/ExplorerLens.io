@@ -58,7 +58,7 @@ public:
     static MonitorConfigWatcher& Instance();
 
 private:
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 
     MonitorConfigWatcher(const MonitorConfigWatcher&) = delete;

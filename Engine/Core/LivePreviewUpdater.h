@@ -12,16 +12,16 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class FileChangeType { Modified, Created, Deleted, Renamed };
+enum class LiveFileChangeType { Modified, Created, Deleted, Renamed };
 
-struct FileChangeEvent {
-    std::string    filePath;
-    std::string    oldPath;  // non-empty on rename
-    FileChangeType type      = FileChangeType::Modified;
-    int64_t        timestampMs = 0;
+struct LiveFileChangeEvent {
+    std::string       filePath;
+    std::string       oldPath;  // non-empty on rename
+    LiveFileChangeType type      = LiveFileChangeType::Modified;
+    int64_t           timestampMs = 0;
 };
 
-using LivePreviewCallback = std::function<void(const FileChangeEvent&)>;
+using LivePreviewCallback = std::function<void(const LiveFileChangeEvent&)>;
 
 class LivePreviewUpdater {
 public:
@@ -53,7 +53,7 @@ public:
         return false;
     }
 
-    void SimulateChange(const FileChangeEvent& evt) {
+    void SimulateChange(const LiveFileChangeEvent& evt) {
         m_pendingEvents.push_back(evt);
     }
 
@@ -79,7 +79,7 @@ private:
     bool                      m_ready      = false;
     uint32_t                  m_debounceMs = 300;
     std::vector<std::string>  m_watchedPaths;
-    std::vector<FileChangeEvent> m_pendingEvents;
+    std::vector<LiveFileChangeEvent> m_pendingEvents;
     LivePreviewCallback       m_callback;
 };
 

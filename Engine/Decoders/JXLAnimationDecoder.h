@@ -111,7 +111,7 @@ public:
     }
 
 private:
-    struct Impl;
+    struct Impl {};
     Impl* m_impl{nullptr};
 
     JXLDecodeResult DecodeInternal(

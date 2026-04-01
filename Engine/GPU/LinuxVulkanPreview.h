@@ -11,7 +11,7 @@
 
 namespace ExplorerLens { namespace Engine {
 
-struct VulkanDeviceInfo {
+struct LinuxVulkanDeviceInfo {
     std::string deviceName;
     uint32_t    driverVersion = 0;
     bool        computeSupport = false;
@@ -41,9 +41,9 @@ public:
     bool IsReady()      const { return m_ready; }
     bool IsPlatformOk() const { return m_platformOk; }
 
-    std::vector<VulkanDeviceInfo> EnumerateDevices() const {
+    std::vector<LinuxVulkanDeviceInfo> EnumerateDevices() const {
         if (!m_platformOk) return {};
-        VulkanDeviceInfo d;
+        LinuxVulkanDeviceInfo d;
         d.deviceName    = "Simulated Vulkan GPU";
         d.computeSupport = true;
         d.discreteGPU   = false;

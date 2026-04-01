@@ -95,7 +95,7 @@ private:
     std::string                  m_licenseEndpoint = "https://license.explorerlens.io/v4";
     std::array<uint8_t, 32>      m_hmacSecret{};
 
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl>        m_impl;
 
     [[nodiscard]] bool VerifySignature(const JWTEntitlement& ent,

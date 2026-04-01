@@ -109,7 +109,7 @@ public:
     QualityScore Analyze(const uint8_t* rgba, uint32_t w, uint32_t h) const {
         QualityScore s;
         if (!rgba || w == 0 || h == 0) { s.verdict = QualityVerdict::Fail_Corrupt; return s; }
-        s.sharpness = ComputeLaplacianVariance(rgba, w, h);
+        s.sharpness = static_cast<float>(ComputeLaplacianVariance(rgba, w, h));
         s.confidence = (s.sharpness > 200.0f) ? 1.0f : s.sharpness / 200.0f;
         if (IsBlank(rgba, w * h * 4)) s.verdict = QualityVerdict::Fail_Blank;
         else if (s.sharpness < 50.0f) s.verdict = QualityVerdict::Fail_TooBlurry;
@@ -133,7 +133,7 @@ public:
         uint32_t crc = 0xFFFFFFFF;
         for (size_t i = 0; i < size; ++i) {
             crc ^= data[i];
-            for (int b = 0; b < 8; ++b) crc = (crc >> 1) ^ (0xEDB88320 & (-(crc & 1)));
+            for (int b = 0; b < 8; ++b) crc = (crc >> 1) ^ (0xEDB88320u & static_cast<uint32_t>(-static_cast<int32_t>(crc & 1u)));
         }
         return ~crc;
     }

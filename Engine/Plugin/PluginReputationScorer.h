@@ -94,7 +94,7 @@ private:
     WeightArray m_weights;
     float       m_threshold = 0.4f;
 
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 
     [[nodiscard]] float NormaliseDownloads(uint64_t count) const noexcept;

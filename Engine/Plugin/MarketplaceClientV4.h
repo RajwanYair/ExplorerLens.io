@@ -1,4 +1,4 @@
-﻿// MarketplaceClientV4.h — Plugin Marketplace Client v4
+// MarketplaceClientV4.h — Plugin Marketplace Client v4
 // Copyright (c) 2026 ExplorerLens Project
 //
 // REST + gRPC dual-protocol marketplace client with offline cache support.
@@ -96,7 +96,7 @@ private:
     std::string                      m_baseUrl      = "https://plugins.explorerlens.io/api/v4";
     std::chrono::steady_clock::time_point m_lastFetch{};
 
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl>            m_impl;
 
     [[nodiscard]] std::vector<MarketplaceListing> FetchFromCache(const SearchQuery& query) const;

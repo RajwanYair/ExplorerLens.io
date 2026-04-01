@@ -84,7 +84,7 @@ public:
     bool Rollback(const std::string& pluginId, std::string& outError);
 
 private:
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 };
 

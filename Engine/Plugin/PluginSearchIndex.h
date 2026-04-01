@@ -62,7 +62,7 @@ public:
     void Clear();
 
 private:
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 
     // Tokenise a string into lowercase words for the inverted index.

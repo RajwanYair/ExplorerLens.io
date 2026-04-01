@@ -17,7 +17,7 @@ struct ShellProperty {
     std::string type;  // "string","uint32","bool"
 };
 
-struct ShellPropertySet {
+struct ShellHandlerPropertySet {
     std::string                                   filePath;
     std::unordered_map<std::string, ShellProperty> props;
 };
@@ -29,12 +29,12 @@ public:
     bool Initialize() { m_ready = true; return true; }
     bool IsReady() const { return m_ready; }
 
-    ShellPropertySet BuildPropertySet(const std::string& filePath,
+    ShellHandlerPropertySet BuildPropertySet(const std::string& filePath,
                                        uint32_t width, uint32_t height,
                                        const std::string& format,
                                        const std::string& colorSpace = "sRGB",
                                        const std::string& aiCaption = "") const {
-        ShellPropertySet ps;
+        ShellHandlerPropertySet ps;
         ps.filePath = filePath;
 
         auto add = [&](const std::string& key, const std::string& val, const std::string& type) {
@@ -54,7 +54,7 @@ public:
         return ps;
     }
 
-    bool GetProperty(const ShellPropertySet& ps, const std::string& key,
+    bool GetProperty(const ShellHandlerPropertySet& ps, const std::string& key,
                      ShellProperty& out) const {
         auto it = ps.props.find(key);
         if (it == ps.props.end()) return false;

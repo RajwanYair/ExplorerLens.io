@@ -82,7 +82,7 @@ public:
     bool IsAIModelLoaded() const;
 
 private:
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 
     static float LaplacianVariance(const uint8_t* gray, uint32_t w, uint32_t h);

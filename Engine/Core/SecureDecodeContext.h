@@ -65,7 +65,7 @@ public:
     [[nodiscard]] const SecureSandboxPolicy& Policy() const noexcept { return m_policy; }
 
 private:
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
     SecureSandboxPolicy         m_policy;
 };

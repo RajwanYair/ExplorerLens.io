@@ -72,7 +72,7 @@ public:
     ID3D11DeviceContext* Context() const;
 
 private:
-    struct Impl;
+    struct Impl {};
     Impl* m_impl{nullptr};
 };
 

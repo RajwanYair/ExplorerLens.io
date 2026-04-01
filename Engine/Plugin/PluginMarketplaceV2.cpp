@@ -3,7 +3,7 @@
 // Plugin marketplace implementation
 //==============================================================================
 
-#include "PluginMarketplaceV2.h"
+#include "PluginMarketplaceUnified.h"
 #include <algorithm>
 #include <fstream>
 #include <iomanip>

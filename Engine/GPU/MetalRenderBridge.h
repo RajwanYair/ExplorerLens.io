@@ -11,14 +11,14 @@
 
 namespace ExplorerLens { namespace Engine {
 
-struct MetalTextureDesc {
+struct MetalBridgeTextureDesc {
     uint32_t    width   = 0;
     uint32_t    height  = 0;
     uint32_t    bytesPerPixel = 4;
     std::string pixelFormat  = "BGRA8Unorm";
 };
 
-struct MetalRenderResult {
+struct MetalBridgeRenderResult {
     bool     success     = false;
     uint32_t renderMs    = 0;
     std::string errorCode;
@@ -40,16 +40,16 @@ public:
     bool IsReady()          const { return m_ready; }
     bool IsMetalAvailable() const { return m_metalAvailable; }
 
-    bool UploadTexture(const MetalTextureDesc& desc,
+    bool UploadTexture(const MetalBridgeTextureDesc& desc,
                        const uint8_t* pixelData, uint64_t dataSize) {
         if (!m_metalAvailable || !pixelData || dataSize == 0) return false;
         m_lastDesc = desc;
         return true;
     }
 
-    MetalRenderResult RenderThumbnail(uint32_t outWidth, uint32_t outHeight,
+    MetalBridgeRenderResult RenderThumbnail(uint32_t outWidth, uint32_t outHeight,
                                        std::vector<uint8_t>& outPixels) {
-        MetalRenderResult r;
+        MetalBridgeRenderResult r;
         if (!m_metalAvailable) { r.errorCode = "METAL_NOT_AVAILABLE"; return r; }
         outPixels.assign(static_cast<size_t>(outWidth) * outHeight * 4, 0xFF);
         r.success  = true;
@@ -62,7 +62,7 @@ public:
 private:
     bool            m_ready          = false;
     bool            m_metalAvailable = false;
-    MetalTextureDesc m_lastDesc;
+    MetalBridgeTextureDesc m_lastDesc;
 };
 
 }} // namespace ExplorerLens::Engine

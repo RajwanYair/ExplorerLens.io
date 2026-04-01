@@ -87,7 +87,7 @@ private:
     float                       m_globalMean  = 3.0f;
     uint32_t                    m_priorCount  = 10;
 
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl>       m_impl;
 
     void RecalculateGlobalMean() noexcept;

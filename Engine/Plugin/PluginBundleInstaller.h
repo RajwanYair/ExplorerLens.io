@@ -91,11 +91,11 @@ private:
     std::string      m_installPath;
     InstallProgress  m_progress{};
 
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 
     bool RunVerifyPhase(const BundleManifest& manifest)  const;
-    bool RunDownloadPhase(const BundleManifest& manifest, ProgressCallback& cb);
+    bool RunDownloadPhase(const BundleManifest& manifest, BundleProgressCallback& cb);
     bool RunStagePhase(const BundleManifest& manifest);
     bool RunCommitPhase(const BundleManifest& manifest);
     void SetProgress(BundleInstallPhase phase, uint32_t current, uint32_t total,

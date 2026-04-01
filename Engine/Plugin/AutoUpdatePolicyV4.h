@@ -101,7 +101,7 @@ private:
     UpdateMode    m_globalMode    = UpdateMode::Silent;
     UpdateChannel m_globalChannel = UpdateChannel::Stable;
 
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
 
     [[nodiscard]] bool ShouldApplyUpdate(const PolicyEntry& policy,

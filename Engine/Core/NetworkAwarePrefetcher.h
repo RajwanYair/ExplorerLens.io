@@ -79,7 +79,7 @@ public:
     static NetworkAwarePrefetcher& Instance();
 
 private:
-    struct Impl;
+    struct Impl {};
     std::unique_ptr<Impl> m_impl;
     bool     m_prefetchOnMetered = false;
     uint64_t m_maxBandwidthBps   = 1 * 1024 * 1024; // 1 MB/s default cloud budget

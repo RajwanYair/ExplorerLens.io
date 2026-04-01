@@ -95,7 +95,7 @@ private:
     bool          m_initialized { false };
     AIUpscaleBackend m_bestBackend { AIUpscaleBackend::Bicubic };
 
-    struct Impl;
+    struct Impl {};
     Impl* m_impl { nullptr };
 };
 

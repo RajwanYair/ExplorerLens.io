@@ -68,7 +68,7 @@ public:
     static bool SupportsHardwareDecode() noexcept { return false; }
 
 private:
-    struct Impl;
+    struct Impl {};
     Impl* m_impl{nullptr};
 };
 

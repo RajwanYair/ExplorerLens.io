@@ -12,11 +12,11 @@
 
 namespace ExplorerLens { namespace Engine {
 
-enum class AuditEventType { VerifyOk, VerifyFail, KeyRotated, CertExpired, PolicyViolation };
+enum class SignatureAuditEventType { VerifyOk, VerifyFail, KeyRotated, CertExpired, PolicyViolation };
 
 struct AuditLogEntry {
-    int64_t       timestampMs  = 0;
-    AuditEventType type        = AuditEventType::VerifyOk;
+    int64_t                 timestampMs  = 0;
+    SignatureAuditEventType type         = SignatureAuditEventType::VerifyOk;
     std::string   subject;
     std::string   algorithm;
     std::string   keyId;
@@ -24,7 +24,7 @@ struct AuditLogEntry {
     bool          success      = false;
 };
 
-using AuditSinkFn = std::function<void(const AuditLogEntry&)>;
+using SignatureAuditSinkFn = std::function<void(const AuditLogEntry&)>;
 
 class SignatureAuditLogger {
 public:
@@ -43,7 +43,7 @@ public:
         if (m_sink) m_sink(entry);
     }
 
-    void SetSink(AuditSinkFn fn) { m_sink = std::move(fn); }
+    void SetSink(SignatureAuditSinkFn fn) { m_sink = std::move(fn); }
 
     std::string ExportJSON() const {
         std::string out = "[";
@@ -69,7 +69,7 @@ private:
     bool                      m_ready      = false;
     uint32_t                  m_maxEntries = 10000;
     std::vector<AuditLogEntry> m_entries;
-    AuditSinkFn               m_sink;
+    SignatureAuditSinkFn       m_sink;
 };
 
 }} // namespace ExplorerLens::Engine

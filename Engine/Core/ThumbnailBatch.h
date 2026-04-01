@@ -120,7 +120,7 @@ struct DecodeRequest {
 class ThumbnailBatchProcessor {
 public:
     BatchExportResult ExportBatch(const std::vector<std::wstring>& files,
-                                  const BatchExportConfig& cfg) {
+                                  const BatchExportConfig& /*cfg*/) {
         BatchExportResult r;
         r.totalFiles = static_cast<uint32_t>(files.size());
         auto start = std::chrono::steady_clock::now();
