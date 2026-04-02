@@ -1,8 +1,8 @@
 # ExplorerLens Documentation Index
 
-**Project:** ExplorerLens 
-**Current Version:** v25.2.0 "Rigel-S" 
-**Last Updated:** March 2026
+**Project:** ExplorerLens
+**Current Version:** v32.1.0 "Fomalhaut-R"
+**Last Updated:** April 2026
 
 ---
 
@@ -14,24 +14,15 @@
 | [CHANGELOG.md](../CHANGELOG.md) | Release history and change log |
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting guide + known issues & mitigations |
 | [USER_GUIDE.md](USER_GUIDE.md) | End-user installation and usage guide |
-| [archive/WINUI3_MIGRATION_PLAN.md](archive/WINUI3_MIGRATION_PLAN.md) | 📦 *Archive* — WinUI 3 / XAML Islands migration plan |
 
 ## Roadmap and Planning
 
 | Document | Description |
 |----------|-------------|
-| [ROADMAP_V30.md](ROADMAP_V30.md) | **Next-Gen Roadmap** — v30.x "Deneb" Gen-6 + v31.x "Achernar" Generative Era |
-| [ROADMAP_V25.md](ROADMAP_V25.md) | Active Roadmap — v25.x "Rigel" through v26.x "Canopus" |
+| [ROADMAP_V30.md](ROADMAP_V30.md) | Gen-6 Roadmap — v30.x "Deneb" + v31.x "Achernar" + v32.x "Fomalhaut" |
+| [SPRINT_PLAN_1100.md](SPRINT_PLAN_1100.md) | Sprints 1061–1160 — v31.9–v33.1 Achernar-Z/Fomalhaut/Vega |
 | [SPRINT_PLAN_1000.md](SPRINT_PLAN_1000.md) | Sprints 961–1060 — v30.0.0 "Deneb" through v31.1.0 "Achernar-R" (Gen-6) |
-| [SPRINT_PLAN_900.md](SPRINT_PLAN_900.md) | Sprints 861–960 — v28.6.0 "Polaris-W" through v29.7.0 "Capella-X" (LTS) |
-| [SPRINT_PLAN_800.md](SPRINT_PLAN_800.md) | Sprints 761–860 — v27.4.0 "Sirius-U" through v28.5.0 "Polaris-V" |
-| [SPRINT_PLAN_700.md](SPRINT_PLAN_700.md) | Sprints 661–760 — v26.2.0 "Canopus-S" through v27.3.0 "Sirius-T" |
-| [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) | Sprints 561–660 — v25.0.0 "Rigel" through v26.1.0 "Canopus-R" (Active) |
-| [archive/SPRINT_PLAN_500.md](archive/SPRINT_PLAN_500.md) | 📦 *Archive* — Sprints 461–560 — v23.6.0 through v24.7.0 "Altair-X" |
-| [archive/SPRINT_PLAN_400.md](archive/SPRINT_PLAN_400.md) | 📦 *Archive* — Sprints 301–460 — v22.0.0 through v23.5.0 "Vega-V" |
-| [archive/SPRINT_PLAN_300.md](archive/SPRINT_PLAN_300.md) | 📦 *Archive* — Sprints 201–300 — v19.1.0 through v21.4.0 |
-| [archive/SPRINT_PLAN_200.md](archive/SPRINT_PLAN_200.md) | 📦 *Archive* — Sprints 101–200 — v17.1.0 through v19.0.0 |
-| [archive/SPRINT_PLAN_100.md](archive/SPRINT_PLAN_100.md) | 📦 *Archive* — Sprints 1–100 — v15.2.0 through v17.0.0 "Nova" |
+| [SPRINT_PLAN_900.md](SPRINT_PLAN_900.md) | Sprints 861–960 — v28.6.0 "Polaris-W" through v29.7.0 "Capella-X" |
 
 ## Development
 
@@ -50,7 +41,6 @@
 | [adr/ADR-002-NPU-heterogeneous-compute.md](adr/ADR-002-NPU-heterogeneous-compute.md) | ADR-002: NPU & Heterogeneous Compute Routing |
 | [adr/ADR-003-CLIP-semantic-search.md](adr/ADR-003-CLIP-semantic-search.md) | ADR-003: CLIP Embeddings for Semantic Search (planned v30.2.0) |
 | [adr/ADR-008-c23-migration-strategy.md](adr/ADR-008-c23-migration-strategy.md) | ADR-008: C++23 Migration Strategy (planned v30.0.0+) |
-| [architecture/PROJECT_STRUCTURE.md](architecture/PROJECT_STRUCTURE.md) | Repository and component structure |
 | [architecture/INTEGRATION_ARCHITECTURE.md](architecture/INTEGRATION_ARCHITECTURE.md) | Integration architecture details |
 
 ## Formats
@@ -65,19 +55,15 @@
 
 | Document | Description |
 |----------|-------------|
-| [PERFORMANCE.md](PERFORMANCE.md) | Top-level performance guidance |
+| [PERFORMANCE.md](PERFORMANCE.md) | Performance guidance and baselines |
 | [gpu/GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing, benchmarking, and Intel GPU guide |
-| [gpu/PERFORMANCE_METRICS.md](gpu/PERFORMANCE_METRICS.md) | Metrics definitions |
-
 
 ## Plugins
 
 | Document | Description |
 |----------|-------------|
-| [plugins/PLUGIN_API.md](plugins/PLUGIN_API.md) | Plugin API reference |
 | [plugins/PLUGIN_PACKAGE_FORMAT_V1.md](plugins/PLUGIN_PACKAGE_FORMAT_V1.md) | Package format spec |
 | [plugins/PLUGIN_SANDBOX_MODEL_V1.md](plugins/PLUGIN_SANDBOX_MODEL_V1.md) | Sandbox model |
-| [plugins/PLUGIN_MARKETPLACE_PROTOCOL_V1.md](plugins/PLUGIN_MARKETPLACE_PROTOCOL_V1.md) | Marketplace protocol |
 | [plugins/PluginSecurityGuide.md](plugins/PluginSecurityGuide.md) | Plugin security guidance |
 
 ## Testing
@@ -108,7 +94,6 @@
 | [../.github/CONTRIBUTING.md](../.github/CONTRIBUTING.md) | Contribution guidelines |
 | [../.github/SECURITY.md](../.github/SECURITY.md) | Security policy and vulnerability reporting |
 | [../.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md) | PR template with checklists |
-
 
 ## Engine
 

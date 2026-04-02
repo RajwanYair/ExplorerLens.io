@@ -7,17 +7,20 @@ The ExplorerLens Plugin SDK enables developers to extend ExplorerLens with custo
 ### 1. Include the API Header
 
 ```cpp
+
 #include "SDK/plugin_api.h"
+
 ```
 
 ### 2. Implement Required Functions
 
 ```cpp
+
 // Get plugin information
 PLUGIN_API const PluginInfo* PLUGIN_CALL plugin_get_info(void) {
  static const char* extensions[] = { ".myformat", NULL };
  static const char* mime_types[] = { "image/myformat", NULL };
- 
+
  static PluginInfo info = {
  .plugin_name = "My Format Decoder",
  .plugin_version = "1.0.0",
@@ -66,12 +69,15 @@ PLUGIN_API PluginErrorCode PLUGIN_CALL plugin_decode(const DecodeRequest* reques
 PLUGIN_API void PLUGIN_CALL plugin_free_result(DecodeResult* result) {
  // Free allocated buffers
 }
+
 ```
 
 ### 3. Build as DLL
 
 **CMakeLists.txt:**
+
 ```cmake
+
 cmake_minimum_required(VERSION 3.20)
 project(MyFormatPlugin)
 
@@ -84,20 +90,26 @@ target_compile_definitions(myformat-plugin PRIVATE
 target_include_directories(myformat-plugin PRIVATE
  ${EXPLORERLENS_SDK_DIR}
 )
+
 ```
 
 **Build:**
+
 ```bash
+
 mkdir build && cd build
 cmake ..
 cmake --build . --config Release
+
 ```
 
 ### 4. Test Your Plugin
 
 ```bash
+
 plugin-tester.exe myformat-plugin.dll --info
 plugin-tester.exe myformat-plugin.dll --test sample.myformat
+
 ```
 
 ## 📚 Documentation
@@ -105,28 +117,35 @@ plugin-tester.exe myformat-plugin.dll --test sample.myformat
 - **[Plugin SDK Guide](docs/PLUGIN_SDK.md)** - Complete developer guide
 - **[API Reference](plugin_api.h)** - Full API documentation
 - **[Examples](examples/)** - Sample plugin implementations
- - [minimal-plugin](examples/minimal-plugin/) - Minimal template
- - [SamplePlugin](examples/SamplePlugin/) - Full example
+- [minimal-plugin](examples/minimal-plugin/) - Minimal template
+- [SamplePlugin](examples/SamplePlugin/) - Full example
 
 ## 🔧 Tools
 
 - **plugin-tester.exe** - Test and validate plugins
+
  ```bash
+
  plugin-tester.exe <plugin.dll> [--info] [--test <file>] [--size WxH]
+
  ```
 
 ## 📦 Plugin Package Format (.dtplugin)
 
 ```
+
 myplugin.dtplugin/
 ├── plugin.dll # Your plugin DLL
 ├── manifest.json # Metadata
 ├── icon.png # Plugin icon (optional)
 └── LICENSE.txt # License file
+
 ```
 
 **manifest.json:**
+
 ```json
+
 {
  "name": "My Format Decoder",
  "version": "1.0.0",
@@ -138,6 +157,7 @@ myplugin.dtplugin/
  "mime_types": ["image/myformat"],
  "requires_gpu": false
 }
+
 ```
 
 ## 🎯 API Stability
@@ -191,7 +211,7 @@ Plugins run in the same process as ExplorerLens, so:
 - Avoid buffer overflows
 - Handle errors gracefully
 
-**Future:** Plugin sandboxing via AppContainer 
+**Future:** Plugin sandboxing via AppContainer
 
 ## 📖 Examples
 
@@ -241,6 +261,5 @@ Your plugins can use any license compatible with your use case.
 
 ---
 
-**Happy Plugin Development! 🎉**
-
+## Happy Plugin Development! 🎉
 

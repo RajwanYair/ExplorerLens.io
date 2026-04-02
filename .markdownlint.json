@@ -13,6 +13,8 @@
     "allow_different_nesting": true,
     "siblings_only": true
   },
+  "MD007": { "indent": 2 },
+  "MD029": { "style": "ordered" },
   "MD032": false,
   "MD033": false,
   "MD034": false,

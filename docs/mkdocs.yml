@@ -66,19 +66,13 @@ nav:
       - System Overview: architecture/system-overview.md
       - Decode Pipeline: architecture/decode-pipeline.md
       - Plugin System: architecture/plugin-architecture.md
-      - Project Structure: architecture/PROJECT_STRUCTURE.md
       - Integration Architecture: architecture/INTEGRATION_ARCHITECTURE.md
 
   - Developer Guide:
       - Developer Guide: development/DEVELOPER_GUIDE.md
       - Build Quick Reference: development/BUILD_QUICK_REFERENCE.md
       - Third Party: development/THIRD_PARTY.md
-      - Build from Source: build/BUILD_GUIDE.md
-      - Build Requirements: build/BUILD_REQUIREMENTS.md
-      - Build Scripts Reference: build/BUILD_SCRIPTS_REFERENCE.md
-      - Build Monitoring: build/BUILD_MONITORING.md
       - Installation Guide: build/INSTALLATION_GUIDE.md
-      - Installer Options: build/INSTALLER_OPTIONS.md
       - COM Registration: build/COM_REGISTRATION_DIAGNOSTICS.md
       - vcpkg Setup: build/VCPKG_SETUP_GUIDE.md
       - Code Signing: CODE_SIGNING.md
@@ -90,12 +84,9 @@ nav:
 
   - GPU:
       - GPU Testing: gpu/GPU_TESTING_GUIDE.md
-      - Performance Metrics: gpu/PERFORMANCE_METRICS.md
 
   - Plugins:
-      - Plugin API: plugins/PLUGIN_API.md
       - Plugin Development: PLUGIN_DEVELOPMENT.md
-      - Marketplace Protocol: plugins/PLUGIN_MARKETPLACE_PROTOCOL_V1.md
       - Package Format: plugins/PLUGIN_PACKAGE_FORMAT_V1.md
       - Sandbox Model: plugins/PLUGIN_SANDBOX_MODEL_V1.md
       - Security Guide: plugins/PluginSecurityGuide.md
@@ -110,19 +101,11 @@ nav:
       - Learnings Log: LEARNINGS.md
 
   - Roadmap:
-      - Roadmap v25.x (Rigel): ROADMAP_V25.md
+      - Roadmap v30+ (Gen-6): ROADMAP_V30.md
+      - Sprint Plan 1061-1160: SPRINT_PLAN_1100.md
+      - Sprint Plan 961-1060: SPRINT_PLAN_1000.md
       - Sprint Plan 861-960: SPRINT_PLAN_900.md
-      - Sprint Plan 761-860: SPRINT_PLAN_800.md
-      - Sprint Plan 661-760: SPRINT_PLAN_700.md
-      - Sprint Plan 561-660: SPRINT_PLAN_600.md
       - Release Process: RELEASE_PROCESS.md
-      - Archive:
-          - Sprint Plan 461-560: archive/SPRINT_PLAN_500.md
-          - Sprint Plan 301-460: archive/SPRINT_PLAN_400.md
-          - Sprint Plan 201-300: archive/SPRINT_PLAN_300.md
-          - Sprint Plan 101-200: archive/SPRINT_PLAN_200.md
-          - Sprint Plan 1-100: archive/SPRINT_PLAN_100.md
-          - WinUI3 Migration: archive/WINUI3_MIGRATION_PLAN.md
 
 plugins:
   - search

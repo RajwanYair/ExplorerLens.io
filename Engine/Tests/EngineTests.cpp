@@ -34678,6 +34678,595 @@ TEST(TestSPA_ScoreComponents) {
     ASSERT(r.overallScore == expected);
 }
 
+//== v32.1.0 Fomalhaut-R — Edge AI & Hardware-Accelerated Inference Tests ==//
+
+// NPUAccelerationEngine
+TEST(TestNPUAE_Init) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    ASSERT(e.Initialize());
+    ASSERT(e.IsReady());
+}
+TEST(TestNPUAE_Dispatch) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    e.Initialize();
+    NPUWorkload w;
+    w.modelName = "clip";
+    w.inputData = {1.0f, 2.0f};
+    w.batchSize = 2;
+    auto out = e.Dispatch(w);
+    ASSERT(out.size() == 2);
+}
+TEST(TestNPUAE_Stats_Dispatched) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    e.Initialize();
+    NPUWorkload w; w.modelName = "m"; w.batchSize = 1;
+    e.Dispatch(w);
+    e.Dispatch(w);
+    ASSERT(e.GetStats().workloadsDispatched == 2);
+}
+TEST(TestNPUAE_CPUFallback) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    e.Initialize();
+    NPUWorkload w;
+    w.modelName = "test";
+    w.mode      = NPUDispatchMode::ForceCPU;
+    w.batchSize = 1;
+    e.Dispatch(w);
+    ASSERT(e.GetStats().cpuFallbacks == 1);
+}
+TEST(TestNPUAE_SetMode) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    e.Initialize();
+    e.SetDispatchMode(NPUDispatchMode::ForceGPU);
+    ASSERT(e.IsReady());
+}
+TEST(TestNPUAE_Reset) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    e.Initialize();
+    NPUWorkload w; w.modelName = "m"; w.batchSize = 1;
+    e.Dispatch(w);
+    e.Reset();
+    ASSERT(e.GetStats().workloadsDispatched == 0);
+}
+TEST(TestNPUAE_AvailableCheck) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    e.Initialize();
+    // IsNPUAvailable is platform-dependent; just verify no crash
+    bool avail = e.IsNPUAvailable();
+    ASSERT(avail || !avail);
+}
+TEST(TestNPUAE_EmptyWorkload) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    e.Initialize();
+    NPUWorkload w; w.batchSize = 0;
+    auto out = e.Dispatch(w);
+    ASSERT(out.empty());
+}
+TEST(TestNPUAE_MultiDispatch) {
+    using namespace ExplorerLens::Engine;
+    NPUAccelerationEngine e;
+    e.Initialize();
+    for (int i = 0; i < 5; ++i) {
+        NPUWorkload w; w.modelName = "m"; w.batchSize = 1;
+        e.Dispatch(w);
+    }
+    ASSERT(e.GetStats().workloadsDispatched == 5);
+}
+
+// EdgeAIInferenceEngine
+TEST(TestEAIE_Init) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    ASSERT(e.Initialize());
+    ASSERT(e.IsReady());
+}
+TEST(TestEAIE_CreateSession) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    e.Initialize();
+    auto s = e.CreateSession("clip.onnx");
+    ASSERT(s.state == EdgeInferenceState::Ready);
+    ASSERT(s.sessionId > 0);
+}
+TEST(TestEAIE_CreateSession_Empty) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    e.Initialize();
+    auto s = e.CreateSession("");
+    ASSERT(s.state == EdgeInferenceState::Error);
+}
+TEST(TestEAIE_RunInference) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    e.Initialize();
+    auto s = e.CreateSession("model.onnx");
+    std::vector<float> in = {1.0f, 2.0f, 3.0f};
+    auto out = e.RunInference(s, in);
+    ASSERT(out.size() == in.size());
+}
+TEST(TestEAIE_RunInference_ErrorState) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    e.Initialize();
+    auto s = e.CreateSession("");
+    std::vector<float> in = {1.0f};
+    auto out = e.RunInference(s, in);
+    ASSERT(out.empty());
+}
+TEST(TestEAIE_MemMapped) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    e.Initialize();
+    auto s = e.CreateSession("model.onnx", true);
+    ASSERT(s.memMapped);
+}
+TEST(TestEAIE_Destroy) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    e.Initialize();
+    auto s = e.CreateSession("model.onnx");
+    e.DestroySession(s);
+    ASSERT(s.state == EdgeInferenceState::Idle);
+}
+TEST(TestEAIE_Stats) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    e.Initialize();
+    auto s = e.CreateSession("model.onnx");
+    std::vector<float> in = {1.0f};
+    e.RunInference(s, in);
+    ASSERT(e.GetStats().inferenceRuns == 1);
+}
+TEST(TestEAIE_Reset) {
+    using namespace ExplorerLens::Engine;
+    EdgeAIInferenceEngine e;
+    e.Initialize();
+    auto s = e.CreateSession("model.onnx");
+    std::vector<float> in = {1.0f};
+    e.RunInference(s, in);
+    e.Reset();
+    ASSERT(e.GetStats().inferenceRuns == 0);
+}
+
+// HardwareCapabilityNegotiator
+TEST(TestHCN_Init) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    ASSERT(n.Initialize());
+    ASSERT(n.IsReady());
+}
+TEST(TestHCN_Negotiate_Embedding) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    n.Initialize();
+    auto s = n.Negotiate("embedding");
+    ASSERT(s.backend == HWBackendChoice::NPU);
+}
+TEST(TestHCN_Negotiate_Render) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    n.Initialize();
+    auto s = n.Negotiate("render");
+    ASSERT(s.backend == HWBackendChoice::GPU);
+}
+TEST(TestHCN_Negotiate_Default) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    n.Initialize();
+    auto s = n.Negotiate("unknown-task");
+    ASSERT(s.backend == HWBackendChoice::CPU);
+}
+TEST(TestHCN_PrefersNPU) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    n.Initialize();
+    ASSERT(n.PrefersNPU("clip"));
+}
+TEST(TestHCN_Score_Avail) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    n.Initialize();
+    auto s = n.Negotiate("embedding");
+    ASSERT(s.available);
+    ASSERT(s.score > 0.0f);
+}
+TEST(TestHCN_Stats_Total) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    n.Initialize();
+    n.Negotiate("embedding");
+    n.Negotiate("render");
+    ASSERT(n.GetStats().totalQueries >= 2);
+}
+TEST(TestHCN_Stats_NPUCount) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    n.Initialize();
+    n.Negotiate("embedding");
+    n.Negotiate("clip");
+    ASSERT(n.GetStats().npuSelections == 2);
+}
+TEST(TestHCN_Reset) {
+    using namespace ExplorerLens::Engine;
+    HardwareCapabilityNegotiator n;
+    n.Initialize();
+    n.Negotiate("embedding");
+    n.Reset();
+    ASSERT(n.GetStats().totalQueries == 0);
+}
+
+// AMDXDNABackend
+TEST(TestXDNA_Init) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    ASSERT(b.Initialize());
+    ASSERT(b.IsReady());
+}
+TEST(TestXDNA_DeviceName) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    b.Initialize();
+    ASSERT(!b.GetDeviceName().empty());
+}
+TEST(TestXDNA_TOPS) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    b.Initialize();
+    ASSERT(b.GetTOPS() > 0.0f);
+}
+TEST(TestXDNA_ExecuteKernel) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    b.Initialize();
+    std::vector<float> w = {1.0f, 2.0f};
+    std::vector<float> in = {3.0f, 4.0f};
+    auto out = b.ExecuteKernel("clip_embedding", w, in);
+    ASSERT(out.size() == in.size());
+}
+TEST(TestXDNA_MLIR) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    b.Initialize();
+    ASSERT(b.SupportsMLIR());
+}
+TEST(TestXDNA_Stats) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    b.Initialize();
+    std::vector<float> w = {1.0f};
+    std::vector<float> in = {2.0f};
+    b.ExecuteKernel("k", w, in);
+    ASSERT(b.GetStats().kernelsDispatched == 1);
+}
+TEST(TestXDNA_Reset) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    b.Initialize();
+    std::vector<float> w = {1.0f};
+    std::vector<float> in = {2.0f};
+    b.ExecuteKernel("k", w, in);
+    b.Reset();
+    ASSERT(b.GetStats().kernelsDispatched == 0);
+}
+TEST(TestXDNA_TileModes) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    b.Initialize();
+    std::vector<float> w = {1.0f};
+    std::vector<float> in = {1.0f};
+    auto o1 = b.ExecuteKernel("k", w, in, XDNATileMode::Tile1x1);
+    auto o2 = b.ExecuteKernel("k", w, in, XDNATileMode::Tile4x4);
+    ASSERT(!o1.empty() && !o2.empty());
+}
+TEST(TestXDNA_AvgLatency) {
+    using namespace ExplorerLens::Engine;
+    AMDXDNABackend b;
+    b.Initialize();
+    std::vector<float> w = {1.0f};
+    std::vector<float> in = {1.0f};
+    b.ExecuteKernel("k", w, in);
+    ASSERT(b.GetStats().avgKernelUs > 0.0f);
+}
+
+// QualcommAIEBackend
+TEST(TestQAIE_Init) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    ASSERT(b.Initialize());
+    ASSERT(b.IsReady());
+}
+TEST(TestQAIE_DeviceName) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    b.Initialize();
+    ASSERT(!b.GetDeviceName().empty());
+}
+TEST(TestQAIE_RunModel) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    b.Initialize();
+    std::vector<float> in = {1.0f, 2.0f, 3.0f};
+    auto out = b.RunModel("resnet50", in);
+    ASSERT(out.size() == in.size());
+}
+TEST(TestQAIE_HTPPath) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    b.Initialize();
+    std::vector<float> in = {1.0f};
+    b.RunModel("m", in, QNNTargetRuntime::HTP);
+    ASSERT(b.GetStats().htpHits == 1);
+}
+TEST(TestQAIE_GPUPath) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    b.Initialize();
+    std::vector<float> in = {1.0f};
+    b.RunModel("m", in, QNNTargetRuntime::GPU);
+    ASSERT(b.GetStats().htpHits == 0);
+}
+TEST(TestQAIE_Quantization) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    b.Initialize();
+    ASSERT(b.SupportsQuantization());
+}
+TEST(TestQAIE_Stats) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    b.Initialize();
+    std::vector<float> in = {1.0f};
+    b.RunModel("m", in);
+    ASSERT(b.GetStats().inferenceRuns == 1);
+}
+TEST(TestQAIE_Reset) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    b.Initialize();
+    std::vector<float> in = {1.0f};
+    b.RunModel("m", in);
+    b.Reset();
+    ASSERT(b.GetStats().inferenceRuns == 0);
+}
+TEST(TestQAIE_AvgLatency_HTP) {
+    using namespace ExplorerLens::Engine;
+    QualcommAIEBackend b;
+    b.Initialize();
+    std::vector<float> in = {1.0f};
+    b.RunModel("m", in, QNNTargetRuntime::HTP);
+    ASSERT(b.GetStats().avgInferenceMs < 15.0f);
+}
+
+// IntelAMXBackend
+TEST(TestAMX_Init) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    ASSERT(b.Initialize());
+    ASSERT(b.IsReady());
+}
+TEST(TestAMX_MatMul_BF16) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    b.Initialize();
+    std::vector<float> a = {1.0f, 2.0f};
+    std::vector<float> v = {3.0f, 4.0f};
+    auto out = b.MatMul(a, v, AMXPrecisionMode::BF16);
+    ASSERT(out.size() == a.size());
+    ASSERT(out[0] == 3.0f);
+}
+TEST(TestAMX_MatMul_INT8) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    b.Initialize();
+    std::vector<float> a = {2.0f};
+    std::vector<float> v = {5.0f};
+    auto out = b.MatMul(a, v, AMXPrecisionMode::INT8);
+    ASSERT(out[0] == 10.0f);
+}
+TEST(TestAMX_MatMul_Empty) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    b.Initialize();
+    std::vector<float> empty;
+    auto out = b.MatMul(empty, empty);
+    ASSERT(out.empty());
+}
+TEST(TestAMX_Throughput) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    b.Initialize();
+    std::vector<float> a = {1.0f};
+    std::vector<float> v = {2.0f};
+    b.MatMul(a, v);
+    ASSERT(b.GetThroughputMultiplierVsSSE42() >= 1.0f);
+}
+TEST(TestAMX_Stats) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    b.Initialize();
+    std::vector<float> a = {1.0f};
+    std::vector<float> v = {1.0f};
+    b.MatMul(a, v);
+    b.MatMul(a, v);
+    ASSERT(b.GetStats().matMulOps == 2);
+}
+TEST(TestAMX_Reset) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    b.Initialize();
+    std::vector<float> a = {1.0f};
+    std::vector<float> v = {1.0f};
+    b.MatMul(a, v);
+    b.Reset();
+    ASSERT(b.GetStats().matMulOps == 0);
+}
+TEST(TestAMX_SupportFlag) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    b.Initialize();
+    bool s = b.IsAMXSupported();
+    ASSERT(s || !s); // platform-dependent, no crash
+}
+TEST(TestAMX_AvgLatency) {
+    using namespace ExplorerLens::Engine;
+    IntelAMXBackend b;
+    b.Initialize();
+    std::vector<float> a = {1.0f};
+    std::vector<float> v = {1.0f};
+    b.MatMul(a, v);
+    ASSERT(b.GetStats().avgLatencyMs > 0.0f);
+}
+
+// HardwareAcceleratedPipeline
+TEST(TestHAP_Init) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    ASSERT(p.Initialize());
+    ASSERT(p.IsReady());
+}
+TEST(TestHAP_Process_Infer) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    p.Initialize();
+    std::vector<uint8_t> in = {0x01, 0x02};
+    auto out = p.Process(HWPipelineStage::Infer, in);
+    ASSERT(out.size() == in.size());
+}
+TEST(TestHAP_NPURouting) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    HWPipelineConfig cfg;
+    cfg.preferNPUForInfer = true;
+    p.Initialize(cfg);
+    std::vector<uint8_t> in = {0x01};
+    p.Process(HWPipelineStage::Infer, in);
+    ASSERT(p.GetStats().npuRoutings == 1);
+}
+TEST(TestHAP_GPURouting) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    HWPipelineConfig cfg;
+    cfg.preferNPUForInfer  = false;
+    cfg.preferGPUForDecode = true;
+    p.Initialize(cfg);
+    std::vector<uint8_t> in = {0x01};
+    p.Process(HWPipelineStage::Decode, in);
+    ASSERT(p.GetStats().gpuRoutings == 1);
+}
+TEST(TestHAP_CPUFallback_Flag) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    p.Initialize();
+    ASSERT(p.HasCPUFallback());
+}
+TEST(TestHAP_Stats) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    p.Initialize();
+    std::vector<uint8_t> in = {0x01};
+    p.Process(HWPipelineStage::Infer, in);
+    p.Process(HWPipelineStage::Decode, in);
+    ASSERT(p.GetStats().stagesProcessed == 2);
+}
+TEST(TestHAP_Reset) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    p.Initialize();
+    std::vector<uint8_t> in = {0x01};
+    p.Process(HWPipelineStage::Infer, in);
+    p.Reset();
+    ASSERT(p.GetStats().stagesProcessed == 0);
+}
+TEST(TestHAP_Empty_Input) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    p.Initialize();
+    std::vector<uint8_t> empty;
+    auto out = p.Process(HWPipelineStage::Encode, empty);
+    ASSERT(out.empty());
+}
+TEST(TestHAP_Composite) {
+    using namespace ExplorerLens::Engine;
+    HardwareAcceleratedPipeline p;
+    p.Initialize();
+    std::vector<uint8_t> in = {0xAB};
+    auto out = p.Process(HWPipelineStage::Composite, in);
+    ASSERT(out.size() == 1);
+    ASSERT(out[0] == 0xAB);
+}
+
+// ComputeDeviceRegistry
+TEST(TestCDR_Instance) {
+    using namespace ExplorerLens::Engine;
+    auto& a = ComputeDeviceRegistry::Instance();
+    auto& b = ComputeDeviceRegistry::Instance();
+    ASSERT(&a == &b);
+}
+TEST(TestCDR_Init) {
+    using namespace ExplorerLens::Engine;
+    auto& r = ComputeDeviceRegistry::Instance();
+    ASSERT(r.Initialize());
+    ASSERT(r.IsReady());
+}
+TEST(TestCDR_HasDevices) {
+    using namespace ExplorerLens::Engine;
+    auto& r = ComputeDeviceRegistry::Instance();
+    r.Initialize();
+    ASSERT(!r.GetDevices().empty());
+}
+TEST(TestCDR_HasCPU) {
+    using namespace ExplorerLens::Engine;
+    auto& r = ComputeDeviceRegistry::Instance();
+    r.Initialize();
+    auto* cpu = r.FindBestFor(ComputeDeviceClass::CPU);
+    ASSERT(cpu != nullptr);
+    ASSERT(cpu->available);
+}
+TEST(TestCDR_CPUCount) {
+    using namespace ExplorerLens::Engine;
+    auto& r = ComputeDeviceRegistry::Instance();
+    r.Initialize();
+    ASSERT(r.GetStats().cpuCount >= 1);
+}
+TEST(TestCDR_Stats_Enumerated) {
+    using namespace ExplorerLens::Engine;
+    auto& r = ComputeDeviceRegistry::Instance();
+    r.Initialize();
+    ASSERT(r.GetStats().devicesEnumerated >= 1);
+}
+TEST(TestCDR_Devices_Valid) {
+    using namespace ExplorerLens::Engine;
+    auto& r = ComputeDeviceRegistry::Instance();
+    r.Initialize();
+    for (const auto& d : r.GetDevices()) {
+        ASSERT(!d.name.empty());
+        ASSERT(d.deviceClass != ComputeDeviceClass::Unknown);
+    }
+}
+TEST(TestCDR_FindBest_Fallback) {
+    using namespace ExplorerLens::Engine;
+    auto& r = ComputeDeviceRegistry::Instance();
+    r.Initialize();
+    // FindBestFor should always return non-null (CPU fallback)
+    auto* d = r.FindBestFor(ComputeDeviceClass::FPGA);
+    ASSERT(d != nullptr); // falls back to CPU
+}
+TEST(TestCDR_MultiInit) {
+    using namespace ExplorerLens::Engine;
+    auto& r = ComputeDeviceRegistry::Instance();
+    r.Initialize();
+    r.Initialize();
+    ASSERT(r.GetStats().devicesEnumerated >= 1);
+}
+
 //== v31.9.0 Achernar-Z — Autonomous Shell Intelligence Tests ==//
 
 TEST(TestAWO_Initialize) {
@@ -39681,6 +40270,79 @@ int main()
     RUN_TEST(TestSPA_Serialize);
     RUN_TEST(TestSPA_Stats);
     RUN_TEST(TestSPA_ScoreComponents);
+    // v32.1.0 — Edge AI & Hardware-Accelerated Inference
+    RUN_TEST(TestNPUAE_Init);
+    RUN_TEST(TestNPUAE_Dispatch);
+    RUN_TEST(TestNPUAE_Stats_Dispatched);
+    RUN_TEST(TestNPUAE_CPUFallback);
+    RUN_TEST(TestNPUAE_SetMode);
+    RUN_TEST(TestNPUAE_Reset);
+    RUN_TEST(TestNPUAE_AvailableCheck);
+    RUN_TEST(TestNPUAE_EmptyWorkload);
+    RUN_TEST(TestNPUAE_MultiDispatch);
+    RUN_TEST(TestEAIE_Init);
+    RUN_TEST(TestEAIE_CreateSession);
+    RUN_TEST(TestEAIE_CreateSession_Empty);
+    RUN_TEST(TestEAIE_RunInference);
+    RUN_TEST(TestEAIE_RunInference_ErrorState);
+    RUN_TEST(TestEAIE_MemMapped);
+    RUN_TEST(TestEAIE_Destroy);
+    RUN_TEST(TestEAIE_Stats);
+    RUN_TEST(TestEAIE_Reset);
+    RUN_TEST(TestHCN_Init);
+    RUN_TEST(TestHCN_Negotiate_Embedding);
+    RUN_TEST(TestHCN_Negotiate_Render);
+    RUN_TEST(TestHCN_Negotiate_Default);
+    RUN_TEST(TestHCN_PrefersNPU);
+    RUN_TEST(TestHCN_Score_Avail);
+    RUN_TEST(TestHCN_Stats_Total);
+    RUN_TEST(TestHCN_Stats_NPUCount);
+    RUN_TEST(TestHCN_Reset);
+    RUN_TEST(TestXDNA_Init);
+    RUN_TEST(TestXDNA_DeviceName);
+    RUN_TEST(TestXDNA_TOPS);
+    RUN_TEST(TestXDNA_ExecuteKernel);
+    RUN_TEST(TestXDNA_MLIR);
+    RUN_TEST(TestXDNA_Stats);
+    RUN_TEST(TestXDNA_Reset);
+    RUN_TEST(TestXDNA_TileModes);
+    RUN_TEST(TestXDNA_AvgLatency);
+    RUN_TEST(TestQAIE_Init);
+    RUN_TEST(TestQAIE_DeviceName);
+    RUN_TEST(TestQAIE_RunModel);
+    RUN_TEST(TestQAIE_HTPPath);
+    RUN_TEST(TestQAIE_GPUPath);
+    RUN_TEST(TestQAIE_Quantization);
+    RUN_TEST(TestQAIE_Stats);
+    RUN_TEST(TestQAIE_Reset);
+    RUN_TEST(TestQAIE_AvgLatency_HTP);
+    RUN_TEST(TestAMX_Init);
+    RUN_TEST(TestAMX_MatMul_BF16);
+    RUN_TEST(TestAMX_MatMul_INT8);
+    RUN_TEST(TestAMX_MatMul_Empty);
+    RUN_TEST(TestAMX_Throughput);
+    RUN_TEST(TestAMX_Stats);
+    RUN_TEST(TestAMX_Reset);
+    RUN_TEST(TestAMX_SupportFlag);
+    RUN_TEST(TestAMX_AvgLatency);
+    RUN_TEST(TestHAP_Init);
+    RUN_TEST(TestHAP_Process_Infer);
+    RUN_TEST(TestHAP_NPURouting);
+    RUN_TEST(TestHAP_GPURouting);
+    RUN_TEST(TestHAP_CPUFallback_Flag);
+    RUN_TEST(TestHAP_Stats);
+    RUN_TEST(TestHAP_Reset);
+    RUN_TEST(TestHAP_Empty_Input);
+    RUN_TEST(TestHAP_Composite);
+    RUN_TEST(TestCDR_Instance);
+    RUN_TEST(TestCDR_Init);
+    RUN_TEST(TestCDR_HasDevices);
+    RUN_TEST(TestCDR_HasCPU);
+    RUN_TEST(TestCDR_CPUCount);
+    RUN_TEST(TestCDR_Stats_Enumerated);
+    RUN_TEST(TestCDR_Devices_Valid);
+    RUN_TEST(TestCDR_FindBest_Fallback);
+    RUN_TEST(TestCDR_MultiInit);
 
     std::wcout << std::endl;
 

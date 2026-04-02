@@ -2,14 +2,14 @@
 
 > Version 24.1.0 "Altair-R" | v2 Performance Architecture
 
-**Targets:** 14ms single thumbnail (↓18%), 270 img/sec batch (↑15%), <3ms cache hit  
+**Targets:** 14ms single thumbnail (↓18%), 270 img/sec batch (↑15%), <3ms cache hit
 **New:** ThumbnailPriorityQueue, PredictivePrefetcher, VulkanComputeDecoder, ZeroCopyTextureUploader, SIMDImageProcessor (AVX2), PersistentDiskCache (SQLite WAL), BatchDecodeScheduler (work-stealing), DirectStorageLoader
 
 ---
 
 ## Table of Contents
 1. [Performance Overview](#performance-overview)
-2. [Hardware Acceleration](#hardware-acceleration)
+1. [Hardware Acceleration](#hardware-acceleration)
 3. [Cache Optimization](#cache-optimization)
 4. [Thread Pool Tuning](#thread-pool-tuning)
 5. [Memory Management](#memory-management)
@@ -71,20 +71,29 @@
 **Default:** Enabled (with WARP fallback)
 
 **Verify current status:**
+
 ```powershell
+
 Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU
 # Output: UseGPU : 1
+
 ```
 
 **Enable GPU (if disabled):**
+
 ```powershell
+
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
+
 ```
 
 **Disable GPU (force CPU):**
+
 ```powershell
+
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 0
 # Use case: GPU driver issues, remote desktop
+
 ```
 
 ---
@@ -111,6 +120,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 0
 ### Testing GPU Acceleration
 
 ```powershell
+
 # Run benchmark with GPU
 cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe --benchmark_filter="GPU"
@@ -119,6 +129,7 @@ cd "C:\Program Files\ExplorerLens"
 # DecodeWebP_GPU 102 ms (vs 520 ms CPU)
 # DecodeAVIF_GPU 85 ms (vs 680 ms CPU)
 # ResizeLarge_GPU 12 ms (vs 95 ms CPU)
+
 ```
 
 ---
@@ -132,12 +143,15 @@ cd "C:\Program Files\ExplorerLens"
 - **PIX (Microsoft)**: https://devblogs.microsoft.com/pix/
 
 **Example with PIX:**
+
 ```powershell
+
 # Capture GPU workload
 "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\WinPixGpuCapturer.exe" `
  -captureGPU -programToCapture "explorer.exe"
 
 # Open .wpix file in PIX for analysis
+
 ```
 
 ---
@@ -149,29 +163,34 @@ cd "C:\Program Files\ExplorerLens"
 **ExplorerLens uses a 2-level cache:**
 
 1. **Memory Cache (L1):**
- - In-process LRU cache
- - Stores decoded bitmaps
- - Size: Dynamic (up to 100 MB)
- - Eviction: Least Recently Used
+  - In-process LRU cache
+  - Stores decoded bitmaps
+  - Size: Dynamic (up to 100 MB)
+  - Eviction: Least Recently Used
 
-2. **Disk Cache (L2):**
- - Persistent file-based cache
- - Location: `C:\ProgramData\ExplorerLens\Cache\`
- - Size: Configurable (default 500 MB)
- - Format: PNG thumbnails with metadata
+1. **Disk Cache (L2):**
+  - Persistent file-based cache
+  - Location: `C:\ProgramData\ExplorerLens\Cache\`
+  - Size: Configurable (default 500 MB)
+  - Format: PNG thumbnails with metadata
 
 ---
 
 ### Cache Size Configuration
 
 **View current size:**
+
 ```powershell
+
 Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB
 # Output: CacheSizeMB : 500
+
 ```
 
 **Adjust cache size:**
+
 ```powershell
+
 # Small system (4 GB RAM, 128 GB SSD)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 250
 
@@ -183,6 +202,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 2048
 
 # Unlimited cache (not recommended)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 0
+
 ```
 
 **Recommendation:**
@@ -197,7 +217,9 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 0
 **Default:** `C:\ProgramData\ExplorerLens\Cache\`
 
 **Change location (e.g., to faster SSD):**
+
 ```powershell
+
 # Create new cache directory
 New-Item "D:\FastSSD\ExplorerLensCache" -ItemType Directory
 
@@ -208,6 +230,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CachePath `
 # Restart Explorer
 Stop-Process -Name explorer -Force
 Start-Process explorer.exe
+
 ```
 
 **Best practices:**
@@ -225,12 +248,15 @@ Start-Process explorer.exe
 - Runs every 24 hours or when 110% full
 
 **Manual cache clearing:**
+
 ```powershell
+
 # Clear entire cache
 Remove-Item "C:\ProgramData\ExplorerLens\Cache\*" -Recurse -Force
 
 # Clear cache for specific extension
 Remove-Item "C:\ProgramData\ExplorerLens\Cache\*.webp.thumb" -Force
+
 ```
 
 ---
@@ -238,7 +264,9 @@ Remove-Item "C:\ProgramData\ExplorerLens\Cache\*.webp.thumb" -Force
 ### Cache Hit Rate Analysis
 
 **Check cache statistics:**
+
 ```powershell
+
 cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe --cache-stats
 
@@ -247,6 +275,7 @@ cd "C:\Program Files\ExplorerLens"
 # Cache Misses: 1,251 (12.8%)
 # Cache Size: 412 MB / 500 MB (82.4% full)
 # Avg Lookup Time: 2.3 ms
+
 ```
 
 **Target hit rate:** 85-95%
@@ -260,6 +289,7 @@ cd "C:\Program Files\ExplorerLens"
 **Use case:** Pre-generate thumbnails for large folders
 
 ```powershell
+
 cd "C:\Program Files\ExplorerLens"
 
 # Pre-cache a photo library
@@ -273,6 +303,7 @@ cd "C:\Program Files\ExplorerLens"
 # Generating thumbnails: [=========> ] 52% (2,721 / 5,234)
 # Elapsed: 3m 42s | Remaining: 3m 18s
 # Cache Hit Rate: 12% (first pass expected)
+
 ```
 
 **Recommended scenarios:**
@@ -297,13 +328,18 @@ cd "C:\Program Files\ExplorerLens"
 ### Thread Count Configuration
 
 **View current setting:**
+
 ```powershell
+
 Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads
 # Output: MaxThreads : 8
+
 ```
 
 **Adjust thread count:**
+
 ```powershell
+
 # Low-end system (4 cores)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 4
 
@@ -312,6 +348,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 8
 
 # High-end system (16+ cores)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 16
+
 ```
 
 **Guidelines:**
@@ -329,7 +366,9 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 16
 ### Thread Pool Profiling
 
 **Detect thread contention:**
+
 ```powershell
+
 # Run benchmark with thread profiling
 .\EngineBenchmark.exe --benchmark_filter="Thread" --benchmark_repetitions=10
 
@@ -339,6 +378,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 16
 # 8 threads: 0.9 sec (optimal)
 # 16 threads: 1.1 sec (diminishing returns)
 # 32 threads: 1.4 sec (contention overhead)
+
 ```
 
 ---
@@ -362,13 +402,18 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 16
 **Default:** 50 MP (megapixels)
 
 **View current limit:**
+
 ```powershell
+
 Get-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels
 # Output: MaxImagePixels : 50000000 (50 MP)
+
 ```
 
 **Adjust limit:**
+
 ```powershell
+
 # Low memory system (4 GB RAM)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 25000000 # 25 MP
 
@@ -380,6 +425,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 15000
 
 # Unlimited (not recommended)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 0
+
 ```
 
 **Example limits:**
@@ -397,7 +443,9 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 0
 **Default:** Unlimited
 
 **Set file size limit:**
+
 ```powershell
+
 # Skip files > 100 MB
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 100
 
@@ -406,6 +454,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 500
 
 # No limit (default)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 0
+
 ```
 
 **Use case:** Network drives with large files (RAW video, gigapixel panoramas)
@@ -420,12 +469,15 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 0
 - **Critical pressure** → Clear in-memory cache
 
 **Manual memory cleanup:**
+
 ```powershell
+
 # Force garbage collection
 .\EngineBenchmark.exe --gc
 
 # Clear in-memory cache only (disk cache persists)
 .\EngineBenchmark.exe --clear-memory-cache
+
 ```
 
 ---
@@ -436,7 +488,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 0
 
 **Causes:**
 1. Network latency (file read delays)
-2. No local caching (repeated network requests)
+1. No local caching (repeated network requests)
 3. Too many concurrent operations (network congestion)
 
 ---
@@ -444,6 +496,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 0
 ### Solution 1: Pre-Cache Thumbnails
 
 ```powershell
+
 # Pre-generate thumbnails for network share
 cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe --cache-warmup "\\NAS\Photos"
@@ -453,6 +506,7 @@ $action = New-ScheduledTaskAction -Execute "PowerShell.exe" `
  -Argument "-File C:\Scripts\PreCacheNAS.ps1"
 $trigger = New-ScheduledTaskTrigger -Weekly -At 2am
 Register-ScheduledTask -TaskName "ExplorerLens PreCache" -Action $action -Trigger $trigger
+
 ```
 
 ---
@@ -460,8 +514,10 @@ Register-ScheduledTask -TaskName "ExplorerLens PreCache" -Action $action -Trigge
 ### Solution 2: Reduce Thread Count
 
 ```powershell
+
 # Avoid overwhelming NAS
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 2
+
 ```
 
 **Effect:** Fewer concurrent file reads (less network congestion)
@@ -471,8 +527,10 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 2
 ### Solution 3: Increase Cache Size
 
 ```powershell
+
 # Store more thumbnails locally
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 2048
+
 ```
 
 **Effect:** Reduces need to re-fetch from network
@@ -482,8 +540,10 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 2048
 ### Solution 4: Skip Large Files
 
 ```powershell
+
 # Don't transfer huge files over network
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
+
 ```
 
 ---
@@ -491,6 +551,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
 ### Benchmarking Network Performance
 
 ```powershell
+
 # Measure network drive performance
 .\EngineBenchmark.exe --benchmark_filter="Network" `
  --network-path="\\NAS\Photos"
@@ -499,6 +560,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
 # Local SSD: 92 ms per thumbnail
 # NAS (cached): 105 ms per thumbnail
 # NAS (uncached): 842 ms per thumbnail (8x slower)
+
 ```
 
 ---
@@ -514,12 +576,15 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxFileSizeMB -Value 50
 **Default:** Seek to 10% of video duration
 
 **Adjust:**
+
 ```powershell
+
 # Seek to 25% (skip intro sequences)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoSeekPercent -Value 25
 
 # Seek to 5% (for short clips)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoSeekPercent -Value 5
+
 ```
 
 ---
@@ -527,9 +592,12 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoSeekPercent -Value 5
 #### **Hardware Decoding** (experimental)
 
 **Enable GPU video decode (NVDEC/VCE/Quick Sync):**
+
 ```powershell
+
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoHWAccel -Value 1
 # Note: Requires FFmpeg with hwaccel support
+
 ```
 
 ---
@@ -538,15 +606,19 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name VideoHWAccel -Value 1
 
 #### **Use Embedded Thumbnails** (default: OFF)
 
-**OFF (default):** Decode full RAW image (high quality, slower) 
+**OFF (default):** Decode full RAW image (high quality, slower)
 **ON:** Extract embedded JPEG preview (lower quality, 5x faster)
 
 **Enable embedded thumbnails:**
+
 ```powershell
+
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name RAWUseEmbedded -Value 1
+
 ```
 
 **Comparison:**
+
 | Mode | Quality | Speed | File Size |
 |------|---------|-------|-----------|
 | **Full decode** | Native (14-bit) | 500-1000 ms | 50 MP RAW |
@@ -564,9 +636,12 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name RAWUseEmbedded -Value 1
 - `2`: Montage of first 4 images (2×2 grid)
 
 **Set mode:**
+
 ```powershell
+
 # Montage mode (comic book archives)
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name ArchivePreviewMode -Value 2
+
 ```
 
 ---
@@ -576,9 +651,12 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name ArchivePreviewMode -Value 2
 **Purpose:** Limit extraction for large archives
 
 **Set limit:**
+
 ```powershell
+
 # Extract up to 4 files for montage
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name ArchiveMaxFiles -Value 4
+
 ```
 
 ---
@@ -588,7 +666,9 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name ArchiveMaxFiles -Value 4
 ### Running Benchmarks
 
 **Full benchmark suite:**
+
 ```powershell
+
 cd "C:\Program Files\ExplorerLens"
 .\EngineBenchmark.exe
 
@@ -599,7 +679,7 @@ cd "C:\Program Files\ExplorerLens"
 # System: Intel Core i7-10700K, 16 GB RAM
 # GPU: NVIDIA RTX 3060 (12 GB VRAM)
 # ==================================================
-# 
+#
 # DecodeJPEG_Small 12.5 ms 80.0 MB/s
 # DecodeJPEG_Large 89.3 ms 112.1 MB/s
 # DecodeWebP_Lossy 24.1 ms 41.5 MB/s
@@ -609,6 +689,7 @@ cd "C:\Program Files\ExplorerLens"
 # DecodeRAW_CR3 523.1 ms 19.1 MB/s
 # DecodeVideo_MP4 215.4 ms 4.6 MB/s
 # ...
+
 ```
 
 ---
@@ -616,6 +697,7 @@ cd "C:\Program Files\ExplorerLens"
 ### Filtering Benchmarks
 
 ```powershell
+
 # Run specific decoder tests
 .\EngineBenchmark.exe --benchmark_filter="WebP"
 
@@ -624,6 +706,7 @@ cd "C:\Program Files\ExplorerLens"
 
 # Run cache tests
 .\EngineBenchmark.exe --benchmark_filter="Cache"
+
 ```
 
 ---
@@ -631,13 +714,19 @@ cd "C:\Program Files\ExplorerLens"
 ### Benchmark Output Formats
 
 **JSON export:**
+
 ```powershell
+
 .\EngineBenchmark.exe --benchmark_format=json --benchmark_out=results.json
+
 ```
 
 **CSV export:**
+
 ```powershell
+
 .\EngineBenchmark.exe --benchmark_format=csv --benchmark_out=results.csv
+
 ```
 
 ---
@@ -645,7 +734,9 @@ cd "C:\Program Files\ExplorerLens"
 ### Comparing Performance
 
 **Before/after optimization:**
+
 ```powershell
+
 # Baseline (CPU only)
 .\EngineBenchmark.exe --benchmark_out=baseline.json
 
@@ -661,6 +752,7 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
 # Output:
 # DecodeWebP_Large: 520 ms → 102 ms (5.1x speedup)
 # DecodeAVIF_10bit: 680 ms → 85 ms (8.0x speedup)
+
 ```
 
 ---
@@ -670,24 +762,26 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
 ### CPU Profiling (Visual Studio)
 
 1. **Attach to Explorer:**
- - Debug → Performance Profiler → Attach to Process
- - Select `explorer.exe`
- - Choose "CPU Usage" profiler
+  - Debug → Performance Profiler → Attach to Process
+  - Select `explorer.exe`
+  - Choose "CPU Usage" profiler
 
-2. **Trigger thumbnail generation:**
- - Navigate to folder with images
- - Enable thumbnails view
+1. **Trigger thumbnail generation:**
+  - Navigate to folder with images
+  - Enable thumbnails view
 
 3. **Analyze results:**
- - Hot Path: `LENSShell.dll!CThumbnailProvider::GetThumbnail`
- - Look for bottlenecks in decoder functions
+  - Hot Path: `LENSShell.dll!CThumbnailProvider::GetThumbnail`
+  - Look for bottlenecks in decoder functions
 
 ---
 
 ### Memory Profiling (CRT Debug Heap)
 
 **Enable memory leak detection:**
+
 ```powershell
+
 # Rebuild with debug CRT
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --config Debug
@@ -696,6 +790,7 @@ cmake --build build --config Debug
 .\build\bin\Debug\EngineTests.exe
 
 # Output shows any memory leaks at exit
+
 ```
 
 ---
@@ -703,7 +798,9 @@ cmake --build build --config Debug
 ### GPU Profiling (PIX)
 
 **Capture D3D11 calls:**
+
 ```powershell
+
 # Launch PIX
 $pix = "C:\Program Files\Microsoft PIX\PIX.exe"
 & $pix
@@ -717,6 +814,7 @@ $pix = "C:\Program Files\Microsoft PIX\PIX.exe"
 # - Draw calls per thumbnail
 # - Texture upload bandwidth
 # - Shader execution time
+
 ```
 
 ---
@@ -724,7 +822,9 @@ $pix = "C:\Program Files\Microsoft PIX\PIX.exe"
 ### Thread Profiling (ETW)
 
 **Capture ETW trace:**
+
 ```powershell
+
 # Start trace (admin required)
 xperf -on PROC_THREAD+LOADER+PROFILE -stackwalk Profile
 
@@ -736,6 +836,7 @@ xperf -stop -d thumbnail_trace.etl
 
 # Analyze in Windows Performance Analyzer (WPA)
 wpa thumbnail_trace.etl
+
 ```
 
 ---
@@ -749,7 +850,7 @@ wpa thumbnail_trace.etl
  Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
  ```
 
-2. **Increase cache size:**
+1. **Increase cache size:**
  ```powershell
  Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 1024
  ```
@@ -764,7 +865,7 @@ wpa thumbnail_trace.etl
 ### Advanced Optimizations (30 minutes)
 
 1. **Move cache to fast SSD**
-2. **Tune thread count** (benchmark different values)
+1. **Tune thread count** (benchmark different values)
 3. **Enable RAW embedded thumbnails** (if quality acceptable)
 4. **Profile with PIX/Nsight** (find decoder bottlenecks)
 
@@ -773,19 +874,25 @@ wpa thumbnail_trace.etl
 ### System-Specific Tuning
 
 **Low-end system (4 GB RAM, HDD):**
+
 ```powershell
+
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 0 # Use WARP
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 100
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 2
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 25000000
+
 ```
 
 **High-end system (32 GB RAM, NVMe SSD, RTX 4090):**
+
 ```powershell
+
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name UseGPU -Value 1
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name CacheSizeMB -Value 4096
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxThreads -Value 24
 Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 150000000
+
 ```
 
 ---
@@ -797,5 +904,5 @@ Set-ItemProperty "HKLM:\SOFTWARE\ExplorerLens" -Name MaxImagePixels -Value 15000
 
 ---
 
-**Last Updated:** March 28, 2026 
+**Last Updated:** March 28, 2026
 **Version:** 24.1.0

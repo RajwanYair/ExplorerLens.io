@@ -7,7 +7,6 @@
 #include <map>
 #include <mutex>
 #include <thread>
-#include "../Engine/contracts/thumbnail_contracts.h"
 
 namespace ExplorerLens::Service {
 
@@ -33,12 +32,12 @@ namespace ExplorerLens::Service {
 
     class LocalApiService {
     public:
-        LocalApiService(const ServiceConfig& config);
+        LocalApiService(ServiceConfig config);
         virtual ~LocalApiService();
 
         // Start the listener loop (blocking or threaded)
         void Start();
-        
+
         // Stop the service
         void Stop();
 
@@ -53,10 +52,9 @@ namespace ExplorerLens::Service {
         std::map<std::string, std::function<std::string()>> m_routes;
         std::unique_ptr<std::thread> m_listenerThread;
         std::mutex m_routeMutex;
-        
-        void ListenHttp();
-        void ListenPipe();
+
+        void ListenHttp() const;
+        void ListenPipe() const;
     };
 
 }
-

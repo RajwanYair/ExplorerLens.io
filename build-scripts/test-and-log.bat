@@ -15,6 +15,9 @@ set "BUILD_DIR=%TEMP%\ExplorerLens-build"
 echo [%date% %time%] Test run starting... > "%LOG%"
 echo ============================================ >> "%LOG%"
 
+REM Source vcvars64 to ensure MSVC runtime DLLs are on PATH
+call "C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\VC\Auxiliary\Build\vcvars64.bat" -vcvars_ver=14.50.35717 >nul 2>&1
+
 REM Check TEMP build dir first, then fall back to local build/
 set "TESTS_EXE=%BUILD_DIR%\bin\EngineTests.exe"
 if not exist "%TESTS_EXE%" set "TESTS_EXE=%ROOT%\build\bin\EngineTests.exe"

@@ -1,8 +1,13 @@
 #include "LocalApiService.h"
 
-#include <atomic>
-#include <sstream>
+#include <chrono>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <string>
 #include <thread>
+#include <vector>
 
 #include "../Worker/ipc_transport.h"
 
@@ -14,8 +19,8 @@ std::string MakeRouteKey(const std::string& method, const std::string& path) {
 }
 }
 
-LocalApiService::LocalApiService(const ServiceConfig& config)
-    : m_config(config), m_isRunning(false) {
+LocalApiService::LocalApiService(ServiceConfig config)
+    : m_config(std::move(config)), m_isRunning(false) {
 }
 
 LocalApiService::~LocalApiService() {
@@ -49,11 +54,11 @@ void LocalApiService::Stop() {
 void LocalApiService::RegisterRoute(const std::string& method,
                                     const std::string& path,
                                     std::function<std::string()> handler) {
-    std::lock_guard<std::mutex> lock(m_routeMutex);
+    std::scoped_lock lock(m_routeMutex);
     m_routes[MakeRouteKey(method, path)] = std::move(handler);
 }
 
-void LocalApiService::ListenHttp() {
+void LocalApiService::ListenHttp() const {
     // Minimal Phase R1 runtime: keep service alive and dispatch internal handlers.
     // A full HTTP parser/router is Phase R3.
     while (m_isRunning) {
@@ -61,7 +66,7 @@ void LocalApiService::ListenHttp() {
     }
 }
 
-void LocalApiService::ListenPipe() {
+void LocalApiService::ListenPipe() const {
     IPC::TransportConfig transport{};
     transport.pipeName = m_config.pipeName.empty() ? L"\\.\\pipe\\ExplorerLens.LocalApi" : m_config.pipeName;
 
@@ -77,6 +82,7 @@ void LocalApiService::ListenPipe() {
         }
 
         IPC::MessageHeader header{};
+        header.messageType = IPC::MessageType::REQUEST_PING; // placeholder; overwritten by Receive()
         std::vector<uint8_t> payload;
         const IPC::IPCStatus status = conn->Receive(header, payload, 1000);
         if (status != IPC::IPCStatus::OK) {
@@ -84,8 +90,8 @@ void LocalApiService::ListenPipe() {
         }
 
         // Lightweight status response for initial integration.
-        const std::string body = "{\"service\":\"ExplorerLens.LocalApi\",\"status\":\"ok\"}";
-        IPC::MessageHeader response = IPC::CreateHeader(
+        const std::string body = R"({"service":"ExplorerLens.LocalApi","status":"ok"})";
+        const IPC::MessageHeader response = IPC::CreateHeader(
             IPC::MessageType::RESPONSE_PONG,
             header.correlationId,
             static_cast<uint32_t>(body.size())
