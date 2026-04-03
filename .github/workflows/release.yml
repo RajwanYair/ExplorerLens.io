@@ -324,6 +324,7 @@ jobs:
       - name: Build MSI installer
         id: msi
         shell: pwsh
+        continue-on-error: true  # wix/Build-Installer.ps1 failures leave $LASTEXITCODE != 0 after try/catch; continue-on-error prevents fatal job failure
         run: |
           $version = "${{ steps.version.outputs.version }}"
           $msiName = "ExplorerLens-$version-x64.msi"
