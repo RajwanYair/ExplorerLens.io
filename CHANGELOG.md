@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+DirectStorage & Zero-Latency Pipeline: DirectStorageManager, GPUDecompressKernel, ZeroLatencyPipeline, ThumbnailPipelineMetrics, StreamingDecodeOrchestrator; fix release.yml git safe.directory in build job
+
+
 ## [32.1.5] — 2026-04-03
 
 ### Fixed

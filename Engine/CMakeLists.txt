@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 32.1.5
+# Version: 32.2.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 32.1.5
+    VERSION 32.2.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1678,6 +1678,12 @@ set(ENGINE_HEADERS
     GPU/IntelAMXBackend.h
     Pipeline/HardwareAcceleratedPipeline.h
     Core/ComputeDeviceRegistry.h
+    # Sprint 1091-1100 — DirectStorage & Zero-Latency Pipeline (v32.2.0 "Fomalhaut-S")
+    Core/DirectStorageManager.h
+    Core/GPUDecompressKernel.h
+    Pipeline/ZeroLatencyPipeline.h
+    Core/ThumbnailPipelineMetrics.h
+    Core/StreamingDecodeOrchestrator.h
 )
 
 set(ENGINE_SOURCES
@@ -1899,6 +1905,12 @@ set(ENGINE_SOURCES
     GPU/IntelAMXBackend.cpp
     Pipeline/HardwareAcceleratedPipeline.cpp
     Core/ComputeDeviceRegistry.cpp
+    # Sprint 1091-1100 — DirectStorage & Zero-Latency Pipeline (v32.2.0 "Fomalhaut-S")
+    Core/DirectStorageManager.cpp
+    Core/GPUDecompressKernel.cpp
+    Pipeline/ZeroLatencyPipeline.cpp
+    Core/ThumbnailPipelineMetrics.cpp
+    Core/StreamingDecodeOrchestrator.cpp
 )
 
 #==============================================================================

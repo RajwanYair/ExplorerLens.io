@@ -53,6 +53,10 @@ jobs:
           submodules: false
           fetch-depth: 0
 
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
+
       # ── Resolve version from tag or input ──────────────────────────────────
       - name: Resolve version
         id: version

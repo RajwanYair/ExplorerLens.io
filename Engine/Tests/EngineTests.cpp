@@ -1,4 +1,4 @@
-//==============================================================================
+﻿//==============================================================================
 // ExplorerLens Engine - Unit Tests
 // Copyright (c) 2026 - ExplorerLens Project
 //==============================================================================
@@ -211,6 +211,12 @@
 #include "../GPU/IntelAMXBackend.h"
 #include "../Pipeline/HardwareAcceleratedPipeline.h"
 #include "../Core/ComputeDeviceRegistry.h"
+// Sprint 1091-1100: DirectStorage & Zero-Latency Pipeline (v32.2.0 "Fomalhaut-S")
+#include "../Core/DirectStorageManager.h"
+#include "../Core/GPUDecompressKernel.h"
+#include "../Pipeline/ZeroLatencyPipeline.h"
+#include "../Core/ThumbnailPipelineMetrics.h"
+#include "../Core/StreamingDecodeOrchestrator.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -35701,6 +35707,216 @@ TEST(TestCPBV_NoFatalErrors) {
         if (r.severity == BuildValidationSeverity::Fatal) { hasFatal = true; break; }
     ASSERT(!hasFatal);
 }
+
+//== v32.2.0 Fomalhaut-S — DirectStorage & Zero-Latency Pipeline Tests ==//
+
+// DirectStorageManager
+TEST(TestDSM_ProbeCapabilities) {
+    using namespace ExplorerLens::Engine;
+    auto caps = DirectStorageManager::ProbeCapabilities();
+    ASSERT(caps.maxQueueDepth >= 1);
+    ASSERT(caps.maxStagingBufferMB >= 64);
+}
+TEST(TestDSM_InitShutdown) {
+    using namespace ExplorerLens::Engine;
+    auto& m = DirectStorageManager::Instance();
+    ASSERT(m.Initialize());
+    m.Shutdown();
+    ASSERT(m.GetQueueDepth() == 0);
+}
+TEST(TestDSM_SubmitRequest_CPUFallback) {
+    using namespace ExplorerLens::Engine;
+    auto& m = DirectStorageManager::Instance();
+    m.Initialize();
+    DSStreamRequest req;
+    req.filePath    = L"test.raw";
+    req.readLength  = 4096;
+    auto r = m.SubmitRequest(req);
+    ASSERT(r.success);
+    ASSERT(r.bytesRead == 4096);
+}
+TEST(TestDSM_BackendName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(DirectStorageManager::BackendName(DSBackend::CPUFallback)) == "CPU-Fallback");
+    ASSERT(std::string(DirectStorageManager::BackendName(DSBackend::DirectStorage12)) == "DirectStorage-1.2");
+}
+TEST(TestDSM_SupportedCompression) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(DirectStorageManager::IsSupportedCompressionFormat(DSCompressionFormat::GDeflate));
+    ASSERT(DirectStorageManager::IsSupportedCompressionFormat(DSCompressionFormat::ZStandard));
+    ASSERT(!DirectStorageManager::IsSupportedCompressionFormat(DSCompressionFormat::None));
+}
+
+// GPUDecompressKernel
+TEST(TestGDK_ProbeCapabilities) {
+    using namespace ExplorerLens::Engine;
+    auto caps = GPUDecompressKernel::ProbeCapabilities();
+    ASSERT(caps.maxInputSizeMB >= 64);
+    ASSERT(caps.maxBatchCount >= 1);
+}
+TEST(TestGDK_InitSelectsVendor) {
+    using namespace ExplorerLens::Engine;
+    auto& k = GPUDecompressKernel::Instance();
+    ASSERT(k.Initialize());
+    auto v = k.GetActiveVendor();
+    ASSERT(v == GPUDecompressVendor::CPUFallback || v == GPUDecompressVendor::NvidiaGDeflate
+        || v == GPUDecompressVendor::IntelDSB || v == GPUDecompressVendor::AmdComputeShader);
+}
+TEST(TestGDK_Decompress_CPUFallback) {
+    using namespace ExplorerLens::Engine;
+    auto& k = GPUDecompressKernel::Instance();
+    k.Initialize(GPUDecompressVendor::CPUFallback);
+    std::vector<uint8_t> src(256, 0xAB);
+    std::vector<uint8_t> dst(1024, 0);
+    GPUDecompressInput in;
+    in.compressedData   = src.data();
+    in.compressedSize   = static_cast<uint32_t>(src.size());
+    in.outputBuffer     = dst.data();
+    in.outputCapacity   = static_cast<uint32_t>(dst.size());
+    in.format           = GPUCompressedFormat::ZStandard;
+    auto out = k.Decompress(in);
+    ASSERT(out.success);
+    ASSERT(out.vendorUsed == GPUDecompressVendor::CPUFallback);
+}
+TEST(TestGDK_EstimateOutputSize) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(GPUDecompressKernel::EstimateOutputSize(1000, GPUCompressedFormat::ZStandard) == 8000);
+    ASSERT(GPUDecompressKernel::EstimateOutputSize(1000, GPUCompressedFormat::Uncompressed) == 1000);
+}
+TEST(TestGDK_VendorName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(GPUDecompressKernel::VendorName(GPUDecompressVendor::CPUFallback)) == "CPU-Fallback");
+    ASSERT(std::string(GPUDecompressKernel::VendorName(GPUDecompressVendor::NvidiaGDeflate)) == "NVIDIA-GDeflate");
+}
+
+// ZeroLatencyPipeline
+TEST(TestZLP_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& p = ZeroLatencyPipeline::Instance();
+    ASSERT(p.Initialize());
+    ASSERT(p.GetState() == ZLPState::Idle);
+}
+TEST(TestZLP_Process_CPUPath) {
+    using namespace ExplorerLens::Engine;
+    auto& p = ZeroLatencyPipeline::Instance();
+    p.Initialize();
+    ZLPRequest req;
+    req.filePath     = L"sample.jpg";
+    req.thumbWidth   = 256;
+    req.thumbHeight  = 256;
+    req.enableGPUPath = false;
+    auto r = p.Process(req);
+    ASSERT(r.success);
+    ASSERT(r.width == 256);
+    ASSERT(!r.usedGPUPath);
+    ASSERT(!r.pixels.empty());
+}
+TEST(TestZLP_Metrics_Tracked) {
+    using namespace ExplorerLens::Engine;
+    auto& p = ZeroLatencyPipeline::Instance();
+    p.Initialize();
+    p.ResetMetrics();
+    ZLPRequest req; req.filePath = L"x.png"; req.thumbWidth = 128; req.thumbHeight = 128;
+    p.Process(req);
+    ASSERT(p.GetMetrics().requestsSubmitted >= 1);
+    ASSERT(p.GetMetrics().requestsCompleted >= 1);
+}
+TEST(TestZLP_RecommendedThumbSize) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(ZeroLatencyPipeline::RecommendedThumbSize(100) == 256);
+    ASSERT(ZeroLatencyPipeline::RecommendedThumbSize(60 * 1024 * 1024ULL) == 512);
+}
+TEST(TestZLP_Shutdown_Resets) {
+    using namespace ExplorerLens::Engine;
+    auto& p = ZeroLatencyPipeline::Instance();
+    p.Initialize();
+    p.Shutdown();
+    p.Initialize();
+    ASSERT(p.GetState() == ZLPState::Idle);
+}
+
+// ThumbnailPipelineMetrics
+TEST(TestTPM_RecordAndStats) {
+    using namespace ExplorerLens::Engine;
+    auto& m = ThumbnailPipelineMetrics::Instance();
+    m.Reset();
+    m.RecordSample(PipelineStage::FileRead, 12.0);
+    m.RecordSample(PipelineStage::FileRead, 14.0);
+    auto s = m.ComputeStats(PipelineStage::FileRead);
+    ASSERT(s.samples == 2);
+    ASSERT(s.p50Ms >= 12.0 && s.p50Ms <= 15.0);
+}
+TEST(TestTPM_StageName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(ThumbnailPipelineMetrics::StageName(PipelineStage::Decode)) == "Decode");
+    ASSERT(std::string(ThumbnailPipelineMetrics::StageName(PipelineStage::Render)) == "Render");
+}
+TEST(TestTPM_BottleneckDetect_IO) {
+    using namespace ExplorerLens::Engine;
+    auto& m = ThumbnailPipelineMetrics::Instance();
+    m.Reset();
+    for (int i = 0; i < 50; ++i) m.RecordSample(PipelineStage::FileRead, 200.0);
+    for (int i = 0; i < 50; ++i) m.RecordSample(PipelineStage::Render, 5.0);
+    auto snap = m.Snapshot();
+    ASSERT(snap.bottleneck == BottleneckStage::IO || snap.bottleneck == BottleneckStage::CPU
+        || snap.bottleneck == BottleneckStage::GPU || snap.bottleneck == BottleneckStage::None);
+}
+TEST(TestTPM_Reset_ClearsStats) {
+    using namespace ExplorerLens::Engine;
+    auto& m = ThumbnailPipelineMetrics::Instance();
+    m.RecordSample(PipelineStage::Decode, 10.0);
+    m.Reset();
+    auto s = m.ComputeStats(PipelineStage::Decode);
+    ASSERT(s.samples == 0);
+}
+TEST(TestTPM_DescribeBottleneck) {
+    using namespace ExplorerLens::Engine;
+    std::string desc = ThumbnailPipelineMetrics::DescribeBottleneck(BottleneckStage::CPU);
+    ASSERT(!desc.empty());
+    ASSERT(desc.find("CPU") != std::string::npos || desc.find("cpu") != std::string::npos
+        || desc.find("decode") != std::string::npos || desc.length() > 5);
+}
+
+// StreamingDecodeOrchestrator
+TEST(TestSDO_Probe_RAW) {
+    using namespace ExplorerLens::Engine;
+    auto& o = StreamingDecodeOrchestrator::Instance();
+    auto p = o.Probe(L"image.cr3");
+    ASSERT(p.fileType == SDOFileType::RAWCamera);
+    ASSERT(p.strategy == SDOStrategy::EmbeddedThumb);
+}
+TEST(TestSDO_Probe_FITS) {
+    using namespace ExplorerLens::Engine;
+    auto& o = StreamingDecodeOrchestrator::Instance();
+    auto p = o.Probe(L"data.fits");
+    ASSERT(p.fileType == SDOFileType::FITS);
+    ASSERT(p.strategy == SDOStrategy::RegionRead);
+    ASSERT(p.targetRegion.has_value());
+}
+TEST(TestSDO_Probe_Unknown) {
+    using namespace ExplorerLens::Engine;
+    auto& o = StreamingDecodeOrchestrator::Instance();
+    auto p = o.Probe(L"file.xyz");
+    ASSERT(p.fileType == SDOFileType::Unknown);
+    ASSERT(p.strategy == SDOStrategy::FullDecode);
+}
+TEST(TestSDO_Decode_Returns_Pixels) {
+    using namespace ExplorerLens::Engine;
+    auto& o = StreamingDecodeOrchestrator::Instance();
+    auto r = o.Decode(L"photo.arw", 256);
+    ASSERT(r.success);
+    ASSERT(r.width == 256);
+    ASSERT(!r.pixelsBGRA.empty());
+    ASSERT(r.totalLatencyMs > 0.0);
+}
+TEST(TestSDO_EstimateMinBytes) {
+    using namespace ExplorerLens::Engine;
+    uint64_t raw = StreamingDecodeOrchestrator::EstimateMinBytesNeeded(SDOFileType::RAWCamera, 50 * 1024 * 1024ULL);
+    ASSERT(raw <= 512 * 1024);
+    uint64_t fits = StreamingDecodeOrchestrator::EstimateMinBytesNeeded(SDOFileType::FITS, 5 * 1024 * 1024ULL);
+    ASSERT(fits <= 64 * 1024);
+}
+
 int main()
 {
     std::wcout << L"========================================" << std::endl;
@@ -40292,6 +40508,33 @@ int main()
     RUN_TEST(TestCDR_Devices_Valid);
     RUN_TEST(TestCDR_FindBest_Fallback);
     RUN_TEST(TestCDR_MultiInit);
+
+    // DirectStorage & Zero-Latency Pipeline Tests (v32.2.0 Fomalhaut-S)
+    RUN_TEST(TestDSM_ProbeCapabilities);
+    RUN_TEST(TestDSM_InitShutdown);
+    RUN_TEST(TestDSM_SubmitRequest_CPUFallback);
+    RUN_TEST(TestDSM_BackendName);
+    RUN_TEST(TestDSM_SupportedCompression);
+    RUN_TEST(TestGDK_ProbeCapabilities);
+    RUN_TEST(TestGDK_InitSelectsVendor);
+    RUN_TEST(TestGDK_Decompress_CPUFallback);
+    RUN_TEST(TestGDK_EstimateOutputSize);
+    RUN_TEST(TestGDK_VendorName);
+    RUN_TEST(TestZLP_Initialize);
+    RUN_TEST(TestZLP_Process_CPUPath);
+    RUN_TEST(TestZLP_Metrics_Tracked);
+    RUN_TEST(TestZLP_RecommendedThumbSize);
+    RUN_TEST(TestZLP_Shutdown_Resets);
+    RUN_TEST(TestTPM_RecordAndStats);
+    RUN_TEST(TestTPM_StageName);
+    RUN_TEST(TestTPM_BottleneckDetect_IO);
+    RUN_TEST(TestTPM_Reset_ClearsStats);
+    RUN_TEST(TestTPM_DescribeBottleneck);
+    RUN_TEST(TestSDO_Probe_RAW);
+    RUN_TEST(TestSDO_Probe_FITS);
+    RUN_TEST(TestSDO_Probe_Unknown);
+    RUN_TEST(TestSDO_Decode_Returns_Pixels);
+    RUN_TEST(TestSDO_EstimateMinBytes);
 
     std::wcout << std::endl;
 
