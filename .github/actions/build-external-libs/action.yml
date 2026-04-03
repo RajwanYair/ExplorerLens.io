@@ -30,19 +30,35 @@ runs:
 
         Write-Host "Building missing libs: $($missing -join ', ')" -ForegroundColor Yellow
 
-        # ── Shared CMake flags: /MD (no /GL — LTCG causes cross-toolset LNK1127)
+        # ── Shared CMake flags: /MD, explicit MSVC cl.exe, Ninja generator ──────
+        # GitHub runners have GCC/Clang in PATH; must explicitly set the MSVC
+        # compiler so cmake does not auto-select the wrong toolchain.
         $commonFlags = @(
+          '-DCMAKE_C_COMPILER=cl',
+          '-DCMAKE_CXX_COMPILER=cl',
           '-DCMAKE_BUILD_TYPE=Release',
           '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL',
-          '-DCMAKE_C_FLAGS_RELEASE=/O2 /Oi /Ob2',
-          '-DCMAKE_CXX_FLAGS_RELEASE=/O2 /Oi /Ob2'
+          '-DCMAKE_C_FLAGS_RELEASE=/O2',
+          '-DCMAKE_CXX_FLAGS_RELEASE=/O2'
         )
+        $generator = 'Ninja'
+
+        # ── Verify MSVC compiler is accessible before building ─────────────────
+        $clPath = Get-Command cl.exe -ErrorAction SilentlyContinue
+        if (-not $clPath) {
+          Write-Host "::warning::cl.exe not found in PATH — external lib build skipped (MSVC environment not available)"
+          Write-Host "PATH entries:"
+          $env:PATH -split ';' | Where-Object { $_ } | ForEach-Object { Write-Host "  $_" }
+          exit 0
+        }
+        Write-Host "Compiler: $(& cl.exe 2>&1 | Select-String 'Version' | Select-Object -First 1)" -ForegroundColor Cyan
+        Write-Host "Generator: $generator" -ForegroundColor Cyan
 
         function Invoke-CMakeLib {
           param([string]$Source, [string]$Build, [string[]]$Flags, [string]$OutLib, [string]$DestLib)
 
           Write-Host "  cmake -S $Source ..." -ForegroundColor Cyan
-          cmake -S $Source -B $Build $Flags
+          cmake -G $generator -S $Source -B $Build @Flags
           if ($LASTEXITCODE -ne 0) { throw "cmake configure failed for $Source" }
 
           cmake --build $Build --config Release -j $env:NUMBER_OF_PROCESSORS
