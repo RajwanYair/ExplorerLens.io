@@ -39,6 +39,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
+
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:

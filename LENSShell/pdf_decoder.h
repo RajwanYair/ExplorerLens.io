@@ -10,8 +10,9 @@
 
 namespace ExplorerLens {
 
-class PDFDecoder {
-public:
+class PDFDecoder
+{
+  public:
     /**
      * Extract first page of PDF as HBITMAP thumbnail
      *
@@ -24,13 +25,8 @@ public:
      *
      * Note: Requires Windows 10 1803+
      */
-    static HRESULT DecodeToHBITMAP(
-        const BYTE* data,
-        size_t size,
-        HBITMAP* phBitmap,
-        int maxWidth = 256,
-        int maxHeight = 256
-    );
+    static HRESULT DecodeToHBITMAP(const BYTE* data, size_t size, HBITMAP* phBitmap, int maxWidth = 256,
+                                   int maxHeight = 256);
 
     /**
      * Check if data is valid PDF format
@@ -59,4 +55,4 @@ public:
     static bool IsPDFPlatformAvailable();
 };
 
-} // namespace ExplorerLens
+}  // namespace ExplorerLens

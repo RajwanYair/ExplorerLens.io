@@ -24,6 +24,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
+
       - name: Install clang-format (pinned LLVM 18)
         shell: pwsh
         run: |
@@ -72,6 +76,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
 
       - name: Setup MSVC (latest available on runner)
         # No toolset pin: auto-selects latest VS. Currently v143/VS2022 on GH runners.
@@ -127,6 +135,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
+
       - name: Check header guards (blocking)
         shell: pwsh
         run: |
@@ -152,6 +164,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
 
       - name: Validate version consistency across all files
         shell: pwsh

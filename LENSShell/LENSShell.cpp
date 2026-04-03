@@ -1,12 +1,13 @@
 // LENSShell.cpp : Implementation of DLL Exports.
 
-#include "StdAfx.h"  // Must be first — provides ATL/COM/Windows headers (PCH anchor)
-
 #include "LENSShell.h"
+
 #include <initguid.h>
+
 #include "LENSShellClass.h"
 #include "LENSShellContextMenu.h"  // v15.0.0 Win11 Context Menu
 #include "LENSShell_i.c"
+#include "StdAfx.h"           // Must be first — provides ATL/COM/Windows headers (PCH anchor)
 #include "gpu_accelerator.h"  // v5.2.0 GPU Acceleration
 #include "resource.h"
 

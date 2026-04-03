@@ -3,14 +3,15 @@
  * LibArchive Integration for ExplorerLens
  ******************************************************************************/
 
-#include "StdAfx.h"
-#include "LENSArchive.h"
 #include "libarchive_wrapper.h"
+
+#include "LENSArchive.h"
+#include "StdAfx.h"
 
 #ifdef ENABLE_LIBARCHIVE_SUPPORT
 
-#include <archive.h>
-#include <archive_entry.h>
+    #include <archive.h>
+    #include <archive_entry.h>
 
 namespace ExplorerLens {
 
@@ -19,7 +20,8 @@ struct archive* LibArchiveWrapper::m_archive = nullptr;
 struct archive_entry* LibArchiveWrapper::m_entry = nullptr;
 std::string LibArchiveWrapper::m_currentPath;
 
-bool LibArchiveWrapper::OpenArchive(LPCTSTR filepath) {
+bool LibArchiveWrapper::OpenArchive(LPCTSTR filepath)
+{
     if (m_archive) {
         CloseArchive();
     }
@@ -31,25 +33,25 @@ bool LibArchiveWrapper::OpenArchive(LPCTSTR filepath) {
 
     // Enable all compression formats
     archive_read_support_filter_all(m_archive);
-    
+
     // Enable all archive formats
     archive_read_support_format_all(m_archive);
 
     // Convert filepath to UTF-8 for libarchive
-#ifdef UNICODE
+    #ifdef UNICODE
     int len = WideCharToMultiByte(CP_UTF8, 0, filepath, -1, nullptr, 0, nullptr, nullptr);
     if (len == 0) {
         CloseArchive();
         return false;
     }
-    
+
     std::string utf8path(len, '\0');
     WideCharToMultiByte(CP_UTF8, 0, filepath, -1, &utf8path[0], len, nullptr, nullptr);
-    
+
     int r = archive_read_open_filename(m_archive, utf8path.c_str(), 10240);
-#else
+    #else
     int r = archive_read_open_filename(m_archive, filepath, 10240);
-#endif
+    #endif
 
     if (r != ARCHIVE_OK) {
         CloseArchive();
@@ -59,7 +61,8 @@ bool LibArchiveWrapper::OpenArchive(LPCTSTR filepath) {
     return true;
 }
 
-void LibArchiveWrapper::CloseArchive() {
+void LibArchiveWrapper::CloseArchive()
+{
     if (m_archive) {
         archive_read_close(m_archive);
         archive_read_free(m_archive);
@@ -69,7 +72,8 @@ void LibArchiveWrapper::CloseArchive() {
     m_currentPath.clear();
 }
 
-int LibArchiveWrapper::GetEntryCount() {
+int LibArchiveWrapper::GetEntryCount()
+{
     if (!m_archive) {
         return -1;
     }
@@ -79,7 +83,8 @@ int LibArchiveWrapper::GetEntryCount() {
     return -1;
 }
 
-bool LibArchiveWrapper::ReadNextEntry() {
+bool LibArchiveWrapper::ReadNextEntry()
+{
     if (!m_archive) {
         return false;
     }
@@ -102,7 +107,8 @@ bool LibArchiveWrapper::ReadNextEntry() {
     return true;
 }
 
-const char* LibArchiveWrapper::GetEntryName() {
+const char* LibArchiveWrapper::GetEntryName()
+{
     if (!m_entry) {
         return nullptr;
     }
@@ -110,7 +116,8 @@ const char* LibArchiveWrapper::GetEntryName() {
     return archive_entry_pathname(m_entry);
 }
 
-int64_t LibArchiveWrapper::GetEntrySize() {
+int64_t LibArchiveWrapper::GetEntrySize()
+{
     if (!m_entry) {
         return 0;
     }
@@ -118,7 +125,8 @@ int64_t LibArchiveWrapper::GetEntrySize() {
     return archive_entry_size(m_entry);
 }
 
-bool LibArchiveWrapper::IsEntryDirectory() {
+bool LibArchiveWrapper::IsEntryDirectory()
+{
     if (!m_entry) {
         return false;
     }
@@ -127,7 +135,8 @@ bool LibArchiveWrapper::IsEntryDirectory() {
     return (filetype == AE_IFDIR);
 }
 
-SSIZE_T LibArchiveWrapper::ExtractEntryToMemory(void* buffer, size_t size) {
+SSIZE_T LibArchiveWrapper::ExtractEntryToMemory(void* buffer, size_t size)
+{
     if (!m_archive || !m_entry || !buffer) {
         return -1;
     }
@@ -139,7 +148,7 @@ SSIZE_T LibArchiveWrapper::ExtractEntryToMemory(void* buffer, size_t size) {
 
     while (true) {
         int r = archive_read_data_block(m_archive, &buff, &buffSize, &offset);
-        
+
         if (r == ARCHIVE_EOF) {
             break;
         }
@@ -164,7 +173,8 @@ SSIZE_T LibArchiveWrapper::ExtractEntryToMemory(void* buffer, size_t size) {
     return totalRead;
 }
 
-int LibArchiveWrapper::DetectArchiveType(const BYTE* data, size_t size) {
+int LibArchiveWrapper::DetectArchiveType(const BYTE* data, size_t size)
+{
     if (!data || size < 16) {
         return LENSTYPE_NONE;
     }
@@ -234,7 +244,11 @@ int LibArchiveWrapper::DetectArchiveType(const BYTE* data, size_t size) {
     }
 
     // XZ (.tar.xz)
-    if (memcmp(data, "\xFD" "7zXZ\x00", 6) == 0) {
+    if (memcmp(data,
+               "\xFD"
+               "7zXZ\x00",
+               6)
+        == 0) {
         return LENSTYPE_TAR_XZ;
     }
 
@@ -246,7 +260,8 @@ int LibArchiveWrapper::DetectArchiveType(const BYTE* data, size_t size) {
     return LENSTYPE_NONE;
 }
 
-bool LibArchiveWrapper::IsSupportedExtension(LPCTSTR ext) {
+bool LibArchiveWrapper::IsSupportedExtension(LPCTSTR ext)
+{
     if (!ext || !*ext) {
         return false;
     }
@@ -258,23 +273,19 @@ bool LibArchiveWrapper::IsSupportedExtension(LPCTSTR ext) {
     }
 
     // TAR and compressed TAR
-    if (wext == L".tar" || wext == L".tar.gz" || wext == L".tgz" ||
-        wext == L".tar.bz2" || wext == L".tbz" || wext == L".tb2" ||
-        wext == L".tar.xz" || wext == L".txz" ||
-        wext == L".tar.zst" || wext == L".tzst") {
+    if (wext == L".tar" || wext == L".tar.gz" || wext == L".tgz" || wext == L".tar.bz2" || wext == L".tbz"
+        || wext == L".tb2" || wext == L".tar.xz" || wext == L".txz" || wext == L".tar.zst" || wext == L".tzst") {
         return true;
     }
 
     // Other formats
-    if (wext == L".cpio" || wext == L".iso" || wext == L".xar" ||
-        wext == L".ar" || wext == L".deb" || wext == L".cab") {
+    if (wext == L".cpio" || wext == L".iso" || wext == L".xar" || wext == L".ar" || wext == L".deb" || wext == L".cab") {
         return true;
     }
 
     return false;
 }
 
-} // namespace ExplorerLens
+}  // namespace ExplorerLens
 
-#endif // ENABLE_LIBARCHIVE_SUPPORT
-
+#endif  // ENABLE_LIBARCHIVE_SUPPORT

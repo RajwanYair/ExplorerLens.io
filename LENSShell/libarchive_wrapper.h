@@ -16,6 +16,7 @@
 #pragma once
 
 #include <windows.h>
+
 #include <string>
 #include <vector>
 
@@ -25,8 +26,9 @@ struct archive_entry;
 
 namespace ExplorerLens {
 
-class LibArchiveWrapper {
-public:
+class LibArchiveWrapper
+{
+  public:
     /**
      * Open an archive file for reading
      * 
@@ -101,11 +103,10 @@ public:
      */
     static bool IsSupportedExtension(LPCTSTR ext);
 
-private:
+  private:
     static struct archive* m_archive;
     static struct archive_entry* m_entry;
     static std::string m_currentPath;
 };
 
-} // namespace ExplorerLens
-
+}  // namespace ExplorerLens

@@ -4,23 +4,27 @@
  * Uses Windows.Data.Pdf API (Windows 10 1803+)
  ******************************************************************************/
 
-#include "StdAfx.h"
 #include "pdf_decoder.h"
-#include <wincodec.h>
-#include <atlbase.h>
+
 #include <Shlwapi.h>
+#include <atlbase.h>
+#include <wincodec.h>
+
 #include <string>
+
+#include "StdAfx.h"
 
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "shlwapi.lib")
 
- // Note: Windows.Data.Pdf requires C++/WinRT which adds significant complexity
- // For now, we'll use a simple WIC-based approach that works with rendered PDFs
- // or use GDI+ as a fallback for basic PDF detection
+// Note: Windows.Data.Pdf requires C++/WinRT which adds significant complexity
+// For now, we'll use a simple WIC-based approach that works with rendered PDFs
+// or use GDI+ as a fallback for basic PDF detection
 
 namespace ExplorerLens {
 
-bool PDFDecoder::IsPDFFormat(const BYTE* data, size_t size) {
+bool PDFDecoder::IsPDFFormat(const BYTE* data, size_t size)
+{
     if (!data || size < 5) {
         return false;
     }
@@ -29,25 +33,24 @@ bool PDFDecoder::IsPDFFormat(const BYTE* data, size_t size) {
     return (memcmp(data, "%PDF-", 5) == 0);
 }
 
-bool PDFDecoder::IsPDFPlatformAvailable() {
+bool PDFDecoder::IsPDFPlatformAvailable()
+{
     // Check if Windows 10 version 1803+ (build 17134)
-    OSVERSIONINFOEXW osvi = { sizeof(osvi), 0, 0, 0, 0, {0}, 0, 0 };
-    DWORDLONG const dwlConditionMask = VerSetConditionMask(
-        VerSetConditionMask(
-            VerSetConditionMask(
-                0, VER_MAJORVERSION, VER_GREATER_EQUAL),
-            VER_MINORVERSION, VER_GREATER_EQUAL),
-        VER_BUILDNUMBER, VER_GREATER_EQUAL);
+    OSVERSIONINFOEXW osvi = {sizeof(osvi), 0, 0, 0, 0, {0}, 0, 0};
+    DWORDLONG const dwlConditionMask =
+        VerSetConditionMask(VerSetConditionMask(VerSetConditionMask(0, VER_MAJORVERSION, VER_GREATER_EQUAL),
+                                                VER_MINORVERSION, VER_GREATER_EQUAL),
+                            VER_BUILDNUMBER, VER_GREATER_EQUAL);
 
     osvi.dwMajorVersion = 10;
     osvi.dwMinorVersion = 0;
     osvi.dwBuildNumber = 17134;
 
-    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER,
-        dwlConditionMask) != FALSE;
+    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER, dwlConditionMask) != FALSE;
 }
 
-bool PDFDecoder::GetPageCount(const BYTE* data, size_t size, int* pageCount) {
+bool PDFDecoder::GetPageCount(const BYTE* data, size_t size, int* pageCount)
+{
     if (!IsPDFFormat(data, size) || !pageCount) {
         return false;
     }
@@ -77,12 +80,8 @@ bool PDFDecoder::GetPageCount(const BYTE* data, size_t size, int* pageCount) {
     return true;
 }
 
-HRESULT PDFDecoder::DecodeToHBITMAP(
-    const BYTE* data,
-    size_t size,
-    HBITMAP* phBitmap,
-    int maxWidth,
-    int maxHeight) {
+HRESULT PDFDecoder::DecodeToHBITMAP(const BYTE* data, size_t size, HBITMAP* phBitmap, int maxWidth, int maxHeight)
+{
     if (!data || size == 0 || !phBitmap) {
         return E_INVALIDARG;
     }
@@ -126,4 +125,4 @@ HRESULT PDFDecoder::DecodeToHBITMAP(
     return E_NOTIMPL;  // Not yet implemented - requires C++/WinRT
 }
 
-} // namespace ExplorerLens
+}  // namespace ExplorerLens

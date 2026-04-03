@@ -4,34 +4,43 @@
  * Renders multiple pages in a grid layout (2x2, 3x3, 4x4)
  ******************************************************************************/
 
-#include "StdAfx.h"
 #include "thumbnail_collage.h"
+
 #include <atlbase.h>
+
+#include "StdAfx.h"
 
 #define LENS_APP_KEY _T("Software\\T800 Productions\\{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}")
 
 namespace ExplorerLens {
 
-void ThumbnailCollage::GetGridDimensions(CollageMode mode, int& cols, int& rows) {
+void ThumbnailCollage::GetGridDimensions(CollageMode mode, int& cols, int& rows)
+{
     switch (mode) {
-    case MODE_SINGLE:
-        cols = 1; rows = 1;
-        break;
-    case MODE_2X2:
-        cols = 2; rows = 2;
-        break;
-    case MODE_3X3:
-        cols = 3; rows = 3;
-        break;
-    case MODE_4X4:
-        cols = 4; rows = 4;
-        break;
-    default:
-        cols = 2; rows = 2;
+        case MODE_SINGLE:
+            cols = 1;
+            rows = 1;
+            break;
+        case MODE_2X2:
+            cols = 2;
+            rows = 2;
+            break;
+        case MODE_3X3:
+            cols = 3;
+            rows = 3;
+            break;
+        case MODE_4X4:
+            cols = 4;
+            rows = 4;
+            break;
+        default:
+            cols = 2;
+            rows = 2;
     }
 }
 
-ThumbnailCollage::CollageMode ThumbnailCollage::GetCollageModeFromRegistry() {
+ThumbnailCollage::CollageMode ThumbnailCollage::GetCollageModeFromRegistry()
+{
     DWORD mode = MODE_SINGLE;  // Default: single image
     CRegKey regKey;
 
@@ -48,7 +57,8 @@ ThumbnailCollage::CollageMode ThumbnailCollage::GetCollageModeFromRegistry() {
     return static_cast<CollageMode>(mode);
 }
 
-bool ThumbnailCollage::SetCollageModeToRegistry(CollageMode mode) {
+bool ThumbnailCollage::SetCollageModeToRegistry(CollageMode mode)
+{
     CRegKey regKey;
 
     if (ERROR_SUCCESS == regKey.Create(HKEY_CURRENT_USER, LENS_APP_KEY)) {
@@ -61,20 +71,20 @@ bool ThumbnailCollage::SetCollageModeToRegistry(CollageMode mode) {
     return false;
 }
 
-bool ThumbnailCollage::DrawBitmapToComposite(
-    HDC hdcDest,
-    int x, int y,
-    int width, int height,
-    HBITMAP hSrc) {
-    if (!hSrc || !hdcDest) return false;
+bool ThumbnailCollage::DrawBitmapToComposite(HDC hdcDest, int x, int y, int width, int height, HBITMAP hSrc)
+{
+    if (!hSrc || !hdcDest)
+        return false;
 
     // Get source bitmap info
     BITMAP bm;
-    if (!GetObject(hSrc, sizeof(BITMAP), &bm)) return false;
+    if (!GetObject(hSrc, sizeof(BITMAP), &bm))
+        return false;
 
     // Create compatible DC for source
     HDC hdcSrc = CreateCompatibleDC(hdcDest);
-    if (!hdcSrc) return false;
+    if (!hdcSrc)
+        return false;
 
     HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcSrc, hSrc);
 
@@ -83,11 +93,7 @@ bool ThumbnailCollage::DrawBitmapToComposite(
     SetBrushOrgEx(hdcDest, 0, 0, NULL);
 
     // Stretch source to destination
-    BOOL result = StretchBlt(
-        hdcDest, x, y, width, height,
-        hdcSrc, 0, 0, bm.bmWidth, bm.bmHeight,
-        SRCCOPY
-    );
+    BOOL result = StretchBlt(hdcDest, x, y, width, height, hdcSrc, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
 
     SelectObject(hdcSrc, hOldBitmap);
     DeleteDC(hdcSrc);
@@ -95,12 +101,11 @@ bool ThumbnailCollage::DrawBitmapToComposite(
     return (result != 0);
 }
 
-HBITMAP ThumbnailCollage::CreateCollage(
-    const std::vector<HBITMAP>& pages,
-    int targetWidth,
-    int targetHeight,
-    CollageMode mode) {
-    if (pages.empty()) return nullptr;
+HBITMAP ThumbnailCollage::CreateCollage(const std::vector<HBITMAP>& pages, int targetWidth, int targetHeight,
+                                        CollageMode mode)
+{
+    if (pages.empty())
+        return nullptr;
 
     // If single page mode or only one page available, return first page
     if (mode == MODE_SINGLE || pages.size() == 1) {
@@ -150,7 +155,7 @@ HBITMAP ThumbnailCollage::CreateCollage(
     HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcComposite, hComposite);
 
     // Fill background with white
-    RECT rc = { 0, 0, targetWidth, targetHeight };
+    RECT rc = {0, 0, targetWidth, targetHeight};
     FillRect(hdcComposite, &rc, (HBRUSH)GetStockObject(WHITE_BRUSH));
 
     // Draw each page into grid
@@ -160,12 +165,7 @@ HBITMAP ThumbnailCollage::CreateCollage(
             int x = col * cellWidth;
             int y = row * cellHeight;
 
-            DrawBitmapToComposite(
-                hdcComposite,
-                x, y,
-                cellWidth, cellHeight,
-                pages[pageIndex]
-            );
+            DrawBitmapToComposite(hdcComposite, x, y, cellWidth, cellHeight, pages[pageIndex]);
 
             pageIndex++;
         }
@@ -178,4 +178,4 @@ HBITMAP ThumbnailCollage::CreateCollage(
     return hComposite;
 }
 
-} // namespace ExplorerLens
+}  // namespace ExplorerLens

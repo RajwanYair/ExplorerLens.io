@@ -6,14 +6,16 @@
 // Show Info, Copy Thumbnail, Settings.
 //==============================================================================
 
-#include <windows.h>
-#include <shlobj.h>
-#include <shobjidl.h>
 #include <atlbase.h>
 #include <atlcom.h>
+#include <shlobj.h>
+#include <shobjidl.h>
+
+#include <windows.h>
+
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 // Forward-declare from LENSShell.h (MIDL-generated)
 extern const CLSID CLSID_LENSShellContextMenu;
@@ -35,16 +37,16 @@ enum class LENSContextAction : UINT {
 // CLENSExplorerSubCommand — Individual sub-command (implements IExplorerCommand)
 //==============================================================================
 class ATL_NO_VTABLE CLENSExplorerSubCommand
-    : public CComObjectRootEx<CComSingleThreadModel>,
-    public IExplorerCommand {
-public:
+    : public CComObjectRootEx<CComSingleThreadModel>
+    , public IExplorerCommand
+{
+  public:
     CLENSExplorerSubCommand() = default;
 
-    void Initialize(LENSContextAction action, const wchar_t* title,
-        const wchar_t* icon, const wchar_t* tooltip);
+    void Initialize(LENSContextAction action, const wchar_t* title, const wchar_t* icon, const wchar_t* tooltip);
 
     BEGIN_COM_MAP(CLENSExplorerSubCommand)
-        COM_INTERFACE_ENTRY(IExplorerCommand)
+    COM_INTERFACE_ENTRY(IExplorerCommand)
     END_COM_MAP()
 
     // IExplorerCommand
@@ -52,14 +54,12 @@ public:
     IFACEMETHODIMP GetIcon(IShellItemArray* pItems, LPWSTR* ppszIcon) override;
     IFACEMETHODIMP GetToolTip(IShellItemArray* pItems, LPWSTR* ppszInfotip) override;
     IFACEMETHODIMP GetCanonicalName(GUID* pguidCommandName) override;
-    IFACEMETHODIMP GetState(IShellItemArray* pItems, BOOL fOkToBeSlow,
-        EXPCMDSTATE* pCmdState) override;
+    IFACEMETHODIMP GetState(IShellItemArray* pItems, BOOL fOkToBeSlow, EXPCMDSTATE* pCmdState) override;
     IFACEMETHODIMP GetFlags(EXPCMDFLAGS* pFlags) override;
     IFACEMETHODIMP EnumSubCommands(IEnumExplorerCommand** ppEnum) override;
-    IFACEMETHODIMP Invoke(IShellItemArray* pItems,
-        IBindCtx* pBindCtx) override;
+    IFACEMETHODIMP Invoke(IShellItemArray* pItems, IBindCtx* pBindCtx) override;
 
-private:
+  private:
     LENSContextAction m_action = LENSContextAction::Regenerate;
     std::wstring m_title;
     std::wstring m_icon;
@@ -72,25 +72,25 @@ private:
 // CLENSEnumExplorerCommand — Enumerator for sub-commands
 //==============================================================================
 class ATL_NO_VTABLE CLENSEnumExplorerCommand
-    : public CComObjectRootEx<CComSingleThreadModel>,
-    public IEnumExplorerCommand {
-public:
+    : public CComObjectRootEx<CComSingleThreadModel>
+    , public IEnumExplorerCommand
+{
+  public:
     CLENSEnumExplorerCommand() = default;
 
     void Initialize(const std::vector<CComPtr<IExplorerCommand>>& commands);
 
     BEGIN_COM_MAP(CLENSEnumExplorerCommand)
-        COM_INTERFACE_ENTRY(IEnumExplorerCommand)
+    COM_INTERFACE_ENTRY(IEnumExplorerCommand)
     END_COM_MAP()
 
     // IEnumExplorerCommand
-    IFACEMETHODIMP Next(ULONG celt, IExplorerCommand** pUICommand,
-        ULONG* pceltFetched) override;
+    IFACEMETHODIMP Next(ULONG celt, IExplorerCommand** pUICommand, ULONG* pceltFetched) override;
     IFACEMETHODIMP Skip(ULONG celt) override;
     IFACEMETHODIMP Reset() override;
     IFACEMETHODIMP Clone(IEnumExplorerCommand** ppEnum) override;
 
-private:
+  private:
     std::vector<CComPtr<IExplorerCommand>> m_commands;
     ULONG m_current = 0;
 };
@@ -101,16 +101,17 @@ private:
 // It returns sub-commands via EnumSubCommands().
 //==============================================================================
 class ATL_NO_VTABLE CLENSShellContextMenu
-    : public CComObjectRootEx<CComSingleThreadModel>,
-    public CComCoClass<CLENSShellContextMenu, &CLSID_LENSShellContextMenu>,
-    public IExplorerCommand {
-public:
+    : public CComObjectRootEx<CComSingleThreadModel>
+    , public CComCoClass<CLENSShellContextMenu, &CLSID_LENSShellContextMenu>
+    , public IExplorerCommand
+{
+  public:
     CLENSShellContextMenu() = default;
 
     HRESULT FinalConstruct();
 
     BEGIN_COM_MAP(CLENSShellContextMenu)
-        COM_INTERFACE_ENTRY(IExplorerCommand)
+    COM_INTERFACE_ENTRY(IExplorerCommand)
     END_COM_MAP()
 
     DECLARE_NOT_AGGREGATABLE(CLENSShellContextMenu)
@@ -121,14 +122,12 @@ public:
     IFACEMETHODIMP GetIcon(IShellItemArray* pItems, LPWSTR* ppszIcon) override;
     IFACEMETHODIMP GetToolTip(IShellItemArray* pItems, LPWSTR* ppszInfotip) override;
     IFACEMETHODIMP GetCanonicalName(GUID* pguidCommandName) override;
-    IFACEMETHODIMP GetState(IShellItemArray* pItems, BOOL fOkToBeSlow,
-        EXPCMDSTATE* pCmdState) override;
+    IFACEMETHODIMP GetState(IShellItemArray* pItems, BOOL fOkToBeSlow, EXPCMDSTATE* pCmdState) override;
     IFACEMETHODIMP GetFlags(EXPCMDFLAGS* pFlags) override;
     IFACEMETHODIMP EnumSubCommands(IEnumExplorerCommand** ppEnum) override;
-    IFACEMETHODIMP Invoke(IShellItemArray* pItems,
-        IBindCtx* pBindCtx) override;
+    IFACEMETHODIMP Invoke(IShellItemArray* pItems, IBindCtx* pBindCtx) override;
 
-private:
+  private:
     std::vector<CComPtr<IExplorerCommand>> m_subCommands;
     void BuildSubCommands();
 };

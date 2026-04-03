@@ -1,65 +1,64 @@
-#include "stdafx.h"
-#include "resource.h"
-
-#include "tools.h"
-#include "MainDlg.h"
 #include "DarkModeHelper.h"
+#include "MainDlg.h"
+#include "resource.h"
+#include "stdafx.h"
+#include "tools.h"
 
 CAppModule _Module;
 
-int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT) {
-	CMessageLoop theLoop;
-	_Module.AddMessageLoop(&theLoop);
+int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
+{
+    CMessageLoop theLoop;
+    _Module.AddMessageLoop(&theLoop);
 
-	// CRITICAL: Set dark mode preference BEFORE any window creation.
-	// Controls only pick up DarkMode_Explorer visual style when
-	// the process has already opted-in via SetPreferredAppMode.
-	DarkMode::SetAppDarkMode(DarkMode::IsSystemDarkMode());
+    // CRITICAL: Set dark mode preference BEFORE any window creation.
+    // Controls only pick up DarkMode_Explorer visual style when
+    // the process has already opted-in via SetPreferredAppMode.
+    DarkMode::SetAppDarkMode(DarkMode::IsSystemDarkMode());
 
-	CMainDlg dlgMain;
+    CMainDlg dlgMain;
 
-	if (dlgMain.Create(NULL) == NULL) {
-		ATLTRACE(_T("Main dialog creation failed!\n"));
-		return 0;
-	}
+    if (dlgMain.Create(NULL) == NULL) {
+        ATLTRACE(_T("Main dialog creation failed!\n"));
+        return 0;
+    }
 
-	dlgMain.ShowWindow(nCmdShow);
+    dlgMain.ShowWindow(nCmdShow);
 
-	int nRet = theLoop.Run();
+    int nRet = theLoop.Run();
 
-	_Module.RemoveMessageLoop();
-	return nRet;
+    _Module.RemoveMessageLoop();
+    return nRet;
 }
 
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
+{
+    // one manager instance per user
+    CHandle mtx(CreateMutex(NULL, FALSE, LENS_MGRMUTEX));
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        MessageBox(HWND_DESKTOP, _T("LENS Shell Manager is already running\n"), _T("Warning"),
+                   MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
+        return 0;
+    }
 
-int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow) {
-	// one manager instance per user
-	CHandle mtx(CreateMutex(NULL, FALSE, LENS_MGRMUTEX));
-	if (GetLastError() == ERROR_ALREADY_EXISTS) {
-		MessageBox(HWND_DESKTOP, _T("LENS Shell Manager is already running\n"), _T("Warning"),
-			MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL);
-		return 0;
-	}
+    HRESULT hRes = ::CoInitialize(NULL);
+    // If you are running on NT 4.0 or higher you can use the following call instead to
+    // make the EXE free threaded. This means that calls come in on a random RPC thread.
+    //	HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    ATLASSERT(SUCCEEDED(hRes));
 
+    // this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
+    ::DefWindowProc(NULL, 0, 0, 0L);
 
-	HRESULT hRes = ::CoInitialize(NULL);
-	// If you are running on NT 4.0 or higher you can use the following call instead to
-	// make the EXE free threaded. This means that calls come in on a random RPC thread.
-	//	HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
-	ATLASSERT(SUCCEEDED(hRes));
+    AtlInitCommonControls(ICC_BAR_CLASSES);  // add flags to support other controls
 
-	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
-	::DefWindowProc(NULL, 0, 0, 0L);
+    hRes = _Module.Init(NULL, hInstance);
+    ATLASSERT(SUCCEEDED(hRes));
 
-	AtlInitCommonControls(ICC_BAR_CLASSES);	// add flags to support other controls
+    int nRet = Run(lpstrCmdLine, nCmdShow);
 
-	hRes = _Module.Init(NULL, hInstance);
-	ATLASSERT(SUCCEEDED(hRes));
+    _Module.Term();
+    ::CoUninitialize();
 
-	int nRet = Run(lpstrCmdLine, nCmdShow);
-
-	_Module.Term();
-	::CoUninitialize();
-
-	return nRet;
+    return nRet;
 }
