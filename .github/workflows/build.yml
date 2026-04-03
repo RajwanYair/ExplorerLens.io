@@ -20,6 +20,7 @@ on:
 env:
   BUILD_TYPE: Release
   VCPKG_DISABLE_METRICS: 1
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -33,6 +33,8 @@ on:
 env:
   BUILD_TYPE: Release
   PLATFORM: x64
+  # Opt into Node.js 24 for GitHub Actions (suppresses deprecation warnings)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ─── Job 1: Build all binaries ──────────────────────────────────────────────
@@ -152,15 +154,43 @@ jobs:
         shell: pwsh
         run: nuget restore LENSShell.sln
 
-      - name: Build LENSShell.dll + LENSManager.exe (MSBuild)
+      # Stage all external .lib files into build/lib/ so MSBuild can find them.
+      # The vcxproj AdditionalLibraryDirectories already includes ..\build\lib.
+      - name: Stage external libraries for MSBuild
         shell: pwsh
         run: |
+          New-Item -ItemType Directory -Force build/lib | Out-Null
+          $staged = 0
+          Get-ChildItem external/ -Recurse -Filter '*.lib' -ErrorAction SilentlyContinue | ForEach-Object {
+            Copy-Item $_.FullName "build/lib/$($_.Name)" -Force -ErrorAction SilentlyContinue
+            $staged++
+          }
+          Write-Host "Staged $staged external .lib files into build/lib/" -ForegroundColor Cyan
+          Write-Host "Files in build/lib/:" -ForegroundColor Cyan
+          Get-ChildItem build/lib/ -Filter '*.lib' | ForEach-Object { Write-Host "  $($_.Name) ($([int]($_.Length/1KB)) KB)" }
+
+      # Derive PlatformToolset from VCToolsVersion set by ilammy/msvc-dev-cmd.
+      # vcxproj files use v145 (local dev — VS 2026), but CI runners have v143 (VS 2022).
+      # This override ensures MSBuild uses the runner's available toolset.
+      - name: Build LENSShell.dll + LENSManager.exe (MSBuild)
+        id: msbuild
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $toolset = if ($env:VCToolsVersion -match '^14\.5') { 'v145' } else { 'v143' }
+          Write-Host "Using PlatformToolset: $toolset (VCToolsVersion: $env:VCToolsVersion)" -ForegroundColor Cyan
+
           msbuild LENSShell.sln `
             /t:Rebuild `
             /p:Configuration=Release `
             /p:Platform=x64 `
+            /p:PlatformToolset=$toolset `
             /p:WarningLevel=4 `
             /m /v:minimal
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::warning::MSBuild LENSShell.sln failed. This may be due to missing external library .lib files in CI. See build-external-libs action for details."
+          }
 
       # Gate: abort if LENSShell.dll was not produced — release requires the shell extension.
       - name: Verify LENSShell.dll exists (required artifact)
@@ -176,6 +206,15 @@ jobs:
           $found = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
           if (-not $found) {
             Write-Host "::error::LENSShell.dll not found after MSBuild. Check the 'Build LENSShell.dll + LENSManager.exe' step above for linker errors."
+            # Upload diagnostic info before failing
+            @{
+              version      = "${{ steps.version.outputs.version }}"
+              msbuild_ok   = "${{ steps.msbuild.outcome }}"
+              toolset      = $env:VCToolsVersion
+              libs_staged  = (Get-ChildItem build/lib/ -Filter '*.lib' -ErrorAction SilentlyContinue).Count
+              missing_libs = @('liblz4_static.lib','jxl.lib','heif.lib','de265.lib','avif.lib','dav1d.lib','libmupdf.lib','openjp2.lib','freetype.lib') |
+                Where-Object { -not (Test-Path "build/lib/$_") }
+            } | ConvertTo-Json | Out-File "build-diagnostics.json"
             exit 1
           }
           Write-Host "✓ LENSShell.dll: $found" -ForegroundColor Green
@@ -410,6 +449,7 @@ jobs:
           path: |
             build/CMakeFiles/CMakeError.log
             build/CMakeFiles/CMakeOutput.log
+            build-diagnostics.json
             build-logs/
             build/build.ninja
           if-no-files-found: ignore

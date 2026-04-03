@@ -39,6 +39,9 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   sign-binaries:
     name: Sign Binaries
@@ -117,11 +120,20 @@ jobs:
           $certPath  = Join-Path $env:TEMP "signing.pfx"
           [IO.File]::WriteAllBytes($certPath, $certBytes)
 
-          $signtool = & "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" 2>&1
+          # Find signtool.exe dynamically (SDK version varies across runners)
+          $signtoolDir = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Directory |
+            Where-Object { $_.Name -match '^\d+\.\d+\.\d+\.\d+$' } |
+            Sort-Object Name -Descending | Select-Object -First 1
+          $signtool = Join-Path $signtoolDir.FullName "x64\signtool.exe"
+          if (-not (Test-Path $signtool)) {
+            Write-Host "::error::signtool.exe not found in Windows Kits" ; exit 1
+          }
+          Write-Host "Using signtool: $signtool" -ForegroundColor Cyan
+
           $dir = "${{ inputs.artifact_dir || 'release-staging' }}"
           Get-ChildItem $dir -Include *.dll,*.exe -Recurse | ForEach-Object {
             Write-Host "Signing: $($_.Name)"
-            & "${env:ProgramFiles(x86)}\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" sign `
+            & $signtool sign `
               /f $certPath /p $env:CERT_PASS `
               /tr "http://timestamp.digicert.com" /td sha256 /fd sha256 `
               /d "ExplorerLens Shell Extension" $_.FullName

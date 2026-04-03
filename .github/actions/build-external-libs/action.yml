@@ -14,6 +14,7 @@ runs:
         # ── Expected output paths (must match Engine/CMakeLists.txt) ──────────
         $libs = [ordered]@{
           zlib    = 'external/compression-libs/zlib-1.3.1/install/lib/zlibstatic.lib'
+          lz4     = 'external/compression-libs/lz4-1.10.0/install/lib/liblz4_static.lib'
           zstd    = 'external/compression-libs/zstd-1.5.7/install/lib/zstd_static.lib'
           minizip = 'external/compression-libs/minizip-ng-4.0.10/build-manual/minizip.lib'
           libwebp = 'external/image-libs/libwebp-1.5.0-build/build-cmake/Release/libwebp.lib'
@@ -61,7 +62,7 @@ runs:
 
         # ── 1. zlib (no dependencies) ─────────────────────────────────────────
         if ($missing -contains 'zlib') {
-          Write-Host "`n[1/5] Building zlib 1.3.1..." -ForegroundColor Yellow
+          Write-Host "`n[1/6] Building zlib 1.3.1..." -ForegroundColor Yellow
           Invoke-CMakeLib `
             -Source 'external/compression-libs/zlib-1.3.1' `
             -Build  'external/compression-libs/zlib-1.3.1/build-ci' `
@@ -70,12 +71,43 @@ runs:
             -DestLib $libs.zlib
         }
 
+        # ── 1b. LZ4 (no dependencies, simple CMake) ──────────────────────────
+        if ($missing -contains 'lz4') {
+          Write-Host "`n[1b/6] Building LZ4 1.10.0..." -ForegroundColor Yellow
+          $lz4Src = 'external/compression-libs/lz4-1.10.0'
+          # LZ4's CMakeLists.txt is in the build/cmake/ subdirectory
+          $lz4CmakeSrc = "$lz4Src/build/cmake"
+
+          if (Test-Path $lz4CmakeSrc) {
+            Invoke-CMakeLib `
+              -Source $lz4CmakeSrc `
+              -Build  "$lz4Src/build-ci" `
+              -Flags  ($commonFlags + @('-DBUILD_SHARED_LIBS=OFF', '-DBUILD_STATIC_LIBS=ON', '-DLZ4_BUILD_CLI=OFF', '-DLZ4_BUILD_LEGACY_LZ4C=OFF')) `
+              -OutLib "$lz4Src/build-ci/Release/liblz4_static.lib" `
+              -DestLib $libs.lz4
+          } else {
+            # Fallback: compile lib/lz4.c directly (single source file)
+            Write-Host "  LZ4 cmake dir not found — compiling lz4.c directly" -ForegroundColor Cyan
+            $lz4Obj = "$lz4Src/build-ci/obj"
+            New-Item -ItemType Directory -Force $lz4Obj | Out-Null
+            $lz4Sources = Get-ChildItem "$lz4Src/lib" -Filter '*.c' -File | Select-Object -ExpandProperty FullName
+            & cl.exe /c /MD /O2 /Oi /Ob2 /DNDEBUG /W0 /I"$lz4Src/lib" $lz4Sources /Fo"$lz4Obj\"
+            if ($LASTEXITCODE -ne 0) { throw "cl.exe compilation failed for LZ4" }
+            $objs = Get-ChildItem $lz4Obj -Filter '*.obj' | Select-Object -ExpandProperty FullName
+            $destDir = Split-Path $libs.lz4 -Parent
+            New-Item -ItemType Directory -Force $destDir | Out-Null
+            & lib.exe /OUT:"$($libs.lz4)" $objs
+            if ($LASTEXITCODE -ne 0) { throw "lib.exe archive failed for LZ4" }
+            Write-Host "  Built: $($libs.lz4) ($([int]((Get-Item $libs.lz4).Length/1KB)) KB)" -ForegroundColor Green
+          }
+        }
+
         # ── 2. zstd (no dependencies) ─────────────────────────────────────────
         # zstd's cmake build system lives in build/cmake/ which is gitignored
         # and absent in CI. Compile directly from the tracked lib/ C sources
         # instead — no cmake required, works identically on any MSVC toolset.
         if ($missing -contains 'zstd') {
-          Write-Host "`n[2/5] Building zstd 1.5.7 (direct cl.exe — cmake source is gitignored)..." -ForegroundColor Yellow
+          Write-Host "`n[2/6] Building zstd 1.5.7 (direct cl.exe — cmake source is gitignored)..." -ForegroundColor Yellow
           $zstdLib = 'external/compression-libs/zstd-1.5.7/lib'
           $zstdObj = 'external/compression-libs/zstd-1.5.7/build-ci/obj'
           New-Item -ItemType Directory -Force $zstdObj | Out-Null
@@ -102,7 +134,7 @@ runs:
 
         # ── 3. minizip-ng (depends on zlib) ───────────────────────────────────
         if ($missing -contains 'minizip') {
-          Write-Host "`n[3/5] Building minizip-ng 4.0.10..." -ForegroundColor Yellow
+          Write-Host "`n[3/6] Building minizip-ng 4.0.10..." -ForegroundColor Yellow
           $zlibBuildDir = (Resolve-Path 'external/compression-libs/zlib-1.3.1/build-ci' -ErrorAction SilentlyContinue)?.Path
           $zlibInstall  = (Resolve-Path 'external/compression-libs/zlib-1.3.1/install/lib' -ErrorAction SilentlyContinue)?.Path
           $zlibRoot = if ($zlibBuildDir) { $zlibBuildDir } elseif ($zlibInstall) { Split-Path $zlibInstall } else { $null }
@@ -129,7 +161,7 @@ runs:
 
         # ── 4. libwebp (no dependencies) ──────────────────────────────────────
         if ($missing -contains 'libwebp') {
-          Write-Host "`n[4/5] Building libwebp 1.5.0..." -ForegroundColor Yellow
+          Write-Host "`n[4/6] Building libwebp 1.5.0..." -ForegroundColor Yellow
           $webpBuildDir = 'external/image-libs/libwebp-1.5.0-build/build-cmake'
           cmake -S 'external/image-libs/libwebp-1.5.0-build' `
                 -B $webpBuildDir `
@@ -169,7 +201,7 @@ runs:
 
         # ── 5. libraw (MSBuild — uses VS project files, no CMake) ─────────────
         if ($missing -contains 'libraw') {
-          Write-Host "`n[5/5] Building LibRaw 0.21.3..." -ForegroundColor Yellow
+          Write-Host "`n[5/6] Building LibRaw 0.21.3..." -ForegroundColor Yellow
           $sln = 'external/camera-libs/libraw/LibRaw.sln'
           if (Test-Path $sln) {
             # Use whichever MSBuild is on PATH (set by ilammy/msvc-dev-cmd)
@@ -177,7 +209,11 @@ runs:
             if (-not $msbuild) { $msbuild = Get-Command MSBuild.exe -ErrorAction SilentlyContinue }
             if (-not $msbuild) { Write-Host "  ::warning::MSBuild not found — LibRaw skipped (RAW camera thumbnails disabled)"; exit 0 }
 
-            & $msbuild $sln /t:libraw /p:Configuration=Release /p:Platform=x64 /m /v:minimal /nologo
+            # Detect PlatformToolset from VCToolsVersion (ilammy/msvc-dev-cmd sets this)
+            $toolset = if ($env:VCToolsVersion -match '^14\.5') { 'v145' } else { 'v143' }
+            Write-Host "  Using PlatformToolset: $toolset (VCToolsVersion: $env:VCToolsVersion)" -ForegroundColor Cyan
+
+            & $msbuild $sln /t:libraw /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=$toolset /m /v:minimal /nologo
             if ($LASTEXITCODE -ne 0) { Write-Host "  ::warning::LibRaw build failed — RAW camera thumbnails disabled"; exit 0 }
 
             # Copy output to install dir

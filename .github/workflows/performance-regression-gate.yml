@@ -16,6 +16,9 @@ concurrency:
 #   -15% batch throughput → BLOCKS merge
 #   +30% memory peak      → warning (non-blocking)
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   performance-regression-check:
     name: Check Performance Regressions
