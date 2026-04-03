@@ -10,9 +10,10 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+
 #include <functional>
 #include <string>
 
@@ -23,7 +24,7 @@ using CrashDumpObserver = std::function<void(const std::wstring& dumpPath)>;
 
 class CrashDumpCapture
 {
-public:
+  public:
     static bool Install(CrashDumpObserver observer = nullptr) noexcept;
     static void Uninstall() noexcept;
 
@@ -33,13 +34,13 @@ public:
 
     static bool WriteDumpNow(EXCEPTION_POINTERS* ep = nullptr) noexcept;
 
-private:
+  private:
     static LONG WINAPI UnhandledExceptionFilter(EXCEPTION_POINTERS* ep) noexcept;
 
-    static bool                           s_installed;
-    static LPTOP_LEVEL_EXCEPTION_FILTER   s_previousFilter;
-    static CrashDumpObserver              s_observer;
+    static bool s_installed;
+    static LPTOP_LEVEL_EXCEPTION_FILTER s_previousFilter;
+    static CrashDumpObserver s_observer;
 };
 
-} // namespace Shell
-} // namespace ExplorerLens
+}  // namespace Shell
+}  // namespace ExplorerLens

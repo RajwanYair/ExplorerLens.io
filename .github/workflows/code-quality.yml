@@ -10,9 +10,6 @@ concurrency:
   group: quality-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   lint:
     name: Lint Code
@@ -58,7 +55,10 @@ jobs:
           } else {
             Write-Host "All $($files.Count) files match clang-format style" -ForegroundColor Green
           }
-          # Non-blocking: style issues are warnings, not errors
+          # Non-blocking: style issues are warnings, not errors.
+          # Explicit exit 0 prevents $LASTEXITCODE from the last clang-format call
+          # (which may be 1 on a file with deviations) from failing the step.
+          exit 0
 
   analyze:
     name: Static Analysis
