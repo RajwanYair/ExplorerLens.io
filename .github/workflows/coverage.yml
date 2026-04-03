@@ -41,6 +41,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure git safe.directory
+        shell: pwsh
+        run: git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
+
       - name: Setup MSVC (latest available on runner)
         # ilammy/msvc-dev-cmd with no vs-version/toolset: auto-picks the newest
         # VS installed on the runner. GitHub windows-latest = VS 2022 (v143).
