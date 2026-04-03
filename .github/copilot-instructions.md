@@ -275,7 +275,9 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 ## Release Procedure (EVERY version bump)
 
 > **Critical:** Every version bump MUST trigger a GitHub Release with all binaries.
-> This applies to EVERY minor version (X.Y.0), not just major releases.
+> This applies to EVERY version (X.Y.Z) — patch, minor, and major — without exception.
+> Use `Bump-Version.ps1 -TagAndPush` on every bump. The tag push fires `release.yml` which
+> builds and publishes: LENSShell.dll, LENSManager.exe, lens.exe, MSI, ZIP, SHA256SUMS.txt, SBOM.json.
 
 ```powershell
 # 1. Update all version references (ALL of these, every time)
