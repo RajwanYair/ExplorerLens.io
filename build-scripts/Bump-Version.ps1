@@ -198,7 +198,7 @@ if ($TestCount -gt 0) {
     Write-Host "[bump] copilot-instructions.md test count updated"
 }
 
-# 13. CHANGELOG.md — prepend new section
+# 13. CHANGELOG.md — prepend new versioned section (proper Keep-a-Changelog format)
 $clPath = "$rootDir\CHANGELOG.md"
 $cl = Get-Content $clPath -Raw
 $marker = "## [Unreleased]"
@@ -206,10 +206,14 @@ $idx = $cl.IndexOf($marker)
 if ($idx -ge 0) {
     $afterMarker = $cl.IndexOf("`n---", $idx)
     if ($afterMarker -ge 0) {
-        $newSection = "`n`n$ChangelogEntry`n"
-        $cl = $cl.Substring(0, $afterMarker + 5) + $newSection + $cl.Substring($afterMarker + 5)
+        $today = (Get-Date).ToString("yyyy-MM-dd")
+        $sectionHeader = "## [$Version] — $today — $Codename"
+        # Build a proper versioned section with a separator after it
+        $newSection = "`n`n$sectionHeader`n`n$ChangelogEntry`n`n---"
+        # Insert after the [Unreleased] separator, replacing nothing
+        $cl = $cl.Substring(0, $afterMarker + 4) + $newSection + $cl.Substring($afterMarker + 4)
         Set-Content $clPath -Value $cl -NoNewline
-        Write-Host "[bump] CHANGELOG.md updated"
+        Write-Host "[bump] CHANGELOG.md updated — added $sectionHeader"
     }
 }
 

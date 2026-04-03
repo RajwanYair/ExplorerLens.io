@@ -9,11 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-Annotation, HDR Tone Mapping & Format Detection: ThumbnailAnnotationOverlay, AdaptiveBitDepthConverter, BatchThumbnailExporter, FormatSignatureDetector, MemoryMappedDecoder
+## [32.3.0] — 2026-04-03 — Fomalhaut-T
 
+### Added
+- Engine/Core: ThumbnailAnnotationOverlay, AdaptiveBitDepthConverter, FormatSignatureDetector,
+  MemoryMappedDecoder (4 new headers + stub implementations)
+- Engine/Pipeline: BatchThumbnailExporter (1 new header + stub implementation)
+- Engine/Tests: 25 new unit tests in EngineTests.cpp (total: 4483)
 
-DirectStorage & Zero-Latency Pipeline: DirectStorageManager, GPUDecompressKernel, ZeroLatencyPipeline, ThumbnailPipelineMetrics, StreamingDecodeOrchestrator; fix release.yml git safe.directory in build job
+### Changed
+- docs: mandate GitHub Release with all binaries on every version bump (patch + minor + major)
 
+---
+
+## [32.2.0] — 2026-04-03 — Fomalhaut-S
+
+### Added
+- Engine/Core: DirectStorageManager, GPUDecompressKernel, ThumbnailPipelineMetrics,
+  StreamingDecodeOrchestrator (4 new headers + stub implementations)
+- Engine/Pipeline: ZeroLatencyPipeline (1 new header + stub implementation)
+- Engine/Tests: 25 new unit tests in EngineTests.cpp (total: 4458)
+
+### Fixed
+- release.yml: add git safe.directory step in build job to fix `git.exe exit code 128`
+  on Windows-hosted runners
+
+---
 
 ## [32.1.5] — 2026-04-03
 
