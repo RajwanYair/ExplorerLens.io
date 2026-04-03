@@ -103,4 +103,3 @@ void LocalApiService::ListenPipe() const {
 }
 
 } // namespace ExplorerLens::Service
-

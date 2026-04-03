@@ -29,7 +29,6 @@
 | Document | Description |
 |----------|-------------|
 | [development/DEVELOPER_GUIDE.md](development/DEVELOPER_GUIDE.md) | Developer setup and architecture guide |
-| [development/BUILD_QUICK_REFERENCE.md](development/BUILD_QUICK_REFERENCE.md) | Build quick reference |
 | [development/THIRD_PARTY.md](development/THIRD_PARTY.md) | Third-party dependency inventory |
 
 ## Architecture
@@ -55,7 +54,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [PERFORMANCE.md](PERFORMANCE.md) | Performance guidance and baselines |
+| [../.github/standards/performance-benchmarks.md](../.github/standards/performance-benchmarks.md) | Performance benchmark baselines |
 | [gpu/GPU_TESTING_GUIDE.md](gpu/GPU_TESTING_GUIDE.md) | GPU testing, benchmarking, and Intel GPU guide |
 
 ## Plugins

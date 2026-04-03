@@ -14,6 +14,11 @@ docs/MIGRATION_GUIDE_V16.md
 docs/RELEASE_NOTES_19.md
 packaging/RELEASE_MANIFEST_19.2.0.md
 
+# Removed stale docs superseded by copilot-instructions/SDK/architecture (consolidated 2026-04-03)
+docs/RELEASE_PROCESS.md
+docs/SDK.md
+docs/README_ARCHITECTURE.md
+
 # User-specific files
 *.rsuser
 *.suo
@@ -93,6 +98,25 @@ external/**/.github/
 external/image-libs/libwebp-1.5.0-original/
 # unrar/ (unversioned) is byte-for-byte identical to unrar-7.2.2/
 external/compression-libs/unrar/
+
+# Pruned external library tests/docs/examples/fuzzing (not needed for build)
+external/**/tests/
+external/**/test_utils/
+external/**/testdata/
+external/**/doc/
+external/**/docs/
+external/**/DOC/
+external/**/examples/
+external/**/fuzzing/
+external/**/contrib/
+external/**/scripts/
+external/pdf-libs/mupdf-*/platform/java/
+external/pdf-libs/mupdf-*/platform/gl/
+external/pdf-libs/mupdf-*/platform/x11/
+external/**/.circleci/
+external/**/.readthedocs.yaml
+external/**/.codecov.yaml
+external/**/.travis.yml
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
