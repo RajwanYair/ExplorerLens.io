@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+Annotation, HDR Tone Mapping & Format Detection: ThumbnailAnnotationOverlay, AdaptiveBitDepthConverter, BatchThumbnailExporter, FormatSignatureDetector, MemoryMappedDecoder
+
+
 DirectStorage & Zero-Latency Pipeline: DirectStorageManager, GPUDecompressKernel, ZeroLatencyPipeline, ThumbnailPipelineMetrics, StreamingDecodeOrchestrator; fix release.yml git safe.directory in build job
 
 

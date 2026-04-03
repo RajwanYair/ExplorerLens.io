@@ -1,13 +1,13 @@
 #==============================================================================
 # ExplorerLens Engine - CMake Build Configuration
 # Copyright (c) 2026 - ExplorerLens.io Project
-# Version: 32.2.0
+# Version: 32.3.0
 #==============================================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(ExplorerLensEngine
-    VERSION 32.2.0
+    VERSION 32.3.0
     DESCRIPTION "ExplorerLens.io Thumbnail Generation Engine"
     LANGUAGES CXX
 )
@@ -1684,6 +1684,12 @@ set(ENGINE_HEADERS
     Pipeline/ZeroLatencyPipeline.h
     Core/ThumbnailPipelineMetrics.h
     Core/StreamingDecodeOrchestrator.h
+    # Sprint 1101-1110 — Annotation, HDR Tone Mapping & Format Detection (v32.3.0 "Fomalhaut-T")
+    Core/ThumbnailAnnotationOverlay.h
+    Core/AdaptiveBitDepthConverter.h
+    Pipeline/BatchThumbnailExporter.h
+    Core/FormatSignatureDetector.h
+    Core/MemoryMappedDecoder.h
 )
 
 set(ENGINE_SOURCES
@@ -1911,6 +1917,12 @@ set(ENGINE_SOURCES
     Pipeline/ZeroLatencyPipeline.cpp
     Core/ThumbnailPipelineMetrics.cpp
     Core/StreamingDecodeOrchestrator.cpp
+    # Sprint 1101-1110 — Annotation, HDR Tone Mapping & Format Detection (v32.3.0 "Fomalhaut-T")
+    Core/ThumbnailAnnotationOverlay.cpp
+    Core/AdaptiveBitDepthConverter.cpp
+    Pipeline/BatchThumbnailExporter.cpp
+    Core/FormatSignatureDetector.cpp
+    Core/MemoryMappedDecoder.cpp
 )
 
 #==============================================================================

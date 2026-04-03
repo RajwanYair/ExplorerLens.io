@@ -217,6 +217,12 @@
 #include "../Pipeline/ZeroLatencyPipeline.h"
 #include "../Core/ThumbnailPipelineMetrics.h"
 #include "../Core/StreamingDecodeOrchestrator.h"
+// Sprint 1101-1110: Annotation, HDR Tone Mapping & Format Detection (v32.3.0 "Fomalhaut-T")
+#include "../Core/ThumbnailAnnotationOverlay.h"
+#include "../Core/AdaptiveBitDepthConverter.h"
+#include "../Pipeline/BatchThumbnailExporter.h"
+#include "../Core/FormatSignatureDetector.h"
+#include "../Core/MemoryMappedDecoder.h"
 
 // Sprint 47-48: CI/CD Pipeline + Build Validation
 #include "../Utils/BuildValidator.h"
@@ -35917,6 +35923,217 @@ TEST(TestSDO_EstimateMinBytes) {
     ASSERT(fits <= 64 * 1024);
 }
 
+//== v32.3.0 Fomalhaut-T — Annotation, HDR Tone Mapping & Format Detection Tests ==//
+
+// ThumbnailAnnotationOverlay
+TEST(TestTAO_NoBadges) {
+    using namespace ExplorerLens::Engine;
+    auto& o = ThumbnailAnnotationOverlay::Instance();
+    std::vector<uint8_t> buf(256 * 256 * 4, 0x80);
+    auto r = o.Apply(buf.data(), 256, 256, 0);
+    ASSERT(!r.applied);
+    ASSERT(r.badgesRendered == 0);
+}
+TEST(TestTAO_DRMBadge) {
+    using namespace ExplorerLens::Engine;
+    auto& o = ThumbnailAnnotationOverlay::Instance();
+    std::vector<uint8_t> buf(256 * 256 * 4, 0x80);
+    uint8_t mask = static_cast<uint8_t>(AnnotationBadge::DRMLocked);
+    auto r = o.Apply(buf.data(), 256, 256, mask);
+    ASSERT(r.applied);
+    ASSERT(r.badgesRendered >= 1);
+    ASSERT(r.latencyUs > 0.0);
+}
+TEST(TestTAO_MultiBadge) {
+    using namespace ExplorerLens::Engine;
+    auto& o = ThumbnailAnnotationOverlay::Instance();
+    std::vector<uint8_t> buf(256 * 256 * 4, 0x80);
+    uint8_t mask = static_cast<uint8_t>(AnnotationBadge::DRMLocked)
+                 | static_cast<uint8_t>(AnnotationBadge::ReadOnly);
+    auto r = o.Apply(buf.data(), 256, 256, mask);
+    ASSERT(r.badgesRendered >= 2);
+}
+TEST(TestTAO_RecommendedSize) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(ThumbnailAnnotationOverlay::RecommendedBadgeSize(32)  == BadgeSize::Small);
+    ASSERT(ThumbnailAnnotationOverlay::RecommendedBadgeSize(128) == BadgeSize::Medium);
+    ASSERT(ThumbnailAnnotationOverlay::RecommendedBadgeSize(256) == BadgeSize::Large);
+}
+TEST(TestTAO_BadgeMaskForFile) {
+    using namespace ExplorerLens::Engine;
+    uint8_t m = ThumbnailAnnotationOverlay::BadgeMaskForFile(L"test.pdf", true, false);
+    ASSERT(m & static_cast<uint8_t>(AnnotationBadge::ReadOnly));
+    uint8_t m2 = ThumbnailAnnotationOverlay::BadgeMaskForFile(L"drm.mp4", false, true);
+    ASSERT(m2 & static_cast<uint8_t>(AnnotationBadge::DRMLocked));
+}
+
+// AdaptiveBitDepthConverter
+TEST(TestABD_SDR_PassThrough) {
+    using namespace ExplorerLens::Engine;
+    auto& c = AdaptiveBitDepthConverter::Instance();
+    std::vector<uint8_t> src(64 * 64 * 4, 0xAB);
+    std::vector<uint8_t> dst(64 * 64 * 4, 0);
+    auto r = c.Convert(src.data(), 64, 64, BitDepthSource::SDR_8bit, dst.data());
+    ASSERT(r.success);
+    ASSERT(r.pixelsConverted == 64 * 64);
+    ASSERT(!r.wasToneMapped);
+}
+TEST(TestABD_DetectSourceFormat) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(AdaptiveBitDepthConverter::DetectSourceFormat(8,  false, false) == BitDepthSource::SDR_8bit);
+    ASSERT(AdaptiveBitDepthConverter::DetectSourceFormat(16, false, false) == BitDepthSource::HDR_16bit_FP);
+    ASSERT(AdaptiveBitDepthConverter::DetectSourceFormat(10, true,  false) == BitDepthSource::HDR_10bit_PQ);
+}
+TEST(TestABD_ToneMappingName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AdaptiveBitDepthConverter::ToneMappingName(ToneMappingOperator::ACES_Filmic)) == "ACES-Filmic");
+    ASSERT(std::string(AdaptiveBitDepthConverter::ToneMappingName(ToneMappingOperator::Reinhard)) == "Reinhard");
+}
+TEST(TestABD_SourceFormatName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(AdaptiveBitDepthConverter::SourceFormatName(BitDepthSource::SDR_8bit)) == "SDR-8bit");
+    ASSERT(std::string(AdaptiveBitDepthConverter::SourceFormatName(BitDepthSource::HDR_16bit_FP)) == "HDR-16bit-FP");
+}
+TEST(TestABD_HDR_Convert_BufferSize) {
+    using namespace ExplorerLens::Engine;
+    auto& c = AdaptiveBitDepthConverter::Instance();
+    std::vector<uint16_t> src(16 * 16 * 4, 0x3C00);  // 1.0 in float16
+    std::vector<uint8_t>  dst(16 * 16 * 4, 0);
+    auto r = c.Convert(src.data(), 16, 16, BitDepthSource::HDR_16bit_FP, dst.data());
+    ASSERT(r.success);
+    ASSERT(r.pixelsConverted == 16 * 16);
+    ASSERT(r.wasToneMapped);
+}
+
+// BatchThumbnailExporter
+TEST(TestBTE_FormatExtension) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(BatchThumbnailExporter::FormatExtension(ExportFormat::JPEG)) == ".jpg");
+    ASSERT(std::string(BatchThumbnailExporter::FormatExtension(ExportFormat::PNG)) == ".png");
+    ASSERT(std::string(BatchThumbnailExporter::FormatExtension(ExportFormat::WebP)) == ".webp");
+}
+TEST(TestBTE_FormatSupportsLossless) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(BatchThumbnailExporter::FormatSupportsLossless(ExportFormat::PNG));
+    ASSERT(BatchThumbnailExporter::FormatSupportsLossless(ExportFormat::WebP));
+    ASSERT(!BatchThumbnailExporter::FormatSupportsLossless(ExportFormat::JPEG));
+}
+TEST(TestBTE_Export_SingleSize) {
+    using namespace ExplorerLens::Engine;
+    auto& e = BatchThumbnailExporter::Instance();
+    std::vector<uint8_t> src(64 * 64 * 4, 0xAA);
+    ExportJob job;
+    job.sourceFile = L"photo.jpg";
+    job.outputDir  = L"C:\\Temp";
+    job.sizes      = {{64, 64, "small"}};
+    job.format     = ExportFormat::JPEG;
+    auto r = e.Export(job, src.data(), 64, 64);
+    ASSERT(r.exportedCount >= 1);
+    ASSERT(!r.thumbs.empty());
+    ASSERT(r.thumbs[0].success);
+}
+TEST(TestBTE_Export_MultiSize) {
+    using namespace ExplorerLens::Engine;
+    auto& e = BatchThumbnailExporter::Instance();
+    std::vector<uint8_t> src(128 * 128 * 4, 0xBB);
+    ExportJob job;
+    job.sourceFile = L"photo.png";
+    job.outputDir  = L"C:\\Temp";
+    job.sizes      = {{64, 64, "sm"}, {128, 128, "md"}};
+    auto r = e.Export(job, src.data(), 128, 128);
+    ASSERT(r.exportedCount == 2);
+    ASSERT(r.thumbs.size() == 2);
+}
+TEST(TestBTE_TotalExported) {
+    using namespace ExplorerLens::Engine;
+    auto& e = BatchThumbnailExporter::Instance();
+    uint64_t before = e.GetTotalExported();
+    std::vector<uint8_t> src(32 * 32 * 4, 0xFF);
+    ExportJob job; job.outputDir = L"C:\\Temp"; job.sizes = {{32, 32, "x"}};
+    e.Export(job, src.data(), 32, 32);
+    ASSERT(e.GetTotalExported() >= before + 1);
+}
+
+// FormatSignatureDetector
+TEST(TestFSD_DetectJPEG) {
+    using namespace ExplorerLens::Engine;
+    auto& d = FormatSignatureDetector::Instance();
+    uint8_t hdr[] = {0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10};
+    auto m = d.Detect(hdr, sizeof(hdr));
+    ASSERT(m.format == DetectedFormat::JPEG);
+    ASSERT(m.confidence == SignatureConfidence::Definitive);
+}
+TEST(TestFSD_DetectPNG) {
+    using namespace ExplorerLens::Engine;
+    auto& d = FormatSignatureDetector::Instance();
+    uint8_t hdr[] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+    auto m = d.Detect(hdr, sizeof(hdr));
+    ASSERT(m.format == DetectedFormat::PNG);
+    ASSERT(m.confidence == SignatureConfidence::Definitive);
+}
+TEST(TestFSD_DetectPDF) {
+    using namespace ExplorerLens::Engine;
+    auto& d = FormatSignatureDetector::Instance();
+    uint8_t hdr[] = {'%', 'P', 'D', 'F', '-', '1', '.', '7'};
+    auto m = d.Detect(hdr, sizeof(hdr));
+    ASSERT(m.format == DetectedFormat::PDF);
+}
+TEST(TestFSD_DetectUnknown) {
+    using namespace ExplorerLens::Engine;
+    auto& d = FormatSignatureDetector::Instance();
+    uint8_t hdr[] = {0x00, 0x01, 0x02, 0x03};
+    auto m = d.Detect(hdr, sizeof(hdr));
+    ASSERT(m.format == DetectedFormat::Unknown);
+    ASSERT(m.confidence == SignatureConfidence::None);
+}
+TEST(TestFSD_ExtensionMatch) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(FormatSignatureDetector::ExtensionMatchesDetected(L"photo.jpg", DetectedFormat::JPEG));
+    ASSERT(FormatSignatureDetector::ExtensionMatchesDetected(L"doc.pdf", DetectedFormat::PDF));
+    ASSERT(!FormatSignatureDetector::ExtensionMatchesDetected(L"", DetectedFormat::JPEG));
+}
+
+// MemoryMappedDecoder
+TEST(TestMMD_Initialize) {
+    using namespace ExplorerLens::Engine;
+    auto& m = MemoryMappedDecoder::Instance();
+    ASSERT(m.Initialize());
+    ASSERT(m.GetBackend() != MMapBackend::Unavailable);
+}
+TEST(TestMMD_Decode_ReturnsPixels) {
+    using namespace ExplorerLens::Engine;
+    auto& m = MemoryMappedDecoder::Instance();
+    m.Initialize();
+    MMapDecodeRequest req;
+    req.filePath  = L"large_photo.tiff";
+    req.thumbSize = 128;
+    auto r = m.Decode(req);
+    ASSERT(r.success);
+    ASSERT(r.thumbWidth == 128);
+    ASSERT(!r.pixelsBGRA.empty());
+    ASSERT(r.totalLatencyMs > 0.0);
+}
+TEST(TestMMD_Stats_Tracked) {
+    using namespace ExplorerLens::Engine;
+    auto& m = MemoryMappedDecoder::Instance();
+    m.ResetStats();
+    m.Initialize();
+    MMapDecodeRequest req; req.filePath = L"big.raw"; req.thumbSize = 64;
+    m.Decode(req);
+    ASSERT(m.GetStats().mappingsCreated >= 1);
+    ASSERT(m.GetStats().bytesAccessed >= 1);
+}
+TEST(TestMMD_RecommendedForFile) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(!MemoryMappedDecoder::IsRecommendedForFile(512 * 1024));       // < 8MB
+    ASSERT( MemoryMappedDecoder::IsRecommendedForFile(10 * 1024 * 1024)); // > 8MB
+}
+TEST(TestMMD_BackendName) {
+    using namespace ExplorerLens::Engine;
+    ASSERT(std::string(MemoryMappedDecoder::BackendName(MMapBackend::WindowsMMapV1)) == "Windows-MMapV1");
+    ASSERT(std::string(MemoryMappedDecoder::BackendName(MMapBackend::Unavailable)) == "Unavailable");
+}
+
 int main()
 {
     std::wcout << L"========================================" << std::endl;
@@ -40535,6 +40752,33 @@ int main()
     RUN_TEST(TestSDO_Probe_Unknown);
     RUN_TEST(TestSDO_Decode_Returns_Pixels);
     RUN_TEST(TestSDO_EstimateMinBytes);
+
+    // Annotation, HDR Tone Mapping & Format Detection Tests (v32.3.0 Fomalhaut-T)
+    RUN_TEST(TestTAO_NoBadges);
+    RUN_TEST(TestTAO_DRMBadge);
+    RUN_TEST(TestTAO_MultiBadge);
+    RUN_TEST(TestTAO_RecommendedSize);
+    RUN_TEST(TestTAO_BadgeMaskForFile);
+    RUN_TEST(TestABD_SDR_PassThrough);
+    RUN_TEST(TestABD_DetectSourceFormat);
+    RUN_TEST(TestABD_ToneMappingName);
+    RUN_TEST(TestABD_SourceFormatName);
+    RUN_TEST(TestABD_HDR_Convert_BufferSize);
+    RUN_TEST(TestBTE_FormatExtension);
+    RUN_TEST(TestBTE_FormatSupportsLossless);
+    RUN_TEST(TestBTE_Export_SingleSize);
+    RUN_TEST(TestBTE_Export_MultiSize);
+    RUN_TEST(TestBTE_TotalExported);
+    RUN_TEST(TestFSD_DetectJPEG);
+    RUN_TEST(TestFSD_DetectPNG);
+    RUN_TEST(TestFSD_DetectPDF);
+    RUN_TEST(TestFSD_DetectUnknown);
+    RUN_TEST(TestFSD_ExtensionMatch);
+    RUN_TEST(TestMMD_Initialize);
+    RUN_TEST(TestMMD_Decode_ReturnsPixels);
+    RUN_TEST(TestMMD_Stats_Tracked);
+    RUN_TEST(TestMMD_RecommendedForFile);
+    RUN_TEST(TestMMD_BackendName);
 
     std::wcout << std::endl;
 
