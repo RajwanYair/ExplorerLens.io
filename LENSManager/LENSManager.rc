@@ -20,8 +20,8 @@ CAPTION "About ExplorerLens"
 FONT 8, "MS Shell Dlg 2", 400, 0, 1
 {
   ICON            IDR_MAINFRAME, IDC_STATIC, 12, 10, 20, 20, SS_ICON
-    CTEXT           "ExplorerLens Shell Manager\nversion 15.2.0 ""Zenith-S""\nExplorerLens.io (c) 2011-2026", IDC_STATIC, 40, 10, 258, 28, SS_CENTER
-    CTEXT           "200+ Formats  -  GPU Thumbnails  -  DirectX 11/12  -  Vulkan  -  Smart Cache", IDC_STATIC, 12, 42, 286, 10, SS_CENTER
+    CTEXT           "ExplorerLens Shell Manager\nv32.1.0 ""Fomalhaut-R""\nExplorerLens.io (c) 2011-2026", IDC_STATIC, 40, 10, 258, 28, SS_CENTER
+    CTEXT           "200+ File Formats  |  GPU-Accelerated  |  DirectX 11/12  |  Vulkan Compute  |  Smart Cache", IDC_STATIC, 12, 42, 286, 10, SS_CENTER
     LTEXT           "System Information:", IDC_STATIC, 12, 58, 286, 8
     EDITTEXT        IDC_ABOUT_SYSINFO, 12, 68, 286, 174, ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL | WS_BORDER
     PUSHBUTTON      "Copy Info", IDC_BTN_COPY_INFO, 12, 250, 60, 18
@@ -44,8 +44,8 @@ FONT 8, "Ms Shell Dlg"
     CONTROL         "All", IDC_CB_ALL_COMIC, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 140, 5, 25, 10
     CONTROL         "CBZ (Comic Book ZIP)", IDC_CB_CBZ, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 18, 145, 10
     CONTROL         "CBR (Comic Book RAR)", IDC_CB_CBR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 31, 145, 10
-    CONTROL         "CB7 (Comic Book 7-Zip)", IDC_CB_CB7, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 44, 145, 10
-    CONTROL         "CBT (Comic Book TAR)", IDC_CB_CBT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 57, 145, 10
+    CONTROL         "CB7 (7-Zip Comics)", IDC_CB_CB7, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 44, 145, 10
+    CONTROL         "CBT (TAR Comics)", IDC_CB_CBT, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 57, 145, 10
 
     // Archive Formats — shifted +3
     CONTROL         "Archive Formats", IDC_ARCHIVE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 75, 165, 65
@@ -64,22 +64,22 @@ FONT 8, "Ms Shell Dlg"
     CONTROL         "JPEG XL Images", IDC_CB_JXL, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 197, 145, 10
 
     // Pro Image Formats — shifted +9
-    CONTROL         "Pro Image Formats", IDC_PRO_IMAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 215, 165, 65
+    CONTROL         "Creative / Professional Formats", IDC_PRO_IMAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 215, 165, 65
     CONTROL         "All", IDC_CB_ALL_PROIMAGE, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 140, 215, 25, 10
     CONTROL         "PSD (Photoshop)", IDC_CB_PSD, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 228, 145, 10
-    CONTROL         "DDS (DirectDraw Surface)", IDC_CB_DDS, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 241, 145, 10
-    CONTROL         "HDR (Radiance HDR)", IDC_CB_HDR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 254, 145, 10
-    CONTROL         "EXR (OpenEXR)", IDC_CB_EXR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 267, 145, 10
+    CONTROL         "DDS (3D Texture / Game Asset)", IDC_CB_DDS, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 241, 145, 10
+    CONTROL         "HDR (High Dynamic Range)", IDC_CB_HDR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 254, 145, 10
+    CONTROL         "EXR (OpenEXR / VFX)", IDC_CB_EXR, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 267, 145, 10
 
-    // Collage Mode — shifted +12
-    CONTROL         "Collage Mode", IDC_COLLAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 285, 165, 64
+    // Collage Mode — How many pages to show in multi-page archive thumbnails
+    CONTROL         "Collage Mode (Multi-Page Preview)", IDC_COLLAGE_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 285, 165, 64
     CONTROL         "Single page (1x1)", IDC_RADIO_1X1, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 20, 298, 145, 10
     CONTROL         "4-page grid (2x2)", IDC_RADIO_2X2, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 311, 145, 10
     CONTROL         "9-page grid (3x3)", IDC_RADIO_3X3, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 324, 145, 10
     CONTROL         "16-page grid (4x4)", IDC_RADIO_4X4, "Button", BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, 20, 337, 145, 10
 
     // Extended Formats — shifted +12
-    CONTROL         "Extended Formats", IDC_EXTENDED_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 354, 165, 65
+    CONTROL         "Additional Formats (Legacy && Special)", IDC_EXTENDED_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 10, 354, 165, 65
     CONTROL         "All", IDC_CB_ALL_EXTENDED, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 140, 354, 25, 10
     CONTROL         "Extended Images (BMP, WMF, ...)", IDC_CB_EXT_IMAGE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 367, 145, 10
     CONTROL         "Texture (KTX, VTF)", IDC_CB_TEXTURE, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 20, 380, 145, 10
@@ -94,12 +94,12 @@ FONT 8, "Ms Shell Dlg"
     CONTROL         "EPUB (Electronic Publication)", IDC_CB_EPUB, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 18, 145, 10
     CONTROL         "MOBI (Mobipocket)", IDC_CB_MOBI, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 31, 145, 10
     CONTROL         "AZW (Kindle)", IDC_CB_AZW, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 44, 145, 10
-    CONTROL         "AZW3 (Kindle Format 8)", IDC_CB_AZW3, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 57, 145, 10
+    CONTROL         "AZW3 (Kindle Enhanced)", IDC_CB_AZW3, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 57, 145, 10
 
     // Photo & Other Formats — shifted +3
     CONTROL         "Photo & Other Formats", IDC_PHOTO_GROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 75, 165, 40
     CONTROL         "All", IDC_CB_ALL_PHOTO, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 315, 75, 25, 10
-    CONTROL         "PHZ (Photo ZIP)", IDC_CB_PHZ, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 88, 145, 10
+    CONTROL         "PHZ (Photo Collection ZIP)", IDC_CB_PHZ, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 88, 145, 10
     CONTROL         "FB2 (FictionBook)", IDC_CB_FB2, "Button", BS_AUTO3STATE | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 101, 145, 10
 
     // Media & Documents — shifted +3
@@ -125,10 +125,10 @@ FONT 8, "Ms Shell Dlg"
 
     // Advanced Options — shifted +3, H=63 (+3 padding)
     CONTROL         "Advanced Options", IDC_SORT_ADVOPTGROUP, "Button", BS_GROUPBOX | WS_CHILD | WS_VISIBLE, 185, 345, 165, 63
-    CONTROL         "Sort images alphabetically", IDC_CB_SORT, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 358, 155, 10
-    LTEXT           "Uncheck for archive order.", IDC_SORT_DESC, 205, 371, 145, 8, SS_LEFT | WS_CHILD | WS_VISIBLE, WS_EX_TRANSPARENT
-    CONTROL         "Show archive indicator", IDC_CB_SHOWICON, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 384, 150, 10
-    LTEXT           "Display ZIP icon on thumbnails.", IDC_CB_SHOWICON_DESC, 205, 397, 145, 8, SS_LEFT | WS_CHILD | WS_VISIBLE, WS_EX_TRANSPARENT
+    CONTROL         "Sort pages alphabetically", IDC_CB_SORT, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 358, 155, 10
+    LTEXT           "Disable to keep original archive order.", IDC_SORT_DESC, 205, 371, 145, 8, SS_LEFT | WS_CHILD | WS_VISIBLE, WS_EX_TRANSPARENT
+    CONTROL         "Show format badge on thumbnails", IDC_CB_SHOWICON, "Button", BS_AUTOCHECKBOX | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 195, 384, 150, 10
+    LTEXT           "Overlay a small icon showing the file type.", IDC_CB_SHOWICON_DESC, 205, 397, 145, 8, SS_LEFT | WS_CHILD | WS_VISIBLE, WS_EX_TRANSPARENT
 
     // ── Bottom buttons (row 1: tools, row 2: actions) ── shifted +15
     CONTROL         "Select All", IDC_BTN_SELECT_ALL, "Button", BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 10, 425, 46, 14

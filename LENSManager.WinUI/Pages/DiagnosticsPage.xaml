@@ -10,7 +10,7 @@
         <StackPanel Grid.Row="0" Spacing="4">
             <TextBlock Text="Diagnostics"
                        Style="{StaticResource TitleTextBlockStyle}"/>
-            <TextBlock Text="Live engine telemetry, ETW trace capture, and log export for support and debugging."
+            <TextBlock Text="Live engine telemetry, log viewer, and diagnostic export for troubleshooting."
                        Style="{StaticResource BodyTextBlockStyle}"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        TextWrapping="Wrap"/>
@@ -93,12 +93,14 @@
                                        FontWeight="SemiBold"/>
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="GPU memory used" VerticalAlignment="Center"/>
+                            <TextBlock Text="GPU memory used" VerticalAlignment="Center"
+                                   ToolTipService.ToolTip="Video memory currently allocated for thumbnail rendering"/>
                             <TextBlock x:Name="GpuMemCounter" Grid.Column="1" Text="—"
                                        FontWeight="SemiBold"/>
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Cache pressure" VerticalAlignment="Center"/>
+                            <TextBlock Text="Cache pressure" VerticalAlignment="Center"
+                                   ToolTipService.ToolTip="Current memory pressure level: None (green) = healthy, Critical (red) = cache is full"/>
                             <TextBlock x:Name="PressureCounter" Grid.Column="1" Text="None"
                                        FontWeight="SemiBold"
                                        Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
@@ -135,7 +137,7 @@
                 BorderThickness="0,1,0,0" Padding="16,8">
             <StackPanel Orientation="Horizontal" Spacing="16">
                 <TextBlock x:Name="StatusText"
-                           Text="Ready — engine v15.7.0"
+                           Text="Ready — engine v32.1.0"
                            Style="{StaticResource CaptionTextBlockStyle}"
                            VerticalAlignment="Center"/>
                 <TextBlock x:Name="SessionText"

@@ -24,7 +24,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Default Thumbnail Size" FontWeight="SemiBold"/>
-                            <TextBlock Text="Pixels. Used when Windows does not specify a size." Opacity="0.6" FontSize="12"/>
+                            <TextBlock Text="Fallback size when Windows does not request a specific one. Larger = sharper but slower. 256 px is recommended." Opacity="0.6" FontSize="12" TextWrapping="Wrap"/>
                         </StackPanel>
                         <ComboBox Grid.Column="1" x:Name="ThumbnailSizeBox" VerticalAlignment="Center">
                             <ComboBoxItem Content="128 px"/>
@@ -42,7 +42,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="GPU Backend" FontWeight="SemiBold"/>
-                            <TextBlock Text="Preferred render pipeline. Falls back to CPU if unavailable." Opacity="0.6" FontSize="12"/>
+                            <TextBlock Text="Which graphics library to use. Auto detects the best option. CPU-only is slower but works on all systems." Opacity="0.6" FontSize="12" TextWrapping="Wrap"/>
                         </StackPanel>
                         <ComboBox Grid.Column="1" x:Name="GpuBackendBox" VerticalAlignment="Center">
                             <ComboBoxItem Content="Auto (recommended)" IsSelected="True"/>
@@ -79,7 +79,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Cache Budget (MB)" FontWeight="SemiBold"/>
-                            <TextBlock Text="Maximum memory allocated to thumbnail cache." Opacity="0.6" FontSize="12"/>
+                            <TextBlock Text="RAM allocated for caching thumbnails. More = faster repeat browsing. 512 MB is fine for most users." Opacity="0.6" FontSize="12" TextWrapping="Wrap"/>
                         </StackPanel>
                         <NumberBox Grid.Column="1" x:Name="CacheBudgetBox"
                                    Minimum="64" Maximum="4096" Value="512"
@@ -94,7 +94,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Enable Hot-Mode Cache" FontWeight="SemiBold"/>
-                            <TextBlock Text="Keeps most-recently-used thumbnails pinned in memory." Opacity="0.6" FontSize="12"/>
+                            <TextBlock Text="Keep recently-viewed thumbnails pinned in memory for instant re-display. Recommended on systems with 8+ GB RAM." Opacity="0.6" FontSize="12" TextWrapping="Wrap"/>
                         </StackPanel>
                         <ToggleSwitch Grid.Column="1" x:Name="HotModeEnabled" IsOn="True"
                                       OnContent="" OffContent="" VerticalAlignment="Center"/>

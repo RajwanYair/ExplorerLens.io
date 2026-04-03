@@ -399,18 +399,26 @@ class ExplorerLensApp:
 
         self._sort_var = tk.BooleanVar(value=self._config.sort_thumbnails)
         ttk.Checkbutton(
-            opt_frame, text="Sort thumbnails alphabetically", variable=self._sort_var
+            opt_frame, text="Sort pages alphabetically", variable=self._sort_var
         ).grid(row=0, column=0, sticky=tk.W, padx=8, pady=2)
 
         self._icon_var = tk.BooleanVar(value=self._config.show_archive_icon)
         ttk.Checkbutton(
-            opt_frame, text="Show archive icon overlay", variable=self._icon_var
+            opt_frame, text="Show format badge on thumbnails", variable=self._icon_var
         ).grid(row=0, column=1, sticky=tk.W, padx=8, pady=2)
         group_row += 1
 
         # Collage Mode section (mirrors EXE's radio buttons)
-        collage_frame = ttk.LabelFrame(scroll_frame, text="Collage Mode")
+        collage_frame = ttk.LabelFrame(
+            scroll_frame, text="Collage Mode (Multi-Page Preview)"
+        )
         collage_frame.grid(row=group_row, column=0, sticky=tk.EW, padx=8, pady=4)
+
+        ttk.Label(
+            collage_frame,
+            text="How many pages to show in each thumbnail for multi-page files (comics, archives).",
+            wraplength=500,
+        ).grid(row=0, column=0, columnspan=4, sticky=tk.W, padx=8, pady=(2, 4))
 
         self._collage_var = tk.IntVar(value=self._config.collage_mode)
         for i, (val, label) in enumerate(
@@ -423,7 +431,7 @@ class ExplorerLensApp:
         ):
             ttk.Radiobutton(
                 collage_frame, text=label, variable=self._collage_var, value=val
-            ).grid(row=0, column=i, sticky=tk.W, padx=8, pady=4)
+            ).grid(row=1, column=i, sticky=tk.W, padx=8, pady=4)
 
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=4)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -437,7 +445,12 @@ class ExplorerLensApp:
     def _build_performance_tab(self, parent: ttk.Frame) -> None:
         """Build performance dashboard."""
         header = ttk.Label(parent, text="Performance Dashboard", style="Header.TLabel")
-        header.pack(anchor=tk.W, padx=12, pady=(12, 8))
+        header.pack(anchor=tk.W, padx=12, pady=(12, 4))
+        ttk.Label(
+            parent,
+            text="Live cache and engine metrics. Click Refresh Stats to update.",
+            wraplength=650,
+        ).pack(anchor=tk.W, padx=12, pady=(0, 8))
 
         frame = ttk.LabelFrame(parent, text="Cache Statistics")
         frame.pack(fill=tk.X, padx=12, pady=4)
@@ -446,10 +459,10 @@ class ExplorerLensApp:
         for i, (label, key) in enumerate(
             [
                 ("Memory items:", "mem_items"),
-                ("Memory usage:", "mem_mb"),
+                ("Memory usage (MB):", "mem_mb"),
                 ("Disk items:", "disk_items"),
-                ("Disk usage:", "disk_mb"),
-                ("Hit rate:", "hit_rate"),
+                ("Disk usage (MB):", "disk_mb"),
+                ("Hit rate (aim for >90%):", "hit_rate"),
             ]
         ):
             ttk.Label(frame, text=label).grid(
@@ -466,10 +479,10 @@ class ExplorerLensApp:
         for i, (label, key) in enumerate(
             [
                 ("Total decoded:", "total"),
-                ("Success:", "succeeded"),
+                ("Succeeded:", "succeeded"),
                 ("Failed:", "failed"),
-                ("Avg time:", "avg_ms"),
-                ("Throughput:", "img_per_sec"),
+                ("Avg decode time (ms):", "avg_ms"),
+                ("Throughput (images/sec):", "img_per_sec"),
             ]
         ):
             ttk.Label(perf_frame, text=label).grid(
@@ -550,7 +563,13 @@ class ExplorerLensApp:
     def _build_settings_tab(self, parent: ttk.Frame) -> None:
         """Build settings controls."""
         header = ttk.Label(parent, text="Settings", style="Header.TLabel")
-        header.pack(anchor=tk.W, padx=12, pady=(12, 8))
+        header.pack(anchor=tk.W, padx=12, pady=(12, 4))
+        ttk.Label(
+            parent,
+            text="General rendering, appearance, and logging options. "
+            "Changes are saved to the configuration file.",
+            wraplength=650,
+        ).pack(anchor=tk.W, padx=12, pady=(0, 8))
 
         frame = ttk.LabelFrame(parent, text="General")
         frame.pack(fill=tk.X, padx=12, pady=4)
@@ -1044,7 +1063,7 @@ class ExplorerLensApp:
                 pystray.MenuItem("Quit", self._tray_quit),
             )
             self._tray_icon = pystray.Icon(
-                "ExplorerLens.py", icon_img, "ExplorerLens.py Manager", menu
+                "ExplorerLens.py", icon_img, "ExplorerLens v32.1.0 — Python Manager", menu
             )
             threading.Thread(target=self._tray_icon.run, daemon=True).start()
         except ImportError:
@@ -1063,4 +1082,3 @@ class ExplorerLensApp:
             self._tray_icon.stop()
         if self._root:
             self._root.after(0, self._on_close)
-

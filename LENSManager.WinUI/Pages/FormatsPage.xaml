@@ -37,6 +37,7 @@
             </ComboBox>
             <ToggleButton Grid.Column="2" x:Name="ShowRegisteredOnly" Margin="8,0,0,0"
                           Content="Registered only" IsChecked="False"
+                          ToolTipService.ToolTip="Show only formats currently registered with Windows Explorer. Registered formats generate thumbnails when you browse."
                           Checked="ShowRegisteredOnly_Changed"
                           Unchecked="ShowRegisteredOnly_Changed"/>
         </Grid>

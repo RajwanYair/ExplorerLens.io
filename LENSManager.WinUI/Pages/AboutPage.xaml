@@ -38,16 +38,19 @@
                         <TextBlock Text="200+" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center"
                                    Foreground="{StaticResource LensAccentBrush}"/>
                         <TextBlock Text="File Formats" FontSize="11" Opacity="0.6" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Images, archives, docs, 3D" FontSize="10" Opacity="0.4" HorizontalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                         <TextBlock Text="25+" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center"
                                    Foreground="{StaticResource LensAccentBrush}"/>
                         <TextBlock Text="Decoders" FontSize="11" Opacity="0.6" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Specialized per format" FontSize="10" Opacity="0.4" HorizontalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                         <TextBlock Text="&lt;17ms" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center"
                                    Foreground="{StaticResource LensAccentBrush}"/>
                         <TextBlock Text="Per Thumbnail" FontSize="11" Opacity="0.6" HorizontalAlignment="Center"/>
+                        <TextBlock Text="GPU-accelerated average" FontSize="10" Opacity="0.4" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
             </Border>

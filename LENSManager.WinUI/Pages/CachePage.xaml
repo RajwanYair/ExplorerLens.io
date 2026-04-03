@@ -10,7 +10,7 @@
             <!-- Header -->
             <TextBlock Text="Cache Management"
                        Style="{StaticResource TitleTextBlockStyle}"/>
-            <TextBlock Text="Monitor and manage the thumbnail cache budget, eviction policy, and sub-millisecond lookup engine."
+            <TextBlock Text="Monitor and control how thumbnails are stored in memory for fast retrieval. A well-tuned cache means instant previews when you revisit folders."
                        Style="{StaticResource BodyTextBlockStyle}"
                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                        TextWrapping="Wrap"/>
@@ -29,11 +29,12 @@
                         CornerRadius="8" Padding="16">
                     <StackPanel>
                         <TextBlock Text="Hit Rate" Style="{StaticResource CaptionTextBlockStyle}"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   ToolTipService.ToolTip="Percentage of thumbnail requests served from cache. Aim for >90%. Low = increase cache budget."/>
                         <TextBlock x:Name="HitRateText" Text="—"
                                    Style="{StaticResource SubtitleTextBlockStyle}"
                                    Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
-                        <TextBlock Text="cache efficiency" Style="{StaticResource CaptionTextBlockStyle}"
+                        <TextBlock Text="how often thumbnails are found in cache" Style="{StaticResource CaptionTextBlockStyle}"
                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
                     </StackPanel>
                 </Border>
@@ -69,11 +70,12 @@
                         CornerRadius="8" Padding="16">
                     <StackPanel>
                         <TextBlock Text="Avg Lookup" Style="{StaticResource CaptionTextBlockStyle}"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   ToolTipService.ToolTip="Average time to find a cached thumbnail. Under 1ms = excellent performance."/>
                         <TextBlock x:Name="AvgLookupText" Text="&lt;1ms"
                                    Style="{StaticResource SubtitleTextBlockStyle}"
                                    Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
-                        <TextBlock Text="sub-ms cache" Style="{StaticResource CaptionTextBlockStyle}"
+                        <TextBlock Text="instant cache lookups" Style="{StaticResource CaptionTextBlockStyle}"
                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
                     </StackPanel>
                 </Border>
@@ -87,7 +89,8 @@
                     <TextBlock Text="Cache Budget" Style="{StaticResource SubtitleTextBlockStyle}"/>
 
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <TextBlock Text="Total budget:" VerticalAlignment="Center" Width="120"/>
+                        <TextBlock Text="Total budget:" VerticalAlignment="Center" Width="120"
+                                   ToolTipService.ToolTip="Maximum RAM for cached thumbnails. More = faster browsing but uses more memory."/>
                         <Slider x:Name="BudgetSlider" Minimum="64" Maximum="4096" Value="512"
                                 Width="300" VerticalAlignment="Center"
                                 ValueChanged="BudgetSlider_ValueChanged"/>
@@ -96,7 +99,8 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <TextBlock Text="Max entries:" VerticalAlignment="Center" Width="120"/>
+                        <TextBlock Text="Max entries:" VerticalAlignment="Center" Width="120"
+                                   ToolTipService.ToolTip="Maximum number of individual files that can be cached. Increase if you browse folders with many files."/>
                         <Slider x:Name="MaxEntriesSlider" Minimum="1000" Maximum="100000" Value="50000"
                                 Width="300" VerticalAlignment="Center"
                                 ValueChanged="MaxEntriesSlider_ValueChanged"/>
@@ -105,7 +109,8 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <TextBlock Text="Hash algorithm:" VerticalAlignment="Center" Width="120"/>
+                        <TextBlock Text="Hash algorithm:" VerticalAlignment="Center" Width="120"
+                                   ToolTipService.ToolTip="Algorithm used to identify cached files. XXH3 is fastest and recommended for most users."/>
                         <ComboBox x:Name="HashAlgoCombo" Width="200">
                             <ComboBoxItem Content="XXH3 (default / fastest)" IsSelected="True"/>
                             <ComboBoxItem Content="SHA-256 (verified)"/>
@@ -121,6 +126,10 @@
                     CornerRadius="8" Padding="20">
                 <StackPanel Spacing="12">
                     <TextBlock Text="Eviction Policy" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <TextBlock Text="When the cache is full, which items to remove first. LRU (default) removes the oldest unused items."
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap" Margin="0,0,0,4"/>
 
                     <ComboBox x:Name="EvictionCombo" Header="Eviction algorithm" Width="300"
                               HorizontalAlignment="Left">

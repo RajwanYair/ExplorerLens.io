@@ -48,32 +48,35 @@ public:
     // Print formatted help for a given subcommand (or global help if None)
     static void PrintHelp(CLICommand cmd = CLICommand::None) {
         if (cmd == CLICommand::Generate || cmd == CLICommand::None) {
-            if (cmd == CLICommand::Generate) wprintf(L"\n  lens generate — Create a single thumbnail\n\n");
+            if (cmd == CLICommand::Generate) wprintf(L"\n  lens generate — Create a single thumbnail image\n\n");
             if (cmd == CLICommand::Generate) wprintf(L"  Usage: lens generate <input-file> [options]\n\n");
             if (cmd == CLICommand::Generate) {
                 wprintf(L"  Options:\n");
                 wprintf(L"    -o, --output <path>   Output file path (default: <input>_thumb.png)\n");
                 wprintf(L"    -s, --size <px>       Thumbnail size in pixels (default: 256)\n");
-                wprintf(L"    -q, --quality         Enable high-quality mode (slower)\n");
-                wprintf(L"        --cpu             Force CPU-only rendering (no GPU)\n");
-                wprintf(L"        --timeout <ms>    Max processing time (default: 15000)\n");
+                wprintf(L"    -q, --quality         High-quality mode: better appearance, 3-5x slower.\n");
+                wprintf(L"                          Use for archival; skip for quick browsing.\n");
+                wprintf(L"        --cpu             Force CPU-only rendering (skip GPU acceleration)\n");
+                wprintf(L"        --timeout <ms>    Max processing time in milliseconds (default: 15000)\n");
                 wprintf(L"\n");
+                wprintf(L"  Output: PNG file matching the input's visual content.\n\n");
                 return;
             }
         }
         if (cmd == CLICommand::Batch || cmd == CLICommand::None) {
-            if (cmd == CLICommand::Batch) wprintf(L"\n  lens batch — Batch-generate thumbnails for a folder\n\n");
+            if (cmd == CLICommand::Batch) wprintf(L"\n  lens batch — Generate thumbnails for every file in a folder\n\n");
             if (cmd == CLICommand::Batch) wprintf(L"  Usage: lens batch <directory> [options]\n\n");
             if (cmd == CLICommand::Batch) {
                 wprintf(L"  Options:\n");
                 wprintf(L"    -o, --output <dir>    Output directory (default: <input>/thumbs/)\n");
                 wprintf(L"    -s, --size <px>       Thumbnail size in pixels (default: 256)\n");
-                wprintf(L"    -f, --filter <glob>   File filter (e.g. \"*.psd\", default: all)\n");
-                wprintf(L"    -r, --recursive       Include subdirectories\n");
-                wprintf(L"    -j, --threads <n>     Worker threads (default: auto)\n");
-                wprintf(L"        --no-skip         Regenerate existing thumbnails\n");
-                wprintf(L"        --no-progress     Disable progress bar\n");
+                wprintf(L"    -f, --filter <glob>   File filter, e.g. \"*.psd\" (default: all supported)\n");
+                wprintf(L"    -r, --recursive       Include all subdirectories\n");
+                wprintf(L"    -j, --threads <n>     Worker threads, 0 = auto-detect (default: auto)\n");
+                wprintf(L"        --no-skip         Regenerate even if thumbnail already exists\n");
+                wprintf(L"        --no-progress     Disable the progress bar\n");
                 wprintf(L"\n");
+                wprintf(L"  Progress: [████░░░░░░] 4/10 files — photo-5.cr2\n\n");
                 return;
             }
         }
