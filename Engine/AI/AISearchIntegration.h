@@ -11,28 +11,28 @@
 namespace ExplorerLens {
 namespace Engine {
 
-enum class AISearchMode : uint8_t {
-    SemanticSimilarity,
+enum class AISearchMode : uint8_t { // NOLINT(readability-identifier-naming)
+    SemanticSimilarity = 0,
     Keywords,
     Visual,
     Hybrid,
-    COUNT = 4
+    COUNT
 };
 
-enum class EmbeddingModel : uint8_t {
-    CLIP,
+enum class EmbeddingModel : uint8_t { // NOLINT(readability-identifier-naming)
+    CLIP = 0,
     ResNet,
     BLIP,
     Sentence,
-    COUNT = 4
+    COUNT
 };
 
-enum class SearchIndexStatus : uint8_t {
-    Building,
+enum class SearchIndexStatus : uint8_t { // NOLINT(readability-identifier-naming)
+    Building = 0,
     Ready,
     Stale,
     Error,
-    COUNT = 4
+    COUNT
 };
 
 class AISearchIntegration {
@@ -74,30 +74,36 @@ public:
     // Average hash: compare each pixel to the mean; returns 64-bit hash
     static uint64_t ComputeAverageHash(
         const uint8_t* data, uint32_t W, uint32_t H, uint32_t stride) noexcept {
-        if (!data || W == 0 || H == 0) return 0;
+        if (!data || W == 0 || H == 0) { return 0; }
         uint64_t sum = 0;
-        for (uint32_t y = 0; y < H; ++y)
-            for (uint32_t x = 0; x < W; ++x)
-                sum += data[y * stride + x];
-        uint64_t mean = sum / (static_cast<uint64_t>(W) * H);
+        for (uint32_t y = 0; y < H; ++y) {
+            for (uint32_t x = 0; x < W; ++x) {
+                sum += data[(y * stride) + x];
+            }
+        }
+        const uint64_t mean = sum / (static_cast<uint64_t>(W) * H);
         uint64_t hash = 0;
         uint32_t bits = 0;
-        for (uint32_t y = 0; y < H && bits < 64; ++y)
-            for (uint32_t x = 0; x < W && bits < 64; ++x)
-                hash |= (static_cast<uint64_t>(data[y * stride + x] > mean) << bits++);
+        for (uint32_t y = 0; y < H && bits < 64; ++y) {
+            for (uint32_t x = 0; x < W && bits < 64; ++x) {
+                hash |= (static_cast<uint64_t>(data[(y * stride) + x] > mean) << bits++);
+            }
+        }
         return hash;
     }
 
     // Difference hash: compare adjacent horizontal pixels; returns 64-bit hash
     static uint64_t ComputeDifferenceHash(
         const uint8_t* data, uint32_t W, uint32_t H, uint32_t stride) noexcept {
-        if (!data || W < 2 || H == 0) return 0;
+        if (!data || W < 2 || H == 0) { return 0; }
         uint64_t hash = 0;
         uint32_t bits = 0;
-        for (uint32_t y = 0; y < H && bits < 64; ++y)
-            for (uint32_t x = 0; x + 1 < W && bits < 64; ++x)
+        for (uint32_t y = 0; y < H && bits < 64; ++y) {
+            for (uint32_t x = 0; x + 1 < W && bits < 64; ++x) {
                 hash |= (static_cast<uint64_t>(
-                    data[y * stride + x] > data[y * stride + x + 1]) << bits++);
+                    data[(y * stride) + x] > data[(y * stride) + x + 1]) << bits++);
+            }
+        }
         return hash;
     }
 

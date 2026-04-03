@@ -14,8 +14,8 @@
 - **Configurations**: Debug, Release
 - **Toolchain**: Visual Studio 18 2026 Build Tools (v145 toolset), MSVC 19.50.35720.0
 - **Build Systems**:
- - **CMake + Ninja** for Engine library + tests + benchmarks + ModernRuntime (preferred)
- - MSBuild for shell extension (LENSShell.sln)
+  - **CMake + Ninja** for Engine library + tests + benchmarks + ModernRuntime (preferred)
+  - MSBuild for shell extension (LENSShell.sln)
 - **Compilation Units**: 190+ total (Engine lib ~150 + tests/benchmarks ~40)
 
 ### Tool Paths (Auto-detected on this machine)
@@ -206,14 +206,12 @@ After each build:
 - [ ] 0 errors in output
 - [ ] 0 warnings in Release (enforced by `/WX`)
 - [ ] Output files exist (CMake preset build):
- - `build/lib/ExplorerLensEngine.lib` — Core engine static library
- - `build/lib/ExplorerLensModernRuntime.lib` — Modern runtime static library
- - `build/bin/EngineTests.exe` — Unit test executable
- - `build/bin/EngineBenchmark.exe` — Benchmark executable
- - `build/bin/IntegrationTests.exe` — Integration test executable
+  - `build/lib/ExplorerLensEngine.lib` — Core engine static library
+  - `build/bin/EngineTests.exe` — Unit test executable
+  - `build/bin/EngineBenchmark.exe` — Benchmark executable
 - [ ] Output files exist (MSBuild):
- - `x64/Release/LENSShell.dll` (~2940 KB) — COM Shell Extension
- - `x64/Release/LENSManager.exe` (~400 KB) — GUI Configuration Utility
+  - `x64/Release/LENSShell.dll` (~2940 KB) — COM Shell Extension
+  - `x64/Release/LENSManager.exe` (~400 KB) — GUI Configuration Utility
 - [ ] Log file saved to `/build-logs`
 - [ ] No build artifacts committed to Git
 
@@ -309,7 +307,7 @@ Current workaround: `/NODEFAULTLIB:LIBCMT` and `/IGNORE:4099` in CMake linker fl
 
 - Core headers: before `# Pipeline` comment
 - Core sources: before `# Pipeline implementations` comment
-- Utils headers: before `# ` comment
+- Utils headers: before `# <!--` comment
 - Utils sources: before closing `)`
 
 ### CMakePresets.json Notes

@@ -430,7 +430,6 @@ set(ENGINE_HEADERS
     Decoders/DatabasePreviewDecoder.h
     Decoders/DDSDecoder.h
     Decoders/DecoderSecurityHardening.h
-    Decoders/DICOMDecoder.h
     Decoders/DICOMDecoderV2.h
     Decoders/DocumentDecoder.h
     Decoders/DPXDecoder.h

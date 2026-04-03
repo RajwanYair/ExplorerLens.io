@@ -3,7 +3,7 @@
 // Medical imaging DICOM format decoder implementation
 //==============================================================================
 
-#include "DICOMDecoder.h"
+#include "DICOMDecoderV2.h"
 #include <algorithm>
 #include <cmath>
 #include <cstring>

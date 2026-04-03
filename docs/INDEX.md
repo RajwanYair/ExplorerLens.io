@@ -20,9 +20,6 @@
 | Document | Description |
 |----------|-------------|
 | [ROADMAP_V30.md](ROADMAP_V30.md) | Gen-6 Roadmap — v30.x "Deneb" + v31.x "Achernar" + v32.x "Fomalhaut" |
-| [SPRINT_PLAN_1100.md](SPRINT_PLAN_1100.md) | Sprints 1061–1160 — v31.9–v33.1 Achernar-Z/Fomalhaut/Vega |
-| [SPRINT_PLAN_1000.md](SPRINT_PLAN_1000.md) | Sprints 961–1060 — v30.0.0 "Deneb" through v31.1.0 "Achernar-R" (Gen-6) |
-| [SPRINT_PLAN_900.md](SPRINT_PLAN_900.md) | Sprints 861–960 — v28.6.0 "Polaris-W" through v29.7.0 "Capella-X" |
 
 ## Development
 
@@ -76,7 +73,7 @@
 | Document | Description |
 |----------|-------------|
 | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Troubleshooting scenarios and known issues |
-| [CODE_SIGNING.md](CODE_SIGNING.md) | Code-signing policy and workflow |
+
 | [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md) | Plugin development guide |
 
 ## Releases and Audit

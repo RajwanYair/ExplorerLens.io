@@ -264,7 +264,7 @@ Because `WIN32_LEAN_AND_MEAN` is globally defined:
 
 - **Current version:** v32.1.3 "Fomalhaut-R"
 - **Source of truth:** `CHANGELOG.md`
-- **Sprint plans:** `docs/SPRINT_PLAN_500.md` (Sprints 461–560) · `docs/SPRINT_PLAN_600.md` (561–660) · `docs/SPRINT_PLAN_700.md` (661–760) · `docs/SPRINT_PLAN_800.md` (761–860) · `docs/SPRINT_PLAN_900.md` (861–960) · `docs/SPRINT_PLAN_1000.md` (961–1060, Gen-6 Deneb/Achernar) · `docs/SPRINT_PLAN_1100.md` (1061–1160, v31.9–v33.1 Achernar-Z/Fomalhaut/Vega)
+- **Sprint plans:** `docs/SPRINT_PLAN_500.md` (Sprints 461–560) · `docs/SPRINT_PLAN_600.md` (561–660) · `docs/SPRINT_PLAN_700.md` (661–760) · `docs/SPRINT_PLAN_800.md` (761–860)
 - **Gen-6 Roadmap:** `docs/ROADMAP_V30.md` — v30.x "Deneb" Platform Unification + v31.x "Achernar" Generative AI
 - **Per feature commit policy:** one clear commit per feature with objective + impacted areas
 - **Deliverables pattern:** header in `Engine/`, test in `Engine/Tests/EngineTests.cpp`, CMakeLists.txt registration (BOTH `Engine/CMakeLists.txt` ENGINE_HEADERS/ENGINE_SOURCES), git commit

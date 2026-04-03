@@ -62,5 +62,7 @@
   // ctypes/tkinter dynamic members lack full type information
   "reportUnknownMemberType": false,
   // Optional member access patterns are validated at runtime
-  "reportOptionalMemberAccess": false
+  "reportOptionalMemberAccess": false,
+  // Third-party packages installed only at runtime (pystray, etc.)
+  "reportMissingImports": false
 }

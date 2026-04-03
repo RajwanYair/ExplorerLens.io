@@ -7,8 +7,8 @@
 # HOW TO DEBUG A FAILURE:
 #   1. Check the auto-opened issue (label: ci/cd + bug) for the run link
 #   2. Click the run link → expand the failed step → read the error
-#   3. For environment problems, use the "Debug CI Environment" workflow
-#      (Actions → Debug CI Environment → Run workflow)
+#   3. For environment problems, run the build locally:
+#        .\build-scripts\Build-MSVC.ps1 -Clean -Test
 #   4. If the build compiled but tests failed, download EngineTests.exe from
 #      the build artifact and run it locally with:
 #        build\bin\EngineTests.exe  (exit code + stdout shows failing test)
@@ -74,11 +74,9 @@ jobs:
               '## How to Debug',
               '',
               '1. **Click the run link above** → expand the red step → read the error',
-              '2. **Quick environment check** (no build):<br>',
-              '   Actions → **Debug CI Environment** → Run workflow → `run_build: false`',
-              '3. **Full repro build** (slow, ~15 min):<br>',
-              '   Actions → **Debug CI Environment** → Run workflow → `run_build: true`<br>',
-              '   Then download the `diagnostic-<run-id>` artifact for `configure.log` + `build.log`',
+              2. **Quick environment check**:<br>
+              `   Check build-logs/ in a local build run`
+              '3. **Full repro build** (slow, ~15 min): run `.\build-scripts\Build-MSVC.ps1 -Clean -Test` locally<br>',
               '4. **External lib cache stale?** → Actions → Caches → delete `external-libs-*` → re-run',
               '5. **Linker error** `LNK1127`? → Lib was built with a different MSVC toolset.',
               '   Delete the cache → the composite action will rebuild from source.',

@@ -131,7 +131,7 @@ class ExplorerLensApp:
             tab_bg = "#2d2d30"
             tab_sel = "#1e1e1e"
 
-            self._root.configure(bg=bg)
+            self._root.configure(bg=bg)  # type: ignore[union-attr]
             style.configure(
                 ".",
                 background=bg,
@@ -356,7 +356,7 @@ class ExplorerLensApp:
                 group_frame,
                 text="All",
                 variable=all_var,
-                command=lambda gk=group_key: self._on_group_all_toggle(gk),
+                command=lambda gk=group_key: self._on_group_all_toggle(gk),  # type: ignore[misc]
             )
             all_cb.grid(row=0, column=0, sticky=tk.W, padx=(8, 4), pady=2)
 
@@ -376,12 +376,12 @@ class ExplorerLensApp:
                     group_frame,
                     text=cb_text,
                     variable=var,
-                    command=lambda gk=group_key: self._on_format_toggle(gk),
+                    command=lambda gk=group_key: self._on_format_toggle(gk),  # type: ignore[misc]
                 )
                 cb.grid(row=row_in_group, column=col, sticky=tk.W, padx=4, pady=1)
                 # Tooltip via binding
                 tip_text = fmt_info["tip"]
-                cb.bind("<Enter>", lambda e, t=tip_text: self._status_var.set(t))
+                cb.bind("<Enter>", lambda e, t=tip_text: self._status_var.set(t))  # type: ignore[misc]
                 cb.bind("<Leave>", lambda e: self._status_var.set("Ready"))
 
                 col += 1
@@ -1039,12 +1039,13 @@ class ExplorerLensApp:
                 pass
         if self._engine is not None:
             self._engine.shutdown()
-        self._root.destroy()
+        if self._root is not None:
+            self._root.destroy()
 
     def _setup_tray_icon(self) -> None:
         """Create a system tray icon with context menu."""
         try:
-            import pystray
+            import pystray  # type: ignore[import-untyped]
             from PIL import Image as PILImage
 
             # Create a simple icon (blue square with "EL")
@@ -1055,7 +1056,7 @@ class ExplorerLensApp:
             try:
                 font = ImageFont.truetype("segoeui.ttf", 28)
             except Exception:
-                font = ImageFont.load_default()
+                font = ImageFont.load_default()  # type: ignore[assignment]
             draw.text((8, 14), "EL", fill=(255, 255, 255), font=font)
 
             menu = pystray.Menu(
@@ -1065,7 +1066,7 @@ class ExplorerLensApp:
             self._tray_icon = pystray.Icon(
                 "ExplorerLens.py", icon_img, "ExplorerLens v32.1.0 — Python Manager", menu
             )
-            threading.Thread(target=self._tray_icon.run, daemon=True).start()
+            threading.Thread(target=self._tray_icon.run, daemon=True).start()  # type: ignore[union-attr]
         except ImportError:
             logger.debug("pystray not installed — tray icon disabled")
         except Exception as exc:

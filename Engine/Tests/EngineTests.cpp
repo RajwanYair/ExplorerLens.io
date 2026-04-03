@@ -71,7 +71,6 @@
 #include "../Decoders/CADFormatDecoder.h"
 #include "../Decoders/DDSDecoder.h"
 #include "../Decoders/DecoderSecurityHardening.h"
-#include "../Decoders/DICOMDecoder.h"
 #include "../Decoders/DICOMDecoderV2.h"
 #include "../Decoders/DPXDecoder.h"
 #include "../Decoders/DatabasePreviewDecoder.h"

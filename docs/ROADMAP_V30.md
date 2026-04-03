@@ -4,7 +4,7 @@
 **Current Active Version:** v25.2.0 "Rigel-S"  
 **This Major Series Begins:** v30.0.0 "Deneb" (sprint 961)  
 **Pre-requisite Series:** [ROADMAP_V25.md](ROADMAP_V25.md) (v25.x Rigel through v26.x Canopus)  
-**Sprint Detail:** [SPRINT_PLAN_1000.md](SPRINT_PLAN_1000.md) — Sprints 961–1060
+**Sprint Detail:** Sprints 961–1060 (historical — plans archived)
 
 ---
 
@@ -259,5 +259,5 @@ in regulated environments. This is a hard invariant — not a soft default.
 | [SPRINT_PLAN_600.md](SPRINT_PLAN_600.md) | v25.0–v26.1 | 561–660 | **Active execution** |
 | [SPRINT_PLAN_700.md](SPRINT_PLAN_700.md) | v26.2–v27.3 | 661–760 | Planned (Canopus/Sirius) |
 | [SPRINT_PLAN_800.md](SPRINT_PLAN_800.md) | v27.4–v28.5 | 761–860 | Planned (Sirius/Polaris) |
-| [SPRINT_PLAN_900.md](SPRINT_PLAN_900.md) | v28.6–v29.7 | 861–960 | Planned (Polaris/Capella) |
-| [SPRINT_PLAN_1000.md](SPRINT_PLAN_1000.md) | v30.0–v31.1 | 961–1060 | **This Roadmap** |
+| SPRINT_PLAN_900 | v28.6–v29.7 | 861–960 | Historical (archived) |
+| SPRINT_PLAN_1000 | v30.0–v31.1 | 961–1060 | Historical (archived) |
