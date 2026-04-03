@@ -2,14 +2,13 @@
 // ExplorerLens v15.0.0 - Implementation
 // Copyright (c) 2025 ExplorerLens Project
 
-#include "gpu_accelerator.h"
+#include "StdAfx.h"  // Must be first — provides ATL/COM/Windows headers (PCH anchor)
 
+#include "gpu_accelerator.h"
 #include <algorithm>
 #include <chrono>
 #include <sstream>
 #include <string>
-
-#include "StdAfx.h"
 
 namespace ExplorerLens {
 
@@ -106,8 +105,8 @@ HRESULT GPUAccelerator::Initialize(bool allowWARP)
                     OutputDebugStringW((L"[GPU] Device: " + m_deviceInfo.name + L"\n").c_str());
 
                     wchar_t msg[256];
-                    swprintf_s(msg, L"[GPU] VRAM: %.1f MB, Feature Level: 0x%04X\n",
-                               m_deviceInfo.dedicatedVideoMemory / (1024.0 * 1024.0), m_deviceInfo.featureLevel);
+                    swprintf_s(msg, _countof(msg), L"[GPU] VRAM: %.1f MB, Feature Level: 0x%04X\n",
+                               m_deviceInfo.dedicatedVideoMemory / (1024.0 * 1024.0), static_cast<unsigned>(m_deviceInfo.featureLevel));
                     OutputDebugStringW(msg);
                 } else {
                     DT_LOG_HRESULT(LogLevel::LVL_ERROR, LogCategory::GPU, "Detect capabilities", hr);

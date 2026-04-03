@@ -1,4 +1,4 @@
-# release-drafter.yml — Auto-draft the next release from merged PR titles
+﻿# release-drafter.yml — Auto-draft the next release from merged PR titles
 #
 # Runs on every push to main. Updates a "Draft" release with categorized PR
 # entries. When you tag vX.Y.Z, release.yml publishes the real release and
@@ -18,6 +18,10 @@ on:
 permissions:
   contents: write
   pull-requests: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   update-draft:

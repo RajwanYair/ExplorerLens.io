@@ -1,4 +1,4 @@
-# CI Toolchain Upgrade — v23.6.0 "Vega-W"
+﻿# CI Toolchain Upgrade — v23.6.0 "Vega-W"
 # Ensures all CI jobs use the latest available MSVC toolset.
 # On GitHub-hosted windows-latest: MSVC v143 (VS 2022)
 # On local dev: MSVC v145 (VS 18 2026) via Build-MSVC.ps1
@@ -15,6 +15,11 @@ on:
 
 permissions:
   contents: read
+
+env:
+  # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   verify-toolchain:

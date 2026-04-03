@@ -1,4 +1,4 @@
-name: Performance Regression Gate
+﻿name: Performance Regression Gate
 
 on:
   pull_request:
@@ -15,6 +15,11 @@ concurrency:
 #   +20% median latency   → warning (non-blocking)
 #   -15% batch throughput → BLOCKS merge
 #   +30% memory peak      → warning (non-blocking)
+
+env:
+  # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   performance-regression-check:

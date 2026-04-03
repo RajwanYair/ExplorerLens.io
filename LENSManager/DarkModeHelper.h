@@ -345,7 +345,8 @@ inline void ApplyDarkStatusBar(HWND hStatusBar, bool darkMode) {
     ThemeColors theme = darkMode ? GetDarkTheme() : GetLightTheme();
     SetDarkScrollbar(hStatusBar, darkMode);
     ::SendMessage(hStatusBar, SB_SETBKCOLOR, 0, (LPARAM)theme.background);
-    ::SendMessage(hStatusBar, SB_SETTEXTCOLOR, 0, (LPARAM)theme.text);
+    // SB_SETTEXTCOLOR is not a standard Windows API; text color on status bars
+    // requires NM_CUSTOMDRAW or owner-draw. Force repaint to pick up theme change.
     InvalidateRect(hStatusBar, nullptr, TRUE);
 }
 

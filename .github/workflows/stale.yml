@@ -1,4 +1,4 @@
-# stale.yml — Close abandoned issues and pull requests automatically
+﻿# stale.yml — Close abandoned issues and pull requests automatically
 #
 # Issues:   stale after 30 days of inactivity → closed after 7 more days
 # PRs:      stale after 21 days of inactivity → closed after 7 more days
@@ -14,6 +14,10 @@ on:
 permissions:
   issues: write
   pull-requests: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   stale:

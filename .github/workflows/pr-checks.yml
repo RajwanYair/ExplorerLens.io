@@ -1,4 +1,4 @@
-# pr-checks.yml — Pull Request validation checks
+﻿# pr-checks.yml — Pull Request validation checks
 #
 # Runs on every PR opened/updated against main. Validates:
 #   1. Conventional commit format in the PR title
@@ -22,6 +22,10 @@ permissions:
 concurrency:
   group: pr-checks-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   # ── 1. Conventional commit title ────────────────────────────────────────────

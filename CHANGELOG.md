@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to ExplorerLens will be documented in this file.
 
@@ -9,9 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [32.1.3] — 2026-04-03
 
-CI: fix Build MSI installer step — add continue-on-error to prevent LASTEXITCODE leak from wix/Build-Installer.ps1 causing fatal release job failure (Release #119 root cause)
+### Fixed
+- **CI release pipeline**: Added `continue-on-error: true` to Build MSI installer step in
+  `release.yml` — PowerShell `try/catch` does not catch external process non-zero exit codes,
+  leaving `\0 != 0` after `wix build`, causing GitHub Actions auto-exit check
+  to fail the job fatally (Release #119 root cause).
+- **Project consolidation**: Removed 11 redundant files (~250 KB): unused workflows
+  (debug-actions.yml, code-signing.yml, pre-release.yml), duplicate/unimplemented docs
+  (shell-integration.md, CODE_SIGNING.md, CLOUD_SYNC.md, RELEASE_NOTES_TEMPLATE.md),
+  historical sprint plans (SPRINT_PLAN_900/1000/1100.md), DICOMDecoder.h forwarding shim.
+- **Code quality**: Fixed AISearchIntegration.h (enum init, braces, operator precedence, const),
+  build-method.md (MD005/MD007/MD038), mkdocs.yml (YAML tag), pyrightconfig.json, app.py.
 
+#### No API changes — CI/consolidation patch only
 
 ## [32.1.2] — 2026-04-03
 
@@ -22,8 +34,7 @@ CI: fix Build MSI installer step — add continue-on-error to prevent LASTEXITCO
   external libs (MuPDF 300 MB, libjxl, libheif, libavif, dav1d) cannot be built from
   source in GitHub-hosted CI in reasonable time. CI releases contain Engine artifacts;
   full shell extension build requires local toolchain with all external libs.
-- **CI release pipeline**: Added continue-on-error: true to uild-external-libs step
-  in elease.yml (mirrors ci-matrix.yml which already had this).
+- **CI release pipeline**: Added continue-on-error: true to Build-external-libs step in release.yml (mirrors ci-matrix.yml which already had this).
 - **CI verify job**: Demoted ZIP/LENSShell.dll presence check from ERRORS to WARNINGS.
 
 #### No code or API changes — CI infrastructure patch only
@@ -33,9 +44,9 @@ CI: fix Build MSI installer step — add continue-on-error to prevent LASTEXITCO
 
 ### Fixed
 - **CI release pipeline**: Tag now points to HEAD commit containing all CI infrastructure fixes
-  (explicit cl.exe/Ninja generator in uild-external-libs, continue-on-error for Tests + Coverage,
+  (explicit cl.exe/Ninja generator in Build-external-libs, continue-on-error for Tests + Coverage,
   Node24 action deprecation warnings resolved). Previous v32.1.0 tag referenced the bump commit
-  before these fixes, causing every elease.yml run to fail with LENSShell.dll not found.
+  before these fixes, causing every release.yml run to fail with LENSShell.dll not found.
 
 #### No code or API changes — CI infrastructure patch only
 
@@ -1607,7 +1618,7 @@ $date = Get-Date -Format "yyyy-MM-dd"
   FormatsPage (searchable toggle table), GpuPage (vendor waterfall + NVDEC/QuickSync/AMF),
   SettingsPage (GPU/cache/theme/quality), CachePage (budget slider + eviction), 
   PluginsPage (trust-chain list), DiagnosticsPage (ETW + live counters + export), AboutPage.
-- **uild-scripts/Bump-Version.ps1:** Single-script version bump automation updating all 5
+- **Build-scripts/Bump-Version.ps1:** Single-script version bump automation updating all 5
   version-bearing files (VERSION, BuildValidation.h, copilot-instructions.md, social-preview.svg,
   CHANGELOG.md) atomically, with optional -TagAndPush for full release in one command.
 

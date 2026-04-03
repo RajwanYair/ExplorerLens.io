@@ -1,4 +1,4 @@
-# notify-failure.yml — Open a GitHub Issue whenever a key workflow fails;
+﻿# notify-failure.yml — Open a GitHub Issue whenever a key workflow fails;
 #                      auto-close it when the same workflow/branch succeeds.
 #
 # TRIGGERED BY: workflow_run completion events for four core workflows.
@@ -30,6 +30,10 @@ on:
 permissions:
   issues: write
   actions: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   # ── Open or update a failure issue ────────────────────────────────────────

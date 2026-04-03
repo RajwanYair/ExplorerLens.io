@@ -21,6 +21,8 @@ env:
   CMAKE_PRESET_RELEASE: ci-release
   CMAKE_PRESET_DEBUG: ci-debug
   SOLUTION_FILE: LENSShell.sln
+  # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ============================================================================

@@ -1,4 +1,4 @@
-name: Code Coverage
+﻿name: Code Coverage
 
 # v23.6.0 "Vega-W": Measures Engine/Core + Engine/Decoders
 # coverage via OpenCppCoverage (Windows) / gcov-llvm (Linux). Enforces a
@@ -26,6 +26,11 @@ concurrency:
 env:
   COVERAGE_FLOOR_CORE: 60      # Minimum % for Engine/Core
   COVERAGE_FLOOR_DECODERS: 60  # Minimum % for Engine/Decoders
+
+env:
+  # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   coverage-windows:

@@ -1,4 +1,4 @@
-name: CodeQL Security Analysis
+﻿name: CodeQL Security Analysis
 
 on:
   push:
@@ -13,6 +13,11 @@ on:
 concurrency:
   group: codeql-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   analyze:

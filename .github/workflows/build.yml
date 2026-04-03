@@ -1,4 +1,4 @@
-# build.yml — Manual / scheduled verification build for ExplorerLens Engine
+﻿# build.yml — Manual / scheduled verification build for ExplorerLens Engine
 # Copyright (c) 2026 ExplorerLens Project
 #
 # NOTE: ci-matrix.yml is the canonical PR/push CI for ExplorerLens.
@@ -24,6 +24,11 @@ env:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 
 jobs:
   build:
