@@ -20,15 +20,12 @@ on:
 env:
   BUILD_TYPE: Release
   VCPKG_DISABLE_METRICS: 1
+  # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  # Opt into Node.js 24 for all actions (avoids Node 20 deprecation warnings)
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 
 jobs:
   build:
