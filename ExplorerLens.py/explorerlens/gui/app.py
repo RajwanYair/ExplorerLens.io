@@ -50,7 +50,7 @@ class ExplorerLensApp:
     def run(self) -> None:
         """Launch the GUI."""
         self._root = tk.Tk()
-        self._root.title("ExplorerLens.py Manager")
+        self._root.title("ExplorerLens Manager (Python)")
         self._root.geometry("700x600")
         self._root.minsize(600, 500)
 
@@ -61,7 +61,7 @@ class ExplorerLensApp:
         if self._dark_mode:
             self._root.option_add("*TCombobox*Listbox.background", "#2d2d30")
             self._root.option_add("*TCombobox*Listbox.foreground", "#d4d4d4")
-            self._root.option_add("*TCombobox*Listbox.selectBackground", "#0e639c")
+            self._root.option_add("*TCombobox*Listbox.selectBackground", "#2F81F7")
             self._root.option_add("*TCombobox*Listbox.selectForeground", "#ffffff")
             # Ensure all native tk widgets (Text, Canvas, Toplevel) get dark colors
             self._root.option_add("*Text.background", "#2d2d30")
@@ -72,13 +72,13 @@ class ExplorerLensApp:
             self._root.option_add("*Listbox.foreground", "#d4d4d4")
             self._root.option_add("*Menu.background", "#2d2d30")
             self._root.option_add("*Menu.foreground", "#d4d4d4")
-            self._root.option_add("*Menu.activeBackground", "#0e639c")
+            self._root.option_add("*Menu.activeBackground", "#2F81F7")
             self._root.option_add("*Menu.activeForeground", "#ffffff")
             self._root.option_add("*Toplevel.background", "#1e1e1e")
             self._root.option_add("*Label.background", "#1e1e1e")
             self._root.option_add("*Label.foreground", "#d4d4d4")
             self._root.option_add("*Frame.background", "#1e1e1e")
-            self._root.option_add("*Button.background", "#0e639c")
+            self._root.option_add("*Button.background", "#2F81F7")
             self._root.option_add("*Button.foreground", "#ffffff")
             self._root.option_add("*Checkbutton.background", "#1e1e1e")
             self._root.option_add("*Checkbutton.foreground", "#d4d4d4")
@@ -127,7 +127,7 @@ class ExplorerLensApp:
             fg = "#d4d4d4"
             field_bg = "#2d2d30"
             border = "#3e3e42"
-            accent = "#0e639c"
+            accent = "#2F81F7"
             tab_bg = "#2d2d30"
             tab_sel = "#1e1e1e"
 
@@ -298,9 +298,15 @@ class ExplorerLensApp:
     def _build_formats_tab(self, parent: ttk.Frame) -> None:
         """Build per-format checkboxes grouped by category (mirrors LENSManager)."""
         header = ttk.Label(
-            parent, text="Supported Format Handlers", style="Header.TLabel"
+            parent, text="File Format Handlers", style="Header.TLabel"
         )
         header.pack(anchor=tk.W, padx=12, pady=(12, 4))
+        ttk.Label(
+            parent,
+            text="Enable or disable thumbnail generation for each format group. "
+            "Changes take effect after Apply & Save.",
+            wraplength=650,
+        ).pack(anchor=tk.W, padx=12, pady=(0, 4))
 
         # Toolbar: Select All / Deselect All / Save
         toolbar = ttk.Frame(parent)
@@ -490,9 +496,11 @@ class ExplorerLensApp:
 
         info = ttk.Label(
             parent,
-            text="Register ExplorerLens.py as the Windows thumbnail "
-            "provider for enabled formats.\n"
-            "Requires administrator privileges.",
+            text="Register ExplorerLens as the Windows Explorer thumbnail "
+            "provider for all enabled file formats. This writes COM handler "
+            "entries to the registry and requires administrator privileges.\n\n"
+            "After registering, restart Explorer or open a new folder window "
+            "to see thumbnails.",
             wraplength=600,
         )
         info.pack(anchor=tk.W, padx=12, pady=4)
@@ -615,21 +623,26 @@ class ExplorerLensApp:
         )
 
     def _build_about_tab(self, parent: ttk.Frame) -> None:
-        """Build About tab (mirrors EXE's About dialog)."""
-        header = ttk.Label(parent, text="ExplorerLens.py", style="Header.TLabel")
+        """Build About tab."""
+        header = ttk.Label(parent, text="ExplorerLens v32.1.0", style="Header.TLabel")
         header.pack(anchor=tk.W, padx=12, pady=(12, 4))
 
         info_lines = [
-            "Python companion for ExplorerLens — Windows Shell Thumbnail Provider",
+            "GPU-Accelerated Thumbnail Provider for Windows Explorer",
+            "Codename: Fomalhaut-R",
             "",
-            "ExplorerLens.io  — C++/COM Shell Extension (LENSShell.dll)",
-            "ExplorerLens.py  — Python GUI Manager + Decode Engine",
+            "Components:",
+            "  LENSShell.dll    — COM Shell Extension (in-process)",
+            "  LENSManager.exe  — Configuration GUI (WTL / WinUI)",
+            "  ExplorerLens.py  — Python GUI Manager + Decode Engine",
+            "  lens.exe         — Command-line thumbnail tool",
             "",
             f"Supported formats: {len(FORMAT_REGISTRY)}",
             f"Format groups: {len(FORMAT_GROUPS)}",
             f"COM CLSID: {{9E6ECB90-5A61-42BD-B851-D3297D9C7F39}}",
             "",
             "Copyright (c) 2026 ExplorerLens Project",
+            "License: MIT",
         ]
         for line in info_lines:
             ttk.Label(parent, text=line, wraplength=600).pack(
@@ -1050,3 +1063,4 @@ class ExplorerLensApp:
             self._tray_icon.stop()
         if self._root:
             self._root.after(0, self._on_close)
+

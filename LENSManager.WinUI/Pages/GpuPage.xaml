@@ -1,5 +1,5 @@
-<!-- GpuPage.xaml — WinUI 3 GPU Pipeline Info Panel
-     Sprint 46 (v15.7.0 Modern GUI) — GPU vendor, D3D feature level, VRAM, backend chain -->
+<!-- GpuPage.xaml — GPU Pipeline Status
+     GPU vendor, DirectX feature level, VRAM, and render backend chain. -->
 <Page
     x:Class="LENSManager.Pages.GpuPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

@@ -1,5 +1,5 @@
-<!-- DashboardPage.xaml — WinUI 3 Dashboard Page
-     Sprint 44 (v15.7.0 Modern GUI) — Live thumbnail pipeline visualizer + status cards -->
+<!-- DashboardPage.xaml — Live Status Overview
+     Thumbnail pipeline status cards, recent activity, and throughput metrics. -->
 <Page
     x:Class="LENSManager.Pages.DashboardPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -21,7 +21,8 @@
 
                 <!-- Registration status -->
                 <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        CornerRadius="8" Padding="16" Margin="0,0,8,0">
+                        CornerRadius="8" Padding="16" Margin="0,0,8,0"
+                        ToolTipService.ToolTip="Whether the ExplorerLens COM shell extension is registered with Windows Explorer">
                     <StackPanel>
                         <FontIcon Glyph="&#xE7BA;" FontSize="24" Foreground="{StaticResource LensAccentBrush}"/>
                         <TextBlock Text="Shell Extension" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6" Margin="0,4,0,0"/>
@@ -32,7 +33,8 @@
 
                 <!-- GPU status -->
                 <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        CornerRadius="8" Padding="16" Margin="0,0,8,0">
+                        CornerRadius="8" Padding="16" Margin="0,0,8,0"
+                        ToolTipService.ToolTip="Active GPU render backend used for thumbnail generation">
                     <StackPanel>
                         <FontIcon Glyph="&#xE7F4;" FontSize="24" Foreground="{StaticResource LensAccentBrush}"/>
                         <TextBlock Text="GPU Acceleration" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6" Margin="0,4,0,0"/>
@@ -42,7 +44,8 @@
 
                 <!-- Cache hit rate -->
                 <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        CornerRadius="8" Padding="16" Margin="0,0,8,0">
+                        CornerRadius="8" Padding="16" Margin="0,0,8,0"
+                        ToolTipService.ToolTip="Percentage of thumbnail requests served from cache without re-decoding">
                     <StackPanel>
                         <FontIcon Glyph="&#xE82D;" FontSize="24" Foreground="{StaticResource LensAccentBrush}"/>
                         <TextBlock Text="Cache Hit Rate" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6" Margin="0,4,0,0"/>
@@ -53,7 +56,8 @@
 
                 <!-- Thumbnails generated -->
                 <Border Grid.Column="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        CornerRadius="8" Padding="16">
+                        CornerRadius="8" Padding="16"
+                        ToolTipService.ToolTip="Total thumbnails generated since this Explorer session started">
                     <StackPanel>
                         <FontIcon Glyph="&#xE8B9;" FontSize="24" Foreground="{StaticResource LensAccentBrush}"/>
                         <TextBlock Text="Thumbnails / Session" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6" Margin="0,4,0,0"/>

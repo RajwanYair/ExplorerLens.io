@@ -1,6 +1,5 @@
-<!-- SettingsPage.xaml — WinUI 3 Configuration Settings Page
-     Sprint 42 (v15.7.0 Modern GUI) — Application settings panels
-     Covers: thumbnail size, GPU selection, cache budget, theme, and advanced flags. -->
+<!-- SettingsPage.xaml — Application Settings
+     Thumbnail rendering, GPU backend, cache, and appearance preferences. -->
 <Page
     x:Class="LENSManager.Pages.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -57,11 +56,11 @@
                     <!-- Quality vs speed tradeoff -->
                     <StackPanel>
                         <TextBlock Text="Quality Mode" FontWeight="SemiBold"/>
-                        <TextBlock Text="Balanced is recommended for explorer performance." Opacity="0.6" FontSize="12" Margin="0,0,0,4"/>
+                        <TextBlock Text="Controls the speed vs. quality tradeoff for thumbnail rendering. Balanced is recommended for everyday use." Opacity="0.6" FontSize="12" Margin="0,0,0,4"/>
                         <RadioButtons>
-                            <RadioButton Content="Speed (fastest, lower quality)"/>
-                            <RadioButton Content="Balanced (recommended)" IsChecked="True"/>
-                            <RadioButton Content="Quality (slower, best output)"/>
+                            <RadioButton Content="Speed — Fastest rendering, slightly lower quality"/>
+                            <RadioButton Content="Balanced — Recommended for everyday Explorer browsing" IsChecked="True"/>
+                            <RadioButton Content="Quality — Best output, takes longer per thumbnail"/>
                         </RadioButtons>
                     </StackPanel>
                 </StackPanel>

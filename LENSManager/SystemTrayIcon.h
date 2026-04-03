@@ -42,7 +42,7 @@ public:
     m_nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP | NIF_SHOWTIP;
     m_nid.uCallbackMessage = WM_TRAYICON;
     m_nid.hIcon = hIcon;
-    wcscpy_s(m_nid.szTip, L"ExplorerLens v15.0.0 — Thumbnail Handler");
+    wcscpy_s(m_nid.szTip, L"ExplorerLens v32.1.0 — Thumbnail Handler");
 
     // Enable modern GUID-based tray icon (Windows 7+)
     m_nid.uVersion = NOTIFYICON_VERSION_4;

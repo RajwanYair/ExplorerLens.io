@@ -1,7 +1,5 @@
-<!-- App.xaml — WinUI 3 Application Resources
-     Sprint 41 (v15.7.0 Modern GUI)
-     Defines global theme resources: AccentColor, FluentDark/Light themes,
-     NavigationView styles, and font overrides. -->
+<!-- App.xaml — ExplorerLens Manager Theme Resources
+     Global color palette, fonts, and NavigationView overrides. -->
 <Application
     x:Class="LENSManager.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

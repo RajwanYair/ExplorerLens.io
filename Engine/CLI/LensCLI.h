@@ -95,7 +95,32 @@ private:
 
     static bool SaveBitmapToPNG(LENS_THUMBNAIL_HANDLE hThumb, const std::wstring& outPath);
     static std::wstring DefaultOutputPath(const std::wstring& inputPath);
-    static void PrintUsage();
+
+    static void PrintUsage() {
+        wprintf(L"\n");
+        wprintf(L"  ExplorerLens CLI — GPU-accelerated thumbnail generator\n");
+        wprintf(L"  Version 32.1.0 (Fomalhaut-R)\n");
+        wprintf(L"\n");
+        wprintf(L"  Usage:  lens.exe <command> [options]\n");
+        wprintf(L"\n");
+        wprintf(L"  Commands:\n");
+        wprintf(L"    generate  <file>           Generate a single thumbnail\n");
+        wprintf(L"    batch     <dir>            Batch-generate thumbnails for a folder\n");
+        wprintf(L"    info      <file>           Show file metadata and decoder info\n");
+        wprintf(L"    formats                    List all supported file formats\n");
+        wprintf(L"    cache     [clear|stats]    Manage the thumbnail cache\n");
+        wprintf(L"    version                    Print version and exit\n");
+        wprintf(L"    help      [command]        Show help for a command\n");
+        wprintf(L"\n");
+        wprintf(L"  Examples:\n");
+        wprintf(L"    lens generate photo.cr2 --output thumb.png --size 512\n");
+        wprintf(L"    lens batch ./photos --recursive --threads 4\n");
+        wprintf(L"    lens formats | findstr /i raw\n");
+        wprintf(L"    lens cache stats\n");
+        wprintf(L"\n");
+        wprintf(L"  Run 'lens help <command>' for detailed options.\n");
+        wprintf(L"\n");
+    }
 
     // ANSI escape guards
     static bool s_ansiEnabled;

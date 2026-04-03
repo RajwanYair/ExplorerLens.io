@@ -21,7 +21,7 @@ void CAboutDlg::PopulateAboutInfo() {
 	std::wostringstream oss;
 
 	// Application version
-	oss << L"ExplorerLens v15.0.0 (Zenith)\r\n";
+	oss << L"ExplorerLens v32.1.0 (Fomalhaut-R)\r\n";
 	oss << L"Build: " << __DATE__ << L" " << __TIME__ << L"\r\n";
 	oss << L"\r\n";
 

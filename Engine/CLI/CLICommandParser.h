@@ -46,7 +46,39 @@ public:
                             std::wstring&    infoPath);
 
     // Print formatted help for a given subcommand (or global help if None)
-    static void PrintHelp(CLICommand cmd = CLICommand::None);
+    static void PrintHelp(CLICommand cmd = CLICommand::None) {
+        if (cmd == CLICommand::Generate || cmd == CLICommand::None) {
+            if (cmd == CLICommand::Generate) wprintf(L"\n  lens generate — Create a single thumbnail\n\n");
+            if (cmd == CLICommand::Generate) wprintf(L"  Usage: lens generate <input-file> [options]\n\n");
+            if (cmd == CLICommand::Generate) {
+                wprintf(L"  Options:\n");
+                wprintf(L"    -o, --output <path>   Output file path (default: <input>_thumb.png)\n");
+                wprintf(L"    -s, --size <px>       Thumbnail size in pixels (default: 256)\n");
+                wprintf(L"    -q, --quality         Enable high-quality mode (slower)\n");
+                wprintf(L"        --cpu             Force CPU-only rendering (no GPU)\n");
+                wprintf(L"        --timeout <ms>    Max processing time (default: 15000)\n");
+                wprintf(L"\n");
+                return;
+            }
+        }
+        if (cmd == CLICommand::Batch || cmd == CLICommand::None) {
+            if (cmd == CLICommand::Batch) wprintf(L"\n  lens batch — Batch-generate thumbnails for a folder\n\n");
+            if (cmd == CLICommand::Batch) wprintf(L"  Usage: lens batch <directory> [options]\n\n");
+            if (cmd == CLICommand::Batch) {
+                wprintf(L"  Options:\n");
+                wprintf(L"    -o, --output <dir>    Output directory (default: <input>/thumbs/)\n");
+                wprintf(L"    -s, --size <px>       Thumbnail size in pixels (default: 256)\n");
+                wprintf(L"    -f, --filter <glob>   File filter (e.g. \"*.psd\", default: all)\n");
+                wprintf(L"    -r, --recursive       Include subdirectories\n");
+                wprintf(L"    -j, --threads <n>     Worker threads (default: auto)\n");
+                wprintf(L"        --no-skip         Regenerate existing thumbnails\n");
+                wprintf(L"        --no-progress     Disable progress bar\n");
+                wprintf(L"\n");
+                return;
+            }
+        }
+        // Global help — delegate to LensCLI::PrintUsage()
+    }
 
 private:
     static std::vector<Token> Lex(int argc, wchar_t* argv[], int startFrom = 1);

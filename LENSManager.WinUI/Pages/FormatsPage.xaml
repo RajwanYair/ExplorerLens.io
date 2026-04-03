@@ -1,5 +1,5 @@
-<!-- FormatsPage.xaml — WinUI 3 Format Registry Editor
-     Sprint 43 (v15.7.0 Modern GUI) — Format registry editor with decoder routing info -->
+<!-- FormatsPage.xaml — File Format Manager
+     Search, filter, and toggle 200+ supported file format handlers. -->
 <Page
     x:Class="LENSManager.Pages.FormatsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

@@ -1,5 +1,5 @@
-<!-- AboutPage.xaml — WinUI 3 About Page
-     Sprint 41/49 (v15.7.0 Modern GUI) — Version, license, and links -->
+<!-- AboutPage.xaml — Version, License & Links
+     Displays current version, quick stats, documentation links, and licensing info. -->
 <Page
     x:Class="LENSManager.Pages.AboutPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -17,7 +17,7 @@
                           HorizontalAlignment="Center"/>
                 <TextBlock Text="ExplorerLens" Style="{StaticResource TitleLargeTextBlockStyle}"
                            HorizontalAlignment="Center"/>
-                <TextBlock x:Name="VersionLabel" Text="v15.7.0 (Zenith-X)"
+                <TextBlock x:Name="VersionLabel" Text="v32.1.0 (Fomalhaut-R)"
                            Style="{StaticResource SubtitleTextBlockStyle}"
                            HorizontalAlignment="Center" Opacity="0.7"/>
                 <TextBlock Text="GPU-Accelerated Thumbnail Provider for Windows Explorer"
