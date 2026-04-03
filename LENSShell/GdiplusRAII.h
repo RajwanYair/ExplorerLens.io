@@ -1,7 +1,8 @@
 #pragma once
 
-#include <windows.h>
 #include <gdiplus.h>
+
+#include <windows.h>
 
 namespace ExplorerLens {
 
@@ -10,10 +11,12 @@ namespace ExplorerLens {
 /// Ensures GdiplusStartup is paired with GdiplusShutdown.
 /// Thread-safe singleton pattern.
 /// </summary>
-class GdiplusRAII {
-public:
+class GdiplusRAII
+{
+  public:
     // Get singleton instance
-    static GdiplusRAII& GetInstance() {
+    static GdiplusRAII& GetInstance()
+    {
         static GdiplusRAII instance;
         return instance;
     }
@@ -24,16 +27,21 @@ public:
     GdiplusRAII(GdiplusRAII&&) = delete;
     GdiplusRAII& operator=(GdiplusRAII&&) = delete;
 
-    bool IsInitialized() const { return m_initialized; }
+    bool IsInitialized() const
+    {
+        return m_initialized;
+    }
 
-private:
-    GdiplusRAII() {
+  private:
+    GdiplusRAII()
+    {
         Gdiplus::GdiplusStartupInput gdiplusStartupInput;
         Gdiplus::Status status = Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, nullptr);
         m_initialized = (status == Gdiplus::Ok);
     }
 
-    ~GdiplusRAII() {
+    ~GdiplusRAII()
+    {
         if (m_initialized) {
             Gdiplus::GdiplusShutdown(m_gdiplusToken);
             m_initialized = false;
@@ -44,5 +52,4 @@ private:
     bool m_initialized = false;
 };
 
-} // namespace ExplorerLens
-
+}  // namespace ExplorerLens
