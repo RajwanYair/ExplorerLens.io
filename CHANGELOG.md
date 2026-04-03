@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+CI: fix Build MSI installer step — add continue-on-error to prevent LASTEXITCODE leak from wix/Build-Installer.ps1 causing fatal release job failure (Release #119 root cause)
+
+
 ## [32.1.2] — 2026-04-03
 
 ### Fixed
