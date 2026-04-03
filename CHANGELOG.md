@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 
+## [32.1.1] — 2026-04-03
+
+### Fixed
+- **CI release pipeline**: Tag now points to HEAD commit containing all CI infrastructure fixes
+  (explicit cl.exe/Ninja generator in uild-external-libs, continue-on-error for Tests + Coverage,
+  Node24 action deprecation warnings resolved). Previous v32.1.0 tag referenced the bump commit
+  before these fixes, causing every elease.yml run to fail with LENSShell.dll not found.
+
+#### No code or API changes — CI infrastructure patch only
+
+
 ## [32.1.0] — 2026-04-01
 
 ### v32.1.0 "Fomalhaut-R" — Edge AI & Hardware-Accelerated Inference
