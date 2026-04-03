@@ -22,8 +22,8 @@ namespace BuildValidation {
 struct BuildInfo {
     static constexpr int MajorVersion = 32;
     static constexpr int MinorVersion = 1;
-    static constexpr int PatchVersion = 4;
-    static constexpr const char* VersionString = "32.1.4";
+    static constexpr int PatchVersion = 5;
+    static constexpr const char* VersionString = "32.1.5";
     static constexpr const char* Codename = "Fomalhaut-R";
     static constexpr const char* BuildDate = __DATE__;
     static constexpr const char* BuildTime = __TIME__;

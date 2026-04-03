@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [32.1.5] — 2026-04-03
+
+### Fixed
+- .github/workflows/ci-matrix.yml: add git safe.directory step after checkout in
+  both engine and shell jobs — fixes `git.exe exit code 128` on Windows runners
+- .github/workflows/code-quality.yml: add git safe.directory step in all 4 jobs
+  (lint, analyze, header-check, version-consistency)
+- .github/workflows/performance-regression-gate.yml: add git safe.directory step
+- .github/workflows/codeql.yml: add git safe.directory step
+- LENSShell + LENSManager (64 files): apply clang-format -i to eliminate all
+  style deviations reported by CI lint check
+
+
 ## [32.1.4] — 2026-04-03
 
 ### Changed
