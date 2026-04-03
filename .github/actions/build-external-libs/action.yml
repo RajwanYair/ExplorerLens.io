@@ -57,6 +57,13 @@ runs:
         function Invoke-CMakeLib {
           param([string]$Source, [string]$Build, [string[]]$Flags, [string]$OutLib, [string]$DestLib)
 
+          # Remove stale CMakeCache.txt to prevent compiler path mismatch on fresh CI runners
+          $cacheFile = Join-Path $Build "CMakeCache.txt"
+          if (Test-Path $cacheFile) {
+            Remove-Item $cacheFile -Force
+            Write-Host "  Cleared stale CMakeCache.txt" -ForegroundColor DarkGray
+          }
+
           Write-Host "  cmake -S $Source ..." -ForegroundColor Cyan
           cmake -G $generator -S $Source -B $Build @Flags
           if ($LASTEXITCODE -ne 0) { throw "cmake configure failed for $Source" }
