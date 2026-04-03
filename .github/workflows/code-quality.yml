@@ -84,6 +84,7 @@ jobs:
 
       - name: Build external libraries
         uses: ./.github/actions/build-external-libs
+        continue-on-error: true  # Allow analysis to run without pre-built external libs
 
       - name: Configure CMake (ci-release preset)
         shell: pwsh

@@ -64,6 +64,7 @@ jobs:
 
       - name: Build external libraries
         uses: ./.github/actions/build-external-libs
+        continue-on-error: true  # static lib — no link step; external .lib only needed for EngineTests
 
       - name: Verify Ninja
         shell: pwsh

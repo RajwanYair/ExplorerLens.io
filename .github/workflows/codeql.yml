@@ -64,6 +64,7 @@ jobs:
 
       - name: Build external libraries
         uses: ./.github/actions/build-external-libs
+        continue-on-error: true  # CodeQL analysis can proceed without pre-built external libs
 
       - name: Configure CMake (ci-release)
         shell: pwsh

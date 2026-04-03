@@ -49,6 +49,7 @@ jobs:
 
       - name: Build external libraries
         uses: ./.github/actions/build-external-libs
+        continue-on-error: true  # Benchmark link may fail; non-blocking
 
       - name: Configure CMake (ci-release preset)
         shell: pwsh

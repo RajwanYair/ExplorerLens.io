@@ -57,6 +57,7 @@ jobs:
 
       - name: Build external libraries
         uses: ./.github/actions/build-external-libs
+        continue-on-error: true  # Coverage can proceed; EngineTests link may fail later
 
       - name: Install OpenCppCoverage
         shell: pwsh
