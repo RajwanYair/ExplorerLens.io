@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to ExplorerLens will be documented in this file.
 
@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ---
+
+## [32.1.4] — 2026-04-03
+
+### Changed
+- Engine/Tests/EngineTests.cpp: removed 50 unused/duplicate `#include` directives
+  identified by IWYU/clangd analysis — eliminates all VS Code "header not used
+  directly" warnings without removing any tests or functionality
+- .github/workflows/coverage.yml: add `git config --global --add safe.directory`
+  step after checkout to fix `git.exe exit code 128` on Windows runner (same
+  pattern as release.yml publish job fix in v32.1.3)
+- build-scripts/utilities/fix_duplicates.py: replaced stale hardcoded line-number
+  removals with dynamic duplicate-include detection — safe to re-run at any time
+- build-scripts/utilities/Fix-EngineTests-Duplicates.ps1: same — fully dynamic
+
 
 ## [32.1.3] — 2026-04-03
 
